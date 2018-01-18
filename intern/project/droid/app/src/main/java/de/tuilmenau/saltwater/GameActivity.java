@@ -42,10 +42,14 @@ public class GameActivity extends NativeActivity
         nativeInitializeInterface(getApplicationContext());
     }
 
+    // -----------------------------------------------------------------------------
+
     @Override
     public void onStart() {
         super.onStart();
     }
+
+    // -----------------------------------------------------------------------------
 
     @Override
     public void onResume()
@@ -62,11 +66,15 @@ public class GameActivity extends NativeActivity
         RequestCameraPermission();
     }
 
+    // -----------------------------------------------------------------------------
+
     @Override
     protected void onPause()
     {
         super.onPause();
     }
+
+    // -----------------------------------------------------------------------------
 
     @Override
     public void onStop()
@@ -74,11 +82,15 @@ public class GameActivity extends NativeActivity
         super.onStop();
     }
 
+    // -----------------------------------------------------------------------------
+
     @Override
     public void onDestroy()
     {
         super.onDestroy();
     }
+
+    // -----------------------------------------------------------------------------
 
     @Override
     public void onRequestPermissionsResult(int _RequestCode, String[] _Permissions, int[] _Results)
@@ -120,15 +132,21 @@ public class GameActivity extends NativeActivity
         return this.checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
     }
 
+    // -----------------------------------------------------------------------------
+
     public void RequestCameraPermission()
     {
         this.requestPermissions(new String[] {Manifest.permission.CAMERA}, 0);
     }
 
+    // -----------------------------------------------------------------------------
+
     public boolean ShouldShowRequestPermissionRationale()
     {
         return this.shouldShowRequestPermissionRationale(Manifest.permission.CAMERA);
     }
+
+    // -----------------------------------------------------------------------------
 
     public void LaunchPermissionSettings()
     {
