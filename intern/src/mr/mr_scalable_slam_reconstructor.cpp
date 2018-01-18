@@ -1683,11 +1683,17 @@ namespace MR
         const int HistoGramBinsInclination = 10;
         const int HistoGramBinsAzimuth = 10;
         ConstantBufferDesc.m_Binding = CBuffer::ResourceBuffer;
-        ConstantBufferDesc.m_NumberOfBytes = sizeof(int) * HistoGramBinsInclination * HistoGramBinsAzimuth;
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(int32_t) * HistoGramBinsInclination * HistoGramBinsAzimuth;
         m_HONVBuffer = BufferManager::CreateBuffer(ConstantBufferDesc);
 
+        int32_t HistogramSizes[] =
+        {
+            HistoGramBinsInclination, HistoGramBinsAzimuth, 0, 0
+        };
+
         ConstantBufferDesc.m_Binding = CBuffer::ConstantBuffer;
-        ConstantBufferDesc.m_NumberOfBytes = 4 * sizeof(int); // 2d histogram dimensions
+        ConstantBufferDesc.m_NumberOfBytes = 4 * sizeof(int32_t); // 2d histogram dimensions
+        ConstantBufferDesc.m_pBytes = HistogramSizes;
         m_HONVMetadataBuffer = BufferManager::CreateBuffer(ConstantBufferDesc);
     }
 
@@ -1939,6 +1945,7 @@ namespace MR
 
         ContextManager::SetShaderCS(m_PlaneDetectionCSPtr);
         ContextManager::SetResourceBuffer(0, m_HONVBuffer);
+        ContextManager::SetConstantBuffer(0, m_HONVMetadataBuffer);
         ContextManager::SetImageTexture(0, static_cast<CTexturePtr>(m_ReferenceVertexMapPtr[2]));
         ContextManager::SetImageTexture(0, static_cast<CTexturePtr>(m_ReferenceNormalMapPtr[2]));
         ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
