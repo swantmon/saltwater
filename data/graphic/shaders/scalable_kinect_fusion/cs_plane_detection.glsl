@@ -2,18 +2,22 @@
 #ifndef __INCLUDE_CS_PLANE_DETECTION_GLSL__
 #define __INCLUDE_CS_PLANE_DETECTION_GLSL__
 
-// -----------------------------------------------------------------------------
-// Defines
-// -----------------------------------------------------------------------------
+layout(row_major, std140, binding = 0) uniform HistogramSizes
+{
+    ivec4 g_HistogramSizes;
+};
 
-const float NaN = 0.0 / 0.0;
+layout(std430, binding = 0) buffer Histogram
+{
+    int g_Histogram[];
+};
 
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
 
-layout (binding = 0, MAP_TEXTURE_FORMAT) readonly uniform image2D cs_VertexMap;
-layout (binding = 1, MAP_TEXTURE_FORMAT) writeonly uniform image2D cs_NormalMap;
+layout (binding = 0, MAP_TEXTURE_FORMAT) uniform image2D cs_VertexMap;
+layout (binding = 1, MAP_TEXTURE_FORMAT) uniform image2D cs_NormalMap;
 
 // -------------------------------------------------------------------------------------
 // Functions
@@ -30,12 +34,12 @@ void main()
 	vec3 Vertex1 = imageLoad(cs_VertexMap, ivec2(x + 1, y)).xyz;
 	vec3 Vertex2 = imageLoad(cs_VertexMap, ivec2(x, y + 1)).xyz;
 	
-	vec3 Normal = cross(Vertex1 - Vertex0, Vertex2 - Vertex0);
+	vec3 Normal = normalize(cross(Vertex1 - Vertex0, Vertex2 - Vertex0));
 
-	const vec3 One = vec3(1.0);	
-	bool IsValid = dot(Vertex0, One) != 0.0 && dot(Vertex1, One) != 0.0 && dot(Vertex2, One) != 0.0;
+	float Inclination = acos(Normal.z);
+	float Azimuth = atan(Normal.y, Normal.x);
 	
-	imageStore(cs_NormalMap, ivec2(x, y), IsValid ? vec4(normalize(Normal), 0.0) : vec4(0.0));
+	imageStore(cs_NormalMap, ivec2(x, y), vec4(Normal, 0.0f));
 }
 
 #endif // __INCLUDE_CS_PLANE_DETECTION_GLSL__
