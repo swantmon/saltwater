@@ -42,11 +42,11 @@ using namespace MR::ControlManager;
 
 namespace
 {
-    const float kUvs[] = {
+    const float k_Uvs[] = {
             0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
     };
 
-    constexpr char kVertexShader[] = R"(
+    constexpr char k_VertexShader[] = R"(
         #version  320 es
 
         layout(location = 0) in vec2 in_UV;
@@ -68,7 +68,7 @@ namespace
         }
     )";
 
-    constexpr char kFragmentShader[] = R"(
+    constexpr char k_FragmentShader[] = R"(
         #version 320 es
 
         #extension GL_OES_EGL_image_external_essl3 : require
@@ -177,13 +177,13 @@ namespace
         return Program;
     }
 
-    unsigned int s_ShaderProgram;
-    unsigned int s_TextureID;
-    unsigned int s_AttributeUVs;
+    unsigned int g_ShaderProgram;
+    unsigned int g_TextureID;
+    unsigned int g_AttributeUVs;
 
     static constexpr int s_NumberOfVertices = 4;
-    bool s_IsUVsInitialized = false;
-    float s_TransformedUVs[s_NumberOfVertices * 2];
+    bool g_IsUVsInitialized = false;
+    float g_TransformedUVs[s_NumberOfVertices * 2];
 } // namespace
 
 namespace
@@ -283,27 +283,27 @@ namespace
         // -----------------------------------------------------------------------------
         // OpenGLES
         // -----------------------------------------------------------------------------
-        s_ShaderProgram = CreateProgram(kVertexShader, kFragmentShader);
+        g_ShaderProgram = CreateProgram(k_VertexShader, k_FragmentShader);
 
-        if (s_ShaderProgram == 0) BASE_THROWM("Failed creating shader capturing webcam image.")
+        if (g_ShaderProgram == 0) BASE_THROWM("Failed creating shader capturing webcam image.")
 
-        glGenTextures(1, &s_TextureID);
+        glGenTextures(1, &g_TextureID);
 
-        glBindTexture(GL_TEXTURE_EXTERNAL_OES, s_TextureID);
+        glBindTexture(GL_TEXTURE_EXTERNAL_OES, g_TextureID);
 
         glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
         glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-        glGenBuffers(1, &s_AttributeUVs);
+        glGenBuffers(1, &g_AttributeUVs);
 
-        glBindBuffer(GL_ARRAY_BUFFER, s_AttributeUVs);
+        glBindBuffer(GL_ARRAY_BUFFER, g_AttributeUVs);
 
-        glBufferData(GL_ARRAY_BUFFER, sizeof(kUvs), &kUvs, GL_DYNAMIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(k_Uvs), &k_Uvs, GL_DYNAMIC_DRAW);
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        ArSession_setCameraTextureName(m_pARSession, s_TextureID);
+        ArSession_setCameraTextureName(m_pARSession, g_TextureID);
     }
 
     // -----------------------------------------------------------------------------
@@ -322,9 +322,9 @@ namespace
         // -----------------------------------------------------------------------------
         // OpenGLES
         // -----------------------------------------------------------------------------
-        glDeleteProgram(s_ShaderProgram);
+        glDeleteProgram(g_ShaderProgram);
 
-        glDeleteTextures(1, &s_TextureID);
+        glDeleteTextures(1, &g_TextureID);
     }
 
     // -----------------------------------------------------------------------------
@@ -435,20 +435,20 @@ namespace
 
         ArFrame_getDisplayGeometryChanged(m_pARSession, m_pARFrame, &HasGeometryChanged);
 
-        if (HasGeometryChanged != 0 || s_IsUVsInitialized == false)
+        if (HasGeometryChanged != 0 || g_IsUVsInitialized == false)
         {
-            ArFrame_transformDisplayUvCoords(m_pARSession, m_pARFrame, s_NumberOfVertices * 2, kUvs, s_TransformedUVs);
+            ArFrame_transformDisplayUvCoords(m_pARSession, m_pARFrame, s_NumberOfVertices * 2, k_Uvs, g_TransformedUVs);
 
-            glBindBuffer(GL_ARRAY_BUFFER, s_AttributeUVs);
+            glBindBuffer(GL_ARRAY_BUFFER, g_AttributeUVs);
 
-            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(s_TransformedUVs), &s_TransformedUVs);
+            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(g_TransformedUVs), &g_TransformedUVs);
 
             glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-            s_IsUVsInitialized = true;
+            g_IsUVsInitialized = true;
         }
 
-        glUseProgram(s_ShaderProgram);
+        glUseProgram(g_ShaderProgram);
 
         glDisable(GL_DEPTH_TEST);
 
@@ -458,11 +458,11 @@ namespace
 
         glActiveTexture(GL_TEXTURE0);
 
-        glBindTexture(GL_TEXTURE_EXTERNAL_OES, s_TextureID);
+        glBindTexture(GL_TEXTURE_EXTERNAL_OES, g_TextureID);
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-        glBindBuffer(GL_ARRAY_BUFFER, s_AttributeUVs);
+        glBindBuffer(GL_ARRAY_BUFFER, g_AttributeUVs);
 
         glEnableVertexAttribArray(0);
 
