@@ -1959,6 +1959,8 @@ namespace MR
 
     void CScalableSLAMReconstructor::PerformTracking()
     {
+        ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
+
         Float4x4 IncPoseMatrix = m_PoseMatrix;
 
         for (int PyramidLevel = m_ReconstructionSettings.m_PyramidLevelCount - 1; PyramidLevel >= 0; -- PyramidLevel)
