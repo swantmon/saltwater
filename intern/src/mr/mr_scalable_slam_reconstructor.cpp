@@ -1947,7 +1947,7 @@ namespace MR
         ContextManager::SetResourceBuffer(0, m_HONVBuffer);
         ContextManager::SetConstantBuffer(0, m_HONVMetadataBuffer);
         ContextManager::SetImageTexture(0, static_cast<CTexturePtr>(m_ReferenceVertexMapPtr[2]));
-        ContextManager::SetImageTexture(0, static_cast<CTexturePtr>(m_ReferenceNormalMapPtr[2]));
+        ContextManager::SetImageTexture(1, static_cast<CTexturePtr>(m_ReferenceNormalMapPtr[2]));
         ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
     }
 
