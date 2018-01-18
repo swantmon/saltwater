@@ -30,12 +30,8 @@ void main()
 	const int x = int(gl_GlobalInvocationID.x);
 	const int y = int(gl_GlobalInvocationID.y);
 	
-	vec3 Vertex0 = imageLoad(cs_VertexMap, ivec2(x, y)).xyz;
-	vec3 Vertex1 = imageLoad(cs_VertexMap, ivec2(x + 1, y)).xyz;
-	vec3 Vertex2 = imageLoad(cs_VertexMap, ivec2(x, y + 1)).xyz;
+	vec3 Normal = imageLoad(cs_NormalMap, ivec2(x, y)).xyz;
 	
-	vec3 Normal = normalize(cross(Vertex1 - Vertex0, Vertex2 - Vertex0));
-
 	float Inclination = acos(Normal.z);
 	float Azimuth = atan(Normal.y, Normal.x);
 	
