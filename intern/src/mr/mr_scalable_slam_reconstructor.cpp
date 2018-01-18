@@ -638,6 +638,7 @@ namespace MR
         m_PointsRootGridCSPtr      = ShaderManager::CompileCS("scalable_kinect_fusion\\rasterization_reverse\\cs_gather.glsl"       , "main", DefineString.c_str());
         m_PointsFullCSPtr          = ShaderManager::CompileCS("scalable_kinect_fusion\\rasterization_reverse\\cs_gather_full.glsl"  , "main", DefineString.c_str());
         m_FillIndirectBufferCSPtr  = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_fill_indirect.glsl"                       , "main", DefineString.c_str());
+        m_PlaneDetectionCSPtr      = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_plane_detection.glsl"                     , "main", DefineString.c_str());
 
         SInputElementDescriptor InputLayoutDesc = {};
 
@@ -1678,6 +1679,16 @@ namespace MR
         ConstantBufferDesc.m_Binding = CBuffer::ConstantBuffer;
         ConstantBufferDesc.m_NumberOfBytes = sizeof(SScalableRaycastConstantBuffer);
         m_VolumeBuffers.m_AABBBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+
+        const int HistoGramBinsInclination = 10;
+        const int HistoGramBinsAzimuth = 10;
+        ConstantBufferDesc.m_Binding = CBuffer::ResourceBuffer;
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(int) * HistoGramBinsInclination * HistoGramBinsAzimuth;
+        m_HONVBuffer = BufferManager::CreateBuffer(ConstantBufferDesc);
+
+        ConstantBufferDesc.m_Binding = CBuffer::ConstantBuffer;
+        ConstantBufferDesc.m_NumberOfBytes = 4 * sizeof(int); // 2d histogram dimensions
+        m_HONVMetadataBuffer = BufferManager::CreateBuffer(ConstantBufferDesc);
     }
 
     // -----------------------------------------------------------------------------
@@ -1725,6 +1736,12 @@ namespace MR
         CreateReferencePyramid();
 
         Performance::EndEvent();
+
+        //////////////////////////////////////////////////////////////////////////////////////
+        // Detect Planes
+        //////////////////////////////////////////////////////////////////////////////////////
+
+        DetectPlanes();
 
         //////////////////////////////////////////////////////////////////////////////////////
         // Tracking
@@ -1899,6 +1916,32 @@ namespace MR
             ContextManager::Barrier();
             ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
         }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CScalableSLAMReconstructor::DetectPlanes()
+    {
+        //////////////////////////////////////////////////////////////////////////////////////
+        // Create a 2D-Histogram based on the inclination and the azimuth of the normals
+        // Histogram of Oriented Normal Vectors for Object Recognition with a Depth Sensor (HONV)
+        // We use the lowest resolution of the pyramid
+        //////////////////////////////////////////////////////////////////////////////////////
+
+        const int WorkGroupsX = DivUp(m_pRGBDCameraControl->GetDepthWidth() / 4, g_TileSize2D);
+        const int WorkGroupsY = DivUp(m_pRGBDCameraControl->GetDepthHeight() / 4, g_TileSize2D);
+
+        //////////////////////////////////////////////////////////////////////////////////////
+        // Bilateral Filter
+        //////////////////////////////////////////////////////////////////////////////////////
+
+        ContextManager::Barrier();
+
+        ContextManager::SetShaderCS(m_PlaneDetectionCSPtr);
+        ContextManager::SetResourceBuffer(0, m_HONVBuffer);
+        ContextManager::SetImageTexture(0, static_cast<CTexturePtr>(m_ReferenceVertexMapPtr[2]));
+        ContextManager::SetImageTexture(0, static_cast<CTexturePtr>(m_ReferenceNormalMapPtr[2]));
+        ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
     }
 
     // -----------------------------------------------------------------------------

@@ -199,6 +199,8 @@ namespace MR
         void GatherVolumeCounters(unsigned int Count, Gfx::CBufferPtr CounterBufferPtr, Gfx::CBufferPtr QueueBuffer, Gfx::CBufferPtr IndirectBufferPtr);
         void GatherGridCounters(unsigned int Count, Gfx::CBufferPtr CounterBufferPtr, Gfx::CBufferPtr QueueBuffer, Gfx::CBufferPtr IndirectBufferPtr);
 
+        void DetectPlanes();
+
         void Raycast();
         void CreateRaycastPyramid();
 
@@ -246,6 +248,9 @@ namespace MR
 
         Gfx::CBufferPtr m_VolumeIndexBufferPtr;
 
+        Gfx::CBufferPtr m_HONVBuffer;
+        Gfx::CBufferPtr m_HONVMetadataBuffer;
+
         Gfx::CShaderPtr m_ClearVolumeCSPtr;
         Gfx::CShaderPtr m_BilateralFilterCSPtr;
         Gfx::CShaderPtr m_VertexMapCSPtr;
@@ -278,6 +283,8 @@ namespace MR
         Gfx::CShaderPtr m_ClearAtomicCountersCSPtr;
 
         Gfx::CShaderPtr m_FillIndirectBufferCSPtr;
+
+        Gfx::CShaderPtr m_PlaneDetectionCSPtr;
 
         Gfx::CMeshPtr m_CubeMeshPtr;
         Gfx::CMeshPtr m_Grid8MeshPtr;
