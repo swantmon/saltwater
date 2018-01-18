@@ -5,6 +5,7 @@
 #include "base/base_exception.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
+#include "base/base_vector2.h"
 
 #include <jni.h>
 
@@ -37,6 +38,8 @@ namespace
 
         int GetDeviceRotation();
 
+        const Base::Int2& GetDeviceDimension();
+
         bool HasCameraPermission();
 
     public:
@@ -55,21 +58,28 @@ namespace
         jmethodID m_FindClassMethod;
         jmethodID m_HasCameraPermissionMethod;
         jmethodID m_GetDeviceRotationMethod;
+        jmethodID m_GetDeviceDimensionWidthMethod;
+        jmethodID m_GetDeviceDimensionHeightMethod;
+
+        Base::Int2 m_Dimension;
     };
 }
 
 namespace
 {
     CJNIInterface::CJNIInterface()
-        : m_pContext                 (0)
-        , m_pCurrentJavaVM           (0)
-        , m_CurrentJavaVersion       (0)
-        , m_GameActivityThiz         (0)
-        , m_GameActivityID           (0)
-        , m_GlobalClassLoader        (0)
-        , m_FindClassMethod          (0)
-        , m_HasCameraPermissionMethod(0)
-        , m_GetDeviceRotationMethod  (0)
+        : m_pContext                      (0)
+        , m_pCurrentJavaVM                (0)
+        , m_CurrentJavaVersion            (0)
+        , m_GameActivityThiz              (0)
+        , m_GameActivityID                (0)
+        , m_GlobalClassLoader             (0)
+        , m_FindClassMethod               (0)
+        , m_HasCameraPermissionMethod     (0)
+        , m_GetDeviceRotationMethod       (0)
+        , m_GetDeviceDimensionWidthMethod (0)
+        , m_GetDeviceDimensionHeightMethod(0)
+        , m_Dimension                     (0)
     {
 
     };
@@ -136,6 +146,10 @@ namespace
         m_HasCameraPermissionMethod = pEnvironment->GetMethodID(m_GameActivityID, "HasCameraPermission", "()Z");
 
         m_GetDeviceRotationMethod = pEnvironment->GetMethodID(m_GameActivityID, "GetDeviceRotation", "()I");
+
+        m_GetDeviceDimensionWidthMethod = pEnvironment->GetMethodID(m_GameActivityID, "GetDeviceDimensionWidth", "()I");
+
+        m_GetDeviceDimensionHeightMethod = pEnvironment->GetMethodID(m_GameActivityID, "GetDeviceDimensionHeight", "()I");
     }
 
     // -----------------------------------------------------------------------------
@@ -201,6 +215,21 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    const Base::Int2& CJNIInterface::GetDeviceDimension()
+    {
+        JNIEnv* pEnvironment = GetJavaEnvironment();
+
+        jint Width  = (jint)pEnvironment->CallIntMethod(m_GameActivityThiz, m_GetDeviceDimensionWidthMethod);
+        jint Height = (jint)pEnvironment->CallIntMethod(m_GameActivityThiz, m_GetDeviceDimensionHeightMethod);
+
+        m_Dimension[0] = Width;
+        m_Dimension[1] = Height;
+
+        return m_Dimension;
+    }
+
+    // -----------------------------------------------------------------------------
+
     bool CJNIInterface::HasCameraPermission()
     {
         JNIEnv* pEnvironment = GetJavaEnvironment();
@@ -232,6 +261,13 @@ namespace JNI
     int GetDeviceRotation()
     {
         return CJNIInterface::GetInstance().GetDeviceRotation();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const Base::Int2& GetDeviceDimension()
+    {
+        return CJNIInterface::GetInstance().GetDeviceDimension();
     }
 
     // -----------------------------------------------------------------------------

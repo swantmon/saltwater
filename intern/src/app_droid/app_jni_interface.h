@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "base/base_vector2.h"
+
 namespace App
 {
 namespace JNI
@@ -10,6 +12,8 @@ namespace JNI
     void* GetContext();
 
     int GetDeviceRotation();
+
+    const Base::Int2& GetDeviceDimension();
 
     bool HasCameraPermission();
 } // namespace JNI

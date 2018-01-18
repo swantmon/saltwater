@@ -9,6 +9,8 @@ import android.content.pm.PackageManager;
 
 import android.Manifest;
 
+import android.graphics.Point;
+
 import android.net.Uri;
 
 import android.provider.Settings;
@@ -122,6 +124,27 @@ public class GameActivity extends NativeActivity
     public int GetDeviceRotation()
     {
         return getWindowManager().getDefaultDisplay().getRotation();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    public int GetDeviceDimensionWidth()
+    {
+        Point Size = new Point();
+
+        getWindowManager().getDefaultDisplay().getSize(Size);
+
+        return Size.x;
+    }
+    // -----------------------------------------------------------------------------
+
+    public int GetDeviceDimensionHeight()
+    {
+        Point Size = new Point();
+
+        getWindowManager().getDefaultDisplay().getSize(Size);
+
+        return Size.y;
     }
 
     // -----------------------------------------------------------------------------
