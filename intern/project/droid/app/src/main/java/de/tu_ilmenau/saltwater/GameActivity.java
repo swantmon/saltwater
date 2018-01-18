@@ -98,9 +98,16 @@ public class GameActivity extends NativeActivity
     // -----------------------------------------------------------------------------
     // Device
     // -----------------------------------------------------------------------------
-    public int GetDeviceRotation()
+    public int GetDeviceOrientation()
     {
         return getResources().getConfiguration().orientation;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    public int GetDeviceRotation()
+    {
+        return getWindowManager().getDefaultDisplay().getRotation();
     }
 
     // -----------------------------------------------------------------------------
