@@ -39,7 +39,7 @@ void main()
 	float Inclination = acos(Normal.z);
 	float Azimuth = atan(Normal.y, Normal.x);
 	
-	imageStore(cs_NormalMap, ivec2(x, y), vec4(Normal, 0.0f));
+	g_Histogram[gl_LocalInvocationIndex] = int(gl_LocalInvocationIndex);
 }
 
 #endif // __INCLUDE_CS_PLANE_DETECTION_GLSL__
