@@ -58,6 +58,8 @@ public class GameActivity extends NativeActivity
 
             return;
         }
+
+        RequestCameraPermission();
     }
 
     @Override
