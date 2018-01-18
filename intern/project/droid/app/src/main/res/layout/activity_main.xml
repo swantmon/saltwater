@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="de.tu_ilmenau.saltwater.MainActivity">
+    tools:context="de.tu_ilmenau.saltwater.GameActivity">
 
     <SurfaceView
         android:id="@+id/surfaceView"
