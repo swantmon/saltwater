@@ -1,5 +1,5 @@
 
-package de.tu_ilmenau.saltwater;
+package de.tuilmenau.saltwater;
 
 import android.app.NativeActivity;
 
@@ -39,7 +39,7 @@ public class GameActivity extends NativeActivity
 
         s_Instance = this;
 
-        native_InitializeInterface(getApplicationContext());
+        nativeInitializeInterface(getApplicationContext());
     }
 
     @Override
@@ -140,7 +140,7 @@ public class GameActivity extends NativeActivity
     // -----------------------------------------------------------------------------
     // Native functions
     // -----------------------------------------------------------------------------
-    public native void native_InitializeInterface(Context context);
+    public native void nativeInitializeInterface(Context context);
 
     // -----------------------------------------------------------------------------
     // Load libraries. E.g. app with native JNI interface

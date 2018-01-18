@@ -92,7 +92,7 @@ namespace
 
             JNIEnv* pEnvironment = GetJavaEnvironment();
 
-            jclass MainClass        = pEnvironment->FindClass("de/tu_ilmenau/saltwater/GameActivity");
+            jclass MainClass        = pEnvironment->FindClass("de/tuilmenau/saltwater/GameActivity");
             jclass ClassClass       = pEnvironment->FindClass("java/lang/Class");
             jclass ClassLoaderClass = pEnvironment->FindClass("java/lang/ClassLoader");
 
@@ -129,7 +129,7 @@ namespace
 
         JNIEnv* pEnvironment = GetJavaEnvironment();
 
-        jclass LocalGameActivityClass = pEnvironment->FindClass("de/tu_ilmenau/saltwater/GameActivity");
+        jclass LocalGameActivityClass = pEnvironment->FindClass("de/tuilmenau/saltwater/GameActivity");
 
         m_GameActivityID = (jclass)pEnvironment->NewGlobalRef(LocalGameActivityClass);
 
@@ -248,7 +248,7 @@ namespace JNI
 // -----------------------------------------------------------------------------
 extern "C"
 {
-    JNIEXPORT void JNICALL Java_de_tu_1ilmenau_saltwater_GameActivity_native_1InitializeInterface(JNIEnv* _pEnv, jobject _LocalThiz, jobject _Context)
+    JNIEXPORT void JNICALL Java_de_tuilmenau_saltwater_GameActivity_nativeInitializeInterface(JNIEnv* _pEnv, jobject _LocalThiz, jobject _Context)
     {
         CJNIInterface::GetInstance().SetActivity(_pEnv->NewGlobalRef(_LocalThiz));
 
