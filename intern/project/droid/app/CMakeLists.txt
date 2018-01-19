@@ -77,9 +77,9 @@ file(
      ${SourceDir}app_droid/*.h*
 )
 
-add_library( app_droid SHARED ${TargetSources} ${SourceDir}app_droid/app_jni_interface.cpp)
+add_library( app_droid SHARED ${TargetSources} )
 
-target_include_directories( app_droid PRIVATE ${ANDROID_NDK}/sources/android/native_app_glue ${ExternDir}/arcore/include )
+target_include_directories( app_droid PRIVATE ${ANDROID_NDK}/sources/android/native_app_glue )
 
 target_link_libraries( app_droid EGL GLESv3 arcore_sdk log android m native_app_glue)
 
