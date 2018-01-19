@@ -5,7 +5,6 @@
 #include "app_droid/app_exit_state.h"
 #include "app_droid/app_init_state.h"
 #include "app_droid/app_intro_state.h"
-#include "app_droid/app_jni_interface.h"
 #include "app_droid/app_load_map_state.h"
 #include "app_droid/app_main_menu_state.h"
 #include "app_droid/app_play_state.h"
@@ -22,6 +21,7 @@
 #include "base/base_singleton.h"
 
 #include "core/core_asset_manager.h"
+#include "core/core_jni_interface.h"
 #include "core/core_time.h"
 
 #include "graphic/gfx_application_interface.h"
@@ -338,7 +338,7 @@ namespace
                     int Width  = Base::Abs(Rectangle.left   - Rectangle.right);
                     int Height = Base::Abs(Rectangle.bottom - Rectangle.top);
 
-                    int Rotation = App::JNI::GetDeviceRotation();
+                    int Rotation = Core::JNI::GetDeviceRotation();
 
                     // -----------------------------------------------------------------------------
                     // Inform all libs

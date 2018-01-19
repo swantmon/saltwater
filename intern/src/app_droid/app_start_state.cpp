@@ -2,10 +2,11 @@
 #include "app_droid/app_precompiled.h"
 
 #include "app_droid/app_application.h"
-#include "app_droid/app_jni_interface.h"
 #include "app_droid/app_start_state.h"
 
 #include "camera/cam_control_manager.h"
+
+#include "core/core_jni_interface.h"
 
 #include "graphic/gfx_start_state.h"
 
@@ -62,11 +63,11 @@ namespace App
         // -----------------------------------------------------------------------------
         MR::ControlManager::SConfiguration Config;
 
-        Config.m_pEnv     = App::JNI::GetJavaEnvironment();
-        Config.m_pContext = App::JNI::GetContext();
-        Config.m_Rotation = static_cast<MR::ControlManager::SConfiguration::EDisplayRotation>(App::JNI::GetDeviceRotation());
-        Config.m_Width    = App::JNI::GetDeviceDimension()[0];
-        Config.m_Height   = App::JNI::GetDeviceDimension()[1];
+        Config.m_pEnv     = Core::JNI::GetJavaEnvironment();
+        Config.m_pContext = Core::JNI::GetContext();
+        Config.m_Rotation = static_cast<MR::ControlManager::SConfiguration::EDisplayRotation>(Core::JNI::GetDeviceRotation());
+        Config.m_Width    = Core::JNI::GetDeviceDimension()[0];
+        Config.m_Height   = Core::JNI::GetDeviceDimension()[1];
 
         MR::ControlManager::OnStart(Config);
     }

@@ -1,11 +1,13 @@
 
-#include "app_droid/app_jni_interface.h"
+#include "core/core_precompiled.h"
 
 #include "base/base_console.h"
 #include "base/base_exception.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 #include "base/base_vector2.h"
+
+#include "core/core_jni_interface.h"
 
 #include <jni.h>
 
@@ -40,7 +42,9 @@ namespace
 
         const Base::Int2& GetDeviceDimension();
 
-        bool HasCameraPermission();
+        bool CheckPermission(const std::string& _rPermission);
+
+        void AcquirePermissions(const std::string* _pPermissions, unsigned int _NumberOfPermissions);
 
     public:
 
@@ -54,12 +58,15 @@ namespace
         jint m_CurrentJavaVersion;
         jobject m_GameActivityThiz;
         jclass m_GameActivityID;
+        jclass m_PermissionHelperID;
+        jclass m_JavaStringClass;
         jobject m_GlobalClassLoader;
         jmethodID m_FindClassMethod;
-        jmethodID m_HasCameraPermissionMethod;
         jmethodID m_GetDeviceRotationMethod;
         jmethodID m_GetDeviceDimensionWidthMethod;
         jmethodID m_GetDeviceDimensionHeightMethod;
+        jmethodID m_CheckPermissionMethod;
+        jmethodID m_AcquirePermissionMethod;
 
         Base::Int2 m_Dimension;
     };
@@ -73,9 +80,10 @@ namespace
         , m_CurrentJavaVersion            (0)
         , m_GameActivityThiz              (0)
         , m_GameActivityID                (0)
+        , m_PermissionHelperID            (0)
+        , m_JavaStringClass               (0)
         , m_GlobalClassLoader             (0)
         , m_FindClassMethod               (0)
-        , m_HasCameraPermissionMethod     (0)
         , m_GetDeviceRotationMethod       (0)
         , m_GetDeviceDimensionWidthMethod (0)
         , m_GetDeviceDimensionHeightMethod(0)
@@ -112,6 +120,16 @@ namespace
 
             m_GlobalClassLoader = pEnvironment->NewGlobalRef(LocalClassLoader);
             m_FindClassMethod   = pEnvironment->GetMethodID(ClassLoaderClass, "findClass", "(Ljava/lang/String;)Ljava/lang/Class;");
+
+            m_PermissionHelperID = (jclass)pEnvironment->NewGlobalRef(pEnvironment->FindClass("de/tuilmenau/saltwater/PermissionHelper"));
+
+            m_CheckPermissionMethod = pEnvironment->GetStaticMethodID(m_PermissionHelperID, "CheckPermission", "(Ljava/lang/String;)Z");
+
+            m_AcquirePermissionMethod = pEnvironment->GetStaticMethodID(m_PermissionHelperID, "AcquirePermissions", "([Ljava/lang/String;)V");
+
+            jclass LocalStringClass = pEnvironment->FindClass("java/lang/String");
+
+            m_JavaStringClass = (jclass)pEnvironment->NewGlobalRef(LocalStringClass);
         }
     }
 
@@ -142,8 +160,6 @@ namespace
         jclass LocalGameActivityClass = pEnvironment->FindClass("de/tuilmenau/saltwater/GameActivity");
 
         m_GameActivityID = (jclass)pEnvironment->NewGlobalRef(LocalGameActivityClass);
-
-        m_HasCameraPermissionMethod = pEnvironment->GetMethodID(m_GameActivityID, "HasCameraPermission", "()Z");
 
         m_GetDeviceRotationMethod = pEnvironment->GetMethodID(m_GameActivityID, "GetDeviceRotation", "()I");
 
@@ -230,17 +246,43 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    bool CJNIInterface::HasCameraPermission()
+    bool CJNIInterface::CheckPermission(const std::string& _rPermission)
     {
         JNIEnv* pEnvironment = GetJavaEnvironment();
 
-        jboolean HasCameraPermission = (jboolean)pEnvironment->CallBooleanMethod(m_GameActivityThiz, m_HasCameraPermissionMethod);
+        jstring Argument = pEnvironment->NewStringUTF(_rPermission.c_str());
 
-        return HasCameraPermission == JNI_TRUE;
+        bool Result = pEnvironment->CallStaticBooleanMethod(m_PermissionHelperID, m_CheckPermissionMethod, Argument);
+
+        pEnvironment->DeleteLocalRef(Argument);
+
+        return Result;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CJNIInterface::AcquirePermissions(const std::string* _pPermissions, unsigned int _NumberOfPermissions)
+    {
+        JNIEnv* pEnvironment = GetJavaEnvironment();
+
+        jobjectArray PermissionsArray = (jobjectArray)pEnvironment->NewObjectArray(_NumberOfPermissions, m_JavaStringClass, 0);
+
+        for (int i = 0; i < _NumberOfPermissions; ++i)
+        {
+            jstring JavaString = pEnvironment->NewStringUTF(_pPermissions[i].c_str());
+
+            pEnvironment->SetObjectArrayElement(PermissionsArray, i, JavaString);
+
+            pEnvironment->DeleteLocalRef(JavaString);
+        }
+
+        pEnvironment->CallStaticVoidMethod(m_PermissionHelperID, m_AcquirePermissionMethod, PermissionsArray);
+
+        pEnvironment->DeleteLocalRef(PermissionsArray);
     }
 }
 
-namespace App
+namespace Core
 {
 namespace JNI
 {
@@ -272,12 +314,19 @@ namespace JNI
 
     // -----------------------------------------------------------------------------
 
-    bool HasCameraPermission()
+    bool CheckPermission(const std::string& _rPermission)
     {
-        return CJNIInterface::GetInstance().HasCameraPermission();
+        return CJNIInterface::GetInstance().CheckPermission(_rPermission);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void AcquirePermissions(const std::string* _pPermissions, unsigned int _NumberOfPermissions)
+    {
+        CJNIInterface::GetInstance().AcquirePermissions(_pPermissions, _NumberOfPermissions);
     }
 } // namespace JNI
-} // namespace App
+} // namespace Core
 
 // -----------------------------------------------------------------------------
 // Native interface from JAVA to C++
@@ -291,6 +340,15 @@ extern "C"
         CJNIInterface::GetInstance().SetContext(_pEnv->NewGlobalRef(_Context));
 
         CJNIInterface::GetInstance().FindClassesAndMethods();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    JNIEXPORT void JNICALL Java_de_tuilmenau_saltwater_PermissionHelper_nativeOnAcquirePermissions(JNIEnv* _pEnv, jobject _LocalThiz, jobjectArray _Permissions, jintArray _GrantResults)
+    {
+        jint* pGrantResults = _pEnv->GetIntArrayElements(_GrantResults, NULL);
+
+        _pEnv->ReleaseIntArrayElements(_GrantResults, pGrantResults, 0);
     }
 }; // extern "C"
 

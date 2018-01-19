@@ -9,6 +9,7 @@
 #include "base/base_uncopyable.h"
 #include "base/base_singleton.h"
 
+#include "core/core_jni_interface.h"
 #include "core/core_time.h"
 
 #include "data/data_actor_type.h"
@@ -28,6 +29,7 @@
 
 #include <assert.h>
 #include <unordered_set>
+#include <string>
 #include <vector>
 
 #ifndef GL_OES_EGL_image_external
@@ -216,6 +218,10 @@ namespace
 
     private:
 
+        static std::string s_Permissions[];
+
+    private:
+
         ArSession* m_pARSession;
         ArFrame* m_pARFrame;
         CTrackedObjects m_TrackedObjects;
@@ -225,6 +231,11 @@ namespace
         void OnDirtyEntity(Dt::CEntity* _pEntity);
     };
 } // namespace
+
+namespace
+{
+    std::string CMRControlManager::s_Permissions[] = { "android.permission.CAMERA" };
+}
 
 namespace
 {
@@ -246,6 +257,16 @@ namespace
     void CMRControlManager::OnStart(const SConfiguration& _rConfiguration)
     {
         Dt::EntityManager::RegisterDirtyEntityHandler(DATA_DIRTY_ENTITY_METHOD(&CMRControlManager::OnDirtyEntity));
+
+        // -----------------------------------------------------------------------------
+        // Check permission
+        // -----------------------------------------------------------------------------
+        if(!Core::JNI::CheckPermission(s_Permissions[0]))
+        {
+            Core::JNI::AcquirePermissions(s_Permissions, 1);
+        }
+
+        while (!Core::JNI::CheckPermission(s_Permissions[0])) {}
 
         // -----------------------------------------------------------------------------
         // AR session and frame
@@ -416,8 +437,6 @@ namespace
     void CMRControlManager::OnResume()
     {
         ArStatus Status = ArSession_resume(m_pARSession);
-
-        assert(Status == AR_SUCCESS);
     }
 
     // -----------------------------------------------------------------------------
