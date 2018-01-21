@@ -795,6 +795,8 @@ namespace
         // -----------------------------------------------------------------------------
         // Render webcam to target set
         // -----------------------------------------------------------------------------
+        TargetSetManager::ClearTargetSet(m_WebcamTargetSetPtr, Base::Float4::s_One);
+
         ContextManager::SetTargetSet(m_WebcamTargetSetPtr);
 
         ContextManager::SetViewPortSet(ViewManager::GetViewPortSet());
