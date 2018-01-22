@@ -41,11 +41,10 @@ void main()
     float Azimuth = atan(Normal.y, Normal.x);
     float Inclination = acos(Normal.z);
         
-    int HistogramBinX = int((Azimuth / g_Tau + 0.5f) * g_AzimuthBinCount);
-    int HistogramBinY = int(Inclination / g_Pi * g_InclinationBinCount);
+    int AzimuthBin = int((Azimuth / g_Tau + 0.5f) * g_AzimuthBinCount);
+    int InclinationBinY = int(Inclination / g_Pi * g_InclinationBinCount);
     
-    imageStore(cs_VertexMap, ivec2(x, y), vec4(HistogramBinY, 0, 0, 0));
-    imageStore(cs_NormalMap, ivec2(x, y), vec4(Inclination, 0, 0, 0));
+    atomicAdd(g_Histogram[InclinationBinY * g_AzimuthBinCount + InclinationBinY], 1);
 }
 
 #endif // __INCLUDE_CS_PLANE_DETECTION_GLSL__
