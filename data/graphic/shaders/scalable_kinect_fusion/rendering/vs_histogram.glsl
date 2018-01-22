@@ -6,6 +6,8 @@
 
 layout(location = 0) in vec3 in_VertexPosition;
 
+layout(location = 0) out vec2 out_TexCoords;
+
 out gl_PerVertex
 {
     vec4 gl_Position;
@@ -17,6 +19,7 @@ out gl_PerVertex
 
 void main()
 {
+    out_TexCoords = in_VertexPosition.xy;
     gl_Position = vec4(in_VertexPosition, 1.0f);
 }
 
