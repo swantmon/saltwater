@@ -136,6 +136,9 @@ namespace
         CShaderPtr m_RaycastVSPtr;
         CShaderPtr m_RaycastFSPtr;
 
+        CShaderPtr m_HistogramVSPtr;
+        CShaderPtr m_HistogramFSPtr;
+
         CBufferPtr m_RaycastConstantBufferPtr;
         CBufferPtr m_DrawCallConstantBufferPtr;
                 
@@ -213,6 +216,8 @@ namespace
         m_OutlineLevel2FSPtr = 0;
         m_RaycastVSPtr = 0;
         m_RaycastFSPtr = 0;
+        m_HistogramVSPtr = 0;
+        m_HistogramFSPtr = 0;
 
         m_RaycastLevel1VSPtr = 0;
         m_RaycastLevel1FSPtr = 0;
@@ -285,6 +290,9 @@ namespace
 
             m_RaycastVSPtr = ShaderManager::CompileVS("scalable_kinect_fusion\\rendering\\vs_raycast.glsl", "main", DefineString.c_str());
             m_RaycastFSPtr = ShaderManager::CompilePS("scalable_kinect_fusion\\rendering\\fs_raycast.glsl", "main", DefineString.c_str());
+
+            m_HistogramVSPtr = ShaderManager::CompileVS("scalable_kinect_fusion\\rendering\\vs_histogram.glsl", "main", DefineString.c_str());
+            m_HistogramFSPtr = ShaderManager::CompilePS("scalable_kinect_fusion\\rendering\\fs_histogram.glsl", "main", DefineString.c_str());
         }
 		else
 		{
@@ -324,7 +332,8 @@ namespace
 
         m_CameraInputLayoutPtr = ShaderManager::CreateInputLayout(&InputLayoutDesc, 1, m_OutlineVSPtr);
         m_VolumeInputLayoutPtr = ShaderManager::CreateInputLayout(&InputLayoutDesc, 1, m_RaycastVSPtr);
-		m_CubeOutlineInputLayoutPtr = ShaderManager::CreateInputLayout(&InputLayoutDesc, 1, m_OutlineVSPtr);
+        m_CubeOutlineInputLayoutPtr = ShaderManager::CreateInputLayout(&InputLayoutDesc, 1, m_OutlineVSPtr);
+        m_QuadInputLayoutPtr = ShaderManager::CreateInputLayout(&InputLayoutDesc, 1, m_OutlineVSPtr);
     }
     
     // -----------------------------------------------------------------------------
@@ -1103,7 +1112,22 @@ namespace
 
     void CGfxReconstructionRenderer::RenderHONV()
     {
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
 
+        ContextManager::SetRenderContext(m_OutlineRenderContextPtr);
+        ContextManager::SetShaderVS(m_HistogramVSPtr);
+        ContextManager::SetShaderPS(m_HistogramFSPtr);
+        
+        ContextManager::SetImageTexture(0, m_pScalableReconstructor->GetHONV());
+
+        const unsigned int Offset = 0;
+        ContextManager::SetVertexBuffer(m_QuadMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+        ContextManager::SetIndexBuffer(m_QuadMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
+
+        ContextManager::SetInputLayout(m_QuadInputLayoutPtr);
+        ContextManager::SetTopology(STopology::TriangleStrip);
+
+        ContextManager::Draw(4, 0);
     }
 
     // -----------------------------------------------------------------------------
