@@ -12,7 +12,7 @@ void main()
 {
     ivec2 Coords = ivec2(in_TexCoords * imageSize(fs_Histogram));
 
-    out_Color = vec4(imageLoad(fs_Histogram, Coords).r / 100.0f, 0.0f, 0.0f, 1.0);
+    out_Color = vec4(imageLoad(fs_Histogram, Coords).r / 50.0f, 0.0f, 0.0f, 1.0);
 }
 
 #endif // __INCLUDE_FS_OUTLINE_GLSL__
