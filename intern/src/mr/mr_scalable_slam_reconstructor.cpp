@@ -1935,8 +1935,7 @@ namespace MR
 
     void CScalableSLAMReconstructor::DetectPlanes()
     {
-        Float4 ClearColor = Float4(0.0f);
-        TextureManager::ClearTexture2D(m_HONVImage, ClearColor);
+        TextureManager::ClearTexture(m_HONVImage);
 
         //////////////////////////////////////////////////////////////////////////////////////
         // Create a 2D-Histogram based on the inclination and the azimuth of the normals
