@@ -39,13 +39,16 @@ void main()
     
     vec3 Normal = imageLoad(cs_NormalMap, ivec2(x, y)).xyz;
     
-    float Azimuth = atan(Normal.y, Normal.x);
-    float Inclination = acos(Normal.z);
+    if (Normal.x != 0.0f)
+    {
+        float Azimuth = atan(Normal.y, Normal.x);
+        float Inclination = acos(Normal.z);
         
-    int AzimuthBin = int((Azimuth / g_Tau + 0.5f) * g_AzimuthBinCount);
-    int InclinationBinY = int(Inclination / g_Pi * g_InclinationBinCount);
+        int AzimuthBin = int((Azimuth / g_Tau + 0.5f) * g_AzimuthBinCount);
+        int InclinationBinY = int((Inclination / g_Pi) * g_InclinationBinCount);
     
-    imageAtomicAdd(cs_Histogram, ivec2(AzimuthBin, InclinationBinY), 1);
+        imageAtomicAdd(cs_Histogram, ivec2(AzimuthBin, InclinationBinY), 1);
+    }
 }
 
 #endif // __INCLUDE_CS_PLANE_DETECTION_GLSL__
