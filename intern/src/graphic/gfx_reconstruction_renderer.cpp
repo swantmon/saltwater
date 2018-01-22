@@ -540,8 +540,8 @@ namespace
 
         Float3 QuadLines[4] =
         {
-            Float3(0.0f, 0.0f, 0.0f),
             Float3(0.0f, 1.0f, 0.0f),
+            Float3(0.0f, 0.0f, 0.0f),
             Float3(1.0f, 1.0f, 0.0f),
             Float3(1.0f, 0.0f, 0.0f),
         };
