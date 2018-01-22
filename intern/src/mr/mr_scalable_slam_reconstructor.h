@@ -163,6 +163,7 @@ namespace MR
         void GetReconstructionSettings(SReconstructionSettings* pReconstructionSettings);
 
         Gfx::CTexturePtr GetVertexMap();
+        Gfx::CTexturePtr GetHONV();
         
     private:
 

@@ -2345,6 +2345,13 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
+    Gfx::CTexturePtr CScalableSLAMReconstructor::GetHONV()
+    {
+        return m_HONVImage;
+    }
+
+    // -----------------------------------------------------------------------------
+
     int CScalableSLAMReconstructor::DivUp(int TotalShaderCount, int WorkGroupSize)
     {
         return (TotalShaderCount + WorkGroupSize - 1) / WorkGroupSize;
