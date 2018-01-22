@@ -373,32 +373,66 @@ namespace
 
     void CGfxTextureManager::ClearTextureLayer(CTexturePtr _TexturePtr, const void* _pData, int _Layer)
     {
+        // TODO: Remove dummy
+        // Renderdoc crashes when _pData is nullptr but OpenGL allows NULL
+        // Therefore we create a dummy value until Renderdoc is fixed
+
+        Base::Int4 Dummy = Base::Int4(0);
+
+        if (_pData == nullptr)
+        {
+            _pData = &Dummy;
+        }
+
         CInternTexture* pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
         Gfx::CNativeTextureHandle TextureHandle = pInternTexture->m_NativeTexture;
         
-        assert(_Layer <= pInternTexture->GetNumberOfTextures());
+        assert(_Layer <= static_cast<int>(pInternTexture->GetNumberOfTextures()));
 
-        int Format = ConvertGLImageFormat(_TexturePtr->GetFormat());
-        int Type = ConvertGLImageType(_TexturePtr->GetFormat());
+        const int Format = ConvertGLImageFormat(_TexturePtr->GetFormat());
+        const int Type = ConvertGLImageType(_TexturePtr->GetFormat());
         
-        glClearTexImage(TextureHandle, _Layer, Format, Type, _pData);
+        const int Width = pInternTexture->GetNumberOfPixelsU();
+        const int Height = pInternTexture->GetNumberOfPixelsV();
+
+        const int MipLevels = pInternTexture->GetNumberOfMipLevels();
+
+        for (int MipIndex = 0; MipIndex < MipLevels; ++ MipIndex)
+        {
+            glClearTexSubImage(TextureHandle, MipIndex, 0, 0, _Layer, Width >> MipIndex, Height >> MipIndex, 1, Format, Type, _pData);
+        }
     }
     
     // -----------------------------------------------------------------------------
 
     void CGfxTextureManager::ClearTexture(CTexturePtr _TexturePtr, const void* _pData)
     {
+        // TODO: Remove dummy
+        // Renderdoc crashes when _pData is nullptr but OpenGL allows NULL
+        // Therefore we create a dummy value until Renderdoc is fixed
+
+        Base::Int4 Dummy = Base::Int4(0);
+
+        if (_pData == nullptr)
+        {
+            _pData = &Dummy;
+        }
+
         CInternTexture* pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
         Gfx::CNativeTextureHandle TextureHandle = pInternTexture->m_NativeTexture;
 
-        int Format = ConvertGLImageFormat(_TexturePtr->GetFormat());
-        int Type = ConvertGLImageType(_TexturePtr->GetFormat());
+        const int Format = ConvertGLImageFormat(_TexturePtr->GetFormat());
+        const int Type = ConvertGLImageType(_TexturePtr->GetFormat());
 
+        const int Width = pInternTexture->GetNumberOfPixelsU();
+        const int Height = pInternTexture->GetNumberOfPixelsV();
         const int LayerCount = pInternTexture->GetNumberOfTextures();
+        
+        const int MipLevels = pInternTexture->GetNumberOfMipLevels();
 
-        for (int LayerIndex = 0; LayerIndex < LayerCount; ++ LayerIndex)
+        for (int MipIndex = 0; MipIndex < MipLevels; ++ MipIndex)
         {
-            glClearTexImage(TextureHandle, LayerIndex, Format, Type, _pData);
+            glClearTexSubImage(TextureHandle, MipIndex, 0, 0, 0, Width >> MipIndex, Height >> MipIndex, LayerCount, Format, Type, _pData);
         }
     }
 
