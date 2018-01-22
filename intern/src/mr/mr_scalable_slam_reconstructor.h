@@ -248,7 +248,7 @@ namespace MR
 
         Gfx::CBufferPtr m_VolumeIndexBufferPtr;
 
-        Gfx::CBufferPtr m_HONVBuffer;
+        Gfx::CTexturePtr m_HONVImage;
         Gfx::CBufferPtr m_HONVMetadataBuffer;
 
         Gfx::CShaderPtr m_ClearVolumeCSPtr;

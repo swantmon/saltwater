@@ -22,8 +22,9 @@ const float g_Pi = g_Tau * 0.5f;
 // Input from engine
 // -----------------------------------------------------------------------------
 
-layout (binding = 0, MAP_TEXTURE_FORMAT) uniform image2D cs_VertexMap;
-layout (binding = 1, MAP_TEXTURE_FORMAT) uniform image2D cs_NormalMap;
+layout (binding = 0, r32i) uniform iimage2D cs_Histogram;
+layout (binding = 1, MAP_TEXTURE_FORMAT) uniform image2D cs_VertexMap;
+layout (binding = 2, MAP_TEXTURE_FORMAT) uniform image2D cs_NormalMap;
 
 // -------------------------------------------------------------------------------------
 // Functions
@@ -44,7 +45,7 @@ void main()
     int AzimuthBin = int((Azimuth / g_Tau + 0.5f) * g_AzimuthBinCount);
     int InclinationBinY = int(Inclination / g_Pi * g_InclinationBinCount);
     
-    atomicAdd(g_Histogram[InclinationBinY * g_AzimuthBinCount + InclinationBinY], 1);
+    imageAtomicAdd(cs_Histogram, ivec2(AzimuthBin, InclinationBinY), 1);
 }
 
 #endif // __INCLUDE_CS_PLANE_DETECTION_GLSL__
