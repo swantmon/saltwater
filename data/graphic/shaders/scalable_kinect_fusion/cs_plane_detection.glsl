@@ -16,7 +16,7 @@ layout(std430, binding = 0) buffer Histogram
 };
 
 const float g_Tau = 6.28318530718f;
-const float g_Pi = 6.28318530718f * 0.5f;
+const float g_Pi = g_Tau * 0.5f;
 
 // -----------------------------------------------------------------------------
 // Input from engine
