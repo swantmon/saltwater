@@ -61,7 +61,7 @@ namespace
 
         CTexturePtr GetTextureByHash(unsigned int _Hash);
 
-        void ClearTexture(CTexturePtr _TexturePtr, const void* _pData);
+        void ClearTexture(CTexturePtr _TexturePtr, const void* _pData, int _Level);
 
         void CopyToTexture2D(CTexturePtr _TexturePtr, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, void* _pBytes, bool _UpdateMipLevels);
         void CopyToTextureArray2D(CTexturePtr _TextureArrayPtr, unsigned int _IndexOfSlice, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, void* _pBytes, bool _UpdateMipLevels);
@@ -370,12 +370,17 @@ namespace
     
     // -----------------------------------------------------------------------------
 
-    void CGfxTextureManager::ClearTexture(CTexturePtr _TexturePtr, const void* _pColor)
+    void CGfxTextureManager::ClearTexture(CTexturePtr _TexturePtr, const void* _pData, int _Level)
     {
-        assert(false); //TODO: implement
+        assert(_pData != nullptr);
 
-        BASE_UNUSED(_TexturePtr);
-        BASE_UNUSED(_pColor);
+        CInternTexture* pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
+        Gfx::CNativeTextureHandle TextureHandle = pInternTexture->m_NativeTexture;
+        
+        int Format = ConvertGLImageFormat(_TexturePtr->GetFormat());
+        int Type = ConvertGLImageType(_TexturePtr->GetFormat());
+
+        glClearTexImage(TextureHandle, _Level, Format, Type, _pData);
     }
     
     // -----------------------------------------------------------------------------
@@ -2463,9 +2468,9 @@ namespace TextureManager
     
     // -----------------------------------------------------------------------------
 
-    void ClearTexture(CTexturePtr _TexturePtr, const void* _pColor)
+    void ClearTexture(CTexturePtr _TexturePtr, const void* _pData, int _Level)
     {
-        CGfxTextureManager::GetInstance().ClearTexture(_TexturePtr, _pColor);
+        CGfxTextureManager::GetInstance().ClearTexture(_TexturePtr, _pData, _Level);
     }
     
     // -----------------------------------------------------------------------------
