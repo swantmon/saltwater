@@ -60,8 +60,7 @@ namespace TextureManager
 
     CTexturePtr GetTextureByHash(unsigned int _Hash);
 
-    void ClearTexture2D(CTexturePtr _TexturePtr, const Base::Float4& _rColor);
-    void ClearTexture3D(CTexturePtr _TexturePtr, const Base::Float4& _rColor);
+    void ClearTexture(CTexturePtr _TexturePtr, const void* _pColor);
 
     void CopyToTexture2D(CTexturePtr _TexturePtr, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, void* _pBytes, bool _UpdateMipLevels = false);
     void CopyToTextureArray2D(CTexturePtr _TextureArrayPtr, unsigned int _IndexOfSlice, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, void* _pBytes, bool _UpdateMipLevels = false);

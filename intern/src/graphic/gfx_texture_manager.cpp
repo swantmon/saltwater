@@ -61,8 +61,7 @@ namespace
 
         CTexturePtr GetTextureByHash(unsigned int _Hash);
 
-        void ClearTexture2D(CTexturePtr _TexturePtr, const Base::Float4& _rColor);
-        void ClearTexture3D(CTexturePtr _TexturePtr, const Base::Float4& _rColor);
+        void ClearTexture(CTexturePtr _TexturePtr, const void* _pData);
 
         void CopyToTexture2D(CTexturePtr _TexturePtr, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, void* _pBytes, bool _UpdateMipLevels);
         void CopyToTextureArray2D(CTexturePtr _TextureArrayPtr, unsigned int _IndexOfSlice, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, void* _pBytes, bool _UpdateMipLevels);
@@ -371,24 +370,14 @@ namespace
     
     // -----------------------------------------------------------------------------
 
-    void CGfxTextureManager::ClearTexture2D(CTexturePtr _TexturePtr, const Base::Float4& _rColor)
+    void CGfxTextureManager::ClearTexture(CTexturePtr _TexturePtr, const void* _pColor)
     {
         assert(false); //TODO: implement
 
         BASE_UNUSED(_TexturePtr);
-        BASE_UNUSED(_rColor);
+        BASE_UNUSED(_pColor);
     }
-
-    // -----------------------------------------------------------------------------
-
-    void CGfxTextureManager::ClearTexture3D(CTexturePtr _TexturePtr, const Base::Float4& _rColor)
-    {
-        assert(false); //TODO: implement
-
-        BASE_UNUSED(_TexturePtr);
-        BASE_UNUSED(_rColor);
-    }
-
+    
     // -----------------------------------------------------------------------------
     
     void CGfxTextureManager::CopyToTexture2D(CTexturePtr _TexturePtr, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, void* _pBytes, bool _UpdateMipLevels)
@@ -2474,18 +2463,11 @@ namespace TextureManager
     
     // -----------------------------------------------------------------------------
 
-    void ClearTexture2D(CTexturePtr _TexturePtr, const Base::Float4& _rColor)
+    void ClearTexture(CTexturePtr _TexturePtr, const void* _pColor)
     {
-        CGfxTextureManager::GetInstance().ClearTexture2D(_TexturePtr, _rColor);
+        CGfxTextureManager::GetInstance().ClearTexture(_TexturePtr, _pColor);
     }
-
-    // -----------------------------------------------------------------------------
-
-    void ClearTexture3D(CTexturePtr _TexturePtr, const Base::Float4& _rColor)
-    {
-        CGfxTextureManager::GetInstance().ClearTexture3D(_TexturePtr, _rColor);
-    }
-
+    
     // -----------------------------------------------------------------------------
 
     void CopyToTexture2D(CTexturePtr _TexturePtr, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, void* _pBytes, bool _UpdateMipLevels)
