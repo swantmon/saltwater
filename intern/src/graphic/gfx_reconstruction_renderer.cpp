@@ -108,6 +108,8 @@ namespace
         void RenderQueuedLevel1Grids();
         void RenderQueuedLevel2Grids();
 
+        void RenderHONV();
+
         void RenderCamera();
 
         void RenderVertexMap();
@@ -145,6 +147,9 @@ namespace
 
         CMeshPtr m_VolumeMeshPtr;        
         CInputLayoutPtr m_VolumeInputLayoutPtr;
+
+        CMeshPtr m_QuadMeshPtr;
+        CInputLayoutPtr m_QuadInputLayoutPtr;
 
         CRenderContextPtr m_OutlineRenderContextPtr;
 
@@ -220,9 +225,11 @@ namespace
                 
         m_CameraMeshPtr = 0;
         m_VolumeMeshPtr = 0;
+        m_QuadMeshPtr = 0;
 		m_CubeOutlineMeshPtr = 0;
         m_CameraInputLayoutPtr = 0;
         m_VolumeInputLayoutPtr = 0;
+        m_QuadInputLayoutPtr = 0;
 		m_CubeOutlineInputLayoutPtr = 0;
 
         m_OutlineRenderContextPtr = 0;
@@ -521,6 +528,34 @@ namespace
 		MeshDesc.m_pMesh = pMesh;
 
 		m_CubeOutlineMeshPtr = MeshManager::CreateMesh(MeshDesc);
+
+        Float3 QuadLines[4] =
+        {
+            Float3(0.0f, 0.0f, 0.0f),
+            Float3(0.0f, 1.0f, 0.0f),
+            Float3(1.0f, 1.0f, 0.0f),
+            Float3(1.0f, 0.0f, 0.0f),
+        };
+
+        pSurface = new Dt::CSurface;
+        pLOD = new Dt::CLOD;
+        pMesh = new Dt::CMesh;
+
+        pSurface->SetPositions(QuadLines);
+        pSurface->SetNumberOfVertices(sizeof(QuadLines) / sizeof(QuadLines[0]));
+        pSurface->SetIndices(nullptr);
+        pSurface->SetNumberOfIndices(0);
+        pSurface->SetElements(0);
+
+        pLOD->SetSurface(0, pSurface);
+        pLOD->SetNumberOfSurfaces(1);
+
+        pMesh->SetLOD(0, pLOD);
+        pMesh->SetNumberOfLODs(1);
+
+        MeshDesc.m_pMesh = pMesh;
+
+        m_QuadMeshPtr = MeshManager::CreateMesh(MeshDesc);
     }
     
     // -----------------------------------------------------------------------------
@@ -1066,6 +1101,13 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    void CGfxReconstructionRenderer::RenderHONV()
+    {
+
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CGfxReconstructionRenderer::RenderCamera()
     {
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
@@ -1162,6 +1204,8 @@ namespace
             RenderQueuedRootVolumes();
             //RenderQueuedLevel1Grids();
             //RenderQueuedLevel2Grids();
+
+            RenderHONV();
 		}
 		else
 		{
