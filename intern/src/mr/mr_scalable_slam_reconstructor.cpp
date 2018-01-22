@@ -1954,6 +1954,7 @@ namespace MR
 
         ContextManager::SetShaderCS(m_PlaneDetectionCSPtr);
         ContextManager::SetConstantBuffer(0, m_HONVMetadataBuffer);
+        ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
         ContextManager::SetImageTexture(0, m_HONVImage);
         ContextManager::SetImageTexture(1, static_cast<CTexturePtr>(m_ReferenceVertexMapPtr[2]));
         ContextManager::SetImageTexture(2, static_cast<CTexturePtr>(m_ReferenceNormalMapPtr[2]));

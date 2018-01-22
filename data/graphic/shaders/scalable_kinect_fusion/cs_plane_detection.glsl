@@ -2,6 +2,8 @@
 #ifndef __INCLUDE_CS_PLANE_DETECTION_GLSL__
 #define __INCLUDE_CS_PLANE_DETECTION_GLSL__
 
+#include "scalable_kinect_fusion/common_tracking.glsl"
+
 layout(row_major, std140, binding = 0) uniform HistogramSizes
 {
     int g_AzimuthBinCount;
@@ -41,6 +43,8 @@ void main()
     
     if (Normal.x != 0.0f)
     {
+        Normal = mat3(g_PoseMatrix) * Normal;
+
         float Azimuth = atan(Normal.y, Normal.x);
         float Inclination = acos(Normal.z);
         
