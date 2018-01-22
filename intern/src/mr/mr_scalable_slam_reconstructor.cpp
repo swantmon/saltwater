@@ -1680,15 +1680,15 @@ namespace MR
         ConstantBufferDesc.m_NumberOfBytes = sizeof(SScalableRaycastConstantBuffer);
         m_VolumeBuffers.m_AABBBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
 
-        const int HistoGramBinsInclination = 10;
-        const int HistoGramBinsAzimuth = 10;
+        const int HistogramBinsInclination = 128;
+        const int HistogramBinsAzimuth = 128;
         ConstantBufferDesc.m_Binding = CBuffer::ResourceBuffer;
-        ConstantBufferDesc.m_NumberOfBytes = sizeof(int32_t) * HistoGramBinsInclination * HistoGramBinsAzimuth;
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(int32_t) * HistogramBinsInclination * HistogramBinsAzimuth;
         m_HONVBuffer = BufferManager::CreateBuffer(ConstantBufferDesc);
 
         int32_t HistogramSizes[] =
         {
-            HistoGramBinsInclination, HistoGramBinsAzimuth, 0, 0
+            HistogramBinsInclination, HistogramBinsAzimuth, 0, 0
         };
 
         ConstantBufferDesc.m_Binding = CBuffer::ConstantBuffer;
