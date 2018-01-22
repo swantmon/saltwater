@@ -61,7 +61,8 @@ namespace
 
         CTexturePtr GetTextureByHash(unsigned int _Hash);
 
-        void ClearTexture(CTexturePtr _TexturePtr, const void* _pData, int _Level);
+        void ClearTextureLayer(CTexturePtr _TexturePtr, const void* _pData, int _Layer);
+        void ClearTexture(CTexturePtr _TexturePtr, const void* _pData);
 
         void CopyToTexture2D(CTexturePtr _TexturePtr, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, void* _pBytes, bool _UpdateMipLevels);
         void CopyToTextureArray2D(CTexturePtr _TextureArrayPtr, unsigned int _IndexOfSlice, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, void* _pBytes, bool _UpdateMipLevels);
@@ -370,19 +371,37 @@ namespace
     
     // -----------------------------------------------------------------------------
 
-    void CGfxTextureManager::ClearTexture(CTexturePtr _TexturePtr, const void* _pData, int _Level)
+    void CGfxTextureManager::ClearTextureLayer(CTexturePtr _TexturePtr, const void* _pData, int _Layer)
     {
-        assert(_pData != nullptr);
-
         CInternTexture* pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
         Gfx::CNativeTextureHandle TextureHandle = pInternTexture->m_NativeTexture;
         
+        assert(_Layer <= pInternTexture->GetNumberOfTextures());
+
+        int Format = ConvertGLImageFormat(_TexturePtr->GetFormat());
+        int Type = ConvertGLImageType(_TexturePtr->GetFormat());
+        
+        glClearTexImage(TextureHandle, _Layer, Format, Type, _pData);
+    }
+    
+    // -----------------------------------------------------------------------------
+
+    void CGfxTextureManager::ClearTexture(CTexturePtr _TexturePtr, const void* _pData)
+    {
+        CInternTexture* pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
+        Gfx::CNativeTextureHandle TextureHandle = pInternTexture->m_NativeTexture;
+
         int Format = ConvertGLImageFormat(_TexturePtr->GetFormat());
         int Type = ConvertGLImageType(_TexturePtr->GetFormat());
 
-        glClearTexImage(TextureHandle, _Level, Format, Type, _pData);
+        const int LayerCount = pInternTexture->GetNumberOfTextures();
+
+        for (int LayerIndex = 0; LayerIndex < LayerCount; ++ LayerIndex)
+        {
+            glClearTexImage(TextureHandle, LayerIndex, Format, Type, _pData);
+        }
     }
-    
+
     // -----------------------------------------------------------------------------
     
     void CGfxTextureManager::CopyToTexture2D(CTexturePtr _TexturePtr, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, void* _pBytes, bool _UpdateMipLevels)
@@ -2468,9 +2487,16 @@ namespace TextureManager
     
     // -----------------------------------------------------------------------------
 
-    void ClearTexture(CTexturePtr _TexturePtr, const void* _pData, int _Level)
+    void ClearTextureLayer(CTexturePtr _TexturePtr, const void* _pData, int _Layer)
     {
-        CGfxTextureManager::GetInstance().ClearTexture(_TexturePtr, _pData, _Level);
+        CGfxTextureManager::GetInstance().ClearTextureLayer(_TexturePtr, _pData, _Layer);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void ClearTexture(CTexturePtr _TexturePtr, const void* _pData)
+    {
+        CGfxTextureManager::GetInstance().ClearTexture(_TexturePtr, _pData);
     }
     
     // -----------------------------------------------------------------------------
