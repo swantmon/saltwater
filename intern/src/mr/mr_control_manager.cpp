@@ -50,7 +50,7 @@ namespace
             0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
     };
 
-    constexpr char k_VertexShader[] = R"(
+    constexpr char k_VertexShaderWebcam[] = R"(
         #version  320 es
 
         layout(location = 0) in vec2 in_UV;
@@ -72,7 +72,7 @@ namespace
         }
     )";
 
-    constexpr char k_FragmentShader[] = R"(
+    constexpr char k_FragmentShaderWebcam[] = R"(
         #version 320 es
 
         #extension GL_OES_EGL_image_external_essl3 : require
@@ -88,6 +88,40 @@ namespace
         void main()
         {
             out_Output = texture(in_ExtOESTexture, in_UV);
+        }
+    )";
+
+    constexpr char k_VertexShaderPlane[] = R"(
+        #version 320 es
+
+        precision highp float;
+
+        layout(location = 0) uniform mat4 m_MVP;
+
+        layout(location = 0) in vec3 in_Vertex;
+
+        layout(location = 0) out float out_Alpha;
+
+        void main()
+        {
+          gl_Position = m_MVP * vec4(in_Vertex.x, 0.0f, in_Vertex.y, 1.0f);
+
+          out_Alpha = in_Vertex.z;
+        }
+    )";
+
+    constexpr char k_FragmentShaderPlane[] = R"(
+        #version 320 es
+
+        precision highp float;
+
+        layout(location = 0) in float in_Alpha;
+
+        layout(location = 0) out vec4 out_Output;
+
+        void main()
+        {
+            out_Output = vec4(vec3(1.0f, 0.0f, 0.0f), in_Alpha);
         }
     )";
 
@@ -181,9 +215,14 @@ namespace
         return Program;
     }
 
-    unsigned int g_ShaderProgram;
+    unsigned int g_ShaderProgramWebcam;
+    unsigned int g_ShaderProgramPlane;
     unsigned int g_TextureID;
     unsigned int g_AttributeUVs;
+    unsigned int g_AttributePlaneVertices;
+    unsigned int g_PlaneIndices;
+
+    static constexpr int s_MaxNumberOfVerticesPerPlane = 1024;
 
     static constexpr int s_NumberOfVertices = 4;
     bool g_IsUVsInitialized = false;
@@ -228,6 +267,9 @@ namespace
         ArFrame* m_pARFrame;
         CTrackedObjects m_TrackedObjects;
 
+        Base::Float4x4 m_ViewMatrix;
+        Base::Float4x4 m_ProjectionMatrix;
+
     private:
 
         void OnDirtyEntity(Dt::CEntity* _pEntity);
@@ -245,6 +287,8 @@ namespace
         : m_pARSession        (0)
         , m_pARFrame          (0)
         , m_TrackedObjects    ()
+        , m_ViewMatrix        (Base::Float4x4::s_Identity)
+        , m_ProjectionMatrix  (Base::Float4x4::s_Identity)
     {
     }
 
@@ -267,7 +311,7 @@ namespace
 
         Status = ArSession_create(_rConfiguration.m_pEnv, _rConfiguration.m_pContext, &m_pARSession);
 
-        if (Status != AR_SUCCESS) BASE_THROWM("Application has to be closed because of unsupoorted ArCore.");
+        if (Status != AR_SUCCESS) BASE_THROWM("Application has to be closed because of unsupported ArCore.");
 
         assert(m_pARSession != 0);
 
@@ -296,9 +340,9 @@ namespace
         // -----------------------------------------------------------------------------
         // OpenGLES
         // -----------------------------------------------------------------------------
-        g_ShaderProgram = CreateProgram(k_VertexShader, k_FragmentShader);
+        g_ShaderProgramWebcam = CreateProgram(k_VertexShaderWebcam, k_FragmentShaderWebcam);
 
-        if (g_ShaderProgram == 0) BASE_THROWM("Failed creating shader capturing webcam image.")
+        if (g_ShaderProgramWebcam == 0) BASE_THROWM("Failed creating shader capturing webcam image.")
 
         glGenTextures(1, &g_TextureID);
 
@@ -317,6 +361,26 @@ namespace
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         ArSession_setCameraTextureName(m_pARSession, g_TextureID);
+
+        // -----------------------------------------------------------------------------
+
+        g_ShaderProgramPlane = CreateProgram(k_VertexShaderPlane, k_FragmentShaderPlane);
+
+        glGenBuffers(1, &g_AttributePlaneVertices);
+
+        glBindBuffer(GL_ARRAY_BUFFER, g_AttributePlaneVertices);
+
+        glBufferData(GL_ARRAY_BUFFER, s_MaxNumberOfVerticesPerPlane * sizeof(Base::Float3), 0, GL_DYNAMIC_DRAW);
+
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+        glGenBuffers(1, &g_PlaneIndices);
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g_PlaneIndices);
+
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, s_MaxNumberOfVerticesPerPlane * 3 * sizeof(GLushort), 0, GL_DYNAMIC_DRAW);
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     }
 
     // -----------------------------------------------------------------------------
@@ -335,7 +399,7 @@ namespace
         // -----------------------------------------------------------------------------
         // OpenGLES
         // -----------------------------------------------------------------------------
-        glDeleteProgram(g_ShaderProgram);
+        glDeleteProgram(g_ShaderProgramWebcam);
 
         glDeleteTextures(1, &g_TextureID);
     }
@@ -357,18 +421,13 @@ namespace
 
         ArFrame_acquireCamera(m_pARSession, m_pARFrame, &pARCamera);
 
-        Base::Float4x4 ViewMatrix       = Base::Float4x4::s_Identity;
-        Base::Float4x4 ProjectionMatrix = Base::Float4x4::s_Identity;
+        ArCamera_getViewMatrix(m_pARSession, pARCamera, &m_ViewMatrix[0][0]);
 
-        ArCamera_getViewMatrix(m_pARSession, pARCamera, &ViewMatrix[0][0]);
-
-        ArCamera_getProjectionMatrix(m_pARSession, pARCamera, 0.1f, 100.0f, &ProjectionMatrix[0][0]);
+        ArCamera_getProjectionMatrix(m_pARSession, pARCamera, 0.1f, 100.0f, &m_ProjectionMatrix[0][0]);
 
         ArCamera_release(pARCamera);
 
-        Gfx::Cam::SetViewMatrix(ViewMatrix);
-
-        Gfx::Cam::SetProjectionMatrix(ProjectionMatrix);
+        // TODO: set matrices to graphic or camera project
 
         // -----------------------------------------------------------------------------
         // Light estimation
@@ -466,7 +525,7 @@ namespace
             g_IsUVsInitialized = true;
         }
 
-        glUseProgram(g_ShaderProgram);
+        glUseProgram(g_ShaderProgramWebcam);
 
         glDisable(GL_DEPTH_TEST);
 
@@ -495,6 +554,213 @@ namespace
         glBindTexture(GL_TEXTURE_EXTERNAL_OES, 0);
 
         glUseProgram(0);
+
+
+        // -----------------------------------------------------------------------------
+        // Render planes (TODO: Only if needed or debug)
+        // -----------------------------------------------------------------------------
+        std::vector<Base::Float3> PlaneVertices;
+        std::vector<GLushort> PlaneIndices;
+
+        Base::Float4x4 PlaneModelMatrix = Base::Float4x4::s_Identity;
+
+        auto UpdateForPlane = [&](const ArPlane* _pPlane)
+        {
+            // -----------------------------------------------------------------------------
+            // The following code generates a triangle mesh filling a convex polygon,
+            // including a feathered edge for blending.
+            //
+            // The indices shown in the diagram are used in comments below.
+            // _______________     0_______________1
+            // |             |      |4___________5|
+            // |             |      | |         | |
+            // |             | =>   | |         | |
+            // |             |      | |         | |
+            // |             |      |7-----------6|
+            // ---------------     3---------------2
+            // -----------------------------------------------------------------------------
+
+            PlaneVertices.clear();
+            PlaneIndices .clear();
+
+            int32_t LengthOfPolygon;
+
+            ArPlane_getPolygonSize(m_pARSession, _pPlane, &LengthOfPolygon);
+
+            int NumberOfVertices = LengthOfPolygon / 2;
+
+            std::vector<Base::Float2> VerticesRAW(NumberOfVertices);
+
+            ArPlane_getPolygon(m_pARSession, _pPlane, &VerticesRAW.front()[0]);
+
+            // -----------------------------------------------------------------------------
+            // Fill vertex 0 to 3. Note that the vertex.xy are used for x and z
+            // position. vertex.z is used for alpha. The outter polygon's alpha
+            // is 0.
+            // -----------------------------------------------------------------------------
+            for (int IndexOfVertex = 0; IndexOfVertex < NumberOfVertices; ++IndexOfVertex)
+            {
+                PlaneVertices.push_back(Base::Float3(VerticesRAW[IndexOfVertex][0], VerticesRAW[IndexOfVertex][1], 0.0f));
+            }
+
+            // -----------------------------------------------------------------------------
+            // Generate pose and get model matrix
+            // -----------------------------------------------------------------------------
+            ArPose* Pose;
+
+            ArPose_create(m_pARSession, nullptr, &Pose);
+
+            ArPlane_getCenterPose(m_pARSession, _pPlane, Pose);
+
+            ArPose_getMatrix(m_pARSession, Pose, &PlaneModelMatrix[0][0]);
+
+            ArPose_destroy(Pose);
+
+            // -----------------------------------------------------------------------------
+            // Get plane center in XZ axis.
+            // -----------------------------------------------------------------------------
+            Base::Float2 CenterOfPlane = Base::Float2(PlaneModelMatrix[3][0], PlaneModelMatrix[3][2]);
+
+            // -----------------------------------------------------------------------------
+            // Settings:
+            // Feather distance 0.2 meters.
+            // Feather scale over the distance between plane center and vertices.
+            // -----------------------------------------------------------------------------
+            const float kFeatherLength = 0.2f;
+            const float kFeatherScale  = 0.2f;
+
+            // -----------------------------------------------------------------------------
+            // Fill vertex 0 to 3, with alpha set to 1.
+            // -----------------------------------------------------------------------------
+            for (int i = 0; i < NumberOfVertices; ++i)
+            {
+                // -----------------------------------------------------------------------------
+                // Vector from plane center to current point.
+                // -----------------------------------------------------------------------------
+                const Base::Float2 CurrentVertex = VerticesRAW[i];
+
+                const Base::Float2 Direction = CurrentVertex - CenterOfPlane;
+
+                const float Scale = 1.0f - std::min((kFeatherLength / 2.0f), kFeatherScale);
+
+                const Base::Float2 ResultVector = Base::Float2(Scale) * Direction + CenterOfPlane;
+
+                PlaneVertices.push_back(Base::Float3(ResultVector[0], ResultVector[1], 1.0f));
+            }
+
+            // -----------------------------------------------------------------------------
+            // Generate vertices / triangles
+            // -----------------------------------------------------------------------------
+            NumberOfVertices = PlaneVertices.size();
+
+            int NumberOfVerticesHalf = NumberOfVertices / 2.0f;
+
+            // -----------------------------------------------------------------------------
+            // Generate triangle (4, 5, 6) and (4, 6, 7).
+            // -----------------------------------------------------------------------------
+            for (int IndexOfIndice = NumberOfVerticesHalf + 1; IndexOfIndice < NumberOfVertices - 1; ++IndexOfIndice)
+            {
+                PlaneIndices.push_back(NumberOfVerticesHalf);
+                PlaneIndices.push_back(IndexOfIndice);
+                PlaneIndices.push_back(IndexOfIndice + 1);
+            }
+
+            // -----------------------------------------------------------------------------
+            // Generate triangle (0, 1, 4), (4, 1, 5), (5, 1, 2), (5, 2, 6),
+            // (6, 2, 3), (6, 3, 7), (7, 3, 0), (7, 0, 4)
+            // -----------------------------------------------------------------------------
+            for (int IndexOfIndice = 0; IndexOfIndice < NumberOfVerticesHalf; ++IndexOfIndice)
+            {
+                PlaneIndices.push_back(IndexOfIndice);
+                PlaneIndices.push_back((IndexOfIndice + 1) % NumberOfVerticesHalf);
+                PlaneIndices.push_back(IndexOfIndice + NumberOfVerticesHalf);
+
+                PlaneIndices.push_back(IndexOfIndice + NumberOfVerticesHalf);
+                PlaneIndices.push_back((IndexOfIndice + 1) % NumberOfVerticesHalf);
+                PlaneIndices.push_back((IndexOfIndice + NumberOfVerticesHalf + 1) % NumberOfVerticesHalf + NumberOfVerticesHalf);
+            }
+        };
+
+        // -----------------------------------------------------------------------------
+        // Get trackable planes
+        // -----------------------------------------------------------------------------
+        ArTrackableList* ListOfPlanes = nullptr;
+
+        ArTrackableList_create(m_pARSession, &ListOfPlanes);
+
+        assert(ListOfPlanes != nullptr);
+
+        ArSession_getAllTrackables(m_pARSession, AR_TRACKABLE_PLANE, ListOfPlanes);
+
+        int32_t NumberOfPlanes = 0;
+
+        ArTrackableList_getSize(m_pARSession, ListOfPlanes, &NumberOfPlanes);
+
+        // -----------------------------------------------------------------------------
+        // Update every available plane
+        // -----------------------------------------------------------------------------
+        for (int i = 0; i < NumberOfPlanes; ++i)
+        {
+            ArTrackable* TrackableItem = nullptr;
+
+            ArTrackableList_acquireItem(m_pARSession, ListOfPlanes, i, &TrackableItem);
+
+            ArPlane* Plane = ArAsPlane(TrackableItem);
+
+            // -----------------------------------------------------------------------------
+            // Generate planes and upload data
+            // -----------------------------------------------------------------------------
+            UpdateForPlane(Plane);
+
+            if (PlaneIndices.size() == 0 || PlaneVertices.size() == 0) continue;
+
+            glBindBuffer(GL_ARRAY_BUFFER, g_AttributePlaneVertices);
+
+            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Base::Float3) * PlaneVertices.size(), &PlaneVertices.front()[0]);
+
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g_PlaneIndices);
+
+            glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(GLuint) * PlaneIndices.size(), &PlaneIndices.front());
+
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+            // -----------------------------------------------------------------------------
+            // Draw
+            // -----------------------------------------------------------------------------
+            glUseProgram(g_ShaderProgramPlane);
+
+            Base::Float4x4 Matrix = PlaneModelMatrix * m_ViewMatrix * m_ProjectionMatrix;
+
+            glUniformMatrix4fv(0, 1, GL_FALSE, &(Matrix[0][0]));
+
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g_PlaneIndices);
+
+            glBindBuffer(GL_ARRAY_BUFFER, g_AttributePlaneVertices);
+
+            glEnableVertexAttribArray(0);
+
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+            glDrawElements(GL_TRIANGLES, PlaneIndices.size(), GL_UNSIGNED_SHORT, 0);
+
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+            glUseProgram(0);
+
+            ArTrackable_release(TrackableItem);
+        }
+
+        ArTrackableList_destroy(ListOfPlanes);
+
+        ListOfPlanes = nullptr;
+
+
+
+
     }
 
     // -----------------------------------------------------------------------------
