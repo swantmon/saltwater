@@ -364,6 +364,8 @@ namespace
                     // -----------------------------------------------------------------------------
                     ASensorEventQueue_setEventRate(AppSetup->m_SensorEventQueue, AppSetup->m_AccelerometerSensor, (1000L / 60) * 1000);
                 }
+
+                AppSetup->m_Animating = 1;
                 break;
 
             case APP_CMD_LOST_FOCUS:
