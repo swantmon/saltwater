@@ -433,6 +433,20 @@ namespace
         ArCamera_release(pARCamera);
 
         // TODO: set matrices to graphic or camera project
+        Gfx::Cam::SetViewMatrix(m_ViewMatrix);
+
+        // -----------------------------------------------------------------------------
+        // Decompose left, right, top, bottom, near and far from projection
+        // matrix:
+        // Near = ProjectionMatrix[2][3] / (ProjectionMatrix[2][2] - 1);
+        // Far  = ProjectionMatrix[2][3] / (ProjectionMatrix[2][2] + 1);
+        // -----------------------------------------------------------------------------
+        float Bottom = 0.1f * (m_ProjectionMatrix[1][2] - 1.0f) / m_ProjectionMatrix[1][1];
+        float Top    = 0.1f * (m_ProjectionMatrix[1][2] + 1.0f) / m_ProjectionMatrix[1][1];
+        float Left   = 0.1f * (m_ProjectionMatrix[0][2] - 1.0f) / m_ProjectionMatrix[0][0];
+        float Right  = 0.1f * (m_ProjectionMatrix[0][2] + 1.0f) / m_ProjectionMatrix[0][0];
+
+        Gfx::Cam::SetPerspective(Left, Right, Bottom, Top, 0.1f, 100.0f);
 
         // -----------------------------------------------------------------------------
         // Light estimation
