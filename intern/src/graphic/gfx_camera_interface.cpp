@@ -354,6 +354,27 @@ namespace Cam
 
         return rView.GetViewMatrix();
     }
+
+    // -----------------------------------------------------------------------------
+
+    void SetProjectionMatrix(const Base::Float4x4& _rProjectionMatrix)
+    {
+        assert(ViewManager::GetMainCamera() != nullptr && ViewManager::GetMainCamera().IsValid());
+        CCamera& rCamera = *ViewManager::GetMainCamera();
+
+        rCamera.SetProjectionMatrix(_rProjectionMatrix);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const Base::Float4x4& GetProjectionMatrix()
+    {
+        assert(ViewManager::GetMainCamera() != nullptr && ViewManager::GetMainCamera().IsValid());
+
+        CCamera& rCamera = *ViewManager::GetMainCamera();
+
+        return rCamera.GetProjectionMatrix();
+    }
     
     // -----------------------------------------------------------------------------
 

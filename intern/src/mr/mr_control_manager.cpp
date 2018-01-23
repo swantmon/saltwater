@@ -21,6 +21,8 @@
 #include "data/data_plugin_type.h"
 #include "data/data_transformation_facet.h"
 
+#include "graphic/gfx_camera_interface.h"
+
 #include "mr/mr_control_manager.h"
 
 #include "arcore_c_api.h"
@@ -365,6 +367,9 @@ namespace
         ArCamera_release(pARCamera);
 
         // TODO: send view and proj. matrix to camera
+        Gfx::Cam::SetViewMatrix(ViewMatrix);
+
+        Gfx::Cam::SetProjectionMatrix(ProjectionMatrix);
 
         // -----------------------------------------------------------------------------
         // Light estimation

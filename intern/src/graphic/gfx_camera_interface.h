@@ -59,6 +59,9 @@ namespace Cam
     void SetViewMatrix(const Base::Float4x4& _rViewMatrix);
     const Base::Float4x4& GetViewMatrix();
 
+    void SetProjectionMatrix(const Base::Float4x4& _rProjectionMatrix);
+    const Base::Float4x4& GetProjectionMatrix();
+
     // -----------------------------------------------------------------------------
     // Manager
     // -----------------------------------------------------------------------------

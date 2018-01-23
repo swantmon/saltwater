@@ -172,6 +172,13 @@ namespace Gfx
         m_ProjectionMatrix.SetRHOrthographic(_Left, _Right, _Bottom, _Top, _Near, _Far);
     }
 
+    // --------------------------------------------------------------------------------
+
+    void CCamera::SetProjectionMatrix(const Base::Float4x4& _rProjectionMatrix)
+    {
+        m_ProjectionMatrix = _rProjectionMatrix;
+    }
+
     // -----------------------------------------------------------------------------
 
     void CCamera::SetAspectRatio(float _Aspect)

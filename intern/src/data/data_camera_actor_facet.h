@@ -29,7 +29,7 @@ namespace Dt
         {
             Perspective,
             Orthographic,
-            RAW,
+            External,
         };
 
         enum ECameraMode

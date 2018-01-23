@@ -167,6 +167,7 @@ namespace
             Dt::CCameraActorFacet* pFacet = Dt::CameraActorManager::CreateCameraActor();
 
             pFacet->SetMainCamera(true);
+            pFacet->SetProjectionType(Dt::CCameraActorFacet::External);
             pFacet->SetClearFlag(Dt::CCameraActorFacet::Webcam);
 
             rEntity.SetDetailFacet(Dt::SFacetCategory::Data, pFacet);
