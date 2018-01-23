@@ -1939,7 +1939,7 @@ namespace MR
 
         //////////////////////////////////////////////////////////////////////////////////////
         // Create a 2D-Histogram based on the inclination and the azimuth of the normals
-        // Histogram of Oriented Normal Vectors for Object Recognition with a Depth Sensor (HONV)
+        // "Histogram of Oriented Normal Vectors for Object Recognition with a Depth Sensor" (HONV)
         // We use the lowest resolution of the pyramid
         //////////////////////////////////////////////////////////////////////////////////////
 
