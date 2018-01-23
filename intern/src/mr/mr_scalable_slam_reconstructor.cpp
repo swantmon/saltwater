@@ -641,7 +641,7 @@ namespace MR
         m_PointsRootGridCSPtr      = ShaderManager::CompileCS("scalable_kinect_fusion\\rasterization_reverse\\cs_gather.glsl"       , "main", DefineString.c_str());
         m_PointsFullCSPtr          = ShaderManager::CompileCS("scalable_kinect_fusion\\rasterization_reverse\\cs_gather_full.glsl"  , "main", DefineString.c_str());
         m_FillIndirectBufferCSPtr  = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_fill_indirect.glsl"                       , "main", DefineString.c_str());
-        m_PlaneDetectionCSPtr      = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_plane_detection.glsl"                     , "main", DefineString.c_str());
+        m_NormalHistogramCSPtr     = ShaderManager::CompileCS("scalable_kinect_fusion\\plane_detection\\cs_histogram.glsl"          , "main", DefineString.c_str());
 
         SInputElementDescriptor InputLayoutDesc = {};
 
@@ -1948,7 +1948,7 @@ namespace MR
 
         ContextManager::Barrier();
 
-        ContextManager::SetShaderCS(m_PlaneDetectionCSPtr);
+        ContextManager::SetShaderCS(m_NormalHistogramCSPtr);
         ContextManager::SetConstantBuffer(0, m_HONVMetadataBuffer);
         ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
         ContextManager::SetImageTexture(0, m_HONVImage);

@@ -285,7 +285,7 @@ namespace MR
 
         Gfx::CShaderPtr m_FillIndirectBufferCSPtr;
 
-        Gfx::CShaderPtr m_PlaneDetectionCSPtr;
+        Gfx::CShaderPtr m_NormalHistogramCSPtr;
 
         Gfx::CMeshPtr m_CubeMeshPtr;
         Gfx::CMeshPtr m_Grid8MeshPtr;
