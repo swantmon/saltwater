@@ -19,6 +19,9 @@
 // -----------------------------------------------------------------------------
 // Interface
 // -----------------------------------------------------------------------------
+using namespace Core;
+using namespace Core::JNI;
+
 namespace
 {
     class CJNIInterface : private Base::CUncopyable
@@ -46,10 +49,18 @@ namespace
 
         void AcquirePermissions(const std::string* _pPermissions, unsigned int _NumberOfPermissions);
 
+        void InformOnAcquirePermission(const std::string& _rPermissions, int _GrantResults);
+
+        void RegisterOnAcquirePermission(COnAcquirePermissionDelegate _NewDelegate);
+
     public:
 
         CJNIInterface();
         ~CJNIInterface();
+
+    private:
+
+        typedef std::vector<COnAcquirePermissionDelegate> COnAcquirePermissionDelegates;
 
     private:
 
@@ -69,6 +80,8 @@ namespace
         jmethodID m_AcquirePermissionMethod;
 
         Base::Int2 m_Dimension;
+
+        COnAcquirePermissionDelegates m_OnAcquirePermissionDelegates;
     };
 }
 
@@ -88,6 +101,7 @@ namespace
         , m_GetDeviceDimensionWidthMethod (0)
         , m_GetDeviceDimensionHeightMethod(0)
         , m_Dimension                     (0)
+        , m_OnAcquirePermissionDelegates  ()
     {
 
     };
@@ -280,6 +294,23 @@ namespace
 
         pEnvironment->DeleteLocalRef(PermissionsArray);
     }
+
+    // -----------------------------------------------------------------------------
+
+    void CJNIInterface::InformOnAcquirePermission(const std::string& _rPermissions, int _GrantResults)
+    {
+        for (auto Delegate : m_OnAcquirePermissionDelegates)
+        {
+            (Delegate)(_rPermissions, _GrantResults);
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CJNIInterface::RegisterOnAcquirePermission(COnAcquirePermissionDelegate _NewDelegate)
+    {
+        m_OnAcquirePermissionDelegates.push_back(_NewDelegate);
+    }
 }
 
 namespace Core
@@ -324,6 +355,13 @@ namespace JNI
     void AcquirePermissions(const std::string* _pPermissions, unsigned int _NumberOfPermissions)
     {
         CJNIInterface::GetInstance().AcquirePermissions(_pPermissions, _NumberOfPermissions);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void RegisterOnAcquirePermission(COnAcquirePermissionDelegate _NewDelegate)
+    {
+        CJNIInterface::GetInstance().RegisterOnAcquirePermissions(_NewDelegate);
     }
 } // namespace JNI
 } // namespace Core

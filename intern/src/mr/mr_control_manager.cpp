@@ -225,10 +225,12 @@ namespace
         ArSession* m_pARSession;
         ArFrame* m_pARFrame;
         CTrackedObjects m_TrackedObjects;
+        bool m_PermissionsGranted;
 
     private:
 
         void OnDirtyEntity(Dt::CEntity* _pEntity);
+        void OnAcquirePermission(const std::string& _rPermission, int _GrantResult);
     };
 } // namespace
 
@@ -240,9 +242,10 @@ namespace
 namespace
 {
     CMRControlManager::CMRControlManager()
-        : m_pARSession    (0)
-        , m_pARFrame      (0)
-        , m_TrackedObjects()
+        : m_pARSession        (0)
+        , m_pARFrame          (0)
+        , m_TrackedObjects    ()
+        , m_PermissionsGranted(false)
     {
     }
 
@@ -258,6 +261,8 @@ namespace
     {
         Dt::EntityManager::RegisterDirtyEntityHandler(DATA_DIRTY_ENTITY_METHOD(&CMRControlManager::OnDirtyEntity));
 
+        Core::JNI::RegisterOnAcquirePermission(CORE_JNI_ON_ACQUIRE_PERMISSION_METHOD(&CMRControlManager::OnAcquirePermission));
+
         // -----------------------------------------------------------------------------
         // Check permission
         // -----------------------------------------------------------------------------
@@ -265,8 +270,6 @@ namespace
         {
             Core::JNI::AcquirePermissions(s_Permissions, 1);
         }
-
-        while (!Core::JNI::CheckPermission(s_Permissions[0])) {}
 
         // -----------------------------------------------------------------------------
         // AR session and frame
@@ -516,6 +519,18 @@ namespace
         if ((DirtyFlags & Dt::CEntity::DirtyCreate) != 0)
         {
             // ...
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMRControlManager::OnAcquirePermission(const std::string& _rPermission, int _GrantResult)
+    {
+        m_PermissionsGranted = false;
+
+        if (_rPermission == s_Permissions[0] && _GrantResult == 1)
+        {
+            m_PermissionsGranted = true;
         }
     }
 } // namespace
