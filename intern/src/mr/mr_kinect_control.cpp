@@ -12,7 +12,9 @@
 
 #include "opencv2/opencv.hpp"
 #include "Kinect.h"
+#ifdef ARTOOLKIT_INCLUDED
 #include <AR/video.h>
+#endif // ARTOOLKIT_INCLUDED
 
 #define COLOR_WIDTH  1920
 #define COLOR_HEIGHT 1080
@@ -69,6 +71,7 @@ namespace MR
 
     void CKinectControl::InternStart(const Base::Char* _pCameraParameterFile)
     {
+#ifdef ARTOOLKIT_INCLUDED
         int Error;
 
         std::string PathToResource;
@@ -216,6 +219,9 @@ namespace MR
         m_pOriginalFrame = Dt::TextureManager::CreateTexture2D(TextureDescriptor);
 
         Dt::TextureManager::MarkTextureAsDirty(m_pOriginalFrame, Dt::CTextureBase::DirtyCreate);
+#else
+        static_cast<void>(_pCameraParameterFile);
+#endif // ARTOOLKIT_INCLUDED
     }
 
     // -----------------------------------------------------------------------------
