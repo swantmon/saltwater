@@ -384,7 +384,20 @@ extern "C"
 
     JNIEXPORT void JNICALL Java_de_tuilmenau_saltwater_PermissionHelper_nativeOnAcquirePermissions(JNIEnv* _pEnv, jobject _LocalThiz, jobjectArray _Permissions, jintArray _GrantResults)
     {
+        int NumberOfPermissions = _pEnv->GetArrayLength(_Permissions);
+
         jint* pGrantResults = _pEnv->GetIntArrayElements(_GrantResults, NULL);
+
+        for (int IndexOfPermssion = 0; IndexOfPermssion < NumberOfPermissions; ++IndexOfPermssion)
+        {
+            jstring PermissionString = (jstring)_pEnv->GetObjectArrayElement(_Permissions, IndexOfPermssion);
+
+            std::string Permission = _pEnv->GetStringUTFChars(PermissionString, 0);
+
+            int GrantResult = (int)pGrantResults[IndexOfPermssion];
+
+            CJNIInterface::GetInstance().InformOnAcquirePermission(Permission, GrantResult);
+        }
 
         _pEnv->ReleaseIntArrayElements(_GrantResults, pGrantResults, 0);
     }
