@@ -6,6 +6,7 @@
 #include "base/base_input_event.h"
 #include "base/base_memory.h"
 #include "base/base_pool.h"
+#include "base/base_program_parameters.h"
 #include "base/base_uncopyable.h"
 #include "base/base_singleton.h"
 
@@ -559,17 +560,30 @@ namespace
 
         glUseProgram(0);
 
+        // -----------------------------------------------------------------------------
+        // Render planes
+        // -----------------------------------------------------------------------------
+        bool RenderPlanes = Base::CProgramParameters::GetInstance().GetBoolean("mr::ar::debug::render_planes", true);
 
-        // -----------------------------------------------------------------------------
-        // Render planes (TODO: Only if needed or debug)
-        // -----------------------------------------------------------------------------
+        if (RenderPlanes == false) return;
+
         std::vector<Base::Float3> PlaneVertices;
         std::vector<GLushort> PlaneIndices;
 
         Base::Float4x4 PlaneModelMatrix = Base::Float4x4::s_Identity;
 
-        auto UpdateForPlane = [&](const ArPlane* _pPlane)
+        auto UpdateGeometryForPlane = [&](const ArPlane* _pPlane)
         {
+            // -----------------------------------------------------------------------------
+            // Settings:
+            // Feather distance 0.2 meters.
+            // Feather scale over the distance between plane center and vertices.
+            // -----------------------------------------------------------------------------
+            const float kFeatherLength = 0.2f;
+            const float kFeatherScale  = 0.2f;
+            const float kOuterAlpha    = 1.0f;
+            const float kInnerAlpha    = 0.3f;
+
             // -----------------------------------------------------------------------------
             // The following code generates a triangle mesh filling a convex polygon,
             // including a feathered edge for blending.
@@ -587,7 +601,7 @@ namespace
             PlaneVertices.clear();
             PlaneIndices .clear();
 
-            int32_t LengthOfPolygon;
+            int LengthOfPolygon;
 
             ArPlane_getPolygonSize(m_pARSession, _pPlane, &LengthOfPolygon);
 
@@ -604,7 +618,7 @@ namespace
             // -----------------------------------------------------------------------------
             for (int IndexOfVertex = 0; IndexOfVertex < NumberOfVertices; ++IndexOfVertex)
             {
-                PlaneVertices.push_back(Base::Float3(VerticesRAW[IndexOfVertex][0], VerticesRAW[IndexOfVertex][1], 0.0f));
+                PlaneVertices.push_back(Base::Float3(VerticesRAW[IndexOfVertex][0], VerticesRAW[IndexOfVertex][1], kOuterAlpha));
             }
 
             // -----------------------------------------------------------------------------
@@ -626,15 +640,6 @@ namespace
             Base::Float2 CenterOfPlane = Base::Float2(PlaneModelMatrix[3][0], PlaneModelMatrix[3][2]);
 
             // -----------------------------------------------------------------------------
-            // Settings:
-            // Feather distance 0.2 meters.
-            // Feather scale over the distance between plane center and vertices.
-            // -----------------------------------------------------------------------------
-            const float kFeatherLength = 0.2f;
-            const float kFeatherScale  = 0.2f;
-            const float kAlpha         = 0.6f;
-
-            // -----------------------------------------------------------------------------
             // Fill vertex 0 to 3, with alpha set to kAlpha.
             // -----------------------------------------------------------------------------
             for (int i = 0; i < NumberOfVertices; ++i)
@@ -645,7 +650,7 @@ namespace
 
                 Base::Float2 ResultVector = Base::Float2(Scale) * Direction + CenterOfPlane;
 
-                PlaneVertices.push_back(Base::Float3(ResultVector[0], ResultVector[1], kAlpha));
+                PlaneVertices.push_back(Base::Float3(ResultVector[0], ResultVector[1], kInnerAlpha));
             }
 
             // -----------------------------------------------------------------------------
@@ -692,27 +697,33 @@ namespace
 
         ArSession_getAllTrackables(m_pARSession, AR_TRACKABLE_PLANE, ListOfPlanes);
 
-        int32_t NumberOfPlanes = 0;
+        int NumberOfPlanes = 0;
 
         ArTrackableList_getSize(m_pARSession, ListOfPlanes, &NumberOfPlanes);
 
         // -----------------------------------------------------------------------------
         // Update every available plane
         // -----------------------------------------------------------------------------
-        for (int i = 0; i < NumberOfPlanes; ++i)
+        for (int IndexOfPlane = 0; IndexOfPlane < NumberOfPlanes; ++IndexOfPlane)
         {
             ArTrackable* TrackableItem = nullptr;
 
-            ArTrackableList_acquireItem(m_pARSession, ListOfPlanes, i, &TrackableItem);
+            ArTrackableList_acquireItem(m_pARSession, ListOfPlanes, IndexOfPlane, &TrackableItem);
 
             ArPlane* Plane = ArAsPlane(TrackableItem);
 
             // -----------------------------------------------------------------------------
             // Generate planes and upload data
             // -----------------------------------------------------------------------------
-            UpdateForPlane(Plane);
+            UpdateGeometryForPlane(Plane);
 
             if (PlaneIndices.size() == 0 || PlaneVertices.size() == 0) continue;
+
+            if (PlaneVertices.size() >= s_MaxNumberOfVerticesPerPlane)
+            {
+                BASE_CONSOLE_WARNING("Plane could not be rendered because of too many vertices.");
+                continue;
+            }
 
             glBindBuffer(GL_ARRAY_BUFFER, g_AttributePlaneVertices);
 
@@ -763,10 +774,6 @@ namespace
         ArTrackableList_destroy(ListOfPlanes);
 
         ListOfPlanes = nullptr;
-
-
-
-
     }
 
     // -----------------------------------------------------------------------------
