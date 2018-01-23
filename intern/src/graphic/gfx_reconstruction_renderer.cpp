@@ -3,6 +3,7 @@
 
 #include "base/base_vector3.h"
 #include "base/base_matrix4x4.h"
+#include "base/base_program_parameters.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
@@ -155,11 +156,19 @@ namespace
         CInputLayoutPtr m_QuadInputLayoutPtr;
 
         CRenderContextPtr m_OutlineRenderContextPtr;
+        
+        CShaderPtr m_PointCloudVSPtr;
+        CShaderPtr m_PointCloudFSPtr;
 
         bool m_UseTrackingCamera;
 
-        CShaderPtr m_PointCloudVSPtr;
-        CShaderPtr m_PointCloudFSPtr;
+        bool m_RenderVertexMap;
+        bool m_RaycastRootGrids;
+        bool m_RaycastLevel1Grid;
+        bool m_RenderRootQueue;
+        bool m_RenderLevel1Queue;
+        bool m_RenderLevel2Queue;
+        bool m_RenderHONV;
     };
 } // namespace
 
@@ -168,6 +177,14 @@ namespace
     using namespace Base;
 
     CGfxReconstructionRenderer::CGfxReconstructionRenderer()
+        : m_UseTrackingCamera(true)
+        , m_RenderVertexMap  (false)
+        , m_RaycastRootGrids (false)
+        , m_RaycastLevel1Grid(false)
+        , m_RenderRootQueue  (false)
+        , m_RenderLevel1Queue(false)
+        , m_RenderLevel2Queue(false)
+        , m_RenderHONV       (false)
     {
         
     }
@@ -202,6 +219,14 @@ namespace
 		}
 
         m_UseTrackingCamera = true;
+
+        m_RenderVertexMap   = Base::CProgramParameters::GetInstance().GetBoolean("mr_slam_render_vertex_map"      , false);
+        m_RaycastRootGrids  = Base::CProgramParameters::GetInstance().GetBoolean("mr_slam_render_root_grid"       , false);
+        m_RaycastLevel1Grid = Base::CProgramParameters::GetInstance().GetBoolean("mr_slam_render_level1_grid"     , false);
+        m_RenderRootQueue   = Base::CProgramParameters::GetInstance().GetBoolean("mr_slam_render_root_queue"      , false);
+        m_RenderLevel1Queue = Base::CProgramParameters::GetInstance().GetBoolean("mr_slam_render_level1_queue"    , false);
+        m_RenderLevel2Queue = Base::CProgramParameters::GetInstance().GetBoolean("mr_slam_render_level2_queue"    , false);
+        m_RenderHONV        = Base::CProgramParameters::GetInstance().GetBoolean("mr_slam_render_normal_histogram", false);
     }
 
     // -----------------------------------------------------------------------------
@@ -1219,17 +1244,42 @@ namespace
 
 		if (m_pScalableReconstructor != nullptr)
 		{
-            RenderVertexMap();
-
-            //RaycastRootGrids();
-            //RaycastLevel1Grids();
             RaycastScalableVolume();
 
-            RenderQueuedRootVolumes();
-            //RenderQueuedLevel1Grids();
-            //RenderQueuedLevel2Grids();
+            if (m_RenderVertexMap)
+            {
+                RenderVertexMap();
+            }
 
-            RenderHONV();
+            if (m_RaycastRootGrids)
+            {
+                RaycastRootGrids();
+            }
+
+            if (m_RaycastLevel1Grid)
+            {
+                RaycastLevel1Grids();
+            }
+
+            if (m_RenderRootQueue)
+            {
+                RenderQueuedRootVolumes();
+            }
+
+            if (m_RenderLevel1Queue)
+            {
+                RenderQueuedLevel1Grids();
+            }
+            
+            if (m_RenderLevel2Queue)
+            {
+                RenderQueuedLevel2Grids();
+            }
+
+            if (m_RenderHONV)
+            {
+                RenderHONV();
+            }
 		}
 		else
 		{
