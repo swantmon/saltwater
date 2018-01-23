@@ -366,7 +366,6 @@ namespace
 
         ArCamera_release(pARCamera);
 
-        // TODO: send view and proj. matrix to camera
         Gfx::Cam::SetViewMatrix(ViewMatrix);
 
         Gfx::Cam::SetProjectionMatrix(ProjectionMatrix);

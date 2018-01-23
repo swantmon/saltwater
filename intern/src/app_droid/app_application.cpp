@@ -288,6 +288,45 @@ namespace
 
         if (AInputEvent_getType(_pEvent) == AINPUT_EVENT_TYPE_MOTION) 
         {
+            int32_t Action = AMotionEvent_getAction(_pEvent);
+            int32_t Source = AInputEvent_getSource(_pEvent);
+
+            switch (Source)
+            {
+                case AINPUT_SOURCE_TOUCHSCREEN:
+                    {
+                        size_t NumberOfPointer = 0;
+
+                        switch( Action & AMOTION_EVENT_ACTION_MASK )
+                        {
+                            case AMOTION_EVENT_ACTION_DOWN:
+                            case AMOTION_EVENT_ACTION_POINTER_DOWN:
+                                NumberOfPointer = 1;
+                                break;
+                            case AMOTION_EVENT_ACTION_POINTER_UP:
+                                NumberOfPointer = 1;
+                                break;
+                            case AMOTION_EVENT_ACTION_MOVE:
+                                NumberOfPointer = AMotionEvent_getPointerCount(_pEvent);
+                                break;
+                            case AMOTION_EVENT_ACTION_UP:
+                            case AMOTION_EVENT_ACTION_CANCEL:
+                            case AMOTION_EVENT_ACTION_OUTSIDE:
+                                NumberOfPointer = AMotionEvent_getPointerCount(_pEvent);
+                                break;
+                        }
+
+                        size_t IndexOfPointer = Action >> AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT;
+
+                        for( size_t i = 0; i < NumberOfPointer; ++i, ++IndexOfPointer )
+                        {
+                            float x = AMotionEvent_getRawX(_pEvent, IndexOfPointer);
+                            float y = AMotionEvent_getRawY(_pEvent, IndexOfPointer);
+                        }
+                    }
+                    break;
+            }
+
             return 1;
         }
 
