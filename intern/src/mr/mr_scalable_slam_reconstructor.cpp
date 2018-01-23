@@ -1946,10 +1946,6 @@ namespace MR
         const int WorkGroupsX = DivUp(m_pRGBDCameraControl->GetDepthWidth() / 4, g_TileSize2D);
         const int WorkGroupsY = DivUp(m_pRGBDCameraControl->GetDepthHeight() / 4, g_TileSize2D);
 
-        //////////////////////////////////////////////////////////////////////////////////////
-        // Bilateral Filter
-        //////////////////////////////////////////////////////////////////////////////////////
-
         ContextManager::Barrier();
 
         ContextManager::SetShaderCS(m_PlaneDetectionCSPtr);
