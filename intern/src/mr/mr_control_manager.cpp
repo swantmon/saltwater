@@ -121,7 +121,11 @@ namespace
 
         void main()
         {
-            out_Output = vec4(vec3(1.0f, 0.0f, 0.0f), in_Alpha);
+            vec2 PixelPos = gl_FragCoord.xy + 0.5f;
+
+            float PatternMask = mod((PixelPos.x / 2.0f + PixelPos.y / 2.0f), 2.0f);
+
+            out_Output = mix(vec4(1, 0, 0, 1), vec4(1, 1 ,0, 1), PatternMask) * in_Alpha;
         }
     )";
 
@@ -628,24 +632,20 @@ namespace
             // -----------------------------------------------------------------------------
             const float kFeatherLength = 0.2f;
             const float kFeatherScale  = 0.2f;
+            const float kAlpha         = 0.6f;
 
             // -----------------------------------------------------------------------------
-            // Fill vertex 0 to 3, with alpha set to 1.
+            // Fill vertex 0 to 3, with alpha set to kAlpha.
             // -----------------------------------------------------------------------------
             for (int i = 0; i < NumberOfVertices; ++i)
             {
-                // -----------------------------------------------------------------------------
-                // Vector from plane center to current point.
-                // -----------------------------------------------------------------------------
-                const Base::Float2 CurrentVertex = VerticesRAW[i];
+                Base::Float2 Direction = VerticesRAW[i] - CenterOfPlane;
 
-                const Base::Float2 Direction = CurrentVertex - CenterOfPlane;
+                float Scale = 1.0f - std::min((kFeatherLength / 2.0f), kFeatherScale);
 
-                const float Scale = 1.0f - std::min((kFeatherLength / 2.0f), kFeatherScale);
+                Base::Float2 ResultVector = Base::Float2(Scale) * Direction + CenterOfPlane;
 
-                const Base::Float2 ResultVector = Base::Float2(Scale) * Direction + CenterOfPlane;
-
-                PlaneVertices.push_back(Base::Float3(ResultVector[0], ResultVector[1], 1.0f));
+                PlaneVertices.push_back(Base::Float3(ResultVector[0], ResultVector[1], kAlpha));
             }
 
             // -----------------------------------------------------------------------------
@@ -729,6 +729,10 @@ namespace
             // -----------------------------------------------------------------------------
             // Draw
             // -----------------------------------------------------------------------------
+            glEnable(GL_BLEND);
+
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
             glUseProgram(g_ShaderProgramPlane);
 
             Base::Float4x4 Matrix = PlaneModelMatrix * m_ViewMatrix * m_ProjectionMatrix;
@@ -750,6 +754,8 @@ namespace
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
             glUseProgram(0);
+
+            glDisable(GL_BLEND);
 
             ArTrackable_release(TrackableItem);
         }
