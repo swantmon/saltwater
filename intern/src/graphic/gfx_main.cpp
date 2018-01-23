@@ -220,9 +220,9 @@ namespace
         // Load graphics API
         // -----------------------------------------------------------------------------
 #ifdef __ANDROID__
-        const std::string GraphicsAPI = Base::CProgramParameters::GetInstance().GetStdString("graphics:api", "gles");
+        const std::string GraphicsAPI = Base::CProgramParameters::GetInstance().GetStdString("graphics:api:name", "gles");
 #else
-        const std::string GraphicsAPI = Base::CProgramParameters::GetInstance().GetStdString("graphics:api", "gl");
+        const std::string GraphicsAPI = Base::CProgramParameters::GetInstance().GetStdString("graphics:api:name", "gl");
 #endif
 
         if      (GraphicsAPI == "gles") m_GraphicsInfo.m_GraphicsAPI = CGraphicsInfo::OpenGLES;
