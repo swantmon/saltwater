@@ -1,11 +1,12 @@
 
 #include "mr/mr_precompiled.h"
 
-#include "base/base_program_parameters.h"
-#include "base/base_vector3.h"
+#include "base/base_console.h"
 #include "base/base_matrix4x4.h"
+#include "base/base_program_parameters.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
+#include "base/base_vector3.h"
 
 #include "core/core_time.h"
 
@@ -22,8 +23,6 @@
 #include "graphic/gfx_texture.h"
 #include "graphic/gfx_texture_manager.h"
 #include "graphic/gfx_view_manager.h"
-
-#include "base/base_console.h"
 
 #include "mr/mr_scalable_slam_reconstructor.h"
 #include "mr/mr_rgbd_camera_control.h"
