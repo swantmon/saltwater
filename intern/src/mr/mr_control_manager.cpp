@@ -25,7 +25,7 @@
 
 #include "arcore_c_api.h"
 
-#include "GLES3/gl3.h"
+#include "GLES3/gl32.h"
 
 #include <assert.h>
 #include <unordered_set>
@@ -225,12 +225,10 @@ namespace
         ArSession* m_pARSession;
         ArFrame* m_pARFrame;
         CTrackedObjects m_TrackedObjects;
-        bool m_PermissionsGranted;
 
     private:
 
         void OnDirtyEntity(Dt::CEntity* _pEntity);
-        void OnAcquirePermission(const std::string& _rPermission, int _GrantResult);
     };
 } // namespace
 
@@ -245,7 +243,6 @@ namespace
         : m_pARSession        (0)
         , m_pARFrame          (0)
         , m_TrackedObjects    ()
-        , m_PermissionsGranted(false)
     {
     }
 
@@ -261,16 +258,6 @@ namespace
     {
         Dt::EntityManager::RegisterDirtyEntityHandler(DATA_DIRTY_ENTITY_METHOD(&CMRControlManager::OnDirtyEntity));
 
-        Core::JNI::RegisterOnAcquirePermission(CORE_JNI_ON_ACQUIRE_PERMISSION_METHOD(&CMRControlManager::OnAcquirePermission));
-
-        // -----------------------------------------------------------------------------
-        // Check permission
-        // -----------------------------------------------------------------------------
-        if(!Core::JNI::CheckPermission(s_Permissions[0]))
-        {
-            Core::JNI::AcquirePermissions(s_Permissions, 1);
-        }
-
         // -----------------------------------------------------------------------------
         // AR session and frame
         // -----------------------------------------------------------------------------
@@ -278,7 +265,7 @@ namespace
 
         Status = ArSession_create(_rConfiguration.m_pEnv, _rConfiguration.m_pContext, &m_pARSession);
 
-        assert(Status == AR_SUCCESS);
+        if (Status != AR_SUCCESS) BASE_THROWM("Application has to be closed because of unsupoorted ArCore.");
 
         assert(m_pARSession != 0);
 
@@ -359,7 +346,7 @@ namespace
 
         Result = ArSession_update(m_pARSession, m_pARFrame);
 
-        if (Result != AR_SUCCESS) BASE_CONSOLE_ERROR("ArSession_update error");
+        if (Result != AR_SUCCESS) return;
 
         // -----------------------------------------------------------------------------
         // Update camera
@@ -439,7 +426,12 @@ namespace
 
     void CMRControlManager::OnResume()
     {
-        ArStatus Status = ArSession_resume(m_pARSession);
+        if(!Core::JNI::CheckPermission(s_Permissions[0]))
+        {
+            Core::JNI::AcquirePermissions(s_Permissions, 1);
+        }
+
+        ArSession_resume(m_pARSession);
     }
 
     // -----------------------------------------------------------------------------
@@ -518,19 +510,6 @@ namespace
         // -----------------------------------------------------------------------------
         if ((DirtyFlags & Dt::CEntity::DirtyCreate) != 0)
         {
-            // ...
-        }
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CMRControlManager::OnAcquirePermission(const std::string& _rPermission, int _GrantResult)
-    {
-        m_PermissionsGranted = false;
-
-        if (_rPermission == s_Permissions[0] && _GrantResult == 1)
-        {
-            m_PermissionsGranted = true;
         }
     }
 } // namespace
