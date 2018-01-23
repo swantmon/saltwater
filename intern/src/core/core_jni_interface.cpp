@@ -361,7 +361,7 @@ namespace JNI
 
     void RegisterOnAcquirePermission(COnAcquirePermissionDelegate _NewDelegate)
     {
-        CJNIInterface::GetInstance().RegisterOnAcquirePermissions(_NewDelegate);
+        CJNIInterface::GetInstance().RegisterOnAcquirePermission(_NewDelegate);
     }
 } // namespace JNI
 } // namespace Core
