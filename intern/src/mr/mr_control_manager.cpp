@@ -563,7 +563,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Render planes
         // -----------------------------------------------------------------------------
-        bool RenderPlanes = Base::CProgramParameters::GetInstance().GetBoolean("mr::ar::debug::render_planes", true);
+        bool RenderPlanes = Base::CProgramParameters::GetInstance().GetBoolean("mr:ar:debug:render_planes", true);
 
         if (RenderPlanes == false) return;
 
