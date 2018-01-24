@@ -221,7 +221,7 @@ namespace MR
 
         m_UseShuffleIntrinsics = false;
 
-        const bool EnableShuffleIntrinsics = Base::CProgramParameters::GetInstance().GetBoolean("mr:slam:use_shuffle_intrinsics", true);
+        const bool EnableShuffleIntrinsics = Base::CProgramParameters::GetInstance().GetBoolean("mr:slam:shuffle_intrinsics_enable", true);
 
         if (EnableShuffleIntrinsics)
         {
