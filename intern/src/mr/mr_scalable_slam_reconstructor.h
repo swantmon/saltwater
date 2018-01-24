@@ -28,7 +28,7 @@ namespace MR
 
 	struct IndexCompare
 	{
-		bool operator()(const Base::Int3& rLeft, const Base::Int3& rRight)
+		bool operator()(const Base::Int3& rLeft, const Base::Int3& rRight) const
 		{
 			if (rLeft[0] < rRight[0])
 			{
