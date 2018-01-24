@@ -51,6 +51,8 @@ endforeach()
 # ---------------------------------------
 # Special dependencies and includes
 # ---------------------------------------
+target_include_directories( base PRIVATE ${ExternDir}/json/include )
+
 target_include_directories( data PRIVATE ${ExternDir}/assimp/include )
 target_include_directories( data PRIVATE ${ExternDir}/devil/include )
 target_include_directories( data PRIVATE ${ExternDir}/tinyxml2/include )

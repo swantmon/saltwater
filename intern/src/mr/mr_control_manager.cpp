@@ -23,8 +23,10 @@
 #include "mr/mr_kinect_control.h"
 #include "mr/mr_webcam_control.h"
 
+#ifdef ARTOOLKIT_INCLUDED
 #include <AR/ar.h>
 #include <AR/gsub_lite.h>
+#endif // ARTOOLKIT_INCLUDED
 
 #include <assert.h>
 #include <unordered_map>
@@ -73,7 +75,9 @@ namespace
         {
         public:
             Dt::CARControllerPluginFacet::SMarker* m_pDataInfos;
+#ifdef ARTOOLKIT_INCLUDED
             ARPattHandle*                          m_pPatternHandle;
+#endif // ARTOOLKIT_INCLUDED
             Base::U64                              m_VisbilityFrame;
             unsigned int                           m_UID;
             unsigned int                           m_NativeID;
@@ -91,9 +95,11 @@ namespace
     private:
 
         bool                          m_IsOriginTracked;
+#ifdef ARTOOLKIT_INCLUDED
         ARHandle*	                  m_pNativeTrackingHandle;
         AR3DHandle*	                  m_pNativeTracking3DHandle;
         ARParamLT*	                  m_pNativeParameterLT;
+#endif // ARTOOLKIT_INCLUDED
         CEntityVector                 m_DirtyEntities;
         CMarkerByIDs                  m_MarkerByIDs;
         CMarkers                      m_Markers;
@@ -128,9 +134,11 @@ namespace
 {
     CMRControlManager::CMRControlManager()
         : m_IsOriginTracked        (false)
+#ifdef ARTOOLKIT_INCLUDED
         , m_pNativeTrackingHandle  (0)
         , m_pNativeTracking3DHandle(0)
         , m_pNativeParameterLT     (0)
+#endif // ARTOOLKIT_INCLUDED
         , m_DirtyEntities          ()
         , m_Markers                ()
         , m_MarkerByIDs            ()
@@ -170,6 +178,7 @@ namespace
 
     void CMRControlManager::Clear()
     {
+#ifdef ARTOOLKIT_INCLUDED
         // -----------------------------------------------------------------------------
         // Delete controls
         // -----------------------------------------------------------------------------
@@ -218,6 +227,7 @@ namespace
         ar3DDeleteHandle(&m_pNativeTracking3DHandle);
         arDeleteHandle(m_pNativeTrackingHandle);
         arParamLTFree(&m_pNativeParameterLT);
+#endif // ARTOOLKIT_INCLUDED
     }
 
     // -----------------------------------------------------------------------------
@@ -429,6 +439,7 @@ namespace
 
     void CMRControlManager::SetupTrackerManager()
     {
+#ifdef ARTOOLKIT_INCLUDED
         assert(m_pActiveControl != nullptr);
 
         // -----------------------------------------------------------------------------
@@ -502,12 +513,14 @@ namespace
         m_pNativeTracking3DHandle = ar3DCreateHandle(&NativeParams);
 
         assert(m_pNativeTracking3DHandle != 0);
+#endif // ARTOOLKIT_INCLUDED
     }
 
     // -----------------------------------------------------------------------------
 
     void CMRControlManager::SetupMarkerManager()
     {
+#ifdef ARTOOLKIT_INCLUDED
         assert(m_pControllerPlugin != nullptr);
 
         unsigned int NumberOfMarker = m_pControllerPlugin->GetNumberOfMarker();
@@ -716,6 +729,7 @@ namespace
 
             assert(Error == 0);
         }
+#endif // ARTOOLKIT_INCLUDED
     }
 
     // -----------------------------------------------------------------------------
@@ -738,6 +752,7 @@ namespace
 
     void CMRControlManager::UpdateTrackerManager()
     {
+#ifdef ARTOOLKIT_INCLUDED
         if (IsActive() == false) return;
 
         // -----------------------------------------------------------------------------
@@ -832,6 +847,7 @@ namespace
                 pMarker->m_RotationToCamera[2][2] = static_cast<float>(pMarker->m_PatternTransformation[2][2]);
             }
         }
+#endif // ARTOOLKIT_INCLUDED
     }
 
     // -----------------------------------------------------------------------------

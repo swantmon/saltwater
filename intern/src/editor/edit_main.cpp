@@ -12,7 +12,7 @@
 
 int main(int _Argc, char* _pArgv[])
 {
-    const std::string VerbosityNameString = "console_verbose";
+    const std::string VerbosityNameString = "console:verbose";
     
     std::string ParameterFile = "editor.config";
 

@@ -1662,7 +1662,7 @@ namespace
     {
         // Determine the number of steps for multiple scattering
 
-        const std::string OrderParameter = "graphics_atmosphere_order_count";
+        const std::string OrderParameter = "graphics:atmosphere:order_count";
         const int OrderCount = Base::CProgramParameters::GetInstance().GetInt(OrderParameter, 4);
 
         // -----------------------------------------------------------------------------
