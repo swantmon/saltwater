@@ -8,6 +8,7 @@
 #include <QColorDialog>
 
 #include "base/base_math_operations.h"
+#include "base/base_program_parameters.h"
 #include "mr/mr_slam_reconstructor.h"
 
 namespace
@@ -90,7 +91,7 @@ namespace Edit
         
         m_pCaptureColorCB->setChecked(DefaultSettings.m_CaptureColor);
 
-        m_pTrackingCameraCB->setChecked(true);
+        m_pTrackingCameraCB->setChecked(Base::CProgramParameters::GetInstance().GetBoolean("mr:slam:rendering:use_tracking_camera", true));
 
 		const bool IsScalable = DefaultSettings.m_IsScalable;
 

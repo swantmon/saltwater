@@ -218,7 +218,7 @@ namespace
 			m_pScalableReconstructor = nullptr;
 		}
 
-        m_UseTrackingCamera = true;
+        m_UseTrackingCamera = Base::CProgramParameters::GetInstance().GetBoolean("mr:slam:rendering:use_tracking_camera", true);
 
         m_RenderVertexMap   = Base::CProgramParameters::GetInstance().GetBoolean("mr:slam:rendering:vertex_map"       , false);
         m_RaycastRootGrids  = Base::CProgramParameters::GetInstance().GetBoolean("mr:slam:rendering:grids:root"       , false);
