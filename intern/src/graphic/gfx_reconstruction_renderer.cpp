@@ -220,13 +220,13 @@ namespace
 
         m_UseTrackingCamera = true;
 
-        m_RenderVertexMap   = Base::CProgramParameters::GetInstance().GetBoolean("mr_slam_render_vertex_map"      , false);
-        m_RaycastRootGrids  = Base::CProgramParameters::GetInstance().GetBoolean("mr_slam_render_root_grid"       , false);
-        m_RaycastLevel1Grid = Base::CProgramParameters::GetInstance().GetBoolean("mr_slam_render_level1_grid"     , false);
-        m_RenderRootQueue   = Base::CProgramParameters::GetInstance().GetBoolean("mr_slam_render_root_queue"      , false);
-        m_RenderLevel1Queue = Base::CProgramParameters::GetInstance().GetBoolean("mr_slam_render_level1_queue"    , false);
-        m_RenderLevel2Queue = Base::CProgramParameters::GetInstance().GetBoolean("mr_slam_render_level2_queue"    , false);
-        m_RenderHONV        = Base::CProgramParameters::GetInstance().GetBoolean("mr_slam_render_normal_histogram", false);
+        m_RenderVertexMap   = Base::CProgramParameters::GetInstance().GetBoolean("mr:slam:rendering:vertex_map"      , false);
+        m_RaycastRootGrids  = Base::CProgramParameters::GetInstance().GetBoolean("mr:slam:rendering:root_grid"       , false);
+        m_RaycastLevel1Grid = Base::CProgramParameters::GetInstance().GetBoolean("mr:slam:rendering:level1_grid"     , false);
+        m_RenderRootQueue   = Base::CProgramParameters::GetInstance().GetBoolean("mr:slam:rendering:root_queue"      , false);
+        m_RenderLevel1Queue = Base::CProgramParameters::GetInstance().GetBoolean("mr:slam:rendering:level1_queue"    , false);
+        m_RenderLevel2Queue = Base::CProgramParameters::GetInstance().GetBoolean("mr:slam:rendering:level2_queue"    , false);
+        m_RenderHONV        = Base::CProgramParameters::GetInstance().GetBoolean("mr:slam:rendering:normal_histogram", false);
     }
 
     // -----------------------------------------------------------------------------
