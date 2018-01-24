@@ -373,6 +373,10 @@ namespace
 
     void CGfxTextureManager::ClearTextureLayer(CTexturePtr _TexturePtr, const void* _pData, int _Layer)
     {
+#ifdef __ANDROID__
+        BASE_CONSOLE_ERROR("Clearing textures is currently not supported on Android");
+        assert(false); // TODO: implement
+#else
         // TODO: Remove dummy
         // Renderdoc crashes when _pData is nullptr but OpenGL allows NULL
         // Therefore we create a dummy value until Renderdoc is fixed
@@ -401,12 +405,17 @@ namespace
         {
             glClearTexSubImage(TextureHandle, MipIndex, 0, 0, _Layer, Width >> MipIndex, Height >> MipIndex, 1, Format, Type, _pData);
         }
+#endif // __ANDROID__
     }
     
     // -----------------------------------------------------------------------------
 
     void CGfxTextureManager::ClearTexture(CTexturePtr _TexturePtr, const void* _pData)
     {
+#ifdef __ANDROID__
+        BASE_CONSOLE_ERROR("Clearing textures is currently not supported on Android");
+        assert(false); // TODO: implement
+#else
         // TODO: Remove dummy
         // Renderdoc crashes when _pData is nullptr but OpenGL allows NULL
         // Therefore we create a dummy value until Renderdoc is fixed
@@ -427,13 +436,14 @@ namespace
         const int Width = pInternTexture->GetNumberOfPixelsU();
         const int Height = pInternTexture->GetNumberOfPixelsV();
         const int LayerCount = pInternTexture->GetNumberOfTextures();
-        
+
         const int MipLevels = pInternTexture->GetNumberOfMipLevels();
 
-        for (int MipIndex = 0; MipIndex < MipLevels; ++ MipIndex)
+        for (int MipIndex = 0; MipIndex < MipLevels; ++MipIndex)
         {
             glClearTexSubImage(TextureHandle, MipIndex, 0, 0, 0, Width >> MipIndex, Height >> MipIndex, LayerCount, Format, Type, _pData);
         }
+#endif // __ANDROID__
     }
 
     // -----------------------------------------------------------------------------
