@@ -955,8 +955,8 @@ namespace
         break;
         case CInternGraphicsInfo::Fix:
         {
-            _pWindowInfo->m_InternalWindowSize[0] = Base::CProgramParameters::GetInstance().GetUInt("graphics:pixel_matching:w", _Width);
-            _pWindowInfo->m_InternalWindowSize[1] = Base::CProgramParameters::GetInstance().GetUInt("graphics:pixel_matching:h", _Height);
+            _pWindowInfo->m_InternalWindowSize[0] = Base::CProgramParameters::GetInstance().GetUInt("graphics:pixel_matching:fixed:w", _Width);
+            _pWindowInfo->m_InternalWindowSize[1] = Base::CProgramParameters::GetInstance().GetUInt("graphics:pixel_matching:fixed:h", _Height);
         }
         break;
         };
