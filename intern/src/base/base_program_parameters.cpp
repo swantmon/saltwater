@@ -46,22 +46,7 @@ namespace IO
 
     void CProgramParameters::ParseFile(const std::string& _rFile)
     {
-        std::ifstream File(_rFile.c_str());
-
-        if (File.is_open())
-        {
-            std::string FileContent((std::istreambuf_iterator<char>(File)), std::istreambuf_iterator<char>());
-
-            InternParseString(FileContent, '\n');
-
-            File.close();
-        }
-        else
-        {
-            BASE_CONSOLE_WARNINGV("Config file %s does not exists!", _rFile.c_str());
-        }
-
-        std::ifstream JSONFile("editor.json");
+        std::ifstream JSONFile(_rFile.c_str());
 
         if (JSONFile.is_open())
         {
@@ -81,25 +66,7 @@ namespace IO
 
     void CProgramParameters::WriteFile(const std::string& _rFile)
     {
-        std::ofstream File(_rFile.c_str());
-
-        if (File.is_open())
-        {
-            File.clear();
-
-            for (auto& rElement : m_Container)
-            {
-                File << rElement.first << " = " << rElement.second << std::endl;
-            }
-
-            File.close();
-        }
-        else
-        {
-            BASE_CONSOLE_ERRORV("Save file %s could not be opened.", _rFile.c_str());
-        }
-
-        std::ofstream JSONFile("editor.json");
+        std::ofstream JSONFile(_rFile.c_str());
 
         if (JSONFile.is_open())
         {
