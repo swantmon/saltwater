@@ -52,7 +52,10 @@ namespace IO
         {
             std::string FileContent((std::istreambuf_iterator<char>(JSONFile)), std::istreambuf_iterator<char>());
 
-            InternParseJSONString(FileContent);
+            if (FileContent.length() > 0)
+            {
+                InternParseJSONString(FileContent);
+            }
 
             JSONFile.close();
         }

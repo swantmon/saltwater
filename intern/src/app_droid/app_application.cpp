@@ -135,7 +135,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Load configuration file
         // -----------------------------------------------------------------------------
-        const std::string VerbosityNameString = "console_verbose"; // TODO: this should be somewhere else - available for every application
+        const std::string VerbosityNameString = "console:verbose"; // TODO: this should be somewhere else - available for every application
 
         int VerbosityLevel = 0;
 
