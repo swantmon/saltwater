@@ -132,6 +132,32 @@ namespace
         }
     )";
 
+    constexpr char k_VertexShaderPoint[] = R"(
+        #version 320 es
+
+        layout(location = 0) uniform mat4 m_MVP;
+
+        layout(location = 0) in vec3 in_Vertex;
+
+        void main()
+        {
+            gl_PointSize = 5.0;
+
+            gl_Position = m_MVP * vec4(in_Vertex.xyz, 1.0);
+        }
+    )";
+
+    constexpr char k_FragmentShaderPoint[] = R"(
+        #version 320 es
+
+        precision lowp float;
+
+        void main()
+        {
+            gl_FragColor = vec4(0.1215f, 0.7372f, 0.8235f, 1.0f);
+        }
+    )";
+
     static GLuint LoadShader(GLenum _Type, const char* _pSource)
     {
         GLuint Shader = glCreateShader(_Type);
@@ -224,12 +250,15 @@ namespace
 
     unsigned int g_ShaderProgramWebcam;
     unsigned int g_ShaderProgramPlane;
+    unsigned int g_ShaderProgramPoint;
     unsigned int g_TextureID;
     unsigned int g_AttributeUVs;
     unsigned int g_AttributePlaneVertices;
+    unsigned int g_AttributePointVertices;
     unsigned int g_PlaneIndices;
 
     static constexpr int s_MaxNumberOfVerticesPerPlane = 1024;
+    static constexpr int s_MaxNumberOfVerticesPerPoint = 512;
 
     static constexpr int s_NumberOfVertices = 4;
     bool g_IsUVsInitialized = false;
@@ -388,6 +417,18 @@ namespace
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, s_MaxNumberOfVerticesPerPlane * 3 * sizeof(GLushort), 0, GL_DYNAMIC_DRAW);
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+        // -----------------------------------------------------------------------------
+
+        g_ShaderProgramPoint = CreateProgram(k_VertexShaderPoint, k_FragmentShaderPoint);
+
+        glGenBuffers(1, &g_AttributePointVertices);
+
+        glBindBuffer(GL_ARRAY_BUFFER, g_AttributePointVertices);
+
+        glBufferData(GL_ARRAY_BUFFER, s_MaxNumberOfVerticesPerPoint * sizeof(Base::Float3), 0, GL_DYNAMIC_DRAW);
+
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 
     // -----------------------------------------------------------------------------
@@ -749,6 +790,7 @@ namespace
 
             // -----------------------------------------------------------------------------
             // Prepare model-view-projection matrix
+            // TODO: Change color depending on height of the plane
             // -----------------------------------------------------------------------------
             Base::Float4x4 PlaneMVPMatrix = Gfx::Cam::GetProjectionMatrix() * Gfx::Cam::GetViewMatrix() * PlaneModelMatrix.GetTransposed() * Base::Float4x4().SetRotationX(Base::DegreesToRadians(-90.0f));
 
@@ -791,6 +833,58 @@ namespace
         ArTrackableList_destroy(ListOfPlanes);
 
         ListOfPlanes = nullptr;
+
+        // -----------------------------------------------------------------------------
+        // Render planes
+        // -----------------------------------------------------------------------------
+        bool RenderPoints = Base::CProgramParameters::GetInstance().GetBoolean("mr:ar:debug:render_points", true);
+
+        if (RenderPoints == false) return;
+
+        ArPointCloud* ar_point_cloud = nullptr;
+
+        ArStatus point_cloud_status = ArFrame_acquirePointCloud(m_pARSession, m_pARFrame, &ar_point_cloud);
+
+        if (point_cloud_status == AR_SUCCESS)
+        {
+            // -----------------------------------------------------------------------------
+            // Generate points and upload data
+            // -----------------------------------------------------------------------------
+            int number_of_points = 0;
+
+            ArPointCloud_getNumberOfPoints(m_pARSession, ar_point_cloud, &number_of_points);
+
+            if (number_of_points <= 0) return;
+
+            const float* point_cloud_data;
+
+            ArPointCloud_getData(m_pARSession, ar_point_cloud, &point_cloud_data);
+
+            glBindBuffer(GL_ARRAY_BUFFER, g_AttributePlaneVertices);
+
+            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * number_of_points, point_cloud_data);
+
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+            Base::Float4x4 PointMVPMatrix = Gfx::Cam::GetProjectionMatrix() * Gfx::Cam::GetViewMatrix();
+
+            // -----------------------------------------------------------------------------
+            // Draw
+            // -----------------------------------------------------------------------------
+            glUseProgram(g_ShaderProgramPoint);
+
+            glUniformMatrix4fv(0, 1, GL_TRUE, &(PointMVPMatrix[0][0]));
+
+            glEnableVertexAttribArray(0);
+
+            glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+
+            glDrawArrays(GL_POINTS, 0, number_of_points);
+
+            glUseProgram(0);
+
+            ArPointCloud_release(ar_point_cloud);
+        }
     }
 
     // -----------------------------------------------------------------------------
