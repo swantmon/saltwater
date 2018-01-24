@@ -95,6 +95,10 @@ namespace Gfx
         _rViewMatrix.GetRotation(m_RotationMatrix);
 
         _rViewMatrix.GetTranslation(m_Position);
+
+        m_Position = m_RotationMatrix.GetTransposed() * m_Position;
+
+        m_Position = m_Position * Base::Float3(-1.0f);
     }
 
     // --------------------------------------------------------------------------------

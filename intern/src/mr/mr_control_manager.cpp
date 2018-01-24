@@ -105,7 +105,7 @@ namespace
 
         void main()
         {
-          gl_Position = m_MVP * vec4(in_Vertex.x, 0.0f, in_Vertex.y, 1.0f);
+          gl_Position = m_MVP * vec4(in_Vertex.x, in_Vertex.y, 0.0f, 1.0f);
 
           out_Alpha = in_Vertex.z;
         }
@@ -422,31 +422,25 @@ namespace
         // -----------------------------------------------------------------------------
         // Update camera
         // -----------------------------------------------------------------------------
+        float Near = Base::CProgramParameters::GetInstance().GetFloat("mr:ar:camera:near", 0.1f);
+        float Far  = Base::CProgramParameters::GetInstance().GetFloat("mr:ar:camera:far", 100.0f);
+
         ArCamera* pARCamera;
 
         ArFrame_acquireCamera(m_pARSession, m_pARFrame, &pARCamera);
 
         ArCamera_getViewMatrix(m_pARSession, pARCamera, &m_ViewMatrix[0][0]);
 
-        ArCamera_getProjectionMatrix(m_pARSession, pARCamera, 0.1f, 100.0f, &m_ProjectionMatrix[0][0]);
+        ArCamera_getProjectionMatrix(m_pARSession, pARCamera, Near, Far, &m_ProjectionMatrix[0][0]);
 
         ArCamera_release(pARCamera);
 
         // TODO: set matrices to graphic or camera project
-        Gfx::Cam::SetViewMatrix(m_ViewMatrix);
+        Gfx::Cam::SetViewMatrix(m_ViewMatrix.GetTransposed());
 
-        // -----------------------------------------------------------------------------
-        // Decompose left, right, top, bottom, near and far from projection
-        // matrix:
-        // Near = ProjectionMatrix[2][3] / (ProjectionMatrix[2][2] - 1);
-        // Far  = ProjectionMatrix[2][3] / (ProjectionMatrix[2][2] + 1);
-        // -----------------------------------------------------------------------------
-        float Bottom = 0.1f * (m_ProjectionMatrix[1][2] - 1.0f) / m_ProjectionMatrix[1][1];
-        float Top    = 0.1f * (m_ProjectionMatrix[1][2] + 1.0f) / m_ProjectionMatrix[1][1];
-        float Left   = 0.1f * (m_ProjectionMatrix[0][2] - 1.0f) / m_ProjectionMatrix[0][0];
-        float Right  = 0.1f * (m_ProjectionMatrix[0][2] + 1.0f) / m_ProjectionMatrix[0][0];
+        Gfx::Cam::SetProjectionMatrix(m_ProjectionMatrix.GetTransposed(), Near, Far);
 
-        Gfx::Cam::SetPerspective(Left, Right, Bottom, Top, 0.1f, 100.0f);
+        Gfx::Cam::Update();
 
         // -----------------------------------------------------------------------------
         // Light estimation
@@ -752,6 +746,14 @@ namespace
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
             // -----------------------------------------------------------------------------
+            // Prepare model-view-projection matrix
+            // Info: It has to be transposed because the uploaded matrix is column major
+            // -----------------------------------------------------------------------------
+            Base::Float4x4 PlaneMVPMatrix = Gfx::Cam::GetProjectionMatrix() * Gfx::Cam::GetViewMatrix() * PlaneModelMatrix.GetTransposed() * Base::Float4x4().SetRotationX(Base::DegreesToRadians(-90.0f));
+
+            PlaneMVPMatrix = PlaneMVPMatrix.GetTransposed();
+
+            // -----------------------------------------------------------------------------
             // Draw
             // -----------------------------------------------------------------------------
             glEnable(GL_BLEND);
@@ -760,9 +762,7 @@ namespace
 
             glUseProgram(g_ShaderProgramPlane);
 
-            Base::Float4x4 Matrix = PlaneModelMatrix * m_ViewMatrix * m_ProjectionMatrix;
-
-            glUniformMatrix4fv(0, 1, GL_FALSE, &(Matrix[0][0]));
+            glUniformMatrix4fv(0, 1, GL_FALSE, &(PlaneMVPMatrix[0][0]));
 
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g_PlaneIndices);
 
