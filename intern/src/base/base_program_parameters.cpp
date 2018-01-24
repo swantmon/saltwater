@@ -275,7 +275,15 @@ namespace IO
 
     bool CProgramParameters::HasParameter(const std::string& _rOption)
     {
-        return m_Container.find(_rOption) != m_Container.end();
+        if (m_Container.find(_rOption) != m_Container.end())
+        {
+            return true;
+        }
+        else
+        {
+            BASE_CONSOLE_INFO((std::string("Creating new config parameter ") + _rOption).c_str());
+            return false;
+        }
     }
 
     // -----------------------------------------------------------------------------
