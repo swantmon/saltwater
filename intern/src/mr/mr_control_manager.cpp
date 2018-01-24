@@ -137,7 +137,7 @@ namespace
 
         layout(location = 0) uniform mat4 m_MVP;
 
-        layout(location = 0) in vec3 in_Vertex;
+        layout(location = 0) in vec4 in_Vertex;
 
         void main()
         {
@@ -152,9 +152,11 @@ namespace
 
         precision lowp float;
 
+        layout(location = 0) out vec4 out_Output;
+
         void main()
         {
-            gl_FragColor = vec4(0.1215f, 0.7372f, 0.8235f, 1.0f);
+            out_Output = vec4(0.1215f, 0.7372f, 0.8235f, 1.0f);
         }
     )";
 
@@ -819,6 +821,8 @@ namespace
 
             glDrawElements(GL_TRIANGLES, PlaneIndices.size(), GL_UNSIGNED_SHORT, 0);
 
+            glDisableVertexAttribArray(0);
+
             glBindBuffer(GL_ARRAY_BUFFER, 0);
 
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -841,49 +845,56 @@ namespace
 
         if (RenderPoints == false) return;
 
-        ArPointCloud* ar_point_cloud = nullptr;
+        ArPointCloud* pPointCloud = nullptr;
 
-        ArStatus point_cloud_status = ArFrame_acquirePointCloud(m_pARSession, m_pARFrame, &ar_point_cloud);
+        ArStatus Status = ArFrame_acquirePointCloud(m_pARSession, m_pARFrame, &pPointCloud);
 
-        if (point_cloud_status == AR_SUCCESS)
+        if (Status == AR_SUCCESS)
         {
             // -----------------------------------------------------------------------------
             // Generate points and upload data
             // -----------------------------------------------------------------------------
-            int number_of_points = 0;
+            int NumberOfPoints = 0;
 
-            ArPointCloud_getNumberOfPoints(m_pARSession, ar_point_cloud, &number_of_points);
+            ArPointCloud_getNumberOfPoints(m_pARSession, pPointCloud, &NumberOfPoints);
 
-            if (number_of_points <= 0) return;
+            if (NumberOfPoints > 0)
+            {
+                const float* pPointCloudData;
 
-            const float* point_cloud_data;
+                ArPointCloud_getData(m_pARSession, pPointCloud, &pPointCloudData);
 
-            ArPointCloud_getData(m_pARSession, ar_point_cloud, &point_cloud_data);
+                glBindBuffer(GL_ARRAY_BUFFER, g_AttributePointVertices);
 
-            glBindBuffer(GL_ARRAY_BUFFER, g_AttributePlaneVertices);
+                glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * NumberOfPoints, pPointCloudData);
 
-            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * number_of_points, point_cloud_data);
+                glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-            glBindBuffer(GL_ARRAY_BUFFER, 0);
+                Base::Float4x4 PointMVPMatrix = Gfx::Cam::GetProjectionMatrix() * Gfx::Cam::GetViewMatrix();
 
-            Base::Float4x4 PointMVPMatrix = Gfx::Cam::GetProjectionMatrix() * Gfx::Cam::GetViewMatrix();
+                // -----------------------------------------------------------------------------
+                // Draw
+                // -----------------------------------------------------------------------------
+                glUseProgram(g_ShaderProgramPoint);
 
-            // -----------------------------------------------------------------------------
-            // Draw
-            // -----------------------------------------------------------------------------
-            glUseProgram(g_ShaderProgramPoint);
+                glUniformMatrix4fv(0, 1, GL_TRUE, &(PointMVPMatrix[0][0]));
 
-            glUniformMatrix4fv(0, 1, GL_TRUE, &(PointMVPMatrix[0][0]));
+                glBindBuffer(GL_ARRAY_BUFFER, g_AttributePointVertices);
 
-            glEnableVertexAttribArray(0);
+                glEnableVertexAttribArray(0);
 
-            glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+                glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
 
-            glDrawArrays(GL_POINTS, 0, number_of_points);
+                glDrawArrays(GL_POINTS, 0, NumberOfPoints);
 
-            glUseProgram(0);
+                glDisableVertexAttribArray(0);
 
-            ArPointCloud_release(ar_point_cloud);
+                glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+                glUseProgram(0);
+
+                ArPointCloud_release(pPointCloud);
+            }
         }
     }
 
