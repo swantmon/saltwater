@@ -203,7 +203,7 @@ namespace MR
         // Check if conservative rasterization is available
         ////////////////////////////////////////////////////////////////////////////////
 
-        const bool EnableConservativeRaster = Base::CProgramParameters::GetInstance().GetBoolean("mr_slam_conservative_raster_enable", true);
+        const bool EnableConservativeRaster = Base::CProgramParameters::GetInstance().GetBoolean("mr:slam:conservative_raster_enable", true);
 
         m_UseConservativeRasterization = false;
 
@@ -219,7 +219,7 @@ namespace MR
 
         m_UseShuffleIntrinsics = false;
 
-        const bool EnableShuffleIntrinsics = Base::CProgramParameters::GetInstance().GetBoolean("mr_slam_use_shuffle_intrinsics", true);
+        const bool EnableShuffleIntrinsics = Base::CProgramParameters::GetInstance().GetBoolean("mr:slam:use_shuffle_intrinsics", true);
 
         if (EnableShuffleIntrinsics)
         {

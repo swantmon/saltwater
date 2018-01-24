@@ -16,11 +16,11 @@ namespace MR
         _Settings.m_UseFullVolumeIntegration = true;
         _Settings.m_UseReverseIntegration = true;
 
-        _Settings.m_IsScalable = Base::CProgramParameters::GetInstance().GetBoolean("mr_slam_scalable", true);
+        _Settings.m_IsScalable = Base::CProgramParameters::GetInstance().GetBoolean("mr:slam:scalable", true);
 
-        _Settings.m_VoxelSize = Base::CProgramParameters::GetInstance().GetFloat("mr_slam_voxel_size", 0.004f);
-        _Settings.m_VolumeSize = Base::CProgramParameters::GetInstance().GetFloat("mr_slam_volume_size", 4.0f);
-        _Settings.m_VolumeResolution = Base::CProgramParameters::GetInstance().GetInt("mr_slam_volume_resolution", 512);
+        _Settings.m_VoxelSize = Base::CProgramParameters::GetInstance().GetFloat("mr:slam:metrics:voxel_size", 0.004f);
+        _Settings.m_VolumeSize = Base::CProgramParameters::GetInstance().GetFloat("mr:slam:metrics:volume_size", 4.0f);
+        _Settings.m_VolumeResolution = Base::CProgramParameters::GetInstance().GetInt("mr:slam:metrics:volume_resolution", 512);
 
         _Settings.m_PyramidLevelIterations[0] = 10;
         _Settings.m_PyramidLevelIterations[1] = 5;
@@ -44,6 +44,6 @@ namespace MR
             }
         }
 
-        _Settings.m_CaptureColor = Base::CProgramParameters::GetInstance().GetBoolean("mr_slam_capture_color", false);
+        _Settings.m_CaptureColor = Base::CProgramParameters::GetInstance().GetBoolean("mr:slam:capture_color", false);
     }
 } // namespace MR
