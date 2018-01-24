@@ -26,6 +26,8 @@
 
 #include "graphic/gfx_application_interface.h"
 
+#include "gui/gui_event_handler.h"
+
 #include "mr/mr_control_manager.h"
 
 namespace
@@ -295,33 +297,37 @@ namespace
             {
                 case AINPUT_SOURCE_TOUCHSCREEN:
                     {
-                        size_t NumberOfPointer = 0;
+                        int NumberOfPointer = 0;
+                        Base::CInputEvent::EAction Action;
 
                         switch( Action & AMOTION_EVENT_ACTION_MASK )
                         {
                             case AMOTION_EVENT_ACTION_DOWN:
                             case AMOTION_EVENT_ACTION_POINTER_DOWN:
+                                Action = Base::CInputEvent::TouchPressed;
                                 NumberOfPointer = 1;
                                 break;
+                            case AMOTION_EVENT_ACTION_UP:
                             case AMOTION_EVENT_ACTION_POINTER_UP:
+                                Action = Base::CInputEvent::TouchReleased;
                                 NumberOfPointer = 1;
                                 break;
                             case AMOTION_EVENT_ACTION_MOVE:
-                                NumberOfPointer = AMotionEvent_getPointerCount(_pEvent);
-                                break;
-                            case AMOTION_EVENT_ACTION_UP:
-                            case AMOTION_EVENT_ACTION_CANCEL:
-                            case AMOTION_EVENT_ACTION_OUTSIDE:
+                                Action = Base::CInputEvent::TouchMove;
                                 NumberOfPointer = AMotionEvent_getPointerCount(_pEvent);
                                 break;
                         }
 
-                        size_t IndexOfPointer = Action >> AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT;
+                        int IndexOfPointer = Action >> AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT;
 
-                        for( size_t i = 0; i < NumberOfPointer; ++i, ++IndexOfPointer )
+                        for( int i = 0; i < NumberOfPointer; ++i, ++IndexOfPointer )
                         {
-                            float x = AMotionEvent_getRawX(_pEvent, IndexOfPointer);
-                            float y = AMotionEvent_getRawY(_pEvent, IndexOfPointer);
+                            float PointerX = AMotionEvent_getRawX(_pEvent, IndexOfPointer);
+                            float PointerY = AMotionEvent_getRawY(_pEvent, IndexOfPointer);
+
+                            Base::CInputEvent Input(Base::CInputEvent::Input, Action, Base::CInputEvent::Pointer + IndexOfPointer, Base::Float2(PointerX, PointerY));
+
+                            Gui::EventHandler::OnUserEvent(Input);
                         }
                     }
                     break;

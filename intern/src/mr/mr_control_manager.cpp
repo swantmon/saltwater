@@ -24,6 +24,8 @@
 
 #include "graphic/gfx_camera_interface.h"
 
+#include "gui/gui_event_handler.h"
+
 #include "mr/mr_control_manager.h"
 
 #include "arcore_c_api.h"
@@ -311,6 +313,7 @@ namespace
     private:
 
         void OnDirtyEntity(Dt::CEntity* _pEntity);
+        void OnEvent(const Base::CInputEvent& _rEvent);
     };
 } // namespace
 
@@ -340,6 +343,8 @@ namespace
 
     void CMRControlManager::OnStart(const SConfiguration& _rConfiguration)
     {
+        Gui::EventHandler::RegisterDirectUserListener(GUI_BIND_INPUT_METHOD(&CMRControlManager::OnEvent));
+
         Dt::EntityManager::RegisterDirtyEntityHandler(DATA_DIRTY_ENTITY_METHOD(&CMRControlManager::OnDirtyEntity));
 
         // -----------------------------------------------------------------------------
@@ -915,6 +920,18 @@ namespace
         // -----------------------------------------------------------------------------
         if ((DirtyFlags & Dt::CEntity::DirtyCreate) != 0)
         {
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMRControlManager::OnEvent(const Base::CInputEvent& _rEvent)
+    {
+        if (_rEvent.GetAction() == Base::CInputEvent::TouchPressed)
+        {
+            Base::CInputEvent::EKey Key = static_cast<Base::CInputEvent::EKey>(_rEvent.GetKey());
+
+            BASE_CONSOLE_INFOV("Touch (%i) at position %f, %f.", Key, _rEvent.GetCursorPosition()[0], _rEvent.GetCursorPosition()[1])
         }
     }
 } // namespace
