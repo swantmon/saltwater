@@ -116,6 +116,8 @@ namespace
 
         precision highp float;
 
+        layout(location = 1) uniform vec4 m_Color;
+
         layout(location = 0) in float in_Alpha;
 
         layout(location = 0) out vec4 out_Output;
@@ -126,7 +128,7 @@ namespace
 
             float PatternMask = mod((PixelPos.x / 2.0f + PixelPos.y / 2.0f), 2.0f);
 
-            out_Output = mix(vec4(1, 0, 0, 1), vec4(1, 1 ,0, 1), PatternMask) * in_Alpha;
+            out_Output = mix(m_Color, vec4(0.0f, 0.0f ,0.0f, 0.0f), PatternMask) * in_Alpha;
         }
     )";
 
@@ -589,8 +591,8 @@ namespace
             // -----------------------------------------------------------------------------
             const float kFeatherLength = 0.2f;
             const float kFeatherScale  = 0.2f;
-            const float kOuterAlpha    = 1.0f;
-            const float kInnerAlpha    = 0.3f;
+            const float kOuterAlpha    = 0.8f;
+            const float kInnerAlpha    = 0.8f;
 
             // -----------------------------------------------------------------------------
             // The following code generates a triangle mesh filling a convex polygon,
@@ -747,11 +749,10 @@ namespace
 
             // -----------------------------------------------------------------------------
             // Prepare model-view-projection matrix
-            // Info: It has to be transposed because the uploaded matrix is column major
             // -----------------------------------------------------------------------------
             Base::Float4x4 PlaneMVPMatrix = Gfx::Cam::GetProjectionMatrix() * Gfx::Cam::GetViewMatrix() * PlaneModelMatrix.GetTransposed() * Base::Float4x4().SetRotationX(Base::DegreesToRadians(-90.0f));
 
-            PlaneMVPMatrix = PlaneMVPMatrix.GetTransposed();
+            Base::Float4 Color = Base::Float4(1.0f, 1.0f, 1.0f, 1.0f);
 
             // -----------------------------------------------------------------------------
             // Draw
@@ -762,7 +763,9 @@ namespace
 
             glUseProgram(g_ShaderProgramPlane);
 
-            glUniformMatrix4fv(0, 1, GL_FALSE, &(PlaneMVPMatrix[0][0]));
+            glUniformMatrix4fv(0, 1, GL_TRUE, &(PlaneMVPMatrix[0][0]));
+
+            glUniform4fv(1, 1, &(Color[0]));
 
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g_PlaneIndices);
 
