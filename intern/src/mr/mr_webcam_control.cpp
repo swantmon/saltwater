@@ -8,7 +8,9 @@
 #include "mr/mr_control_manager.h"
 #include "mr/mr_webcam_control.h"
 
+#ifdef ARTOOLKIT_INCLUDED
 #include <AR/video.h>
+#endif // ARTOOLKIT_INCLUDED
 
 #include "opencv2/opencv.hpp"
 
@@ -52,6 +54,7 @@ namespace MR
 
     void CWebcamControl::InternStart(const Base::Char* _pCameraParameterFile)
     {
+#ifdef ARTOOLKIT_INCLUDED
         int Error;
 
         std::string PathToResource;
@@ -207,20 +210,26 @@ namespace MR
         // Convert from original to output
         // -----------------------------------------------------------------------------
         ConvertOriginalToOutput();
+#else
+        static_cast<void>(_pCameraParameterFile);
+#endif // ARTOOLKIT_INCLUDED
     }
 
     // -----------------------------------------------------------------------------
 
     void CWebcamControl::InternStop()
     {
+#ifdef ARTOOLKIT_INCLUDED
         arVideoCapStop();
         arVideoClose();
+#endif // ARTOOLKIT_INCLUDED
     }
 
     // -----------------------------------------------------------------------------
 
     void CWebcamControl::InternUpdate()
     {
+#ifdef ARTOOLKIT_INCLUDED
         // -----------------------------------------------------------------------------
         // Get new video image from ARToolkit
         // -----------------------------------------------------------------------------
@@ -244,6 +253,7 @@ namespace MR
                 ConvertOriginalToOutput();
             }
         }
+#endif // ARTOOLKIT_INCLUDED
     }
 
     // -----------------------------------------------------------------------------
