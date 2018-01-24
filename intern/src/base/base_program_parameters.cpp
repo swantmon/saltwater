@@ -56,12 +56,16 @@ namespace IO
             {
                 InternParseJSONString(FileContent);
             }
+            else
+            {
+                BASE_CONSOLE_WARNINGV("Config file %s exists but is empty!", _rFile.c_str());
+            }
 
             JSONFile.close();
         }
         else
         {
-            BASE_CONSOLE_WARNINGV("Config file %s does not exists!", _rFile.c_str());
+            BASE_CONSOLE_WARNINGV("Config file %s does not exist!", _rFile.c_str());
         }
     }
 
@@ -331,7 +335,18 @@ namespace IO
 
     void CProgramParameters::InternParseJSONString(const std::string& _rString)
     {
-        json FileContent = json::parse(_rString);
+        json FileContent;
+        try
+        {
+            FileContent = json::parse(_rString);
+        }
+        catch (json::parse_error& e)
+        {
+            std::string Error = "Error parsing config file:\n";
+            Error += e.what();
+            BASE_CONSOLE_ERRORV(Error.c_str());
+            return;
+        }
 
         FileContent = FileContent.flatten();
 
