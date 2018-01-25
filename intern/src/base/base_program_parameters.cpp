@@ -361,7 +361,7 @@ namespace IO
         {
             std::string Error = "Error parsing config file:\nWill use default values instead\n";
             Error += e.what();
-            BASE_CONSOLE_ERRORV(Error.c_str());
+            BASE_CONSOLE_ERROR(Error.c_str());
             m_ParsingFailed = true;
             return;
         }
