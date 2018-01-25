@@ -143,7 +143,7 @@ namespace
 
         void main()
         {
-            gl_PointSize = 5.0;
+            gl_PointSize = 10.0;
 
             gl_Position = m_MVP * vec4(in_Vertex.xyz, 1.0);
         }
