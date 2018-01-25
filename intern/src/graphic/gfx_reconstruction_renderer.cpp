@@ -208,7 +208,7 @@ namespace
         MR::SReconstructionSettings::SetDefaultSettings(DefaultSettings);
 
 		if (DefaultSettings.m_IsScalable)
-		{			
+		{
 			m_pScalableReconstructor.reset(new MR::CScalableSLAMReconstructor);
 			m_pReconstructor = nullptr;
 		}
