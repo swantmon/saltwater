@@ -310,6 +310,8 @@ namespace
         Base::Float4x4 m_ViewMatrix;
         Base::Float4x4 m_ProjectionMatrix;
 
+        Dt::CEntity* m_pEntity;
+
     private:
 
         void OnDirtyEntity(Dt::CEntity* _pEntity);
@@ -330,6 +332,7 @@ namespace
         , m_TrackedObjects    ()
         , m_ViewMatrix        (Base::Float4x4::s_Identity)
         , m_ProjectionMatrix  (Base::Float4x4::s_Identity)
+        , m_pEntity           (0)
     {
     }
 
@@ -539,6 +542,27 @@ namespace
             ArPose_getMatrix(m_pARSession, pARPose, &ModelMatrix[0][0]);
 
             ModelMatrix.Transpose();
+
+            if (m_pEntity != 0)
+            {
+                Dt::CTransformationFacet* pTransformation = m_pEntity->GetTransformationFacet();
+
+                Base::Float3 Position;
+                Base::Float3x3 Rotation;
+                Base::Float3 EulerRotation;
+
+                ModelMatrix.GetRotation(Rotation);
+
+                ModelMatrix.GetRotation(EulerRotation);
+
+                ModelMatrix.GetTranslation(Position);
+
+                pTransformation->SetPosition(Position);
+
+                // pTransformation->SetRotation(EulerRotation);
+
+                Dt::EntityManager::MarkEntityAsDirty(*m_pEntity, Dt::CEntity::DirtyMove | Dt::CEntity::DirtyDetail);
+            }
 
             ArPose_destroy(pARPose);
         }
@@ -914,7 +938,7 @@ namespace
     {
         assert(_pEntity != 0);
 
-        if (_pEntity->GetCategory() != Dt::SEntityCategory::Plugin) return;
+        if (_pEntity->GetCategory() != Dt::SEntityCategory::Actor) return;
 
         unsigned int DirtyFlags;
 
@@ -925,6 +949,10 @@ namespace
         // -----------------------------------------------------------------------------
         if ((DirtyFlags & Dt::CEntity::DirtyCreate) != 0)
         {
+            if (_pEntity->GetType() == Dt::SActorType::Node)
+            {
+                m_pEntity = _pEntity;
+            }
         }
     }
 

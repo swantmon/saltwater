@@ -135,12 +135,10 @@ namespace
 
     void CLgLoadMapState::CreateDefaultScene()
     {
-                // -----------------------------------------------------------------------------
+        // -----------------------------------------------------------------------------
         // Allocate a map
         // -----------------------------------------------------------------------------
         Dt::Map::AllocateMap(1, 1);
-
-        Dt::CEntity* pCameraEntity = nullptr;
 
         // -----------------------------------------------------------------------------
         // Setup cameras
@@ -153,8 +151,6 @@ namespace
             EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
 
             Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
-
-            pCameraEntity = &rEntity;
 
             rEntity.SetName("Main Camera");
 
@@ -193,7 +189,7 @@ namespace
 
             pSkyboxFacet->SetRefreshMode(Dt::CSkyFacet::Static);
             pSkyboxFacet->SetType(Dt::CSkyFacet::Procedural);
-            pSkyboxFacet->SetIntensity(60000.0f);
+            pSkyboxFacet->SetIntensity(40000.0f);
 
             rEnvironment.SetDetailFacet(Dt::SFacetCategory::Data, pSkyboxFacet);
 
@@ -278,7 +274,7 @@ namespace
         {
             Dt::SModelFileDescriptor ModelFileDesc;
 
-            ModelFileDesc.m_pFileName = "models/MatTester.obj";
+            ModelFileDesc.m_pFileName = "models/sphere.obj";
             ModelFileDesc.m_GenFlag = Dt::SGeneratorFlag::DefaultFlipUVs;
 
             Dt::CModel& rModel = Dt::ModelManager::CreateModel(ModelFileDesc);
@@ -291,9 +287,9 @@ namespace
 
             Dt::CTransformationFacet* pTransformationFacet = rSphere.GetTransformationFacet();
 
-            pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, -10.0f));
-            pTransformationFacet->SetScale(Base::Float3(0.2f));
-            pTransformationFacet->SetRotation(Base::Float3(Base::DegreesToRadians(-45.0f), 0.0f, 0.0f));
+            pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 0.0f));
+            pTransformationFacet->SetScale(Base::Float3(0.01f));
+            pTransformationFacet->SetRotation(Base::Float3(0.0f));
 
             // -----------------------------------------------------------------------------
 
@@ -303,7 +299,7 @@ namespace
 
             Dt::SMaterialDescriptor MaterialFileDesc;
 
-            MaterialFileDesc.m_pFileName = "materials/naturals/metals/Gold_Worn_00.mat";
+            MaterialFileDesc.m_pFileName = "materials/red.mat";
 
             Dt::CMaterial& rMaterial = Dt::MaterialManager::CreateMaterial(MaterialFileDesc);
 
@@ -313,7 +309,7 @@ namespace
 
             // -----------------------------------------------------------------------------
 
-            // Dt::EntityManager::MarkEntityAsDirty(rSphere, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+            Dt::EntityManager::MarkEntityAsDirty(rSphere, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
     }
 } // namespace
