@@ -25,6 +25,7 @@ namespace IO
 namespace IO
 {
     CProgramParameters::CProgramParameters()
+        : m_ParsingFailed(false)
     {
     }
 
@@ -73,30 +74,38 @@ namespace IO
 
     void CProgramParameters::WriteFile(const std::string& _rFile)
     {
-        std::ofstream JSONFile(_rFile.c_str());
-
-        if (JSONFile.is_open())
+        if (m_ParsingFailed)
         {
-            json FileContent = json::object({});
-            
-            for (auto& rElement : m_Container)
-            {               
-                FileContent.push_back({ ConfigStringToJSON(rElement.first), rElement.second });
-            }
-
-            /////////////////////////////////////////////////////////////////////////////////////////
-            // Now we iterate over the deques and add names as json objects and values at the end
-            /////////////////////////////////////////////////////////////////////////////////////////
-            
-            JSONFile.clear();
-            
-            JSONFile << FileContent.unflatten().dump(4);
-
-            JSONFile.close();
+            std::string Error = "The config file " + _rFile + " could not be parsed\nFix the JSON syntax error or delete the file to create a default config";
+            BASE_CONSOLE_ERROR(Error.c_str());
         }
         else
         {
-            BASE_CONSOLE_ERRORV("Save file %s could not be opened.", _rFile.c_str());
+            std::ofstream JSONFile(_rFile.c_str());
+
+            if (JSONFile.is_open())
+            {
+                json FileContent = json::object({});
+
+                for (auto& rElement : m_Container)
+                {
+                    FileContent.push_back({ ConfigStringToJSON(rElement.first), rElement.second });
+                }
+
+                /////////////////////////////////////////////////////////////////////////////////////////
+                // Now we iterate over the deques and add names as json objects and values at the end
+                /////////////////////////////////////////////////////////////////////////////////////////
+
+                JSONFile.clear();
+
+                JSONFile << FileContent.unflatten().dump(4);
+
+                JSONFile.close();
+            }
+            else
+            {
+                BASE_CONSOLE_ERRORV("Save file %s could not be opened.", _rFile.c_str());
+            }
         }
     }
 
@@ -350,9 +359,10 @@ namespace IO
         }
         catch (json::parse_error& e)
         {
-            std::string Error = "Error parsing config file:\n";
+            std::string Error = "Error parsing config file:\nWill use default values instead\n";
             Error += e.what();
             BASE_CONSOLE_ERRORV(Error.c_str());
+            m_ParsingFailed = true;
             return;
         }
 

@@ -77,6 +77,8 @@ namespace IO
         void InternParseJSONString(const std::string& _rString);
         std::string ConfigStringToJSON(const std::string& _rString);
         std::string JSONStringToConfig(const std::string& _rString);
+
+        bool m_ParsingFailed;
     };
 } // namespace IO
 
