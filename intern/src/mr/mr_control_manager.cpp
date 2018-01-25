@@ -485,10 +485,13 @@ namespace
 
         ArCamera_release(pARCamera);
 
-        // TODO: set matrices to graphic or camera project
-        Gfx::Cam::SetViewMatrix(m_ViewMatrix.GetTransposed());
+        m_ViewMatrix.Transpose();
 
-        Gfx::Cam::SetProjectionMatrix(m_ProjectionMatrix.GetTransposed(), Near, Far);
+        m_ProjectionMatrix.Transpose();
+
+        Gfx::Cam::SetViewMatrix(m_ViewMatrix);
+
+        Gfx::Cam::SetProjectionMatrix(m_ProjectionMatrix, Near, Far);
 
         Gfx::Cam::Update();
 
@@ -534,6 +537,8 @@ namespace
             ArAnchor_getPose(m_pARSession, rObject, pARPose);
 
             ArPose_getMatrix(m_pARSession, pARPose, &ModelMatrix[0][0]);
+
+            ModelMatrix.Transpose();
 
             ArPose_destroy(pARPose);
         }
@@ -932,6 +937,114 @@ namespace
             Base::CInputEvent::EKey Key = static_cast<Base::CInputEvent::EKey>(_rEvent.GetKey());
 
             BASE_CONSOLE_INFOV("Touch (%i) at position %f, %f.", Key, _rEvent.GetCursorPosition()[0], _rEvent.GetCursorPosition()[1])
+
+            float x = _rEvent.GetCursorPosition()[0];
+            float y = _rEvent.GetCursorPosition()[1];
+
+            if (m_pARFrame != nullptr && m_pARSession != nullptr)
+            {
+                ArHitResultList* pHitResultList = 0;
+
+                ArHitResultList_create(m_pARSession, &pHitResultList);
+
+                assert(pHitResultList);
+
+                ArFrame_hitTest(m_pARSession, m_pARFrame, x, y, pHitResultList);
+
+                int NumberOfHits = 0;
+
+                ArHitResultList_getSize(m_pARSession, pHitResultList, &NumberOfHits);
+
+                // -----------------------------------------------------------------------------
+                // The hitTest method sorts the resulting list by distance from the camera,
+                // increasing.  The first hit result will usually be the most relevant when
+                // responding to user input
+                // -----------------------------------------------------------------------------
+                for (int IndexOfHit = 0; IndexOfHit < NumberOfHits; ++IndexOfHit)
+                {
+                    ArHitResult* pHitResult = nullptr;
+
+                    ArHitResult_create(m_pARSession, &pHitResult);
+
+                    ArHitResultList_getItem(m_pARSession, pHitResultList, IndexOfHit, pHitResult);
+
+                    if (pHitResult == nullptr)
+                    {
+                        return;
+                    }
+
+                    // -----------------------------------------------------------------------------
+                    // Only consider planes for this sample app.
+                    // -----------------------------------------------------------------------------
+                    ArTrackable* pTrackable = nullptr;
+
+                    ArHitResult_acquireTrackable(m_pARSession, pHitResult, &pTrackable);
+
+                    ArTrackableType TrackableType = AR_TRACKABLE_NOT_VALID;
+
+                    ArTrackable_getType(m_pARSession, pTrackable, &TrackableType);
+
+                    if (TrackableType != AR_TRACKABLE_PLANE)
+                    {
+                        ArTrackable_release(pTrackable);
+
+                        continue;
+                    }
+
+                    ArPose* pPose = nullptr;
+
+                    ArPose_create(m_pARSession, nullptr, &pPose);
+
+                    ArHitResult_getHitPose(m_pARSession, pHitResult, pPose);
+
+                    int32_t IsPoseInPolygon = 0;
+
+                    ArPlane* pPlane = ArAsPlane(pTrackable);
+
+                    ArPlane_isPoseInPolygon(m_pARSession, pPlane, pPose, &IsPoseInPolygon);
+
+                    ArTrackable_release(pTrackable);
+
+                    ArPose_destroy(pPose);
+
+                    if (!IsPoseInPolygon)
+                    {
+                        continue;
+                    }
+
+                    // -----------------------------------------------------------------------------
+                    // Note that the application is responsible for releasing the pAnchor
+                    // pointer after using it. Call ArAnchor_release(pAnchor) to release.
+                    // -----------------------------------------------------------------------------
+                    ArAnchor* pAnchor = nullptr;
+
+                    if (ArHitResult_acquireNewAnchor(m_pARSession, pHitResult, &pAnchor) != AR_SUCCESS)
+                    {
+                        return;
+                    }
+
+                    ArTrackingState TrackingState = AR_TRACKING_STATE_STOPPED;
+
+                    ArAnchor_getTrackingState(m_pARSession, pAnchor, &TrackingState);
+
+                    if (TrackingState != AR_TRACKING_STATE_TRACKING)
+                    {
+                        ArAnchor_release(pAnchor);
+
+                        continue;
+                    }
+
+                    m_TrackedObjects.insert(pAnchor);
+
+                    ArHitResult_destroy(pHitResult);
+
+                    pHitResult = nullptr;
+                }
+
+                ArHitResultList_destroy(pHitResultList);
+
+                pHitResultList = nullptr;
+            }
         }
     }
 } // namespace
