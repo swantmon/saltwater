@@ -274,7 +274,7 @@ namespace
         {
             Dt::SModelFileDescriptor ModelFileDesc;
 
-            ModelFileDesc.m_pFileName = "models/sphere.obj";
+            ModelFileDesc.m_pFileName = "models/MatTester.obj";
             ModelFileDesc.m_GenFlag = Dt::SGeneratorFlag::DefaultFlipUVs;
 
             Dt::CModel& rModel = Dt::ModelManager::CreateModel(ModelFileDesc);

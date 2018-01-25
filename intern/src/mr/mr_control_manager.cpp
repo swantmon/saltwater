@@ -551,15 +551,13 @@ namespace
                 Base::Float3x3 Rotation;
                 Base::Float3 EulerRotation;
 
-                ModelMatrix.GetRotation(Rotation);
-
                 ModelMatrix.GetRotation(EulerRotation);
 
                 ModelMatrix.GetTranslation(Position);
 
                 pTransformation->SetPosition(Position);
 
-                // pTransformation->SetRotation(EulerRotation);
+                pTransformation->SetRotation(EulerRotation);
 
                 Dt::EntityManager::MarkEntityAsDirty(*m_pEntity, Dt::CEntity::DirtyMove | Dt::CEntity::DirtyDetail);
             }
