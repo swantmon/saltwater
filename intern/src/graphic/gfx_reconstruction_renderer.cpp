@@ -218,15 +218,14 @@ namespace
 			m_pScalableReconstructor = nullptr;
 		}
 
-        m_UseTrackingCamera = Base::CProgramParameters::GetInstance().GetBoolean("mr:slam:rendering:use_tracking_camera", true);
-
-        m_RenderVertexMap   = Base::CProgramParameters::GetInstance().GetBoolean("mr:slam:rendering:vertex_map"       , false);
-        m_RaycastRootGrids  = Base::CProgramParameters::GetInstance().GetBoolean("mr:slam:rendering:grids:root"       , false);
-        m_RaycastLevel1Grid = Base::CProgramParameters::GetInstance().GetBoolean("mr:slam:rendering:grids:level1"     , false);
-        m_RenderRootQueue   = Base::CProgramParameters::GetInstance().GetBoolean("mr:slam:rendering:queues:root"      , false);
-        m_RenderLevel1Queue = Base::CProgramParameters::GetInstance().GetBoolean("mr:slam:rendering:queues:level1"    , false);
-        m_RenderLevel2Queue = Base::CProgramParameters::GetInstance().GetBoolean("mr:slam:rendering:queues:level2"    , false);
-        m_RenderHONV        = Base::CProgramParameters::GetInstance().GetBoolean("mr:slam:rendering:normal_histogram" , false);
+        m_UseTrackingCamera = Base::CProgramParameters::GetInstance().GetBoolean("mr:slam:rendering:use_tracking_camera", true );
+        m_RenderVertexMap   = Base::CProgramParameters::GetInstance().GetBoolean("mr:slam:rendering:vertex_map"         , false);
+        m_RaycastRootGrids  = Base::CProgramParameters::GetInstance().GetBoolean("mr:slam:rendering:grids:root"         , false);
+        m_RaycastLevel1Grid = Base::CProgramParameters::GetInstance().GetBoolean("mr:slam:rendering:grids:level1"       , false);
+        m_RenderRootQueue   = Base::CProgramParameters::GetInstance().GetBoolean("mr:slam:rendering:queues:root"        , false);
+        m_RenderLevel1Queue = Base::CProgramParameters::GetInstance().GetBoolean("mr:slam:rendering:queues:level1"      , false);
+        m_RenderLevel2Queue = Base::CProgramParameters::GetInstance().GetBoolean("mr:slam:rendering:queues:level2"      , false);
+        m_RenderHONV        = Base::CProgramParameters::GetInstance().GetBoolean("mr:slam:rendering:normal_histogram"   , false);
     }
 
     // -----------------------------------------------------------------------------
