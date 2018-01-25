@@ -298,22 +298,20 @@ namespace
                 case AINPUT_SOURCE_TOUCHSCREEN:
                     {
                         int NumberOfPointer = 0;
-                        Base::CInputEvent::EAction Action;
+                        Base::CInputEvent::EAction InputAction;
 
                         switch( Action & AMOTION_EVENT_ACTION_MASK )
                         {
                             case AMOTION_EVENT_ACTION_DOWN:
-                            case AMOTION_EVENT_ACTION_POINTER_DOWN:
-                                Action = Base::CInputEvent::TouchPressed;
+                                InputAction = Base::CInputEvent::TouchPressed;
                                 NumberOfPointer = 1;
                                 break;
                             case AMOTION_EVENT_ACTION_UP:
-                            case AMOTION_EVENT_ACTION_POINTER_UP:
-                                Action = Base::CInputEvent::TouchReleased;
+                                InputAction = Base::CInputEvent::TouchReleased;
                                 NumberOfPointer = 1;
                                 break;
                             case AMOTION_EVENT_ACTION_MOVE:
-                                Action = Base::CInputEvent::TouchMove;
+                                InputAction = Base::CInputEvent::TouchMove;
                                 NumberOfPointer = AMotionEvent_getPointerCount(_pEvent);
                                 break;
                         }
@@ -325,7 +323,7 @@ namespace
                             float PointerX = AMotionEvent_getRawX(_pEvent, IndexOfPointer);
                             float PointerY = AMotionEvent_getRawY(_pEvent, IndexOfPointer);
 
-                            Base::CInputEvent Input(Base::CInputEvent::Input, Action, Base::CInputEvent::Pointer + IndexOfPointer, Base::Float2(PointerX, PointerY));
+                            Base::CInputEvent Input(Base::CInputEvent::Input, InputAction, Base::CInputEvent::Pointer + IndexOfPointer, Base::Float2(PointerX, PointerY));
 
                             Gui::EventHandler::OnUserEvent(Input);
                         }
