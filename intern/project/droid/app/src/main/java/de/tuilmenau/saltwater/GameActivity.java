@@ -9,6 +9,8 @@ import android.graphics.Point;
 
 import android.os.Bundle;
 
+import android.view.WindowManager;
+
 public class GameActivity extends NativeActivity
 {
     private static final String LOG_TAG = "GameActivity";
@@ -32,6 +34,11 @@ public class GameActivity extends NativeActivity
         super.onCreate(_SavedInstanceState);
 
         s_Instance = this;
+
+        int UIOptions = WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+                      | WindowManager.LayoutParams.FLAG_FULLSCREEN;
+
+        getWindow().addFlags(UIOptions);
 
         nativeInitializeInterface(getApplicationContext());
     }
