@@ -1661,9 +1661,12 @@ namespace
     void CGfxSkyManager::PrecomputeScattering()
     {
         // Determine the number of steps for multiple scattering
+        // We use a default of 4 orders for Desktop and 0 for mobile
+
+        const int DefaultOrderCount = (Main::GetGraphicsAPI().m_GraphicsAPI == CGraphicsInfo::OpenGL) ? 4 : 0;
 
         const std::string OrderParameter = "graphics:atmosphere:order_count";
-        const int OrderCount = Base::CProgramParameters::GetInstance().GetInt(OrderParameter, 4);
+        const int OrderCount = Base::CProgramParameters::GetInstance().GetInt(OrderParameter, DefaultOrderCount);
 
         // -----------------------------------------------------------------------------
         // Textures
