@@ -1,6 +1,6 @@
 
-#ifndef __INCLUDE_CS_PLANE_DETECTION_GLSL__
-#define __INCLUDE_CS_PLANE_DETECTION_GLSL__
+#ifndef __INCLUDE_CS_HISTOGRAM_CREATION_GLSL__
+#define __INCLUDE_CS_HISTOGRAM_CREATION_GLSL__
 
 layout(row_major, std140, binding = 0) uniform HistogramSizes
 {
@@ -66,4 +66,4 @@ void main()
     }
 }
 
-#endif // __INCLUDE_CS_PLANE_DETECTION_GLSL__
+#endif // __INCLUDE_CS_HISTOGRAM_CREATION_GLSL__
