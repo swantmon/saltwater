@@ -131,8 +131,8 @@ namespace MR
     {
         TextureManager::ClearTexture(m_NormalHistogram);
 
-        int Counter = 0;
-        BufferManager::UploadBufferData(m_PlaneBuffer, &Counter, 0, sizeof(int32_t)); // Just set counter to 0
+        Base::Int2 Counter = Base::Int2(0, g_MaxDetectablePlanes);  // Just set counter to 0
+        BufferManager::UploadBufferData(m_PlaneBuffer, &Counter, 0, sizeof(Counter));
     }
 
     // -----------------------------------------------------------------------------
@@ -160,6 +160,8 @@ namespace MR
 
     CPlaneDetector::CPlaneDetector()
     {
+        m_MaxPlanes = Base::CProgramParameters::GetInstance().GetInt("mr:plane_detection:max_planes", g_MaxDetectablePlanes);
+
         //////////////////////////////////////////////////////////////////////////
         // Create Shaders
         //////////////////////////////////////////////////////////////////////////
@@ -168,7 +170,8 @@ namespace MR
 
         DefineStream
             << "#define TILE_SIZE2D " << g_TileSize2D << " \n"
-            << "#define MAP_TEXTURE_FORMAT " << Base::CProgramParameters::GetInstance().GetStdString("mr:slam:map_format", "rgba16f") << " \n";
+            << "#define MAP_TEXTURE_FORMAT " << Base::CProgramParameters::GetInstance().GetStdString("mr:slam:map_format", "rgba16f") << " \n"
+            << "#define MAX_EXTRACTABLE_PLANES " << m_MaxPlanes << " \n";
 
         std::string DefineString = DefineStream.str();
 

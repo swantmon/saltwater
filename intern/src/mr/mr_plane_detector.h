@@ -43,5 +43,7 @@ namespace MR
 
         Gfx::CShaderPtr m_HistogramCreationCSPtr;
         Gfx::CShaderPtr m_PlaneExtractionCSPtr;
+
+        int m_MaxPlanes;
     };
 } // namespace MR
