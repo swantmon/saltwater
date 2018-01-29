@@ -12,6 +12,7 @@
 #include "base/base_matrix4x4.h"
 #include "base/base_vector2.h"
 
+#include "mr/mr_plane_detector.h"
 #include "mr/mr_slam_reconstruction_settings.h"
 
 #include "graphic/gfx_shader.h"
@@ -343,5 +344,7 @@ namespace MR
         
         bool m_UseConservativeRasterization;
         bool m_UseShuffleIntrinsics;
+
+        CPlaneDetector m_PlaneDetector;
     };
 } // namespace MR

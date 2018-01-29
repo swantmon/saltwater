@@ -43,6 +43,8 @@ namespace MR
 
     void CPlaneDetector::DetectPlanes(Gfx::CTexturePtr _VertexMap, Gfx::CTexturePtr _NormalMap)
     {
+        Performance::BeginDurationEvent("Plane Detection");
+
         if (_VertexMap != nullptr && _NormalMap != nullptr)
         {
             m_VertexMap = _VertexMap;
@@ -50,6 +52,8 @@ namespace MR
         }
 
         assert(m_VertexMap != nullptr && m_NormalMap != nullptr);
+        assert(m_VertexMap->GetNumberOfPixelsU() == m_NormalMap->GetNumberOfPixelsU() &&
+               m_VertexMap->GetNumberOfPixelsV() == m_NormalMap->GetNumberOfPixelsV());
 
         TextureManager::ClearTexture(m_NormalHistogram);
 
@@ -71,6 +75,8 @@ namespace MR
         ContextManager::SetImageTexture(1, static_cast<CTexturePtr>(m_VertexMap));
         ContextManager::SetImageTexture(2, static_cast<CTexturePtr>(m_NormalMap));
         ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+
+        Performance::EndEvent();
     }
 
     // -----------------------------------------------------------------------------

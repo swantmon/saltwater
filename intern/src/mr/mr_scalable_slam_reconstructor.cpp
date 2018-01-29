@@ -252,6 +252,8 @@ namespace MR
 
         ClearPool();
 
+        m_PlaneDetector.SetImages(m_ReferenceVertexMapPtr[2], m_ReferenceNormalMapPtr[2]);
+
         m_IsIntegrationPaused = false;
         m_IsTrackingPaused = false;
     }
@@ -1748,12 +1750,8 @@ namespace MR
         //////////////////////////////////////////////////////////////////////////////////////
         // Detect Planes
         //////////////////////////////////////////////////////////////////////////////////////
-
-        Performance::BeginDurationEvent("Plane Detection");
-
-        DetectPlanes();
-
-        Performance::EndEvent();
+        
+        m_PlaneDetector.DetectPlanes();
 
         //////////////////////////////////////////////////////////////////////////////////////
         // Tracking
