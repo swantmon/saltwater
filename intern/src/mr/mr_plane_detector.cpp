@@ -69,20 +69,31 @@ namespace MR
         RenderHistogram(_PoseMatrix);
         Performance::EndEvent();
 
+        Performance::BeginDurationEvent("Plane Extraction");
+        ExtractPlanes();
         Performance::EndEvent();
+
+        Performance::EndEvent();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void ExtractPlanes()
+    {
+        
     }
 
     // -----------------------------------------------------------------------------
 
     void CPlaneDetector::RenderHistogram(const Base::Float4x4& _PoseMatrix)
     {
-        TextureManager::ClearTexture(m_NormalHistogram);
-
         //////////////////////////////////////////////////////////////////////////////////////
         // Create a 2D-Histogram based on the inclination and the azimuth of the normals
         // "Histogram of Oriented Normal Vectors for Object Recognition with a Depth Sensor" (HONV)
         // We use the lowest resolution of the pyramid
         //////////////////////////////////////////////////////////////////////////////////////
+
+        TextureManager::ClearTexture(m_NormalHistogram);
 
         const int WorkGroupsX = DivUp(m_VertexMap->GetNumberOfPixelsU(), g_TileSize2D);
         const int WorkGroupsY = DivUp(m_VertexMap->GetNumberOfPixelsV(), g_TileSize2D);
@@ -95,7 +106,7 @@ namespace MR
 
         BufferManager::UploadBufferData(m_HistogramConstantBuffer, &BufferData);
 
-        ContextManager::SetShaderCS(m_NormalHistogramCSPtr);
+        ContextManager::SetShaderCS(m_HistogramCreationCSPtr);
         ContextManager::SetConstantBuffer(0, m_HistogramConstantBuffer);
         ContextManager::SetImageTexture(0, m_NormalHistogram);
         ContextManager::SetImageTexture(1, m_VertexMap);
@@ -140,7 +151,8 @@ namespace MR
 
         std::string DefineString = DefineStream.str();
 
-        m_NormalHistogramCSPtr = ShaderManager::CompileCS("scalable_kinect_fusion\\plane_detection\\cs_histogram.glsl", "main", DefineString.c_str());
+        m_HistogramCreationCSPtr = ShaderManager::CompileCS("scalable_kinect_fusion\\plane_detection\\cs_histogram_creation.glsl", "main", DefineString.c_str());
+        m_PlaneExtractionCSPtr = ShaderManager::CompileCS("scalable_kinect_fusion\\plane_detection\\cs_plane_extraction.glsl", "main", DefineString.c_str());
 
         //////////////////////////////////////////////////////////////////////////
         // Create Buffers

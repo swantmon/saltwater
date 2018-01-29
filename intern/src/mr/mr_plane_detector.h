@@ -28,6 +28,7 @@ namespace MR
 	private:
 
         void RenderHistogram(const Base::Float4x4& _PoseMatrix);
+        void ExtractPlanes();
 
     private:
 
@@ -35,9 +36,9 @@ namespace MR
         Gfx::CTexturePtr m_NormalMap;
         Gfx::CTexturePtr m_NormalHistogram;
 
-        Gfx::CShaderPtr m_NormalHistogramCSPtr;
-
         Gfx::CBufferPtr m_HistogramConstantBuffer;
 
+        Gfx::CShaderPtr m_HistogramCreationCSPtr;
+        Gfx::CShaderPtr m_PlaneExtractionCSPtr;
     };
 } // namespace MR
