@@ -2,6 +2,15 @@
 #ifndef __INCLUDE_COMMON_PLANE_DETECTION_GLSL__
 #define __INCLUDE_COMMON_PLANE_DETECTION_GLSL__
 
+layout(row_major, std140, binding = 0) uniform HistogramSizes
+{
+    mat4 g_PoseMatrix;
+    int g_AzimuthBinCount;
+    int g_InclinationBinCount;
+    int g_Unused0;
+    int g_Unused1;
+};
+
 const float g_Tau = 6.28318530718f;
 const float g_Pi = g_Tau * 0.5f;
 const int g_KernelSize = 3;

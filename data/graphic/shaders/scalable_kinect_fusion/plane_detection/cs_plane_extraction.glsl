@@ -7,8 +7,9 @@
 layout(std430, binding = 0) buffer ExtractedPlanes
 {
     int g_PlaneCount;
-    ivec3 Padding;
-    vec4 g_Planes[];
+    int g_MaxPlaneCount;
+    ivec2 Padding;
+    vec4 g_Planes[MAX_EXTRACTABLE_PLANES];
 };
 
 // -----------------------------------------------------------------------------
@@ -30,6 +31,18 @@ void main()
     const int y = int(gl_GlobalInvocationID.y);
     
     int Count = imageLoad(cs_Histogram, ivec2(x, y)).x;
+
+    if (Count > 100)
+    {
+        int PlaneIndex = atomicAdd(g_PlaneCount, 1);
+
+        if (PlaneIndex < g_MaxPlaneCount)
+        {
+            vec2 Spherical = BinToSpherical(ivec2(x, y), g_AzimuthBinCount, g_InclinationBinCount);
+            vec3 Normal = SphericalToCartesian(Spherical);
+            g_Planes[PlaneIndex] = vec4(Normal, 0.0f);
+        }
+    }
 }
 
 #endif // __INCLUDE_CS_PLANE_EXTRACTION_GLSL__
