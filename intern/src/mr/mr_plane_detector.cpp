@@ -156,7 +156,14 @@ namespace MR
         TextureDescriptor.m_NumberOfPixelsU = g_HistogramSize[0];
         TextureDescriptor.m_NumberOfPixelsV = g_HistogramSize[1];
         TextureDescriptor.m_NumberOfPixelsW = 1;
+        TextureDescriptor.m_NumberOfMipMaps = 1;
+        TextureDescriptor.m_NumberOfTextures = 1;
+        TextureDescriptor.m_Binding = CTexture::ShaderResource;
+        TextureDescriptor.m_Access = CTexture::CPUWrite;
+        TextureDescriptor.m_Usage = CTexture::GPUReadWrite;
+        TextureDescriptor.m_Semantic = CTexture::UndefinedSemantic;
         TextureDescriptor.m_Format = CTexture::R32_INT;
+
         m_NormalHistogram = TextureManager::CreateTexture2D(TextureDescriptor);
     }
 
