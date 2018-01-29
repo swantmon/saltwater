@@ -28,14 +28,18 @@
 
 #include "mr/mr_control_manager.h"
 
+#if PLATFORM_ANDROID
 #include "arcore_c_api.h"
 
 #include "GLES3/gl32.h"
+#endif
 
 #include <assert.h>
 #include <unordered_set>
 #include <string>
 #include <vector>
+
+#if PLATFORM_ANDROID
 
 #ifndef GL_OES_EGL_image_external
 #define GL_OES_EGL_image_external 1
@@ -1123,3 +1127,48 @@ namespace ControlManager
     }
 } // namespace ControlManager
 } // namespace MR
+#else // PLATFORM_ANDROID
+namespace MR
+{
+namespace ControlManager
+{
+    void OnStart(const SConfiguration& _rConfiguration)
+    {
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void OnExit()
+    {
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void Update()
+    {
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void OnPause()
+    {
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void OnResume()
+    {
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void OnDisplayGeometryChanged(int _DisplayRotation, int _Width, int _Height)
+    {
+    }
+
+    void OnDraw()
+    {
+    }
+} // namespace ControlManager
+} // namespace MR
+#endif // !PLATFORM_ANDROID
