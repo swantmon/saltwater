@@ -32,6 +32,7 @@ layout (binding = 2, MAP_TEXTURE_FORMAT) uniform image2D cs_NormalMap;
 // -------------------------------------------------------------------------------------
 // Functions
 // -------------------------------------------------------------------------------------
+
 layout (local_size_x = TILE_SIZE2D, local_size_y = TILE_SIZE2D, local_size_z = 1) in;
 void main()
 {    
@@ -55,17 +56,20 @@ void main()
         }
     }
     
-    Normal /= Count;
+    if (Count > 0)
+    {
+        Normal /= Count;
     
-    Normal = mat3(g_PoseMatrix) * Normal;
+        Normal = mat3(g_PoseMatrix) * Normal;
 
-    float Azimuth = atan(Normal.y, Normal.x);
-    float Inclination = acos(Normal.z);
+        float Azimuth = atan(Normal.y, Normal.x);
+        float Inclination = acos(Normal.z);
         
-    int AzimuthBin = int((Azimuth / g_Tau + 0.5f) * g_AzimuthBinCount);
-    int InclinationBinY = int((Inclination / g_Pi) * g_InclinationBinCount);
+        int AzimuthBin = int((Azimuth / g_Tau + 0.5f) * g_AzimuthBinCount);
+        int InclinationBinY = int((Inclination / g_Pi) * g_InclinationBinCount);
     
-    imageAtomicAdd(cs_Histogram, ivec2(AzimuthBin, InclinationBinY), 1);
+        imageAtomicAdd(cs_Histogram, ivec2(AzimuthBin, InclinationBinY), 1);
+    }
 }
 
 #endif // __INCLUDE_CS_PLANE_DETECTION_GLSL__
