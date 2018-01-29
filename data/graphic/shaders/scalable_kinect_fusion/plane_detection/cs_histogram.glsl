@@ -2,19 +2,13 @@
 #ifndef __INCLUDE_CS_PLANE_DETECTION_GLSL__
 #define __INCLUDE_CS_PLANE_DETECTION_GLSL__
 
-#include "scalable_kinect_fusion/common_tracking.glsl"
-
 layout(row_major, std140, binding = 0) uniform HistogramSizes
 {
+    mat4 g_PoseMatrix;
     int g_AzimuthBinCount;
     int g_InclinationBinCount;
     int g_Unused0;
     int g_Unused1;
-};
-
-layout(std430, binding = 0) buffer Histogram
-{
-    int g_Histogram[];
 };
 
 const float g_Tau = 6.28318530718f;
