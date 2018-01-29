@@ -23,6 +23,7 @@
     <ClCompile Include="..\..\..\src\mr\mr_control.cpp" />
     <ClCompile Include="..\..\..\src\mr\mr_control_manager.cpp" />
     <ClCompile Include="..\..\..\src\mr\mr_kinect_control.cpp" />
+    <ClCompile Include="..\..\..\src\mr\mr_plane_detector.cpp" />
     <ClCompile Include="..\..\..\src\mr\mr_precompiled.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -42,6 +43,7 @@
     <ClInclude Include="..\..\..\src\mr\mr_control_manager.h" />
     <ClInclude Include="..\..\..\src\mr\mr_depth_sensor_control.h" />
     <ClInclude Include="..\..\..\src\mr\mr_kinect_control.h" />
+    <ClInclude Include="..\..\..\src\mr\mr_plane_detector.h" />
     <ClInclude Include="..\..\..\src\mr\mr_precompiled.h" />
     <ClInclude Include="..\..\..\src\mr\mr_realsense_control.h" />
     <ClInclude Include="..\..\..\src\mr\mr_rgbd_camera_control.h" />
