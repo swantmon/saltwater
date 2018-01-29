@@ -3,6 +3,8 @@
 
 #include "mr/mr_plane_detector.h"
 
+#include "base/base_program_parameters.h"
+
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_main.h"
@@ -125,7 +127,7 @@ namespace MR
 
         DefineStream
             << "#define TILE_SIZE2D " << g_TileSize2D << " \n"
-            << "#define MAP_TEXTURE_FORMAT " << "rgba16f" << " \n";
+            << "#define MAP_TEXTURE_FORMAT " << Base::CProgramParameters::GetInstance().GetStdString("mr:slam:map_format", "rgba16f") << " \n";
 
         std::string DefineString = DefineStream.str();
 

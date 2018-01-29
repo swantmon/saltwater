@@ -338,7 +338,7 @@ namespace MR
         
         bool m_UseConservativeRasterization;
         bool m_UseShuffleIntrinsics;
-
+        
         CPlaneDetector m_PlaneDetector;
     };
 } // namespace MR

@@ -69,9 +69,7 @@ namespace
 
     const bool g_UseFullVolumeIntegration = true;
     const bool g_UseReverseIntegration = true;
-
-    const bool g_UseHighPrecisionMaps = false;
-    
+        
     const float g_EpsilonDistance = 0.1f;
     const float g_EpsilonAngle = 0.75f;
     
@@ -569,7 +567,7 @@ namespace MR
         
         const float VoxelSize = m_ReconstructionSettings.m_VoxelSize;
 
-        const std::string InternalFormatString = g_UseHighPrecisionMaps ? "rgba32f" : "rgba16f";
+        const std::string InternalFormatString = Base::CProgramParameters::GetInstance().GetStdString("mr:slam:map_format", "rgba16f");
 
         std::stringstream DefineStream;
 
@@ -1458,6 +1456,10 @@ namespace MR
         m_RaycastVertexMapPtr.resize(m_ReconstructionSettings.m_PyramidLevelCount);
         m_RaycastNormalMapPtr.resize(m_ReconstructionSettings.m_PyramidLevelCount);
 
+        std::string MapFormatString = Base::CProgramParameters::GetInstance().GetStdString("mr:slam:map_format", "rgba16f");
+        assert(MapFormatString == "rgba16f" || MapFormatString == "rgba32f");
+        CTexture::EFormat MapFormat = MapFormatString == "rgba16f" ? CTexture::R16G16B16A16_FLOAT : CTexture::R32G32B32A32_FLOAT;
+
         STextureDescriptor TextureDescriptor = {};
         
         for (int i = 0; i < m_ReconstructionSettings.m_PyramidLevelCount; ++i)
@@ -1477,7 +1479,7 @@ namespace MR
 
             m_SmoothDepthBufferPtr[i] = TextureManager::CreateTexture2D(TextureDescriptor);
 
-            TextureDescriptor.m_Format = g_UseHighPrecisionMaps ? CTexture::R32G32B32A32_FLOAT : CTexture::R16G16B16A16_FLOAT;
+            TextureDescriptor.m_Format = MapFormat;
 
             m_ReferenceVertexMapPtr[i] = TextureManager::CreateTexture2D(TextureDescriptor);
             m_ReferenceNormalMapPtr[i] = TextureManager::CreateTexture2D(TextureDescriptor);
@@ -1500,7 +1502,7 @@ namespace MR
 
         m_RawDepthBufferPtr = TextureManager::CreateTexture2D(TextureDescriptor);
 
-        TextureDescriptor.m_Format = g_UseHighPrecisionMaps ? CTexture::R32G32B32A32_FLOAT : CTexture::R16G16B16A16_FLOAT;
+        TextureDescriptor.m_Format = MapFormat;
 
         m_RawVertexMapPtr = TextureManager::CreateTexture2D(TextureDescriptor);
 
