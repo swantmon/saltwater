@@ -11,6 +11,9 @@ namespace MR
 
         void SetDepthImage(Gfx::CTexturePtr _DepthImage);
         void DetectPlanes(Gfx::CTexturePtr _DepthImage = nullptr);
+
+        Gfx::CTexturePtr GetDepthImage();
+        Gfx::CTexturePtr GetNormalHistogram();
         
     public:
 
@@ -20,6 +23,7 @@ namespace MR
 	private:
 
         Gfx::CTexturePtr m_DepthImage;
+        Gfx::CTexturePtr m_NormalHistogram;
 
     };
 } // namespace MR

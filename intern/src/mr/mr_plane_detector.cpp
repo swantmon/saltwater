@@ -18,22 +18,40 @@
 
 #include <cassert>
 
+using namespace Gfx;
+
 namespace MR
 {
 
-    void CPlaneDetector::SetDepthImage(Gfx::CTexturePtr _DepthImage)
+    void CPlaneDetector::SetDepthImage(CTexturePtr _DepthImage)
     {
         m_DepthImage = _DepthImage;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CPlaneDetector::DetectPlanes(Gfx::CTexturePtr _DepthImage)
+    void CPlaneDetector::DetectPlanes(CTexturePtr _DepthImage)
     {
         if (_DepthImage != nullptr)
         {
             m_DepthImage = _DepthImage;
         }
+
+        assert(m_DepthImage != nullptr);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CTexturePtr CPlaneDetector::GetDepthImage()
+    {
+        return m_DepthImage;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CTexturePtr CPlaneDetector::GetNormalHistogram()
+    {
+        return m_NormalHistogram;
     }
 
     // -----------------------------------------------------------------------------
