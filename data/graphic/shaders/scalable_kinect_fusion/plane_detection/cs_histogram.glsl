@@ -19,6 +19,7 @@ layout(std430, binding = 0) buffer Histogram
 
 const float g_Tau = 6.28318530718f;
 const float g_Pi = g_Tau * 0.5f;
+const int g_KernelSize = 3;
 
 // -----------------------------------------------------------------------------
 // Input from engine
@@ -33,18 +34,16 @@ layout (binding = 2, MAP_TEXTURE_FORMAT) uniform image2D cs_NormalMap;
 // -------------------------------------------------------------------------------------
 layout (local_size_x = TILE_SIZE2D, local_size_y = TILE_SIZE2D, local_size_z = 1) in;
 void main()
-{
-    const ivec2 ImageSize = imageSize(cs_VertexMap);
-    
+{    
     const int x = int(gl_GlobalInvocationID.x);
     const int y = int(gl_GlobalInvocationID.y);
     
     vec3 Normal = vec3(0.0f);
     int Count = 0;
     
-    for (int i = -3; i <= 3; ++ i)
+    for (int i = -g_KernelSize; i <= g_KernelSize; ++ i)
     {
-        for (int j = -3; j <= 3; ++ j)
+        for (int j = -g_KernelSize; j <= g_KernelSize; ++ j)
         {
             vec3 Sample = imageLoad(cs_NormalMap, ivec2(x + i, y + j)).xyz;
             
