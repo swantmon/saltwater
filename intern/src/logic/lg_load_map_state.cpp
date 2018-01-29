@@ -135,12 +135,10 @@ namespace
 
     void CLgLoadMapState::CreateDefaultScene()
     {
-                // -----------------------------------------------------------------------------
+        // -----------------------------------------------------------------------------
         // Allocate a map
         // -----------------------------------------------------------------------------
         Dt::Map::AllocateMap(1, 1);
-
-        Dt::CEntity* pCameraEntity = nullptr;
 
         // -----------------------------------------------------------------------------
         // Setup cameras
@@ -154,8 +152,6 @@ namespace
 
             Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
 
-            pCameraEntity = &rEntity;
-
             rEntity.SetName("Main Camera");
 
             Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
@@ -167,6 +163,8 @@ namespace
             Dt::CCameraActorFacet* pFacet = Dt::CameraActorManager::CreateCameraActor();
 
             pFacet->SetMainCamera(true);
+            pFacet->SetProjectionType(Dt::CCameraActorFacet::External);
+            pFacet->SetClearFlag(Dt::CCameraActorFacet::Webcam);
 
             rEntity.SetDetailFacet(Dt::SFacetCategory::Data, pFacet);
 
@@ -191,7 +189,7 @@ namespace
 
             pSkyboxFacet->SetRefreshMode(Dt::CSkyFacet::Static);
             pSkyboxFacet->SetType(Dt::CSkyFacet::Procedural);
-            pSkyboxFacet->SetIntensity(60000.0f);
+            pSkyboxFacet->SetIntensity(40000.0f);
 
             rEnvironment.SetDetailFacet(Dt::SFacetCategory::Data, pSkyboxFacet);
 
@@ -231,7 +229,7 @@ namespace
 
             rGlobalProbeLight.SetDetailFacet(Dt::SFacetCategory::Data, pProbeLightFacet);
 
-            Dt::EntityManager::MarkEntityAsDirty(rGlobalProbeLight, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+            // Dt::EntityManager::MarkEntityAsDirty(rGlobalProbeLight, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
 
         {
@@ -289,9 +287,9 @@ namespace
 
             Dt::CTransformationFacet* pTransformationFacet = rSphere.GetTransformationFacet();
 
-            pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, -10.0f));
-            pTransformationFacet->SetScale(Base::Float3(0.2f));
-            pTransformationFacet->SetRotation(Base::Float3(Base::DegreesToRadians(-45.0f), 0.0f, 0.0f));
+            pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 0.0f));
+            pTransformationFacet->SetScale(Base::Float3(0.01f));
+            pTransformationFacet->SetRotation(Base::Float3(0.0f));
 
             // -----------------------------------------------------------------------------
 
@@ -301,7 +299,7 @@ namespace
 
             Dt::SMaterialDescriptor MaterialFileDesc;
 
-            MaterialFileDesc.m_pFileName = "materials/naturals/metals/Gold_Worn_00.mat";
+            MaterialFileDesc.m_pFileName = "materials/red.mat";
 
             Dt::CMaterial& rMaterial = Dt::MaterialManager::CreateMaterial(MaterialFileDesc);
 

@@ -15,14 +15,20 @@
 #include "base/base_exception.h"
 #include "base/base_input_event.h"
 #include "base/base_uncopyable.h"
+#include "base/base_math_operations.h"
+#include "base/base_memory.h"
 #include "base/base_program_parameters.h"
 #include "base/base_singleton.h"
 
 #include "core/core_asset_manager.h"
-
+#include "core/core_jni_interface.h"
 #include "core/core_time.h"
 
 #include "graphic/gfx_application_interface.h"
+
+#include "gui/gui_event_handler.h"
+
+#include "mr/mr_control_manager.h"
 
 namespace
 {
@@ -100,7 +106,7 @@ namespace
         , m_RequestState (App::CState::Init)
         , m_ParameterFile("/android.config")
     {
-        memset(&m_AppSetup, 0, sizeof(m_AppSetup));
+        Base::CMemory::Zero(&m_AppSetup, sizeof(m_AppSetup));
     }
     
     // -----------------------------------------------------------------------------
@@ -284,6 +290,47 @@ namespace
 
         if (AInputEvent_getType(_pEvent) == AINPUT_EVENT_TYPE_MOTION) 
         {
+            int32_t Action = AMotionEvent_getAction(_pEvent);
+            int32_t Source = AInputEvent_getSource(_pEvent);
+
+            switch (Source)
+            {
+                case AINPUT_SOURCE_TOUCHSCREEN:
+                    {
+                        int NumberOfPointer = 0;
+                        Base::CInputEvent::EAction InputAction;
+
+                        switch( Action & AMOTION_EVENT_ACTION_MASK )
+                        {
+                            case AMOTION_EVENT_ACTION_DOWN:
+                                InputAction = Base::CInputEvent::TouchPressed;
+                                NumberOfPointer = 1;
+                                break;
+                            case AMOTION_EVENT_ACTION_UP:
+                                InputAction = Base::CInputEvent::TouchReleased;
+                                NumberOfPointer = 1;
+                                break;
+                            case AMOTION_EVENT_ACTION_MOVE:
+                                InputAction = Base::CInputEvent::TouchMove;
+                                NumberOfPointer = AMotionEvent_getPointerCount(_pEvent);
+                                break;
+                        }
+
+                        int IndexOfPointer = Action >> AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT;
+
+                        for( int i = 0; i < NumberOfPointer; ++i, ++IndexOfPointer )
+                        {
+                            float PointerX = AMotionEvent_getRawX(_pEvent, IndexOfPointer);
+                            float PointerY = AMotionEvent_getRawY(_pEvent, IndexOfPointer);
+
+                            Base::CInputEvent Input(Base::CInputEvent::Input, InputAction, Base::CInputEvent::Pointer + IndexOfPointer, Base::Float2(PointerX, PointerY));
+
+                            Gui::EventHandler::OnUserEvent(Input);
+                        }
+                    }
+                    break;
+            }
+
             return 1;
         }
 
@@ -298,59 +345,86 @@ namespace
 
         switch (_Command) 
         {
-        case APP_CMD_SAVE_STATE:
-            break;
+            case APP_CMD_SAVE_STATE:
+                break;
 
-        case APP_CMD_INIT_WINDOW:
-            // -----------------------------------------------------------------------------
-            // The window is being shown, get it ready.
-            // -----------------------------------------------------------------------------
-            if (AppSetup->m_pAndroidApp->window != NULL) 
-            {
-                unsigned int WindowID = Gfx::App::RegisterWindow(AppSetup->m_pAndroidApp->window);
-
-                Gfx::App::ActivateWindow(WindowID);
-
-                AppSetup->m_WindowID = WindowID;
-
-                App::Application::ChangeState(App::CState::Start);
-            }
-            break;
-
-        case APP_CMD_TERM_WINDOW:
-            // -----------------------------------------------------------------------------
-            // The window is being hidden or closed, clean it up.
-            // -----------------------------------------------------------------------------
-            AppSetup->m_TerminateRequested = true;
-            break;
-
-        case APP_CMD_GAINED_FOCUS:
-            // -----------------------------------------------------------------------------
-            // When our app gains focus, we start monitoring the accelerometer.
-            // -----------------------------------------------------------------------------
-            if (AppSetup->m_AccelerometerSensor != NULL) 
-            {
-                ASensorEventQueue_enableSensor(AppSetup->m_SensorEventQueue, AppSetup->m_AccelerometerSensor);
-
+            case APP_CMD_INIT_WINDOW:
                 // -----------------------------------------------------------------------------
-                // We'd like to get 60 events per second (in us).
+                // The window is being shown, get it ready.
                 // -----------------------------------------------------------------------------
-                ASensorEventQueue_setEventRate(AppSetup->m_SensorEventQueue, AppSetup->m_AccelerometerSensor, (1000L / 60) * 1000);
-            }
-            break;
+                if (AppSetup->m_pAndroidApp->window != NULL)
+                {
+                    unsigned int WindowID = Gfx::App::RegisterWindow(AppSetup->m_pAndroidApp->window);
 
-        case APP_CMD_LOST_FOCUS:
-            // -----------------------------------------------------------------------------
-            // When our app loses focus, we stop monitoring the accelerometer.
-            // This is to avoid consuming battery while not being used.
-            // -----------------------------------------------------------------------------
-            if (AppSetup->m_AccelerometerSensor != NULL) 
-            {
-                ASensorEventQueue_disableSensor(AppSetup->m_SensorEventQueue, AppSetup->m_AccelerometerSensor);
-            }
+                    Gfx::App::ActivateWindow(WindowID);
 
-            AppSetup->m_Animating = 0;
-            break;
+                    AppSetup->m_WindowID = WindowID;
+
+                    App::Application::ChangeState(App::CState::Start);
+                }
+                break;
+
+            case APP_CMD_TERM_WINDOW:
+                // -----------------------------------------------------------------------------
+                // The window is being hidden or closed, clean it up.
+                // -----------------------------------------------------------------------------
+                AppSetup->m_TerminateRequested = true;
+                break;
+
+            case APP_CMD_CONTENT_RECT_CHANGED:
+                {
+                    // -----------------------------------------------------------------------------
+                    // The window has changed the rectangle
+                    // -----------------------------------------------------------------------------
+                    ARect Rectangle = AppSetup->m_pAndroidApp->pendingContentRect;
+
+                    int Width  = Base::Abs(Rectangle.left   - Rectangle.right);
+                    int Height = Base::Abs(Rectangle.bottom - Rectangle.top);
+
+                    int Rotation = Core::JNI::GetDeviceRotation();
+
+                    // -----------------------------------------------------------------------------
+                    // Inform all libs
+                    // -----------------------------------------------------------------------------
+                    MR::ControlManager::OnDisplayGeometryChanged(Rotation, Width, Height);
+
+                    Gfx::App::OnResize(AppSetup->m_WindowID, Width, Height);
+                }
+                break;
+
+            case APP_CMD_GAINED_FOCUS:
+                // -----------------------------------------------------------------------------
+                // When our app gains focus, we start monitoring the accelerometer.
+                // -----------------------------------------------------------------------------
+                MR::ControlManager::OnResume();
+
+                if (AppSetup->m_AccelerometerSensor != NULL)
+                {
+                    ASensorEventQueue_enableSensor(AppSetup->m_SensorEventQueue, AppSetup->m_AccelerometerSensor);
+
+                    // -----------------------------------------------------------------------------
+                    // We'd like to get 60 events per second (in us).
+                    // -----------------------------------------------------------------------------
+                    ASensorEventQueue_setEventRate(AppSetup->m_SensorEventQueue, AppSetup->m_AccelerometerSensor, (1000L / 60) * 1000);
+                }
+
+                AppSetup->m_Animating = 1;
+                break;
+
+            case APP_CMD_LOST_FOCUS:
+                // -----------------------------------------------------------------------------
+                // When our app loses focus, we stop monitoring the accelerometer.
+                // This is to avoid consuming battery while not being used.
+                // -----------------------------------------------------------------------------
+                MR::ControlManager::OnPause();
+
+                if (AppSetup->m_AccelerometerSensor != NULL)
+                {
+                    ASensorEventQueue_disableSensor(AppSetup->m_SensorEventQueue, AppSetup->m_AccelerometerSensor);
+                }
+
+                AppSetup->m_Animating = 0;
+                break;
         }
     }
 }

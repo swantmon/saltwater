@@ -70,6 +70,9 @@ namespace IO
             KeyPressed,
             KeyCharPressed,
             KeyReleased,
+            TouchMove,
+            TouchPressed,
+            TouchReleased,
             UndefinedAction = -1,
         };
         
@@ -104,7 +107,8 @@ namespace IO
             KeyD       = Native::s_KeyD      ,
             KeyS       = Native::s_KeyS      ,
             KeyW       = Native::s_KeyW      ,
-            Mouse      = 0x00,
+            Mouse      = 0x00                ,
+            Pointer    = 0x00                ,
         };
         
         enum EKeyModifier
@@ -119,8 +123,8 @@ namespace IO
         
         inline CInputEvent(unsigned int _Type);
         inline CInputEvent(unsigned int _Type, unsigned int _Action, unsigned int _Key, unsigned int _KeyModifier);
-        inline CInputEvent(unsigned int _Type, unsigned int _Action, unsigned int _Key, const Base::Short2& _rCursorPosition);
-        inline CInputEvent(unsigned int _Type, unsigned int _Action, unsigned int _Key, const Base::Short2& _rCursorPosition, int _WheelDelta);
+        inline CInputEvent(unsigned int _Type, unsigned int _Action, unsigned int _Key, const Base::Float2& _rPointerPosition);
+        inline CInputEvent(unsigned int _Type, unsigned int _Action, unsigned int _Key, const Base::Float2& _rPointerPosition, float _WheelDelta);
         inline CInputEvent(const CInputEvent& _rEvent);
         inline ~CInputEvent();
         
@@ -141,9 +145,9 @@ namespace IO
         inline bool HasControl() const;
         inline bool HasModifier() const;
         
-        inline const Base::Short2& GetCursorPosition() const;
+        inline const Base::Float2& GetCursorPosition() const;
         
-        inline int GetWheelDelta() const;
+        inline float GetWheelDelta() const;
         
     private:
         
@@ -157,17 +161,17 @@ namespace IO
         
     private:
         
-        SBits         m_Bits;
-        Base::Short2 m_CursorPosition;
-        int           m_WheelDelta;
+        SBits        m_Bits;
+        Base::Float2 m_PointerPosition;
+        float        m_WheelDelta;
     };
 } // namespace IO
 
 namespace IO
 {
     inline CInputEvent::CInputEvent(unsigned int _Type)
-    : m_CursorPosition(-1, -1)
-    , m_WheelDelta    (0)
+        : m_PointerPosition(-1, -1)
+        , m_WheelDelta    (0)
     {
         m_Bits.m_Action      = 0;
         m_Bits.m_Key         = 0;
@@ -178,8 +182,8 @@ namespace IO
     // -----------------------------------------------------------------------------
     
     inline CInputEvent::CInputEvent(unsigned int _Type, unsigned int _Action, unsigned int _Key, unsigned int _KeyCombo)
-    : m_CursorPosition(-1, -1)
-    , m_WheelDelta    (0)
+        : m_PointerPosition(-1, -1)
+        , m_WheelDelta    (0)
     {
         m_Bits.m_Action      = _Action;
         m_Bits.m_Key         = _Key;
@@ -189,9 +193,9 @@ namespace IO
     
     // -----------------------------------------------------------------------------
     
-    inline CInputEvent::CInputEvent(unsigned int _Type, unsigned int _Action, unsigned int _Key, const Base::Short2& _rCursorPosition)
-    : m_CursorPosition(_rCursorPosition)
-    , m_WheelDelta    (0)
+    inline CInputEvent::CInputEvent(unsigned int _Type, unsigned int _Action, unsigned int _Key, const Base::Float2& _rPointerPosition)
+        : m_PointerPosition(_rPointerPosition)
+        , m_WheelDelta    (0)
     {
         m_Bits.m_Type        = _Type;
         m_Bits.m_Action      = _Action;
@@ -201,9 +205,9 @@ namespace IO
     
     // -----------------------------------------------------------------------------
     
-    inline CInputEvent::CInputEvent(unsigned int _Type, unsigned int _Action, unsigned int _Key, const Base::Short2& _rCursorPosition, int _WheelDelta)
-    : m_CursorPosition(_rCursorPosition)
-    , m_WheelDelta    (_WheelDelta)
+    inline CInputEvent::CInputEvent(unsigned int _Type, unsigned int _Action, unsigned int _Key, const Base::Float2& _rPointerPosition, float _WheelDelta)
+        : m_PointerPosition(_rPointerPosition)
+        , m_WheelDelta    (_WheelDelta)
     {
         m_Bits.m_Type        = _Type;
         m_Bits.m_Action      = _Action;
@@ -214,8 +218,8 @@ namespace IO
     // -----------------------------------------------------------------------------
     
     inline CInputEvent::CInputEvent(const CInputEvent& _rEvent)
-    : m_CursorPosition(_rEvent.m_CursorPosition)
-    , m_WheelDelta    (_rEvent.m_WheelDelta)
+        : m_PointerPosition(_rEvent.m_PointerPosition)
+        , m_WheelDelta    (_rEvent.m_WheelDelta)
     {
         m_Bits.m_Type        = _rEvent.m_Bits.m_Type;
         m_Bits.m_Action      = _rEvent.m_Bits.m_Action;
@@ -237,7 +241,7 @@ namespace IO
         m_Bits.m_Action      = _rEvent.m_Bits.m_Action;
         m_Bits.m_Key         = _rEvent.m_Bits.m_Key;
         m_Bits.m_KeyModifier = _rEvent.m_Bits.m_KeyModifier;
-        m_CursorPosition     = _rEvent.m_CursorPosition;
+        m_PointerPosition    = _rEvent.m_PointerPosition;
         m_WheelDelta         = _rEvent.m_WheelDelta;
         
         return *this;
@@ -294,14 +298,14 @@ namespace IO
     
     // -----------------------------------------------------------------------------
     
-    inline const Base::Short2& CInputEvent::GetCursorPosition() const
+    inline const Base::Float2& CInputEvent::GetCursorPosition() const
     {
-        return m_CursorPosition;
+        return m_PointerPosition;
     }
     
     // -----------------------------------------------------------------------------
     
-    inline int CInputEvent::GetWheelDelta() const
+    inline float CInputEvent::GetWheelDelta() const
     {
         return m_WheelDelta;
     }

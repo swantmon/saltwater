@@ -17,6 +17,7 @@ namespace Cam
     void SetFieldOfView(float _FOVY, float _Near, float _Far);
     void SetPerspective(float _Left, float _Right, float _Bottom, float _Top, float _Near, float _Far);
     void SetOrthographic(float _Left, float _Right, float _Bottom, float _Top, float _Near, float _Far);
+    void SetProjectionMatrix(const Base::Float4x4& _rProjectionMatrix, float _Near, float _Far);
 
     void SetBackgroundColor(Base::Float3& _rBackgroundColor);
     const Base::Float3& GetBackgroundColor();
@@ -58,6 +59,8 @@ namespace Cam
 
     void SetViewMatrix(const Base::Float4x4& _rViewMatrix);
     const Base::Float4x4& GetViewMatrix();
+
+    const Base::Float4x4& GetProjectionMatrix();
 
     // -----------------------------------------------------------------------------
     // Manager

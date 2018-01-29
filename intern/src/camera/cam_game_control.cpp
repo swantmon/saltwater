@@ -104,28 +104,6 @@ namespace Cam
                 
                 Gfx::Cam::SetOrthographic(Left, Right, Bottom, Top, pCameraFacet->GetNear(), pCameraFacet->GetFar());
             }
-            else if (pCameraFacet->GetProjectionType() == Dt::CCameraActorFacet::RAW)
-            {
-                Base::Float4x4 ProjectionMatrix(Base::Float3x3::s_Identity);
-
-                float Near = pCameraFacet->GetNear();
-                float Far  = pCameraFacet->GetFar();
-
-                ProjectionMatrix.SetRHPerspective(Near, Far, pCameraFacet->GetProjectionMatrix());
-
-                // -----------------------------------------------------------------------------
-                // Decompose left, right, top, bottom, near and far from projection
-                // matrix:
-                // Near = ProjectionMatrix[2][3] / (ProjectionMatrix[2][2] - 1);
-                // Far  = ProjectionMatrix[2][3] / (ProjectionMatrix[2][2] + 1);
-                // -----------------------------------------------------------------------------
-                float Bottom = Near * (ProjectionMatrix[1][2] - 1.0f) / ProjectionMatrix[1][1];
-                float Top    = Near * (ProjectionMatrix[1][2] + 1.0f) / ProjectionMatrix[1][1];
-                float Left   = Near * (ProjectionMatrix[0][2] - 1.0f) / ProjectionMatrix[0][0];
-                float Right  = Near * (ProjectionMatrix[0][2] + 1.0f) / ProjectionMatrix[0][0];
-
-                Gfx::Cam::SetPerspective(Left, Right, Bottom, Top, Near, Far);
-            }
 
             // -----------------------------------------------------------------------------
             // Camera mode + variables
@@ -162,6 +140,13 @@ namespace Cam
     
     void CGameControl::InternUpdate()
     {
+        if (m_pMainCameraEntity != 0)
+        {
+            Dt::CCameraActorFacet* pCameraFacet = static_cast<Dt::CCameraActorFacet*>(m_pMainCameraEntity->GetDetailFacet(Dt::SFacetCategory::Data));
+
+            if (pCameraFacet->GetProjectionType() == Dt::CCameraActorFacet::External) return;
+        }
+
         Gfx::Cam::SetPosition(m_Position);
         Gfx::Cam::SetRotationMatrix(m_RotationMatrix);
 

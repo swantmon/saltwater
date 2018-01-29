@@ -172,6 +172,46 @@ namespace Gfx
         m_ProjectionMatrix.SetRHOrthographic(_Left, _Right, _Bottom, _Top, _Near, _Far);
     }
 
+    // --------------------------------------------------------------------------------
+
+    void CCamera::SetProjectionMatrix(const Base::Float4x4& _rProjectionMatrix, float _Near, float _Far)
+    {
+        m_ProjectionMatrix = _rProjectionMatrix;
+
+        // -----------------------------------------------------------------------------
+        // Decompose left, right, top, bottom, near and far from projection
+        // matrix:
+        // Near = ProjectionMatrix[2][3] / (ProjectionMatrix[2][2] - 1);
+        // Far  = ProjectionMatrix[2][3] / (ProjectionMatrix[2][2] + 1);
+        // -----------------------------------------------------------------------------
+        float Bottom = _Near * (m_ProjectionMatrix[1][2] - 1.0f) / m_ProjectionMatrix[1][1];
+        float Top    = _Near * (m_ProjectionMatrix[1][2] + 1.0f) / m_ProjectionMatrix[1][1];
+        float Left   = _Near * (m_ProjectionMatrix[0][2] - 1.0f) / m_ProjectionMatrix[0][0];
+        float Right  = _Near * (m_ProjectionMatrix[0][2] + 1.0f) / m_ProjectionMatrix[0][0];
+
+        // --------------------------------------------------------------------------------
+        // Save the dimensions.
+        // --------------------------------------------------------------------------------
+        m_Left   = Left;
+        m_Right  = Right;
+        m_Bottom = Bottom;
+        m_Top    = Top;
+        m_Near   = _Near;
+        m_Far    = _Far;
+
+        // --------------------------------------------------------------------------------
+        // Compute the cubic view frustum in object space coordinates.
+        // --------------------------------------------------------------------------------
+        m_ObjectSpaceFrustum[SFace::Near | SFace::Left  | SFace::Bottom] = Base::Float3(Left , Bottom, -_Near);
+        m_ObjectSpaceFrustum[SFace::Near | SFace::Left  | SFace::Top   ] = Base::Float3(Left , Top   , -_Near);
+        m_ObjectSpaceFrustum[SFace::Near | SFace::Right | SFace::Bottom] = Base::Float3(Right, Bottom, -_Near);
+        m_ObjectSpaceFrustum[SFace::Near | SFace::Right | SFace::Top   ] = Base::Float3(Right, Top   , -_Near);
+        m_ObjectSpaceFrustum[SFace::Far  | SFace::Left  | SFace::Bottom] = Base::Float3(Left , Bottom, -_Far );
+        m_ObjectSpaceFrustum[SFace::Far  | SFace::Left  | SFace::Top   ] = Base::Float3(Left , Top   , -_Far );
+        m_ObjectSpaceFrustum[SFace::Far  | SFace::Right | SFace::Bottom] = Base::Float3(Right, Bottom, -_Far );
+        m_ObjectSpaceFrustum[SFace::Far  | SFace::Right | SFace::Top   ] = Base::Float3(Right, Top   , -_Far );
+    }
+
     // -----------------------------------------------------------------------------
 
     void CCamera::SetAspectRatio(float _Aspect)

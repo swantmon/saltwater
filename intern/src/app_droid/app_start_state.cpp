@@ -6,11 +6,15 @@
 
 #include "camera/cam_control_manager.h"
 
+#include "core/core_jni_interface.h"
+
 #include "graphic/gfx_start_state.h"
 
 #include "gui/gui_start_state.h"
 
 #include "logic/lg_start_state.h"
+
+#include "mr/mr_control_manager.h"
 
 namespace App
 {
@@ -53,6 +57,19 @@ namespace App
         Lg ::Start::OnEnter();
         Gui::Start::OnEnter();
         Gfx::Start::OnEnter();
+
+        // -----------------------------------------------------------------------------
+        // Setup mixed reality
+        // -----------------------------------------------------------------------------
+        MR::ControlManager::SConfiguration Config;
+
+        Config.m_pEnv     = Core::JNI::GetJavaEnvironment();
+        Config.m_pContext = Core::JNI::GetContext();
+        Config.m_Rotation = static_cast<MR::ControlManager::SConfiguration::EDisplayRotation>(Core::JNI::GetDeviceRotation());
+        Config.m_Width    = Core::JNI::GetDeviceDimension()[0];
+        Config.m_Height   = Core::JNI::GetDeviceDimension()[1];
+
+        MR::ControlManager::OnStart(Config);
     }
 
     // -----------------------------------------------------------------------------

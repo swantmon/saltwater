@@ -19,6 +19,7 @@ namespace Dt
         {
             Skybox,
             Texture,
+            Webcam,
             SolidColor,
             DepthOnly,
             DontClear,
@@ -28,7 +29,7 @@ namespace Dt
         {
             Perspective,
             Orthographic,
-            RAW,
+            External,
         };
 
         enum ECameraMode
