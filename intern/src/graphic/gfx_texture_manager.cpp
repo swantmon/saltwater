@@ -61,8 +61,8 @@ namespace
 
         CTexturePtr GetTextureByHash(unsigned int _Hash);
 
-        void ClearTexture2D(CTexturePtr _TexturePtr, const Base::Float4& _rColor);
-        void ClearTexture3D(CTexturePtr _TexturePtr, const Base::Float4& _rColor);
+        void ClearTextureLayer(CTexturePtr _TexturePtr, const void* _pData, int _Layer);
+        void ClearTexture(CTexturePtr _TexturePtr, const void* _pData);
 
         void CopyToTexture2D(CTexturePtr _TexturePtr, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, void* _pBytes, bool _UpdateMipLevels);
         void CopyToTextureArray2D(CTexturePtr _TextureArrayPtr, unsigned int _IndexOfSlice, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, void* _pBytes, bool _UpdateMipLevels);
@@ -371,22 +371,79 @@ namespace
     
     // -----------------------------------------------------------------------------
 
-    void CGfxTextureManager::ClearTexture2D(CTexturePtr _TexturePtr, const Base::Float4& _rColor)
+    void CGfxTextureManager::ClearTextureLayer(CTexturePtr _TexturePtr, const void* _pData, int _Layer)
     {
-        assert(false); //TODO: implement
+#ifdef __ANDROID__
+        BASE_CONSOLE_ERROR("Clearing textures is currently not supported on Android");
+        assert(false); // TODO: implement
+#else
+        // TODO: Remove dummy
+        // Renderdoc crashes when _pData is nullptr but OpenGL allows NULL
+        // Therefore we create a dummy value until Renderdoc is fixed
 
-        BASE_UNUSED(_TexturePtr);
-        BASE_UNUSED(_rColor);
+        Base::Int4 Dummy = Base::Int4(0);
+
+        if (_pData == nullptr)
+        {
+            _pData = &Dummy;
+        }
+
+        CInternTexture* pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
+        Gfx::CNativeTextureHandle TextureHandle = pInternTexture->m_NativeTexture;
+        
+        assert(_Layer <= static_cast<int>(pInternTexture->GetNumberOfTextures()));
+
+        const int Format = ConvertGLImageFormat(_TexturePtr->GetFormat());
+        const int Type = ConvertGLImageType(_TexturePtr->GetFormat());
+        
+        const int Width = pInternTexture->GetNumberOfPixelsU();
+        const int Height = pInternTexture->GetNumberOfPixelsV();
+
+        const int MipLevels = pInternTexture->GetNumberOfMipLevels();
+
+        for (int MipIndex = 0; MipIndex < MipLevels; ++ MipIndex)
+        {
+            glClearTexSubImage(TextureHandle, MipIndex, 0, 0, _Layer, Width >> MipIndex, Height >> MipIndex, 1, Format, Type, _pData);
+        }
+#endif // __ANDROID__
     }
-
+    
     // -----------------------------------------------------------------------------
 
-    void CGfxTextureManager::ClearTexture3D(CTexturePtr _TexturePtr, const Base::Float4& _rColor)
+    void CGfxTextureManager::ClearTexture(CTexturePtr _TexturePtr, const void* _pData)
     {
-        assert(false); //TODO: implement
+#ifdef __ANDROID__
+        BASE_CONSOLE_ERROR("Clearing textures is currently not supported on Android");
+        assert(false); // TODO: implement
+#else
+        // TODO: Remove dummy
+        // Renderdoc crashes when _pData is nullptr but OpenGL allows NULL
+        // Therefore we create a dummy value until Renderdoc is fixed
 
-        BASE_UNUSED(_TexturePtr);
-        BASE_UNUSED(_rColor);
+        Base::Int4 Dummy = Base::Int4(0);
+
+        if (_pData == nullptr)
+        {
+            _pData = &Dummy;
+        }
+
+        CInternTexture* pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
+        Gfx::CNativeTextureHandle TextureHandle = pInternTexture->m_NativeTexture;
+
+        const int Format = ConvertGLImageFormat(_TexturePtr->GetFormat());
+        const int Type = ConvertGLImageType(_TexturePtr->GetFormat());
+
+        const int Width = pInternTexture->GetNumberOfPixelsU();
+        const int Height = pInternTexture->GetNumberOfPixelsV();
+        const int LayerCount = pInternTexture->GetNumberOfTextures();
+
+        const int MipLevels = pInternTexture->GetNumberOfMipLevels();
+
+        for (int MipIndex = 0; MipIndex < MipLevels; ++MipIndex)
+        {
+            glClearTexSubImage(TextureHandle, MipIndex, 0, 0, 0, Width >> MipIndex, Height >> MipIndex, LayerCount, Format, Type, _pData);
+        }
+#endif // __ANDROID__
     }
 
     // -----------------------------------------------------------------------------
@@ -2474,18 +2531,18 @@ namespace TextureManager
     
     // -----------------------------------------------------------------------------
 
-    void ClearTexture2D(CTexturePtr _TexturePtr, const Base::Float4& _rColor)
+    void ClearTextureLayer(CTexturePtr _TexturePtr, const void* _pData, int _Layer)
     {
-        CGfxTextureManager::GetInstance().ClearTexture2D(_TexturePtr, _rColor);
+        CGfxTextureManager::GetInstance().ClearTextureLayer(_TexturePtr, _pData, _Layer);
     }
 
     // -----------------------------------------------------------------------------
 
-    void ClearTexture3D(CTexturePtr _TexturePtr, const Base::Float4& _rColor)
+    void ClearTexture(CTexturePtr _TexturePtr, const void* _pData)
     {
-        CGfxTextureManager::GetInstance().ClearTexture3D(_TexturePtr, _rColor);
+        CGfxTextureManager::GetInstance().ClearTexture(_TexturePtr, _pData);
     }
-
+    
     // -----------------------------------------------------------------------------
 
     void CopyToTexture2D(CTexturePtr _TexturePtr, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, void* _pBytes, bool _UpdateMipLevels)

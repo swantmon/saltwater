@@ -3,7 +3,10 @@
 
 #include "base/base_program_parameters.h"
 
-#include <algorithm> 
+#include "json.hpp"
+using json = nlohmann::json;
+
+#include <algorithm>
 #include <cctype>
 #include <fstream>
 #include <sstream>
@@ -22,6 +25,7 @@ namespace IO
 namespace IO
 {
     CProgramParameters::CProgramParameters()
+        : m_ParsingFailed(false)
     {
     }
 
@@ -43,19 +47,26 @@ namespace IO
 
     void CProgramParameters::ParseFile(const std::string& _rFile)
     {
-        std::ifstream File(_rFile.c_str());
+        std::ifstream JSONFile(_rFile.c_str());
 
-        if (File.is_open())
+        if (JSONFile.is_open())
         {
-            std::string FileContent((std::istreambuf_iterator<char>(File)), std::istreambuf_iterator<char>());
+            std::string FileContent((std::istreambuf_iterator<char>(JSONFile)), std::istreambuf_iterator<char>());
 
-            InternParseString(FileContent, '\n');
+            if (FileContent.length() > 0)
+            {
+                InternParseJSONString(FileContent);
+            }
+            else
+            {
+                BASE_CONSOLE_WARNINGV("Config file %s exists but is empty!", _rFile.c_str());
+            }
 
-            File.close();
+            JSONFile.close();
         }
         else
         {
-            BASE_CONSOLE_WARNINGV("Config file %s does not exists!", _rFile.c_str());
+            BASE_CONSOLE_WARNINGV("Config file %s does not exist!", _rFile.c_str());
         }
     }
 
@@ -63,22 +74,38 @@ namespace IO
 
     void CProgramParameters::WriteFile(const std::string& _rFile)
     {
-        std::ofstream File(_rFile.c_str());
-
-        if (File.is_open())
+        if (m_ParsingFailed)
         {
-            File.clear();
-
-            for (auto& rElement : m_Container)
-            {
-                File << rElement.first << " = " << rElement.second << std::endl;
-            }
-
-            File.close();
+            std::string Error = "The config file " + _rFile + " could not be parsed\nFix the JSON syntax error or delete the file to create a default config";
+            BASE_CONSOLE_ERROR(Error.c_str());
         }
         else
         {
-            BASE_CONSOLE_ERRORV("Save file %s could not be opened.", _rFile.c_str());
+            std::ofstream JSONFile(_rFile.c_str());
+
+            if (JSONFile.is_open())
+            {
+                json FileContent = json::object({});
+
+                for (auto& rElement : m_Container)
+                {
+                    FileContent.push_back({ ConfigStringToJSON(rElement.first), rElement.second });
+                }
+
+                /////////////////////////////////////////////////////////////////////////////////////////
+                // Now we iterate over the deques and add names as json objects and values at the end
+                /////////////////////////////////////////////////////////////////////////////////////////
+
+                JSONFile.clear();
+
+                JSONFile << FileContent.unflatten().dump(4);
+
+                JSONFile.close();
+            }
+            else
+            {
+                BASE_CONSOLE_ERRORV("Save file %s could not be opened.", _rFile.c_str());
+            }
         }
     }
 
@@ -257,7 +284,15 @@ namespace IO
 
     bool CProgramParameters::HasParameter(const std::string& _rOption)
     {
-        return m_Container.find(_rOption) != m_Container.end();
+        if (m_Container.find(_rOption) != m_Container.end())
+        {
+            return true;
+        }
+        else
+        {
+            BASE_CONSOLE_INFO((std::string("Creating new config parameter ") + _rOption).c_str());
+            return false;
+        }
     }
 
     // -----------------------------------------------------------------------------
@@ -312,4 +347,52 @@ namespace IO
             AddParameter(Option, Value);
         }
     }
+
+    // -----------------------------------------------------------------------------
+
+    void CProgramParameters::InternParseJSONString(const std::string& _rString)
+    {
+        json FileContent;
+        try
+        {
+            FileContent = json::parse(_rString);
+        }
+        catch (json::parse_error& e)
+        {
+            std::string Error = "Error parsing config file:\nWill use default values instead\n";
+            Error += e.what();
+            BASE_CONSOLE_ERROR(Error.c_str());
+            m_ParsingFailed = true;
+            return;
+        }
+
+        FileContent = FileContent.flatten();
+
+        for (auto Iterator = FileContent.begin(); Iterator != FileContent.end(); ++ Iterator)
+        {
+            std::string Option = JSONStringToConfig(Iterator.key());
+            std::string Value = Iterator.value();
+            AddParameter(Option, Value);
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    std::string CProgramParameters::ConfigStringToJSON(const std::string& _rString)
+    {
+        std::string String = _rString;
+        std::replace(String.begin(), String.end(), ':', '/');
+        return '/' + String;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    std::string CProgramParameters::JSONStringToConfig(const std::string& _rString)
+    {
+        std::string String = _rString;
+        String.erase(String.begin());
+        std::replace(String.begin(), String.end(), '/', ':');
+        return String;
+    }
+
 } // namespace IO

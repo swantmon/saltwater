@@ -73,7 +73,12 @@ namespace IO
     private:
 
         void InternParseString(const std::string& _rString, const char _Delimiter);
-    
+
+        void InternParseJSONString(const std::string& _rString);
+        std::string ConfigStringToJSON(const std::string& _rString);
+        std::string JSONStringToConfig(const std::string& _rString);
+
+        bool m_ParsingFailed;
     };
 } // namespace IO
 
