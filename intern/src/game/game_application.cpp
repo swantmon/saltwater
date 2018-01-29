@@ -58,7 +58,7 @@ namespace
     private:
         
         Game::CState::EStateType m_CurrentState;
-        Base::Short2             m_LatestMousePosition;
+        Base::Float2             m_LatestMousePosition;
         SDL_Window*              m_pWindow;
         unsigned int             m_GameWindowID;
         
@@ -89,7 +89,7 @@ namespace
 {
     CApplication::CApplication()
         : m_CurrentState       (Game::CState::Start)
-        , m_LatestMousePosition(Base::Short2(0, 0))
+        , m_LatestMousePosition(Base::Float2(0, 0))
         , m_pWindow            (nullptr)
         , m_GameWindowID       (0)
     {
