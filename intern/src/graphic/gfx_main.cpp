@@ -249,7 +249,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Load pixel matching behavior
         // -----------------------------------------------------------------------------
-        m_GraphicsInfo.m_PixelMatching = static_cast<CInternGraphicsInfo::EPixelMatching>(Base::CProgramParameters::GetInstance().GetInt("graphics:pixel_matching:enable", 0));
+        m_GraphicsInfo.m_PixelMatching = static_cast<CInternGraphicsInfo::EPixelMatching>(Base::CProgramParameters::GetInstance().GetInt("graphics:pixel_matching:type", 0));
     }
     
     // -----------------------------------------------------------------------------
