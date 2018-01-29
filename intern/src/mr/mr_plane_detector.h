@@ -30,6 +30,8 @@ namespace MR
         void CreateHistogram(const Base::Float4x4& _PoseMatrix);
         void ExtractPlanes();
 
+        void ClearData();
+
     private:
 
         Gfx::CTexturePtr m_VertexMap;
@@ -37,6 +39,7 @@ namespace MR
         Gfx::CTexturePtr m_NormalHistogram;
 
         Gfx::CBufferPtr m_HistogramConstantBuffer;
+        Gfx::CBufferPtr m_PlaneBuffer;
 
         Gfx::CShaderPtr m_HistogramCreationCSPtr;
         Gfx::CShaderPtr m_PlaneExtractionCSPtr;

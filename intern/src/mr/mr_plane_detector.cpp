@@ -27,6 +27,8 @@ namespace
 {
     Base::Int2 g_HistogramSize = Base::Int2(128, 128);
 
+    const int g_MaxDetectablePlanes = 5;
+
     int DivUp(int TotalShaderCount, int WorkGroupSize)
     {
         return (TotalShaderCount + WorkGroupSize - 1) / WorkGroupSize;
@@ -65,6 +67,8 @@ namespace MR
 
         Performance::BeginDurationEvent("Plane Detection");
 
+        ClearData();
+
         Performance::BeginDurationEvent("Histogram Creation");
         CreateHistogram(_PoseMatrix);
         Performance::EndEvent();
@@ -101,9 +105,7 @@ namespace MR
         // "Histogram of Oriented Normal Vectors for Object Recognition with a Depth Sensor" (HONV)
         // We use the lowest resolution of the pyramid
         //////////////////////////////////////////////////////////////////////////////////////
-
-        TextureManager::ClearTexture(m_NormalHistogram);
-
+        
         const int WorkGroupsX = DivUp(m_VertexMap->GetNumberOfPixelsU(), g_TileSize2D);
         const int WorkGroupsY = DivUp(m_VertexMap->GetNumberOfPixelsV(), g_TileSize2D);
 
@@ -121,6 +123,16 @@ namespace MR
         ContextManager::SetImageTexture(1, m_VertexMap);
         ContextManager::SetImageTexture(2, m_NormalMap);
         ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CPlaneDetector::ClearData()
+    {
+        TextureManager::ClearTexture(m_NormalHistogram);
+
+        int Counter = 0;
+        BufferManager::UploadBufferData(m_PlaneBuffer, &Counter, 0, sizeof(int32_t)); // Just set counter to 0
     }
 
     // -----------------------------------------------------------------------------
@@ -167,17 +179,21 @@ namespace MR
         // Create Buffers
         //////////////////////////////////////////////////////////////////////////
 
-        SBufferDescriptor ConstantBufferDesc = {};
+        SBufferDescriptor BufferDesc = {};
 
-        ConstantBufferDesc.m_Stride = 0;
-        ConstantBufferDesc.m_Usage = CBuffer::EUsage::GPURead;
-        ConstantBufferDesc.m_Binding = CBuffer::ConstantBuffer;
-        ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
-        ConstantBufferDesc.m_NumberOfBytes = sizeof(SHistogramMetaBuffer);
-        ConstantBufferDesc.m_pBytes = nullptr;
-        ConstantBufferDesc.m_pClassKey = 0;
+        BufferDesc.m_Usage = CBuffer::EUsage::GPURead;
+        BufferDesc.m_Binding = CBuffer::ConstantBuffer;
+        BufferDesc.m_Access = CBuffer::CPUWrite;
+        BufferDesc.m_NumberOfBytes = sizeof(SHistogramMetaBuffer);
 
-        m_HistogramConstantBuffer = BufferManager::CreateBuffer(ConstantBufferDesc);
+        m_HistogramConstantBuffer = BufferManager::CreateBuffer(BufferDesc);
+
+        BufferDesc.m_Usage = CBuffer::EUsage::GPUToCPU;
+        BufferDesc.m_Binding = CBuffer::ResourceBuffer;
+        BufferDesc.m_Access = CBuffer::EAccess::CPUReadWrite;
+        BufferDesc.m_NumberOfBytes = (g_MaxDetectablePlanes + 1) * sizeof(Base::Float4); // + 1 because of some meta data
+
+        m_PlaneBuffer = BufferManager::CreateBuffer(BufferDesc);
 
         //////////////////////////////////////////////////////////////////////////
         // Create Textures

@@ -2,18 +2,12 @@
 #ifndef __INCLUDE_CS_PLANE_EXTRACTION_GLSL__
 #define __INCLUDE_CS_PLANE_EXTRACTION_GLSL__
 
-layout(row_major, std140, binding = 0) uniform HistogramSizes
+layout(std430, binding = 0) buffer ExtractedPlanes
 {
-    mat4 g_PoseMatrix;
-    int g_AzimuthBinCount;
-    int g_InclinationBinCount;
-    int g_Unused0;
-    int g_Unused1;
+    int g_PlaneCount;
+    ivec3 Padding;
+    vec4 g_Planes[];
 };
-
-const float g_Tau = 6.28318530718f;
-const float g_Pi = g_Tau * 0.5f;
-const int g_KernelSize = 3;
 
 // -----------------------------------------------------------------------------
 // Input from engine
