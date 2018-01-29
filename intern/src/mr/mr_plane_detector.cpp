@@ -66,7 +66,7 @@ namespace MR
         Performance::BeginDurationEvent("Plane Detection");
 
         Performance::BeginDurationEvent("Histogram Creation");
-        RenderHistogram(_PoseMatrix);
+        CreateHistogram(_PoseMatrix);
         Performance::EndEvent();
 
         Performance::BeginDurationEvent("Plane Extraction");
@@ -78,14 +78,23 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void ExtractPlanes()
+    void CPlaneDetector::ExtractPlanes()
     {
+        const int WorkGroupsX = DivUp(g_HistogramSize[0], g_TileSize2D);
+        const int WorkGroupsY = DivUp(g_HistogramSize[1], g_TileSize2D);
+
+        ContextManager::Barrier();
         
+        ContextManager::SetShaderCS(m_PlaneExtractionCSPtr);
+        ContextManager::SetImageTexture(0, m_NormalHistogram);
+        ContextManager::SetImageTexture(1, m_VertexMap);
+        ContextManager::SetImageTexture(2, m_NormalMap);
+        ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
     }
 
     // -----------------------------------------------------------------------------
 
-    void CPlaneDetector::RenderHistogram(const Base::Float4x4& _PoseMatrix)
+    void CPlaneDetector::CreateHistogram(const Base::Float4x4& _PoseMatrix)
     {
         //////////////////////////////////////////////////////////////////////////////////////
         // Create a 2D-Histogram based on the inclination and the azimuth of the normals
@@ -152,7 +161,7 @@ namespace MR
         std::string DefineString = DefineStream.str();
 
         m_HistogramCreationCSPtr = ShaderManager::CompileCS("scalable_kinect_fusion\\plane_detection\\cs_histogram_creation.glsl", "main", DefineString.c_str());
-        m_PlaneExtractionCSPtr = ShaderManager::CompileCS("scalable_kinect_fusion\\plane_detection\\cs_plane_extraction.glsl", "main", DefineString.c_str());
+        m_PlaneExtractionCSPtr =   ShaderManager::CompileCS("scalable_kinect_fusion\\plane_detection\\cs_plane_extraction.glsl"  , "main", DefineString.c_str());
 
         //////////////////////////////////////////////////////////////////////////
         // Create Buffers

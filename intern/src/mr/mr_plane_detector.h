@@ -27,7 +27,7 @@ namespace MR
 
 	private:
 
-        void RenderHistogram(const Base::Float4x4& _PoseMatrix);
+        void CreateHistogram(const Base::Float4x4& _PoseMatrix);
         void ExtractPlanes();
 
     private:

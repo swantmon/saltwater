@@ -33,37 +33,7 @@ void main()
     const int x = int(gl_GlobalInvocationID.x);
     const int y = int(gl_GlobalInvocationID.y);
     
-    vec3 Normal = vec3(0.0f);
-    int Count = 0;
-    
-    for (int i = -g_KernelSize; i <= g_KernelSize; ++ i)
-    {
-        for (int j = -g_KernelSize; j <= g_KernelSize; ++ j)
-        {
-            vec3 Sample = imageLoad(cs_NormalMap, ivec2(x + i, y + j)).xyz;
-            
-            if (Sample.x != 0.0f)
-            {
-                ++ Count;
-                Normal += Sample;
-            }
-        }
-    }
-    
-    if (Count > 0)
-    {
-        Normal /= Count;
-    
-        Normal = mat3(g_PoseMatrix) * Normal;
-
-        float Azimuth = atan(Normal.y, Normal.x);
-        float Inclination = acos(Normal.z);
-        
-        int AzimuthBin = int((Azimuth / g_Tau + 0.5f) * g_AzimuthBinCount);
-        int InclinationBinY = int((Inclination / g_Pi) * g_InclinationBinCount);
-    
-        imageAtomicAdd(cs_Histogram, ivec2(AzimuthBin, InclinationBinY), 1);
-    }
+    int Count = imageLoad(cs_Histogram, ivec2(x, y)).x;
 }
 
 #endif // __INCLUDE_CS_PLANE_EXTRACTION_GLSL__
