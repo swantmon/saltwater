@@ -53,8 +53,6 @@ namespace MR
 
     void CPlaneDetector::DetectPlanes(const Base::Float4x4& _PoseMatrix, Gfx::CTexturePtr _VertexMap, Gfx::CTexturePtr _NormalMap)
     {
-        Performance::BeginDurationEvent("Plane Detection");
-
         if (_VertexMap != nullptr && _NormalMap != nullptr)
         {
             m_VertexMap = _VertexMap;
@@ -65,6 +63,19 @@ namespace MR
         assert(m_VertexMap->GetNumberOfPixelsU() == m_NormalMap->GetNumberOfPixelsU() &&
                m_VertexMap->GetNumberOfPixelsV() == m_NormalMap->GetNumberOfPixelsV());
 
+        Performance::BeginDurationEvent("Plane Detection");
+
+        Performance::BeginDurationEvent("Histogram Creation");
+        RenderHistogram(_PoseMatrix);
+        Performance::EndEvent();
+
+        Performance::EndEvent();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CPlaneDetector::RenderHistogram(const Base::Float4x4& _PoseMatrix)
+    {
         TextureManager::ClearTexture(m_NormalHistogram);
 
         //////////////////////////////////////////////////////////////////////////////////////
@@ -72,7 +83,7 @@ namespace MR
         // "Histogram of Oriented Normal Vectors for Object Recognition with a Depth Sensor" (HONV)
         // We use the lowest resolution of the pyramid
         //////////////////////////////////////////////////////////////////////////////////////
-        
+
         const int WorkGroupsX = DivUp(m_VertexMap->GetNumberOfPixelsU(), g_TileSize2D);
         const int WorkGroupsY = DivUp(m_VertexMap->GetNumberOfPixelsV(), g_TileSize2D);
 
@@ -90,8 +101,6 @@ namespace MR
         ContextManager::SetImageTexture(1, m_VertexMap);
         ContextManager::SetImageTexture(2, m_NormalMap);
         ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
-
-        Performance::EndEvent();
     }
 
     // -----------------------------------------------------------------------------

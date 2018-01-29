@@ -27,6 +27,10 @@ namespace MR
 
 	private:
 
+        void RenderHistogram(const Base::Float4x4& _PoseMatrix);
+
+    private:
+
         Gfx::CTexturePtr m_VertexMap;
         Gfx::CTexturePtr m_NormalMap;
         Gfx::CTexturePtr m_NormalHistogram;
