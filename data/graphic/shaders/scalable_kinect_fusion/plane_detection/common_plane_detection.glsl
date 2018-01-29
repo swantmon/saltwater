@@ -2,6 +2,10 @@
 #ifndef __INCLUDE_COMMON_PLANE_DETECTION_GLSL__
 #define __INCLUDE_COMMON_PLANE_DETECTION_GLSL__
 
+const float g_Tau = 6.28318530718f;
+const float g_Pi = g_Tau * 0.5f;
+const int g_KernelSize = 3;
+
 // Functions to convert between cartesian and spherical coordinates
 // r in spherical is always 1 when the normal is normalized
 
@@ -25,6 +29,22 @@ vec3 SphericalToCartesian(vec2 Spherical)
     Normal.z = cos(Inclination);
 
     return Normal;
+}
+
+ivec2 SphericalToBin(float Azimuth, float Inclination, int AzimuthBinCount, int InclinationBinCount)
+{
+    int AzimuthBin = int((Azimuth / g_Tau + 0.5f) * AzimuthBinCount);
+    int InclinationBin = int((Inclination / g_Pi) * InclinationBinCount);
+
+    return ivec2(AzimuthBin, InclinationBin);
+}
+
+vec2 BinToSpherical(ivec2 Bin, int AzimuthBinCount, int InclinationBinCount)
+{
+    float Azimuth = (float(Bin.x) / AzimuthBinCount - 0.5f) * g_Tau;
+    float Inclination = (float(Bin.y) / InclinationBinCount) * g_Pi;
+
+    return vec2(Azimuth, Inclination);
 }
 
 #endif // __INCLUDE_COMMON_PLANE_DETECTION_GLSL__
