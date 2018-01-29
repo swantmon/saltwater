@@ -43,11 +43,6 @@ layout(location = 0) out vec4 out_Output;
 void main(void)
 {
     // -----------------------------------------------------------------------------
-    // TexCoord for kinect textures
-    // -----------------------------------------------------------------------------
-    vec2 UV = vec2(in_UV.x, 1.0f - in_UV.y);
-
-    // -----------------------------------------------------------------------------
     // Check Depth
     // -----------------------------------------------------------------------------
     float VSDepth = texture(ps_Depth, in_UV).r;
@@ -65,7 +60,7 @@ void main(void)
     // -----------------------------------------------------------------------------
     // Lighting only if depth is infinity
     // -----------------------------------------------------------------------------
-    vec4 FinalColor = texture(ps_EnvironmentTexture, UV);
+    vec4 FinalColor = texture(ps_EnvironmentTexture, in_UV);
 
     if (m_IsHDR == 0.0f)
     {

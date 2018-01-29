@@ -1,62 +1,27 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="extern">
-      <UniqueIdentifier>{a0b74be8-1a6f-401a-839b-c867c8633dcd}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="controls">
-      <UniqueIdentifier>{01e74968-0a08-4664-bc3e-f20bfc2e1ee8}</UniqueIdentifier>
-    </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\..\..\src\mr\cv_guidedfilter.cpp">
-      <Filter>extern</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\mr\mr_control.cpp" />
     <ClCompile Include="..\..\..\src\mr\mr_control_manager.cpp" />
-    <ClCompile Include="..\..\..\src\mr\mr_kinect_control.cpp">
-      <Filter>controls</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\mr\mr_webcam_control.cpp">
-      <Filter>controls</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\mr\mr_precompiled.cpp" />
-    <ClCompile Include="..\..\..\src\mr\mr_realsense_control.cpp">
-      <Filter>controls</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\mr\mr_slam_reconstructor.cpp" />
     <ClCompile Include="..\..\..\src\mr\mr_scalable_slam_reconstructor.cpp" />
     <ClCompile Include="..\..\..\src\mr\mr_slam_reconstruction_settings.cpp" />
     <ClCompile Include="..\..\..\src\mr\mr_plane_detector.cpp" />
+    <ClCompile Include="..\..\..\src\mr\mr_kinect_control.cpp" />
+    <ClCompile Include="..\..\..\src\mr\mr_realsense_control.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\src\mr\cv_guidedfilter.h">
-      <Filter>extern</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\mr\mr_control.h" />
     <ClInclude Include="..\..\..\src\mr\mr_control_manager.h" />
-    <ClInclude Include="..\..\..\src\mr\mr_kinect_control.h">
-      <Filter>controls</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\mr\mr_webcam_control.h">
-      <Filter>controls</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\mr\mr_precompiled.h" />
-    <ClInclude Include="..\..\..\src\mr\mr_realsense_control.h">
-      <Filter>controls</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\mr\mr_depth_sensor_control.h">
-      <Filter>controls</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\mr\mr_camera_control.h">
-      <Filter>controls</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\mr\mr_rgbd_camera_control.h">
-      <Filter>controls</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\mr\mr_slam_reconstructor.h" />
     <ClInclude Include="..\..\..\src\mr\mr_scalable_slam_reconstructor.h" />
     <ClInclude Include="..\..\..\src\mr\mr_slam_reconstruction_settings.h" />
     <ClInclude Include="..\..\..\src\mr\mr_plane_detector.h" />
+    <ClInclude Include="..\..\..\src\mr\mr_control.h" />
+    <ClInclude Include="..\..\..\src\mr\mr_camera_control.h" />
+    <ClInclude Include="..\..\..\src\mr\mr_depth_sensor_control.h" />
+    <ClInclude Include="..\..\..\src\mr\mr_kinect_control.h" />
+    <ClInclude Include="..\..\..\src\mr\mr_realsense_control.h" />
+    <ClInclude Include="..\..\..\src\mr\mr_rgbd_camera_control.h" />
   </ItemGroup>
 </Project>

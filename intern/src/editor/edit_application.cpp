@@ -64,7 +64,7 @@ namespace
         
         Edit::CState::EStateType m_CurrentState;
         unsigned int             m_EditWindowID;
-        Base::Short2             m_LatestMousePosition;
+        Base::Float2             m_LatestMousePosition;
         
     private:
         
@@ -104,7 +104,7 @@ namespace
     CApplication::CApplication()
         : m_CurrentState       (Edit::CState::Start)
         , m_EditWindowID       (0)
-        , m_LatestMousePosition(Base::Short2(0, 0))
+        , m_LatestMousePosition(Base::Float2(0, 0))
     { 
     }
     

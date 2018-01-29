@@ -55,6 +55,17 @@ namespace Cam
 
     // -----------------------------------------------------------------------------
 
+    void SetProjectionMatrix(const Base::Float4x4& _rProjectionMatrix, float _Near, float _Far)
+    {
+        assert(ViewManager::GetMainCamera() != nullptr && ViewManager::GetMainCamera().IsValid());
+
+        CCamera& rCamera = *ViewManager::GetMainCamera();
+
+        rCamera.SetProjectionMatrix(_rProjectionMatrix, _Near, _Far);
+    }
+
+    // -----------------------------------------------------------------------------
+
     void SetBackgroundColor(Base::Float3& _rBackgroundColor)
     {
         assert(ViewManager::GetMainCamera() != nullptr && ViewManager::GetMainCamera().IsValid());
@@ -353,6 +364,17 @@ namespace Cam
         CView&   rView   = *rCamera.GetView();
 
         return rView.GetViewMatrix();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const Base::Float4x4& GetProjectionMatrix()
+    {
+        assert(ViewManager::GetMainCamera() != nullptr && ViewManager::GetMainCamera().IsValid());
+
+        CCamera& rCamera = *ViewManager::GetMainCamera();
+
+        return rCamera.GetProjectionMatrix();
     }
     
     // -----------------------------------------------------------------------------

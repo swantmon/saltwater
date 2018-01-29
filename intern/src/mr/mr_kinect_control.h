@@ -1,8 +1,6 @@
 
 #pragma once
 
-#include "mr/mr_control.h"
-
 #include "mr_rgbd_camera_control.h"
 
 #include "base/base_console.h"

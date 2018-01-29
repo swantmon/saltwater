@@ -98,12 +98,12 @@ namespace Cam
                 Base::Float3 Right(1.0f, 0.0f, 0.0f);
                 Base::Float3 Up(0.0f, 0.0f, 1.0f);
 
-                const Base::Short2& rCursorPosition = _rEvent.GetCursorPosition();
+                const Base::Float2& rCursorPosition = _rEvent.GetCursorPosition();
 
                 float DeltaTime = static_cast<float>(Core::Time::GetDeltaTimeLastFrame());
 
-                float CurrentVelocityX = static_cast<float>(rCursorPosition[0] - m_LastCursorPosition[0]);
-                float CurrentVelocityY = static_cast<float>(rCursorPosition[1] - m_LastCursorPosition[1]);
+                float CurrentVelocityX = (rCursorPosition[0] - m_LastCursorPosition[0]);
+                float CurrentVelocityY = (rCursorPosition[1] - m_LastCursorPosition[1]);
 
                 Forward = Forward * m_RotationMatrix;
                 Right   = Right   * m_RotationMatrix;
@@ -117,10 +117,10 @@ namespace Cam
 
             if (m_IsFlying)
             {
-                const Base::Short2& rCursorPosition = _rEvent.GetCursorPosition();
+                const Base::Float2& rCursorPosition = _rEvent.GetCursorPosition();
 
-                m_CurrentRotation[0] += static_cast<float>(rCursorPosition[0] - m_LastCursorPosition[0]) * s_RotationVelocity;
-                m_CurrentRotation[1] += static_cast<float>(rCursorPosition[1] - m_LastCursorPosition[1]) * s_RotationVelocity;
+                m_CurrentRotation[0] += (rCursorPosition[0] - m_LastCursorPosition[0]) * s_RotationVelocity;
+                m_CurrentRotation[1] += (rCursorPosition[1] - m_LastCursorPosition[1]) * s_RotationVelocity;
 
                 if (m_CurrentRotation[0] < 0.0f)
                 {

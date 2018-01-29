@@ -24,7 +24,7 @@ namespace InputManager
     bool GetMouseButtonDown(Base::CInputEvent::EKey _Key);
     bool GetMouseButtonUp(Base::CInputEvent::EKey _Key);
 
-    Base::Short2& GetMousePosition();
+    Base::Float2& GetMousePosition();
     float GetMouseScrollDelta();
 } // namespace InputManager
 } // namespace Gui

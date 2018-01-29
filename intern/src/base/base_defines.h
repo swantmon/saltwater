@@ -51,3 +51,12 @@
 #define STR                         String
 #define UT                          Unittest
 #endif // User defined or default namespace
+
+// -----------------------------------------------------------------------------
+// Platform
+// -----------------------------------------------------------------------------
+#if __ANDROID__
+#define PLATFORM_ANDROID 1
+#else
+#define PLATFORM_WINDOWS 1
+#endif
