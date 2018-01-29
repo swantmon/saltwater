@@ -90,6 +90,8 @@ namespace MR
         ContextManager::Barrier();
         
         ContextManager::SetShaderCS(m_PlaneExtractionCSPtr);
+        ContextManager::SetConstantBuffer(0, m_HistogramConstantBuffer);
+        ContextManager::SetResourceBuffer(0, m_PlaneBuffer);
         ContextManager::SetImageTexture(0, m_NormalHistogram);
         ContextManager::SetImageTexture(1, m_VertexMap);
         ContextManager::SetImageTexture(2, m_NormalMap);
