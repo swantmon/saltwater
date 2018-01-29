@@ -58,7 +58,7 @@ void main()
     
         Normal = mat3(g_PoseMatrix) * Normal;
 
-        vec2 Spherical = NormalToSpherical(Normal);
+        vec2 Spherical = CartesianToSpherical(Normal);
 
         float Azimuth = Spherical.x;
         float Inclination = Spherical.y;
