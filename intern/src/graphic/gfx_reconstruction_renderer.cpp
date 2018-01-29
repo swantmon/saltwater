@@ -1142,7 +1142,7 @@ namespace
         ContextManager::SetShaderVS(m_HistogramVSPtr);
         ContextManager::SetShaderPS(m_HistogramFSPtr);
         
-        ContextManager::SetImageTexture(0, m_pScalableReconstructor->GetHONV());
+        ContextManager::SetImageTexture(0, m_pScalableReconstructor->GetPlaneDetector().GetNormalHistogram());
 
         const unsigned int Offset = 0;
         ContextManager::SetVertexBuffer(m_QuadMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
