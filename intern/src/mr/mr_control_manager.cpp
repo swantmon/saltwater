@@ -962,8 +962,6 @@ namespace
         {
             Base::CInputEvent::EKey Key = static_cast<Base::CInputEvent::EKey>(_rEvent.GetKey());
 
-            BASE_CONSOLE_INFOV("Touch (%i) at position %f, %f.", Key, _rEvent.GetCursorPosition()[0], _rEvent.GetCursorPosition()[1])
-
             float x = _rEvent.GetCursorPosition()[0];
             float y = _rEvent.GetCursorPosition()[1];
 
