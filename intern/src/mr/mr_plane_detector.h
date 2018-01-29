@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include "graphic/gfx_shader.h"
 #include "graphic/gfx_texture.h"
 
 namespace MR
@@ -9,10 +10,11 @@ namespace MR
     {
     public:
 
-        void SetDepthImage(Gfx::CTexturePtr _DepthImage);
-        void DetectPlanes(Gfx::CTexturePtr _DepthImage = nullptr);
+        void SetImages(Gfx::CTexturePtr _VertexMap, Gfx::CTexturePtr _NormalMap);
+        void DetectPlanes(Gfx::CTexturePtr _VertexMap = nullptr, Gfx::CTexturePtr _NormalMap = nullptr);
 
-        Gfx::CTexturePtr GetDepthImage();
+        Gfx::CTexturePtr GetVertexMap();
+        Gfx::CTexturePtr GetNormalMap();
         Gfx::CTexturePtr GetNormalHistogram();
         
     public:
@@ -22,8 +24,11 @@ namespace MR
 
 	private:
 
-        Gfx::CTexturePtr m_DepthImage;
+        Gfx::CTexturePtr m_VertexMap;
+        Gfx::CTexturePtr m_NormalMap;
         Gfx::CTexturePtr m_NormalHistogram;
+
+        Gfx::CShaderPtr m_NormalHistogramCSPtr;
 
     };
 } // namespace MR
