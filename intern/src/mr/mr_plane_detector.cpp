@@ -23,10 +23,18 @@ using namespace Gfx;
 
 namespace
 {
+    Base::Int2 g_HistogramSize = Base::Int2(128, 128);
+
     int DivUp(int TotalShaderCount, int WorkGroupSize)
     {
         return (TotalShaderCount + WorkGroupSize - 1) / WorkGroupSize;
     }
+
+    struct SHistogramMetaBuffer
+    {
+        Base::Float4x4 m_PoseMatrix;
+        Base::Int4 m_HistogramSize;
+    };
 }
 
 namespace MR
@@ -41,7 +49,7 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CPlaneDetector::DetectPlanes(Gfx::CTexturePtr _VertexMap, Gfx::CTexturePtr _NormalMap)
+    void CPlaneDetector::DetectPlanes(const Base::Float4x4& _PoseMatrix, Gfx::CTexturePtr _VertexMap, Gfx::CTexturePtr _NormalMap)
     {
         Performance::BeginDurationEvent("Plane Detection");
 
@@ -68,12 +76,17 @@ namespace MR
 
         ContextManager::Barrier();
 
+        SHistogramMetaBuffer BufferData;
+        BufferData.m_PoseMatrix = _PoseMatrix;
+        BufferData.m_HistogramSize = Base::Int4(g_HistogramSize[0], g_HistogramSize[1], 0, 0);
+
+        BufferManager::UploadBufferData(m_HistogramConstantBuffer, &BufferData);
+
         ContextManager::SetShaderCS(m_NormalHistogramCSPtr);
-        //ContextManager::SetConstantBuffer(0, m_HONVMetadataBuffer);
-        //ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
+        ContextManager::SetConstantBuffer(0, m_HistogramConstantBuffer);
         ContextManager::SetImageTexture(0, m_NormalHistogram);
-        ContextManager::SetImageTexture(1, static_cast<CTexturePtr>(m_VertexMap));
-        ContextManager::SetImageTexture(2, static_cast<CTexturePtr>(m_NormalMap));
+        ContextManager::SetImageTexture(1, m_VertexMap);
+        ContextManager::SetImageTexture(2, m_NormalMap);
         ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
 
         Performance::EndEvent();
@@ -104,11 +117,47 @@ namespace MR
 
     CPlaneDetector::CPlaneDetector()
     {
-        std::stringstream Stream;
+        //////////////////////////////////////////////////////////////////////////
+        // Create Shaders
+        //////////////////////////////////////////////////////////////////////////
 
-        std::string DefineString = Stream.str();
+        std::stringstream DefineStream;
+
+        DefineStream
+            << "#define TILE_SIZE2D " << g_TileSize2D << " \n"
+            << "#define MAP_TEXTURE_FORMAT " << "rgba16f" << " \n";
+
+        std::string DefineString = DefineStream.str();
 
         m_NormalHistogramCSPtr = ShaderManager::CompileCS("scalable_kinect_fusion\\plane_detection\\cs_histogram.glsl", "main", DefineString.c_str());
+
+        //////////////////////////////////////////////////////////////////////////
+        // Create Buffers
+        //////////////////////////////////////////////////////////////////////////
+
+        SBufferDescriptor ConstantBufferDesc = {};
+
+        ConstantBufferDesc.m_Stride = 0;
+        ConstantBufferDesc.m_Usage = CBuffer::EUsage::GPURead;
+        ConstantBufferDesc.m_Binding = CBuffer::ConstantBuffer;
+        ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(SHistogramMetaBuffer);
+        ConstantBufferDesc.m_pBytes = nullptr;
+        ConstantBufferDesc.m_pClassKey = 0;
+
+        m_HistogramConstantBuffer = BufferManager::CreateBuffer(ConstantBufferDesc);
+
+        //////////////////////////////////////////////////////////////////////////
+        // Create Textures
+        //////////////////////////////////////////////////////////////////////////
+
+        STextureDescriptor TextureDescriptor = {};
+
+        TextureDescriptor.m_NumberOfPixelsU = g_HistogramSize[0];
+        TextureDescriptor.m_NumberOfPixelsV = g_HistogramSize[1];
+        TextureDescriptor.m_NumberOfPixelsW = 1;
+        TextureDescriptor.m_Format = CTexture::R32_INT;
+        m_NormalHistogram = TextureManager::CreateTexture2D(TextureDescriptor);
     }
 
     // -----------------------------------------------------------------------------

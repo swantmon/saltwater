@@ -50,10 +50,7 @@ namespace
 	const Base::Float3 g_InitialCameraPosition = Base::Float3(0.5f, 0.5f, -0.5f);
 	const Base::Float3 g_InitialCameraRotation = Base::Float3(0.0f, 0.0f, 0.0f);
 	//*/
-
-    const int g_HistogramBinsInclination = 128;
-    const int g_HistogramBinsAzimuth = 128;
-
+    
     const unsigned int g_MegabyteSize = 1024u * 1024u;
 
     const unsigned int g_AABB = 8;
@@ -642,7 +639,6 @@ namespace MR
         m_PointsRootGridCSPtr      = ShaderManager::CompileCS("scalable_kinect_fusion\\rasterization_reverse\\cs_gather.glsl"       , "main", DefineString.c_str());
         m_PointsFullCSPtr          = ShaderManager::CompileCS("scalable_kinect_fusion\\rasterization_reverse\\cs_gather_full.glsl"  , "main", DefineString.c_str());
         m_FillIndirectBufferCSPtr  = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_fill_indirect.glsl"                       , "main", DefineString.c_str());
-        m_NormalHistogramCSPtr     = ShaderManager::CompileCS("scalable_kinect_fusion\\plane_detection\\cs_histogram.glsl"          , "main", DefineString.c_str());
 
         SInputElementDescriptor InputLayoutDesc = {};
 
@@ -1539,12 +1535,6 @@ namespace MR
         m_FullVolumeTargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTexturePtr>(m_FullVolumePtr));
 
         m_EmptyTargetSetPtr = TargetSetManager::CreateEmptyTargetSet(m_pRGBDCameraControl->GetDepthWidth(), m_pRGBDCameraControl->GetDepthHeight());
-
-        TextureDescriptor.m_NumberOfPixelsU = g_HistogramBinsAzimuth;
-        TextureDescriptor.m_NumberOfPixelsV = g_HistogramBinsInclination;
-        TextureDescriptor.m_NumberOfPixelsW = 1;
-        TextureDescriptor.m_Format = CTexture::R32_INT;
-        m_HONVImage = TextureManager::CreateTexture2D(TextureDescriptor);
     }
     
     // -----------------------------------------------------------------------------
@@ -1689,16 +1679,6 @@ namespace MR
         ConstantBufferDesc.m_Binding = CBuffer::ConstantBuffer;
         ConstantBufferDesc.m_NumberOfBytes = sizeof(SScalableRaycastConstantBuffer);
         m_VolumeBuffers.m_AABBBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
-
-        int32_t HistogramSizes[] =
-        {
-            g_HistogramBinsInclination, g_HistogramBinsAzimuth, 0, 0
-        };
-
-        ConstantBufferDesc.m_Binding = CBuffer::ConstantBuffer;
-        ConstantBufferDesc.m_NumberOfBytes = 4 * sizeof(int32_t); // 2d histogram dimensions
-        ConstantBufferDesc.m_pBytes = HistogramSizes;
-        m_HONVMetadataBuffer = BufferManager::CreateBuffer(ConstantBufferDesc);
     }
 
     // -----------------------------------------------------------------------------
@@ -1751,7 +1731,7 @@ namespace MR
         // Detect Planes
         //////////////////////////////////////////////////////////////////////////////////////
         
-        m_PlaneDetector.DetectPlanes();
+        m_PlaneDetector.DetectPlanes(m_PoseMatrix);
 
         //////////////////////////////////////////////////////////////////////////////////////
         // Tracking
@@ -1927,33 +1907,7 @@ namespace MR
             ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
         }
     }
-
-    // -----------------------------------------------------------------------------
-
-    void CScalableSLAMReconstructor::DetectPlanes()
-    {
-        TextureManager::ClearTexture(m_HONVImage);
-
-        //////////////////////////////////////////////////////////////////////////////////////
-        // Create a 2D-Histogram based on the inclination and the azimuth of the normals
-        // "Histogram of Oriented Normal Vectors for Object Recognition with a Depth Sensor" (HONV)
-        // We use the lowest resolution of the pyramid
-        //////////////////////////////////////////////////////////////////////////////////////
-
-        const int WorkGroupsX = DivUp(m_pRGBDCameraControl->GetDepthWidth() / 4, g_TileSize2D);
-        const int WorkGroupsY = DivUp(m_pRGBDCameraControl->GetDepthHeight() / 4, g_TileSize2D);
-
-        ContextManager::Barrier();
-
-        ContextManager::SetShaderCS(m_NormalHistogramCSPtr);
-        ContextManager::SetConstantBuffer(0, m_HONVMetadataBuffer);
-        ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
-        ContextManager::SetImageTexture(0, m_HONVImage);
-        ContextManager::SetImageTexture(1, static_cast<CTexturePtr>(m_ReferenceVertexMapPtr[2]));
-        ContextManager::SetImageTexture(2, static_cast<CTexturePtr>(m_ReferenceNormalMapPtr[2]));
-        ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
-    }
-
+    
     // -----------------------------------------------------------------------------
 
     void CScalableSLAMReconstructor::PerformTracking()
@@ -2339,9 +2293,9 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    Gfx::CTexturePtr CScalableSLAMReconstructor::GetHONV()
+    CPlaneDetector& CScalableSLAMReconstructor::GetPlaneDetector()
     {
-        return m_HONVImage;
+        return m_PlaneDetector;
     }
 
     // -----------------------------------------------------------------------------

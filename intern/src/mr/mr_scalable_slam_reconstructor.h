@@ -164,7 +164,8 @@ namespace MR
         void GetReconstructionSettings(SReconstructionSettings* pReconstructionSettings);
 
         Gfx::CTexturePtr GetVertexMap();
-        Gfx::CTexturePtr GetHONV();
+
+        CPlaneDetector& GetPlaneDetector();
         
     private:
 
@@ -200,9 +201,7 @@ namespace MR
         void RasterizeRootVolumes();
         void GatherVolumeCounters(unsigned int Count, Gfx::CBufferPtr CounterBufferPtr, Gfx::CBufferPtr QueueBuffer, Gfx::CBufferPtr IndirectBufferPtr);
         void GatherGridCounters(unsigned int Count, Gfx::CBufferPtr CounterBufferPtr, Gfx::CBufferPtr QueueBuffer, Gfx::CBufferPtr IndirectBufferPtr);
-
-        void DetectPlanes();
-
+        
         void Raycast();
         void CreateRaycastPyramid();
 
@@ -249,10 +248,7 @@ namespace MR
         SScalableVolume m_VolumeBuffers;
 
         Gfx::CBufferPtr m_VolumeIndexBufferPtr;
-
-        Gfx::CTexturePtr m_HONVImage;
-        Gfx::CBufferPtr m_HONVMetadataBuffer;
-
+        
         Gfx::CShaderPtr m_ClearVolumeCSPtr;
         Gfx::CShaderPtr m_BilateralFilterCSPtr;
         Gfx::CShaderPtr m_VertexMapCSPtr;
@@ -285,9 +281,7 @@ namespace MR
         Gfx::CShaderPtr m_ClearAtomicCountersCSPtr;
 
         Gfx::CShaderPtr m_FillIndirectBufferCSPtr;
-
-        Gfx::CShaderPtr m_NormalHistogramCSPtr;
-
+        
         Gfx::CMeshPtr m_CubeMeshPtr;
         Gfx::CMeshPtr m_Grid8MeshPtr;
         Gfx::CMeshPtr m_Grid16MeshPtr;

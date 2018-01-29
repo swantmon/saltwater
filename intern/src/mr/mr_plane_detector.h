@@ -1,6 +1,9 @@
 
 #pragma once
 
+#include "base/base_matrix4x4.h"
+
+#include "graphic/gfx_buffer.h"
 #include "graphic/gfx_shader.h"
 #include "graphic/gfx_texture.h"
 
@@ -11,7 +14,7 @@ namespace MR
     public:
 
         void SetImages(Gfx::CTexturePtr _VertexMap, Gfx::CTexturePtr _NormalMap);
-        void DetectPlanes(Gfx::CTexturePtr _VertexMap = nullptr, Gfx::CTexturePtr _NormalMap = nullptr);
+        void DetectPlanes(const Base::Float4x4& _PoseMatrix, Gfx::CTexturePtr _VertexMap = nullptr, Gfx::CTexturePtr _NormalMap = nullptr);
 
         Gfx::CTexturePtr GetVertexMap();
         Gfx::CTexturePtr GetNormalMap();
@@ -29,6 +32,8 @@ namespace MR
         Gfx::CTexturePtr m_NormalHistogram;
 
         Gfx::CShaderPtr m_NormalHistogramCSPtr;
+
+        Gfx::CBufferPtr m_HistogramConstantBuffer;
 
     };
 } // namespace MR
