@@ -2,6 +2,8 @@
 #ifndef __INCLUDE_CS_HISTOGRAM_CREATION_GLSL__
 #define __INCLUDE_CS_HISTOGRAM_CREATION_GLSL__
 
+#include "scalable_kinect_fusion/plane_detection/common_plane_detection.glsl"
+
 layout(row_major, std140, binding = 0) uniform HistogramSizes
 {
     mat4 g_PoseMatrix;
@@ -56,8 +58,10 @@ void main()
     
         Normal = mat3(g_PoseMatrix) * Normal;
 
-        float Azimuth = atan(Normal.y, Normal.x);
-        float Inclination = acos(Normal.z);
+        vec2 Spherical = NormalToSpherical(Normal);
+
+        float Azimuth = Spherical.x;
+        float Inclination = Spherical.y;
         
         int AzimuthBin = int((Azimuth / g_Tau + 0.5f) * g_AzimuthBinCount);
         int InclinationBinY = int((Inclination / g_Pi) * g_InclinationBinCount);

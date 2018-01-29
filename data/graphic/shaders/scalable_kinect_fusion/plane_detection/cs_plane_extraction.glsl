@@ -2,6 +2,8 @@
 #ifndef __INCLUDE_CS_PLANE_EXTRACTION_GLSL__
 #define __INCLUDE_CS_PLANE_EXTRACTION_GLSL__
 
+#include "scalable_kinect_fusion/plane_detection/common_plane_detection.glsl"
+
 layout(std430, binding = 0) buffer ExtractedPlanes
 {
     int g_PlaneCount;
