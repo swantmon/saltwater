@@ -57,4 +57,15 @@ vec2 BinToSpherical(ivec2 Bin, int AzimuthBinCount, int InclinationBinCount)
     return vec2(Azimuth, Inclination);
 }
 
+int PlaneDistanceToBin(float D, int BinCount)
+{
+    return int(((D / 10.0f) + 0.5f) * BinCount);
+}
+
+float BinToPlaneDistance(int Bin, int BinCount)
+{
+    return (float(Bin) / BinCount - 0.5f) * 10.0f;
+}
+
+
 #endif // __INCLUDE_COMMON_PLANE_DETECTION_GLSL__
