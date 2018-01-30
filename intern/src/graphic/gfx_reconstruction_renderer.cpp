@@ -158,6 +158,8 @@ namespace
         CInputLayoutPtr m_QuadInputLayoutPtr;
 
         CRenderContextPtr m_OutlineRenderContextPtr;
+
+        CMeshPtr m_PlaneMeshPtr;
         
         CShaderPtr m_PointCloudVSPtr;
         CShaderPtr m_PointCloudFSPtr;
@@ -261,6 +263,7 @@ namespace
         m_VolumeMeshPtr = 0;
         m_QuadMeshPtr = 0;
 		m_CubeOutlineMeshPtr = 0;
+        m_PlaneMeshPtr = 0;
         m_CameraInputLayoutPtr = 0;
         m_VolumeInputLayoutPtr = 0;
         m_QuadInputLayoutPtr = 0;
@@ -429,22 +432,26 @@ namespace
     
     void CGfxReconstructionRenderer::OnSetupModels()
     {
+        ////////////////////////////////////////////////////////////////////////////////
+        // Create camera frustum mesh
+        ////////////////////////////////////////////////////////////////////////////////
+
 		//Todo: remove magic numbers (focal length/point, max/min depth)
 
-		float x = (-0.50602675f) / 0.72113f;
-		float y = (-0.499133f) / 0.870799f;
+		float Focalx = (-0.50602675f) / 0.72113f;
+		float Focaly = (-0.499133f) / 0.870799f;
 		
         Float3 CameraVertices[] =
         {
-            Float3(-x * 8.0f, -y * 8.0f, 8.0f),
-            Float3( x * 8.0f, -y * 8.0f, 8.0f),
-            Float3( x * 8.0f,  y * 8.0f, 8.0f),
-            Float3(-x * 8.0f,  y * 8.0f, 8.0f),
-            Float3(     0.0f,      0.0f, 0.0f),
-			Float3(-x * 0.5f, -y * 0.5f, 0.5f),
-			Float3( x * 0.5f, -y * 0.5f, 0.5f),
-			Float3( x * 0.5f,  y * 0.5f, 0.5f),
-			Float3(-x * 0.5f,  y * 0.5f, 0.5f),
+            Float3(-Focalx * 8.0f, -Focaly * 8.0f, 8.0f),
+            Float3( Focalx * 8.0f, -Focaly * 8.0f, 8.0f),
+            Float3( Focalx * 8.0f,  Focaly * 8.0f, 8.0f),
+            Float3(-Focalx * 8.0f,  Focaly * 8.0f, 8.0f),
+            Float3(          0.0f,           0.0f, 0.0f),
+			Float3(-Focalx * 0.5f, -Focaly * 0.5f, 0.5f),
+			Float3( Focalx * 0.5f, -Focaly * 0.5f, 0.5f),
+			Float3( Focalx * 0.5f,  Focaly * 0.5f, 0.5f),
+			Float3(-Focalx * 0.5f,  Focaly * 0.5f, 0.5f),
         };
 
 		Float3 CameraLines[24] =
@@ -464,7 +471,11 @@ namespace
 			CameraVertices[7], CameraVertices[8],
 			CameraVertices[8], CameraVertices[5],
         };
-                
+        
+        ////////////////////////////////////////////////////////////////////////////////
+        // Create cube mesh
+        ////////////////////////////////////////////////////////////////////////////////
+
         Dt::CSurface* pSurface = new Dt::CSurface;
         Dt::CLOD* pLOD = new Dt::CLOD;
         Dt::CMesh* pMesh = new Dt::CMesh;
@@ -547,6 +558,10 @@ namespace
 
         m_VolumeMeshPtr = MeshManager::CreateMesh(MeshDesc);
 
+        ////////////////////////////////////////////////////////////////////////////////
+        // Create cube outline mesh
+        ////////////////////////////////////////////////////////////////////////////////
+
 		pSurface = new Dt::CSurface;
 		pLOD = new Dt::CLOD;
 		pMesh = new Dt::CMesh;
@@ -566,6 +581,10 @@ namespace
 		MeshDesc.m_pMesh = pMesh;
 
 		m_CubeOutlineMeshPtr = MeshManager::CreateMesh(MeshDesc);
+
+        ////////////////////////////////////////////////////////////////////////////////
+        // Create quad mesh
+        ////////////////////////////////////////////////////////////////////////////////
 
         Float3 QuadLines[4] =
         {
@@ -594,6 +613,70 @@ namespace
         MeshDesc.m_pMesh = pMesh;
 
         m_QuadMeshPtr = MeshManager::CreateMesh(MeshDesc);
+
+        ////////////////////////////////////////////////////////////////////////////////
+        // Create plane mesh
+        ////////////////////////////////////////////////////////////////////////////////
+
+        std::vector<Base::Float3> PlaneVertices;
+
+        for (int x = -5; x <= 5; ++ x)
+        {
+            for (int y = -5; y <= 5; ++ y)
+            {
+                Float3 NewVertices[4] =
+                {
+                    QuadLines[0],
+                    QuadLines[1],
+                    QuadLines[2],
+                    QuadLines[3],
+                };
+
+                for (int i = 0; i < 4; ++ i)
+                {
+                    NewVertices[i][0] += x;
+                    NewVertices[i][1] += y;
+
+                    PlaneVertices.push_back(NewVertices[i]);
+                }
+            }
+        }
+
+        uint32_t BaseIndices[] =
+        {
+            0, 1, 2,
+            0, 3, 2,
+        };
+
+        std::vector<uint32_t> Indices;
+
+        for (int i = 0; i < static_cast<int>(PlaneVertices.size()) / 6; ++ i)
+        {
+            for (int j = 0; j < 6; ++ j)
+            {
+                Indices.push_back(BaseIndices[j] + i);
+            }
+        }
+
+        pSurface = new Dt::CSurface;
+        pLOD = new Dt::CLOD;
+        pMesh = new Dt::CMesh;
+
+        pSurface->SetPositions(PlaneVertices.data());
+        pSurface->SetNumberOfVertices(int(PlaneVertices.size()));
+        pSurface->SetIndices(&Indices[0]);
+        pSurface->SetNumberOfIndices(static_cast<int>(Indices.size()));
+        pSurface->SetElements(0);
+
+        pLOD->SetSurface(0, pSurface);
+        pLOD->SetNumberOfSurfaces(1);
+
+        pMesh->SetLOD(0, pLOD);
+        pMesh->SetNumberOfLODs(1);
+
+        MeshDesc.m_pMesh = pMesh;
+
+        m_PlaneMeshPtr = MeshManager::CreateMesh(MeshDesc);
     }
     
     // -----------------------------------------------------------------------------
@@ -1163,7 +1246,35 @@ namespace
 
     void CGfxReconstructionRenderer::RenderPlanes()
     {
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
 
+        ContextManager::SetRenderContext(m_OutlineRenderContextPtr);
+        ContextManager::SetShaderVS(m_OutlineVSPtr);
+        ContextManager::SetShaderPS(m_OutlineFSPtr);
+
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+        ContextManager::SetConstantBuffer(1, m_DrawCallConstantBufferPtr);
+
+        const unsigned int Offset = 0;
+        ContextManager::SetVertexBuffer(m_PlaneMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+        ContextManager::SetIndexBuffer(m_PlaneMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
+
+        ContextManager::SetInputLayout(m_CameraInputLayoutPtr);
+        ContextManager::SetTopology(STopology::LineList);
+        
+        SDrawCallConstantBuffer BufferData;
+
+        auto& Planes = m_pScalableReconstructor->GetPlaneDetector().GetPlanes();
+
+        for (auto& rPlane : Planes)
+        {
+            BufferData.m_WorldMatrix.SetIdentity();
+            BufferData.m_Color = Float4(1.0f, 0.0f, 1.0f, 1.0f);
+
+            BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
+
+            ContextManager::Draw(m_PlaneMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfVertices(), 0);
+        }
     }
 
     // -----------------------------------------------------------------------------
