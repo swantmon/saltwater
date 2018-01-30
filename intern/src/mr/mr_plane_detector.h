@@ -7,6 +7,8 @@
 #include "graphic/gfx_shader.h"
 #include "graphic/gfx_texture.h"
 
+#include <vector>
+
 namespace MR
 {
     class CPlaneDetector
@@ -27,8 +29,10 @@ namespace MR
 
 	private:
 
+        typedef std::vector<Base::Float4> Float4Vector;
+
         void CreateHistogram(const Base::Float4x4& _PoseMatrix);
-        void ExtractPlanes();
+        void ExtractPlanes(Float4Vector& _rPlanes);
 
         void ClearData();
 
@@ -39,11 +43,14 @@ namespace MR
         Gfx::CTexturePtr m_NormalHistogram;
 
         Gfx::CBufferPtr m_HistogramConstantBuffer;
+        Gfx::CBufferPtr m_PlaneCountBuffer;
         Gfx::CBufferPtr m_PlaneBuffer;
 
         Gfx::CShaderPtr m_HistogramCreationCSPtr;
         Gfx::CShaderPtr m_PlaneExtractionCSPtr;
 
         int m_MaxPlanes;
+
+        Float4Vector m_Planes;
     };
 } // namespace MR

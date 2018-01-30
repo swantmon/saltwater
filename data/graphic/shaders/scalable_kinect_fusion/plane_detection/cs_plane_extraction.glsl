@@ -4,12 +4,16 @@
 
 #include "scalable_kinect_fusion/plane_detection/common_plane_detection.glsl"
 
-layout(std430, binding = 0) buffer ExtractedPlanes
+layout(std430, binding = 0) buffer PlaneCountBuffer
 {
     int g_PlaneCount;
     int g_MaxPlaneCount;
     ivec2 Padding;
-    vec4 g_Planes[MAX_EXTRACTABLE_PLANES];
+};
+
+layout(std430, binding = 1) buffer PlaneBuffer
+{
+    vec4 g_Planes[];
 };
 
 // -----------------------------------------------------------------------------
@@ -31,16 +35,32 @@ void main()
     const int y = int(gl_GlobalInvocationID.y);
     
     int Count = imageLoad(cs_Histogram, ivec2(x, y)).x;
-
+    
     if (Count > 100)
     {
-        int PlaneIndex = atomicAdd(g_PlaneCount, 1);
+        bool IsHotspot = true;
 
-        if (PlaneIndex < g_MaxPlaneCount)
+        for (int i = -1; i <= 1; ++ i)
         {
-            vec2 Spherical = BinToSpherical(ivec2(x, y), g_AzimuthBinCount, g_InclinationBinCount);
-            vec3 Normal = SphericalToCartesian(Spherical);
-            g_Planes[PlaneIndex] = vec4(Normal, 0.0f);
+            for (int j = -1; j <= 1; ++ j)
+            {
+                if (imageLoad(cs_Histogram, ivec2(x + i, y + j)).x > Count)
+                {
+                    IsHotspot = false;
+                }
+            }
+        }
+
+        if (IsHotspot)
+        {
+            int PlaneIndex = atomicAdd(g_PlaneCount, 1);
+
+            if (PlaneIndex < g_MaxPlaneCount)
+            {
+                vec2 Spherical = BinToSpherical(ivec2(x, y), g_AzimuthBinCount, g_InclinationBinCount);
+                vec3 Normal = SphericalToCartesian(Spherical);
+                g_Planes[PlaneIndex] = vec4(Normal, 0.0f);
+            }
         }
     }
 }

@@ -5,6 +5,7 @@
 layout(row_major, std140, binding = 0) uniform HistogramSizes
 {
     mat4 g_PoseMatrix;
+    mat4 g_InvPoseMatrix;
     int g_AzimuthBinCount;
     int g_InclinationBinCount;
     int g_Unused0;

@@ -37,6 +37,7 @@ namespace
     struct SHistogramMetaBuffer
     {
         Base::Float4x4 m_PoseMatrix;
+        Base::Float4x4 m_InvPoseMatrix;
         Base::Int4 m_HistogramSize;
     };
 }
@@ -69,12 +70,14 @@ namespace MR
 
         ClearData();
 
+        std::vector<Base::Float4> NewPlanes;
+
         Performance::BeginDurationEvent("Histogram Creation");
         CreateHistogram(_PoseMatrix);
         Performance::EndEvent();
 
         Performance::BeginDurationEvent("Plane Extraction");
-        ExtractPlanes();
+        ExtractPlanes(NewPlanes);
         Performance::EndEvent();
 
         Performance::EndEvent();
@@ -82,8 +85,10 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CPlaneDetector::ExtractPlanes()
+    void CPlaneDetector::ExtractPlanes(Float4Vector& _rPlanes)
     {
+        _rPlanes.clear();
+
         const int WorkGroupsX = DivUp(g_HistogramSize[0], g_TileSize2D);
         const int WorkGroupsY = DivUp(g_HistogramSize[1], g_TileSize2D);
 
@@ -91,11 +96,26 @@ namespace MR
         
         ContextManager::SetShaderCS(m_PlaneExtractionCSPtr);
         ContextManager::SetConstantBuffer(0, m_HistogramConstantBuffer);
-        ContextManager::SetResourceBuffer(0, m_PlaneBuffer);
+        ContextManager::SetResourceBuffer(0, m_PlaneCountBuffer);
+        ContextManager::SetResourceBuffer(1, m_PlaneBuffer);
         ContextManager::SetImageTexture(0, m_NormalHistogram);
         ContextManager::SetImageTexture(1, m_VertexMap);
         ContextManager::SetImageTexture(2, m_NormalMap);
         ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+
+        void* pBufferData = BufferManager::MapBufferRange(m_PlaneCountBuffer, CBuffer::EMap::Read, 0, sizeof(int32_t));
+        int32_t PlaneCount = *static_cast<int32_t*>(pBufferData);
+        BufferManager::UnmapBuffer(m_PlaneCountBuffer);
+
+        pBufferData = BufferManager::MapBuffer(m_PlaneBuffer, CBuffer::EMap::Read);
+        
+        for (int i = 0; i < PlaneCount; ++ i)
+        {
+            Base::Float4 Plane = static_cast<Base::Float4*>(pBufferData)[i];
+            _rPlanes.push_back(Plane);
+        }
+
+        BufferManager::UnmapBuffer(m_PlaneBuffer);
     }
 
     // -----------------------------------------------------------------------------
@@ -115,6 +135,7 @@ namespace MR
 
         SHistogramMetaBuffer BufferData;
         BufferData.m_PoseMatrix = _PoseMatrix;
+        BufferData.m_InvPoseMatrix = _PoseMatrix.GetInverted();
         BufferData.m_HistogramSize = Base::Int4(g_HistogramSize[0], g_HistogramSize[1], 0, 0);
 
         BufferManager::UploadBufferData(m_HistogramConstantBuffer, &BufferData);
@@ -134,7 +155,7 @@ namespace MR
         TextureManager::ClearTexture(m_NormalHistogram);
 
         Base::Int2 Counter = Base::Int2(0, g_MaxDetectablePlanes);  // Just set counter to 0
-        BufferManager::UploadBufferData(m_PlaneBuffer, &Counter, 0, sizeof(Counter));
+        BufferManager::UploadBufferData(m_PlaneCountBuffer, &Counter, 0, sizeof(Counter));
     }
 
     // -----------------------------------------------------------------------------
@@ -196,7 +217,11 @@ namespace MR
         BufferDesc.m_Usage = CBuffer::EUsage::GPUToCPU;
         BufferDesc.m_Binding = CBuffer::ResourceBuffer;
         BufferDesc.m_Access = CBuffer::EAccess::CPUReadWrite;
-        BufferDesc.m_NumberOfBytes = (g_MaxDetectablePlanes + 1) * sizeof(Base::Float4); // + 1 because of some meta data
+        BufferDesc.m_NumberOfBytes = sizeof(Base::Float4);
+
+        m_PlaneCountBuffer = BufferManager::CreateBuffer(BufferDesc);
+
+        BufferDesc.m_NumberOfBytes = sizeof(Base::Float4) * g_MaxDetectablePlanes;
 
         m_PlaneBuffer = BufferManager::CreateBuffer(BufferDesc);
 
