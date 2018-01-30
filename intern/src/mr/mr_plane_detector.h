@@ -33,6 +33,7 @@ namespace MR
 
         void CreateHistogram(const Base::Float4x4& _PoseMatrix);
         void ExtractPlaneCandidates(Float4Vector& _rPlanes);
+        void FindPlaneEquations(Float4Vector& _rPlanes);
 
         void ClearData();
 
@@ -48,6 +49,7 @@ namespace MR
 
         Gfx::CShaderPtr m_HistogramCreationCSPtr;
         Gfx::CShaderPtr m_PlaneCandidatesCSPtr;
+        Gfx::CShaderPtr m_PlaneEquationCSPtr;
 
         int m_MaxDetectablePlaneCount;
 

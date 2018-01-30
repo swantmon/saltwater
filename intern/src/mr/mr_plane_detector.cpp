@@ -76,8 +76,12 @@ namespace MR
         CreateHistogram(_PoseMatrix);
         Performance::EndEvent();
 
-        Performance::BeginDurationEvent("Plane Extraction");
+        Performance::BeginDurationEvent("Plane Candidate Extraction");
         ExtractPlaneCandidates(NewPlanes);
+        Performance::EndEvent();
+
+        Performance::BeginDurationEvent("Plane Equation Calculation");
+        FindPlaneEquations(NewPlanes);
         Performance::EndEvent();
 
         Performance::EndEvent();
@@ -114,6 +118,32 @@ namespace MR
         }
 
         BufferManager::UnmapBuffer(m_PlaneBuffer);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CPlaneDetector::FindPlaneEquations(Float4Vector& _rPlanes)
+    {
+        const int WorkGroupsX = DivUp(m_VertexMap->GetNumberOfPixelsU(), g_TileSize2D);
+        const int WorkGroupsY = DivUp(m_VertexMap->GetNumberOfPixelsV(), g_TileSize2D);
+
+        ContextManager::Barrier();
+
+        ContextManager::SetShaderCS(m_PlaneEquationCSPtr);
+        ContextManager::SetConstantBuffer(0, m_HistogramConstantBuffer);
+        ContextManager::SetResourceBuffer(0, m_PlaneCountBuffer);
+        ContextManager::SetResourceBuffer(1, m_PlaneBuffer);
+        ContextManager::SetImageTexture(0, m_NormalHistogram);
+        ContextManager::SetImageTexture(1, m_VertexMap);
+        ContextManager::SetImageTexture(2, m_NormalMap);
+
+        for (int i = 0; i < _rPlanes.size(); ++ i)
+        {
+            // We just reuse the Atomic Counter as an Index
+            BufferManager::UploadBufferData(m_PlaneCountBuffer, &_rPlanes[i], 0, sizeof(int32_t));
+
+            ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+        }
     }
 
     // -----------------------------------------------------------------------------
@@ -197,7 +227,8 @@ namespace MR
         std::string DefineString = DefineStream.str();
 
         m_HistogramCreationCSPtr = ShaderManager::CompileCS("scalable_kinect_fusion\\plane_detection\\cs_histogram_creation.glsl", "main", DefineString.c_str());
-        m_PlaneCandidatesCSPtr =   ShaderManager::CompileCS("scalable_kinect_fusion\\plane_detection\\cs_plane_candidates.glsl"  , "main", DefineString.c_str());
+        m_PlaneCandidatesCSPtr   = ShaderManager::CompileCS("scalable_kinect_fusion\\plane_detection\\cs_plane_candidates.glsl"  , "main", DefineString.c_str());
+        m_PlaneEquationCSPtr     = ShaderManager::CompileCS("scalable_kinect_fusion\\plane_detection\\cs_plane_equation.glsl"    , "main", DefineString.c_str());
 
         //////////////////////////////////////////////////////////////////////////
         // Create Buffers
