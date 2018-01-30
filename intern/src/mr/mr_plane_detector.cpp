@@ -87,8 +87,6 @@ namespace MR
 
     void CPlaneDetector::ExtractPlanes(Float4Vector& _rPlanes)
     {
-        _rPlanes.clear();
-
         const int WorkGroupsX = DivUp(g_HistogramSize[0], g_TileSize2D);
         const int WorkGroupsY = DivUp(g_HistogramSize[1], g_TileSize2D);
 
