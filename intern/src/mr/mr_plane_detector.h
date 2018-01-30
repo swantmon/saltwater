@@ -15,12 +15,16 @@ namespace MR
     {
     public:
 
+        typedef std::vector<Base::Float4> Float4Vector;
+
         void SetImages(Gfx::CTexturePtr _VertexMap, Gfx::CTexturePtr _NormalMap);
         void DetectPlanes(const Base::Float4x4& _PoseMatrix, Gfx::CTexturePtr _VertexMap = nullptr, Gfx::CTexturePtr _NormalMap = nullptr);
 
         Gfx::CTexturePtr GetVertexMap();
         Gfx::CTexturePtr GetNormalMap();
         Gfx::CTexturePtr GetNormalHistogram();
+
+        const Float4Vector& GetPlanes();
         
     public:
 
@@ -28,8 +32,6 @@ namespace MR
        ~CPlaneDetector();
 
 	private:
-
-        typedef std::vector<Base::Float4> Float4Vector;
 
         void CreateHistogram(const Base::Float4x4& _PoseMatrix);
         void ExtractPlaneCandidates(Float4Vector& _rPlanes);

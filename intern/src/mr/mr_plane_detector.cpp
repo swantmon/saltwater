@@ -244,6 +244,13 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
+    const CPlaneDetector::Float4Vector& CPlaneDetector::GetPlanes()
+    {
+        return m_Planes;
+    }
+
+    // -----------------------------------------------------------------------------
+
     CPlaneDetector::CPlaneDetector()
     {
         m_MaxDetectablePlaneCount = Base::CProgramParameters::GetInstance().GetInt("mr:plane_detection:max_plane_count", g_MaxDetectablePlaneCount);
