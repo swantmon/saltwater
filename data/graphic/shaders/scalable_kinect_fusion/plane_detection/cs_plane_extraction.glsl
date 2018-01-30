@@ -34,13 +34,27 @@ void main()
     const int x = int(gl_GlobalInvocationID.x);
     const int y = int(gl_GlobalInvocationID.y);
     
-    int PlaneIndex = int(gl_WorkGroupID.y);
+    const int PlaneIndex = int(gl_WorkGroupID.y);
 
-    int Count = imageLoad(cs_Histogram, ivec2(gl_GlobalInvocationID.xy)).x;
+    const int Count = imageLoad(cs_Histogram, ivec2(gl_GlobalInvocationID.xy)).x;
 
     if (Count > 500)
     {
-        float D = BinToPlaneDistance(gl_GlobalInvocationID.x, g_AzimuthBinCount);
+        bool IsHotSpot = true;
+
+        for(int i = -2; i <= 2; ++ i)
+        {
+            if (imageLoad(cs_Histogram, ivec2(gl_GlobalInvocationID.xy)).x > Count)
+            {
+                IsHotSpot = false;
+            }
+        }
+
+        if (IsHotSpot)
+        {
+            float D = BinToPlaneDistance(int(gl_GlobalInvocationID.x), g_AzimuthBinCount);
+            g_Planes[PlaneIndex].w = D;
+        }
     }
 }
 

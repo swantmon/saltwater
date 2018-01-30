@@ -132,7 +132,7 @@ namespace MR
     void CPlaneDetector::ExtractPlanes(Float4Vector& _rPlanes)
     {
         const int WorkGroupsX = DivUp(g_HistogramSize[0], g_TileSize2D);
-        const int WorkGroupsY = _rPlanes.size();
+        const int WorkGroupsY = int(_rPlanes.size());
 
         ContextManager::SetShaderCS(m_PlaneExtractionCSPtr);
         ContextManager::SetConstantBuffer(0, m_HistogramConstantBuffer);
@@ -143,6 +143,16 @@ namespace MR
         ContextManager::SetImageTexture(2, m_NormalMap);
 
         ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+
+        void* pBufferData = BufferManager::MapBuffer(m_PlaneBuffer, CBuffer::EMap::Read);
+
+        for (int32_t i = 0; i < _rPlanes.size(); ++i)
+        {
+            Base::Float4 Plane = static_cast<Base::Float4*>(pBufferData)[i];
+            _rPlanes[i] = Plane;
+        }
+
+        BufferManager::UnmapBuffer(m_PlaneBuffer);
     }
 
     // -----------------------------------------------------------------------------
