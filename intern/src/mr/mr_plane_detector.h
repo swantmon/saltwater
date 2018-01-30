@@ -32,7 +32,7 @@ namespace MR
         typedef std::vector<Base::Float4> Float4Vector;
 
         void CreateHistogram(const Base::Float4x4& _PoseMatrix);
-        void ExtractPlanes(Float4Vector& _rPlanes);
+        void ExtractPlaneCandidates(Float4Vector& _rPlanes);
 
         void ClearData();
 

@@ -77,7 +77,7 @@ namespace MR
         Performance::EndEvent();
 
         Performance::BeginDurationEvent("Plane Extraction");
-        ExtractPlanes(NewPlanes);
+        ExtractPlaneCandidates(NewPlanes);
         Performance::EndEvent();
 
         Performance::EndEvent();
@@ -85,7 +85,7 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CPlaneDetector::ExtractPlanes(Float4Vector& _rPlanes)
+    void CPlaneDetector::ExtractPlaneCandidates(Float4Vector& _rPlanes)
     {
         const int WorkGroupsX = DivUp(g_HistogramSize[0], g_TileSize2D);
         const int WorkGroupsY = DivUp(g_HistogramSize[1], g_TileSize2D);
