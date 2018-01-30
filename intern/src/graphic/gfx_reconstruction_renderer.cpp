@@ -1276,10 +1276,10 @@ namespace
             Base::Float3 Vertex1 = Base::Float3(1.0f);
 
             Vertex0[2] = -rPlane[3] / rPlane[2];
-            Vertex1[2] = (rPlane[3] - rPlane[0] - rPlane[1]) / rPlane[2];
+            Vertex1[2] = (-rPlane[3] - rPlane[0] - rPlane[1]) / rPlane[2];
 
-            float Distance0 = Vertex0.DotProduct(Base::Float3(rPlane[0], rPlane[1], rPlane[2])) - rPlane[3];
-            float Distance1 = Vertex1.DotProduct(Base::Float3(rPlane[0], rPlane[1], rPlane[2])) - rPlane[3];
+            float Distance0 = Vertex0.DotProduct(Base::Float3(rPlane[0], rPlane[1], rPlane[2])) + rPlane[3];
+            float Distance1 = Vertex1.DotProduct(Base::Float3(rPlane[0], rPlane[1], rPlane[2])) + rPlane[3];
 
             BufferData.m_WorldMatrix.SetIdentity();
             BufferData.m_Color = Float4(1.0f, 1.0f, 0.0f, 1.0f);
