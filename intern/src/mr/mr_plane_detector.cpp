@@ -107,7 +107,7 @@ namespace MR
 
         pBufferData = BufferManager::MapBuffer(m_PlaneBuffer, CBuffer::EMap::Read);
         
-        for (int i = 0; i < PlaneCount; ++ i)
+        for (int32_t i = 0; i < PlaneCount; ++ i)
         {
             Base::Float4 Plane = static_cast<Base::Float4*>(pBufferData)[i];
             _rPlanes.push_back(Plane);
