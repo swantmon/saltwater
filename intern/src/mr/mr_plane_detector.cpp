@@ -92,6 +92,8 @@ namespace MR
         Performance::EndEvent();
 
         Performance::EndEvent();
+
+        m_Planes = std::move(NewPlanes);
     }
 
     // -----------------------------------------------------------------------------
