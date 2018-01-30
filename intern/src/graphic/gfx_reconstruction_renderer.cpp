@@ -620,9 +620,11 @@ namespace
 
         std::vector<Base::Float3> PlaneVertices;
 
-        for (int x = -5; x <= 5; ++ x)
+        const int PlaneSize = 3;
+
+        for (int x = -PlaneSize; x <= PlaneSize; ++ x)
         {
-            for (int y = -5; y <= 5; ++ y)
+            for (int y = -PlaneSize; y <= PlaneSize; ++ y)
             {
                 Float3 NewVertices[4] =
                 {
@@ -645,16 +647,16 @@ namespace
         uint32_t BaseIndices[] =
         {
             0, 1, 2,
-            0, 3, 2,
+            1, 2, 3,
         };
 
         std::vector<uint32_t> Indices;
 
-        for (int i = 0; i < static_cast<int>(PlaneVertices.size()) / 6; ++ i)
+        for (int i = 0; i < static_cast<int>(PlaneVertices.size()) / 4; ++ i)
         {
             for (int j = 0; j < 6; ++ j)
             {
-                Indices.push_back(BaseIndices[j] + i);
+                Indices.push_back(BaseIndices[j] + i * 4);
             }
         }
 
