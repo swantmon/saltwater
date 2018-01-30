@@ -1,6 +1,6 @@
 
-#ifndef __INCLUDE_CS_HISTOGRAM_CREATION_GLSL__
-#define __INCLUDE_CS_HISTOGRAM_CREATION_GLSL__
+#ifndef __INCLUDE_CS_NORMAL_HISTOGRAM_GLSL__
+#define __INCLUDE_CS_NORMAL_HISTOGRAM_GLSL__
 
 #include "scalable_kinect_fusion/plane_detection/common_plane_detection.glsl"
 
@@ -56,4 +56,4 @@ void main()
     }
 }
 
-#endif // __INCLUDE_CS_HISTOGRAM_CREATION_GLSL__
+#endif // __INCLUDE_CS_NORMAL_HISTOGRAM_GLSL__

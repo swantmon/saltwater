@@ -229,9 +229,9 @@ namespace MR
 
         std::string DefineString = DefineStream.str();
 
-        m_HistogramCreationCSPtr = ShaderManager::CompileCS("scalable_kinect_fusion\\plane_detection\\cs_histogram_creation.glsl", "main", DefineString.c_str());
-        m_PlaneCandidatesCSPtr   = ShaderManager::CompileCS("scalable_kinect_fusion\\plane_detection\\cs_plane_candidates.glsl"  , "main", DefineString.c_str());
-        m_PlaneEquationCSPtr     = ShaderManager::CompileCS("scalable_kinect_fusion\\plane_detection\\cs_plane_equation.glsl"    , "main", DefineString.c_str());
+        m_HistogramCreationCSPtr = ShaderManager::CompileCS("scalable_kinect_fusion\\plane_detection\\cs_normal_histogram.glsl", "main", DefineString.c_str());
+        m_PlaneCandidatesCSPtr   = ShaderManager::CompileCS("scalable_kinect_fusion\\plane_detection\\cs_plane_candidates.glsl", "main", DefineString.c_str());
+        m_PlaneEquationCSPtr     = ShaderManager::CompileCS("scalable_kinect_fusion\\plane_detection\\cs_plane_equation.glsl"  , "main", DefineString.c_str());
 
         //////////////////////////////////////////////////////////////////////////
         // Create Buffers
