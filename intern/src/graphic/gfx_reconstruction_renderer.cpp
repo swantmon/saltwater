@@ -1273,7 +1273,7 @@ namespace
 
             BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
 
-            ContextManager::Draw(m_PlaneMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfVertices(), 0);
+            ContextManager::DrawIndexed(m_PlaneMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
         }
     }
 
