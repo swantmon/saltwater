@@ -87,6 +87,10 @@ namespace MR
         FindPlaneEquations(NewPlanes);
         Performance::EndEvent();
 
+        Performance::BeginDurationEvent("Plane Equation Extraction");
+        ExtractPlanes(NewPlanes);
+        Performance::EndEvent();
+
         Performance::EndEvent();
     }
 
@@ -121,6 +125,24 @@ namespace MR
         }
 
         BufferManager::UnmapBuffer(m_PlaneBuffer);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CPlaneDetector::ExtractPlanes(Float4Vector& _rPlanes)
+    {
+        const int WorkGroupsX = DivUp(g_HistogramSize[0], g_TileSize2D);
+        const int WorkGroupsY = _rPlanes.size();
+
+        ContextManager::SetShaderCS(m_PlaneExtractionCSPtr);
+        ContextManager::SetConstantBuffer(0, m_HistogramConstantBuffer);
+        ContextManager::SetResourceBuffer(0, m_PlaneCountBuffer);
+        ContextManager::SetResourceBuffer(1, m_PlaneBuffer);
+        ContextManager::SetImageTexture(0, m_Histogram);
+        ContextManager::SetImageTexture(1, m_VertexMap);
+        ContextManager::SetImageTexture(2, m_NormalMap);
+
+        ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
     }
 
     // -----------------------------------------------------------------------------
@@ -232,6 +254,7 @@ namespace MR
         m_HistogramCreationCSPtr = ShaderManager::CompileCS("scalable_kinect_fusion\\plane_detection\\cs_normal_histogram.glsl", "main", DefineString.c_str());
         m_PlaneCandidatesCSPtr   = ShaderManager::CompileCS("scalable_kinect_fusion\\plane_detection\\cs_plane_candidates.glsl", "main", DefineString.c_str());
         m_PlaneEquationCSPtr     = ShaderManager::CompileCS("scalable_kinect_fusion\\plane_detection\\cs_plane_equation.glsl"  , "main", DefineString.c_str());
+        m_PlaneExtractionCSPtr   = ShaderManager::CompileCS("scalable_kinect_fusion\\plane_detection\\cs_plane_extraction.glsl", "main", DefineString.c_str());
 
         //////////////////////////////////////////////////////////////////////////
         // Create Buffers
