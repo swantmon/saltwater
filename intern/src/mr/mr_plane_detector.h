@@ -41,7 +41,7 @@ namespace MR
 
         Gfx::CTexturePtr m_VertexMap;
         Gfx::CTexturePtr m_NormalMap;
-        Gfx::CTexturePtr m_NormalHistogram;
+        Gfx::CTexturePtr m_Histogram;
 
         Gfx::CBufferPtr m_HistogramConstantBuffer;
         Gfx::CBufferPtr m_PlaneCountBuffer;

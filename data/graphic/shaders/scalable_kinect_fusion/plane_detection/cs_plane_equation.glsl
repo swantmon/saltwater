@@ -20,6 +20,7 @@ layout(std430, binding = 1) buffer PlaneBuffer
 // Input from engine
 // -----------------------------------------------------------------------------
 
+layout (binding = 0, r32i) uniform iimage2D cs_Histogram;
 layout (binding = 1, MAP_TEXTURE_FORMAT) uniform image2D cs_VertexMap;
 layout (binding = 2, MAP_TEXTURE_FORMAT) uniform image2D cs_NormalMap;
 
@@ -32,11 +33,18 @@ void main()
 {    
     const int x = int(gl_GlobalInvocationID.x);
     const int y = int(gl_GlobalInvocationID.y);
-
-    vec4 Plane = g_Planes[g_PlaneIndex];
-    vec3 Normal = imageLoad(cs_NormalMap, ivec2(x, y)).xyz;
-
-    imageStore(cs_NormalMap, ivec2(x, y), vec4(0.5));
+    vec3 Plane = normalize(g_Planes[g_PlaneIndex].xyz);
+    vec3 Normal = mat3(g_InvPoseMatrix) * normalize(imageLoad(cs_NormalMap, ivec2(x, y)).xyz);
+    vec3 Vertex = normalize(imageLoad(cs_VertexMap, ivec2(x, y)).xyz);
+    
+    if (abs(dot(Plane, Normal)) < 0.1f)
+    {
+        float D = dot(Plane, Vertex);
+    
+        int Bin = int(((D / 5.0f) + 0.5f) * g_AzimuthBinCount);
+    
+        imageAtomicAdd(cs_Histogram, ivec2(Bin, g_PlaneIndex), 1);
+    }
 }
 
 #endif // __INCLUDE_CS_PLANE_EQUATION_GLSL__

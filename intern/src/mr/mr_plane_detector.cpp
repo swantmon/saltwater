@@ -80,6 +80,9 @@ namespace MR
         ExtractPlaneCandidates(NewPlanes);
         Performance::EndEvent();
 
+        // We reuse the normal histogram for the plane distance because why not
+        TextureManager::ClearTexture(m_Histogram);
+        
         Performance::BeginDurationEvent("Plane Equation Calculation");
         FindPlaneEquations(NewPlanes);
         Performance::EndEvent();
@@ -100,7 +103,7 @@ namespace MR
         ContextManager::SetConstantBuffer(0, m_HistogramConstantBuffer);
         ContextManager::SetResourceBuffer(0, m_PlaneCountBuffer);
         ContextManager::SetResourceBuffer(1, m_PlaneBuffer);
-        ContextManager::SetImageTexture(0, m_NormalHistogram);
+        ContextManager::SetImageTexture(0, m_Histogram);
         ContextManager::SetImageTexture(1, m_VertexMap);
         ContextManager::SetImageTexture(2, m_NormalMap);
         ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
@@ -133,7 +136,7 @@ namespace MR
         ContextManager::SetConstantBuffer(0, m_HistogramConstantBuffer);
         ContextManager::SetResourceBuffer(0, m_PlaneCountBuffer);
         ContextManager::SetResourceBuffer(1, m_PlaneBuffer);
-        ContextManager::SetImageTexture(0, m_NormalHistogram);
+        ContextManager::SetImageTexture(0, m_Histogram);
         ContextManager::SetImageTexture(1, m_VertexMap);
         ContextManager::SetImageTexture(2, m_NormalMap);
 
@@ -170,7 +173,7 @@ namespace MR
 
         ContextManager::SetShaderCS(m_HistogramCreationCSPtr);
         ContextManager::SetConstantBuffer(0, m_HistogramConstantBuffer);
-        ContextManager::SetImageTexture(0, m_NormalHistogram);
+        ContextManager::SetImageTexture(0, m_Histogram);
         ContextManager::SetImageTexture(1, m_VertexMap);
         ContextManager::SetImageTexture(2, m_NormalMap);
         ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
@@ -180,7 +183,7 @@ namespace MR
 
     void CPlaneDetector::ClearData()
     {
-        TextureManager::ClearTexture(m_NormalHistogram);
+        TextureManager::ClearTexture(m_Histogram);
 
         Base::Int2 Counter = Base::Int2(0, g_MaxDetectablePlaneCount);  // Just set counter to 0
         BufferManager::UploadBufferData(m_PlaneCountBuffer, &Counter, 0, sizeof(Counter));
@@ -204,7 +207,7 @@ namespace MR
 
     CTexturePtr CPlaneDetector::GetNormalHistogram()
     {
-        return m_NormalHistogram;
+        return m_Histogram;
     }
 
     // -----------------------------------------------------------------------------
@@ -271,7 +274,7 @@ namespace MR
         TextureDescriptor.m_Semantic = CTexture::UndefinedSemantic;
         TextureDescriptor.m_Format = CTexture::R32_INT;
 
-        m_NormalHistogram = TextureManager::CreateTexture2D(TextureDescriptor);
+        m_Histogram = TextureManager::CreateTexture2D(TextureDescriptor);
     }
 
     // -----------------------------------------------------------------------------
