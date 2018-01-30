@@ -140,7 +140,7 @@ namespace MR
         for (int i = 0; i < _rPlanes.size(); ++ i)
         {
             // We just reuse the Atomic Counter as an Index
-            BufferManager::UploadBufferData(m_PlaneCountBuffer, &_rPlanes[i], 0, sizeof(int32_t));
+            BufferManager::UploadBufferData(m_PlaneCountBuffer, &i, 0, sizeof(int32_t));
 
             ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
         }
