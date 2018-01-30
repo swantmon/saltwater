@@ -41,7 +41,7 @@ void main()
     {
         float D = dot(Plane, Vertex);
     
-        int Bin = int(((D / 5.0f) + 0.5f) * g_AzimuthBinCount);
+        int Bin = PlaneDistanceToBin(D, g_AzimuthBinCount);
     
         imageAtomicAdd(cs_Histogram, ivec2(Bin, g_PlaneIndex), 1);
     }
