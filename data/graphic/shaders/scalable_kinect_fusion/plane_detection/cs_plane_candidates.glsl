@@ -1,6 +1,6 @@
 
-#ifndef __INCLUDE_CS_PLANE_EXTRACTION_GLSL__
-#define __INCLUDE_CS_PLANE_EXTRACTION_GLSL__
+#ifndef __INCLUDE_CS_PLANE_CANDIDATES_GLSL__
+#define __INCLUDE_CS_PLANE_CANDIDATES_GLSL__
 
 #include "scalable_kinect_fusion/plane_detection/common_plane_detection.glsl"
 
@@ -65,4 +65,4 @@ void main()
     }
 }
 
-#endif // __INCLUDE_CS_PLANE_EXTRACTION_GLSL__
+#endif // __INCLUDE_CS_PLANE_CANDIDATES_GLSL__

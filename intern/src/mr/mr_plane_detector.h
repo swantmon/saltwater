@@ -47,9 +47,9 @@ namespace MR
         Gfx::CBufferPtr m_PlaneBuffer;
 
         Gfx::CShaderPtr m_HistogramCreationCSPtr;
-        Gfx::CShaderPtr m_PlaneExtractionCSPtr;
+        Gfx::CShaderPtr m_PlaneCandidatesCSPtr;
 
-        int m_MaxPlanes;
+        int m_MaxDetectablePlaneCount;
 
         Float4Vector m_Planes;
     };

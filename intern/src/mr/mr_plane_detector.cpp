@@ -27,7 +27,7 @@ namespace
 {
     Base::Int2 g_HistogramSize = Base::Int2(128, 128);
 
-    const int g_MaxDetectablePlanes = 5;
+    const int g_MaxDetectablePlaneCount = 5;
 
     int DivUp(int TotalShaderCount, int WorkGroupSize)
     {
@@ -92,7 +92,7 @@ namespace MR
 
         ContextManager::Barrier();
         
-        ContextManager::SetShaderCS(m_PlaneExtractionCSPtr);
+        ContextManager::SetShaderCS(m_PlaneCandidatesCSPtr);
         ContextManager::SetConstantBuffer(0, m_HistogramConstantBuffer);
         ContextManager::SetResourceBuffer(0, m_PlaneCountBuffer);
         ContextManager::SetResourceBuffer(1, m_PlaneBuffer);
@@ -152,7 +152,7 @@ namespace MR
     {
         TextureManager::ClearTexture(m_NormalHistogram);
 
-        Base::Int2 Counter = Base::Int2(0, g_MaxDetectablePlanes);  // Just set counter to 0
+        Base::Int2 Counter = Base::Int2(0, g_MaxDetectablePlaneCount);  // Just set counter to 0
         BufferManager::UploadBufferData(m_PlaneCountBuffer, &Counter, 0, sizeof(Counter));
     }
 
@@ -181,7 +181,7 @@ namespace MR
 
     CPlaneDetector::CPlaneDetector()
     {
-        m_MaxPlanes = Base::CProgramParameters::GetInstance().GetInt("mr:plane_detection:max_planes", g_MaxDetectablePlanes);
+        m_MaxDetectablePlaneCount = Base::CProgramParameters::GetInstance().GetInt("mr:plane_detection:max_plane_count", g_MaxDetectablePlaneCount);
 
         //////////////////////////////////////////////////////////////////////////
         // Create Shaders
@@ -192,12 +192,12 @@ namespace MR
         DefineStream
             << "#define TILE_SIZE2D " << g_TileSize2D << " \n"
             << "#define MAP_TEXTURE_FORMAT " << Base::CProgramParameters::GetInstance().GetStdString("mr:slam:map_format", "rgba16f") << " \n"
-            << "#define MAX_EXTRACTABLE_PLANES " << m_MaxPlanes << " \n";
+            << "#define MAX_DETECTABLE_PLANE_COUNT " << m_MaxDetectablePlaneCount << " \n";
 
         std::string DefineString = DefineStream.str();
 
         m_HistogramCreationCSPtr = ShaderManager::CompileCS("scalable_kinect_fusion\\plane_detection\\cs_histogram_creation.glsl", "main", DefineString.c_str());
-        m_PlaneExtractionCSPtr =   ShaderManager::CompileCS("scalable_kinect_fusion\\plane_detection\\cs_plane_extraction.glsl"  , "main", DefineString.c_str());
+        m_PlaneCandidatesCSPtr =   ShaderManager::CompileCS("scalable_kinect_fusion\\plane_detection\\cs_plane_candidates.glsl"  , "main", DefineString.c_str());
 
         //////////////////////////////////////////////////////////////////////////
         // Create Buffers
@@ -219,7 +219,7 @@ namespace MR
 
         m_PlaneCountBuffer = BufferManager::CreateBuffer(BufferDesc);
 
-        BufferDesc.m_NumberOfBytes = sizeof(Base::Float4) * g_MaxDetectablePlanes;
+        BufferDesc.m_NumberOfBytes = sizeof(Base::Float4) * g_MaxDetectablePlaneCount;
 
         m_PlaneBuffer = BufferManager::CreateBuffer(BufferDesc);
 
