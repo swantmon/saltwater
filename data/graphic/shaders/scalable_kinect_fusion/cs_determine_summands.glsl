@@ -128,7 +128,7 @@ bool findCorrespondence(out vec3 ReferenceVertex, out vec3 RaycastVertex, out ve
     const float Distance = distance(ReferenceVertex, RaycastVertex);
     const float Angle = dot(ReferenceNormal, RaycastNormal);
 
-    if (Distance > EPSILON_DISTANCE || Angle < EPSILON_ANGLE)
+    if (abs(Distance) > EPSILON_DISTANCE || abs(Angle) < EPSILON_ANGLE)
     {
         return false;
     }
