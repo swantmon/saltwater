@@ -109,12 +109,14 @@ namespace
         void RenderQueuedLevel1Grids();
         void RenderQueuedLevel2Grids();
 
-        void RenderHONV();
+        void RenderHistogram();
 
         void RenderCamera();
 
         void RenderVertexMap();
         
+        void RenderPlanes();
+
     private:
 
 		std::unique_ptr<MR::CSLAMReconstructor> m_pReconstructor;
@@ -168,7 +170,8 @@ namespace
         bool m_RenderRootQueue;
         bool m_RenderLevel1Queue;
         bool m_RenderLevel2Queue;
-        bool m_RenderHONV;
+        bool m_RenderHistogram;
+        bool m_RenderPlanes;
     };
 } // namespace
 
@@ -184,7 +187,8 @@ namespace
         , m_RenderRootQueue  (false)
         , m_RenderLevel1Queue(false)
         , m_RenderLevel2Queue(false)
-        , m_RenderHONV       (false)
+        , m_RenderHistogram  (false)
+        , m_RenderPlanes     (false)
     {
         
     }
@@ -225,7 +229,8 @@ namespace
         m_RenderRootQueue   = Base::CProgramParameters::GetInstance().GetBoolean("mr:slam:rendering:queues:root"        , false);
         m_RenderLevel1Queue = Base::CProgramParameters::GetInstance().GetBoolean("mr:slam:rendering:queues:level1"      , false);
         m_RenderLevel2Queue = Base::CProgramParameters::GetInstance().GetBoolean("mr:slam:rendering:queues:level2"      , false);
-        m_RenderHONV        = Base::CProgramParameters::GetInstance().GetBoolean("mr:slam:rendering:normal_histogram"   , false);
+        m_RenderHistogram   = Base::CProgramParameters::GetInstance().GetBoolean("mr:slam:rendering:normal_histogram"   , false);
+        m_RenderPlanes      = Base::CProgramParameters::GetInstance().GetBoolean("mr:slam:rendering:planes"             , false);
     }
 
     // -----------------------------------------------------------------------------
@@ -1134,7 +1139,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxReconstructionRenderer::RenderHONV()
+    void CGfxReconstructionRenderer::RenderHistogram()
     {
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
 
@@ -1152,6 +1157,13 @@ namespace
         ContextManager::SetTopology(STopology::TriangleStrip);
 
         ContextManager::Draw(4, 0);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxReconstructionRenderer::RenderPlanes()
+    {
+
     }
 
     // -----------------------------------------------------------------------------
@@ -1275,9 +1287,14 @@ namespace
                 RenderQueuedLevel2Grids();
             }
 
-            if (m_RenderHONV)
+            if (m_RenderHistogram)
             {
-                RenderHONV();
+                RenderHistogram();
+            }
+
+            if (m_RenderPlanes)
+            {
+                RenderPlanes();
             }
 		}
 		else
