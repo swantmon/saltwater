@@ -1246,6 +1246,8 @@ namespace
 
     void CGfxReconstructionRenderer::RenderPlanes()
     {
+        Performance::BeginEvent("Plane Rendering");
+
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
 
         ContextManager::SetRenderContext(m_OutlineRenderContextPtr);
@@ -1260,7 +1262,7 @@ namespace
         ContextManager::SetIndexBuffer(m_PlaneMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
 
         ContextManager::SetInputLayout(m_CameraInputLayoutPtr);
-        ContextManager::SetTopology(STopology::LineList);
+        ContextManager::SetTopology(STopology::TriangleList);
         
         SDrawCallConstantBuffer BufferData;
 
@@ -1275,6 +1277,8 @@ namespace
 
             ContextManager::DrawIndexed(m_PlaneMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
         }
+
+        Performance::EndEvent();
     }
 
     // -----------------------------------------------------------------------------
