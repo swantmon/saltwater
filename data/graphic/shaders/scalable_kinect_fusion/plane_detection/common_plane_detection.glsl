@@ -49,12 +49,27 @@ ivec2 SphericalToBin(float Azimuth, float Inclination, int AzimuthBinCount, int 
     return ivec2(AzimuthBin, InclinationBin);
 }
 
+ivec2 SphericalToBin(vec2 Spherical, int AzimuthBinCount, int InclinationBinCount)
+{
+    return SphericalToBin(Spherical.x, Spherical.y, AzimuthBinCount, InclinationBinCount);
+}
+
 vec2 BinToSpherical(ivec2 Bin, int AzimuthBinCount, int InclinationBinCount)
 {
     float Azimuth = (float(Bin.x) / AzimuthBinCount - 0.5f) * g_Tau;
     float Inclination = (float(Bin.y) / InclinationBinCount) * g_Pi;
 
     return vec2(Azimuth, Inclination);
+}
+
+ivec2 CartesianToBin(vec3 Normal, int AzimuthBinCount, int InclinationBinCount)
+{
+    return SphericalToBin(CartesianToSpherical(Normal), AzimuthBinCount, InclinationBinCount);
+}
+
+vec3 BinToCartesian(ivec2 Bin, int AzimuthBinCount, int InclinationBinCount)
+{
+    return SphericalToCartesian(BinToSpherical(Bin, AzimuthBinCount, InclinationBinCount));
 }
 
 int PlaneDistanceToBin(float D, int BinCount)
