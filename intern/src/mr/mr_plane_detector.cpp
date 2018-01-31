@@ -136,25 +136,28 @@ namespace MR
         const int WorkGroupsX = DivUp(g_HistogramSize[0], g_TileSize2D);
         const int WorkGroupsY = int(_rPlanes.size());
 
-        ContextManager::SetShaderCS(m_PlaneExtractionCSPtr);
-        ContextManager::SetConstantBuffer(0, m_HistogramConstantBuffer);
-        ContextManager::SetResourceBuffer(0, m_PlaneCountBuffer);
-        ContextManager::SetResourceBuffer(1, m_PlaneBuffer);
-        ContextManager::SetImageTexture(0, m_Histogram);
-        ContextManager::SetImageTexture(1, m_VertexMap);
-        ContextManager::SetImageTexture(2, m_NormalMap);
-
-        ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
-
-        void* pBufferData = BufferManager::MapBuffer(m_PlaneBuffer, CBuffer::EMap::Read);
-
-        for (int32_t i = 0; i < _rPlanes.size(); ++i)
+        if (WorkGroupsY > 0) // Was at least one plane found?
         {
-            Base::Float4 Plane = static_cast<Base::Float4*>(pBufferData)[i];
-            _rPlanes[i] = Plane;
-        }
+            ContextManager::SetShaderCS(m_PlaneExtractionCSPtr);
+            ContextManager::SetConstantBuffer(0, m_HistogramConstantBuffer);
+            ContextManager::SetResourceBuffer(0, m_PlaneCountBuffer);
+            ContextManager::SetResourceBuffer(1, m_PlaneBuffer);
+            ContextManager::SetImageTexture(0, m_Histogram);
+            ContextManager::SetImageTexture(1, m_VertexMap);
+            ContextManager::SetImageTexture(2, m_NormalMap);
 
-        BufferManager::UnmapBuffer(m_PlaneBuffer);
+            ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+
+            void* pBufferData = BufferManager::MapBuffer(m_PlaneBuffer, CBuffer::EMap::Read);
+
+            for (int32_t i = 0; i < _rPlanes.size(); ++i)
+            {
+                Base::Float4 Plane = static_cast<Base::Float4*>(pBufferData)[i];
+                _rPlanes[i] = Plane;
+            }
+
+            BufferManager::UnmapBuffer(m_PlaneBuffer);
+        }
     }
 
     // -----------------------------------------------------------------------------
