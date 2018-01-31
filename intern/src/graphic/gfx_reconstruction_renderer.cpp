@@ -1250,7 +1250,7 @@ namespace
     {
         Performance::BeginEvent("Plane Rendering");
 
-        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Wireframe));
 
         ContextManager::SetRenderContext(m_OutlineRenderContextPtr);
         ContextManager::SetShaderVS(m_OutlineVSPtr);
