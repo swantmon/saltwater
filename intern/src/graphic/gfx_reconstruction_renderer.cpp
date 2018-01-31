@@ -231,7 +231,7 @@ namespace
         m_RenderRootQueue   = Base::CProgramParameters::GetInstance().GetBoolean("mr:slam:rendering:queues:root"        , false);
         m_RenderLevel1Queue = Base::CProgramParameters::GetInstance().GetBoolean("mr:slam:rendering:queues:level1"      , false);
         m_RenderLevel2Queue = Base::CProgramParameters::GetInstance().GetBoolean("mr:slam:rendering:queues:level2"      , false);
-        m_RenderHistogram   = Base::CProgramParameters::GetInstance().GetBoolean("mr:slam:rendering:normal_histogram"   , false);
+        m_RenderHistogram   = Base::CProgramParameters::GetInstance().GetBoolean("mr:slam:rendering:histogram"          , false);
         m_RenderPlanes      = Base::CProgramParameters::GetInstance().GetBoolean("mr:slam:rendering:planes"             , false);
     }
 
