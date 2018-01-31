@@ -21,8 +21,8 @@ layout(std430, binding = 1) buffer PlaneBuffer
 // -----------------------------------------------------------------------------
 
 layout (binding = 0, r32i) uniform iimage2D cs_Histogram;
-layout (binding = 1, MAP_TEXTURE_FORMAT) uniform image2D cs_VertexMap;
-layout (binding = 2, MAP_TEXTURE_FORMAT) uniform image2D cs_NormalMap;
+//layout (binding = 1, MAP_TEXTURE_FORMAT) uniform image2D cs_VertexMap;
+//layout (binding = 2, MAP_TEXTURE_FORMAT) uniform image2D cs_NormalMap;
 
 // -------------------------------------------------------------------------------------
 // Functions

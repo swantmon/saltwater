@@ -1287,7 +1287,7 @@ namespace
             Base::Float4x4 Rotation;
 
             Translation.SetTranslation(Base::Float4(Vertex0[0], Vertex0[1], Vertex0[2], 1.0f));
-            Rotation.LookTo(Vertex0, PlaneNormal, Base::Float3(0,1,0));
+            Rotation.LookTo(Vertex0, PlaneNormal, Base::Float3(0.0f, 1.0f, 0.0f));
 
             BufferData.m_WorldMatrix = Translation * Rotation;
             BufferData.m_Color = Float4(1.0f, 1.0f, 0.0f, 1.0f);
