@@ -1270,23 +1270,24 @@ namespace
 
         auto& Planes = m_pScalableReconstructor->GetPlaneDetector().GetPlanes();
 
-        for (auto& rPlane : Planes)
+        for (auto rPlane : Planes)
         {
+            Base::Float3 PlaneNormal = Base::Float3(rPlane[0], rPlane[1], rPlane[2]).Normalize();
+
             Base::Float3 Vertex0 = Base::Float3(0.0f);
             Base::Float3 Vertex1 = Base::Float3(1.0f);
 
-            Vertex0[2] = -rPlane[3] / rPlane[2];
-            Vertex1[2] = (-rPlane[3] - rPlane[0] - rPlane[1]) / rPlane[2];
+            Vertex0[2] = -rPlane[3] / PlaneNormal[2];
+            Vertex1[2] = (-rPlane[3] - PlaneNormal[0] - PlaneNormal[1]) / PlaneNormal[2];
 
-            Base::Float3 Normal = Base::Float3(rPlane[0], rPlane[1], rPlane[2]).Normalize();
-            Base::Float3 Binormal = (Vertex0 - Vertex1).Normalize();
-            Base::Float3 Tangent = Normal.CrossProduct(Binormal).Normalize();
+            Base::Float3 Binormal = (Vertex1 - Vertex0).Normalize();
+            Base::Float3 Tangent = PlaneNormal.CrossProduct(Binormal).Normalize();
 
             Base::Float4x4 Translation;
             Base::Float4x4 Rotation;
 
             Translation.SetTranslation(Base::Float4(Vertex0[0], Vertex0[1], Vertex0[2], 1.0f));
-            Rotation.LookTo(Vertex0, Normal, Base::Float3(0.0f, 1.0f, 0.0f));
+            Rotation.LookTo(Vertex0, PlaneNormal, Base::Float3(0,1,0));
 
             BufferData.m_WorldMatrix = Translation * Rotation;
             BufferData.m_Color = Float4(1.0f, 1.0f, 0.0f, 1.0f);
