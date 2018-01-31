@@ -38,7 +38,7 @@ void main()
 
     const int Count = imageLoad(cs_Histogram, ivec2(gl_GlobalInvocationID.xy)).x;
 
-    if (Count > 500)
+    if (Count > 50)
     {
         bool IsHotSpot = true;
 
@@ -53,7 +53,7 @@ void main()
         if (IsHotSpot)
         {
             float D = BinToPlaneDistance(int(gl_GlobalInvocationID.x), g_AzimuthBinCount);
-            g_Planes[PlaneIndex].w = D;
+            g_Planes[PlaneIndex].w = -D;
         }
     }
 }
