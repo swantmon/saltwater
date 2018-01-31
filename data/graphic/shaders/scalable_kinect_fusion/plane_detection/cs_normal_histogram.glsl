@@ -21,7 +21,14 @@ void main()
 {    
     const int x = int(gl_GlobalInvocationID.x);
     const int y = int(gl_GlobalInvocationID.y);
-    
+
+    ivec2 ImageSize = imageSize(cs_VertexMap);
+
+    if (x >= ImageSize.x || y >= ImageSize.y)
+    {
+        return;
+    }
+
     vec3 Normal = vec3(0.0f);
     int Count = 0;
     

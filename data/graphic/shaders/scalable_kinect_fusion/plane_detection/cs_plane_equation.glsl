@@ -33,6 +33,13 @@ void main()
 {    
     const int x = int(gl_GlobalInvocationID.x);
     const int y = int(gl_GlobalInvocationID.y);
+
+    ivec2 ImageSize = imageSize(cs_VertexMap);
+    if (x >= ImageSize.x || y >= ImageSize.y)
+    {
+        return;
+    }
+
     vec3 Plane = normalize(g_Planes[g_PlaneIndex].xyz);
     vec3 Normal = mat3(g_InvPoseMatrix) * normalize(imageLoad(cs_NormalMap, ivec2(x, y)).xyz);
     vec3 Vertex = normalize(imageLoad(cs_VertexMap, ivec2(x, y)).xyz);
