@@ -1278,10 +1278,17 @@ namespace
             Vertex0[2] = -rPlane[3] / rPlane[2];
             Vertex1[2] = (-rPlane[3] - rPlane[0] - rPlane[1]) / rPlane[2];
 
-            float Distance0 = Vertex0.DotProduct(Base::Float3(rPlane[0], rPlane[1], rPlane[2])) + rPlane[3];
-            float Distance1 = Vertex1.DotProduct(Base::Float3(rPlane[0], rPlane[1], rPlane[2])) + rPlane[3];
+            Base::Float3 Normal = Base::Float3(rPlane[0], rPlane[1], rPlane[2]).Normalize();
+            Base::Float3 Binormal = (Vertex0 - Vertex1).Normalize();
+            Base::Float3 Tangent = Normal.CrossProduct(Binormal).Normalize();
 
-            BufferData.m_WorldMatrix.SetIdentity();
+            Base::Float4x4 Translation;
+            Base::Float4x4 Rotation;
+
+            Translation.SetTranslation(Base::Float4(Vertex0[0], Vertex0[1], Vertex0[2], 1.0f));
+            Rotation.LookTo(Vertex0, Normal, Base::Float3(0.0f, 1.0f, 0.0f));
+
+            BufferData.m_WorldMatrix = Translation * Rotation;
             BufferData.m_Color = Float4(1.0f, 1.0f, 0.0f, 1.0f);
 
             BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
