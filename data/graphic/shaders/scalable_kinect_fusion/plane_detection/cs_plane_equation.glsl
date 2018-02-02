@@ -33,6 +33,7 @@ void main()
 {    
     const int x = int(gl_GlobalInvocationID.x);
     const int y = int(gl_GlobalInvocationID.y);
+    const int z = int(gl_WorkGroupID.z);
 
     ivec2 ImageSize = imageSize(cs_VertexMap);
     if (x >= ImageSize.x || y >= ImageSize.y)
@@ -40,7 +41,7 @@ void main()
         return;
     }
 
-    vec3 Plane = normalize(g_Planes[g_PlaneIndex].xyz);
+    vec3 Plane = normalize(g_Planes[z].xyz);
     vec3 Normal = mat3(g_InvPoseMatrix) * normalize(imageLoad(cs_NormalMap, ivec2(x, y)).xyz);
     vec3 Vertex = (g_InvPoseMatrix * vec4(imageLoad(cs_VertexMap, ivec2(x, y)).xyz, 1.0f)).xyz;
     
@@ -50,7 +51,7 @@ void main()
     
         int Bin = PlaneDistanceToBin(D, g_AzimuthBinCount);
     
-        imageAtomicAdd(cs_Histogram, ivec2(Bin, g_PlaneIndex), 1);
+        imageAtomicAdd(cs_Histogram, ivec2(Bin, z), 1);
     }
 }
 

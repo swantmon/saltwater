@@ -177,13 +177,7 @@ namespace MR
         ContextManager::SetImageTexture(1, m_VertexMap);
         ContextManager::SetImageTexture(2, m_NormalMap);
 
-        for (int i = 0; i < _rPlanes.size(); ++ i)
-        {
-            // We just reuse the Atomic Counter as an Index
-            BufferManager::UploadBufferData(m_PlaneCountBuffer, &i, 0, sizeof(int32_t));
-
-            ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
-        }
+        ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, static_cast<int>(_rPlanes.size()));
     }
 
     // -----------------------------------------------------------------------------
