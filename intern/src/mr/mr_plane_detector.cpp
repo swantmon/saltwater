@@ -77,14 +77,14 @@ namespace MR
         Performance::EndEvent();
 
         Performance::BeginDurationEvent("Plane Candidate Extraction");
-        ExtractPlaneCandidates(NewPlanes);
+        ExtractPlaneCandidates();
         Performance::EndEvent();
 
         // We reuse the normal histogram for the plane distance because why not
         TextureManager::ClearTexture(m_Histogram);
         
         Performance::BeginDurationEvent("Plane Equation Calculation");
-        FindPlaneEquations(NewPlanes);
+        FindPlaneEquations();
         Performance::EndEvent();
 
         Performance::BeginDurationEvent("Plane Equation Extraction");
@@ -98,90 +98,6 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CPlaneDetector::ExtractPlaneCandidates(Float4Vector& _rPlanes)
-    {
-        const int WorkGroupsX = DivUp(g_HistogramSize[0], g_TileSize2D);
-        const int WorkGroupsY = DivUp(g_HistogramSize[1], g_TileSize2D);
-
-        ContextManager::Barrier();
-        
-        ContextManager::SetShaderCS(m_PlaneCandidatesCSPtr);
-        ContextManager::SetConstantBuffer(0, m_HistogramConstantBuffer);
-        ContextManager::SetResourceBuffer(0, m_PlaneCountBuffer);
-        ContextManager::SetResourceBuffer(1, m_PlaneBuffer);
-        ContextManager::SetImageTexture(0, m_Histogram);
-        ContextManager::SetImageTexture(1, m_VertexMap);
-        ContextManager::SetImageTexture(2, m_NormalMap);
-        ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
-
-        void* pBufferData = BufferManager::MapBufferRange(m_PlaneCountBuffer, CBuffer::EMap::Read, 0, sizeof(int32_t));
-        int32_t PlaneCount = *static_cast<int32_t*>(pBufferData);
-        BufferManager::UnmapBuffer(m_PlaneCountBuffer);
-
-        pBufferData = BufferManager::MapBuffer(m_PlaneBuffer, CBuffer::EMap::Read);
-        
-        for (int32_t i = 0; i < PlaneCount; ++ i)
-        {
-            Base::Float4 Plane = static_cast<Base::Float4*>(pBufferData)[i];
-            _rPlanes.push_back(Plane);
-        }
-
-        BufferManager::UnmapBuffer(m_PlaneBuffer);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CPlaneDetector::ExtractPlanes(Float4Vector& _rPlanes)
-    {
-        const int WorkGroupsX = DivUp(g_HistogramSize[0], g_TileSize2D);
-        const int WorkGroupsY = int(_rPlanes.size());
-
-        if (WorkGroupsY > 0) // Was at least one plane found?
-        {
-            ContextManager::SetShaderCS(m_PlaneExtractionCSPtr);
-            ContextManager::SetConstantBuffer(0, m_HistogramConstantBuffer);
-            ContextManager::SetResourceBuffer(0, m_PlaneCountBuffer);
-            ContextManager::SetResourceBuffer(1, m_PlaneBuffer);
-            ContextManager::SetImageTexture(0, m_Histogram);
-            ContextManager::SetImageTexture(1, m_VertexMap);
-            ContextManager::SetImageTexture(2, m_NormalMap);
-
-            ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
-
-            void* pBufferData = BufferManager::MapBuffer(m_PlaneBuffer, CBuffer::EMap::Read);
-
-            for (int32_t i = 0; i < _rPlanes.size(); ++i)
-            {
-                Base::Float4 Plane = static_cast<Base::Float4*>(pBufferData)[i];
-                _rPlanes[i] = Plane;
-            }
-
-            BufferManager::UnmapBuffer(m_PlaneBuffer);
-        }
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CPlaneDetector::FindPlaneEquations(Float4Vector& _rPlanes)
-    {
-        const int WorkGroupsX = DivUp(m_VertexMap->GetNumberOfPixelsU(), g_TileSize2D);
-        const int WorkGroupsY = DivUp(m_VertexMap->GetNumberOfPixelsV(), g_TileSize2D);
-
-        ContextManager::Barrier();
-
-        ContextManager::SetShaderCS(m_PlaneEquationCSPtr);
-        ContextManager::SetConstantBuffer(0, m_HistogramConstantBuffer);
-        ContextManager::SetResourceBuffer(0, m_PlaneCountBuffer);
-        ContextManager::SetResourceBuffer(1, m_PlaneBuffer);
-        ContextManager::SetImageTexture(0, m_Histogram);
-        ContextManager::SetImageTexture(1, m_VertexMap);
-        ContextManager::SetImageTexture(2, m_NormalMap);
-
-        ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, static_cast<int>(_rPlanes.size()));
-    }
-
-    // -----------------------------------------------------------------------------
-
     void CPlaneDetector::CreateHistogram(const Base::Float4x4& _PoseMatrix)
     {
         //////////////////////////////////////////////////////////////////////////////////////
@@ -189,7 +105,7 @@ namespace MR
         // "Histogram of Oriented Normal Vectors for Object Recognition with a Depth Sensor" (HONV)
         // We use the lowest resolution of the pyramid
         //////////////////////////////////////////////////////////////////////////////////////
-        
+
         const int WorkGroupsX = DivUp(m_VertexMap->GetNumberOfPixelsU(), g_TileSize2D);
         const int WorkGroupsY = DivUp(m_VertexMap->GetNumberOfPixelsV(), g_TileSize2D);
 
@@ -212,11 +128,86 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
+    void CPlaneDetector::ExtractPlaneCandidates()
+    {
+        const int WorkGroupsX = DivUp(g_HistogramSize[0], g_TileSize2D);
+        const int WorkGroupsY = DivUp(g_HistogramSize[1], g_TileSize2D);
+
+        ContextManager::Barrier();
+        
+        ContextManager::SetShaderCS(m_PlaneCandidatesCSPtr);
+        ContextManager::SetConstantBuffer(0, m_HistogramConstantBuffer);
+        ContextManager::SetResourceBuffer(0, m_PlaneCountBuffer);
+        ContextManager::SetResourceBuffer(1, m_PlaneBuffer);
+        ContextManager::SetImageTexture(0, m_Histogram);
+        ContextManager::SetImageTexture(1, m_VertexMap);
+        ContextManager::SetImageTexture(2, m_NormalMap);
+        ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CPlaneDetector::FindPlaneEquations()
+    {
+        const int WorkGroupsX = DivUp(m_VertexMap->GetNumberOfPixelsU(), g_TileSize2D);
+        const int WorkGroupsY = DivUp(m_VertexMap->GetNumberOfPixelsV(), g_TileSize2D);
+
+        Base::UInt2 Indirect = Base::UInt2(WorkGroupsX, WorkGroupsY);
+
+        BufferManager::UploadBufferData(m_PlaneCountBuffer, &Indirect, 0, sizeof(uint32_t) * 2);
+
+        ContextManager::Barrier();
+
+        ContextManager::SetShaderCS(m_PlaneEquationCSPtr);
+        ContextManager::SetConstantBuffer(0, m_HistogramConstantBuffer);
+        ContextManager::SetResourceBuffer(0, m_PlaneCountBuffer);
+        ContextManager::SetResourceBuffer(1, m_PlaneBuffer);
+        ContextManager::SetImageTexture(0, m_Histogram);
+        ContextManager::SetImageTexture(1, m_VertexMap);
+        ContextManager::SetImageTexture(2, m_NormalMap);
+
+        ContextManager::DispatchIndirect(m_PlaneCountBuffer);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CPlaneDetector::ExtractPlanes(Float4Vector& _rPlanes)
+    {
+        const int WorkGroupsX = DivUp(g_HistogramSize[0], g_TileSize2D);
+        
+        BufferManager::UploadBufferData(m_PlaneCountBuffer, &WorkGroupsX, 0, sizeof(uint32_t));
+
+        ContextManager::SetShaderCS(m_PlaneExtractionCSPtr);
+        ContextManager::SetConstantBuffer(0, m_HistogramConstantBuffer);
+        ContextManager::SetResourceBuffer(0, m_PlaneCountBuffer);
+        ContextManager::SetResourceBuffer(1, m_PlaneBuffer);
+        ContextManager::SetImageTexture(0, m_Histogram);
+        ContextManager::SetImageTexture(1, m_VertexMap);
+        ContextManager::SetImageTexture(2, m_NormalMap);
+
+        ContextManager::DispatchIndirect(m_PlaneCountBuffer);
+
+        void* pBufferData = BufferManager::MapBuffer(m_PlaneCountBuffer, CBuffer::EMap::Read);
+        _rPlanes.resize(static_cast<uint32_t*>(pBufferData)[2]); // z component of the indirect buffer is the plane count
+        BufferManager::UnmapBuffer(m_PlaneBuffer);
+
+        pBufferData = BufferManager::MapBuffer(m_PlaneBuffer, CBuffer::EMap::Read);
+        for (int32_t i = 0; i < _rPlanes.size(); ++i)
+        {
+            Base::Float4 Plane = static_cast<Base::Float4*>(pBufferData)[i];
+            _rPlanes[i] = Plane;
+        }
+        BufferManager::UnmapBuffer(m_PlaneBuffer);
+    }
+
+
+    // -----------------------------------------------------------------------------
+
     void CPlaneDetector::ClearData()
     {
         TextureManager::ClearTexture(m_Histogram);
 
-        Base::Int2 Counter = Base::Int2(0, g_MaxDetectablePlaneCount);  // Just set counter to 0
+        Base::UInt4 Counter = Base::UInt4(1, 1, 0, g_MaxDetectablePlaneCount);  // Just set counter to 0
         BufferManager::UploadBufferData(m_PlaneCountBuffer, &Counter, 0, sizeof(Counter));
     }
 

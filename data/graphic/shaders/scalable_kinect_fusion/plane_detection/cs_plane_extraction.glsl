@@ -4,13 +4,6 @@
 
 #include "scalable_kinect_fusion/plane_detection/common_plane_detection.glsl"
 
-layout(std430, binding = 0) buffer PlaneCountBuffer
-{
-    int g_PlaneIndex;
-    int g_MaxPlaneCount;
-    ivec2 Padding;
-};
-
 layout(std430, binding = 1) buffer PlaneBuffer
 {
     vec4 g_Planes[];
@@ -32,11 +25,10 @@ layout (local_size_x = TILE_SIZE2D, local_size_y = 1, local_size_z = 1) in;
 void main()
 {    
     const int x = int(gl_GlobalInvocationID.x);
-    const int y = int(gl_GlobalInvocationID.y);
-    
-    const int PlaneIndex = int(gl_WorkGroupID.y);
 
-    const int Count = imageLoad(cs_Histogram, ivec2(gl_GlobalInvocationID.xy)).x;
+    const uint PlaneIndex = gl_WorkGroupID.z;
+
+    const int Count = imageLoad(cs_Histogram, ivec2(gl_GlobalInvocationID.xz)).x;
 
     if (Count > 50)
     {
@@ -44,7 +36,7 @@ void main()
 
         for(int i = -2; i <= 2; ++ i)
         {
-            if (imageLoad(cs_Histogram, ivec2(gl_GlobalInvocationID.xy)).x > Count)
+            if (imageLoad(cs_Histogram, ivec2(gl_GlobalInvocationID.xz)).x > Count)
             {
                 IsHotSpot = false;
             }

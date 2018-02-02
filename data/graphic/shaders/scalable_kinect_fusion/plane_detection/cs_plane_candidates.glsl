@@ -6,9 +6,10 @@
 
 layout(std430, binding = 0) buffer PlaneCountBuffer
 {
-    int g_PlaneCount;
-    int g_MaxPlaneCount;
-    ivec2 Padding;
+    uint g_IndirectX;
+    uint g_IndirectY;
+    uint g_IndirectZ;
+    uint g_MaxPlaneCount;
 };
 
 layout(std430, binding = 1) buffer PlaneBuffer
@@ -53,7 +54,7 @@ void main()
 
         if (IsHotspot)
         {
-            int PlaneIndex = atomicAdd(g_PlaneCount, 1);
+            uint PlaneIndex = atomicAdd(g_IndirectZ, 1);
 
             if (PlaneIndex < g_MaxPlaneCount)
             {

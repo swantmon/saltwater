@@ -34,8 +34,8 @@ namespace MR
 	private:
 
         void CreateHistogram(const Base::Float4x4& _PoseMatrix);
-        void ExtractPlaneCandidates(Float4Vector& _rPlanes);
-        void FindPlaneEquations(Float4Vector& _rPlanes);
+        void ExtractPlaneCandidates();
+        void FindPlaneEquations();
         void ExtractPlanes(Float4Vector& _rPlanes);
 
         void ClearData();
