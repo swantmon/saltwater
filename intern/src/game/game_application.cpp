@@ -58,7 +58,7 @@ namespace
     private:
         
         Game::CState::EStateType m_CurrentState;
-        Base::Short2             m_LatestMousePosition;
+        Base::Float2             m_LatestMousePosition;
         SDL_Window*              m_pWindow;
         unsigned int             m_GameWindowID;
         
