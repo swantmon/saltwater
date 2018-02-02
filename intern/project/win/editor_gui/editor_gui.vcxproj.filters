@@ -5,11 +5,6 @@
       <UniqueIdentifier>{99349809-55BA-4b9d-BF79-8FDBB0286EB3}</UniqueIdentifier>
       <Extensions>ui</Extensions>
     </Filter>
-    <Filter Include="Generated Files">
-      <UniqueIdentifier>{71ED8ED8-ACB9-4CE9-BBE1-E00B30144E11}</UniqueIdentifier>
-      <Extensions>moc;h;cpp</Extensions>
-      <SourceControlFiles>False</SourceControlFiles>
-    </Filter>
     <Filter Include="Widgets">
       <UniqueIdentifier>{a5bea1c9-0d0a-4d89-a6cf-ec3d3bd6cdc0}</UniqueIdentifier>
     </Filter>
@@ -22,36 +17,23 @@
     <Filter Include="Form Files\Inspector">
       <UniqueIdentifier>{6b50727c-1fa1-4ff6-86dd-c95526cdcb5d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Generated Files">
+      <UniqueIdentifier>{71ED8ED8-ACB9-4CE9-BBE1-E00B30144E11}</UniqueIdentifier>
+      <Extensions>moc;h;cpp</Extensions>
+      <ParseFiles>true</ParseFiles>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\editor_gui\edit_gui.cpp" />
-    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_mainwindow.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\editor_gui\edit_mainwindow.cpp" />
     <ClCompile Include="..\..\..\src\editor_gui\edit_render_context.cpp">
       <Filter>Widgets</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_render_context.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_newscenedialog.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\editor_gui\edit_scenegraph.cpp">
       <Filter>Widgets</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_scenegraph.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\editor_gui\edit_inspector.cpp">
       <Filter>Widgets</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_transformation.cpp">
-      <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\editor_gui\edit_newscenedialog.cpp">
       <Filter>Dialogs</Filter>
@@ -62,41 +44,20 @@
     <ClCompile Include="..\..\..\src\editor_gui\edit_inspector_pointlight.cpp">
       <Filter>Widgets\Inspector</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_pointlight.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\editor_gui\edit_inspector_environment.cpp">
       <Filter>Widgets\Inspector</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_environment.cpp">
-      <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\editor_gui\edit_inspector_bloom.cpp">
       <Filter>Widgets\Inspector</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_bloom.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\editor_gui\edit_inspector_dof.cpp">
       <Filter>Widgets\Inspector</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_dof.cpp">
-      <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\editor_gui\edit_inspector_ssr.cpp">
       <Filter>Widgets\Inspector</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_ssr.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\editor_gui\edit_inspector_volumefog.cpp">
       <Filter>Widgets\Inspector</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_volumefog.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_clickable_label.cpp">
-      <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\editor_gui\edit_clickable_label.cpp">
       <Filter>Widgets</Filter>
@@ -104,85 +65,124 @@
     <ClCompile Include="..\..\..\src\editor_gui\edit_inspector_sun.cpp">
       <Filter>Widgets\Inspector</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_sun.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\editor_gui\edit_inspector_entity.cpp">
       <Filter>Widgets\Inspector</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_entity.cpp">
-      <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\editor_gui\edit_inspector_material.cpp">
       <Filter>Widgets\Inspector</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_material.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\editor_gui\edit_inspector_camera.cpp">
       <Filter>Widgets\Inspector</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_camera.cpp">
-      <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\editor_gui\edit_inspector_arcontroller.cpp">
       <Filter>Widgets\Inspector</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_arcontroller.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\editor_gui\edit_inspector_arcontroller_marker.cpp">
       <Filter>Widgets\Inspector</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_arcontroller_marker.cpp">
-      <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\editor_gui\edit_inspector_post_aa.cpp">
       <Filter>Widgets\Inspector</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_post_aa.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\editor_gui\edit_asset_browser.cpp">
       <Filter>Widgets</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_asset_browser.cpp">
-      <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\editor_gui\edit_texture_value.cpp">
       <Filter>Widgets</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_texture_value.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\editor_gui\edit_asset_file_list.cpp">
       <Filter>Widgets</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_asset_file_list.cpp">
-      <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\editor_gui\edit_inspector_texture.cpp">
       <Filter>Widgets\Inspector</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_texture.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\editor_gui\edit_inspector_arealight.cpp">
       <Filter>Widgets\Inspector</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_arealight.cpp">
-      <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\editor_gui\edit_tone_mapping.cpp">
       <Filter>Widgets</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_tone_mapping.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\editor_gui\edit_inspector_light_probe.cpp">
       <Filter>Widgets\Inspector</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_scenegraph.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_asset_file_list.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_texture_value.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_clickable_label.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_arcontroller.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_newscenedialog.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_arcontroller_marker.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_arealight.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_bloom.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_camera.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_dof.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_entity.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_environment.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_light_probe.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_material.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_pointlight.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_post_aa.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_ssr.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_sun.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_texture.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_transformation.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_volumefog.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_asset_browser.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_render_context.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_tone_mapping.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_mainwindow.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -341,77 +341,5 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\editor_gui\edit_gui.h" />
-    <ClInclude Include="..\..\..\src\editor_gui\ui_edit_mainwindow.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\editor_gui\ui_edit_newscenedialog.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\editor_gui\ui_edit_inspector_transformation.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\editor_gui\ui_edit_inspector_environment.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\editor_gui\ui_edit_inspector_bloom.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\editor_gui\ui_edit_inspector_ssr.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\editor_gui\ui_edit_inspector_dof.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\editor_gui\ui_edit_inspector_volumefog.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\editor_gui\ui_edit_inspector_sun.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\editor_gui\ui_edit_inspector_entity.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\editor_gui\ui_edit_inspector_material.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\editor_gui\ui_edit_inspector_camera.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\editor_gui\ui_edit_inspector_arcontroller.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\editor_gui\ui_edit_inspector_arcontroller_marker.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\editor_gui\ui_edit_inspector_artrackedobject.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\editor_gui\ui_edit_inspector_post_aa.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\editor_gui\ui_edit_asset_browser.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\editor_gui\ui_edit_inspector.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\editor_gui\ui_edit_texture_value.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\editor_gui\ui_edit_inspector_texture.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\editor_gui\ui_edit_tone_mapping.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\editor_gui\ui_edit_inspector_area_light.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\editor_gui\ui_edit_inspector_point_light.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\editor_gui\ui_edit_inspector_light_probe.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
   </ItemGroup>
 </Project>
