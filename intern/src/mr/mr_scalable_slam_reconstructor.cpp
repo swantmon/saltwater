@@ -2133,6 +2133,8 @@ namespace MR
 
     void CScalableSLAMReconstructor::ClearBuffer(CBufferPtr BufferPtr, size_t Size)
     {
+        (void)Size;
+
         assert(Size > 0);
         assert(BufferPtr.IsValid());
         
