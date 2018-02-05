@@ -89,6 +89,8 @@ namespace
 
     void CMaterialHelper::OnNewMaterial(Edit::CMessage& _rMessage)
     {
+        (void)_rMessage;
+
         // -----------------------------------------------------------------------------
         // Material
         // -----------------------------------------------------------------------------
@@ -275,12 +277,12 @@ namespace
         bool HasBumpMap      = false;
         bool HasAOMap        = false;
 
-        unsigned int ColorMapName;
-        unsigned int NormalMapName;
-        unsigned int RoughnessMapName;
-        unsigned int MetalMapName;
-        unsigned int BumpMapName;
-        unsigned int AOMapName;
+        unsigned int ColorMapName = 0;
+        unsigned int NormalMapName = 0;
+        unsigned int RoughnessMapName = 0;
+        unsigned int MetalMapName = 0;
+        unsigned int BumpMapName = 0;
+        unsigned int AOMapName = 0;
 
         // -----------------------------------------------------------------------------
         // Read values

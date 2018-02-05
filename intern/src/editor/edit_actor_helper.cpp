@@ -100,6 +100,7 @@ namespace
 
     void CActorHelper::OnNewActorModel(Edit::CMessage& _rMessage)
     {
+        (void)_rMessage;
     }
 
     // -----------------------------------------------------------------------------

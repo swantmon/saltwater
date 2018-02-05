@@ -1134,6 +1134,7 @@ namespace ControlManager
 {
     void OnStart(const SConfiguration& _rConfiguration)
     {
+        (void)_rConfiguration;
     }
 
     // -----------------------------------------------------------------------------
@@ -1164,6 +1165,9 @@ namespace ControlManager
 
     void OnDisplayGeometryChanged(int _DisplayRotation, int _Width, int _Height)
     {
+        (void)_DisplayRotation;
+        (void)_Width;
+        (void)_Height;
     }
 
     void OnDraw()
