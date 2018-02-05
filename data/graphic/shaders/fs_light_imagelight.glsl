@@ -35,7 +35,7 @@ layout(std140, binding = 1) uniform UB1
     vec4 ps_ConstantBufferData0;
 };
 
-layout(std430, row_major, binding = 0) readonly buffer BB0
+layout(std430, binding = 0) readonly buffer BB0
 {
     SProbeProperties ps_LightProperties[MAX_NUMBER_OF_PROBES];
 };

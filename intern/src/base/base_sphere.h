@@ -9,7 +9,8 @@
 #pragma once
 
 #include "base/base_defines.h"
-#include "base/base_vector3.h"
+
+#include "glm.hpp"
 
 #include <assert.h>
 
@@ -36,7 +37,7 @@ namespace MATH
         typedef X*           XPtr;
         typedef const X*     XConstPtr;
         
-        typedef CVector3<T>  CVector;
+        typedef glm::vec3    CVector;
         
     public:
         
@@ -229,7 +230,7 @@ namespace MATH
     template<typename T>
     bool CSphere<T>::Contains(const CVector& _rPoint) const
     {
-        X Distance = (m_Center - _rPoint).Length();
+        X Distance = (m_Center - _rPoint).length();
         
         return Distance <= m_Radius;
     }
@@ -239,7 +240,7 @@ namespace MATH
     template<typename T>
     bool CSphere<T>::Contains(const CThis& _rSphere) const
     {
-        X Distance        = (m_Center - _rSphere.m_Center).Length();
+        X Distance        = (m_Center - _rSphere.m_Center).length();
         X MinimalDistance = m_Radius - _rSphere.m_Radius;
         
         return Distance <= MinimalDistance;
@@ -250,7 +251,7 @@ namespace MATH
     template<typename T>
     bool CSphere<T>::Intersects(const CThis& _rSphere) const
     {
-        X Distance        = (m_Center - _rSphere.m_Center).Length();
+        X Distance        = (m_Center - _rSphere.m_Center).length();
         X MinimalDistance = m_Radius + _rSphere.m_Radius;
         
         return Distance <= MinimalDistance;

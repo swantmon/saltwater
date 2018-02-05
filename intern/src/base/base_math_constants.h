@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "base/base_defines.h"
+
 namespace MATH
 {
     template <typename T>

@@ -1,7 +1,5 @@
 ﻿
 #include "base/base_crc.h"
-#include "base/base_vector3.h"
-#include "base/base_vector4.h"
 
 #include "editor_gui/edit_inspector_Texture.h"
 #include "editor_gui/edit_texture_value.h"

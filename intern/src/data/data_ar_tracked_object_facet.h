@@ -1,8 +1,6 @@
 
 #pragma once
 
-#include "base/base_vector2.h"
-
 namespace Dt
 {
     class CARTrackedObjectPluginFacet

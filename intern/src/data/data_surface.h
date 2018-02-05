@@ -8,9 +8,6 @@
 
 #pragma once
 
-#include "base/base_vector2.h"
-#include "base/base_vector3.h"
-
 #include "data/data_material.h"
 
 namespace Dt
@@ -52,25 +49,25 @@ namespace Dt
         BIndice* GetIndices();
         const BIndice* GetIndices() const;
 
-        void SetPositions(Base::Float3* _pPositions);
-        Base::Float3* GetPositions();
-        const Base::Float3* GetPositions() const;
+        void SetPositions(glm::vec3* _pPositions);
+        glm::vec3* GetPositions();
+        const glm::vec3* GetPositions() const;
 
-        void SetNormals(Base::Float3* _pNormals);
-        Base::Float3* GetNormals();
-        const Base::Float3* GetNormals() const;
+        void SetNormals(glm::vec3* _pNormals);
+        glm::vec3* GetNormals();
+        const glm::vec3* GetNormals() const;
 
-        void SetTangents(Base::Float3* _pTangents);
-        Base::Float3* GetTangents();
-        const Base::Float3* GetTangents() const;
+        void SetTangents(glm::vec3* _pTangents);
+        glm::vec3* GetTangents();
+        const glm::vec3* GetTangents() const;
 
-        void SetBitangents(Base::Float3* _pBitangents);
-        Base::Float3* GetBitangents();
-        const Base::Float3* GetBitangents() const;
+        void SetBitangents(glm::vec3* _pBitangents);
+        glm::vec3* GetBitangents();
+        const glm::vec3* GetBitangents() const;
 
-        void SetTexCoords(Base::Float2* _pTexCoords);
-        Base::Float2* GetTexCoords();
-        const Base::Float2* GetTexCoords() const;
+        void SetTexCoords(glm::vec2* _pTexCoords);
+        glm::vec2* GetTexCoords();
+        const glm::vec2* GetTexCoords() const;
 
         void SetMaterial(CMaterial* _pMaterial);
         CMaterial* GetMaterial();
@@ -84,11 +81,11 @@ namespace Dt
         unsigned int m_NumberOfVertices;
         
         BIndice* m_pIndices;
-        Base::Float3* m_pPositions;
-        Base::Float3* m_pNormals;
-        Base::Float3* m_pTangents;
-        Base::Float3* m_pBitangents;
-        Base::Float2* m_pTexCoords;
+        glm::vec3* m_pPositions;
+        glm::vec3* m_pNormals;
+        glm::vec3* m_pTangents;
+        glm::vec3* m_pBitangents;
+        glm::vec2* m_pTexCoords;
         
         CMaterial* m_pMaterial;
     };

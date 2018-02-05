@@ -346,7 +346,7 @@ namespace
                 pFacet->SetTexture(nullptr);
             }
 
-            pFacet->SetBackgroundColor(Base::Float3(R, G, B));
+            pFacet->SetBackgroundColor(glm::vec3(R, G, B));
 
             pFacet->SetCullingMask(CullingMask);
 
@@ -360,7 +360,7 @@ namespace
 
             pFacet->SetFar(Far);
 
-            pFacet->SetViewportRect(Base::AABB2Float(Base::Float2(X, Y), Base::Float2(W, H)));
+            pFacet->SetViewportRect(Base::AABB2Float(glm::vec2(X, Y), glm::vec2(W, H)));
             
             pFacet->SetDepth(Depth);
 

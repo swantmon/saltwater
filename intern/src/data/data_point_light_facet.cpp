@@ -1,6 +1,9 @@
 
 #include "data/data_precompiled.h"
 
+#include "base/base_math_constants.h"
+#include "base/base_math_operations.h"
+
 #include "data/data_point_light_facet.h"
 
 namespace Dt
@@ -76,42 +79,42 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CPointLightFacet::SetColor(const Base::Float3& _rColor)
+    void CPointLightFacet::SetColor(const glm::vec3& _rColor)
     {
         m_Color = _rColor;
     }
 
     // -----------------------------------------------------------------------------
 
-    Base::Float3& CPointLightFacet::GetColor()
+    glm::vec3& CPointLightFacet::GetColor()
     {
         return m_Color;
     }
 
     // -----------------------------------------------------------------------------
 
-    const Base::Float3& CPointLightFacet::GetColor() const
+    const glm::vec3& CPointLightFacet::GetColor() const
     {
         return m_Color;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CPointLightFacet::SetDirection(const Base::Float3& _rDirection)
+    void CPointLightFacet::SetDirection(const glm::vec3& _rDirection)
     {
         m_Direction = _rDirection;
     }
 
     // -----------------------------------------------------------------------------
 
-    Base::Float3& CPointLightFacet::GetDirection()
+    glm::vec3& CPointLightFacet::GetDirection()
     {
         return m_Direction;
     }
 
     // -----------------------------------------------------------------------------
 
-    const Base::Float3& CPointLightFacet::GetDirection() const
+    const glm::vec3& CPointLightFacet::GetDirection() const
     {
         return m_Direction;
     }
@@ -225,14 +228,14 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    Base::Float3& CPointLightFacet::GetLightness()
+    glm::vec3& CPointLightFacet::GetLightness()
     {
         return m_Lightness;
     }
 
     // -----------------------------------------------------------------------------
 
-    const Base::Float3& CPointLightFacet::GetLightness() const
+    const glm::vec3& CPointLightFacet::GetLightness() const
     {
         return m_Lightness;
     }
@@ -241,7 +244,7 @@ namespace Dt
 
     void CPointLightFacet::UpdateLightness()
     {
-        Base::Float3 Color;
+        glm::vec3 Color;
 
         if (m_HasTemperature)
         {

@@ -4,7 +4,8 @@
 #include "base/base_defines.h"
 #include "base/base_math_constants.h"
 #include "base/base_math_operations.h"
-#include "base/base_vector3.h"
+
+#include "glm.hpp"
 
 #include <assert.h>
 
@@ -39,7 +40,7 @@ namespace MATH
         typedef X*           XPtr;
         typedef const X*     XConstPtr;
 
-        typedef CVector3<T>  CVector;
+        typedef glm::vec3 CVector;
 
     public:
 
@@ -80,7 +81,7 @@ namespace MATH
 
     public:
 
-        inline const CVector BuildCorner(const Base::Int3& _rIndices) const;
+        inline const CVector BuildCorner(const glm::ivec3& _rIndices) const;
 
     public:
 
@@ -329,7 +330,7 @@ namespace MATH
     // -----------------------------------------------------------------------------
 
     template<typename T>
-    const typename CAABB3<T>::CVector CAABB3<T>::BuildCorner(const Base::Int3& _rIndices) const
+    const typename CAABB3<T>::CVector CAABB3<T>::BuildCorner(const glm::ivec3& _rIndices) const
     {
         assert(_rIndices[0] >=0 && _rIndices[0] < 6);
         assert(_rIndices[1] >=0 && _rIndices[1] < 6);

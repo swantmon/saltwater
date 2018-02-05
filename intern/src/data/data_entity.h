@@ -10,7 +10,6 @@
 
 #include "base/base_aabb3.h"
 #include "base/base_typedef.h"
-#include "base/base_vector3.h"
 
 #include "data/data_entity_folder.h"
 
@@ -147,9 +146,9 @@ namespace Dt
         void SetType(unsigned int _Type);
         unsigned int GetType() const;
 
-        void SetWorldPosition(const Base::Float3& _rPosition);
-        Base::Float3& GetWorldPosition();
-        const Base::Float3& GetWorldPosition() const;
+        void SetWorldPosition(const glm::vec3& _rPosition);
+        glm::vec3& GetWorldPosition();
+        const glm::vec3& GetWorldPosition() const;
 
         void SetWorldAABB(const Base::AABB3Float& _rAABB);
         Base::AABB3Float& GetWorldAABB();
@@ -195,7 +194,7 @@ namespace Dt
         BID                   m_ID;                                                               //< A specific unique id of this entity inside the map
         std::string           m_Name;                                                             //< A name of the entity to search for inside scripts
         Base::AABB3Float      m_WorldAABB;                                                        //< Axis Aligned Bounding Box (AABB) of the entity in map for region bounding box calculations
-        Base::Float3          m_WorldPosition;                                                    //< World position of the entity
+        glm::vec3          m_WorldPosition;                                                    //< World position of the entity
         SFlags                m_Flags;                                                            //< Set of possible states of the entity (dirty, type, level, ... -> @see SFlags)
 
     protected:

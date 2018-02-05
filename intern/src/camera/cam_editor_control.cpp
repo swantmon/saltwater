@@ -11,6 +11,9 @@
 
 #include "graphic/gfx_camera_interface.h"
 
+#include "glm.hpp"
+#include "ext.hpp"
+
 #include <cmath>
 #include <iostream>
 
@@ -94,11 +97,11 @@ namespace Cam
         {
             if (m_IsDragging)
             {
-                Base::Float3 Forward(0.0f, 0.0f, -1.0f);
-                Base::Float3 Right(1.0f, 0.0f, 0.0f);
-                Base::Float3 Up(0.0f, 0.0f, 1.0f);
+                glm::vec3 Forward(0.0f, 0.0f, -1.0f);
+                glm::vec3 Right(1.0f, 0.0f, 0.0f);
+                glm::vec3 Up(0.0f, 0.0f, 1.0f);
 
-                const Base::Float2& rCursorPosition = _rEvent.GetCursorPosition();
+                const glm::vec2& rCursorPosition = _rEvent.GetCursorPosition();
 
                 float DeltaTime = static_cast<float>(Core::Time::GetDeltaTimeLastFrame());
 
@@ -107,7 +110,7 @@ namespace Cam
 
                 Forward = Forward * m_RotationMatrix;
                 Right   = Right   * m_RotationMatrix;
-                Up      = Forward.CrossProduct(Right);
+                Up      = glm::cross(Forward, Right);
 
                 m_Position -= (Right * CurrentVelocityX * DeltaTime);
                 m_Position -= (Up    * CurrentVelocityY * DeltaTime);
@@ -117,7 +120,7 @@ namespace Cam
 
             if (m_IsFlying)
             {
-                const Base::Float2& rCursorPosition = _rEvent.GetCursorPosition();
+                const glm::vec2& rCursorPosition = _rEvent.GetCursorPosition();
 
                 m_CurrentRotation[0] += (rCursorPosition[0] - m_LastCursorPosition[0]) * s_RotationVelocity;
                 m_CurrentRotation[1] += (rCursorPosition[1] - m_LastCursorPosition[1]) * s_RotationVelocity;
@@ -136,11 +139,11 @@ namespace Cam
 
                 m_CurrentRotation[1] = Base::Modulo(m_CurrentRotation[1], 360.0f);
 
-                Base::Float3x3 RotationX(Base::Float3x3::s_Identity);
-                Base::Float3x3 RotationZ(Base::Float3x3::s_Identity);
+                glm::mat3 RotationX(1.0f);
+                glm::mat3 RotationZ(1.0f);
 
-                RotationX.SetRotationX(Base::DegreesToRadians(m_CurrentRotation[1]));
-                RotationZ.SetRotationZ(Base::DegreesToRadians(m_CurrentRotation[0]));
+                RotationX = glm::eulerAngleX(Base::DegreesToRadians(m_CurrentRotation[1]));
+                RotationZ = glm::eulerAngleZ(Base::DegreesToRadians(m_CurrentRotation[0]));
 
                 m_RotationMatrix = RotationX * RotationZ;
 
@@ -160,8 +163,8 @@ namespace Cam
 
     void CEditorControl::InternUpdate()
     {
-        Base::Float3 Forward(0.0f, 0.0f, -1.0f);
-        Base::Float3 Right  (1.0f, 0.0f,  0.0f);
+        glm::vec3 Forward(0.0f, 0.0f, -1.0f);
+        glm::vec3 Right  (1.0f, 0.0f,  0.0f);
 
         float DeltaTime = static_cast<float>(Core::Time::GetDeltaTimeLastFrame());
 

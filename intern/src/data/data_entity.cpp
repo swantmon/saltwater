@@ -5,6 +5,10 @@
 #include "data/data_hierarchy_facet.h"
 #include "data/data_transformation_facet.h"
 
+#include "glm.hpp"
+#include "ext.hpp"
+#include "gtx/matrix_decompose.hpp"
+
 namespace Dt
 {
     CEntity::CEntity()
@@ -147,21 +151,21 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CEntity::SetWorldPosition(const Base::Float3& _rPosition)
+    void CEntity::SetWorldPosition(const glm::vec3& _rPosition)
     {
         m_WorldPosition = _rPosition;
     }
 
     // -----------------------------------------------------------------------------
 
-    Base::Float3& CEntity::GetWorldPosition()
+    glm::vec3& CEntity::GetWorldPosition()
     {
         return m_WorldPosition;
     }
 
     // -----------------------------------------------------------------------------
 
-    const Base::Float3& CEntity::GetWorldPosition() const
+    const glm::vec3& CEntity::GetWorldPosition() const
     {
         return m_WorldPosition;
     }
@@ -350,23 +354,20 @@ namespace Dt
             return;
         }
 
-        Base::Float4x4 NewMatrix;
+        glm::mat4 NewMatrix;
 
-        Base::Float3 Translation;
-        Base::Float3 Rotation;
-        Base::Float3 Scale;
+        glm::vec3 Translation;
+        glm::quat Rotation;
+        glm::vec3 Scale;
+        glm::vec3 Skew;
+        glm::vec4 Perspective;
 
-        NewMatrix = m_pTransformationFacet->GetWorldMatrix().GetInverted() * pChildTransformationFacet->GetWorldMatrix();
+        NewMatrix = glm::inverse(m_pTransformationFacet->GetWorldMatrix()) * pChildTransformationFacet->GetWorldMatrix();
 
-        NewMatrix.GetTranslation(Translation);
-        NewMatrix.GetRotation(Rotation);
-
-        Rotation *= Base::Float3(-1, 1, 1);
-
-        NewMatrix.GetScale(Scale);
+        glm::decompose(NewMatrix, Scale, Rotation, Translation, Skew, Perspective);
 
         pChildTransformationFacet->SetPosition(Translation);
-        pChildTransformationFacet->SetRotation(Rotation);
+        pChildTransformationFacet->SetRotation(glm::eulerAngles(Rotation));
         pChildTransformationFacet->SetScale(Scale);
     }
 
@@ -404,31 +405,24 @@ namespace Dt
             return;
         }
 
-        Base::Float4x4 NewMatrix;
-        Base::Float4x4 RotationMatrix;
+        glm::vec3 Translation;
+        glm::quat Rotation;
+        glm::vec3 Scale;
+        glm::vec3 Skew;
+        glm::vec4 Perspective;
 
-        Base::Float3 Translation;
-        Base::Float3 Rotation;
-        Base::Float3 Scale;
+        glm::mat4 NewMatrix = m_pTransformationFacet->GetWorldMatrix();
 
-        NewMatrix = m_pTransformationFacet->GetWorldMatrix();
+        glm::decompose(NewMatrix, Scale, Rotation, Translation, Skew, Perspective);
 
-        NewMatrix.GetTranslation(Translation);
+        glm::mat4 RotationMatrix = glm::toMat4(Rotation);
 
-        NewMatrix.GetRotation(Rotation);
+        NewMatrix = glm::inverse(RotationMatrix) * NewMatrix;
 
-        // TODO by tschwandt
-        // is it necessary to do this?
-        Rotation *= Base::Float3(-1, 1, 1);
-
-        RotationMatrix.SetRotation(Rotation[0], Rotation[1], Rotation[2]);
-
-        NewMatrix = RotationMatrix.GetInverted() * NewMatrix;
-
-        NewMatrix.GetScale(Scale);
+        glm::decompose(NewMatrix, Scale, Rotation, Translation, Skew, Perspective);
 
         m_pTransformationFacet->SetPosition(Translation);
-        m_pTransformationFacet->SetRotation(Rotation);
+        m_pTransformationFacet->SetRotation(glm::eulerAngles(Rotation));
         m_pTransformationFacet->SetScale(Scale);
     }
 } // namespace Dt

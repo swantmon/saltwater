@@ -40,7 +40,7 @@ namespace
         CRegion* GetRegions() const;
         CRegion& GetRegionByID(unsigned int _RegionID) const;
         CRegion& GetRegionByPosition(float _AxisX, float _AxisY) const;
-        CRegion& GetRegionByPosition(const Base::Float3& _rPosition) const;
+        CRegion& GetRegionByPosition(const glm::vec3& _rPosition) const;
 
         Base::Size GetNumberOfRegions() const;
         Base::Size GetNumberOfRegionsX() const;
@@ -62,8 +62,8 @@ namespace
         CEntityIterator EntitiesBegin(unsigned int _Category) const;
         CEntityIterator EntitiesBegin(const Base::AABB3Float& _rAABB) const;
         CEntityIterator EntitiesBegin(unsigned int _Category, const Base::AABB3Float& _rAABB) const;
-        CEntityIterator EntitiesBegin(const Base::AABB3Float& _rAABB, const Base::Float3& _rPosition, float _SquareRadius) const;
-        CEntityIterator EntitiesBegin(unsigned int _Category, const Base::AABB3Float& _rAABB, const Base::Float3& _rPosition, float _SquareRadius) const;
+        CEntityIterator EntitiesBegin(const Base::AABB3Float& _rAABB, const glm::vec3& _rPosition, float _SquareRadius) const;
+        CEntityIterator EntitiesBegin(unsigned int _Category, const Base::AABB3Float& _rAABB, const glm::vec3& _rPosition, float _SquareRadius) const;
         CEntityIterator EntitiesEnd() const;
         
     public:
@@ -72,14 +72,14 @@ namespace
         CEntity* GetFirstEntity(unsigned int _Category) const;
         CEntity* GetFirstEntity(const Base::AABB3Float& _rAABB) const;
         CEntity* GetFirstEntity(unsigned int _Category, const Base::AABB3Float& _rAABB) const;
-        CEntity* GetFirstEntity(const Base::AABB3Float& _rAABB, const Base::Float3& _rPosition, float _SquareRadius) const;
-        CEntity* GetFirstEntity(unsigned int _Category, const Base::AABB3Float& _rAABB, const Base::Float3& _rPosition, float _SquareRadius) const;
+        CEntity* GetFirstEntity(const Base::AABB3Float& _rAABB, const glm::vec3& _rPosition, float _SquareRadius) const;
+        CEntity* GetFirstEntity(unsigned int _Category, const Base::AABB3Float& _rAABB, const glm::vec3& _rPosition, float _SquareRadius) const;
         CEntity* GetNextEntity(CEntity* _pEntity) const;
         CEntity* GetNextEntity(CEntity* _pEntity, unsigned int _Category) const;
         CEntity* GetNextEntity(CEntity* _pEntity, const Base::AABB3Float& _rAABB) const;
         CEntity* GetNextEntity(CEntity* _pEntity, unsigned int _Category, const Base::AABB3Float& _rAABB) const;
-        CEntity* GetNextEntity(CEntity* _pEntity, const Base::AABB3Float& _rAABB, const Base::Float3& _rPosition, float _SquareRadius) const;
-        CEntity* GetNextEntity(CEntity* _pEntity, unsigned int _Category, const Base::AABB3Float& _rAABB, const Base::Float3& _rPosition, float _SquareRadius) const;
+        CEntity* GetNextEntity(CEntity* _pEntity, const Base::AABB3Float& _rAABB, const glm::vec3& _rPosition, float _SquareRadius) const;
+        CEntity* GetNextEntity(CEntity* _pEntity, unsigned int _Category, const Base::AABB3Float& _rAABB, const glm::vec3& _rPosition, float _SquareRadius) const;
 
     private:
 
@@ -330,7 +330,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    CRegion& CDtLvlMap::GetRegionByPosition(const Base::Float3& _rPosition) const
+    CRegion& CDtLvlMap::GetRegionByPosition(const glm::vec3& _rPosition) const
     {
         return GetRegionByPosition(_rPosition[0], _rPosition[1]);
     }
@@ -521,14 +521,14 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    CEntityIterator CDtLvlMap::EntitiesBegin(const Base::AABB3Float& _rAABB, const Base::Float3& _rPosition, float _SquareRadius) const
+    CEntityIterator CDtLvlMap::EntitiesBegin(const Base::AABB3Float& _rAABB, const glm::vec3& _rPosition, float _SquareRadius) const
     {
         return CInternEntityIterator(GetFirstEntity(_rAABB, _rPosition, _SquareRadius));
     }
 
     // -----------------------------------------------------------------------------
 
-    CEntityIterator CDtLvlMap::EntitiesBegin(unsigned int _Category, const Base::AABB3Float& _rAABB, const Base::Float3& _rPosition, float _SquareRadius) const
+    CEntityIterator CDtLvlMap::EntitiesBegin(unsigned int _Category, const Base::AABB3Float& _rAABB, const glm::vec3& _rPosition, float _SquareRadius) const
     {
         return CInternEntityIterator(GetFirstEntity(_Category, _rAABB, _rPosition, _SquareRadius));
     }
@@ -718,15 +718,15 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    CEntity* CDtLvlMap::GetFirstEntity(const Base::AABB3Float& _rAABB, const Base::Float3& _rPosition, float _SquareRadius) const
+    CEntity* CDtLvlMap::GetFirstEntity(const Base::AABB3Float& _rAABB, const glm::vec3& _rPosition, float _SquareRadius) const
     {
         const CEntityIterator EndEntity = EntitiesEnd();
 
         for (CEntityIterator FirstEntity = EntitiesBegin(_rAABB); FirstEntity != EndEntity; FirstEntity = FirstEntity.Next(_rAABB))
         {
-            Base::Float3 Delta = FirstEntity->GetWorldPosition() - _rPosition;
+            glm::vec3 Delta = FirstEntity->GetWorldPosition() - _rPosition;
 
-            if (Delta.SquaredLength() <= _SquareRadius)
+            if (Delta.length() * Delta.length() <= _SquareRadius)
             {
                 return &(*FirstEntity);
             }
@@ -737,15 +737,15 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    CEntity* CDtLvlMap::GetFirstEntity(unsigned int _Category, const Base::AABB3Float& _rAABB, const Base::Float3& _rPosition, float _SquareRadius) const
+    CEntity* CDtLvlMap::GetFirstEntity(unsigned int _Category, const Base::AABB3Float& _rAABB, const glm::vec3& _rPosition, float _SquareRadius) const
     {
         const CEntityIterator EndEntity = EntitiesEnd();
 
         for (CEntityIterator FirstEntity = EntitiesBegin(_Category, _rAABB); FirstEntity != EndEntity; FirstEntity = FirstEntity.Next(_Category, _rAABB))
         {
-            Base::Float3 Delta = FirstEntity->GetWorldPosition() - _rPosition;
+            glm::vec3 Delta = FirstEntity->GetWorldPosition() - _rPosition;
 
-            if (Delta.SquaredLength() <= _SquareRadius)
+            if (Delta.length() * Delta.length() <= _SquareRadius)
             {
                 return &(*FirstEntity);
             }
@@ -1004,15 +1004,15 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    CEntity* CDtLvlMap::GetNextEntity(CEntity* _pEntity, const Base::AABB3Float& _rAABB, const Base::Float3& _rPosition, float _SquareRadius) const
+    CEntity* CDtLvlMap::GetNextEntity(CEntity* _pEntity, const Base::AABB3Float& _rAABB, const glm::vec3& _rPosition, float _SquareRadius) const
     {
         const CInternEntityIterator EntityEndIterator = EntitiesEnd();
 
         for (CInternEntityIterator EntityIterator = GetNextEntity(_pEntity, _rAABB); EntityIterator != EntityEndIterator; EntityIterator = EntityIterator.Next(_rAABB))
         {
-            Base::Float3 Delta = EntityIterator->GetWorldPosition() - _rPosition;
+            glm::vec3 Delta = EntityIterator->GetWorldPosition() - _rPosition;
 
-            if (Delta.SquaredLength() <= _SquareRadius)
+            if (Delta.length() * Delta.length() <= _SquareRadius)
             {
                 return &(*EntityIterator);
             }
@@ -1023,15 +1023,15 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    CEntity* CDtLvlMap::GetNextEntity(CEntity* _pEntity, unsigned int _Category, const Base::AABB3Float& _rAABB, const Base::Float3& _rPosition, float _SquareRadius) const
+    CEntity* CDtLvlMap::GetNextEntity(CEntity* _pEntity, unsigned int _Category, const Base::AABB3Float& _rAABB, const glm::vec3& _rPosition, float _SquareRadius) const
     {
         const CInternEntityIterator EntityEndIterator = EntitiesEnd();
 
         for (CInternEntityIterator EntityIterator = GetNextEntity(_pEntity, _Category, _rAABB); EntityIterator != EntityEndIterator; EntityIterator = EntityIterator.Next(_Category, _rAABB))
         {
-            Base::Float3 Delta = EntityIterator->GetWorldPosition() - _rPosition;
+            glm::vec3 Delta = EntityIterator->GetWorldPosition() - _rPosition;
 
-            if (Delta.SquaredLength() <= _SquareRadius)
+            if (Delta.length() * Delta.length() <= _SquareRadius)
             {
                 return &(*EntityIterator);
             }
@@ -1141,7 +1141,7 @@ namespace Map
 
     // -----------------------------------------------------------------------------
 
-    CEntityIterator& CEntityIterator::Next(const Base::AABB3Float& _rAABB, const Base::Float3& _rPosition, float _SquareRadius)
+    CEntityIterator& CEntityIterator::Next(const Base::AABB3Float& _rAABB, const glm::vec3& _rPosition, float _SquareRadius)
     {
         m_pCurrentEntity = CDtLvlMap::GetInstance().GetNextEntity(m_pCurrentEntity, _rAABB, _rPosition, _SquareRadius);
 
@@ -1150,7 +1150,7 @@ namespace Map
 
     // -----------------------------------------------------------------------------
 
-    CEntityIterator& CEntityIterator::Next(unsigned int _Category, const Base::AABB3Float& _rAABB, const Base::Float3& _rPosition, float _SquareRadius)
+    CEntityIterator& CEntityIterator::Next(unsigned int _Category, const Base::AABB3Float& _rAABB, const glm::vec3& _rPosition, float _SquareRadius)
     {
         m_pCurrentEntity = CDtLvlMap::GetInstance().GetNextEntity(m_pCurrentEntity, _Category, _rAABB, _rPosition, _SquareRadius);
 
@@ -1219,7 +1219,7 @@ namespace Map
 
     // -----------------------------------------------------------------------------
 
-    CRegion& GetRegionByPosition(const Base::Float3& _rPosition)
+    CRegion& GetRegionByPosition(const glm::vec3& _rPosition)
     {
         return CDtLvlMap::GetInstance().GetRegionByPosition(_rPosition);
     }
@@ -1296,14 +1296,14 @@ namespace Map
 
     // -----------------------------------------------------------------------------
 
-    CEntityIterator EntitiesBegin(const Base::AABB3Float& _rAABB, const Base::Float3& _rPosition, float _SquareRadius)
+    CEntityIterator EntitiesBegin(const Base::AABB3Float& _rAABB, const glm::vec3& _rPosition, float _SquareRadius)
     {
         return CDtLvlMap::GetInstance().EntitiesBegin(_rAABB, _rPosition, _SquareRadius);
     }
 
     // -----------------------------------------------------------------------------
 
-    CEntityIterator EntitiesBegin(unsigned int _Category, const Base::AABB3Float& _rAABB, const Base::Float3& _rPosition, float _SquareRadius)
+    CEntityIterator EntitiesBegin(unsigned int _Category, const Base::AABB3Float& _rAABB, const glm::vec3& _rPosition, float _SquareRadius)
     {
         return CDtLvlMap::GetInstance().EntitiesBegin(_Category, _rAABB, _rPosition, _SquareRadius);
     }

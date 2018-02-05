@@ -2,7 +2,6 @@
 #include "graphic/gfx_precompiled.h"
 
 #include "base/base_console.h"
-#include "base/base_matrix4x4.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
@@ -29,6 +28,9 @@
 #include "graphic/gfx_target_set_manager.h"
 #include "graphic/gfx_texture_manager.h"
 #include "graphic/gfx_view_manager.h"
+
+#include "glm.hpp"
+#include "ext.hpp"
 
 using namespace Gfx;
 
@@ -67,25 +69,25 @@ namespace
         
         struct SPerDrawCallConstantBuffer
         {
-            Base::Float4x4 m_ModelMatrix;
+            glm::mat4 m_ModelMatrix;
         };
         
         struct SCameraProperties
         {
-            Base::Float4x4 m_InverseCameraProjection;
-            Base::Float4x4 m_InverseCameraView;
-            Base::Float4   m_CameraPosition;
-            Base::Float4   m_InvertedScreenSize;
+            glm::mat4 m_InverseCameraProjection;
+            glm::mat4 m_InverseCameraView;
+            glm::vec4   m_CameraPosition;
+            glm::vec4   m_InvertedScreenSize;
             unsigned int   m_ExposureHistoryIndex;
         };
         
         struct SPunctualLightProperties
         {
-            Base::Float4 m_LightPosition;
-            Base::Float4 m_LightDirection;
-            Base::Float4 m_LightColor;
-            Base::Float4 m_LightSettings; // InvSqrAttenuationRadius, AngleScale, AngleOffset, WithShadow
-            Base::Float4x4 m_LightViewProjection;
+            glm::vec4 m_LightPosition;
+            glm::vec4 m_LightDirection;
+            glm::vec4 m_LightColor;
+            glm::vec4 m_LightSettings; // InvSqrAttenuationRadius, AngleScale, AngleOffset, WithShadow
+            glm::mat4 m_LightViewProjection;
         };
         
         struct SRenderJob
@@ -345,12 +347,12 @@ namespace
         
         SCameraProperties CameraProperties;
         
-        Base::Float3 Position = CameraPtr->GetView()->GetPosition();
+        glm::vec3 Position = CameraPtr->GetView()->GetPosition();
         
-        CameraProperties.m_InverseCameraProjection = CameraPtr->GetProjectionMatrix().GetInverted();
-        CameraProperties.m_InverseCameraView       = CameraPtr->GetView()->GetViewMatrix().GetInverted();
-        CameraProperties.m_CameraPosition          = Base::Float4(Position[0], Position[1], Position[2], 1.0f);
-        CameraProperties.m_InvertedScreenSize      = Base::Float4(1.0f / Main::GetActiveWindowSize()[0], 1.0f / Main::GetActiveWindowSize()[1], 0, 0);
+        CameraProperties.m_InverseCameraProjection = glm::inverse(CameraPtr->GetProjectionMatrix());
+        CameraProperties.m_InverseCameraView       = glm::inverse(CameraPtr->GetView()->GetViewMatrix());
+        CameraProperties.m_CameraPosition          = glm::vec4(Position[0], Position[1], Position[2], 1.0f);
+        CameraProperties.m_InvertedScreenSize      = glm::vec4(1.0f / Main::GetActiveWindowSize()[0], 1.0f / Main::GetActiveWindowSize()[1], 0, 0);
         CameraProperties.m_ExposureHistoryIndex    = HistogramRenderer::GetLastExposureHistoryIndex();
         
         BufferManager::UploadBufferData(m_PunctualLightPSBufferPtr->GetBuffer(0), &CameraProperties);
@@ -414,9 +416,11 @@ namespace
             // -----------------------------------------------------------------------------
             SPerDrawCallConstantBuffer ModelBuffer;
             
-            ModelBuffer.m_ModelMatrix = Base::Float4x4::s_Identity;
-            ModelBuffer.m_ModelMatrix *= Base::Float4x4().SetTranslation(pEntity->GetWorldPosition());
-            ModelBuffer.m_ModelMatrix *= Base::Float4x4().SetScale(pDtLightFacet->GetAttenuationRadius());
+            ModelBuffer.m_ModelMatrix  = glm::mat4(1.0f);
+
+            ModelBuffer.m_ModelMatrix[3] = glm::vec4(pEntity->GetWorldPosition(), 1.0f);
+
+            ModelBuffer.m_ModelMatrix *= glm::scale(glm::vec3(pDtLightFacet->GetAttenuationRadius()));
             
             BufferManager::UploadBufferData(m_MainVSBufferPtr->GetBuffer(0), &ModelBuffer);
             
@@ -430,12 +434,12 @@ namespace
             float AngleOffset             = pDtLightFacet->GetAngleOffset();
             float HasShadows              = pDtLightFacet->GetShadowType() != Dt::CPointLightFacet::NoShadows ? 1.0f : 0.0f;
             
-            LightBuffer.m_LightPosition  = Base::Float4(pEntity->GetWorldPosition(), 1.0f);
-            LightBuffer.m_LightDirection = Base::Float4(pDtLightFacet->GetDirection(), 0.0f).Normalize();
-            LightBuffer.m_LightColor     = Base::Float4(pDtLightFacet->GetLightness(), 1.0f);
-            LightBuffer.m_LightSettings  = Base::Float4(InvSqrAttenuationRadius, AngleScale, AngleOffset, HasShadows);
+            LightBuffer.m_LightPosition  = glm::vec4(pEntity->GetWorldPosition(), 1.0f);
+            LightBuffer.m_LightDirection = glm::normalize(glm::vec4(pDtLightFacet->GetDirection(), 0.0f));
+            LightBuffer.m_LightColor     = glm::vec4(pDtLightFacet->GetLightness(), 1.0f);
+            LightBuffer.m_LightSettings  = glm::vec4(InvSqrAttenuationRadius, AngleScale, AngleOffset, HasShadows);
 
-            LightBuffer.m_LightViewProjection.SetIdentity();
+            LightBuffer.m_LightViewProjection = glm::mat4(1.0f);
 
             if (pDtLightFacet->GetShadowType() != Dt::CPointLightFacet::NoShadows)
             {

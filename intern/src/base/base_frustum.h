@@ -59,8 +59,8 @@ namespace MATH
 
     public:
 
-        inline Base::Float4& operator [] (const int _Index);
-        inline const Base::Float4& operator [] (const int _Index) const;
+        inline glm::vec4& operator [] (const int _Index);
+        inline const glm::vec4& operator [] (const int _Index) const;
 
     public:
 
@@ -70,9 +70,9 @@ namespace MATH
 
     private:
 
-        Base::Float4 m_ClippingPlanes    [NumberOfPlanes];
-        Base::Int3   m_IndexMaxPlaneArray[NumberOfPlanes];
-        Base::Int3   m_IndexMinPlaneArray[NumberOfPlanes];
+        glm::vec4 m_ClippingPlanes    [NumberOfPlanes];
+        glm::ivec3   m_IndexMaxPlaneArray[NumberOfPlanes];
+        glm::ivec3   m_IndexMinPlaneArray[NumberOfPlanes];
 
     private:
 
@@ -86,7 +86,7 @@ namespace MATH
 namespace MATH
 {
 
-	Base::Float4& CFrustum::operator[] (const int _Index)
+	glm::vec4& CFrustum::operator[] (const int _Index)
     {
         assert(_Index >= 0 && _Index < NumberOfPlanes);
 
@@ -95,7 +95,7 @@ namespace MATH
 
     // -----------------------------------------------------------------------------
 
-    const Base::Float4& CFrustum::operator[] (const int _Index) const
+    const glm::vec4& CFrustum::operator[] (const int _Index) const
     {
         assert(_Index >= 0 && _Index < NumberOfPlanes);
 
@@ -229,9 +229,9 @@ namespace MATH
 
     CFrustum::EIntersects CFrustum::IntersectsClippingPlaneByAabb(Base::CFrustum::EClippingPlane _Plane, const Base::AABB3Float& _rAabb) const
     {
-        Base::Float4 Plane    = m_ClippingPlanes[_Plane];
-        Base::Float3 MinPoint = _rAabb.BuildCorner(m_IndexMinPlaneArray[_Plane]);
-        Base::Float3 MaxPoint = _rAabb.BuildCorner(m_IndexMaxPlaneArray[_Plane]);
+        glm::vec4 Plane    = m_ClippingPlanes[_Plane];
+        glm::vec3 MinPoint = _rAabb.BuildCorner(m_IndexMinPlaneArray[_Plane]);
+        glm::vec3 MaxPoint = _rAabb.BuildCorner(m_IndexMaxPlaneArray[_Plane]);
 
         float DistanceToMinimalPoint = 
             Plane[0] * MinPoint[0] +

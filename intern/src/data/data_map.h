@@ -9,9 +9,10 @@
 
 #include "base/base_aabb3.h"
 #include "base/base_typedef.h"
-#include "base/base_vector2.h"
 
 #include "data/data_region.h"
+
+#include "glm.hpp"
 
 namespace Base
 {
@@ -48,8 +49,8 @@ namespace Map
         CEntityIterator& Next(unsigned int _Category);
         CEntityIterator& Next(const Base::AABB3Float& _rAABB);
         CEntityIterator& Next(unsigned int _Category, const Base::AABB3Float& _rAABB);
-        CEntityIterator& Next(const Base::AABB3Float& _rAABB, const Base::Float3& _rPosition, float _SquareRadius);
-        CEntityIterator& Next(unsigned int _Category, const Base::AABB3Float& _rAABB, const Base::Float3& _rPosition, float _SquareRadius);
+        CEntityIterator& Next(const Base::AABB3Float& _rAABB, const glm::vec3& _rPosition, float _SquareRadius);
+        CEntityIterator& Next(unsigned int _Category, const Base::AABB3Float& _rAABB, const glm::vec3& _rPosition, float _SquareRadius);
 
     public:
 
@@ -91,7 +92,7 @@ namespace Map
     CRegion* GetRegions();                                                                                                                                          ///< Returns a pointer to the region array.
     CRegion& GetRegionByID(unsigned int _RegionID);                                                                                                                 ///< Returns the regions with the passed ID.
     CRegion& GetRegionByPosition(float _AxisX, float _AxisY);                                                                                                               ///< Returns the region that covers the given world coordinate.
-    CRegion& GetRegionByPosition(const Base::Float3& _rPosition);                                                                                                   ///< Returns the region that covers the given world coordinate.
+    CRegion& GetRegionByPosition(const glm::vec3& _rPosition);                                                                                                   ///< Returns the region that covers the given world coordinate.
     
     Base::Size GetNumberOfRegions();                                                                                                                                ///< Returns the number of regions in the map.
     Base::Size GetNumberOfRegionsX();                                                                                                                               ///< Returns the number of regions in one row of the map.
@@ -105,8 +106,8 @@ namespace Map
     CEntityIterator EntitiesBegin(unsigned int _Category);                                                                                              ///< Returns an iterator to the first entity of the given category.
     CEntityIterator EntitiesBegin(const Base::AABB3Float& _rAABB);                                                                                                  ///< Returns an iterator to the first entity within the AABB.
     CEntityIterator EntitiesBegin(unsigned int _Category, const Base::AABB3Float& _rAABB);                                                              ///< Returns an iterator to the first entity of the given category within the AABB.
-    CEntityIterator EntitiesBegin(const Base::AABB3Float& _rAABB, const Base::Float3& _rPosition, float _SquareRadius);                                             ///< Returns an iterator to the first entity within the given radius.
-    CEntityIterator EntitiesBegin(unsigned int _Category, const Base::AABB3Float& _rAABB, const Base::Float3& _rPosition, float _SquareRadius);         ///< Returns an iterator to the first entity of the given category within the given radius.
+    CEntityIterator EntitiesBegin(const Base::AABB3Float& _rAABB, const glm::vec3& _rPosition, float _SquareRadius);                                             ///< Returns an iterator to the first entity within the given radius.
+    CEntityIterator EntitiesBegin(unsigned int _Category, const Base::AABB3Float& _rAABB, const glm::vec3& _rPosition, float _SquareRadius);         ///< Returns an iterator to the first entity of the given category within the given radius.
     CEntityIterator EntitiesEnd();                                                                                                                                  ///< Returns an iterator with a null pointer.
     
     void AddEntity(CEntity& _rEntity);

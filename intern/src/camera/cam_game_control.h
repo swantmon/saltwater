@@ -2,11 +2,8 @@
 #pragma once
 
 #include "base/base_input_event.h"
-#include "base/base_vector2.h"
 
 #include "camera/cam_control.h"
-
-
 
 namespace Cam
 {

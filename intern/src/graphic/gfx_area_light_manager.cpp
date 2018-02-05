@@ -58,13 +58,13 @@ namespace
 
         struct SFilterProperties
         {
-            Base::Float4 m_InverseSizeAndOffset;
+            glm::vec4 m_InverseSizeAndOffset;
             
         };
 
         struct SBlurProperties
         {
-            Base::UInt2  m_Direction;
+            glm::uvec2  m_Direction;
             unsigned int m_LOD;
         };
 
@@ -366,26 +366,26 @@ namespace
         // -----------------------------------------------------------------------------
         // Update
         // -----------------------------------------------------------------------------
-        Base::Float3 LightPosition  = _pEntity->GetWorldPosition();
-        Base::Float3 LightDirection = pDtLightFacet->GetDirection().Normalize() * Base::Float3(-1.0f);
-        Base::Float3 DirectionX     = Base::Float3(0.0f, pDtLightFacet->GetRotation(), 1.0f).Normalize();
-        Base::Float3 DirectionY     = LightDirection.CrossProduct(DirectionX).Normalize();
+        glm::vec3 LightPosition  = _pEntity->GetWorldPosition();
+        glm::vec3 LightDirection = glm::normalize(pDtLightFacet->GetDirection()) * glm::vec3(-1.0f);
+        glm::vec3 DirectionX     = glm::normalize(glm::vec3(0.0f, pDtLightFacet->GetRotation(), 1.0f));
+        glm::vec3 DirectionY     = glm::cross(LightDirection, glm::normalize(DirectionX));
 
-        DirectionX = LightDirection.CrossProduct(DirectionY);
+        DirectionX = glm::cross(LightDirection, DirectionY);
 
-        pGfxLightFacet->m_DirectionX = Base::Float4(DirectionY, 0.0f);
-        pGfxLightFacet->m_DirectionY = Base::Float4(DirectionX, 0.0f);
+        pGfxLightFacet->m_DirectionX = glm::vec4(DirectionY, 0.0f);
+        pGfxLightFacet->m_DirectionY = glm::vec4(DirectionX, 0.0f);
         pGfxLightFacet->m_HalfWidth  = 0.5f * pDtLightFacet->GetWidth();
         pGfxLightFacet->m_HalfHeight = 0.5f * pDtLightFacet->GetHeight();
-        pGfxLightFacet->m_Plane      = Base::Float4(LightDirection, -(LightDirection.DotProduct(LightPosition)));
+        pGfxLightFacet->m_Plane      = glm::vec4(LightDirection, -(glm::dot(LightDirection, LightPosition)));
 
-        Base::Float3 ExtendX = Base::Float3(pDtLightFacet->GetWidth()  * 0.5f) * DirectionY;
-        Base::Float3 ExtendY = Base::Float3(pDtLightFacet->GetHeight() * 0.5f) * DirectionX;
+        glm::vec3 ExtendX = glm::vec3(pDtLightFacet->GetWidth()  * 0.5f) * DirectionY;
+        glm::vec3 ExtendY = glm::vec3(pDtLightFacet->GetHeight() * 0.5f) * DirectionX;
 
-        Base::Float3 LightbulbCorners0 = LightPosition - ExtendX - ExtendY;
-        Base::Float3 LightbulbCorners1 = LightPosition + ExtendX - ExtendY;
-        Base::Float3 LightbulbCorners2 = LightPosition + ExtendX + ExtendY;
-        Base::Float3 LightbulbCorners3 = LightPosition - ExtendX + ExtendY;
+        glm::vec3 LightbulbCorners0 = LightPosition - ExtendX - ExtendY;
+        glm::vec3 LightbulbCorners1 = LightPosition + ExtendX - ExtendY;
+        glm::vec3 LightbulbCorners2 = LightPosition + ExtendX + ExtendY;
+        glm::vec3 LightbulbCorners3 = LightPosition - ExtendX + ExtendY;
 
         float ViewBuffer[20];
 
@@ -444,7 +444,7 @@ namespace
         // -----------------------------------------------------------------------------
         SFilterProperties FilterSettings;
 
-        FilterSettings.m_InverseSizeAndOffset = Base::Float4(1.0f / static_cast<float>(m_BackgroundTexturePtr->GetNumberOfPixelsU()), 1.0f / static_cast<float>(m_BackgroundTexturePtr->GetNumberOfPixelsV()), 0.125f, 0.125f);
+        FilterSettings.m_InverseSizeAndOffset = glm::vec4(1.0f / static_cast<float>(m_BackgroundTexturePtr->GetNumberOfPixelsU()), 1.0f / static_cast<float>(m_BackgroundTexturePtr->GetNumberOfPixelsV()), 0.125f, 0.125f);
 
         BufferManager::UploadBufferData(m_FilterPropertiesPtr, &FilterSettings);
 
@@ -517,7 +517,7 @@ namespace
         // -----------------------------------------------------------------------------
         CTexturePtr MipmapLevel0Ptr = TextureManager::GetMipmapFromTexture2D(_OutputTexturePtr, 0);
 
-        FilterSettings.m_InverseSizeAndOffset = Base::Float4(1.0f / static_cast<float>(MipmapLevel0Ptr->GetNumberOfPixelsU()), 1.0f / static_cast<float>(MipmapLevel0Ptr->GetNumberOfPixelsV()), 0.125f, 0.125f);
+        FilterSettings.m_InverseSizeAndOffset = glm::vec4(1.0f / static_cast<float>(MipmapLevel0Ptr->GetNumberOfPixelsU()), 1.0f / static_cast<float>(MipmapLevel0Ptr->GetNumberOfPixelsV()), 0.125f, 0.125f);
 
         BufferManager::UploadBufferData(m_FilterPropertiesPtr, &FilterSettings);
 
@@ -568,7 +568,7 @@ namespace
 
             BufferManager::UploadBufferData(m_GaussianPropertiesPtr, &GaussianSettings);
 
-            FilterSettings.m_InverseSizeAndOffset = Base::Float4(1.0f / static_cast<float>(CurrentMipmapLevel->GetNumberOfPixelsU()), 1.0f / static_cast<float>(CurrentMipmapLevel->GetNumberOfPixelsV()), 0.125f, 0.125f);
+            FilterSettings.m_InverseSizeAndOffset = glm::vec4(1.0f / static_cast<float>(CurrentMipmapLevel->GetNumberOfPixelsU()), 1.0f / static_cast<float>(CurrentMipmapLevel->GetNumberOfPixelsV()), 0.125f, 0.125f);
 
             BufferManager::UploadBufferData(m_FilterPropertiesPtr, &FilterSettings);
 

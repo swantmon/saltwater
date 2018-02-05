@@ -1,9 +1,9 @@
 ﻿
-#include "base/base_vector3.h"
-
 #include "editor_gui/edit_inspector_camera.h"
 
 #include "editor_port/edit_message_manager.h"
+
+#include "glm.hpp"
 
 #include <QColorDialog>
 
@@ -69,7 +69,7 @@ namespace Edit
 
         QColor RGB = ButtonPalette.color(QPalette::Button);
 
-        Base::Float3 AlbedoColor = Base::Float3(RGB.red() / 255.0f, RGB.green() / 255.0f, RGB.blue() / 255.0f);
+        glm::vec3 AlbedoColor = glm::vec3(RGB.red() / 255.0f, RGB.green() / 255.0f, RGB.blue() / 255.0f);
 
         int CullingMask = 0;
 

@@ -6,6 +6,7 @@
 #include "base/base_crc.h"
 #include "base/base_console.h"
 #include "base/base_exception.h"
+#include "base/base_math_operations.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
@@ -17,6 +18,8 @@
 #include "graphic/gfx_main.h"
 #include "graphic/gfx_native_texture.h"
 #include "graphic/gfx_texture_manager.h"
+
+#include "glm.hpp"
 
 #include "IL/il.h"
 #include "IL/ilu.h"
@@ -185,11 +188,11 @@ namespace
         // -----------------------------------------------------------------------------
         // Create 2x2 dummy texture
         // -----------------------------------------------------------------------------
-        Base::Byte4 Pixels[4];
-        Pixels[0] = Base::Byte4(1, 0, 0, 1);
-        Pixels[1] = Base::Byte4(0, 1, 0, 1);
-        Pixels[2] = Base::Byte4(0, 0, 1, 1);
-        Pixels[3] = Base::Byte4(1, 1, 0, 1);
+        glm::tvec4<char> Pixels[4];
+        Pixels[0] = glm::tvec4<char>(1, 0, 0, 1);
+        Pixels[1] = glm::tvec4<char>(0, 1, 0, 1);
+        Pixels[2] = glm::tvec4<char>(0, 0, 1, 1);
+        Pixels[3] = glm::tvec4<char>(1, 1, 0, 1);
 
         Gfx::STextureDescriptor TextureDescriptor;
 
@@ -381,7 +384,7 @@ namespace
         // Renderdoc crashes when _pData is nullptr but OpenGL allows NULL
         // Therefore we create a dummy value until Renderdoc is fixed
 
-        Base::Int4 Dummy = Base::Int4(0);
+        glm::ivec4 Dummy = glm::ivec4(0);
 
         if (_pData == nullptr)
         {
@@ -420,7 +423,7 @@ namespace
         // Renderdoc crashes when _pData is nullptr but OpenGL allows NULL
         // Therefore we create a dummy value until Renderdoc is fixed
 
-        Base::Int4 Dummy = Base::Int4(0);
+        glm::ivec4 Dummy = glm::ivec4(0);
 
         if (_pData == nullptr)
         {
@@ -458,8 +461,8 @@ namespace
         assert(_TexturePtr.IsValid());
         assert(_pBytes != 0);
         
-        Base::UInt2 Offset     = _rTargetRect[0];
-        Base::UInt2 UpdateSize = _rTargetRect[1] - _rTargetRect[0];
+        glm::uvec2 Offset     = _rTargetRect[0];
+        glm::uvec2 UpdateSize = _rTargetRect[1] - _rTargetRect[0];
         
         assert(_TexturePtr->GetNumberOfPixelsU() <= UpdateSize[0] + Offset[0]);
         assert(_TexturePtr->GetNumberOfPixelsV() <= UpdateSize[1] + Offset[1]);
@@ -494,14 +497,14 @@ namespace
         // -----------------------------------------------------------------------------
         // Get informations
         // -----------------------------------------------------------------------------
-        Base::UInt2 Size = _rTargetRect.Size();
+        glm::uvec2 Size = _rTargetRect.Size();
 
         assert(_pBytes != 0);
         assert(_TextureArrayPtr.IsValid());
         assert(_TextureArrayPtr->GetNumberOfPixelsU() == Size[0] && _TextureArrayPtr->GetNumberOfPixelsV() == Size[1]);
         
-        Base::UInt2 Offset     = Base::UInt2(0);
-        Base::UInt2 UpdateSize = Base::UInt2(_TextureArrayPtr->GetNumberOfPixelsU(), _TextureArrayPtr->GetNumberOfPixelsV());
+        glm::uvec2 Offset     = glm::uvec2(0);
+        glm::uvec2 UpdateSize = glm::uvec2(_TextureArrayPtr->GetNumberOfPixelsU(), _TextureArrayPtr->GetNumberOfPixelsV());
         
         assert(Size[0] <= UpdateSize[0] + Offset[0]);
         assert(Size[1] <= UpdateSize[1] + Offset[1]);
@@ -544,8 +547,8 @@ namespace
         assert(_TexturePtr     .IsValid());
         assert(_TextureArrayPtr->GetNumberOfPixelsU() == _TexturePtr->GetNumberOfPixelsU() && _TextureArrayPtr->GetNumberOfPixelsV() == _TexturePtr->GetNumberOfPixelsV());
         
-        Base::UInt2 Offset     = Base::UInt2(0);
-        Base::UInt2 UpdateSize = Base::UInt2(_TextureArrayPtr->GetNumberOfPixelsU(), _TextureArrayPtr->GetNumberOfPixelsV());
+        glm::uvec2 Offset     = glm::uvec2(0);
+        glm::uvec2 UpdateSize = glm::uvec2(_TextureArrayPtr->GetNumberOfPixelsU(), _TextureArrayPtr->GetNumberOfPixelsV());
         
         assert(_TexturePtr->GetNumberOfPixelsU() <= UpdateSize[0] + Offset[0]);
         assert(_TexturePtr->GetNumberOfPixelsV() <= UpdateSize[1] + Offset[1]);
@@ -797,9 +800,9 @@ namespace
                     Gfx::CTexture*    pGraphicTexture = m_TexturesByHash.at(Hash);
                     Dt::CTextureCube* pDataTexture    = static_cast<Dt::CTextureCube*>(_pTexture);
 
-                    Base::UInt2 CubemapResolution = Base::UInt2(pDataTexture->GetNumberOfPixelsU(), pDataTexture->GetNumberOfPixelsV());
+                    glm::uvec2 CubemapResolution = glm::uvec2(pDataTexture->GetNumberOfPixelsU(), pDataTexture->GetNumberOfPixelsV());
 
-                    Base::AABB2UInt CubemapRect(Base::UInt2(0), CubemapResolution);
+                    Base::AABB2UInt CubemapRect(glm::uvec2(0), CubemapResolution);
 
                     CopyToTextureArray2D(pGraphicTexture, 0, CubemapRect, CubemapRect[1][0], pDataTexture->GetFace(Dt::CTextureCube::Right)->GetPixels(), false);
                     CopyToTextureArray2D(pGraphicTexture, 1, CubemapRect, CubemapRect[1][0], pDataTexture->GetFace(Dt::CTextureCube::Left)->GetPixels(), false);
@@ -817,9 +820,9 @@ namespace
 
                     if (pDataTexture->GetPixels() != nullptr)
                     {   
-                        Base::UInt2 TextureResolution = Base::UInt2(pDataTexture->GetNumberOfPixelsU(), pDataTexture->GetNumberOfPixelsV());
+                        glm::uvec2 TextureResolution = glm::uvec2(pDataTexture->GetNumberOfPixelsU(), pDataTexture->GetNumberOfPixelsV());
 
-                        Base::AABB2UInt TargetRect(Base::UInt2(0), TextureResolution);
+                        Base::AABB2UInt TargetRect(glm::uvec2(0), TextureResolution);
 
                         CopyToTexture2D(pGraphicTexture, TargetRect, TargetRect[1][0], pDataTexture->GetPixels(), true);
                     }

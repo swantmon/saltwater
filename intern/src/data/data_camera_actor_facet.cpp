@@ -17,9 +17,9 @@ namespace Dt
         , m_FoV             (60.0f)
         , m_Near            (0.3f)
         , m_Far             (1000.0f)
-        , m_BackgroundColor (Base::Float3::s_One)
+        , m_BackgroundColor (glm::vec3(1.0f))
         , m_pTexture2D      (nullptr)
-        , m_ProjectionMatrix(Base::Float3x3::s_Identity)
+        , m_ProjectionMatrix(glm::mat3(1.0f))
         , m_ViewportRect    ()
         , m_ClearFlag       (Skybox)
         , m_ProjectionType  (Perspective)
@@ -85,21 +85,21 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CCameraActorFacet::SetBackgroundColor(Base::Float3& _rBackgroundColor)
+    void CCameraActorFacet::SetBackgroundColor(glm::vec3& _rBackgroundColor)
     {
         m_BackgroundColor = _rBackgroundColor;
     }
 
     // -----------------------------------------------------------------------------
 
-    Base::Float3& CCameraActorFacet::GetBackgroundColor()
+    glm::vec3& CCameraActorFacet::GetBackgroundColor()
     {
         return m_BackgroundColor;
     }
 
     // -----------------------------------------------------------------------------
 
-    const Base::Float3& CCameraActorFacet::GetBackgroundColor() const
+    const glm::vec3& CCameraActorFacet::GetBackgroundColor() const
     {
         return m_BackgroundColor;
     }
@@ -162,21 +162,21 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CCameraActorFacet::SetProjectionMatrix(const Base::Float3x3& _rProjection)
+    void CCameraActorFacet::SetProjectionMatrix(const glm::mat3& _rProjection)
     {
         m_ProjectionMatrix = _rProjection;
     }
 
     // -----------------------------------------------------------------------------
 
-    Base::Float3x3& CCameraActorFacet::GetProjectionMatrix()
+    glm::mat3& CCameraActorFacet::GetProjectionMatrix()
     {
         return m_ProjectionMatrix;
     }
 
     // -----------------------------------------------------------------------------
 
-    const Base::Float3x3& CCameraActorFacet::GetProjectionMatrix() const
+    const glm::mat3& CCameraActorFacet::GetProjectionMatrix() const
     {
         return m_ProjectionMatrix;
     }

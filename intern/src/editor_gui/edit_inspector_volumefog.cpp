@@ -1,9 +1,9 @@
 ﻿
-#include "base/base_vector4.h"
-
 #include "editor_gui/edit_inspector_volumefog.h"
 
 #include "editor_port/edit_message_manager.h"
+
+#include "glm.hpp"
 
 #include <QColorDialog>
 
@@ -49,13 +49,13 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
-        Base::Float4 WindDirection = Base::Float4(m_pWindDirectionXEdit->text().toFloat(), m_pWindDirectionYEdit->text().toFloat(), m_pWindDirectionZEdit->text().toFloat(), 0.0f);
+        glm::vec4 WindDirection = glm::vec4(m_pWindDirectionXEdit->text().toFloat(), m_pWindDirectionYEdit->text().toFloat(), m_pWindDirectionZEdit->text().toFloat(), 0.0f);
 
         QPalette ButtonPalette = m_pFogColorButton->palette();
 
         QColor RGB = ButtonPalette.color(QPalette::Button);
 
-        Base::Float4 Color = Base::Float4(RGB.red() / 255.0f, RGB.green() / 255.0f, RGB.blue() / 255.0f, RGB.alpha() / 255.0f);
+        glm::vec4 Color = glm::vec4(RGB.red() / 255.0f, RGB.green() / 255.0f, RGB.blue() / 255.0f, RGB.alpha() / 255.0f);
 
         float FrustumDepth       = m_pFrustumDepthEdit      ->text().toFloat();
         float ShadowIntensity    = m_pShadowIntensityEdit   ->text().toFloat();
@@ -147,14 +147,14 @@ namespace Edit
         Z = _rMessage.GetFloat();
         W = _rMessage.GetFloat();
 
-        Base::Float4 Direction = Base::Float4(X, Y, Z, W);
+        glm::vec4 Direction = glm::vec4(X, Y, Z, W);
 
         R = _rMessage.GetFloat();
         G = _rMessage.GetFloat();
         B = _rMessage.GetFloat();
         A = _rMessage.GetFloat();
         
-        Base::Int4 Color = Base::Int4(R * 255, G * 255, B * 255, A * 255);
+        glm::ivec4 Color = glm::ivec4(R * 255, G * 255, B * 255, A * 255);
 
         float FrustumDepth       = _rMessage.GetFloat();
         float ShadowIntensity    = _rMessage.GetFloat();

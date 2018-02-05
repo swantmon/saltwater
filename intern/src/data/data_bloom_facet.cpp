@@ -1,6 +1,7 @@
 
 #include "data/data_precompiled.h"
 
+#include "base/base_math_operations.h"
 #include "base/base_memory.h"
 
 #include "data/data_bloom_facet.h"
@@ -8,7 +9,7 @@
 namespace Dt
 {
     CBloomFXFacet::CBloomFXFacet()
-        : m_Tint         (Base::Float4(1.0f, 1.0f, 1.0f, 1.0f))
+        : m_Tint         (glm::vec4(1.0f, 1.0f, 1.0f, 1.0f))
         , m_Intensity    (1.0f)
         , m_Treshhold    (1.0f)
         , m_ExposureScale(2.0f)
@@ -24,14 +25,14 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CBloomFXFacet::SetTint(Base::Float4& _rTint)
+    void CBloomFXFacet::SetTint(glm::vec4& _rTint)
     {
         m_Tint = _rTint;
     }
 
     // -----------------------------------------------------------------------------
 
-    Base::Float4& CBloomFXFacet::GetTint()
+    glm::vec4& CBloomFXFacet::GetTint()
     {
         return m_Tint;
     }

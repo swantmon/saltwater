@@ -8,13 +8,12 @@
 
 #pragma once
 
-#include "base/base_vector3.h"
-#include "base/base_vector4.h"
-
 #include "data/data_material.h"
 
 #include "graphic/gfx_material.h"
 #include "graphic/gfx_surface.h"
+
+#include "glm.hpp"
 
 namespace Gfx
 {
@@ -31,8 +30,8 @@ namespace Gfx
         float             m_Reflectance;
         float             m_MetalMask;
         float             m_Displacement;
-        Base::Float3      m_AlbedoColor;
-        Base::Float4      m_TilingOffset;
+        glm::vec3      m_AlbedoColor;
+        glm::vec4      m_TilingOffset;
         const Base::Char* m_pFileName;
     };
 } // namespace Gfx

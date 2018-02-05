@@ -1,7 +1,6 @@
 
 #include "graphic/gfx_precompiled.h"
 
-#include "base/base_matrix4x4.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
@@ -25,6 +24,8 @@
 #include "graphic/gfx_target_set_manager.h"
 #include "graphic/gfx_texture_manager.h"
 #include "graphic/gfx_view_manager.h"
+
+#include "glm.hpp"
 
 #include <sstream>
 
@@ -94,20 +95,20 @@ namespace
         
         struct SDOFDownProperties
         {
-            Base::Float2 m_DofNear;             //< Distance up to everything should be blured (y = 1; x = -y / Far_Distance)
-            Base::Float2 m_DofRowDelta;         //< (x = 1; y = 0.25 / ScreenHeight)
+            glm::vec2 m_DofNear;             //< Distance up to everything should be blured (y = 1; x = -y / Far_Distance)
+            glm::vec2 m_DofRowDelta;         //< (x = 1; y = 0.25 / ScreenHeight)
         };
         
         struct SDOFApplyProperties
         {
-            Base::Float4 m_DofLerpScale;
-            Base::Float4 m_DofLerpBias;
-            Base::Float3 m_DofEqFar;            //< Distance since everything should be blured (x = 1 / 1 - Start_Distance; y = 1 - x)
+            glm::vec4 m_DofLerpScale;
+            glm::vec4 m_DofLerpBias;
+            glm::vec3 m_DofEqFar;            //< Distance since everything should be blured (x = 1 / 1 - Start_Distance; y = 1 - x)
         };
         
         struct SGaussianSettings
         {
-            Base::Float2 m_Direction;
+            glm::vec2 m_Direction;
             float        m_Weights[7];
         };
 
@@ -276,7 +277,7 @@ namespace
         CShaderPtr ShaderGaussianBlurPSPtr    = ShaderManager::CompilePS("fs_gaussian_blur.glsl"    , "main");
         CShaderPtr ShaderFXAAPSPtr            = ShaderManager::CompilePS("fs_fxaa.glsl"             , "main");
 
-        Base::Int2 WindowSize = Gfx::Main::GetActiveWindowSize();
+        glm::ivec2 WindowSize = Gfx::Main::GetActiveWindowSize();
 
         std::stringstream SMAADefineStream;
 
@@ -349,10 +350,10 @@ namespace
         // -----------------------------------------------------------------------------
         // Initiate target set
         // -----------------------------------------------------------------------------
-        Base::Int2 Size = Main::GetActiveWindowSize();
+        glm::ivec2 Size = Main::GetActiveWindowSize();
         
-        Base::Int2 HalfSize   (Size[0] / 2, Size[1] / 2);
-        Base::Int2 QuarterSize(Size[0] / 4, Size[1] / 4);
+        glm::ivec2 HalfSize   (Size[0] / 2, Size[1] / 2);
+        glm::ivec2 QuarterSize(Size[0] / 4, Size[1] / 4);
         
         // -----------------------------------------------------------------------------
         // Create render target textures
@@ -485,11 +486,11 @@ namespace
         // -----------------------------------------------------------------------------
         // Get screen resolutions
         // -----------------------------------------------------------------------------
-        Base::Int2 Size       = Main::GetActiveWindowSize();
-        Base::Int2 NativeSize = Main::GetActiveNativeWindowSize();
+        glm::ivec2 Size       = Main::GetActiveWindowSize();
+        glm::ivec2 NativeSize = Main::GetActiveNativeWindowSize();
         
-        Base::Int2 HalfSize   (Size[0] / 2, Size[1] / 2);
-        Base::Int2 QuarterSize(Size[0] / 4, Size[1] / 4);
+        glm::ivec2 HalfSize   (Size[0] / 2, Size[1] / 2);
+        glm::ivec2 QuarterSize(Size[0] / 4, Size[1] / 4);
         
         // -----------------------------------------------------------------------------
         // Build view ports
@@ -858,10 +859,10 @@ namespace
         // -----------------------------------------------------------------------------
         // Initiate target set
         // -----------------------------------------------------------------------------
-        Base::Int2 Size(_Width, _Height);
+        glm::ivec2 Size(_Width, _Height);
         
-        Base::Int2 HalfSize   (Size[0] / 2, Size[1] / 2);
-        Base::Int2 QuarterSize(Size[0] / 4, Size[1] / 4);
+        glm::ivec2 HalfSize   (Size[0] / 2, Size[1] / 2);
+        glm::ivec2 QuarterSize(Size[0] / 4, Size[1] / 4);
         
         // -----------------------------------------------------------------------------
         // Create render target textures
@@ -991,7 +992,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Build view ports
         // -----------------------------------------------------------------------------
-        Base::Int2 NativeSize = Main::GetActiveNativeWindowSize();
+        glm::ivec2 NativeSize = Main::GetActiveNativeWindowSize();
 
         SViewPortDescriptor ViewPortDesc;
 
@@ -1127,10 +1128,10 @@ namespace
         // -----------------------------------------------------------------------------
         // Get screen resolutions
         // -----------------------------------------------------------------------------
-        Base::Int2 Size = Main::GetActiveWindowSize();
+        glm::ivec2 Size = Main::GetActiveWindowSize();
         
-        Base::Int2 HalfSize   (Size[0] / 2, Size[1] / 2);
-        Base::Int2 QuarterSize(Size[0] / 4, Size[1] / 4);
+        glm::ivec2 HalfSize   (Size[0] / 2, Size[1] / 2);
+        glm::ivec2 QuarterSize(Size[0] / 4, Size[1] / 4);
         
         // -----------------------------------------------------------------------------
         // Set current swap buffer count
@@ -1144,7 +1145,7 @@ namespace
         SDOFDownProperties DOFDownProperties;
 
         DOFDownProperties.m_DofNear     = pDataDOFFacet->GetNear();
-        DOFDownProperties.m_DofRowDelta = Base::Float2(1.0f, 0.25f / Size[1]);
+        DOFDownProperties.m_DofRowDelta = glm::vec2(1.0f, 0.25f / Size[1]);
 
         BufferManager::UploadBufferData(m_DOFDownPropertiesPSBufferPtr->GetBuffer(0), &DOFDownProperties);
 

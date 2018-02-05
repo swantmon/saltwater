@@ -3,12 +3,9 @@
 
 #include "base/base_console.h"
 #include "base/base_exception.h"
-#include "base/base_matrix4x4.h"
 #include "base/base_program_parameters.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
-#include "base/base_vector3.h"
-#include "base/base_vector4.h"
 
 #include "core/core_time.h"
 #include "core/core_config.h"
@@ -21,6 +18,8 @@
 #include "graphic/gfx_target_set_manager.h"
 #include "graphic/gfx_texture_manager.h"
 #include "graphic/gfx_view_manager.h"
+
+#include "glm.hpp"
 
 #include <unordered_set>
 #include <vector>
@@ -92,11 +91,11 @@ namespace
 
         void ActivateWindow(unsigned int _WindowID);
 
-        const Base::Int2& GetActiveWindowSize();
-        const Base::Int2& GetWindowSize(unsigned int _WindowID);
+        const glm::ivec2& GetActiveWindowSize();
+        const glm::ivec2& GetWindowSize(unsigned int _WindowID);
 
-        const Base::Int2& GetActiveNativeWindowSize();
-        const Base::Int2& GetNativeWindowSize(unsigned int _WindowID);
+        const glm::ivec2& GetActiveNativeWindowSize();
+        const glm::ivec2& GetNativeWindowSize(unsigned int _WindowID);
 
         void OnResize(unsigned int _WindowID, unsigned int _Width, unsigned int _Height);
 
@@ -152,32 +151,32 @@ namespace
             HDC   m_pNativeDeviceContextHandle;
             HGLRC m_pNativeOpenGLContextHandle;
 #endif
-            Base::Int2   m_InternalWindowSize;
-            Base::Int2   m_NativeWindowSize;
+            glm::ivec2   m_InternalWindowSize;
+            glm::ivec2   m_NativeWindowSize;
             unsigned int m_VSync;
         };
         
         struct SPerFrameConstantBuffer
         {
-            Base::Float4x4 m_WorldToScreen;
-            Base::Float4x4 m_WorldToQuad;
-            Base::Float4x4 m_WorldToView;
-            Base::Float4x4 m_ViewToScreen;
-            Base::Float4x4 m_ScreenToView;
-            Base::Float4x4 m_ViewToWorld;
-            Base::Float4   m_ViewPosition;
-            Base::Float4   m_ViewDirection;
-            Base::Float4x4 m_PreviousWorldToView;
-            Base::Float4x4 m_PreviousViewToScreen;
-            Base::Float4x4 m_PreviousScreenToView;
-            Base::Float4x4 m_PreviousViewToWorld;
-            Base::Float4   m_PreviousViewPosition;
-            Base::Float4   m_PreviousViewDirection;
-            Base::Float4   m_InvertedScreensizeAndScreensize;
-            Base::Float4   m_ScreenPositionScaleBias;
-            Base::Float4   m_CameraParameters0;
-            Base::Float4   m_WorldParameters0;
-            Base::Float4   m_FrameParameters0;
+            glm::mat4 m_WorldToScreen;
+            glm::mat4 m_WorldToQuad;
+            glm::mat4 m_WorldToView;
+            glm::mat4 m_ViewToScreen;
+            glm::mat4 m_ScreenToView;
+            glm::mat4 m_ViewToWorld;
+            glm::vec4   m_ViewPosition;
+            glm::vec4   m_ViewDirection;
+            glm::mat4 m_PreviousWorldToView;
+            glm::mat4 m_PreviousViewToScreen;
+            glm::mat4 m_PreviousScreenToView;
+            glm::mat4 m_PreviousViewToWorld;
+            glm::vec4   m_PreviousViewPosition;
+            glm::vec4   m_PreviousViewDirection;
+            glm::vec4   m_InvertedScreensizeAndScreensize;
+            glm::vec4   m_ScreenPositionScaleBias;
+            glm::vec4   m_CameraParameters0;
+            glm::vec4   m_WorldParameters0;
+            glm::vec4   m_FrameParameters0;
         };
         
     private:
@@ -633,7 +632,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    const Base::Int2& CGfxMain::GetActiveWindowSize()
+    const glm::ivec2& CGfxMain::GetActiveWindowSize()
     {
         assert(m_pActiveWindowInfo != 0);
 
@@ -642,7 +641,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    const Base::Int2& CGfxMain::GetWindowSize(unsigned int _WindowID)
+    const glm::ivec2& CGfxMain::GetWindowSize(unsigned int _WindowID)
     {
         assert(_WindowID < m_NumberOfWindows);
 
@@ -651,7 +650,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    const Base::Int2& CGfxMain::GetActiveNativeWindowSize()
+    const glm::ivec2& CGfxMain::GetActiveNativeWindowSize()
     {
         assert(m_pActiveWindowInfo != 0);
 
@@ -660,7 +659,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    const Base::Int2& CGfxMain::GetNativeWindowSize(unsigned int _WindowID)
+    const glm::ivec2& CGfxMain::GetNativeWindowSize(unsigned int _WindowID)
     {
         assert(_WindowID < m_NumberOfWindows);
 
@@ -813,19 +812,19 @@ namespace
         // -----------------------------------------------------------------------------
         // Setup default values
         // -----------------------------------------------------------------------------
-        m_PerFrameConstantBuffer.m_WorldToScreen                  .SetIdentity();
-        m_PerFrameConstantBuffer.m_WorldToQuad                    .SetIdentity();
-        m_PerFrameConstantBuffer.m_WorldToView                    .SetIdentity();
-        m_PerFrameConstantBuffer.m_ViewToScreen                   .SetIdentity();
-        m_PerFrameConstantBuffer.m_ScreenToView                   .SetIdentity();
-        m_PerFrameConstantBuffer.m_ViewToWorld                    .SetIdentity();
-        m_PerFrameConstantBuffer.m_ViewPosition                   .SetZero();
-        m_PerFrameConstantBuffer.m_ViewDirection                  .SetZero();
-        m_PerFrameConstantBuffer.m_InvertedScreensizeAndScreensize.SetZero();
-        m_PerFrameConstantBuffer.m_ScreenPositionScaleBias        .SetZero();
-        m_PerFrameConstantBuffer.m_CameraParameters0              .SetZero();
-        m_PerFrameConstantBuffer.m_WorldParameters0               .SetZero();
-        m_PerFrameConstantBuffer.m_FrameParameters0               .SetZero();
+        m_PerFrameConstantBuffer.m_WorldToScreen                  = glm::mat4(1.0f);
+        m_PerFrameConstantBuffer.m_WorldToQuad                    = glm::mat4(1.0f);
+        m_PerFrameConstantBuffer.m_WorldToView                    = glm::mat4(1.0f);
+        m_PerFrameConstantBuffer.m_ViewToScreen                   = glm::mat4(1.0f);
+        m_PerFrameConstantBuffer.m_ScreenToView                   = glm::mat4(1.0f);
+        m_PerFrameConstantBuffer.m_ViewToWorld                    = glm::mat4(1.0f);
+        m_PerFrameConstantBuffer.m_ViewPosition                   = glm::vec4(0.0f);
+        m_PerFrameConstantBuffer.m_ViewDirection                  = glm::vec4(0.0f);
+        m_PerFrameConstantBuffer.m_InvertedScreensizeAndScreensize= glm::vec4(0.0f);
+        m_PerFrameConstantBuffer.m_ScreenPositionScaleBias        = glm::vec4(0.0f);
+        m_PerFrameConstantBuffer.m_CameraParameters0              = glm::vec4(0.0f);
+        m_PerFrameConstantBuffer.m_WorldParameters0               = glm::vec4(0.0f);
+        m_PerFrameConstantBuffer.m_FrameParameters0               = glm::vec4(0.0f);
         m_PerFrameConstantBuffer.m_PreviousWorldToView            = m_PerFrameConstantBuffer.m_WorldToView;
         m_PerFrameConstantBuffer.m_PreviousViewToScreen           = m_PerFrameConstantBuffer.m_ViewToScreen;
         m_PerFrameConstantBuffer.m_PreviousScreenToView           = m_PerFrameConstantBuffer.m_ScreenToView;
@@ -912,19 +911,19 @@ namespace
         // -----------------------------------------------------------------------------
         // Set new values;
         // -----------------------------------------------------------------------------
-        m_PerFrameConstantBuffer.m_WorldToScreen                  .Set(MainCameraPtr->GetViewProjectionMatrix());
-        m_PerFrameConstantBuffer.m_WorldToQuad                    .Set(ScreenCameraPtr->GetViewProjectionMatrix());
-        m_PerFrameConstantBuffer.m_WorldToView                    .Set(MainViewPtr->GetViewMatrix());
-        m_PerFrameConstantBuffer.m_ViewToScreen                   .Set(MainCameraPtr->GetProjectionMatrix());
-        m_PerFrameConstantBuffer.m_ScreenToView                   .Set(MainCameraPtr->GetProjectionMatrix().GetInverted());
-        m_PerFrameConstantBuffer.m_ViewToWorld                    .Set(MainViewPtr->GetViewMatrix().GetInverted());
-        m_PerFrameConstantBuffer.m_ViewPosition                   .Set(MainViewPtr->GetPosition(), 1.0f);
-        m_PerFrameConstantBuffer.m_ViewDirection                  .Set(MainViewPtr->GetViewDirection(), 0.0f);
-        m_PerFrameConstantBuffer.m_InvertedScreensizeAndScreensize.Set(InvertedScreensizeX, InvertedScreensizeY, ScreensizeX, ScreensizeY);
-        m_PerFrameConstantBuffer.m_ScreenPositionScaleBias        .Set(0.5f, 0.5f, 0.5f, 0.5f);
-        m_PerFrameConstantBuffer.m_CameraParameters0              .Set(Near, Far, 0.0f, 0.0f);
-        m_PerFrameConstantBuffer.m_WorldParameters0               .Set(WorldNumberOfMetersX, WorldNumberOfMetersY, WorldNumberOfMetersZ, 0.0f);
-        m_PerFrameConstantBuffer.m_FrameParameters0               .Set(FrameNumber, FrameDeltaTime, 0.0f, 0.0f);
+        m_PerFrameConstantBuffer.m_WorldToScreen                   = (MainCameraPtr->GetViewProjectionMatrix());
+        m_PerFrameConstantBuffer.m_WorldToQuad                     = (ScreenCameraPtr->GetViewProjectionMatrix());
+        m_PerFrameConstantBuffer.m_WorldToView                     = (MainViewPtr->GetViewMatrix());
+        m_PerFrameConstantBuffer.m_ViewToScreen                    = (MainCameraPtr->GetProjectionMatrix());
+        m_PerFrameConstantBuffer.m_ScreenToView                    = glm::inverse(MainCameraPtr->GetProjectionMatrix());
+        m_PerFrameConstantBuffer.m_ViewToWorld                     = glm::inverse(MainViewPtr->GetViewMatrix());
+        m_PerFrameConstantBuffer.m_ViewPosition                    = glm::vec4(MainViewPtr->GetPosition(), 1.0f);
+        m_PerFrameConstantBuffer.m_ViewDirection                   = glm::vec4(MainViewPtr->GetViewDirection(), 0.0f);
+        m_PerFrameConstantBuffer.m_InvertedScreensizeAndScreensize = glm::vec4(InvertedScreensizeX, InvertedScreensizeY, ScreensizeX, ScreensizeY);
+        m_PerFrameConstantBuffer.m_ScreenPositionScaleBias         = glm::vec4(0.5f, 0.5f, 0.5f, 0.5f);
+        m_PerFrameConstantBuffer.m_CameraParameters0               = glm::vec4(Near, Far, 0.0f, 0.0f);
+        m_PerFrameConstantBuffer.m_WorldParameters0                = glm::vec4(WorldNumberOfMetersX, WorldNumberOfMetersY, WorldNumberOfMetersZ, 0.0f);
+        m_PerFrameConstantBuffer.m_FrameParameters0                = glm::vec4(FrameNumber, FrameDeltaTime, 0.0f, 0.0f);
         
         BufferManager::UploadBufferData(m_PerFrameConstantBufferBufferPtr, &m_PerFrameConstantBuffer);
     }
@@ -1018,28 +1017,28 @@ namespace Main
 
     // -----------------------------------------------------------------------------
 
-    const Base::Int2& GetActiveWindowSize()
+    const glm::ivec2& GetActiveWindowSize()
     {
         return CGfxMain::GetInstance().GetActiveWindowSize();
     }
 
     // -----------------------------------------------------------------------------
 
-    const Base::Int2& GetWindowSize(unsigned int _WindowID)
+    const glm::ivec2& GetWindowSize(unsigned int _WindowID)
     {
         return CGfxMain::GetInstance().GetWindowSize(_WindowID);
     }
 
     // -----------------------------------------------------------------------------
 
-    const Base::Int2& GetActiveNativeWindowSize()
+    const glm::ivec2& GetActiveNativeWindowSize()
     {
         return CGfxMain::GetInstance().GetActiveNativeWindowSize();
     }
 
     // -----------------------------------------------------------------------------
 
-    const Base::Int2& GetNativeWindowSize(unsigned int _WindowID)
+    const glm::ivec2& GetNativeWindowSize(unsigned int _WindowID)
     {
         return CGfxMain::GetInstance().GetNativeWindowSize(_WindowID);
     }

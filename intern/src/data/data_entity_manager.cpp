@@ -18,6 +18,9 @@
 #include "data/data_model_manager.h"
 #include "data/data_transformation_facet.h"
 
+#include "glm.hpp"
+#include "ext.hpp"
+
 #include <assert.h>
 #include <unordered_map>
 #include <vector>
@@ -466,15 +469,15 @@ namespace
         // -----------------------------------------------------------------------------
         // Calculate the world matrix of the entity in SRT order.
         // -----------------------------------------------------------------------------
-        Base::Float4x4 WorldMatrix;
+        glm::mat4 WorldMatrix;
 
-        WorldMatrix.SetScale(pTransformationFacet->GetScale());
+        WorldMatrix = glm::scale(pTransformationFacet->GetScale());
 
-        Base::Float4x4 RotationMatrix;
+        glm::mat4 RotationMatrix;
 
-        const Base::Float3& rRotation = pTransformationFacet->GetRotation();
+        const glm::vec3& rRotation = pTransformationFacet->GetRotation();
 
-        RotationMatrix.SetRotation(rRotation[0], rRotation[1], rRotation[2]);
+        RotationMatrix = glm::eulerAngleXYZ(rRotation[0], rRotation[1], rRotation[2]);
 
         WorldMatrix = RotationMatrix * WorldMatrix;
 
@@ -492,7 +495,7 @@ namespace
             // -----------------------------------------------------------------------------
             // In case of an hierarchy we use the position relative to the parent.
             // -----------------------------------------------------------------------------
-            WorldMatrix.InjectTranslation(pTransformationFacet->GetPosition());
+            WorldMatrix[3] = glm::vec4(pTransformationFacet->GetPosition(), 1.0f);
 
             if (pParentEntity != nullptr)
             {
@@ -511,7 +514,7 @@ namespace
             // -----------------------------------------------------------------------------
             // If the entity does not have a parent then use the absolute world position.
             // -----------------------------------------------------------------------------
-            WorldMatrix.InjectTranslation(_rEntity.GetWorldPosition());
+            WorldMatrix[3] = glm::vec4(_rEntity.GetWorldPosition(), 1.0f);
         }
 
         pTransformationFacet->SetWorldMatrix(WorldMatrix);
@@ -519,9 +522,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Extract the world space position of the entity from the world matrix.
         // -----------------------------------------------------------------------------
-        Base::Float3 WorldPosition;
+        glm::vec3 WorldPosition;
 
-        WorldMatrix.GetTranslation(WorldPosition);
+        WorldPosition = WorldMatrix[3];
 
         _rEntity.SetWorldPosition(WorldPosition);
     }

@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "base/base_vector4.h"
+#include "glm.hpp"
 
 namespace Dt
 {
@@ -9,11 +9,11 @@ namespace Dt
     {
     public:
 
-        void SetWindDirection(const Base::Float4& _rWindDirection);
-        Base::Float4& GetWindDirection();
+        void SetWindDirection(const glm::vec4& _rWindDirection);
+        glm::vec4& GetWindDirection();
 
-        void SetFogColor(const Base::Float4& _rFogColor);
-        Base::Float4& GetFogColor();
+        void SetFogColor(const glm::vec4& _rFogColor);
+        glm::vec4& GetFogColor();
 
         void SetFrustumDepthInMeter(float _FrustumDepthInMeter);
         float GetFrustumDepthInMeter();
@@ -40,8 +40,8 @@ namespace Dt
 
     private:
 
-        Base::Float4 m_WindDirection;                      //< Wind direction of the fog (xyz = direction, w = speed)
-        Base::Float4 m_FogColor;                           //< Overall color of the fog (rgb = color, a = intensity)
+        glm::vec4 m_WindDirection;                      //< Wind direction of the fog (xyz = direction, w = speed)
+        glm::vec4 m_FogColor;                           //< Overall color of the fog (rgb = color, a = intensity)
         float        m_FrustumDepthInMeter;                //< Meters of the fog will be calculated
         float        m_ShadowIntensity;                    //< Intensity of the fog (higher is harder edges)
         float        m_ScatteringCoefficient;              //< Scattering amount of light by the fog

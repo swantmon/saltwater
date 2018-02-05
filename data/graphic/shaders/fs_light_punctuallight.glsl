@@ -9,7 +9,7 @@
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
-layout(row_major, std140, binding = 2) uniform UB2
+layout(std140, binding = 2) uniform UB2
 {
     mat4 ps_InverseCameraProjection;
     mat4 ps_InverseCameraView;
@@ -18,7 +18,7 @@ layout(row_major, std140, binding = 2) uniform UB2
     uint ps_ExposureHistoryIndex;
 };
 
-layout(row_major, std140, binding = 3) uniform UB3
+layout(std140, binding = 3) uniform UB3
 {
     vec4  ps_LightPosition;
     vec4  ps_LightDirection;

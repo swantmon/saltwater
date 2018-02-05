@@ -311,8 +311,8 @@ namespace
         ArFrame* m_pARFrame;
         CTrackedObjects m_TrackedObjects;
 
-        Base::Float4x4 m_ViewMatrix;
-        Base::Float4x4 m_ProjectionMatrix;
+        glm::mat4 m_ViewMatrix;
+        glm::mat4 m_ProjectionMatrix;
 
         Dt::CEntity* m_pEntity;
 
@@ -334,8 +334,8 @@ namespace
         : m_pARSession        (0)
         , m_pARFrame          (0)
         , m_TrackedObjects    ()
-        , m_ViewMatrix        (Base::Float4x4::s_Identity)
-        , m_ProjectionMatrix  (Base::Float4x4::s_Identity)
+        , m_ViewMatrix        (glm::mat4(1.0f))
+        , m_ProjectionMatrix  (glm::mat4(1.0f))
         , m_pEntity           (0)
     {
     }
@@ -420,7 +420,7 @@ namespace
 
         glBindBuffer(GL_ARRAY_BUFFER, g_AttributePlaneVertices);
 
-        glBufferData(GL_ARRAY_BUFFER, s_MaxNumberOfVerticesPerPlane * sizeof(Base::Float3), 0, GL_DYNAMIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, s_MaxNumberOfVerticesPerPlane * sizeof(glm::vec3), 0, GL_DYNAMIC_DRAW);
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -440,7 +440,7 @@ namespace
 
         glBindBuffer(GL_ARRAY_BUFFER, g_AttributePointVertices);
 
-        glBufferData(GL_ARRAY_BUFFER, s_MaxNumberOfVerticesPerPoint * sizeof(Base::Float3), 0, GL_DYNAMIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, s_MaxNumberOfVerticesPerPoint * sizeof(glm::vec3), 0, GL_DYNAMIC_DRAW);
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
@@ -531,7 +531,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Use tracked objects matrices
         // -----------------------------------------------------------------------------
-        Base::Float4x4 ModelMatrix = Base::Float4x4::s_Identity;
+        glm::mat4 ModelMatrix = glm::mat4(1.0f);
 
         for (const auto& rObject : m_TrackedObjects)
         {
@@ -551,9 +551,9 @@ namespace
             {
                 Dt::CTransformationFacet* pTransformation = m_pEntity->GetTransformationFacet();
 
-                Base::Float3 Position;
-                Base::Float3x3 Rotation;
-                Base::Float3 EulerRotation;
+                glm::vec3 Position;
+                glm::mat3 Rotation;
+                glm::vec3 EulerRotation;
 
                 ModelMatrix.GetRotation(EulerRotation);
 
@@ -656,10 +656,10 @@ namespace
 
         if (RenderPlanes == false) return;
 
-        std::vector<Base::Float3> PlaneVertices;
+        std::vector<glm::vec3> PlaneVertices;
         std::vector<GLushort> PlaneIndices;
 
-        Base::Float4x4 PlaneModelMatrix = Base::Float4x4::s_Identity;
+        glm::mat4 PlaneModelMatrix = glm::mat4(1.0f);
 
         auto UpdateGeometryForPlane = [&](const ArPlane* _pPlane)
         {
@@ -696,7 +696,7 @@ namespace
 
             int NumberOfVertices = LengthOfPolygon / 2;
 
-            std::vector<Base::Float2> VerticesRAW(NumberOfVertices);
+            std::vector<glm::vec2> VerticesRAW(NumberOfVertices);
 
             ArPlane_getPolygon(m_pARSession, _pPlane, &VerticesRAW.front()[0]);
 
@@ -707,7 +707,7 @@ namespace
             // -----------------------------------------------------------------------------
             for (int IndexOfVertex = 0; IndexOfVertex < NumberOfVertices; ++IndexOfVertex)
             {
-                PlaneVertices.push_back(Base::Float3(VerticesRAW[IndexOfVertex][0], VerticesRAW[IndexOfVertex][1], kOuterAlpha));
+                PlaneVertices.push_back(glm::vec3(VerticesRAW[IndexOfVertex][0], VerticesRAW[IndexOfVertex][1], kOuterAlpha));
             }
 
             // -----------------------------------------------------------------------------
@@ -726,20 +726,20 @@ namespace
             // -----------------------------------------------------------------------------
             // Get plane center in XZ axis.
             // -----------------------------------------------------------------------------
-            Base::Float2 CenterOfPlane = Base::Float2(PlaneModelMatrix[3][0], PlaneModelMatrix[3][2]);
+            glm::vec2 CenterOfPlane = glm::vec2(PlaneModelMatrix[3][0], PlaneModelMatrix[3][2]);
 
             // -----------------------------------------------------------------------------
             // Fill vertex 0 to 3, with alpha set to kAlpha.
             // -----------------------------------------------------------------------------
             for (int i = 0; i < NumberOfVertices; ++i)
             {
-                Base::Float2 Direction = VerticesRAW[i] - CenterOfPlane;
+                glm::vec2 Direction = VerticesRAW[i] - CenterOfPlane;
 
                 float Scale = 1.0f - std::min((kFeatherLength / 2.0f), kFeatherScale);
 
-                Base::Float2 ResultVector = Base::Float2(Scale) * Direction + CenterOfPlane;
+                glm::vec2 ResultVector = glm::vec2(Scale) * Direction + CenterOfPlane;
 
-                PlaneVertices.push_back(Base::Float3(ResultVector[0], ResultVector[1], kInnerAlpha));
+                PlaneVertices.push_back(glm::vec3(ResultVector[0], ResultVector[1], kInnerAlpha));
             }
 
             // -----------------------------------------------------------------------------
@@ -816,7 +816,7 @@ namespace
 
             glBindBuffer(GL_ARRAY_BUFFER, g_AttributePlaneVertices);
 
-            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Base::Float3) * PlaneVertices.size(), &PlaneVertices.front()[0]);
+            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec3) * PlaneVertices.size(), &PlaneVertices.front()[0]);
 
             glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -830,9 +830,9 @@ namespace
             // Prepare model-view-projection matrix
             // TODO: Change color depending on height of the plane
             // -----------------------------------------------------------------------------
-            Base::Float4x4 PlaneMVPMatrix = Gfx::Cam::GetProjectionMatrix() * Gfx::Cam::GetViewMatrix() * PlaneModelMatrix.GetTransposed() * Base::Float4x4().SetRotationX(Base::DegreesToRadians(-90.0f));
+            glm::mat4 PlaneMVPMatrix = Gfx::Cam::GetProjectionMatrix() * Gfx::Cam::GetViewMatrix() * PlaneModelMatrix.GetTransposed() * glm::mat4().SetRotationX(Base::DegreesToRadians(-90.0f));
 
-            Base::Float4 Color = Base::Float4(1.0f, 1.0f, 1.0f, 1.0f);
+            glm::vec4 Color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
             // -----------------------------------------------------------------------------
             // Draw
@@ -906,7 +906,7 @@ namespace
 
                 glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-                Base::Float4x4 PointMVPMatrix = Gfx::Cam::GetProjectionMatrix() * Gfx::Cam::GetViewMatrix();
+                glm::mat4 PointMVPMatrix = Gfx::Cam::GetProjectionMatrix() * Gfx::Cam::GetViewMatrix();
 
                 // -----------------------------------------------------------------------------
                 // Draw

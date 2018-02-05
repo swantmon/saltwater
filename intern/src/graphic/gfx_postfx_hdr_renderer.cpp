@@ -1,7 +1,6 @@
 
 #include "graphic/gfx_precompiled.h"
 
-#include "base/base_matrix4x4.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
@@ -23,6 +22,8 @@
 #include "graphic/gfx_target_set_manager.h"
 #include "graphic/gfx_texture_manager.h"
 #include "graphic/gfx_view_manager.h"
+
+#include "glm.hpp"
 
 using namespace Gfx;
 
@@ -92,20 +93,20 @@ namespace
 
         struct SGaussianShaderProperties
         {
-            Base::Int2 m_Direction;
-            Base::Int2 m_MaxPixelCoord;
+            glm::ivec2 m_Direction;
+            glm::ivec2 m_MaxPixelCoord;
             float      m_Weights[7];
         };
 
         struct SBloomShaderProperties
         {
-            Base::Float4 m_BloomThresholdValue;
-            Base::Float4 m_BloomTintIntensity;
+            glm::vec4 m_BloomThresholdValue;
+            glm::vec4 m_BloomTintIntensity;
         };
 
         struct SDownSampleShaderProperties
         {
-            Base::Float4 m_InvertTexturesize;
+            glm::vec4 m_InvertTexturesize;
         };
 
     private:
@@ -138,7 +139,7 @@ namespace
         CTextureSetPtr    m_DownSampleTextureSetPtrs[NumberOfDownSamples];
         CRenderContextPtr m_DownSampleRenderContextPtrs[NumberOfDownSamples];
         CTargetSetPtr     m_DownSampleTargetSetPtrs[NumberOfDownSamples];
-        Base::Int2        m_DownSampleSizes[NumberOfDownSamples];
+        glm::ivec2        m_DownSampleSizes[NumberOfDownSamples];
 
         CBloomRenderJobs m_BloomRenderJobs;
         
@@ -200,13 +201,13 @@ namespace
         // -----------------------------------------------------------------------------
         // Initiate target set sizes of down samples
         // -----------------------------------------------------------------------------
-        Base::Int2 Size = Main::GetActiveWindowSize();
+        glm::ivec2 Size = Main::GetActiveWindowSize();
 
         for (unsigned int IndexOfBlur = 0; IndexOfBlur < s_NumberOfBlurStages; ++ IndexOfBlur)
         {
             int Devisor = Base::Pow(2, (IndexOfBlur + 1));
 
-            m_DownSampleSizes[IndexOfBlur] = Base::Int2(Size[0] / Devisor, Size[1] / Devisor);
+            m_DownSampleSizes[IndexOfBlur] = glm::ivec2(Size[0] / Devisor, Size[1] / Devisor);
         }
     }
     
@@ -290,7 +291,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Initiate target set
         // -----------------------------------------------------------------------------
-        Base::Int2 Size = Main::GetActiveWindowSize();
+        glm::ivec2 Size = Main::GetActiveWindowSize();
         
         // -----------------------------------------------------------------------------
         // Create render target textures
@@ -344,7 +345,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Get screen resolutions
         // -----------------------------------------------------------------------------
-        Base::Int2 Size = Main::GetActiveWindowSize();
+        glm::ivec2 Size = Main::GetActiveWindowSize();
         
         // -----------------------------------------------------------------------------
         // Setup states
@@ -573,13 +574,13 @@ namespace
         // -----------------------------------------------------------------------------
         // Initiate target set sizes of down samples
         // -----------------------------------------------------------------------------
-        Base::Int2 Size(_Width, _Height);
+        glm::ivec2 Size(_Width, _Height);
 
         for (unsigned int IndexOfBlur = 0; IndexOfBlur < s_NumberOfBlurStages; ++IndexOfBlur)
         {
             int Devisor = Base::Pow(2, (IndexOfBlur + 1));
 
-            m_DownSampleSizes[IndexOfBlur] = Base::Int2(Size[0] / Devisor, Size[1] / Devisor);
+            m_DownSampleSizes[IndexOfBlur] = glm::ivec2(Size[0] / Devisor, Size[1] / Devisor);
         }
 
         // -----------------------------------------------------------------------------
@@ -896,7 +897,7 @@ namespace
         // -----------------------------------------------------------------------------
         SBloomShaderProperties BloomShaderProperties;
 
-        BloomShaderProperties.m_BloomThresholdValue = Base::Float4(static_cast<float>(pDataBloomFacet->GetTreshhold()), 0, 0, pDataBloomFacet->GetExposureScale());
+        BloomShaderProperties.m_BloomThresholdValue = glm::vec4(static_cast<float>(pDataBloomFacet->GetTreshhold()), 0, 0, pDataBloomFacet->GetExposureScale());
         BloomShaderProperties.m_BloomTintIntensity  = pDataBloomFacet->GetTint() * pDataBloomFacet->GetIntensity();
 
         BufferManager::UploadBufferData(m_BloomPropertiesBufferPtr, &BloomShaderProperties);

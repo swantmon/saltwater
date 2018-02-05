@@ -1,11 +1,12 @@
 #pragma once
 
 #include "base/base_managed_pool.h"
-#include "base/base_vector4.h"
 
 #include "graphic/gfx_buffer.h"
 #include "graphic/gfx_buffer_set.h"
 #include "graphic/gfx_texture.h"
+
+#include "glm.hpp"
 
 namespace Gfx
 {
@@ -21,9 +22,9 @@ namespace Gfx
         CBufferPtr GetPlaneIndexBuffer() const;
         CBufferPtr GetPlaneVertexBuffer() const;
 
-        Base::Float4 GetDirectionX() const;
-        Base::Float4 GetDirectionY() const;
-        Base::Float4 GetPlane() const;
+        glm::vec4 GetDirectionX() const;
+        glm::vec4 GetDirectionY() const;
+        glm::vec4 GetPlane() const;
         float GetHalfWidth() const;
         float GetHalfHeight() const;
 
@@ -38,9 +39,9 @@ namespace Gfx
         CBufferPtr    m_PlaneVertexBufferSetPtr;
         CTexturePtr m_TexturePtr;
         CTexturePtr m_FilteredTexturePtr;
-        Base::Float4  m_DirectionX;
-        Base::Float4  m_DirectionY;
-        Base::Float4  m_Plane;
+        glm::vec4  m_DirectionX;
+        glm::vec4  m_DirectionY;
+        glm::vec4  m_Plane;
         float         m_HalfWidth;
         float         m_HalfHeight;
         Base::U64     m_TimeStamp;

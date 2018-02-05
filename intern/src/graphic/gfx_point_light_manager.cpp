@@ -32,6 +32,9 @@
 #include "graphic/gfx_texture_manager.h"
 #include "graphic/gfx_view_manager.h"
 
+#include "glm.hpp"
+#include "ext.hpp"
+
 using namespace Gfx;
 
 namespace 
@@ -56,20 +59,20 @@ namespace
 
         struct SPerLightConstantBuffer
         {
-            Base::Float4x4 vs_ViewProjectionMatrix;
+            glm::mat4 vs_ViewProjectionMatrix;
         };
 
         struct SPerDrawCallConstantBuffer
         {
-            Base::Float4x4 m_ModelMatrix;
+            glm::mat4 m_ModelMatrix;
         };
 
         struct SPunctualLightProperties
         {
-            Base::Float4 m_LightPosition;
-            Base::Float4 m_LightDirection;
-            Base::Float4 m_LightColor;
-            Base::Float4 m_LightSettings; // InvSqrAttenuationRadius, AngleScale, AngleOffset, Has shadows
+            glm::vec4 m_LightPosition;
+            glm::vec4 m_LightDirection;
+            glm::vec4 m_LightColor;
+            glm::vec4 m_LightSettings; // InvSqrAttenuationRadius, AngleScale, AngleOffset, Has shadows
         };
 
         class CInternPointLightFacet : public CPointLightFacet
@@ -114,7 +117,7 @@ namespace
 
         void CreateSM(unsigned int _Size, CInternPointLightFacet& _rInternLight);
 
-        void RenderShadows(CInternPointLightFacet& _rInternLight, const Dt::CPointLightFacet* _pDtPointLight, const Base::Float3& _rLightPosition);
+        void RenderShadows(CInternPointLightFacet& _rInternLight, const Dt::CPointLightFacet* _pDtPointLight, const glm::vec3& _rLightPosition);
     };
 } // namespace 
 
@@ -273,15 +276,15 @@ namespace
                     Gfx::CViewPtr   ShadowViewPtr = pGfxPointLightFacet->m_RenderContextPtr->GetCamera()->GetView();
                     Gfx::CCameraPtr ShadowCameraPtr = pGfxPointLightFacet->m_RenderContextPtr->GetCamera();
 
-                    Base::Float3 LightPosition = rCurrentEntity.GetWorldPosition();
-                    Base::Float3 LightDirection = pDtPointLightFacet->GetDirection();
+                    glm::vec3 LightPosition = rCurrentEntity.GetWorldPosition();
+                    glm::vec3 LightDirection = pDtPointLightFacet->GetDirection();
 
                     // -----------------------------------------------------------------------------
                     // Set view
                     // -----------------------------------------------------------------------------
-                    Base::Float3x3 RotationMatrix = Base::Float3x3::s_Identity;
+                    glm::mat3 RotationMatrix = glm::mat3(1.0f);
 
-                    RotationMatrix.LookAt(LightPosition, LightPosition + LightDirection, Base::Float3::s_AxisZ);
+                    RotationMatrix = glm::lookAt(LightPosition, LightPosition + LightDirection, glm::vec3(0.0f, 0.0f, 1.0f));
 
                     ShadowViewPtr->SetPosition(LightPosition);
                     ShadowViewPtr->SetRotationMatrix(RotationMatrix);
@@ -418,15 +421,15 @@ namespace
         Gfx::CViewPtr   ShadowViewPtr   = pGfxPointLightFacet->m_RenderContextPtr->GetCamera()->GetView();
         Gfx::CCameraPtr ShadowCameraPtr = pGfxPointLightFacet->m_RenderContextPtr->GetCamera();
 
-        Base::Float3 LightPosition  = _pEntity->GetWorldPosition();
-        Base::Float3 LightDirection = pDtPointLightFacet->GetDirection();
+        glm::vec3 LightPosition  = _pEntity->GetWorldPosition();
+        glm::vec3 LightDirection = pDtPointLightFacet->GetDirection();
 
         // -----------------------------------------------------------------------------
         // Set view
         // -----------------------------------------------------------------------------
-        Base::Float3x3 RotationMatrix = Base::Float3x3::s_Identity;
+        glm::mat3 RotationMatrix = glm::mat3(1.0f);
 
-        RotationMatrix.LookAt(LightPosition, LightPosition + LightDirection, Base::Float3::s_AxisZ);
+        RotationMatrix = glm::lookAt(LightPosition, LightPosition + LightDirection, glm::vec3(0.0f, 0.0f, 1.0f));
 
         ShadowViewPtr->SetPosition(LightPosition);
         ShadowViewPtr->SetRotationMatrix(RotationMatrix);
@@ -646,7 +649,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxPointLightManager::RenderShadows(CInternPointLightFacet& _rInternLight, const Dt::CPointLightFacet* _pDtPointLight, const Base::Float3& _rLightPosition)
+    void CGfxPointLightManager::RenderShadows(CInternPointLightFacet& _rInternLight, const Dt::CPointLightFacet* _pDtPointLight, const glm::vec3& _rLightPosition)
     {
         if (_rInternLight.m_CurrentShadowType == Dt::CPointLightFacet::NoShadows) return;
 
@@ -768,10 +771,10 @@ namespace
                     float AngleScale              = _pDtPointLight->GetAngleScale();
                     float AngleOffset             = _pDtPointLight->GetAngleOffset();
 
-                    PunctualLightProperties.m_LightPosition  = Base::Float4(_rLightPosition, 1.0f);
-                    PunctualLightProperties.m_LightDirection = Base::Float4(_pDtPointLight->GetDirection(), 0.0f).Normalize();
-                    PunctualLightProperties.m_LightColor     = Base::Float4(_pDtPointLight->GetLightness(), 1.0f);
-                    PunctualLightProperties.m_LightSettings  = Base::Float4(InvSqrAttenuationRadius, AngleScale, AngleOffset, 0.0f);
+                    PunctualLightProperties.m_LightPosition  = glm::vec4(_rLightPosition, 1.0f);
+                    PunctualLightProperties.m_LightDirection = glm::normalize(glm::vec4(_pDtPointLight->GetDirection(), 0.0f));
+                    PunctualLightProperties.m_LightColor     = glm::vec4(_pDtPointLight->GetLightness(), 1.0f);
+                    PunctualLightProperties.m_LightSettings  = glm::vec4(InvSqrAttenuationRadius, AngleScale, AngleOffset, 0.0f);
 
                     BufferManager::UploadBufferData(m_RSMPSBuffer->GetBuffer(1), &PunctualLightProperties);
 

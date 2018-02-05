@@ -2,7 +2,8 @@
 #pragma once
 
 #include "base/base_defines.h"
-#include "base/base_vector2.h"
+
+#include "glm.hpp"
 
 namespace IO
 {
@@ -123,8 +124,8 @@ namespace IO
         
         inline CInputEvent(unsigned int _Type);
         inline CInputEvent(unsigned int _Type, unsigned int _Action, unsigned int _Key, unsigned int _KeyModifier);
-        inline CInputEvent(unsigned int _Type, unsigned int _Action, unsigned int _Key, const Base::Float2& _rPointerPosition);
-        inline CInputEvent(unsigned int _Type, unsigned int _Action, unsigned int _Key, const Base::Float2& _rPointerPosition, float _WheelDelta);
+        inline CInputEvent(unsigned int _Type, unsigned int _Action, unsigned int _Key, const glm::vec2& _rPointerPosition);
+        inline CInputEvent(unsigned int _Type, unsigned int _Action, unsigned int _Key, const glm::vec2& _rPointerPosition, float _WheelDelta);
         inline CInputEvent(const CInputEvent& _rEvent);
         inline ~CInputEvent();
         
@@ -145,7 +146,7 @@ namespace IO
         inline bool HasControl() const;
         inline bool HasModifier() const;
         
-        inline const Base::Float2& GetCursorPosition() const;
+        inline const glm::vec2& GetCursorPosition() const;
         
         inline float GetWheelDelta() const;
         
@@ -161,9 +162,9 @@ namespace IO
         
     private:
         
-        SBits        m_Bits;
-        Base::Float2 m_PointerPosition;
-        float        m_WheelDelta;
+        SBits     m_Bits;
+        glm::vec2 m_PointerPosition;
+        float     m_WheelDelta;
     };
 } // namespace IO
 
@@ -193,7 +194,7 @@ namespace IO
     
     // -----------------------------------------------------------------------------
     
-    inline CInputEvent::CInputEvent(unsigned int _Type, unsigned int _Action, unsigned int _Key, const Base::Float2& _rPointerPosition)
+    inline CInputEvent::CInputEvent(unsigned int _Type, unsigned int _Action, unsigned int _Key, const glm::vec2& _rPointerPosition)
         : m_PointerPosition(_rPointerPosition)
         , m_WheelDelta    (0)
     {
@@ -205,7 +206,7 @@ namespace IO
     
     // -----------------------------------------------------------------------------
     
-    inline CInputEvent::CInputEvent(unsigned int _Type, unsigned int _Action, unsigned int _Key, const Base::Float2& _rPointerPosition, float _WheelDelta)
+    inline CInputEvent::CInputEvent(unsigned int _Type, unsigned int _Action, unsigned int _Key, const glm::vec2& _rPointerPosition, float _WheelDelta)
         : m_PointerPosition(_rPointerPosition)
         , m_WheelDelta    (_WheelDelta)
     {
@@ -298,7 +299,7 @@ namespace IO
     
     // -----------------------------------------------------------------------------
     
-    inline const Base::Float2& CInputEvent::GetCursorPosition() const
+    inline const glm::vec2& CInputEvent::GetCursorPosition() const
     {
         return m_PointerPosition;
     }

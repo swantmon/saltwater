@@ -42,21 +42,21 @@ namespace Gfx
 
     // -----------------------------------------------------------------------------
 
-    Base::Float4 CAreaLightFacet::GetDirectionX() const
+    glm::vec4 CAreaLightFacet::GetDirectionX() const
     {
         return m_DirectionX;
     }
 
     // -----------------------------------------------------------------------------
 
-    Base::Float4 CAreaLightFacet::GetDirectionY() const
+    glm::vec4 CAreaLightFacet::GetDirectionY() const
     {
         return m_DirectionY;
     }
 
     // -----------------------------------------------------------------------------
 
-    Base::Float4 CAreaLightFacet::GetPlane() const
+    glm::vec4 CAreaLightFacet::GetPlane() const
     {
         return m_Plane;
     }

@@ -40,42 +40,42 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CSunLightFacet::SetColor(const Base::Float3& _rColor)
+    void CSunLightFacet::SetColor(const glm::vec3& _rColor)
     {
         m_Color = _rColor;
     }
 
     // -----------------------------------------------------------------------------
 
-    Base::Float3& CSunLightFacet::GetColor()  
+    glm::vec3& CSunLightFacet::GetColor()  
     {
         return m_Color;
     }
 
     // -----------------------------------------------------------------------------
 
-    const Base::Float3& CSunLightFacet::GetColor() const
+    const glm::vec3& CSunLightFacet::GetColor() const
     {
         return m_Color;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CSunLightFacet::SetDirection(const Base::Float3& _rDirection)
+    void CSunLightFacet::SetDirection(const glm::vec3& _rDirection)
     {
         m_Direction = _rDirection;
     }
 
     // -----------------------------------------------------------------------------
 
-    Base::Float3& CSunLightFacet::GetDirection()
+    glm::vec3& CSunLightFacet::GetDirection()
     {
         return m_Direction;
     }
 
     // -----------------------------------------------------------------------------
 
-    const Base::Float3& CSunLightFacet::GetDirection() const
+    const glm::vec3& CSunLightFacet::GetDirection() const
     {
         return m_Direction;
     }
@@ -124,14 +124,14 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    Base::Float3& CSunLightFacet::GetLightness()
+    glm::vec3& CSunLightFacet::GetLightness()
     {
         return m_Lightness;
     }
 
     // -----------------------------------------------------------------------------
 
-    const Base::Float3& CSunLightFacet::GetLightness() const
+    const glm::vec3& CSunLightFacet::GetLightness() const
     {
         return m_Lightness;
     }
@@ -140,7 +140,7 @@ namespace Dt
 
     void CSunLightFacet::UpdateLightness()
     {
-        Base::Float3 Color;
+        glm::vec3 Color;
 
         if (m_HasTemperature)
         {

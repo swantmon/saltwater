@@ -72,7 +72,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         Cam::ControlManager::SetActiveControl(Cam::CControl::EditorControl);
 
-        // Cam::ControlManager::GetActiveControl().SetPosition(Base::Float3(0.0f, 0.0f, 10.0f));
+        // Cam::ControlManager::GetActiveControl().SetPosition(glm::vec3(0.0f, 0.0f, 10.0f));
 
         // -----------------------------------------------------------------------------
         // Running states
@@ -231,7 +231,7 @@ namespace Edit
 
         if (m_pSelectionTicket != 0)
         {
-            Gfx::SelectionRenderer::PushPick(*m_pSelectionTicket, Base::Int2(LocalMousePositionX, LocalMousePositionY));
+            Gfx::SelectionRenderer::PushPick(*m_pSelectionTicket, glm::ivec2(LocalMousePositionX, LocalMousePositionY));
         }
     }
 } // namespace Edit

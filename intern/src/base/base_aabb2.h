@@ -9,9 +9,10 @@
 #pragma once
 
 #include "base/base_defines.h"
-#include "base/base_vector2.h"
 
 #include <assert.h>
+
+#include "glm.hpp"
 
 namespace MATH
 {
@@ -37,7 +38,7 @@ namespace MATH
         typedef X*           XPtr;
         typedef const X*     XConstPtr;
         
-        typedef CVector2<T>  CCorner;
+        typedef glm::vec2 CCorner;
         
     public:
         
@@ -76,7 +77,7 @@ namespace MATH
         
     public:
         
-        inline const CCorner BuildCorner(const Base::Int2& _rIndices) const;
+        inline const CCorner BuildCorner(const glm::ivec2& _rIndices) const;
         
     public:
         
@@ -291,7 +292,7 @@ namespace MATH
     // -----------------------------------------------------------------------------
     
     template<typename T>
-    const typename CAABB2<T>::CCorner CAABB2<T>::BuildCorner(const Base::Int2& _rIndices) const
+    const typename CAABB2<T>::CCorner CAABB2<T>::BuildCorner(const glm::ivec2& _rIndices) const
     {
         assert(_rIndices[0] >=0 && _rIndices[0] < 4);
         assert(_rIndices[1] >=0 && _rIndices[1] < 4);

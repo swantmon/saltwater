@@ -14,13 +14,13 @@ const float g_DeltaTheta = g_PI / float(g_InscatterIntegralSphereSampleCount);
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
-layout(row_major, std140, binding = 3) uniform PSLayerValues
+layout(std140, binding = 3) uniform PSLayerValues
 {
     vec4  g_Dhdh;
     float g_Radius;
 };
 
-layout(row_major, std140, binding = 4) uniform PSScatteringOrder
+layout(std140, binding = 4) uniform PSScatteringOrder
 {
     float g_FirstOrder;
 };

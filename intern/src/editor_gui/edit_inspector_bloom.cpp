@@ -1,9 +1,9 @@
 ﻿
-#include "base/base_vector4.h"
-
 #include "editor_gui/edit_inspector_bloom.h"
 
 #include "editor_port/edit_message_manager.h"
+
+#include "glm.hpp"
 
 #include <QColorDialog>
 
@@ -53,7 +53,7 @@ namespace Edit
 
         QColor RGB = ButtonPalette.color(QPalette::Button);
 
-        Base::Float4 Color = Base::Float4(RGB.red() / 255.0f, RGB.green() / 255.0f, RGB.blue() / 255.0f, RGB.alpha() / 255.0f);
+        glm::vec4 Color = glm::vec4(RGB.red() / 255.0f, RGB.green() / 255.0f, RGB.blue() / 255.0f, RGB.alpha() / 255.0f);
 
         float Intensity     = m_pIntensityEdit->text().toFloat();
         float Treshhold     = m_pTreshholdEdit->text().toFloat();
@@ -135,7 +135,7 @@ namespace Edit
         B = _rMessage.GetFloat();
         A = _rMessage.GetFloat();
 
-        Base::Int4 Color = Base::Int4(R * 255, G * 255, B * 255, A * 255);
+        glm::ivec4 Color = glm::ivec4(R * 255, G * 255, B * 255, A * 255);
 
         float Intensity     = _rMessage.GetFloat();
         float Treshhold     = _rMessage.GetFloat();

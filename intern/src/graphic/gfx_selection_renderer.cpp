@@ -2,7 +2,6 @@
 #include "graphic/gfx_precompiled.h"
 
 #include "base/base_console.h"
-#include "base/base_matrix4x4.h"
 #include "base/base_math_limits.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
@@ -33,6 +32,9 @@
 #include "graphic/gfx_target_set_manager.h"
 #include "graphic/gfx_texture_manager.h"
 #include "graphic/gfx_view_manager.h"
+
+#include "glm.hpp"
+#include "ext.hpp"
 
 using namespace Gfx;
 
@@ -73,7 +75,7 @@ namespace
         CSelectionTicket& AcquireTicket(int _OffsetX, int _OffsetY, int _SizeX, int _SizeY, unsigned int _Flags = SPickFlag::Nothing);
         void ReleaseTicket(CSelectionTicket& _rTicket);
 
-        void PushPick(CSelectionTicket& _rTicket, const Base::Int2& _rCursor);
+        void PushPick(CSelectionTicket& _rTicket, const glm::ivec2& _rCursor);
         bool PopPick(CSelectionTicket& _rTicket);
 
         void Clear(CSelectionTicket& _rTicket);
@@ -92,15 +94,15 @@ namespace
 
         struct SSelectionOutput
         {
-            Base::Float4 m_WSPosition;
-            Base::Float4 m_WSNormal;
+            glm::vec4 m_WSPosition;
+            glm::vec4 m_WSNormal;
             float        m_Depth;
             unsigned int m_EntityID;
         };
 
         struct SRequest
         {
-            Base::Int2 m_Cursor;
+            glm::ivec2 m_Cursor;
             Base::U64  m_TimeStamp;
         };
         
@@ -147,7 +149,7 @@ namespace
 
         struct SPerDrawCallConstantBufferVS
         {
-            Base::Float4x4 m_ModelMatrix;
+            glm::mat4 m_ModelMatrix;
         };
 
         struct SSelectionSettings
@@ -160,18 +162,18 @@ namespace
         
         struct SHighlightSettings
         {
-            Base::Float4 m_ColorAlpha;
+            glm::vec4 m_ColorAlpha;
         };
 
         struct SSurfaceRenderJob
         {
             CSurfacePtr    m_SurfacePtr;
-            Base::Float4x4 m_ModelMatrix;
+            glm::mat4 m_ModelMatrix;
         };
 
         struct SProbeRenderJob
         {
-            Base::Float4x4        m_ModelMatrix;
+            glm::mat4        m_ModelMatrix;
             Gfx::CTexturePtr  m_TextureCubePtr;
             Dt::CLightProbeFacet* m_pDtProbeFacet;
         };
@@ -496,8 +498,8 @@ namespace
         rTicket.m_SizeY         = _SizeY;
         rTicket.m_IndexOfTicket = IndexOfTicket;
         rTicket.m_Flags         = _Flags;
-        rTicket.m_WSPosition    = Base::Float3::s_Zero;
-        rTicket.m_WSNormal      = Base::Float3::s_Zero;
+        rTicket.m_WSPosition    = glm::vec3(0.0f);
+        rTicket.m_WSNormal      = glm::vec3(0.0f);
         rTicket.m_Depth         = -1.0f;
         rTicket.m_pObject       = 0;
         rTicket.m_Frame         = Core::Time::GetNumberOfFrame() - 1;
@@ -518,7 +520,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxSelectionRenderer::PushPick(CSelectionTicket& _rTicket, const Base::Int2& _rCursor)
+    void CGfxSelectionRenderer::PushPick(CSelectionTicket& _rTicket, const glm::ivec2& _rCursor)
     {
         CInternSelectionTicket& rTicket = static_cast<CInternSelectionTicket&>(_rTicket);
 
@@ -537,7 +539,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Take care that the cursor position is within the window.
         // -----------------------------------------------------------------------------
-        Base::Int2 ActiveWindowSize = Gfx::Main::GetActiveWindowSize();
+        glm::ivec2 ActiveWindowSize = Gfx::Main::GetActiveWindowSize();
 
         if ((_rCursor[0] < 0) || (_rCursor[1] < 0) || (_rCursor[0] >= static_cast<short>(ActiveWindowSize[0])) || (_rCursor[1] >= static_cast<short>(ActiveWindowSize[1])))
         {
@@ -599,8 +601,8 @@ namespace
 
         SSelectionOutput* pOutput = static_cast<SSelectionOutput*>(BufferManager::MapBuffer(m_SelectionBufferSetPtrs[IndexOfBuffer]->GetBuffer(1), CBuffer::Read));
 
-        rTicket.m_WSPosition = Base::Float3(pOutput->m_WSPosition[0], pOutput->m_WSPosition[1], pOutput->m_WSPosition[2]);
-        rTicket.m_WSNormal   = Base::Float3(pOutput->m_WSNormal[0], pOutput->m_WSNormal[1], pOutput->m_WSNormal[2]);
+        rTicket.m_WSPosition = glm::vec3(pOutput->m_WSPosition[0], pOutput->m_WSPosition[1], pOutput->m_WSPosition[2]);
+        rTicket.m_WSNormal   = glm::vec3(pOutput->m_WSNormal[0], pOutput->m_WSNormal[1], pOutput->m_WSNormal[2]);
         rTicket.m_Depth      = pOutput->m_Depth;
         rTicket.m_HitFlag    = SHitFlag::Nothing;
         rTicket.m_pObject    = nullptr;
@@ -692,7 +694,7 @@ namespace
         // -----------------------------------------------------------------------------
         SHighlightSettings SelectionSettings;
 
-        SelectionSettings.m_ColorAlpha = Base::Float4(0.31f, 0.45f, 0.64f, 0.4f);
+        SelectionSettings.m_ColorAlpha = glm::vec4(0.31f, 0.45f, 0.64f, 0.4f);
 
         BufferManager::UploadBufferData(m_HighlightPSBufferPtr, &SelectionSettings);
 
@@ -841,7 +843,7 @@ namespace
             SPerDrawCallConstantBufferVS ModelBuffer;
 
             ModelBuffer.m_ModelMatrix  = CurrentProbeRenderJob->m_ModelMatrix;
-            ModelBuffer.m_ModelMatrix *= Base::Float4x4().SetScale(CurrentProbeRenderJob->m_pDtProbeFacet->GetBoxSize());
+            ModelBuffer.m_ModelMatrix *= glm::scale(CurrentProbeRenderJob->m_pDtProbeFacet->GetBoxSize());
 
             BufferManager::UploadBufferData(m_ModelBufferPtr, &ModelBuffer);
 
@@ -897,7 +899,7 @@ namespace
                 // -----------------------------------------------------------------------------
                 // Setup buffer
                 // -----------------------------------------------------------------------------
-                Base::Int2 ActiveWindowSize = Gfx::Main::GetActiveWindowSize();
+                glm::ivec2 ActiveWindowSize = Gfx::Main::GetActiveWindowSize();
 
                 SSelectionSettings Settings;
 
@@ -954,7 +956,7 @@ namespace
                 // -----------------------------------------------------------------------------
                 // Clear hit proxy target set
                 // -----------------------------------------------------------------------------
-                TargetSetManager::ClearTargetSet(TargetSetManager::GetHitProxyTargetSet(), Base::Float4(0.0f));
+                TargetSetManager::ClearTargetSet(TargetSetManager::GetHitProxyTargetSet(), glm::vec4(0.0f));
 
                 // -----------------------------------------------------------------------------
                 // Set request
@@ -1229,7 +1231,7 @@ namespace SelectionRenderer
 
     // -----------------------------------------------------------------------------
 
-    void PushPick(CSelectionTicket& _rTicket, const Base::Int2& _rCursor)
+    void PushPick(CSelectionTicket& _rTicket, const glm::ivec2& _rCursor)
     {
         CGfxSelectionRenderer::GetInstance().PushPick(_rTicket, _rCursor);
     }

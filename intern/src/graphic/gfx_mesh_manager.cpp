@@ -9,8 +9,6 @@
 #include "base/base_memory.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
-#include "base/base_vector2.h"
-#include "base/base_vector3.h"
 
 #include "data/data_entity.h"
 #include "data/data_model.h"
@@ -21,6 +19,8 @@
 #include "graphic/gfx_mesh_manager.h"
 #include "graphic/gfx_shader.h"
 #include "graphic/gfx_shader_manager.h"
+
+#include "glm.hpp"
 
 #include <unordered_map>
 #include <functional>
@@ -333,17 +333,17 @@ namespace
                 // -----------------------------------------------------------------------------
                 // Get data from data model
                 // -----------------------------------------------------------------------------
-                const Base::Float3* pPosition   = rCurrentSurface.GetPositions();
-                const Base::Float3* pNormals    = rCurrentSurface.GetNormals();
-                const Base::Float3* pTangents   = rCurrentSurface.GetTangents();
-                const Base::Float3* pBitangents = rCurrentSurface.GetBitangents();
-                const Base::Float2* pTexCoords  = rCurrentSurface.GetTexCoords();
+                const glm::vec3* pPosition   = rCurrentSurface.GetPositions();
+                const glm::vec3* pNormals    = rCurrentSurface.GetNormals();
+                const glm::vec3* pTangents   = rCurrentSurface.GetTangents();
+                const glm::vec3* pBitangents = rCurrentSurface.GetBitangents();
+                const glm::vec2* pTexCoords  = rCurrentSurface.GetTexCoords();
                 const unsigned int* pIndices    = rCurrentSurface.GetIndices();
 
                 // -----------------------------------------------------------------------------
                 // Prepare AABB
                 // -----------------------------------------------------------------------------
-                Base::Float3 StartPosition(pPosition[0][0], pPosition[0][1], pPosition[0][2]);
+                glm::vec3 StartPosition(pPosition[0][0], pPosition[0][1], pPosition[0][2]);
 
                 rModel.m_AABB.SetMin(StartPosition);
                 rModel.m_AABB.SetMax(StartPosition);
@@ -360,7 +360,7 @@ namespace
                 {
                     unsigned int CurrentAlignIndex = CurrentVertex * NumberOfElementsPerVertex;
                     
-                    Base::Float3 CurrentPosition(pPosition[CurrentVertex][0], pPosition[CurrentVertex][1], pPosition[CurrentVertex][2]);
+                    glm::vec3 CurrentPosition(pPosition[CurrentVertex][0], pPosition[CurrentVertex][1], pPosition[CurrentVertex][2]);
                     
                     rModel.m_AABB.Extend(CurrentPosition);
                     
@@ -533,7 +533,7 @@ namespace
         unsigned int NumberOfVertices = 8;
         unsigned int NumberOfIndices = 36;
 
-        Base::Float3* pVertices = static_cast<Base::Float3*>(Base::CMemory::Allocate(sizeof(Base::Float3) * NumberOfVertices * 2));
+        glm::vec3* pVertices = static_cast<glm::vec3*>(Base::CMemory::Allocate(sizeof(glm::vec3) * NumberOfVertices * 2));
         unsigned int* pIndices  = static_cast<unsigned int*>(Base::CMemory::Allocate(sizeof(unsigned int) * NumberOfIndices));
 
         assert(pVertices);
@@ -637,7 +637,7 @@ namespace
         BufferDesc.m_Usage         = CBuffer::GPURead;
         BufferDesc.m_Binding       = CBuffer::VertexBuffer;
         BufferDesc.m_Access        = CBuffer::CPUWrite;
-        BufferDesc.m_NumberOfBytes = sizeof(Base::Float3) * NumberOfVertices * 2;
+        BufferDesc.m_NumberOfBytes = sizeof(glm::vec3) * NumberOfVertices * 2;
         BufferDesc.m_pBytes        = pVertices;
         BufferDesc.m_pClassKey     = 0;
         
@@ -722,7 +722,7 @@ namespace
         unsigned int NumberOfVertices = (Height - 2) * Width + 2;
         unsigned int NumberOfIndices  = ((Height - 2) * (Width - 1) * 2) * 3;
         
-        Base::Float3* pVertices = static_cast<Base::Float3*>(Base::CMemory::Allocate(sizeof(Base::Float3) * NumberOfVertices * 2));
+        glm::vec3* pVertices = static_cast<glm::vec3*>(Base::CMemory::Allocate(sizeof(glm::vec3) * NumberOfVertices * 2));
         unsigned int* pIndices  = static_cast<unsigned int*>(Base::CMemory::Allocate(sizeof(unsigned int) * NumberOfIndices));
         
         assert(pVertices);
@@ -819,7 +819,7 @@ namespace
         BufferDesc.m_Usage         = CBuffer::GPURead;
         BufferDesc.m_Binding       = CBuffer::VertexBuffer;
         BufferDesc.m_Access        = CBuffer::CPUWrite;
-        BufferDesc.m_NumberOfBytes = sizeof(Base::Float3) * NumberOfVertices * 2;
+        BufferDesc.m_NumberOfBytes = sizeof(glm::vec3) * NumberOfVertices * 2;
         BufferDesc.m_pBytes        = pVertices;
         BufferDesc.m_pClassKey     = 0;
 
@@ -898,38 +898,38 @@ namespace
         // -----------------------------------------------------------------------------
         // Calculate data
         // -----------------------------------------------------------------------------
-        std::vector<Base::Float3> LightVertices;
-        std::vector<Base::UInt3>  LightTriangles;
+        std::vector<glm::vec3> LightVertices;
+        std::vector<glm::uvec3>  LightTriangles;
 
         // Create a simple tetrahedron
-        LightVertices.push_back(Base::Float3(-1.0f, -1.0f, -1.0f));
-        LightVertices.push_back(Base::Float3(1.0f, -1.0f, 1.0f));
-        LightVertices.push_back(Base::Float3(-1.0f, 1.0f, 1.0f));
-        LightVertices.push_back(Base::Float3(1.0f, 1.0f, -1.0f));
+        LightVertices.push_back(glm::vec3(-1.0f, -1.0f, -1.0f));
+        LightVertices.push_back(glm::vec3(1.0f, -1.0f, 1.0f));
+        LightVertices.push_back(glm::vec3(-1.0f, 1.0f, 1.0f));
+        LightVertices.push_back(glm::vec3(1.0f, 1.0f, -1.0f));
 
-        LightTriangles.push_back(Base::UInt3(0, 3, 2));
-        LightTriangles.push_back(Base::UInt3(0, 1, 3));
-        LightTriangles.push_back(Base::UInt3(1, 0, 2));
-        LightTriangles.push_back(Base::UInt3(1, 2, 3));
+        LightTriangles.push_back(glm::uvec3(0, 3, 2));
+        LightTriangles.push_back(glm::uvec3(0, 1, 3));
+        LightTriangles.push_back(glm::uvec3(1, 0, 2));
+        LightTriangles.push_back(glm::uvec3(1, 2, 3));
 
         // Split the faces of the tetrahedron
         for (unsigned int RefinementStep = 0; RefinementStep < _Refinement; ++RefinementStep)
         {
-            std::vector<Base::Float3> Vertices;
-            std::vector<Base::UInt3>  Triangles;
+            std::vector<glm::vec3> Vertices;
+            std::vector<glm::uvec3>  Triangles;
 
             unsigned int NextVertexIndex = 0;
 
             for (unsigned int IndexOfTriangle = 0; IndexOfTriangle < LightTriangles.size(); ++IndexOfTriangle)
             {
-                Base::Float3 NewVertices[6];
+                glm::vec3 NewVertices[6];
 
                 for (unsigned int IndexOfVertex = 0; IndexOfVertex < 3; ++IndexOfVertex)
                 {
                     NewVertices[IndexOfVertex] = LightVertices[LightTriangles[IndexOfTriangle][IndexOfVertex]];
                 }
 
-                Base::Float3 StartVertex, EndVertex;
+                glm::vec3 StartVertex, EndVertex;
 
                 for (unsigned int IndexOfVertex = 0; IndexOfVertex < 3; ++IndexOfVertex)
                 {
@@ -944,10 +944,10 @@ namespace
                     Vertices.push_back(NewVertices[IndexOfVertex]);
                 }
 
-                Triangles.push_back(Base::UInt3(NextVertexIndex + 0, NextVertexIndex + 3, NextVertexIndex + 5));
-                Triangles.push_back(Base::UInt3(NextVertexIndex + 3, NextVertexIndex + 1, NextVertexIndex + 4));
-                Triangles.push_back(Base::UInt3(NextVertexIndex + 3, NextVertexIndex + 4, NextVertexIndex + 5));
-                Triangles.push_back(Base::UInt3(NextVertexIndex + 5, NextVertexIndex + 4, NextVertexIndex + 2));
+                Triangles.push_back(glm::uvec3(NextVertexIndex + 0, NextVertexIndex + 3, NextVertexIndex + 5));
+                Triangles.push_back(glm::uvec3(NextVertexIndex + 3, NextVertexIndex + 1, NextVertexIndex + 4));
+                Triangles.push_back(glm::uvec3(NextVertexIndex + 3, NextVertexIndex + 4, NextVertexIndex + 5));
+                Triangles.push_back(glm::uvec3(NextVertexIndex + 5, NextVertexIndex + 4, NextVertexIndex + 2));
 
                 NextVertexIndex += 6;
             }
@@ -957,11 +957,11 @@ namespace
         }
 
         // We want a unit sphere
-        std::vector<Base::Float3> VerticesNormal;
+        std::vector<glm::vec3> VerticesNormal;
 
         for (unsigned int IndexOfVertex = 0; IndexOfVertex < LightVertices.size(); ++IndexOfVertex)
         {
-            Base::Float3 Vertex = LightVertices[IndexOfVertex].Normalize();
+            glm::vec3 Vertex = glm::normalize(LightVertices[IndexOfVertex]);
 
             VerticesNormal.push_back(Vertex * _Radius);
             VerticesNormal.push_back(Vertex);
@@ -1054,7 +1054,7 @@ namespace
         unsigned int NumberOfVertices = 3 + _Slices;
         unsigned int NumberOfIndices = _Slices * 6;
 
-        Base::Float3* pVertices = static_cast<Base::Float3*>(Base::CMemory::Allocate(sizeof(Base::Float3) * NumberOfVertices * 2));
+        glm::vec3* pVertices = static_cast<glm::vec3*>(Base::CMemory::Allocate(sizeof(glm::vec3) * NumberOfVertices * 2));
         unsigned int* pIndices = static_cast<unsigned int*>(Base::CMemory::Allocate(sizeof(unsigned int) * NumberOfIndices));
 
         assert(pVertices);
@@ -1065,10 +1065,10 @@ namespace
         // -----------------------------------------------------------------------------
         unsigned int IndexOfVertex = 0;
 
-        pVertices[IndexOfVertex++] = Base::Float3(0.0f, 0.0f,  _Height / 2.0f);
-        pVertices[IndexOfVertex++] = Base::Float3(0.0f, 0.0f,  _Height / 2.0f);
-        pVertices[IndexOfVertex++] = Base::Float3(0.0f, 0.0f, -_Height / 2.0f);
-        pVertices[IndexOfVertex++] = Base::Float3(0.0f, 0.0f, -_Height / 2.0f);
+        pVertices[IndexOfVertex++] = glm::vec3(0.0f, 0.0f,  _Height / 2.0f);
+        pVertices[IndexOfVertex++] = glm::vec3(0.0f, 0.0f,  _Height / 2.0f);
+        pVertices[IndexOfVertex++] = glm::vec3(0.0f, 0.0f, -_Height / 2.0f);
+        pVertices[IndexOfVertex++] = glm::vec3(0.0f, 0.0f, -_Height / 2.0f);
 
         for (unsigned int IndexOfSlice = 0; IndexOfSlice < _Slices + 1; ++IndexOfSlice)
         {
@@ -1127,7 +1127,7 @@ namespace
         BufferDesc.m_Usage         = CBuffer::GPURead;
         BufferDesc.m_Binding       = CBuffer::VertexBuffer;
         BufferDesc.m_Access        = CBuffer::CPUWrite;
-        BufferDesc.m_NumberOfBytes = sizeof(Base::Float3) * NumberOfVertices * 2;
+        BufferDesc.m_NumberOfBytes = sizeof(glm::vec3) * NumberOfVertices * 2;
         BufferDesc.m_pBytes        = pVertices;
         BufferDesc.m_pClassKey     = 0;
         
@@ -1211,7 +1211,7 @@ namespace
         unsigned int NumberOfVertices = 4;
         unsigned int NumberOfIndices  = 6;
         
-        Base::Float2* pVertices = static_cast<Base::Float2*>(Base::CMemory::Allocate(sizeof(Base::Float2) * NumberOfVertices));
+        glm::vec2* pVertices = static_cast<glm::vec2*>(Base::CMemory::Allocate(sizeof(glm::vec2) * NumberOfVertices));
         unsigned int* pIndices  = static_cast<unsigned int*>(Base::CMemory::Allocate(sizeof(unsigned int) * NumberOfIndices));
         
         // -----------------------------------------------------------------------------
@@ -1219,10 +1219,10 @@ namespace
         // -----------------------------------------------------------------------------
         unsigned int IndexOfVertex = 0;
         
-        pVertices[IndexOfVertex ++] = Base::Float2(_AxisX         , _AxisY + _Height);
-        pVertices[IndexOfVertex ++] = Base::Float2(_AxisX + _Width, _AxisY +_Height);
-        pVertices[IndexOfVertex ++] = Base::Float2(_AxisX + _Width, _AxisY);
-        pVertices[IndexOfVertex ++] = Base::Float2(_AxisX         , _AxisY);
+        pVertices[IndexOfVertex ++] = glm::vec2(_AxisX         , _AxisY + _Height);
+        pVertices[IndexOfVertex ++] = glm::vec2(_AxisX + _Width, _AxisY +_Height);
+        pVertices[IndexOfVertex ++] = glm::vec2(_AxisX + _Width, _AxisY);
+        pVertices[IndexOfVertex ++] = glm::vec2(_AxisX         , _AxisY);
         
         assert(IndexOfVertex == NumberOfVertices);
         
@@ -1249,7 +1249,7 @@ namespace
         BufferDesc.m_Usage         = CBuffer::GPURead;
         BufferDesc.m_Binding       = CBuffer::VertexBuffer;
         BufferDesc.m_Access        = CBuffer::CPUWrite;
-        BufferDesc.m_NumberOfBytes = sizeof(Base::Float2) * NumberOfVertices;
+        BufferDesc.m_NumberOfBytes = sizeof(glm::vec2) * NumberOfVertices;
         BufferDesc.m_pBytes        = pVertices;
         BufferDesc.m_pClassKey     = 0;
         

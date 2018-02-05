@@ -2,10 +2,8 @@
 #pragma once
 
 #include "base/base_aabb2.h"
-#include "base/base_matrix3x3.h"
-#include "base/base_matrix4x4.h"
-#include "base/base_vector2.h"
-#include "base/base_vector3.h"
+
+#include "glm.hpp"
 
 namespace Gfx
 {
@@ -17,10 +15,10 @@ namespace Cam
     void SetFieldOfView(float _FOVY, float _Near, float _Far);
     void SetPerspective(float _Left, float _Right, float _Bottom, float _Top, float _Near, float _Far);
     void SetOrthographic(float _Left, float _Right, float _Bottom, float _Top, float _Near, float _Far);
-    void SetProjectionMatrix(const Base::Float4x4& _rProjectionMatrix, float _Near, float _Far);
+    void SetProjectionMatrix(const glm::mat4& _rProjectionMatrix, float _Near, float _Far);
 
-    void SetBackgroundColor(Base::Float3& _rBackgroundColor);
-    const Base::Float3& GetBackgroundColor();
+    void SetBackgroundColor(glm::vec3& _rBackgroundColor);
+    const glm::vec3& GetBackgroundColor();
 
     void SetCullingMask(unsigned int _CullingMask);
     unsigned int GetCullingMask();
@@ -49,18 +47,17 @@ namespace Cam
     // -----------------------------------------------------------------------------
     // View
     // -----------------------------------------------------------------------------
-    void SetRotationMatrix();
-    void SetRotationMatrix(const Base::Float3x3& _rMatrix);
-    const Base::Float3x3& GetRotationMatrix();
+    void SetRotationMatrix(const glm::mat3& _rMatrix);
+    const glm::mat3& GetRotationMatrix();
 
     void SetPosition(float _AxisX, float _AxisY, float _AxisZ);
-    void SetPosition(const Base::Float3& _rPosition);
-    const Base::Float3& GetPosition();
+    void SetPosition(const glm::vec3& _rPosition);
+    const glm::vec3& GetPosition();
 
-    void SetViewMatrix(const Base::Float4x4& _rViewMatrix);
-    const Base::Float4x4& GetViewMatrix();
+    void SetViewMatrix(const glm::mat4& _rViewMatrix);
+    const glm::mat4& GetViewMatrix();
 
-    const Base::Float4x4& GetProjectionMatrix();
+    const glm::mat4& GetProjectionMatrix();
 
     // -----------------------------------------------------------------------------
     // Manager

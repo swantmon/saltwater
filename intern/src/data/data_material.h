@@ -9,10 +9,10 @@
 #pragma once
 
 #include "base/base_typedef.h"
-#include "base/base_vector3.h"
-#include "base/base_vector4.h"
 
 #include "data/data_texture_2d.h"
+
+#include "glm.hpp"
 
 #include <string>
 
@@ -68,11 +68,11 @@ namespace Dt
         Dt::CTexture2D* GetBumpTexture();
         const Dt::CTexture2D* GetBumpTexture() const;
 
-        void SetColor(const Base::Float3& _rColor);
-        const Base::Float3& GetColor() const;
+        void SetColor(const glm::vec3& _rColor);
+        const glm::vec3& GetColor() const;
 
-        void SetTilingOffset(const Base::Float4& _rTilingOffset);
-        const Base::Float4& GetTilingOffset() const;
+        void SetTilingOffset(const glm::vec4& _rTilingOffset);
+        const glm::vec4& GetTilingOffset() const;
 
         void SetRoughness(float _Roughness);
         float GetRoughness() const;
@@ -105,8 +105,8 @@ namespace Dt
         Dt::CTexture2D* m_pMetalTexture;
         Dt::CTexture2D* m_pAOTexture;
         Dt::CTexture2D* m_pBumpTexture;
-        Base::Float3    m_Color;
-        Base::Float4    m_TilingOffset;
+        glm::vec3    m_Color;
+        glm::vec4    m_TilingOffset;
         float           m_Roughness;
         float           m_Reflectance;
         float           m_MetalMask;

@@ -162,14 +162,14 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CLightProbeFacet::SetBoxSize(const Base::Float3& _rSize)
+    void CLightProbeFacet::SetBoxSize(const glm::vec3& _rSize)
     {
         m_BoxSize = _rSize;
     }
 
     // -----------------------------------------------------------------------------
 
-    const Base::Float3& CLightProbeFacet::GetBoxSize() const
+    const glm::vec3& CLightProbeFacet::GetBoxSize() const
     {
         return m_BoxSize;
     }

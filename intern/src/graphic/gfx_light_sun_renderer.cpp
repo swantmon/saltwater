@@ -2,10 +2,8 @@
 #include "graphic/gfx_precompiled.h"
 
 #include "base/base_console.h"
-#include "base/base_matrix4x4.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
-#include "base/base_vector4.h"
 
 #include "camera/cam_control_manager.h"
 
@@ -31,6 +29,8 @@
 #include "graphic/gfx_target_set_manager.h"
 #include "graphic/gfx_texture_manager.h"
 #include "graphic/gfx_view_manager.h"
+
+#include "glm.hpp"
 
 using namespace Gfx;
 
@@ -69,9 +69,9 @@ namespace
 
         struct SSunLightProperties
         {
-            Base::Float4x4 m_LightViewProjection;
-            Base::Float4   m_LightDirection;
-            Base::Float4   m_LightColor;
+            glm::mat4 m_LightViewProjection;
+            glm::vec4   m_LightDirection;
+            glm::vec4   m_LightColor;
             float          m_SunAngularRadius;
             unsigned int   m_ExposureHistoryIndex;
         };
@@ -323,8 +323,8 @@ namespace
             SSunLightProperties LightBuffer;
     
             LightBuffer.m_LightViewProjection  = pGraphicSunFacet->GetCamera()->GetViewProjectionMatrix();
-            LightBuffer.m_LightDirection       = Base::Float4(pDataSunFacet->GetDirection(), 0.0f).Normalize();
-            LightBuffer.m_LightColor           = Base::Float4(pDataSunFacet->GetLightness(), 1.0f);
+            LightBuffer.m_LightDirection       = glm::normalize(glm::vec4(pDataSunFacet->GetDirection(), 0.0f));
+            LightBuffer.m_LightColor           = glm::vec4(pDataSunFacet->GetLightness(), 1.0f);
             LightBuffer.m_SunAngularRadius     = 0.27f * Base::SConstants<float>::s_Pi / 180.0f;
             LightBuffer.m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
     

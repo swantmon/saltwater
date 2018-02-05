@@ -3,8 +3,8 @@
 
 #include "base/base_math_constants.h"
 #include "base/base_math_operations.h"
-#include "base/base_vector3.h"
-#include "base/base_vector4.h"
+
+#include "glm.hpp"
 
 namespace MATH
 {
@@ -19,13 +19,13 @@ namespace MATH
 
     public:
 
-        typedef CPlane<T>   CThis;
-        typedef T           X;
-        typedef T*          XPtr;
-        typedef const T*    XConstPtr;
-        typedef T&          XRef;
-        typedef const T&    XConstRef;
-        typedef CVector3<T> CVector;
+        typedef CPlane<T>     CThis;
+        typedef T             X;
+        typedef T*            XPtr;
+        typedef const T*      XConstPtr;
+        typedef T&            XRef;
+        typedef const T&      XConstRef;
+        typedef glm::tvec3<T> CVector;
 
     public:
 
@@ -38,12 +38,12 @@ namespace MATH
         inline CPlane(X _NormalX, X _NormalY, X _NormalZ, X _Distance);
         inline CPlane(const CVector& _rNormal, const CVector& _rVector);
         inline CPlane(const CVector& _rVector0, const CVector& _rVector1, const CVector& _rVector2);
-        inline CPlane(const CVector4<X>& _rVector);
+        inline CPlane(const glm::tvec4<X>& _rVector);
 
     public:
 
         inline CThis& operator = (const CThis& _rPlane);
-        inline CThis& operator = (const CVector4<X>& _rVector);
+        inline CThis& operator = (const glm::tvec4<X>& _rVector);
 
     public:
 
@@ -63,12 +63,12 @@ namespace MATH
         inline CThis& Set(X _NormalX, X _NormalY, X _NormalZ, X _Distance);
         inline CThis& Set(const CVector& _rNormal, const CVector& _rVector);
         inline CThis& Set(const CVector& _rVector0, const CVector& _rVector1, const CVector& _rVector2);
-        inline CThis& Set(const CVector4<X>& _rVector);
+        inline CThis& Set(const glm::tvec4<X>& _rVector);
 
     public:
 
         inline bool IsEqual(const CThis& _rPlane, X _Epsilon) const;
-        inline bool IsEqual(const CThis& _rPlane, const CVector4<X>& _rEpsilon) const;
+        inline bool IsEqual(const CThis& _rPlane, const glm::tvec4<X>& _rEpsilon) const;
 
     public:
 
@@ -80,7 +80,7 @@ namespace MATH
 
     private:
 
-        CVector4<X> m_P;
+        glm::tvec4<X> m_P;
     };
 } // namespace MATH
 
@@ -137,7 +137,7 @@ namespace MATH
     // ------------------------------------------------------------------------
 
     template <typename T>
-    inline CPlane<T>::CPlane(const CVector4<X>& _rVector)
+    inline CPlane<T>::CPlane(const glm::tvec4<X>& _rVector)
     {
         Set(_rVector);
     }
@@ -153,7 +153,7 @@ namespace MATH
     // -----------------------------------------------------------------------------
 
     template <typename T>
-    inline typename CPlane<T>::CThis& CPlane<T>::operator = (const CVector4<X>& _rVector)
+    inline typename CPlane<T>::CThis& CPlane<T>::operator = (const glm::tvec4<X>& _rVector)
     {
         return Set(_rVector);
     }
@@ -195,7 +195,7 @@ namespace MATH
     template <typename T>
     inline typename CPlane<T>::CThis& CPlane<T>::SetZero()
     {
-        m_P.SetZero();
+        m_P = glm::tvec4<T>(0.0f);
 
         return *this;
     }
@@ -215,7 +215,7 @@ namespace MATH
     template <typename T>
     inline typename CPlane<T>::CThis& CPlane<T>::Set(X _NormalX, X _NormalY, X _NormalZ, X _Distance)
     {
-        m_P.Set(_NormalX, _NormalY, _NormalZ, _Distance);
+        m_P = glm::tvec4<T>(_NormalX, _NormalY, _NormalZ, _Distance);
 
         return *this;
     }
@@ -225,7 +225,7 @@ namespace MATH
     template <typename T>
     inline typename CPlane<T>::CThis& CPlane<T>::Set(const CVector& _rNormal, const CVector& _rVector)
     {
-        m_P.Set(_rNormal[0], _rNormal[1], _rNormal[2], -(_rNormal.DotProduct(_rVector)));
+        m_P.Set(_rNormal[0], _rNormal[1], _rNormal[2], -glm::dot(_rNormal, _rVector));
 
         return *this;
     }
@@ -238,9 +238,9 @@ namespace MATH
         // ------------------------------------------------------------------------
         // Constructs the plane for an anti-clockwise winding of the points.
         // ------------------------------------------------------------------------
-        CVector Normal = ((_rVector1 - _rVector0).CrossProduct(_rVector2 - _rVector0)).Normalized();
+        CVector Normal = glm::normalize(glm::cross((_rVector1 - _rVector0), (_rVector2 - _rVector0)));
 
-        m_P.Set(Normal[0], Normal[1], Normal[2], -(Normal.DotProduct(_rVector0)));
+        m_P.Set(Normal[0], Normal[1], Normal[2], -glm::dot(Normal, _rVector0));
 
         return *this;
     }
@@ -248,7 +248,7 @@ namespace MATH
     // ------------------------------------------------------------------------
 
     template <typename T>
-    inline typename CPlane<T>::CThis& CPlane<T>::Set(const CVector4<X>& _rVector)
+    inline typename CPlane<T>::CThis& CPlane<T>::Set(const glm::tvec4<X>& _rVector)
     {
         m_P = _rVector;
 
@@ -260,15 +260,15 @@ namespace MATH
     template <typename T>
     inline bool CPlane<T>::IsEqual(const CThis& _rPlane, X _Epsilon) const
     {
-        return m_P.IsEqual(_rPlane.m_P, _Epsilon);
+        return glm::epsilonEqual(m_P, _rPlane.m_P, _Epsilon);
     }
 
     // -------------------------------------------------------------------------------
 
     template <typename T>
-    inline bool CPlane<T>::IsEqual(const CThis& _rPlane, const CVector4<X>& _rEpsilon) const
+    inline bool CPlane<T>::IsEqual(const CThis& _rPlane, const glm::tvec4<X>& _rEpsilon) const
     {
-        return m_P.IsEqual(_rPlane.m_P, _rEpsilon);
+        return glm::epsilonEqual(m_P, _rPlane.m_P, _rEpsilon);
     }
 
     // -------------------------------------------------------------------------------

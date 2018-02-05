@@ -4,7 +4,8 @@
 #include "camera/cam_control.h"
 
 #include "base/base_input_event.h"
-#include "base/base_vector2.h"
+
+#include "glm.hpp"
 
 namespace Cam
 {
@@ -24,8 +25,8 @@ namespace Cam
 
         bool          m_IsFlying;
         bool          m_IsDragging;
-        Base::Float2  m_LastCursorPosition;
-        Base::Float3  m_CurrentRotation;
+        glm::vec2  m_LastCursorPosition;
+        glm::vec3  m_CurrentRotation;
         unsigned int  m_MoveDirection;
 
     private:

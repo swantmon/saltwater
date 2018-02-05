@@ -19,7 +19,7 @@ namespace Cam
 
         CCamera& rCamera = *ViewManager::GetMainCamera();
 
-        Base::Int2 ScreenSize = Main::GetActiveWindowSize();
+        glm::ivec2 ScreenSize = Main::GetActiveWindowSize();
 
         assert(ScreenSize[0] > 0 && ScreenSize[1] > 0);
 
@@ -55,7 +55,7 @@ namespace Cam
 
     // -----------------------------------------------------------------------------
 
-    void SetProjectionMatrix(const Base::Float4x4& _rProjectionMatrix, float _Near, float _Far)
+    void SetProjectionMatrix(const glm::mat4& _rProjectionMatrix, float _Near, float _Far)
     {
         assert(ViewManager::GetMainCamera() != nullptr && ViewManager::GetMainCamera().IsValid());
 
@@ -66,7 +66,7 @@ namespace Cam
 
     // -----------------------------------------------------------------------------
 
-    void SetBackgroundColor(Base::Float3& _rBackgroundColor)
+    void SetBackgroundColor(glm::vec3& _rBackgroundColor)
     {
         assert(ViewManager::GetMainCamera() != nullptr && ViewManager::GetMainCamera().IsValid());
 
@@ -77,7 +77,7 @@ namespace Cam
 
     // -----------------------------------------------------------------------------
 
-    const Base::Float3& GetBackgroundColor()
+    const glm::vec3& GetBackgroundColor()
     {
         assert(ViewManager::GetMainCamera() != nullptr && ViewManager::GetMainCamera().IsValid());
 
@@ -264,20 +264,7 @@ namespace Cam
 
     // -----------------------------------------------------------------------------
 
-    void SetRotationMatrix()
-    {
-        assert(ViewManager::GetMainCamera() != nullptr && ViewManager::GetMainCamera().IsValid());
-        assert(ViewManager::GetMainCamera()->GetView() != nullptr && ViewManager::GetMainCamera()->GetView().IsValid());
-
-        CCamera& rCamera = *ViewManager::GetMainCamera();
-        CView&   rView   = *rCamera.GetView();
-
-        rView.SetRotationMatrix();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void SetRotationMatrix(const Base::Float3x3& _rMatrix)
+    void SetRotationMatrix(const glm::mat3& _rMatrix)
     {
         assert(ViewManager::GetMainCamera() != nullptr && ViewManager::GetMainCamera().IsValid());
         assert(ViewManager::GetMainCamera()->GetView() != nullptr && ViewManager::GetMainCamera()->GetView().IsValid());
@@ -290,7 +277,7 @@ namespace Cam
 
     // -----------------------------------------------------------------------------
 
-    const Base::Float3x3& GetRotationMatrix()
+    const glm::mat3& GetRotationMatrix()
     {
         assert(ViewManager::GetMainCamera() != nullptr && ViewManager::GetMainCamera().IsValid());
         assert(ViewManager::GetMainCamera()->GetView() != nullptr && ViewManager::GetMainCamera()->GetView().IsValid());
@@ -316,7 +303,7 @@ namespace Cam
 
     // -----------------------------------------------------------------------------
 
-    void SetPosition(const Base::Float3& _rPosition)
+    void SetPosition(const glm::vec3& _rPosition)
     {
         assert(ViewManager::GetMainCamera() != nullptr && ViewManager::GetMainCamera().IsValid());
         assert(ViewManager::GetMainCamera()->GetView() != nullptr && ViewManager::GetMainCamera()->GetView().IsValid());
@@ -329,7 +316,7 @@ namespace Cam
 
     // -----------------------------------------------------------------------------
 
-    const Base::Float3& GetPosition()
+    const glm::vec3& GetPosition()
     {
         assert(ViewManager::GetMainCamera() != nullptr && ViewManager::GetMainCamera().IsValid());
         assert(ViewManager::GetMainCamera()->GetView() != nullptr && ViewManager::GetMainCamera()->GetView().IsValid());
@@ -342,7 +329,7 @@ namespace Cam
 
     // -----------------------------------------------------------------------------
 
-    void SetViewMatrix(const Base::Float4x4& _rViewMatrix)
+    void SetViewMatrix(const glm::mat4& _rViewMatrix)
     {
         assert(ViewManager::GetMainCamera() != nullptr && ViewManager::GetMainCamera().IsValid());
         assert(ViewManager::GetMainCamera()->GetView() != nullptr && ViewManager::GetMainCamera()->GetView().IsValid());
@@ -355,7 +342,7 @@ namespace Cam
 
     // -----------------------------------------------------------------------------
 
-    const Base::Float4x4& GetViewMatrix()
+    const glm::mat4& GetViewMatrix()
     {
         assert(ViewManager::GetMainCamera() != nullptr && ViewManager::GetMainCamera().IsValid());
         assert(ViewManager::GetMainCamera()->GetView() != nullptr && ViewManager::GetMainCamera()->GetView().IsValid());
@@ -368,7 +355,7 @@ namespace Cam
 
     // -----------------------------------------------------------------------------
 
-    const Base::Float4x4& GetProjectionMatrix()
+    const glm::mat4& GetProjectionMatrix()
     {
         assert(ViewManager::GetMainCamera() != nullptr && ViewManager::GetMainCamera().IsValid());
 

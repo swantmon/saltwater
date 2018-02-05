@@ -4,7 +4,6 @@
 #include "base/base_console.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
-#include "base/base_vector3.h"
 
 #include "camera/cam_control_manager.h"
 #include "camera/cam_game_control.h"
@@ -117,9 +116,9 @@ namespace
 
             Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
 
-            pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 10.0f));
-            pTransformationFacet->SetScale(Base::Float3(1.0f));
-            pTransformationFacet->SetRotation(Base::Float3(0.0f, 0.0f, 0.0f));
+            pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 10.0f));
+            pTransformationFacet->SetScale(glm::vec3(1.0f));
+            pTransformationFacet->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
 
             Dt::CCameraActorFacet* pFacet = Dt::CameraActorManager::CreateCameraActor();
 
@@ -156,9 +155,9 @@ namespace
 
             Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
 
-            pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 10.0f));
-            pTransformationFacet->SetScale(Base::Float3(1.0f));
-            pTransformationFacet->SetRotation(Base::Float3(0.0f, 0.0f, 0.0f));
+            pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 10.0f));
+            pTransformationFacet->SetScale(glm::vec3(1.0f));
+            pTransformationFacet->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
 
             Dt::CCameraActorFacet* pFacet = Dt::CameraActorManager::CreateCameraActor();
 
@@ -212,9 +211,9 @@ namespace
 
             Dt::CTransformationFacet* pTransformationFacet = rGlobalProbeLight.GetTransformationFacet();
 
-            pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 0.0f));
-            pTransformationFacet->SetScale   (Base::Float3(1.0f));
-            pTransformationFacet->SetRotation(Base::Float3(0.0f));
+            pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+            pTransformationFacet->SetScale   (glm::vec3(1.0f));
+            pTransformationFacet->SetRotation(glm::vec3(0.0f));
 
             Dt::CLightProbeFacet* pProbeLightFacet = Dt::LightProbeManager::CreateLightProbe();
 
@@ -225,7 +224,7 @@ namespace
             pProbeLightFacet->SetNear(0.01f);
             pProbeLightFacet->SetFar(1024.0f);
             pProbeLightFacet->SetParallaxCorrection(false);
-            pProbeLightFacet->SetBoxSize(Base::Float3(1024.0f));
+            pProbeLightFacet->SetBoxSize(glm::vec3(1024.0f));
 
             rGlobalProbeLight.SetDetailFacet(Dt::SFacetCategory::Data, pProbeLightFacet);
 
@@ -248,15 +247,15 @@ namespace
             // -----------------------------------------------------------------------------
             Dt::CTransformationFacet* pTransformationFacet = rSunLight.GetTransformationFacet();
 
-            pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 20.0f));
-            pTransformationFacet->SetScale   (Base::Float3(1.0f));
-            pTransformationFacet->SetRotation(Base::Float3(0.0f));
+            pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 20.0f));
+            pTransformationFacet->SetScale   (glm::vec3(1.0f));
+            pTransformationFacet->SetRotation(glm::vec3(0.0f));
 
             Dt::CSunLightFacet* pSunLightFacet = Dt::SunManager::CreateSunLight();
 
             pSunLightFacet->EnableTemperature(false);
-            pSunLightFacet->SetColor         (Base::Float3(1.0f, 1.0f, 1.0f));
-            pSunLightFacet->SetDirection     (Base::Float3(0.0f, 0.01f, -1.0f));
+            pSunLightFacet->SetColor         (glm::vec3(1.0f, 1.0f, 1.0f));
+            pSunLightFacet->SetDirection     (glm::vec3(0.0f, 0.01f, -1.0f));
             pSunLightFacet->SetIntensity     (90600.0f);
             pSunLightFacet->SetTemperature   (0);
             pSunLightFacet->SetRefreshMode   (Dt::CSunLightFacet::Dynamic);
@@ -287,9 +286,9 @@ namespace
 
             Dt::CTransformationFacet* pTransformationFacet = rSphere.GetTransformationFacet();
 
-            pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 0.0f));
-            pTransformationFacet->SetScale(Base::Float3(0.01f));
-            pTransformationFacet->SetRotation(Base::Float3(0.0f));
+            pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+            pTransformationFacet->SetScale(glm::vec3(0.01f));
+            pTransformationFacet->SetRotation(glm::vec3(0.0f));
 
             // -----------------------------------------------------------------------------
 

@@ -1132,7 +1132,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <PreprocessorDefinitions>UNICODE;_UNICODE;WIN32;WIN64;QT_DLL;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.\..\..\..\src;.\..\..\..\..\extern\qt\include;.\..\..\..\..\extern\qt\include\QtCore;.\..\..\..\..\extern\qt\include\QtGui;.\..\..\..\..\extern\qt\include\QtWidgets;.\..\..\..\src\editor_gui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\..\..\..\src;..\..\..\..\extern\glm\include;.\..\..\..\..\extern\qt\include;.\..\..\..\..\extern\qt\include\QtCore;.\..\..\..\..\extern\qt\include\QtGui;.\..\..\..\..\extern\qt\include\QtWidgets;.\..\..\..\src\editor_gui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -1177,7 +1177,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <PreprocessorDefinitions>UNICODE;_UNICODE;WIN32;WIN64;QT_DLL;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.\..\..\..\src;.\..\..\..\..\extern\qt\include;.\..\..\..\..\extern\qt\include\QtCore;.\..\..\..\..\extern\qt\include\QtGui;.\..\..\..\..\extern\qt\include\QtWidgets;.\..\..\..\src\editor_gui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\..\..\..\src;..\..\..\..\extern\glm\include;.\..\..\..\..\extern\qt\include;.\..\..\..\..\extern\qt\include\QtCore;.\..\..\..\..\extern\qt\include\QtGui;.\..\..\..\..\extern\qt\include\QtWidgets;.\..\..\..\src\editor_gui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat />
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>

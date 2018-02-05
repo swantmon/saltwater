@@ -1,9 +1,9 @@
 ﻿
-#include "base/base_vector3.h"
-
 #include "editor_gui/edit_inspector_arealight.h"
 
 #include "editor_port/edit_message_manager.h"
+
+#include "glm.hpp"
 
 #include <QColorDialog>
 
@@ -65,7 +65,7 @@ namespace Edit
 
         QColor RGB = ButtonPalette.color(QPalette::Button);
 
-        Base::Float3 Color = Base::Float3(RGB.red() / 255.0f, RGB.green() / 255.0f, RGB.blue() / 255.0f);
+        glm::vec3 Color = glm::vec3(RGB.red() / 255.0f, RGB.green() / 255.0f, RGB.blue() / 255.0f);
 
         QString NewTexture = m_pTextureEdit->GetTextureFile();
 
@@ -76,7 +76,7 @@ namespace Edit
         float Height      = m_pHeightEdit->text().toFloat();
         bool  IsTwoSided  = m_IsTwoSidedCB->isChecked();
 
-        Base::Float3 Direction = Base::Float3(m_pDirectionXEdit->text().toFloat(), m_pDirectionYEdit->text().toFloat(), m_pDirectionZEdit->text().toFloat());
+        glm::vec3 Direction = glm::vec3(m_pDirectionXEdit->text().toFloat(), m_pDirectionYEdit->text().toFloat(), m_pDirectionZEdit->text().toFloat());
 
         // -----------------------------------------------------------------------------
         // Send message
@@ -87,9 +87,9 @@ namespace Edit
 
         NewMessage.PutInt(ColorMode);
 
-        NewMessage.PutFloat(Color[0]);
-        NewMessage.PutFloat(Color[1]);
-        NewMessage.PutFloat(Color[2]);
+        NewMessage.PutFloat(Color.x);
+        NewMessage.PutFloat(Color.y);
+        NewMessage.PutFloat(Color.z);
 
         NewMessage.PutFloat(Temperature);
         NewMessage.PutFloat(Intensity);
@@ -174,7 +174,7 @@ namespace Edit
         G = _rMessage.GetFloat();
         B = _rMessage.GetFloat();
 
-        Base::Int3 Color = Base::Int3(R * 255, G * 255, B * 255);
+        glm::ivec3 Color = glm::ivec3(R * 255, G * 255, B * 255);
 
         float Temperature = _rMessage.GetFloat();
         float Intensity   = _rMessage.GetFloat();
@@ -187,7 +187,7 @@ namespace Edit
         Y = _rMessage.GetFloat();
         Z = _rMessage.GetFloat();
 
-        Base::Float3 Direction = Base::Float3(X, Y, Z);
+        glm::vec3 Direction = glm::vec3(X, Y, Z);
 
         HasTexture = _rMessage.GetBool();
 
@@ -208,7 +208,7 @@ namespace Edit
 
         QPalette ButtonPalette = m_pPickColorButton->palette();
 
-        ButtonPalette.setColor(QPalette::Button, QColor(Color[0], Color[1], Color[2]));
+        ButtonPalette.setColor(QPalette::Button, QColor(Color.x, Color.y, Color.z));
 
         m_pPickColorButton->setPalette(ButtonPalette);
 

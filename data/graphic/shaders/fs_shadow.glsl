@@ -16,7 +16,7 @@ layout(std140, binding = 2) uniform UB2
     float ps_MetalMask;
 };
 
-layout(row_major, std140, binding = 3) uniform UB3
+layout(std140, binding = 3) uniform UB3
 {
     vec4 ps_LightPosition;
     vec4 ps_LightDirection;

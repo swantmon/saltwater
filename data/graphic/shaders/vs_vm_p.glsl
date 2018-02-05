@@ -2,7 +2,7 @@
 #ifndef __INCLUDE_VS_VM_P_GLSL__
 #define __INCLUDE_VS_VM_P_GLSL__
 
-layout(row_major, std140, binding = 0) uniform UB0
+layout(std140, binding = 0) uniform UB0
 {
     mat4 m_ViewProjectionMatrix;
     mat4 m_ModelMatrix;

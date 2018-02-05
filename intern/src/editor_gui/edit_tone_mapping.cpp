@@ -1,7 +1,7 @@
 ﻿
 #include "edit_tone_mapping.h"
 
-#include "base/base_vector3.h"
+#include "glm.hpp"
 
 #include <QColorDialog>
 #include <QDrag>
@@ -114,8 +114,8 @@ namespace Edit
 
     void CToneMapping::changeToneMappingSettings()
     {
-        Base::Float3 Tint;
-        Base::Float3 DarkTint;
+        glm::vec3 Tint;
+        glm::vec3 DarkTint;
         float DarkTintBlend;
         float DarkTintStrength;
         float Saturation;
@@ -123,34 +123,34 @@ namespace Edit
         float DynamicRange;
         float CrushBrights;
         float CrushDarks;
-        Base::Float3 Red;
-        Base::Float3 Green;
-        Base::Float3 Blue;
+        glm::vec3 Red;
+        glm::vec3 Green;
+        glm::vec3 Blue;
         QColor RGB;
-        Base::Float3 Color;
+        glm::vec3 Color;
         Edit::CMessage NewMessage;
 
         // -----------------------------------------------------------------------------
 
         RGB = m_pPickTintButton->palette().color(QPalette::Button);
 
-        Tint = Base::Float3(RGB.red() / 255.0f, RGB.green() / 255.0f, RGB.blue() / 255.0f);
+        Tint = glm::vec3(RGB.red() / 255.0f, RGB.green() / 255.0f, RGB.blue() / 255.0f);
 
         RGB = m_pPickDarkTintButton->palette().color(QPalette::Button);
 
-        DarkTint = Base::Float3(RGB.red() / 255.0f, RGB.green() / 255.0f, RGB.blue() / 255.0f);
+        DarkTint = glm::vec3(RGB.red() / 255.0f, RGB.green() / 255.0f, RGB.blue() / 255.0f);
 
         RGB = m_pPickRedButton->palette().color(QPalette::Button);
 
-        Red = Base::Float3(RGB.red() / 255.0f, RGB.green() / 255.0f, RGB.blue() / 255.0f);
+        Red = glm::vec3(RGB.red() / 255.0f, RGB.green() / 255.0f, RGB.blue() / 255.0f);
 
         RGB = m_pPickGreenButton->palette().color(QPalette::Button);
 
-        Green = Base::Float3(RGB.red() / 255.0f, RGB.green() / 255.0f, RGB.blue() / 255.0f);
+        Green = glm::vec3(RGB.red() / 255.0f, RGB.green() / 255.0f, RGB.blue() / 255.0f);
 
         RGB = m_pPickBlueButton->palette().color(QPalette::Button);
 
-        Blue = Base::Float3(RGB.red() / 255.0f, RGB.green() / 255.0f, RGB.blue() / 255.0f);
+        Blue = glm::vec3(RGB.red() / 255.0f, RGB.green() / 255.0f, RGB.blue() / 255.0f);
 
         DarkTintBlend = m_pDarkTintBlendEdit->text().toFloat();
 

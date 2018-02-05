@@ -2,8 +2,8 @@
 #pragma once
 
 #include "base/base_input_event.h"
-#include "base/base_matrix3x3.h"
-#include "base/base_vector3.h"
+
+#include "glm.hpp"
 
 namespace Dt
 {
@@ -46,11 +46,11 @@ namespace Cam
             void SetMoveVelocity(float _Velocity);
             float GetMoveVelocity() const;
 
-            void SetPosition(const Base::Float3& _rPosition);
-            const Base::Float3& GetPosition() const;
+            void SetPosition(const glm::vec3& _rPosition);
+            const glm::vec3& GetPosition() const;
 
-            void SetRotation(const Base::Float3x3& _rMatrix);
-            const Base::Float3x3& GetRotation() const;
+            void SetRotation(const glm::mat3& _rMatrix);
+            const glm::mat3& GetRotation() const;
 
         public:
 
@@ -60,13 +60,13 @@ namespace Cam
 
         protected:
 
-            EType          m_Type;
-            Base::Float3   m_Position;
-            Base::Float3x3 m_RotationMatrix;
-            float          m_MoveVelocity;
-            bool           m_HasPositionChanged;
-            bool           m_HasRotationChanged;
-            bool           m_HasMoveVelocityChanged;
+            EType     m_Type;
+            glm::vec3 m_Position;
+            glm::mat3 m_RotationMatrix;
+            float     m_MoveVelocity;
+            bool      m_HasPositionChanged;
+            bool      m_HasRotationChanged;
+            bool      m_HasMoveVelocityChanged;
 
         protected:
 
