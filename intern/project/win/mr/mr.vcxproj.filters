@@ -8,7 +8,6 @@
     <ClCompile Include="..\..\..\src\mr\mr_slam_reconstruction_settings.cpp" />
     <ClCompile Include="..\..\..\src\mr\mr_plane_detector.cpp" />
     <ClCompile Include="..\..\..\src\mr\mr_kinect_control.cpp" />
-    <ClCompile Include="..\..\..\src\mr\mr_realsense_control.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\mr\mr_control_manager.h" />
@@ -21,7 +20,6 @@
     <ClInclude Include="..\..\..\src\mr\mr_camera_control.h" />
     <ClInclude Include="..\..\..\src\mr\mr_depth_sensor_control.h" />
     <ClInclude Include="..\..\..\src\mr\mr_kinect_control.h" />
-    <ClInclude Include="..\..\..\src\mr\mr_realsense_control.h" />
     <ClInclude Include="..\..\..\src\mr\mr_rgbd_camera_control.h" />
   </ItemGroup>
 </Project>

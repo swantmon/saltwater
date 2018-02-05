@@ -28,7 +28,6 @@
 #include "mr/mr_slam_reconstructor.h"
 #include "mr/mr_rgbd_camera_control.h"
 #include "mr/mr_kinect_control.h"
-#include "mr/mr_realsense_control.h"
 
 #include <gl/glew.h>
 
