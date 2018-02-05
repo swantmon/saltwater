@@ -133,6 +133,9 @@ namespace Edit
         bool IsCube  = _rMessage.GetBool();
         bool IsDummy = _rMessage.GetBool();
 
+        (void)IsArray;
+        (void)IsDummy;
+
         char Filename[256];
         char Identifier[256];
 

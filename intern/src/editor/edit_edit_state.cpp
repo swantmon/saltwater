@@ -235,6 +235,9 @@ namespace Edit
         int LocalMousePositionX  = _rMessage.GetInt();
         int LocalMousePositionY  = _rMessage.GetInt();
 
+        (void)GlobalMousePositionX;
+        (void)GlobalMousePositionY;
+
         if (m_pSelectionTicket != 0)
         {
             Gfx::SelectionRenderer::PushPick(*m_pSelectionTicket, Base::Int2(LocalMousePositionX, LocalMousePositionY));
