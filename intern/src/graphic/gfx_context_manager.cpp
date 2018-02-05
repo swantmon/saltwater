@@ -1574,7 +1574,7 @@ namespace
         glBindBuffer(GL_DRAW_INDIRECT_BUFFER, rNativeBuffer.m_NativeBuffer);
 
         ValidatePipeline();
-        glDrawArraysIndirect(s_NativeTopologies[m_Topology], reinterpret_cast<void*>(_Offset));
+        glDrawArraysIndirect(s_NativeTopologies[m_Topology], reinterpret_cast<void*>(static_cast<unsigned long long>(_Offset)));
 
         glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
     }
@@ -1588,7 +1588,7 @@ namespace
         glBindBuffer(GL_DRAW_INDIRECT_BUFFER, rNativeBuffer.m_NativeBuffer);
 
         ValidatePipeline();
-        glDrawElementsIndirect(s_NativeTopologies[m_Topology], GL_UNSIGNED_INT, reinterpret_cast<void*>(_Offset));
+        glDrawElementsIndirect(s_NativeTopologies[m_Topology], GL_UNSIGNED_INT, reinterpret_cast<void*>(static_cast<unsigned long long>(_Offset)));
 
         glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
     }
