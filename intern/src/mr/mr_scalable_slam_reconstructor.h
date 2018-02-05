@@ -341,5 +341,7 @@ namespace MR
         bool m_UseShuffleIntrinsics;
         
         CPlaneDetector m_PlaneDetector;
+
+        std::vector<char> m_ClearVector;
     };
 } // namespace MR

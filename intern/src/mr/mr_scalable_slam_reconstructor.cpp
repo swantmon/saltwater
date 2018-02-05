@@ -713,7 +713,7 @@ namespace MR
         ContextManager::SetShaderVS(m_RasterizeRootVolumeVSPtr);
         ContextManager::SetShaderPS(m_RasterizeRootVolumeFSPtr);
 
-        ContextManager::SetImageTexture(0, static_cast<CTexturePtr>(m_RawVertexMapPtr));
+        ContextManager::SetImageTexture(0, m_RawVertexMapPtr);
 
         ContextManager::SetResourceBuffer(0, m_AtomicCounterBufferPtr);
         ContextManager::SetResourceBuffer(1, m_RootVolumeInstanceBufferPtr);
@@ -722,7 +722,7 @@ namespace MR
         
         const unsigned int IndexCount = m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
         const unsigned int InstanceCount = static_cast<unsigned int>(m_RootVolumeMap.size());
-        ClearBuffer(m_AtomicCounterBufferPtr);
+        ClearBuffer(m_AtomicCounterBufferPtr, InstanceCount * sizeof(int32_t));
         ContextManager::DrawIndexedInstanced(IndexCount, InstanceCount, 0, 0, 0);
 
         ContextManager::ResetShaderVS();
@@ -779,7 +779,7 @@ namespace MR
         ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
         ContextManager::SetConstantBuffer(2, m_GridRasterizationBufferPtr);
 
-        ContextManager::SetImageTexture(0, static_cast<CTexturePtr>(m_RawVertexMapPtr));
+        ContextManager::SetImageTexture(0, m_RawVertexMapPtr);
 
         const unsigned int Offset = 0;
 
@@ -848,7 +848,7 @@ namespace MR
 
                 ContextManager::SetShaderCS(m_PointsFullCSPtr);
                 
-                ContextManager::SetImageTexture(1, static_cast<CTexturePtr>(m_FullVolumePtr));
+                ContextManager::SetImageTexture(1, m_FullVolumePtr);
 
                 SIndirectBuffers IndirectBufferData = {};
                 IndirectBufferData.m_Indexed.m_IndexCount = m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
@@ -1104,10 +1104,10 @@ namespace MR
 
         Performance::BeginEvent("Compute new TSDF");
 
-        ContextManager::SetImageTexture(0, static_cast<CTexturePtr>(m_RawDepthBufferPtr));
+        ContextManager::SetImageTexture(0, m_RawDepthBufferPtr);
         if (m_ReconstructionSettings.m_CaptureColor)
         {
-            ContextManager::SetImageTexture(1, static_cast<CTexturePtr>(m_RawCameraFramePtr));
+            ContextManager::SetImageTexture(1, m_RawCameraFramePtr);
         }
         ContextManager::SetShaderCS(m_IntegrateTSDFCSPtr);
 
@@ -1197,7 +1197,7 @@ namespace MR
         IndirectBufferData.m_Indexed.m_IndexCount = m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
         BufferManager::UploadBufferData(rRootGrid.m_IndirectLevel1Buffer, &IndirectBufferData);
 
-        ContextManager::SetImageTexture(1, static_cast<CTexturePtr>(m_RootGridVolumePtr));
+        ContextManager::SetImageTexture(1, m_RootGridVolumePtr);
         ContextManager::SetResourceBuffer(2, rRootGrid.m_Level1QueuePtr);
         ContextManager::SetResourceBuffer(3, rRootGrid.m_IndirectLevel1Buffer);
 
@@ -1527,14 +1527,14 @@ namespace MR
         TextureDescriptor.m_Format = CTexture::R8_UINT;
 
         m_RootGridVolumePtr = TextureManager::CreateTexture3D(TextureDescriptor);
-        m_RootGridVolumeTargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTexturePtr>(m_RootGridVolumePtr));
+        m_RootGridVolumeTargetSetPtr = TargetSetManager::CreateTargetSet(m_RootGridVolumePtr);
 
         TextureDescriptor.m_NumberOfPixelsU = 16 * 8;
         TextureDescriptor.m_NumberOfPixelsV = 16 * 8;
         TextureDescriptor.m_NumberOfPixelsW = 16 * 8;
 
         m_FullVolumePtr = TextureManager::CreateTexture3D(TextureDescriptor);
-        m_FullVolumeTargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTexturePtr>(m_FullVolumePtr));
+        m_FullVolumeTargetSetPtr = TargetSetManager::CreateTargetSet(m_FullVolumePtr);
 
         m_EmptyTargetSetPtr = TargetSetManager::CreateEmptyTargetSet(m_pRGBDCameraControl->GetDepthWidth(), m_pRGBDCameraControl->GetDepthHeight());
     }
@@ -1841,8 +1841,8 @@ namespace MR
 
         ContextManager::SetShaderCS(m_BilateralFilterCSPtr);
         ContextManager::SetConstantBuffer(0, m_BilateralFilterConstantBufferPtr);
-        ContextManager::SetImageTexture(0, static_cast<CTexturePtr>(m_RawDepthBufferPtr));
-        ContextManager::SetImageTexture(1, static_cast<CTexturePtr>(m_SmoothDepthBufferPtr[0]));
+        ContextManager::SetImageTexture(0, m_RawDepthBufferPtr);
+        ContextManager::SetImageTexture(1, m_SmoothDepthBufferPtr[0]);
         ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
 
         //////////////////////////////////////////////////////////////////////////////////////
@@ -1856,8 +1856,8 @@ namespace MR
             
             ContextManager::SetShaderCS(m_DownSampleDepthCSPtr);
 
-            ContextManager::SetImageTexture(0, static_cast<CTexturePtr>(m_SmoothDepthBufferPtr[PyramidLevel - 1]));
-            ContextManager::SetImageTexture(1, static_cast<CTexturePtr>(m_SmoothDepthBufferPtr[PyramidLevel]));
+            ContextManager::SetImageTexture(0, m_SmoothDepthBufferPtr[PyramidLevel - 1]);
+            ContextManager::SetImageTexture(1, m_SmoothDepthBufferPtr[PyramidLevel]);
             ContextManager::Barrier();
 
             ContextManager::Dispatch(PyramidWorkGroupsX, PyramidWorkGroupsY, 1);
@@ -1876,8 +1876,8 @@ namespace MR
             const int PyramidWorkGroupsX = DivUp(m_pRGBDCameraControl->GetDepthWidth() >> PyramidLevel, g_TileSize2D);
             const int PyramidWorkGroupsY = DivUp(m_pRGBDCameraControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
 
-            ContextManager::SetImageTexture(0, static_cast<CTexturePtr>(m_SmoothDepthBufferPtr[PyramidLevel]));
-            ContextManager::SetImageTexture(1, static_cast<CTexturePtr>(m_ReferenceVertexMapPtr[PyramidLevel]));
+            ContextManager::SetImageTexture(0, m_SmoothDepthBufferPtr[PyramidLevel]);
+            ContextManager::SetImageTexture(1, m_ReferenceVertexMapPtr[PyramidLevel]);
             ContextManager::Barrier();
             ContextManager::Dispatch(PyramidWorkGroupsX, PyramidWorkGroupsY, 1);
         }
@@ -1888,8 +1888,8 @@ namespace MR
         
         ContextManager::SetShaderCS(m_VertexMapCSPtr);
 
-        ContextManager::SetImageTexture(0, static_cast<CTexturePtr>(m_RawDepthBufferPtr));
-        ContextManager::SetImageTexture(1, static_cast<CTexturePtr>(m_RawVertexMapPtr));
+        ContextManager::SetImageTexture(0, m_RawDepthBufferPtr);
+        ContextManager::SetImageTexture(1, m_RawVertexMapPtr);
         ContextManager::Barrier();
         ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
 
@@ -2145,12 +2145,14 @@ namespace MR
 
     void CScalableSLAMReconstructor::ClearBuffer(CBufferPtr BufferPtr, size_t Size)
     {
-        std::vector<char> Data;
-        Data.resize(Size);
-
-        for (auto& Value : Data)
+        if (Size > m_ClearVector.size())
         {
-            Value = 0;
+            m_ClearVector.resize(Size);
+
+            for (auto& Value : m_ClearVector)
+            {
+                Value = 0;
+            }
         }
 
         (void)Size;
@@ -2158,7 +2160,7 @@ namespace MR
         assert(Size > 0);
         assert(BufferPtr.IsValid());
 
-        BufferManager::UploadBufferData(BufferPtr, Data.data());
+        BufferManager::UploadBufferData(BufferPtr, m_ClearVector.data());
     }
 
     // -----------------------------------------------------------------------------
