@@ -2147,9 +2147,8 @@ namespace MR
     {
         if (Size > m_ClearVector.size())
         {
-            m_ClearVector.resize(Size);
-
-            std::memset(m_ClearVector.data(), static_cast<int>(m_ClearVector.size()), sizeof(m_ClearVector[0]));
+            char Value = 0;
+            m_ClearVector.resize(Size, Value);
         }
 
         (void)Size;
