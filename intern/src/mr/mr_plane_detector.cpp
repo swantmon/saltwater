@@ -123,6 +123,7 @@ namespace MR
         ContextManager::SetImageTexture(0, m_Histogram);
         ContextManager::SetImageTexture(1, m_VertexMap);
         ContextManager::SetImageTexture(2, m_NormalMap);
+
         ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
     }
 
@@ -142,6 +143,7 @@ namespace MR
         ContextManager::SetImageTexture(0, m_Histogram);
         ContextManager::SetImageTexture(1, m_VertexMap);
         ContextManager::SetImageTexture(2, m_NormalMap);
+
         ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
     }
 
