@@ -1,19 +1,12 @@
-//
-//  gfx_material_manager.h
-//  graphic
-//
-//  Created by Tobias Schwandt on 22/04/15.
-//  Copyright (c) 2015 TU Ilmenau. All rights reserved.
-//
 
 #pragma once
+
+#include "base/base_lib_glm.h"
 
 #include "data/data_material.h"
 
 #include "graphic/gfx_material.h"
 #include "graphic/gfx_surface.h"
-
-#include "glm.hpp"
 
 namespace Gfx
 {

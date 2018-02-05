@@ -8,14 +8,13 @@
 
 #pragma once
 
+#include "base/base_lib_glm.h"
 #include "base/base_managed_pool.h"
 
 #include "graphic/gfx_buffer.h"
 #include "graphic/gfx_sampler_set.h"
 #include "graphic/gfx_shader.h"
 #include "graphic/gfx_texture_set.h"
-
-#include "glm.hpp"
 
 namespace Gfx
 {

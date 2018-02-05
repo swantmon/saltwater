@@ -2,13 +2,12 @@
 #pragma once
 
 #include "base/base_aabb2.h"
+#include "base/base_lib_glm.h"
 #include "base/base_typedef.h"
 
 #include "data/data_data_behavior.h"
 #include "data/data_texture_2d.h"
 #include "data/data_texture_cube.h"
-
-#include "glm.hpp"
 
 #include <functional>
 

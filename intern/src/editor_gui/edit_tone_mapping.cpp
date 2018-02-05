@@ -1,7 +1,7 @@
 ﻿
 #include "edit_tone_mapping.h"
 
-#include "glm.hpp"
+#include "base/base_lib_glm.h"
 
 #include <QColorDialog>
 #include <QDrag>

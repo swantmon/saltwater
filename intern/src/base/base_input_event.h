@@ -2,8 +2,7 @@
 #pragma once
 
 #include "base/base_defines.h"
-
-#include "glm.hpp"
+#include "base/base_lib_glm.h"
 
 namespace IO
 {

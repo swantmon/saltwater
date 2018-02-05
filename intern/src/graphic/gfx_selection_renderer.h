@@ -1,16 +1,9 @@
-//
-//  gfx_selection_renderer.h
-//  graphic
-//
-//  Created by Tobias Schwandt on 17/11/16.
-//  Copyright (c) 2016 TU Ilmenau. All rights reserved.
-//
 
 #pragma once
 
-#include "graphic/gfx_selection.h"
+#include "base/base_lib_glm.h"
 
-#include "glm.hpp"
+#include "graphic/gfx_selection.h"
 
 namespace Gfx
 {

@@ -1,12 +1,10 @@
 
 #include "graphic/gfx_precompiled.h"
 
+#include "base/base_lib_glm.h"
 #include "base/base_math_operations.h"
 
 #include "graphic/gfx_camera.h"
-
-#include "glm.hpp"
-#include "ext.hpp"
 
 namespace Gfx
 {

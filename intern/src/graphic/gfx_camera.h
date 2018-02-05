@@ -3,11 +3,10 @@
 
 #include "base/base_aabb2.h"
 #include "base/base_aabb3.h"
+#include "base/base_lib_glm.h"
 #include "base/base_managed_pool.h"
 
 #include "graphic/gfx_view.h"
-
-#include "glm.hpp"
 
 namespace Gfx
 {

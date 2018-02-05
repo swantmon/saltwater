@@ -1,18 +1,10 @@
-//
-//  base_aabb2.h
-//  base
-//
-//  Created by Tobias Schwandt on 29/09/14.
-//  Copyright (c) 2014 TU Ilmenau. All rights reserved.
-//
 
 #pragma once
 
 #include "base/base_defines.h"
+#include "base/base_lib_glm.h"
 
 #include <assert.h>
-
-#include "glm.hpp"
 
 namespace MATH
 {

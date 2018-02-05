@@ -1,6 +1,8 @@
 
 #include "camera/cam_precompiled.h"
 
+#include "base/base_lib_glm.h"
+
 #include "core/core_time.h"
 
 #include "base/base_input_event.h"
@@ -10,9 +12,6 @@
 #include "camera/cam_editor_control.h"
 
 #include "graphic/gfx_camera_interface.h"
-
-#include "glm.hpp"
-#include "ext.hpp"
 
 #include <cmath>
 #include <iostream>

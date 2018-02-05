@@ -1,16 +1,8 @@
-//
-//  base_sphere.h
-//  base
-//
-//  Created by Tobias Schwandt on 16/02/15.
-//  Copyright (c) 2015 TU Ilmenau. All rights reserved.
-//
 
 #pragma once
 
 #include "base/base_defines.h"
-
-#include "glm.hpp"
+#include "base/base_lib_glm.h"
 
 #include <assert.h>
 

@@ -4,8 +4,7 @@
 #include "camera/cam_control.h"
 
 #include "base/base_input_event.h"
-
-#include "glm.hpp"
+#include "base/base_lib_glm.h"
 
 namespace Cam
 {

@@ -1,6 +1,8 @@
 
 #include "camera/cam_precompiled.h"
 
+#include "base/base_lib_glm.h"
+
 #include "camera/cam_control_manager.h"
 #include "camera/cam_game_control.h"
 
@@ -10,9 +12,6 @@
 #include "data/data_transformation_facet.h"
 
 #include "graphic/gfx_camera_interface.h"
-
-#include "glm.hpp"
-#include "ext.hpp"
 
 namespace Cam
 {

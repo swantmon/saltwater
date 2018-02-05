@@ -1,14 +1,7 @@
-//
-//  gfx_tonemapping_renderer.h
-//  graphic
-//
-//  Created by Tobias Schwandt on 26/05/15.
-//  Copyright (c) 2014 TU Ilmenau. All rights reserved.
-//
 
 #pragma once
 
-#include "glm.hpp"
+#include "base/base_lib_glm.h"
 
 namespace Gfx
 {

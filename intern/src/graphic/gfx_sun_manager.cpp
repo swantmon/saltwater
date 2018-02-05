@@ -7,6 +7,8 @@
 
 #include "core/core_time.h"
 
+#include "base/base_lib_glm.h"
+
 #include "data/data_actor_type.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
@@ -30,9 +32,6 @@
 #include "graphic/gfx_target_set_manager.h"
 #include "graphic/gfx_texture_manager.h"
 #include "graphic/gfx_view_manager.h"
-
-#include "glm.hpp"
-#include "ext.hpp"
 
 using namespace Gfx;
 

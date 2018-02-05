@@ -4,9 +4,10 @@
 #include "base/base_test_defines.h"
 
 #include "base/base_aabb3.h"
+
 #include "base/base_sphere.h"
 
-#include "glm.hpp"
+#include "base/base_lib_glm.h"
 
 using namespace Base;
 

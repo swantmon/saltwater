@@ -5,7 +5,7 @@
 
 #include "base/base_plane.h"
 
-#include "glm.hpp"
+#include "base/base_lib_glm.h"
 
 using namespace Base;
 

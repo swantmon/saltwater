@@ -2,6 +2,7 @@
 #include "data/data_precompiled.h"
 
 #include "base/base_exception.h"
+#include "base/base_lib_glm.h"
 #include "base/base_pool.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
@@ -17,9 +18,6 @@
 #include "data/data_mesh_manager.h"
 #include "data/data_model_manager.h"
 #include "data/data_transformation_facet.h"
-
-#include "glm.hpp"
-#include "ext.hpp"
 
 #include <assert.h>
 #include <unordered_map>

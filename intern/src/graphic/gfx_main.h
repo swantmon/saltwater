@@ -9,10 +9,10 @@
 
 #pragma once
 
+#include "base/base_lib_glm.h"
+
 #include "graphic/gfx_buffer.h"
 #include "graphic/gfx_graphics_info.h"
-
-#include "glm.hpp"
 
 #include <functional>
 

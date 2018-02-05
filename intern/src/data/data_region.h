@@ -2,11 +2,10 @@
 #pragma once
 
 #include "base/base_aabb3.h"
+#include "base/base_lib_glm.h"
 
 #include "data/data_entity.h"
 #include "data/data_entity_folder.h"
-
-#include "glm.hpp"
 
 namespace Dt
 {

@@ -4,6 +4,7 @@
 #include "base/base_aabb3.h"
 #include "base/base_console.h"
 #include "base/base_crc.h"
+#include "base/base_lib_glm.h"
 #include "base/base_math_constants.h"
 #include "base/base_math_operations.h"
 #include "base/base_memory.h"
@@ -19,8 +20,6 @@
 #include "graphic/gfx_mesh_manager.h"
 #include "graphic/gfx_shader.h"
 #include "graphic/gfx_shader_manager.h"
-
-#include "glm.hpp"
 
 #include <unordered_map>
 #include <functional>

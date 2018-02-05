@@ -1,14 +1,7 @@
-//
-//  data_fx_facet.h
-//  data
-//
-//  Created by Tobias Schwandt on 29/03/16.
-//  Copyright © 2016 TU Ilmenau. All rights reserved.
-//
 
 #pragma once
 
-#include "glm.hpp"
+#include "base/base_lib_glm.h"
 
 namespace Dt
 {

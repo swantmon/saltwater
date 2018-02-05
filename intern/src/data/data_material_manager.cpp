@@ -5,6 +5,7 @@
 #include "base/base_console.h"
 #include "base/base_crc.h"
 #include "base/base_exception.h"
+#include "base/base_lib_glm.h"
 #include "base/base_math_constants.h"
 #include "base/base_math_operations.h"
 #include "base/base_memory.h"
@@ -23,8 +24,6 @@
 #include "data/data_surface.h"
 #include "data/data_texture_2d.h"
 #include "data/data_texture_manager.h"
-
-#include "glm.hpp"
 
 #include "tinyxml2.h"
 

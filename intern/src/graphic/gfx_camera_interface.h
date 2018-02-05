@@ -2,8 +2,7 @@
 #pragma once
 
 #include "base/base_aabb2.h"
-
-#include "glm.hpp"
+#include "base/base_lib_glm.h"
 
 namespace Gfx
 {

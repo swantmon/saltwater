@@ -1,10 +1,9 @@
 
 #pragma once
 
+#include "base/base_lib_glm.h"
 #include "base/base_math_constants.h"
 #include "base/base_math_operations.h"
-
-#include "glm.hpp"
 
 namespace MATH
 {

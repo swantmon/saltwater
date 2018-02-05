@@ -1,6 +1,7 @@
 
 #include "graphic/gfx_precompiled.h"
 
+#include "base/base_lib_glm.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
@@ -24,8 +25,6 @@
 #include "graphic/gfx_target_set_manager.h"
 #include "graphic/gfx_texture_manager.h"
 #include "graphic/gfx_view_manager.h"
-
-#include "glm.hpp"
 
 #include <sstream>
 

@@ -23,6 +23,7 @@
     <ClInclude Include="..\..\..\src\base\base_event_queue.h" />
     <ClInclude Include="..\..\..\src\base\base_exception.h" />
     <ClInclude Include="..\..\..\src\base\base_getopt.h" />
+    <ClInclude Include="..\..\..\src\base\base_lib_glm.h" />
     <ClInclude Include="..\..\..\src\base\base_precompiled.h" />
     <ClInclude Include="..\..\..\src\base\base_program_parameters.h" />
     <ClInclude Include="..\..\..\src\base\base_tokenizer.h" />

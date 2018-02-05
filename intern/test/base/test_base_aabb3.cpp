@@ -5,7 +5,7 @@
 
 #include "base/base_aabb3.h"
 
-#include "glm.hpp"
+#include "base/base_lib_glm.h"
 
 BASE_TEST(Test_Base_AABB3_Intersect_AABB3)
 {

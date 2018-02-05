@@ -1,9 +1,9 @@
 ﻿
+#include "base/base_lib_glm.h"
+
 #include "editor_gui/edit_inspector_camera.h"
 
 #include "editor_port/edit_message_manager.h"
-
-#include "glm.hpp"
 
 #include <QColorDialog>
 

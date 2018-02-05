@@ -1,13 +1,11 @@
 
 #include "data/data_precompiled.h"
 
+#include "base/base_lib_glm.h"
+
 #include "data/data_entity.h"
 #include "data/data_hierarchy_facet.h"
 #include "data/data_transformation_facet.h"
-
-#include "glm.hpp"
-#include "ext.hpp"
-#include "gtx/matrix_decompose.hpp"
 
 namespace Dt
 {
