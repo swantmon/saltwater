@@ -342,53 +342,7 @@ namespace Edit
 
         return _pString;
     }
-
-    // -----------------------------------------------------------------------------
-
-    void CMessage::PutAddress(void* _pPointer)
-    {
-        InternPutAddress<sizeof(_pPointer)>(_pPointer);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    template <>
-    void CMessage::InternPutAddress<4>(void* _pPointer)
-    {
-        PutInt(static_cast<int>((int) _pPointer));
-    }
-
-    // -----------------------------------------------------------------------------
-
-    template <>
-    void CMessage::InternPutAddress<8>(void* _pPointer)
-    {
-        PutLongLong((long long) _pPointer);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void* CMessage::GetAddress()
-    {
-        return InternGetAddress<sizeof(void*)>();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    template <>
-    void* CMessage::InternGetAddress<4>()
-    {
-        return (void*) static_cast<Base::Size>(GetInt());
-    }
-
-    // -----------------------------------------------------------------------------
-
-    template <>
-    void* CMessage::InternGetAddress<8>()
-    {
-        return (void*) GetLongLong();
-    }
-
+    
     // -----------------------------------------------------------------------------
 
     void CMessage::PutBytes(void* _pBytes, Base::Size _NumberOfBytes)

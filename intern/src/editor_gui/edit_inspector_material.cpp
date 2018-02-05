@@ -24,7 +24,7 @@ namespace Edit
 {
     CInspectorMaterial::CInspectorMaterial(QWidget* _pParent)
         : QWidget          (_pParent)
-        , m_CurrentEntityID(-1)
+        , m_CurrentEntityID(static_cast<unsigned int>(-1))
         , m_MaterialHash   (0)
     {
         // -----------------------------------------------------------------------------
@@ -303,13 +303,13 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Load material from file
         // -----------------------------------------------------------------------------
-        Edit::CMessage NewMessage;
+        Edit::CMessage LoadMessage;
 
-        NewMessage.PutString(_rRelPathToTexture.toLatin1().data());
+        LoadMessage.PutString(_rRelPathToTexture.toLatin1().data());
 
-        NewMessage.Reset();
+        LoadMessage.Reset();
 
-        int Hash = Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Material_Load, NewMessage);
+        int Hash = Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Material_Load, LoadMessage);
 
         if (Hash != -1)
         {
@@ -318,13 +318,13 @@ namespace Edit
             // -----------------------------------------------------------------------------
             // Request info of texture
             // -----------------------------------------------------------------------------
-            Edit::CMessage NewMessage;
+            Edit::CMessage RequestMessage;
 
-            NewMessage.PutInt(m_MaterialHash);
+            RequestMessage.PutInt(m_MaterialHash);
 
-            NewMessage.Reset();
+            RequestMessage.Reset();
 
-            Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Material_Info, NewMessage);
+            Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Material_Info, RequestMessage);
         }
     }
 
@@ -381,9 +381,6 @@ namespace Edit
 
     void CInspectorMaterial::OnEntityInfoMaterial(Edit::CMessage& _rMessage)
     {
-        float R, G, B;
-        float X, Y, Z, W;
-
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
@@ -423,7 +420,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         int MaterialHash = _rMessage.GetInt();
 
-        if (MaterialHash != m_MaterialHash) return;
+        if (static_cast<unsigned int>(MaterialHash) != m_MaterialHash) return;
 
         bool HasColorMap     = false;
         bool HasNormalMap    = false;

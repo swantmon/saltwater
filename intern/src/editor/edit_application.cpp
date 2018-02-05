@@ -332,8 +332,8 @@ namespace
         int MousePositionX = _rMessage.GetInt();
         int MousePositionY = _rMessage.GetInt();
 
-        m_LatestMousePosition[0] = MousePositionX;
-        m_LatestMousePosition[1] = MousePositionY;
+        m_LatestMousePosition[0] = static_cast<float>(MousePositionX);
+        m_LatestMousePosition[1] = static_cast<float>(MousePositionY);
 
         Base::CInputEvent NewInput(Base::CInputEvent::Input, Base::CInputEvent::MouseLeftPressed, Base::CInputEvent::Mouse, m_LatestMousePosition);
 
@@ -347,8 +347,8 @@ namespace
         int MousePositionX = _rMessage.GetInt();
         int MousePositionY = _rMessage.GetInt();
 
-        m_LatestMousePosition[0] = MousePositionX;
-        m_LatestMousePosition[1] = MousePositionY;
+        m_LatestMousePosition[0] = static_cast<float>(MousePositionX);
+        m_LatestMousePosition[1] = static_cast<float>(MousePositionY);
 
         Base::CInputEvent NewInput(Base::CInputEvent::Input, Base::CInputEvent::MouseLeftReleased, Base::CInputEvent::Mouse, m_LatestMousePosition);
 
@@ -362,8 +362,8 @@ namespace
         int MousePositionX = _rMessage.GetInt();
         int MousePositionY = _rMessage.GetInt();
 
-        m_LatestMousePosition[0] = MousePositionX;
-        m_LatestMousePosition[1] = MousePositionY;
+        m_LatestMousePosition[0] = static_cast<float>(MousePositionX);
+        m_LatestMousePosition[1] = static_cast<float>(MousePositionY);
 
         Base::CInputEvent NewInput(Base::CInputEvent::Input, Base::CInputEvent::MouseMiddlePressed, Base::CInputEvent::Mouse, m_LatestMousePosition);
 
@@ -377,8 +377,8 @@ namespace
         int MousePositionX = _rMessage.GetInt();
         int MousePositionY = _rMessage.GetInt();
 
-        m_LatestMousePosition[0] = MousePositionX;
-        m_LatestMousePosition[1] = MousePositionY;
+        m_LatestMousePosition[0] = static_cast<float>(MousePositionX);
+        m_LatestMousePosition[1] = static_cast<float>(MousePositionY);
 
         Base::CInputEvent NewInput(Base::CInputEvent::Input, Base::CInputEvent::MouseMiddleReleased, Base::CInputEvent::Mouse, m_LatestMousePosition);
 
@@ -392,8 +392,8 @@ namespace
         int MousePositionX = _rMessage.GetInt();
         int MousePositionY = _rMessage.GetInt();
 
-        m_LatestMousePosition[0] = MousePositionX;
-        m_LatestMousePosition[1] = MousePositionY;
+        m_LatestMousePosition[0] = static_cast<float>(MousePositionX);
+        m_LatestMousePosition[1] = static_cast<float>(MousePositionY);
 
         Base::CInputEvent NewInput(Base::CInputEvent::Input, Base::CInputEvent::MouseRightPressed, Base::CInputEvent::Mouse, m_LatestMousePosition);
 
@@ -407,8 +407,8 @@ namespace
         int MousePositionX = _rMessage.GetInt();
         int MousePositionY = _rMessage.GetInt();
 
-        m_LatestMousePosition[0] = MousePositionX;
-        m_LatestMousePosition[1] = MousePositionY;
+        m_LatestMousePosition[0] = static_cast<float>(MousePositionX);
+        m_LatestMousePosition[1] = static_cast<float>(MousePositionY);
 
         Base::CInputEvent NewInput(Base::CInputEvent::Input, Base::CInputEvent::MouseRightReleased, Base::CInputEvent::Mouse, m_LatestMousePosition);
 
@@ -422,8 +422,8 @@ namespace
         int MousePositionX = _rMessage.GetInt();
         int MousePositionY = _rMessage.GetInt();
 
-        m_LatestMousePosition[0] = MousePositionX;
-        m_LatestMousePosition[1] = MousePositionY;
+        m_LatestMousePosition[0] = static_cast<float>(MousePositionX);
+        m_LatestMousePosition[1] = static_cast<float>(MousePositionY);
 
         Base::CInputEvent NewInput(Base::CInputEvent::Input, Base::CInputEvent::MouseMove, Base::CInputEvent::Mouse, m_LatestMousePosition);
 
@@ -437,7 +437,9 @@ namespace
         bool IsVertically = _rMessage.GetBool();
         int WheelDelta    = _rMessage.GetInt();
 
-        Base::CInputEvent NewInput(Base::CInputEvent::Input, Base::CInputEvent::MouseWheel, Base::CInputEvent::Mouse, m_LatestMousePosition, WheelDelta);
+        (void)IsVertically;
+
+        Base::CInputEvent NewInput(Base::CInputEvent::Input, Base::CInputEvent::MouseWheel, Base::CInputEvent::Mouse, m_LatestMousePosition, static_cast<float>(WheelDelta));
 
         Gui::EventHandler::OnUserEvent(NewInput);
     }

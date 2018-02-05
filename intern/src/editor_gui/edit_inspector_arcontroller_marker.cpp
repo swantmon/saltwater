@@ -70,6 +70,8 @@ namespace Edit
 
     void CInspectorARControllerMarker::RequestInformation(unsigned int _EntityID, unsigned int _MarkerID)
     {
+        (void)_MarkerID;
+
         m_CurrentEntityID = _EntityID;
 
         CMessage NewMessage;
