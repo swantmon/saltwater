@@ -323,6 +323,7 @@ namespace
 
         int Category = _rMessage.GetInt();
 
+        (void)Category;
         assert(Category == static_cast<int>(rCurrentEntity.GetCategory()));
 
         bool HasName = _rMessage.GetBool();
