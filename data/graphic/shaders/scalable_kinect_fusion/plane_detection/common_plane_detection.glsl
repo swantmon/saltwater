@@ -16,7 +16,7 @@ const float g_Tau = 6.28318530718f;
 const float g_Pi = g_Tau * 0.5f;
 const int g_KernelSize = 3;
 
-// Functions to convert between cartesian and spherical coordinates
+// Functions to convert between cartesian, spherical and bin coordinates
 // r in spherical is always 1 when the normal is normalized
 
 vec2 CartesianToSpherical(vec3 Normal)
