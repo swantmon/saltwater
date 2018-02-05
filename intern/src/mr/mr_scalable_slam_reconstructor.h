@@ -186,6 +186,7 @@ namespace MR
 
         void RasterizeFullVolumeReverse(SRootVolume& rRootGrid);
 
+        void ClearBuffer(Gfx::CBufferPtr BufferPtr);
         void ClearBuffer(Gfx::CBufferPtr BufferPtr, size_t Size);
         void ClearPool();
 

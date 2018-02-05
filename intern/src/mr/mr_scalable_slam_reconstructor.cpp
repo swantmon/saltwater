@@ -403,6 +403,9 @@ namespace MR
 		m_FrameCount = 0;
 		m_TrackingLost = true;
 
+        m_VolumeBuffers.m_RootGridPoolSize = 0;
+        m_VolumeBuffers.m_Level1PoolSize= 0;
+        m_VolumeBuffers.m_TSDFPoolSize = 0;
         m_VolumeBuffers.m_RootVolumeTotalWidth = g_AABB;
 
 		UpdateFrustum();
@@ -719,7 +722,7 @@ namespace MR
         
         const unsigned int IndexCount = m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
         const unsigned int InstanceCount = static_cast<unsigned int>(m_RootVolumeMap.size());
-        ClearBuffer(m_AtomicCounterBufferPtr, InstanceCount);
+        ClearBuffer(m_AtomicCounterBufferPtr);
         ContextManager::DrawIndexedInstanced(IndexCount, InstanceCount, 0, 0, 0);
 
         ContextManager::ResetShaderVS();
@@ -1149,7 +1152,7 @@ namespace MR
         IndirectBufferData.m_Indexed.m_IndexCount = m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
         BufferManager::UploadBufferData(rRootGrid.m_IndirectLevel1Buffer, &IndirectBufferData);
         
-        ClearBuffer(m_VolumeAtomicCounterBufferPtr, GridData.m_Resolution * GridData.m_Resolution * GridData.m_Resolution);
+        ClearBuffer(m_VolumeAtomicCounterBufferPtr, GridData.m_Resolution * GridData.m_Resolution * GridData.m_Resolution * sizeof(int32_t));
 
         ContextManager::SetResourceBuffer(3, rRootGrid.m_Level1QueuePtr);
         ContextManager::SetResourceBuffer(4, m_VolumeAtomicCounterBufferPtr);
@@ -1250,7 +1253,7 @@ namespace MR
         IndirectBufferData.m_Indexed.m_IndexCount = m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
         BufferManager::UploadBufferData(rRootGrid.m_IndirectLevel2Buffer, &IndirectBufferData);
 
-        ClearBuffer(m_VolumeAtomicCounterBufferPtr, 128 * 128 * 128);
+        ClearBuffer(m_VolumeAtomicCounterBufferPtr, 128 * 128 * 128 * sizeof(int32_t));
         
         ContextManager::DrawIndexedIndirect(rRootGrid.m_IndirectLevel1Buffer, SIndirectBuffers::s_IndexedOffset);
     }
@@ -1310,7 +1313,7 @@ namespace MR
         // Prepare instance buffers
         ////////////////////////////////////////////////////////////////////////////////
 
-        ClearBuffer(m_AtomicCounterBufferPtr, m_RootVolumeMap.size());
+        ClearBuffer(m_AtomicCounterBufferPtr, m_RootVolumeMap.size() * sizeof(int32_t));
         
         ////////////////////////////////////////////////////////////////////////////////
         // Create vector and instance buffer for root grid volumes
@@ -2131,17 +2134,31 @@ namespace MR
     
     // -----------------------------------------------------------------------------
 
+    void CScalableSLAMReconstructor::ClearBuffer(CBufferPtr BufferPtr)
+    {
+        assert(BufferPtr.IsValid());
+
+        ClearBuffer(BufferPtr, BufferPtr->GetNumberOfBytes());
+    }
+    
+    // -----------------------------------------------------------------------------
+
     void CScalableSLAMReconstructor::ClearBuffer(CBufferPtr BufferPtr, size_t Size)
     {
+        std::vector<char> Data;
+        Data.resize(Size);
+
+        for (auto& Value : Data)
+        {
+            Value = 0;
+        }
+
         (void)Size;
 
         assert(Size > 0);
         assert(BufferPtr.IsValid());
-        
-        GLuint NativeBuffer = static_cast<CNativeBuffer*>(BufferPtr.GetPtr())->m_NativeBuffer;
 
-        //glClearNamedBufferSubData(NativeBuffer, GL_R32UI, 0, Size * sizeof(uint32_t), GL_RED_INTEGER, GL_UNSIGNED_INT, nullptr);
-        glClearNamedBufferData(NativeBuffer, GL_R32UI, GL_RED_INTEGER, GL_UNSIGNED_INT, nullptr);
+        BufferManager::UploadBufferData(BufferPtr, Data.data());
     }
 
     // -----------------------------------------------------------------------------
@@ -2167,7 +2184,7 @@ namespace MR
         }
 
         BufferManager::UploadBufferData(m_VolumeBuffers.m_RootVolumePositionBufferPtr, Data.data());
-        ClearBuffer(m_VolumeBuffers.m_PoolItemCountBufferPtr, m_ReconstructionSettings.GRID_LEVELS);
+        ClearBuffer(m_VolumeBuffers.m_PoolItemCountBufferPtr);
 
         std::memset(Data.data(), 0, DataSize);
         for (int i = 0; i < g_TSDFPoolSize / g_MegabyteSize; ++ i)
