@@ -77,15 +77,15 @@ namespace Edit
 
     void CInspectorARController::numberOfMarkerChanged()
     {
-        unsigned int CurrentNumberOfMarker = m_pMarkerLayout->count();
-        unsigned int NewNumberOfMarker     = m_pNumberOfMarkerEdit->text().toUInt();
+        int CurrentNumberOfMarker = m_pMarkerLayout->count();
+        int NewNumberOfMarker     = m_pNumberOfMarkerEdit->text().toUInt();
 
         if (CurrentNumberOfMarker == NewNumberOfMarker)
         {
             return;
         }
 
-        unsigned int CurrentAvailableMarkerIndex = 0;
+        int CurrentAvailableMarkerIndex = 0;
 
         for (CurrentAvailableMarkerIndex = 0; CurrentAvailableMarkerIndex < m_pMarkerLayout->count(); ++CurrentAvailableMarkerIndex)
         {
@@ -103,7 +103,7 @@ namespace Edit
             }
         }
 
-        for (unsigned int CurrentMarkerIndex = CurrentAvailableMarkerIndex; CurrentMarkerIndex < NewNumberOfMarker; ++CurrentMarkerIndex)
+        for (int CurrentMarkerIndex = CurrentAvailableMarkerIndex; CurrentMarkerIndex < NewNumberOfMarker; ++CurrentMarkerIndex)
         {
             CInspectorARControllerMarker* pWidget = new CInspectorARControllerMarker();
 

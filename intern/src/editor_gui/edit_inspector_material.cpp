@@ -420,7 +420,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         int MaterialHash = _rMessage.GetInt();
 
-        if (MaterialHash != m_MaterialHash) return;
+        if (static_cast<unsigned int>(MaterialHash) != m_MaterialHash) return;
 
         bool HasColorMap     = false;
         bool HasNormalMap    = false;
