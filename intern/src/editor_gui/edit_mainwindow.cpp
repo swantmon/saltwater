@@ -739,6 +739,7 @@ namespace Edit
     {
         int OldState = _rMessage.GetInt();
         int NewState = _rMessage.GetInt();
+        (void)OldState;
 
         // TODO by tschwandt
         // Find a better solution to handle different states

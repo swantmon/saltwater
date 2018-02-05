@@ -8,7 +8,7 @@ namespace Edit
 {
     CInspectorARController::CInspectorARController(QWidget* _pParent)
         : QWidget(_pParent)
-        , m_CurrentEntityID(-1)
+        , m_CurrentEntityID(static_cast<unsigned int>(-1))
     {
         // -----------------------------------------------------------------------------
         // Setup UI
