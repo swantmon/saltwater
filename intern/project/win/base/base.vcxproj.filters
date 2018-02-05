@@ -206,7 +206,7 @@
       <Filter>io</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\base_include_glm.h">
-      <Filter>lib</Filter>
+      <Filter>includes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -240,7 +240,7 @@
     <Filter Include="pattern">
       <UniqueIdentifier>{757702e6-16a5-416d-8e38-7fc9a9390376}</UniqueIdentifier>
     </Filter>
-    <Filter Include="lib">
+    <Filter Include="includes">
       <UniqueIdentifier>{ca28e310-04a9-4dd9-9b02-2acad924cfe1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
