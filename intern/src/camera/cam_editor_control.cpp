@@ -1,7 +1,7 @@
 
 #include "camera/cam_precompiled.h"
 
-#include "base/base_lib_glm.h"
+#include "base/base_include_glm.h"
 
 #include "core/core_time.h"
 

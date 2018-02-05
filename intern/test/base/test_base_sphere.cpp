@@ -7,7 +7,7 @@
 
 #include "base/base_sphere.h"
 
-#include "base/base_lib_glm.h"
+#include "base/base_include_glm.h"
 
 using namespace Base;
 

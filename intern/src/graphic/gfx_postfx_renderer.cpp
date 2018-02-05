@@ -1,7 +1,7 @@
 
 #include "graphic/gfx_precompiled.h"
 
-#include "base/base_lib_glm.h"
+#include "base/base_include_glm.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 

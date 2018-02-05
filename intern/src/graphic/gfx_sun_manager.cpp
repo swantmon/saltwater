@@ -7,7 +7,7 @@
 
 #include "core/core_time.h"
 
-#include "base/base_lib_glm.h"
+#include "base/base_include_glm.h"
 
 #include "data/data_actor_type.h"
 #include "data/data_entity.h"

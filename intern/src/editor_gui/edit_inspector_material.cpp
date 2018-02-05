@@ -1,6 +1,6 @@
 ﻿
 #include "base/base_crc.h"
-#include "base/base_lib_glm.h"
+#include "base/base_include_glm.h"
 
 #include "editor_gui/edit_inspector_material.h"
 #include "editor_gui/edit_texture_value.h"

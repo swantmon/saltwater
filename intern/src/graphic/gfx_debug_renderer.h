@@ -2,7 +2,7 @@
 #pragma once
 
 #include "base/base_aabb2.h"
-#include "base/base_lib_glm.h"
+#include "base/base_include_glm.h"
 
 #include "graphic/gfx_camera.h"
 #include "graphic/gfx_texture.h"

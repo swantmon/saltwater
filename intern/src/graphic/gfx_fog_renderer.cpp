@@ -7,7 +7,7 @@
 
 #include "camera/cam_control_manager.h"
 
-#include "base/base_lib_glm.h"
+#include "base/base_include_glm.h"
 
 #include "data/data_entity.h"
 #include "data/data_fx_type.h"

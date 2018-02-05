@@ -2,7 +2,7 @@
 #pragma once
 
 #include "base/base_defines.h"
-#include "base/base_lib_glm.h"
+#include "base/base_include_glm.h"
 #include "base/base_math_constants.h"
 #include "base/base_math_operations.h"
 

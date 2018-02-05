@@ -205,7 +205,7 @@
     <ClInclude Include="..\..\..\src\base\base_getopt.h">
       <Filter>io</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_lib_glm.h">
+    <ClInclude Include="..\..\..\src\base\base_include_glm.h">
       <Filter>lib</Filter>
     </ClInclude>
   </ItemGroup>
