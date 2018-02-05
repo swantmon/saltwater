@@ -27,7 +27,6 @@
 #include "mr/mr_scalable_slam_reconstructor.h"
 #include "mr/mr_rgbd_camera_control.h"
 #include "mr/mr_kinect_control.h"
-#include "mr/mr_realsense_control.h"
 
 #include <iostream>
 #include <limits>
@@ -820,7 +819,6 @@ namespace MR
             ContextManager::SetTargetSet(m_FullVolumeTargetSetPtr);
             ContextManager::SetViewPortSet(m_FullVolumeViewPort);
 
-            const unsigned int Offset = 0;
             ContextManager::SetShaderVS(m_PointsRootGridVSPtr);
             ContextManager::SetShaderPS(m_PointsRootGridGSPtr);
             ContextManager::SetShaderPS(m_PointsRootGridFSPtr);
@@ -883,7 +881,6 @@ namespace MR
                 ContextManager::SetTargetSet(m_RootGridVolumeTargetSetPtr);
                 ContextManager::SetViewPortSet(m_RootGridViewPort);
 
-                const unsigned int Offset = 0;
                 ContextManager::SetShaderVS(m_PointsRootGridVSPtr);
                 ContextManager::SetShaderPS(m_PointsRootGridGSPtr);
                 ContextManager::SetShaderPS(m_PointsRootGridFSPtr);
@@ -1851,8 +1848,8 @@ namespace MR
 
         for (int PyramidLevel = 1; PyramidLevel < m_ReconstructionSettings.m_PyramidLevelCount; ++ PyramidLevel)
         {
-            const int WorkGroupsX = DivUp(m_pRGBDCameraControl->GetDepthWidth() >> PyramidLevel, g_TileSize2D);
-            const int WorkGroupsY = DivUp(m_pRGBDCameraControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
+            const int PyramidWorkGroupsX = DivUp(m_pRGBDCameraControl->GetDepthWidth() >> PyramidLevel, g_TileSize2D);
+            const int PyramidWorkGroupsY = DivUp(m_pRGBDCameraControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
             
             ContextManager::SetShaderCS(m_DownSampleDepthCSPtr);
 
@@ -1860,7 +1857,7 @@ namespace MR
             ContextManager::SetImageTexture(1, static_cast<CTexturePtr>(m_SmoothDepthBufferPtr[PyramidLevel]));
             ContextManager::Barrier();
 
-            ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+            ContextManager::Dispatch(PyramidWorkGroupsX, PyramidWorkGroupsY, 1);
         }
 
         /////////////////////////////////////////////////////////////////////////////////////
@@ -1873,13 +1870,13 @@ namespace MR
         ContextManager::SetShaderCS(m_VertexMapCSPtr);
         for (int PyramidLevel = 0; PyramidLevel < m_ReconstructionSettings.m_PyramidLevelCount; ++ PyramidLevel)
         {
-            const int WorkGroupsX = DivUp(m_pRGBDCameraControl->GetDepthWidth() >> PyramidLevel, g_TileSize2D);
-            const int WorkGroupsY = DivUp(m_pRGBDCameraControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
+            const int PyramidWorkGroupsX = DivUp(m_pRGBDCameraControl->GetDepthWidth() >> PyramidLevel, g_TileSize2D);
+            const int PyramidWorkGroupsY = DivUp(m_pRGBDCameraControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
 
             ContextManager::SetImageTexture(0, static_cast<CTexturePtr>(m_SmoothDepthBufferPtr[PyramidLevel]));
             ContextManager::SetImageTexture(1, static_cast<CTexturePtr>(m_ReferenceVertexMapPtr[PyramidLevel]));
             ContextManager::Barrier();
-            ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+            ContextManager::Dispatch(PyramidWorkGroupsX, PyramidWorkGroupsY, 1);
         }
 
         /////////////////////////////////////////////////////////////////////////////////////
@@ -1900,13 +1897,13 @@ namespace MR
         ContextManager::SetShaderCS(m_NormalMapCSPtr);
         for (int PyramidLevel = 0; PyramidLevel < m_ReconstructionSettings.m_PyramidLevelCount; ++ PyramidLevel)
         {
-            const int WorkGroupsX = DivUp(m_pRGBDCameraControl->GetDepthWidth() >> PyramidLevel, g_TileSize2D);
-            const int WorkGroupsY = DivUp(m_pRGBDCameraControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
+            const int PyramidWorkGroupsX = DivUp(m_pRGBDCameraControl->GetDepthWidth() >> PyramidLevel, g_TileSize2D);
+            const int PyramidWorkGroupsY = DivUp(m_pRGBDCameraControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
                         
             ContextManager::SetImageTexture(0, static_cast<CTexturePtr>(m_ReferenceVertexMapPtr[PyramidLevel]));
             ContextManager::SetImageTexture(1, static_cast<CTexturePtr>(m_ReferenceNormalMapPtr[PyramidLevel]));
             ContextManager::Barrier();
-            ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+            ContextManager::Dispatch(PyramidWorkGroupsX, PyramidWorkGroupsY, 1);
         }
     }
     
@@ -2210,7 +2207,7 @@ namespace MR
         }
         else
         {
-            MR:SReconstructionSettings::SetDefaultSettings(m_ReconstructionSettings);
+            SReconstructionSettings::SetDefaultSettings(m_ReconstructionSettings);
         }
         Start();
     }
