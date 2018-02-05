@@ -123,6 +123,8 @@ namespace Edit
 
     void CMainWindow::SetRenderSize(int _Width, int _Height)
     {
+        (void)_Width;
+        (void)_Height;
         // m_pEditorRenderContext->setMinimumSize(QSize(_Width, _Height));
     }
 
@@ -722,6 +724,8 @@ namespace Edit
 
     void CMainWindow::closeEvent(QCloseEvent* _pEvent)
     {
+        (void)_pEvent;
+
         CMessage NewMessage(true);
 
         NewMessage.Reset();
@@ -733,6 +737,8 @@ namespace Edit
 
     void CMainWindow::mousePressEvent(QMouseEvent* _pMouseEvent)
     {
+        (void)_pMouseEvent;
+
         setFocus();
     }
 
@@ -742,6 +748,7 @@ namespace Edit
     {
         int OldState = _rMessage.GetInt();
         int NewState = _rMessage.GetInt();
+        (void)OldState;
 
         // TODO by tschwandt
         // Find a better solution to handle different states

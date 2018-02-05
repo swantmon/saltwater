@@ -2172,7 +2172,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Copy deltaE to irradiance
             // -----------------------------------------------------------------------------
-            SPSIrradianceK PSIrradianceK;
+            PSIrradianceK;
 
             PSIrradianceK.k = 1;
 

@@ -246,6 +246,8 @@ namespace Edit
 
         int CullingMask = _rMessage.GetInt();
 
+        (void)CullingMask;
+
         int ProjectionType = _rMessage.GetInt();
 
         float Size = _rMessage.GetFloat();

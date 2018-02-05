@@ -77,6 +77,8 @@ namespace
 
     void CSLAMHelper::OnNewSLAMReconstruction(Edit::CMessage& _rMessage)
     {
+        (void)_rMessage;
+
         BASE_CONSOLE_INFO("New Reconstruction");
     }
 

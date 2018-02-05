@@ -167,12 +167,7 @@ namespace Edit
 
     void CTextureValue::OnTextureInfo(Edit::CMessage& _rMessage)
     {
-        int Hash = _rMessage.GetInt();
-
-        if (Hash == m_Hash)
-        {
-            // ...
-        }
+        (void)_rMessage;
     }
 
     // -----------------------------------------------------------------------------

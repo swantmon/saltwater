@@ -88,13 +88,13 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Load texture
         // -----------------------------------------------------------------------------
-        Edit::CMessage NewMessage;
+        Edit::CMessage LoadMessage;
 
-        NewMessage.PutString(_rRelPathToTexture.toLatin1().data());
+        LoadMessage.PutString(_rRelPathToTexture.toLatin1().data());
 
-        NewMessage.Reset();
+        LoadMessage.Reset();
 
-        int Hash = Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Texture_Load, NewMessage);
+        int Hash = Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Texture_Load, LoadMessage);
 
         if (Hash != -1)
         {
@@ -103,13 +103,13 @@ namespace Edit
             // -----------------------------------------------------------------------------
             // Request info of texture
             // -----------------------------------------------------------------------------
-            Edit::CMessage NewMessage;
+            Edit::CMessage RequestMessage;
 
-            NewMessage.PutInt(m_TextureHash);
+            RequestMessage.PutInt(m_TextureHash);
 
-            NewMessage.Reset();
+            RequestMessage.Reset();
 
-            Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Texture_Info, NewMessage);
+            Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Texture_Info, RequestMessage);
         }
     }
 
@@ -132,6 +132,9 @@ namespace Edit
         bool IsArray = _rMessage.GetBool();
         bool IsCube  = _rMessage.GetBool();
         bool IsDummy = _rMessage.GetBool();
+
+        (void)IsArray;
+        (void)IsDummy;
 
         char Filename[256];
         char Identifier[256];

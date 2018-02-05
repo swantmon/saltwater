@@ -457,10 +457,8 @@ namespace
             CInternBuffer& rTargetBuffer = *static_cast<CInternBuffer*>(&(*_TargetBufferPtr));
             CInternBuffer& rSourceBuffer = *static_cast<CInternBuffer*>(&(*_SourceBufferPtr));
 
-            unsigned int ReadBufferSize = rTargetBuffer.m_NumberOfBytes;
-            unsigned int WriteBufferSize = rSourceBuffer.m_NumberOfBytes;
-            assert(_ReadOffset + _Range <= ReadBufferSize);
-            assert(_WriteOffset + _Range <= WriteBufferSize);
+            assert(_ReadOffset + _Range <= rTargetBuffer.m_NumberOfBytes);
+            assert(_WriteOffset + _Range <= rSourceBuffer.m_NumberOfBytes);
 
             glCopyBufferSubData(rTargetBuffer.m_NativeBuffer, rSourceBuffer.m_NativeBuffer, _ReadOffset, _WriteOffset, _Range);
         }

@@ -167,6 +167,8 @@ namespace Edit
 
     void CInspectorSLAM::volumeResolutionChanged(int _Value)
     {
+        (void)_Value;
+
         const int SliderPosition = m_pResolutionHS->value();
         assert(SliderPosition >= 0 && SliderPosition < g_ResolutionCount);
 

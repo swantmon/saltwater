@@ -138,7 +138,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Execute drag action
         // -----------------------------------------------------------------------------
-        Qt::DropAction pDropAction = pDrag->exec(Qt::CopyAction | Qt::MoveAction);
+        pDrag->exec(Qt::CopyAction | Qt::MoveAction);
 
         QListView::mouseMoveEvent(_pEvent);
     }

@@ -51,7 +51,7 @@ namespace Dt
 
         bool GetHasTexture() const;
 
-        void SetBackgroundColor(Base::Float3& _rBackgroundColor);
+        void SetBackgroundColor(const Base::Float3& _rBackgroundColor);
         Base::Float3& GetBackgroundColor();
         const Base::Float3& GetBackgroundColor() const;
 
@@ -77,7 +77,7 @@ namespace Dt
         void SetFar(float _Far);
         float GetFar() const;
 
-        void SetViewportRect(Base::AABB2Float& _rViewportRect);
+        void SetViewportRect(const Base::AABB2Float& _rViewportRect);
         Base::AABB2Float& GetViewportRect();
         const Base::AABB2Float& GetViewportRect() const;
 

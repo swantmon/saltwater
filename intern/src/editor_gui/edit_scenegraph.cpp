@@ -75,7 +75,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Move all selected items
         // -----------------------------------------------------------------------------
-        for (unsigned int IndexOfSelectedItem = 0; IndexOfSelectedItem < SelectedItems.length(); ++IndexOfSelectedItem)
+        for (int IndexOfSelectedItem = 0; IndexOfSelectedItem < SelectedItems.length(); ++IndexOfSelectedItem)
         {
             QTreeWidgetItem* pSource = SelectedItems.at(IndexOfSelectedItem);
 
@@ -116,7 +116,7 @@ namespace Edit
 
             if (SelectedItems.size() == 0) return;
 
-            for (unsigned int IndexOfSelectedItem = 0; IndexOfSelectedItem < SelectedItems.length(); ++IndexOfSelectedItem)
+            for (int IndexOfSelectedItem = 0; IndexOfSelectedItem < SelectedItems.length(); ++IndexOfSelectedItem)
             {
                 QTreeWidgetItem* pSource = SelectedItems.at(IndexOfSelectedItem);
 
