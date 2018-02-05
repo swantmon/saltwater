@@ -199,8 +199,7 @@ namespace MR
         }
         BufferManager::UnmapBuffer(m_PlaneBuffer);
     }
-
-
+    
     // -----------------------------------------------------------------------------
 
     void CPlaneDetector::ClearData()
