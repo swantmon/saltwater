@@ -2149,10 +2149,7 @@ namespace MR
         {
             m_ClearVector.resize(Size);
 
-            for (auto& Value : m_ClearVector)
-            {
-                Value = 0;
-            }
+            std::memset(m_ClearVector.data(), static_cast<int>(m_ClearVector.size()), sizeof(m_ClearVector[0]));
         }
 
         (void)Size;
