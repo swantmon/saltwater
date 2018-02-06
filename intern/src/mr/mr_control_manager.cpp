@@ -464,11 +464,10 @@ namespace
         if (Result != AR_SUCCESS) return;
 
         // -----------------------------------------------------------------------------
-        // Variables
+        // Variables for decompose
         // -----------------------------------------------------------------------------
         glm::vec3 Translation;
         glm::quat Rotation;
-        glm::mat3 RotationMatrix;
         glm::vec3 Scale;
         glm::vec3 Skew;
         glm::vec4 Perspective;
@@ -491,11 +490,9 @@ namespace
 
         glm::decompose(m_ViewMatrix, Scale, Rotation, Translation, Skew, Perspective);
 
-        RotationMatrix = glm::toMat3(Rotation);
+        Gfx::Cam::SetPosition((Rotation * Translation) * -1.0f);
 
-        Gfx::Cam::SetPosition((RotationMatrix * Translation) * -1.0f);
-
-        Gfx::Cam::SetRotationMatrix(RotationMatrix);
+        Gfx::Cam::SetRotationMatrix(glm::toMat3(Rotation));
 
         Gfx::Cam::SetProjectionMatrix(m_ProjectionMatrix, Near, Far);
 
