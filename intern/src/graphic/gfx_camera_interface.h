@@ -53,7 +53,6 @@ namespace Cam
     void SetPosition(const glm::vec3& _rPosition);
     const glm::vec3& GetPosition();
 
-    void SetViewMatrix(const glm::mat4& _rViewMatrix);
     const glm::mat4& GetViewMatrix();
 
     const glm::mat4& GetProjectionMatrix();

@@ -329,19 +329,6 @@ namespace Cam
 
     // -----------------------------------------------------------------------------
 
-    void SetViewMatrix(const glm::mat4& _rViewMatrix)
-    {
-        assert(ViewManager::GetMainCamera() != nullptr && ViewManager::GetMainCamera().IsValid());
-        assert(ViewManager::GetMainCamera()->GetView() != nullptr && ViewManager::GetMainCamera()->GetView().IsValid());
-
-        CCamera& rCamera = *ViewManager::GetMainCamera();
-        CView&   rView   = *rCamera.GetView();
-
-        rView.SetViewMatrix(_rViewMatrix);
-    }
-
-    // -----------------------------------------------------------------------------
-
     const glm::mat4& GetViewMatrix()
     {
         assert(ViewManager::GetMainCamera() != nullptr && ViewManager::GetMainCamera().IsValid());

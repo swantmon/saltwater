@@ -26,7 +26,6 @@ namespace Gfx
             const glm::vec3& GetRightDirection() const;
             const glm::vec3& GetUpDirection() const;
 
-            void SetViewMatrix(const glm::mat4& _rViewMatrix);
             const glm::mat4& GetViewMatrix() const;
 
         public:

@@ -464,6 +464,16 @@ namespace
         if (Result != AR_SUCCESS) return;
 
         // -----------------------------------------------------------------------------
+        // Variables
+        // -----------------------------------------------------------------------------
+        glm::vec3 Translation;
+        glm::quat Rotation;
+        glm::mat3 RotationMatrix;
+        glm::vec3 Scale;
+        glm::vec3 Skew;
+        glm::vec4 Perspective;
+
+        // -----------------------------------------------------------------------------
         // Update camera
         // -----------------------------------------------------------------------------
         float Near = Base::CProgramParameters::GetInstance().GetFloat("mr:ar:camera:near", 0.1f);
@@ -479,11 +489,13 @@ namespace
 
         ArCamera_release(pARCamera);
 
-        glm::transpose(m_ViewMatrix);
+        glm::decompose(m_ViewMatrix, Scale, Rotation, Translation, Skew, Perspective);
 
-        glm::transpose(m_ProjectionMatrix);
+        RotationMatrix = glm::toMat3(Rotation);
 
-        Gfx::Cam::SetViewMatrix(m_ViewMatrix);
+        Gfx::Cam::SetPosition((RotationMatrix * Translation) * -1.0f);
+
+        Gfx::Cam::SetRotationMatrix(RotationMatrix);
 
         Gfx::Cam::SetProjectionMatrix(m_ProjectionMatrix, Near, Far);
 
@@ -537,12 +549,6 @@ namespace
             if (m_pEntity != 0)
             {
                 Dt::CTransformationFacet* pTransformation = m_pEntity->GetTransformationFacet();
-
-                glm::vec3 Translation;
-                glm::quat Rotation;
-                glm::vec3 Scale;
-                glm::vec3 Skew;
-                glm::vec4 Perspective;
 
                 glm::decompose(ModelMatrix, Scale, Rotation, Translation, Skew, Perspective);
 
@@ -817,7 +823,7 @@ namespace
             // Prepare model-view-projection matrix
             // TODO: Change color depending on height of the plane
             // -----------------------------------------------------------------------------
-            glm::mat4 PlaneMVPMatrix = Gfx::Cam::GetProjectionMatrix() * Gfx::Cam::GetViewMatrix() * glm::transpose(PlaneModelMatrix) * glm::eulerAngleX(glm::radians(-90.0f));
+            glm::mat4 PlaneMVPMatrix = Gfx::Cam::GetProjectionMatrix() * Gfx::Cam::GetViewMatrix() * PlaneModelMatrix * glm::eulerAngleX(glm::radians(-90.0f));
 
             glm::vec4 Color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
@@ -830,7 +836,7 @@ namespace
 
             glUseProgram(g_ShaderProgramPlane);
 
-            glUniformMatrix4fv(0, 1, GL_TRUE, &(PlaneMVPMatrix[0][0]));
+            glUniformMatrix4fv(0, 1, GL_FALSE, &(PlaneMVPMatrix[0][0]));
 
             glUniform4fv(1, 1, &(Color[0]));
 
@@ -900,7 +906,7 @@ namespace
                 // -----------------------------------------------------------------------------
                 glUseProgram(g_ShaderProgramPoint);
 
-                glUniformMatrix4fv(0, 1, GL_TRUE, &(PointMVPMatrix[0][0]));
+                glUniformMatrix4fv(0, 1, GL_FALSE, &(PointMVPMatrix[0][0]));
 
                 glBindBuffer(GL_ARRAY_BUFFER, g_AttributePointVertices);
 

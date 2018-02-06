@@ -185,10 +185,10 @@ namespace Gfx
         // Near = ProjectionMatrix[2][3] / (ProjectionMatrix[2][2] - 1);
         // Far  = ProjectionMatrix[2][3] / (ProjectionMatrix[2][2] + 1);
         // -----------------------------------------------------------------------------
-        float Bottom = _Near * (m_ProjectionMatrix[1][2] - 1.0f) / m_ProjectionMatrix[1][1];
-        float Top    = _Near * (m_ProjectionMatrix[1][2] + 1.0f) / m_ProjectionMatrix[1][1];
-        float Left   = _Near * (m_ProjectionMatrix[0][2] - 1.0f) / m_ProjectionMatrix[0][0];
-        float Right  = _Near * (m_ProjectionMatrix[0][2] + 1.0f) / m_ProjectionMatrix[0][0];
+        float Bottom = _Near * (m_ProjectionMatrix[2][1] - 1.0f) / m_ProjectionMatrix[1][1];
+        float Top    = _Near * (m_ProjectionMatrix[2][1] + 1.0f) / m_ProjectionMatrix[1][1];
+        float Left   = _Near * (m_ProjectionMatrix[2][0] - 1.0f) / m_ProjectionMatrix[0][0];
+        float Right  = _Near * (m_ProjectionMatrix[2][0] + 1.0f) / m_ProjectionMatrix[0][0];
 
         // --------------------------------------------------------------------------------
         // Save the dimensions.

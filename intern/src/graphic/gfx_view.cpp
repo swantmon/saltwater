@@ -81,21 +81,6 @@ namespace Gfx
         return m_RotationMatrix;
     }
 
-    // -----------------------------------------------------------------------------
-
-    void CView::SetViewMatrix(const glm::mat4& _rViewMatrix)
-    {
-        m_RotationMatrix[0] = _rViewMatrix[0];
-        m_RotationMatrix[1] = _rViewMatrix[1];
-        m_RotationMatrix[2] = _rViewMatrix[2];
-
-        m_Position = _rViewMatrix[3];
-
-        m_Position = glm::transpose(m_RotationMatrix) * m_Position;
-
-        m_Position = m_Position * glm::vec3(-1.0f);
-    }
-
     // --------------------------------------------------------------------------------
 
     const glm::mat4& CView::GetViewMatrix() const
