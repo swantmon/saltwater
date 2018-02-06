@@ -162,8 +162,8 @@ namespace
             Dt::CCameraActorFacet* pFacet = Dt::CameraActorManager::CreateCameraActor();
 
             pFacet->SetMainCamera(true);
-            pFacet->SetProjectionType(Dt::CCameraActorFacet::External);
-            pFacet->SetClearFlag(Dt::CCameraActorFacet::Webcam);
+            pFacet->SetProjectionType(Dt::CCameraActorFacet::Perspective);
+            pFacet->SetClearFlag(Dt::CCameraActorFacet::Skybox);
 
             rEntity.SetDetailFacet(Dt::SFacetCategory::Data, pFacet);
 
@@ -286,9 +286,9 @@ namespace
 
             Dt::CTransformationFacet* pTransformationFacet = rSphere.GetTransformationFacet();
 
-            pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+            pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 0.1f));
             pTransformationFacet->SetScale(glm::vec3(0.01f));
-            pTransformationFacet->SetRotation(glm::vec3(0.0f));
+            pTransformationFacet->SetRotation(glm::vec3(glm::radians(90.0f), 0.0f, 0.0f));
 
             // -----------------------------------------------------------------------------
 
@@ -311,6 +311,60 @@ namespace
             MaterialFileDesc.m_MetalMask = 0.0f;
             MaterialFileDesc.m_Displacement = 0.0f;
             MaterialFileDesc.m_AlbedoColor = glm::vec3(1.0f, 0.0f, 0.0f);
+            MaterialFileDesc.m_TilingOffset = glm::vec4(1.0f, 1.0f, 0.0f, 0.0f);
+
+            Dt::CMaterial& rMaterial = Dt::MaterialManager::CreateMaterial(MaterialFileDesc);
+
+            pModelActorFacet->SetMaterial(0, &rMaterial);
+
+            Dt::MaterialManager::MarkMaterialAsDirty(rMaterial, Dt::CMaterial::DirtyCreate);
+
+            // -----------------------------------------------------------------------------
+
+            Dt::EntityManager::MarkEntityAsDirty(rSphere, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
+
+        {
+            Dt::SModelFileDescriptor ModelFileDesc;
+
+            ModelFileDesc.m_pFileName = "models/plane.obj";
+            ModelFileDesc.m_GenFlag = Dt::SGeneratorFlag::DefaultFlipUVs;
+
+            Dt::CModel& rModel = Dt::ModelManager::CreateModel(ModelFileDesc);
+
+            // -----------------------------------------------------------------------------
+
+            Dt::CEntity& rSphere = Dt::EntityManager::CreateEntityFromModel(rModel);
+
+            rSphere.SetName("Plane");
+
+            Dt::CTransformationFacet* pTransformationFacet = rSphere.GetTransformationFacet();
+
+            pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+            pTransformationFacet->SetScale(glm::vec3(0.01f));
+            pTransformationFacet->SetRotation(glm::vec3(glm::radians(90.0f), 0.0f, 0.0f));
+
+            // -----------------------------------------------------------------------------
+
+            Dt::CEntity* pSubEntity = rSphere.GetHierarchyFacet()->GetFirstChild();
+
+            Dt::CMeshActorFacet* pModelActorFacet = static_cast<Dt::CMeshActorFacet*>(pSubEntity->GetDetailFacet(Dt::SFacetCategory::Data));
+
+            Dt::SMaterialDescriptor MaterialFileDesc;
+
+            MaterialFileDesc.m_pFileName = 0;
+            MaterialFileDesc.m_pMaterialName = "Grey";
+            MaterialFileDesc.m_pColorMap = 0;
+            MaterialFileDesc.m_pNormalMap = 0;
+            MaterialFileDesc.m_pRoughnessMap = 0;
+            MaterialFileDesc.m_pMetalMaskMap = 0;
+            MaterialFileDesc.m_pAOMap = 0;
+            MaterialFileDesc.m_pBumpMap = 0;
+            MaterialFileDesc.m_Roughness = 1.0f;
+            MaterialFileDesc.m_Reflectance = 0.0f;
+            MaterialFileDesc.m_MetalMask = 0.0f;
+            MaterialFileDesc.m_Displacement = 0.0f;
+            MaterialFileDesc.m_AlbedoColor = glm::vec3(0.8f, 0.8f, 0.8f);
             MaterialFileDesc.m_TilingOffset = glm::vec4(1.0f, 1.0f, 0.0f, 0.0f);
 
             Dt::CMaterial& rMaterial = Dt::MaterialManager::CreateMaterial(MaterialFileDesc);
