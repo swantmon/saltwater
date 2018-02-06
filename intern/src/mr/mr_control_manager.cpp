@@ -1124,6 +1124,7 @@ namespace ControlManager
 {
     void OnStart(const SConfiguration& _rConfiguration)
     {
+        BASE_UNUSED(_rConfiguration);
     }
 
     // -----------------------------------------------------------------------------
@@ -1154,6 +1155,9 @@ namespace ControlManager
 
     void OnDisplayGeometryChanged(int _DisplayRotation, int _Width, int _Height)
     {
+        BASE_UNUSED(_DisplayRotation);
+        BASE_UNUSED(_Width);
+        BASE_UNUSED(_Height);
     }
 
     void OnDraw()
