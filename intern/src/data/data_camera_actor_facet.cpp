@@ -211,7 +211,7 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CCameraActorFacet::SetViewportRect(Base::AABB2Float& _rViewportRect)
+    void CCameraActorFacet::SetViewportRect(const Base::AABB2Float& _rViewportRect)
     {
         m_ViewportRect = _rViewportRect;
     }

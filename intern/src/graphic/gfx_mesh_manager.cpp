@@ -453,9 +453,9 @@ namespace
                 {
                     Gfx::SMaterialDescriptor MaterialDesc;
 
-                    unsigned int Hash = rCurrentSurface.GetMaterial()->GetHash();
+                    unsigned int MaterialHash = rCurrentSurface.GetMaterial()->GetHash();
                     
-                    rSurface.m_MaterialPtr = Gfx::MaterialManager::GetMaterialByHash(Hash);
+                    rSurface.m_MaterialPtr = Gfx::MaterialManager::GetMaterialByHash(MaterialHash);
                 }
                 else
                 {

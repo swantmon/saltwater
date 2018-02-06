@@ -185,6 +185,8 @@ namespace Edit
 
     void CEditState::OnExit(Edit::CMessage& _rMessage)
     {
+        BASE_UNUSED(_rMessage);
+
         m_Action = CState::Exit;
     }
 
@@ -192,6 +194,8 @@ namespace Edit
 
     void CEditState::OnPlay(Edit::CMessage& _rMessage)
     {
+        BASE_UNUSED(_rMessage);
+
         m_Action = CState::Play;
     }
 
@@ -199,6 +203,8 @@ namespace Edit
 
     void CEditState::OnNewMap(Edit::CMessage& _rMessage)
     {
+        BASE_UNUSED(_rMessage);
+
         m_Action = CState::Intro;
     }
 
@@ -228,6 +234,9 @@ namespace Edit
         int GlobalMousePositionY = _rMessage.GetInt();
         int LocalMousePositionX  = _rMessage.GetInt();
         int LocalMousePositionY  = _rMessage.GetInt();
+
+        BASE_UNUSED(GlobalMousePositionX);
+        BASE_UNUSED(GlobalMousePositionY);
 
         if (m_pSelectionTicket != 0)
         {

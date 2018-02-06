@@ -578,6 +578,8 @@ namespace
             float DensityLevel       = _rMessage.GetFloat();
             float DensityAttenuation = _rMessage.GetFloat();
 
+            BASE_UNUSED(ShadowIntensity);
+
             // -----------------------------------------------------------------------------
             // Set values
             // -----------------------------------------------------------------------------

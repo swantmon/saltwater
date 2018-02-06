@@ -2170,8 +2170,6 @@ namespace
             // -----------------------------------------------------------------------------
             // Copy deltaE to irradiance
             // -----------------------------------------------------------------------------
-            SPSIrradianceK PSIrradianceK;
-
             PSIrradianceK.k = 1;
 
             BufferManager::UploadBufferData(m_PSIrradianceK, &PSIrradianceK);

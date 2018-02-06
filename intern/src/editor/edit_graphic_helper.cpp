@@ -87,6 +87,8 @@ namespace
 
     void CGraphicHelper::OnRequestHistogramInfo(Edit::CMessage& _rMessage)
     {
+        BASE_UNUSED(_rMessage);
+
         Gfx::SHistogramSettings& rSettings = Gfx::HistogramRenderer::GetSettings();
 
         Edit::CMessage NewMessage;
@@ -123,6 +125,8 @@ namespace
 
     void CGraphicHelper::OnRequestToneMappingInfo(Edit::CMessage& _rMessage)
     {
+        BASE_UNUSED(_rMessage);
+
         const Gfx::SColorGradingSettings& rSettings = Gfx::TonemappingRenderer::GetSettings();
 
         Edit::CMessage NewMessage;
@@ -191,6 +195,8 @@ namespace
 
     void CGraphicHelper::OnReloadAllRenderer(Edit::CMessage& _rMessage)
     {
+        BASE_UNUSED(_rMessage);
+
         Gfx::Renderer::ReloadRenderer();
     }
 
@@ -198,6 +204,8 @@ namespace
 
     void CGraphicHelper::OnReloadAllShader(Edit::CMessage& _rMessage)
     {
+        BASE_UNUSED(_rMessage);
+
         Gfx::Manager::ReloadAllShaders();
     }
 } // namespace

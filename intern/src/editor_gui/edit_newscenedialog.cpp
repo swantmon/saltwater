@@ -8,6 +8,8 @@ namespace Edit
     CNewSceneDialog::CNewSceneDialog(QObject* _pParent) 
         : QDialog() 
     {
+        BASE_UNUSED(_pParent);
+
         setupUi(this);
     }
 

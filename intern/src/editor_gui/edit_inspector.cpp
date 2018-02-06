@@ -25,7 +25,7 @@ namespace Edit
         , m_pCameraWidget      (0)
         , m_pARControllerWidget(0)
         , m_pTextureWidget     (0)
-        , m_ActiveEntityID     (-1)
+        , m_ActiveEntityID     (static_cast<unsigned int>(-1))
     {
         // -----------------------------------------------------------------------------
         // Setup
@@ -165,6 +165,8 @@ namespace Edit
 
     void CInspector::updateContentForModel(const QString& _rRelPath)
     {
+        BASE_UNUSED(_rRelPath);
+
         ResetLayout();
 
         ResetHighlight();
@@ -178,6 +180,8 @@ namespace Edit
 
     void CInspector::mousePressEvent(QMouseEvent* _pEvent)
     {
+        BASE_UNUSED(_pEvent);
+
         ResetHighlight();
     }
 
@@ -201,8 +205,12 @@ namespace Edit
         bool HasTransformation = _rMessage.GetBool();
         bool HasHierarchy      = _rMessage.GetBool();
 
+        BASE_UNUSED(HasHierarchy);
+
         bool HasDetailData    = _rMessage.GetBool();
         bool HasDetailGraphic = _rMessage.GetBool();
+        
+        BASE_UNUSED(HasDetailGraphic);
 
         // -----------------------------------------------------------------------------
         // General informations

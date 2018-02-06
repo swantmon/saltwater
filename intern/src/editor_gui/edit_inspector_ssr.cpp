@@ -9,7 +9,7 @@ namespace Edit
 {
     CInspectorSSR::CInspectorSSR(QWidget* _pParent)
         : QWidget          (_pParent)
-        , m_CurrentEntityID(-1)
+        , m_CurrentEntityID(static_cast<unsigned int>(-1))
     {
         // -----------------------------------------------------------------------------
         // Setup UI
@@ -85,6 +85,8 @@ namespace Edit
         float RoughnessMask        = _rMessage.GetFloat();
         float Distance             = _rMessage.GetFloat();
         bool  UseDoubleReflections = _rMessage.GetBool();
+
+        BASE_UNUSED(EntityID);
 
         // -----------------------------------------------------------------------------
         // Set values

@@ -11,7 +11,7 @@ namespace Edit
 {
     CInspectorSun::CInspectorSun(QWidget* _pParent)
         : QWidget          (_pParent)
-        , m_CurrentEntityID(-1)
+        , m_CurrentEntityID(static_cast<unsigned int>(-1))
     {
         // -----------------------------------------------------------------------------
         // Setup UI
@@ -135,6 +135,8 @@ namespace Edit
         // -----------------------------------------------------------------------------
         int EntityID = _rMessage.GetInt();
         int ColorMode = _rMessage.GetInt();
+
+        BASE_UNUSED(EntityID);
 
         X = _rMessage.GetFloat();
         Y = _rMessage.GetFloat();

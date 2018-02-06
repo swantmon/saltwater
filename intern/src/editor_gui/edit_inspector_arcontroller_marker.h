@@ -25,8 +25,8 @@ namespace Edit
 
     private:
 
-        unsigned int m_CurrentEntityID;
-        unsigned int m_CurrentMarkerID;
+        int m_CurrentEntityID;
+        int m_CurrentMarkerID;
 
     private:
 

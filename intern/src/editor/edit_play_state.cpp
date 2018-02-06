@@ -130,6 +130,8 @@ namespace Edit
 
     void CPlayState::OnExit(Edit::CMessage& _rMessage)
     {
+        BASE_UNUSED(_rMessage);
+
         m_Action = CState::Exit;
     }
 
@@ -137,6 +139,8 @@ namespace Edit
 
     void CPlayState::OnEdit(Edit::CMessage& _rMessage)
     {
+        BASE_UNUSED(_rMessage);
+
         m_Action = CState::Edit;
     }
 } // namespace Edit

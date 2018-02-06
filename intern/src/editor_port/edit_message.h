@@ -86,22 +86,6 @@ namespace Edit
         EMode       m_Mode;
         CByteVector m_Bytes;
         CIterator   m_Pos;
-
-    private:
-
-        template <Base::Size TNumberOfBytes>
-        void InternPutAddress(void* _pPointer);
-        template <>
-        void InternPutAddress<4>(void* _pPointer);
-        template <>
-        void InternPutAddress<8>(void* _pPointer);
-
-        template <Base::Size TNumberOfBytes>
-        void* InternGetAddress();
-        template <>
-        void* InternGetAddress<4>();
-        template <>
-        void* InternGetAddress<8>();
     };
 } // namespace Edit
 

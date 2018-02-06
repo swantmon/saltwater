@@ -101,6 +101,8 @@ namespace Edit
 
     void CIntroState::OnLoadMap(Edit::CMessage& _rMessage)
     {
+        BASE_UNUSED(_rMessage);
+
         m_CurrentState = Edit::CState::LoadMap;
     }
 } // namespace Edit

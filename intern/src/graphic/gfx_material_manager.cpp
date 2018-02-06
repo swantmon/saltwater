@@ -416,44 +416,44 @@ namespace
 
             if (rMaterial.m_MaterialKey.m_HasDiffuseTex)
             {
-                unsigned int Hash = rDataMaterial.GetColorTexture()->GetHash();
+                unsigned int TextureHash = rDataMaterial.GetColorTexture()->GetHash();
 
-                TexturePtrs[0] = TextureManager::GetTextureByHash(Hash);
+                TexturePtrs[0] = TextureManager::GetTextureByHash(TextureHash);
             }
 
             if (rMaterial.m_MaterialKey.m_HasNormalTex)
             {
-                unsigned int Hash = rDataMaterial.GetNormalTexture()->GetHash();
+                unsigned int TextureHash = rDataMaterial.GetNormalTexture()->GetHash();
 
-                TexturePtrs[1] = TextureManager::GetTextureByHash(Hash);
+                TexturePtrs[1] = TextureManager::GetTextureByHash(TextureHash);
             }
 
             if (rMaterial.m_MaterialKey.m_HasRoughnessTex)
             {
-                unsigned int Hash = rDataMaterial.GetRoughnessTexture()->GetHash();
+                unsigned int TextureHash = rDataMaterial.GetRoughnessTexture()->GetHash();
 
-                TexturePtrs[2] = TextureManager::GetTextureByHash(Hash);
+                TexturePtrs[2] = TextureManager::GetTextureByHash(TextureHash);
             }
 
             if (rMaterial.m_MaterialKey.m_HasMetallicTex)
             {
-                unsigned int Hash = rDataMaterial.GetMetalTexture()->GetHash();
+                unsigned int TextureHash = rDataMaterial.GetMetalTexture()->GetHash();
 
-                TexturePtrs[3] = TextureManager::GetTextureByHash(Hash);
+                TexturePtrs[3] = TextureManager::GetTextureByHash(TextureHash);
             }
 
             if (rMaterial.m_MaterialKey.m_HasAOTex)
             {
-                unsigned int Hash = rDataMaterial.GetAmbientOcclusionTexture()->GetHash();
+                unsigned int TextureHash = rDataMaterial.GetAmbientOcclusionTexture()->GetHash();
 
-                TexturePtrs[4] = TextureManager::GetTextureByHash(Hash);
+                TexturePtrs[4] = TextureManager::GetTextureByHash(TextureHash);
             }
 
             if (rMaterial.m_MaterialKey.m_HasBumpTex)
             {
-                unsigned int Hash = rDataMaterial.GetBumpTexture()->GetHash();
+                unsigned int TextureHash = rDataMaterial.GetBumpTexture()->GetHash();
 
-                TexturePtrs[5] = TextureManager::GetTextureByHash(Hash);
+                TexturePtrs[5] = TextureManager::GetTextureByHash(TextureHash);
             }
 
             rMaterial.m_TextureSetPtrs[CShader::Pixel] = TextureManager::CreateTextureSet(TexturePtrs, CMaterial::SMaterialKey::s_NumberOfTextures);

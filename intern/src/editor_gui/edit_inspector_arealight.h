@@ -26,7 +26,7 @@ namespace Edit
 
     private:
 
-        unsigned int m_CurrentEntityID;
+        int m_CurrentEntityID;
 
     private:
 
