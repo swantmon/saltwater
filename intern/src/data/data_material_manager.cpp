@@ -25,8 +25,9 @@
 
 #include "tinyxml2.h"
 
-#include <unordered_map>
 #include <functional>
+#include <unordered_map>
+#include <vector>
 
 using namespace Dt;
 using namespace Dt::MaterialManager;

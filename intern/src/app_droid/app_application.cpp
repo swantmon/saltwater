@@ -373,8 +373,8 @@ namespace
                     // -----------------------------------------------------------------------------
                     ARect Rectangle = AppSetup->m_pAndroidApp->pendingContentRect;
 
-                    int Width  = Base::Abs(Rectangle.left   - Rectangle.right);
-                    int Height = Base::Abs(Rectangle.bottom - Rectangle.top);
+                    int Width  = glm::abs(Rectangle.left   - Rectangle.right);
+                    int Height = glm::abs(Rectangle.bottom - Rectangle.top);
 
                     int Rotation = Core::JNI::GetDeviceRotation();
 
