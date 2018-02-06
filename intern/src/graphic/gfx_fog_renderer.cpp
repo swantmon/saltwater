@@ -722,7 +722,7 @@ namespace
         LightBuffer.m_LightViewProjection  = pGfxSunFacet->GetCamera()->GetViewProjectionMatrix();
         LightBuffer.m_LightDirection       = glm::normalize(glm::vec4(pDtSunFacet->GetDirection(), 0.0f));
         LightBuffer.m_LightColor           = glm::vec4(pDtSunFacet->GetLightness(), 1.0f);
-        LightBuffer.m_SunAngularRadius     = 0.27f * Base::SConstants<float>::s_Pi / 180.0f;
+        LightBuffer.m_SunAngularRadius     = 0.27f * glm::pi<float>() / 180.0f;
         LightBuffer.m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
 
         BufferManager::UploadBufferData(m_VolumeLightingCSBufferSetPtr->GetBuffer(0), &LightBuffer);

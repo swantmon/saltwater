@@ -21,6 +21,8 @@
 #include "graphic/gfx_camera_actor_manager.h"
 #include "graphic/gfx_texture_manager.h"
 
+#include <vector>
+
 using namespace Gfx;
 
 namespace

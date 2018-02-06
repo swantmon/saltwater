@@ -7,7 +7,6 @@
 #include "base/base_console.h"
 #include "base/base_exception.h"
 #include "base/base_include_glm.h"
-#include "base/base_math_operations.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
@@ -595,12 +594,12 @@ namespace
             
             CInternTexture& rTexture = *Texture2DPtr;
             
-            unsigned int MipmapPow = Base::Pow(2, _Mipmap);
+            unsigned int MipmapPow = glm::pow(2u, _Mipmap);
 
             rTexture.m_FileName          = _TexturePtr->GetFileName();
             rTexture.m_pPixels           = _TexturePtr->GetPixels();
-            rTexture.m_NumberOfPixels[0] = static_cast<Base::U16>(Base::Max(static_cast<unsigned int>(_TexturePtr->GetNumberOfPixelsU()) / MipmapPow, 1u));
-            rTexture.m_NumberOfPixels[1] = static_cast<Base::U16>(Base::Max(static_cast<unsigned int>(_TexturePtr->GetNumberOfPixelsV()) / MipmapPow, 1u));
+            rTexture.m_NumberOfPixels[0] = static_cast<Base::U16>(glm::max(static_cast<unsigned int>(_TexturePtr->GetNumberOfPixelsU()) / MipmapPow, 1u));
+            rTexture.m_NumberOfPixels[1] = static_cast<Base::U16>(glm::max(static_cast<unsigned int>(_TexturePtr->GetNumberOfPixelsV()) / MipmapPow, 1u));
             
             rTexture.m_Info.m_Access            = _TexturePtr->GetAccess();
             rTexture.m_Info.m_Binding           = _TexturePtr->GetBinding();
@@ -951,7 +950,7 @@ namespace
 
         if (_rDescriptor.m_NumberOfMipMaps == STextureDescriptor::s_GenerateAllMipMaps)
         {
-            NumberOfMipmaps = static_cast<int>(Base::Log2(static_cast<float>(Base::Max(ImageWidth, ImageHeight)))) + 1;
+            NumberOfMipmaps = static_cast<int>(glm::log2(static_cast<float>(glm::max(ImageWidth, ImageHeight)))) + 1;
         }
         else if (_rDescriptor.m_NumberOfMipMaps == STextureDescriptor::s_NumberOfMipMapsFromSource)
         {
@@ -1198,7 +1197,7 @@ namespace
 
         if (_rDescriptor.m_NumberOfMipMaps == STextureDescriptor::s_GenerateAllMipMaps)
         {
-            NumberOfMipmaps = static_cast<int>(Base::Log2(static_cast<float>(Base::Max(ImageWidth, ImageHeight)))) + 1;
+            NumberOfMipmaps = static_cast<int>(glm::log2(static_cast<float>(glm::max(ImageWidth, ImageHeight)))) + 1;
         }
         
         // -----------------------------------------------------------------------------
@@ -1492,7 +1491,7 @@ namespace
 
         if (_rDescriptor.m_NumberOfMipMaps == STextureDescriptor::s_GenerateAllMipMaps)
         {
-            NumberOfMipmaps = static_cast<int>(Base::Log2(static_cast<float>(Base::Max(ImageWidth, ImageHeight)))) + 1;
+            NumberOfMipmaps = static_cast<int>(glm::log2(static_cast<float>(glm::max(ImageWidth, ImageHeight)))) + 1;
         }
         
         // -----------------------------------------------------------------------------

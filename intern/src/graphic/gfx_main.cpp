@@ -520,8 +520,8 @@ namespace
 
             GetWindowRect(pNativeWindowHandle, &WindowRect);
 
-            int Width  = Base::Abs(WindowRect.right - WindowRect.left);
-            int Height = Base::Abs(WindowRect.bottom - WindowRect.top);
+            int Width  = glm::abs(WindowRect.right - WindowRect.left);
+            int Height = glm::abs(WindowRect.bottom - WindowRect.top);
 
             SetWindowSize(m_pActiveWindowInfo, Width, Height);
 

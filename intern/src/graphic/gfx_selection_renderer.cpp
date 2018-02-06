@@ -557,7 +557,7 @@ namespace
         // -----------------------------------------------------------------------------
         rTicket.m_IndexOfPushRequest = (rTicket.m_IndexOfPushRequest + 1) % CInternSelectionTicket::s_MaxNumberOfRequests;
         
-        rTicket.m_NumberOfRequests = Base::Clamp(rTicket.m_NumberOfRequests + 1, 0u, CInternSelectionTicket::s_MaxNumberOfRequests);
+        rTicket.m_NumberOfRequests = glm::clamp(rTicket.m_NumberOfRequests + 1, 0u, CInternSelectionTicket::s_MaxNumberOfRequests);
     }
 
     // -----------------------------------------------------------------------------

@@ -6,7 +6,6 @@
 #include "core/core_time.h"
 
 #include "base/base_input_event.h"
-#include "base/base_math_operations.h"
 
 #include "camera/cam_control_manager.h"
 #include "camera/cam_editor_control.h"
@@ -90,7 +89,7 @@ namespace Cam
 
             WheelDelta = static_cast<float>(_rEvent.GetWheelDelta()) * s_MoveVelocityBorder[2];
 
-            m_MoveVelocity = Base::Clamp(m_MoveVelocity + WheelDelta, s_MoveVelocityBorder[0], s_MoveVelocityBorder[1]);
+            m_MoveVelocity = glm::clamp(m_MoveVelocity + WheelDelta, s_MoveVelocityBorder[0], s_MoveVelocityBorder[1]);
         }
         else if (_rEvent.GetAction() == Base::CInputEvent::MouseMove)
         {

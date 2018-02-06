@@ -1,7 +1,6 @@
 
 #include "data/data_precompiled.h"
 
-#include "base/base_math_operations.h"
 #include "base/base_memory.h"
 
 #include "data/data_bloom_facet.h"
@@ -41,7 +40,7 @@ namespace Dt
 
     void CBloomFXFacet::SetIntensity(float _Intensity)
     {
-        m_Intensity = Base::Clamp(_Intensity, 0.0f, 8.0f);
+        m_Intensity = glm::clamp(_Intensity, 0.0f, 8.0f);
     }
 
     // -----------------------------------------------------------------------------
@@ -55,7 +54,7 @@ namespace Dt
 
     void CBloomFXFacet::SetTreshhold(float _Treshhold)
     {
-        m_Treshhold = Base::Clamp(_Treshhold, -1.0f, 8.0f);
+        m_Treshhold = glm::clamp(_Treshhold, -1.0f, 8.0f);
     }
 
     // -----------------------------------------------------------------------------
@@ -83,7 +82,7 @@ namespace Dt
 
     void CBloomFXFacet::SetSize(unsigned int _Size)
     {
-        m_Size = Base::Clamp(_Size, 1u, 5u);
+        m_Size = glm::clamp(_Size, 1u, 5u);
     }
 
     // -----------------------------------------------------------------------------

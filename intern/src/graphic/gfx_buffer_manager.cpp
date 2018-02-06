@@ -4,7 +4,6 @@
 #include "base/base_console.h"
 #include "base/base_exception.h"
 #include "base/base_managed_pool.h"
-#include "base/base_math_operations.h"
 #include "base/base_memory.h"
 #include "base/base_typedef.h"
 #include "base/base_singleton.h"
@@ -442,7 +441,7 @@ namespace
             CInternBuffer& rTargetBuffer = *static_cast<CInternBuffer*>(&(*_TargetBufferPtr));
             CInternBuffer& rSourceBuffer = *static_cast<CInternBuffer*>(&(*_SourceBufferPtr));
             
-            unsigned int NumberOfBytes = Base::Min(rTargetBuffer.m_NumberOfBytes, rSourceBuffer.m_NumberOfBytes);
+            unsigned int NumberOfBytes = glm::min(rTargetBuffer.m_NumberOfBytes, rSourceBuffer.m_NumberOfBytes);
 
             glCopyBufferSubData(rTargetBuffer.m_NativeBuffer, rSourceBuffer.m_NativeBuffer, 0, 0, NumberOfBytes);
         }

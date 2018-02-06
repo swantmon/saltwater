@@ -377,7 +377,7 @@ namespace
 
 	    glm::vec3 InWhitePoint = _rSettings.m_Tint;
 
-	    float InSaturation = Base::Clamp(_rSettings.m_Saturation, 0.0f, 2.0f);
+	    float InSaturation = glm::clamp(_rSettings.m_Saturation, 0.0f, 2.0f);
 
 	    glm::vec3 InLuma(1.0f / 3.0f, 1.0f / 3.0f, 1.0f / 3.0f);
 
@@ -385,23 +385,23 @@ namespace
 	    glm::vec3 InMatrixG = _rSettings.m_Green;
 	    glm::vec3 InMatrixB = _rSettings.m_Blue;
 
-	    float InContrast = Base::Clamp(_rSettings.m_Contrast, 0.0f, 1.0f) + 1.0f;
+	    float InContrast = glm::clamp(_rSettings.m_Contrast, 0.0f, 1.0f) + 1.0f;
 
-	    float InDynamicRange = Base::Pow(2.0f, Base::Clamp(_rSettings.m_DynamicRange, 1.0f, 18.0f));
+	    float InDynamicRange = glm::pow(2.0f, glm::clamp(_rSettings.m_DynamicRange, 1.0f, 18.0f));
 
-	    float InToe = (1.0f - Base::Clamp(_rSettings.m_CrushDarks, 0.0f, 1.0f)) * 0.18f;
-	    InToe = Base::Clamp(InToe, 0.18f / 8.0f, 0.18f * (15.0f / 16.0f));
+	    float InToe = (1.0f - glm::clamp(_rSettings.m_CrushDarks, 0.0f, 1.0f)) * 0.18f;
+	    InToe = glm::clamp(InToe, 0.18f / 8.0f, 0.18f * (15.0f / 16.0f));
 
-	    float InHeal = 1.0f - (Base::Max(1.0f / 32.0f, 1.0f - Base::Clamp(_rSettings.m_CrushBrights, 0.0f, 1.0f)) * (1.0f - 0.18f)); 
+	    float InHeal = 1.0f - (glm::max(1.0f / 32.0f, 1.0f - glm::clamp(_rSettings.m_CrushBrights, 0.0f, 1.0f)) * (1.0f - 0.18f)); 
 
 	    glm::vec3 InShadowTint = _rSettings.m_DarkTint;
 
-	    float InShadowTintBlend = Base::Clamp(_rSettings.m_DarkTintBlend, 0.0f, 1.0f) * 64.0f;
+	    float InShadowTintBlend = glm::clamp(_rSettings.m_DarkTintBlend, 0.0f, 1.0f) * 64.0f;
 
         // -----------------------------------------------------------------------------
 	    // Shadow tint amount enables turning off shadow tinting.
 	    // -----------------------------------------------------------------------------
-        float InShadowTintAmount = Base::Clamp(_rSettings.m_DarkTintStrength, 0.0f, 1.0f);
+        float InShadowTintAmount = glm::clamp(_rSettings.m_DarkTintStrength, 0.0f, 1.0f);
 
 	    InShadowTint = InWhitePoint + (InShadowTint - InWhitePoint) * InShadowTintAmount;
 

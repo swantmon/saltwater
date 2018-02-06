@@ -189,15 +189,11 @@ namespace
         {
             glm::vec3 KernelElement;
 
-            float fRandomX = (Base::Random() * 2.0f - 1.0f);
-            float fRandomY = (Base::Random() * 2.0f - 1.0f);
-            float fRandomZ = Base::Random();
-
-            KernelElement = glm::vec3(fRandomX, fRandomY, fRandomZ);
+            KernelElement = glm::linearRand(glm::vec3(-1.0f, -1.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 
             float Scale = static_cast<float>(IndexOfNoiseSeq) / static_cast<float>(s_SSAOKernelSize);
 
-            KernelElement += Base::Lerp(0.1f, 1.0f, Scale * Scale);
+            KernelElement += glm::lerp(0.1f, 1.0f, Scale * Scale);
 
             KernelElement = glm::normalize(KernelElement);
 
@@ -405,10 +401,7 @@ namespace
         {
             glm::vec3 NoiseNormal;
 
-            float fRandomX = (Base::Random() * 2.0f - 1.0f);
-            float fRandomY = (Base::Random() * 2.0f - 1.0f);
-
-            NoiseNormal = glm::vec3(fRandomX, fRandomY, 0.0f);
+            NoiseNormal = glm::vec3(glm::linearRand(glm::vec2(-1.0f, -1.0f), glm::vec2(1.0f, 1.0f)), 0.0f);
 
             NoiseNormal = glm::normalize(NoiseNormal);
 

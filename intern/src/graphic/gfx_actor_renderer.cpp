@@ -26,6 +26,9 @@
 #include "graphic/gfx_texture_manager.h"
 #include "graphic/gfx_view_manager.h"
 
+#include <algorithm>
+#include <vector>
+
 using namespace Gfx;
 
 namespace

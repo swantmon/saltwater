@@ -1336,7 +1336,7 @@ namespace
 
                 if (pDtSunFacet != 0 && pGfxSunFacet != 0)
                 {
-                    float SunAngularRadius = 0.27f * Base::SConstants<float>::s_Pi / 180.0f;
+                    float SunAngularRadius = 0.27f * glm::pi<float>() / 180.0f;
                     float HasShadows = 1.0f;
 
                     LightBuffer[IndexOfLight].m_LightType           = 1;
@@ -1436,7 +1436,7 @@ namespace
 
         SCubemapGeometryBuffer Values;
 
-        Values.m_CubeProjectionMatrix = glm::perspective(Base::SConstants<float>::s_Pi * 0.5f, 1.0f, _Near, _Far);
+        Values.m_CubeProjectionMatrix = glm::perspective(glm::half_pi<float>(), 1.0f, _Near, _Far);
 
         // -----------------------------------------------------------------------------
 

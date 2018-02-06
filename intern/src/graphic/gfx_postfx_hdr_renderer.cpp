@@ -202,9 +202,9 @@ namespace
         // -----------------------------------------------------------------------------
         glm::ivec2 Size = Main::GetActiveWindowSize();
 
-        for (unsigned int IndexOfBlur = 0; IndexOfBlur < s_NumberOfBlurStages; ++ IndexOfBlur)
+        for (int IndexOfBlur = 0; IndexOfBlur < s_NumberOfBlurStages; ++ IndexOfBlur)
         {
-            int Devisor = Base::Pow(2, (IndexOfBlur + 1));
+            int Devisor = glm::pow(2, (IndexOfBlur + 1));
 
             m_DownSampleSizes[IndexOfBlur] = glm::ivec2(Size[0] / Devisor, Size[1] / Devisor);
         }
@@ -575,9 +575,9 @@ namespace
         // -----------------------------------------------------------------------------
         glm::ivec2 Size(_Width, _Height);
 
-        for (unsigned int IndexOfBlur = 0; IndexOfBlur < s_NumberOfBlurStages; ++IndexOfBlur)
+        for (int IndexOfBlur = 0; IndexOfBlur < s_NumberOfBlurStages; ++IndexOfBlur)
         {
-            int Devisor = Base::Pow(2, (IndexOfBlur + 1));
+            int Devisor = glm::pow(2, (IndexOfBlur + 1));
 
             m_DownSampleSizes[IndexOfBlur] = glm::ivec2(Size[0] / Devisor, Size[1] / Devisor);
         }

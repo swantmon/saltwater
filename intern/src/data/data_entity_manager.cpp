@@ -232,7 +232,7 @@ namespace
         }
         else
         {
-            m_EntityID = Base::Max(ID, m_EntityID);
+            m_EntityID = glm::max(ID, m_EntityID);
         }
 
         ++m_EntityID;

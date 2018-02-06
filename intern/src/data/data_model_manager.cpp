@@ -5,8 +5,6 @@
 #include "base/base_console.h"
 #include "base/base_crc.h"
 #include "base/base_exception.h"
-#include "base/base_math_constants.h"
-#include "base/base_math_operations.h"
 #include "base/base_memory.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
@@ -648,12 +646,12 @@ namespace
         {
             for(unsigned int IndexOfSlice = 0; IndexOfSlice < Width; ++ IndexOfSlice)
             {
-                float THETA = static_cast<float>(IndexOfStack) / static_cast<float>(Height - 1) * Base::SConstants<float>::s_Pi;
-                float PHI   = static_cast<float>(IndexOfSlice) / static_cast<float>(Width  - 1) * Base::SConstants<float>::s_Pi * 2.0f;
+                float THETA = static_cast<float>(IndexOfStack) / static_cast<float>(Height - 1) * glm::pi<float>();
+                float PHI   = static_cast<float>(IndexOfSlice) / static_cast<float>(Width  - 1) * glm::pi<float>() * 2.0f;
                 
-                rBoxSurface.m_pPositions[IndexOfVertex][0] =  Base::Sin(THETA) * Base::Cos(PHI) * _Radius;
-                rBoxSurface.m_pPositions[IndexOfVertex][1] =  Base::Cos(THETA) * _Radius;
-                rBoxSurface.m_pPositions[IndexOfVertex][2] = -Base::Sin(THETA) * Base::Sin(PHI) * _Radius;
+                rBoxSurface.m_pPositions[IndexOfVertex][0] =  glm::sin(THETA) * glm::cos(PHI) * _Radius;
+                rBoxSurface.m_pPositions[IndexOfVertex][1] =  glm::cos(THETA) * _Radius;
+                rBoxSurface.m_pPositions[IndexOfVertex][2] = -glm::sin(THETA) * glm::sin(PHI) * _Radius;
                 
                 ++ IndexOfVertex;
             }
@@ -750,10 +748,10 @@ namespace
         {
             assert( IndexOfVertex < NumberOfVertices);
             
-            float PHI   = static_cast<float>(IndexOfSlice) / (_Slices) * Base::SConstants<float>::s_Pi * 2.0f;
+            float PHI   = static_cast<float>(IndexOfSlice) / (_Slices) * glm::pi<float>() * 2.0f;
             
-            rBoxSurface.m_pPositions[IndexOfVertex][0] = Base::Cos(PHI) * _Radius;
-            rBoxSurface.m_pPositions[IndexOfVertex][1] = Base::Sin(PHI) * _Radius;
+            rBoxSurface.m_pPositions[IndexOfVertex][0] = glm::cos(PHI) * _Radius;
+            rBoxSurface.m_pPositions[IndexOfVertex][1] = glm::sin(PHI) * _Radius;
             rBoxSurface.m_pPositions[IndexOfVertex][2] = - _Height;
             
             ++ IndexOfVertex;

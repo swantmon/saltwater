@@ -1,9 +1,6 @@
 
 #include "graphic/gfx_precompiled.h"
 
-#include "base/base_include_glm.h"
-#include "base/base_math_operations.h"
-
 #include "graphic/gfx_camera.h"
 
 namespace Gfx
@@ -52,7 +49,7 @@ namespace Gfx
         float Bottom;
         float Top;
 
-        Bottom = -Base::Tan(glm::radians(_FOVY) / 2.0f) * Base::Max(_Near, 0.000001f);
+        Bottom = -glm::tan(glm::radians(_FOVY) / 2.0f) * glm::max(_Near, 0.000001f);
         Top    = -Bottom;
         Left   =  _Aspect * Bottom;
         Right  =  _Aspect * Top;
@@ -444,7 +441,7 @@ namespace Gfx
 
     float CCamera::GetFOVY() const
     {
-        return Base::ATan((m_Top - m_Bottom) / m_Near / 2.0f) * 2.0f;
+        return glm::atan((m_Top - m_Bottom) / m_Near / 2.0f) * 2.0f;
     }
 
     // --------------------------------------------------------------------------------

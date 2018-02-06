@@ -332,7 +332,7 @@ namespace
         
         SCubemapBufferGS DefaultGSValues;
         
-        DefaultGSValues.m_CubeProjectionMatrix = glm::perspective(Base::SConstants<float>::s_Pi * 0.5f, 1.0f, 0.1f, 20000.0f);
+        DefaultGSValues.m_CubeProjectionMatrix = glm::perspective(glm::half_pi<float>(), 1.0f, 0.1f, 20000.0f);
         
         // -----------------------------------------------------------------------------
         // By creating a cube map in OpenGL, several facts should be considered:
@@ -1840,16 +1840,16 @@ namespace
 
         auto GetLayerValues = [&](unsigned int _Layer, float& _rRadius, glm::vec4& _rDhdH)
         {
-            float Radius = _Layer / Base::Max((g_InscatterAltitude - 1.0f), 1.0f);
+            float Radius = _Layer / glm::max((g_InscatterAltitude - 1.0f), 1.0f);
 
             Radius = Radius * Radius;
-            Radius = Base::Sqrt(g_RadiusGround * g_RadiusGround + Radius * (g_RadiusAtmosphere * g_RadiusAtmosphere - g_RadiusGround * g_RadiusGround)) + (_Layer == 0 ? 0.01f : (_Layer == g_InscatterAltitude - 1 ? -0.001f : 0.0f));
+            Radius = glm::sqrt(g_RadiusGround * g_RadiusGround + Radius * (g_RadiusAtmosphere * g_RadiusAtmosphere - g_RadiusGround * g_RadiusGround)) + (_Layer == 0 ? 0.01f : (_Layer == g_InscatterAltitude - 1 ? -0.001f : 0.0f));
 
             float DMin  = g_RadiusAtmosphere - Radius;
-            float DMax  = Base::Sqrt(Radius * Radius - g_RadiusGround * g_RadiusGround) + Base::Sqrt(g_RadiusAtmosphere * g_RadiusAtmosphere - g_RadiusGround * g_RadiusGround);
+            float DMax  = glm::sqrt(Radius * Radius - g_RadiusGround * g_RadiusGround) + glm::sqrt(g_RadiusAtmosphere * g_RadiusAtmosphere - g_RadiusGround * g_RadiusGround);
 
             float DMinP = Radius - g_RadiusGround;
-            float DMaxP = Base::Sqrt(Radius * Radius - g_RadiusGround * g_RadiusGround);
+            float DMaxP = glm::sqrt(Radius * Radius - g_RadiusGround * g_RadiusGround);
 
             _rRadius = Radius;
 

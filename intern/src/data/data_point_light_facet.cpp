@@ -1,8 +1,7 @@
 
 #include "data/data_precompiled.h"
 
-#include "base/base_math_constants.h"
-#include "base/base_math_operations.h"
+#include "base/base_include_glm.h"
 
 #include "data/data_point_light_facet.h"
 
@@ -259,15 +258,15 @@ namespace Dt
         // -----------------------------------------------------------------------------
         // Scale & Offset
         // -----------------------------------------------------------------------------
-        float CosInnerConeAngle = Base::Cos(m_InnerConeAngle / 2.0f);
-        float CosOuterConeAngle = Base::Cos(m_OuterConeAngle / 2.0f);
+        float CosInnerConeAngle = glm::cos(m_InnerConeAngle / 2.0f);
+        float CosOuterConeAngle = glm::cos(m_OuterConeAngle / 2.0f);
 
-        m_AngleScale  = 1.0f / Base::Max(0.001f, CosInnerConeAngle - CosOuterConeAngle);
+        m_AngleScale  = 1.0f / glm::max(0.001f, CosInnerConeAngle - CosOuterConeAngle);
         m_AngleOffset = -CosOuterConeAngle * m_AngleScale;
 
         // -----------------------------------------------------------------------------
         // Luminous power (lumen) is converted into luminous intensity (candela).
         // -----------------------------------------------------------------------------
-        m_Lightness = Color * (m_Intensity / Base::SConstants<float>::s_Pi);
+        m_Lightness = Color * (m_Intensity / glm::pi<float>());
     }
 } // namespace Dt

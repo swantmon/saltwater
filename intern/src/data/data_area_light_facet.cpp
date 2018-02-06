@@ -1,8 +1,6 @@
 
 #include "data/data_precompiled.h"
 
-#include "base/base_math_constants.h"
-
 #include "data/data_area_light_facet.h"
 
 namespace Dt
@@ -224,6 +222,6 @@ namespace Dt
         // -----------------------------------------------------------------------------
         // Luminous power (lumen) is converted into luminous intensity (candela).
         // -----------------------------------------------------------------------------
-        m_Lightness = Color * (m_Intensity / (m_Width * m_Height * Base::SConstants<float>::s_Pi));
+        m_Lightness = Color * (m_Intensity / (m_Width * m_Height * glm::pi<float>()));
     }
 } // namespace Dt

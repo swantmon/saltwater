@@ -3,8 +3,6 @@
 
 #include "base/base_defines.h"
 #include "base/base_include_glm.h"
-#include "base/base_math_constants.h"
-#include "base/base_math_operations.h"
 
 #include <assert.h>
 
@@ -39,7 +37,7 @@ namespace MATH
         typedef X*           XPtr;
         typedef const X*     XConstPtr;
 
-        typedef glm::vec3 CVector;
+        typedef glm::tvec3<T> CVector;
 
     public:
 

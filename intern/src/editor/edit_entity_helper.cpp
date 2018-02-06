@@ -287,9 +287,9 @@ namespace
             NewMessage.PutFloat(pTransformationFacet->GetPosition()[1]);
             NewMessage.PutFloat(pTransformationFacet->GetPosition()[2]);
 
-            NewMessage.PutFloat(Base::RadiansToDegree(pTransformationFacet->GetRotation()[0]));
-            NewMessage.PutFloat(Base::RadiansToDegree(pTransformationFacet->GetRotation()[1]));
-            NewMessage.PutFloat(Base::RadiansToDegree(pTransformationFacet->GetRotation()[2]));
+            NewMessage.PutFloat(glm::degrees(pTransformationFacet->GetRotation()[0]));
+            NewMessage.PutFloat(glm::degrees(pTransformationFacet->GetRotation()[1]));
+            NewMessage.PutFloat(glm::degrees(pTransformationFacet->GetRotation()[2]));
 
             NewMessage.PutFloat(pTransformationFacet->GetScale()[0]);
             NewMessage.PutFloat(pTransformationFacet->GetScale()[1]);
@@ -399,7 +399,7 @@ namespace
 
 
             glm::vec3 Position(TranslationX, TranslationY, TranslationZ);
-            glm::vec3 Rotation(Base::DegreesToRadians(RotationX), Base::DegreesToRadians(RotationY), Base::DegreesToRadians(RotationZ));
+            glm::vec3 Rotation(glm::radians(RotationX), glm::radians(RotationY), glm::radians(RotationZ));
             glm::vec3 Scale(ScaleX, ScaleY, ScaleZ);
 
             pTransformationFacet->SetPosition(Position);

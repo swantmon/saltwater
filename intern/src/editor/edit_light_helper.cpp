@@ -139,8 +139,8 @@ namespace
             pPointLightFacet->EnableTemperature   (false);
             pPointLightFacet->SetColor            (glm::vec3(1.0f, 1.0f, 1.0f));
             pPointLightFacet->SetAttenuationRadius(10.0f);
-            pPointLightFacet->SetInnerConeAngle   (Base::DegreesToRadians(45.0f));
-            pPointLightFacet->SetOuterConeAngle   (Base::DegreesToRadians(90.0f));
+            pPointLightFacet->SetInnerConeAngle   (glm::radians(45.0f));
+            pPointLightFacet->SetOuterConeAngle   (glm::radians(90.0f));
             pPointLightFacet->SetDirection        (glm::vec3(-1.0f, -1.0f, -1.0f));
             pPointLightFacet->SetIntensity        (1200.0f);
             pPointLightFacet->SetTemperature      (0);
@@ -323,8 +323,8 @@ namespace
             NewMessage.PutFloat(pPointLightFacet->GetTemperature());
             NewMessage.PutFloat(pPointLightFacet->GetIntensity());
             NewMessage.PutFloat(pPointLightFacet->GetAttenuationRadius());
-            NewMessage.PutFloat(Base::RadiansToDegree(pPointLightFacet->GetInnerConeAngle()));
-            NewMessage.PutFloat(Base::RadiansToDegree(pPointLightFacet->GetOuterConeAngle()));
+            NewMessage.PutFloat(glm::degrees(pPointLightFacet->GetInnerConeAngle()));
+            NewMessage.PutFloat(glm::degrees(pPointLightFacet->GetOuterConeAngle()));
             NewMessage.PutFloat(pPointLightFacet->GetDirection()[0]);
             NewMessage.PutFloat(pPointLightFacet->GetDirection()[1]);
             NewMessage.PutFloat(pPointLightFacet->GetDirection()[2]);
@@ -502,7 +502,7 @@ namespace
             NewMessage.PutFloat(pLightFacet->GetColor()[2]);
             NewMessage.PutFloat(pLightFacet->GetTemperature());
             NewMessage.PutFloat(pLightFacet->GetIntensity());
-            NewMessage.PutFloat(Base::RadiansToDegree(pLightFacet->GetRotation()));
+            NewMessage.PutFloat(glm::degrees(pLightFacet->GetRotation()));
             NewMessage.PutFloat(pLightFacet->GetWidth());
             NewMessage.PutFloat(pLightFacet->GetHeight());
             NewMessage.PutBool(pLightFacet->GetIsTwoSided());
@@ -557,8 +557,8 @@ namespace
             float Temperature       = _rMessage.GetFloat();
             float Intensity         = _rMessage.GetFloat();
             float AttenuationRadius = _rMessage.GetFloat();
-            float InnerConeAngle    = Base::DegreesToRadians(_rMessage.GetFloat());
-            float OuterConeAngle    = Base::DegreesToRadians(_rMessage.GetFloat());
+            float InnerConeAngle    = glm::radians(_rMessage.GetFloat());
+            float OuterConeAngle    = glm::radians(_rMessage.GetFloat());
 
             X = _rMessage.GetFloat();
             Y = _rMessage.GetFloat();
@@ -797,7 +797,7 @@ namespace
 
             float Temperature = _rMessage.GetFloat();
             float Intensity   = _rMessage.GetFloat();
-            float Rotation    = Base::DegreesToRadians(_rMessage.GetFloat());
+            float Rotation    = glm::radians(_rMessage.GetFloat());
             float Width       = _rMessage.GetFloat();
             float Height      = _rMessage.GetFloat();
             bool  IsTwoSided  = _rMessage.GetBool();
