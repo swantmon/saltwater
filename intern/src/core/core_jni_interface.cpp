@@ -3,9 +3,9 @@
 
 #include "base/base_console.h"
 #include "base/base_exception.h"
+#include "base/base_include_glm.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
-#include "base/base_vector2.h"
 
 #include "core/core_jni_interface.h"
 
@@ -43,7 +43,7 @@ namespace
 
         int GetDeviceRotation();
 
-        const Base::Int2& GetDeviceDimension();
+        const glm::ivec2& GetDeviceDimension();
 
         bool CheckPermission(const std::string& _rPermission);
 
@@ -79,7 +79,7 @@ namespace
         jmethodID m_CheckPermissionMethod;
         jmethodID m_AcquirePermissionMethod;
 
-        Base::Int2 m_Dimension;
+        glm::ivec2 m_Dimension;
 
         COnAcquirePermissionDelegates m_OnAcquirePermissionDelegates;
     };
@@ -245,7 +245,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    const Base::Int2& CJNIInterface::GetDeviceDimension()
+    const glm::ivec2& CJNIInterface::GetDeviceDimension()
     {
         JNIEnv* pEnvironment = GetJavaEnvironment();
 
@@ -338,7 +338,7 @@ namespace JNI
 
     // -----------------------------------------------------------------------------
 
-    const Base::Int2& GetDeviceDimension()
+    const glm::ivec2& GetDeviceDimension()
     {
         return CJNIInterface::GetInstance().GetDeviceDimension();
     }

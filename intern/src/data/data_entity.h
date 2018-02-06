@@ -194,7 +194,7 @@ namespace Dt
         BID                   m_ID;                                                               //< A specific unique id of this entity inside the map
         std::string           m_Name;                                                             //< A name of the entity to search for inside scripts
         Base::AABB3Float      m_WorldAABB;                                                        //< Axis Aligned Bounding Box (AABB) of the entity in map for region bounding box calculations
-        glm::vec3          m_WorldPosition;                                                    //< World position of the entity
+        glm::vec3             m_WorldPosition;                                                    //< World position of the entity
         SFlags                m_Flags;                                                            //< Set of possible states of the entity (dirty, type, level, ... -> @see SFlags)
 
     protected:

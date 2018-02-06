@@ -16,6 +16,7 @@
 #include "IL/il.h"
 
 #include <unordered_map>
+#include <vector>
 
 using namespace Dt;
 using namespace Dt::TextureManager;

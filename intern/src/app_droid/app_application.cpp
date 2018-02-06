@@ -11,13 +11,8 @@
 #include "app_droid/app_start_state.h"
 #include "app_droid/app_unload_map_state.h"
 
-#include "base/base_console.h"
-#include "base/base_exception.h"
 #include "base/base_input_event.h"
 #include "base/base_uncopyable.h"
-#include "base/base_math_operations.h"
-#include "base/base_memory.h"
-#include "base/base_program_parameters.h"
 #include "base/base_singleton.h"
 
 #include "core/core_asset_manager.h"
@@ -323,7 +318,7 @@ namespace
                             float PointerX = AMotionEvent_getRawX(_pEvent, IndexOfPointer);
                             float PointerY = AMotionEvent_getRawY(_pEvent, IndexOfPointer);
 
-                            Base::CInputEvent Input(Base::CInputEvent::Input, InputAction, Base::CInputEvent::Pointer + IndexOfPointer, Base::Float2(PointerX, PointerY));
+                            Base::CInputEvent Input(Base::CInputEvent::Input, InputAction, Base::CInputEvent::Pointer + IndexOfPointer, glm::vec2(PointerX, PointerY));
 
                             Gui::EventHandler::OnUserEvent(Input);
                         }

@@ -47,10 +47,15 @@ foreach( MyLibrary IN ITEMS ${MyLibraries} )
 
     add_library( ${TargetName} STATIC ${TargetSources} )
 
+    # ---------------------------------------
+    # Global dependencies / includes
+    # ---------------------------------------
+    target_include_directories( ${TargetName} PRIVATE ${ExternDir}/glm/include )
+
 endforeach()
 
 # ---------------------------------------
-# Special dependencies and includes
+# Special dependencies / includes
 # ---------------------------------------
 target_include_directories( base PRIVATE ${ExternDir}/json/include )
 
@@ -81,7 +86,7 @@ file(
 
 add_library( app_droid SHARED ${TargetSources} )
 
-target_include_directories( app_droid PRIVATE ${ANDROID_NDK}/sources/android/native_app_glue )
+target_include_directories( app_droid PRIVATE ${ANDROID_NDK}/sources/android/native_app_glue ${ExternDir}/glm/include )
 
 target_link_libraries( app_droid EGL GLESv3 arcore_sdk log android m native_app_glue)
 

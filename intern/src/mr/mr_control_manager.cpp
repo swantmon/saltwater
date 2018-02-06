@@ -1,17 +1,12 @@
 
 #include "mr/mr_precompiled.h"
 
-#include "base/base_console.h"
-#include "base/base_exception.h"
 #include "base/base_input_event.h"
-#include "base/base_memory.h"
 #include "base/base_pool.h"
-#include "base/base_program_parameters.h"
 #include "base/base_uncopyable.h"
 #include "base/base_singleton.h"
 
 #include "core/core_jni_interface.h"
-#include "core/core_time.h"
 
 #include "data/data_actor_type.h"
 #include "data/data_ar_controller_facet.h"
@@ -32,14 +27,6 @@
 #include "arcore_c_api.h"
 
 #include "GLES3/gl32.h"
-#endif
-
-#include <assert.h>
-#include <unordered_set>
-#include <string>
-#include <vector>
-
-#if PLATFORM_ANDROID
 
 #ifndef GL_OES_EGL_image_external
 #define GL_OES_EGL_image_external 1
@@ -492,9 +479,9 @@ namespace
 
         ArCamera_release(pARCamera);
 
-        m_ViewMatrix.Transpose();
+        glm::transpose(m_ViewMatrix);
 
-        m_ProjectionMatrix.Transpose();
+        glm::transpose(m_ProjectionMatrix);
 
         Gfx::Cam::SetViewMatrix(m_ViewMatrix);
 
@@ -545,23 +532,23 @@ namespace
 
             ArPose_getMatrix(m_pARSession, pARPose, &ModelMatrix[0][0]);
 
-            ModelMatrix.Transpose();
+            glm::transpose(ModelMatrix);
 
             if (m_pEntity != 0)
             {
                 Dt::CTransformationFacet* pTransformation = m_pEntity->GetTransformationFacet();
 
-                glm::vec3 Position;
-                glm::mat3 Rotation;
-                glm::vec3 EulerRotation;
+                glm::vec3 Translation;
+                glm::quat Rotation;
+                glm::vec3 Scale;
+                glm::vec3 Skew;
+                glm::vec4 Perspective;
 
-                ModelMatrix.GetRotation(EulerRotation);
+                glm::decompose(ModelMatrix, Scale, Rotation, Translation, Skew, Perspective);
 
-                ModelMatrix.GetTranslation(Position);
+                pTransformation->SetPosition(Translation);
 
-                pTransformation->SetPosition(Position);
-
-                pTransformation->SetRotation(EulerRotation);
+                pTransformation->SetRotation(glm::eulerAngles(Rotation));
 
                 Dt::EntityManager::MarkEntityAsDirty(*m_pEntity, Dt::CEntity::DirtyMove | Dt::CEntity::DirtyDetail);
             }
@@ -830,7 +817,7 @@ namespace
             // Prepare model-view-projection matrix
             // TODO: Change color depending on height of the plane
             // -----------------------------------------------------------------------------
-            glm::mat4 PlaneMVPMatrix = Gfx::Cam::GetProjectionMatrix() * Gfx::Cam::GetViewMatrix() * PlaneModelMatrix.GetTransposed() * glm::mat4().SetRotationX(Base::DegreesToRadians(-90.0f));
+            glm::mat4 PlaneMVPMatrix = Gfx::Cam::GetProjectionMatrix() * Gfx::Cam::GetViewMatrix() * glm::transpose(PlaneModelMatrix) * glm::eulerAngleX(glm::radians(-90.0f));
 
             glm::vec4 Color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 

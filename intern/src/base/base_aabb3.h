@@ -404,7 +404,7 @@ namespace MATH
         Lambda[1] = X(-1);
         Lambda[2] = X(-1);
 
-        CVector HitPoint(CVector::Uninitialized);
+        CVector HitPoint;
 
         if (_rOrigin[0] < m_V[MinX])
         {
