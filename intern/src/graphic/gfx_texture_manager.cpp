@@ -598,8 +598,8 @@ namespace
 
             rTexture.m_FileName          = _TexturePtr->GetFileName();
             rTexture.m_pPixels           = _TexturePtr->GetPixels();
-            rTexture.m_NumberOfPixels[0] = static_cast<Base::U16>(glm::max(static_cast<unsigned int>(_TexturePtr->GetNumberOfPixelsU()) / MipmapPow, 1u));
-            rTexture.m_NumberOfPixels[1] = static_cast<Base::U16>(glm::max(static_cast<unsigned int>(_TexturePtr->GetNumberOfPixelsV()) / MipmapPow, 1u));
+            rTexture.m_NumberOfPixels[0] = static_cast<Gfx::CTexture::BPixels>(glm::max(static_cast<unsigned int>(_TexturePtr->GetNumberOfPixelsU()) / MipmapPow, 1u));
+            rTexture.m_NumberOfPixels[1] = static_cast<Gfx::CTexture::BPixels>(glm::max(static_cast<unsigned int>(_TexturePtr->GetNumberOfPixelsV()) / MipmapPow, 1u));
             
             rTexture.m_Info.m_Access            = _TexturePtr->GetAccess();
             rTexture.m_Info.m_Binding           = _TexturePtr->GetBinding();

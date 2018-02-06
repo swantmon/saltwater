@@ -449,8 +449,6 @@ namespace
                 // -----------------------------------------------------------------------------
                 if (rCurrentSurface.GetMaterial())
                 {
-                    Gfx::SMaterialDescriptor MaterialDesc;
-
                     unsigned int MaterialHash = rCurrentSurface.GetMaterial()->GetHash();
                     
                     rSurface.m_MaterialPtr = Gfx::MaterialManager::GetMaterialByHash(MaterialHash);

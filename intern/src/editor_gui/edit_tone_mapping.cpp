@@ -127,7 +127,6 @@ namespace Edit
         glm::vec3 Green;
         glm::vec3 Blue;
         QColor RGB;
-        glm::vec3 Color;
         Edit::CMessage NewMessage;
 
         // -----------------------------------------------------------------------------

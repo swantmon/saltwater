@@ -6,7 +6,7 @@
 namespace Dt
 {
     CTransformationFacet::CTransformationFacet()
-        : m_WorldMatrix()
+        : m_WorldMatrix(1.0f)
         , m_Position   (0.0f)
         , m_Rotation   (0.0f)
         , m_Scale      (1.0f)
