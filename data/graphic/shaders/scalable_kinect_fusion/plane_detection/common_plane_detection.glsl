@@ -72,14 +72,16 @@ vec3 BinToCartesian(ivec2 Bin, int AzimuthBinCount, int InclinationBinCount)
     return SphericalToCartesian(BinToSpherical(Bin, AzimuthBinCount, InclinationBinCount));
 }
 
+const float BinWidth = 5.0f;
+
 int PlaneDistanceToBin(float D, int BinCount)
 {
-    return int(((D / 10.0f) + 0.5f) * BinCount);
+    return int(((D / BinWidth) + 0.5f) * BinCount);
 }
 
 float BinToPlaneDistance(int Bin, int BinCount)
 {
-    return (float(Bin) / BinCount - 0.5f) * 10.0f;
+    return (float(Bin) / BinCount - 0.5f) * BinWidth;
 }
 
 
