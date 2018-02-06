@@ -24,8 +24,8 @@ namespace Cam
 
         bool          m_IsFlying;
         bool          m_IsDragging;
-        glm::vec2  m_LastCursorPosition;
-        glm::vec3  m_CurrentRotation;
+        glm::vec2     m_LastCursorPosition;
+        glm::vec2     m_CurrentRotation;
         unsigned int  m_MoveDirection;
 
     private:
