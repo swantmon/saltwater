@@ -940,7 +940,7 @@ namespace
         // -----------------------------------------------------------------------------
         SPSPASSettings PSBuffer;
 
-        PSBuffer.g_SunDirection           = pDataSunFacet == nullptr ? glm::vec4(0.0f, 1.0f, 0.0f, 0.0f) : glm::eulerAngleX(Base::DegreesToRadians(90.0f)) * glm::vec4(pDataSunFacet->GetDirection(), 0.0f);
+        PSBuffer.g_SunDirection           = pDataSunFacet == nullptr ? glm::vec4(0.0f, 1.0f, 0.0f, 0.0f) : glm::eulerAngleX(glm::radians(90.0f)) * glm::vec4(pDataSunFacet->GetDirection(), 0.0f);
         PSBuffer.g_SunIntensity           = glm::vec4(_Intensity);
         PSBuffer.ps_ExposureHistoryIndex  = 0;
 

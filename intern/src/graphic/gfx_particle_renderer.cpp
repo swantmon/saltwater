@@ -600,7 +600,7 @@ namespace
         
         PerFrameConstantBuffer.m_LiquidMatrix  = glm::mat4(1.0f);
         PerFrameConstantBuffer.m_LiquidMatrix *= glm::transpose(glm::mat4(ViewManager::GetMainCamera()->GetView()->GetRotationMatrix()));
-        PerFrameConstantBuffer.m_LiquidMatrix *= glm::eulerAngleX(Base::DegreesToRadians(-180.0f));
+        PerFrameConstantBuffer.m_LiquidMatrix *= glm::eulerAngleX(glm::radians(-180.0f));
         PerFrameConstantBuffer.m_LiquidMatrix *= glm::scale(glm::vec3(0.3f));
         
         BufferManager::UploadBufferData(m_LiquidVSBufferPtr->GetBuffer(0), &PerFrameConstantBuffer);

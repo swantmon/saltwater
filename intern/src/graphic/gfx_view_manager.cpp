@@ -305,7 +305,7 @@ namespace
         // -----------------------------------------------------------------------------
         glm::mat3 Rotation(1.0f);
 
-        Rotation = glm::eulerAngleX(Base::DegreesToRadians(180.0f));
+        Rotation = glm::eulerAngleX(glm::radians(180.0f));
         
         GUIViewPtr->SetRotationMatrix(Rotation);
         
@@ -334,7 +334,7 @@ namespace
         // Flip the camera around the x-axis, so that the origin of the post coordinate
         // system is in the upper left corner of the render area.
         // -----------------------------------------------------------------------------
-        Rotation = glm::eulerAngleX(Base::DegreesToRadians(180.0f));
+        Rotation = glm::eulerAngleX(glm::radians(180.0f));
         
         PostViewPtr->SetRotationMatrix(Rotation);
         

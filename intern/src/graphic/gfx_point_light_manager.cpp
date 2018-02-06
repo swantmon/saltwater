@@ -296,7 +296,7 @@ namespace
                     // -----------------------------------------------------------------------------
                     // Set matrix
                     // -----------------------------------------------------------------------------
-                    ShadowCameraPtr->SetFieldOfView(Base::RadiansToDegree(pDtPointLightFacet->GetOuterConeAngle()), 1.0f, Near, Far);
+                    ShadowCameraPtr->SetFieldOfView(glm::degrees(pDtPointLightFacet->GetOuterConeAngle()), 1.0f, Near, Far);
 
                     ShadowViewPtr->Update();
 
@@ -441,7 +441,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Set matrix
         // -----------------------------------------------------------------------------
-        ShadowCameraPtr->SetFieldOfView(Base::RadiansToDegree(pDtPointLightFacet->GetOuterConeAngle()), 1.0f, Near, Far);
+        ShadowCameraPtr->SetFieldOfView(glm::degrees(pDtPointLightFacet->GetOuterConeAngle()), 1.0f, Near, Far);
 
         ShadowViewPtr->Update();
 

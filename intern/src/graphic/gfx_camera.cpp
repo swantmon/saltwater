@@ -52,7 +52,7 @@ namespace Gfx
         float Bottom;
         float Top;
 
-        Bottom = -Base::Tan(Base::DegreesToRadians(_FOVY) / 2.0f) * Base::Max(_Near, 0.000001f);
+        Bottom = -Base::Tan(glm::radians(_FOVY) / 2.0f) * Base::Max(_Near, 0.000001f);
         Top    = -Bottom;
         Left   =  _Aspect * Bottom;
         Right  =  _Aspect * Top;

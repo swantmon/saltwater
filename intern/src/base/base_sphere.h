@@ -21,15 +21,15 @@ namespace MATH
         
     public:
         
-        typedef CSphere<T>   CThis;
-        typedef T            X;
-        typedef const X      XConst;
-        typedef X&           XRef;
-        typedef const X&     XConstRef;
-        typedef X*           XPtr;
-        typedef const X*     XConstPtr;
+        typedef CSphere<T> CThis;
+        typedef T          X;
+        typedef const X    XConst;
+        typedef X&         XRef;
+        typedef const X&   XConstRef;
+        typedef X*         XPtr;
+        typedef const X*   XConstPtr;
         
-        typedef glm::vec3    CVector;
+        typedef glm::tvec3<T> CVector;
         
     public:
         

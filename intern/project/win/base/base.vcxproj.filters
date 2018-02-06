@@ -83,12 +83,6 @@
     <ClInclude Include="..\..\..\src\base\base_math_operations.h">
       <Filter>math</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_matrix3x3.h">
-      <Filter>math</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_matrix4x4.h">
-      <Filter>math</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\base\base_memory.h">
       <Filter>memory</Filter>
     </ClInclude>
@@ -162,15 +156,6 @@
     <ClInclude Include="..\..\..\src\base\base_typedef.h">
       <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_vector2.h">
-      <Filter>math</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_vector3.h">
-      <Filter>math</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_vector4.h">
-      <Filter>math</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\base\base_console.h">
       <Filter>io</Filter>
     </ClInclude>
@@ -178,9 +163,6 @@
       <Filter>pattern</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\base_circle.h">
-      <Filter>math</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_triangle3.h">
       <Filter>math</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\base_math_constants.h">
