@@ -332,7 +332,7 @@ namespace
         
         SCubemapBufferGS DefaultGSValues;
         
-        DefaultGSValues.m_CubeProjectionMatrix = glm::perspective(Base::RadiansToDegree(Base::SConstants<float>::s_Pi * 0.5f), 1.0f, 0.3f, 20000.0f);
+        DefaultGSValues.m_CubeProjectionMatrix = glm::perspective(Base::SConstants<float>::s_Pi * 0.5f, 1.0f, 0.1f, 20000.0f);
         
         // -----------------------------------------------------------------------------
         // By creating a cube map in OpenGL, several facts should be considered:
@@ -377,42 +377,42 @@ namespace
         // -> Viewer is inside the cube > LHS
         // -----------------------------------------------------------------------------
         LookDirection = EyePosition + glm::vec3(1.0f, 0.0f, 0.0f);
-        UpDirection   = glm::vec3(0.0f, 1.0f, 0.0f);
+        UpDirection   = glm::vec3(0.0f, -1.0f, 0.0f);
         
         DefaultGSValues.m_CubeViewMatrix[0] = glm::lookAt(EyePosition, LookDirection, UpDirection);
         
         // -----------------------------------------------------------------------------
         
         LookDirection = EyePosition - glm::vec3(1.0f, 0.0f, 0.0f);
-        UpDirection   = glm::vec3(0.0f, 1.0f, 0.0f);
+        UpDirection   = glm::vec3(0.0f, -1.0f, 0.0f);
         
         DefaultGSValues.m_CubeViewMatrix[1] = glm::lookAt(EyePosition, LookDirection, UpDirection);
         
         // -----------------------------------------------------------------------------
         
         LookDirection = EyePosition + glm::vec3(0.0f, 1.0f, 0.0f);
-        UpDirection   = -glm::vec3(0.0f, 0.0f, 1.0f);;
+        UpDirection   = -glm::vec3(0.0f, 0.0f, -1.0f);;
         
         DefaultGSValues.m_CubeViewMatrix[2] = glm::lookAt(EyePosition, LookDirection, UpDirection);
         
         // -----------------------------------------------------------------------------
         
         LookDirection = EyePosition - glm::vec3(0.0f, 1.0f, 0.0f);
-        UpDirection   = glm::vec3(0.0f, 0.0f, 1.0f);;
+        UpDirection   = glm::vec3(0.0f, 0.0f, -1.0f);;
         
         DefaultGSValues.m_CubeViewMatrix[3] = glm::lookAt(EyePosition, LookDirection, UpDirection);
         
         // -----------------------------------------------------------------------------
         
         LookDirection = EyePosition + glm::vec3(0.0f, 0.0f, 1.0f);
-        UpDirection   = glm::vec3(0.0f, 1.0f, 0.0f);
+        UpDirection   = glm::vec3(0.0f, -1.0f, 0.0f);
         
         DefaultGSValues.m_CubeViewMatrix[4] = glm::lookAt(EyePosition, LookDirection, UpDirection);
 
         // -----------------------------------------------------------------------------
         
         LookDirection = EyePosition - glm::vec3(0.0f, 0.0f, 1.0f);
-        UpDirection   = glm::vec3(0.0f, 1.0f, 0.0f);
+        UpDirection   = glm::vec3(0.0f, -1.0f, 0.0f);
         
         DefaultGSValues.m_CubeViewMatrix[5] = glm::lookAt(EyePosition, LookDirection, UpDirection);
 

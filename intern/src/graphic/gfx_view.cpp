@@ -112,9 +112,9 @@ namespace Gfx
         // --------------------------------------------------------------------------------
         // Extract the axes of the camera out of the rotation matrix.
         // --------------------------------------------------------------------------------
-        m_Right =  m_RotationMatrix[0];
-        m_Up    =  m_RotationMatrix[1];
-        m_View  =  m_RotationMatrix[2] * -1.0f;
+        m_Right = m_RotationMatrix[0];
+        m_Up    = m_RotationMatrix[1];
+        m_View  = m_RotationMatrix[2] * -1.0f;
 
         // --------------------------- -----------------------------------------------------
         // Get the right handed view space coordinate system.
