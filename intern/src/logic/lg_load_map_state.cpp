@@ -131,8 +131,168 @@ namespace
     }
 
     // -----------------------------------------------------------------------------
-
+#if PLATFORM_ANDROID
     void CLgLoadMapState::CreateDefaultScene()
+    {
+        // -----------------------------------------------------------------------------
+        // Allocate a map
+        // -----------------------------------------------------------------------------
+        Dt::Map::AllocateMap(1, 1);
+
+        // -----------------------------------------------------------------------------
+        // Setup cameras
+        // -----------------------------------------------------------------------------
+        {
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Actor;
+            EntityDesc.m_EntityType     = Dt::SActorType::Camera;
+            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
+
+            Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+
+            rEntity.SetName("Main Camera");
+
+            Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
+
+            pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 10.0f));
+            pTransformationFacet->SetScale(glm::vec3(1.0f));
+            pTransformationFacet->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
+
+            Dt::CCameraActorFacet* pFacet = Dt::CameraActorManager::CreateCameraActor();
+
+            pFacet->SetMainCamera(true);
+            pFacet->SetProjectionType(Dt::CCameraActorFacet::External);
+            pFacet->SetClearFlag(Dt::CCameraActorFacet::Webcam);
+
+            rEntity.SetDetailFacet(Dt::SFacetCategory::Data, pFacet);
+
+            Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
+
+        // -----------------------------------------------------------------------------
+        // Setup environment
+        // -----------------------------------------------------------------------------
+        {
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Light;
+            EntityDesc.m_EntityType     = Dt::SLightType::Sky;
+            EntityDesc.m_FacetFlags     = 0;
+
+            Dt::CEntity& rEnvironment = Dt::EntityManager::CreateEntity(EntityDesc);
+
+            rEnvironment.SetName("Environment");
+
+            Dt::CSkyFacet* pSkyboxFacet = Dt::SkyManager::CreateSky();
+
+            pSkyboxFacet->SetRefreshMode(Dt::CSkyFacet::Static);
+            pSkyboxFacet->SetType(Dt::CSkyFacet::Procedural);
+            pSkyboxFacet->SetIntensity(40000.0f);
+
+            rEnvironment.SetDetailFacet(Dt::SFacetCategory::Data, pSkyboxFacet);
+
+            Dt::EntityManager::MarkEntityAsDirty(rEnvironment, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
+
+        // -----------------------------------------------------------------------------
+        // Setup light
+        // -----------------------------------------------------------------------------
+        {
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Light;
+            EntityDesc.m_EntityType     = Dt::SLightType::Sun;
+            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
+
+            Dt::CEntity& rSunLight = Dt::EntityManager::CreateEntity(EntityDesc);
+
+            rSunLight.SetName("Sun");
+
+            // -----------------------------------------------------------------------------
+            // Transformation
+            // -----------------------------------------------------------------------------
+            Dt::CTransformationFacet* pTransformationFacet = rSunLight.GetTransformationFacet();
+
+            pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 20.0f));
+            pTransformationFacet->SetScale   (glm::vec3(1.0f));
+            pTransformationFacet->SetRotation(glm::vec3(0.0f));
+
+            Dt::CSunLightFacet* pSunLightFacet = Dt::SunManager::CreateSunLight();
+
+            pSunLightFacet->EnableTemperature(false);
+            pSunLightFacet->SetColor         (glm::vec3(1.0f, 1.0f, 1.0f));
+            pSunLightFacet->SetDirection     (glm::vec3(0.0f, 0.01f, -1.0f));
+            pSunLightFacet->SetIntensity     (90600.0f);
+            pSunLightFacet->SetTemperature   (0);
+            pSunLightFacet->SetRefreshMode   (Dt::CSunLightFacet::Dynamic);
+
+            pSunLightFacet->UpdateLightness();
+
+            rSunLight.SetDetailFacet(Dt::SFacetCategory::Data, pSunLightFacet);
+
+            Dt::EntityManager::MarkEntityAsDirty(rSunLight, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
+
+        // -----------------------------------------------------------------------------
+        // Setup entities
+        // -----------------------------------------------------------------------------
+        {
+            Dt::SModelFileDescriptor ModelFileDesc;
+
+            ModelFileDesc.m_pFileName = "models/MatTester.obj";
+            ModelFileDesc.m_GenFlag = Dt::SGeneratorFlag::DefaultFlipUVs;
+
+            Dt::CModel& rModel = Dt::ModelManager::CreateModel(ModelFileDesc);
+
+            // -----------------------------------------------------------------------------
+
+            Dt::CEntity& rSphere = Dt::EntityManager::CreateEntityFromModel(rModel);
+
+            rSphere.SetName("Sphere");
+
+            Dt::CTransformationFacet* pTransformationFacet = rSphere.GetTransformationFacet();
+
+            pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 0.1f));
+            pTransformationFacet->SetScale(glm::vec3(0.01f));
+            pTransformationFacet->SetRotation(glm::vec3(glm::radians(90.0f), 0.0f, 0.0f));
+
+            // -----------------------------------------------------------------------------
+
+            Dt::CEntity* pSubEntity = rSphere.GetHierarchyFacet()->GetFirstChild();
+
+            Dt::CMeshActorFacet* pModelActorFacet = static_cast<Dt::CMeshActorFacet*>(pSubEntity->GetDetailFacet(Dt::SFacetCategory::Data));
+
+            Dt::SMaterialDescriptor MaterialFileDesc;
+
+            MaterialFileDesc.m_pFileName = 0;
+            MaterialFileDesc.m_pMaterialName = "Red Sparrow";
+            MaterialFileDesc.m_pColorMap = 0;
+            MaterialFileDesc.m_pNormalMap = 0;
+            MaterialFileDesc.m_pRoughnessMap = 0;
+            MaterialFileDesc.m_pMetalMaskMap = 0;
+            MaterialFileDesc.m_pAOMap = 0;
+            MaterialFileDesc.m_pBumpMap = 0;
+            MaterialFileDesc.m_Roughness = 1.0f;
+            MaterialFileDesc.m_Reflectance = 0.0f;
+            MaterialFileDesc.m_MetalMask = 0.0f;
+            MaterialFileDesc.m_Displacement = 0.0f;
+            MaterialFileDesc.m_AlbedoColor = glm::vec3(1.0f, 0.0f, 0.0f);
+            MaterialFileDesc.m_TilingOffset = glm::vec4(1.0f, 1.0f, 0.0f, 0.0f);
+
+            Dt::CMaterial& rMaterial = Dt::MaterialManager::CreateMaterial(MaterialFileDesc);
+
+            pModelActorFacet->SetMaterial(0, &rMaterial);
+
+            Dt::MaterialManager::MarkMaterialAsDirty(rMaterial, Dt::CMaterial::DirtyCreate);
+
+            // -----------------------------------------------------------------------------
+
+            Dt::EntityManager::MarkEntityAsDirty(rSphere, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
+    }
+#else
+void CLgLoadMapState::CreateDefaultScene()
     {
         // -----------------------------------------------------------------------------
         // Allocate a map
@@ -378,6 +538,7 @@ namespace
             Dt::EntityManager::MarkEntityAsDirty(rSphere, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
     }
+#endif
 } // namespace
 
 namespace Lg
