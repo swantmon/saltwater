@@ -30,7 +30,7 @@ namespace MATH
         typedef X*           XPtr;
         typedef const X*     XConstPtr;
         
-        typedef glm::vec2 CCorner;
+        typedef glm::tvec2<T> CCorner;
         
     public:
         

@@ -5,8 +5,6 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
-#include "graphic/gfx_debug_interface.h"
-
 #include "gui/gui_event_handler.h"
 
 #include "logic/lg_debug_state.h"

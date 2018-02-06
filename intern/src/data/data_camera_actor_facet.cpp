@@ -85,7 +85,7 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CCameraActorFacet::SetBackgroundColor(glm::vec3& _rBackgroundColor)
+    void CCameraActorFacet::SetBackgroundColor(const glm::vec3& _rBackgroundColor)
     {
         m_BackgroundColor = _rBackgroundColor;
     }

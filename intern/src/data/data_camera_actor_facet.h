@@ -51,7 +51,7 @@ namespace Dt
 
         bool GetHasTexture() const;
 
-        void SetBackgroundColor(glm::vec3& _rBackgroundColor);
+        void SetBackgroundColor(const glm::vec3& _rBackgroundColor);
         glm::vec3& GetBackgroundColor();
         const glm::vec3& GetBackgroundColor() const;
 
