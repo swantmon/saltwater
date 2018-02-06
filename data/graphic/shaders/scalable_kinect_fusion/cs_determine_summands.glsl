@@ -110,7 +110,7 @@ bool findCorrespondence(out vec3 ReferenceVertex, out vec3 RaycastVertex, out ve
 
     vec3 ReferenceNormal = imageLoad(cs_NormalMap, ivec2(x, y)).xyz;
 
-    if (ReferenceNormal.x == 0.0f)
+    if (ReferenceNormal.x < -5.0f)
     {
         return false;
     }

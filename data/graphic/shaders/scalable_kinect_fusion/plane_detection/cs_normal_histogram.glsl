@@ -38,7 +38,7 @@ void main()
         {
             vec3 Sample = imageLoad(cs_NormalMap, ivec2(x + i, y + j)).xyz;
             
-            if (Sample.x != 0.0f)
+            if (Sample.x > -5.0f)
             {
                 ++ Count;
                 Normal += Sample;
@@ -50,7 +50,7 @@ void main()
     {
         Normal /= Count;
     
-        Normal = mat3(g_PoseMatrix) * Normal;
+        //Normal = mat3(g_PoseMatrix) * Normal;
 
         vec2 Spherical = CartesianToSpherical(Normal);
 

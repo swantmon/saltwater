@@ -35,8 +35,8 @@ void main()
     }
 
     vec3 Plane = normalize(g_Planes[PlaneIndex].xyz);
-    vec3 Normal = mat3(g_InvPoseMatrix) * normalize(imageLoad(cs_NormalMap, ivec2(x, y)).xyz);
-    vec3 Vertex = (g_InvPoseMatrix * vec4(imageLoad(cs_VertexMap, ivec2(x, y)).xyz, 1.0f)).xyz;
+    vec3 Normal = normalize(imageLoad(cs_NormalMap, ivec2(x, y)).xyz);
+    vec3 Vertex = imageLoad(cs_VertexMap, ivec2(x, y)).xyz;
     
     if (abs(dot(Plane, Normal)) < 0.1f)
     {
