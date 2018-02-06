@@ -408,7 +408,7 @@ namespace MATH
         {
             HitPoint[0] = m_V[MinX]; IsInside = false;
 
-            if (!Base::IsEqual(_rDirection[0], X(0), SConstants<X>::s_Epsilon))
+            if (!glm::epsilonEqual(_rDirection[0], X(0), glm::epsilon<float>()))
             {
                 Lambda[0] = (m_V[MinX] - _rOrigin[0]) / _rDirection[0];
             }
@@ -417,7 +417,7 @@ namespace MATH
         {
             HitPoint[0] = m_V[MaxX]; IsInside = false;
 
-            if (!Base::IsEqual(_rDirection[0], X(0), SConstants<X>::s_Epsilon))
+            if (!glm::epsilonEqual(_rDirection[0], X(0), glm::epsilon<float>()))
             {
                 Lambda[0] = (m_V[MaxX] - _rOrigin[0]) / _rDirection[0];
             }
@@ -427,7 +427,7 @@ namespace MATH
         {
             HitPoint[1] = m_V[MinY]; IsInside = false;
 
-            if (!Base::IsEqual(_rDirection[1], X(0), SConstants<X>::s_Epsilon))
+            if (!glm::epsilonEqual(_rDirection[1], X(0), glm::epsilon<float>()))
             {
                 Lambda[1] = (m_V[MinY] - _rOrigin[1]) / _rDirection[1];
             }
@@ -436,7 +436,7 @@ namespace MATH
         {
             HitPoint[1] = m_V[MaxY]; IsInside = false;
 
-            if (!Base::IsEqual(_rDirection[1], X(0), SConstants<X>::s_Epsilon))
+            if (!glm::epsilonEqual(_rDirection[1], X(0), glm::epsilon<float>()))
             {
                 Lambda[1] = (m_V[MaxY] - _rOrigin[1]) / _rDirection[1];
             }
@@ -446,7 +446,7 @@ namespace MATH
         {
             HitPoint[2] = m_V[MinZ]; IsInside = false;
 
-            if (!Base::IsEqual(_rDirection[2], X(0), SConstants<X>::s_Epsilon))
+            if (!glm::epsilonEqual(_rDirection[2], X(0), glm::epsilon<float>()))
             {
                 Lambda[2] = (m_V[MinZ] - _rOrigin[2]) / _rDirection[2];
             }
@@ -455,7 +455,7 @@ namespace MATH
         {
             HitPoint[2] = m_V[MaxZ]; IsInside = false;
 
-            if (!Base::IsEqual(_rDirection[2], X(0), SConstants<X>::s_Epsilon))
+            if (!glm::epsilonEqual(_rDirection[2], X(0), glm::epsilon<float>()))
             {
                 Lambda[2] = (m_V[MaxZ] - _rOrigin[2]) / _rDirection[2];
             }
