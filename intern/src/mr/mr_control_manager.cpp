@@ -541,8 +541,6 @@ namespace
 
             ArPose_getMatrix(m_pARSession, pARPose, &ModelMatrix[0][0]);
 
-            glm::transpose(ModelMatrix);
-
             if (m_pEntity != 0)
             {
                 Dt::CTransformationFacet* pTransformation = m_pEntity->GetTransformationFacet();
