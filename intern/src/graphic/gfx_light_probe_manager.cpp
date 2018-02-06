@@ -1436,7 +1436,7 @@ namespace
 
         SCubemapGeometryBuffer Values;
 
-        Values.m_CubeProjectionMatrix = glm::perspective(Base::RadiansToDegree(Base::SConstants<float>::s_Pi * 0.5f), 1.0f, _Near, _Far);
+        Values.m_CubeProjectionMatrix = glm::perspective(Base::SConstants<float>::s_Pi * 0.5f, 1.0f, _Near, _Far);
 
         // -----------------------------------------------------------------------------
 
