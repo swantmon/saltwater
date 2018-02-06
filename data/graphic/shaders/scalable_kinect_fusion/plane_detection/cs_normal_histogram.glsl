@@ -36,8 +36,8 @@ void main()
     {
         for (int j = -g_KernelSize; j <= g_KernelSize; ++ j)
         {
-            if (x + i < ImageSize.x && y + j < ImageSize.y
-             && x + i >= 0 && y + j >= 0)
+            if (x + i < ImageSize.x && x + i >= 0 &&
+                y + j < ImageSize.y && y + j >= 0)
             {
                 vec3 Sample = imageLoad(cs_NormalMap, ivec2(x + i, y + j)).xyz;
             
