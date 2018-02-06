@@ -215,9 +215,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Setup default settings in OpenGL
         // -----------------------------------------------------------------------------
-#ifndef __ANDROID__
+#ifndef PLATFORM_ANDROID
         glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-#endif // __ANDROID__
+#endif // PLATFORM_ANDROID
 
         // -----------------------------------------------------------------------------
         // Set dirty handler of data textures
@@ -374,7 +374,7 @@ namespace
 
     void CGfxTextureManager::ClearTextureLayer(CTexturePtr _TexturePtr, const void* _pData, int _Layer)
     {
-#ifdef __ANDROID__
+#ifdef PLATFORM_ANDROID
         BASE_CONSOLE_ERROR("Clearing textures is currently not supported on Android");
         assert(false); // TODO: implement
 #else
@@ -406,14 +406,14 @@ namespace
         {
             glClearTexSubImage(TextureHandle, MipIndex, 0, 0, _Layer, Width >> MipIndex, Height >> MipIndex, 1, Format, Type, _pData);
         }
-#endif // __ANDROID__
+#endif // PLATFORM_ANDROID
     }
     
     // -----------------------------------------------------------------------------
 
     void CGfxTextureManager::ClearTexture(CTexturePtr _TexturePtr, const void* _pData)
     {
-#ifdef __ANDROID__
+#ifdef PLATFORM_ANDROID
         BASE_CONSOLE_ERROR("Clearing textures is currently not supported on Android");
         assert(false); // TODO: implement
 #else
@@ -444,7 +444,7 @@ namespace
         {
             glClearTexSubImage(TextureHandle, MipIndex, 0, 0, 0, Width >> MipIndex, Height >> MipIndex, LayerCount, Format, Type, _pData);
         }
-#endif // __ANDROID__
+#endif // PLATFORM_ANDROID
     }
 
     // -----------------------------------------------------------------------------
@@ -892,7 +892,7 @@ namespace
 
             PathToTexture = Core::AssetManager::GetPathToAssets() + "/" + _rDescriptor.m_pFileName;
 
-#ifdef __ANDROID__
+#ifdef PLATFORM_ANDROID
             const char* pPathToTexture = 0;
 
             pPathToTexture = PathToTexture.c_str();
@@ -908,7 +908,7 @@ namespace
             {
                 PathToTexture = Core::AssetManager::GetPathToData() + g_PathToDataTextures + _rDescriptor.m_pFileName;
 
-#ifdef __ANDROID__
+#ifdef PLATFORM_ANDROID
                 pPathToTexture = PathToTexture.c_str();
 #else
                 pPathToTexture = reinterpret_cast<const wchar_t*>(PathToTexture.c_str());
@@ -1427,7 +1427,7 @@ namespace
 
             PathToTexture = Core::AssetManager::GetPathToAssets() + "/" + _rDescriptor.m_pFileName;
 
-#ifdef __ANDROID__
+#ifdef PLATFORM_ANDROID
             const char* pPathToTexture = 0;
 
             pPathToTexture = PathToTexture.c_str();
@@ -1443,7 +1443,7 @@ namespace
             {
                 PathToTexture = Core::AssetManager::GetPathToData() + g_PathToDataTextures + _rDescriptor.m_pFileName;
 
-#ifdef __ANDROID__
+#ifdef PLATFORM_ANDROID
                 pPathToTexture = PathToTexture.c_str();
 #else
                 pPathToTexture = reinterpret_cast<const wchar_t*>(PathToTexture.c_str());

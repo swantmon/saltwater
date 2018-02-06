@@ -18,10 +18,10 @@
 #include <string>
 #include <vector>
 
-#ifdef __ANDROID__
+#ifdef PLATFORM_ANDROID
 GfxQueryCounterEXT glQueryCounter = 0;
 GfxGetQueryObjectui64vEXT glGetQueryObjectui64v = 0;
-#endif // __ANDROID__
+#endif // PLATFORM_ANDROID
 
 namespace
 {
@@ -114,7 +114,7 @@ namespace
 
     void CGfxPerformance::OnStart()
     {
-#ifdef __ANDROID__
+#ifdef PLATFORM_ANDROID
         if (Gfx::Main::IsExtensionAvailable("GL_EXT_disjoint_timer_query"))
         {
             glQueryCounter = reinterpret_cast<GfxQueryCounterEXT>(eglGetProcAddress("glQueryCounterEXT"));
@@ -279,7 +279,7 @@ namespace
             Item.m_HasStatistics = false;
 
             GLuint StartQuery;
-#ifdef __ANDROID__
+#ifdef PLATFORM_ANDROID
             glGenQueries(1, &StartQuery);
             glQueryCounter(StartQuery, GL_TIMESTAMP_EXT);
 #else
@@ -310,7 +310,7 @@ namespace
             Item.m_HasStatistics = true;
 
             GLuint StartQuery;
-#ifdef __ANDROID__
+#ifdef PLATFORM_ANDROID
             glGenQueries(1, &StartQuery);
             glQueryCounter(StartQuery, GL_TIMESTAMP_EXT);
 #else
@@ -353,7 +353,7 @@ namespace
         if (m_UsePerformanceMarker)
         {
             GLuint EndQuery;
-#ifdef __ANDROID__
+#ifdef PLATFORM_ANDROID
             glGenQueries(1, &EndQuery);
 
             glQueryCounter(EndQuery, GL_TIMESTAMP_EXT);
@@ -374,7 +374,7 @@ namespace
         GLuint StartQuery = 0;
         GLuint EndQuery   = 0;
 
-#ifdef __ANDROID__
+#ifdef PLATFORM_ANDROID
         glGenQueries(1, &StartQuery);
         glGenQueries(1, &EndQuery);
 
@@ -399,7 +399,7 @@ namespace
         SQueryStackItem Item = m_QueryStack.back();
         m_QueryStack.pop_back();
 
-#ifdef __ANDROID__
+#ifdef PLATFORM_ANDROID
         glQueryCounter(Item.m_EndQuery, GL_TIMESTAMP_EXT);
 #else
         glQueryCounter(Item.m_EndQuery, GL_TIMESTAMP);
@@ -417,7 +417,7 @@ namespace
         SQueryStackItem Item = m_QueryStack.back();
         m_QueryStack.pop_back();
 
-#ifdef __ANDROID__
+#ifdef PLATFORM_ANDROID
         glQueryCounter(Item.m_EndQuery, GL_TIMESTAMP_EXT);
 #else
         glQueryCounter(Item.m_EndQuery, GL_TIMESTAMP);

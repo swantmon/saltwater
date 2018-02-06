@@ -57,6 +57,6 @@
 // -----------------------------------------------------------------------------
 #if __ANDROID__
 #define PLATFORM_ANDROID 1
-#else
+#else // !__ANDROID__
 #define PLATFORM_WINDOWS 1
 #endif

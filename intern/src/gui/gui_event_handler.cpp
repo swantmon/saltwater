@@ -115,7 +115,7 @@ namespace
 
         for (CDelegateConstIterator CurrentDirectUserListener = m_DirectUserListeners.begin(); CurrentDirectUserListener < EndOfDirectUserListeners; ++ CurrentDirectUserListener)
         {
-#ifdef __ANDROID__
+#ifdef PLATFORM_ANDROID
             if (&(*CurrentDirectUserListener) == &_rListener)
             {
                 return CurrentDirectUserListener;

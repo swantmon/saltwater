@@ -22,9 +22,9 @@
 #include <unordered_map>
 #include <vector>
 
-#ifdef __ANDROID__
+#ifdef PLATFORM_ANDROID
 GfxBufferStorageEXT glBufferStorage = 0;
-#endif // __ANDROID__
+#endif // PLATFORM_ANDROID
 
 using namespace Gfx;
 
@@ -220,7 +220,7 @@ namespace
 
     void CGfxBufferManager::OnStart()
     {
-#ifdef __ANDROID__
+#ifdef PLATFORM_ANDROID
         if (Main::IsExtensionAvailable("GL_EXT_buffer_storage"))
         {
             glBufferStorage = reinterpret_cast<GfxBufferStorageEXT>(eglGetProcAddress("glBufferStorageEXT"));

@@ -141,7 +141,7 @@ namespace
         {
             void* m_pNativeWindowHandle;
 
-#ifdef __ANDROID__
+#ifdef PLATFORM_ANDROID
             EGLDisplay m_EglDisplay;
             EGLConfig  m_EglConfig;
             EGLSurface m_EglSurface;
@@ -217,7 +217,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Load graphics API
         // -----------------------------------------------------------------------------
-#ifdef __ANDROID__
+#ifdef PLATFORM_ANDROID
         const std::string GraphicsAPI = Base::CProgramParameters::GetInstance().GetStdString("graphics:api:name", "gles");
 #else
         const std::string GraphicsAPI = Base::CProgramParameters::GetInstance().GetStdString("graphics:api:name", "gl");
@@ -270,7 +270,7 @@ namespace
         {
             SWindowInfo& rWindowInfo = m_WindowInfos[IndexOfWindow];
 
-#ifdef __ANDROID__
+#ifdef PLATFORM_ANDROID
             EGLNativeWindowType  pNativeWindowHandle;
             EGLBoolean           Status;
             EGLint               Error;
@@ -579,14 +579,14 @@ namespace
     
     void CGfxMain::OnExit()
     {
-#ifdef __ANDROID__
+#ifdef PLATFORM_ANDROID
         for (SWindowInfo& rWindowInfo : m_WindowInfos)
         {
             eglMakeCurrent(rWindowInfo.m_pNativeWindowHandle, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
 
             eglTerminate(rWindowInfo.m_pNativeWindowHandle);
         }
-#endif // __ANDROID__
+#endif // PLATFORM_ANDROID
     }
     
     // -----------------------------------------------------------------------------
@@ -764,7 +764,7 @@ namespace
 
         SWindowInfo& rWindowInfo = *m_pActiveWindowInfo;
 
-#ifdef __ANDROID__
+#ifdef PLATFORM_ANDROID
         eglMakeCurrent(rWindowInfo.m_EglDisplay, rWindowInfo.m_EglSurface, rWindowInfo.m_EglSurface, rWindowInfo.m_EglContext);
 #else
         wglMakeCurrent(rWindowInfo.m_pNativeDeviceContextHandle, rWindowInfo.m_pNativeOpenGLContextHandle);
@@ -784,7 +784,7 @@ namespace
 
         SWindowInfo& rWindowInfo = *m_pActiveWindowInfo;
 
-#ifdef __ANDROID__
+#ifdef PLATFORM_ANDROID
         eglSwapBuffers(rWindowInfo.m_EglDisplay, rWindowInfo.m_EglSurface);
 #else
         SwapBuffers(rWindowInfo.m_pNativeDeviceContextHandle);

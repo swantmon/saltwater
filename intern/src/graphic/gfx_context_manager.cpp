@@ -223,7 +223,7 @@ namespace
 
 namespace
 {
-#ifdef __ANDROID__
+#ifdef PLATFORM_ANDROID
     const GLenum CGfxContextManager::s_NativeTopologies[] =
     {
         GL_POINTS,
@@ -586,9 +586,9 @@ namespace
             {
                 glEnable(GL_STENCIL_TEST);
 
-#ifndef __ANDROID__
+#ifndef PLATFORM_ANDROID
                 glEnable(GL_STENCIL_TEST_TWO_SIDE_EXT);
-#endif // !__ANDROID__
+#endif // !PLATFORM_ANDROID
                 
                 // -----------------------------------------------------------------------------
                 
@@ -600,9 +600,9 @@ namespace
                 
                 // -----------------------------------------------------------------------------
                 
-#ifndef __ANDROID__
+#ifndef PLATFORM_ANDROID
                 glActiveStencilFaceEXT(GL_FRONT);
-#endif // !__ANDROID__
+#endif // !PLATFORM_ANDROID
                 
                 StencilFunc = rDescription.FrontFace.StencilFunc;
                 Mask        = rDescription.StencilReadMask;
@@ -618,9 +618,9 @@ namespace
                 
                 // -----------------------------------------------------------------------------
                 
-#ifndef __ANDROID__
+#ifndef PLATFORM_ANDROID
                 glActiveStencilFaceEXT(GL_BACK);
-#endif // !__ANDROID__
+#endif // !PLATFORM_ANDROID
                 
                 StencilFunc = rDescription.BackFace.StencilFunc;
                 Mask        = rDescription.StencilWriteMask;
@@ -679,9 +679,9 @@ namespace
                 
                 glCullFace(CullMode);
                 
-#ifndef __ANDROID__
+#ifndef PLATFORM_ANDROID
                 glPolygonMode(GL_FRONT_AND_BACK, FillMode);
-#endif // !__ANDROID__
+#endif // !PLATFORM_ANDROID
                 
                 glFrontFace(FrontFace);
             }
