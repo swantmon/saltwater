@@ -23,8 +23,8 @@ namespace Gfx
         float             m_Reflectance;
         float             m_MetalMask;
         float             m_Displacement;
-        glm::vec3      m_AlbedoColor;
-        glm::vec4      m_TilingOffset;
+        glm::vec3         m_AlbedoColor;
+        glm::vec4         m_TilingOffset;
         const Base::Char* m_pFileName;
     };
 } // namespace Gfx
