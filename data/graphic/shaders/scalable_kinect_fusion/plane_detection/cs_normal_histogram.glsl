@@ -36,12 +36,16 @@ void main()
     {
         for (int j = -g_KernelSize; j <= g_KernelSize; ++ j)
         {
-            vec3 Sample = imageLoad(cs_NormalMap, ivec2(x + i, y + j)).xyz;
-            
-            if (Sample.x > -5.0f)
+            if (x + i < ImageSize.x && y + j < ImageSize.y
+             && x + i >= 0 && y + j >= 0)
             {
-                ++ Count;
-                Normal += Sample;
+                vec3 Sample = imageLoad(cs_NormalMap, ivec2(x + i, y + j)).xyz;
+            
+                if (Sample.x > -5.0f)
+                {
+                    ++ Count;
+                    Normal += Sample;
+                }
             }
         }
     }
