@@ -594,12 +594,12 @@ namespace
             
             CInternTexture& rTexture = *Texture2DPtr;
             
-            unsigned int MipmapPow = glm::pow(2u, _Mipmap);
+            int MipmapPow = glm::pow(2, static_cast<int>(_Mipmap));
 
             rTexture.m_FileName          = _TexturePtr->GetFileName();
             rTexture.m_pPixels           = _TexturePtr->GetPixels();
-            rTexture.m_NumberOfPixels[0] = static_cast<Gfx::CTexture::BPixels>(glm::max(static_cast<unsigned int>(_TexturePtr->GetNumberOfPixelsU()) / MipmapPow, 1u));
-            rTexture.m_NumberOfPixels[1] = static_cast<Gfx::CTexture::BPixels>(glm::max(static_cast<unsigned int>(_TexturePtr->GetNumberOfPixelsV()) / MipmapPow, 1u));
+            rTexture.m_NumberOfPixels[0] = static_cast<Gfx::CTexture::BPixels>(glm::max(static_cast<int>(_TexturePtr->GetNumberOfPixelsU()) / MipmapPow, 1));
+            rTexture.m_NumberOfPixels[1] = static_cast<Gfx::CTexture::BPixels>(glm::max(static_cast<int>(_TexturePtr->GetNumberOfPixelsV()) / MipmapPow, 1));
             
             rTexture.m_Info.m_Access            = _TexturePtr->GetAccess();
             rTexture.m_Info.m_Binding           = _TexturePtr->GetBinding();
