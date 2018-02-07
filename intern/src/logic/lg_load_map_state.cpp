@@ -427,6 +427,33 @@ void CLgLoadMapState::CreateDefaultScene()
             Dt::EntityManager::MarkEntityAsDirty(rSunLight, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
 
+        {
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::FX;
+            EntityDesc.m_EntityType     = Dt::SFXType::SSAO;
+            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
+
+            Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+
+            rEntity.SetName("SSAO");
+
+            // -----------------------------------------------------------------------------
+            // Transformation
+            // -----------------------------------------------------------------------------
+            Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
+
+            pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+            pTransformationFacet->SetScale   (glm::vec3(1.0f));
+            pTransformationFacet->SetRotation(glm::vec3(0.0f));
+
+            Dt::CSSAOFXFacet* pFacet = Dt::SSAOManager::CreateSSAOFX();
+
+            rEntity.SetDetailFacet(Dt::SFacetCategory::Data, pFacet);
+
+            Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
+
         // -----------------------------------------------------------------------------
         // Setup entities
         // -----------------------------------------------------------------------------

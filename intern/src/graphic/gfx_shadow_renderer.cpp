@@ -615,8 +615,6 @@ namespace
 
         Performance::BeginEvent("SSAO");
 
-        
-
         // -----------------------------------------------------------------------------
         // Get screen resolutions
         // -----------------------------------------------------------------------------
@@ -671,7 +669,7 @@ namespace
 
         ContextManager::SetTexture(0, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(0));
         ContextManager::SetTexture(1, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(1));
-        ContextManager::SetTexture(2, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(2));
+        ContextManager::SetTexture(2, TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget());
         ContextManager::SetTexture(3, m_NoiseTexturePtr);
 
         ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
