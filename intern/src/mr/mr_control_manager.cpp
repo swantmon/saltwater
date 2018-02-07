@@ -23,6 +23,8 @@
 
 #include "mr/mr_control_manager.h"
 
+#include <array>
+
 #if PLATFORM_ANDROID
 #include "arcore_c_api.h"
 
@@ -40,11 +42,24 @@ using namespace MR::ControlManager;
 
 namespace
 {
-    const float k_Uvs[] = {
+    glm::vec3 GetPlaneColor(int _Index)
+    {
+        static constexpr int s_NumberOfPlaneColors = 12;
+
+        constexpr unsigned int s_PlaneColorRGB[s_NumberOfPlaneColors] = {
+                0xFFFFFFFF, 0xF44336FF, 0xE91E63FF, 0x9C27B0FF, 0x673AB7FF, 0x3F51B5FF,
+                0x2196F3FF, 0x03A9F4FF, 0x00BCD4FF, 0x009688FF, 0x4CAF50FF, 0x8BC34AFF};
+
+        const int RGB = s_PlaneColorRGB[_Index % s_NumberOfPlaneColors];
+
+        return glm::vec3(((RGB >> 24) & 0xff) / 255.0f, ((RGB >> 16) & 0xff) / 255.0f, ((RGB >> 8) & 0xff) / 255.0f);
+    }
+
+    const float c_Uvs[] = {
             0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
     };
 
-    constexpr char k_VertexShaderWebcam[] = R"(
+    constexpr char c_VertexShaderWebcam[] = R"(
         #version  320 es
 
         layout(location = 0) in vec2 in_UV;
@@ -66,7 +81,7 @@ namespace
         }
     )";
 
-    constexpr char k_FragmentShaderWebcam[] = R"(
+    constexpr char c_FragmentShaderWebcam[] = R"(
         #version 320 es
 
         #extension GL_OES_EGL_image_external_essl3 : require
@@ -85,7 +100,7 @@ namespace
         }
     )";
 
-    constexpr char k_VertexShaderPlane[] = R"(
+    constexpr char c_VertexShaderPlane[] = R"(
         #version 320 es
 
         precision highp float;
@@ -104,7 +119,7 @@ namespace
         }
     )";
 
-    constexpr char k_FragmentShaderPlane[] = R"(
+    constexpr char c_FragmentShaderPlane[] = R"(
         #version 320 es
 
         precision highp float;
@@ -125,7 +140,7 @@ namespace
         }
     )";
 
-    constexpr char k_VertexShaderPoint[] = R"(
+    constexpr char c_VertexShaderPoint[] = R"(
         #version 320 es
 
         layout(location = 0) uniform mat4 m_MVP;
@@ -140,7 +155,7 @@ namespace
         }
     )";
 
-    constexpr char k_FragmentShaderPoint[] = R"(
+    constexpr char c_FragmentShaderPoint[] = R"(
         #version 320 es
 
         precision lowp float;
@@ -264,12 +279,12 @@ namespace
 {
     class CMRControlManager : private Base::CUncopyable
     {
-        BASE_SINGLETON_FUNC(CMRControlManager);
+    BASE_SINGLETON_FUNC(CMRControlManager);
 
     public:
 
         CMRControlManager();
-       ~CMRControlManager();
+        ~CMRControlManager();
 
     public:
 
@@ -318,12 +333,12 @@ namespace
 namespace
 {
     CMRControlManager::CMRControlManager()
-        : m_pARSession        (0)
-        , m_pARFrame          (0)
-        , m_TrackedObjects    ()
-        , m_ViewMatrix        (glm::mat4(1.0f))
-        , m_ProjectionMatrix  (glm::mat4(1.0f))
-        , m_pEntity           (0)
+            : m_pARSession        (0)
+            , m_pARFrame          (0)
+            , m_TrackedObjects    ()
+            , m_ViewMatrix        (glm::mat4(1.0f))
+            , m_ProjectionMatrix  (glm::mat4(1.0f))
+            , m_pEntity           (0)
     {
     }
 
@@ -377,7 +392,7 @@ namespace
         // -----------------------------------------------------------------------------
         // OpenGLES
         // -----------------------------------------------------------------------------
-        g_ShaderProgramWebcam = CreateProgram(k_VertexShaderWebcam, k_FragmentShaderWebcam);
+        g_ShaderProgramWebcam = CreateProgram(c_VertexShaderWebcam, c_FragmentShaderWebcam);
 
         if (g_ShaderProgramWebcam == 0) BASE_THROWM("Failed creating shader capturing webcam image.")
 
@@ -393,7 +408,7 @@ namespace
 
         glBindBuffer(GL_ARRAY_BUFFER, g_AttributeUVs);
 
-        glBufferData(GL_ARRAY_BUFFER, sizeof(k_Uvs), &k_Uvs, GL_DYNAMIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(c_Uvs), &c_Uvs, GL_DYNAMIC_DRAW);
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -401,7 +416,7 @@ namespace
 
         // -----------------------------------------------------------------------------
 
-        g_ShaderProgramPlane = CreateProgram(k_VertexShaderPlane, k_FragmentShaderPlane);
+        g_ShaderProgramPlane = CreateProgram(c_VertexShaderPlane, c_FragmentShaderPlane);
 
         glGenBuffers(1, &g_AttributePlaneVertices);
 
@@ -421,7 +436,7 @@ namespace
 
         // -----------------------------------------------------------------------------
 
-        g_ShaderProgramPoint = CreateProgram(k_VertexShaderPoint, k_FragmentShaderPoint);
+        g_ShaderProgramPoint = CreateProgram(c_VertexShaderPoint, c_FragmentShaderPoint);
 
         glGenBuffers(1, &g_AttributePointVertices);
 
@@ -596,7 +611,7 @@ namespace
 
         if (HasGeometryChanged != 0 || g_IsUVsInitialized == false)
         {
-            ArFrame_transformDisplayUvCoords(m_pARSession, m_pARFrame, s_NumberOfVertices * 2, k_Uvs, g_TransformedUVs);
+            ArFrame_transformDisplayUvCoords(m_pARSession, m_pARFrame, s_NumberOfVertices * 2, c_Uvs, g_TransformedUVs);
 
             glBindBuffer(GL_ARRAY_BUFFER, g_AttributeUVs);
 
@@ -820,7 +835,7 @@ namespace
             // -----------------------------------------------------------------------------
             glm::mat4 PlaneMVPMatrix = Gfx::Cam::GetProjectionMatrix() * Gfx::Cam::GetViewMatrix() * PlaneModelMatrix * glm::eulerAngleX(glm::radians(90.0f));
 
-            glm::vec4 Color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+            glm::vec4 Color = glm::vec4(GetPlaneColor(IndexOfPlane), 1.0f);
 
             // -----------------------------------------------------------------------------
             // Draw
@@ -1067,53 +1082,53 @@ namespace
 
 namespace MR
 {
-namespace ControlManager
-{
-    void OnStart(const SConfiguration& _rConfiguration)
+    namespace ControlManager
     {
-        CMRControlManager::GetInstance().OnStart(_rConfiguration);
-    }
+        void OnStart(const SConfiguration& _rConfiguration)
+        {
+            CMRControlManager::GetInstance().OnStart(_rConfiguration);
+        }
 
-    // -----------------------------------------------------------------------------
+        // -----------------------------------------------------------------------------
 
-    void OnExit()
-    {
-        CMRControlManager::GetInstance().OnExit();
-    }
+        void OnExit()
+        {
+            CMRControlManager::GetInstance().OnExit();
+        }
 
-    // -----------------------------------------------------------------------------
+        // -----------------------------------------------------------------------------
 
-    void Update()
-    {
-        CMRControlManager::GetInstance().Update();
-    }
+        void Update()
+        {
+            CMRControlManager::GetInstance().Update();
+        }
 
-    // -----------------------------------------------------------------------------
+        // -----------------------------------------------------------------------------
 
-    void OnPause()
-    {
-        CMRControlManager::GetInstance().OnPause();
-    }
+        void OnPause()
+        {
+            CMRControlManager::GetInstance().OnPause();
+        }
 
-    // -----------------------------------------------------------------------------
+        // -----------------------------------------------------------------------------
 
-    void OnResume()
-    {
-        CMRControlManager::GetInstance().OnResume();
-    }
+        void OnResume()
+        {
+            CMRControlManager::GetInstance().OnResume();
+        }
 
-    // -----------------------------------------------------------------------------
+        // -----------------------------------------------------------------------------
 
-    void OnDisplayGeometryChanged(int _DisplayRotation, int _Width, int _Height)
-    {
-        CMRControlManager::GetInstance().OnDisplayGeometryChanged(_DisplayRotation, _Width, _Height);
-    }
+        void OnDisplayGeometryChanged(int _DisplayRotation, int _Width, int _Height)
+        {
+            CMRControlManager::GetInstance().OnDisplayGeometryChanged(_DisplayRotation, _Width, _Height);
+        }
 
-    void OnDraw()
-    {
-        CMRControlManager::GetInstance().OnDraw();
-    }
-} // namespace ControlManager
+        void OnDraw()
+        {
+            CMRControlManager::GetInstance().OnDraw();
+        }
+    } // namespace ControlManager
 } // namespace MR
 #else // PLATFORM_ANDROID
 namespace MR
