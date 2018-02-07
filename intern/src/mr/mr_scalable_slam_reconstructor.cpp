@@ -52,7 +52,7 @@ namespace
     
     const unsigned int g_MegabyteSize = 1024u * 1024u;
 
-    const unsigned int g_AABB = 8;
+    const int g_AABB = 8;
 
     /*
     const unsigned int g_RootVolumePoolSize =        g_MegabyteSize;
@@ -74,9 +74,9 @@ namespace
     
     const int g_ICPValueCount = 27;
 
-    const unsigned int g_TileSize1D = 64;
-    const unsigned int g_TileSize2D = 16;
-    const unsigned int g_TileSize3D = 8;
+    const int g_TileSize1D = 64;
+    const int g_TileSize2D = 16;
+    const int g_TileSize3D = 8;
 
     Base::Float3 CubeVertices[] =
     {
