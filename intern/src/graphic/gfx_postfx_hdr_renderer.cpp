@@ -204,7 +204,7 @@ namespace
 
         for (int IndexOfBlur = 0; IndexOfBlur < s_NumberOfBlurStages; ++ IndexOfBlur)
         {
-            int Devisor = glm::pow(2, (IndexOfBlur + 1));
+            int Devisor = static_cast<int>(glm::pow(2, (IndexOfBlur + 1)));
 
             m_DownSampleSizes[IndexOfBlur] = glm::ivec2(Size[0] / Devisor, Size[1] / Devisor);
         }
@@ -577,7 +577,7 @@ namespace
 
         for (int IndexOfBlur = 0; IndexOfBlur < s_NumberOfBlurStages; ++IndexOfBlur)
         {
-            int Devisor = glm::pow(2, (IndexOfBlur + 1));
+            int Devisor = static_cast<int>(glm::pow(2, (IndexOfBlur + 1)));
 
             m_DownSampleSizes[IndexOfBlur] = glm::ivec2(Size[0] / Devisor, Size[1] / Devisor);
         }
@@ -688,8 +688,8 @@ namespace
             m_BlurStagesTextureSetPtrs[IndexOfBlurStage * 2 + 0] = TextureManager::CreateTextureSet(DownSampleTexturePtr						, static_cast<CTexturePtr>(TempTexturePtr));
             m_BlurStagesTextureSetPtrs[IndexOfBlurStage * 2 + 1] = TextureManager::CreateTextureSet(static_cast<CTexturePtr>(TempTexturePtr), static_cast<CTexturePtr>(ResultTexturePtr));
 
-			TextureManager::SetTextureLabel(ResultTexturePtr, "Blur Stage Result");
-			TextureManager::SetTextureLabel(TempTexturePtr  , "Blur Temp Stage Result");
+            TextureManager::SetTextureLabel(ResultTexturePtr, "Blur Stage Result");
+            TextureManager::SetTextureLabel(TempTexturePtr  , "Blur Temp Stage Result");
         }
 
         // -----------------------------------------------------------------------------

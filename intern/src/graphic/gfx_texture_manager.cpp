@@ -594,7 +594,7 @@ namespace
             
             CInternTexture& rTexture = *Texture2DPtr;
             
-            int MipmapPow = glm::pow(2, static_cast<int>(_Mipmap));
+            int MipmapPow = static_cast<int>(glm::pow(2, static_cast<int>(_Mipmap)));
 
             rTexture.m_FileName          = _TexturePtr->GetFileName();
             rTexture.m_pPixels           = _TexturePtr->GetPixels();
