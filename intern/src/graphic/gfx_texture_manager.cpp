@@ -215,9 +215,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Setup default settings in OpenGL
         // -----------------------------------------------------------------------------
-#ifndef PLATFORM_ANDROID
+#ifdef PLATFORM_WINDOWS
         glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-#endif // PLATFORM_ANDROID
+#endif // PLATFORM_WINDOWS
 
         // -----------------------------------------------------------------------------
         // Set dirty handler of data textures
