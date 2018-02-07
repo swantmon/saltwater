@@ -19,7 +19,7 @@ layout(std430, binding = 0) writeonly buffer UHistogramPerGroupBuffer
     float m_HistogramPerGroup[ ];
 };
 
-layout(std430, binding = 1) readonly buffer UExposureHistoryBuffer
+layout(std430, binding = 2) readonly buffer UExposureHistoryBuffer
 {
     float m_ExposureHistory[HISTORY_SIZE];
 };
