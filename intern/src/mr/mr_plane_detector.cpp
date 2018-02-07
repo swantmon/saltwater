@@ -175,9 +175,9 @@ namespace MR
 
     void CPlaneDetector::ExtractPlanes(Float4Vector& _rPlanes)
     {
-        const int WorkGroupsX = DivUp(g_HistogramSize[0], g_TileSize2D);
+        const Base::UInt2 WorkGroups = Base::UInt2(1, 1);
         
-        BufferManager::UploadBufferData(m_PlaneCountBuffer, &WorkGroupsX, 0, sizeof(uint32_t));
+        BufferManager::UploadBufferData(m_PlaneCountBuffer, &WorkGroups, 0, sizeof(WorkGroups));
 
         ContextManager::SetShaderCS(m_PlaneExtractionCSPtr);
         ContextManager::SetConstantBuffer(0, m_HistogramConstantBuffer);
@@ -255,7 +255,8 @@ namespace MR
         DefineStream
             << "#define TILE_SIZE2D " << g_TileSize2D << " \n"
             << "#define MAP_TEXTURE_FORMAT " << Base::CProgramParameters::GetInstance().GetStdString("mr:slam:map_format", "rgba16f") << " \n"
-            << "#define MAX_DETECTABLE_PLANE_COUNT " << m_MaxDetectablePlaneCount << " \n";
+            << "#define MAX_DETECTABLE_PLANE_COUNT " << m_MaxDetectablePlaneCount << " \n"
+            << "#define HISTOGRAM_WIDTH " << g_HistogramSize[0] << " \n";
 
         std::string DefineString = DefineStream.str();
 
