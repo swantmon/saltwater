@@ -24,7 +24,7 @@ layout(triangle_strip, max_vertices = 3) out;
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
-layout(row_major, std140, binding = 2) uniform UB0
+layout(std140, binding = 2) uniform UB0
 {
     uint m_Layer;
 };

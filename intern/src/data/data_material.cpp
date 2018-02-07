@@ -190,28 +190,28 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CMaterial::SetColor(const Base::Float3& _rColor)
+    void CMaterial::SetColor(const glm::vec3& _rColor)
     {
         m_Color = _rColor;
     }
 
     // -----------------------------------------------------------------------------
 
-    const Base::Float3& CMaterial::GetColor() const
+    const glm::vec3& CMaterial::GetColor() const
     {
         return m_Color;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CMaterial::SetTilingOffset(const Base::Float4& _rTilingOffset)
+    void CMaterial::SetTilingOffset(const glm::vec4& _rTilingOffset)
     {
         m_TilingOffset = _rTilingOffset;
     }
 
     // -----------------------------------------------------------------------------
 
-    const Base::Float4& CMaterial::GetTilingOffset() const
+    const glm::vec4& CMaterial::GetTilingOffset() const
     {
         return m_TilingOffset;
     }

@@ -2,7 +2,7 @@
 #include "graphic/gfx_precompiled.h"
 
 #include "base/base_console.h"
-#include "base/base_matrix4x4.h"
+#include "base/base_include_glm.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
@@ -66,31 +66,31 @@ namespace
         void DrawCamera(CCameraPtr _CameraPtr);
         void DrawGizmo(bool _Flag);
         void DrawTexture(CTexturePtr _TexturePtr, const Base::AABB2Float& _rScreenRegion);
-        void DrawText(const std::string& _rText, const Base::Float2& _rScreenPosition, const Base::Float4& _rColor, unsigned int m_TextSize);
+        void DrawText(const std::string& _rText, const glm::vec2& _rScreenPosition, const glm::vec4& _rColor, unsigned int m_TextSize);
         
     private:
         
         struct SPerFrameConstantBuffer
         {
-            Base::Float4x4 m_ViewProjection;
-            Base::Float4x4 m_ModelMatrix;
+            glm::mat4 m_ViewProjection;
+            glm::mat4 m_ModelMatrix;
         };
         
         struct SPerDrawCallConstantBuffer
         {
-            Base::Float4x4 m_ModelMatrix;
+            glm::mat4 m_ModelMatrix;
         };
 
         struct SPerTextInstanceBuffer
         {
-            Base::Float3 m_TextSettings;
-            Base::Float3 m_CharSettings;
-            Base::Float4 m_CharColor;
+            glm::vec3 m_TextSettings;
+            glm::vec3 m_CharSettings;
+            glm::vec4 m_CharColor;
         };
         
         struct SProperties
         {
-            Base::Float4 m_Color;
+            glm::vec4 m_Color;
         };
 
         struct SDebugCamera
@@ -107,8 +107,8 @@ namespace
         struct SDebugText
         {
             std::string  m_Text;
-            Base::Float2 m_ScreenPosition;
-            Base::Float4 m_Color;
+            glm::vec2 m_ScreenPosition;
+            glm::vec4 m_Color;
             unsigned int m_TextSize;
         };
 
@@ -563,7 +563,7 @@ namespace
     
     void CGfxDebugRenderer::RenderCameras()
     {
-        auto RenderFrustumPlane = [&](const Base::Float3& _rTopLeft, const Base::Float3& _rTopRight, const Base::Float3& _rBottomRight, const Base::Float3& _rBottomLeft, const Base::Float3& _rColor)
+        auto RenderFrustumPlane = [&](const glm::vec3& _rTopLeft, const glm::vec3& _rTopRight, const glm::vec3& _rBottomRight, const glm::vec3& _rBottomLeft, const glm::vec3& _rColor)
         {
             float ViewBuffer[12];
 
@@ -638,18 +638,18 @@ namespace
             // -----------------------------------------------------------------------------
             CCameraPtr CameraPtr = CurrentCamera->m_CameraPtr;
             
-            const Base::Float3* pWorldSpaceCameraFrustum = CameraPtr->GetWorldSpaceFrustum();
+            const glm::vec3* pWorldSpaceCameraFrustum = CameraPtr->GetWorldSpaceFrustum();
             
             // -----------------------------------------------------------------------------
             // Render
             // -----------------------------------------------------------------------------
-            RenderFrustumPlane(pWorldSpaceCameraFrustum[5], pWorldSpaceCameraFrustum[1], pWorldSpaceCameraFrustum[0], pWorldSpaceCameraFrustum[4], Base::Float3(1.0f, 0.0f, 0.0f)); // Left
-            RenderFrustumPlane(pWorldSpaceCameraFrustum[4], pWorldSpaceCameraFrustum[6], pWorldSpaceCameraFrustum[2], pWorldSpaceCameraFrustum[0], Base::Float3(0.0f, 1.0f, 0.0f)); // Bottom
-            RenderFrustumPlane(pWorldSpaceCameraFrustum[3], pWorldSpaceCameraFrustum[7], pWorldSpaceCameraFrustum[6], pWorldSpaceCameraFrustum[2], Base::Float3(0.0f, 0.0f, 1.0f)); // Right
-            RenderFrustumPlane(pWorldSpaceCameraFrustum[5], pWorldSpaceCameraFrustum[7], pWorldSpaceCameraFrustum[3], pWorldSpaceCameraFrustum[1], Base::Float3(1.0f, 1.0f, 0.0f)); // Top
+            RenderFrustumPlane(pWorldSpaceCameraFrustum[5], pWorldSpaceCameraFrustum[1], pWorldSpaceCameraFrustum[0], pWorldSpaceCameraFrustum[4], glm::vec3(1.0f, 0.0f, 0.0f)); // Left
+            RenderFrustumPlane(pWorldSpaceCameraFrustum[4], pWorldSpaceCameraFrustum[6], pWorldSpaceCameraFrustum[2], pWorldSpaceCameraFrustum[0], glm::vec3(0.0f, 1.0f, 0.0f)); // Bottom
+            RenderFrustumPlane(pWorldSpaceCameraFrustum[3], pWorldSpaceCameraFrustum[7], pWorldSpaceCameraFrustum[6], pWorldSpaceCameraFrustum[2], glm::vec3(0.0f, 0.0f, 1.0f)); // Right
+            RenderFrustumPlane(pWorldSpaceCameraFrustum[5], pWorldSpaceCameraFrustum[7], pWorldSpaceCameraFrustum[3], pWorldSpaceCameraFrustum[1], glm::vec3(1.0f, 1.0f, 0.0f)); // Top
             
-            RenderFrustumPlane(pWorldSpaceCameraFrustum[5], pWorldSpaceCameraFrustum[7], pWorldSpaceCameraFrustum[6], pWorldSpaceCameraFrustum[4], Base::Float3(1.0f, 0.0f, 1.0f)); // Far
-            RenderFrustumPlane(pWorldSpaceCameraFrustum[1], pWorldSpaceCameraFrustum[3], pWorldSpaceCameraFrustum[2], pWorldSpaceCameraFrustum[0], Base::Float3(0.0f, 1.0f, 1.0f)); // Near
+            RenderFrustumPlane(pWorldSpaceCameraFrustum[5], pWorldSpaceCameraFrustum[7], pWorldSpaceCameraFrustum[6], pWorldSpaceCameraFrustum[4], glm::vec3(1.0f, 0.0f, 1.0f)); // Far
+            RenderFrustumPlane(pWorldSpaceCameraFrustum[1], pWorldSpaceCameraFrustum[3], pWorldSpaceCameraFrustum[2], pWorldSpaceCameraFrustum[0], glm::vec3(0.0f, 1.0f, 1.0f)); // Near
         }
         
         ContextManager::ResetConstantBuffer(0);
@@ -689,9 +689,8 @@ namespace
         SPerFrameConstantBuffer ViewBuffer;
 
         ViewBuffer.m_ViewProjection = CameraPtr->GetProjectionMatrix();
-        ViewBuffer.m_ModelMatrix  = Base::Float4x4::s_Identity;
-        ViewBuffer.m_ModelMatrix *= Base::Float4x4().SetTranslation(0.0f, 0.0f, -1.0f);
-        ViewBuffer.m_ModelMatrix *= Base::Float4x4().SetScale(0.1f) * ViewManager::GetMainCamera()->GetView()->GetRotationMatrix();
+        ViewBuffer.m_ModelMatrix  = glm::mat4(1.0f);
+        // TODO: Change model matrix
 
         BufferManager::UploadBufferData(m_ViewModelVSBuffer->GetBuffer(0), &ViewBuffer);
 
@@ -803,15 +802,14 @@ namespace
             //
             // -----------------------------------------------------------------------------
 
-            Base::Float2 MinPoint   = CurrentTexture->m_ScreenRegion.GetMin();
-            Base::Float2 MaxPoint   = CurrentTexture->m_ScreenRegion.GetMax();
-            Base::Float2 Difference = MaxPoint - MinPoint;
+            glm::vec2 MinPoint   = CurrentTexture->m_ScreenRegion.GetMin();
+            glm::vec2 MaxPoint   = CurrentTexture->m_ScreenRegion.GetMax();
+            glm::vec2 Difference = MaxPoint - MinPoint;
 
             SPerDrawCallConstantBuffer ModelBuffer;
 
-            ModelBuffer.m_ModelMatrix = Base::Float4x4::s_Identity;
-            ModelBuffer.m_ModelMatrix.SetScale(Difference[0], Difference[1], 1.0f);
-            ModelBuffer.m_ModelMatrix.InjectTranslation(MinPoint[0], MinPoint[1], 1.0f);
+            ModelBuffer.m_ModelMatrix = glm::mat4(1.0f);
+            // TODO: Change model matrix
 
             BufferManager::UploadBufferData(m_BaseModelVSBuffer->GetBuffer(0), &ModelBuffer);
 
@@ -857,7 +855,7 @@ namespace
 
     void CGfxDebugRenderer::RenderTexts()
     {
-        Base::Int2 ScreenSize = Main::GetActiveWindowSize();
+        glm::ivec2 ScreenSize = Main::GetActiveWindowSize();
 
         CDebugTexts::const_iterator CurrentText = m_DebugTexts.begin();
         CDebugTexts::const_iterator EndOfTexts  = m_DebugTexts.end();
@@ -901,8 +899,8 @@ namespace
 // 
 //         for (; CurrentText != EndOfTexts; ++CurrentText)
 //         {
-//             Base::Float2 Start    = CurrentText->m_ScreenPosition * Base::Float2(static_cast<float>(ScreenSize[0]), static_cast<float>(ScreenSize[1]));
-//             Base::Float2 Padding  = Start;
+//             glm::vec2 Start    = CurrentText->m_ScreenPosition * glm::vec2(static_cast<float>(ScreenSize[0]), static_cast<float>(ScreenSize[1]));
+//             glm::vec2 Padding  = Start;
 //             std::string  Text     = CurrentText->m_Text;
 //             float        TextSize = static_cast<float>(CurrentText->m_TextSize);
 // 
@@ -920,15 +918,15 @@ namespace
 // 
 //                 unsigned char DrawLetter = CurrentLetter - 32;
 // 
-//                 Base::Float2 LetterPosition;
+//                 glm::vec2 LetterPosition;
 // 
 //                 LetterPosition[0] = static_cast<float>(DrawLetter % 16);
 //                 LetterPosition[1] = static_cast<float>(DrawLetter / 16);
 // 
 //                 pInstance = &(static_cast<SPerTextInstanceBuffer*>(pInstances))[NumberOfLetters++];
 // 
-//                 pInstance->m_TextSettings = Base::Float3(TextSize, Padding[0], Padding[1]);
-//                 pInstance->m_CharSettings = Base::Float3(1.0f / 16.0f, LetterPosition[0], LetterPosition[1]);
+//                 pInstance->m_TextSettings = glm::vec3(TextSize, Padding[0], Padding[1]);
+//                 pInstance->m_CharSettings = glm::vec3(1.0f / 16.0f, LetterPosition[0], LetterPosition[1]);
 //                 pInstance->m_CharColor    = CurrentText->m_Color;
 // 
 //                 if (NumberOfLetters == s_MaxNumberOfInstances)
@@ -1014,7 +1012,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxDebugRenderer::DrawText(const std::string& _rText, const Base::Float2& _rScreenPosition, const Base::Float4& _rColor, unsigned int _TextSize)
+    void CGfxDebugRenderer::DrawText(const std::string& _rText, const glm::vec2& _rScreenPosition, const glm::vec4& _rColor, unsigned int _TextSize)
     {
         SDebugText NewDebugText;
 
@@ -1152,7 +1150,7 @@ namespace DebugRenderer
 
     // -----------------------------------------------------------------------------
 
-    void DrawText(const std::string& _rText, const Base::Float2& _rScreenPosition, const Base::Float4& _rColor, unsigned int _TextSize)
+    void DrawText(const std::string& _rText, const glm::vec2& _rScreenPosition, const glm::vec4& _rColor, unsigned int _TextSize)
     {
         CGfxDebugRenderer::GetInstance().DrawText(_rText, _rScreenPosition, _rColor, _TextSize);
     }

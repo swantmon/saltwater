@@ -1,16 +1,8 @@
-//
-//  gfx_debug_renderer.h
-//  graphic
-//
-//  Created by Tobias Schwandt on 03/12/14.
-//  Copyright (c) 2014 TU Ilmenau. All rights reserved.
-//
 
 #pragma once
 
 #include "base/base_aabb2.h"
-#include "base/base_vector2.h"
-#include "base/base_vector3.h"
+#include "base/base_include_glm.h"
 
 #include "graphic/gfx_camera.h"
 #include "graphic/gfx_texture.h"
@@ -42,6 +34,6 @@ namespace DebugRenderer
     void DrawCamera(Gfx::CCameraPtr _CameraPtr);
     void DrawGizmo(bool _Flag);
     void DrawTexture(Gfx::CTexturePtr _TexturePtr, const Base::AABB2Float& _rScreenRegion);
-    void DrawText(const std::string& _rText, const Base::Float2& _rScreenPosition, const Base::Float4& _rColor, unsigned int _TextSize);
+    void DrawText(const std::string& _rText, const glm::vec2& _rScreenPosition, const glm::vec4& _rColor, unsigned int _TextSize);
 } // namespace DebugRenderer
 } // namespace Gfx

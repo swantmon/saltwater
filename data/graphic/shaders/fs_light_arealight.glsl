@@ -15,7 +15,7 @@ const float LUT_SIZE  = 32.0f;
 const float LUT_SCALE = (LUT_SIZE - 1.0f) / LUT_SIZE;
 const float LUT_BIAS  = 0.5f / LUT_SIZE;
 
-layout(row_major, std140, binding = 1) uniform UB1
+layout(std140, binding = 1) uniform UB1
 {
     vec4  m_Color;
     vec4  m_Position;

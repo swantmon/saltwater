@@ -1,6 +1,8 @@
 
 #include "camera/cam_precompiled.h"
 
+#include "base/base_include_glm.h"
+
 #include "camera/cam_control_manager.h"
 #include "camera/cam_game_control.h"
 
@@ -72,14 +74,14 @@ namespace Cam
             // -----------------------------------------------------------------------------
             // Position
             // -----------------------------------------------------------------------------
-            m_Position.Set(m_pMainCameraEntity->GetWorldPosition());
+            m_Position = m_pMainCameraEntity->GetWorldPosition();
 
             // -----------------------------------------------------------------------------
             // Rotation
             // -----------------------------------------------------------------------------
-            Base::Float3& rRotationInDegree = pTransformationFacet->GetRotation();
+            glm::vec3& rRotationInDegree = pTransformationFacet->GetRotation();
 
-            m_RotationMatrix.SetRotation(rRotationInDegree[0], rRotationInDegree[1], rRotationInDegree[2]);
+            m_RotationMatrix = glm::eulerAngleXYZ(rRotationInDegree[0], rRotationInDegree[1], rRotationInDegree[2]);
         }
 
         if (m_pMainCameraEntity->GetDirtyFlags() & Dt::CEntity::DirtyDetail)

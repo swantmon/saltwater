@@ -3,7 +3,7 @@
 
 #include "base/base_console.h"
 
-#ifdef __ANDROID__
+#ifdef PLATFORM_ANDROID
 
 #include <android/native_window.h>
 
@@ -58,7 +58,7 @@ typedef void (GFX_APIENTRY *GfxGetQueryObjectuivEXT)(GLuint id, GLenum pname, GL
 typedef void (GFX_APIENTRY *GfxGetQueryObjecti64vEXT)(GLuint id, GLenum pname, GLint64 *params);
 typedef void (GFX_APIENTRY *GfxGetQueryObjectui64vEXT)(GLuint id, GLenum pname, GLuint64 *params);
 
-#else // __ANDROID__
+#else // PLATFORM_ANDROID
 
 #include "GL/glew.h"
 #include "GL/wglew.h"

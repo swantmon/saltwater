@@ -5,13 +5,9 @@
 #include "base/base_console.h"
 #include "base/base_crc.h"
 #include "base/base_exception.h"
-#include "base/base_math_constants.h"
-#include "base/base_math_operations.h"
 #include "base/base_memory.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
-#include "base/base_vector2.h"
-#include "base/base_vector3.h"
 #include "base/base_pool.h"
 
 #include "core/core_asset_manager.h"
@@ -337,7 +333,7 @@ namespace
 
                             for (unsigned int CurrentVertex = 0; CurrentVertex < NumberOfVertices; ++CurrentVertex)
                             {
-                                Base::Float3 CurrentPosition(pVertexData[CurrentVertex].x, pVertexData[CurrentVertex].y, pVertexData[CurrentVertex].z);
+                                glm::vec3 CurrentPosition(pVertexData[CurrentVertex].x, pVertexData[CurrentVertex].y, pVertexData[CurrentVertex].z);
 
                                 rNewSurface.m_pPositions[CurrentVertex][0] = pVertexData[CurrentVertex].x;
                                 rNewSurface.m_pPositions[CurrentVertex][1] = pVertexData[CurrentVertex].y;
@@ -409,8 +405,8 @@ namespace
                                     MaterialDescriptor.m_Roughness       = 1.0f;
                                     MaterialDescriptor.m_Reflectance     = 0.0f;
                                     MaterialDescriptor.m_MetalMask       = 0.0f;
-                                    MaterialDescriptor.m_AlbedoColor     = Base::Float3(1.0f);
-                                    MaterialDescriptor.m_TilingOffset    = Base::Float4(1.0f, 1.0f, 0.0f, 0.0f);
+                                    MaterialDescriptor.m_AlbedoColor     = glm::vec3(1.0f);
+                                    MaterialDescriptor.m_TilingOffset    = glm::vec4(1.0f, 1.0f, 0.0f, 0.0f);
                                     MaterialDescriptor.m_pFileName       = MaterialExaminer.c_str();
 
                                     rNewSurface.m_pMaterial = &MaterialManager::CreateMaterial(MaterialDescriptor);
@@ -432,8 +428,8 @@ namespace
                                 MaterialDescriptor.m_Roughness       = 1.0f;
                                 MaterialDescriptor.m_Reflectance     = 0.0f;
                                 MaterialDescriptor.m_MetalMask       = 0.0f;
-                                MaterialDescriptor.m_AlbedoColor     = Base::Float3(1.0f);
-                                MaterialDescriptor.m_TilingOffset    = Base::Float4(1.0f, 1.0f, 0.0f, 0.0f);
+                                MaterialDescriptor.m_AlbedoColor     = glm::vec3(1.0f);
+                                MaterialDescriptor.m_TilingOffset    = glm::vec4(1.0f, 1.0f, 0.0f, 0.0f);
                                 MaterialDescriptor.m_pFileName       = 0;
 
                                 // -----------------------------------------------------------------------------
@@ -650,12 +646,12 @@ namespace
         {
             for(unsigned int IndexOfSlice = 0; IndexOfSlice < Width; ++ IndexOfSlice)
             {
-                float THETA = static_cast<float>(IndexOfStack) / static_cast<float>(Height - 1) * Base::SConstants<float>::s_Pi;
-                float PHI   = static_cast<float>(IndexOfSlice) / static_cast<float>(Width  - 1) * Base::SConstants<float>::s_Pi * 2.0f;
+                float THETA = static_cast<float>(IndexOfStack) / static_cast<float>(Height - 1) * glm::pi<float>();
+                float PHI   = static_cast<float>(IndexOfSlice) / static_cast<float>(Width  - 1) * glm::pi<float>() * 2.0f;
                 
-                rBoxSurface.m_pPositions[IndexOfVertex][0] =  Base::Sin(THETA) * Base::Cos(PHI) * _Radius;
-                rBoxSurface.m_pPositions[IndexOfVertex][1] =  Base::Cos(THETA) * _Radius;
-                rBoxSurface.m_pPositions[IndexOfVertex][2] = -Base::Sin(THETA) * Base::Sin(PHI) * _Radius;
+                rBoxSurface.m_pPositions[IndexOfVertex][0] =  glm::sin(THETA) * glm::cos(PHI) * _Radius;
+                rBoxSurface.m_pPositions[IndexOfVertex][1] =  glm::cos(THETA) * _Radius;
+                rBoxSurface.m_pPositions[IndexOfVertex][2] = -glm::sin(THETA) * glm::sin(PHI) * _Radius;
                 
                 ++ IndexOfVertex;
             }
@@ -745,17 +741,17 @@ namespace
         // -----------------------------------------------------------------------------
         unsigned int IndexOfVertex = 0;
         
-        rBoxSurface.m_pPositions[IndexOfVertex ++] = Base::Float3(0.0f, 0.0f, 0.0f);
-        rBoxSurface.m_pPositions[IndexOfVertex ++] = Base::Float3(0.0f, 0.0f, - _Height);
+        rBoxSurface.m_pPositions[IndexOfVertex ++] = glm::vec3(0.0f, 0.0f, 0.0f);
+        rBoxSurface.m_pPositions[IndexOfVertex ++] = glm::vec3(0.0f, 0.0f, - _Height);
         
         for( unsigned int IndexOfSlice = 0; IndexOfSlice < _Slices + 1; ++IndexOfSlice )
         {
             assert( IndexOfVertex < NumberOfVertices);
             
-            float PHI   = static_cast<float>(IndexOfSlice) / (_Slices) * Base::SConstants<float>::s_Pi * 2.0f;
+            float PHI   = static_cast<float>(IndexOfSlice) / (_Slices) * glm::pi<float>() * 2.0f;
             
-            rBoxSurface.m_pPositions[IndexOfVertex][0] = Base::Cos(PHI) * _Radius;
-            rBoxSurface.m_pPositions[IndexOfVertex][1] = Base::Sin(PHI) * _Radius;
+            rBoxSurface.m_pPositions[IndexOfVertex][0] = glm::cos(PHI) * _Radius;
+            rBoxSurface.m_pPositions[IndexOfVertex][1] = glm::sin(PHI) * _Radius;
             rBoxSurface.m_pPositions[IndexOfVertex][2] = - _Height;
             
             ++ IndexOfVertex;
@@ -831,10 +827,10 @@ namespace
         // -----------------------------------------------------------------------------
         unsigned int IndexOfVertex = 0;
         
-        rBoxSurface.m_pPositions[IndexOfVertex ++] = Base::Float3(_AxisX         , _AxisY + _Height, 0.0f);
-        rBoxSurface.m_pPositions[IndexOfVertex ++] = Base::Float3(_AxisX + _Width, _AxisY +_Height , 0.0f);
-        rBoxSurface.m_pPositions[IndexOfVertex ++] = Base::Float3(_AxisX + _Width, _AxisY          , 0.0f);
-        rBoxSurface.m_pPositions[IndexOfVertex ++] = Base::Float3(_AxisX         , _AxisY          , 0.0f);
+        rBoxSurface.m_pPositions[IndexOfVertex ++] = glm::vec3(_AxisX         , _AxisY + _Height, 0.0f);
+        rBoxSurface.m_pPositions[IndexOfVertex ++] = glm::vec3(_AxisX + _Width, _AxisY +_Height , 0.0f);
+        rBoxSurface.m_pPositions[IndexOfVertex ++] = glm::vec3(_AxisX + _Width, _AxisY          , 0.0f);
+        rBoxSurface.m_pPositions[IndexOfVertex ++] = glm::vec3(_AxisX         , _AxisY          , 0.0f);
         
         assert(IndexOfVertex == NumberOfVertices);
         
@@ -1008,7 +1004,7 @@ namespace
         // -----------------------------------------------------------------------------
         assert(NumberOfPositions > 0);
         
-        rNewSurface.m_pPositions = static_cast<Base::Float3*>(Base::CMemory::Allocate(sizeof(Base::Float3) * NumberOfPositions));
+        rNewSurface.m_pPositions = static_cast<glm::vec3*>(Base::CMemory::Allocate(sizeof(glm::vec3) * NumberOfPositions));
         
         // -----------------------------------------------------------------------------
         // Normals
@@ -1017,7 +1013,7 @@ namespace
         
         if (NumberOfNormals > 0)
         {
-            rNewSurface.m_pNormals = static_cast<Base::Float3*>(Base::CMemory::Allocate(sizeof(Base::Float3) * NumberOfNormals));
+            rNewSurface.m_pNormals = static_cast<glm::vec3*>(Base::CMemory::Allocate(sizeof(glm::vec3) * NumberOfNormals));
         }
         
         // -----------------------------------------------------------------------------
@@ -1027,7 +1023,7 @@ namespace
         
         if (NumberOfTagents > 0)
         {
-            rNewSurface.m_pTangents = static_cast<Base::Float3*>(Base::CMemory::Allocate(sizeof(Base::Float3) * NumberOfTagents));
+            rNewSurface.m_pTangents = static_cast<glm::vec3*>(Base::CMemory::Allocate(sizeof(glm::vec3) * NumberOfTagents));
         }
         
         // -----------------------------------------------------------------------------
@@ -1037,7 +1033,7 @@ namespace
         
         if (NumberOfBitangents > 0)
         {
-            rNewSurface.m_pBitangents = static_cast<Base::Float3*>(Base::CMemory::Allocate(sizeof(Base::Float3) * NumberOfBitangents));
+            rNewSurface.m_pBitangents = static_cast<glm::vec3*>(Base::CMemory::Allocate(sizeof(glm::vec3) * NumberOfBitangents));
         }
         
         // -----------------------------------------------------------------------------
@@ -1047,7 +1043,7 @@ namespace
         
         if (NumberOfTexCoords > 0)
         {
-            rNewSurface.m_pTexCoords = static_cast<Base::Float2*>(Base::CMemory::Allocate(sizeof(Base::Float2) * NumberOfTexCoords));
+            rNewSurface.m_pTexCoords = static_cast<glm::vec2*>(Base::CMemory::Allocate(sizeof(glm::vec2) * NumberOfTexCoords));
         }
         
         return rNewSurface;

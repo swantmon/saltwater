@@ -39,7 +39,7 @@ namespace
         bool GetMouseButtonDown(Base::CInputEvent::EKey _Key);
         bool GetMouseButtonUp(Base::CInputEvent::EKey _Key);
 
-        Base::Float2& GetMousePosition();
+        glm::vec2& GetMousePosition();
         float GetMouseScrollDelta();
 
     private:
@@ -49,7 +49,7 @@ namespace
             int          m_ButtonLeft;
             int          m_ButtonMiddle;
             int          m_ButtonRight;
-            Base::Float2 m_LatestMousePosition;
+            glm::vec2 m_LatestMousePosition;
             float        m_ScrollDelta;
         };
 
@@ -263,7 +263,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    Base::Float2& CGuiInputManager::GetMousePosition()
+    glm::vec2& CGuiInputManager::GetMousePosition()
     {
         return m_Mouse.m_LatestMousePosition;
     }
@@ -407,7 +407,7 @@ namespace InputManager
 
     // -----------------------------------------------------------------------------
 
-    Base::Float2& GetMousePosition()
+    glm::vec2& GetMousePosition()
     {
         return CGuiInputManager::GetInstance().GetMousePosition();
     }

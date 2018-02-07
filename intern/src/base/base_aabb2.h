@@ -1,15 +1,8 @@
-//
-//  base_aabb2.h
-//  base
-//
-//  Created by Tobias Schwandt on 29/09/14.
-//  Copyright (c) 2014 TU Ilmenau. All rights reserved.
-//
 
 #pragma once
 
 #include "base/base_defines.h"
-#include "base/base_vector2.h"
+#include "base/base_include_glm.h"
 
 #include <assert.h>
 
@@ -37,7 +30,7 @@ namespace MATH
         typedef X*           XPtr;
         typedef const X*     XConstPtr;
         
-        typedef CVector2<T>  CCorner;
+        typedef glm::tvec2<T> CCorner;
         
     public:
         
@@ -76,7 +69,7 @@ namespace MATH
         
     public:
         
-        inline const CCorner BuildCorner(const Base::Int2& _rIndices) const;
+        inline const CCorner BuildCorner(const glm::ivec2& _rIndices) const;
         
     public:
         
@@ -291,7 +284,7 @@ namespace MATH
     // -----------------------------------------------------------------------------
     
     template<typename T>
-    const typename CAABB2<T>::CCorner CAABB2<T>::BuildCorner(const Base::Int2& _rIndices) const
+    const typename CAABB2<T>::CCorner CAABB2<T>::BuildCorner(const glm::ivec2& _rIndices) const
     {
         assert(_rIndices[0] >=0 && _rIndices[0] < 4);
         assert(_rIndices[1] >=0 && _rIndices[1] < 4);

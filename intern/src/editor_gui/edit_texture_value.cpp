@@ -167,7 +167,7 @@ namespace Edit
 
     void CTextureValue::OnTextureInfo(Edit::CMessage& _rMessage)
     {
-        (void)_rMessage;
+        BASE_UNUSED(_rMessage);
     }
 
     // -----------------------------------------------------------------------------

@@ -6,6 +6,7 @@
 #include "base/base_crc.h"
 #include "base/base_console.h"
 #include "base/base_exception.h"
+#include "base/base_include_glm.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
@@ -185,11 +186,11 @@ namespace
         // -----------------------------------------------------------------------------
         // Create 2x2 dummy texture
         // -----------------------------------------------------------------------------
-        Base::Byte4 Pixels[4];
-        Pixels[0] = Base::Byte4(1, 0, 0, 1);
-        Pixels[1] = Base::Byte4(0, 1, 0, 1);
-        Pixels[2] = Base::Byte4(0, 0, 1, 1);
-        Pixels[3] = Base::Byte4(1, 1, 0, 1);
+        glm::tvec4<char> Pixels[4];
+        Pixels[0] = glm::tvec4<char>(1, 0, 0, 1);
+        Pixels[1] = glm::tvec4<char>(0, 1, 0, 1);
+        Pixels[2] = glm::tvec4<char>(0, 0, 1, 1);
+        Pixels[3] = glm::tvec4<char>(1, 1, 0, 1);
 
         Gfx::STextureDescriptor TextureDescriptor;
 
@@ -214,9 +215,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Setup default settings in OpenGL
         // -----------------------------------------------------------------------------
-#ifndef __ANDROID__
+#ifdef PLATFORM_WINDOWS
         glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-#endif // __ANDROID__
+#endif // PLATFORM_WINDOWS
 
         // -----------------------------------------------------------------------------
         // Set dirty handler of data textures
@@ -373,7 +374,7 @@ namespace
 
     void CGfxTextureManager::ClearTextureLayer(CTexturePtr _TexturePtr, const void* _pData, int _Layer)
     {
-#ifdef __ANDROID__
+#ifdef PLATFORM_ANDROID
         BASE_CONSOLE_ERROR("Clearing textures is currently not supported on Android");
         assert(false); // TODO: implement
 #else
@@ -381,7 +382,7 @@ namespace
         // Renderdoc crashes when _pData is nullptr but OpenGL allows NULL
         // Therefore we create a dummy value until Renderdoc is fixed
 
-        Base::Int4 Dummy = Base::Int4(0);
+        glm::ivec4 Dummy = glm::ivec4(0);
 
         if (_pData == nullptr)
         {
@@ -405,14 +406,14 @@ namespace
         {
             glClearTexSubImage(TextureHandle, MipIndex, 0, 0, _Layer, Width >> MipIndex, Height >> MipIndex, 1, Format, Type, _pData);
         }
-#endif // __ANDROID__
+#endif // PLATFORM_ANDROID
     }
     
     // -----------------------------------------------------------------------------
 
     void CGfxTextureManager::ClearTexture(CTexturePtr _TexturePtr, const void* _pData)
     {
-#ifdef __ANDROID__
+#ifdef PLATFORM_ANDROID
         BASE_CONSOLE_ERROR("Clearing textures is currently not supported on Android");
         assert(false); // TODO: implement
 #else
@@ -420,7 +421,7 @@ namespace
         // Renderdoc crashes when _pData is nullptr but OpenGL allows NULL
         // Therefore we create a dummy value until Renderdoc is fixed
 
-        Base::Int4 Dummy = Base::Int4(0);
+        glm::ivec4 Dummy = glm::ivec4(0);
 
         if (_pData == nullptr)
         {
@@ -443,7 +444,7 @@ namespace
         {
             glClearTexSubImage(TextureHandle, MipIndex, 0, 0, 0, Width >> MipIndex, Height >> MipIndex, LayerCount, Format, Type, _pData);
         }
-#endif // __ANDROID__
+#endif // PLATFORM_ANDROID
     }
 
     // -----------------------------------------------------------------------------
@@ -458,8 +459,8 @@ namespace
         assert(_TexturePtr.IsValid());
         assert(_pBytes != 0);
         
-        Base::UInt2 Offset     = _rTargetRect[0];
-        Base::UInt2 UpdateSize = _rTargetRect[1] - _rTargetRect[0];
+        glm::uvec2 Offset     = _rTargetRect[0];
+        glm::uvec2 UpdateSize = _rTargetRect[1] - _rTargetRect[0];
         
         assert(_TexturePtr->GetNumberOfPixelsU() <= UpdateSize[0] + Offset[0]);
         assert(_TexturePtr->GetNumberOfPixelsV() <= UpdateSize[1] + Offset[1]);
@@ -494,14 +495,14 @@ namespace
         // -----------------------------------------------------------------------------
         // Get informations
         // -----------------------------------------------------------------------------
-        Base::UInt2 Size = _rTargetRect.Size();
+        glm::uvec2 Size = _rTargetRect.Size();
 
         assert(_pBytes != 0);
         assert(_TextureArrayPtr.IsValid());
         assert(_TextureArrayPtr->GetNumberOfPixelsU() == Size[0] && _TextureArrayPtr->GetNumberOfPixelsV() == Size[1]);
         
-        Base::UInt2 Offset     = Base::UInt2(0);
-        Base::UInt2 UpdateSize = Base::UInt2(_TextureArrayPtr->GetNumberOfPixelsU(), _TextureArrayPtr->GetNumberOfPixelsV());
+        glm::uvec2 Offset     = glm::uvec2(0);
+        glm::uvec2 UpdateSize = glm::uvec2(_TextureArrayPtr->GetNumberOfPixelsU(), _TextureArrayPtr->GetNumberOfPixelsV());
         
         assert(Size[0] <= UpdateSize[0] + Offset[0]);
         assert(Size[1] <= UpdateSize[1] + Offset[1]);
@@ -544,8 +545,8 @@ namespace
         assert(_TexturePtr     .IsValid());
         assert(_TextureArrayPtr->GetNumberOfPixelsU() == _TexturePtr->GetNumberOfPixelsU() && _TextureArrayPtr->GetNumberOfPixelsV() == _TexturePtr->GetNumberOfPixelsV());
         
-        Base::UInt2 Offset     = Base::UInt2(0);
-        Base::UInt2 UpdateSize = Base::UInt2(_TextureArrayPtr->GetNumberOfPixelsU(), _TextureArrayPtr->GetNumberOfPixelsV());
+        glm::uvec2 Offset     = glm::uvec2(0);
+        glm::uvec2 UpdateSize = glm::uvec2(_TextureArrayPtr->GetNumberOfPixelsU(), _TextureArrayPtr->GetNumberOfPixelsV());
         
         assert(_TexturePtr->GetNumberOfPixelsU() <= UpdateSize[0] + Offset[0]);
         assert(_TexturePtr->GetNumberOfPixelsV() <= UpdateSize[1] + Offset[1]);
@@ -593,12 +594,12 @@ namespace
             
             CInternTexture& rTexture = *Texture2DPtr;
             
-            unsigned int MipmapPow = Base::Pow(2, _Mipmap);
+            int MipmapPow = static_cast<int>(glm::pow(2, static_cast<int>(_Mipmap)));
 
             rTexture.m_FileName          = _TexturePtr->GetFileName();
             rTexture.m_pPixels           = _TexturePtr->GetPixels();
-            rTexture.m_NumberOfPixels[0] = static_cast<Base::U16>(Base::Max(static_cast<unsigned int>(_TexturePtr->GetNumberOfPixelsU()) / MipmapPow, 1u));
-            rTexture.m_NumberOfPixels[1] = static_cast<Base::U16>(Base::Max(static_cast<unsigned int>(_TexturePtr->GetNumberOfPixelsV()) / MipmapPow, 1u));
+            rTexture.m_NumberOfPixels[0] = static_cast<Gfx::CTexture::BPixels>(glm::max(static_cast<int>(_TexturePtr->GetNumberOfPixelsU()) / MipmapPow, 1));
+            rTexture.m_NumberOfPixels[1] = static_cast<Gfx::CTexture::BPixels>(glm::max(static_cast<int>(_TexturePtr->GetNumberOfPixelsV()) / MipmapPow, 1));
             
             rTexture.m_Info.m_Access            = _TexturePtr->GetAccess();
             rTexture.m_Info.m_Binding           = _TexturePtr->GetBinding();
@@ -797,9 +798,9 @@ namespace
                     Gfx::CTexture*    pGraphicTexture = m_TexturesByHash.at(Hash);
                     Dt::CTextureCube* pDataTexture    = static_cast<Dt::CTextureCube*>(_pTexture);
 
-                    Base::UInt2 CubemapResolution = Base::UInt2(pDataTexture->GetNumberOfPixelsU(), pDataTexture->GetNumberOfPixelsV());
+                    glm::uvec2 CubemapResolution = glm::uvec2(pDataTexture->GetNumberOfPixelsU(), pDataTexture->GetNumberOfPixelsV());
 
-                    Base::AABB2UInt CubemapRect(Base::UInt2(0), CubemapResolution);
+                    Base::AABB2UInt CubemapRect(glm::uvec2(0), CubemapResolution);
 
                     CopyToTextureArray2D(pGraphicTexture, 0, CubemapRect, CubemapRect[1][0], pDataTexture->GetFace(Dt::CTextureCube::Right)->GetPixels(), false);
                     CopyToTextureArray2D(pGraphicTexture, 1, CubemapRect, CubemapRect[1][0], pDataTexture->GetFace(Dt::CTextureCube::Left)->GetPixels(), false);
@@ -817,9 +818,9 @@ namespace
 
                     if (pDataTexture->GetPixels() != nullptr)
                     {   
-                        Base::UInt2 TextureResolution = Base::UInt2(pDataTexture->GetNumberOfPixelsU(), pDataTexture->GetNumberOfPixelsV());
+                        glm::uvec2 TextureResolution = glm::uvec2(pDataTexture->GetNumberOfPixelsU(), pDataTexture->GetNumberOfPixelsV());
 
-                        Base::AABB2UInt TargetRect(Base::UInt2(0), TextureResolution);
+                        Base::AABB2UInt TargetRect(glm::uvec2(0), TextureResolution);
 
                         CopyToTexture2D(pGraphicTexture, TargetRect, TargetRect[1][0], pDataTexture->GetPixels(), true);
                     }
@@ -891,7 +892,7 @@ namespace
 
             PathToTexture = Core::AssetManager::GetPathToAssets() + "/" + _rDescriptor.m_pFileName;
 
-#ifdef __ANDROID__
+#ifdef PLATFORM_ANDROID
             const char* pPathToTexture = 0;
 
             pPathToTexture = PathToTexture.c_str();
@@ -907,7 +908,7 @@ namespace
             {
                 PathToTexture = Core::AssetManager::GetPathToData() + g_PathToDataTextures + _rDescriptor.m_pFileName;
 
-#ifdef __ANDROID__
+#ifdef PLATFORM_ANDROID
                 pPathToTexture = PathToTexture.c_str();
 #else
                 pPathToTexture = reinterpret_cast<const wchar_t*>(PathToTexture.c_str());
@@ -949,7 +950,7 @@ namespace
 
         if (_rDescriptor.m_NumberOfMipMaps == STextureDescriptor::s_GenerateAllMipMaps)
         {
-            NumberOfMipmaps = static_cast<int>(Base::Log2(static_cast<float>(Base::Max(ImageWidth, ImageHeight)))) + 1;
+            NumberOfMipmaps = static_cast<int>(glm::log2(static_cast<float>(glm::max(ImageWidth, ImageHeight)))) + 1;
         }
         else if (_rDescriptor.m_NumberOfMipMaps == STextureDescriptor::s_NumberOfMipMapsFromSource)
         {
@@ -1196,7 +1197,7 @@ namespace
 
         if (_rDescriptor.m_NumberOfMipMaps == STextureDescriptor::s_GenerateAllMipMaps)
         {
-            NumberOfMipmaps = static_cast<int>(Base::Log2(static_cast<float>(Base::Max(ImageWidth, ImageHeight)))) + 1;
+            NumberOfMipmaps = static_cast<int>(glm::log2(static_cast<float>(glm::max(ImageWidth, ImageHeight)))) + 1;
         }
         
         // -----------------------------------------------------------------------------
@@ -1426,7 +1427,7 @@ namespace
 
             PathToTexture = Core::AssetManager::GetPathToAssets() + "/" + _rDescriptor.m_pFileName;
 
-#ifdef __ANDROID__
+#ifdef PLATFORM_ANDROID
             const char* pPathToTexture = 0;
 
             pPathToTexture = PathToTexture.c_str();
@@ -1442,7 +1443,7 @@ namespace
             {
                 PathToTexture = Core::AssetManager::GetPathToData() + g_PathToDataTextures + _rDescriptor.m_pFileName;
 
-#ifdef __ANDROID__
+#ifdef PLATFORM_ANDROID
                 pPathToTexture = PathToTexture.c_str();
 #else
                 pPathToTexture = reinterpret_cast<const wchar_t*>(PathToTexture.c_str());
@@ -1490,7 +1491,7 @@ namespace
 
         if (_rDescriptor.m_NumberOfMipMaps == STextureDescriptor::s_GenerateAllMipMaps)
         {
-            NumberOfMipmaps = static_cast<int>(Base::Log2(static_cast<float>(Base::Max(ImageWidth, ImageHeight)))) + 1;
+            NumberOfMipmaps = static_cast<int>(glm::log2(static_cast<float>(glm::max(ImageWidth, ImageHeight)))) + 1;
         }
         
         // -----------------------------------------------------------------------------

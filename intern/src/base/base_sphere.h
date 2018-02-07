@@ -1,15 +1,8 @@
-//
-//  base_sphere.h
-//  base
-//
-//  Created by Tobias Schwandt on 16/02/15.
-//  Copyright (c) 2015 TU Ilmenau. All rights reserved.
-//
 
 #pragma once
 
 #include "base/base_defines.h"
-#include "base/base_vector3.h"
+#include "base/base_include_glm.h"
 
 #include <assert.h>
 
@@ -28,15 +21,15 @@ namespace MATH
         
     public:
         
-        typedef CSphere<T>   CThis;
-        typedef T            X;
-        typedef const X      XConst;
-        typedef X&           XRef;
-        typedef const X&     XConstRef;
-        typedef X*           XPtr;
-        typedef const X*     XConstPtr;
+        typedef CSphere<T> CThis;
+        typedef T          X;
+        typedef const X    XConst;
+        typedef X&         XRef;
+        typedef const X&   XConstRef;
+        typedef X*         XPtr;
+        typedef const X*   XConstPtr;
         
-        typedef CVector3<T>  CVector;
+        typedef glm::tvec3<T> CVector;
         
     public:
         
@@ -229,7 +222,7 @@ namespace MATH
     template<typename T>
     bool CSphere<T>::Contains(const CVector& _rPoint) const
     {
-        X Distance = (m_Center - _rPoint).Length();
+        X Distance = (m_Center - _rPoint).length();
         
         return Distance <= m_Radius;
     }
@@ -239,7 +232,7 @@ namespace MATH
     template<typename T>
     bool CSphere<T>::Contains(const CThis& _rSphere) const
     {
-        X Distance        = (m_Center - _rSphere.m_Center).Length();
+        X Distance        = (m_Center - _rSphere.m_Center).length();
         X MinimalDistance = m_Radius - _rSphere.m_Radius;
         
         return Distance <= MinimalDistance;
@@ -250,7 +243,7 @@ namespace MATH
     template<typename T>
     bool CSphere<T>::Intersects(const CThis& _rSphere) const
     {
-        X Distance        = (m_Center - _rSphere.m_Center).Length();
+        X Distance        = (m_Center - _rSphere.m_Center).length();
         X MinimalDistance = m_Radius + _rSphere.m_Radius;
         
         return Distance <= MinimalDistance;

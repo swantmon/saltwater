@@ -6,10 +6,10 @@
 namespace Dt
 {
     CTransformationFacet::CTransformationFacet()
-        : m_WorldMatrix()
-        , m_Position   (Base::Float3::s_Zero)
-        , m_Rotation   (Base::Float3::s_Zero)
-        , m_Scale      (Base::Float3::s_One)
+        : m_WorldMatrix(1.0f)
+        , m_Position   (0.0f)
+        , m_Rotation   (0.0f)
+        , m_Scale      (1.0f)
     {
 
     }
@@ -24,84 +24,84 @@ namespace Dt
     // -----------------------------------------------------------------------------
 
 
-    void CTransformationFacet::SetPosition(const Base::Float3& _rPosition)
+    void CTransformationFacet::SetPosition(const glm::vec3& _rPosition)
     {
         m_Position = _rPosition;
     }
 
     // -----------------------------------------------------------------------------
 
-    Base::Float3& CTransformationFacet::GetPosition()
+    glm::vec3& CTransformationFacet::GetPosition()
     {
         return m_Position;
     }
 
     // -----------------------------------------------------------------------------
 
-    const Base::Float3& CTransformationFacet::GetPosition() const
+    const glm::vec3& CTransformationFacet::GetPosition() const
     {
         return m_Position;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CTransformationFacet::SetRotation(const Base::Float3& _rRotation)
+    void CTransformationFacet::SetRotation(const glm::vec3& _rRotation)
     {
         m_Rotation = _rRotation;
     }
 
     // -----------------------------------------------------------------------------
 
-    Base::Float3& CTransformationFacet::GetRotation()
+    glm::vec3& CTransformationFacet::GetRotation()
     {
         return m_Rotation;
     }
 
     // -----------------------------------------------------------------------------
 
-    const Base::Float3& CTransformationFacet::GetRotation() const
+    const glm::vec3& CTransformationFacet::GetRotation() const
     {
         return m_Rotation;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CTransformationFacet::SetScale(const Base::Float3& _rScale)
+    void CTransformationFacet::SetScale(const glm::vec3& _rScale)
     {
         m_Scale = _rScale;
     }
 
     // -----------------------------------------------------------------------------
 
-    Base::Float3& CTransformationFacet::GetScale()
+    glm::vec3& CTransformationFacet::GetScale()
     {
         return m_Scale;
     }
 
     // -----------------------------------------------------------------------------
 
-    const Base::Float3& CTransformationFacet::GetScale() const
+    const glm::vec3& CTransformationFacet::GetScale() const
     {
         return m_Scale;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CTransformationFacet::SetWorldMatrix(Base::Float4x4& _rMatrix)
+    void CTransformationFacet::SetWorldMatrix(glm::mat4& _rMatrix)
     {
         m_WorldMatrix = _rMatrix;
     }
 
     // -----------------------------------------------------------------------------
 
-    Base::Float4x4& CTransformationFacet::GetWorldMatrix()
+    glm::mat4& CTransformationFacet::GetWorldMatrix()
     {
         return m_WorldMatrix;
     }
 
     // -----------------------------------------------------------------------------
 
-    const Base::Float4x4& CTransformationFacet::GetWorldMatrix() const
+    const glm::mat4& CTransformationFacet::GetWorldMatrix() const
     {
         return m_WorldMatrix;
     }

@@ -1,8 +1,8 @@
 
 #pragma once
 
+#include "base/base_include_glm.h"
 #include "base/base_typedef.h"
-#include "base/base_vector3.h"
 
 #include "data/data_texture_cube.h"
 
@@ -77,8 +77,8 @@ namespace Dt
         void SetParallaxCorrection(bool _Flag);
         bool GetParallaxCorrection() const;
 
-        void SetBoxSize(const Base::Float3& _rSize);
-        const Base::Float3& GetBoxSize() const;
+        void SetBoxSize(const glm::vec3& _rSize);
+        const glm::vec3& GetBoxSize() const;
 
     public:
 
@@ -96,6 +96,6 @@ namespace Dt
         float             m_Near;               //< Near clipping plane
         float             m_Far;                //< Far clipping plane
         bool              m_ParallaxCorrection; //< Use a parallax correction of the reflection
-        Base::Float3      m_BoxSize;            //< Size of the box around the probe that affects the objects
+        glm::vec3      m_BoxSize;            //< Size of the box around the probe that affects the objects
     };
 } // namespace Dt

@@ -3,6 +3,19 @@
 #define __INCLUDE_COMMON_GLSL__
 
 // -----------------------------------------------------------------------------
+// Clip control
+// -----------------------------------------------------------------------------
+#define DEPTH_ZERO_TO_ONE         1
+#define DEPTH_NEGATIVE_ONE_TO_ONE 2
+
+#ifdef FORCE_DEPTH_ZERO_TO_ONE
+    #define DEPTH_CLIP_SPACE DEPTH_ZERO_TO_ONE
+#else
+    #define DEPTH_CLIP_SPACE DEPTH_NEGATIVE_ONE_TO_ONE
+#endif
+
+
+// -----------------------------------------------------------------------------
 // Defines
 // -----------------------------------------------------------------------------
 #define PI      3.1415926535897932f
@@ -38,7 +51,13 @@ vec3 GetViewSpacePositionFromDepth(in float _Depth, in vec2 _ScreenPosition, in 
     
     ScreenPosition.x = _ScreenPosition.x * 2.0f - 1.0f;
     ScreenPosition.y = _ScreenPosition.y * 2.0f - 1.0f;
+
+#if DEPTH_CLIP_SPACE == DEPTH_ZERO_TO_ONE
     ScreenPosition.z = _Depth;
+#else
+    ScreenPosition.z = _Depth * 2.0f - 1.0f;
+#endif
+
     ScreenPosition.w = 1.0f;
     
     // -----------------------------------------------------------------------------

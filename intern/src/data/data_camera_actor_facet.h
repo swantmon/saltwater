@@ -2,7 +2,7 @@
 #pragma once
 
 #include "base/base_aabb2.h"
-#include "base/base_matrix3x3.h"
+#include "base/base_include_glm.h"
 
 namespace Dt
 {
@@ -51,9 +51,9 @@ namespace Dt
 
         bool GetHasTexture() const;
 
-        void SetBackgroundColor(const Base::Float3& _rBackgroundColor);
-        Base::Float3& GetBackgroundColor();
-        const Base::Float3& GetBackgroundColor() const;
+        void SetBackgroundColor(const glm::vec3& _rBackgroundColor);
+        glm::vec3& GetBackgroundColor();
+        const glm::vec3& GetBackgroundColor() const;
 
         void SetCullingMask(unsigned int _CullingMask);
         unsigned int GetCullingMask() const;
@@ -67,9 +67,9 @@ namespace Dt
         void SetFoV(float _FoV);
         float GetFoV() const;
 
-        void SetProjectionMatrix(const Base::Float3x3& _rProjection);
-        Base::Float3x3& GetProjectionMatrix();
-        const Base::Float3x3& GetProjectionMatrix() const;
+        void SetProjectionMatrix(const glm::mat3& _rProjection);
+        glm::mat3& GetProjectionMatrix();
+        const glm::mat3& GetProjectionMatrix() const;
 
         void SetNear(float _Near);
         float GetNear() const;
@@ -117,9 +117,9 @@ namespace Dt
         float            m_FoV;                             //< Field of view even projection is active
         float            m_Near;                            //< Near field of the camera
         float            m_Far;                             //< Far field of the camera
-        Base::Float3     m_BackgroundColor;                 //< Default background color of the camera (depending on clear flag)
+        glm::vec3     m_BackgroundColor;                 //< Default background color of the camera (depending on clear flag)
         Dt::CTexture2D*  m_pTexture2D;                      //< Background image of the camera (depending on clear flag)
-        Base::Float3x3   m_ProjectionMatrix;                //< RAW projection matrix even RAW is active
+        glm::mat3   m_ProjectionMatrix;                //< RAW projection matrix even RAW is active
         Base::AABB2Float m_ViewportRect;                    //< View port this camera should render
         EClearFlag       m_ClearFlag;                       //< Clear flag of the render target (@see EClearFlag)
         EProjectionType  m_ProjectionType;                  //< Camera can be orthographic or projection

@@ -8,8 +8,6 @@
 
 #pragma once
 
-#include "base/base_vector4.h"
-
 #include "graphic/gfx_target_set.h"
 #include "graphic/gfx_texture.h"
 
@@ -34,8 +32,8 @@ namespace TargetSetManager
     
     CTargetSetPtr CreateEmptyTargetSet(int _Width, int _Height, int _Layers = 0);
 
-    void ClearTargetSet(CTargetSetPtr _TargetPtr, const Base::Float4& _rColor, float _Depth);
-    void ClearTargetSet(CTargetSetPtr _TargetPtr, const Base::Float4& _rColor);
+    void ClearTargetSet(CTargetSetPtr _TargetPtr, const glm::vec4& _rColor, float _Depth);
+    void ClearTargetSet(CTargetSetPtr _TargetPtr, const glm::vec4& _rColor);
     void ClearTargetSet(CTargetSetPtr _TargetPtr, float _Depth);
     void ClearTargetSet(CTargetSetPtr _TargetPtr);
 

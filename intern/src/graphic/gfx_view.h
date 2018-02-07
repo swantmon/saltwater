@@ -1,10 +1,8 @@
 
 #pragma once
 
+#include "base/base_include_glm.h"
 #include "base/base_managed_pool.h"
-#include "base/base_matrix3x3.h"
-#include "base/base_matrix4x4.h"
-#include "base/base_vector3.h"
 
 namespace Gfx
 {
@@ -17,20 +15,18 @@ namespace Gfx
     {
         public:
 
-            void SetRotationMatrix();
-            void SetRotationMatrix(const Base::Float3x3& _rMatrix);
-            const Base::Float3x3& GetRotationMatrix() const;
+            void SetRotationMatrix(const glm::mat3& _rMatrix);
+            const glm::mat3& GetRotationMatrix() const;
 
             void SetPosition(float _AxisX, float _AxisY, float _AxisZ);
-            void SetPosition(const Base::Float3& _rPosition);
-            const Base::Float3& GetPosition() const;
+            void SetPosition(const glm::vec3& _rPosition);
+            const glm::vec3& GetPosition() const;
 
-            const Base::Float3& GetViewDirection() const;
-            const Base::Float3& GetRightDirection() const;
-            const Base::Float3& GetUpDirection() const;
+            const glm::vec3& GetViewDirection() const;
+            const glm::vec3& GetRightDirection() const;
+            const glm::vec3& GetUpDirection() const;
 
-            void SetViewMatrix(const Base::Float4x4& _rViewMatrix);
-            const Base::Float4x4& GetViewMatrix() const;
+            const glm::mat4& GetViewMatrix() const;
 
         public:
 
@@ -38,15 +34,15 @@ namespace Gfx
 		
         protected:
 
-            Base::Float4x4 m_ViewMatrix;
-            Base::Float3x3 m_RotationMatrix;
+            glm::mat4 m_ViewMatrix;
+            glm::mat3 m_RotationMatrix;
 
-            Base::Float3   m_Position;
-            Base::Float3   m_View;
-            Base::Float3   m_Right;
-            Base::Float3   m_Up;
+            glm::vec3 m_Position;
+            glm::vec3 m_View;
+            glm::vec3 m_Right;
+            glm::vec3 m_Up;
 
-            CCamera*       m_pFirstCamera;
+            CCamera* m_pFirstCamera;
 
         protected:
 

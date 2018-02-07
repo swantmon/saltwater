@@ -89,7 +89,7 @@ namespace
 
     void CMaterialHelper::OnNewMaterial(Edit::CMessage& _rMessage)
     {
-        (void)_rMessage;
+        BASE_UNUSED(_rMessage);
 
         // -----------------------------------------------------------------------------
         // Material
@@ -107,8 +107,8 @@ namespace
         MaterialDescriptor.m_Reflectance     = 0.0f;
         MaterialDescriptor.m_MetalMask       = 0.0f;
         MaterialDescriptor.m_Displacement    = 0.0f;
-        MaterialDescriptor.m_AlbedoColor     = Base::Float3(1.0f);
-        MaterialDescriptor.m_TilingOffset    = Base::Float4(1.0f, 1.0f, 0.0f, 0.0f);
+        MaterialDescriptor.m_AlbedoColor     = glm::vec3(1.0f);
+        MaterialDescriptor.m_TilingOffset    = glm::vec4(1.0f, 1.0f, 0.0f, 0.0f);
         MaterialDescriptor.m_pFileName       = 0;
         
         Dt::CMaterial& rNewMaterial = Dt::MaterialManager::CreateMaterial(MaterialDescriptor);
@@ -146,8 +146,8 @@ namespace
         MaterialDescriptor.m_Reflectance     = 0.0f;
         MaterialDescriptor.m_MetalMask       = 0.0f;
         MaterialDescriptor.m_Displacement    = 0.0f;
-        MaterialDescriptor.m_AlbedoColor     = Base::Float3(1.0f);
-        MaterialDescriptor.m_TilingOffset    = Base::Float4(1.0f, 1.0f, 0.0f, 0.0f);
+        MaterialDescriptor.m_AlbedoColor     = glm::vec3(1.0f);
+        MaterialDescriptor.m_TilingOffset    = glm::vec4(1.0f, 1.0f, 0.0f, 0.0f);
         MaterialDescriptor.m_pFileName       = pPathToFile;
         
         Dt::CMaterial& rNewMaterial = Dt::MaterialManager::CreateMaterial(MaterialDescriptor);
@@ -291,14 +291,14 @@ namespace
         Y = _rMessage.GetFloat();
         Z = _rMessage.GetFloat();
 
-        Base::Float3 Color = Base::Float3(X, Y, Z);
+        glm::vec3 Color = glm::vec3(X, Y, Z);
 
         X = _rMessage.GetFloat();
         Y = _rMessage.GetFloat();
         Z = _rMessage.GetFloat();
         W = _rMessage.GetFloat();
 
-        Base::Float4 TilingOffset = Base::Float4(X, Y, Z, W);
+        glm::vec4 TilingOffset = glm::vec4(X, Y, Z, W);
 
         float Roughness = _rMessage.GetFloat();
 

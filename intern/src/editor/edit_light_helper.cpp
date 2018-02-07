@@ -137,11 +137,11 @@ namespace
             pPointLightFacet->SetShadowType       (Dt::CPointLightFacet::HardShadows);
             pPointLightFacet->SetShadowQuality    (Dt::CPointLightFacet::High);
             pPointLightFacet->EnableTemperature   (false);
-            pPointLightFacet->SetColor            (Base::Float3(1.0f, 1.0f, 1.0f));
+            pPointLightFacet->SetColor            (glm::vec3(1.0f, 1.0f, 1.0f));
             pPointLightFacet->SetAttenuationRadius(10.0f);
-            pPointLightFacet->SetInnerConeAngle   (Base::DegreesToRadians(45.0f));
-            pPointLightFacet->SetOuterConeAngle   (Base::DegreesToRadians(90.0f));
-            pPointLightFacet->SetDirection        (Base::Float3(-1.0f, -1.0f, -1.0f));
+            pPointLightFacet->SetInnerConeAngle   (glm::radians(45.0f));
+            pPointLightFacet->SetOuterConeAngle   (glm::radians(90.0f));
+            pPointLightFacet->SetDirection        (glm::vec3(-1.0f, -1.0f, -1.0f));
             pPointLightFacet->SetIntensity        (1200.0f);
             pPointLightFacet->SetTemperature      (0);
 
@@ -172,8 +172,8 @@ namespace
             Dt::CSunLightFacet* pSunLightFacet = Dt::SunManager::CreateSunLight();
 
             pSunLightFacet->EnableTemperature(false);
-            pSunLightFacet->SetColor         (Base::Float3(1.0f, 1.0f, 1.0f));
-            pSunLightFacet->SetDirection     (Base::Float3(0.01f, 0.01f, -1.0f));
+            pSunLightFacet->SetColor         (glm::vec3(1.0f, 1.0f, 1.0f));
+            pSunLightFacet->SetDirection     (glm::vec3(0.01f, 0.01f, -1.0f));
             pSunLightFacet->SetIntensity     (90600.0f);
             pSunLightFacet->SetTemperature   (0);
             pSunLightFacet->SetRefreshMode   (Dt::CSunLightFacet::Dynamic);
@@ -259,7 +259,7 @@ namespace
             pLightProbeFacet->SetNear              (0.1f);
             pLightProbeFacet->SetFar               (10.0f);
             pLightProbeFacet->SetParallaxCorrection(true);
-            pLightProbeFacet->SetBoxSize           (Base::Float3(10.0f));
+            pLightProbeFacet->SetBoxSize           (glm::vec3(10.0f));
 
             rCurrentEntity.SetDetailFacet(Dt::SFacetCategory::Data, pLightProbeFacet);
         }
@@ -286,11 +286,11 @@ namespace
             Dt::CAreaLightFacet* pLightFacet = Dt::AreaLightManager::CreateAreaLight();
 
             pLightFacet->EnableTemperature   (false);
-            pLightFacet->SetColor            (Base::Float3(1.0f, 1.0f, 1.0f));
+            pLightFacet->SetColor            (glm::vec3(1.0f, 1.0f, 1.0f));
             pLightFacet->SetRotation         (0.0f);
             pLightFacet->SetWidth            (8.0f);
             pLightFacet->SetHeight           (8.0f);
-            pLightFacet->SetDirection        (Base::Float3(-0.01f, 0.01f, -1.0f));
+            pLightFacet->SetDirection        (glm::vec3(-0.01f, 0.01f, -1.0f));
             pLightFacet->SetIntensity        (1200.0f);
             pLightFacet->SetTemperature      (0);
             pLightFacet->SetIsTwoSided       (false);
@@ -323,8 +323,8 @@ namespace
             NewMessage.PutFloat(pPointLightFacet->GetTemperature());
             NewMessage.PutFloat(pPointLightFacet->GetIntensity());
             NewMessage.PutFloat(pPointLightFacet->GetAttenuationRadius());
-            NewMessage.PutFloat(Base::RadiansToDegree(pPointLightFacet->GetInnerConeAngle()));
-            NewMessage.PutFloat(Base::RadiansToDegree(pPointLightFacet->GetOuterConeAngle()));
+            NewMessage.PutFloat(glm::degrees(pPointLightFacet->GetInnerConeAngle()));
+            NewMessage.PutFloat(glm::degrees(pPointLightFacet->GetOuterConeAngle()));
             NewMessage.PutFloat(pPointLightFacet->GetDirection()[0]);
             NewMessage.PutFloat(pPointLightFacet->GetDirection()[1]);
             NewMessage.PutFloat(pPointLightFacet->GetDirection()[2]);
@@ -502,7 +502,7 @@ namespace
             NewMessage.PutFloat(pLightFacet->GetColor()[2]);
             NewMessage.PutFloat(pLightFacet->GetTemperature());
             NewMessage.PutFloat(pLightFacet->GetIntensity());
-            NewMessage.PutFloat(Base::RadiansToDegree(pLightFacet->GetRotation()));
+            NewMessage.PutFloat(glm::degrees(pLightFacet->GetRotation()));
             NewMessage.PutFloat(pLightFacet->GetWidth());
             NewMessage.PutFloat(pLightFacet->GetHeight());
             NewMessage.PutBool(pLightFacet->GetIsTwoSided());
@@ -552,19 +552,19 @@ namespace
             G = _rMessage.GetFloat();
             B = _rMessage.GetFloat();
 
-            Base::Float3 Color = Base::Float3(R, G, B);
+            glm::vec3 Color = glm::vec3(R, G, B);
 
             float Temperature       = _rMessage.GetFloat();
             float Intensity         = _rMessage.GetFloat();
             float AttenuationRadius = _rMessage.GetFloat();
-            float InnerConeAngle    = Base::DegreesToRadians(_rMessage.GetFloat());
-            float OuterConeAngle    = Base::DegreesToRadians(_rMessage.GetFloat());
+            float InnerConeAngle    = glm::radians(_rMessage.GetFloat());
+            float OuterConeAngle    = glm::radians(_rMessage.GetFloat());
 
             X = _rMessage.GetFloat();
             Y = _rMessage.GetFloat();
             Z = _rMessage.GetFloat();
 
-            Base::Float3 Direction = Base::Float3(X, Y, Z);
+            glm::vec3 Direction = glm::vec3(X, Y, Z);
 
             int ShadowType    = _rMessage.GetInt();
             int ShadowQuality = _rMessage.GetInt();
@@ -615,7 +615,7 @@ namespace
             G = _rMessage.GetFloat();
             B = _rMessage.GetFloat();
 
-            Base::Float3 Color = Base::Float3(R, G, B);
+            glm::vec3 Color = glm::vec3(R, G, B);
 
             float Temperature = _rMessage.GetFloat();
             float Intensity = _rMessage.GetFloat();
@@ -624,7 +624,7 @@ namespace
             Y = _rMessage.GetFloat();
             Z = _rMessage.GetFloat();
 
-            Base::Float3 Direction = Base::Float3(X, Y, Z);
+            glm::vec3 Direction = glm::vec3(X, Y, Z);
 
             int ShadowRefresh = _rMessage.GetInt();
 
@@ -761,7 +761,7 @@ namespace
 
             pLightFacet->SetParallaxCorrection(ParallaxCorrection);
 
-            pLightFacet->SetBoxSize(Base::Float3(BoxSizeX, BoxSizeY, BoxSizeZ));
+            pLightFacet->SetBoxSize(glm::vec3(BoxSizeX, BoxSizeY, BoxSizeZ));
 
             Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
         }
@@ -793,11 +793,11 @@ namespace
             G = _rMessage.GetFloat();
             B = _rMessage.GetFloat();
 
-            Base::Float3 Color = Base::Float3(R, G, B);
+            glm::vec3 Color = glm::vec3(R, G, B);
 
             float Temperature = _rMessage.GetFloat();
             float Intensity   = _rMessage.GetFloat();
-            float Rotation    = Base::DegreesToRadians(_rMessage.GetFloat());
+            float Rotation    = glm::radians(_rMessage.GetFloat());
             float Width       = _rMessage.GetFloat();
             float Height      = _rMessage.GetFloat();
             bool  IsTwoSided  = _rMessage.GetBool();
@@ -806,7 +806,7 @@ namespace
             Y = _rMessage.GetFloat();
             Z = _rMessage.GetFloat();
 
-            Base::Float3 Direction = Base::Float3(X, Y, Z);
+            glm::vec3 Direction = glm::vec3(X, Y, Z);
 
             bool HasTexture = _rMessage.GetBool();
 

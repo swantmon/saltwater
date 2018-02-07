@@ -2,9 +2,7 @@
 #pragma once
 
 #include "base/base_defines.h"
-#include "base/base_math_constants.h"
-#include "base/base_math_operations.h"
-#include "base/base_vector3.h"
+#include "base/base_include_glm.h"
 
 #include <assert.h>
 
@@ -39,7 +37,7 @@ namespace MATH
         typedef X*           XPtr;
         typedef const X*     XConstPtr;
 
-        typedef CVector3<T>  CVector;
+        typedef glm::tvec3<T> CVector;
 
     public:
 
@@ -80,7 +78,7 @@ namespace MATH
 
     public:
 
-        inline const CVector BuildCorner(const Base::Int3& _rIndices) const;
+        inline const CVector BuildCorner(const glm::ivec3& _rIndices) const;
 
     public:
 
@@ -329,7 +327,7 @@ namespace MATH
     // -----------------------------------------------------------------------------
 
     template<typename T>
-    const typename CAABB3<T>::CVector CAABB3<T>::BuildCorner(const Base::Int3& _rIndices) const
+    const typename CAABB3<T>::CVector CAABB3<T>::BuildCorner(const glm::ivec3& _rIndices) const
     {
         assert(_rIndices[0] >=0 && _rIndices[0] < 6);
         assert(_rIndices[1] >=0 && _rIndices[1] < 6);
@@ -404,13 +402,13 @@ namespace MATH
         Lambda[1] = X(-1);
         Lambda[2] = X(-1);
 
-        CVector HitPoint(CVector::Uninitialized);
+        CVector HitPoint;
 
         if (_rOrigin[0] < m_V[MinX])
         {
             HitPoint[0] = m_V[MinX]; IsInside = false;
 
-            if (!Base::IsEqual(_rDirection[0], X(0), SConstants<X>::s_Epsilon))
+            if (!glm::epsilonEqual(_rDirection[0], X(0), glm::epsilon<float>()))
             {
                 Lambda[0] = (m_V[MinX] - _rOrigin[0]) / _rDirection[0];
             }
@@ -419,7 +417,7 @@ namespace MATH
         {
             HitPoint[0] = m_V[MaxX]; IsInside = false;
 
-            if (!Base::IsEqual(_rDirection[0], X(0), SConstants<X>::s_Epsilon))
+            if (!glm::epsilonEqual(_rDirection[0], X(0), glm::epsilon<float>()))
             {
                 Lambda[0] = (m_V[MaxX] - _rOrigin[0]) / _rDirection[0];
             }
@@ -429,7 +427,7 @@ namespace MATH
         {
             HitPoint[1] = m_V[MinY]; IsInside = false;
 
-            if (!Base::IsEqual(_rDirection[1], X(0), SConstants<X>::s_Epsilon))
+            if (!glm::epsilonEqual(_rDirection[1], X(0), glm::epsilon<float>()))
             {
                 Lambda[1] = (m_V[MinY] - _rOrigin[1]) / _rDirection[1];
             }
@@ -438,7 +436,7 @@ namespace MATH
         {
             HitPoint[1] = m_V[MaxY]; IsInside = false;
 
-            if (!Base::IsEqual(_rDirection[1], X(0), SConstants<X>::s_Epsilon))
+            if (!glm::epsilonEqual(_rDirection[1], X(0), glm::epsilon<float>()))
             {
                 Lambda[1] = (m_V[MaxY] - _rOrigin[1]) / _rDirection[1];
             }
@@ -448,7 +446,7 @@ namespace MATH
         {
             HitPoint[2] = m_V[MinZ]; IsInside = false;
 
-            if (!Base::IsEqual(_rDirection[2], X(0), SConstants<X>::s_Epsilon))
+            if (!glm::epsilonEqual(_rDirection[2], X(0), glm::epsilon<float>()))
             {
                 Lambda[2] = (m_V[MinZ] - _rOrigin[2]) / _rDirection[2];
             }
@@ -457,7 +455,7 @@ namespace MATH
         {
             HitPoint[2] = m_V[MaxZ]; IsInside = false;
 
-            if (!Base::IsEqual(_rDirection[2], X(0), SConstants<X>::s_Epsilon))
+            if (!glm::epsilonEqual(_rDirection[2], X(0), glm::epsilon<float>()))
             {
                 Lambda[2] = (m_V[MaxZ] - _rOrigin[2]) / _rDirection[2];
             }

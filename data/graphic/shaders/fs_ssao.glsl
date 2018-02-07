@@ -10,7 +10,7 @@
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
-layout(row_major, std140, binding = 1) uniform UB1
+layout(std140, binding = 1) uniform UB1
 {
     mat4 ps_InverseCameraProjection;
     mat4 ps_CameraProjection;

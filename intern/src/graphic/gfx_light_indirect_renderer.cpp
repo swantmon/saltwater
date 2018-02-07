@@ -2,10 +2,8 @@
 #include "graphic/gfx_precompiled.h"
 
 #include "base/base_console.h"
-#include "base/base_matrix4x4.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
-#include "base/base_vector4.h"
 
 #include "camera/cam_control_manager.h"
 
@@ -69,7 +67,7 @@ namespace
 
         struct SIndirectLightProperties
         {
-            Base::Float4 m_RSMSettings;
+            glm::vec4 m_RSMSettings;
             unsigned int m_ExposureHistoryIndex;
         };
 

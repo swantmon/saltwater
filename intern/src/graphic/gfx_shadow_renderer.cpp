@@ -2,7 +2,7 @@
 #include "graphic/gfx_precompiled.h"
 
 #include "base/base_console.h"
-#include "base/base_matrix4x4.h"
+#include "base/base_include_glm.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
@@ -92,18 +92,18 @@ namespace
         
         struct SGaussianSettings
         {
-            Base::Int2 m_Direction;
-            Base::Int2 m_MaxPixelCoord;
+            glm::ivec2 m_Direction;
+            glm::ivec2 m_MaxPixelCoord;
             float      m_Weights[7];
         };
 
         struct SSSAOProperties
         {
-            Base::Float4x4 m_InverseCameraProjection;
-            Base::Float4x4 m_CameraProjection;
-            Base::Float4x4 m_CameraView;
-            Base::Float4   m_NoiseScale;
-            Base::Float4   m_Kernel[s_SSAOKernelSize];
+            glm::mat4 m_InverseCameraProjection;
+            glm::mat4 m_CameraProjection;
+            glm::mat4 m_CameraView;
+            glm::vec4   m_NoiseScale;
+            glm::vec4   m_Kernel[s_SSAOKernelSize];
         };
 
     private:
@@ -136,7 +136,7 @@ namespace
         CRenderContextPtr m_DeferredRenderContextPtr;
         CRenderContextPtr m_HalfContextPtr;
 
-        Base::Float4 m_Kernel[s_SSAOKernelSize];
+        glm::vec4 m_Kernel[s_SSAOKernelSize];
 
         CSSAORenderJobs m_SSAORenderJobs;
 
@@ -187,21 +187,17 @@ namespace
         // -----------------------------------------------------------------------------
         for (unsigned int IndexOfNoiseSeq = 0; IndexOfNoiseSeq < s_SSAOKernelSize; ++IndexOfNoiseSeq)
         {
-            Base::Float3 KernelElement;
+            glm::vec3 KernelElement;
 
-            float fRandomX = (Base::Random() * 2.0f - 1.0f);
-            float fRandomY = (Base::Random() * 2.0f - 1.0f);
-            float fRandomZ = Base::Random();
-
-            KernelElement = Base::Float3(fRandomX, fRandomY, fRandomZ);
+            KernelElement = glm::linearRand(glm::vec3(-1.0f, -1.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 
             float Scale = static_cast<float>(IndexOfNoiseSeq) / static_cast<float>(s_SSAOKernelSize);
 
-            KernelElement += Base::Lerp(0.1f, 1.0f, Scale * Scale);
+            KernelElement += glm::lerp(0.1f, 1.0f, Scale * Scale);
 
-            KernelElement = KernelElement.Normalize();
+            KernelElement = glm::normalize(KernelElement);
 
-            m_Kernel[IndexOfNoiseSeq] = Base::Float4(KernelElement, 0.0f);
+            m_Kernel[IndexOfNoiseSeq] = glm::vec4(KernelElement, 0.0f);
         }
     }
     
@@ -263,9 +259,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Initiate target set
         // -----------------------------------------------------------------------------
-        Base::Int2 Size = Main::GetActiveWindowSize();
+        glm::ivec2 Size = Main::GetActiveWindowSize();
 
-        Base::Int2 HalfSize   (Size[0] / 2, Size[1] / 2);
+        glm::ivec2 HalfSize   (Size[0] / 2, Size[1] / 2);
 
         // -----------------------------------------------------------------------------
         // Create render target textures
@@ -308,10 +304,10 @@ namespace
         // -----------------------------------------------------------------------------
         // Get screen resolutions
         // -----------------------------------------------------------------------------
-        Base::Int2 Size = Main::GetActiveWindowSize();
+        glm::ivec2 Size = Main::GetActiveWindowSize();
 
-        Base::Int2 HalfSize(Size[0] / 2, Size[1] / 2);
-        Base::Int2 QuarterSize(Size[0] / 4, Size[1] / 4);
+        glm::ivec2 HalfSize(Size[0] / 2, Size[1] / 2);
+        glm::ivec2 QuarterSize(Size[0] / 4, Size[1] / 4);
 
         // -----------------------------------------------------------------------------
         // Build view ports
@@ -370,9 +366,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Initiate target set
         // -----------------------------------------------------------------------------
-        Base::Int2 Size = Main::GetActiveWindowSize();
+        glm::ivec2 Size = Main::GetActiveWindowSize();
         
-        Base::Int2 HalfSize(Size[0] / 2, Size[1] / 2);
+        glm::ivec2 HalfSize(Size[0] / 2, Size[1] / 2);
 
         CTexturePtr HalfTextureOnePtr = m_HalfRenderbufferPtr->GetRenderTarget(0);
 
@@ -399,18 +395,15 @@ namespace
         // -----------------------------------------------------------------------------
         // Noise textures
         // -----------------------------------------------------------------------------
-        Base::Byte3 NoiseColor[16];
+        glm::tvec3<char> NoiseColor[16];
 
         for (unsigned int IndexOfNoiseSeq = 0; IndexOfNoiseSeq < 16; ++IndexOfNoiseSeq)
         {
-            Base::Float3 NoiseNormal;
+            glm::vec3 NoiseNormal;
 
-            float fRandomX = (Base::Random() * 2.0f - 1.0f);
-            float fRandomY = (Base::Random() * 2.0f - 1.0f);
+            NoiseNormal = glm::vec3(glm::linearRand(glm::vec2(-1.0f, -1.0f), glm::vec2(1.0f, 1.0f)), 0.0f);
 
-            NoiseNormal = Base::Float3(fRandomX, fRandomY, 0.0f);
-
-            NoiseNormal = NoiseNormal.Normalize();
+            NoiseNormal = glm::normalize(NoiseNormal);
 
             NoiseColor[IndexOfNoiseSeq][0] = static_cast<unsigned char>((NoiseNormal[0] * 0.5f + 0.5f) * 255.0f);
             NoiseColor[IndexOfNoiseSeq][1] = static_cast<unsigned char>((NoiseNormal[1] * 0.5f + 0.5f) * 255.0f);
@@ -526,10 +519,10 @@ namespace
         // -----------------------------------------------------------------------------
         // Initiate target set
         // -----------------------------------------------------------------------------
-        Base::Int2 Size(_Width, _Height);
+        glm::ivec2 Size(_Width, _Height);
 
-        Base::Int2 HalfSize   (Size[0] / 2, Size[1] / 2);
-        Base::Int2 QuarterSize(Size[0] / 4, Size[1] / 4);
+        glm::ivec2 HalfSize   (Size[0] / 2, Size[1] / 2);
+        glm::ivec2 QuarterSize(Size[0] / 4, Size[1] / 4);
 
         // -----------------------------------------------------------------------------
         // Create render target textures
@@ -622,19 +615,17 @@ namespace
 
         Performance::BeginEvent("SSAO");
 
-        
-
         // -----------------------------------------------------------------------------
         // Get screen resolutions
         // -----------------------------------------------------------------------------
-        Base::Int2 Size = Main::GetActiveWindowSize();
+        glm::ivec2 Size = Main::GetActiveWindowSize();
         
-        Base::Int2 HalfSize   (Size[0] / 2, Size[1] / 2);
+        glm::ivec2 HalfSize   (Size[0] / 2, Size[1] / 2);
 
         // -----------------------------------------------------------------------------
         // Clear buffer
         // -----------------------------------------------------------------------------
-        TargetSetManager::ClearTargetSet(m_HalfRenderbufferPtr, Base::Float4(1.0f));
+        TargetSetManager::ClearTargetSet(m_HalfRenderbufferPtr, glm::vec4(1.0f));
 
         // -----------------------------------------------------------------------------
         // Rendering: SSAO
@@ -659,10 +650,10 @@ namespace
 
         ContextManager::SetConstantBuffer(1, m_SSAOPropertiesPSBufferPtr);
 
-        SSAOSettings.m_InverseCameraProjection = ViewManager::GetMainCamera()->GetProjectionMatrix().GetInverted();
+        SSAOSettings.m_InverseCameraProjection = glm::inverse(ViewManager::GetMainCamera()->GetProjectionMatrix());
         SSAOSettings.m_CameraProjection        = ViewManager::GetMainCamera()->GetProjectionMatrix();
         SSAOSettings.m_CameraView              = ViewManager::GetMainCamera()->GetView()->GetViewMatrix();
-        SSAOSettings.m_NoiseScale              = Base::Float4(static_cast<float>(HalfSize[0]), static_cast<float>(HalfSize[1]), 0.14f, 2.0f);
+        SSAOSettings.m_NoiseScale              = glm::vec4(static_cast<float>(HalfSize[0]), static_cast<float>(HalfSize[1]), 0.14f, 2.0f);
         
         for (unsigned int IndexOfNoiseSeq = 0; IndexOfNoiseSeq < s_SSAOKernelSize; ++ IndexOfNoiseSeq)
         {
@@ -678,7 +669,7 @@ namespace
 
         ContextManager::SetTexture(0, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(0));
         ContextManager::SetTexture(1, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(1));
-        ContextManager::SetTexture(2, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(2));
+        ContextManager::SetTexture(2, TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget());
         ContextManager::SetTexture(3, m_NoiseTexturePtr);
 
         ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);

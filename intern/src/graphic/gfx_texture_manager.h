@@ -3,8 +3,6 @@
 
 #include "base/base_aabb2.h"
 #include "base/base_typedef.h"
-#include "base/base_vector2.h"
-#include "base/base_vector4.h"
 
 #include "graphic/gfx_data_behavior.h"
 #include "graphic/gfx_target_set.h"

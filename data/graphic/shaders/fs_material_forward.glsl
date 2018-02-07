@@ -50,7 +50,7 @@ layout(std430, binding = 0) readonly buffer BB0
     float ps_ExposureHistory[8];
 };
 
-layout(std430, row_major, binding = 1) readonly buffer BB1
+layout(std430, binding = 1) readonly buffer BB1
 {
     SLightProperties ps_LightProperties[MAX_NUMBER_OF_LIGHTS];
 };

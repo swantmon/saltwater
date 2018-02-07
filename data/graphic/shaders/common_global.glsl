@@ -2,7 +2,7 @@
 #ifndef __INCLUDE_COMMON_GLOBAL_GLSL__
 #define __INCLUDE_COMMON_GLOBAL_GLSL__
 
-layout(row_major, std140, binding = 0) uniform UB0
+layout(std140, binding = 0) uniform UB0
 {
 	mat4 g_WorldToScreen;
     mat4 g_WorldToQuad;

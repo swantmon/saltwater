@@ -4,7 +4,7 @@
 
 #include "common_global.glsl"
 
-layout(row_major, std140, binding = 1) uniform UB1
+layout(std140, binding = 1) uniform UB1
 {
     mat4 m_LiquidMatrix;
 };

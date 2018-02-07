@@ -2,6 +2,7 @@
 #include "graphic/gfx_precompiled.h"
 
 #include "base/base_console.h"
+#include "base/base_include_glm.h"
 #include "base/base_pool.h"
 #include "base/base_program_parameters.h"
 #include "base/base_singleton.h"
@@ -92,13 +93,13 @@ namespace
 
         struct SModelMatrixBuffer
         {
-            Base::Float4x4 m_ModelMatrix;
+            glm::mat4 m_ModelMatrix;
         };
 
         struct SCubemapBufferGS
         {
-            Base::Float4x4 m_CubeProjectionMatrix;
-            Base::Float4x4 m_CubeViewMatrix[6];
+            glm::mat4 m_CubeProjectionMatrix;
+            glm::mat4 m_CubeViewMatrix[6];
         };
 
         struct SOutputBufferPS
@@ -133,7 +134,7 @@ namespace
 
         struct SPSLayerValues
         {
-            Base::Float4 m_Dhdh;
+            glm::vec4 m_Dhdh;
             float m_Radius;
             float Padding[3];
         };
@@ -146,8 +147,8 @@ namespace
 
         struct SPSPASSettings
         {
-            Base::Float4 g_SunDirection;
-            Base::Float4 g_SunIntensity;
+            glm::vec4 g_SunDirection;
+            glm::vec4 g_SunIntensity;
             unsigned int ps_ExposureHistoryIndex;
         };
 
@@ -325,13 +326,13 @@ namespace
         // -----------------------------------------------------------------------------
         SBufferDescriptor ConstanteBufferDesc;
 
-        Base::Float3 EyePosition = Base::Float3::s_Zero;
-        Base::Float3 UpDirection;
-        Base::Float3 LookDirection;
+        glm::vec3 EyePosition = glm::vec3(0.0f);
+        glm::vec3 UpDirection;
+        glm::vec3 LookDirection;
         
         SCubemapBufferGS DefaultGSValues;
         
-        DefaultGSValues.m_CubeProjectionMatrix.SetRHFieldOfView(Base::RadiansToDegree(Base::SConstants<float>::s_Pi * 0.5f), 1.0f, 0.3f, 20000.0f);
+        DefaultGSValues.m_CubeProjectionMatrix = glm::perspective(glm::half_pi<float>(), 1.0f, 0.1f, 20000.0f);
         
         // -----------------------------------------------------------------------------
         // By creating a cube map in OpenGL, several facts should be considered:
@@ -375,45 +376,45 @@ namespace
         // Creating VS matrix for spherical image to cube map:
         // -> Viewer is inside the cube > LHS
         // -----------------------------------------------------------------------------
-        LookDirection = EyePosition + Base::Float3::s_AxisX;
-        UpDirection   = Base::Float3::s_AxisY;
+        LookDirection = EyePosition + glm::vec3(1.0f, 0.0f, 0.0f);
+        UpDirection   = glm::vec3(0.0f, -1.0f, 0.0f);
         
-        DefaultGSValues.m_CubeViewMatrix[0].LookAt(EyePosition, LookDirection, UpDirection);
-        
-        // -----------------------------------------------------------------------------
-        
-        LookDirection = EyePosition - Base::Float3::s_AxisX;
-        UpDirection   = Base::Float3::s_AxisY;
-        
-        DefaultGSValues.m_CubeViewMatrix[1].LookAt(EyePosition, LookDirection, UpDirection);
+        DefaultGSValues.m_CubeViewMatrix[0] = glm::lookAt(EyePosition, LookDirection, UpDirection);
         
         // -----------------------------------------------------------------------------
         
-        LookDirection = EyePosition + Base::Float3::s_AxisY;
-        UpDirection   = Base::Float3::s_Zero - Base::Float3::s_AxisZ;
+        LookDirection = EyePosition - glm::vec3(1.0f, 0.0f, 0.0f);
+        UpDirection   = glm::vec3(0.0f, -1.0f, 0.0f);
         
-        DefaultGSValues.m_CubeViewMatrix[2].LookAt(EyePosition, LookDirection, UpDirection);
-        
-        // -----------------------------------------------------------------------------
-        
-        LookDirection = EyePosition - Base::Float3::s_AxisY;
-        UpDirection   = Base::Float3::s_AxisZ;
-        
-        DefaultGSValues.m_CubeViewMatrix[3].LookAt(EyePosition, LookDirection, UpDirection);
+        DefaultGSValues.m_CubeViewMatrix[1] = glm::lookAt(EyePosition, LookDirection, UpDirection);
         
         // -----------------------------------------------------------------------------
         
-        LookDirection = EyePosition + Base::Float3::s_AxisZ;
-        UpDirection   = Base::Float3::s_AxisY;
+        LookDirection = EyePosition + glm::vec3(0.0f, 1.0f, 0.0f);
+        UpDirection   = -glm::vec3(0.0f, 0.0f, -1.0f);;
         
-        DefaultGSValues.m_CubeViewMatrix[4].LookAt(EyePosition, LookDirection, UpDirection);
+        DefaultGSValues.m_CubeViewMatrix[2] = glm::lookAt(EyePosition, LookDirection, UpDirection);
         
         // -----------------------------------------------------------------------------
         
-        LookDirection = EyePosition - Base::Float3::s_AxisZ;
-        UpDirection   = Base::Float3::s_AxisY;
+        LookDirection = EyePosition - glm::vec3(0.0f, 1.0f, 0.0f);
+        UpDirection   = glm::vec3(0.0f, 0.0f, -1.0f);;
         
-        DefaultGSValues.m_CubeViewMatrix[5].LookAt(EyePosition, LookDirection, UpDirection);
+        DefaultGSValues.m_CubeViewMatrix[3] = glm::lookAt(EyePosition, LookDirection, UpDirection);
+        
+        // -----------------------------------------------------------------------------
+        
+        LookDirection = EyePosition + glm::vec3(0.0f, 0.0f, 1.0f);
+        UpDirection   = glm::vec3(0.0f, -1.0f, 0.0f);
+        
+        DefaultGSValues.m_CubeViewMatrix[4] = glm::lookAt(EyePosition, LookDirection, UpDirection);
+
+        // -----------------------------------------------------------------------------
+        
+        LookDirection = EyePosition - glm::vec3(0.0f, 0.0f, 1.0f);
+        UpDirection   = glm::vec3(0.0f, -1.0f, 0.0f);
+        
+        DefaultGSValues.m_CubeViewMatrix[5] = glm::lookAt(EyePosition, LookDirection, UpDirection);
 
         // -----------------------------------------------------------------------------
 
@@ -431,7 +432,7 @@ namespace
         
         for (unsigned int IndexOfCubeface = 0; IndexOfCubeface < 6; ++ IndexOfCubeface)
         {
-            DefaultGSValues.m_CubeViewMatrix[IndexOfCubeface] *= Base::Float4x4().SetRotationX(Base::DegreesToRadians(-90.0f));
+            DefaultGSValues.m_CubeViewMatrix[IndexOfCubeface] *= glm::eulerAngleX(glm::radians(-90.0f));
         }
         
         // -----------------------------------------------------------------------------
@@ -939,8 +940,8 @@ namespace
         // -----------------------------------------------------------------------------
         SPSPASSettings PSBuffer;
 
-        PSBuffer.g_SunDirection           = pDataSunFacet == nullptr ? Base::Float4(0.0f, 1.0f, 0.0f, 0.0f) : Base::Float4x4().SetRotationX(Base::DegreesToRadians(90.0f)) * Base::Float4(pDataSunFacet->GetDirection(), 0.0f);
-        PSBuffer.g_SunIntensity           = Base::Float4(_Intensity);
+        PSBuffer.g_SunDirection           = pDataSunFacet == nullptr ? glm::vec4(0.0f, 1.0f, 0.0f, 0.0f) : glm::eulerAngleX(glm::radians(90.0f)) * glm::vec4(pDataSunFacet->GetDirection(), 0.0f);
+        PSBuffer.g_SunIntensity           = glm::vec4(_Intensity);
         PSBuffer.ps_ExposureHistoryIndex  = 0;
 
         BufferManager::UploadBufferData(PSBufferSetPtr->GetBuffer(0), &PSBuffer);
@@ -1275,10 +1276,10 @@ namespace
         // -----------------------------------------------------------------------------
         SModelMatrixBuffer ViewBuffer;
 
-        ViewBuffer.m_ModelMatrix  = Base::Float4x4::s_Identity;
-        ViewBuffer.m_ModelMatrix *= MainViewPtr->GetRotationMatrix().GetTransposed();
-        ViewBuffer.m_ModelMatrix *= Base::Float4x4().SetTranslation(0.0f, 0.0f, -0.1f);
-        ViewBuffer.m_ModelMatrix *= Base::Float4x4().SetScale(ScaleY, ScaleX, 1.0f);
+        ViewBuffer.m_ModelMatrix  = glm::mat4(1.0f);
+        ViewBuffer.m_ModelMatrix *= glm::transpose(glm::mat4(MainViewPtr->GetRotationMatrix()));
+        ViewBuffer.m_ModelMatrix *= glm::translate(glm::vec3(0.0f, 0.0f, -0.1f));
+        ViewBuffer.m_ModelMatrix *= glm::scale(glm::vec3(ScaleY, ScaleX, 1.0f));
 
         BufferManager::UploadBufferData(VSBufferSetPtr->GetBuffer(0), &ViewBuffer);
 
@@ -1394,12 +1395,12 @@ namespace
         CCameraPtr MainCameraPtr = ViewManager::GetMainCamera();
         CViewPtr   MainViewPtr = MainCameraPtr->GetView();
 
-        const Base::Float3* pWorldSpaceCameraFrustum = MainCameraPtr->GetWorldSpaceFrustum();
+        const glm::vec3* pWorldSpaceCameraFrustum = MainCameraPtr->GetWorldSpaceFrustum();
 
-        Base::Float3 FarBottomLeft  = pWorldSpaceCameraFrustum[4];
-        Base::Float3 FarTopLeft     = pWorldSpaceCameraFrustum[5];
-        Base::Float3 FarBottomRight = pWorldSpaceCameraFrustum[6];
-        Base::Float3 FarTopRight    = pWorldSpaceCameraFrustum[7];
+        glm::vec3 FarBottomLeft  = pWorldSpaceCameraFrustum[4];
+        glm::vec3 FarTopLeft     = pWorldSpaceCameraFrustum[5];
+        glm::vec3 FarBottomRight = pWorldSpaceCameraFrustum[6];
+        glm::vec3 FarTopRight    = pWorldSpaceCameraFrustum[7];
 
         // -----------------------------------------------------------------------------
         // Calculate far plane and setup plane
@@ -1437,7 +1438,7 @@ namespace
         // -----------------------------------------------------------------------------
         SModelMatrixBuffer ViewBuffer;
 
-        ViewBuffer.m_ModelMatrix = Base::Float4x4::s_Identity;
+        ViewBuffer.m_ModelMatrix = glm::mat4(1.0f);
 
         BufferManager::UploadBufferData(VSBufferSetPtr->GetBuffer(0), &ViewBuffer);
 
@@ -1559,11 +1560,8 @@ namespace
         // -----------------------------------------------------------------------------
         SModelMatrixBuffer ViewBuffer;
 
-        Base::Float3 Rotation;
-        ViewManager::GetMainCamera()->GetView()->GetRotationMatrix().GetRotation(Rotation);
-
-        ViewBuffer.m_ModelMatrix  = Base::Float4x4::s_Identity;
-        ViewBuffer.m_ModelMatrix *= Base::Float4x4().SetRotationY(Rotation[1]);
+        ViewBuffer.m_ModelMatrix  = glm::mat4(1.0f);
+        ViewBuffer.m_ModelMatrix *= glm::mat4(ViewManager::GetMainCamera()->GetView()->GetRotationMatrix());
 
         BufferManager::UploadBufferData(GSBufferSetPtr->GetBuffer(1), &ViewBuffer);
 
@@ -1840,22 +1838,22 @@ namespace
         // -----------------------------------------------------------------------------
         Performance::BeginEvent("Precompute Atmospheric Scattering");
 
-        auto GetLayerValues = [&](unsigned int _Layer, float& _rRadius, Base::Float4& _rDhdH)
+        auto GetLayerValues = [&](unsigned int _Layer, float& _rRadius, glm::vec4& _rDhdH)
         {
-            float Radius = _Layer / Base::Max((g_InscatterAltitude - 1.0f), 1.0f);
+            float Radius = _Layer / glm::max((g_InscatterAltitude - 1.0f), 1.0f);
 
             Radius = Radius * Radius;
-            Radius = Base::Sqrt(g_RadiusGround * g_RadiusGround + Radius * (g_RadiusAtmosphere * g_RadiusAtmosphere - g_RadiusGround * g_RadiusGround)) + (_Layer == 0 ? 0.01f : (_Layer == g_InscatterAltitude - 1 ? -0.001f : 0.0f));
+            Radius = glm::sqrt(g_RadiusGround * g_RadiusGround + Radius * (g_RadiusAtmosphere * g_RadiusAtmosphere - g_RadiusGround * g_RadiusGround)) + (_Layer == 0 ? 0.01f : (_Layer == g_InscatterAltitude - 1 ? -0.001f : 0.0f));
 
             float DMin  = g_RadiusAtmosphere - Radius;
-            float DMax  = Base::Sqrt(Radius * Radius - g_RadiusGround * g_RadiusGround) + Base::Sqrt(g_RadiusAtmosphere * g_RadiusAtmosphere - g_RadiusGround * g_RadiusGround);
+            float DMax  = glm::sqrt(Radius * Radius - g_RadiusGround * g_RadiusGround) + glm::sqrt(g_RadiusAtmosphere * g_RadiusAtmosphere - g_RadiusGround * g_RadiusGround);
 
             float DMinP = Radius - g_RadiusGround;
-            float DMaxP = Base::Sqrt(Radius * Radius - g_RadiusGround * g_RadiusGround);
+            float DMaxP = glm::sqrt(Radius * Radius - g_RadiusGround * g_RadiusGround);
 
             _rRadius = Radius;
 
-            _rDhdH = Base::Float4(DMin, DMax, DMinP, DMaxP);
+            _rDhdH = glm::vec4(DMin, DMax, DMinP, DMaxP);
         };
 
         // -----------------------------------------------------------------------------
@@ -1926,7 +1924,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Inscatter single
         // -----------------------------------------------------------------------------
-        Base::Float4 Dhdh;
+        glm::vec4 Dhdh;
         float Radius;
 
         Performance::BeginEvent("Inscatter Single");
@@ -2172,8 +2170,6 @@ namespace
             // -----------------------------------------------------------------------------
             // Copy deltaE to irradiance
             // -----------------------------------------------------------------------------
-            PSIrradianceK;
-
             PSIrradianceK.k = 1;
 
             BufferManager::UploadBufferData(m_PSIrradianceK, &PSIrradianceK);

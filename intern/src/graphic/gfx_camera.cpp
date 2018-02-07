@@ -1,8 +1,6 @@
 
 #include "graphic/gfx_precompiled.h"
 
-#include "base/base_math_operations.h"
-
 #include "graphic/gfx_camera.h"
 
 namespace Gfx
@@ -28,7 +26,7 @@ namespace Gfx
         , m_ISO                 (0.0f)
         , m_EC                  (0.0f)
         , m_Size                (0.0f)
-        , m_BackgroundColor     (Base::Float3::s_Zero)
+        , m_BackgroundColor     (0.0f)
         , m_WorldAABB           ()
         , m_ViewportRect        ()
         , m_pSibling            (nullptr)
@@ -51,7 +49,7 @@ namespace Gfx
         float Bottom;
         float Top;
 
-        Bottom = -Base::Tan(Base::DegreesToRadians(_FOVY) / 2.0f) * Base::Max(_Near, 0.000001f);
+        Bottom = -glm::tan(glm::radians(_FOVY) / 2.0f) * glm::max(_Near, 0.000001f);
         Top    = -Bottom;
         Left   =  _Aspect * Bottom;
         Right  =  _Aspect * Top;
@@ -107,24 +105,24 @@ namespace Gfx
         // --------------------------------------------------------------------------------
         Scale = _Far / _Near;
 
-        m_ObjectSpaceFrustum[SFace::Near | SFace::Left  | SFace::Bottom] = Base::Float3(_Left         , _Bottom        , -_Near);
-        m_ObjectSpaceFrustum[SFace::Near | SFace::Left  | SFace::Top   ] = Base::Float3(_Left         , _Top           , -_Near);
-        m_ObjectSpaceFrustum[SFace::Near | SFace::Right | SFace::Bottom] = Base::Float3(_Right        , _Bottom        , -_Near);
-        m_ObjectSpaceFrustum[SFace::Near | SFace::Right | SFace::Top   ] = Base::Float3(_Right        , _Top           , -_Near);
-        m_ObjectSpaceFrustum[SFace::Far  | SFace::Left  | SFace::Bottom] = Base::Float3(_Left  * Scale, _Bottom * Scale, -_Far );
-        m_ObjectSpaceFrustum[SFace::Far  | SFace::Left  | SFace::Top   ] = Base::Float3(_Left  * Scale, _Top    * Scale, -_Far );
-        m_ObjectSpaceFrustum[SFace::Far  | SFace::Right | SFace::Bottom] = Base::Float3(_Right * Scale, _Bottom * Scale, -_Far );
-        m_ObjectSpaceFrustum[SFace::Far  | SFace::Right | SFace::Top   ] = Base::Float3(_Right * Scale, _Top    * Scale, -_Far );
+        m_ObjectSpaceFrustum[SFace::Near | SFace::Left  | SFace::Bottom] = glm::vec3(_Left         , _Bottom        , -_Near);
+        m_ObjectSpaceFrustum[SFace::Near | SFace::Left  | SFace::Top   ] = glm::vec3(_Left         , _Top           , -_Near);
+        m_ObjectSpaceFrustum[SFace::Near | SFace::Right | SFace::Bottom] = glm::vec3(_Right        , _Bottom        , -_Near);
+        m_ObjectSpaceFrustum[SFace::Near | SFace::Right | SFace::Top   ] = glm::vec3(_Right        , _Top           , -_Near);
+        m_ObjectSpaceFrustum[SFace::Far  | SFace::Left  | SFace::Bottom] = glm::vec3(_Left  * Scale, _Bottom * Scale, -_Far );
+        m_ObjectSpaceFrustum[SFace::Far  | SFace::Left  | SFace::Top   ] = glm::vec3(_Left  * Scale, _Top    * Scale, -_Far );
+        m_ObjectSpaceFrustum[SFace::Far  | SFace::Right | SFace::Bottom] = glm::vec3(_Right * Scale, _Bottom * Scale, -_Far );
+        m_ObjectSpaceFrustum[SFace::Far  | SFace::Right | SFace::Top   ] = glm::vec3(_Right * Scale, _Top    * Scale, -_Far );
 
         // --------------------------------------------------------------------------------
         // Get the distance from the eye point to the furthest point of the camera.
         // --------------------------------------------------------------------------------
-        m_Radius = static_cast<float>(m_ObjectSpaceFrustum[SFace::Far | SFace::Right | SFace::Top].Length());
+        m_Radius = static_cast<float>(m_ObjectSpaceFrustum[SFace::Far | SFace::Right | SFace::Top].length());
 
         // --------------------------------------------------------------------------------
         // Compute the projection matrix.
         // --------------------------------------------------------------------------------
-        m_ProjectionMatrix.SetRHPerspective(_Left, _Right, _Bottom, _Top, _Near, _Far);
+        m_ProjectionMatrix = glm::frustumRH(_Left, _Right, _Bottom, _Top, _Near, _Far);
     }
     
     // --------------------------------------------------------------------------------
@@ -157,24 +155,24 @@ namespace Gfx
         // --------------------------------------------------------------------------------
         // Compute the cubic view frustum in object space coordinates.
         // --------------------------------------------------------------------------------
-        m_ObjectSpaceFrustum[SFace::Near | SFace::Left  | SFace::Bottom] = Base::Float3(_Left , _Bottom, -_Near);
-        m_ObjectSpaceFrustum[SFace::Near | SFace::Left  | SFace::Top   ] = Base::Float3(_Left , _Top   , -_Near);
-        m_ObjectSpaceFrustum[SFace::Near | SFace::Right | SFace::Bottom] = Base::Float3(_Right, _Bottom, -_Near);
-        m_ObjectSpaceFrustum[SFace::Near | SFace::Right | SFace::Top   ] = Base::Float3(_Right, _Top   , -_Near);
-        m_ObjectSpaceFrustum[SFace::Far  | SFace::Left  | SFace::Bottom] = Base::Float3(_Left , _Bottom, -_Far );
-        m_ObjectSpaceFrustum[SFace::Far  | SFace::Left  | SFace::Top   ] = Base::Float3(_Left , _Top   , -_Far );
-        m_ObjectSpaceFrustum[SFace::Far  | SFace::Right | SFace::Bottom] = Base::Float3(_Right, _Bottom, -_Far );
-        m_ObjectSpaceFrustum[SFace::Far  | SFace::Right | SFace::Top   ] = Base::Float3(_Right, _Top   , -_Far );
+        m_ObjectSpaceFrustum[SFace::Near | SFace::Left  | SFace::Bottom] = glm::vec3(_Left , _Bottom, -_Near);
+        m_ObjectSpaceFrustum[SFace::Near | SFace::Left  | SFace::Top   ] = glm::vec3(_Left , _Top   , -_Near);
+        m_ObjectSpaceFrustum[SFace::Near | SFace::Right | SFace::Bottom] = glm::vec3(_Right, _Bottom, -_Near);
+        m_ObjectSpaceFrustum[SFace::Near | SFace::Right | SFace::Top   ] = glm::vec3(_Right, _Top   , -_Near);
+        m_ObjectSpaceFrustum[SFace::Far  | SFace::Left  | SFace::Bottom] = glm::vec3(_Left , _Bottom, -_Far );
+        m_ObjectSpaceFrustum[SFace::Far  | SFace::Left  | SFace::Top   ] = glm::vec3(_Left , _Top   , -_Far );
+        m_ObjectSpaceFrustum[SFace::Far  | SFace::Right | SFace::Bottom] = glm::vec3(_Right, _Bottom, -_Far );
+        m_ObjectSpaceFrustum[SFace::Far  | SFace::Right | SFace::Top   ] = glm::vec3(_Right, _Top   , -_Far );
 
         // --------------------------------------------------------------------------------
         // Compute the projection matrix.
         // --------------------------------------------------------------------------------
-        m_ProjectionMatrix.SetRHOrthographic(_Left, _Right, _Bottom, _Top, _Near, _Far);
+        m_ProjectionMatrix = glm::orthoRH(_Left, _Right, _Bottom, _Top, _Near, _Far);
     }
 
     // --------------------------------------------------------------------------------
 
-    void CCamera::SetProjectionMatrix(const Base::Float4x4& _rProjectionMatrix, float _Near, float _Far)
+    void CCamera::SetProjectionMatrix(const glm::mat4& _rProjectionMatrix, float _Near, float _Far)
     {
         m_ProjectionMatrix = _rProjectionMatrix;
 
@@ -184,10 +182,10 @@ namespace Gfx
         // Near = ProjectionMatrix[2][3] / (ProjectionMatrix[2][2] - 1);
         // Far  = ProjectionMatrix[2][3] / (ProjectionMatrix[2][2] + 1);
         // -----------------------------------------------------------------------------
-        float Bottom = _Near * (m_ProjectionMatrix[1][2] - 1.0f) / m_ProjectionMatrix[1][1];
-        float Top    = _Near * (m_ProjectionMatrix[1][2] + 1.0f) / m_ProjectionMatrix[1][1];
-        float Left   = _Near * (m_ProjectionMatrix[0][2] - 1.0f) / m_ProjectionMatrix[0][0];
-        float Right  = _Near * (m_ProjectionMatrix[0][2] + 1.0f) / m_ProjectionMatrix[0][0];
+        float Bottom = _Near * (m_ProjectionMatrix[2][1] - 1.0f) / m_ProjectionMatrix[1][1];
+        float Top    = _Near * (m_ProjectionMatrix[2][1] + 1.0f) / m_ProjectionMatrix[1][1];
+        float Left   = _Near * (m_ProjectionMatrix[2][0] - 1.0f) / m_ProjectionMatrix[0][0];
+        float Right  = _Near * (m_ProjectionMatrix[2][0] + 1.0f) / m_ProjectionMatrix[0][0];
 
         // --------------------------------------------------------------------------------
         // Save the dimensions.
@@ -202,14 +200,14 @@ namespace Gfx
         // --------------------------------------------------------------------------------
         // Compute the cubic view frustum in object space coordinates.
         // --------------------------------------------------------------------------------
-        m_ObjectSpaceFrustum[SFace::Near | SFace::Left  | SFace::Bottom] = Base::Float3(Left , Bottom, -_Near);
-        m_ObjectSpaceFrustum[SFace::Near | SFace::Left  | SFace::Top   ] = Base::Float3(Left , Top   , -_Near);
-        m_ObjectSpaceFrustum[SFace::Near | SFace::Right | SFace::Bottom] = Base::Float3(Right, Bottom, -_Near);
-        m_ObjectSpaceFrustum[SFace::Near | SFace::Right | SFace::Top   ] = Base::Float3(Right, Top   , -_Near);
-        m_ObjectSpaceFrustum[SFace::Far  | SFace::Left  | SFace::Bottom] = Base::Float3(Left , Bottom, -_Far );
-        m_ObjectSpaceFrustum[SFace::Far  | SFace::Left  | SFace::Top   ] = Base::Float3(Left , Top   , -_Far );
-        m_ObjectSpaceFrustum[SFace::Far  | SFace::Right | SFace::Bottom] = Base::Float3(Right, Bottom, -_Far );
-        m_ObjectSpaceFrustum[SFace::Far  | SFace::Right | SFace::Top   ] = Base::Float3(Right, Top   , -_Far );
+        m_ObjectSpaceFrustum[SFace::Near | SFace::Left  | SFace::Bottom] = glm::vec3(Left , Bottom, -_Near);
+        m_ObjectSpaceFrustum[SFace::Near | SFace::Left  | SFace::Top   ] = glm::vec3(Left , Top   , -_Near);
+        m_ObjectSpaceFrustum[SFace::Near | SFace::Right | SFace::Bottom] = glm::vec3(Right, Bottom, -_Near);
+        m_ObjectSpaceFrustum[SFace::Near | SFace::Right | SFace::Top   ] = glm::vec3(Right, Top   , -_Near);
+        m_ObjectSpaceFrustum[SFace::Far  | SFace::Left  | SFace::Bottom] = glm::vec3(Left , Bottom, -_Far );
+        m_ObjectSpaceFrustum[SFace::Far  | SFace::Left  | SFace::Top   ] = glm::vec3(Left , Top   , -_Far );
+        m_ObjectSpaceFrustum[SFace::Far  | SFace::Right | SFace::Bottom] = glm::vec3(Right, Bottom, -_Far );
+        m_ObjectSpaceFrustum[SFace::Far  | SFace::Right | SFace::Top   ] = glm::vec3(Right, Top   , -_Far );
     }
 
     // -----------------------------------------------------------------------------
@@ -234,19 +232,19 @@ namespace Gfx
 
     // -----------------------------------------------------------------------------
 
-    void CCamera::SetBackgroundColor(Base::Float3& _rBackgroundColor)
+    void CCamera::SetBackgroundColor(glm::vec3& _rBackgroundColor)
     {
         m_BackgroundColor = _rBackgroundColor;
     }
 
     // -----------------------------------------------------------------------------
-    Base::Float3& CCamera::GetBackgroundColor()
+    glm::vec3& CCamera::GetBackgroundColor()
     {
         return m_BackgroundColor;
     }
 
     // -----------------------------------------------------------------------------
-    const Base::Float3& CCamera::GetBackgroundColor() const
+    const glm::vec3& CCamera::GetBackgroundColor() const
     {
         return m_BackgroundColor;
     }
@@ -443,26 +441,26 @@ namespace Gfx
 
     float CCamera::GetFOVY() const
     {
-        return Base::ATan((m_Top - m_Bottom) / m_Near / 2.0f) * 2.0f;
+        return glm::atan((m_Top - m_Bottom) / m_Near / 2.0f) * 2.0f;
     }
 
     // --------------------------------------------------------------------------------
 
-    const Base::Float4x4& CCamera::GetProjectionMatrix() const
+    const glm::mat4& CCamera::GetProjectionMatrix() const
     {
         return m_ProjectionMatrix;
     }
 
     // --------------------------------------------------------------------------------
 
-    const Base::Float4x4& CCamera::GetViewProjectionMatrix() const
+    const glm::mat4& CCamera::GetViewProjectionMatrix() const
     {
         return m_ViewProjectionMatrix;
     }
 
     // --------------------------------------------------------------------------------
 
-    const Base::Float3* CCamera::GetWorldSpaceFrustum() const
+    const glm::vec3* CCamera::GetWorldSpaceFrustum() const
     {
         return m_WorldSpaceFrustum;
     }
@@ -509,8 +507,8 @@ namespace Gfx
 		// --------------------------------------------------------------------------------
 		// Determine the lower and higher extrema of camera's world position
 		// --------------------------------------------------------------------------------
-		Base::Float3& rMin = m_WorldAABB.GetMin();
-        Base::Float3& rMax = m_WorldAABB.GetMax();
+		glm::vec3& rMin = m_WorldAABB.GetMin();
+        glm::vec3& rMax = m_WorldAABB.GetMax();
 
         rMin = m_WorldSpaceFrustum[0];
         rMax = m_WorldSpaceFrustum[0];

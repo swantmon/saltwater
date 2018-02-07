@@ -2,7 +2,7 @@
 #ifndef __INCLUDE_VS_CUBEMAP_GLSL__
 #define __INCLUDE_VS_CUBEMAP_GLSL__
 
-layout(row_major, std140, binding = 0) uniform UView
+layout(std140, binding = 0) uniform UView
 {
     mat4 vs_View;
     mat4 vs_Projection;

@@ -7,6 +7,8 @@
 
 #include "core/core_time.h"
 
+#include "base/base_include_glm.h"
+
 #include "data/data_actor_type.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
@@ -55,12 +57,12 @@ namespace
 
         struct SPerLightConstantBuffer
         {
-            Base::Float4x4 vs_ViewProjectionMatrix;
+            glm::mat4 vs_ViewProjectionMatrix;
         };
 
         struct SPerDrawCallConstantBuffer
         {
-            Base::Float4x4 m_ModelMatrix;
+            glm::mat4 m_ModelMatrix;
         };
 
         class CInternSunFacet : public CSunFacet
@@ -220,15 +222,13 @@ namespace
                     Gfx::CViewPtr   ShadowViewPtr = pGfxSunFacet->m_RenderContextPtr->GetCamera()->GetView();
                     Gfx::CCameraPtr ShadowCameraPtr = pGfxSunFacet->m_RenderContextPtr->GetCamera();
 
-                    Base::Float3x3 RotationMatrix = Base::Float3x3::s_Identity;
-
-                    Base::Float3 SunPosition = rCurrentEntity.GetWorldPosition();
-                    Base::Float3 SunRotation = pDtSunFacet->GetDirection();
+                    glm::vec3 SunPosition = rCurrentEntity.GetWorldPosition();
+                    glm::vec3 SunRotation = pDtSunFacet->GetDirection();
 
                     // -----------------------------------------------------------------------------
                     // Set view
                     // -----------------------------------------------------------------------------
-                    RotationMatrix.LookAt(SunPosition, SunPosition + SunRotation, Base::Float3::s_AxisZ);
+                    glm::mat3 RotationMatrix = glm::lookAtRH(SunPosition, SunPosition + SunRotation, glm::vec3(0.0f, 0.0f, 1.0f));
 
                     ShadowViewPtr->SetPosition(SunPosition);
                     ShadowViewPtr->SetRotationMatrix(RotationMatrix);
@@ -320,15 +320,15 @@ namespace
         Gfx::CViewPtr   ShadowViewPtr   = pGfxSunFacet->m_RenderContextPtr->GetCamera()->GetView();
         Gfx::CCameraPtr ShadowCameraPtr = pGfxSunFacet->m_RenderContextPtr->GetCamera();
 
-        Base::Float3x3 RotationMatrix = Base::Float3x3::s_Identity;
+        glm::mat3 RotationMatrix = glm::mat3(1.0f);
 
-        Base::Float3 SunPosition = _pEntity->GetWorldPosition();
-        Base::Float3 SunRotation = pDtSunFacet->GetDirection();
+        glm::vec3 SunPosition = _pEntity->GetWorldPosition();
+        glm::vec3 SunRotation = pDtSunFacet->GetDirection();
 
         // -----------------------------------------------------------------------------
         // Set view
         // -----------------------------------------------------------------------------
-        RotationMatrix.LookAt(SunPosition, SunPosition + SunRotation, Base::Float3::s_AxisZ);
+        RotationMatrix = glm::lookAtRH(SunPosition, SunPosition + SunRotation, glm::vec3(0.0f, 0.0f, 1.0f));
 
         ShadowViewPtr->SetPosition(SunPosition);
         ShadowViewPtr->SetRotationMatrix(RotationMatrix);

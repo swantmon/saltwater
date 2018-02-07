@@ -2,7 +2,7 @@
 #pragma once
 
 #include "base/base_aabb3.h"
-#include "base/base_vector3.h"
+#include "base/base_include_glm.h"
 
 #include "data/data_entity.h"
 #include "data/data_entity_folder.h"
@@ -24,7 +24,7 @@ namespace Dt
     public:
 
         BID              m_ID;
-        Base::Int3       m_Position;
+        glm::ivec3       m_Position;
         Base::AABB3Float m_AABB;
         CEntityFolder    m_EntityFolders[s_NumberOfCategories];
     };

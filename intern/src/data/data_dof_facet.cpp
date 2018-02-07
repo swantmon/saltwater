@@ -97,28 +97,28 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    Base::Float2& CDOFFXFacet::GetNear()
+    glm::vec2& CDOFFXFacet::GetNear()
     {
         return m_Near;
     }
 
     // -----------------------------------------------------------------------------
 
-    Base::Float4& CDOFFXFacet::GetLerpScale()
+    glm::vec4& CDOFFXFacet::GetLerpScale()
     {
         return m_LerpScale;
     }
 
     // -----------------------------------------------------------------------------
 
-    Base::Float4& CDOFFXFacet::GetLerpBias()
+    glm::vec4& CDOFFXFacet::GetLerpBias()
     {
         return m_LerpBias;
     }
 
     // -----------------------------------------------------------------------------
 
-    Base::Float3& CDOFFXFacet::GetEqFar()
+    glm::vec3& CDOFFXFacet::GetEqFar()
     {
         return m_EqFar;
     }
@@ -127,7 +127,7 @@ namespace Dt
 
     void CDOFFXFacet::UpdateEffect()
     {
-        auto CalculateLerpDistances = [](Base::Float4& _rLerpScale, Base::Float4& _rLerpBias, float _FadeUnToSmallBlur, float _FadeSmallToMediumBlur)
+        auto CalculateLerpDistances = [](glm::vec4& _rLerpScale, glm::vec4& _rLerpBias, float _FadeUnToSmallBlur, float _FadeSmallToMediumBlur)
         {
             // -----------------------------------------------------------------------------
             // NOTE: D0 + D1 have to be between 0 and 1.
@@ -149,13 +149,13 @@ namespace Dt
             
             float FadeMediumToLargeBlur = 1.0f - (_FadeUnToSmallBlur + _FadeSmallToMediumBlur);
             
-            _rLerpScale = Base::Float4(-1.0f / _FadeUnToSmallBlur, -1.0f / _FadeSmallToMediumBlur                         , -1.0f / FadeMediumToLargeBlur, 1.0f / FadeMediumToLargeBlur);
-            _rLerpBias  = Base::Float4( 1.0f                     , (1.0f - FadeMediumToLargeBlur) / _FadeSmallToMediumBlur,  1.0f / FadeMediumToLargeBlur, (FadeMediumToLargeBlur - 1.0f) / FadeMediumToLargeBlur);
+            _rLerpScale = glm::vec4(-1.0f / _FadeUnToSmallBlur, -1.0f / _FadeSmallToMediumBlur                         , -1.0f / FadeMediumToLargeBlur, 1.0f / FadeMediumToLargeBlur);
+            _rLerpBias  = glm::vec4( 1.0f                     , (1.0f - FadeMediumToLargeBlur) / _FadeSmallToMediumBlur,  1.0f / FadeMediumToLargeBlur, (FadeMediumToLargeBlur - 1.0f) / FadeMediumToLargeBlur);
         };
         
         // -----------------------------------------------------------------------------
         
-        auto CalculateEquationFarDistance = [](Base::Float3& _rEqFar, float _StartDistance, float _NearToFarRatio)
+        auto CalculateEquationFarDistance = [](glm::vec3& _rEqFar, float _StartDistance, float _NearToFarRatio)
         {
             // -----------------------------------------------------------------------------
             // Set the far distance start point for the DOF
@@ -168,7 +168,7 @@ namespace Dt
         
         // -----------------------------------------------------------------------------
         
-        auto CalculateNearDistance = [](Base::Float2& _rNear, float _FinishDistance)
+        auto CalculateNearDistance = [](glm::vec2& _rNear, float _FinishDistance)
         {
             // -----------------------------------------------------------------------------
             // DofNear: (Linear distance up to everything should be blurred):

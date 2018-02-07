@@ -5,13 +5,10 @@
 #include "base/base_console.h"
 #include "base/base_crc.h"
 #include "base/base_exception.h"
-#include "base/base_math_constants.h"
-#include "base/base_math_operations.h"
+#include "base/base_include_glm.h"
 #include "base/base_memory.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
-#include "base/base_vector2.h"
-#include "base/base_vector3.h"
 #include "base/base_pool.h"
 
 #include "core/core_asset_manager.h"
@@ -28,8 +25,9 @@
 
 #include "tinyxml2.h"
 
-#include <unordered_map>
 #include <functional>
+#include <unordered_map>
+#include <vector>
 
 using namespace Dt;
 using namespace Dt::MaterialManager;
@@ -124,8 +122,8 @@ namespace
         MaterialDescriptor.m_Reflectance     = 0.0f;
         MaterialDescriptor.m_MetalMask       = 0.0f;
         MaterialDescriptor.m_Displacement    = 0.0f;
-        MaterialDescriptor.m_AlbedoColor     = Base::Float3(1.0f);
-        MaterialDescriptor.m_TilingOffset    = Base::Float4(0.0f);
+        MaterialDescriptor.m_AlbedoColor     = glm::vec3(1.0f);
+        MaterialDescriptor.m_TilingOffset    = glm::vec4(0.0f);
         MaterialDescriptor.m_pFileName       = 0;
 
         m_pDefaultMaterial = &static_cast<CInternMaterial&>(CreateMaterial(MaterialDescriptor));
@@ -163,8 +161,8 @@ namespace
         float                 Reflectance;
         float                 MetalMask;
         float                 Displacement;
-        Base::Float3          AlbedoColor;
-        Base::Float4          TilingOffset;
+        glm::vec3          AlbedoColor;
+        glm::vec4          TilingOffset;
         int                   NumberOfBytes;
         unsigned int          Hash;
         tinyxml2::XMLDocument MaterialFile;
@@ -250,7 +248,7 @@ namespace
             float ColorG = pMaterialColor->FloatAttribute("G");
             float ColorB = pMaterialColor->FloatAttribute("B");
 
-            AlbedoColor = Base::Float3(ColorR, ColorG, ColorB);
+            AlbedoColor = glm::vec3(ColorR, ColorG, ColorB);
 
             pColorMap = pMaterialColor->Attribute("Map");
 

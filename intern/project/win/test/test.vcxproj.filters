@@ -7,22 +7,10 @@
     <ClCompile Include="..\..\..\test\base\test_base_crc.cpp">
       <Filter>base</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\test\base\test_base_matrix3x3.cpp">
-      <Filter>base</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\test\base\test_base_matrix4x4.cpp">
-      <Filter>base</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\test\base\test_base_memory.cpp">
       <Filter>base</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\test\base\test_base_pool.cpp">
-      <Filter>base</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\test\base\test_base_vector3.cpp">
-      <Filter>base</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\test\base\test_base_vector4.cpp">
       <Filter>base</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\test\core\test_core_function_call.cpp">

@@ -1,6 +1,4 @@
 ﻿
-#include "base/base_vector3.h"
-
 #include "editor_gui/edit_inspector_dof.h"
 
 #include "editor_port/edit_message_manager.h"

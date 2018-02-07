@@ -1,5 +1,5 @@
 ﻿
-#include "base/base_vector3.h"
+#include "base/base_include_glm.h"
 
 #include "editor_gui/edit_inspector_pointlight.h"
 
@@ -55,7 +55,7 @@ namespace Edit
 
         QColor RGB = ButtonPalette.color(QPalette::Button);
 
-        Base::Float3 Color = Base::Float3(RGB.red() / 255.0f, RGB.green() / 255.0f, RGB.blue() / 255.0f);
+        glm::vec3 Color = glm::vec3(RGB.red() / 255.0f, RGB.green() / 255.0f, RGB.blue() / 255.0f);
 
         float Temperature       = m_pTemperatureEdit->text().toFloat();
         float Intensity         = m_pIntensityEdit->text().toFloat();
@@ -63,7 +63,7 @@ namespace Edit
         float InnerConeAngle    = m_pInnerConeAngleEdit->text().toFloat();
         float OuterConeAngle    = m_pOuterConeAngleEdit->text().toFloat();
 
-        Base::Float3 Direction = Base::Float3(m_pDirectionXEdit->text().toFloat(), m_pDirectionYEdit->text().toFloat(), m_pDirectionZEdit->text().toFloat());
+        glm::vec3 Direction = glm::vec3(m_pDirectionXEdit->text().toFloat(), m_pDirectionYEdit->text().toFloat(), m_pDirectionZEdit->text().toFloat());
 
         int ShadowType    = m_pShadowTypeCB->currentIndex();
         int ShadowQuality = m_pShadowQualityCB->currentIndex();
@@ -147,13 +147,13 @@ namespace Edit
         int EntityID  = _rMessage.GetInt();
         int ColorMode = _rMessage.GetInt();
 
-        (void)EntityID;
+        BASE_UNUSED(EntityID);
 
         R = _rMessage.GetFloat();
         G = _rMessage.GetFloat();
         B = _rMessage.GetFloat();
 
-        Base::Int3 Color = Base::Int3(R * 255, G * 255, B * 255);
+        glm::ivec3 Color = glm::ivec3(R * 255, G * 255, B * 255);
 
         float Temperature       = _rMessage.GetFloat();
         float Intensity         = _rMessage.GetFloat();
@@ -165,7 +165,7 @@ namespace Edit
         Y = _rMessage.GetFloat();
         Z = _rMessage.GetFloat();
 
-        Base::Float3 Direction = Base::Float3(X, Y, Z);
+        glm::vec3 Direction = glm::vec3(X, Y, Z);
 
         int ShadowType    = _rMessage.GetInt();
         int ShadowQuality = _rMessage.GetInt();
