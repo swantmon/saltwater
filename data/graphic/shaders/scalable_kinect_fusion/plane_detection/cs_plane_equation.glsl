@@ -38,7 +38,7 @@ void main()
     vec3 Normal = normalize(imageLoad(cs_NormalMap, ivec2(x, y)).xyz);
     vec3 Vertex = imageLoad(cs_VertexMap, ivec2(x, y)).xyz;
     
-    if (abs(dot(Plane, Normal)) < 0.1f)
+    if (abs(dot(Plane, Normal)) > 0.1f)
     {
         float D = dot(Plane, Vertex);
     
