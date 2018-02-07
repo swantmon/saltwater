@@ -27,7 +27,7 @@ namespace
 {
     Base::Int2 g_HistogramSize = Base::Int2(128, 128);
 
-    const int g_MaxDetectablePlaneCount = 5;
+    const int g_MaxDetectablePlaneCount = 10;
 
     int DivUp(int TotalShaderCount, int WorkGroupSize)
     {
