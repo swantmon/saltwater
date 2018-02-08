@@ -348,9 +348,9 @@ namespace
         Settings.m_Tint.r           = Base::CProgramParameters::GetInstance().GetFloat("graphics:tone_mapping:tint:r", 1.0f);
         Settings.m_Tint.g           = Base::CProgramParameters::GetInstance().GetFloat("graphics:tone_mapping:tint:g", 1.0f);
         Settings.m_Tint.b           = Base::CProgramParameters::GetInstance().GetFloat("graphics:tone_mapping:tint:b", 1.0f);
-        Settings.m_DarkTint.r       = Base::CProgramParameters::GetInstance().GetFloat("graphics:tone_mapping:dark_tint:r", 0.2f);
-        Settings.m_DarkTint.g       = Base::CProgramParameters::GetInstance().GetFloat("graphics:tone_mapping:dark_tint:g", 0.2f);
-        Settings.m_DarkTint.b       = Base::CProgramParameters::GetInstance().GetFloat("graphics:tone_mapping:dark_tint:b", 0.2f);
+        Settings.m_DarkTint.r       = Base::CProgramParameters::GetInstance().GetFloat("graphics:tone_mapping:dark_tint:color:r", 0.2f);
+        Settings.m_DarkTint.g       = Base::CProgramParameters::GetInstance().GetFloat("graphics:tone_mapping:dark_tint:color:g", 0.2f);
+        Settings.m_DarkTint.b       = Base::CProgramParameters::GetInstance().GetFloat("graphics:tone_mapping:dark_tint:color:b", 0.2f);
         Settings.m_DarkTintBlend    = Base::CProgramParameters::GetInstance().GetFloat("graphics:tone_mapping:dark_tint:blend", 0.5f);
         Settings.m_DarkTintStrength = Base::CProgramParameters::GetInstance().GetFloat("graphics:tone_mapping:dark_tint:strength", 0.5f);
         Settings.m_Saturation       = Base::CProgramParameters::GetInstance().GetFloat("graphics:tone_mapping:saturation", 1.0f);
