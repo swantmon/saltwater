@@ -12,12 +12,12 @@
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
-layout(std430, binding = 0) readonly buffer UHistogramBuffer
+layout(std430, binding = 1) readonly buffer UHistogramBuffer
 {
     float m_Histogram[HISTOGRAM_SIZE];
 };
 
-layout(std430, binding = 1) buffer UExposureHistoryBuffer
+layout(std430, binding = 2) buffer UExposureHistoryBuffer
 {
     float m_ExposureHistory[HISTORY_SIZE];
 };
