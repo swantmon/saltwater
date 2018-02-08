@@ -46,7 +46,6 @@ void main()
     if (g_Counts[0] == Count)
     {
         float D = BinToPlaneDistance(int(gl_GlobalInvocationID.x), g_AzimuthBinCount);
-        imageStore(cs_Histogram, ivec2(0, gl_GlobalInvocationID.z), ivec4(Count));
         g_Planes[PlaneIndex].w = -D;
     }
 }
