@@ -39,7 +39,7 @@ void main()
             if (x + i < ImageSize.x && x + i >= 0 &&
                 y + j < ImageSize.y && y + j >= 0)
             {
-                vec3 Sample = imageLoad(cs_NormalMap, ivec2(x + i, y + j)).xyz;
+                vec3 Sample = mat3(g_InvPoseMatrix) * imageLoad(cs_NormalMap, ivec2(x + i, y + j)).xyz;
             
                 if (Sample.x > -5.0f)
                 {
