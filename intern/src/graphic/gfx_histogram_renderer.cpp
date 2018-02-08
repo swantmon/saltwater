@@ -2,6 +2,7 @@
 #include "graphic/gfx_precompiled.h"
 
 #include "base/base_console.h"
+#include "base/base_program_parameters.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
@@ -54,9 +55,9 @@ namespace
         void Update();
         void Render();
 
-        void SetSettings();
+        void ResetSettings();
         void SetSettings(const SHistogramSettings& _rSettings);
-        SHistogramSettings& GetSettings();
+        const SHistogramSettings& GetSettings();
         
         CBufferPtr GetExposureHistoryBuffer();
 
@@ -173,7 +174,7 @@ namespace
     
     void CGfxHistogramRenderer::OnStart()
     {
-        SetSettings();
+        ResetSettings();
     }
     
     // -----------------------------------------------------------------------------
@@ -481,19 +482,19 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxHistogramRenderer::SetSettings()
+    void CGfxHistogramRenderer::ResetSettings()
     {
         BASE_CONSOLE_STREAMINFO("Gfx> Loading default settings for histogram");
         
         SHistogramSettings Settings;
 
-        Settings.m_HistogramLowerBound  =   0.80f;
-        Settings.m_HistogramUpperBound  =   0.983f;
-        Settings.m_HistogramLogMin      = - 8.00f;
-        Settings.m_HistogramLogMax      =  12.00f;
-        Settings.m_EyeAdaptionSpeedUp   =   0.25f;
-        Settings.m_EyeAdaptionSpeedDown =   0.25f;
-        Settings.m_ResetEyeAdaption     =   true;
+        Settings.m_HistogramLowerBound  = Base::CProgramParameters::GetInstance().GetFloat("graphics:histogram:lower_bound", 0.80f);
+        Settings.m_HistogramUpperBound  = Base::CProgramParameters::GetInstance().GetFloat("graphics:histogram:upper_bound", 0.983f);
+        Settings.m_HistogramLogMin      = Base::CProgramParameters::GetInstance().GetFloat("graphics:histogram:log_min", -8.00f);
+        Settings.m_HistogramLogMax      = Base::CProgramParameters::GetInstance().GetFloat("graphics:histogram:log_max", 12.00f);
+        Settings.m_EyeAdaptionSpeedUp   = Base::CProgramParameters::GetInstance().GetFloat("graphics:histogram:eye_adaption:speed_up", 0.25f);
+        Settings.m_EyeAdaptionSpeedDown = Base::CProgramParameters::GetInstance().GetFloat("graphics:histogram:eye_adaption:speed_down", 0.25f);
+        Settings.m_ResetEyeAdaption     = true;
 
         SetSettings(Settings);
     }
@@ -522,7 +523,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    SHistogramSettings& CGfxHistogramRenderer::GetSettings()
+    const SHistogramSettings& CGfxHistogramRenderer::GetSettings()
     {
         return m_Settings;
     }
@@ -672,9 +673,9 @@ namespace HistogramRenderer
 
     // -----------------------------------------------------------------------------
 
-    void SetSettings()
+    void ResetSettings()
     {
-        CGfxHistogramRenderer::GetInstance().SetSettings();
+        CGfxHistogramRenderer::GetInstance().ResetSettings();
     }
 
     // -----------------------------------------------------------------------------
@@ -686,7 +687,7 @@ namespace HistogramRenderer
 
     // -----------------------------------------------------------------------------
 
-    SHistogramSettings& GetSettings()
+    const SHistogramSettings& GetSettings()
     {
         return CGfxHistogramRenderer::GetInstance().GetSettings();
     }

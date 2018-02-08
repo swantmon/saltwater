@@ -46,9 +46,8 @@ namespace TonemappingRenderer
     void Update();
     void Render();
 
-    void SetSettings();
+    void ResetSettings();
     void SetSettings(const SColorGradingSettings& _rSettings);
-
     const SColorGradingSettings& GetSettings();
 } // namespace TonemappingRenderer
 } // namespace Gfx

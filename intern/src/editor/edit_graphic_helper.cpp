@@ -89,7 +89,7 @@ namespace
     {
         BASE_UNUSED(_rMessage);
 
-        Gfx::SHistogramSettings& rSettings = Gfx::HistogramRenderer::GetSettings();
+        const Gfx::SHistogramSettings& rSettings = Gfx::HistogramRenderer::GetSettings();
 
         Edit::CMessage NewMessage;
 

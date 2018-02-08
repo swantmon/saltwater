@@ -7,6 +7,15 @@
 
 namespace Gfx
 {
+    struct SSelectionSettings
+    {
+        glm::vec4 m_HighlightColor;
+        bool      m_HighlightUseDepth;
+    };
+} // namespace Gfx
+
+namespace Gfx
+{
 namespace SelectionRenderer
 {
     void OnStart();
@@ -41,5 +50,9 @@ namespace SelectionRenderer
     bool IsEmpty(const CSelectionTicket& _rTicket);
 
     bool IsValid(const CSelectionTicket& _rTicket);
+
+    void ResetSettings();
+    void SetSettings(const SSelectionSettings& _rSettings);
+    const SSelectionSettings& GetSettings();
 } // namespace SelectionRenderer
 } // namespace Gfx
