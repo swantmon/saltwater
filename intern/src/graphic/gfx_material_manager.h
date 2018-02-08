@@ -1,15 +1,7 @@
-//
-//  gfx_material_manager.h
-//  graphic
-//
-//  Created by Tobias Schwandt on 22/04/15.
-//  Copyright (c) 2015 TU Ilmenau. All rights reserved.
-//
 
 #pragma once
 
-#include "base/base_vector3.h"
-#include "base/base_vector4.h"
+#include "base/base_include_glm.h"
 
 #include "data/data_material.h"
 
@@ -31,8 +23,8 @@ namespace Gfx
         float             m_Reflectance;
         float             m_MetalMask;
         float             m_Displacement;
-        Base::Float3      m_AlbedoColor;
-        Base::Float4      m_TilingOffset;
+        glm::vec3         m_AlbedoColor;
+        glm::vec4         m_TilingOffset;
         const Base::Char* m_pFileName;
     };
 } // namespace Gfx

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "base/base_vector3.h"
+#include "base/base_include_glm.h"
 
 namespace Gfx
 {
@@ -38,8 +38,8 @@ namespace Gfx
     public:
 
         SHitFlag::Enum m_HitFlag;
-        Base::Float3   m_WSPosition;
-        Base::Float3   m_WSNormal;
+        glm::vec3   m_WSPosition;
+        glm::vec3   m_WSNormal;
         float          m_Depth;
         void*          m_pObject;
     };

@@ -1,10 +1,11 @@
 
 #include "camera/cam_precompiled.h"
 
+#include "base/base_include_glm.h"
+
 #include "core/core_time.h"
 
 #include "base/base_input_event.h"
-#include "base/base_math_operations.h"
 
 #include "camera/cam_control_manager.h"
 #include "camera/cam_editor_control.h"
@@ -88,61 +89,39 @@ namespace Cam
 
             WheelDelta = static_cast<float>(_rEvent.GetWheelDelta()) * s_MoveVelocityBorder[2];
 
-            m_MoveVelocity = Base::Clamp(m_MoveVelocity + WheelDelta, s_MoveVelocityBorder[0], s_MoveVelocityBorder[1]);
+            m_MoveVelocity = glm::clamp(m_MoveVelocity + WheelDelta, s_MoveVelocityBorder[0], s_MoveVelocityBorder[1]);
         }
         else if (_rEvent.GetAction() == Base::CInputEvent::MouseMove)
         {
             if (m_IsDragging)
             {
-                Base::Float3 Forward(0.0f, 0.0f, -1.0f);
-                Base::Float3 Right(1.0f, 0.0f, 0.0f);
-                Base::Float3 Up(0.0f, 0.0f, 1.0f);
+                glm::vec3 Forward(0.0f, 0.0f, -1.0f);
+                glm::vec3 Right(1.0f, 0.0f, 0.0f);
+                glm::vec3 Up(0.0f, 0.0f, 1.0f);
 
-                const Base::Float2& rCursorPosition = _rEvent.GetCursorPosition();
+                const glm::vec2& rCursorPosition = _rEvent.GetCursorPosition();
 
                 float DeltaTime = static_cast<float>(Core::Time::GetDeltaTimeLastFrame());
 
-                float CurrentVelocityX = (rCursorPosition[0] - m_LastCursorPosition[0]);
-                float CurrentVelocityY = (rCursorPosition[1] - m_LastCursorPosition[1]);
+                glm::vec2 CurrentVelocity = (rCursorPosition - m_LastCursorPosition);
 
-                Forward = Forward * m_RotationMatrix;
-                Right   = Right   * m_RotationMatrix;
-                Up      = Forward.CrossProduct(Right);
+                Forward = m_RotationMatrix * Forward;
+                Right   = m_RotationMatrix * Right;
+                Up      = glm::cross(Forward, Right);
 
-                m_Position -= (Right * CurrentVelocityX * DeltaTime);
-                m_Position -= (Up    * CurrentVelocityY * DeltaTime);
+                m_Position -= (Right * CurrentVelocity[0] * DeltaTime);
+                m_Position -= (Up    * CurrentVelocity[1] * DeltaTime);
 
                 m_LastCursorPosition = rCursorPosition;
             }
 
             if (m_IsFlying)
             {
-                const Base::Float2& rCursorPosition = _rEvent.GetCursorPosition();
+                const glm::vec2& rCursorPosition = _rEvent.GetCursorPosition();
 
-                m_CurrentRotation[0] += (rCursorPosition[0] - m_LastCursorPosition[0]) * s_RotationVelocity;
-                m_CurrentRotation[1] += (rCursorPosition[1] - m_LastCursorPosition[1]) * s_RotationVelocity;
+                m_CurrentRotation -= (rCursorPosition - m_LastCursorPosition) * s_RotationVelocity;
 
-                if (m_CurrentRotation[0] < 0.0f)
-                {
-                    m_CurrentRotation[0] = 360.0f + m_CurrentRotation[0];
-                }
-
-                m_CurrentRotation[0] = Base::Modulo(m_CurrentRotation[0], 360.0f);
-
-                if (m_CurrentRotation[1] < 0.0f)
-                {
-                    m_CurrentRotation[1] = 360.0f + m_CurrentRotation[1];
-                }
-
-                m_CurrentRotation[1] = Base::Modulo(m_CurrentRotation[1], 360.0f);
-
-                Base::Float3x3 RotationX(Base::Float3x3::s_Identity);
-                Base::Float3x3 RotationZ(Base::Float3x3::s_Identity);
-
-                RotationX.SetRotationX(Base::DegreesToRadians(m_CurrentRotation[1]));
-                RotationZ.SetRotationZ(Base::DegreesToRadians(m_CurrentRotation[0]));
-
-                m_RotationMatrix = RotationX * RotationZ;
+                m_RotationMatrix = glm::eulerAngleZX(glm::radians(m_CurrentRotation[0]), glm::radians(m_CurrentRotation[1]));
 
                 m_LastCursorPosition = rCursorPosition;
             }
@@ -160,13 +139,13 @@ namespace Cam
 
     void CEditorControl::InternUpdate()
     {
-        Base::Float3 Forward(0.0f, 0.0f, -1.0f);
-        Base::Float3 Right  (1.0f, 0.0f,  0.0f);
+        glm::vec3 Forward(0.0f, 0.0f, -1.0f);
+        glm::vec3 Right  (1.0f, 0.0f,  0.0f);
 
         float DeltaTime = static_cast<float>(Core::Time::GetDeltaTimeLastFrame());
 
-        Forward = Forward * m_RotationMatrix;
-        Right   = Right   * m_RotationMatrix;
+        Forward = m_RotationMatrix * Forward;
+        Right   = m_RotationMatrix * Right;
 
         if (m_MoveDirection & 0x01) m_Position += (Forward * m_MoveVelocity * DeltaTime);
         if (m_MoveDirection & 0x02) m_Position -= (Forward * m_MoveVelocity * DeltaTime);

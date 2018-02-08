@@ -8,9 +8,8 @@
 
 #pragma once
 
+#include "base/base_include_glm.h"
 #include "base/base_managed_pool.h"
-#include "base/base_vector3.h"
-#include "base/base_vector4.h"
 
 #include "graphic/gfx_buffer.h"
 #include "graphic/gfx_sampler_set.h"
@@ -49,8 +48,8 @@ namespace Gfx
         
         struct SMaterialAttributes
         {
-            Base::Float4  m_TilingOffset;
-            Base::Float3  m_Color;
+            glm::vec4  m_TilingOffset;
+            glm::vec3  m_Color;
             float         m_Roughness;
             float         m_Reflectance;
             float         m_MetalMask;

@@ -106,7 +106,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Add debug outputs
         // -----------------------------------------------------------------------------
-        DebugRenderer::DrawText("DEBUGGING!", Base::Float2(0.0f, 0.0f), Base::Float4(0.0f, 1.0f, 0.0f, 1.0f), 20);
+        DebugRenderer::DrawText("DEBUGGING!", glm::vec2(0.0f, 0.0f), glm::vec4(0.0f, 1.0f, 0.0f, 1.0f), 20);
 
         Gfx::DebugRenderer::DrawGizmo(true);
         

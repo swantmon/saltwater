@@ -6,7 +6,7 @@
 // Constants
 // -----------------------------------------------------------------------------
 
-layout(row_major, std140, binding = 0) uniform UBONormalize
+layout(std140, binding = 0) uniform UBONormalize
 {
 	float g_Normalize;
 };

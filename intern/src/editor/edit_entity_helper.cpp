@@ -118,9 +118,9 @@ namespace
 
         Dt::CTransformationFacet* pTransformationFacet = rNewEntity.GetTransformationFacet();
 
-        pTransformationFacet->SetPosition(Base::Float3(0.0f));
-        pTransformationFacet->SetScale(Base::Float3(1.0f));
-        pTransformationFacet->SetRotation(Base::Float3(0.0f));
+        pTransformationFacet->SetPosition(glm::vec3(0.0f));
+        pTransformationFacet->SetScale(glm::vec3(1.0f));
+        pTransformationFacet->SetRotation(glm::vec3(0.0f));
 
         _rMessage.SetResult(rNewEntity.GetID());
     }
@@ -287,9 +287,9 @@ namespace
             NewMessage.PutFloat(pTransformationFacet->GetPosition()[1]);
             NewMessage.PutFloat(pTransformationFacet->GetPosition()[2]);
 
-            NewMessage.PutFloat(Base::RadiansToDegree(pTransformationFacet->GetRotation()[0]));
-            NewMessage.PutFloat(Base::RadiansToDegree(pTransformationFacet->GetRotation()[1]));
-            NewMessage.PutFloat(Base::RadiansToDegree(pTransformationFacet->GetRotation()[2]));
+            NewMessage.PutFloat(glm::degrees(pTransformationFacet->GetRotation()[0]));
+            NewMessage.PutFloat(glm::degrees(pTransformationFacet->GetRotation()[1]));
+            NewMessage.PutFloat(glm::degrees(pTransformationFacet->GetRotation()[2]));
 
             NewMessage.PutFloat(pTransformationFacet->GetScale()[0]);
             NewMessage.PutFloat(pTransformationFacet->GetScale()[1]);
@@ -323,8 +323,7 @@ namespace
 
         int Category = _rMessage.GetInt();
 
-        (void)Category;
-        assert(Category == static_cast<int>(rCurrentEntity.GetCategory()));
+        if(Category != static_cast<int>(rCurrentEntity.GetCategory())) return;
 
         bool HasName = _rMessage.GetBool();
 
@@ -399,9 +398,9 @@ namespace
             ScaleZ = _rMessage.GetFloat();
 
 
-            Base::Float3 Position(TranslationX, TranslationY, TranslationZ);
-            Base::Float3 Rotation(Base::DegreesToRadians(RotationX), Base::DegreesToRadians(RotationY), Base::DegreesToRadians(RotationZ));
-            Base::Float3 Scale(ScaleX, ScaleY, ScaleZ);
+            glm::vec3 Position(TranslationX, TranslationY, TranslationZ);
+            glm::vec3 Rotation(glm::radians(RotationX), glm::radians(RotationY), glm::radians(RotationZ));
+            glm::vec3 Scale(ScaleX, ScaleY, ScaleZ);
 
             pTransformationFacet->SetPosition(Position);
             pTransformationFacet->SetScale(Scale);
@@ -409,7 +408,7 @@ namespace
         }
         else
         {
-            Base::Float3 Position(TranslationX, TranslationY, TranslationZ);
+            glm::vec3 Position(TranslationX, TranslationY, TranslationZ);
 
             rCurrentEntity.SetWorldPosition(Position);
         }

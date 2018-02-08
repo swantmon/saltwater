@@ -2,7 +2,7 @@
 #include "graphic/gfx_precompiled.h"
 
 #include "base/base_console.h"
-#include "base/base_matrix4x4.h"
+#include "base/base_program_parameters.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
@@ -55,9 +55,9 @@ namespace
         void Update();
         void Render();
 
-        void SetSettings();
+        void ResetSettings();
         void SetSettings(const SHistogramSettings& _rSettings);
-        SHistogramSettings& GetSettings();
+        const SHistogramSettings& GetSettings();
         
         CBufferPtr GetExposureHistoryBuffer();
 
@@ -129,13 +129,18 @@ namespace
 
         SConstantBufferCS      m_ConstantBufferPS;
 
+        CShaderPtr             m_HistogramShaderPtrs[NumberOfHistogramPasses];
+
         CBufferPtr             m_ExposureHistoryBufferPtr;
 
-        CShaderPtr             m_HistogramShaderPtrs[NumberOfHistogramPasses];
-        
-        CBufferSetPtr          m_HistogramBufferSetPtrs[NumberOfHistogramPasses];
+        CBufferPtr             m_HistogramSettingsBufferPtr;
+
+        CBufferPtr             m_HistogramPerThreadGroupBufferPtr;
+
+        CBufferPtr             m_HistogramBufferPtr;
 
         unsigned int           m_HistoryIndex;
+
         unsigned int           m_LastHistoryIndex;
         
         unsigned int           m_FrameOnResetEyeAdaption;
@@ -147,9 +152,11 @@ namespace
     CGfxHistogramRenderer::CGfxHistogramRenderer()
         : m_Settings                         ()
         , m_ConstantBufferPS                 ()
-        , m_ExposureHistoryBufferPtr         ()
         , m_HistogramShaderPtrs              ()
-        , m_HistogramBufferSetPtrs           ()
+        , m_HistogramSettingsBufferPtr       ()
+        , m_HistogramPerThreadGroupBufferPtr ()
+        , m_ExposureHistoryBufferPtr         ()
+        , m_HistogramBufferPtr               ()
         , m_HistoryIndex                     (0)
         , m_LastHistoryIndex                 (s_HistogramHistorySize - 1)
         , m_FrameOnResetEyeAdaption          (0)
@@ -167,22 +174,21 @@ namespace
     
     void CGfxHistogramRenderer::OnStart()
     {
-        SetSettings();
+        ResetSettings();
     }
     
     // -----------------------------------------------------------------------------
     
     void CGfxHistogramRenderer::OnExit()
     {
-        m_ExposureHistoryBufferPtr    = 0;
-
         m_HistogramShaderPtrs[HistogramBuild]    = 0;
         m_HistogramShaderPtrs[HistogramMerge]    = 0;
         m_HistogramShaderPtrs[HistogramEvaluate] = 0;
 
-        m_HistogramBufferSetPtrs[HistogramBuild]    = 0;
-        m_HistogramBufferSetPtrs[HistogramMerge]    = 0;
-        m_HistogramBufferSetPtrs[HistogramEvaluate] = 0;
+        m_HistogramSettingsBufferPtr       = 0;
+        m_HistogramPerThreadGroupBufferPtr = 0;
+        m_HistogramBufferPtr               = 0;
+        m_ExposureHistoryBufferPtr         = 0;
     }
     
     // -----------------------------------------------------------------------------
@@ -251,7 +257,7 @@ namespace
         
         m_ExposureHistoryBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
-		BufferManager::SetBufferLabel(m_ExposureHistoryBufferPtr, "Histogram Exposure History");
+        BufferManager::SetBufferLabel(m_ExposureHistoryBufferPtr, "Histogram Exposure History");
 
         // -----------------------------------------------------------------------------
 
@@ -263,9 +269,9 @@ namespace
         ConstanteBufferDesc.m_pBytes        = 0;
         ConstanteBufferDesc.m_pClassKey     = 0;
 
-        CBufferPtr HistogramSettingsBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
+        m_HistogramSettingsBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
-		BufferManager::SetBufferLabel(m_ExposureHistoryBufferPtr, "Histogram Settings");
+        BufferManager::SetBufferLabel(m_HistogramSettingsBufferPtr, "Histogram Settings");
 
         // -----------------------------------------------------------------------------
         
@@ -277,9 +283,9 @@ namespace
         ConstanteBufferDesc.m_pBytes        = 0;
         ConstanteBufferDesc.m_pClassKey     = 0;
         
-        CBufferPtr HistogramPerThreadGroupBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
+        m_HistogramPerThreadGroupBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
-		BufferManager::SetBufferLabel(m_ExposureHistoryBufferPtr, "Histogram Per Thread Group");
+        BufferManager::SetBufferLabel(m_HistogramPerThreadGroupBufferPtr, "Histogram Per Thread Group");
 
         // -----------------------------------------------------------------------------
         
@@ -291,17 +297,9 @@ namespace
         ConstanteBufferDesc.m_pBytes        = 0;
         ConstanteBufferDesc.m_pClassKey     = 0;
         
-        CBufferPtr HistogramBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
+        m_HistogramBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
-		BufferManager::SetBufferLabel(m_ExposureHistoryBufferPtr, "Histogram");
-
-        // -----------------------------------------------------------------------------
-
-        m_HistogramBufferSetPtrs[HistogramBuild]    = BufferManager::CreateBufferSet(HistogramPerThreadGroupBufferPtr, m_ExposureHistoryBufferPtr, HistogramSettingsBufferPtr);
-
-        m_HistogramBufferSetPtrs[HistogramMerge]    = BufferManager::CreateBufferSet(HistogramPerThreadGroupBufferPtr, HistogramBufferPtr, HistogramSettingsBufferPtr);
-
-        m_HistogramBufferSetPtrs[HistogramEvaluate] = BufferManager::CreateBufferSet(HistogramBufferPtr, m_ExposureHistoryBufferPtr, HistogramSettingsBufferPtr);
+        BufferManager::SetBufferLabel(m_HistogramBufferPtr, "Histogram");
     }
     
     // -----------------------------------------------------------------------------
@@ -424,7 +422,18 @@ namespace
         HistogramSettings.m_ISO                      = m_ConstantBufferPS.m_ISO;
         HistogramSettings.m_ResetEyeAdaption         = m_ConstantBufferPS.m_ResetEyeAdaption;
         
-        BufferManager::UploadBufferData(m_HistogramBufferSetPtrs[HistogramEvaluate]->GetBuffer(2), &HistogramSettings);
+        BufferManager::UploadBufferData(m_HistogramSettingsBufferPtr, &HistogramSettings);
+
+        // -----------------------------------------------------------------------------
+        // Setup
+        // -----------------------------------------------------------------------------
+        ContextManager::SetResourceBuffer(0, m_HistogramPerThreadGroupBufferPtr);
+        ContextManager::SetResourceBuffer(1, m_HistogramBufferPtr);
+        ContextManager::SetResourceBuffer(2, m_ExposureHistoryBufferPtr);
+
+        ContextManager::SetConstantBuffer(0, m_HistogramSettingsBufferPtr);
+
+        ContextManager::SetImageTexture(0, TargetSetManager::GetLightAccumulationTargetSet()->GetRenderTarget(0));
 
         // -----------------------------------------------------------------------------
         // 1. pass: Build partial histograms
@@ -432,23 +441,7 @@ namespace
         {
             ContextManager::SetShaderCS(m_HistogramShaderPtrs[HistogramBuild]);
 
-            ContextManager::SetResourceBuffer(0, m_HistogramBufferSetPtrs[HistogramBuild]->GetBuffer(0));
-            ContextManager::SetResourceBuffer(1, m_HistogramBufferSetPtrs[HistogramBuild]->GetBuffer(1));
-
-            ContextManager::SetConstantBuffer(0, m_HistogramBufferSetPtrs[HistogramBuild]->GetBuffer(2));
-
-            ContextManager::SetImageTexture(0, TargetSetManager::GetLightAccumulationTargetSet()->GetRenderTarget(0));
-
             ContextManager::Dispatch(HistogramSettings.m_NumberOfThreadGroupsX, HistogramSettings.m_NumberOfThreadGroupsY, 1);
-
-            ContextManager::ResetImageTexture(0);
-
-            ContextManager::ResetResourceBuffer(0);
-            ContextManager::ResetResourceBuffer(1);
-
-            ContextManager::ResetConstantBuffer(0);
-
-            ContextManager::ResetShaderCS();
         }
         
         // -----------------------------------------------------------------------------
@@ -456,20 +449,8 @@ namespace
         // -----------------------------------------------------------------------------
         {
             ContextManager::SetShaderCS(m_HistogramShaderPtrs[HistogramMerge]);
-
-            ContextManager::SetResourceBuffer(0, m_HistogramBufferSetPtrs[HistogramMerge]->GetBuffer(0));
-            ContextManager::SetResourceBuffer(1, m_HistogramBufferSetPtrs[HistogramMerge]->GetBuffer(1));
-
-            ContextManager::SetConstantBuffer(0, m_HistogramBufferSetPtrs[HistogramMerge]->GetBuffer(2));
             
             ContextManager::Dispatch(s_HistogramSize, 1, 1);
-            
-            ContextManager::ResetResourceBuffer(0);
-            ContextManager::ResetResourceBuffer(1);
-
-            ContextManager::ResetConstantBuffer(0);
-            
-            ContextManager::ResetShaderCS();
         }
         
         // -----------------------------------------------------------------------------
@@ -477,21 +458,19 @@ namespace
         // -----------------------------------------------------------------------------
         {
             ContextManager::SetShaderCS(m_HistogramShaderPtrs[HistogramEvaluate]);
-
-            ContextManager::SetResourceBuffer(0, m_HistogramBufferSetPtrs[HistogramEvaluate]->GetBuffer(0));
-            ContextManager::SetResourceBuffer(1, m_HistogramBufferSetPtrs[HistogramEvaluate]->GetBuffer(1));
-
-            ContextManager::SetConstantBuffer(0, m_HistogramBufferSetPtrs[HistogramEvaluate]->GetBuffer(2));
             
             ContextManager::Dispatch(1, 1, 1);
-            
-            ContextManager::ResetResourceBuffer(0);
-            ContextManager::ResetResourceBuffer(1);
-
-            ContextManager::ResetConstantBuffer(0);
-            
-            ContextManager::ResetShaderCS();
         }
+
+        ContextManager::ResetImageTexture(0);
+
+        ContextManager::ResetConstantBuffer(0);
+
+        ContextManager::ResetResourceBuffer(0);
+        ContextManager::ResetResourceBuffer(1);
+        ContextManager::ResetResourceBuffer(2);
+
+        ContextManager::ResetShaderCS();
 
         // -----------------------------------------------------------------------------
 
@@ -503,19 +482,19 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxHistogramRenderer::SetSettings()
+    void CGfxHistogramRenderer::ResetSettings()
     {
         BASE_CONSOLE_STREAMINFO("Gfx> Loading default settings for histogram");
         
         SHistogramSettings Settings;
 
-        Settings.m_HistogramLowerBound  =   0.80f;
-        Settings.m_HistogramUpperBound  =   0.983f;
-        Settings.m_HistogramLogMin      = - 8.00f;
-        Settings.m_HistogramLogMax      =  12.00f;
-        Settings.m_EyeAdaptionSpeedUp   =   0.25f;
-        Settings.m_EyeAdaptionSpeedDown =   0.25f;
-        Settings.m_ResetEyeAdaption     =   true;
+        Settings.m_HistogramLowerBound  = Base::CProgramParameters::GetInstance().GetFloat("graphics:histogram:lower_bound", 0.80f);
+        Settings.m_HistogramUpperBound  = Base::CProgramParameters::GetInstance().GetFloat("graphics:histogram:upper_bound", 0.983f);
+        Settings.m_HistogramLogMin      = Base::CProgramParameters::GetInstance().GetFloat("graphics:histogram:log_min", -8.00f);
+        Settings.m_HistogramLogMax      = Base::CProgramParameters::GetInstance().GetFloat("graphics:histogram:log_max", 12.00f);
+        Settings.m_EyeAdaptionSpeedUp   = Base::CProgramParameters::GetInstance().GetFloat("graphics:histogram:eye_adaption:speed_up", 0.25f);
+        Settings.m_EyeAdaptionSpeedDown = Base::CProgramParameters::GetInstance().GetFloat("graphics:histogram:eye_adaption:speed_down", 0.25f);
+        Settings.m_ResetEyeAdaption     = true;
 
         SetSettings(Settings);
     }
@@ -544,7 +523,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    SHistogramSettings& CGfxHistogramRenderer::GetSettings()
+    const SHistogramSettings& CGfxHistogramRenderer::GetSettings()
     {
         return m_Settings;
     }
@@ -694,9 +673,9 @@ namespace HistogramRenderer
 
     // -----------------------------------------------------------------------------
 
-    void SetSettings()
+    void ResetSettings()
     {
-        CGfxHistogramRenderer::GetInstance().SetSettings();
+        CGfxHistogramRenderer::GetInstance().ResetSettings();
     }
 
     // -----------------------------------------------------------------------------
@@ -708,7 +687,7 @@ namespace HistogramRenderer
 
     // -----------------------------------------------------------------------------
 
-    SHistogramSettings& GetSettings()
+    const SHistogramSettings& GetSettings()
     {
         return CGfxHistogramRenderer::GetInstance().GetSettings();
     }

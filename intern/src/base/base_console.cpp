@@ -5,9 +5,9 @@
 
 #include <stdarg.h>
 
-#if __ANDROID__
+#if PLATFORM_ANDROID
 #include "android/log.h"
-#endif // __ANDROID__
+#endif // PLATFORM_ANDROID
 
 namespace IO
 {
@@ -57,7 +57,7 @@ namespace IO
 
             char Buffer[s_MaxNumberOfFormatCharacters];
 
-#if __APPLE__ || __ANDROID__
+#if PLATFORM_ANDROID
             vsnprintf(Buffer, s_MaxNumberOfFormatCharacters, _pFormat, pArguments);
 #else
             vsnprintf_s(Buffer, s_MaxNumberOfFormatCharacters, _pFormat, pArguments);
@@ -135,7 +135,7 @@ namespace IO
 
     void CConsole::Out(EConsoleLevel _ConsoleLevel, const Char* _pText) const
     {
-#ifdef __ANDROID__
+#ifdef PLATFORM_ANDROID
         static const int s_LogLevel[] =
         {
             ANDROID_LOG_DEFAULT,
@@ -150,6 +150,6 @@ namespace IO
 
         fprintf(stdout, "%s: %s\n", GetLogLevelString(_ConsoleLevel).c_str(), _pText);
         fflush(stdout);
-#endif // __ANDROID__
+#endif // PLATFORM_ANDROID
     }
 } // namespace IO

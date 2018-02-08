@@ -1,6 +1,4 @@
 ﻿
-#include "base/base_vector3.h"
-
 #include "editor_gui/edit_inspector_ssr.h"
 
 #include "editor_port/edit_message_manager.h"
@@ -88,7 +86,7 @@ namespace Edit
         float Distance             = _rMessage.GetFloat();
         bool  UseDoubleReflections = _rMessage.GetBool();
 
-        (void)EntityID;
+        BASE_UNUSED(EntityID);
 
         // -----------------------------------------------------------------------------
         // Set values

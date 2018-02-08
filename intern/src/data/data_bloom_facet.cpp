@@ -8,7 +8,7 @@
 namespace Dt
 {
     CBloomFXFacet::CBloomFXFacet()
-        : m_Tint         (Base::Float4(1.0f, 1.0f, 1.0f, 1.0f))
+        : m_Tint         (glm::vec4(1.0f, 1.0f, 1.0f, 1.0f))
         , m_Intensity    (1.0f)
         , m_Treshhold    (1.0f)
         , m_ExposureScale(2.0f)
@@ -24,14 +24,14 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CBloomFXFacet::SetTint(Base::Float4& _rTint)
+    void CBloomFXFacet::SetTint(glm::vec4& _rTint)
     {
         m_Tint = _rTint;
     }
 
     // -----------------------------------------------------------------------------
 
-    Base::Float4& CBloomFXFacet::GetTint()
+    glm::vec4& CBloomFXFacet::GetTint()
     {
         return m_Tint;
     }
@@ -40,7 +40,7 @@ namespace Dt
 
     void CBloomFXFacet::SetIntensity(float _Intensity)
     {
-        m_Intensity = Base::Clamp(_Intensity, 0.0f, 8.0f);
+        m_Intensity = glm::clamp(_Intensity, 0.0f, 8.0f);
     }
 
     // -----------------------------------------------------------------------------
@@ -54,7 +54,7 @@ namespace Dt
 
     void CBloomFXFacet::SetTreshhold(float _Treshhold)
     {
-        m_Treshhold = Base::Clamp(_Treshhold, -1.0f, 8.0f);
+        m_Treshhold = glm::clamp(_Treshhold, -1.0f, 8.0f);
     }
 
     // -----------------------------------------------------------------------------
@@ -82,7 +82,7 @@ namespace Dt
 
     void CBloomFXFacet::SetSize(unsigned int _Size)
     {
-        m_Size = Base::Clamp(_Size, 1u, 5u);
+        m_Size = glm::clamp(_Size, 1u, 5u);
     }
 
     // -----------------------------------------------------------------------------

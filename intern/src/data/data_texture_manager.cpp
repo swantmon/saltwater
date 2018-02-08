@@ -16,6 +16,7 @@
 #include "IL/il.h"
 
 #include <unordered_map>
+#include <vector>
 
 using namespace Dt;
 using namespace Dt::TextureManager;
@@ -264,7 +265,7 @@ namespace
 
             PathToTexture = Core::AssetManager::GetPathToAssets() + "/" + _rDescriptor.m_pFileName;
 
-#if __ANDROID__
+#if PLATFORM_ANDROID
             const char* pPathToTexture = PathToTexture.c_str();
 #else
             const wchar_t* pPathToTexture = reinterpret_cast<const wchar_t*>(PathToTexture.c_str());
@@ -406,7 +407,7 @@ namespace
             NativeILFormat = ConvertILImageFormat(_rDescriptor.m_Format);
             NativeILType   = ConvertILImageType(_rDescriptor.m_Format);
 
-#if __ANDROID__
+#if PLATFORM_ANDROID
             const char* pPathToTexture = PathToTexture.c_str();
 #else
             const wchar_t* pPathToTexture = reinterpret_cast<const wchar_t*>(PathToTexture.c_str());
@@ -636,7 +637,7 @@ namespace
             NativeILFormat = ConvertILImageFormat(_rDescriptor.m_Format);
             NativeILType   = ConvertILImageType(_rDescriptor.m_Format);
 
-#if __ANDROID__
+#if PLATFORM_ANDROID
             const char* pPathToTexture = PathToTexture.c_str();
 #else
             const wchar_t* pPathToTexture = reinterpret_cast<const wchar_t*>(PathToTexture.c_str());

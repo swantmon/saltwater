@@ -9,7 +9,7 @@
 // Uniform buffers
 // -----------------------------------------------------------------------------
 
-layout(row_major, std140, binding = 2) uniform UBOTransform
+layout(std140, binding = 2) uniform UBOTransform
 {
     ivec3 g_Offset;
     int g_Resolution;

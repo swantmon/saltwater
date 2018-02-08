@@ -2,7 +2,7 @@
 #include "graphic/gfx_precompiled.h"
 
 #include "base/base_console.h"
-#include "base/base_matrix4x4.h"
+#include "base/base_include_glm.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
@@ -29,10 +29,6 @@
 #include "graphic/gfx_target_set_manager.h"
 #include "graphic/gfx_texture_manager.h"
 #include "graphic/gfx_view_manager.h"
-
-// #include "mr/mr_control_manager.h"
-// #include "mr/mr_kinect_control.h"
-// #include "mr/mr_webcam_control.h"
 
 using namespace Gfx;
 
@@ -74,12 +70,12 @@ namespace
 
         struct SPerDrawCallConstantBufferVS
         {
-            Base::Float4x4 m_ModelMatrix;
+            glm::mat4 m_ModelMatrix;
         };
 
         struct SBilateralBlurConstantBufferCS
         {
-            Base::UInt4 m_Direction;
+            glm::uvec4 m_Direction;
         };
 
         struct SHitProxyProperties
@@ -92,7 +88,7 @@ namespace
             unsigned int   m_EntityID;
             CSurfacePtr    m_SurfacePtr;
             CMaterialPtr   m_SurfaceMaterialPtr;
-            Base::Float4x4 m_ModelMatrix;
+            glm::mat4 m_ModelMatrix;
         };
 
     private:
@@ -434,7 +430,7 @@ namespace
 //                 // TODO: Target rectangle should be variable
 //                 // TODO: Use image from main camera?
 //                 // -----------------------------------------------------------------------------
-//                 Base::AABB2UInt TargetRect(Base::UInt2(0), Base::UInt2(1280, 720));
+//                 Base::AABB2UInt TargetRect(glm::uvec2(0), glm::uvec2(1280, 720));
 // 
 //                 TextureManager::CopyToTexture2D(m_WebcamTexturePtr, TargetRect, TargetRect[1][0], rWebcamControl.GetConvertedFrame()->GetPixels());
 //             }
@@ -448,7 +444,7 @@ namespace
 //             // -----------------------------------------------------------------------------
 //             MR::CKinectControl& rKinectControl = static_cast<MR::CKinectControl&>(*pControl);
 // 
-//             Base::AABB2UInt TargetRect(Base::UInt2(0), Base::UInt2(1280, 720));
+//             Base::AABB2UInt TargetRect(glm::uvec2(0), glm::uvec2(1280, 720));
 // 
 //             TextureManager::CopyToTexture2D(m_BackgroundTexturePtr, TargetRect, TargetRect[1][0], rKinectControl.GetConvertedFrame()->GetPixels());
 // 

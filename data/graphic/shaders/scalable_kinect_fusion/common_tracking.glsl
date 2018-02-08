@@ -11,12 +11,12 @@ struct SIntrinics
 	vec2 m_InvFocalLength;
 };
 
-layout(row_major, std140, binding = 0) uniform UBOIntrinsics
+layout(std140, binding = 0) uniform UBOIntrinsics
 {
 	SIntrinics g_Intrinsics[PYRAMID_LEVELS];
 };
 
-layout(row_major, std140, binding = 1) uniform UBOTrackingData
+layout(std140, binding = 1) uniform UBOTrackingData
 {
 	mat4 g_PoseMatrix;
 	mat4 g_InvPoseMatrix;

@@ -2,7 +2,6 @@
 #include "graphic/gfx_precompiled.h"
 
 #include "base/base_console.h"
-#include "base/base_matrix4x4.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
@@ -26,6 +25,9 @@
 #include "graphic/gfx_target_set_manager.h"
 #include "graphic/gfx_texture_manager.h"
 #include "graphic/gfx_view_manager.h"
+
+#include <algorithm>
+#include <vector>
 
 using namespace Gfx;
 
@@ -67,7 +69,7 @@ namespace
 
         struct SPerDrawCallConstantBufferVS
         {
-            Base::Float4x4 m_ModelMatrix;
+            glm::mat4 m_ModelMatrix;
         };
 
         struct SHitProxyProperties
@@ -81,7 +83,7 @@ namespace
             unsigned int   m_EntityID;
             CSurfacePtr    m_SurfacePtr;
             CMaterialPtr   m_SurfaceMaterialPtr;
-            Base::Float4x4 m_ModelMatrix;
+            glm::mat4 m_ModelMatrix;
         };
 
     private:

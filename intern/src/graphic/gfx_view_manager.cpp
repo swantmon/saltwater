@@ -1,16 +1,9 @@
-//
-//  gfx_view_manager.cpp
-//  graphic
-//
-//  Created by Tobias Schwandt on 23/10/14.
-//  Copyright (c) 2014 TU Ilmenau. All rights reserved.
-//
 
 #include "graphic/gfx_precompiled.h"
 
 #include "base/base_exception.h"
+#include "base/base_include_glm.h"
 #include "base/base_managed_pool.h"
-#include "base/base_matrix3x3.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
@@ -137,7 +130,7 @@ namespace
     private:
         
         // -----------------------------------------------------------------------------
-        // Possible other cameras and viewports depending on renderer
+        // Possible other cameras and view ports depending on renderer
         // -----------------------------------------------------------------------------
         CViews          m_Views;
         CCameras        m_Cameras;
@@ -145,7 +138,7 @@ namespace
         CViewPortSets   m_ViewPortSets;
         
         // -----------------------------------------------------------------------------
-        // Main camera and viewports
+        // Main camera and view ports
         // -----------------------------------------------------------------------------
         CCameraPtr      m_MainCameraPtr;
         CCameraPtr      m_DebugCameraPtr;
@@ -183,7 +176,7 @@ namespace
         
         try
         {
-            Base::Int2 ScreenSize = Main::GetActiveWindowSize();
+            glm::ivec2 ScreenSize = Main::GetActiveWindowSize();
             
             Width  = static_cast<float>(ScreenSize[0]);
             Height = static_cast<float>(ScreenSize[1]);
@@ -310,9 +303,9 @@ namespace
         // Flip the camera around the x-axis, so that the origin of the GUI coordinate
         // system is in the upper left corner of the render area.
         // -----------------------------------------------------------------------------
-        Base::Float3x3 Rotation(Base::Float3x3::s_Identity);
-         
-        Rotation.SetRotationX(Base::DegreesToRadians(180.0f));
+        glm::mat3 Rotation(1.0f);
+
+        Rotation = glm::eulerAngleX(glm::radians(180.0f));
         
         GUIViewPtr->SetRotationMatrix(Rotation);
         
@@ -341,7 +334,7 @@ namespace
         // Flip the camera around the x-axis, so that the origin of the post coordinate
         // system is in the upper left corner of the render area.
         // -----------------------------------------------------------------------------
-        Rotation.SetRotationX(Base::DegreesToRadians(180.0f));
+        Rotation = glm::eulerAngleX(glm::radians(180.0f));
         
         PostViewPtr->SetRotationMatrix(Rotation);
         

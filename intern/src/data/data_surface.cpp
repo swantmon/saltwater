@@ -94,105 +94,105 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CSurface::SetPositions(Base::Float3* _pPositions)
+    void CSurface::SetPositions(glm::vec3* _pPositions)
     {
         m_pPositions = _pPositions;
     }
 
     // -----------------------------------------------------------------------------
 
-    Base::Float3* CSurface::GetPositions()
+    glm::vec3* CSurface::GetPositions()
     {
         return m_pPositions;
     }
 
     // -----------------------------------------------------------------------------
 
-    const Base::Float3* CSurface::GetPositions() const
+    const glm::vec3* CSurface::GetPositions() const
     {
         return m_pPositions;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CSurface::SetNormals(Base::Float3* _pNormals)
+    void CSurface::SetNormals(glm::vec3* _pNormals)
     {
         m_pNormals = _pNormals;
     }
 
     // -----------------------------------------------------------------------------
 
-    Base::Float3* CSurface::GetNormals()
+    glm::vec3* CSurface::GetNormals()
     {
         return m_pNormals;
     }
 
     // -----------------------------------------------------------------------------
 
-    const Base::Float3* CSurface::GetNormals() const
+    const glm::vec3* CSurface::GetNormals() const
     {
         return m_pNormals;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CSurface::SetTangents(Base::Float3* _pTangents)
+    void CSurface::SetTangents(glm::vec3* _pTangents)
     {
         m_pTangents = _pTangents;
     }
 
     // -----------------------------------------------------------------------------
 
-    Base::Float3* CSurface::GetTangents()
+    glm::vec3* CSurface::GetTangents()
     {
         return m_pTangents;
     }
 
     // -----------------------------------------------------------------------------
 
-    const Base::Float3* CSurface::GetTangents() const
+    const glm::vec3* CSurface::GetTangents() const
     {
         return m_pTangents;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CSurface::SetBitangents(Base::Float3* _pBitangents)
+    void CSurface::SetBitangents(glm::vec3* _pBitangents)
     {
         m_pBitangents = _pBitangents;
     }
 
     // -----------------------------------------------------------------------------
 
-    Base::Float3* CSurface::GetBitangents()
+    glm::vec3* CSurface::GetBitangents()
     {
         return m_pBitangents;
     }
 
     // -----------------------------------------------------------------------------
 
-    const Base::Float3* CSurface::GetBitangents() const
+    const glm::vec3* CSurface::GetBitangents() const
     {
         return m_pBitangents;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CSurface::SetTexCoords(Base::Float2* _pTexCoords)
+    void CSurface::SetTexCoords(glm::vec2* _pTexCoords)
     {
         m_pTexCoords = _pTexCoords;
     }
 
     // -----------------------------------------------------------------------------
 
-    Base::Float2* CSurface::GetTexCoords()
+    glm::vec2* CSurface::GetTexCoords()
     {
         return m_pTexCoords;
     }
 
     // -----------------------------------------------------------------------------
 
-    const Base::Float2* CSurface::GetTexCoords() const
+    const glm::vec2* CSurface::GetTexCoords() const
     {
         return m_pTexCoords;
     }

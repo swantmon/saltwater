@@ -2,10 +2,9 @@
 #include "graphic/gfx_precompiled.h"
 
 #include "base/base_console.h"
-#include "base/base_matrix4x4.h"
+#include "base/base_include_glm.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
-#include "base/base_vector4.h"
 
 #include "camera/cam_control_manager.h"
 
@@ -105,18 +104,18 @@ namespace
 
         struct SSkyboxVSBuffer
         {
-            Base::Float4x4 m_View;
-            Base::Float4x4 m_Projection;
+            glm::mat4 m_View;
+            glm::mat4 m_Projection;
         };
 
         struct SSkyboxFromTextureVSBuffer
         {
-            Base::Float4x4 m_ModelMatrix;
+            glm::mat4 m_ModelMatrix;
         };
         
         struct SSkyboxBufferPS
         {
-            Base::Float4   m_InvertedScreenSize;
+            glm::vec4   m_InvertedScreenSize;
             unsigned int   m_ExposureHistoryIndex;
         };
 
@@ -520,7 +519,7 @@ namespace
         ViewBuffer.m_View       = CameraPtr->GetView()->GetViewMatrix();
         ViewBuffer.m_Projection = CameraPtr->GetProjectionMatrix();
 
-        ViewBuffer.m_View.InjectTranslation(0.0f, 0.0f, 0.0f);
+        ViewBuffer.m_View[3] = glm::vec4(0.0f);
 
         BufferManager::UploadBufferData(VSBufferSetPtr->GetBuffer(0), &ViewBuffer);
 
@@ -528,7 +527,7 @@ namespace
 
         SSkyboxBufferPS PSBuffer;
  
-        PSBuffer.m_InvertedScreenSize   = Base::Float4(1.0f / Main::GetActiveWindowSize()[0], 1.0f / Main::GetActiveWindowSize()[1], 0, 0);
+        PSBuffer.m_InvertedScreenSize   = glm::vec4(1.0f / Main::GetActiveWindowSize()[0], 1.0f / Main::GetActiveWindowSize()[1], 0, 0);
         PSBuffer.m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
         
         BufferManager::UploadBufferData(PSBufferSetPtr->GetBuffer(0), &PSBuffer);
@@ -795,7 +794,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Render webcam to target set
         // -----------------------------------------------------------------------------
-        TargetSetManager::ClearTargetSet(m_WebcamTargetSetPtr, Base::Float4::s_One);
+        TargetSetManager::ClearTargetSet(m_WebcamTargetSetPtr, glm::vec4(1.0f));
 
         ContextManager::SetTargetSet(m_WebcamTargetSetPtr);
 

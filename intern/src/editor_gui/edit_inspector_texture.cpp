@@ -1,7 +1,5 @@
 ﻿
 #include "base/base_crc.h"
-#include "base/base_vector3.h"
-#include "base/base_vector4.h"
 
 #include "editor_gui/edit_inspector_Texture.h"
 #include "editor_gui/edit_texture_value.h"
@@ -133,8 +131,8 @@ namespace Edit
         bool IsCube  = _rMessage.GetBool();
         bool IsDummy = _rMessage.GetBool();
 
-        (void)IsArray;
-        (void)IsDummy;
+        BASE_UNUSED(IsArray);
+        BASE_UNUSED(IsDummy);
 
         char Filename[256];
         char Identifier[256];

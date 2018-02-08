@@ -7,7 +7,7 @@
 // -------------------------------------------------------------------------------------
 // Input from engine
 // -------------------------------------------------------------------------------------
-layout(row_major, std140, binding = 1) uniform UB1
+layout(std140, binding = 1) uniform UB1
 {
     mat4   cs_LightViewProjection;
     vec4   cs_LightDirection;
@@ -16,7 +16,7 @@ layout(row_major, std140, binding = 1) uniform UB1
     uint   cs_ExposureHistoryIndex;
 };
 
-layout(row_major, std140, binding = 2) uniform UB2
+layout(std140, binding = 2) uniform UB2
 {
     vec4 cs_WindDirection;
     vec4 cs_FogColor;

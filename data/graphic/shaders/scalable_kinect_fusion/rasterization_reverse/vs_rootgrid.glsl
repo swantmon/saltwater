@@ -8,7 +8,7 @@
 // Buffers
 // -----------------------------------------------------------------------------
 
-layout(row_major, std140, binding = 3) uniform PerVolumeData
+layout(std140, binding = 3) uniform PerVolumeData
 {
     ivec3 g_Offset;
     int g_Resolution;

@@ -12,7 +12,7 @@
 // Input from engine
 // -----------------------------------------------------------------------------
 
-layout(row_major, std140, binding = 2) uniform UBOOffset
+layout(std140, binding = 2) uniform UBOOffset
 {
     vec3 g_Offset;
 };

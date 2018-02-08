@@ -14,7 +14,7 @@
 // Input from engine
 // -----------------------------------------------------------------------------
 
-layout(row_major, std140, binding = 1) uniform PerDrawCallData
+layout(std140, binding = 1) uniform PerDrawCallData
 {
     vec4 g_LightPosition;
     vec4 g_Color;

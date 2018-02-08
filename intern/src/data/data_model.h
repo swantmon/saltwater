@@ -13,6 +13,7 @@
 #include "data/data_mesh.h"
 
 #include <string>
+#include <vector>
 
 namespace Dt
 {

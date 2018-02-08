@@ -16,7 +16,7 @@ const float HeightOffset = 0.01f;
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
-layout(row_major, std140, binding = 3) uniform UB3
+layout(std140, binding = 3) uniform UB3
 {
     vec4 g_SunDirection;
     vec4 g_SunIntensity;

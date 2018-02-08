@@ -9,10 +9,7 @@
 // -----------------------------------------------------------------------------
 layout(std430, binding = 0) readonly buffer USettingBuffer
 {
-    uint m_MinX;
-    uint m_MinY;
-    uint m_MaxX;
-    uint m_MaxY;
+    vec4 m_MinMaxUV;
 };
 
 layout(std430, binding = 1) writeonly buffer UOutput
@@ -36,10 +33,6 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 
 void main()
 {
-    uint X = gl_GlobalInvocationID.x;
-    uint Y = gl_GlobalInvocationID.y;
-
-
     // -----------------------------------------------------------------------------
     // Check the current pixel and find information about this including:
     // 1. GBuffer data
@@ -66,10 +59,9 @@ void main()
     // That implementation is for a first test and will be replaced as soon
     // as needed.
     // -----------------------------------------------------------------------------
-    ivec2 UV = ivec2(m_MinX, g_InvertedScreensizeAndScreensize.w - float(m_MinY));
+    vec2 HomogeneousUV = vec2(m_MinMaxUV.x, 1.0f - m_MinMaxUV.y);
 
-
-    vec2 HomogeneousUV = vec2(UV) * g_InvertedScreensizeAndScreensize.xy;
+    ivec2 UV = ivec2(HomogeneousUV * g_InvertedScreensizeAndScreensize.zw);
 
     // -----------------------------------------------------------------------------
     // Get data

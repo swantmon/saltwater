@@ -9,7 +9,7 @@ out gl_PerVertex
     vec4 gl_Position;
 };
 
-layout(row_major, std140, binding = 1) uniform PerDrawCall
+layout(std140, binding = 1) uniform PerDrawCall
 {
 	mat4 g_WorldMatrix;
 	mat4 g_WorldToViewMatrix;

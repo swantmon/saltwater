@@ -7,8 +7,8 @@ namespace Cam
 {
     CControl::CControl(EType _Type)
         : m_Type                  (_Type)
-        , m_Position              (Base::Float3::s_Zero)
-        , m_RotationMatrix        (Base::Float3x3::s_Identity)
+        , m_Position              (0.0f)
+        , m_RotationMatrix        (1.0f)
         , m_MoveVelocity          (10.0f)
         , m_HasPositionChanged    (false)
         , m_HasRotationChanged    (false)
@@ -70,28 +70,28 @@ namespace Cam
 
     // -----------------------------------------------------------------------------
 
-    void CControl::SetPosition(const Base::Float3& _rPosition)
+    void CControl::SetPosition(const glm::vec3& _rPosition)
     {
         m_Position = _rPosition;
     }
 
     // -----------------------------------------------------------------------------
 
-    const Base::Float3& CControl::GetPosition() const
+    const glm::vec3& CControl::GetPosition() const
     {
         return m_Position;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CControl::SetRotation(const Base::Float3x3& _rMatrix)
+    void CControl::SetRotation(const glm::mat3& _rMatrix)
     {
         m_RotationMatrix = _rMatrix;
     }
 
     // -----------------------------------------------------------------------------
 
-    const Base::Float3x3& CControl::GetRotation() const
+    const glm::mat3& CControl::GetRotation() const
     {
         return m_RotationMatrix;
     }

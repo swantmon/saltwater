@@ -2,7 +2,7 @@
 #include "graphic/gfx_precompiled.h"
 
 #include "base/base_console.h"
-#include "base/base_matrix4x4.h"
+#include "base/base_include_glm.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
@@ -93,7 +93,7 @@ namespace
         
         struct SPerDrawCallConstantBuffer
         {
-            Base::Float4x4 m_ModelMatrix;
+            glm::mat4 m_ModelMatrix;
         };
 
         struct SSSRProperties
@@ -106,17 +106,17 @@ namespace
 
         struct SHCBProperties
         {
-            Base::Float4 m_UVBoundaries;
-            Base::Float2 m_InverseTextureSize;
+            glm::vec4 m_UVBoundaries;
+            glm::vec2 m_InverseTextureSize;
             float        m_MipmapLevel;
         };
 
         struct SProbePropertiesBuffer
         {
-            Base::Float4x4 m_WorldToProbeLS;
-            Base::Float4   m_ProbePosition;
-            Base::Float4   m_UnitaryBox;
-            Base::Float4   m_LightSettings;
+            glm::mat4 m_WorldToProbeLS;
+            glm::vec4   m_ProbePosition;
+            glm::vec4   m_UnitaryBox;
+            glm::vec4   m_LightSettings;
             unsigned int   m_LightType;
             unsigned int   m_Padding0;
             unsigned int   m_Padding1;
@@ -125,7 +125,7 @@ namespace
         
         struct SIBLSettings
         {
-            Base::Float4 m_IBLSettings;
+            glm::vec4 m_IBLSettings;
         };
 
     private:
@@ -298,7 +298,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Initiate target set
         // -----------------------------------------------------------------------------
-        Base::Int2 Size = Main::GetActiveWindowSize();
+        glm::ivec2 Size = Main::GetActiveWindowSize();
 
         // -----------------------------------------------------------------------------
         // Create render target textures
@@ -568,7 +568,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Initiate target set
         // -----------------------------------------------------------------------------
-        Base::Int2 Size(_Width, _Height);
+        glm::ivec2 Size(_Width, _Height);
 
         // -----------------------------------------------------------------------------
         // Create render target textures
@@ -709,7 +709,7 @@ namespace
         // -----------------------------------------------------------------------------
         SIBLSettings IBLSettings;
 
-        IBLSettings.m_IBLSettings    = Base::Float4::s_Zero;
+        IBLSettings.m_IBLSettings    = glm::vec4(0.0f);
         IBLSettings.m_IBLSettings[0] = m_SSRRenderJobs.size() > 0 ? 1.0f : 0.0f;
 
         BufferManager::UploadBufferData(m_ImageLightBufferPtr, &IBLSettings);
@@ -868,13 +868,13 @@ namespace
         {
             SHCBProperties HCBProperties;
 
-            HCBProperties.m_UVBoundaries       = Base::Float4(0.0f, 0.0f, 1.0f, 1.0f);
-            HCBProperties.m_InverseTextureSize = Base::Float2(1.0f, 1.0f);
+            HCBProperties.m_UVBoundaries       = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+            HCBProperties.m_InverseTextureSize = glm::vec2(1.0f, 1.0f);
             HCBProperties.m_MipmapLevel        = static_cast<float>(IndexOfMipmap);
 
             if (IndexOfMipmap > 0)
             {
-                HCBProperties.m_InverseTextureSize = Base::Float2(1.0f / m_HCBViewPortSetPtrs[IndexOfMipmap - 1]->GetViewPorts()[0]->GetWidth(), 1.0f / m_HCBViewPortSetPtrs[IndexOfMipmap - 1]->GetViewPorts()[0]->GetHeight());
+                HCBProperties.m_InverseTextureSize = glm::vec2(1.0f / m_HCBViewPortSetPtrs[IndexOfMipmap - 1]->GetViewPorts()[0]->GetWidth(), 1.0f / m_HCBViewPortSetPtrs[IndexOfMipmap - 1]->GetViewPorts()[0]->GetHeight());
             }
 
             BufferManager::UploadBufferData(m_HCBBufferPtr, &HCBProperties);
@@ -933,7 +933,7 @@ namespace
 
         SSSRProperties SSRProperties;
 
-        Base::Float3 Position = CameraPtr->GetView()->GetPosition();
+        glm::vec3 Position = CameraPtr->GetView()->GetPosition();
 
         SSRProperties.m_SSRIntesity          = pDataSSRFacet->GetIntensity();
         SSRProperties.m_SSRRougnessMaskScale = pDataSSRFacet->GetRoughnessMask();
@@ -1045,10 +1045,10 @@ namespace
         for (; IndexOfLight < s_MaxNumberOfProbes; ++ IndexOfLight)
         {
             LightBuffer[IndexOfLight].m_LightType      = 0;
-            LightBuffer[IndexOfLight].m_WorldToProbeLS = Base::Float4x4::s_Identity;
-            LightBuffer[IndexOfLight].m_ProbePosition  = Base::Float4::s_Zero;
-            LightBuffer[IndexOfLight].m_UnitaryBox     = Base::Float4::s_One;
-            LightBuffer[IndexOfLight].m_LightSettings  = Base::Float4::s_Zero;
+            LightBuffer[IndexOfLight].m_WorldToProbeLS = glm::mat4(1.0f);
+            LightBuffer[IndexOfLight].m_ProbePosition  = glm::vec4(0.0f);
+            LightBuffer[IndexOfLight].m_UnitaryBox     = glm::vec4(1.0f);
+            LightBuffer[IndexOfLight].m_LightSettings  = glm::vec4(0.0f);
         }
 
         // -----------------------------------------------------------------------------
@@ -1081,9 +1081,9 @@ namespace
                 // Fill data
                 // -----------------------------------------------------------------------------
                 LightBuffer[IndexOfLight].m_LightType        = static_cast<int>(pDataLightProbeFacet->GetType()) + 1;
-                LightBuffer[IndexOfLight].m_WorldToProbeLS   = rCurrentEntity.GetTransformationFacet()->GetWorldMatrix().GetInverted();
-                LightBuffer[IndexOfLight].m_ProbePosition    = Base::Float4(rCurrentEntity.GetWorldPosition(), 1.0f);
-                LightBuffer[IndexOfLight].m_UnitaryBox       = Base::Float4(pDataLightProbeFacet->GetBoxSize(), 0.0f);
+                LightBuffer[IndexOfLight].m_WorldToProbeLS   = glm::inverse(rCurrentEntity.GetTransformationFacet()->GetWorldMatrix());
+                LightBuffer[IndexOfLight].m_ProbePosition    = glm::vec4(rCurrentEntity.GetWorldPosition(), 1.0f);
+                LightBuffer[IndexOfLight].m_UnitaryBox       = glm::vec4(pDataLightProbeFacet->GetBoxSize(), 0.0f);
                 LightBuffer[IndexOfLight].m_LightSettings[0] = static_cast<float>(pGraphicLightProbeFacet->GetSpecularPtr()->GetNumberOfMipLevels() - 1);
                 LightBuffer[IndexOfLight].m_LightSettings[1] = pDataLightProbeFacet->GetParallaxCorrection() == true ? 1.0f : 0.0f;
                 LightBuffer[IndexOfLight].m_LightSettings[2] = 0.0f;

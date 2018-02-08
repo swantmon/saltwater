@@ -4,7 +4,10 @@
 #include "base/base_test_defines.h"
 
 #include "base/base_aabb3.h"
+
 #include "base/base_sphere.h"
+
+#include "base/base_include_glm.h"
 
 using namespace Base;
 
@@ -28,13 +31,13 @@ BASE_TEST(SphereCollisionWithAABB)
     
     // -----------------------------------------------------------------------------
     
-    BASE_CHECK(!MySphere.Contains(Float3(0.0f)));
+    BASE_CHECK(!MySphere.Contains(glm::vec3(0.0f)));
     
-    BASE_CHECK(MySphere.Contains(Float3(1.0f)));
+    BASE_CHECK(MySphere.Contains(glm::vec3(1.0f)));
     
-    BASE_CHECK(MySphere.Contains(Float3(1.0f, 1.0f, 0.0f)));
+    BASE_CHECK(MySphere.Contains(glm::vec3(1.0f, 1.0f, 0.0f)));
     
-    BASE_CHECK(MySphere.Contains(Float3(0.0f, 1.0f, 1.0f)));
+    BASE_CHECK(MySphere.Contains(glm::vec3(0.0f, 1.0f, 1.0f)));
     
     // -----------------------------------------------------------------------------
     

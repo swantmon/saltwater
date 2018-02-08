@@ -1,6 +1,12 @@
 
 #pragma once
 
+#include "base/base_console.h"
+#include "base/base_exception.h"
+#include "base/base_include_glm.h"
+#include "base/base_memory.h"
+#include "base/base_program_parameters.h"
+
 #include <jni.h>
 #include <errno.h>
 
@@ -12,5 +18,3 @@
 
 #include <android/log.h>
 #include "android_native_app_glue.h"
-
-#include "base/base_console.h"

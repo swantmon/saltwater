@@ -1,8 +1,8 @@
 
 #pragma once
 
+#include "base/base_include_glm.h"
 #include "base/base_typedef.h"
-#include "base/base_vector3.h"
 
 namespace Dt
 {
@@ -44,13 +44,13 @@ namespace Dt
         void SetRefreshMode(ERefreshMode _RefreshMode);
         ERefreshMode GetRefreshMode();
 
-        void SetColor(const Base::Float3& _rColor);
-        Base::Float3& GetColor();
-        const Base::Float3& GetColor() const;
+        void SetColor(const glm::vec3& _rColor);
+        glm::vec3& GetColor();
+        const glm::vec3& GetColor() const;
 
-        void SetDirection(const Base::Float3& _rDirection);
-        Base::Float3& GetDirection();
-        const Base::Float3& GetDirection() const;
+        void SetDirection(const glm::vec3& _rDirection);
+        glm::vec3& GetDirection();
+        const glm::vec3& GetDirection() const;
 
         void SetTemperature(float _Temperature);
         float GetTemperature() const;
@@ -74,8 +74,8 @@ namespace Dt
         float GetAngleScale() const;
         float GetAngleOffset() const;
 
-        Base::Float3& GetLightness();
-        const Base::Float3& GetLightness() const;
+        glm::vec3& GetLightness();
+        const glm::vec3& GetLightness() const;
 
     public:
 
@@ -90,9 +90,9 @@ namespace Dt
         EShadowType    m_ShadowType;
         EShadowQuality m_ShadowQuality;
         ERefreshMode   m_RefreshMode;
-        Base::Float3   m_Color;
-        Base::Float3   m_Direction;
-        Base::Float3   m_Lightness;
+        glm::vec3   m_Color;
+        glm::vec3   m_Direction;
+        glm::vec3   m_Lightness;
         float          m_Temperature;
         float          m_Intensity;
         float          m_AttentuationRadius;

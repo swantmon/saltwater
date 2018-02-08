@@ -2,12 +2,12 @@
 #ifndef __INCLUDE_VS_VM_PNX0_GLSL__
 #define __INCLUDE_VS_VM_PNX0_GLSL__
 
-layout(row_major, std140, binding = 0) uniform UB0
+layout(std140, binding = 0) uniform UB0
 {
     mat4 m_ViewProjection;
 };
 
-layout(row_major, std140, binding = 1) uniform UB1
+layout(std140, binding = 1) uniform UB1
 {
     mat4 m_ModelMatrix;
 };

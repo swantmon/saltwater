@@ -1,6 +1,7 @@
 
 #include "graphic/gfx_precompiled.h"
 
+#include "base/base_include_glm.h"
 #include "base/base_pool.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
@@ -78,28 +79,28 @@ namespace
 
         struct SGeometryVPBuffer
         {
-            Base::Float4x4 m_Projection;
-            Base::Float4x4 m_View;
+            glm::mat4 m_Projection;
+            glm::mat4 m_View;
         };
 
         struct SGeometryMBuffer
         {
-            Base::Float4x4 m_ModelMatrix;
+            glm::mat4 m_ModelMatrix;
         };
 
         struct SCubemapGeometryBuffer
         {
-            Base::Float4x4 m_CubeProjectionMatrix;
-            Base::Float4x4 m_CubeViewMatrix[6];
+            glm::mat4 m_CubeProjectionMatrix;
+            glm::mat4 m_CubeViewMatrix[6];
         };
 
         struct SLightPropertiesBuffer
         {
-            Base::Float4x4 m_LightViewProjection;
-            Base::Float4   m_LightPosition;
-            Base::Float4   m_LightDirection;
-            Base::Float4   m_LightColor;
-            Base::Float4   m_LightSettings;
+            glm::mat4 m_LightViewProjection;
+            glm::vec4   m_LightPosition;
+            glm::vec4   m_LightDirection;
+            glm::vec4   m_LightColor;
+            glm::vec4   m_LightSettings;
             unsigned int   m_LightType;
             unsigned int   m_Padding0;
             unsigned int   m_Padding1;
@@ -108,12 +109,12 @@ namespace
 
         struct SReflectionProbePropertiesBuffer
         {
-            Base::Float4 m_Properties;
+            glm::vec4 m_Properties;
         };
 
         struct SCameraPropertiesBuffer
         {
-            Base::Float4 m_CameraPosition;
+            glm::vec4 m_CameraPosition;
             unsigned int m_ExposureHistoryIndex;
         };
 
@@ -194,13 +195,13 @@ namespace
 
         void RenderEnvironment(CInternLightProbeFacet& _rInterLightProbeFacet);
 
-        void RenderEntities(CInternLightProbeFacet& _rInterLightProbeFacet, const Base::Float3& _rPosition);
+        void RenderEntities(CInternLightProbeFacet& _rInterLightProbeFacet, const glm::vec3& _rPosition);
 
         void RenderFiltering(CInternLightProbeFacet& _rInterLightProbeFacet, const Dt::CLightProbeFacet& _rDtLightProbeFacet);
 
         void UpdateLightProperties();
 
-        void UpdateGeometryBuffer(const Base::Float3& _rPosition, float _Near, float _Far);
+        void UpdateGeometryBuffer(const glm::vec3& _rPosition, float _Near, float _Far);
     };
 } // namespace 
 
@@ -324,7 +325,7 @@ namespace
         
         m_CubemapGSBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
-        UpdateGeometryBuffer(Base::Float3::s_Zero, 0.1f, 1000.0f);
+        UpdateGeometryBuffer(glm::vec3(0.0f), 0.1f, 1000.0f);
 
         // -----------------------------------------------------------------------------
 
@@ -779,11 +780,11 @@ namespace
         // -----------------------------------------------------------------------------
         // Upload data
         // -----------------------------------------------------------------------------
-        UpdateGeometryBuffer(Base::Float3::s_Zero, 0.2f, 2.0f);
+        UpdateGeometryBuffer(glm::vec3(0.0f), 0.2f, 2.0f);
 
         SReflectionProbePropertiesBuffer ReflectionProbePropertiesBuffer;
 
-        ReflectionProbePropertiesBuffer.m_Properties    = Base::Float4::s_Zero;
+        ReflectionProbePropertiesBuffer.m_Properties    = glm::vec4(0.0f);
         ReflectionProbePropertiesBuffer.m_Properties[0] = static_cast<float>(HistogramRenderer::GetCurrentExposureHistoryIndex());
         ReflectionProbePropertiesBuffer.m_Properties[1] = 1.0f;
 
@@ -895,7 +896,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxLightProbeManager::RenderEntities(CInternLightProbeFacet& _rInterLightProbeFacet, const Base::Float3& _rPosition)
+    void CGfxLightProbeManager::RenderEntities(CInternLightProbeFacet& _rInterLightProbeFacet, const glm::vec3& _rPosition)
     {
         Performance::BeginEvent("Render Entities");
 
@@ -936,8 +937,8 @@ namespace
         // -----------------------------------------------------------------------------
         SGeometryVPBuffer ViewBuffer;
 
-        ViewBuffer.m_Projection = Base::Float4x4::s_Identity;
-        ViewBuffer.m_View       = Base::Float4x4::s_Identity;
+        ViewBuffer.m_Projection = glm::mat4(1.0f);
+        ViewBuffer.m_View       = glm::mat4(1.0f);
 
         BufferManager::UploadBufferData(m_GeometryVPBufferPtr, &ViewBuffer);
 
@@ -1001,7 +1002,7 @@ namespace
             // -----------------------------------------------------------------------------
             SCameraPropertiesBuffer ProbeProperties;
 
-            ProbeProperties.m_CameraPosition       = Base::Float4(_rPosition, 1.0f);
+            ProbeProperties.m_CameraPosition       = glm::vec4(_rPosition, 1.0f);
             ProbeProperties.m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
 
             BufferManager::UploadBufferData(m_CameraPropertiesBufferPtr, &ProbeProperties);
@@ -1141,7 +1142,7 @@ namespace
 
         BufferManager::UploadBufferData(m_FilteringPSBufferPtr, &CubemapSettings);
 
-        UpdateGeometryBuffer(Base::Float3::s_Zero, 0.1f, 1000.0f);
+        UpdateGeometryBuffer(glm::vec3(0.0f), 0.1f, 1000.0f);
 
         // -----------------------------------------------------------------------------
         // Prepare
@@ -1308,12 +1309,12 @@ namespace
 
         for (; IndexOfLight < s_MaxNumberOfLightsPerProbe; ++ IndexOfLight)
         {
-            LightBuffer[IndexOfLight].m_LightType          = 0;
-            LightBuffer[IndexOfLight].m_LightViewProjection.SetIdentity();
-            LightBuffer[IndexOfLight].m_LightPosition      .SetZero();
-            LightBuffer[IndexOfLight].m_LightDirection     .SetZero();
-            LightBuffer[IndexOfLight].m_LightColor         .SetZero();
-            LightBuffer[IndexOfLight].m_LightSettings      .SetZero();
+            LightBuffer[IndexOfLight].m_LightType           = 0;
+            LightBuffer[IndexOfLight].m_LightViewProjection = glm::mat4(1.0f);
+            LightBuffer[IndexOfLight].m_LightPosition       = glm::vec4(0.0f);
+            LightBuffer[IndexOfLight].m_LightDirection      = glm::vec4(0.0f);
+            LightBuffer[IndexOfLight].m_LightColor          = glm::vec4(0.0f);
+            LightBuffer[IndexOfLight].m_LightSettings       = glm::vec4(0.0f);
         }
 
         // -----------------------------------------------------------------------------
@@ -1335,14 +1336,14 @@ namespace
 
                 if (pDtSunFacet != 0 && pGfxSunFacet != 0)
                 {
-                    float SunAngularRadius = 0.27f * Base::SConstants<float>::s_Pi / 180.0f;
+                    float SunAngularRadius = 0.27f * glm::pi<float>() / 180.0f;
                     float HasShadows = 1.0f;
 
                     LightBuffer[IndexOfLight].m_LightType           = 1;
                     LightBuffer[IndexOfLight].m_LightViewProjection = pGfxSunFacet->GetCamera()->GetViewProjectionMatrix();
-                    LightBuffer[IndexOfLight].m_LightDirection      = Base::Float4(pDtSunFacet->GetDirection(), 0.0f).Normalize();
-                    LightBuffer[IndexOfLight].m_LightColor          = Base::Float4(pDtSunFacet->GetLightness(), 1.0f);
-                    LightBuffer[IndexOfLight].m_LightSettings       = Base::Float4(SunAngularRadius, 0.0f, 0.0f, HasShadows);
+                    LightBuffer[IndexOfLight].m_LightDirection      = glm::normalize(glm::vec4(pDtSunFacet->GetDirection(), 0.0f));
+                    LightBuffer[IndexOfLight].m_LightColor          = glm::vec4(pDtSunFacet->GetLightness(), 1.0f);
+                    LightBuffer[IndexOfLight].m_LightSettings       = glm::vec4(SunAngularRadius, 0.0f, 0.0f, HasShadows);
 
                     // -----------------------------------------------------------------------------
 
@@ -1366,12 +1367,12 @@ namespace
                     float HasShadows              = pDtPointFacet->GetShadowType() != Dt::CPointLightFacet::NoShadows ? 1.0f : 0.0f;
 
                     LightBuffer[IndexOfLight].m_LightType      = 2;
-                    LightBuffer[IndexOfLight].m_LightPosition  = Base::Float4(rCurrentEntity.GetWorldPosition(), 1.0f);
-                    LightBuffer[IndexOfLight].m_LightDirection = Base::Float4(pDtPointFacet->GetDirection(), 0.0f).Normalize();
-                    LightBuffer[IndexOfLight].m_LightColor     = Base::Float4(pDtPointFacet->GetLightness(), 1.0f);
-                    LightBuffer[IndexOfLight].m_LightSettings  = Base::Float4(InvSqrAttenuationRadius, AngleScale, AngleOffset, HasShadows);
+                    LightBuffer[IndexOfLight].m_LightPosition  = glm::vec4(rCurrentEntity.GetWorldPosition(), 1.0f);
+                    LightBuffer[IndexOfLight].m_LightDirection = glm::normalize(glm::vec4(pDtPointFacet->GetDirection(), 0.0f));
+                    LightBuffer[IndexOfLight].m_LightColor     = glm::vec4(pDtPointFacet->GetLightness(), 1.0f);
+                    LightBuffer[IndexOfLight].m_LightSettings  = glm::vec4(InvSqrAttenuationRadius, AngleScale, AngleOffset, HasShadows);
 
-                    LightBuffer[IndexOfLight].m_LightViewProjection.SetIdentity();
+                    LightBuffer[IndexOfLight].m_LightViewProjection = glm::mat4(1.0f);
 
                     if (pDtPointFacet->GetShadowType() != Dt::CPointLightFacet::NoShadows)
                     {
@@ -1400,12 +1401,12 @@ namespace
                 if (pDtLightProbeFacet != 0 && pGfxLightProbeFacet != 0 && pDtLightProbeFacet->GetType() == Dt::CLightProbeFacet::Sky)
                 {
                     LightBuffer[IndexOfLight].m_LightType      = 3;
-                    LightBuffer[IndexOfLight].m_LightPosition  = Base::Float4(rCurrentEntity.GetWorldPosition(), 1.0f);
-                    LightBuffer[IndexOfLight].m_LightDirection = Base::Float4(0.0f);
-                    LightBuffer[IndexOfLight].m_LightColor     = Base::Float4(0.0f);
-                    LightBuffer[IndexOfLight].m_LightSettings  = Base::Float4(static_cast<float>(pGfxLightProbeFacet->GetSpecularPtr()->GetNumberOfMipLevels() - 1), 0.0f, 0.0f, 0.0f);
+                    LightBuffer[IndexOfLight].m_LightPosition  = glm::vec4(rCurrentEntity.GetWorldPosition(), 1.0f);
+                    LightBuffer[IndexOfLight].m_LightDirection = glm::vec4(0.0f);
+                    LightBuffer[IndexOfLight].m_LightColor     = glm::vec4(0.0f);
+                    LightBuffer[IndexOfLight].m_LightSettings  = glm::vec4(static_cast<float>(pGfxLightProbeFacet->GetSpecularPtr()->GetNumberOfMipLevels() - 1), 0.0f, 0.0f, 0.0f);
 
-                    LightBuffer[IndexOfLight].m_LightViewProjection.SetIdentity();
+                    LightBuffer[IndexOfLight].m_LightViewProjection = glm::mat4(1.0f);
 
                     ++IndexOfLight;
 
@@ -1427,57 +1428,57 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxLightProbeManager::UpdateGeometryBuffer(const Base::Float3& _rPosition, float _Near, float _Far)
+    void CGfxLightProbeManager::UpdateGeometryBuffer(const glm::vec3& _rPosition, float _Near, float _Far)
     {
-        Base::Float3 EyePosition = _rPosition;
-        Base::Float3 UpDirection;
-        Base::Float3 TargetPosition;
+        glm::vec3 EyePosition = _rPosition;
+        glm::vec3 UpDirection;
+        glm::vec3 TargetPosition;
 
         SCubemapGeometryBuffer Values;
 
-        Values.m_CubeProjectionMatrix.SetRHFieldOfView(Base::RadiansToDegree(Base::SConstants<float>::s_Pi * 0.5f), 1.0f, _Near, _Far);
+        Values.m_CubeProjectionMatrix = glm::perspective(glm::half_pi<float>(), 1.0f, _Near, _Far);
 
         // -----------------------------------------------------------------------------
 
-        TargetPosition = EyePosition + Base::Float3::s_AxisX;
-        UpDirection    = Base::Float3::s_AxisY;
+        TargetPosition = EyePosition + glm::vec3(1.0f, 0.0f, 0.0f);
+        UpDirection    = glm::vec3(0.0f, 1.0f, 0.0f);
 
-        Values.m_CubeViewMatrix[0].LookAt(EyePosition, TargetPosition, UpDirection);
-
-        // -----------------------------------------------------------------------------
-
-        TargetPosition = EyePosition - Base::Float3::s_AxisX;
-        UpDirection    = Base::Float3::s_AxisY;
-
-        Values.m_CubeViewMatrix[1].LookAt(EyePosition, TargetPosition, UpDirection);
+        Values.m_CubeViewMatrix[0] = glm::lookAt(EyePosition, TargetPosition, UpDirection);
 
         // -----------------------------------------------------------------------------
 
-        TargetPosition = EyePosition + Base::Float3::s_AxisY;
-        UpDirection    = Base::Float3::s_Zero - Base::Float3::s_AxisZ;
+        TargetPosition = EyePosition - glm::vec3(1.0f, 0.0f, 0.0f);
+        UpDirection    = glm::vec3(0.0f, 1.0f, 0.0f);
 
-        Values.m_CubeViewMatrix[2].LookAt(EyePosition, TargetPosition, UpDirection);
-
-        // -----------------------------------------------------------------------------
-
-        TargetPosition = EyePosition - Base::Float3::s_AxisY;
-        UpDirection    = Base::Float3::s_AxisZ;
-
-        Values.m_CubeViewMatrix[3].LookAt(EyePosition, TargetPosition, UpDirection);
+        Values.m_CubeViewMatrix[1] = glm::lookAt(EyePosition, TargetPosition, UpDirection);
 
         // -----------------------------------------------------------------------------
 
-        TargetPosition = EyePosition + Base::Float3::s_AxisZ;
-        UpDirection    = Base::Float3::s_AxisY;
+        TargetPosition = EyePosition + glm::vec3(0.0f, 1.0f, 0.0f);
+        UpDirection    = -glm::vec3(0.0f, 0.0f, 1.0f);
 
-        Values.m_CubeViewMatrix[4].LookAt(EyePosition, TargetPosition, UpDirection);
+        Values.m_CubeViewMatrix[2] = glm::lookAt(EyePosition, TargetPosition, UpDirection);
 
         // -----------------------------------------------------------------------------
 
-        TargetPosition = EyePosition - Base::Float3::s_AxisZ;
-        UpDirection    = Base::Float3::s_AxisY;
+        TargetPosition = EyePosition - glm::vec3(0.0f, 1.0f, 0.0f);
+        UpDirection    = glm::vec3(0.0f, 0.0f, 1.0f);
 
-        Values.m_CubeViewMatrix[5].LookAt(EyePosition, TargetPosition, UpDirection);
+        Values.m_CubeViewMatrix[3] = glm::lookAt(EyePosition, TargetPosition, UpDirection);
+
+        // -----------------------------------------------------------------------------
+
+        TargetPosition = EyePosition + glm::vec3(0.0f, 0.0f, 1.0f);
+        UpDirection    = glm::vec3(0.0f, 1.0f, 0.0f);
+
+        Values.m_CubeViewMatrix[4] = glm::lookAt(EyePosition, TargetPosition, UpDirection);
+
+        // -----------------------------------------------------------------------------
+
+        TargetPosition = EyePosition - glm::vec3(0.0f, 0.0f, 1.0f);
+        UpDirection    = glm::vec3(0.0f, 1.0f, 0.0f);
+
+        Values.m_CubeViewMatrix[5] = glm::lookAt(EyePosition, TargetPosition, UpDirection);
 
         // -----------------------------------------------------------------------------
         // Upload data

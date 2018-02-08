@@ -8,7 +8,7 @@
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
-layout(row_major, std140, binding = 3) uniform UB2
+layout(std140, binding = 3) uniform UB2
 {
     vec4  g_Dhdh;
     float g_Radius;

@@ -2,7 +2,6 @@
 #include "graphic/gfx_precompiled.h"
 
 #include "base/base_console.h"
-#include "base/base_matrix4x4.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
@@ -68,11 +67,11 @@ namespace
                 
         struct SAreaLightProperties
         {
-            Base::Float4 m_Color;
-            Base::Float4 m_Position;
-            Base::Float4 m_DirectionX;
-            Base::Float4 m_DirectionY;
-            Base::Float4 m_Plane;
+            glm::vec4 m_Color;
+            glm::vec4 m_Position;
+            glm::vec4 m_DirectionX;
+            glm::vec4 m_DirectionY;
+            glm::vec4 m_Plane;
             float        m_HalfWidth;
             float        m_HalfHeight;
             float        m_IsTwoSided;
@@ -82,7 +81,7 @@ namespace
 
         struct SAreaLightbulbProperties
         {
-            Base::Float4 m_Color;
+            glm::vec4 m_Color;
         };
 
         struct SRenderJob
@@ -451,8 +450,8 @@ namespace
             // -----------------------------------------------------------------------------
             SAreaLightProperties LightBuffer;
 
-            LightBuffer.m_Color                = Base::Float4(pDtLightFacet->GetLightness(), pDtLightFacet->GetIntensity());
-            LightBuffer.m_Position             = Base::Float4(pDtEntity->GetWorldPosition(), 1.0f);
+            LightBuffer.m_Color                = glm::vec4(pDtLightFacet->GetLightness(), pDtLightFacet->GetIntensity());
+            LightBuffer.m_Position             = glm::vec4(pDtEntity->GetWorldPosition(), 1.0f);
             LightBuffer.m_DirectionX           = pGfxLightFacet->GetDirectionX();
             LightBuffer.m_DirectionY           = pGfxLightFacet->GetDirectionY();
             LightBuffer.m_HalfWidth            = pGfxLightFacet->GetHalfWidth();
@@ -562,7 +561,7 @@ namespace
 
             SAreaLightbulbProperties LightBuffer;
 
-            LightBuffer.m_Color = Base::Float4(pDtLightFacet->GetColor(), pGfxLightFacet->HasTexture() ? 1.0f : 0.0f);
+            LightBuffer.m_Color = glm::vec4(pDtLightFacet->GetColor(), pGfxLightFacet->HasTexture() ? 1.0f : 0.0f);
 
             BufferManager::UploadBufferData(m_AreaLightbulbBufferPtr, &LightBuffer);
 

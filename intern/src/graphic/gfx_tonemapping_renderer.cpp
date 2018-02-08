@@ -2,7 +2,8 @@
 #include "graphic/gfx_precompiled.h"
 
 #include "base/base_console.h"
-#include "base/base_matrix4x4.h"
+#include "base/base_include_glm.h"
+#include "base/base_program_parameters.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
@@ -54,23 +55,22 @@ namespace
         void Update();
         void Render();
 
-        void SetSettings();
+        void ResetSettings();
         void SetSettings(const SColorGradingSettings& _rSettings);
-
         const SColorGradingSettings& GetSettings();
 
     private:
 
         struct SConstantBufferPS
         {
-            Base::Float4 m_ColorMatrixR_ColorCurveCd1;
-            Base::Float4 m_ColorMatrixG_ColorCurveCd3Cm3;
-            Base::Float4 m_ColorMatrixB_ColorCurveCm2;
-            Base::Float4 m_ColorCurve_Cm0Cd0_Cd2_Ch0Cm1_Ch3;
-            Base::Float4 m_ColorCurve_Ch1_Ch2;
-            Base::Float4 m_ColorShadow_Luma;
-            Base::Float4 m_ColorShadow_Tint1;
-            Base::Float4 m_ColorShadow_Tint2;
+            glm::vec4 m_ColorMatrixR_ColorCurveCd1;
+            glm::vec4 m_ColorMatrixG_ColorCurveCd3Cm3;
+            glm::vec4 m_ColorMatrixB_ColorCurveCm2;
+            glm::vec4 m_ColorCurve_Cm0Cd0_Cd2_Ch0Cm1_Ch3;
+            glm::vec4 m_ColorCurve_Ch1_Ch2;
+            glm::vec4 m_ColorShadow_Luma;
+            glm::vec4 m_ColorShadow_Tint1;
+            glm::vec4 m_ColorShadow_Tint2;
         };
 
     private:
@@ -117,7 +117,7 @@ namespace
     
     void CGfxShadingRenderer::OnStart()
     {
-        SetSettings();
+        ResetSettings();
     }
     
     // -----------------------------------------------------------------------------
@@ -339,24 +339,34 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxShadingRenderer::SetSettings()
+    void CGfxShadingRenderer::ResetSettings()
     {
         BASE_CONSOLE_STREAMINFO("Gfx> Loading default settings for final shading & tone mapping");
         
         SColorGradingSettings Settings;
 
-        Settings.m_Tint             = Base::Float3(1.0f, 1.0f, 1.0f);
-        Settings.m_DarkTint         = Base::Float3(0.2f, 0.2f, 0.2f);
-        Settings.m_DarkTintBlend    = 0.5f;
-        Settings.m_DarkTintStrength = 0.5f;
-        Settings.m_Saturation       = 1.0f;
-        Settings.m_Contrast         = 0.05f;
-        Settings.m_DynamicRange     = 4.0f;
-        Settings.m_CrushBrights     = 0.18f;
-        Settings.m_CrushDarks       = 1.0f;
-        Settings.m_Red              = Base::Float3(1.0f, 0.0f, 0.0f);
-        Settings.m_Green            = Base::Float3(0.0f, 1.0f, 0.0f);
-        Settings.m_Blue             = Base::Float3(0.0f, 0.0f, 1.0f);
+        Settings.m_Tint.r           = Base::CProgramParameters::GetInstance().GetFloat("graphics:tone_mapping:tint:r", 1.0f);
+        Settings.m_Tint.g           = Base::CProgramParameters::GetInstance().GetFloat("graphics:tone_mapping:tint:g", 1.0f);
+        Settings.m_Tint.b           = Base::CProgramParameters::GetInstance().GetFloat("graphics:tone_mapping:tint:b", 1.0f);
+        Settings.m_DarkTint.r       = Base::CProgramParameters::GetInstance().GetFloat("graphics:tone_mapping:dark_tint:color:r", 0.2f);
+        Settings.m_DarkTint.g       = Base::CProgramParameters::GetInstance().GetFloat("graphics:tone_mapping:dark_tint:color:g", 0.2f);
+        Settings.m_DarkTint.b       = Base::CProgramParameters::GetInstance().GetFloat("graphics:tone_mapping:dark_tint:color:b", 0.2f);
+        Settings.m_DarkTintBlend    = Base::CProgramParameters::GetInstance().GetFloat("graphics:tone_mapping:dark_tint:blend", 0.5f);
+        Settings.m_DarkTintStrength = Base::CProgramParameters::GetInstance().GetFloat("graphics:tone_mapping:dark_tint:strength", 0.5f);
+        Settings.m_Saturation       = Base::CProgramParameters::GetInstance().GetFloat("graphics:tone_mapping:saturation", 1.0f);
+        Settings.m_Contrast         = Base::CProgramParameters::GetInstance().GetFloat("graphics:tone_mapping:contrast", 0.05f);
+        Settings.m_DynamicRange     = Base::CProgramParameters::GetInstance().GetFloat("graphics:tone_mapping:dynamic_range", 4.0f);
+        Settings.m_CrushBrights     = Base::CProgramParameters::GetInstance().GetFloat("graphics:tone_mapping:crush_brights", 0.18f);
+        Settings.m_CrushDarks       = Base::CProgramParameters::GetInstance().GetFloat("graphics:tone_mapping:crush_darks", 1.0f);
+        Settings.m_Red.r            = Base::CProgramParameters::GetInstance().GetFloat("graphics:tone_mapping:red:r", 1.0f);
+        Settings.m_Red.g            = Base::CProgramParameters::GetInstance().GetFloat("graphics:tone_mapping:red:g", 0.0f);
+        Settings.m_Red.b            = Base::CProgramParameters::GetInstance().GetFloat("graphics:tone_mapping:red:b", 0.0f);
+        Settings.m_Green.r          = Base::CProgramParameters::GetInstance().GetFloat("graphics:tone_mapping:green:r", 0.0f);
+        Settings.m_Green.g          = Base::CProgramParameters::GetInstance().GetFloat("graphics:tone_mapping:green:g", 1.0f);
+        Settings.m_Green.b          = Base::CProgramParameters::GetInstance().GetFloat("graphics:tone_mapping:green:b", 0.0f);
+        Settings.m_Blue.r           = Base::CProgramParameters::GetInstance().GetFloat("graphics:tone_mapping:blue:r", 0.0f);
+        Settings.m_Blue.g           = Base::CProgramParameters::GetInstance().GetFloat("graphics:tone_mapping:blue:g", 0.0f);
+        Settings.m_Blue.b           = Base::CProgramParameters::GetInstance().GetFloat("graphics:tone_mapping:blue:b", 1.0f);
 
         SetSettings(Settings);
     }
@@ -371,173 +381,173 @@ namespace
         m_ColorGradingSettings = _rSettings;
 
         // -----------------------------------------------------------------------------
-	    // Must insure inputs are in correct range (else possible generation of NaNs).
-	    // -----------------------------------------------------------------------------
+        // Must insure inputs are in correct range (else possible generation of NaNs).
+        // -----------------------------------------------------------------------------
         float InExposure = 1.0f;
 
-	    Base::Float3 InWhitePoint = _rSettings.m_Tint;
+        glm::vec3 InWhitePoint = _rSettings.m_Tint;
 
-	    float InSaturation = Base::Clamp(_rSettings.m_Saturation, 0.0f, 2.0f);
+        float InSaturation = glm::clamp(_rSettings.m_Saturation, 0.0f, 2.0f);
 
-	    Base::Float3 InLuma(1.0f / 3.0f, 1.0f / 3.0f, 1.0f / 3.0f);
+        glm::vec3 InLuma(1.0f / 3.0f, 1.0f / 3.0f, 1.0f / 3.0f);
 
-	    Base::Float3 InMatrixR = _rSettings.m_Red;
-	    Base::Float3 InMatrixG = _rSettings.m_Green;
-	    Base::Float3 InMatrixB = _rSettings.m_Blue;
+        glm::vec3 InMatrixR = _rSettings.m_Red;
+        glm::vec3 InMatrixG = _rSettings.m_Green;
+        glm::vec3 InMatrixB = _rSettings.m_Blue;
 
-	    float InContrast = Base::Clamp(_rSettings.m_Contrast, 0.0f, 1.0f) + 1.0f;
+        float InContrast = glm::clamp(_rSettings.m_Contrast, 0.0f, 1.0f) + 1.0f;
 
-	    float InDynamicRange = Base::Pow(2.0f, Base::Clamp(_rSettings.m_DynamicRange, 1.0f, 18.0f));
+        float InDynamicRange = glm::pow(2.0f, glm::clamp(_rSettings.m_DynamicRange, 1.0f, 18.0f));
 
-	    float InToe = (1.0f - Base::Clamp(_rSettings.m_CrushDarks, 0.0f, 1.0f)) * 0.18f;
-	    InToe = Base::Clamp(InToe, 0.18f / 8.0f, 0.18f * (15.0f / 16.0f));
+        float InToe = (1.0f - glm::clamp(_rSettings.m_CrushDarks, 0.0f, 1.0f)) * 0.18f;
+        InToe = glm::clamp(InToe, 0.18f / 8.0f, 0.18f * (15.0f / 16.0f));
 
-	    float InHeal = 1.0f - (Base::Max(1.0f / 32.0f, 1.0f - Base::Clamp(_rSettings.m_CrushBrights, 0.0f, 1.0f)) * (1.0f - 0.18f)); 
+        float InHeal = 1.0f - (glm::max(1.0f / 32.0f, 1.0f - glm::clamp(_rSettings.m_CrushBrights, 0.0f, 1.0f)) * (1.0f - 0.18f)); 
 
-	    Base::Float3 InShadowTint = _rSettings.m_DarkTint;
+        glm::vec3 InShadowTint = _rSettings.m_DarkTint;
 
-	    float InShadowTintBlend = Base::Clamp(_rSettings.m_DarkTintBlend, 0.0f, 1.0f) * 64.0f;
-
-        // -----------------------------------------------------------------------------
-	    // Shadow tint amount enables turning off shadow tinting.
-	    // -----------------------------------------------------------------------------
-        float InShadowTintAmount = Base::Clamp(_rSettings.m_DarkTintStrength, 0.0f, 1.0f);
-
-	    InShadowTint = InWhitePoint + (InShadowTint - InWhitePoint) * InShadowTintAmount;
+        float InShadowTintBlend = glm::clamp(_rSettings.m_DarkTintBlend, 0.0f, 1.0f) * 64.0f;
 
         // -----------------------------------------------------------------------------
-	    // Make sure channel mixer inputs sum to 1 (+ smart dealing with all zeros).
-	    // -----------------------------------------------------------------------------
+        // Shadow tint amount enables turning off shadow tinting.
+        // -----------------------------------------------------------------------------
+        float InShadowTintAmount = glm::clamp(_rSettings.m_DarkTintStrength, 0.0f, 1.0f);
+
+        InShadowTint = InWhitePoint + (InShadowTint - InWhitePoint) * InShadowTintAmount;
+
+        // -----------------------------------------------------------------------------
+        // Make sure channel mixer inputs sum to 1 (+ smart dealing with all zeros).
+        // -----------------------------------------------------------------------------
         InMatrixR[0] += 1.0f / (256.0f * 256.0f * 32.0f);
-	    InMatrixG[1] += 1.0f / (256.0f * 256.0f * 32.0f);
-	    InMatrixB[2] += 1.0f / (256.0f * 256.0f * 32.0f);
+        InMatrixG[1] += 1.0f / (256.0f * 256.0f * 32.0f);
+        InMatrixB[2] += 1.0f / (256.0f * 256.0f * 32.0f);
 
-	    InMatrixR *= 1.0f / InMatrixR.DotProduct(Base::Float3::s_One);
-	    InMatrixG *= 1.0f / InMatrixG.DotProduct(Base::Float3::s_One);
-	    InMatrixB *= 1.0f / InMatrixB.DotProduct(Base::Float3::s_One);
-
-        // -----------------------------------------------------------------------------
-	    // Conversion from linear rgb to luma (using HDTV coef).
-	    // -----------------------------------------------------------------------------
-        Base::Float3 LumaWeights(0.2126f, 0.7152f, 0.0722f);
+        InMatrixR *= 1.0f / glm::dot(InMatrixR, glm::vec3(1.0f));
+        InMatrixG *= 1.0f / glm::dot(InMatrixG, glm::vec3(1.0f));
+        InMatrixB *= 1.0f / glm::dot(InMatrixB, glm::vec3(1.0f));
 
         // -----------------------------------------------------------------------------
-	    // Make sure white point has 1.0 as luma (so adjusting white point doesn't 
-	    // change exposure).
-	    // Make sure {0.0,0.0,0.0} inputs do something sane (default to white).
-	    // -----------------------------------------------------------------------------
-	    InWhitePoint += Base::Float3(1.0f / (256.0f * 256.0f * 32.0f));
-	    InWhitePoint *= 1.0f / InWhitePoint.DotProduct(LumaWeights);
-	    InShadowTint += Base::Float3(1.0f / (256.0f * 256.0f * 32.0f));
-	    InShadowTint *= 1.0f / InShadowTint.DotProduct(LumaWeights);
+        // Conversion from linear rgb to luma (using HDTV coef).
+        // -----------------------------------------------------------------------------
+        glm::vec3 LumaWeights(0.2126f, 0.7152f, 0.0722f);
 
-	    // Grey after color matrix is applied.
-	    Base::Float3 ColorMatrixLuma(0.0f);
+        // -----------------------------------------------------------------------------
+        // Make sure white point has 1.0 as luma (so adjusting white point doesn't 
+        // change exposure).
+        // Make sure {0.0,0.0,0.0} inputs do something sane (default to white).
+        // -----------------------------------------------------------------------------
+        InWhitePoint += glm::vec3(1.0f / (256.0f * 256.0f * 32.0f));
+        InWhitePoint *= 1.0f / glm::dot(InWhitePoint, LumaWeights);
+        InShadowTint += glm::vec3(1.0f / (256.0f * 256.0f * 32.0f));
+        InShadowTint *= 1.0f / glm::dot(InShadowTint, LumaWeights);
+
+        // Grey after color matrix is applied.
+        glm::vec3 ColorMatrixLuma(0.0f);
         
-	    ColorMatrixLuma[0] = Base::Float3::s_One.DotProduct(Base::Float3(InMatrixR[0], InMatrixG[0], InMatrixB[0]) * InLuma[0]);
-	    ColorMatrixLuma[1] = Base::Float3::s_One.DotProduct(Base::Float3(InMatrixR[1], InMatrixG[1], InMatrixB[1]) * InLuma[1]);
-	    ColorMatrixLuma[2] = Base::Float3::s_One.DotProduct(Base::Float3(InMatrixR[2], InMatrixG[2], InMatrixB[2]) * InLuma[2]);
+        ColorMatrixLuma[0] = glm::dot(glm::vec3(1.0f), glm::vec3(InMatrixR[0], InMatrixG[0], InMatrixB[0]) * InLuma[0]);
+        ColorMatrixLuma[1] = glm::dot(glm::vec3(1.0f), glm::vec3(InMatrixR[1], InMatrixG[1], InMatrixB[1]) * InLuma[1]);
+        ColorMatrixLuma[2] = glm::dot(glm::vec3(1.0f), glm::vec3(InMatrixR[2], InMatrixG[2], InMatrixB[2]) * InLuma[2]);
 
-	    Base::Float3 OutMatrixR(0.0f);
-	    Base::Float3 OutMatrixG(0.0f);
-	    Base::Float3 OutMatrixB(0.0f);
+        glm::vec3 OutMatrixR(0.0f);
+        glm::vec3 OutMatrixG(0.0f);
+        glm::vec3 OutMatrixB(0.0f);
 
-	    Base::Float3 OutColorShadow_Luma = LumaWeights * InShadowTintBlend;
-	    Base::Float3 OutColorShadow_Tint1 = InWhitePoint;
-	    Base::Float3 OutColorShadow_Tint2 = InShadowTint - InWhitePoint;
+        glm::vec3 OutColorShadow_Luma = LumaWeights * InShadowTintBlend;
+        glm::vec3 OutColorShadow_Tint1 = InWhitePoint;
+        glm::vec3 OutColorShadow_Tint2 = InShadowTint - InWhitePoint;
 
         // -----------------------------------------------------------------------------
-		// Final color matrix effected by saturation and exposure.
+        // Final color matrix effected by saturation and exposure.
         // -----------------------------------------------------------------------------
         OutMatrixR = (ColorMatrixLuma + ((InMatrixR - ColorMatrixLuma) * InSaturation)) * InExposure;
-		OutMatrixG = (ColorMatrixLuma + ((InMatrixG - ColorMatrixLuma) * InSaturation)) * InExposure;
-		OutMatrixB = (ColorMatrixLuma + ((InMatrixB - ColorMatrixLuma) * InSaturation)) * InExposure;
+        OutMatrixG = (ColorMatrixLuma + ((InMatrixG - ColorMatrixLuma) * InSaturation)) * InExposure;
+        OutMatrixB = (ColorMatrixLuma + ((InMatrixB - ColorMatrixLuma) * InSaturation)) * InExposure;
 
         // -----------------------------------------------------------------------------
-	    // Curve constants.
-	    // -----------------------------------------------------------------------------
+        // Curve constants.
+        // -----------------------------------------------------------------------------
         float OutColorCurveCh3;
-	    float OutColorCurveCh0Cm1;
-	    float OutColorCurveCd2;
-	    float OutColorCurveCm0Cd0;
-	    float OutColorCurveCh1;
-	    float OutColorCurveCh2;
-	    float OutColorCurveCd1;
-	    float OutColorCurveCd3Cm3;
-	    float OutColorCurveCm2;
+        float OutColorCurveCh0Cm1;
+        float OutColorCurveCd2;
+        float OutColorCurveCm0Cd0;
+        float OutColorCurveCh1;
+        float OutColorCurveCh2;
+        float OutColorCurveCd1;
+        float OutColorCurveCd3Cm3;
+        float OutColorCurveCm2;
 
         // -----------------------------------------------------------------------------
-	    // Line for linear section.
-	    // -----------------------------------------------------------------------------
+        // Line for linear section.
+        // -----------------------------------------------------------------------------
         float FilmLineOffset = 0.18f - 0.18f * InContrast;
-	    float FilmXAtY0 = -FilmLineOffset / InContrast;
-	    float FilmXAtY1 = (1.0f - FilmLineOffset) / InContrast;
-	    float FilmXS = FilmXAtY1 - FilmXAtY0;
+        float FilmXAtY0 = -FilmLineOffset / InContrast;
+        float FilmXAtY1 = (1.0f - FilmLineOffset) / InContrast;
+        float FilmXS = FilmXAtY1 - FilmXAtY0;
 
         // -----------------------------------------------------------------------------
-	    // Coordinates of linear section.
-	    // -----------------------------------------------------------------------------
+        // Coordinates of linear section.
+        // -----------------------------------------------------------------------------
         float FilmHiX = FilmXAtY0 + InHeal * FilmXS;
-	    float FilmHiY = FilmHiX * InContrast + FilmLineOffset;
-	    float FilmLoX = FilmXAtY0 + InToe * FilmXS;
-	    float FilmLoY = FilmLoX * InContrast + FilmLineOffset;
+        float FilmHiY = FilmHiX * InContrast + FilmLineOffset;
+        float FilmLoX = FilmXAtY0 + InToe * FilmXS;
+        float FilmLoY = FilmLoX * InContrast + FilmLineOffset;
 
         // -----------------------------------------------------------------------------
-	    // Supported exposure range before clipping.
-	    // -----------------------------------------------------------------------------
+        // Supported exposure range before clipping.
+        // -----------------------------------------------------------------------------
         float FilmHeal = InDynamicRange - FilmHiX;
 
         // -----------------------------------------------------------------------------
-	    // Intermediates.
-	    // -----------------------------------------------------------------------------
+        // Intermediates.
+        // -----------------------------------------------------------------------------
         float FilmMidXS = FilmHiX - FilmLoX;
-	    float FilmMidYS = FilmHiY - FilmLoY;
-	    float FilmSlope = FilmMidYS / (FilmMidXS);
-	    float FilmHiYS = 1.0f - FilmHiY;
-	    float FilmLoYS = FilmLoY;
-	    float FilmToe = FilmLoX;
-	    float FilmHiG = (-FilmHiYS + (FilmSlope * FilmHeal)) / (FilmSlope * FilmHeal);
-	    float FilmLoG = (-FilmLoYS + (FilmSlope * FilmToe)) / (FilmSlope * FilmToe);
+        float FilmMidYS = FilmHiY - FilmLoY;
+        float FilmSlope = FilmMidYS / (FilmMidXS);
+        float FilmHiYS = 1.0f - FilmHiY;
+        float FilmLoYS = FilmLoY;
+        float FilmToe = FilmLoX;
+        float FilmHiG = (-FilmHiYS + (FilmSlope * FilmHeal)) / (FilmSlope * FilmHeal);
+        float FilmLoG = (-FilmLoYS + (FilmSlope * FilmToe)) / (FilmSlope * FilmToe);
 
         // -----------------------------------------------------------------------------
-		// Constants.
-		// -----------------------------------------------------------------------------
+        // Constants.
+        // -----------------------------------------------------------------------------
         OutColorCurveCh1 = FilmHiYS / FilmHiG;
-		OutColorCurveCh2 = -FilmHiX * (FilmHiYS / FilmHiG);
-		OutColorCurveCh3 = FilmHiYS / (FilmSlope * FilmHiG) - FilmHiX;
-		OutColorCurveCh0Cm1 = FilmHiX;
-		OutColorCurveCm2 = FilmSlope;
-		OutColorCurveCm0Cd0 = FilmLoX;
-		OutColorCurveCd3Cm3 = FilmLoY - FilmLoX * FilmSlope;
+        OutColorCurveCh2 = -FilmHiX * (FilmHiYS / FilmHiG);
+        OutColorCurveCh3 = FilmHiYS / (FilmSlope * FilmHiG) - FilmHiX;
+        OutColorCurveCh0Cm1 = FilmHiX;
+        OutColorCurveCm2 = FilmSlope;
+        OutColorCurveCm0Cd0 = FilmLoX;
+        OutColorCurveCd3Cm3 = FilmLoY - FilmLoX * FilmSlope;
 
         // -----------------------------------------------------------------------------
-		// Handle these separate in case of FilmLoG being 0.
-		// -----------------------------------------------------------------------------
+        // Handle these separate in case of FilmLoG being 0.
+        // -----------------------------------------------------------------------------
         if (FilmLoG != 0.0f)
-		{
-			OutColorCurveCd1 = -FilmLoYS / FilmLoG;
-			OutColorCurveCd2 = FilmLoYS / (FilmSlope * FilmLoG);
-		}
-		else
-		{
+        {
+            OutColorCurveCd1 = -FilmLoYS / FilmLoG;
+            OutColorCurveCd2 = FilmLoYS / (FilmSlope * FilmLoG);
+        }
+        else
+        {
             // -----------------------------------------------------------------------------
-			// FilmLoG being zero means dark region is a linear segment (so just continue 
-			// the middle section).
-			// -----------------------------------------------------------------------------
+            // FilmLoG being zero means dark region is a linear segment (so just continue 
+            // the middle section).
+            // -----------------------------------------------------------------------------
             OutColorCurveCd1 = 0.0f;
-			OutColorCurveCd2 = 1.0f;
-			OutColorCurveCm0Cd0 = 0.0f;
-			OutColorCurveCd3Cm3 = 0.0f;
-		}
+            OutColorCurveCd2 = 1.0f;
+            OutColorCurveCm0Cd0 = 0.0f;
+            OutColorCurveCd3Cm3 = 0.0f;
+        }
 
-        m_ConstantBufferPS.m_ColorMatrixR_ColorCurveCd1      .Set(OutMatrixR[0], OutMatrixR[1], OutMatrixR[2], OutColorCurveCd1);
-        m_ConstantBufferPS.m_ColorMatrixG_ColorCurveCd3Cm3   .Set(OutMatrixG[0], OutMatrixG[1], OutMatrixG[2], OutColorCurveCd3Cm3); 
-        m_ConstantBufferPS.m_ColorMatrixB_ColorCurveCm2      .Set(OutMatrixB[0], OutMatrixB[1], OutMatrixB[2], OutColorCurveCm2); 
-        m_ConstantBufferPS.m_ColorCurve_Cm0Cd0_Cd2_Ch0Cm1_Ch3.Set(OutColorCurveCm0Cd0, OutColorCurveCd2, OutColorCurveCh0Cm1, OutColorCurveCh3); 
-        m_ConstantBufferPS.m_ColorCurve_Ch1_Ch2              .Set(OutColorCurveCh1, OutColorCurveCh2, 0.0f, 0.0f); 
-        m_ConstantBufferPS.m_ColorShadow_Luma                .Set(OutColorShadow_Luma [0], OutColorShadow_Luma [1], OutColorShadow_Luma [2], 0.0f);
-        m_ConstantBufferPS.m_ColorShadow_Tint1               .Set(OutColorShadow_Tint1[0], OutColorShadow_Tint1[1], OutColorShadow_Tint1[2], 0.0f);
-        m_ConstantBufferPS.m_ColorShadow_Tint2               .Set(OutColorShadow_Tint2[0], OutColorShadow_Tint2[1], OutColorShadow_Tint2[2], 0.0f);
+        m_ConstantBufferPS.m_ColorMatrixR_ColorCurveCd1       = glm::vec4(OutMatrixR, OutColorCurveCd1);
+        m_ConstantBufferPS.m_ColorMatrixG_ColorCurveCd3Cm3    = glm::vec4(OutMatrixG, OutColorCurveCd3Cm3); 
+        m_ConstantBufferPS.m_ColorMatrixB_ColorCurveCm2       = glm::vec4(OutMatrixB, OutColorCurveCm2); 
+        m_ConstantBufferPS.m_ColorCurve_Cm0Cd0_Cd2_Ch0Cm1_Ch3 = glm::vec4(OutColorCurveCm0Cd0, OutColorCurveCd2, OutColorCurveCh0Cm1, OutColorCurveCh3); 
+        m_ConstantBufferPS.m_ColorCurve_Ch1_Ch2               = glm::vec4(OutColorCurveCh1, OutColorCurveCh2, 0.0f, 0.0f); 
+        m_ConstantBufferPS.m_ColorShadow_Luma                 = glm::vec4(OutColorShadow_Luma, 0.0f);
+        m_ConstantBufferPS.m_ColorShadow_Tint1                = glm::vec4(OutColorShadow_Tint1, 0.0f);
+        m_ConstantBufferPS.m_ColorShadow_Tint2                = glm::vec4(OutColorShadow_Tint2, 0.0f);
     }
 
     // -----------------------------------------------------------------------------
@@ -665,9 +675,9 @@ namespace TonemappingRenderer
 
     // -----------------------------------------------------------------------------
 
-    void SetSettings()
+    void ResetSettings()
     {
-        CGfxShadingRenderer::GetInstance().SetSettings();
+        CGfxShadingRenderer::GetInstance().ResetSettings();
     }
 
     // -----------------------------------------------------------------------------

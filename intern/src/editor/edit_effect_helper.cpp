@@ -406,7 +406,7 @@ namespace
             B = _rMessage.GetFloat();
             A = _rMessage.GetFloat();
 
-            Base::Float4 Color = Base::Float4(R, G, B, A);
+            glm::vec4 Color = glm::vec4(R, G, B, A);
 
             float Intensity     = _rMessage.GetFloat();
             float Treshhold     = _rMessage.GetFloat();
@@ -562,14 +562,14 @@ namespace
             Z = _rMessage.GetFloat();
             W = _rMessage.GetFloat();
 
-            Base::Float4 WindDirection = Base::Float4(X, Y, Z, W);
+            glm::vec4 WindDirection = glm::vec4(X, Y, Z, W);
 
             R = _rMessage.GetFloat();
             G = _rMessage.GetFloat();
             B = _rMessage.GetFloat();
             A = _rMessage.GetFloat();
 
-            Base::Float4 Color = Base::Float4(R, G, B, A);
+            glm::vec4 Color = glm::vec4(R, G, B, A);
 
             float FrustumDepth       = _rMessage.GetFloat();
             float ShadowIntensity    = _rMessage.GetFloat();
@@ -578,7 +578,7 @@ namespace
             float DensityLevel       = _rMessage.GetFloat();
             float DensityAttenuation = _rMessage.GetFloat();
 
-            (void)ShadowIntensity;
+            BASE_UNUSED(ShadowIntensity);
 
             // -----------------------------------------------------------------------------
             // Set values

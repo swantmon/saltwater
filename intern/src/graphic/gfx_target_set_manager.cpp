@@ -2,8 +2,8 @@
 #include "graphic/gfx_precompiled.h"
 
 #include "base/base_console.h"
+#include "base/base_include_glm.h"
 #include "base/base_exception.h"
-#include "base/base_vector2.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
@@ -42,8 +42,8 @@ namespace
         CTargetSetPtr CreateEmptyTargetSet(int _Width, int _Height, int _Layers);
         
         void ClearTargetSet(CTargetSetPtr _TargetPtr, float _Depth);
-        void ClearTargetSet(CTargetSetPtr _TargetPtr, const Base::Float4& _rColor);
-        void ClearTargetSet(CTargetSetPtr _TargetPtr, const Base::Float4& _rColor, float _Depth);
+        void ClearTargetSet(CTargetSetPtr _TargetPtr, const glm::vec4& _rColor);
+        void ClearTargetSet(CTargetSetPtr _TargetPtr, const glm::vec4& _rColor, float _Depth);
 
         void SetTargetSetLabel(CTargetSetPtr _TargetSetPtr, const char* _pLabel);
         
@@ -119,7 +119,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Initiate target set
         // -----------------------------------------------------------------------------
-        Base::Int2 Size = Main::GetActiveWindowSize();
+        glm::ivec2 Size = Main::GetActiveWindowSize();
         
         // -----------------------------------------------------------------------------
         // Create render target textures
@@ -439,7 +439,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxTargetSetManager::ClearTargetSet(CTargetSetPtr _TargetPtr, const Base::Float4& _rColor)
+    void CGfxTargetSetManager::ClearTargetSet(CTargetSetPtr _TargetPtr, const glm::vec4& _rColor)
     {
         CNativeTargetSet& rNativeTargetSet = *static_cast<CNativeTargetSet*>(_TargetPtr.GetPtr());
 
@@ -453,7 +453,7 @@ namespace
     
     // -----------------------------------------------------------------------------
     
-    void CGfxTargetSetManager::ClearTargetSet(CTargetSetPtr _TargetPtr, const Base::Float4& _rColor, float _Depth)
+    void CGfxTargetSetManager::ClearTargetSet(CTargetSetPtr _TargetPtr, const glm::vec4& _rColor, float _Depth)
     {
         CNativeTargetSet& rNativeTargetSet = *static_cast<CNativeTargetSet*>(_TargetPtr.GetPtr());
 
@@ -485,7 +485,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Initiate target set
         // -----------------------------------------------------------------------------
-        Base::Int2 Size(_Width, _Height);
+        glm::ivec2 Size(_Width, _Height);
         
         // -----------------------------------------------------------------------------
         // Create render target textures
@@ -859,14 +859,14 @@ namespace TargetSetManager
     
     // -----------------------------------------------------------------------------
     
-    void ClearTargetSet(CTargetSetPtr _TargetPtr, const Base::Float4& _rColor, float _Depth)
+    void ClearTargetSet(CTargetSetPtr _TargetPtr, const glm::vec4& _rColor, float _Depth)
     {
         CGfxTargetSetManager::GetInstance().ClearTargetSet(_TargetPtr, _rColor, _Depth);
     }
     
     // -----------------------------------------------------------------------------
     
-    void ClearTargetSet(CTargetSetPtr _TargetPtr, const Base::Float4& _rColor)
+    void ClearTargetSet(CTargetSetPtr _TargetPtr, const glm::vec4& _rColor)
     {
         CGfxTargetSetManager::GetInstance().ClearTargetSet(_TargetPtr, _rColor);
     }
@@ -882,7 +882,7 @@ namespace TargetSetManager
     
     void ClearTargetSet(CTargetSetPtr _TargetPtr)
     {
-        CGfxTargetSetManager::GetInstance().ClearTargetSet(_TargetPtr, Base::Float4(0.0f), 1.0f);
+        CGfxTargetSetManager::GetInstance().ClearTargetSet(_TargetPtr, glm::vec4(0.0f), 1.0f);
     }
 
     // -----------------------------------------------------------------------------

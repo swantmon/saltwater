@@ -2,12 +2,12 @@
 #include "graphic/gfx_precompiled.h"
 
 #include "base/base_console.h"
-#include "base/base_matrix4x4.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
-#include "base/base_vector4.h"
 
 #include "camera/cam_control_manager.h"
+
+#include "base/base_include_glm.h"
 
 #include "data/data_entity.h"
 #include "data/data_fx_type.h"
@@ -81,16 +81,16 @@ namespace
 
         struct SGaussianShaderProperties
         {
-            Base::Int2 m_Direction;
-            Base::Int2 m_MaxPixelCoord;
+            glm::ivec2 m_Direction;
+            glm::ivec2 m_MaxPixelCoord;
             float      m_Weights[7];
         };
 
         struct SSunLightProperties
         {
-            Base::Float4x4 m_LightViewProjection;
-            Base::Float4   m_LightDirection;
-            Base::Float4   m_LightColor;
+            glm::mat4 m_LightViewProjection;
+            glm::vec4   m_LightDirection;
+            glm::vec4   m_LightColor;
             float          m_SunAngularRadius;
             unsigned int   m_ExposureHistoryIndex;
             float          m_Padding[2];
@@ -98,8 +98,8 @@ namespace
 
         struct SVolumeLightingProperties
         {
-            Base::Float4 m_WindDirection;
-            Base::Float4 m_FogColor;
+            glm::vec4 m_WindDirection;
+            glm::vec4 m_FogColor;
             float        m_FrustumDepthInMeter;
             float        m_ShadowIntensity;
             float        m_VolumetricFogScatteringCoefficient;
@@ -336,7 +336,7 @@ namespace
             return s_PerlinPermutations[_Index % 256];
         };
 
-        auto GetPermutationAtPosition = [&](const Base::UInt2& _rUV) -> Base::Float4
+        auto GetPermutationAtPosition = [&](const glm::uvec2& _rUV) -> glm::vec4
         {
             int A  = GetPermutationAtIndex(_rUV[0]) + _rUV[1];
             int AA = GetPermutationAtIndex(A);
@@ -345,17 +345,17 @@ namespace
             int BA = GetPermutationAtIndex(B);
             int BB = GetPermutationAtIndex(B + 1);
 
-            return Base::Float4(static_cast<float>(AA), static_cast<float>(AB), static_cast<float>(BA), static_cast<float>(BB)) / 255.0f;
+            return glm::vec4(static_cast<float>(AA), static_cast<float>(AB), static_cast<float>(BA), static_cast<float>(BB)) / 255.0f;
         };
 
 
-        Base::Float4* pPermutationData = static_cast<Base::Float4*>(Base::CMemory::Allocate(sizeof(Base::Float4) * 256 * 256));
+        glm::vec4* pPermutationData = static_cast<glm::vec4*>(Base::CMemory::Allocate(sizeof(glm::vec4) * 256 * 256));
 
         for (unsigned int Y = 0; Y < 256; ++Y)
         {
             for (unsigned int X = 0; X < 256; ++X)
             {
-                pPermutationData[Y * 256 + X] = GetPermutationAtPosition(Base::UInt2(X, Y));
+                pPermutationData[Y * 256 + X] = GetPermutationAtPosition(glm::uvec2(X, Y));
             }
         }
 
@@ -378,32 +378,32 @@ namespace
 
         // -----------------------------------------------------------------------------
 
-        static Base::Float4 s_PerlinGradients[] = 
+        static glm::vec4 s_PerlinGradients[] = 
         {
-            Base::Float4(1,1,0,     0),
-            Base::Float4(-1,1,0,    0),
-            Base::Float4(1,-1,0,    0),
-            Base::Float4(-1,-1,0,   0),
-            Base::Float4(1,0,1,     0),
-            Base::Float4(-1,0,1,    0),
-            Base::Float4(1,0,-1,    0),
-            Base::Float4(-1,0,-1,   0),
-            Base::Float4(0,1,1,     0),
-            Base::Float4(0,-1,1,    0),
-            Base::Float4(0,1,-1,    0),
-            Base::Float4(0,-1,-1,   0),
-            Base::Float4(1,1,0,     0),
-            Base::Float4(0,-1,1,    0),
-            Base::Float4(-1,1,0,    0),
-            Base::Float4(0,-1,-1,   0),
+            glm::vec4(1,1,0,     0),
+            glm::vec4(-1,1,0,    0),
+            glm::vec4(1,-1,0,    0),
+            glm::vec4(-1,-1,0,   0),
+            glm::vec4(1,0,1,     0),
+            glm::vec4(-1,0,1,    0),
+            glm::vec4(1,0,-1,    0),
+            glm::vec4(-1,0,-1,   0),
+            glm::vec4(0,1,1,     0),
+            glm::vec4(0,-1,1,    0),
+            glm::vec4(0,1,-1,    0),
+            glm::vec4(0,-1,-1,   0),
+            glm::vec4(1,1,0,     0),
+            glm::vec4(0,-1,1,    0),
+            glm::vec4(-1,1,0,    0),
+            glm::vec4(0,-1,-1,   0),
         };
 
-        auto GetPermutationGradientAtIndex = [&](unsigned int _Index) -> Base::Float4
+        auto GetPermutationGradientAtIndex = [&](unsigned int _Index) -> glm::vec4
         {
             return s_PerlinGradients[s_PerlinPermutations[_Index] % 16];
         };
 
-        Base::Float4* pPermutationGradientData = static_cast<Base::Float4*>(Base::CMemory::Allocate(sizeof(Base::Float4) * 256));
+        glm::vec4* pPermutationGradientData = static_cast<glm::vec4*>(Base::CMemory::Allocate(sizeof(glm::vec4) * 256));
 
         for (unsigned int X = 0; X < 256; ++X)
         {
@@ -720,9 +720,9 @@ namespace
         SSunLightProperties LightBuffer;
 
         LightBuffer.m_LightViewProjection  = pGfxSunFacet->GetCamera()->GetViewProjectionMatrix();
-        LightBuffer.m_LightDirection       = Base::Float4(pDtSunFacet->GetDirection(), 0.0f).Normalize();
-        LightBuffer.m_LightColor           = Base::Float4(pDtSunFacet->GetLightness(), 1.0f);
-        LightBuffer.m_SunAngularRadius     = 0.27f * Base::SConstants<float>::s_Pi / 180.0f;
+        LightBuffer.m_LightDirection       = glm::normalize(glm::vec4(pDtSunFacet->GetDirection(), 0.0f));
+        LightBuffer.m_LightColor           = glm::vec4(pDtSunFacet->GetLightness(), 1.0f);
+        LightBuffer.m_SunAngularRadius     = 0.27f * glm::pi<float>() / 180.0f;
         LightBuffer.m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
 
         BufferManager::UploadBufferData(m_VolumeLightingCSBufferSetPtr->GetBuffer(0), &LightBuffer);

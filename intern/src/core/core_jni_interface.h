@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "base/base_vector2.h"
+#include "glm.hpp"
 
 #include <functional>
 #include <string>
@@ -27,7 +27,7 @@ namespace JNI
 
     int GetDeviceRotation();
 
-    const Base::Int2& GetDeviceDimension();
+    const glm::ivec2& GetDeviceDimension();
 
     bool CheckPermission(const std::string& _rPermission);
 

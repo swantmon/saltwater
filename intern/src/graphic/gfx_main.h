@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "base/base_vector2.h"
+#include "base/base_include_glm.h"
 
 #include "graphic/gfx_buffer.h"
 #include "graphic/gfx_graphics_info.h"
@@ -41,11 +41,11 @@ namespace Main
 
     void ActivateWindow(unsigned int _WindowID);
 
-    const Base::Int2& GetActiveWindowSize();
-    const Base::Int2& GetWindowSize(unsigned int _WindowID);
+    const glm::ivec2& GetActiveWindowSize();
+    const glm::ivec2& GetWindowSize(unsigned int _WindowID);
 
-    const Base::Int2& GetActiveNativeWindowSize();
-    const Base::Int2& GetNativeWindowSize(unsigned int _WindowID);
+    const glm::ivec2& GetActiveNativeWindowSize();
+    const glm::ivec2& GetNativeWindowSize(unsigned int _WindowID);
 
     void OnResize(unsigned int _WindowID, unsigned int _Width, unsigned int _Height);
 

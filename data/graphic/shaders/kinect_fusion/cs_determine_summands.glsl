@@ -18,7 +18,7 @@ layout(binding = 1, MAP_TEXTURE_FORMAT) uniform image2D cs_NormalMap;
 layout(binding = 2, MAP_TEXTURE_FORMAT) uniform image2D cs_RaycastVertexMap;
 layout(binding = 3, MAP_TEXTURE_FORMAT) uniform image2D cs_RaycastNormalMap;
 
-layout(row_major, std140, binding = 2) uniform UBOInc
+layout(std140, binding = 2) uniform UBOInc
 {
     mat4 g_IncPoseMatrix;
     mat4 g_InvIncPoseMatrix;

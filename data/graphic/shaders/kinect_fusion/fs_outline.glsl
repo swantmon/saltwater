@@ -2,7 +2,7 @@
 #ifndef __INCLUDE_FS_OUTLINE_GLSL__
 #define __INCLUDE_FS_OUTLINE_GLSL__
 
-layout(row_major, std140, binding = 1) uniform PerDrawCallData
+layout(std140, binding = 1) uniform PerDrawCallData
 {
     mat4 g_WorldMatrix;
 	vec4 g_Color;

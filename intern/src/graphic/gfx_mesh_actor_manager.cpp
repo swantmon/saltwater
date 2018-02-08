@@ -190,8 +190,6 @@ namespace
         // -----------------------------------------------------------------------------
         // Update material
         // -----------------------------------------------------------------------------
-        SMaterialDescriptor MaterialDesc;
-
         CLODPtr ModelLODPtr = pGfxActorModelFacet->GetMesh()->GetLOD(0);
 
         for (unsigned int NumberOfSurface = 0; NumberOfSurface < ModelLODPtr->GetNumberOfSurfaces(); ++NumberOfSurface)
@@ -244,8 +242,6 @@ namespace
         // -----------------------------------------------------------------------------
         // Prepare storage data : Material
         // -----------------------------------------------------------------------------
-        SMaterialDescriptor MaterialDesc;
-
         CLODPtr ModelLODPtr = NewModelPtr->GetLOD(0);
 
         for (unsigned int NumberOfSurface = 0; NumberOfSurface < ModelLODPtr->GetNumberOfSurfaces(); ++NumberOfSurface)

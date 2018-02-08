@@ -27,28 +27,28 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CVolumeFogFXFacet::SetWindDirection(const Base::Float4& _rWindDirection)
+    void CVolumeFogFXFacet::SetWindDirection(const glm::vec4& _rWindDirection)
     {
         m_WindDirection = _rWindDirection;
     }
 
     // -----------------------------------------------------------------------------
 
-    Base::Float4& CVolumeFogFXFacet::GetWindDirection()
+    glm::vec4& CVolumeFogFXFacet::GetWindDirection()
     {
         return m_WindDirection;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CVolumeFogFXFacet::SetFogColor(const Base::Float4& _rFogColor)
+    void CVolumeFogFXFacet::SetFogColor(const glm::vec4& _rFogColor)
     {
         m_FogColor = _rFogColor;
     }
 
     // -----------------------------------------------------------------------------
 
-    Base::Float4& CVolumeFogFXFacet::GetFogColor()
+    glm::vec4& CVolumeFogFXFacet::GetFogColor()
     {
         return m_FogColor;
     }

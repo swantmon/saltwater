@@ -72,7 +72,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         Cam::ControlManager::SetActiveControl(Cam::CControl::EditorControl);
 
-        // Cam::ControlManager::GetActiveControl().SetPosition(Base::Float3(0.0f, 0.0f, 10.0f));
+        // Cam::ControlManager::GetActiveControl().SetPosition(glm::vec3(0.0f, 0.0f, 10.0f));
 
         // -----------------------------------------------------------------------------
         // Running states
@@ -185,7 +185,7 @@ namespace Edit
 
     void CEditState::OnExit(Edit::CMessage& _rMessage)
     {
-        (void)_rMessage;
+        BASE_UNUSED(_rMessage);
 
         m_Action = CState::Exit;
     }
@@ -194,7 +194,7 @@ namespace Edit
 
     void CEditState::OnPlay(Edit::CMessage& _rMessage)
     {
-        (void)_rMessage;
+        BASE_UNUSED(_rMessage);
 
         m_Action = CState::Play;
     }
@@ -203,7 +203,7 @@ namespace Edit
 
     void CEditState::OnNewMap(Edit::CMessage& _rMessage)
     {
-        (void)_rMessage;
+        BASE_UNUSED(_rMessage);
 
         m_Action = CState::Intro;
     }
@@ -235,12 +235,12 @@ namespace Edit
         int LocalMousePositionX  = _rMessage.GetInt();
         int LocalMousePositionY  = _rMessage.GetInt();
 
-        (void)GlobalMousePositionX;
-        (void)GlobalMousePositionY;
+        BASE_UNUSED(GlobalMousePositionX);
+        BASE_UNUSED(GlobalMousePositionY);
 
         if (m_pSelectionTicket != 0)
         {
-            Gfx::SelectionRenderer::PushPick(*m_pSelectionTicket, Base::Int2(LocalMousePositionX, LocalMousePositionY));
+            Gfx::SelectionRenderer::PushPick(*m_pSelectionTicket, glm::ivec2(LocalMousePositionX, LocalMousePositionY));
         }
     }
 } // namespace Edit

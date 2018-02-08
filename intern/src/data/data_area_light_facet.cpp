@@ -30,21 +30,21 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CAreaLightFacet::SetColor(const Base::Float3& _rColor)
+    void CAreaLightFacet::SetColor(const glm::vec3& _rColor)
     {
         m_Color = _rColor;
     }
 
     // -----------------------------------------------------------------------------
 
-    Base::Float3& CAreaLightFacet::GetColor()
+    glm::vec3& CAreaLightFacet::GetColor()
     {
         return m_Color;
     }
 
     // -----------------------------------------------------------------------------
 
-    const Base::Float3& CAreaLightFacet::GetColor() const
+    const glm::vec3& CAreaLightFacet::GetColor() const
     {
         return m_Color;
     }
@@ -72,21 +72,21 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CAreaLightFacet::SetDirection(const Base::Float3& _rDirection)
+    void CAreaLightFacet::SetDirection(const glm::vec3& _rDirection)
     {
         m_Direction = _rDirection;
     }
 
     // -----------------------------------------------------------------------------
 
-    Base::Float3& CAreaLightFacet::GetDirection()
+    glm::vec3& CAreaLightFacet::GetDirection()
     {
         return m_Direction;
     }
 
     // -----------------------------------------------------------------------------
 
-    const Base::Float3& CAreaLightFacet::GetDirection() const
+    const glm::vec3& CAreaLightFacet::GetDirection() const
     {
         return m_Direction;
     }
@@ -191,14 +191,14 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    Base::Float3& CAreaLightFacet::GetLightness()
+    glm::vec3& CAreaLightFacet::GetLightness()
     {
         return m_Lightness;
     }
 
     // -----------------------------------------------------------------------------
 
-    const Base::Float3& CAreaLightFacet::GetLightness() const
+    const glm::vec3& CAreaLightFacet::GetLightness() const
     {
         return m_Lightness;
     }
@@ -207,7 +207,7 @@ namespace Dt
 
     void CAreaLightFacet::UpdateLightness()
     {
-        Base::Float3 Color;
+        glm::vec3 Color;
 
         if (m_HasTemperature)
         {
@@ -222,6 +222,6 @@ namespace Dt
         // -----------------------------------------------------------------------------
         // Luminous power (lumen) is converted into luminous intensity (candela).
         // -----------------------------------------------------------------------------
-        m_Lightness = Color * (m_Intensity / (m_Width * m_Height * Base::SConstants<float>::s_Pi));
+        m_Lightness = Color * (m_Intensity / (m_Width * m_Height * glm::pi<float>()));
     }
 } // namespace Dt

@@ -3,7 +3,6 @@
 
 #include "base/base_aabb2.h"
 #include "base/base_defines.h"
-#include "base/base_vector2.h"
 
 #include <assert.h>
 

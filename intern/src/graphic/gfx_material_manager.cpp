@@ -207,8 +207,8 @@ namespace
         MaterialDescriptor.m_Reflectance     = 0.0f;
         MaterialDescriptor.m_MetalMask       = 0.0f;
         MaterialDescriptor.m_Displacement    = 0.0f;
-        MaterialDescriptor.m_AlbedoColor     = Base::Float3(1.0f);
-        MaterialDescriptor.m_TilingOffset    = Base::Float4(0.0f);
+        MaterialDescriptor.m_AlbedoColor     = glm::vec3(1.0f);
+        MaterialDescriptor.m_TilingOffset    = glm::vec4(0.0f);
         MaterialDescriptor.m_pFileName       = 0;
 
         m_DefaultMaterialPtr = CreateMaterial(MaterialDescriptor);
@@ -511,8 +511,8 @@ namespace
         float                 Reflectance;
         float                 MetalMask;
         float                 Displacement;
-        Base::Float3          AlbedoColor;
-        Base::Float4          TilingOffset;
+        glm::vec3          AlbedoColor;
+        glm::vec4          TilingOffset;
         tinyxml2::XMLDocument MaterialFile;
 
         pMaterialName   = _rDescriptor.m_pMaterialName;
@@ -566,7 +566,7 @@ namespace
             float ColorG = pMaterialColor->FloatAttribute("G");
             float ColorB = pMaterialColor->FloatAttribute("B");
 
-            AlbedoColor = Base::Float3(ColorR, ColorG, ColorB);
+            AlbedoColor = glm::vec3(ColorR, ColorG, ColorB);
 
             pColorMap = pMaterialColor->Attribute("Map");
 

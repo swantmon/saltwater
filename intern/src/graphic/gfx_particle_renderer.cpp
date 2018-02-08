@@ -2,7 +2,7 @@
 #include "graphic/gfx_precompiled.h"
 
 #include "base/base_console.h"
-#include "base/base_matrix4x4.h"
+#include "base/base_include_glm.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
@@ -72,47 +72,47 @@ namespace
         
         struct SPerFrameConstantBuffer
         {
-            Base::Float4x4 m_LiquidMatrix;
+            glm::mat4 m_LiquidMatrix;
         };
         
         struct SPerInstanceBuffer
         {
-            Base::Float3 m_Offset;
+            glm::vec3 m_Offset;
         };
     
         struct SLiquidSettings
         {
-            Base::Float4x4  m_ViewMatrix;
-            Base::Float4x4  m_ProjectionMatrix;
-            Base::Float4    m_LightDirection;
-            Base::Float4    m_Color;
+            glm::mat4  m_ViewMatrix;
+            glm::mat4  m_ProjectionMatrix;
+            glm::vec4    m_LightDirection;
+            glm::vec4    m_Color;
             float           m_SphereRadius;
         };
         
         struct SBilateralSettings
         {
-            Base::Float2 m_Direction;
+            glm::vec2 m_Direction;
         };
         
         struct SGaussianSettings
         {
-            Base::Float2 m_Direction;
+            glm::vec2 m_Direction;
             float        m_Weights[7];
         };
         
         struct SShadingSettings
         {
-            Base::Float4x4 m_InvertedProjectionMatrix;
-            Base::Float4x4 m_InvertedViewMatrix;
-            Base::Float4   m_LightDirection;
-            Base::Float4   m_ViewDirection;
-            Base::Float2   m_InvertedScreensize;
+            glm::mat4 m_InvertedProjectionMatrix;
+            glm::mat4 m_InvertedViewMatrix;
+            glm::vec4   m_LightDirection;
+            glm::vec4   m_ViewDirection;
+            glm::vec2   m_InvertedScreensize;
         };
         
         struct SRenderJob
         {
-            Base::Float3 m_Position;
-            Base::Float3 m_Color;
+            glm::vec3 m_Position;
+            glm::vec3 m_Color;
         };
         
     private:
@@ -306,7 +306,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Initiate target set
         // -----------------------------------------------------------------------------
-        Base::Int2 Size = Main::GetActiveWindowSize();
+        glm::ivec2 Size = Main::GetActiveWindowSize();
         
         // -----------------------------------------------------------------------------
         // Create render target textures
@@ -598,18 +598,18 @@ namespace
         // -----------------------------------------------------------------------------
         SPerFrameConstantBuffer PerFrameConstantBuffer;
         
-        PerFrameConstantBuffer.m_LiquidMatrix = Base::Float4x4::s_Identity;
-        PerFrameConstantBuffer.m_LiquidMatrix *= ViewManager::GetMainCamera()->GetView()->GetRotationMatrix().GetTransposed();
-        PerFrameConstantBuffer.m_LiquidMatrix *= Base::Float4x4().SetRotation(Base::DegreesToRadians(-180.0f), 0.0f, 0.0f);
-        PerFrameConstantBuffer.m_LiquidMatrix *= Base::Float4x4().SetScale(0.3f);
+        PerFrameConstantBuffer.m_LiquidMatrix  = glm::mat4(1.0f);
+        PerFrameConstantBuffer.m_LiquidMatrix *= glm::transpose(glm::mat4(ViewManager::GetMainCamera()->GetView()->GetRotationMatrix()));
+        PerFrameConstantBuffer.m_LiquidMatrix *= glm::eulerAngleX(glm::radians(-180.0f));
+        PerFrameConstantBuffer.m_LiquidMatrix *= glm::scale(glm::vec3(0.3f));
         
         BufferManager::UploadBufferData(m_LiquidVSBufferPtr->GetBuffer(0), &PerFrameConstantBuffer);
         
         // -----------------------------------------------------------------------------
         // Clear render targets
         // -----------------------------------------------------------------------------
-        TargetSetManager::ClearTargetSet(m_LiquidTargetSetPtrs[0], Base::Float4(1.0f));
-        TargetSetManager::ClearTargetSet(m_LiquidTargetSetPtrs[1], Base::Float4(0.0f));
+        TargetSetManager::ClearTargetSet(m_LiquidTargetSetPtrs[0], glm::vec4(1.0f));
+        TargetSetManager::ClearTargetSet(m_LiquidTargetSetPtrs[1], glm::vec4(0.0f));
         TargetSetManager::ClearTargetSet(m_LiquidTargetSetPtrs[2]);
         
         // -----------------------------------------------------------------------------
@@ -649,8 +649,8 @@ namespace
 
         LiquidBuffer.m_ViewMatrix = ViewManager::GetMainCamera()->GetView()->GetViewMatrix();
         LiquidBuffer.m_ProjectionMatrix = ViewManager::GetMainCamera()->GetProjectionMatrix();
-        LiquidBuffer.m_LightDirection = Base::Float4(-0.4f, -0.3f, -1.0f, 0.0f);
-        LiquidBuffer.m_Color = Base::Float4(0.0f, 0.0f, 1.0f, 1.0f);
+        LiquidBuffer.m_LightDirection = glm::vec4(-0.4f, -0.3f, -1.0f, 0.0f);
+        LiquidBuffer.m_Color = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
         LiquidBuffer.m_SphereRadius = 0.3f;
 
         BufferManager::UploadBufferData(m_LiquidPSBufferPtr->GetBuffer(0), &LiquidBuffer);
@@ -1002,12 +1002,12 @@ namespace
         // -----------------------------------------------------------------------------
         SShadingSettings ShadingSettings;
 
-        ShadingSettings.m_InvertedProjectionMatrix = ViewManager::GetMainCamera()->GetProjectionMatrix().GetInverted();
-        ShadingSettings.m_InvertedViewMatrix = ViewManager::GetMainCamera()->GetView()->GetViewMatrix().GetInverted();
-        ShadingSettings.m_LightDirection = Base::Float4(-0.4f, -0.3f, -1.0f, 0.0f);
-        ShadingSettings.m_ViewDirection = Base::Float4(ViewManager::GetMainCamera()->GetView()->GetViewDirection(), 0.0f);
-        ShadingSettings.m_InvertedScreensize[0] = 1.0f / static_cast<float>(1280.0f);
-        ShadingSettings.m_InvertedScreensize[1] = 1.0f / static_cast<float>(800.0f);
+        ShadingSettings.m_InvertedProjectionMatrix = glm::inverse(ViewManager::GetMainCamera()->GetProjectionMatrix());
+        ShadingSettings.m_InvertedViewMatrix       = glm::inverse(ViewManager::GetMainCamera()->GetView()->GetViewMatrix());
+        ShadingSettings.m_LightDirection           = glm::vec4(-0.4f, -0.3f, -1.0f, 0.0f);
+        ShadingSettings.m_ViewDirection            = glm::vec4(ViewManager::GetMainCamera()->GetView()->GetViewDirection(), 0.0f);
+        ShadingSettings.m_InvertedScreensize[0]    = 1.0f / static_cast<float>(1280.0f);
+        ShadingSettings.m_InvertedScreensize[1]    = 1.0f / static_cast<float>(800.0f);
 
         BufferManager::UploadBufferData(m_ShadingPSBufferPtr->GetBuffer(0), &ShadingSettings);
 

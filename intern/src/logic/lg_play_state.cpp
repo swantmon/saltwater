@@ -3,7 +3,6 @@
 
 #include "base/base_console.h"
 #include "base/base_input_event.h"
-#include "base/base_math_operations.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
@@ -147,7 +146,7 @@ namespace
     
     void CLgPlayState::OnInputEvent(const Base::CInputEvent& _rInputEvent)
     {
-        auto AddLightToScene = [&] (const Base::Float3& _rPosition, float _Range, const Base::Float3& _rColor)
+        auto AddLightToScene = [&] (const glm::vec3& _rPosition, float _Range, const glm::vec3& _rColor)
         {
             BASE_UNUSED(_rPosition);
             BASE_UNUSED(_Range);
@@ -159,23 +158,23 @@ namespace
             
             if (_rInputEvent.GetKey() == Base::CInputEvent::Key1)
             {
-                Base::Float3 CurrentPosition = Cam::ControlManager::GetActiveControl().GetPosition();
+                glm::vec3 CurrentPosition = Cam::ControlManager::GetActiveControl().GetPosition();
                 
-                AddLightToScene(CurrentPosition, 8.0f, Base::Float3(1.0f, 0.0f, 0.0f));
+                AddLightToScene(CurrentPosition, 8.0f, glm::vec3(1.0f, 0.0f, 0.0f));
             }
             
             if (_rInputEvent.GetKey() == Base::CInputEvent::Key2)
             {
-                Base::Float3 CurrentPosition = Cam::ControlManager::GetActiveControl().GetPosition();
+                glm::vec3 CurrentPosition = Cam::ControlManager::GetActiveControl().GetPosition();
                 
-                AddLightToScene(CurrentPosition, 8.0f, Base::Float3(0.0f, 1.0f, 0.0f));
+                AddLightToScene(CurrentPosition, 8.0f, glm::vec3(0.0f, 1.0f, 0.0f));
             }
             
             if (_rInputEvent.GetKey() == Base::CInputEvent::Key3)
             {
-                Base::Float3 CurrentPosition = Cam::ControlManager::GetActiveControl().GetPosition();
+                glm::vec3 CurrentPosition = Cam::ControlManager::GetActiveControl().GetPosition();
                 
-                AddLightToScene(CurrentPosition, 8.0f, Base::Float3(0.0f, 0.0f, 1.0f));
+                AddLightToScene(CurrentPosition, 8.0f, glm::vec3(0.0f, 0.0f, 1.0f));
             }
             
             if (_rInputEvent.GetKey() == Base::CInputEvent::KeyRhombos)

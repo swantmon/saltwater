@@ -3,10 +3,8 @@
 
 #include "base/base_aabb2.h"
 #include "base/base_aabb3.h"
+#include "base/base_include_glm.h"
 #include "base/base_managed_pool.h"
-#include "base/base_matrix4x4.h"
-#include "base/base_vector2.h"
-#include "base/base_vector3.h"
 
 #include "graphic/gfx_view.h"
 
@@ -35,16 +33,16 @@ namespace Gfx
         void SetOrthographic(float _Width, float _Height, float _Near, float _Far);
         void SetOrthographic(float _Left, float _Right, float _Bottom, float _Top, float _Near, float _Far);
 
-        void SetProjectionMatrix(const Base::Float4x4& _rProjectionMatrix, float _Near, float _Far);
+        void SetProjectionMatrix(const glm::mat4& _rProjectionMatrix, float _Near, float _Far);
 
     public:
 
         void SetAspectRatio(float _Aspect);
         float GetAspectRatio();
 
-        void SetBackgroundColor(Base::Float3& _rBackgroundColor);
-        Base::Float3& GetBackgroundColor();
-        const Base::Float3& GetBackgroundColor() const;
+        void SetBackgroundColor(glm::vec3& _rBackgroundColor);
+        glm::vec3& GetBackgroundColor();
+        const glm::vec3& GetBackgroundColor() const;
 
         void SetCullingMask(unsigned int _CullingMask);
         unsigned int GetCullingMask() const;
@@ -93,10 +91,10 @@ namespace Gfx
 
         float GetFOVY() const;
 
-        const Base::Float4x4& GetProjectionMatrix() const;
-        const Base::Float4x4& GetViewProjectionMatrix() const;
+        const glm::mat4& GetProjectionMatrix() const;
+        const glm::mat4& GetViewProjectionMatrix() const;
 
-        const Base::Float3* GetWorldSpaceFrustum() const;
+        const glm::vec3* GetWorldSpaceFrustum() const;
 
         const Base::AABB3Float& GetWorldAABB() const;
 
@@ -121,8 +119,8 @@ namespace Gfx
 
     protected:
 
-        Base::Float4x4   m_ProjectionMatrix;
-        Base::Float4x4   m_ViewProjectionMatrix;
+        glm::mat4   m_ProjectionMatrix;
+        glm::mat4   m_ViewProjectionMatrix;
 
         unsigned int     m_CullingMask;
         float            m_Depth;
@@ -141,9 +139,9 @@ namespace Gfx
 
         ECameraMode      m_Mode;
 
-        Base::Float3     m_BackgroundColor;
-        Base::Float3     m_ObjectSpaceFrustum[8];
-        Base::Float3     m_WorldSpaceFrustum [8];
+        glm::vec3     m_BackgroundColor;
+        glm::vec3     m_ObjectSpaceFrustum[8];
+        glm::vec3     m_WorldSpaceFrustum [8];
 
         Base::AABB3Float m_WorldAABB;
         Base::AABB2Float m_ViewportRect;

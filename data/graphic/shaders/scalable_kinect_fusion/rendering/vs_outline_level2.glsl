@@ -5,7 +5,7 @@
 #include "common_global.glsl"
 #include "scalable_kinect_fusion/common_scalable.glsl"
 
-layout(row_major, std140, binding = 1) uniform PerDrawCallData
+layout(std140, binding = 1) uniform PerDrawCallData
 {
     mat4 g_WorldMatrix;
 	vec4 g_Color;

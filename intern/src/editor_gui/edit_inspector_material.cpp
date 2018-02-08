@@ -1,7 +1,6 @@
 ﻿
 #include "base/base_crc.h"
-#include "base/base_vector3.h"
-#include "base/base_vector4.h"
+#include "base/base_include_glm.h"
 
 #include "editor_gui/edit_inspector_material.h"
 #include "editor_gui/edit_texture_value.h"
@@ -99,7 +98,7 @@ namespace Edit
 
         QColor RGB = ButtonPalette.color(QPalette::Button);
 
-        Base::Float3 AlbedoColor = Base::Float3(RGB.red() / 255.0f, RGB.green() / 255.0f, RGB.blue() / 255.0f);
+        glm::vec3 AlbedoColor = glm::vec3(RGB.red() / 255.0f, RGB.green() / 255.0f, RGB.blue() / 255.0f);
 
         QString NewColorTexture     = m_pAlbedoTextureEdit->GetTextureFile();
         QString NewNormalTexture    = m_pNormalTextureEdit->GetTextureFile();
@@ -440,14 +439,14 @@ namespace Edit
         G = _rMessage.GetFloat();
         B = _rMessage.GetFloat();
 
-        Base::Float3 AlbedoColor = Base::Float3(R, G, B);
+        glm::vec3 AlbedoColor = glm::vec3(R, G, B);
 
         X = _rMessage.GetFloat();
         Y = _rMessage.GetFloat();
         Z = _rMessage.GetFloat();
         W = _rMessage.GetFloat();
 
-        Base::Float4 TilingOffset = Base::Float4(X, Y, Z, W);
+        glm::vec4 TilingOffset = glm::vec4(X, Y, Z, W);
 
         float Roughness   = _rMessage.GetFloat();
         float Reflectance = _rMessage.GetFloat();

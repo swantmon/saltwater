@@ -2,13 +2,13 @@
 #ifndef __INCLUDE_VS_MVP_PNTBX0_GLSL__
 #define __INCLUDE_VS_MVP_PNTBX0_GLSL__
 
-layout(row_major, std140, binding = 0) uniform UB0
+layout(std140, binding = 0) uniform UB0
 {
     mat4 m_ProjectionMatrix;
     mat4 m_ViewMatrix;
 };
 
-layout(row_major, std140, binding = 1) uniform UB1
+layout(std140, binding = 1) uniform UB1
 {
     mat4 m_ModelMatrix;
 };

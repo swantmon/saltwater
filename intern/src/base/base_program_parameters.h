@@ -87,7 +87,7 @@ namespace IO
     template<typename T>
     void CProgramParameters::AddParameter(const std::string& _rOption, const T _Parameter)
     {
-#ifdef __ANDROID__
+#ifdef PLATFORM_ANDROID
         std::ostringstream Stream;
 
         Stream << _Parameter;
@@ -95,6 +95,6 @@ namespace IO
         m_Container.insert(COptionParameterPair(_rOption, Stream.str()));
 #else
         m_Container.insert(COptionParameterPair(_rOption, std::to_string(_Parameter)));
-#endif // __ANDROID__
+#endif // PLATFORM_ANDROID
     }
 } // namespace IO

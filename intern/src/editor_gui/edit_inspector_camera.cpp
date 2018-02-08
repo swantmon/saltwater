@@ -1,5 +1,5 @@
 ﻿
-#include "base/base_vector3.h"
+#include "base/base_include_glm.h"
 
 #include "editor_gui/edit_inspector_camera.h"
 
@@ -69,7 +69,7 @@ namespace Edit
 
         QColor RGB = ButtonPalette.color(QPalette::Button);
 
-        Base::Float3 AlbedoColor = Base::Float3(RGB.red() / 255.0f, RGB.green() / 255.0f, RGB.blue() / 255.0f);
+        glm::vec3 AlbedoColor = glm::vec3(RGB.red() / 255.0f, RGB.green() / 255.0f, RGB.blue() / 255.0f);
 
         int CullingMask = 0;
 
@@ -246,7 +246,7 @@ namespace Edit
 
         int CullingMask = _rMessage.GetInt();
 
-        (void)CullingMask;
+        BASE_UNUSED(CullingMask);
 
         int ProjectionType = _rMessage.GetInt();
 

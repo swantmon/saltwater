@@ -257,7 +257,7 @@ namespace
         // https://www.opengl.org/sdk/docs/man/docbook4/xhtml/glCullFace.xml
         // https://www.opengl.org/sdk/docs/man/docbook4/xhtml/glPolygonMode.xml
         // -----------------------------------------------------------------------------
-#ifdef __ANDROID__
+#ifdef PLATFORM_ANDROID
         { GL_TRUE , GL_NONE, GL_BACK, GL_CCW, 0, 0.0f, 0.0f, GL_TRUE, GL_FALSE, GL_FALSE, GL_FALSE, },
         { GL_TRUE , GL_NONE, GL_BACK, GL_CCW, 0, 0.0f, 0.0f, GL_TRUE, GL_FALSE, GL_FALSE, GL_FALSE, },
         { GL_FALSE, GL_NONE, GL_BACK, GL_CCW, 0, 0.0f, 0.0f, GL_TRUE, GL_FALSE, GL_FALSE, GL_FALSE, },
@@ -267,7 +267,7 @@ namespace
         { GL_TRUE , GL_LINE, GL_BACK, GL_CCW, 0, 0.0f, 0.0f, GL_TRUE, GL_FALSE, GL_FALSE, GL_FALSE, },
         { GL_FALSE, GL_FILL, GL_BACK, GL_CCW, 0, 0.0f, 0.0f, GL_TRUE, GL_FALSE, GL_FALSE, GL_FALSE, },
         { GL_FALSE, GL_LINE, GL_BACK, GL_CCW, 0, 0.0f, 0.0f, GL_TRUE, GL_FALSE, GL_FALSE, GL_FALSE, },
-#endif // __ANDROID__
+#endif // PLATFORM_ANDROID
     };
 } // namespace
 

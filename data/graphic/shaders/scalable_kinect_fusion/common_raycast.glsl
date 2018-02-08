@@ -8,7 +8,7 @@
 // Input from engine
 // -----------------------------------------------------------------------------
 
-layout(row_major, std140, binding = 2) uniform ScalableRaycastConstantBuffer
+layout(std140, binding = 2) uniform ScalableRaycastConstantBuffer
 {
     vec3 g_AABBMin;
     vec3 g_AABBMax;

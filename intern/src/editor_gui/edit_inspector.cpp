@@ -169,7 +169,7 @@ namespace Edit
 
     void CInspector::updateContentForModel(const QString& _rRelPath)
     {
-        (void)_rRelPath;
+        BASE_UNUSED(_rRelPath);
 
         ResetLayout();
 
@@ -184,7 +184,7 @@ namespace Edit
 
     void CInspector::mousePressEvent(QMouseEvent* _pEvent)
     {
-        (void)_pEvent;
+        BASE_UNUSED(_pEvent);
 
         ResetHighlight();
     }
@@ -208,11 +208,13 @@ namespace Edit
 
         bool HasTransformation = _rMessage.GetBool();
         bool HasHierarchy      = _rMessage.GetBool();
-        (void)HasHierarchy;
+
+        BASE_UNUSED(HasHierarchy);
 
         bool HasDetailData    = _rMessage.GetBool();
         bool HasDetailGraphic = _rMessage.GetBool();
-        (void)HasDetailGraphic;
+        
+        BASE_UNUSED(HasDetailGraphic);
 
         // -----------------------------------------------------------------------------
         // General informations

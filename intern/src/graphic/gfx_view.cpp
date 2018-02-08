@@ -7,13 +7,13 @@
 namespace Gfx
 {
     CView::CView()
-        : m_RotationMatrix          (Base::Float3x3::s_Identity)
-        , m_ViewMatrix              (Base::Float4x4::s_Identity)
-        , m_Position                (0.0f, 0.0f, 0.0f)
-        , m_View                    (0.0f, 0.0f, 0.0f)
-        , m_Right                   (0.0f, 0.0f, 0.0f)
-        , m_Up                      (0.0f, 0.0f, 0.0f)
-        , m_pFirstCamera            (nullptr)
+        : m_RotationMatrix(1.0f)
+        , m_ViewMatrix    (1.0f)
+        , m_Position      (0.0f, 0.0f, 0.0f)
+        , m_View          (0.0f, 0.0f, 0.0f)
+        , m_Right         (0.0f, 0.0f, 0.0f)
+        , m_Up            (0.0f, 0.0f, 0.0f)
+        , m_pFirstCamera  (nullptr)
     {
     }
 
@@ -34,76 +34,56 @@ namespace Gfx
 
     // --------------------------------------------------------------------------------
 
-    void CView::SetPosition(const Base::Float3& _rPosition)
+    void CView::SetPosition(const glm::vec3& _rPosition)
     {
         m_Position = _rPosition;
     }
 
     // --------------------------------------------------------------------------------
 
-    const Base::Float3& CView::GetPosition() const
+    const glm::vec3& CView::GetPosition() const
     {
         return m_Position;
     }
 
     // --------------------------------------------------------------------------------
 
-    const Base::Float3& CView::GetViewDirection() const
+    const glm::vec3& CView::GetViewDirection() const
     {
         return m_View;
     }
 
     // --------------------------------------------------------------------------------
 
-    const Base::Float3& CView::GetRightDirection() const
+    const glm::vec3& CView::GetRightDirection() const
     {
         return m_Right;
     }
 
     // --------------------------------------------------------------------------------
 
-    const Base::Float3& CView::GetUpDirection() const
+    const glm::vec3& CView::GetUpDirection() const
     {
         return m_Up;
     }
 
     // --------------------------------------------------------------------------------
 
-    void CView::SetRotationMatrix()
-    {
-        m_RotationMatrix.SetIdentity();
-    }
-
-    // --------------------------------------------------------------------------------
-
-    void CView::SetRotationMatrix(const Base::Float3x3& _rMatrix)
+    void CView::SetRotationMatrix(const glm::mat3& _rMatrix)
     {
         m_RotationMatrix = _rMatrix;
     }
 
     // --------------------------------------------------------------------------------
 
-    const Base::Float3x3& CView::GetRotationMatrix() const
+    const glm::mat3& CView::GetRotationMatrix() const
     {
         return m_RotationMatrix;
     }
 
-    // -----------------------------------------------------------------------------
-
-    void CView::SetViewMatrix(const Base::Float4x4& _rViewMatrix)
-    {
-        _rViewMatrix.GetRotation(m_RotationMatrix);
-
-        _rViewMatrix.GetTranslation(m_Position);
-
-        m_Position = m_RotationMatrix.GetTransposed() * m_Position;
-
-        m_Position = m_Position * Base::Float3(-1.0f);
-    }
-
     // --------------------------------------------------------------------------------
 
-    const Base::Float4x4& CView::GetViewMatrix() const
+    const glm::mat4& CView::GetViewMatrix() const
     {
         return m_ViewMatrix;
     }
@@ -117,24 +97,24 @@ namespace Gfx
         // --------------------------------------------------------------------------------
         // Extract the axes of the camera out of the rotation matrix.
         // --------------------------------------------------------------------------------
-        m_Right =  m_RotationMatrix[0];
-        m_Up    =  m_RotationMatrix[1];
-        m_View  =  m_RotationMatrix[2] * Base::Float3(-1.0f);
+        m_Right = m_RotationMatrix[0];
+        m_Up    = m_RotationMatrix[1];
+        m_View  = m_RotationMatrix[2] * -1.0f;
 
         // --------------------------- -----------------------------------------------------
         // Get the right handed view space coordinate system.
         // --------------------------------------------------------------------------------
-        Base::Float3 XAxis(m_RotationMatrix[0]);
-        Base::Float3 YAxis(m_RotationMatrix[1]);
-        Base::Float3 ZAxis(m_RotationMatrix[2]);
+        glm::vec3 XAxis(m_RotationMatrix[0]);
+        glm::vec3 YAxis(m_RotationMatrix[1]);
+        glm::vec3 ZAxis(m_RotationMatrix[2]);
 
         // --------------------------------------------------------------------------------
         // Create the view matrix.
         // --------------------------------------------------------------------------------
-        m_ViewMatrix[0][0] = XAxis[0]; m_ViewMatrix[0][1] = XAxis[1]; m_ViewMatrix[0][2] = XAxis[2]; m_ViewMatrix[0][3] = -(XAxis.DotProduct(m_Position));
-        m_ViewMatrix[1][0] = YAxis[0]; m_ViewMatrix[1][1] = YAxis[1]; m_ViewMatrix[1][2] = YAxis[2]; m_ViewMatrix[1][3] = -(YAxis.DotProduct(m_Position));
-        m_ViewMatrix[2][0] = ZAxis[0]; m_ViewMatrix[2][1] = ZAxis[1]; m_ViewMatrix[2][2] = ZAxis[2]; m_ViewMatrix[2][3] = -(ZAxis.DotProduct(m_Position));
-        m_ViewMatrix[3][0] = 0.0f    ; m_ViewMatrix[3][1] = 0.0f    ; m_ViewMatrix[3][2] = 0.0f    ; m_ViewMatrix[3][3] = 1.0f;
+        m_ViewMatrix[0][0] = XAxis[0];                     m_ViewMatrix[0][1] = YAxis[0];                     m_ViewMatrix[0][2] = ZAxis[0];                     m_ViewMatrix[0][3] = 0.0f;
+        m_ViewMatrix[1][0] = XAxis[1];                     m_ViewMatrix[1][1] = YAxis[1];                     m_ViewMatrix[1][2] = ZAxis[1];                     m_ViewMatrix[1][3] = 0.0f;
+        m_ViewMatrix[2][0] = XAxis[2];                     m_ViewMatrix[2][1] = YAxis[2];                     m_ViewMatrix[2][2] = ZAxis[2];                     m_ViewMatrix[2][3] = 0.0f;
+        m_ViewMatrix[3][0] = -glm::dot(XAxis, m_Position); m_ViewMatrix[3][1] = -glm::dot(YAxis, m_Position); m_ViewMatrix[3][2] = -glm::dot(ZAxis, m_Position); m_ViewMatrix[3][3] = 1.0f;
         
         // --------------------------------------------------------------------------------
         // Update all the cameras attached to the current view.

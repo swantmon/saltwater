@@ -1,10 +1,3 @@
-//
-//  gfx_histogram_renderer.h
-//  graphic
-//
-//  Created by Tobias Schwandt on 06/06/15.
-//  Copyright (c) 2014 TU Ilmenau. All rights reserved.
-//
 
 #pragma once
 
@@ -48,9 +41,9 @@ namespace HistogramRenderer
     void Update();
     void Render();
 
-    void SetSettings();
+    void ResetSettings();
     void SetSettings(const SHistogramSettings& _rSettings);
-    SHistogramSettings& GetSettings();
+    const SHistogramSettings& GetSettings();
 
     CBufferPtr GetExposureHistoryBuffer();
     unsigned int GetCurrentExposureHistoryIndex();

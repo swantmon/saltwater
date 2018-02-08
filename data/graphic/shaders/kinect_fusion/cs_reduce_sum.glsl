@@ -4,7 +4,7 @@
 
 #include "kinect_fusion/common_tracking.glsl"
 
-layout(row_major, std140, binding = 2) uniform UBOSummationData
+layout(std140, binding = 2) uniform UBOSummationData
 {
     int g_SumCount;
     int g_SumCountPOT;

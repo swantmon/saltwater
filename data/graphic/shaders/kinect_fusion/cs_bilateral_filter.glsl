@@ -22,7 +22,7 @@ const int D = R * 2 + 1;
 // Input from engine
 // -----------------------------------------------------------------------------
 
-layout(row_major, std140, binding = 0) uniform UBODepthThreshold
+layout(std140, binding = 0) uniform UBODepthThreshold
 {
     int g_MinDepth;
     int g_MaxDepth;

@@ -2,7 +2,7 @@
 #ifndef __INCLUDE_COMMON_PLANE_DETECTION_GLSL__
 #define __INCLUDE_COMMON_PLANE_DETECTION_GLSL__
 
-layout(row_major, std140, binding = 0) uniform HistogramSizes
+layout(std140, binding = 0) uniform HistogramSizes
 {
     mat4 g_PoseMatrix;
     mat4 g_InvPoseMatrix;

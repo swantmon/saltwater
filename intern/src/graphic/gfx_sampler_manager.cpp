@@ -233,9 +233,9 @@ namespace
                 glSamplerParameterf(NativeSampler, GL_TEXTURE_MIN_LOD, s_NativeSamplerDescriptors[IndexOfSampler].MinLOD);
                 glSamplerParameterf(NativeSampler, GL_TEXTURE_MAX_LOD, s_NativeSamplerDescriptors[IndexOfSampler].MaxLOD);
                 
-#ifndef __ANDROID__
+#ifndef PLATFORM_ANDROID
                 glSamplerParameterf(NativeSampler, GL_TEXTURE_LOD_BIAS, s_NativeSamplerDescriptors[IndexOfSampler].Bias);
-#endif // !__ANDROID__
+#endif // !PLATFORM_ANDROID
                 
                 glSamplerParameteri(NativeSampler, GL_TEXTURE_COMPARE_MODE, GL_NONE);
 
