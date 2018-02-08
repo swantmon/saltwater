@@ -234,7 +234,7 @@ namespace MR
         BASE_CONSOLE_INFO("Using Kinect for SLAM");
 
         m_DepthPixels = std::vector<unsigned short>(m_pRGBDCameraControl->GetDepthPixelCount());
-        m_CameraPixels = std::vector<Base::Byte4>(m_pRGBDCameraControl->GetDepthPixelCount());
+        m_CameraPixels = std::vector<char>(m_pRGBDCameraControl->GetDepthPixelCount());
 
         SetupMeshes();
 		SetupData();
@@ -316,7 +316,7 @@ namespace MR
 
     Gfx::CMeshPtr CScalableSLAMReconstructor::CreateGridMesh(int Width)
     {
-        std::vector<Float3> Vertices;
+        std::vector<glm::vec3> Vertices;
         std::vector<unsigned int> Indices;
 
         for (int z = 0; z < Width; ++ z)
@@ -327,7 +327,7 @@ namespace MR
                 {
                     for (int i = 0; i < 8; ++ i)
                     {
-                        Float3 Vertex = CubeVertices[i];
+                        glm::vec3 Vertex = CubeVertices[i];
 
                         Vertex[0] += x;
                         Vertex[1] += y;
@@ -388,13 +388,9 @@ namespace MR
 		const float VolumeSize = m_VolumeSizes[0];
 		glm::mat4 PoseRotation, PoseTranslation;
 		
-		PoseRotation.SetRotation(g_InitialCameraRotation[0], g_InitialCameraRotation[1], g_InitialCameraRotation[2]);
-		PoseTranslation.SetTranslation
-		(
-			g_InitialCameraPosition[0] * VolumeSize,
-			g_InitialCameraPosition[1] * VolumeSize,
-			g_InitialCameraPosition[2] * VolumeSize
-		);
+		PoseRotation = glm::eulerAngleXYZ(g_InitialCameraRotation[0], g_InitialCameraRotation[1], g_InitialCameraRotation[2]);
+        PoseTranslation = glm::translate(g_InitialCameraPosition * VolumeSize);
+		
 		m_PoseMatrix = PoseTranslation * PoseRotation;
         
         m_RootVolumePoolItemCount = 0;
@@ -424,23 +420,23 @@ namespace MR
 
 		// near
 
-		m_FrustumPoints[0] = Float3( x * Near,  y * Near, Near);
-		m_FrustumPoints[1] = Float3(-x * Near,  y * Near, Near);
-		m_FrustumPoints[2] = Float3(-x * Near, -y * Near, Near);
-		m_FrustumPoints[3] = Float3( x * Near, -y * Near, Near);
+		m_FrustumPoints[0] = glm::vec3( x * Near,  y * Near, Near);
+		m_FrustumPoints[1] = glm::vec3(-x * Near,  y * Near, Near);
+		m_FrustumPoints[2] = glm::vec3(-x * Near, -y * Near, Near);
+		m_FrustumPoints[3] = glm::vec3( x * Near, -y * Near, Near);
 
 		// far
 
-		m_FrustumPoints[4] = Float3( x * Far,  y * Far, Far);
-		m_FrustumPoints[5] = Float3(-x * Far,  y * Far, Far);
-		m_FrustumPoints[6] = Float3(-x * Far, -y * Far, Far);
-		m_FrustumPoints[7] = Float3( x * Far, -y * Far, Far);
+		m_FrustumPoints[4] = glm::vec3( x * Far,  y * Far, Far);
+		m_FrustumPoints[5] = glm::vec3(-x * Far,  y * Far, Far);
+		m_FrustumPoints[6] = glm::vec3(-x * Far, -y * Far, Far);
+		m_FrustumPoints[7] = glm::vec3( x * Far, -y * Far, Far);
 
 		for (int i = 0; i < g_FrustumCorners; ++i)
 		{
 			glm::vec4 Corner = glm::vec4(m_FrustumPoints[i], 1.0f);
 			Corner = m_PoseMatrix * Corner;
-			m_FrustumPoints[i] = Float3(Corner[0], Corner[1], Corner[2]);
+			m_FrustumPoints[i] = glm::vec3(Corner[0], Corner[1], Corner[2]);
 		}
 
 		m_FrustumPlanes[0] = GetHessianNormalForm(m_FrustumPoints[0], m_FrustumPoints[2], m_FrustumPoints[1]); // near
@@ -455,12 +451,12 @@ namespace MR
 
 	glm::vec4 CScalableSLAMReconstructor::GetHessianNormalForm(const glm::vec3& rA, const glm::vec3& rB, const glm::vec3& rC)
 	{
-		Float3 V1 = rB - rA;
-		Float3 V2 = rC - rA;
+		glm::vec3 V1 = rB - rA;
+        glm::vec3 V2 = rC - rA;
 
-		Float3 Normal = V1.CrossProduct(V2).Normalize();
+        glm::vec3 Normal = glm::normalize(glm::cross(V1, V2));
 
-		float D = rA.DotProduct(Normal);
+        float D = glm::dot(rA, Normal);
 
 		return glm::vec4(Normal, D);
 	}
@@ -469,7 +465,7 @@ namespace MR
 
 	float CScalableSLAMReconstructor::GetPointPlaneDistance(const glm::vec3& rPoint, const glm::vec4& rPlane)
 	{
-		const float Dot = rPoint.DotProduct(Float3(rPlane[0], rPlane[1], rPlane[2]));
+        const float Dot = glm::dot(rPoint, glm::vec3(rPlane));
 		return Dot - rPlane[3];
 	}
 
@@ -563,7 +559,7 @@ namespace MR
         const int SummandsY = DivUp(m_pRGBDCameraControl->GetDepthHeight(), g_TileSize2D);
 
         const int Summands = SummandsX * SummandsY;
-        const float SummandsLog2 = Log2(static_cast<float>(Summands));
+        const float SummandsLog2 = glm::log2(static_cast<float>(Summands));
         const int SummandsPOT = 1 << (static_cast<int>(SummandsLog2) + 1);
         
         const float VoxelSize = m_ReconstructionSettings.m_VoxelSize;
@@ -655,7 +651,7 @@ namespace MR
     
     // -----------------------------------------------------------------------------
     
-	bool CScalableSLAMReconstructor::RootGridInFrustum(const Int3& rKey)
+	bool CScalableSLAMReconstructor::RootGridInFrustum(const glm::ivec3& rKey)
 	{
 		float AABB[6];
 
@@ -665,16 +661,16 @@ namespace MR
 			AABB[PlaneIndex * 2 + 1] = AABB[PlaneIndex * 2] + m_VolumeSizes[0];
 		}
 
-		Float3 Cube[8] =
+		glm::vec3 Cube[8] =
 		{
-			Float3(AABB[0], AABB[2], AABB[4]),
-			Float3(AABB[0], AABB[3], AABB[4]),
-			Float3(AABB[0], AABB[2], AABB[5]),
-			Float3(AABB[0], AABB[3], AABB[5]),
-			Float3(AABB[1], AABB[2], AABB[4]),
-			Float3(AABB[1], AABB[3], AABB[4]),
-			Float3(AABB[1], AABB[2], AABB[5]),
-			Float3(AABB[1], AABB[3], AABB[5]),
+			glm::vec3(AABB[0], AABB[2], AABB[4]),
+			glm::vec3(AABB[0], AABB[3], AABB[4]),
+			glm::vec3(AABB[0], AABB[2], AABB[5]),
+			glm::vec3(AABB[0], AABB[3], AABB[5]),
+			glm::vec3(AABB[1], AABB[2], AABB[4]),
+			glm::vec3(AABB[1], AABB[3], AABB[4]),
+			glm::vec3(AABB[1], AABB[2], AABB[5]),
+			glm::vec3(AABB[1], AABB[3], AABB[5]),
 		};
 
 		for (int PlaneIndex = 0; PlaneIndex < 6; ++ PlaneIndex)
@@ -1265,20 +1261,20 @@ namespace MR
         // Create all root grid volumes that are in the view frustum 
         ////////////////////////////////////////////////////////////////////////////////
 
-		Float3 BBMax = m_FrustumPoints[0];
-		Float3 BBMin = m_FrustumPoints[0];
+		glm::vec3 BBMax = m_FrustumPoints[0];
+        glm::vec3 BBMin = m_FrustumPoints[0];
 
 		for (int i = 1; i < g_FrustumCorners; ++ i)
 		{
 			for (int j = 0; j < 3; ++ j)
 			{
-				BBMax[j] = Base::Max(m_FrustumPoints[i][j], BBMax[j]);
-				BBMin[j] = Base::Min(m_FrustumPoints[i][j], BBMin[j]);
+				BBMax[j] = glm::max(m_FrustumPoints[i][j], BBMax[j]);
+				BBMin[j] = glm::max(m_FrustumPoints[i][j], BBMin[j]);
 			}
 		}
 		
-		Int3 MaxIndex;
-		Int3 MinIndex;
+        glm::ivec3 MaxIndex;
+        glm::ivec3 MinIndex;
 
 		for (int i = 0; i < 3; ++ i)
 		{
@@ -1295,7 +1291,7 @@ namespace MR
 			{
 				for (int z = MinIndex[2] - 1; z <= MaxIndex[2]; ++ z)
 				{
-					Int3 Key = Int3(x, y, z);
+                    glm::ivec3 Key = glm::ivec3(x, y, z);
 					
 					if (m_RootVolumeMap.count(Key) == 0 && RootGridInFrustum(Key))
 					{
@@ -1404,13 +1400,13 @@ namespace MR
                 glm::ivec3 MinOffset = m_RootVolumeVector[VolumeQueue[i]]->m_Offset;
                 glm::ivec3 MaxOffset = MinOffset;
 
-                TotalMinOffset[0] = Base::Min(TotalMinOffset[0], MinOffset[0]);
-                TotalMinOffset[1] = Base::Min(TotalMinOffset[1], MinOffset[1]);
-                TotalMinOffset[2] = Base::Min(TotalMinOffset[2], MinOffset[2]);
+                TotalMinOffset[0] = glm::min(TotalMinOffset[0], MinOffset[0]);
+                TotalMinOffset[1] = glm::min(TotalMinOffset[1], MinOffset[1]);
+                TotalMinOffset[2] = glm::min(TotalMinOffset[2], MinOffset[2]);
 
-                TotalMaxOffset[0] = Base::Max(TotalMaxOffset[0], MaxOffset[0]);
-                TotalMaxOffset[1] = Base::Max(TotalMaxOffset[1], MaxOffset[1]);
-                TotalMaxOffset[2] = Base::Max(TotalMaxOffset[2], MaxOffset[2]);
+                TotalMaxOffset[0] = glm::max(TotalMaxOffset[0], MaxOffset[0]);
+                TotalMaxOffset[1] = glm::max(TotalMaxOffset[1], MaxOffset[1]);
+                TotalMaxOffset[2] = glm::max(TotalMaxOffset[2], MaxOffset[2]);
             }
 
             const int CurrentWidth = m_VolumeBuffers.m_RootVolumeTotalWidth / 2;
@@ -1422,13 +1418,13 @@ namespace MR
                 assert(false);
             }
 
-            m_VolumeBuffers.m_MinOffset[0] = Base::Min(TotalMinOffset[0], m_VolumeBuffers.m_MinOffset[0]);
-            m_VolumeBuffers.m_MinOffset[1] = Base::Min(TotalMinOffset[1], m_VolumeBuffers.m_MinOffset[1]);
-            m_VolumeBuffers.m_MinOffset[2] = Base::Min(TotalMinOffset[2], m_VolumeBuffers.m_MinOffset[2]);
+            m_VolumeBuffers.m_MinOffset[0] = glm::min(TotalMinOffset[0], m_VolumeBuffers.m_MinOffset[0]);
+            m_VolumeBuffers.m_MinOffset[1] = glm::min(TotalMinOffset[1], m_VolumeBuffers.m_MinOffset[1]);
+            m_VolumeBuffers.m_MinOffset[2] = glm::min(TotalMinOffset[2], m_VolumeBuffers.m_MinOffset[2]);
 
-            m_VolumeBuffers.m_MaxOffset[0] = Base::Max(TotalMaxOffset[0], m_VolumeBuffers.m_MaxOffset[0]);
-            m_VolumeBuffers.m_MaxOffset[1] = Base::Max(TotalMaxOffset[1], m_VolumeBuffers.m_MaxOffset[1]);
-            m_VolumeBuffers.m_MaxOffset[2] = Base::Max(TotalMaxOffset[2], m_VolumeBuffers.m_MaxOffset[2]);
+            m_VolumeBuffers.m_MaxOffset[0] = glm::max(TotalMaxOffset[0], m_VolumeBuffers.m_MaxOffset[0]);
+            m_VolumeBuffers.m_MaxOffset[1] = glm::max(TotalMaxOffset[1], m_VolumeBuffers.m_MaxOffset[1]);
+            m_VolumeBuffers.m_MaxOffset[2] = glm::max(TotalMaxOffset[2], m_VolumeBuffers.m_MaxOffset[2]);
 
             for (uint32_t VolumeIndex : VolumeQueue)
             {
@@ -1568,8 +1564,8 @@ namespace MR
             Intrinsics[i].m_FocalPoint = glm::vec2(FocalPointX, FocalPointY);
             Intrinsics[i].m_FocalLength = glm::vec2(FocalLengthX, FocalLengthY);
             Intrinsics[i].m_InvFocalLength = glm::vec2(1.0f / FocalLengthX, 1.0f / FocalLengthY);
-            Intrinsics[i].m_KMatrix = Intrinsics[i].m_InvKMatrix = KMatrix;
-            Intrinsics[i].m_InvKMatrix.Invert();
+            Intrinsics[i].m_KMatrix = KMatrix;
+            Intrinsics[i].m_InvKMatrix = glm::inverse(KMatrix);
         }
 
         SBufferDescriptor ConstantBufferDesc = {};
@@ -1586,7 +1582,7 @@ namespace MR
         
         STrackingData TrackingData;
         TrackingData.m_PoseMatrix = m_PoseMatrix;
-        TrackingData.m_InvPoseMatrix = m_PoseMatrix.GetInverted();
+        TrackingData.m_InvPoseMatrix = glm::inverse(m_PoseMatrix);
 
         ConstantBufferDesc.m_NumberOfBytes = sizeof(STrackingData);
         ConstantBufferDesc.m_pBytes        = &TrackingData;
@@ -1689,7 +1685,7 @@ namespace MR
         const bool CaptureColor = m_ReconstructionSettings.m_CaptureColor;
         
         unsigned short* pDepth = m_DepthPixels.data();
-        Base::Byte4* pColor = m_CameraPixels.data();
+        char* pColor = m_CameraPixels.data();
 
         if (m_IsTrackingPaused)
         {
@@ -1746,7 +1742,7 @@ namespace MR
 
             STrackingData TrackingData;
             TrackingData.m_PoseMatrix = m_PoseMatrix;
-            TrackingData.m_InvPoseMatrix = m_PoseMatrix.GetInverted();
+            TrackingData.m_InvPoseMatrix = glm::inverse(m_PoseMatrix);
 
             BufferManager::UploadBufferData(m_TrackingDataConstantBufferPtr, &TrackingData);
 
@@ -1946,7 +1942,7 @@ namespace MR
         
         SIncBuffer TrackingData;
         TrackingData.m_PoseMatrix = rIncPoseMatrix;
-        TrackingData.m_InvPoseMatrix = rIncPoseMatrix.GetInverted();
+        TrackingData.m_InvPoseMatrix = glm::inverse(rIncPoseMatrix);
         TrackingData.m_PyramidLevel = PyramidLevel;
         
         BufferManager::UploadBufferData(m_IncPoseMatrixConstantBufferPtr, &TrackingData);
@@ -1974,7 +1970,7 @@ namespace MR
         const int SummandsY = DivUp(m_pRGBDCameraControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
 
         const int Summands = SummandsX * SummandsY;
-        const float SummandsLog2 = Log2(static_cast<float>(Summands));
+        const float SummandsLog2 = glm::log2(static_cast<float>(Summands));
         const int SummandsPOT = 1 << (static_cast<int>(SummandsLog2) + 1);
         
         glm::ivec2 BufferData;
@@ -2064,12 +2060,8 @@ namespace MR
         x[1] = (y[1] - L[11] * x[5] - L[10] * x[4] - L[9] * x[3] - L[8] * x[2]) / L[7];
         x[0] = (y[0] - L[5] * x[5] - L[4] * x[4] - L[3] * x[3] - L[2] * x[2] - L[1] * x[1]) / L[0];
         
-        glm::mat4 RotationX, RotationY, RotationZ, Rotation, Translation;
-        RotationX.SetRotationX(static_cast<float>(x[0]));
-        RotationY.SetRotationY(static_cast<float>(x[1]));
-        RotationZ.SetRotationZ(static_cast<float>(x[2]));
-        Rotation = RotationZ * RotationY * RotationX;
-        Translation.SetTranslation(static_cast<float>(x[3]), static_cast<float>(x[4]), static_cast<float>(x[5]));
+        glm::mat4 Rotation = glm::eulerAngleXYZ(static_cast<float>(x[0]), static_cast<float>(x[1]), static_cast<float>(x[2]));
+        glm::mat4 Translation = glm::translate(glm::vec3(static_cast<float>(x[3]), static_cast<float>(x[4]), static_cast<float>(x[5])));
         
         rIncPoseMatrix = Translation * Rotation * rIncPoseMatrix;
 

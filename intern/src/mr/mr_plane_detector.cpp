@@ -113,7 +113,7 @@ namespace MR
 
         SHistogramMetaBuffer BufferData;
         BufferData.m_PoseMatrix = _PoseMatrix;
-        BufferData.m_InvPoseMatrix = _PoseMatrix.GetInverted();
+        BufferData.m_InvPoseMatrix = glm::inverse(_PoseMatrix);
         BufferData.m_HistogramSize = glm::ivec4(g_HistogramSize[0], g_HistogramSize[1], 0, 0);
 
         BufferManager::UploadBufferData(m_HistogramConstantBuffer, &BufferData);
@@ -213,7 +213,7 @@ namespace MR
     {
         TextureManager::ClearTexture(m_Histogram);
 
-        Base::UInt4 Counter = Base::UInt4(1, 1, 0, g_MaxDetectablePlaneCount);  // Just set counter to 0
+        glm::uvec4 Counter = glm::uvec4(1, 1, 0, g_MaxDetectablePlaneCount);  // Just set counter to 0
         BufferManager::UploadBufferData(m_PlaneCountBuffer, &Counter, 0, sizeof(Counter));
     }
 
@@ -240,7 +240,7 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    const CPlaneDetector::glm::vec4Vector& CPlaneDetector::GetPlanes()
+    const CPlaneDetector::Vec4Vector& CPlaneDetector::GetPlanes()
     {
         return m_Planes;
     }

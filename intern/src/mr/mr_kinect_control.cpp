@@ -74,7 +74,7 @@ namespace MR
                 
         m_pKinect->get_CoordinateMapper(&m_pMapper);
 
-        m_CameraFrameBuffer = std::vector<Base::Byte4>(GetCameraWidth() * GetCameraHeight());
+        m_CameraFrameBuffer = std::vector<char>(GetCameraWidth() * GetCameraHeight() * 4); // 1 char per channel
         m_DepthBuffer = std::vector<UINT16>(GetDepthWidth() * GetDepthHeight());
         m_ColorSpacePoints = std::vector<ColorSpacePoint>(GetDepthWidth() * GetDepthHeight());
     }
@@ -143,8 +143,10 @@ namespace MR
 
     // -----------------------------------------------------------------------------
     
-    bool CKinectControl::GetCameraFrame(Base::Byte4* pBuffer)
+    bool CKinectControl::GetCameraFrame(char* pBuffer)
     {
+        assert(false);
+
         IColorFrame* pColorFrame = nullptr;
 
         if (m_pColorFrameReader->AcquireLatestFrame(&pColorFrame) != S_OK)
@@ -152,11 +154,11 @@ namespace MR
             return false;
         }
         
-        pColorFrame->CopyConvertedFrameDataToArray(
-            GetCameraWidth() * GetCameraHeight() * sizeof(m_CameraFrameBuffer[0]),
-            &m_CameraFrameBuffer[0][0],
+        /*pColorFrame->CopyConvertedFrameDataToArray(
+            GetCameraWidth() * GetCameraHeight() * sizeof(m_CameraFrameBuffer[0] * 4),
+            m_CameraFrameBuffer.data(),
             ColorImageFormat::ColorImageFormat_Rgba
-        );
+        );*/
 
         pColorFrame->Release();
         
@@ -183,7 +185,8 @@ namespace MR
                 }
                 else
                 {
-                    pBuffer[j * GetDepthWidth() + i] = Base::Byte4(0, 0, 0, 255);
+                    assert(false);
+                    //pBuffer[j * GetDepthWidth() + i] = Base::Byte4(0, 0, 0, 255);
                 }
             }
         }
