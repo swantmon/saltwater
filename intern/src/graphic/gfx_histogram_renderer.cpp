@@ -467,6 +467,7 @@ namespace
 
         ContextManager::ResetResourceBuffer(0);
         ContextManager::ResetResourceBuffer(1);
+        ContextManager::ResetResourceBuffer(2);
 
         ContextManager::ResetShaderCS();
 

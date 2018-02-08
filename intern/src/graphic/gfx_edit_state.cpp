@@ -145,16 +145,9 @@ namespace
 
         LightAreaRenderer::RenderBulbs();
 
-        PostFX::Render();
-
-        Performance::EndEvent();
-
-        // -----------------------------------------------------------------------------
-        // Interaction
-        // -----------------------------------------------------------------------------
-        Performance::BeginEvent("Interaction Pass");
-
         SelectionRenderer::Render();
+
+        PostFX::Render();
 
         Performance::EndEvent();
 

@@ -671,13 +671,13 @@ namespace
         // -----------------------------------------------------------------------------
         // Prepare renderer
         // -----------------------------------------------------------------------------
-        ContextManager::SetTargetSet(TargetSetManager::GetSystemTargetSet());
+        ContextManager::SetTargetSet(TargetSetManager::GetDefaultTargetSet());
 
         ContextManager::SetViewPortSet(ViewManager::GetViewPortSet());
 
-        ContextManager::SetBlendState(StateManager::GetBlendState(0));
+        ContextManager::SetBlendState(StateManager::GetBlendState(CBlendState::AlphaBlend));
 
-        ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(0));
+        ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::LessEqualDepth));
 
         ContextManager::SetTopology(STopology::TriangleList);
 
