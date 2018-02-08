@@ -403,7 +403,7 @@ namespace MR
 
             Intrinsics[i].m_FocalPoint = glm::vec2(FocalPointX, FocalPointY);
             Intrinsics[i].m_FocalLength = glm::vec2(FocalLengthX, FocalLengthY);
-            Intrinsics[i].m_InvFocalLength = glm::vec2(1.0f / FocalLengthX, 1.0f / FocalLengthY);
+            Intrinsics[i].m_InvFocalLength = 1.0f / glm::vec2(FocalLengthX, FocalLengthY);
             Intrinsics[i].m_KMatrix = KMatrix;
             Intrinsics[i].m_InvKMatrix = glm::inverse(KMatrix);
         }

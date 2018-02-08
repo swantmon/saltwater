@@ -1,13 +1,10 @@
 ﻿
-#include "base/base_vector3.h"
-
 #include "editor_gui/edit_inspector_slam.h"
 
 #include "editor_port/edit_message_manager.h"
 
 #include <QColorDialog>
 
-#include "base/base_math_operations.h"
 #include "base/base_program_parameters.h"
 #include "mr/mr_slam_reconstructor.h"
 
