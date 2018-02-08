@@ -157,10 +157,7 @@ namespace
 
         struct SSelectionSettingsBuffer
         {
-            unsigned int m_MinX;
-            unsigned int m_MinY;
-            unsigned int m_MaxX;
-            unsigned int m_MaxY;
+            glm::vec4 m_MinMaxUV;
         };
         
         struct SHighlightSettingsBuffer
@@ -544,7 +541,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Take care that the cursor position is within the window.
         // -----------------------------------------------------------------------------
-        glm::ivec2 ActiveWindowSize = Gfx::Main::GetActiveWindowSize();
+        glm::ivec2 ActiveWindowSize = Gfx::Main::GetActiveNativeWindowSize();
 
         if ((_rCursor[0] < 0) || (_rCursor[1] < 0) || (_rCursor[0] >= static_cast<short>(ActiveWindowSize[0])) || (_rCursor[1] >= static_cast<short>(ActiveWindowSize[1])))
         {
@@ -659,11 +656,12 @@ namespace
     {
         SSelectionSettings Settings;
 
-        Settings.m_HighlightColor[0] = Base::CProgramParameters::GetInstance().GetFloat("graphics:selection:highlight:color:r", 0.31f);
-        Settings.m_HighlightColor[1] = Base::CProgramParameters::GetInstance().GetFloat("graphics:selection:highlight:color:g", 0.45f);
-        Settings.m_HighlightColor[2] = Base::CProgramParameters::GetInstance().GetFloat("graphics:selection:highlight:color:b", 0.64f);
-        Settings.m_HighlightColor[3] = Base::CProgramParameters::GetInstance().GetFloat("graphics:selection:highlight:color:a", 0.4f);
-        Settings.m_HighlightUseDepth = Base::CProgramParameters::GetInstance().GetBoolean("graphics:selection:highlight:use_depth", true);
+        Settings.m_HighlightColor[0]     = Base::CProgramParameters::GetInstance().GetFloat("graphics:selection:highlight:color:r", 0.31f);
+        Settings.m_HighlightColor[1]     = Base::CProgramParameters::GetInstance().GetFloat("graphics:selection:highlight:color:g", 0.45f);
+        Settings.m_HighlightColor[2]     = Base::CProgramParameters::GetInstance().GetFloat("graphics:selection:highlight:color:b", 0.64f);
+        Settings.m_HighlightColor[3]     = Base::CProgramParameters::GetInstance().GetFloat("graphics:selection:highlight:color:a", 0.4f);
+        Settings.m_HighlightUseDepth     = Base::CProgramParameters::GetInstance().GetBoolean("graphics:selection:highlight:use_depth", true);
+        Settings.m_HighlightUseWireframe = Base::CProgramParameters::GetInstance().GetBoolean("graphics:selection:highlight:use_wireframe", true);
 
         SetSettings(Settings);
     }
@@ -777,7 +775,7 @@ namespace
 
     void CGfxSelectionRenderer::RenderHighlightSurfaces()
     {
-        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Wireframe));
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(m_Settings.m_HighlightUseWireframe == true ? CRasterizerState::Wireframe : 0));
 
         ContextManager::SetShaderPS(m_HighlightPSPtr);
 
@@ -933,7 +931,7 @@ namespace
                 // -----------------------------------------------------------------------------
                 // Setup buffer
                 // -----------------------------------------------------------------------------
-                glm::ivec2 ActiveWindowSize = Gfx::Main::GetActiveWindowSize();
+                glm::ivec2 ActiveWindowSize = Gfx::Main::GetActiveNativeWindowSize();
 
                 SSelectionSettingsBuffer Settings;
 
@@ -947,10 +945,10 @@ namespace
                 if (MinX > MaxX) MinX = 0;
                 if (MinY > MaxY) MinY = 0;
 
-                Settings.m_MinX = MinX;
-                Settings.m_MinY = MinY;
-                Settings.m_MaxX = MaxX;
-                Settings.m_MaxY = MaxY;
+                Settings.m_MinMaxUV.x = static_cast<float>(MinX) / static_cast<float>(ActiveWindowSize[0]);
+                Settings.m_MinMaxUV.y = static_cast<float>(MinY) / static_cast<float>(ActiveWindowSize[1]);
+                Settings.m_MinMaxUV.z = static_cast<float>(MaxX) / static_cast<float>(ActiveWindowSize[0]);
+                Settings.m_MinMaxUV.w = static_cast<float>(MaxY) / static_cast<float>(ActiveWindowSize[1]);
 
                 BufferManager::UploadBufferData(m_SelectionBufferSetPtrs[IndexOfBuffer]->GetBuffer(0), &Settings);
 

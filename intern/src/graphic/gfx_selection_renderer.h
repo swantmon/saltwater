@@ -11,6 +11,7 @@ namespace Gfx
     {
         glm::vec4 m_HighlightColor;
         bool      m_HighlightUseDepth;
+        bool      m_HighlightUseWireframe;
     };
 } // namespace Gfx
 
