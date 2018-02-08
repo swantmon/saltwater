@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "base/base_matrix4x4.h"
+#include "base/base_include_glm.h"
 
 #include "graphic/gfx_buffer.h"
 #include "graphic/gfx_shader.h"
@@ -15,16 +15,16 @@ namespace MR
     {
     public:
 
-        typedef std::vector<Base::Float4> Float4Vector;
+        typedef std::vector<glm::vec4> glm::vec4Vector;
 
         void SetImages(Gfx::CTexturePtr _VertexMap, Gfx::CTexturePtr _NormalMap);
-        void DetectPlanes(const Base::Float4x4& _PoseMatrix, Gfx::CTexturePtr _VertexMap = nullptr, Gfx::CTexturePtr _NormalMap = nullptr);
+        void DetectPlanes(const glm::mat4& _PoseMatrix, Gfx::CTexturePtr _VertexMap = nullptr, Gfx::CTexturePtr _NormalMap = nullptr);
 
         Gfx::CTexturePtr GetVertexMap();
         Gfx::CTexturePtr GetNormalMap();
         Gfx::CTexturePtr GetNormalHistogram();
 
-        const Float4Vector& GetPlanes();
+        const glm::vec4Vector& GetPlanes();
         
     public:
 
@@ -33,10 +33,10 @@ namespace MR
 
 	private:
 
-        void CreateHistogram(const Base::Float4x4& _PoseMatrix);
+        void CreateHistogram(const glm::mat4& _PoseMatrix);
         void ExtractPlaneCandidates();
         void FindPlaneEquations();
-        void ExtractPlanes(Float4Vector& _rPlanes);
+        void ExtractPlanes(glm::vec4Vector& _rPlanes);
 
         void ClearData();
 
@@ -59,6 +59,6 @@ namespace MR
 
         int m_MaxDetectablePlaneCount;
 
-        Float4Vector m_Planes;
+        glm::vec4Vector m_Planes;
     };
 } // namespace MR

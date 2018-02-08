@@ -1,8 +1,7 @@
 
 #include "graphic/gfx_precompiled.h"
 
-#include "base/base_vector3.h"
-#include "base/base_matrix4x4.h"
+#include "base/base_include_glm.h"
 #include "base/base_program_parameters.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
@@ -54,8 +53,8 @@ namespace
 
 	struct SDrawCallConstantBuffer
 	{
-		Float4x4 m_WorldMatrix;
-		Float4 m_Color;
+		glm::mat4 m_WorldMatrix;
+		glm::vec4 m_Color;
 	};
 
     class CGfxReconstructionRenderer : private Base::CUncopyable
@@ -411,7 +410,7 @@ namespace
         ConstantBufferDesc.m_Usage = CBuffer::EUsage::GPURead;
         ConstantBufferDesc.m_Binding = CBuffer::ConstantBuffer;
         ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
-        ConstantBufferDesc.m_NumberOfBytes = sizeof(Float4) * 2;
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(glm::vec4) * 2;
         ConstantBufferDesc.m_pBytes = nullptr;
         ConstantBufferDesc.m_pClassKey = 0;
 
@@ -618,7 +617,7 @@ namespace
         // Create plane mesh
         ////////////////////////////////////////////////////////////////////////////////
 
-        std::vector<Base::Float3> PlaneVertices;
+        std::vector<glm::vec3> PlaneVertices;
 
         const int PlaneSize = 3;
 
@@ -762,15 +761,15 @@ namespace
         {
             Cam::CControl& rControl = static_cast<Cam::CEditorControl&>(Cam::ControlManager::GetActiveControl());
             
-            Float4x4 PoseMatrix = (m_pScalableReconstructor != nullptr) ? m_pScalableReconstructor->GetPoseMatrix() : m_pReconstructor->GetPoseMatrix();
+            glm::mat4 PoseMatrix = (m_pScalableReconstructor != nullptr) ? m_pScalableReconstructor->GetPoseMatrix() : m_pReconstructor->GetPoseMatrix();
 
-            Base::Float3 Position;
-            Base::Float3 Rotation;
+            glm::vec3 Position;
+            glm::vec3 Rotation;
 
             PoseMatrix.GetTranslation(Position);
             PoseMatrix.GetRotation(Rotation);
 
-            Base::Float3x3 RotationMatrix;
+            glm::vec3x3 RotationMatrix;
             RotationMatrix.SetRotation(Rotation[0] + 3.14f, Rotation[1], Rotation[2]);            
 
             rControl.SetPosition(Position);
@@ -785,18 +784,18 @@ namespace
         MR::SReconstructionSettings Settings;
         m_pReconstructor->GetReconstructionSettings(&Settings);
 
-        Float4x4 PoseMatrix = m_pReconstructor->GetPoseMatrix();
+        glm::mat4 PoseMatrix = m_pReconstructor->GetPoseMatrix();
 
-        Float4 RaycastData[2];
+        glm::vec4 RaycastData[2];
         PoseMatrix.GetTranslation(RaycastData[0][0], RaycastData[0][1], RaycastData[0][2]);
         RaycastData[0][3] = 1.0f;
         if (Settings.m_CaptureColor)
         {
-            RaycastData[1] = m_pReconstructor->IsTrackingLost() ? Float4(1.0f, 0.0f, 0.0f, 1.0f) : Float4(0.0f, 0.0f, 0.0f, 1.0f);
+            RaycastData[1] = m_pReconstructor->IsTrackingLost() ? glm::vec4(1.0f, 0.0f, 0.0f, 1.0f) : glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
         }
         else
         {
-            RaycastData[1] = m_pReconstructor->IsTrackingLost() ? Float4(1.0f, 0.0f, 0.0f, 1.0f) : Float4(0.0f, 1.0f, 0.0f, 1.0f);
+            RaycastData[1] = m_pReconstructor->IsTrackingLost() ? glm::vec4(1.0f, 0.0f, 0.0f, 1.0f) : glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
         }
 
         BufferManager::UploadBufferData(m_RaycastConstantBufferPtr, RaycastData);
@@ -841,7 +840,7 @@ namespace
 		SDrawCallConstantBuffer BufferData;
 
 		BufferData.m_WorldMatrix.SetScale(Settings.m_VolumeSize);
-		BufferData.m_Color = Float4(0.0f, 0.0f, 1.0f, 1.0f);
+		BufferData.m_Color = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
 
 		BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
 
@@ -865,7 +864,7 @@ namespace
         MR::SReconstructionSettings Settings;
         m_pScalableReconstructor->GetReconstructionSettings(&Settings);
 
-        Float4x4 PoseMatrix = m_pScalableReconstructor->GetPoseMatrix();
+        glm::mat4 PoseMatrix = m_pScalableReconstructor->GetPoseMatrix();
 
         ContextManager::SetShaderVS(m_RaycastVSPtr);
         ContextManager::SetShaderPS(m_RaycastFSPtr);
@@ -909,16 +908,16 @@ namespace
             Float3(Min[0], Max[1], Max[2]),
         };
 
-        Float4 RaycastData[2];
+        glm::vec4 RaycastData[2];
         PoseMatrix.GetTranslation(RaycastData[0][0], RaycastData[0][1], RaycastData[0][2]);
         RaycastData[0][3] = 1.0f;
         if (Settings.m_CaptureColor)
         {
-            RaycastData[1] = m_pScalableReconstructor->IsTrackingLost() ? Float4(1.0f, 0.0f, 0.0f, 1.0f) : Float4(0.0f, 0.0f, 0.0f, 1.0f);
+            RaycastData[1] = m_pScalableReconstructor->IsTrackingLost() ? glm::vec4(1.0f, 0.0f, 0.0f, 1.0f) : glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
         }
         else
         {
-            RaycastData[1] = m_pScalableReconstructor->IsTrackingLost() ? Float4(1.0f, 0.0f, 0.0f, 1.0f) : Float4(0.0f, 1.0f, 0.0f, 1.0f);
+            RaycastData[1] = m_pScalableReconstructor->IsTrackingLost() ? glm::vec4(1.0f, 0.0f, 0.0f, 1.0f) : glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
         }
         BufferManager::UploadBufferData(m_RaycastConstantBufferPtr, RaycastData);
 
@@ -943,7 +942,7 @@ namespace
         MR::SReconstructionSettings Settings;
         m_pScalableReconstructor->GetReconstructionSettings(&Settings);
 
-        Float4x4 PoseMatrix = m_pScalableReconstructor->GetPoseMatrix();
+        glm::mat4 PoseMatrix = m_pScalableReconstructor->GetPoseMatrix();
 
         ContextManager::SetShaderVS(m_RaycastRootGridsVSPtr);
         ContextManager::SetShaderPS(m_RaycastRootGridsFSPtr);
@@ -1005,7 +1004,7 @@ namespace
         MR::SReconstructionSettings Settings;
         m_pScalableReconstructor->GetReconstructionSettings(&Settings);
 
-        Float4x4 PoseMatrix = m_pScalableReconstructor->GetPoseMatrix();
+        glm::mat4 PoseMatrix = m_pScalableReconstructor->GetPoseMatrix();
 
         ContextManager::SetShaderVS(m_RaycastLevel1VSPtr);
         ContextManager::SetShaderPS(m_RaycastLevel1FSPtr);
@@ -1080,8 +1079,8 @@ namespace
 		ContextManager::SetTopology(STopology::LineList);
 
 		Float3 Position;
-		Float4x4 Scaling;
-		Float4x4 Translation;
+		glm::mat4 Scaling;
+		glm::mat4 Translation;
 
         const auto& GridSizes = m_pScalableReconstructor->GetVolumeSizes();
 
@@ -1101,7 +1100,7 @@ namespace
                 Translation.SetTranslation(Position);
 
                 BufferData.m_WorldMatrix = Translation * Scaling;
-                BufferData.m_Color = Float4(0.0f, 0.0f, 1.0f, 1.0f);
+                BufferData.m_Color = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
 
                 BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
 
@@ -1131,8 +1130,8 @@ namespace
         ContextManager::SetTopology(STopology::LineList);
 
         Float3 Position;
-        Float4x4 Scaling;
-        Float4x4 Translation;
+        glm::mat4 Scaling;
+        glm::mat4 Translation;
 
         const auto& VolumeSizes = m_pScalableReconstructor->GetVolumeSizes();
 
@@ -1152,7 +1151,7 @@ namespace
                 Translation.SetTranslation(Position);
 
                 BufferData.m_WorldMatrix = Translation * Scaling;
-                BufferData.m_Color = Float4(0.0f, 0.0f, 1.0f, 1.0f);
+                BufferData.m_Color = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
 
                 BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
 
@@ -1188,7 +1187,7 @@ namespace
         ContextManager::SetTopology(STopology::LineList);
 
         Float3 Position;
-        Float4x4 Translation;
+        glm::mat4 Translation;
 
         const auto& VolumeSizes = m_pScalableReconstructor->GetVolumeSizes();
 
@@ -1207,7 +1206,7 @@ namespace
                 Translation.SetTranslation(Position);
 
                 BufferData.m_WorldMatrix = Translation;
-                BufferData.m_Color = Float4(0.0f, 0.0f, 1.0f, 1.0f);
+                BufferData.m_Color = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
 
                 BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
 
@@ -1272,25 +1271,25 @@ namespace
 
         for (auto rPlane : Planes)
         {
-            Base::Float3 PlaneNormal = Base::Float3(rPlane[0], rPlane[1], rPlane[2]).Normalize();
+            glm::vec3 PlaneNormal = glm::vec3(rPlane[0], rPlane[1], rPlane[2]).Normalize();
 
-            Base::Float3 Vertex0 = Base::Float3(0.0f);
-            Base::Float3 Vertex1 = Base::Float3(1.0f);
+            glm::vec3 Vertex0 = glm::vec3(0.0f);
+            glm::vec3 Vertex1 = glm::vec3(1.0f);
 
             Vertex0[2] = -rPlane[3] / PlaneNormal[2];
             Vertex1[2] = (-rPlane[3] - PlaneNormal[0] - PlaneNormal[1]) / PlaneNormal[2];
 
-            Base::Float3 Binormal = (Vertex1 - Vertex0).Normalize();
-            Base::Float3 Tangent = PlaneNormal.CrossProduct(Binormal).Normalize();
+            glm::vec3 Binormal = (Vertex1 - Vertex0).Normalize();
+            glm::vec3 Tangent = PlaneNormal.CrossProduct(Binormal).Normalize();
 
-            Base::Float4x4 Translation;
-            Base::Float4x4 Rotation;
+            glm::mat4 Translation;
+            glm::mat4 Rotation;
 
-            Translation.SetTranslation(Base::Float4(Vertex0[0], Vertex0[1], Vertex0[2], 1.0f));
-            Rotation.LookTo(Vertex0, PlaneNormal, Base::Float3(0.0f, 1.0f, 0.0f));
+            Translation.SetTranslation(glm::vec4(Vertex0[0], Vertex0[1], Vertex0[2], 1.0f));
+            Rotation.LookTo(Vertex0, PlaneNormal, glm::vec3(0.0f, 1.0f, 0.0f));
 
             BufferData.m_WorldMatrix = Translation * Rotation;
-            BufferData.m_Color = Float4(1.0f, 1.0f, 0.0f, 1.0f);
+            BufferData.m_Color = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
 
             BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
 
@@ -1313,7 +1312,7 @@ namespace
 		SDrawCallConstantBuffer BufferData;
 
 		BufferData.m_WorldMatrix = (m_pScalableReconstructor != nullptr) ? m_pScalableReconstructor->GetPoseMatrix() : m_pReconstructor->GetPoseMatrix();
-		BufferData.m_Color = Float4(1.0f, 0.0f, 1.0f, 1.0f);
+		BufferData.m_Color = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
 
 		BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
 
@@ -1343,7 +1342,7 @@ namespace
         SDrawCallConstantBuffer BufferData;
 
         BufferData.m_WorldMatrix = m_pScalableReconstructor->GetPoseMatrix();
-        BufferData.m_Color = Float4(1.0f, 0.0f, 1.0f, 1.0f);
+        BufferData.m_Color = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
 
         BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
 
@@ -1379,7 +1378,7 @@ namespace
         
         ContextManager::SetViewPortSet(ViewManager::GetViewPortSet());
         ContextManager::SetTargetSet(TargetSetManager::GetDeferredTargetSet());
-        //Base::Float4 ClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+        //glm::vec4 ClearColor(0.2f, 0.2f, 0.2f, 1.0f);
         //TargetSetManager::ClearTargetSet(TargetSetManager::GetDeferredTargetSet(), ClearColor);
 
         if (!m_UseTrackingCamera)

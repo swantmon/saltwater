@@ -9,8 +9,7 @@
 #pragma once
 
 #include "base/base_uncopyable.h"
-#include "base/base_matrix4x4.h"
-#include "base/base_vector2.h"
+#include "base/base_include_glm.h"
 
 #include "mr/mr_plane_detector.h"
 #include "mr/mr_slam_reconstruction_settings.h"
@@ -29,7 +28,7 @@ namespace MR
 
 	struct IndexCompare
 	{
-		bool operator()(const Base::Int3& rLeft, const Base::Int3& rRight) const
+		bool operator()(const glm::ivec3& rLeft, const glm::ivec3& rRight) const
 		{
 			if (rLeft[0] < rRight[0])
 			{
@@ -102,7 +101,7 @@ namespace MR
 
 		struct SRootVolume
 		{
-            Base::Int3 m_Offset;
+            glm::ivec3 m_Offset;
             bool m_IsVisible;
             int m_PoolIndex;
             Gfx::CBufferPtr m_Level1QueuePtr;
@@ -113,9 +112,9 @@ namespace MR
 
         struct SScalableRaycastConstantBuffer
         {
-            Base::Float3 m_AABBMin;
+            glm::vec3 m_AABBMin;
             float Padding;
-            Base::Float3 m_AABBMax;
+            glm::vec3 m_AABBMax;
             int m_VolumeTextureWidth;
         };
 
@@ -128,15 +127,15 @@ namespace MR
             Gfx::CBufferPtr m_TSDFPoolPtr;                // TSDF Data           ( 8x 8x 8)
             Gfx::CBufferPtr m_PoolItemCountBufferPtr;
             Gfx::CBufferPtr m_AABBBufferPtr;
-            Base::Int3 m_MinOffset;                         // AABB of the whole reconstruction
-            Base::Int3 m_MaxOffset;
+            glm::ivec3 m_MinOffset;                         // AABB of the whole reconstruction
+            glm::ivec3 m_MaxOffset;
             int m_RootVolumeTotalWidth;
             int m_RootGridPoolSize;
             int m_Level1PoolSize;
             int m_TSDFPoolSize;
         };
 
-        typedef std::map<Base::Int3, SRootVolume, IndexCompare> CRootVolumeMap;
+        typedef std::map<glm::ivec3, SRootVolume, IndexCompare> CRootVolumeMap;
         typedef std::vector<SRootVolume*> CRootVolumeVector;
 
     public:
@@ -152,7 +151,7 @@ namespace MR
         void PauseIntegration(bool _Paused);
         void PauseTracking(bool _Paused);
         bool IsTrackingLost() const;
-        Base::Float4x4 GetPoseMatrix() const;
+        glm::mat4 GetPoseMatrix() const;
 
 		CRootVolumeMap& GetRootVolumeMap();
         CRootVolumeVector& GetRootVolumeVector();
@@ -172,9 +171,9 @@ namespace MR
         void Start();
         void Exit();
 
-		Base::Float4 GetHessianNormalForm(const Base::Float3& rA, const Base::Float3& rB, const Base::Float3& rC);
-		float GetPointPlaneDistance(const Base::Float3& rPoint, const Base::Float4& rPlane);
-		bool RootGridInFrustum(const Base::Int3& rKey);
+		glm::vec4 GetHessianNormalForm(const glm::vec3& rA, const glm::vec3& rB, const glm::vec3& rC);
+		float GetPointPlaneDistance(const glm::vec3& rPoint, const glm::vec4& rPlane);
+		bool RootGridInFrustum(const glm::ivec3& rKey);
 
 		void UpdateRootrids();
         void CreateIntegrationQueues(std::vector<uint32_t>& rVolumeQueue);
@@ -210,9 +209,9 @@ namespace MR
 
 		void UpdateFrustum();
 
-        void DetermineSummands(int PyramidLevel, const Base::Float4x4& rIncPoseMatrix);
+        void DetermineSummands(int PyramidLevel, const glm::mat4& rIncPoseMatrix);
         void ReduceSum(int PyramidLevel);
-        bool CalculatePoseMatrix(Base::Float4x4& rIncPoseMatrix);
+        bool CalculatePoseMatrix(glm::mat4& rIncPoseMatrix);
 
         Gfx::CMeshPtr CreateGridMesh(int Width);
         
@@ -317,10 +316,10 @@ namespace MR
 
         std::unique_ptr<MR::IRGBDCameraControl> m_pRGBDCameraControl;
 
-        Base::Float4x4 m_PoseMatrix;
+        glm::mat4 m_PoseMatrix;
         
         std::vector<unsigned short> m_DepthPixels;
-        std::vector<Base::Byte4> m_CameraPixels;
+        std::vector<char> m_CameraPixels;
 
         int m_RootVolumePoolItemCount;
 
@@ -334,8 +333,8 @@ namespace MR
 
 		std::vector<float> m_VolumeSizes;
         
-		std::array<Base::Float3, 8> m_FrustumPoints;
-		std::array<Base::Float4, 6> m_FrustumPlanes;
+		std::array<glm::vec3, 8> m_FrustumPoints;
+		std::array<glm::vec4, 6> m_FrustumPlanes;
         
         bool m_UseConservativeRasterization;
         bool m_UseShuffleIntrinsics;

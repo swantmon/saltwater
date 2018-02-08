@@ -2,11 +2,10 @@
 #include "mr/mr_precompiled.h"
 
 #include "base/base_console.h"
-#include "base/base_matrix4x4.h"
+#include "base/base_include_glm.h"
 #include "base/base_program_parameters.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
-#include "base/base_vector3.h"
 
 #include "core/core_time.h"
 
@@ -43,11 +42,11 @@ using namespace Gfx;
 namespace
 {
 	//*
-	const Base::Float3 g_InitialCameraPosition = Base::Float3(0.0f, 0.0f, 0.0f);
-	const Base::Float3 g_InitialCameraRotation = Base::Float3(3.14f, 0.0f, 0.0f);
+	const glm::vec3 g_InitialCameraPosition = glm::vec3(0.0f, 0.0f, 0.0f);
+	const glm::vec3 g_InitialCameraRotation = glm::vec3(3.14f, 0.0f, 0.0f);
 	/*/
-	const Base::Float3 g_InitialCameraPosition = Base::Float3(0.5f, 0.5f, -0.5f);
-	const Base::Float3 g_InitialCameraRotation = Base::Float3(0.0f, 0.0f, 0.0f);
+	const glm::vec3 g_InitialCameraPosition = glm::vec3(0.5f, 0.5f, -0.5f);
+	const glm::vec3 g_InitialCameraRotation = glm::vec3(0.0f, 0.0f, 0.0f);
 	//*/
     
     const unsigned int g_MegabyteSize = 1024u * 1024u;
@@ -78,16 +77,16 @@ namespace
     const int g_TileSize2D = 16;
     const int g_TileSize3D = 8;
 
-    Base::Float3 CubeVertices[] =
+    glm::vec3 CubeVertices[] =
     {
-        Base::Float3(0.0f, 0.0f, 0.0f),
-        Base::Float3(1.0f, 0.0f, 0.0f),
-        Base::Float3(1.0f, 1.0f, 0.0f),
-        Base::Float3(0.0f, 1.0f, 0.0f),
-        Base::Float3(0.0f, 0.0f, 1.0f),
-        Base::Float3(1.0f, 0.0f, 1.0f),
-        Base::Float3(1.0f, 1.0f, 1.0f),
-        Base::Float3(0.0f, 1.0f, 1.0f),
+        glm::vec3(0.0f, 0.0f, 0.0f),
+        glm::vec3(1.0f, 0.0f, 0.0f),
+        glm::vec3(1.0f, 1.0f, 0.0f),
+        glm::vec3(0.0f, 1.0f, 0.0f),
+        glm::vec3(0.0f, 0.0f, 1.0f),
+        glm::vec3(1.0f, 0.0f, 1.0f),
+        glm::vec3(1.0f, 1.0f, 1.0f),
+        glm::vec3(0.0f, 1.0f, 1.0f),
     };
 
     unsigned int CubeIndices[] =
@@ -113,48 +112,48 @@ namespace
 
     struct SIntrinsics
     {
-        Base::Float4x4 m_KMatrix;
-        Base::Float4x4 m_InvKMatrix;
-        Base::Float2 m_FocalPoint;
-        Base::Float2 m_FocalLength;
-        Base::Float2 m_InvFocalLength;
-        Base::Float2 Padding;
+        glm::mat4 m_KMatrix;
+        glm::mat4 m_InvKMatrix;
+        glm::vec2 m_FocalPoint;
+        glm::vec2 m_FocalLength;
+        glm::vec2 m_InvFocalLength;
+        glm::vec2 Padding;
     };
 
     struct STrackingData
     {
-        Base::Float4x4 m_PoseMatrix;
-        Base::Float4x4 m_InvPoseMatrix;
+        glm::mat4 m_PoseMatrix;
+        glm::mat4 m_InvPoseMatrix;
     };
 
     struct SIncBuffer
     {
-        Base::Float4x4 m_PoseMatrix;
-        Base::Float4x4 m_InvPoseMatrix;
+        glm::mat4 m_PoseMatrix;
+        glm::mat4 m_InvPoseMatrix;
         int m_PyramidLevel;
         float Padding[3];
     };
 
 	struct SPositionBuffer
 	{
-		Base::Float3 m_Position;
+		glm::vec3 m_Position;
 		int m_Index;
 	};
 
     struct SDrawCallBufferData
     {
-        Base::Float4x4 m_WorldMatrix;
+        glm::mat4 m_WorldMatrix;
     };
 
     struct SInstanceData
     {
-        Base::Int3 m_Offset;
+        glm::ivec3 m_Offset;
         int m_Index;
     };
 
     struct SGridRasterization
     {
-        Base::Int3 m_Offset;
+        glm::ivec3 m_Offset;
         int32_t m_Resolution;
         float m_CubeSize;
         float m_ParentSize;
@@ -163,13 +162,13 @@ namespace
 
     struct SPointRasterization
     {
-        Base::Int3 m_Offset;
+        glm::ivec3 m_Offset;
         int32_t m_Resolution;
     };
 
     struct SVolumePoolItem
     {
-        Base::Int3 m_Offset;
+        glm::ivec3 m_Offset;
         bool m_NearSurface;
     };
 
@@ -387,7 +386,7 @@ namespace MR
         }
 
 		const float VolumeSize = m_VolumeSizes[0];
-		Float4x4 PoseRotation, PoseTranslation;
+		glm::mat4 PoseRotation, PoseTranslation;
 		
 		PoseRotation.SetRotation(g_InitialCameraRotation[0], g_InitialCameraRotation[1], g_InitialCameraRotation[2]);
 		PoseTranslation.SetTranslation
@@ -439,7 +438,7 @@ namespace MR
 
 		for (int i = 0; i < g_FrustumCorners; ++i)
 		{
-			Float4 Corner = Float4(m_FrustumPoints[i], 1.0f);
+			glm::vec4 Corner = glm::vec4(m_FrustumPoints[i], 1.0f);
 			Corner = m_PoseMatrix * Corner;
 			m_FrustumPoints[i] = Float3(Corner[0], Corner[1], Corner[2]);
 		}
@@ -454,7 +453,7 @@ namespace MR
 
 	// -----------------------------------------------------------------------------
 
-	Base::Float4 CScalableSLAMReconstructor::GetHessianNormalForm(const Base::Float3& rA, const Base::Float3& rB, const Base::Float3& rC)
+	glm::vec4 CScalableSLAMReconstructor::GetHessianNormalForm(const glm::vec3& rA, const glm::vec3& rB, const glm::vec3& rC)
 	{
 		Float3 V1 = rB - rA;
 		Float3 V2 = rC - rA;
@@ -463,12 +462,12 @@ namespace MR
 
 		float D = rA.DotProduct(Normal);
 
-		return Float4(Normal, D);
+		return glm::vec4(Normal, D);
 	}
 
 	// -----------------------------------------------------------------------------
 
-	float CScalableSLAMReconstructor::GetPointPlaneDistance(const Base::Float3& rPoint, const Base::Float4& rPlane)
+	float CScalableSLAMReconstructor::GetPointPlaneDistance(const glm::vec3& rPoint, const glm::vec4& rPlane)
 	{
 		const float Dot = rPoint.DotProduct(Float3(rPlane[0], rPlane[1], rPlane[2]));
 		return Dot - rPlane[3];
@@ -1397,13 +1396,13 @@ namespace MR
 
             // Compute the AABB for the whole reconstruction
 
-            Base::Int3 TotalMinOffset = m_RootVolumeVector[VolumeQueue[0]]->m_Offset;
-            Base::Int3 TotalMaxOffset = TotalMinOffset;
+            glm::ivec3 TotalMinOffset = m_RootVolumeVector[VolumeQueue[0]]->m_Offset;
+            glm::ivec3 TotalMaxOffset = TotalMinOffset;
 
             for (int i = 1; i < VolumeQueue.size(); ++i)
             {
-                Base::Int3 MinOffset = m_RootVolumeVector[VolumeQueue[i]]->m_Offset;
-                Base::Int3 MaxOffset = MinOffset;
+                glm::ivec3 MinOffset = m_RootVolumeVector[VolumeQueue[i]]->m_Offset;
+                glm::ivec3 MaxOffset = MinOffset;
 
                 TotalMinOffset[0] = Base::Min(TotalMinOffset[0], MinOffset[0]);
                 TotalMinOffset[1] = Base::Min(TotalMinOffset[1], MinOffset[1]);
@@ -1438,7 +1437,7 @@ namespace MR
                 // Store pool indices in root volume position buffer
 
                 const int Width = m_VolumeBuffers.m_RootVolumeTotalWidth;
-                const Base::Int3 Offset = rRootVolume.m_Offset + Width / 2; // Offset value by half of width so it is positive
+                const glm::ivec3 Offset = rRootVolume.m_Offset + Width / 2; // Offset value by half of width so it is positive
                 const int Index = Offset[0] + (Offset[1] * Width) + (Offset[2] * Width * Width);
 
                 BufferManager::UploadBufferData(m_VolumeBuffers.m_RootVolumePositionBufferPtr, &rRootVolume.m_PoolIndex, Index * sizeof(int32_t), sizeof(int32_t));
@@ -1559,16 +1558,16 @@ namespace MR
             const float FocalPointX = FocalPointX0 / PyramidFactor;
             const float FocalPointY = FocalPointY0 / PyramidFactor;
 
-            Float4x4 KMatrix(
+            glm::mat4 KMatrix(
                 FocalLengthX, 0.0f, FocalPointX, 0.0f,
                 0.0f, FocalLengthY, FocalPointY, 0.0f,
                 0.0f, 0.0f, 1.0f, 0.0f,
                 0.0f, 0.0f, 0.0f, 1.0f
             );
 
-            Intrinsics[i].m_FocalPoint = Float2(FocalPointX, FocalPointY);
-            Intrinsics[i].m_FocalLength = Float2(FocalLengthX, FocalLengthY);
-            Intrinsics[i].m_InvFocalLength = Float2(1.0f / FocalLengthX, 1.0f / FocalLengthY);
+            Intrinsics[i].m_FocalPoint = glm::vec2(FocalPointX, FocalPointY);
+            Intrinsics[i].m_FocalLength = glm::vec2(FocalLengthX, FocalLengthY);
+            Intrinsics[i].m_InvFocalLength = glm::vec2(1.0f / FocalLengthX, 1.0f / FocalLengthY);
             Intrinsics[i].m_KMatrix = Intrinsics[i].m_InvKMatrix = KMatrix;
             Intrinsics[i].m_InvKMatrix.Invert();
         }
@@ -1919,7 +1918,7 @@ namespace MR
     {
         ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
 
-        Float4x4 IncPoseMatrix = m_PoseMatrix;
+        glm::mat4 IncPoseMatrix = m_PoseMatrix;
 
         for (int PyramidLevel = m_ReconstructionSettings.m_PyramidLevelCount - 1; PyramidLevel >= 0; -- PyramidLevel)
         {
@@ -1940,7 +1939,7 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CScalableSLAMReconstructor::DetermineSummands(int PyramidLevel, const Float4x4& rIncPoseMatrix)
+    void CScalableSLAMReconstructor::DetermineSummands(int PyramidLevel, const glm::mat4& rIncPoseMatrix)
     {
         const int WorkGroupsX = DivUp(m_pRGBDCameraControl->GetDepthWidth() >> PyramidLevel, g_TileSize2D);
         const int WorkGroupsY = DivUp(m_pRGBDCameraControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
@@ -1978,7 +1977,7 @@ namespace MR
         const float SummandsLog2 = Log2(static_cast<float>(Summands));
         const int SummandsPOT = 1 << (static_cast<int>(SummandsLog2) + 1);
         
-        Base::Int2 BufferData;
+        glm::ivec2 BufferData;
         BufferData[0] = Summands / 2;
         BufferData[1] = SummandsPOT / 2;
 
@@ -1995,7 +1994,7 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    bool CScalableSLAMReconstructor::CalculatePoseMatrix(Float4x4& rIncPoseMatrix)
+    bool CScalableSLAMReconstructor::CalculatePoseMatrix(glm::mat4& rIncPoseMatrix)
     {
         typedef double Scalar;
 
@@ -2065,7 +2064,7 @@ namespace MR
         x[1] = (y[1] - L[11] * x[5] - L[10] * x[4] - L[9] * x[3] - L[8] * x[2]) / L[7];
         x[0] = (y[0] - L[5] * x[5] - L[4] * x[4] - L[3] * x[3] - L[2] * x[2] - L[1] * x[1]) / L[0];
         
-        Float4x4 RotationX, RotationY, RotationZ, Rotation, Translation;
+        glm::mat4 RotationX, RotationY, RotationZ, Rotation, Translation;
         RotationX.SetRotationX(static_cast<float>(x[0]));
         RotationY.SetRotationY(static_cast<float>(x[1]));
         RotationZ.SetRotationZ(static_cast<float>(x[2]));
@@ -2248,7 +2247,7 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    Float4x4 CScalableSLAMReconstructor::GetPoseMatrix() const
+    glm::mat4 CScalableSLAMReconstructor::GetPoseMatrix() const
     {
         return m_PoseMatrix;
     }

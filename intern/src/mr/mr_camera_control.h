@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "base/base_vector4.h"
+#include "base/base_include_glm.h"
 
 namespace MR
 {
@@ -18,6 +18,6 @@ namespace MR
         virtual float GetCameraFocalLengthY() const = 0;
         virtual float GetCameraFocalPointX() const = 0;
         virtual float GetCameraFocalPointY() const = 0;
-        virtual bool GetCameraFrame(Base::Byte4* pBuffer) = 0;
+        virtual bool GetCameraFrame(char* pBuffer) = 0;
     };
 } // namespace MR

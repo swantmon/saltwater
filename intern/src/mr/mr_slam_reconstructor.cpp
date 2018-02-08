@@ -1,8 +1,7 @@
 
 #include "mr/mr_precompiled.h"
 
-#include "base/base_vector3.h"
-#include "base/base_matrix4x4.h"
+#include "base/base_include_glm.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
@@ -42,11 +41,11 @@ using namespace Gfx;
 namespace
 {
     //*
-    const Base::Float3 g_InitialCameraPosition = Base::Float3(0.5f, 0.5f, 1.5f);
-    const Base::Float3 g_InitialCameraRotation = Base::Float3(3.14f, 0.0f, 0.0f);
+    const glm::vec3 g_InitialCameraPosition = glm::vec3(0.5f, 0.5f, 1.5f);
+    const glm::vec3 g_InitialCameraRotation = glm::vec3(3.14f, 0.0f, 0.0f);
     /*/
-    const Base::Float3 g_InitialCameraPosition = Base::Float3(0.5f, 0.5f, -0.5f);
-    const Base::Float3 g_InitialCameraRotation = Base::Float3(0.0f, 0.0f, 0.0f);
+    const glm::vec3 g_InitialCameraPosition = glm::vec3(0.5f, 0.5f, -0.5f);
+    const glm::vec3 g_InitialCameraRotation = glm::vec3(0.0f, 0.0f, 0.0f);
     //*/
     
     const float g_EpsilonDistance = 0.1f;
@@ -62,31 +61,31 @@ namespace
 
     struct SIntrinsics
     {
-        Base::Float4x4 m_KMatrix;
-        Base::Float4x4 m_InvKMatrix;
-        Base::Float2 m_FocalPoint;
-        Base::Float2 m_FocalLength;
-        Base::Float2 m_InvFocalLength;
-        Base::Float2 Padding;
+        glm::mat4 m_KMatrix;
+        glm::mat4 m_InvKMatrix;
+        glm::vec2 m_FocalPoint;
+        glm::vec2 m_FocalLength;
+        glm::vec2 m_InvFocalLength;
+        glm::vec2 Padding;
     };
 
     struct STrackingData
     {
-        Base::Float4x4 m_PoseMatrix;
-        Base::Float4x4 m_InvPoseMatrix;
+        glm::mat4 m_PoseMatrix;
+        glm::mat4 m_InvPoseMatrix;
     };
 
     struct SIncBuffer
     {
-        Base::Float4x4 m_PoseMatrix;
-        Base::Float4x4 m_InvPoseMatrix;
+        glm::mat4 m_PoseMatrix;
+        glm::mat4 m_InvPoseMatrix;
         int m_PyramidLevel;
         float Padding[3];
     };
 
     struct SDrawCallBufferData
     {
-        Base::Float4x4 m_WorldMatrix;
+        glm::mat4 m_WorldMatrix;
     };
     
 } // namespace
@@ -127,7 +126,7 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    Float4x4 CSLAMReconstructor::GetPoseMatrix() const
+    glm::mat4 CSLAMReconstructor::GetPoseMatrix() const
     {
         return m_PoseMatrix;
     }
@@ -168,18 +167,13 @@ namespace MR
         BASE_CONSOLE_INFO("Using Kinect for SLAM");
 
         m_DepthPixels = std::vector<unsigned short>(m_pRGBDCameraControl->GetDepthPixelCount());
-        m_CameraPixels = std::vector<Base::Byte4>(m_pRGBDCameraControl->GetDepthPixelCount());
+        m_CameraPixels = std::vector<char>(m_pRGBDCameraControl->GetDepthPixelCount());
 
         const float VolumeSize = m_ReconstructionSettings.m_VolumeSize;
-        Float4x4 PoseRotation, PoseTranslation;
+        glm::mat4 PoseRotation, PoseTranslation;
 
-        PoseRotation.SetRotation(g_InitialCameraRotation[0], g_InitialCameraRotation[1], g_InitialCameraRotation[2]);
-        PoseTranslation.SetTranslation
-        (
-            g_InitialCameraPosition[0] * VolumeSize,
-            g_InitialCameraPosition[1] * VolumeSize,
-            g_InitialCameraPosition[2] * VolumeSize
-        );
+        PoseRotation = glm::eulerAngleXYZ(g_InitialCameraRotation.x, g_InitialCameraRotation.y, g_InitialCameraRotation.z);
+        PoseTranslation = glm::translate(g_InitialCameraPosition * VolumeSize);
         m_PoseMatrix = PoseTranslation * PoseRotation;
 
         m_IntegratedFrameCount = 0;
@@ -400,18 +394,18 @@ namespace MR
             const float FocalPointX = FocalPointX0 / PyramidFactor;
             const float FocalPointY = FocalPointY0 / PyramidFactor;
 
-            Float4x4 KMatrix(
+            glm::mat4 KMatrix(
                 FocalLengthX, 0.0f, FocalPointX, 0.0f,
                 0.0f, FocalLengthY, FocalPointY, 0.0f,
                 0.0f, 0.0f, 1.0f, 0.0f,
                 0.0f, 0.0f, 0.0f, 1.0f
             );
 
-            Intrinsics[i].m_FocalPoint = Float2(FocalPointX, FocalPointY);
-            Intrinsics[i].m_FocalLength = Float2(FocalLengthX, FocalLengthY);
-            Intrinsics[i].m_InvFocalLength = Float2(1.0f / FocalLengthX, 1.0f / FocalLengthY);
-            Intrinsics[i].m_KMatrix = Intrinsics[i].m_InvKMatrix = KMatrix;
-            Intrinsics[i].m_InvKMatrix.Invert();
+            Intrinsics[i].m_FocalPoint = glm::vec2(FocalPointX, FocalPointY);
+            Intrinsics[i].m_FocalLength = glm::vec2(FocalLengthX, FocalLengthY);
+            Intrinsics[i].m_InvFocalLength = glm::vec2(1.0f / FocalLengthX, 1.0f / FocalLengthY);
+            Intrinsics[i].m_KMatrix = KMatrix;
+            Intrinsics[i].m_InvKMatrix = glm::inverse(KMatrix);
         }
 
         SBufferDescriptor ConstantBufferDesc = {};
@@ -628,7 +622,7 @@ namespace MR
 
     void CSLAMReconstructor::PerformTracking()
     {
-        Float4x4 IncPoseMatrix = m_PoseMatrix;
+        glm::mat4 IncPoseMatrix = m_PoseMatrix;
 
         for (int PyramidLevel = m_ReconstructionSettings.m_PyramidLevelCount - 1; PyramidLevel >= 0; -- PyramidLevel)
         {
@@ -649,7 +643,7 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CSLAMReconstructor::DetermineSummands(int PyramidLevel, const Float4x4& rIncPoseMatrix)
+    void CSLAMReconstructor::DetermineSummands(int PyramidLevel, const glm::mat4& rIncPoseMatrix)
     {
         const int WorkGroupsX = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthWidth() >> PyramidLevel, g_TileSize2D);
         const int WorkGroupsY = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
@@ -687,7 +681,7 @@ namespace MR
         const float SummandsLog2 = Log2(static_cast<float>(Summands));
         const int SummandsPOT = 1 << (static_cast<int>(SummandsLog2) + 1);
         
-        Base::Int2 BufferData;
+        glm::ivec2 BufferData;
         BufferData[0] = Summands / 2;
         BufferData[1] = SummandsPOT / 2;
 
@@ -704,7 +698,7 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    bool CSLAMReconstructor::CalculatePoseMatrix(Float4x4& rIncPoseMatrix)
+    bool CSLAMReconstructor::CalculatePoseMatrix(glm::mat4& rIncPoseMatrix)
     {
         typedef double Scalar;
 
@@ -774,7 +768,7 @@ namespace MR
         x[1] = (y[1] - L[11] * x[5] - L[10] * x[4] - L[9] * x[3] - L[8] * x[2]) / L[7];
         x[0] = (y[0] - L[5] * x[5] - L[4] * x[4] - L[3] * x[3] - L[2] * x[2] - L[1] * x[1]) / L[0];
         
-        Float4x4 RotationX, RotationY, RotationZ, Rotation, Translation;
+        glm::mat4 RotationX, RotationY, RotationZ, Rotation, Translation;
         RotationX.SetRotationX(static_cast<float>(x[0]));
         RotationY.SetRotationY(static_cast<float>(x[1]));
         RotationZ.SetRotationZ(static_cast<float>(x[2]));
@@ -884,7 +878,7 @@ namespace MR
             SetupShaders();
         }
 
-        Float4x4 PoseRotation, PoseTranslation;
+        glm::mat4 PoseRotation, PoseTranslation;
 
         PoseRotation.SetRotation(g_InitialCameraRotation[0], g_InitialCameraRotation[1], g_InitialCameraRotation[2]);
         PoseTranslation.SetTranslation

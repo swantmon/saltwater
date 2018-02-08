@@ -9,9 +9,7 @@
 #pragma once
 
 #include "base/base_uncopyable.h"
-#include "base/base_matrix4x4.h"
-#include "base/base_vector2.h"
-
+#include "base/base_include_glm.h"
 #include "mr/mr_slam_reconstruction_settings.h"
 
 #include "graphic/gfx_shader.h"
@@ -39,7 +37,7 @@ namespace MR
         void PauseIntegration(bool _Paused);
         void PauseTracking(bool _Paused);
         bool IsTrackingLost() const;
-        Base::Float4x4 GetPoseMatrix() const;
+        glm::mat4 GetPoseMatrix() const;
         Gfx::CTexturePtr GetTSDFVolume();
         Gfx::CTexturePtr GetColorVolume();
 
@@ -61,9 +59,9 @@ namespace MR
 
         void PerformTracking();
 
-        void DetermineSummands(int PyramidLevel, const Base::Float4x4& rIncPoseMatrix);
+        void DetermineSummands(int PyramidLevel, const glm::mat4& rIncPoseMatrix);
         void ReduceSum(int PyramidLevel);
-        bool CalculatePoseMatrix(Base::Float4x4& rIncPoseMatrix);
+        bool CalculatePoseMatrix(glm::mat4& rIncPoseMatrix);
         void ClearVolume();
 
     private:
@@ -107,10 +105,10 @@ namespace MR
 
         std::unique_ptr<MR::IRGBDCameraControl> m_pRGBDCameraControl;
 
-        Base::Float4x4 m_PoseMatrix;
+        glm::mat4 m_PoseMatrix;
         
         std::vector<unsigned short> m_DepthPixels;
-        std::vector<Base::Byte4> m_CameraPixels;
+        std::vector<char> m_CameraPixels;
 
         int m_IntegratedFrameCount;
         int m_FrameCount;

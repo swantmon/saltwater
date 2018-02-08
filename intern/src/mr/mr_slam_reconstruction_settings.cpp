@@ -12,7 +12,7 @@ namespace MR
         _Settings.m_TruncatedDistance = 30.0f;
         _Settings.m_MaxIntegrationWeight = 200;
         _Settings.m_PyramidLevelCount = 3;
-        _Settings.m_DepthThreshold = Base::Int2(500, 8000);
+        _Settings.m_DepthThreshold = glm::ivec2(500, 8000);
         _Settings.m_UseFullVolumeIntegration = true;
         _Settings.m_UseReverseIntegration = true;
 

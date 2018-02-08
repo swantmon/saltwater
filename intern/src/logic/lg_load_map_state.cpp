@@ -473,9 +473,9 @@ void CLgLoadMapState::CreateDefaultScene()
 
             Dt::CTransformationFacet* pTransformationFacet = rSphere.GetTransformationFacet();
 
-            pTransformationFacet->SetPosition(Base::Float3(0.0f, 0.0f, 1.0f));
-            pTransformationFacet->SetScale(Base::Float3(0.02f));
-            pTransformationFacet->SetRotation(Base::Float3(0.0f));
+            pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 1.0f));
+            pTransformationFacet->SetScale(glm::vec3(0.02f));
+            pTransformationFacet->SetRotation(glm::vec3(0.0f));
 
             // -----------------------------------------------------------------------------
 

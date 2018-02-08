@@ -25,7 +25,7 @@ using namespace Gfx;
 
 namespace
 {
-    Base::Int2 g_HistogramSize = Base::Int2(128, 128);
+    glm::ivec2 g_HistogramSize = glm::ivec2(128, 128);
 
     const int g_MaxDetectablePlaneCount = 10;
 
@@ -36,9 +36,9 @@ namespace
 
     struct SHistogramMetaBuffer
     {
-        Base::Float4x4 m_PoseMatrix;
-        Base::Float4x4 m_InvPoseMatrix;
-        Base::Int4 m_HistogramSize;
+        glm::mat4 m_PoseMatrix;
+        glm::mat4 m_InvPoseMatrix;
+        glm::ivec4 m_HistogramSize;
     };
 }
 
@@ -54,7 +54,7 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CPlaneDetector::DetectPlanes(const Base::Float4x4& _PoseMatrix, Gfx::CTexturePtr _VertexMap, Gfx::CTexturePtr _NormalMap)
+    void CPlaneDetector::DetectPlanes(const glm::mat4& _PoseMatrix, Gfx::CTexturePtr _VertexMap, Gfx::CTexturePtr _NormalMap)
     {
         if (_VertexMap != nullptr && _NormalMap != nullptr)
         {
@@ -70,7 +70,7 @@ namespace MR
 
         ClearData();
 
-        std::vector<Base::Float4> NewPlanes;
+        std::vector<glm::vec4> NewPlanes;
 
         Performance::BeginDurationEvent("Histogram Creation");
         CreateHistogram(_PoseMatrix);
@@ -98,7 +98,7 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CPlaneDetector::CreateHistogram(const Base::Float4x4& _PoseMatrix)
+    void CPlaneDetector::CreateHistogram(const glm::mat4& _PoseMatrix)
     {
         //////////////////////////////////////////////////////////////////////////////////////
         // Create a 2D-Histogram based on the inclination and the azimuth of the normals
@@ -114,7 +114,7 @@ namespace MR
         SHistogramMetaBuffer BufferData;
         BufferData.m_PoseMatrix = _PoseMatrix;
         BufferData.m_InvPoseMatrix = _PoseMatrix.GetInverted();
-        BufferData.m_HistogramSize = Base::Int4(g_HistogramSize[0], g_HistogramSize[1], 0, 0);
+        BufferData.m_HistogramSize = glm::ivec4(g_HistogramSize[0], g_HistogramSize[1], 0, 0);
 
         BufferManager::UploadBufferData(m_HistogramConstantBuffer, &BufferData);
 
@@ -173,7 +173,7 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CPlaneDetector::ExtractPlanes(Float4Vector& _rPlanes)
+    void CPlaneDetector::ExtractPlanes(glm::vec4Vector& _rPlanes)
     {
         const Base::UInt2 WorkGroups = Base::UInt2(1, 1);
         
@@ -196,7 +196,7 @@ namespace MR
         pBufferData = BufferManager::MapBuffer(m_PlaneBuffer, CBuffer::EMap::Read);
         for (int32_t i = 0; i < _rPlanes.size(); ++i)
         {
-            Base::Float4 Plane = static_cast<Base::Float4*>(pBufferData)[i];
+            glm::vec4 Plane = static_cast<glm::vec4*>(pBufferData)[i];
             _rPlanes[i] = Plane;
         }
         BufferManager::UnmapBuffer(m_PlaneBuffer);
@@ -240,7 +240,7 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    const CPlaneDetector::Float4Vector& CPlaneDetector::GetPlanes()
+    const CPlaneDetector::glm::vec4Vector& CPlaneDetector::GetPlanes()
     {
         return m_Planes;
     }
@@ -287,11 +287,11 @@ namespace MR
         BufferDesc.m_Usage = CBuffer::EUsage::GPUToCPU;
         BufferDesc.m_Binding = CBuffer::ResourceBuffer;
         BufferDesc.m_Access = CBuffer::EAccess::CPUReadWrite;
-        BufferDesc.m_NumberOfBytes = sizeof(Base::Float4);
+        BufferDesc.m_NumberOfBytes = sizeof(glm::vec4);
 
         m_PlaneCountBuffer = BufferManager::CreateBuffer(BufferDesc);
 
-        BufferDesc.m_NumberOfBytes = sizeof(Base::Float4) * g_MaxDetectablePlaneCount;
+        BufferDesc.m_NumberOfBytes = sizeof(glm::vec4) * g_MaxDetectablePlaneCount;
 
         m_PlaneBuffer = BufferManager::CreateBuffer(BufferDesc);
 

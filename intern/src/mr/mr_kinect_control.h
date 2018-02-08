@@ -26,7 +26,7 @@ namespace MR
         virtual float GetCameraFocalLengthY() const;
         virtual float GetCameraFocalPointX() const;
         virtual float GetCameraFocalPointY() const;
-        virtual bool GetCameraFrame(Base::Byte4* pBuffer);
+        virtual bool GetCameraFrame(char* pBuffer);
                 
         virtual int GetDepthWidth() const override;
         virtual int GetDepthHeight() const override;
@@ -54,7 +54,7 @@ namespace MR
         IDepthFrameReader* m_pDepthFrameReader;
         ICoordinateMapper* m_pMapper;
 
-        std::vector<Base::Byte4> m_CameraFrameBuffer;
+        std::vector<char> m_CameraFrameBuffer;
         std::vector<UINT16> m_DepthBuffer;
         std::vector<ColorSpacePoint> m_ColorSpacePoints;
     };

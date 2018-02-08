@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include "base/base_vector2.h"
+#include "base/base_include_glm.h"
 
 namespace MR
 {
@@ -24,7 +24,7 @@ namespace MR
 		int m_MaxIntegrationWeight;
 		int m_PyramidLevelCount;
 		int m_PyramidLevelIterations[MAX_PYRAMIDLEVELS];
-		Base::Int2 m_DepthThreshold;
+		glm::ivec2 m_DepthThreshold;
 		bool m_CaptureColor;
 
 		bool m_IsScalable;
