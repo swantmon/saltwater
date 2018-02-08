@@ -200,6 +200,11 @@ namespace MR
             _rPlanes[i] = Plane;
         }
         BufferManager::UnmapBuffer(m_PlaneBuffer);
+
+        const int WorkGroupsX = DivUp(m_VertexMap->GetNumberOfPixelsU(), g_TileSize2D);
+        const int WorkGroupsY = DivUp(m_VertexMap->GetNumberOfPixelsV(), g_TileSize2D);
+        ContextManager::SetShaderCS(m_PlaneTestCSPtr);
+        ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
     }
     
     // -----------------------------------------------------------------------------
@@ -264,6 +269,7 @@ namespace MR
         m_PlaneCandidatesCSPtr   = ShaderManager::CompileCS("scalable_kinect_fusion\\plane_detection\\cs_plane_candidates.glsl", "main", DefineString.c_str());
         m_PlaneEquationCSPtr     = ShaderManager::CompileCS("scalable_kinect_fusion\\plane_detection\\cs_plane_equation.glsl"  , "main", DefineString.c_str());
         m_PlaneExtractionCSPtr   = ShaderManager::CompileCS("scalable_kinect_fusion\\plane_detection\\cs_plane_extraction.glsl", "main", DefineString.c_str());
+        m_PlaneTestCSPtr         = ShaderManager::CompileCS("scalable_kinect_fusion\\plane_detection\\cs_plane_debug.glsl"     , "main", DefineString.c_str());
 
         //////////////////////////////////////////////////////////////////////////
         // Create Buffers

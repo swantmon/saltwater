@@ -55,6 +55,8 @@ namespace MR
         Gfx::CShaderPtr m_PlaneEquationCSPtr;
         Gfx::CShaderPtr m_PlaneExtractionCSPtr;
 
+        Gfx::CShaderPtr m_PlaneTestCSPtr;
+
         int m_MaxDetectablePlaneCount;
 
         Float4Vector m_Planes;

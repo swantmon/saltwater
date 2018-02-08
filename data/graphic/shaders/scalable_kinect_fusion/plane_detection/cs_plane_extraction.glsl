@@ -46,7 +46,7 @@ void main()
     if (g_Counts[0] == Count)
     {
         float D = BinToPlaneDistance(int(gl_GlobalInvocationID.x), g_AzimuthBinCount);
-        g_Planes[PlaneIndex].w = -D;
+        g_Planes[PlaneIndex].w = D;
     }
 }
 
