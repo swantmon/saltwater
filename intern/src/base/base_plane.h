@@ -282,7 +282,7 @@ namespace MATH
         // ------------------------------------------------------------------------
         Cosine = _rDirection[0] * m_P[0] + _rDirection[1] * m_P[1] + _rDirection[2] * m_P[2];
 
-        if (MATH::IsEqual(Cosine, X(0), MATH::SConstants<X>::s_Epsilon))
+        if (glm::epsilonEqual(Cosine, X(0), glm::epsilon<X>()))
         {
             return false;
         }
