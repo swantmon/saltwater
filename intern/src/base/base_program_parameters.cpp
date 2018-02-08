@@ -77,8 +77,6 @@ namespace IO
 
         std::replace(Copy.begin(), Copy.end(), ':', '/');
 
-        auto Check = std::find(m_Container.begin(), m_Container.end(), json::json_pointer("/" + Copy));
-
         return m_Container.find(json::json_pointer("/" + Copy)) != m_Container.end();
     }
 } // namespace IO
