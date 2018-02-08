@@ -656,12 +656,12 @@ namespace
     {
         SSelectionSettings Settings;
 
-        Settings.m_HighlightColor[0]     = Base::CProgramParameters::GetInstance().GetFloat("graphics:selection:highlight:color:r", 0.31f);
-        Settings.m_HighlightColor[1]     = Base::CProgramParameters::GetInstance().GetFloat("graphics:selection:highlight:color:g", 0.45f);
-        Settings.m_HighlightColor[2]     = Base::CProgramParameters::GetInstance().GetFloat("graphics:selection:highlight:color:b", 0.64f);
-        Settings.m_HighlightColor[3]     = Base::CProgramParameters::GetInstance().GetFloat("graphics:selection:highlight:color:a", 0.4f);
-        Settings.m_HighlightUseDepth     = Base::CProgramParameters::GetInstance().GetBoolean("graphics:selection:highlight:use_depth", true);
-        Settings.m_HighlightUseWireframe = Base::CProgramParameters::GetInstance().GetBoolean("graphics:selection:highlight:use_wireframe", true);
+        Settings.m_HighlightColor[0]     = Base::CProgramParameters::GetInstance().Get<float>("graphics:selection:highlight:color:r", 0.31f);
+        Settings.m_HighlightColor[1]     = Base::CProgramParameters::GetInstance().Get<float>("graphics:selection:highlight:color:g", 0.45f);
+        Settings.m_HighlightColor[2]     = Base::CProgramParameters::GetInstance().Get<float>("graphics:selection:highlight:color:b", 0.64f);
+        Settings.m_HighlightColor[3]     = Base::CProgramParameters::GetInstance().Get<float>("graphics:selection:highlight:color:a", 0.4f);
+        Settings.m_HighlightUseDepth     = Base::CProgramParameters::GetInstance().Get<bool>("graphics:selection:highlight:use_depth", true);
+        Settings.m_HighlightUseWireframe = Base::CProgramParameters::GetInstance().Get<bool>("graphics:selection:highlight:use_wireframe", true);
 
         SetSettings(Settings);
     }

@@ -1663,8 +1663,7 @@ namespace
 
         const int DefaultOrderCount = (Main::GetGraphicsAPI().m_GraphicsAPI == CGraphicsInfo::OpenGL) ? 4 : 0;
 
-        const std::string OrderParameter = "graphics:atmosphere:order_count";
-        const int OrderCount = Base::CProgramParameters::GetInstance().GetInt(OrderParameter, DefaultOrderCount);
+        const int OrderCount = Base::CProgramParameters::GetInstance().Get<int>("graphics:atmosphere:order_count", DefaultOrderCount);
 
         // -----------------------------------------------------------------------------
         // Textures

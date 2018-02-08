@@ -218,9 +218,9 @@ namespace
         // Load graphics API
         // -----------------------------------------------------------------------------
 #ifdef PLATFORM_ANDROID
-        const std::string GraphicsAPI = Base::CProgramParameters::GetInstance().GetStdString("graphics:api:name", "gles");
+        const std::string GraphicsAPI = Base::CProgramParameters::GetInstance().Get<std::string>("graphics:api:name", "gles");
 #else
-        const std::string GraphicsAPI = Base::CProgramParameters::GetInstance().GetStdString("graphics:api:name", "gl");
+        const std::string GraphicsAPI = Base::CProgramParameters::GetInstance().Get<std::string>("graphics:api:name", "gl");
 #endif
         int DefaultMajorVersion = 0, DefaultMinorVersion = 0;
 
@@ -241,13 +241,13 @@ namespace
             BASE_THROWV("Graphics API %s is not supported! Possible options are \"gles\" or \"gl\"", GraphicsAPI.c_str());
         }
         
-        m_GraphicsInfo.m_MajorVersion = Base::CProgramParameters::GetInstance().GetInt("graphics:api:major_version", DefaultMajorVersion);
-        m_GraphicsInfo.m_MinorVersion = Base::CProgramParameters::GetInstance().GetInt("graphics:api:minor_version", DefaultMinorVersion);
+        m_GraphicsInfo.m_MajorVersion = Base::CProgramParameters::GetInstance().Get<int>("graphics:api:major_version", DefaultMajorVersion);
+        m_GraphicsInfo.m_MinorVersion = Base::CProgramParameters::GetInstance().Get<int>("graphics:api:minor_version", DefaultMinorVersion);
 
         // -----------------------------------------------------------------------------
         // Load pixel matching behavior
         // -----------------------------------------------------------------------------
-        m_GraphicsInfo.m_PixelMatching = static_cast<CInternGraphicsInfo::EPixelMatching>(Base::CProgramParameters::GetInstance().GetInt("graphics:pixel_matching:type", 0));
+        m_GraphicsInfo.m_PixelMatching = static_cast<CInternGraphicsInfo::EPixelMatching>(Base::CProgramParameters::GetInstance().Get<int>("graphics:pixel_matching:type", 0));
     }
     
     // -----------------------------------------------------------------------------
@@ -956,7 +956,7 @@ namespace
         {
         case CInternGraphicsInfo::Scale:
         {
-            float Scale = Base::CProgramParameters::GetInstance().GetFloat("graphics:pixel_matching:scale", 1.0f);
+            float Scale = Base::CProgramParameters::GetInstance().Get<float>("graphics:pixel_matching:scale", 1.0f);
 
             _pWindowInfo->m_InternalWindowSize[0] = static_cast<int>(static_cast<float>(_pWindowInfo->m_NativeWindowSize[0]) * Scale);
             _pWindowInfo->m_InternalWindowSize[1] = static_cast<int>(static_cast<float>(_pWindowInfo->m_NativeWindowSize[1]) * Scale);
@@ -964,8 +964,8 @@ namespace
         break;
         case CInternGraphicsInfo::Fix:
         {
-            _pWindowInfo->m_InternalWindowSize[0] = Base::CProgramParameters::GetInstance().GetUInt("graphics:pixel_matching:fixed:w", _Width);
-            _pWindowInfo->m_InternalWindowSize[1] = Base::CProgramParameters::GetInstance().GetUInt("graphics:pixel_matching:fixed:h", _Height);
+            _pWindowInfo->m_InternalWindowSize[0] = Base::CProgramParameters::GetInstance().Get<unsigned int>("graphics:pixel_matching:fixed:w", _Width);
+            _pWindowInfo->m_InternalWindowSize[1] = Base::CProgramParameters::GetInstance().Get<unsigned int>("graphics:pixel_matching:fixed:h", _Height);
         }
         break;
         };
