@@ -234,7 +234,7 @@ namespace MR
         const int SummandsY = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight(), g_TileSize2D);
 
         const int Summands = SummandsX * SummandsY;
-        const float SummandsLog2 = Log2(static_cast<float>(Summands));
+        const float SummandsLog2 = glm::log2(static_cast<float>(Summands));
         const int SummandsPOT = 1 << (static_cast<int>(SummandsLog2) + 1);
         
         const float VoxelSize = m_ReconstructionSettings.m_VolumeSize / m_ReconstructionSettings.m_VolumeResolution;
@@ -422,7 +422,7 @@ namespace MR
         
         STrackingData TrackingData;
         TrackingData.m_PoseMatrix = m_PoseMatrix;
-        TrackingData.m_InvPoseMatrix = m_PoseMatrix.GetInverted();
+        TrackingData.m_InvPoseMatrix = glm::inverse(m_PoseMatrix);
 
         ConstantBufferDesc.m_NumberOfBytes = sizeof(STrackingData);
         ConstantBufferDesc.m_pBytes        = &TrackingData;
@@ -462,7 +462,7 @@ namespace MR
         const bool CaptureColor = m_ReconstructionSettings.m_CaptureColor;
 
         unsigned short* pDepth = m_DepthPixels.data();
-        Base::Byte4* pColor = m_CameraPixels.data();
+        char* pColor = m_CameraPixels.data();
 
         if (m_IsTrackingPaused)
         {
@@ -484,12 +484,12 @@ namespace MR
         Performance::BeginEvent("Data Input");
 
         Base::AABB2UInt TargetRect;
-        TargetRect = Base::AABB2UInt(Base::UInt2(0, 0), Base::UInt2(m_pRGBDCameraControl->GetDepthWidth(), m_pRGBDCameraControl->GetDepthHeight()));
+        TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_pRGBDCameraControl->GetDepthWidth(), m_pRGBDCameraControl->GetDepthHeight()));
         TextureManager::CopyToTexture2D(m_RawDepthBufferPtr, TargetRect, m_pRGBDCameraControl->GetDepthWidth(), pDepth);
 
         if (CaptureColor)
         {
-            TargetRect = Base::AABB2UInt(Base::UInt2(0, 0), Base::UInt2(m_pRGBDCameraControl->GetDepthWidth(), m_pRGBDCameraControl->GetDepthHeight()));
+            TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_pRGBDCameraControl->GetDepthWidth(), m_pRGBDCameraControl->GetDepthHeight()));
             TextureManager::CopyToTexture2D(m_RawCameraFramePtr, TargetRect, m_pRGBDCameraControl->GetDepthWidth(), pColor);
         }
 
@@ -513,7 +513,7 @@ namespace MR
 
             STrackingData TrackingData;
             TrackingData.m_PoseMatrix = m_PoseMatrix;
-            TrackingData.m_InvPoseMatrix = m_PoseMatrix.GetInverted();
+            TrackingData.m_InvPoseMatrix = glm::inverse(m_PoseMatrix);
 
             BufferManager::UploadBufferData(m_TrackingDataConstantBufferPtr, &TrackingData);
 
@@ -650,7 +650,7 @@ namespace MR
         
         SIncBuffer TrackingData;
         TrackingData.m_PoseMatrix = rIncPoseMatrix;
-        TrackingData.m_InvPoseMatrix = rIncPoseMatrix.GetInverted();
+        TrackingData.m_InvPoseMatrix = glm::inverse(rIncPoseMatrix);
         TrackingData.m_PyramidLevel = PyramidLevel;
         
         BufferManager::UploadBufferData(m_IncPoseMatrixConstantBufferPtr, &TrackingData);
@@ -678,7 +678,7 @@ namespace MR
         const int SummandsY = GetWorkGroupCount(m_pRGBDCameraControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
 
         const int Summands = SummandsX * SummandsY;
-        const float SummandsLog2 = Log2(static_cast<float>(Summands));
+        const float SummandsLog2 = glm::log2(static_cast<float>(Summands));
         const int SummandsPOT = 1 << (static_cast<int>(SummandsLog2) + 1);
         
         glm::ivec2 BufferData;
@@ -768,12 +768,8 @@ namespace MR
         x[1] = (y[1] - L[11] * x[5] - L[10] * x[4] - L[9] * x[3] - L[8] * x[2]) / L[7];
         x[0] = (y[0] - L[5] * x[5] - L[4] * x[4] - L[3] * x[3] - L[2] * x[2] - L[1] * x[1]) / L[0];
         
-        glm::mat4 RotationX, RotationY, RotationZ, Rotation, Translation;
-        RotationX.SetRotationX(static_cast<float>(x[0]));
-        RotationY.SetRotationY(static_cast<float>(x[1]));
-        RotationZ.SetRotationZ(static_cast<float>(x[2]));
-        Rotation = RotationZ * RotationY * RotationX;
-        Translation.SetTranslation(static_cast<float>(x[3]), static_cast<float>(x[4]), static_cast<float>(x[5]));
+        glm::mat4 Rotation = glm::eulerAngleXYZ(static_cast<float>(x[0]), static_cast<float>(x[1]), static_cast<float>(x[2]));
+        glm::mat4 Translation = glm::translate(glm::vec3(static_cast<float>(x[3]), static_cast<float>(x[4]), static_cast<float>(x[5])));
         
         rIncPoseMatrix = Translation * Rotation * rIncPoseMatrix;
 
@@ -880,13 +876,8 @@ namespace MR
 
         glm::mat4 PoseRotation, PoseTranslation;
 
-        PoseRotation.SetRotation(g_InitialCameraRotation[0], g_InitialCameraRotation[1], g_InitialCameraRotation[2]);
-        PoseTranslation.SetTranslation
-        (
-            g_InitialCameraPosition[0] * m_ReconstructionSettings.m_VolumeSize,
-            g_InitialCameraPosition[1] * m_ReconstructionSettings.m_VolumeSize,
-            g_InitialCameraPosition[2] * m_ReconstructionSettings.m_VolumeSize
-        );
+        PoseRotation = glm::eulerAngleXYZ(g_InitialCameraRotation.x, g_InitialCameraRotation.y, g_InitialCameraRotation.z);
+        PoseTranslation = glm::translate(g_InitialCameraPosition * m_ReconstructionSettings.m_VolumeSize);
         m_PoseMatrix = PoseTranslation * PoseRotation;
 
         m_IntegratedFrameCount = 0;
@@ -895,7 +886,7 @@ namespace MR
 
         STrackingData TrackingData;
         TrackingData.m_PoseMatrix = m_PoseMatrix;
-        TrackingData.m_InvPoseMatrix = m_PoseMatrix.GetInverted();
+        TrackingData.m_InvPoseMatrix = glm::inverse(m_PoseMatrix);
         
         BufferManager::UploadBufferData(m_TrackingDataConstantBufferPtr, &TrackingData);
                 

@@ -39,16 +39,16 @@ using namespace Gfx;
 
 namespace
 {
-    Float3 g_CubeVertices[] =
+    glm::vec3 g_CubeVertices[] =
     {
-        Float3(0.0f, 0.0f, 0.0f),
-        Float3(1.0f, 0.0f, 0.0f),
-        Float3(1.0f, 1.0f, 0.0f),
-        Float3(0.0f, 1.0f, 0.0f),
-        Float3(0.0f, 0.0f, 1.0f),
-        Float3(1.0f, 0.0f, 1.0f),
-        Float3(1.0f, 1.0f, 1.0f),
-        Float3(0.0f, 1.0f, 1.0f),
+        glm::vec3(0.0f, 0.0f, 0.0f),
+        glm::vec3(1.0f, 0.0f, 0.0f),
+        glm::vec3(1.0f, 1.0f, 0.0f),
+        glm::vec3(0.0f, 1.0f, 0.0f),
+        glm::vec3(0.0f, 0.0f, 1.0f),
+        glm::vec3(1.0f, 0.0f, 1.0f),
+        glm::vec3(1.0f, 1.0f, 1.0f),
+        glm::vec3(0.0f, 1.0f, 1.0f),
     };
 
 	struct SDrawCallConstantBuffer
@@ -440,20 +440,20 @@ namespace
 		float Focalx = (-0.50602675f) / 0.72113f;
 		float Focaly = (-0.499133f) / 0.870799f;
 		
-        Float3 CameraVertices[] =
+        glm::vec3 CameraVertices[] =
         {
-            Float3(-Focalx * 8.0f, -Focaly * 8.0f, 8.0f),
-            Float3( Focalx * 8.0f, -Focaly * 8.0f, 8.0f),
-            Float3( Focalx * 8.0f,  Focaly * 8.0f, 8.0f),
-            Float3(-Focalx * 8.0f,  Focaly * 8.0f, 8.0f),
-            Float3(          0.0f,           0.0f, 0.0f),
-			Float3(-Focalx * 0.5f, -Focaly * 0.5f, 0.5f),
-			Float3( Focalx * 0.5f, -Focaly * 0.5f, 0.5f),
-			Float3( Focalx * 0.5f,  Focaly * 0.5f, 0.5f),
-			Float3(-Focalx * 0.5f,  Focaly * 0.5f, 0.5f),
+            glm::vec3(-Focalx * 8.0f, -Focaly * 8.0f, 8.0f),
+            glm::vec3( Focalx * 8.0f, -Focaly * 8.0f, 8.0f),
+            glm::vec3( Focalx * 8.0f,  Focaly * 8.0f, 8.0f),
+            glm::vec3(-Focalx * 8.0f,  Focaly * 8.0f, 8.0f),
+            glm::vec3(          0.0f,           0.0f, 0.0f),
+			glm::vec3(-Focalx * 0.5f, -Focaly * 0.5f, 0.5f),
+			glm::vec3( Focalx * 0.5f, -Focaly * 0.5f, 0.5f),
+			glm::vec3( Focalx * 0.5f,  Focaly * 0.5f, 0.5f),
+			glm::vec3(-Focalx * 0.5f,  Focaly * 0.5f, 0.5f),
         };
 
-		Float3 CameraLines[24] =
+        glm::vec3 CameraLines[24] =
         {
 			CameraVertices[4], CameraVertices[0],
 			CameraVertices[4], CameraVertices[1],
@@ -498,7 +498,7 @@ namespace
 
         m_CameraMeshPtr = MeshManager::CreateMesh(MeshDesc);
 
-		Float3 CubeLines[24] =
+		glm::vec3 CubeLines[24] =
 		{
 			g_CubeVertices[0], g_CubeVertices[1],
 			g_CubeVertices[1], g_CubeVertices[2],
@@ -585,12 +585,12 @@ namespace
         // Create quad mesh
         ////////////////////////////////////////////////////////////////////////////////
 
-        Float3 QuadLines[4] =
+        glm::vec3 QuadLines[4] =
         {
-            Float3(0.0f, 1.0f, 0.0f),
-            Float3(0.0f, 0.0f, 0.0f),
-            Float3(1.0f, 1.0f, 0.0f),
-            Float3(1.0f, 0.0f, 0.0f),
+            glm::vec3(0.0f, 1.0f, 0.0f),
+            glm::vec3(0.0f, 0.0f, 0.0f),
+            glm::vec3(1.0f, 1.0f, 0.0f),
+            glm::vec3(1.0f, 0.0f, 0.0f),
         };
 
         pSurface = new Dt::CSurface;
@@ -625,7 +625,7 @@ namespace
         {
             for (int y = -PlaneSize; y <= PlaneSize; ++ y)
             {
-                Float3 NewVertices[4] =
+                glm::vec3 NewVertices[4] =
                 {
                     QuadLines[0],
                     QuadLines[1],
@@ -762,16 +762,18 @@ namespace
             Cam::CControl& rControl = static_cast<Cam::CEditorControl&>(Cam::ControlManager::GetActiveControl());
             
             glm::mat4 PoseMatrix = (m_pScalableReconstructor != nullptr) ? m_pScalableReconstructor->GetPoseMatrix() : m_pReconstructor->GetPoseMatrix();
-
+                        
+            glm::vec3 Scale;
             glm::vec3 Position;
-            glm::vec3 Rotation;
+            glm::quat Rotation;
+            glm::vec3 Skew;
+            glm::vec4 Perspective;
 
-            PoseMatrix.GetTranslation(Position);
-            PoseMatrix.GetRotation(Rotation);
+            glm::decompose(PoseMatrix, Scale, Rotation, Position, Skew, Perspective);
 
-            glm::vec3x3 RotationMatrix;
-            RotationMatrix.SetRotation(Rotation[0] + 3.14f, Rotation[1], Rotation[2]);            
-
+            glm::mat4 RotationMatrix = glm::toMat4(Rotation);
+            RotationMatrix = glm::rotate(RotationMatrix, 3.14f, glm::vec3(1.0f, 0.0f, 0.0f));
+            
             rControl.SetPosition(Position);
             rControl.SetRotation(RotationMatrix);
         }        
@@ -787,7 +789,8 @@ namespace
         glm::mat4 PoseMatrix = m_pReconstructor->GetPoseMatrix();
 
         glm::vec4 RaycastData[2];
-        PoseMatrix.GetTranslation(RaycastData[0][0], RaycastData[0][1], RaycastData[0][2]);
+        PoseMatrix = glm::translate(glm::vec3(RaycastData[0][0], RaycastData[0][1], RaycastData[0][2]));
+        
         RaycastData[0][3] = 1.0f;
         if (Settings.m_CaptureColor)
         {
@@ -839,7 +842,7 @@ namespace
 
 		SDrawCallConstantBuffer BufferData;
 
-		BufferData.m_WorldMatrix.SetScale(Settings.m_VolumeSize);
+		BufferData.m_WorldMatrix = glm::scale(glm::vec3(Settings.m_VolumeSize));
 		BufferData.m_Color = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
 
 		BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
@@ -884,32 +887,32 @@ namespace
         ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::Default));
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
 
-        const Float3 Min = Float3(
+        const glm::vec3 Min = glm::vec3(
             rVolume.m_MinOffset[0] * Settings.m_VolumeSize,
             rVolume.m_MinOffset[1] * Settings.m_VolumeSize,
             rVolume.m_MinOffset[2] * Settings.m_VolumeSize
         );
 
-        const Float3 Max = Float3(
+        const glm::vec3 Max = glm::vec3(
             (rVolume.m_MaxOffset[0] + 1.0f) * Settings.m_VolumeSize, // Add 1.0f because MaxOffset stores the max volume offset
             (rVolume.m_MaxOffset[1] + 1.0f) * Settings.m_VolumeSize, // and we have to consider the volume size
             (rVolume.m_MaxOffset[2] + 1.0f) * Settings.m_VolumeSize
         );
 
-        Float3 Vertices[8] =
+        glm::vec3 Vertices[8] =
         {
-            Float3(Min[0], Min[1], Min[2]),
-            Float3(Max[0], Min[1], Min[2]),
-            Float3(Max[0], Max[1], Min[2]),
-            Float3(Min[0], Max[1], Min[2]),
-            Float3(Min[0], Min[1], Max[2]),
-            Float3(Max[0], Min[1], Max[2]),
-            Float3(Max[0], Max[1], Max[2]),
-            Float3(Min[0], Max[1], Max[2]),
+            glm::vec3(Min[0], Min[1], Min[2]),
+            glm::vec3(Max[0], Min[1], Min[2]),
+            glm::vec3(Max[0], Max[1], Min[2]),
+            glm::vec3(Min[0], Max[1], Min[2]),
+            glm::vec3(Min[0], Min[1], Max[2]),
+            glm::vec3(Max[0], Min[1], Max[2]),
+            glm::vec3(Max[0], Max[1], Max[2]),
+            glm::vec3(Min[0], Max[1], Max[2]),
         };
 
         glm::vec4 RaycastData[2];
-        PoseMatrix.GetTranslation(RaycastData[0][0], RaycastData[0][1], RaycastData[0][2]);
+        PoseMatrix = glm::translate(glm::vec3(RaycastData[0][0], RaycastData[0][1], RaycastData[0][2]));
         RaycastData[0][3] = 1.0f;
         if (Settings.m_CaptureColor)
         {
@@ -959,28 +962,28 @@ namespace
         ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::Default));
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
 
-        const Float3 Min = Float3(
+        const glm::vec3 Min = glm::vec3(
             rVolume.m_MinOffset[0] * Settings.m_VolumeSize,
             rVolume.m_MinOffset[1] * Settings.m_VolumeSize,
             rVolume.m_MinOffset[2] * Settings.m_VolumeSize
         );
 
-        const Float3 Max = Float3(
+        const glm::vec3 Max = glm::vec3(
             (rVolume.m_MaxOffset[0] + 1.0f) * Settings.m_VolumeSize, // Add 1.0f because MaxOffset stores the max volume offset
             (rVolume.m_MaxOffset[1] + 1.0f) * Settings.m_VolumeSize, // and we have to consider the volume size
             (rVolume.m_MaxOffset[2] + 1.0f) * Settings.m_VolumeSize
         );
 
-        Float3 Vertices[8] =
+        glm::vec3 Vertices[8] =
         {
-            Float3(Min[0], Min[1], Min[2]),
-            Float3(Max[0], Min[1], Min[2]),
-            Float3(Max[0], Max[1], Min[2]),
-            Float3(Min[0], Max[1], Min[2]),
-            Float3(Min[0], Min[1], Max[2]),
-            Float3(Max[0], Min[1], Max[2]),
-            Float3(Max[0], Max[1], Max[2]),
-            Float3(Min[0], Max[1], Max[2]),
+            glm::vec3(Min[0], Min[1], Min[2]),
+            glm::vec3(Max[0], Min[1], Min[2]),
+            glm::vec3(Max[0], Max[1], Min[2]),
+            glm::vec3(Min[0], Max[1], Min[2]),
+            glm::vec3(Min[0], Min[1], Max[2]),
+            glm::vec3(Max[0], Min[1], Max[2]),
+            glm::vec3(Max[0], Max[1], Max[2]),
+            glm::vec3(Min[0], Max[1], Max[2]),
         };
 
         BufferManager::UploadBufferData(m_VolumeMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Vertices);
@@ -1022,28 +1025,28 @@ namespace
         ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::Default));
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
 
-        const Float3 Min = Float3(
+        const glm::vec3 Min = glm::vec3(
             rVolume.m_MinOffset[0] * Settings.m_VolumeSize,
             rVolume.m_MinOffset[1] * Settings.m_VolumeSize,
             rVolume.m_MinOffset[2] * Settings.m_VolumeSize
         );
 
-        const Float3 Max = Float3(
+        const glm::vec3 Max = glm::vec3(
             (rVolume.m_MaxOffset[0] + 1.0f) * Settings.m_VolumeSize, // Add 1.0f because MaxOffset stores the max volume offset
             (rVolume.m_MaxOffset[1] + 1.0f) * Settings.m_VolumeSize, // and we have to consider the volume size
             (rVolume.m_MaxOffset[2] + 1.0f) * Settings.m_VolumeSize
         );
 
-        Float3 Vertices[8] =
+        glm::vec3 Vertices[8] =
         {
-            Float3(Min[0], Min[1], Min[2]),
-            Float3(Max[0], Min[1], Min[2]),
-            Float3(Max[0], Max[1], Min[2]),
-            Float3(Min[0], Max[1], Min[2]),
-            Float3(Min[0], Min[1], Max[2]),
-            Float3(Max[0], Min[1], Max[2]),
-            Float3(Max[0], Max[1], Max[2]),
-            Float3(Min[0], Max[1], Max[2]),
+            glm::vec3(Min[0], Min[1], Min[2]),
+            glm::vec3(Max[0], Min[1], Min[2]),
+            glm::vec3(Max[0], Max[1], Min[2]),
+            glm::vec3(Min[0], Max[1], Min[2]),
+            glm::vec3(Min[0], Min[1], Max[2]),
+            glm::vec3(Max[0], Min[1], Max[2]),
+            glm::vec3(Max[0], Max[1], Max[2]),
+            glm::vec3(Min[0], Max[1], Max[2]),
         };
 
         BufferManager::UploadBufferData(m_VolumeMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Vertices);
@@ -1078,7 +1081,7 @@ namespace
 
 		ContextManager::SetTopology(STopology::LineList);
 
-		Float3 Position;
+        glm::vec3 Position;
 		glm::mat4 Scaling;
 		glm::mat4 Translation;
 
@@ -1096,8 +1099,8 @@ namespace
 
                 Position = Position * GridSizes[0];
 
-                Scaling.SetScale(GridSizes[0]);
-                Translation.SetTranslation(Position);
+                Scaling = glm::scale(glm::vec3(GridSizes[0]));
+                Translation = glm::translate(Position);
 
                 BufferData.m_WorldMatrix = Translation * Scaling;
                 BufferData.m_Color = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
@@ -1129,7 +1132,7 @@ namespace
 
         ContextManager::SetTopology(STopology::LineList);
 
-        Float3 Position;
+        glm::vec3 Position;
         glm::mat4 Scaling;
         glm::mat4 Translation;
 
@@ -1147,8 +1150,8 @@ namespace
 
                 Position = Position * VolumeSizes[0];
 
-                Scaling.SetScale(VolumeSizes[1]);
-                Translation.SetTranslation(Position);
+                Scaling = glm::scale(glm::vec3(VolumeSizes[1]));
+                Translation = glm::translate(Position);
 
                 BufferData.m_WorldMatrix = Translation * Scaling;
                 BufferData.m_Color = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
@@ -1186,7 +1189,7 @@ namespace
 
         ContextManager::SetTopology(STopology::LineList);
 
-        Float3 Position;
+        glm::vec3 Position;
         glm::mat4 Translation;
 
         const auto& VolumeSizes = m_pScalableReconstructor->GetVolumeSizes();
@@ -1203,7 +1206,7 @@ namespace
 
                 Position = Position * VolumeSizes[0];
 
-                Translation.SetTranslation(Position);
+                Translation = glm::translate(Position);
 
                 BufferData.m_WorldMatrix = Translation;
                 BufferData.m_Color = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
@@ -1271,7 +1274,7 @@ namespace
 
         for (auto rPlane : Planes)
         {
-            glm::vec3 PlaneNormal = glm::vec3(rPlane[0], rPlane[1], rPlane[2]).Normalize();
+            glm::vec3 PlaneNormal = glm::normalize(glm::vec3(rPlane));
 
             glm::vec3 Vertex0 = glm::vec3(0.0f);
             glm::vec3 Vertex1 = glm::vec3(1.0f);
@@ -1279,14 +1282,14 @@ namespace
             Vertex0[2] = -rPlane[3] / PlaneNormal[2];
             Vertex1[2] = (-rPlane[3] - PlaneNormal[0] - PlaneNormal[1]) / PlaneNormal[2];
 
-            glm::vec3 Binormal = (Vertex1 - Vertex0).Normalize();
-            glm::vec3 Tangent = PlaneNormal.CrossProduct(Binormal).Normalize();
+            glm::vec3 Binormal = glm::normalize(Vertex1 - Vertex0);
+            glm::vec3 Tangent = glm::normalize(glm::cross(PlaneNormal, Binormal));
 
             glm::mat4 Translation;
             glm::mat4 Rotation;
 
-            Translation.SetTranslation(glm::vec4(Vertex0[0], Vertex0[1], Vertex0[2], 1.0f));
-            Rotation.LookTo(Vertex0, PlaneNormal, glm::vec3(0.0f, 1.0f, 0.0f));
+            Translation = glm::translate(Vertex0);
+            Rotation = glm::lookAt(Vertex0, Vertex0 + PlaneNormal, glm::vec3(0.0f, 1.0f, 0.0f));
 
             BufferData.m_WorldMatrix = Translation * Rotation;
             BufferData.m_Color = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);

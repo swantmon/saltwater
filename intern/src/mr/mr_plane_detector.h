@@ -15,7 +15,7 @@ namespace MR
     {
     public:
 
-        typedef std::vector<glm::vec4> glm::vec4Vector;
+        typedef std::vector<glm::vec4> Vec4Vector;
 
         void SetImages(Gfx::CTexturePtr _VertexMap, Gfx::CTexturePtr _NormalMap);
         void DetectPlanes(const glm::mat4& _PoseMatrix, Gfx::CTexturePtr _VertexMap = nullptr, Gfx::CTexturePtr _NormalMap = nullptr);
@@ -24,7 +24,7 @@ namespace MR
         Gfx::CTexturePtr GetNormalMap();
         Gfx::CTexturePtr GetNormalHistogram();
 
-        const glm::vec4Vector& GetPlanes();
+        const Vec4Vector& GetPlanes();
         
     public:
 
@@ -36,7 +36,7 @@ namespace MR
         void CreateHistogram(const glm::mat4& _PoseMatrix);
         void ExtractPlaneCandidates();
         void FindPlaneEquations();
-        void ExtractPlanes(glm::vec4Vector& _rPlanes);
+        void ExtractPlanes(Vec4Vector& _rPlanes);
 
         void ClearData();
 
@@ -59,6 +59,6 @@ namespace MR
 
         int m_MaxDetectablePlaneCount;
 
-        glm::vec4Vector m_Planes;
+        Vec4Vector m_Planes;
     };
 } // namespace MR

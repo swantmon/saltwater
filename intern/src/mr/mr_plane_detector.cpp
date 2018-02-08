@@ -154,7 +154,7 @@ namespace MR
         const int WorkGroupsX = DivUp(m_VertexMap->GetNumberOfPixelsU(), g_TileSize2D);
         const int WorkGroupsY = DivUp(m_VertexMap->GetNumberOfPixelsV(), g_TileSize2D);
 
-        Base::UInt2 Indirect = Base::UInt2(WorkGroupsX, WorkGroupsY);
+        glm::uvec2 Indirect = glm::uvec2(WorkGroupsX, WorkGroupsY);
 
         BufferManager::UploadBufferData(m_PlaneCountBuffer, &Indirect, 0, sizeof(uint32_t) * 2);
 
@@ -173,9 +173,9 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CPlaneDetector::ExtractPlanes(glm::vec4Vector& _rPlanes)
+    void CPlaneDetector::ExtractPlanes(Vec4Vector& _rPlanes)
     {
-        const Base::UInt2 WorkGroups = Base::UInt2(1, 1);
+        const glm::uvec2 WorkGroups = glm::uvec2(1, 1);
         
         BufferManager::UploadBufferData(m_PlaneCountBuffer, &WorkGroups, 0, sizeof(WorkGroups));
 
