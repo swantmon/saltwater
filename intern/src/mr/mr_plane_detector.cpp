@@ -204,7 +204,7 @@ namespace MR
         const int WorkGroupsX = DivUp(m_VertexMap->GetNumberOfPixelsU(), g_TileSize2D);
         const int WorkGroupsY = DivUp(m_VertexMap->GetNumberOfPixelsV(), g_TileSize2D);
         ContextManager::SetShaderCS(m_PlaneTestCSPtr);
-        ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+        //ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
     }
     
     // -----------------------------------------------------------------------------
