@@ -2,6 +2,7 @@
 #pragma once
 
 #include "base/base_console.h"
+#include "base/base_exception.h"
 
 #include "json.hpp"
 using nlohmann::json;
@@ -18,8 +19,14 @@ namespace IO
 
     public:
 
+        void ParseJSON(const std::string& _rJSON);
+
         void ParseFile(const std::string& _rFile);
         void WriteFile(const std::string& _rFile);
+
+    public:
+
+        void Clear();
 
     public:
 
@@ -27,7 +34,10 @@ namespace IO
         void Add(const std::string& _rOption, const T _rParameter);
 
         template<typename T>
-        T Get(const std::string& _rOption, const T _Default);
+        const T Get(const std::string& _rOption);
+
+        template<typename T>
+        const T Get(const std::string& _rOption, const T _Default);
 
         bool IsNull(const std::string& _rOption);
 
@@ -59,7 +69,20 @@ namespace IO
     // -----------------------------------------------------------------------------
 
     template<typename T>
-    T CProgramParameters::Get(const std::string& _rOption, const T _Default)
+    const T CProgramParameters::Get(const std::string& _rOption)
+    {
+        if (IsNull(_rOption))
+        {
+            BASE_THROWM("Parameter is not available.");
+        }
+
+        return m_Container[ConvertOptionToJSONPointer(_rOption)];
+    }
+
+    // -----------------------------------------------------------------------------
+
+    template<typename T>
+    const T CProgramParameters::Get(const std::string& _rOption, const T _Default)
     {
         if (IsNull(_rOption))
         {

@@ -28,7 +28,14 @@ namespace IO
 
     CProgramParameters::~CProgramParameters()
     {
-        m_Container.clear();
+        Clear();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CProgramParameters::ParseJSON(const std::string& _rJSON)
+    {
+        m_Container = json::parse(_rJSON);
     }
 
     // -----------------------------------------------------------------------------
@@ -39,7 +46,7 @@ namespace IO
 
         if (JSONFile.is_open())
         {
-            m_Container = json::parse(JSONFile, nullptr, false);
+            m_Container = json::parse(JSONFile);
 
             JSONFile.close();
         }
@@ -67,6 +74,13 @@ namespace IO
         {
             BASE_CONSOLE_ERRORV("Save file %s could not be opened.", _rFile.c_str());
         }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CProgramParameters::Clear()
+    {
+        m_Container.clear();
     }
 
     // -----------------------------------------------------------------------------
