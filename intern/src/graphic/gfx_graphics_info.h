@@ -11,6 +11,7 @@ namespace Gfx
         {
             OpenGL,
             OpenGLES,
+            UndefinedAPI = -1
         };
 
         EGraphicAPI m_GraphicsAPI;

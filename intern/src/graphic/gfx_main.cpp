@@ -214,8 +214,25 @@ namespace
         , m_PerFrameConstantBuffer         ()
         , m_PerFrameConstantBufferBufferPtr()
     {
+        m_GraphicsInfo.m_GraphicsAPI   = CGraphicsInfo::UndefinedAPI;
+        m_GraphicsInfo.m_MajorVersion  = 0;
+        m_GraphicsInfo.m_MinorVersion  = 0;
+        m_GraphicsInfo.m_PixelMatching = CInternGraphicsInfo::PixelPerfect;
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    CGfxMain::~CGfxMain()
+    {
+        
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    void CGfxMain::OnStart()
+    {
         // -----------------------------------------------------------------------------
-        // Load graphics API
+        // Load graphics API settings
         // -----------------------------------------------------------------------------
 #ifdef PLATFORM_ANDROID
         const std::string GraphicsAPI = Base::CProgramParameters::GetInstance().Get<std::string>("graphics:api:name", "gles");
@@ -240,7 +257,7 @@ namespace
         {
             BASE_THROWV("Graphics API %s is not supported! Possible options are \"gles\" or \"gl\"", GraphicsAPI.c_str());
         }
-        
+
         m_GraphicsInfo.m_MajorVersion = Base::CProgramParameters::GetInstance().Get<int>("graphics:api:major_version", DefaultMajorVersion);
         m_GraphicsInfo.m_MinorVersion = Base::CProgramParameters::GetInstance().Get<int>("graphics:api:minor_version", DefaultMinorVersion);
 
@@ -248,19 +265,7 @@ namespace
         // Load pixel matching behavior
         // -----------------------------------------------------------------------------
         m_GraphicsInfo.m_PixelMatching = static_cast<CInternGraphicsInfo::EPixelMatching>(Base::CProgramParameters::GetInstance().Get<int>("graphics:pixel_matching:type", 0));
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    CGfxMain::~CGfxMain()
-    {
-        
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    void CGfxMain::OnStart()
-    {
+
         // -----------------------------------------------------------------------------
         // Show information of windows and initialize them
         // -----------------------------------------------------------------------------
