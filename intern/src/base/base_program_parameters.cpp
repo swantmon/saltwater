@@ -71,12 +71,19 @@ namespace IO
 
     // -----------------------------------------------------------------------------
 
-    bool CProgramParameters::HasParameter(const std::string& _rOption)
+    bool CProgramParameters::Exists(const std::string& _rOption)
+    {
+        return m_Container[ConvertOptionToJSONPointer(_rOption)].is_null() == false;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    json::json_pointer CProgramParameters::ConvertOptionToJSONPointer(const std::string& _rOption)
     {
         std::string Copy = _rOption;
 
         std::replace(Copy.begin(), Copy.end(), ':', '/');
 
-        return m_Container.find(json::json_pointer("/" + Copy)) != m_Container.end();
+        return json::json_pointer("/" + Copy);
     }
 } // namespace IO

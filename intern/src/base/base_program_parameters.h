@@ -29,9 +29,7 @@ namespace IO
         template<typename T>
         T Get(const std::string& _rOption, const T _Default);
 
-    public:
-
-        bool HasParameter(const std::string& _rOption);
+        bool Exists(const std::string& _rOption);
 
     private:
 
@@ -41,6 +39,10 @@ namespace IO
 
         CProgramParameters();
         ~CProgramParameters();
+
+    private:
+
+        json::json_pointer ConvertOptionToJSONPointer(const std::string& _rOption);
     };
 } // namespace IO
 
@@ -51,11 +53,7 @@ namespace IO
     {
         BASE_CONSOLE_INFO((std::string("Creating new config parameter ") + _rOption).c_str());
 
-        std::string Copy = _rOption;
-
-        std::replace(Copy.begin(), Copy.end(), ':', '/');
-
-        m_Container[json::json_pointer("/" + Copy)] = _Parameter;
+        m_Container[ConvertOptionToJSONPointer(_rOption)] = _Parameter;
     }
 
     // -----------------------------------------------------------------------------
@@ -63,17 +61,13 @@ namespace IO
     template<typename T>
     T CProgramParameters::Get(const std::string& _rOption, const T _Default)
     {
-        if (HasParameter(_rOption) == false)
+        if (Exists(_rOption) == false)
         {
             Add(_rOption, _Default);
 
             return _Default;
         }
 
-        std::string Copy = _rOption;
-
-        std::replace(Copy.begin(), Copy.end(), ':', '/');
-
-        return m_Container[json::json_pointer("/" + Copy)];
+        return m_Container[ConvertOptionToJSONPointer(_rOption)];
     }
 } // namespace IO
