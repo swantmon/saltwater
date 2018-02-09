@@ -9,171 +9,124 @@ using namespace Base;
 
 BASE_TEST(ProgramParametersDefault)
 {
-    CProgramParameters::GetInstance().AddParameter("Speed", 4.0f);
-
-    CProgramParameters::GetInstance().AddParameter("Debug", true);
-
-    CProgramParameters::GetInstance().AddParameter("Desc", "It's me Mario");
-
-    CProgramParameters::GetInstance().AddParameter("Instance", 1337);
-
-    CProgramParameters::GetInstance().AddParameter("TimeScale", 2.3);
+    CProgramParameters::GetInstance().Clear();
 
     // -----------------------------------------------------------------------------
 
-    BASE_CHECK(CProgramParameters::GetInstance().HasParameter("Left") == false);
+    CProgramParameters::GetInstance().Add("Speed", 4.0f);
 
-    BASE_CHECK(CProgramParameters::GetInstance().HasParameter("Speed") == true);
+    CProgramParameters::GetInstance().Add("Debug", true);
 
-    BASE_CHECK(CProgramParameters::GetInstance().HasParameter("Debug") == true);
+    CProgramParameters::GetInstance().Add("Desc", "It's me Mario");
 
-    BASE_CHECK(CProgramParameters::GetInstance().HasParameter("Desc") == true);
+    CProgramParameters::GetInstance().Add("Instance", 1337);
 
-    BASE_CHECK(CProgramParameters::GetInstance().HasParameter("Instance") == true);
-
-    BASE_CHECK(CProgramParameters::GetInstance().HasParameter("TimeScale") == true);
+    CProgramParameters::GetInstance().Add("TimeScale", 2.3);
 
     // -----------------------------------------------------------------------------
 
-    CProgramParameters::GetInstance().AddParameter("Left", std::string("RightKey"));
+    BASE_CHECK(CProgramParameters::GetInstance().IsNull("Left") == true);
 
-    BASE_CHECK(CProgramParameters::GetInstance().HasParameter("Left") == true);
+    BASE_CHECK(CProgramParameters::GetInstance().IsNull("Speed") == false);
 
-    CProgramParameters::GetInstance().AddParameter("Left", std::string("LeftKey"));
+    BASE_CHECK(CProgramParameters::GetInstance().IsNull("Debug") == false);
 
-    BASE_CHECK(CProgramParameters::GetInstance().HasParameter("Left") == true);
+    BASE_CHECK(CProgramParameters::GetInstance().IsNull("Desc") == false);
 
-    // -----------------------------------------------------------------------------
+    BASE_CHECK(CProgramParameters::GetInstance().IsNull("Instance") == false);
 
-    BASE_CHECK(CProgramParameters::GetInstance().GetFloat("Speed") == 4.0f);
-
-    BASE_CHECK(CProgramParameters::GetInstance().GetBoolean("Debug") == true);
-
-    BASE_CHECK(CProgramParameters::GetInstance().GetStdString("Desc") == "It's me Mario");
-
-    BASE_CHECK(CProgramParameters::GetInstance().GetInt("Instance") == 1337);
-
-    BASE_CHECK(CProgramParameters::GetInstance().GetDouble("TimeScale") == 2.3);
+    BASE_CHECK(CProgramParameters::GetInstance().IsNull("TimeScale") == false);
 
     // -----------------------------------------------------------------------------
 
-    BASE_CHECK(CProgramParameters::GetInstance().GetStdString("Left") == "RightKey");
+    CProgramParameters::GetInstance().Add("Left", std::string("RightKey"));
+
+    BASE_CHECK(CProgramParameters::GetInstance().IsNull("Left") == false);
+
+    CProgramParameters::GetInstance().Add("Left", std::string("LeftKey"));
+
+    BASE_CHECK(CProgramParameters::GetInstance().IsNull("Left") == false);
 
     // -----------------------------------------------------------------------------
 
-    BASE_CHECK(CProgramParameters::GetInstance().GetFloat("Instance") == 1337.0f);
+    BASE_CHECK(CProgramParameters::GetInstance().Get<float>("Speed", 0.0f) == 4.0f);
 
-    // -----------------------------------------------------------------------------
+    BASE_CHECK(CProgramParameters::GetInstance().Get<bool>("Debug", false) == true);
 
-    BASE_CHECK(CProgramParameters::GetInstance().GetInt("Speed") == 4);
+    BASE_CHECK(CProgramParameters::GetInstance().Get<std::string>("Desc", "") == "It's me Mario");
 
-    // -----------------------------------------------------------------------------
+    BASE_CHECK(CProgramParameters::GetInstance().Get<int>("Instance", 0) == 1337);
 
-    BASE_CHECK(CProgramParameters::GetInstance().GetBoolean("Desc") == false);
+    BASE_CHECK(CProgramParameters::GetInstance().Get<double>("TimeScale", 0.0) == 2.3);
 
-    // -----------------------------------------------------------------------------
-
-    BASE_CHECK(CProgramParameters::GetInstance().GetInt("Debug") == 1);
-
-    // -----------------------------------------------------------------------------
-
-    int NotExisting = 0;
-
-    try
-    {
-        NotExisting = CProgramParameters::GetInstance().GetInt("NotExisting");
-    }
-    catch (...)
-    {
-        BASE_CHECK(NotExisting == 0);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    int WrongParameter = 0;
-
-    try
-    {
-        WrongParameter = CProgramParameters::GetInstance().GetInt("Desc");
-    }
-    catch (...)
-    {
-        BASE_CHECK(WrongParameter == 0);
-    }
+    BASE_CHECK(CProgramParameters::GetInstance().Get<std::string>("Left", "") == "LeftKey");
 }
 
 BASE_TEST(ProgramParametersParseArguments)
 {
+    CProgramParameters::GetInstance().Clear();
+
+    // -----------------------------------------------------------------------------
+
     const char* pParameters = "";
 
-    CProgramParameters::GetInstance().ParseArguments(pParameters);
+    CProgramParameters::GetInstance().ParseJSON(pParameters);
 
-    pParameters = "app_activate_logic=1;con_color=255 180 30;window_name=Saltwater is cool;gfx_timeout=35;gfx_use_picking=0";
+    pParameters = R"({ "app_activate_logic": 1, "con_color": "255 180 30", "window_name": "Saltwater is cool", "gfx_timeout": 35, "gfx_use_picking": 0 })";
 
-    CProgramParameters::GetInstance().ParseArguments(pParameters);
+    CProgramParameters::GetInstance().ParseJSON(pParameters);
 
-    pParameters = "check timing=1";
+    pParameters = R"({ "check timing": 1 })";
 
-    CProgramParameters::GetInstance().ParseArguments(pParameters);
-
-    // -----------------------------------------------------------------------------
-
-    BASE_CHECK(CProgramParameters::GetInstance().HasParameter("app_activate_logic") == true);
-
-    BASE_CHECK(CProgramParameters::GetInstance().HasParameter("con_color") == true);
-
-    BASE_CHECK(CProgramParameters::GetInstance().HasParameter("window_name") == true);
-
-    BASE_CHECK(CProgramParameters::GetInstance().HasParameter("gfx_timeout") == true);
-
-    BASE_CHECK(CProgramParameters::GetInstance().HasParameter("gfx_use_picking") == true);
+    CProgramParameters::GetInstance().ParseJSON(pParameters);
 
     // -----------------------------------------------------------------------------
 
-    BASE_CHECK(CProgramParameters::GetInstance().GetBoolean("app_activate_logic") == true);
+    BASE_CHECK(CProgramParameters::GetInstance().IsNull("app_activate_logic") == false);
 
-    BASE_CHECK(CProgramParameters::GetInstance().GetStdString("con_color") == "255 180 30");
+    BASE_CHECK(CProgramParameters::GetInstance().IsNull("con_color") == false);
 
-    BASE_CHECK(CProgramParameters::GetInstance().GetStdString("window_name") == "Saltwater is cool");
+    BASE_CHECK(CProgramParameters::GetInstance().IsNull("window_name") == false);
 
-    BASE_CHECK(CProgramParameters::GetInstance().GetInt("gfx_timeout") == 35);
+    BASE_CHECK(CProgramParameters::GetInstance().IsNull("gfx_timeout") == false);
 
-    BASE_CHECK(CProgramParameters::GetInstance().GetFloat("gfx_timeout") == 35.0f);
+    BASE_CHECK(CProgramParameters::GetInstance().IsNull("gfx_use_picking") == false);
 
-    BASE_CHECK(CProgramParameters::GetInstance().GetBoolean("gfx_use_picking") == false);
+    // -----------------------------------------------------------------------------
 
-    BASE_CHECK(CProgramParameters::GetInstance().GetBoolean("check timing") == true);
+    BASE_CHECK(CProgramParameters::GetInstance().Get<bool>("app_activate_logic", false) == true);
+
+    BASE_CHECK(CProgramParameters::GetInstance().Get<std::string>("con_color", "") == "255 180 30");
+
+    BASE_CHECK(CProgramParameters::GetInstance().Get<std::string>("window_name", "") == "Saltwater is cool");
+
+    BASE_CHECK(CProgramParameters::GetInstance().Get<int>("gfx_timeout", 0) == 35);
+
+    BASE_CHECK(CProgramParameters::GetInstance().Get<float>("gfx_timeout", 0.0f) == 35.0f);
+
+    BASE_CHECK(CProgramParameters::GetInstance().Get<bool>("gfx_use_picking", false) == false);
+
+    BASE_CHECK(CProgramParameters::GetInstance().Get<bool>("check timing", false) == true);
 }
 
-BASE_TEST(ProgramParametersParseFile)
+BASE_TEST(ProgramParametersArrays)
 {
-    BASE_CHECK(CProgramParameters::GetInstance().HasParameter("file_read") == false);
-
-    BASE_CHECK(CProgramParameters::GetInstance().HasParameter("file_size") == false);
-
-    BASE_CHECK(CProgramParameters::GetInstance().HasParameter("file_type") == false);
+    CProgramParameters::GetInstance().Clear();
 
     // -----------------------------------------------------------------------------
 
-    CProgramParameters::GetInstance().ParseFile("test.config");
+    std::vector<float> Floats;
 
-    // -----------------------------------------------------------------------------
+    for (int i = 0; i < 20; ++i)
+    {
+        Floats.push_back((float)(std::rand() % RAND_MAX));
+    }
 
-    BASE_CHECK(CProgramParameters::GetInstance().HasParameter("file_read") == true);
+    CProgramParameters::GetInstance().Add("My Floats", Floats);
 
-    BASE_CHECK(CProgramParameters::GetInstance().HasParameter("file_size") == true);
+    std::vector<float> ResultFloats;
 
-    BASE_CHECK(CProgramParameters::GetInstance().HasParameter("file_type") == true);
+    ResultFloats = CProgramParameters::GetInstance().Get<std::vector<float>>("My Floats");
 
-    // -----------------------------------------------------------------------------
-
-    BASE_CHECK(CProgramParameters::GetInstance().GetBoolean("file_read") == true);
-
-    BASE_CHECK(CProgramParameters::GetInstance().GetInt("file_size") == 1337);
-
-    BASE_CHECK(CProgramParameters::GetInstance().GetStdString("file_type") == "config");
-
-    // -----------------------------------------------------------------------------
-
-    CProgramParameters::GetInstance().WriteFile("test.config");
+    BASE_CHECK(Floats == ResultFloats);
 }
