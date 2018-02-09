@@ -35,7 +35,7 @@ namespace IO
 
     void CProgramParameters::ParseJSON(const std::string& _rJSON)
     {
-        m_Container += json::parse(_rJSON);
+        m_Container = json::parse(_rJSON);
     }
 
     // -----------------------------------------------------------------------------
@@ -46,7 +46,7 @@ namespace IO
 
         if (JSONFile.is_open())
         {
-            m_Container += json::parse(JSONFile);
+            m_Container = json::parse(JSONFile);
 
             JSONFile.close();
         }

@@ -68,15 +68,7 @@ BASE_TEST(ProgramParametersParseArguments)
 
     // -----------------------------------------------------------------------------
 
-    const char* pParameters = "";
-
-    CProgramParameters::GetInstance().ParseJSON(pParameters);
-
-    pParameters = R"({ "app_activate_logic": 1, "con_color": "255 180 30", "window_name": "Saltwater is cool", "gfx_timeout": 35, "gfx_use_picking": 0 })";
-
-    CProgramParameters::GetInstance().ParseJSON(pParameters);
-
-    pParameters = R"({ "check timing": 1 })";
+    const char* pParameters = R"({ "app_activate_logic": true, "con_color": "255 180 30", "window_name": "Saltwater is cool", "gfx_timeout": 35, "gfx_use_picking": false })";
 
     CProgramParameters::GetInstance().ParseJSON(pParameters);
 
@@ -105,8 +97,6 @@ BASE_TEST(ProgramParametersParseArguments)
     BASE_CHECK(CProgramParameters::GetInstance().Get<float>("gfx_timeout", 0.0f) == 35.0f);
 
     BASE_CHECK(CProgramParameters::GetInstance().Get<bool>("gfx_use_picking", false) == false);
-
-    BASE_CHECK(CProgramParameters::GetInstance().Get<bool>("check timing", false) == true);
 }
 
 BASE_TEST(ProgramParametersArrays)
