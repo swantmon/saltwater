@@ -9,8 +9,9 @@ namespace Gfx
 
         enum EGraphicAPI
         {
-            OpenGL,
-            OpenGLES,
+            OpenGL       = 0,
+            OpenGLES     = 1,
+            UndefinedAPI = -1
         };
 
         EGraphicAPI m_GraphicsAPI;
