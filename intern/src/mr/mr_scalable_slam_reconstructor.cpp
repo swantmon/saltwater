@@ -1269,7 +1269,7 @@ namespace MR
 			for (int j = 0; j < 3; ++ j)
 			{
 				BBMax[j] = glm::max(m_FrustumPoints[i][j], BBMax[j]);
-				BBMin[j] = glm::max(m_FrustumPoints[i][j], BBMin[j]);
+				BBMin[j] = glm::min(m_FrustumPoints[i][j], BBMin[j]);
 			}
 		}
 		
