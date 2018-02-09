@@ -29,7 +29,7 @@ namespace IO
         template<typename T>
         T Get(const std::string& _rOption, const T _Default);
 
-        bool Exists(const std::string& _rOption);
+        bool IsNull(const std::string& _rOption);
 
     private:
 
@@ -51,7 +51,7 @@ namespace IO
     template<typename T>
     void CProgramParameters::Add(const std::string& _rOption, const T _Parameter)
     {
-        BASE_CONSOLE_INFO((std::string("Creating new config parameter ") + _rOption).c_str());
+        BASE_CONSOLE_INFOV("Creating new config parameter %s", _rOption.c_str());
 
         m_Container[ConvertOptionToJSONPointer(_rOption)] = _Parameter;
     }
@@ -61,7 +61,7 @@ namespace IO
     template<typename T>
     T CProgramParameters::Get(const std::string& _rOption, const T _Default)
     {
-        if (Exists(_rOption) == false)
+        if (IsNull(_rOption))
         {
             Add(_rOption, _Default);
 

@@ -71,9 +71,9 @@ namespace IO
 
     // -----------------------------------------------------------------------------
 
-    bool CProgramParameters::Exists(const std::string& _rOption)
+    bool CProgramParameters::IsNull(const std::string& _rOption)
     {
-        return m_Container[ConvertOptionToJSONPointer(_rOption)].is_null() == false;
+        return m_Container[ConvertOptionToJSONPointer(_rOption)].is_null();
     }
 
     // -----------------------------------------------------------------------------
