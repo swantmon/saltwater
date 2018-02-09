@@ -218,11 +218,7 @@ namespace MR
     private:
 
         static int DivUp(int TotalShaderCount, int WorkGroupSize);
-
-	private:
-
-		static const int g_FrustumCorners = 8;
-
+        
     private:
 
         SReconstructionSettings m_ReconstructionSettings;

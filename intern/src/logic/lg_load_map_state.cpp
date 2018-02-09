@@ -491,7 +491,7 @@ void CLgLoadMapState::CreateDefaultScene()
 
             pModelActorFacet->SetMaterial(0, &rMaterial);
 
-            Dt::MaterialManager::MarkMaterialAsDirty(rMaterial, Dt::CMaterial::DirtyCreate);
+            //Dt::MaterialManager::MarkMaterialAsDirty(rMaterial, Dt::CMaterial::DirtyCreate);
 
             // -----------------------------------------------------------------------------
 
@@ -545,11 +545,11 @@ void CLgLoadMapState::CreateDefaultScene()
 
             pModelActorFacet->SetMaterial(0, &rMaterial);
 
-            Dt::MaterialManager::MarkMaterialAsDirty(rMaterial, Dt::CMaterial::DirtyCreate);
+            //Dt::MaterialManager::MarkMaterialAsDirty(rMaterial, Dt::CMaterial::DirtyCreate);
 
             // -----------------------------------------------------------------------------
 
-            Dt::EntityManager::MarkEntityAsDirty(rSphere, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+            //Dt::EntityManager::MarkEntityAsDirty(rSphere, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
     }
 #endif

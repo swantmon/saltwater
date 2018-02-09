@@ -432,7 +432,7 @@ namespace MR
 		m_FrustumPoints[6] = glm::vec3(-x * Far, -y * Far, Far);
 		m_FrustumPoints[7] = glm::vec3( x * Far, -y * Far, Far);
 
-		for (int i = 0; i < g_FrustumCorners; ++i)
+		for (int i = 0; i < m_FrustumPoints.size(); ++i)
 		{
 			glm::vec4 Corner = glm::vec4(m_FrustumPoints[i], 1.0f);
 			Corner = m_PoseMatrix * Corner;
@@ -1264,7 +1264,7 @@ namespace MR
 		glm::vec3 BBMax = m_FrustumPoints[0];
         glm::vec3 BBMin = m_FrustumPoints[0];
 
-		for (int i = 1; i < g_FrustumCorners; ++ i)
+		for (int i = 1; i < m_FrustumPoints.size(); ++ i)
 		{
 			for (int j = 0; j < 3; ++ j)
 			{
@@ -1555,9 +1555,9 @@ namespace MR
             const float FocalPointY = FocalPointY0 / PyramidFactor;
 
             glm::mat4 KMatrix(
-                FocalLengthX, 0.0f, FocalPointX, 0.0f,
-                0.0f, FocalLengthY, FocalPointY, 0.0f,
-                0.0f, 0.0f, 1.0f, 0.0f,
+                FocalLengthX, 0.0f, 0.0f, 0.0f,
+                0.0f, FocalLengthY, 0.0f, 0.0f,
+                FocalPointX, FocalPointY, 1.0f, 0.0f,
                 0.0f, 0.0f, 0.0f, 1.0f
             );
 

@@ -395,9 +395,9 @@ namespace MR
             const float FocalPointY = FocalPointY0 / PyramidFactor;
 
             glm::mat4 KMatrix(
-                FocalLengthX, 0.0f, FocalPointX, 0.0f,
-                0.0f, FocalLengthY, FocalPointY, 0.0f,
-                0.0f, 0.0f, 1.0f, 0.0f,
+                FocalLengthX, 0.0f, 0.0f, 0.0f,
+                0.0f, FocalLengthY, 0.0f, 0.0f,
+                FocalPointX, FocalPointY, 1.0f, 0.0f,
                 0.0f, 0.0f, 0.0f, 1.0f
             );
 
