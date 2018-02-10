@@ -184,6 +184,9 @@
     <ClInclude Include="..\..\..\src\base\base_include_glm.h">
       <Filter>includes</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_include_json.h">
+      <Filter>includes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="container">

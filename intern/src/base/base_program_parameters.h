@@ -3,9 +3,7 @@
 
 #include "base/base_console.h"
 #include "base/base_exception.h"
-
-#include "json.hpp"
-using nlohmann::json;
+#include "base/base_include_json.h"
 
 #include <string>
 
