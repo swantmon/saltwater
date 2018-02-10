@@ -3,9 +3,7 @@
 
 #include "base/base_console.h"
 #include "base/base_exception.h"
-
-#include "json.hpp"
-using nlohmann::json;
+#include "base/base_include_json.h"
 
 #include <string>
 
@@ -73,7 +71,7 @@ namespace IO
     {
         if (IsNull(_rOption))
         {
-            BASE_THROWM("Parameter is not available.");
+            BASE_THROWV("Parameter \"%s\" is not available.", _rOption.c_str());
         }
 
         return m_Container[ConvertOptionToJSONPointer(_rOption)];
@@ -84,13 +82,22 @@ namespace IO
     template<typename T>
     const T CProgramParameters::Get(const std::string& _rOption, const T _Default)
     {
-        if (IsNull(_rOption))
+        try
         {
-            Add(_rOption, _Default);
+            if (IsNull(_rOption))
+            {
+                Add(_rOption, _Default);
 
-            return _Default;
+                return _Default;
+            }
+
+            return m_Container[ConvertOptionToJSONPointer(_rOption)];
+        }
+        catch (const json::exception& _rException)
+        {
+            BASE_CONSOLE_ERRORV("Getting value of option \"%s\" from program parameters failed with error: \"%s\"", _rOption.c_str(), _rException.what());
         }
 
-        return m_Container[ConvertOptionToJSONPointer(_rOption)];
+        return _Default;
     }
 } // namespace IO

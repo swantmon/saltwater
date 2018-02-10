@@ -3,10 +3,7 @@
 
 #include "base/base_program_parameters.h"
 
-#include <cctype>
-#include <fstream>
 #include <sstream>
-#include <iterator>
 
 namespace IO
 {
@@ -35,7 +32,22 @@ namespace IO
 
     void CProgramParameters::ParseJSON(const std::string& _rJSON)
     {
-        m_Container = json::parse(_rJSON);
+        try
+        {
+            m_Container = json::parse(_rJSON);
+        }
+        catch (const json::exception& _rException)
+        {
+            BASE_CONSOLE_ERRORV("Failed parsing JSON with reason \"%s\". Container will be empty.", _rException.what());
+
+            ParseJSON("{ }");
+        }
+        catch (...)
+        {
+            BASE_CONSOLE_ERROR("An undefined exception got up while parsing JSON file.");
+
+            ParseJSON("{ }");
+        }
     }
 
     // -----------------------------------------------------------------------------
@@ -46,13 +58,17 @@ namespace IO
 
         if (JSONFile.is_open())
         {
-            m_Container = json::parse(JSONFile);
+            std::string FileContent((std::istreambuf_iterator<char>(JSONFile)), std::istreambuf_iterator<char>());
 
+            ParseJSON(FileContent);
+            
             JSONFile.close();
         }
         else
         {
-            BASE_CONSOLE_WARNINGV("Config file %s does not exist!", _rFile.c_str());
+            BASE_CONSOLE_WARNINGV("Config file %s could not be opened or does not exist! Container will be empty.", _rFile.c_str());
+
+            ParseJSON("{ }");
         }
     }
 
@@ -72,7 +88,7 @@ namespace IO
         }
         else
         {
-            BASE_CONSOLE_ERRORV("Save file %s could not be opened.", _rFile.c_str());
+            BASE_CONSOLE_ERRORV("Save file %s could not be opened. No changes will be saved.", _rFile.c_str());
         }
     }
 
