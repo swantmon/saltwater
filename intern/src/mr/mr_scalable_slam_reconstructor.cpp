@@ -2310,6 +2310,16 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
+    glm::int2 CScalableSLAMReconstructor::GetDepthImageSize()
+    {
+        int Width = m_pRGBDCameraControl->GetDepthWidth();
+        int Height = m_pRGBDCameraControl->GetDepthHeight();
+
+        return glm::int2(Width, Height);
+    }
+    
+    // -----------------------------------------------------------------------------
+
     int CScalableSLAMReconstructor::DivUp(int TotalShaderCount, int WorkGroupSize)
     {
         return (TotalShaderCount + WorkGroupSize - 1) / WorkGroupSize;

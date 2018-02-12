@@ -165,6 +165,8 @@ namespace MR
         Gfx::CTexturePtr GetVertexMap();
 
         CPlaneDetector& GetPlaneDetector();
+
+        glm::int2 GetDepthImageSize();
         
     private:
 
