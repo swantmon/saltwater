@@ -59,6 +59,7 @@ namespace MR
                 s_DefaultSettings.m_GridResolutions[i] *
                 s_DefaultSettings.m_GridResolutions[i] *
                 s_DefaultSettings.m_GridResolutions[i];
+
             if (s_DefaultSettings.m_IsScalable)
             {
                 s_DefaultSettings.m_VolumeSize *= s_DefaultSettings.m_GridResolutions[i];
