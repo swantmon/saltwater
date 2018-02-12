@@ -142,7 +142,7 @@ namespace
 
         Base::CProgramParameters::GetInstance().ParseFile(m_AppSetup.m_pAndroidApp->activity->externalDataPath + m_ParameterFile);
 
-        VerbosityLevel = Base::CProgramParameters::GetInstance().GetInt(VerbosityNameString, 3);
+        VerbosityLevel = Base::CProgramParameters::GetInstance().Get<int>(VerbosityNameString, 3);
 
         Base::CConsole::GetInstance().SetVerbosityLevel(VerbosityLevel);
 

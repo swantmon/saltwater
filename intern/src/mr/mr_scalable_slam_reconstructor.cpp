@@ -198,7 +198,7 @@ namespace MR
         // Check if conservative rasterization is available
         ////////////////////////////////////////////////////////////////////////////////
 
-        const bool EnableConservativeRaster = Base::CProgramParameters::GetInstance().GetBoolean("mr:slam:conservative_raster_enable", true);
+        const bool EnableConservativeRaster = Base::CProgramParameters::GetInstance().Get("mr:slam:conservative_raster_enable", true);
 
         m_UseConservativeRasterization = false;
 
@@ -214,7 +214,7 @@ namespace MR
 
         m_UseShuffleIntrinsics = false;
 
-        const bool EnableShuffleIntrinsics = Base::CProgramParameters::GetInstance().GetBoolean("mr:slam:shuffle_intrinsics_enable", true);
+        const bool EnableShuffleIntrinsics = Base::CProgramParameters::GetInstance().Get("mr:slam:shuffle_intrinsics_enable", true);
 
         if (EnableShuffleIntrinsics)
         {
@@ -564,7 +564,7 @@ namespace MR
         
         const float VoxelSize = m_ReconstructionSettings.m_VoxelSize;
 
-        const std::string InternalFormatString = Base::CProgramParameters::GetInstance().GetStdString("mr:slam:map_format", "rgba16f");
+        const std::string InternalFormatString = Base::CProgramParameters::GetInstance().Get("mr:slam:map_format", "rgba16f");
 
         std::stringstream DefineStream;
 
@@ -1454,7 +1454,7 @@ namespace MR
         m_RaycastVertexMapPtr.resize(m_ReconstructionSettings.m_PyramidLevelCount);
         m_RaycastNormalMapPtr.resize(m_ReconstructionSettings.m_PyramidLevelCount);
 
-        std::string MapFormatString = Base::CProgramParameters::GetInstance().GetStdString("mr:slam:map_format", "rgba16f");
+        std::string MapFormatString = Base::CProgramParameters::GetInstance().Get("mr:slam:map_format", "rgba16f");
         assert(MapFormatString == "rgba16f" || MapFormatString == "rgba32f");
         CTexture::EFormat MapFormat = MapFormatString == "rgba16f" ? CTexture::R16G16B16A16_FLOAT : CTexture::R32G32B32A32_FLOAT;
 

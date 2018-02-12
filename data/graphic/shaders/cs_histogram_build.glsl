@@ -159,7 +159,7 @@ void main()
         }
     }
 
-    IndexOfPixel = int(gl_WorkGroupID.x + gl_WorkGroupID.y * cs_NumberOfThreadGroups.x) * HISTOGRAM_SIZE + int(gl_LocalInvocationIndex);
+    IndexOfPixel = (int(gl_WorkGroupID.x) + int(gl_WorkGroupID.y) * cs_NumberOfThreadGroups.x) * HISTOGRAM_SIZE + int(gl_LocalInvocationIndex);
 
     m_HistogramPerGroup[IndexOfPixel] = SumInBin;
 }

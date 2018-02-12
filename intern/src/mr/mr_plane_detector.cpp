@@ -249,7 +249,7 @@ namespace MR
 
     CPlaneDetector::CPlaneDetector()
     {
-        m_MaxDetectablePlaneCount = Base::CProgramParameters::GetInstance().GetInt("mr:plane_detection:max_plane_count", g_MaxDetectablePlaneCount);
+        m_MaxDetectablePlaneCount = Base::CProgramParameters::GetInstance().Get("mr:plane_detection:max_plane_count", g_MaxDetectablePlaneCount);
 
         //////////////////////////////////////////////////////////////////////////
         // Create Shaders
@@ -259,7 +259,7 @@ namespace MR
 
         DefineStream
             << "#define TILE_SIZE2D " << g_TileSize2D << " \n"
-            << "#define MAP_TEXTURE_FORMAT " << Base::CProgramParameters::GetInstance().GetStdString("mr:slam:map_format", "rgba16f") << " \n"
+            << "#define MAP_TEXTURE_FORMAT " << Base::CProgramParameters::GetInstance().Get("mr:slam:map_format", "rgba16f") << " \n"
             << "#define MAX_DETECTABLE_PLANE_COUNT " << m_MaxDetectablePlaneCount << " \n"
             << "#define HISTOGRAM_WIDTH " << g_HistogramSize[0] << " \n";
 

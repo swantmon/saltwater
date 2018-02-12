@@ -88,7 +88,7 @@ namespace Edit
         
         m_pCaptureColorCB->setChecked(DefaultSettings.m_CaptureColor);
 
-        m_pTrackingCameraCB->setChecked(Base::CProgramParameters::GetInstance().GetBoolean("mr:slam:rendering:use_tracking_camera", true));
+        m_pTrackingCameraCB->setChecked(Base::CProgramParameters::GetInstance().Get("mr:slam:rendering:use_tracking_camera", true));
 
 		const bool IsScalable = DefaultSettings.m_IsScalable;
 

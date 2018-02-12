@@ -2,8 +2,9 @@
 #pragma once
 
 #include "base/base_console.h"
+#include "base/base_exception.h"
+#include "base/base_include_json.h"
 
-#include <map>
 #include <string>
 
 namespace IO
@@ -16,54 +17,31 @@ namespace IO
 
     public:
 
-        void ParseArguments(const std::string& _rArguments);
+        void ParseJSON(const std::string& _rJSON);
+
         void ParseFile(const std::string& _rFile);
-
-    public:
-
         void WriteFile(const std::string& _rFile);
 
     public:
 
+        void Clear();
+
+    public:
+
         template<typename T>
-        void AddParameter(const std::string& _rOption, const T _rParameter);
-        void AddParameter(const std::string& _rOption, bool _Bool);
-        void AddParameter(const std::string& _rOption, const char* _pText);
-        void AddParameter(const std::string& _rOption, const std::string& _rText);
+        void Add(const std::string& _rOption, const T _rParameter);
 
-    public:
+        template<typename T>
+        const T Get(const std::string& _rOption);
 
-        int GetInt(const std::string& _rOption, int _Default = 0);
-        unsigned int GetUInt(const std::string& _rOption,  unsigned int _Default = 0);
+        template<typename T>
+        const T Get(const std::string& _rOption, const T _Default);
 
-        long GetLong(const std::string& _rOption, long _Default = 0);
-        unsigned long GetULong(const std::string& _rOption, unsigned long _Default = 0);
-
-        long long GetLongLong(const std::string& _rOption, long long _Default = 0);
-        unsigned long long GetULongLong(const std::string& _rOption, unsigned long long _Default = 0);
-
-        bool GetBoolean(const std::string& _rOption, bool _Default = 0);
-
-        float GetFloat(const std::string& _rOption, float _Default = 0);
-
-        double GetDouble(const std::string& _rOption, double _Default = 0);
-
-        const char* GetString(const std::string& _rOption, const char* _Default = 0);
-
-        const std::string& GetStdString(const std::string& _rOption, const std::string& _rDefault = "");
-
-    public:
-
-        bool HasParameter(const std::string& _rOption);
+        bool IsNull(const std::string& _rOption);
 
     private:
 
-        typedef std::map<std::string, std::string>  COptionParameter;
-        typedef std::pair<std::string, std::string> COptionParameterPair;
-
-    private:
-
-        COptionParameter m_Container;
+        json m_Container;
 
     private:
 
@@ -72,29 +50,54 @@ namespace IO
 
     private:
 
-        void InternParseString(const std::string& _rString, const char _Delimiter);
-
-        void InternParseJSONString(const std::string& _rString);
-        std::string ConfigStringToJSON(const std::string& _rString);
-        std::string JSONStringToConfig(const std::string& _rString);
-
-        bool m_ParsingFailed;
+        json::json_pointer ConvertOptionToJSONPointer(const std::string& _rOption);
     };
 } // namespace IO
 
 namespace IO
 {
     template<typename T>
-    void CProgramParameters::AddParameter(const std::string& _rOption, const T _Parameter)
+    void CProgramParameters::Add(const std::string& _rOption, const T _Parameter)
     {
-#ifdef PLATFORM_ANDROID
-        std::ostringstream Stream;
+        BASE_CONSOLE_INFOV("Creating new config parameter %s", _rOption.c_str());
 
-        Stream << _Parameter;
+        m_Container[ConvertOptionToJSONPointer(_rOption)] = _Parameter;
+    }
 
-        m_Container.insert(COptionParameterPair(_rOption, Stream.str()));
-#else
-        m_Container.insert(COptionParameterPair(_rOption, std::to_string(_Parameter)));
-#endif // PLATFORM_ANDROID
+    // -----------------------------------------------------------------------------
+
+    template<typename T>
+    const T CProgramParameters::Get(const std::string& _rOption)
+    {
+        if (IsNull(_rOption))
+        {
+            BASE_THROWV("Parameter \"%s\" is not available.", _rOption.c_str());
+        }
+
+        return m_Container[ConvertOptionToJSONPointer(_rOption)];
+    }
+
+    // -----------------------------------------------------------------------------
+
+    template<typename T>
+    const T CProgramParameters::Get(const std::string& _rOption, const T _Default)
+    {
+        try
+        {
+            if (IsNull(_rOption))
+            {
+                Add(_rOption, _Default);
+
+                return _Default;
+            }
+
+            return m_Container[ConvertOptionToJSONPointer(_rOption)];
+        }
+        catch (const json::exception& _rException)
+        {
+            BASE_CONSOLE_ERRORV("Getting value of option \"%s\" from program parameters failed with error: \"%s\"", _rOption.c_str(), _rException.what());
+        }
+
+        return _Default;
     }
 } // namespace IO

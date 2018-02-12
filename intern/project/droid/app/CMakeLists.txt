@@ -50,15 +50,13 @@ foreach( MyLibrary IN ITEMS ${MyLibraries} )
     # ---------------------------------------
     # Global dependencies / includes
     # ---------------------------------------
-    target_include_directories( ${TargetName} PRIVATE ${ExternDir}/glm/include )
+    target_include_directories( ${TargetName} PRIVATE ${ExternDir}/glm/include ${ExternDir}/json/include )
 
 endforeach()
 
 # ---------------------------------------
 # Special dependencies / includes
 # ---------------------------------------
-target_include_directories( base PRIVATE ${ExternDir}/json/include )
-
 target_include_directories( data PRIVATE ${ExternDir}/assimp/include )
 target_include_directories( data PRIVATE ${ExternDir}/devil/include )
 target_include_directories( data PRIVATE ${ExternDir}/tinyxml2/include )
@@ -86,7 +84,7 @@ file(
 
 add_library( app_droid SHARED ${TargetSources} )
 
-target_include_directories( app_droid PRIVATE ${ANDROID_NDK}/sources/android/native_app_glue ${ExternDir}/glm/include )
+target_include_directories( app_droid PRIVATE ${ANDROID_NDK}/sources/android/native_app_glue ${ExternDir}/glm/include ${ExternDir}/json/include )
 
 target_link_libraries( app_droid EGL GLESv3 arcore_sdk log android m native_app_glue)
 

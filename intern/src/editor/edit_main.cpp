@@ -39,7 +39,7 @@ int main(int _Argc, char* _pArgv[])
             std::string Option = Argument.substr(0, PositionOfSpace);
             std::string Value  = Argument.substr(PositionOfSpace + 1, Argument.length());
 
-            Base::CProgramParameters::GetInstance().AddParameter(Option, Value);
+            Base::CProgramParameters::GetInstance().Add(Option, Value);
             break;
         }
     }
@@ -47,11 +47,11 @@ int main(int _Argc, char* _pArgv[])
     if (VerbosityLevel == 0)
     {
         Base::CProgramParameters::GetInstance().ParseFile(ParameterFile);
-        VerbosityLevel = Base::CProgramParameters::GetInstance().GetInt(VerbosityNameString, 3);
+        VerbosityLevel = Base::CProgramParameters::GetInstance().Get<int>(VerbosityNameString, 3);
     }
     else
     {
-        VerbosityLevel = Base::CProgramParameters::GetInstance().GetInt(VerbosityNameString, VerbosityLevel);
+        VerbosityLevel = Base::CProgramParameters::GetInstance().Get<int>(VerbosityNameString, VerbosityLevel);
         Base::CProgramParameters::GetInstance().ParseFile(ParameterFile);
     }
 

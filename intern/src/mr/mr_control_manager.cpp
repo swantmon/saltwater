@@ -490,8 +490,8 @@ namespace
         // -----------------------------------------------------------------------------
         // Update camera
         // -----------------------------------------------------------------------------
-        float Near = Base::CProgramParameters::GetInstance().GetFloat("mr:ar:camera:near", 0.1f);
-        float Far  = Base::CProgramParameters::GetInstance().GetFloat("mr:ar:camera:far", 100.0f);
+        float Near = Base::CProgramParameters::GetInstance().Get<float>("mr:ar:camera:near", 0.1f);
+        float Far  = Base::CProgramParameters::GetInstance().Get<float>("mr:ar:camera:far", 100.0f);
 
         ArCamera* pARCamera;
 
@@ -655,7 +655,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Render planes
         // -----------------------------------------------------------------------------
-        bool RenderPlanes = Base::CProgramParameters::GetInstance().GetBoolean("mr:ar:debug:render_planes", true);
+        bool RenderPlanes = Base::CProgramParameters::GetInstance().Get<bool>("mr:ar:debug:render_planes", true);
 
         if (RenderPlanes == false) return;
 
@@ -880,7 +880,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Render planes
         // -----------------------------------------------------------------------------
-        bool RenderPoints = Base::CProgramParameters::GetInstance().GetBoolean("mr:ar:debug:render_points", true);
+        bool RenderPoints = Base::CProgramParameters::GetInstance().Get<bool>("mr:ar:debug:render_points", true);
 
         if (RenderPoints == false) return;
 

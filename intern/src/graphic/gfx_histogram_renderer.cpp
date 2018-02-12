@@ -488,12 +488,12 @@ namespace
         
         SHistogramSettings Settings;
 
-        Settings.m_HistogramLowerBound  = Base::CProgramParameters::GetInstance().GetFloat("graphics:histogram:lower_bound", 0.80f);
-        Settings.m_HistogramUpperBound  = Base::CProgramParameters::GetInstance().GetFloat("graphics:histogram:upper_bound", 0.983f);
-        Settings.m_HistogramLogMin      = Base::CProgramParameters::GetInstance().GetFloat("graphics:histogram:log_min", -8.00f);
-        Settings.m_HistogramLogMax      = Base::CProgramParameters::GetInstance().GetFloat("graphics:histogram:log_max", 12.00f);
-        Settings.m_EyeAdaptionSpeedUp   = Base::CProgramParameters::GetInstance().GetFloat("graphics:histogram:eye_adaption:speed_up", 0.25f);
-        Settings.m_EyeAdaptionSpeedDown = Base::CProgramParameters::GetInstance().GetFloat("graphics:histogram:eye_adaption:speed_down", 0.25f);
+        Settings.m_HistogramLowerBound  = Base::CProgramParameters::GetInstance().Get<float>("graphics:histogram:lower_bound", 0.80f);
+        Settings.m_HistogramUpperBound  = Base::CProgramParameters::GetInstance().Get<float>("graphics:histogram:upper_bound", 0.983f);
+        Settings.m_HistogramLogMin      = Base::CProgramParameters::GetInstance().Get<float>("graphics:histogram:log_min", -8.00f);
+        Settings.m_HistogramLogMax      = Base::CProgramParameters::GetInstance().Get<float>("graphics:histogram:log_max", 12.00f);
+        Settings.m_EyeAdaptionSpeedUp   = Base::CProgramParameters::GetInstance().Get<float>("graphics:histogram:eye_adaption:speed_up", 0.25f);
+        Settings.m_EyeAdaptionSpeedDown = Base::CProgramParameters::GetInstance().Get<float>("graphics:histogram:eye_adaption:speed_down", 0.25f);
         Settings.m_ResetEyeAdaption     = true;
 
         SetSettings(Settings);
