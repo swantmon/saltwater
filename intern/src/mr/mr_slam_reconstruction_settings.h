@@ -10,6 +10,8 @@
 
 #include "base/base_include_glm.h"
 
+#include <array>
+
 namespace MR
 {
 	struct SReconstructionSettings
@@ -23,18 +25,25 @@ namespace MR
 		float m_TruncatedDistance;
 		int m_MaxIntegrationWeight;
 		int m_PyramidLevelCount;
-		int m_PyramidLevelIterations[MAX_PYRAMIDLEVELS];
+        std::array<int, MAX_PYRAMIDLEVELS> m_PyramidLevelIterations;
 		glm::ivec2 m_DepthThreshold;
 		bool m_CaptureColor;
 
 		bool m_IsScalable;
 
-		int m_GridResolutions[GRID_LEVELS];
-        int m_VoxelsPerGrid[GRID_LEVELS];
+		std::array<int, GRID_LEVELS> m_GridResolutions;
+        std::array<int, GRID_LEVELS> m_VoxelsPerGrid;
 
         bool m_UseFullVolumeIntegration;
         bool m_UseReverseIntegration;
         
         static void SetDefaultSettings(SReconstructionSettings& _Settings);
+
+    private:
+
+        static void SetupDefaultSettings();
+
+        static bool s_IsInitialized;
+        static SReconstructionSettings s_DefaultSettings;
 	};
 } // namespace MR

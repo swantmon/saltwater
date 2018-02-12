@@ -11,45 +11,63 @@ namespace MR
 {
     void SReconstructionSettings::SetDefaultSettings(SReconstructionSettings& _Settings)
     {
-        _Settings.m_TruncatedDistance = 30.0f;
-        _Settings.m_MaxIntegrationWeight = 200;
-        _Settings.m_PyramidLevelCount = 3;
-        _Settings.m_DepthThreshold = glm::ivec2(500, 8000);
-        _Settings.m_UseFullVolumeIntegration = true;
-        _Settings.m_UseReverseIntegration = true;
+        if (!s_IsInitialized)
+        {
+            SetupDefaultSettings();
+        }
+        _Settings = s_DefaultSettings;
+    }
 
-        _Settings.m_IsScalable = Base::CProgramParameters::GetInstance().Get("mr:slam:scalable", true);
+    bool SReconstructionSettings::s_IsInitialized = false;
+    SReconstructionSettings SReconstructionSettings::s_DefaultSettings = {};
 
-        _Settings.m_VoxelSize = Base::CProgramParameters::GetInstance().Get("mr:slam:metrics:voxel_size", 0.004f);
-        _Settings.m_VolumeSize = Base::CProgramParameters::GetInstance().Get("mr:slam:metrics:volume_size", 4.0f);
-        _Settings.m_VolumeResolution = Base::CProgramParameters::GetInstance().Get("mr:slam:metrics:volume_resolution", 512);
+    void SReconstructionSettings::SetupDefaultSettings()
+    {
+        s_DefaultSettings.m_TruncatedDistance = 30.0f;
+        s_DefaultSettings.m_MaxIntegrationWeight = 200;
+        s_DefaultSettings.m_PyramidLevelCount = 3;
+        s_DefaultSettings.m_DepthThreshold = glm::ivec2(500, 8000);
+        s_DefaultSettings.m_UseFullVolumeIntegration = true;
+        s_DefaultSettings.m_UseReverseIntegration = true;
+
+        s_DefaultSettings.m_IsScalable = Base::CProgramParameters::GetInstance().Get("mr:slam:scalable", true);
+
+        s_DefaultSettings.m_VoxelSize = Base::CProgramParameters::GetInstance().Get("mr:slam:metrics:voxel_size", 0.004f);
+        s_DefaultSettings.m_VolumeSize = Base::CProgramParameters::GetInstance().Get("mr:slam:metrics:volume_size", 4.0f);
+        s_DefaultSettings.m_VolumeResolution = Base::CProgramParameters::GetInstance().Get("mr:slam:metrics:volume_resolution", 512);
 
         std::vector<int> PyramidLevelIterations = Base::CProgramParameters::GetInstance().Get<std::vector<int>>("mr:slam:tracking_iterations", { 10, 5, 4 });
 
-        assert(PyramidLevelIterations.size() == _Settings.m_PyramidLevelCount);
+        assert(PyramidLevelIterations.size() == s_DefaultSettings.m_PyramidLevelCount);
 
-        _Settings.m_PyramidLevelIterations[0] = PyramidLevelIterations[0];
-        _Settings.m_PyramidLevelIterations[1] = PyramidLevelIterations[1];
-        _Settings.m_PyramidLevelIterations[2] = PyramidLevelIterations[2];
+        s_DefaultSettings.m_PyramidLevelIterations[0] = PyramidLevelIterations[0];
+        s_DefaultSettings.m_PyramidLevelIterations[1] = PyramidLevelIterations[1];
+        s_DefaultSettings.m_PyramidLevelIterations[2] = PyramidLevelIterations[2];
 
-        _Settings.m_GridResolutions[0] = 16;
-        _Settings.m_GridResolutions[1] = 8;
-        _Settings.m_GridResolutions[2] = 8;
+        s_DefaultSettings.m_GridResolutions[0] = 16;
+        s_DefaultSettings.m_GridResolutions[1] = 8;
+        s_DefaultSettings.m_GridResolutions[2] = 8;
 
-        if (_Settings.m_IsScalable)
+        if (s_DefaultSettings.m_IsScalable)
         {
-            _Settings.m_VolumeSize = _Settings.m_VoxelSize;
+            s_DefaultSettings.m_VolumeSize = s_DefaultSettings.m_VoxelSize;
         }
 
         for (int i = 0; i < GRID_LEVELS; ++i)
         {
-            _Settings.m_VoxelsPerGrid[i] = _Settings.m_GridResolutions[i] * _Settings.m_GridResolutions[i] * _Settings.m_GridResolutions[i];
-            if (_Settings.m_IsScalable)
+            s_DefaultSettings.m_VoxelsPerGrid[i] =
+                s_DefaultSettings.m_GridResolutions[i] *
+                s_DefaultSettings.m_GridResolutions[i] *
+                s_DefaultSettings.m_GridResolutions[i];
+            if (s_DefaultSettings.m_IsScalable)
             {
-                _Settings.m_VolumeSize *= _Settings.m_GridResolutions[i];
+                s_DefaultSettings.m_VolumeSize *= s_DefaultSettings.m_GridResolutions[i];
             }
         }
 
-        _Settings.m_CaptureColor = Base::CProgramParameters::GetInstance().Get("mr:slam:capture_color", false);
+        s_DefaultSettings.m_CaptureColor = Base::CProgramParameters::GetInstance().Get("mr:slam:capture_color", false);
+
+        s_IsInitialized = true;
     }
+
 } // namespace MR
