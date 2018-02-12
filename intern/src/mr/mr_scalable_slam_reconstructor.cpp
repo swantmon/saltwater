@@ -1744,7 +1744,7 @@ namespace MR
 
         if (m_IntegratedFrameCount > 0)
         {
-            Performance::BeginEvent("Tracking");
+            Performance::BeginDurationEvent("Tracking");
 
             PerformTracking();
 

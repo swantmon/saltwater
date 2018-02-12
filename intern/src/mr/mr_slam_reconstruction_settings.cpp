@@ -5,6 +5,8 @@
 
 #include "mr_slam_reconstruction_settings.h"
 
+#include <vector>
+
 namespace MR
 {
     void SReconstructionSettings::SetDefaultSettings(SReconstructionSettings& _Settings)
@@ -22,9 +24,13 @@ namespace MR
         _Settings.m_VolumeSize = Base::CProgramParameters::GetInstance().Get("mr:slam:metrics:volume_size", 4.0f);
         _Settings.m_VolumeResolution = Base::CProgramParameters::GetInstance().Get("mr:slam:metrics:volume_resolution", 512);
 
-        _Settings.m_PyramidLevelIterations[0] = 10;
-        _Settings.m_PyramidLevelIterations[1] = 5;
-        _Settings.m_PyramidLevelIterations[2] = 4;
+        std::vector<int> PyramidLevelIterations = Base::CProgramParameters::GetInstance().Get<std::vector<int>>("mr:slam:tracking_iterations", { 10, 5, 4 });
+
+        assert(PyramidLevelIterations.size() == 3);
+
+        _Settings.m_PyramidLevelIterations[0] = PyramidLevelIterations[0];
+        _Settings.m_PyramidLevelIterations[1] = PyramidLevelIterations[1];
+        _Settings.m_PyramidLevelIterations[2] = PyramidLevelIterations[2];
 
         _Settings.m_GridResolutions[0] = 16;
         _Settings.m_GridResolutions[1] = 8;
