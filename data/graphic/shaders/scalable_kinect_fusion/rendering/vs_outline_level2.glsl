@@ -31,11 +31,11 @@ void main()
 {
     uint VolumeID = g_VolumeID[gl_InstanceID];
 
-    vec3 Offset = IndexToOffset(VolumeID, 16 * 8);
+    vec3 Offset = IndexToOffset(VolumeID, ROOT_RESOLUTION * LEVEL1_RESOLUTION);
 
-    Offset = Offset * (0.004 * 8);
+    Offset = Offset * (VOXEL_SIZE * LEVEL1_RESOLUTION);
 
-    vec4 WSPosition = g_WorldMatrix * vec4(in_VertexPosition * 0.004 * 8 + Offset, 1.0f);
+    vec4 WSPosition = g_WorldMatrix * vec4(in_VertexPosition * VOXEL_SIZE * LEVEL1_RESOLUTION + Offset, 1.0f);
     gl_Position = g_WorldToScreen * WSPosition;
 }
 

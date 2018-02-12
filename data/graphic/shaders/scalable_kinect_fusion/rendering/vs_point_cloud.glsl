@@ -24,8 +24,8 @@ out gl_PerVertex
 void main()
 {
     ivec2 UV;
-    UV.x = gl_VertexID % 512;
-    UV.y = gl_VertexID / 512;
+    UV.x = gl_VertexID % DEPTH_IMAGE_WIDTH;
+    UV.y = gl_VertexID / DEPTH_IMAGE_WIDTH;
     vec4 WSPosition = imageLoad(cs_VertexMap, UV);
     WSPosition.w = 1.0f;
     WSPosition = g_WorldMatrix * WSPosition;
