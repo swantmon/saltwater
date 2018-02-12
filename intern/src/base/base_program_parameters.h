@@ -36,6 +36,7 @@ namespace IO
 
         template<typename T>
         const T Get(const std::string& _rOption, const T _Default);
+        const std::string Get(const std::string& _rOption, const char* _Default);
 
         bool IsNull(const std::string& _rOption);
 
