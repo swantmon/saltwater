@@ -116,7 +116,7 @@ BASE_TEST(ProgramParametersArrays)
 
     std::vector<float> ResultFloats;
 
-    ResultFloats = CProgramParameters::GetInstance().Get<std::vector<float>>("My Floats");
+    ResultFloats = CProgramParameters::GetInstance().Get<std::vector<float>>("My Floats", { 1.0f, 0.0f, 5.0f, 0.2f });
 
     BASE_CHECK(Floats == ResultFloats);
 }

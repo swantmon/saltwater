@@ -30,10 +30,7 @@ namespace IO
 
         template<typename T>
         void Add(const std::string& _rOption, const T _rParameter);
-
-        template<typename T>
-        const T Get(const std::string& _rOption);
-
+        
         template<typename T>
         const T Get(const std::string& _rOption, const T _Default);
         const std::string Get(const std::string& _rOption, const char* _Default);
@@ -64,20 +61,7 @@ namespace IO
 
         m_Container[ConvertOptionToJSONPointer(_rOption)] = _Parameter;
     }
-
-    // -----------------------------------------------------------------------------
-
-    template<typename T>
-    const T CProgramParameters::Get(const std::string& _rOption)
-    {
-        if (IsNull(_rOption))
-        {
-            BASE_THROWV("Parameter \"%s\" is not available.", _rOption.c_str());
-        }
-
-        return m_Container[ConvertOptionToJSONPointer(_rOption)];
-    }
-
+    
     // -----------------------------------------------------------------------------
 
     template<typename T>
