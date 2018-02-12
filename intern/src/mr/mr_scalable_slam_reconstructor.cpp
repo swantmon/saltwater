@@ -1695,10 +1695,15 @@ namespace MR
             return;
         }
 
+        /*
         if (!m_pRGBDCameraControl->GetDepthBuffer(pDepth))
         {
             return;
         }
+        /*/
+#pragma message("Warning: Active polling of depth frame is active and could lead to an infinite loop!")
+        while (!m_pRGBDCameraControl->GetDepthBuffer(pDepth));
+        //*/
 
         if (CaptureColor && !m_pRGBDCameraControl->GetCameraFrame(pColor))
         {
