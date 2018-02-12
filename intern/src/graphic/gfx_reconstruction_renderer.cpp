@@ -294,7 +294,7 @@ namespace
             DefineStream
                 << "#define TRUNCATED_DISTANCE "     << Settings.m_TruncatedDistance << " \n"
                 << "#define VOLUME_SIZE "            << Settings.m_VolumeSize << " \n"
-                << "#define VOXEL_SIZE "             << Settings.m_VolumeSize / Settings.m_VolumeResolution << " \n"
+                << "#define VOXEL_SIZE "             << Settings.m_VoxelSize << " \n"
                 << "#define MAX_INTEGRATION_WEIGHT " << Settings.m_MaxIntegrationWeight << '\n'
                 << "#define DEPTH_IMAGE_WIDTH "      << DepthImageSize.x << '\n'
                 << "#define DEPTH_IMAGE_HEIGHT "     << DepthImageSize.y << '\n'
