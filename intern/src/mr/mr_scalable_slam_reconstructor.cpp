@@ -587,6 +587,9 @@ namespace MR
             << "#define ICP_SUMMAND_COUNT "      << Summands                                        << " \n"
             << "#define MAP_TEXTURE_FORMAT "     << InternalFormatString                            << " \n"
             << "#define HIERARCHY_LEVELS "       << MR::SReconstructionSettings::GRID_LEVELS        << " \n"
+            << "#define ROOT_RESOLUTION "        << m_ReconstructionSettings.m_GridResolutions[0]   << " \n"
+            << "#define LEVEL1_RESOLUTION "      << m_ReconstructionSettings.m_GridResolutions[1]   << " \n"
+            << "#define LEVEL2_RESOLUTION "      << m_ReconstructionSettings.m_GridResolutions[2]   << " \n"
             << "#define VOXELS_PER_ROOTGRID "    << m_ReconstructionSettings.m_VoxelsPerGrid[0]     << " \n"
             << "#define VOXELS_PER_LEVEL1GRID "  << m_ReconstructionSettings.m_VoxelsPerGrid[1]     << " \n"
             << "#define VOXELS_PER_LEVEL2GRID "  << m_ReconstructionSettings.m_VoxelsPerGrid[2]     << " \n";

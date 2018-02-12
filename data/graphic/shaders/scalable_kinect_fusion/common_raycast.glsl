@@ -73,21 +73,23 @@ uint GetRawVoxel(vec3 Position)
             if (Level1VolumeBufferOffset != -1)
             {
                 // Offset of level 1 volume in rootgrid
-                ivec3 Level1VolumeOffset = ivec3(floor(Position * 16.0f * 8.0f));
-                Level1VolumeOffset %= 8;
+                ivec3 Level1VolumeOffset = ivec3(floor(Position * ROOT_RESOLUTION * LEVEL1_RESOLUTION));
+                Level1VolumeOffset %= LEVEL1_RESOLUTION;
 
-                int Level1BufferInnerOffset = OffsetToIndex(Level1VolumeOffset, 8);
-                int Level1BufferIndex = Level1VolumeBufferOffset * 8 * 8 * 8 + Level1BufferInnerOffset;
+                int Level1BufferInnerOffset = OffsetToIndex(Level1VolumeOffset, LEVEL1_RESOLUTION);
+                int Level1BufferIndex = Level1VolumeBufferOffset * VOXELS_PER_LEVEL1GRID + Level1BufferInnerOffset;
 
                 int TSDFVolumeBufferOffset = g_Level1GridPool[Level1BufferIndex].m_PoolIndex;
 
                 if (TSDFVolumeBufferOffset != -1)
                 {
-                    ivec3 TSDFVolumeOffset = ivec3(floor(Position * 16.0f * 8.0f * 8.0f));
+                    float TotalResolution = ROOT_RESOLUTION * LEVEL1_RESOLUTION * LEVEL2_RESOLUTION;
+
+                    ivec3 TSDFVolumeOffset = ivec3(floor(Position * TotalResolution));
                     TSDFVolumeOffset %= 8;
 
-                    int TSDFBufferInnerOffset = OffsetToIndex(TSDFVolumeOffset, 8);
-                    int TSDFBufferIndex = TSDFVolumeBufferOffset * 8 * 8 * 8 + TSDFBufferInnerOffset;
+                    int TSDFBufferInnerOffset = OffsetToIndex(TSDFVolumeOffset, LEVEL2_RESOLUTION);
+                    int TSDFBufferIndex = TSDFVolumeBufferOffset * VOXELS_PER_LEVEL2GRID + TSDFBufferInnerOffset;
 
                     return g_TSDFPool[TSDFBufferIndex];
                 }
@@ -126,21 +128,23 @@ vec2 GetVoxelWithStep(vec3 Position, vec3 Direction, out float Step)
             if (Level1VolumeBufferOffset != -1)
             {
                 // Offset of level 1 volume in rootgrid
-                ivec3 Level1VolumeOffset = ivec3(floor(Position * 16.0f * 8.0f));
+                ivec3 Level1VolumeOffset = ivec3(floor(Position * ROOT_RESOLUTION * LEVEL1_RESOLUTION));
                 Level1VolumeOffset %= 8;
 
-                int Level1BufferInnerOffset = OffsetToIndex(Level1VolumeOffset, 8);
-                int Level1BufferIndex = Level1VolumeBufferOffset * 8 * 8 * 8 + Level1BufferInnerOffset;
+                int Level1BufferInnerOffset = OffsetToIndex(Level1VolumeOffset, LEVEL1_RESOLUTION);
+                int Level1BufferIndex = Level1VolumeBufferOffset * VOXELS_PER_LEVEL1GRID + Level1BufferInnerOffset;
 
                 int TSDFVolumeBufferOffset = g_Level1GridPool[Level1BufferIndex].m_PoolIndex;
 
                 if (TSDFVolumeBufferOffset != -1)
                 {
-                    ivec3 TSDFVolumeOffset = ivec3(floor(Position * 16.0f * 8.0f * 8.0f));
-                    TSDFVolumeOffset %= 8;
+                    float TotalResolution = ROOT_RESOLUTION * LEVEL1_RESOLUTION * LEVEL2_RESOLUTION;
 
-                    int TSDFBufferInnerOffset = OffsetToIndex(TSDFVolumeOffset, 8);
-                    int TSDFBufferIndex = TSDFVolumeBufferOffset * 8 * 8 * 8 + TSDFBufferInnerOffset;
+                    ivec3 TSDFVolumeOffset = ivec3(floor(Position * TotalResolution));
+                    TSDFVolumeOffset %= LEVEL2_RESOLUTION;
+
+                    int TSDFBufferInnerOffset = OffsetToIndex(TSDFVolumeOffset, LEVEL2_RESOLUTION);
+                    int TSDFBufferIndex = TSDFVolumeBufferOffset * VOXELS_PER_LEVEL2GRID + TSDFBufferInnerOffset;
                     
                     return UnpackVoxel(g_TSDFPool[TSDFBufferIndex]);
                 }
@@ -148,8 +152,8 @@ vec2 GetVoxelWithStep(vec3 Position, vec3 Direction, out float Step)
                 {
                     Position *= VOLUME_SIZE;
             
-                    vec3 AABBMin = Position - mod(Position, VOLUME_SIZE / (16.0f * 8.0f));
-                    vec3 AABBMax = AABBMin + VOLUME_SIZE / (16.0f * 8.0f);
+                    vec3 AABBMin = Position - mod(Position, VOLUME_SIZE / (ROOT_RESOLUTION * LEVEL1_RESOLUTION));
+                    vec3 AABBMax = AABBMin + VOLUME_SIZE / (ROOT_RESOLUTION * LEVEL1_RESOLUTION);
             
                     Step = GetEndLength(Position, Direction, AABBMin, AABBMax);
                 }
@@ -158,8 +162,8 @@ vec2 GetVoxelWithStep(vec3 Position, vec3 Direction, out float Step)
             {
                 Position *= VOLUME_SIZE;
             
-                vec3 AABBMin = Position - mod(Position, VOLUME_SIZE / (16.0f));
-                vec3 AABBMax = AABBMin + VOLUME_SIZE / (16.0f);
+                vec3 AABBMin = Position - mod(Position, VOLUME_SIZE / (ROOT_RESOLUTION));
+                vec3 AABBMax = AABBMin + VOLUME_SIZE / (ROOT_RESOLUTION);
             
                 Step = GetEndLength(Position, Direction, AABBMin, AABBMax);
             }

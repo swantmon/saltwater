@@ -300,8 +300,10 @@ namespace
                 << "#define DEPTH_IMAGE_HEIGHT "     << DepthImageSize.y << '\n'
                 << "#define ROOT_RESOLUTION "        << Settings.m_GridResolutions[0] << '\n'
                 << "#define LEVEL1_RESOLUTION "      << Settings.m_GridResolutions[1] << '\n'
-                << "#define LEVEL2_RESOLUTION "      << Settings.m_GridResolutions[2] << '\n';
-
+                << "#define LEVEL2_RESOLUTION "      << Settings.m_GridResolutions[2] << '\n'
+                << "#define VOXELS_PER_ROOTGRID "    << Settings.m_VoxelsPerGrid[0] << " \n"
+                << "#define VOXELS_PER_LEVEL1GRID "  << Settings.m_VoxelsPerGrid[1] << " \n"
+                << "#define VOXELS_PER_LEVEL2GRID "  << Settings.m_VoxelsPerGrid[2] << " \n";
 
             if (Settings.m_CaptureColor)
             {
