@@ -26,7 +26,7 @@ namespace MR
 
         std::vector<int> PyramidLevelIterations = Base::CProgramParameters::GetInstance().Get<std::vector<int>>("mr:slam:tracking_iterations", { 10, 5, 4 });
 
-        assert(PyramidLevelIterations.size() == 3);
+        assert(PyramidLevelIterations.size() == _Settings.m_PyramidLevelCount);
 
         _Settings.m_PyramidLevelIterations[0] = PyramidLevelIterations[0];
         _Settings.m_PyramidLevelIterations[1] = PyramidLevelIterations[1];
