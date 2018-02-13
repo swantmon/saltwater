@@ -66,28 +66,28 @@ namespace MR
         assert(m_VertexMap->GetNumberOfPixelsU() == m_NormalMap->GetNumberOfPixelsU() &&
                m_VertexMap->GetNumberOfPixelsV() == m_NormalMap->GetNumberOfPixelsV());
 
-        Performance::BeginDurationEvent("Plane Detection");
+        Performance::BeginEvent("Plane Detection");
 
         ClearData();
 
         std::vector<glm::vec4> NewPlanes;
 
-        Performance::BeginDurationEvent("Histogram Creation");
+        Performance::BeginEvent("Histogram Creation");
         CreateHistogram(_PoseMatrix);
         Performance::EndEvent();
 
-        Performance::BeginDurationEvent("Plane Candidate Extraction");
+        Performance::BeginEvent("Plane Candidate Extraction");
         ExtractPlaneCandidates();
         Performance::EndEvent();
 
         // We reuse the normal histogram for the plane distance because why not
         TextureManager::ClearTexture(m_Histogram);
         
-        Performance::BeginDurationEvent("Plane Equation Calculation");
+        Performance::BeginEvent("Plane Equation Calculation");
         FindPlaneEquations();
         Performance::EndEvent();
 
-        Performance::BeginDurationEvent("Plane Equation Extraction");
+        Performance::BeginEvent("Plane Equation Extraction");
         ExtractPlanes(NewPlanes);
         Performance::EndEvent();
 
