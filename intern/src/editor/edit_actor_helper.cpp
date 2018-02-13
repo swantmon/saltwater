@@ -117,7 +117,11 @@ namespace
 
             rCurrentEntity.SetCategory(Dt::SEntityCategory::Dynamic);
 
-            rCurrentEntity.AddComponent(Dt::CComponentManager::GetInstance().Allocate<Dt::CCameraComponent>());
+            auto pComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CCameraComponent>();
+
+            rCurrentEntity.AddComponent(pComponent);
+
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pComponent, Dt::CCameraComponent::DirtyCreate);
         }
     }
 
@@ -255,7 +259,7 @@ namespace
 
             pFacet->SetMaterial(0, &rDtMaterial);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pFacet, Dt::CMeshComponent::DirtyInfo);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pFacet, Dt::CMeshComponent::DirtyInfo);
         }
     }
 
@@ -369,7 +373,7 @@ namespace
 
             pFacet->SetEC(EC);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pFacet, Dt::CCameraComponent::DirtyInfo);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pFacet, Dt::CCameraComponent::DirtyInfo);
         }
     }
 

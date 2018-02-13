@@ -1395,7 +1395,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Create facet
             // -----------------------------------------------------------------------------
-            CInternMeshComponent& rGraphicActorModelFacet = CComponentManager::GetInstance().Allocate<CInternMeshComponent>(pMeshComponent->GetID());
+            CInternMeshComponent* pGfxMeshComponent = CComponentManager::GetInstance().Allocate<CInternMeshComponent>(pMeshComponent->GetID());
 
             // -----------------------------------------------------------------------------
             // Prepare storage data : Model
@@ -1406,7 +1406,7 @@ namespace
 
             CMeshPtr NewModelPtr = MeshManager::CreateMesh(ModelDesc);
 
-            rGraphicActorModelFacet.SetMesh(NewModelPtr);
+            pGfxMeshComponent->SetMesh(NewModelPtr);
 
             // -----------------------------------------------------------------------------
             // Prepare storage data : Material
@@ -1426,7 +1426,7 @@ namespace
 
                     CMaterialPtr NewMaterialPtr = MaterialManager::GetMaterialByHash(Hash);
 
-                    rGraphicActorModelFacet.SetMaterial(NumberOfSurface, NewMaterialPtr);
+                    pGfxMeshComponent->SetMaterial(NumberOfSurface, NewMaterialPtr);
                 }
             }
         }

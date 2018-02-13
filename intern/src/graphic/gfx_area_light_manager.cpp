@@ -46,12 +46,12 @@ namespace
 
     private:
 
-        class CInternAreaLightFacet : public CAreaLightComponent
+        class CInternComponent : public CAreaLightComponent
         {
         public:
 
-            CInternAreaLightFacet();
-            ~CInternAreaLightFacet();
+            CInternComponent();
+            ~CInternComponent();
 
         private:
 
@@ -89,7 +89,7 @@ namespace
 
 namespace 
 {
-    CGfxAreaLightManager::CInternAreaLightFacet::CInternAreaLightFacet()
+    CGfxAreaLightManager::CInternComponent::CInternComponent()
         : CAreaLightComponent()
     {
 
@@ -97,7 +97,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    CGfxAreaLightManager::CInternAreaLightFacet::~CInternAreaLightFacet()
+    CGfxAreaLightManager::CInternComponent::~CInternComponent()
     {
     }
 } // namespace 
@@ -213,7 +213,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Vars
         // -----------------------------------------------------------------------------
-        CInternAreaLightFacet* pGfxLightFacet = 0;
+        CInternComponent* pGfxLightFacet = 0;
 
         // -----------------------------------------------------------------------------
         // Only if component has changed
@@ -234,7 +234,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Create facet
             // -----------------------------------------------------------------------------
-            CInternAreaLightFacet& rGfxLightFacet = CComponentManager::GetInstance().Allocate<CInternAreaLightFacet>(pAreaLightComponent->GetID());
+            CInternComponent* pGfxComponent = CComponentManager::GetInstance().Allocate<CInternComponent>(pAreaLightComponent->GetID());
 
             // -----------------------------------------------------------------------------
             // Buffer
@@ -262,7 +262,7 @@ namespace
             BufferDesc.m_pBytes        = &PlaneVertexBufferData[0];
             BufferDesc.m_pClassKey     = 0;
         
-            rGfxLightFacet.m_PlaneVertexBufferSetPtr = BufferManager::CreateBuffer(BufferDesc);
+            pGfxComponent->m_PlaneVertexBufferSetPtr = BufferManager::CreateBuffer(BufferDesc);
         
             // -----------------------------------------------------------------------------
         
@@ -274,17 +274,17 @@ namespace
             BufferDesc.m_pBytes        = &PlaneIndexBufferData[0];
             BufferDesc.m_pClassKey     = 0;
         
-            rGfxLightFacet.m_PlaneIndexBufferPtr = BufferManager::CreateBuffer(BufferDesc);
+            pGfxComponent->m_PlaneIndexBufferPtr = BufferManager::CreateBuffer(BufferDesc);
 
             // -----------------------------------------------------------------------------
             // Texture
             // -----------------------------------------------------------------------------
-            rGfxLightFacet.m_FilteredTexturePtr = 0;
-            rGfxLightFacet.m_TexturePtr         = 0;
+            pGfxComponent->m_FilteredTexturePtr = 0;
+            pGfxComponent->m_TexturePtr         = 0;
         }
         else
         {
-            pGfxLightFacet = CComponentManager::GetInstance().GetComponent<CInternAreaLightFacet>(pAreaLightComponent->GetID());
+            pGfxLightFacet = CComponentManager::GetInstance().GetComponent<CInternComponent>(pAreaLightComponent->GetID());
 
             if (pAreaLightComponent->GetHasTexture())
             {

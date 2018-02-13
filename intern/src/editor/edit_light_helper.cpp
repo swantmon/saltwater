@@ -130,23 +130,25 @@ namespace
             // -----------------------------------------------------------------------------
             // Create facet and set it
             // -----------------------------------------------------------------------------
-            Dt::CPointLightComponent& rComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CPointLightComponent>();
+            Dt::CPointLightComponent* pComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CPointLightComponent>();
 
-            rComponent.SetRefreshMode      (Dt::CPointLightComponent::Static);
-            rComponent.SetShadowType       (Dt::CPointLightComponent::HardShadows);
-            rComponent.SetShadowQuality    (Dt::CPointLightComponent::High);
-            rComponent.EnableTemperature   (false);
-            rComponent.SetColor            (glm::vec3(1.0f, 1.0f, 1.0f));
-            rComponent.SetAttenuationRadius(10.0f);
-            rComponent.SetInnerConeAngle   (glm::radians(45.0f));
-            rComponent.SetOuterConeAngle   (glm::radians(90.0f));
-            rComponent.SetDirection        (glm::vec3(-1.0f, -1.0f, -1.0f));
-            rComponent.SetIntensity        (1200.0f);
-            rComponent.SetTemperature      (0);
+            pComponent->SetRefreshMode      (Dt::CPointLightComponent::Static);
+            pComponent->SetShadowType       (Dt::CPointLightComponent::HardShadows);
+            pComponent->SetShadowQuality    (Dt::CPointLightComponent::High);
+            pComponent->EnableTemperature   (false);
+            pComponent->SetColor            (glm::vec3(1.0f, 1.0f, 1.0f));
+            pComponent->SetAttenuationRadius(10.0f);
+            pComponent->SetInnerConeAngle   (glm::radians(45.0f));
+            pComponent->SetOuterConeAngle   (glm::radians(90.0f));
+            pComponent->SetDirection        (glm::vec3(-1.0f, -1.0f, -1.0f));
+            pComponent->SetIntensity        (1200.0f);
+            pComponent->SetTemperature      (0);
 
-            rComponent.UpdateLightness();
+            pComponent->UpdateLightness();
 
-            rCurrentEntity.AddComponent(rComponent);
+            rCurrentEntity.AddComponent(pComponent);
+
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pComponent, Dt::CPointLightComponent::DirtyCreate);
         }
     }
 
@@ -167,18 +169,20 @@ namespace
             // -----------------------------------------------------------------------------
             // Create facet and set it
             // -----------------------------------------------------------------------------
-            Dt::CSunComponent& rComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CSunComponent>();
+            Dt::CSunComponent* pComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CSunComponent>();
 
-            rComponent.EnableTemperature(false);
-            rComponent.SetColor         (glm::vec3(1.0f, 1.0f, 1.0f));
-            rComponent.SetDirection     (glm::vec3(0.01f, 0.01f, -1.0f));
-            rComponent.SetIntensity     (90600.0f);
-            rComponent.SetTemperature   (0);
-            rComponent.SetRefreshMode   (Dt::CSunComponent::Dynamic);
+            pComponent->EnableTemperature(false);
+            pComponent->SetColor         (glm::vec3(1.0f, 1.0f, 1.0f));
+            pComponent->SetDirection     (glm::vec3(0.01f, 0.01f, -1.0f));
+            pComponent->SetIntensity     (90600.0f);
+            pComponent->SetTemperature   (0);
+            pComponent->SetRefreshMode   (Dt::CSunComponent::Dynamic);
 
-            rComponent.UpdateLightness();
+            pComponent->UpdateLightness();
 
-            rCurrentEntity.AddComponent(rComponent);
+            rCurrentEntity.AddComponent(pComponent);
+
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pComponent, Dt::CSunComponent::DirtyCreate);
         }
     }
 
@@ -217,14 +221,16 @@ namespace
 
             // -----------------------------------------------------------------------------
 
-            Dt::CSkyComponent& rComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CSkyComponent>();
+            Dt::CSkyComponent* pComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CSkyComponent>();
 
-            rComponent.SetRefreshMode(Dt::CSkyComponent::Static);
-            rComponent.SetType       (Dt::CSkyComponent::Panorama);
-            rComponent.SetPanorama   (pPanoramaTexture);
-            rComponent.SetIntensity  (5000.0f);
+            pComponent->SetRefreshMode(Dt::CSkyComponent::Static);
+            pComponent->SetType       (Dt::CSkyComponent::Panorama);
+            pComponent->SetPanorama   (pPanoramaTexture);
+            pComponent->SetIntensity  (5000.0f);
 
-            rCurrentEntity.AddComponent(rComponent);
+            rCurrentEntity.AddComponent(pComponent);
+
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pComponent, Dt::CSkyComponent::DirtyCreate);
         }
     }
 
@@ -245,19 +251,21 @@ namespace
             // -----------------------------------------------------------------------------
             // Create facet and set it
             // -----------------------------------------------------------------------------
-            Dt::CLightProbeComponent& rComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CLightProbeComponent>();
+            Dt::CLightProbeComponent* pComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CLightProbeComponent>();
 
-            rComponent.SetRefreshMode       (Dt::CLightProbeComponent::Static);
-            rComponent.SetType              (Dt::CLightProbeComponent::Local);
-            rComponent.SetQuality           (Dt::CLightProbeComponent::PX256);
-            rComponent.SetClearFlag         (Dt::CLightProbeComponent::Skybox);
-            rComponent.SetIntensity         (1.0f);
-            rComponent.SetNear              (0.1f);
-            rComponent.SetFar               (10.0f);
-            rComponent.SetParallaxCorrection(true);
-            rComponent.SetBoxSize           (glm::vec3(10.0f));
+            pComponent->SetRefreshMode       (Dt::CLightProbeComponent::Static);
+            pComponent->SetType              (Dt::CLightProbeComponent::Local);
+            pComponent->SetQuality           (Dt::CLightProbeComponent::PX256);
+            pComponent->SetClearFlag         (Dt::CLightProbeComponent::Skybox);
+            pComponent->SetIntensity         (1.0f);
+            pComponent->SetNear              (0.1f);
+            pComponent->SetFar               (10.0f);
+            pComponent->SetParallaxCorrection(true);
+            pComponent->SetBoxSize           (glm::vec3(10.0f));
 
-            rCurrentEntity.AddComponent(rComponent);
+            rCurrentEntity.AddComponent(pComponent);
+
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pComponent, Dt::CLightProbeComponent::DirtyCreate);
         }
     }
 
@@ -278,21 +286,23 @@ namespace
             // -----------------------------------------------------------------------------
             // Create facet and set it
             // -----------------------------------------------------------------------------
-            Dt::CAreaLightComponent& rComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CAreaLightComponent>();
+            Dt::CAreaLightComponent* pComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CAreaLightComponent>();
 
-            rComponent.EnableTemperature   (false);
-            rComponent.SetColor            (glm::vec3(1.0f, 1.0f, 1.0f));
-            rComponent.SetRotation         (0.0f);
-            rComponent.SetWidth            (8.0f);
-            rComponent.SetHeight           (8.0f);
-            rComponent.SetDirection        (glm::vec3(-0.01f, 0.01f, -1.0f));
-            rComponent.SetIntensity        (1200.0f);
-            rComponent.SetTemperature      (0);
-            rComponent.SetIsTwoSided       (false);
+            pComponent->EnableTemperature   (false);
+            pComponent->SetColor            (glm::vec3(1.0f, 1.0f, 1.0f));
+            pComponent->SetRotation         (0.0f);
+            pComponent->SetWidth            (8.0f);
+            pComponent->SetHeight           (8.0f);
+            pComponent->SetDirection        (glm::vec3(-0.01f, 0.01f, -1.0f));
+            pComponent->SetIntensity        (1200.0f);
+            pComponent->SetTemperature      (0);
+            pComponent->SetIsTwoSided       (false);
 
-            rComponent.UpdateLightness();
+            pComponent->UpdateLightness();
 
-            rCurrentEntity.AddComponent(rComponent);
+            rCurrentEntity.AddComponent(pComponent);
+
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pComponent, Dt::CAreaLightComponent::DirtyCreate);
         }
     }
 
@@ -583,7 +593,7 @@ namespace
             
             pLightFacet->UpdateLightness();
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pLightFacet, Dt::CPointLightComponent::DirtyInfo);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pLightFacet, Dt::CPointLightComponent::DirtyInfo);
         }
     }
 
@@ -636,7 +646,7 @@ namespace
 
             pLightFacet->UpdateLightness();
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pLightFacet, Dt::CSunComponent::DirtyInfo);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pLightFacet, Dt::CSunComponent::DirtyInfo);
         }
     }
 
@@ -698,7 +708,7 @@ namespace
                 }
             }
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pLightFacet, Dt::CSkyComponent::DirtyInfo);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pLightFacet, Dt::CSkyComponent::DirtyInfo);
         }
     }
 
@@ -760,7 +770,7 @@ namespace
 
             pLightFacet->SetBoxSize(glm::vec3(BoxSizeX, BoxSizeY, BoxSizeZ));
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pLightFacet, Dt::CLightProbeComponent::DirtyInfo);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pLightFacet, Dt::CLightProbeComponent::DirtyInfo);
         }
     }
 
@@ -842,7 +852,7 @@ namespace
             
             pLightFacet->UpdateLightness();
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pLightFacet, Dt::CAreaLightComponent::DirtyInfo);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pLightFacet, Dt::CAreaLightComponent::DirtyInfo);
         }
     }
 

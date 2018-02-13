@@ -129,7 +129,7 @@ namespace
             float m_Intensity;
         };
 
-        class CInternLightProbeFacet : public CLightProbeComponent
+        class CInternComponent : public CLightProbeComponent
         {
         public:
 
@@ -138,8 +138,8 @@ namespace
 
         public:
 
-            CInternLightProbeFacet();
-            ~CInternLightProbeFacet();
+            CInternComponent();
+            ~CInternComponent();
 
         public:
 
@@ -188,15 +188,15 @@ namespace
 
         void OnDirtyComponent(Base::ID _TypeID, Dt::IComponent* _pComponent);
 
-        CInternLightProbeFacet& AllocateLightProbeFacet(Base::ID _ID, unsigned int _SpecularFaceSize, unsigned int _DiffuseFaceSize);
+        CInternComponent* AllocateLightProbeFacet(Base::ID _ID, unsigned int _SpecularFaceSize, unsigned int _DiffuseFaceSize);
 
-        void Render(const Dt::CEntity& _rEntity, CInternLightProbeFacet& _rInterLightProbeFacet, const Dt::CLightProbeComponent& _rDtLightProbeFacet);
+        void Render(const Dt::CEntity& _rEntity, CInternComponent& _rInterLightProbeFacet, const Dt::CLightProbeComponent& _rDtLightProbeFacet);
 
-        void RenderEnvironment(CInternLightProbeFacet& _rInterLightProbeFacet);
+        void RenderEnvironment(CInternComponent& _rInterLightProbeFacet);
 
-        void RenderEntities(CInternLightProbeFacet& _rInterLightProbeFacet, const glm::vec3& _rPosition);
+        void RenderEntities(CInternComponent& _rInterLightProbeFacet, const glm::vec3& _rPosition);
 
-        void RenderFiltering(CInternLightProbeFacet& _rInterLightProbeFacet, const Dt::CLightProbeComponent& _rDtLightProbeFacet);
+        void RenderFiltering(CInternComponent& _rInterLightProbeFacet, const Dt::CLightProbeComponent& _rDtLightProbeFacet);
 
         void UpdateLightProperties();
 
@@ -206,7 +206,7 @@ namespace
 
 namespace 
 {
-    CGfxLightProbeManager::CInternLightProbeFacet::CInternLightProbeFacet()
+    CGfxLightProbeManager::CInternComponent::CInternComponent()
         : CLightProbeComponent          ()
         , m_DiffuseHDRTargetSetPtr  ()
         , m_DiffuseViewPortSetPtr   ()
@@ -218,7 +218,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    CGfxLightProbeManager::CInternLightProbeFacet::~CInternLightProbeFacet()
+    CGfxLightProbeManager::CInternComponent::~CInternComponent()
     {
         m_TargetSetPtr   = 0;
         m_ViewPortSetPtr = 0;
@@ -456,7 +456,7 @@ namespace
             {
                 Dt::CLightProbeComponent* pDtProbeFacet = rCurrentEntity.GetComponent<Dt::CLightProbeComponent>();
 
-                CInternLightProbeFacet* pGfxProbeFacet = CComponentManager::GetInstance().GetComponent<CInternLightProbeFacet>(pDtProbeFacet->GetID());
+                CInternComponent* pGfxProbeFacet = CComponentManager::GetInstance().GetComponent<CInternComponent>(pDtProbeFacet->GetID());
 
                 // -----------------------------------------------------------------------------
                 // Check update needs
@@ -489,32 +489,29 @@ namespace
 
         DirtyFlags = pLightProbeComponent->GetDirtyFlags();
 
+        CInternComponent* pGfxComponent = 0;
+
         if ((DirtyFlags & Dt::CLightProbeComponent::DirtyCreate) != 0)
         {
             // -----------------------------------------------------------------------------
             // Create facet
             // -----------------------------------------------------------------------------
-            CInternLightProbeFacet& rGfxLightProbeFacet = AllocateLightProbeFacet(pLightProbeComponent->GetID(), pLightProbeComponent->GetQualityInPixel(), 128);
-
-            // -----------------------------------------------------------------------------
-            // Set time
-            // -----------------------------------------------------------------------------
-            rGfxLightProbeFacet.m_TimeStamp = Core::Time::GetNumberOfFrame() + 1;
+            pGfxComponent = AllocateLightProbeFacet(pLightProbeComponent->GetID(), pLightProbeComponent->GetQualityInPixel(), 128);
         }
-        else if ((DirtyFlags & Dt::CLightProbeComponent::DirtyInfo) != 0)
+        else
         {
-            CInternLightProbeFacet* pGfxLightProbeFacet = CComponentManager::GetInstance().GetComponent<CInternLightProbeFacet>(pLightProbeComponent->GetID());
-
-            // -----------------------------------------------------------------------------
-            // Set time
-            // -----------------------------------------------------------------------------
-            pGfxLightProbeFacet->m_TimeStamp = Core::Time::GetNumberOfFrame() + 1;
+            pGfxComponent = CComponentManager::GetInstance().GetComponent<CInternComponent>(pLightProbeComponent->GetID());
         }
+
+        // -----------------------------------------------------------------------------
+        // Set time
+        // -----------------------------------------------------------------------------
+        pGfxComponent->m_TimeStamp = Core::Time::GetNumberOfFrame() + 1;
     }
 
     // -----------------------------------------------------------------------------
 
-    CGfxLightProbeManager::CInternLightProbeFacet& CGfxLightProbeManager::AllocateLightProbeFacet(Base::ID _ID, unsigned int _SpecularFaceSize, unsigned int _DiffuseFaceSize)
+    CGfxLightProbeManager::CInternComponent* CGfxLightProbeManager::AllocateLightProbeFacet(Base::ID _ID, unsigned int _SpecularFaceSize, unsigned int _DiffuseFaceSize)
     {
         Gfx::STextureDescriptor  TextureDescriptor;
         Gfx::SViewPortDescriptor ViewPortDesc;
@@ -522,7 +519,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Create facet
         // -----------------------------------------------------------------------------
-        CInternLightProbeFacet& rGfxLightProbeFacet = CComponentManager::GetInstance().Allocate<CInternLightProbeFacet>(_ID);
+        CInternComponent* pGfxLightProbeComponent = CComponentManager::GetInstance().Allocate<CInternComponent>(_ID);
 
         // -----------------------------------------------------------------------------
         // Create stuff for reflection probe
@@ -541,9 +538,9 @@ namespace
         TextureDescriptor.m_pPixels          = 0;
         TextureDescriptor.m_Format           = CTexture::R16G16B16A16_FLOAT;
 
-        rGfxLightProbeFacet.m_ReflectionCubemapPtr = TextureManager::CreateCubeTexture(TextureDescriptor);
+        pGfxLightProbeComponent->m_ReflectionCubemapPtr = TextureManager::CreateCubeTexture(TextureDescriptor);
 
-		TextureManager::SetTextureLabel(rGfxLightProbeFacet.m_ReflectionCubemapPtr, "Light Probe Reflection Texture");
+		TextureManager::SetTextureLabel(pGfxLightProbeComponent->m_ReflectionCubemapPtr, "Light Probe Reflection Texture");
 
         // -----------------------------------------------------------------------------
 
@@ -553,13 +550,13 @@ namespace
         TextureDescriptor.m_Binding          = CTexture::ShaderResource | CTexture::DepthStencilTarget;
         TextureDescriptor.m_Format           = CTexture::R32_FLOAT;
 
-        rGfxLightProbeFacet.m_DepthPtr = TextureManager::CreateCubeTexture(TextureDescriptor);
+        pGfxLightProbeComponent->m_DepthPtr = TextureManager::CreateCubeTexture(TextureDescriptor);
 
-        TextureManager::SetTextureLabel(rGfxLightProbeFacet.m_DepthPtr, "Light Probe Depth Texture");
+        TextureManager::SetTextureLabel(pGfxLightProbeComponent->m_DepthPtr, "Light Probe Depth Texture");
 
         // -----------------------------------------------------------------------------
 
-        CTargetSetPtr ReflectionTargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTexturePtr>(rGfxLightProbeFacet.m_ReflectionCubemapPtr), static_cast<CTexturePtr>(rGfxLightProbeFacet.m_DepthPtr));
+        CTargetSetPtr ReflectionTargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTexturePtr>(pGfxLightProbeComponent->m_ReflectionCubemapPtr), static_cast<CTexturePtr>(pGfxLightProbeComponent->m_DepthPtr));
 
         TargetSetManager::SetTargetSetLabel(ReflectionTargetSetPtr, "Light Probe Reflection Target");
 
@@ -576,8 +573,8 @@ namespace
 
         CViewPortSetPtr ReflectionViewPortSetPtr = ViewManager::CreateViewPortSet(ReflectionViewPortPtr);
 
-        rGfxLightProbeFacet.m_TargetSetPtr   = ReflectionTargetSetPtr;
-        rGfxLightProbeFacet.m_ViewPortSetPtr = ReflectionViewPortSetPtr;
+        pGfxLightProbeComponent->m_TargetSetPtr   = ReflectionTargetSetPtr;
+        pGfxLightProbeComponent->m_ViewPortSetPtr = ReflectionViewPortSetPtr;
 
         // -----------------------------------------------------------------------------
         // Create rest of the probe that is available at any type
@@ -600,9 +597,9 @@ namespace
         TextureDescriptor.m_pPixels          = 0;
         TextureDescriptor.m_Format           = CTexture::R16G16B16A16_FLOAT;
         
-        rGfxLightProbeFacet.m_SpecularPtr = TextureManager::CreateCubeTexture(TextureDescriptor);
+        pGfxLightProbeComponent->m_SpecularPtr = TextureManager::CreateCubeTexture(TextureDescriptor);
 
-		TextureManager::SetTextureLabel(rGfxLightProbeFacet.m_SpecularPtr, "Light Probe Specular Texture");
+		TextureManager::SetTextureLabel(pGfxLightProbeComponent->m_SpecularPtr, "Light Probe Specular Texture");
         
         // -----------------------------------------------------------------------------
         
@@ -612,9 +609,9 @@ namespace
         TextureDescriptor.m_Binding          = CTexture::ShaderResource | CTexture::RenderTarget;
         TextureDescriptor.m_Format           = CTexture::R16G16B16A16_FLOAT;
         
-        rGfxLightProbeFacet.m_DiffusePtr = TextureManager::CreateCubeTexture(TextureDescriptor);
+        pGfxLightProbeComponent->m_DiffusePtr = TextureManager::CreateCubeTexture(TextureDescriptor);
 
-		TextureManager::SetTextureLabel(rGfxLightProbeFacet.m_DiffusePtr, "Light Probe Diffuse Texture");
+		TextureManager::SetTextureLabel(pGfxLightProbeComponent->m_DiffusePtr, "Light Probe Diffuse Texture");
         
         // -----------------------------------------------------------------------------
         // For all cube maps create a render target for every mip map
@@ -624,15 +621,15 @@ namespace
         ViewPortDesc.m_MinDepth = 0.0f;
         ViewPortDesc.m_MaxDepth = 1.0f;
 
-        CInternLightProbeFacet::CTargetSets&   rSpecularTargetSets   = rGfxLightProbeFacet.m_SpecularHDRTargetSetPtrs;
-        CInternLightProbeFacet::CViewPortSets& rSpecularViewPortSets = rGfxLightProbeFacet.m_SpecularViewPortSetPtrs;
+        CInternComponent::CTargetSets&   rSpecularTargetSets   = pGfxLightProbeComponent->m_SpecularHDRTargetSetPtrs;
+        CInternComponent::CViewPortSets& rSpecularViewPortSets = pGfxLightProbeComponent->m_SpecularViewPortSetPtrs;
 
-        for (unsigned int IndexOfMipmap = 0; IndexOfMipmap < rGfxLightProbeFacet.m_SpecularPtr->GetNumberOfMipLevels(); ++ IndexOfMipmap)
+        for (unsigned int IndexOfMipmap = 0; IndexOfMipmap < pGfxLightProbeComponent->m_SpecularPtr->GetNumberOfMipLevels(); ++ IndexOfMipmap)
         {
             // -----------------------------------------------------------------------------
             // Target set
             // -----------------------------------------------------------------------------
-            CTexturePtr MipmapCubeTexture = TextureManager::GetMipmapFromTexture2D(rGfxLightProbeFacet.m_SpecularPtr, IndexOfMipmap);
+            CTexturePtr MipmapCubeTexture = TextureManager::GetMipmapFromTexture2D(pGfxLightProbeComponent->m_SpecularPtr, IndexOfMipmap);
             
             CTargetSetPtr SpecularMipmapTargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTexturePtr>(MipmapCubeTexture));
             
@@ -659,13 +656,13 @@ namespace
             // -----------------------------------------------------------------------------
             // Target set
             // -----------------------------------------------------------------------------
-            CTargetSetPtr DiffuseMipmapTargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTexturePtr>(rGfxLightProbeFacet.m_DiffusePtr));
+            CTargetSetPtr DiffuseMipmapTargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTexturePtr>(pGfxLightProbeComponent->m_DiffusePtr));
             
             // -----------------------------------------------------------------------------
             // View port
             // -----------------------------------------------------------------------------
-            ViewPortDesc.m_Width    = static_cast<float>(rGfxLightProbeFacet.m_DiffusePtr->GetNumberOfPixelsU());
-            ViewPortDesc.m_Height   = static_cast<float>(rGfxLightProbeFacet.m_DiffusePtr->GetNumberOfPixelsV());
+            ViewPortDesc.m_Width    = static_cast<float>(pGfxLightProbeComponent->m_DiffusePtr->GetNumberOfPixelsU());
+            ViewPortDesc.m_Height   = static_cast<float>(pGfxLightProbeComponent->m_DiffusePtr->GetNumberOfPixelsV());
             
             CViewPortPtr DiffuseMipmapViewPort = ViewManager::CreateViewPort(ViewPortDesc);
             
@@ -674,16 +671,16 @@ namespace
             // -----------------------------------------------------------------------------
             // Put into light probe
             // -----------------------------------------------------------------------------
-            rGfxLightProbeFacet.m_DiffuseHDRTargetSetPtr = DiffuseMipmapTargetSetPtr;
-            rGfxLightProbeFacet.m_DiffuseViewPortSetPtr  = DiffuseViewPortSetPtr;
+            pGfxLightProbeComponent->m_DiffuseHDRTargetSetPtr = DiffuseMipmapTargetSetPtr;
+            pGfxLightProbeComponent->m_DiffuseViewPortSetPtr  = DiffuseViewPortSetPtr;
         }
 
-        return rGfxLightProbeFacet;
+        return pGfxLightProbeComponent;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CGfxLightProbeManager::Render(const Dt::CEntity& _rEntity, CInternLightProbeFacet& _rInterLightProbeFacet, const Dt::CLightProbeComponent& _rDtLightProbeFacet)
+    void CGfxLightProbeManager::Render(const Dt::CEntity& _rEntity, CInternComponent& _rInterLightProbeFacet, const Dt::CLightProbeComponent& _rDtLightProbeFacet)
     {
         Performance::BeginEvent("Light Probe");
 
@@ -718,7 +715,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxLightProbeManager::RenderEnvironment(CInternLightProbeFacet& _rInterLightProbeFacet)
+    void CGfxLightProbeManager::RenderEnvironment(CInternComponent& _rInterLightProbeFacet)
     {
         Performance::BeginEvent("Render Environment");
 
@@ -870,7 +867,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxLightProbeManager::RenderEntities(CInternLightProbeFacet& _rInterLightProbeFacet, const glm::vec3& _rPosition)
+    void CGfxLightProbeManager::RenderEntities(CInternComponent& _rInterLightProbeFacet, const glm::vec3& _rPosition)
     {
         Performance::BeginEvent("Render Entities");
 
@@ -1095,7 +1092,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxLightProbeManager::RenderFiltering(CInternLightProbeFacet& _rInterLightProbeFacet, const Dt::CLightProbeComponent& _rDtLightProbeFacet)
+    void CGfxLightProbeManager::RenderFiltering(CInternComponent& _rInterLightProbeFacet, const Dt::CLightProbeComponent& _rDtLightProbeFacet)
     {
         // -----------------------------------------------------------------------------
         // Start updating/filtering
@@ -1149,11 +1146,11 @@ namespace
         // -----------------------------------------------------------------------------
         // Refine HDR specular from HDR cube map
         // -----------------------------------------------------------------------------
-        CInternLightProbeFacet::CTargetSets&   rSpecularTargetSets   = _rInterLightProbeFacet.m_SpecularHDRTargetSetPtrs;
-        CInternLightProbeFacet::CViewPortSets& rSpecularViewPortSets = _rInterLightProbeFacet.m_SpecularViewPortSetPtrs;
+        CInternComponent::CTargetSets&   rSpecularTargetSets   = _rInterLightProbeFacet.m_SpecularHDRTargetSetPtrs;
+        CInternComponent::CViewPortSets& rSpecularViewPortSets = _rInterLightProbeFacet.m_SpecularViewPortSetPtrs;
 
-        CInternLightProbeFacet::CTargetSets::iterator CurrentOfSpecularMipmap = rSpecularTargetSets.begin();
-        CInternLightProbeFacet::CTargetSets::iterator EndOfSpecularMipmaps    = rSpecularTargetSets.end();
+        CInternComponent::CTargetSets::iterator CurrentOfSpecularMipmap = rSpecularTargetSets.begin();
+        CInternComponent::CTargetSets::iterator EndOfSpecularMipmaps    = rSpecularTargetSets.end();
 
         unsigned int IndexOfMipmap = 0;
 

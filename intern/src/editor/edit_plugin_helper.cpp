@@ -129,24 +129,26 @@ namespace
 
         // -----------------------------------------------------------------------------
 
-        Dt::CARControllerPluginComponent& rFacet = Dt::CComponentManager::GetInstance().Allocate<Dt::CARControllerPluginComponent>();
+        Dt::CARControllerPluginComponent* pFacet = Dt::CComponentManager::GetInstance().Allocate<Dt::CARControllerPluginComponent>();
 
-        rFacet.SetCameraEntity       (0);
-        rFacet.SetConfiguration      ("-device=WinDS -flipV");
-        rFacet.SetCameraParameterFile("ar/configurations/logitech_para.dat");
-        rFacet.SetOutputBackground   (pBackgroundTexture);
-        rFacet.SetDeviceType         (Dt::CARControllerPluginComponent::Webcam);
-        rFacet.SetNumberOfMarker     (1);
-        rFacet.SetFreezeOutput       (false);
+        pFacet->SetCameraEntity       (0);
+        pFacet->SetConfiguration      ("-device=WinDS -flipV");
+        pFacet->SetCameraParameterFile("ar/configurations/logitech_para.dat");
+        pFacet->SetOutputBackground   (pBackgroundTexture);
+        pFacet->SetDeviceType         (Dt::CARControllerPluginComponent::Webcam);
+        pFacet->SetNumberOfMarker     (1);
+        pFacet->SetFreezeOutput       (false);
             
-        Dt::CARControllerPluginComponent::SMarker& rMarkerOne = rFacet.GetMarker(0);
+        Dt::CARControllerPluginComponent::SMarker& rMarkerOne = pFacet->GetMarker(0);
 
         rMarkerOne.m_UID          = 0;
         rMarkerOne.m_Type         = Dt::CARControllerPluginComponent::SMarker::Square;
         rMarkerOne.m_WidthInMeter = 0.08f;
         rMarkerOne.m_PatternFile  = "ar/patterns/patt.hiro";
 
-        rCurrentEntity.AddComponent(rFacet);
+        rCurrentEntity.AddComponent(pFacet);
+
+        Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pFacet, Dt::CARControllerPluginComponent::DirtyCreate);
     }
 
     // -----------------------------------------------------------------------------
@@ -311,7 +313,7 @@ namespace
 
             pFacet->SetNumberOfMarker(NumberOfMarker);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pFacet, Dt::CARControllerPluginComponent::DirtyInfo);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pFacet, Dt::CARControllerPluginComponent::DirtyInfo);
         }
     }
 
@@ -355,7 +357,7 @@ namespace
 
             rMarker.m_WidthInMeter = Width;
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pFacet, Dt::CARControllerPluginComponent::DirtyInfo);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pFacet, Dt::CARControllerPluginComponent::DirtyInfo);
         }
     }
 

@@ -723,7 +723,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Create facet
             // -----------------------------------------------------------------------------
-            CInternSkyFacet& rGraphicSkyboxFacet = CComponentManager::GetInstance().Allocate<CInternSkyFacet>(pSkyComponent->GetID());
+            CInternSkyFacet* pGraphicSkyboxFacet = CComponentManager::GetInstance().Allocate<CInternSkyFacet>(pSkyComponent->GetID());
 
             // -----------------------------------------------------------------------------
             // Cubemap
@@ -744,16 +744,16 @@ namespace
             TextureDescriptor.m_pPixels          = 0;
             TextureDescriptor.m_Format           = CTexture::R16G16B16A16_FLOAT;
         
-            rGraphicSkyboxFacet.m_CubemapPtr = TextureManager::CreateCubeTexture(TextureDescriptor);
+            pGraphicSkyboxFacet->m_CubemapPtr = TextureManager::CreateCubeTexture(TextureDescriptor);
 
-            TextureManager::SetTextureLabel(rGraphicSkyboxFacet.m_CubemapPtr, "Sky Texture");
+            TextureManager::SetTextureLabel(pGraphicSkyboxFacet->m_CubemapPtr, "Sky Texture");
 
             // -----------------------------------------------------------------------------
             // Target Set
             // -----------------------------------------------------------------------------
-            CTexturePtr FirstMipmapCubeTexture = TextureManager::GetMipmapFromTexture2D(rGraphicSkyboxFacet.m_CubemapPtr, 0);
+            CTexturePtr FirstMipmapCubeTexture = TextureManager::GetMipmapFromTexture2D(pGraphicSkyboxFacet->m_CubemapPtr, 0);
 
-            rGraphicSkyboxFacet.m_TargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTexturePtr>(FirstMipmapCubeTexture));
+            pGraphicSkyboxFacet->m_TargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTexturePtr>(FirstMipmapCubeTexture));
 
             // -----------------------------------------------------------------------------
             // Viewport
@@ -770,7 +770,7 @@ namespace
 
             CViewPortPtr MipMapViewPort = ViewManager::CreateViewPort(ViewPortDesc);
 
-            rGraphicSkyboxFacet.m_ViewPortSetPtr = ViewManager::CreateViewPortSet(MipMapViewPort);
+            pGraphicSkyboxFacet->m_ViewPortSetPtr = ViewManager::CreateViewPortSet(MipMapViewPort);
 
             // -----------------------------------------------------------------------------
             // Render context
@@ -781,21 +781,21 @@ namespace
             CRenderContextPtr CubemapRenderContextPtr = ContextManager::CreateRenderContext();
 
             CubemapRenderContextPtr->SetCamera(CameraPtr);
-            CubemapRenderContextPtr->SetViewPortSet(rGraphicSkyboxFacet.m_ViewPortSetPtr);
-            CubemapRenderContextPtr->SetTargetSet(rGraphicSkyboxFacet.m_TargetSetPtr);
+            CubemapRenderContextPtr->SetViewPortSet(pGraphicSkyboxFacet->m_ViewPortSetPtr);
+            CubemapRenderContextPtr->SetTargetSet(pGraphicSkyboxFacet->m_TargetSetPtr);
             CubemapRenderContextPtr->SetRenderState(NoDepthStatePtr);
 
-            rGraphicSkyboxFacet.m_RenderContextPtr = CubemapRenderContextPtr;
+            pGraphicSkyboxFacet->m_RenderContextPtr = CubemapRenderContextPtr;
 
             // -----------------------------------------------------------------------------
             // Update
             // -----------------------------------------------------------------------------
-            UpdateFacet(pSkyComponent, &rGraphicSkyboxFacet);
+            UpdateFacet(pSkyComponent, pGraphicSkyboxFacet);
 
             // -----------------------------------------------------------------------------
             // Save facet
             // -----------------------------------------------------------------------------
-            rGraphicSkyboxFacet.m_TimeStamp = Core::Time::GetNumberOfFrame() + 1;
+            pGraphicSkyboxFacet->m_TimeStamp = Core::Time::GetNumberOfFrame() + 1;
         }
         else if ((DirtyFlags & Dt::CSkyComponent::DirtyInfo))
         {

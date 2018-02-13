@@ -77,8 +77,6 @@ namespace
 
         public:
 
-            Dt::CSunComponent* m_pComponent;
-
             CRenderContextPtr m_RenderContextPtr;
 
         private:
@@ -97,9 +95,9 @@ namespace
 
         void OnDirtyComponent(Base::ID _TypeID, Dt::IComponent* _pComponent);
 
-        void CreateSM(unsigned int _Size, CInternSunComponent& _rInternLight);
+        void CreateSM(unsigned int _Size, CInternSunComponent* _pInternLight);
 
-        void RenderShadows(CInternSunComponent& _rInternLight);
+        void RenderShadows(CInternSunComponent* _pInternLight);
     };
 } // namespace
 
@@ -235,7 +233,7 @@ namespace
                 // -----------------------------------------------------------------------------
                 // Render
                 // -----------------------------------------------------------------------------
-                RenderShadows(*pGfxSunFacet);
+                RenderShadows(pGfxSunFacet);
             }
         }
     }
@@ -260,22 +258,22 @@ namespace
             // -----------------------------------------------------------------------------
             // Create facet
             // -----------------------------------------------------------------------------
-            CInternSunComponent& rGfxSunFacet = CComponentManager::GetInstance().Allocate<CInternSunComponent>(pSunComponent->GetID());
+            CInternSunComponent* pGfxSunFacet = CComponentManager::GetInstance().Allocate<CInternSunComponent>(pSunComponent->GetID());
 
             // -----------------------------------------------------------------------------
             // Set shadow data
             // -----------------------------------------------------------------------------
-            CreateSM(2048, rGfxSunFacet);
+            CreateSM(2048, pGfxSunFacet);
 
             // -----------------------------------------------------------------------------
             // Set variables
             // -----------------------------------------------------------------------------
-            rGfxSunFacet.m_CameraPtr = rGfxSunFacet.m_RenderContextPtr->GetCamera();
+            pGfxSunFacet->m_CameraPtr = pGfxSunFacet->m_RenderContextPtr->GetCamera();
 
             // -----------------------------------------------------------------------------
             // Set dirty
             // -----------------------------------------------------------------------------
-            rGfxSunFacet.m_TimeStamp = Core::Time::GetNumberOfFrame() + 1;
+            pGfxSunFacet->m_TimeStamp = Core::Time::GetNumberOfFrame() + 1;
         }
         else
         {
@@ -289,7 +287,7 @@ namespace
 
     // -----------------------------------------------------------------------------
     
-    void CGfxSunManager::CreateSM(unsigned int _Size, CInternSunComponent& _rInternLight)
+    void CGfxSunManager::CreateSM(unsigned int _Size, CInternSunComponent* _pInternLight)
     {
         unsigned int NumberOfShadowMapPixel = _Size;
         
@@ -311,14 +309,14 @@ namespace
         RendertargetDescriptor.m_Binding          = CTexture::DepthStencilTarget | CTexture::RenderTarget;
         RendertargetDescriptor.m_Format           = CTexture::R32_FLOAT;
         
-        _rInternLight.m_TextureSMPtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // Depth only
+        _pInternLight->m_TextureSMPtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // Depth only
 
-		TextureManager::SetTextureLabel(_rInternLight.m_TextureSMPtr, "Sun: Shadowmap");
+		TextureManager::SetTextureLabel(_pInternLight->m_TextureSMPtr, "Sun: Shadowmap");
         
         // -----------------------------------------------------------------------------
         // Create target set for shadow mapping
         // -----------------------------------------------------------------------------
-        CTargetSetPtr ShadowTargetSetPtr = TargetSetManager::CreateTargetSet(_rInternLight.m_TextureSMPtr);
+        CTargetSetPtr ShadowTargetSetPtr = TargetSetManager::CreateTargetSet(_pInternLight->m_TextureSMPtr);
 
 		TargetSetManager::SetTargetSetLabel(ShadowTargetSetPtr, "Sun: Shadowmap");
         
@@ -349,29 +347,29 @@ namespace
         CRenderStatePtr RenderStatePtr = StateManager::GetRenderState(0);
         CTargetSetPtr   TargetSetPtr   = ShadowTargetSetPtr;
         
-        _rInternLight.m_RenderContextPtr = ContextManager::CreateRenderContext();
+        _pInternLight->m_RenderContextPtr = ContextManager::CreateRenderContext();
         
-        _rInternLight.m_RenderContextPtr->SetCamera(CameraPtr);
-        _rInternLight.m_RenderContextPtr->SetViewPortSet(ViewPortSetPtr);
-        _rInternLight.m_RenderContextPtr->SetTargetSet(TargetSetPtr);
-        _rInternLight.m_RenderContextPtr->SetRenderState(RenderStatePtr);
+        _pInternLight->m_RenderContextPtr->SetCamera(CameraPtr);
+        _pInternLight->m_RenderContextPtr->SetViewPortSet(ViewPortSetPtr);
+        _pInternLight->m_RenderContextPtr->SetTargetSet(TargetSetPtr);
+        _pInternLight->m_RenderContextPtr->SetRenderState(RenderStatePtr);
     }
 
     // -----------------------------------------------------------------------------
 
-    void CGfxSunManager::RenderShadows(CInternSunComponent& _rInternLight)
+    void CGfxSunManager::RenderShadows(CInternSunComponent* _pInternLight)
     {
         Performance::BeginEvent("Sun Shadows");
 
         // -----------------------------------------------------------------------------
         // Prepare shadow
         // -----------------------------------------------------------------------------
-        TargetSetManager::ClearTargetSet(_rInternLight.m_RenderContextPtr->GetTargetSet());
+        TargetSetManager::ClearTargetSet(_pInternLight->m_RenderContextPtr->GetTargetSet());
             
         // -----------------------------------------------------------------------------
         // Set light as render target
         // -----------------------------------------------------------------------------
-        ContextManager::SetRenderContext(_rInternLight.m_RenderContextPtr);
+        ContextManager::SetRenderContext(_pInternLight->m_RenderContextPtr);
             
         // -----------------------------------------------------------------------------
         // Set shader
@@ -391,7 +389,7 @@ namespace
         // -----------------------------------------------------------------------------
         SPerLightConstantBuffer ViewBuffer;
 
-        ViewBuffer.vs_ViewProjectionMatrix = _rInternLight.m_RenderContextPtr->GetCamera()->GetViewProjectionMatrix();
+        ViewBuffer.vs_ViewProjectionMatrix = _pInternLight->m_RenderContextPtr->GetCamera()->GetViewProjectionMatrix();
             
         BufferManager::UploadBufferData(m_LightCameraVSBufferPtr->GetBuffer(0), &ViewBuffer);
             
@@ -401,7 +399,7 @@ namespace
         Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Dynamic);
         Dt::Map::CEntityIterator EndOfEntities = Dt::Map::EntitiesEnd();
             
-        for (; CurrentEntity != EndOfEntities; )
+        for (; CurrentEntity != EndOfEntities; CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Dynamic))
         {
             Dt::CEntity& rCurrentEntity = *CurrentEntity;
 
@@ -464,11 +462,6 @@ namespace
                     
                 ContextManager::ResetVertexBuffer();
             }
-                
-            // -----------------------------------------------------------------------------
-            // Next entity
-            // -----------------------------------------------------------------------------
-            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Dynamic);
         }
             
         ContextManager::ResetConstantBuffer(0);

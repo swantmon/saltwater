@@ -9,6 +9,7 @@
 #include "graphic/gfx_component.h"
 
 #include <map>
+#include <memory>
 
 namespace Gfx
 {
@@ -19,15 +20,15 @@ namespace Gfx
     public:
 
         template<class T>
-        T& Allocate(Base::ID _ID);
+        T* Allocate(Base::ID _ID);
 
         template<class T>
         T* GetComponent(Base::ID _ID);
 
     private:
 
-        typedef std::map<Base::ID, Gfx::IComponent*>  CComponentByID;
-        typedef std::pair<Base::ID, Gfx::IComponent*> CComponentPair;
+        typedef std::map<Base::ID, std::unique_ptr<Gfx::IComponent>>  CComponentByID;
+        typedef std::pair<Base::ID, std::unique_ptr<Gfx::IComponent>> CComponentPair;
 
     private:
 
@@ -43,13 +44,13 @@ namespace Gfx
 namespace Gfx
 {
     template<class T>
-    T& CComponentManager::Allocate(Base::ID _ID)
+    T* CComponentManager::Allocate(Base::ID _ID)
     {
-        T* pComponent = Base::CMemory::NewObject<T>();
+        std::unique_ptr<T> Component(new T());
 
-        m_Components.insert(CComponentPair(_ID, pComponent));
+        m_Components.insert(CComponentPair(_ID, std::move(Component)));
 
-        return *pComponent;
+        return static_cast<T*>(m_Components.at(_ID).get());
     }
 
     // -----------------------------------------------------------------------------
@@ -59,6 +60,6 @@ namespace Gfx
     {
         if (m_Components.find(_ID) == m_Components.end()) return nullptr;
 
-        return static_cast<T*>(m_Components.at(_ID));
+        return static_cast<T*>(m_Components.at(_ID).get());
     }
 } // namespace Gfx

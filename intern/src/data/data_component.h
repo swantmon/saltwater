@@ -64,6 +64,9 @@ namespace Dt
 
     public:
 
+        CComponent();
+        ~CComponent();
+
         const Base::ID GetID() const;
         const Base::ID GetTypeID() const override;
 
@@ -93,6 +96,22 @@ namespace Dt
 
 namespace Dt
 {
+    template<class T>
+    CComponent<T>::CComponent()
+    {
+
+    }
+
+    // -----------------------------------------------------------------------------
+
+    template<class T>
+    CComponent<T>::~CComponent()
+    {
+
+    }
+
+    // -----------------------------------------------------------------------------
+
     template<class T>
     const Base::ID CComponent<T>::GetID() const
     {

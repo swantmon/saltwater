@@ -128,12 +128,11 @@ namespace
 
             rCurrentEntity.SetCategory(Dt::SEntityCategory::Dynamic);
 
-            // -----------------------------------------------------------------------------
-            // Create facet and set it
-            // -----------------------------------------------------------------------------
-            Dt::CBloomComponent& rEffectFacet = Dt::CComponentManager::GetInstance().Allocate<Dt::CBloomComponent>();
+            auto pComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CBloomComponent>();
 
-            rCurrentEntity.AddComponent(rEffectFacet);
+            rCurrentEntity.AddComponent(pComponent);
+
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pComponent, Dt::CBloomComponent::DirtyCreate);
         }
     }
 
@@ -151,12 +150,11 @@ namespace
 
             rCurrentEntity.SetCategory(Dt::SEntityCategory::Dynamic);
 
-            // -----------------------------------------------------------------------------
-            // Create facet and set it
-            // -----------------------------------------------------------------------------
-            Dt::CDOFComponent& rEffectFacet = Dt::CComponentManager::GetInstance().Allocate<Dt::CDOFComponent>();
+            auto pComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CDOFComponent>();
 
-            rCurrentEntity.AddComponent(rEffectFacet);
+            rCurrentEntity.AddComponent(pComponent);
+
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pComponent, Dt::CDOFComponent::DirtyCreate);
         }
     }
 
@@ -174,12 +172,11 @@ namespace
 
             rCurrentEntity.SetCategory(Dt::SEntityCategory::Dynamic);
 
-            // -----------------------------------------------------------------------------
-            // Create facet and set it
-            // -----------------------------------------------------------------------------
-            Dt::CPostAAComponent& rEffectFacet = Dt::CComponentManager::GetInstance().Allocate<Dt::CPostAAComponent>();
+            auto pComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CPostAAComponent>();
 
-            rCurrentEntity.AddComponent(rEffectFacet);
+            rCurrentEntity.AddComponent(pComponent);
+
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pComponent, Dt::CPostAAComponent::DirtyCreate);
         }
     }
 
@@ -197,12 +194,11 @@ namespace
 
             rCurrentEntity.SetCategory(Dt::SEntityCategory::Dynamic);
 
-            // -----------------------------------------------------------------------------
-            // Create facet and set it
-            // -----------------------------------------------------------------------------
-            Dt::CSSRComponent& rEffectFacet = Dt::CComponentManager::GetInstance().Allocate<Dt::CSSRComponent>();
+            auto pComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CSSRComponent>();
 
-            rCurrentEntity.AddComponent(rEffectFacet);
+            rCurrentEntity.AddComponent(pComponent);
+
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pComponent, Dt::CSSRComponent::DirtyCreate);
         }
     }
 
@@ -220,12 +216,11 @@ namespace
 
             rCurrentEntity.SetCategory(Dt::SEntityCategory::Dynamic);
 
-            // -----------------------------------------------------------------------------
-            // Create facet and set it
-            // -----------------------------------------------------------------------------
-            Dt::CVolumeFogComponent& rEffectFacet = Dt::CComponentManager::GetInstance().Allocate<Dt::CVolumeFogComponent>();
+            auto pComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CVolumeFogComponent>();
 
-            rCurrentEntity.AddComponent(rEffectFacet);
+            rCurrentEntity.AddComponent(pComponent);
+
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pComponent, Dt::CVolumeFogComponent::DirtyCreate);
         }
     }
 
@@ -423,7 +418,7 @@ namespace
 
             pFXFacet->UpdateEffect();
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pFXFacet, Dt::CBloomComponent::DirtyInfo);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pFXFacet, Dt::CBloomComponent::DirtyInfo);
         }
     }
 
@@ -463,7 +458,7 @@ namespace
 
             pFXFacet->UpdateEffect();
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pFXFacet, Dt::CDOFComponent::DirtyInfo);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pFXFacet, Dt::CDOFComponent::DirtyInfo);
         }
     }
 
@@ -493,7 +488,7 @@ namespace
 
             pFXFacet->UpdateEffect();
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pFXFacet, Dt::CPostAAComponent::DirtyInfo);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pFXFacet, Dt::CPostAAComponent::DirtyInfo);
         }
     }
 
@@ -530,7 +525,7 @@ namespace
 
             pFXFacet->UpdateEffect();
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pFXFacet, Dt::CSSRComponent::DirtyInfo);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pFXFacet, Dt::CSSRComponent::DirtyInfo);
         }
     }
 
@@ -592,7 +587,7 @@ namespace
 
             pFXFacet->SetDensityAttenuation(DensityAttenuation);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pFXFacet, Dt::CVolumeFogComponent::DirtyInfo);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pFXFacet, Dt::CVolumeFogComponent::DirtyInfo);
         }
     }
 

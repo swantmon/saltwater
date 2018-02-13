@@ -17,23 +17,18 @@ namespace Dt
     
     CComponentManager::~CComponentManager()
     {
-        for (auto Element : m_Components)
-        {
-            Base::CMemory::DeleteObject(Element);
-        }
-
         m_Components.clear();
     }
 
     // -----------------------------------------------------------------------------
 
-    void CComponentManager::MarkComponentAsDirty(Dt::IComponent& _rComponent, unsigned int _DirtyFlags)
+    void CComponentManager::MarkComponentAsDirty(Dt::IComponent* _pComponent, unsigned int _DirtyFlags)
     {
-        _rComponent.SetDirtyFlags(_DirtyFlags);
+        _pComponent->SetDirtyFlags(_DirtyFlags);
 
         for (auto Delegate : m_ComponentDelegates)
         {
-            Delegate(_rComponent.GetTypeID(), &_rComponent);
+            Delegate(_pComponent->GetTypeID(), _pComponent);
         }
     }
 

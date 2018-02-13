@@ -399,7 +399,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Get graphic facet
             // -----------------------------------------------------------------------------
-            if (rCurrentEntity.HasComponent<Dt::CSunComponent>())
+            if (!rCurrentEntity.HasComponent<Dt::CSunComponent>())
             {
                 CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Dynamic);
 

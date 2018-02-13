@@ -9,6 +9,7 @@
 #include "data/data_component.h"
 
 #include <functional>
+#include <memory>
 #include <vector>
 
 namespace Dt
@@ -24,16 +25,16 @@ namespace Dt
     public:
 
         template<class T>
-        T& Allocate();
+        T* Allocate();
 
-        void MarkComponentAsDirty(Dt::IComponent& _rComponent, unsigned int _DirtyFlags);
+        void MarkComponentAsDirty(Dt::IComponent* _pComponent, unsigned int _DirtyFlags);
 
         void RegisterDirtyComponentHandler(CComponentDelegate _NewDelegate);
 
     private:
 
-        typedef std::vector<Dt::IComponent*>    CComponents;
-        typedef std::vector<CComponentDelegate> CComponentDelegates;
+        typedef std::vector<std::unique_ptr<Dt::IComponent>> CComponents;
+        typedef std::vector<CComponentDelegate>              CComponentDelegates;
 
     private:
 
@@ -53,14 +54,14 @@ namespace Dt
 namespace Dt
 {
     template<class T>
-    T& CComponentManager::Allocate()
+    T* CComponentManager::Allocate()
     {
-        T* pComponent = Base::CMemory::NewObject<T>();
+        std::unique_ptr<T> Component(new T());
 
-        pComponent->m_ID = m_CurrentID++;
+        Component->m_ID = m_CurrentID++;
 
-        m_Components.push_back(pComponent);
+        m_Components.push_back(std::move(Component));
 
-        return *pComponent;
+        return static_cast<T*>(m_Components.back().get());
     }
 } // namespace Dt

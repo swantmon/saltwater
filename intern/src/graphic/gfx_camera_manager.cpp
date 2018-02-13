@@ -46,7 +46,7 @@ namespace
 
     private:
 
-        class CInternCameraActorFacet : public CCameraComponent
+        class CInternComponent : public CCameraComponent
         {
         private:
 
@@ -115,7 +115,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Create facet
             // -----------------------------------------------------------------------------
-            CInternCameraActorFacet& rGraphicCamera = CComponentManager::GetInstance().Allocate<CInternCameraActorFacet>(pCameraComponent->GetID());
+            CInternComponent* pGfxComponent = CComponentManager::GetInstance().Allocate<CInternComponent>(pCameraComponent->GetID());
 
             if (pCameraComponent->GetClearFlag() == Dt::CCameraComponent::Texture)
             {
@@ -125,15 +125,15 @@ namespace
 
                 if (BackgroundTexturePtr.IsValid())
                 {
-                    rGraphicCamera.SetBackgroundTexture2D(BackgroundTexturePtr);
+                    pGfxComponent->SetBackgroundTexture2D(BackgroundTexturePtr);
 
-                    rGraphicCamera.SetBackgroundTextureSet(TextureManager::CreateTextureSet(static_cast<CTexturePtr>(BackgroundTexturePtr)));
+                    pGfxComponent->SetBackgroundTextureSet(TextureManager::CreateTextureSet(static_cast<CTexturePtr>(BackgroundTexturePtr)));
                 }
             }
         }
         else if ((DirtyFlags & Dt::CCameraComponent::DirtyInfo) != 0)
         {
-            CInternCameraActorFacet* pGraphicCamera = CComponentManager::GetInstance().GetComponent<CInternCameraActorFacet>(pCameraComponent->GetID());
+            CInternComponent* pGraphicCamera = CComponentManager::GetInstance().GetComponent<CInternComponent>(pCameraComponent->GetID());
 
             // -----------------------------------------------------------------------------
             // Background

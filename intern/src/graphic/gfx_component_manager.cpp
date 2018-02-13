@@ -17,11 +17,6 @@ namespace Gfx
 
     CComponentManager::~CComponentManager()
     {
-        for (auto Element : m_Components)
-        {
-            Base::CMemory::DeleteObject(&Element);
-        }
-
         m_Components.clear();
     }
 } // namespace Gfx

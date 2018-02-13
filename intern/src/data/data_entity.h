@@ -162,7 +162,7 @@ namespace Dt
         CComponentVector m_Components; //< Components added to this entity
 
         template<class T>
-        void AddComponent(T& _rComponent);
+        void AddComponent(T* _pComponent);
 
         template<class T>
         T* GetComponent();
@@ -196,11 +196,13 @@ namespace Dt
 namespace Dt
 {
     template<class T>
-    void CEntity::AddComponent(T& _rComponent)
+    void CEntity::AddComponent(T* _pComponent)
     {
-        _rComponent.SetLinkedEntity(this);
+        assert(_pComponent != nullptr);
 
-        m_Components.push_back(&_rComponent);
+        _pComponent->SetLinkedEntity(this);
+
+        m_Components.push_back(_pComponent);
     }
 
     // -----------------------------------------------------------------------------

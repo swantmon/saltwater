@@ -198,11 +198,11 @@ namespace
             // -----------------------------------------------------------------------------
             // Create facet
             // -----------------------------------------------------------------------------
-            auto rModelActorFacet = CComponentManager::GetInstance().Allocate<Dt::CMeshComponent>();
+            auto pModelActorFacet = CComponentManager::GetInstance().Allocate<Dt::CMeshComponent>();
 
-            rModelActorFacet.SetMesh(&rMesh);
+            pModelActorFacet->SetMesh(&rMesh);
 
-            rChildEntity.AddComponent(rModelActorFacet);
+            rChildEntity.AddComponent(pModelActorFacet);
 
             // -----------------------------------------------------------------------------
             // Attach mesh to entity
