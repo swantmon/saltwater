@@ -17,7 +17,6 @@
     <ClCompile Include="..\..\..\src\base\base_getopt.cpp">
       <Filter>io</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\base\base_json.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\base_aabb2.h">
