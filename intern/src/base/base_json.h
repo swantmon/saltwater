@@ -3,7 +3,7 @@
 
 #include "json.hpp"
 
-#include "fwd.hpp"
+#include "base_include_glm.h"
 
 #include <string>
 
@@ -60,7 +60,7 @@ namespace Base
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////
-    // Converting between json and glm vectors
+    // Converting between json and glm types
     ////////////////////////////////////////////////////////////////////////////////////////////
 
     template<int N, typename T>
