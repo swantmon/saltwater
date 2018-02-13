@@ -48,8 +48,6 @@ namespace
         // Update data manager
         // -----------------------------------------------------------------------------
         Dt::EntityManager::Update();
-
-        Dt::CComponentManager::GetInstance().Update();
         
         // -----------------------------------------------------------------------------
         // Return state changes

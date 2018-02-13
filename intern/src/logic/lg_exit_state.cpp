@@ -36,12 +36,10 @@ namespace
         // -----------------------------------------------------------------------------
         // Data
         // -----------------------------------------------------------------------------
-        Dt::TextureManager    ::OnExit();
-        Dt::MaterialManager   ::OnExit();
-        Dt::ModelManager      ::OnExit();
-        Dt::EntityManager     ::OnExit();
-
-        Dt::CComponentManager::GetInstance().OnExit();
+        Dt::TextureManager ::OnExit();
+        Dt::MaterialManager::OnExit();
+        Dt::ModelManager   ::OnExit();
+        Dt::EntityManager  ::OnExit();
 
         return Lg::Exit::SResult::Exit;
     }

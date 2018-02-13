@@ -37,11 +37,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Data
         // -----------------------------------------------------------------------------
-        Dt::EntityManager     ::OnStart();
-        Dt::ModelManager      ::OnStart();
-        Dt::MaterialManager   ::OnStart();
-
-        Dt::CComponentManager::GetInstance().OnStart();
+        Dt::EntityManager  ::OnStart();
+        Dt::ModelManager   ::OnStart();
+        Dt::MaterialManager::OnStart();
 
         // -----------------------------------------------------------------------------
         // External

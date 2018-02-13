@@ -17,34 +17,12 @@ namespace Dt
     
     CComponentManager::~CComponentManager()
     {
-
-    }
-
-    // -----------------------------------------------------------------------------
-
-
-    void CComponentManager::OnStart()
-    {
-
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CComponentManager::OnExit()
-    {
         for (auto Element : m_Components)
         {
             Base::CMemory::DeleteObject(Element);
         }
 
         m_Components.clear();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CComponentManager::Update()
-    {
-
     }
 
     // -----------------------------------------------------------------------------

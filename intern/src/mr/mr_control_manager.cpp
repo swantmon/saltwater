@@ -564,7 +564,7 @@ namespace
 
                 pTransformation->SetRotation(glm::eulerAngles(Rotation));
 
-                Dt::EntityManager::MarkEntityAsDirty(*m_pEntity, Dt::CEntity::DirtyMove | Dt::CEntity::DirtyDetail);
+                Dt::EntityManager::MarkEntityAsDirty(*m_pEntity, Dt::CEntity::DirtyMove);
             }
 
             ArPose_destroy(pARPose);
@@ -939,24 +939,6 @@ namespace
 
     void CMRControlManager::OnDirtyEntity(Dt::CEntity* _pEntity)
     {
-        assert(_pEntity != 0);
-
-        if (_pEntity->GetCategory() != Dt::SEntityCategory::Actor) return;
-
-        unsigned int DirtyFlags;
-
-        DirtyFlags = _pEntity->GetDirtyFlags();
-
-        // -----------------------------------------------------------------------------
-        // Check if it is a new actor
-        // -----------------------------------------------------------------------------
-        if ((DirtyFlags & Dt::CEntity::DirtyCreate) != 0)
-        {
-            if (_pEntity->GetType() == Dt::SActorType::Node)
-            {
-                m_pEntity = _pEntity;
-            }
-        }
     }
 
     // -----------------------------------------------------------------------------

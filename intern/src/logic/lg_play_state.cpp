@@ -78,18 +78,6 @@ namespace
     int CLgPlayState::OnRun()
     {
         // -----------------------------------------------------------------------------
-        // Prepare updates depending on time difference between frames
-        // -----------------------------------------------------------------------------
-        float TimeOfLastFrame = static_cast<float>(Core::Time::GetDeltaTimeLastFrame());
-
-        BASE_UNUSED(TimeOfLastFrame);
-
-        // -----------------------------------------------------------------------------
-        // Update data manager
-        // -----------------------------------------------------------------------------
-        Dt::CComponentManager::GetInstance().Update();
-
-        // -----------------------------------------------------------------------------
         // Get main camera entity and set this entity to the camera project
         // as linked entity.
         // After the first main camera we can break the loop.

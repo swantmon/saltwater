@@ -23,12 +23,6 @@ namespace Dt
 
     public:
 
-        void OnStart();
-
-        void OnExit();
-
-        void Update();
-
         template<class T>
         T& Allocate();
 

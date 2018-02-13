@@ -133,8 +133,7 @@ namespace
         {
             Dt::SEntityDescriptor EntityDesc;
 
-            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Actor;
-            EntityDesc.m_EntityType     = Dt::SActorType::Camera;
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
             EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
 
             Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
@@ -147,13 +146,13 @@ namespace
             pTransformationFacet->SetScale(glm::vec3(1.0f));
             pTransformationFacet->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
 
-            Dt::CCameraComponent* pFacet = Dt::CameraActorManager::CreateCameraActor();
+            Dt::CCameraComponent& rFacet = Dt::CComponentManager::GetInstance().Allocate<Dt::CCameraComponent>();
 
-            pFacet->SetMainCamera(true);
-            pFacet->SetProjectionType(Dt::CCameraComponent::External);
-            pFacet->SetClearFlag(Dt::CCameraComponent::Webcam);
+            rFacet.SetMainCamera(true);
+            rFacet.SetProjectionType(Dt::CCameraComponent::External);
+            rFacet.SetClearFlag(Dt::CCameraComponent::Webcam);
 
-            rEntity.SetDetailFacet(Dt::SFacetCategory::Data, pFacet);
+            rEntity.AddComponent(rFacet);
 
             Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
@@ -164,21 +163,20 @@ namespace
         {
             Dt::SEntityDescriptor EntityDesc;
 
-            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Light;
-            EntityDesc.m_EntityType     = Dt::SLightType::Sky;
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
             EntityDesc.m_FacetFlags     = 0;
 
             Dt::CEntity& rEnvironment = Dt::EntityManager::CreateEntity(EntityDesc);
 
             rEnvironment.SetName("Environment");
 
-            Dt::CSkyComponent* pSkyboxFacet = Dt::SkyManager::CreateSky();
+            Dt::CSkyComponent& rSkyboxFacet = Dt::CComponentManager::GetInstance().Allocate<Dt::CSkyComponent>();
 
-            pSkyboxFacet->SetRefreshMode(Dt::CSkyComponent::Static);
-            pSkyboxFacet->SetType(Dt::CSkyComponent::Procedural);
-            pSkyboxFacet->SetIntensity(40000.0f);
+            rSkyboxFacet.SetRefreshMode(Dt::CSkyComponent::Static);
+            rSkyboxFacet.SetType(Dt::CSkyComponent::Procedural);
+            rSkyboxFacet.SetIntensity(40000.0f);
 
-            rEnvironment.SetDetailFacet(Dt::SFacetCategory::Data, pSkyboxFacet);
+            rEnvironment.AddComponent(rSkyboxFacet);
 
             Dt::EntityManager::MarkEntityAsDirty(rEnvironment, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
@@ -189,8 +187,7 @@ namespace
         {
             Dt::SEntityDescriptor EntityDesc;
 
-            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Light;
-            EntityDesc.m_EntityType     = Dt::SLightType::Sun;
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
             EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
 
             Dt::CEntity& rSunLight = Dt::EntityManager::CreateEntity(EntityDesc);
@@ -206,18 +203,18 @@ namespace
             pTransformationFacet->SetScale   (glm::vec3(1.0f));
             pTransformationFacet->SetRotation(glm::vec3(0.0f));
 
-            Dt::CSunLightFacet* pSunLightFacet = Dt::SunManager::CreateSunLight();
+            Dt::CSunComponent& rSunLightFacet = Dt::CComponentManager::GetInstance().Allocate<Dt::CSunComponent>();
 
-            pSunLightFacet->EnableTemperature(false);
-            pSunLightFacet->SetColor         (glm::vec3(1.0f, 1.0f, 1.0f));
-            pSunLightFacet->SetDirection     (glm::vec3(0.0f, 0.01f, -1.0f));
-            pSunLightFacet->SetIntensity     (90600.0f);
-            pSunLightFacet->SetTemperature   (0);
-            pSunLightFacet->SetRefreshMode   (Dt::CSunLightFacet::Dynamic);
+            rSunLightFacet.EnableTemperature(false);
+            rSunLightFacet.SetColor         (glm::vec3(1.0f, 1.0f, 1.0f));
+            rSunLightFacet.SetDirection     (glm::vec3(0.0f, 0.01f, -1.0f));
+            rSunLightFacet.SetIntensity     (90600.0f);
+            rSunLightFacet.SetTemperature   (0);
+            rSunLightFacet.SetRefreshMode   (Dt::CSunComponent::Dynamic);
 
-            pSunLightFacet->UpdateLightness();
+            rSunLightFacet.UpdateLightness();
 
-            rSunLight.SetDetailFacet(Dt::SFacetCategory::Data, pSunLightFacet);
+            rSunLight.AddComponent(rSunLightFacet);
 
             Dt::EntityManager::MarkEntityAsDirty(rSunLight, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
@@ -249,7 +246,7 @@ namespace
 
             Dt::CEntity* pSubEntity = rSphere.GetHierarchyFacet()->GetFirstChild();
 
-            Dt::CMeshComponent* pModelActorFacet = static_cast<Dt::CMeshComponent*>(pSubEntity->GetDetailFacet(Dt::SFacetCategory::Data));
+            Dt::CMeshComponent* pModelActorFacet = pSubEntity->GetComponent<Dt::CMeshComponent>();
 
             Dt::SMaterialDescriptor MaterialFileDesc;
 
