@@ -26,7 +26,6 @@ namespace Performance
     void OnExit();
 
     void BeginEvent(const Base::Char* _pEventName);
-    void BeginDurationEvent(const Base::Char* _pEventName);
     void ResetEventStatistics(const Base::Char* _pEventName);
     void EndEvent();
 
