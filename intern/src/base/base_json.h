@@ -49,7 +49,7 @@ namespace Base
     }
 
     template<int N, typename T>
-    inline void InternToJson(nlohmann::json& j, T _rValue)
+    inline void InternToJson(nlohmann::json& j, const T& _rValue)
     {
         std::stringstream Stream;
 
@@ -61,6 +61,19 @@ namespace Base
         }
         Stream << pData[N - 1];
         j = Stream.str();
+    }
+
+    template<int N, typename T>
+    inline void InternFromJson(const nlohmann::json& j, T& _rValue)
+    {
+        const auto Values = Base::Split<T::value_type>(j, ',');
+        
+        auto* pData = glm::value_ptr(_rValue);
+        
+        for (int i = 0; i < N; ++ i)
+        {
+            pData[i] = Values[i];
+        }
     }
 }
 
@@ -75,8 +88,6 @@ namespace glm
     template<typename T>
     inline void from_json(const nlohmann::json& j, T& _rValue)
     {
-        BASE_UNUSED(j);
-        BASE_UNUSED(_rValue);
-        //const auto Values = Base::Split<decltype(_rValue.x)>(j, ',');
+        Base::InternFromJson<sizeof(T) / sizeof(T::value_type)>(j, _rValue);
     }
 }
