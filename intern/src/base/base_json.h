@@ -3,7 +3,10 @@
 
 #include "json.hpp"
 
-#include <glm.hpp>
+#include "fwd.hpp"
 
-inline void to_json(nlohmann::json& j, const glm::vec4& Test);
-inline void from_json(const nlohmann::json& j, glm::vec4& Test);
+namespace glm
+{
+    void to_json(nlohmann::json& j, const glm::vec4& _rValue);
+    void from_json(const nlohmann::json& j, glm::vec4&  _rValue);
+}
