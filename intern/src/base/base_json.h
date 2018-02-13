@@ -46,12 +46,7 @@ namespace Base
         assert(_rString.length() > 0);
 
         std::string String = _rString;
-
-        if (String[String.size() - 1] == _Delimiter)
-        {
-            String.pop_back();
-        }
-
+        
         std::stringstream Stream(String);
         std::string Value;
         std::vector<T> Values;
