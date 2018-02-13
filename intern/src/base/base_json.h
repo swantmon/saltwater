@@ -5,8 +5,14 @@
 
 #include "fwd.hpp"
 
+#include <string>
+
 namespace Base
 {
+    ////////////////////////////////////////////////////////////////////////////////////////////
+    // Converting between strings and integrals
+    ////////////////////////////////////////////////////////////////////////////////////////////
+
     template<typename T>
     inline T ParseString(const std::string& _rString);
 
@@ -37,42 +43,106 @@ namespace Base
     template<typename T>
     inline std::vector<T> Split(const std::string& _rString, char _Delimiter)
     {
-        std::stringstream Stream(_rString);
+        assert(_rString.length() > 0);
+
+        std::string String = _rString;
+
+        if (String[String.size() - 1] == _Delimiter)
+        {
+            String.pop_back();
+        }
+
+        std::stringstream Stream(String);
         std::string Value;
         std::vector<T> Values;
 
-        while (std::getline(Stream, Value, _Delimiter)) {
+        while (std::getline(Stream, Value, _Delimiter))
+        {
             Values.push_back(ParseString<T>(Value));
         }
 
         return Values;
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////
+    // Converting between json and glm vectors
+    ////////////////////////////////////////////////////////////////////////////////////////////
+
     template<int N, typename T>
     inline void InternToJson(nlohmann::json& j, const T& _rValue)
     {
-        std::stringstream Stream;
+        // operator[] returns a vector from matrices and integrals from vectors
+        // That way we can distinguish between them because we want to have individual matrix columns
+
+        const bool IsVector = sizeof(_rValue[0]) == sizeof(T::value_type);
 
         const auto* pData = glm::value_ptr(_rValue);
 
-        for (int i = 0; i < N - 1; ++i)
+        if (IsVector)
         {
-            Stream << pData[i] << ", ";
+            std::stringstream Stream;
+
+            for (int i = 0; i < N - 1; ++i)
+            {
+                Stream << pData[i] << ", ";
+            }
+            Stream << pData[N - 1];
+
+            j = Stream.str();
         }
-        Stream << pData[N - 1];
-        j = Stream.str();
+        else
+        {
+            j = nlohmann::json::array();
+
+            const int Width = sizeof(_rValue[0]) / sizeof(T::value_type);
+
+            for (int Column = 0; Column < Width; ++ Column)
+            {
+                std::stringstream Stream;
+
+                for (int Row = 0; Row < Width - 1; ++Row)
+                {
+                    Stream << pData[Column * Width + Row] << ", ";
+                }
+                Stream << pData[Column * Width + (Width - 1)];
+
+                j.push_back(Stream.str());
+            }
+        }
     }
 
     template<int N, typename T>
     inline void InternFromJson(const nlohmann::json& j, T& _rValue)
     {
-        const auto Values = Base::Split<T::value_type>(j, ',');
+        // operator[] returns a vector from matrices and integrals from vectors
+        // That way we can distinguish between them because we want to have individual matrix columns
+
+        const bool IsVector = sizeof(_rValue[0]) == sizeof(T::value_type);
         
         auto* pData = glm::value_ptr(_rValue);
-        
-        for (int i = 0; i < N; ++ i)
+
+        if (IsVector)
         {
-            pData[i] = Values[i];
+            const auto Values = Base::Split<T::value_type>(j, ',');
+            
+            for (int i = 0; i < N; ++i)
+            {
+                pData[i] = Values[i];
+            }
+        }
+        else
+        {
+            const int Width = sizeof(_rValue[0]) / sizeof(T::value_type);
+
+            for (int Column = 0; Column < Width; ++Column)
+            {
+                const auto Values = Base::Split<T::value_type>(j[Column], ',');
+
+                for (int i = 0; i < Width; ++i)
+                {
+                    pData[Column * Width + i] = Values[i];
+                }
+            }
         }
     }
 }
