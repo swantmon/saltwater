@@ -71,10 +71,10 @@ namespace Base
 
         const bool IsVector = sizeof(_rValue[0]) == sizeof(T::value_type);
 
-        const auto* pData = glm::value_ptr(_rValue);
-
         if (IsVector)
         {
+            const auto* pData = glm::value_ptr(_rValue);
+
             std::stringstream Stream;
 
             for (int i = 0; i < N - 1; ++i)
@@ -87,6 +87,10 @@ namespace Base
         }
         else
         {
+            const auto TransposedMatrix = glm::transpose(_rValue);
+
+            const auto* pData = glm::value_ptr(TransposedMatrix);
+
             j = nlohmann::json::array();
 
             const int Width = sizeof(_rValue[0]) / sizeof(T::value_type);
@@ -138,6 +142,8 @@ namespace Base
                     pData[Column * Width + i] = Values[i];
                 }
             }
+
+            _rValue = glm::transpose(_rValue);
         }
     }
 }
