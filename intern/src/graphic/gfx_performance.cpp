@@ -3,6 +3,7 @@
 
 #include "base/base_console.h"
 #include "base/base_exception.h"
+#include "base/base_program_parameters.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
@@ -13,6 +14,7 @@
 
 #include <cassert>
 #include <unordered_map>
+#include <set>
 #include <sstream>
 #include <stack>
 #include <string>
@@ -41,7 +43,6 @@ namespace
         void OnExit();
 
         void BeginEvent(const Base::Char* _pEventName);
-        void BeginDurationEvent(const Base::Char* _pEventName);
         void ResetEventStatistics(const Base::Char* _pEventName);
         void EndEvent();
 
@@ -69,13 +70,10 @@ namespace
             float m_AccumulatedTime;
 
             std::vector<std::pair<GLuint, GLuint>> m_PendingQueries;
-
-            bool m_HasStatistics;
-
+            
             SPerformanceMarker()
                 : m_NumberOfMarkers(0)
                 , m_AccumulatedTime(0.0f)
-                , m_HasStatistics(false)
             {
 
             }
@@ -87,7 +85,7 @@ namespace
         std::unordered_map<std::string, SPerformanceMarker> m_PerformanceMarkerTimings;
         std::stack<SPerformanceMarker*> m_OpenedMarkerStack;
 
-        bool m_UsePerformanceMarker;
+        bool m_QueryPerformanceMarkers;
     };
 } // namespace 
 
@@ -98,7 +96,7 @@ namespace
         , m_QueryStack              ()
         , m_PerformanceMarkerTimings()
         , m_OpenedMarkerStack       ()
-        , m_UsePerformanceMarker    (true)
+        , m_QueryPerformanceMarkers (true)
     {
 
     }
@@ -114,6 +112,8 @@ namespace
 
     void CGfxPerformance::OnStart()
     {
+        m_QueryPerformanceMarkers = Base::CProgramParameters::GetInstance().Get("graphics:performance:enable_statistics", true);
+
 #ifdef PLATFORM_ANDROID
         if (Gfx::Main::IsExtensionAvailable("GL_EXT_disjoint_timer_query"))
         {
@@ -122,7 +122,7 @@ namespace
         }
         else
         {
-            m_UsePerformanceMarker = false;
+            m_QueryPerformanceMarkers = false;
 
             BASE_CONSOLE_WARNING("GL_EXT_disjoint_timer_query is not available. So, time measurements can not be computed!");
         }
@@ -135,7 +135,7 @@ namespace
     {
         CheckDurationQueries();
 
-        if (m_UsePerformanceMarker)
+        if (m_QueryPerformanceMarkers)
         {
             CheckPerformanceMarkerQueries();
         }
@@ -145,13 +145,17 @@ namespace
 
     void CGfxPerformance::OnExit()
     {
-        if (m_UsePerformanceMarker)
+        if (m_QueryPerformanceMarkers)
         {
+            using namespace std;
+
+            set<string> DurationQueries = Base::CProgramParameters::GetInstance().Get<set<string>>("graphics:performance:markers", {});
+
             for (auto& rItemPair : m_PerformanceMarkerTimings)
             {
                 auto& rItem = rItemPair.second;
 
-                if (rItem.m_HasStatistics)
+                if (DurationQueries.count(rItemPair.first) > 0)
                 {
                     while (!rItem.m_PendingQueries.empty())
                     {
@@ -184,7 +188,7 @@ namespace
 
     void CGfxPerformance::CheckDurationQueries()
     {
-        if (!m_UsePerformanceMarker) return;
+        if (!m_QueryPerformanceMarkers) return;
 
         for (auto i = m_Queries.begin(); i < m_Queries.end();)
         {
@@ -225,7 +229,7 @@ namespace
 
     void CGfxPerformance::CheckPerformanceMarkerQueries()
     {
-        if (!m_UsePerformanceMarker) return;
+        if (!m_QueryPerformanceMarkers) return;
 
         for (auto& rItemPair : m_PerformanceMarkerTimings)
         {
@@ -270,14 +274,12 @@ namespace
 
         glPushDebugGroup(GL_DEBUG_SOURCE_THIRD_PARTY, 0, LengthOfEventName, _pEventName);
 
-        if (m_UsePerformanceMarker)
+        if (m_QueryPerformanceMarkers)
         {
             std::string Name = _pEventName;
 
             auto& Item = m_PerformanceMarkerTimings[Name];
-
-            Item.m_HasStatistics = false;
-
+            
             GLuint StartQuery;
 #ifdef PLATFORM_ANDROID
             glGenQueries(1, &StartQuery);
@@ -292,38 +294,7 @@ namespace
             m_OpenedMarkerStack.push(&Item);
         }
     }
-
-    // -----------------------------------------------------------------------------
-
-    void CGfxPerformance::BeginDurationEvent(const Base::Char* _pEventName)
-    {
-        GLsizei LengthOfEventName = static_cast<GLsizei>(strlen(_pEventName));
-
-        glPushDebugGroup(GL_DEBUG_SOURCE_THIRD_PARTY, 0, LengthOfEventName, _pEventName);
-
-        if (m_UsePerformanceMarker)
-        {
-            std::string Name = _pEventName;
-
-            auto& Item = m_PerformanceMarkerTimings[Name];
-
-            Item.m_HasStatistics = true;
-
-            GLuint StartQuery;
-#ifdef PLATFORM_ANDROID
-            glGenQueries(1, &StartQuery);
-            glQueryCounter(StartQuery, GL_TIMESTAMP_EXT);
-#else
-            glCreateQueries(GL_TIMESTAMP, 1, &StartQuery);
-            glQueryCounter(StartQuery, GL_TIMESTAMP);
-#endif
-
-            Item.m_PendingQueries.push_back(std::make_pair(StartQuery, 0));
-
-            m_OpenedMarkerStack.push(&Item);
-        }
-    }
-
+    
     // -----------------------------------------------------------------------------
 
     void CGfxPerformance::ResetEventStatistics(const Base::Char* _pEventName)
@@ -350,7 +321,7 @@ namespace
     {
         glPopDebugGroup();
 
-        if (m_UsePerformanceMarker)
+        if (m_QueryPerformanceMarkers)
         {
             GLuint EndQuery;
 #ifdef PLATFORM_ANDROID
@@ -462,14 +433,7 @@ namespace Performance
     {
         CGfxPerformance::GetInstance().BeginEvent(_pEventName);
     }
-
-    // -----------------------------------------------------------------------------
-
-    void BeginDurationEvent(const Base::Char* _pEventName)
-    {
-        CGfxPerformance::GetInstance().BeginDurationEvent(_pEventName);
-    }
-
+    
     // -----------------------------------------------------------------------------
 
     void ResetEventStatistics(const Base::Char* _pEventName)
