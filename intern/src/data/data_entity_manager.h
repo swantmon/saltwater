@@ -33,7 +33,6 @@ namespace Dt
     struct SEntityDescriptor
     {
         unsigned int m_EntityCategory;
-        unsigned int m_EntityType;
         unsigned int m_FacetFlags;
     };
 } // namespace Dt

@@ -5,11 +5,12 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
-#include "data/data_actor_type.h"
-#include "data/data_ar_controller_manager.h"
+#include "data/data_ar_controller_component.h"
+#include "data/data_ar_tracked_object_component.h"
+#include "data/data_camera_component.h"
+#include "data/data_component_manager.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
-#include "data/data_plugin_type.h"
 #include "data/data_texture_manager.h"
 
 #include "editor/edit_plugin_helper.h"
@@ -105,8 +106,7 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        rCurrentEntity.SetCategory(Dt::SEntityCategory::Plugin);
-        rCurrentEntity.SetType(Dt::SPluginType::ARControlManager);
+        rCurrentEntity.SetCategory(Dt::SEntityCategory::Dynamic);
 
         // -----------------------------------------------------------------------------
         // Create facet and set it
@@ -129,24 +129,24 @@ namespace
 
         // -----------------------------------------------------------------------------
 
-        Dt::CARControllerPluginFacet* pFacet = Dt::ARControllerManager::CreateARControllerPlugin();
+        Dt::CARControllerPluginComponent& rFacet = Dt::CComponentManager::GetInstance().Allocate<Dt::CARControllerPluginComponent>();
 
-        pFacet->SetCameraEntity       (0);
-        pFacet->SetConfiguration      ("-device=WinDS -flipV");
-        pFacet->SetCameraParameterFile("ar/configurations/logitech_para.dat");
-        pFacet->SetOutputBackground   (pBackgroundTexture);
-        pFacet->SetDeviceType         (Dt::CARControllerPluginFacet::Webcam);
-        pFacet->SetNumberOfMarker     (1);
-        pFacet->SetFreezeOutput       (false);
+        rFacet.SetCameraEntity       (0);
+        rFacet.SetConfiguration      ("-device=WinDS -flipV");
+        rFacet.SetCameraParameterFile("ar/configurations/logitech_para.dat");
+        rFacet.SetOutputBackground   (pBackgroundTexture);
+        rFacet.SetDeviceType         (Dt::CARControllerPluginComponent::Webcam);
+        rFacet.SetNumberOfMarker     (1);
+        rFacet.SetFreezeOutput       (false);
             
-        Dt::CARControllerPluginFacet::SMarker& rMarkerOne = pFacet->GetMarker(0);
+        Dt::CARControllerPluginComponent::SMarker& rMarkerOne = rFacet.GetMarker(0);
 
         rMarkerOne.m_UID          = 0;
-        rMarkerOne.m_Type         = Dt::CARControllerPluginFacet::SMarker::Square;
+        rMarkerOne.m_Type         = Dt::CARControllerPluginComponent::SMarker::Square;
         rMarkerOne.m_WidthInMeter = 0.08f;
         rMarkerOne.m_PatternFile  = "ar/patterns/patt.hiro";
 
-        rCurrentEntity.SetDetailFacet(Dt::SFacetCategory::Data, pFacet);
+        rCurrentEntity.AddComponent(rFacet);
     }
 
     // -----------------------------------------------------------------------------
@@ -157,9 +157,9 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CARControllerPluginFacet* pFacet = static_cast<Dt::CARControllerPluginFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+        Dt::CARControllerPluginComponent* pFacet = rCurrentEntity.GetComponent<Dt::CARControllerPluginComponent>();
 
-        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Plugin && rCurrentEntity.GetType() == Dt::SPluginType::ARControlManager && pFacet != nullptr)
+        if (pFacet != nullptr)
         {
             // -----------------------------------------------------------------------------
             // Read value
@@ -172,7 +172,7 @@ namespace
 
             const char* pParameterFile = pFacet->GetCameraParameterFile().c_str();
 
-            int CameraEntityID = -1;
+            Base::ID CameraEntityID = static_cast<Base::ID>(-1);
 
             if (pFacet->GetCameraEntity() != nullptr)
             {
@@ -188,7 +188,7 @@ namespace
             // -----------------------------------------------------------------------------
             Edit::CMessage NewMessage;
 
-            NewMessage.PutInt(rCurrentEntity.GetID());
+            NewMessage.PutInt(static_cast<int>(rCurrentEntity.GetID()));
 
             NewMessage.PutInt(Device);
 
@@ -198,7 +198,7 @@ namespace
            
             NewMessage.PutString(pParameterFile);
 
-            NewMessage.PutInt(CameraEntityID);
+            NewMessage.PutInt(static_cast<int>(CameraEntityID));
 
             NewMessage.PutInt(OutputBackground);
 
@@ -218,16 +218,16 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CARControllerPluginFacet* pFacet = static_cast<Dt::CARControllerPluginFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+        Dt::CARControllerPluginComponent* pFacet = rCurrentEntity.GetComponent<Dt::CARControllerPluginComponent>();
 
-        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Plugin && rCurrentEntity.GetType() == Dt::SPluginType::ARControlManager && pFacet != nullptr)
+        if (pFacet != nullptr)
         {
             // -----------------------------------------------------------------------------
             // Read value
             // -----------------------------------------------------------------------------
             int MarkerID = pFacet->GetDeviceType();
 
-            Dt::CARControllerPluginFacet::SMarker& rMarker = pFacet->GetMarker(MarkerID);
+            Dt::CARControllerPluginComponent::SMarker& rMarker = pFacet->GetMarker(MarkerID);
 
             unsigned int UID = rMarker.m_UID;
 
@@ -242,7 +242,7 @@ namespace
             // -----------------------------------------------------------------------------
             Edit::CMessage NewMessage;
 
-            NewMessage.PutInt(rCurrentEntity.GetID());
+            NewMessage.PutInt(static_cast<int>(rCurrentEntity.GetID()));
 
             NewMessage.PutInt(MarkerID);
 
@@ -267,9 +267,10 @@ namespace
         int EntityID = _rMessage.GetInt();
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
-        Dt::CARControllerPluginFacet* pFacet = static_cast<Dt::CARControllerPluginFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+        
+        Dt::CARControllerPluginComponent* pFacet = rCurrentEntity.GetComponent<Dt::CARControllerPluginComponent>();
 
-        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Plugin && rCurrentEntity.GetType() == Dt::SPluginType::ARControlManager && pFacet != nullptr)
+        if (pFacet != nullptr)
         {
             // -----------------------------------------------------------------------------
             // Read values
@@ -295,7 +296,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Set values
             // -----------------------------------------------------------------------------
-            pFacet->SetDeviceType(static_cast<Dt::CARControllerPluginFacet::EType>(Device));
+            pFacet->SetDeviceType(static_cast<Dt::CARControllerPluginComponent::EType>(Device));
 
             pFacet->SetFreezeOutput(FreezeOutput);
 
@@ -303,15 +304,14 @@ namespace
 
             pFacet->SetCameraParameterFile(ParameterFile);
 
-            if (rCameraEntity.GetCategory() == Dt::SEntityCategory::Actor && rCameraEntity.GetType() == Dt::SActorType::Camera)
+            if (rCameraEntity.HasComponent<Dt::CCameraComponent>())
             {
                 pFacet->SetCameraEntity(&rCameraEntity);
             }
 
             pFacet->SetNumberOfMarker(NumberOfMarker);
-            
 
-            Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pFacet, Dt::CARControllerPluginComponent::DirtyInfo);
         }
     }
 
@@ -322,9 +322,10 @@ namespace
         int EntityID = _rMessage.GetInt();
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
-        Dt::CARControllerPluginFacet* pFacet = static_cast<Dt::CARControllerPluginFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
 
-        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Plugin && rCurrentEntity.GetType() == Dt::SPluginType::ARControlManager && pFacet != nullptr)
+        Dt::CARControllerPluginComponent* pFacet = rCurrentEntity.GetComponent<Dt::CARControllerPluginComponent>();
+
+        if (pFacet != nullptr)
         {
             // -----------------------------------------------------------------------------
             // Read values
@@ -344,17 +345,17 @@ namespace
             // -----------------------------------------------------------------------------
             // Set values
             // -----------------------------------------------------------------------------
-            Dt::CARControllerPluginFacet::SMarker& rMarker = pFacet->GetMarker(MarkerID);
+            Dt::CARControllerPluginComponent::SMarker& rMarker = pFacet->GetMarker(MarkerID);
 
             rMarker.m_UID = UID;
 
-            rMarker.m_Type = static_cast<Dt::CARControllerPluginFacet::SMarker::EMarkerType>(Type);
+            rMarker.m_Type = static_cast<Dt::CARControllerPluginComponent::SMarker::EMarkerType>(Type);
 
             rMarker.m_PatternFile = Text;
 
             rMarker.m_WidthInMeter = Width;
 
-            Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pFacet, Dt::CARControllerPluginComponent::DirtyInfo);
         }
     }
 

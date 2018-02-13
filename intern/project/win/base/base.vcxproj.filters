@@ -187,6 +187,9 @@
     <ClInclude Include="..\..\..\src\base\base_include_json.h">
       <Filter>includes</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_type_info.h">
+      <Filter>core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="container">

@@ -10,7 +10,7 @@
 #include "graphic/gfx_area_light_manager.h"
 #include "graphic/gfx_background_renderer.h"
 #include "graphic/gfx_buffer_manager.h"
-#include "graphic/gfx_camera_actor_manager.h"
+#include "graphic/gfx_camera_manager.h"
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_debug_renderer.h"
 #include "graphic/gfx_fog_renderer.h"
@@ -22,7 +22,6 @@
 #include "graphic/gfx_light_sun_renderer.h"
 #include "graphic/gfx_main.h"
 #include "graphic/gfx_material_manager.h"
-#include "graphic/gfx_mesh_actor_manager.h"
 #include "graphic/gfx_mesh_manager.h"
 #include "graphic/gfx_particle_renderer.h"
 #include "graphic/gfx_performance.h"
@@ -106,8 +105,7 @@ namespace
         // -----------------------------------------------------------------------------
         BASE_CONSOLE_STREAMINFO("Gfx> Start entity/facet manager...");
 
-        MeshActorManager  ::OnStart();
-        CameraActorManager::OnStart();
+        CameraManager     ::OnStart();
         SunManager        ::OnStart();
         MeshManager       ::OnStart();
         MaterialManager   ::OnStart();

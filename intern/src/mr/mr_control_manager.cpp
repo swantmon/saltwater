@@ -8,13 +8,11 @@
 
 #include "core/core_jni_interface.h"
 
-#include "data/data_actor_type.h"
-#include "data/data_ar_controller_facet.h"
-#include "data/data_camera_actor_facet.h"
+#include "data/data_ar_controller_component.h"
+#include "data/data_camera_component.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_map.h"
-#include "data/data_plugin_type.h"
 #include "data/data_transformation_facet.h"
 
 #include "graphic/gfx_camera_interface.h"

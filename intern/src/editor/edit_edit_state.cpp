@@ -147,14 +147,14 @@ namespace Edit
             {
                 Dt::CEntity* pEntity = (Dt::CEntity*)rSelectionTicket.m_pObject;
 
-                Gfx::SelectionRenderer::SelectEntity(pEntity->GetID());
+                Gfx::SelectionRenderer::SelectEntity(static_cast<unsigned int>(pEntity->GetID()));
 
                 // -----------------------------------------------------------------------------
                 // Send entity to editor
                 // -----------------------------------------------------------------------------
                 Edit::CMessage NewMessage;
 
-                NewMessage.PutInt(pEntity->GetID());
+                NewMessage.PutInt(static_cast<int>(pEntity->GetID()));
 
                 NewMessage.Reset();
 

@@ -5,14 +5,13 @@
 #include "base/base_uncopyable.h"
 
 #include "data/data_entity.h"
-#include "data/data_light_type.h"
 #include "data/data_map.h"
 
 #include "graphic/gfx_actor_renderer.h"
 #include "graphic/gfx_ar_renderer.h"
 #include "graphic/gfx_area_light_manager.h"
 #include "graphic/gfx_background_renderer.h"
-#include "graphic/gfx_camera_actor_manager.h"
+#include "graphic/gfx_camera_manager.h"
 #include "graphic/gfx_debug_renderer.h"
 #include "graphic/gfx_debug_state.h"
 #include "graphic/gfx_fog_renderer.h"
@@ -23,7 +22,6 @@
 #include "graphic/gfx_light_probe_manager.h"
 #include "graphic/gfx_light_sun_renderer.h"
 #include "graphic/gfx_main.h"
-#include "graphic/gfx_mesh_actor_manager.h"
 #include "graphic/gfx_particle_renderer.h"
 #include "graphic/gfx_performance.h"
 #include "graphic/gfx_point_light_manager.h"
@@ -75,8 +73,7 @@ namespace
     {
         Main::BeginFrame();
 
-        MeshActorManager  ::Update();
-        CameraActorManager::Update();
+        CameraManager     ::Update();
         SunManager        ::Update();
         SkyManager        ::Update();
         LightProbeManager ::Update();

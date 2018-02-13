@@ -10,15 +10,14 @@
 #include "base/base_include_glm.h"
 
 #include "data/data_entity.h"
-#include "data/data_fx_type.h"
-#include "data/data_light_type.h"
 #include "data/data_map.h"
 #include "data/data_model_manager.h"
-#include "data/data_sun_facet.h"
-#include "data/data_volume_fog_facet.h"
+#include "data/data_sun_component.h"
+#include "data/data_volume_fog_component.h"
 
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"
+#include "graphic/gfx_component_manager.h"
 #include "graphic/gfx_fog_renderer.h"
 #include "graphic/gfx_histogram_renderer.h"
 #include "graphic/gfx_main.h"
@@ -27,7 +26,7 @@
 #include "graphic/gfx_sampler_manager.h"
 #include "graphic/gfx_shader_manager.h"
 #include "graphic/gfx_state_manager.h"
-#include "graphic/gfx_sun_facet.h"
+#include "graphic/gfx_sun_component.h"
 #include "graphic/gfx_target_set.h"
 #include "graphic/gfx_target_set_manager.h"
 #include "graphic/gfx_texture_manager.h"
@@ -74,9 +73,9 @@ namespace
 
         struct SVolumeFogRenderJob
         {
-            Dt::CVolumeFogFXFacet* m_pDataVolumeFogFacet;
-            Dt::CSunLightFacet*    m_pDataSunFacet;
-            Gfx::CSunFacet*        m_pGraphicSunFacet;
+            Dt::CVolumeFogComponent* m_pDtVolumeFogComponent;
+            Dt::CSunComponent*       m_pDtSunComponent;
+            Gfx::CSunComponent*      m_pGfxSunComponent;
         };
 
         struct SGaussianShaderProperties
@@ -604,7 +603,7 @@ namespace
         // Getting volume fog informations from render job
         // TODO: What happens if more then one DOF effect is available?
         // -----------------------------------------------------------------------------
-        Gfx::CSunFacet* pGfxSunFacet = m_VolumeFogRenderJobs[0].m_pGraphicSunFacet;
+        Gfx::CSunComponent* pGfxSunFacet = m_VolumeFogRenderJobs[0].m_pGfxSunComponent;
 
         assert(pGfxSunFacet != 0);
 
@@ -711,17 +710,17 @@ namespace
         // Getting volume fog informations from render job
         // TODO: What happens if more then one DOF effect is available?
         // -----------------------------------------------------------------------------
-        Dt::CVolumeFogFXFacet* pDataVolumeFogFacet = m_VolumeFogRenderJobs[0].m_pDataVolumeFogFacet;
-        Dt::CSunLightFacet*    pDtSunFacet         = m_VolumeFogRenderJobs[0].m_pDataSunFacet;
-        Gfx::CSunFacet*        pGfxSunFacet        = m_VolumeFogRenderJobs[0].m_pGraphicSunFacet;
+        Dt::CVolumeFogComponent* pDtVolumeFogComponent = m_VolumeFogRenderJobs[0].m_pDtVolumeFogComponent;
+        Dt::CSunComponent*       pDtSunComponent       = m_VolumeFogRenderJobs[0].m_pDtSunComponent;
+        Gfx::CSunComponent*      pGfxSunComponent      = m_VolumeFogRenderJobs[0].m_pGfxSunComponent;
 
-        assert(pDataVolumeFogFacet != 0 && pDtSunFacet != 0 && pGfxSunFacet != 0);
+        assert(pDtVolumeFogComponent != 0 && pDtSunComponent != 0 && pGfxSunComponent != 0);
 
         SSunLightProperties LightBuffer;
 
-        LightBuffer.m_LightViewProjection  = pGfxSunFacet->GetCamera()->GetViewProjectionMatrix();
-        LightBuffer.m_LightDirection       = glm::normalize(glm::vec4(pDtSunFacet->GetDirection(), 0.0f));
-        LightBuffer.m_LightColor           = glm::vec4(pDtSunFacet->GetLightness(), 1.0f);
+        LightBuffer.m_LightViewProjection  = pGfxSunComponent->GetCamera()->GetViewProjectionMatrix();
+        LightBuffer.m_LightDirection       = glm::normalize(glm::vec4(pDtSunComponent->GetDirection(), 0.0f));
+        LightBuffer.m_LightColor           = glm::vec4(pDtSunComponent->GetLightness(), 1.0f);
         LightBuffer.m_SunAngularRadius     = 0.27f * glm::pi<float>() / 180.0f;
         LightBuffer.m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
 
@@ -731,14 +730,14 @@ namespace
 
         SVolumeLightingProperties VolumeProperties;
 
-        VolumeProperties.m_WindDirection                      = pDataVolumeFogFacet->GetWindDirection();
-        VolumeProperties.m_FogColor                           = pDataVolumeFogFacet->GetFogColor();
-        VolumeProperties.m_FrustumDepthInMeter                = pDataVolumeFogFacet->GetFrustumDepthInMeter();
-        VolumeProperties.m_ShadowIntensity                    = pDataVolumeFogFacet->GetShadowIntensity();
-        VolumeProperties.m_VolumetricFogScatteringCoefficient = pDataVolumeFogFacet->GetScatteringCoefficient();
-        VolumeProperties.m_VolumetricFogAbsorptionCoefficient = pDataVolumeFogFacet->GetAbsorptionCoefficient();
-        VolumeProperties.m_DensityLevel                       = pDataVolumeFogFacet->GetDensityLevel();
-        VolumeProperties.m_DensityAttenuation                 = pDataVolumeFogFacet->GetDensityAttenuation();
+        VolumeProperties.m_WindDirection                      = pDtVolumeFogComponent->GetWindDirection();
+        VolumeProperties.m_FogColor                           = pDtVolumeFogComponent->GetFogColor();
+        VolumeProperties.m_FrustumDepthInMeter                = pDtVolumeFogComponent->GetFrustumDepthInMeter();
+        VolumeProperties.m_ShadowIntensity                    = pDtVolumeFogComponent->GetShadowIntensity();
+        VolumeProperties.m_VolumetricFogScatteringCoefficient = pDtVolumeFogComponent->GetScatteringCoefficient();
+        VolumeProperties.m_VolumetricFogAbsorptionCoefficient = pDtVolumeFogComponent->GetAbsorptionCoefficient();
+        VolumeProperties.m_DensityLevel                       = pDtVolumeFogComponent->GetDensityLevel();
+        VolumeProperties.m_DensityAttenuation                 = pDtVolumeFogComponent->GetDensityAttenuation();
 
         BufferManager::UploadBufferData(m_VolumeLightingCSBufferSetPtr->GetBuffer(1), &VolumeProperties);
 
@@ -829,7 +828,7 @@ namespace
         // Getting volume fog informations from render job
         // TODO: What happens if more then one DOF effect is available?
         // -----------------------------------------------------------------------------
-        Dt::CVolumeFogFXFacet* pDataVolumeFogFacet = m_VolumeFogRenderJobs[0].m_pDataVolumeFogFacet;
+        Dt::CVolumeFogComponent* pDataVolumeFogFacet = m_VolumeFogRenderJobs[0].m_pDtVolumeFogComponent;
 
         assert(pDataVolumeFogFacet != 0);
 
@@ -908,8 +907,8 @@ namespace
 
     void CGfxFogRenderer::BuildRenderJobs()
     {
-        Dt::CSunLightFacet* pDataSunFacet    = 0;
-        Gfx::CSunFacet*     pGraphicSunFacet = 0;
+        Dt::CSunComponent*  pDtSunComponent  = 0;
+        Gfx::CSunComponent* pGfxSunComponent = 0;
 
         // -----------------------------------------------------------------------------
         // Clear current render jobs
@@ -919,27 +918,30 @@ namespace
         // -----------------------------------------------------------------------------
         // Iterate throw every entity inside this map
         // -----------------------------------------------------------------------------
-        Dt::Map::CEntityIterator CurrentSunEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Light);
+        Dt::Map::CEntityIterator CurrentSunEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Dynamic);
         Dt::Map::CEntityIterator EndOfSunEntities = Dt::Map::EntitiesEnd();
 
-        Dt::Map::CEntityIterator CurrentEffectEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::FX);
+        Dt::Map::CEntityIterator CurrentEffectEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Dynamic);
         Dt::Map::CEntityIterator EndOfEffectEntities = Dt::Map::EntitiesEnd();
 
         // -----------------------------------------------------------------------------
         // Sun
+        // TODO: Sun and fog should be in the same entity or linked!
         // -----------------------------------------------------------------------------
-        for (; CurrentSunEntity != EndOfSunEntities; CurrentSunEntity = CurrentSunEntity.Next(Dt::SEntityCategory::Light))
+        for (; CurrentSunEntity != EndOfSunEntities; CurrentSunEntity = CurrentSunEntity.Next(Dt::SEntityCategory::Dynamic))
         {
             Dt::CEntity& rCurrentEntity = *CurrentSunEntity;
 
-            if (rCurrentEntity.GetType() == Dt::SLightType::Sun)
+            if (rCurrentEntity.HasComponent<Dt::CSunComponent>())
             {
-                pDataSunFacet    = static_cast<Dt::CSunLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
-                pGraphicSunFacet = static_cast<Gfx::CSunFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
+                pDtSunComponent  = rCurrentEntity.GetComponent<Dt::CSunComponent>();
+                pGfxSunComponent = Gfx::CComponentManager::GetInstance().GetComponent<Gfx::CSunComponent>(pDtSunComponent->GetID());
+
+                break;
             }
         }
 
-        if (pDataSunFacet == nullptr || pGraphicSunFacet == nullptr) return;
+        if (pDtSunComponent == nullptr || pGfxSunComponent == nullptr) return;
 
         // -----------------------------------------------------------------------------
         // Effect
@@ -951,9 +953,9 @@ namespace
             // -----------------------------------------------------------------------------
             // Get graphic facet
             // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetType() == Dt::SFXType::VolumeFog)
+            if (rCurrentEntity.HasComponent<Dt::CVolumeFogComponent>())
             {
-                Dt::CVolumeFogFXFacet* pDataSSRFacet = static_cast<Dt::CVolumeFogFXFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+                Dt::CVolumeFogComponent* pDataSSRFacet = rCurrentEntity.GetComponent<Dt::CVolumeFogComponent>();
 
                 assert(pDataSSRFacet != 0);
 
@@ -962,9 +964,9 @@ namespace
                 // -----------------------------------------------------------------------------
                 SVolumeFogRenderJob NewRenderJob;
 
-                NewRenderJob.m_pDataVolumeFogFacet = pDataSSRFacet;
-                NewRenderJob.m_pGraphicSunFacet    = pGraphicSunFacet;
-                NewRenderJob.m_pDataSunFacet       = pDataSunFacet;
+                NewRenderJob.m_pDtVolumeFogComponent = pDataSSRFacet;
+                NewRenderJob.m_pGfxSunComponent      = pGfxSunComponent;
+                NewRenderJob.m_pDtSunComponent       = pDtSunComponent;
 
                 m_VolumeFogRenderJobs.push_back(NewRenderJob);
             }
@@ -972,7 +974,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Next entity
             // -----------------------------------------------------------------------------
-            CurrentEffectEntity = CurrentEffectEntity.Next(Dt::SEntityCategory::FX);
+            CurrentEffectEntity = CurrentEffectEntity.Next(Dt::SEntityCategory::Dynamic);
         }
     }
 } // namespace

@@ -59,107 +59,56 @@
     <ClInclude Include="..\..\..\src\data\data_mesh.h">
       <Filter>models</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_point_light_facet.h">
-      <Filter>map\lights\point light</Filter>
+    <ClInclude Include="..\..\..\src\data\data_component.h">
+      <Filter>map\entity\components</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_point_light_manager.h">
-      <Filter>map\lights\point light</Filter>
+    <ClInclude Include="..\..\..\src\data\data_component_manager.h">
+      <Filter>map\entity\components</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_light_probe_facet.h">
-      <Filter>map\lights\light probe</Filter>
+    <ClInclude Include="..\..\..\src\data\data_ar_controller_component.h">
+      <Filter>map\entity\components\plugins</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_light_probe_manager.h">
-      <Filter>map\lights\light probe</Filter>
+    <ClInclude Include="..\..\..\src\data\data_ar_tracked_object_component.h">
+      <Filter>map\entity\components\plugins</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_sun_facet.h">
-      <Filter>map\lights\sun</Filter>
+    <ClInclude Include="..\..\..\src\data\data_sun_component.h">
+      <Filter>map\entity\components\lights</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_sun_manager.h">
-      <Filter>map\lights\sun</Filter>
+    <ClInclude Include="..\..\..\src\data\data_sky_component.h">
+      <Filter>map\entity\components\lights</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_sky_facet.h">
-      <Filter>map\lights\sky</Filter>
+    <ClInclude Include="..\..\..\src\data\data_point_light_component.h">
+      <Filter>map\entity\components\lights</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_sky_manager.h">
-      <Filter>map\lights\sky</Filter>
+    <ClInclude Include="..\..\..\src\data\data_light_probe_component.h">
+      <Filter>map\entity\components\lights</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_light_type.h">
-      <Filter>map\lights</Filter>
+    <ClInclude Include="..\..\..\src\data\data_area_light_component.h">
+      <Filter>map\entity\components\lights</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_ar_controller_facet.h">
-      <Filter>map\plugins\AR</Filter>
+    <ClInclude Include="..\..\..\src\data\data_volume_fog_component.h">
+      <Filter>map\entity\components\fx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_ar_controller_manager.h">
-      <Filter>map\plugins\AR</Filter>
+    <ClInclude Include="..\..\..\src\data\data_ssr_component.h">
+      <Filter>map\entity\components\fx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_ar_tracked_object_facet.h">
-      <Filter>map\plugins\AR</Filter>
+    <ClInclude Include="..\..\..\src\data\data_ssao_component.h">
+      <Filter>map\entity\components\fx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_ar_tracked_object_manager.h">
-      <Filter>map\plugins\AR</Filter>
+    <ClInclude Include="..\..\..\src\data\data_post_aa_component.h">
+      <Filter>map\entity\components\fx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_plugin_type.h">
-      <Filter>map\plugins</Filter>
+    <ClInclude Include="..\..\..\src\data\data_dof_component.h">
+      <Filter>map\entity\components\fx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_volume_fog_manager.h">
-      <Filter>map\fx\volume fog</Filter>
+    <ClInclude Include="..\..\..\src\data\data_bloom_component.h">
+      <Filter>map\entity\components\fx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_volume_fog_facet.h">
-      <Filter>map\fx\volume fog</Filter>
+    <ClInclude Include="..\..\..\src\data\data_mesh_component.h">
+      <Filter>map\entity\components\actors</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_ssr_manager.h">
-      <Filter>map\fx\ssr</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_ssr_facet.h">
-      <Filter>map\fx\ssr</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_ssao_manager.h">
-      <Filter>map\fx\ssao</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_ssao_facet.h">
-      <Filter>map\fx\ssao</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_dof_manager.h">
-      <Filter>map\fx\dof</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_dof_facet.h">
-      <Filter>map\fx\dof</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_bloom_manager.h">
-      <Filter>map\fx\bloom</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_bloom_facet.h">
-      <Filter>map\fx\bloom</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_fx_type.h">
-      <Filter>map\fx</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_mesh_manager.h">
-      <Filter>map\actors\mesh</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_actor_type.h">
-      <Filter>map\actors</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_camera_actor_facet.h">
-      <Filter>map\actors\camera</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_camera_actor_manager.h">
-      <Filter>map\actors\camera</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_mesh_actor_facet.h">
-      <Filter>map\actors\mesh</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_post_aa_facet.h">
-      <Filter>map\fx\post_aa</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_post_aa_manager.h">
-      <Filter>map\fx\post_aa</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_area_light_facet.h">
-      <Filter>map\lights\area light</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_area_light_manager.h">
-      <Filter>map\lights\area light</Filter>
+    <ClInclude Include="..\..\..\src\data\data_camera_component.h">
+      <Filter>map\entity\components\actors</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -212,95 +161,53 @@
     <ClCompile Include="..\..\..\src\data\data_mesh.cpp">
       <Filter>models</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_point_light_facet.cpp">
-      <Filter>map\lights\point light</Filter>
+    <ClCompile Include="..\..\..\src\data\data_component_manager.cpp">
+      <Filter>map\entity\components</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_point_light_manager.cpp">
-      <Filter>map\lights\point light</Filter>
+    <ClCompile Include="..\..\..\src\data\data_ar_controller_component.cpp">
+      <Filter>map\entity\components\plugins</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_light_probe_facet.cpp">
-      <Filter>map\lights\light probe</Filter>
+    <ClCompile Include="..\..\..\src\data\data_ar_tracked_object_component.cpp">
+      <Filter>map\entity\components\plugins</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_light_probe_manager.cpp">
-      <Filter>map\lights\light probe</Filter>
+    <ClCompile Include="..\..\..\src\data\data_sun_component.cpp">
+      <Filter>map\entity\components\lights</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_sun_facet.cpp">
-      <Filter>map\lights\sun</Filter>
+    <ClCompile Include="..\..\..\src\data\data_sky_component.cpp">
+      <Filter>map\entity\components\lights</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_sun_manager.cpp">
-      <Filter>map\lights\sun</Filter>
+    <ClCompile Include="..\..\..\src\data\data_point_light_component.cpp">
+      <Filter>map\entity\components\lights</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_sky_facet.cpp">
-      <Filter>map\lights\sky</Filter>
+    <ClCompile Include="..\..\..\src\data\data_light_probe_component.cpp">
+      <Filter>map\entity\components\lights</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_sky_manager.cpp">
-      <Filter>map\lights\sky</Filter>
+    <ClCompile Include="..\..\..\src\data\data_area_light_component.cpp">
+      <Filter>map\entity\components\lights</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_ar_controller_facet.cpp">
-      <Filter>map\plugins\AR</Filter>
+    <ClCompile Include="..\..\..\src\data\data_volume_fog_component.cpp">
+      <Filter>map\entity\components\fx</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_ar_controller_manager.cpp">
-      <Filter>map\plugins\AR</Filter>
+    <ClCompile Include="..\..\..\src\data\data_ssr_component.cpp">
+      <Filter>map\entity\components\fx</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_ar_tracked_object_manager.cpp">
-      <Filter>map\plugins\AR</Filter>
+    <ClCompile Include="..\..\..\src\data\data_ssao_component.cpp">
+      <Filter>map\entity\components\fx</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_ar_tracked_object_facet.cpp">
-      <Filter>map\plugins\AR</Filter>
+    <ClCompile Include="..\..\..\src\data\data_post_aa_component.cpp">
+      <Filter>map\entity\components\fx</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_volume_fog_facet.cpp">
-      <Filter>map\fx\volume fog</Filter>
+    <ClCompile Include="..\..\..\src\data\data_dof_component.cpp">
+      <Filter>map\entity\components\fx</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_volume_fog_manager.cpp">
-      <Filter>map\fx\volume fog</Filter>
+    <ClCompile Include="..\..\..\src\data\data_bloom_component.cpp">
+      <Filter>map\entity\components\fx</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_ssr_facet.cpp">
-      <Filter>map\fx\ssr</Filter>
+    <ClCompile Include="..\..\..\src\data\data_mesh_component.cpp">
+      <Filter>map\entity\components\actors</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_ssr_manager.cpp">
-      <Filter>map\fx\ssr</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_ssao_facet.cpp">
-      <Filter>map\fx\ssao</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_ssao_manager.cpp">
-      <Filter>map\fx\ssao</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_dof_facet.cpp">
-      <Filter>map\fx\dof</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_dof_manager.cpp">
-      <Filter>map\fx\dof</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_bloom_facet.cpp">
-      <Filter>map\fx\bloom</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_bloom_manager.cpp">
-      <Filter>map\fx\bloom</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_mesh_manager.cpp">
-      <Filter>map\actors\mesh</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_camera_actor_facet.cpp">
-      <Filter>map\actors\camera</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_camera_actor_manager.cpp">
-      <Filter>map\actors\camera</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_mesh_actor_facet.cpp">
-      <Filter>map\actors\mesh</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_post_aa_facet.cpp">
-      <Filter>map\fx\post_aa</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_post_aa_manager.cpp">
-      <Filter>map\fx\post_aa</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_area_light_manager.cpp">
-      <Filter>map\lights\area light</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_area_light_facet.cpp">
-      <Filter>map\lights\area light</Filter>
+    <ClCompile Include="..\..\..\src\data\data_camera_component.cpp">
+      <Filter>map\entity\components\actors</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -325,65 +232,23 @@
     <Filter Include="models">
       <UniqueIdentifier>{07e34a49-6329-43c1-9b85-20225bbfc5ef}</UniqueIdentifier>
     </Filter>
-    <Filter Include="map\actors">
-      <UniqueIdentifier>{d34f13b4-e357-49b8-8290-e4c854b0353f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="map\lights">
-      <UniqueIdentifier>{63d59431-f218-40ff-b88f-6a6a4290ed5d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="map\fx">
-      <UniqueIdentifier>{1b041ed4-ca9c-472b-b2b9-017f5f782f57}</UniqueIdentifier>
-    </Filter>
     <Filter Include="textures">
       <UniqueIdentifier>{71afbfc9-2627-4eba-a9d3-f355b40c9a27}</UniqueIdentifier>
     </Filter>
-    <Filter Include="map\plugins">
+    <Filter Include="map\entity\components">
+      <UniqueIdentifier>{d8ea709d-af56-47ad-9294-e3a6000c4096}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\entity\components\lights">
+      <UniqueIdentifier>{63d59431-f218-40ff-b88f-6a6a4290ed5d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\entity\components\plugins">
       <UniqueIdentifier>{7ffd24e8-c227-4102-88eb-f81cc0290671}</UniqueIdentifier>
     </Filter>
-    <Filter Include="map\lights\light probe">
-      <UniqueIdentifier>{dd3080f5-fba1-4d78-b7d9-1aee5fc0d0c2}</UniqueIdentifier>
+    <Filter Include="map\entity\components\fx">
+      <UniqueIdentifier>{1b041ed4-ca9c-472b-b2b9-017f5f782f57}</UniqueIdentifier>
     </Filter>
-    <Filter Include="map\lights\point light">
-      <UniqueIdentifier>{8eda5cad-d4bb-458b-8e6b-178dda009f9e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="map\lights\sky">
-      <UniqueIdentifier>{0ce16624-8746-4388-91ee-c41ffe8cb4d3}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="map\lights\sun">
-      <UniqueIdentifier>{e0f2f524-9458-45f1-8368-558fbbe75641}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="map\plugins\AR">
-      <UniqueIdentifier>{d67d8b33-b962-4ca4-945b-f24048380089}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="map\fx\bloom">
-      <UniqueIdentifier>{3a7ffc7a-f08e-47b5-a9fe-e4d2c6579b1c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="map\fx\dof">
-      <UniqueIdentifier>{dc4a0cbe-7703-497d-973f-49ed484d2443}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="map\fx\ssao">
-      <UniqueIdentifier>{82c81c63-4158-48e8-9ee4-6dc0558f41de}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="map\fx\ssr">
-      <UniqueIdentifier>{22d3eaa0-0bc0-4be8-8182-1f5a4a7b79ba}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="map\fx\volume fog">
-      <UniqueIdentifier>{0456c7d1-ffb4-4a56-916b-44ea551038cd}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="map\actors\node">
-      <UniqueIdentifier>{d838610a-1186-493d-8adf-b3078c1c2f14}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="map\actors\mesh">
-      <UniqueIdentifier>{4810099f-6ede-482d-b04b-ad6e69f2d148}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="map\actors\camera">
-      <UniqueIdentifier>{e6e96045-c296-40c6-b9f2-1f9f46701d11}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="map\fx\post_aa">
-      <UniqueIdentifier>{cc4d74eb-3e0b-4be2-b81b-8ce81125f7f1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="map\lights\area light">
-      <UniqueIdentifier>{ca13568f-5167-48be-a0a7-4e8fb1077983}</UniqueIdentifier>
+    <Filter Include="map\entity\components\actors">
+      <UniqueIdentifier>{d34f13b4-e357-49b8-8290-e4c854b0353f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

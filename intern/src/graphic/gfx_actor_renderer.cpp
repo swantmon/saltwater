@@ -5,18 +5,19 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
-#include "data/data_actor_type.h"
 #include "data/data_entity.h"
 #include "data/data_map.h"
+#include "data/data_mesh_component.h"
 #include "data/data_transformation_facet.h"
 
 #include "graphic/gfx_actor_renderer.h"
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"
+#include "graphic/gfx_component_manager.h"
 #include "graphic/gfx_main.h"
 #include "graphic/gfx_material_manager.h"
 #include "graphic/gfx_mesh.h"
-#include "graphic/gfx_mesh_actor_facet.h"
+#include "graphic/gfx_mesh_component.h"
 #include "graphic/gfx_mesh_manager.h"
 #include "graphic/gfx_performance.h"
 #include "graphic/gfx_sampler_manager.h"
@@ -79,11 +80,11 @@ namespace
 
         struct SRenderJob
         {
-            unsigned int   m_SurfaceAttributes;
-            unsigned int   m_EntityID;
-            CSurfacePtr    m_SurfacePtr;
-            CMaterialPtr   m_SurfaceMaterialPtr;
-            glm::mat4 m_ModelMatrix;
+            unsigned int m_SurfaceAttributes;
+            Base::ID     m_EntityID;
+            CSurfacePtr  m_SurfacePtr;
+            CMaterialPtr m_SurfaceMaterialPtr;
+            glm::mat4    m_ModelMatrix;
         };
 
     private:
@@ -469,7 +470,7 @@ namespace
 
             SHitProxyProperties HitProxyProperties;
 
-            HitProxyProperties.m_ID = CurrentRenderJob->m_EntityID;
+            HitProxyProperties.m_ID = static_cast<unsigned int>(CurrentRenderJob->m_EntityID);
 
             BufferManager::UploadBufferData(m_HitProxyPassPSBufferPtr, &HitProxyProperties);
 
@@ -540,7 +541,7 @@ namespace
         // Iterate throw every entity inside this map
         // TODO: Visibility culling!, Sort objects by deferred and forward rendering
         // -----------------------------------------------------------------------------
-        Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Actor);
+        Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Dynamic);
         Dt::Map::CEntityIterator EndOfEntities = Dt::Map::EntitiesEnd();
 
         for (; CurrentEntity != EndOfEntities; )
@@ -550,62 +551,59 @@ namespace
             // -----------------------------------------------------------------------------
             // Get graphic facet
             // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetType() != Dt::SActorType::Mesh || rCurrentEntity.GetLayer() != Dt::SEntityLayer::Default)
+            if (rCurrentEntity.GetLayer() == Dt::SEntityLayer::Default && rCurrentEntity.HasComponent<Dt::CMeshComponent>())
             {
-                CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Actor);
+                Dt::CMeshComponent*  pDtComponent  = rCurrentEntity.GetComponent<Dt::CMeshComponent>();
+                Gfx::CMeshComponent* pGfxComponent = Gfx::CComponentManager::GetInstance().GetComponent<Gfx::CMeshComponent>(pDtComponent->GetID());
 
-                continue;
-            }
-
-            CMeshActorFacet* pGraphicModelActorFacet = static_cast<CMeshActorFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
-
-            CMeshPtr MeshPtr = pGraphicModelActorFacet->GetMesh();
-
-            // -----------------------------------------------------------------------------
-            // Set every surface of this entity into a new render job
-            // -----------------------------------------------------------------------------
-            unsigned int NumberOfSurfaces = MeshPtr->GetLOD(0)->GetNumberOfSurfaces();
-
-            for (unsigned int IndexOfSurface = 0; IndexOfSurface < NumberOfSurfaces; ++ IndexOfSurface)
-            {
-                CSurfacePtr SurfacePtr = MeshPtr->GetLOD(0)->GetSurface(IndexOfSurface);
-
-                if (SurfacePtr == nullptr)
-                {
-                    break;
-                }
-
-                CMaterialPtr MaterialPtr;
-
-                if (pGraphicModelActorFacet->GetMaterial(IndexOfSurface) != 0)
-                {
-                    MaterialPtr = pGraphicModelActorFacet->GetMaterial(IndexOfSurface);
-                }
-                else
-                {
-                    MaterialPtr = SurfacePtr->GetMaterial();
-                }
-
-                assert(MaterialPtr != 0 && MaterialPtr.IsValid());
+                CMeshPtr MeshPtr = pGfxComponent->GetMesh();
 
                 // -----------------------------------------------------------------------------
-                // Set information to render job
+                // Set every surface of this entity into a new render job
                 // -----------------------------------------------------------------------------
-                SRenderJob NewRenderJob;
+                unsigned int NumberOfSurfaces = MeshPtr->GetLOD(0)->GetNumberOfSurfaces();
 
-                NewRenderJob.m_SurfaceAttributes  = SurfacePtr->GetKey().m_Key;
-                NewRenderJob.m_EntityID           = CurrentEntity->GetID();
-                NewRenderJob.m_SurfacePtr         = SurfacePtr;
-                NewRenderJob.m_SurfaceMaterialPtr = MaterialPtr;
-                NewRenderJob.m_ModelMatrix        = rCurrentEntity.GetTransformationFacet()->GetWorldMatrix();
+                for (unsigned int IndexOfSurface = 0; IndexOfSurface < NumberOfSurfaces; ++IndexOfSurface)
+                {
+                    CSurfacePtr SurfacePtr = MeshPtr->GetLOD(0)->GetSurface(IndexOfSurface);
 
-                m_DeferredRenderJobs.push_back(NewRenderJob);
+                    if (SurfacePtr == nullptr)
+                    {
+                        break;
+                    }
+
+                    CMaterialPtr MaterialPtr;
+
+                    if (pGfxComponent->GetMaterial(IndexOfSurface) != 0)
+                    {
+                        MaterialPtr = pGfxComponent->GetMaterial(IndexOfSurface);
+                    }
+                    else
+                    {
+                        MaterialPtr = SurfacePtr->GetMaterial();
+                    }
+
+                    assert(MaterialPtr != 0 && MaterialPtr.IsValid());
+
+                    // -----------------------------------------------------------------------------
+                    // Set information to render job
+                    // -----------------------------------------------------------------------------
+                    SRenderJob NewRenderJob;
+
+                    NewRenderJob.m_SurfaceAttributes = SurfacePtr->GetKey().m_Key;
+                    NewRenderJob.m_EntityID = CurrentEntity->GetID();
+                    NewRenderJob.m_SurfacePtr = SurfacePtr;
+                    NewRenderJob.m_SurfaceMaterialPtr = MaterialPtr;
+                    NewRenderJob.m_ModelMatrix = rCurrentEntity.GetTransformationFacet()->GetWorldMatrix();
+
+                    m_DeferredRenderJobs.push_back(NewRenderJob);
+                }
             }
 
             // -----------------------------------------------------------------------------
             // Next entity
             // -----------------------------------------------------------------------------
-            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Actor);
+            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Dynamic);
         }
 
         // -----------------------------------------------------------------------------

@@ -5,17 +5,17 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
-#include "data/data_bloom_manager.h"
-#include "data/data_dof_manager.h"
+#include "data/data_bloom_component.h"
+#include "data/data_component_manager.h"
+#include "data/data_dof_component.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
-#include "data/data_fx_type.h"
-#include "data/data_post_aa_manager.h"
 #include "data/data_map.h"
-#include "data/data_ssao_manager.h"
-#include "data/data_ssr_manager.h"
+#include "data/data_post_aa_component.h"
+#include "data/data_ssao_component.h"
+#include "data/data_ssr_component.h"
 #include "data/data_transformation_facet.h"
-#include "data/data_volume_fog_manager.h"
+#include "data/data_volume_fog_component.h"
 
 #include "editor/edit_effect_helper.h"
 
@@ -126,15 +126,14 @@ namespace
 
             Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-            rCurrentEntity.SetCategory(Dt::SEntityCategory::FX);
-            rCurrentEntity.SetType(Dt::SFXType::Bloom);
+            rCurrentEntity.SetCategory(Dt::SEntityCategory::Dynamic);
 
             // -----------------------------------------------------------------------------
             // Create facet and set it
             // -----------------------------------------------------------------------------
-            Dt::CBloomFXFacet* pEffectFacet = Dt::BloomManager::CreateBloomFX();
+            Dt::CBloomComponent& rEffectFacet = Dt::CComponentManager::GetInstance().Allocate<Dt::CBloomComponent>();
 
-            rCurrentEntity.SetDetailFacet(Dt::SFacetCategory::Data, pEffectFacet);
+            rCurrentEntity.AddComponent(rEffectFacet);
         }
     }
 
@@ -150,15 +149,14 @@ namespace
 
             Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-            rCurrentEntity.SetCategory(Dt::SEntityCategory::FX);
-            rCurrentEntity.SetType(Dt::SFXType::DOF);
+            rCurrentEntity.SetCategory(Dt::SEntityCategory::Dynamic);
 
             // -----------------------------------------------------------------------------
             // Create facet and set it
             // -----------------------------------------------------------------------------
-            Dt::CDOFFXFacet* pEffectFacet = Dt::DOFManager::CreateDOFFX();
+            Dt::CDOFComponent& rEffectFacet = Dt::CComponentManager::GetInstance().Allocate<Dt::CDOFComponent>();
 
-            rCurrentEntity.SetDetailFacet(Dt::SFacetCategory::Data, pEffectFacet);
+            rCurrentEntity.AddComponent(rEffectFacet);
         }
     }
 
@@ -174,15 +172,14 @@ namespace
 
             Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-            rCurrentEntity.SetCategory(Dt::SEntityCategory::FX);
-            rCurrentEntity.SetType(Dt::SFXType::PostAA);
+            rCurrentEntity.SetCategory(Dt::SEntityCategory::Dynamic);
 
             // -----------------------------------------------------------------------------
             // Create facet and set it
             // -----------------------------------------------------------------------------
-            Dt::CPostAAFXFacet* pEffectFacet = Dt::PostAAManager::CreatePostAAFX();
+            Dt::CPostAAComponent& rEffectFacet = Dt::CComponentManager::GetInstance().Allocate<Dt::CPostAAComponent>();
 
-            rCurrentEntity.SetDetailFacet(Dt::SFacetCategory::Data, pEffectFacet);
+            rCurrentEntity.AddComponent(rEffectFacet);
         }
     }
 
@@ -198,15 +195,14 @@ namespace
 
             Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-            rCurrentEntity.SetCategory(Dt::SEntityCategory::FX);
-            rCurrentEntity.SetType(Dt::SFXType::SSR);
+            rCurrentEntity.SetCategory(Dt::SEntityCategory::Dynamic);
 
             // -----------------------------------------------------------------------------
             // Create facet and set it
             // -----------------------------------------------------------------------------
-            Dt::CSSRFXFacet* pEffectFacet = Dt::SSRFXManager::CreateSSRFX();
+            Dt::CSSRComponent& rEffectFacet = Dt::CComponentManager::GetInstance().Allocate<Dt::CSSRComponent>();
 
-            rCurrentEntity.SetDetailFacet(Dt::SFacetCategory::Data, pEffectFacet);
+            rCurrentEntity.AddComponent(rEffectFacet);
         }
     }
 
@@ -222,15 +218,14 @@ namespace
 
             Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-            rCurrentEntity.SetCategory(Dt::SEntityCategory::FX);
-            rCurrentEntity.SetType(Dt::SFXType::VolumeFog);
+            rCurrentEntity.SetCategory(Dt::SEntityCategory::Dynamic);
 
             // -----------------------------------------------------------------------------
             // Create facet and set it
             // -----------------------------------------------------------------------------
-            Dt::CVolumeFogFXFacet* pEffectFacet = Dt::VolumeFogManager::CreateVolumeFogFX();
+            Dt::CVolumeFogComponent& rEffectFacet = Dt::CComponentManager::GetInstance().Allocate<Dt::CVolumeFogComponent>();
 
-            rCurrentEntity.SetDetailFacet(Dt::SFacetCategory::Data, pEffectFacet);
+            rCurrentEntity.AddComponent(rEffectFacet);
         }
     }
 
@@ -242,13 +237,13 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CBloomFXFacet* pFXFacet = static_cast<Dt::CBloomFXFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+        Dt::CBloomComponent* pFXFacet = rCurrentEntity.GetComponent<Dt::CBloomComponent>();
 
-        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::FX && rCurrentEntity.GetType() == Dt::SFXType::Bloom && pFXFacet != nullptr)
+        if (pFXFacet != nullptr)
         {
             Edit::CMessage NewMessage;
 
-            NewMessage.PutInt(rCurrentEntity.GetID());
+            NewMessage.PutInt(static_cast<int>(rCurrentEntity.GetID()));
 
             NewMessage.PutFloat(pFXFacet->GetTint()[0]);
             NewMessage.PutFloat(pFXFacet->GetTint()[1]);
@@ -274,13 +269,13 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CDOFFXFacet* pFXFacet = static_cast<Dt::CDOFFXFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+        Dt::CDOFComponent* pFXFacet = rCurrentEntity.GetComponent<Dt::CDOFComponent>();
 
-        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::FX && rCurrentEntity.GetType() == Dt::SFXType::DOF && pFXFacet != nullptr)
+        if (pFXFacet != nullptr)
         {
             Edit::CMessage NewMessage;
 
-            NewMessage.PutInt(rCurrentEntity.GetID());
+            NewMessage.PutInt(static_cast<int>(rCurrentEntity.GetID()));
 
             NewMessage.PutFloat(pFXFacet->GetNearDistance());
             NewMessage.PutFloat(pFXFacet->GetFarDistance());
@@ -302,13 +297,13 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CPostAAFXFacet* pFXFacet = static_cast<Dt::CPostAAFXFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+        Dt::CPostAAComponent* pFXFacet = rCurrentEntity.GetComponent<Dt::CPostAAComponent>();
 
-        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::FX && rCurrentEntity.GetType() == Dt::SFXType::PostAA && pFXFacet != nullptr)
+        if (pFXFacet != nullptr)
         {
             Edit::CMessage NewMessage;
 
-            NewMessage.PutInt(rCurrentEntity.GetID());
+            NewMessage.PutInt(static_cast<int>(rCurrentEntity.GetID()));
 
             NewMessage.PutInt(pFXFacet->GetType());
 
@@ -326,13 +321,13 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CSSRFXFacet* pFXFacet = static_cast<Dt::CSSRFXFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+        Dt::CSSRComponent* pFXFacet = rCurrentEntity.GetComponent<Dt::CSSRComponent>();
 
-        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::FX && rCurrentEntity.GetType() == Dt::SFXType::SSR && pFXFacet != nullptr)
+        if (pFXFacet != nullptr)
         {
             Edit::CMessage NewMessage;
 
-            NewMessage.PutInt(rCurrentEntity.GetID());
+            NewMessage.PutInt(static_cast<int>(rCurrentEntity.GetID()));
 
             NewMessage.PutFloat(pFXFacet->GetIntensity());
             NewMessage.PutFloat(pFXFacet->GetRoughnessMask());
@@ -353,13 +348,13 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CVolumeFogFXFacet* pFXFacet = static_cast<Dt::CVolumeFogFXFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+        Dt::CVolumeFogComponent* pFXFacet = rCurrentEntity.GetComponent<Dt::CVolumeFogComponent>();
 
-        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::FX && rCurrentEntity.GetType() == Dt::SFXType::VolumeFog && pFXFacet != nullptr)
+        if (pFXFacet != nullptr)
         {
             Edit::CMessage NewMessage;
 
-            NewMessage.PutInt(rCurrentEntity.GetID());
+            NewMessage.PutInt(static_cast<int>(rCurrentEntity.GetID()));
 
             NewMessage.PutFloat(pFXFacet->GetWindDirection()[0]);
             NewMessage.PutFloat(pFXFacet->GetWindDirection()[1]);
@@ -392,9 +387,9 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CBloomFXFacet* pFXFacet = static_cast<Dt::CBloomFXFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+        Dt::CBloomComponent* pFXFacet = rCurrentEntity.GetComponent<Dt::CBloomComponent>();
 
-        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::FX && rCurrentEntity.GetType() == Dt::SFXType::Bloom && pFXFacet != nullptr)
+        if (pFXFacet != nullptr)
         {
             float R, G, B, A;
 
@@ -428,7 +423,7 @@ namespace
 
             pFXFacet->UpdateEffect();
 
-            Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pFXFacet, Dt::CBloomComponent::DirtyInfo);
         }
     }
 
@@ -440,9 +435,9 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CDOFFXFacet* pFXFacet = static_cast<Dt::CDOFFXFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+        Dt::CDOFComponent* pFXFacet = rCurrentEntity.GetComponent<Dt::CDOFComponent>();
 
-        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::FX && rCurrentEntity.GetType() == Dt::SFXType::DOF && pFXFacet != nullptr)
+        if (pFXFacet != nullptr)
         {
             // -----------------------------------------------------------------------------
             // Read values
@@ -468,7 +463,7 @@ namespace
 
             pFXFacet->UpdateEffect();
 
-            Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pFXFacet, Dt::CDOFComponent::DirtyInfo);
         }
     }
 
@@ -480,16 +475,16 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CPostAAFXFacet* pFXFacet = static_cast<Dt::CPostAAFXFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+        Dt::CPostAAComponent* pFXFacet = rCurrentEntity.GetComponent<Dt::CPostAAComponent>();
 
-        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::FX && rCurrentEntity.GetType() == Dt::SFXType::PostAA && pFXFacet != nullptr)
+        if (pFXFacet != nullptr)
         {
-            Dt::CPostAAFXFacet::EType Type;
+            Dt::CPostAAComponent::EType Type;
 
             // -----------------------------------------------------------------------------
             // Read values
             // -----------------------------------------------------------------------------          
-            Type = static_cast<Dt::CPostAAFXFacet::EType>(_rMessage.GetInt());
+            Type = static_cast<Dt::CPostAAComponent::EType>(_rMessage.GetInt());
 
             // -----------------------------------------------------------------------------
             // Set values
@@ -498,7 +493,7 @@ namespace
 
             pFXFacet->UpdateEffect();
 
-            Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pFXFacet, Dt::CPostAAComponent::DirtyInfo);
         }
     }
 
@@ -510,9 +505,9 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CSSRFXFacet* pFXFacet = static_cast<Dt::CSSRFXFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+        Dt::CSSRComponent* pFXFacet = rCurrentEntity.GetComponent<Dt::CSSRComponent>();
 
-        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::FX && rCurrentEntity.GetType() == Dt::SFXType::SSR && pFXFacet != nullptr)
+        if (pFXFacet != nullptr)
         {
             // -----------------------------------------------------------------------------
             // Read values
@@ -535,7 +530,7 @@ namespace
 
             pFXFacet->UpdateEffect();
 
-            Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pFXFacet, Dt::CSSRComponent::DirtyInfo);
         }
     }
 
@@ -547,9 +542,9 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CVolumeFogFXFacet* pFXFacet = static_cast<Dt::CVolumeFogFXFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+        Dt::CVolumeFogComponent* pFXFacet = rCurrentEntity.GetComponent<Dt::CVolumeFogComponent>();
 
-        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::FX && rCurrentEntity.GetType() == Dt::SFXType::VolumeFog && pFXFacet != nullptr)
+        if (pFXFacet != nullptr)
         {
             float R, G, B, A;
             float X, Y, Z, W;
@@ -597,7 +592,7 @@ namespace
 
             pFXFacet->SetDensityAttenuation(DensityAttenuation);
 
-            Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pFXFacet, Dt::CVolumeFogComponent::DirtyInfo);
         }
     }
 

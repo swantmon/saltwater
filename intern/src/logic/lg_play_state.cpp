@@ -11,18 +11,11 @@
 
 #include "core/core_time.h"
 
-#include "data/data_actor_type.h"
-#include "data/data_area_light_manager.h"
-#include "data/data_camera_actor_manager.h"
+#include "data/data_camera_component.h"
+#include "data/data_component_manager.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
-#include "data/data_light_probe_manager.h"
-#include "data/data_light_type.h"
 #include "data/data_map.h"
-#include "data/data_mesh_manager.h"
-#include "data/data_point_light_manager.h"
-#include "data/data_sky_manager.h"
-#include "data/data_sun_manager.h"
 
 #include "gui/gui_event_handler.h"
 
@@ -94,34 +87,25 @@ namespace
         // -----------------------------------------------------------------------------
         // Update data manager
         // -----------------------------------------------------------------------------
-        Dt::MeshActorManager  ::Update();
-        Dt::CameraActorManager::Update();
-        Dt::EntityManager     ::Update();
-        Dt::SunManager        ::Update();
-        Dt::LightProbeManager ::Update();
-        Dt::PointLightManager ::Update();
-        Dt::AreaLightManager  ::Update();
-        Dt::SkyManager        ::Update();
+        Dt::CComponentManager::GetInstance().Update();
 
         // -----------------------------------------------------------------------------
         // Get main camera entity and set this entity to the camera project
         // as linked entity.
         // After the first main camera we can break the loop.
         // -----------------------------------------------------------------------------
-        Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Actor);
+        Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Dynamic);
         Dt::Map::CEntityIterator EndOfEntities = Dt::Map::EntitiesEnd();
 
-        for (; CurrentEntity != EndOfEntities; CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Actor))
+        for (; CurrentEntity != EndOfEntities; CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Dynamic))
         {
             Dt::CEntity& rCurrentEntity = *CurrentEntity;
 
-            if (rCurrentEntity.GetType() == Dt::SActorType::Camera)
+            Dt::CCameraComponent* pCameraComponent = rCurrentEntity.GetComponent<Dt::CCameraComponent>();
+
+            if (pCameraComponent != nullptr)
             {
-                Dt::CCameraActorFacet* pCameraActorFacet = static_cast<Dt::CCameraActorFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
-
-                assert(pCameraActorFacet != nullptr);
-
-                if (pCameraActorFacet->IsMainCamera())
+                if (pCameraComponent->IsMainCamera())
                 {
                     Cam::CControl& rControl = Cam::ControlManager::GetActiveControl();
 

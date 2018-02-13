@@ -67,6 +67,7 @@
     <ClInclude Include="..\..\..\src\base\base_test_suite.h" />
     <ClInclude Include="..\..\..\src\base\base_timer.h" />
     <ClInclude Include="..\..\..\src\base\base_typedef.h" />
+    <ClInclude Include="..\..\..\src\base\base_type_info.h" />
     <ClInclude Include="..\..\..\src\base\base_uncopyable.h" />
     <ClInclude Include="..\..\..\src\base\base_math_limits.h" />
   </ItemGroup>

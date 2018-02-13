@@ -8,19 +8,19 @@
 #include "camera/cam_control_manager.h"
 
 #include "data/data_entity.h"
-#include "data/data_light_type.h"
 #include "data/data_map.h"
 #include "data/data_model_manager.h"
-#include "data/data_point_light_facet.h"
+#include "data/data_point_light_component.h"
 
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"
+#include "graphic/gfx_component_manager.h"
 #include "graphic/gfx_histogram_renderer.h"
 #include "graphic/gfx_light_sun_renderer.h"
 #include "graphic/gfx_main.h"
 #include "graphic/gfx_mesh_manager.h"
 #include "graphic/gfx_performance.h"
-#include "graphic/gfx_point_light_facet.h"
+#include "graphic/gfx_point_light_component.h"
 #include "graphic/gfx_point_light_manager.h"
 #include "graphic/gfx_sampler_manager.h"
 #include "graphic/gfx_shader_manager.h"
@@ -73,7 +73,7 @@ namespace
 
         struct SRenderJob
         {
-            Gfx::CPointLightFacet* m_pGraphicPointLightFacet;
+            Gfx::CPointLightComponent* m_pGraphicPointLightFacet;
         };
 
     private:
@@ -317,7 +317,7 @@ namespace
 
         for (; CurrentRenderJob != EndOfRenderJobs; ++CurrentRenderJob)
         {
-            Gfx::CPointLightFacet* pGfxPointLight = CurrentRenderJob->m_pGraphicPointLightFacet;
+            Gfx::CPointLightComponent* pGfxPointLight = CurrentRenderJob->m_pGraphicPointLightFacet;
 
             assert(pGfxPointLight != nullptr);
 
@@ -412,7 +412,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Iterate throw every entity inside this map
         // -----------------------------------------------------------------------------
-        Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Light);
+        Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Dynamic);
         Dt::Map::CEntityIterator EndOfEntities = Dt::Map::EntitiesEnd();
 
         for (; CurrentEntity != EndOfEntities; )
@@ -422,20 +422,20 @@ namespace
             // -----------------------------------------------------------------------------
             // Get graphic facet
             // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetType() != Dt::SLightType::Point)
+            if (!rCurrentEntity.HasComponent<Dt::CPointLightComponent>())
             {
-                CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Light);
+                CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Dynamic);
 
                 continue;
             }
 
-            Dt::CPointLightFacet*  pDataPointFacet    = static_cast<Dt::CPointLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
-            Gfx::CPointLightFacet* pGraphicPointFacet = static_cast<Gfx::CPointLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
+            Dt::CPointLightComponent*  pDataPointFacet    = rCurrentEntity.GetComponent<Dt::CPointLightComponent>();
+            Gfx::CPointLightComponent* pGraphicPointFacet = Gfx::CComponentManager::GetInstance().GetComponent<Gfx::CPointLightComponent>(pDataPointFacet->GetID());
 
             // -----------------------------------------------------------------------------
             // Set sun into a new render job
             // -----------------------------------------------------------------------------
-            if (pDataPointFacet->GetShadowType() == Dt::CPointLightFacet::GlobalIllumination)
+            if (pDataPointFacet->GetShadowType() == Dt::CPointLightComponent::GlobalIllumination)
             {
                 SRenderJob NewRenderJob;
 
@@ -447,7 +447,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Next entity
             // -----------------------------------------------------------------------------
-            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Light);
+            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Dynamic);
         }
     }
 } // namespace

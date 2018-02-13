@@ -8,17 +8,14 @@
 
 #include "core/core_time.h"
 
-#include "data/data_actor_type.h"
 #include "data/data_entity.h"
-#include "data/data_fx_type.h"
-#include "data/data_light_type.h"
 #include "data/data_map.h"
-#include "data/data_ssao_facet.h"
+#include "data/data_ssao_component.h"
 #include "data/data_transformation_facet.h"
 
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"
-#include "graphic/gfx_sun_facet.h"
+#include "graphic/gfx_sun_component.h"
 #include "graphic/gfx_sun_manager.h"
 #include "graphic/gfx_main.h"
 #include "graphic/gfx_mesh.h"
@@ -87,7 +84,7 @@ namespace
 
         struct SSSAORenderJob
         {
-            Dt::CSSAOFXFacet* m_pDataSSAOFacet;
+            Dt::CSSAOComponent* m_pDataSSAOFacet;
         };
         
         struct SGaussianSettings
@@ -833,7 +830,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Iterate throw every entity inside this map
         // -----------------------------------------------------------------------------
-        Dt::Map::CEntityIterator CurrentEffectEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::FX);
+        Dt::Map::CEntityIterator CurrentEffectEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Static);
         Dt::Map::CEntityIterator EndOfEffectEntities = Dt::Map::EntitiesEnd();
 
         for (; CurrentEffectEntity != EndOfEffectEntities; )
@@ -843,9 +840,9 @@ namespace
             // -----------------------------------------------------------------------------
             // Get graphic facet
             // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetType() == Dt::SFXType::SSAO)
+            if (rCurrentEntity.HasComponent<Dt::CSSAOComponent>())
             {
-                Dt::CSSAOFXFacet* pDataSSAOFacet = static_cast<Dt::CSSAOFXFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+                Dt::CSSAOComponent* pDataSSAOFacet = rCurrentEntity.GetComponent<Dt::CSSAOComponent>();
 
                 assert(pDataSSAOFacet != 0);
 
@@ -862,7 +859,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Next entity
             // -----------------------------------------------------------------------------
-            CurrentEffectEntity = CurrentEffectEntity.Next(Dt::SEntityCategory::FX);
+            CurrentEffectEntity = CurrentEffectEntity.Next(Dt::SEntityCategory::Static);
         }
     }
 } // namespace

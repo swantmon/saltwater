@@ -5,7 +5,7 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
-#include "data/data_actor_type.h"
+#include "data/data_component_manager.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_hierarchy_facet.h"
@@ -111,7 +111,6 @@ namespace
         Dt::SEntityDescriptor EntityDesc;
 
         EntityDesc.m_EntityCategory = 0;
-        EntityDesc.m_EntityType     = 0;
         EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
 
         Dt::CEntity& rNewEntity = Dt::EntityManager::CreateEntity(EntityDesc);
@@ -122,7 +121,7 @@ namespace
         pTransformationFacet->SetScale(glm::vec3(1.0f));
         pTransformationFacet->SetRotation(glm::vec3(0.0f));
 
-        _rMessage.SetResult(rNewEntity.GetID());
+        _rMessage.SetResult(static_cast<int>(rNewEntity.GetID()));
     }
 
     // -----------------------------------------------------------------------------
@@ -215,16 +214,18 @@ namespace
 
         Edit::CMessage NewMessage;
 
-        NewMessage.PutInt(rCurrentEntity.GetID());
+        NewMessage.PutInt(static_cast<int>(rCurrentEntity.GetID()));
 
         NewMessage.PutInt(rCurrentEntity.GetCategory());
-        NewMessage.PutInt(rCurrentEntity.GetType());
+        NewMessage.PutInt(0); //<< REMOVE!
 
         NewMessage.PutBool(rCurrentEntity.GetTransformationFacet() != nullptr);
         NewMessage.PutBool(rCurrentEntity.GetHierarchyFacet()      != nullptr);
 
-        NewMessage.PutBool(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data)    != nullptr);
-        NewMessage.PutBool(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic) != nullptr);
+        // TODO by tschwandt
+        // Extend this by giving the information of what kind of components are available!
+        NewMessage.PutBool(false);
+        NewMessage.PutBool(false);
 
         NewMessage.Reset();
 
@@ -241,7 +242,7 @@ namespace
            
         Edit::CMessage NewMessage;
 
-        NewMessage.PutInt(rCurrentEntity.GetID());
+        NewMessage.PutInt(static_cast<int>(rCurrentEntity.GetID()));
 
         NewMessage.PutBool(rCurrentEntity.IsInMap());
 
@@ -277,7 +278,7 @@ namespace
 
         Dt::CTransformationFacet* pTransformationFacet = rCurrentEntity.GetTransformationFacet();
 
-        NewMessage.PutInt(rCurrentEntity.GetID());
+        NewMessage.PutInt(static_cast<int>(rCurrentEntity.GetID()));
 
         if (pTransformationFacet)
         {
@@ -429,7 +430,7 @@ namespace
             // -----------------------------------------------------------------------------
             // ID
             // -----------------------------------------------------------------------------
-            NewMessage.PutInt(rCurrentEntity.GetID());
+            NewMessage.PutInt(static_cast<int>(rCurrentEntity.GetID()));
 
             // -----------------------------------------------------------------------------
             // Name
@@ -459,7 +460,7 @@ namespace
                 {
                     NewMessage.PutBool(true);
 
-                    NewMessage.PutInt(pParentEntity->GetID());
+                    NewMessage.PutInt(static_cast<int>(pParentEntity->GetID()));
                 }
                 else
                 {

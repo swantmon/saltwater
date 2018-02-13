@@ -7,13 +7,13 @@
 #include "base/base_uncopyable.h"
 
 #include "data/data_entity.h"
-#include "data/data_light_type.h"
 #include "data/data_map.h"
 #include "data/data_transformation_facet.h"
-#include "data/data_point_light_facet.h"
+#include "data/data_point_light_component.h"
 
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"
+#include "graphic/gfx_component_manager.h"
 #include "graphic/gfx_debug_renderer.h"
 #include "graphic/gfx_histogram_renderer.h"
 #include "graphic/gfx_light_point_renderer.h"
@@ -21,7 +21,7 @@
 #include "graphic/gfx_mesh.h"
 #include "graphic/gfx_mesh_manager.h"
 #include "graphic/gfx_performance.h"
-#include "graphic/gfx_point_light_facet.h"
+#include "graphic/gfx_point_light_component.h"
 #include "graphic/gfx_sampler_manager.h"
 #include "graphic/gfx_shader_manager.h"
 #include "graphic/gfx_state_manager.h"
@@ -90,10 +90,8 @@ namespace
         
         struct SRenderJob
         {
-            Dt::CPointLightFacet* m_pDataLightFacet;
-            Dt::CEntity*          m_pLevelEntity;
-            
-            Gfx::CPointLightFacet* m_pGfxLightFacet;
+            Dt::CPointLightComponent*  m_pDtComponent;
+            Gfx::CPointLightComponent* m_pGfxComponent;
         };
         
     private:
@@ -404,10 +402,10 @@ namespace
 
         for (; CurrentRenderJob != EndOfRenderJobs; ++ CurrentRenderJob)
         {
-            Dt::CPointLightFacet* pDtLightFacet    = static_cast<Dt::CPointLightFacet*>(CurrentRenderJob->m_pDataLightFacet);
-            Dt::CEntity*          pEntity            = CurrentRenderJob->m_pLevelEntity;
+            Gfx::CPointLightComponent* pGfxComponent = CurrentRenderJob->m_pGfxComponent;
+            Dt::CPointLightComponent*  pDtComponent  = CurrentRenderJob->m_pDtComponent;
             
-            assert(pDtLightFacet    != nullptr);
+            assert(pDtComponent    != nullptr);
 
             // -----------------------------------------------------------------------------
             // Upload model matrix to buffer
@@ -416,9 +414,9 @@ namespace
             
             ModelBuffer.m_ModelMatrix  = glm::mat4(1.0f);
 
-            ModelBuffer.m_ModelMatrix[3] = glm::vec4(pEntity->GetWorldPosition(), 1.0f);
+            ModelBuffer.m_ModelMatrix[3] = glm::vec4(pDtComponent->GetLinkedEntity()->GetWorldPosition(), 1.0f);
 
-            ModelBuffer.m_ModelMatrix *= glm::scale(glm::vec3(pDtLightFacet->GetAttenuationRadius()));
+            ModelBuffer.m_ModelMatrix *= glm::scale(glm::vec3(pDtComponent->GetAttenuationRadius()));
             
             BufferManager::UploadBufferData(m_MainVSBufferPtr->GetBuffer(0), &ModelBuffer);
             
@@ -427,23 +425,23 @@ namespace
             // -----------------------------------------------------------------------------
             SPunctualLightProperties LightBuffer;
             
-            float InvSqrAttenuationRadius = pDtLightFacet->GetReciprocalSquaredAttenuationRadius();
-            float AngleScale              = pDtLightFacet->GetAngleScale();
-            float AngleOffset             = pDtLightFacet->GetAngleOffset();
-            float HasShadows              = pDtLightFacet->GetShadowType() != Dt::CPointLightFacet::NoShadows ? 1.0f : 0.0f;
+            float InvSqrAttenuationRadius = pDtComponent->GetReciprocalSquaredAttenuationRadius();
+            float AngleScale              = pDtComponent->GetAngleScale();
+            float AngleOffset             = pDtComponent->GetAngleOffset();
+            float HasShadows              = pDtComponent->GetShadowType() != Dt::CPointLightComponent::NoShadows ? 1.0f : 0.0f;
             
-            LightBuffer.m_LightPosition  = glm::vec4(pEntity->GetWorldPosition(), 1.0f);
-            LightBuffer.m_LightDirection = glm::normalize(glm::vec4(pDtLightFacet->GetDirection(), 0.0f));
-            LightBuffer.m_LightColor     = glm::vec4(pDtLightFacet->GetLightness(), 1.0f);
+            LightBuffer.m_LightPosition  = glm::vec4(pDtComponent->GetLinkedEntity()->GetWorldPosition(), 1.0f);
+            LightBuffer.m_LightDirection = glm::normalize(glm::vec4(pDtComponent->GetDirection(), 0.0f));
+            LightBuffer.m_LightColor     = glm::vec4(pDtComponent->GetLightness(), 1.0f);
             LightBuffer.m_LightSettings  = glm::vec4(InvSqrAttenuationRadius, AngleScale, AngleOffset, HasShadows);
 
             LightBuffer.m_LightViewProjection = glm::mat4(1.0f);
 
-            if (pDtLightFacet->GetShadowType() != Dt::CPointLightFacet::NoShadows)
+            if (pDtComponent->GetShadowType() != Dt::CPointLightComponent::NoShadows)
             {
-                assert(CurrentRenderJob->m_pGfxLightFacet->GetCamera().IsValid());
+                assert(pGfxComponent->GetCamera().IsValid());
 
-                LightBuffer.m_LightViewProjection = CurrentRenderJob->m_pGfxLightFacet->GetCamera()->GetViewProjectionMatrix();
+                LightBuffer.m_LightViewProjection = pGfxComponent->GetCamera()->GetViewProjectionMatrix();
             }
             
             BufferManager::UploadBufferData(m_PunctualLightPSBufferPtr->GetBuffer(1), &LightBuffer);
@@ -451,9 +449,9 @@ namespace
             // -----------------------------------------------------------------------------
             // Set shadow map
             // -----------------------------------------------------------------------------
-            if (pDtLightFacet->GetShadowType() != Dt::CPointLightFacet::NoShadows)
+            if (pDtComponent->GetShadowType() != Dt::CPointLightComponent::NoShadows)
             {
-                ContextManager::SetTexture(4, CurrentRenderJob->m_pGfxLightFacet->GetTextureSMSet()->GetTexture(0));
+                ContextManager::SetTexture(4, pGfxComponent->GetTextureSMSet()->GetTexture(0));
             }
             
             // -----------------------------------------------------------------------------
@@ -508,35 +506,34 @@ namespace
         // -----------------------------------------------------------------------------
         // Iterate throw every entity inside this map
         // -----------------------------------------------------------------------------
-        Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Light);
+        Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Dynamic);
         Dt::Map::CEntityIterator EndOfEntities = Dt::Map::EntitiesEnd();
         
         for (; CurrentEntity != EndOfEntities; )
         {
             Dt::CEntity& rCurrentEntity = *CurrentEntity;
 
-            if (rCurrentEntity.GetType() != Dt::SLightType::Point)
+            if (!rCurrentEntity.HasComponent<Dt::CPointLightComponent>())
             {
-                CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Light);
+                CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Dynamic);
 
                 continue;
             }
             
-            Dt::CPointLightFacet*   pDataLightFacet    = static_cast<Dt::CPointLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
-            Gfx::CPointLightFacet*  pGraphicLightFacet = static_cast<Gfx::CPointLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
+            Dt::CPointLightComponent*  pDataLightFacet    = rCurrentEntity.GetComponent<Dt::CPointLightComponent>();
+            Gfx::CPointLightComponent* pGraphicLightFacet = Gfx::CComponentManager::GetInstance().GetComponent<Gfx::CPointLightComponent>(pDataLightFacet->GetID());
             
             SRenderJob NewRenderJob;
-                
-            NewRenderJob.m_pDataLightFacet        = pDataLightFacet;
-            NewRenderJob.m_pLevelEntity           = &rCurrentEntity;
-            NewRenderJob.m_pGfxLightFacet     = pGraphicLightFacet;
+
+            NewRenderJob.m_pDtComponent   = pDataLightFacet;
+            NewRenderJob.m_pGfxComponent  = pGraphicLightFacet;
 
             m_PunctualLightRenderJobs.push_back(NewRenderJob);
             
             // -----------------------------------------------------------------------------
             // Get next light
             // -----------------------------------------------------------------------------
-            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Light);
+            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Dynamic);
         }
     }
 } // namespace

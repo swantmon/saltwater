@@ -6,20 +6,19 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
-#include "data/data_light_probe_facet.h"
-#include "data/data_light_type.h"
+#include "data/data_light_probe_component.h"
 #include "data/data_entity.h"
-#include "data/data_fx_type.h"
 #include "data/data_map.h"
-#include "data/data_ssr_facet.h"
+#include "data/data_ssr_component.h"
 #include "data/data_transformation_facet.h"
 
 #include "graphic/gfx_buffer_manager.h"
+#include "graphic/gfx_component_manager.h"
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_debug_renderer.h"
 #include "graphic/gfx_histogram_renderer.h"
 #include "graphic/gfx_reflection_renderer.h"
-#include "graphic/gfx_light_probe_facet.h"
+#include "graphic/gfx_light_probe_component.h"
 #include "graphic/gfx_light_probe_manager.h"
 #include "graphic/gfx_main.h"
 #include "graphic/gfx_mesh.h"
@@ -28,7 +27,7 @@
 #include "graphic/gfx_sampler_manager.h"
 #include "graphic/gfx_shader_manager.h"
 #include "graphic/gfx_state_manager.h"
-#include "graphic/gfx_sun_facet.h"
+#include "graphic/gfx_sun_component.h"
 #include "graphic/gfx_target_set.h"
 #include "graphic/gfx_target_set_manager.h"
 #include "graphic/gfx_texture_manager.h"
@@ -88,7 +87,7 @@ namespace
 
         struct SSSRRenderJob
         {
-            Dt::CSSRFXFacet* m_pDataSSRFacet;
+            Dt::CSSRComponent* m_pDataSSRFacet;
         };
         
         struct SPerDrawCallConstantBuffer
@@ -922,7 +921,7 @@ namespace
         Performance::BeginEvent("SSR");
 
         // TODO: What happens if more then one SSR effect is available?
-        Dt::CSSRFXFacet* pDataSSRFacet = m_SSRRenderJobs[0].m_pDataSSRFacet;
+        Dt::CSSRComponent* pDataSSRFacet = m_SSRRenderJobs[0].m_pDataSSRFacet;
 
         assert(pDataSSRFacet != 0);
 
@@ -1060,7 +1059,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Iterate throw every entity inside this map
         // -----------------------------------------------------------------------------
-        Dt::Map::CEntityIterator CurrentLightEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Light);
+        Dt::Map::CEntityIterator CurrentLightEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Dynamic);
         Dt::Map::CEntityIterator EndOfLightEntities = Dt::Map::EntitiesEnd();
 
         for (IndexOfLight = 0; CurrentLightEntity != EndOfLightEntities && IndexOfLight < s_MaxNumberOfProbes; )
@@ -1070,10 +1069,10 @@ namespace
             // -----------------------------------------------------------------------------
             // Get graphic facet
             // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetType() == Dt::SLightType::LightProbe)
+            if (rCurrentEntity.HasComponent<Dt::CLightProbeComponent>())
             {
-                Dt::CLightProbeFacet*  pDataLightProbeFacet = static_cast<Dt::CLightProbeFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
-                Gfx::CLightProbeFacet* pGraphicLightProbeFacet = static_cast<Gfx::CLightProbeFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
+                Dt::CLightProbeComponent*  pDataLightProbeFacet    = rCurrentEntity.GetComponent<Dt::CLightProbeComponent>();
+                Gfx::CLightProbeComponent* pGraphicLightProbeFacet = Gfx::CComponentManager::GetInstance().GetComponent<Gfx::CLightProbeComponent>(pDataLightProbeFacet->GetID());
 
                 assert(pDataLightProbeFacet != 0 && pGraphicLightProbeFacet != 0);
 
@@ -1106,7 +1105,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Next entity
             // -----------------------------------------------------------------------------
-            CurrentLightEntity = CurrentLightEntity.Next(Dt::SEntityCategory::Light);
+            CurrentLightEntity = CurrentLightEntity.Next(Dt::SEntityCategory::Dynamic);
         }
 
         BufferManager::UploadBufferData(m_ProbePropertiesBufferPtr, &LightBuffer);
@@ -1114,7 +1113,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Iterate throw every entity inside this map
         // -----------------------------------------------------------------------------
-        Dt::Map::CEntityIterator CurrentEffectEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::FX);
+        Dt::Map::CEntityIterator CurrentEffectEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Dynamic);
         Dt::Map::CEntityIterator EndOfEffectEntities = Dt::Map::EntitiesEnd();
 
         for (; CurrentEffectEntity != EndOfEffectEntities; )
@@ -1124,9 +1123,9 @@ namespace
             // -----------------------------------------------------------------------------
             // Get graphic facet
             // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetType() == Dt::SFXType::SSR)
+            if (rCurrentEntity.HasComponent<Dt::CSSRComponent>())
             {
-                Dt::CSSRFXFacet* pDataSSRFacet = static_cast<Dt::CSSRFXFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+                Dt::CSSRComponent* pDataSSRFacet = rCurrentEntity.GetComponent<Dt::CSSRComponent>();
 
                 assert(pDataSSRFacet != 0);
 
@@ -1143,7 +1142,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Next entity
             // -----------------------------------------------------------------------------
-            CurrentEffectEntity = CurrentEffectEntity.Next(Dt::SEntityCategory::FX);
+            CurrentEffectEntity = CurrentEffectEntity.Next(Dt::SEntityCategory::Dynamic);
         }
     }
 } // namespace

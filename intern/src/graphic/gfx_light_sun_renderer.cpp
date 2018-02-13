@@ -8,14 +8,14 @@
 
 #include "camera/cam_control_manager.h"
 
-#include "data/data_light_type.h"
 #include "data/data_entity.h"
 #include "data/data_map.h"
 #include "data/data_model_manager.h"
-#include "data/data_sun_facet.h"
+#include "data/data_sun_component.h"
 
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"
+#include "graphic/gfx_component_manager.h"
 #include "graphic/gfx_histogram_renderer.h"
 #include "graphic/gfx_light_sun_renderer.h"
 #include "graphic/gfx_main.h"
@@ -24,7 +24,7 @@
 #include "graphic/gfx_sampler_manager.h"
 #include "graphic/gfx_shader_manager.h"
 #include "graphic/gfx_state_manager.h"
-#include "graphic/gfx_sun_facet.h"
+#include "graphic/gfx_sun_component.h"
 #include "graphic/gfx_sun_manager.h"
 #include "graphic/gfx_target_set.h"
 #include "graphic/gfx_target_set_manager.h"
@@ -77,8 +77,8 @@ namespace
 
         struct SRenderJob
         {
-            Dt::CSunLightFacet*  m_pDataSunLightFacet;
-            Gfx::CSunFacet* m_pGraphicSunLightFacet;
+            Dt::CSunComponent*  m_pDataSunLightFacet;
+            Gfx::CSunComponent* m_pGraphicSunLightFacet;
         };
 
     private:
@@ -313,8 +313,8 @@ namespace
 
         for (; CurrentRenderJob != EndOfRenderJobs; ++CurrentRenderJob)
         {
-        	Dt::CSunLightFacet* pDataSunFacet    = CurrentRenderJob->m_pDataSunLightFacet;
-        	Gfx::CSunFacet*     pGraphicSunFacet = CurrentRenderJob->m_pGraphicSunLightFacet;
+        	Dt::CSunComponent* pDataSunFacet     = CurrentRenderJob->m_pDataSunLightFacet;
+        	Gfx::CSunComponent* pGraphicSunFacet = CurrentRenderJob->m_pGraphicSunLightFacet;
 
         	// -----------------------------------------------------------------------------
             // Upload buffer data
@@ -389,7 +389,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Iterate throw every entity inside this map
         // -----------------------------------------------------------------------------
-        Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Light);
+        Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Dynamic);
         Dt::Map::CEntityIterator EndOfEntities = Dt::Map::EntitiesEnd();
 
         for (; CurrentEntity != EndOfEntities; )
@@ -399,15 +399,15 @@ namespace
             // -----------------------------------------------------------------------------
             // Get graphic facet
             // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetType() != Dt::SLightType::Sun)
+            if (rCurrentEntity.HasComponent<Dt::CSunComponent>())
             {
-                CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Light);
+                CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Dynamic);
 
                 continue;
             }
 
-            Dt::CSunLightFacet*  pDataSunFacet    = static_cast<Dt::CSunLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
-            Gfx::CSunFacet* pGraphicSunFacet = static_cast<Gfx::CSunFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
+            Dt::CSunComponent*  pDataSunFacet    = rCurrentEntity.GetComponent<Dt::CSunComponent>();
+            Gfx::CSunComponent* pGraphicSunFacet = CComponentManager::GetInstance().GetComponent<Gfx::CSunComponent>(pDataSunFacet->GetID());
 
             // -----------------------------------------------------------------------------
             // Set sun into a new render job
@@ -422,7 +422,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Next entity
             // -----------------------------------------------------------------------------
-            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Light);
+            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Dynamic);
         }
     }
 } // namespace

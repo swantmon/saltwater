@@ -21,9 +21,6 @@ namespace Dt
         , m_WorldPosition       ()
         , m_Flags               ()
     {
-        m_pDetailFacets[SFacetCategory::Data]    = 0;
-        m_pDetailFacets[SFacetCategory::Graphic] = 0;
-
         m_Flags.m_Key = 0;
     }
 
@@ -131,20 +128,6 @@ namespace Dt
     bool CEntity::IsInMap() const
     {
         return m_pFolder != nullptr;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CEntity::SetType(unsigned int _Type)
-    {
-        m_Flags.m_Type = _Type;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    unsigned int CEntity::GetType() const
-    {
-        return m_Flags.m_Type;
     }
 
     // -----------------------------------------------------------------------------
@@ -292,27 +275,6 @@ namespace Dt
     const CTransformationFacet* CEntity::GetTransformationFacet() const
     {
         return m_pTransformationFacet;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CEntity::SetDetailFacet(unsigned int _Category, void* _pFacet)
-    {
-        m_pDetailFacets[_Category] = _pFacet;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void* CEntity::GetDetailFacet(unsigned int _Category)
-    {
-        return m_pDetailFacets[_Category];
-    }
-
-    // -----------------------------------------------------------------------------
-
-    const void* CEntity::GetDetailFacet(unsigned int _Category) const
-    {
-        return m_pDetailFacets[_Category];
     }
 
     // -----------------------------------------------------------------------------

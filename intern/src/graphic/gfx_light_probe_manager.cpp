@@ -8,36 +8,40 @@
 
 #include "core/core_time.h"
 
-#include "data/data_actor_type.h"
+#include "data/data_component.h"
+#include "data/data_component_manager.h"
 #include "data/data_entity.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
-#include "data/data_light_probe_facet.h"
-#include "data/data_light_type.h"
+#include "data/data_light_probe_component.h"
 #include "data/data_map.h"
+#include "data/data_mesh_component.h"
 #include "data/data_model_manager.h"
-#include "data/data_point_light_facet.h"
-#include "data/data_sun_facet.h"
+#include "data/data_point_light_component.h"
+#include "data/data_sky_component.h"
+#include "data/data_sun_component.h"
 #include "data/data_transformation_facet.h"
 
 #include "graphic/gfx_buffer_manager.h"
+#include "graphic/gfx_component.h"
+#include "graphic/gfx_component_manager.h"
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_histogram_renderer.h"
-#include "graphic/gfx_light_probe_facet.h"
+#include "graphic/gfx_light_probe_component.h"
 #include "graphic/gfx_light_probe_manager.h"
 #include "graphic/gfx_main.h"
 #include "graphic/gfx_mesh.h"
-#include "graphic/gfx_mesh_actor_facet.h"
+#include "graphic/gfx_mesh_component.h"
 #include "graphic/gfx_mesh_manager.h"
 #include "graphic/gfx_performance.h"
-#include "graphic/gfx_point_light_facet.h"
+#include "graphic/gfx_point_light_component.h"
 #include "graphic/gfx_reflection_renderer.h"
 #include "graphic/gfx_sampler_manager.h"
 #include "graphic/gfx_shader_manager.h"
-#include "graphic/gfx_sky_facet.h"
+#include "graphic/gfx_sky_component.h"
 #include "graphic/gfx_state_manager.h"
 #include "graphic/gfx_state_manager.h"
-#include "graphic/gfx_sun_facet.h"
+#include "graphic/gfx_sun_component.h"
 #include "graphic/gfx_target_set.h"
 #include "graphic/gfx_target_set_manager.h"
 #include "graphic/gfx_texture_manager.h"
@@ -125,7 +129,7 @@ namespace
             float m_Intensity;
         };
 
-        class CInternLightProbeFacet : public CLightProbeFacet
+        class CInternLightProbeFacet : public CLightProbeComponent
         {
         public:
 
@@ -157,10 +161,6 @@ namespace
 
     private:
 
-        typedef Base::CPool<CInternLightProbeFacet, 1> CLightProbeFacets;
-
-    private:
-
         CMeshPtr m_EnvironmentSpherePtr;
         CMeshPtr m_SkyboxBoxPtr;
 
@@ -182,22 +182,21 @@ namespace
 
         CInputLayoutPtr m_P3N3InputLayoutPtr;
 
-        CLightProbeFacets m_LightprobeFacets;
         SLightJob m_LightJob;
 
     private:
 
-        void OnDirtyEntity(Dt::CEntity* _pEntity);
+        void OnDirtyComponent(Base::ID _TypeID, Dt::IComponent* _pComponent);
 
-        CInternLightProbeFacet& AllocateLightProbeFacet(unsigned int _SpecularFaceSize, unsigned int _DiffuseFaceSize);
+        CInternLightProbeFacet& AllocateLightProbeFacet(Base::ID _ID, unsigned int _SpecularFaceSize, unsigned int _DiffuseFaceSize);
 
-        void Render(const Dt::CEntity& _rEntity, CInternLightProbeFacet& _rInterLightProbeFacet, const Dt::CLightProbeFacet& _rDtLightProbeFacet);
+        void Render(const Dt::CEntity& _rEntity, CInternLightProbeFacet& _rInterLightProbeFacet, const Dt::CLightProbeComponent& _rDtLightProbeFacet);
 
         void RenderEnvironment(CInternLightProbeFacet& _rInterLightProbeFacet);
 
         void RenderEntities(CInternLightProbeFacet& _rInterLightProbeFacet, const glm::vec3& _rPosition);
 
-        void RenderFiltering(CInternLightProbeFacet& _rInterLightProbeFacet, const Dt::CLightProbeFacet& _rDtLightProbeFacet);
+        void RenderFiltering(CInternLightProbeFacet& _rInterLightProbeFacet, const Dt::CLightProbeComponent& _rDtLightProbeFacet);
 
         void UpdateLightProperties();
 
@@ -208,7 +207,7 @@ namespace
 namespace 
 {
     CGfxLightProbeManager::CInternLightProbeFacet::CInternLightProbeFacet()
-        : CLightProbeFacet          ()
+        : CLightProbeComponent          ()
         , m_DiffuseHDRTargetSetPtr  ()
         , m_DiffuseViewPortSetPtr   ()
         , m_SpecularHDRTargetSetPtrs()
@@ -245,7 +244,6 @@ namespace
         , m_CubemapGSBufferPtr    ()
         , m_FilteringPSBufferPtr  ()
         , m_P3N3InputLayoutPtr    ()
-        , m_LightprobeFacets      ()
     {
 
     }
@@ -395,10 +393,10 @@ namespace
         m_SkyboxBoxPtr = MeshManager::CreateBox(2.0f, 2.0f, 2.0f);
 
         // -----------------------------------------------------------------------------
-        // Register dirty entity handler for automatic light probe / reflection
+        // Register dirty handler for automatic light probe / reflection
         // creation
         // -----------------------------------------------------------------------------
-        Dt::EntityManager::RegisterDirtyEntityHandler(DATA_DIRTY_ENTITY_METHOD(&CGfxLightProbeManager::OnDirtyEntity));
+        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(DATA_DIRTY_COMPONENT_METHOD(&CGfxLightProbeManager::OnDirtyComponent));
     }
 
     // -----------------------------------------------------------------------------
@@ -435,8 +433,6 @@ namespace
 
         m_LightJob.m_SpecularTexturePtr = 0;
         m_LightJob.m_DiffuseTexturePtr  = 0;
-
-        m_LightprobeFacets.Clear();
     }
 
     // -----------------------------------------------------------------------------
@@ -446,7 +442,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Iterate throw every entity inside this map
         // -----------------------------------------------------------------------------
-        Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Light);
+        Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Dynamic);
         Dt::Map::CEntityIterator EndOfEntities = Dt::Map::EntitiesEnd();
 
         for (; CurrentEntity != EndOfEntities; )
@@ -456,15 +452,16 @@ namespace
             // -----------------------------------------------------------------------------
             // Get graphic facet
             // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetType() == Dt::SLightType::LightProbe)
+            if (rCurrentEntity.HasComponent<Dt::CLightProbeComponent>())
             {
-                Dt::CLightProbeFacet*   pDtProbeFacet  = static_cast<Dt::CLightProbeFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
-                CInternLightProbeFacet* pGfxProbeFacet = static_cast<CInternLightProbeFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
+                Dt::CLightProbeComponent* pDtProbeFacet = rCurrentEntity.GetComponent<Dt::CLightProbeComponent>();
+
+                CInternLightProbeFacet* pGfxProbeFacet = CComponentManager::GetInstance().GetComponent<CInternLightProbeFacet>(pDtProbeFacet->GetID());
 
                 // -----------------------------------------------------------------------------
                 // Check update needs
                 // -----------------------------------------------------------------------------
-                if (pDtProbeFacet->GetRefreshMode() == Dt::CLightProbeFacet::Dynamic || pGfxProbeFacet->m_TimeStamp >= Core::Time::GetNumberOfFrame() - 1)
+                if (pDtProbeFacet->GetRefreshMode() == Dt::CLightProbeComponent::Dynamic || pGfxProbeFacet->m_TimeStamp >= Core::Time::GetNumberOfFrame())
                 {
                     Render(rCurrentEntity, *pGfxProbeFacet, *pDtProbeFacet);
                 }
@@ -473,71 +470,51 @@ namespace
             // -----------------------------------------------------------------------------
             // Next entity
             // -----------------------------------------------------------------------------
-            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Light);
+            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Dynamic);
         }
     }
 
     // -----------------------------------------------------------------------------
 
-    void CGfxLightProbeManager::OnDirtyEntity(Dt::CEntity* _pEntity)
+    void CGfxLightProbeManager::OnDirtyComponent(Base::ID _TypeID, Dt::IComponent* _pComponent)
     {
-        assert(_pEntity != 0);
+        if (_TypeID != Base::CTypeInfo::GetTypeID<Dt::CLightProbeComponent>()) return;
 
-        // -----------------------------------------------------------------------------
-        // Entity check
-        // -----------------------------------------------------------------------------
-        if (_pEntity->GetCategory() != Dt::SEntityCategory::Light) return;
-        if (_pEntity->GetType()     != Dt::SLightType::LightProbe) return;
-
-        // -----------------------------------------------------------------------------
-        // Get data
-        // -----------------------------------------------------------------------------
-        Dt::CLightProbeFacet* pDtLightProbeFacet = static_cast<Dt::CLightProbeFacet*>(_pEntity->GetDetailFacet(Dt::SFacetCategory::Data));
-
-        if (pDtLightProbeFacet == nullptr) return;
+        Dt::CLightProbeComponent* pLightProbeComponent = static_cast<Dt::CLightProbeComponent*>(_pComponent);
 
         // -----------------------------------------------------------------------------
         // Dirty check
         // -----------------------------------------------------------------------------
         unsigned int DirtyFlags;
 
-        DirtyFlags = _pEntity->GetDirtyFlags();
+        DirtyFlags = pLightProbeComponent->GetDirtyFlags();
 
-        if ((DirtyFlags & Dt::CEntity::DirtyCreate) != 0)
+        if ((DirtyFlags & Dt::CLightProbeComponent::DirtyCreate) != 0)
         {
             // -----------------------------------------------------------------------------
             // Create facet
             // -----------------------------------------------------------------------------
-            CInternLightProbeFacet& rGfxLightProbeFacet = AllocateLightProbeFacet(pDtLightProbeFacet->GetQualityInPixel(), 128);
+            CInternLightProbeFacet& rGfxLightProbeFacet = AllocateLightProbeFacet(pLightProbeComponent->GetID(), pLightProbeComponent->GetQualityInPixel(), 128);
 
             // -----------------------------------------------------------------------------
             // Set time
             // -----------------------------------------------------------------------------
-            rGfxLightProbeFacet.m_TimeStamp = Core::Time::GetNumberOfFrame();
-
-            // -----------------------------------------------------------------------------
-            // Save facet
-            // -----------------------------------------------------------------------------
-            _pEntity->SetDetailFacet(Dt::SFacetCategory::Graphic, &rGfxLightProbeFacet);
+            rGfxLightProbeFacet.m_TimeStamp = Core::Time::GetNumberOfFrame() + 1;
         }
-        else if ((DirtyFlags & Dt::CEntity::DirtyDetail) != 0)
+        else if ((DirtyFlags & Dt::CLightProbeComponent::DirtyInfo) != 0)
         {
-            CInternLightProbeFacet*  pGfxLightProbeFacet;
-
-            pGfxLightProbeFacet = static_cast<CInternLightProbeFacet*>(_pEntity->GetDetailFacet(Dt::SFacetCategory::Graphic));
+            CInternLightProbeFacet* pGfxLightProbeFacet = CComponentManager::GetInstance().GetComponent<CInternLightProbeFacet>(pLightProbeComponent->GetID());
 
             // -----------------------------------------------------------------------------
             // Set time
             // -----------------------------------------------------------------------------
-            Base::U64 FrameTime = Core::Time::GetNumberOfFrame();
-
-            pGfxLightProbeFacet->m_TimeStamp = FrameTime;
+            pGfxLightProbeFacet->m_TimeStamp = Core::Time::GetNumberOfFrame() + 1;
         }
     }
 
     // -----------------------------------------------------------------------------
 
-    CGfxLightProbeManager::CInternLightProbeFacet& CGfxLightProbeManager::AllocateLightProbeFacet(unsigned int _SpecularFaceSize, unsigned int _DiffuseFaceSize)
+    CGfxLightProbeManager::CInternLightProbeFacet& CGfxLightProbeManager::AllocateLightProbeFacet(Base::ID _ID, unsigned int _SpecularFaceSize, unsigned int _DiffuseFaceSize)
     {
         Gfx::STextureDescriptor  TextureDescriptor;
         Gfx::SViewPortDescriptor ViewPortDesc;
@@ -545,7 +522,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Create facet
         // -----------------------------------------------------------------------------
-        CInternLightProbeFacet& rGfxLightProbeFacet = m_LightprobeFacets.Allocate();
+        CInternLightProbeFacet& rGfxLightProbeFacet = CComponentManager::GetInstance().Allocate<CInternLightProbeFacet>(_ID);
 
         // -----------------------------------------------------------------------------
         // Create stuff for reflection probe
@@ -578,13 +555,13 @@ namespace
 
         rGfxLightProbeFacet.m_DepthPtr = TextureManager::CreateCubeTexture(TextureDescriptor);
 
-		TextureManager::SetTextureLabel(rGfxLightProbeFacet.m_DepthPtr, "Light Probe Depth Texture");
+        TextureManager::SetTextureLabel(rGfxLightProbeFacet.m_DepthPtr, "Light Probe Depth Texture");
 
         // -----------------------------------------------------------------------------
 
         CTargetSetPtr ReflectionTargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTexturePtr>(rGfxLightProbeFacet.m_ReflectionCubemapPtr), static_cast<CTexturePtr>(rGfxLightProbeFacet.m_DepthPtr));
 
-		TargetSetManager::SetTargetSetLabel(ReflectionTargetSetPtr, "Light Probe Reflection Target");
+        TargetSetManager::SetTargetSetLabel(ReflectionTargetSetPtr, "Light Probe Reflection Target");
 
         // -----------------------------------------------------------------------------
 
@@ -706,23 +683,23 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxLightProbeManager::Render(const Dt::CEntity& _rEntity, CInternLightProbeFacet& _rInterLightProbeFacet, const Dt::CLightProbeFacet& _rDtLightProbeFacet)
+    void CGfxLightProbeManager::Render(const Dt::CEntity& _rEntity, CInternLightProbeFacet& _rInterLightProbeFacet, const Dt::CLightProbeComponent& _rDtLightProbeFacet)
     {
         Performance::BeginEvent("Light Probe");
 
         TargetSetManager::ClearTargetSet(_rInterLightProbeFacet.m_TargetSetPtr);
 
-        if (_rDtLightProbeFacet.GetType() == Dt::CLightProbeFacet::Sky)
+        if (_rDtLightProbeFacet.GetType() == Dt::CLightProbeComponent::Sky)
         {
             RenderEnvironment(_rInterLightProbeFacet);
 
             TextureManager::UpdateMipmap(_rInterLightProbeFacet.m_ReflectionCubemapPtr);
         }
-        else if (_rDtLightProbeFacet.GetType() == Dt::CLightProbeFacet::Local)
+        else if (_rDtLightProbeFacet.GetType() == Dt::CLightProbeComponent::Local)
         {
             UpdateLightProperties();
 
-            if (_rDtLightProbeFacet.GetClearFlag() == Dt::CLightProbeFacet::Skybox)
+            if (_rDtLightProbeFacet.GetClearFlag() == Dt::CLightProbeComponent::Skybox)
             {
                 RenderEnvironment(_rInterLightProbeFacet);
             }
@@ -793,7 +770,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Actors
         // -----------------------------------------------------------------------------
-        CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Light);
+        CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Dynamic);
         EndOfEntities = Dt::Map::EntitiesEnd();
 
         for (; CurrentEntity != EndOfEntities; )
@@ -803,14 +780,11 @@ namespace
             // -----------------------------------------------------------------------------
             // Get graphic facet
             // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetType() != Dt::SLightType::Sky)
-            {
-                CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Light);
+            if (!rCurrentEntity.HasComponent<Dt::CSkyComponent>()) continue;
 
-                continue;
-            }
+            Dt::CSkyComponent* pSkyComponent = rCurrentEntity.GetComponent<Dt::CSkyComponent>();
 
-            Gfx::CSkyFacet* pSkyFacet = static_cast<Gfx::CSkyFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
+            Gfx::CSkyComponent* pSkyFacet = CComponentManager::GetInstance().GetComponent<Gfx::CSkyComponent>(pSkyComponent->GetID());
 
             // -----------------------------------------------------------------------------
             // Set every surface of this entity into a new render job
@@ -861,7 +835,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Next entity
             // -----------------------------------------------------------------------------
-            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Light);
+            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Dynamic);
         }
 
         ContextManager::ResetResourceBuffer(0);
@@ -976,7 +950,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Actors
         // -----------------------------------------------------------------------------
-        CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Actor);
+        CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Dynamic);
         EndOfEntities = Dt::Map::EntitiesEnd();
 
         for (; CurrentEntity != EndOfEntities; )
@@ -986,14 +960,11 @@ namespace
             // -----------------------------------------------------------------------------
             // Get graphic facet
             // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetType() != Dt::SActorType::Mesh || rCurrentEntity.GetLayer() != Dt::SEntityLayer::Default)
-            {
-                CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Actor);
+            Dt::CMeshComponent* pMeshComponent = rCurrentEntity.GetComponent<Dt::CMeshComponent>();
 
-                continue;
-            }
+            if (pMeshComponent == 0) continue;
 
-            CMeshActorFacet* pGraphicModelActorFacet = static_cast<CMeshActorFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
+            CMeshComponent* pGraphicModelActorFacet = CComponentManager::GetInstance().GetComponent<CMeshComponent>(pMeshComponent->GetID());
 
             CMeshPtr MeshPtr = pGraphicModelActorFacet->GetMesh();
 
@@ -1078,7 +1049,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Next entity
             // -----------------------------------------------------------------------------
-            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Actor);
+            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Dynamic);
         }
 
         for (unsigned int IndexOfTexture = 0; IndexOfTexture < 16; ++IndexOfTexture)
@@ -1124,7 +1095,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxLightProbeManager::RenderFiltering(CInternLightProbeFacet& _rInterLightProbeFacet, const Dt::CLightProbeFacet& _rDtLightProbeFacet)
+    void CGfxLightProbeManager::RenderFiltering(CInternLightProbeFacet& _rInterLightProbeFacet, const Dt::CLightProbeComponent& _rDtLightProbeFacet)
     {
         // -----------------------------------------------------------------------------
         // Start updating/filtering
@@ -1299,7 +1270,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Iterate throw every entity inside this map
         // -----------------------------------------------------------------------------
-        Dt::Map::CEntityIterator CurrentLightEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Light);
+        Dt::Map::CEntityIterator CurrentLightEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Dynamic);
         Dt::Map::CEntityIterator EndOfLightEntities = Dt::Map::EntitiesEnd();
 
         // -----------------------------------------------------------------------------
@@ -1329,10 +1300,10 @@ namespace
             // -----------------------------------------------------------------------------
             // Setup buffer
             // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetType() == Dt::SLightType::Sun)
+            if (rCurrentEntity.HasComponent<Dt::CSunComponent>())
             {
-                Dt::CSunLightFacet* pDtSunFacet  = static_cast<Dt::CSunLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
-                Gfx::CSunFacet*     pGfxSunFacet = static_cast<Gfx::CSunFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
+                Dt::CSunComponent* pDtSunFacet = rCurrentEntity.GetComponent<Dt::CSunComponent>();
+                Gfx::CSunComponent* pGfxSunFacet = CComponentManager::GetInstance().GetComponent<Gfx::CSunComponent>(pDtSunFacet->GetID());
 
                 if (pDtSunFacet != 0 && pGfxSunFacet != 0)
                 {
@@ -1354,17 +1325,18 @@ namespace
                     ++IndexOfLight;
                 }
             }
-            else if (rCurrentEntity.GetType() == Dt::SLightType::Point)
+            
+            if (rCurrentEntity.HasComponent<Dt::CPointLightComponent>())
             {
-                Dt::CPointLightFacet*  pDtPointFacet  = static_cast<Dt::CPointLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
-                Gfx::CPointLightFacet* pGfxPointFacet = static_cast<Gfx::CPointLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
+                Dt::CPointLightComponent*  pDtPointFacet  = rCurrentEntity.GetComponent<Dt::CPointLightComponent>();
+                Gfx::CPointLightComponent* pGfxPointFacet = CComponentManager::GetInstance().GetComponent<Gfx::CPointLightComponent>(pDtPointFacet->GetID());
 
                 if (pDtPointFacet != 0 && pGfxPointFacet != 0)
                 {
                     float InvSqrAttenuationRadius = pDtPointFacet->GetReciprocalSquaredAttenuationRadius();
                     float AngleScale              = pDtPointFacet->GetAngleScale();
                     float AngleOffset             = pDtPointFacet->GetAngleOffset();
-                    float HasShadows              = pDtPointFacet->GetShadowType() != Dt::CPointLightFacet::NoShadows ? 1.0f : 0.0f;
+                    float HasShadows              = pDtPointFacet->GetShadowType() != Dt::CPointLightComponent::NoShadows ? 1.0f : 0.0f;
 
                     LightBuffer[IndexOfLight].m_LightType      = 2;
                     LightBuffer[IndexOfLight].m_LightPosition  = glm::vec4(rCurrentEntity.GetWorldPosition(), 1.0f);
@@ -1374,7 +1346,7 @@ namespace
 
                     LightBuffer[IndexOfLight].m_LightViewProjection = glm::mat4(1.0f);
 
-                    if (pDtPointFacet->GetShadowType() != Dt::CPointLightFacet::NoShadows)
+                    if (pDtPointFacet->GetShadowType() != Dt::CPointLightComponent::NoShadows)
                     {
                         assert(pGfxPointFacet->GetCamera().IsValid());
 
@@ -1383,7 +1355,7 @@ namespace
 
                     // -----------------------------------------------------------------------------
 
-                    if (pDtPointFacet->GetShadowType() != Dt::CPointLightFacet::NoShadows)
+                    if (pDtPointFacet->GetShadowType() != Dt::CPointLightComponent::NoShadows)
                     {
                         m_LightJob.m_ShadowTexturePtrs[IndexOfLight] = pGfxPointFacet->GetTextureSMSet()->GetTexture(0);
                     }
@@ -1393,12 +1365,13 @@ namespace
                     ++IndexOfLight;
                 }
             }
-            else if (rCurrentEntity.GetType() == Dt::SLightType::LightProbe && (m_LightJob.m_SpecularTexturePtr == 0 && m_LightJob.m_DiffuseTexturePtr == 0))
+            
+            if (rCurrentEntity.HasComponent<Dt::CLightProbeComponent>() && (m_LightJob.m_SpecularTexturePtr == 0 && m_LightJob.m_DiffuseTexturePtr == 0))
             {
-                Dt::CLightProbeFacet*  pDtLightProbeFacet  = static_cast<Dt::CLightProbeFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
-                Gfx::CLightProbeFacet* pGfxLightProbeFacet = static_cast<Gfx::CLightProbeFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
+                Dt::CLightProbeComponent* pDtLightProbeFacet = rCurrentEntity.GetComponent<Dt::CLightProbeComponent>();
+                Gfx::CLightProbeComponent* pGfxLightProbeFacet   = CComponentManager::GetInstance().GetComponent<Gfx::CLightProbeComponent>(pDtLightProbeFacet->GetID());
 
-                if (pDtLightProbeFacet != 0 && pGfxLightProbeFacet != 0 && pDtLightProbeFacet->GetType() == Dt::CLightProbeFacet::Sky)
+                if (pDtLightProbeFacet != 0 && pGfxLightProbeFacet != 0 && pDtLightProbeFacet->GetType() == Dt::CLightProbeComponent::Sky)
                 {
                     LightBuffer[IndexOfLight].m_LightType      = 3;
                     LightBuffer[IndexOfLight].m_LightPosition  = glm::vec4(rCurrentEntity.GetWorldPosition(), 1.0f);
@@ -1420,7 +1393,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Next entity
             // -----------------------------------------------------------------------------
-            CurrentLightEntity = CurrentLightEntity.Next(Dt::SEntityCategory::Light);
+            CurrentLightEntity = CurrentLightEntity.Next(Dt::SEntityCategory::Dynamic);
         }
 
         BufferManager::UploadBufferData(m_LightPropertiesBufferPtr, &LightBuffer);

@@ -5,9 +5,8 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
-#include "data/data_bloom_facet.h"
+#include "data/data_bloom_component.h"
 #include "data/data_entity.h"
-#include "data/data_fx_type.h"
 #include "data/data_map.h"
 
 #include "graphic/gfx_buffer_manager.h"
@@ -87,7 +86,7 @@ namespace
 
         struct SBloomRenderJob
         {
-            Dt::CBloomFXFacet* m_pDataBloomFacet;
+            Dt::CBloomComponent* m_pDataBloomFacet;
         };
 
         struct SGaussianShaderProperties
@@ -746,7 +745,7 @@ namespace
         Performance::BeginEvent("Bloom");
 
         // TODO: What happens if more then one DOF effect is available?
-        Dt::CBloomFXFacet* pDataBloomFacet = m_BloomRenderJobs[0].m_pDataBloomFacet;
+        Dt::CBloomComponent* pDataBloomFacet = m_BloomRenderJobs[0].m_pDataBloomFacet;
 
         assert(pDataBloomFacet != 0);
 
@@ -1038,7 +1037,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Iterate throw every entity inside this map
         // -----------------------------------------------------------------------------
-        Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::FX);
+        Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Dynamic);
         Dt::Map::CEntityIterator EndOfEntities = Dt::Map::EntitiesEnd();
 
         for (; CurrentEntity != EndOfEntities; )
@@ -1048,9 +1047,9 @@ namespace
             // -----------------------------------------------------------------------------
             // Get graphic facet
             // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetType() == Dt::SFXType::Bloom)
+            if (rCurrentEntity.HasComponent<Dt::CBloomComponent>())
             {
-                Dt::CBloomFXFacet* pDataBloomFacet = static_cast<Dt::CBloomFXFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+                Dt::CBloomComponent* pDataBloomFacet = rCurrentEntity.GetComponent<Dt::CBloomComponent>();
 
                 assert(pDataBloomFacet != 0);
 
@@ -1067,7 +1066,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Next entity
             // -----------------------------------------------------------------------------
-            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::FX);
+            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Dynamic);
         }
     }
 } // namespace

@@ -10,27 +10,26 @@
 
 #include "core/core_time.h"
 
-#include "data/data_actor_type.h"
-#include "data/data_camera_actor_facet.h"
+#include "data/data_camera_component.h"
 #include "data/data_entity.h"
-#include "data/data_light_type.h"
 #include "data/data_map.h"
 #include "data/data_model_manager.h"
-#include "data/data_sky_facet.h"
+#include "data/data_sky_component.h"
 
 #include "graphic/gfx_background_renderer.h"
 #include "graphic/gfx_buffer_manager.h"
-#include "graphic/gfx_camera_actor_facet.h"
+#include "graphic/gfx_camera_component.h"
 #include "graphic/gfx_context_manager.h"
+#include "graphic/gfx_component_manager.h"
 #include "graphic/gfx_histogram_renderer.h"
 #include "graphic/gfx_main.h"
 #include "graphic/gfx_mesh_manager.h"
 #include "graphic/gfx_performance.h"
 #include "graphic/gfx_sampler_manager.h"
 #include "graphic/gfx_shader_manager.h"
-#include "graphic/gfx_sky_facet.h"
+#include "graphic/gfx_sky_component.h"
 #include "graphic/gfx_state_manager.h"
-#include "graphic/gfx_sun_facet.h"
+#include "graphic/gfx_sun_component.h"
 #include "graphic/gfx_sun_manager.h"
 #include "graphic/gfx_target_set.h"
 #include "graphic/gfx_target_set_manager.h"
@@ -91,8 +90,8 @@ namespace
 
         struct SCameraRenderJob
         {
-            Dt::CCameraActorFacet* m_pDataCamera;
-            Gfx::CCameraActorFacet* m_pGraphicCamera;
+            Dt::CCameraComponent* m_pDtComponent;
+            Gfx::CCameraComponent* m_pGfxComponent;
         };
 
         struct SSkytextureBufferPS
@@ -433,15 +432,15 @@ namespace
 
             Performance::BeginEvent("Background");
 
-            if (rRenderJob.m_pDataCamera->GetClearFlag() == Dt::CCameraActorFacet::Skybox)
+            if (rRenderJob.m_pDtComponent->GetClearFlag() == Dt::CCameraComponent::Skybox)
             {
                 RenderBackgroundFromSkybox();
             }
-            else if (rRenderJob.m_pDataCamera->GetClearFlag() == Dt::CCameraActorFacet::Texture)
+            else if (rRenderJob.m_pDtComponent->GetClearFlag() == Dt::CCameraComponent::Texture)
             {
                 RenderBackgroundFromTexture();
             }
-            else if (rRenderJob.m_pDataCamera->GetClearFlag() == Dt::CCameraActorFacet::Webcam)
+            else if (rRenderJob.m_pDtComponent->GetClearFlag() == Dt::CCameraComponent::Webcam)
             {
                 RenderBackgroundFromWebcam();
             }
@@ -472,7 +471,7 @@ namespace
         Dt::Map::CEntityIterator CurrentEntity;
         Dt::Map::CEntityIterator EndOfEntities;
 
-        CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Light);
+        CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Dynamic);
         EndOfEntities = Dt::Map::EntitiesEnd();
 
         Dt::CEntity* pSkyEntity = 0;
@@ -484,7 +483,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Get graphic facet
             // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetType() == Dt::SLightType::Sky)
+            if (rCurrentEntity.HasComponent<Dt::CSkyComponent>())
             {
                 pSkyEntity = &rCurrentEntity;
             }
@@ -492,7 +491,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Next entity
             // -----------------------------------------------------------------------------
-            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Light);
+            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Dynamic);
         }
 
         if (pSkyEntity == 0)
@@ -500,7 +499,7 @@ namespace
             return;
         }
 
-        Gfx::CSkyFacet* pSkyFacet = static_cast<Gfx::CSkyFacet*>(pSkyEntity->GetDetailFacet(Dt::SFacetCategory::Graphic));
+        Gfx::CSkyComponent* pSkyFacet = CComponentManager::GetInstance().GetComponent<Gfx::CSkyComponent>(pSkyEntity->GetComponent<Dt::CSkyComponent>()->GetID());
 
         assert(pSkyFacet);
 
@@ -598,7 +597,7 @@ namespace
     {
         SCameraRenderJob& rRenderJob = m_CameraRenderJobs[0];
 
-        if (rRenderJob.m_pGraphicCamera->GetBackgroundTexture2D() == nullptr)
+        if (rRenderJob.m_pGfxComponent->GetBackgroundTexture2D() == nullptr)
         {
             return;
         }
@@ -611,7 +610,7 @@ namespace
         Dt::Map::CEntityIterator CurrentEntity;
         Dt::Map::CEntityIterator EndOfEntities;
 
-        CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Light);
+        CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Dynamic);
         EndOfEntities = Dt::Map::EntitiesEnd();
 
         Dt::CEntity* pSkyEntity = 0;
@@ -623,7 +622,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Get graphic facet
             // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetType() == Dt::SLightType::Sky)
+            if (rCurrentEntity.HasComponent<Dt::CSkyComponent>())
             {
                 pSkyEntity = &rCurrentEntity;
             }
@@ -631,16 +630,16 @@ namespace
             // -----------------------------------------------------------------------------
             // Next entity
             // -----------------------------------------------------------------------------
-            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Light);
+            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Dynamic);
         }
 
         if (pSkyEntity != 0)
         {
-            Dt::CSkyFacet* pSkyFacet = static_cast<Dt::CSkyFacet*>(pSkyEntity->GetDetailFacet(Dt::SFacetCategory::Data));
+            Dt::CSkyComponent* pSkyComponent = pSkyEntity->GetComponent<Dt::CSkyComponent>();
 
-            assert(pSkyFacet);
+            assert(pSkyComponent);
 
-            HDRIntensity = pSkyFacet->GetIntensity();
+            HDRIntensity = pSkyComponent->GetIntensity();
         }
 
         // -----------------------------------------------------------------------------
@@ -665,7 +664,7 @@ namespace
         SSkytextureBufferPS PSBuffer;
 
         PSBuffer.m_HDRFactor     = HDRIntensity;
-        PSBuffer.m_IsHDR         = rRenderJob.m_pGraphicCamera->GetBackgroundTexture2D()->GetSemantic() == Dt::CTextureBase::HDR ? 1.0f : 0.0f;
+        PSBuffer.m_IsHDR         = rRenderJob.m_pGfxComponent->GetBackgroundTexture2D()->GetSemantic() == Dt::CTextureBase::HDR ? 1.0f : 0.0f;
         PSBuffer.m_ExposureIndex = static_cast<float>(HistogramRenderer::GetLastExposureHistoryIndex());
 
         BufferManager::UploadBufferData(PSBufferSetPtr->GetBuffer(0), &PSBuffer);
@@ -696,7 +695,7 @@ namespace
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
         ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
 
-        ContextManager::SetTexture(0, rRenderJob.m_pGraphicCamera->GetBackgroundTextureSet()->GetTexture(0));
+        ContextManager::SetTexture(0, rRenderJob.m_pGfxComponent->GetBackgroundTextureSet()->GetTexture(0));
         ContextManager::SetTexture(1, TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget());
 
         ContextManager::DrawIndexed(MeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
@@ -742,7 +741,7 @@ namespace
         Dt::Map::CEntityIterator CurrentEntity;
         Dt::Map::CEntityIterator EndOfEntities;
 
-        CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Light);
+        CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Dynamic);
         EndOfEntities = Dt::Map::EntitiesEnd();
 
         Dt::CEntity* pSkyEntity = 0;
@@ -754,7 +753,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Get graphic facet
             // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetType() == Dt::SLightType::Sky)
+            if (rCurrentEntity.HasComponent<Dt::CSkyComponent>())
             {
                 pSkyEntity = &rCurrentEntity;
             }
@@ -762,16 +761,16 @@ namespace
             // -----------------------------------------------------------------------------
             // Next entity
             // -----------------------------------------------------------------------------
-            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Light);
+            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Dynamic);
         }
 
         if (pSkyEntity != 0)
         {
-            Dt::CSkyFacet* pSkyFacet = static_cast<Dt::CSkyFacet*>(pSkyEntity->GetDetailFacet(Dt::SFacetCategory::Data));
+            Dt::CSkyComponent* pDtSkyComponent = pSkyEntity->GetComponent<Dt::CSkyComponent>();
 
-            assert(pSkyFacet);
+            assert(pDtSkyComponent);
 
-            HDRIntensity = pSkyFacet->GetIntensity();
+            HDRIntensity = pDtSkyComponent->GetIntensity();
         }
 
         // -----------------------------------------------------------------------------
@@ -892,7 +891,7 @@ namespace
         Dt::Map::CEntityIterator CurrentEntity;
         Dt::Map::CEntityIterator EndOfEntities;
 
-        CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Actor);
+        CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Dynamic);
         EndOfEntities = Dt::Map::EntitiesEnd();
 
         for (; CurrentEntity != EndOfEntities; )
@@ -902,17 +901,16 @@ namespace
             // -----------------------------------------------------------------------------
             // Get graphic facet
             // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetType() == Dt::SActorType::Camera)
+            if (rCurrentEntity.HasComponent<Dt::CCameraComponent>())
             {
-                Dt::CCameraActorFacet* pDataCameraFacet = static_cast<Dt::CCameraActorFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
-                Gfx::CCameraActorFacet* pGraphicCameraFacet = static_cast<Gfx::CCameraActorFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
+                Dt::CCameraComponent* pDtComponent = rCurrentEntity.GetComponent<Dt::CCameraComponent>();
 
-                if (pDataCameraFacet->IsMainCamera())
+                if (pDtComponent->IsMainCamera())
                 {
                     SCameraRenderJob NewRenderJob;
 
-                    NewRenderJob.m_pDataCamera    = pDataCameraFacet;
-                    NewRenderJob.m_pGraphicCamera = pGraphicCameraFacet;
+                    NewRenderJob.m_pDtComponent  = pDtComponent;
+                    NewRenderJob.m_pGfxComponent = CComponentManager::GetInstance().GetComponent<Gfx::CCameraComponent>(pDtComponent->GetID());
 
                     m_CameraRenderJobs.push_back(NewRenderJob);
                 }
@@ -921,7 +919,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Next entity
             // -----------------------------------------------------------------------------
-            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Actor);
+            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Dynamic);
         }
     }
 } // namespace

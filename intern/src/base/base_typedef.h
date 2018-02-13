@@ -25,11 +25,12 @@ namespace CORE
     typedef Private::Native::C16        C16;                                                        ///< 16 bit character type
     typedef Private::Native::C32        C32;                                                        ///< 32 bit character type
     typedef Private::Native::Size       Size;                                                       ///< Portable unsigned integral size type
+    typedef Private::Native::ID         ID;                                                         ///< ID to identify objects and classes
     typedef Private::Native::Time32     Time32;                                                     ///< 32 bit time
     typedef Private::Native::Time64     Time64;                                                     ///< 64 bit time
 } // namespace CORE
 
 namespace CORE
 {
-	typedef unsigned int BHash;
+    typedef unsigned int BHash;
 } // namespace CORE

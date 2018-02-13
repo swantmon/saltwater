@@ -8,32 +8,21 @@
 #include "camera/cam_control_manager.h"
 #include "camera/cam_game_control.h"
 
-#include "data/data_actor_type.h"
-#include "data/data_ar_controller_manager.h"
-#include "data/data_area_light_manager.h"
-#include "data/data_bloom_manager.h"
-#include "data/data_dof_manager.h"
+#include "data/data_camera_component.h"
+#include "data/data_component_manager.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
-#include "data/data_fx_type.h"
-#include "data/data_post_aa_manager.h"
 #include "data/data_hierarchy_facet.h"
-#include "data/data_light_type.h"
+#include "data/data_light_probe_component.h"
 #include "data/data_map.h"
 #include "data/data_material_manager.h"
-#include "data/data_mesh_manager.h"
-#include "data/data_camera_actor_manager.h"
+#include "data/data_mesh_component.h"
 #include "data/data_model_manager.h"
-#include "data/data_plugin_type.h"
-#include "data/data_point_light_manager.h"
-#include "data/data_light_probe_manager.h"
-#include "data/data_sun_manager.h"
-#include "data/data_sky_manager.h"
-#include "data/data_ssao_manager.h"
-#include "data/data_ssr_manager.h"
+#include "data/data_sky_component.h"
+#include "data/data_ssao_component.h"
+#include "data/data_sun_component.h"
 #include "data/data_texture_manager.h"
 #include "data/data_transformation_facet.h"
-#include "data/data_volume_fog_manager.h"
 
 #include "logic/lg_load_map_state.h"
 
@@ -106,9 +95,8 @@ namespace
         {
             Dt::SEntityDescriptor EntityDesc;
 
-            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Actor;
-            EntityDesc.m_EntityType = Dt::SActorType::Camera;
-            EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
+            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
 
             Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
 
@@ -120,11 +108,11 @@ namespace
             pTransformationFacet->SetScale(glm::vec3(1.0f));
             pTransformationFacet->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
 
-            Dt::CCameraActorFacet* pFacet = Dt::CameraActorManager::CreateCameraActor();
+            auto Component = Dt::CComponentManager::GetInstance().Allocate<Dt::CCameraComponent>();
 
-            pFacet->SetMainCamera(true);
+            Component.SetMainCamera(true);
 
-            rEntity.SetDetailFacet(Dt::SFacetCategory::Data, pFacet);
+            rEntity.AddComponent(Component);
 
             Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
@@ -159,11 +147,11 @@ namespace
             pTransformationFacet->SetScale(glm::vec3(1.0f));
             pTransformationFacet->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
 
-            Dt::CCameraActorFacet* pFacet = Dt::CameraActorManager::CreateCameraActor();
+            Dt::CCameraComponent* pFacet = Dt::CameraActorManager::CreateCameraActor();
 
             pFacet->SetMainCamera(true);
-            pFacet->SetProjectionType(Dt::CCameraActorFacet::External);
-            pFacet->SetClearFlag(Dt::CCameraActorFacet::Webcam);
+            pFacet->SetProjectionType(Dt::CCameraComponent::External);
+            pFacet->SetClearFlag(Dt::CCameraComponent::Webcam);
 
             rEntity.SetDetailFacet(Dt::SFacetCategory::Data, pFacet);
 
@@ -184,10 +172,10 @@ namespace
 
             rEnvironment.SetName("Environment");
 
-            Dt::CSkyFacet* pSkyboxFacet = Dt::SkyManager::CreateSky();
+            Dt::CSkyComponent* pSkyboxFacet = Dt::SkyManager::CreateSky();
 
-            pSkyboxFacet->SetRefreshMode(Dt::CSkyFacet::Static);
-            pSkyboxFacet->SetType(Dt::CSkyFacet::Procedural);
+            pSkyboxFacet->SetRefreshMode(Dt::CSkyComponent::Static);
+            pSkyboxFacet->SetType(Dt::CSkyComponent::Procedural);
             pSkyboxFacet->SetIntensity(40000.0f);
 
             rEnvironment.SetDetailFacet(Dt::SFacetCategory::Data, pSkyboxFacet);
@@ -261,7 +249,7 @@ namespace
 
             Dt::CEntity* pSubEntity = rSphere.GetHierarchyFacet()->GetFirstChild();
 
-            Dt::CMeshActorFacet* pModelActorFacet = static_cast<Dt::CMeshActorFacet*>(pSubEntity->GetDetailFacet(Dt::SFacetCategory::Data));
+            Dt::CMeshComponent* pModelActorFacet = static_cast<Dt::CMeshComponent*>(pSubEntity->GetDetailFacet(Dt::SFacetCategory::Data));
 
             Dt::SMaterialDescriptor MaterialFileDesc;
 
@@ -305,8 +293,7 @@ void CLgLoadMapState::CreateDefaultScene()
         {
             Dt::SEntityDescriptor EntityDesc;
 
-            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Actor;
-            EntityDesc.m_EntityType     = Dt::SActorType::Camera;
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
             EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
 
             Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
@@ -319,13 +306,13 @@ void CLgLoadMapState::CreateDefaultScene()
             pTransformationFacet->SetScale(glm::vec3(1.0f));
             pTransformationFacet->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
 
-            Dt::CCameraActorFacet* pFacet = Dt::CameraActorManager::CreateCameraActor();
+            auto CameraComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CCameraComponent>();
 
-            pFacet->SetMainCamera(true);
-            pFacet->SetProjectionType(Dt::CCameraActorFacet::Perspective);
-            pFacet->SetClearFlag(Dt::CCameraActorFacet::Skybox);
+            CameraComponent.SetMainCamera(true);
+            CameraComponent.SetProjectionType(Dt::CCameraComponent::Perspective);
+            CameraComponent.SetClearFlag(Dt::CCameraComponent::Skybox);
 
-            rEntity.SetDetailFacet(Dt::SFacetCategory::Data, pFacet);
+            rEntity.AddComponent(CameraComponent);
 
             Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
@@ -336,21 +323,20 @@ void CLgLoadMapState::CreateDefaultScene()
         {
             Dt::SEntityDescriptor EntityDesc;
 
-            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Light;
-            EntityDesc.m_EntityType     = Dt::SLightType::Sky;
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
             EntityDesc.m_FacetFlags     = 0;
 
             Dt::CEntity& rEnvironment = Dt::EntityManager::CreateEntity(EntityDesc);
 
             rEnvironment.SetName("Environment");
 
-            Dt::CSkyFacet* pSkyboxFacet = Dt::SkyManager::CreateSky();
+            auto SkyComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CSkyComponent>();
 
-            pSkyboxFacet->SetRefreshMode(Dt::CSkyFacet::Static);
-            pSkyboxFacet->SetType(Dt::CSkyFacet::Procedural);
-            pSkyboxFacet->SetIntensity(40000.0f);
+            SkyComponent.SetRefreshMode(Dt::CSkyComponent::Static);
+            SkyComponent.SetType(Dt::CSkyComponent::Procedural);
+            SkyComponent.SetIntensity(40000.0f);
 
-            rEnvironment.SetDetailFacet(Dt::SFacetCategory::Data, pSkyboxFacet);
+            rEnvironment.AddComponent(SkyComponent);
 
             Dt::EntityManager::MarkEntityAsDirty(rEnvironment, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
@@ -361,8 +347,7 @@ void CLgLoadMapState::CreateDefaultScene()
         {
             Dt::SEntityDescriptor EntityDesc;
 
-            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Light;
-            EntityDesc.m_EntityType     = Dt::SLightType::LightProbe;
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
             EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
 
             Dt::CEntity& rGlobalProbeLight = Dt::EntityManager::CreateEntity(EntityDesc);
@@ -375,18 +360,18 @@ void CLgLoadMapState::CreateDefaultScene()
             pTransformationFacet->SetScale   (glm::vec3(1.0f));
             pTransformationFacet->SetRotation(glm::vec3(0.0f));
 
-            Dt::CLightProbeFacet* pProbeLightFacet = Dt::LightProbeManager::CreateLightProbe();
+            auto LightProbeComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CLightProbeComponent>();
 
-            pProbeLightFacet->SetType(Dt::CLightProbeFacet::Sky);
-            pProbeLightFacet->SetQuality(Dt::CLightProbeFacet::PX256);
-            pProbeLightFacet->SetIntensity(1.0f);
-            pProbeLightFacet->SetRefreshMode(Dt::CLightProbeFacet::Static);
-            pProbeLightFacet->SetNear(0.01f);
-            pProbeLightFacet->SetFar(1024.0f);
-            pProbeLightFacet->SetParallaxCorrection(false);
-            pProbeLightFacet->SetBoxSize(glm::vec3(1024.0f));
+            LightProbeComponent.SetType(Dt::CLightProbeComponent::Sky);
+            LightProbeComponent.SetQuality(Dt::CLightProbeComponent::PX256);
+            LightProbeComponent.SetIntensity(1.0f);
+            LightProbeComponent.SetRefreshMode(Dt::CLightProbeComponent::Static);
+            LightProbeComponent.SetNear(0.01f);
+            LightProbeComponent.SetFar(1024.0f);
+            LightProbeComponent.SetParallaxCorrection(false);
+            LightProbeComponent.SetBoxSize(glm::vec3(1024.0f));
 
-            rGlobalProbeLight.SetDetailFacet(Dt::SFacetCategory::Data, pProbeLightFacet);
+            rGlobalProbeLight.AddComponent(LightProbeComponent);
 
             Dt::EntityManager::MarkEntityAsDirty(rGlobalProbeLight, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
@@ -394,8 +379,7 @@ void CLgLoadMapState::CreateDefaultScene()
         {
             Dt::SEntityDescriptor EntityDesc;
 
-            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Light;
-            EntityDesc.m_EntityType     = Dt::SLightType::Sun;
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
             EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
 
             Dt::CEntity& rSunLight = Dt::EntityManager::CreateEntity(EntityDesc);
@@ -411,18 +395,18 @@ void CLgLoadMapState::CreateDefaultScene()
             pTransformationFacet->SetScale   (glm::vec3(1.0f));
             pTransformationFacet->SetRotation(glm::vec3(0.0f));
 
-            Dt::CSunLightFacet* pSunLightFacet = Dt::SunManager::CreateSunLight();
+            auto SunComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CSunComponent>();
 
-            pSunLightFacet->EnableTemperature(false);
-            pSunLightFacet->SetColor         (glm::vec3(1.0f, 1.0f, 1.0f));
-            pSunLightFacet->SetDirection     (glm::vec3(0.0f, 0.01f, -1.0f));
-            pSunLightFacet->SetIntensity     (90600.0f);
-            pSunLightFacet->SetTemperature   (0);
-            pSunLightFacet->SetRefreshMode   (Dt::CSunLightFacet::Dynamic);
+            SunComponent.EnableTemperature(false);
+            SunComponent.SetColor         (glm::vec3(1.0f, 1.0f, 1.0f));
+            SunComponent.SetDirection     (glm::vec3(0.0f, 0.01f, -1.0f));
+            SunComponent.SetIntensity     (90600.0f);
+            SunComponent.SetTemperature   (0);
+            SunComponent.SetRefreshMode   (Dt::CSunComponent::Dynamic);
 
-            pSunLightFacet->UpdateLightness();
+            SunComponent.UpdateLightness();
 
-            rSunLight.SetDetailFacet(Dt::SFacetCategory::Data, pSunLightFacet);
+            rSunLight.AddComponent(SunComponent);
 
             Dt::EntityManager::MarkEntityAsDirty(rSunLight, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
@@ -430,8 +414,7 @@ void CLgLoadMapState::CreateDefaultScene()
         {
             Dt::SEntityDescriptor EntityDesc;
 
-            EntityDesc.m_EntityCategory = Dt::SEntityCategory::FX;
-            EntityDesc.m_EntityType     = Dt::SFXType::SSAO;
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Static;
             EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
 
             Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
@@ -441,15 +424,13 @@ void CLgLoadMapState::CreateDefaultScene()
             // -----------------------------------------------------------------------------
             // Transformation
             // -----------------------------------------------------------------------------
-            Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
+            auto pTransformationFacet = rEntity.GetTransformationFacet();
 
             pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
             pTransformationFacet->SetScale   (glm::vec3(1.0f));
             pTransformationFacet->SetRotation(glm::vec3(0.0f));
 
-            Dt::CSSAOFXFacet* pFacet = Dt::SSAOManager::CreateSSAOFX();
-
-            rEntity.SetDetailFacet(Dt::SFacetCategory::Data, pFacet);
+            rEntity.AddComponent(Dt::CComponentManager::GetInstance().Allocate<Dt::CSSAOComponent>());
 
             Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
@@ -481,7 +462,7 @@ void CLgLoadMapState::CreateDefaultScene()
 
             Dt::CEntity* pSubEntity = rSphere.GetHierarchyFacet()->GetFirstChild();
 
-            Dt::CMeshActorFacet* pModelActorFacet = static_cast<Dt::CMeshActorFacet*>(pSubEntity->GetDetailFacet(Dt::SFacetCategory::Data));
+            auto pMeshComponent = pSubEntity->GetComponent<Dt::CMeshComponent>();
 
             Dt::SMaterialDescriptor MaterialFileDesc;
 
@@ -502,7 +483,7 @@ void CLgLoadMapState::CreateDefaultScene()
 
             Dt::CMaterial& rMaterial = Dt::MaterialManager::CreateMaterial(MaterialFileDesc);
 
-            pModelActorFacet->SetMaterial(0, &rMaterial);
+            pMeshComponent->SetMaterial(0, &rMaterial);
 
             Dt::MaterialManager::MarkMaterialAsDirty(rMaterial, Dt::CMaterial::DirtyCreate);
 
@@ -535,7 +516,7 @@ void CLgLoadMapState::CreateDefaultScene()
 
             Dt::CEntity* pSubEntity = rSphere.GetHierarchyFacet()->GetFirstChild();
 
-            Dt::CMeshActorFacet* pModelActorFacet = static_cast<Dt::CMeshActorFacet*>(pSubEntity->GetDetailFacet(Dt::SFacetCategory::Data));
+            auto pMeshComponent = pSubEntity->GetComponent<Dt::CMeshComponent>();
 
             Dt::SMaterialDescriptor MaterialFileDesc;
 
@@ -556,7 +537,7 @@ void CLgLoadMapState::CreateDefaultScene()
 
             Dt::CMaterial& rMaterial = Dt::MaterialManager::CreateMaterial(MaterialFileDesc);
 
-            pModelActorFacet->SetMaterial(0, &rMaterial);
+            pMeshComponent->SetMaterial(0, &rMaterial);
 
             Dt::MaterialManager::MarkMaterialAsDirty(rMaterial, Dt::CMaterial::DirtyCreate);
 

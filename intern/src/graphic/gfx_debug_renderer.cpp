@@ -7,7 +7,6 @@
 #include "base/base_uncopyable.h"
 
 #include "data/data_entity.h"
-#include "data/data_light_type.h"
 #include "data/data_map.h"
 #include "data/data_model_manager.h"
 

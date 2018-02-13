@@ -1,19 +1,14 @@
-//
-//  data_entity.h
-//  data
-//
-//  Created by Tobias Schwandt on 05/11/14.
-//  Copyright (c) 2014 TU Ilmenau. All rights reserved.
-//
 
 #pragma once
 
 #include "base/base_aabb3.h"
 #include "base/base_typedef.h"
 
+#include "data/data_component.h"
 #include "data/data_entity_folder.h"
 
 #include <string>
+#include <vector>
 
 namespace Dt
 {
@@ -27,21 +22,8 @@ namespace Dt
     {
         enum
         {
-            Actor,
-            Light,
-            FX,
-            Plugin,
-            NumberOfCategories,
-            UndefinedCategory = -1,
-        };
-    };
-
-    struct SFacetCategory
-    {
-        enum
-        {
-            Data,                                           //< General informations about this entity available in the whole project
-            Graphic,                                        //< Graphic specific informations like target sets, buffer, ...
+            Static,
+            Dynamic,
             NumberOfCategories,
             UndefinedCategory = -1,
         };
@@ -75,20 +57,18 @@ namespace Dt
             DirtyAdd     = 0x02,
             DirtyMove    = 0x04,
             DirtyRemove  = 0x08,
-            DirtyDestroy = 0x10,
-            DirtyDetail  = 0x20,
+            DirtyDestroy = 0x10
         };
         
         enum EFacetFlags
         {
-            FacetHierarchy      = 0x01,                      //< Either the entity is inside a hierarchy or not (global entity are not part of scene graph)
-            FacetTransformation = 0x02,                      //< Either the entity has a transformation or not (global entity doesn't need transformations)
-            FacetDetail         = 0x04,                      //< Detail informations of the entity (light, environment, fx, actors, ...)
+            FacetHierarchy      = 0x01,                 //< Either the entity is inside a hierarchy or not (global entity are not part of scene graph)
+            FacetTransformation = 0x02,                 //< Either the entity has a transformation or not (global entity doesn't need transformations)
         };
 
     public:
 
-        typedef unsigned int BID;
+        typedef Base::ID BID;
 
     public:
 
@@ -104,13 +84,12 @@ namespace Dt
             {
                 struct 
                 {
-                    unsigned int m_DirtyFlags   : 8;        //< Dirty flags if something happens
-                    unsigned int m_Category     : 4;        //< Category of entity (@see SEntitycategories)
-                    unsigned int m_Type         : 8;        //< Specific type of the category (e.g.: light -> point, spot, probe, ...)
-                    unsigned int m_Layer        : 8;        //< Layer of the entity needed for special culling techniques
-                    unsigned int m_IsDynamic    : 1;        //< Either the entity can be moved in game and editor
-                    unsigned int m_IsSelectable : 1;        //< Either the entity is selectable in editor
-                    unsigned int m_Padding      : 2;
+                    unsigned int m_DirtyFlags   :  8;        //< Dirty flags if something happens
+                    unsigned int m_Category     :  4;        //< Category of entity (@see SEntitycategories)
+                    unsigned int m_Layer        :  8;        //< Layer of the entity needed for special culling techniques
+                    unsigned int m_IsDynamic    :  1;        //< Either the entity can be moved in game and editor
+                    unsigned int m_IsSelectable :  1;        //< Either the entity is selectable in editor
+                    unsigned int m_Padding      : 10;
                 };
 
                 unsigned int m_Key;
@@ -143,9 +122,6 @@ namespace Dt
 
         bool IsInMap() const;
 
-        void SetType(unsigned int _Type);
-        unsigned int GetType() const;
-
         void SetWorldPosition(const glm::vec3& _rPosition);
         glm::vec3& GetWorldPosition();
         const glm::vec3& GetWorldPosition() const;
@@ -174,14 +150,28 @@ namespace Dt
         CTransformationFacet* GetTransformationFacet();
         const CTransformationFacet* GetTransformationFacet() const;
 
-        void SetDetailFacet(unsigned int _Category, void* _pFacet);
-        void* GetDetailFacet(unsigned int _Category);
-        const void* GetDetailFacet(unsigned int _Category) const;
-
     public:
 
         void Attach(CEntity& _rEntity);
         void Detach();
+
+    public:
+
+        typedef std::vector<Dt::IComponent*> CComponentVector;
+
+        CComponentVector m_Components; //< Components added to this entity
+
+        template<class T>
+        void AddComponent(T& _rComponent);
+
+        template<class T>
+        T* GetComponent();
+
+        template<class T>
+        const T* GetComponent() const;
+
+        template<class T>
+        bool HasComponent() const;
 
     protected:
         
@@ -190,7 +180,6 @@ namespace Dt
         Dt::CEntityFolder*    m_pFolder;                                                          //< Pointer to folder of this entity
         CHierarchyFacet*      m_pHierarchyFacet;                                                  //< Contains hierarchical informations of the entity (scene graph)
         CTransformationFacet* m_pTransformationFacet;                                             //< Contains transformation informations depending on hierarchy
-        void*                 m_pDetailFacets[SFacetCategory::NumberOfCategories];                //< Contains detail informations of the entity (@see EFacetFlags::FacetDetail)
         BID                   m_ID;                                                               //< A specific unique id of this entity inside the map
         std::string           m_Name;                                                             //< A name of the entity to search for inside scripts
         Base::AABB3Float      m_WorldAABB;                                                        //< Axis Aligned Bounding Box (AABB) of the entity in map for region bounding box calculations
@@ -202,4 +191,55 @@ namespace Dt
         CEntity();
         ~CEntity();
     };
+} // namespace Dt
+
+namespace Dt
+{
+    template<class T>
+    void CEntity::AddComponent(T& _rComponent)
+    {
+        _rComponent.SetLinkedEntity(this);
+
+        m_Components.push_back(&_rComponent);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    template<class T>
+    T* CEntity::GetComponent()
+    {
+        for (auto Component : m_Components)
+        {
+            if (Component->GetTypeID() == Base::CTypeInfo::GetTypeID<T>())
+            {
+                return static_cast<T*>(Component);
+            }
+        }
+
+        return nullptr;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    template<class T>
+    const T* CEntity::GetComponent() const
+    {
+        for (auto Component : m_Components)
+        {
+            if (Component->GetTypeID() == Base::CTypeInfo::GetTypeID<T>())
+            {
+                return static_cast<T*>(Component);
+            }
+        }
+
+        return nullptr;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    template<class T>
+    bool CEntity::HasComponent() const
+    {
+        return GetComponent<T>() != nullptr;
+    }
 } // namespace Dt

@@ -6,14 +6,14 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
-#include "data/data_actor_type.h"
-#include "data/data_camera_actor_manager.h"
+#include "data/data_camera_component.h"
+#include "data/data_component_manager.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_map.h"
 #include "data/data_material_manager.h"
 #include "data/data_mesh.h"
-#include "data/data_mesh_actor_facet.h"
+#include "data/data_mesh_component.h"
 #include "data/data_texture_manager.h"
 #include "data/data_transformation_facet.h"
 
@@ -115,15 +115,9 @@ namespace
 
             Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-            rCurrentEntity.SetCategory(Dt::SEntityCategory::Actor);
-            rCurrentEntity.SetType(Dt::SActorType::Camera);
+            rCurrentEntity.SetCategory(Dt::SEntityCategory::Dynamic);
 
-            // -----------------------------------------------------------------------------
-            // Create facet and set it
-            // -----------------------------------------------------------------------------
-            Dt::CCameraActorFacet* pFacet = Dt::CameraActorManager::CreateCameraActor();
-
-            rCurrentEntity.SetDetailFacet(Dt::SFacetCategory::Data, pFacet);
+            rCurrentEntity.AddComponent(Dt::CComponentManager::GetInstance().Allocate<Dt::CCameraComponent>());
         }
     }
 
@@ -135,9 +129,9 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CMeshActorFacet* pFacet = static_cast<Dt::CMeshActorFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+        Dt::CMeshComponent* pFacet = rCurrentEntity.GetComponent<Dt::CMeshComponent>();
 
-        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Actor && rCurrentEntity.GetType() == Dt::SActorType::Mesh && pFacet != nullptr)
+        if (pFacet != nullptr)
         {
             // TODO by tschwandt
             // different surfaces necessary?
@@ -154,7 +148,7 @@ namespace
 
             Edit::CMessage NewMessage;
 
-            NewMessage.PutInt(rCurrentEntity.GetID());
+            NewMessage.PutInt(static_cast<int>(rCurrentEntity.GetID()));
 
             if (pMaterial)
             {
@@ -181,13 +175,13 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CCameraActorFacet* pFacet = static_cast<Dt::CCameraActorFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+        Dt::CCameraComponent* pFacet = rCurrentEntity.GetComponent<Dt::CCameraComponent>();
 
-        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Actor && rCurrentEntity.GetType() == Dt::SActorType::Camera && pFacet != nullptr)
+        if (pFacet != nullptr)
         {
             Edit::CMessage NewMessage;
 
-            NewMessage.PutInt(rCurrentEntity.GetID());
+            NewMessage.PutInt(static_cast<int>(rCurrentEntity.GetID()));
 
             NewMessage.PutBool(pFacet->IsMainCamera());
 
@@ -253,15 +247,15 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CMeshActorFacet* pFacet = static_cast<Dt::CMeshActorFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+        Dt::CMeshComponent* pFacet = rCurrentEntity.GetComponent<Dt::CMeshComponent>();
 
-        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Actor && rCurrentEntity.GetType() == Dt::SActorType::Mesh && pFacet != nullptr)
+        if (pFacet != nullptr)
         {
             Dt::CMaterial& rDtMaterial = Dt::MaterialManager::GetMaterialByHash(MaterialHash);
 
             pFacet->SetMaterial(0, &rDtMaterial);
 
-            Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pFacet, Dt::CMeshComponent::DirtyInfo);
         }
     }
 
@@ -273,9 +267,9 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CCameraActorFacet* pFacet = static_cast<Dt::CCameraActorFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+        Dt::CCameraComponent* pFacet = rCurrentEntity.GetComponent<Dt::CCameraComponent>();
 
-        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Actor && rCurrentEntity.GetType() == Dt::SActorType::Camera && pFacet != nullptr)
+        if (pFacet != nullptr)
         {
             float R, G, B;
             float X, Y, W, H;
@@ -285,7 +279,7 @@ namespace
             // -----------------------------------------------------------------------------
             bool IsMainCamera = _rMessage.GetBool();
 
-            Dt::CCameraActorFacet::EClearFlag ClearFlag = static_cast<Dt::CCameraActorFacet::EClearFlag >(_rMessage.GetInt());
+            Dt::CCameraComponent::EClearFlag ClearFlag = static_cast<Dt::CCameraComponent::EClearFlag >(_rMessage.GetInt());
 
             bool HasTexture = _rMessage.GetBool();
 
@@ -302,7 +296,7 @@ namespace
 
             int CullingMask = _rMessage.GetInt();
 
-            Dt::CCameraActorFacet::EProjectionType ProjectionType = static_cast<Dt::CCameraActorFacet::EProjectionType>(_rMessage.GetInt());
+            Dt::CCameraComponent::EProjectionType ProjectionType = static_cast<Dt::CCameraComponent::EProjectionType>(_rMessage.GetInt());
 
             float Size = _rMessage.GetFloat();
 
@@ -319,7 +313,7 @@ namespace
 
             float Depth = _rMessage.GetFloat();
 
-            Dt::CCameraActorFacet::ECameraMode CameraMode = static_cast<Dt::CCameraActorFacet::ECameraMode>(_rMessage.GetInt());
+            Dt::CCameraComponent::ECameraMode CameraMode = static_cast<Dt::CCameraComponent::ECameraMode>(_rMessage.GetInt());
 
             float ShutterSpeed = _rMessage.GetFloat();
 
@@ -375,7 +369,7 @@ namespace
 
             pFacet->SetEC(EC);
 
-            Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pFacet, Dt::CCameraComponent::DirtyInfo);
         }
     }
 
