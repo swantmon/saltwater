@@ -22,6 +22,7 @@ namespace Gfx
     {
     public:
         
+#pragma warning(push)
 #pragma warning(disable:4201)
         struct SMaterialKey
         {
@@ -44,7 +45,7 @@ namespace Gfx
                 BMaterialID m_Key;
             };
         };
-#pragma warning(default:4201)
+#pragma warning(pop)
         
         struct SMaterialAttributes
         {

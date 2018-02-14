@@ -92,6 +92,7 @@ namespace MATH
         
     private:
         
+#pragma warning(push)
 #pragma warning(disable:4201)
         struct
         {
@@ -107,7 +108,7 @@ namespace MATH
                 T m_PointData[4];
             };
         };
-#pragma warning(default:4201)
+#pragma warning(pop)
         
     private:
         
