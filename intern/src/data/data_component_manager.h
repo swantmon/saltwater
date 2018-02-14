@@ -37,7 +37,7 @@ namespace Dt
 
     private:
 
-        typedef std::vector<std::shared_ptr<Dt::IComponent>>     CComponents;
+        typedef std::vector<std::unique_ptr<Dt::IComponent>>     CComponents;
         typedef std::map<Base::ID, std::vector<Dt::IComponent*>> CComponentsByType;
         typedef std::vector<CComponentDelegate>                  CComponentDelegates;
 
@@ -65,7 +65,7 @@ namespace Dt
         // -----------------------------------------------------------------------------
         // Allocate new component
         // -----------------------------------------------------------------------------
-        m_Components.emplace_back(std::shared_ptr<T>(new T()));
+        m_Components.emplace_back(std::unique_ptr<T>(new T()));
 
         T* pComponent = static_cast<T*>(m_Components.back().get());
 
@@ -84,7 +84,7 @@ namespace Dt
     template<class T>
     const std::vector<Dt::IComponent*>& CComponentManager::GetComponents()
     {
-        return m_ComponentsByType.at(Base::CTypeInfo::GetTypeID<T>());
+        return m_ComponentsByType[Base::CTypeInfo::GetTypeID<T>()];
     }
 
     // -----------------------------------------------------------------------------

@@ -12,6 +12,8 @@ namespace Gfx
     public:
 
         virtual const Base::ID GetTypeID() const = 0;
+
+        virtual ~IComponent() {};
     };
 } // namespace Gfx
 
