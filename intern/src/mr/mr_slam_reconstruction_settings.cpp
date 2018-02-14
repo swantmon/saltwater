@@ -27,8 +27,6 @@ namespace MR
         s_DefaultSettings.m_MaxIntegrationWeight = 200;
         s_DefaultSettings.m_PyramidLevelCount = 3;
         s_DefaultSettings.m_DepthThreshold = glm::ivec2(500, 8000);
-        s_DefaultSettings.m_UseFullVolumeIntegration = true;
-        s_DefaultSettings.m_UseReverseIntegration = true;
 
         s_DefaultSettings.m_IsScalable = Base::CProgramParameters::GetInstance().Get("mr:slam:scalable", true);
 

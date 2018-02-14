@@ -33,10 +33,7 @@ namespace MR
 
 		glm::ivec3  m_GridResolutions;
         glm::ivec3  m_VoxelsPerGrid;
-
-        bool m_UseFullVolumeIntegration;
-        bool m_UseReverseIntegration;
-        
+                
         static void SetDefaultSettings(SReconstructionSettings& _Settings);
 
     private:

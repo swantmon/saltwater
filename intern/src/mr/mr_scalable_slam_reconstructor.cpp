@@ -64,10 +64,7 @@ namespace
     const unsigned int g_Level1GridPoolSize =       128u * g_MegabyteSize;
     const unsigned int g_TSDFPoolSize       = 16u * 128u * g_MegabyteSize;
     //*/
-
-    const bool g_UseFullVolumeIntegration = true;
-    const bool g_UseReverseIntegration = true;
-        
+            
     const float g_EpsilonDistance = 0.1f;
     const float g_EpsilonAngle = 0.75f;
     
@@ -373,9 +370,6 @@ namespace MR
 
 	void CScalableSLAMReconstructor::SetupData()
 	{
-        m_ReconstructionSettings.m_UseFullVolumeIntegration = g_UseFullVolumeIntegration;
-        m_ReconstructionSettings.m_UseReverseIntegration = g_UseReverseIntegration;
-
         const int GridLevelCount = MR::SReconstructionSettings::GRID_LEVELS;
 
         m_VolumeSizes.resize(GridLevelCount);
@@ -485,21 +479,10 @@ namespace MR
         m_ClearVolumeCSPtr = 0;
 		m_RootgridDepthCSPtr = 0;
         m_VolumeCountersCSPtr = 0;
-
-        m_RasterizeRootGridVSPtr = 0;
-        m_RasterizeRootGridFSPtr = 0;
-        m_RasterizeLevel1GridVSPtr = 0;
-        m_RasterizeLevel1GridFSPtr = 0;
-
+        
         m_RasterizeRootVolumeVSPtr = 0;
         m_RasterizeRootVolumeFSPtr = 0;
-
-        m_RasterizeRootGridVSPtr = 0;
-        m_RasterizeRootGridFSPtr = 0;
-
-        m_RasterizeLevel1GridVSPtr = 0;
-        m_RasterizeLevel1GridFSPtr = 0;
-
+        
         m_ClearAtomicCountersCSPtr = 0;
 
         m_IntegrateRootGridCSPtr = 0;
@@ -624,10 +607,6 @@ namespace MR
         m_GridCountersCSPtr        = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_grid_counters.glsl"                       , "main", DefineString.c_str());
         m_RasterizeRootVolumeVSPtr = ShaderManager::CompileVS("scalable_kinect_fusion\\rasterization\\vs_rasterize_rootvolume.glsl" , "main", DefineString.c_str());
         m_RasterizeRootVolumeFSPtr = ShaderManager::CompilePS("scalable_kinect_fusion\\rasterization\\fs_rasterize_rootvolume.glsl" , "main", DefineString.c_str());
-        m_RasterizeRootGridVSPtr   = ShaderManager::CompileVS("scalable_kinect_fusion\\rasterization\\vs_rasterize_grid.glsl"       , "main", DefineString.c_str());
-        m_RasterizeRootGridFSPtr   = ShaderManager::CompilePS("scalable_kinect_fusion\\rasterization\\fs_rasterize_grid.glsl"       , "main", DefineString.c_str());
-        m_RasterizeLevel1GridVSPtr = ShaderManager::CompileVS("scalable_kinect_fusion\\rasterization\\vs_rasterize_level1grid.glsl" , "main", DefineString.c_str());
-        m_RasterizeLevel1GridFSPtr = ShaderManager::CompilePS("scalable_kinect_fusion\\rasterization\\fs_rasterize_level1grid.glsl" , "main", DefineString.c_str());
         m_IntegrateRootGridCSPtr   = ShaderManager::CompileCS("scalable_kinect_fusion\\integration\\cs_integrate_rootgrid.glsl"     , "main", DefineString.c_str());
         m_IntegrateLevel1GridCSPtr = ShaderManager::CompileCS("scalable_kinect_fusion\\integration\\cs_integrate_level1grid.glsl"   , "main", DefineString.c_str());
         m_IntegrateTSDFCSPtr       = ShaderManager::CompileCS("scalable_kinect_fusion\\integration\\cs_integrate_tsdf.glsl"         , "main", DefineString.c_str());
@@ -809,169 +788,67 @@ namespace MR
             }
         }
 
-        if (m_ReconstructionSettings.m_UseFullVolumeIntegration)
+        ////////////////////////////////////////////////////////////////////////////////////////////////
+        // Render point cloud to full volume
+        ////////////////////////////////////////////////////////////////////////////////////////////////
+
+        Performance::BeginEvent("Rasterize point cloud to full volume");
+
+        ContextManager::SetTargetSet(m_FullVolumeTargetSetPtr);
+        ContextManager::SetViewPortSet(m_FullVolumeViewPort);
+
+        ContextManager::SetShaderVS(m_PointsRootGridVSPtr);
+        ContextManager::SetShaderPS(m_PointsRootGridGSPtr);
+        ContextManager::SetShaderPS(m_PointsRootGridFSPtr);
+        ContextManager::Barrier();
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_FRONT);
+        glDisable(GL_DEPTH_TEST);
+        glDisable(GL_MULTISAMPLE);
+        ContextManager::SetVertexBuffer(m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+        ContextManager::SetIndexBuffer(m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
+        ContextManager::SetInputLayout(m_CubeInputLayoutPtr);
+        ContextManager::SetTopology(STopology::PointList);
+
+
+        if (m_UseConservativeRasterization)
         {
-            ////////////////////////////////////////////////////////////////////////////////////////////////
-            // Render point cloud to full volume
-            ////////////////////////////////////////////////////////////////////////////////////////////////
+            glEnable(GL_CONSERVATIVE_RASTERIZATION_NV);
+        }
+        for (uint32_t VolumeIndex : rVolumeQueue)
+        {
+            auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
 
-            Performance::BeginEvent("Rasterize point cloud to full volume");
+            RasterizeFullVolumeReverse(rRootVolume);
 
-            ContextManager::SetTargetSet(m_FullVolumeTargetSetPtr);
-            ContextManager::SetViewPortSet(m_FullVolumeViewPort);
+            ContextManager::SetShaderCS(m_PointsFullCSPtr);
 
-            ContextManager::SetShaderVS(m_PointsRootGridVSPtr);
-            ContextManager::SetShaderPS(m_PointsRootGridGSPtr);
-            ContextManager::SetShaderPS(m_PointsRootGridFSPtr);
+            ContextManager::SetImageTexture(1, m_FullVolumePtr);
+
+            SIndirectBuffers IndirectBufferData = {};
+            IndirectBufferData.m_Indexed.m_IndexCount = m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
+            BufferManager::UploadBufferData(rRootVolume.m_IndirectLevel1Buffer, &IndirectBufferData);
+            BufferManager::UploadBufferData(rRootVolume.m_IndirectLevel2Buffer, &IndirectBufferData);
+
+            ContextManager::SetResourceBuffer(0, rRootVolume.m_IndirectLevel1Buffer);
+            ContextManager::SetResourceBuffer(1, rRootVolume.m_IndirectLevel2Buffer);
+            ContextManager::SetResourceBuffer(2, rRootVolume.m_Level1QueuePtr);
+            ContextManager::SetResourceBuffer(3, rRootVolume.m_Level2QueuePtr);
+
+            ContextManager::Dispatch(16, 16, 16);
+
             ContextManager::Barrier();
-            glEnable(GL_CULL_FACE);
-            glCullFace(GL_FRONT);
-            glDisable(GL_DEPTH_TEST);
-            glDisable(GL_MULTISAMPLE);
-            ContextManager::SetVertexBuffer(m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
-            ContextManager::SetIndexBuffer(m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
-            ContextManager::SetInputLayout(m_CubeInputLayoutPtr);
-            ContextManager::SetTopology(STopology::PointList);
-
-
-            if (m_UseConservativeRasterization)
-            {
-                glEnable(GL_CONSERVATIVE_RASTERIZATION_NV);
-            }
-            for (uint32_t VolumeIndex : rVolumeQueue)
-            {
-                auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
-
-                RasterizeFullVolumeReverse(rRootVolume);
-
-                ContextManager::SetShaderCS(m_PointsFullCSPtr);
-                
-                ContextManager::SetImageTexture(1, m_FullVolumePtr);
-
-                SIndirectBuffers IndirectBufferData = {};
-                IndirectBufferData.m_Indexed.m_IndexCount = m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
-                BufferManager::UploadBufferData(rRootVolume.m_IndirectLevel1Buffer, &IndirectBufferData);
-                BufferManager::UploadBufferData(rRootVolume.m_IndirectLevel2Buffer, &IndirectBufferData);
-
-                ContextManager::SetResourceBuffer(0, rRootVolume.m_IndirectLevel1Buffer);
-                ContextManager::SetResourceBuffer(1, rRootVolume.m_IndirectLevel2Buffer);
-                ContextManager::SetResourceBuffer(2, rRootVolume.m_Level1QueuePtr);
-                ContextManager::SetResourceBuffer(3, rRootVolume.m_Level2QueuePtr);
-
-                ContextManager::Dispatch(16, 16, 16);
-
-                ContextManager::Barrier();
-            }
-            if (m_UseConservativeRasterization)
-            {
-                glDisable(GL_CONSERVATIVE_RASTERIZATION_NV);
-            }
-            
-            Performance::EndEvent();
         }
-        else
+        if (m_UseConservativeRasterization)
         {
-            if (m_ReconstructionSettings.m_UseReverseIntegration)
-            {
-                ////////////////////////////////////////////////////////////////////////////////////////////////
-                // Render point cloud to root grids
-                ////////////////////////////////////////////////////////////////////////////////////////////////
-
-                Performance::BeginEvent("Rasterize point cloud to root grids");
-
-                ContextManager::SetTargetSet(m_RootGridVolumeTargetSetPtr);
-                ContextManager::SetViewPortSet(m_RootGridViewPort);
-
-                ContextManager::SetShaderVS(m_PointsRootGridVSPtr);
-                ContextManager::SetShaderPS(m_PointsRootGridGSPtr);
-                ContextManager::SetShaderPS(m_PointsRootGridFSPtr);
-                ContextManager::Barrier();
-                glEnable(GL_CULL_FACE);
-                glCullFace(GL_FRONT);
-                glDisable(GL_DEPTH_TEST);
-                glDisable(GL_MULTISAMPLE);
-                ContextManager::SetVertexBuffer(m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
-                ContextManager::SetIndexBuffer(m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
-                ContextManager::SetInputLayout(m_CubeInputLayoutPtr);
-                ContextManager::SetTopology(STopology::PointList);
-
-                if (m_UseConservativeRasterization)
-                {
-                    glEnable(GL_CONSERVATIVE_RASTERIZATION_NV);
-                }
-                for (uint32_t VolumeIndex : rVolumeQueue)
-                {
-                    auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
-
-                    RasterizeRootGridReverse(rRootVolume);
-                }
-                if (m_UseConservativeRasterization)
-                {
-                    glDisable(GL_CONSERVATIVE_RASTERIZATION_NV);
-                }
-
-                Performance::EndEvent();
-            }
-            else
-            {
-                ////////////////////////////////////////////////////////////////////////////////////////////////
-                // Rasterize root grids
-                ////////////////////////////////////////////////////////////////////////////////////////////////
-
-                Performance::BeginEvent("Rasterize Root Grids");
-
-                ContextManager::SetShaderVS(m_RasterizeRootGridVSPtr);
-                ContextManager::SetShaderPS(m_RasterizeRootGridFSPtr);
-                ContextManager::Barrier();
-                glEnable(GL_CULL_FACE);
-                glCullFace(GL_FRONT);
-                glDisable(GL_DEPTH_TEST);
-                glDisable(GL_MULTISAMPLE);
-                ContextManager::SetVertexBuffer(m_Grid16MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
-                ContextManager::SetIndexBuffer(m_Grid16MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
-                ContextManager::SetInputLayout(m_CubeInputLayoutPtr);
-                ContextManager::SetTopology(STopology::TriangleList);
-
-                for (uint32_t VolumeIndex : rVolumeQueue)
-                {
-                    auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
-
-                    RasterizeRootGrid(rRootVolume);
-                }
-
-                Performance::EndEvent();
-            }
-
-            ContextManager::ResetShaderVS();
-            ContextManager::ResetShaderGS();
-            ContextManager::ResetShaderPS();
-            ContextManager::ResetShaderCS();
-
-            ////////////////////////////////////////////////////////////////////////////////////////////////
-            // Rasterize level1 grids
-            ////////////////////////////////////////////////////////////////////////////////////////////////
-
-            Performance::BeginEvent("Rasterize Level 1 Grids");
-
-            ContextManager::SetTargetSet(m_EmptyTargetSetPtr);
-            ContextManager::SetViewPortSet(m_DepthViewPortSetPtr);
-
-            ContextManager::SetShaderVS(m_RasterizeLevel1GridVSPtr);
-            ContextManager::SetShaderPS(m_RasterizeLevel1GridFSPtr);
-            ContextManager::SetVertexBuffer(m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
-            ContextManager::SetIndexBuffer(m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
-            ContextManager::SetInputLayout(m_CubeInputLayoutPtr);
-            ContextManager::SetTopology(STopology::TriangleList);
-
-            for (uint32_t VolumeIndex : rVolumeQueue)
-            {
-                auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
-
-                RasterizeLevel1Grid(rRootVolume);
-            }
-
-            Performance::EndEvent();
+            glDisable(GL_CONSERVATIVE_RASTERIZATION_NV);
         }
+
+        Performance::EndEvent();
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////
+        // Fill the indirect buffers
+        ////////////////////////////////////////////////////////////////////////////////////////////////
 
         ContextManager::SetShaderCS(m_FillIndirectBufferCSPtr);
 
@@ -1136,76 +1013,6 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CScalableSLAMReconstructor::RasterizeRootGrid(SRootVolume& rRootGrid)
-    {
-        SGridRasterization GridData = {};
-        GridData.m_Resolution = m_ReconstructionSettings.m_GridResolutions[0];
-        GridData.m_CubeSize = m_VolumeSizes[1];
-        GridData.m_ParentSize = m_VolumeSizes[0];
-        GridData.m_Offset = rRootGrid.m_Offset;
-
-        BufferManager::UploadBufferData(m_GridRasterizationBufferPtr, &GridData);
-
-        SIndirectBuffers IndirectBufferData = {};
-        IndirectBufferData.m_Indexed.m_IndexCount = m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
-        BufferManager::UploadBufferData(rRootGrid.m_IndirectLevel1Buffer, &IndirectBufferData);
-        
-        ClearBuffer(m_VolumeAtomicCounterBufferPtr, GridData.m_Resolution * GridData.m_Resolution * GridData.m_Resolution * sizeof(int32_t));
-
-        ContextManager::SetResourceBuffer(3, rRootGrid.m_Level1QueuePtr);
-        ContextManager::SetResourceBuffer(4, m_VolumeAtomicCounterBufferPtr);
-        ContextManager::SetResourceBuffer(5, rRootGrid.m_IndirectLevel1Buffer);
-
-        const unsigned int IndexCount = m_Grid16MeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
-        ContextManager::DrawIndexed(IndexCount, 0, 0);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CScalableSLAMReconstructor::RasterizeRootGridReverse(SRootVolume& rRootGrid)
-    {
-        ////////////////////////////////////////////////////////////////////////////////
-        // Render point cloud into 3D texture
-        ////////////////////////////////////////////////////////////////////////////////
-
-        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
-
-        ContextManager::SetShaderVS(m_PointsRootGridVSPtr);
-        ContextManager::SetShaderGS(m_PointsRootGridGSPtr);
-        ContextManager::SetShaderPS(m_PointsRootGridFSPtr);
-
-        SPointRasterization BufferData;
-
-        BufferData.m_Offset = rRootGrid.m_Offset;
-        BufferData.m_Resolution = m_ReconstructionSettings.m_GridResolutions[0];
-        BufferManager::UploadBufferData(m_PointRasterizationBufferPtr, &BufferData);
-
-        ContextManager::SetConstantBuffer(3, m_PointRasterizationBufferPtr);
-        ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
-
-        ContextManager::Draw(m_pRGBDCameraControl->GetDepthPixelCount(), 0);
-
-        ////////////////////////////////////////////////////////////////////////////////
-        // Gather all tagged voxels
-        ////////////////////////////////////////////////////////////////////////////////
-
-        ContextManager::SetShaderCS(m_PointsRootGridCSPtr);
-
-        SIndirectBuffers IndirectBufferData = {};
-        IndirectBufferData.m_Indexed.m_IndexCount = m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
-        BufferManager::UploadBufferData(rRootGrid.m_IndirectLevel1Buffer, &IndirectBufferData);
-
-        ContextManager::SetImageTexture(1, m_RootGridVolumePtr);
-        ContextManager::SetResourceBuffer(2, rRootGrid.m_Level1QueuePtr);
-        ContextManager::SetResourceBuffer(3, rRootGrid.m_IndirectLevel1Buffer);
-
-        ContextManager::Dispatch(1, 1, 16);
-
-        ContextManager::Barrier();
-    }
-
-    // -----------------------------------------------------------------------------
-
     void CScalableSLAMReconstructor::RasterizeFullVolumeReverse(SRootVolume& rRootGrid)
     {
         ////////////////////////////////////////////////////////////////////////////////
@@ -1228,32 +1035,6 @@ namespace MR
         ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
 
         ContextManager::Draw(m_pRGBDCameraControl->GetDepthPixelCount(), 0);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CScalableSLAMReconstructor::RasterizeLevel1Grid(SRootVolume& rRootGrid)
-    {
-        SGridRasterization GridData = {};
-        GridData.m_Resolution = m_ReconstructionSettings.m_GridResolutions[1];
-        GridData.m_CubeSize = m_VolumeSizes[2];
-        GridData.m_ParentSize = m_VolumeSizes[1];
-        GridData.m_Offset = rRootGrid.m_Offset;
-
-        BufferManager::UploadBufferData(m_GridRasterizationBufferPtr, &GridData);
-        
-        ContextManager::SetResourceBuffer(2, rRootGrid.m_Level1QueuePtr);
-        ContextManager::SetResourceBuffer(3, rRootGrid.m_Level2QueuePtr);
-        ContextManager::SetResourceBuffer(4, m_VolumeAtomicCounterBufferPtr);
-        ContextManager::SetResourceBuffer(5, rRootGrid.m_IndirectLevel2Buffer);
-
-        SIndirectBuffers IndirectBufferData = {};
-        IndirectBufferData.m_Indexed.m_IndexCount = m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
-        BufferManager::UploadBufferData(rRootGrid.m_IndirectLevel2Buffer, &IndirectBufferData);
-
-        ClearBuffer(m_VolumeAtomicCounterBufferPtr, 128 * 128 * 128 * sizeof(int32_t));
-        
-        ContextManager::DrawIndexedIndirect(rRootGrid.m_IndirectLevel1Buffer, SIndirectBuffers::s_IndexedOffset);
     }
 
     // -----------------------------------------------------------------------------

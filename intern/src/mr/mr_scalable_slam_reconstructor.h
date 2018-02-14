@@ -180,11 +180,7 @@ namespace MR
 		void UpdateRootrids();
         void CreateIntegrationQueues(std::vector<uint32_t>& rVolumeQueue);
         void IntegrateHierarchies(std::vector<uint32_t>& rVolumeQueue);
-
-        void RasterizeRootGrid(SRootVolume& rRootGrid);
-        void RasterizeRootGridReverse(SRootVolume& rRootGrid);
-        void RasterizeLevel1Grid(SRootVolume& rRootGrid);
-
+        
         void RasterizeFullVolumeReverse(SRootVolume& rRootGrid);
 
         void ClearBuffer(Gfx::CBufferPtr BufferPtr);
@@ -264,12 +260,7 @@ namespace MR
         Gfx::CShaderPtr m_RasterizeRootVolumeVSPtr;
         Gfx::CShaderPtr m_RasterizeRootVolumeFSPtr;
         Gfx::CShaderPtr m_GridCountersCSPtr;
-
-        Gfx::CShaderPtr m_RasterizeRootGridVSPtr;
-        Gfx::CShaderPtr m_RasterizeRootGridFSPtr;
-        Gfx::CShaderPtr m_RasterizeLevel1GridVSPtr;
-        Gfx::CShaderPtr m_RasterizeLevel1GridFSPtr;
-
+        
         Gfx::CShaderPtr m_PointsRootGridVSPtr;
         Gfx::CShaderPtr m_PointsRootGridGSPtr;
         Gfx::CShaderPtr m_PointsRootGridFSPtr;
