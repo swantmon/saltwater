@@ -265,13 +265,6 @@ namespace MR
 
         m_DepthViewPortSetPtr = ViewManager::CreateViewPortSet(DepthViewPort);
 
-        ViewPortDescriptor.m_Width = static_cast<float>(m_ReconstructionSettings.m_GridResolutions[0]);
-        ViewPortDescriptor.m_Height = static_cast<float>(m_ReconstructionSettings.m_GridResolutions[0]);
-
-        Gfx::CViewPortPtr RootGridViewPort = ViewManager::CreateViewPort(ViewPortDescriptor);
-
-        m_RootGridViewPort = ViewManager::CreateViewPortSet(RootGridViewPort);
-
         ViewPortDescriptor.m_Width = 128.0f;
         ViewPortDescriptor.m_Height = 128.0f;
 
@@ -304,68 +297,8 @@ namespace MR
         MeshDesc.m_pMesh = pMesh;
 
         m_CubeMeshPtr = MeshManager::CreateMesh(MeshDesc);
-        
-        m_Grid8MeshPtr = CreateGridMesh(8);
-        m_Grid16MeshPtr = CreateGridMesh(16);
     }
-
-    // -----------------------------------------------------------------------------
-
-    Gfx::CMeshPtr CScalableSLAMReconstructor::CreateGridMesh(int Width)
-    {
-        std::vector<glm::vec3> Vertices;
-        std::vector<unsigned int> Indices;
-
-        for (int z = 0; z < Width; ++ z)
-        {
-            for (int y = 0; y < Width; ++ y)
-            {
-                for (int x = 0; x < Width; ++ x)
-                {
-                    for (int i = 0; i < 8; ++ i)
-                    {
-                        glm::vec3 Vertex = CubeVertices[i];
-
-                        Vertex[0] += x;
-                        Vertex[1] += y;
-                        Vertex[2] += z;
-
-                        Vertices.push_back(Vertex);
-                    }
-                }
-            }
-        }
-
-        for (int i = 0; i < Width * Width * Width; ++ i)
-        {
-            for (int j = 0; j < 36; ++ j)
-            {
-                Indices.push_back(CubeIndices[j] + i * 8);
-            }
-        }
-
-        Dt::CSurface* pSurface = new Dt::CSurface;
-        Dt::CLOD* pLOD = new Dt::CLOD;
-        Dt::CMesh* pMesh = new Dt::CMesh;
-
-        pSurface->SetPositions(Vertices.data());
-        pSurface->SetNumberOfVertices(static_cast<unsigned int>(Vertices.size()));
-        pSurface->SetIndices(Indices.data());
-        pSurface->SetNumberOfIndices(static_cast<unsigned int>(Indices.size()));
-        pSurface->SetElements(0);
-
-        pLOD->SetSurface(0, pSurface);
-        pLOD->SetNumberOfSurfaces(1);
-
-        pMesh->SetLOD(0, pLOD);
-        pMesh->SetNumberOfLODs(1);
-
-        SMeshDescriptor MeshDesc = {};
-        MeshDesc.m_pMesh = pMesh;
-
-        return MeshManager::CreateMesh(MeshDesc);
-    }
-
+    
 	// -----------------------------------------------------------------------------
 
 	void CScalableSLAMReconstructor::SetupData()
@@ -489,8 +422,6 @@ namespace MR
         m_IntegrateLevel1GridCSPtr = 0;
 
         m_CubeMeshPtr = 0;
-        m_Grid8MeshPtr = 0;
-        m_Grid16MeshPtr = 0;
         m_CubeInputLayoutPtr = 0;
 
         m_RawVertexMapPtr = 0;
@@ -509,9 +440,7 @@ namespace MR
         }
 
         m_RootVolumeMap.clear();
-
-        m_RootGridVolumePtr = 0;
-
+        
         m_IntrinsicsConstantBufferPtr = 0;
         m_TrackingDataConstantBufferPtr = 0;
         m_RaycastPyramidConstantBufferPtr = 0;
@@ -805,12 +734,12 @@ namespace MR
         glCullFace(GL_FRONT);
         glDisable(GL_DEPTH_TEST);
         glDisable(GL_MULTISAMPLE);
-        ContextManager::SetVertexBuffer(m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
-        ContextManager::SetIndexBuffer(m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
+        // Just set a dummy mesh
+        ContextManager::SetVertexBuffer(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+        ContextManager::SetIndexBuffer(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
         ContextManager::SetInputLayout(m_CubeInputLayoutPtr);
         ContextManager::SetTopology(STopology::PointList);
-
-
+        
         if (m_UseConservativeRasterization)
         {
             glEnable(GL_CONSERVATIVE_RASTERIZATION_NV);
@@ -826,7 +755,7 @@ namespace MR
             ContextManager::SetImageTexture(1, m_FullVolumePtr);
 
             SIndirectBuffers IndirectBufferData = {};
-            IndirectBufferData.m_Indexed.m_IndexCount = m_Grid8MeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
+            IndirectBufferData.m_Indexed.m_IndexCount = m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
             BufferManager::UploadBufferData(rRootVolume.m_IndirectLevel1Buffer, &IndirectBufferData);
             BufferManager::UploadBufferData(rRootVolume.m_IndirectLevel2Buffer, &IndirectBufferData);
 
@@ -1294,23 +1223,14 @@ namespace MR
 			m_RawCameraFramePtr = TextureManager::CreateTexture2D(TextureDescriptor);
 		}
 
-        TextureDescriptor.m_NumberOfPixelsU = 16;
-        TextureDescriptor.m_NumberOfPixelsV = 16;
-        TextureDescriptor.m_NumberOfPixelsW = 16;
-        TextureDescriptor.m_NumberOfMipMaps = 1;
-        TextureDescriptor.m_NumberOfTextures = 1;
+        TextureDescriptor.m_NumberOfPixelsU = 16 * 8;
+        TextureDescriptor.m_NumberOfPixelsV = 16 * 8;
+        TextureDescriptor.m_NumberOfPixelsW = 16 * 8;
         TextureDescriptor.m_Binding = CTexture::RenderTarget | CTexture::ShaderResource;
         TextureDescriptor.m_Access = CTexture::CPUWrite;
         TextureDescriptor.m_Usage = CTexture::GPUReadWrite;
         TextureDescriptor.m_Semantic = CTexture::UndefinedSemantic;
         TextureDescriptor.m_Format = CTexture::R8_UINT;
-
-        m_RootGridVolumePtr = TextureManager::CreateTexture3D(TextureDescriptor);
-        m_RootGridVolumeTargetSetPtr = TargetSetManager::CreateTargetSet(m_RootGridVolumePtr);
-
-        TextureDescriptor.m_NumberOfPixelsU = 16 * 8;
-        TextureDescriptor.m_NumberOfPixelsV = 16 * 8;
-        TextureDescriptor.m_NumberOfPixelsW = 16 * 8;
 
         m_FullVolumePtr = TextureManager::CreateTexture3D(TextureDescriptor);
         m_FullVolumeTargetSetPtr = TargetSetManager::CreateTargetSet(m_FullVolumePtr);

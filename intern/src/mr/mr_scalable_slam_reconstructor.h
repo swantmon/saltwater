@@ -272,16 +272,10 @@ namespace MR
         Gfx::CShaderPtr m_FillIndirectBufferCSPtr;
         
         Gfx::CMeshPtr m_CubeMeshPtr;
-        Gfx::CMeshPtr m_Grid8MeshPtr;
-        Gfx::CMeshPtr m_Grid16MeshPtr;
         
         Gfx::CInputLayoutPtr m_CubeInputLayoutPtr;
         Gfx::CTargetSetPtr m_EmptyTargetSetPtr;
         Gfx::CViewPortSetPtr m_DepthViewPortSetPtr;
-
-        Gfx::CTexturePtr m_RootGridVolumePtr;
-        Gfx::CTargetSetPtr m_RootGridVolumeTargetSetPtr;
-        Gfx::CViewPortSetPtr m_RootGridViewPort;
 
         Gfx::CTexturePtr m_FullVolumePtr;
         Gfx::CTargetSetPtr m_FullVolumeTargetSetPtr;
