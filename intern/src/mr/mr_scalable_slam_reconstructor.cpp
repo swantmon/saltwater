@@ -729,7 +729,13 @@ namespace MR
         {
             auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
 
+            Performance::BeginEvent("Render single point cloud");
+
             RasterizePointCloud(rRootVolume);
+
+            Performance::EndEvent();
+
+            Performance::BeginEvent("Gather data");
 
             ContextManager::SetShaderCS(m_PointsFullCSPtr);
 
@@ -748,6 +754,7 @@ namespace MR
             ContextManager::Dispatch(16, 16, 16);
 
             ContextManager::Barrier();
+            Performance::EndEvent();
         }
         if (m_UseConservativeRasterization)
         {
