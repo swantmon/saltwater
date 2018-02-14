@@ -66,12 +66,12 @@ namespace Base
     template<typename T>
     T Transpose(const T& _rMatrix)
     {
-        const int Width = sizeof(_rMatrix[0]) / sizeof(T::value_type);
+        const int Width = sizeof(_rMatrix[0]) / sizeof(typename T::value_type);
         T Result;
 
         // Check matrix is quadratic
-        static_assert(sizeof(_rMatrix[0]) == sizeof(T::value_type) ||
-            (sizeof(_rMatrix) / sizeof(T::value_type)) == (Width * Width),
+        static_assert(sizeof(_rMatrix[0]) == sizeof(typename T::value_type) ||
+            (sizeof(_rMatrix) / sizeof(typename T::value_type)) == (Width * Width),
             "Storing non quadratics matrices is currently not supported!");
         
         auto pSource = glm::value_ptr(_rMatrix);
@@ -97,7 +97,7 @@ namespace Base
         // operator[] returns a vector from matrices and integrals from vectors
         // That way we can distinguish between them because we want to have individual matrix columns
 
-        const bool IsVector = sizeof(_rValue[0]) == sizeof(T::value_type);
+        const bool IsVector = sizeof(_rValue[0]) == sizeof(typename T::value_type);
 
         if (IsVector)
         {
@@ -121,7 +121,7 @@ namespace Base
 
             j = nlohmann::json::array();
 
-            const int Width = sizeof(_rValue[0]) / sizeof(T::value_type);
+            const int Width = sizeof(_rValue[0]) / sizeof(typename T::value_type);
 
             for (int Column = 0; Column < Width; ++ Column)
             {
@@ -144,13 +144,13 @@ namespace Base
         // operator[] returns a vector from matrices and integrals from vectors
         // That way we can distinguish between them because we want to have individual matrix columns
 
-        const bool IsVector = sizeof(_rValue[0]) == sizeof(T::value_type);
+        const bool IsVector = sizeof(_rValue[0]) == sizeof(typename T::value_type);
         
         auto* pData = glm::value_ptr(_rValue);
 
         if (IsVector)
         {
-            const auto Values = Base::Split<T::value_type>(j, ',');
+            const auto Values = Base::Split<typename T::value_type>(j, ',');
             
             for (int i = 0; i < N; ++i)
             {
@@ -159,11 +159,11 @@ namespace Base
         }
         else
         {
-            const int Width = sizeof(_rValue[0]) / sizeof(T::value_type);
+            const int Width = sizeof(_rValue[0]) / sizeof(typename T::value_type);
 
             for (int Column = 0; Column < Width; ++Column)
             {
-                const auto Values = Base::Split<T::value_type>(j[Column], ',');
+                const auto Values = Base::Split<typename T::value_type>(j[Column], ',');
 
                 for (int i = 0; i < Width; ++i)
                 {
@@ -181,12 +181,12 @@ namespace glm
     template<typename T>
     inline void to_json(nlohmann::json& j, const T& _rValue)
     {
-        Base::InternToJson<sizeof(T) / sizeof(T::value_type)>(j, _rValue);
+        Base::InternToJson<sizeof(T) / sizeof(typename T::value_type)>(j, _rValue);
     }
 
     template<typename T>
     inline void from_json(const nlohmann::json& j, T& _rValue)
     {
-        Base::InternFromJson<sizeof(T) / sizeof(T::value_type)>(j, _rValue);
+        Base::InternFromJson<sizeof(T) / sizeof(typename T::value_type)>(j, _rValue);
     }
 }
