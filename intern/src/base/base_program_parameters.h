@@ -3,7 +3,7 @@
 
 #include "base/base_console.h"
 #include "base/base_exception.h"
-#include "base/base_include_json.h"
+#include "base/base_json.h"
 
 #include <string>
 
@@ -39,7 +39,7 @@ namespace IO
 
     private:
 
-        json m_Container;
+        nlohmann::json m_Container;
 
     private:
 
@@ -48,7 +48,7 @@ namespace IO
 
     private:
 
-        json::json_pointer ConvertOptionToJSONPointer(const std::string& _rOption);
+        nlohmann::json::json_pointer ConvertOptionToJSONPointer(const std::string& _rOption);
     };
 } // namespace IO
 
@@ -78,7 +78,7 @@ namespace IO
 
             return m_Container[ConvertOptionToJSONPointer(_rOption)];
         }
-        catch (const json::exception& _rException)
+        catch (const nlohmann::json::exception& _rException)
         {
             BASE_CONSOLE_ERRORV("Getting value of option \"%s\" from program parameters failed with error: \"%s\"", _rOption.c_str(), _rException.what());
         }

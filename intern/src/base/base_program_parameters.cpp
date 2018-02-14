@@ -15,6 +15,8 @@ namespace IO
     }
 } // namespace IO
 
+using namespace nlohmann;
+
 namespace IO
 {
     CProgramParameters::CProgramParameters()
