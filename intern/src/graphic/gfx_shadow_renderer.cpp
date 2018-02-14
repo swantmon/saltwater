@@ -9,6 +9,7 @@
 #include "core/core_time.h"
 
 #include "data/data_component_facet.h"
+#include "data/data_component_manager.h"
 #include "data/data_entity.h"
 #include "data/data_map.h"
 #include "data/data_ssao_component.h"
@@ -823,44 +824,19 @@ namespace
 
     void CGfxShadowRenderer::BuildRenderJobs()
     {
-        // -----------------------------------------------------------------------------
-        // Clear current render jobs
-        // -----------------------------------------------------------------------------
         m_SSAORenderJobs.clear();
 
-        // -----------------------------------------------------------------------------
-        // Iterate throw every entity inside this map
-        // -----------------------------------------------------------------------------
-        Dt::Map::CEntityIterator CurrentEffectEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Dynamic);
-        Dt::Map::CEntityIterator EndOfEffectEntities = Dt::Map::EntitiesEnd();
+        auto DataComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CSSAOComponent>();
 
-        for (; CurrentEffectEntity != EndOfEffectEntities; )
+        for (auto Component : DataComponents)
         {
-            Dt::CEntity& rCurrentEntity = *CurrentEffectEntity;
+            Dt::CSSAOComponent* pDataSSAOFacet = static_cast<Dt::CSSAOComponent*>(Component);
 
-            // -----------------------------------------------------------------------------
-            // Get graphic facet
-            // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetComponentFacet()->HasComponent<Dt::CSSAOComponent>())
-            {
-                Dt::CSSAOComponent* pDataSSAOFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CSSAOComponent>();
+            SSSAORenderJob NewRenderJob;
 
-                assert(pDataSSAOFacet != 0);
+            NewRenderJob.m_pDataSSAOFacet = pDataSSAOFacet;
 
-                // -----------------------------------------------------------------------------
-                // Set sun into a new render job
-                // -----------------------------------------------------------------------------
-                SSSAORenderJob NewRenderJob;
-
-                NewRenderJob.m_pDataSSAOFacet = pDataSSAOFacet;
-
-                m_SSAORenderJobs.push_back(NewRenderJob);
-            }
-
-            // -----------------------------------------------------------------------------
-            // Next entity
-            // -----------------------------------------------------------------------------
-            CurrentEffectEntity = CurrentEffectEntity.Next(Dt::SEntityCategory::Dynamic);
+            m_SSAORenderJobs.push_back(NewRenderJob);
         }
     }
 } // namespace

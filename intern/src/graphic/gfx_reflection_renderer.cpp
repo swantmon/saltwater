@@ -7,6 +7,7 @@
 #include "base/base_uncopyable.h"
 
 #include "data/data_component_facet.h"
+#include "data/data_component_manager.h"
 #include "data/data_entity.h"
 #include "data/data_light_probe_component.h"
 #include "data/data_map.h"
@@ -1058,92 +1059,58 @@ namespace
         m_SSRRenderJobs       .clear();
 
         // -----------------------------------------------------------------------------
-        // Iterate throw every entity inside this map
+        // Fill render jobs
         // -----------------------------------------------------------------------------
-        Dt::Map::CEntityIterator CurrentLightEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Dynamic);
-        Dt::Map::CEntityIterator EndOfLightEntities = Dt::Map::EntitiesEnd();
+        auto DataComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CLightProbeComponent>();
 
-        for (IndexOfLight = 0; CurrentLightEntity != EndOfLightEntities && IndexOfLight < s_MaxNumberOfProbes; )
+        for (auto Component : DataComponents)
         {
-            Dt::CEntity& rCurrentEntity = *CurrentLightEntity;
+            Dt::CLightProbeComponent*  pDataLightProbeFacet    = static_cast<Dt::CLightProbeComponent*>(Component);
+            Gfx::CLightProbeComponent* pGraphicLightProbeFacet = Gfx::CComponentManager::GetInstance().GetComponent<Gfx::CLightProbeComponent>(pDataLightProbeFacet->GetID());
+
+            assert(pDataLightProbeFacet != 0 && pGraphicLightProbeFacet != 0);
 
             // -----------------------------------------------------------------------------
-            // Get graphic facet
+            // Fill data
             // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetComponentFacet()->HasComponent<Dt::CLightProbeComponent>())
-            {
-                Dt::CLightProbeComponent*  pDataLightProbeFacet    = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CLightProbeComponent>();
-                Gfx::CLightProbeComponent* pGraphicLightProbeFacet = Gfx::CComponentManager::GetInstance().GetComponent<Gfx::CLightProbeComponent>(pDataLightProbeFacet->GetID());
+            LightBuffer[IndexOfLight].m_LightType        = static_cast<int>(pDataLightProbeFacet->GetType()) + 1;
+            LightBuffer[IndexOfLight].m_WorldToProbeLS   = glm::inverse(pDataLightProbeFacet->GetHostEntity()->GetTransformationFacet()->GetWorldMatrix());
+            LightBuffer[IndexOfLight].m_ProbePosition    = glm::vec4(pDataLightProbeFacet->GetHostEntity()->GetWorldPosition(), 1.0f);
+            LightBuffer[IndexOfLight].m_UnitaryBox       = glm::vec4(pDataLightProbeFacet->GetBoxSize(), 0.0f);
+            LightBuffer[IndexOfLight].m_LightSettings[0] = static_cast<float>(pGraphicLightProbeFacet->GetSpecularPtr()->GetNumberOfMipLevels() - 1);
+            LightBuffer[IndexOfLight].m_LightSettings[1] = pDataLightProbeFacet->GetParallaxCorrection() == true ? 1.0f : 0.0f;
+            LightBuffer[IndexOfLight].m_LightSettings[2] = 0.0f;
+            LightBuffer[IndexOfLight].m_LightSettings[3] = 0.0f;
 
-                assert(pDataLightProbeFacet != 0 && pGraphicLightProbeFacet != 0);
-
-                // -----------------------------------------------------------------------------
-                // Fill data
-                // -----------------------------------------------------------------------------
-                LightBuffer[IndexOfLight].m_LightType        = static_cast<int>(pDataLightProbeFacet->GetType()) + 1;
-                LightBuffer[IndexOfLight].m_WorldToProbeLS   = glm::inverse(rCurrentEntity.GetTransformationFacet()->GetWorldMatrix());
-                LightBuffer[IndexOfLight].m_ProbePosition    = glm::vec4(rCurrentEntity.GetWorldPosition(), 1.0f);
-                LightBuffer[IndexOfLight].m_UnitaryBox       = glm::vec4(pDataLightProbeFacet->GetBoxSize(), 0.0f);
-                LightBuffer[IndexOfLight].m_LightSettings[0] = static_cast<float>(pGraphicLightProbeFacet->GetSpecularPtr()->GetNumberOfMipLevels() - 1);
-                LightBuffer[IndexOfLight].m_LightSettings[1] = pDataLightProbeFacet->GetParallaxCorrection() == true ? 1.0f : 0.0f;
-                LightBuffer[IndexOfLight].m_LightSettings[2] = 0.0f;
-                LightBuffer[IndexOfLight].m_LightSettings[3] = 0.0f;
-
-                ++IndexOfLight;
-
-                // -----------------------------------------------------------------------------
-                // Set probe into a new render job
-                // -----------------------------------------------------------------------------
-                SLightProbeRenderJob NewRenderJob;
-
-                NewRenderJob.m_Texture0Ptr = pGraphicLightProbeFacet->GetSpecularPtr();
-                NewRenderJob.m_Texture1Ptr = pGraphicLightProbeFacet->GetDiffusePtr();
-                NewRenderJob.m_Texture2Ptr = pGraphicLightProbeFacet->GetDepthPtr();
-
-                m_LightProbeRenderJobs.push_back(NewRenderJob);
-            }
+            ++IndexOfLight;
 
             // -----------------------------------------------------------------------------
-            // Next entity
+            // Set probe into a new render job
             // -----------------------------------------------------------------------------
-            CurrentLightEntity = CurrentLightEntity.Next(Dt::SEntityCategory::Dynamic);
+            SLightProbeRenderJob NewRenderJob;
+
+            NewRenderJob.m_Texture0Ptr = pGraphicLightProbeFacet->GetSpecularPtr();
+            NewRenderJob.m_Texture1Ptr = pGraphicLightProbeFacet->GetDiffusePtr();
+            NewRenderJob.m_Texture2Ptr = pGraphicLightProbeFacet->GetDepthPtr();
+
+            m_LightProbeRenderJobs.push_back(NewRenderJob);
         }
 
         BufferManager::UploadBufferData(m_ProbePropertiesBufferPtr, &LightBuffer);
 
         // -----------------------------------------------------------------------------
-        // Iterate throw every entity inside this map
-        // -----------------------------------------------------------------------------
-        Dt::Map::CEntityIterator CurrentEffectEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Dynamic);
-        Dt::Map::CEntityIterator EndOfEffectEntities = Dt::Map::EntitiesEnd();
 
-        for (; CurrentEffectEntity != EndOfEffectEntities; )
+        DataComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CSSRComponent>();
+
+        for (auto Component : DataComponents)
         {
-            Dt::CEntity& rCurrentEntity = *CurrentEffectEntity;
+            Dt::CSSRComponent* pDataSSRFacet = static_cast<Dt::CSSRComponent*>(Component);
 
-            // -----------------------------------------------------------------------------
-            // Get graphic facet
-            // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetComponentFacet()->HasComponent<Dt::CSSRComponent>())
-            {
-                Dt::CSSRComponent* pDataSSRFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CSSRComponent>();
+            SSSRRenderJob NewRenderJob;
 
-                assert(pDataSSRFacet != 0);
+            NewRenderJob.m_pDataSSRFacet = pDataSSRFacet;
 
-                // -----------------------------------------------------------------------------
-                // Set sun into a new render job
-                // -----------------------------------------------------------------------------
-                SSSRRenderJob NewRenderJob;
-
-                NewRenderJob.m_pDataSSRFacet = pDataSSRFacet;
-
-                m_SSRRenderJobs.push_back(NewRenderJob);
-            }
-
-            // -----------------------------------------------------------------------------
-            // Next entity
-            // -----------------------------------------------------------------------------
-            CurrentEffectEntity = CurrentEffectEntity.Next(Dt::SEntityCategory::Dynamic);
+            m_SSRRenderJobs.push_back(NewRenderJob);
         }
     }
 } // namespace

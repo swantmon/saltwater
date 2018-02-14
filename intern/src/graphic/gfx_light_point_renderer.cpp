@@ -7,6 +7,7 @@
 #include "base/base_uncopyable.h"
 
 #include "data/data_component_facet.h"
+#include "data/data_component_manager.h"
 #include "data/data_entity.h"
 #include "data/data_map.h"
 #include "data/data_transformation_facet.h"
@@ -499,42 +500,21 @@ namespace
     
     void CGfxPointLightRenderer::BuildRenderJobs()
     {
-        // -----------------------------------------------------------------------------
-        // Clear current render jobs
-        // -----------------------------------------------------------------------------
         m_PunctualLightRenderJobs.clear();
-        
-        // -----------------------------------------------------------------------------
-        // Iterate throw every entity inside this map
-        // -----------------------------------------------------------------------------
-        Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Dynamic);
-        Dt::Map::CEntityIterator EndOfEntities = Dt::Map::EntitiesEnd();
-        
-        for (; CurrentEntity != EndOfEntities; )
+
+        auto DataComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CPointLightComponent>();
+
+        for (auto Component : DataComponents)
         {
-            Dt::CEntity& rCurrentEntity = *CurrentEntity;
+            Dt::CPointLightComponent*  pDataPointFacet = static_cast<Dt::CPointLightComponent*>(Component);
+            Gfx::CPointLightComponent* pGraphicPointFacet = Gfx::CComponentManager::GetInstance().GetComponent<Gfx::CPointLightComponent>(pDataPointFacet->GetID());
 
-            if (!rCurrentEntity.GetComponentFacet()->HasComponent<Dt::CPointLightComponent>())
-            {
-                CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Dynamic);
-
-                continue;
-            }
-            
-            Dt::CPointLightComponent*  pDataLightFacet    = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CPointLightComponent>();
-            Gfx::CPointLightComponent* pGraphicLightFacet = Gfx::CComponentManager::GetInstance().GetComponent<Gfx::CPointLightComponent>(pDataLightFacet->GetID());
-            
             SRenderJob NewRenderJob;
 
-            NewRenderJob.m_pDtComponent   = pDataLightFacet;
-            NewRenderJob.m_pGfxComponent  = pGraphicLightFacet;
+            NewRenderJob.m_pDtComponent  = pDataPointFacet;
+            NewRenderJob.m_pGfxComponent = pGraphicPointFacet;
 
             m_PunctualLightRenderJobs.push_back(NewRenderJob);
-            
-            // -----------------------------------------------------------------------------
-            // Get next light
-            // -----------------------------------------------------------------------------
-            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Dynamic);
         }
     }
 } // namespace

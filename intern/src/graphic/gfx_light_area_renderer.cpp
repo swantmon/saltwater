@@ -7,6 +7,7 @@
 
 #include "data/data_area_light_component.h"
 #include "data/data_component_facet.h"
+#include "data/data_component_manager.h"
 #include "data/data_entity.h"
 #include "data/data_map.h"
 
@@ -89,7 +90,6 @@ namespace
         {
             Gfx::CAreaLightComponent* m_pGfxComponent;
             Dt::CAreaLightComponent*  m_pDtComponent;
-            Dt::CEntity*              m_pDtEntity;
         };
 
     private:
@@ -440,11 +440,10 @@ namespace
 
         for (; CurrentRenderJob != EndOfRenderJobs; ++CurrentRenderJob)
         {
-            Dt::CEntity*              pDtEntity     = CurrentRenderJob->m_pDtEntity;
             Dt::CAreaLightComponent*  pDtComponent  = CurrentRenderJob->m_pDtComponent;
             Gfx::CAreaLightComponent* pGfxComponent = CurrentRenderJob->m_pGfxComponent;
 
-            assert(pDtEntity && pDtComponent && pGfxComponent);
+            assert(pDtComponent && pGfxComponent);
 
             // -----------------------------------------------------------------------------
             // Update data
@@ -452,7 +451,7 @@ namespace
             SAreaLightProperties LightBuffer;
 
             LightBuffer.m_Color                = glm::vec4(pDtComponent->GetLightness(), pDtComponent->GetIntensity());
-            LightBuffer.m_Position             = glm::vec4(pDtEntity->GetWorldPosition(), 1.0f);
+            LightBuffer.m_Position             = glm::vec4(pDtComponent->GetHostEntity()->GetWorldPosition(), 1.0f);
             LightBuffer.m_DirectionX           = pGfxComponent->GetDirectionX();
             LightBuffer.m_DirectionY           = pGfxComponent->GetDirectionY();
             LightBuffer.m_HalfWidth            = pGfxComponent->GetHalfWidth();
@@ -608,40 +607,20 @@ namespace
 
     void CGfxAreaLightRenderer::BuildRenderJobs()
     {
-        // -----------------------------------------------------------------------------
-        // Clear current render jobs
-        // -----------------------------------------------------------------------------
         m_RenderJobs.clear();
 
-        // -----------------------------------------------------------------------------
-        // Iterate throw every entity inside this map
-        // -----------------------------------------------------------------------------
-        Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Dynamic);
-        Dt::Map::CEntityIterator EndOfEntities = Dt::Map::EntitiesEnd();
+        auto DataComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CAreaLightComponent>();
 
-        for (; CurrentEntity != EndOfEntities; )
+        for (auto Component : DataComponents)
         {
-            Dt::CEntity& rCurrentEntity = *CurrentEntity;
-
-            if (!rCurrentEntity.GetComponentFacet()->HasComponent<Dt::CAreaLightComponent>())
-            {
-                CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Dynamic);
-
-                continue;
-            }
+            Dt::CAreaLightComponent* pDtComponent = static_cast<Dt::CAreaLightComponent*>(Component);
 
             SRenderJob NewRenderJob;
 
-            NewRenderJob.m_pDtComponent  = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CAreaLightComponent>();
+            NewRenderJob.m_pDtComponent  = pDtComponent;
             NewRenderJob.m_pGfxComponent = Gfx::CComponentManager::GetInstance().GetComponent<Gfx::CAreaLightComponent>(NewRenderJob.m_pDtComponent->GetID());
-            NewRenderJob.m_pDtEntity     = &rCurrentEntity;
 
             m_RenderJobs.push_back(NewRenderJob);
-
-            // -----------------------------------------------------------------------------
-            // Get next light
-            // -----------------------------------------------------------------------------
-            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Dynamic);
         }
     }
 } // namespace

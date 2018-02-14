@@ -6,6 +6,7 @@
 #include "base/base_uncopyable.h"
 
 #include "data/data_component_facet.h"
+#include "data/data_component_manager.h"
 #include "data/data_dof_component.h"
 #include "data/data_entity.h"
 #include "data/data_post_aa_component.h"
@@ -1811,56 +1812,28 @@ namespace
         // Clear current render jobs
         // -----------------------------------------------------------------------------
         m_PostAARenderJobs.clear();
-        m_DOFRenderJobs .clear();
+        m_DOFRenderJobs   .clear();
 
-        // -----------------------------------------------------------------------------
-        // Iterate throw every entity inside this map
-        // -----------------------------------------------------------------------------
-        Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Dynamic);
-        Dt::Map::CEntityIterator EndOfEntities = Dt::Map::EntitiesEnd();
+        auto DataComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CPostAAComponent>();
 
-        for (; CurrentEntity != EndOfEntities; )
+        for (auto Component : DataComponents)
         {
-            Dt::CEntity& rCurrentEntity = *CurrentEntity;
+            SPostAARenderJob NewRenderJob;
 
-            // -----------------------------------------------------------------------------
-            // Get graphic facet
-            // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetComponentFacet()->HasComponent<Dt::CPostAAComponent>())
-            {
-                Dt::CPostAAComponent* pDataPostAAFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CPostAAComponent>();
+            NewRenderJob.m_pDataPostAAFacet = static_cast<Dt::CPostAAComponent*>(Component);
 
-                assert(pDataPostAAFacet != 0);
+            m_PostAARenderJobs.push_back(NewRenderJob);
+        }
 
-                // -----------------------------------------------------------------------------
-                // Set sun into a new render job
-                // -----------------------------------------------------------------------------
-                SPostAARenderJob NewRenderJob;
+        DataComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CDOFComponent>();
 
-                NewRenderJob.m_pDataPostAAFacet = pDataPostAAFacet;
+        for (auto Component : DataComponents)
+        {
+            SDOFRenderJob NewRenderJob;
 
-                m_PostAARenderJobs.push_back(NewRenderJob);
-            }
-            else if (rCurrentEntity.GetComponentFacet()->HasComponent<Dt::CDOFComponent>())
-            {
-                Dt::CDOFComponent* pDataDOFFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CDOFComponent>();
+            NewRenderJob.m_pDataDOFFacet = static_cast<Dt::CDOFComponent*>(Component);
 
-                assert(pDataDOFFacet != 0);
-
-                // -----------------------------------------------------------------------------
-                // Set sun into a new render job
-                // -----------------------------------------------------------------------------
-                SDOFRenderJob NewRenderJob;
-
-                NewRenderJob.m_pDataDOFFacet = pDataDOFFacet;
-
-                m_DOFRenderJobs.push_back(NewRenderJob);
-            }
-
-            // -----------------------------------------------------------------------------
-            // Next entity
-            // -----------------------------------------------------------------------------
-            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Dynamic);
+            m_DOFRenderJobs.push_back(NewRenderJob);
         }
     }
 } // namespace

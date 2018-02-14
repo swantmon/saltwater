@@ -7,6 +7,7 @@
 
 #include "data/data_bloom_component.h"
 #include "data/data_component_facet.h"
+#include "data/data_component_manager.h"
 #include "data/data_entity.h"
 #include "data/data_map.h"
 
@@ -1030,44 +1031,19 @@ namespace
 
     void CGfxPostFXHDRRenderer::BuildRenderJobs()
     {
-        // -----------------------------------------------------------------------------
-        // Clear current render jobs
-        // -----------------------------------------------------------------------------
         m_BloomRenderJobs.clear();
 
-        // -----------------------------------------------------------------------------
-        // Iterate throw every entity inside this map
-        // -----------------------------------------------------------------------------
-        Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Dynamic);
-        Dt::Map::CEntityIterator EndOfEntities = Dt::Map::EntitiesEnd();
+        auto DataComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CBloomComponent>();
 
-        for (; CurrentEntity != EndOfEntities; )
+        for (auto Component : DataComponents)
         {
-            Dt::CEntity& rCurrentEntity = *CurrentEntity;
+            Dt::CBloomComponent* pDataBloomFacet = static_cast<Dt::CBloomComponent*>(Component);
 
-            // -----------------------------------------------------------------------------
-            // Get graphic facet
-            // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetComponentFacet()->HasComponent<Dt::CBloomComponent>())
-            {
-                Dt::CBloomComponent* pDataBloomFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CBloomComponent>();
+            SBloomRenderJob NewRenderJob;
 
-                assert(pDataBloomFacet != 0);
+            NewRenderJob.m_pDataBloomFacet = pDataBloomFacet;
 
-                // -----------------------------------------------------------------------------
-                // Set sun into a new render job
-                // -----------------------------------------------------------------------------
-                SBloomRenderJob NewRenderJob;
-
-                NewRenderJob.m_pDataBloomFacet = pDataBloomFacet;
-
-                m_BloomRenderJobs.push_back(NewRenderJob);
-            }
-
-            // -----------------------------------------------------------------------------
-            // Next entity
-            // -----------------------------------------------------------------------------
-            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Dynamic);
+            m_BloomRenderJobs.push_back(NewRenderJob);
         }
     }
 } // namespace

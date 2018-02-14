@@ -12,6 +12,7 @@
 
 #include "data/data_camera_component.h"
 #include "data/data_component_facet.h"
+#include "data/data_component_manager.h"
 #include "data/data_entity.h"
 #include "data/data_map.h"
 #include "data/data_model_manager.h"
@@ -886,41 +887,21 @@ namespace
         // -----------------------------------------------------------------------------
         m_CameraRenderJobs.clear();
 
-        // -----------------------------------------------------------------------------
-        // Iterate throw every entity inside this map
-        // -----------------------------------------------------------------------------
-        Dt::Map::CEntityIterator CurrentEntity;
-        Dt::Map::CEntityIterator EndOfEntities;
+        auto DataCameraComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CCameraComponent>();
 
-        CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Dynamic);
-        EndOfEntities = Dt::Map::EntitiesEnd();
-
-        for (; CurrentEntity != EndOfEntities; )
+        for (auto Component : DataCameraComponents)
         {
-            Dt::CEntity& rCurrentEntity = *CurrentEntity;
+            Dt::CCameraComponent* pDtComponent = static_cast<Dt::CCameraComponent*>(Component);
 
-            // -----------------------------------------------------------------------------
-            // Get graphic facet
-            // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetComponentFacet()->HasComponent<Dt::CCameraComponent>())
+            if (pDtComponent->IsMainCamera())
             {
-                Dt::CCameraComponent* pDtComponent = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CCameraComponent>();
+                SCameraRenderJob NewRenderJob;
 
-                if (pDtComponent->IsMainCamera())
-                {
-                    SCameraRenderJob NewRenderJob;
+                NewRenderJob.m_pDtComponent  = pDtComponent;
+                NewRenderJob.m_pGfxComponent = CComponentManager::GetInstance().GetComponent<Gfx::CCameraComponent>(pDtComponent->GetID());
 
-                    NewRenderJob.m_pDtComponent  = pDtComponent;
-                    NewRenderJob.m_pGfxComponent = CComponentManager::GetInstance().GetComponent<Gfx::CCameraComponent>(pDtComponent->GetID());
-
-                    m_CameraRenderJobs.push_back(NewRenderJob);
-                }
+                m_CameraRenderJobs.push_back(NewRenderJob);
             }
-
-            // -----------------------------------------------------------------------------
-            // Next entity
-            // -----------------------------------------------------------------------------
-            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Dynamic);
         }
     }
 } // namespace

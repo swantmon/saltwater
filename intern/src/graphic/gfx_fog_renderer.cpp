@@ -10,6 +10,7 @@
 #include "base/base_include_glm.h"
 
 #include "data/data_component_facet.h"
+#include "data/data_component_manager.h"
 #include "data/data_entity.h"
 #include "data/data_map.h"
 #include "data/data_model_manager.h"
@@ -908,74 +909,50 @@ namespace
 
     void CGfxFogRenderer::BuildRenderJobs()
     {
-        Dt::CSunComponent*  pDtSunComponent  = 0;
-        Gfx::CSunComponent* pGfxSunComponent = 0;
-
-        // -----------------------------------------------------------------------------
-        // Clear current render jobs
-        // -----------------------------------------------------------------------------
         m_VolumeFogRenderJobs.clear();
 
-        // -----------------------------------------------------------------------------
-        // Iterate throw every entity inside this map
-        // -----------------------------------------------------------------------------
-        Dt::Map::CEntityIterator CurrentSunEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Dynamic);
-        Dt::Map::CEntityIterator EndOfSunEntities = Dt::Map::EntitiesEnd();
+        auto DataVolumeFogComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CVolumeFogComponent>();
 
-        Dt::Map::CEntityIterator CurrentEffectEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Dynamic);
-        Dt::Map::CEntityIterator EndOfEffectEntities = Dt::Map::EntitiesEnd();
-
-        // -----------------------------------------------------------------------------
-        // Sun
-        // TODO: Sun and fog should be in the same entity or linked!
-        // -----------------------------------------------------------------------------
-        for (; CurrentSunEntity != EndOfSunEntities; CurrentSunEntity = CurrentSunEntity.Next(Dt::SEntityCategory::Dynamic))
+        for (auto VolumeFogComponent : DataVolumeFogComponents)
         {
-            Dt::CEntity& rCurrentEntity = *CurrentSunEntity;
+            Dt::CVolumeFogComponent* pDtVolumeFogComponent = static_cast<Dt::CVolumeFogComponent*>(VolumeFogComponent);
+
+            const Dt::CEntity& rCurrentEntity = *pDtVolumeFogComponent->GetHostEntity();
+
+            // -----------------------------------------------------------------------------
+            // Looking for sun
+            // -----------------------------------------------------------------------------
+            const Dt::CSunComponent*  pDtSunComponent  = 0;
+            const Gfx::CSunComponent* pGfxSunComponent = 0;
 
             if (rCurrentEntity.GetComponentFacet()->HasComponent<Dt::CSunComponent>())
             {
-                pDtSunComponent  = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CSunComponent>();
-                pGfxSunComponent = Gfx::CComponentManager::GetInstance().GetComponent<Gfx::CSunComponent>(pDtSunComponent->GetID());
-
-                break;
+                pDtSunComponent = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CSunComponent>();
             }
-        }
-
-        if (pDtSunComponent == nullptr || pGfxSunComponent == nullptr) return;
-
-        // -----------------------------------------------------------------------------
-        // Effect
-        // -----------------------------------------------------------------------------
-        for (; CurrentEffectEntity != EndOfEffectEntities; )
-        {
-            Dt::CEntity& rCurrentEntity = *CurrentEffectEntity;
-
-            // -----------------------------------------------------------------------------
-            // Get graphic facet
-            // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetComponentFacet()->HasComponent<Dt::CVolumeFogComponent>())
+            else
             {
-                Dt::CVolumeFogComponent* pDataSSRFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CVolumeFogComponent>();
+                auto DataSunComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CSunComponent>();
 
-                assert(pDataSSRFacet != 0);
-
-                // -----------------------------------------------------------------------------
-                // Set sun into a new render job
-                // -----------------------------------------------------------------------------
-                SVolumeFogRenderJob NewRenderJob;
-
-                NewRenderJob.m_pDtVolumeFogComponent = pDataSSRFacet;
-                NewRenderJob.m_pGfxSunComponent      = pGfxSunComponent;
-                NewRenderJob.m_pDtSunComponent       = pDtSunComponent;
-
-                m_VolumeFogRenderJobs.push_back(NewRenderJob);
+                for (auto VolumeSunComponent : DataSunComponents)
+                {
+                    pDtSunComponent = static_cast<Dt::CSunComponent*>(VolumeSunComponent);
+                }
             }
 
+            if (pDtSunComponent == nullptr) continue;
+
+            pGfxSunComponent = Gfx::CComponentManager::GetInstance().GetComponent<Gfx::CSunComponent>(pDtSunComponent->GetID());
+
             // -----------------------------------------------------------------------------
-            // Next entity
+            // Build job
             // -----------------------------------------------------------------------------
-            CurrentEffectEntity = CurrentEffectEntity.Next(Dt::SEntityCategory::Dynamic);
+            SVolumeFogRenderJob NewRenderJob;
+
+            NewRenderJob.m_pDtVolumeFogComponent = pDtVolumeFogComponent;
+            NewRenderJob.m_pGfxSunComponent      = const_cast<Gfx::CSunComponent*>(pGfxSunComponent);
+            NewRenderJob.m_pDtSunComponent       = const_cast<Dt::CSunComponent*>(pDtSunComponent);
+
+            m_VolumeFogRenderJobs.push_back(NewRenderJob);
         }
     }
 } // namespace
