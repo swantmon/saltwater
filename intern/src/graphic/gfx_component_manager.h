@@ -1,7 +1,6 @@
 
 #pragma once
 
-#include "base/base_memory.h"
 #include "base/base_singleton.h"
 #include "base/base_typedef.h"
 #include "base/base_uncopyable.h"
@@ -25,9 +24,11 @@ namespace Gfx
         template<class T>
         T* GetComponent(Base::ID _ID);
 
+        void Clear();
+
     private:
 
-        typedef std::map<Base::ID, std::unique_ptr<Gfx::IComponent>>  CComponentByID;
+        typedef std::map<Base::ID, std::shared_ptr<Gfx::IComponent>> CComponentByID;
 
     private:
 
@@ -45,7 +46,7 @@ namespace Gfx
     template<class T>
     T* CComponentManager::Allocate(Base::ID _ID)
     {
-        m_Components.insert(std::make_pair(_ID, std::unique_ptr<T>(new T())));
+        m_Components.insert(std::make_pair(_ID, std::shared_ptr<T>(new T())));
 
         return static_cast<T*>(m_Components.at(_ID).get());
     }

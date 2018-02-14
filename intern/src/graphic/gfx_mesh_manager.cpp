@@ -159,7 +159,7 @@ namespace
             friend class CGfxMeshManager;
         };
         
-        class CInternModel : public CMesh
+        class CInternMesh : public CMesh
         {
         private:
             
@@ -182,16 +182,16 @@ namespace
         
     private:
         
-        typedef Base::CManagedPool<CInternModel   , 64  , 1> CModels;
+        typedef Base::CManagedPool<CInternMesh    , 64  , 1> CMeshes;
         typedef Base::CManagedPool<CInternLOD     , 256 , 1> CLODs;
         typedef Base::CManagedPool<CInternSurface , 1024, 1> CSurfaces;
         
-        typedef std::unordered_map<unsigned int, CInternModel*> CModelByIDs;
+        typedef std::unordered_map<unsigned int, CInternMesh*> CModelByIDs;
         typedef CModelByIDs::iterator                           CModelByIDPair;
         
     private:
         
-        CModels    m_Meshes;
+        CMeshes    m_Meshes;
         CLODs      m_LODs;
         CSurfaces  m_Surfaces;
         
@@ -272,9 +272,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Create model
         // -----------------------------------------------------------------------------
-        CModels::CPtr ModelPtr = m_Meshes.Allocate();
+        CMeshes::CPtr ModelPtr = m_Meshes.Allocate();
         
-        CInternModel& rModel = *ModelPtr;
+        CInternMesh& rModel = *ModelPtr;
         
         rModel.m_NumberOfLODs = rDataModel.GetNumberOfLODs();
         
@@ -504,9 +504,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Create model with LOD, surface and materials
         // -----------------------------------------------------------------------------
-        CModels::CPtr ModelPtr = m_Meshes.Allocate();
+        CMeshes::CPtr ModelPtr = m_Meshes.Allocate();
 
-        CInternModel& rModel = *ModelPtr;
+        CInternMesh& rModel = *ModelPtr;
 
         CLODs::CPtr LODPtr = m_LODs.Allocate();
 
@@ -694,9 +694,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Create model with LOD, surface and materials
         // -----------------------------------------------------------------------------
-        CModels::CPtr MeshPtr = m_Meshes.Allocate();
+        CMeshes::CPtr MeshPtr = m_Meshes.Allocate();
         
-        CInternModel& rModel = *MeshPtr;
+        CInternMesh& rModel = *MeshPtr;
         
         CLODs::CPtr LODPtr = m_LODs.Allocate();
         
@@ -876,9 +876,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Create model with LOD, surface and materials
         // -----------------------------------------------------------------------------
-        CModels::CPtr MeshPtr = m_Meshes.Allocate();
+        CMeshes::CPtr MeshPtr = m_Meshes.Allocate();
         
-        CInternModel& rModel = *MeshPtr;
+        CInternMesh& rModel = *MeshPtr;
         
         CLODs::CPtr LODPtr = m_LODs.Allocate();
         
@@ -1027,9 +1027,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Create model with LOD, surface and materials
         // -----------------------------------------------------------------------------
-        CModels::CPtr ModelPtr = m_Meshes.Allocate();
+        CMeshes::CPtr ModelPtr = m_Meshes.Allocate();
 
-        CInternModel& rModel = *ModelPtr;
+        CInternMesh& rModel = *ModelPtr;
 
         CLODs::CPtr LODPtr = m_LODs.Allocate();
 
@@ -1184,9 +1184,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Create model with LOD, surface and materials
         // -----------------------------------------------------------------------------
-        CModels::CPtr ModelPtr = m_Meshes.Allocate();
+        CMeshes::CPtr ModelPtr = m_Meshes.Allocate();
         
-        CInternModel& rModel = *ModelPtr;
+        CInternMesh& rModel = *ModelPtr;
         
         CLODs::CPtr LODPtr = m_LODs.Allocate();
         

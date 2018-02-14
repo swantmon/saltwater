@@ -11,6 +11,7 @@
 #include "graphic/gfx_background_renderer.h"
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_camera_manager.h"
+#include "graphic/gfx_component_manager.h"
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_debug_renderer.h"
 #include "graphic/gfx_exit_state.h"
@@ -102,6 +103,8 @@ namespace
         // -----------------------------------------------------------------------------
         BASE_CONSOLE_STREAMINFO("Gfx> Exit manager...");
 
+        CComponentManager::GetInstance().Clear();
+
         PointLightManager ::OnExit();
         AreaLightManager  ::OnExit();
         LightProbeManager ::OnExit();
@@ -110,6 +113,13 @@ namespace
         SunManager        ::OnExit();
         MeshManager       ::OnExit();
         MaterialManager   ::OnExit();
+
+        BASE_CONSOLE_STREAMINFO("Gfx> Finished exiting manager.");
+
+        // -----------------------------------------------------------------------------
+        // Exit graphic resources
+        // -----------------------------------------------------------------------------
+        BASE_CONSOLE_STREAMINFO("Gfx> Exit resource manager.");
 
         TargetSetManager::OnExit();
         ContextManager  ::OnExit();
@@ -120,7 +130,7 @@ namespace
         SamplerManager  ::OnExit();
         ViewManager     ::OnExit();
 
-        BASE_CONSOLE_STREAMINFO("Gfx> Finished exiting manager.");
+        BASE_CONSOLE_STREAMINFO("Gfx> Finished exiting resource manager.");
 
         // -----------------------------------------------------------------------------
         // Exit performance tools

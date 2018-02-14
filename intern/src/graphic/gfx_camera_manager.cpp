@@ -28,14 +28,14 @@ using namespace Gfx;
 
 namespace
 {
-    class CGfxCameraFacetManager : private Base::CUncopyable
+    class CGfxCameraManager : private Base::CUncopyable
     {
-        BASE_SINGLETON_FUNC(CGfxCameraFacetManager)
+        BASE_SINGLETON_FUNC(CGfxCameraManager)
         
     public:
         
-        CGfxCameraFacetManager();
-        ~CGfxCameraFacetManager();
+        CGfxCameraManager();
+        ~CGfxCameraManager();
         
     public:
         
@@ -50,7 +50,7 @@ namespace
         {
         private:
 
-            friend class CGfxCameraFacetManager;
+            friend class CGfxCameraManager;
         };
         
     private:
@@ -61,40 +61,40 @@ namespace
 
 namespace
 {
-    CGfxCameraFacetManager::CGfxCameraFacetManager()
+    CGfxCameraManager::CGfxCameraManager()
     {
     }
     
     // -----------------------------------------------------------------------------
     
-    CGfxCameraFacetManager::~CGfxCameraFacetManager()
+    CGfxCameraManager::~CGfxCameraManager()
     {
     }
     
     // -----------------------------------------------------------------------------
     
-    void CGfxCameraFacetManager::OnStart()
+    void CGfxCameraManager::OnStart()
     {
-        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(DATA_DIRTY_COMPONENT_METHOD(&CGfxCameraFacetManager::OnDirtyComponent));
+        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(DATA_DIRTY_COMPONENT_METHOD(&CGfxCameraManager::OnDirtyComponent));
     }
     
     // -----------------------------------------------------------------------------
     
-    void CGfxCameraFacetManager::OnExit()
-    {
-
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CGfxCameraFacetManager::Update()
+    void CGfxCameraManager::OnExit()
     {
 
     }
 
     // -----------------------------------------------------------------------------
 
-    void CGfxCameraFacetManager::OnDirtyComponent(Dt::IComponent* _pComponent)
+    void CGfxCameraManager::Update()
+    {
+
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxCameraManager::OnDirtyComponent(Dt::IComponent* _pComponent)
     {
         if (_pComponent->GetTypeID() != Base::CTypeInfo::GetTypeID<Dt::CCameraComponent>()) return;
 
@@ -171,21 +171,21 @@ namespace CameraManager
 {
     void OnStart()
     {
-        CGfxCameraFacetManager::GetInstance().OnStart();
+        CGfxCameraManager::GetInstance().OnStart();
     }
     
     // -----------------------------------------------------------------------------
     
     void OnExit()
     {
-        CGfxCameraFacetManager::GetInstance().OnExit();
+        CGfxCameraManager::GetInstance().OnExit();
     }
 
     // -----------------------------------------------------------------------------
 
     void Update()
     {
-        CGfxCameraFacetManager::GetInstance().Update();
+        CGfxCameraManager::GetInstance().Update();
     }
 } // namespace CameraActorManager
 } // namespace Gfx

@@ -1,7 +1,6 @@
 
 #pragma once
 
-#include "base/base_memory.h"
 #include "base/base_singleton.h"
 #include "base/base_typedef.h"
 #include "base/base_uncopyable.h"
@@ -34,7 +33,7 @@ namespace Dt
 
     private:
 
-        typedef std::vector<std::unique_ptr<Dt::IComponent>> CComponents;
+        typedef std::vector<std::shared_ptr<Dt::IComponent>> CComponents;
         typedef std::vector<CComponentDelegate>              CComponentDelegates;
 
     private:
@@ -57,7 +56,7 @@ namespace Dt
     template<class T>
     T* CComponentManager::Allocate()
     {
-        m_Components.emplace_back(std::unique_ptr<T>(new T()));
+        m_Components.emplace_back(std::shared_ptr<T>(new T()));
 
         T* pComponent = static_cast<T*>(m_Components.back().get());
 

@@ -17,6 +17,12 @@ namespace Gfx
 
     CComponentManager::~CComponentManager()
     {
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CComponentManager::Clear()
+    {
         m_Components.clear();
     }
 } // namespace Gfx
