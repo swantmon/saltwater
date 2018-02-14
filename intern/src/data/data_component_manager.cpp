@@ -22,18 +22,6 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CComponentManager::MarkComponentAsDirty(Dt::IComponent* _pComponent, unsigned int _DirtyFlags)
-    {
-        _pComponent->SetDirtyFlags(_DirtyFlags);
-
-        for (auto Delegate : m_ComponentDelegates)
-        {
-            Delegate(_pComponent->GetTypeID(), _pComponent);
-        }
-    }
-
-    // -----------------------------------------------------------------------------
-
     void CComponentManager::RegisterDirtyComponentHandler(CComponentDelegate _NewDelegate)
     {
         m_ComponentDelegates.push_back(_NewDelegate);

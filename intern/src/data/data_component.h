@@ -17,8 +17,6 @@ namespace Dt
     public:
 
         virtual const Base::ID GetTypeID() const = 0;
-
-        virtual void SetDirtyFlags(unsigned int _Flags) = 0;
     };
 } // namespace Dt
 
@@ -68,7 +66,7 @@ namespace Dt
         const Base::ID GetID() const;
         const Base::ID GetTypeID() const override;
 
-        void SetDirtyFlags(unsigned int _Flags) override;
+        void SetDirtyFlags(unsigned int _Flags);
         unsigned int GetDirtyFlags() const;
 
         void SetLinkedEntity(const Dt::CEntity* _pEntity);

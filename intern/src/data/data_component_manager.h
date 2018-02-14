@@ -27,7 +27,8 @@ namespace Dt
         template<class T>
         T* Allocate();
 
-        void MarkComponentAsDirty(Dt::IComponent* _pComponent, unsigned int _DirtyFlags);
+        template<class T>
+        void MarkComponentAsDirty(T* _pComponent, unsigned int _DirtyFlags);
 
         void RegisterDirtyComponentHandler(CComponentDelegate _NewDelegate);
 
@@ -63,5 +64,18 @@ namespace Dt
         m_Components.push_back(std::move(Component));
 
         return static_cast<T*>(m_Components.back().get());
+    }
+
+    // -----------------------------------------------------------------------------
+
+    template<class T>
+    void CComponentManager::MarkComponentAsDirty(T* _pComponent, unsigned int _DirtyFlags)
+    {
+        _pComponent->SetDirtyFlags(_DirtyFlags);
+
+        for (auto Delegate : m_ComponentDelegates)
+        {
+            Delegate(_pComponent->GetTypeID(), _pComponent);
+        }
     }
 } // namespace Dt
