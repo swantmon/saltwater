@@ -1106,7 +1106,10 @@ namespace
                     NavigateToNextEntity(pFirstChild);
                 }
 
-                AddEntityToJobs(pSiblingEntity);
+                if (pSiblingEntity->IsActive())
+                {
+                    AddEntityToJobs(pSiblingEntity);
+                }
 
                 pSiblingEntity = pSiblingEntity->GetHierarchyFacet()->GetSibling();
             }

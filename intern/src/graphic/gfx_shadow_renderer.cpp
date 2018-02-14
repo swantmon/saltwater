@@ -101,17 +101,15 @@ namespace
             glm::mat4 m_InverseCameraProjection;
             glm::mat4 m_CameraProjection;
             glm::mat4 m_CameraView;
-            glm::vec4   m_NoiseScale;
-            glm::vec4   m_Kernel[s_SSAOKernelSize];
+            glm::vec4 m_NoiseScale;
+            glm::vec4 m_Kernel[s_SSAOKernelSize];
         };
 
     private:
 
-        typedef std::vector<SSSAORenderJob> CSSAORenderJobs;
-        
+        typedef std::vector<> CSSAORenderJobs;
+
     private:
-        
-       
 
         CMeshPtr m_QuadModelPtr;
         
@@ -831,6 +829,8 @@ namespace
         for (auto Component : DataComponents)
         {
             Dt::CSSAOComponent* pDataSSAOFacet = static_cast<Dt::CSSAOComponent*>(Component);
+
+            if (!(pDataSSAOFacet->IsActive() && pDataSSAOFacet->GetHostEntity() != nullptr && pDataSSAOFacet->GetHostEntity()->IsActive())) continue;
 
             SSSAORenderJob NewRenderJob;
 

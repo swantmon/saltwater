@@ -893,6 +893,8 @@ namespace
         {
             Dt::CCameraComponent* pDtComponent = static_cast<Dt::CCameraComponent*>(Component);
 
+            if (!(pDtComponent->IsActive() && pDtComponent->GetHostEntity() != nullptr && pDtComponent->GetHostEntity()->IsActive())) continue;
+
             if (pDtComponent->IsMainCamera())
             {
                 SCameraRenderJob NewRenderJob;

@@ -917,6 +917,8 @@ namespace
         {
             Dt::CVolumeFogComponent* pDtVolumeFogComponent = static_cast<Dt::CVolumeFogComponent*>(VolumeFogComponent);
 
+            if (!(pDtVolumeFogComponent->IsActive() && pDtVolumeFogComponent->GetHostEntity() != nullptr && pDtVolumeFogComponent->GetHostEntity()->IsActive())) continue;
+
             const Dt::CEntity& rCurrentEntity = *pDtVolumeFogComponent->GetHostEntity();
 
             // -----------------------------------------------------------------------------

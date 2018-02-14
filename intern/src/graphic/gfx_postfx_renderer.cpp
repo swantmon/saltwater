@@ -1818,9 +1818,13 @@ namespace
 
         for (auto Component : DataComponents)
         {
+            Dt::CPostAAComponent* pDtComponent = static_cast<Dt::CPostAAComponent*>(Component);
+
+            if (!(pDtComponent->IsActive() && pDtComponent->GetHostEntity() != nullptr && pDtComponent->GetHostEntity()->IsActive())) continue;
+
             SPostAARenderJob NewRenderJob;
 
-            NewRenderJob.m_pDataPostAAFacet = static_cast<Dt::CPostAAComponent*>(Component);
+            NewRenderJob.m_pDataPostAAFacet = pDtComponent;
 
             m_PostAARenderJobs.push_back(NewRenderJob);
         }

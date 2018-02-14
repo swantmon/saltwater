@@ -776,6 +776,8 @@ namespace
         {
             Dt::CMeshComponent* pDtMeshComponent = static_cast<Dt::CMeshComponent*>(Component);
 
+            if (!(pDtMeshComponent->IsActive() && pDtMeshComponent->GetHostEntity() != nullptr && pDtMeshComponent->GetHostEntity()->IsActive())) continue;
+
             const Dt::CEntity& rCurrentEntity = *pDtMeshComponent->GetHostEntity();
 
             // -----------------------------------------------------------------------------
