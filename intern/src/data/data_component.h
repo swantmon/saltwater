@@ -66,21 +66,21 @@ namespace Dt
         const Base::ID GetID() const;
         const Base::ID GetTypeID() const override;
 
+        const Dt::CEntity* GetHostEntity() const;
+
         void SetDirtyFlags(unsigned int _Flags);
         unsigned int GetDirtyFlags() const;
-
-        void SetLinkedEntity(const Dt::CEntity* _pEntity);
-        const Dt::CEntity* GetLinkedEntity() const;
 
     private:
 
         Base::ID           m_ID;
         SFlags             m_Flags;
-        const Dt::CEntity* m_pEntity;
+        const Dt::CEntity* m_pHostEntity;
 
     private:
 
         friend class CComponentManager;
+        friend class CEntity;
     };
 } // namespace Dt
 
@@ -125,6 +125,14 @@ namespace Dt
     // -----------------------------------------------------------------------------
 
     template<class T>
+    const Dt::CEntity* CComponent<T>::GetHostEntity() const
+    {
+        return m_pHostEntity;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    template<class T>
     void CComponent<T>::SetDirtyFlags(unsigned int _Flags)
     {
         m_Flags.m_Key = _Flags;
@@ -136,22 +144,6 @@ namespace Dt
     unsigned int CComponent<T>::GetDirtyFlags() const
     {
         return m_Flags.m_Key;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    template<class T>
-    void CComponent<T>::SetLinkedEntity(const Dt::CEntity* _pEntity)
-    {
-        m_pEntity = _pEntity;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    template<class T>
-    const Dt::CEntity* CComponent<T>::GetLinkedEntity() const
-    {
-        return m_pEntity;
     }
 } // namespace Dt
 

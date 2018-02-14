@@ -339,7 +339,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Update
         // -----------------------------------------------------------------------------
-        glm::vec3 LightPosition  = pAreaLightComponent->GetLinkedEntity()->GetWorldPosition();
+        glm::vec3 LightPosition  = pAreaLightComponent->GetHostEntity()->GetWorldPosition();
         glm::vec3 LightDirection = glm::normalize(pAreaLightComponent->GetDirection()) * glm::vec3(-1.0f);
         glm::vec3 DirectionX     = glm::normalize(glm::vec3(0.0f, pAreaLightComponent->GetRotation(), 1.0f));
         glm::vec3 DirectionY     = glm::cross(LightDirection, glm::normalize(DirectionX));

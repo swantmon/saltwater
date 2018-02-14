@@ -193,9 +193,9 @@ namespace Dt
     {
         assert(_pComponent);
 
-        assert(_pComponent->GetLinkedEntity());
+        assert(_pComponent->GetHostEntity());
 
-        _pComponent->SetLinkedEntity(this);
+        _pComponent->m_pHostEntity = this;
 
         m_pComponentsFacet->AddComponent(_pComponent);
     }
@@ -207,7 +207,9 @@ namespace Dt
     {
         assert(_pComponent);
 
-        _pComponent->SetLinkedEntity(0);
+        assert(_pComponent->GetHostEntity() == this);
+
+        _pComponent->m_pHostEntity(0);
 
         m_pComponentsFacet->RemoveComponent(_pComponent);
     }

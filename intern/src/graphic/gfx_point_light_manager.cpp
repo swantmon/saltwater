@@ -390,7 +390,7 @@ namespace
         Gfx::CViewPtr   ShadowViewPtr   = pGfxPointLightFacet->m_RenderContextPtr->GetCamera()->GetView();
         Gfx::CCameraPtr ShadowCameraPtr = pGfxPointLightFacet->m_RenderContextPtr->GetCamera();
 
-        glm::vec3 LightPosition  = pPointLightComponent->GetLinkedEntity()->GetWorldPosition();
+        glm::vec3 LightPosition  = pPointLightComponent->GetHostEntity()->GetWorldPosition();
         glm::vec3 LightDirection = pPointLightComponent->GetDirection();
 
         // -----------------------------------------------------------------------------

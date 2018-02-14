@@ -415,7 +415,7 @@ namespace
             
             ModelBuffer.m_ModelMatrix  = glm::mat4(1.0f);
 
-            ModelBuffer.m_ModelMatrix[3] = glm::vec4(pDtComponent->GetLinkedEntity()->GetWorldPosition(), 1.0f);
+            ModelBuffer.m_ModelMatrix[3] = glm::vec4(pDtComponent->GetHostEntity()->GetWorldPosition(), 1.0f);
 
             ModelBuffer.m_ModelMatrix *= glm::scale(glm::vec3(pDtComponent->GetAttenuationRadius()));
             
@@ -431,7 +431,7 @@ namespace
             float AngleOffset             = pDtComponent->GetAngleOffset();
             float HasShadows              = pDtComponent->GetShadowType() != Dt::CPointLightComponent::NoShadows ? 1.0f : 0.0f;
             
-            LightBuffer.m_LightPosition  = glm::vec4(pDtComponent->GetLinkedEntity()->GetWorldPosition(), 1.0f);
+            LightBuffer.m_LightPosition  = glm::vec4(pDtComponent->GetHostEntity()->GetWorldPosition(), 1.0f);
             LightBuffer.m_LightDirection = glm::normalize(glm::vec4(pDtComponent->GetDirection(), 0.0f));
             LightBuffer.m_LightColor     = glm::vec4(pDtComponent->GetLightness(), 1.0f);
             LightBuffer.m_LightSettings  = glm::vec4(InvSqrAttenuationRadius, AngleScale, AngleOffset, HasShadows);

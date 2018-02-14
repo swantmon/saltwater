@@ -95,7 +95,7 @@ namespace Dt
     void CComponentFacet::AddComponent(T* _pComponent)
     {
         assert(_pComponent != nullptr);
-        assert(_pComponent->GetLinkedEntity() != nullptr);
+        assert(_pComponent->GetHostEntity() != nullptr);
 
         m_Components.push_back(_pComponent);
     }
@@ -106,7 +106,7 @@ namespace Dt
     void CComponentFacet::RemoveComponent(T* _pComponent)
     {
         assert(_pComponent != nullptr);
-        assert(_pComponent->GetLinkedEntity() == nullptr);
+        assert(_pComponent->GetHostEntity() == nullptr);
 
         m_Components.erase(_pComponent);
     }
