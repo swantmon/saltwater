@@ -24,6 +24,10 @@ namespace Dt
         , m_Flags               ()
     {
         m_Flags.m_Key = 0;
+
+        m_Flags.m_IsDynamic    = true;
+        m_Flags.m_IsSelectable = true;
+        m_Flags.m_IsActive     = true;
     }
 
     // -----------------------------------------------------------------------------
@@ -95,6 +99,20 @@ namespace Dt
     bool CEntity::IsSelectable() const
     {
         return m_Flags.m_IsSelectable == true;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CEntity::SetActive(bool _Flag)
+    {
+        m_Flags.m_IsActive = _Flag;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    bool CEntity::IsActive() const
+    {
+        return m_Flags.m_IsActive == true;
     }
 
     // -----------------------------------------------------------------------------

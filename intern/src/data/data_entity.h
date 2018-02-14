@@ -84,12 +84,13 @@ namespace Dt
             {
                 struct 
                 {
-                    unsigned int m_DirtyFlags   :  8;        //< Dirty flags if something happens
-                    unsigned int m_Category     :  4;        //< Category of entity (@see SEntitycategories)
-                    unsigned int m_Layer        :  8;        //< Layer of the entity needed for special culling techniques
-                    unsigned int m_IsDynamic    :  1;        //< Either the entity can be moved in game and editor
-                    unsigned int m_IsSelectable :  1;        //< Either the entity is selectable in editor
-                    unsigned int m_Padding      : 10;
+                    unsigned int m_DirtyFlags   : 8;        //< Dirty flags if something happens
+                    unsigned int m_Category     : 4;        //< Category of entity (@see SEntitycategories)
+                    unsigned int m_Layer        : 8;        //< Layer of the entity needed for special culling techniques
+                    unsigned int m_IsDynamic    : 1;        //< Either the entity can be moved
+                    unsigned int m_IsSelectable : 1;        //< Either the entity is selectable
+                    unsigned int m_IsActive     : 1;        //< Either the entity is active
+                    unsigned int m_Padding      : 9;
                 };
 
                 unsigned int m_Key;
@@ -113,6 +114,9 @@ namespace Dt
 
         void SetSelectable(bool _Flag);
         bool IsSelectable() const;
+
+        void SetActive(bool _Flag);
+        bool IsActive() const;
 
         void SetLayer(unsigned int _Layer);
         unsigned int GetLayer() const;
@@ -172,7 +176,7 @@ namespace Dt
         Dt::CEntityFolder*    m_pFolder;                                                          //< Pointer to folder of this entity
         CHierarchyFacet*      m_pHierarchyFacet;                                                  //< Contains hierarchical information of the entity (scene graph)
         CTransformationFacet* m_pTransformationFacet;                                             //< Contains transformation information depending on hierarchy
-        CComponentFacet*     m_pComponentsFacet;                                                 //< Contains components of this entity
+        CComponentFacet*      m_pComponentsFacet;                                                 //< Contains components of this entity
         BID                   m_ID;                                                               //< A specific unique id of this entity inside the map
         std::string           m_Name;                                                             //< A name of the entity to search for inside scripts
         Base::AABB3Float      m_WorldAABB;                                                        //< Axis Aligned Bounding Box (AABB) of the entity in map for region bounding box calculations
