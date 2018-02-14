@@ -14,6 +14,7 @@ namespace Dt
 {
     class CHierarchyFacet;
     class CTransformationFacet;
+    class CComponentsFacet;
 } // namespace Dt
 
 namespace Dt
@@ -62,8 +63,9 @@ namespace Dt
         
         enum EFacetFlags
         {
-            FacetHierarchy      = 0x01,                 //< Either the entity is inside a hierarchy or not (global entity are not part of scene graph)
-            FacetTransformation = 0x02,                 //< Either the entity has a transformation or not (global entity doesn't need transformations)
+            FacetHierarchy      = 0x01,                 //< Either the entity is inside a hierarchy or not (global entities are not part of scene graph)
+            FacetTransformation = 0x02,                 //< Either the entity has a transformation or not (global entities doesn't need transformations)
+            FacetComponents     = 0x04,                 //< Either the entity has components or not (node/empty entities doesn't need components)
         };
 
     public:
@@ -150,28 +152,14 @@ namespace Dt
         CTransformationFacet* GetTransformationFacet();
         const CTransformationFacet* GetTransformationFacet() const;
 
+        void SetComponentsFacet(CComponentsFacet* _pFacet);
+        CComponentsFacet* GetComponentsFacet();
+        const CComponentsFacet* GetComponentsFacet() const;
+
     public:
 
         void Attach(CEntity& _rEntity);
         void Detach();
-
-    public:
-
-        typedef std::vector<Dt::IComponent*> CComponentVector;
-
-        CComponentVector m_Components; //< Components added to this entity
-
-        template<class T>
-        void AddComponent(T* _pComponent);
-
-        template<class T>
-        T* GetComponent();
-
-        template<class T>
-        const T* GetComponent() const;
-
-        template<class T>
-        bool HasComponent() const;
 
     protected:
         
@@ -180,6 +168,7 @@ namespace Dt
         Dt::CEntityFolder*    m_pFolder;                                                          //< Pointer to folder of this entity
         CHierarchyFacet*      m_pHierarchyFacet;                                                  //< Contains hierarchical informations of the entity (scene graph)
         CTransformationFacet* m_pTransformationFacet;                                             //< Contains transformation informations depending on hierarchy
+        CComponentsFacet*     m_pComponentsFacet;                                                 //< Contains components of this entity
         BID                   m_ID;                                                               //< A specific unique id of this entity inside the map
         std::string           m_Name;                                                             //< A name of the entity to search for inside scripts
         Base::AABB3Float      m_WorldAABB;                                                        //< Axis Aligned Bounding Box (AABB) of the entity in map for region bounding box calculations
@@ -191,57 +180,4 @@ namespace Dt
         CEntity();
         ~CEntity();
     };
-} // namespace Dt
-
-namespace Dt
-{
-    template<class T>
-    void CEntity::AddComponent(T* _pComponent)
-    {
-        assert(_pComponent != nullptr);
-
-        _pComponent->SetLinkedEntity(this);
-
-        m_Components.push_back(_pComponent);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    template<class T>
-    T* CEntity::GetComponent()
-    {
-        for (auto Component : m_Components)
-        {
-            if (Component->GetTypeID() == Base::CTypeInfo::GetTypeID<T>())
-            {
-                return static_cast<T*>(Component);
-            }
-        }
-
-        return nullptr;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    template<class T>
-    const T* CEntity::GetComponent() const
-    {
-        for (auto Component : m_Components)
-        {
-            if (Component->GetTypeID() == Base::CTypeInfo::GetTypeID<T>())
-            {
-                return static_cast<T*>(Component);
-            }
-        }
-
-        return nullptr;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    template<class T>
-    bool CEntity::HasComponent() const
-    {
-        return GetComponent<T>() != nullptr;
-    }
 } // namespace Dt

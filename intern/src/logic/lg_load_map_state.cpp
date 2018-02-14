@@ -10,6 +10,7 @@
 
 #include "data/data_camera_component.h"
 #include "data/data_component_manager.h"
+#include "data/data_components_facet.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_hierarchy_facet.h"
@@ -96,7 +97,7 @@ namespace
             Dt::SEntityDescriptor EntityDesc;
 
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
-            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
+            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
             Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
 
@@ -112,7 +113,7 @@ namespace
 
             Component->SetMainCamera(true);
 
-            rEntity.AddComponent(Component);
+            rEntity.GetComponentsFacet()->AddComponent(Component);
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(Component, Dt::CCameraComponent::DirtyCreate);
 
@@ -136,7 +137,7 @@ namespace
             Dt::SEntityDescriptor EntityDesc;
 
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
-            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
+            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
             Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
 
@@ -154,7 +155,7 @@ namespace
             pFacet->SetProjectionType(Dt::CCameraComponent::External);
             pFacet->SetClearFlag(Dt::CCameraComponent::Webcam);
 
-            rEntity.AddComponent(pFacet);
+            rEntity.GetComponentsFacet()->AddComponent(pFacet);
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pFacet, Dt::CCameraComponent::DirtyCreate);
 
@@ -168,7 +169,7 @@ namespace
             Dt::SEntityDescriptor EntityDesc;
 
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
-            EntityDesc.m_FacetFlags     = 0;
+            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetComponents;
 
             Dt::CEntity& rEnvironment = Dt::EntityManager::CreateEntity(EntityDesc);
 
@@ -180,7 +181,7 @@ namespace
             pComponent->SetType(Dt::CSkyComponent::Procedural);
             pComponent->SetIntensity(40000.0f);
 
-            rEnvironment.AddComponent(pComponent);
+            rEnvironment.GetComponentsFacet()->AddComponent(pComponent);
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pComponent, Dt::CSkyComponent::DirtyCreate);
 
@@ -194,7 +195,7 @@ namespace
             Dt::SEntityDescriptor EntityDesc;
 
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
-            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
+            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
             Dt::CEntity& rSunLight = Dt::EntityManager::CreateEntity(EntityDesc);
 
@@ -220,7 +221,7 @@ namespace
 
             pComponent->UpdateLightness();
 
-            rSunLight.AddComponent(pComponent);
+            rSunLight.GetComponentsFacet()->AddComponent(pComponent);
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pComponent, Dt::CSunComponent::DirtyCreate);
 
@@ -254,7 +255,7 @@ namespace
 
             Dt::CEntity* pSubEntity = rSphere.GetHierarchyFacet()->GetFirstChild();
 
-            Dt::CMeshComponent* pComponent = pSubEntity->GetComponent<Dt::CMeshComponent>();
+            Dt::CMeshComponent* pComponent = pSubEntity->GetComponentsFacet()->GetComponent<Dt::CMeshComponent>();
 
             Dt::SMaterialDescriptor MaterialFileDesc;
 
@@ -301,7 +302,7 @@ void CLgLoadMapState::CreateDefaultScene()
             Dt::SEntityDescriptor EntityDesc;
 
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
-            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
+            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
             Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
 
@@ -333,7 +334,7 @@ void CLgLoadMapState::CreateDefaultScene()
             Dt::SEntityDescriptor EntityDesc;
 
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
-            EntityDesc.m_FacetFlags     = 0;
+            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetComponents;
 
             Dt::CEntity& rEnvironment = Dt::EntityManager::CreateEntity(EntityDesc);
 
@@ -359,7 +360,7 @@ void CLgLoadMapState::CreateDefaultScene()
             Dt::SEntityDescriptor EntityDesc;
 
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
-            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
+            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
             Dt::CEntity& rGlobalProbeLight = Dt::EntityManager::CreateEntity(EntityDesc);
 
@@ -382,7 +383,7 @@ void CLgLoadMapState::CreateDefaultScene()
             LightProbeComponent->SetParallaxCorrection(false);
             LightProbeComponent->SetBoxSize(glm::vec3(1024.0f));
 
-            rGlobalProbeLight.AddComponent(LightProbeComponent);
+            rGlobalProbeLight.GetComponentsFacet()->AddComponent(LightProbeComponent);
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(LightProbeComponent, Dt::CLightProbeComponent::DirtyCreate);
 
@@ -393,7 +394,7 @@ void CLgLoadMapState::CreateDefaultScene()
             Dt::SEntityDescriptor EntityDesc;
 
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
-            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
+            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
             Dt::CEntity& rSunLight = Dt::EntityManager::CreateEntity(EntityDesc);
 
@@ -419,7 +420,7 @@ void CLgLoadMapState::CreateDefaultScene()
 
             SunComponent->UpdateLightness();
 
-            rSunLight.AddComponent(SunComponent);
+            rSunLight.GetComponentsFacet()->AddComponent(SunComponent);
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(SunComponent, Dt::CSunComponent::DirtyCreate);
 
@@ -430,7 +431,7 @@ void CLgLoadMapState::CreateDefaultScene()
             Dt::SEntityDescriptor EntityDesc;
 
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Static;
-            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation;
+            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
             Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
 
@@ -447,7 +448,7 @@ void CLgLoadMapState::CreateDefaultScene()
 
             auto Component = Dt::CComponentManager::GetInstance().Allocate<Dt::CSSAOComponent>();
 
-            rEntity.AddComponent(Component);
+            rEntity.GetComponentsFacet()->AddComponent(Component);
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(Component, Dt::CSSAOComponent::DirtyCreate);
 

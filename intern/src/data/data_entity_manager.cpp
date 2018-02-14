@@ -10,6 +10,7 @@
 #include "core/core_time.h"
 
 #include "data/data_component_manager.h"
+#include "data/data_components_facet.h
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_hierarchy_facet.h"
@@ -76,12 +77,19 @@ namespace
         private:
             friend class CDtLvlEntityManager;
         };
+
+        class CInternComponentsFacet : public CComponentsFacet
+        {
+        private:
+            friend class CDtLvlEntityManager;
+        };
         
     private:
         
         typedef Base::CPool<CInternEntity, 2048>              CEntityPool;
         typedef Base::CPool<CInternHierarchyFacet, 2048>      CHierarchyFacetPool;
         typedef Base::CPool<CInternTransformationFacet, 2048> CTransformationFacetPool;
+        typedef Base::CPool<CInternComponentsFacet, 2048>     CComponentsFacetPool;
         typedef std::vector<CEntity*>                         CEntityVector;
         typedef std::vector<CEntityDelegate>                  CEntityDelegates;
 
@@ -93,6 +101,7 @@ namespace
         CEntityPool              m_Entities;
         CHierarchyFacetPool      m_HierarchyFacets;
         CTransformationFacetPool m_TransformationFacets;
+        CComponentsFacetPool     m_ComponentsFacets;
         CEntityVector            m_DirtyEntities;
         CEntityDelegates         m_EntityDelegates;
         CEntityByIDs             m_EntityByID;
@@ -147,6 +156,7 @@ namespace
         m_Entities            .Clear();
         m_HierarchyFacets     .Clear();
         m_TransformationFacets.Clear();
+        m_ComponentsFacets    .Clear();
 
         m_DirtyEntities.clear();
 
@@ -160,7 +170,7 @@ namespace
         SEntityDescriptor EntityDesc;
 
         EntityDesc.m_EntityCategory = SEntityCategory::Dynamic;
-        EntityDesc.m_FacetFlags     = CEntity::FacetTransformation | CEntity::FacetHierarchy;
+        EntityDesc.m_FacetFlags     = CEntity::FacetTransformation | CEntity::FacetHierarchy | CEntity::FacetComponents;
 
         // -----------------------------------------------------------------------------
         // Create root node
@@ -202,7 +212,7 @@ namespace
 
             pModelActorFacet->SetMesh(&rMesh);
 
-            rChildEntity.AddComponent(pModelActorFacet);
+            rChildEntity.GetComponentsFacet()->AddComponent(pModelActorFacet);
 
             // -----------------------------------------------------------------------------
             // Attach mesh to entity
@@ -245,6 +255,11 @@ namespace
             rEntity.m_pTransformationFacet = &m_TransformationFacets.Allocate();
         }
 
+        if ((_rDescriptor.m_FacetFlags & CEntity::FacetComponents) != 0)
+        {
+            rEntity.m_pComponentsFacet = &m_ComponentsFacets.Allocate();
+        }
+
         m_EntityByID[rEntity.m_ID] = &rEntity;
 
         return rEntity;
@@ -264,6 +279,11 @@ namespace
         if (rInternEntity.m_pTransformationFacet != nullptr)
         {
             m_TransformationFacets.Free(static_cast<CInternTransformationFacet*>(rInternEntity.m_pTransformationFacet));
+        }
+
+        if (rInternEntity.m_pComponentsFacet != nullptr)
+        {
+            m_ComponentsFacets.Free(static_cast<CInternComponentsFacet*>(rInternEntity.m_pComponentsFacet));
         }
 
         m_Entities.Free(&rInternEntity);

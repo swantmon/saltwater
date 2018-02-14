@@ -3,6 +3,7 @@
 
 #include "base/base_include_glm.h"
 
+#include "data/data_components_facet.h"
 #include "data/data_entity.h"
 #include "data/data_hierarchy_facet.h"
 #include "data/data_transformation_facet.h"
@@ -15,6 +16,7 @@ namespace Dt
         , m_pFolder             (nullptr)
         , m_pHierarchyFacet     (nullptr)
         , m_pTransformationFacet(nullptr)
+        , m_pComponentsFacet    (nullptr)
         , m_ID                  (s_InvalidID)
         , m_Name                ()
         , m_WorldAABB           ()
@@ -275,6 +277,27 @@ namespace Dt
     const CTransformationFacet* CEntity::GetTransformationFacet() const
     {
         return m_pTransformationFacet;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CEntity::SetComponentsFacet(CComponentsFacet* _pFacet)
+    {
+        m_pComponentsFacet = _pFacet;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CComponentsFacet* CEntity::GetComponentsFacet()
+    {
+        return m_pComponentsFacet;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const CComponentsFacet* CEntity::GetComponentsFacet() const
+    {
+        return m_pComponentsFacet;
     }
 
     // -----------------------------------------------------------------------------
