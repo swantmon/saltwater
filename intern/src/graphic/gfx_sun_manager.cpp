@@ -192,13 +192,15 @@ namespace
 
     void CGfxSunManager::Update()
     {
-        // TODO by tschwandt
-        // Get all components from component manager instead of using the map
-        for (Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Dynamic); CurrentEntity != Dt::Map::EntitiesEnd(); CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Dynamic))
-        {
-            if (!CurrentEntity->GetComponentFacet()->HasComponent<Dt::CSunComponent>()) continue;
+        auto DataComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CSunComponent>();
 
-            Dt::CSunComponent* pSunComponent = CurrentEntity->GetComponentFacet()->GetComponent<Dt::CSunComponent>();
+        for (auto Component : DataComponents)
+        {
+            Dt::CSunComponent* pSunComponent = static_cast<Dt::CSunComponent*>(Component);
+
+            assert(pSunComponent->GetHostEntity());
+
+            if (!pSunComponent->IsActive()) continue;
 
             CInternSunComponent* pGfxSunFacet = CComponentManager::GetInstance().GetComponent<CInternSunComponent>(pSunComponent->GetID());
 
@@ -218,7 +220,7 @@ namespace
                 // -----------------------------------------------------------------------------
                 // Set view
                 // -----------------------------------------------------------------------------
-                glm::vec3 SunPosition    = CurrentEntity->GetWorldPosition();
+                glm::vec3 SunPosition    = pSunComponent->GetHostEntity()->GetWorldPosition();
                 glm::vec3 SunRotation    = pSunComponent->GetDirection();
                 glm::mat3 RotationMatrix = glm::lookAtRH(SunPosition, SunPosition + SunRotation, glm::vec3(0.0f, 0.0f, 1.0f));
 

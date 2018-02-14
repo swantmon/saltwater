@@ -440,38 +440,23 @@ namespace
 
     void CGfxLightProbeManager::Update()
     {
-        // -----------------------------------------------------------------------------
-        // Iterate throw every entity inside this map
-        // -----------------------------------------------------------------------------
-        Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Dynamic);
-        Dt::Map::CEntityIterator EndOfEntities = Dt::Map::EntitiesEnd();
+        auto DataComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CLightProbeComponent>();
 
-        for (; CurrentEntity != EndOfEntities; )
+        for (auto Component : DataComponents)
         {
-            Dt::CEntity& rCurrentEntity = *CurrentEntity;
+            Dt::CLightProbeComponent* pDtProbeFacet = static_cast<Dt::CLightProbeComponent*>(Component);
+
+            if (!(pDtProbeFacet->IsActive() && pDtProbeFacet->GetHostEntity() != nullptr && pDtProbeFacet->GetHostEntity()->IsActive())) continue;
+
+            CInternComponent* pGfxProbeFacet = CComponentManager::GetInstance().GetComponent<CInternComponent>(pDtProbeFacet->GetID());
 
             // -----------------------------------------------------------------------------
-            // Get graphic facet
+            // Check update needs
             // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetComponentFacet()->HasComponent<Dt::CLightProbeComponent>())
+            if (pDtProbeFacet->GetRefreshMode() == Dt::CLightProbeComponent::Dynamic || pGfxProbeFacet->m_TimeStamp >= Core::Time::GetNumberOfFrame())
             {
-                Dt::CLightProbeComponent* pDtProbeFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CLightProbeComponent>();
-
-                CInternComponent* pGfxProbeFacet = CComponentManager::GetInstance().GetComponent<CInternComponent>(pDtProbeFacet->GetID());
-
-                // -----------------------------------------------------------------------------
-                // Check update needs
-                // -----------------------------------------------------------------------------
-                if (pDtProbeFacet->GetRefreshMode() == Dt::CLightProbeComponent::Dynamic || pGfxProbeFacet->m_TimeStamp >= Core::Time::GetNumberOfFrame())
-                {
-                    Render(rCurrentEntity, *pGfxProbeFacet, *pDtProbeFacet);
-                }
+                Render(*pDtProbeFacet->GetHostEntity(), *pGfxProbeFacet, *pDtProbeFacet);
             }
-
-            // -----------------------------------------------------------------------------
-            // Next entity
-            // -----------------------------------------------------------------------------
-            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Dynamic);
         }
     }
 

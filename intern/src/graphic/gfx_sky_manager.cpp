@@ -624,32 +624,22 @@ namespace
 
     void CGfxSkyManager::Update()
     {
-        Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Dynamic);
-        Dt::Map::CEntityIterator EndOfEntities = Dt::Map::EntitiesEnd();
+        auto DataComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CSkyComponent>();
 
-        for (; CurrentEntity != EndOfEntities; )
+        for (auto Component : DataComponents)
         {
-            Dt::CEntity& rCurrentEntity = *CurrentEntity;
+            Dt::CSkyComponent* pDataSkyboxFacet = static_cast<Dt::CSkyComponent*>(Component);
 
-            // -----------------------------------------------------------------------------
-            // Get graphic facet
-            // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetComponentFacet()->HasComponent<Dt::CSkyComponent>())
+            assert(pDataSkyboxFacet->GetHostEntity());
+
+            if (!pDataSkyboxFacet->IsActive()) continue;
+
+            if (pDataSkyboxFacet->GetRefreshMode() == Dt::CSkyComponent::Dynamic)
             {
-                Dt::CSkyComponent* pDataSkyboxFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CSkyComponent>();
+                CInternSkyFacet* pGraphicSkyboxFacet = CComponentManager::GetInstance().GetComponent<CInternSkyFacet>(pDataSkyboxFacet->GetID());
 
-                if (pDataSkyboxFacet->GetRefreshMode() == Dt::CSkyComponent::Dynamic)
-                {
-                    CInternSkyFacet* pGraphicSkyboxFacet = CComponentManager::GetInstance().GetComponent<CInternSkyFacet>(pDataSkyboxFacet->GetID());
-
-                    RenderSkybox(pDataSkyboxFacet, pGraphicSkyboxFacet);
-                }
+                RenderSkybox(pDataSkyboxFacet, pGraphicSkyboxFacet);
             }
-
-            // -----------------------------------------------------------------------------
-            // Next entity
-            // -----------------------------------------------------------------------------
-            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Dynamic);
         }
     }
 

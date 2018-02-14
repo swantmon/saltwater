@@ -246,64 +246,57 @@ namespace
         // -----------------------------------------------------------------------------
         // Iterate throw every entity inside this map
         // -----------------------------------------------------------------------------
-        Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Dynamic);
-        Dt::Map::CEntityIterator EndOfEntities = Dt::Map::EntitiesEnd();
+        auto DataComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CPointLightComponent>();
 
-        for (; CurrentEntity != EndOfEntities; )
+        for (auto Component : DataComponents)
         {
-            Dt::CEntity& rCurrentEntity = *CurrentEntity;
+            Dt::CPointLightComponent* pDtPointLightFacet = static_cast<Dt::CPointLightComponent*>(Component);
 
-            if (rCurrentEntity.GetComponentFacet()->HasComponent<Dt::CPointLightComponent>())
+            assert(pDtPointLightFacet->GetHostEntity());
+
+            if (!pDtPointLightFacet->IsActive()) continue;
+
+            CInternComponent* pGfxPointLightFacet = CComponentManager::GetInstance().GetComponent<CInternComponent>(pDtPointLightFacet->GetID());
+
+            if (pDtPointLightFacet->GetRefreshMode() == Dt::CPointLightComponent::Dynamic)
             {
-                Dt::CPointLightComponent* pDtPointLightFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CPointLightComponent>();
+                // -----------------------------------------------------------------------------
+                // Update views
+                // -----------------------------------------------------------------------------
+                Gfx::CViewPtr   ShadowViewPtr   = pGfxPointLightFacet->m_RenderContextPtr->GetCamera()->GetView();
+                Gfx::CCameraPtr ShadowCameraPtr = pGfxPointLightFacet->m_RenderContextPtr->GetCamera();
 
-                CInternComponent* pGfxPointLightFacet = CComponentManager::GetInstance().GetComponent<CInternComponent>(pDtPointLightFacet->GetID());
+                glm::vec3 LightPosition  = pDtPointLightFacet->GetHostEntity()->GetWorldPosition();
+                glm::vec3 LightDirection = pDtPointLightFacet->GetDirection();
 
-                if (pDtPointLightFacet->GetRefreshMode() == Dt::CPointLightComponent::Dynamic)
-                {
-                    // -----------------------------------------------------------------------------
-                    // Update views
-                    // -----------------------------------------------------------------------------
-                    Gfx::CViewPtr   ShadowViewPtr   = pGfxPointLightFacet->m_RenderContextPtr->GetCamera()->GetView();
-                    Gfx::CCameraPtr ShadowCameraPtr = pGfxPointLightFacet->m_RenderContextPtr->GetCamera();
+                // -----------------------------------------------------------------------------
+                // Set view
+                // -----------------------------------------------------------------------------
+                glm::mat3 RotationMatrix = glm::mat3(1.0f);
 
-                    glm::vec3 LightPosition = rCurrentEntity.GetWorldPosition();
-                    glm::vec3 LightDirection = pDtPointLightFacet->GetDirection();
+                RotationMatrix = glm::lookAt(LightPosition, LightPosition + LightDirection, glm::vec3(0.0f, 0.0f, 1.0f));
 
-                    // -----------------------------------------------------------------------------
-                    // Set view
-                    // -----------------------------------------------------------------------------
-                    glm::mat3 RotationMatrix = glm::mat3(1.0f);
+                ShadowViewPtr->SetPosition(LightPosition);
+                ShadowViewPtr->SetRotationMatrix(RotationMatrix);
 
-                    RotationMatrix = glm::lookAt(LightPosition, LightPosition + LightDirection, glm::vec3(0.0f, 0.0f, 1.0f));
+                // -----------------------------------------------------------------------------
+                // Calculate near and far plane
+                // -----------------------------------------------------------------------------
+                float Near = 0.1f;
+                float Far = pDtPointLightFacet->GetAttenuationRadius() + Near;
 
-                    ShadowViewPtr->SetPosition(LightPosition);
-                    ShadowViewPtr->SetRotationMatrix(RotationMatrix);
+                // -----------------------------------------------------------------------------
+                // Set matrix
+                // -----------------------------------------------------------------------------
+                ShadowCameraPtr->SetFieldOfView(glm::degrees(pDtPointLightFacet->GetOuterConeAngle()), 1.0f, Near, Far);
 
-                    // -----------------------------------------------------------------------------
-                    // Calculate near and far plane
-                    // -----------------------------------------------------------------------------
-                    float Near = 0.1f;
-                    float Far = pDtPointLightFacet->GetAttenuationRadius() + Near;
+                ShadowViewPtr->Update();
 
-                    // -----------------------------------------------------------------------------
-                    // Set matrix
-                    // -----------------------------------------------------------------------------
-                    ShadowCameraPtr->SetFieldOfView(glm::degrees(pDtPointLightFacet->GetOuterConeAngle()), 1.0f, Near, Far);
-
-                    ShadowViewPtr->Update();
-
-                    // -----------------------------------------------------------------------------
-                    // Render
-                    // -----------------------------------------------------------------------------
-                    RenderShadows(*pGfxPointLightFacet, pDtPointLightFacet, LightPosition);
-                }
+                // -----------------------------------------------------------------------------
+                // Render
+                // -----------------------------------------------------------------------------
+                RenderShadows(*pGfxPointLightFacet, pDtPointLightFacet, LightPosition);
             }
-
-            // -----------------------------------------------------------------------------
-            // Next entity
-            // -----------------------------------------------------------------------------
-            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Dynamic);
         }
     }
 
