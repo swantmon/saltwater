@@ -47,11 +47,11 @@ int main(int _Argc, char* _pArgv[])
     if (VerbosityLevel == 0)
     {
         Base::CProgramParameters::GetInstance().ParseFile(ParameterFile);
-        VerbosityLevel = Base::CProgramParameters::GetInstance().Get<int>(VerbosityNameString, 3);
+        VerbosityLevel = Base::CProgramParameters::GetInstance().Get(VerbosityNameString, 3);
     }
     else
     {
-        VerbosityLevel = Base::CProgramParameters::GetInstance().Get<int>(VerbosityNameString, VerbosityLevel);
+        VerbosityLevel = Base::CProgramParameters::GetInstance().Get(VerbosityNameString, VerbosityLevel);
         Base::CProgramParameters::GetInstance().ParseFile(ParameterFile);
     }
 

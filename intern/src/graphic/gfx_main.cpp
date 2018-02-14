@@ -235,19 +235,19 @@ namespace
         // Load graphics API settings
         // -----------------------------------------------------------------------------
 #ifdef PLATFORM_ANDROID
-        m_GraphicsInfo.m_GraphicsAPI  = Base::CProgramParameters::GetInstance().Get<CGraphicsInfo::EGraphicAPI>("graphics:api:type", CGraphicsInfo::OpenGLES);
-        m_GraphicsInfo.m_MajorVersion = Base::CProgramParameters::GetInstance().Get<int>("graphics:api:major_version", 3);
-        m_GraphicsInfo.m_MinorVersion = Base::CProgramParameters::GetInstance().Get<int>("graphics:api:minor_version", 2);
+        m_GraphicsInfo.m_GraphicsAPI  = Base::CProgramParameters::GetInstance().Get("graphics:api:type", CGraphicsInfo::OpenGLES);
+        m_GraphicsInfo.m_MajorVersion = Base::CProgramParameters::GetInstance().Get("graphics:api:major_version", 3);
+        m_GraphicsInfo.m_MinorVersion = Base::CProgramParameters::GetInstance().Get("graphics:api:minor_version", 2);
 #else
-        m_GraphicsInfo.m_GraphicsAPI  = Base::CProgramParameters::GetInstance().Get<CGraphicsInfo::EGraphicAPI>("graphics:api:type", CGraphicsInfo::OpenGL);
-        m_GraphicsInfo.m_MajorVersion = Base::CProgramParameters::GetInstance().Get<int>("graphics:api:major_version", 4);
-        m_GraphicsInfo.m_MinorVersion = Base::CProgramParameters::GetInstance().Get<int>("graphics:api:minor_version", 5);
+        m_GraphicsInfo.m_GraphicsAPI  = Base::CProgramParameters::GetInstance().Get("graphics:api:type", CGraphicsInfo::OpenGL);
+        m_GraphicsInfo.m_MajorVersion = Base::CProgramParameters::GetInstance().Get("graphics:api:major_version", 4);
+        m_GraphicsInfo.m_MinorVersion = Base::CProgramParameters::GetInstance().Get("graphics:api:minor_version", 5);
 #endif        
 
         // -----------------------------------------------------------------------------
         // Load pixel matching behavior
         // -----------------------------------------------------------------------------
-        m_GraphicsInfo.m_PixelMatching = static_cast<CInternGraphicsInfo::EPixelMatching>(Base::CProgramParameters::GetInstance().Get<int>("graphics:pixel_matching:type", 0));
+        m_GraphicsInfo.m_PixelMatching = static_cast<CInternGraphicsInfo::EPixelMatching>(Base::CProgramParameters::GetInstance().Get("graphics:pixel_matching:type", 0));
 
         // -----------------------------------------------------------------------------
         // Show information of windows and initialize them
