@@ -17,6 +17,7 @@ namespace Dt
     
     CComponentManager::~CComponentManager()
     {
+        m_ComponentsByType.clear();
         m_Components.clear();
     }
 

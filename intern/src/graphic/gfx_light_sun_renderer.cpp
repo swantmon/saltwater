@@ -9,6 +9,7 @@
 #include "camera/cam_control_manager.h"
 
 #include "data/data_component_facet.h"
+#include "data/data_component_manager.h"
 #include "data/data_entity.h"
 #include "data/data_map.h"
 #include "data/data_model_manager.h"
@@ -387,27 +388,11 @@ namespace
         // -----------------------------------------------------------------------------
         m_RenderJobs.clear();
 
-        // -----------------------------------------------------------------------------
-        // Iterate throw every entity inside this map
-        // -----------------------------------------------------------------------------
-        Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Dynamic);
-        Dt::Map::CEntityIterator EndOfEntities = Dt::Map::EntitiesEnd();
+        auto DataSunComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CSunComponent>();
 
-        for (; CurrentEntity != EndOfEntities; )
+        for (auto DataComponent : DataSunComponents)
         {
-            Dt::CEntity& rCurrentEntity = *CurrentEntity;
-
-            // -----------------------------------------------------------------------------
-            // Get graphic facet
-            // -----------------------------------------------------------------------------
-            if (!rCurrentEntity.GetComponentFacet()->HasComponent<Dt::CSunComponent>())
-            {
-                CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Dynamic);
-
-                continue;
-            }
-
-            Dt::CSunComponent*  pDataSunFacet    = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CSunComponent>();
+            Dt::CSunComponent*  pDataSunFacet    = static_cast<Dt::CSunComponent*>(DataComponent);
             Gfx::CSunComponent* pGraphicSunFacet = CComponentManager::GetInstance().GetComponent<Gfx::CSunComponent>(pDataSunFacet->GetID());
 
             // -----------------------------------------------------------------------------
@@ -415,15 +400,10 @@ namespace
             // -----------------------------------------------------------------------------
             SRenderJob NewRenderJob;
 
-            NewRenderJob.m_pDataSunLightFacet    = pDataSunFacet;
+            NewRenderJob.m_pDataSunLightFacet = pDataSunFacet;
             NewRenderJob.m_pGraphicSunLightFacet = pGraphicSunFacet;
 
             m_RenderJobs.push_back(NewRenderJob);
-
-            // -----------------------------------------------------------------------------
-            // Next entity
-            // -----------------------------------------------------------------------------
-            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Dynamic);
         }
     }
 } // namespace
