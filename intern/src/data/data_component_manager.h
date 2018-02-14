@@ -57,13 +57,13 @@ namespace Dt
     template<class T>
     T* CComponentManager::Allocate()
     {
-        std::unique_ptr<T> Component(new T());
+        m_Components.emplace_back(std::unique_ptr<T>(new T()));
 
-        Component->m_ID = m_CurrentID++;
+        T* pComponent = static_cast<T*>(m_Components.back().get());
 
-        m_Components.push_back(std::move(Component));
+        pComponent->m_ID = m_CurrentID++;
 
-        return static_cast<T*>(m_Components.back().get());
+        return pComponent;
     }
 
     // -----------------------------------------------------------------------------
