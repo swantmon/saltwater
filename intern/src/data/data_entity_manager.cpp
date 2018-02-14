@@ -10,7 +10,7 @@
 #include "core/core_time.h"
 
 #include "data/data_component_manager.h"
-#include "data/data_components_facet.h
+#include "data/data_components_facet.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_hierarchy_facet.h"
@@ -193,7 +193,7 @@ namespace
             // Create entity
             // -----------------------------------------------------------------------------
             EntityDesc.m_EntityCategory = SEntityCategory::Dynamic;
-            EntityDesc.m_FacetFlags     = CEntity::FacetTransformation | CEntity::FacetHierarchy;
+            EntityDesc.m_FacetFlags     = CEntity::FacetTransformation | CEntity::FacetHierarchy | CEntity::FacetComponents;
 
             Dt::CEntity& rChildEntity = CreateEntity(EntityDesc);
 
@@ -212,7 +212,7 @@ namespace
 
             pModelActorFacet->SetMesh(&rMesh);
 
-            rChildEntity.GetComponentsFacet()->AddComponent(pModelActorFacet);
+            rChildEntity.AttachComponent(pModelActorFacet);
 
             // -----------------------------------------------------------------------------
             // Attach mesh to entity

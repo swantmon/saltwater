@@ -6,6 +6,7 @@
 #include "base/base_uncopyable.h"
 
 #include "data/data_area_light_component.h"
+#include "data/data_components_facet.h"
 #include "data/data_entity.h"
 #include "data/data_map.h"
 
@@ -622,7 +623,7 @@ namespace
         {
             Dt::CEntity& rCurrentEntity = *CurrentEntity;
 
-            if (!rCurrentEntity.HasComponent<Dt::CAreaLightComponent>())
+            if (!rCurrentEntity.GetComponentsFacet()->HasComponent<Dt::CAreaLightComponent>())
             {
                 CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Dynamic);
 
@@ -631,7 +632,7 @@ namespace
 
             SRenderJob NewRenderJob;
 
-            NewRenderJob.m_pDtComponent  = rCurrentEntity.GetComponent<Dt::CAreaLightComponent>();
+            NewRenderJob.m_pDtComponent  = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CAreaLightComponent>();
             NewRenderJob.m_pGfxComponent = Gfx::CComponentManager::GetInstance().GetComponent<Gfx::CAreaLightComponent>(NewRenderJob.m_pDtComponent->GetID());
             NewRenderJob.m_pDtEntity     = &rCurrentEntity;
 

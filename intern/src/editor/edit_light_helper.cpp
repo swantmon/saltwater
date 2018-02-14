@@ -7,6 +7,7 @@
 
 #include "data/data_area_light_component.h"
 #include "data/data_component_manager.h"
+#include "data/data_components_facet.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_hierarchy_facet.h"
@@ -146,7 +147,7 @@ namespace
 
             pComponent->UpdateLightness();
 
-            rCurrentEntity.AddComponent(pComponent);
+            rCurrentEntity.AttachComponent(pComponent);
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pComponent, Dt::CPointLightComponent::DirtyCreate);
         }
@@ -180,7 +181,7 @@ namespace
 
             pComponent->UpdateLightness();
 
-            rCurrentEntity.AddComponent(pComponent);
+            rCurrentEntity.AttachComponent(pComponent);
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pComponent, Dt::CSunComponent::DirtyCreate);
         }
@@ -228,7 +229,7 @@ namespace
             pComponent->SetPanorama   (pPanoramaTexture);
             pComponent->SetIntensity  (5000.0f);
 
-            rCurrentEntity.AddComponent(pComponent);
+            rCurrentEntity.AttachComponent(pComponent);
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pComponent, Dt::CSkyComponent::DirtyCreate);
         }
@@ -263,7 +264,7 @@ namespace
             pComponent->SetParallaxCorrection(true);
             pComponent->SetBoxSize           (glm::vec3(10.0f));
 
-            rCurrentEntity.AddComponent(pComponent);
+            rCurrentEntity.AttachComponent(pComponent);
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pComponent, Dt::CLightProbeComponent::DirtyCreate);
         }
@@ -300,7 +301,7 @@ namespace
 
             pComponent->UpdateLightness();
 
-            rCurrentEntity.AddComponent(pComponent);
+            rCurrentEntity.AttachComponent(pComponent);
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pComponent, Dt::CAreaLightComponent::DirtyCreate);
         }
@@ -314,7 +315,7 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CPointLightComponent* pPointLightFacet = rCurrentEntity.GetComponent<Dt::CPointLightComponent>();
+        Dt::CPointLightComponent* pPointLightFacet = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CPointLightComponent>();
 
         if (pPointLightFacet != nullptr)
         {
@@ -351,7 +352,7 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CSunComponent* pLightFacet = rCurrentEntity.GetComponent<Dt::CSunComponent>();
+        Dt::CSunComponent* pLightFacet = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CSunComponent>();
 
         if (pLightFacet != nullptr)
         {
@@ -410,7 +411,7 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CSkyComponent* pLightFacet = rCurrentEntity.GetComponent<Dt::CSkyComponent>();
+        Dt::CSkyComponent* pLightFacet = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CSkyComponent>();
 
         if (pLightFacet != nullptr)
         {
@@ -461,7 +462,7 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CLightProbeComponent* pLightFacet = rCurrentEntity.GetComponent<Dt::CLightProbeComponent>();
+        Dt::CLightProbeComponent* pLightFacet = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CLightProbeComponent>();
 
         if (pLightFacet != nullptr)
         {
@@ -494,7 +495,7 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CAreaLightComponent* pLightFacet = rCurrentEntity.GetComponent<Dt::CAreaLightComponent>();
+        Dt::CAreaLightComponent* pLightFacet = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CAreaLightComponent>();
 
         if (pLightFacet != nullptr)
         {
@@ -542,7 +543,7 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CPointLightComponent* pLightFacet = rCurrentEntity.GetComponent<Dt::CPointLightComponent>();
+        Dt::CPointLightComponent* pLightFacet = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CPointLightComponent>();
 
         if (pLightFacet != nullptr)
         {
@@ -605,7 +606,7 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CSunComponent* pLightFacet = rCurrentEntity.GetComponent<Dt::CSunComponent>();
+        Dt::CSunComponent* pLightFacet = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CSunComponent>();
 
         if (pLightFacet != nullptr)
         {
@@ -658,7 +659,7 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CSkyComponent* pLightFacet = rCurrentEntity.GetComponent<Dt::CSkyComponent>();
+        Dt::CSkyComponent* pLightFacet = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CSkyComponent>();
 
         if (pLightFacet != nullptr)
         {
@@ -720,7 +721,7 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CLightProbeComponent* pLightFacet = rCurrentEntity.GetComponent<Dt::CLightProbeComponent>();
+        Dt::CLightProbeComponent* pLightFacet = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CLightProbeComponent>();
 
         if (pLightFacet != nullptr)
         {
@@ -782,7 +783,7 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CAreaLightComponent* pLightFacet = rCurrentEntity.GetComponent<Dt::CAreaLightComponent>();
+        Dt::CAreaLightComponent* pLightFacet = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CAreaLightComponent>();
 
         if (pLightFacet != nullptr)
         {

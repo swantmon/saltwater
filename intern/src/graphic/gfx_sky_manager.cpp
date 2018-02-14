@@ -12,6 +12,7 @@
 
 #include "data/data_component.h"
 #include "data/data_component_manager.h"
+#include "data/data_components_facet.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_map.h"
@@ -633,9 +634,9 @@ namespace
             // -----------------------------------------------------------------------------
             // Get graphic facet
             // -----------------------------------------------------------------------------
-            if (rCurrentEntity.HasComponent<Dt::CSkyComponent>())
+            if (rCurrentEntity.GetComponentsFacet()->HasComponent<Dt::CSkyComponent>())
             {
-                Dt::CSkyComponent* pDataSkyboxFacet = rCurrentEntity.GetComponent<Dt::CSkyComponent>();
+                Dt::CSkyComponent* pDataSkyboxFacet = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CSkyComponent>();
 
                 if (pDataSkyboxFacet->GetRefreshMode() == Dt::CSkyComponent::Dynamic)
                 {
@@ -847,9 +848,9 @@ namespace
 
         for (Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Dynamic); CurrentEntity != Dt::Map::EntitiesEnd() && pDataSunFacet == 0; CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Dynamic))
         {
-            if (CurrentEntity->HasComponent<Dt::CSunComponent>())
+            if (CurrentEntity->GetComponentsFacet()->HasComponent<Dt::CSunComponent>())
             {
-                pDataSunFacet = CurrentEntity->GetComponent<Dt::CSunComponent>();
+                pDataSunFacet = CurrentEntity->GetComponentsFacet()->GetComponent<Dt::CSunComponent>();
             }
         }
 

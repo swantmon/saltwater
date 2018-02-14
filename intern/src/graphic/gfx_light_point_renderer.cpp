@@ -6,6 +6,7 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
+#include "data/data_components_facet.h"
 #include "data/data_entity.h"
 #include "data/data_map.h"
 #include "data/data_transformation_facet.h"
@@ -513,14 +514,14 @@ namespace
         {
             Dt::CEntity& rCurrentEntity = *CurrentEntity;
 
-            if (!rCurrentEntity.HasComponent<Dt::CPointLightComponent>())
+            if (!rCurrentEntity.GetComponentsFacet()->HasComponent<Dt::CPointLightComponent>())
             {
                 CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Dynamic);
 
                 continue;
             }
             
-            Dt::CPointLightComponent*  pDataLightFacet    = rCurrentEntity.GetComponent<Dt::CPointLightComponent>();
+            Dt::CPointLightComponent*  pDataLightFacet    = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CPointLightComponent>();
             Gfx::CPointLightComponent* pGraphicLightFacet = Gfx::CComponentManager::GetInstance().GetComponent<Gfx::CPointLightComponent>(pDataLightFacet->GetID());
             
             SRenderJob NewRenderJob;

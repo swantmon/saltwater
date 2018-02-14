@@ -5,6 +5,7 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
+#include "data/data_components_facet.h"
 #include "data/data_dof_component.h"
 #include "data/data_entity.h"
 #include "data/data_post_aa_component.h"
@@ -1825,9 +1826,9 @@ namespace
             // -----------------------------------------------------------------------------
             // Get graphic facet
             // -----------------------------------------------------------------------------
-            if (rCurrentEntity.HasComponent<Dt::CPostAAComponent>())
+            if (rCurrentEntity.GetComponentsFacet()->HasComponent<Dt::CPostAAComponent>())
             {
-                Dt::CPostAAComponent* pDataPostAAFacet = rCurrentEntity.GetComponent<Dt::CPostAAComponent>();
+                Dt::CPostAAComponent* pDataPostAAFacet = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CPostAAComponent>();
 
                 assert(pDataPostAAFacet != 0);
 
@@ -1840,9 +1841,9 @@ namespace
 
                 m_PostAARenderJobs.push_back(NewRenderJob);
             }
-            else if (rCurrentEntity.HasComponent<Dt::CDOFComponent>())
+            else if (rCurrentEntity.GetComponentsFacet()->HasComponent<Dt::CDOFComponent>())
             {
-                Dt::CDOFComponent* pDataDOFFacet = rCurrentEntity.GetComponent<Dt::CDOFComponent>();
+                Dt::CDOFComponent* pDataDOFFacet = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CDOFComponent>();
 
                 assert(pDataDOFFacet != 0);
 

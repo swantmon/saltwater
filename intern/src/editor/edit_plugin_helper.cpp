@@ -9,6 +9,7 @@
 #include "data/data_ar_tracked_object_component.h"
 #include "data/data_camera_component.h"
 #include "data/data_component_manager.h"
+#include "data/data_components_facet.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_texture_manager.h"
@@ -146,7 +147,7 @@ namespace
         rMarkerOne.m_WidthInMeter = 0.08f;
         rMarkerOne.m_PatternFile  = "ar/patterns/patt.hiro";
 
-        rCurrentEntity.AddComponent(pFacet);
+        rCurrentEntity.AttachComponent(pFacet);
 
         Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pFacet, Dt::CARControllerPluginComponent::DirtyCreate);
     }
@@ -159,7 +160,7 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CARControllerPluginComponent* pFacet = rCurrentEntity.GetComponent<Dt::CARControllerPluginComponent>();
+        Dt::CARControllerPluginComponent* pFacet = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CARControllerPluginComponent>();
 
         if (pFacet != nullptr)
         {
@@ -220,7 +221,7 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CARControllerPluginComponent* pFacet = rCurrentEntity.GetComponent<Dt::CARControllerPluginComponent>();
+        Dt::CARControllerPluginComponent* pFacet = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CARControllerPluginComponent>();
 
         if (pFacet != nullptr)
         {
@@ -270,7 +271,7 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
         
-        Dt::CARControllerPluginComponent* pFacet = rCurrentEntity.GetComponent<Dt::CARControllerPluginComponent>();
+        Dt::CARControllerPluginComponent* pFacet = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CARControllerPluginComponent>();
 
         if (pFacet != nullptr)
         {
@@ -306,7 +307,7 @@ namespace
 
             pFacet->SetCameraParameterFile(ParameterFile);
 
-            if (rCameraEntity.HasComponent<Dt::CCameraComponent>())
+            if (rCameraEntity.GetComponentsFacet()->HasComponent<Dt::CCameraComponent>())
             {
                 pFacet->SetCameraEntity(&rCameraEntity);
             }
@@ -325,7 +326,7 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CARControllerPluginComponent* pFacet = rCurrentEntity.GetComponent<Dt::CARControllerPluginComponent>();
+        Dt::CARControllerPluginComponent* pFacet = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CARControllerPluginComponent>();
 
         if (pFacet != nullptr)
         {

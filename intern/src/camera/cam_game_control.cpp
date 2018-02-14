@@ -9,6 +9,7 @@
 
 #include "data/data_camera_component.h"
 #include "data/data_component.h"
+#include "data/data_components_facet.h"
 #include "data/data_entity.h"
 #include "data/data_transformation_facet.h"
 
@@ -88,7 +89,7 @@ namespace Cam
         // -----------------------------------------------------------------------------
         // Update camera depending on camera component
         // -----------------------------------------------------------------------------
-        Dt::CCameraComponent* pCameraComponent = m_pMainCameraEntity->GetComponent<Dt::CCameraComponent>();
+        Dt::CCameraComponent* pCameraComponent = m_pMainCameraEntity->GetComponentsFacet()->GetComponent<Dt::CCameraComponent>();
 
         assert(pCameraComponent != nullptr);
 
@@ -145,7 +146,7 @@ namespace Cam
     {
         if (m_pMainCameraEntity != 0)
         {
-            Dt::CCameraComponent* pCameraComponent = m_pMainCameraEntity->GetComponent<Dt::CCameraComponent>();
+            Dt::CCameraComponent* pCameraComponent = m_pMainCameraEntity->GetComponentsFacet()->GetComponent<Dt::CCameraComponent>();
 
             if (pCameraComponent->GetProjectionType() == Dt::CCameraComponent::External) return;
         }

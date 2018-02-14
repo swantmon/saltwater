@@ -8,6 +8,7 @@
 
 #include "camera/cam_control_manager.h"
 
+#include "data/data_components_facet.h"
 #include "data/data_entity.h"
 #include "data/data_map.h"
 #include "data/data_model_manager.h"
@@ -399,14 +400,14 @@ namespace
             // -----------------------------------------------------------------------------
             // Get graphic facet
             // -----------------------------------------------------------------------------
-            if (!rCurrentEntity.HasComponent<Dt::CSunComponent>())
+            if (!rCurrentEntity.GetComponentsFacet()->HasComponent<Dt::CSunComponent>())
             {
                 CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Dynamic);
 
                 continue;
             }
 
-            Dt::CSunComponent*  pDataSunFacet    = rCurrentEntity.GetComponent<Dt::CSunComponent>();
+            Dt::CSunComponent*  pDataSunFacet    = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CSunComponent>();
             Gfx::CSunComponent* pGraphicSunFacet = CComponentManager::GetInstance().GetComponent<Gfx::CSunComponent>(pDataSunFacet->GetID());
 
             // -----------------------------------------------------------------------------

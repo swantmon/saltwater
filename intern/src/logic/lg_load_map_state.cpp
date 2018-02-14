@@ -113,7 +113,7 @@ namespace
 
             Component->SetMainCamera(true);
 
-            rEntity.GetComponentsFacet()->AddComponent(Component);
+            rEntity.AttachComponent(Component);
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(Component, Dt::CCameraComponent::DirtyCreate);
 
@@ -320,7 +320,7 @@ void CLgLoadMapState::CreateDefaultScene()
             Component->SetProjectionType(Dt::CCameraComponent::Perspective);
             Component->SetClearFlag(Dt::CCameraComponent::Skybox);
 
-            rEntity.AddComponent(Component);
+            rEntity.AttachComponent(Component);
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(Component, Dt::CCameraComponent::DirtyCreate);
 
@@ -346,7 +346,7 @@ void CLgLoadMapState::CreateDefaultScene()
             Component->SetType(Dt::CSkyComponent::Procedural);
             Component->SetIntensity(40000.0f);
 
-            rEnvironment.AddComponent(Component);
+            rEnvironment.AttachComponent(Component);
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(Component, Dt::CSkyComponent::DirtyCreate);
 
@@ -383,7 +383,7 @@ void CLgLoadMapState::CreateDefaultScene()
             LightProbeComponent->SetParallaxCorrection(false);
             LightProbeComponent->SetBoxSize(glm::vec3(1024.0f));
 
-            rGlobalProbeLight.GetComponentsFacet()->AddComponent(LightProbeComponent);
+            rGlobalProbeLight.AttachComponent(LightProbeComponent);
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(LightProbeComponent, Dt::CLightProbeComponent::DirtyCreate);
 
@@ -420,7 +420,7 @@ void CLgLoadMapState::CreateDefaultScene()
 
             SunComponent->UpdateLightness();
 
-            rSunLight.GetComponentsFacet()->AddComponent(SunComponent);
+            rSunLight.AttachComponent(SunComponent);
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(SunComponent, Dt::CSunComponent::DirtyCreate);
 
@@ -448,7 +448,7 @@ void CLgLoadMapState::CreateDefaultScene()
 
             auto Component = Dt::CComponentManager::GetInstance().Allocate<Dt::CSSAOComponent>();
 
-            rEntity.GetComponentsFacet()->AddComponent(Component);
+            rEntity.AttachComponent(Component);
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(Component, Dt::CSSAOComponent::DirtyCreate);
 
@@ -482,7 +482,7 @@ void CLgLoadMapState::CreateDefaultScene()
 
             Dt::CEntity* pSubEntity = rSphere.GetHierarchyFacet()->GetFirstChild();
 
-            auto pMeshComponent = pSubEntity->GetComponent<Dt::CMeshComponent>();
+            auto pMeshComponent = pSubEntity->GetComponentsFacet()->GetComponent<Dt::CMeshComponent>();
 
             Dt::SMaterialDescriptor MaterialFileDesc;
 
@@ -538,7 +538,7 @@ void CLgLoadMapState::CreateDefaultScene()
 
             Dt::CEntity* pSubEntity = rSphere.GetHierarchyFacet()->GetFirstChild();
 
-            auto pMeshComponent = pSubEntity->GetComponent<Dt::CMeshComponent>();
+            auto pMeshComponent = pSubEntity->GetComponentsFacet()->GetComponent<Dt::CMeshComponent>();
 
             Dt::SMaterialDescriptor MaterialFileDesc;
 

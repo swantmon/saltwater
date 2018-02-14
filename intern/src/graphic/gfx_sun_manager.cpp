@@ -11,6 +11,7 @@
 #include "base/base_include_glm.h"
 
 #include "data/data_component_manager.h"
+#include "data/data_components_facet.h"
 #include "data/data_entity.h"
 #include "data/data_map.h"
 #include "data/data_mesh_component.h"
@@ -195,11 +196,9 @@ namespace
         // Get all components from component manager instead of using the map
         for (Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Dynamic); CurrentEntity != Dt::Map::EntitiesEnd(); CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Dynamic))
         {
-            if (!CurrentEntity->HasComponent<Dt::CSunComponent>()) continue;
+            if (!CurrentEntity->GetComponentsFacet()->HasComponent<Dt::CSunComponent>()) continue;
 
-            Dt::CSunComponent* pSunComponent = CurrentEntity->GetComponent<Dt::CSunComponent>();
-
-            const Dt::CEntity* pEntity = pSunComponent->GetLinkedEntity();
+            Dt::CSunComponent* pSunComponent = CurrentEntity->GetComponentsFacet()->GetComponent<Dt::CSunComponent>();
 
             CInternSunComponent* pGfxSunFacet = CComponentManager::GetInstance().GetComponent<CInternSunComponent>(pSunComponent->GetID());
 
@@ -219,7 +218,7 @@ namespace
                 // -----------------------------------------------------------------------------
                 // Set view
                 // -----------------------------------------------------------------------------
-                glm::vec3 SunPosition    = pEntity->GetWorldPosition();
+                glm::vec3 SunPosition    = CurrentEntity->GetWorldPosition();
                 glm::vec3 SunRotation    = pSunComponent->GetDirection();
                 glm::mat3 RotationMatrix = glm::lookAtRH(SunPosition, SunPosition + SunRotation, glm::vec3(0.0f, 0.0f, 1.0f));
 
@@ -403,7 +402,7 @@ namespace
         {
             Dt::CEntity& rCurrentEntity = *CurrentEntity;
 
-            Dt::CMeshComponent* pMeshComponent = rCurrentEntity.GetComponent<Dt::CMeshComponent>();
+            Dt::CMeshComponent* pMeshComponent = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CMeshComponent>();
 
             if (pMeshComponent == 0) continue;
 

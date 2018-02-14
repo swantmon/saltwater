@@ -10,6 +10,7 @@
 
 #include "data/data_component.h"
 #include "data/data_component_manager.h"
+#include "data/data_components_facet.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_map.h"
@@ -254,9 +255,9 @@ namespace
         {
             Dt::CEntity& rCurrentEntity = *CurrentEntity;
 
-            if (rCurrentEntity.HasComponent<Dt::CPointLightComponent>())
+            if (rCurrentEntity.GetComponentsFacet()->HasComponent<Dt::CPointLightComponent>())
             {
-                Dt::CPointLightComponent* pDtPointLightFacet = rCurrentEntity.GetComponent<Dt::CPointLightComponent>();
+                Dt::CPointLightComponent* pDtPointLightFacet = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CPointLightComponent>();
 
                 CInternComponent* pGfxPointLightFacet = CComponentManager::GetInstance().GetComponent<CInternComponent>(pDtPointLightFacet->GetID());
 
@@ -645,7 +646,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Get graphic facet
             // -----------------------------------------------------------------------------
-            Dt::CMeshComponent* pMeshComponent = rCurrentEntity.GetComponent<Dt::CMeshComponent>();
+            Dt::CMeshComponent* pMeshComponent = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CMeshComponent>();
 
             if (pMeshComponent == 0) continue;
 

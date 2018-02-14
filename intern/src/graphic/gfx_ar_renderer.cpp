@@ -9,6 +9,7 @@
 #include "camera/cam_control_manager.h"
 #include "camera/cam_game_control.h"
 
+#include "data/data_components_facet.h"
 #include "data/data_entity.h"
 #include "data/data_map.h"
 #include "data/data_mesh_component.h"
@@ -782,9 +783,9 @@ namespace
             // -----------------------------------------------------------------------------
             // Get graphic facet
             // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetLayer() != Dt::SEntityLayer::AR && rCurrentEntity.HasComponent<Dt::CMeshComponent>())
+            if (rCurrentEntity.GetLayer() != Dt::SEntityLayer::AR && rCurrentEntity.GetComponentsFacet()->HasComponent<Dt::CMeshComponent>())
             {
-                CMeshComponent* pGfxComponent = CComponentManager::GetInstance().GetComponent<Gfx::CMeshComponent>(rCurrentEntity.GetComponent<Dt::CMeshComponent>()->GetID());
+                CMeshComponent* pGfxComponent = CComponentManager::GetInstance().GetComponent<Gfx::CMeshComponent>(rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CMeshComponent>()->GetID());
 
                 CMeshPtr ModelPtr = pGfxComponent->GetMesh();
 

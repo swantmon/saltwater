@@ -8,6 +8,7 @@
 
 #include "data/data_camera_component.h"
 #include "data/data_component_manager.h"
+#include "data/data_components_facet.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_map.h"
@@ -119,7 +120,7 @@ namespace
 
             auto pComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CCameraComponent>();
 
-            rCurrentEntity.AddComponent(pComponent);
+            rCurrentEntity.AttachComponent(pComponent);
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pComponent, Dt::CCameraComponent::DirtyCreate);
         }
@@ -133,7 +134,7 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CMeshComponent* pFacet = rCurrentEntity.GetComponent<Dt::CMeshComponent>();
+        Dt::CMeshComponent* pFacet = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CMeshComponent>();
 
         if (pFacet != nullptr)
         {
@@ -179,7 +180,7 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CCameraComponent* pFacet = rCurrentEntity.GetComponent<Dt::CCameraComponent>();
+        Dt::CCameraComponent* pFacet = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CCameraComponent>();
 
         if (pFacet != nullptr)
         {
@@ -251,7 +252,7 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CMeshComponent* pFacet = rCurrentEntity.GetComponent<Dt::CMeshComponent>();
+        Dt::CMeshComponent* pFacet = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CMeshComponent>();
 
         if (pFacet != nullptr)
         {
@@ -271,7 +272,7 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CCameraComponent* pFacet = rCurrentEntity.GetComponent<Dt::CCameraComponent>();
+        Dt::CCameraComponent* pFacet = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CCameraComponent>();
 
         if (pFacet != nullptr)
         {

@@ -110,6 +110,9 @@
     <ClInclude Include="..\..\..\src\data\data_camera_component.h">
       <Filter>map\entity\components\actors</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_components_facet.h">
+      <Filter>map\entity\facets\components</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\data\data_entity_manager.cpp">
@@ -209,6 +212,9 @@
     <ClCompile Include="..\..\..\src\data\data_camera_component.cpp">
       <Filter>map\entity\components\actors</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_components_facet.cpp">
+      <Filter>map\entity\facets\components</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="map">
@@ -249,6 +255,9 @@
     </Filter>
     <Filter Include="map\entity\components\actors">
       <UniqueIdentifier>{d34f13b4-e357-49b8-8290-e4c854b0353f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\entity\facets\components">
+      <UniqueIdentifier>{2e1a7254-2026-4f68-b9c2-ff39ac63afd2}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

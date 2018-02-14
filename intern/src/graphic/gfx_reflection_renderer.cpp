@@ -6,8 +6,9 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
-#include "data/data_light_probe_component.h"
+#include "data/data_components_facet.h"
 #include "data/data_entity.h"
+#include "data/data_light_probe_component.h"
 #include "data/data_map.h"
 #include "data/data_ssr_component.h"
 #include "data/data_transformation_facet.h"
@@ -1069,9 +1070,9 @@ namespace
             // -----------------------------------------------------------------------------
             // Get graphic facet
             // -----------------------------------------------------------------------------
-            if (rCurrentEntity.HasComponent<Dt::CLightProbeComponent>())
+            if (rCurrentEntity.GetComponentsFacet()->HasComponent<Dt::CLightProbeComponent>())
             {
-                Dt::CLightProbeComponent*  pDataLightProbeFacet    = rCurrentEntity.GetComponent<Dt::CLightProbeComponent>();
+                Dt::CLightProbeComponent*  pDataLightProbeFacet    = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CLightProbeComponent>();
                 Gfx::CLightProbeComponent* pGraphicLightProbeFacet = Gfx::CComponentManager::GetInstance().GetComponent<Gfx::CLightProbeComponent>(pDataLightProbeFacet->GetID());
 
                 assert(pDataLightProbeFacet != 0 && pGraphicLightProbeFacet != 0);
@@ -1123,9 +1124,9 @@ namespace
             // -----------------------------------------------------------------------------
             // Get graphic facet
             // -----------------------------------------------------------------------------
-            if (rCurrentEntity.HasComponent<Dt::CSSRComponent>())
+            if (rCurrentEntity.GetComponentsFacet()->HasComponent<Dt::CSSRComponent>())
             {
-                Dt::CSSRComponent* pDataSSRFacet = rCurrentEntity.GetComponent<Dt::CSSRComponent>();
+                Dt::CSSRComponent* pDataSSRFacet = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CSSRComponent>();
 
                 assert(pDataSSRFacet != 0);
 

@@ -4,11 +4,9 @@
 #include "base/base_aabb3.h"
 #include "base/base_typedef.h"
 
-#include "data/data_component.h"
 #include "data/data_entity_folder.h"
 
 #include <string>
-#include <vector>
 
 namespace Dt
 {
@@ -161,13 +159,19 @@ namespace Dt
         void Attach(CEntity& _rEntity);
         void Detach();
 
+        template<class T>
+        void AttachComponent(T* _pComponent);
+
+        template<class T>
+        void DetachComponent(T* _pComponent);
+
     protected:
         
         Dt::CEntity*          m_pNextNeighbor;                                                    //< Next neighbor entity in folder
         Dt::CEntity*          m_pPreviousNeighbor;                                                //< Previous neighbor entity in folder
         Dt::CEntityFolder*    m_pFolder;                                                          //< Pointer to folder of this entity
-        CHierarchyFacet*      m_pHierarchyFacet;                                                  //< Contains hierarchical informations of the entity (scene graph)
-        CTransformationFacet* m_pTransformationFacet;                                             //< Contains transformation informations depending on hierarchy
+        CHierarchyFacet*      m_pHierarchyFacet;                                                  //< Contains hierarchical information of the entity (scene graph)
+        CTransformationFacet* m_pTransformationFacet;                                             //< Contains transformation information depending on hierarchy
         CComponentsFacet*     m_pComponentsFacet;                                                 //< Contains components of this entity
         BID                   m_ID;                                                               //< A specific unique id of this entity inside the map
         std::string           m_Name;                                                             //< A name of the entity to search for inside scripts
@@ -180,4 +184,31 @@ namespace Dt
         CEntity();
         ~CEntity();
     };
+} // namespace Dt
+
+namespace Dt
+{
+    template<class T>
+    void CEntity::AttachComponent(T* _pComponent)
+    {
+        assert(_pComponent);
+
+        assert(_pComponent->GetLinkedEntity());
+
+        _pComponent->SetLinkedEntity(this);
+
+        m_pComponentsFacet->AddComponent(_pComponent);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    template<class T>
+    void CEntity::DetachComponent(T* _pComponent)
+    {
+        assert(_pComponent);
+
+        _pComponent->SetLinkedEntity(0);
+
+        m_pComponentsFacet->RemoveComponent(_pComponent);
+    }
 } // namespace Dt
