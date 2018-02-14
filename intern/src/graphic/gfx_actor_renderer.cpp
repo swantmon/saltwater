@@ -5,7 +5,7 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
-#include "data/data_components_facet.h"
+#include "data/data_component_facet.h"
 #include "data/data_entity.h"
 #include "data/data_map.h"
 #include "data/data_mesh_component.h"
@@ -552,9 +552,9 @@ namespace
             // -----------------------------------------------------------------------------
             // Get graphic facet
             // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetLayer() == Dt::SEntityLayer::Default && rCurrentEntity.GetComponentsFacet()->HasComponent<Dt::CMeshComponent>())
+            if (rCurrentEntity.GetLayer() == Dt::SEntityLayer::Default && rCurrentEntity.GetComponentFacet()->HasComponent<Dt::CMeshComponent>())
             {
-                Dt::CMeshComponent*  pDtComponent  = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CMeshComponent>();
+                Dt::CMeshComponent*  pDtComponent  = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CMeshComponent>();
                 Gfx::CMeshComponent* pGfxComponent = Gfx::CComponentManager::GetInstance().GetComponent<Gfx::CMeshComponent>(pDtComponent->GetID());
 
                 CMeshPtr MeshPtr = pGfxComponent->GetMesh();

@@ -7,7 +7,7 @@
 
 #include "data/data_bloom_component.h"
 #include "data/data_component_manager.h"
-#include "data/data_components_facet.h"
+#include "data/data_component_facet.h"
 #include "data/data_dof_component.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
@@ -233,7 +233,7 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CBloomComponent* pFXFacet = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CBloomComponent>();
+        Dt::CBloomComponent* pFXFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CBloomComponent>();
 
         if (pFXFacet != nullptr)
         {
@@ -265,7 +265,7 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CDOFComponent* pFXFacet = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CDOFComponent>();
+        Dt::CDOFComponent* pFXFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CDOFComponent>();
 
         if (pFXFacet != nullptr)
         {
@@ -293,7 +293,7 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CPostAAComponent* pFXFacet = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CPostAAComponent>();
+        Dt::CPostAAComponent* pFXFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CPostAAComponent>();
 
         if (pFXFacet != nullptr)
         {
@@ -317,7 +317,7 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CSSRComponent* pFXFacet = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CSSRComponent>();
+        Dt::CSSRComponent* pFXFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CSSRComponent>();
 
         if (pFXFacet != nullptr)
         {
@@ -344,7 +344,7 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CVolumeFogComponent* pFXFacet = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CVolumeFogComponent>();
+        Dt::CVolumeFogComponent* pFXFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CVolumeFogComponent>();
 
         if (pFXFacet != nullptr)
         {
@@ -383,7 +383,7 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CBloomComponent* pFXFacet = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CBloomComponent>();
+        Dt::CBloomComponent* pFXFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CBloomComponent>();
 
         if (pFXFacet != nullptr)
         {
@@ -431,7 +431,7 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CDOFComponent* pFXFacet = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CDOFComponent>();
+        Dt::CDOFComponent* pFXFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CDOFComponent>();
 
         if (pFXFacet != nullptr)
         {
@@ -471,7 +471,7 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CPostAAComponent* pFXFacet = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CPostAAComponent>();
+        Dt::CPostAAComponent* pFXFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CPostAAComponent>();
 
         if (pFXFacet != nullptr)
         {
@@ -501,7 +501,7 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CSSRComponent* pFXFacet = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CSSRComponent>();
+        Dt::CSSRComponent* pFXFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CSSRComponent>();
 
         if (pFXFacet != nullptr)
         {
@@ -538,7 +538,7 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CVolumeFogComponent* pFXFacet = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CVolumeFogComponent>();
+        Dt::CVolumeFogComponent* pFXFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CVolumeFogComponent>();
 
         if (pFXFacet != nullptr)
         {

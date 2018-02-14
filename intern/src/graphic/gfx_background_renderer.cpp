@@ -11,7 +11,7 @@
 #include "core/core_time.h"
 
 #include "data/data_camera_component.h"
-#include "data/data_components_facet.h"
+#include "data/data_component_facet.h"
 #include "data/data_entity.h"
 #include "data/data_map.h"
 #include "data/data_model_manager.h"
@@ -484,7 +484,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Get graphic facet
             // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetComponentsFacet()->HasComponent<Dt::CSkyComponent>())
+            if (rCurrentEntity.GetComponentFacet()->HasComponent<Dt::CSkyComponent>())
             {
                 pSkyEntity = &rCurrentEntity;
             }
@@ -500,7 +500,7 @@ namespace
             return;
         }
 
-        Gfx::CSkyComponent* pSkyFacet = CComponentManager::GetInstance().GetComponent<Gfx::CSkyComponent>(pSkyEntity->GetComponentsFacet()->GetComponent<Dt::CSkyComponent>()->GetID());
+        Gfx::CSkyComponent* pSkyFacet = CComponentManager::GetInstance().GetComponent<Gfx::CSkyComponent>(pSkyEntity->GetComponentFacet()->GetComponent<Dt::CSkyComponent>()->GetID());
 
         assert(pSkyFacet);
 
@@ -623,7 +623,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Get graphic facet
             // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetComponentsFacet()->HasComponent<Dt::CSkyComponent>())
+            if (rCurrentEntity.GetComponentFacet()->HasComponent<Dt::CSkyComponent>())
             {
                 pSkyEntity = &rCurrentEntity;
             }
@@ -636,7 +636,7 @@ namespace
 
         if (pSkyEntity != 0)
         {
-            Dt::CSkyComponent* pSkyComponent = pSkyEntity->GetComponentsFacet()->GetComponent<Dt::CSkyComponent>();
+            Dt::CSkyComponent* pSkyComponent = pSkyEntity->GetComponentFacet()->GetComponent<Dt::CSkyComponent>();
 
             assert(pSkyComponent);
 
@@ -754,7 +754,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Get graphic facet
             // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetComponentsFacet()->HasComponent<Dt::CSkyComponent>())
+            if (rCurrentEntity.GetComponentFacet()->HasComponent<Dt::CSkyComponent>())
             {
                 pSkyEntity = &rCurrentEntity;
             }
@@ -767,7 +767,7 @@ namespace
 
         if (pSkyEntity != 0)
         {
-            Dt::CSkyComponent* pDtSkyComponent = pSkyEntity->GetComponentsFacet()->GetComponent<Dt::CSkyComponent>();
+            Dt::CSkyComponent* pDtSkyComponent = pSkyEntity->GetComponentFacet()->GetComponent<Dt::CSkyComponent>();
 
             assert(pDtSkyComponent);
 
@@ -902,9 +902,9 @@ namespace
             // -----------------------------------------------------------------------------
             // Get graphic facet
             // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetComponentsFacet()->HasComponent<Dt::CCameraComponent>())
+            if (rCurrentEntity.GetComponentFacet()->HasComponent<Dt::CCameraComponent>())
             {
-                Dt::CCameraComponent* pDtComponent = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CCameraComponent>();
+                Dt::CCameraComponent* pDtComponent = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CCameraComponent>();
 
                 if (pDtComponent->IsMainCamera())
                 {

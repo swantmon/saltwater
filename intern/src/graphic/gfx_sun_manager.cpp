@@ -11,7 +11,7 @@
 #include "base/base_include_glm.h"
 
 #include "data/data_component_manager.h"
-#include "data/data_components_facet.h"
+#include "data/data_component_facet.h"
 #include "data/data_entity.h"
 #include "data/data_map.h"
 #include "data/data_mesh_component.h"
@@ -196,9 +196,9 @@ namespace
         // Get all components from component manager instead of using the map
         for (Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Dynamic); CurrentEntity != Dt::Map::EntitiesEnd(); CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Dynamic))
         {
-            if (!CurrentEntity->GetComponentsFacet()->HasComponent<Dt::CSunComponent>()) continue;
+            if (!CurrentEntity->GetComponentFacet()->HasComponent<Dt::CSunComponent>()) continue;
 
-            Dt::CSunComponent* pSunComponent = CurrentEntity->GetComponentsFacet()->GetComponent<Dt::CSunComponent>();
+            Dt::CSunComponent* pSunComponent = CurrentEntity->GetComponentFacet()->GetComponent<Dt::CSunComponent>();
 
             CInternSunComponent* pGfxSunFacet = CComponentManager::GetInstance().GetComponent<CInternSunComponent>(pSunComponent->GetID());
 
@@ -402,7 +402,7 @@ namespace
         {
             Dt::CEntity& rCurrentEntity = *CurrentEntity;
 
-            Dt::CMeshComponent* pMeshComponent = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CMeshComponent>();
+            Dt::CMeshComponent* pMeshComponent = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CMeshComponent>();
 
             if (pMeshComponent == 0) continue;
 

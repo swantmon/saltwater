@@ -10,7 +10,7 @@
 #include "core/core_time.h"
 
 #include "data/data_component_manager.h"
-#include "data/data_components_facet.h"
+#include "data/data_component_facet.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_hierarchy_facet.h"
@@ -78,7 +78,7 @@ namespace
             friend class CDtLvlEntityManager;
         };
 
-        class CInternComponentsFacet : public CComponentsFacet
+        class CInternComponentsFacet : public CComponentFacet
         {
         private:
             friend class CDtLvlEntityManager;

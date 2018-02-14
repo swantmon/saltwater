@@ -7,7 +7,7 @@
 
 #include "camera/cam_control_manager.h"
 
-#include "data/data_components_facet.h"
+#include "data/data_component_facet.h"
 #include "data/data_entity.h"
 #include "data/data_map.h"
 #include "data/data_model_manager.h"
@@ -423,14 +423,14 @@ namespace
             // -----------------------------------------------------------------------------
             // Get graphic facet
             // -----------------------------------------------------------------------------
-            if (!rCurrentEntity.GetComponentsFacet()->HasComponent<Dt::CPointLightComponent>())
+            if (!rCurrentEntity.GetComponentFacet()->HasComponent<Dt::CPointLightComponent>())
             {
                 CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Dynamic);
 
                 continue;
             }
 
-            Dt::CPointLightComponent*  pDataPointFacet    = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CPointLightComponent>();
+            Dt::CPointLightComponent*  pDataPointFacet    = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CPointLightComponent>();
             Gfx::CPointLightComponent* pGraphicPointFacet = Gfx::CComponentManager::GetInstance().GetComponent<Gfx::CPointLightComponent>(pDataPointFacet->GetID());
 
             // -----------------------------------------------------------------------------

@@ -13,7 +13,7 @@
 
 #include "data/data_camera_component.h"
 #include "data/data_component_manager.h"
-#include "data/data_components_facet.h"
+#include "data/data_component_facet.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_map.h"
@@ -90,7 +90,7 @@ namespace
         {
             Dt::CEntity& rCurrentEntity = *CurrentEntity;
 
-            Dt::CCameraComponent* pCameraComponent = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CCameraComponent>();
+            Dt::CCameraComponent* pCameraComponent = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CCameraComponent>();
 
             if (pCameraComponent != nullptr)
             {

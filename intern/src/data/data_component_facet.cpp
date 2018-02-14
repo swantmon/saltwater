@@ -1,18 +1,18 @@
 
 #include "data/data_precompiled.h"
 
-#include "data/data_components_facet.h"
+#include "data/data_component_facet.h"
 
 namespace Dt
 {
-    CComponentsFacet::CComponentsFacet()
+    CComponentFacet::CComponentFacet()
     {
 
     }
 
     // -----------------------------------------------------------------------------
 
-    CComponentsFacet::~CComponentsFacet()
+    CComponentFacet::~CComponentFacet()
     {
 
     }

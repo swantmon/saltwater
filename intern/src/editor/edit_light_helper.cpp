@@ -7,7 +7,7 @@
 
 #include "data/data_area_light_component.h"
 #include "data/data_component_manager.h"
-#include "data/data_components_facet.h"
+#include "data/data_component_facet.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_hierarchy_facet.h"
@@ -315,7 +315,7 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CPointLightComponent* pPointLightFacet = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CPointLightComponent>();
+        Dt::CPointLightComponent* pPointLightFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CPointLightComponent>();
 
         if (pPointLightFacet != nullptr)
         {
@@ -352,7 +352,7 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CSunComponent* pLightFacet = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CSunComponent>();
+        Dt::CSunComponent* pLightFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CSunComponent>();
 
         if (pLightFacet != nullptr)
         {
@@ -411,7 +411,7 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CSkyComponent* pLightFacet = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CSkyComponent>();
+        Dt::CSkyComponent* pLightFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CSkyComponent>();
 
         if (pLightFacet != nullptr)
         {
@@ -462,7 +462,7 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CLightProbeComponent* pLightFacet = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CLightProbeComponent>();
+        Dt::CLightProbeComponent* pLightFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CLightProbeComponent>();
 
         if (pLightFacet != nullptr)
         {
@@ -495,7 +495,7 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CAreaLightComponent* pLightFacet = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CAreaLightComponent>();
+        Dt::CAreaLightComponent* pLightFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CAreaLightComponent>();
 
         if (pLightFacet != nullptr)
         {
@@ -543,7 +543,7 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CPointLightComponent* pLightFacet = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CPointLightComponent>();
+        Dt::CPointLightComponent* pLightFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CPointLightComponent>();
 
         if (pLightFacet != nullptr)
         {
@@ -606,7 +606,7 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CSunComponent* pLightFacet = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CSunComponent>();
+        Dt::CSunComponent* pLightFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CSunComponent>();
 
         if (pLightFacet != nullptr)
         {
@@ -659,7 +659,7 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CSkyComponent* pLightFacet = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CSkyComponent>();
+        Dt::CSkyComponent* pLightFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CSkyComponent>();
 
         if (pLightFacet != nullptr)
         {
@@ -721,7 +721,7 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CLightProbeComponent* pLightFacet = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CLightProbeComponent>();
+        Dt::CLightProbeComponent* pLightFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CLightProbeComponent>();
 
         if (pLightFacet != nullptr)
         {
@@ -783,7 +783,7 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CAreaLightComponent* pLightFacet = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CAreaLightComponent>();
+        Dt::CAreaLightComponent* pLightFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CAreaLightComponent>();
 
         if (pLightFacet != nullptr)
         {

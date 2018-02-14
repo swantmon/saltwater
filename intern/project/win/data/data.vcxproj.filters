@@ -110,7 +110,7 @@
     <ClInclude Include="..\..\..\src\data\data_camera_component.h">
       <Filter>map\entity\components\actors</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_components_facet.h">
+    <ClInclude Include="..\..\..\src\data\data_component_facet.h">
       <Filter>map\entity\facets\components</Filter>
     </ClInclude>
   </ItemGroup>
@@ -212,7 +212,7 @@
     <ClCompile Include="..\..\..\src\data\data_camera_component.cpp">
       <Filter>map\entity\components\actors</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_components_facet.cpp">
+    <ClCompile Include="..\..\..\src\data\data_component_facet.cpp">
       <Filter>map\entity\facets\components</Filter>
     </ClCompile>
   </ItemGroup>

@@ -8,7 +8,7 @@
 
 #include "data/data_camera_component.h"
 #include "data/data_component_manager.h"
-#include "data/data_components_facet.h"
+#include "data/data_component_facet.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_map.h"
@@ -134,7 +134,7 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CMeshComponent* pFacet = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CMeshComponent>();
+        Dt::CMeshComponent* pFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CMeshComponent>();
 
         if (pFacet != nullptr)
         {
@@ -180,7 +180,7 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CCameraComponent* pFacet = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CCameraComponent>();
+        Dt::CCameraComponent* pFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CCameraComponent>();
 
         if (pFacet != nullptr)
         {
@@ -252,7 +252,7 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CMeshComponent* pFacet = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CMeshComponent>();
+        Dt::CMeshComponent* pFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CMeshComponent>();
 
         if (pFacet != nullptr)
         {
@@ -272,7 +272,7 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
 
-        Dt::CCameraComponent* pFacet = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CCameraComponent>();
+        Dt::CCameraComponent* pFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CCameraComponent>();
 
         if (pFacet != nullptr)
         {

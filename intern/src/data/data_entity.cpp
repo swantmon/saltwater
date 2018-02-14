@@ -3,7 +3,7 @@
 
 #include "base/base_include_glm.h"
 
-#include "data/data_components_facet.h"
+#include "data/data_component_facet.h"
 #include "data/data_entity.h"
 #include "data/data_hierarchy_facet.h"
 #include "data/data_transformation_facet.h"
@@ -281,21 +281,21 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CEntity::SetComponentsFacet(CComponentsFacet* _pFacet)
+    void CEntity::SetComponentFacet(CComponentFacet* _pFacet)
     {
         m_pComponentsFacet = _pFacet;
     }
 
     // -----------------------------------------------------------------------------
 
-    CComponentsFacet* CEntity::GetComponentsFacet()
+    CComponentFacet* CEntity::GetComponentFacet()
     {
         return m_pComponentsFacet;
     }
 
     // -----------------------------------------------------------------------------
 
-    const CComponentsFacet* CEntity::GetComponentsFacet() const
+    const CComponentFacet* CEntity::GetComponentFacet() const
     {
         return m_pComponentsFacet;
     }

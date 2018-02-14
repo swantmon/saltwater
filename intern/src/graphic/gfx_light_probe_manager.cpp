@@ -10,7 +10,7 @@
 
 #include "data/data_component.h"
 #include "data/data_component_manager.h"
-#include "data/data_components_facet.h"
+#include "data/data_component_facet.h"
 #include "data/data_entity.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
@@ -453,9 +453,9 @@ namespace
             // -----------------------------------------------------------------------------
             // Get graphic facet
             // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetComponentsFacet()->HasComponent<Dt::CLightProbeComponent>())
+            if (rCurrentEntity.GetComponentFacet()->HasComponent<Dt::CLightProbeComponent>())
             {
-                Dt::CLightProbeComponent* pDtProbeFacet = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CLightProbeComponent>();
+                Dt::CLightProbeComponent* pDtProbeFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CLightProbeComponent>();
 
                 CInternComponent* pGfxProbeFacet = CComponentManager::GetInstance().GetComponent<CInternComponent>(pDtProbeFacet->GetID());
 
@@ -778,9 +778,9 @@ namespace
             // -----------------------------------------------------------------------------
             // Get graphic facet
             // -----------------------------------------------------------------------------
-            if (!rCurrentEntity.GetComponentsFacet()->HasComponent<Dt::CSkyComponent>()) continue;
+            if (!rCurrentEntity.GetComponentFacet()->HasComponent<Dt::CSkyComponent>()) continue;
 
-            Dt::CSkyComponent* pSkyComponent = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CSkyComponent>();
+            Dt::CSkyComponent* pSkyComponent = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CSkyComponent>();
 
             Gfx::CSkyComponent* pSkyFacet = CComponentManager::GetInstance().GetComponent<Gfx::CSkyComponent>(pSkyComponent->GetID());
 
@@ -958,7 +958,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Get graphic facet
             // -----------------------------------------------------------------------------
-            Dt::CMeshComponent* pMeshComponent = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CMeshComponent>();
+            Dt::CMeshComponent* pMeshComponent = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CMeshComponent>();
 
             if (pMeshComponent == 0) continue;
 
@@ -1298,9 +1298,9 @@ namespace
             // -----------------------------------------------------------------------------
             // Setup buffer
             // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetComponentsFacet()->HasComponent<Dt::CSunComponent>())
+            if (rCurrentEntity.GetComponentFacet()->HasComponent<Dt::CSunComponent>())
             {
-                Dt::CSunComponent* pDtSunFacet = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CSunComponent>();
+                Dt::CSunComponent* pDtSunFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CSunComponent>();
                 Gfx::CSunComponent* pGfxSunFacet = CComponentManager::GetInstance().GetComponent<Gfx::CSunComponent>(pDtSunFacet->GetID());
 
                 if (pDtSunFacet != 0 && pGfxSunFacet != 0)
@@ -1324,9 +1324,9 @@ namespace
                 }
             }
             
-            if (rCurrentEntity.GetComponentsFacet()->HasComponent<Dt::CPointLightComponent>())
+            if (rCurrentEntity.GetComponentFacet()->HasComponent<Dt::CPointLightComponent>())
             {
-                Dt::CPointLightComponent*  pDtPointFacet  = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CPointLightComponent>();
+                Dt::CPointLightComponent*  pDtPointFacet  = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CPointLightComponent>();
                 Gfx::CPointLightComponent* pGfxPointFacet = CComponentManager::GetInstance().GetComponent<Gfx::CPointLightComponent>(pDtPointFacet->GetID());
 
                 if (pDtPointFacet != 0 && pGfxPointFacet != 0)
@@ -1364,9 +1364,9 @@ namespace
                 }
             }
             
-            if (rCurrentEntity.GetComponentsFacet()->HasComponent<Dt::CLightProbeComponent>() && (m_LightJob.m_SpecularTexturePtr == 0 && m_LightJob.m_DiffuseTexturePtr == 0))
+            if (rCurrentEntity.GetComponentFacet()->HasComponent<Dt::CLightProbeComponent>() && (m_LightJob.m_SpecularTexturePtr == 0 && m_LightJob.m_DiffuseTexturePtr == 0))
             {
-                Dt::CLightProbeComponent* pDtLightProbeFacet = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CLightProbeComponent>();
+                Dt::CLightProbeComponent* pDtLightProbeFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CLightProbeComponent>();
                 Gfx::CLightProbeComponent* pGfxLightProbeFacet   = CComponentManager::GetInstance().GetComponent<Gfx::CLightProbeComponent>(pDtLightProbeFacet->GetID());
 
                 if (pDtLightProbeFacet != 0 && pGfxLightProbeFacet != 0 && pDtLightProbeFacet->GetType() == Dt::CLightProbeComponent::Sky)

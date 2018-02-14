@@ -10,7 +10,7 @@
 
 #include "core/core_time.h"
 
-#include "data/data_components_facet.h"
+#include "data/data_component_facet.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_hierarchy_facet.h"
@@ -1023,9 +1023,9 @@ namespace
         {
             assert(_pEntity);
 
-            if (_pEntity->GetComponentsFacet()->HasComponent<Dt::CMeshComponent>())
+            if (_pEntity->GetComponentFacet()->HasComponent<Dt::CMeshComponent>())
             {
-                CMeshComponent* pGfxComponent = CComponentManager::GetInstance().GetComponent<CMeshComponent>(_pEntity->GetComponentsFacet()->GetComponent<Dt::CMeshComponent>()->GetID());
+                CMeshComponent* pGfxComponent = CComponentManager::GetInstance().GetComponent<CMeshComponent>(_pEntity->GetComponentFacet()->GetComponent<Dt::CMeshComponent>()->GetID());
 
                 assert(pGfxComponent != nullptr);
 
@@ -1071,9 +1071,9 @@ namespace
                     m_SurfaceRenderJobs.push_back(NewRenderJob);
                 }
             }
-            else if (_pEntity->GetComponentsFacet()->HasComponent<Dt::CLightProbeComponent>())
+            else if (_pEntity->GetComponentFacet()->HasComponent<Dt::CLightProbeComponent>())
             {
-                Dt::CLightProbeComponent*  pDataComponent = _pEntity->GetComponentsFacet()->GetComponent<Dt::CLightProbeComponent>();
+                Dt::CLightProbeComponent*  pDataComponent = _pEntity->GetComponentFacet()->GetComponent<Dt::CLightProbeComponent>();
                 Gfx::CLightProbeComponent* pGfxComponent  = CComponentManager::GetInstance().GetComponent<Gfx::CLightProbeComponent>(pDataComponent->GetID());
 
                 assert(pGfxComponent != nullptr);

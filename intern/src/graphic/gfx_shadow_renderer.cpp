@@ -8,7 +8,7 @@
 
 #include "core/core_time.h"
 
-#include "data/data_components_facet.h"
+#include "data/data_component_facet.h"
 #include "data/data_entity.h"
 #include "data/data_map.h"
 #include "data/data_ssao_component.h"
@@ -841,9 +841,9 @@ namespace
             // -----------------------------------------------------------------------------
             // Get graphic facet
             // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetComponentsFacet()->HasComponent<Dt::CSSAOComponent>())
+            if (rCurrentEntity.GetComponentFacet()->HasComponent<Dt::CSSAOComponent>())
             {
-                Dt::CSSAOComponent* pDataSSAOFacet = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CSSAOComponent>();
+                Dt::CSSAOComponent* pDataSSAOFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CSSAOComponent>();
 
                 assert(pDataSSAOFacet != 0);
 

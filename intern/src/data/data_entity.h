@@ -12,7 +12,7 @@ namespace Dt
 {
     class CHierarchyFacet;
     class CTransformationFacet;
-    class CComponentsFacet;
+    class CComponentFacet;
 } // namespace Dt
 
 namespace Dt
@@ -150,9 +150,9 @@ namespace Dt
         CTransformationFacet* GetTransformationFacet();
         const CTransformationFacet* GetTransformationFacet() const;
 
-        void SetComponentsFacet(CComponentsFacet* _pFacet);
-        CComponentsFacet* GetComponentsFacet();
-        const CComponentsFacet* GetComponentsFacet() const;
+        void SetComponentFacet(CComponentFacet* _pFacet);
+        CComponentFacet* GetComponentFacet();
+        const CComponentFacet* GetComponentFacet() const;
 
     public:
 
@@ -172,7 +172,7 @@ namespace Dt
         Dt::CEntityFolder*    m_pFolder;                                                          //< Pointer to folder of this entity
         CHierarchyFacet*      m_pHierarchyFacet;                                                  //< Contains hierarchical information of the entity (scene graph)
         CTransformationFacet* m_pTransformationFacet;                                             //< Contains transformation information depending on hierarchy
-        CComponentsFacet*     m_pComponentsFacet;                                                 //< Contains components of this entity
+        CComponentFacet*     m_pComponentsFacet;                                                 //< Contains components of this entity
         BID                   m_ID;                                                               //< A specific unique id of this entity inside the map
         std::string           m_Name;                                                             //< A name of the entity to search for inside scripts
         Base::AABB3Float      m_WorldAABB;                                                        //< Axis Aligned Bounding Box (AABB) of the entity in map for region bounding box calculations

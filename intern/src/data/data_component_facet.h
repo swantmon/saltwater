@@ -9,7 +9,7 @@
 
 namespace Dt
 {
-    class CComponentsFacet
+    class CComponentFacet
     {
     public:
 
@@ -24,8 +24,8 @@ namespace Dt
 
     public:
 
-        CComponentsFacet();
-        ~CComponentsFacet();
+        CComponentFacet();
+        ~CComponentFacet();
 
     protected:
 
@@ -52,7 +52,7 @@ namespace Dt
 namespace Dt
 {
     template<class T>
-    T* CComponentsFacet::GetComponent()
+    T* CComponentFacet::GetComponent()
     {
         for (auto Component : m_Components)
         {
@@ -68,7 +68,7 @@ namespace Dt
     // -----------------------------------------------------------------------------
 
     template<class T>
-    const T* CComponentsFacet::GetComponent() const
+    const T* CComponentFacet::GetComponent() const
     {
         for (auto Component : m_Components)
         {
@@ -84,7 +84,7 @@ namespace Dt
     // -----------------------------------------------------------------------------
 
     template<class T>
-    bool CComponentsFacet::HasComponent() const
+    bool CComponentFacet::HasComponent() const
     {
         return GetComponent<T>() != nullptr;
     }
@@ -92,7 +92,7 @@ namespace Dt
     // -----------------------------------------------------------------------------
 
     template<class T>
-    void CComponentsFacet::AddComponent(T* _pComponent)
+    void CComponentFacet::AddComponent(T* _pComponent)
     {
         assert(_pComponent != nullptr);
         assert(_pComponent->GetLinkedEntity() != nullptr);
@@ -103,7 +103,7 @@ namespace Dt
     // -----------------------------------------------------------------------------
 
     template<class T>
-    void CComponentsFacet::RemoveComponent(T* _pComponent)
+    void CComponentFacet::RemoveComponent(T* _pComponent)
     {
         assert(_pComponent != nullptr);
         assert(_pComponent->GetLinkedEntity() == nullptr);

@@ -6,7 +6,7 @@
 #include "base/base_uncopyable.h"
 
 #include "data/data_bloom_component.h"
-#include "data/data_components_facet.h"
+#include "data/data_component_facet.h"
 #include "data/data_entity.h"
 #include "data/data_map.h"
 
@@ -1048,9 +1048,9 @@ namespace
             // -----------------------------------------------------------------------------
             // Get graphic facet
             // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetComponentsFacet()->HasComponent<Dt::CBloomComponent>())
+            if (rCurrentEntity.GetComponentFacet()->HasComponent<Dt::CBloomComponent>())
             {
-                Dt::CBloomComponent* pDataBloomFacet = rCurrentEntity.GetComponentsFacet()->GetComponent<Dt::CBloomComponent>();
+                Dt::CBloomComponent* pDataBloomFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CBloomComponent>();
 
                 assert(pDataBloomFacet != 0);
 
