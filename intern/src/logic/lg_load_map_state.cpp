@@ -148,15 +148,15 @@ namespace
             pTransformationFacet->SetScale(glm::vec3(1.0f));
             pTransformationFacet->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
 
-            Dt::CCameraComponent& rFacet = Dt::CComponentManager::GetInstance().Allocate<Dt::CCameraComponent>();
+            Dt::CCameraComponent* pFacet = Dt::CComponentManager::GetInstance().Allocate<Dt::CCameraComponent>();
 
-            rFacet.SetMainCamera(true);
-            rFacet.SetProjectionType(Dt::CCameraComponent::External);
-            rFacet.SetClearFlag(Dt::CCameraComponent::Webcam);
+            pFacet->SetMainCamera(true);
+            pFacet->SetProjectionType(Dt::CCameraComponent::External);
+            pFacet->SetClearFlag(Dt::CCameraComponent::Webcam);
 
-            rEntity.AddComponent(rFacet);
+            rEntity.AddComponent(pFacet);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(Component, Dt::CCameraComponent::DirtyCreate);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pFacet, Dt::CCameraComponent::DirtyCreate);
 
             Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
