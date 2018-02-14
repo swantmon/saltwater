@@ -893,7 +893,9 @@ namespace
         {
             Dt::CCameraComponent* pDtComponent = static_cast<Dt::CCameraComponent*>(Component);
 
-            if (!(pDtComponent->IsActive() && pDtComponent->GetHostEntity() != nullptr && pDtComponent->GetHostEntity()->IsActive())) continue;
+            assert(pDtComponent->GetHostEntity());
+
+            if (!pDtComponent->IsActive()) continue;
 
             if (pDtComponent->IsMainCamera())
             {

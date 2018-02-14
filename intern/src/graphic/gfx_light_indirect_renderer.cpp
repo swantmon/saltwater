@@ -415,7 +415,9 @@ namespace
             Dt::CPointLightComponent*  pDataPointFacet    = static_cast<Dt::CPointLightComponent*>(Component);
             Gfx::CPointLightComponent* pGraphicPointFacet = Gfx::CComponentManager::GetInstance().GetComponent<Gfx::CPointLightComponent>(pDataPointFacet->GetID());
 
-            if (!(pDataPointFacet->IsActive() && pDataPointFacet->GetHostEntity() != nullptr && pDataPointFacet->GetHostEntity()->IsActive())) continue;
+            assert(pDataPointFacet->GetHostEntity());
+
+            if (!pDataPointFacet->IsActive()) continue;
 
             if (pDataPointFacet->GetShadowType() == Dt::CPointLightComponent::GlobalIllumination)
             {

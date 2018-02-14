@@ -830,7 +830,9 @@ namespace
         {
             Dt::CSSAOComponent* pDataSSAOFacet = static_cast<Dt::CSSAOComponent*>(Component);
 
-            if (!(pDataSSAOFacet->IsActive() && pDataSSAOFacet->GetHostEntity() != nullptr && pDataSSAOFacet->GetHostEntity()->IsActive())) continue;
+            assert(pDataSSAOFacet->GetHostEntity());
+
+            if (!pDataSSAOFacet->IsActive()) continue;
 
             SSSAORenderJob NewRenderJob;
 

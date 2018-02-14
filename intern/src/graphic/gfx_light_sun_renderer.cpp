@@ -395,7 +395,9 @@ namespace
             Dt::CSunComponent*  pDataSunFacet    = static_cast<Dt::CSunComponent*>(DataComponent);
             Gfx::CSunComponent* pGraphicSunFacet = CComponentManager::GetInstance().GetComponent<Gfx::CSunComponent>(pDataSunFacet->GetID());
 
-            if (!(pDataSunFacet->IsActive() && pDataSunFacet->GetHostEntity() != nullptr && pDataSunFacet->GetHostEntity()->IsActive())) continue;
+            assert(pDataSunFacet->GetHostEntity());
+
+            if (!pDataSunFacet->IsActive()) continue;
 
             // -----------------------------------------------------------------------------
             // Set sun into a new render job

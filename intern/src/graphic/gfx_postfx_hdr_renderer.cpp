@@ -1039,7 +1039,9 @@ namespace
         {
             Dt::CBloomComponent* pDataBloomFacet = static_cast<Dt::CBloomComponent*>(Component);
 
-            if (!(pDataBloomFacet->IsActive() && pDataBloomFacet->GetHostEntity() != nullptr && pDataBloomFacet->GetHostEntity()->IsActive())) continue;
+            assert(pDataBloomFacet->GetHostEntity());
+
+            if (!pDataBloomFacet->IsActive()) continue;
 
             SBloomRenderJob NewRenderJob;
 

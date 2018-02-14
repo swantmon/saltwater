@@ -1820,7 +1820,9 @@ namespace
         {
             Dt::CPostAAComponent* pDtComponent = static_cast<Dt::CPostAAComponent*>(Component);
 
-            if (!(pDtComponent->IsActive() && pDtComponent->GetHostEntity() != nullptr && pDtComponent->GetHostEntity()->IsActive())) continue;
+            assert(pDtComponent->GetHostEntity());
+
+            if (!pDtComponent->IsActive()) continue;
 
             SPostAARenderJob NewRenderJob;
 

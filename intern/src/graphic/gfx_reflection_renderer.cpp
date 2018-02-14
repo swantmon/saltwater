@@ -1068,7 +1068,9 @@ namespace
             Dt::CLightProbeComponent*  pDataLightProbeFacet    = static_cast<Dt::CLightProbeComponent*>(Component);
             Gfx::CLightProbeComponent* pGraphicLightProbeFacet = Gfx::CComponentManager::GetInstance().GetComponent<Gfx::CLightProbeComponent>(pDataLightProbeFacet->GetID());
 
-            if (!(pDataLightProbeFacet->IsActive() && pDataLightProbeFacet->GetHostEntity() != nullptr && pDataLightProbeFacet->GetHostEntity()->IsActive())) continue;
+            assert(pDataLightProbeFacet->GetHostEntity());
+
+            if (!pDataLightProbeFacet->IsActive()) continue;
 
             // -----------------------------------------------------------------------------
             // Fill data
@@ -1106,7 +1108,9 @@ namespace
         {
             Dt::CSSRComponent* pDataSSRFacet = static_cast<Dt::CSSRComponent*>(Component);
 
-            if (!(pDataSSRFacet->IsActive() && pDataSSRFacet->GetHostEntity() != nullptr && pDataSSRFacet->GetHostEntity()->IsActive())) continue;
+            assert(pDataSSRFacet->GetHostEntity());
+
+            if (!pDataSSRFacet->IsActive()) continue;
 
             SSSRRenderJob NewRenderJob;
 
