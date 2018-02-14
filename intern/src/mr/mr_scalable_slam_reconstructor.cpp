@@ -1831,12 +1831,9 @@ namespace MR
     {
         if (Size > m_ClearVector.size())
         {
-            char Value = 0;
-            m_ClearVector.resize(Size, Value);
+            m_ClearVector.resize(Size, 0);
         }
-
-        (void)Size;
-
+        
         assert(Size > 0);
         assert(BufferPtr.IsValid());
 
