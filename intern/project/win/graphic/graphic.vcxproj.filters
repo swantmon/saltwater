@@ -133,9 +133,6 @@
     <ClCompile Include="..\..\..\src\graphic\gfx_performance.cpp">
       <Filter>ogl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_actor_renderer.cpp">
-      <Filter>engine\renderer</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_ar_renderer.cpp">
       <Filter>engine\renderer</Filter>
     </ClCompile>
@@ -235,6 +232,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_sun_component.cpp">
       <Filter>map\components\lights</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_mesh_renderer.cpp">
+      <Filter>engine\renderer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -409,9 +409,6 @@
     <ClInclude Include="..\..\..\src\graphic\gfx_performance.h">
       <Filter>engine</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_actor_renderer.h">
-      <Filter>engine\renderer</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_ar_renderer.h">
       <Filter>engine\renderer</Filter>
     </ClInclude>
@@ -529,6 +526,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_sun_component.h">
       <Filter>map\components\lights</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_mesh_renderer.h">
+      <Filter>engine\renderer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

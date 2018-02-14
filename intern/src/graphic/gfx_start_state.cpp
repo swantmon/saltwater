@@ -5,7 +5,6 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
-#include "graphic/gfx_actor_renderer.h"
 #include "graphic/gfx_ar_renderer.h"
 #include "graphic/gfx_area_light_manager.h"
 #include "graphic/gfx_background_renderer.h"
@@ -23,6 +22,7 @@
 #include "graphic/gfx_main.h"
 #include "graphic/gfx_material_manager.h"
 #include "graphic/gfx_mesh_manager.h"
+#include "graphic/gfx_mesh_renderer.h"
 #include "graphic/gfx_particle_renderer.h"
 #include "graphic/gfx_performance.h"
 #include "graphic/gfx_point_light_manager.h"
@@ -139,7 +139,7 @@ namespace
         ShadowRenderer       ::OnStart();
         FogRenderer          ::OnStart();
         ARRenderer           ::OnStart();
-        ActorRenderer        ::OnStart();
+        MeshRenderer         ::OnStart();
         ParticleRenderer     ::OnStart();
         PostFXHDR            ::OnStart();
         PostFX               ::OnStart();
@@ -161,7 +161,7 @@ namespace
         ShadowRenderer       ::OnSetupShader();
         FogRenderer          ::OnSetupShader();
         ARRenderer           ::OnSetupShader();
-        ActorRenderer        ::OnSetupShader();
+        MeshRenderer         ::OnSetupShader();
         ParticleRenderer     ::OnSetupShader();
         PostFXHDR            ::OnSetupShader();
         PostFX               ::OnSetupShader();
@@ -182,7 +182,7 @@ namespace
         ShadowRenderer       ::OnSetupKernels();
         FogRenderer          ::OnSetupKernels();
         ARRenderer           ::OnSetupKernels();
-        ActorRenderer        ::OnSetupKernels();
+        MeshRenderer         ::OnSetupKernels();
         ParticleRenderer     ::OnSetupKernels();
         PostFXHDR            ::OnSetupKernels();
         PostFX               ::OnSetupKernels();
@@ -203,7 +203,7 @@ namespace
         ShadowRenderer       ::OnSetupRenderTargets();
         FogRenderer          ::OnSetupRenderTargets();
         ARRenderer           ::OnSetupRenderTargets();
-        ActorRenderer        ::OnSetupRenderTargets();
+        MeshRenderer         ::OnSetupRenderTargets();
         ParticleRenderer     ::OnSetupRenderTargets();
         PostFXHDR            ::OnSetupRenderTargets();
         PostFX               ::OnSetupRenderTargets();
@@ -224,7 +224,7 @@ namespace
         ShadowRenderer       ::OnSetupStates();
         FogRenderer          ::OnSetupStates();
         ARRenderer           ::OnSetupStates();
-        ActorRenderer        ::OnSetupStates();
+        MeshRenderer         ::OnSetupStates();
         ParticleRenderer     ::OnSetupStates();
         PostFXHDR            ::OnSetupStates();
         PostFX               ::OnSetupStates();
@@ -245,7 +245,7 @@ namespace
         ShadowRenderer       ::OnSetupTextures();
         FogRenderer          ::OnSetupTextures();
         ARRenderer           ::OnSetupTextures();
-        ActorRenderer        ::OnSetupTextures();
+        MeshRenderer         ::OnSetupTextures();
         ParticleRenderer     ::OnSetupTextures();
         PostFXHDR            ::OnSetupTextures();
         PostFX               ::OnSetupTextures();
@@ -266,7 +266,7 @@ namespace
         ShadowRenderer       ::OnSetupBuffers();
         FogRenderer          ::OnSetupBuffers();
         ARRenderer           ::OnSetupBuffers();
-        ActorRenderer        ::OnSetupBuffers();
+        MeshRenderer         ::OnSetupBuffers();
         ParticleRenderer     ::OnSetupBuffers();
         PostFXHDR            ::OnSetupBuffers();
         PostFX               ::OnSetupBuffers();
@@ -287,7 +287,7 @@ namespace
         ShadowRenderer       ::OnSetupResources();
         FogRenderer          ::OnSetupResources();
         ARRenderer           ::OnSetupResources();
-        ActorRenderer        ::OnSetupResources();
+        MeshRenderer         ::OnSetupResources();
         ParticleRenderer     ::OnSetupResources();
         PostFXHDR            ::OnSetupResources();
         PostFX               ::OnSetupResources();
@@ -308,7 +308,7 @@ namespace
         ShadowRenderer       ::OnSetupModels();
         FogRenderer          ::OnSetupModels();
         ARRenderer           ::OnSetupModels();
-        ActorRenderer        ::OnSetupModels();
+        MeshRenderer         ::OnSetupModels();
         ParticleRenderer     ::OnSetupModels();
         PostFXHDR            ::OnSetupModels();
         PostFX               ::OnSetupModels();
@@ -329,7 +329,7 @@ namespace
         ShadowRenderer       ::OnSetupEnd();
         FogRenderer          ::OnSetupEnd();
         ARRenderer           ::OnSetupEnd();
-        ActorRenderer        ::OnSetupEnd();
+        MeshRenderer         ::OnSetupEnd();
         ParticleRenderer     ::OnSetupEnd();
         PostFXHDR            ::OnSetupEnd();
         PostFX               ::OnSetupEnd();

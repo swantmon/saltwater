@@ -18,7 +18,6 @@
 #include "data/data_mesh_component.h"
 #include "data/data_transformation_facet.h"
 
-#include "graphic/gfx_actor_renderer.h"
 #include "graphic/gfx_ar_renderer.h"
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_component_manager.h"
@@ -28,6 +27,7 @@
 #include "graphic/gfx_main.h"
 #include "graphic/gfx_mesh_component.h"
 #include "graphic/gfx_mesh_manager.h"
+#include "graphic/gfx_mesh_renderer.h"
 #include "graphic/gfx_performance.h"
 #include "graphic/gfx_selection_renderer.h"
 #include "graphic/gfx_shader_manager.h"
@@ -926,7 +926,7 @@ namespace
                 // -----------------------------------------------------------------------------
                 // Render hit proxies depending on flag
                 // -----------------------------------------------------------------------------
-                if (rTicket.m_Flags & SPickFlag::Actor) ActorRenderer::RenderHitProxy();
+                if (rTicket.m_Flags & SPickFlag::Actor) MeshRenderer::RenderHitProxy();
                 if (rTicket.m_Flags & SPickFlag::AR)    ARRenderer   ::RenderHitProxy();
 
                 // -----------------------------------------------------------------------------

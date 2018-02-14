@@ -12,15 +12,15 @@
 #include "data/data_mesh_component.h"
 #include "data/data_transformation_facet.h"
 
-#include "graphic/gfx_actor_renderer.h"
 #include "graphic/gfx_buffer_manager.h"
-#include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_component_manager.h"
+#include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_main.h"
 #include "graphic/gfx_material_manager.h"
 #include "graphic/gfx_mesh.h"
 #include "graphic/gfx_mesh_component.h"
 #include "graphic/gfx_mesh_manager.h"
+#include "graphic/gfx_mesh_renderer.h"
 #include "graphic/gfx_performance.h"
 #include "graphic/gfx_sampler_manager.h"
 #include "graphic/gfx_shader_manager.h"
@@ -36,14 +36,14 @@ using namespace Gfx;
 
 namespace
 {
-    class CGfxActorRenderer : private Base::CUncopyable
+    class CGfxMeshRenderer : private Base::CUncopyable
     {
-        BASE_SINGLETON_FUNC(CGfxActorRenderer)
+        BASE_SINGLETON_FUNC(CGfxMeshRenderer)
 
     public:
 
-        CGfxActorRenderer();
-        ~CGfxActorRenderer();
+        CGfxMeshRenderer();
+        ~CGfxMeshRenderer();
 
     public:
 
@@ -111,7 +111,7 @@ namespace
 
 namespace
 {
-    CGfxActorRenderer::CGfxActorRenderer()
+    CGfxMeshRenderer::CGfxMeshRenderer()
         : m_ModelBufferPtr          ()
         , m_SurfaceMaterialBufferPtr()
         , m_HitProxyPassPSBufferPtr ()
@@ -128,21 +128,21 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    CGfxActorRenderer::~CGfxActorRenderer()
+    CGfxMeshRenderer::~CGfxMeshRenderer()
     {
 
     }
 
     // -----------------------------------------------------------------------------
 
-    void CGfxActorRenderer::OnStart()
+    void CGfxMeshRenderer::OnStart()
     {
 
     }
 
     // -----------------------------------------------------------------------------
 
-    void CGfxActorRenderer::OnExit()
+    void CGfxMeshRenderer::OnExit()
     {
         m_ModelBufferPtr           = 0;
         m_SurfaceMaterialBufferPtr = 0;
@@ -168,27 +168,27 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxActorRenderer::OnSetupShader()
+    void CGfxMeshRenderer::OnSetupShader()
     {
         m_HitProxyShaderPtr = ShaderManager::CompilePS("fs_hitproxy.glsl", "main");
     }
 
     // -----------------------------------------------------------------------------
 
-    void CGfxActorRenderer::OnSetupKernels()
+    void CGfxMeshRenderer::OnSetupKernels()
     {
 
     }
 
     // -----------------------------------------------------------------------------
 
-    void CGfxActorRenderer::OnSetupRenderTargets()
+    void CGfxMeshRenderer::OnSetupRenderTargets()
     {
     }
 
     // -----------------------------------------------------------------------------
 
-    void CGfxActorRenderer::OnSetupStates()
+    void CGfxMeshRenderer::OnSetupStates()
     {
         CCameraPtr      CameraPtr              = ViewManager     ::GetMainCamera ();
         CViewPortSetPtr ViewPortSetPtr         = ViewManager     ::GetViewPortSet();
@@ -220,14 +220,14 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxActorRenderer::OnSetupTextures()
+    void CGfxMeshRenderer::OnSetupTextures()
     {
 
     }
 
     // -----------------------------------------------------------------------------
 
-    void CGfxActorRenderer::OnSetupBuffers()
+    void CGfxMeshRenderer::OnSetupBuffers()
     {
         SBufferDescriptor ConstanteBufferDesc;
 
@@ -268,48 +268,48 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxActorRenderer::OnSetupResources()
+    void CGfxMeshRenderer::OnSetupResources()
     {
 
     }
 
     // -----------------------------------------------------------------------------
 
-    void CGfxActorRenderer::OnSetupModels()
+    void CGfxMeshRenderer::OnSetupModels()
     {
     }
 
     // -----------------------------------------------------------------------------
 
-    void CGfxActorRenderer::OnSetupEnd()
-    {
-
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CGfxActorRenderer::OnReload()
+    void CGfxMeshRenderer::OnSetupEnd()
     {
 
     }
 
     // -----------------------------------------------------------------------------
 
-    void CGfxActorRenderer::OnNewMap()
+    void CGfxMeshRenderer::OnReload()
     {
 
     }
 
     // -----------------------------------------------------------------------------
 
-    void CGfxActorRenderer::OnUnloadMap()
+    void CGfxMeshRenderer::OnNewMap()
     {
 
     }
 
     // -----------------------------------------------------------------------------
 
-    void CGfxActorRenderer::Update()
+    void CGfxMeshRenderer::OnUnloadMap()
+    {
+
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxMeshRenderer::Update()
     {
         // -----------------------------------------------------------------------------
         // Set render jobs depending on camera. At the end we have to iterate throw
@@ -321,7 +321,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxActorRenderer::Render()
+    void CGfxMeshRenderer::Render()
     {
         if (m_DeferredRenderJobs.size() == 0) return;
 
@@ -439,7 +439,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxActorRenderer::RenderHitProxy()
+    void CGfxMeshRenderer::RenderHitProxy()
     {
         if (m_DeferredRenderJobs.size() == 0) return;
 
@@ -519,7 +519,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxActorRenderer::BuildRenderJobs()
+    void CGfxMeshRenderer::BuildRenderJobs()
     {
         // -----------------------------------------------------------------------------
         // That is an sort object for sorting render jobs. They will be sorted from
@@ -609,123 +609,123 @@ namespace
 
 namespace Gfx
 {
-namespace ActorRenderer
+namespace MeshRenderer
 {
     void OnStart()
     {
-        CGfxActorRenderer::GetInstance().OnStart();
+        CGfxMeshRenderer::GetInstance().OnStart();
     }
 
     // -----------------------------------------------------------------------------
 
     void OnExit()
     {
-        CGfxActorRenderer::GetInstance().OnExit();
+        CGfxMeshRenderer::GetInstance().OnExit();
     }
 
     // -----------------------------------------------------------------------------
 
     void OnSetupShader()
     {
-        CGfxActorRenderer::GetInstance().OnSetupShader();
+        CGfxMeshRenderer::GetInstance().OnSetupShader();
     }
 
     // -----------------------------------------------------------------------------
 
     void OnSetupKernels()
     {
-        CGfxActorRenderer::GetInstance().OnSetupKernels();
+        CGfxMeshRenderer::GetInstance().OnSetupKernels();
     }
 
     // -----------------------------------------------------------------------------
 
     void OnSetupRenderTargets()
     {
-        CGfxActorRenderer::GetInstance().OnSetupRenderTargets();
+        CGfxMeshRenderer::GetInstance().OnSetupRenderTargets();
     }
 
     // -----------------------------------------------------------------------------
 
     void OnSetupStates()
     {
-        CGfxActorRenderer::GetInstance().OnSetupStates();
+        CGfxMeshRenderer::GetInstance().OnSetupStates();
     }
 
     // -----------------------------------------------------------------------------
 
     void OnSetupTextures()
     {
-        CGfxActorRenderer::GetInstance().OnSetupTextures();
+        CGfxMeshRenderer::GetInstance().OnSetupTextures();
     }
 
     // -----------------------------------------------------------------------------
 
     void OnSetupBuffers()
     {
-        CGfxActorRenderer::GetInstance().OnSetupBuffers();
+        CGfxMeshRenderer::GetInstance().OnSetupBuffers();
     }
 
     // -----------------------------------------------------------------------------
 
     void OnSetupResources()
     {
-        CGfxActorRenderer::GetInstance().OnSetupResources();
+        CGfxMeshRenderer::GetInstance().OnSetupResources();
     }
 
     // -----------------------------------------------------------------------------
 
     void OnSetupModels()
     {
-        CGfxActorRenderer::GetInstance().OnSetupModels();
+        CGfxMeshRenderer::GetInstance().OnSetupModels();
     }
 
     // -----------------------------------------------------------------------------
 
     void OnSetupEnd()
     {
-        CGfxActorRenderer::GetInstance().OnSetupEnd();
+        CGfxMeshRenderer::GetInstance().OnSetupEnd();
     }
 
     // -----------------------------------------------------------------------------
 
     void OnReload()
     {
-        CGfxActorRenderer::GetInstance().OnReload();
+        CGfxMeshRenderer::GetInstance().OnReload();
     }
 
     // -----------------------------------------------------------------------------
 
     void OnNewMap()
     {
-        CGfxActorRenderer::GetInstance().OnNewMap();
+        CGfxMeshRenderer::GetInstance().OnNewMap();
     }
 
     // -----------------------------------------------------------------------------
 
     void OnUnloadMap()
     {
-        CGfxActorRenderer::GetInstance().OnUnloadMap();
+        CGfxMeshRenderer::GetInstance().OnUnloadMap();
     }
 
     // -----------------------------------------------------------------------------
 
     void Update()
     {
-        CGfxActorRenderer::GetInstance().Update();
+        CGfxMeshRenderer::GetInstance().Update();
     }
 
     // -----------------------------------------------------------------------------
 
     void Render()
     {
-        CGfxActorRenderer::GetInstance().Render();
+        CGfxMeshRenderer::GetInstance().Render();
     }
 
     // -----------------------------------------------------------------------------
 
     void RenderHitProxy()
     {
-        CGfxActorRenderer::GetInstance().RenderHitProxy();
+        CGfxMeshRenderer::GetInstance().RenderHitProxy();
     }
-} // namespace ActorRenderer
+} // namespace MeshRenderer
 } // namespace Gfx

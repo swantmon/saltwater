@@ -5,7 +5,6 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
-#include "graphic/gfx_actor_renderer.h"
 #include "graphic/gfx_ar_renderer.h"
 #include "graphic/gfx_area_light_manager.h"
 #include "graphic/gfx_background_renderer.h"
@@ -25,6 +24,7 @@
 #include "graphic/gfx_main.h"
 #include "graphic/gfx_material_manager.h"
 #include "graphic/gfx_mesh_manager.h"
+#include "graphic/gfx_mesh_renderer.h"
 #include "graphic/gfx_particle_renderer.h"
 #include "graphic/gfx_performance.h"
 #include "graphic/gfx_point_light_manager.h"
@@ -80,7 +80,7 @@ namespace
         ShadowRenderer       ::OnExit();
         FogRenderer          ::OnExit();
         HistogramRenderer    ::OnExit();
-        ActorRenderer        ::OnExit();
+        MeshRenderer        ::OnExit();
         ARRenderer           ::OnExit();
         ParticleRenderer     ::OnExit();
         PostFXHDR            ::OnExit();
