@@ -25,14 +25,14 @@ namespace MR
 		float m_TruncatedDistance;
 		int m_MaxIntegrationWeight;
 		int m_PyramidLevelCount;
-        std::array<int, MAX_PYRAMIDLEVELS> m_PyramidLevelIterations;
+        glm::ivec3 m_PyramidLevelIterations;
 		glm::ivec2 m_DepthThreshold;
 		bool m_CaptureColor;
 
 		bool m_IsScalable;
 
-		std::array<int, GRID_LEVELS> m_GridResolutions;
-        std::array<int, GRID_LEVELS> m_VoxelsPerGrid;
+		glm::ivec3  m_GridResolutions;
+        glm::ivec3  m_VoxelsPerGrid;
 
         bool m_UseFullVolumeIntegration;
         bool m_UseReverseIntegration;

@@ -1625,7 +1625,7 @@ namespace MR
         ConstantBufferDesc.m_Binding = CBuffer::ConstantBuffer;
         ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
         ConstantBufferDesc.m_NumberOfBytes = sizeof(float) * MR::SReconstructionSettings::GRID_LEVELS;
-        ConstantBufferDesc.m_pBytes = m_ReconstructionSettings.m_GridResolutions.data();
+        ConstantBufferDesc.m_pBytes = &m_ReconstructionSettings.m_GridResolutions;
         m_HierarchyConstantBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
 
         ConstantBufferDesc.m_Usage = CBuffer::GPURead;

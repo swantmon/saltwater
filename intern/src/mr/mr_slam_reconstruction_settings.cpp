@@ -36,17 +36,9 @@ namespace MR
         s_DefaultSettings.m_VolumeSize = Base::CProgramParameters::GetInstance().Get("mr:slam:metrics:volume_size", 4.0f);
         s_DefaultSettings.m_VolumeResolution = Base::CProgramParameters::GetInstance().Get("mr:slam:metrics:volume_resolution", 512);
 
-        std::vector<int> PyramidLevelIterations = Base::CProgramParameters::GetInstance().Get<std::vector<int>>("mr:slam:tracking_iterations", { 10, 5, 4 });
-
-        assert(PyramidLevelIterations.size() == s_DefaultSettings.m_PyramidLevelCount);
-
-        s_DefaultSettings.m_PyramidLevelIterations[0] = PyramidLevelIterations[0];
-        s_DefaultSettings.m_PyramidLevelIterations[1] = PyramidLevelIterations[1];
-        s_DefaultSettings.m_PyramidLevelIterations[2] = PyramidLevelIterations[2];
-
-        s_DefaultSettings.m_GridResolutions[0] = 16;
-        s_DefaultSettings.m_GridResolutions[1] = 8;
-        s_DefaultSettings.m_GridResolutions[2] = 8;
+        s_DefaultSettings.m_PyramidLevelIterations = Base::CProgramParameters::GetInstance().Get("mr:slam:tracking_iterations", glm::ivec3(10, 5, 4));
+        
+        s_DefaultSettings.m_GridResolutions = glm::ivec3(16, 8, 8);
 
         if (s_DefaultSettings.m_IsScalable)
         {
