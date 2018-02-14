@@ -6,6 +6,7 @@
 #include "base/base_uncopyable.h"
 
 #include "data/data_component_facet.h"
+#include "data/data_component_manager.h"
 #include "data/data_entity.h"
 #include "data/data_map.h"
 #include "data/data_mesh_component.h"
@@ -538,24 +539,20 @@ namespace
         // -----------------------------------------------------------------------------
         m_DeferredRenderJobs.clear();
 
-        // -----------------------------------------------------------------------------
-        // Iterate throw every entity inside this map
-        // TODO: Visibility culling!, Sort objects by deferred and forward rendering
-        // -----------------------------------------------------------------------------
-        Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Dynamic);
-        Dt::Map::CEntityIterator EndOfEntities = Dt::Map::EntitiesEnd();
+        auto DataMeshComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CMeshComponent>();
 
-        for (; CurrentEntity != EndOfEntities; )
+        for (auto Component : DataMeshComponents)
         {
-            Dt::CEntity& rCurrentEntity = *CurrentEntity;
+            Dt::CMeshComponent* pDtMeshComponent = static_cast<Dt::CMeshComponent*>(Component);
+
+            const Dt::CEntity& rCurrentEntity = *pDtMeshComponent->GetHostEntity();
 
             // -----------------------------------------------------------------------------
             // Get graphic facet
             // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetLayer() == Dt::SEntityLayer::Default && rCurrentEntity.GetComponentFacet()->HasComponent<Dt::CMeshComponent>())
+            if (rCurrentEntity.GetLayer() == Dt::SEntityLayer::Default)
             {
-                Dt::CMeshComponent*  pDtComponent  = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CMeshComponent>();
-                Gfx::CMeshComponent* pGfxComponent = Gfx::CComponentManager::GetInstance().GetComponent<Gfx::CMeshComponent>(pDtComponent->GetID());
+                Gfx::CMeshComponent* pGfxComponent = Gfx::CComponentManager::GetInstance().GetComponent<Gfx::CMeshComponent>(pDtMeshComponent->GetID());
 
                 CMeshPtr MeshPtr = pGfxComponent->GetMesh();
 
@@ -591,20 +588,15 @@ namespace
                     // -----------------------------------------------------------------------------
                     SRenderJob NewRenderJob;
 
-                    NewRenderJob.m_SurfaceAttributes = SurfacePtr->GetKey().m_Key;
-                    NewRenderJob.m_EntityID = CurrentEntity->GetID();
-                    NewRenderJob.m_SurfacePtr = SurfacePtr;
+                    NewRenderJob.m_SurfaceAttributes  = SurfacePtr->GetKey().m_Key;
+                    NewRenderJob.m_EntityID           = rCurrentEntity.GetID();
+                    NewRenderJob.m_SurfacePtr         = SurfacePtr;
                     NewRenderJob.m_SurfaceMaterialPtr = MaterialPtr;
-                    NewRenderJob.m_ModelMatrix = rCurrentEntity.GetTransformationFacet()->GetWorldMatrix();
+                    NewRenderJob.m_ModelMatrix        = rCurrentEntity.GetTransformationFacet()->GetWorldMatrix();
 
                     m_DeferredRenderJobs.push_back(NewRenderJob);
                 }
             }
-
-            // -----------------------------------------------------------------------------
-            // Next entity
-            // -----------------------------------------------------------------------------
-            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Dynamic);
         }
 
         // -----------------------------------------------------------------------------
