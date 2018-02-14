@@ -63,6 +63,34 @@ namespace Base
     // Converting between json and glm types
     ////////////////////////////////////////////////////////////////////////////////////////////
 
+    template<typename T>
+    T Transpose(const T& _rMatrix)
+    {
+        const int Width = sizeof(_rMatrix[0]) / sizeof(T::value_type);
+        T Result;
+
+        // Check matrix is quadratic
+        static_assert(sizeof(_rMatrix[0]) == sizeof(T::value_type) ||
+            (sizeof(_rMatrix) / sizeof(T::value_type)) == (Width * Width),
+            "Storing non quadratics matrices is currently not supported!");
+        
+        auto pSource = glm::value_ptr(_rMatrix);
+        auto pDestination = glm::value_ptr(Result);
+
+        for (int i = 0; i < Width; ++ i)
+        {
+            for (int j = 0; j < Width; ++ j)
+            {
+                assert(i * Width + j < Width * Width);
+                assert(j * Width + i < Width * Width);
+
+                pDestination[i * Width + j] = pSource[j * Width + i];
+            }
+        }
+
+        return Result;
+    }
+
     template<int N, typename T>
     inline void InternToJson(nlohmann::json& j, const T& _rValue)
     {
@@ -87,7 +115,7 @@ namespace Base
         }
         else
         {
-            const auto TransposedMatrix = glm::transpose(_rValue);
+            const auto TransposedMatrix = Transpose(_rValue);
 
             const auto* pData = glm::value_ptr(TransposedMatrix);
 
@@ -143,7 +171,7 @@ namespace Base
                 }
             }
 
-            _rValue = glm::transpose(_rValue);
+            _rValue = Transpose(_rValue);
         }
     }
 }
