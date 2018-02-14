@@ -536,14 +536,14 @@ namespace MR
         m_GridCountersCSPtr        = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_grid_counters.glsl"                       , "main", DefineString.c_str());
         m_RasterizeRootVolumeVSPtr = ShaderManager::CompileVS("scalable_kinect_fusion\\rasterization\\vs_rasterize_rootvolume.glsl" , "main", DefineString.c_str());
         m_RasterizeRootVolumeFSPtr = ShaderManager::CompilePS("scalable_kinect_fusion\\rasterization\\fs_rasterize_rootvolume.glsl" , "main", DefineString.c_str());
+        m_PointCloudVSPtr          = ShaderManager::CompileVS("scalable_kinect_fusion\\rasterization\\vs_rootgrid.glsl"             , "main", DefineString.c_str());
+        m_PointCloudGSPtr          = ShaderManager::CompileGS("scalable_kinect_fusion\\rasterization\\gs_rootgrid.glsl"             , "main", DefineString.c_str());
+        m_PointCloudFSPtr          = ShaderManager::CompilePS("scalable_kinect_fusion\\rasterization\\fs_rootgrid.glsl"             , "main", DefineString.c_str());
+        m_PointsRootGridCSPtr      = ShaderManager::CompileCS("scalable_kinect_fusion\\rasterization\\cs_gather.glsl"               , "main", DefineString.c_str());
+        m_PointsFullCSPtr          = ShaderManager::CompileCS("scalable_kinect_fusion\\rasterization\\cs_gather_full.glsl"          , "main", DefineString.c_str());
         m_IntegrateRootGridCSPtr   = ShaderManager::CompileCS("scalable_kinect_fusion\\integration\\cs_integrate_rootgrid.glsl"     , "main", DefineString.c_str());
         m_IntegrateLevel1GridCSPtr = ShaderManager::CompileCS("scalable_kinect_fusion\\integration\\cs_integrate_level1grid.glsl"   , "main", DefineString.c_str());
         m_IntegrateTSDFCSPtr       = ShaderManager::CompileCS("scalable_kinect_fusion\\integration\\cs_integrate_tsdf.glsl"         , "main", DefineString.c_str());
-        m_PointsRootGridVSPtr      = ShaderManager::CompileVS("scalable_kinect_fusion\\rasterization_reverse\\vs_rootgrid.glsl"     , "main", DefineString.c_str());
-        m_PointsRootGridGSPtr      = ShaderManager::CompileGS("scalable_kinect_fusion\\rasterization_reverse\\gs_rootgrid.glsl"     , "main", DefineString.c_str());
-        m_PointsRootGridFSPtr      = ShaderManager::CompilePS("scalable_kinect_fusion\\rasterization_reverse\\fs_rootgrid.glsl"     , "main", DefineString.c_str());
-        m_PointsRootGridCSPtr      = ShaderManager::CompileCS("scalable_kinect_fusion\\rasterization_reverse\\cs_gather.glsl"       , "main", DefineString.c_str());
-        m_PointsFullCSPtr          = ShaderManager::CompileCS("scalable_kinect_fusion\\rasterization_reverse\\cs_gather_full.glsl"  , "main", DefineString.c_str());
         m_FillIndirectBufferCSPtr  = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_fill_indirect.glsl"                       , "main", DefineString.c_str());
 
         SInputElementDescriptor InputLayoutDesc = {};
@@ -654,25 +654,6 @@ namespace MR
         ContextManager::Dispatch(Count, 1, 1);
     }
 
-    // -----------------------------------------------------------------------------
-
-    void CScalableSLAMReconstructor::GatherGridCounters(unsigned int Count, CBufferPtr CounterBuffer, CBufferPtr QueueBuffer, CBufferPtr IndirectBuffer)
-    {
-        ContextManager::Barrier();
-
-        ContextManager::SetShaderCS(m_GridCountersCSPtr);
-
-        SIndirectBuffers IndirectBufferData = {};
-        IndirectBufferData.m_Indexed.m_IndexCount = 36;
-        BufferManager::UploadBufferData(IndirectBuffer, &IndirectBufferData);
-
-        ContextManager::SetResourceBuffer(0, CounterBuffer);
-        ContextManager::SetResourceBuffer(1, IndirectBuffer);
-        ContextManager::SetResourceBuffer(2, QueueBuffer);
-
-        ContextManager::Dispatch(Count, 1, 1);
-    }
-
 	// -----------------------------------------------------------------------------
     
     void CScalableSLAMReconstructor::CreateIntegrationQueues(std::vector<uint32_t>& rVolumeQueue)
@@ -726,9 +707,9 @@ namespace MR
         ContextManager::SetTargetSet(m_FullVolumeTargetSetPtr);
         ContextManager::SetViewPortSet(m_FullVolumeViewPort);
 
-        ContextManager::SetShaderVS(m_PointsRootGridVSPtr);
-        ContextManager::SetShaderPS(m_PointsRootGridGSPtr);
-        ContextManager::SetShaderPS(m_PointsRootGridFSPtr);
+        ContextManager::SetShaderVS(m_PointCloudVSPtr);
+        ContextManager::SetShaderPS(m_PointCloudGSPtr);
+        ContextManager::SetShaderPS(m_PointCloudFSPtr);
         ContextManager::Barrier();
         glEnable(GL_CULL_FACE);
         glCullFace(GL_FRONT);
@@ -748,7 +729,7 @@ namespace MR
         {
             auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
 
-            RasterizeFullVolumeReverse(rRootVolume);
+            RasterizePointCloud(rRootVolume);
 
             ContextManager::SetShaderCS(m_PointsFullCSPtr);
 
@@ -942,7 +923,7 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CScalableSLAMReconstructor::RasterizeFullVolumeReverse(SRootVolume& rRootGrid)
+    void CScalableSLAMReconstructor::RasterizePointCloud(SRootVolume& rRootGrid)
     {
         ////////////////////////////////////////////////////////////////////////////////
         // Render point cloud into 3D texture
@@ -950,9 +931,9 @@ namespace MR
 
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
 
-        ContextManager::SetShaderVS(m_PointsRootGridVSPtr);
-        ContextManager::SetShaderGS(m_PointsRootGridGSPtr);
-        ContextManager::SetShaderPS(m_PointsRootGridFSPtr);
+        ContextManager::SetShaderVS(m_PointCloudVSPtr);
+        ContextManager::SetShaderGS(m_PointCloudGSPtr);
+        ContextManager::SetShaderPS(m_PointCloudFSPtr);
 
         SPointRasterization BufferData;
 

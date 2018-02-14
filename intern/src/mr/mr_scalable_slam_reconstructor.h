@@ -181,7 +181,7 @@ namespace MR
         void CreateIntegrationQueues(std::vector<uint32_t>& rVolumeQueue);
         void IntegrateHierarchies(std::vector<uint32_t>& rVolumeQueue);
         
-        void RasterizeFullVolumeReverse(SRootVolume& rRootGrid);
+        void RasterizePointCloud(SRootVolume& rRootGrid);
 
         void ClearBuffer(Gfx::CBufferPtr BufferPtr);
         void ClearBuffer(Gfx::CBufferPtr BufferPtr, size_t Size);
@@ -198,7 +198,6 @@ namespace MR
         void CreateReferencePyramid();
         void RasterizeRootVolumes();
         void GatherVolumeCounters(unsigned int Count, Gfx::CBufferPtr CounterBufferPtr, Gfx::CBufferPtr QueueBuffer, Gfx::CBufferPtr IndirectBufferPtr);
-        void GatherGridCounters(unsigned int Count, Gfx::CBufferPtr CounterBufferPtr, Gfx::CBufferPtr QueueBuffer, Gfx::CBufferPtr IndirectBufferPtr);
         
         void Raycast();
         void CreateRaycastPyramid();
@@ -261,9 +260,9 @@ namespace MR
         Gfx::CShaderPtr m_RasterizeRootVolumeFSPtr;
         Gfx::CShaderPtr m_GridCountersCSPtr;
         
-        Gfx::CShaderPtr m_PointsRootGridVSPtr;
-        Gfx::CShaderPtr m_PointsRootGridGSPtr;
-        Gfx::CShaderPtr m_PointsRootGridFSPtr;
+        Gfx::CShaderPtr m_PointCloudVSPtr;
+        Gfx::CShaderPtr m_PointCloudGSPtr;
+        Gfx::CShaderPtr m_PointCloudFSPtr;
         Gfx::CShaderPtr m_PointsRootGridCSPtr;
         Gfx::CShaderPtr m_PointsFullCSPtr;
 
