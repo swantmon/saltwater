@@ -81,7 +81,7 @@ namespace
 
     private:
 
-        void OnDirtyComponent(Base::ID _TypeID, Dt::IComponent* _pComponent);
+        void OnDirtyComponent(Dt::IComponent* _pComponent);
 
         void FilterTexture(Gfx::CTexturePtr _TexturePtr, Gfx::CTexturePtr _OutputTexturePtr);
     };
@@ -208,7 +208,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxAreaLightManager::OnDirtyComponent(Base::ID _TypeID, Dt::IComponent* _pComponent)
+    void CGfxAreaLightManager::OnDirtyComponent(Dt::IComponent* _pComponent)
     {
         // -----------------------------------------------------------------------------
         // Vars
@@ -218,7 +218,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Only if component has changed
         // -----------------------------------------------------------------------------
-        if (_TypeID != Base::CTypeInfo::GetTypeID<Dt::CAreaLightComponent>()) return;
+        if (_pComponent->GetTypeID() != Base::CTypeInfo::GetTypeID<Dt::CAreaLightComponent>()) return;
 
         Dt::CAreaLightComponent* pAreaLightComponent = static_cast<Dt::CAreaLightComponent*>(_pComponent);
 

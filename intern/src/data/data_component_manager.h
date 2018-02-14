@@ -20,7 +20,7 @@ namespace Dt
 
     public:
 
-        typedef std::function<void(Base::ID _TypeID, Dt::IComponent* _pComponent) > CComponentDelegate;
+        typedef std::function<void(Dt::IComponent* _pComponent) > CComponentDelegate;
 
     public:
 
@@ -50,7 +50,7 @@ namespace Dt
     };
 } // namespace Dt
 
-#define DATA_DIRTY_COMPONENT_METHOD(_Method) std::bind(_Method, this, std::placeholders::_1, std::placeholders::_2)
+#define DATA_DIRTY_COMPONENT_METHOD(_Method) std::bind(_Method, this, std::placeholders::_1)
 
 namespace Dt
 {
@@ -75,7 +75,7 @@ namespace Dt
 
         for (auto Delegate : m_ComponentDelegates)
         {
-            Delegate(_pComponent->GetTypeID(), _pComponent);
+            Delegate(_pComponent);
         }
     }
 } // namespace Dt

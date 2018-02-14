@@ -104,9 +104,7 @@ namespace
 
     private:
 
-        void OnDirtyComponent(Base::ID _TypeID, Dt::IComponent* _pComponent);
-
-        CInternComponent& AllocatePointLightFacet();
+        void OnDirtyComponent(Dt::IComponent* _pComponent);
 
         void CreateRSM(unsigned int _Size, CInternComponent* _pInternLight);
 
@@ -311,9 +309,9 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxPointLightManager::OnDirtyComponent(Base::ID _TypeID, Dt::IComponent* _pComponent)
+    void CGfxPointLightManager::OnDirtyComponent(Dt::IComponent* _pComponent)
     {
-        if (_TypeID != Base::CTypeInfo::GetTypeID<Dt::CPointLightComponent>()) return;
+        if (_pComponent->GetTypeID() != Base::CTypeInfo::GetTypeID<Dt::CPointLightComponent>()) return;
 
         Dt::CPointLightComponent* pPointLightComponent = static_cast<Dt::CPointLightComponent*>(_pComponent);
 

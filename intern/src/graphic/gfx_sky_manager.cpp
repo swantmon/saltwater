@@ -192,7 +192,7 @@ namespace
 
     private:
 
-        void OnDirtyComponent(Base::ID _TypeID, Dt::IComponent* _pComponent);
+        void OnDirtyComponent(Dt::IComponent* _pComponent);
 
         void RenderSkybox(Dt::CSkyComponent* _pDataSkyFacet, CInternSkyFacet* _pOutput);
 
@@ -655,9 +655,9 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxSkyManager::OnDirtyComponent(Base::ID _TypeID, Dt::IComponent* _pComponent)
+    void CGfxSkyManager::OnDirtyComponent(Dt::IComponent* _pComponent)
     {
-        if (_TypeID != Base::CTypeInfo::GetTypeID<Dt::CSkyComponent>()) return;
+        if (_pComponent->GetTypeID() != Base::CTypeInfo::GetTypeID<Dt::CSkyComponent>()) return;
 
         Dt::CSkyComponent* pSkyComponent = static_cast<Dt::CSkyComponent*>(_pComponent);
 

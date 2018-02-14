@@ -201,7 +201,7 @@ namespace
 
         void SetVertexShaderOfSurface(CInternSurface& _rSurface);
 
-        void OnDirtyComponent(Base::ID _TypeID, Dt::IComponent* _pComponent);
+        void OnDirtyComponent(Dt::IComponent* _pComponent);
     };
 } // namespace
 
@@ -1374,9 +1374,9 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxMeshManager::OnDirtyComponent(Base::ID _TypeID, Dt::IComponent* _pComponent)
+    void CGfxMeshManager::OnDirtyComponent(Dt::IComponent* _pComponent)
     {
-        if (_TypeID != Base::CTypeInfo::GetTypeID<Dt::CMeshComponent>()) return;
+        if (_pComponent->GetTypeID() != Base::CTypeInfo::GetTypeID<Dt::CMeshComponent>()) return;
 
         Dt::CMeshComponent* pMeshComponent = static_cast<Dt::CMeshComponent*>(_pComponent);
 
@@ -1398,7 +1398,7 @@ namespace
             CInternMeshComponent* pGfxMeshComponent = CComponentManager::GetInstance().Allocate<CInternMeshComponent>(pMeshComponent->GetID());
 
             // -----------------------------------------------------------------------------
-            // Prepare storage data : Model
+            // Prepare storage data : Mesh
             // -----------------------------------------------------------------------------
             SMeshDescriptor ModelDesc;
 

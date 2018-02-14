@@ -55,7 +55,7 @@ namespace
         
     private:
 
-        void OnDirtyComponent(Base::ID _TypeID, Dt::IComponent* _pComponent);
+        void OnDirtyComponent(Dt::IComponent* _pComponent);
     };
 } // namespace
 
@@ -94,9 +94,9 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxCameraFacetManager::OnDirtyComponent(Base::ID _TypeID, Dt::IComponent* _pComponent)
+    void CGfxCameraFacetManager::OnDirtyComponent(Dt::IComponent* _pComponent)
     {
-        if (_TypeID != Base::CTypeInfo::GetTypeID<Dt::CCameraComponent>()) return;
+        if (_pComponent->GetTypeID() != Base::CTypeInfo::GetTypeID<Dt::CCameraComponent>()) return;
 
         Dt::CCameraComponent* pCameraComponent = static_cast<Dt::CCameraComponent*>(_pComponent);
 

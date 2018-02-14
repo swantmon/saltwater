@@ -94,7 +94,7 @@ namespace
         
     private:
 
-        void OnDirtyComponent(Base::ID _TypeID, Dt::IComponent* _pComponent);
+        void OnDirtyComponent(Dt::IComponent* _pComponent);
 
         void CreateSM(unsigned int _Size, CInternSunComponent* _pInternLight);
 
@@ -239,9 +239,9 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxSunManager::OnDirtyComponent(Base::ID _TypeID, Dt::IComponent* _pComponent)
+    void CGfxSunManager::OnDirtyComponent(Dt::IComponent* _pComponent)
     {
-        if (_TypeID != Base::CTypeInfo::GetTypeID<Dt::CSunComponent>()) return;
+        if (_pComponent->GetTypeID() != Base::CTypeInfo::GetTypeID<Dt::CSunComponent>()) return;
 
         Dt::CSunComponent* pSunComponent = static_cast<Dt::CSunComponent*>(_pComponent);
 

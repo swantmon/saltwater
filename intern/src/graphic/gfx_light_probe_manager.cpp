@@ -187,7 +187,7 @@ namespace
 
     private:
 
-        void OnDirtyComponent(Base::ID _TypeID, Dt::IComponent* _pComponent);
+        void OnDirtyComponent(Dt::IComponent* _pComponent);
 
         CInternComponent* AllocateLightProbeFacet(Base::ID _ID, unsigned int _SpecularFaceSize, unsigned int _DiffuseFaceSize);
 
@@ -477,9 +477,9 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxLightProbeManager::OnDirtyComponent(Base::ID _TypeID, Dt::IComponent* _pComponent)
+    void CGfxLightProbeManager::OnDirtyComponent(Dt::IComponent* _pComponent)
     {
-        if (_TypeID != Base::CTypeInfo::GetTypeID<Dt::CLightProbeComponent>()) return;
+        if (_pComponent->GetTypeID() != Base::CTypeInfo::GetTypeID<Dt::CLightProbeComponent>()) return;
 
         Dt::CLightProbeComponent* pLightProbeComponent = static_cast<Dt::CLightProbeComponent*>(_pComponent);
 
