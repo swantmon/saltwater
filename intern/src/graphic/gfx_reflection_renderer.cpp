@@ -1061,6 +1061,8 @@ namespace
         // -----------------------------------------------------------------------------
         // Fill render jobs
         // -----------------------------------------------------------------------------
+        IndexOfLight = 0;
+
         auto DataComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CLightProbeComponent>();
 
         for (auto Component : DataComponents)
@@ -1096,6 +1098,14 @@ namespace
             NewRenderJob.m_Texture2Ptr = pGraphicLightProbeFacet->GetDepthPtr();
 
             m_LightProbeRenderJobs.push_back(NewRenderJob);
+
+            // -----------------------------------------------------------------------------
+            // Check index
+            // -----------------------------------------------------------------------------
+            if (IndexOfLight == s_MaxNumberOfProbes)
+            {
+                break;
+            }
         }
 
         BufferManager::UploadBufferData(m_ProbePropertiesBufferPtr, &LightBuffer);
