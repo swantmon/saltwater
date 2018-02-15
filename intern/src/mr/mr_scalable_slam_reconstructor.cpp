@@ -544,19 +544,35 @@ namespace MR
         m_IntegrateTSDFCSPtr       = ShaderManager::CompileCS("scalable_kinect_fusion\\integration\\cs_integrate_tsdf.glsl"         , "main", DefineString.c_str());
         m_FillIndirectBufferCSPtr  = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_fill_indirect.glsl"                       , "main", DefineString.c_str());
 
-        for (int i = 0; i < 3; ++ i)
+        if (m_UseShuffleIntrinsics)
         {
-            const int ReductionSummandsX = DivUp(m_pRGBDCameraControl->GetDepthWidth() >> i, g_TileSize2D);
-            const int ReductionSummandsY = DivUp(m_pRGBDCameraControl->GetDepthHeight() >> i, g_TileSize2D);
+            for (int i = 0; i < 3; ++i)
+            {
+                const int ReductionSummandsX = DivUp(m_pRGBDCameraControl->GetDepthWidth() >> i, g_TileSize2D);
+                const int ReductionSummandsY = DivUp(m_pRGBDCameraControl->GetDepthHeight() >> i, g_TileSize2D);
+
+                const int ReductionSummands = ReductionSummandsX * ReductionSummandsY;
+                const float ReductionSummandsLog2 = glm::log2(static_cast<float>(ReductionSummands));
+                const int ReductionSummandsPOT = 1 << (static_cast<int>(ReductionSummandsLog2) + 1);
+
+                std::stringstream TempStream;
+                TempStream << DefineString << "#define REDUCTION_SHADER_COUNT " << ReductionSummandsPOT / 2 << " \n";
+
+                m_ReduceSumCSPtr[i] = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_reduce_sum.glsl", "main", TempStream.str().c_str());
+            }
+        }
+        else
+        {
+            const int ReductionSummandsX = DivUp(m_pRGBDCameraControl->GetDepthWidth(), g_TileSize2D);
+            const int ReductionSummandsY = DivUp(m_pRGBDCameraControl->GetDepthHeight(), g_TileSize2D);
 
             const int ReductionSummands = ReductionSummandsX * ReductionSummandsY;
             const float ReductionSummandsLog2 = glm::log2(static_cast<float>(ReductionSummands));
             const int ReductionSummandsPOT = 1 << (static_cast<int>(ReductionSummandsLog2) + 1);
 
-            std::stringstream TempStream;
-            TempStream << DefineString << "#define REDUCTION_SHADER_COUNT " << ReductionSummandsPOT / 2 << " \n";
-
-            m_ReduceSumCSPtr[i] = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_reduce_sum.glsl", "main", TempStream.str().c_str());
+            DefineStream << "#define REDUCTION_SHADER_COUNT " << ReductionSummandsPOT / 2 << " \n";
+            
+            m_ReduceSumCSPtr[0] = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_reduce_sum.glsl", "main", DefineStream.str().c_str());
         }
 
         SInputElementDescriptor InputLayoutDesc = {};
@@ -1704,7 +1720,8 @@ namespace MR
 
         BufferManager::UploadBufferData(m_ICPSummationConstantBufferPtr, &BufferData);
 
-        ContextManager::SetShaderCS(m_ReduceSumCSPtr[PyramidLevel]);
+        ContextManager::SetShaderCS(m_ReduceSumCSPtr[m_UseShuffleIntrinsics ? PyramidLevel : 0]);
+
         ContextManager::SetResourceBuffer(0, m_ICPResourceBufferPtr);
         ContextManager::SetConstantBuffer(2, m_ICPSummationConstantBufferPtr);
         
