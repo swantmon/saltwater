@@ -7,6 +7,11 @@
 
 #include "scalable_kinect_fusion/common_tracking.glsl"
 
+layout(std430, binding = 0) buffer ICPBuffer
+{
+    float g_ICPData[ICP_SUMMAND_COUNT][ICP_VALUE_COUNT];
+};
+
 layout(std140, binding = 2) uniform UBOSummationData
 {
     int g_SumCount;

@@ -22,9 +22,4 @@ layout(std140, binding = 1) uniform UBOTrackingData
 	mat4 g_InvPoseMatrix;
 };
 
-layout(std430, binding = 0) buffer ICPBuffer
-{
-    float g_ICPData[ICP_SUMMAND_COUNT][ICP_VALUE_COUNT];
-};
-
 #endif // __INCLUDE_TRACKING_COMMON_GLSL__

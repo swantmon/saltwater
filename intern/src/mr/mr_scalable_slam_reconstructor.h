@@ -202,17 +202,9 @@ namespace MR
         
         void Raycast();
         void CreateRaycastPyramid();
-
-        void PerformTracking();
-
+        
 		void UpdateFrustum();
-
-        void DetermineSummands(int PyramidLevel, const glm::mat4& rIncPoseMatrix);
-        void ReduceSum(int PyramidLevel);
-        bool CalculatePoseMatrix(glm::mat4& rIncPoseMatrix);
-
-        Gfx::CMeshPtr CreateGridMesh(int Width);
-                
+                        
     private:
 
         SReconstructionSettings m_ReconstructionSettings;
@@ -220,8 +212,6 @@ namespace MR
         Gfx::CBufferPtr m_IntrinsicsConstantBufferPtr;
         Gfx::CBufferPtr m_TrackingDataConstantBufferPtr;
         Gfx::CBufferPtr m_RaycastPyramidConstantBufferPtr;
-        Gfx::CBufferPtr m_ICPSummationConstantBufferPtr;
-        Gfx::CBufferPtr m_IncPoseMatrixConstantBufferPtr;
         Gfx::CBufferPtr m_BilateralFilterConstantBufferPtr;
         Gfx::CBufferPtr m_PositionConstantBufferPtr;
         Gfx::CBufferPtr m_HierarchyConstantBufferPtr;
@@ -249,8 +239,6 @@ namespace MR
         Gfx::CShaderPtr m_IntegrateTSDFCSPtr;
         Gfx::CShaderPtr m_RaycastCSPtr;
         Gfx::CShaderPtr m_RaycastPyramidCSPtr;
-        Gfx::CShaderPtr m_DetermineSummandsCSPtr;
-        Gfx::CShaderPtr m_ReduceSumCSPtr[3];
 		Gfx::CShaderPtr m_RootgridDepthCSPtr;
         Gfx::CShaderPtr m_VolumeCountersCSPtr;
         Gfx::CShaderPtr m_RasterizeRootVolumeVSPtr;
@@ -291,8 +279,6 @@ namespace MR
 		CRootVolumeMap m_RootVolumeMap;
         CRootVolumeVector m_RootVolumeVector;
 
-        Gfx::CBufferPtr m_ICPResourceBufferPtr;
-
         std::unique_ptr<MR::IRGBDCameraControl> m_pRGBDCameraControl;
 
         glm::mat4 m_PoseMatrix;
@@ -316,7 +302,6 @@ namespace MR
 		std::array<glm::vec4, 6> m_FrustumPlanes;
         
         bool m_UseConservativeRasterization;
-        bool m_UseShuffleIntrinsics;
         
         CPlaneDetector m_PlaneDetector;
         std::unique_ptr<CICPTracker> m_pTracker;

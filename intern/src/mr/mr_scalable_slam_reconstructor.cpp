@@ -214,20 +214,6 @@ namespace MR
             }
         }
 
-        m_UseShuffleIntrinsics = false;
-
-        const bool EnableShuffleIntrinsics = Base::CProgramParameters::GetInstance().Get("mr:slam:shuffle_intrinsics_enable", true);
-
-        if (EnableShuffleIntrinsics)
-        {
-            m_UseShuffleIntrinsics = Main::IsExtensionAvailable("GL_NV_shader_thread_shuffle");
-
-            if (!m_UseShuffleIntrinsics)
-            {
-                BASE_CONSOLE_INFO("Shuffle intrinsics are not available. Will use fallback method");
-            }
-        }
-
         ////////////////////////////////////////////////////////////////////////////////
         // Setup data, buffer etc.
         ////////////////////////////////////////////////////////////////////////////////
@@ -416,10 +402,6 @@ namespace MR
         m_IntegrateTSDFCSPtr = 0;
         m_RaycastCSPtr = 0;
         m_RaycastPyramidCSPtr = 0;
-        m_DetermineSummandsCSPtr = 0;
-        m_ReduceSumCSPtr[0] = 0;
-        m_ReduceSumCSPtr[1] = 0;
-        m_ReduceSumCSPtr[2] = 0;
         m_ClearVolumeCSPtr = 0;
 		m_RootgridDepthCSPtr = 0;
         m_VolumeCountersCSPtr = 0;
@@ -455,9 +437,6 @@ namespace MR
         m_IntrinsicsConstantBufferPtr = 0;
         m_TrackingDataConstantBufferPtr = 0;
         m_RaycastPyramidConstantBufferPtr = 0;
-        m_ICPResourceBufferPtr = 0;
-        m_ICPSummationConstantBufferPtr = 0;
-        m_IncPoseMatrixConstantBufferPtr = 0;
         m_BilateralFilterConstantBufferPtr = 0;
 		m_PositionConstantBufferPtr = 0;
         m_HierarchyConstantBufferPtr = 0;
@@ -478,11 +457,6 @@ namespace MR
     
     void CScalableSLAMReconstructor::SetupShaders()
     {
-        const int SummandsX = DivUp(m_pRGBDCameraControl->GetDepthWidth(), g_TileSize2D);
-        const int SummandsY = DivUp(m_pRGBDCameraControl->GetDepthHeight(), g_TileSize2D);
-
-        const int Summands = SummandsX * SummandsY;
-
         const float VoxelSize = m_ReconstructionSettings.m_VoxelSize;
 
         const std::string InternalFormatString = Base::CProgramParameters::GetInstance().Get("mr:slam:map_format", "rgba16f");
@@ -504,7 +478,6 @@ namespace MR
             << "#define EPSILON_DISTANCE "       << g_EpsilonDistance                               << " \n"
             << "#define EPSILON_ANGLE "          << g_EpsilonAngle                                  << " \n"
             << "#define ICP_VALUE_COUNT "        << g_ICPValueCount                                 << " \n"
-            << "#define ICP_SUMMAND_COUNT "      << Summands                                        << " \n"
             << "#define MAP_TEXTURE_FORMAT "     << InternalFormatString                            << " \n"
             << "#define HIERARCHY_LEVELS "       << MR::SReconstructionSettings::GRID_LEVELS        << " \n"
             << "#define ROOT_RESOLUTION "        << m_ReconstructionSettings.m_GridResolutions[0]   << " \n"
@@ -522,10 +495,6 @@ namespace MR
         {
             DefineStream << "#define CONSERVATIVE_RASTERIZATION_AVAILABLE\n";
         }
-        if (m_UseShuffleIntrinsics)
-        {
-            DefineStream << "#define USE_SHUFFLE_INTRINSICS\n";
-        }
 
         std::string DefineString = DefineStream.str();
         
@@ -535,7 +504,6 @@ namespace MR
         m_DownSampleDepthCSPtr     = ShaderManager::CompileCS("scalable_kinect_fusion\\pyramid_creation\\cs_downsample_depth.glsl"  , "main", DefineString.c_str());
         m_RaycastPyramidCSPtr      = ShaderManager::CompileCS("scalable_kinect_fusion\\pyramid_creation\\cs_raycast_pyramid.glsl"   , "main", DefineString.c_str());
         m_RaycastCSPtr             = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_raycast.glsl"                             , "main", DefineString.c_str());
-        m_DetermineSummandsCSPtr   = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_determine_summands.glsl"                  , "main", DefineString.c_str());
         m_ClearVolumeCSPtr         = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_clear_volume.glsl"                        , "main", DefineString.c_str());
 		m_RootgridDepthCSPtr       = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_rootgrid_depth.glsl"                      , "main", DefineString.c_str());
         m_ClearAtomicCountersCSPtr = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_clear_atomic_buffer.glsl"                 , "main", DefineString.c_str());
@@ -552,37 +520,6 @@ namespace MR
         m_IntegrateLevel1GridCSPtr = ShaderManager::CompileCS("scalable_kinect_fusion\\integration\\cs_integrate_level1grid.glsl"   , "main", DefineString.c_str());
         m_IntegrateTSDFCSPtr       = ShaderManager::CompileCS("scalable_kinect_fusion\\integration\\cs_integrate_tsdf.glsl"         , "main", DefineString.c_str());
         m_FillIndirectBufferCSPtr  = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_fill_indirect.glsl"                       , "main", DefineString.c_str());
-
-        if (m_UseShuffleIntrinsics)
-        {
-            for (int i = 0; i < 3; ++i)
-            {
-                const int ReductionSummandsX = DivUp(m_pRGBDCameraControl->GetDepthWidth() >> i, g_TileSize2D);
-                const int ReductionSummandsY = DivUp(m_pRGBDCameraControl->GetDepthHeight() >> i, g_TileSize2D);
-
-                const int ReductionSummands = ReductionSummandsX * ReductionSummandsY;
-                const float ReductionSummandsLog2 = glm::log2(static_cast<float>(ReductionSummands));
-                const int ReductionSummandsPOT = 1 << (static_cast<int>(ReductionSummandsLog2) + 1);
-
-                std::stringstream TempStream;
-                TempStream << DefineString << "#define REDUCTION_SHADER_COUNT " << ReductionSummandsPOT / 2 << " \n";
-
-                m_ReduceSumCSPtr[i] = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_reduce_sum.glsl", "main", TempStream.str().c_str());
-            }
-        }
-        else
-        {
-            const int ReductionSummandsX = DivUp(m_pRGBDCameraControl->GetDepthWidth(), g_TileSize2D);
-            const int ReductionSummandsY = DivUp(m_pRGBDCameraControl->GetDepthHeight(), g_TileSize2D);
-
-            const int ReductionSummands = ReductionSummandsX * ReductionSummandsY;
-            const float ReductionSummandsLog2 = glm::log2(static_cast<float>(ReductionSummands));
-            const int ReductionSummandsPOT = 1 << (static_cast<int>(ReductionSummandsLog2) + 1);
-
-            DefineStream << "#define REDUCTION_SHADER_COUNT " << ReductionSummandsPOT / 2 << " \n";
-            
-            m_ReduceSumCSPtr[0] = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_reduce_sum.glsl", "main", DefineStream.str().c_str());
-        }
 
         SInputElementDescriptor InputLayoutDesc = {};
 
@@ -1324,11 +1261,6 @@ namespace MR
         m_RaycastPyramidConstantBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
         
         ConstantBufferDesc.m_Usage = CBuffer::GPURead;
-        ConstantBufferDesc.m_NumberOfBytes = 16;
-        m_ICPSummationConstantBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
-
-        ConstantBufferDesc.m_NumberOfBytes = sizeof(SIncBuffer);
-        m_IncPoseMatrixConstantBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
 
         ConstantBufferDesc.m_NumberOfBytes = 16;
         ConstantBufferDesc.m_pBytes = &m_ReconstructionSettings.m_DepthThreshold;
@@ -1337,17 +1269,7 @@ namespace MR
 		ConstantBufferDesc.m_NumberOfBytes = sizeof(SPositionBuffer);
 		ConstantBufferDesc.m_pBytes = nullptr;
 		m_PositionConstantBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
-
-        const int ICPRowCount = DivUp(m_pRGBDCameraControl->GetDepthWidth() , g_TileSize2D) *
-                                DivUp(m_pRGBDCameraControl->GetDepthHeight(), g_TileSize2D);
-
-        ConstantBufferDesc.m_Usage = CBuffer::GPUToCPU;
-        ConstantBufferDesc.m_Binding = CBuffer::ResourceBuffer;
-        ConstantBufferDesc.m_Access = CBuffer::CPURead;
-        ConstantBufferDesc.m_NumberOfBytes = sizeof(float) * ICPRowCount * g_ICPValueCount;
-        ConstantBufferDesc.m_pBytes = nullptr;
-        m_ICPResourceBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
-
+        
         ConstantBufferDesc.m_Usage = CBuffer::GPURead;
         ConstantBufferDesc.m_Binding = CBuffer::ConstantBuffer;
         ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
@@ -1655,183 +1577,7 @@ namespace MR
             ContextManager::Dispatch(PyramidWorkGroupsX, PyramidWorkGroupsY, 1);
         }
     }
-    
-    // -----------------------------------------------------------------------------
-
-    void CScalableSLAMReconstructor::PerformTracking()
-    {
-        std::string Markers[] =
-        {
-            "Reduce sum0",
-            "Reduce sum1",
-            "Reduce sum2",
-            "Determine summands0",
-            "Determine summands1",
-            "Determine summands2"
-        };
-
-        ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
-
-        glm::mat4 IncPoseMatrix = m_PoseMatrix;
-
-        for (int PyramidLevel = m_ReconstructionSettings.m_PyramidLevelCount - 1; PyramidLevel >= 0; -- PyramidLevel)
-        {
-            for (int Iteration = 0; Iteration < m_ReconstructionSettings.m_PyramidLevelIterations[PyramidLevel]; ++ Iteration)
-            {
-                Performance::BeginEvent(Markers[3 + PyramidLevel].c_str());
-                DetermineSummands(PyramidLevel, IncPoseMatrix);
-                Performance::EndEvent();
-
-                Performance::BeginEvent(Markers[PyramidLevel].c_str());
-                ReduceSum(PyramidLevel);
-                Performance::EndEvent();
-
-                m_TrackingLost = !CalculatePoseMatrix(IncPoseMatrix);
-                if (m_TrackingLost)
-                {
-                    return;
-                }
-            }
-        }
-        m_PoseMatrix = IncPoseMatrix;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CScalableSLAMReconstructor::DetermineSummands(int PyramidLevel, const glm::mat4& rIncPoseMatrix)
-    {
-        const int WorkGroupsX = DivUp(m_pRGBDCameraControl->GetDepthWidth() >> PyramidLevel, g_TileSize2D);
-        const int WorkGroupsY = DivUp(m_pRGBDCameraControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
-        
-        SIncBuffer TrackingData;
-        TrackingData.m_PoseMatrix = rIncPoseMatrix;
-        TrackingData.m_InvPoseMatrix = glm::inverse(rIncPoseMatrix);
-        TrackingData.m_PyramidLevel = PyramidLevel;
-        
-        BufferManager::UploadBufferData(m_IncPoseMatrixConstantBufferPtr, &TrackingData);
-
-        ContextManager::SetShaderCS(m_DetermineSummandsCSPtr);
-        ContextManager::SetResourceBuffer(0, m_ICPResourceBufferPtr);
-        ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
-        ContextManager::SetConstantBuffer(2, m_IncPoseMatrixConstantBufferPtr);
-        
-        ContextManager::SetImageTexture(0, static_cast<CTexturePtr>(m_ReferenceVertexMapPtr[PyramidLevel]));
-        ContextManager::SetImageTexture(1, static_cast<CTexturePtr>(m_ReferenceNormalMapPtr[PyramidLevel]));
-        ContextManager::SetImageTexture(2, static_cast<CTexturePtr>(m_RaycastVertexMapPtr[PyramidLevel]));
-        ContextManager::SetImageTexture(3, static_cast<CTexturePtr>(m_RaycastNormalMapPtr[PyramidLevel]));
-
-        ContextManager::Barrier();
-
-        ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CScalableSLAMReconstructor::ReduceSum(int PyramidLevel)
-    {
-        const int SummandsX = DivUp(m_pRGBDCameraControl->GetDepthWidth() >> PyramidLevel, g_TileSize2D);
-        const int SummandsY = DivUp(m_pRGBDCameraControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
-
-        const int Summands = SummandsX * SummandsY;
-        const float SummandsLog2 = glm::log2(static_cast<float>(Summands));
-        const int SummandsPOT = 1 << (static_cast<int>(SummandsLog2) + 1);
-        
-        glm::ivec2 BufferData;
-        BufferData[0] = Summands;
-        BufferData[1] = SummandsPOT;
-
-        BufferManager::UploadBufferData(m_ICPSummationConstantBufferPtr, &BufferData);
-
-        ContextManager::SetShaderCS(m_ReduceSumCSPtr[m_UseShuffleIntrinsics ? PyramidLevel : 0]);
-
-        ContextManager::SetResourceBuffer(0, m_ICPResourceBufferPtr);
-        ContextManager::SetConstantBuffer(2, m_ICPSummationConstantBufferPtr);
-        
-        ContextManager::Barrier();
-
-        ContextManager::Dispatch(1, g_ICPValueCount, 1);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    bool CScalableSLAMReconstructor::CalculatePoseMatrix(glm::mat4& rIncPoseMatrix)
-    {
-        typedef double Scalar;
-
-        Scalar A[36];
-        Scalar b[6];
-        
-        float ICPValues[g_ICPValueCount];
-        void* pICPBuffer = BufferManager::MapBufferRange(m_ICPResourceBufferPtr, CBuffer::EMap::Read, 0, sizeof(float) * g_ICPValueCount);
-        memcpy(ICPValues, pICPBuffer, sizeof(ICPValues[0]) * g_ICPValueCount);
-        BufferManager::UnmapBuffer(m_ICPResourceBufferPtr);
-
-        int ValueIndex = 0;
-        for (int i = 0; i < 6; ++ i)
-        {
-            for (int j = i; j < 7; ++ j)
-            {
-                float Value = ICPValues[ValueIndex++];
-                
-                if (j == 6)
-                {
-                    b[i] = static_cast<Scalar>(Value);
-                }
-                else
-                {
-                    A[j * 6 + i] = A[i * 6 + j] = static_cast<Scalar>(Value);
-                }
-            }
-        }
-
-        Scalar L[36];
-
-        for (int i = 0; i < 6; ++ i)
-        {
-            for (int j = 0; j <= i; ++ j)
-            {
-                Scalar Sum = 0.0;
-                for (int k = 0; k < j; ++ k)
-                {
-                    Sum += L[k * 6 + i] * L[k * 6 + j];
-                }
-                L[j * 6 + i] = i == j ? sqrt(A[i * 6 + i] - Sum) : ((1.0f / L[j * 6 + j]) * (A[j * 6 + i] - Sum));
-            }
-        }
-
-        const Scalar Det = L[0] * L[0] * L[7] * L[7] * L[14] * L[14] * L[21] * L[21] * L[28] * L[28] * L[35] * L[35];
-        
-        if (std::isnan(Det) || abs(Det) < 1e-5)
-        {
-            return false;
-        }
-
-        Scalar y[6];
-        
-        y[0] = b[0] / L[0];
-        y[1] = (b[1] - L[1] * y[0]) / L[7];
-        y[2] = (b[2] - L[2] * y[0] - L[8] * y[1]) / L[14];
-        y[3] = (b[3] - L[3] * y[0] - L[9] * y[1] - L[15] * y[2]) / L[21];
-        y[4] = (b[4] - L[4] * y[0] - L[10] * y[1] - L[16] * y[2] - L[22] * y[3]) / L[28];
-        y[5] = (b[5] - L[5] * y[0] - L[11] * y[1] - L[17] * y[2] - L[23] * y[3] - L[29] * y[4]) / L[35];
-
-        Scalar x[6];
-
-        x[5] = y[5] / L[35];
-        x[4] = (y[4] - L[29] * x[5]) / L[28];
-        x[3] = (y[3] - L[23] * x[5] - L[22] * x[4]) / L[21];
-        x[2] = (y[2] - L[17] * x[5] - L[16] * x[4] - L[15] * x[3]) / L[14];
-        x[1] = (y[1] - L[11] * x[5] - L[10] * x[4] - L[9] * x[3] - L[8] * x[2]) / L[7];
-        x[0] = (y[0] - L[5] * x[5] - L[4] * x[4] - L[3] * x[3] - L[2] * x[2] - L[1] * x[1]) / L[0];
-        
-        glm::mat4 Rotation = glm::eulerAngleXYZ(static_cast<float>(x[0]), static_cast<float>(x[1]), static_cast<float>(x[2]));
-        glm::mat4 Translation = glm::translate(glm::vec3(static_cast<float>(x[3]), static_cast<float>(x[4]), static_cast<float>(x[5])));
-        
-        rIncPoseMatrix = Translation * Rotation * rIncPoseMatrix;
-
-        return true;
-    }    
-        
+      
     // -----------------------------------------------------------------------------
 
     void CScalableSLAMReconstructor::CreateRaycastPyramid()

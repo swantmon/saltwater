@@ -18,6 +18,11 @@ layout(binding = 1, MAP_TEXTURE_FORMAT) uniform image2D cs_NormalMap;
 layout(binding = 2, MAP_TEXTURE_FORMAT) uniform image2D cs_RaycastVertexMap;
 layout(binding = 3, MAP_TEXTURE_FORMAT) uniform image2D cs_RaycastNormalMap;
 
+layout(std430, binding = 0) buffer ICPBuffer
+{
+    float g_ICPData[ICP_SUMMAND_COUNT][ICP_VALUE_COUNT];
+};
+
 layout(std140, binding = 2) uniform UBOInc
 {
     mat4 g_IncPoseMatrix;
