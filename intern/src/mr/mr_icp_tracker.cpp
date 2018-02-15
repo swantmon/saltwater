@@ -56,6 +56,11 @@ namespace MR
         const Gfx::CBufferPtr& _rIntrinsicsBuffer
     )
     {
+        STrackingData TrackingData;
+        TrackingData.m_PoseMatrix = _rPoseMatrix;
+        TrackingData.m_InvPoseMatrix = glm::inverse(_rPoseMatrix);
+        Gfx::BufferManager::UploadBufferData(m_TrackingDataBufferPtr, &TrackingData);
+
         std::string Markers[] =
         {
             "Reduce sum0",

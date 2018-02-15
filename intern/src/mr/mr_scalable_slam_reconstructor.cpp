@@ -1473,7 +1473,7 @@ namespace MR
         {
             Performance::BeginEvent("Tracking");
 
-            glm::mat4 Test = m_pTracker->Track(m_PoseMatrix,
+            glm::mat4 NewPoseMatrix = m_pTracker->Track(m_PoseMatrix,
                 m_ReferenceVertexMapPtr,
                 m_ReferenceNormalMapPtr,
                 m_RaycastVertexMapPtr,
@@ -1481,15 +1481,20 @@ namespace MR
                 m_IntrinsicsConstantBufferPtr
             );
 
-            PerformTracking();
+            m_TrackingLost = m_pTracker->IsTrackingLost();
 
-            STrackingData TrackingData;
-            TrackingData.m_PoseMatrix = m_PoseMatrix;
-            TrackingData.m_InvPoseMatrix = glm::inverse(m_PoseMatrix);
+            if (!m_TrackingLost)
+            {
+                m_PoseMatrix = NewPoseMatrix;
 
-            BufferManager::UploadBufferData(m_TrackingDataConstantBufferPtr, &TrackingData);
-            
-            Performance::EndEvent();
+                Performance::EndEvent();
+
+                STrackingData TrackingData;
+                TrackingData.m_PoseMatrix = NewPoseMatrix;
+                TrackingData.m_InvPoseMatrix = glm::inverse(NewPoseMatrix);
+
+                BufferManager::UploadBufferData(m_TrackingDataConstantBufferPtr, &TrackingData);
+            }
         }
 
         //////////////////////////////////////////////////////////////////////////////////////
