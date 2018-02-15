@@ -15,6 +15,8 @@
 #include "graphic/gfx_shader.h"
 #include "graphic/gfx_texture.h"
 
+#include "mr/mr_icp_tracker.h"
+
 #include <memory>
 #include <vector>
 
@@ -56,12 +58,7 @@ namespace MR
         void Integrate();
         void Raycast();
         void CreateRaycastPyramid();
-
-        void PerformTracking();
-
-        void DetermineSummands(int PyramidLevel, const glm::mat4& rIncPoseMatrix);
-        void ReduceSum(int PyramidLevel);
-        bool CalculatePoseMatrix(glm::mat4& rIncPoseMatrix);
+        
         void ClearVolume();
 
     private:
@@ -75,8 +72,6 @@ namespace MR
         Gfx::CBufferPtr m_IntrinsicsConstantBufferPtr;
         Gfx::CBufferPtr m_TrackingDataConstantBufferPtr;
         Gfx::CBufferPtr m_RaycastPyramidConstantBufferPtr;
-        Gfx::CBufferPtr m_ICPSummationConstantBufferPtr;
-        Gfx::CBufferPtr m_IncPoseMatrixConstantBufferPtr;
         Gfx::CBufferPtr m_BilateralFilterConstantBufferPtr;
 
         Gfx::CShaderPtr m_ClearVolumeCSPtr;
@@ -87,8 +82,6 @@ namespace MR
         Gfx::CShaderPtr m_IntegrationCSPtr;
         Gfx::CShaderPtr m_RaycastCSPtr;
         Gfx::CShaderPtr m_RaycastPyramidCSPtr;
-        Gfx::CShaderPtr m_DetermineSummandsCSPtr;
-        Gfx::CShaderPtr m_ReduceSumCSPtr;
 
         Gfx::CTexturePtr m_RawDepthBufferPtr;
         Gfx::CTexturePtr m_RawCameraFramePtr;
@@ -100,9 +93,7 @@ namespace MR
 
         Gfx::CTexturePtr m_TSDFVolumePtr;
         Gfx::CTexturePtr m_ColorVolumePtr;
-
-        Gfx::CBufferPtr m_ICPResourceBufferPtr;
-
+        
         std::unique_ptr<MR::IRGBDCameraControl> m_pRGBDCameraControl;
 
         glm::mat4 m_PoseMatrix;
@@ -118,6 +109,6 @@ namespace MR
         bool m_IsIntegrationPaused;
         bool m_IsTrackingPaused;
 
-        bool m_UseShuffleIntrinsics;
+        std::unique_ptr<CICPTracker> m_pTracker;
     };
 } // namespace MR

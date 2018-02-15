@@ -58,7 +58,7 @@ void reduce(float _Input)
 
         if (gl_LocalInvocationIndex == 0)
         {
-            g_SharedData[0] == Data; 
+            g_SharedData[0] = Data; 
         }
     }
 

@@ -1409,14 +1409,14 @@ namespace MR
             {
                 m_PoseMatrix = NewPoseMatrix;
 
-                Performance::EndEvent();
-
                 STrackingData TrackingData;
                 TrackingData.m_PoseMatrix = NewPoseMatrix;
                 TrackingData.m_InvPoseMatrix = glm::inverse(NewPoseMatrix);
 
                 BufferManager::UploadBufferData(m_TrackingDataConstantBufferPtr, &TrackingData);
             }
+
+            Performance::EndEvent();
         }
 
         //////////////////////////////////////////////////////////////////////////////////////
