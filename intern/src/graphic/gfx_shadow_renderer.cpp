@@ -107,7 +107,7 @@ namespace
 
     private:
 
-        typedef std::vector<> CSSAORenderJobs;
+        typedef std::vector<SSSAORenderJob> CSSAORenderJobs;
 
     private:
 
