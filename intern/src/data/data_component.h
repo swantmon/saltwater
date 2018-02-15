@@ -159,7 +159,7 @@ namespace Dt
     template<class T>
     void CComponent<T>::SetDirtyFlags(unsigned int _Flags)
     {
-        m_Flags.m_Key = _Flags;
+        m_Flags.m_DirtyFlags = _Flags;
     }
 
     // -----------------------------------------------------------------------------
