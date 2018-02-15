@@ -265,11 +265,11 @@ namespace MR
 
         std::string DefineString = DefineStream.str();
 
-        m_HistogramCreationCSPtr = ShaderManager::CompileCS("scalable_kinect_fusion\\plane_detection\\cs_normal_histogram.glsl", "main", DefineString.c_str());
-        m_PlaneCandidatesCSPtr   = ShaderManager::CompileCS("scalable_kinect_fusion\\plane_detection\\cs_plane_candidates.glsl", "main", DefineString.c_str());
-        m_PlaneEquationCSPtr     = ShaderManager::CompileCS("scalable_kinect_fusion\\plane_detection\\cs_plane_equation.glsl"  , "main", DefineString.c_str());
-        m_PlaneExtractionCSPtr   = ShaderManager::CompileCS("scalable_kinect_fusion\\plane_detection\\cs_plane_extraction.glsl", "main", DefineString.c_str());
-        m_PlaneTestCSPtr         = ShaderManager::CompileCS("scalable_kinect_fusion\\plane_detection\\cs_plane_debug.glsl"     , "main", DefineString.c_str());
+        m_HistogramCreationCSPtr = ShaderManager::CompileCS("slam\\scalable_kinect_fusion\\plane_detection\\cs_normal_histogram.glsl", "main", DefineString.c_str());
+        m_PlaneCandidatesCSPtr   = ShaderManager::CompileCS("slam\\scalable_kinect_fusion\\plane_detection\\cs_plane_candidates.glsl", "main", DefineString.c_str());
+        m_PlaneEquationCSPtr     = ShaderManager::CompileCS("slam\\scalable_kinect_fusion\\plane_detection\\cs_plane_equation.glsl"  , "main", DefineString.c_str());
+        m_PlaneExtractionCSPtr   = ShaderManager::CompileCS("slam\\scalable_kinect_fusion\\plane_detection\\cs_plane_extraction.glsl", "main", DefineString.c_str());
+        m_PlaneTestCSPtr         = ShaderManager::CompileCS("slam\\scalable_kinect_fusion\\plane_detection\\cs_plane_debug.glsl"     , "main", DefineString.c_str());
 
         //////////////////////////////////////////////////////////////////////////
         // Create Buffers

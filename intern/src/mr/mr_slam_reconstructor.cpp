@@ -251,17 +251,17 @@ namespace MR
         {
             DefineStream << "#define CAPTURE_COLOR\n";
         }
-
+        
         std::string DefineString = DefineStream.str();
         
-        m_BilateralFilterCSPtr   = ShaderManager::CompileCS("kinect_fusion\\cs_bilateral_filter.glsl"  , "main", DefineString.c_str());
-        m_VertexMapCSPtr         = ShaderManager::CompileCS("kinect_fusion\\cs_vertex_map.glsl"        , "main", DefineString.c_str());
-        m_NormalMapCSPtr         = ShaderManager::CompileCS("kinect_fusion\\cs_normal_map.glsl"        , "main", DefineString.c_str());
-        m_DownSampleDepthCSPtr   = ShaderManager::CompileCS("kinect_fusion\\cs_downsample_depth.glsl"  , "main", DefineString.c_str());
-        m_IntegrationCSPtr       = ShaderManager::CompileCS("kinect_fusion\\cs_integrate.glsl"         , "main", DefineString.c_str());        
-        m_RaycastCSPtr           = ShaderManager::CompileCS("kinect_fusion\\cs_raycast.glsl"           , "main", DefineString.c_str());
-        m_RaycastPyramidCSPtr    = ShaderManager::CompileCS("kinect_fusion\\cs_raycast_pyramid.glsl"   , "main", DefineString.c_str());
-        m_ClearVolumeCSPtr       = ShaderManager::CompileCS("kinect_fusion\\cs_clear_volume.glsl"      , "main", DefineString.c_str());
+        m_BilateralFilterCSPtr   = ShaderManager::CompileCS("slam\\kinect_fusion\\cs_bilateral_filter.glsl"  , "main", DefineString.c_str());
+        m_VertexMapCSPtr         = ShaderManager::CompileCS("slam\\kinect_fusion\\cs_vertex_map.glsl"        , "main", DefineString.c_str());
+        m_NormalMapCSPtr         = ShaderManager::CompileCS("slam\\kinect_fusion\\cs_normal_map.glsl"        , "main", DefineString.c_str());
+        m_DownSampleDepthCSPtr   = ShaderManager::CompileCS("slam\\kinect_fusion\\cs_downsample_depth.glsl"  , "main", DefineString.c_str());
+        m_IntegrationCSPtr       = ShaderManager::CompileCS("slam\\kinect_fusion\\cs_integrate.glsl"         , "main", DefineString.c_str());        
+        m_RaycastCSPtr           = ShaderManager::CompileCS("slam\\kinect_fusion\\cs_raycast.glsl"           , "main", DefineString.c_str());
+        m_RaycastPyramidCSPtr    = ShaderManager::CompileCS("slam\\kinect_fusion\\cs_raycast_pyramid.glsl"   , "main", DefineString.c_str());
+        m_ClearVolumeCSPtr       = ShaderManager::CompileCS("slam\\kinect_fusion\\cs_clear_volume.glsl"      , "main", DefineString.c_str());
     }
     
     // -----------------------------------------------------------------------------
