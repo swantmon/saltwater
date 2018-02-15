@@ -1609,6 +1609,16 @@ namespace MR
 
     void CScalableSLAMReconstructor::PerformTracking()
     {
+        std::string Markers[] =
+        {
+            "Reduce sum0",
+            "Reduce sum1",
+            "Reduce sum2",
+            "Determine summands0",
+            "Determine summands1",
+            "Determine summands2"
+        };
+
         ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
 
         glm::mat4 IncPoseMatrix = m_PoseMatrix;
@@ -1617,8 +1627,13 @@ namespace MR
         {
             for (int Iteration = 0; Iteration < m_ReconstructionSettings.m_PyramidLevelIterations[PyramidLevel]; ++ Iteration)
             {
+                Performance::BeginEvent(Markers[3 + PyramidLevel].c_str());
                 DetermineSummands(PyramidLevel, IncPoseMatrix);
+                Performance::EndEvent();
+
+                Performance::BeginEvent(Markers[PyramidLevel].c_str());
                 ReduceSum(PyramidLevel);
+                Performance::EndEvent();
 
                 m_TrackingLost = !CalculatePoseMatrix(IncPoseMatrix);
                 if (m_TrackingLost)
