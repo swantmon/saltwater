@@ -253,7 +253,7 @@ namespace MR
         Gfx::CShaderPtr m_RaycastCSPtr;
         Gfx::CShaderPtr m_RaycastPyramidCSPtr;
         Gfx::CShaderPtr m_DetermineSummandsCSPtr;
-        Gfx::CShaderPtr m_ReduceSumCSPtr;
+        Gfx::CShaderPtr m_ReduceSumCSPtr[3];
 		Gfx::CShaderPtr m_RootgridDepthCSPtr;
         Gfx::CShaderPtr m_VolumeCountersCSPtr;
         Gfx::CShaderPtr m_RasterizeRootVolumeVSPtr;

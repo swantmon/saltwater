@@ -408,7 +408,9 @@ namespace MR
         m_RaycastCSPtr = 0;
         m_RaycastPyramidCSPtr = 0;
         m_DetermineSummandsCSPtr = 0;
-        m_ReduceSumCSPtr = 0;
+        m_ReduceSumCSPtr[0] = 0;
+        m_ReduceSumCSPtr[1] = 0;
+        m_ReduceSumCSPtr[2] = 0;
         m_ClearVolumeCSPtr = 0;
 		m_RootgridDepthCSPtr = 0;
         m_VolumeCountersCSPtr = 0;
@@ -471,9 +473,7 @@ namespace MR
         const int SummandsY = DivUp(m_pRGBDCameraControl->GetDepthHeight(), g_TileSize2D);
 
         const int Summands = SummandsX * SummandsY;
-        const float SummandsLog2 = glm::log2(static_cast<float>(Summands));
-        const int SummandsPOT = 1 << (static_cast<int>(SummandsLog2) + 1);
-        
+
         const float VoxelSize = m_ReconstructionSettings.m_VoxelSize;
 
         const std::string InternalFormatString = Base::CProgramParameters::GetInstance().Get("mr:slam:map_format", "rgba16f");
@@ -495,7 +495,6 @@ namespace MR
             << "#define EPSILON_DISTANCE "       << g_EpsilonDistance                               << " \n"
             << "#define EPSILON_ANGLE "          << g_EpsilonAngle                                  << " \n"
             << "#define ICP_VALUE_COUNT "        << g_ICPValueCount                                 << " \n"
-            << "#define REDUCTION_SHADER_COUNT " << SummandsPOT / 2                                 << " \n"
             << "#define ICP_SUMMAND_COUNT "      << Summands                                        << " \n"
             << "#define MAP_TEXTURE_FORMAT "     << InternalFormatString                            << " \n"
             << "#define HIERARCHY_LEVELS "       << MR::SReconstructionSettings::GRID_LEVELS        << " \n"
@@ -528,7 +527,6 @@ namespace MR
         m_RaycastPyramidCSPtr      = ShaderManager::CompileCS("scalable_kinect_fusion\\pyramid_creation\\cs_raycast_pyramid.glsl"   , "main", DefineString.c_str());
         m_RaycastCSPtr             = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_raycast.glsl"                             , "main", DefineString.c_str());
         m_DetermineSummandsCSPtr   = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_determine_summands.glsl"                  , "main", DefineString.c_str());
-        m_ReduceSumCSPtr           = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_reduce_sum.glsl"                          , "main", DefineString.c_str());
         m_ClearVolumeCSPtr         = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_clear_volume.glsl"                        , "main", DefineString.c_str());
 		m_RootgridDepthCSPtr       = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_rootgrid_depth.glsl"                      , "main", DefineString.c_str());
         m_ClearAtomicCountersCSPtr = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_clear_atomic_buffer.glsl"                 , "main", DefineString.c_str());
@@ -545,6 +543,21 @@ namespace MR
         m_IntegrateLevel1GridCSPtr = ShaderManager::CompileCS("scalable_kinect_fusion\\integration\\cs_integrate_level1grid.glsl"   , "main", DefineString.c_str());
         m_IntegrateTSDFCSPtr       = ShaderManager::CompileCS("scalable_kinect_fusion\\integration\\cs_integrate_tsdf.glsl"         , "main", DefineString.c_str());
         m_FillIndirectBufferCSPtr  = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_fill_indirect.glsl"                       , "main", DefineString.c_str());
+
+        for (int i = 0; i < 3; ++ i)
+        {
+            const int ReductionSummandsX = DivUp(m_pRGBDCameraControl->GetDepthWidth() >> i, g_TileSize2D);
+            const int ReductionSummandsY = DivUp(m_pRGBDCameraControl->GetDepthHeight() >> i, g_TileSize2D);
+
+            const int ReductionSummands = ReductionSummandsX * ReductionSummandsY;
+            const float ReductionSummandsLog2 = glm::log2(static_cast<float>(ReductionSummands));
+            const int ReductionSummandsPOT = 1 << (static_cast<int>(ReductionSummandsLog2) + 1);
+
+            std::stringstream TempStream;
+            TempStream << DefineString << "#define REDUCTION_SHADER_COUNT " << ReductionSummandsPOT / 2 << " \n";
+
+            m_ReduceSumCSPtr[i] = ShaderManager::CompileCS("scalable_kinect_fusion\\cs_reduce_sum.glsl", "main", TempStream.str().c_str());
+        }
 
         SInputElementDescriptor InputLayoutDesc = {};
 
@@ -1686,12 +1699,12 @@ namespace MR
         const int SummandsPOT = 1 << (static_cast<int>(SummandsLog2) + 1);
         
         glm::ivec2 BufferData;
-        BufferData[0] = Summands / 2;
-        BufferData[1] = SummandsPOT / 2;
+        BufferData[0] = Summands;
+        BufferData[1] = SummandsPOT;
 
         BufferManager::UploadBufferData(m_ICPSummationConstantBufferPtr, &BufferData);
 
-        ContextManager::SetShaderCS(m_ReduceSumCSPtr);
+        ContextManager::SetShaderCS(m_ReduceSumCSPtr[PyramidLevel]);
         ContextManager::SetResourceBuffer(0, m_ICPResourceBufferPtr);
         ContextManager::SetConstantBuffer(2, m_ICPSummationConstantBufferPtr);
         
