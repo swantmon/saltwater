@@ -706,12 +706,6 @@ namespace
         Performance::BeginEvent("Render Environment");
 
         // -----------------------------------------------------------------------------
-        // Find environment entity
-        // -----------------------------------------------------------------------------
-        Dt::Map::CEntityIterator CurrentEntity;
-        Dt::Map::CEntityIterator EndOfEntities;
-
-        // -----------------------------------------------------------------------------
         // Render environment as reflection into cube map
         // -----------------------------------------------------------------------------
         ContextManager::SetTargetSet        (_rInterLightProbeFacet.m_TargetSetPtr);
@@ -753,25 +747,18 @@ namespace
         // -----------------------------------------------------------------------------
         // Actors
         // -----------------------------------------------------------------------------
-        CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Dynamic);
-        EndOfEntities = Dt::Map::EntitiesEnd();
+        auto DataSkyComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CSkyComponent>();
 
-        for (; CurrentEntity != EndOfEntities; )
+        for (auto Component : DataSkyComponents)
         {
-            Dt::CEntity& rCurrentEntity = *CurrentEntity;
+            Dt::CSkyComponent* pDtComponent = static_cast<Dt::CSkyComponent*>(Component);
 
-            // -----------------------------------------------------------------------------
-            // Get graphic facet
-            // -----------------------------------------------------------------------------
-            if (!rCurrentEntity.GetComponentFacet()->HasComponent<Dt::CSkyComponent>()) continue;
+            assert(pDtComponent->GetHostEntity());
 
-            Dt::CSkyComponent* pSkyComponent = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CSkyComponent>();
+            if (!pDtComponent->IsActive()) continue;
 
-            Gfx::CSkyComponent* pSkyFacet = CComponentManager::GetInstance().GetComponent<Gfx::CSkyComponent>(pSkyComponent->GetID());
+            Gfx::CSkyComponent* pGfxComponent = CComponentManager::GetInstance().GetComponent<Gfx::CSkyComponent>(pDtComponent->GetID());
 
-            // -----------------------------------------------------------------------------
-            // Set every surface of this entity into a new render job
-            // -----------------------------------------------------------------------------
             unsigned int NumberOfSurfaces = m_SkyboxBoxPtr->GetLOD(0)->GetNumberOfSurfaces();
 
             for (unsigned int IndexOfSurface = 0; IndexOfSurface < NumberOfSurfaces; ++IndexOfSurface)
@@ -791,7 +778,7 @@ namespace
                 // -----------------------------------------------------------------------------
                 ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
-                ContextManager::SetTexture(0, static_cast<Gfx::CTexturePtr>(pSkyFacet->GetCubemapPtr()));
+                ContextManager::SetTexture(0, static_cast<Gfx::CTexturePtr>(pGfxComponent->GetCubemapPtr()));
 
                 // -----------------------------------------------------------------------------
                 // Render
@@ -814,11 +801,6 @@ namespace
 
                 ContextManager::ResetTexture(0);
             }
-
-            // -----------------------------------------------------------------------------
-            // Next entity
-            // -----------------------------------------------------------------------------
-            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Dynamic);
         }
 
         ContextManager::ResetResourceBuffer(0);
@@ -858,16 +840,8 @@ namespace
         Performance::BeginEvent("Render Entities");
 
         // -----------------------------------------------------------------------------
-        // Find actors
-        // -----------------------------------------------------------------------------
-        Dt::Map::CEntityIterator CurrentEntity;
-        Dt::Map::CEntityIterator EndOfEntities;
-
-        // -----------------------------------------------------------------------------
         // Prepare renderer
         // -----------------------------------------------------------------------------
-        
-
         ContextManager::SetTargetSet        (_rInterLightProbeFacet.m_TargetSetPtr);
         ContextManager::SetViewPortSet      (_rInterLightProbeFacet.m_ViewPortSetPtr);
         ContextManager::SetBlendState       (StateManager::GetBlendState(0));
@@ -933,23 +907,19 @@ namespace
         // -----------------------------------------------------------------------------
         // Actors
         // -----------------------------------------------------------------------------
-        CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Dynamic);
-        EndOfEntities = Dt::Map::EntitiesEnd();
+        auto DataMeshComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CMeshComponent>();
 
-        for (; CurrentEntity != EndOfEntities; )
+        for (auto Component : DataMeshComponents)
         {
-            Dt::CEntity& rCurrentEntity = *CurrentEntity;
+            Dt::CMeshComponent* pDtComponent = static_cast<Dt::CMeshComponent*>(Component);
 
-            // -----------------------------------------------------------------------------
-            // Get graphic facet
-            // -----------------------------------------------------------------------------
-            Dt::CMeshComponent* pMeshComponent = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CMeshComponent>();
+            assert(pDtComponent->GetHostEntity());
 
-            if (pMeshComponent == 0) continue;
+            if (!pDtComponent->IsActive()) continue;
 
-            CMeshComponent* pGraphicModelActorFacet = CComponentManager::GetInstance().GetComponent<CMeshComponent>(pMeshComponent->GetID());
+            CMeshComponent* pGfxComponent = CComponentManager::GetInstance().GetComponent<CMeshComponent>(pDtComponent->GetID());
 
-            CMeshPtr MeshPtr = pGraphicModelActorFacet->GetMesh();
+            CMeshPtr MeshPtr = pGfxComponent->GetMesh();
 
             // -----------------------------------------------------------------------------
             // Upload data to buffer
@@ -965,7 +935,7 @@ namespace
 
             SGeometryMBuffer ModelBuffer;
 
-            ModelBuffer.m_ModelMatrix = rCurrentEntity.GetTransformationFacet()->GetWorldMatrix();
+            ModelBuffer.m_ModelMatrix = pDtComponent->GetHostEntity()->GetTransformationFacet()->GetWorldMatrix();
 
             BufferManager::UploadBufferData(m_GeometryMBufferPtr, &ModelBuffer);
 
@@ -989,7 +959,7 @@ namespace
                 // -----------------------------------------------------------------------------
                 // Get material and upload correct attributes
                 // -----------------------------------------------------------------------------
-                CMaterialPtr MaterialPtr = pGraphicModelActorFacet->GetMaterial(IndexOfSurface);
+                CMaterialPtr MaterialPtr = pGfxComponent->GetMaterial(IndexOfSurface);
 
                 if (MaterialPtr == 0)
                 {
@@ -1028,11 +998,6 @@ namespace
 
                 ContextManager::DrawIndexed(SurfacePtr->GetNumberOfIndices(), 0, 0);
             }
-
-            // -----------------------------------------------------------------------------
-            // Next entity
-            // -----------------------------------------------------------------------------
-            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Dynamic);
         }
 
         for (unsigned int IndexOfTexture = 0; IndexOfTexture < 16; ++IndexOfTexture)
@@ -1251,12 +1216,6 @@ namespace
         }
 
         // -----------------------------------------------------------------------------
-        // Iterate throw every entity inside this map
-        // -----------------------------------------------------------------------------
-        Dt::Map::CEntityIterator CurrentLightEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Dynamic);
-        Dt::Map::CEntityIterator EndOfLightEntities = Dt::Map::EntitiesEnd();
-
-        // -----------------------------------------------------------------------------
         // Initiate light buffer
         // -----------------------------------------------------------------------------
         IndexOfLight = 0;
@@ -1276,107 +1235,116 @@ namespace
         // -----------------------------------------------------------------------------
         IndexOfLight = 0;
 
-        for (; CurrentLightEntity != EndOfLightEntities && IndexOfLight < s_MaxNumberOfLightsPerProbe; )
+        // -----------------------------------------------------------------------------
+        // Sun
+        // -----------------------------------------------------------------------------
+        auto DataComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CSunComponent>();
+
+        for (auto Component : DataComponents)
         {
-            Dt::CEntity& rCurrentEntity = *CurrentLightEntity;
+            if (IndexOfLight == s_MaxNumberOfLightsPerProbe) break;
+
+            Dt::CSunComponent* pDtComponent = static_cast<Dt::CSunComponent*>(Component);
+
+            assert(pDtComponent->GetHostEntity());
+
+            if (!pDtComponent->IsActive()) continue;
+
+            Gfx::CSunComponent* pGfxComponent = CComponentManager::GetInstance().GetComponent<Gfx::CSunComponent>(pDtComponent->GetID());
+
+            float SunAngularRadius = 0.27f * glm::pi<float>() / 180.0f;
+            float HasShadows       = 1.0f;
+
+            LightBuffer[IndexOfLight].m_LightType           = 1;
+            LightBuffer[IndexOfLight].m_LightViewProjection = pGfxComponent->GetCamera()->GetViewProjectionMatrix();
+            LightBuffer[IndexOfLight].m_LightDirection      = glm::normalize(glm::vec4(pDtComponent->GetDirection(), 0.0f));
+            LightBuffer[IndexOfLight].m_LightColor          = glm::vec4(pDtComponent->GetLightness(), 1.0f);
+            LightBuffer[IndexOfLight].m_LightSettings       = glm::vec4(SunAngularRadius, 0.0f, 0.0f, HasShadows);
 
             // -----------------------------------------------------------------------------
-            // Setup buffer
+
+            m_LightJob.m_ShadowTexturePtrs[IndexOfLight] = pGfxComponent->GetShadowMapPtr();
+
             // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetComponentFacet()->HasComponent<Dt::CSunComponent>())
+
+            ++IndexOfLight;
+        }
+
+        // -----------------------------------------------------------------------------
+        // Point lights
+        // -----------------------------------------------------------------------------
+        DataComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CPointLightComponent>();
+
+        for (auto Component : DataComponents)
+        {
+            if (IndexOfLight == s_MaxNumberOfLightsPerProbe) break;
+
+            Dt::CPointLightComponent* pDtComponent = static_cast<Dt::CPointLightComponent*>(Component);
+
+            assert(pDtComponent->GetHostEntity());
+
+            if (!pDtComponent->IsActive()) continue;
+
+            Gfx::CPointLightComponent* pGfxComponent = CComponentManager::GetInstance().GetComponent<Gfx::CPointLightComponent>(pDtComponent->GetID());
+
+            float InvSqrAttenuationRadius = pDtComponent->GetReciprocalSquaredAttenuationRadius();
+            float AngleScale              = pDtComponent->GetAngleScale();
+            float AngleOffset             = pDtComponent->GetAngleOffset();
+            float HasShadows              = pDtComponent->GetShadowType() != Dt::CPointLightComponent::NoShadows ? 1.0f : 0.0f;
+
+            LightBuffer[IndexOfLight].m_LightType      = 2;
+            LightBuffer[IndexOfLight].m_LightPosition  = glm::vec4(pDtComponent->GetHostEntity()->GetWorldPosition(), 1.0f);
+            LightBuffer[IndexOfLight].m_LightDirection = glm::normalize(glm::vec4(pDtComponent->GetDirection(), 0.0f));
+            LightBuffer[IndexOfLight].m_LightColor     = glm::vec4(pDtComponent->GetLightness(), 1.0f);
+            LightBuffer[IndexOfLight].m_LightSettings  = glm::vec4(InvSqrAttenuationRadius, AngleScale, AngleOffset, HasShadows);
+
+            LightBuffer[IndexOfLight].m_LightViewProjection = glm::mat4(1.0f);
+
+            if (pDtComponent->GetShadowType() != Dt::CPointLightComponent::NoShadows)
             {
-                Dt::CSunComponent* pDtSunFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CSunComponent>();
-                Gfx::CSunComponent* pGfxSunFacet = CComponentManager::GetInstance().GetComponent<Gfx::CSunComponent>(pDtSunFacet->GetID());
+                assert(pGfxComponent->GetCamera().IsValid());
 
-                if (pDtSunFacet != 0 && pGfxSunFacet != 0)
-                {
-                    float SunAngularRadius = 0.27f * glm::pi<float>() / 180.0f;
-                    float HasShadows = 1.0f;
-
-                    LightBuffer[IndexOfLight].m_LightType           = 1;
-                    LightBuffer[IndexOfLight].m_LightViewProjection = pGfxSunFacet->GetCamera()->GetViewProjectionMatrix();
-                    LightBuffer[IndexOfLight].m_LightDirection      = glm::normalize(glm::vec4(pDtSunFacet->GetDirection(), 0.0f));
-                    LightBuffer[IndexOfLight].m_LightColor          = glm::vec4(pDtSunFacet->GetLightness(), 1.0f);
-                    LightBuffer[IndexOfLight].m_LightSettings       = glm::vec4(SunAngularRadius, 0.0f, 0.0f, HasShadows);
-
-                    // -----------------------------------------------------------------------------
-
-                    m_LightJob.m_ShadowTexturePtrs[IndexOfLight] = pGfxSunFacet->GetShadowMapPtr();
-
-                    // -----------------------------------------------------------------------------
-
-                    ++IndexOfLight;
-                }
-            }
-            
-            if (rCurrentEntity.GetComponentFacet()->HasComponent<Dt::CPointLightComponent>())
-            {
-                Dt::CPointLightComponent*  pDtPointFacet  = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CPointLightComponent>();
-                Gfx::CPointLightComponent* pGfxPointFacet = CComponentManager::GetInstance().GetComponent<Gfx::CPointLightComponent>(pDtPointFacet->GetID());
-
-                if (pDtPointFacet != 0 && pGfxPointFacet != 0)
-                {
-                    float InvSqrAttenuationRadius = pDtPointFacet->GetReciprocalSquaredAttenuationRadius();
-                    float AngleScale              = pDtPointFacet->GetAngleScale();
-                    float AngleOffset             = pDtPointFacet->GetAngleOffset();
-                    float HasShadows              = pDtPointFacet->GetShadowType() != Dt::CPointLightComponent::NoShadows ? 1.0f : 0.0f;
-
-                    LightBuffer[IndexOfLight].m_LightType      = 2;
-                    LightBuffer[IndexOfLight].m_LightPosition  = glm::vec4(rCurrentEntity.GetWorldPosition(), 1.0f);
-                    LightBuffer[IndexOfLight].m_LightDirection = glm::normalize(glm::vec4(pDtPointFacet->GetDirection(), 0.0f));
-                    LightBuffer[IndexOfLight].m_LightColor     = glm::vec4(pDtPointFacet->GetLightness(), 1.0f);
-                    LightBuffer[IndexOfLight].m_LightSettings  = glm::vec4(InvSqrAttenuationRadius, AngleScale, AngleOffset, HasShadows);
-
-                    LightBuffer[IndexOfLight].m_LightViewProjection = glm::mat4(1.0f);
-
-                    if (pDtPointFacet->GetShadowType() != Dt::CPointLightComponent::NoShadows)
-                    {
-                        assert(pGfxPointFacet->GetCamera().IsValid());
-
-                        LightBuffer[IndexOfLight].m_LightViewProjection = pGfxPointFacet->GetCamera()->GetViewProjectionMatrix();
-                    }
-
-                    // -----------------------------------------------------------------------------
-
-                    if (pDtPointFacet->GetShadowType() != Dt::CPointLightComponent::NoShadows)
-                    {
-                        m_LightJob.m_ShadowTexturePtrs[IndexOfLight] = pGfxPointFacet->GetTextureSMSet()->GetTexture(0);
-                    }
-
-                    // -----------------------------------------------------------------------------
-
-                    ++IndexOfLight;
-                }
-            }
-            
-            if (rCurrentEntity.GetComponentFacet()->HasComponent<Dt::CLightProbeComponent>() && (m_LightJob.m_SpecularTexturePtr == 0 && m_LightJob.m_DiffuseTexturePtr == 0))
-            {
-                Dt::CLightProbeComponent* pDtLightProbeFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CLightProbeComponent>();
-                Gfx::CLightProbeComponent* pGfxLightProbeFacet   = CComponentManager::GetInstance().GetComponent<Gfx::CLightProbeComponent>(pDtLightProbeFacet->GetID());
-
-                if (pDtLightProbeFacet != 0 && pGfxLightProbeFacet != 0 && pDtLightProbeFacet->GetType() == Dt::CLightProbeComponent::Sky)
-                {
-                    LightBuffer[IndexOfLight].m_LightType      = 3;
-                    LightBuffer[IndexOfLight].m_LightPosition  = glm::vec4(rCurrentEntity.GetWorldPosition(), 1.0f);
-                    LightBuffer[IndexOfLight].m_LightDirection = glm::vec4(0.0f);
-                    LightBuffer[IndexOfLight].m_LightColor     = glm::vec4(0.0f);
-                    LightBuffer[IndexOfLight].m_LightSettings  = glm::vec4(static_cast<float>(pGfxLightProbeFacet->GetSpecularPtr()->GetNumberOfMipLevels() - 1), 0.0f, 0.0f, 0.0f);
-
-                    LightBuffer[IndexOfLight].m_LightViewProjection = glm::mat4(1.0f);
-
-                    ++IndexOfLight;
-
-                    // -----------------------------------------------------------------------------
-
-                    m_LightJob.m_SpecularTexturePtr = pGfxLightProbeFacet->GetSpecularPtr();
-                    m_LightJob.m_DiffuseTexturePtr  = pGfxLightProbeFacet->GetDiffusePtr();
-                }
+                LightBuffer[IndexOfLight].m_LightViewProjection = pGfxComponent->GetCamera()->GetViewProjectionMatrix();
             }
 
             // -----------------------------------------------------------------------------
-            // Next entity
+
+            if (pDtComponent->GetShadowType() != Dt::CPointLightComponent::NoShadows)
+            {
+                m_LightJob.m_ShadowTexturePtrs[IndexOfLight] = pGfxComponent->GetTextureSMSet()->GetTexture(0);
+            }
+
             // -----------------------------------------------------------------------------
-            CurrentLightEntity = CurrentLightEntity.Next(Dt::SEntityCategory::Dynamic);
+
+            ++IndexOfLight;
+        }
+
+        // -----------------------------------------------------------------------------
+        // Light probe
+        // -----------------------------------------------------------------------------
+        DataComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CLightProbeComponent>();
+
+        for (auto Component : DataComponents)
+        {
+            if (IndexOfLight == s_MaxNumberOfLightsPerProbe) break;
+
+            Dt::CLightProbeComponent* pDtComponent = static_cast<Dt::CLightProbeComponent*>(Component);
+
+            assert(pDtComponent->GetHostEntity());
+
+            if (!pDtComponent->IsActive()) continue;
+
+            Gfx::CLightProbeComponent* pGfxComponent = CComponentManager::GetInstance().GetComponent<Gfx::CLightProbeComponent>(pDtComponent->GetID());
+
+            LightBuffer[IndexOfLight].m_LightType      = 3;
+            LightBuffer[IndexOfLight].m_LightPosition  = glm::vec4(pDtComponent->GetHostEntity()->GetWorldPosition(), 1.0f);
+            LightBuffer[IndexOfLight].m_LightDirection = glm::vec4(0.0f);
+            LightBuffer[IndexOfLight].m_LightColor     = glm::vec4(0.0f);
+            LightBuffer[IndexOfLight].m_LightSettings  = glm::vec4(static_cast<float>(pGfxComponent->GetSpecularPtr()->GetNumberOfMipLevels() - 1), 0.0f, 0.0f, 0.0f);
+
+            LightBuffer[IndexOfLight].m_LightViewProjection = glm::mat4(1.0f);
+
+            ++IndexOfLight;
         }
 
         BufferManager::UploadBufferData(m_LightPropertiesBufferPtr, &LightBuffer);

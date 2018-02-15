@@ -397,74 +397,73 @@ namespace
         // -----------------------------------------------------------------------------
         // Iterate throw every entity inside this map
         // -----------------------------------------------------------------------------
-        Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Dynamic);
-        Dt::Map::CEntityIterator EndOfEntities = Dt::Map::EntitiesEnd();
-            
-        for (; CurrentEntity != EndOfEntities; CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Dynamic))
+        auto DataMeshComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CMeshComponent*>();
+
+        for (auto Component : DataMeshComponents)
         {
-            Dt::CEntity& rCurrentEntity = *CurrentEntity;
+            Dt::CMeshComponent* pStComponent = static_cast<Dt::CMeshComponent*>(Component);
 
-            Dt::CMeshComponent* pMeshComponent = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CMeshComponent>();
+            assert(pStComponent->GetHostEntity());
 
-            if (pMeshComponent == 0) continue;
+            if (!pStComponent->IsActive()) continue;
 
-            CMeshComponent* pGraphicModelActorFacet = CComponentManager::GetInstance().GetComponent<CMeshComponent>(pMeshComponent->GetID());
+            CMeshComponent* pGfxComponent = CComponentManager::GetInstance().GetComponent<CMeshComponent>(pStComponent->GetID());
 
-            CMeshPtr MeshPtr = pGraphicModelActorFacet->GetMesh();
-                
+            CMeshPtr MeshPtr = pGfxComponent->GetMesh();
+
             // -----------------------------------------------------------------------------
             // Upload model matrix to buffer
             // -----------------------------------------------------------------------------
             SPerDrawCallConstantBuffer ModelBuffer;
-                
-            ModelBuffer.m_ModelMatrix = rCurrentEntity.GetTransformationFacet()->GetWorldMatrix();
-                
+
+            ModelBuffer.m_ModelMatrix = pStComponent->GetHostEntity()->GetTransformationFacet()->GetWorldMatrix();
+
             BufferManager::UploadBufferData(m_LightCameraVSBufferPtr->GetBuffer(1), &ModelBuffer);
-                
+
             // -----------------------------------------------------------------------------
             // Render every surface of this entity
             // -----------------------------------------------------------------------------
             unsigned int NumberOfSurfaces = MeshPtr->GetLOD(0)->GetNumberOfSurfaces();
-                
-            for (unsigned int IndexOfSurface = 0; IndexOfSurface < NumberOfSurfaces; ++ IndexOfSurface)
+
+            for (unsigned int IndexOfSurface = 0; IndexOfSurface < NumberOfSurfaces; ++IndexOfSurface)
             {
                 CSurfacePtr SurfacePtr = MeshPtr->GetLOD(0)->GetSurface(IndexOfSurface);
-                    
+
                 if (SurfacePtr == nullptr)
                 {
                     continue;
                 }
-                    
+
                 // -----------------------------------------------------------------------------
                 // Get input layout from optimal shader
                 // -----------------------------------------------------------------------------
                 assert(SurfacePtr->GetKey().m_HasPosition);
-                    
+
                 CInputLayoutPtr LayoutPtr = SurfacePtr->GetShaderVS()->GetInputLayout();
-                    
+
                 // -----------------------------------------------------------------------------
                 // Set items to context manager
                 // -----------------------------------------------------------------------------
                 ContextManager::SetVertexBuffer(SurfacePtr->GetVertexBuffer());
-                    
+
                 ContextManager::SetIndexBuffer(SurfacePtr->GetIndexBuffer(), 0);
-                    
+
                 ContextManager::SetInputLayout(LayoutPtr);
-                    
+
                 ContextManager::SetTopology(STopology::TriangleList);
-                    
+
                 ContextManager::DrawIndexed(SurfacePtr->GetNumberOfIndices(), 0, 0);
-                    
+
                 ContextManager::ResetTopology();
-                    
+
                 ContextManager::ResetInputLayout();
-                    
+
                 ContextManager::ResetIndexBuffer();
-                    
+
                 ContextManager::ResetVertexBuffer();
             }
         }
-            
+
         ContextManager::ResetConstantBuffer(0);
         ContextManager::ResetConstantBuffer(1);
 

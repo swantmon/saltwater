@@ -834,14 +834,17 @@ namespace
         // -----------------------------------------------------------------------------
         // Iterate throw every entity inside this map
         // -----------------------------------------------------------------------------
-        Dt::CSunComponent* pDataSunFacet = 0;
+        Dt::CSunComponent* pDtSunComponent = 0;
 
-        for (Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Dynamic); CurrentEntity != Dt::Map::EntitiesEnd() && pDataSunFacet == 0; CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Dynamic))
+        auto DataSunComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CSunComponent>();
+
+        for (auto Component : DataSunComponents)
         {
-            if (CurrentEntity->GetComponentFacet()->HasComponent<Dt::CSunComponent>())
-            {
-                pDataSunFacet = CurrentEntity->GetComponentFacet()->GetComponent<Dt::CSunComponent>();
-            }
+            Dt::CSunComponent* pDtComponent = static_cast<Dt::CSunComponent*>(Component);
+
+            if (!pDtComponent->IsActive()) continue;
+
+            pDtSunComponent = pDtComponent;
         }
 
         Performance::BeginEvent("Skybox from PAS");
@@ -851,7 +854,7 @@ namespace
         // -----------------------------------------------------------------------------
         SPSPASSettings PSBuffer;
 
-        PSBuffer.g_SunDirection           = pDataSunFacet == nullptr ? glm::vec4(0.0f, 1.0f, 0.0f, 0.0f) : glm::eulerAngleX(glm::radians(90.0f)) * glm::vec4(pDataSunFacet->GetDirection(), 0.0f);
+        PSBuffer.g_SunDirection           = pDtSunComponent == nullptr ? glm::vec4(0.0f, 1.0f, 0.0f, 0.0f) : glm::eulerAngleX(glm::radians(90.0f)) * glm::vec4(pDtSunComponent->GetDirection(), 0.0f);
         PSBuffer.g_SunIntensity           = glm::vec4(_Intensity);
         PSBuffer.ps_ExposureHistoryIndex  = 0;
 

@@ -96,6 +96,12 @@ namespace
             Gfx::CCameraComponent* m_pGfxComponent;
         };
 
+        struct SSkyRenderJob
+        {
+            Dt::CSkyComponent* m_pDtComponent;
+            Gfx::CSkyComponent* m_pGfxComponent;
+        };
+
         struct SSkytextureBufferPS
         {
             float m_HDRFactor;
@@ -116,13 +122,14 @@ namespace
         
         struct SSkyboxBufferPS
         {
-            glm::vec4   m_InvertedScreenSize;
-            unsigned int   m_ExposureHistoryIndex;
+            glm::vec4    m_InvertedScreenSize;
+            unsigned int m_ExposureHistoryIndex;
         };
 
     private:
 
         typedef std::vector<SCameraRenderJob> CCameraRenderJobs;
+        typedef std::vector<SSkyRenderJob> CSkyRenderJobs;
         
     private:
 
@@ -134,6 +141,7 @@ namespace
         CTargetSetPtr m_WebcamTargetSetPtr;
 
         CCameraRenderJobs m_CameraRenderJobs;
+        CSkyRenderJobs m_SkyRenderJobs;
         
     private:
 
@@ -155,6 +163,7 @@ namespace
         , m_WebcamTexturePtr           ()
         , m_WebcamTargetSetPtr         ()
         , m_CameraRenderJobs           ()
+        , m_SkyRenderJobs              ()
     {
     }
     
@@ -195,6 +204,8 @@ namespace
         m_WebcamTargetSetPtr = 0;
 
         m_CameraRenderJobs.clear();
+
+        m_SkyRenderJobs.clear();
     }
     
     // -----------------------------------------------------------------------------
@@ -459,6 +470,8 @@ namespace
 
     void CGfxBackgroundRenderer::RenderBackgroundFromSkybox()
     {
+        if (m_SkyRenderJobs.size() == 0) return;
+
         CRenderContextPtr RenderContextPtr = m_BackgroundFromSkybox.m_RenderContextPtr;
         CShaderPtr        VSPtr            = m_BackgroundFromSkybox.m_VSPtr;
         CShaderPtr        PSPtr            = m_BackgroundFromSkybox.m_PSPtr;
@@ -467,43 +480,7 @@ namespace
         CInputLayoutPtr   InputLayoutPtr   = m_BackgroundFromSkybox.m_InputLayoutPtr;
         CMeshPtr          MeshPtr          = m_BackgroundFromSkybox.m_MeshPtr;
 
-        // -----------------------------------------------------------------------------
-        // Find sky entity
-        // -----------------------------------------------------------------------------
-        Dt::Map::CEntityIterator CurrentEntity;
-        Dt::Map::CEntityIterator EndOfEntities;
-
-        CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Dynamic);
-        EndOfEntities = Dt::Map::EntitiesEnd();
-
-        Dt::CEntity* pSkyEntity = 0;
-
-        for (; CurrentEntity != EndOfEntities; )
-        {
-            Dt::CEntity& rCurrentEntity = *CurrentEntity;
-
-            // -----------------------------------------------------------------------------
-            // Get graphic facet
-            // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetComponentFacet()->HasComponent<Dt::CSkyComponent>())
-            {
-                pSkyEntity = &rCurrentEntity;
-            }
-
-            // -----------------------------------------------------------------------------
-            // Next entity
-            // -----------------------------------------------------------------------------
-            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Dynamic);
-        }
-
-        if (pSkyEntity == 0)
-        {
-            return;
-        }
-
-        Gfx::CSkyComponent* pSkyFacet = CComponentManager::GetInstance().GetComponent<Gfx::CSkyComponent>(pSkyEntity->GetComponentFacet()->GetComponent<Dt::CSkyComponent>()->GetID());
-
-        assert(pSkyFacet);
+        SSkyRenderJob& rCurrentJob = m_SkyRenderJobs[0];
 
         // -----------------------------------------------------------------------------
         // Render sky box
@@ -559,7 +536,7 @@ namespace
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
         ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
         
-        ContextManager::SetTexture(0, pSkyFacet->GetCubemapPtr());
+        ContextManager::SetTexture(0, rCurrentJob.m_pGfxComponent->GetCubemapPtr());
         ContextManager::SetTexture(1, TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget());
         
         ContextManager::DrawIndexed(MeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
@@ -597,6 +574,8 @@ namespace
 
     void CGfxBackgroundRenderer::RenderBackgroundFromTexture()
     {
+        if (m_CameraRenderJobs.size() == 0) return;
+
         SCameraRenderJob& rRenderJob = m_CameraRenderJobs[0];
 
         if (rRenderJob.m_pGfxComponent->GetBackgroundTexture2D() == nullptr)
@@ -605,39 +584,15 @@ namespace
         }
 
         // -----------------------------------------------------------------------------
-        // Find sky entity
+        // Get HDR intensity from sky
         // -----------------------------------------------------------------------------
         float HDRIntensity = 1.0f;
 
-        Dt::Map::CEntityIterator CurrentEntity;
-        Dt::Map::CEntityIterator EndOfEntities;
-
-        CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Dynamic);
-        EndOfEntities = Dt::Map::EntitiesEnd();
-
-        Dt::CEntity* pSkyEntity = 0;
-
-        for (; CurrentEntity != EndOfEntities; )
+        if (m_SkyRenderJobs.size() > 0)
         {
-            Dt::CEntity& rCurrentEntity = *CurrentEntity;
+            SSkyRenderJob& rCurrentJob = m_SkyRenderJobs[0];
 
-            // -----------------------------------------------------------------------------
-            // Get graphic facet
-            // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetComponentFacet()->HasComponent<Dt::CSkyComponent>())
-            {
-                pSkyEntity = &rCurrentEntity;
-            }
-
-            // -----------------------------------------------------------------------------
-            // Next entity
-            // -----------------------------------------------------------------------------
-            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Dynamic);
-        }
-
-        if (pSkyEntity != 0)
-        {
-            Dt::CSkyComponent* pSkyComponent = pSkyEntity->GetComponentFacet()->GetComponent<Dt::CSkyComponent>();
+            Dt::CSkyComponent* pSkyComponent = rCurrentJob.m_pDtComponent;
 
             assert(pSkyComponent);
 
@@ -736,43 +691,19 @@ namespace
     void CGfxBackgroundRenderer::RenderBackgroundFromWebcam()
     {
         // -----------------------------------------------------------------------------
-        // Find sky entity
+        // Get HDR intensity from sky
         // -----------------------------------------------------------------------------
         float HDRIntensity = 1.0f;
 
-        Dt::Map::CEntityIterator CurrentEntity;
-        Dt::Map::CEntityIterator EndOfEntities;
-
-        CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Dynamic);
-        EndOfEntities = Dt::Map::EntitiesEnd();
-
-        Dt::CEntity* pSkyEntity = 0;
-
-        for (; CurrentEntity != EndOfEntities; )
+        if (m_SkyRenderJobs.size() > 0)
         {
-            Dt::CEntity& rCurrentEntity = *CurrentEntity;
+            SSkyRenderJob& rCurrentJob = m_SkyRenderJobs[0];
 
-            // -----------------------------------------------------------------------------
-            // Get graphic facet
-            // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetComponentFacet()->HasComponent<Dt::CSkyComponent>())
-            {
-                pSkyEntity = &rCurrentEntity;
-            }
+            Dt::CSkyComponent* pSkyComponent = rCurrentJob.m_pDtComponent;
 
-            // -----------------------------------------------------------------------------
-            // Next entity
-            // -----------------------------------------------------------------------------
-            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Dynamic);
-        }
+            assert(pSkyComponent);
 
-        if (pSkyEntity != 0)
-        {
-            Dt::CSkyComponent* pDtSkyComponent = pSkyEntity->GetComponentFacet()->GetComponent<Dt::CSkyComponent>();
-
-            assert(pDtSkyComponent);
-
-            HDRIntensity = pDtSkyComponent->GetIntensity();
+            HDRIntensity = pSkyComponent->GetIntensity();
         }
 
         // -----------------------------------------------------------------------------
@@ -791,9 +722,8 @@ namespace
         // -----------------------------------------------------------------------------
         Performance::BeginEvent("Background from Webcam");
 
-
         // -----------------------------------------------------------------------------
-        // Render webcam to target set
+        // Render web cam to target set
         // -----------------------------------------------------------------------------
         TargetSetManager::ClearTargetSet(m_WebcamTargetSetPtr, glm::vec4(1.0f));
 
@@ -882,9 +812,6 @@ namespace
 
     void CGfxBackgroundRenderer::BuildRenderJobs()
     {
-        // -----------------------------------------------------------------------------
-        // Clear current render jobs
-        // -----------------------------------------------------------------------------
         m_CameraRenderJobs.clear();
 
         auto DataCameraComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CCameraComponent>();
@@ -906,6 +833,28 @@ namespace
 
                 m_CameraRenderJobs.push_back(NewRenderJob);
             }
+        }
+
+        // -----------------------------------------------------------------------------
+
+        m_SkyRenderJobs.clear();
+
+        auto DataComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CSkyComponent>();
+
+        for (auto Component : DataComponents)
+        {
+            Dt::CSkyComponent* pDtComponent = static_cast<Dt::CSkyComponent*>(Component);
+
+            assert(pDtComponent->GetHostEntity());
+
+            if (!pDtComponent->IsActive()) continue;
+
+            SSkyRenderJob NewRenderJob;
+
+            NewRenderJob.m_pDtComponent  = pDtComponent;
+            NewRenderJob.m_pGfxComponent = CComponentManager::GetInstance().GetComponent<Gfx::CSkyComponent>(pDtComponent->GetID());
+
+            m_SkyRenderJobs.push_back(NewRenderJob);
         }
     }
 } // namespace

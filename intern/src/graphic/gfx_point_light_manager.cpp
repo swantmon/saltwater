@@ -625,60 +625,53 @@ namespace
         BufferManager::UploadBufferData(m_LightCameraVSBufferPtr->GetBuffer(0), &ViewBuffer);
             
         // -----------------------------------------------------------------------------
-        // Iterate throw every entity inside this map
+        // Iterate throw every component inside this map
         // -----------------------------------------------------------------------------
-        Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Dynamic);
-        Dt::Map::CEntityIterator EndOfEntities = Dt::Map::EntitiesEnd();
-            
-        for (; CurrentEntity != EndOfEntities; )
+        auto DataMeshComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CMeshComponent>();
+
+        for (auto Component : DataMeshComponents)
         {
-            Dt::CEntity& rCurrentEntity = *CurrentEntity;
-                
-            // -----------------------------------------------------------------------------
-            // Get graphic facet
-            // -----------------------------------------------------------------------------
-            Dt::CMeshComponent* pMeshComponent = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CMeshComponent>();
+            Dt::CMeshComponent* pDtComponent = static_cast<Dt::CMeshComponent*>(Component);
 
-            if (pMeshComponent == 0) continue;
+            assert(pDtComponent->GetHostEntity());
 
-            // -----------------------------------------------------------------------------
-            // Set other graphic data of this entity
-            // -----------------------------------------------------------------------------
-            CMeshComponent* pActorModelFacet = CComponentManager::GetInstance().GetComponent<CMeshComponent>(pMeshComponent->GetID());
+            if (!pDtComponent->IsActive()) continue;
 
-            CMeshPtr ModelPtr = pActorModelFacet->GetMesh();
-                
+            CMeshComponent* pGfxComponent = CComponentManager::GetInstance().GetComponent<CMeshComponent>(pDtComponent->GetID());
+
+            CMeshPtr ModelPtr = pGfxComponent->GetMesh();
+
             // -----------------------------------------------------------------------------
             // Upload model matrix to buffer
             // -----------------------------------------------------------------------------
             SPerDrawCallConstantBuffer ModelBuffer;
-                
-            ModelBuffer.m_ModelMatrix = rCurrentEntity.GetTransformationFacet()->GetWorldMatrix();
-                
+
+            ModelBuffer.m_ModelMatrix = pDtComponent->GetHostEntity()->GetTransformationFacet()->GetWorldMatrix();
+
             BufferManager::UploadBufferData(m_LightCameraVSBufferPtr->GetBuffer(1), &ModelBuffer);
-                
+
             // -----------------------------------------------------------------------------
             // Render every surface of this entity
             // -----------------------------------------------------------------------------
             unsigned int NumberOfSurfaces = ModelPtr->GetLOD(0)->GetNumberOfSurfaces();
-                
-            for (unsigned int IndexOfSurface = 0; IndexOfSurface < NumberOfSurfaces; ++ IndexOfSurface)
+
+            for (unsigned int IndexOfSurface = 0; IndexOfSurface < NumberOfSurfaces; ++IndexOfSurface)
             {
                 CSurfacePtr SurfacePtr = ModelPtr->GetLOD(0)->GetSurface(IndexOfSurface);
-                    
+
                 if (SurfacePtr == nullptr)
                 {
                     continue;
                 }
-                    
+
                 // -----------------------------------------------------------------------------
                 // Set material
                 // -----------------------------------------------------------------------------
                 CMaterialPtr MaterialPtr = SurfacePtr->GetMaterial();
 
-                if (pActorModelFacet->GetMaterial(IndexOfSurface) != 0)
+                if (pGfxComponent->GetMaterial(IndexOfSurface) != 0)
                 {
-                    MaterialPtr = pActorModelFacet->GetMaterial(IndexOfSurface);
+                    MaterialPtr = pGfxComponent->GetMaterial(IndexOfSurface);
                 }
 
                 // -----------------------------------------------------------------------------
@@ -715,13 +708,13 @@ namespace
                     SPunctualLightProperties PunctualLightProperties;
 
                     float InvSqrAttenuationRadius = _pDtPointLight->GetReciprocalSquaredAttenuationRadius();
-                    float AngleScale              = _pDtPointLight->GetAngleScale();
-                    float AngleOffset             = _pDtPointLight->GetAngleOffset();
+                    float AngleScale = _pDtPointLight->GetAngleScale();
+                    float AngleOffset = _pDtPointLight->GetAngleOffset();
 
-                    PunctualLightProperties.m_LightPosition  = glm::vec4(_rLightPosition, 1.0f);
+                    PunctualLightProperties.m_LightPosition = glm::vec4(_rLightPosition, 1.0f);
                     PunctualLightProperties.m_LightDirection = glm::normalize(glm::vec4(_pDtPointLight->GetDirection(), 0.0f));
-                    PunctualLightProperties.m_LightColor     = glm::vec4(_pDtPointLight->GetLightness(), 1.0f);
-                    PunctualLightProperties.m_LightSettings  = glm::vec4(InvSqrAttenuationRadius, AngleScale, AngleOffset, 0.0f);
+                    PunctualLightProperties.m_LightColor = glm::vec4(_pDtPointLight->GetLightness(), 1.0f);
+                    PunctualLightProperties.m_LightSettings = glm::vec4(InvSqrAttenuationRadius, AngleScale, AngleOffset, 0.0f);
 
                     BufferManager::UploadBufferData(m_RSMPSBuffer->GetBuffer(1), &PunctualLightProperties);
 
@@ -733,42 +726,37 @@ namespace
                 {
                     ContextManager::SetShaderPS(m_ShadowSMShaderPSPtr);
                 }
-                    
+
                 // -----------------------------------------------------------------------------
                 // Get input layout from optimal shader
                 // -----------------------------------------------------------------------------
                 assert(SurfacePtr->GetKey().m_HasPosition);
-                    
+
                 CInputLayoutPtr LayoutPtr = SurfacePtr->GetShaderVS()->GetInputLayout();
-                    
+
                 // -----------------------------------------------------------------------------
                 // Set items to context manager
                 // -----------------------------------------------------------------------------
                 ContextManager::SetVertexBuffer(SurfacePtr->GetVertexBuffer());
-                    
+
                 ContextManager::SetIndexBuffer(SurfacePtr->GetIndexBuffer(), 0);
-                    
+
                 ContextManager::SetInputLayout(LayoutPtr);
-                    
+
                 ContextManager::SetTopology(STopology::TriangleList);
-                    
+
                 ContextManager::DrawIndexed(SurfacePtr->GetNumberOfIndices(), 0, 0);
-                    
+
                 ContextManager::ResetTopology();
-                    
+
                 ContextManager::ResetInputLayout();
-                    
+
                 ContextManager::ResetIndexBuffer();
-                    
+
                 ContextManager::ResetVertexBuffer();
             }
-                
-            // -----------------------------------------------------------------------------
-            // Next entity
-            // -----------------------------------------------------------------------------
-            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Dynamic);
         }
-            
+
         ContextManager::ResetConstantBuffer(0);
 
         ContextManager::ResetConstantBuffer(1);
