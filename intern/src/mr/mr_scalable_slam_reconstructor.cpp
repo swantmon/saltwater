@@ -181,6 +181,11 @@ namespace
         uint16_t m_Weight;
     };
 
+    int DivUp(int TotalShaderCount, int WorkGroupSize)
+    {
+        return (TotalShaderCount + WorkGroupSize - 1) / WorkGroupSize;
+    }
+
 } // namespace
 
 namespace MR
@@ -243,6 +248,10 @@ namespace MR
         ClearPool();
 
         m_PlaneDetector.SetImages(m_ReferenceVertexMapPtr[2], m_ReferenceNormalMapPtr[2]);
+
+        const int Width = m_pRGBDCameraControl->GetDepthWidth();
+        const int Height = m_pRGBDCameraControl->GetDepthHeight();
+        m_pTracker.reset(new CICPTracker(Width, Height, m_ReconstructionSettings));
 
         m_IsIntegrationPaused = false;
         m_IsTrackingPaused = false;
@@ -1464,6 +1473,14 @@ namespace MR
         {
             Performance::BeginEvent("Tracking");
 
+            glm::mat4 Test = m_pTracker->Track(m_PoseMatrix,
+                m_ReferenceVertexMapPtr,
+                m_ReferenceNormalMapPtr,
+                m_RaycastVertexMapPtr,
+                m_RaycastNormalMapPtr,
+                m_IntrinsicsConstantBufferPtr
+            );
+
             PerformTracking();
 
             STrackingData TrackingData;
@@ -1471,7 +1488,7 @@ namespace MR
             TrackingData.m_InvPoseMatrix = glm::inverse(m_PoseMatrix);
 
             BufferManager::UploadBufferData(m_TrackingDataConstantBufferPtr, &TrackingData);
-
+            
             Performance::EndEvent();
         }
 
@@ -2057,10 +2074,4 @@ namespace MR
         return glm::int2(Width, Height);
     }
     
-    // -----------------------------------------------------------------------------
-
-    int CScalableSLAMReconstructor::DivUp(int TotalShaderCount, int WorkGroupSize)
-    {
-        return (TotalShaderCount + WorkGroupSize - 1) / WorkGroupSize;
-    }
 } // namespace MR

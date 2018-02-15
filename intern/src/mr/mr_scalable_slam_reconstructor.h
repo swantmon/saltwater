@@ -13,6 +13,7 @@
 
 #include "mr/mr_plane_detector.h"
 #include "mr/mr_slam_reconstruction_settings.h"
+#include "mr/mr_icp_tracker.h"
 
 #include "graphic/gfx_shader.h"
 #include "graphic/gfx_texture.h"
@@ -211,11 +212,7 @@ namespace MR
         bool CalculatePoseMatrix(glm::mat4& rIncPoseMatrix);
 
         Gfx::CMeshPtr CreateGridMesh(int Width);
-        
-    private:
-
-        static int DivUp(int TotalShaderCount, int WorkGroupSize);
-        
+                
     private:
 
         SReconstructionSettings m_ReconstructionSettings;
@@ -322,6 +319,7 @@ namespace MR
         bool m_UseShuffleIntrinsics;
         
         CPlaneDetector m_PlaneDetector;
+        std::unique_ptr<CICPTracker> m_pTracker;
 
         std::vector<char> m_ClearVector;
     };
