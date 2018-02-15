@@ -149,13 +149,16 @@ namespace
         {
             using namespace std;
 
+            typedef std::pair<std::string, SPerformanceMarker> SMarkerPair;
+
+            std::vector<SMarkerPair> ActiveDurationMarkers;
             set<string> DurationQueries = Base::CProgramParameters::GetInstance().Get<set<string>>("graphics:performance:markers", {});
 
             for (auto& rItemPair : m_PerformanceMarkerTimings)
             {
                 auto& rItem = rItemPair.second;
 
-                if (DurationQueries.count(rItemPair.first) > 0)
+                if ((DurationQueries.count(rItemPair.first) > 0))
                 {
                     while (!rItem.m_PendingQueries.empty())
                     {
@@ -172,14 +175,23 @@ namespace
                         ++rItem.m_NumberOfMarkers;
                     }
 
-                    std::stringstream Stream;
-
-                    Stream << '\n' << rItemPair.first << '\n'
-                        << rItem.m_NumberOfMarkers << " Times called\n"
-                        << rItem.m_AccumulatedTime / rItem.m_NumberOfMarkers << " ms average time\n";
-
-                    BASE_CONSOLE_STREAMINFO(Stream.str());
+                    ActiveDurationMarkers.push_back(rItemPair);
                 }
+            }
+
+            auto CompareMarkers = [](const SMarkerPair& _rLeft, const SMarkerPair& _rRight) { return _rLeft.first < _rRight.first; };
+
+            std::sort(ActiveDurationMarkers.begin(), ActiveDurationMarkers.end(), CompareMarkers);
+
+            for (auto& rItem : ActiveDurationMarkers)
+            {
+                std::stringstream Stream;
+
+                Stream << '\n' << rItem.first << '\n'
+                    << rItem.second.m_NumberOfMarkers << " Times called\n"
+                    << rItem.second.m_AccumulatedTime / rItem.second.m_NumberOfMarkers << " ms average time\n";
+
+                BASE_CONSOLE_STREAMINFO(Stream.str());
             }
         }
     }
