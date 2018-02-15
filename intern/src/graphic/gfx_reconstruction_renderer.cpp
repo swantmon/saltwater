@@ -165,6 +165,7 @@ namespace
 
         bool m_UseTrackingCamera;
 
+        bool m_RenderVolume;
         bool m_RenderVertexMap;
         bool m_RaycastRootGrids;
         bool m_RaycastLevel1Grid;
@@ -182,6 +183,7 @@ namespace
 
     CGfxReconstructionRenderer::CGfxReconstructionRenderer()
         : m_UseTrackingCamera(true)
+        , m_RenderVolume     (true)
         , m_RenderVertexMap  (false)
         , m_RaycastRootGrids (false)
         , m_RaycastLevel1Grid(false)
@@ -223,7 +225,8 @@ namespace
 			m_pScalableReconstructor = nullptr;
 		}
 
-        m_UseTrackingCamera = Base::CProgramParameters::GetInstance().Get("mr:slam:rendering:use_tracking_camera", true );
+        m_UseTrackingCamera = Base::CProgramParameters::GetInstance().Get("mr:slam:rendering:use_tracking_camera", true);
+        m_RenderVolume      = Base::CProgramParameters::GetInstance().Get("mr:slam:rendering:volume"             , true);
         m_RenderVertexMap   = Base::CProgramParameters::GetInstance().Get("mr:slam:rendering:vertex_map"         , false);
         m_RaycastRootGrids  = Base::CProgramParameters::GetInstance().Get("mr:slam:rendering:grids:root"         , false);
         m_RaycastLevel1Grid = Base::CProgramParameters::GetInstance().Get("mr:slam:rendering:grids:level1"       , false);
@@ -1400,7 +1403,10 @@ namespace
 
 		if (m_pScalableReconstructor != nullptr)
 		{
-            RaycastScalableVolume();
+            if (m_RenderVolume)
+            {
+                RaycastScalableVolume();
+            }
 
             if (m_RenderVertexMap)
             {
