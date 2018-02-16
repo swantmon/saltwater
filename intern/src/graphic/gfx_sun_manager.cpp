@@ -397,17 +397,17 @@ namespace
         // -----------------------------------------------------------------------------
         // Iterate throw every entity inside this map
         // -----------------------------------------------------------------------------
-        auto DataMeshComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CMeshComponent*>();
+        auto DataMeshComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CMeshComponent>();
 
         for (auto Component : DataMeshComponents)
         {
-            Dt::CMeshComponent* pStComponent = static_cast<Dt::CMeshComponent*>(Component);
+            Dt::CMeshComponent* pDtComponent = static_cast<Dt::CMeshComponent*>(Component);
 
-            assert(pStComponent->GetHostEntity());
+            assert(pDtComponent->GetHostEntity());
 
-            if (!pStComponent->IsActive()) continue;
+            if (!pDtComponent->IsActive()) continue;
 
-            CMeshComponent* pGfxComponent = CComponentManager::GetInstance().GetComponent<CMeshComponent>(pStComponent->GetID());
+            CMeshComponent* pGfxComponent = CComponentManager::GetInstance().GetComponent<CMeshComponent>(pDtComponent->GetID());
 
             CMeshPtr MeshPtr = pGfxComponent->GetMesh();
 
@@ -416,7 +416,7 @@ namespace
             // -----------------------------------------------------------------------------
             SPerDrawCallConstantBuffer ModelBuffer;
 
-            ModelBuffer.m_ModelMatrix = pStComponent->GetHostEntity()->GetTransformationFacet()->GetWorldMatrix();
+            ModelBuffer.m_ModelMatrix = pDtComponent->GetHostEntity()->GetTransformationFacet()->GetWorldMatrix();
 
             BufferManager::UploadBufferData(m_LightCameraVSBufferPtr->GetBuffer(1), &ModelBuffer);
 
