@@ -197,14 +197,14 @@ namespace
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
             EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
-            Dt::CEntity& rSunLight = Dt::EntityManager::CreateEntity(EntityDesc);
+            Dt::CEntity& rEnvironmentEntity = Dt::EntityManager::CreateEntity(EntityDesc);
 
-            rSunLight.SetName("Sun");
+            rEnvironmentEntity.SetName("Sun");
 
             // -----------------------------------------------------------------------------
             // Transformation
             // -----------------------------------------------------------------------------
-            Dt::CTransformationFacet* pTransformationFacet = rSunLight.GetTransformationFacet();
+            Dt::CTransformationFacet* pTransformationFacet = rEnvironmentEntity.GetTransformationFacet();
 
             pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 20.0f));
             pTransformationFacet->SetScale   (glm::vec3(1.0f));
@@ -221,11 +221,11 @@ namespace
 
             pComponent->UpdateLightness();
 
-            rSunLight.GetComponentFacet()->AddComponent(pComponent);
+            rEnvironmentEntity.GetComponentFacet()->AddComponent(pComponent);
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pComponent, Dt::CSunComponent::DirtyCreate);
 
-            Dt::EntityManager::MarkEntityAsDirty(rSunLight, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+            Dt::EntityManager::MarkEntityAsDirty(rEnvironmentEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
 
         // -----------------------------------------------------------------------------
@@ -328,32 +328,6 @@ void CLgLoadMapState::CreateDefaultScene()
         }
 
         // -----------------------------------------------------------------------------
-        // Setup environment
-        // -----------------------------------------------------------------------------
-        {
-            Dt::SEntityDescriptor EntityDesc;
-
-            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
-            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetComponents;
-
-            Dt::CEntity& rEnvironment = Dt::EntityManager::CreateEntity(EntityDesc);
-
-            rEnvironment.SetName("Environment");
-
-            auto Component = Dt::CComponentManager::GetInstance().Allocate<Dt::CSkyComponent>();
-
-            Component->SetRefreshMode(Dt::CSkyComponent::Static);
-            Component->SetType(Dt::CSkyComponent::Procedural);
-            Component->SetIntensity(40000.0f);
-
-            rEnvironment.AttachComponent(Component);
-
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(Component, Dt::CSkyComponent::DirtyCreate);
-
-            Dt::EntityManager::MarkEntityAsDirty(rEnvironment, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
-        }
-
-        // -----------------------------------------------------------------------------
         // Setup light
         // -----------------------------------------------------------------------------
         {
@@ -362,32 +336,34 @@ void CLgLoadMapState::CreateDefaultScene()
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
             EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
-            Dt::CEntity& rGlobalProbeLight = Dt::EntityManager::CreateEntity(EntityDesc);
+            Dt::CEntity& rLightingEntity = Dt::EntityManager::CreateEntity(EntityDesc);
 
-            rGlobalProbeLight.SetName("Local light probe");
+            rLightingEntity.SetName("Local light probe");
 
-            Dt::CTransformationFacet* pTransformationFacet = rGlobalProbeLight.GetTransformationFacet();
+            Dt::CTransformationFacet* pTransformationFacet = rLightingEntity.GetTransformationFacet();
 
             pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
             pTransformationFacet->SetScale   (glm::vec3(1.0f));
             pTransformationFacet->SetRotation(glm::vec3(0.0f));
 
-            auto LightProbeComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CLightProbeComponent>();
+            {
+                auto LightProbeComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CLightProbeComponent>();
 
-            LightProbeComponent->SetType(Dt::CLightProbeComponent::Sky);
-            LightProbeComponent->SetQuality(Dt::CLightProbeComponent::PX256);
-            LightProbeComponent->SetIntensity(1.0f);
-            LightProbeComponent->SetRefreshMode(Dt::CLightProbeComponent::Static);
-            LightProbeComponent->SetNear(0.01f);
-            LightProbeComponent->SetFar(1024.0f);
-            LightProbeComponent->SetParallaxCorrection(false);
-            LightProbeComponent->SetBoxSize(glm::vec3(1024.0f));
+                LightProbeComponent->SetType(Dt::CLightProbeComponent::Sky);
+                LightProbeComponent->SetQuality(Dt::CLightProbeComponent::PX256);
+                LightProbeComponent->SetIntensity(1.0f);
+                LightProbeComponent->SetRefreshMode(Dt::CLightProbeComponent::Static);
+                LightProbeComponent->SetNear(0.01f);
+                LightProbeComponent->SetFar(1024.0f);
+                LightProbeComponent->SetParallaxCorrection(false);
+                LightProbeComponent->SetBoxSize(glm::vec3(1024.0f));
 
-            rGlobalProbeLight.AttachComponent(LightProbeComponent);
+                rLightingEntity.AttachComponent(LightProbeComponent);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(LightProbeComponent, Dt::CLightProbeComponent::DirtyCreate);
+                Dt::CComponentManager::GetInstance().MarkComponentAsDirty(LightProbeComponent, Dt::CLightProbeComponent::DirtyCreate);
+            }
 
-            Dt::EntityManager::MarkEntityAsDirty(rGlobalProbeLight, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+            Dt::EntityManager::MarkEntityAsDirty(rLightingEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
 
         {
@@ -396,35 +372,49 @@ void CLgLoadMapState::CreateDefaultScene()
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
             EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
-            Dt::CEntity& rSunLight = Dt::EntityManager::CreateEntity(EntityDesc);
+            Dt::CEntity& rEnvironmentEntity = Dt::EntityManager::CreateEntity(EntityDesc);
 
-            rSunLight.SetName("Sun");
+            rEnvironmentEntity.SetName("Environment");
 
             // -----------------------------------------------------------------------------
             // Transformation
             // -----------------------------------------------------------------------------
-            Dt::CTransformationFacet* pTransformationFacet = rSunLight.GetTransformationFacet();
+            Dt::CTransformationFacet* pTransformationFacet = rEnvironmentEntity.GetTransformationFacet();
 
             pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 20.0f));
             pTransformationFacet->SetScale   (glm::vec3(1.0f));
             pTransformationFacet->SetRotation(glm::vec3(0.0f));
 
-            auto SunComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CSunComponent>();
+            {
+                auto SunComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CSunComponent>();
 
-            SunComponent->EnableTemperature(false);
-            SunComponent->SetColor         (glm::vec3(1.0f, 1.0f, 1.0f));
-            SunComponent->SetDirection     (glm::vec3(0.0f, 0.01f, -1.0f));
-            SunComponent->SetIntensity     (90600.0f);
-            SunComponent->SetTemperature   (0);
-            SunComponent->SetRefreshMode   (Dt::CSunComponent::Dynamic);
+                SunComponent->EnableTemperature(false);
+                SunComponent->SetColor(glm::vec3(1.0f, 1.0f, 1.0f));
+                SunComponent->SetDirection(glm::vec3(0.0f, 0.01f, -1.0f));
+                SunComponent->SetIntensity(90600.0f);
+                SunComponent->SetTemperature(0);
+                SunComponent->SetRefreshMode(Dt::CSunComponent::Dynamic);
 
-            SunComponent->UpdateLightness();
+                SunComponent->UpdateLightness();
 
-            rSunLight.AttachComponent(SunComponent);
+                rEnvironmentEntity.AttachComponent(SunComponent);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(SunComponent, Dt::CSunComponent::DirtyCreate);
+                Dt::CComponentManager::GetInstance().MarkComponentAsDirty(SunComponent, Dt::CSunComponent::DirtyCreate);
+            }
 
-            Dt::EntityManager::MarkEntityAsDirty(rSunLight, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+            {
+                auto Component = Dt::CComponentManager::GetInstance().Allocate<Dt::CSkyComponent>();
+
+                Component->SetRefreshMode(Dt::CSkyComponent::Static);
+                Component->SetType(Dt::CSkyComponent::Procedural);
+                Component->SetIntensity(40000.0f);
+
+                rEnvironmentEntity.AttachComponent(Component);
+
+                Dt::CComponentManager::GetInstance().MarkComponentAsDirty(Component, Dt::CSkyComponent::DirtyCreate);
+            }
+
+            Dt::EntityManager::MarkEntityAsDirty(rEnvironmentEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
 
         {

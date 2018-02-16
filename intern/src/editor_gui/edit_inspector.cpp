@@ -217,18 +217,14 @@ namespace Edit
 
         bool HasTransformation = _rMessage.Get<bool>();
 
-        bool HasComponents = _rMessage.Get<bool>();
-
         size_t NumberOfComponents = _rMessage.Get<size_t>();
 
-        Base::ID TypeID = static_cast<Base::ID>(-1);
+        std::vector<Base::ID> ComponentIDs;
 
         for (int IndexOfComponent = 0; IndexOfComponent < NumberOfComponents; ++IndexOfComponent)
         {
-            TypeID = _rMessage.Get<Base::ID>();
+            ComponentIDs.push_back(_rMessage.Get<Base::ID>());
         }
-
-        if (NumberOfComponents == 0) HasComponents = false;
 
         // -----------------------------------------------------------------------------
         // General informations
@@ -250,7 +246,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Details
         // -----------------------------------------------------------------------------
-        if (HasComponents)
+        for (auto TypeID : ComponentIDs)
         {
             if (TypeID == Base::CTypeInfo::GetTypeID<Dt::CMeshComponent>())
             {

@@ -210,7 +210,6 @@ namespace
         NewMessage.Put(rCurrentEntity.GetID());
 
         NewMessage.Put(rCurrentEntity.GetTransformationFacet() != nullptr);
-        NewMessage.Put(rCurrentEntity.GetComponentFacet()      != nullptr);
 
         auto Components = rCurrentEntity.GetComponentFacet()->GetComponents();
 
