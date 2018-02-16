@@ -123,12 +123,10 @@ namespace
 
     void CMaterialHelper::OnLoadMaterial(Edit::CMessage& _rMessage)
     {
-        char pTmp[512];
-
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
-        const char* pPathToFile = _rMessage.GetString(pTmp, 512);
+        std::string PathToFile = _rMessage.Get<std::string>();
 
         // -----------------------------------------------------------------------------
         // Material
@@ -148,7 +146,7 @@ namespace
         MaterialDescriptor.m_Displacement    = 0.0f;
         MaterialDescriptor.m_AlbedoColor     = glm::vec3(1.0f);
         MaterialDescriptor.m_TilingOffset    = glm::vec4(1.0f, 1.0f, 0.0f, 0.0f);
-        MaterialDescriptor.m_pFileName       = pPathToFile;
+        MaterialDescriptor.m_pFileName       = PathToFile.c_str();
         
         Dt::CMaterial& rNewMaterial = Dt::MaterialManager::CreateMaterial(MaterialDescriptor);
 
@@ -193,7 +191,7 @@ namespace
         {
             NewMessage.Put(true);
 
-            NewMessage.PutString(rMaterial.GetColorTexture()->GetFileName().c_str());
+            NewMessage.Put(rMaterial.GetColorTexture()->GetFileName());
         }
         else
         {
@@ -204,7 +202,7 @@ namespace
         {
             NewMessage.Put(true);
 
-            NewMessage.PutString(rMaterial.GetNormalTexture()->GetFileName().c_str());
+            NewMessage.Put(rMaterial.GetNormalTexture()->GetFileName());
         }
         else
         {
@@ -215,7 +213,7 @@ namespace
         {
             NewMessage.Put(true);
 
-            NewMessage.PutString(rMaterial.GetRoughnessTexture()->GetFileName().c_str());
+            NewMessage.Put(rMaterial.GetRoughnessTexture()->GetFileName());
         }
         else
         {
@@ -226,7 +224,7 @@ namespace
         {
             NewMessage.Put(true);
 
-            NewMessage.PutString(rMaterial.GetMetalTexture()->GetFileName().c_str());
+            NewMessage.Put(rMaterial.GetMetalTexture()->GetFileName());
         }
         else
         {
@@ -237,7 +235,7 @@ namespace
         {
             NewMessage.Put(true);
 
-            NewMessage.PutString(rMaterial.GetBumpTexture()->GetFileName().c_str());
+            NewMessage.Put(rMaterial.GetBumpTexture()->GetFileName());
         }
         else
         {
@@ -248,7 +246,7 @@ namespace
         {
             NewMessage.Put(true);
 
-            NewMessage.PutString(rMaterial.GetAmbientOcclusionTexture()->GetFileName().c_str());
+            NewMessage.Put(rMaterial.GetAmbientOcclusionTexture()->GetFileName());
         }
         else
         {
@@ -312,42 +310,42 @@ namespace
 
         if (HasColorMap)
         {
-            ColorMapName = _rMessage.Get<int>();
+            ColorMapName = _rMessage.Get<unsigned int>();
         }
 
         HasNormalMap = _rMessage.Get<bool>();
 
         if (HasNormalMap)
         {
-            NormalMapName = _rMessage.Get<int>();
+            NormalMapName = _rMessage.Get<unsigned int>();
         }
 
         HasRoughnessMap = _rMessage.Get<bool>();
 
         if (HasRoughnessMap)
         {
-            RoughnessMapName = _rMessage.Get<int>();
+            RoughnessMapName = _rMessage.Get<unsigned int>();
         }
 
         HasMetalnessMap = _rMessage.Get<bool>();
 
         if (HasMetalnessMap)
         {
-            MetalMapName = _rMessage.Get<int>();
+            MetalMapName = _rMessage.Get<unsigned int>();
         }
 
         HasBumpMap = _rMessage.Get<bool>();
 
         if (HasBumpMap)
         {
-            BumpMapName = _rMessage.Get<int>();
+            BumpMapName = _rMessage.Get<unsigned int>();
         }
 
         HasAOMap = _rMessage.Get<bool>();
 
         if (HasAOMap)
         {
-            AOMapName = _rMessage.Get<int>();
+            AOMapName = _rMessage.Get<unsigned int>();
         }
 
         rMaterial.SetColor       (Color);

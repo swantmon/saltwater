@@ -152,20 +152,9 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Name
         // -----------------------------------------------------------------------------
-        bool HasName = _rMessage.Get<bool>();
+        std::string EntityName = _rMessage.Get<std::string>();
 
-        if (HasName)
-        {
-            char pEntityName[256];
-
-            _rMessage.GetString(pEntityName, 256);
-
-            pNewItem->setText(0, QString(pEntityName));
-        }
-        else
-        {
-            pNewItem->setText(0, "Unnamed entity");
-        }
+        pNewItem->setText(0, QString(EntityName.c_str()));
 
         // -----------------------------------------------------------------------------
         // Hierarchy
@@ -178,7 +167,7 @@ namespace Edit
 
             if (HasParent)
             {
-                int ParentID = _rMessage.Get<Base::ID>();
+                Base::ID ParentID = _rMessage.Get<Base::ID>();
 
                 QList<QTreeWidgetItem*> ListOfEntities = findItems(QString::number(ParentID), Qt::MatchContains | Qt::MatchRecursive, 1);
 

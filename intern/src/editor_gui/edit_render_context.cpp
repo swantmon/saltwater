@@ -185,7 +185,7 @@ namespace Edit
 
         CMessage NewMessage;
 
-        NewMessage.PutString(ModelFileBinary.data());
+        NewMessage.Put(std::string(ModelFileBinary.data()));
 
         NewMessage.Reset();
 

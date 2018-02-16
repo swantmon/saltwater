@@ -107,7 +107,7 @@ namespace Edit
         QString NewBumpTexture      = m_pBumpTextureEdit->GetTextureFile();
         QString NewAOTexture        = m_pAOTextureEdit->GetTextureFile();
 
-        float RoughnessValue   = m_pRoughnessEdit  ->text().toFloat();
+        float RoughnessValue   = m_pRoughnessEdit->text().toFloat();
         float MetallicValue    = m_pMetallicEdit->text().toFloat();
         float ReflectanceValue = m_pReflectanceEdit->text().toFloat();
         float BumpValue        = m_pBumpEdit->text().toFloat();
@@ -304,7 +304,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         Edit::CMessage LoadMessage;
 
-        LoadMessage.PutString(_rRelPathToTexture.toLatin1().data());
+        LoadMessage.Put(std::string(_rRelPathToTexture.toLatin1().data()));
 
         LoadMessage.Reset();
 
@@ -352,7 +352,7 @@ namespace Edit
 
         CMessage NewLoadMaterialMessage;
 
-        NewLoadMaterialMessage.PutString(ModelFileBinary.data());
+        NewLoadMaterialMessage.Put(std::string(ModelFileBinary.data()));
 
         NewLoadMaterialMessage.Reset();
 
@@ -428,12 +428,12 @@ namespace Edit
         bool HasBumpMap      = false;
         bool HasAOMap        = false;
 
-        char ColorMapName[256];
-        char NormalMapName[256];
-        char RoughnessMapName[256];
-        char MetalMapName[256];
-        char BumpMapName[256];
-        char AOMapName[256];
+        std::string ColorMapName;
+        std::string NormalMapName;
+        std::string RoughnessMapName;
+        std::string MetalMapName;
+        std::string BumpMapName;
+        std::string AOMapName;
 
         R = _rMessage.Get<float>();
         G = _rMessage.Get<float>();
@@ -457,42 +457,42 @@ namespace Edit
 
         if (HasColorMap)
         {
-            _rMessage.GetString(ColorMapName, 256);
+            ColorMapName = _rMessage.Get<std::string>();
         }
 
         HasNormalMap = _rMessage.Get<bool>();
 
         if (HasNormalMap)
         {
-            _rMessage.GetString(NormalMapName, 256);
+            NormalMapName = _rMessage.Get<std::string>();
         }
 
         HasRoughnessMap = _rMessage.Get<bool>();
 
         if (HasRoughnessMap)
         {
-            _rMessage.GetString(RoughnessMapName, 256);
+            RoughnessMapName =_rMessage.Get<std::string>();
         }
 
         HasMetalnessMap = _rMessage.Get<bool>();
 
         if (HasMetalnessMap)
         {
-            _rMessage.GetString(MetalMapName, 256);
+            MetalMapName = _rMessage.Get<std::string>();
         }
 
         HasBumpMap = _rMessage.Get<bool>();
 
         if (HasBumpMap)
         {
-            _rMessage.GetString(BumpMapName, 256);
+            BumpMapName = _rMessage.Get<std::string>();
         }
 
         HasAOMap = _rMessage.Get<bool>();
 
         if (HasAOMap)
         {
-            _rMessage.GetString(AOMapName, 256);
+            AOMapName = _rMessage.Get<std::string>();
         }
 
         // -----------------------------------------------------------------------------
@@ -508,9 +508,7 @@ namespace Edit
 
         // -----------------------------------------------------------------------------
 
-        m_pAlbedoTextureEdit->SetTextureFile("");
-
-        if (HasColorMap) m_pAlbedoTextureEdit->SetTextureFile(ColorMapName);
+        m_pAlbedoTextureEdit->SetTextureFile(QString(ColorMapName.c_str()));
 
         QPalette ButtonPalette = m_pAlbedoColorButton->palette();
 
@@ -522,15 +520,11 @@ namespace Edit
 
         // -----------------------------------------------------------------------------
 
-        m_pNormalTextureEdit->SetTextureFile("");
-
-        if (HasNormalMap) m_pNormalTextureEdit->SetTextureFile(NormalMapName);
+        m_pNormalTextureEdit->SetTextureFile(QString(NormalMapName.c_str()));
 
         // -----------------------------------------------------------------------------
 
-        m_pRoughnessTextureEdit->SetTextureFile("");
-
-        if (HasRoughnessMap) m_pRoughnessTextureEdit->SetTextureFile(RoughnessMapName);
+        m_pRoughnessTextureEdit->SetTextureFile(QString(RoughnessMapName.c_str()));
 
         m_pRoughnessSlider->setValue(static_cast<int>(Roughness * 100.0f));
 
@@ -538,9 +532,7 @@ namespace Edit
 
         // -----------------------------------------------------------------------------
 
-        m_pMetallicTextureEdit->SetTextureFile("");
-
-        if (HasMetalnessMap) m_pMetallicTextureEdit->SetTextureFile(MetalMapName);
+        m_pMetallicTextureEdit->SetTextureFile(QString(MetalMapName.c_str()));
 
         m_pMetallicSlider->setValue(static_cast<int>(Metalness * 100.0f));
 
@@ -554,17 +546,13 @@ namespace Edit
 
         // -----------------------------------------------------------------------------
 
-        m_pBumpTextureEdit->SetTextureFile("");
-
-        if (HasBumpMap) m_pBumpTextureEdit->SetTextureFile(BumpMapName);
+        m_pBumpTextureEdit->SetTextureFile(QString(BumpMapName.c_str()));
 
         m_pBumpEdit->setText(QString::number(BumpFactor));
 
         // -----------------------------------------------------------------------------
 
-        m_pAOTextureEdit->SetTextureFile("");
-
-        if (HasAOMap) m_pAOTextureEdit->SetTextureFile(AOMapName);
+        m_pAOTextureEdit->SetTextureFile(QString(AOMapName.c_str()));
 
         // -----------------------------------------------------------------------------
 

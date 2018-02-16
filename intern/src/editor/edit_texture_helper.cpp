@@ -98,9 +98,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Read
         // -----------------------------------------------------------------------------
-        char TextureName[256];
+        std::string TextureName;
 
-        _rMessage.GetString(TextureName, 256);
+        TextureName = _rMessage.Get<std::string>();
 
         // -----------------------------------------------------------------------------
         // Load
@@ -115,7 +115,7 @@ namespace
         TextureDescriptor.m_Semantic         = Dt::CTextureBase::Diffuse;
         TextureDescriptor.m_Binding          = Dt::CTextureBase::ShaderResource;
         TextureDescriptor.m_pPixels          = 0;
-        TextureDescriptor.m_pFileName        = TextureName;
+        TextureDescriptor.m_pFileName        = TextureName.c_str();
         TextureDescriptor.m_pIdentifier      = 0;
 
         Dt::CTextureBase* pLoadedTexture = Dt::TextureManager::CreateTexture(TextureDescriptor);
@@ -160,7 +160,7 @@ namespace
             {
                 NewMessage.Put(true);
 
-                NewMessage.PutString(pTexture->GetFileName().c_str());
+                NewMessage.Put(pTexture->GetFileName());
             }
             else
             {
@@ -171,7 +171,7 @@ namespace
             {
                 NewMessage.Put(true);
 
-                NewMessage.PutString(pTexture->GetIdentifier().c_str());
+                NewMessage.Put(pTexture->GetIdentifier());
             }
             else
             {

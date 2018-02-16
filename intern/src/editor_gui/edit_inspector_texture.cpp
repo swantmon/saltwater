@@ -88,7 +88,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         Edit::CMessage LoadMessage;
 
-        LoadMessage.PutString(_rRelPathToTexture.toLatin1().data());
+        LoadMessage.Put(std::string(_rRelPathToTexture.toLatin1().data()));
 
         LoadMessage.Reset();
 
@@ -134,16 +134,16 @@ namespace Edit
         BASE_UNUSED(IsArray);
         BASE_UNUSED(IsDummy);
 
-        char Filename[256];
-        char Identifier[256];
+        std::string Filename;
+        std::string Identifier;
 
         bool HasFilename = _rMessage.Get<bool>();
         
-        if (HasFilename) _rMessage.GetString(Filename, 256);
+        if (HasFilename) Filename = _rMessage.Get<std::string>();
 
         bool HasIdentifier = _rMessage.Get<bool>();
 
-        if (HasIdentifier) _rMessage.GetString(Identifier, 256);
+        if (HasIdentifier) Identifier = _rMessage.Get<std::string>();
 
         // -----------------------------------------------------------------------------
         // Set values
@@ -168,7 +168,7 @@ namespace Edit
 
         if (HasFilename)
         {
-            m_pFilenameEdit->setText(Filename);
+            m_pFilenameEdit->setText(QString(Filename.c_str()));
         }
         else
         {

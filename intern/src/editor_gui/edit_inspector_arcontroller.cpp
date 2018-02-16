@@ -60,9 +60,9 @@ namespace Edit
 
         NewMessage.Put(FreezeLastFrame);
 
-        NewMessage.PutString(ConfigurationFileBinary.data());
+        NewMessage.Put(std::string(ConfigurationFileBinary.data()));
 
-        NewMessage.PutString(ParameterFileBinary.data());
+        NewMessage.Put(std::string(ParameterFileBinary.data()));
 
         NewMessage.Put(CameraEntityID);
 
@@ -143,13 +143,9 @@ namespace Edit
 
         bool FreezeLastFrame = _rMessage.Get<bool>();
 
-        char Configuration[256];
+        std::string Configuration = _rMessage.Get<std::string>();
 
-        _rMessage.GetString(Configuration, 256);
-
-        char ParameterFile[256];
-
-        _rMessage.GetString(ParameterFile, 256);
+        std::string ParameterFile = _rMessage.Get<std::string>();
 
         Base::ID CameraEntityID = _rMessage.Get<Base::ID>();
 
@@ -167,9 +163,9 @@ namespace Edit
 
         m_pFreezeLastFrameCB->setChecked(FreezeLastFrame);
 
-        m_pConfigurationEdit->setText(Configuration);
+        m_pConfigurationEdit->setText(QString(Configuration.c_str()));
 
-        m_pParameterFile->setText(ParameterFile);
+        m_pParameterFile->setText(QString(ParameterFile.c_str()));
 
         if (CameraEntityID >= 0)
         {

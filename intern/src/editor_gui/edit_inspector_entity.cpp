@@ -52,16 +52,7 @@ namespace Edit
 
         NewMessage.Put(Category);
 
-        if (NewEntityName.length() > 0)
-        {
-            NewMessage.Put(true);
-
-            NewMessage.PutString(NewEntityNameBinary.data());
-        }
-        else
-        {
-            NewMessage.Put(false);
-        }
+        NewMessage.Put(std::string(NewEntityNameBinary.data()));
 
         NewMessage.Reset();
 
@@ -110,7 +101,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
-        char EntityName[256];
+        std::string EntityName;
 
         Base::ID EntityID = _rMessage.Get<Base::ID>();
 
@@ -125,7 +116,7 @@ namespace Edit
 
         if (HasName)
         {
-            _rMessage.GetString(EntityName, 256);
+            EntityName = _rMessage.Get<std::string>();
         }
 
         // -----------------------------------------------------------------------------
@@ -139,7 +130,7 @@ namespace Edit
 
         if (HasName)
         {
-            m_pEntityNameEdit->setText(EntityName);
+            m_pEntityNameEdit->setText(QString(EntityName.c_str()));
         }
         else
         {

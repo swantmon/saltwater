@@ -129,20 +129,12 @@ namespace
 
     void CEntityHelper::OnLoadEntity(Edit::CMessage& _rMessage)
     {
-        // -----------------------------------------------------------------------------
-        // Create new entity
-        // -----------------------------------------------------------------------------
-        char pTmp[512];
-
-        // -----------------------------------------------------------------------------
-        // Model
-        // -----------------------------------------------------------------------------
         Dt::SModelFileDescriptor ModelFileDesc;
 
-        const char* pPathToFile = _rMessage.GetString(pTmp, 512);
+        std::string PathToFile = _rMessage.Get<std::string>();
 
-        ModelFileDesc.m_pFileName = pPathToFile;
-        ModelFileDesc.m_GenFlag = Dt::SGeneratorFlag::Default;
+        ModelFileDesc.m_pFileName = PathToFile.c_str();
+        ModelFileDesc.m_GenFlag   = Dt::SGeneratorFlag::Default;
 
         Dt::CModel& rModel = Dt::ModelManager::CreateModel(ModelFileDesc);
 
@@ -256,7 +248,7 @@ namespace
         {
             NewMessage.Put(true);
 
-            NewMessage.PutString(rCurrentEntity.GetName().c_str());
+            NewMessage.Put(rCurrentEntity.GetName());
         }
         else
         {
@@ -328,16 +320,9 @@ namespace
 
         if(Category != static_cast<int>(rCurrentEntity.GetCategory())) return;
 
-        bool HasName = _rMessage.Get<bool>();
+        std::string NewEntityName = _rMessage.Get<std::string>();
 
-        if (HasName)
-        {
-            char NewEntityName[256];
-
-            _rMessage.GetString(NewEntityName, 256);
-
-            rCurrentEntity.SetName(NewEntityName);
-        }
+        rCurrentEntity.SetName(NewEntityName);
     }
 
     // -----------------------------------------------------------------------------
@@ -437,15 +422,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Name
             // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetName().length() > 0)
-            {
-                NewMessage.Put(true);
-                NewMessage.PutString(rCurrentEntity.GetName().c_str());
-            }
-            else
-            {
-                NewMessage.Put(false);
-            }
+            NewMessage.Put(rCurrentEntity.GetName());
 
             // -----------------------------------------------------------------------------
             // Hierarchy

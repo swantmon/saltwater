@@ -96,8 +96,7 @@ namespace Edit
 
     void CInspectorEnvironment::OnEntityInfoEnvironment(Edit::CMessage& _rMessage)
     {
-        char pTemp[256];
-        const char* pTexture = nullptr;
+        std::string TextureName;
 
         // -----------------------------------------------------------------------------
         // Read values
@@ -118,7 +117,7 @@ namespace Edit
 
             if (HasName)
             {
-                pTexture = _rMessage.GetString(pTemp, 256);
+                TextureName = _rMessage.Get<std::string>();
             }
         }
 
@@ -138,7 +137,7 @@ namespace Edit
 
         if (HasTexture)
         {
-            m_pTextureValue->SetTextureFile(pTexture);
+            m_pTextureValue->SetTextureFile(QString(TextureName.c_str()));
         }
 
         m_pTextureValue->SetTextureHash(TextureHash);

@@ -388,7 +388,7 @@ namespace
                 {
                     _rMessage.Put(true);
 
-                    _rMessage.PutString(_pTextureBase->GetFileName().c_str());
+                    _rMessage.Put(_pTextureBase->GetFileName());
                 }
                 else
                 {
@@ -520,7 +520,7 @@ namespace
             {
                 NewMessage.Put(true);
 
-                NewMessage.PutString(pLightFacet->GetTexture()->GetFileName().c_str());
+                NewMessage.Put(pLightFacet->GetTexture()->GetFileName());
 
                 NewMessage.Put(pLightFacet->GetTexture()->GetHash());
             }

@@ -171,9 +171,9 @@ namespace
 
             bool FreezeOutput = pFacet->GetFreezeLastFrame();
 
-            const char* pConfiguration = pFacet->GetConfiguration().c_str();
+            std::string Configuration = pFacet->GetConfiguration();
 
-            const char* pParameterFile = pFacet->GetCameraParameterFile().c_str();
+            std::string ParameterFile = pFacet->GetCameraParameterFile();
 
             Base::ID CameraEntityID = static_cast<Base::ID>(-1);
 
@@ -197,9 +197,9 @@ namespace
 
             NewMessage.Put(FreezeOutput);
 
-            NewMessage.PutString(pConfiguration);
+            NewMessage.Put(Configuration);
            
-            NewMessage.PutString(pParameterFile);
+            NewMessage.Put(ParameterFile);
 
             NewMessage.Put(static_cast<int>(CameraEntityID));
 
@@ -236,7 +236,7 @@ namespace
 
             unsigned int Type = rMarker.m_Type;
 
-            const char* pPatternFile = rMarker.m_PatternFile.c_str();
+            std::string PatternFile = rMarker.m_PatternFile;
 
             float Width = rMarker.m_WidthInMeter;
 
@@ -253,7 +253,7 @@ namespace
 
             NewMessage.Put(Type);
 
-            NewMessage.PutString(pPatternFile);
+            NewMessage.Put(PatternFile);
 
             NewMessage.Put(Width);
 
@@ -282,13 +282,9 @@ namespace
 
             bool FreezeOutput = _rMessage.Get<bool>();
 
-            char Configuration[256];
+            std::string Configuration = _rMessage.Get<std::string>();
 
-            _rMessage.GetString(Configuration, 256);
-
-            char ParameterFile[256];
-
-            _rMessage.GetString(ParameterFile, 256);
+            std::string ParameterFile = _rMessage.Get<std::string>();
 
             unsigned int CameraEntityID = _rMessage.Get<int>();
 
@@ -339,9 +335,7 @@ namespace
 
             unsigned int Type = _rMessage.Get<int>();
 
-            char Text[256];
-
-            _rMessage.GetString(Text, 256);
+            std::string Text = _rMessage.Get<std::string>();
 
             float Width = _rMessage.Get<float>();
 

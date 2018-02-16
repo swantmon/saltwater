@@ -201,7 +201,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         Edit::CMessage NewMessage;
 
-        NewMessage.PutString(_rPathToTexture.toLatin1().data());
+        NewMessage.Put(std::string(_rPathToTexture.toLatin1().data()));
 
         NewMessage.Reset();
 

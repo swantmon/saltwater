@@ -33,8 +33,14 @@ namespace Edit
         template<typename T>
         void Put(const T _Value);
 
+        template<>
+        void Put(const std::string _Value);
+
         template<typename T>
         const T Get();
+
+        template<>
+        const std::string Get();
 
         template<typename T>
         void Put(Base::Size _Position, const T _Value);
@@ -42,16 +48,9 @@ namespace Edit
         template<typename T>
         const T Get(Base::Size _Position) const;
 
-        void PutString(const Base::Char* _pString);
-        Base::Char* GetString(Base::Char* _pString, Base::Size _MaxNumberOfChars);
-
         void PutBytes(void* _pBytes, Base::Size _NumberOfBytes);
         Base::Size GetNumberOfBytes() const;
         const void* GetBytes() const;
-
-        template <typename T>
-        T GetEnum();
-
 
     private:
 
@@ -63,8 +62,8 @@ namespace Edit
 
     private:
 
-        typedef std::vector<Base::U8>  CByteVector;
-        typedef CByteVector::iterator  CIterator;
+        typedef std::vector<Base::U8> CByteVector;
+        typedef CByteVector::iterator CIterator;
 
     private:
 
@@ -87,6 +86,20 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
+    template<>
+    void CMessage::Put(const std::string _Value)
+    {
+        assert(m_Mode == Write);
+
+        size_t NumberOfChars = _Value.length();
+
+        Put(NumberOfChars);
+        
+        m_Bytes.insert(m_Bytes.end(), reinterpret_cast<const Base::U8*>(_Value.c_str()), reinterpret_cast<const Base::U8*>(_Value.c_str()) + sizeof(Base::Char) * NumberOfChars);
+    }
+
+    // -----------------------------------------------------------------------------
+
     template<typename T>
     const T CMessage::Get()
     {
@@ -97,6 +110,22 @@ namespace Edit
         m_Pos += sizeof(T);
 
         return Value;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    template<>
+    const std::string CMessage::Get()
+    {
+        assert(m_Mode == Read);
+
+        size_t NumberOfChars = Get<size_t>();
+
+        std::string ReturnValue(reinterpret_cast<const char*>(&(*m_Pos)), NumberOfChars);
+
+        m_Pos += NumberOfChars;
+
+        return ReturnValue;
     }
 
     // -----------------------------------------------------------------------------
@@ -119,13 +148,5 @@ namespace Edit
         const T Value = *reinterpret_cast<const T*>(&m_Bytes[_Position]);
 
         return Value;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    template <typename T>
-    T CMessage::GetEnum()
-    {
-        return static_cast<T>(GetInt());
     }
 } // namespace Edit

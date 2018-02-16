@@ -158,7 +158,7 @@ namespace Edit
         float R, G, B;
         float X, Y, Z;
         bool HasTexture = false;
-        char TextureName[256];
+        std::string TextureName;
         unsigned int TextureHash = 0;
 
         // -----------------------------------------------------------------------------
@@ -193,7 +193,7 @@ namespace Edit
 
         if (HasTexture)
         {
-            _rMessage.GetString(TextureName, 256);
+            TextureName = _rMessage.Get<std::string>();
 
             TextureHash = _rMessage.Get<int>();
         }
@@ -231,7 +231,7 @@ namespace Edit
 
         if (HasTexture)
         {
-            m_pTextureEdit->SetTextureFile(TextureName);
+            m_pTextureEdit->SetTextureFile(QString(TextureName.c_str()));
 
             m_pTextureEdit->SetTextureHash(TextureHash);
         }

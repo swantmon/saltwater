@@ -57,7 +57,7 @@ namespace Edit
 
         NewMessage.Put(Type);
 
-        NewMessage.PutString(PatternFileBinary.data());
+        NewMessage.Put(std::string(PatternFileBinary.data()));
 
         NewMessage.Put(Width);
 
@@ -100,9 +100,7 @@ namespace Edit
 
         int Type = _rMessage.Get<int>();
 
-        char Text[256];
-
-        _rMessage.GetString(Text, 256);
+        std::string Text = _rMessage.Get<std::string>();
 
         float Width = _rMessage.Get<float>();
 
@@ -115,7 +113,7 @@ namespace Edit
 
         m_pTypeCB->setCurrentIndex(Type);
 
-        m_pPatternFileEdit->setText(Text);
+        m_pPatternFileEdit->setText(Text.c_str());
 
         m_pWidthEdit->setText(QString::number(Width));
 

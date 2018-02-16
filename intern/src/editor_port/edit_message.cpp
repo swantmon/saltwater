@@ -65,45 +65,6 @@ namespace Edit
     {
         return m_Pos - const_cast<CByteVector&>(m_Bytes).begin();
     }
-
-    // -----------------------------------------------------------------------------
-
-    void CMessage::PutString(const Base::Char* _pString)
-    {
-        Base::Size NumberOfChars;
-
-        assert(m_Mode == Write);
-        assert(_pString != 0);
-
-        NumberOfChars = strlen(_pString);
-
-        Put<int>(static_cast<int>(NumberOfChars));
-
-        m_Bytes.insert(m_Bytes.end(), reinterpret_cast<const Base::U8*>(_pString), reinterpret_cast<const Base::U8*>(_pString) + sizeof(Base::Char) * NumberOfChars);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    Base::Char* CMessage::GetString(Base::Char* _pString, Base::Size _MaxNumberOfChars)
-    {
-        Base::Size NumberOfChars;
-
-        BASE_UNUSED(_MaxNumberOfChars);
-
-        assert(m_Mode == Read);
-
-        NumberOfChars = Get<int>();
-
-        assert(NumberOfChars < _MaxNumberOfChars);
-
-        ::memcpy(_pString, &(*m_Pos), NumberOfChars);
-
-        _pString[NumberOfChars] = '\0';
-
-        m_Pos += NumberOfChars;
-
-        return _pString;
-    }
     
     // -----------------------------------------------------------------------------
 
