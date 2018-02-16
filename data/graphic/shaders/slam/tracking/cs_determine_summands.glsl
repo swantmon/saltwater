@@ -87,11 +87,11 @@ bool findCorrespondence(out vec3 ReferenceVertex, out vec3 RaycastVertex, out ve
 
 #ifdef USE_SHUFFLE_INTRINSICS
 
-shared float g_SharedData[8];
+shared vec4 g_SharedData[8];
 
-void reduce(float _Input)
+void reduce(vec4 _Input)
 {
-    float Data = _Input;
+    vec4 Data = _Input;
 
     Data += shuffleDownNV(Data, 16, 32);
     Data += shuffleDownNV(Data,  8, 32);
@@ -194,14 +194,44 @@ void main()
     
 #ifdef USE_SHUFFLE_INTRINSICS    
     
-    for (int i = 0; i < 27; ++ i)
+    for (int i = 0; i < 24; i += 4)
     {
-        reduce(ICPData[i]);
-    
+        vec4 Data;
+            
+        Data[0] = ICPData[i];
+        Data[1] = ICPData[i + 1];
+        Data[2] = ICPData[i + 2];
+        Data[3] = ICPData[i + 3];
+
+        barrier();
+
+        reduce(Data);
+
         if (gl_LocalInvocationIndex == 0)
         {
-            g_ICPData[ICPSummandIndex][i] = g_SharedData[0];
+            g_ICPData[ICPSummandIndex][i] = g_SharedData[0][0];
+            g_ICPData[ICPSummandIndex][i + 1] = g_SharedData[0][1];
+            g_ICPData[ICPSummandIndex][i + 2] = g_SharedData[0][2];
+            g_ICPData[ICPSummandIndex][i + 3] = g_SharedData[0][3];
         }
+    }
+        
+    vec4 Data;
+
+    Data[0] = ICPData[24];
+    Data[1] = ICPData[24 + 1];
+    Data[2] = ICPData[24 + 2];
+    Data[3] = 0.0f;
+
+    barrier();
+
+    reduce(Data);
+        
+    if (gl_LocalInvocationIndex == 0)
+    {
+        g_ICPData[ICPSummandIndex][24] = g_SharedData[0][0];
+        g_ICPData[ICPSummandIndex][24 + 1] = g_SharedData[0][1];
+        g_ICPData[ICPSummandIndex][24 + 2] = g_SharedData[0][2];
     }
     
 #else
