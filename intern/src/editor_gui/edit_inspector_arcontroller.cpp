@@ -45,7 +45,7 @@ namespace Edit
         QString ParameterFile = m_pParameterFile->text();
         QByteArray ParameterFileBinary = ParameterFile.toLatin1();
 
-        unsigned int CameraEntityID = m_pCameraEntityIDEdit->text().toUInt();
+        Base::ID CameraEntityID = m_pCameraEntityIDEdit->text().toUInt();
 
         unsigned int NumberOfMarker = m_pNumberOfMarkerEdit->text().toUInt();
 
@@ -54,19 +54,19 @@ namespace Edit
         // -----------------------------------------------------------------------------
         Edit::CMessage NewMessage;
 
-        NewMessage.PutInt(m_CurrentEntityID);
+        NewMessage.Put(m_CurrentEntityID);
 
-        NewMessage.PutInt(Device);
+        NewMessage.Put(Device);
 
-        NewMessage.PutBool(FreezeLastFrame);
+        NewMessage.Put(FreezeLastFrame);
 
         NewMessage.PutString(ConfigurationFileBinary.data());
 
         NewMessage.PutString(ParameterFileBinary.data());
 
-        NewMessage.PutInt(CameraEntityID);
+        NewMessage.Put(CameraEntityID);
 
-        NewMessage.PutInt(NumberOfMarker);
+        NewMessage.Put(NumberOfMarker);
 
         NewMessage.Reset();
 
@@ -115,13 +115,13 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void CInspectorARController::RequestInformation(unsigned int _EntityID)
+    void CInspectorARController::RequestInformation(Base::ID _EntityID)
     {
         m_CurrentEntityID = _EntityID;
 
         CMessage NewMessage;
 
-        NewMessage.PutInt(m_CurrentEntityID);
+        NewMessage.Put(m_CurrentEntityID);
 
         NewMessage.Reset();
 
@@ -135,13 +135,13 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
         if (EntityID != m_CurrentEntityID) return;
 
-        int Device = _rMessage.GetInt();
+        int Device = _rMessage.Get<int>();
 
-        bool FreezeLastFrame = _rMessage.GetBool();
+        bool FreezeLastFrame = _rMessage.Get<bool>();
 
         char Configuration[256];
 
@@ -151,11 +151,11 @@ namespace Edit
 
         _rMessage.GetString(ParameterFile, 256);
 
-        int CameraEntityID = _rMessage.GetInt();
+        Base::ID CameraEntityID = _rMessage.Get<Base::ID>();
 
-        unsigned int OutputBackground = _rMessage.GetInt();
+        unsigned int OutputBackground = _rMessage.Get<int>();
 
-        unsigned int NumberOfMarker = _rMessage.GetInt();
+        unsigned int NumberOfMarker = _rMessage.Get<int>();
 
         // -----------------------------------------------------------------------------
         // Set values

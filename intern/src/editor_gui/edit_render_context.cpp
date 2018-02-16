@@ -36,8 +36,8 @@ namespace Edit
 
         char CharCode = _pKeyEvent->text()[0].toLatin1();
 
-        NewMessage.PutInt((int)(CharCode));
-        NewMessage.PutInt(_pKeyEvent->modifiers());
+        NewMessage.Put((int)(CharCode));
+        NewMessage.Put(_pKeyEvent->modifiers());
 
         NewMessage.Reset();
 
@@ -52,8 +52,8 @@ namespace Edit
 
         char CharCode = _pKeyEvent->text()[0].toLatin1();
 
-        NewMessage.PutInt((int)(CharCode));
-        NewMessage.PutInt(_pKeyEvent->modifiers());
+        NewMessage.Put((int)(CharCode));
+        NewMessage.Put(_pKeyEvent->modifiers());
 
         NewMessage.Reset();
 
@@ -66,10 +66,10 @@ namespace Edit
     {
         CMessage NewMessage;
 
-        NewMessage.PutInt(_pMouseEvent->globalX());
-        NewMessage.PutInt(_pMouseEvent->globalY());
-        NewMessage.PutInt(_pMouseEvent->x());
-        NewMessage.PutInt(_pMouseEvent->y());
+        NewMessage.Put(_pMouseEvent->globalX());
+        NewMessage.Put(_pMouseEvent->globalY());
+        NewMessage.Put(_pMouseEvent->x());
+        NewMessage.Put(_pMouseEvent->y());
 
         NewMessage.Reset();
 
@@ -84,10 +84,10 @@ namespace Edit
 
         CMessage NewMessage;
 
-        NewMessage.PutInt(_pMouseEvent->globalX());
-        NewMessage.PutInt(_pMouseEvent->globalY());
-        NewMessage.PutInt(_pMouseEvent->x());
-        NewMessage.PutInt(_pMouseEvent->y());
+        NewMessage.Put(_pMouseEvent->globalX());
+        NewMessage.Put(_pMouseEvent->globalY());
+        NewMessage.Put(_pMouseEvent->x());
+        NewMessage.Put(_pMouseEvent->y());
 
         NewMessage.Reset();
 
@@ -111,10 +111,10 @@ namespace Edit
     {
         CMessage NewMessage;
 
-        NewMessage.PutInt(_pMouseEvent->globalX());
-        NewMessage.PutInt(_pMouseEvent->globalY());
-        NewMessage.PutInt(_pMouseEvent->x());
-        NewMessage.PutInt(_pMouseEvent->y());
+        NewMessage.Put(_pMouseEvent->globalX());
+        NewMessage.Put(_pMouseEvent->globalY());
+        NewMessage.Put(_pMouseEvent->x());
+        NewMessage.Put(_pMouseEvent->y());
 
         NewMessage.Reset();
 
@@ -138,8 +138,8 @@ namespace Edit
     {
         CMessage NewMessage;
 
-        NewMessage.PutBool(_pWheelEvent->orientation() == Qt::Vertical);
-        NewMessage.PutInt(_pWheelEvent->delta());
+        NewMessage.Put(_pWheelEvent->orientation() == Qt::Vertical);
+        NewMessage.Put(_pWheelEvent->delta());
 
         NewMessage.Reset();
 
@@ -152,8 +152,8 @@ namespace Edit
     {
         CMessage NewMessage;
 
-        NewMessage.PutInt(_pResizeEvent->size().width());
-        NewMessage.PutInt(_pResizeEvent->size().height());
+        NewMessage.Put(_pResizeEvent->size().width());
+        NewMessage.Put(_pResizeEvent->size().height());
 
         NewMessage.Reset();
 

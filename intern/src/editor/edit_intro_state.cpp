@@ -88,8 +88,8 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Allocate a map
         // -----------------------------------------------------------------------------
-        int MapX = _rMessage.GetInt();
-        int MapY = _rMessage.GetInt();
+        int MapX = _rMessage.Get<int>();
+        int MapY = _rMessage.Get<int>();
 
         BASE_UNUSED(MapX);
         BASE_UNUSED(MapY);

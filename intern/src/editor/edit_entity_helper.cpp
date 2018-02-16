@@ -157,9 +157,9 @@ namespace
 
     void CEntityHelper::OnCreateEntity(Edit::CMessage& _rMessage)
     {
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
         Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyCreate);
 
@@ -170,9 +170,9 @@ namespace
 
     void CEntityHelper::OnAddEntity(Edit::CMessage& _rMessage)
     {
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
         Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyAdd);
 
@@ -183,9 +183,9 @@ namespace
 
     void CEntityHelper::OnRemoveEntity(Edit::CMessage& _rMessage)
     {
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
         Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyRemove);
 
@@ -196,9 +196,9 @@ namespace
 
     void CEntityHelper::OnDestroyEntity(Edit::CMessage& _rMessage)
     {
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
         Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyRemove | Dt::CEntity::DirtyDestroy);
 
@@ -209,26 +209,24 @@ namespace
 
     void CEntityHelper::OnRequestInfoFacets(Edit::CMessage& _rMessage)
     {
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
         Edit::CMessage NewMessage;
 
-        NewMessage.PutInt(static_cast<int>(rCurrentEntity.GetID()));
+        NewMessage.Put(rCurrentEntity.GetID());
 
-        NewMessage.PutInt(rCurrentEntity.GetCategory());
-
-        NewMessage.PutBool(rCurrentEntity.GetTransformationFacet() != nullptr);
-        NewMessage.PutBool(rCurrentEntity.GetComponentFacet()      != nullptr);
+        NewMessage.Put(rCurrentEntity.GetTransformationFacet() != nullptr);
+        NewMessage.Put(rCurrentEntity.GetComponentFacet()      != nullptr);
 
         auto Components = rCurrentEntity.GetComponentFacet()->GetComponents();
 
-        NewMessage.PutInt(Components.size());
+        NewMessage.Put(Components.size());
 
         for (auto Component : Components)
         {
-            NewMessage.Put<Base::ID>(Component->GetTypeID());
+            NewMessage.Put(Component->GetTypeID());
         }
 
         NewMessage.Reset();
@@ -240,29 +238,29 @@ namespace
 
     void CEntityHelper::OnRequestInfoEntity(Edit::CMessage& _rMessage)
     {
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
            
         Edit::CMessage NewMessage;
 
-        NewMessage.PutInt(static_cast<int>(rCurrentEntity.GetID()));
+        NewMessage.Put(rCurrentEntity.GetID());
 
-        NewMessage.PutBool(rCurrentEntity.IsInMap());
+        NewMessage.Put(rCurrentEntity.IsInMap());
 
-        NewMessage.PutInt(rCurrentEntity.GetLayer());
+        NewMessage.Put(rCurrentEntity.GetLayer());
 
-        NewMessage.PutInt(rCurrentEntity.GetCategory());
+        NewMessage.Put(rCurrentEntity.GetCategory());
 
         if (rCurrentEntity.GetName().length() > 0)
         {
-            NewMessage.PutBool(true);
+            NewMessage.Put(true);
 
             NewMessage.PutString(rCurrentEntity.GetName().c_str());
         }
         else
         {
-            NewMessage.PutBool(false);
+            NewMessage.Put(false);
         }
 
         NewMessage.Reset();
@@ -274,39 +272,39 @@ namespace
 
     void CEntityHelper::OnRequestInfoTransformation(Edit::CMessage& _rMessage)
     {
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
         Edit::CMessage NewMessage;
 
         Dt::CTransformationFacet* pTransformationFacet = rCurrentEntity.GetTransformationFacet();
 
-        NewMessage.PutInt(static_cast<int>(rCurrentEntity.GetID()));
+        NewMessage.Put(rCurrentEntity.GetID());
 
         if (pTransformationFacet)
         {
-            NewMessage.PutBool(true);
+            NewMessage.Put(true);
 
-            NewMessage.PutFloat(pTransformationFacet->GetPosition()[0]);
-            NewMessage.PutFloat(pTransformationFacet->GetPosition()[1]);
-            NewMessage.PutFloat(pTransformationFacet->GetPosition()[2]);
+            NewMessage.Put(pTransformationFacet->GetPosition()[0]);
+            NewMessage.Put(pTransformationFacet->GetPosition()[1]);
+            NewMessage.Put(pTransformationFacet->GetPosition()[2]);
 
-            NewMessage.PutFloat(glm::degrees(pTransformationFacet->GetRotation()[0]));
-            NewMessage.PutFloat(glm::degrees(pTransformationFacet->GetRotation()[1]));
-            NewMessage.PutFloat(glm::degrees(pTransformationFacet->GetRotation()[2]));
+            NewMessage.Put(glm::degrees(pTransformationFacet->GetRotation()[0]));
+            NewMessage.Put(glm::degrees(pTransformationFacet->GetRotation()[1]));
+            NewMessage.Put(glm::degrees(pTransformationFacet->GetRotation()[2]));
 
-            NewMessage.PutFloat(pTransformationFacet->GetScale()[0]);
-            NewMessage.PutFloat(pTransformationFacet->GetScale()[1]);
-            NewMessage.PutFloat(pTransformationFacet->GetScale()[2]);
+            NewMessage.Put(pTransformationFacet->GetScale()[0]);
+            NewMessage.Put(pTransformationFacet->GetScale()[1]);
+            NewMessage.Put(pTransformationFacet->GetScale()[2]);
         }
         else
         {
-            NewMessage.PutBool(false);
+            NewMessage.Put(false);
 
-            NewMessage.PutFloat(rCurrentEntity.GetWorldPosition()[0]);
-            NewMessage.PutFloat(rCurrentEntity.GetWorldPosition()[1]);
-            NewMessage.PutFloat(rCurrentEntity.GetWorldPosition()[2]);
+            NewMessage.Put(rCurrentEntity.GetWorldPosition()[0]);
+            NewMessage.Put(rCurrentEntity.GetWorldPosition()[1]);
+            NewMessage.Put(rCurrentEntity.GetWorldPosition()[2]);
         }
 
         NewMessage.Reset();
@@ -318,19 +316,19 @@ namespace
 
     void CEntityHelper::OnInfoEntity(Edit::CMessage& _rMessage)
     {
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-        int Layer = _rMessage.GetInt();
+        int Layer = _rMessage.Get<int>();
 
         rCurrentEntity.SetLayer(Layer);
 
-        int Category = _rMessage.GetInt();
+        int Category = _rMessage.Get<int>();
 
         if(Category != static_cast<int>(rCurrentEntity.GetCategory())) return;
 
-        bool HasName = _rMessage.GetBool();
+        bool HasName = _rMessage.Get<bool>();
 
         if (HasName)
         {
@@ -346,21 +344,21 @@ namespace
 
     void CEntityHelper::OnInfoHierarchie(Edit::CMessage& _rMessage)
     {
-        int EntityIDSource = _rMessage.GetInt();
-        int EntityIDDestination = _rMessage.GetInt();
+        Base::ID EntityIDSource      = _rMessage.Get<Base::ID>();
+        Base::ID EntityIDDestination = _rMessage.Get<Base::ID>();
 
         assert(EntityIDSource != -1);
 
         // ----------------------------------------------------------------------------- 
         // Get source entity and hierarchy facet 
         // ----------------------------------------------------------------------------- 
-        Dt::CEntity& rSourceEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityIDSource));
+        Dt::CEntity& rSourceEntity = Dt::EntityManager::GetEntityByID(EntityIDSource);
 
         rSourceEntity.Detach();
 
         if (EntityIDDestination != -1)
         {
-            Dt::CEntity& rDestinationEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityIDDestination));
+            Dt::CEntity& rDestinationEntity = Dt::EntityManager::GetEntityByID(EntityIDDestination);
 
             rDestinationEntity.Attach(rSourceEntity);
         }
@@ -382,25 +380,25 @@ namespace
         float ScaleY;
         float ScaleZ;
 
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
         Dt::CTransformationFacet* pTransformationFacet = rCurrentEntity.GetTransformationFacet();
 
-        TranslationX = _rMessage.GetFloat();
-        TranslationY = _rMessage.GetFloat();
-        TranslationZ = _rMessage.GetFloat();
+        TranslationX = _rMessage.Get<float>();
+        TranslationY = _rMessage.Get<float>();
+        TranslationZ = _rMessage.Get<float>();
 
         if (pTransformationFacet)
         {
-            RotationX = _rMessage.GetFloat();
-            RotationY = _rMessage.GetFloat();
-            RotationZ = _rMessage.GetFloat();
+            RotationX = _rMessage.Get<float>();
+            RotationY = _rMessage.Get<float>();
+            RotationZ = _rMessage.Get<float>();
 
-            ScaleX = _rMessage.GetFloat();
-            ScaleY = _rMessage.GetFloat();
-            ScaleZ = _rMessage.GetFloat();
+            ScaleX = _rMessage.Get<float>();
+            ScaleY = _rMessage.Get<float>();
+            ScaleZ = _rMessage.Get<float>();
 
 
             glm::vec3 Position(TranslationX, TranslationY, TranslationZ);
@@ -434,19 +432,19 @@ namespace
             // -----------------------------------------------------------------------------
             // ID
             // -----------------------------------------------------------------------------
-            NewMessage.PutInt(static_cast<int>(rCurrentEntity.GetID()));
+            NewMessage.Put(rCurrentEntity.GetID());
 
             // -----------------------------------------------------------------------------
             // Name
             // -----------------------------------------------------------------------------
             if (rCurrentEntity.GetName().length() > 0)
             {
-                NewMessage.PutBool(true);
+                NewMessage.Put(true);
                 NewMessage.PutString(rCurrentEntity.GetName().c_str());
             }
             else
             {
-                NewMessage.PutBool(false);
+                NewMessage.Put(false);
             }
 
             // -----------------------------------------------------------------------------
@@ -456,24 +454,24 @@ namespace
 
             if (pHierarchyFacet)
             {
-                NewMessage.PutBool(true);
+                NewMessage.Put(true);
 
                 Dt::CEntity* pParentEntity = pHierarchyFacet->GetParent();
 
                 if (pParentEntity)
                 {
-                    NewMessage.PutBool(true);
+                    NewMessage.Put(true);
 
-                    NewMessage.PutInt(static_cast<int>(pParentEntity->GetID()));
+                    NewMessage.Put(pParentEntity->GetID());
                 }
                 else
                 {
-                    NewMessage.PutBool(false);
+                    NewMessage.Put(false);
                 }
             }
             else
             {
-                NewMessage.PutBool(false);
+                NewMessage.Put(false);
             }
 
 

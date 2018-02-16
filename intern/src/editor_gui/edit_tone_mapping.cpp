@@ -165,39 +165,39 @@ namespace Edit
 
         CrushDarks = m_pCrushDarksEdit->text().toFloat();
 
-        NewMessage.PutFloat(Tint[0]);
-        NewMessage.PutFloat(Tint[1]);
-        NewMessage.PutFloat(Tint[2]);
+        NewMessage.Put(Tint[0]);
+        NewMessage.Put(Tint[1]);
+        NewMessage.Put(Tint[2]);
 
-        NewMessage.PutFloat(DarkTint[0]);
-        NewMessage.PutFloat(DarkTint[1]);
-        NewMessage.PutFloat(DarkTint[2]);
+        NewMessage.Put(DarkTint[0]);
+        NewMessage.Put(DarkTint[1]);
+        NewMessage.Put(DarkTint[2]);
 
-        NewMessage.PutFloat(DarkTintBlend);
+        NewMessage.Put(DarkTintBlend);
 
-        NewMessage.PutFloat(DarkTintStrength);
+        NewMessage.Put(DarkTintStrength);
 
-        NewMessage.PutFloat(Saturation);
+        NewMessage.Put(Saturation);
 
-        NewMessage.PutFloat(Contrast);
+        NewMessage.Put(Contrast);
 
-        NewMessage.PutFloat(DynamicRange);
+        NewMessage.Put(DynamicRange);
 
-        NewMessage.PutFloat(CrushBrights);
+        NewMessage.Put(CrushBrights);
 
-        NewMessage.PutFloat(CrushDarks);
+        NewMessage.Put(CrushDarks);
 
-        NewMessage.PutFloat(Red[0]);
-        NewMessage.PutFloat(Red[1]);
-        NewMessage.PutFloat(Red[2]);
+        NewMessage.Put(Red[0]);
+        NewMessage.Put(Red[1]);
+        NewMessage.Put(Red[2]);
 
-        NewMessage.PutFloat(Green[0]);
-        NewMessage.PutFloat(Green[1]);
-        NewMessage.PutFloat(Green[2]);
+        NewMessage.Put(Green[0]);
+        NewMessage.Put(Green[1]);
+        NewMessage.Put(Green[2]);
 
-        NewMessage.PutFloat(Blue[0]);
-        NewMessage.PutFloat(Blue[1]);
-        NewMessage.PutFloat(Blue[2]);
+        NewMessage.Put(Blue[0]);
+        NewMessage.Put(Blue[1]);
+        NewMessage.Put(Blue[2]);
 
         NewMessage.Reset();
 

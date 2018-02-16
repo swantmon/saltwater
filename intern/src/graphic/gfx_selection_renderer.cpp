@@ -69,7 +69,7 @@ namespace
         void Update();
         void Render();
 
-        void SelectEntity(unsigned int _EntityID);
+        void SelectEntity(Base::ID _EntityID);
         void UnselectEntity();
 
         CSelectionTicket& AcquireTicket(int _OffsetX, int _OffsetY, int _SizeX, int _SizeY, unsigned int _Flags = SPickFlag::Nothing);
@@ -457,7 +457,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxSelectionRenderer::SelectEntity(unsigned int _EntityID)
+    void CGfxSelectionRenderer::SelectEntity(Base::ID _EntityID)
     {
         m_pSelectedEntity = &Dt::EntityManager::GetEntityByID(_EntityID);
 
@@ -1239,7 +1239,7 @@ namespace SelectionRenderer
 
     // -----------------------------------------------------------------------------
 
-    void SelectEntity(unsigned int _EntityID)
+    void SelectEntity(Base::ID _EntityID)
     {
         CGfxSelectionRenderer::GetInstance().SelectEntity(_EntityID);
     }

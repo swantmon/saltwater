@@ -4,6 +4,7 @@
 #include "base/base_defines.h"
 #include "base/base_typedef.h"
 
+#include <assert.h>
 #include <vector>
 
 namespace Edit
@@ -41,36 +42,8 @@ namespace Edit
         template<typename T>
         const T Get(Base::Size _Position) const;
 
-        BASE_DEPRECATED(void PutBool(bool _Value));
-        BASE_DEPRECATED(bool GetBool());
-        BASE_DEPRECATED(void PutBool(Base::Size _Position, bool _Value));
-        BASE_DEPRECATED(bool GetBool(Base::Size _Position) const);
-
-        BASE_DEPRECATED(void PutInt(int _Value));
-        BASE_DEPRECATED(int GetInt());
-        BASE_DEPRECATED(void PutInt(Base::Size _Position, int _Value));
-        BASE_DEPRECATED(int GetInt(Base::Size _Position) const);
-
-        BASE_DEPRECATED(void PutLongLong(long long _Value));
-        BASE_DEPRECATED(long long GetLongLong());
-        BASE_DEPRECATED(void PutLongLong(Base::Size _Position, long long _Value));
-        BASE_DEPRECATED(long long GetLongLong(Base::Size _Position) const);
-
-        BASE_DEPRECATED(void PutFloat(float _Value));
-        BASE_DEPRECATED(float GetFloat());
-        BASE_DEPRECATED(void PutFloat(Base::Size _Position, float _Value));
-        BASE_DEPRECATED(float GetFloat(Base::Size _Position) const);
-
-        BASE_DEPRECATED(void PutDouble(double _Value));
-        BASE_DEPRECATED(double GetDouble());
-        BASE_DEPRECATED(void PutDouble(Base::Size _Position, double _Value));
-        BASE_DEPRECATED(double GetDouble(Base::Size _Position) const);
-
         void PutString(const Base::Char* _pString);
         Base::Char* GetString(Base::Char* _pString, Base::Size _MaxNumberOfChars);
-
-        void PutAddress(void* _pPointer);
-        void* GetAddress();
 
         void PutBytes(void* _pBytes, Base::Size _NumberOfBytes);
         Base::Size GetNumberOfBytes() const;

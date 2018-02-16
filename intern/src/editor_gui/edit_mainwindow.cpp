@@ -161,8 +161,8 @@ namespace Edit
 
     void CMainWindow::createNewLightSun()
     {
-        CMessage     NewMessage;
-        unsigned int EntityID = 0;
+        CMessage NewMessage;
+        Base::ID EntityID = 0;
 
         // -----------------------------------------------------------------------------
         // Create new entity
@@ -174,7 +174,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Create facet on entity
         // -----------------------------------------------------------------------------
-        NewMessage.PutInt(EntityID);
+        NewMessage.Put(EntityID);
 
         NewMessage.Reset();
 
@@ -183,13 +183,13 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Create and add entity
         // -----------------------------------------------------------------------------
-        NewMessage.PutInt(EntityID);
+        NewMessage.Put(EntityID);
 
         NewMessage.Reset();
 
         MessageManager::SendMessage(SGUIMessageType::Entity_Create, NewMessage);
 
-        NewMessage.PutInt(EntityID);
+        NewMessage.Put(EntityID);
 
         NewMessage.Reset();
 
@@ -200,8 +200,8 @@ namespace Edit
 
     void CMainWindow::createNewEntityBloom()
     {
-        CMessage     NewMessage;
-        unsigned int EntityID = 0;
+        CMessage NewMessage;
+        Base::ID EntityID = 0;
 
         // -----------------------------------------------------------------------------
         // Create new entity
@@ -213,7 +213,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Create facet on entity
         // -----------------------------------------------------------------------------
-        NewMessage.PutInt(EntityID);
+        NewMessage.Put(EntityID);
 
         NewMessage.Reset();
 
@@ -222,13 +222,13 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Create and add entity
         // -----------------------------------------------------------------------------
-        NewMessage.PutInt(EntityID);
+        NewMessage.Put(EntityID);
 
         NewMessage.Reset();
 
         MessageManager::SendMessage(SGUIMessageType::Entity_Create, NewMessage);
 
-        NewMessage.PutInt(EntityID);
+        NewMessage.Put(EntityID);
 
         NewMessage.Reset();
 
@@ -239,8 +239,8 @@ namespace Edit
 
     void CMainWindow::createNewEntityDOF()
     {
-        CMessage     NewMessage;
-        unsigned int EntityID = 0;
+        CMessage NewMessage;
+        Base::ID EntityID = 0;
 
         // -----------------------------------------------------------------------------
         // Create new entity
@@ -252,7 +252,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Create facet on entity
         // -----------------------------------------------------------------------------
-        NewMessage.PutInt(EntityID);
+        NewMessage.Put(EntityID);
 
         NewMessage.Reset();
 
@@ -261,13 +261,13 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Create and add entity
         // -----------------------------------------------------------------------------
-        NewMessage.PutInt(EntityID);
+        NewMessage.Put(EntityID);
 
         NewMessage.Reset();
 
         MessageManager::SendMessage(SGUIMessageType::Entity_Create, NewMessage);
 
-        NewMessage.PutInt(EntityID);
+        NewMessage.Put(EntityID);
 
         NewMessage.Reset();
 
@@ -278,8 +278,8 @@ namespace Edit
 
     void CMainWindow::createNewEntityPostAA()
     {
-        CMessage     NewMessage;
-        unsigned int EntityID = 0;
+        CMessage NewMessage;
+        Base::ID EntityID = 0;
 
         // -----------------------------------------------------------------------------
         // Create new entity
@@ -291,7 +291,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Create facet on entity
         // -----------------------------------------------------------------------------
-        NewMessage.PutInt(EntityID);
+        NewMessage.Put(EntityID);
 
         NewMessage.Reset();
 
@@ -300,13 +300,13 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Create and add entity
         // -----------------------------------------------------------------------------
-        NewMessage.PutInt(EntityID);
+        NewMessage.Put(EntityID);
 
         NewMessage.Reset();
 
         MessageManager::SendMessage(SGUIMessageType::Entity_Create, NewMessage);
 
-        NewMessage.PutInt(EntityID);
+        NewMessage.Put(EntityID);
 
         NewMessage.Reset();
 
@@ -317,8 +317,8 @@ namespace Edit
 
     void CMainWindow::createNewEntitySSR()
     {
-        CMessage     NewMessage;
-        unsigned int EntityID = 0;
+        CMessage NewMessage;
+        Base::ID EntityID = 0;
 
         // -----------------------------------------------------------------------------
         // Create new entity
@@ -330,7 +330,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Create facet on entity
         // -----------------------------------------------------------------------------
-        NewMessage.PutInt(EntityID);
+        NewMessage.Put(EntityID);
 
         NewMessage.Reset();
 
@@ -339,13 +339,13 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Create and add entity
         // -----------------------------------------------------------------------------
-        NewMessage.PutInt(EntityID);
+        NewMessage.Put(EntityID);
 
         NewMessage.Reset();
 
         MessageManager::SendMessage(SGUIMessageType::Entity_Create, NewMessage);
 
-        NewMessage.PutInt(EntityID);
+        NewMessage.Put(EntityID);
 
         NewMessage.Reset();
 
@@ -356,8 +356,8 @@ namespace Edit
 
     void CMainWindow::createNewEntityVolumeFog()
     {
-        CMessage     NewMessage;
-        unsigned int EntityID = 0;
+        CMessage NewMessage;
+        Base::ID EntityID = 0;
 
         // -----------------------------------------------------------------------------
         // Create new entity
@@ -369,7 +369,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Create facet on entity
         // -----------------------------------------------------------------------------
-        NewMessage.PutInt(EntityID);
+        NewMessage.Put(EntityID);
 
         NewMessage.Reset();
 
@@ -378,13 +378,13 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Create and add entity
         // -----------------------------------------------------------------------------
-        NewMessage.PutInt(EntityID);
+        NewMessage.Put(EntityID);
 
         NewMessage.Reset();
 
         MessageManager::SendMessage(SGUIMessageType::Entity_Create, NewMessage);
 
-        NewMessage.PutInt(EntityID);
+        NewMessage.Put(EntityID);
 
         NewMessage.Reset();
 
@@ -395,8 +395,8 @@ namespace Edit
 
     void CMainWindow::createNewLightPoint()
     {
-        CMessage     NewMessage;
-        unsigned int EntityID = 0;
+        CMessage NewMessage;
+        Base::ID EntityID = 0;
 
         // -----------------------------------------------------------------------------
         // Create new entity
@@ -408,7 +408,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Create facet on entity
         // -----------------------------------------------------------------------------
-        NewMessage.PutInt(EntityID);
+        NewMessage.Put(EntityID);
 
         NewMessage.Reset();
 
@@ -417,13 +417,13 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Create and add entity
         // -----------------------------------------------------------------------------
-        NewMessage.PutInt(EntityID);
+        NewMessage.Put(EntityID);
 
         NewMessage.Reset();
 
         MessageManager::SendMessage(SGUIMessageType::Entity_Create, NewMessage);
 
-        NewMessage.PutInt(EntityID);
+        NewMessage.Put(EntityID);
 
         NewMessage.Reset();
 
@@ -434,8 +434,8 @@ namespace Edit
 
     void CMainWindow::createNewLightEnvironment()
     {
-        CMessage     NewMessage;
-        unsigned int EntityID = 0;
+        CMessage NewMessage;
+        Base::ID EntityID = 0;
 
         // -----------------------------------------------------------------------------
         // Create new entity
@@ -447,7 +447,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Create facet on entity
         // -----------------------------------------------------------------------------
-        NewMessage.PutInt(EntityID);
+        NewMessage.Put(EntityID);
 
         NewMessage.Reset();
 
@@ -456,13 +456,13 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Create and add entity
         // -----------------------------------------------------------------------------
-        NewMessage.PutInt(EntityID);
+        NewMessage.Put(EntityID);
 
         NewMessage.Reset();
 
         MessageManager::SendMessage(SGUIMessageType::Entity_Create, NewMessage);
 
-        NewMessage.PutInt(EntityID);
+        NewMessage.Put(EntityID);
 
         NewMessage.Reset();
 
@@ -473,8 +473,8 @@ namespace Edit
 
     void CMainWindow::createNewLightGlobalProbe()
     {
-        CMessage     NewMessage;
-        unsigned int EntityID = 0;
+        CMessage NewMessage;
+        Base::ID EntityID = 0;
 
         // -----------------------------------------------------------------------------
         // Create new entity
@@ -486,7 +486,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Create facet on entity
         // -----------------------------------------------------------------------------
-        NewMessage.PutInt(EntityID);
+        NewMessage.Put(EntityID);
 
         NewMessage.Reset();
 
@@ -495,13 +495,13 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Create and add entity
         // -----------------------------------------------------------------------------
-        NewMessage.PutInt(EntityID);
+        NewMessage.Put(EntityID);
 
         NewMessage.Reset();
 
         MessageManager::SendMessage(SGUIMessageType::Entity_Create, NewMessage);
 
-        NewMessage.PutInt(EntityID);
+        NewMessage.Put(EntityID);
 
         NewMessage.Reset();
 
@@ -512,8 +512,8 @@ namespace Edit
 
     void CMainWindow::createNewLightArea()
     {
-        CMessage     NewMessage;
-        unsigned int EntityID = 0;
+        CMessage NewMessage;
+        Base::ID EntityID = 0;
 
         // -----------------------------------------------------------------------------
         // Create new entity
@@ -525,7 +525,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Create facet on entity
         // -----------------------------------------------------------------------------
-        NewMessage.PutInt(EntityID);
+        NewMessage.Put(EntityID);
 
         NewMessage.Reset();
 
@@ -534,13 +534,13 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Create and add entity
         // -----------------------------------------------------------------------------
-        NewMessage.PutInt(EntityID);
+        NewMessage.Put(EntityID);
 
         NewMessage.Reset();
 
         MessageManager::SendMessage(SGUIMessageType::Entity_Create, NewMessage);
 
-        NewMessage.PutInt(EntityID);
+        NewMessage.Put(EntityID);
 
         NewMessage.Reset();
 
@@ -551,8 +551,8 @@ namespace Edit
 
     void CMainWindow::createNewPluginARController()
     {
-        CMessage     NewMessage;
-        unsigned int EntityID = 0;
+        CMessage NewMessage;
+        Base::ID EntityID = 0;
 
         // -----------------------------------------------------------------------------
         // Create new entity
@@ -564,7 +564,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Create facet on entity
         // -----------------------------------------------------------------------------
-        NewMessage.PutInt(EntityID);
+        NewMessage.Put(EntityID);
 
         NewMessage.Reset();
 
@@ -573,13 +573,13 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Create and add entity
         // -----------------------------------------------------------------------------
-        NewMessage.PutInt(EntityID);
+        NewMessage.Put(EntityID);
 
         NewMessage.Reset();
 
         MessageManager::SendMessage(SGUIMessageType::Entity_Create, NewMessage);
 
-        NewMessage.PutInt(EntityID);
+        NewMessage.Put(EntityID);
 
         NewMessage.Reset();
 
@@ -619,12 +619,12 @@ namespace Edit
 
         Edit::CMessage NewMessage;
 
-        NewMessage.PutFloat(LowerBound);
-        NewMessage.PutFloat(UpperBound);
-        NewMessage.PutFloat(LogMin);
-        NewMessage.PutFloat(LogMax);
-        NewMessage.PutFloat(EyeUp);
-        NewMessage.PutFloat(EyeDown);
+        NewMessage.Put(LowerBound);
+        NewMessage.Put(UpperBound);
+        NewMessage.Put(LogMin);
+        NewMessage.Put(LogMax);
+        NewMessage.Put(EyeUp);
+        NewMessage.Put(EyeDown);
 
         NewMessage.Reset();
 
@@ -737,8 +737,8 @@ namespace Edit
 
     void CMainWindow::OnStateChange(Edit::CMessage& _rMessage)
     {
-        int OldState = _rMessage.GetInt();
-        int NewState = _rMessage.GetInt();
+        int OldState = _rMessage.Get<int>();
+        int NewState = _rMessage.Get<int>();
         
         BASE_UNUSED(OldState);
 
@@ -782,7 +782,7 @@ namespace Edit
 
     void CMainWindow::OnFramesPerSecond(Edit::CMessage& _rMessage)
     {
-        float FPS = _rMessage.GetDouble();
+        float FPS = _rMessage.Get<double>();
 
         m_pStatusLabel->setText("FPS: " + QString::number(1.0f / FPS));
     }
@@ -791,14 +791,14 @@ namespace Edit
 
     void CMainWindow::OnHistogramInfo(Edit::CMessage& _rMessage)
     {
-        float LowerBound = _rMessage.GetFloat();
-        float UpperBound = _rMessage.GetFloat();
+        float LowerBound = _rMessage.Get<float>();
+        float UpperBound = _rMessage.Get<float>();
 
-        float LogMin = _rMessage.GetFloat();
-        float LogMax = _rMessage.GetFloat();
+        float LogMin = _rMessage.Get<float>();
+        float LogMax = _rMessage.Get<float>();
 
-        float EyeUp   = _rMessage.GetFloat();
-        float EyeDown = _rMessage.GetFloat();
+        float EyeUp   = _rMessage.Get<float>();
+        float EyeDown = _rMessage.Get<float>();
 
         m_pHistogramLowerBoundEdit->setText(QString::number(LowerBound));
         m_pHistogramUpperBoundEdit->setText(QString::number(UpperBound));

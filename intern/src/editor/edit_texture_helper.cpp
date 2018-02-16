@@ -139,7 +139,7 @@ namespace
 
     void CTextureHelper::OnTextureInfo(Edit::CMessage& _rMessage)
     {
-        unsigned int TextureHash = _rMessage.GetInt();
+        unsigned int TextureHash = _rMessage.Get<int>();
 
         Dt::CTextureBase* pTexture = Dt::TextureManager::GetTextureByHash(static_cast<unsigned int>(TextureHash));
 
@@ -147,35 +147,35 @@ namespace
         {
             Edit::CMessage NewMessage;
 
-            NewMessage.PutInt(pTexture->GetHash());
-            NewMessage.PutInt(pTexture->GetDimension());
-            NewMessage.PutInt(pTexture->GetFormat());
-            NewMessage.PutInt(pTexture->GetSemantic());
-            NewMessage.PutInt(pTexture->GetBinding());
-            NewMessage.PutBool(pTexture->IsArray());
-            NewMessage.PutBool(pTexture->IsCube());
-            NewMessage.PutBool(pTexture->IsDummy());
+            NewMessage.Put(pTexture->GetHash());
+            NewMessage.Put(pTexture->GetDimension());
+            NewMessage.Put(pTexture->GetFormat());
+            NewMessage.Put(pTexture->GetSemantic());
+            NewMessage.Put(pTexture->GetBinding());
+            NewMessage.Put(pTexture->IsArray());
+            NewMessage.Put(pTexture->IsCube());
+            NewMessage.Put(pTexture->IsDummy());
 
             if (pTexture->GetFileName().length() > 0)
             {
-                NewMessage.PutBool(true);
+                NewMessage.Put(true);
 
                 NewMessage.PutString(pTexture->GetFileName().c_str());
             }
             else
             {
-                NewMessage.PutBool(false);
+                NewMessage.Put(false);
             }
 
             if (pTexture->GetIdentifier().length() > 0)
             {
-                NewMessage.PutBool(true);
+                NewMessage.Put(true);
 
                 NewMessage.PutString(pTexture->GetIdentifier().c_str());
             }
             else
             {
-                NewMessage.PutBool(false);
+                NewMessage.Put(false);
             }
 
             NewMessage.Reset();

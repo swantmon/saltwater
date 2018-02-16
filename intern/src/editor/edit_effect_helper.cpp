@@ -123,9 +123,9 @@ namespace
             // -----------------------------------------------------------------------------
             // Get entity and set type + category
             // -----------------------------------------------------------------------------
-            int EntityID = _rMessage.GetInt();
+            Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-            Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+            Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
             rCurrentEntity.SetCategory(Dt::SEntityCategory::Dynamic);
 
@@ -145,9 +145,9 @@ namespace
             // -----------------------------------------------------------------------------
             // Get entity and set type + category
             // -----------------------------------------------------------------------------
-            int EntityID = _rMessage.GetInt();
+            Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-            Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+            Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
             rCurrentEntity.SetCategory(Dt::SEntityCategory::Dynamic);
 
@@ -167,9 +167,9 @@ namespace
             // -----------------------------------------------------------------------------
             // Get entity and set type + category
             // -----------------------------------------------------------------------------
-            int EntityID = _rMessage.GetInt();
+            Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-            Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+            Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
             rCurrentEntity.SetCategory(Dt::SEntityCategory::Dynamic);
 
@@ -189,9 +189,9 @@ namespace
             // -----------------------------------------------------------------------------
             // Get entity and set type + category
             // -----------------------------------------------------------------------------
-            int EntityID = _rMessage.GetInt();
+            Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-            Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+            Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
             rCurrentEntity.SetCategory(Dt::SEntityCategory::Dynamic);
 
@@ -211,9 +211,9 @@ namespace
             // -----------------------------------------------------------------------------
             // Get entity and set type + category
             // -----------------------------------------------------------------------------
-            int EntityID = _rMessage.GetInt();
+            Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-            Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+            Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
             rCurrentEntity.SetCategory(Dt::SEntityCategory::Dynamic);
 
@@ -229,9 +229,9 @@ namespace
 
     void CEffectHelper::OnRequestInfoBloom(Edit::CMessage& _rMessage)
     {
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
         Dt::CBloomComponent* pFXFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CBloomComponent>();
 
@@ -239,17 +239,17 @@ namespace
         {
             Edit::CMessage NewMessage;
 
-            NewMessage.PutInt(static_cast<int>(rCurrentEntity.GetID()));
+            NewMessage.Put(rCurrentEntity.GetID());
 
-            NewMessage.PutFloat(pFXFacet->GetTint()[0]);
-            NewMessage.PutFloat(pFXFacet->GetTint()[1]);
-            NewMessage.PutFloat(pFXFacet->GetTint()[2]);
-            NewMessage.PutFloat(pFXFacet->GetTint()[3]);
+            NewMessage.Put(pFXFacet->GetTint()[0]);
+            NewMessage.Put(pFXFacet->GetTint()[1]);
+            NewMessage.Put(pFXFacet->GetTint()[2]);
+            NewMessage.Put(pFXFacet->GetTint()[3]);
 
-            NewMessage.PutFloat(pFXFacet->GetIntensity());
-            NewMessage.PutFloat(pFXFacet->GetTreshhold());
-            NewMessage.PutFloat(pFXFacet->GetExposureScale());
-            NewMessage.PutInt(pFXFacet->GetSize());
+            NewMessage.Put(pFXFacet->GetIntensity());
+            NewMessage.Put(pFXFacet->GetTreshhold());
+            NewMessage.Put(pFXFacet->GetExposureScale());
+            NewMessage.Put(pFXFacet->GetSize());
 
             NewMessage.Reset();
 
@@ -261,9 +261,9 @@ namespace
 
     void CEffectHelper::OnRequestInfoDOF(Edit::CMessage& _rMessage)
     {
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
         Dt::CDOFComponent* pFXFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CDOFComponent>();
 
@@ -271,13 +271,13 @@ namespace
         {
             Edit::CMessage NewMessage;
 
-            NewMessage.PutInt(static_cast<int>(rCurrentEntity.GetID()));
+            NewMessage.Put(rCurrentEntity.GetID());
 
-            NewMessage.PutFloat(pFXFacet->GetNearDistance());
-            NewMessage.PutFloat(pFXFacet->GetFarDistance());
-            NewMessage.PutFloat(pFXFacet->GetNearToFarRatio());
-            NewMessage.PutFloat(pFXFacet->GetFadeUnToSmallBlur());
-            NewMessage.PutFloat(pFXFacet->GetFadeSmallToMediumBlur());
+            NewMessage.Put(pFXFacet->GetNearDistance());
+            NewMessage.Put(pFXFacet->GetFarDistance());
+            NewMessage.Put(pFXFacet->GetNearToFarRatio());
+            NewMessage.Put(pFXFacet->GetFadeUnToSmallBlur());
+            NewMessage.Put(pFXFacet->GetFadeSmallToMediumBlur());
 
             NewMessage.Reset();
 
@@ -289,9 +289,9 @@ namespace
 
     void CEffectHelper::OnRequestInfoPostAA(Edit::CMessage& _rMessage)
     {
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
         Dt::CPostAAComponent* pFXFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CPostAAComponent>();
 
@@ -299,9 +299,9 @@ namespace
         {
             Edit::CMessage NewMessage;
 
-            NewMessage.PutInt(static_cast<int>(rCurrentEntity.GetID()));
+            NewMessage.Put(rCurrentEntity.GetID());
 
-            NewMessage.PutInt(pFXFacet->GetType());
+            NewMessage.Put(pFXFacet->GetType());
 
             NewMessage.Reset();
 
@@ -313,9 +313,9 @@ namespace
 
     void CEffectHelper::OnRequestInfoSSR(Edit::CMessage& _rMessage)
     {
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
         Dt::CSSRComponent* pFXFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CSSRComponent>();
 
@@ -323,12 +323,12 @@ namespace
         {
             Edit::CMessage NewMessage;
 
-            NewMessage.PutInt(static_cast<int>(rCurrentEntity.GetID()));
+            NewMessage.Put(rCurrentEntity.GetID());
 
-            NewMessage.PutFloat(pFXFacet->GetIntensity());
-            NewMessage.PutFloat(pFXFacet->GetRoughnessMask());
-            NewMessage.PutFloat(pFXFacet->GetDistance());
-            NewMessage.PutBool(pFXFacet->GetUseLastFrame());
+            NewMessage.Put(pFXFacet->GetIntensity());
+            NewMessage.Put(pFXFacet->GetRoughnessMask());
+            NewMessage.Put(pFXFacet->GetDistance());
+            NewMessage.Put(pFXFacet->GetUseLastFrame());
 
             NewMessage.Reset();
 
@@ -340,9 +340,9 @@ namespace
 
     void CEffectHelper::OnRequestInfoVolumeFog(Edit::CMessage& _rMessage)
     {
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
         Dt::CVolumeFogComponent* pFXFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CVolumeFogComponent>();
 
@@ -350,24 +350,24 @@ namespace
         {
             Edit::CMessage NewMessage;
 
-            NewMessage.PutInt(static_cast<int>(rCurrentEntity.GetID()));
+            NewMessage.Put(rCurrentEntity.GetID());
 
-            NewMessage.PutFloat(pFXFacet->GetWindDirection()[0]);
-            NewMessage.PutFloat(pFXFacet->GetWindDirection()[1]);
-            NewMessage.PutFloat(pFXFacet->GetWindDirection()[2]);
-            NewMessage.PutFloat(pFXFacet->GetWindDirection()[3]);
+            NewMessage.Put(pFXFacet->GetWindDirection()[0]);
+            NewMessage.Put(pFXFacet->GetWindDirection()[1]);
+            NewMessage.Put(pFXFacet->GetWindDirection()[2]);
+            NewMessage.Put(pFXFacet->GetWindDirection()[3]);
 
-            NewMessage.PutFloat(pFXFacet->GetFogColor()[0]);
-            NewMessage.PutFloat(pFXFacet->GetFogColor()[1]);
-            NewMessage.PutFloat(pFXFacet->GetFogColor()[2]);
-            NewMessage.PutFloat(pFXFacet->GetFogColor()[3]);
+            NewMessage.Put(pFXFacet->GetFogColor()[0]);
+            NewMessage.Put(pFXFacet->GetFogColor()[1]);
+            NewMessage.Put(pFXFacet->GetFogColor()[2]);
+            NewMessage.Put(pFXFacet->GetFogColor()[3]);
 
-            NewMessage.PutFloat(pFXFacet->GetFrustumDepthInMeter());
-            NewMessage.PutFloat(pFXFacet->GetShadowIntensity());
-            NewMessage.PutFloat(pFXFacet->GetScatteringCoefficient());
-            NewMessage.PutFloat(pFXFacet->GetAbsorptionCoefficient());
-            NewMessage.PutFloat(pFXFacet->GetDensityLevel());
-            NewMessage.PutFloat(pFXFacet->GetDensityAttenuation());
+            NewMessage.Put(pFXFacet->GetFrustumDepthInMeter());
+            NewMessage.Put(pFXFacet->GetShadowIntensity());
+            NewMessage.Put(pFXFacet->GetScatteringCoefficient());
+            NewMessage.Put(pFXFacet->GetAbsorptionCoefficient());
+            NewMessage.Put(pFXFacet->GetDensityLevel());
+            NewMessage.Put(pFXFacet->GetDensityAttenuation());
 
             NewMessage.Reset();
 
@@ -379,9 +379,9 @@ namespace
 
     void CEffectHelper::OnInfoBloom(Edit::CMessage& _rMessage)
     {
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
         Dt::CBloomComponent* pFXFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CBloomComponent>();
 
@@ -392,17 +392,17 @@ namespace
             // -----------------------------------------------------------------------------
             // Read values
             // -----------------------------------------------------------------------------
-            R = _rMessage.GetFloat();
-            G = _rMessage.GetFloat();
-            B = _rMessage.GetFloat();
-            A = _rMessage.GetFloat();
+            R = _rMessage.Get<float>();
+            G = _rMessage.Get<float>();
+            B = _rMessage.Get<float>();
+            A = _rMessage.Get<float>();
 
             glm::vec4 Color = glm::vec4(R, G, B, A);
 
-            float Intensity     = _rMessage.GetFloat();
-            float Treshhold     = _rMessage.GetFloat();
-            float ExposureScale = _rMessage.GetFloat();
-            int   Size          = _rMessage.GetInt();
+            float Intensity     = _rMessage.Get<float>();
+            float Treshhold     = _rMessage.Get<float>();
+            float ExposureScale = _rMessage.Get<float>();
+            int   Size          = _rMessage.Get<int>();
 
             // -----------------------------------------------------------------------------
             // Set values
@@ -427,9 +427,9 @@ namespace
 
     void CEffectHelper::OnInfoDOF(Edit::CMessage& _rMessage)
     {
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
         Dt::CDOFComponent* pFXFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CDOFComponent>();
 
@@ -438,11 +438,11 @@ namespace
             // -----------------------------------------------------------------------------
             // Read values
             // -----------------------------------------------------------------------------               
-            float Near            = _rMessage.GetFloat();
-            float Far             = _rMessage.GetFloat();
-            float NearToFarRatio  = _rMessage.GetFloat();
-            float FadeUnSmall     = _rMessage.GetFloat();
-            float FadeSmallMedium = _rMessage.GetFloat();
+            float Near            = _rMessage.Get<float>();
+            float Far             = _rMessage.Get<float>();
+            float NearToFarRatio  = _rMessage.Get<float>();
+            float FadeUnSmall     = _rMessage.Get<float>();
+            float FadeSmallMedium = _rMessage.Get<float>();
 
             // -----------------------------------------------------------------------------
             // Set values
@@ -467,9 +467,9 @@ namespace
 
     void CEffectHelper::OnInfoPostAA(Edit::CMessage& _rMessage)
     {
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
         Dt::CPostAAComponent* pFXFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CPostAAComponent>();
 
@@ -480,7 +480,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Read values
             // -----------------------------------------------------------------------------          
-            Type = static_cast<Dt::CPostAAComponent::EType>(_rMessage.GetInt());
+            Type = static_cast<Dt::CPostAAComponent::EType>(_rMessage.Get<int>());
 
             // -----------------------------------------------------------------------------
             // Set values
@@ -497,9 +497,9 @@ namespace
 
     void CEffectHelper::OnInfoSSR(Edit::CMessage& _rMessage)
     {
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
         Dt::CSSRComponent* pFXFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CSSRComponent>();
 
@@ -508,10 +508,10 @@ namespace
             // -----------------------------------------------------------------------------
             // Read values
             // -----------------------------------------------------------------------------               
-            float Intensity            = _rMessage.GetFloat();
-            float RoughnessMask        = _rMessage.GetFloat();
-            float Distance             = _rMessage.GetFloat();
-            bool  UseDoubleReflections = _rMessage.GetBool();
+            float Intensity            = _rMessage.Get<float>();
+            float RoughnessMask        = _rMessage.Get<float>();
+            float Distance             = _rMessage.Get<float>();
+            bool  UseDoubleReflections = _rMessage.Get<bool>();
 
             // -----------------------------------------------------------------------------
             // Set values
@@ -534,9 +534,9 @@ namespace
 
     void CEffectHelper::OnInfoVolumeFog(Edit::CMessage& _rMessage)
     {
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
         Dt::CVolumeFogComponent* pFXFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CVolumeFogComponent>();
 
@@ -548,26 +548,26 @@ namespace
             // -----------------------------------------------------------------------------
             // Read values
             // -----------------------------------------------------------------------------
-            X = _rMessage.GetFloat();
-            Y = _rMessage.GetFloat();
-            Z = _rMessage.GetFloat();
-            W = _rMessage.GetFloat();
+            X = _rMessage.Get<float>();
+            Y = _rMessage.Get<float>();
+            Z = _rMessage.Get<float>();
+            W = _rMessage.Get<float>();
 
             glm::vec4 WindDirection = glm::vec4(X, Y, Z, W);
 
-            R = _rMessage.GetFloat();
-            G = _rMessage.GetFloat();
-            B = _rMessage.GetFloat();
-            A = _rMessage.GetFloat();
+            R = _rMessage.Get<float>();
+            G = _rMessage.Get<float>();
+            B = _rMessage.Get<float>();
+            A = _rMessage.Get<float>();
 
             glm::vec4 Color = glm::vec4(R, G, B, A);
 
-            float FrustumDepth       = _rMessage.GetFloat();
-            float ShadowIntensity    = _rMessage.GetFloat();
-            float ScatteringCoeff    = _rMessage.GetFloat();
-            float AbsorptionCoeff    = _rMessage.GetFloat();
-            float DensityLevel       = _rMessage.GetFloat();
-            float DensityAttenuation = _rMessage.GetFloat();
+            float FrustumDepth       = _rMessage.Get<float>();
+            float ShadowIntensity    = _rMessage.Get<float>();
+            float ScatteringCoeff    = _rMessage.Get<float>();
+            float AbsorptionCoeff    = _rMessage.Get<float>();
+            float DensityLevel       = _rMessage.Get<float>();
+            float DensityAttenuation = _rMessage.Get<float>();
 
             BASE_UNUSED(ShadowIntensity);
 

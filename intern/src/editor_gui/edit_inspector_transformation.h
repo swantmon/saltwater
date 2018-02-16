@@ -34,11 +34,11 @@ namespace Edit
         void changeScaleY(QPoint _Difference);
         void changeScaleZ(QPoint _Difference);
 
-        void RequestInformation(unsigned int _EntityID);
+        void RequestInformation(Base::ID _EntityID);
 
     private:
 
-        int m_CurrentEntityID;
+        Base::ID m_CurrentEntityID;
 
     private:
 

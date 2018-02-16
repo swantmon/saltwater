@@ -49,17 +49,17 @@ namespace Edit
         // -----------------------------------------------------------------------------
         Edit::CMessage NewMessage;
 
-        NewMessage.PutInt(m_CurrentEntityID);
+        NewMessage.Put(m_CurrentEntityID);
 
-        NewMessage.PutInt(m_CurrentMarkerID);
+        NewMessage.Put(m_CurrentMarkerID);
 
-        NewMessage.PutInt(UID);
+        NewMessage.Put(UID);
 
-        NewMessage.PutInt(Type);
+        NewMessage.Put(Type);
 
         NewMessage.PutString(PatternFileBinary.data());
 
-        NewMessage.PutFloat(Width);
+        NewMessage.Put(Width);
 
         NewMessage.Reset();
 
@@ -68,7 +68,7 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void CInspectorARControllerMarker::RequestInformation(unsigned int _EntityID, unsigned int _MarkerID)
+    void CInspectorARControllerMarker::RequestInformation(Base::ID _EntityID, unsigned int _MarkerID)
     {
         BASE_UNUSED(_MarkerID);
 
@@ -76,7 +76,7 @@ namespace Edit
 
         CMessage NewMessage;
 
-        NewMessage.PutInt(m_CurrentEntityID);
+        NewMessage.Put(m_CurrentEntityID);
 
         NewMessage.Reset();
 
@@ -90,21 +90,21 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        int MarkerID = _rMessage.GetInt();
+        int MarkerID = _rMessage.Get<int>();
 
         if (EntityID != m_CurrentEntityID || MarkerID != m_CurrentMarkerID) return;
 
-        int UID = _rMessage.GetInt();
+        int UID = _rMessage.Get<int>();
 
-        int Type = _rMessage.GetInt();
+        int Type = _rMessage.Get<int>();
 
         char Text[256];
 
         _rMessage.GetString(Text, 256);
 
-        float Width = _rMessage.GetFloat();
+        float Width = _rMessage.Get<float>();
 
         // -----------------------------------------------------------------------------
         // Set values

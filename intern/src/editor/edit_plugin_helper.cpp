@@ -103,9 +103,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Get entity and set type + category
         // -----------------------------------------------------------------------------
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
         rCurrentEntity.SetCategory(Dt::SEntityCategory::Dynamic);
 
@@ -156,9 +156,9 @@ namespace
 
     void CPluginHelper::OnRequestPluginInfoARController(Edit::CMessage& _rMessage)
     {
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
         Dt::CARControllerPluginComponent* pFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CARControllerPluginComponent>();
 
@@ -191,21 +191,21 @@ namespace
             // -----------------------------------------------------------------------------
             Edit::CMessage NewMessage;
 
-            NewMessage.PutInt(static_cast<int>(rCurrentEntity.GetID()));
+            NewMessage.Put(rCurrentEntity.GetID());
 
-            NewMessage.PutInt(Device);
+            NewMessage.Put(Device);
 
-            NewMessage.PutBool(FreezeOutput);
+            NewMessage.Put(FreezeOutput);
 
             NewMessage.PutString(pConfiguration);
            
             NewMessage.PutString(pParameterFile);
 
-            NewMessage.PutInt(static_cast<int>(CameraEntityID));
+            NewMessage.Put(static_cast<int>(CameraEntityID));
 
-            NewMessage.PutInt(OutputBackground);
+            NewMessage.Put(OutputBackground);
 
-            NewMessage.PutInt(NumberOfMarker);
+            NewMessage.Put(NumberOfMarker);
 
             NewMessage.Reset();
 
@@ -217,9 +217,9 @@ namespace
 
     void CPluginHelper::OnRequestPluginInfoARControllerMarker(Edit::CMessage& _rMessage)
     {
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
         Dt::CARControllerPluginComponent* pFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CARControllerPluginComponent>();
 
@@ -245,17 +245,17 @@ namespace
             // -----------------------------------------------------------------------------
             Edit::CMessage NewMessage;
 
-            NewMessage.PutInt(static_cast<int>(rCurrentEntity.GetID()));
+            NewMessage.Put(rCurrentEntity.GetID());
 
-            NewMessage.PutInt(MarkerID);
+            NewMessage.Put(MarkerID);
 
-            NewMessage.PutInt(UID);
+            NewMessage.Put(UID);
 
-            NewMessage.PutInt(Type);
+            NewMessage.Put(Type);
 
             NewMessage.PutString(pPatternFile);
 
-            NewMessage.PutFloat(Width);
+            NewMessage.Put(Width);
 
             NewMessage.Reset();
 
@@ -267,9 +267,9 @@ namespace
 
     void CPluginHelper::OnPluginInfoARController(Edit::CMessage& _rMessage)
     {
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
         
         Dt::CARControllerPluginComponent* pFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CARControllerPluginComponent>();
 
@@ -278,9 +278,9 @@ namespace
             // -----------------------------------------------------------------------------
             // Read values
             // -----------------------------------------------------------------------------
-            int Device = _rMessage.GetInt();
+            int Device = _rMessage.Get<int>();
 
-            bool FreezeOutput = _rMessage.GetBool();
+            bool FreezeOutput = _rMessage.Get<bool>();
 
             char Configuration[256];
 
@@ -290,11 +290,11 @@ namespace
 
             _rMessage.GetString(ParameterFile, 256);
 
-            unsigned int CameraEntityID = _rMessage.GetInt();
+            unsigned int CameraEntityID = _rMessage.Get<int>();
 
             Dt::CEntity& rCameraEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(CameraEntityID));
 
-            unsigned int NumberOfMarker = _rMessage.GetInt();
+            unsigned int NumberOfMarker = _rMessage.Get<int>();
 
             // -----------------------------------------------------------------------------
             // Set values
@@ -322,9 +322,9 @@ namespace
 
     void CPluginHelper::OnPluginInfoARControllerMarker(Edit::CMessage& _rMessage)
     {
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
         Dt::CARControllerPluginComponent* pFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CARControllerPluginComponent>();
 
@@ -335,15 +335,15 @@ namespace
             // -----------------------------------------------------------------------------
             int MarkerID = pFacet->GetDeviceType();
 
-            unsigned int UID = _rMessage.GetInt();
+            unsigned int UID = _rMessage.Get<int>();
 
-            unsigned int Type = _rMessage.GetInt();
+            unsigned int Type = _rMessage.Get<int>();
 
             char Text[256];
 
             _rMessage.GetString(Text, 256);
 
-            float Width = _rMessage.GetFloat();
+            float Width = _rMessage.Get<float>();
 
             // -----------------------------------------------------------------------------
             // Set values

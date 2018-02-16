@@ -62,15 +62,15 @@ namespace Edit
         // -----------------------------------------------------------------------------
         Edit::CMessage NewMessage;
 
-        NewMessage.PutInt(m_CurrentEntityID);
+        NewMessage.Put(m_CurrentEntityID);
 
-        NewMessage.PutInt(RefreshMode);
+        NewMessage.Put(RefreshMode);
 
-        NewMessage.PutInt(Type);
+        NewMessage.Put(Type);
 
-        NewMessage.PutInt(TextureHash);
+        NewMessage.Put(TextureHash);
 
-        NewMessage.PutFloat(Intensity);
+        NewMessage.Put(Intensity);
 
         NewMessage.Reset();
 
@@ -79,13 +79,13 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void CInspectorEnvironment::RequestInformation(unsigned int _EntityID)
+    void CInspectorEnvironment::RequestInformation(Base::ID _EntityID)
     {
         m_CurrentEntityID = _EntityID;
 
         CMessage NewMessage;
 
-        NewMessage.PutInt(m_CurrentEntityID);
+        NewMessage.Put(m_CurrentEntityID);
 
         NewMessage.Reset();
 
@@ -102,19 +102,19 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
         if (EntityID != m_CurrentEntityID) return;
 
-        int RefreshMode = _rMessage.GetInt();
+        int RefreshMode = _rMessage.Get<int>();
 
-        int Type = _rMessage.GetInt();
+        int Type = _rMessage.Get<int>();
 
-        bool HasTexture = _rMessage.GetBool();
+        bool HasTexture = _rMessage.Get<bool>();
 
         if (HasTexture)
         {
-            bool HasName = _rMessage.GetBool();
+            bool HasName = _rMessage.Get<bool>();
 
             if (HasName)
             {
@@ -122,9 +122,9 @@ namespace Edit
             }
         }
 
-        unsigned int TextureHash = _rMessage.GetInt();
+        unsigned int TextureHash = _rMessage.Get<int>();
 
-        float Intensity = _rMessage.GetFloat();
+        float Intensity = _rMessage.Get<float>();
 
         // -----------------------------------------------------------------------------
         // Set values

@@ -41,7 +41,7 @@ namespace Edit
         , m_pCameraWidget      (0)
         , m_pARControllerWidget(0)
         , m_pTextureWidget     (0)
-        , m_ActiveEntityID     (static_cast<unsigned int>(-1))
+        , m_ActiveEntityID     (static_cast<Base::ID>(-1))
     {
         // -----------------------------------------------------------------------------
         // Setup
@@ -120,7 +120,7 @@ namespace Edit
         m_pSunWidget         = 0;
         m_pTransformWidget   = 0;
         m_pEnvironmentWidget = 0;
-        m_pLightProbeWidget = 0;
+        m_pLightProbeWidget  = 0;
         m_pBloomWidget       = 0;
         m_pDOFWidget         = 0;
         m_pFXAAWidget        = 0;
@@ -134,7 +134,7 @@ namespace Edit
 
     void CInspector::updateContentForEntity(int _ID)
     {
-        m_ActiveEntityID = _ID;
+        m_ActiveEntityID = static_cast<Base::ID>(_ID);
 
         // -----------------------------------------------------------------------------
 
@@ -144,7 +144,7 @@ namespace Edit
 
         CMessage FacetMessage;
 
-        FacetMessage.PutInt(m_ActiveEntityID);
+        FacetMessage.Put(m_ActiveEntityID);
 
         FacetMessage.Reset();
 
@@ -213,15 +213,13 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Read data
         // -----------------------------------------------------------------------------
-        unsigned int EntityID = static_cast<unsigned int>(_rMessage.GetInt());
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        int Category = _rMessage.GetInt();
+        bool HasTransformation = _rMessage.Get<bool>();
 
-        bool HasTransformation = _rMessage.GetBool();
+        bool HasComponents = _rMessage.Get<bool>();
 
-        bool HasComponents = _rMessage.GetBool();
-
-        int NumberOfComponents = _rMessage.GetInt();
+        size_t NumberOfComponents = _rMessage.Get<size_t>();
 
         Base::ID TypeID = static_cast<Base::ID>(-1);
 
@@ -371,14 +369,14 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void CInspector::HighlightEntity(int _ID)
+    void CInspector::HighlightEntity(Base::ID _ID)
     {
         // -----------------------------------------------------------------------------
         // Send messages: Selection and facet infos
         // -----------------------------------------------------------------------------
         Edit::CMessage SelectionMessage;
 
-        SelectionMessage.PutInt(_ID);
+        SelectionMessage.Put(_ID);
 
         SelectionMessage.Reset();
 
@@ -391,7 +389,7 @@ namespace Edit
     {
         Edit::CMessage NewMessage;
 
-        NewMessage.PutInt(-1);
+        NewMessage.Put<Base::ID>(static_cast<Base::ID>(-1));
 
         NewMessage.Reset();
 

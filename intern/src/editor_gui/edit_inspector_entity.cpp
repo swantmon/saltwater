@@ -46,21 +46,21 @@ namespace Edit
         // -----------------------------------------------------------------------------
         Edit::CMessage NewMessage;
 
-        NewMessage.PutInt(m_CurrentEntityID);
+        NewMessage.Put(m_CurrentEntityID);
 
-        NewMessage.PutInt(Layer);
+        NewMessage.Put(Layer);
 
-        NewMessage.PutInt(Category);
+        NewMessage.Put(Category);
 
         if (NewEntityName.length() > 0)
         {
-            NewMessage.PutBool(true);
+            NewMessage.Put(true);
 
             NewMessage.PutString(NewEntityNameBinary.data());
         }
         else
         {
-            NewMessage.PutBool(false);
+            NewMessage.Put(false);
         }
 
         NewMessage.Reset();
@@ -74,7 +74,7 @@ namespace Edit
     {
         Edit::CMessage NewMessage;
 
-        NewMessage.PutInt(m_CurrentEntityID);
+        NewMessage.Put(m_CurrentEntityID);
 
         NewMessage.Reset();
 
@@ -90,13 +90,13 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void CInspectorEntity::RequestInformation(unsigned int _EntityID)
+    void CInspectorEntity::RequestInformation(Base::ID _EntityID)
     {
         m_CurrentEntityID = _EntityID;
 
         CMessage NewMessage;
 
-        NewMessage.PutInt(m_CurrentEntityID);
+        NewMessage.Put(m_CurrentEntityID);
 
         NewMessage.Reset();
 
@@ -112,16 +112,16 @@ namespace Edit
         // -----------------------------------------------------------------------------
         char EntityName[256];
 
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
         if (EntityID != m_CurrentEntityID) return;
 
-        bool IsEnabled = _rMessage.GetBool();
+        bool IsEnabled = _rMessage.Get<bool>();
 
-        int Layer    = _rMessage.GetInt();
-        int Category = _rMessage.GetInt();
+        int Layer    = _rMessage.Get<int>();
+        int Category = _rMessage.Get<int>();
 
-        bool HasName = _rMessage.GetBool();
+        bool HasName = _rMessage.Get<bool>();
 
         if (HasName)
         {

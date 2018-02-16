@@ -112,9 +112,9 @@ namespace
             // -----------------------------------------------------------------------------
             // Get entity and set type + category
             // -----------------------------------------------------------------------------
-            int EntityID = _rMessage.GetInt();
+            Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-            Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+            Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
             rCurrentEntity.SetCategory(Dt::SEntityCategory::Dynamic);
 
@@ -130,9 +130,9 @@ namespace
 
     void CActorHelper::OnRequestActorInfoMaterial(Edit::CMessage& _rMessage)
     {
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
         Dt::CMeshComponent* pFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CMeshComponent>();
 
@@ -153,17 +153,17 @@ namespace
 
             Edit::CMessage NewMessage;
 
-            NewMessage.PutInt(static_cast<int>(rCurrentEntity.GetID()));
+            NewMessage.Put(rCurrentEntity.GetID());
 
             if (pMaterial)
             {
-                NewMessage.PutBool(true);
+                NewMessage.Put(true);
 
-                NewMessage.PutInt(pMaterial->GetHash());
+                NewMessage.Put(pMaterial->GetHash());
             }
             else
             {
-                NewMessage.PutBool(false);
+                NewMessage.Put(false);
             }
 
             NewMessage.Reset();
@@ -176,9 +176,9 @@ namespace
 
     void CActorHelper::OnRequestActorInfoCamera(Edit::CMessage& _rMessage)
     {
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
         Dt::CCameraComponent* pFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CCameraComponent>();
 
@@ -186,55 +186,55 @@ namespace
         {
             Edit::CMessage NewMessage;
 
-            NewMessage.PutInt(static_cast<int>(rCurrentEntity.GetID()));
+            NewMessage.Put(rCurrentEntity.GetID());
 
-            NewMessage.PutBool(pFacet->IsMainCamera());
+            NewMessage.Put(pFacet->IsMainCamera());
 
-            NewMessage.PutInt(pFacet->GetClearFlag());
+            NewMessage.Put(pFacet->GetClearFlag());
 
             if (pFacet->GetHasTexture())
             {
-                NewMessage.PutBool(true);
+                NewMessage.Put(true);
 
-                NewMessage.PutInt(pFacet->GetTexture()->GetHash());
+                NewMessage.Put(pFacet->GetTexture()->GetHash());
             }
             else
             {
-                NewMessage.PutBool(false);
+                NewMessage.Put(false);
             }
 
-            NewMessage.PutFloat(pFacet->GetBackgroundColor()[0]);
-            NewMessage.PutFloat(pFacet->GetBackgroundColor()[1]);
-            NewMessage.PutFloat(pFacet->GetBackgroundColor()[2]);
+            NewMessage.Put(pFacet->GetBackgroundColor()[0]);
+            NewMessage.Put(pFacet->GetBackgroundColor()[1]);
+            NewMessage.Put(pFacet->GetBackgroundColor()[2]);
 
-            NewMessage.PutInt(pFacet->GetCullingMask());
+            NewMessage.Put(pFacet->GetCullingMask());
 
-            NewMessage.PutInt(pFacet->GetProjectionType());
+            NewMessage.Put(pFacet->GetProjectionType());
 
-            NewMessage.PutFloat(pFacet->GetSize());
+            NewMessage.Put(pFacet->GetSize());
 
-            NewMessage.PutFloat(pFacet->GetFoV());
+            NewMessage.Put(pFacet->GetFoV());
 
-            NewMessage.PutFloat(pFacet->GetNear());
+            NewMessage.Put(pFacet->GetNear());
 
-            NewMessage.PutFloat(pFacet->GetFar());
+            NewMessage.Put(pFacet->GetFar());
 
-            NewMessage.PutFloat(pFacet->GetViewportRect()[0][0]);
-            NewMessage.PutFloat(pFacet->GetViewportRect()[0][1]);
-            NewMessage.PutFloat(pFacet->GetViewportRect()[1][0]);
-            NewMessage.PutFloat(pFacet->GetViewportRect()[1][1]);
+            NewMessage.Put(pFacet->GetViewportRect()[0][0]);
+            NewMessage.Put(pFacet->GetViewportRect()[0][1]);
+            NewMessage.Put(pFacet->GetViewportRect()[1][0]);
+            NewMessage.Put(pFacet->GetViewportRect()[1][1]);
 
-            NewMessage.PutFloat(pFacet->GetDepth());
+            NewMessage.Put(pFacet->GetDepth());
 
-            NewMessage.PutInt(pFacet->GetCameraMode());
+            NewMessage.Put(pFacet->GetCameraMode());
 
-            NewMessage.PutFloat(pFacet->GetShutterSpeed());
+            NewMessage.Put(pFacet->GetShutterSpeed());
 
-            NewMessage.PutFloat(pFacet->GetAperture());
+            NewMessage.Put(pFacet->GetAperture());
 
-            NewMessage.PutFloat(pFacet->GetISO());
+            NewMessage.Put(pFacet->GetISO());
 
-            NewMessage.PutFloat(pFacet->GetEC());
+            NewMessage.Put(pFacet->GetEC());
             
             NewMessage.Reset();
 
@@ -246,11 +246,11 @@ namespace
 
     void CActorHelper::OnActorInfoMaterial(Edit::CMessage& _rMessage)
     {
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        int MaterialHash = _rMessage.GetInt();
+        int MaterialHash = _rMessage.Get<int>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
         Dt::CMeshComponent* pFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CMeshComponent>();
 
@@ -268,9 +268,9 @@ namespace
 
     void CActorHelper::OnActorInfoCamera(Edit::CMessage& _rMessage)
     {
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
         Dt::CCameraComponent* pFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CCameraComponent>();
 
@@ -282,51 +282,51 @@ namespace
             // -----------------------------------------------------------------------------
             // Get values
             // -----------------------------------------------------------------------------
-            bool IsMainCamera = _rMessage.GetBool();
+            bool IsMainCamera = _rMessage.Get<bool>();
 
-            Dt::CCameraComponent::EClearFlag ClearFlag = static_cast<Dt::CCameraComponent::EClearFlag >(_rMessage.GetInt());
+            Dt::CCameraComponent::EClearFlag ClearFlag = static_cast<Dt::CCameraComponent::EClearFlag >(_rMessage.Get<int>());
 
-            bool HasTexture = _rMessage.GetBool();
+            bool HasTexture = _rMessage.Get<bool>();
 
             int TextureHash = -1;
 
             if (HasTexture)
             {
-                TextureHash = _rMessage.GetInt();
+                TextureHash = _rMessage.Get<int>();
             }
 
-            R = _rMessage.GetFloat();
-            G = _rMessage.GetFloat();
-            B = _rMessage.GetFloat();
+            R = _rMessage.Get<float>();
+            G = _rMessage.Get<float>();
+            B = _rMessage.Get<float>();
 
-            int CullingMask = _rMessage.GetInt();
+            int CullingMask = _rMessage.Get<int>();
 
-            Dt::CCameraComponent::EProjectionType ProjectionType = static_cast<Dt::CCameraComponent::EProjectionType>(_rMessage.GetInt());
+            Dt::CCameraComponent::EProjectionType ProjectionType = static_cast<Dt::CCameraComponent::EProjectionType>(_rMessage.Get<int>());
 
-            float Size = _rMessage.GetFloat();
+            float Size = _rMessage.Get<float>();
 
-            float FOV = _rMessage.GetFloat();
+            float FOV = _rMessage.Get<float>();
 
-            float Near = _rMessage.GetFloat();
+            float Near = _rMessage.Get<float>();
 
-            float Far = _rMessage.GetFloat();
+            float Far = _rMessage.Get<float>();
 
-            X = _rMessage.GetFloat();
-            Y = _rMessage.GetFloat();
-            W = _rMessage.GetFloat();
-            H = _rMessage.GetFloat();
+            X = _rMessage.Get<float>();
+            Y = _rMessage.Get<float>();
+            W = _rMessage.Get<float>();
+            H = _rMessage.Get<float>();
 
-            float Depth = _rMessage.GetFloat();
+            float Depth = _rMessage.Get<float>();
 
-            Dt::CCameraComponent::ECameraMode CameraMode = static_cast<Dt::CCameraComponent::ECameraMode>(_rMessage.GetInt());
+            Dt::CCameraComponent::ECameraMode CameraMode = static_cast<Dt::CCameraComponent::ECameraMode>(_rMessage.Get<int>());
 
-            float ShutterSpeed = _rMessage.GetFloat();
+            float ShutterSpeed = _rMessage.Get<float>();
 
-            float Aperture = _rMessage.GetFloat();
+            float Aperture = _rMessage.Get<float>();
 
-            float ISO = _rMessage.GetFloat();
+            float ISO = _rMessage.Get<float>();
 
-            float EC = _rMessage.GetFloat();
+            float EC = _rMessage.Get<float>();
 
             // -----------------------------------------------------------------------------
             // Set values

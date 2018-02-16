@@ -65,17 +65,17 @@ namespace Edit
         // -----------------------------------------------------------------------------
         Edit::CMessage NewMessage;
 
-        NewMessage.PutInt(m_CurrentEntityID);
+        NewMessage.Put(m_CurrentEntityID);
 
-        NewMessage.PutFloat(Color[0]);
-        NewMessage.PutFloat(Color[1]);
-        NewMessage.PutFloat(Color[2]);
-        NewMessage.PutFloat(Color[3]);
+        NewMessage.Put(Color[0]);
+        NewMessage.Put(Color[1]);
+        NewMessage.Put(Color[2]);
+        NewMessage.Put(Color[3]);
 
-        NewMessage.PutFloat(Intensity);
-        NewMessage.PutFloat(Treshhold);
-        NewMessage.PutFloat(ExposureScale);
-        NewMessage.PutInt(Size);
+        NewMessage.Put(Intensity);
+        NewMessage.Put(Treshhold);
+        NewMessage.Put(ExposureScale);
+        NewMessage.Put(Size);
 
         NewMessage.Reset();
 
@@ -104,13 +104,13 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void CInspectorBloom::RequestInformation(unsigned int _EntityID)
+    void CInspectorBloom::RequestInformation(Base::ID _EntityID)
     {
         m_CurrentEntityID = _EntityID;
 
         CMessage NewMessage;
 
-        NewMessage.PutInt(m_CurrentEntityID);
+        NewMessage.Put(m_CurrentEntityID);
 
         NewMessage.Reset();
 
@@ -126,21 +126,21 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
         if (EntityID != m_CurrentEntityID) return;
 
-        R = _rMessage.GetFloat();
-        G = _rMessage.GetFloat();
-        B = _rMessage.GetFloat();
-        A = _rMessage.GetFloat();
+        R = _rMessage.Get<float>();
+        G = _rMessage.Get<float>();
+        B = _rMessage.Get<float>();
+        A = _rMessage.Get<float>();
 
         glm::ivec4 Color = glm::ivec4(R * 255, G * 255, B * 255, A * 255);
 
-        float Intensity     = _rMessage.GetFloat();
-        float Treshhold     = _rMessage.GetFloat();
-        float ExposureScale = _rMessage.GetFloat();
-        int   Size          = _rMessage.GetInt();
+        float Intensity     = _rMessage.Get<float>();
+        float Treshhold     = _rMessage.Get<float>();
+        float ExposureScale = _rMessage.Get<float>();
+        int   Size          = _rMessage.Get<int>();
 
         // -----------------------------------------------------------------------------
         // Set values

@@ -63,7 +63,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Destination (this could be only one single element)
         // -----------------------------------------------------------------------------
-        int EntityIDDestination = -1;
+        Base::ID EntityIDDestination = static_cast<Base::ID>(-1);
 
         QTreeWidgetItem* pDestination = SelectedItems.at(0)->parent();
 
@@ -79,7 +79,7 @@ namespace Edit
         {
             QTreeWidgetItem* pSource = SelectedItems.at(IndexOfSelectedItem);
 
-            int EntityIDSource = -1;
+            Base::ID EntityIDSource = static_cast<Base::ID>(-1);
             
             if (pSource == Q_NULLPTR)
             {
@@ -92,8 +92,8 @@ namespace Edit
 
             Edit::CMessage NewMessage;
 
-            NewMessage.PutInt(EntityIDSource);
-            NewMessage.PutInt(EntityIDDestination);
+            NewMessage.Put(EntityIDSource);
+            NewMessage.Put(EntityIDDestination);
 
             NewMessage.Reset();
 
@@ -120,11 +120,11 @@ namespace Edit
             {
                 QTreeWidgetItem* pSource = SelectedItems.at(IndexOfSelectedItem);
 
-                int EntityID = pSource->text(1).toInt();
+                Base::ID EntityID = pSource->text(1).toInt();
 
                 Edit::CMessage NewMessage;
 
-                NewMessage.PutInt(EntityID);
+                NewMessage.Put(EntityID);
 
                 NewMessage.Reset();
 
@@ -147,12 +147,12 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // ID
         // -----------------------------------------------------------------------------
-        pNewItem->setText(1, QString::number(_rMessage.GetInt()));
+        pNewItem->setText(1, QString::number(_rMessage.Get<Base::ID>()));
 
         // -----------------------------------------------------------------------------
         // Name
         // -----------------------------------------------------------------------------
-        bool HasName = _rMessage.GetBool();
+        bool HasName = _rMessage.Get<bool>();
 
         if (HasName)
         {
@@ -170,15 +170,15 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Hierarchy
         // -----------------------------------------------------------------------------
-        bool HasHierachy = _rMessage.GetBool();
+        bool HasHierachy = _rMessage.Get<bool>();
 
         if (HasHierachy)
         {
-            bool HasParent = _rMessage.GetBool();
+            bool HasParent = _rMessage.Get<bool>();
 
             if (HasParent)
             {
-                int ParentID = _rMessage.GetInt();
+                int ParentID = _rMessage.Get<Base::ID>();
 
                 QList<QTreeWidgetItem*> ListOfEntities = findItems(QString::number(ParentID), Qt::MatchContains | Qt::MatchRecursive, 1);
 
@@ -211,7 +211,7 @@ namespace Edit
 
     void CSceneGraph::OnEntitySelected(Edit::CMessage& _rMessage)
     {
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
         QList<QTreeWidgetItem*> ListOfEntities = findItems(QString::number(EntityID), Qt::MatchExactly | Qt::MatchRecursive, 1);
 
