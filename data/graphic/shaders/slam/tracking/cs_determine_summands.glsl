@@ -32,6 +32,59 @@ layout(std140, binding = 2) uniform UBOInc
 
 // -------------------------------------------------------------------------------------
 
+bool findCorrespondence(out vec3 ReferenceVertex, out vec3 RaycastVertex, out vec3 RaycastNormal)
+{
+    const int x = int(gl_GlobalInvocationID.x);
+    const int y = int(gl_GlobalInvocationID.y);
+    
+    const ivec2 ImageSize = imageSize(cs_VertexMap);
+
+    vec3 Vertex = imageLoad(cs_VertexMap, ivec2(x, y)).xyz;
+
+    if (Vertex.x == 0.0f)
+    {
+        return false;
+    }
+    
+    ReferenceVertex = (g_IncPoseMatrix * vec4(Vertex, 1.0)).xyz;
+
+    vec3 CameraPlane = mat3(g_Intrinsics[g_PyramidLevel].m_KMatrix) * (g_InvPoseMatrix * vec4(ReferenceVertex, 1.0f)).xyz;
+    CameraPlane /= CameraPlane.z;
+
+    if (CameraPlane.x < 0.0f || CameraPlane.x > ImageSize.x ||
+        CameraPlane.y < 0.0f || CameraPlane.y > ImageSize.y)
+    {
+        return false;
+    }
+
+    vec3 ReferenceNormal = imageLoad(cs_NormalMap, ivec2(x, y)).xyz;
+
+    if (ReferenceNormal.x < -5.0f)
+    {
+        return false;
+    }
+
+    ReferenceNormal = mat3(g_IncPoseMatrix) * ReferenceNormal;
+
+    RaycastVertex = imageLoad(cs_RaycastVertexMap, ivec2(CameraPlane.xy)).xyz;
+    RaycastNormal = imageLoad(cs_RaycastNormalMap, ivec2(CameraPlane.xy)).xyz;
+
+    if (RaycastVertex.x == 0.0f || RaycastNormal.x == 0.0f)
+    {
+        return false;
+    }
+    
+    const float Distance = distance(ReferenceVertex, RaycastVertex);
+    const float Angle = dot(ReferenceNormal, RaycastNormal);
+
+    if (abs(Distance) > EPSILON_DISTANCE || abs(Angle) < EPSILON_ANGLE)
+    {
+        return false;
+    }
+    
+    return true;
+}
+
 #ifdef USE_SHUFFLE_INTRINSICS
 
 shared float g_SharedData[8];
@@ -88,59 +141,6 @@ void reduce()
 
 #endif
 
-bool findCorrespondence(out vec3 ReferenceVertex, out vec3 RaycastVertex, out vec3 RaycastNormal)
-{
-    const int x = int(gl_GlobalInvocationID.x);
-    const int y = int(gl_GlobalInvocationID.y);
-    
-    const ivec2 ImageSize = imageSize(cs_VertexMap);
-
-    vec3 Vertex = imageLoad(cs_VertexMap, ivec2(x, y)).xyz;
-
-    if (Vertex.x == 0.0f)
-    {
-        return false;
-    }
-    
-    ReferenceVertex = (g_IncPoseMatrix * vec4(Vertex, 1.0)).xyz;
-
-    vec3 CameraPlane = mat3(g_Intrinsics[g_PyramidLevel].m_KMatrix) * (g_InvPoseMatrix * vec4(ReferenceVertex, 1.0f)).xyz;
-    CameraPlane /= CameraPlane.z;
-
-    if (CameraPlane.x < 0.0f || CameraPlane.x > ImageSize.x ||
-        CameraPlane.y < 0.0f || CameraPlane.y > ImageSize.y)
-    {
-        return false;
-    }
-
-    vec3 ReferenceNormal = imageLoad(cs_NormalMap, ivec2(x, y)).xyz;
-
-    if (ReferenceNormal.x < -5.0f)
-    {
-        return false;
-    }
-
-    ReferenceNormal = mat3(g_IncPoseMatrix) * ReferenceNormal;
-
-    RaycastVertex = imageLoad(cs_RaycastVertexMap, ivec2(CameraPlane.xy)).xyz;
-    RaycastNormal = imageLoad(cs_RaycastNormalMap, ivec2(CameraPlane.xy)).xyz;
-
-    if (RaycastVertex.x == 0.0f || RaycastNormal.x == 0.0f)
-    {
-        return false;
-    }
-    
-    const float Distance = distance(ReferenceVertex, RaycastVertex);
-    const float Angle = dot(ReferenceNormal, RaycastNormal);
-
-    if (abs(Distance) > EPSILON_DISTANCE || abs(Angle) < EPSILON_ANGLE)
-    {
-        return false;
-    }
-    
-    return true;
-}
-
 layout (local_size_x = TILE_SIZE2D, local_size_y = TILE_SIZE2D, local_size_z = 1) in;
 void main()
 {
@@ -181,37 +181,46 @@ void main()
     
     const uint ICPSummandIndex = gl_WorkGroupID.x + gl_WorkGroupID.y * gl_NumWorkGroups.x;
     int ICPValueIndex = 0;
-    
+
+    float ICPData[27];
+
     for (int i = 0; i < 6; ++ i)
     {
         for (int j = i; j < 7; ++ j)
         {
-            barrier();
-            
-            #ifdef USE_SHUFFLE_INTRINSICS
-
-            reduce(Row[i] * Row[j]);
-            
-            if (gl_LocalInvocationIndex == 0)
-            {
-                g_ICPData[ICPSummandIndex][ICPValueIndex++] = g_SharedData[0];
-            }
-            #else
-
-            g_SharedData[gl_LocalInvocationIndex] = Row[i] * Row[j];
-
-            barrier();
-
-            reduce();
-            
-            if (gl_LocalInvocationIndex == 0)
-            {
-                g_ICPData[ICPSummandIndex][ICPValueIndex++] = g_SharedData[0];
-            }
-            
-            #endif
+            ICPData[ICPValueIndex++] = Row[i] * Row[j];
         }
     }
+    
+#ifdef USE_SHUFFLE_INTRINSICS    
+    
+    for (int i = 0; i < 27; ++ i)
+    {
+        reduce(ICPData[i]);
+    
+        if (gl_LocalInvocationIndex == 0)
+        {
+            g_ICPData[ICPSummandIndex][i] = g_SharedData[0];
+        }
+    }
+    
+#else
+
+    for (int i = 0; i < 27; ++ i)
+    {
+        g_SharedData[gl_LocalInvocationIndex] = ICPData[i];
+
+        barrier();
+
+        reduce();
+    
+        if (gl_LocalInvocationIndex == 0)
+        {
+            g_ICPData[ICPSummandIndex][i] = g_SharedData[0];
+        }
+    }
+    
+#endif
 }
 
 #endif // __INCLUDE_CS_DETERMINE_SUMMANDS_GLSL__
