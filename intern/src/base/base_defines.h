@@ -2,6 +2,19 @@
 #pragma once
 
 // -----------------------------------------------------------------------------
+// Platform
+// -----------------------------------------------------------------------------
+#if __ANDROID__
+#define PLATFORM_ANDROID 1
+#elif __APPLE__
+#define PLATFORM_APPLE 1
+#elif _WIN32
+#define PLATFORM_WINDOWS 1
+#else
+#pragma message("ERROR: The platform/compiler is not supported.")
+#endif
+
+// -----------------------------------------------------------------------------
 // Used variable macro
 // -----------------------------------------------------------------------------
 #define BASE_UNUSED(Argument)           ((void) & Argument)
@@ -53,10 +66,13 @@
 #endif // User defined or default namespace
 
 // -----------------------------------------------------------------------------
-// Platform
+// Deprecated
 // -----------------------------------------------------------------------------
-#if __ANDROID__
-#define PLATFORM_ANDROID 1
-#else // !__ANDROID__
-#define PLATFORM_WINDOWS 1
+#ifdef PLATFORM_ANDROID
+#define BASE_DEPRECATED(Function) Function __attribute__ ((deprecated))
+#elif PLATFORM_WINDOWS
+#define BASE_DEPRECATED(Function) __declspec(deprecated) Function
+#else
+#pragma message("INFO: Highlighting deprecated functions is not supported on this platform. Please implement function.")
+#define BASE_DEPRECATED(Function) Function
 #endif
