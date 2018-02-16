@@ -13,6 +13,10 @@ namespace Dt
     {
     public:
 
+        typedef std::vector<Dt::IComponent*> CComponentVector;
+
+    public:
+
         template<class T>
         T* GetComponent();
 
@@ -21,6 +25,8 @@ namespace Dt
 
         template<class T>
         bool HasComponent() const;
+
+        const CComponentVector& GetComponents() const;
 
     public:
 
@@ -34,10 +40,6 @@ namespace Dt
 
         template<class T>
         void RemoveComponent(T* _pComponent);
-
-    private:
-
-        typedef std::vector<Dt::IComponent*> CComponentVector;
 
     private:
 

@@ -5,6 +5,7 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
+#include "data/data_component_facet.h"
 #include "data/data_component_manager.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
@@ -217,15 +218,18 @@ namespace
         NewMessage.PutInt(static_cast<int>(rCurrentEntity.GetID()));
 
         NewMessage.PutInt(rCurrentEntity.GetCategory());
-        NewMessage.PutInt(0); //<< REMOVE!
 
         NewMessage.PutBool(rCurrentEntity.GetTransformationFacet() != nullptr);
-        NewMessage.PutBool(rCurrentEntity.GetHierarchyFacet()      != nullptr);
+        NewMessage.PutBool(rCurrentEntity.GetComponentFacet()      != nullptr);
 
-        // TODO by tschwandt
-        // Extend this by giving the information of what kind of components are available!
-        NewMessage.PutBool(false);
-        NewMessage.PutBool(false);
+        auto Components = rCurrentEntity.GetComponentFacet()->GetComponents();
+
+        NewMessage.PutInt(Components.size());
+
+        for (auto Component : Components)
+        {
+            NewMessage.Put<Base::ID>(Component->GetTypeID());
+        }
 
         NewMessage.Reset();
 

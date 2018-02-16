@@ -16,4 +16,11 @@ namespace Dt
     {
 
     }
+
+    // -----------------------------------------------------------------------------
+
+    const CComponentFacet::CComponentVector& CComponentFacet::GetComponents() const
+    {
+        return m_Components;
+    }
 } // namespace Dt

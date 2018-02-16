@@ -28,6 +28,18 @@ namespace Edit
 
     public:
 
+        template<typename T>
+        void Put(const T _Value);
+
+        template<typename T>
+        const T Get();
+
+        template<typename T>
+        void Put(Base::Size _Position, const T _Value);
+
+        template<typename T>
+        const T Get(Base::Size _Position) const;
+
         void PutBool(bool _Value);
         bool GetBool();
         void PutBool(Base::Size _Position, bool _Value);
@@ -91,6 +103,52 @@ namespace Edit
 
 namespace Edit
 {
+    template<typename T>
+    void CMessage::Put(const T _Value)
+    {
+        assert(m_Mode == Write);
+
+        m_Bytes.insert(m_Bytes.end(), reinterpret_cast<const Base::U8*>(&_Value), reinterpret_cast<const Base::U8*>(&_Value) + sizeof(T));
+    }
+
+    // -----------------------------------------------------------------------------
+
+    template<typename T>
+    const T CMessage::Get()
+    {
+        assert(m_Mode == Read);
+
+        const T Value = *reinterpret_cast<T*>(&(*m_Pos));
+
+        m_Pos += sizeof(T);
+
+        return Value;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    template<typename T>
+    void CMessage::Put(Base::Size _Position, const T _Value)
+    {
+        assert(m_Mode == Write);
+
+        *reinterpret_cast<int*>(&m_Bytes[_Position]) = _Value;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    template<typename T>
+    const T CMessage::Get(Base::Size _Position) const
+    {
+        assert(m_Mode == Read);
+
+        const T Value = *reinterpret_cast<const T*>(&m_Bytes[_Position]);
+
+        return Value;
+    }
+
+    // -----------------------------------------------------------------------------
+
     template <typename T>
     T CMessage::GetEnum()
     {

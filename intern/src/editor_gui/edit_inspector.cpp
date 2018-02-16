@@ -1,4 +1,20 @@
 ﻿
+#include "base/base_typedef.h"
+#include "base/base_type_info.h"
+
+#include "data/data_ar_controller_component.h"
+#include "data/data_area_light_component.h"
+#include "data/data_bloom_component.h"
+#include "data/data_camera_component.h"
+#include "data/data_dof_component.h"
+#include "data/data_light_probe_component.h"
+#include "data/data_mesh_component.h"
+#include "data/data_point_light_component.h"
+#include "data/data_post_aa_component.h"
+#include "data/data_sky_component.h"
+#include "data/data_ssr_component.h"
+#include "data/data_sun_component.h"
+#include "data/data_volume_fog_component.h"
 
 #include "editor_gui/edit_inspector.h"
 
@@ -200,17 +216,21 @@ namespace Edit
         unsigned int EntityID = static_cast<unsigned int>(_rMessage.GetInt());
 
         int Category = _rMessage.GetInt();
-        int Type     = _rMessage.GetInt();
 
         bool HasTransformation = _rMessage.GetBool();
-        bool HasHierarchy      = _rMessage.GetBool();
 
-        BASE_UNUSED(HasHierarchy);
+        bool HasComponents = _rMessage.GetBool();
 
-        bool HasDetailData    = _rMessage.GetBool();
-        bool HasDetailGraphic = _rMessage.GetBool();
-        
-        BASE_UNUSED(HasDetailGraphic);
+        int NumberOfComponents = _rMessage.GetInt();
+
+        Base::ID TypeID = static_cast<Base::ID>(-1);
+
+        for (int IndexOfComponent = 0; IndexOfComponent < NumberOfComponents; ++IndexOfComponent)
+        {
+            TypeID = _rMessage.Get<Base::ID>();
+        }
+
+        if (NumberOfComponents == 0) HasComponents = false;
 
         // -----------------------------------------------------------------------------
         // General informations
@@ -232,106 +252,97 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Details
         // -----------------------------------------------------------------------------
-        if (HasDetailData)
+        if (HasComponents)
         {
-            if (Category == 0) // Actors
+            if (TypeID == Base::CTypeInfo::GetTypeID<Dt::CMeshComponent>())
             {
-                if (Type == 0) // Node
-                {
-                }
-                else if (Type == 1) // Model
-                {
-                    m_pMaterialWidget->RequestInformation(EntityID);
+                m_pMaterialWidget->RequestInformation(EntityID);
 
-                    m_pMaterialWidget->setVisible(true);
-                }
-                else if (Type == 2) // Camera
-                {
-                    m_pCameraWidget->RequestInformation(EntityID);
-
-                    m_pCameraWidget->setVisible(true);
-                }
+                m_pMaterialWidget->setVisible(true);
             }
-            else if (Category == 1) // Light
+
+            if (TypeID == Base::CTypeInfo::GetTypeID<Dt::CCameraComponent>())
             {
-                if (Type == 0) // Point
-                {
-                    m_pPointlightWidget->RequestInformation(EntityID);
+                m_pCameraWidget->RequestInformation(EntityID);
 
-                    m_pPointlightWidget->setVisible(true);
-                }
-                else if (Type == 1) // Area
-                {
-                    m_pArealightWidget->RequestInformation(EntityID);
-
-                    m_pArealightWidget->setVisible(true);
-                }
-                else if (Type == 2) // Sun
-                {
-                    m_pSunWidget->RequestInformation(EntityID);
-
-                    m_pSunWidget->setVisible(true);
-                }
-                else if (Type == 3) // Probe
-                {
-                    m_pLightProbeWidget->RequestInformation(EntityID);
-
-                    m_pLightProbeWidget->setVisible(true);
-                }
-                else if (Type == 4) // Environment
-                {
-                    m_pEnvironmentWidget->RequestInformation(EntityID);
-
-                    m_pEnvironmentWidget->setVisible(true);
-                }
+                m_pCameraWidget->setVisible(true);
             }
-            else if (Category == 2) // FX
+
+            if (TypeID == Base::CTypeInfo::GetTypeID<Dt::CPointLightComponent>())
             {
-                if (Type == 0) // Bloom
-                {
-                    m_pBloomWidget->RequestInformation(EntityID);
+                m_pPointlightWidget->RequestInformation(EntityID);
 
-                    m_pBloomWidget->setVisible(true);
-                }
-                else if (Type == 1) // SSR
-                {
-                    m_pSSRWidget->RequestInformation(EntityID);
-
-                    m_pSSRWidget->setVisible(true);
-                }
-                else if (Type == 2) // DOF
-                {
-                    m_pDOFWidget->RequestInformation(EntityID);
-
-                    m_pDOFWidget->setVisible(true);
-                }
-                else if (Type == 3) // FXAA
-                {
-                    m_pFXAAWidget->RequestInformation(EntityID);
-
-                    m_pFXAAWidget->setVisible(true);
-                }
-                else if (Type == 4) // SSAO
-                {
-                }
-                else if (Type == 5) // VolumeFog
-                {
-                    m_pVolumeFogWidget->RequestInformation(EntityID);
-
-                    m_pVolumeFogWidget->setVisible(true);
-                }
+                m_pPointlightWidget->setVisible(true);
             }
-            else if (Category == 3) // Plugin
-            {
-                if (Type == 0) // ARControlManager
-                {
-                    m_pARControllerWidget->RequestInformation(EntityID);
 
-                    m_pARControllerWidget->setVisible(true);
-                }
-                else if (Type == 1) // ARTrackedObject
-                {
-                }
+            if (TypeID == Base::CTypeInfo::GetTypeID<Dt::CAreaLightComponent>())
+            {
+                m_pArealightWidget->RequestInformation(EntityID);
+
+                m_pArealightWidget->setVisible(true);
+            }
+
+            if (TypeID == Base::CTypeInfo::GetTypeID<Dt::CSunComponent>())
+            {
+                m_pSunWidget->RequestInformation(EntityID);
+
+                m_pSunWidget->setVisible(true);
+            }
+
+            if (TypeID == Base::CTypeInfo::GetTypeID<Dt::CLightProbeComponent>())
+            {
+                m_pLightProbeWidget->RequestInformation(EntityID);
+
+                m_pLightProbeWidget->setVisible(true);
+            }
+
+            if (TypeID == Base::CTypeInfo::GetTypeID<Dt::CSkyComponent>())
+            {
+                m_pEnvironmentWidget->RequestInformation(EntityID);
+
+                m_pEnvironmentWidget->setVisible(true);
+            }
+
+            if (TypeID == Base::CTypeInfo::GetTypeID<Dt::CBloomComponent>())
+            {
+                m_pBloomWidget->RequestInformation(EntityID);
+
+                m_pBloomWidget->setVisible(true);
+            }
+
+            if (TypeID == Base::CTypeInfo::GetTypeID<Dt::CSSRComponent>())
+            {
+                m_pSSRWidget->RequestInformation(EntityID);
+
+                m_pSSRWidget->setVisible(true);
+            }
+
+            if (TypeID == Base::CTypeInfo::GetTypeID<Dt::CDOFComponent>())
+            {
+                m_pDOFWidget->RequestInformation(EntityID);
+
+                m_pDOFWidget->setVisible(true);
+            }
+
+            if (TypeID == Base::CTypeInfo::GetTypeID<Dt::CPostAAComponent>())
+            {
+                m_pFXAAWidget->RequestInformation(EntityID);
+
+                m_pFXAAWidget->setVisible(true);
+            }
+
+            if (TypeID == Base::CTypeInfo::GetTypeID<Dt::CVolumeFogComponent>())
+            {
+                m_pVolumeFogWidget->RequestInformation(EntityID);
+
+                m_pVolumeFogWidget->setVisible(true);
+            }
+
+            if (TypeID == Base::CTypeInfo::GetTypeID<Dt::CARControllerPluginComponent>())
+            {
+                m_pARControllerWidget->RequestInformation(EntityID);
+
+                m_pARControllerWidget->setVisible(true);
             }
         }
     }
@@ -346,7 +357,7 @@ namespace Edit
         m_pArealightWidget   ->setVisible(false);
         m_pSunWidget         ->setVisible(false);
         m_pEnvironmentWidget ->setVisible(false);
-        m_pLightProbeWidget ->setVisible(false);
+        m_pLightProbeWidget  ->setVisible(false);
         m_pBloomWidget       ->setVisible(false);
         m_pDOFWidget         ->setVisible(false);
         m_pFXAAWidget        ->setVisible(false);
