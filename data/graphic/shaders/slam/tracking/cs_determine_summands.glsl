@@ -125,7 +125,7 @@ void reduce(float _Input)
 
 #else
 
-shared float g_SharedData[WORKGROUP_SIZE];
+shared vec4 g_SharedData[WORKGROUP_SIZE];
 
 void reduce()
 {
@@ -206,9 +206,12 @@ void main()
     
 #else
 
-    for (int i = 0; i < 27; ++ i)
+    for (int i = 0; i < 24; i += 4)
     {
-        g_SharedData[gl_LocalInvocationIndex] = ICPData[i];
+        g_SharedData[gl_LocalInvocationIndex][0] = ICPData[i];
+        g_SharedData[gl_LocalInvocationIndex][1] = ICPData[i + 1];
+        g_SharedData[gl_LocalInvocationIndex][2] = ICPData[i + 2];
+        g_SharedData[gl_LocalInvocationIndex][3] = ICPData[i + 3];
 
         barrier();
 
@@ -216,8 +219,27 @@ void main()
     
         if (gl_LocalInvocationIndex == 0)
         {
-            g_ICPData[ICPSummandIndex][i] = g_SharedData[0];
+            g_ICPData[ICPSummandIndex][i] = g_SharedData[0][0];
+            g_ICPData[ICPSummandIndex][i + 1] = g_SharedData[0][1];
+            g_ICPData[ICPSummandIndex][i + 2] = g_SharedData[0][2];
+            g_ICPData[ICPSummandIndex][i + 3] = g_SharedData[0][3];
         }
+    }
+        
+    g_SharedData[gl_LocalInvocationIndex][0] = ICPData[24];
+    g_SharedData[gl_LocalInvocationIndex][1] = ICPData[24 + 1];
+    g_SharedData[gl_LocalInvocationIndex][2] = ICPData[24 + 2];
+    g_SharedData[gl_LocalInvocationIndex][3] = 0.0f;
+
+    barrier();
+
+    reduce();
+    
+    if (gl_LocalInvocationIndex == 0)
+    {
+        g_ICPData[ICPSummandIndex][24] = g_SharedData[0][0];
+        g_ICPData[ICPSummandIndex][24 + 1] = g_SharedData[0][1];
+        g_ICPData[ICPSummandIndex][24 + 2] = g_SharedData[0][2];
     }
     
 #endif
