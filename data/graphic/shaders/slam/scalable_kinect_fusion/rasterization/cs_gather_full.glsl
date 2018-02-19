@@ -35,9 +35,11 @@ layout(std430, binding = 3) buffer Level2Queue
 // Compute Shader
 // -----------------------------------------------------------------------------
 
+const int g_Resolution = ROOT_RESOLUTION * LEVEL1_RESOLUTION;
+
 shared int TaggedSum;
 
-layout (local_size_x = 8, local_size_y = 8, local_size_z = 8) in;
+layout (local_size_x = LEVEL1_RESOLUTION, local_size_y = LEVEL1_RESOLUTION, local_size_z = LEVEL1_RESOLUTION) in;
 void main()
 {
     uint IsTagged = imageLoad(cs_Volume, ivec3(gl_GlobalInvocationID)).x;
@@ -53,7 +55,7 @@ void main()
     if (IsTagged > 0)
     {
         uint Index = atomicAdd(g_Level2Indirect.m_Indexed.m_InstanceCount, 1);
-        g_Level2VolumeID[Index] = OffsetToIndex(vec3(gl_GlobalInvocationID), 16 * 8);
+        g_Level2VolumeID[Index] = OffsetToIndex(vec3(gl_GlobalInvocationID), ROOT_RESOLUTION * LEVEL1_RESOLUTION);
 
         atomicAdd(TaggedSum, 1);
     }
@@ -62,7 +64,7 @@ void main()
     if (gl_LocalInvocationIndex == 0 && TaggedSum > 0)
     {
         uint Index = atomicAdd(g_Level1Indirect.m_Indexed.m_InstanceCount, 1);
-        g_Level1VolumeID[Index] = OffsetToIndex(vec3(gl_WorkGroupID), 16);
+        g_Level1VolumeID[Index] = OffsetToIndex(vec3(gl_WorkGroupID), ROOT_RESOLUTION);
     }
 }
 
