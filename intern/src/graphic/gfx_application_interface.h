@@ -5,7 +5,7 @@ namespace Gfx
 {
 namespace App
 {
-    unsigned int RegisterWindow(void* _pWindow, unsigned int _VSync = 0);
+    unsigned int RegisterWindow(void* _pWindow, int _VSync = 0);
 
     void ActivateWindow(unsigned int _WindowID);
 
