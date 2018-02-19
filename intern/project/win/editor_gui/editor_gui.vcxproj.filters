@@ -14,13 +14,13 @@
     <Filter Include="Widgets\Inspector">
       <UniqueIdentifier>{38ae8e22-8004-4fed-ac45-11a1a148b7f7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Form Files\Inspector">
+      <UniqueIdentifier>{6b50727c-1fa1-4ff6-86dd-c95526cdcb5d}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Generated Files">
       <UniqueIdentifier>{71ED8ED8-ACB9-4CE9-BBE1-E00B30144E11}</UniqueIdentifier>
       <Extensions>moc;h;cpp</Extensions>
       <ParseFiles>true</ParseFiles>
-    </Filter>
-    <Filter Include="Form Files\Components">
-      <UniqueIdentifier>{6b50727c-1fa1-4ff6-86dd-c95526cdcb5d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -185,12 +185,6 @@
     <ClCompile Include="..\..\..\src\editor_gui\moc_edit_mainwindow.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\editor_gui\edit_component.cpp">
-      <Filter>Widgets</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_component.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_mainwindow.ui">
@@ -237,52 +231,52 @@
       <Filter>Widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_bloom.ui">
-      <Filter>Form Files\Components</Filter>
+      <Filter>Form Files\Inspector</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_dof.ui">
-      <Filter>Form Files\Components</Filter>
+      <Filter>Form Files\Inspector</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_environment.ui">
-      <Filter>Form Files\Components</Filter>
+      <Filter>Form Files\Inspector</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_ssr.ui">
-      <Filter>Form Files\Components</Filter>
+      <Filter>Form Files\Inspector</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_sun.ui">
-      <Filter>Form Files\Components</Filter>
+      <Filter>Form Files\Inspector</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_transformation.ui">
-      <Filter>Form Files\Components</Filter>
+      <Filter>Form Files\Inspector</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_volumefog.ui">
-      <Filter>Form Files\Components</Filter>
+      <Filter>Form Files\Inspector</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_sun.h">
       <Filter>Widgets\Inspector</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_entity.ui">
-      <Filter>Form Files\Components</Filter>
+      <Filter>Form Files\Inspector</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_entity.h">
       <Filter>Widgets\Inspector</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_material.ui">
-      <Filter>Form Files\Components</Filter>
+      <Filter>Form Files\Inspector</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_material.h">
       <Filter>Widgets\Inspector</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_camera.ui">
-      <Filter>Form Files\Components</Filter>
+      <Filter>Form Files\Inspector</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_arcontroller.ui">
-      <Filter>Form Files\Components</Filter>
+      <Filter>Form Files\Inspector</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_arcontroller_marker.ui">
-      <Filter>Form Files\Components</Filter>
+      <Filter>Form Files\Inspector</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_artrackedobject.ui">
-      <Filter>Form Files\Components</Filter>
+      <Filter>Form Files\Inspector</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_camera.h">
       <Filter>Widgets\Inspector</Filter>
@@ -297,7 +291,7 @@
       <Filter>Widgets\Inspector</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_post_aa.ui">
-      <Filter>Form Files\Components</Filter>
+      <Filter>Form Files\Inspector</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_asset_browser.h">
       <Filter>Widgets</Filter>
@@ -318,7 +312,7 @@
       <Filter>Widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_texture.ui">
-      <Filter>Form Files\Components</Filter>
+      <Filter>Form Files\Inspector</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_texture.h">
       <Filter>Widgets\Inspector</Filter>
@@ -333,28 +327,19 @@
       <Filter>Widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_area_light.ui">
-      <Filter>Form Files\Components</Filter>
+      <Filter>Form Files\Inspector</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_point_light.ui">
-      <Filter>Form Files\Components</Filter>
+      <Filter>Form Files\Inspector</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_light_probe.ui">
-      <Filter>Form Files\Components</Filter>
+      <Filter>Form Files\Inspector</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_light_probe.h">
       <Filter>Widgets\Inspector</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_component.ui">
-      <Filter>Form Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_component.h">
-      <Filter>Widgets</Filter>
-    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\editor_gui\edit_gui.h" />
-    <ClInclude Include="..\..\..\src\editor_gui\ui_edit_component.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
   </ItemGroup>
 </Project>

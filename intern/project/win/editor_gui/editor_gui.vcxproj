@@ -22,7 +22,6 @@
     <ClCompile Include="..\..\..\src\editor_gui\edit_asset_browser.cpp" />
     <ClCompile Include="..\..\..\src\editor_gui\edit_asset_file_list.cpp" />
     <ClCompile Include="..\..\..\src\editor_gui\edit_clickable_label.cpp" />
-    <ClCompile Include="..\..\..\src\editor_gui\edit_component.cpp" />
     <ClCompile Include="..\..\..\src\editor_gui\edit_gui.cpp" />
     <ClCompile Include="..\..\..\src\editor_gui\edit_inspector.cpp" />
     <ClCompile Include="..\..\..\src\editor_gui\edit_inspector_arcontroller.cpp" />
@@ -51,7 +50,6 @@
     <ClCompile Include="..\..\..\src\editor_gui\moc_edit_asset_browser.cpp" />
     <ClCompile Include="..\..\..\src\editor_gui\moc_edit_asset_file_list.cpp" />
     <ClCompile Include="..\..\..\src\editor_gui\moc_edit_clickable_label.cpp" />
-    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_component.cpp" />
     <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector.cpp" />
     <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_arcontroller.cpp" />
     <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_arcontroller_marker.cpp" />
@@ -98,25 +96,6 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_component.h">
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing edit_component.h...</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\..\..\..\src\editor_gui\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\..\..\..\src\editor_gui\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -DEDITUR_GUI_LIB "-I.\..\..\..\src" "-I.\..\..\..\..\extern\qt\include" "-I.\..\..\..\..\extern\qt\include\QtCore" "-I.\..\..\..\..\extern\qt\include\QtGui" "-I.\..\..\..\..\extern\qt\include\QtWidgets" "-I.\..\..\..\src\editor_gui"</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing edit_component.h...</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\..\..\..\src\editor_gui\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\..\..\..\src\editor_gui\moc_%(Filename).cpp"  -DUNICODE -D_UNICODE -DWIN32 -DWIN64 -DQT_DLL -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB "-I.\..\..\..\src" "-I.\..\..\..\..\extern\glm\include" "-I.\..\..\..\..\extern\qt\include" "-I.\..\..\..\..\extern\qt\include\QtCore" "-I.\..\..\..\..\extern\qt\include\QtGui" "-I.\..\..\..\..\extern\qt\include\QtWidgets" "-I.\..\..\..\src\editor_gui"</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing edit_component.h...</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\..\..\..\src\editor_gui\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\..\..\..\src\editor_gui\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -DEDITUR_GUI_LIB "-I.\..\..\..\src" "-I.\..\..\..\..\extern\qt\include" "-I.\..\..\..\..\extern\qt\include\QtCore" "-I.\..\..\..\..\extern\qt\include\QtGui" "-I.\..\..\..\..\extern\qt\include\QtWidgets" "-I.\..\..\..\src\editor_gui"</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing edit_component.h...</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\..\..\..\src\editor_gui\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\..\..\..\src\editor_gui\moc_%(Filename).cpp"  -DUNICODE -D_UNICODE -DWIN32 -DWIN64 -DQT_DLL -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB "-I.\..\..\..\src" "-I.\..\..\..\..\extern\glm\include" "-I.\..\..\..\..\extern\qt\include" "-I.\..\..\..\..\extern\qt\include\QtCore" "-I.\..\..\..\..\extern\qt\include\QtGui" "-I.\..\..\..\..\extern\qt\include\QtWidgets" "-I.\..\..\..\src\editor_gui"</Command>
-    </CustomBuild>
-    <ClInclude Include="..\..\..\src\editor_gui\ui_edit_component.h" />
     <CustomBuild Include="..\..\..\src\editor_gui\edit_tone_mapping.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing edit_tone_mapping.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\..\..\..\src\editor_gui\moc_%(Filename).cpp</Outputs>
@@ -1047,26 +1026,6 @@
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_tone_mapping.ui">
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Uic%27ing %(Identity)...</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\..\..\..\src\editor_gui\ui_%(Filename).h;%(Outputs)</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\uic.exe" -o ".\..\..\..\src\editor_gui\ui_%(Filename).h" "%(FullPath)"</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Uic%27ing %(Identity)...</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\..\..\..\src\editor_gui\ui_%(Filename).h;%(Outputs)</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTDIR)\bin\uic.exe" -o ".\..\..\..\src\editor_gui\ui_%(Filename).h" "%(FullPath)"</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Uic%27ing %(Identity)...</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\..\..\..\src\editor_gui\ui_%(Filename).h;%(Outputs)</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\uic.exe" -o ".\..\..\..\src\editor_gui\ui_%(Filename).h" "%(FullPath)"</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Uic%27ing %(Identity)...</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\..\..\..\src\editor_gui\ui_%(Filename).h;%(Outputs)</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\uic.exe" -o ".\..\..\..\src\editor_gui\ui_%(Filename).h" "%(FullPath)"</Command>
-    </CustomBuild>
-  </ItemGroup>
-  <ItemGroup>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_component.ui">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Uic%27ing %(Identity)...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\..\..\..\src\editor_gui\ui_%(Filename).h;%(Outputs)</Outputs>
