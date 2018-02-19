@@ -731,7 +731,8 @@ namespace MR
             ContextManager::SetResourceBuffer(2, rRootVolume.m_Level1QueuePtr);
             ContextManager::SetResourceBuffer(3, rRootVolume.m_Level2QueuePtr);
 
-            ContextManager::Dispatch(16, 16, 16);
+            const int WorkGroups = m_ReconstructionSettings.m_GridResolutions[0];
+            ContextManager::Dispatch(WorkGroups, WorkGroups, WorkGroups);
 
             ContextManager::Barrier();
             Performance::EndEvent();
