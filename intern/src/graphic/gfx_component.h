@@ -3,6 +3,7 @@
 
 #include "base/base_type_info.h"
 
+#pragma warning(push)
 #pragma warning(disable : 4505)
 
 namespace Gfx
@@ -51,4 +52,4 @@ namespace Gfx
     }
 } // namespace Gfx
 
-#pragma warning(default : 4505)
+#pragma warning(pop)

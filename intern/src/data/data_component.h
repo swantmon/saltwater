@@ -3,6 +3,7 @@
 
 #include "base/base_type_info.h"
 
+#pragma warning(push)
 #pragma warning(disable : 4505)
 
 namespace Dt
@@ -42,6 +43,7 @@ namespace Dt
 
     public:
 
+#pragma warning(push)
 #pragma warning(disable : 4201)
 
         struct SFlags
@@ -59,7 +61,7 @@ namespace Dt
             };
         };
 
-#pragma warning(default : 4201) 
+#pragma warning(pop) 
 
     public:
 
@@ -182,4 +184,4 @@ namespace Dt
     }
 } // namespace Dt
 
-#pragma warning(default : 4505)
+#pragma warning(pop)
