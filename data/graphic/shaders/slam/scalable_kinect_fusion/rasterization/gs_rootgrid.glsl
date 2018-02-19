@@ -96,7 +96,7 @@ void main()
             {
                 for(int i = 0; i < 2; ++ i)
                 {
-                    gl_Layer = LayerIndex;
+                    gl_Layer = LayerIndex + g_BufferOffset * g_Resolution;
                     gl_Position = vec4(VSLinePositions[i], 1.0f);
                     out_WSPosition = WSPosition;
 
@@ -177,33 +177,33 @@ void main()
             for(int LayerIndex = MinLayer; LayerIndex <= MaxLayer; ++ LayerIndex)
             {
                 // Face 1
-                gl_Layer = LayerIndex;
+                gl_Layer = LayerIndex + g_BufferOffset * g_Resolution;
                 gl_Position = vec4(AABBMin.x, AABBMin.y, 1.0f, 1.0f);
                 out_WSPosition = WSPosition;
                 EmitVertex();
 
-                gl_Layer = LayerIndex;
+                gl_Layer = LayerIndex + g_BufferOffset * g_Resolution;
                 gl_Position = vec4(AABBMax.x, AABBMin.y, 1.0f, 1.0f);
                 out_WSPosition = WSPosition;
                 EmitVertex();
 
-                gl_Layer = LayerIndex;
+                gl_Layer = LayerIndex + g_BufferOffset * g_Resolution;
                 gl_Position = vec4(AABBMax.x, AABBMax.y, 1.0f, 1.0f);
                 out_WSPosition = WSPosition;
                 EmitVertex();
 
                 // Face 2
-                gl_Layer = LayerIndex;
+                gl_Layer = LayerIndex + g_BufferOffset * g_Resolution;
                 gl_Position = vec4(AABBMax.x, AABBMax.y, 1.0f, 1.0f);
                 out_WSPosition = WSPosition;
                 EmitVertex();
 
-                gl_Layer = LayerIndex;
+                gl_Layer = LayerIndex + g_BufferOffset * g_Resolution;
                 gl_Position = vec4(AABBMin.x, AABBMax.y, 1.0f, 1.0f);
                 out_WSPosition = WSPosition;
                 EmitVertex();
 
-                gl_Layer = LayerIndex;
+                gl_Layer = LayerIndex + g_BufferOffset * g_Resolution;
                 gl_Position = vec4(AABBMin.x, AABBMin.y, 1.0f, 1.0f);
                 out_WSPosition = WSPosition;
                 EmitVertex();

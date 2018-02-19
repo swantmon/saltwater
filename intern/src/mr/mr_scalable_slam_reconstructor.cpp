@@ -716,6 +716,11 @@ namespace MR
 
             ContextManager::SetImageTexture(1, m_FullVolumePtr);
 
+            SPointRasterization BufferData;
+            BufferData.m_Offset = rRootVolume.m_Offset;
+            BufferData.m_BufferOffset = 0;
+            BufferManager::UploadBufferData(m_PointRasterizationBufferPtr, &BufferData);
+
             SIndirectBuffers IndirectBufferData = {};
             IndirectBufferData.m_Indexed.m_IndexCount = m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
             BufferManager::UploadBufferData(rRootVolume.m_IndirectLevel1Buffer, &IndirectBufferData);
@@ -905,7 +910,7 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CScalableSLAMReconstructor::RasterizePointCloud(SRootVolume& rRootGrid)
+    void CScalableSLAMReconstructor::RasterizePointCloud(SRootVolume& rRootVolume)
     {
         ////////////////////////////////////////////////////////////////////////////////
         // Render point cloud into 3D texture
@@ -918,8 +923,7 @@ namespace MR
         ContextManager::SetShaderPS(m_PointCloudFSPtr);
 
         SPointRasterization BufferData;
-
-        BufferData.m_Offset = rRootGrid.m_Offset;
+        BufferData.m_Offset = rRootVolume.m_Offset;
         BufferData.m_BufferOffset = 0;
         BufferManager::UploadBufferData(m_PointRasterizationBufferPtr, &BufferData);
 
@@ -1190,7 +1194,7 @@ namespace MR
 
         TextureDescriptor.m_NumberOfPixelsU = VolumeWidth;
         TextureDescriptor.m_NumberOfPixelsV = VolumeWidth;
-        TextureDescriptor.m_NumberOfPixelsW = VolumeWidth * 8;
+        TextureDescriptor.m_NumberOfPixelsW = VolumeWidth;
         TextureDescriptor.m_Binding = CTexture::RenderTarget | CTexture::ShaderResource;
         TextureDescriptor.m_Access = CTexture::CPUWrite;
         TextureDescriptor.m_Usage = CTexture::GPUReadWrite;
