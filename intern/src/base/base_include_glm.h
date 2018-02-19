@@ -1,6 +1,8 @@
 
 #pragma once
 
+
+#pragma warning(push)
 #pragma warning(disable : 4201 4310)
 
 // -----------------------------------------------------------------------------
@@ -19,4 +21,4 @@
 #include "ext.hpp"
 #include "gtx/matrix_decompose.hpp"
 
-#pragma warning(default : 4201 4310)
+#pragma warning(pop)

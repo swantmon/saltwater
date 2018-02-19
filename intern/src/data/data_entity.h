@@ -76,6 +76,7 @@ namespace Dt
 
     public:
 
+#pragma warning(push)
 #pragma warning(disable : 4201)
 
         struct SFlags
@@ -97,7 +98,7 @@ namespace Dt
             };
         };
 
-#pragma warning(default : 4201) 
+#pragma warning(pop) 
 
     public:
 

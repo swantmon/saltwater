@@ -15,6 +15,8 @@ namespace IO
     }
 } // namespace IO
 
+using namespace nlohmann;
+
 namespace IO
 {
     CProgramParameters::CProgramParameters()
@@ -115,5 +117,12 @@ namespace IO
         std::replace(Copy.begin(), Copy.end(), ':', '/');
 
         return json::json_pointer("/" + Copy);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const std::string CProgramParameters::Get(const std::string& _rOption, const char* _Default)
+    {
+        return Get(_rOption, std::string(_Default));
     }
 } // namespace IO

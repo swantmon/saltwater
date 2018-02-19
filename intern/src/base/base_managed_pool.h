@@ -703,6 +703,7 @@ namespace CON
         // If we are holder of this data we have to remove the object for ourself.
         // Otherwise the decrement of the reference will execute the destructor.
         // -----------------------------------------------------------------------------
+#pragma warning(push)
 #pragma warning(disable:4127)       
         if (TDataPolicy == 1)
         {
@@ -717,7 +718,7 @@ namespace CON
                 Base::CMemory::DestructObject(&pNode->m_Item);
             }
         }
-#pragma warning(default:4127)
+#pragma warning(pop)
     
         // -----------------------------------------------------------------------------
         // Free the pages.

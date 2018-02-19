@@ -3,7 +3,7 @@
 
 #include "base/base_console.h"
 #include "base/base_exception.h"
-#include "base/base_include_json.h"
+#include "base/base_json.h"
 
 #include <string>
 
@@ -30,18 +30,16 @@ namespace IO
 
         template<typename T>
         void Add(const std::string& _rOption, const T _rParameter);
-
-        template<typename T>
-        const T Get(const std::string& _rOption);
-
+        
         template<typename T>
         const T Get(const std::string& _rOption, const T _Default);
+        const std::string Get(const std::string& _rOption, const char* _Default);
 
         bool IsNull(const std::string& _rOption);
 
     private:
 
-        json m_Container;
+        nlohmann::json m_Container;
 
     private:
 
@@ -50,7 +48,7 @@ namespace IO
 
     private:
 
-        json::json_pointer ConvertOptionToJSONPointer(const std::string& _rOption);
+        nlohmann::json::json_pointer ConvertOptionToJSONPointer(const std::string& _rOption);
     };
 } // namespace IO
 
@@ -63,20 +61,7 @@ namespace IO
 
         m_Container[ConvertOptionToJSONPointer(_rOption)] = _Parameter;
     }
-
-    // -----------------------------------------------------------------------------
-
-    template<typename T>
-    const T CProgramParameters::Get(const std::string& _rOption)
-    {
-        if (IsNull(_rOption))
-        {
-            BASE_THROWV("Parameter \"%s\" is not available.", _rOption.c_str());
-        }
-
-        return m_Container[ConvertOptionToJSONPointer(_rOption)];
-    }
-
+    
     // -----------------------------------------------------------------------------
 
     template<typename T>
@@ -93,7 +78,7 @@ namespace IO
 
             return m_Container[ConvertOptionToJSONPointer(_rOption)];
         }
-        catch (const json::exception& _rException)
+        catch (const nlohmann::json::exception& _rException)
         {
             BASE_CONSOLE_ERRORV("Getting value of option \"%s\" from program parameters failed with error: \"%s\"", _rOption.c_str(), _rException.what());
         }

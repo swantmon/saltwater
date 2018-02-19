@@ -114,6 +114,7 @@ namespace MATH
 
     private:
 
+#pragma warning(push)
 #pragma warning(disable:4201)
         struct  
         {
@@ -129,7 +130,7 @@ namespace MATH
                 X m_V[6];
             };
         };
-#pragma warning(default:4201)
+#pragma warning(pop)
 
     private:
 

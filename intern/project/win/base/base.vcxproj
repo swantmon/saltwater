@@ -24,7 +24,7 @@
     <ClInclude Include="..\..\..\src\base\base_exception.h" />
     <ClInclude Include="..\..\..\src\base\base_getopt.h" />
     <ClInclude Include="..\..\..\src\base\base_include_glm.h" />
-    <ClInclude Include="..\..\..\src\base\base_include_json.h" />
+    <ClInclude Include="..\..\..\src\base\base_json.h" />
     <ClInclude Include="..\..\..\src\base\base_precompiled.h" />
     <ClInclude Include="..\..\..\src\base\base_program_parameters.h" />
     <ClInclude Include="..\..\..\src\base\base_tokenizer.h" />
