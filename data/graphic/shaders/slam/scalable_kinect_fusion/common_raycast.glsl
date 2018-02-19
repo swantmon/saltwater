@@ -177,6 +177,15 @@ vec2 GetVoxelWithStep(vec3 Position, vec3 Direction, out float Step)
             
             Step = GetEndLength(Position, Direction, AABBMin, AABBMax);
         }
+    }    
+    else
+    {
+        Position *= VOLUME_SIZE;
+                
+        vec3 AABBMin = Position - mod(Position, VOLUME_SIZE);
+        vec3 AABBMax = AABBMin + VOLUME_SIZE;
+                
+        Step = GetEndLength(Position, Direction, AABBMin, AABBMax);
     }
     
     return vec2(0.0f);
