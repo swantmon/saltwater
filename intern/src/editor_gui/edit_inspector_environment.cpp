@@ -62,15 +62,15 @@ namespace Edit
         // -----------------------------------------------------------------------------
         Edit::CMessage NewMessage;
 
-        NewMessage.PutInt(m_CurrentEntityID);
+        NewMessage.Put(m_CurrentEntityID);
 
-        NewMessage.PutInt(RefreshMode);
+        NewMessage.Put(RefreshMode);
 
-        NewMessage.PutInt(Type);
+        NewMessage.Put(Type);
 
-        NewMessage.PutInt(TextureHash);
+        NewMessage.Put(TextureHash);
 
-        NewMessage.PutFloat(Intensity);
+        NewMessage.Put(Intensity);
 
         NewMessage.Reset();
 
@@ -79,13 +79,13 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void CInspectorEnvironment::RequestInformation(unsigned int _EntityID)
+    void CInspectorEnvironment::RequestInformation(Base::ID _EntityID)
     {
         m_CurrentEntityID = _EntityID;
 
         CMessage NewMessage;
 
-        NewMessage.PutInt(m_CurrentEntityID);
+        NewMessage.Put(m_CurrentEntityID);
 
         NewMessage.Reset();
 
@@ -96,35 +96,34 @@ namespace Edit
 
     void CInspectorEnvironment::OnEntityInfoEnvironment(Edit::CMessage& _rMessage)
     {
-        char pTemp[256];
-        const char* pTexture = nullptr;
+        std::string TextureName;
 
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
         if (EntityID != m_CurrentEntityID) return;
 
-        int RefreshMode = _rMessage.GetInt();
+        int RefreshMode = _rMessage.Get<int>();
 
-        int Type = _rMessage.GetInt();
+        int Type = _rMessage.Get<int>();
 
-        bool HasTexture = _rMessage.GetBool();
+        bool HasTexture = _rMessage.Get<bool>();
 
         if (HasTexture)
         {
-            bool HasName = _rMessage.GetBool();
+            bool HasName = _rMessage.Get<bool>();
 
             if (HasName)
             {
-                pTexture = _rMessage.GetString(pTemp, 256);
+                TextureName = _rMessage.Get<std::string>();
             }
         }
 
-        unsigned int TextureHash = _rMessage.GetInt();
+        unsigned int TextureHash = _rMessage.Get<int>();
 
-        float Intensity = _rMessage.GetFloat();
+        float Intensity = _rMessage.Get<float>();
 
         // -----------------------------------------------------------------------------
         // Set values
@@ -138,7 +137,7 @@ namespace Edit
 
         if (HasTexture)
         {
-            m_pTextureValue->SetTextureFile(pTexture);
+            m_pTextureValue->SetTextureFile(QString(TextureName.c_str()));
         }
 
         m_pTextureValue->SetTextureHash(TextureHash);

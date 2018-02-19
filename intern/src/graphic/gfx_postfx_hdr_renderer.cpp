@@ -5,9 +5,10 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
-#include "data/data_bloom_facet.h"
+#include "data/data_bloom_component.h"
+#include "data/data_component_facet.h"
+#include "data/data_component_manager.h"
 #include "data/data_entity.h"
-#include "data/data_fx_type.h"
 #include "data/data_map.h"
 
 #include "graphic/gfx_buffer_manager.h"
@@ -87,7 +88,7 @@ namespace
 
         struct SBloomRenderJob
         {
-            Dt::CBloomFXFacet* m_pDataBloomFacet;
+            Dt::CBloomComponent* m_pDataBloomFacet;
         };
 
         struct SGaussianShaderProperties
@@ -746,7 +747,7 @@ namespace
         Performance::BeginEvent("Bloom");
 
         // TODO: What happens if more then one DOF effect is available?
-        Dt::CBloomFXFacet* pDataBloomFacet = m_BloomRenderJobs[0].m_pDataBloomFacet;
+        Dt::CBloomComponent* pDataBloomFacet = m_BloomRenderJobs[0].m_pDataBloomFacet;
 
         assert(pDataBloomFacet != 0);
 
@@ -1030,44 +1031,21 @@ namespace
 
     void CGfxPostFXHDRRenderer::BuildRenderJobs()
     {
-        // -----------------------------------------------------------------------------
-        // Clear current render jobs
-        // -----------------------------------------------------------------------------
         m_BloomRenderJobs.clear();
 
-        // -----------------------------------------------------------------------------
-        // Iterate throw every entity inside this map
-        // -----------------------------------------------------------------------------
-        Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::FX);
-        Dt::Map::CEntityIterator EndOfEntities = Dt::Map::EntitiesEnd();
+        auto DataComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CBloomComponent>();
 
-        for (; CurrentEntity != EndOfEntities; )
+        for (auto Component : DataComponents)
         {
-            Dt::CEntity& rCurrentEntity = *CurrentEntity;
+            Dt::CBloomComponent* pDtComponent = static_cast<Dt::CBloomComponent*>(Component);
 
-            // -----------------------------------------------------------------------------
-            // Get graphic facet
-            // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetType() == Dt::SFXType::Bloom)
-            {
-                Dt::CBloomFXFacet* pDataBloomFacet = static_cast<Dt::CBloomFXFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+            if (pDtComponent->IsActiveAndUsable() == false) continue;
 
-                assert(pDataBloomFacet != 0);
+            SBloomRenderJob NewRenderJob;
 
-                // -----------------------------------------------------------------------------
-                // Set sun into a new render job
-                // -----------------------------------------------------------------------------
-                SBloomRenderJob NewRenderJob;
+            NewRenderJob.m_pDataBloomFacet = pDtComponent;
 
-                NewRenderJob.m_pDataBloomFacet = pDataBloomFacet;
-
-                m_BloomRenderJobs.push_back(NewRenderJob);
-            }
-
-            // -----------------------------------------------------------------------------
-            // Next entity
-            // -----------------------------------------------------------------------------
-            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::FX);
+            m_BloomRenderJobs.push_back(NewRenderJob);
         }
     }
 } // namespace

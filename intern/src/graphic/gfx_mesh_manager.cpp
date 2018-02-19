@@ -9,12 +9,18 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
+#include "data/data_component.h"
+#include "data/data_component_manager.h"
 #include "data/data_entity.h"
+#include "data/data_mesh_component.h"
 #include "data/data_model.h"
 
 #include "graphic/gfx_buffer_manager.h"
+#include "graphic/gfx_component.h"
+#include "graphic/gfx_component_manager.h"
 #include "graphic/gfx_input_layout.h"
 #include "graphic/gfx_material_manager.h"
+#include "graphic/gfx_mesh_component.h"
 #include "graphic/gfx_mesh_manager.h"
 #include "graphic/gfx_shader.h"
 #include "graphic/gfx_shader_manager.h"
@@ -145,8 +151,15 @@ namespace
         CMeshPtr CreateRectangle(float _AxisX, float _AxisY, float _Width, float _Height);
 
     private:
+
+        class CInternMeshComponent : public CMeshComponent
+        {
+        private:
+
+            friend class CGfxMeshManager;
+        };
         
-        class CInternModel : public CMesh
+        class CInternMesh : public CMesh
         {
         private:
             
@@ -169,16 +182,16 @@ namespace
         
     private:
         
-        typedef Base::CManagedPool<CInternModel   , 64  , 1> CModels;
+        typedef Base::CManagedPool<CInternMesh    , 64  , 1> CMeshes;
         typedef Base::CManagedPool<CInternLOD     , 256 , 1> CLODs;
         typedef Base::CManagedPool<CInternSurface , 1024, 1> CSurfaces;
         
-        typedef std::unordered_map<unsigned int, CInternModel*> CModelByIDs;
+        typedef std::unordered_map<unsigned int, CInternMesh*> CModelByIDs;
         typedef CModelByIDs::iterator                           CModelByIDPair;
         
     private:
         
-        CModels    m_Meshes;
+        CMeshes    m_Meshes;
         CLODs      m_LODs;
         CSurfaces  m_Surfaces;
         
@@ -187,6 +200,8 @@ namespace
     private:
 
         void SetVertexShaderOfSurface(CInternSurface& _rSurface);
+
+        void OnDirtyComponent(Dt::IComponent* _pComponent);
     };
 } // namespace
 
@@ -212,6 +227,7 @@ namespace
     
     void CGfxMeshManager::OnStart()
     {
+        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(DATA_DIRTY_COMPONENT_METHOD(&CGfxMeshManager::OnDirtyComponent));
     }
     
     // -----------------------------------------------------------------------------
@@ -256,9 +272,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Create model
         // -----------------------------------------------------------------------------
-        CModels::CPtr ModelPtr = m_Meshes.Allocate();
+        CMeshes::CPtr ModelPtr = m_Meshes.Allocate();
         
-        CInternModel& rModel = *ModelPtr;
+        CInternMesh& rModel = *ModelPtr;
         
         rModel.m_NumberOfLODs = rDataModel.GetNumberOfLODs();
         
@@ -488,9 +504,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Create model with LOD, surface and materials
         // -----------------------------------------------------------------------------
-        CModels::CPtr ModelPtr = m_Meshes.Allocate();
+        CMeshes::CPtr ModelPtr = m_Meshes.Allocate();
 
-        CInternModel& rModel = *ModelPtr;
+        CInternMesh& rModel = *ModelPtr;
 
         CLODs::CPtr LODPtr = m_LODs.Allocate();
 
@@ -678,9 +694,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Create model with LOD, surface and materials
         // -----------------------------------------------------------------------------
-        CModels::CPtr MeshPtr = m_Meshes.Allocate();
+        CMeshes::CPtr MeshPtr = m_Meshes.Allocate();
         
-        CInternModel& rModel = *MeshPtr;
+        CInternMesh& rModel = *MeshPtr;
         
         CLODs::CPtr LODPtr = m_LODs.Allocate();
         
@@ -860,9 +876,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Create model with LOD, surface and materials
         // -----------------------------------------------------------------------------
-        CModels::CPtr MeshPtr = m_Meshes.Allocate();
+        CMeshes::CPtr MeshPtr = m_Meshes.Allocate();
         
-        CInternModel& rModel = *MeshPtr;
+        CInternMesh& rModel = *MeshPtr;
         
         CLODs::CPtr LODPtr = m_LODs.Allocate();
         
@@ -1011,9 +1027,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Create model with LOD, surface and materials
         // -----------------------------------------------------------------------------
-        CModels::CPtr ModelPtr = m_Meshes.Allocate();
+        CMeshes::CPtr ModelPtr = m_Meshes.Allocate();
 
-        CInternModel& rModel = *ModelPtr;
+        CInternMesh& rModel = *ModelPtr;
 
         CLODs::CPtr LODPtr = m_LODs.Allocate();
 
@@ -1168,9 +1184,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Create model with LOD, surface and materials
         // -----------------------------------------------------------------------------
-        CModels::CPtr ModelPtr = m_Meshes.Allocate();
+        CMeshes::CPtr ModelPtr = m_Meshes.Allocate();
         
-        CInternModel& rModel = *ModelPtr;
+        CInternMesh& rModel = *ModelPtr;
         
         CLODs::CPtr LODPtr = m_LODs.Allocate();
         
@@ -1354,6 +1370,95 @@ namespace
         _rSurface.m_VertexShaderPtr = VSShader;
 
         _rSurface.m_MVPVertexShaderPtr = VSMVPShader;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxMeshManager::OnDirtyComponent(Dt::IComponent* _pComponent)
+    {
+        if (_pComponent->GetTypeID() != Base::CTypeInfo::GetTypeID<Dt::CMeshComponent>()) return;
+
+        Dt::CMeshComponent* pMeshComponent = static_cast<Dt::CMeshComponent*>(_pComponent);
+
+        // -----------------------------------------------------------------------------
+        // Dirty check
+        // -----------------------------------------------------------------------------
+        unsigned int DirtyFlags;
+
+        DirtyFlags = pMeshComponent->GetDirtyFlags();
+
+        // -----------------------------------------------------------------------------
+        // Check if it is a new actor
+        // -----------------------------------------------------------------------------
+        if ((DirtyFlags & Dt::CMeshComponent::DirtyCreate) != 0)
+        {
+            // -----------------------------------------------------------------------------
+            // Create facet
+            // -----------------------------------------------------------------------------
+            CInternMeshComponent* pGfxMeshComponent = CComponentManager::GetInstance().Allocate<CInternMeshComponent>(pMeshComponent->GetID());
+
+            // -----------------------------------------------------------------------------
+            // Prepare storage data : Mesh
+            // -----------------------------------------------------------------------------
+            SMeshDescriptor ModelDesc;
+
+            ModelDesc.m_pMesh = pMeshComponent->GetMesh();
+
+            CMeshPtr NewModelPtr = MeshManager::CreateMesh(ModelDesc);
+
+            pGfxMeshComponent->SetMesh(NewModelPtr);
+
+            // -----------------------------------------------------------------------------
+            // Prepare storage data : Material
+            // -----------------------------------------------------------------------------
+            CLODPtr ModelLODPtr = NewModelPtr->GetLOD(0);
+
+            for (unsigned int NumberOfSurface = 0; NumberOfSurface < ModelLODPtr->GetNumberOfSurfaces(); ++NumberOfSurface)
+            {
+                Dt::CMaterial* pDataMaterial = pMeshComponent->GetMaterial(NumberOfSurface);
+
+                if (pDataMaterial != 0)
+                {
+                    // -----------------------------------------------------------------------------
+                    // Create and set material
+                    // -----------------------------------------------------------------------------
+                    unsigned int Hash = pDataMaterial->GetHash();
+
+                    CMaterialPtr NewMaterialPtr = MaterialManager::GetMaterialByHash(Hash);
+
+                    pGfxMeshComponent->SetMaterial(NumberOfSurface, NewMaterialPtr);
+                }
+            }
+        }
+        else if ((DirtyFlags & Dt::CMeshComponent::DirtyInfo) != 0)
+        {
+            // -----------------------------------------------------------------------------
+            // Get data
+            // -----------------------------------------------------------------------------
+            CInternMeshComponent* pGfxActorModelFacet = CComponentManager::GetInstance().GetComponent<CInternMeshComponent>(pMeshComponent->GetID());
+
+            // -----------------------------------------------------------------------------
+            // Update material
+            // -----------------------------------------------------------------------------
+            CLODPtr ModelLODPtr = pGfxActorModelFacet->GetMesh()->GetLOD(0);
+
+            for (unsigned int NumberOfSurface = 0; NumberOfSurface < ModelLODPtr->GetNumberOfSurfaces(); ++NumberOfSurface)
+            {
+                Dt::CMaterial* pDataMaterial = pMeshComponent->GetMaterial(NumberOfSurface);
+
+                if (pDataMaterial != 0)
+                {
+                    // -----------------------------------------------------------------------------
+                    // Set material from material manager
+                    // -----------------------------------------------------------------------------
+                    unsigned int Hash = pDataMaterial->GetHash();
+
+                    CMaterialPtr NewMaterialPtr = MaterialManager::GetMaterialByHash(Hash);
+
+                    pGfxActorModelFacet->SetMaterial(NumberOfSurface, NewMaterialPtr);
+                }
+            }
+        }
     }
 } // namespace
 

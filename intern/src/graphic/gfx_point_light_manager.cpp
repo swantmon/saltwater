@@ -8,22 +8,25 @@
 
 #include "core/core_time.h"
 
-#include "data/data_actor_type.h"
+#include "data/data_component.h"
+#include "data/data_component_manager.h"
+#include "data/data_component_facet.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
-#include "data/data_light_type.h"
 #include "data/data_map.h"
+#include "data/data_mesh_component.h"
 #include "data/data_model_manager.h"
-#include "data/data_point_light_facet.h"
+#include "data/data_point_light_component.h"
 #include "data/data_transformation_facet.h"
 
 #include "graphic/gfx_buffer_manager.h"
+#include "graphic/gfx_component_manager.h"
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_main.h"
 #include "graphic/gfx_mesh.h"
-#include "graphic/gfx_mesh_actor_facet.h"
+#include "graphic/gfx_mesh_component.h"
 #include "graphic/gfx_performance.h"
-#include "graphic/gfx_point_light_facet.h"
+#include "graphic/gfx_point_light_component.h"
 #include "graphic/gfx_point_light_manager.h"
 #include "graphic/gfx_sampler_manager.h"
 #include "graphic/gfx_shader_manager.h"
@@ -73,26 +76,22 @@ namespace
             glm::vec4 m_LightSettings; // InvSqrAttenuationRadius, AngleScale, AngleOffset, Has shadows
         };
 
-        class CInternPointLightFacet : public CPointLightFacet
+        class CInternComponent : public CPointLightComponent
         {
         public:
 
-            CInternPointLightFacet();
-            ~CInternPointLightFacet();
+            CInternComponent();
+            ~CInternComponent();
 
         public:
 
             CRenderContextPtr m_RenderContextPtr;
-            Dt::CPointLightFacet::EShadowType m_CurrentShadowType;
+            Dt::CPointLightComponent::EShadowType m_CurrentShadowType;
 
         private:
 
             friend class CGfxPointLightManager;
         };
-
-    private:
-
-        typedef Base::CPool<CInternPointLightFacet, 64> CPointLightFacets;
 
     private:
 
@@ -103,35 +102,31 @@ namespace
         CBufferSetPtr m_LightCameraVSBufferPtr;
         CBufferSetPtr m_RSMPSBuffer;
 
-        CPointLightFacets m_PointLightFacets;
-
     private:
 
-        void OnDirtyEntity(Dt::CEntity* _pEntity);
+        void OnDirtyComponent(Dt::IComponent* _pComponent);
 
-        CInternPointLightFacet& AllocatePointLightFacet();
+        void CreateRSM(unsigned int _Size, CInternComponent* _pInternLight);
 
-        void CreateRSM(unsigned int _Size, CInternPointLightFacet& _rInternLight);
+        void CreateSM(unsigned int _Size, CInternComponent* _pInternLight);
 
-        void CreateSM(unsigned int _Size, CInternPointLightFacet& _rInternLight);
-
-        void RenderShadows(CInternPointLightFacet& _rInternLight, const Dt::CPointLightFacet* _pDtPointLight, const glm::vec3& _rLightPosition);
+        void RenderShadows(CInternComponent& _rInternLight, const Dt::CPointLightComponent* _pDtPointLight, const glm::vec3& _rLightPosition);
     };
 } // namespace 
 
 namespace 
 {
-    CGfxPointLightManager::CInternPointLightFacet::CInternPointLightFacet()
-        : CPointLightFacet   ()
+    CGfxPointLightManager::CInternComponent::CInternComponent()
+        : CPointLightComponent   ()
         , m_RenderContextPtr ()
-        , m_CurrentShadowType(Dt::CPointLightFacet::NoShadows)
+        , m_CurrentShadowType(Dt::CPointLightComponent::NoShadows)
     {
 
     }
 
     // -----------------------------------------------------------------------------
 
-    CGfxPointLightManager::CInternPointLightFacet::~CInternPointLightFacet()
+    CGfxPointLightManager::CInternComponent::~CInternComponent()
     {
         m_RenderContextPtr = 0;
     }
@@ -146,7 +141,6 @@ namespace
         , m_ShadowRSMTexShaderPSPtr()
         , m_LightCameraVSBufferPtr ()
         , m_RSMPSBuffer            ()
-        , m_PointLightFacets       ()
     {
 
     }
@@ -230,7 +224,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Register dirty entity handler for automatic sky creation
         // -----------------------------------------------------------------------------
-        Dt::EntityManager::RegisterDirtyEntityHandler(DATA_DIRTY_ENTITY_METHOD(&CGfxPointLightManager::OnDirtyEntity));
+        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(DATA_DIRTY_COMPONENT_METHOD(&CGfxPointLightManager::OnDirtyComponent));
     }
 
     // -----------------------------------------------------------------------------
@@ -243,8 +237,6 @@ namespace
         m_ShadowRSMTexShaderPSPtr = 0;
         m_LightCameraVSBufferPtr  = 0;
         m_RSMPSBuffer             = 0;
-
-        m_PointLightFacets.Clear();
     }
 
     // -----------------------------------------------------------------------------
@@ -254,144 +246,114 @@ namespace
         // -----------------------------------------------------------------------------
         // Iterate throw every entity inside this map
         // -----------------------------------------------------------------------------
-        Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Light);
-        Dt::Map::CEntityIterator EndOfEntities = Dt::Map::EntitiesEnd();
+        auto DataComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CPointLightComponent>();
 
-        for (; CurrentEntity != EndOfEntities; )
+        for (auto Component : DataComponents)
         {
-            Dt::CEntity& rCurrentEntity = *CurrentEntity;
+            Dt::CPointLightComponent* pDtComponent = static_cast<Dt::CPointLightComponent*>(Component);
 
-            if (rCurrentEntity.GetType() == Dt::SLightType::Point)
+            if (pDtComponent->IsActiveAndUsable() == false) continue;
+
+            CInternComponent* pGfxPointLightFacet = CComponentManager::GetInstance().GetComponent<CInternComponent>(pDtComponent->GetID());
+
+            if (pDtComponent->GetRefreshMode() == Dt::CPointLightComponent::Dynamic)
             {
-                Dt::CPointLightFacet*   pDtPointLightFacet = static_cast<Dt::CPointLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
-                CInternPointLightFacet* pGfxPointLightFacet = static_cast<CInternPointLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
+                // -----------------------------------------------------------------------------
+                // Update views
+                // -----------------------------------------------------------------------------
+                Gfx::CViewPtr   ShadowViewPtr   = pGfxPointLightFacet->m_RenderContextPtr->GetCamera()->GetView();
+                Gfx::CCameraPtr ShadowCameraPtr = pGfxPointLightFacet->m_RenderContextPtr->GetCamera();
 
-                if (pDtPointLightFacet->GetRefreshMode() == Dt::CPointLightFacet::Dynamic)
-                {
-                    // -----------------------------------------------------------------------------
-                    // Update views
-                    // -----------------------------------------------------------------------------
-                    Gfx::CViewPtr   ShadowViewPtr = pGfxPointLightFacet->m_RenderContextPtr->GetCamera()->GetView();
-                    Gfx::CCameraPtr ShadowCameraPtr = pGfxPointLightFacet->m_RenderContextPtr->GetCamera();
+                glm::vec3 LightPosition  = pDtComponent->GetHostEntity()->GetWorldPosition();
+                glm::vec3 LightDirection = pDtComponent->GetDirection();
 
-                    glm::vec3 LightPosition = rCurrentEntity.GetWorldPosition();
-                    glm::vec3 LightDirection = pDtPointLightFacet->GetDirection();
+                // -----------------------------------------------------------------------------
+                // Set view
+                // -----------------------------------------------------------------------------
+                glm::mat3 RotationMatrix = glm::mat3(1.0f);
 
-                    // -----------------------------------------------------------------------------
-                    // Set view
-                    // -----------------------------------------------------------------------------
-                    glm::mat3 RotationMatrix = glm::mat3(1.0f);
+                RotationMatrix = glm::lookAt(LightPosition, LightPosition + LightDirection, glm::vec3(0.0f, 0.0f, 1.0f));
 
-                    RotationMatrix = glm::lookAt(LightPosition, LightPosition + LightDirection, glm::vec3(0.0f, 0.0f, 1.0f));
+                ShadowViewPtr->SetPosition(LightPosition);
+                ShadowViewPtr->SetRotationMatrix(RotationMatrix);
 
-                    ShadowViewPtr->SetPosition(LightPosition);
-                    ShadowViewPtr->SetRotationMatrix(RotationMatrix);
+                // -----------------------------------------------------------------------------
+                // Calculate near and far plane
+                // -----------------------------------------------------------------------------
+                float Near = 0.1f;
+                float Far = pDtComponent->GetAttenuationRadius() + Near;
 
-                    // -----------------------------------------------------------------------------
-                    // Calculate near and far plane
-                    // -----------------------------------------------------------------------------
-                    float Near = 0.1f;
-                    float Far = pDtPointLightFacet->GetAttenuationRadius() + Near;
+                // -----------------------------------------------------------------------------
+                // Set matrix
+                // -----------------------------------------------------------------------------
+                ShadowCameraPtr->SetFieldOfView(glm::degrees(pDtComponent->GetOuterConeAngle()), 1.0f, Near, Far);
 
-                    // -----------------------------------------------------------------------------
-                    // Set matrix
-                    // -----------------------------------------------------------------------------
-                    ShadowCameraPtr->SetFieldOfView(glm::degrees(pDtPointLightFacet->GetOuterConeAngle()), 1.0f, Near, Far);
+                ShadowViewPtr->Update();
 
-                    ShadowViewPtr->Update();
-
-                    // -----------------------------------------------------------------------------
-                    // Render
-                    // -----------------------------------------------------------------------------
-                    RenderShadows(*pGfxPointLightFacet, pDtPointLightFacet, LightPosition);
-                }
+                // -----------------------------------------------------------------------------
+                // Render
+                // -----------------------------------------------------------------------------
+                RenderShadows(*pGfxPointLightFacet, pDtComponent, LightPosition);
             }
-
-            // -----------------------------------------------------------------------------
-            // Next entity
-            // -----------------------------------------------------------------------------
-            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Light);
         }
     }
 
     // -----------------------------------------------------------------------------
 
-    void CGfxPointLightManager::OnDirtyEntity(Dt::CEntity* _pEntity)
+    void CGfxPointLightManager::OnDirtyComponent(Dt::IComponent* _pComponent)
     {
-        CInternPointLightFacet* pGfxPointLightFacet = 0;
+        if (_pComponent->GetTypeID() != Base::CTypeInfo::GetTypeID<Dt::CPointLightComponent>()) return;
 
-        Dt::CPointLightFacet::EShadowType ShadowType;
-        unsigned int ShadowmapSizes[Dt::CPointLightFacet::NumberOfQualities] = { 256, 512, 1024, 2048 };
+        Dt::CPointLightComponent* pPointLightComponent = static_cast<Dt::CPointLightComponent*>(_pComponent);
+
+        CInternComponent* pGfxPointLightFacet = 0;
+        Dt::CPointLightComponent::EShadowType ShadowType;
+        unsigned int ShadowmapSizes[Dt::CPointLightComponent::NumberOfQualities] = { 256, 512, 1024, 2048 };
         unsigned int ShadowmapSize = 0;
-
-        assert(_pEntity != 0);
-
-        // -----------------------------------------------------------------------------
-        // Entity check
-        // -----------------------------------------------------------------------------
-        if (_pEntity->GetCategory() != Dt::SEntityCategory::Light) return;
-        if (_pEntity->GetType()     != Dt::SLightType::Point) return;
-
-        // -----------------------------------------------------------------------------
-        // Get data
-        // -----------------------------------------------------------------------------
-        Dt::CPointLightFacet* pDtPointLightFacet = static_cast<Dt::CPointLightFacet*>(_pEntity->GetDetailFacet(Dt::SFacetCategory::Data));
-
-        if (pDtPointLightFacet == nullptr) return;
 
         // -----------------------------------------------------------------------------
         // Dirty check
         // -----------------------------------------------------------------------------
         unsigned int DirtyFlags;
 
-        DirtyFlags = _pEntity->GetDirtyFlags();
+        DirtyFlags = pPointLightComponent->GetDirtyFlags();
 
-        if ((DirtyFlags & Dt::CEntity::DirtyCreate) != 0)
+        if ((DirtyFlags & Dt::CPointLightComponent::DirtyCreate) != 0)
         {
             // -----------------------------------------------------------------------------
             // Create facet
             // -----------------------------------------------------------------------------
-            CInternPointLightFacet& rGfxPointLightFacet = AllocatePointLightFacet();
+            pGfxPointLightFacet = CComponentManager::GetInstance().Allocate<CInternComponent>(pPointLightComponent->GetID());
 
             // -----------------------------------------------------------------------------
             // Set shadow data
             // -----------------------------------------------------------------------------
-            ShadowmapSize = ShadowmapSizes[pDtPointLightFacet->GetShadowQuality()];
+            ShadowmapSize = ShadowmapSizes[pPointLightComponent->GetShadowQuality()];
 
-            ShadowType = pDtPointLightFacet->GetShadowType();
+            ShadowType = pPointLightComponent->GetShadowType();
 
             switch (ShadowType)
             {
-            case Dt::CPointLightFacet::HardShadows:        CreateSM(ShadowmapSize, rGfxPointLightFacet); break;
-            case Dt::CPointLightFacet::GlobalIllumination: CreateRSM(ShadowmapSize, rGfxPointLightFacet); break;
+            case Dt::CPointLightComponent::HardShadows:        CreateSM(ShadowmapSize, pGfxPointLightFacet); break;
+            case Dt::CPointLightComponent::GlobalIllumination: CreateRSM(ShadowmapSize, pGfxPointLightFacet); break;
             }
 
             // -----------------------------------------------------------------------------
             // Set variables
             // -----------------------------------------------------------------------------
-            rGfxPointLightFacet.m_ShadowmapSize = ShadowmapSize;
+            pGfxPointLightFacet->m_ShadowmapSize = ShadowmapSize;
 
-            rGfxPointLightFacet.m_CurrentShadowType = ShadowType;
-
-            // -----------------------------------------------------------------------------
-            // Save facet
-            // -----------------------------------------------------------------------------
-            _pEntity->SetDetailFacet(Dt::SFacetCategory::Graphic, &rGfxPointLightFacet);
-
-            // -----------------------------------------------------------------------------
-            // pGfxPointLightFacet
-            // -----------------------------------------------------------------------------
-            pGfxPointLightFacet = &rGfxPointLightFacet;
+            pGfxPointLightFacet->m_CurrentShadowType = ShadowType;
         }
-        else if ((DirtyFlags & Dt::CEntity::DirtyDetail) != 0)
+        else if ((DirtyFlags & Dt::CPointLightComponent::DirtyInfo) != 0)
         {
-            pGfxPointLightFacet = static_cast<CInternPointLightFacet*>(_pEntity->GetDetailFacet(Dt::SFacetCategory::Graphic));
+            pGfxPointLightFacet = CComponentManager::GetInstance().GetComponent<CInternComponent>(pPointLightComponent->GetID());
 
             assert(pGfxPointLightFacet);
 
-            ShadowmapSize = ShadowmapSizes[pDtPointLightFacet->GetShadowQuality()];
+            ShadowmapSize = ShadowmapSizes[pPointLightComponent->GetShadowQuality()];
 
-            ShadowType = pDtPointLightFacet->GetShadowType();
+            ShadowType = pPointLightComponent->GetShadowType();
 
             if (ShadowmapSize != pGfxPointLightFacet->m_ShadowmapSize || ShadowType != pGfxPointLightFacet->m_CurrentShadowType)
             {
@@ -401,14 +363,14 @@ namespace
 
                 switch (ShadowType)
                 {
-                case Dt::CPointLightFacet::HardShadows:        CreateSM(ShadowmapSize, *pGfxPointLightFacet); break;
-                case Dt::CPointLightFacet::GlobalIllumination: CreateRSM(ShadowmapSize, *pGfxPointLightFacet); break;
+                case Dt::CPointLightComponent::HardShadows:        CreateSM(ShadowmapSize, pGfxPointLightFacet); break;
+                case Dt::CPointLightComponent::GlobalIllumination: CreateRSM(ShadowmapSize, pGfxPointLightFacet); break;
                 }
             }
         }
         else
         {
-            pGfxPointLightFacet = static_cast<CInternPointLightFacet*>(_pEntity->GetDetailFacet(Dt::SFacetCategory::Graphic));
+            pGfxPointLightFacet = CComponentManager::GetInstance().GetComponent<CInternComponent>(pPointLightComponent->GetID());
         }
         
         assert(pGfxPointLightFacet);
@@ -419,8 +381,8 @@ namespace
         Gfx::CViewPtr   ShadowViewPtr   = pGfxPointLightFacet->m_RenderContextPtr->GetCamera()->GetView();
         Gfx::CCameraPtr ShadowCameraPtr = pGfxPointLightFacet->m_RenderContextPtr->GetCamera();
 
-        glm::vec3 LightPosition  = _pEntity->GetWorldPosition();
-        glm::vec3 LightDirection = pDtPointLightFacet->GetDirection();
+        glm::vec3 LightPosition  = pPointLightComponent->GetHostEntity()->GetWorldPosition();
+        glm::vec3 LightDirection = pPointLightComponent->GetDirection();
 
         // -----------------------------------------------------------------------------
         // Set view
@@ -436,19 +398,19 @@ namespace
         // Calculate near and far plane
         // -----------------------------------------------------------------------------
         float Near = 0.1f;
-        float Far = pDtPointLightFacet->GetAttenuationRadius() + Near;
+        float Far = pPointLightComponent->GetAttenuationRadius() + Near;
 
         // -----------------------------------------------------------------------------
         // Set matrix
         // -----------------------------------------------------------------------------
-        ShadowCameraPtr->SetFieldOfView(glm::degrees(pDtPointLightFacet->GetOuterConeAngle()), 1.0f, Near, Far);
+        ShadowCameraPtr->SetFieldOfView(glm::degrees(pPointLightComponent->GetOuterConeAngle()), 1.0f, Near, Far);
 
         ShadowViewPtr->Update();
 
         // -----------------------------------------------------------------------------
         // Render shadows
         // -----------------------------------------------------------------------------
-        RenderShadows(*pGfxPointLightFacet, pDtPointLightFacet, LightPosition);
+        RenderShadows(*pGfxPointLightFacet, pPointLightComponent, LightPosition);
 
         // -----------------------------------------------------------------------------
         // Set time
@@ -459,20 +421,8 @@ namespace
     }
 
     // -----------------------------------------------------------------------------
-
-    CGfxPointLightManager::CInternPointLightFacet& CGfxPointLightManager::AllocatePointLightFacet()
-    {
-        // -----------------------------------------------------------------------------
-        // Create facet
-        // -----------------------------------------------------------------------------
-        CInternPointLightFacet& rGraphicPointLightFacet = m_PointLightFacets.Allocate();
-        
-        return rGraphicPointLightFacet;
-    }
-
-    // -----------------------------------------------------------------------------
     
-    void CGfxPointLightManager::CreateRSM(unsigned int _Size, CInternPointLightFacet& _rInternLight)
+    void CGfxPointLightManager::CreateRSM(unsigned int _Size, CInternComponent* _pInternLight)
     {
         unsigned int NumberOfShadowMapPixel = _Size;
         
@@ -517,9 +467,9 @@ namespace
         
         ShadowRenderbuffer[3] = TextureManager::CreateTexture2D(RendertargetDescriptor); // Depth
         
-        _rInternLight.m_TextureSMPtr = TextureManager::CreateTextureSet(ShadowRenderbuffer[3]);
+        _pInternLight->m_TextureSMPtr = TextureManager::CreateTextureSet(ShadowRenderbuffer[3]);
 
-        _rInternLight.m_TextureRSMPtr = TextureManager::CreateTextureSet(ShadowRenderbuffer, 4);
+        _pInternLight->m_TextureRSMPtr = TextureManager::CreateTextureSet(ShadowRenderbuffer, 4);
         
         // -----------------------------------------------------------------------------
         // Create target set for shadow mapping
@@ -553,24 +503,24 @@ namespace
         CRenderStatePtr RenderStatePtr = StateManager::GetRenderState(0);
         CTargetSetPtr   TargetSetPtr   = ShadowTargetSetPtr;
         
-        _rInternLight.m_RenderContextPtr = ContextManager::CreateRenderContext();
+        _pInternLight->m_RenderContextPtr = ContextManager::CreateRenderContext();
         
-        assert(_rInternLight.m_RenderContextPtr.IsValid());
+        assert(_pInternLight->m_RenderContextPtr.IsValid());
 
-        _rInternLight.m_RenderContextPtr->SetCamera(CameraPtr);
-        _rInternLight.m_RenderContextPtr->SetViewPortSet(ViewPortSetPtr);
-        _rInternLight.m_RenderContextPtr->SetTargetSet(TargetSetPtr);
-        _rInternLight.m_RenderContextPtr->SetRenderState(RenderStatePtr);
+        _pInternLight->m_RenderContextPtr->SetCamera(CameraPtr);
+        _pInternLight->m_RenderContextPtr->SetViewPortSet(ViewPortSetPtr);
+        _pInternLight->m_RenderContextPtr->SetTargetSet(TargetSetPtr);
+        _pInternLight->m_RenderContextPtr->SetRenderState(RenderStatePtr);
 
         // -----------------------------------------------------------------------------
         // Save camera
         // -----------------------------------------------------------------------------
-        _rInternLight.m_CameraPtr = CameraPtr;
+        _pInternLight->m_CameraPtr = CameraPtr;
     }
 
     // -----------------------------------------------------------------------------
     
-    void CGfxPointLightManager::CreateSM(unsigned int _Size, CInternPointLightFacet& _rInternLight)
+    void CGfxPointLightManager::CreateSM(unsigned int _Size, CInternComponent* _pInternLight)
     {
         unsigned int NumberOfShadowMapPixel = _Size;
         
@@ -596,9 +546,9 @@ namespace
         
         ShadowRenderbuffer[0] = TextureManager::CreateTexture2D(RendertargetDescriptor); // Depth only
         
-        _rInternLight.m_TextureSMPtr  = TextureManager::CreateTextureSet(ShadowRenderbuffer, 1);
+        _pInternLight->m_TextureSMPtr  = TextureManager::CreateTextureSet(ShadowRenderbuffer, 1);
 
-        _rInternLight.m_TextureRSMPtr = 0;
+        _pInternLight->m_TextureRSMPtr = 0;
         
         // -----------------------------------------------------------------------------
         // Create target set for shadow mapping
@@ -632,24 +582,24 @@ namespace
         CRenderStatePtr RenderStatePtr = StateManager::GetRenderState(0);
         CTargetSetPtr   TargetSetPtr   = ShadowTargetSetPtr;
         
-        _rInternLight.m_RenderContextPtr = ContextManager::CreateRenderContext();
+        _pInternLight->m_RenderContextPtr = ContextManager::CreateRenderContext();
         
-        _rInternLight.m_RenderContextPtr->SetCamera(CameraPtr);
-        _rInternLight.m_RenderContextPtr->SetViewPortSet(ViewPortSetPtr);
-        _rInternLight.m_RenderContextPtr->SetTargetSet(TargetSetPtr);
-        _rInternLight.m_RenderContextPtr->SetRenderState(RenderStatePtr);
+        _pInternLight->m_RenderContextPtr->SetCamera(CameraPtr);
+        _pInternLight->m_RenderContextPtr->SetViewPortSet(ViewPortSetPtr);
+        _pInternLight->m_RenderContextPtr->SetTargetSet(TargetSetPtr);
+        _pInternLight->m_RenderContextPtr->SetRenderState(RenderStatePtr);
 
         // -----------------------------------------------------------------------------
         // Save camera
         // -----------------------------------------------------------------------------
-        _rInternLight.m_CameraPtr = CameraPtr;
+        _pInternLight->m_CameraPtr = CameraPtr;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CGfxPointLightManager::RenderShadows(CInternPointLightFacet& _rInternLight, const Dt::CPointLightFacet* _pDtPointLight, const glm::vec3& _rLightPosition)
+    void CGfxPointLightManager::RenderShadows(CInternComponent& _rInternLight, const Dt::CPointLightComponent* _pDtPointLight, const glm::vec3& _rLightPosition)
     {
-        if (_rInternLight.m_CurrentShadowType == Dt::CPointLightFacet::NoShadows) return;
+        if (_rInternLight.m_CurrentShadowType == Dt::CPointLightComponent::NoShadows) return;
 
         Performance::BeginEvent("Point Light Shadows");
         
@@ -673,63 +623,51 @@ namespace
         BufferManager::UploadBufferData(m_LightCameraVSBufferPtr->GetBuffer(0), &ViewBuffer);
             
         // -----------------------------------------------------------------------------
-        // Iterate throw every entity inside this map
+        // Iterate throw every component inside this map
         // -----------------------------------------------------------------------------
-        Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Actor);
-        Dt::Map::CEntityIterator EndOfEntities = Dt::Map::EntitiesEnd();
-            
-        for (; CurrentEntity != EndOfEntities; )
+        auto DataMeshComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CMeshComponent>();
+
+        for (auto Component : DataMeshComponents)
         {
-            Dt::CEntity& rCurrentEntity = *CurrentEntity;
-                
-            // -----------------------------------------------------------------------------
-            // Get graphic facet
-            // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetType() != Dt::SActorType::Mesh)
-            {
-                CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Actor);
+            Dt::CMeshComponent* pDtComponent = static_cast<Dt::CMeshComponent*>(Component);
 
-                continue;
-            }
-                
-            // -----------------------------------------------------------------------------
-            // Set other graphic data of this entity
-            // -----------------------------------------------------------------------------
-            CMeshActorFacet* pActorModelFacet = static_cast<CMeshActorFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
+            if (pDtComponent->IsActiveAndUsable() == false) continue;
 
-            CMeshPtr ModelPtr = pActorModelFacet->GetMesh();
-                
+            CMeshComponent* pGfxComponent = CComponentManager::GetInstance().GetComponent<CMeshComponent>(pDtComponent->GetID());
+
+            CMeshPtr ModelPtr = pGfxComponent->GetMesh();
+
             // -----------------------------------------------------------------------------
             // Upload model matrix to buffer
             // -----------------------------------------------------------------------------
             SPerDrawCallConstantBuffer ModelBuffer;
-                
-            ModelBuffer.m_ModelMatrix = rCurrentEntity.GetTransformationFacet()->GetWorldMatrix();
-                
+
+            ModelBuffer.m_ModelMatrix = pDtComponent->GetHostEntity()->GetTransformationFacet()->GetWorldMatrix();
+
             BufferManager::UploadBufferData(m_LightCameraVSBufferPtr->GetBuffer(1), &ModelBuffer);
-                
+
             // -----------------------------------------------------------------------------
             // Render every surface of this entity
             // -----------------------------------------------------------------------------
             unsigned int NumberOfSurfaces = ModelPtr->GetLOD(0)->GetNumberOfSurfaces();
-                
-            for (unsigned int IndexOfSurface = 0; IndexOfSurface < NumberOfSurfaces; ++ IndexOfSurface)
+
+            for (unsigned int IndexOfSurface = 0; IndexOfSurface < NumberOfSurfaces; ++IndexOfSurface)
             {
                 CSurfacePtr SurfacePtr = ModelPtr->GetLOD(0)->GetSurface(IndexOfSurface);
-                    
+
                 if (SurfacePtr == nullptr)
                 {
                     continue;
                 }
-                    
+
                 // -----------------------------------------------------------------------------
                 // Set material
                 // -----------------------------------------------------------------------------
                 CMaterialPtr MaterialPtr = SurfacePtr->GetMaterial();
 
-                if (pActorModelFacet->GetMaterial(IndexOfSurface) != 0)
+                if (pGfxComponent->GetMaterial(IndexOfSurface) != 0)
                 {
-                    MaterialPtr = pActorModelFacet->GetMaterial(IndexOfSurface);
+                    MaterialPtr = pGfxComponent->GetMaterial(IndexOfSurface);
                 }
 
                 // -----------------------------------------------------------------------------
@@ -741,7 +679,7 @@ namespace
 
                 ContextManager::SetConstantBuffer(1, m_LightCameraVSBufferPtr->GetBuffer(1));
 
-                if (_rInternLight.m_CurrentShadowType == Dt::CPointLightFacet::GlobalIllumination)
+                if (_rInternLight.m_CurrentShadowType == Dt::CPointLightComponent::GlobalIllumination)
                 {
                     if (MaterialPtr->GetKey().m_HasDiffuseTex)
                     {
@@ -766,13 +704,13 @@ namespace
                     SPunctualLightProperties PunctualLightProperties;
 
                     float InvSqrAttenuationRadius = _pDtPointLight->GetReciprocalSquaredAttenuationRadius();
-                    float AngleScale              = _pDtPointLight->GetAngleScale();
-                    float AngleOffset             = _pDtPointLight->GetAngleOffset();
+                    float AngleScale = _pDtPointLight->GetAngleScale();
+                    float AngleOffset = _pDtPointLight->GetAngleOffset();
 
-                    PunctualLightProperties.m_LightPosition  = glm::vec4(_rLightPosition, 1.0f);
+                    PunctualLightProperties.m_LightPosition = glm::vec4(_rLightPosition, 1.0f);
                     PunctualLightProperties.m_LightDirection = glm::normalize(glm::vec4(_pDtPointLight->GetDirection(), 0.0f));
-                    PunctualLightProperties.m_LightColor     = glm::vec4(_pDtPointLight->GetLightness(), 1.0f);
-                    PunctualLightProperties.m_LightSettings  = glm::vec4(InvSqrAttenuationRadius, AngleScale, AngleOffset, 0.0f);
+                    PunctualLightProperties.m_LightColor = glm::vec4(_pDtPointLight->GetLightness(), 1.0f);
+                    PunctualLightProperties.m_LightSettings = glm::vec4(InvSqrAttenuationRadius, AngleScale, AngleOffset, 0.0f);
 
                     BufferManager::UploadBufferData(m_RSMPSBuffer->GetBuffer(1), &PunctualLightProperties);
 
@@ -784,42 +722,37 @@ namespace
                 {
                     ContextManager::SetShaderPS(m_ShadowSMShaderPSPtr);
                 }
-                    
+
                 // -----------------------------------------------------------------------------
                 // Get input layout from optimal shader
                 // -----------------------------------------------------------------------------
                 assert(SurfacePtr->GetKey().m_HasPosition);
-                    
+
                 CInputLayoutPtr LayoutPtr = SurfacePtr->GetShaderVS()->GetInputLayout();
-                    
+
                 // -----------------------------------------------------------------------------
                 // Set items to context manager
                 // -----------------------------------------------------------------------------
                 ContextManager::SetVertexBuffer(SurfacePtr->GetVertexBuffer());
-                    
+
                 ContextManager::SetIndexBuffer(SurfacePtr->GetIndexBuffer(), 0);
-                    
+
                 ContextManager::SetInputLayout(LayoutPtr);
-                    
+
                 ContextManager::SetTopology(STopology::TriangleList);
-                    
+
                 ContextManager::DrawIndexed(SurfacePtr->GetNumberOfIndices(), 0, 0);
-                    
+
                 ContextManager::ResetTopology();
-                    
+
                 ContextManager::ResetInputLayout();
-                    
+
                 ContextManager::ResetIndexBuffer();
-                    
+
                 ContextManager::ResetVertexBuffer();
             }
-                
-            // -----------------------------------------------------------------------------
-            // Next entity
-            // -----------------------------------------------------------------------------
-            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Actor);
         }
-            
+
         ContextManager::ResetConstantBuffer(0);
 
         ContextManager::ResetConstantBuffer(1);

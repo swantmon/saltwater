@@ -7,14 +7,16 @@
 
 #include "core/core_time.h"
 
-#include "data/data_actor_type.h"
-#include "data/data_area_light_facet.h"
+#include "data/data_component.h"
+#include "data/data_component_manager.h"
+#include "data/data_area_light_component.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
-#include "data/data_light_type.h"
 #include "data/data_map.h"
 
-#include "graphic/gfx_area_light_facet.h"
+#include "graphic/gfx_component.h"
+#include "graphic/gfx_component_manager.h"
+#include "graphic/gfx_area_light_component.h"
 #include "graphic/gfx_area_light_manager.h"
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"
@@ -44,12 +46,12 @@ namespace
 
     private:
 
-        class CInternAreaLightFacet : public CAreaLightFacet
+        class CInternComponent : public CAreaLightComponent
         {
         public:
 
-            CInternAreaLightFacet();
-            ~CInternAreaLightFacet();
+            CInternComponent();
+            ~CInternComponent();
 
         private:
 
@@ -59,36 +61,27 @@ namespace
         struct SFilterProperties
         {
             glm::vec4 m_InverseSizeAndOffset;
-            
         };
 
         struct SBlurProperties
         {
-            glm::uvec2  m_Direction;
+            glm::uvec2   m_Direction;
             unsigned int m_LOD;
         };
 
     private:
-
-        typedef Base::CPool<CInternAreaLightFacet, 64> CAreaLightFacets;
-
-    private:
-
-        CAreaLightFacets m_AreaLightFacets;
-
-        CShaderPtr    m_FilterShaderPtr;
-        CShaderPtr    m_BackgroundBlurShaderPtr;
-        CShaderPtr    m_CombineShaderPtr;
-        CShaderPtr    m_ForegroundBlurShaderPtr;
+        
+        CShaderPtr  m_FilterShaderPtr;
+        CShaderPtr  m_BackgroundBlurShaderPtr;
+        CShaderPtr  m_CombineShaderPtr;
+        CShaderPtr  m_ForegroundBlurShaderPtr;
         CTexturePtr m_BackgroundTexturePtr;
-        CBufferPtr    m_GaussianPropertiesPtr;
-        CBufferPtr    m_FilterPropertiesPtr;
+        CBufferPtr  m_GaussianPropertiesPtr;
+        CBufferPtr  m_FilterPropertiesPtr;
 
     private:
 
-        void OnDirtyEntity(Dt::CEntity* _pEntity);
-
-        CInternAreaLightFacet& AllocateAreaLightFacet();
+        void OnDirtyComponent(Dt::IComponent* _pComponent);
 
         void FilterTexture(Gfx::CTexturePtr _TexturePtr, Gfx::CTexturePtr _OutputTexturePtr);
     };
@@ -96,15 +89,15 @@ namespace
 
 namespace 
 {
-    CGfxAreaLightManager::CInternAreaLightFacet::CInternAreaLightFacet()
-        : CAreaLightFacet()
+    CGfxAreaLightManager::CInternComponent::CInternComponent()
+        : CAreaLightComponent()
     {
 
     }
 
     // -----------------------------------------------------------------------------
 
-    CGfxAreaLightManager::CInternAreaLightFacet::~CInternAreaLightFacet()
+    CGfxAreaLightManager::CInternComponent::~CInternComponent()
     {
     }
 } // namespace 
@@ -112,8 +105,7 @@ namespace
 namespace 
 {
     CGfxAreaLightManager::CGfxAreaLightManager()
-        : m_AreaLightFacets        ()
-        , m_FilterShaderPtr        (0)
+        : m_FilterShaderPtr        (0)
         , m_BackgroundBlurShaderPtr(0)
         , m_CombineShaderPtr       (0)
         , m_ForegroundBlurShaderPtr(0)
@@ -135,13 +127,6 @@ namespace
 
     void CGfxAreaLightManager::OnStart()
     {
-        // -----------------------------------------------------------------------------
-        // Register dirty entity handler for automatic sky creation
-        // -----------------------------------------------------------------------------
-        Dt::EntityManager::RegisterDirtyEntityHandler(DATA_DIRTY_ENTITY_METHOD(&CGfxAreaLightManager::OnDirtyEntity));
-
-        // -----------------------------------------------------------------------------
-
         STextureDescriptor TextureDescriptor;
 
         TextureDescriptor.m_NumberOfPixelsU  = 256;
@@ -195,14 +180,17 @@ namespace
         ConstanteBufferDesc.m_pClassKey     = 0;
         
         m_FilterPropertiesPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
+
+        // -----------------------------------------------------------------------------
+        // Register dirty entity handler for automatic sky creation
+        // -----------------------------------------------------------------------------
+        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(DATA_DIRTY_COMPONENT_METHOD(&CGfxAreaLightManager::OnDirtyComponent));
     }
 
     // -----------------------------------------------------------------------------
 
     void CGfxAreaLightManager::OnExit()
     {
-        m_AreaLightFacets.Clear();
-
         m_FilterShaderPtr         = 0;
         m_BackgroundBlurShaderPtr = 0;
         m_CombineShaderPtr        = 0;
@@ -220,38 +208,33 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxAreaLightManager::OnDirtyEntity(Dt::CEntity* _pEntity)
+    void CGfxAreaLightManager::OnDirtyComponent(Dt::IComponent* _pComponent)
     {
-        CInternAreaLightFacet* pGfxLightFacet = 0;
-
-        assert(_pEntity != 0);
-
         // -----------------------------------------------------------------------------
-        // Entity check
+        // Vars
         // -----------------------------------------------------------------------------
-        if (_pEntity->GetCategory() != Dt::SEntityCategory::Light) return;
-        if (_pEntity->GetType()     != Dt::SLightType::Area) return;
+        CInternComponent* pGfxLightFacet = 0;
 
         // -----------------------------------------------------------------------------
-        // Get data
+        // Only if component has changed
         // -----------------------------------------------------------------------------
-        Dt::CAreaLightFacet* pDtLightFacet = static_cast<Dt::CAreaLightFacet*>(_pEntity->GetDetailFacet(Dt::SFacetCategory::Data));
+        if (_pComponent->GetTypeID() != Base::CTypeInfo::GetTypeID<Dt::CAreaLightComponent>()) return;
 
-        if (pDtLightFacet == nullptr) return;
+        Dt::CAreaLightComponent* pAreaLightComponent = static_cast<Dt::CAreaLightComponent*>(_pComponent);
 
         // -----------------------------------------------------------------------------
         // Dirty check
         // -----------------------------------------------------------------------------
         unsigned int DirtyFlags;
 
-        DirtyFlags = _pEntity->GetDirtyFlags();
+        DirtyFlags = pAreaLightComponent->GetDirtyFlags();
 
-        if ((DirtyFlags & Dt::CEntity::DirtyCreate) != 0)
+        if ((DirtyFlags & Dt::CAreaLightComponent::DirtyCreate) != 0)
         {
             // -----------------------------------------------------------------------------
             // Create facet
             // -----------------------------------------------------------------------------
-            CInternAreaLightFacet& rGfxLightFacet = AllocateAreaLightFacet();
+            CInternComponent* pGfxComponent = CComponentManager::GetInstance().Allocate<CInternComponent>(pAreaLightComponent->GetID());
 
             // -----------------------------------------------------------------------------
             // Buffer
@@ -279,7 +262,7 @@ namespace
             BufferDesc.m_pBytes        = &PlaneVertexBufferData[0];
             BufferDesc.m_pClassKey     = 0;
         
-            rGfxLightFacet.m_PlaneVertexBufferSetPtr = BufferManager::CreateBuffer(BufferDesc);
+            pGfxComponent->m_PlaneVertexBufferSetPtr = BufferManager::CreateBuffer(BufferDesc);
         
             // -----------------------------------------------------------------------------
         
@@ -291,33 +274,23 @@ namespace
             BufferDesc.m_pBytes        = &PlaneIndexBufferData[0];
             BufferDesc.m_pClassKey     = 0;
         
-            rGfxLightFacet.m_PlaneIndexBufferPtr = BufferManager::CreateBuffer(BufferDesc);
+            pGfxComponent->m_PlaneIndexBufferPtr = BufferManager::CreateBuffer(BufferDesc);
 
             // -----------------------------------------------------------------------------
             // Texture
             // -----------------------------------------------------------------------------
-            rGfxLightFacet.m_FilteredTexturePtr = 0;
-            rGfxLightFacet.m_TexturePtr         = 0;
-
-            // -----------------------------------------------------------------------------
-            // Save facet
-            // -----------------------------------------------------------------------------
-            _pEntity->SetDetailFacet(Dt::SFacetCategory::Graphic, &rGfxLightFacet);
-
-            // -----------------------------------------------------------------------------
-            // pGfxPointLightFacet
-            // -----------------------------------------------------------------------------
-            pGfxLightFacet = &rGfxLightFacet;
+            pGfxComponent->m_FilteredTexturePtr = 0;
+            pGfxComponent->m_TexturePtr         = 0;
         }
         else
         {
-            pGfxLightFacet = static_cast<CInternAreaLightFacet*>(_pEntity->GetDetailFacet(Dt::SFacetCategory::Graphic));
+            pGfxLightFacet = CComponentManager::GetInstance().GetComponent<CInternComponent>(pAreaLightComponent->GetID());
 
-            if (pDtLightFacet->GetHasTexture())
+            if (pAreaLightComponent->GetHasTexture())
             {
-                if (pGfxLightFacet->m_TexturePtr == 0 || pGfxLightFacet->m_TexturePtr != 0 && pGfxLightFacet->m_TexturePtr->GetHash() != pDtLightFacet->GetTexture()->GetHash())
+                if (pGfxLightFacet->m_TexturePtr == 0 || pGfxLightFacet->m_TexturePtr != 0 && pGfxLightFacet->m_TexturePtr->GetHash() != pAreaLightComponent->GetTexture()->GetHash())
                 {
-                    Gfx::CTexturePtr GfxTexturePtr = Gfx::TextureManager::GetTextureByHash(pDtLightFacet->GetTexture()->GetHash());
+                    Gfx::CTexturePtr GfxTexturePtr = Gfx::TextureManager::GetTextureByHash(pAreaLightComponent->GetTexture()->GetHash());
 
                     if (GfxTexturePtr != 0 && GfxTexturePtr.IsValid())
                     {
@@ -366,21 +339,21 @@ namespace
         // -----------------------------------------------------------------------------
         // Update
         // -----------------------------------------------------------------------------
-        glm::vec3 LightPosition  = _pEntity->GetWorldPosition();
-        glm::vec3 LightDirection = glm::normalize(pDtLightFacet->GetDirection()) * glm::vec3(-1.0f);
-        glm::vec3 DirectionX     = glm::normalize(glm::vec3(0.0f, pDtLightFacet->GetRotation(), 1.0f));
+        glm::vec3 LightPosition  = pAreaLightComponent->GetHostEntity()->GetWorldPosition();
+        glm::vec3 LightDirection = glm::normalize(pAreaLightComponent->GetDirection()) * glm::vec3(-1.0f);
+        glm::vec3 DirectionX     = glm::normalize(glm::vec3(0.0f, pAreaLightComponent->GetRotation(), 1.0f));
         glm::vec3 DirectionY     = glm::cross(LightDirection, glm::normalize(DirectionX));
 
         DirectionX = glm::cross(LightDirection, DirectionY);
 
         pGfxLightFacet->m_DirectionX = glm::vec4(DirectionY, 0.0f);
         pGfxLightFacet->m_DirectionY = glm::vec4(DirectionX, 0.0f);
-        pGfxLightFacet->m_HalfWidth  = 0.5f * pDtLightFacet->GetWidth();
-        pGfxLightFacet->m_HalfHeight = 0.5f * pDtLightFacet->GetHeight();
+        pGfxLightFacet->m_HalfWidth  = 0.5f * pAreaLightComponent->GetWidth();
+        pGfxLightFacet->m_HalfHeight = 0.5f * pAreaLightComponent->GetHeight();
         pGfxLightFacet->m_Plane      = glm::vec4(LightDirection, -(glm::dot(LightDirection, LightPosition)));
 
-        glm::vec3 ExtendX = glm::vec3(pDtLightFacet->GetWidth()  * 0.5f) * DirectionY;
-        glm::vec3 ExtendY = glm::vec3(pDtLightFacet->GetHeight() * 0.5f) * DirectionX;
+        glm::vec3 ExtendX = glm::vec3(pAreaLightComponent->GetWidth()  * 0.5f) * DirectionY;
+        glm::vec3 ExtendY = glm::vec3(pAreaLightComponent->GetHeight() * 0.5f) * DirectionX;
 
         glm::vec3 LightbulbCorners0 = LightPosition - ExtendX - ExtendY;
         glm::vec3 LightbulbCorners1 = LightPosition + ExtendX - ExtendY;
@@ -421,18 +394,6 @@ namespace
         Base::U64 FrameTime = Core::Time::GetNumberOfFrame();
 
         pGfxLightFacet->m_TimeStamp = FrameTime;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CGfxAreaLightManager::CInternAreaLightFacet& CGfxAreaLightManager::AllocateAreaLightFacet()
-    {
-        // -----------------------------------------------------------------------------
-        // Create facet
-        // -----------------------------------------------------------------------------
-        CInternAreaLightFacet& rGfxLightFacet = m_AreaLightFacets.Allocate();
-        
-        return rGfxLightFacet;
     }
 
     // -----------------------------------------------------------------------------

@@ -10,11 +10,11 @@ namespace Edit
 {
     class CInspectorArealight : public QWidget, public Ui::InspectorAreaLight
     {
-	    Q_OBJECT
+        Q_OBJECT
 
     public:
-	    CInspectorArealight(QWidget* _pParent = Q_NULLPTR);
-	    ~CInspectorArealight();
+        CInspectorArealight(QWidget* _pParent = Q_NULLPTR);
+        ~CInspectorArealight();
 
     public Q_SLOTS:
 
@@ -22,11 +22,11 @@ namespace Edit
 
         void pickColorFromDialog();
 
-        void RequestInformation(unsigned int _EntityID);
+        void RequestInformation(Base::ID _EntityID);
 
     private:
 
-        int m_CurrentEntityID;
+        Base::ID m_CurrentEntityID;
 
     private:
 

@@ -6,6 +6,7 @@ namespace Gfx
 namespace SunManager
 {
     void OnStart();
+
     void OnExit();
 
     void Update();

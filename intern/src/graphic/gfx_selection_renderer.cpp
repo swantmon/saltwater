@@ -10,23 +10,24 @@
 
 #include "core/core_time.h"
 
-#include "data/data_actor_type.h"
+#include "data/data_component_facet.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_hierarchy_facet.h"
-#include "data/data_light_type.h"
-#include "data/data_light_probe_facet.h"
+#include "data/data_light_probe_component.h"
+#include "data/data_mesh_component.h"
 #include "data/data_transformation_facet.h"
 
-#include "graphic/gfx_actor_renderer.h"
 #include "graphic/gfx_ar_renderer.h"
 #include "graphic/gfx_buffer_manager.h"
+#include "graphic/gfx_component_manager.h"
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_debug_renderer.h"
-#include "graphic/gfx_light_probe_facet.h"
+#include "graphic/gfx_light_probe_component.h"
 #include "graphic/gfx_main.h"
-#include "graphic/gfx_mesh_actor_facet.h"
+#include "graphic/gfx_mesh_component.h"
 #include "graphic/gfx_mesh_manager.h"
+#include "graphic/gfx_mesh_renderer.h"
 #include "graphic/gfx_performance.h"
 #include "graphic/gfx_selection_renderer.h"
 #include "graphic/gfx_shader_manager.h"
@@ -68,7 +69,7 @@ namespace
         void Update();
         void Render();
 
-        void SelectEntity(unsigned int _EntityID);
+        void SelectEntity(Base::ID _EntityID);
         void UnselectEntity();
 
         CSelectionTicket& AcquireTicket(int _OffsetX, int _OffsetY, int _SizeX, int _SizeY, unsigned int _Flags = SPickFlag::Nothing);
@@ -175,7 +176,7 @@ namespace
         {
             glm::mat4        m_ModelMatrix;
             Gfx::CTexturePtr  m_TextureCubePtr;
-            Dt::CLightProbeFacet* m_pDtProbeFacet;
+            Dt::CLightProbeComponent* m_pDtProbeFacet;
         };
 
     private:
@@ -456,7 +457,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxSelectionRenderer::SelectEntity(unsigned int _EntityID)
+    void CGfxSelectionRenderer::SelectEntity(Base::ID _EntityID)
     {
         m_pSelectedEntity = &Dt::EntityManager::GetEntityByID(_EntityID);
 
@@ -922,7 +923,7 @@ namespace
                 // -----------------------------------------------------------------------------
                 // Render hit proxies depending on flag
                 // -----------------------------------------------------------------------------
-                if (rTicket.m_Flags & SPickFlag::Actor) ActorRenderer::RenderHitProxy();
+                if (rTicket.m_Flags & SPickFlag::Actor) MeshRenderer::RenderHitProxy();
                 if (rTicket.m_Flags & SPickFlag::AR)    ARRenderer   ::RenderHitProxy();
 
                 // -----------------------------------------------------------------------------
@@ -1019,13 +1020,13 @@ namespace
         {
             assert(_pEntity);
 
-            if (_pEntity->GetCategory() == Dt::SEntityCategory::Actor && _pEntity->GetType() == Dt::SActorType::Mesh)
+            if (_pEntity->GetComponentFacet()->HasComponent<Dt::CMeshComponent>())
             {
-                CMeshActorFacet* pGraphicModelActorFacet = static_cast<CMeshActorFacet*>(_pEntity->GetDetailFacet(Dt::SFacetCategory::Graphic));
+                CMeshComponent* pGfxComponent = CComponentManager::GetInstance().GetComponent<CMeshComponent>(_pEntity->GetComponentFacet()->GetComponent<Dt::CMeshComponent>()->GetID());
 
-                assert(pGraphicModelActorFacet != nullptr);
+                assert(pGfxComponent != nullptr);
 
-                CMeshPtr MeshPtr = pGraphicModelActorFacet->GetMesh();
+                CMeshPtr MeshPtr = pGfxComponent->GetMesh();
 
                 assert(MeshPtr.IsValid());
 
@@ -1045,9 +1046,9 @@ namespace
 
                     CMaterialPtr MaterialPtr;
 
-                    if (pGraphicModelActorFacet->GetMaterial(IndexOfSurface) != 0)
+                    if (pGfxComponent->GetMaterial(IndexOfSurface) != 0)
                     {
-                        MaterialPtr = pGraphicModelActorFacet->GetMaterial(IndexOfSurface);
+                        MaterialPtr = pGfxComponent->GetMaterial(IndexOfSurface);
                     }
                     else
                     {
@@ -1067,12 +1068,12 @@ namespace
                     m_SurfaceRenderJobs.push_back(NewRenderJob);
                 }
             }
-            else if (_pEntity->GetCategory() == Dt::SEntityCategory::Light && _pEntity->GetType() == Dt::SLightType::LightProbe)
+            else if (_pEntity->GetComponentFacet()->HasComponent<Dt::CLightProbeComponent>())
             {
-                Dt::CLightProbeFacet*  pDtFacet  = static_cast<Dt::CLightProbeFacet* > (_pEntity->GetDetailFacet(Dt::SFacetCategory::Data));
-                Gfx::CLightProbeFacet* pGfxFacet = static_cast<Gfx::CLightProbeFacet*>(_pEntity->GetDetailFacet(Dt::SFacetCategory::Graphic));
+                Dt::CLightProbeComponent*  pDataComponent = _pEntity->GetComponentFacet()->GetComponent<Dt::CLightProbeComponent>();
+                Gfx::CLightProbeComponent* pGfxComponent  = CComponentManager::GetInstance().GetComponent<Gfx::CLightProbeComponent>(pDataComponent->GetID());
 
-                assert(pGfxFacet != nullptr);
+                assert(pGfxComponent != nullptr);
 
                 // -----------------------------------------------------------------------------
                 // Set informations to render job
@@ -1080,8 +1081,8 @@ namespace
                 SProbeRenderJob NewRenderJob;
 
                 NewRenderJob.m_ModelMatrix    = _pEntity->GetTransformationFacet()->GetWorldMatrix();
-                NewRenderJob.m_TextureCubePtr = pGfxFacet->GetSpecularPtr();
-                NewRenderJob.m_pDtProbeFacet  = pDtFacet;
+                NewRenderJob.m_TextureCubePtr = pGfxComponent->GetSpecularPtr();
+                NewRenderJob.m_pDtProbeFacet  = pDataComponent;
 
                 m_ProbeRenderJobs.push_back(NewRenderJob);
             }
@@ -1102,7 +1103,10 @@ namespace
                     NavigateToNextEntity(pFirstChild);
                 }
 
-                AddEntityToJobs(pSiblingEntity);
+                if (pSiblingEntity->IsActive())
+                {
+                    AddEntityToJobs(pSiblingEntity);
+                }
 
                 pSiblingEntity = pSiblingEntity->GetHierarchyFacet()->GetSibling();
             }
@@ -1232,7 +1236,7 @@ namespace SelectionRenderer
 
     // -----------------------------------------------------------------------------
 
-    void SelectEntity(unsigned int _EntityID)
+    void SelectEntity(Base::ID _EntityID)
     {
         CGfxSelectionRenderer::GetInstance().SelectEntity(_EntityID);
     }

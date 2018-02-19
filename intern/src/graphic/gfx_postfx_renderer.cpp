@@ -5,10 +5,11 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
-#include "data/data_dof_facet.h"
+#include "data/data_component_facet.h"
+#include "data/data_component_manager.h"
+#include "data/data_dof_component.h"
 #include "data/data_entity.h"
-#include "data/data_fx_type.h"
-#include "data/data_post_aa_facet.h"
+#include "data/data_post_aa_component.h"
 #include "data/data_map.h"
 
 #include "graphic/gfx_buffer_manager.h"
@@ -84,12 +85,12 @@ namespace
 
         struct SPostAARenderJob
         {
-            Dt::CPostAAFXFacet* m_pDataPostAAFacet;
+            Dt::CPostAAComponent* m_pDataPostAAFacet;
         };
 
         struct SDOFRenderJob
         {
-            Dt::CDOFFXFacet* m_pDataDOFFacet;
+            Dt::CDOFComponent* m_pDataDOFFacet;
         };
         
         struct SDOFDownProperties
@@ -1120,7 +1121,7 @@ namespace
         Performance::BeginEvent("Depth of Field");
 
         // TODO: What happens if more then one DOF effect is available?
-        Dt::CDOFFXFacet* pDataDOFFacet = m_DOFRenderJobs[0].m_pDataDOFFacet;
+        Dt::CDOFComponent* pDataDOFFacet = m_DOFRenderJobs[0].m_pDataDOFFacet;
 
         assert(pDataDOFFacet != 0);
 
@@ -1542,16 +1543,16 @@ namespace
         if (m_PostAARenderJobs.size() == 0) return;
 
         // TODO: What happens if more then one PostAA effect is available?
-        Dt::CPostAAFXFacet* pDataPostAAFacet = m_PostAARenderJobs[0].m_pDataPostAAFacet;
+        Dt::CPostAAComponent* pDataPostAAFacet = m_PostAARenderJobs[0].m_pDataPostAAFacet;
 
         assert(pDataPostAAFacet != 0);
 
         switch (pDataPostAAFacet->GetType())
         {
-        case Dt::CPostAAFXFacet::FXAA:
+        case Dt::CPostAAComponent::FXAA:
             RenderFXAA();
             break;
-        case Dt::CPostAAFXFacet::SMAA:
+        case Dt::CPostAAComponent::SMAA:
             RenderSMAA();
             break;
         default:
@@ -1811,56 +1812,32 @@ namespace
         // Clear current render jobs
         // -----------------------------------------------------------------------------
         m_PostAARenderJobs.clear();
-        m_DOFRenderJobs .clear();
+        m_DOFRenderJobs   .clear();
 
-        // -----------------------------------------------------------------------------
-        // Iterate throw every entity inside this map
-        // -----------------------------------------------------------------------------
-        Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::FX);
-        Dt::Map::CEntityIterator EndOfEntities = Dt::Map::EntitiesEnd();
+        auto DataComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CPostAAComponent>();
 
-        for (; CurrentEntity != EndOfEntities; )
+        for (auto Component : DataComponents)
         {
-            Dt::CEntity& rCurrentEntity = *CurrentEntity;
+            Dt::CPostAAComponent* pDtComponent = static_cast<Dt::CPostAAComponent*>(Component);
 
-            // -----------------------------------------------------------------------------
-            // Get graphic facet
-            // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetType() == Dt::SFXType::PostAA)
-            {
-                Dt::CPostAAFXFacet* pDataPostAAFacet = static_cast<Dt::CPostAAFXFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+            if (pDtComponent->IsActiveAndUsable() == false) continue;
 
-                assert(pDataPostAAFacet != 0);
+            SPostAARenderJob NewRenderJob;
 
-                // -----------------------------------------------------------------------------
-                // Set sun into a new render job
-                // -----------------------------------------------------------------------------
-                SPostAARenderJob NewRenderJob;
+            NewRenderJob.m_pDataPostAAFacet = pDtComponent;
 
-                NewRenderJob.m_pDataPostAAFacet = pDataPostAAFacet;
+            m_PostAARenderJobs.push_back(NewRenderJob);
+        }
 
-                m_PostAARenderJobs.push_back(NewRenderJob);
-            }
-            else if (rCurrentEntity.GetType() == Dt::SFXType::DOF)
-            {
-                Dt::CDOFFXFacet* pDataDOFFacet = static_cast<Dt::CDOFFXFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+        DataComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CDOFComponent>();
 
-                assert(pDataDOFFacet != 0);
+        for (auto Component : DataComponents)
+        {
+            SDOFRenderJob NewRenderJob;
 
-                // -----------------------------------------------------------------------------
-                // Set sun into a new render job
-                // -----------------------------------------------------------------------------
-                SDOFRenderJob NewRenderJob;
+            NewRenderJob.m_pDataDOFFacet = static_cast<Dt::CDOFComponent*>(Component);
 
-                NewRenderJob.m_pDataDOFFacet = pDataDOFFacet;
-
-                m_DOFRenderJobs.push_back(NewRenderJob);
-            }
-
-            // -----------------------------------------------------------------------------
-            // Next entity
-            // -----------------------------------------------------------------------------
-            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::FX);
+            m_DOFRenderJobs.push_back(NewRenderJob);
         }
     }
 } // namespace

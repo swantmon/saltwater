@@ -10,21 +10,21 @@ namespace Edit
 {
     class CInspectorDOF : public QWidget, public Ui::InspectorDOF
     {
-	    Q_OBJECT
+        Q_OBJECT
 
     public:
-	    CInspectorDOF(QWidget* _pParent = Q_NULLPTR);
-	    ~CInspectorDOF();
+        CInspectorDOF(QWidget* _pParent = Q_NULLPTR);
+        ~CInspectorDOF();
 
     public Q_SLOTS:
 
         void valueChanged();
 
-        void RequestInformation(unsigned int _EntityID);
+        void RequestInformation(Base::ID _EntityID);
 
     private:
 
-        int m_CurrentEntityID;
+        Base::ID m_CurrentEntityID;
 
     private:
 

@@ -10,15 +10,18 @@
 
 #include "core/core_time.h"
 
+#include "data/data_component.h"
+#include "data/data_component_manager.h"
+#include "data/data_component_facet.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
-#include "data/data_light_type.h"
 #include "data/data_map.h"
 #include "data/data_model_manager.h"
-#include "data/data_sky_facet.h"
-#include "data/data_sun_facet.h"
+#include "data/data_sky_component.h"
+#include "data/data_sun_component.h"
 
 #include "graphic/gfx_buffer_manager.h"
+#include "graphic/gfx_component_manager.h"
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_main.h"
 #include "graphic/gfx_mesh_manager.h"
@@ -26,7 +29,7 @@
 #include "graphic/gfx_sampler_manager.h"
 #include "graphic/gfx_selection_renderer.h"
 #include "graphic/gfx_shader_manager.h"
-#include "graphic/gfx_sky_facet.h"
+#include "graphic/gfx_sky_component.h"
 #include "graphic/gfx_sky_manager.h"
 #include "graphic/gfx_state_manager.h"
 #include "graphic/gfx_target_set.h"
@@ -73,8 +76,6 @@ namespace
         void OnExit();
 
         void Update();
-
-        CSkyFacetPtr CreateSky(unsigned int _FaceSize, const Base::Char* _pFileName);
 
     private:
 
@@ -152,7 +153,7 @@ namespace
             unsigned int ps_ExposureHistoryIndex;
         };
 
-        class CInternSkyFacet : public CSkyFacet
+        class CInternSkyFacet : public CSkyComponent
         {
         public:
 
@@ -173,10 +174,6 @@ namespace
 
     private:
 
-        typedef Base::CPool<CInternSkyFacet, 1> CSkyfacets;
-
-    private:
-
         SRenderContext    m_SkyboxFromAtmosphere;
         SRenderContext    m_SkyboxFromPanorama;
         SRenderContext    m_SkyboxFromCubemap;
@@ -186,7 +183,6 @@ namespace
         CTexturePtr       m_LookUpTexturePtr;
         CInputLayoutPtr   m_P3T2CubemapInputLayoutPtr;
         CSelectionTicket* m_pSelectionTicket;
-        CSkyfacets        m_Skyfacets;
 
         CBufferPtr m_PSPrecomputeConstants;
 
@@ -196,11 +192,9 @@ namespace
 
     private:
 
-        void OnDirtyEntity(Dt::CEntity* _pEntity);
+        void OnDirtyComponent(Dt::IComponent* _pComponent);
 
-        CInternSkyFacet& AllocateSkyFacet(unsigned int _FaceSize);
-
-        void RenderSkybox(Dt::CSkyFacet* _pDataSkyFacet, CInternSkyFacet* _pOutput);
+        void RenderSkybox(Dt::CSkyComponent* _pDataSkyFacet, CInternSkyFacet* _pOutput);
 
         void RenderSkyboxFromAtmopsphericScattering(CInternSkyFacet* _pOutput, float _Intensity = 1.0f);
 
@@ -223,7 +217,7 @@ namespace
 namespace 
 {
     CGfxSkyManager::CInternSkyFacet::CInternSkyFacet()
-        : CSkyFacet           ()
+        : CSkyComponent           ()
         , m_RenderContextPtr  ()
         , m_TargetSetPtr      ()
         , m_ViewPortSetPtr    ()
@@ -253,7 +247,6 @@ namespace
         , m_SkyboxFromLUT      ()
         , m_LookUpTexturePtr   (0)
         , m_pSelectionTicket   (0)
-        , m_Skyfacets          ()
     {
 
     }
@@ -595,7 +588,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Register dirty entity handler for automatic sky creation
         // -----------------------------------------------------------------------------
-        Dt::EntityManager::RegisterDirtyEntityHandler(DATA_DIRTY_ENTITY_METHOD(&CGfxSkyManager::OnDirtyEntity));
+        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(DATA_DIRTY_COMPONENT_METHOD(&CGfxSkyManager::OnDirtyComponent));
 
         // -----------------------------------------------------------------------------
         // Acquire an selection ticket at selection renderer
@@ -625,130 +618,58 @@ namespace
         m_TransmittanceTable = 0;
         m_InscatterTable     = 0;
         m_IrradianceTable    = 0;
-
-        m_Skyfacets.Clear();
     }
 
     // -----------------------------------------------------------------------------
 
     void CGfxSkyManager::Update()
     {
-        Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Light);
-        Dt::Map::CEntityIterator EndOfEntities = Dt::Map::EntitiesEnd();
+        auto DataComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CSkyComponent>();
 
-        for (; CurrentEntity != EndOfEntities; )
+        for (auto Component : DataComponents)
         {
-            Dt::CEntity& rCurrentEntity = *CurrentEntity;
+            Dt::CSkyComponent* pDataSkyboxFacet = static_cast<Dt::CSkyComponent*>(Component);
 
-            // -----------------------------------------------------------------------------
-            // Get graphic facet
-            // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetType() == Dt::SLightType::Sky)
+            assert(pDataSkyboxFacet->GetHostEntity());
+
+            if (!pDataSkyboxFacet->IsActive()) continue;
+
+            if (pDataSkyboxFacet->GetRefreshMode() == Dt::CSkyComponent::Dynamic)
             {
-                Dt::CSkyFacet*   pDataSkyboxFacet = static_cast<Dt::CSkyFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+                CInternSkyFacet* pGraphicSkyboxFacet = CComponentManager::GetInstance().GetComponent<CInternSkyFacet>(pDataSkyboxFacet->GetID());
 
-                if (pDataSkyboxFacet->GetRefreshMode() == Dt::CSkyFacet::Dynamic)
-                {
-                    CInternSkyFacet* pGraphicSkyboxFacet = static_cast<CInternSkyFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
-
-                    RenderSkybox(pDataSkyboxFacet, pGraphicSkyboxFacet);
-                }
+                RenderSkybox(pDataSkyboxFacet, pGraphicSkyboxFacet);
             }
-
-            // -----------------------------------------------------------------------------
-            // Next entity
-            // -----------------------------------------------------------------------------
-            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Light);
         }
     }
 
     // -----------------------------------------------------------------------------
 
-    CSkyFacetPtr CGfxSkyManager::CreateSky(unsigned int _FaceSize, const Base::Char* _pFileName)
+    void CGfxSkyManager::OnDirtyComponent(Dt::IComponent* _pComponent)
     {
-        CInternSkyFacet& rInternSky = AllocateSkyFacet(_FaceSize);
+        if (_pComponent->GetTypeID() != Base::CTypeInfo::GetTypeID<Dt::CSkyComponent>()) return;
 
-        // -----------------------------------------------------------------------------
-        // Create texture
-        // -----------------------------------------------------------------------------
-        STextureDescriptor TextureDescriptor;
-        
-        TextureDescriptor.m_NumberOfPixelsU  = STextureDescriptor::s_NumberOfPixelsFromSource;
-        TextureDescriptor.m_NumberOfPixelsV  = STextureDescriptor::s_NumberOfPixelsFromSource;
-        TextureDescriptor.m_NumberOfPixelsW  = 1;
-        TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_GenerateAllMipMaps;
-        TextureDescriptor.m_NumberOfTextures = 6;
-        TextureDescriptor.m_Binding          = CTexture::ShaderResource;
-        TextureDescriptor.m_Access           = CTexture::CPUWrite;
-        TextureDescriptor.m_Format           = CTexture::Unknown;
-        TextureDescriptor.m_Usage            = CTexture::GPURead;
-        TextureDescriptor.m_Semantic         = CTexture::Diffuse;
-        TextureDescriptor.m_pFileName        = _pFileName;
-        TextureDescriptor.m_pPixels          = 0;
-        TextureDescriptor.m_Format           = CTexture::R8G8B8A8_UBYTE;
-        
-        rInternSky.m_InputTexturePtr  = TextureManager::CreateCubeTexture(TextureDescriptor);
-
-		TextureManager::SetTextureLabel(rInternSky.m_InputTexturePtr, "Sky Input Texture");
-
-        // -----------------------------------------------------------------------------
-        // Render cube map
-        // TODO: Find out if texture is cube or not
-        // -----------------------------------------------------------------------------
-        RenderSkyboxFromCubemap(&rInternSky);
-
-        // -----------------------------------------------------------------------------
-        // Set time
-        // -----------------------------------------------------------------------------
-        rInternSky.m_TimeStamp = Core::Time::GetNumberOfFrame();
-
-        return CSkyFacetPtr(&rInternSky);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CGfxSkyManager::OnDirtyEntity(Dt::CEntity* _pEntity)
-    {
-        assert(_pEntity != 0);
-
-        unsigned int DirtyFlags;
-        unsigned int Hash;
-
-        CInternSkyFacet* pGraphicSkyboxFacet;
-        Dt::CSkyFacet*   pDataSkyboxFacet;
-
-        // -----------------------------------------------------------------------------
-        // Entity check
-        // -----------------------------------------------------------------------------
-        if (_pEntity->GetCategory() != Dt::SEntityCategory::Light) return;
-        if (_pEntity->GetType()     != Dt::SLightType::Sky) return;
-
-        // -----------------------------------------------------------------------------
-        // Get data
-        // -----------------------------------------------------------------------------
-        pDataSkyboxFacet = static_cast<Dt::CSkyFacet*>(_pEntity->GetDetailFacet(Dt::SFacetCategory::Data));
-
-        if (pDataSkyboxFacet == nullptr) return;
+        Dt::CSkyComponent* pSkyComponent = static_cast<Dt::CSkyComponent*>(_pComponent);
 
         // -----------------------------------------------------------------------------
         // Lamda function
         // -----------------------------------------------------------------------------
-        auto UpdateFacet = [&](Dt::CSkyFacet* _pDataSkyboxFacet, CInternSkyFacet* _pGraphicSkyboxFacet)->void
+        auto UpdateFacet = [&](Dt::CSkyComponent* _pDataSkyboxFacet, CInternSkyFacet* _pGraphicSkyboxFacet)->void
         {
             // -----------------------------------------------------------------------------
             // Get hash
             // -----------------------------------------------------------------------------
-            Hash = 0;
+            Base::BHash Hash = 0;
 
-            if (_pDataSkyboxFacet->GetType() == Dt::CSkyFacet::Panorama)
+            if (_pDataSkyboxFacet->GetType() == Dt::CSkyComponent::Panorama)
             {
                 if (_pDataSkyboxFacet->GetHasPanorama()) Hash = _pDataSkyboxFacet->GetPanorama()->GetHash();
             }
-            else if (_pDataSkyboxFacet->GetType() == Dt::CSkyFacet::Cubemap)
+            else if (_pDataSkyboxFacet->GetType() == Dt::CSkyComponent::Cubemap)
             {
                 if (_pDataSkyboxFacet->GetHasCubemap()) Hash = _pDataSkyboxFacet->GetCubemap()->GetHash();
             }
-            else if (_pDataSkyboxFacet->GetType() == Dt::CSkyFacet::Texture || _pDataSkyboxFacet->GetType() == Dt::CSkyFacet::TextureGeometry || _pDataSkyboxFacet->GetType() == Dt::CSkyFacet::TextureLUT)
+            else if (_pDataSkyboxFacet->GetType() == Dt::CSkyComponent::Texture || _pDataSkyboxFacet->GetType() == Dt::CSkyComponent::TextureGeometry || _pDataSkyboxFacet->GetType() == Dt::CSkyComponent::TextureLUT)
             {
                 if (_pDataSkyboxFacet->GetHasTexture()) Hash = _pDataSkyboxFacet->GetTexture()->GetHash();
             }
@@ -784,127 +705,117 @@ namespace
         // -----------------------------------------------------------------------------
         // Dirty check
         // -----------------------------------------------------------------------------
-        DirtyFlags = _pEntity->GetDirtyFlags();
+        unsigned int DirtyFlags;
 
-        if ((DirtyFlags & Dt::CEntity::DirtyCreate))
+        DirtyFlags = pSkyComponent->GetDirtyFlags();
+
+        if ((DirtyFlags & Dt::CSkyComponent::DirtyCreate))
         {
             // -----------------------------------------------------------------------------
             // Create facet
             // -----------------------------------------------------------------------------
-            pGraphicSkyboxFacet = &AllocateSkyFacet(2048);
+            CInternSkyFacet* pGraphicSkyboxFacet = CComponentManager::GetInstance().Allocate<CInternSkyFacet>(pSkyComponent->GetID());
+
+            // -----------------------------------------------------------------------------
+            // Cubemap
+            // -----------------------------------------------------------------------------
+            STextureDescriptor TextureDescriptor;
+
+            TextureDescriptor.m_NumberOfPixelsU  = 2048;
+            TextureDescriptor.m_NumberOfPixelsV  = 2048;
+            TextureDescriptor.m_NumberOfPixelsW  = 1;
+            TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_GenerateAllMipMaps;
+            TextureDescriptor.m_NumberOfTextures = 6;
+            TextureDescriptor.m_Binding          = CTexture::ShaderResource | CTexture::RenderTarget;
+            TextureDescriptor.m_Access           = CTexture::CPUWrite;
+            TextureDescriptor.m_Format           = CTexture::Unknown;
+            TextureDescriptor.m_Usage            = CTexture::GPURead;
+            TextureDescriptor.m_Semantic         = CTexture::Diffuse;
+            TextureDescriptor.m_pFileName        = 0;
+            TextureDescriptor.m_pPixels          = 0;
+            TextureDescriptor.m_Format           = CTexture::R16G16B16A16_FLOAT;
+        
+            pGraphicSkyboxFacet->m_CubemapPtr = TextureManager::CreateCubeTexture(TextureDescriptor);
+
+            TextureManager::SetTextureLabel(pGraphicSkyboxFacet->m_CubemapPtr, "Sky Texture");
+
+            // -----------------------------------------------------------------------------
+            // Target Set
+            // -----------------------------------------------------------------------------
+            CTexturePtr FirstMipmapCubeTexture = TextureManager::GetMipmapFromTexture2D(pGraphicSkyboxFacet->m_CubemapPtr, 0);
+
+            pGraphicSkyboxFacet->m_TargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTexturePtr>(FirstMipmapCubeTexture));
+
+            // -----------------------------------------------------------------------------
+            // Viewport
+            // -----------------------------------------------------------------------------
+            SViewPortDescriptor ViewPortDesc;
+
+            ViewPortDesc.m_TopLeftX = 0.0f;
+            ViewPortDesc.m_TopLeftY = 0.0f;
+            ViewPortDesc.m_MinDepth = 0.0f;
+            ViewPortDesc.m_MaxDepth = 1.0f;
+
+            ViewPortDesc.m_Width = static_cast<float>(FirstMipmapCubeTexture->GetNumberOfPixelsU());
+            ViewPortDesc.m_Height = static_cast<float>(FirstMipmapCubeTexture->GetNumberOfPixelsV());
+
+            CViewPortPtr MipMapViewPort = ViewManager::CreateViewPort(ViewPortDesc);
+
+            pGraphicSkyboxFacet->m_ViewPortSetPtr = ViewManager::CreateViewPortSet(MipMapViewPort);
+
+            // -----------------------------------------------------------------------------
+            // Render context
+            // -----------------------------------------------------------------------------
+            CCameraPtr          CameraPtr       = ViewManager::GetMainCamera();
+            CRenderStatePtr     NoDepthStatePtr = StateManager::GetRenderState(CRenderState::NoDepth | CRenderState::NoCull | CRenderState::AlphaBlend);
+
+            CRenderContextPtr CubemapRenderContextPtr = ContextManager::CreateRenderContext();
+
+            CubemapRenderContextPtr->SetCamera(CameraPtr);
+            CubemapRenderContextPtr->SetViewPortSet(pGraphicSkyboxFacet->m_ViewPortSetPtr);
+            CubemapRenderContextPtr->SetTargetSet(pGraphicSkyboxFacet->m_TargetSetPtr);
+            CubemapRenderContextPtr->SetRenderState(NoDepthStatePtr);
+
+            pGraphicSkyboxFacet->m_RenderContextPtr = CubemapRenderContextPtr;
 
             // -----------------------------------------------------------------------------
             // Update
             // -----------------------------------------------------------------------------
-            UpdateFacet(pDataSkyboxFacet, pGraphicSkyboxFacet);
+            UpdateFacet(pSkyComponent, pGraphicSkyboxFacet);
 
             // -----------------------------------------------------------------------------
             // Save facet
             // -----------------------------------------------------------------------------
-            _pEntity->SetDetailFacet(Dt::SFacetCategory::Graphic, pGraphicSkyboxFacet);
+            pGraphicSkyboxFacet->m_TimeStamp = Core::Time::GetNumberOfFrame() + 1;
         }
-        else if ((DirtyFlags & Dt::CEntity::DirtyDetail))
+        else if ((DirtyFlags & Dt::CSkyComponent::DirtyInfo))
         {
-            pGraphicSkyboxFacet = static_cast<CInternSkyFacet*>(_pEntity->GetDetailFacet(Dt::SFacetCategory::Graphic));
+            CInternSkyFacet* pGraphicSkyboxFacet = CComponentManager::GetInstance().GetComponent<CInternSkyFacet>(pSkyComponent->GetID());
 
             // -----------------------------------------------------------------------------
             // Update
             // -----------------------------------------------------------------------------
-            UpdateFacet(pDataSkyboxFacet, pGraphicSkyboxFacet);
+            UpdateFacet(pSkyComponent, pGraphicSkyboxFacet);
 
             // -----------------------------------------------------------------------------
             // Set time
             // -----------------------------------------------------------------------------
-            pGraphicSkyboxFacet->m_TimeStamp = Core::Time::GetNumberOfFrame();
+            pGraphicSkyboxFacet->m_TimeStamp = Core::Time::GetNumberOfFrame() + 1;
         }
     }
 
     // -----------------------------------------------------------------------------
 
-    CGfxSkyManager::CInternSkyFacet& CGfxSkyManager::AllocateSkyFacet(unsigned int _FaceSize)
-    {
-        // -----------------------------------------------------------------------------
-        // Create facet
-        // -----------------------------------------------------------------------------
-        CInternSkyFacet& rGraphicSkyboxFacet = m_Skyfacets.Allocate();
-
-        // -----------------------------------------------------------------------------
-        // Cubemap
-        // -----------------------------------------------------------------------------
-        STextureDescriptor TextureDescriptor;
-
-        TextureDescriptor.m_NumberOfPixelsU  = _FaceSize;
-        TextureDescriptor.m_NumberOfPixelsV  = _FaceSize;
-        TextureDescriptor.m_NumberOfPixelsW  = 1;
-        TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_GenerateAllMipMaps;
-        TextureDescriptor.m_NumberOfTextures = 6;
-        TextureDescriptor.m_Binding          = CTexture::ShaderResource | CTexture::RenderTarget;
-        TextureDescriptor.m_Access           = CTexture::CPUWrite;
-        TextureDescriptor.m_Format           = CTexture::Unknown;
-        TextureDescriptor.m_Usage            = CTexture::GPURead;
-        TextureDescriptor.m_Semantic         = CTexture::Diffuse;
-        TextureDescriptor.m_pFileName        = 0;
-        TextureDescriptor.m_pPixels          = 0;
-        TextureDescriptor.m_Format           = CTexture::R16G16B16A16_FLOAT;
-        
-        rGraphicSkyboxFacet.m_CubemapPtr = TextureManager::CreateCubeTexture(TextureDescriptor);
-
-		TextureManager::SetTextureLabel(rGraphicSkyboxFacet.m_CubemapPtr, "Sky Texture");
-
-        // -----------------------------------------------------------------------------
-        // Target Set
-        // -----------------------------------------------------------------------------
-        CTexturePtr FirstMipmapCubeTexture = TextureManager::GetMipmapFromTexture2D(rGraphicSkyboxFacet.m_CubemapPtr, 0);
-
-        rGraphicSkyboxFacet.m_TargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTexturePtr>(FirstMipmapCubeTexture));
-
-        // -----------------------------------------------------------------------------
-        // Viewport
-        // -----------------------------------------------------------------------------
-        SViewPortDescriptor ViewPortDesc;
-
-        ViewPortDesc.m_TopLeftX = 0.0f;
-        ViewPortDesc.m_TopLeftY = 0.0f;
-        ViewPortDesc.m_MinDepth = 0.0f;
-        ViewPortDesc.m_MaxDepth = 1.0f;
-
-        ViewPortDesc.m_Width = static_cast<float>(FirstMipmapCubeTexture->GetNumberOfPixelsU());
-        ViewPortDesc.m_Height = static_cast<float>(FirstMipmapCubeTexture->GetNumberOfPixelsV());
-
-        CViewPortPtr MipMapViewPort = ViewManager::CreateViewPort(ViewPortDesc);
-
-        rGraphicSkyboxFacet.m_ViewPortSetPtr = ViewManager::CreateViewPortSet(MipMapViewPort);
-
-        // -----------------------------------------------------------------------------
-        // Render context
-        // -----------------------------------------------------------------------------
-        CCameraPtr          CameraPtr       = ViewManager::GetMainCamera();
-        CRenderStatePtr     NoDepthStatePtr = StateManager::GetRenderState(CRenderState::NoDepth | CRenderState::NoCull | CRenderState::AlphaBlend);
-
-        CRenderContextPtr CubemapRenderContextPtr = ContextManager::CreateRenderContext();
-
-        CubemapRenderContextPtr->SetCamera(CameraPtr);
-        CubemapRenderContextPtr->SetViewPortSet(rGraphicSkyboxFacet.m_ViewPortSetPtr);
-        CubemapRenderContextPtr->SetTargetSet(rGraphicSkyboxFacet.m_TargetSetPtr);
-        CubemapRenderContextPtr->SetRenderState(NoDepthStatePtr);
-
-        rGraphicSkyboxFacet.m_RenderContextPtr = CubemapRenderContextPtr;
-
-        return rGraphicSkyboxFacet;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CGfxSkyManager::RenderSkybox(Dt::CSkyFacet* _pDataSkyFacet, CInternSkyFacet* _pOutput)
+    void CGfxSkyManager::RenderSkybox(Dt::CSkyComponent* _pDataSkyFacet, CInternSkyFacet* _pOutput)
     {
         switch (_pDataSkyFacet->GetType())
         {
-            case Dt::CSkyFacet::Procedural:      RenderSkyboxFromAtmopsphericScattering(_pOutput, _pDataSkyFacet->GetIntensity()); break;
-            case Dt::CSkyFacet::Panorama:        RenderSkyboxFromPanorama(_pOutput, _pDataSkyFacet->GetIntensity()); break;
-            case Dt::CSkyFacet::Cubemap:         RenderSkyboxFromCubemap(_pOutput, _pDataSkyFacet->GetIntensity()); break;
-            case Dt::CSkyFacet::Texture:         RenderSkyboxFromTexture(_pOutput, _pDataSkyFacet->GetIntensity()); break;
-            case Dt::CSkyFacet::TextureGeometry: RenderSkyboxFromGeometry(_pOutput, _pDataSkyFacet->GetIntensity()); break;
-            case Dt::CSkyFacet::TextureLUT:      RenderSkyboxFromLUT(_pOutput, _pDataSkyFacet->GetIntensity()); break;
+            case Dt::CSkyComponent::Procedural:      RenderSkyboxFromAtmopsphericScattering(_pOutput, _pDataSkyFacet->GetIntensity()); break;
+            case Dt::CSkyComponent::Panorama:        RenderSkyboxFromPanorama(_pOutput, _pDataSkyFacet->GetIntensity()); break;
+            case Dt::CSkyComponent::Cubemap:         RenderSkyboxFromCubemap(_pOutput, _pDataSkyFacet->GetIntensity()); break;
+            case Dt::CSkyComponent::Texture:         RenderSkyboxFromTexture(_pOutput, _pDataSkyFacet->GetIntensity()); break;
+            case Dt::CSkyComponent::TextureGeometry: RenderSkyboxFromGeometry(_pOutput, _pDataSkyFacet->GetIntensity()); break;
+            case Dt::CSkyComponent::TextureLUT:      RenderSkyboxFromLUT(_pOutput, _pDataSkyFacet->GetIntensity()); break;
         }
     }
 
@@ -923,14 +834,17 @@ namespace
         // -----------------------------------------------------------------------------
         // Iterate throw every entity inside this map
         // -----------------------------------------------------------------------------
-        Dt::CSunLightFacet* pDataSunFacet = 0;
+        Dt::CSunComponent* pDtSunComponent = 0;
 
-        for (Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Light); CurrentEntity != Dt::Map::EntitiesEnd() && pDataSunFacet == 0; CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Light))
+        auto DataSunComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CSunComponent>();
+
+        for (auto Component : DataSunComponents)
         {
-            if (CurrentEntity->GetType() == Dt::SLightType::Sun)
-            {
-                pDataSunFacet = static_cast<Dt::CSunLightFacet*>(CurrentEntity->GetDetailFacet(Dt::SFacetCategory::Data));
-            }
+            Dt::CSunComponent* pDtComponent = static_cast<Dt::CSunComponent*>(Component);
+
+            if (pDtComponent->IsActiveAndUsable() == false) continue;
+
+            pDtSunComponent = pDtComponent;
         }
 
         Performance::BeginEvent("Skybox from PAS");
@@ -940,7 +854,7 @@ namespace
         // -----------------------------------------------------------------------------
         SPSPASSettings PSBuffer;
 
-        PSBuffer.g_SunDirection           = pDataSunFacet == nullptr ? glm::vec4(0.0f, 1.0f, 0.0f, 0.0f) : glm::eulerAngleX(glm::radians(90.0f)) * glm::vec4(pDataSunFacet->GetDirection(), 0.0f);
+        PSBuffer.g_SunDirection           = pDtSunComponent == nullptr ? glm::vec4(0.0f, 1.0f, 0.0f, 0.0f) : glm::eulerAngleX(glm::radians(90.0f)) * glm::vec4(pDtSunComponent->GetDirection(), 0.0f);
         PSBuffer.g_SunIntensity           = glm::vec4(_Intensity);
         PSBuffer.ps_ExposureHistoryIndex  = 0;
 
@@ -2326,13 +2240,6 @@ namespace SkyManager
     void Update()
     {
         CGfxSkyManager::GetInstance().Update();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CSkyFacetPtr CreateSky(unsigned int _FaceSize, const Base::Char* _pFileName)
-    {
-        return CGfxSkyManager::GetInstance().CreateSky(_FaceSize, _pFileName);
     }
 } // namespace SkyManager
 } // namespace Gfx

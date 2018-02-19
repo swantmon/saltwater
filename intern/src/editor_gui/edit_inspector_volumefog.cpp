@@ -70,24 +70,24 @@ namespace Edit
         // -----------------------------------------------------------------------------
         Edit::CMessage NewMessage;
 
-        NewMessage.PutInt(m_CurrentEntityID);
+        NewMessage.Put(m_CurrentEntityID);
 
-        NewMessage.PutFloat(WindDirection[0]);
-        NewMessage.PutFloat(WindDirection[1]);
-        NewMessage.PutFloat(WindDirection[2]);
-        NewMessage.PutFloat(WindDirection[3]);
+        NewMessage.Put(WindDirection[0]);
+        NewMessage.Put(WindDirection[1]);
+        NewMessage.Put(WindDirection[2]);
+        NewMessage.Put(WindDirection[3]);
 
-        NewMessage.PutFloat(Color[0]);
-        NewMessage.PutFloat(Color[1]);
-        NewMessage.PutFloat(Color[2]);
-        NewMessage.PutFloat(Color[3]);
+        NewMessage.Put(Color[0]);
+        NewMessage.Put(Color[1]);
+        NewMessage.Put(Color[2]);
+        NewMessage.Put(Color[3]);
 
-        NewMessage.PutFloat(FrustumDepth);
-        NewMessage.PutFloat(ShadowIntensity);
-        NewMessage.PutFloat(ScatteringCoeff);
-        NewMessage.PutFloat(AbsorptionCoeff);
-        NewMessage.PutFloat(DensityLevel);
-        NewMessage.PutFloat(DensityAttenuation);
+        NewMessage.Put(FrustumDepth);
+        NewMessage.Put(ShadowIntensity);
+        NewMessage.Put(ScatteringCoeff);
+        NewMessage.Put(AbsorptionCoeff);
+        NewMessage.Put(DensityLevel);
+        NewMessage.Put(DensityAttenuation);
 
         NewMessage.Reset();
 
@@ -115,13 +115,13 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void CInspectorVolumeFog::RequestInformation(unsigned int _EntityID)
+    void CInspectorVolumeFog::RequestInformation(Base::ID _EntityID)
     {
         m_CurrentEntityID = _EntityID;
 
         CMessage NewMessage;
 
-        NewMessage.PutInt(m_CurrentEntityID);
+        NewMessage.Put(m_CurrentEntityID);
 
         NewMessage.Reset();
 
@@ -138,30 +138,30 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
         if (EntityID != m_CurrentEntityID) return;
 
-        X = _rMessage.GetFloat();
-        Y = _rMessage.GetFloat();
-        Z = _rMessage.GetFloat();
-        W = _rMessage.GetFloat();
+        X = _rMessage.Get<float>();
+        Y = _rMessage.Get<float>();
+        Z = _rMessage.Get<float>();
+        W = _rMessage.Get<float>();
 
         glm::vec4 Direction = glm::vec4(X, Y, Z, W);
 
-        R = _rMessage.GetFloat();
-        G = _rMessage.GetFloat();
-        B = _rMessage.GetFloat();
-        A = _rMessage.GetFloat();
+        R = _rMessage.Get<float>();
+        G = _rMessage.Get<float>();
+        B = _rMessage.Get<float>();
+        A = _rMessage.Get<float>();
         
         glm::ivec4 Color = glm::ivec4(R * 255, G * 255, B * 255, A * 255);
 
-        float FrustumDepth       = _rMessage.GetFloat();
-        float ShadowIntensity    = _rMessage.GetFloat();
-        float ScatteringCoeff    = _rMessage.GetFloat();
-        float AbsorptionCoeff    = _rMessage.GetFloat();
-        float DensityLevel       = _rMessage.GetFloat();
-        float DensityAttenuation = _rMessage.GetFloat();
+        float FrustumDepth       = _rMessage.Get<float>();
+        float ShadowIntensity    = _rMessage.Get<float>();
+        float ScatteringCoeff    = _rMessage.Get<float>();
+        float AbsorptionCoeff    = _rMessage.Get<float>();
+        float DensityLevel       = _rMessage.Get<float>();
+        float DensityAttenuation = _rMessage.Get<float>();
 
         // -----------------------------------------------------------------------------
         // Set values

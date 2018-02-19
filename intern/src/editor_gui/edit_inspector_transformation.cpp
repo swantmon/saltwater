@@ -61,19 +61,19 @@ namespace Edit
         // -----------------------------------------------------------------------------
         CMessage NewMessage;
 
-        NewMessage.PutInt(m_CurrentEntityID);
+        NewMessage.Put(m_CurrentEntityID);
 
-        NewMessage.PutFloat(TranslationX);
-        NewMessage.PutFloat(TranslationY);
-        NewMessage.PutFloat(TranslationZ);
+        NewMessage.Put(TranslationX);
+        NewMessage.Put(TranslationY);
+        NewMessage.Put(TranslationZ);
 
-        NewMessage.PutFloat(RotationX);
-        NewMessage.PutFloat(RotationY);
-        NewMessage.PutFloat(RotationZ);
+        NewMessage.Put(RotationX);
+        NewMessage.Put(RotationY);
+        NewMessage.Put(RotationZ);
 
-        NewMessage.PutFloat(ScaleX);
-        NewMessage.PutFloat(ScaleY);
-        NewMessage.PutFloat(ScaleZ);
+        NewMessage.Put(ScaleX);
+        NewMessage.Put(ScaleY);
+        NewMessage.Put(ScaleZ);
 
         NewMessage.Reset();
 
@@ -199,13 +199,13 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void CInspectorTransformation::RequestInformation(unsigned int _EntityID)
+    void CInspectorTransformation::RequestInformation(Base::ID _EntityID)
     {
         m_CurrentEntityID = _EntityID;
 
         CMessage NewMessage;
 
-        NewMessage.PutInt(m_CurrentEntityID);
+        NewMessage.Put(m_CurrentEntityID);
 
         NewMessage.Reset();
 
@@ -228,28 +228,28 @@ namespace Edit
 
         bool  HasTransformation;
         
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
         if (EntityID != m_CurrentEntityID)
         {
             return;
         }
 
-        HasTransformation = _rMessage.GetBool();
+        HasTransformation = _rMessage.Get<bool>();
 
         if (HasTransformation)
         {
-            TranslationX = _rMessage.GetFloat();
-            TranslationY = _rMessage.GetFloat();
-            TranslationZ = _rMessage.GetFloat();
+            TranslationX = _rMessage.Get<float>();
+            TranslationY = _rMessage.Get<float>();
+            TranslationZ = _rMessage.Get<float>();
 
-            RotationX = _rMessage.GetFloat();
-            RotationY = _rMessage.GetFloat();
-            RotationZ = _rMessage.GetFloat();
+            RotationX = _rMessage.Get<float>();
+            RotationY = _rMessage.Get<float>();
+            RotationZ = _rMessage.Get<float>();
 
-            ScaleX = _rMessage.GetFloat();
-            ScaleY = _rMessage.GetFloat();
-            ScaleZ = _rMessage.GetFloat();
+            ScaleX = _rMessage.Get<float>();
+            ScaleY = _rMessage.Get<float>();
+            ScaleZ = _rMessage.Get<float>();
 
             m_pTransformationRotationX->setEnabled(true);
             m_pTransformationRotationY->setEnabled(true);
@@ -261,9 +261,9 @@ namespace Edit
         }
         else
         {
-            TranslationX = _rMessage.GetFloat();
-            TranslationY = _rMessage.GetFloat();
-            TranslationZ = _rMessage.GetFloat();
+            TranslationX = _rMessage.Get<float>();
+            TranslationY = _rMessage.Get<float>();
+            TranslationZ = _rMessage.Get<float>();
 
             RotationX = 0.0f;
             RotationY = 0.0f;

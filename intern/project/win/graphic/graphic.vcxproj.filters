@@ -29,10 +29,10 @@
       <Filter>engine\layout</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_lod.cpp">
-      <Filter>engine\models</Filter>
+      <Filter>map\manager\models</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_surface.cpp">
-      <Filter>engine\models</Filter>
+      <Filter>map\manager\models</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_view_port.cpp">
       <Filter>engine\view ports</Filter>
@@ -133,9 +133,6 @@
     <ClCompile Include="..\..\..\src\graphic\gfx_performance.cpp">
       <Filter>ogl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_actor_renderer.cpp">
-      <Filter>engine\renderer</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_ar_renderer.cpp">
       <Filter>engine\renderer</Filter>
     </ClCompile>
@@ -144,12 +141,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_postfx_renderer.cpp">
       <Filter>engine\renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_material_manager.cpp">
-      <Filter>engine\materials</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_material.cpp">
-      <Filter>engine\materials</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_light_sun_renderer.cpp">
       <Filter>engine\renderer</Filter>
@@ -171,61 +162,19 @@
       <Filter>engine\renderer</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_mesh.cpp">
-      <Filter>engine\models</Filter>
+      <Filter>map\manager\models</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_mesh_manager.cpp">
-      <Filter>engine\models</Filter>
+      <Filter>map\manager\models</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_selection_renderer.cpp">
       <Filter>engine\renderer</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_sky_manager.cpp">
-      <Filter>engine\map\lights\sky</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_sky_facet.cpp">
-      <Filter>engine\map\lights\sky</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_light_probe_facet.cpp">
-      <Filter>engine\map\lights\light probe</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_light_probe_manager.cpp">
-      <Filter>engine\map\lights\light probe</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_point_light_manager.cpp">
-      <Filter>engine\map\lights\point light</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_point_light_facet.cpp">
-      <Filter>engine\map\lights\point light</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_sun_facet.cpp">
-      <Filter>engine\map\lights\sun</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_sun_manager.cpp">
-      <Filter>engine\map\lights\sun</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_background_renderer.cpp">
       <Filter>engine\renderer</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_camera_actor_facet.cpp">
-      <Filter>engine\map\actors\camera</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_camera_actor_manager.cpp">
-      <Filter>engine\map\actors\camera</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_mesh_actor_manager.cpp">
-      <Filter>engine\map\actors\mesh</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_mesh_actor_facet.cpp">
-      <Filter>engine\map\actors\mesh</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_light_indirect_renderer.cpp">
       <Filter>engine\renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_area_light_facet.cpp">
-      <Filter>engine\map\lights\area light</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_area_light_manager.cpp">
-      <Filter>engine\map\lights\area light</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_renderer_interface.cpp">
       <Filter>interface\renderer</Filter>
@@ -235,6 +184,57 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_texture.cpp">
       <Filter>engine\textures</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_component_manager.cpp">
+      <Filter>map\components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_mesh_component.cpp">
+      <Filter>map\components\models</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_camera_component.cpp">
+      <Filter>map\components\camera</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_camera_manager.cpp">
+      <Filter>map\manager\camera</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_area_light_manager.cpp">
+      <Filter>map\manager\lights</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_light_probe_manager.cpp">
+      <Filter>map\manager\lights</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_point_light_manager.cpp">
+      <Filter>map\manager\lights</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_sky_manager.cpp">
+      <Filter>map\manager\lights</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_sun_manager.cpp">
+      <Filter>map\manager\lights</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_material.cpp">
+      <Filter>map\manager\models</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_material_manager.cpp">
+      <Filter>map\manager\models</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_area_light_component.cpp">
+      <Filter>map\components\lights</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_light_probe_component.cpp">
+      <Filter>map\components\lights</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_point_light_component.cpp">
+      <Filter>map\components\lights</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_sky_component.cpp">
+      <Filter>map\components\lights</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_sun_component.cpp">
+      <Filter>map\components\lights</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_mesh_renderer.cpp">
+      <Filter>engine\renderer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -275,10 +275,10 @@
       <Filter>engine\layout</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_lod.h">
-      <Filter>engine\models</Filter>
+      <Filter>map\manager\models</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_surface.h">
-      <Filter>engine\models</Filter>
+      <Filter>map\manager\models</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_view_port_set.h">
       <Filter>engine\view ports</Filter>
@@ -409,9 +409,6 @@
     <ClInclude Include="..\..\..\src\graphic\gfx_performance.h">
       <Filter>engine</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_actor_renderer.h">
-      <Filter>engine\renderer</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_ar_renderer.h">
       <Filter>engine\renderer</Filter>
     </ClInclude>
@@ -420,12 +417,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_postfx_renderer.h">
       <Filter>engine\renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_material_manager.h">
-      <Filter>engine\materials</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_material.h">
-      <Filter>engine\materials</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_light_sun_renderer.h">
       <Filter>engine\renderer</Filter>
@@ -447,52 +438,16 @@
       <Filter>engine\renderer</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_mesh.h">
-      <Filter>engine\models</Filter>
+      <Filter>map\manager\models</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_mesh_manager.h">
-      <Filter>engine\models</Filter>
+      <Filter>map\manager\models</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_selection_renderer.h">
       <Filter>engine\renderer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_sky_manager.h">
-      <Filter>engine\map\lights\sky</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_sky_facet.h">
-      <Filter>engine\map\lights\sky</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_light_probe_facet.h">
-      <Filter>engine\map\lights\light probe</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_light_probe_manager.h">
-      <Filter>engine\map\lights\light probe</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_point_light_manager.h">
-      <Filter>engine\map\lights\point light</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_point_light_facet.h">
-      <Filter>engine\map\lights\point light</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_sun_facet.h">
-      <Filter>engine\map\lights\sun</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_sun_manager.h">
-      <Filter>engine\map\lights\sun</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_background_renderer.h">
       <Filter>engine\renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_camera_actor_facet.h">
-      <Filter>engine\map\actors\camera</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_camera_actor_manager.h">
-      <Filter>engine\map\actors\camera</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_mesh_actor_manager.h">
-      <Filter>engine\map\actors\mesh</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_mesh_actor_facet.h">
-      <Filter>engine\map\actors\mesh</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_light_indirect_renderer.h">
       <Filter>engine\renderer</Filter>
@@ -505,12 +460,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_ltc_look_up_textures.h">
       <Filter>engine\renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_area_light_facet.h">
-      <Filter>engine\map\lights\area light</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_area_light_manager.h">
-      <Filter>engine\map\lights\area light</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_renderer_interface.h">
       <Filter>interface\renderer</Filter>
@@ -526,6 +475,60 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_graphics_info.h">
       <Filter>engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_component.h">
+      <Filter>map\components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_component_manager.h">
+      <Filter>map\components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_mesh_component.h">
+      <Filter>map\components\models</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_camera_component.h">
+      <Filter>map\components\camera</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_camera_manager.h">
+      <Filter>map\manager\camera</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_area_light_manager.h">
+      <Filter>map\manager\lights</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_light_probe_manager.h">
+      <Filter>map\manager\lights</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_point_light_manager.h">
+      <Filter>map\manager\lights</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_sky_manager.h">
+      <Filter>map\manager\lights</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_sun_manager.h">
+      <Filter>map\manager\lights</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_material.h">
+      <Filter>map\manager\models</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_material_manager.h">
+      <Filter>map\manager\models</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_area_light_component.h">
+      <Filter>map\components\lights</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_light_probe_component.h">
+      <Filter>map\components\lights</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_point_light_component.h">
+      <Filter>map\components\lights</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_sky_component.h">
+      <Filter>map\components\lights</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_sun_component.h">
+      <Filter>map\components\lights</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_mesh_renderer.h">
+      <Filter>engine\renderer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -646,44 +649,8 @@
     <Filter Include="ogl\shaders\files\builtin\render_pass\3_tone_mapping">
       <UniqueIdentifier>{6a5b8a92-193d-4a42-9ed1-3cfddc0e5702}</UniqueIdentifier>
     </Filter>
-    <Filter Include="engine\map">
-      <UniqueIdentifier>{e4eafc3a-84ac-4c03-a5cf-7207a9d5652a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="engine\map\lights">
-      <UniqueIdentifier>{b6012d62-e689-4741-b1d8-d09e91c6e5aa}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="engine\materials">
-      <UniqueIdentifier>{8fc6af4b-1e99-4100-93b3-3e02646c82d4}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="engine\models">
-      <UniqueIdentifier>{92e433e6-6b6c-4461-a57f-45a88b68bc58}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="engine\map\actors">
-      <UniqueIdentifier>{02e2bfc8-3fc9-4c52-94d8-71e03226c74f}</UniqueIdentifier>
-    </Filter>
     <Filter Include="interface\app">
       <UniqueIdentifier>{d2d6b2f8-bc87-4bab-a774-595fc150e167}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="engine\map\lights\sky">
-      <UniqueIdentifier>{e368e615-e6ff-4088-91bb-c8f8c4579806}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="engine\map\lights\light probe">
-      <UniqueIdentifier>{a475361d-5742-4a44-b188-1c76dd2ce874}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="engine\map\lights\point light">
-      <UniqueIdentifier>{26d9f37c-3192-4a47-863f-54b5d9663a1a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="engine\map\lights\sun">
-      <UniqueIdentifier>{fd022fc1-0bf0-4614-b478-05be935c009c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="engine\map\actors\mesh">
-      <UniqueIdentifier>{0443e64d-1c8b-4e07-86ed-68412f045b36}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="engine\map\actors\camera">
-      <UniqueIdentifier>{9e400c53-a975-4c85-9026-d24010c20ccc}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="engine\map\lights\area light">
-      <UniqueIdentifier>{7713c0bf-9988-4696-8dfc-fe318fab49c1}</UniqueIdentifier>
     </Filter>
     <Filter Include="interface\renderer">
       <UniqueIdentifier>{2b179e5e-f187-406a-8007-f761468b75d2}</UniqueIdentifier>
@@ -693,6 +660,33 @@
     </Filter>
     <Filter Include="engine\samplers">
       <UniqueIdentifier>{7ba8ed96-cc8c-4b77-a570-b8aeb9711e1b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map">
+      <UniqueIdentifier>{e4eafc3a-84ac-4c03-a5cf-7207a9d5652a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\manager">
+      <UniqueIdentifier>{90be79bc-ccb4-4f41-9be1-79251d7bcc69}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\manager\models">
+      <UniqueIdentifier>{92e433e6-6b6c-4461-a57f-45a88b68bc58}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\manager\camera">
+      <UniqueIdentifier>{45fd8bec-67d1-48cb-83bf-795fdc42fb7e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\manager\lights">
+      <UniqueIdentifier>{052c8047-a167-4853-b3f9-06033bbc6ed8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\components">
+      <UniqueIdentifier>{7c66b770-b2d3-4d0b-b8e9-bbec72e7d8f5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\components\lights">
+      <UniqueIdentifier>{b6012d62-e689-4741-b1d8-d09e91c6e5aa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\components\camera">
+      <UniqueIdentifier>{9e400c53-a975-4c85-9026-d24010c20ccc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\components\models">
+      <UniqueIdentifier>{0443e64d-1c8b-4e07-86ed-68412f045b36}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

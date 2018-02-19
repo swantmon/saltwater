@@ -12,7 +12,6 @@
 
 #include "core/core_asset_manager.h"
 
-#include "data/data_actor_type.h"
 #include "data/data_lod.h"
 #include "data/data_map.h"
 #include "data/data_material.h"

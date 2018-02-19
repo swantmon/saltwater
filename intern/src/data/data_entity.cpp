@@ -3,6 +3,7 @@
 
 #include "base/base_include_glm.h"
 
+#include "data/data_component_facet.h"
 #include "data/data_entity.h"
 #include "data/data_hierarchy_facet.h"
 #include "data/data_transformation_facet.h"
@@ -15,16 +16,18 @@ namespace Dt
         , m_pFolder             (nullptr)
         , m_pHierarchyFacet     (nullptr)
         , m_pTransformationFacet(nullptr)
+        , m_pComponentsFacet    (nullptr)
         , m_ID                  (s_InvalidID)
         , m_Name                ()
         , m_WorldAABB           ()
         , m_WorldPosition       ()
         , m_Flags               ()
     {
-        m_pDetailFacets[SFacetCategory::Data]    = 0;
-        m_pDetailFacets[SFacetCategory::Graphic] = 0;
-
         m_Flags.m_Key = 0;
+
+        m_Flags.m_IsDynamic    = true;
+        m_Flags.m_IsSelectable = true;
+        m_Flags.m_IsActive     = true;
     }
 
     // -----------------------------------------------------------------------------
@@ -100,6 +103,20 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
+    void CEntity::SetActive(bool _Flag)
+    {
+        m_Flags.m_IsActive = _Flag;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    bool CEntity::IsActive() const
+    {
+        return m_Flags.m_IsActive == true;
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CEntity::SetLayer(unsigned int _Layer)
     {
         m_Flags.m_Layer = _Layer;
@@ -131,20 +148,6 @@ namespace Dt
     bool CEntity::IsInMap() const
     {
         return m_pFolder != nullptr;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CEntity::SetType(unsigned int _Type)
-    {
-        m_Flags.m_Type = _Type;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    unsigned int CEntity::GetType() const
-    {
-        return m_Flags.m_Type;
     }
 
     // -----------------------------------------------------------------------------
@@ -296,23 +299,23 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CEntity::SetDetailFacet(unsigned int _Category, void* _pFacet)
+    void CEntity::SetComponentFacet(CComponentFacet* _pFacet)
     {
-        m_pDetailFacets[_Category] = _pFacet;
+        m_pComponentsFacet = _pFacet;
     }
 
     // -----------------------------------------------------------------------------
 
-    void* CEntity::GetDetailFacet(unsigned int _Category)
+    CComponentFacet* CEntity::GetComponentFacet()
     {
-        return m_pDetailFacets[_Category];
+        return m_pComponentsFacet;
     }
 
     // -----------------------------------------------------------------------------
 
-    const void* CEntity::GetDetailFacet(unsigned int _Category) const
+    const CComponentFacet* CEntity::GetComponentFacet() const
     {
-        return m_pDetailFacets[_Category];
+        return m_pComponentsFacet;
     }
 
     // -----------------------------------------------------------------------------

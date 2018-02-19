@@ -72,7 +72,7 @@ namespace Edit
 
         Edit::CMessage NewMessage;
 
-        NewMessage.PutInt(m_TextureHash);
+        NewMessage.Put(m_TextureHash);
 
         NewMessage.Reset();
 
@@ -88,7 +88,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         Edit::CMessage LoadMessage;
 
-        LoadMessage.PutString(_rRelPathToTexture.toLatin1().data());
+        LoadMessage.Put(std::string(_rRelPathToTexture.toLatin1().data()));
 
         LoadMessage.Reset();
 
@@ -103,7 +103,7 @@ namespace Edit
             // -----------------------------------------------------------------------------
             Edit::CMessage RequestMessage;
 
-            RequestMessage.PutInt(m_TextureHash);
+            RequestMessage.Put(m_TextureHash);
 
             RequestMessage.Reset();
 
@@ -115,35 +115,35 @@ namespace Edit
 
     void CInspectorTexture::OnTextureInfo(Edit::CMessage& _rMessage)
     {
-        unsigned int Hash = _rMessage.GetInt();
+        unsigned int Hash = _rMessage.Get<int>();
 
         if (Hash != m_TextureHash) return;
 
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
-        int Dimension = _rMessage.GetInt();
-        int Format    = _rMessage.GetInt();
-        int Semantic  = _rMessage.GetInt();
-        int Binding   = _rMessage.GetInt();
+        int Dimension = _rMessage.Get<int>();
+        int Format    = _rMessage.Get<int>();
+        int Semantic  = _rMessage.Get<int>();
+        int Binding   = _rMessage.Get<int>();
 
-        bool IsArray = _rMessage.GetBool();
-        bool IsCube  = _rMessage.GetBool();
-        bool IsDummy = _rMessage.GetBool();
+        bool IsArray = _rMessage.Get<bool>();
+        bool IsCube  = _rMessage.Get<bool>();
+        bool IsDummy = _rMessage.Get<bool>();
 
         BASE_UNUSED(IsArray);
         BASE_UNUSED(IsDummy);
 
-        char Filename[256];
-        char Identifier[256];
+        std::string Filename;
+        std::string Identifier;
 
-        bool HasFilename = _rMessage.GetBool();
+        bool HasFilename = _rMessage.Get<bool>();
         
-        if (HasFilename) _rMessage.GetString(Filename, 256);
+        if (HasFilename) Filename = _rMessage.Get<std::string>();
 
-        bool HasIdentifier = _rMessage.GetBool();
+        bool HasIdentifier = _rMessage.Get<bool>();
 
-        if (HasIdentifier) _rMessage.GetString(Identifier, 256);
+        if (HasIdentifier) Identifier = _rMessage.Get<std::string>();
 
         // -----------------------------------------------------------------------------
         // Set values
@@ -168,7 +168,7 @@ namespace Edit
 
         if (HasFilename)
         {
-            m_pFilenameEdit->setText(Filename);
+            m_pFilenameEdit->setText(QString(Filename.c_str()));
         }
         else
         {

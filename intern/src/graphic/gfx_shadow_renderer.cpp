@@ -8,17 +8,16 @@
 
 #include "core/core_time.h"
 
-#include "data/data_actor_type.h"
+#include "data/data_component_facet.h"
+#include "data/data_component_manager.h"
 #include "data/data_entity.h"
-#include "data/data_fx_type.h"
-#include "data/data_light_type.h"
 #include "data/data_map.h"
-#include "data/data_ssao_facet.h"
+#include "data/data_ssao_component.h"
 #include "data/data_transformation_facet.h"
 
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"
-#include "graphic/gfx_sun_facet.h"
+#include "graphic/gfx_sun_component.h"
 #include "graphic/gfx_sun_manager.h"
 #include "graphic/gfx_main.h"
 #include "graphic/gfx_mesh.h"
@@ -87,7 +86,7 @@ namespace
 
         struct SSSAORenderJob
         {
-            Dt::CSSAOFXFacet* m_pDataSSAOFacet;
+            Dt::CSSAOComponent* m_pDataSSAOFacet;
         };
         
         struct SGaussianSettings
@@ -102,17 +101,15 @@ namespace
             glm::mat4 m_InverseCameraProjection;
             glm::mat4 m_CameraProjection;
             glm::mat4 m_CameraView;
-            glm::vec4   m_NoiseScale;
-            glm::vec4   m_Kernel[s_SSAOKernelSize];
+            glm::vec4 m_NoiseScale;
+            glm::vec4 m_Kernel[s_SSAOKernelSize];
         };
 
     private:
 
         typedef std::vector<SSSAORenderJob> CSSAORenderJobs;
-        
+
     private:
-        
-       
 
         CMeshPtr m_QuadModelPtr;
         
@@ -825,44 +822,21 @@ namespace
 
     void CGfxShadowRenderer::BuildRenderJobs()
     {
-        // -----------------------------------------------------------------------------
-        // Clear current render jobs
-        // -----------------------------------------------------------------------------
         m_SSAORenderJobs.clear();
 
-        // -----------------------------------------------------------------------------
-        // Iterate throw every entity inside this map
-        // -----------------------------------------------------------------------------
-        Dt::Map::CEntityIterator CurrentEffectEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::FX);
-        Dt::Map::CEntityIterator EndOfEffectEntities = Dt::Map::EntitiesEnd();
+        auto DataComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CSSAOComponent>();
 
-        for (; CurrentEffectEntity != EndOfEffectEntities; )
+        for (auto Component : DataComponents)
         {
-            Dt::CEntity& rCurrentEntity = *CurrentEffectEntity;
+            Dt::CSSAOComponent* pDtComponent = static_cast<Dt::CSSAOComponent*>(Component);
 
-            // -----------------------------------------------------------------------------
-            // Get graphic facet
-            // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetType() == Dt::SFXType::SSAO)
-            {
-                Dt::CSSAOFXFacet* pDataSSAOFacet = static_cast<Dt::CSSAOFXFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+            if (pDtComponent->IsActiveAndUsable() == false) continue;
 
-                assert(pDataSSAOFacet != 0);
+            SSSAORenderJob NewRenderJob;
 
-                // -----------------------------------------------------------------------------
-                // Set sun into a new render job
-                // -----------------------------------------------------------------------------
-                SSSAORenderJob NewRenderJob;
+            NewRenderJob.m_pDataSSAOFacet = pDtComponent;
 
-                NewRenderJob.m_pDataSSAOFacet = pDataSSAOFacet;
-
-                m_SSAORenderJobs.push_back(NewRenderJob);
-            }
-
-            // -----------------------------------------------------------------------------
-            // Next entity
-            // -----------------------------------------------------------------------------
-            CurrentEffectEntity = CurrentEffectEntity.Next(Dt::SEntityCategory::FX);
+            m_SSAORenderJobs.push_back(NewRenderJob);
         }
     }
 } // namespace

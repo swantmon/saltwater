@@ -9,13 +9,13 @@
 
 #include "core/core_time.h"
 
-#include "data/data_actor_type.h"
+#include "data/data_component_manager.h"
+#include "data/data_component_facet.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_hierarchy_facet.h"
 #include "data/data_map.h"
-#include "data/data_mesh_actor_facet.h"
-#include "data/data_mesh_manager.h"
+#include "data/data_mesh_component.h"
 #include "data/data_model_manager.h"
 #include "data/data_transformation_facet.h"
 
@@ -77,33 +77,39 @@ namespace
         private:
             friend class CDtLvlEntityManager;
         };
+
+        class CInternComponentsFacet : public CComponentFacet
+        {
+        private:
+            friend class CDtLvlEntityManager;
+        };
         
     private:
         
         typedef Base::CPool<CInternEntity, 2048>              CEntityPool;
         typedef Base::CPool<CInternHierarchyFacet, 2048>      CHierarchyFacetPool;
         typedef Base::CPool<CInternTransformationFacet, 2048> CTransformationFacetPool;
+        typedef Base::CPool<CInternComponentsFacet, 2048>     CComponentsFacetPool;
         typedef std::vector<CEntity*>                         CEntityVector;
         typedef std::vector<CEntityDelegate>                  CEntityDelegates;
 
-        typedef std::unordered_map<unsigned int, CInternEntity*> CEntityByIDs;
-        typedef CEntityByIDs::iterator                           CEntityByIDPair;
+        typedef std::unordered_map<Base::ID, CInternEntity*> CEntityByIDs;
+        typedef CEntityByIDs::iterator                       CEntityByIDPair;
 
     private:
         
         CEntityPool              m_Entities;
         CHierarchyFacetPool      m_HierarchyFacets;
         CTransformationFacetPool m_TransformationFacets;
+        CComponentsFacetPool     m_ComponentsFacets;
         CEntityVector            m_DirtyEntities;
         CEntityDelegates         m_EntityDelegates;
         CEntityByIDs             m_EntityByID;
-        unsigned int             m_EntityID;
+        Base::ID                 m_EntityID;
 
     private:
 
         void UpdateEntity(CEntity& _rEntity);
-        void UpdateActorEntity(CEntity& _rEntity);
-        void UpdateLightEntity(CEntity& _rEntity);
 
         template<typename THasHierarchy>
         void UpdateWorldMatrix(CEntity& _rEntity, THasHierarchy _HasHierarchy);
@@ -150,6 +156,7 @@ namespace
         m_Entities            .Clear();
         m_HierarchyFacets     .Clear();
         m_TransformationFacets.Clear();
+        m_ComponentsFacets    .Clear();
 
         m_DirtyEntities.clear();
 
@@ -162,9 +169,8 @@ namespace
     {
         SEntityDescriptor EntityDesc;
 
-        EntityDesc.m_EntityCategory = SEntityCategory::Actor;
-        EntityDesc.m_EntityType     = SActorType::Node;
-        EntityDesc.m_FacetFlags     = CEntity::FacetTransformation | CEntity::FacetHierarchy;
+        EntityDesc.m_EntityCategory = SEntityCategory::Dynamic;
+        EntityDesc.m_FacetFlags     = CEntity::FacetTransformation | CEntity::FacetHierarchy | CEntity::FacetComponents;
 
         // -----------------------------------------------------------------------------
         // Create root node
@@ -186,9 +192,8 @@ namespace
             // -----------------------------------------------------------------------------
             // Create entity
             // -----------------------------------------------------------------------------
-            EntityDesc.m_EntityCategory = SEntityCategory::Actor;
-            EntityDesc.m_EntityType     = SActorType::Mesh;
-            EntityDesc.m_FacetFlags     = CEntity::FacetTransformation | CEntity::FacetHierarchy;
+            EntityDesc.m_EntityCategory = SEntityCategory::Dynamic;
+            EntityDesc.m_FacetFlags     = CEntity::FacetTransformation | CEntity::FacetHierarchy | CEntity::FacetComponents;
 
             Dt::CEntity& rChildEntity = CreateEntity(EntityDesc);
 
@@ -203,11 +208,11 @@ namespace
             // -----------------------------------------------------------------------------
             // Create facet
             // -----------------------------------------------------------------------------
-            Dt::CMeshActorFacet* pModelActorFacet = MeshActorManager::CreateMeshActor();
+            auto pModelActorFacet = CComponentManager::GetInstance().Allocate<Dt::CMeshComponent>();
 
             pModelActorFacet->SetMesh(&rMesh);
 
-            rChildEntity.SetDetailFacet(SFacetCategory::Data, pModelActorFacet);
+            rChildEntity.AttachComponent(pModelActorFacet);
 
             // -----------------------------------------------------------------------------
             // Attach mesh to entity
@@ -239,7 +244,6 @@ namespace
 
         rEntity.m_ID               = ID;
         rEntity.m_Flags.m_Category = _rDescriptor.m_EntityCategory;
-        rEntity.m_Flags.m_Type     = _rDescriptor.m_EntityType;
 
         if ((_rDescriptor.m_FacetFlags & CEntity::FacetHierarchy) != 0)
         {
@@ -249,6 +253,11 @@ namespace
         if ((_rDescriptor.m_FacetFlags & CEntity::FacetTransformation) != 0)
         {
             rEntity.m_pTransformationFacet = &m_TransformationFacets.Allocate();
+        }
+
+        if ((_rDescriptor.m_FacetFlags & CEntity::FacetComponents) != 0)
+        {
+            rEntity.m_pComponentsFacet = &m_ComponentsFacets.Allocate();
         }
 
         m_EntityByID[rEntity.m_ID] = &rEntity;
@@ -270,6 +279,11 @@ namespace
         if (rInternEntity.m_pTransformationFacet != nullptr)
         {
             m_TransformationFacets.Free(static_cast<CInternTransformationFacet*>(rInternEntity.m_pTransformationFacet));
+        }
+
+        if (rInternEntity.m_pComponentsFacet != nullptr)
+        {
+            m_ComponentsFacets.Free(static_cast<CInternComponentsFacet*>(rInternEntity.m_pComponentsFacet));
         }
 
         m_Entities.Free(&rInternEntity);
@@ -394,15 +408,6 @@ namespace
         }
 
         // -----------------------------------------------------------------------------
-        // Update specific entity categories
-        // -----------------------------------------------------------------------------
-        switch (_rEntity.GetCategory())
-        {
-        case SEntityCategory::Actor: UpdateActorEntity(_rEntity); break;
-        case SEntityCategory::Light: UpdateLightEntity(_rEntity); break;
-        }
-
-        // -----------------------------------------------------------------------------
         // Update entity in map
         // -----------------------------------------------------------------------------
         DirtyFlags = _rEntity.GetDirtyFlags();
@@ -422,26 +427,6 @@ namespace
         }
 
         _rEntity.SetDirtyFlags(0);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CDtLvlEntityManager::UpdateActorEntity(CEntity& _rEntity)
-    {
-        BASE_UNUSED(_rEntity);
-
-        // TODO:
-        // Update AABB of world
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CDtLvlEntityManager::UpdateLightEntity(CEntity& _rEntity)
-    {
-        BASE_UNUSED(_rEntity);
-
-        // TODO:
-        // Update light including AABB
     }
 
     // -----------------------------------------------------------------------------
