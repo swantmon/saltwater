@@ -166,6 +166,8 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
+        rCurrentEntity.SetActive(true);
+
         Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyAdd);
 
         _rMessage.SetResult(1);
@@ -178,6 +180,8 @@ namespace
         Base::ID EntityID = _rMessage.Get<Base::ID>();
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+
+        rCurrentEntity.SetActive(false);
 
         Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyRemove);
 

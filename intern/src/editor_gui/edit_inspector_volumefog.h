@@ -10,11 +10,11 @@ namespace Edit
 {
     class CInspectorVolumeFog : public QWidget, public Ui::InspectorVolumeFog
     {
-	    Q_OBJECT
+        Q_OBJECT
 
     public:
-	    CInspectorVolumeFog(QWidget* _pParent = Q_NULLPTR);
-	    ~CInspectorVolumeFog();
+        CInspectorVolumeFog(QWidget* _pParent = Q_NULLPTR);
+        ~CInspectorVolumeFog();
 
     public Q_SLOTS:
 

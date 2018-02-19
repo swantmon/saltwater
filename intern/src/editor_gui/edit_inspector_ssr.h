@@ -10,11 +10,11 @@ namespace Edit
 {
     class CInspectorSSR : public QWidget, public Ui::InspectorSSR
     {
-	    Q_OBJECT
+        Q_OBJECT
 
     public:
-	    CInspectorSSR(QWidget* _pParent = Q_NULLPTR);
-	    ~CInspectorSSR();
+        CInspectorSSR(QWidget* _pParent = Q_NULLPTR);
+        ~CInspectorSSR();
 
     public Q_SLOTS:
 

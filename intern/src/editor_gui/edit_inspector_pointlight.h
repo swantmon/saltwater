@@ -10,11 +10,11 @@ namespace Edit
 {
     class CInspectorPointlight : public QWidget, public Ui::InspectorPointLight
     {
-	    Q_OBJECT
+        Q_OBJECT
 
     public:
-	    CInspectorPointlight(QWidget* _pParent = Q_NULLPTR);
-	    ~CInspectorPointlight();
+        CInspectorPointlight(QWidget* _pParent = Q_NULLPTR);
+        ~CInspectorPointlight();
 
     public Q_SLOTS:
 

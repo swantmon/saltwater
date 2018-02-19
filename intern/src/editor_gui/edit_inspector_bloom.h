@@ -10,11 +10,11 @@ namespace Edit
 {
     class CInspectorBloom : public QWidget, public Ui::InspectorBloom
     {
-	    Q_OBJECT
+        Q_OBJECT
 
     public:
-	    CInspectorBloom(QWidget* _pParent = Q_NULLPTR);
-	    ~CInspectorBloom();
+        CInspectorBloom(QWidget* _pParent = Q_NULLPTR);
+        ~CInspectorBloom();
 
     public Q_SLOTS:
 

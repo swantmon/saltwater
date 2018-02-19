@@ -10,11 +10,11 @@ namespace Edit
 {
     class CInspectorDOF : public QWidget, public Ui::InspectorDOF
     {
-	    Q_OBJECT
+        Q_OBJECT
 
     public:
-	    CInspectorDOF(QWidget* _pParent = Q_NULLPTR);
-	    ~CInspectorDOF();
+        CInspectorDOF(QWidget* _pParent = Q_NULLPTR);
+        ~CInspectorDOF();
 
     public Q_SLOTS:
 
