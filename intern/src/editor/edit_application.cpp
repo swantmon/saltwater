@@ -3,6 +3,7 @@
 
 #include "base/base_console.h"
 #include "base/base_input_event.h"
+#include "base/base_program_parameters.h"
 #include "base/base_uncopyable.h"
 #include "base/base_singleton.h"
 
@@ -141,7 +142,7 @@ namespace
         // Now we get the information of the window handle and set this to
         // the graphic part and active this window.
         // -----------------------------------------------------------------------------
-        unsigned int VSync = 0;
+        int VSync = Base::CProgramParameters::GetInstance().Get("graphics:vsync_interval", 0);
 
         m_EditWindowID = Gfx::App::RegisterWindow(Edit::GUI::GetEditorWindowHandle(), VSync);
 

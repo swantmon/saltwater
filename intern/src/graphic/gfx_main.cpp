@@ -84,7 +84,7 @@ namespace
         
     public:
 
-        unsigned int RegisterWindow(void* _pWindow, unsigned int _VSync);
+        unsigned int RegisterWindow(void* _pWindow, int _VSync);
 
         unsigned int GetNumberOfWindows();
 
@@ -150,9 +150,9 @@ namespace
             HDC   m_pNativeDeviceContextHandle;
             HGLRC m_pNativeOpenGLContextHandle;
 #endif
-            glm::ivec2   m_InternalWindowSize;
-            glm::ivec2   m_NativeWindowSize;
-            unsigned int m_VSync;
+            glm::ivec2 m_InternalWindowSize;
+            glm::ivec2 m_NativeWindowSize;
+            int        m_VSync;
         };
         
         struct SPerFrameConstantBuffer
@@ -586,7 +586,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    unsigned int CGfxMain::RegisterWindow(void* _pWindow, unsigned int _VSync)
+    unsigned int CGfxMain::RegisterWindow(void* _pWindow, int _VSync)
     {
         if (_pWindow == 0 || m_NumberOfWindows == s_MaxNumberOfWindows) return 0;
 
@@ -985,7 +985,7 @@ namespace Main
 
     // -----------------------------------------------------------------------------
 
-    unsigned int RegisterWindow(void* _pWindow, unsigned int _VSync)
+    unsigned int RegisterWindow(void* _pWindow, int _VSync)
     {
         return CGfxMain::GetInstance().RegisterWindow(_pWindow, _VSync);
     }
