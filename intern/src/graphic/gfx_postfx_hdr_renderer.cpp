@@ -1037,15 +1037,13 @@ namespace
 
         for (auto Component : DataComponents)
         {
-            Dt::CBloomComponent* pDataBloomFacet = static_cast<Dt::CBloomComponent*>(Component);
+            Dt::CBloomComponent* pDtComponent = static_cast<Dt::CBloomComponent*>(Component);
 
-            assert(pDataBloomFacet->GetHostEntity());
-
-            if (!pDataBloomFacet->IsActive()) continue;
+            if (pDtComponent->IsActiveAndUsable() == false) continue;
 
             SBloomRenderJob NewRenderJob;
 
-            NewRenderJob.m_pDataBloomFacet = pDataBloomFacet;
+            NewRenderJob.m_pDataBloomFacet = pDtComponent;
 
             m_BloomRenderJobs.push_back(NewRenderJob);
         }

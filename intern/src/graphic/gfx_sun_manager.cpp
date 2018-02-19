@@ -196,17 +196,15 @@ namespace
 
         for (auto Component : DataComponents)
         {
-            Dt::CSunComponent* pSunComponent = static_cast<Dt::CSunComponent*>(Component);
+            Dt::CSunComponent* pDtComponent = static_cast<Dt::CSunComponent*>(Component);
 
-            assert(pSunComponent->GetHostEntity());
+            if (pDtComponent->IsActiveAndUsable() == false) continue;
 
-            if (!pSunComponent->IsActive()) continue;
-
-            CInternSunComponent* pGfxSunFacet = CComponentManager::GetInstance().GetComponent<CInternSunComponent>(pSunComponent->GetID());
+            CInternSunComponent* pGfxSunFacet = CComponentManager::GetInstance().GetComponent<CInternSunComponent>(pDtComponent->GetID());
 
             assert(pGfxSunFacet != nullptr);
 
-            if (pSunComponent->GetRefreshMode() == Dt::CSunComponent::Dynamic || pGfxSunFacet->GetTimeStamp() >= Core::Time::GetNumberOfFrame())
+            if (pDtComponent->GetRefreshMode() == Dt::CSunComponent::Dynamic || pGfxSunFacet->GetTimeStamp() >= Core::Time::GetNumberOfFrame())
             {
                 // -----------------------------------------------------------------------------
                 // Calculate near and far plane
@@ -220,8 +218,8 @@ namespace
                 // -----------------------------------------------------------------------------
                 // Set view
                 // -----------------------------------------------------------------------------
-                glm::vec3 SunPosition    = pSunComponent->GetHostEntity()->GetWorldPosition();
-                glm::vec3 SunRotation    = pSunComponent->GetDirection();
+                glm::vec3 SunPosition    = pDtComponent->GetHostEntity()->GetWorldPosition();
+                glm::vec3 SunRotation    = pDtComponent->GetDirection();
                 glm::mat3 RotationMatrix = glm::lookAtRH(SunPosition, SunPosition + SunRotation, glm::vec3(0.0f, 0.0f, 1.0f));
 
                 Gfx::CViewPtr ShadowViewPtr = pGfxSunFacet->m_RenderContextPtr->GetCamera()->GetView();
@@ -403,9 +401,7 @@ namespace
         {
             Dt::CMeshComponent* pDtComponent = static_cast<Dt::CMeshComponent*>(Component);
 
-            assert(pDtComponent->GetHostEntity());
-
-            if (!pDtComponent->IsActive()) continue;
+            if (pDtComponent->IsActiveAndUsable() == false) continue;
 
             CMeshComponent* pGfxComponent = CComponentManager::GetInstance().GetComponent<CMeshComponent>(pDtComponent->GetID());
 

@@ -73,6 +73,7 @@ namespace Dt
 
         void SetActive(bool _Flag);
         bool IsActive() const;
+        bool IsActiveAndUsable() const;
 
         void SetDirtyFlags(unsigned int _Flags);
         unsigned int GetDirtyFlags() const;
@@ -152,6 +153,16 @@ namespace Dt
     bool CComponent<T>::IsActive() const
     {
         return m_Flags.m_IsActive == true;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    template<class T>
+    bool CComponent<T>::IsActiveAndUsable() const
+    {
+        assert(m_pHostEntity);
+
+        return m_Flags.m_IsActive == true && m_pHostEntity->IsActive() == true;
     }
 
     // -----------------------------------------------------------------------------

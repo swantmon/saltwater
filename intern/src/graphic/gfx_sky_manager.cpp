@@ -842,7 +842,7 @@ namespace
         {
             Dt::CSunComponent* pDtComponent = static_cast<Dt::CSunComponent*>(Component);
 
-            if (!pDtComponent->IsActive()) continue;
+            if (pDtComponent->IsActiveAndUsable() == false) continue;
 
             pDtSunComponent = pDtComponent;
         }

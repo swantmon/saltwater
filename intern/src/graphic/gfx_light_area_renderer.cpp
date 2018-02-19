@@ -615,9 +615,7 @@ namespace
         {
             Dt::CAreaLightComponent* pDtComponent = static_cast<Dt::CAreaLightComponent*>(Component);
 
-            assert(pDtComponent->GetHostEntity());
-
-            if (!pDtComponent->IsActive()) continue;
+            if (pDtComponent->IsActiveAndUsable() == false) continue;
 
             SRenderJob NewRenderJob;
 

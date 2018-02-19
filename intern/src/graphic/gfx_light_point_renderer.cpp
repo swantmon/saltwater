@@ -506,17 +506,15 @@ namespace
 
         for (auto Component : DataComponents)
         {
-            Dt::CPointLightComponent*  pDataPointFacet = static_cast<Dt::CPointLightComponent*>(Component);
-            Gfx::CPointLightComponent* pGraphicPointFacet = Gfx::CComponentManager::GetInstance().GetComponent<Gfx::CPointLightComponent>(pDataPointFacet->GetID());
+            Dt::CPointLightComponent*  pDtComponent  = static_cast<Dt::CPointLightComponent*>(Component);
+            Gfx::CPointLightComponent* pGfxComponent = Gfx::CComponentManager::GetInstance().GetComponent<Gfx::CPointLightComponent>(pDtComponent->GetID());
 
-            assert(pDataPointFacet->GetHostEntity());
-
-            if (!pDataPointFacet->IsActive()) continue;
+            if (pDtComponent->IsActiveAndUsable() == false) continue;
 
             SRenderJob NewRenderJob;
 
-            NewRenderJob.m_pDtComponent  = pDataPointFacet;
-            NewRenderJob.m_pGfxComponent = pGraphicPointFacet;
+            NewRenderJob.m_pDtComponent  = pDtComponent;
+            NewRenderJob.m_pGfxComponent = pGfxComponent;
 
             m_PunctualLightRenderJobs.push_back(NewRenderJob);
         }

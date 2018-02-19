@@ -250,15 +250,13 @@ namespace
 
         for (auto Component : DataComponents)
         {
-            Dt::CPointLightComponent* pDtPointLightFacet = static_cast<Dt::CPointLightComponent*>(Component);
+            Dt::CPointLightComponent* pDtComponent = static_cast<Dt::CPointLightComponent*>(Component);
 
-            assert(pDtPointLightFacet->GetHostEntity());
+            if (pDtComponent->IsActiveAndUsable() == false) continue;
 
-            if (!pDtPointLightFacet->IsActive()) continue;
+            CInternComponent* pGfxPointLightFacet = CComponentManager::GetInstance().GetComponent<CInternComponent>(pDtComponent->GetID());
 
-            CInternComponent* pGfxPointLightFacet = CComponentManager::GetInstance().GetComponent<CInternComponent>(pDtPointLightFacet->GetID());
-
-            if (pDtPointLightFacet->GetRefreshMode() == Dt::CPointLightComponent::Dynamic)
+            if (pDtComponent->GetRefreshMode() == Dt::CPointLightComponent::Dynamic)
             {
                 // -----------------------------------------------------------------------------
                 // Update views
@@ -266,8 +264,8 @@ namespace
                 Gfx::CViewPtr   ShadowViewPtr   = pGfxPointLightFacet->m_RenderContextPtr->GetCamera()->GetView();
                 Gfx::CCameraPtr ShadowCameraPtr = pGfxPointLightFacet->m_RenderContextPtr->GetCamera();
 
-                glm::vec3 LightPosition  = pDtPointLightFacet->GetHostEntity()->GetWorldPosition();
-                glm::vec3 LightDirection = pDtPointLightFacet->GetDirection();
+                glm::vec3 LightPosition  = pDtComponent->GetHostEntity()->GetWorldPosition();
+                glm::vec3 LightDirection = pDtComponent->GetDirection();
 
                 // -----------------------------------------------------------------------------
                 // Set view
@@ -283,19 +281,19 @@ namespace
                 // Calculate near and far plane
                 // -----------------------------------------------------------------------------
                 float Near = 0.1f;
-                float Far = pDtPointLightFacet->GetAttenuationRadius() + Near;
+                float Far = pDtComponent->GetAttenuationRadius() + Near;
 
                 // -----------------------------------------------------------------------------
                 // Set matrix
                 // -----------------------------------------------------------------------------
-                ShadowCameraPtr->SetFieldOfView(glm::degrees(pDtPointLightFacet->GetOuterConeAngle()), 1.0f, Near, Far);
+                ShadowCameraPtr->SetFieldOfView(glm::degrees(pDtComponent->GetOuterConeAngle()), 1.0f, Near, Far);
 
                 ShadowViewPtr->Update();
 
                 // -----------------------------------------------------------------------------
                 // Render
                 // -----------------------------------------------------------------------------
-                RenderShadows(*pGfxPointLightFacet, pDtPointLightFacet, LightPosition);
+                RenderShadows(*pGfxPointLightFacet, pDtComponent, LightPosition);
             }
         }
     }
@@ -633,9 +631,7 @@ namespace
         {
             Dt::CMeshComponent* pDtComponent = static_cast<Dt::CMeshComponent*>(Component);
 
-            assert(pDtComponent->GetHostEntity());
-
-            if (!pDtComponent->IsActive()) continue;
+            if (pDtComponent->IsActiveAndUsable() == false) continue;
 
             CMeshComponent* pGfxComponent = CComponentManager::GetInstance().GetComponent<CMeshComponent>(pDtComponent->GetID());
 

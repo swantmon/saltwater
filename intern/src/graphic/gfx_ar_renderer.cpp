@@ -774,20 +774,18 @@ namespace
 
         for (auto Component : DataMeshComponents)
         {
-            Dt::CMeshComponent* pDtMeshComponent = static_cast<Dt::CMeshComponent*>(Component);
+            Dt::CMeshComponent* pDtComponent = static_cast<Dt::CMeshComponent*>(Component);
 
-            assert(pDtMeshComponent->GetHostEntity());
+            if (pDtComponent->IsActiveAndUsable() == false) continue;
 
-            if (!pDtMeshComponent->IsActive()) continue;
-
-            const Dt::CEntity& rCurrentEntity = *pDtMeshComponent->GetHostEntity();
+            const Dt::CEntity& rCurrentEntity = *pDtComponent->GetHostEntity();
 
             // -----------------------------------------------------------------------------
             // Get graphic facet
             // -----------------------------------------------------------------------------
             if (rCurrentEntity.GetLayer() == Dt::SEntityLayer::AR)
             {
-                Gfx::CMeshComponent* pGfxComponent = Gfx::CComponentManager::GetInstance().GetComponent<Gfx::CMeshComponent>(pDtMeshComponent->GetID());
+                Gfx::CMeshComponent* pGfxComponent = Gfx::CComponentManager::GetInstance().GetComponent<Gfx::CMeshComponent>(pDtComponent->GetID());
 
                 CMeshPtr MeshPtr = pGfxComponent->GetMesh();
 

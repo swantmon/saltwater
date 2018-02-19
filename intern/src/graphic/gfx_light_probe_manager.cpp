@@ -101,15 +101,15 @@ namespace
 
         struct SLightPropertiesBuffer
         {
-            glm::mat4 m_LightViewProjection;
-            glm::vec4   m_LightPosition;
-            glm::vec4   m_LightDirection;
-            glm::vec4   m_LightColor;
-            glm::vec4   m_LightSettings;
-            unsigned int   m_LightType;
-            unsigned int   m_Padding0;
-            unsigned int   m_Padding1;
-            unsigned int   m_Padding2;
+            glm::mat4    m_LightViewProjection;
+            glm::vec4    m_LightPosition;
+            glm::vec4    m_LightDirection;
+            glm::vec4    m_LightColor;
+            glm::vec4    m_LightSettings;
+            unsigned int m_LightType;
+            unsigned int m_Padding0;
+            unsigned int m_Padding1;
+            unsigned int m_Padding2;
         };
 
         struct SReflectionProbePropertiesBuffer
@@ -444,18 +444,18 @@ namespace
 
         for (auto Component : DataComponents)
         {
-            Dt::CLightProbeComponent* pDtProbeFacet = static_cast<Dt::CLightProbeComponent*>(Component);
+            Dt::CLightProbeComponent* pDtComponent = static_cast<Dt::CLightProbeComponent*>(Component);
 
-            if (!(pDtProbeFacet->IsActive() && pDtProbeFacet->GetHostEntity() != nullptr && pDtProbeFacet->GetHostEntity()->IsActive())) continue;
+            if (!pDtComponent->IsActiveAndUsable()) continue;
 
-            CInternComponent* pGfxProbeFacet = CComponentManager::GetInstance().GetComponent<CInternComponent>(pDtProbeFacet->GetID());
+            CInternComponent* pGfxProbeFacet = CComponentManager::GetInstance().GetComponent<CInternComponent>(pDtComponent->GetID());
 
             // -----------------------------------------------------------------------------
             // Check update needs
             // -----------------------------------------------------------------------------
-            if (pDtProbeFacet->GetRefreshMode() == Dt::CLightProbeComponent::Dynamic || pGfxProbeFacet->m_TimeStamp >= Core::Time::GetNumberOfFrame())
+            if (pDtComponent->GetRefreshMode() == Dt::CLightProbeComponent::Dynamic || pGfxProbeFacet->m_TimeStamp >= Core::Time::GetNumberOfFrame())
             {
-                Render(*pDtProbeFacet->GetHostEntity(), *pGfxProbeFacet, *pDtProbeFacet);
+                Render(*pDtComponent->GetHostEntity(), *pGfxProbeFacet, *pDtComponent);
             }
         }
     }
@@ -753,9 +753,7 @@ namespace
         {
             Dt::CSkyComponent* pDtComponent = static_cast<Dt::CSkyComponent*>(Component);
 
-            assert(pDtComponent->GetHostEntity());
-
-            if (!pDtComponent->IsActive()) continue;
+            if (pDtComponent->IsActiveAndUsable() == false) continue;
 
             Gfx::CSkyComponent* pGfxComponent = CComponentManager::GetInstance().GetComponent<Gfx::CSkyComponent>(pDtComponent->GetID());
 
@@ -913,9 +911,7 @@ namespace
         {
             Dt::CMeshComponent* pDtComponent = static_cast<Dt::CMeshComponent*>(Component);
 
-            assert(pDtComponent->GetHostEntity());
-
-            if (!pDtComponent->IsActive()) continue;
+            if (pDtComponent->IsActiveAndUsable() == false) continue;
 
             CMeshComponent* pGfxComponent = CComponentManager::GetInstance().GetComponent<CMeshComponent>(pDtComponent->GetID());
 
@@ -1246,9 +1242,7 @@ namespace
 
             Dt::CSunComponent* pDtComponent = static_cast<Dt::CSunComponent*>(Component);
 
-            assert(pDtComponent->GetHostEntity());
-
-            if (!pDtComponent->IsActive()) continue;
+            if (pDtComponent->IsActiveAndUsable() == false) continue;
 
             Gfx::CSunComponent* pGfxComponent = CComponentManager::GetInstance().GetComponent<Gfx::CSunComponent>(pDtComponent->GetID());
 
@@ -1281,9 +1275,7 @@ namespace
 
             Dt::CPointLightComponent* pDtComponent = static_cast<Dt::CPointLightComponent*>(Component);
 
-            assert(pDtComponent->GetHostEntity());
-
-            if (!pDtComponent->IsActive()) continue;
+            if (pDtComponent->IsActiveAndUsable() == false) continue;
 
             Gfx::CPointLightComponent* pGfxComponent = CComponentManager::GetInstance().GetComponent<Gfx::CPointLightComponent>(pDtComponent->GetID());
 
@@ -1330,9 +1322,7 @@ namespace
 
             Dt::CLightProbeComponent* pDtComponent = static_cast<Dt::CLightProbeComponent*>(Component);
 
-            assert(pDtComponent->GetHostEntity());
-
-            if (!pDtComponent->IsActive()) continue;
+            if (pDtComponent->IsActiveAndUsable() == false) continue;
 
             Gfx::CLightProbeComponent* pGfxComponent = CComponentManager::GetInstance().GetComponent<Gfx::CLightProbeComponent>(pDtComponent->GetID());
 

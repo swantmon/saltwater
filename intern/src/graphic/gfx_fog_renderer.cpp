@@ -915,11 +915,11 @@ namespace
 
         for (auto VolumeFogComponent : DataVolumeFogComponents)
         {
-            Dt::CVolumeFogComponent* pDtVolumeFogComponent = static_cast<Dt::CVolumeFogComponent*>(VolumeFogComponent);
+            Dt::CVolumeFogComponent* pDtComponent = static_cast<Dt::CVolumeFogComponent*>(VolumeFogComponent);
 
-            if (!(pDtVolumeFogComponent->IsActive() && pDtVolumeFogComponent->GetHostEntity() != nullptr && pDtVolumeFogComponent->GetHostEntity()->IsActive())) continue;
+            if (!(pDtComponent->IsActive() && pDtComponent->GetHostEntity()->IsActive())) continue;
 
-            const Dt::CEntity& rCurrentEntity = *pDtVolumeFogComponent->GetHostEntity();
+            const Dt::CEntity& rCurrentEntity = *pDtComponent->GetHostEntity();
 
             // -----------------------------------------------------------------------------
             // Looking for sun
@@ -950,7 +950,7 @@ namespace
             // -----------------------------------------------------------------------------
             SVolumeFogRenderJob NewRenderJob;
 
-            NewRenderJob.m_pDtVolumeFogComponent = pDtVolumeFogComponent;
+            NewRenderJob.m_pDtVolumeFogComponent = pDtComponent;
             NewRenderJob.m_pGfxSunComponent      = const_cast<Gfx::CSunComponent*>(pGfxSunComponent);
             NewRenderJob.m_pDtSunComponent       = const_cast<Dt::CSunComponent*>(pDtSunComponent);
 

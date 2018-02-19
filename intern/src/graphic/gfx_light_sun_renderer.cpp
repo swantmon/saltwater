@@ -392,20 +392,18 @@ namespace
 
         for (auto DataComponent : DataSunComponents)
         {
-            Dt::CSunComponent*  pDataSunFacet    = static_cast<Dt::CSunComponent*>(DataComponent);
-            Gfx::CSunComponent* pGraphicSunFacet = CComponentManager::GetInstance().GetComponent<Gfx::CSunComponent>(pDataSunFacet->GetID());
+            Dt::CSunComponent*  pDtComponent  = static_cast<Dt::CSunComponent*>(DataComponent);
+            Gfx::CSunComponent* pGfxComponent = CComponentManager::GetInstance().GetComponent<Gfx::CSunComponent>(pDtComponent->GetID());
 
-            assert(pDataSunFacet->GetHostEntity());
-
-            if (!pDataSunFacet->IsActive()) continue;
+            if (pDtComponent->IsActiveAndUsable() == false) continue;
 
             // -----------------------------------------------------------------------------
             // Set sun into a new render job
             // -----------------------------------------------------------------------------
             SRenderJob NewRenderJob;
 
-            NewRenderJob.m_pDataSunLightFacet = pDataSunFacet;
-            NewRenderJob.m_pGraphicSunLightFacet = pGraphicSunFacet;
+            NewRenderJob.m_pDataSunLightFacet = pDtComponent;
+            NewRenderJob.m_pGraphicSunLightFacet = pGfxComponent;
 
             m_RenderJobs.push_back(NewRenderJob);
         }

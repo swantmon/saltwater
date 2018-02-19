@@ -1067,22 +1067,20 @@ namespace
 
         for (auto Component : DataComponents)
         {
-            Dt::CLightProbeComponent*  pDataLightProbeFacet    = static_cast<Dt::CLightProbeComponent*>(Component);
-            Gfx::CLightProbeComponent* pGraphicLightProbeFacet = Gfx::CComponentManager::GetInstance().GetComponent<Gfx::CLightProbeComponent>(pDataLightProbeFacet->GetID());
+            Dt::CLightProbeComponent*  pDtComponent  = static_cast<Dt::CLightProbeComponent*>(Component);
+            Gfx::CLightProbeComponent* pGfxComponent = Gfx::CComponentManager::GetInstance().GetComponent<Gfx::CLightProbeComponent>(pDtComponent->GetID());
 
-            assert(pDataLightProbeFacet->GetHostEntity());
-
-            if (!pDataLightProbeFacet->IsActive()) continue;
+            if (pDtComponent->IsActiveAndUsable() == false) continue;
 
             // -----------------------------------------------------------------------------
             // Fill data
             // -----------------------------------------------------------------------------
-            LightBuffer[IndexOfLight].m_LightType        = static_cast<int>(pDataLightProbeFacet->GetType()) + 1;
-            LightBuffer[IndexOfLight].m_WorldToProbeLS   = glm::inverse(pDataLightProbeFacet->GetHostEntity()->GetTransformationFacet()->GetWorldMatrix());
-            LightBuffer[IndexOfLight].m_ProbePosition    = glm::vec4(pDataLightProbeFacet->GetHostEntity()->GetWorldPosition(), 1.0f);
-            LightBuffer[IndexOfLight].m_UnitaryBox       = glm::vec4(pDataLightProbeFacet->GetBoxSize(), 0.0f);
-            LightBuffer[IndexOfLight].m_LightSettings[0] = static_cast<float>(pGraphicLightProbeFacet->GetSpecularPtr()->GetNumberOfMipLevels() - 1);
-            LightBuffer[IndexOfLight].m_LightSettings[1] = pDataLightProbeFacet->GetParallaxCorrection() == true ? 1.0f : 0.0f;
+            LightBuffer[IndexOfLight].m_LightType        = static_cast<int>(pDtComponent->GetType()) + 1;
+            LightBuffer[IndexOfLight].m_WorldToProbeLS   = glm::inverse(pDtComponent->GetHostEntity()->GetTransformationFacet()->GetWorldMatrix());
+            LightBuffer[IndexOfLight].m_ProbePosition    = glm::vec4(pDtComponent->GetHostEntity()->GetWorldPosition(), 1.0f);
+            LightBuffer[IndexOfLight].m_UnitaryBox       = glm::vec4(pDtComponent->GetBoxSize(), 0.0f);
+            LightBuffer[IndexOfLight].m_LightSettings[0] = static_cast<float>(pGfxComponent->GetSpecularPtr()->GetNumberOfMipLevels() - 1);
+            LightBuffer[IndexOfLight].m_LightSettings[1] = pDtComponent->GetParallaxCorrection() == true ? 1.0f : 0.0f;
             LightBuffer[IndexOfLight].m_LightSettings[2] = 0.0f;
             LightBuffer[IndexOfLight].m_LightSettings[3] = 0.0f;
 
@@ -1093,9 +1091,9 @@ namespace
             // -----------------------------------------------------------------------------
             SLightProbeRenderJob NewRenderJob;
 
-            NewRenderJob.m_Texture0Ptr = pGraphicLightProbeFacet->GetSpecularPtr();
-            NewRenderJob.m_Texture1Ptr = pGraphicLightProbeFacet->GetDiffusePtr();
-            NewRenderJob.m_Texture2Ptr = pGraphicLightProbeFacet->GetDepthPtr();
+            NewRenderJob.m_Texture0Ptr = pGfxComponent->GetSpecularPtr();
+            NewRenderJob.m_Texture1Ptr = pGfxComponent->GetDiffusePtr();
+            NewRenderJob.m_Texture2Ptr = pGfxComponent->GetDepthPtr();
 
             m_LightProbeRenderJobs.push_back(NewRenderJob);
 
@@ -1116,15 +1114,13 @@ namespace
 
         for (auto Component : DataComponents)
         {
-            Dt::CSSRComponent* pDataSSRFacet = static_cast<Dt::CSSRComponent*>(Component);
+            Dt::CSSRComponent* pDtComponent = static_cast<Dt::CSSRComponent*>(Component);
 
-            assert(pDataSSRFacet->GetHostEntity());
-
-            if (!pDataSSRFacet->IsActive()) continue;
+            if (pDtComponent->IsActiveAndUsable() == false) continue;
 
             SSSRRenderJob NewRenderJob;
 
-            NewRenderJob.m_pDataSSRFacet = pDataSSRFacet;
+            NewRenderJob.m_pDataSSRFacet = pDtComponent;
 
             m_SSRRenderJobs.push_back(NewRenderJob);
         }

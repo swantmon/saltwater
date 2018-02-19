@@ -820,9 +820,7 @@ namespace
         {
             Dt::CCameraComponent* pDtComponent = static_cast<Dt::CCameraComponent*>(Component);
 
-            assert(pDtComponent->GetHostEntity());
-
-            if (!pDtComponent->IsActive()) continue;
+            if (pDtComponent->IsActiveAndUsable() == false) continue;
 
             if (pDtComponent->IsMainCamera())
             {
@@ -845,9 +843,7 @@ namespace
         {
             Dt::CSkyComponent* pDtComponent = static_cast<Dt::CSkyComponent*>(Component);
 
-            assert(pDtComponent->GetHostEntity());
-
-            if (!pDtComponent->IsActive()) continue;
+            if (pDtComponent->IsActiveAndUsable() == false) continue;
 
             SSkyRenderJob NewRenderJob;
 

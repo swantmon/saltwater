@@ -828,15 +828,13 @@ namespace
 
         for (auto Component : DataComponents)
         {
-            Dt::CSSAOComponent* pDataSSAOFacet = static_cast<Dt::CSSAOComponent*>(Component);
+            Dt::CSSAOComponent* pDtComponent = static_cast<Dt::CSSAOComponent*>(Component);
 
-            assert(pDataSSAOFacet->GetHostEntity());
-
-            if (!pDataSSAOFacet->IsActive()) continue;
+            if (pDtComponent->IsActiveAndUsable() == false) continue;
 
             SSSAORenderJob NewRenderJob;
 
-            NewRenderJob.m_pDataSSAOFacet = pDataSSAOFacet;
+            NewRenderJob.m_pDataSSAOFacet = pDtComponent;
 
             m_SSAORenderJobs.push_back(NewRenderJob);
         }
