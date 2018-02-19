@@ -1186,9 +1186,11 @@ namespace MR
 			m_RawCameraFramePtr = TextureManager::CreateTexture2D(TextureDescriptor);
 		}
 
-        TextureDescriptor.m_NumberOfPixelsU = 16 * 8;
-        TextureDescriptor.m_NumberOfPixelsV = 16 * 8;
-        TextureDescriptor.m_NumberOfPixelsW = 16 * 8;
+        const int VolumeWidth = m_ReconstructionSettings.m_GridResolutions[0] * m_ReconstructionSettings.m_GridResolutions[1];
+
+        TextureDescriptor.m_NumberOfPixelsU = VolumeWidth;
+        TextureDescriptor.m_NumberOfPixelsV = VolumeWidth;
+        TextureDescriptor.m_NumberOfPixelsW = VolumeWidth;
         TextureDescriptor.m_Binding = CTexture::RenderTarget | CTexture::ShaderResource;
         TextureDescriptor.m_Access = CTexture::CPUWrite;
         TextureDescriptor.m_Usage = CTexture::GPUReadWrite;
