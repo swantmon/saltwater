@@ -11,7 +11,7 @@
 layout(std140, binding = 3) uniform PerVolumeData
 {
     ivec3 g_Offset;
-    int g_Resolution;
+    int g_BufferOffset;
 };
 
 layout(binding = 0, rgba16f) uniform image2D cs_VertexMap;
@@ -39,6 +39,8 @@ out gl_PerVertex
 out int gl_Layer;
 
 layout(location = 0) out flat vec3 out_WSPosition;
+
+const int g_Resolution = ROOT_RESOLUTION * LEVEL1_RESOLUTION;
 
 // -----------------------------------------------------------------------------
 // Geometry shader

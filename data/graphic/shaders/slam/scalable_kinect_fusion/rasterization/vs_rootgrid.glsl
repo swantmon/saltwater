@@ -11,7 +11,7 @@
 layout(std140, binding = 3) uniform PerVolumeData
 {
     ivec3 g_Offset;
-    int g_Resolution;
+    int g_BufferOffset;
 };
 
 layout(location = 0) out flat int out_VertexID;

@@ -160,7 +160,7 @@ namespace
     struct SPointRasterization
     {
         glm::ivec3 m_Offset;
-        int32_t m_Resolution;
+        int32_t m_BufferOffset;
     };
 
     struct SVolumePoolItem
@@ -920,7 +920,7 @@ namespace MR
         SPointRasterization BufferData;
 
         BufferData.m_Offset = rRootGrid.m_Offset;
-        BufferData.m_Resolution = 128;
+        BufferData.m_BufferOffset = 0;
         BufferManager::UploadBufferData(m_PointRasterizationBufferPtr, &BufferData);
 
         ContextManager::SetConstantBuffer(3, m_PointRasterizationBufferPtr);
@@ -1190,7 +1190,7 @@ namespace MR
 
         TextureDescriptor.m_NumberOfPixelsU = VolumeWidth;
         TextureDescriptor.m_NumberOfPixelsV = VolumeWidth;
-        TextureDescriptor.m_NumberOfPixelsW = VolumeWidth;
+        TextureDescriptor.m_NumberOfPixelsW = VolumeWidth * 8;
         TextureDescriptor.m_Binding = CTexture::RenderTarget | CTexture::ShaderResource;
         TextureDescriptor.m_Access = CTexture::CPUWrite;
         TextureDescriptor.m_Usage = CTexture::GPUReadWrite;

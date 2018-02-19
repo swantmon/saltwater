@@ -9,7 +9,7 @@
 layout(std140, binding = 3) uniform PerVolumeData
 {
     ivec3 g_Offset;
-    int g_Resolution;
+    int g_BufferOffset;
 };
 
 // -----------------------------------------------------------------------------
@@ -19,6 +19,8 @@ layout(std140, binding = 3) uniform PerVolumeData
 layout(location = 0) in flat vec3 in_WSPosition;
 
 layout(location = 0) out vec4 out_Color;
+
+const int g_Resolution = ROOT_RESOLUTION * LEVEL1_RESOLUTION;
 
 // -----------------------------------------------------------------------------
 // Fragment shader
