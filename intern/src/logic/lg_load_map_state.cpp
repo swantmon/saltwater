@@ -444,7 +444,6 @@ void CLgLoadMapState::CreateDefaultScene()
 
             Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
-
     }
 #endif
 } // namespace
