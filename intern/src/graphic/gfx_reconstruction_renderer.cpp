@@ -874,6 +874,8 @@ namespace
 
 	void CGfxReconstructionRenderer::RaycastScalableVolume()
 	{
+        Performance::BeginEvent("Raycasting for rendering");
+
         MR::CScalableSLAMReconstructor::SScalableVolume& rVolume = m_pScalableReconstructor->GetVolume();
 
         MR::SReconstructionSettings Settings;
@@ -946,6 +948,8 @@ namespace
         ContextManager::SetTopology(STopology::TriangleList);
 
         ContextManager::DrawIndexed(36, 0, 0);
+
+        Performance::EndEvent();
 	}
     
     // -----------------------------------------------------------------------------

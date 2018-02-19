@@ -1460,7 +1460,7 @@ namespace MR
 
             Performance::EndEvent();
         }
-        Performance::BeginEvent("Raycasting");
+        Performance::BeginEvent("Raycasting for tracking");
 
         SScalableRaycastConstantBuffer Data;
 
