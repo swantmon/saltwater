@@ -114,55 +114,55 @@ namespace Edit
         // -----------------------------------------------------------------------------
         Edit::CMessage NewMessage;
 
-        NewMessage.PutInt(m_CurrentEntityID);
+        NewMessage.Put(m_CurrentEntityID);
 
-        NewMessage.PutBool(IsMainCamera);
+        NewMessage.Put(IsMainCamera);
 
-        NewMessage.PutInt(ClearFlag);
+        NewMessage.Put(ClearFlag);
 
         if (Hash != 0)
         {
-            NewMessage.PutBool(true);
+            NewMessage.Put(true);
 
-            NewMessage.PutInt(Hash);
+            NewMessage.Put(Hash);
         }
         else
         {
-            NewMessage.PutBool(false);
+            NewMessage.Put(false);
         }
 
-        NewMessage.PutFloat(AlbedoColor[0]);
-        NewMessage.PutFloat(AlbedoColor[1]);
-        NewMessage.PutFloat(AlbedoColor[2]);
+        NewMessage.Put(AlbedoColor[0]);
+        NewMessage.Put(AlbedoColor[1]);
+        NewMessage.Put(AlbedoColor[2]);
 
-        NewMessage.PutInt(CullingMask);
+        NewMessage.Put(CullingMask);
 
-        NewMessage.PutInt(ProjectionType);
+        NewMessage.Put(ProjectionType);
 
-        NewMessage.PutFloat(Size);
+        NewMessage.Put(Size);
 
-        NewMessage.PutFloat(FOV);
+        NewMessage.Put(FOV);
 
-        NewMessage.PutFloat(Near);
+        NewMessage.Put(Near);
 
-        NewMessage.PutFloat(Far);
+        NewMessage.Put(Far);
 
-        NewMessage.PutFloat(X);
-        NewMessage.PutFloat(Y);
-        NewMessage.PutFloat(W);
-        NewMessage.PutFloat(H);
+        NewMessage.Put(X);
+        NewMessage.Put(Y);
+        NewMessage.Put(W);
+        NewMessage.Put(H);
 
-        NewMessage.PutFloat(Depth);
+        NewMessage.Put(Depth);
 
-        NewMessage.PutInt(CameraMode);
+        NewMessage.Put(CameraMode);
 
-        NewMessage.PutFloat(ShutterSpeed);
+        NewMessage.Put(ShutterSpeed);
 
-        NewMessage.PutFloat(Aperture);
+        NewMessage.Put(Aperture);
 
-        NewMessage.PutFloat(ISO);
+        NewMessage.Put(ISO);
 
-        NewMessage.PutFloat(EC);
+        NewMessage.Put(EC);
 
         NewMessage.Reset();
 
@@ -197,13 +197,13 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void CInspectorCamera::RequestInformation(unsigned int _EntityID)
+    void CInspectorCamera::RequestInformation(Base::ID _EntityID)
     {
         m_CurrentEntityID = _EntityID;
 
         CMessage NewMessage;
 
-        NewMessage.PutInt(m_CurrentEntityID);
+        NewMessage.Put(m_CurrentEntityID);
 
         NewMessage.Reset();
 
@@ -220,60 +220,60 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
         if (EntityID != m_CurrentEntityID) return;
 
         // -----------------------------------------------------------------------------
         // Get values
         // -----------------------------------------------------------------------------
-        bool IsMainCamera = _rMessage.GetBool();
+        bool IsMainCamera = _rMessage.Get<bool>();
 
-        int ClearFlag = _rMessage.GetInt();
+        int ClearFlag = _rMessage.Get<int>();
 
-        bool HasTexture = _rMessage.GetBool();
+        bool HasTexture = _rMessage.Get<bool>();
 
         int TextureHash = -1;
 
         if (HasTexture)
         {
-            TextureHash = _rMessage.GetInt();
+            TextureHash = _rMessage.Get<int>();
         }
 
-        R = _rMessage.GetFloat();
-        G = _rMessage.GetFloat();
-        B = _rMessage.GetFloat();
+        R = _rMessage.Get<float>();
+        G = _rMessage.Get<float>();
+        B = _rMessage.Get<float>();
 
-        int CullingMask = _rMessage.GetInt();
+        int CullingMask = _rMessage.Get<int>();
 
         BASE_UNUSED(CullingMask);
 
-        int ProjectionType = _rMessage.GetInt();
+        int ProjectionType = _rMessage.Get<int>();
 
-        float Size = _rMessage.GetFloat();
+        float Size = _rMessage.Get<float>();
 
-        float FOV = _rMessage.GetFloat();
+        float FOV = _rMessage.Get<float>();
 
-        float Near = _rMessage.GetFloat();
+        float Near = _rMessage.Get<float>();
 
-        float Far = _rMessage.GetFloat();
+        float Far = _rMessage.Get<float>();
 
-        X = _rMessage.GetFloat();
-        Y = _rMessage.GetFloat();
-        W = _rMessage.GetFloat();
-        H = _rMessage.GetFloat();
+        X = _rMessage.Get<float>();
+        Y = _rMessage.Get<float>();
+        W = _rMessage.Get<float>();
+        H = _rMessage.Get<float>();
 
-        float Depth = _rMessage.GetFloat();
+        float Depth = _rMessage.Get<float>();
 
-        int CameraMode = _rMessage.GetInt();
+        int CameraMode = _rMessage.Get<int>();
 
-        float ShutterSpeed = _rMessage.GetFloat();
+        float ShutterSpeed = _rMessage.Get<float>();
 
-        float Aperture = _rMessage.GetFloat();
+        float Aperture = _rMessage.Get<float>();
 
-        float ISO = _rMessage.GetFloat();
+        float ISO = _rMessage.Get<float>();
 
-        float EC = _rMessage.GetFloat();
+        float EC = _rMessage.Get<float>();
 
         // -----------------------------------------------------------------------------
         // Set values

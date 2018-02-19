@@ -123,12 +123,10 @@ namespace
 
     void CMaterialHelper::OnLoadMaterial(Edit::CMessage& _rMessage)
     {
-        char pTmp[512];
-
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
-        const char* pPathToFile = _rMessage.GetString(pTmp, 512);
+        std::string PathToFile = _rMessage.Get<std::string>();
 
         // -----------------------------------------------------------------------------
         // Material
@@ -148,7 +146,7 @@ namespace
         MaterialDescriptor.m_Displacement    = 0.0f;
         MaterialDescriptor.m_AlbedoColor     = glm::vec3(1.0f);
         MaterialDescriptor.m_TilingOffset    = glm::vec4(1.0f, 1.0f, 0.0f, 0.0f);
-        MaterialDescriptor.m_pFileName       = pPathToFile;
+        MaterialDescriptor.m_pFileName       = PathToFile.c_str();
         
         Dt::CMaterial& rNewMaterial = Dt::MaterialManager::CreateMaterial(MaterialDescriptor);
 
@@ -167,92 +165,92 @@ namespace
 
     void CMaterialHelper::OnRequestMaterialInfo(Edit::CMessage& _rMessage)
     {
-        int MaterialHash = _rMessage.GetInt();
+        int MaterialHash = _rMessage.Get<int>();
 
         Dt::CMaterial& rMaterial = Dt::MaterialManager::GetMaterialByHash(static_cast<unsigned int>(MaterialHash));
 
         Edit::CMessage NewMessage;
 
-        NewMessage.PutInt(rMaterial.GetHash());
+        NewMessage.Put(rMaterial.GetHash());
 
-        NewMessage.PutFloat(rMaterial.GetColor()[0]);
-        NewMessage.PutFloat(rMaterial.GetColor()[1]);
-        NewMessage.PutFloat(rMaterial.GetColor()[2]);
+        NewMessage.Put(rMaterial.GetColor()[0]);
+        NewMessage.Put(rMaterial.GetColor()[1]);
+        NewMessage.Put(rMaterial.GetColor()[2]);
 
-        NewMessage.PutFloat(rMaterial.GetTilingOffset()[0]);
-        NewMessage.PutFloat(rMaterial.GetTilingOffset()[1]);
-        NewMessage.PutFloat(rMaterial.GetTilingOffset()[2]);
-        NewMessage.PutFloat(rMaterial.GetTilingOffset()[3]);
+        NewMessage.Put(rMaterial.GetTilingOffset()[0]);
+        NewMessage.Put(rMaterial.GetTilingOffset()[1]);
+        NewMessage.Put(rMaterial.GetTilingOffset()[2]);
+        NewMessage.Put(rMaterial.GetTilingOffset()[3]);
 
-        NewMessage.PutFloat(rMaterial.GetRoughness());
-        NewMessage.PutFloat(rMaterial.GetReflectance());
-        NewMessage.PutFloat(rMaterial.GetMetalness());
-        NewMessage.PutFloat(rMaterial.GetDisplacement());
+        NewMessage.Put(rMaterial.GetRoughness());
+        NewMessage.Put(rMaterial.GetReflectance());
+        NewMessage.Put(rMaterial.GetMetalness());
+        NewMessage.Put(rMaterial.GetDisplacement());
 
         if (rMaterial.GetColorTexture())
         {
-            NewMessage.PutBool(true);
+            NewMessage.Put(true);
 
-            NewMessage.PutString(rMaterial.GetColorTexture()->GetFileName().c_str());
+            NewMessage.Put(rMaterial.GetColorTexture()->GetFileName());
         }
         else
         {
-            NewMessage.PutBool(false);
+            NewMessage.Put(false);
         }
 
         if (rMaterial.GetNormalTexture())
         {
-            NewMessage.PutBool(true);
+            NewMessage.Put(true);
 
-            NewMessage.PutString(rMaterial.GetNormalTexture()->GetFileName().c_str());
+            NewMessage.Put(rMaterial.GetNormalTexture()->GetFileName());
         }
         else
         {
-            NewMessage.PutBool(false);
+            NewMessage.Put(false);
         }
 
         if (rMaterial.GetRoughnessTexture())
         {
-            NewMessage.PutBool(true);
+            NewMessage.Put(true);
 
-            NewMessage.PutString(rMaterial.GetRoughnessTexture()->GetFileName().c_str());
+            NewMessage.Put(rMaterial.GetRoughnessTexture()->GetFileName());
         }
         else
         {
-            NewMessage.PutBool(false);
+            NewMessage.Put(false);
         }
 
         if (rMaterial.GetMetalTexture())
         {
-            NewMessage.PutBool(true);
+            NewMessage.Put(true);
 
-            NewMessage.PutString(rMaterial.GetMetalTexture()->GetFileName().c_str());
+            NewMessage.Put(rMaterial.GetMetalTexture()->GetFileName());
         }
         else
         {
-            NewMessage.PutBool(false);
+            NewMessage.Put(false);
         }
 
         if (rMaterial.GetBumpTexture())
         {
-            NewMessage.PutBool(true);
+            NewMessage.Put(true);
 
-            NewMessage.PutString(rMaterial.GetBumpTexture()->GetFileName().c_str());
+            NewMessage.Put(rMaterial.GetBumpTexture()->GetFileName());
         }
         else
         {
-            NewMessage.PutBool(false);
+            NewMessage.Put(false);
         }
 
         if (rMaterial.GetAmbientOcclusionTexture())
         {
-            NewMessage.PutBool(true);
+            NewMessage.Put(true);
 
-            NewMessage.PutString(rMaterial.GetAmbientOcclusionTexture()->GetFileName().c_str());
+            NewMessage.Put(rMaterial.GetAmbientOcclusionTexture()->GetFileName());
         }
         else
         {
-            NewMessage.PutBool(false);
+            NewMessage.Put(false);
         }
 
         NewMessage.Reset();
@@ -264,7 +262,7 @@ namespace
 
     void CMaterialHelper::OnMaterialUpdate(Edit::CMessage& _rMessage)
     {
-        unsigned int MaterialHash = _rMessage.GetInt();
+        unsigned int MaterialHash = _rMessage.Get<int>();
 
         Dt::CMaterial& rMaterial = Dt::MaterialManager::GetMaterialByHash(MaterialHash);
 
@@ -287,67 +285,67 @@ namespace
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
-        X = _rMessage.GetFloat();
-        Y = _rMessage.GetFloat();
-        Z = _rMessage.GetFloat();
+        X = _rMessage.Get<float>();
+        Y = _rMessage.Get<float>();
+        Z = _rMessage.Get<float>();
 
         glm::vec3 Color = glm::vec3(X, Y, Z);
 
-        X = _rMessage.GetFloat();
-        Y = _rMessage.GetFloat();
-        Z = _rMessage.GetFloat();
-        W = _rMessage.GetFloat();
+        X = _rMessage.Get<float>();
+        Y = _rMessage.Get<float>();
+        Z = _rMessage.Get<float>();
+        W = _rMessage.Get<float>();
 
         glm::vec4 TilingOffset = glm::vec4(X, Y, Z, W);
 
-        float Roughness = _rMessage.GetFloat();
+        float Roughness = _rMessage.Get<float>();
 
-        float Reflectance = _rMessage.GetFloat();
+        float Reflectance = _rMessage.Get<float>();
 
-        float Metalness = _rMessage.GetFloat();
+        float Metalness = _rMessage.Get<float>();
 
-        float Displacement = _rMessage.GetFloat();
+        float Displacement = _rMessage.Get<float>();
 
-        HasColorMap = _rMessage.GetBool();
+        HasColorMap = _rMessage.Get<bool>();
 
         if (HasColorMap)
         {
-            ColorMapName = _rMessage.GetInt();
+            ColorMapName = _rMessage.Get<unsigned int>();
         }
 
-        HasNormalMap = _rMessage.GetBool();
+        HasNormalMap = _rMessage.Get<bool>();
 
         if (HasNormalMap)
         {
-            NormalMapName = _rMessage.GetInt();
+            NormalMapName = _rMessage.Get<unsigned int>();
         }
 
-        HasRoughnessMap = _rMessage.GetBool();
+        HasRoughnessMap = _rMessage.Get<bool>();
 
         if (HasRoughnessMap)
         {
-            RoughnessMapName = _rMessage.GetInt();
+            RoughnessMapName = _rMessage.Get<unsigned int>();
         }
 
-        HasMetalnessMap = _rMessage.GetBool();
+        HasMetalnessMap = _rMessage.Get<bool>();
 
         if (HasMetalnessMap)
         {
-            MetalMapName = _rMessage.GetInt();
+            MetalMapName = _rMessage.Get<unsigned int>();
         }
 
-        HasBumpMap = _rMessage.GetBool();
+        HasBumpMap = _rMessage.Get<bool>();
 
         if (HasBumpMap)
         {
-            BumpMapName = _rMessage.GetInt();
+            BumpMapName = _rMessage.Get<unsigned int>();
         }
 
-        HasAOMap = _rMessage.GetBool();
+        HasAOMap = _rMessage.Get<bool>();
 
         if (HasAOMap)
         {
-            AOMapName = _rMessage.GetInt();
+            AOMapName = _rMessage.Get<unsigned int>();
         }
 
         rMaterial.SetColor       (Color);

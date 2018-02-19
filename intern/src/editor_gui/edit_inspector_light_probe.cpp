@@ -59,29 +59,29 @@ namespace Edit
         // -----------------------------------------------------------------------------
         Edit::CMessage NewMessage;
 
-        NewMessage.PutInt(m_CurrentEntityID);
+        NewMessage.Put(m_CurrentEntityID);
 
-        NewMessage.PutInt(RefreshMode);
+        NewMessage.Put(RefreshMode);
 
-        NewMessage.PutInt(Type);
+        NewMessage.Put(Type);
 
-        NewMessage.PutInt(Quality);
+        NewMessage.Put(Quality);
 
-        NewMessage.PutInt(ClearFlag);
+        NewMessage.Put(ClearFlag);
 
-        NewMessage.PutFloat(Intensity);
+        NewMessage.Put(Intensity);
 
-        NewMessage.PutFloat(Near);
+        NewMessage.Put(Near);
 
-        NewMessage.PutFloat(Far);
+        NewMessage.Put(Far);
 
-        NewMessage.PutBool(ParallaxCorrection);
+        NewMessage.Put(ParallaxCorrection);
 
-        NewMessage.PutFloat(BoxSizeX);
+        NewMessage.Put(BoxSizeX);
 
-        NewMessage.PutFloat(BoxSizeY);
+        NewMessage.Put(BoxSizeY);
 
-        NewMessage.PutFloat(BoxSizeZ);
+        NewMessage.Put(BoxSizeZ);
 
         NewMessage.Reset();
 
@@ -90,13 +90,13 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void CInspectorLightProbe::RequestInformation(unsigned int _EntityID)
+    void CInspectorLightProbe::RequestInformation(Base::ID _EntityID)
     {
         m_CurrentEntityID = _EntityID;
 
         CMessage NewMessage;
 
-        NewMessage.PutInt(m_CurrentEntityID);
+        NewMessage.Put(m_CurrentEntityID);
 
         NewMessage.Reset();
 
@@ -110,31 +110,31 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
         if (EntityID != m_CurrentEntityID) return;
 
-        int RefreshMode = _rMessage.GetInt();
+        int RefreshMode = _rMessage.Get<int>();
 
-        int Type = _rMessage.GetInt();
+        int Type = _rMessage.Get<int>();
 
-        int Quality = _rMessage.GetInt();
+        int Quality = _rMessage.Get<int>();
 
-        int ClearFlag = _rMessage.GetInt();
+        int ClearFlag = _rMessage.Get<int>();
 
-        float Intensity = _rMessage.GetFloat();
+        float Intensity = _rMessage.Get<float>();
 
-        float Near = _rMessage.GetFloat();
+        float Near = _rMessage.Get<float>();
 
-        float Far = _rMessage.GetFloat();
+        float Far = _rMessage.Get<float>();
 
-        bool ParallaxCorrection = _rMessage.GetBool();
+        bool ParallaxCorrection = _rMessage.Get<bool>();
 
-        float BoxSizeX = _rMessage.GetFloat();
+        float BoxSizeX = _rMessage.Get<float>();
 
-        float BoxSizeY = _rMessage.GetFloat();
+        float BoxSizeY = _rMessage.Get<float>();
 
-        float BoxSizeZ = _rMessage.GetFloat();
+        float BoxSizeZ = _rMessage.Get<float>();
 
         // -----------------------------------------------------------------------------
         // Set values

@@ -6,6 +6,7 @@ namespace Gfx
 namespace LightProbeManager
 {
     void OnStart();
+
     void OnExit();
 
     void Update();

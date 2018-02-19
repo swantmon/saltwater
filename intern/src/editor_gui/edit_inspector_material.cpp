@@ -107,7 +107,7 @@ namespace Edit
         QString NewBumpTexture      = m_pBumpTextureEdit->GetTextureFile();
         QString NewAOTexture        = m_pAOTextureEdit->GetTextureFile();
 
-        float RoughnessValue   = m_pRoughnessEdit  ->text().toFloat();
+        float RoughnessValue   = m_pRoughnessEdit->text().toFloat();
         float MetallicValue    = m_pMetallicEdit->text().toFloat();
         float ReflectanceValue = m_pReflectanceEdit->text().toFloat();
         float BumpValue        = m_pBumpEdit->text().toFloat();
@@ -138,86 +138,86 @@ namespace Edit
         // -----------------------------------------------------------------------------
         Edit::CMessage NewMessage;
 
-        NewMessage.PutInt(m_MaterialHash);
+        NewMessage.Put(m_MaterialHash);
 
-        NewMessage.PutFloat(AlbedoColor[0]);
-        NewMessage.PutFloat(AlbedoColor[1]);
-        NewMessage.PutFloat(AlbedoColor[2]);
+        NewMessage.Put(AlbedoColor[0]);
+        NewMessage.Put(AlbedoColor[1]);
+        NewMessage.Put(AlbedoColor[2]);
 
-        NewMessage.PutFloat(TilingX);
-        NewMessage.PutFloat(TilingY);
-        NewMessage.PutFloat(OffsetX);
-        NewMessage.PutFloat(OffsetY);
+        NewMessage.Put(TilingX);
+        NewMessage.Put(TilingY);
+        NewMessage.Put(OffsetX);
+        NewMessage.Put(OffsetY);
 
-        NewMessage.PutFloat(RoughnessValue);
-        NewMessage.PutFloat(ReflectanceValue);
-        NewMessage.PutFloat(MetallicValue);
-        NewMessage.PutFloat(BumpValue);
+        NewMessage.Put(RoughnessValue);
+        NewMessage.Put(ReflectanceValue);
+        NewMessage.Put(MetallicValue);
+        NewMessage.Put(BumpValue);
 
         if (NewColorTexture.length() > 0)
         {
-            NewMessage.PutBool(true);
+            NewMessage.Put(true);
 
-            NewMessage.PutInt(m_pAlbedoTextureEdit->GetTextureHash());
+            NewMessage.Put(m_pAlbedoTextureEdit->GetTextureHash());
         }
         else
         {
-            NewMessage.PutBool(false);
+            NewMessage.Put(false);
         }
 
         if (NewNormalTexture.length() > 0)
         {
-            NewMessage.PutBool(true);
+            NewMessage.Put(true);
 
-            NewMessage.PutInt(m_pNormalTextureEdit->GetTextureHash());
+            NewMessage.Put(m_pNormalTextureEdit->GetTextureHash());
         }
         else
         {
-            NewMessage.PutBool(false);
+            NewMessage.Put(false);
         }
 
         if (NewRoughnessTexture.length() > 0)
         {
-            NewMessage.PutBool(true);
+            NewMessage.Put(true);
 
-            NewMessage.PutInt(m_pRoughnessTextureEdit->GetTextureHash());
+            NewMessage.Put(m_pRoughnessTextureEdit->GetTextureHash());
         }
         else
         {
-            NewMessage.PutBool(false);
+            NewMessage.Put(false);
         }
 
         if (NewMetalicTexture.length() > 0)
         {
-            NewMessage.PutBool(true);
+            NewMessage.Put(true);
 
-            NewMessage.PutInt(m_pMetallicTextureEdit->GetTextureHash());
+            NewMessage.Put(m_pMetallicTextureEdit->GetTextureHash());
         }
         else
         {
-            NewMessage.PutBool(false);
+            NewMessage.Put(false);
         }
 
         if (NewBumpTexture.length() > 0)
         {
-            NewMessage.PutBool(true);
+            NewMessage.Put(true);
 
-            NewMessage.PutInt(m_pBumpTextureEdit->GetTextureHash());
+            NewMessage.Put(m_pBumpTextureEdit->GetTextureHash());
         }
         else
         {
-            NewMessage.PutBool(false);
+            NewMessage.Put(false);
         }
 
         if (NewAOTexture.length() > 0)
         {
-            NewMessage.PutBool(true);
+            NewMessage.Put(true);
 
-            NewMessage.PutInt(m_pAOTextureEdit->GetTextureHash());
+            NewMessage.Put(m_pAOTextureEdit->GetTextureHash());
         }
         else
         {
-            NewMessage.PutBool(false);
+            NewMessage.Put(false);
         }
 
         NewMessage.Reset();
@@ -269,7 +269,7 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void CInspectorMaterial::RequestInformation(unsigned int _EntityID)
+    void CInspectorMaterial::RequestInformation(Base::ID _EntityID)
     {
         // -----------------------------------------------------------------------------
         // Behavior
@@ -283,7 +283,7 @@ namespace Edit
 
         CMessage NewMessage;
 
-        NewMessage.PutInt(m_CurrentEntityID);
+        NewMessage.Put(m_CurrentEntityID);
 
         NewMessage.Reset();
 
@@ -304,7 +304,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         Edit::CMessage LoadMessage;
 
-        LoadMessage.PutString(_rRelPathToTexture.toLatin1().data());
+        LoadMessage.Put(std::string(_rRelPathToTexture.toLatin1().data()));
 
         LoadMessage.Reset();
 
@@ -319,7 +319,7 @@ namespace Edit
             // -----------------------------------------------------------------------------
             Edit::CMessage RequestMessage;
 
-            RequestMessage.PutInt(m_MaterialHash);
+            RequestMessage.Put(m_MaterialHash);
 
             RequestMessage.Reset();
 
@@ -352,7 +352,7 @@ namespace Edit
 
         CMessage NewLoadMaterialMessage;
 
-        NewLoadMaterialMessage.PutString(ModelFileBinary.data());
+        NewLoadMaterialMessage.Put(std::string(ModelFileBinary.data()));
 
         NewLoadMaterialMessage.Reset();
 
@@ -365,9 +365,9 @@ namespace Edit
         // -----------------------------------------------------------------------------
         Edit::CMessage NewApplyMessage;
 
-        NewApplyMessage.PutInt(m_CurrentEntityID);
+        NewApplyMessage.Put(m_CurrentEntityID);
 
-        NewApplyMessage.PutInt(HashOfMaterial);
+        NewApplyMessage.Put(HashOfMaterial);
 
         NewApplyMessage.Reset();
 
@@ -383,24 +383,24 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
         if (EntityID != m_CurrentEntityID) return;
 
-        bool HasMaterial = _rMessage.GetBool();
+        bool HasMaterial = _rMessage.Get<bool>();
 
         if (HasMaterial == false)
         {
             return;
         }
 
-        int MaterialHash = _rMessage.GetInt();
+        int MaterialHash = _rMessage.Get<int>();
 
         m_MaterialHash = static_cast<unsigned int>(MaterialHash);
 
         CMessage NewMessage;
 
-        NewMessage.PutInt(MaterialHash);
+        NewMessage.Put(MaterialHash);
 
         NewMessage.Reset();
 
@@ -417,7 +417,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
-        int MaterialHash = _rMessage.GetInt();
+        int MaterialHash = _rMessage.Get<int>();
 
         if (static_cast<unsigned int>(MaterialHash) != m_MaterialHash) return;
 
@@ -428,71 +428,71 @@ namespace Edit
         bool HasBumpMap      = false;
         bool HasAOMap        = false;
 
-        char ColorMapName[256];
-        char NormalMapName[256];
-        char RoughnessMapName[256];
-        char MetalMapName[256];
-        char BumpMapName[256];
-        char AOMapName[256];
+        std::string ColorMapName;
+        std::string NormalMapName;
+        std::string RoughnessMapName;
+        std::string MetalMapName;
+        std::string BumpMapName;
+        std::string AOMapName;
 
-        R = _rMessage.GetFloat();
-        G = _rMessage.GetFloat();
-        B = _rMessage.GetFloat();
+        R = _rMessage.Get<float>();
+        G = _rMessage.Get<float>();
+        B = _rMessage.Get<float>();
 
         glm::vec3 AlbedoColor = glm::vec3(R, G, B);
 
-        X = _rMessage.GetFloat();
-        Y = _rMessage.GetFloat();
-        Z = _rMessage.GetFloat();
-        W = _rMessage.GetFloat();
+        X = _rMessage.Get<float>();
+        Y = _rMessage.Get<float>();
+        Z = _rMessage.Get<float>();
+        W = _rMessage.Get<float>();
 
         glm::vec4 TilingOffset = glm::vec4(X, Y, Z, W);
 
-        float Roughness   = _rMessage.GetFloat();
-        float Reflectance = _rMessage.GetFloat();
-        float Metalness   = _rMessage.GetFloat();
-        float BumpFactor  = _rMessage.GetFloat();
+        float Roughness   = _rMessage.Get<float>();
+        float Reflectance = _rMessage.Get<float>();
+        float Metalness   = _rMessage.Get<float>();
+        float BumpFactor  = _rMessage.Get<float>();
 
-        HasColorMap = _rMessage.GetBool();
+        HasColorMap = _rMessage.Get<bool>();
 
         if (HasColorMap)
         {
-            _rMessage.GetString(ColorMapName, 256);
+            ColorMapName = _rMessage.Get<std::string>();
         }
 
-        HasNormalMap = _rMessage.GetBool();
+        HasNormalMap = _rMessage.Get<bool>();
 
         if (HasNormalMap)
         {
-            _rMessage.GetString(NormalMapName, 256);
+            NormalMapName = _rMessage.Get<std::string>();
         }
 
-        HasRoughnessMap = _rMessage.GetBool();
+        HasRoughnessMap = _rMessage.Get<bool>();
 
         if (HasRoughnessMap)
         {
-            _rMessage.GetString(RoughnessMapName, 256);
+            RoughnessMapName =_rMessage.Get<std::string>();
         }
 
-        HasMetalnessMap = _rMessage.GetBool();
+        HasMetalnessMap = _rMessage.Get<bool>();
 
         if (HasMetalnessMap)
         {
-            _rMessage.GetString(MetalMapName, 256);
+            MetalMapName = _rMessage.Get<std::string>();
         }
 
-        HasBumpMap = _rMessage.GetBool();
+        HasBumpMap = _rMessage.Get<bool>();
 
         if (HasBumpMap)
         {
-            _rMessage.GetString(BumpMapName, 256);
+            BumpMapName = _rMessage.Get<std::string>();
         }
 
-        HasAOMap = _rMessage.GetBool();
+        HasAOMap = _rMessage.Get<bool>();
 
         if (HasAOMap)
         {
-            _rMessage.GetString(AOMapName, 256);
+            AOMapName = _rMessage.Get<std::string>();
         }
 
         // -----------------------------------------------------------------------------
@@ -508,9 +508,7 @@ namespace Edit
 
         // -----------------------------------------------------------------------------
 
-        m_pAlbedoTextureEdit->SetTextureFile("");
-
-        if (HasColorMap) m_pAlbedoTextureEdit->SetTextureFile(ColorMapName);
+        m_pAlbedoTextureEdit->SetTextureFile(QString(ColorMapName.c_str()));
 
         QPalette ButtonPalette = m_pAlbedoColorButton->palette();
 
@@ -522,15 +520,11 @@ namespace Edit
 
         // -----------------------------------------------------------------------------
 
-        m_pNormalTextureEdit->SetTextureFile("");
-
-        if (HasNormalMap) m_pNormalTextureEdit->SetTextureFile(NormalMapName);
+        m_pNormalTextureEdit->SetTextureFile(QString(NormalMapName.c_str()));
 
         // -----------------------------------------------------------------------------
 
-        m_pRoughnessTextureEdit->SetTextureFile("");
-
-        if (HasRoughnessMap) m_pRoughnessTextureEdit->SetTextureFile(RoughnessMapName);
+        m_pRoughnessTextureEdit->SetTextureFile(QString(RoughnessMapName.c_str()));
 
         m_pRoughnessSlider->setValue(static_cast<int>(Roughness * 100.0f));
 
@@ -538,9 +532,7 @@ namespace Edit
 
         // -----------------------------------------------------------------------------
 
-        m_pMetallicTextureEdit->SetTextureFile("");
-
-        if (HasMetalnessMap) m_pMetallicTextureEdit->SetTextureFile(MetalMapName);
+        m_pMetallicTextureEdit->SetTextureFile(QString(MetalMapName.c_str()));
 
         m_pMetallicSlider->setValue(static_cast<int>(Metalness * 100.0f));
 
@@ -554,17 +546,13 @@ namespace Edit
 
         // -----------------------------------------------------------------------------
 
-        m_pBumpTextureEdit->SetTextureFile("");
-
-        if (HasBumpMap) m_pBumpTextureEdit->SetTextureFile(BumpMapName);
+        m_pBumpTextureEdit->SetTextureFile(QString(BumpMapName.c_str()));
 
         m_pBumpEdit->setText(QString::number(BumpFactor));
 
         // -----------------------------------------------------------------------------
 
-        m_pAOTextureEdit->SetTextureFile("");
-
-        if (HasAOMap) m_pAOTextureEdit->SetTextureFile(AOMapName);
+        m_pAOTextureEdit->SetTextureFile(QString(AOMapName.c_str()));
 
         // -----------------------------------------------------------------------------
 

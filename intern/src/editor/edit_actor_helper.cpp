@@ -6,14 +6,15 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
-#include "data/data_actor_type.h"
-#include "data/data_camera_actor_manager.h"
+#include "data/data_camera_component.h"
+#include "data/data_component_manager.h"
+#include "data/data_component_facet.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_map.h"
 #include "data/data_material_manager.h"
 #include "data/data_mesh.h"
-#include "data/data_mesh_actor_facet.h"
+#include "data/data_mesh_component.h"
 #include "data/data_texture_manager.h"
 #include "data/data_transformation_facet.h"
 
@@ -111,19 +112,17 @@ namespace
             // -----------------------------------------------------------------------------
             // Get entity and set type + category
             // -----------------------------------------------------------------------------
-            int EntityID = _rMessage.GetInt();
+            Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-            Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+            Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-            rCurrentEntity.SetCategory(Dt::SEntityCategory::Actor);
-            rCurrentEntity.SetType(Dt::SActorType::Camera);
+            rCurrentEntity.SetCategory(Dt::SEntityCategory::Dynamic);
 
-            // -----------------------------------------------------------------------------
-            // Create facet and set it
-            // -----------------------------------------------------------------------------
-            Dt::CCameraActorFacet* pFacet = Dt::CameraActorManager::CreateCameraActor();
+            auto pComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CCameraComponent>();
 
-            rCurrentEntity.SetDetailFacet(Dt::SFacetCategory::Data, pFacet);
+            rCurrentEntity.AttachComponent(pComponent);
+
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pComponent, Dt::CCameraComponent::DirtyCreate);
         }
     }
 
@@ -131,13 +130,13 @@ namespace
 
     void CActorHelper::OnRequestActorInfoMaterial(Edit::CMessage& _rMessage)
     {
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-        Dt::CMeshActorFacet* pFacet = static_cast<Dt::CMeshActorFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+        Dt::CMeshComponent* pFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CMeshComponent>();
 
-        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Actor && rCurrentEntity.GetType() == Dt::SActorType::Mesh && pFacet != nullptr)
+        if (pFacet != nullptr)
         {
             // TODO by tschwandt
             // different surfaces necessary?
@@ -154,17 +153,17 @@ namespace
 
             Edit::CMessage NewMessage;
 
-            NewMessage.PutInt(rCurrentEntity.GetID());
+            NewMessage.Put(rCurrentEntity.GetID());
 
             if (pMaterial)
             {
-                NewMessage.PutBool(true);
+                NewMessage.Put(true);
 
-                NewMessage.PutInt(pMaterial->GetHash());
+                NewMessage.Put(pMaterial->GetHash());
             }
             else
             {
-                NewMessage.PutBool(false);
+                NewMessage.Put(false);
             }
 
             NewMessage.Reset();
@@ -177,65 +176,65 @@ namespace
 
     void CActorHelper::OnRequestActorInfoCamera(Edit::CMessage& _rMessage)
     {
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-        Dt::CCameraActorFacet* pFacet = static_cast<Dt::CCameraActorFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+        Dt::CCameraComponent* pFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CCameraComponent>();
 
-        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Actor && rCurrentEntity.GetType() == Dt::SActorType::Camera && pFacet != nullptr)
+        if (pFacet != nullptr)
         {
             Edit::CMessage NewMessage;
 
-            NewMessage.PutInt(rCurrentEntity.GetID());
+            NewMessage.Put(rCurrentEntity.GetID());
 
-            NewMessage.PutBool(pFacet->IsMainCamera());
+            NewMessage.Put(pFacet->IsMainCamera());
 
-            NewMessage.PutInt(pFacet->GetClearFlag());
+            NewMessage.Put(pFacet->GetClearFlag());
 
             if (pFacet->GetHasTexture())
             {
-                NewMessage.PutBool(true);
+                NewMessage.Put(true);
 
-                NewMessage.PutInt(pFacet->GetTexture()->GetHash());
+                NewMessage.Put(pFacet->GetTexture()->GetHash());
             }
             else
             {
-                NewMessage.PutBool(false);
+                NewMessage.Put(false);
             }
 
-            NewMessage.PutFloat(pFacet->GetBackgroundColor()[0]);
-            NewMessage.PutFloat(pFacet->GetBackgroundColor()[1]);
-            NewMessage.PutFloat(pFacet->GetBackgroundColor()[2]);
+            NewMessage.Put(pFacet->GetBackgroundColor()[0]);
+            NewMessage.Put(pFacet->GetBackgroundColor()[1]);
+            NewMessage.Put(pFacet->GetBackgroundColor()[2]);
 
-            NewMessage.PutInt(pFacet->GetCullingMask());
+            NewMessage.Put(pFacet->GetCullingMask());
 
-            NewMessage.PutInt(pFacet->GetProjectionType());
+            NewMessage.Put(pFacet->GetProjectionType());
 
-            NewMessage.PutFloat(pFacet->GetSize());
+            NewMessage.Put(pFacet->GetSize());
 
-            NewMessage.PutFloat(pFacet->GetFoV());
+            NewMessage.Put(pFacet->GetFoV());
 
-            NewMessage.PutFloat(pFacet->GetNear());
+            NewMessage.Put(pFacet->GetNear());
 
-            NewMessage.PutFloat(pFacet->GetFar());
+            NewMessage.Put(pFacet->GetFar());
 
-            NewMessage.PutFloat(pFacet->GetViewportRect()[0][0]);
-            NewMessage.PutFloat(pFacet->GetViewportRect()[0][1]);
-            NewMessage.PutFloat(pFacet->GetViewportRect()[1][0]);
-            NewMessage.PutFloat(pFacet->GetViewportRect()[1][1]);
+            NewMessage.Put(pFacet->GetViewportRect()[0][0]);
+            NewMessage.Put(pFacet->GetViewportRect()[0][1]);
+            NewMessage.Put(pFacet->GetViewportRect()[1][0]);
+            NewMessage.Put(pFacet->GetViewportRect()[1][1]);
 
-            NewMessage.PutFloat(pFacet->GetDepth());
+            NewMessage.Put(pFacet->GetDepth());
 
-            NewMessage.PutInt(pFacet->GetCameraMode());
+            NewMessage.Put(pFacet->GetCameraMode());
 
-            NewMessage.PutFloat(pFacet->GetShutterSpeed());
+            NewMessage.Put(pFacet->GetShutterSpeed());
 
-            NewMessage.PutFloat(pFacet->GetAperture());
+            NewMessage.Put(pFacet->GetAperture());
 
-            NewMessage.PutFloat(pFacet->GetISO());
+            NewMessage.Put(pFacet->GetISO());
 
-            NewMessage.PutFloat(pFacet->GetEC());
+            NewMessage.Put(pFacet->GetEC());
             
             NewMessage.Reset();
 
@@ -247,21 +246,21 @@ namespace
 
     void CActorHelper::OnActorInfoMaterial(Edit::CMessage& _rMessage)
     {
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        int MaterialHash = _rMessage.GetInt();
+        int MaterialHash = _rMessage.Get<int>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-        Dt::CMeshActorFacet* pFacet = static_cast<Dt::CMeshActorFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+        Dt::CMeshComponent* pFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CMeshComponent>();
 
-        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Actor && rCurrentEntity.GetType() == Dt::SActorType::Mesh && pFacet != nullptr)
+        if (pFacet != nullptr)
         {
             Dt::CMaterial& rDtMaterial = Dt::MaterialManager::GetMaterialByHash(MaterialHash);
 
             pFacet->SetMaterial(0, &rDtMaterial);
 
-            Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pFacet, Dt::CMeshComponent::DirtyInfo);
         }
     }
 
@@ -269,13 +268,13 @@ namespace
 
     void CActorHelper::OnActorInfoCamera(Edit::CMessage& _rMessage)
     {
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-        Dt::CCameraActorFacet* pFacet = static_cast<Dt::CCameraActorFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+        Dt::CCameraComponent* pFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CCameraComponent>();
 
-        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Actor && rCurrentEntity.GetType() == Dt::SActorType::Camera && pFacet != nullptr)
+        if (pFacet != nullptr)
         {
             float R, G, B;
             float X, Y, W, H;
@@ -283,51 +282,51 @@ namespace
             // -----------------------------------------------------------------------------
             // Get values
             // -----------------------------------------------------------------------------
-            bool IsMainCamera = _rMessage.GetBool();
+            bool IsMainCamera = _rMessage.Get<bool>();
 
-            Dt::CCameraActorFacet::EClearFlag ClearFlag = static_cast<Dt::CCameraActorFacet::EClearFlag >(_rMessage.GetInt());
+            Dt::CCameraComponent::EClearFlag ClearFlag = static_cast<Dt::CCameraComponent::EClearFlag >(_rMessage.Get<int>());
 
-            bool HasTexture = _rMessage.GetBool();
+            bool HasTexture = _rMessage.Get<bool>();
 
             int TextureHash = -1;
 
             if (HasTexture)
             {
-                TextureHash = _rMessage.GetInt();
+                TextureHash = _rMessage.Get<int>();
             }
 
-            R = _rMessage.GetFloat();
-            G = _rMessage.GetFloat();
-            B = _rMessage.GetFloat();
+            R = _rMessage.Get<float>();
+            G = _rMessage.Get<float>();
+            B = _rMessage.Get<float>();
 
-            int CullingMask = _rMessage.GetInt();
+            int CullingMask = _rMessage.Get<int>();
 
-            Dt::CCameraActorFacet::EProjectionType ProjectionType = static_cast<Dt::CCameraActorFacet::EProjectionType>(_rMessage.GetInt());
+            Dt::CCameraComponent::EProjectionType ProjectionType = static_cast<Dt::CCameraComponent::EProjectionType>(_rMessage.Get<int>());
 
-            float Size = _rMessage.GetFloat();
+            float Size = _rMessage.Get<float>();
 
-            float FOV = _rMessage.GetFloat();
+            float FOV = _rMessage.Get<float>();
 
-            float Near = _rMessage.GetFloat();
+            float Near = _rMessage.Get<float>();
 
-            float Far = _rMessage.GetFloat();
+            float Far = _rMessage.Get<float>();
 
-            X = _rMessage.GetFloat();
-            Y = _rMessage.GetFloat();
-            W = _rMessage.GetFloat();
-            H = _rMessage.GetFloat();
+            X = _rMessage.Get<float>();
+            Y = _rMessage.Get<float>();
+            W = _rMessage.Get<float>();
+            H = _rMessage.Get<float>();
 
-            float Depth = _rMessage.GetFloat();
+            float Depth = _rMessage.Get<float>();
 
-            Dt::CCameraActorFacet::ECameraMode CameraMode = static_cast<Dt::CCameraActorFacet::ECameraMode>(_rMessage.GetInt());
+            Dt::CCameraComponent::ECameraMode CameraMode = static_cast<Dt::CCameraComponent::ECameraMode>(_rMessage.Get<int>());
 
-            float ShutterSpeed = _rMessage.GetFloat();
+            float ShutterSpeed = _rMessage.Get<float>();
 
-            float Aperture = _rMessage.GetFloat();
+            float Aperture = _rMessage.Get<float>();
 
-            float ISO = _rMessage.GetFloat();
+            float ISO = _rMessage.Get<float>();
 
-            float EC = _rMessage.GetFloat();
+            float EC = _rMessage.Get<float>();
 
             // -----------------------------------------------------------------------------
             // Set values
@@ -375,7 +374,7 @@ namespace
 
             pFacet->SetEC(EC);
 
-            Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pFacet, Dt::CCameraComponent::DirtyInfo);
         }
     }
 

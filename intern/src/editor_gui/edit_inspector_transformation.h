@@ -11,12 +11,12 @@ namespace Edit
 {
     class CInspectorTransformation : public QWidget, public Ui::InspectorTransformation
     {
-	    Q_OBJECT
+        Q_OBJECT
 
     public:
 
-	    CInspectorTransformation(QWidget* _pParent = Q_NULLPTR);
-	    ~CInspectorTransformation();
+        CInspectorTransformation(QWidget* _pParent = Q_NULLPTR);
+        ~CInspectorTransformation();
 
     public Q_SLOTS:
 
@@ -34,11 +34,11 @@ namespace Edit
         void changeScaleY(QPoint _Difference);
         void changeScaleZ(QPoint _Difference);
 
-        void RequestInformation(unsigned int _EntityID);
+        void RequestInformation(Base::ID _EntityID);
 
     private:
 
-        int m_CurrentEntityID;
+        Base::ID m_CurrentEntityID;
 
     private:
 

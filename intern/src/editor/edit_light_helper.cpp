@@ -5,16 +5,17 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
-#include "data/data_area_light_manager.h"
+#include "data/data_area_light_component.h"
+#include "data/data_component_manager.h"
+#include "data/data_component_facet.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_hierarchy_facet.h"
-#include "data/data_light_probe_manager.h"
-#include "data/data_light_type.h"
+#include "data/data_light_probe_component.h"
 #include "data/data_map.h"
-#include "data/data_point_light_manager.h"
-#include "data/data_sky_manager.h"
-#include "data/data_sun_manager.h"
+#include "data/data_point_light_component.h"
+#include "data/data_sky_component.h"
+#include "data/data_sun_component.h"
 #include "data/data_texture_manager.h"
 #include "data/data_transformation_facet.h"
 
@@ -121,33 +122,34 @@ namespace
             // -----------------------------------------------------------------------------
             // Get entity and set type + category
             // -----------------------------------------------------------------------------
-            int EntityID = _rMessage.GetInt();
+            Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-            Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+            Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-            rCurrentEntity.SetCategory(Dt::SEntityCategory::Light);
-            rCurrentEntity.SetType(Dt::SLightType::Point);
+            rCurrentEntity.SetCategory(Dt::SEntityCategory::Dynamic);
 
             // -----------------------------------------------------------------------------
             // Create facet and set it
             // -----------------------------------------------------------------------------
-            Dt::CPointLightFacet* pPointLightFacet = Dt::PointLightManager::CreatePointLight();
+            Dt::CPointLightComponent* pComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CPointLightComponent>();
 
-            pPointLightFacet->SetRefreshMode      (Dt::CPointLightFacet::Static);
-            pPointLightFacet->SetShadowType       (Dt::CPointLightFacet::HardShadows);
-            pPointLightFacet->SetShadowQuality    (Dt::CPointLightFacet::High);
-            pPointLightFacet->EnableTemperature   (false);
-            pPointLightFacet->SetColor            (glm::vec3(1.0f, 1.0f, 1.0f));
-            pPointLightFacet->SetAttenuationRadius(10.0f);
-            pPointLightFacet->SetInnerConeAngle   (glm::radians(45.0f));
-            pPointLightFacet->SetOuterConeAngle   (glm::radians(90.0f));
-            pPointLightFacet->SetDirection        (glm::vec3(-1.0f, -1.0f, -1.0f));
-            pPointLightFacet->SetIntensity        (1200.0f);
-            pPointLightFacet->SetTemperature      (0);
+            pComponent->SetRefreshMode      (Dt::CPointLightComponent::Static);
+            pComponent->SetShadowType       (Dt::CPointLightComponent::HardShadows);
+            pComponent->SetShadowQuality    (Dt::CPointLightComponent::High);
+            pComponent->EnableTemperature   (false);
+            pComponent->SetColor            (glm::vec3(1.0f, 1.0f, 1.0f));
+            pComponent->SetAttenuationRadius(10.0f);
+            pComponent->SetInnerConeAngle   (glm::radians(45.0f));
+            pComponent->SetOuterConeAngle   (glm::radians(90.0f));
+            pComponent->SetDirection        (glm::vec3(-1.0f, -1.0f, -1.0f));
+            pComponent->SetIntensity        (1200.0f);
+            pComponent->SetTemperature      (0);
 
-            pPointLightFacet->UpdateLightness();
+            pComponent->UpdateLightness();
 
-            rCurrentEntity.SetDetailFacet(Dt::SFacetCategory::Data, pPointLightFacet);
+            rCurrentEntity.AttachComponent(pComponent);
+
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pComponent, Dt::CPointLightComponent::DirtyCreate);
         }
     }
 
@@ -159,28 +161,29 @@ namespace
             // -----------------------------------------------------------------------------
             // Get entity and set type + category
             // -----------------------------------------------------------------------------
-            int EntityID = _rMessage.GetInt();
+            Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-            Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+            Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-            rCurrentEntity.SetCategory(Dt::SEntityCategory::Light);
-            rCurrentEntity.SetType(Dt::SLightType::Sun);
+            rCurrentEntity.SetCategory(Dt::SEntityCategory::Dynamic);
 
             // -----------------------------------------------------------------------------
             // Create facet and set it
             // -----------------------------------------------------------------------------
-            Dt::CSunLightFacet* pSunLightFacet = Dt::SunManager::CreateSunLight();
+            Dt::CSunComponent* pComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CSunComponent>();
 
-            pSunLightFacet->EnableTemperature(false);
-            pSunLightFacet->SetColor         (glm::vec3(1.0f, 1.0f, 1.0f));
-            pSunLightFacet->SetDirection     (glm::vec3(0.01f, 0.01f, -1.0f));
-            pSunLightFacet->SetIntensity     (90600.0f);
-            pSunLightFacet->SetTemperature   (0);
-            pSunLightFacet->SetRefreshMode   (Dt::CSunLightFacet::Dynamic);
+            pComponent->EnableTemperature(false);
+            pComponent->SetColor         (glm::vec3(1.0f, 1.0f, 1.0f));
+            pComponent->SetDirection     (glm::vec3(0.01f, 0.01f, -1.0f));
+            pComponent->SetIntensity     (90600.0f);
+            pComponent->SetTemperature   (0);
+            pComponent->SetRefreshMode   (Dt::CSunComponent::Dynamic);
 
-            pSunLightFacet->UpdateLightness();
+            pComponent->UpdateLightness();
 
-            rCurrentEntity.SetDetailFacet(Dt::SFacetCategory::Data, pSunLightFacet);
+            rCurrentEntity.AttachComponent(pComponent);
+
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pComponent, Dt::CSunComponent::DirtyCreate);
         }
     }
 
@@ -192,12 +195,11 @@ namespace
             // -----------------------------------------------------------------------------
             // Get entity and set type + category
             // -----------------------------------------------------------------------------
-            int EntityID = _rMessage.GetInt();
+            Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-            Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+            Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-            rCurrentEntity.SetCategory(Dt::SEntityCategory::Light);
-            rCurrentEntity.SetType(Dt::SLightType::Sky);
+            rCurrentEntity.SetCategory(Dt::SEntityCategory::Dynamic);
 
             // -----------------------------------------------------------------------------
             // Create facet and set it
@@ -220,14 +222,16 @@ namespace
 
             // -----------------------------------------------------------------------------
 
-            Dt::CSkyFacet* pSkyboxFacet = Dt::SkyManager::CreateSky();
+            Dt::CSkyComponent* pComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CSkyComponent>();
 
-            pSkyboxFacet->SetRefreshMode(Dt::CSkyFacet::Static);
-            pSkyboxFacet->SetType       (Dt::CSkyFacet::Panorama);
-            pSkyboxFacet->SetPanorama   (pPanoramaTexture);
-            pSkyboxFacet->SetIntensity  (5000.0f);
+            pComponent->SetRefreshMode(Dt::CSkyComponent::Static);
+            pComponent->SetType       (Dt::CSkyComponent::Panorama);
+            pComponent->SetPanorama   (pPanoramaTexture);
+            pComponent->SetIntensity  (5000.0f);
 
-            rCurrentEntity.SetDetailFacet(Dt::SFacetCategory::Data, pSkyboxFacet);
+            rCurrentEntity.AttachComponent(pComponent);
+
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pComponent, Dt::CSkyComponent::DirtyCreate);
         }
     }
 
@@ -239,29 +243,30 @@ namespace
             // -----------------------------------------------------------------------------
             // Get entity and set type + category
             // -----------------------------------------------------------------------------
-            int EntityID = _rMessage.GetInt();
+            Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-            Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+            Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-            rCurrentEntity.SetCategory(Dt::SEntityCategory::Light);
-            rCurrentEntity.SetType(Dt::SLightType::LightProbe);
+            rCurrentEntity.SetCategory(Dt::SEntityCategory::Dynamic);
 
             // -----------------------------------------------------------------------------
             // Create facet and set it
             // -----------------------------------------------------------------------------
-            Dt::CLightProbeFacet* pLightProbeFacet = Dt::LightProbeManager::CreateLightProbe();
+            Dt::CLightProbeComponent* pComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CLightProbeComponent>();
 
-            pLightProbeFacet->SetRefreshMode       (Dt::CLightProbeFacet::Static);
-            pLightProbeFacet->SetType              (Dt::CLightProbeFacet::Local);
-            pLightProbeFacet->SetQuality           (Dt::CLightProbeFacet::PX256);
-            pLightProbeFacet->SetClearFlag         (Dt::CLightProbeFacet::Skybox);
-            pLightProbeFacet->SetIntensity         (1.0f);
-            pLightProbeFacet->SetNear              (0.1f);
-            pLightProbeFacet->SetFar               (10.0f);
-            pLightProbeFacet->SetParallaxCorrection(true);
-            pLightProbeFacet->SetBoxSize           (glm::vec3(10.0f));
+            pComponent->SetRefreshMode       (Dt::CLightProbeComponent::Static);
+            pComponent->SetType              (Dt::CLightProbeComponent::Local);
+            pComponent->SetQuality           (Dt::CLightProbeComponent::PX256);
+            pComponent->SetClearFlag         (Dt::CLightProbeComponent::Skybox);
+            pComponent->SetIntensity         (1.0f);
+            pComponent->SetNear              (0.1f);
+            pComponent->SetFar               (10.0f);
+            pComponent->SetParallaxCorrection(true);
+            pComponent->SetBoxSize           (glm::vec3(10.0f));
 
-            rCurrentEntity.SetDetailFacet(Dt::SFacetCategory::Data, pLightProbeFacet);
+            rCurrentEntity.AttachComponent(pComponent);
+
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pComponent, Dt::CLightProbeComponent::DirtyCreate);
         }
     }
 
@@ -273,31 +278,32 @@ namespace
             // -----------------------------------------------------------------------------
             // Get entity and set type + category
             // -----------------------------------------------------------------------------
-            int EntityID = _rMessage.GetInt();
+            Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-            Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+            Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-            rCurrentEntity.SetCategory(Dt::SEntityCategory::Light);
-            rCurrentEntity.SetType(Dt::SLightType::Area);
+            rCurrentEntity.SetCategory(Dt::SEntityCategory::Dynamic);
 
             // -----------------------------------------------------------------------------
             // Create facet and set it
             // -----------------------------------------------------------------------------
-            Dt::CAreaLightFacet* pLightFacet = Dt::AreaLightManager::CreateAreaLight();
+            Dt::CAreaLightComponent* pComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CAreaLightComponent>();
 
-            pLightFacet->EnableTemperature   (false);
-            pLightFacet->SetColor            (glm::vec3(1.0f, 1.0f, 1.0f));
-            pLightFacet->SetRotation         (0.0f);
-            pLightFacet->SetWidth            (8.0f);
-            pLightFacet->SetHeight           (8.0f);
-            pLightFacet->SetDirection        (glm::vec3(-0.01f, 0.01f, -1.0f));
-            pLightFacet->SetIntensity        (1200.0f);
-            pLightFacet->SetTemperature      (0);
-            pLightFacet->SetIsTwoSided       (false);
+            pComponent->EnableTemperature   (false);
+            pComponent->SetColor            (glm::vec3(1.0f, 1.0f, 1.0f));
+            pComponent->SetRotation         (0.0f);
+            pComponent->SetWidth            (8.0f);
+            pComponent->SetHeight           (8.0f);
+            pComponent->SetDirection        (glm::vec3(-0.01f, 0.01f, -1.0f));
+            pComponent->SetIntensity        (1200.0f);
+            pComponent->SetTemperature      (0);
+            pComponent->SetIsTwoSided       (false);
 
-            pLightFacet->UpdateLightness();
+            pComponent->UpdateLightness();
 
-            rCurrentEntity.SetDetailFacet(Dt::SFacetCategory::Data, pLightFacet);
+            rCurrentEntity.AttachComponent(pComponent);
+
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pComponent, Dt::CAreaLightComponent::DirtyCreate);
         }
     }
 
@@ -305,32 +311,32 @@ namespace
 
     void CLightHelper::OnRequestInfoPointlight(Edit::CMessage& _rMessage)
     {
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-        Dt::CPointLightFacet* pPointLightFacet = static_cast<Dt::CPointLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+        Dt::CPointLightComponent* pPointLightFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CPointLightComponent>();
 
-        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Light && rCurrentEntity.GetType() == Dt::SLightType::Point && pPointLightFacet != nullptr)
+        if (pPointLightFacet != nullptr)
         {
             Edit::CMessage NewMessage;
 
-            NewMessage.PutInt(rCurrentEntity.GetID());
-            NewMessage.PutInt(static_cast<int>(pPointLightFacet->HasTemperature()));
-            NewMessage.PutFloat(pPointLightFacet->GetColor()[0]);
-            NewMessage.PutFloat(pPointLightFacet->GetColor()[1]);
-            NewMessage.PutFloat(pPointLightFacet->GetColor()[2]);
-            NewMessage.PutFloat(pPointLightFacet->GetTemperature());
-            NewMessage.PutFloat(pPointLightFacet->GetIntensity());
-            NewMessage.PutFloat(pPointLightFacet->GetAttenuationRadius());
-            NewMessage.PutFloat(glm::degrees(pPointLightFacet->GetInnerConeAngle()));
-            NewMessage.PutFloat(glm::degrees(pPointLightFacet->GetOuterConeAngle()));
-            NewMessage.PutFloat(pPointLightFacet->GetDirection()[0]);
-            NewMessage.PutFloat(pPointLightFacet->GetDirection()[1]);
-            NewMessage.PutFloat(pPointLightFacet->GetDirection()[2]);
-            NewMessage.PutInt(static_cast<int>(pPointLightFacet->GetShadowType()));
-            NewMessage.PutInt(static_cast<int>(pPointLightFacet->GetShadowQuality()));
-            NewMessage.PutInt(static_cast<int>(pPointLightFacet->GetRefreshMode()));
+            NewMessage.Put(rCurrentEntity.GetID());
+            NewMessage.Put(static_cast<int>(pPointLightFacet->HasTemperature()));
+            NewMessage.Put(pPointLightFacet->GetColor()[0]);
+            NewMessage.Put(pPointLightFacet->GetColor()[1]);
+            NewMessage.Put(pPointLightFacet->GetColor()[2]);
+            NewMessage.Put(pPointLightFacet->GetTemperature());
+            NewMessage.Put(pPointLightFacet->GetIntensity());
+            NewMessage.Put(pPointLightFacet->GetAttenuationRadius());
+            NewMessage.Put(glm::degrees(pPointLightFacet->GetInnerConeAngle()));
+            NewMessage.Put(glm::degrees(pPointLightFacet->GetOuterConeAngle()));
+            NewMessage.Put(pPointLightFacet->GetDirection()[0]);
+            NewMessage.Put(pPointLightFacet->GetDirection()[1]);
+            NewMessage.Put(pPointLightFacet->GetDirection()[2]);
+            NewMessage.Put(static_cast<int>(pPointLightFacet->GetShadowType()));
+            NewMessage.Put(static_cast<int>(pPointLightFacet->GetShadowQuality()));
+            NewMessage.Put(static_cast<int>(pPointLightFacet->GetRefreshMode()));
 
             NewMessage.Reset();
 
@@ -342,27 +348,27 @@ namespace
 
     void CLightHelper::OnRequestInfoSun(Edit::CMessage& _rMessage)
     {
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-        Dt::CSunLightFacet* pLightFacet = static_cast<Dt::CSunLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+        Dt::CSunComponent* pLightFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CSunComponent>();
 
-        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Light && rCurrentEntity.GetType() == Dt::SLightType::Sun && pLightFacet != nullptr)
+        if (pLightFacet != nullptr)
         {
             Edit::CMessage NewMessage;
 
-            NewMessage.PutInt(rCurrentEntity.GetID());
-            NewMessage.PutInt(static_cast<int>(pLightFacet->HasTemperature()));
-            NewMessage.PutFloat(pLightFacet->GetColor()[0]);
-            NewMessage.PutFloat(pLightFacet->GetColor()[1]);
-            NewMessage.PutFloat(pLightFacet->GetColor()[2]);
-            NewMessage.PutFloat(pLightFacet->GetTemperature());
-            NewMessage.PutFloat(pLightFacet->GetIntensity());
-            NewMessage.PutFloat(pLightFacet->GetDirection()[0]);
-            NewMessage.PutFloat(pLightFacet->GetDirection()[1]);
-            NewMessage.PutFloat(pLightFacet->GetDirection()[2]);
-            NewMessage.PutInt(static_cast<int>(pLightFacet->GetRefreshMode()));
+            NewMessage.Put(rCurrentEntity.GetID());
+            NewMessage.Put(static_cast<int>(pLightFacet->HasTemperature()));
+            NewMessage.Put(pLightFacet->GetColor()[0]);
+            NewMessage.Put(pLightFacet->GetColor()[1]);
+            NewMessage.Put(pLightFacet->GetColor()[2]);
+            NewMessage.Put(pLightFacet->GetTemperature());
+            NewMessage.Put(pLightFacet->GetIntensity());
+            NewMessage.Put(pLightFacet->GetDirection()[0]);
+            NewMessage.Put(pLightFacet->GetDirection()[1]);
+            NewMessage.Put(pLightFacet->GetDirection()[2]);
+            NewMessage.Put(static_cast<int>(pLightFacet->GetRefreshMode()));
 
             NewMessage.Reset();
 
@@ -380,67 +386,67 @@ namespace
             {
                 if (_pTextureBase->GetFileName().length() > 0)
                 {
-                    _rMessage.PutBool(true);
+                    _rMessage.Put(true);
 
-                    _rMessage.PutString(_pTextureBase->GetFileName().c_str());
+                    _rMessage.Put(_pTextureBase->GetFileName());
                 }
                 else
                 {
-                    _rMessage.PutBool(false);
+                    _rMessage.Put(false);
                 }
 
-                _rMessage.PutInt(_pTextureBase->GetHash());
+                _rMessage.Put(_pTextureBase->GetHash());
             }
             else
             {
-                _rMessage.PutBool(false);
+                _rMessage.Put(false);
 
-                _rMessage.PutInt(0);
+                _rMessage.Put(0);
             }
         };
 
         // -----------------------------------------------------------------------------
 
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-        Dt::CSkyFacet* pLightFacet = static_cast<Dt::CSkyFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+        Dt::CSkyComponent* pLightFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CSkyComponent>();
 
-        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Light && rCurrentEntity.GetType() == Dt::SLightType::Sky && pLightFacet != nullptr)
+        if (pLightFacet != nullptr)
         {
             Edit::CMessage NewMessage;
 
-            NewMessage.PutInt(rCurrentEntity.GetID());
-            NewMessage.PutInt(static_cast<int>(pLightFacet->GetRefreshMode()));
-            NewMessage.PutInt(static_cast<int>(pLightFacet->GetType()));
+            NewMessage.Put(rCurrentEntity.GetID());
+            NewMessage.Put(static_cast<int>(pLightFacet->GetRefreshMode()));
+            NewMessage.Put(static_cast<int>(pLightFacet->GetType()));
 
-            if (pLightFacet->GetType() == Dt::CSkyFacet::Procedural)
+            if (pLightFacet->GetType() == Dt::CSkyComponent::Procedural)
             {
-                NewMessage.PutBool(false);
+                NewMessage.Put(false);
 
-                NewMessage.PutInt(0);
+                NewMessage.Put(0);
             }
-            else if (pLightFacet->GetType() == Dt::CSkyFacet::Panorama)
+            else if (pLightFacet->GetType() == Dt::CSkyComponent::Panorama)
             {
-                NewMessage.PutBool(true);
+                NewMessage.Put(true);
 
                 AddTextureToMessage(pLightFacet->GetPanorama(), NewMessage);
             }
-            else if (pLightFacet->GetType() == Dt::CSkyFacet::Cubemap)
+            else if (pLightFacet->GetType() == Dt::CSkyComponent::Cubemap)
             {
-                NewMessage.PutBool(true);
+                NewMessage.Put(true);
 
                 AddTextureToMessage(pLightFacet->GetCubemap(), NewMessage);
             }
-            else if (pLightFacet->GetType() == Dt::CSkyFacet::Texture || pLightFacet->GetType() == Dt::CSkyFacet::TextureGeometry || pLightFacet->GetType() == Dt::CSkyFacet::TextureLUT)
+            else if (pLightFacet->GetType() == Dt::CSkyComponent::Texture || pLightFacet->GetType() == Dt::CSkyComponent::TextureGeometry || pLightFacet->GetType() == Dt::CSkyComponent::TextureLUT)
             {
-                NewMessage.PutBool(true);
+                NewMessage.Put(true);
 
                 AddTextureToMessage(pLightFacet->GetTexture(), NewMessage);
             }
 
-            NewMessage.PutFloat (pLightFacet->GetIntensity());
+            NewMessage.Put(pLightFacet->GetIntensity());
                 
             NewMessage.Reset();
 
@@ -452,28 +458,28 @@ namespace
     
     void CLightHelper::OnRequestInfoLightProbe(Edit::CMessage& _rMessage)
     {
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-        Dt::CLightProbeFacet* pLightFacet = static_cast<Dt::CLightProbeFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+        Dt::CLightProbeComponent* pLightFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CLightProbeComponent>();
 
-        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Light && rCurrentEntity.GetType() == Dt::SLightType::LightProbe && pLightFacet != nullptr)
+        if (pLightFacet != nullptr)
         {
             Edit::CMessage NewMessage;
 
-            NewMessage.PutInt(rCurrentEntity.GetID());
-            NewMessage.PutInt(pLightFacet->GetRefreshMode());
-            NewMessage.PutInt(pLightFacet->GetType());
-            NewMessage.PutInt(pLightFacet->GetQuality());
-            NewMessage.PutInt(pLightFacet->GetClearFlag());
-            NewMessage.PutFloat(pLightFacet->GetIntensity());
-            NewMessage.PutFloat(pLightFacet->GetNear());
-            NewMessage.PutFloat(pLightFacet->GetFar());
-            NewMessage.PutBool(pLightFacet->GetParallaxCorrection());
-            NewMessage.PutFloat(pLightFacet->GetBoxSize()[0]);
-            NewMessage.PutFloat(pLightFacet->GetBoxSize()[1]);
-            NewMessage.PutFloat(pLightFacet->GetBoxSize()[2]);
+            NewMessage.Put(rCurrentEntity.GetID());
+            NewMessage.Put(pLightFacet->GetRefreshMode());
+            NewMessage.Put(pLightFacet->GetType());
+            NewMessage.Put(pLightFacet->GetQuality());
+            NewMessage.Put(pLightFacet->GetClearFlag());
+            NewMessage.Put(pLightFacet->GetIntensity());
+            NewMessage.Put(pLightFacet->GetNear());
+            NewMessage.Put(pLightFacet->GetFar());
+            NewMessage.Put(pLightFacet->GetParallaxCorrection());
+            NewMessage.Put(pLightFacet->GetBoxSize()[0]);
+            NewMessage.Put(pLightFacet->GetBoxSize()[1]);
+            NewMessage.Put(pLightFacet->GetBoxSize()[2]);
 
             NewMessage.Reset();
 
@@ -485,42 +491,42 @@ namespace
 
     void CLightHelper::OnRequestInfoArealight(Edit::CMessage& _rMessage)
     {
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-        Dt::CAreaLightFacet* pLightFacet = static_cast<Dt::CAreaLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+        Dt::CAreaLightComponent* pLightFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CAreaLightComponent>();
 
-        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Light && rCurrentEntity.GetType() == Dt::SLightType::Area && pLightFacet != nullptr)
+        if (pLightFacet != nullptr)
         {
             Edit::CMessage NewMessage;
 
-            NewMessage.PutInt(rCurrentEntity.GetID());
-            NewMessage.PutInt(static_cast<int>(pLightFacet->HasTemperature()));
-            NewMessage.PutFloat(pLightFacet->GetColor()[0]);
-            NewMessage.PutFloat(pLightFacet->GetColor()[1]);
-            NewMessage.PutFloat(pLightFacet->GetColor()[2]);
-            NewMessage.PutFloat(pLightFacet->GetTemperature());
-            NewMessage.PutFloat(pLightFacet->GetIntensity());
-            NewMessage.PutFloat(glm::degrees(pLightFacet->GetRotation()));
-            NewMessage.PutFloat(pLightFacet->GetWidth());
-            NewMessage.PutFloat(pLightFacet->GetHeight());
-            NewMessage.PutBool(pLightFacet->GetIsTwoSided());
-            NewMessage.PutFloat(pLightFacet->GetDirection()[0]);
-            NewMessage.PutFloat(pLightFacet->GetDirection()[1]);
-            NewMessage.PutFloat(pLightFacet->GetDirection()[2]);
+            NewMessage.Put(rCurrentEntity.GetID());
+            NewMessage.Put(static_cast<int>(pLightFacet->HasTemperature()));
+            NewMessage.Put(pLightFacet->GetColor()[0]);
+            NewMessage.Put(pLightFacet->GetColor()[1]);
+            NewMessage.Put(pLightFacet->GetColor()[2]);
+            NewMessage.Put(pLightFacet->GetTemperature());
+            NewMessage.Put(pLightFacet->GetIntensity());
+            NewMessage.Put(glm::degrees(pLightFacet->GetRotation()));
+            NewMessage.Put(pLightFacet->GetWidth());
+            NewMessage.Put(pLightFacet->GetHeight());
+            NewMessage.Put(pLightFacet->GetIsTwoSided());
+            NewMessage.Put(pLightFacet->GetDirection()[0]);
+            NewMessage.Put(pLightFacet->GetDirection()[1]);
+            NewMessage.Put(pLightFacet->GetDirection()[2]);
 
             if (pLightFacet->GetHasTexture())
             {
-                NewMessage.PutBool(true);
+                NewMessage.Put(true);
 
-                NewMessage.PutString(pLightFacet->GetTexture()->GetFileName().c_str());
+                NewMessage.Put(pLightFacet->GetTexture()->GetFileName());
 
-                NewMessage.PutInt(pLightFacet->GetTexture()->GetHash());
+                NewMessage.Put(pLightFacet->GetTexture()->GetHash());
             }
             else
             {
-                NewMessage.PutBool(false);
+                NewMessage.Put(false);
             }
 
             NewMessage.Reset();
@@ -533,12 +539,13 @@ namespace
 
     void CLightHelper::OnInfoPointlight(Edit::CMessage& _rMessage)
     {
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
-        Dt::CPointLightFacet* pPointLightFacet = static_cast<Dt::CPointLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Light && rCurrentEntity.GetType() == Dt::SLightType::Point && pPointLightFacet != nullptr)
+        Dt::CPointLightComponent* pLightFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CPointLightComponent>();
+
+        if (pLightFacet != nullptr)
         {
             float R, G, B;
             float X, Y, Z;
@@ -546,48 +553,48 @@ namespace
             // -----------------------------------------------------------------------------
             // Read values
             // -----------------------------------------------------------------------------
-            int ColorMode = _rMessage.GetInt();
+            int ColorMode = _rMessage.Get<int>();
 
-            R = _rMessage.GetFloat();
-            G = _rMessage.GetFloat();
-            B = _rMessage.GetFloat();
+            R = _rMessage.Get<float>();
+            G = _rMessage.Get<float>();
+            B = _rMessage.Get<float>();
 
             glm::vec3 Color = glm::vec3(R, G, B);
 
-            float Temperature       = _rMessage.GetFloat();
-            float Intensity         = _rMessage.GetFloat();
-            float AttenuationRadius = _rMessage.GetFloat();
-            float InnerConeAngle    = glm::radians(_rMessage.GetFloat());
-            float OuterConeAngle    = glm::radians(_rMessage.GetFloat());
+            float Temperature       = _rMessage.Get<float>();
+            float Intensity         = _rMessage.Get<float>();
+            float AttenuationRadius = _rMessage.Get<float>();
+            float InnerConeAngle    = glm::radians(_rMessage.Get<float>());
+            float OuterConeAngle    = glm::radians(_rMessage.Get<float>());
 
-            X = _rMessage.GetFloat();
-            Y = _rMessage.GetFloat();
-            Z = _rMessage.GetFloat();
+            X = _rMessage.Get<float>();
+            Y = _rMessage.Get<float>();
+            Z = _rMessage.Get<float>();
 
             glm::vec3 Direction = glm::vec3(X, Y, Z);
 
-            int ShadowType    = _rMessage.GetInt();
-            int ShadowQuality = _rMessage.GetInt();
-            int ShadowRefresh = _rMessage.GetInt();
+            int ShadowType    = _rMessage.Get<int>();
+            int ShadowQuality = _rMessage.Get<int>();
+            int ShadowRefresh = _rMessage.Get<int>();
 
             // -----------------------------------------------------------------------------
             // Set values
             // -----------------------------------------------------------------------------
-            pPointLightFacet->EnableTemperature   (ColorMode == 1);
-            pPointLightFacet->SetColor            (Color);
-            pPointLightFacet->SetTemperature      (Temperature);
-            pPointLightFacet->SetIntensity        (Intensity);
-            pPointLightFacet->SetAttenuationRadius(AttenuationRadius);
-            pPointLightFacet->SetInnerConeAngle   (InnerConeAngle);
-            pPointLightFacet->SetOuterConeAngle   (OuterConeAngle);
-            pPointLightFacet->SetDirection        (Direction);
-            pPointLightFacet->SetShadowType       (static_cast<Dt::CPointLightFacet::EShadowType>(ShadowType));
-            pPointLightFacet->SetShadowQuality    (static_cast<Dt::CPointLightFacet::EShadowQuality>(ShadowQuality));
-            pPointLightFacet->SetRefreshMode      (static_cast<Dt::CPointLightFacet::ERefreshMode>(ShadowRefresh));
+            pLightFacet->EnableTemperature   (ColorMode == 1);
+            pLightFacet->SetColor            (Color);
+            pLightFacet->SetTemperature      (Temperature);
+            pLightFacet->SetIntensity        (Intensity);
+            pLightFacet->SetAttenuationRadius(AttenuationRadius);
+            pLightFacet->SetInnerConeAngle   (InnerConeAngle);
+            pLightFacet->SetOuterConeAngle   (OuterConeAngle);
+            pLightFacet->SetDirection        (Direction);
+            pLightFacet->SetShadowType       (static_cast<Dt::CPointLightComponent::EShadowType>(ShadowType));
+            pLightFacet->SetShadowQuality    (static_cast<Dt::CPointLightComponent::EShadowQuality>(ShadowQuality));
+            pLightFacet->SetRefreshMode      (static_cast<Dt::CPointLightComponent::ERefreshMode>(ShadowRefresh));
             
-            pPointLightFacet->UpdateLightness();
+            pLightFacet->UpdateLightness();
 
-            Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pLightFacet, Dt::CPointLightComponent::DirtyInfo);
         }
     }
 
@@ -595,13 +602,13 @@ namespace
 
     void CLightHelper::OnInfoSun(Edit::CMessage& _rMessage)
     {
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-        Dt::CSunLightFacet* pLightFacet = static_cast<Dt::CSunLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+        Dt::CSunComponent* pLightFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CSunComponent>();
 
-        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Light && rCurrentEntity.GetType() == Dt::SLightType::Sun && pLightFacet != nullptr)
+        if (pLightFacet != nullptr)
         {
             float R, G, B;
             float X, Y, Z;
@@ -609,24 +616,24 @@ namespace
             // -----------------------------------------------------------------------------
             // Read values
             // -----------------------------------------------------------------------------
-            int ColorMode = _rMessage.GetInt();
+            int ColorMode = _rMessage.Get<int>();
 
-            R = _rMessage.GetFloat();
-            G = _rMessage.GetFloat();
-            B = _rMessage.GetFloat();
+            R = _rMessage.Get<float>();
+            G = _rMessage.Get<float>();
+            B = _rMessage.Get<float>();
 
             glm::vec3 Color = glm::vec3(R, G, B);
 
-            float Temperature = _rMessage.GetFloat();
-            float Intensity = _rMessage.GetFloat();
+            float Temperature = _rMessage.Get<float>();
+            float Intensity = _rMessage.Get<float>();
 
-            X = _rMessage.GetFloat();
-            Y = _rMessage.GetFloat();
-            Z = _rMessage.GetFloat();
+            X = _rMessage.Get<float>();
+            Y = _rMessage.Get<float>();
+            Z = _rMessage.Get<float>();
 
             glm::vec3 Direction = glm::vec3(X, Y, Z);
 
-            int ShadowRefresh = _rMessage.GetInt();
+            int ShadowRefresh = _rMessage.Get<int>();
 
             // -----------------------------------------------------------------------------
             // Set values
@@ -636,11 +643,11 @@ namespace
             pLightFacet->SetTemperature(Temperature);
             pLightFacet->SetIntensity(Intensity);
             pLightFacet->SetDirection(Direction);
-            pLightFacet->SetRefreshMode(static_cast<Dt::CSunLightFacet::ERefreshMode>(ShadowRefresh));
+            pLightFacet->SetRefreshMode(static_cast<Dt::CSunComponent::ERefreshMode>(ShadowRefresh));
 
             pLightFacet->UpdateLightness();
 
-            Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pLightFacet, Dt::CSunComponent::DirtyInfo);
         }
     }
 
@@ -648,32 +655,33 @@ namespace
 
     void CLightHelper::OnInfoEnvironment(Edit::CMessage& _rMessage)
     {
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
-        Dt::CSkyFacet* pLightFacet = static_cast<Dt::CSkyFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Light && rCurrentEntity.GetType() == Dt::SLightType::Sky && pLightFacet != nullptr)
+        Dt::CSkyComponent* pLightFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CSkyComponent>();
+
+        if (pLightFacet != nullptr)
         {
             // -----------------------------------------------------------------------------
             // Read values
             // -----------------------------------------------------------------------------
-            int RefreshMode = _rMessage.GetInt();
+            int RefreshMode = _rMessage.Get<int>();
 
-            int Type = _rMessage.GetInt();
+            int Type = _rMessage.Get<int>();
 
-            unsigned int TextureHash = _rMessage.GetInt();
+            unsigned int TextureHash = _rMessage.Get<int>();
 
-            float Intensity = _rMessage.GetFloat();
+            float Intensity = _rMessage.Get<float>();
 
             // -----------------------------------------------------------------------------
             // Set values
             // -----------------------------------------------------------------------------
-            pLightFacet->SetRefreshMode(static_cast<Dt::CSkyFacet::ERefreshMode>(RefreshMode));
-            pLightFacet->SetType       (static_cast<Dt::CSkyFacet::EType>(Type));
+            pLightFacet->SetRefreshMode(static_cast<Dt::CSkyComponent::ERefreshMode>(RefreshMode));
+            pLightFacet->SetType       (static_cast<Dt::CSkyComponent::EType>(Type));
             pLightFacet->SetIntensity  (Intensity);
 
-            if (pLightFacet->GetType() == Dt::CSkyFacet::Cubemap)
+            if (pLightFacet->GetType() == Dt::CSkyComponent::Cubemap)
             {
                 Dt::CTextureCube* pTextureCube = Dt::TextureManager::GetTextureCubeByHash(TextureHash);
 
@@ -682,7 +690,7 @@ namespace
                     pLightFacet->SetCubemap(pTextureCube);
                 }
             }
-            else if (pLightFacet->GetType() == Dt::CSkyFacet::Panorama)
+            else if (pLightFacet->GetType() == Dt::CSkyComponent::Panorama)
             {
                 Dt::CTexture2D* pTexturePanorama = Dt::TextureManager::GetTexture2DByHash(TextureHash);
 
@@ -691,7 +699,7 @@ namespace
                     pLightFacet->SetPanorama(pTexturePanorama);
                 }
             }
-            else if (pLightFacet->GetType() == Dt::CSkyFacet::Texture || pLightFacet->GetType() == Dt::CSkyFacet::TextureGeometry || pLightFacet->GetType() == Dt::CSkyFacet::TextureLUT)
+            else if (pLightFacet->GetType() == Dt::CSkyComponent::Texture || pLightFacet->GetType() == Dt::CSkyComponent::TextureGeometry || pLightFacet->GetType() == Dt::CSkyComponent::TextureLUT)
             {
                 Dt::CTexture2D* pTexture = Dt::TextureManager::GetTexture2DByHash(TextureHash);
 
@@ -701,7 +709,7 @@ namespace
                 }
             }
 
-            Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pLightFacet, Dt::CSkyComponent::DirtyInfo);
         }
     }
 
@@ -709,49 +717,49 @@ namespace
 
     void CLightHelper::OnInfoLightProbe(Edit::CMessage& _rMessage)
     {
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-        Dt::CLightProbeFacet* pLightFacet = static_cast<Dt::CLightProbeFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+        Dt::CLightProbeComponent* pLightFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CLightProbeComponent>();
 
-        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Light && rCurrentEntity.GetType() == Dt::SLightType::LightProbe && pLightFacet != nullptr)
+        if (pLightFacet != nullptr)
         {
             // -----------------------------------------------------------------------------
             // Read values
             // -----------------------------------------------------------------------------
-            int RefreshMode = _rMessage.GetInt();
+            int RefreshMode = _rMessage.Get<int>();
 
-            int Type = _rMessage.GetInt();
+            int Type = _rMessage.Get<int>();
 
-            int Quality = _rMessage.GetInt();
+            int Quality = _rMessage.Get<int>();
 
-            int ClearFlag = _rMessage.GetInt();
+            int ClearFlag = _rMessage.Get<int>();
 
-            float Intensity = _rMessage.GetFloat();
+            float Intensity = _rMessage.Get<float>();
 
-            float Near = _rMessage.GetFloat();
+            float Near = _rMessage.Get<float>();
 
-            float Far = _rMessage.GetFloat();
+            float Far = _rMessage.Get<float>();
 
-            bool ParallaxCorrection = _rMessage.GetBool();
+            bool ParallaxCorrection = _rMessage.Get<bool>();
 
-            float BoxSizeX = _rMessage.GetFloat();
+            float BoxSizeX = _rMessage.Get<float>();
 
-            float BoxSizeY = _rMessage.GetFloat();
+            float BoxSizeY = _rMessage.Get<float>();
 
-            float BoxSizeZ = _rMessage.GetFloat();
+            float BoxSizeZ = _rMessage.Get<float>();
 
             // -----------------------------------------------------------------------------
             // Set values
             // -----------------------------------------------------------------------------
-            pLightFacet->SetRefreshMode(static_cast<Dt::CLightProbeFacet::ERefreshMode>(RefreshMode));
+            pLightFacet->SetRefreshMode(static_cast<Dt::CLightProbeComponent::ERefreshMode>(RefreshMode));
 
-            pLightFacet->SetType(static_cast<Dt::CLightProbeFacet::EType>(Type));
+            pLightFacet->SetType(static_cast<Dt::CLightProbeComponent::EType>(Type));
 
-            pLightFacet->SetQuality(static_cast<Dt::CLightProbeFacet::EQuality>(Quality));
+            pLightFacet->SetQuality(static_cast<Dt::CLightProbeComponent::EQuality>(Quality));
 
-            pLightFacet->SetClearFlag(static_cast<Dt::CLightProbeFacet::EClearFlag>(ClearFlag));
+            pLightFacet->SetClearFlag(static_cast<Dt::CLightProbeComponent::EClearFlag>(ClearFlag));
 
             pLightFacet->SetIntensity(Intensity);
 
@@ -763,7 +771,7 @@ namespace
 
             pLightFacet->SetBoxSize(glm::vec3(BoxSizeX, BoxSizeY, BoxSizeZ));
 
-            Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pLightFacet, Dt::CLightProbeComponent::DirtyInfo);
         }
     }
 
@@ -771,12 +779,13 @@ namespace
 
     void CLightHelper::OnInfoArealight(Edit::CMessage& _rMessage)
     {
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(EntityID));
-        Dt::CAreaLightFacet* pLightFacet = static_cast<Dt::CAreaLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
+        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-        if (rCurrentEntity.GetCategory() == Dt::SEntityCategory::Light && rCurrentEntity.GetType() == Dt::SLightType::Area && pLightFacet != nullptr)
+        Dt::CAreaLightComponent* pLightFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CAreaLightComponent>();
+
+        if (pLightFacet != nullptr)
         {
             float R, G, B;
             float X, Y, Z;
@@ -787,32 +796,32 @@ namespace
             // -----------------------------------------------------------------------------
             // Read values
             // -----------------------------------------------------------------------------
-            int ColorMode = _rMessage.GetInt();
+            int ColorMode = _rMessage.Get<int>();
 
-            R = _rMessage.GetFloat();
-            G = _rMessage.GetFloat();
-            B = _rMessage.GetFloat();
+            R = _rMessage.Get<float>();
+            G = _rMessage.Get<float>();
+            B = _rMessage.Get<float>();
 
             glm::vec3 Color = glm::vec3(R, G, B);
 
-            float Temperature = _rMessage.GetFloat();
-            float Intensity   = _rMessage.GetFloat();
-            float Rotation    = glm::radians(_rMessage.GetFloat());
-            float Width       = _rMessage.GetFloat();
-            float Height      = _rMessage.GetFloat();
-            bool  IsTwoSided  = _rMessage.GetBool();
+            float Temperature = _rMessage.Get<float>();
+            float Intensity   = _rMessage.Get<float>();
+            float Rotation    = glm::radians(_rMessage.Get<float>());
+            float Width       = _rMessage.Get<float>();
+            float Height      = _rMessage.Get<float>();
+            bool  IsTwoSided  = _rMessage.Get<bool>();
 
-            X = _rMessage.GetFloat();
-            Y = _rMessage.GetFloat();
-            Z = _rMessage.GetFloat();
+            X = _rMessage.Get<float>();
+            Y = _rMessage.Get<float>();
+            Z = _rMessage.Get<float>();
 
             glm::vec3 Direction = glm::vec3(X, Y, Z);
 
-            bool HasTexture = _rMessage.GetBool();
+            bool HasTexture = _rMessage.Get<bool>();
 
             if (HasTexture)
             {
-                TextureHash = _rMessage.GetInt();
+                TextureHash = _rMessage.Get<int>();
             }
 
             // -----------------------------------------------------------------------------
@@ -844,7 +853,7 @@ namespace
             
             pLightFacet->UpdateLightness();
 
-            Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyDetail);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pLightFacet, Dt::CAreaLightComponent::DirtyInfo);
         }
     }
 

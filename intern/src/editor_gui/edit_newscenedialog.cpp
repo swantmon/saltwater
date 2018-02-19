@@ -32,8 +32,8 @@ namespace Edit
         int SizeX = m_pEditX->text().toInt();
         int SizeY = m_pEditY->text().toInt();
 
-        NewMessage.PutInt(SizeX);
-        NewMessage.PutInt(SizeY);
+        NewMessage.Put(SizeX);
+        NewMessage.Put(SizeY);
 
         NewMessage.Reset();
 

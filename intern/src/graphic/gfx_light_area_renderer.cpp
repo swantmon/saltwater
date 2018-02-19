@@ -5,14 +5,16 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
-#include "data/data_area_light_facet.h"
+#include "data/data_area_light_component.h"
+#include "data/data_component_facet.h"
+#include "data/data_component_manager.h"
 #include "data/data_entity.h"
-#include "data/data_light_type.h"
 #include "data/data_map.h"
 
-#include "graphic/gfx_area_light_facet.h"
+#include "graphic/gfx_area_light_component.h"
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"
+#include "graphic/gfx_component_manager.h"
 #include "graphic/gfx_debug_renderer.h"
 #include "graphic/gfx_histogram_renderer.h"
 #include "graphic/gfx_light_area_renderer.h"
@@ -67,11 +69,11 @@ namespace
                 
         struct SAreaLightProperties
         {
-            glm::vec4 m_Color;
-            glm::vec4 m_Position;
-            glm::vec4 m_DirectionX;
-            glm::vec4 m_DirectionY;
-            glm::vec4 m_Plane;
+            glm::vec4    m_Color;
+            glm::vec4    m_Position;
+            glm::vec4    m_DirectionX;
+            glm::vec4    m_DirectionY;
+            glm::vec4    m_Plane;
             float        m_HalfWidth;
             float        m_HalfHeight;
             float        m_IsTwoSided;
@@ -86,9 +88,8 @@ namespace
 
         struct SRenderJob
         {
-            Gfx::CAreaLightFacet* m_pGfxLightFacet;
-            Dt::CAreaLightFacet*  m_pDtLightFacet;
-            Dt::CEntity*          m_pDtEntity;
+            Gfx::CAreaLightComponent* m_pGfxComponent;
+            Dt::CAreaLightComponent*  m_pDtComponent;
         };
 
     private:
@@ -439,26 +440,25 @@ namespace
 
         for (; CurrentRenderJob != EndOfRenderJobs; ++CurrentRenderJob)
         {
-            Dt::CEntity*          pDtEntity      = CurrentRenderJob->m_pDtEntity;
-            Dt::CAreaLightFacet*  pDtLightFacet  = CurrentRenderJob->m_pDtLightFacet;
-            Gfx::CAreaLightFacet* pGfxLightFacet = CurrentRenderJob->m_pGfxLightFacet;
+            Dt::CAreaLightComponent*  pDtComponent  = CurrentRenderJob->m_pDtComponent;
+            Gfx::CAreaLightComponent* pGfxComponent = CurrentRenderJob->m_pGfxComponent;
 
-            assert(pDtEntity && pDtLightFacet && pGfxLightFacet);
+            assert(pDtComponent && pGfxComponent);
 
             // -----------------------------------------------------------------------------
             // Update data
             // -----------------------------------------------------------------------------
             SAreaLightProperties LightBuffer;
 
-            LightBuffer.m_Color                = glm::vec4(pDtLightFacet->GetLightness(), pDtLightFacet->GetIntensity());
-            LightBuffer.m_Position             = glm::vec4(pDtEntity->GetWorldPosition(), 1.0f);
-            LightBuffer.m_DirectionX           = pGfxLightFacet->GetDirectionX();
-            LightBuffer.m_DirectionY           = pGfxLightFacet->GetDirectionY();
-            LightBuffer.m_HalfWidth            = pGfxLightFacet->GetHalfWidth();
-            LightBuffer.m_HalfHeight           = pGfxLightFacet->GetHalfHeight();
-            LightBuffer.m_Plane                = pGfxLightFacet->GetPlane();
-            LightBuffer.m_IsTwoSided           = pDtLightFacet->GetIsTwoSided() ? 1.0f : 0.0f;
-            LightBuffer.m_IsTextured           = pGfxLightFacet->HasTexture() ? 1.0f : 0.0f;
+            LightBuffer.m_Color                = glm::vec4(pDtComponent->GetLightness(), pDtComponent->GetIntensity());
+            LightBuffer.m_Position             = glm::vec4(pDtComponent->GetHostEntity()->GetWorldPosition(), 1.0f);
+            LightBuffer.m_DirectionX           = pGfxComponent->GetDirectionX();
+            LightBuffer.m_DirectionY           = pGfxComponent->GetDirectionY();
+            LightBuffer.m_HalfWidth            = pGfxComponent->GetHalfWidth();
+            LightBuffer.m_HalfHeight           = pGfxComponent->GetHalfHeight();
+            LightBuffer.m_Plane                = pGfxComponent->GetPlane();
+            LightBuffer.m_IsTwoSided           = pDtComponent->GetIsTwoSided() ? 1.0f : 0.0f;
+            LightBuffer.m_IsTextured           = pGfxComponent->HasTexture() ? 1.0f : 0.0f;
             LightBuffer.m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
 
             BufferManager::UploadBufferData(m_AreaLightBufferPtr, &LightBuffer);
@@ -466,11 +466,11 @@ namespace
             // -----------------------------------------------------------------------------
             // Set texture
             // -----------------------------------------------------------------------------
-            if (pGfxLightFacet->HasTexture())
+            if (pGfxComponent->HasTexture())
             {
                 ContextManager::SetSampler(6, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
-                ContextManager::SetTexture(6, static_cast<Gfx::CTexturePtr>(pGfxLightFacet->GetFilteredTexturePtr()));
+                ContextManager::SetTexture(6, static_cast<Gfx::CTexturePtr>(pGfxComponent->GetFilteredTexturePtr()));
             }
 
             ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
@@ -535,16 +535,16 @@ namespace
 
         for (; CurrentRenderJob != EndOfRenderJobs; ++CurrentRenderJob)
         {
-            Dt::CAreaLightFacet*  pDtLightFacet  = CurrentRenderJob->m_pDtLightFacet;
-            Gfx::CAreaLightFacet* pGfxLightFacet = CurrentRenderJob->m_pGfxLightFacet;
+            Dt::CAreaLightComponent*  pDtComponent  = CurrentRenderJob->m_pDtComponent;
+            Gfx::CAreaLightComponent* pGfxComponent = CurrentRenderJob->m_pGfxComponent;
 
-            assert(pDtLightFacet && pGfxLightFacet);
+            assert(pDtComponent && pGfxComponent);
 
             ContextManager::SetRenderContext(m_DefaultRenderContextPtr);
 
-            ContextManager::SetVertexBuffer(pGfxLightFacet->GetPlaneVertexBuffer());
+            ContextManager::SetVertexBuffer(pGfxComponent->GetPlaneVertexBuffer());
 
-            ContextManager::SetIndexBuffer(pGfxLightFacet->GetPlaneIndexBuffer(), 0);
+            ContextManager::SetIndexBuffer(pGfxComponent->GetPlaneIndexBuffer(), 0);
 
             ContextManager::SetInputLayout(m_PositionShaderPtr->GetInputLayout());
 
@@ -561,17 +561,17 @@ namespace
 
             SAreaLightbulbProperties LightBuffer;
 
-            LightBuffer.m_Color = glm::vec4(pDtLightFacet->GetColor(), pGfxLightFacet->HasTexture() ? 1.0f : 0.0f);
+            LightBuffer.m_Color = glm::vec4(pDtComponent->GetColor(), pGfxComponent->HasTexture() ? 1.0f : 0.0f);
 
             BufferManager::UploadBufferData(m_AreaLightbulbBufferPtr, &LightBuffer);
 
             // -----------------------------------------------------------------------------
 
-            if (pGfxLightFacet->HasTexture())
+            if (pGfxComponent->HasTexture())
             {
                 ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
-                ContextManager::SetTexture(0, static_cast<Gfx::CTexturePtr>(pGfxLightFacet->GetTexturePtr()));
+                ContextManager::SetTexture(0, static_cast<Gfx::CTexturePtr>(pGfxComponent->GetTexturePtr()));
             }
 
             // -----------------------------------------------------------------------------
@@ -607,40 +607,22 @@ namespace
 
     void CGfxAreaLightRenderer::BuildRenderJobs()
     {
-        // -----------------------------------------------------------------------------
-        // Clear current render jobs
-        // -----------------------------------------------------------------------------
         m_RenderJobs.clear();
 
-        // -----------------------------------------------------------------------------
-        // Iterate throw every entity inside this map
-        // -----------------------------------------------------------------------------
-        Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Light);
-        Dt::Map::CEntityIterator EndOfEntities = Dt::Map::EntitiesEnd();
+        auto DataComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CAreaLightComponent>();
 
-        for (; CurrentEntity != EndOfEntities; )
+        for (auto Component : DataComponents)
         {
-            Dt::CEntity& rCurrentEntity = *CurrentEntity;
+            Dt::CAreaLightComponent* pDtComponent = static_cast<Dt::CAreaLightComponent*>(Component);
 
-            if (rCurrentEntity.GetType() != Dt::SLightType::Area)
-            {
-                CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Light);
-
-                continue;
-            }
+            if (pDtComponent->IsActiveAndUsable() == false) continue;
 
             SRenderJob NewRenderJob;
 
-            NewRenderJob.m_pGfxLightFacet = static_cast<Gfx::CAreaLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
-            NewRenderJob.m_pDtLightFacet  = static_cast<Dt::CAreaLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
-            NewRenderJob.m_pDtEntity      = &rCurrentEntity;
+            NewRenderJob.m_pDtComponent  = pDtComponent;
+            NewRenderJob.m_pGfxComponent = Gfx::CComponentManager::GetInstance().GetComponent<Gfx::CAreaLightComponent>(NewRenderJob.m_pDtComponent->GetID());
 
             m_RenderJobs.push_back(NewRenderJob);
-
-            // -----------------------------------------------------------------------------
-            // Get next light
-            // -----------------------------------------------------------------------------
-            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Light);
         }
     }
 } // namespace

@@ -11,7 +11,7 @@ namespace Edit
 {
     CInspectorArealight::CInspectorArealight(QWidget* _pParent)
         : QWidget          (_pParent)
-        , m_CurrentEntityID(static_cast<unsigned int>(-1))
+        , m_CurrentEntityID(static_cast<Base::ID>(-1))
     {
         // -----------------------------------------------------------------------------
         // Setup UI
@@ -83,34 +83,34 @@ namespace Edit
         // -----------------------------------------------------------------------------
         Edit::CMessage NewMessage;
 
-        NewMessage.PutInt(m_CurrentEntityID);
+        NewMessage.Put(m_CurrentEntityID);
 
-        NewMessage.PutInt(ColorMode);
+        NewMessage.Put(ColorMode);
 
-        NewMessage.PutFloat(Color.x);
-        NewMessage.PutFloat(Color.y);
-        NewMessage.PutFloat(Color.z);
+        NewMessage.Put(Color.x);
+        NewMessage.Put(Color.y);
+        NewMessage.Put(Color.z);
 
-        NewMessage.PutFloat(Temperature);
-        NewMessage.PutFloat(Intensity);
-        NewMessage.PutFloat(Rotation);
-        NewMessage.PutFloat(Width);
-        NewMessage.PutFloat(Height);
-        NewMessage.PutBool(IsTwoSided);
+        NewMessage.Put(Temperature);
+        NewMessage.Put(Intensity);
+        NewMessage.Put(Rotation);
+        NewMessage.Put(Width);
+        NewMessage.Put(Height);
+        NewMessage.Put(IsTwoSided);
 
-        NewMessage.PutFloat(Direction[0]);
-        NewMessage.PutFloat(Direction[1]);
-        NewMessage.PutFloat(Direction[2]);
+        NewMessage.Put(Direction[0]);
+        NewMessage.Put(Direction[1]);
+        NewMessage.Put(Direction[2]);
 
         if (NewTexture.length() > 0)
         {
-            NewMessage.PutBool(true);
+            NewMessage.Put(true);
 
-            NewMessage.PutInt(m_pTextureEdit->GetTextureHash());
+            NewMessage.Put(m_pTextureEdit->GetTextureHash());
         }
         else
         {
-            NewMessage.PutBool(false);
+            NewMessage.Put(false);
         }
 
         NewMessage.Reset();
@@ -138,13 +138,13 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void CInspectorArealight::RequestInformation(unsigned int _EntityID)
+    void CInspectorArealight::RequestInformation(Base::ID _EntityID)
     {
         m_CurrentEntityID = _EntityID;
 
         CMessage NewMessage;
 
-        NewMessage.PutInt(m_CurrentEntityID);
+        NewMessage.Put(m_CurrentEntityID);
 
         NewMessage.Reset();
 
@@ -158,44 +158,44 @@ namespace Edit
         float R, G, B;
         float X, Y, Z;
         bool HasTexture = false;
-        char TextureName[256];
+        std::string TextureName;
         unsigned int TextureHash = 0;
 
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
-        int EntityID  = _rMessage.GetInt();
+        Base::ID EntityID  = _rMessage.Get<Base::ID>();
 
         if (EntityID != m_CurrentEntityID) return;
 
-        int ColorMode = _rMessage.GetInt();
+        int ColorMode = _rMessage.Get<int>();
 
-        R = _rMessage.GetFloat();
-        G = _rMessage.GetFloat();
-        B = _rMessage.GetFloat();
+        R = _rMessage.Get<float>();
+        G = _rMessage.Get<float>();
+        B = _rMessage.Get<float>();
 
         glm::ivec3 Color = glm::ivec3(R * 255, G * 255, B * 255);
 
-        float Temperature = _rMessage.GetFloat();
-        float Intensity   = _rMessage.GetFloat();
-        float Rotation    = _rMessage.GetFloat();
-        float Width       = _rMessage.GetFloat();
-        float Height      = _rMessage.GetFloat();
-        bool  IsTwoSided  = _rMessage.GetBool();
+        float Temperature = _rMessage.Get<float>();
+        float Intensity   = _rMessage.Get<float>();
+        float Rotation    = _rMessage.Get<float>();
+        float Width       = _rMessage.Get<float>();
+        float Height      = _rMessage.Get<float>();
+        bool  IsTwoSided  = _rMessage.Get<bool>();
 
-        X = _rMessage.GetFloat();
-        Y = _rMessage.GetFloat();
-        Z = _rMessage.GetFloat();
+        X = _rMessage.Get<float>();
+        Y = _rMessage.Get<float>();
+        Z = _rMessage.Get<float>();
 
         glm::vec3 Direction = glm::vec3(X, Y, Z);
 
-        HasTexture = _rMessage.GetBool();
+        HasTexture = _rMessage.Get<bool>();
 
         if (HasTexture)
         {
-            _rMessage.GetString(TextureName, 256);
+            TextureName = _rMessage.Get<std::string>();
 
-            TextureHash = _rMessage.GetInt();
+            TextureHash = _rMessage.Get<int>();
         }
 
         // -----------------------------------------------------------------------------
@@ -231,7 +231,7 @@ namespace Edit
 
         if (HasTexture)
         {
-            m_pTextureEdit->SetTextureFile(TextureName);
+            m_pTextureEdit->SetTextureFile(QString(TextureName.c_str()));
 
             m_pTextureEdit->SetTextureHash(TextureHash);
         }

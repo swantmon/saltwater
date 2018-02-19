@@ -37,7 +37,7 @@ namespace SelectionRenderer
     void Update();
     void Render();
 
-    void SelectEntity(unsigned int _EntityID);
+    void SelectEntity(Base::ID _EntityID);
     void UnselectEntity();
 
     CSelectionTicket& AcquireTicket(int _OffsetX, int _OffsetY, int _SizeX, int _SizeY, unsigned int _Flags = SPickFlag::Nothing);

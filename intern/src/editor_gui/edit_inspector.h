@@ -66,7 +66,7 @@ namespace Edit
         CInspectorARController*   m_pARControllerWidget;
         CInspectorTexture*        m_pTextureWidget;
         CInspectorSLAM*           m_pSlamWidget;
-        unsigned int              m_ActiveEntityID;
+        Base::ID                  m_ActiveEntityID;
 
     private:
 
@@ -74,7 +74,7 @@ namespace Edit
 
         void ResetLayout();
 
-        void HighlightEntity(int _ID);
+        void HighlightEntity(Base::ID _ID);
         void ResetHighlight();
     };
 } // namespace Edit

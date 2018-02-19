@@ -89,15 +89,15 @@ namespace
         MR::SReconstructionSettings Settings;
         MR::SReconstructionSettings::SetDefaultSettings(Settings);
 
-        Settings.m_VolumeSize = _rMessage.GetFloat();
-		Settings.m_VolumeResolution = _rMessage.GetInt();
-		Settings.m_VoxelSize = _rMessage.GetFloat();
-        Settings.m_TruncatedDistance = _rMessage.GetFloat();
-        Settings.m_MaxIntegrationWeight = _rMessage.GetInt();
-        Settings.m_DepthThreshold[0] = _rMessage.GetInt();
-        Settings.m_DepthThreshold[1] = _rMessage.GetInt();
-        Settings.m_CaptureColor = _rMessage.GetBool();
-		Settings.m_IsScalable = _rMessage.GetBool();
+        Settings.m_VolumeSize = _rMessage.Get<float>();
+		Settings.m_VolumeResolution = _rMessage.Get<int>();
+		Settings.m_VoxelSize = _rMessage.Get<float>();
+        Settings.m_TruncatedDistance = _rMessage.Get<float>();
+        Settings.m_MaxIntegrationWeight = _rMessage.Get<int>();
+        Settings.m_DepthThreshold[0] = _rMessage.Get<int>();
+        Settings.m_DepthThreshold[1] = _rMessage.Get<int>();
+        Settings.m_CaptureColor = _rMessage.Get<bool>();
+		Settings.m_IsScalable = _rMessage.Get<bool>();
 
         Gfx::ReconstructionRenderer::OnReconstructionUpdate(Settings);
 
@@ -108,7 +108,7 @@ namespace
 
     void CSLAMHelper::OnSLAMReconstructionPauseIntegration(Edit::CMessage& _rMessage)
     {
-        bool Pause = _rMessage.GetBool();
+        bool Pause = _rMessage.Get<bool>();
 
         Gfx::ReconstructionRenderer::PauseIntegration(Pause);
 
@@ -119,7 +119,7 @@ namespace
 
     void CSLAMHelper::OnSLAMReconstructionPauseTracking(Edit::CMessage& _rMessage)
     {
-        bool Pause = _rMessage.GetBool();
+        bool Pause = _rMessage.Get<bool>();
 
         Gfx::ReconstructionRenderer::PauseTracking(Pause);
 
@@ -130,7 +130,7 @@ namespace
 
     void CSLAMHelper::OnSLAMReconstructionChangeCamera(Edit::CMessage& _rMessage)
     {
-        bool Pause = _rMessage.GetBool();
+        bool Pause = _rMessage.Get<bool>();
 
         Gfx::ReconstructionRenderer::ChangeCamera(Pause);
 

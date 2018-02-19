@@ -4,11 +4,10 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
-#include "graphic/gfx_actor_renderer.h"
 #include "graphic/gfx_ar_renderer.h"
 #include "graphic/gfx_area_light_manager.h"
 #include "graphic/gfx_background_renderer.h"
-#include "graphic/gfx_camera_actor_manager.h"
+#include "graphic/gfx_camera_manager.h"
 #include "graphic/gfx_fog_renderer.h"
 #include "graphic/gfx_histogram_renderer.h"
 #include "graphic/gfx_light_area_renderer.h"
@@ -17,7 +16,7 @@
 #include "graphic/gfx_light_probe_manager.h"
 #include "graphic/gfx_light_sun_renderer.h"
 #include "graphic/gfx_main.h"
-#include "graphic/gfx_mesh_actor_manager.h"
+#include "graphic/gfx_mesh_renderer.h"
 #include "graphic/gfx_particle_renderer.h"
 #include "graphic/gfx_performance.h"
 #include "graphic/gfx_play_state.h"
@@ -75,8 +74,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Update graphic entities
         // -----------------------------------------------------------------------------
-        MeshActorManager  ::Update();
-        CameraActorManager::Update();
+        CameraManager     ::Update();
         SunManager        ::Update();
         SkyManager        ::Update();
         LightProbeManager ::Update();
@@ -92,16 +90,16 @@ namespace
         // Update renderer to prepare for rendering
         // -----------------------------------------------------------------------------
         ARRenderer           ::Update();
-        ActorRenderer        ::Update();
+        MeshRenderer         ::Update();
         FogRenderer          ::Update();
         ShadowRenderer       ::Update();
         LightAreaRenderer    ::Update();
-        LightPointRenderer   ::Update();   
-        LightSunRenderer     ::Update();   
+        LightPointRenderer   ::Update();
+        LightSunRenderer     ::Update();
         LightIndirectRenderer::Update();
-        ReflectionRenderer   ::Update();    
+        ReflectionRenderer   ::Update();
         BackgroundRenderer   ::Update();
-        HistogramRenderer    ::Update(); 
+        HistogramRenderer    ::Update();
         TonemappingRenderer  ::Update();
         PostFXHDR            ::Update();
         PostFX               ::Update();
@@ -114,7 +112,7 @@ namespace
         Performance::BeginEvent("Creation Pass");
 
         ARRenderer   ::Render();
-        ActorRenderer::Render();
+        MeshRenderer::Render();
 
         Performance::EndEvent();
         

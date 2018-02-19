@@ -10,27 +10,28 @@
 
 #include "core/core_time.h"
 
-#include "data/data_actor_type.h"
-#include "data/data_camera_actor_facet.h"
+#include "data/data_camera_component.h"
+#include "data/data_component_facet.h"
+#include "data/data_component_manager.h"
 #include "data/data_entity.h"
-#include "data/data_light_type.h"
 #include "data/data_map.h"
 #include "data/data_model_manager.h"
-#include "data/data_sky_facet.h"
+#include "data/data_sky_component.h"
 
 #include "graphic/gfx_background_renderer.h"
 #include "graphic/gfx_buffer_manager.h"
-#include "graphic/gfx_camera_actor_facet.h"
+#include "graphic/gfx_camera_component.h"
 #include "graphic/gfx_context_manager.h"
+#include "graphic/gfx_component_manager.h"
 #include "graphic/gfx_histogram_renderer.h"
 #include "graphic/gfx_main.h"
 #include "graphic/gfx_mesh_manager.h"
 #include "graphic/gfx_performance.h"
 #include "graphic/gfx_sampler_manager.h"
 #include "graphic/gfx_shader_manager.h"
-#include "graphic/gfx_sky_facet.h"
+#include "graphic/gfx_sky_component.h"
 #include "graphic/gfx_state_manager.h"
-#include "graphic/gfx_sun_facet.h"
+#include "graphic/gfx_sun_component.h"
 #include "graphic/gfx_sun_manager.h"
 #include "graphic/gfx_target_set.h"
 #include "graphic/gfx_target_set_manager.h"
@@ -91,8 +92,14 @@ namespace
 
         struct SCameraRenderJob
         {
-            Dt::CCameraActorFacet* m_pDataCamera;
-            Gfx::CCameraActorFacet* m_pGraphicCamera;
+            Dt::CCameraComponent* m_pDtComponent;
+            Gfx::CCameraComponent* m_pGfxComponent;
+        };
+
+        struct SSkyRenderJob
+        {
+            Dt::CSkyComponent* m_pDtComponent;
+            Gfx::CSkyComponent* m_pGfxComponent;
         };
 
         struct SSkytextureBufferPS
@@ -115,13 +122,14 @@ namespace
         
         struct SSkyboxBufferPS
         {
-            glm::vec4   m_InvertedScreenSize;
-            unsigned int   m_ExposureHistoryIndex;
+            glm::vec4    m_InvertedScreenSize;
+            unsigned int m_ExposureHistoryIndex;
         };
 
     private:
 
         typedef std::vector<SCameraRenderJob> CCameraRenderJobs;
+        typedef std::vector<SSkyRenderJob> CSkyRenderJobs;
         
     private:
 
@@ -133,6 +141,7 @@ namespace
         CTargetSetPtr m_WebcamTargetSetPtr;
 
         CCameraRenderJobs m_CameraRenderJobs;
+        CSkyRenderJobs m_SkyRenderJobs;
         
     private:
 
@@ -154,6 +163,7 @@ namespace
         , m_WebcamTexturePtr           ()
         , m_WebcamTargetSetPtr         ()
         , m_CameraRenderJobs           ()
+        , m_SkyRenderJobs              ()
     {
     }
     
@@ -194,6 +204,8 @@ namespace
         m_WebcamTargetSetPtr = 0;
 
         m_CameraRenderJobs.clear();
+
+        m_SkyRenderJobs.clear();
     }
     
     // -----------------------------------------------------------------------------
@@ -433,15 +445,15 @@ namespace
 
             Performance::BeginEvent("Background");
 
-            if (rRenderJob.m_pDataCamera->GetClearFlag() == Dt::CCameraActorFacet::Skybox)
+            if (rRenderJob.m_pDtComponent->GetClearFlag() == Dt::CCameraComponent::Skybox)
             {
                 RenderBackgroundFromSkybox();
             }
-            else if (rRenderJob.m_pDataCamera->GetClearFlag() == Dt::CCameraActorFacet::Texture)
+            else if (rRenderJob.m_pDtComponent->GetClearFlag() == Dt::CCameraComponent::Texture)
             {
                 RenderBackgroundFromTexture();
             }
-            else if (rRenderJob.m_pDataCamera->GetClearFlag() == Dt::CCameraActorFacet::Webcam)
+            else if (rRenderJob.m_pDtComponent->GetClearFlag() == Dt::CCameraComponent::Webcam)
             {
                 RenderBackgroundFromWebcam();
             }
@@ -458,6 +470,8 @@ namespace
 
     void CGfxBackgroundRenderer::RenderBackgroundFromSkybox()
     {
+        if (m_SkyRenderJobs.size() == 0) return;
+
         CRenderContextPtr RenderContextPtr = m_BackgroundFromSkybox.m_RenderContextPtr;
         CShaderPtr        VSPtr            = m_BackgroundFromSkybox.m_VSPtr;
         CShaderPtr        PSPtr            = m_BackgroundFromSkybox.m_PSPtr;
@@ -466,43 +480,7 @@ namespace
         CInputLayoutPtr   InputLayoutPtr   = m_BackgroundFromSkybox.m_InputLayoutPtr;
         CMeshPtr          MeshPtr          = m_BackgroundFromSkybox.m_MeshPtr;
 
-        // -----------------------------------------------------------------------------
-        // Find sky entity
-        // -----------------------------------------------------------------------------
-        Dt::Map::CEntityIterator CurrentEntity;
-        Dt::Map::CEntityIterator EndOfEntities;
-
-        CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Light);
-        EndOfEntities = Dt::Map::EntitiesEnd();
-
-        Dt::CEntity* pSkyEntity = 0;
-
-        for (; CurrentEntity != EndOfEntities; )
-        {
-            Dt::CEntity& rCurrentEntity = *CurrentEntity;
-
-            // -----------------------------------------------------------------------------
-            // Get graphic facet
-            // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetType() == Dt::SLightType::Sky)
-            {
-                pSkyEntity = &rCurrentEntity;
-            }
-
-            // -----------------------------------------------------------------------------
-            // Next entity
-            // -----------------------------------------------------------------------------
-            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Light);
-        }
-
-        if (pSkyEntity == 0)
-        {
-            return;
-        }
-
-        Gfx::CSkyFacet* pSkyFacet = static_cast<Gfx::CSkyFacet*>(pSkyEntity->GetDetailFacet(Dt::SFacetCategory::Graphic));
-
-        assert(pSkyFacet);
+        SSkyRenderJob& rCurrentJob = m_SkyRenderJobs[0];
 
         // -----------------------------------------------------------------------------
         // Render sky box
@@ -558,7 +536,7 @@ namespace
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
         ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
         
-        ContextManager::SetTexture(0, pSkyFacet->GetCubemapPtr());
+        ContextManager::SetTexture(0, rCurrentJob.m_pGfxComponent->GetCubemapPtr());
         ContextManager::SetTexture(1, TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget());
         
         ContextManager::DrawIndexed(MeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
@@ -596,51 +574,29 @@ namespace
 
     void CGfxBackgroundRenderer::RenderBackgroundFromTexture()
     {
+        if (m_CameraRenderJobs.size() == 0) return;
+
         SCameraRenderJob& rRenderJob = m_CameraRenderJobs[0];
 
-        if (rRenderJob.m_pGraphicCamera->GetBackgroundTexture2D() == nullptr)
+        if (rRenderJob.m_pGfxComponent->GetBackgroundTexture2D() == nullptr)
         {
             return;
         }
 
         // -----------------------------------------------------------------------------
-        // Find sky entity
+        // Get HDR intensity from sky
         // -----------------------------------------------------------------------------
         float HDRIntensity = 1.0f;
 
-        Dt::Map::CEntityIterator CurrentEntity;
-        Dt::Map::CEntityIterator EndOfEntities;
-
-        CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Light);
-        EndOfEntities = Dt::Map::EntitiesEnd();
-
-        Dt::CEntity* pSkyEntity = 0;
-
-        for (; CurrentEntity != EndOfEntities; )
+        if (m_SkyRenderJobs.size() > 0)
         {
-            Dt::CEntity& rCurrentEntity = *CurrentEntity;
+            SSkyRenderJob& rCurrentJob = m_SkyRenderJobs[0];
 
-            // -----------------------------------------------------------------------------
-            // Get graphic facet
-            // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetType() == Dt::SLightType::Sky)
-            {
-                pSkyEntity = &rCurrentEntity;
-            }
+            Dt::CSkyComponent* pSkyComponent = rCurrentJob.m_pDtComponent;
 
-            // -----------------------------------------------------------------------------
-            // Next entity
-            // -----------------------------------------------------------------------------
-            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Light);
-        }
+            assert(pSkyComponent);
 
-        if (pSkyEntity != 0)
-        {
-            Dt::CSkyFacet* pSkyFacet = static_cast<Dt::CSkyFacet*>(pSkyEntity->GetDetailFacet(Dt::SFacetCategory::Data));
-
-            assert(pSkyFacet);
-
-            HDRIntensity = pSkyFacet->GetIntensity();
+            HDRIntensity = pSkyComponent->GetIntensity();
         }
 
         // -----------------------------------------------------------------------------
@@ -665,7 +621,7 @@ namespace
         SSkytextureBufferPS PSBuffer;
 
         PSBuffer.m_HDRFactor     = HDRIntensity;
-        PSBuffer.m_IsHDR         = rRenderJob.m_pGraphicCamera->GetBackgroundTexture2D()->GetSemantic() == Dt::CTextureBase::HDR ? 1.0f : 0.0f;
+        PSBuffer.m_IsHDR         = rRenderJob.m_pGfxComponent->GetBackgroundTexture2D()->GetSemantic() == Dt::CTextureBase::HDR ? 1.0f : 0.0f;
         PSBuffer.m_ExposureIndex = static_cast<float>(HistogramRenderer::GetLastExposureHistoryIndex());
 
         BufferManager::UploadBufferData(PSBufferSetPtr->GetBuffer(0), &PSBuffer);
@@ -696,7 +652,7 @@ namespace
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
         ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
 
-        ContextManager::SetTexture(0, rRenderJob.m_pGraphicCamera->GetBackgroundTextureSet()->GetTexture(0));
+        ContextManager::SetTexture(0, rRenderJob.m_pGfxComponent->GetBackgroundTextureSet()->GetTexture(0));
         ContextManager::SetTexture(1, TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget());
 
         ContextManager::DrawIndexed(MeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
@@ -735,43 +691,19 @@ namespace
     void CGfxBackgroundRenderer::RenderBackgroundFromWebcam()
     {
         // -----------------------------------------------------------------------------
-        // Find sky entity
+        // Get HDR intensity from sky
         // -----------------------------------------------------------------------------
         float HDRIntensity = 1.0f;
 
-        Dt::Map::CEntityIterator CurrentEntity;
-        Dt::Map::CEntityIterator EndOfEntities;
-
-        CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Light);
-        EndOfEntities = Dt::Map::EntitiesEnd();
-
-        Dt::CEntity* pSkyEntity = 0;
-
-        for (; CurrentEntity != EndOfEntities; )
+        if (m_SkyRenderJobs.size() > 0)
         {
-            Dt::CEntity& rCurrentEntity = *CurrentEntity;
+            SSkyRenderJob& rCurrentJob = m_SkyRenderJobs[0];
 
-            // -----------------------------------------------------------------------------
-            // Get graphic facet
-            // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetType() == Dt::SLightType::Sky)
-            {
-                pSkyEntity = &rCurrentEntity;
-            }
+            Dt::CSkyComponent* pSkyComponent = rCurrentJob.m_pDtComponent;
 
-            // -----------------------------------------------------------------------------
-            // Next entity
-            // -----------------------------------------------------------------------------
-            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Light);
-        }
+            assert(pSkyComponent);
 
-        if (pSkyEntity != 0)
-        {
-            Dt::CSkyFacet* pSkyFacet = static_cast<Dt::CSkyFacet*>(pSkyEntity->GetDetailFacet(Dt::SFacetCategory::Data));
-
-            assert(pSkyFacet);
-
-            HDRIntensity = pSkyFacet->GetIntensity();
+            HDRIntensity = pSkyComponent->GetIntensity();
         }
 
         // -----------------------------------------------------------------------------
@@ -790,9 +722,8 @@ namespace
         // -----------------------------------------------------------------------------
         Performance::BeginEvent("Background from Webcam");
 
-
         // -----------------------------------------------------------------------------
-        // Render webcam to target set
+        // Render web cam to target set
         // -----------------------------------------------------------------------------
         TargetSetManager::ClearTargetSet(m_WebcamTargetSetPtr, glm::vec4(1.0f));
 
@@ -881,47 +812,45 @@ namespace
 
     void CGfxBackgroundRenderer::BuildRenderJobs()
     {
-        // -----------------------------------------------------------------------------
-        // Clear current render jobs
-        // -----------------------------------------------------------------------------
         m_CameraRenderJobs.clear();
 
-        // -----------------------------------------------------------------------------
-        // Iterate throw every entity inside this map
-        // -----------------------------------------------------------------------------
-        Dt::Map::CEntityIterator CurrentEntity;
-        Dt::Map::CEntityIterator EndOfEntities;
+        auto DataCameraComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CCameraComponent>();
 
-        CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Actor);
-        EndOfEntities = Dt::Map::EntitiesEnd();
-
-        for (; CurrentEntity != EndOfEntities; )
+        for (auto Component : DataCameraComponents)
         {
-            Dt::CEntity& rCurrentEntity = *CurrentEntity;
+            Dt::CCameraComponent* pDtComponent = static_cast<Dt::CCameraComponent*>(Component);
 
-            // -----------------------------------------------------------------------------
-            // Get graphic facet
-            // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetType() == Dt::SActorType::Camera)
+            if (pDtComponent->IsActiveAndUsable() == false) continue;
+
+            if (pDtComponent->IsMainCamera())
             {
-                Dt::CCameraActorFacet* pDataCameraFacet = static_cast<Dt::CCameraActorFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
-                Gfx::CCameraActorFacet* pGraphicCameraFacet = static_cast<Gfx::CCameraActorFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
+                SCameraRenderJob NewRenderJob;
 
-                if (pDataCameraFacet->IsMainCamera())
-                {
-                    SCameraRenderJob NewRenderJob;
+                NewRenderJob.m_pDtComponent  = pDtComponent;
+                NewRenderJob.m_pGfxComponent = CComponentManager::GetInstance().GetComponent<Gfx::CCameraComponent>(pDtComponent->GetID());
 
-                    NewRenderJob.m_pDataCamera    = pDataCameraFacet;
-                    NewRenderJob.m_pGraphicCamera = pGraphicCameraFacet;
-
-                    m_CameraRenderJobs.push_back(NewRenderJob);
-                }
+                m_CameraRenderJobs.push_back(NewRenderJob);
             }
+        }
 
-            // -----------------------------------------------------------------------------
-            // Next entity
-            // -----------------------------------------------------------------------------
-            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Actor);
+        // -----------------------------------------------------------------------------
+
+        m_SkyRenderJobs.clear();
+
+        auto DataComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CSkyComponent>();
+
+        for (auto Component : DataComponents)
+        {
+            Dt::CSkyComponent* pDtComponent = static_cast<Dt::CSkyComponent*>(Component);
+
+            if (pDtComponent->IsActiveAndUsable() == false) continue;
+
+            SSkyRenderJob NewRenderJob;
+
+            NewRenderJob.m_pDtComponent  = pDtComponent;
+            NewRenderJob.m_pGfxComponent = CComponentManager::GetInstance().GetComponent<Gfx::CSkyComponent>(pDtComponent->GetID());
+
+            m_SkyRenderJobs.push_back(NewRenderJob);
         }
     }
 } // namespace

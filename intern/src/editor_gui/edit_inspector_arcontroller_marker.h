@@ -21,11 +21,11 @@ namespace Edit
 
         void valueChanged();
 
-        void RequestInformation(unsigned int _EntityID, unsigned int _MarkerID);
+        void RequestInformation(Base::ID _EntityID, unsigned int _MarkerID);
 
     private:
 
-        int m_CurrentEntityID;
+        Base::ID m_CurrentEntityID;
         int m_CurrentMarkerID;
 
     private:

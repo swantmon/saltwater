@@ -43,9 +43,9 @@ namespace Edit
         // -----------------------------------------------------------------------------
         Edit::CMessage NewMessage;
 
-        NewMessage.PutInt(m_CurrentEntityID);
+        NewMessage.Put(m_CurrentEntityID);
 
-        NewMessage.PutInt(Index);
+        NewMessage.Put(Index);
 
         NewMessage.Reset();
 
@@ -54,13 +54,13 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void CInspectorPostAA::RequestInformation(unsigned int _EntityID)
+    void CInspectorPostAA::RequestInformation(Base::ID _EntityID)
     {
         m_CurrentEntityID = _EntityID;
 
         CMessage NewMessage;
 
-        NewMessage.PutInt(m_CurrentEntityID);
+        NewMessage.Put(m_CurrentEntityID);
 
         NewMessage.Reset();
 
@@ -76,11 +76,11 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
         if (EntityID != m_CurrentEntityID) return;
 
-        Type = _rMessage.GetInt();
+        Type = _rMessage.Get<int>();
 
         // -----------------------------------------------------------------------------
         // Set values

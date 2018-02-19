@@ -154,7 +154,7 @@ namespace Edit
                 // -----------------------------------------------------------------------------
                 Edit::CMessage NewMessage;
 
-                NewMessage.PutInt(pEntity->GetID());
+                NewMessage.Put(pEntity->GetID());
 
                 NewMessage.Reset();
 
@@ -212,13 +212,11 @@ namespace Edit
 
     void CEditState::OnHighlightEntity(Edit::CMessage& _rMessage)
     {
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        if (EntityID >= 0)
+        if (EntityID != static_cast<Base::ID>(-1))
         {
-            unsigned int SelectedEntity = static_cast<unsigned int>(EntityID);
-
-            Gfx::SelectionRenderer::SelectEntity(SelectedEntity);
+            Gfx::SelectionRenderer::SelectEntity(EntityID);
         }
         else
         {
@@ -230,10 +228,10 @@ namespace Edit
 
     void CEditState::OnMouseLeftReleased(Edit::CMessage& _rMessage)
     {
-        int GlobalMousePositionX = _rMessage.GetInt();
-        int GlobalMousePositionY = _rMessage.GetInt();
-        int LocalMousePositionX  = _rMessage.GetInt();
-        int LocalMousePositionY  = _rMessage.GetInt();
+        int GlobalMousePositionX = _rMessage.Get<int>();
+        int GlobalMousePositionY = _rMessage.Get<int>();
+        int LocalMousePositionX  = _rMessage.Get<int>();
+        int LocalMousePositionY  = _rMessage.Get<int>();
 
         BASE_UNUSED(GlobalMousePositionX);
         BASE_UNUSED(GlobalMousePositionY);

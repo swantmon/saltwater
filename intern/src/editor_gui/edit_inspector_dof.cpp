@@ -47,13 +47,13 @@ namespace Edit
         // -----------------------------------------------------------------------------
         Edit::CMessage NewMessage;
 
-        NewMessage.PutInt(m_CurrentEntityID);
+        NewMessage.Put(m_CurrentEntityID);
 
-        NewMessage.PutFloat(Near);
-        NewMessage.PutFloat(Far);
-        NewMessage.PutFloat(NearToFarRatio);
-        NewMessage.PutFloat(FadeUnSmall);
-        NewMessage.PutFloat(FadeSmallMedium);
+        NewMessage.Put(Near);
+        NewMessage.Put(Far);
+        NewMessage.Put(NearToFarRatio);
+        NewMessage.Put(FadeUnSmall);
+        NewMessage.Put(FadeSmallMedium);
 
         NewMessage.Reset();
 
@@ -63,13 +63,13 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void CInspectorDOF::RequestInformation(unsigned int _EntityID)
+    void CInspectorDOF::RequestInformation(Base::ID _EntityID)
     {
         m_CurrentEntityID = _EntityID;
 
         CMessage NewMessage;
 
-        NewMessage.PutInt(m_CurrentEntityID);
+        NewMessage.Put(m_CurrentEntityID);
 
         NewMessage.Reset();
 
@@ -83,15 +83,15 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
-        int EntityID = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
         if (EntityID != m_CurrentEntityID) return;
 
-        float Near            = _rMessage.GetFloat();
-        float Far             = _rMessage.GetFloat();
-        float NearToFarRatio  = _rMessage.GetFloat();
-        float FadeUnSmall     = _rMessage.GetFloat();
-        float FadeSmallMedium = _rMessage.GetFloat();
+        float Near            = _rMessage.Get<float>();
+        float Far             = _rMessage.Get<float>();
+        float NearToFarRatio  = _rMessage.Get<float>();
+        float FadeUnSmall     = _rMessage.Get<float>();
+        float FadeSmallMedium = _rMessage.Get<float>();
 
         // -----------------------------------------------------------------------------
         // Set values

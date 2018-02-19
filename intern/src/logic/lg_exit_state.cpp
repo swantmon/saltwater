@@ -5,24 +5,12 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
-#include "data/data_area_light_manager.h"
-#include "data/data_bloom_manager.h"
-#include "data/data_camera_actor_manager.h"
-#include "data/data_dof_manager.h"
+#include "data/data_component_manager.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
-#include "data/data_post_aa_manager.h"
-#include "data/data_light_probe_manager.h"
 #include "data/data_material_manager.h"
-#include "data/data_mesh_manager.h"
 #include "data/data_model_manager.h"
-#include "data/data_point_light_manager.h"
-#include "data/data_sky_manager.h"
-#include "data/data_ssao_manager.h"
-#include "data/data_ssr_manager.h"
-#include "data/data_sun_manager.h"
 #include "data/data_texture_manager.h"
-#include "data/data_volume_fog_manager.h"
 
 #include "logic/lg_exit_state.h"
 
@@ -48,23 +36,10 @@ namespace
         // -----------------------------------------------------------------------------
         // Data
         // -----------------------------------------------------------------------------
-        Dt::TextureManager    ::OnExit();
-        Dt::MaterialManager   ::OnExit();
-        Dt::ModelManager      ::OnExit();
-        Dt::BloomManager      ::OnExit();
-        Dt::DOFManager        ::OnExit();
-        Dt::PostAAManager     ::OnExit();
-        Dt::SSAOManager       ::OnExit();
-        Dt::SSRFXManager      ::OnExit();
-        Dt::VolumeFogManager  ::OnExit();
-        Dt::MeshActorManager  ::OnExit();
-        Dt::CameraActorManager::OnExit();
-        Dt::EntityManager     ::OnExit();
-        Dt::SunManager        ::OnExit();
-        Dt::LightProbeManager ::OnExit();
-        Dt::PointLightManager ::OnExit();
-        Dt::AreaLightManager  ::OnExit();
-        Dt::SkyManager        ::OnExit();
+        Dt::TextureManager ::OnExit();
+        Dt::MaterialManager::OnExit();
+        Dt::ModelManager   ::OnExit();
+        Dt::EntityManager  ::OnExit();
 
         return Lg::Exit::SResult::Exit;
     }

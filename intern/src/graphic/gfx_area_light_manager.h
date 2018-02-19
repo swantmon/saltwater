@@ -6,6 +6,7 @@ namespace Gfx
 namespace AreaLightManager
 {
     void OnStart();
+
     void OnExit();
 
     void Update();

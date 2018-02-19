@@ -93,12 +93,12 @@ namespace
 
         Edit::CMessage NewMessage;
 
-        NewMessage.PutFloat(rSettings.m_HistogramLowerBound);
-        NewMessage.PutFloat(rSettings.m_HistogramUpperBound);
-        NewMessage.PutFloat(rSettings.m_HistogramLogMin);
-        NewMessage.PutFloat(rSettings.m_HistogramLogMax);
-        NewMessage.PutFloat(rSettings.m_EyeAdaptionSpeedUp);
-        NewMessage.PutFloat(rSettings.m_EyeAdaptionSpeedDown);
+        NewMessage.Put(rSettings.m_HistogramLowerBound);
+        NewMessage.Put(rSettings.m_HistogramUpperBound);
+        NewMessage.Put(rSettings.m_HistogramLogMin);
+        NewMessage.Put(rSettings.m_HistogramLogMax);
+        NewMessage.Put(rSettings.m_EyeAdaptionSpeedUp);
+        NewMessage.Put(rSettings.m_EyeAdaptionSpeedDown);
 
         NewMessage.Reset();
 
@@ -111,12 +111,12 @@ namespace
     {
         Gfx::SHistogramSettings Settings;
 
-        Settings.m_HistogramLowerBound  = _rMessage.GetFloat();
-        Settings.m_HistogramUpperBound  = _rMessage.GetFloat();
-        Settings.m_HistogramLogMin      = _rMessage.GetFloat();
-        Settings.m_HistogramLogMax      = _rMessage.GetFloat();
-        Settings.m_EyeAdaptionSpeedUp   = _rMessage.GetFloat();
-        Settings.m_EyeAdaptionSpeedDown = _rMessage.GetFloat();
+        Settings.m_HistogramLowerBound  = _rMessage.Get<float>();
+        Settings.m_HistogramUpperBound  = _rMessage.Get<float>();
+        Settings.m_HistogramLogMin      = _rMessage.Get<float>();
+        Settings.m_HistogramLogMax      = _rMessage.Get<float>();
+        Settings.m_EyeAdaptionSpeedUp   = _rMessage.Get<float>();
+        Settings.m_EyeAdaptionSpeedDown = _rMessage.Get<float>();
 
         Gfx::HistogramRenderer::SetSettings(Settings);
     }
@@ -131,28 +131,28 @@ namespace
 
         Edit::CMessage NewMessage;
 
-        NewMessage.PutFloat(rSettings.m_Tint[0]);
-        NewMessage.PutFloat(rSettings.m_Tint[1]);
-        NewMessage.PutFloat(rSettings.m_Tint[2]);
-        NewMessage.PutFloat(rSettings.m_DarkTint[0]);
-        NewMessage.PutFloat(rSettings.m_DarkTint[1]);
-        NewMessage.PutFloat(rSettings.m_DarkTint[2]);
-        NewMessage.PutFloat(rSettings.m_DarkTintBlend);
-        NewMessage.PutFloat(rSettings.m_DarkTintStrength);
-        NewMessage.PutFloat(rSettings.m_Saturation);
-        NewMessage.PutFloat(rSettings.m_Contrast);
-        NewMessage.PutFloat(rSettings.m_DynamicRange);
-        NewMessage.PutFloat(rSettings.m_CrushBrights);
-        NewMessage.PutFloat(rSettings.m_CrushDarks);
-        NewMessage.PutFloat(rSettings.m_Red[0]);
-        NewMessage.PutFloat(rSettings.m_Red[1]);
-        NewMessage.PutFloat(rSettings.m_Red[2]);
-        NewMessage.PutFloat(rSettings.m_Green[0]);
-        NewMessage.PutFloat(rSettings.m_Green[1]);
-        NewMessage.PutFloat(rSettings.m_Green[2]);
-        NewMessage.PutFloat(rSettings.m_Blue[0]);
-        NewMessage.PutFloat(rSettings.m_Blue[1]);
-        NewMessage.PutFloat(rSettings.m_Blue[2]);
+        NewMessage.Put(rSettings.m_Tint[0]);
+        NewMessage.Put(rSettings.m_Tint[1]);
+        NewMessage.Put(rSettings.m_Tint[2]);
+        NewMessage.Put(rSettings.m_DarkTint[0]);
+        NewMessage.Put(rSettings.m_DarkTint[1]);
+        NewMessage.Put(rSettings.m_DarkTint[2]);
+        NewMessage.Put(rSettings.m_DarkTintBlend);
+        NewMessage.Put(rSettings.m_DarkTintStrength);
+        NewMessage.Put(rSettings.m_Saturation);
+        NewMessage.Put(rSettings.m_Contrast);
+        NewMessage.Put(rSettings.m_DynamicRange);
+        NewMessage.Put(rSettings.m_CrushBrights);
+        NewMessage.Put(rSettings.m_CrushDarks);
+        NewMessage.Put(rSettings.m_Red[0]);
+        NewMessage.Put(rSettings.m_Red[1]);
+        NewMessage.Put(rSettings.m_Red[2]);
+        NewMessage.Put(rSettings.m_Green[0]);
+        NewMessage.Put(rSettings.m_Green[1]);
+        NewMessage.Put(rSettings.m_Green[2]);
+        NewMessage.Put(rSettings.m_Blue[0]);
+        NewMessage.Put(rSettings.m_Blue[1]);
+        NewMessage.Put(rSettings.m_Blue[2]);
 
         NewMessage.Reset();
 
@@ -165,28 +165,28 @@ namespace
     {
         Gfx::SColorGradingSettings Settings;
 
-        Settings.m_Tint[0]          = _rMessage.GetFloat();
-        Settings.m_Tint[1]          = _rMessage.GetFloat();
-        Settings.m_Tint[2]          = _rMessage.GetFloat();
-        Settings.m_DarkTint[0]      = _rMessage.GetFloat();
-        Settings.m_DarkTint[1]      = _rMessage.GetFloat();
-        Settings.m_DarkTint[2]      = _rMessage.GetFloat();
-        Settings.m_DarkTintBlend    = _rMessage.GetFloat();
-        Settings.m_DarkTintStrength = _rMessage.GetFloat();
-        Settings.m_Saturation       = _rMessage.GetFloat();
-        Settings.m_Contrast         = _rMessage.GetFloat();
-        Settings.m_DynamicRange     = _rMessage.GetFloat();
-        Settings.m_CrushBrights     = _rMessage.GetFloat();
-        Settings.m_CrushDarks       = _rMessage.GetFloat();
-        Settings.m_Red[0]           = _rMessage.GetFloat();
-        Settings.m_Red[1]           = _rMessage.GetFloat();
-        Settings.m_Red[2]           = _rMessage.GetFloat();
-        Settings.m_Green[0]         = _rMessage.GetFloat();
-        Settings.m_Green[1]         = _rMessage.GetFloat();
-        Settings.m_Green[2]         = _rMessage.GetFloat();
-        Settings.m_Blue[0]          = _rMessage.GetFloat();
-        Settings.m_Blue[1]          = _rMessage.GetFloat();
-        Settings.m_Blue[2]          = _rMessage.GetFloat();
+        Settings.m_Tint[0]          = _rMessage.Get<float>();
+        Settings.m_Tint[1]          = _rMessage.Get<float>();
+        Settings.m_Tint[2]          = _rMessage.Get<float>();
+        Settings.m_DarkTint[0]      = _rMessage.Get<float>();
+        Settings.m_DarkTint[1]      = _rMessage.Get<float>();
+        Settings.m_DarkTint[2]      = _rMessage.Get<float>();
+        Settings.m_DarkTintBlend    = _rMessage.Get<float>();
+        Settings.m_DarkTintStrength = _rMessage.Get<float>();
+        Settings.m_Saturation       = _rMessage.Get<float>();
+        Settings.m_Contrast         = _rMessage.Get<float>();
+        Settings.m_DynamicRange     = _rMessage.Get<float>();
+        Settings.m_CrushBrights     = _rMessage.Get<float>();
+        Settings.m_CrushDarks       = _rMessage.Get<float>();
+        Settings.m_Red[0]           = _rMessage.Get<float>();
+        Settings.m_Red[1]           = _rMessage.Get<float>();
+        Settings.m_Red[2]           = _rMessage.Get<float>();
+        Settings.m_Green[0]         = _rMessage.Get<float>();
+        Settings.m_Green[1]         = _rMessage.Get<float>();
+        Settings.m_Green[2]         = _rMessage.Get<float>();
+        Settings.m_Blue[0]          = _rMessage.Get<float>();
+        Settings.m_Blue[1]          = _rMessage.Get<float>();
+        Settings.m_Blue[2]          = _rMessage.Get<float>();
 
         Gfx::TonemappingRenderer::SetSettings(Settings);
     }

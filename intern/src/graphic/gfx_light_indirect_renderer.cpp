@@ -7,20 +7,22 @@
 
 #include "camera/cam_control_manager.h"
 
+#include "data/data_component_facet.h"
+#include "data/data_component_manager.h"
 #include "data/data_entity.h"
-#include "data/data_light_type.h"
 #include "data/data_map.h"
 #include "data/data_model_manager.h"
-#include "data/data_point_light_facet.h"
+#include "data/data_point_light_component.h"
 
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"
+#include "graphic/gfx_component_manager.h"
 #include "graphic/gfx_histogram_renderer.h"
 #include "graphic/gfx_light_sun_renderer.h"
 #include "graphic/gfx_main.h"
 #include "graphic/gfx_mesh_manager.h"
 #include "graphic/gfx_performance.h"
-#include "graphic/gfx_point_light_facet.h"
+#include "graphic/gfx_point_light_component.h"
 #include "graphic/gfx_point_light_manager.h"
 #include "graphic/gfx_sampler_manager.h"
 #include "graphic/gfx_shader_manager.h"
@@ -73,7 +75,7 @@ namespace
 
         struct SRenderJob
         {
-            Gfx::CPointLightFacet* m_pGraphicPointLightFacet;
+            Gfx::CPointLightComponent* m_pGraphicPointLightFacet;
         };
 
     private:
@@ -317,7 +319,7 @@ namespace
 
         for (; CurrentRenderJob != EndOfRenderJobs; ++CurrentRenderJob)
         {
-            Gfx::CPointLightFacet* pGfxPointLight = CurrentRenderJob->m_pGraphicPointLightFacet;
+            Gfx::CPointLightComponent* pGfxPointLight = CurrentRenderJob->m_pGraphicPointLightFacet;
 
             assert(pGfxPointLight != nullptr);
 
@@ -404,50 +406,25 @@ namespace
 
     void CGfxLightIndirectRenderer::BuildRenderJobs()
     {
-        // -----------------------------------------------------------------------------
-        // Clear current render jobs
-        // -----------------------------------------------------------------------------
         m_RenderJobs.clear();
 
-        // -----------------------------------------------------------------------------
-        // Iterate throw every entity inside this map
-        // -----------------------------------------------------------------------------
-        Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Light);
-        Dt::Map::CEntityIterator EndOfEntities = Dt::Map::EntitiesEnd();
+        auto DataComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CPointLightComponent>();
 
-        for (; CurrentEntity != EndOfEntities; )
+        for (auto Component : DataComponents)
         {
-            Dt::CEntity& rCurrentEntity = *CurrentEntity;
+            Dt::CPointLightComponent*  pDtComponent  = static_cast<Dt::CPointLightComponent*>(Component);
+            Gfx::CPointLightComponent* pGfxComponent = Gfx::CComponentManager::GetInstance().GetComponent<Gfx::CPointLightComponent>(pDtComponent->GetID());
 
-            // -----------------------------------------------------------------------------
-            // Get graphic facet
-            // -----------------------------------------------------------------------------
-            if (rCurrentEntity.GetType() != Dt::SLightType::Point)
-            {
-                CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Light);
+            if (pDtComponent->IsActiveAndUsable() == false) continue;
 
-                continue;
-            }
-
-            Dt::CPointLightFacet*  pDataPointFacet    = static_cast<Dt::CPointLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Data));
-            Gfx::CPointLightFacet* pGraphicPointFacet = static_cast<Gfx::CPointLightFacet*>(rCurrentEntity.GetDetailFacet(Dt::SFacetCategory::Graphic));
-
-            // -----------------------------------------------------------------------------
-            // Set sun into a new render job
-            // -----------------------------------------------------------------------------
-            if (pDataPointFacet->GetShadowType() == Dt::CPointLightFacet::GlobalIllumination)
+            if (pDtComponent->GetShadowType() == Dt::CPointLightComponent::GlobalIllumination)
             {
                 SRenderJob NewRenderJob;
 
-                NewRenderJob.m_pGraphicPointLightFacet = pGraphicPointFacet;
+                NewRenderJob.m_pGraphicPointLightFacet = pGfxComponent;
 
                 m_RenderJobs.push_back(NewRenderJob);
             }
-
-            // -----------------------------------------------------------------------------
-            // Next entity
-            // -----------------------------------------------------------------------------
-            CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Light);
         }
     }
 } // namespace

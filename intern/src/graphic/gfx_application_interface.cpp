@@ -8,7 +8,7 @@ namespace Gfx
 {
 namespace App
 {
-    unsigned int RegisterWindow(void* _pWindow, unsigned int _VSync)
+    unsigned int RegisterWindow(void* _pWindow, int _VSync)
     {
         assert(_pWindow != 0);
 

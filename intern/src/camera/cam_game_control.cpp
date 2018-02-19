@@ -2,12 +2,14 @@
 #include "camera/cam_precompiled.h"
 
 #include "base/base_include_glm.h"
+#include "base/base_type_info.h"
 
 #include "camera/cam_control_manager.h"
 #include "camera/cam_game_control.h"
 
-#include "data/data_actor_type.h"
-#include "data/data_camera_actor_facet.h"
+#include "data/data_camera_component.h"
+#include "data/data_component.h"
+#include "data/data_component_facet.h"
 #include "data/data_entity.h"
 #include "data/data_transformation_facet.h"
 
@@ -84,58 +86,58 @@ namespace Cam
             m_RotationMatrix = glm::eulerAngleXYZ(rRotationInDegree[0], rRotationInDegree[1], rRotationInDegree[2]);
         }
 
-        if (m_pMainCameraEntity->GetDirtyFlags() & Dt::CEntity::DirtyDetail)
+        // -----------------------------------------------------------------------------
+        // Update camera depending on camera component
+        // -----------------------------------------------------------------------------
+        Dt::CCameraComponent* pCameraComponent = m_pMainCameraEntity->GetComponentFacet()->GetComponent<Dt::CCameraComponent>();
+
+        assert(pCameraComponent != nullptr);
+
+        // -----------------------------------------------------------------------------
+        // Projection
+        // -----------------------------------------------------------------------------
+        if (pCameraComponent->GetProjectionType() == Dt::CCameraComponent::Perspective)
         {
-            Dt::CCameraActorFacet*    pCameraFacet = static_cast<Dt::CCameraActorFacet*>(m_pMainCameraEntity->GetDetailFacet(Dt::SFacetCategory::Data));
-
-            assert(pCameraFacet != nullptr);
-
-            // -----------------------------------------------------------------------------
-            // Projection
-            // -----------------------------------------------------------------------------
-            if (pCameraFacet->GetProjectionType() == Dt::CCameraActorFacet::Perspective)
-            {
-                Gfx::Cam::SetFieldOfView(pCameraFacet->GetFoV(), pCameraFacet->GetNear(), pCameraFacet->GetFar());
-            }
-            else if (pCameraFacet->GetProjectionType() == Dt::CCameraActorFacet::Orthographic)
-            {
-                float Left   = -pCameraFacet->GetSize() / 2.0f;
-                float Right  =  pCameraFacet->GetSize() / 2.0f;
-                float Bottom = -pCameraFacet->GetSize() / 2.0f;
-                float Top    =  pCameraFacet->GetSize() / 2.0f;
-                
-                Gfx::Cam::SetOrthographic(Left, Right, Bottom, Top, pCameraFacet->GetNear(), pCameraFacet->GetFar());
-            }
-
-            // -----------------------------------------------------------------------------
-            // Camera mode + variables
-            // -----------------------------------------------------------------------------
-            Gfx::Cam::SetAutoCameraMode();
-            
-            if (pCameraFacet->GetCameraMode() == Dt::CCameraActorFacet::Manual)
-            {
-                Gfx::Cam::SetManualCameraMode();
-
-                Gfx::Cam::SetShutterSpeed(pCameraFacet->GetShutterSpeed());
-
-                Gfx::Cam::SetAperture(pCameraFacet->GetAperture());
-
-                Gfx::Cam::SetISO(pCameraFacet->GetISO());
-
-                Gfx::Cam::SetEC(pCameraFacet->GetEC());
-            }
-
-            // -----------------------------------------------------------------------------
-            // Other
-            // -----------------------------------------------------------------------------
-            Gfx::Cam::SetBackgroundColor(pCameraFacet->GetBackgroundColor());
-            
-            Gfx::Cam::SetCullingMask(pCameraFacet->GetCullingMask());
-
-            Gfx::Cam::SetViewportRect(pCameraFacet->GetViewportRect());
-
-            Gfx::Cam::SetDepth(pCameraFacet->GetDepth());
+            Gfx::Cam::SetFieldOfView(pCameraComponent->GetFoV(), pCameraComponent->GetNear(), pCameraComponent->GetFar());
         }
+        else if (pCameraComponent->GetProjectionType() == Dt::CCameraComponent::Orthographic)
+        {
+            float Left   = -pCameraComponent->GetSize() / 2.0f;
+            float Right  =  pCameraComponent->GetSize() / 2.0f;
+            float Bottom = -pCameraComponent->GetSize() / 2.0f;
+            float Top    =  pCameraComponent->GetSize() / 2.0f;
+                
+            Gfx::Cam::SetOrthographic(Left, Right, Bottom, Top, pCameraComponent->GetNear(), pCameraComponent->GetFar());
+        }
+
+        // -----------------------------------------------------------------------------
+        // Camera mode + variables
+        // -----------------------------------------------------------------------------
+        Gfx::Cam::SetAutoCameraMode();
+            
+        if (pCameraComponent->GetCameraMode() == Dt::CCameraComponent::Manual)
+        {
+            Gfx::Cam::SetManualCameraMode();
+
+            Gfx::Cam::SetShutterSpeed(pCameraComponent->GetShutterSpeed());
+
+            Gfx::Cam::SetAperture(pCameraComponent->GetAperture());
+
+            Gfx::Cam::SetISO(pCameraComponent->GetISO());
+
+            Gfx::Cam::SetEC(pCameraComponent->GetEC());
+        }
+
+        // -----------------------------------------------------------------------------
+        // Other
+        // -----------------------------------------------------------------------------
+        Gfx::Cam::SetBackgroundColor(pCameraComponent->GetBackgroundColor());
+            
+        Gfx::Cam::SetCullingMask(pCameraComponent->GetCullingMask());
+
+        Gfx::Cam::SetViewportRect(pCameraComponent->GetViewportRect());
+
+        Gfx::Cam::SetDepth(pCameraComponent->GetDepth());
     }
     
     // -----------------------------------------------------------------------------
@@ -144,9 +146,9 @@ namespace Cam
     {
         if (m_pMainCameraEntity != 0)
         {
-            Dt::CCameraActorFacet* pCameraFacet = static_cast<Dt::CCameraActorFacet*>(m_pMainCameraEntity->GetDetailFacet(Dt::SFacetCategory::Data));
+            Dt::CCameraComponent* pCameraComponent = m_pMainCameraEntity->GetComponentFacet()->GetComponent<Dt::CCameraComponent>();
 
-            if (pCameraFacet->GetProjectionType() == Dt::CCameraActorFacet::External) return;
+            if (pCameraComponent->GetProjectionType() == Dt::CCameraComponent::External) return;
         }
 
         Gfx::Cam::SetPosition(m_Position);

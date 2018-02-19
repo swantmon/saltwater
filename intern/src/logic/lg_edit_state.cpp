@@ -4,14 +4,8 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
-#include "data/data_area_light_manager.h"
-#include "data/data_camera_actor_manager.h"
+#include "data/data_component_manager.h"
 #include "data/data_entity_manager.h"
-#include "data/data_light_probe_manager.h"
-#include "data/data_mesh_manager.h"
-#include "data/data_point_light_manager.h"
-#include "data/data_sky_manager.h"
-#include "data/data_sun_manager.h"
 
 #include "logic/lg_edit_state.h"
 
@@ -53,14 +47,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Update data manager
         // -----------------------------------------------------------------------------
-        Dt::MeshActorManager  ::Update();
-        Dt::CameraActorManager::Update();
-        Dt::EntityManager     ::Update();
-        Dt::SunManager        ::Update();
-        Dt::LightProbeManager ::Update();
-        Dt::PointLightManager ::Update();
-        Dt::AreaLightManager  ::Update();
-        Dt::SkyManager        ::Update();
+        Dt::EntityManager::Update();
         
         // -----------------------------------------------------------------------------
         // Return state changes

@@ -6,6 +6,7 @@ namespace Gfx
 namespace PointLightManager
 {
     void OnStart();
+
     void OnExit();
 
     void Update();

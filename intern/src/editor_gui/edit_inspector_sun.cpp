@@ -69,22 +69,22 @@ namespace Edit
         // -----------------------------------------------------------------------------
         Edit::CMessage NewMessage;
 
-        NewMessage.PutInt(m_CurrentEntityID);
+        NewMessage.Put(m_CurrentEntityID);
 
-        NewMessage.PutInt(ColorMode);
+        NewMessage.Put(ColorMode);
 
-        NewMessage.PutFloat(Color[0]);
-        NewMessage.PutFloat(Color[1]);
-        NewMessage.PutFloat(Color[2]);
+        NewMessage.Put(Color[0]);
+        NewMessage.Put(Color[1]);
+        NewMessage.Put(Color[2]);
 
-        NewMessage.PutFloat(Temperature);
-        NewMessage.PutFloat(Intensity);
+        NewMessage.Put(Temperature);
+        NewMessage.Put(Intensity);
 
-        NewMessage.PutFloat(Direction[0]);
-        NewMessage.PutFloat(Direction[1]);
-        NewMessage.PutFloat(Direction[2]);
+        NewMessage.Put(Direction[0]);
+        NewMessage.Put(Direction[1]);
+        NewMessage.Put(Direction[2]);
 
-        NewMessage.PutInt(ShadowRefresh);
+        NewMessage.Put(ShadowRefresh);
 
         NewMessage.Reset();
 
@@ -111,13 +111,13 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void CInspectorSun::RequestInformation(unsigned int _EntityID)
+    void CInspectorSun::RequestInformation(Base::ID _EntityID)
     {
         m_CurrentEntityID = _EntityID;
 
         CMessage NewMessage;
 
-        NewMessage.PutInt(m_CurrentEntityID);
+        NewMessage.Put(m_CurrentEntityID);
 
         NewMessage.Reset();
 
@@ -133,27 +133,27 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
-        int EntityID = _rMessage.GetInt();
-        int ColorMode = _rMessage.GetInt();
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
+        int ColorMode = _rMessage.Get<int>();
 
         BASE_UNUSED(EntityID);
 
-        X = _rMessage.GetFloat();
-        Y = _rMessage.GetFloat();
-        Z = _rMessage.GetFloat();
+        X = _rMessage.Get<float>();
+        Y = _rMessage.Get<float>();
+        Z = _rMessage.Get<float>();
 
         glm::ivec3 Color = glm::ivec3(X * 255, Y * 255, Z * 255);
 
-        float Temperature = _rMessage.GetFloat();
-        float Intensity   = _rMessage.GetFloat();
+        float Temperature = _rMessage.Get<float>();
+        float Intensity   = _rMessage.Get<float>();
 
-        X = _rMessage.GetFloat();
-        Y = _rMessage.GetFloat();
-        Z = _rMessage.GetFloat();
+        X = _rMessage.Get<float>();
+        Y = _rMessage.Get<float>();
+        Z = _rMessage.Get<float>();
 
         glm::vec3 Direction = glm::vec3(X, Y, Z);
 
-        int ShadowRefresh = _rMessage.GetInt();
+        int ShadowRefresh = _rMessage.Get<int>();
 
         // -----------------------------------------------------------------------------
         // Set values

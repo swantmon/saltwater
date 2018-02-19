@@ -9,12 +9,12 @@ namespace Edit
 {
     class CSceneGraph : public QTreeWidget
     {
-	    Q_OBJECT
+        Q_OBJECT
 
     public:
 
-	    CSceneGraph(QWidget* _pParent = Q_NULLPTR);
-	    ~CSceneGraph();
+        CSceneGraph(QWidget* _pParent = Q_NULLPTR);
+        ~CSceneGraph();
 
     Q_SIGNALS:
 

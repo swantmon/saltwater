@@ -46,11 +46,11 @@ namespace Edit
         // -----------------------------------------------------------------------------
         Edit::CMessage NewMessage;
 
-        NewMessage.PutInt(m_CurrentEntityID);
-        NewMessage.PutFloat(Intensity);
-        NewMessage.PutFloat(RoughnessMask);
-        NewMessage.PutFloat(Distance);
-        NewMessage.PutBool(UseDoubleReflections);
+        NewMessage.Put(m_CurrentEntityID);
+        NewMessage.Put(Intensity);
+        NewMessage.Put(RoughnessMask);
+        NewMessage.Put(Distance);
+        NewMessage.Put(UseDoubleReflections);
 
         NewMessage.Reset();
 
@@ -60,13 +60,13 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void CInspectorSSR::RequestInformation(unsigned int _EntityID)
+    void CInspectorSSR::RequestInformation(Base::ID _EntityID)
     {
         m_CurrentEntityID = _EntityID;
 
         CMessage NewMessage;
 
-        NewMessage.PutInt(m_CurrentEntityID);
+        NewMessage.Put(m_CurrentEntityID);
 
         NewMessage.Reset();
 
@@ -80,11 +80,11 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
-        int   EntityID             = _rMessage.GetInt();
-        float Intensity            = _rMessage.GetFloat();
-        float RoughnessMask        = _rMessage.GetFloat();
-        float Distance             = _rMessage.GetFloat();
-        bool  UseDoubleReflections = _rMessage.GetBool();
+        int   EntityID             = _rMessage.Get<int>();
+        float Intensity            = _rMessage.Get<float>();
+        float RoughnessMask        = _rMessage.Get<float>();
+        float Distance             = _rMessage.Get<float>();
+        bool  UseDoubleReflections = _rMessage.Get<bool>();
 
         BASE_UNUSED(EntityID);
 

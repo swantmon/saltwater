@@ -1,7 +1,6 @@
 
 #include "graphic/gfx_precompiled.h"
 
-#include "graphic/gfx_actor_renderer.h"
 #include "graphic/gfx_ar_renderer.h"
 #include "graphic/gfx_background_renderer.h"
 #include "graphic/gfx_debug_renderer.h"
@@ -11,6 +10,7 @@
 #include "graphic/gfx_light_indirect_renderer.h"
 #include "graphic/gfx_light_point_renderer.h"
 #include "graphic/gfx_light_sun_renderer.h"
+#include "graphic/gfx_mesh_renderer.h"
 #include "graphic/gfx_particle_renderer.h"
 #include "graphic/gfx_postfx_hdr_renderer.h"
 #include "graphic/gfx_postfx_renderer.h"
@@ -27,7 +27,7 @@ namespace Renderer
     void ReloadRenderer()
     {
         ARRenderer           ::OnReload();
-        ActorRenderer        ::OnReload();
+        MeshRenderer         ::OnReload();
         FogRenderer          ::OnReload();
         ShadowRenderer       ::OnReload();
         LightAreaRenderer    ::OnReload();

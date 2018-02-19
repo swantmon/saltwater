@@ -3,6 +3,7 @@
 
 #include "base/base_console.h"
 #include "base/base_input_event.h"
+#include "base/base_program_parameters.h"
 #include "base/base_uncopyable.h"
 #include "base/base_singleton.h"
 
@@ -142,7 +143,7 @@ namespace
         // Now we get the information of the window handle and set this to
         // the graphic part and active this window.
         // -----------------------------------------------------------------------------
-        unsigned int VSync = 0;
+        int VSync = Base::CProgramParameters::GetInstance().Get("graphics:vsync_interval", 0);
 
         m_EditWindowID = Gfx::App::RegisterWindow(Edit::GUI::GetEditorWindowHandle(), VSync);
 
@@ -238,7 +239,7 @@ namespace
             // -----------------------------------------------------------------------------
             Edit::CMessage NewMessage;
 
-            NewMessage.PutDouble(Core::Time::GetDeltaTimeLastFrame());
+            NewMessage.Put(Core::Time::GetDeltaTimeLastFrame());
 
             NewMessage.Reset();
 
@@ -290,9 +291,9 @@ namespace
         // -----------------------------------------------------------------------------
         Edit::CMessage NewMessage;
 
-        NewMessage.PutInt(m_CurrentState);
+        NewMessage.Put(m_CurrentState);
 
-        NewMessage.PutInt(_NewState);
+        NewMessage.Put(_NewState);
 
         NewMessage.Reset();
 
@@ -308,8 +309,8 @@ namespace
 
     void CApplication::OnKeyPressed(Edit::CMessage& _rMessage)
     {
-        unsigned int Key = _rMessage.GetInt();
-        unsigned int Mod = _rMessage.GetInt();
+        unsigned int Key = _rMessage.Get<int>();
+        unsigned int Mod = _rMessage.Get<int>();
 
         Base::CInputEvent NewInput(Base::CInputEvent::Input, Base::CInputEvent::KeyPressed, Key, Mod);
 
@@ -320,8 +321,8 @@ namespace
 
     void CApplication::OnKeyReleased(Edit::CMessage& _rMessage)
     {
-        unsigned int Key = _rMessage.GetInt();
-        unsigned int Mod = _rMessage.GetInt();
+        unsigned int Key = _rMessage.Get<int>();
+        unsigned int Mod = _rMessage.Get<int>();
 
         Base::CInputEvent NewInput(Base::CInputEvent::Input, Base::CInputEvent::KeyReleased, Key, Mod);
 
@@ -332,8 +333,8 @@ namespace
 
     void CApplication::OnMouseLeftPressed(Edit::CMessage& _rMessage)
     {
-        int MousePositionX = _rMessage.GetInt();
-        int MousePositionY = _rMessage.GetInt();
+        int MousePositionX = _rMessage.Get<int>();
+        int MousePositionY = _rMessage.Get<int>();
 
         m_LatestMousePosition[0] = static_cast<float>(MousePositionX);
         m_LatestMousePosition[1] = static_cast<float>(MousePositionY);
@@ -347,8 +348,8 @@ namespace
 
     void CApplication::OnMouseLeftReleased(Edit::CMessage& _rMessage)
     {
-        int MousePositionX = _rMessage.GetInt();
-        int MousePositionY = _rMessage.GetInt();
+        int MousePositionX = _rMessage.Get<int>();
+        int MousePositionY = _rMessage.Get<int>();
 
         m_LatestMousePosition[0] = static_cast<float>(MousePositionX);
         m_LatestMousePosition[1] = static_cast<float>(MousePositionY);
@@ -362,8 +363,8 @@ namespace
 
     void CApplication::OnMouseMiddlePressed(Edit::CMessage& _rMessage)
     {
-        int MousePositionX = _rMessage.GetInt();
-        int MousePositionY = _rMessage.GetInt();
+        int MousePositionX = _rMessage.Get<int>();
+        int MousePositionY = _rMessage.Get<int>();
 
         m_LatestMousePosition[0] = static_cast<float>(MousePositionX);
         m_LatestMousePosition[1] = static_cast<float>(MousePositionY);
@@ -377,8 +378,8 @@ namespace
 
     void CApplication::OnMouseMiddleReleased(Edit::CMessage& _rMessage)
     {
-        int MousePositionX = _rMessage.GetInt();
-        int MousePositionY = _rMessage.GetInt();
+        int MousePositionX = _rMessage.Get<int>();
+        int MousePositionY = _rMessage.Get<int>();
 
         m_LatestMousePosition[0] = static_cast<float>(MousePositionX);
         m_LatestMousePosition[1] = static_cast<float>(MousePositionY);
@@ -392,8 +393,8 @@ namespace
 
     void CApplication::OnMouseRightPressed(Edit::CMessage& _rMessage)
     {
-        int MousePositionX = _rMessage.GetInt();
-        int MousePositionY = _rMessage.GetInt();
+        int MousePositionX = _rMessage.Get<int>();
+        int MousePositionY = _rMessage.Get<int>();
 
         m_LatestMousePosition[0] = static_cast<float>(MousePositionX);
         m_LatestMousePosition[1] = static_cast<float>(MousePositionY);
@@ -407,8 +408,8 @@ namespace
 
     void CApplication::OnMouseRightReleased(Edit::CMessage& _rMessage)
     {
-        int MousePositionX = _rMessage.GetInt();
-        int MousePositionY = _rMessage.GetInt();
+        int MousePositionX = _rMessage.Get<int>();
+        int MousePositionY = _rMessage.Get<int>();
 
         m_LatestMousePosition[0] = static_cast<float>(MousePositionX);
         m_LatestMousePosition[1] = static_cast<float>(MousePositionY);
@@ -422,8 +423,8 @@ namespace
 
     void CApplication::OnMouseMove(Edit::CMessage& _rMessage)
     {
-        int MousePositionX = _rMessage.GetInt();
-        int MousePositionY = _rMessage.GetInt();
+        int MousePositionX = _rMessage.Get<int>();
+        int MousePositionY = _rMessage.Get<int>();
 
         m_LatestMousePosition[0] = static_cast<float>(MousePositionX);
         m_LatestMousePosition[1] = static_cast<float>(MousePositionY);
@@ -437,8 +438,8 @@ namespace
 
     void CApplication::OnWheel(Edit::CMessage& _rMessage)
     {
-        bool IsVertically = _rMessage.GetBool();
-        int WheelDelta    = _rMessage.GetInt();
+        bool IsVertically = _rMessage.Get<bool>();
+        int WheelDelta    = _rMessage.Get<int>();
 
         (void)IsVertically;
 
@@ -451,8 +452,8 @@ namespace
 
     void CApplication::OnResize(Edit::CMessage& _rMessage)
     {
-        int Width  = _rMessage.GetInt();
-        int Height = _rMessage.GetInt();
+        int Width  = _rMessage.Get<int>();
+        int Height = _rMessage.Get<int>();
 
         Gfx::App::OnResize(m_EditWindowID, Width, Height);
     }

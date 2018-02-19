@@ -145,15 +145,15 @@ namespace Edit
 
         Edit::CMessage NewMessage;
         
-        NewMessage.PutFloat(VolumeSize);
-        NewMessage.PutInt(Resolution);
-		NewMessage.PutFloat(VoxelSize);
-        NewMessage.PutFloat(TruncatedDistance);
-        NewMessage.PutInt(MaxIntegrationWeight);
-        NewMessage.PutInt(MinDepth);
-        NewMessage.PutInt(MaxDepth);
-        NewMessage.PutBool(CaptureColor);
-		NewMessage.PutBool(IsScalable);
+        NewMessage.Put<float>(VolumeSize);
+        NewMessage.Put<int>(Resolution);
+		NewMessage.Put<float>(VoxelSize);
+        NewMessage.Put<float>(TruncatedDistance);
+        NewMessage.Put<int>(MaxIntegrationWeight);
+        NewMessage.Put<int>(MinDepth);
+        NewMessage.Put<int>(MaxDepth);
+        NewMessage.Put<bool>(CaptureColor);
+		NewMessage.Put<bool>(IsScalable);
 
         NewMessage.Reset();
 
@@ -195,7 +195,7 @@ namespace Edit
         m_pPauseIntegrationButton->setText(m_IsIntegrationPaused ? s_ResumeIntegrationText : s_PauseIntegrationText);
 
         Edit::CMessage NewMessage;
-        NewMessage.PutBool(m_IsIntegrationPaused);
+        NewMessage.Put<bool>(m_IsIntegrationPaused);
         NewMessage.Reset();
 
         Edit::MessageManager::SendMessage(Edit::SGUIMessageType::MR_SLAM_Reconstruction_Pause_Integration, NewMessage);
@@ -210,7 +210,7 @@ namespace Edit
         m_pPauseTrackingButton->setText(m_IsTrackingPaused ? s_ResumeTrackingText : s_PauseTrackingText);
 
         Edit::CMessage NewMessage;
-        NewMessage.PutBool(m_IsTrackingPaused);
+        NewMessage.Put<bool>(m_IsTrackingPaused);
         NewMessage.Reset();
 
         Edit::MessageManager::SendMessage(Edit::SGUIMessageType::MR_SLAM_Reconstruction_Pause_Tracking, NewMessage);
@@ -221,7 +221,7 @@ namespace Edit
         const bool UseTrackingCamera = m_pTrackingCameraCB->checkState() == Qt::CheckState::Checked;
 
         Edit::CMessage NewMessage;
-        NewMessage.PutBool(UseTrackingCamera);
+        NewMessage.Put<bool>(UseTrackingCamera);
         NewMessage.Reset();
 
         Edit::MessageManager::SendMessage(Edit::SGUIMessageType::MR_SLAM_Reconstruction_Change_Camera, NewMessage);

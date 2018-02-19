@@ -8,13 +8,11 @@
 
 #include "core/core_jni_interface.h"
 
-#include "data/data_actor_type.h"
-#include "data/data_ar_controller_facet.h"
-#include "data/data_camera_actor_facet.h"
+#include "data/data_ar_controller_component.h"
+#include "data/data_camera_component.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_map.h"
-#include "data/data_plugin_type.h"
 #include "data/data_transformation_facet.h"
 
 #include "graphic/gfx_camera_interface.h"
@@ -566,7 +564,7 @@ namespace
 
                 pTransformation->SetRotation(glm::eulerAngles(Rotation));
 
-                Dt::EntityManager::MarkEntityAsDirty(*m_pEntity, Dt::CEntity::DirtyMove | Dt::CEntity::DirtyDetail);
+                Dt::EntityManager::MarkEntityAsDirty(*m_pEntity, Dt::CEntity::DirtyMove);
             }
 
             ArPose_destroy(pARPose);
@@ -941,24 +939,6 @@ namespace
 
     void CMRControlManager::OnDirtyEntity(Dt::CEntity* _pEntity)
     {
-        assert(_pEntity != 0);
-
-        if (_pEntity->GetCategory() != Dt::SEntityCategory::Actor) return;
-
-        unsigned int DirtyFlags;
-
-        DirtyFlags = _pEntity->GetDirtyFlags();
-
-        // -----------------------------------------------------------------------------
-        // Check if it is a new actor
-        // -----------------------------------------------------------------------------
-        if ((DirtyFlags & Dt::CEntity::DirtyCreate) != 0)
-        {
-            if (_pEntity->GetType() == Dt::SActorType::Node)
-            {
-                m_pEntity = _pEntity;
-            }
-        }
     }
 
     // -----------------------------------------------------------------------------
