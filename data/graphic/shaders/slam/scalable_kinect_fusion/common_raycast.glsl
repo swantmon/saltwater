@@ -42,12 +42,13 @@ int GetRootVolumeBufferIndex(vec3 GlobalPosition)
 
 int GetRootGridItemIndex(vec3 PositionInVolume, int VolumeBufferOffset)
 {    
-    ivec3 ItemOffset = ivec3(floor(PositionInVolume * 16.0f));
-    ivec3 VolumeOffset = ItemOffset % 16;
+    ivec3 ItemOffset = ivec3(floor(PositionInVolume * ROOT_RESOLUTION));
+    ivec3 VolumeOffset = ItemOffset % ROOT_RESOLUTION;
     
-    int BufferOffset = VolumeOffset.z * 16 * 16 + VolumeOffset.y * 16 + VolumeOffset.x;
+    int BufferOffset = VolumeOffset.z * ROOT_RESOLUTION * ROOT_RESOLUTION;
+    BufferOffset += VolumeOffset.y * ROOT_RESOLUTION + VolumeOffset.x;
     
-    return VolumeBufferOffset * 16 * 16 * 16 + BufferOffset;
+    return VolumeBufferOffset * VOXELS_PER_ROOTGRID + BufferOffset;
 }
 
 uint GetRawVoxel(vec3 Position)
