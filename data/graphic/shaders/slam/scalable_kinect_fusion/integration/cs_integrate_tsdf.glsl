@@ -29,28 +29,28 @@ layout(binding = 1, rgba8) readonly uniform image2D cs_Color;
 // Functions
 // -------------------------------------------------------------------------------------
 
-layout (local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
+layout (local_size_x = LEVEL2_RESOLUTION, local_size_y = LEVEL2_RESOLUTION, local_size_z = 1) in;
 void main()
 {    
     const vec3 CameraPosition = g_PoseMatrix[3].xyz;
     const vec3 VolumeOffset = g_RootVolumePool[g_CurrentVolumeIndex].m_Offset * VOLUME_SIZE;    
     
-    ivec3 Level1Offset = ivec3(IndexToOffset(g_VolumeID[gl_WorkGroupID.x], 16 * 8));
-    vec3 ParentOffset = Level1Offset * VOXEL_SIZE * 8.0f + VolumeOffset;
+    ivec3 Level1Offset = ivec3(IndexToOffset(g_VolumeID[gl_WorkGroupID.x], ROOT_RESOLUTION * LEVEL1_RESOLUTION));
+    vec3 ParentOffset = Level1Offset * VOXEL_SIZE * LEVEL2_RESOLUTION + VolumeOffset;
 
-    ivec3 VoxelRootOffset = Level1Offset / 8;
-    ivec3 VoxelLevel1InnerOffset = Level1Offset % 8;
+    ivec3 VoxelRootOffset = Level1Offset / LEVEL1_RESOLUTION;
+    ivec3 VoxelLevel1InnerOffset = Level1Offset % LEVEL1_RESOLUTION;
     
     int RootGridBufferOffset = g_CurrentVolumeIndex * VOXELS_PER_ROOTGRID;
-    RootGridBufferOffset += OffsetToIndex(VoxelRootOffset, 16);
+    RootGridBufferOffset += OffsetToIndex(VoxelRootOffset, ROOT_RESOLUTION);
     
     int Level1GridBufferOffset = g_RootGridPool[RootGridBufferOffset].m_PoolIndex * VOXELS_PER_LEVEL1GRID;
-    Level1GridBufferOffset += OffsetToIndex(VoxelLevel1InnerOffset, 8);
+    Level1GridBufferOffset += OffsetToIndex(VoxelLevel1InnerOffset, LEVEL1_RESOLUTION);
 
     int Level2GridBufferOffset = g_Level1GridPool[Level1GridBufferOffset].m_PoolIndex * VOXELS_PER_LEVEL2GRID;
 
     int MaxWeight = 0;
-    for (int i = 0; i < 8; ++ i)
+    for (int i = 0; i < LEVEL2_RESOLUTION; ++ i)
     {
         vec3 WSVoxelPosition = ParentOffset + vec3(gl_LocalInvocationID.xy, i) * VOXEL_SIZE;
 		
@@ -74,7 +74,7 @@ void main()
                 {
                     const float TSDF = min(SDF / TRUNCATED_DISTANCE, 1.0f);
 
-                    int TSDFIndex = Level2GridBufferOffset + OffsetToIndex(vec3(gl_LocalInvocationID.xy, i), 8);
+                    int TSDFIndex = Level2GridBufferOffset + OffsetToIndex(vec3(gl_LocalInvocationID.xy, i), LEVEL2_RESOLUTION);
 
                     uint TSDFPoolValue = g_TSDFPool[TSDFIndex];
                     

@@ -22,15 +22,15 @@ void main()
     {
         int VoxelLevel1Index = int(g_VolumeID[gl_GlobalInvocationID.x]);
         
-        ivec3 VoxelLevel1Offset = ivec3(IndexToOffset(VoxelLevel1Index, 16 * 8));
-        ivec3 VoxelRootOffset = VoxelLevel1Offset / 8;
-        ivec3 VoxelLevel1InnerOffset = VoxelLevel1Offset % 8;
+        ivec3 VoxelLevel1Offset = ivec3(IndexToOffset(VoxelLevel1Index, ROOT_RESOLUTION * LEVEL1_RESOLUTION));
+        ivec3 VoxelRootOffset = VoxelLevel1Offset / LEVEL1_RESOLUTION;
+        ivec3 VoxelLevel1InnerOffset = VoxelLevel1Offset % LEVEL1_RESOLUTION;
         
         int RootGridBufferOffset = g_CurrentVolumeIndex * VOXELS_PER_ROOTGRID;
-        RootGridBufferOffset += OffsetToIndex(VoxelRootOffset, 16);
+        RootGridBufferOffset += OffsetToIndex(VoxelRootOffset, ROOT_RESOLUTION);
         
         int Level1GridBufferOffset = g_RootGridPool[RootGridBufferOffset].m_PoolIndex * VOXELS_PER_LEVEL1GRID;
-        Level1GridBufferOffset += OffsetToIndex(VoxelLevel1InnerOffset, 8);
+        Level1GridBufferOffset += OffsetToIndex(VoxelLevel1InnerOffset, LEVEL1_RESOLUTION);
         
         if (g_Level1GridPool[Level1GridBufferOffset].m_PoolIndex == -1)
         {
