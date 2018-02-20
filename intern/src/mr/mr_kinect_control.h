@@ -46,6 +46,11 @@ namespace MR
 
 	private:
 
+        struct Byte4
+        {
+            BYTE r, g, b, a;
+        };
+
         void Start();
         void Stop();
 
@@ -54,7 +59,7 @@ namespace MR
         IDepthFrameReader* m_pDepthFrameReader;
         ICoordinateMapper* m_pMapper;
 
-        std::vector<char> m_CameraFrameBuffer;
+        std::vector<Byte4> m_CameraFrameBuffer;
         std::vector<UINT16> m_DepthBuffer;
         std::vector<ColorSpacePoint> m_ColorSpacePoints;
     };

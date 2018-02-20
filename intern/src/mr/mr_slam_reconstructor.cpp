@@ -153,7 +153,7 @@ namespace MR
         BASE_CONSOLE_INFO("Using Kinect for SLAM");
 
         m_DepthPixels = std::vector<unsigned short>(m_pRGBDCameraControl->GetDepthPixelCount());
-        m_CameraPixels = std::vector<char>(m_pRGBDCameraControl->GetDepthPixelCount());
+        m_CameraPixels = std::vector<char>(m_pRGBDCameraControl->GetDepthPixelCount() * 4);
 
         const float VolumeSize = m_ReconstructionSettings.m_VolumeSize;
         glm::mat4 PoseRotation, PoseTranslation;
