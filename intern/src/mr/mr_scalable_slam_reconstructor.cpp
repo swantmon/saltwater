@@ -798,8 +798,6 @@ namespace MR
             }
         }
 
-        BufferManager::UploadBufferData(m_VolumeBuffers.m_PoolItemCountBufferPtr, &m_RootVolumePoolItemCount, 0, sizeof(uint32_t));
-
         ContextManager::SetResourceBuffer(0, m_VolumeBuffers.m_RootVolumePoolPtr);
         ContextManager::SetResourceBuffer(1, m_VolumeBuffers.m_RootGridPoolPtr);
         ContextManager::SetResourceBuffer(2, m_VolumeBuffers.m_Level1PoolPtr);
@@ -1427,11 +1425,11 @@ namespace MR
         }
 
         //////////////////////////////////////////////////////////////////////////////////////
-        // Read pool sizes
+        // Store root grid count on gpu and read other pool sizes form gpu
         //////////////////////////////////////////////////////////////////////////////////////
 
-        int* pPoolSizes = static_cast<int*>(BufferManager::MapBuffer(m_VolumeBuffers.m_PoolItemCountBufferPtr, CBuffer::EMap::Read));
-        m_VolumeBuffers.m_RootGridPoolSize = pPoolSizes[0];
+        int* pPoolSizes = static_cast<int*>(BufferManager::MapBuffer(m_VolumeBuffers.m_PoolItemCountBufferPtr, CBuffer::EMap::ReadWrite));
+        pPoolSizes[0] = m_RootVolumePoolItemCount;
         m_VolumeBuffers.m_Level1PoolSize = pPoolSizes[1];
         m_VolumeBuffers.m_TSDFPoolSize = pPoolSizes[2];
         BufferManager::UnmapBuffer(m_VolumeBuffers.m_PoolItemCountBufferPtr);
