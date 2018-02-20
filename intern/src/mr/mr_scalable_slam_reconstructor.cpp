@@ -260,8 +260,9 @@ namespace MR
 
         m_DepthViewPortSetPtr = ViewManager::CreateViewPortSet(DepthViewPort);
 
-        ViewPortDescriptor.m_Width = 128.0f;
-        ViewPortDescriptor.m_Height = 128.0f;
+        const int Width = m_ReconstructionSettings.m_GridResolutions[0] * m_ReconstructionSettings.m_GridResolutions[1];
+        ViewPortDescriptor.m_Width = static_cast<float>(Width);
+        ViewPortDescriptor.m_Height = static_cast<float>(Width);
 
         Gfx::CViewPortPtr FullVolumeViewPort = ViewManager::CreateViewPort(ViewPortDescriptor);
 
