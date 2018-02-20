@@ -478,7 +478,6 @@ namespace MR
             << "#define EPSILON_ANGLE "          << g_EpsilonAngle                                  << " \n"
             << "#define ICP_VALUE_COUNT "        << g_ICPValueCount                                 << " \n"
             << "#define MAP_TEXTURE_FORMAT "     << InternalFormatString                            << " \n"
-            << "#define HIERARCHY_LEVELS "       << MR::SReconstructionSettings::GRID_LEVELS        << " \n"
             << "#define ROOT_RESOLUTION "        << m_ReconstructionSettings.m_GridResolutions[0]   << " \n"
             << "#define LEVEL1_RESOLUTION "      << m_ReconstructionSettings.m_GridResolutions[1]   << " \n"
             << "#define LEVEL2_RESOLUTION "      << m_ReconstructionSettings.m_GridResolutions[2]   << " \n"
