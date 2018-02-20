@@ -229,7 +229,6 @@ namespace MR
 
         Gfx::CBufferPtr m_VolumeIndexBufferPtr;
         
-        Gfx::CShaderPtr m_ClearVolumeCSPtr;
         Gfx::CShaderPtr m_BilateralFilterCSPtr;
         Gfx::CShaderPtr m_VertexMapCSPtr;
         Gfx::CShaderPtr m_NormalMapCSPtr;
