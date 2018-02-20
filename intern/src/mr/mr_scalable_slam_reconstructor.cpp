@@ -687,7 +687,7 @@ namespace MR
         // Render point cloud to full volume
         ////////////////////////////////////////////////////////////////////////////////////////////////
 
-        Performance::BeginEvent("Rasterize point cloud to full volume");
+        Performance::BeginEvent("Rasterize point cloud");
 
         ContextManager::SetTargetSet(m_FullVolumeTargetSetPtr);
         ContextManager::SetViewPortSet(m_FullVolumeViewPort);
@@ -720,7 +720,7 @@ namespace MR
 
             Performance::EndEvent();
 
-            Performance::BeginEvent("Gather data");
+            Performance::BeginEvent("Gather point cloud data");
 
             ContextManager::SetShaderCS(m_PointsFullCSPtr);
 
