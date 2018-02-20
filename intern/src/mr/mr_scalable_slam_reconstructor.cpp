@@ -525,7 +525,6 @@ namespace MR
         m_PointCloudVSPtr          = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rasterization\\vs_rootgrid.glsl"             , "main", DefineString.c_str());
         m_PointCloudGSPtr          = ShaderManager::CompileGS("slam\\scalable_kinect_fusion\\rasterization\\gs_rootgrid.glsl"             , "main", DefineString.c_str());
         m_PointCloudFSPtr          = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rasterization\\fs_rootgrid.glsl"             , "main", DefineString.c_str());
-        m_PointsRootGridCSPtr      = ShaderManager::CompileCS("slam\\scalable_kinect_fusion\\rasterization\\cs_gather.glsl"               , "main", DefineString.c_str());
         m_PointsFullCSPtr          = ShaderManager::CompileCS("slam\\scalable_kinect_fusion\\rasterization\\cs_gather_full.glsl"          , "main", DefineString.c_str());
         m_IntegrateRootGridCSPtr   = ShaderManager::CompileCS("slam\\scalable_kinect_fusion\\integration\\cs_integrate_rootgrid.glsl"     , "main", DefineString.c_str());
         m_IntegrateLevel1GridCSPtr = ShaderManager::CompileCS("slam\\scalable_kinect_fusion\\integration\\cs_integrate_level1grid.glsl"   , "main", DefineString.c_str());
