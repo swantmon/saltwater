@@ -395,6 +395,20 @@ namespace MR
     
     void CScalableSLAMReconstructor::Exit()
     {
+        int* pPoolSizes = static_cast<int*>(BufferManager::MapBuffer(m_VolumeBuffers.m_PoolItemCountBufferPtr, CBuffer::EMap::ReadWrite));
+        
+        const float Megabyte = 1024.0f * 1024.0f;
+        std::stringstream Stream[3];
+        Stream[0] << "Rootgrid pool size: " << m_RootVolumePoolItemCount * m_ReconstructionSettings.m_VoxelsPerGrid[0] * sizeof(SGridPoolItem) / Megabyte << " MB";
+        Stream[1] << "Level1 pool size  : " << pPoolSizes[1] * m_ReconstructionSettings.m_VoxelsPerGrid[1] * sizeof(SGridPoolItem) / Megabyte << " MB";
+        Stream[2] << "TSDF pool size    : " << pPoolSizes[2] * m_ReconstructionSettings.m_VoxelsPerGrid[2] * sizeof(STSDFPoolItem) / Megabyte << " MB";
+
+        BufferManager::UnmapBuffer(m_VolumeBuffers.m_PoolItemCountBufferPtr);
+
+        BASE_CONSOLE_INFO(Stream[0].str().c_str());
+        BASE_CONSOLE_INFO(Stream[1].str().c_str());
+        BASE_CONSOLE_INFO(Stream[2].str().c_str());
+
         m_BilateralFilterCSPtr = 0;
         m_VertexMapCSPtr = 0;
         m_NormalMapCSPtr = 0;
