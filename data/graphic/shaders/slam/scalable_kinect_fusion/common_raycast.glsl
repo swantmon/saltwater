@@ -87,7 +87,7 @@ uint GetRawVoxel(vec3 Position)
                     float TotalResolution = ROOT_RESOLUTION * LEVEL1_RESOLUTION * LEVEL2_RESOLUTION;
 
                     ivec3 TSDFVolumeOffset = ivec3(floor(Position * TotalResolution));
-                    TSDFVolumeOffset %= 8;
+                    TSDFVolumeOffset %= LEVEL1_RESOLUTION;
 
                     int TSDFBufferInnerOffset = OffsetToIndex(TSDFVolumeOffset, LEVEL2_RESOLUTION);
                     int TSDFBufferIndex = TSDFVolumeBufferOffset * VOXELS_PER_LEVEL2GRID + TSDFBufferInnerOffset;
@@ -130,7 +130,7 @@ vec2 GetVoxelWithStep(vec3 Position, vec3 Direction, out float Step)
             {
                 // Offset of level 1 volume in rootgrid
                 ivec3 Level1VolumeOffset = ivec3(floor(Position * ROOT_RESOLUTION * LEVEL1_RESOLUTION));
-                Level1VolumeOffset %= 8;
+                Level1VolumeOffset %= LEVEL1_RESOLUTION;
 
                 int Level1BufferInnerOffset = OffsetToIndex(Level1VolumeOffset, LEVEL1_RESOLUTION);
                 int Level1BufferIndex = Level1VolumeBufferOffset * VOXELS_PER_LEVEL1GRID + Level1BufferInnerOffset;
