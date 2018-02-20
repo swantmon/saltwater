@@ -465,7 +465,6 @@ namespace MR
 
         DefineStream
             << "#define PYRAMID_LEVELS "         << m_ReconstructionSettings.m_PyramidLevelCount    << " \n"
-            << "#define VOLUME_RESOLUTION "      << m_ReconstructionSettings.m_GridResolutions[0]   << " \n"
             << "#define VOXEL_SIZE "             << VoxelSize                                       << " \n"
             << "#define VOLUME_SIZE "            << m_VolumeSizes[0]                                << " \n"
             << "#define DEPTH_IMAGE_WIDTH "      << m_pRGBDCameraControl->GetDepthWidth()           << " \n"
