@@ -10,7 +10,7 @@ layout(std140, binding = 1) uniform PerDrawCallData
     vec4 g_Color;
 };
 
-layout (binding = 0, rgba16f) uniform image2D cs_VertexMap;
+layout (binding = 0, MAP_TEXTURE_FORMAT) uniform image2D cs_VertexMap;
 
 out gl_PerVertex
 {
