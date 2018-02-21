@@ -164,6 +164,7 @@ namespace MR
         void GetReconstructionSettings(SReconstructionSettings* pReconstructionSettings);
 
         Gfx::CTexturePtr GetVertexMap();
+        Gfx::CTexturePtr GetNormalMap();
 
         CPlaneDetector& GetPlaneDetector();
 
