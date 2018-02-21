@@ -29,6 +29,8 @@
 #include "mr/mr_slam_reconstructor.h"
 #include "mr/mr_scalable_slam_reconstructor.h"
 
+#include "GL/glew.h"
+
 #include <iostream>
 #include <limits>
 #include <memory>
@@ -88,7 +90,7 @@ namespace
         void OnResize(unsigned int _Width, unsigned int _Height);
         
         void Update();
-        void Render();
+        void Render(int _Pass);
         void PauseIntegration(bool _Paused);
         void PauseTracking(bool _Paused);
         void ChangeCamera(bool _IsTrackingCamera);
@@ -97,6 +99,7 @@ namespace
 
     private:
 
+        void RenderVolumeVertexMap();
 		void RaycastVolume();
 
 		void RaycastScalableVolume();
@@ -120,6 +123,9 @@ namespace
         
         CShaderPtr m_OutlineVSPtr;
         CShaderPtr m_OutlineFSPtr;
+
+        CShaderPtr m_VolumeVertexMapVSPtr;
+        CShaderPtr m_VolumeVertexMapFSPtr;
 
         CShaderPtr m_OutlineLevel1VSPtr;
         CShaderPtr m_OutlineLevel1FSPtr;
@@ -156,6 +162,7 @@ namespace
 
         bool m_UseTrackingCamera;
 
+        bool m_RenderVolumeVertexMap;
         bool m_RenderVolume;
         bool m_RenderVertexMap;
         bool m_RenderRootQueue;
@@ -171,14 +178,15 @@ namespace
     using namespace Base;
 
     CGfxReconstructionRenderer::CGfxReconstructionRenderer()
-        : m_UseTrackingCamera(true)
-        , m_RenderVolume     (true)
-        , m_RenderVertexMap  (false)
-        , m_RenderRootQueue  (false)
-        , m_RenderLevel1Queue(false)
-        , m_RenderLevel2Queue(false)
-        , m_RenderHistogram  (false)
-        , m_RenderPlanes     (false)
+        : m_UseTrackingCamera    (true)
+        , m_RenderVolume         (true)
+        , m_RenderVolumeVertexMap(false)
+        , m_RenderVertexMap      (false)
+        , m_RenderRootQueue      (false)
+        , m_RenderLevel1Queue    (false)
+        , m_RenderLevel2Queue    (false)
+        , m_RenderHistogram      (false)
+        , m_RenderPlanes         (false)
     {
         
     }
@@ -212,14 +220,15 @@ namespace
 			m_pScalableReconstructor = nullptr;
 		}
 
-        m_UseTrackingCamera = Base::CProgramParameters::GetInstance().Get("mr:slam:rendering:use_tracking_camera", true);
-        m_RenderVolume      = Base::CProgramParameters::GetInstance().Get("mr:slam:rendering:volume"             , true);
-        m_RenderVertexMap   = Base::CProgramParameters::GetInstance().Get("mr:slam:rendering:vertex_map"         , false);
-        m_RenderRootQueue   = Base::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:root"        , false);
-        m_RenderLevel1Queue = Base::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:level1"      , false);
-        m_RenderLevel2Queue = Base::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:level2"      , false);
-        m_RenderHistogram   = Base::CProgramParameters::GetInstance().Get("mr:slam:rendering:histogram"          , false);
-        m_RenderPlanes      = Base::CProgramParameters::GetInstance().Get("mr:slam:rendering:planes"             , false);
+        m_UseTrackingCamera     = Base::CProgramParameters::GetInstance().Get("mr:slam:rendering:use_tracking_camera", true);
+        m_RenderVolume          = Base::CProgramParameters::GetInstance().Get("mr:slam:rendering:volume"             , true);
+        m_RenderVolumeVertexMap = Base::CProgramParameters::GetInstance().Get("mr:slam:rendering:volume_vertex_map"  , false);;
+        m_RenderVertexMap       = Base::CProgramParameters::GetInstance().Get("mr:slam:rendering:vertex_map"         , false);
+        m_RenderRootQueue       = Base::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:root"        , false);
+        m_RenderLevel1Queue     = Base::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:level1"      , false);
+        m_RenderLevel2Queue     = Base::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:level2"      , false);
+        m_RenderHistogram       = Base::CProgramParameters::GetInstance().Get("mr:slam:rendering:histogram"          , false);
+        m_RenderPlanes          = Base::CProgramParameters::GetInstance().Get("mr:slam:rendering:planes"             , false);
     }
 
     // -----------------------------------------------------------------------------
@@ -236,6 +245,9 @@ namespace
         m_RaycastFSPtr = 0;
         m_HistogramVSPtr = 0;
         m_HistogramFSPtr = 0;
+
+        m_VolumeVertexMapVSPtr = 0;
+        m_VolumeVertexMapFSPtr = 0;
                 
         m_RaycastConstantBufferPtr = 0;
         m_DrawCallConstantBufferPtr = 0;
@@ -265,6 +277,8 @@ namespace
     {
 		MR::SReconstructionSettings Settings;
 
+        const std::string InternalFormatString = Base::CProgramParameters::GetInstance().Get("mr:slam:map_format", "rgba16f");
+
 		if (m_pScalableReconstructor != nullptr)
 		{
 			m_pScalableReconstructor->GetReconstructionSettings(&Settings);
@@ -285,7 +299,8 @@ namespace
                 << "#define LEVEL2_RESOLUTION "      << Settings.m_GridResolutions[2] << '\n'
                 << "#define VOXELS_PER_ROOTGRID "    << Settings.m_VoxelsPerGrid[0] << " \n"
                 << "#define VOXELS_PER_LEVEL1GRID "  << Settings.m_VoxelsPerGrid[1] << " \n"
-                << "#define VOXELS_PER_LEVEL2GRID "  << Settings.m_VoxelsPerGrid[2] << " \n";
+                << "#define VOXELS_PER_LEVEL2GRID "  << Settings.m_VoxelsPerGrid[2] << " \n"
+                << "#define MAP_TEXTURE_FORMAT "     << InternalFormatString << " \n";
 
             if (Settings.m_CaptureColor)
             {
@@ -309,6 +324,9 @@ namespace
 
             m_HistogramVSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_histogram.glsl", "main", DefineString.c_str());
             m_HistogramFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_histogram.glsl", "main", DefineString.c_str());
+
+            m_VolumeVertexMapVSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_volume_vertex_map.glsl", "main", DefineString.c_str());
+            m_VolumeVertexMapFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_volume_vertex_map.glsl", "main", DefineString.c_str());
         }
 		else
 		{
@@ -320,7 +338,8 @@ namespace
 				<< "#define VOLUME_RESOLUTION "  << Settings.m_VolumeResolution << " \n"
 				<< "#define TRUNCATED_DISTANCE " << Settings.m_TruncatedDistance << " \n"
 				<< "#define VOLUME_SIZE "        << Settings.m_VolumeSize << " \n"
-				<< "#define VOXEL_SIZE "         << Settings.m_VolumeSize / Settings.m_VolumeResolution << " \n";
+				<< "#define VOXEL_SIZE "         << Settings.m_VolumeSize / Settings.m_VolumeResolution << " \n"
+                << "#define MAP_TEXTURE_FORMAT " << InternalFormatString << " \n";
 
 			if (Settings.m_CaptureColor)
 			{
@@ -765,6 +784,36 @@ namespace
     }
     
     // -----------------------------------------------------------------------------
+
+    void CGfxReconstructionRenderer::RenderVolumeVertexMap()
+    {
+        //GLint OldViewPort[4];
+        //glGetIntegerv(GL_VIEWPORT, OldViewPort);
+        //
+        //glViewport(0, 0, 512, 424);
+
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
+
+        ContextManager::SetRenderContext(m_OutlineRenderContextPtr);
+        ContextManager::SetShaderVS(m_VolumeVertexMapVSPtr);
+        ContextManager::SetShaderPS(m_VolumeVertexMapFSPtr);
+
+        ContextManager::SetImageTexture(0, m_pScalableReconstructor->GetVertexMap());
+        ContextManager::SetImageTexture(1, m_pScalableReconstructor->GetNormalMap());
+
+        const unsigned int Offset = 0;
+        ContextManager::SetVertexBuffer(m_QuadMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+        ContextManager::SetIndexBuffer(m_QuadMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
+
+        ContextManager::SetInputLayout(m_QuadInputLayoutPtr);
+        ContextManager::SetTopology(STopology::TriangleStrip);
+
+        ContextManager::Draw(4, 0);
+
+        //glViewport(OldViewPort[0], OldViewPort[1], OldViewPort[2], OldViewPort[3]);
+    }
+
+    // -----------------------------------------------------------------------------
     
     void CGfxReconstructionRenderer::RaycastVolume()
     {
@@ -1208,7 +1257,7 @@ namespace
 
         SDrawCallConstantBuffer BufferData;
 
-        BufferData.m_WorldMatrix = m_pScalableReconstructor->GetPoseMatrix();
+        BufferData.m_WorldMatrix = glm::mat4(1);
         BufferData.m_Color = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
 
         BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
@@ -1230,72 +1279,90 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxReconstructionRenderer::Render()
+    void CGfxReconstructionRenderer::Render(int _Pass)
     {
-		if (m_pScalableReconstructor != nullptr)
+		if (_Pass == 0)
 		{
-			m_pScalableReconstructor->Update();
-		}
-		else
-		{
-			m_pReconstructor->Update();
-		}
+            if (m_pScalableReconstructor != nullptr)
+            {
+                m_pScalableReconstructor->Update();
+            }
+            else
+            {
+                m_pReconstructor->Update();
+            }
 
-        Performance::BeginEvent("SLAM Reconstruction Rendering");
-        
-        ContextManager::SetViewPortSet(ViewManager::GetViewPortSet());
-        ContextManager::SetTargetSet(TargetSetManager::GetDeferredTargetSet());
-        //glm::vec4 ClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-        //TargetSetManager::ClearTargetSet(TargetSetManager::GetDeferredTargetSet(), ClearColor);
+            Performance::BeginEvent("SLAM Reconstruction Rendering");
 
-        if (!m_UseTrackingCamera)
+            ContextManager::SetViewPortSet(ViewManager::GetViewPortSet());
+            ContextManager::SetTargetSet(TargetSetManager::GetDeferredTargetSet());
+            //glm::vec4 ClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+            //TargetSetManager::ClearTargetSet(TargetSetManager::GetDeferredTargetSet(), ClearColor);
+
+            if (!m_UseTrackingCamera)
+            {
+                RenderCamera();
+            }
+
+            if (m_pScalableReconstructor != nullptr)
+            {
+                if (m_RenderVolumeVertexMap)
+                {
+                    RenderVolumeVertexMap();
+                }
+
+                if (m_RenderVolume)
+                {
+                    RaycastScalableVolume();
+                }
+
+                if (m_RenderVertexMap)
+                {
+                    RenderVertexMap();
+                }
+
+                if (m_RenderRootQueue)
+                {
+                    RenderQueuedRootVolumes();
+                }
+
+                if (m_RenderLevel1Queue)
+                {
+                    RenderQueuedLevel1Grids();
+                }
+
+                if (m_RenderLevel2Queue)
+                {
+                    RenderQueuedLevel2Grids();
+                }
+
+                if (m_RenderHistogram)
+                {
+                    RenderHistogram();
+                }
+
+                if (m_RenderPlanes)
+                {
+                    RenderPlanes();
+                }
+            }
+            else
+            {
+                RaycastVolume();
+            }
+
+            Performance::EndEvent();
+		}
+        else
         {
-            RenderCamera();
+            if (m_pScalableReconstructor != nullptr)
+            {
+                if (m_RenderVolumeVertexMap)
+                {
+                    RenderVolumeVertexMap();
+                }
+            }
         }
-
-		if (m_pScalableReconstructor != nullptr)
-		{
-            if (m_RenderVolume)
-            {
-                RaycastScalableVolume();
-            }
-
-            if (m_RenderVertexMap)
-            {
-                RenderVertexMap();
-            }
-            
-            if (m_RenderRootQueue)
-            {
-                RenderQueuedRootVolumes();
-            }
-
-            if (m_RenderLevel1Queue)
-            {
-                RenderQueuedLevel1Grids();
-            }
-            
-            if (m_RenderLevel2Queue)
-            {
-                RenderQueuedLevel2Grids();
-            }
-
-            if (m_RenderHistogram)
-            {
-                RenderHistogram();
-            }
-
-            if (m_RenderPlanes)
-            {
-                RenderPlanes();
-            }
-		}
-		else
-		{
-			RaycastVolume();
-		}
-        
-        Performance::EndEvent();
     }
 
     // -----------------------------------------------------------------------------
@@ -1451,9 +1518,9 @@ namespace ReconstructionRenderer
     
     // -----------------------------------------------------------------------------
     
-    void Render()
+    void Render(int _Pass)
     {
-        CGfxReconstructionRenderer::GetInstance().Render();
+        CGfxReconstructionRenderer::GetInstance().Render(_Pass);
     }
     
     // -----------------------------------------------------------------------------

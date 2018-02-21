@@ -33,7 +33,7 @@ namespace ReconstructionRenderer
     void OnUnloadMap();
     
     void Update();
-    void Render();
+    void Render(int _Pass);
     void PauseIntegration(bool _Paused);
     void PauseTracking(bool _Paused);
     void ChangeCamera(bool _IsTrackingCamera);

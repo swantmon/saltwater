@@ -113,7 +113,7 @@ namespace
 
         ARRenderer  ::Render();
         MeshRenderer::Render();
-        ReconstructionRenderer::Render();
+        ReconstructionRenderer::Render(0);
 
         Performance::EndEvent();
         

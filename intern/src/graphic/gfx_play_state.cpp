@@ -141,7 +141,7 @@ namespace
         // -----------------------------------------------------------------------------
         Performance::BeginEvent("Shading Pass");
         
-        ReconstructionRenderer::Render();
+        ReconstructionRenderer::Render(0);
 
         TonemappingRenderer::Render();
 
