@@ -48,7 +48,7 @@ void main()
 #endif
 
 
-    if (WSPosition.x != 0.0f && Color.r != 0.0f)
+    if (WSPosition.x != 0.0f && (Color.r != 0.0f || Color.g != 0.0f || Color.b != 0.0f))
     {
         vec3 WSNormal = GetNormal(WSPosition);
         
