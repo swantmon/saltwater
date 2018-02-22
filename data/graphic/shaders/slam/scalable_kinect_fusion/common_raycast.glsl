@@ -51,7 +51,7 @@ int GetRootGridItemIndex(vec3 PositionInVolume, int VolumeBufferOffset)
     return VolumeBufferOffset * VOXELS_PER_ROOTGRID + BufferOffset;
 }
 
-uint GetRawVoxel(vec3 Position)
+STSDFPoolItem GetRawVoxel(vec3 Position)
 {
     Position /= VOLUME_SIZE;
 
@@ -97,7 +97,9 @@ uint GetRawVoxel(vec3 Position)
             }
         }
     }
-    return 0;
+    STSDFPoolItem EmptyItem;
+    EmptyItem.m_TSDF = packSnorm2x16(vec2(0.0f));
+    return EmptyItem;
 }
 
 vec2 GetVoxel(vec3 Position)
@@ -239,7 +241,7 @@ vec3 GetColor(vec3 Position)
 
     g = g * VOXEL_SIZE;
 
-    uint Voxel = GetRawVoxel(g);
+    STSDFPoolItem Voxel = GetRawVoxel(g);
 
     vec3 Color;
     vec2 Unused = UnpackVoxel(Voxel, Color);
@@ -347,8 +349,10 @@ void GetPositionAndColor(vec3 CameraPosition, vec3 RayDirection, out vec3 Vertex
     RayLength += Step;
 
     Vertex = vec3(0.0f);
-    Color = vec3(0.0f);
+    Color = vec3(0.5f);
 
+    float NewStep;
+    
     while (RayLength < EndLength)
     {
         vec3 PreviousPosition = CameraPosition + RayLength * RayDirection;
@@ -356,24 +360,28 @@ void GetPositionAndColor(vec3 CameraPosition, vec3 RayDirection, out vec3 Vertex
         vec3 CurrentPosition = CameraPosition + RayLength * RayDirection;
 
         PreviousTSDF = CurrentTSDF;
-        CurrentTSDF = GetVoxel(CurrentPosition).x;
+        
+        CurrentTSDF = GetVoxelWithStep(CurrentPosition, RayDirection, NewStep).x;
 
-        if (CurrentTSDF < 0.0f && PreviousTSDF > 0.0f)
+        if (NewStep > 0.0f)
+        {
+            RayLength += NewStep;
+        }
+        else if (CurrentTSDF < 0.0f && PreviousTSDF > 0.0f)
         {
             float Ft = GetInterpolatedTSDF(PreviousPosition);
             float Ftdt = GetInterpolatedTSDF(CurrentPosition);
             float Ts = RayLength - Step * Ft / (Ftdt - Ft);
 
             Vertex = CameraPosition + RayDirection * Ts;
-            Color = GetColor(PreviousPosition);
-
+            Color = GetColor(Vertex);
+            
             break;
         }
         
         Step = CurrentTSDF < 1.0f ? VOXEL_SIZE : TruncatedDistance;
     }
 }
-
 
 #endif
 

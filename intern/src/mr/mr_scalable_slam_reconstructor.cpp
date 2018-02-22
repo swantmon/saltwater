@@ -181,6 +181,13 @@ namespace
         uint16_t m_Weight;
     };
 
+    struct STSDFColorPoolItem
+    {
+        uint16_t m_TSDF;
+        uint16_t m_Weight;
+        uint32_t m_Color;
+    };
+
     int DivUp(int TotalShaderCount, int WorkGroupSize)
     {
         return (TotalShaderCount + WorkGroupSize - 1) / WorkGroupSize;
@@ -396,13 +403,15 @@ namespace MR
     
     void CScalableSLAMReconstructor::Exit()
     {
+        const int TSDFItemSize = m_ReconstructionSettings.m_CaptureColor ? sizeof(STSDFColorPoolItem) : sizeof(STSDFPoolItem);
+
         int* pPoolSizes = static_cast<int*>(BufferManager::MapBuffer(m_VolumeBuffers.m_PoolItemCountBufferPtr, CBuffer::EMap::ReadWrite));
         
         const float Megabyte = 1024.0f * 1024.0f;
         std::stringstream Stream[3];
         Stream[0] << "Rootgrid pool size: " << m_RootVolumePoolItemCount * m_ReconstructionSettings.m_VoxelsPerGrid[0] * sizeof(SGridPoolItem) / Megabyte << " MB";
         Stream[1] << "Level1 pool size  : " << pPoolSizes[1] * m_ReconstructionSettings.m_VoxelsPerGrid[1] * sizeof(SGridPoolItem) / Megabyte << " MB";
-        Stream[2] << "TSDF pool size    : " << pPoolSizes[2] * m_ReconstructionSettings.m_VoxelsPerGrid[2] * sizeof(STSDFPoolItem) / Megabyte << " MB";
+        Stream[2] << "TSDF pool size    : " << pPoolSizes[2] * m_ReconstructionSettings.m_VoxelsPerGrid[2] * TSDFItemSize / Megabyte << " MB";
 
         BufferManager::UnmapBuffer(m_VolumeBuffers.m_PoolItemCountBufferPtr);
 
@@ -1364,16 +1373,17 @@ namespace MR
         {
             return;
         }
-        /*/
-#pragma message("Warning: Active polling of depth frame is active and could lead to an infinite loop!")
-        while (!m_pRGBDCameraControl->GetDepthBuffer(pDepth));
-        //*/
 
         if (CaptureColor && !m_pRGBDCameraControl->GetCameraFrame(pColor))
         {
-            return;
+        return;
         }
-
+        /*/
+#pragma message("Warning: Active polling of depth frame is active and could lead to an infinite loop!")
+        while (!m_pRGBDCameraControl->GetDepthBuffer(pDepth));
+        while (CaptureColor && !m_pRGBDCameraControl->GetCameraFrame(pColor));
+        //*/
+        
         Performance::BeginEvent("Scalable Kinect Fusion");
 
         Performance::BeginEvent("Data Input");
@@ -1454,7 +1464,8 @@ namespace MR
             m_IsIntegrationPaused = true;
             BASE_CONSOLE_ERROR("Level1 pool is full!");
         }
-        if (m_VolumeBuffers.m_TSDFPoolSize * m_ReconstructionSettings.m_VoxelsPerGrid[2] * sizeof(STSDFPoolItem) > g_TSDFPoolSize)
+        const int TSDFItemSize = m_ReconstructionSettings.m_CaptureColor ? sizeof(STSDFColorPoolItem) : sizeof(STSDFPoolItem);
+        if (m_VolumeBuffers.m_TSDFPoolSize * m_ReconstructionSettings.m_VoxelsPerGrid[2] * TSDFItemSize > g_TSDFPoolSize)
         {
             m_IsIntegrationPaused = true;
             BASE_CONSOLE_ERROR("TSDF pool buffer is full!");
