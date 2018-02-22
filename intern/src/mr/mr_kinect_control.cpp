@@ -172,20 +172,25 @@ namespace MR
             return false;
         }
 
-        for (int i = 0; i < GetDepthWidth(); ++ i)
-        {
-            for (int j = 0; j < GetDepthHeight(); ++ j)
-            {
-                const int x = static_cast<int>(m_ColorSpacePoints[j * GetDepthWidth() + i].X + 0.5f);
-                const int y = static_cast<int>(m_ColorSpacePoints[j * GetDepthWidth() + i].Y + 0.5f);
+        const int DepthWidth = GetDepthWidth();
+        const int DepthHeight = GetDepthHeight();
+        const int CameraWidth = GetCameraWidth();
+        const int CameraHeight = GetCameraHeight();
 
-                if (x >= 0 && x < GetCameraWidth() && y >= 0 && y < GetCameraHeight())
+        for (int i = 0; i < DepthWidth; ++ i)
+        {
+            for (int j = 0; j < DepthHeight; ++ j)
+            {
+                const int x = static_cast<int>(m_ColorSpacePoints[j * DepthWidth + i].X + 0.5f);
+                const int y = static_cast<int>(m_ColorSpacePoints[j * DepthWidth + i].Y + 0.5f);
+
+                if (x >= 0 && x < CameraWidth && y >= 0 && y < CameraHeight)
                 {
-                    pBuffer[j * GetDepthWidth() + i] = m_CameraFrameBuffer[y * GetCameraWidth() + x];
+                    pBuffer[j * DepthWidth + i] = m_CameraFrameBuffer[y * CameraWidth + x];
                 }
                 else
                 {
-                    pBuffer[j * GetDepthWidth() + i] = { 0, 0, 0, 255 };
+                    pBuffer[j * DepthWidth + i] = { 0, 0, 0, 255 };
                 }
             }
         }
