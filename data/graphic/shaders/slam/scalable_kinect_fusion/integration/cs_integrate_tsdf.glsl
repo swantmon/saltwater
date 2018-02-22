@@ -78,13 +78,19 @@ void main()
 
                     STSDFPoolItem TSDFPoolValue = g_TSDFPool[TSDFIndex];
                     
+                #ifdef CAPTURE_COLOR
+                    vec3 OldColor;
+                    vec2 Voxel = UnpackVoxel(TSDFPoolValue, OldColor);
+                #else
                     vec2 Voxel = UnpackVoxel(TSDFPoolValue);
+                #endif
 
                     Voxel.x = (Voxel.x * Voxel.y + TSDF) / (Voxel.y + 1.0f);
                     Voxel.y = min(MAX_INTEGRATION_WEIGHT, Voxel.y + 1.0f);
 
                 #ifdef CAPTURE_COLOR
                     vec3 Color = imageLoad(cs_Color, DepthCoords).rgb;
+                    Color = Color.x == 0.0f ? OldColor : Color;
                     TSDFPoolValue = PackVoxel(Voxel.x, Voxel.y, Color);
                 #else
                     TSDFPoolValue = PackVoxel(Voxel.x, Voxel.y);
