@@ -18,6 +18,15 @@ struct SGridPoolItem
     int m_Weight;
 };
 
+
+struct STSDFPoolItem
+{
+    uint m_TSDF;
+#ifdef CAPTURE_COLOR
+    uint m_Color;
+#endif
+};
+
 ////////////////////////////////////////////////////////////////////////
 // Pools
 ////////////////////////////////////////////////////////////////////////
@@ -39,7 +48,7 @@ layout(std430, binding = 2) buffer Level1Pool
 
 layout(std430, binding = 3) buffer TSDFPool
 {
-    uint g_TSDFPool[];
+    STSDFPoolItem g_TSDFPool[];
 };
 
 layout(std430, binding = 4) buffer PoolItemCounts
@@ -59,101 +68,59 @@ layout(std430, binding = 6) buffer RootVolumePositionBuffer
     int g_RootVolumePositionBuffer[];
 };
 
+////////////////////////////////////////////////////////////////////////
+// Pack and unpack voxels
+////////////////////////////////////////////////////////////////////////
+
+STSDFPoolItem PackVoxel(float TSDF, float Weight)
+{
+    Weight /= MAX_INTEGRATION_WEIGHT;
+
+    STSDFPoolItem Voxel;
+    Voxel.m_TSDF = packSnorm2x16(vec2(TSDF, Weight));
+
+#ifdef CAPTURE_COLOR
+    Voxel.m_Color = packUnorm4x8(vec4(0.0f));
+#endif
+
+    return Voxel;
+}
+
 #ifdef CAPTURE_COLOR
 
-uint PackVoxel(float TSDF, float Weight, vec3 Color)
-{
-    uvec3 RGB565 = uvec3(Color * 255.0f);
-    RGB565.r = ((RGB565.r >> 3) & 0x1F);
-    RGB565.g = ((RGB565.g >> 2) & 0x3F) << 5;
-    RGB565.b = ((RGB565.b >> 3) & 0x1F) << 11;
-
-    uint PackedColor = (RGB565.r | RGB565.g | RGB565.b) << 16;
-
-    uint PackedWeight = (uint(Weight) & 0x1F) << 11;
-    uint PackedTSDF = uint((TSDF * 0.5f + 0.5f) * 2048.0f) & 0x7FF;
-
-    return PackedColor | PackedWeight | PackedTSDF;
-}
-
-vec2 UnpackVoxel(uint Voxel, out vec3 Color)
-{
-    uint PackedTSDF = Voxel & 0x7FF;
-    uint PackedWeight = (Voxel >> 11) & 0x1F;
-
-    vec2 Result;
-    Result.x = (float(PackedTSDF) / 2048.0f) * 2.0f - 1.0f;
-    Result.y = float(PackedWeight);
-
-    Voxel = Voxel >> 16;
-
-    uvec3 RGB565;
-    RGB565.r = (Voxel & 0x1F) << 3;
-    RGB565.g = ((Voxel >> 5) & 0x3F) << 2;
-    RGB565.b = ((Voxel >> 11) & 0x1F) << 3;
-
-    Color = RGB565 / 255.0f;
-
-    return Result;
-}
-
-vec2 UnpackVoxel(uint Voxel)
-{
-    uint PackedTSDF = Voxel & 0x7FF;
-    uint PackedWeight = (Voxel >> 11) & 0x1F;
-
-    vec2 Result;
-    Result.x = (float(PackedTSDF) / 2048.0f) * 2.0f - 1.0f;
-    Result.y = float(PackedWeight);
-
-    return Result;
-}
-
-#else
-
-/*uint PackVoxel(float TSDF, float Weight)
+STSDFPoolItem PackVoxel(float TSDF, float Weight, vec3 Color)
 {
     Weight /= MAX_INTEGRATION_WEIGHT;
 
-    uint uTSDF = uint((TSDF * 0.5f + 0.5f) * 16777216.0f);
-    uint uWeight = uint(Weight * 256.0f);
+    STSDFPoolItem Voxel;
+    Voxel.m_TSDF = packSnorm2x16(vec2(TSDF, Weight));
+    Voxel.m_Color = packUnorm4x8(vec4(Color, 1.0f));
 
-    uint PackedTSDF = (uTSDF & 0xFFFFFF) << 8;
-    uint PackedWeight = (uWeight & 0xFF);
-
-    return PackedTSDF | PackedWeight;
+    return Voxel;
 }
 
-vec2 UnpackVoxel(uint Voxel)
+vec2 UnpackVoxel(STSDFPoolItem Voxel, out vec3 Color)
 {
-    uint uTSDF = (Voxel >> 8) & 0xFFFFFF;
-    uint uWeight = Voxel & 0xFF;
+    vec2 Data = unpackSnorm2x16(Voxel.m_TSDF);
 
-    float TSDF = (uTSDF / 16777216.0f) * 2.0f - 1.0f;
-    float Weight = uWeight / 256.0f;
+    Data.y *= MAX_INTEGRATION_WEIGHT;
 
-    Weight *= MAX_INTEGRATION_WEIGHT;
+    Color = unpackUnorm4x8(Voxel.m_Color).rgb;
 
-    return vec2(TSDF, Weight);
-}*/
-
-uint PackVoxel(float TSDF, float Weight)
-{
-    Weight /= MAX_INTEGRATION_WEIGHT;
-
-    return packSnorm2x16(vec2(TSDF, Weight));
+    return Data;
 }
 
-vec2 UnpackVoxel(uint Voxel)
+
+#endif
+
+vec2 UnpackVoxel(STSDFPoolItem Voxel)
 {
-    vec2 Data = unpackSnorm2x16(Voxel);
+    vec2 Data = unpackSnorm2x16(Voxel.m_TSDF);
 
     Data.y *= MAX_INTEGRATION_WEIGHT;
 
     return Data;
 }
-
-#endif // CAPTURE_COLOR
 
 ////////////////////////////////////////////////////////////////////////
 // Some helper functions

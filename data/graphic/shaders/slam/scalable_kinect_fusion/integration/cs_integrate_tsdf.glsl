@@ -76,27 +76,18 @@ void main()
 
                     int TSDFIndex = Level2GridBufferOffset + OffsetToIndex(vec3(gl_LocalInvocationID.xy, i), LEVEL2_RESOLUTION);
 
-                    uint TSDFPoolValue = g_TSDFPool[TSDFIndex];
+                    STSDFPoolItem TSDFPoolValue = g_TSDFPool[TSDFIndex];
                     
-                #ifdef CAPTURE_COLOR
-
                     vec2 Voxel = UnpackVoxel(TSDFPoolValue);
 
                     Voxel.x = (Voxel.x * Voxel.y + TSDF) / (Voxel.y + 1.0f);
                     Voxel.y = min(MAX_INTEGRATION_WEIGHT, Voxel.y + 1.0f);
 
+                #ifdef CAPTURE_COLOR
                     vec3 Color = imageLoad(cs_Color, DepthCoords).rgb;
                     TSDFPoolValue = PackVoxel(Voxel.x, Voxel.y, Color);
-
                 #else
-
-                    vec2 Voxel = UnpackVoxel(TSDFPoolValue);
-
-                    Voxel.x = (Voxel.x * Voxel.y + TSDF) / (Voxel.y + 1.0f);
-                    Voxel.y = min(MAX_INTEGRATION_WEIGHT, Voxel.y + 1.0f);
-
                     TSDFPoolValue = PackVoxel(Voxel.x, Voxel.y);
-
                 #endif // CAPTURE_COLOR
                     
                     g_TSDFPool[TSDFIndex] = TSDFPoolValue;

@@ -51,7 +51,7 @@ int GetRootGridItemIndex(vec3 PositionInVolume, int VolumeBufferOffset)
     return VolumeBufferOffset * VOXELS_PER_ROOTGRID + BufferOffset;
 }
 
-uint GetRawVoxel(vec3 Position)
+STSDFPoolItem GetRawVoxel(vec3 Position)
 {
     Position /= VOLUME_SIZE;
 
@@ -97,7 +97,9 @@ uint GetRawVoxel(vec3 Position)
             }
         }
     }
-    return 0;
+    STSDFPoolItem EmptyItem;
+    EmptyItem.m_TSDF = packSnorm2x16(vec2(0.0f));
+    return EmptyItem;
 }
 
 vec2 GetVoxel(vec3 Position)
@@ -239,7 +241,7 @@ vec3 GetColor(vec3 Position)
 
     g = g * VOXEL_SIZE;
 
-    uint Voxel = GetRawVoxel(g);
+    STSDFPoolItem Voxel = GetRawVoxel(g);
 
     vec3 Color;
     vec2 Unused = UnpackVoxel(Voxel, Color);
