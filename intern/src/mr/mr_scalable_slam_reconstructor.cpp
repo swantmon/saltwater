@@ -1373,16 +1373,17 @@ namespace MR
         {
             return;
         }
-        /*/
-#pragma message("Warning: Active polling of depth frame is active and could lead to an infinite loop!")
-        while (!m_pRGBDCameraControl->GetDepthBuffer(pDepth));
-        //*/
 
         if (CaptureColor && !m_pRGBDCameraControl->GetCameraFrame(pColor))
         {
-            return;
+        return;
         }
-
+        /*/
+#pragma message("Warning: Active polling of depth frame is active and could lead to an infinite loop!")
+        while (!m_pRGBDCameraControl->GetDepthBuffer(pDepth));
+        while (CaptureColor && !m_pRGBDCameraControl->GetCameraFrame(pColor));
+        //*/
+        
         Performance::BeginEvent("Scalable Kinect Fusion");
 
         Performance::BeginEvent("Data Input");
