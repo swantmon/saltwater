@@ -1239,7 +1239,7 @@ namespace MR
     
     // -----------------------------------------------------------------------------
     
-    void CScalableSLAMReconstructor::SetupBuffers()
+    void CScalableSLAMReconstructor::SetupBuffers(bool _CreatePool)
     {
         const float FocalLengthX0 = m_pRGBDCameraControl->GetDepthFocalLengthX();
         const float FocalLengthY0 = m_pRGBDCameraControl->GetDepthFocalLengthY();
@@ -1342,18 +1342,21 @@ namespace MR
         ConstantBufferDesc.m_NumberOfBytes = sizeof(uint32_t) * g_MaxVolumeInstanceCount;
         m_AtomicCounterBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
 
-        const unsigned int RootVolumePositionBufferSize = g_AABB * g_AABB * g_AABB * sizeof(uint32_t);
+        if (_CreatePool)
+        {
+            const unsigned int RootVolumePositionBufferSize = g_AABB * g_AABB * g_AABB * sizeof(uint32_t);
 
-        ConstantBufferDesc.m_NumberOfBytes = RootVolumePositionBufferSize;
-        m_VolumeBuffers.m_RootVolumePositionBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
-        ConstantBufferDesc.m_NumberOfBytes = g_RootVolumePoolSize;
-        m_VolumeBuffers.m_RootVolumePoolPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
-        ConstantBufferDesc.m_NumberOfBytes = g_RootGridPoolSize;
-        m_VolumeBuffers.m_RootGridPoolPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
-        ConstantBufferDesc.m_NumberOfBytes = g_Level1GridPoolSize;
-        m_VolumeBuffers.m_Level1PoolPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
-        ConstantBufferDesc.m_NumberOfBytes = g_TSDFPoolSize;
-        m_VolumeBuffers.m_TSDFPoolPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+            ConstantBufferDesc.m_NumberOfBytes = RootVolumePositionBufferSize;
+            m_VolumeBuffers.m_RootVolumePositionBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+            ConstantBufferDesc.m_NumberOfBytes = g_RootVolumePoolSize;
+            m_VolumeBuffers.m_RootVolumePoolPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+            ConstantBufferDesc.m_NumberOfBytes = g_RootGridPoolSize;
+            m_VolumeBuffers.m_RootGridPoolPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+            ConstantBufferDesc.m_NumberOfBytes = g_Level1GridPoolSize;
+            m_VolumeBuffers.m_Level1PoolPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+            ConstantBufferDesc.m_NumberOfBytes = g_TSDFPoolSize;
+            m_VolumeBuffers.m_TSDFPoolPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+        }
 
         ConstantBufferDesc.m_NumberOfBytes = sizeof(uint32_t) * 4;// m_ReconstructionSettings.GRID_LEVELS;
         m_VolumeBuffers.m_PoolItemCountBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
@@ -1747,7 +1750,7 @@ namespace MR
 		SetupData();
 
 		SetupTextures();
-		SetupBuffers();
+		SetupBuffers(false);
 		SetupShaders();
 
         ClearPool();

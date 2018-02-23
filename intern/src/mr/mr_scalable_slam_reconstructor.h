@@ -195,7 +195,7 @@ namespace MR
 
         void SetupShaders();
         void SetupTextures();
-        void SetupBuffers();
+        void SetupBuffers(bool _CreatePool = true);
 
         void CreateReferencePyramid();
         void RasterizeRootVolumes();
