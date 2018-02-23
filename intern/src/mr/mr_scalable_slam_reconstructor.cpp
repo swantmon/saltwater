@@ -306,6 +306,8 @@ namespace MR
 
 	void CScalableSLAMReconstructor::SetupData()
 	{
+        m_MinWeight = Base::CProgramParameters::GetInstance().Get("mr:slam:min_weight", 15);
+
         const int GridLevelCount = MR::SReconstructionSettings::GRID_LEVELS;
 
         m_VolumeSizes.resize(GridLevelCount);
@@ -1503,6 +1505,7 @@ namespace MR
             Data.m_AABBMax[i] = (m_VolumeBuffers.m_MaxOffset[i] + 1.0f) * m_ReconstructionSettings.m_VolumeSize;
         }
 
+        Data.m_MinWeight = m_MinWeight;
         Data.m_VolumeTextureWidth = m_VolumeBuffers.m_RootVolumeTotalWidth;
 
         BufferManager::UploadBufferData(m_VolumeBuffers.m_AABBBufferPtr, &Data);

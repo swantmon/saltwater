@@ -114,7 +114,7 @@ namespace MR
         struct SScalableRaycastConstantBuffer
         {
             glm::vec3 m_AABBMin;
-            float Padding;
+            int m_MinWeight;
             glm::vec3 m_AABBMax;
             int m_VolumeTextureWidth;
         };
@@ -295,6 +295,8 @@ namespace MR
 
         bool m_IsIntegrationPaused;
         bool m_IsTrackingPaused;
+
+        int m_MinWeight;
 
 		std::vector<float> m_VolumeSizes;
         
