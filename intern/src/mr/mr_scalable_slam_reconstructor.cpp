@@ -53,6 +53,8 @@ namespace
 
     const int g_AABB = 8;
 
+    const int g_MaxVolumeInstanceCount = 128;
+
     /*
     const unsigned int g_RootVolumePoolSize =        g_MegabyteSize;
     const unsigned int g_RootGridPoolSize   =  16u * g_MegabyteSize;
@@ -624,6 +626,7 @@ namespace MR
         
         const unsigned int IndexCount = m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
         const unsigned int InstanceCount = static_cast<unsigned int>(m_RootVolumeMap.size());
+        assert(InstanceCount < g_MaxVolumeInstanceCount);
         ClearBuffer(m_AtomicCounterBufferPtr, InstanceCount * sizeof(int32_t));
         ContextManager::DrawIndexedInstanced(IndexCount, InstanceCount, 0, 0, 0);
 
@@ -1336,7 +1339,7 @@ namespace MR
         ConstantBufferDesc.m_Usage = CBuffer::GPURead;
         m_VolumeAtomicCounterBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
         m_VolumeQueueBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
-        ConstantBufferDesc.m_NumberOfBytes = sizeof(uint32_t) * 2048;
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(uint32_t) * g_MaxVolumeInstanceCount;
         m_AtomicCounterBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
 
         const unsigned int RootVolumePositionBufferSize = g_AABB * g_AABB * g_AABB * sizeof(uint32_t);
