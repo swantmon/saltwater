@@ -261,6 +261,7 @@ namespace MR
         Gfx::CViewPortSetPtr m_DepthViewPortSetPtr;
 
         Gfx::CTexturePtr m_FullVolumePtr;
+        Gfx::CTargetSetPtr m_EmptyFullVolumePtr;
         Gfx::CTargetSetPtr m_FullVolumeTargetSetPtr;
         Gfx::CViewPortSetPtr m_FullVolumeViewPort;
 
