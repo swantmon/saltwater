@@ -303,12 +303,15 @@ vec3 GetPosition(vec3 CameraPosition, vec3 RayDirection)
     vec3 Vertex = vec3(0.0f);
         
     float NewStep;
-    
+
+    vec3 PreviousPosition;
+    vec3 CurrentPosition;
+
     while (RayLength < EndLength)
     {
-        vec3 PreviousPosition = CameraPosition + RayLength * RayDirection;
+        PreviousPosition = CameraPosition + RayLength * RayDirection;
         RayLength += Step;
-        vec3 CurrentPosition = CameraPosition + RayLength * RayDirection;
+        CurrentPosition = CameraPosition + RayLength * RayDirection;
 
         PreviousTSDF = CurrentTSDF;
         
@@ -320,16 +323,19 @@ vec3 GetPosition(vec3 CameraPosition, vec3 RayDirection)
         }
         else if (CurrentTSDF < 0.0f && PreviousTSDF > 0.0f)
         {
-            float Ft = GetInterpolatedTSDF(PreviousPosition);
-            float Ftdt = GetInterpolatedTSDF(CurrentPosition);
-            float Ts = RayLength - Step * Ft / (Ftdt - Ft);
-
-            Vertex = CameraPosition + RayDirection * Ts;
-
             break;
         }
         
         Step = CurrentTSDF < 1.0f ? VOXEL_SIZE : TruncatedDistance;
+    }
+
+    if (RayLength < EndLength)
+    {
+        float Ft = GetInterpolatedTSDF(PreviousPosition);
+        float Ftdt = GetInterpolatedTSDF(CurrentPosition);
+        float Ts = RayLength - Step * Ft / (Ftdt - Ft);
+
+        Vertex = CameraPosition + RayDirection * Ts;
     }
 
     return Vertex;
