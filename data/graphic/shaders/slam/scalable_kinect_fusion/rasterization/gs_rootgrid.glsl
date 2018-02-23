@@ -36,9 +36,8 @@ out gl_PerVertex
     vec4 gl_Position;
 };
 
-out int gl_Layer;
-
 layout(location = 0) out flat vec3 out_WSPosition;
+layout(location = 1) out flat ivec2 out_Layers;
 
 const int g_Resolution = ROOT_RESOLUTION * LEVEL1_RESOLUTION;
 
@@ -49,7 +48,7 @@ const int g_Resolution = ROOT_RESOLUTION * LEVEL1_RESOLUTION;
 #ifdef CONSERVATIVE_RASTERIZATION_AVAILABLE
 
 layout(points) in;
-layout(line_strip, max_vertices = 8) out;
+layout(line_strip, max_vertices = 2) out;
 void main()
 {
     ivec2 UV;
@@ -92,18 +91,15 @@ void main()
             int MinLayer = max(               0, min(Layers[0], Layers[1]));
             int MaxLayer = min(g_Resolution - 1, max(Layers[0], Layers[1]));
 
-            for(int LayerIndex = MinLayer; LayerIndex <= MaxLayer; ++ LayerIndex)
+            for(int i = 0; i < 2; ++ i)
             {
-                for(int i = 0; i < 2; ++ i)
-                {
-                    gl_Layer = LayerIndex + g_BufferOffset * g_Resolution;
-                    gl_Position = vec4(VSLinePositions[i], 1.0f);
-                    out_WSPosition = WSPosition;
+                gl_Position = vec4(VSLinePositions[i], 1.0f);
+                out_WSPosition = WSPosition;
+                out_Layers = ivec2(MinLayer, MaxLayer);
 
-                    EmitVertex();
-                }
-                EndPrimitive();
+                EmitVertex();
             }
+            EndPrimitive();
         }
     }
 }
@@ -111,7 +107,7 @@ void main()
 #else
 
 layout(points) in;
-layout(triangle_strip, max_vertices = 24) out;
+layout(triangle_strip, max_vertices = 6) out;
 void main()
 {
     ivec2 UV;
@@ -174,42 +170,39 @@ void main()
             AABBMin -= 1.0f / g_Resolution;
             AABBMax += 1.0f / g_Resolution;
 
-            for(int LayerIndex = MinLayer; LayerIndex <= MaxLayer; ++ LayerIndex)
-            {
-                // Face 1
-                gl_Layer = LayerIndex + g_BufferOffset * g_Resolution;
-                gl_Position = vec4(AABBMin.x, AABBMin.y, 1.0f, 1.0f);
-                out_WSPosition = WSPosition;
-                EmitVertex();
+            // Face 1
+            gl_Position = vec4(AABBMin.x, AABBMin.y, 1.0f, 1.0f);
+            out_WSPosition = WSPosition;
+            out_Layers = ivec2(MinLayer, MaxLayer);
+            EmitVertex();
 
-                gl_Layer = LayerIndex + g_BufferOffset * g_Resolution;
-                gl_Position = vec4(AABBMax.x, AABBMin.y, 1.0f, 1.0f);
-                out_WSPosition = WSPosition;
-                EmitVertex();
+            gl_Position = vec4(AABBMax.x, AABBMin.y, 1.0f, 1.0f);
+            out_WSPosition = WSPosition;
+            out_Layers = ivec2(MinLayer, MaxLayer);
+            EmitVertex();
 
-                gl_Layer = LayerIndex + g_BufferOffset * g_Resolution;
-                gl_Position = vec4(AABBMax.x, AABBMax.y, 1.0f, 1.0f);
-                out_WSPosition = WSPosition;
-                EmitVertex();
+            gl_Position = vec4(AABBMax.x, AABBMax.y, 1.0f, 1.0f);
+            out_WSPosition = WSPosition;
+            out_Layers = ivec2(MinLayer, MaxLayer);
+            EmitVertex();
 
-                // Face 2
-                gl_Layer = LayerIndex + g_BufferOffset * g_Resolution;
-                gl_Position = vec4(AABBMax.x, AABBMax.y, 1.0f, 1.0f);
-                out_WSPosition = WSPosition;
-                EmitVertex();
+            // Face 2
+            gl_Position = vec4(AABBMax.x, AABBMax.y, 1.0f, 1.0f);
+            out_WSPosition = WSPosition;
+            out_Layers = ivec2(MinLayer, MaxLayer);
+            EmitVertex();
 
-                gl_Layer = LayerIndex + g_BufferOffset * g_Resolution;
-                gl_Position = vec4(AABBMin.x, AABBMax.y, 1.0f, 1.0f);
-                out_WSPosition = WSPosition;
-                EmitVertex();
+            gl_Position = vec4(AABBMin.x, AABBMax.y, 1.0f, 1.0f);
+            out_WSPosition = WSPosition;
+            out_Layers = ivec2(MinLayer, MaxLayer);
+            EmitVertex();
 
-                gl_Layer = LayerIndex + g_BufferOffset * g_Resolution;
-                gl_Position = vec4(AABBMin.x, AABBMin.y, 1.0f, 1.0f);
-                out_WSPosition = WSPosition;
-                EmitVertex();
+            gl_Position = vec4(AABBMin.x, AABBMin.y, 1.0f, 1.0f);
+            out_WSPosition = WSPosition;
+            out_Layers = ivec2(MinLayer, MaxLayer);
+            EmitVertex();
 
-                EndPrimitive();
-            }
+            EndPrimitive();
         }
     }
 }

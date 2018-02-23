@@ -306,6 +306,8 @@ namespace MR
 
 	void CScalableSLAMReconstructor::SetupData()
 	{
+        m_MinWeight = Base::CProgramParameters::GetInstance().Get("mr:slam:min_weight", 15);
+
         const int GridLevelCount = MR::SReconstructionSettings::GRID_LEVELS;
 
         m_VolumeSizes.resize(GridLevelCount);
@@ -699,6 +701,7 @@ namespace MR
         Performance::BeginEvent("Rasterize point cloud");
 
         ContextManager::SetTargetSet(m_FullVolumeTargetSetPtr);
+        ContextManager::SetImageTexture(1, m_FullVolumePtr);
         ContextManager::SetViewPortSet(m_FullVolumeViewPort);
 
         ContextManager::SetShaderVS(m_PointCloudVSPtr);
@@ -1075,6 +1078,8 @@ namespace MR
 
         if (VolumeCount > 0)
         {
+            Performance::BeginEvent("Update volume");
+
             std::vector<uint32_t> VolumeQueue(VolumeCount);
             uint32_t* pVoxelQueue = static_cast<uint32_t*>(BufferManager::MapBufferRange(m_VolumeQueueBufferPtr, CBuffer::Read, 0, VolumeCount * sizeof(uint32_t)));
             memcpy(VolumeQueue.data(), pVoxelQueue, sizeof(uint32_t) * VolumeCount);
@@ -1136,6 +1141,8 @@ namespace MR
 
                 BufferManager::UploadBufferData(m_VolumeBuffers.m_RootVolumePositionBufferPtr, &rRootVolume.m_PoolIndex, Index * sizeof(int32_t), sizeof(int32_t));
             }
+
+            Performance::EndEvent();
         }
 	}
 
@@ -1221,6 +1228,8 @@ namespace MR
 
         m_FullVolumePtr = TextureManager::CreateTexture3D(TextureDescriptor);
         m_FullVolumeTargetSetPtr = TargetSetManager::CreateTargetSet(m_FullVolumePtr);
+
+        m_EmptyFullVolumePtr = TargetSetManager::CreateEmptyTargetSet(VolumeWidth, VolumeWidth);
 
         m_EmptyTargetSetPtr = TargetSetManager::CreateEmptyTargetSet(m_pRGBDCameraControl->GetDepthWidth(), m_pRGBDCameraControl->GetDepthHeight());
     }
@@ -1496,6 +1505,7 @@ namespace MR
             Data.m_AABBMax[i] = (m_VolumeBuffers.m_MaxOffset[i] + 1.0f) * m_ReconstructionSettings.m_VolumeSize;
         }
 
+        Data.m_MinWeight = m_MinWeight;
         Data.m_VolumeTextureWidth = m_VolumeBuffers.m_RootVolumeTotalWidth;
 
         BufferManager::UploadBufferData(m_VolumeBuffers.m_AABBBufferPtr, &Data);

@@ -11,6 +11,7 @@
 layout(std140, binding = 2) uniform ScalableRaycastConstantBuffer
 {
     vec3 g_AABBMin;
+    int g_MinWeight;
     vec3 g_AABBMax;
     int g_VolumeTextureWidth;
 };
@@ -125,10 +126,11 @@ vec2 GetVoxelWithStep(vec3 Position, vec3 Direction, out float Step)
         
         if (RootGridItemBufferOffset != -1)
         {
-            // Pool index of whole level 1 grid                
-            int Level1VolumeBufferOffset = g_RootGridPool[RootGridItemBufferOffset].m_PoolIndex;
+            // Pool index of whole level 1 grid
+            SGridPoolItem RootItem =  g_RootGridPool[RootGridItemBufferOffset];
+            int Level1VolumeBufferOffset = RootItem.m_PoolIndex;
 
-            if (Level1VolumeBufferOffset != -1)
+            if (Level1VolumeBufferOffset != -1 && RootItem.m_Weight > g_MinWeight)
             {
                 // Offset of level 1 volume in rootgrid
                 ivec3 Level1VolumeOffset = ivec3(floor(Position * ROOT_RESOLUTION * LEVEL1_RESOLUTION));
@@ -137,9 +139,10 @@ vec2 GetVoxelWithStep(vec3 Position, vec3 Direction, out float Step)
                 int Level1BufferInnerOffset = OffsetToIndex(Level1VolumeOffset, LEVEL1_RESOLUTION);
                 int Level1BufferIndex = Level1VolumeBufferOffset * VOXELS_PER_LEVEL1GRID + Level1BufferInnerOffset;
 
-                int TSDFVolumeBufferOffset = g_Level1GridPool[Level1BufferIndex].m_PoolIndex;
+                SGridPoolItem Level1Item = g_Level1GridPool[Level1BufferIndex];
+                int TSDFVolumeBufferOffset = Level1Item.m_PoolIndex;
 
-                if (TSDFVolumeBufferOffset != -1)
+                if (TSDFVolumeBufferOffset != -1 && Level1Item.m_Weight > g_MinWeight)
                 {
                     float TotalResolution = ROOT_RESOLUTION * LEVEL1_RESOLUTION * LEVEL2_RESOLUTION;
 
