@@ -126,6 +126,7 @@ namespace Edit
         if (IsScalable)
         {
             MR::SReconstructionSettings DefaultSettings;
+            MR::SReconstructionSettings::SetDefaultSettings(DefaultSettings);
 
             int VoxelCount = 1;
             for (int i = 0; i < DefaultSettings.GRID_LEVELS; ++ i)
