@@ -51,7 +51,6 @@ void main()
                 if (in_WSPosition.x > AABBMin.x && in_WSPosition.x < AABBMax.x)
                 {
                     imageStore(cs_Volume, ivec3(gl_FragCoord.xy, LayerIndex), ivec4(1.0f));
-                    return;
                 }
             }
         }
