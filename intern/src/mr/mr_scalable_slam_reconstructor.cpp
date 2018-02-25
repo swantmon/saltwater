@@ -1752,6 +1752,16 @@ namespace MR
 
     void CScalableSLAMReconstructor::FindGarbage(SRootVolume& _rVolume)
     {
+        if (m_IntegratedFrameCount < 30)
+        {
+            return;
+        }
+
+        if (!(m_IntegratedFrameCount % 30 == 0))
+        {
+            return;
+        }
+
         Performance::BeginEvent("Find garbage");
 
         const int32_t Zero = 0;
