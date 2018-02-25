@@ -7,6 +7,8 @@ namespace Dt
 {
     CComponentManager::CComponentManager()
         : m_Components        ( )
+        , m_ComponentByID     ( )
+        , m_ComponentsByType  ( )
         , m_ComponentDelegates( )
         , m_CurrentID         (0)
     {
@@ -17,6 +19,7 @@ namespace Dt
     
     CComponentManager::~CComponentManager()
     {
+        m_ComponentByID.clear();
         m_ComponentsByType.clear();
         m_Components.clear();
     }

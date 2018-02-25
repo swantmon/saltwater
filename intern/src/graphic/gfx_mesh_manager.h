@@ -3,8 +3,6 @@
 
 #include "base/base_typedef.h"
 
-#include "data/data_mesh.h"
-
 #include "graphic/gfx_mesh.h"
 
 namespace Gfx

@@ -16,7 +16,7 @@
 #include "data/data_hierarchy_facet.h"
 #include "data/data_map.h"
 #include "data/data_mesh_component.h"
-#include "data/data_mesh_manager.h"
+#include "data/data_mesh_helper.h"
 #include "data/data_transformation_facet.h"
 
 #include <assert.h>

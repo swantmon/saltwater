@@ -1,10 +1,3 @@
-//
-//  gfx_material_manager.cpp
-//  graphic
-//
-//  Created by Tobias Schwandt on 22/04/15.
-//  Copyright (c) 2015 TU Ilmenau. All rights reserved.
-//
 
 #include "graphic/gfx_precompiled.h"
 
@@ -19,9 +12,8 @@
 #include "data/data_component.h"
 #include "data/data_component_manager.h"
 #include "data/data_entity.h"
-#include "data/data_material_manager.h"
+#include "data/data_material_helper.h"
 #include "data/data_mesh_component.h"
-#include "data/data_mesh.h"
 
 #include "graphic/gfx_material_manager.h"
 #include "graphic/gfx_texture_manager.h"
@@ -156,14 +148,14 @@ namespace
 
         typedef Base::CManagedPool<CInternMaterial, 32, 0> CMaterials;
 
-        typedef std::unordered_map<unsigned int, CMaterialPtr> CMaterialByHashs;
+        typedef std::unordered_map<Base::ID, CMaterialPtr> CMaterialByIDs;
 
     private:
 
         CMaterials   m_Materials;
         CMaterialPtr m_DefaultMaterialPtr;
 
-        CMaterialByHashs m_MaterialByHash;
+        CMaterialByIDs m_MaterialByIDs;
 
     private:
 
@@ -180,7 +172,7 @@ namespace
     CGfxMaterialManager::CGfxMaterialManager()
         : m_Materials         ()
         , m_DefaultMaterialPtr()
-        , m_MaterialByHash    ()
+        , m_MaterialByIDs     ()
     {
 
     }
@@ -233,7 +225,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Clear hashes
         // -----------------------------------------------------------------------------
-        m_MaterialByHash.clear();
+        m_MaterialByIDs.clear();
 
         // -----------------------------------------------------------------------------
         // Clear materials
@@ -268,9 +260,9 @@ namespace
             Hash = Base::CRC32(pData, NumberOfBytes);
         }
 
-        if (m_MaterialByHash.find(Hash) != m_MaterialByHash.end())
+        if (m_MaterialByIDs.find(Hash) != m_MaterialByIDs.end())
         {
-            return m_MaterialByHash.at(Hash);
+            return m_MaterialByIDs.at(Hash);
         }
 
         // -----------------------------------------------------------------------------
@@ -289,7 +281,7 @@ namespace
         {
             pInternMaterial->m_Hash = Hash;
 
-            m_MaterialByHash[Hash] = pInternMaterial;
+            m_MaterialByIDs[Hash] = pInternMaterial;
         }
 
         return MaterialPtr;
@@ -306,9 +298,9 @@ namespace
 
     CMaterialPtr CGfxMaterialManager::GetMaterialByHash(unsigned int _Hash)
     {
-        if (m_MaterialByHash.find(_Hash) != m_MaterialByHash.end())
+        if (m_MaterialByIDs.find(_Hash) != m_MaterialByIDs.end())
         {
-            return m_MaterialByHash.at(_Hash);
+            return m_MaterialByIDs.at(_Hash);
         }
 
         return nullptr;
@@ -318,48 +310,46 @@ namespace
 
     void CGfxMaterialManager::OnDirtyComponent(Dt::IComponent* _pComponent)
     {
-        if (_pComponent->GetTypeID() != Base::CTypeInfo::GetTypeID<Dt::CMeshComponent>()) return;
+        if (_pComponent->GetTypeID() != Base::CTypeInfo::GetTypeID<Dt::CMaterialComponent>()) return;
 
-        Dt::CMeshComponent* pMeshComponent = static_cast<Dt::CMeshComponent*>(_pComponent);
+        Dt::CMaterialComponent* pMaterialComponent = static_cast<Dt::CMaterialComponent*>(_pComponent);
 
         // -----------------------------------------------------------------------------
         // Dirty check
         // -----------------------------------------------------------------------------
         unsigned int DirtyFlags;
 
-        DirtyFlags = pMeshComponent->GetDirtyFlags();
+        DirtyFlags = pMaterialComponent->GetDirtyFlags();
 
         // -----------------------------------------------------------------------------
         // Material
         // -----------------------------------------------------------------------------
-        Dt::CMaterial* pMaterial = pMeshComponent->GetMaterial();
+        Base::ID ID = pMaterialComponent->GetID();
 
-        unsigned int Hash = pMaterial->GetHash();
-
-        assert(Hash != 0);
+        assert(ID != 0);
 
         if ((DirtyFlags & Dt::CMeshComponent::DirtyCreate) != 0)
         {
-            if (m_MaterialByHash.find(Hash) == m_MaterialByHash.end())
+            if (m_MaterialByIDs.find(ID) == m_MaterialByIDs.end())
             {
                 SMaterialDescriptor MaterialDescriptor;
 
-                MaterialDescriptor.m_pMaterialName   = pMaterial->GetMaterialname().length() > 0 ? pMaterial->GetMaterialname().c_str() : 0;
-                MaterialDescriptor.m_pFileName       = pMaterial->GetFileName().length()     > 0 ? pMaterial->GetFileName().c_str()     : 0;
+                MaterialDescriptor.m_pMaterialName   = pMaterialComponent->GetMaterialname().length() > 0 ? pMaterialComponent->GetMaterialname().c_str() : 0;
+                MaterialDescriptor.m_pFileName       = pMaterialComponent->GetFileName().length()     > 0 ? pMaterialComponent->GetFileName().c_str()     : 0;
 
-                MaterialDescriptor.m_pColorMap       = pMaterial->GetColorTexture()            != 0 ? pMaterial->GetColorTexture()->GetFileName().c_str()            : 0;
-                MaterialDescriptor.m_pNormalMap      = pMaterial->GetNormalTexture()           != 0 ? pMaterial->GetNormalTexture()->GetFileName().c_str()           : 0;
-                MaterialDescriptor.m_pRoughnessMap   = pMaterial->GetRoughnessTexture()        != 0 ? pMaterial->GetRoughnessTexture()->GetFileName().c_str()        : 0;
-                MaterialDescriptor.m_pMetalMaskMap   = pMaterial->GetMetalTexture()            != 0 ? pMaterial->GetMetalTexture()->GetFileName().c_str()            : 0;
-                MaterialDescriptor.m_pAOMap          = pMaterial->GetAmbientOcclusionTexture() != 0 ? pMaterial->GetAmbientOcclusionTexture()->GetFileName().c_str() : 0;
-                MaterialDescriptor.m_pBumpMap        = pMaterial->GetBumpTexture()             != 0 ? pMaterial->GetBumpTexture()->GetFileName().c_str()             : 0;
+                MaterialDescriptor.m_pColorMap       = pMaterialComponent->GetColorTexture().c_str();
+                MaterialDescriptor.m_pNormalMap      = pMaterialComponent->GetNormalTexture().c_str();
+                MaterialDescriptor.m_pRoughnessMap   = pMaterialComponent->GetRoughnessTexture().c_str();
+                MaterialDescriptor.m_pMetalMaskMap   = pMaterialComponent->GetMetalTexture().c_str();
+                MaterialDescriptor.m_pAOMap          = pMaterialComponent->GetAmbientOcclusionTexture().c_str();
+                MaterialDescriptor.m_pBumpMap        = pMaterialComponent->GetBumpTexture().c_str();
 
-                MaterialDescriptor.m_Roughness       = pMaterial->GetRoughness();
-                MaterialDescriptor.m_Reflectance     = pMaterial->GetReflectance();
-                MaterialDescriptor.m_MetalMask       = pMaterial->GetMetalness();
-                MaterialDescriptor.m_Displacement    = pMaterial->GetDisplacement();
-                MaterialDescriptor.m_AlbedoColor     = pMaterial->GetColor();
-                MaterialDescriptor.m_TilingOffset    = pMaterial->GetTilingOffset();
+                MaterialDescriptor.m_Roughness       = pMaterialComponent->GetRoughness();
+                MaterialDescriptor.m_Reflectance     = pMaterialComponent->GetReflectance();
+                MaterialDescriptor.m_MetalMask       = pMaterialComponent->GetMetalness();
+                MaterialDescriptor.m_Displacement    = pMaterialComponent->GetDisplacement();
+                MaterialDescriptor.m_AlbedoColor     = pMaterialComponent->GetColor();
+                MaterialDescriptor.m_TilingOffset    = pMaterialComponent->GetTilingOffset();
 
                 CMaterialPtr MaterialPtr = InternCreateMaterial(MaterialDescriptor);
 
@@ -367,9 +357,9 @@ namespace
 
                 if (pInternMaterial != nullptr)
                 {
-                    pInternMaterial->m_Hash = Hash;
+                    pInternMaterial->m_Hash = ID;
 
-                    m_MaterialByHash[Hash] = pInternMaterial;
+                    m_MaterialByIDs[ID] = pInternMaterial;
                 }
             }
             else
@@ -382,9 +372,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Get data material
             // -----------------------------------------------------------------------------
-            Dt::CMaterial& rDataMaterial = *pMaterial;
-
-            CMaterialPtr MaterialPtr = m_MaterialByHash.at(Hash);
+            CMaterialPtr MaterialPtr = m_MaterialByIDs.at(ID);
 
             CInternMaterial* pGraphicMaterial = static_cast<CInternMaterial*>(MaterialPtr.GetPtr());
 
@@ -400,17 +388,17 @@ namespace
             // -----------------------------------------------------------------------------
             // Key estimation
             // -----------------------------------------------------------------------------
-            rMaterial.m_MaterialKey.m_HasDiffuseTex     = rDataMaterial.GetColorTexture()            != 0;
-            rMaterial.m_MaterialKey.m_HasNormalTex      = rDataMaterial.GetNormalTexture()           != 0;
-            rMaterial.m_MaterialKey.m_HasRoughnessTex   = rDataMaterial.GetRoughnessTexture()        != 0;
-            rMaterial.m_MaterialKey.m_HasMetallicTex    = rDataMaterial.GetMetalTexture()            != 0;
-            rMaterial.m_MaterialKey.m_HasAOTex          = rDataMaterial.GetAmbientOcclusionTexture() != 0;
-            rMaterial.m_MaterialKey.m_HasBumpTex        = rDataMaterial.GetBumpTexture()             != 0;
+            rMaterial.m_MaterialKey.m_HasDiffuseTex     = pMaterialComponent->GetColorTexture().length() > 0;
+            rMaterial.m_MaterialKey.m_HasNormalTex      = pMaterialComponent->GetNormalTexture().length() > 0;
+            rMaterial.m_MaterialKey.m_HasRoughnessTex   = pMaterialComponent->GetRoughnessTexture().length() > 0;
+            rMaterial.m_MaterialKey.m_HasMetallicTex    = pMaterialComponent->GetMetalTexture().length() > 0;
+            rMaterial.m_MaterialKey.m_HasAOTex          = pMaterialComponent->GetAmbientOcclusionTexture().length() > 0;
+            rMaterial.m_MaterialKey.m_HasBumpTex        = pMaterialComponent->GetBumpTexture().length() > 0;
 
             // -----------------------------------------------------------------------------
             // Set definitions
             // -----------------------------------------------------------------------------
-            rMaterial.m_HasBump  = rDataMaterial.GetBumpTexture() != 0;
+            rMaterial.m_HasBump  = pMaterialComponent->GetBumpTexture().length() > 0;
 
             // -----------------------------------------------------------------------------
             // Shader
@@ -429,46 +417,62 @@ namespace
             TexturePtrs[4] = 0;
             TexturePtrs[5] = 0;
 
+            STextureDescriptor TextureDescriptor;
+
+            TextureDescriptor.m_NumberOfPixelsU  = STextureDescriptor::s_NumberOfPixelsFromSource;
+            TextureDescriptor.m_NumberOfPixelsV  = STextureDescriptor::s_NumberOfPixelsFromSource;
+            TextureDescriptor.m_NumberOfPixelsW  = STextureDescriptor::s_NumberOfPixelsFromSource;
+            TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_NumberOfMipMapsFromSource;
+            TextureDescriptor.m_NumberOfTextures = STextureDescriptor::s_NumberOfTexturesFromSource;
+            TextureDescriptor.m_Binding          = CTexture::ShaderResource;
+            TextureDescriptor.m_Access           = CTexture::CPUWrite;
+            TextureDescriptor.m_Format           = CTexture::Unknown;
+            TextureDescriptor.m_Usage            = CTexture::GPURead;
+            TextureDescriptor.m_Semantic         = CTexture::Diffuse;
+            TextureDescriptor.m_pFileName        = 0;
+            TextureDescriptor.m_pPixels          = 0;
+            TextureDescriptor.m_Format           = STextureDescriptor::s_FormatFromSource;
+
             if (rMaterial.m_MaterialKey.m_HasDiffuseTex)
             {
-                unsigned int TextureHash = rDataMaterial.GetColorTexture()->GetHash();
+                TextureDescriptor.m_pFileName = pMaterialComponent->GetColorTexture().c_str();
 
-                TexturePtrs[0] = TextureManager::GetTextureByHash(TextureHash);
+                TexturePtrs[0] = TextureManager::CreateTexture2D(TextureDescriptor);
             }
 
             if (rMaterial.m_MaterialKey.m_HasNormalTex)
             {
-                unsigned int TextureHash = rDataMaterial.GetNormalTexture()->GetHash();
+                TextureDescriptor.m_pFileName = pMaterialComponent->GetNormalTexture().c_str();
 
-                TexturePtrs[1] = TextureManager::GetTextureByHash(TextureHash);
+                TexturePtrs[1] = TextureManager::CreateTexture2D(TextureDescriptor);
             }
 
             if (rMaterial.m_MaterialKey.m_HasRoughnessTex)
             {
-                unsigned int TextureHash = rDataMaterial.GetRoughnessTexture()->GetHash();
+                TextureDescriptor.m_pFileName = pMaterialComponent->GetRoughnessTexture().c_str();
 
-                TexturePtrs[2] = TextureManager::GetTextureByHash(TextureHash);
+                TexturePtrs[2] = TextureManager::CreateTexture2D(TextureDescriptor);
             }
 
             if (rMaterial.m_MaterialKey.m_HasMetallicTex)
             {
-                unsigned int TextureHash = rDataMaterial.GetMetalTexture()->GetHash();
+                TextureDescriptor.m_pFileName = pMaterialComponent->GetMetalTexture().c_str();
 
-                TexturePtrs[3] = TextureManager::GetTextureByHash(TextureHash);
+                TexturePtrs[3] = TextureManager::CreateTexture2D(TextureDescriptor);
             }
 
             if (rMaterial.m_MaterialKey.m_HasAOTex)
             {
-                unsigned int TextureHash = rDataMaterial.GetAmbientOcclusionTexture()->GetHash();
+                TextureDescriptor.m_pFileName = pMaterialComponent->GetAmbientOcclusionTexture().c_str();
 
-                TexturePtrs[4] = TextureManager::GetTextureByHash(TextureHash);
+                TexturePtrs[4] = TextureManager::CreateTexture2D(TextureDescriptor);
             }
 
             if (rMaterial.m_MaterialKey.m_HasBumpTex)
             {
-                unsigned int TextureHash = rDataMaterial.GetBumpTexture()->GetHash();
+                TextureDescriptor.m_pFileName = pMaterialComponent->GetBumpTexture().c_str();
 
-                TexturePtrs[5] = TextureManager::GetTextureByHash(TextureHash);
+                TexturePtrs[5] = TextureManager::CreateTexture2D(TextureDescriptor);
             }
 
             rMaterial.m_TextureSetPtrs[CShader::Pixel] = TextureManager::CreateTextureSet(TexturePtrs, CMaterial::SMaterialKey::s_NumberOfTextures);
@@ -479,9 +483,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Get data material
             // -----------------------------------------------------------------------------
-            Dt::CMaterial&   rDataMaterial = *pMaterial;
-
-            CMaterialPtr MaterialPtr = m_MaterialByHash.at(Hash);
+            CMaterialPtr MaterialPtr = m_MaterialByIDs.at(ID);
 
             CInternMaterial* pGraphicMaterial = static_cast<CInternMaterial*>(MaterialPtr.GetPtr());
 
@@ -502,12 +504,12 @@ namespace
             // -----------------------------------------------------------------------------
             // Set attributes
             // -----------------------------------------------------------------------------
-            rMaterial.m_MaterialAttributes.m_Color        = rDataMaterial.GetColor();
-            rMaterial.m_MaterialAttributes.m_Roughness    = rDataMaterial.GetRoughness();
-            rMaterial.m_MaterialAttributes.m_Reflectance  = rDataMaterial.GetReflectance();
-            rMaterial.m_MaterialAttributes.m_MetalMask    = rDataMaterial.GetMetalness();
-            rMaterial.m_MaterialAttributes.m_Displacement = rDataMaterial.GetDisplacement();
-            rMaterial.m_MaterialAttributes.m_TilingOffset = rDataMaterial.GetTilingOffset();
+            rMaterial.m_MaterialAttributes.m_Color        = pMaterialComponent->GetColor();
+            rMaterial.m_MaterialAttributes.m_Roughness    = pMaterialComponent->GetRoughness();
+            rMaterial.m_MaterialAttributes.m_Reflectance  = pMaterialComponent->GetReflectance();
+            rMaterial.m_MaterialAttributes.m_MetalMask    = pMaterialComponent->GetMetalness();
+            rMaterial.m_MaterialAttributes.m_Displacement = pMaterialComponent->GetDisplacement();
+            rMaterial.m_MaterialAttributes.m_TilingOffset = pMaterialComponent->GetTilingOffset();
         }
     }
 

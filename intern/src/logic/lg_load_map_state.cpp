@@ -16,9 +16,9 @@
 #include "data/data_hierarchy_facet.h"
 #include "data/data_light_probe_component.h"
 #include "data/data_map.h"
-#include "data/data_material_manager.h"
+#include "data/data_material_helper.h"
 #include "data/data_mesh_component.h"
-#include "data/data_mesh_manager.h"
+#include "data/data_mesh_helper.h"
 #include "data/data_sky_component.h"
 #include "data/data_ssao_component.h"
 #include "data/data_sun_component.h"
@@ -274,11 +274,11 @@ namespace
             MaterialFileDesc.m_AlbedoColor = glm::vec3(1.0f, 0.0f, 0.0f);
             MaterialFileDesc.m_TilingOffset = glm::vec4(1.0f, 1.0f, 0.0f, 0.0f);
 
-            Dt::CMaterial& rMaterial = Dt::MaterialManager::CreateMaterial(MaterialFileDesc);
+            Dt::CMaterial& rMaterial = Dt::MaterialHelper::CreateMaterial(MaterialFileDesc);
 
             pComponent->SetMaterial(0, &rMaterial);
 
-            Dt::MaterialManager::MarkMaterialAsDirty(rMaterial, Dt::CMaterial::DirtyCreate);
+            Dt::MaterialHelper::MarkMaterialAsDirty(rMaterial, Dt::CMaterial::DirtyCreate);
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pComponent, Dt::CMeshComponent::DirtyCreate);
 
@@ -466,36 +466,22 @@ void CLgLoadMapState::CreateDefaultScene()
 
             // -----------------------------------------------------------------------------
 
-            auto pMeshComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CMeshComponent>();
-
-            Dt::SMaterialDescriptor MaterialFileDesc;
-
-            MaterialFileDesc.m_pFileName = "";
-            MaterialFileDesc.m_pMaterialName = "Red Sparrow";
-            MaterialFileDesc.m_pColorMap = "";
-            MaterialFileDesc.m_pNormalMap = "";
-            MaterialFileDesc.m_pRoughnessMap = "";
-            MaterialFileDesc.m_pMetalMaskMap = "";
-            MaterialFileDesc.m_pAOMap = "";
-            MaterialFileDesc.m_pBumpMap = "";
-            MaterialFileDesc.m_Roughness = 1.0f;
-            MaterialFileDesc.m_Reflectance = 0.0f;
-            MaterialFileDesc.m_MetalMask = 0.0f;
-            MaterialFileDesc.m_Displacement = 0.0f;
-            MaterialFileDesc.m_AlbedoColor = glm::vec3(1.0f, 0.0f, 0.0f);
-            MaterialFileDesc.m_TilingOffset = glm::vec4(1.0f, 1.0f, 0.0f, 0.0f);
-
-            Dt::CMaterial& rMaterial = Dt::MaterialManager::CreateMaterial(MaterialFileDesc);
-
-            Dt::CMesh& rMesh = Dt::MeshManager::CreateMeshFromFile("models/MatTester.obj", Dt::CMesh::SGeneratorFlag::Default | Dt::CMesh::SGeneratorFlag::FlipUVs);
-
-            pMeshComponent->SetMesh(&rMesh);
-
-            pMeshComponent->SetMaterial(&rMaterial);
+            auto pMeshComponent = Dt::MeshHelper::CreateMeshFromFile("models/MatTester.obj", Dt::CMeshComponent::SGeneratorFlag::Default | Dt::CMeshComponent::SGeneratorFlag::FlipUVs);
 
             rEntity.AttachComponent(pMeshComponent);
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pMeshComponent, Dt::CMeshComponent::DirtyCreate);
+
+            // -----------------------------------------------------------------------------
+
+            auto pMaterialComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CMaterialComponent>();
+
+            pMaterialComponent->SetMaterialname("Red Sparrow");
+            pMaterialComponent->SetColor(glm::vec3(1.0f, 0.0f, 0.0f));
+
+            rEntity.AttachComponent(pMaterialComponent);
+
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pMaterialComponent, Dt::CMeshComponent::DirtyCreate);
 
             // -----------------------------------------------------------------------------
 

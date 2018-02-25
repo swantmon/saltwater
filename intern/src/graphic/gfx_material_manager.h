@@ -3,8 +3,6 @@
 
 #include "base/base_include_glm.h"
 
-#include "data/data_material.h"
-
 #include "graphic/gfx_material.h"
 #include "graphic/gfx_surface.h"
 

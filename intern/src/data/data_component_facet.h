@@ -110,6 +110,6 @@ namespace Dt
         assert(_pComponent != nullptr);
         assert(_pComponent->GetHostEntity() == nullptr);
 
-        m_Components.erase(_pComponent);
+        m_Components.erase(std::find(m_Components.begin(), m_Components.end(), _pComponent));
     }
 } // namespace Dt

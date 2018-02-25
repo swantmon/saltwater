@@ -16,7 +16,7 @@
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_map.h"
-#include "data/data_mesh_manager.h"
+#include "data/data_mesh_helper.h"
 #include "data/data_sky_component.h"
 #include "data/data_sun_component.h"
 
@@ -509,7 +509,7 @@ namespace
 
         // -----------------------------------------------------------------------------
 
-        CMeshPtr CurvedPlanePtr = MeshManager::CreateMeshFromFile("curvedplane.obj", Dt::CMesh::SGeneratorFlag::Default);
+        CMeshPtr CurvedPlanePtr = MeshManager::CreateMeshFromFile("curvedplane.obj", Dt::CMeshComponent::SGeneratorFlag::Default);
 
         // -----------------------------------------------------------------------------
 

@@ -28,6 +28,9 @@ namespace Dt
         T* Allocate();
 
         template<class T>
+        T* GetComponent(Base::ID _ID);
+
+        template<class T>
         const std::vector<Dt::IComponent*>& GetComponents();
 
         template<class T>
@@ -38,12 +41,14 @@ namespace Dt
     private:
 
         typedef std::vector<std::unique_ptr<Dt::IComponent>>     CComponents;
+        typedef std::map<Base::ID, Dt::IComponent*>              CComponentsByID;
         typedef std::map<Base::ID, std::vector<Dt::IComponent*>> CComponentsByType;
         typedef std::vector<CComponentDelegate>                  CComponentDelegates;
 
     private:
 
         CComponents         m_Components; 
+        CComponentsByID     m_ComponentByID;
         CComponentsByType   m_ComponentsByType;
         CComponentDelegates m_ComponentDelegates;
         Base::ID            m_CurrentID;
@@ -77,6 +82,14 @@ namespace Dt
         m_ComponentsByType[Base::CTypeInfo::GetTypeID<T>()].emplace_back(pComponent);
 
         return pComponent;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    template<class T>
+    T* CComponentManager::GetComponent(Base::ID _ID)
+    {
+        return static_cast<T*>(m_ComponentByID[_ID]);
     }
 
     // -----------------------------------------------------------------------------

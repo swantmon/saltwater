@@ -8,7 +8,7 @@
 
 #include "data/data_entity.h"
 #include "data/data_map.h"
-#include "data/data_mesh_manager.h"
+#include "data/data_mesh_helper.h"
 
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"
@@ -450,7 +450,7 @@ namespace
 
         // -----------------------------------------------------------------------------
 
-        m_GizmoModelPtr = MeshManager::CreateMeshFromFile("gizmo.obj", Dt::CMesh::SGeneratorFlag::Default | Dt::CMesh::SGeneratorFlag::FlipUVs);
+        m_GizmoModelPtr = MeshManager::CreateMeshFromFile("gizmo.obj", Dt::CMeshComponent::SGeneratorFlag::Default | Dt::CMeshComponent::SGeneratorFlag::FlipUVs);
 
         // -----------------------------------------------------------------------------
 

@@ -16,7 +16,6 @@
 #include "data/data_component_manager.h"
 #include "data/data_entity.h"
 #include "data/data_mesh_component.h"
-#include "data/data_mesh.h"
 
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_component.h"
@@ -1219,54 +1218,9 @@ namespace
             // -----------------------------------------------------------------------------
             // Prepare storage data : Mesh
             // -----------------------------------------------------------------------------
-            CMeshPtr NewModelPtr = MeshManager::CreateMeshFromFile(pMeshComponent->GetMesh()->GetFilename().c_str(), 0);
+            CMeshPtr NewModelPtr = MeshManager::CreateMeshFromFile(pMeshComponent->GetFilename().c_str(), 0);
 
             pGfxMeshComponent->SetMesh(NewModelPtr);
-
-            // -----------------------------------------------------------------------------
-            // Prepare storage data : Material
-            // -----------------------------------------------------------------------------
-            CLODPtr ModelLODPtr = NewModelPtr->GetLOD(0);
-
-            Dt::CMaterial* pDataMaterial = pMeshComponent->GetMaterial();
-
-            if (pDataMaterial != 0)
-            {
-                // -----------------------------------------------------------------------------
-                // Create and set material
-                // -----------------------------------------------------------------------------
-                unsigned int Hash = pDataMaterial->GetHash();
-
-                CMaterialPtr NewMaterialPtr = MaterialManager::GetMaterialByHash(Hash);
-
-                pGfxMeshComponent->SetMaterial(NewMaterialPtr);
-            }
-        }
-        else if ((DirtyFlags & Dt::CMeshComponent::DirtyInfo) != 0)
-        {
-            // -----------------------------------------------------------------------------
-            // Get data
-            // -----------------------------------------------------------------------------
-            CInternMeshComponent* pGfxActorModelFacet = CComponentManager::GetInstance().GetComponent<CInternMeshComponent>(pMeshComponent->GetID());
-
-            // -----------------------------------------------------------------------------
-            // Update material
-            // -----------------------------------------------------------------------------
-            CLODPtr ModelLODPtr = pGfxActorModelFacet->GetMesh()->GetLOD(0);
-
-            Dt::CMaterial* pDataMaterial = pMeshComponent->GetMaterial();
-
-            if (pDataMaterial != 0)
-            {
-                // -----------------------------------------------------------------------------
-                // Set material from material manager
-                // -----------------------------------------------------------------------------
-                unsigned int Hash = pDataMaterial->GetHash();
-
-                CMaterialPtr NewMaterialPtr = MaterialManager::GetMaterialByHash(Hash);
-
-                pGfxActorModelFacet->SetMaterial(NewMaterialPtr);
-            }
         }
     }
 
@@ -1604,22 +1558,22 @@ namespace
     {
         int ReturnFlag = 0;
 
-        if ((_Flags & Dt::CMesh::SGeneratorFlag::Nothing) == Dt::CMesh::SGeneratorFlag::Nothing)
+        if ((_Flags & Dt::CMeshComponent::SGeneratorFlag::Nothing) == Dt::CMeshComponent::SGeneratorFlag::Nothing)
         {
             ReturnFlag |= aiProcess_Triangulate;
         }
 
-        if ((_Flags & Dt::CMesh::SGeneratorFlag::Default) == Dt::CMesh::SGeneratorFlag::Default)
+        if ((_Flags & Dt::CMeshComponent::SGeneratorFlag::Default) == Dt::CMeshComponent::SGeneratorFlag::Default)
         {
             ReturnFlag |= aiProcess_CalcTangentSpace | aiProcess_GenNormals | aiProcess_Triangulate | aiProcess_JoinIdenticalVertices;
         }
 
-        if ((_Flags & Dt::CMesh::SGeneratorFlag::FlipUVs) == Dt::CMesh::SGeneratorFlag::FlipUVs)
+        if ((_Flags & Dt::CMeshComponent::SGeneratorFlag::FlipUVs) == Dt::CMeshComponent::SGeneratorFlag::FlipUVs)
         {
             ReturnFlag |= aiProcess_FlipUVs;
         }
 
-        if ((_Flags & Dt::CMesh::SGeneratorFlag::RealtimeFast) == Dt::CMesh::SGeneratorFlag::RealtimeFast)
+        if ((_Flags & Dt::CMeshComponent::SGeneratorFlag::RealtimeFast) == Dt::CMeshComponent::SGeneratorFlag::RealtimeFast)
         {
             ReturnFlag |= aiProcess_GenUVCoords | aiProcess_SortByPType;
         }

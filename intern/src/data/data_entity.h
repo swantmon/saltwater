@@ -214,7 +214,7 @@ namespace Dt
 
         assert(_pComponent->GetHostEntity() == this);
 
-        _pComponent->m_pHostEntity(0);
+        _pComponent->m_pHostEntity = 0;
 
         m_pComponentsFacet->RemoveComponent(_pComponent);
     }

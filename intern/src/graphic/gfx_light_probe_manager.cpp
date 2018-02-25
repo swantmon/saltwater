@@ -17,7 +17,7 @@
 #include "data/data_light_probe_component.h"
 #include "data/data_map.h"
 #include "data/data_mesh_component.h"
-#include "data/data_mesh_manager.h"
+#include "data/data_mesh_helper.h"
 #include "data/data_point_light_component.h"
 #include "data/data_sky_component.h"
 #include "data/data_sun_component.h"

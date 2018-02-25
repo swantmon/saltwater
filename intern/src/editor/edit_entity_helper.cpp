@@ -11,7 +11,7 @@
 #include "data/data_entity_manager.h"
 #include "data/data_hierarchy_facet.h"
 #include "data/data_map.h"
-#include "data/data_mesh_manager.h"
+#include "data/data_mesh_helper.h"
 #include "data/data_transformation_facet.h"
 
 #include "editor/edit_entity_helper.h"
@@ -129,6 +129,8 @@ namespace
 
     void CEntityHelper::OnLoadEntity(Edit::CMessage& _rMessage)
     {
+        BASE_UNUSED(_rMessage);
+
         // TODO by tschwandt
         // Add loading map from scene file
     }
