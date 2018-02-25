@@ -1772,6 +1772,9 @@ namespace MR
         const int WorkGroups = m_ReconstructionSettings.m_GridResolutions[0];
         ContextManager::Dispatch(WorkGroups, WorkGroups, WorkGroups);
         
+        Performance::EndEvent();
+        Performance::BeginEvent("Clear garbage");
+
         int32_t Count = *static_cast<int32_t*>(BufferManager::MapBufferRange(m_GarbageBuffer, CBuffer::EMap::Read, 0, 4));
         BufferManager::UnmapBuffer(m_GarbageBuffer);
 
