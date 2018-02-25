@@ -1465,6 +1465,7 @@ namespace MR
 
         int* pPoolSizes = static_cast<int*>(BufferManager::MapBuffer(m_VolumeBuffers.m_PoolItemCountBufferPtr, CBuffer::EMap::ReadWrite));
         pPoolSizes[0] = m_RootVolumePoolItemCount;
+        m_VolumeBuffers.m_RootGridPoolSize = m_RootVolumePoolItemCount;
         m_VolumeBuffers.m_Level1PoolSize = pPoolSizes[1];
         m_VolumeBuffers.m_TSDFPoolSize = pPoolSizes[2];
         BufferManager::UnmapBuffer(m_VolumeBuffers.m_PoolItemCountBufferPtr);
