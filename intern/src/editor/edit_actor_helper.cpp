@@ -12,6 +12,7 @@
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_map.h"
+#include "data/data_material.h"
 #include "data/data_material_manager.h"
 #include "data/data_mesh.h"
 #include "data/data_mesh_component.h"

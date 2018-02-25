@@ -470,14 +470,14 @@ void CLgLoadMapState::CreateDefaultScene()
 
             Dt::SMaterialDescriptor MaterialFileDesc;
 
-            MaterialFileDesc.m_pFileName = 0;
+            MaterialFileDesc.m_pFileName = "";
             MaterialFileDesc.m_pMaterialName = "Red Sparrow";
-            MaterialFileDesc.m_pColorMap = 0;
-            MaterialFileDesc.m_pNormalMap = 0;
-            MaterialFileDesc.m_pRoughnessMap = 0;
-            MaterialFileDesc.m_pMetalMaskMap = 0;
-            MaterialFileDesc.m_pAOMap = 0;
-            MaterialFileDesc.m_pBumpMap = 0;
+            MaterialFileDesc.m_pColorMap = "";
+            MaterialFileDesc.m_pNormalMap = "";
+            MaterialFileDesc.m_pRoughnessMap = "";
+            MaterialFileDesc.m_pMetalMaskMap = "";
+            MaterialFileDesc.m_pAOMap = "";
+            MaterialFileDesc.m_pBumpMap = "";
             MaterialFileDesc.m_Roughness = 1.0f;
             MaterialFileDesc.m_Reflectance = 0.0f;
             MaterialFileDesc.m_MetalMask = 0.0f;
@@ -492,8 +492,6 @@ void CLgLoadMapState::CreateDefaultScene()
             pMeshComponent->SetMesh(&rMesh);
 
             pMeshComponent->SetMaterial(&rMaterial);
-
-            Dt::MaterialManager::MarkMaterialAsDirty(rMaterial, Dt::CMaterial::DirtyCreate);
 
             rEntity.AttachComponent(pMeshComponent);
 

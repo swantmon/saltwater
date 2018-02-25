@@ -21,24 +21,13 @@ namespace Dt
         , m_MetalMask        (0.0f)
         , m_Displacement     (0.0f)
         , m_Hash             (0)
-        , m_DirtyFlags       (0)
-        , m_DirtyTime        (0)
     {
-
     }
 
     // -----------------------------------------------------------------------------
 
     CMaterial::~CMaterial()
     {
-        m_Materialname.clear();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CMaterial::SetMaterialname(const std::string& _rMaterialname)
-    {
-        m_Materialname = _rMaterialname;
     }
 
     // -----------------------------------------------------------------------------
@@ -50,23 +39,9 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CMaterial::SetFilename(const std::string& _rFilename)
-    {
-        m_FileName = _rFilename;
-    }
-
-    // -----------------------------------------------------------------------------
-
     const std::string& CMaterial::GetFileName() const
     {
         return m_FileName;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CMaterial::SetColorTexture(Dt::CTexture2D* _pColorTexture)
-    {
-        m_pColorTexture = _pColorTexture;
     }
 
     // -----------------------------------------------------------------------------
@@ -85,13 +60,6 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CMaterial::SetNormalTexture(Dt::CTexture2D* _pNormalTexture)
-    {
-        m_pNormalTexture = _pNormalTexture;
-    }
-
-    // -----------------------------------------------------------------------------
-
     Dt::CTexture2D* CMaterial::GetNormalTexture()
     {
         return m_pNormalTexture;
@@ -102,13 +70,6 @@ namespace Dt
     const Dt::CTexture2D* CMaterial::GetNormalTexture() const
     {
         return m_pNormalTexture;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CMaterial::SetRoughnessTexture(Dt::CTexture2D* _pRoughnessTexture)
-    {
-        m_pRoughnessTexture = _pRoughnessTexture;
     }
 
     // -----------------------------------------------------------------------------
@@ -127,13 +88,6 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CMaterial::SetMetalTexture(Dt::CTexture2D* _pMetalTexture)
-    {
-        m_pMetalTexture = _pMetalTexture;
-    }
-
-    // -----------------------------------------------------------------------------
-
     Dt::CTexture2D* CMaterial::GetMetalTexture()
     {
         return m_pMetalTexture;
@@ -144,13 +98,6 @@ namespace Dt
     const Dt::CTexture2D* CMaterial::GetMetalTexture() const
     {
         return m_pMetalTexture;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CMaterial::SetAmbientOcclusionTexture(Dt::CTexture2D* _pAmbientOcclusionTexture)
-    {
-        m_pAOTexture = _pAmbientOcclusionTexture;
     }
 
     // -----------------------------------------------------------------------------
@@ -169,13 +116,6 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CMaterial::SetBumpTexture(Dt::CTexture2D* _pBumpTexture)
-    {
-        m_pBumpTexture = _pBumpTexture;
-    }
-
-    // -----------------------------------------------------------------------------
-
     Dt::CTexture2D* CMaterial::GetBumpTexture()
     {
         return m_pBumpTexture;
@@ -190,23 +130,9 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CMaterial::SetColor(const glm::vec3& _rColor)
-    {
-        m_Color = _rColor;
-    }
-
-    // -----------------------------------------------------------------------------
-
     const glm::vec3& CMaterial::GetColor() const
     {
         return m_Color;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CMaterial::SetTilingOffset(const glm::vec4& _rTilingOffset)
-    {
-        m_TilingOffset = _rTilingOffset;
     }
 
     // -----------------------------------------------------------------------------
@@ -218,23 +144,9 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CMaterial::SetRoughness(float _Roughness)
-    {
-        m_Roughness = _Roughness;
-    }
-
-    // -----------------------------------------------------------------------------
-
     float CMaterial::GetRoughness() const
     {
         return m_Roughness;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CMaterial::SetSmoothness(float _Smoothness)
-    {
-        m_Roughness = 1.0f - _Smoothness;
     }
 
     // -----------------------------------------------------------------------------
@@ -246,13 +158,6 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CMaterial::SetReflectance(float _Reflectance)
-    {
-        m_Reflectance = _Reflectance;
-    }
-
-    // -----------------------------------------------------------------------------
-
     float CMaterial::GetReflectance() const
     {
         return m_Reflectance;
@@ -260,23 +165,9 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CMaterial::SetMetalness(float _Metalness)
-    {
-        m_MetalMask = _Metalness;
-    }
-
-    // -----------------------------------------------------------------------------
-
     float CMaterial::GetMetalness() const
     {
         return m_MetalMask;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CMaterial::SetDisplacement(float _Displacement)
-    {
-        m_Displacement = _Displacement;
     }
 
     // -----------------------------------------------------------------------------
@@ -291,19 +182,5 @@ namespace Dt
     unsigned int CMaterial::GetHash() const
     {
         return m_Hash;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    unsigned int CMaterial::GetDirtyFlags() const
-    {
-        return m_DirtyFlags;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    Base::U64 CMaterial::GetDirtyTime() const
-    {
-        return m_DirtyTime;
     }
 } // namespace Dt

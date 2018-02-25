@@ -5,6 +5,7 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
+#include "data/data_material.h"
 #include "data/data_material_manager.h"
 #include "data/data_texture_manager.h"
 
@@ -62,11 +63,6 @@ namespace
     void CMaterialHelper::OnStart()
     {
         // -----------------------------------------------------------------------------
-        // Entity
-        // -----------------------------------------------------------------------------
-        Dt::MaterialManager::RegisterDirtyMaterialHandler(DATA_DIRTY_MATERIAL_METHOD(&CMaterialHelper::OnDirtyMaterial));
-
-        // -----------------------------------------------------------------------------
         // Edit
         // -----------------------------------------------------------------------------
         Edit::MessageManager::Register(Edit::SGUIMessageType::Material_New, EDIT_RECEIVE_MESSAGE(&CMaterialHelper::OnNewMaterial));
@@ -96,27 +92,22 @@ namespace
         // -----------------------------------------------------------------------------
         Dt::SMaterialDescriptor MaterialDescriptor;
 
-        MaterialDescriptor.m_pMaterialName   = 0;
-        MaterialDescriptor.m_pColorMap       = 0;
-        MaterialDescriptor.m_pNormalMap      = 0;
-        MaterialDescriptor.m_pRoughnessMap   = 0;
-        MaterialDescriptor.m_pMetalMaskMap   = 0;
-        MaterialDescriptor.m_pAOMap          = 0;
-        MaterialDescriptor.m_pBumpMap        = 0;
+        MaterialDescriptor.m_pMaterialName   = "";
+        MaterialDescriptor.m_pColorMap       = "";
+        MaterialDescriptor.m_pNormalMap      = "";
+        MaterialDescriptor.m_pRoughnessMap   = "";
+        MaterialDescriptor.m_pMetalMaskMap   = "";
+        MaterialDescriptor.m_pAOMap          = "";
+        MaterialDescriptor.m_pBumpMap        = "";
         MaterialDescriptor.m_Roughness       = 1.0f;
         MaterialDescriptor.m_Reflectance     = 0.0f;
         MaterialDescriptor.m_MetalMask       = 0.0f;
         MaterialDescriptor.m_Displacement    = 0.0f;
         MaterialDescriptor.m_AlbedoColor     = glm::vec3(1.0f);
         MaterialDescriptor.m_TilingOffset    = glm::vec4(1.0f, 1.0f, 0.0f, 0.0f);
-        MaterialDescriptor.m_pFileName       = 0;
+        MaterialDescriptor.m_pFileName       = "";
         
         Dt::CMaterial& rNewMaterial = Dt::MaterialManager::CreateMaterial(MaterialDescriptor);
-
-        // -----------------------------------------------------------------------------
-        // Add model to map
-        // -----------------------------------------------------------------------------
-        Dt::MaterialManager::MarkMaterialAsDirty(rNewMaterial, Dt::CMaterial::DirtyCreate);
     }
 
     // -----------------------------------------------------------------------------
@@ -133,13 +124,13 @@ namespace
         // -----------------------------------------------------------------------------
         Dt::SMaterialDescriptor MaterialDescriptor;
 
-        MaterialDescriptor.m_pMaterialName   = 0;
-        MaterialDescriptor.m_pColorMap       = 0;
-        MaterialDescriptor.m_pNormalMap      = 0;
-        MaterialDescriptor.m_pRoughnessMap   = 0;
-        MaterialDescriptor.m_pMetalMaskMap   = 0;
-        MaterialDescriptor.m_pAOMap          = 0;
-        MaterialDescriptor.m_pBumpMap        = 0;
+        MaterialDescriptor.m_pMaterialName   = "";
+        MaterialDescriptor.m_pColorMap       = "";
+        MaterialDescriptor.m_pNormalMap      = "";
+        MaterialDescriptor.m_pRoughnessMap   = "";
+        MaterialDescriptor.m_pMetalMaskMap   = "";
+        MaterialDescriptor.m_pAOMap          = "";
+        MaterialDescriptor.m_pBumpMap        = "";
         MaterialDescriptor.m_Roughness       = 1.0f;
         MaterialDescriptor.m_Reflectance     = 0.0f;
         MaterialDescriptor.m_MetalMask       = 0.0f;
@@ -154,11 +145,6 @@ namespace
         // Set result as hash
         // -----------------------------------------------------------------------------
         _rMessage.SetResult(rNewMaterial.GetHash());
-
-        // -----------------------------------------------------------------------------
-        // Mark material as dirty
-        // -----------------------------------------------------------------------------
-        Dt::MaterialManager::MarkMaterialAsDirty(rNewMaterial, Dt::CMaterial::DirtyCreate);
     }
 
     // -----------------------------------------------------------------------------
@@ -347,7 +333,7 @@ namespace
         {
             AOMapName = _rMessage.Get<unsigned int>();
         }
-
+        /*
         rMaterial.SetColor       (Color);
         rMaterial.SetTilingOffset(TilingOffset);
         rMaterial.SetRoughness   (Roughness);
@@ -440,19 +426,7 @@ namespace
         }
 
         Dt::MaterialManager::MarkMaterialAsDirty(rMaterial, Dt::CMaterial::DirtyData | Dt::CMaterial::DirtyTexture);
-    }
-
-
-    // -----------------------------------------------------------------------------
-
-    void CMaterialHelper::OnDirtyMaterial(Dt::CMaterial* _pMaterial)
-    {
-        assert(_pMaterial != nullptr);
-
-        if ((_pMaterial->GetDirtyFlags() & Dt::CMaterial::DirtyCreate) != 0)
-        {
-            
-        }
+        */
     }
 } // namespace
 
