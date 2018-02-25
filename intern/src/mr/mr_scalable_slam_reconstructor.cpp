@@ -831,6 +831,7 @@ namespace MR
         ContextManager::SetResourceBuffer(3, m_VolumeBuffers.m_TSDFPoolPtr);
         ContextManager::SetResourceBuffer(4, m_VolumeBuffers.m_PoolItemCountBufferPtr);
         ContextManager::SetResourceBuffer(5, m_VolumeIndexBufferPtr);
+        ContextManager::SetResourceBuffer(6, m_GarbageBuffer);
 
         ////////////////////////////////////////////////////////////////////////////////////////////////
         // Fill root grids
@@ -1376,6 +1377,9 @@ namespace MR
         ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
         ConstantBufferDesc.m_NumberOfBytes = 2 * g_MegabyteSize;
         m_GarbageBuffer = BufferManager::CreateBuffer(ConstantBufferDesc);
+
+        const int32_t Zero = 0;
+        BufferManager::UploadBufferData(m_GarbageBuffer, &Zero, 0, sizeof(Zero));
     }
 
     // -----------------------------------------------------------------------------
