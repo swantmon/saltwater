@@ -28,10 +28,10 @@ void main()
 
     if (Level2GridBufferOffset > -1)
     {
-        if (g_Level1GridPool[Level1GridBufferOffset].m_Weight < 5)
+        if (g_Level1GridPool[Level1GridBufferOffset].m_Weight < 2)
         {
-            //g_Level1GridPool[Level1GridBufferOffset].m_PoolIndex = -1;
-            //g_Level1GridPool[Level1GridBufferOffset].m_Weight = 0;
+            g_Level1GridPool[Level1GridBufferOffset].m_PoolIndex = -1;
+            g_Level1GridPool[Level1GridBufferOffset].m_Weight = 0;
 
             int GarbageIndex = atomicAdd(g_GarbageCount, 1);
             g_GarbageList[GarbageIndex] = Level2GridBufferOffset;
