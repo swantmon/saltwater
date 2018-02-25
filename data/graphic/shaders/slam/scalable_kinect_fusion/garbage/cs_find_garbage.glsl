@@ -9,12 +9,6 @@
 // Buffers
 // -----------------------------------------------------------------------------
 
-layout(std430, binding = 6) buffer Garbage
-{
-    int g_GarbageCount;
-    int g_GarbageList[];
-};
-
 // -----------------------------------------------------------------------------
 // Compute Shader
 // -----------------------------------------------------------------------------
@@ -34,10 +28,10 @@ void main()
 
     if (Level2GridBufferOffset > -1)
     {
-        if (g_Level1GridPool[Level1GridBufferOffset].m_Weight < 15)
+        if (g_Level1GridPool[Level1GridBufferOffset].m_Weight < 5)
         {
-            g_Level1GridPool[Level1GridBufferOffset].m_PoolIndex = -1;
-            g_Level1GridPool[Level1GridBufferOffset].m_Weight = 0;
+            //g_Level1GridPool[Level1GridBufferOffset].m_PoolIndex = -1;
+            //g_Level1GridPool[Level1GridBufferOffset].m_Weight = 0;
 
             int GarbageIndex = atomicAdd(g_GarbageCount, 1);
             g_GarbageList[GarbageIndex] = Level2GridBufferOffset;

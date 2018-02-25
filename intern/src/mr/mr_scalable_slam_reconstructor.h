@@ -257,6 +257,7 @@ namespace MR
         Gfx::CShaderPtr m_FillIndirectBufferCSPtr;
 
         Gfx::CShaderPtr m_FindGarbageCSPtr;
+        Gfx::CShaderPtr m_ClearGarbage;
         
         Gfx::CMeshPtr m_CubeMeshPtr;
         

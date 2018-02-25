@@ -68,6 +68,12 @@ layout(std430, binding = 6) buffer RootVolumePositionBuffer
     int g_RootVolumePositionBuffer[];
 };
 
+layout(std430, binding = 6) buffer Garbage
+{
+    int g_GarbageCount;
+    int g_GarbageList[];
+};
+
 ////////////////////////////////////////////////////////////////////////
 // Pack and unpack voxels
 ////////////////////////////////////////////////////////////////////////

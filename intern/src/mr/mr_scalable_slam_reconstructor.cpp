@@ -544,6 +544,7 @@ namespace MR
         m_IntegrateTSDFCSPtr       = ShaderManager::CompileCS("slam\\scalable_kinect_fusion\\integration\\cs_integrate_tsdf.glsl"         , "main", DefineString.c_str());
         m_FillIndirectBufferCSPtr  = ShaderManager::CompileCS("slam\\scalable_kinect_fusion\\cs_fill_indirect.glsl"                       , "main", DefineString.c_str());
         m_FindGarbageCSPtr         = ShaderManager::CompileCS("slam\\scalable_kinect_fusion\\garbage\\cs_find_garbage.glsl"               , "main", DefineString.c_str());
+        m_ClearGarbage             = ShaderManager::CompileCS("slam\\scalable_kinect_fusion\\garbage\\cs_clear_garbage.glsl"              , "main", DefineString.c_str());
 
         SInputElementDescriptor InputLayoutDesc = {};
 
@@ -1749,6 +1750,9 @@ namespace MR
     {
         Performance::BeginEvent("Find garbage");
 
+        const int32_t Zero = 0;
+        BufferManager::UploadBufferData(m_GarbageBuffer, &Zero, 0, sizeof(Zero));
+
         ContextManager::SetResourceBuffer(0, m_VolumeBuffers.m_RootVolumePoolPtr);
         ContextManager::SetResourceBuffer(1, m_VolumeBuffers.m_RootGridPoolPtr);
         ContextManager::SetResourceBuffer(2, m_VolumeBuffers.m_Level1PoolPtr);
@@ -1763,6 +1767,13 @@ namespace MR
 
         const int WorkGroups = m_ReconstructionSettings.m_GridResolutions[0];
         ContextManager::Dispatch(WorkGroups, WorkGroups, WorkGroups);
+        
+        int32_t Count = *static_cast<int32_t*>(BufferManager::MapBufferRange(m_GarbageBuffer, CBuffer::EMap::Read, 0, 4));
+        BufferManager::UnmapBuffer(m_GarbageBuffer);
+
+        ContextManager::SetShaderCS(m_ClearGarbage);
+
+        ContextManager::Dispatch(Count, 1, 1);
 
         Performance::EndEvent();
     }

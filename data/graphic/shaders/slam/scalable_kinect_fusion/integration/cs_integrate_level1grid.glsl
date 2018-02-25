@@ -34,7 +34,16 @@ void main()
         
         if (g_Level1GridPool[Level1GridBufferOffset].m_PoolIndex == -1)
         {
-            g_Level1GridPool[Level1GridBufferOffset].m_PoolIndex = atomicAdd(g_TSDFPoolItemCount, 1);
+            int GarbageIndex = atomicAdd(g_GarbageCount, -1);
+
+            if (GarbageIndex >= 0)
+            {
+                g_Level1GridPool[Level1GridBufferOffset].m_PoolIndex = g_GarbageList[GarbageIndex];
+            }
+            else
+            {
+                g_Level1GridPool[Level1GridBufferOffset].m_PoolIndex = atomicAdd(g_TSDFPoolItemCount, 1);
+            }
         }
         else
         {
