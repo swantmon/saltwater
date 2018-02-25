@@ -24,7 +24,7 @@ void main()
     int Level1GridBufferOffset = g_RootGridPool[RootGridBufferOffset].m_PoolIndex * VOXELS_PER_LEVEL1GRID;
     Level1GridBufferOffset += OffsetToIndex(gl_LocalInvocationID, LEVEL1_RESOLUTION);
 
-    int Level2GridBufferOffset = g_Level1GridPool[Level1GridBufferOffset].m_PoolIndex * VOXELS_PER_LEVEL2GRID;
+    int Level2GridBufferOffset = g_Level1GridPool[Level1GridBufferOffset].m_PoolIndex;
 
     if (Level2GridBufferOffset > -1)
     {
