@@ -543,6 +543,7 @@ namespace MR
         m_IntegrateLevel1GridCSPtr = ShaderManager::CompileCS("slam\\scalable_kinect_fusion\\integration\\cs_integrate_level1grid.glsl"   , "main", DefineString.c_str());
         m_IntegrateTSDFCSPtr       = ShaderManager::CompileCS("slam\\scalable_kinect_fusion\\integration\\cs_integrate_tsdf.glsl"         , "main", DefineString.c_str());
         m_FillIndirectBufferCSPtr  = ShaderManager::CompileCS("slam\\scalable_kinect_fusion\\cs_fill_indirect.glsl"                       , "main", DefineString.c_str());
+        m_FindGarbageCSPtr         = ShaderManager::CompileCS("slam\\scalable_kinect_fusion\\garbage\\cs_find_garbage.glsl"               , "main", DefineString.c_str());
 
         SInputElementDescriptor InputLayoutDesc = {};
 
@@ -1145,6 +1146,8 @@ namespace MR
                 BufferManager::UploadBufferData(m_VolumeBuffers.m_RootVolumePositionBufferPtr, &rRootVolume.m_PoolIndex, Index * sizeof(int32_t), sizeof(int32_t));
             }
 
+            FindGarbage(*m_RootVolumeVector[VolumeQueue[0]]);
+
             Performance::EndEvent();
         }
 	}
@@ -1367,6 +1370,11 @@ namespace MR
         ConstantBufferDesc.m_Binding = CBuffer::ConstantBuffer;
         ConstantBufferDesc.m_NumberOfBytes = sizeof(SScalableRaycastConstantBuffer);
         m_VolumeBuffers.m_AABBBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+
+        ConstantBufferDesc.m_Binding = CBuffer::ResourceBuffer;
+        ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
+        ConstantBufferDesc.m_NumberOfBytes = 2 * g_MegabyteSize;
+        m_GarbageBuffer = BufferManager::CreateBuffer(ConstantBufferDesc);
     }
 
     // -----------------------------------------------------------------------------
@@ -1733,6 +1741,30 @@ namespace MR
         {
             BufferManager::UploadBufferData(m_VolumeBuffers.m_TSDFPoolPtr, Data.data(), i * DataSize, DataSize);
         }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CScalableSLAMReconstructor::FindGarbage(SRootVolume& _rVolume)
+    {
+        Performance::BeginEvent("Find garbage");
+
+        ContextManager::SetResourceBuffer(0, m_VolumeBuffers.m_RootVolumePoolPtr);
+        ContextManager::SetResourceBuffer(1, m_VolumeBuffers.m_RootGridPoolPtr);
+        ContextManager::SetResourceBuffer(2, m_VolumeBuffers.m_Level1PoolPtr);
+        ContextManager::SetResourceBuffer(3, m_VolumeBuffers.m_TSDFPoolPtr);
+        ContextManager::SetResourceBuffer(4, m_VolumeBuffers.m_PoolItemCountBufferPtr);
+        ContextManager::SetResourceBuffer(5, m_VolumeIndexBufferPtr);
+        ContextManager::SetResourceBuffer(6, m_GarbageBuffer);
+
+        BufferManager::UploadBufferData(m_VolumeIndexBufferPtr, &_rVolume.m_PoolIndex);
+
+        ContextManager::SetShaderCS(m_FindGarbageCSPtr);
+
+        const int WorkGroups = m_ReconstructionSettings.m_GridResolutions[0];
+        ContextManager::Dispatch(WorkGroups, WorkGroups, WorkGroups);
+
+        Performance::EndEvent();
     }
 
     // -----------------------------------------------------------------------------

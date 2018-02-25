@@ -205,6 +205,8 @@ namespace MR
         void CreateRaycastPyramid();
         
 		void UpdateFrustum();
+
+        void FindGarbage(SRootVolume& _rVolume);
                         
     private:
 
@@ -253,6 +255,8 @@ namespace MR
         Gfx::CShaderPtr m_ClearAtomicCountersCSPtr;
 
         Gfx::CShaderPtr m_FillIndirectBufferCSPtr;
+
+        Gfx::CShaderPtr m_FindGarbageCSPtr;
         
         Gfx::CMeshPtr m_CubeMeshPtr;
         
@@ -309,5 +313,7 @@ namespace MR
         std::unique_ptr<CICPTracker> m_pTracker;
 
         std::vector<char> m_ClearVector;
+
+        Gfx::CBufferPtr m_GarbageBuffer;
     };
 } // namespace MR
