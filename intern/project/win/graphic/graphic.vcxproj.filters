@@ -189,7 +189,7 @@
       <Filter>map\components</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_mesh_component.cpp">
-      <Filter>map\components\models</Filter>
+      <Filter>map\components\model</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_camera_component.cpp">
       <Filter>map\components\camera</Filter>
@@ -483,7 +483,7 @@
       <Filter>map\components</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_mesh_component.h">
-      <Filter>map\components\models</Filter>
+      <Filter>map\components\model</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_camera_component.h">
       <Filter>map\components\camera</Filter>
@@ -685,7 +685,7 @@
     <Filter Include="map\components\camera">
       <UniqueIdentifier>{9e400c53-a975-4c85-9026-d24010c20ccc}</UniqueIdentifier>
     </Filter>
-    <Filter Include="map\components\models">
+    <Filter Include="map\components\model">
       <UniqueIdentifier>{0443e64d-1c8b-4e07-86ed-68412f045b36}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
