@@ -1771,9 +1771,12 @@ namespace MR
         int32_t Count = *static_cast<int32_t*>(BufferManager::MapBufferRange(m_GarbageBuffer, CBuffer::EMap::Read, 0, 4));
         BufferManager::UnmapBuffer(m_GarbageBuffer);
 
-        ContextManager::SetShaderCS(m_ClearGarbage);
+        if (Count > 0)
+        {
+            ContextManager::SetShaderCS(m_ClearGarbage);
 
-        ContextManager::Dispatch(Count, 1, 1);
+            ContextManager::Dispatch(Count, 1, 1);
+        }
 
         Performance::EndEvent();
     }
