@@ -631,7 +631,7 @@ namespace
 
         ContextManager::SetVertexBuffer(m_ParticleInstanceBufferSetPtr);
 
-        ContextManager::SetIndexBuffer(m_ParticleModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+        ContextManager::SetIndexBuffer(m_ParticleModelPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
 
         ContextManager::SetInputLayout(m_ParticleInputLayouPtr);
 
@@ -673,7 +673,7 @@ namespace
 //             {
 //                 BufferManager::UnmapVertexBuffer(m_ParticleInstanceBufferSetPtr->GetBuffer(1));
 // 
-//                 ContextManager::DrawIndexedInstanced(m_ParticleModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), NumberOfParticles, 0, 0, 0);
+//                 ContextManager::DrawIndexedInstanced(m_ParticleModelPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), NumberOfParticles, 0, 0, 0);
 // 
 //                 pInstances = BufferManager::MapVertexBuffer(m_ParticleInstanceBufferSetPtr->GetBuffer(1), CBuffer::Write);
 // 
@@ -685,7 +685,7 @@ namespace
 //         {
 //             BufferManager::UnmapVertexBuffer(m_ParticleInstanceBufferSetPtr->GetBuffer(1));
 // 
-//             ContextManager::DrawIndexedInstanced(m_ParticleModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), NumberOfParticles, 0, 0, 0);
+//             ContextManager::DrawIndexedInstanced(m_ParticleModelPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), NumberOfParticles, 0, 0, 0);
 // 
 //             NumberOfParticles = 0;
 //         }
@@ -716,7 +716,7 @@ namespace
 
         ContextManager::SetVertexBuffer(m_ParticleInstanceBufferSetPtr);
 
-        ContextManager::SetIndexBuffer(m_ParticleModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+        ContextManager::SetIndexBuffer(m_ParticleModelPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
 
         ContextManager::SetInputLayout(m_ParticleInputLayouPtr);
 
@@ -745,7 +745,7 @@ namespace
 //             {
 //                 BufferManager::UnmapVertexBuffer(m_ParticleInstanceBufferSetPtr->GetBuffer(1));
 // 
-//                 ContextManager::DrawIndexedInstanced(m_ParticleModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), NumberOfParticles, 0, 0, 0);
+//                 ContextManager::DrawIndexedInstanced(m_ParticleModelPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), NumberOfParticles, 0, 0, 0);
 // 
 //                 pInstances = BufferManager::MapVertexBuffer(m_ParticleInstanceBufferSetPtr->GetBuffer(1), CBuffer::Write);
 // 
@@ -757,7 +757,7 @@ namespace
 //         {
 //             BufferManager::UnmapVertexBuffer(m_ParticleInstanceBufferSetPtr->GetBuffer(1));
 // 
-//             ContextManager::DrawIndexedInstanced(m_ParticleModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), NumberOfParticles, 0, 0, 0);
+//             ContextManager::DrawIndexedInstanced(m_ParticleModelPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), NumberOfParticles, 0, 0, 0);
 // 
 //             NumberOfParticles = 0;
 //         }
@@ -786,9 +786,9 @@ namespace
 
         ContextManager::SetRenderContext(m_LiquidContextPtrs[2]);
 
-        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
 
-        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
 
         ContextManager::SetInputLayout(m_QuadInputLayouPtr);
 
@@ -810,7 +810,7 @@ namespace
 
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
-        ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+        ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
 
         ContextManager::ResetSampler(0);
 
@@ -837,9 +837,9 @@ namespace
 
         ContextManager::SetRenderContext(m_LiquidContextPtrs[3]);
 
-        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
 
-        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
 
         ContextManager::SetInputLayout(m_QuadInputLayouPtr);
 
@@ -861,7 +861,7 @@ namespace
 
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
-        ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+        ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
 
         ContextManager::ResetTexture(0);
 
@@ -899,9 +899,9 @@ namespace
 
         ContextManager::SetRenderContext(m_LiquidContextPtrs[2]);
 
-        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
 
-        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
 
         ContextManager::SetInputLayout(m_QuadInputLayouPtr);
 
@@ -923,7 +923,7 @@ namespace
 
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
-        ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+        ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
 
         ContextManager::ResetTexture(0);
 
@@ -950,9 +950,9 @@ namespace
 
         ContextManager::SetRenderContext(m_LiquidContextPtrs[4]);
 
-        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
 
-        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
 
         ContextManager::SetInputLayout(m_QuadInputLayouPtr);
 
@@ -974,7 +974,7 @@ namespace
 
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
-        ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+        ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
 
         ContextManager::ResetTexture(0);
 
@@ -1013,9 +1013,9 @@ namespace
 
         ContextManager::SetRenderContext(m_LiquidContextPtrs[5]);
 
-        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
 
-        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
 
         ContextManager::SetInputLayout(m_QuadInputLayouPtr);
 
@@ -1036,7 +1036,7 @@ namespace
         ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
         ContextManager::SetSampler(2, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
-        ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+        ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
 
         ContextManager::ResetSampler(0);
         ContextManager::ResetSampler(1);

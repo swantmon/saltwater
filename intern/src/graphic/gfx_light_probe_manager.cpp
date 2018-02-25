@@ -17,7 +17,7 @@
 #include "data/data_light_probe_component.h"
 #include "data/data_map.h"
 #include "data/data_mesh_component.h"
-#include "data/data_model_manager.h"
+#include "data/data_mesh_manager.h"
 #include "data/data_point_light_component.h"
 #include "data/data_sky_component.h"
 #include "data/data_sun_component.h"
@@ -757,48 +757,38 @@ namespace
 
             Gfx::CSkyComponent* pGfxComponent = CComponentManager::GetInstance().GetComponent<Gfx::CSkyComponent>(pDtComponent->GetID());
 
-            unsigned int NumberOfSurfaces = m_SkyboxBoxPtr->GetLOD(0)->GetNumberOfSurfaces();
+            // -----------------------------------------------------------------------------
+            // Get surface
+            // -----------------------------------------------------------------------------
+            CSurfacePtr SurfacePtr = m_SkyboxBoxPtr->GetLOD(0)->GetSurface();
 
-            for (unsigned int IndexOfSurface = 0; IndexOfSurface < NumberOfSurfaces; ++IndexOfSurface)
-            {
-                // -----------------------------------------------------------------------------
-                // Get surface
-                // -----------------------------------------------------------------------------
-                CSurfacePtr SurfacePtr = m_SkyboxBoxPtr->GetLOD(0)->GetSurface(IndexOfSurface);
+            // -----------------------------------------------------------------------------
+            // Set textures
+            // -----------------------------------------------------------------------------
+            ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
-                if (SurfacePtr == 0)
-                {
-                    break;
-                }
+            ContextManager::SetTexture(0, static_cast<Gfx::CTexturePtr>(pGfxComponent->GetCubemapPtr()));
 
-                // -----------------------------------------------------------------------------
-                // Set textures
-                // -----------------------------------------------------------------------------
-                ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+            // -----------------------------------------------------------------------------
+            // Render
+            // -----------------------------------------------------------------------------
+            ContextManager::SetVertexBuffer(SurfacePtr->GetVertexBuffer());
 
-                ContextManager::SetTexture(0, static_cast<Gfx::CTexturePtr>(pGfxComponent->GetCubemapPtr()));
+            ContextManager::SetIndexBuffer(SurfacePtr->GetIndexBuffer(), 0);
 
-                // -----------------------------------------------------------------------------
-                // Render
-                // -----------------------------------------------------------------------------
-                ContextManager::SetVertexBuffer(SurfacePtr->GetVertexBuffer());
+            ContextManager::SetInputLayout(m_P3N3InputLayoutPtr);
 
-                ContextManager::SetIndexBuffer(SurfacePtr->GetIndexBuffer(), 0);
+            ContextManager::DrawIndexed(SurfacePtr->GetNumberOfIndices(), 0, 0);
 
-                ContextManager::SetInputLayout(m_P3N3InputLayoutPtr);
+            ContextManager::ResetInputLayout();
 
-                ContextManager::DrawIndexed(SurfacePtr->GetNumberOfIndices(), 0, 0);
+            ContextManager::ResetIndexBuffer();
 
-                ContextManager::ResetInputLayout();
+            ContextManager::ResetVertexBuffer();
 
-                ContextManager::ResetIndexBuffer();
+            ContextManager::ResetSampler(0);
 
-                ContextManager::ResetVertexBuffer();
-
-                ContextManager::ResetSampler(0);
-
-                ContextManager::ResetTexture(0);
-            }
+            ContextManager::ResetTexture(0);
         }
 
         ContextManager::ResetResourceBuffer(0);
@@ -936,64 +926,56 @@ namespace
             BufferManager::UploadBufferData(m_GeometryMBufferPtr, &ModelBuffer);
 
             // -----------------------------------------------------------------------------
-            // Set every surface of this entity into a new render job
+            // Surface
             // -----------------------------------------------------------------------------
-            unsigned int NumberOfSurfaces = MeshPtr->GetLOD(0)->GetNumberOfSurfaces();
+            CSurfacePtr SurfacePtr = MeshPtr->GetLOD(0)->GetSurface();
 
-            for (unsigned int IndexOfSurface = 0; IndexOfSurface < NumberOfSurfaces; ++IndexOfSurface)
+            if (SurfacePtr == 0)
             {
-                // -----------------------------------------------------------------------------
-                // Get surface
-                // -----------------------------------------------------------------------------
-                CSurfacePtr SurfacePtr = MeshPtr->GetLOD(0)->GetSurface(IndexOfSurface);
-
-                if (SurfacePtr == 0)
-                {
-                    break;
-                }
-
-                // -----------------------------------------------------------------------------
-                // Get material and upload correct attributes
-                // -----------------------------------------------------------------------------
-                CMaterialPtr MaterialPtr = pGfxComponent->GetMaterial(IndexOfSurface);
-
-                if (MaterialPtr == 0)
-                {
-                    MaterialPtr = SurfacePtr->GetMaterial();
-                }
-
-                assert(MaterialPtr != 0);
-
-                BufferManager::UploadBufferData(m_SurfaceMaterialBufferPtr, &MaterialPtr->GetMaterialAttributes());
-
-                // -----------------------------------------------------------------------------
-                // Set shader
-                // -----------------------------------------------------------------------------
-                ContextManager::SetShaderVS(SurfacePtr->GetMVPShaderVS());
-
-                ContextManager::SetShaderPS(MaterialPtr->GetForwardShaderPS());
-
-                // -----------------------------------------------------------------------------
-                // Set textures
-                // -----------------------------------------------------------------------------
-                for (unsigned int IndexOfTexture = 0; IndexOfTexture < MaterialPtr->GetTextureSetPS()->GetNumberOfTextures(); ++IndexOfTexture)
-                {
-                    ContextManager::SetSampler(IndexOfTexture, MaterialPtr->GetSamplerSetPS()->GetSampler(IndexOfTexture));
-
-                    ContextManager::SetTexture(IndexOfTexture, MaterialPtr->GetTextureSetPS()->GetTexture(IndexOfTexture));
-                }
-
-                // -----------------------------------------------------------------------------
-                // Render
-                // -----------------------------------------------------------------------------
-                ContextManager::SetVertexBuffer(SurfacePtr->GetVertexBuffer());
-
-                ContextManager::SetIndexBuffer(SurfacePtr->GetIndexBuffer(), 0);
-
-                ContextManager::SetInputLayout(SurfacePtr->GetMVPShaderVS()->GetInputLayout());
-
-                ContextManager::DrawIndexed(SurfacePtr->GetNumberOfIndices(), 0, 0);
+                break;
             }
+
+            // -----------------------------------------------------------------------------
+            // Get material and upload correct attributes
+            // -----------------------------------------------------------------------------
+            CMaterialPtr MaterialPtr = pGfxComponent->GetMaterial();
+
+            if (MaterialPtr == 0)
+            {
+                MaterialPtr = SurfacePtr->GetMaterial();
+            }
+
+            assert(MaterialPtr != 0);
+
+            BufferManager::UploadBufferData(m_SurfaceMaterialBufferPtr, &MaterialPtr->GetMaterialAttributes());
+
+            // -----------------------------------------------------------------------------
+            // Set shader
+            // -----------------------------------------------------------------------------
+            ContextManager::SetShaderVS(SurfacePtr->GetMVPShaderVS());
+
+            ContextManager::SetShaderPS(MaterialPtr->GetForwardShaderPS());
+
+            // -----------------------------------------------------------------------------
+            // Set textures
+            // -----------------------------------------------------------------------------
+            for (unsigned int IndexOfTexture = 0; IndexOfTexture < MaterialPtr->GetTextureSetPS()->GetNumberOfTextures(); ++IndexOfTexture)
+            {
+                ContextManager::SetSampler(IndexOfTexture, MaterialPtr->GetSamplerSetPS()->GetSampler(IndexOfTexture));
+
+                ContextManager::SetTexture(IndexOfTexture, MaterialPtr->GetTextureSetPS()->GetTexture(IndexOfTexture));
+            }
+
+            // -----------------------------------------------------------------------------
+            // Render
+            // -----------------------------------------------------------------------------
+            ContextManager::SetVertexBuffer(SurfacePtr->GetVertexBuffer());
+
+            ContextManager::SetIndexBuffer(SurfacePtr->GetIndexBuffer(), 0);
+
+            ContextManager::SetInputLayout(SurfacePtr->GetMVPShaderVS()->GetInputLayout());
+
+            ContextManager::DrawIndexed(SurfacePtr->GetNumberOfIndices(), 0, 0);
         }
 
         for (unsigned int IndexOfTexture = 0; IndexOfTexture < 16; ++IndexOfTexture)
@@ -1076,11 +1058,11 @@ namespace
 
         ContextManager::SetShaderPS(m_FilteringSpecularPSPtr);
 
-        ContextManager::SetVertexBuffer(m_EnvironmentSpherePtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+        ContextManager::SetVertexBuffer(m_EnvironmentSpherePtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
 
-        ContextManager::SetIndexBuffer(m_EnvironmentSpherePtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+        ContextManager::SetIndexBuffer(m_EnvironmentSpherePtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
 
-        ContextManager::SetInputLayout(m_EnvironmentSpherePtr->GetLOD(0)->GetSurface(0)->GetMVPShaderVS()->GetInputLayout());
+        ContextManager::SetInputLayout(m_EnvironmentSpherePtr->GetLOD(0)->GetSurface()->GetMVPShaderVS()->GetInputLayout());
 
         ContextManager::SetConstantBuffer(2, m_CubemapGSBufferPtr);
 
@@ -1123,7 +1105,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Draw
             // -----------------------------------------------------------------------------
-            ContextManager::DrawIndexed(m_EnvironmentSpherePtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+            ContextManager::DrawIndexed(m_EnvironmentSpherePtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
 
             // -----------------------------------------------------------------------------
             // Next mip
@@ -1154,7 +1136,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Draw
             // -----------------------------------------------------------------------------
-            ContextManager::DrawIndexed(m_EnvironmentSpherePtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+            ContextManager::DrawIndexed(m_EnvironmentSpherePtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
         }
 
         // -----------------------------------------------------------------------------

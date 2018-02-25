@@ -400,9 +400,9 @@ namespace
 
         ContextManager::SetRenderContext(m_LightRenderContextPtr);
 
-        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
 
-        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
 
         ContextManager::SetInputLayout(m_ScreenQuadShaderPtr->GetInputLayout());
 
@@ -473,7 +473,7 @@ namespace
                 ContextManager::SetTexture(6, static_cast<Gfx::CTexturePtr>(pGfxComponent->GetFilteredTexturePtr()));
             }
 
-            ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+            ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
         }
 
         // -----------------------------------------------------------------------------

@@ -134,22 +134,14 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-        Dt::CMeshComponent* pFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CMeshComponent>();
+        Dt::CMeshComponent* pComponent = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CMeshComponent>();
 
-        if (pFacet != nullptr)
+        if (pComponent != nullptr)
         {
-            // TODO by tschwandt
-            // different surfaces necessary?
-
-            Dt::CMaterial* pMaterial = pFacet->GetMaterial(0);
+            Dt::CMaterial* pMaterial = pComponent->GetMaterial();
 
             // TODO by tschwandt
-            // default material necessary?
-
-            if (pMaterial == nullptr)
-            {
-                pMaterial = pFacet->GetMesh()->GetLOD(0)->GetSurface(0)->GetMaterial();
-            }
+            // Use material created by mesh if no material was defined material 
 
             Edit::CMessage NewMessage;
 
@@ -252,15 +244,15 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-        Dt::CMeshComponent* pFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CMeshComponent>();
+        Dt::CMeshComponent* pComponent = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CMeshComponent>();
 
-        if (pFacet != nullptr)
+        if (pComponent != nullptr)
         {
             Dt::CMaterial& rDtMaterial = Dt::MaterialManager::GetMaterialByHash(MaterialHash);
 
-            pFacet->SetMaterial(0, &rDtMaterial);
+            pComponent->SetMaterial(&rDtMaterial);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pFacet, Dt::CMeshComponent::DirtyInfo);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pComponent, Dt::CMeshComponent::DirtyInfo);
         }
     }
 

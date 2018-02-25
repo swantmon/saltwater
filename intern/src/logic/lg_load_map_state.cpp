@@ -18,7 +18,7 @@
 #include "data/data_map.h"
 #include "data/data_material_manager.h"
 #include "data/data_mesh_component.h"
-#include "data/data_model_manager.h"
+#include "data/data_mesh_manager.h"
 #include "data/data_sky_component.h"
 #include "data/data_ssao_component.h"
 #include "data/data_sun_component.h"
@@ -449,20 +449,16 @@ void CLgLoadMapState::CreateDefaultScene()
         // Setup entities
         // -----------------------------------------------------------------------------
         {
-            Dt::SModelFileDescriptor ModelFileDesc;
+            Dt::SEntityDescriptor EntityDesc;
 
-            ModelFileDesc.m_pFileName = "models/MatTester.obj";
-            ModelFileDesc.m_GenFlag = Dt::SGeneratorFlag::DefaultFlipUVs;
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Static;
+            EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
-            Dt::CModel& rModel = Dt::ModelManager::CreateModel(ModelFileDesc);
+            Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
 
-            // -----------------------------------------------------------------------------
+            rEntity.SetName("Sphere");
 
-            Dt::CEntity& rSphere = Dt::EntityManager::CreateEntityFromModel(rModel);
-
-            rSphere.SetName("Sphere");
-
-            Dt::CTransformationFacet* pTransformationFacet = rSphere.GetTransformationFacet();
+            Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
 
             pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 0.1f));
             pTransformationFacet->SetScale(glm::vec3(0.01f));
@@ -470,9 +466,7 @@ void CLgLoadMapState::CreateDefaultScene()
 
             // -----------------------------------------------------------------------------
 
-            Dt::CEntity* pSubEntity = rSphere.GetHierarchyFacet()->GetFirstChild();
-
-            auto pMeshComponent = pSubEntity->GetComponentFacet()->GetComponent<Dt::CMeshComponent>();
+            auto pMeshComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CMeshComponent>();
 
             Dt::SMaterialDescriptor MaterialFileDesc;
 
@@ -493,71 +487,21 @@ void CLgLoadMapState::CreateDefaultScene()
 
             Dt::CMaterial& rMaterial = Dt::MaterialManager::CreateMaterial(MaterialFileDesc);
 
-            pMeshComponent->SetMaterial(0, &rMaterial);
+            Dt::CMesh& rMesh = Dt::MeshManager::CreateMeshFromFile("models/MatTester.obj", Dt::CMesh::SGeneratorFlag::Default | Dt::CMesh::SGeneratorFlag::FlipUVs);
+
+            pMeshComponent->SetMesh(&rMesh);
+
+            pMeshComponent->SetMaterial(&rMaterial);
 
             Dt::MaterialManager::MarkMaterialAsDirty(rMaterial, Dt::CMaterial::DirtyCreate);
+
+            rEntity.AttachComponent(pMeshComponent);
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pMeshComponent, Dt::CMeshComponent::DirtyCreate);
 
             // -----------------------------------------------------------------------------
 
-            Dt::EntityManager::MarkEntityAsDirty(rSphere, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
-        }
-
-        {
-            Dt::SModelFileDescriptor ModelFileDesc;
-
-            ModelFileDesc.m_pFileName = "models/plane.obj";
-            ModelFileDesc.m_GenFlag = Dt::SGeneratorFlag::DefaultFlipUVs;
-
-            Dt::CModel& rModel = Dt::ModelManager::CreateModel(ModelFileDesc);
-
-            // -----------------------------------------------------------------------------
-
-            Dt::CEntity& rSphere = Dt::EntityManager::CreateEntityFromModel(rModel);
-
-            rSphere.SetName("Plane");
-
-            Dt::CTransformationFacet* pTransformationFacet = rSphere.GetTransformationFacet();
-
-            pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
-            pTransformationFacet->SetScale(glm::vec3(0.01f));
-            pTransformationFacet->SetRotation(glm::vec3(glm::radians(90.0f), 0.0f, 0.0f));
-
-            // -----------------------------------------------------------------------------
-
-            Dt::CEntity* pSubEntity = rSphere.GetHierarchyFacet()->GetFirstChild();
-
-            auto pMeshComponent = pSubEntity->GetComponentFacet()->GetComponent<Dt::CMeshComponent>();
-
-            Dt::SMaterialDescriptor MaterialFileDesc;
-
-            MaterialFileDesc.m_pFileName = 0;
-            MaterialFileDesc.m_pMaterialName = "Grey";
-            MaterialFileDesc.m_pColorMap = 0;
-            MaterialFileDesc.m_pNormalMap = 0;
-            MaterialFileDesc.m_pRoughnessMap = 0;
-            MaterialFileDesc.m_pMetalMaskMap = 0;
-            MaterialFileDesc.m_pAOMap = 0;
-            MaterialFileDesc.m_pBumpMap = 0;
-            MaterialFileDesc.m_Roughness = 1.0f;
-            MaterialFileDesc.m_Reflectance = 0.0f;
-            MaterialFileDesc.m_MetalMask = 0.0f;
-            MaterialFileDesc.m_Displacement = 0.0f;
-            MaterialFileDesc.m_AlbedoColor = glm::vec3(0.8f, 0.8f, 0.8f);
-            MaterialFileDesc.m_TilingOffset = glm::vec4(1.0f, 1.0f, 0.0f, 0.0f);
-
-            Dt::CMaterial& rMaterial = Dt::MaterialManager::CreateMaterial(MaterialFileDesc);
-
-            pMeshComponent->SetMaterial(0, &rMaterial);
-
-            Dt::MaterialManager::MarkMaterialAsDirty(rMaterial, Dt::CMaterial::DirtyCreate);
-
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pMeshComponent, Dt::CMeshComponent::DirtyCreate);
-
-            // -----------------------------------------------------------------------------
-
-            Dt::EntityManager::MarkEntityAsDirty(rSphere, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+            Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
     }
 #endif

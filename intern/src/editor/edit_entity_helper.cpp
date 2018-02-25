@@ -11,7 +11,7 @@
 #include "data/data_entity_manager.h"
 #include "data/data_hierarchy_facet.h"
 #include "data/data_map.h"
-#include "data/data_model_manager.h"
+#include "data/data_mesh_manager.h"
 #include "data/data_transformation_facet.h"
 
 #include "editor/edit_entity_helper.h"
@@ -129,20 +129,8 @@ namespace
 
     void CEntityHelper::OnLoadEntity(Edit::CMessage& _rMessage)
     {
-        Dt::SModelFileDescriptor ModelFileDesc;
-
-        std::string PathToFile = _rMessage.Get<std::string>();
-
-        ModelFileDesc.m_pFileName = PathToFile.c_str();
-        ModelFileDesc.m_GenFlag   = Dt::SGeneratorFlag::Default;
-
-        Dt::CModel& rModel = Dt::ModelManager::CreateModel(ModelFileDesc);
-
-        Dt::CEntity& rNewEntity = Dt::EntityManager::CreateEntityFromModel(rModel);
-
-        rNewEntity.SetName("New Prefab");
-
-        Dt::EntityManager::MarkEntityAsDirty(rNewEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        // TODO by tschwandt
+        // Add loading map from scene file
     }
 
     // -----------------------------------------------------------------------------

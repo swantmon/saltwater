@@ -15,7 +15,7 @@
 
 namespace Dt
 {
-    class CModel;
+    class CMesh;
 } // namespace Dt
 
 namespace Dt
@@ -45,8 +45,6 @@ namespace EntityManager
     void OnExit();
 
     void Clear();
-
-    CEntity& CreateEntityFromModel(const CModel& _rModel);
 
     CEntity& CreateEntity(const SEntityDescriptor& _rDescriptor, CEntity::BID _ID = CEntity::s_InvalidID);
 

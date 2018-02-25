@@ -8,7 +8,7 @@
 
 #include "data/data_entity.h"
 #include "data/data_map.h"
-#include "data/data_model_manager.h"
+#include "data/data_mesh_manager.h"
 
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"
@@ -442,25 +442,15 @@ namespace
     
     void CGfxDebugRenderer::OnSetupModels()
     {
-        SMeshDescriptor  ModelDesc;
         SBufferDescriptor BufferDesc;
 
         m_QuadModelPtr = MeshManager::CreateRectangle(0.0f, 0.0f, 1.0f, 1.0f);
 
-        m_TextInstanceBufferSetPtr = m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer();
+        m_TextInstanceBufferSetPtr = m_QuadModelPtr->GetLOD(0)->GetSurface()->GetVertexBuffer();
 
         // -----------------------------------------------------------------------------
 
-        Dt::SModelFileDescriptor ModelFileDesc;
-
-        ModelFileDesc.m_pFileName = "gizmo.obj";
-        ModelFileDesc.m_GenFlag   = Dt::SGeneratorFlag::DefaultFlipUVs;
-
-        Dt::CModel& rModel = Dt::ModelManager::CreateModel(ModelFileDesc);
-
-        ModelDesc.m_pMesh = &rModel.GetMesh(0);
-
-        m_GizmoModelPtr = MeshManager::CreateMesh(ModelDesc);
+        m_GizmoModelPtr = MeshManager::CreateMeshFromFile("gizmo.obj", Dt::CMesh::SGeneratorFlag::Default | Dt::CMesh::SGeneratorFlag::FlipUVs);
 
         // -----------------------------------------------------------------------------
 
@@ -476,8 +466,6 @@ namespace
         {
             0, 1, 2, 0, 2, 3,
         };
-        
-         
         
         // -----------------------------------------------------------------------------
         // Engine buffer handling
@@ -696,57 +684,48 @@ namespace
         // -----------------------------------------------------------------------------
         // Per surface
         // -----------------------------------------------------------------------------
-        unsigned int NumberOfSurface = m_GizmoModelPtr->GetLOD(0)->GetNumberOfSurfaces();
+        BufferManager::UploadBufferData(m_DeferredPassPSBuffer->GetBuffer(0), &m_GizmoModelPtr->GetLOD(0)->GetSurface()->GetMaterial()->GetMaterialAttributes());
 
-        for (unsigned int IndexOfSurface = 0; IndexOfSurface < NumberOfSurface; ++ IndexOfSurface)
-        {
+        // -----------------------------------------------------------------------------
+        // Render
+        // -----------------------------------------------------------------------------        
+        ContextManager::SetRenderContext(m_RenderContextPtr);
 
-            // -----------------------------------------------------------------------------
-            // Buffer
-            // -----------------------------------------------------------------------------
-            BufferManager::UploadBufferData(m_DeferredPassPSBuffer->GetBuffer(0), &m_GizmoModelPtr->GetLOD(0)->GetSurface(IndexOfSurface)->GetMaterial()->GetMaterialAttributes());
+        ContextManager::SetVertexBuffer(m_GizmoModelPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
 
-            // -----------------------------------------------------------------------------
-            // Render
-            // -----------------------------------------------------------------------------        
-            ContextManager::SetRenderContext(m_RenderContextPtr);
+        ContextManager::SetIndexBuffer(m_GizmoModelPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
 
-            ContextManager::SetVertexBuffer(m_GizmoModelPtr->GetLOD(0)->GetSurface(IndexOfSurface)->GetVertexBuffer());
+        ContextManager::SetInputLayout(m_GizmoModelPtr->GetLOD(0)->GetSurface()->GetShaderVS()->GetInputLayout());
 
-            ContextManager::SetIndexBuffer(m_GizmoModelPtr->GetLOD(0)->GetSurface(IndexOfSurface)->GetIndexBuffer(), 0);
+        ContextManager::SetTopology(STopology::TriangleList);
 
-            ContextManager::SetInputLayout(m_GizmoModelPtr->GetLOD(0)->GetSurface(IndexOfSurface)->GetShaderVS()->GetInputLayout());
+        ContextManager::SetShaderVS(m_GizmoShaderVSPtr);
 
-            ContextManager::SetTopology(STopology::TriangleList);
+        ContextManager::SetShaderPS(m_GizmoShaderPSPtr);
 
-            ContextManager::SetShaderVS(m_GizmoShaderVSPtr);
+        ContextManager::SetConstantBuffer(0, m_ViewModelVSBuffer->GetBuffer(0));
 
-            ContextManager::SetShaderPS(m_GizmoShaderPSPtr);
+        ContextManager::SetConstantBuffer(1, m_DeferredPassPSBuffer->GetBuffer(0));
 
-            ContextManager::SetConstantBuffer(0, m_ViewModelVSBuffer->GetBuffer(0));
+        ContextManager::DrawIndexed(m_GizmoModelPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
 
-            ContextManager::SetConstantBuffer(1, m_DeferredPassPSBuffer->GetBuffer(0));
+        ContextManager::ResetConstantBuffer(0);
 
-            ContextManager::DrawIndexed(m_GizmoModelPtr->GetLOD(0)->GetSurface(IndexOfSurface)->GetNumberOfIndices(), 0, 0);
+        ContextManager::ResetConstantBuffer(1);
 
-            ContextManager::ResetConstantBuffer(0);
+        ContextManager::ResetTopology();
 
-            ContextManager::ResetConstantBuffer(1);
+        ContextManager::ResetInputLayout();
 
-            ContextManager::ResetTopology();
+        ContextManager::ResetIndexBuffer();
 
-            ContextManager::ResetInputLayout();
+        ContextManager::ResetVertexBuffer();
 
-            ContextManager::ResetIndexBuffer();
+        ContextManager::ResetShaderVS();
 
-            ContextManager::ResetVertexBuffer();
+        ContextManager::ResetShaderPS();
 
-            ContextManager::ResetShaderVS();
-
-            ContextManager::ResetShaderPS();
-
-            ContextManager::ResetRenderContext();
-        }
+        ContextManager::ResetRenderContext();
 
         Performance::EndEvent();
     }
@@ -770,9 +749,9 @@ namespace
 
         ContextManager::SetRenderContext(m_RenderContextPtr);
 
-        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
  
-        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
 
         ContextManager::SetInputLayout(m_QuadTextureShaderVSPtr->GetInputLayout());
 
@@ -818,7 +797,7 @@ namespace
 
             ContextManager::SetTexture(0, CurrentTexture->m_TexturePtr->GetTexture(0));
 
-            ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+            ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
         }
 
         ContextManager::ResetTexture(0);
@@ -872,7 +851,7 @@ namespace
 
         ContextManager::SetVertexBuffer(m_TextInstanceBufferSetPtr);
 
-        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
 
         ContextManager::SetInputLayout(m_QuadTextShaderVSPtr->GetInputLayout());
 
@@ -932,7 +911,7 @@ namespace
 //                 {
 //                     BufferManager::UnmapVertexBuffer(m_TextInstanceBufferSetPtr->GetBuffer(1));
 // 
-//                     ContextManager::DrawIndexedInstanced(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), NumberOfLetters, 0, 0, 0);
+//                     ContextManager::DrawIndexedInstanced(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), NumberOfLetters, 0, 0, 0);
 // 
 //                     pInstances = BufferManager::MapVertexBuffer(m_TextInstanceBufferSetPtr->GetBuffer(1), CBuffer::Write);
 // 
@@ -947,7 +926,7 @@ namespace
 //         {
 //             BufferManager::UnmapVertexBuffer(m_TextInstanceBufferSetPtr->GetBuffer(1));
 // 
-//             ContextManager::DrawIndexedInstanced(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), NumberOfLetters, 0, 0, 0);
+//             ContextManager::DrawIndexedInstanced(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), NumberOfLetters, 0, 0, 0);
 // 
 //             NumberOfLetters = 0;
 //         }

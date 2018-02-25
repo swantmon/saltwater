@@ -11,7 +11,7 @@
 #include "data/data_component_manager.h"
 #include "data/data_entity.h"
 #include "data/data_map.h"
-#include "data/data_model_manager.h"
+#include "data/data_mesh_manager.h"
 #include "data/data_point_light_component.h"
 
 #include "graphic/gfx_buffer_manager.h"
@@ -276,9 +276,9 @@ namespace
 
         ContextManager::SetRenderContext(m_LightRenderContextPtr);
 
-        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
 
-        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
 
         ContextManager::SetInputLayout(m_P2InputLayoutPtr);
 
@@ -354,7 +354,7 @@ namespace
                 // -----------------------------------------------------------------------------
                 // Draw
                 // -----------------------------------------------------------------------------
-                Gfx::ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+                Gfx::ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
             }
         }
 

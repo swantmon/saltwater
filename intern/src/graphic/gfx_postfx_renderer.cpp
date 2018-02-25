@@ -1164,9 +1164,9 @@ namespace
         // -----------------------------------------------------------------------------
         ContextManager::SetRenderContext(m_SwapRenderContextPtrs[NextSwapBufferCount]);
         
-        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
         
-        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
         
         ContextManager::SetInputLayout(m_FullQuadInputLayoutPtr);
         
@@ -1182,7 +1182,7 @@ namespace
         
         ContextManager::SetTexture(0, m_SwapTextureSetPtrs[CurrentSwapBufferCount]->GetTexture(0));
         
-        ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+        ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
         
         ContextManager::ResetTexture(0);
 
@@ -1209,9 +1209,9 @@ namespace
         // -----------------------------------------------------------------------------        
         ContextManager::SetRenderContext(m_QuarterRenderContextPtrs[0]);
         
-        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
         
-        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
         
         ContextManager::SetInputLayout(m_FullQuadInputLayoutPtr);
         
@@ -1231,7 +1231,7 @@ namespace
         ContextManager::SetTexture(0, m_SwapTextureSetPtrs[CurrentSwapBufferCount]->GetTexture(0));
         ContextManager::SetTexture(1, m_SwapTextureSetPtrs[CurrentSwapBufferCount]->GetTexture(1));
         
-        ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+        ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
         
         ContextManager::ResetTexture(0);
         ContextManager::ResetTexture(1);
@@ -1272,9 +1272,9 @@ namespace
         
         ContextManager::SetRenderContext(m_QuarterRenderContextPtrs[1]);
 
-        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
         
-        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
         
         ContextManager::SetInputLayout(m_FullQuadInputLayoutPtr);
         
@@ -1297,7 +1297,7 @@ namespace
 
         ContextManager::SetTexture(0, m_QuarterTextureSetPtrs[0]->GetTexture(0));
         
-        ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+        ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
         
         ContextManager::ResetTexture(0);
 
@@ -1325,9 +1325,9 @@ namespace
         
         ContextManager::SetRenderContext(m_QuarterRenderContextPtrs[2]);
 
-        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
         
-        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
         
         ContextManager::SetInputLayout(m_FullQuadInputLayoutPtr);
         
@@ -1350,7 +1350,7 @@ namespace
 
         ContextManager::SetTexture(0, m_QuarterTextureSetPtrs[1]->GetTexture(0));
         
-        ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+        ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
         
         ContextManager::ResetTexture(0);
 
@@ -1379,9 +1379,9 @@ namespace
         // -----------------------------------------------------------------------------        
         ContextManager::SetRenderContext(m_QuarterRenderContextPtrs[1]);
         
-        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
         
-        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
         
         ContextManager::SetInputLayout(m_FullQuadInputLayoutPtr);
         
@@ -1399,7 +1399,7 @@ namespace
         ContextManager::SetTexture(0, m_QuarterTextureSetPtrs[0]->GetTexture(0));
         ContextManager::SetTexture(1, m_QuarterTextureSetPtrs[2]->GetTexture(0));
         
-        ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+        ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
         
         ContextManager::ResetTexture(0);
         ContextManager::ResetTexture(1);
@@ -1428,9 +1428,9 @@ namespace
         // -----------------------------------------------------------------------------        
         ContextManager::SetRenderContext(m_QuarterRenderContextPtrs[0]);
         
-        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
         
-        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
         
         ContextManager::SetInputLayout(m_FullQuadInputLayoutPtr);
         
@@ -1446,7 +1446,7 @@ namespace
 
         ContextManager::SetTexture(0, m_QuarterTextureSetPtrs[1]->GetTexture(0));
         
-        ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+        ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
         
         ContextManager::ResetTexture(0);
 
@@ -1475,9 +1475,9 @@ namespace
         
         ContextManager::SetRenderContext(m_SwapRenderContextPtrs[NextSwapBufferCount]);
         
-        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
         
-        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
         
         ContextManager::SetInputLayout(m_FullQuadInputLayoutPtr);
         
@@ -1501,7 +1501,7 @@ namespace
         ContextManager::SetTexture(2, m_QuarterTextureSetPtrs[0]->GetTexture(0));
         ContextManager::SetTexture(3, m_QuarterTextureSetPtrs[2]->GetTexture(0));
         
-        ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+        ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
         
         ContextManager::ResetTexture(0);
         ContextManager::ResetTexture(1);
@@ -1577,9 +1577,9 @@ namespace
         // -----------------------------------------------------------------------------
         ContextManager::SetRenderContext(m_SwapRenderContextPtrs[NextSwapBufferCount]);
         
-        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
         
-        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
         
         ContextManager::SetInputLayout(m_FullQuadInputLayoutPtr);
         
@@ -1597,7 +1597,7 @@ namespace
         ContextManager::SetTexture(0, m_SwapTextureSetPtrs[CurrentSwapBufferCount]->GetTexture(0));
         ContextManager::SetTexture(1, m_SwapTextureSetPtrs[CurrentSwapBufferCount]->GetTexture(1));
         
-        ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+        ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
         
         ContextManager::ResetTexture(0);
         ContextManager::ResetTexture(1);
@@ -1645,7 +1645,7 @@ namespace
 
         ContextManager::SetRenderContext(m_SMAAEdgeDetectContextPtr);
 
-        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
 
         ContextManager::SetInputLayout(m_FullQuadInputLayoutPtr);
 
@@ -1666,7 +1666,7 @@ namespace
         // -----------------------------------------------------------------------------
         ContextManager::SetRenderContext(m_SMAAWeightCalcContextPtr);
 
-        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
 
         ContextManager::SetInputLayout(m_FullQuadInputLayoutPtr);
 
@@ -1691,7 +1691,7 @@ namespace
         // -----------------------------------------------------------------------------
         ContextManager::SetRenderContext(m_SwapRenderContextPtrs[NextSwapBufferCount]);
 
-        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
 
         ContextManager::SetInputLayout(m_FullQuadInputLayoutPtr);
 
@@ -1761,9 +1761,9 @@ namespace
 
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
         
-        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
         
-        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
         
         ContextManager::SetInputLayout(m_FullQuadInputLayoutPtr);
         
@@ -1779,7 +1779,7 @@ namespace
 
         ContextManager::SetTexture(0, m_SwapTextureSetPtrs[CurrentSwapBufferCount]->GetTexture(0));
 
-        ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+        ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
 
         ContextManager::ResetTexture(0);
 

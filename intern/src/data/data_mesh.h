@@ -3,8 +3,6 @@
 
 #include "base/base_typedef.h"
 
-#include "data/data_lod.h"
-
 #include <string>
 
 namespace Dt
@@ -13,26 +11,42 @@ namespace Dt
     {
     public:
 
-        static const unsigned int s_NumberOfLODs = 4;
+        struct SGeneratorFlag
+        {
+            enum
+            {
+                Nothing      = 0x00,
+                Default      = 0x01,
+                FlipUVs      = 0x02,
+                RealtimeFast = 0x04
+            };
+        };
+
+        enum EPredefinedMesh
+        {
+            Nothing,
+            Box,
+            Sphere,
+            IsometricSphere,
+            Cone,
+            Rectangle,
+        };
 
     public:
 
         CMesh();
         ~CMesh();
 
-        const std::string& GetMeshname() const;
+        const std::string& GetFilename() const;
 
-        void SetNumberOfLODs(unsigned int _NumberOfLODs);
-        unsigned int GetNumberOfLODs() const;
+        int GetGeneratorFlag() const;
 
-        void SetLOD(unsigned int _Index, CLOD* _pLOD);
-        CLOD* GetLOD(unsigned int _Index);
-        const CLOD* GetLOD(unsigned int _Index) const;
-
+        EPredefinedMesh GetPredefinedMesh() const;
+        
     protected:
-
-        std::string  m_Meshname;
-        unsigned int m_NumberOfLODs;
-        CLOD*        m_LODs[s_NumberOfLODs];
+        
+        std::string     m_Filename;
+        int             m_GeneratorFlag;
+        EPredefinedMesh m_PredefinedMesh;
     };
 } // namespace Dt

@@ -15,7 +15,7 @@
 #include "data/data_component_manager.h"
 #include "data/data_entity.h"
 #include "data/data_map.h"
-#include "data/data_model_manager.h"
+#include "data/data_mesh_manager.h"
 #include "data/data_sky_component.h"
 
 #include "graphic/gfx_background_renderer.h"
@@ -515,9 +515,9 @@ namespace
         // -----------------------------------------------------------------------------
         ContextManager::SetRenderContext(RenderContextPtr);
                 
-        ContextManager::SetVertexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+        ContextManager::SetVertexBuffer(MeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
         
-        ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+        ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
         
         ContextManager::SetInputLayout(InputLayoutPtr);
         
@@ -539,7 +539,7 @@ namespace
         ContextManager::SetTexture(0, rCurrentJob.m_pGfxComponent->GetCubemapPtr());
         ContextManager::SetTexture(1, TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget());
         
-        ContextManager::DrawIndexed(MeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+        ContextManager::DrawIndexed(MeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
         
         ContextManager::ResetTexture(0);
         ContextManager::ResetTexture(1);
@@ -631,9 +631,9 @@ namespace
         // -----------------------------------------------------------------------------
         ContextManager::SetRenderContext(RenderContextPtr);
 
-        ContextManager::SetVertexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+        ContextManager::SetVertexBuffer(MeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
 
-        ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+        ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
 
         ContextManager::SetInputLayout(InputLayoutPtr);
 
@@ -655,7 +655,7 @@ namespace
         ContextManager::SetTexture(0, rRenderJob.m_pGfxComponent->GetBackgroundTextureSet()->GetTexture(0));
         ContextManager::SetTexture(1, TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget());
 
-        ContextManager::DrawIndexed(MeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+        ContextManager::DrawIndexed(MeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
 
         ContextManager::ResetTexture(0);
         ContextManager::ResetTexture(1);
@@ -753,9 +753,9 @@ namespace
         // -----------------------------------------------------------------------------
         ContextManager::SetRenderContext(RenderContextPtr);
 
-        ContextManager::SetVertexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+        ContextManager::SetVertexBuffer(MeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
 
-        ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+        ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
 
         ContextManager::SetInputLayout(InputLayoutPtr);
 
@@ -777,7 +777,7 @@ namespace
         ContextManager::SetTexture(0, m_WebcamTexturePtr);
         ContextManager::SetTexture(1, TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget());
 
-        ContextManager::DrawIndexed(MeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+        ContextManager::DrawIndexed(MeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
 
         ContextManager::ResetTexture(0);
         ContextManager::ResetTexture(1);

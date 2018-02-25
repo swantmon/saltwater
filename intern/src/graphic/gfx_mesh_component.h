@@ -15,8 +15,8 @@ namespace Gfx
         void SetMesh(CMeshPtr _ModelPtr);
         CMeshPtr GetMesh();
 
-        void SetMaterial(unsigned int _Surface, CMaterialPtr _MaterialPtr);
-        CMaterialPtr GetMaterial(unsigned int _Surface);
+        void SetMaterial(CMaterialPtr _MaterialPtr);
+        CMaterialPtr GetMaterial();
 
     public:
 
@@ -26,6 +26,6 @@ namespace Gfx
     protected:
 
         CMeshPtr     m_ModelPtr;
-        CMaterialPtr m_MaterialPtrs[CLOD::s_NumberOfSurfaces];
+        CMaterialPtr m_MaterialPtr;
     };
 } // namespace Gfx

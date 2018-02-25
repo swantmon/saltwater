@@ -15,11 +15,9 @@
 #include "core/core_time.h"
 
 #include "data/data_entity.h"
-#include "data/data_lod.h"
 #include "data/data_map.h"
 #include "data/data_material.h"
 #include "data/data_material_manager.h"
-#include "data/data_surface.h"
 #include "data/data_texture_2d.h"
 #include "data/data_texture_manager.h"
 

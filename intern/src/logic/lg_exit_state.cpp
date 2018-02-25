@@ -9,7 +9,7 @@
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_material_manager.h"
-#include "data/data_model_manager.h"
+#include "data/data_mesh_manager.h"
 #include "data/data_texture_manager.h"
 
 #include "logic/lg_exit_state.h"
@@ -38,7 +38,7 @@ namespace
         // -----------------------------------------------------------------------------
         Dt::TextureManager ::OnExit();
         Dt::MaterialManager::OnExit();
-        Dt::ModelManager   ::OnExit();
+        Dt::MeshManager    ::OnExit();
         Dt::EntityManager  ::OnExit();
 
         return Lg::Exit::SResult::Exit;

@@ -631,9 +631,9 @@ namespace
         
         ContextManager::SetRenderContext(m_HalfContextPtr);
 
-        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
 
-        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
 
         ContextManager::SetInputLayout(m_QuadInputLayoutPtr);
 
@@ -669,7 +669,7 @@ namespace
         ContextManager::SetTexture(2, TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget());
         ContextManager::SetTexture(3, m_NoiseTexturePtr);
 
-        ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+        ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
 
         ContextManager::ResetTexture(0);
         ContextManager::ResetTexture(1);
@@ -763,9 +763,9 @@ namespace
         // -----------------------------------------------------------------------------        
         ContextManager::SetRenderContext(m_DeferredRenderContextPtr);
         
-        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
         
-        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
         
         ContextManager::SetInputLayout(m_QuadInputLayoutPtr);
         
@@ -787,7 +787,7 @@ namespace
         ContextManager::SetTexture(2, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(2));
         ContextManager::SetTexture(3, m_HalfTexturePtrs[0]->GetTexture(0));
         
-        ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+        ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
         
         ContextManager::ResetTexture(0);
         ContextManager::ResetTexture(1);

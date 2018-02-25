@@ -2,7 +2,6 @@
 #pragma once
 
 #include "data/data_component.h"
-#include "data/data_lod.h"
 
 namespace Dt
 {
@@ -16,11 +15,11 @@ namespace Dt
     {
     public:
 
-        void SetMesh(CMesh* _pModel);
-        CMesh* GetMesh();
+        void SetMesh(const CMesh* _pMesh);
+        const CMesh* GetMesh();
 
-        void SetMaterial(unsigned int _Surface, CMaterial* _pMaterial);
-        CMaterial* GetMaterial(unsigned int _Surface);
+        void SetMaterial(CMaterial* _pMaterial);
+        CMaterial* GetMaterial();
 
     public:
 
@@ -29,7 +28,7 @@ namespace Dt
 
     private:
 
-        CMesh*     m_pModel;
-        CMaterial* m_pMaterial[CLOD::s_NumberOfSurfaces];
+        const CMesh* m_pMesh;
+        CMaterial* m_pMaterial;
     };
 } // namespace Dt

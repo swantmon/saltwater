@@ -16,12 +16,6 @@
     <ClInclude Include="..\..\..\src\data\data_region.h">
       <Filter>map</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_model.h">
-      <Filter>models</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_model_manager.h">
-      <Filter>models</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\data\data_material.h">
       <Filter>materials</Filter>
     </ClInclude>
@@ -33,12 +27,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\data\data_hierarchy_facet.h">
       <Filter>map\entity\facets\hierarchy</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_lod.h">
-      <Filter>models</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_surface.h">
-      <Filter>models</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\data\data_texture_2d.h">
       <Filter>textures</Filter>
@@ -56,9 +44,6 @@
       <Filter>textures</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\data\data_precompiled.h" />
-    <ClInclude Include="..\..\..\src\data\data_mesh.h">
-      <Filter>models</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\data\data_component.h">
       <Filter>map\entity\components</Filter>
     </ClInclude>
@@ -113,6 +98,12 @@
     <ClInclude Include="..\..\..\src\data\data_component_facet.h">
       <Filter>map\entity\facets\components</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_mesh_manager.h">
+      <Filter>models</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_mesh.h">
+      <Filter>models</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\data\data_entity_manager.cpp">
@@ -120,9 +111,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\data\data_map.cpp">
       <Filter>map</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_model_manager.cpp">
-      <Filter>models</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\data\data_material_manager.cpp">
       <Filter>materials</Filter>
@@ -149,20 +137,8 @@
       <Filter>textures</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\data\data_precompiled.cpp" />
-    <ClCompile Include="..\..\..\src\data\data_model.cpp">
-      <Filter>models</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_lod.cpp">
-      <Filter>models</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_surface.cpp">
-      <Filter>models</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\data\data_material.cpp">
       <Filter>materials</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_mesh.cpp">
-      <Filter>models</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\data\data_component_manager.cpp">
       <Filter>map\entity\components</Filter>
@@ -214,6 +190,12 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\data\data_component_facet.cpp">
       <Filter>map\entity\facets\components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_mesh.cpp">
+      <Filter>models</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_mesh_manager.cpp">
+      <Filter>models</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

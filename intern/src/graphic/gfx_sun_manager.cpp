@@ -419,45 +419,40 @@ namespace
             // -----------------------------------------------------------------------------
             // Render every surface of this entity
             // -----------------------------------------------------------------------------
-            unsigned int NumberOfSurfaces = MeshPtr->GetLOD(0)->GetNumberOfSurfaces();
+            CSurfacePtr SurfacePtr = MeshPtr->GetLOD(0)->GetSurface();
 
-            for (unsigned int IndexOfSurface = 0; IndexOfSurface < NumberOfSurfaces; ++IndexOfSurface)
+            if (SurfacePtr == nullptr)
             {
-                CSurfacePtr SurfacePtr = MeshPtr->GetLOD(0)->GetSurface(IndexOfSurface);
-
-                if (SurfacePtr == nullptr)
-                {
-                    continue;
-                }
-
-                // -----------------------------------------------------------------------------
-                // Get input layout from optimal shader
-                // -----------------------------------------------------------------------------
-                assert(SurfacePtr->GetKey().m_HasPosition);
-
-                CInputLayoutPtr LayoutPtr = SurfacePtr->GetShaderVS()->GetInputLayout();
-
-                // -----------------------------------------------------------------------------
-                // Set items to context manager
-                // -----------------------------------------------------------------------------
-                ContextManager::SetVertexBuffer(SurfacePtr->GetVertexBuffer());
-
-                ContextManager::SetIndexBuffer(SurfacePtr->GetIndexBuffer(), 0);
-
-                ContextManager::SetInputLayout(LayoutPtr);
-
-                ContextManager::SetTopology(STopology::TriangleList);
-
-                ContextManager::DrawIndexed(SurfacePtr->GetNumberOfIndices(), 0, 0);
-
-                ContextManager::ResetTopology();
-
-                ContextManager::ResetInputLayout();
-
-                ContextManager::ResetIndexBuffer();
-
-                ContextManager::ResetVertexBuffer();
+                continue;
             }
+
+            // -----------------------------------------------------------------------------
+            // Get input layout from optimal shader
+            // -----------------------------------------------------------------------------
+            assert(SurfacePtr->GetKey().m_HasPosition);
+
+            CInputLayoutPtr LayoutPtr = SurfacePtr->GetShaderVS()->GetInputLayout();
+
+            // -----------------------------------------------------------------------------
+            // Set items to context manager
+            // -----------------------------------------------------------------------------
+            ContextManager::SetVertexBuffer(SurfacePtr->GetVertexBuffer());
+
+            ContextManager::SetIndexBuffer(SurfacePtr->GetIndexBuffer(), 0);
+
+            ContextManager::SetInputLayout(LayoutPtr);
+
+            ContextManager::SetTopology(STopology::TriangleList);
+
+            ContextManager::DrawIndexed(SurfacePtr->GetNumberOfIndices(), 0, 0);
+
+            ContextManager::ResetTopology();
+
+            ContextManager::ResetInputLayout();
+
+            ContextManager::ResetIndexBuffer();
+
+            ContextManager::ResetVertexBuffer();
         }
 
         ContextManager::ResetConstantBuffer(0);

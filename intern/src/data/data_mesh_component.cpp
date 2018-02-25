@@ -3,12 +3,14 @@
 
 #include "data/data_mesh_component.h"
 
+#include <assert.h>
+
 namespace Dt
 {
     CMeshComponent::CMeshComponent()
-        : m_pModel(nullptr)
+        : m_pMesh    (0)
+        , m_pMaterial(0)
     {
-        Base::CMemory::Zero(m_pMaterial, sizeof(CMaterial*) * CLOD::s_NumberOfSurfaces);
     }
 
     // -----------------------------------------------------------------------------
@@ -20,33 +22,29 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CMeshComponent::SetMesh(CMesh* _pModel)
+    void CMeshComponent::SetMesh(const CMesh* _pModel)
     {
-        m_pModel = _pModel;
+        m_pMesh = _pModel;
     }
 
     // -----------------------------------------------------------------------------
 
-    CMesh* CMeshComponent::GetMesh()
+    const CMesh* CMeshComponent::GetMesh()
     {
-        return m_pModel;
+        return m_pMesh;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CMeshComponent::SetMaterial(unsigned int _Surface, CMaterial* _pMaterial)
+    void CMeshComponent::SetMaterial(CMaterial* _pMaterial)
     {
-        assert(_Surface >= 0 && _Surface < CLOD::s_NumberOfSurfaces);
-
-        m_pMaterial[_Surface] = _pMaterial;
+        m_pMaterial = _pMaterial;
     }
 
     // -----------------------------------------------------------------------------
 
-    CMaterial* CMeshComponent::GetMaterial(unsigned int _Surface)
+    CMaterial* CMeshComponent::GetMaterial()
     {
-        assert(_Surface >= 0 && _Surface < CLOD::s_NumberOfSurfaces);
-
-        return m_pMaterial[_Surface];
+        return m_pMaterial;
     }
 } // namespace Dt

@@ -9,7 +9,7 @@
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_material_manager.h"
-#include "data/data_model_manager.h"
+#include "data/data_mesh_manager.h"
 
 #include "logic/lg_start_state.h"
 
@@ -38,7 +38,7 @@ namespace
         // Data
         // -----------------------------------------------------------------------------
         Dt::EntityManager  ::OnStart();
-        Dt::ModelManager   ::OnStart();
+        Dt::MeshManager    ::OnStart();
         Dt::MaterialManager::OnStart();
 
         // -----------------------------------------------------------------------------

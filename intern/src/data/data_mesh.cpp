@@ -6,10 +6,10 @@
 namespace Dt
 {
     CMesh::CMesh()
-        : m_Meshname    ()
-        , m_NumberOfLODs(0)
+        : m_Filename      ()
+        , m_GeneratorFlag (0)
+        , m_PredefinedMesh(Nothing)
     {
-        Base::CMemory::Zero(&m_LODs, s_NumberOfLODs * sizeof(CLOD*));
     }
 
     // -----------------------------------------------------------------------------
@@ -21,51 +21,22 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    const std::string& CMesh::GetMeshname() const
+    const std::string& CMesh::GetFilename() const
     {
-        return m_Meshname;
+        return m_Filename;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CMesh::SetNumberOfLODs(unsigned int _NumberOfLODs)
+    int CMesh::GetGeneratorFlag() const
     {
-        assert(_NumberOfLODs >= 0 && _NumberOfLODs < s_NumberOfLODs);
-
-        m_NumberOfLODs = _NumberOfLODs;
+        return m_GeneratorFlag;
     }
 
     // -----------------------------------------------------------------------------
 
-    unsigned int CMesh::GetNumberOfLODs() const
+    CMesh::EPredefinedMesh CMesh::GetPredefinedMesh() const
     {
-        return m_NumberOfLODs;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CMesh::SetLOD(unsigned int _Index, CLOD* _pLOD)
-    {
-        assert(_Index >= 0 && _Index < s_NumberOfLODs);
-
-        m_LODs[_Index] = _pLOD;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CLOD* CMesh::GetLOD(unsigned int _Index)
-    {
-        assert(_Index >= 0 && _Index < s_NumberOfLODs);
-
-        return m_LODs[_Index];
-    }
-
-    // -----------------------------------------------------------------------------
-
-    const CLOD* CMesh::GetLOD(unsigned int _Index) const
-    {
-        assert(_Index >= 0 && _Index < s_NumberOfLODs);
-
-        return m_LODs[_Index];
+        return m_PredefinedMesh;
     }
 } // namespace Dt

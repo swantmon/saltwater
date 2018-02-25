@@ -1,26 +1,11 @@
-//
-//  gfx_model_manager.h
-//  graphic
-//
-//  Created by Tobias Schwandt on 03/11/14.
-//  Copyright (c) 2014 TU Ilmenau. All rights reserved.
-//
 
 #pragma once
 
 #include "base/base_typedef.h"
 
-#include "data/data_model.h"
+#include "data/data_mesh.h"
 
 #include "graphic/gfx_mesh.h"
-
-namespace Gfx
-{
-    struct SMeshDescriptor
-    {
-        Dt::CMesh* m_pMesh;
-    };
-} // namespace Gfx
 
 namespace Gfx
 {
@@ -31,7 +16,8 @@ namespace MeshManager
 
     void Clear();
     
-    CMeshPtr CreateMesh(const SMeshDescriptor& _rDescriptor);
+    CMeshPtr CreateMeshFromFile(const Base::Char* _pFilename, int _GenFlag);
+
     CMeshPtr CreateBox(float _Width, float _Height, float _Depth);
     CMeshPtr CreateSphere(float _Radius, unsigned int _Stacks, unsigned int _Slices);
     CMeshPtr CreateSphereIsometric(float _Radius, unsigned int _Refinement);

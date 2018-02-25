@@ -1,10 +1,3 @@
-//
-//  gfx_lod.cpp
-//  graphic
-//
-//  Created by Tobias Schwandt on 03/11/14.
-//  Copyright (c) 2014 TU Ilmenau. All rights reserved.
-//
 
 #include "graphic/gfx_precompiled.h"
 
@@ -13,7 +6,7 @@
 namespace Gfx
 {
     CLOD::CLOD()
-        : m_NumberOfSurfaces(0)
+        : m_Surface(0)
     {
     }
     
@@ -21,22 +14,13 @@ namespace Gfx
     
     CLOD::~CLOD()
     {
-        
+        m_Surface = 0;
     }
     
     // -----------------------------------------------------------------------------
     
-    unsigned int CLOD::GetNumberOfSurfaces() const
+    CSurfacePtr CLOD::GetSurface() const
     {
-        return m_NumberOfSurfaces;
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    CSurfacePtr CLOD::GetSurface(unsigned int _Index) const
-    {
-        assert(_Index < s_NumberOfSurfaces);
-        
-        return m_Surfaces[_Index];
+        return m_Surface;
     }
 } // namespace Gfx

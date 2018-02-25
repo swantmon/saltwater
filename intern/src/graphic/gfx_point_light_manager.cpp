@@ -15,7 +15,7 @@
 #include "data/data_entity_manager.h"
 #include "data/data_map.h"
 #include "data/data_mesh_component.h"
-#include "data/data_model_manager.h"
+#include "data/data_mesh_manager.h"
 #include "data/data_point_light_component.h"
 #include "data/data_transformation_facet.h"
 
@@ -647,110 +647,100 @@ namespace
             BufferManager::UploadBufferData(m_LightCameraVSBufferPtr->GetBuffer(1), &ModelBuffer);
 
             // -----------------------------------------------------------------------------
-            // Render every surface of this entity
+            // Render surface of this entity
             // -----------------------------------------------------------------------------
-            unsigned int NumberOfSurfaces = ModelPtr->GetLOD(0)->GetNumberOfSurfaces();
+            CSurfacePtr SurfacePtr = ModelPtr->GetLOD(0)->GetSurface();
 
-            for (unsigned int IndexOfSurface = 0; IndexOfSurface < NumberOfSurfaces; ++IndexOfSurface)
+            // -----------------------------------------------------------------------------
+            // Set material
+            // -----------------------------------------------------------------------------
+            CMaterialPtr MaterialPtr = SurfacePtr->GetMaterial();
+
+            if (pGfxComponent->GetMaterial() != 0)
             {
-                CSurfacePtr SurfacePtr = ModelPtr->GetLOD(0)->GetSurface(IndexOfSurface);
+                MaterialPtr = pGfxComponent->GetMaterial();
+            }
 
-                if (SurfacePtr == nullptr)
+            // -----------------------------------------------------------------------------
+            // Set shader + buffer
+            // -----------------------------------------------------------------------------
+            ContextManager::SetShaderVS(m_ShadowShaderVSPtr);
+
+            ContextManager::SetConstantBuffer(0, m_LightCameraVSBufferPtr->GetBuffer(0));
+
+            ContextManager::SetConstantBuffer(1, m_LightCameraVSBufferPtr->GetBuffer(1));
+
+            if (_rInternLight.m_CurrentShadowType == Dt::CPointLightComponent::GlobalIllumination)
+            {
+                if (MaterialPtr->GetKey().m_HasDiffuseTex)
                 {
-                    continue;
-                }
+                    ContextManager::SetShaderPS(m_ShadowRSMTexShaderPSPtr);
 
-                // -----------------------------------------------------------------------------
-                // Set material
-                // -----------------------------------------------------------------------------
-                CMaterialPtr MaterialPtr = SurfacePtr->GetMaterial();
-
-                if (pGfxComponent->GetMaterial(IndexOfSurface) != 0)
-                {
-                    MaterialPtr = pGfxComponent->GetMaterial(IndexOfSurface);
-                }
-
-                // -----------------------------------------------------------------------------
-                // Set shader + buffer
-                // -----------------------------------------------------------------------------
-                ContextManager::SetShaderVS(m_ShadowShaderVSPtr);
-
-                ContextManager::SetConstantBuffer(0, m_LightCameraVSBufferPtr->GetBuffer(0));
-
-                ContextManager::SetConstantBuffer(1, m_LightCameraVSBufferPtr->GetBuffer(1));
-
-                if (_rInternLight.m_CurrentShadowType == Dt::CPointLightComponent::GlobalIllumination)
-                {
-                    if (MaterialPtr->GetKey().m_HasDiffuseTex)
+                    for (unsigned int IndexOfTexture = 0; IndexOfTexture < MaterialPtr->GetTextureSetPS()->GetNumberOfTextures(); ++IndexOfTexture)
                     {
-                        ContextManager::SetShaderPS(m_ShadowRSMTexShaderPSPtr);
+                        ContextManager::SetSampler(IndexOfTexture, MaterialPtr->GetSamplerSetPS()->GetSampler(IndexOfTexture));
 
-                        for (unsigned int IndexOfTexture = 0; IndexOfTexture < MaterialPtr->GetTextureSetPS()->GetNumberOfTextures(); ++IndexOfTexture)
-                        {
-                            ContextManager::SetSampler(IndexOfTexture, MaterialPtr->GetSamplerSetPS()->GetSampler(IndexOfTexture));
-
-                            ContextManager::SetTexture(IndexOfTexture, MaterialPtr->GetTextureSetPS()->GetTexture(IndexOfTexture));
-                        }
+                        ContextManager::SetTexture(IndexOfTexture, MaterialPtr->GetTextureSetPS()->GetTexture(IndexOfTexture));
                     }
-                    else
-                    {
-                        ContextManager::SetShaderPS(m_ShadowRSMShaderPSPtr);
-                    }
-
-                    BufferManager::UploadBufferData(m_RSMPSBuffer->GetBuffer(0), &MaterialPtr->GetMaterialAttributes());
-
-                    // -----------------------------------------------------------------------------
-
-                    SPunctualLightProperties PunctualLightProperties;
-
-                    float InvSqrAttenuationRadius = _pDtPointLight->GetReciprocalSquaredAttenuationRadius();
-                    float AngleScale = _pDtPointLight->GetAngleScale();
-                    float AngleOffset = _pDtPointLight->GetAngleOffset();
-
-                    PunctualLightProperties.m_LightPosition = glm::vec4(_rLightPosition, 1.0f);
-                    PunctualLightProperties.m_LightDirection = glm::normalize(glm::vec4(_pDtPointLight->GetDirection(), 0.0f));
-                    PunctualLightProperties.m_LightColor = glm::vec4(_pDtPointLight->GetLightness(), 1.0f);
-                    PunctualLightProperties.m_LightSettings = glm::vec4(InvSqrAttenuationRadius, AngleScale, AngleOffset, 0.0f);
-
-                    BufferManager::UploadBufferData(m_RSMPSBuffer->GetBuffer(1), &PunctualLightProperties);
-
-                    ContextManager::SetConstantBuffer(2, m_RSMPSBuffer->GetBuffer(0));
-
-                    ContextManager::SetConstantBuffer(3, m_RSMPSBuffer->GetBuffer(1));
                 }
                 else
                 {
-                    ContextManager::SetShaderPS(m_ShadowSMShaderPSPtr);
+                    ContextManager::SetShaderPS(m_ShadowRSMShaderPSPtr);
                 }
 
-                // -----------------------------------------------------------------------------
-                // Get input layout from optimal shader
-                // -----------------------------------------------------------------------------
-                assert(SurfacePtr->GetKey().m_HasPosition);
-
-                CInputLayoutPtr LayoutPtr = SurfacePtr->GetShaderVS()->GetInputLayout();
+                BufferManager::UploadBufferData(m_RSMPSBuffer->GetBuffer(0), &MaterialPtr->GetMaterialAttributes());
 
                 // -----------------------------------------------------------------------------
-                // Set items to context manager
-                // -----------------------------------------------------------------------------
-                ContextManager::SetVertexBuffer(SurfacePtr->GetVertexBuffer());
 
-                ContextManager::SetIndexBuffer(SurfacePtr->GetIndexBuffer(), 0);
+                SPunctualLightProperties PunctualLightProperties;
 
-                ContextManager::SetInputLayout(LayoutPtr);
+                float InvSqrAttenuationRadius = _pDtPointLight->GetReciprocalSquaredAttenuationRadius();
+                float AngleScale = _pDtPointLight->GetAngleScale();
+                float AngleOffset = _pDtPointLight->GetAngleOffset();
 
-                ContextManager::SetTopology(STopology::TriangleList);
+                PunctualLightProperties.m_LightPosition  = glm::vec4(_rLightPosition, 1.0f);
+                PunctualLightProperties.m_LightDirection = glm::normalize(glm::vec4(_pDtPointLight->GetDirection(), 0.0f));
+                PunctualLightProperties.m_LightColor     = glm::vec4(_pDtPointLight->GetLightness(), 1.0f);
+                PunctualLightProperties.m_LightSettings  = glm::vec4(InvSqrAttenuationRadius, AngleScale, AngleOffset, 0.0f);
 
-                ContextManager::DrawIndexed(SurfacePtr->GetNumberOfIndices(), 0, 0);
+                BufferManager::UploadBufferData(m_RSMPSBuffer->GetBuffer(1), &PunctualLightProperties);
 
-                ContextManager::ResetTopology();
+                ContextManager::SetConstantBuffer(2, m_RSMPSBuffer->GetBuffer(0));
 
-                ContextManager::ResetInputLayout();
-
-                ContextManager::ResetIndexBuffer();
-
-                ContextManager::ResetVertexBuffer();
+                ContextManager::SetConstantBuffer(3, m_RSMPSBuffer->GetBuffer(1));
             }
+            else
+            {
+                ContextManager::SetShaderPS(m_ShadowSMShaderPSPtr);
+            }
+
+            // -----------------------------------------------------------------------------
+            // Get input layout from optimal shader
+            // -----------------------------------------------------------------------------
+            assert(SurfacePtr->GetKey().m_HasPosition);
+
+            CInputLayoutPtr LayoutPtr = SurfacePtr->GetShaderVS()->GetInputLayout();
+
+            // -----------------------------------------------------------------------------
+            // Set items to context manager
+            // -----------------------------------------------------------------------------
+            ContextManager::SetVertexBuffer(SurfacePtr->GetVertexBuffer());
+
+            ContextManager::SetIndexBuffer(SurfacePtr->GetIndexBuffer(), 0);
+
+            ContextManager::SetInputLayout(LayoutPtr);
+
+            ContextManager::SetTopology(STopology::TriangleList);
+
+            ContextManager::DrawIndexed(SurfacePtr->GetNumberOfIndices(), 0, 0);
+
+            ContextManager::ResetTopology();
+
+            ContextManager::ResetInputLayout();
+
+            ContextManager::ResetIndexBuffer();
+
+            ContextManager::ResetVertexBuffer();
         }
 
         ContextManager::ResetConstantBuffer(0);

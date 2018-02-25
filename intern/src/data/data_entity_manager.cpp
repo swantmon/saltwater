@@ -16,7 +16,7 @@
 #include "data/data_hierarchy_facet.h"
 #include "data/data_map.h"
 #include "data/data_mesh_component.h"
-#include "data/data_model_manager.h"
+#include "data/data_mesh_manager.h"
 #include "data/data_transformation_facet.h"
 
 #include <assert.h>
@@ -43,8 +43,6 @@ namespace
         void OnExit();
 
         void Clear();
-
-        CEntity& CreateEntityFromModel(const CModel& _rModel);
 
         CEntity& CreateEntity(const SEntityDescriptor& _rDescriptor, CEntity::BID _ID = CEntity::s_InvalidID);
 
@@ -161,66 +159,6 @@ namespace
         m_DirtyEntities.clear();
 
         m_EntityByID.clear();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CEntity& CDtLvlEntityManager::CreateEntityFromModel(const CModel& _rModel)
-    {
-        SEntityDescriptor EntityDesc;
-
-        EntityDesc.m_EntityCategory = SEntityCategory::Dynamic;
-        EntityDesc.m_FacetFlags     = CEntity::FacetTransformation | CEntity::FacetHierarchy | CEntity::FacetComponents;
-
-        // -----------------------------------------------------------------------------
-        // Create root node
-        // -----------------------------------------------------------------------------
-        Dt::CEntity& rRootEntity = CreateEntity(EntityDesc);
-
-        // -----------------------------------------------------------------------------
-        // Iterate throw the meshes
-        // -----------------------------------------------------------------------------
-        unsigned int NumberOfMeshes = _rModel.GetNumberOfMeshes();
-
-        for (unsigned int IndexOfMesh = 0; IndexOfMesh < NumberOfMeshes; ++ IndexOfMesh)
-        {
-            // -----------------------------------------------------------------------------
-            // Get mesh
-            // -----------------------------------------------------------------------------
-            CMesh& rMesh = _rModel.GetMesh(IndexOfMesh);
-
-            // -----------------------------------------------------------------------------
-            // Create entity
-            // -----------------------------------------------------------------------------
-            EntityDesc.m_EntityCategory = SEntityCategory::Dynamic;
-            EntityDesc.m_FacetFlags     = CEntity::FacetTransformation | CEntity::FacetHierarchy | CEntity::FacetComponents;
-
-            Dt::CEntity& rChildEntity = CreateEntity(EntityDesc);
-
-            // -----------------------------------------------------------------------------
-            // Set name
-            // -----------------------------------------------------------------------------
-            if (rMesh.GetMeshname().length() > 0)
-            {
-                rChildEntity.SetName(rMesh.GetMeshname());
-            }
-
-            // -----------------------------------------------------------------------------
-            // Create facet
-            // -----------------------------------------------------------------------------
-            auto pModelActorFacet = CComponentManager::GetInstance().Allocate<Dt::CMeshComponent>();
-
-            pModelActorFacet->SetMesh(&rMesh);
-
-            rChildEntity.AttachComponent(pModelActorFacet);
-
-            // -----------------------------------------------------------------------------
-            // Attach mesh to entity
-            // -----------------------------------------------------------------------------
-            rRootEntity.Attach(rChildEntity);
-        }
-
-        return rRootEntity;
     }
 
     // -----------------------------------------------------------------------------
@@ -534,13 +472,6 @@ namespace EntityManager
     void Clear()
     {
         CDtLvlEntityManager::GetInstance().Clear();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CEntity& CreateEntityFromModel(const CModel& _rModel)
-    {
-        return CDtLvlEntityManager::GetInstance().CreateEntityFromModel(_rModel);
     }
 
     // -----------------------------------------------------------------------------

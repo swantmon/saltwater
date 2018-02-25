@@ -16,7 +16,7 @@
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_map.h"
-#include "data/data_model_manager.h"
+#include "data/data_mesh_manager.h"
 #include "data/data_sky_component.h"
 #include "data/data_sun_component.h"
 
@@ -509,17 +509,7 @@ namespace
 
         // -----------------------------------------------------------------------------
 
-        SMeshDescriptor ModelDescr;
-        Dt::SModelFileDescriptor ModelFileDesc;
-
-        ModelFileDesc.m_pFileName = "curvedplane.obj";
-        ModelFileDesc.m_GenFlag = Dt::SGeneratorFlag::Nothing;
-
-        Dt::CModel& rCurvedPlaneModel = Dt::ModelManager::CreateModel(ModelFileDesc);
-
-        ModelDescr.m_pMesh = &rCurvedPlaneModel.GetMesh(0);
-
-        CMeshPtr CurvedPlanePtr = MeshManager::CreateMesh(ModelDescr);
+        CMeshPtr CurvedPlanePtr = MeshManager::CreateMeshFromFile("curvedplane.obj", Dt::CMesh::SGeneratorFlag::Default);
 
         // -----------------------------------------------------------------------------
 
@@ -881,11 +871,11 @@ namespace
 
         ContextManager::SetShaderPS(PSPtr);
 
-        ContextManager::SetVertexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+        ContextManager::SetVertexBuffer(MeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
 
-        ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+        ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
 
-        ContextManager::SetInputLayout(MeshPtr->GetLOD(0)->GetSurface(0)->GetMVPShaderVS()->GetInputLayout());
+        ContextManager::SetInputLayout(MeshPtr->GetLOD(0)->GetSurface()->GetMVPShaderVS()->GetInputLayout());
 
         ContextManager::SetConstantBuffer(2, GSBufferSetPtr->GetBuffer(0));
 
@@ -910,7 +900,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Draw
         // -----------------------------------------------------------------------------
-        ContextManager::DrawIndexed(MeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+        ContextManager::DrawIndexed(MeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
 
         // -----------------------------------------------------------------------------
         // Reset
@@ -996,11 +986,11 @@ namespace
 
         ContextManager::SetShaderPS(PSPtr);
 
-        ContextManager::SetVertexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+        ContextManager::SetVertexBuffer(MeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
 
-        ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+        ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
 
-        ContextManager::SetInputLayout(MeshPtr->GetLOD(0)->GetSurface(0)->GetMVPShaderVS()->GetInputLayout());
+        ContextManager::SetInputLayout(MeshPtr->GetLOD(0)->GetSurface()->GetMVPShaderVS()->GetInputLayout());
 
         ContextManager::SetConstantBuffer(2, GSBufferSetPtr->GetBuffer(0));
 
@@ -1013,7 +1003,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Draw
         // -----------------------------------------------------------------------------
-        ContextManager::DrawIndexed(MeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+        ContextManager::DrawIndexed(MeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
 
         // -----------------------------------------------------------------------------
         // Reset
@@ -1099,11 +1089,11 @@ namespace
 
         ContextManager::SetShaderPS(PSPtr);
 
-        ContextManager::SetVertexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+        ContextManager::SetVertexBuffer(MeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
 
-        ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+        ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
 
-        ContextManager::SetInputLayout(MeshPtr->GetLOD(0)->GetSurface(0)->GetMVPShaderVS()->GetInputLayout());
+        ContextManager::SetInputLayout(MeshPtr->GetLOD(0)->GetSurface()->GetMVPShaderVS()->GetInputLayout());
 
         ContextManager::SetConstantBuffer(2, GSBufferSetPtr->GetBuffer(0));
 
@@ -1116,7 +1106,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Draw
         // -----------------------------------------------------------------------------
-        ContextManager::DrawIndexed(MeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+        ContextManager::DrawIndexed(MeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
 
         // -----------------------------------------------------------------------------
         // Reset
@@ -1223,11 +1213,11 @@ namespace
 
         ContextManager::SetShaderPS(PSPtr);
 
-        ContextManager::SetVertexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+        ContextManager::SetVertexBuffer(MeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
 
-        ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+        ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
 
-        ContextManager::SetInputLayout(MeshPtr->GetLOD(0)->GetSurface(0)->GetMVPShaderVS()->GetInputLayout());
+        ContextManager::SetInputLayout(MeshPtr->GetLOD(0)->GetSurface()->GetMVPShaderVS()->GetInputLayout());
 
         ContextManager::SetConstantBuffer(1, VSBufferSetPtr->GetBuffer(0));
 
@@ -1243,7 +1233,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Draw
         // -----------------------------------------------------------------------------
-        ContextManager::DrawIndexed(MeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+        ContextManager::DrawIndexed(MeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
 
         // -----------------------------------------------------------------------------
         // Reset
@@ -1507,11 +1497,11 @@ namespace
 
         ContextManager::SetShaderPS(PSPtr);
 
-        ContextManager::SetVertexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+        ContextManager::SetVertexBuffer(MeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
 
-        ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+        ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
 
-        ContextManager::SetInputLayout(MeshPtr->GetLOD(0)->GetSurface(0)->GetMVPShaderVS()->GetInputLayout());
+        ContextManager::SetInputLayout(MeshPtr->GetLOD(0)->GetSurface()->GetMVPShaderVS()->GetInputLayout());
 
         ContextManager::SetConstantBuffer(2, GSBufferSetPtr->GetBuffer(0));
         ContextManager::SetConstantBuffer(3, GSBufferSetPtr->GetBuffer(1));
@@ -1527,7 +1517,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Draw
         // -----------------------------------------------------------------------------
-        ContextManager::DrawIndexed(MeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+        ContextManager::DrawIndexed(MeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
 
         // -----------------------------------------------------------------------------
         // Reset

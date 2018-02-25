@@ -371,15 +371,15 @@ namespace
         // -----------------------------------------------------------------------------
         // Set static stuff
         // -----------------------------------------------------------------------------
-        ContextManager::SetShaderVS(m_SphereModelPtr->GetLOD(0)->GetSurface(0)->GetMVPShaderVS());
+        ContextManager::SetShaderVS(m_SphereModelPtr->GetLOD(0)->GetSurface()->GetMVPShaderVS());
 
         ContextManager::SetShaderPS(m_PunctualLightShaderPSPtr);
 
-        ContextManager::SetVertexBuffer(m_SphereModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+        ContextManager::SetVertexBuffer(m_SphereModelPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
 
-        ContextManager::SetIndexBuffer(m_SphereModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+        ContextManager::SetIndexBuffer(m_SphereModelPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
 
-        ContextManager::SetInputLayout(m_SphereModelPtr->GetLOD(0)->GetSurface(0)->GetMVPShaderVS()->GetInputLayout());
+        ContextManager::SetInputLayout(m_SphereModelPtr->GetLOD(0)->GetSurface()->GetMVPShaderVS()->GetInputLayout());
 
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
 
@@ -459,7 +459,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Draw light
             // -----------------------------------------------------------------------------
-            ContextManager::DrawIndexed(m_SphereModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+            ContextManager::DrawIndexed(m_SphereModelPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
         }
 
         ContextManager::ResetTexture(0);
