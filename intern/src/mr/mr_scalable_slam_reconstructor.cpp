@@ -1500,6 +1500,15 @@ namespace MR
             BASE_CONSOLE_ERROR("TSDF pool buffer is full!");
         }
 
+        {
+            const int TSDFItemSize = m_ReconstructionSettings.m_CaptureColor ? sizeof(STSDFColorPoolItem) : sizeof(STSDFPoolItem);
+            float TotalSize = 0.0f;
+            TotalSize += m_VolumeBuffers.m_RootGridPoolSize * m_ReconstructionSettings.m_VoxelsPerGrid[0] * sizeof(SGridPoolItem);
+            TotalSize += m_VolumeBuffers.m_Level1PoolSize * m_ReconstructionSettings.m_VoxelsPerGrid[1] * sizeof(SGridPoolItem);
+            TotalSize += m_VolumeBuffers.m_TSDFPoolSize * m_ReconstructionSettings.m_VoxelsPerGrid[2] * TSDFItemSize;
+            std::cout << TotalSize / (1024.0f * 1024.0f) << '\n';
+        }
+
         //////////////////////////////////////////////////////////////////////////////////////
         // Integrate and raycast pyramid
         //////////////////////////////////////////////////////////////////////////////////////
