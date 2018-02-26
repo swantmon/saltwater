@@ -1412,11 +1412,10 @@ namespace
         // -----------------------------------------------------------------------------
         unsigned int NumberOfMeshes = pScene->mNumMeshes;
 
-        assert(NumberOfMeshes == 1);
-
-        aiMesh* pMesh = pScene->mMeshes[0];
-
-        FillMeshInComponent(_pMesh, pMesh);
+        if (NumberOfMeshes > 0)
+        {
+            FillMeshInComponent(_pMesh, pScene->mMeshes[0]);
+        }
     }
 
     // ----------------------------------------------------------------------------- 

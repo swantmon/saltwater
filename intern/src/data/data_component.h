@@ -41,6 +41,12 @@ namespace Dt
             DirtyDestroy = 0x04,
         };
 
+        enum EFacets
+        {
+            Graphic,
+            NumberOfFacets
+        };
+
     public:
 
         static const Base::ID STATIC_TYPE_ID;
@@ -83,10 +89,15 @@ namespace Dt
         void SetDirtyFlags(unsigned int _Flags);
         unsigned int GetDirtyFlags() const;
 
+        void SetFacet(unsigned int _Category, void* _pFacet);
+        void* GetFacet(unsigned int _Category);
+        const void* GetFacet(unsigned int _Category) const;
+
     private:
 
         SFlags             m_Flags;
         const Dt::CEntity* m_pHostEntity;
+        void*              m_pFacets[NumberOfFacets];
 
     private:
 
@@ -108,6 +119,11 @@ namespace Dt
         m_Flags.m_Key = 0;
 
         m_Flags.m_IsActive = true;
+
+        for (int i = 0; i < NumberOfFacets; ++i)
+        {
+            m_pFacets[i] = 0;
+        }
     }
 
     // -----------------------------------------------------------------------------
@@ -174,6 +190,30 @@ namespace Dt
     unsigned int CComponent<T>::GetDirtyFlags() const
     {
         return m_Flags.m_DirtyFlags;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    template<class T>
+    void CComponent<T>::SetFacet(unsigned int _Category, void* _pFacet)
+    {
+        m_pFacets[_Category] = _pFacet;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    template<class T>
+    void* CComponent<T>::GetFacet(unsigned int _Category)
+    {
+        return m_pFacets[_Category];
+    }
+
+    // -----------------------------------------------------------------------------
+
+    template<class T>
+    const void* CComponent<T>::GetFacet(unsigned int _Category) const
+    {
+        return m_pFacets[_Category];
     }
 } // namespace Dt
 

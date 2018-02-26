@@ -420,6 +420,7 @@ namespace
         if (pElementRoughness) MaterialDescriptor.m_Roughness = pElementRoughness->FloatAttribute("V");
         if (pElementReflectance) MaterialDescriptor.m_Reflectance = pElementReflectance->FloatAttribute("V");
         if (pElementMetallic) MaterialDescriptor.m_MetalMask = pElementMetallic->FloatAttribute("V");
+        if (pElementBump) MaterialDescriptor.m_Displacement = pElementBump->FloatAttribute("V");
 
         if (pElementTiling)
         {
@@ -440,6 +441,7 @@ namespace
         MaterialDescriptor.m_pNormalMap    = pElementNormal->Attribute("Map");
         MaterialDescriptor.m_pRoughnessMap = pElementRoughness->Attribute("Map");
         MaterialDescriptor.m_pMetalMaskMap = pElementMetallic->Attribute("Map");
+        MaterialDescriptor.m_pBumpMap      = pElementBump->Attribute("Map");
         MaterialDescriptor.m_pAOMap        = pElementAO->Attribute("Map");
 
         // -----------------------------------------------------------------------------
