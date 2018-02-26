@@ -10,17 +10,20 @@
 #include "camera/cam_game_control.h"
 
 #include "data/data_component_facet.h"
-#include "data/data_component_manager.h"
+#include "data/data_component.h"
 #include "data/data_entity.h"
 #include "data/data_map.h"
+#include "data/data_material_component.h"
 #include "data/data_mesh_component.h"
 #include "data/data_transformation_facet.h"
 
 #include "graphic/gfx_ar_renderer.h"
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"
-#include "graphic/gfx_component_manager.h"
+#include "graphic/gfx_component.h"
 #include "graphic/gfx_main.h"
+#include "graphic/gfx_material.h"
+#include "graphic/gfx_material_component.h"
 #include "graphic/gfx_mesh.h"
 #include "graphic/gfx_mesh_component.h"
 #include "graphic/gfx_mesh_manager.h"
@@ -799,15 +802,13 @@ namespace
                     break;
                 }
 
-                CMaterialPtr MaterialPtr;
+                CMaterialPtr MaterialPtr = SurfacePtr->GetMaterial();
+                
+                if (pDtComponent->GetHostEntity()->GetComponentFacet()->HasComponent<Dt::CMaterialComponent>())
+                {
+                    Base::ID MaterialID = pDtComponent->GetHostEntity()->GetComponentFacet()->GetComponent<Dt::CMaterialComponent>()->GetID();
 
-                if (pGfxComponent->GetMaterial() != 0)
-                {
-                    MaterialPtr = pGfxComponent->GetMaterial();
-                }
-                else
-                {
-                    MaterialPtr = SurfacePtr->GetMaterial();
+                    MaterialPtr = Gfx::CComponentManager::GetInstance().GetComponent<Gfx::CMaterialComponent>(MaterialID)->GetMaterial();
                 }
 
                 // -----------------------------------------------------------------------------

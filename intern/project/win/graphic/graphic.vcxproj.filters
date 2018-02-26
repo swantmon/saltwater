@@ -161,9 +161,6 @@
     <ClCompile Include="..\..\..\src\graphic\gfx_fog_renderer.cpp">
       <Filter>engine\renderer</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_mesh.cpp">
-      <Filter>map\manager\models</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_mesh_manager.cpp">
       <Filter>map\manager\models</Filter>
     </ClCompile>
@@ -184,9 +181,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_texture.cpp">
       <Filter>engine\textures</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_component_manager.cpp">
-      <Filter>map\components</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_mesh_component.cpp">
       <Filter>map\components\model</Filter>
@@ -212,9 +206,6 @@
     <ClCompile Include="..\..\..\src\graphic\gfx_sun_manager.cpp">
       <Filter>map\manager\lights</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_material.cpp">
-      <Filter>map\manager\models</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_material_manager.cpp">
       <Filter>map\manager\models</Filter>
     </ClCompile>
@@ -235,6 +226,15 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_mesh_renderer.cpp">
       <Filter>engine\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_material_component.cpp">
+      <Filter>map\components\model</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_mesh.cpp">
+      <Filter>map\manager\models</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_material.cpp">
+      <Filter>map\manager\models</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -437,9 +437,6 @@
     <ClInclude Include="..\..\..\src\graphic\gfx_fog_renderer.h">
       <Filter>engine\renderer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_mesh.h">
-      <Filter>map\manager\models</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_mesh_manager.h">
       <Filter>map\manager\models</Filter>
     </ClInclude>
@@ -479,9 +476,6 @@
     <ClInclude Include="..\..\..\src\graphic\gfx_component.h">
       <Filter>map\components</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_component_manager.h">
-      <Filter>map\components</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_mesh_component.h">
       <Filter>map\components\model</Filter>
     </ClInclude>
@@ -506,9 +500,6 @@
     <ClInclude Include="..\..\..\src\graphic\gfx_sun_manager.h">
       <Filter>map\manager\lights</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_material.h">
-      <Filter>map\manager\models</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_material_manager.h">
       <Filter>map\manager\models</Filter>
     </ClInclude>
@@ -529,6 +520,15 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_mesh_renderer.h">
       <Filter>engine\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_material_component.h">
+      <Filter>map\components\model</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_mesh.h">
+      <Filter>map\manager\models</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_material.h">
+      <Filter>map\manager\models</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

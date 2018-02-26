@@ -11,8 +11,6 @@ namespace MeshManager
 {
     void OnStart();
     void OnExit();
-
-    void Clear();
     
     CMeshPtr CreateMeshFromFile(const Base::Char* _pFilename, int _GenFlag);
 

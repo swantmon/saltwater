@@ -1,14 +1,7 @@
-//
-//  gfx_model.cpp
-//  graphic
-//
-//  Created by Tobias Schwandt on 03/11/14.
-//  Copyright (c) 2014 TU Ilmenau. All rights reserved.
-//
 
 #include "graphic/gfx_precompiled.h"
 
-#include "gfx_mesh.h"
+#include "graphic/gfx_mesh.h"
 
 namespace Gfx
 {

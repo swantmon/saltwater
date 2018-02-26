@@ -10,7 +10,7 @@
 #include "core/core_time.h"
 
 #include "data/data_component.h"
-#include "data/data_component_manager.h"
+#include "data/data_component.h"
 #include "data/data_camera_component.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
@@ -19,7 +19,7 @@
 #include "data/data_texture_2d.h"
 
 #include "graphic/gfx_component.h"
-#include "graphic/gfx_component_manager.h"
+#include "graphic/gfx_component.h"
 #include "graphic/gfx_camera_component.h"
 #include "graphic/gfx_camera_manager.h"
 #include "graphic/gfx_texture_manager.h"
@@ -55,7 +55,7 @@ namespace
         
     private:
 
-        void OnDirtyComponent(Dt::IComponent* _pComponent);
+        void OnDirtyComponent(Base::IComponent* _pComponent);
     };
 } // namespace
 
@@ -75,7 +75,7 @@ namespace
     
     void CGfxCameraManager::OnStart()
     {
-        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(DATA_DIRTY_COMPONENT_METHOD(&CGfxCameraManager::OnDirtyComponent));
+        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(BASE_DIRTY_COMPONENT_METHOD(&CGfxCameraManager::OnDirtyComponent));
     }
     
     // -----------------------------------------------------------------------------
@@ -94,7 +94,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxCameraManager::OnDirtyComponent(Dt::IComponent* _pComponent)
+    void CGfxCameraManager::OnDirtyComponent(Base::IComponent* _pComponent)
     {
         if (_pComponent->GetTypeID() != Base::CTypeInfo::GetTypeID<Dt::CCameraComponent>()) return;
 

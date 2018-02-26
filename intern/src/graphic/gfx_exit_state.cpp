@@ -10,7 +10,7 @@
 #include "graphic/gfx_background_renderer.h"
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_camera_manager.h"
-#include "graphic/gfx_component_manager.h"
+#include "graphic/gfx_component.h"
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_debug_renderer.h"
 #include "graphic/gfx_exit_state.h"
@@ -102,8 +102,6 @@ namespace
         // Exit manager
         // -----------------------------------------------------------------------------
         BASE_CONSOLE_STREAMINFO("Gfx> Exit manager...");
-
-        CComponentManager::GetInstance().Clear();
 
         PointLightManager ::OnExit();
         AreaLightManager  ::OnExit();

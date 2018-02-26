@@ -10,7 +10,7 @@
 
 #include "base/base_include_glm.h"
 
-#include "data/data_component_manager.h"
+#include "data/data_component.h"
 #include "data/data_component_facet.h"
 #include "data/data_entity.h"
 #include "data/data_map.h"
@@ -19,7 +19,7 @@
 #include "data/data_transformation_facet.h"
 
 #include "graphic/gfx_buffer_manager.h"
-#include "graphic/gfx_component_manager.h"
+#include "graphic/gfx_component.h"
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_main.h"
 #include "graphic/gfx_mesh.h"
@@ -94,7 +94,7 @@ namespace
         
     private:
 
-        void OnDirtyComponent(Dt::IComponent* _pComponent);
+        void OnDirtyComponent(Base::IComponent* _pComponent);
 
         void CreateSM(unsigned int _Size, CInternSunComponent* _pInternLight);
 
@@ -176,7 +176,7 @@ namespace
         // -----------------------------------------------------------------------------
         // On dirty stuff
         // -----------------------------------------------------------------------------
-        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(DATA_DIRTY_COMPONENT_METHOD(&CGfxSunManager::OnDirtyComponent));
+        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(BASE_DIRTY_COMPONENT_METHOD(&CGfxSunManager::OnDirtyComponent));
     }
     
     // -----------------------------------------------------------------------------
@@ -239,7 +239,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxSunManager::OnDirtyComponent(Dt::IComponent* _pComponent)
+    void CGfxSunManager::OnDirtyComponent(Base::IComponent* _pComponent)
     {
         if (_pComponent->GetTypeID() != Base::CTypeInfo::GetTypeID<Dt::CSunComponent>()) return;
 

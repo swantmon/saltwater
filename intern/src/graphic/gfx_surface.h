@@ -1,10 +1,3 @@
-//
-//  gfx_surface.h
-//  graphic
-//
-//  Created by Tobias Schwandt on 03/11/14.
-//  Copyright (c) 2014 TU Ilmenau. All rights reserved.
-//
 
 #pragma once
 

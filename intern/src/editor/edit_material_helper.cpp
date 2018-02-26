@@ -5,7 +5,7 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
-#include "data/data_component_manager.h"
+#include "data/data_component.h"
 #include "data/data_material_helper.h"
 #include "data/data_texture_manager.h"
 

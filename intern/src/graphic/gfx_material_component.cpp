@@ -1,33 +1,33 @@
 
 #include "graphic/gfx_precompiled.h"
 
-#include "graphic/gfx_mesh_component.h"
+#include "graphic/gfx_material_component.h"
 
 namespace Gfx
 {
-    CMeshComponent::CMeshComponent()
-        : m_MeshPtr   ()
+    CMaterialComponent::CMaterialComponent()
+        : m_MaterialPtr()
     {
     }
 
     // -----------------------------------------------------------------------------
 
-    CMeshComponent::~CMeshComponent()
+    CMaterialComponent::~CMaterialComponent()
     {
-        m_MeshPtr    = 0;
+        m_MaterialPtr = 0;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CMeshComponent::SetMesh(CMeshPtr _MeshPtr)
+    void CMaterialComponent::SetMaterial(CMaterialPtr _MaterialPtr)
     {
-        m_MeshPtr = _MeshPtr;
+        m_MaterialPtr = _MaterialPtr;
     }
 
     // -----------------------------------------------------------------------------
 
-    CMeshPtr CMeshComponent::GetMesh()
+    CMaterialPtr CMaterialComponent::GetMaterial()
     {
-        return m_MeshPtr;
+        return m_MaterialPtr;
     }
 } // namespace Gfx

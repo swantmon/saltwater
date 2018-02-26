@@ -15,16 +15,18 @@
 #include "data/data_entity_manager.h"
 #include "data/data_hierarchy_facet.h"
 #include "data/data_light_probe_component.h"
+#include "data/data_material_component.h"
 #include "data/data_mesh_component.h"
 #include "data/data_transformation_facet.h"
 
 #include "graphic/gfx_ar_renderer.h"
 #include "graphic/gfx_buffer_manager.h"
-#include "graphic/gfx_component_manager.h"
+#include "graphic/gfx_component.h"
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_debug_renderer.h"
 #include "graphic/gfx_light_probe_component.h"
 #include "graphic/gfx_main.h"
+#include "graphic/gfx_material_component.h"
 #include "graphic/gfx_mesh_component.h"
 #include "graphic/gfx_mesh_manager.h"
 #include "graphic/gfx_mesh_renderer.h"
@@ -1023,6 +1025,7 @@ namespace
             if (_pEntity->GetComponentFacet()->HasComponent<Dt::CMeshComponent>())
             {
                 CMeshComponent* pGfxComponent = CComponentManager::GetInstance().GetComponent<CMeshComponent>(_pEntity->GetComponentFacet()->GetComponent<Dt::CMeshComponent>()->GetID());
+                CMaterialComponent* pGfxMaterialComponent = CComponentManager::GetInstance().GetComponent<CMaterialComponent>(_pEntity->GetComponentFacet()->GetComponent<Dt::CMaterialComponent>()->GetID());
 
                 assert(pGfxComponent != nullptr);
 
@@ -1037,9 +1040,9 @@ namespace
 
                 CMaterialPtr MaterialPtr;
 
-                if (pGfxComponent->GetMaterial() != 0)
+                if (pGfxMaterialComponent != 0)
                 {
-                    MaterialPtr = pGfxComponent->GetMaterial();
+                    MaterialPtr = pGfxMaterialComponent->GetMaterial();
                 }
                 else
                 {

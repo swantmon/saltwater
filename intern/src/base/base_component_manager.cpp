@@ -1,9 +1,9 @@
 
-#include "data/data_precompiled.h"
+#include "base/base_precompiled.h"
 
-#include "data/data_component_manager.h"
+#include "base/base_component_manager.h"
 
-namespace Dt
+namespace CON
 {
     CComponentManager::CComponentManager()
         : m_Components        ( )
@@ -30,4 +30,4 @@ namespace Dt
     {
         m_ComponentDelegates.push_back(_NewDelegate);
     }
-} // namespace Dt
+} // namespace CON

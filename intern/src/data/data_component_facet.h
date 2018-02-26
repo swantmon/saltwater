@@ -13,7 +13,7 @@ namespace Dt
     {
     public:
 
-        typedef std::vector<Dt::IComponent*> CComponentVector;
+        typedef std::vector<CON::IComponent*> CComponentVector;
 
     public:
 

@@ -9,13 +9,14 @@
 #include "core/core_time.h"
 
 #include "data/data_component.h"
-#include "data/data_component_manager.h"
+#include "data/data_component.h"
 #include "data/data_component_facet.h"
 #include "data/data_entity.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_light_probe_component.h"
 #include "data/data_map.h"
+#include "data/data_material_component.h"
 #include "data/data_mesh_component.h"
 #include "data/data_mesh_helper.h"
 #include "data/data_point_light_component.h"
@@ -25,12 +26,14 @@
 
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_component.h"
-#include "graphic/gfx_component_manager.h"
+#include "graphic/gfx_component.h"
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_histogram_renderer.h"
 #include "graphic/gfx_light_probe_component.h"
 #include "graphic/gfx_light_probe_manager.h"
 #include "graphic/gfx_main.h"
+#include "graphic/gfx_material.h"
+#include "graphic/gfx_material_component.h"
 #include "graphic/gfx_mesh.h"
 #include "graphic/gfx_mesh_component.h"
 #include "graphic/gfx_mesh_manager.h"
@@ -187,7 +190,7 @@ namespace
 
     private:
 
-        void OnDirtyComponent(Dt::IComponent* _pComponent);
+        void OnDirtyComponent(Base::IComponent* _pComponent);
 
         CInternComponent* AllocateLightProbeFacet(Base::ID _ID, unsigned int _SpecularFaceSize, unsigned int _DiffuseFaceSize);
 
@@ -397,7 +400,7 @@ namespace
         // Register dirty handler for automatic light probe / reflection
         // creation
         // -----------------------------------------------------------------------------
-        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(DATA_DIRTY_COMPONENT_METHOD(&CGfxLightProbeManager::OnDirtyComponent));
+        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(BASE_DIRTY_COMPONENT_METHOD(&CGfxLightProbeManager::OnDirtyComponent));
     }
 
     // -----------------------------------------------------------------------------
@@ -462,7 +465,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxLightProbeManager::OnDirtyComponent(Dt::IComponent* _pComponent)
+    void CGfxLightProbeManager::OnDirtyComponent(Base::IComponent* _pComponent)
     {
         if (_pComponent->GetTypeID() != Base::CTypeInfo::GetTypeID<Dt::CLightProbeComponent>()) return;
 
@@ -938,11 +941,13 @@ namespace
             // -----------------------------------------------------------------------------
             // Get material and upload correct attributes
             // -----------------------------------------------------------------------------
-            CMaterialPtr MaterialPtr = pGfxComponent->GetMaterial();
-
-            if (MaterialPtr == 0)
+            CMaterialPtr MaterialPtr = SurfacePtr->GetMaterial();
+            
+            if (pDtComponent->GetHostEntity()->GetComponentFacet()->HasComponent<Dt::CMaterialComponent>())
             {
-                MaterialPtr = SurfacePtr->GetMaterial();
+                Base::ID MaterialID = pDtComponent->GetHostEntity()->GetComponentFacet()->GetComponent<Dt::CMaterialComponent>()->GetID();
+
+                MaterialPtr = Gfx::CComponentManager::GetInstance().GetComponent<Gfx::CMaterialComponent>(MaterialID)->GetMaterial();
             }
 
             assert(MaterialPtr != 0);

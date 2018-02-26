@@ -2,8 +2,6 @@
 #pragma once
 
 #include "graphic/gfx_component.h"
-#include "graphic/gfx_lod.h"
-#include "graphic/gfx_material.h"
 #include "graphic/gfx_mesh.h"
 
 namespace Gfx
@@ -15,9 +13,6 @@ namespace Gfx
         void SetMesh(CMeshPtr _ModelPtr);
         CMeshPtr GetMesh();
 
-        void SetMaterial(CMaterialPtr _MaterialPtr);
-        CMaterialPtr GetMaterial();
-
     public:
 
         CMeshComponent();
@@ -25,7 +20,6 @@ namespace Gfx
 
     protected:
 
-        CMeshPtr     m_ModelPtr;
-        CMaterialPtr m_MaterialPtr;
+        CMeshPtr m_MeshPtr;
     };
 } // namespace Gfx

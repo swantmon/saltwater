@@ -4,7 +4,6 @@
 #include "base/base_include_glm.h"
 
 #include "graphic/gfx_material.h"
-#include "graphic/gfx_surface.h"
 
 namespace Gfx
 {
@@ -36,8 +35,8 @@ namespace MaterialManager
 
     CMaterialPtr CreateMaterial(const SMaterialDescriptor& _rDescriptor);
 
-    CMaterialPtr GetDefaultMaterial();
+    CMaterialPtr CreateMaterialFromAssimp(const void* _pMaterialClass);
 
-    CMaterialPtr GetMaterialByHash(unsigned int _Hash);
+    const CMaterialPtr GetDefaultMaterial();
 } // namespace MaterialManager
 } // namespace Gfx

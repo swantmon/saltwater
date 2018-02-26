@@ -2,9 +2,25 @@
 #pragma once
 
 #include "base/base_type_info.h"
+#include "base/base_component.h"
+#include "base/base_component_manager.h"
 
 #pragma warning(push)
 #pragma warning(disable : 4505)
+
+namespace Dt
+{
+    class CComponentManager
+    {
+    public:
+        static Base::CComponentManager& GetInstance()
+        {
+            static Base::CComponentManager s_Singleton;
+
+            return s_Singleton;
+        }
+    };
+} // namespace Dt 
 
 namespace Dt
 {
@@ -13,20 +29,8 @@ namespace Dt
 
 namespace Dt
 {
-    class IComponent
-    {
-    public:
-
-        virtual const Base::ID GetTypeID() const = 0;
-
-        virtual ~IComponent() {};
-    };
-} // namespace Dt
-
-namespace Dt
-{
     template<class T>
-    class CComponent : public IComponent
+    class CComponent : public Base::IComponent
     {
     public:
 
@@ -68,7 +72,6 @@ namespace Dt
         CComponent();
         ~CComponent();
 
-        const Base::ID GetID() const;
         const Base::ID GetTypeID() const override;
 
         const Dt::CEntity* GetHostEntity() const;
@@ -82,13 +85,11 @@ namespace Dt
 
     private:
 
-        Base::ID           m_ID;
         SFlags             m_Flags;
         const Dt::CEntity* m_pHostEntity;
 
     private:
 
-        friend class CComponentManager;
         friend class CEntity;
     };
 } // namespace Dt
@@ -115,14 +116,6 @@ namespace Dt
     CComponent<T>::~CComponent()
     {
 
-    }
-
-    // -----------------------------------------------------------------------------
-
-    template<class T>
-    const Base::ID CComponent<T>::GetID() const
-    {
-        return m_ID;
     }
 
     // -----------------------------------------------------------------------------

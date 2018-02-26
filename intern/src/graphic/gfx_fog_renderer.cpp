@@ -10,7 +10,7 @@
 #include "base/base_include_glm.h"
 
 #include "data/data_component_facet.h"
-#include "data/data_component_manager.h"
+#include "data/data_component.h"
 #include "data/data_entity.h"
 #include "data/data_map.h"
 #include "data/data_mesh_helper.h"
@@ -19,7 +19,7 @@
 
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"
-#include "graphic/gfx_component_manager.h"
+#include "graphic/gfx_component.h"
 #include "graphic/gfx_fog_renderer.h"
 #include "graphic/gfx_histogram_renderer.h"
 #include "graphic/gfx_main.h"

@@ -7,7 +7,7 @@
 #include "base/base_uncopyable.h"
 
 #include "data/data_component_facet.h"
-#include "data/data_component_manager.h"
+#include "data/data_component.h"
 #include "data/data_entity.h"
 #include "data/data_light_probe_component.h"
 #include "data/data_map.h"
@@ -15,7 +15,7 @@
 #include "data/data_transformation_facet.h"
 
 #include "graphic/gfx_buffer_manager.h"
-#include "graphic/gfx_component_manager.h"
+#include "graphic/gfx_component.h"
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_debug_renderer.h"
 #include "graphic/gfx_histogram_renderer.h"

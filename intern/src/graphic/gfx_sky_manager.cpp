@@ -11,7 +11,6 @@
 #include "core/core_time.h"
 
 #include "data/data_component.h"
-#include "data/data_component_manager.h"
 #include "data/data_component_facet.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
@@ -21,7 +20,7 @@
 #include "data/data_sun_component.h"
 
 #include "graphic/gfx_buffer_manager.h"
-#include "graphic/gfx_component_manager.h"
+#include "graphic/gfx_component.h"
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_main.h"
 #include "graphic/gfx_mesh_manager.h"
@@ -192,7 +191,7 @@ namespace
 
     private:
 
-        void OnDirtyComponent(Dt::IComponent* _pComponent);
+        void OnDirtyComponent(Base::IComponent* _pComponent);
 
         void RenderSkybox(Dt::CSkyComponent* _pDataSkyFacet, CInternSkyFacet* _pOutput);
 
@@ -578,7 +577,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Register dirty entity handler for automatic sky creation
         // -----------------------------------------------------------------------------
-        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(DATA_DIRTY_COMPONENT_METHOD(&CGfxSkyManager::OnDirtyComponent));
+        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(BASE_DIRTY_COMPONENT_METHOD(&CGfxSkyManager::OnDirtyComponent));
 
         // -----------------------------------------------------------------------------
         // Acquire an selection ticket at selection renderer
@@ -635,7 +634,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxSkyManager::OnDirtyComponent(Dt::IComponent* _pComponent)
+    void CGfxSkyManager::OnDirtyComponent(Base::IComponent* _pComponent)
     {
         if (_pComponent->GetTypeID() != Base::CTypeInfo::GetTypeID<Dt::CSkyComponent>()) return;
 

@@ -41,9 +41,6 @@
     <ClInclude Include="..\..\..\src\data\data_component.h">
       <Filter>map\entity\components</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_component_manager.h">
-      <Filter>map\entity\components</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\data\data_ar_controller_component.h">
       <Filter>map\entity\components\plugins</Filter>
     </ClInclude>
@@ -131,9 +128,6 @@
       <Filter>textures</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\data\data_precompiled.cpp" />
-    <ClCompile Include="..\..\..\src\data\data_component_manager.cpp">
-      <Filter>map\entity\components</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\data\data_ar_controller_component.cpp">
       <Filter>map\entity\components\plugins</Filter>
     </ClCompile>

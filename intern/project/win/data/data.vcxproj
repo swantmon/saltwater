@@ -26,7 +26,6 @@
     <ClInclude Include="..\..\..\src\data\data_camera_component.h" />
     <ClInclude Include="..\..\..\src\data\data_component.h" />
     <ClInclude Include="..\..\..\src\data\data_component_facet.h" />
-    <ClInclude Include="..\..\..\src\data\data_component_manager.h" />
     <ClInclude Include="..\..\..\src\data\data_data_behavior.h" />
     <ClInclude Include="..\..\..\src\data\data_dof_component.h" />
     <ClInclude Include="..\..\..\src\data\data_entity.h" />
@@ -61,7 +60,6 @@
     <ClCompile Include="..\..\..\src\data\data_bloom_component.cpp" />
     <ClCompile Include="..\..\..\src\data\data_camera_component.cpp" />
     <ClCompile Include="..\..\..\src\data\data_component_facet.cpp" />
-    <ClCompile Include="..\..\..\src\data\data_component_manager.cpp" />
     <ClCompile Include="..\..\..\src\data\data_dof_component.cpp" />
     <ClCompile Include="..\..\..\src\data\data_entity.cpp" />
     <ClCompile Include="..\..\..\src\data\data_entity_manager.cpp" />

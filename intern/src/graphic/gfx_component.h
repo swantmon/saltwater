@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "base/base_component.h"
+#include "base/base_component_manager.h"
 #include "base/base_type_info.h"
 
 #pragma warning(push)
@@ -8,20 +10,22 @@
 
 namespace Gfx
 {
-    class IComponent
+    class CComponentManager
     {
     public:
+        static Base::CComponentManager& GetInstance()
+        {
+            static Base::CComponentManager s_Singleton;
 
-        virtual const Base::ID GetTypeID() const = 0;
-
-        virtual ~IComponent() {};
+            return s_Singleton;
+        }
     };
-} // namespace Gfx
+} // namespace Gfx 
 
 namespace Gfx
 {
     template<class T>
-    class CComponent : public IComponent
+    class CComponent : public Base::IComponent
     {
     public:
 
@@ -33,7 +37,7 @@ namespace Gfx
 
     private:
 
-        friend class CComponentManager;
+        friend class Base::CComponentManager;
     };
 } // namespace Gfx
 

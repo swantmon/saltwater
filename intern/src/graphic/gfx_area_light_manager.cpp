@@ -8,14 +8,14 @@
 #include "core/core_time.h"
 
 #include "data/data_component.h"
-#include "data/data_component_manager.h"
+#include "data/data_component.h"
 #include "data/data_area_light_component.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_map.h"
 
 #include "graphic/gfx_component.h"
-#include "graphic/gfx_component_manager.h"
+#include "graphic/gfx_component.h"
 #include "graphic/gfx_area_light_component.h"
 #include "graphic/gfx_area_light_manager.h"
 #include "graphic/gfx_buffer_manager.h"
@@ -81,7 +81,7 @@ namespace
 
     private:
 
-        void OnDirtyComponent(Dt::IComponent* _pComponent);
+        void OnDirtyComponent(Base::IComponent* _pComponent);
 
         void FilterTexture(Gfx::CTexturePtr _TexturePtr, Gfx::CTexturePtr _OutputTexturePtr);
     };
@@ -184,7 +184,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Register dirty entity handler for automatic sky creation
         // -----------------------------------------------------------------------------
-        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(DATA_DIRTY_COMPONENT_METHOD(&CGfxAreaLightManager::OnDirtyComponent));
+        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(BASE_DIRTY_COMPONENT_METHOD(&CGfxAreaLightManager::OnDirtyComponent));
     }
 
     // -----------------------------------------------------------------------------
@@ -208,7 +208,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxAreaLightManager::OnDirtyComponent(Dt::IComponent* _pComponent)
+    void CGfxAreaLightManager::OnDirtyComponent(Base::IComponent* _pComponent)
     {
         // -----------------------------------------------------------------------------
         // Vars
