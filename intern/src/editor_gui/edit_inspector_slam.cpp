@@ -96,6 +96,8 @@ namespace Edit
 		m_pSizeHS->setEnabled(!IsScalable);
 		m_pResolutionHS->setEnabled(!IsScalable);
 		m_pVoxelSizeHS->setEnabled(IsScalable);
+
+        m_pMemoryLabel->setText(QString::number(0.0f) + " MB");
     }
 
     // -----------------------------------------------------------------------------
