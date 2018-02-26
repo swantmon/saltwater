@@ -345,57 +345,8 @@ vec3 GetPosition(vec3 CameraPosition, vec3 RayDirection)
 
 void GetPositionAndColor(vec3 CameraPosition, vec3 RayDirection, out vec3 Vertex, out vec3 Color)
 {
-    const float TruncatedDistance = TRUNCATED_DISTANCE / 1000.0f;
-
-    const float StartLength = GetStartLength(CameraPosition, RayDirection, g_AABBMin, g_AABBMax);
-    const float EndLength = GetEndLength(CameraPosition, RayDirection, g_AABBMin, g_AABBMax);
-
-    float RayLength = StartLength;
-    float Step = TruncatedDistance;
-
-    float CurrentTSDF = GetVoxel(CameraPosition + RayLength * RayDirection).x;
-    float PreviousTSDF;
-    RayLength += Step;
-
-    Vertex = vec3(0.0f);
-    Color = vec3(0.0f);
-    
-    float NewStep;
-
-    vec3 PreviousPosition;
-    vec3 CurrentPosition;
-
-    while (RayLength < EndLength)
-    {
-        PreviousPosition = CameraPosition + RayLength * RayDirection;
-        RayLength += Step;
-        CurrentPosition = CameraPosition + RayLength * RayDirection;
-
-        PreviousTSDF = CurrentTSDF;
-        
-        CurrentTSDF = GetVoxelWithStep(CurrentPosition, RayDirection, NewStep).x;
-
-        if (NewStep > 0.0f)
-        {
-            RayLength += NewStep;
-        }
-        else if (CurrentTSDF < 0.0f && PreviousTSDF > 0.0f)
-        {
-            break;
-        }
-        
-        Step = CurrentTSDF < 1.0f ? VOXEL_SIZE : TruncatedDistance;
-    }
-
-    if (RayLength < EndLength)
-    {
-        float Ft = GetInterpolatedTSDF(PreviousPosition);
-        float Ftdt = GetInterpolatedTSDF(CurrentPosition);
-        float Ts = RayLength - Step * Ft / (Ftdt - Ft);
-
-        Vertex = CameraPosition + RayDirection * Ts;
-        Color = GetColor(Vertex); 
-    }
+    Vertex = GetPosition(CameraPosition, RayDirection);
+    Color = GetColor(Vertex); 
 }
 
 #endif
