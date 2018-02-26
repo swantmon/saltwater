@@ -330,27 +330,23 @@ namespace
         // -----------------------------------------------------------------------------
         // Prepare renderer
         // -----------------------------------------------------------------------------
-        
-
         ContextManager::SetRenderContext(m_DeferredContextPtr);
 
         // -----------------------------------------------------------------------------
-        // First pass: iterate throw render jobs and compute all meshes
+        // Iterate throw render jobs and render all meshes
         // -----------------------------------------------------------------------------
-        CRenderJobs::const_iterator EndOfRenderJobs = m_DeferredRenderJobs.end();
-
-        for (CRenderJobs::const_iterator CurrentRenderJob = m_DeferredRenderJobs.begin(); CurrentRenderJob != EndOfRenderJobs; ++CurrentRenderJob)
+        for (auto CurrentRenderJob : m_DeferredRenderJobs)
         {
-            CSurfacePtr SurfacePtr = CurrentRenderJob->m_SurfacePtr;
+            CSurfacePtr SurfacePtr = CurrentRenderJob.m_SurfacePtr;
 
-            const CMaterial* pMaterial = CurrentRenderJob->m_SurfaceMaterialPtr;
+            const CMaterial* pMaterial = CurrentRenderJob.m_SurfaceMaterialPtr;
 
             // -----------------------------------------------------------------------------
             // Upload data to buffer
             // -----------------------------------------------------------------------------
             SPerDrawCallConstantBufferVS ModelBuffer;
 
-            ModelBuffer.m_ModelMatrix = CurrentRenderJob->m_ModelMatrix;
+            ModelBuffer.m_ModelMatrix = CurrentRenderJob.m_ModelMatrix;
 
             BufferManager::UploadBufferData(m_ModelBufferPtr, &ModelBuffer);
 
@@ -409,17 +405,17 @@ namespace
 
                 ContextManager::ResetTexture(IndexOfTexture);
             }
-
-            ContextManager::ResetInputLayout();
-
-            ContextManager::ResetIndexBuffer();
-
-            ContextManager::ResetVertexBuffer();
-
-            ContextManager::ResetConstantBuffer(0);
-            ContextManager::ResetConstantBuffer(1);
-            ContextManager::ResetConstantBuffer(2);
         }
+
+        ContextManager::ResetInputLayout();
+
+        ContextManager::ResetIndexBuffer();
+
+        ContextManager::ResetVertexBuffer();
+
+        ContextManager::ResetConstantBuffer(0);
+        ContextManager::ResetConstantBuffer(1);
+        ContextManager::ResetConstantBuffer(2);
 
         ContextManager::ResetShaderVS();
 
@@ -446,34 +442,26 @@ namespace
 
         Performance::BeginEvent("Actors Hit Proxy");
 
-        // -----------------------------------------------------------------------------
-        // Prepare renderer
-        // -----------------------------------------------------------------------------
         ContextManager::SetRenderContext(m_HitProxyContextPtr);
 
         ContextManager::SetTopology(STopology::TriangleList);
 
-        // -----------------------------------------------------------------------------
-        // First pass: iterate throw render jobs and compute all meshes
-        // -----------------------------------------------------------------------------
-        CRenderJobs::const_iterator EndOfRenderJobs = m_DeferredRenderJobs.end();
-
-        for (CRenderJobs::const_iterator CurrentRenderJob = m_DeferredRenderJobs.begin(); CurrentRenderJob != EndOfRenderJobs; ++CurrentRenderJob)
+        for (auto CurrentRenderJob : m_DeferredRenderJobs)
         {
-            CSurfacePtr  SurfacePtr  = CurrentRenderJob->m_SurfacePtr;
+            CSurfacePtr  SurfacePtr  = CurrentRenderJob.m_SurfacePtr;
 
             // -----------------------------------------------------------------------------
             // Upload data to buffer
             // -----------------------------------------------------------------------------
             SPerDrawCallConstantBufferVS ModelBuffer;
 
-            ModelBuffer.m_ModelMatrix = CurrentRenderJob->m_ModelMatrix;
+            ModelBuffer.m_ModelMatrix = CurrentRenderJob.m_ModelMatrix;
 
             BufferManager::UploadBufferData(m_ModelBufferPtr, &ModelBuffer);
 
             SHitProxyProperties HitProxyProperties;
 
-            HitProxyProperties.m_ID = static_cast<unsigned int>(CurrentRenderJob->m_EntityID);
+            HitProxyProperties.m_ID = static_cast<unsigned int>(CurrentRenderJob.m_EntityID);
 
             BufferManager::UploadBufferData(m_HitProxyPassPSBufferPtr, &HitProxyProperties);
 
@@ -495,21 +483,21 @@ namespace
             ContextManager::SetInputLayout(SurfacePtr->GetShaderVS()->GetInputLayout());
 
             ContextManager::DrawIndexed(SurfacePtr->GetNumberOfIndices(), 0, 0);
-
-            ContextManager::ResetInputLayout();
-
-            ContextManager::ResetIndexBuffer();
-
-            ContextManager::ResetVertexBuffer();
-
-            ContextManager::ResetConstantBuffer(0);
-            ContextManager::ResetConstantBuffer(1);
-            ContextManager::ResetConstantBuffer(2);
-
-            ContextManager::ResetShaderPS();
-
-            ContextManager::ResetShaderVS();
         }
+
+        ContextManager::ResetInputLayout();
+
+        ContextManager::ResetIndexBuffer();
+
+        ContextManager::ResetVertexBuffer();
+
+        ContextManager::ResetConstantBuffer(0);
+        ContextManager::ResetConstantBuffer(1);
+        ContextManager::ResetConstantBuffer(2);
+
+        ContextManager::ResetShaderPS();
+
+        ContextManager::ResetShaderVS();
 
         ContextManager::ResetTopology();
 

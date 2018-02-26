@@ -5,9 +5,6 @@
 
 namespace Gfx
 {
-    // -------------------------
-    // Equals the camera lens
-    // -------------------------
     CCamera::CCamera()
         : m_ProjectionMatrix      ()
         , m_ViewProjectionMatrix  ()

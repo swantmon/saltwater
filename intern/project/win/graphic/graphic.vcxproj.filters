@@ -29,10 +29,10 @@
       <Filter>engine\layout</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_lod.cpp">
-      <Filter>map\manager\models</Filter>
+      <Filter>map\models</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_surface.cpp">
-      <Filter>map\manager\models</Filter>
+      <Filter>map\models</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_view_port.cpp">
       <Filter>engine\view ports</Filter>
@@ -153,7 +153,7 @@
       <Filter>engine\renderer</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_mesh_manager.cpp">
-      <Filter>map\manager\models</Filter>
+      <Filter>map\models</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_selection_renderer.cpp">
       <Filter>engine\renderer</Filter>
@@ -174,55 +174,55 @@
       <Filter>engine\textures</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_area_light_manager.cpp">
-      <Filter>map\manager\lights</Filter>
+      <Filter>map\lights</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_light_probe_manager.cpp">
-      <Filter>map\manager\lights</Filter>
+      <Filter>map\lights</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_point_light_manager.cpp">
-      <Filter>map\manager\lights</Filter>
+      <Filter>map\lights</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_sky_manager.cpp">
-      <Filter>map\manager\lights</Filter>
+      <Filter>map\lights</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_sun_manager.cpp">
-      <Filter>map\manager\lights</Filter>
+      <Filter>map\lights</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_material_manager.cpp">
-      <Filter>map\manager\models</Filter>
+      <Filter>map\models</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_mesh_renderer.cpp">
       <Filter>engine\renderer</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_mesh.cpp">
-      <Filter>map\manager\models</Filter>
+      <Filter>map\models</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_material.cpp">
-      <Filter>map\manager\models</Filter>
+      <Filter>map\models</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_area_light.cpp">
-      <Filter>map\manager\lights</Filter>
+      <Filter>map\lights</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_sun.cpp">
-      <Filter>map\manager\lights</Filter>
+      <Filter>map\lights</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_sky.cpp">
-      <Filter>map\manager\lights</Filter>
+      <Filter>map\lights</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_point_light.cpp">
-      <Filter>map\manager\lights</Filter>
+      <Filter>map\lights</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_light_probe.cpp">
-      <Filter>map\manager\lights</Filter>
+      <Filter>map\lights</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_camera.cpp">
-      <Filter>map\manager\camera</Filter>
+      <Filter>map\view</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_view.cpp">
-      <Filter>map\manager\camera</Filter>
+      <Filter>map\view</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_view_manager.cpp">
-      <Filter>map\manager\camera</Filter>
+      <Filter>map\view</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -263,10 +263,10 @@
       <Filter>engine\layout</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_lod.h">
-      <Filter>map\manager\models</Filter>
+      <Filter>map\models</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_surface.h">
-      <Filter>map\manager\models</Filter>
+      <Filter>map\models</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_view_port_set.h">
       <Filter>engine\view ports</Filter>
@@ -417,7 +417,7 @@
       <Filter>engine\renderer</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_mesh_manager.h">
-      <Filter>map\manager\models</Filter>
+      <Filter>map\models</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_selection_renderer.h">
       <Filter>engine\renderer</Filter>
@@ -453,55 +453,55 @@
       <Filter>engine</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_area_light_manager.h">
-      <Filter>map\manager\lights</Filter>
+      <Filter>map\lights</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_light_probe_manager.h">
-      <Filter>map\manager\lights</Filter>
+      <Filter>map\lights</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_point_light_manager.h">
-      <Filter>map\manager\lights</Filter>
+      <Filter>map\lights</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_sky_manager.h">
-      <Filter>map\manager\lights</Filter>
+      <Filter>map\lights</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_sun_manager.h">
-      <Filter>map\manager\lights</Filter>
+      <Filter>map\lights</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_material_manager.h">
-      <Filter>map\manager\models</Filter>
+      <Filter>map\models</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_mesh_renderer.h">
       <Filter>engine\renderer</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_mesh.h">
-      <Filter>map\manager\models</Filter>
+      <Filter>map\models</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_material.h">
-      <Filter>map\manager\models</Filter>
+      <Filter>map\models</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_area_light.h">
-      <Filter>map\manager\lights</Filter>
+      <Filter>map\lights</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_sun.h">
-      <Filter>map\manager\lights</Filter>
+      <Filter>map\lights</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_sky.h">
-      <Filter>map\manager\lights</Filter>
+      <Filter>map\lights</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_point_light.h">
-      <Filter>map\manager\lights</Filter>
+      <Filter>map\lights</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_light_probe.h">
-      <Filter>map\manager\lights</Filter>
+      <Filter>map\lights</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_camera.h">
-      <Filter>map\manager\camera</Filter>
+      <Filter>map\view</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_view.h">
-      <Filter>map\manager\camera</Filter>
+      <Filter>map\view</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_view_manager.h">
-      <Filter>map\manager\camera</Filter>
+      <Filter>map\view</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -634,17 +634,14 @@
     <Filter Include="map">
       <UniqueIdentifier>{e4eafc3a-84ac-4c03-a5cf-7207a9d5652a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="map\manager">
-      <UniqueIdentifier>{90be79bc-ccb4-4f41-9be1-79251d7bcc69}</UniqueIdentifier>
+    <Filter Include="map\lights">
+      <UniqueIdentifier>{052c8047-a167-4853-b3f9-06033bbc6ed8}</UniqueIdentifier>
     </Filter>
-    <Filter Include="map\manager\models">
+    <Filter Include="map\models">
       <UniqueIdentifier>{92e433e6-6b6c-4461-a57f-45a88b68bc58}</UniqueIdentifier>
     </Filter>
-    <Filter Include="map\manager\camera">
+    <Filter Include="map\view">
       <UniqueIdentifier>{45fd8bec-67d1-48cb-83bf-795fdc42fb7e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="map\manager\lights">
-      <UniqueIdentifier>{052c8047-a167-4853-b3f9-06033bbc6ed8}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

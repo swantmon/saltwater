@@ -1386,13 +1386,26 @@ namespace
                 // Set last data information of the surface
                 // -----------------------------------------------------------------------------
                 rSurface.m_NumberOfVertices = NumberOfVertices;
-                rSurface.m_NumberOfIndices = NumberOfIndices;
+                rSurface.m_NumberOfIndices  = NumberOfIndices;
 
                 // -----------------------------------------------------------------------------
                 // Delete allocated memory
                 // -----------------------------------------------------------------------------
                 Base::CMemory::Free(pUploadIndexData);
                 Base::CMemory::Free(pUploadVertexData);
+
+                // -----------------------------------------------------------------------------
+                // Load material from material manager
+                // -----------------------------------------------------------------------------
+                if (_pAssimpMesh->mMaterialIndex < pScene->mNumMaterials)
+                {
+                    aiMaterial* pMaterial = pScene->mMaterials[_pAssimpMesh->mMaterialIndex];
+
+                    if (pMaterial != 0)
+                    {
+                        rSurface.m_MaterialPtr = MaterialManager::CreateMaterialFromAssimp(pMaterial);
+                    }
+                }
             }
         };
 

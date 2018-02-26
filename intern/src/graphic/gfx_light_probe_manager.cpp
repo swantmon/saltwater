@@ -1085,16 +1085,13 @@ namespace
         CInternObject::CTargetSets&   rSpecularTargetSets   = _rInterLightProbeFacet.m_SpecularHDRTargetSetPtrs;
         CInternObject::CViewPortSets& rSpecularViewPortSets = _rInterLightProbeFacet.m_SpecularViewPortSetPtrs;
 
-        CInternObject::CTargetSets::iterator CurrentOfSpecularMipmap = rSpecularTargetSets.begin();
-        CInternObject::CTargetSets::iterator EndOfSpecularMipmaps    = rSpecularTargetSets.end();
-
         unsigned int IndexOfMipmap = 0;
 
         float NumberOfMiplevels    = static_cast<float>(rSpecularTargetSets.size());
         float MipmapRoughness      = 0.0f;
         float MipmapRoughnessDelta = 1.0f / NumberOfMiplevels;
 
-        for (; CurrentOfSpecularMipmap != EndOfSpecularMipmaps; ++CurrentOfSpecularMipmap)
+        for (auto CurrentOfSpecularMipmap : rSpecularTargetSets)
         {
             // -----------------------------------------------------------------------------
             // Upload per mipmap changing data
