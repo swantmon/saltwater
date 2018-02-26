@@ -436,7 +436,7 @@ namespace
 
         const int Width = pInternTexture->GetNumberOfPixelsU();
         const int Height = pInternTexture->GetNumberOfPixelsV();
-        const int LayerCount = pInternTexture->GetNumberOfTextures();
+        const int LayerCount = pInternTexture->GetNumberOfPixelsW();
 
         const int MipLevels = pInternTexture->GetNumberOfMipLevels();
 
