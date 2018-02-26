@@ -44,12 +44,12 @@ namespace
 
     private:
 
-        class CInternComponent : public CAreaLight
+        class CInternObject : public CAreaLight
         {
         public:
 
-            CInternComponent();
-            ~CInternComponent();
+            CInternObject();
+            ~CInternObject();
 
         private:
 
@@ -69,7 +69,7 @@ namespace
 
     private:
 
-        typedef Base::CManagedPool<CInternComponent, 4, 0> CAreaLights;
+        typedef Base::CManagedPool<CInternObject, 4, 0> CAreaLights;
 
     private:
 
@@ -93,7 +93,7 @@ namespace
 
 namespace 
 {
-    CGfxAreaLightManager::CInternComponent::CInternComponent()
+    CGfxAreaLightManager::CInternObject::CInternObject()
         : CAreaLight()
     {
 
@@ -101,7 +101,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    CGfxAreaLightManager::CInternComponent::~CInternComponent()
+    CGfxAreaLightManager::CInternObject::~CInternObject()
     {
     }
 } // namespace 
@@ -220,7 +220,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Vars
         // -----------------------------------------------------------------------------
-        CInternComponent* pGfxLightFacet = 0;
+        CInternObject* pGfxLightFacet = 0;
 
         // -----------------------------------------------------------------------------
         // Only if component has changed
@@ -241,7 +241,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Create facet
             // -----------------------------------------------------------------------------
-            CInternComponent* pGfxComponent = m_AreaLights.Allocate();
+            CInternObject* pGfxComponent = m_AreaLights.Allocate();
 
             // -----------------------------------------------------------------------------
             // Buffer
@@ -296,7 +296,7 @@ namespace
         }
         else
         {
-            pGfxLightFacet = static_cast<CInternComponent*>(pAreaLightComponent->GetFacet(Dt::CAreaLightComponent::Graphic));
+            pGfxLightFacet = static_cast<CInternObject*>(pAreaLightComponent->GetFacet(Dt::CAreaLightComponent::Graphic));
 
             if (pAreaLightComponent->GetHasTexture())
             {

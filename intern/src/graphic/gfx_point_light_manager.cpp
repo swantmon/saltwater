@@ -75,12 +75,12 @@ namespace
             glm::vec4 m_LightSettings; // InvSqrAttenuationRadius, AngleScale, AngleOffset, Has shadows
         };
 
-        class CInternComponent : public CPointLight
+        class CInternObject : public CPointLight
         {
         public:
 
-            CInternComponent();
-            ~CInternComponent();
+            CInternObject();
+            ~CInternObject();
 
         public:
 
@@ -94,7 +94,7 @@ namespace
 
     private:
 
-        typedef Base::CManagedPool<CInternComponent, 32, 0> CPointLights;
+        typedef Base::CManagedPool<CInternObject, 32, 0> CPointLights;
 
     private:
 
@@ -110,17 +110,17 @@ namespace
 
         void OnDirtyComponent(Base::IComponent* _pComponent);
 
-        void CreateRSM(unsigned int _Size, CInternComponent* _pInternLight);
+        void CreateRSM(unsigned int _Size, CInternObject* _pInternLight);
 
-        void CreateSM(unsigned int _Size, CInternComponent* _pInternLight);
+        void CreateSM(unsigned int _Size, CInternObject* _pInternLight);
 
-        void RenderShadows(CInternComponent& _rInternLight, const Dt::CPointLightComponent* _pDtPointLight, const glm::vec3& _rLightPosition);
+        void RenderShadows(CInternObject& _rInternLight, const Dt::CPointLightComponent* _pDtPointLight, const glm::vec3& _rLightPosition);
     };
 } // namespace 
 
 namespace 
 {
-    CGfxPointLightManager::CInternComponent::CInternComponent()
+    CGfxPointLightManager::CInternObject::CInternObject()
         : CPointLight        ()
         , m_RenderContextPtr ()
         , m_CurrentShadowType(Dt::CPointLightComponent::NoShadows)
@@ -130,7 +130,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    CGfxPointLightManager::CInternComponent::~CInternComponent()
+    CGfxPointLightManager::CInternObject::~CInternObject()
     {
         m_RenderContextPtr = 0;
     }
@@ -261,7 +261,7 @@ namespace
 
             if (pDtComponent->IsActiveAndUsable() == false) continue;
 
-            CInternComponent* pGfxPointLight = static_cast<CInternComponent*>(pDtComponent->GetFacet(Dt::CPointLightComponent::Graphic));
+            CInternObject* pGfxPointLight = static_cast<CInternObject*>(pDtComponent->GetFacet(Dt::CPointLightComponent::Graphic));
 
             if (pDtComponent->GetRefreshMode() == Dt::CPointLightComponent::Dynamic)
             {
@@ -313,7 +313,7 @@ namespace
 
         Dt::CPointLightComponent* pPointLightComponent = static_cast<Dt::CPointLightComponent*>(_pComponent);
 
-        CInternComponent* pGfxPointLightFacet = 0;
+        CInternObject* pGfxPointLightFacet = 0;
         Dt::CPointLightComponent::EShadowType ShadowType;
         unsigned int ShadowmapSizes[Dt::CPointLightComponent::NumberOfQualities] = { 256, 512, 1024, 2048 };
         unsigned int ShadowmapSize = 0;
@@ -359,7 +359,7 @@ namespace
         }
         else if ((DirtyFlags & Dt::CPointLightComponent::DirtyInfo) != 0)
         {
-            pGfxPointLightFacet = static_cast<CInternComponent*>(pPointLightComponent->GetFacet(Dt::CPointLightComponent::Graphic));
+            pGfxPointLightFacet = static_cast<CInternObject*>(pPointLightComponent->GetFacet(Dt::CPointLightComponent::Graphic));
 
             assert(pGfxPointLightFacet);
 
@@ -382,7 +382,7 @@ namespace
         }
         else
         {
-            pGfxPointLightFacet = static_cast<CInternComponent*>(pPointLightComponent->GetFacet(Dt::CPointLightComponent::Graphic));
+            pGfxPointLightFacet = static_cast<CInternObject*>(pPointLightComponent->GetFacet(Dt::CPointLightComponent::Graphic));
         }
         
         assert(pGfxPointLightFacet);
@@ -434,7 +434,7 @@ namespace
 
     // -----------------------------------------------------------------------------
     
-    void CGfxPointLightManager::CreateRSM(unsigned int _Size, CInternComponent* _pInternLight)
+    void CGfxPointLightManager::CreateRSM(unsigned int _Size, CInternObject* _pInternLight)
     {
         unsigned int NumberOfShadowMapPixel = _Size;
         
@@ -532,7 +532,7 @@ namespace
 
     // -----------------------------------------------------------------------------
     
-    void CGfxPointLightManager::CreateSM(unsigned int _Size, CInternComponent* _pInternLight)
+    void CGfxPointLightManager::CreateSM(unsigned int _Size, CInternObject* _pInternLight)
     {
         unsigned int NumberOfShadowMapPixel = _Size;
         
@@ -609,7 +609,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxPointLightManager::RenderShadows(CInternComponent& _rInternLight, const Dt::CPointLightComponent* _pDtPointLight, const glm::vec3& _rLightPosition)
+    void CGfxPointLightManager::RenderShadows(CInternObject& _rInternLight, const Dt::CPointLightComponent* _pDtPointLight, const glm::vec3& _rLightPosition)
     {
         if (_rInternLight.m_CurrentShadowType == Dt::CPointLightComponent::NoShadows) return;
 

@@ -781,16 +781,16 @@ namespace
             const Dt::CEntity& rCurrentEntity = *pDtComponent->GetHostEntity();
 
             // -----------------------------------------------------------------------------
-            // Get graphic facet
+            // Get graphic
             // -----------------------------------------------------------------------------
             if (rCurrentEntity.GetLayer() == Dt::SEntityLayer::AR)
             {
-                Gfx::CMesh* pGfxComponent = static_cast<Gfx::CMesh*>(pDtComponent->GetFacet(Dt::CMeshComponent::Graphic));
+                Gfx::CMesh* pMeshObject = static_cast<Gfx::CMesh*>(pDtComponent->GetFacet(Dt::CMeshComponent::Graphic));
 
                 // -----------------------------------------------------------------------------
                 // Surface
                 // -----------------------------------------------------------------------------
-                CSurfacePtr SurfacePtr = pGfxComponent->GetLOD(0)->GetSurface();
+                CSurfacePtr SurfacePtr = pMeshObject->GetLOD(0)->GetSurface();
 
                 if (SurfacePtr == nullptr)
                 {

@@ -91,13 +91,13 @@ namespace
         struct SCameraRenderJob
         {
             Dt::CCameraComponent* m_pDtComponent;
-            Gfx::CCamera* m_pGfxComponent;
+            Gfx::CCamera* m_pCameraObject;
         };
 
         struct SSkyRenderJob
         {
             Dt::CSkyComponent* m_pDtComponent;
-            Gfx::CSky* m_pGfxComponent;
+            Gfx::CSky* m_pSkyObject;
         };
 
         struct SSkytextureBufferPS
@@ -534,7 +534,7 @@ namespace
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
         ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
         
-        ContextManager::SetTexture(0, rCurrentJob.m_pGfxComponent->GetCubemapPtr());
+        ContextManager::SetTexture(0, rCurrentJob.m_pSkyObject->GetCubemapPtr());
         ContextManager::SetTexture(1, TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget());
         
         ContextManager::DrawIndexed(MeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
@@ -576,7 +576,7 @@ namespace
 
         SCameraRenderJob& rRenderJob = m_CameraRenderJobs[0];
 
-        if (rRenderJob.m_pGfxComponent->GetBackgroundTexture2D() == nullptr)
+        if (rRenderJob.m_pCameraObject->GetBackgroundTexture2D() == nullptr)
         {
             return;
         }
@@ -619,7 +619,7 @@ namespace
         SSkytextureBufferPS PSBuffer;
 
         PSBuffer.m_HDRFactor     = HDRIntensity;
-        PSBuffer.m_IsHDR         = rRenderJob.m_pGfxComponent->GetBackgroundTexture2D()->GetSemantic() == Dt::CTextureBase::HDR ? 1.0f : 0.0f;
+        PSBuffer.m_IsHDR         = rRenderJob.m_pCameraObject->GetBackgroundTexture2D()->GetSemantic() == Dt::CTextureBase::HDR ? 1.0f : 0.0f;
         PSBuffer.m_ExposureIndex = static_cast<float>(HistogramRenderer::GetLastExposureHistoryIndex());
 
         BufferManager::UploadBufferData(PSBufferSetPtr->GetBuffer(0), &PSBuffer);
@@ -650,7 +650,7 @@ namespace
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
         ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
 
-        ContextManager::SetTexture(0, rRenderJob.m_pGfxComponent->GetBackgroundTexture2D());
+        ContextManager::SetTexture(0, rRenderJob.m_pCameraObject->GetBackgroundTexture2D());
         ContextManager::SetTexture(1, TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget());
 
         ContextManager::DrawIndexed(MeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
@@ -825,7 +825,7 @@ namespace
                 SCameraRenderJob NewRenderJob;
 
                 NewRenderJob.m_pDtComponent  = pDtComponent;
-                NewRenderJob.m_pGfxComponent = static_cast<Gfx::CCamera*>(pDtComponent->GetFacet(Dt::CCameraComponent::Graphic));
+                NewRenderJob.m_pCameraObject = static_cast<Gfx::CCamera*>(pDtComponent->GetFacet(Dt::CCameraComponent::Graphic));
 
                 m_CameraRenderJobs.push_back(NewRenderJob);
             }
@@ -845,8 +845,8 @@ namespace
 
             SSkyRenderJob NewRenderJob;
 
-            NewRenderJob.m_pDtComponent  = pDtComponent;
-            NewRenderJob.m_pGfxComponent = static_cast<Gfx::CSky*>(pDtComponent->GetFacet(Dt::CSkyComponent::Graphic));
+            NewRenderJob.m_pDtComponent = pDtComponent;
+            NewRenderJob.m_pSkyObject   = static_cast<Gfx::CSky*>(pDtComponent->GetFacet(Dt::CSkyComponent::Graphic));
 
             m_SkyRenderJobs.push_back(NewRenderJob);
         }
