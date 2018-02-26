@@ -29,6 +29,8 @@ namespace Edit
 
     private:
 
+        void OnMemoryUpdate(Edit::CMessage& _rMessage);
+
         bool m_IsIntegrationPaused;
         bool m_IsTrackingPaused;
 

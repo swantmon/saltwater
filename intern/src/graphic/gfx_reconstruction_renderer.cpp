@@ -94,6 +94,7 @@ namespace
         void PauseIntegration(bool _Paused);
         void PauseTracking(bool _Paused);
         void ChangeCamera(bool _IsTrackingCamera);
+        float GetReconstructionSize();
 
         void OnReconstructionUpdate(const MR::SReconstructionSettings& _Settings);
 
@@ -1400,6 +1401,22 @@ namespace
         m_UseTrackingCamera = _IsTrackingCamera;
     }
 
+    float CGfxReconstructionRenderer::GetReconstructionSize()
+    {
+        if (m_pScalableReconstructor != nullptr)
+        {
+            return m_pScalableReconstructor->GetReconstructionSize();
+        }
+        else
+        {
+            MR::SReconstructionSettings Settings;
+            m_pReconstructor->GetReconstructionSettings(&Settings);
+
+            int Resolution = Settings.m_VolumeResolution;
+            return Resolution * Resolution * Resolution * sizeof(uint32_t) / (1024.0f * 1024.0f);
+        }
+    }
+
 } // namespace
 
 namespace Gfx
@@ -1542,6 +1559,13 @@ namespace ReconstructionRenderer
     void ChangeCamera(bool _IsTrackingCamera)
     {
         CGfxReconstructionRenderer::GetInstance().ChangeCamera(_IsTrackingCamera);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    float GetReconstructionSize()
+    {
+        return CGfxReconstructionRenderer::GetInstance().GetReconstructionSize();
     }
 
 } // namespace Voxel

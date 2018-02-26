@@ -98,6 +98,8 @@ namespace Edit
 		m_pVoxelSizeHS->setEnabled(IsScalable);
 
         m_pMemoryLabel->setText(QString::number(0.0f) + " MB");
+
+        Edit::MessageManager::Register(Edit::SGUIMessageType::MR_SLAM_Reconstruction_Memory_Update, EDIT_RECEIVE_MESSAGE(&CInspectorSLAM::OnMemoryUpdate));
     }
 
     // -----------------------------------------------------------------------------
@@ -240,6 +242,17 @@ namespace Edit
 		m_pResolutionHS->setEnabled(!isScalable); 
 		m_pVoxelSizeHS->setEnabled(isScalable);
 	}
+
+    // -----------------------------------------------------------------------------
+
+    void CInspectorSLAM::OnMemoryUpdate(Edit::CMessage& _rMessage)
+    {
+        float Memory = _rMessage.Get<float>();
+
+        _rMessage.SetResult(1);
+
+        m_pMemoryLabel->setText(QString::number(Memory) + " MB");
+    }
 
 	// -----------------------------------------------------------------------------
 

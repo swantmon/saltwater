@@ -37,5 +37,6 @@ namespace ReconstructionRenderer
     void PauseIntegration(bool _Paused);
     void PauseTracking(bool _Paused);
     void ChangeCamera(bool _IsTrackingCamera);
+    float GetReconstructionSize();
 } // namespace ReconstructionRenderer
 } // namespace Gfx

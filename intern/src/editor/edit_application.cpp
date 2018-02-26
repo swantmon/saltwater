@@ -246,6 +246,12 @@ namespace
             Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::Graphic_FPS_Info, NewMessage);
 
             // -----------------------------------------------------------------------------
+            // Send SLAM reconstruction size to editor
+            // -----------------------------------------------------------------------------
+
+            Edit::Helper::SLAM::OnUpdate();
+
+            // -----------------------------------------------------------------------------
             // State engine
             // -----------------------------------------------------------------------------
             Edit::CState::EStateType NextState;

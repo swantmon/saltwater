@@ -26,6 +26,7 @@ namespace
     public:
 
         void OnStart();
+        void OnUpdate();
         void OnExit();
 
     private:
@@ -64,6 +65,19 @@ namespace
         Edit::MessageManager::Register(Edit::SGUIMessageType::MR_SLAM_Reconstruction_Pause_Integration, EDIT_RECEIVE_MESSAGE(&CSLAMHelper::OnSLAMReconstructionPauseIntegration));
         Edit::MessageManager::Register(Edit::SGUIMessageType::MR_SLAM_Reconstruction_Pause_Tracking, EDIT_RECEIVE_MESSAGE(&CSLAMHelper::OnSLAMReconstructionPauseTracking));
         Edit::MessageManager::Register(Edit::SGUIMessageType::MR_SLAM_Reconstruction_Change_Camera, EDIT_RECEIVE_MESSAGE(&CSLAMHelper::OnSLAMReconstructionChangeCamera));
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CSLAMHelper::OnUpdate()
+    {
+        Edit::CMessage NewMessage;
+
+        NewMessage.Put<float>(Gfx::ReconstructionRenderer::GetReconstructionSize());
+
+        NewMessage.Reset();
+
+        Edit::MessageManager::SendMessage(Edit::SGUIMessageType::MR_SLAM_Reconstruction_Memory_Update, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -148,6 +162,13 @@ namespace SLAM
     void OnStart()
     {
         CSLAMHelper::GetInstance().OnStart();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void OnUpdate()
+    {
+        CSLAMHelper::GetInstance().OnUpdate();
     }
 
     // -----------------------------------------------------------------------------

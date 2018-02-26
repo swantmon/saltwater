@@ -8,6 +8,7 @@ namespace SLAM
 {
 	
     void OnStart();
+    void OnUpdate();
     void OnExit();
 
 } // namespace SLAM
