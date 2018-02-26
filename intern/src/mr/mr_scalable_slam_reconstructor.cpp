@@ -149,16 +149,7 @@ namespace
         glm::ivec3 m_Offset;
         int m_Index;
     };
-
-    struct SGridRasterization
-    {
-        glm::ivec3 m_Offset;
-        int32_t m_Resolution;
-        float m_CubeSize;
-        float m_ParentSize;
-        float Padding[2];
-    };
-
+    
     struct SPointRasterization
     {
         glm::ivec3 m_Offset;
@@ -467,10 +458,9 @@ namespace MR
         m_TrackingDataConstantBufferPtr = 0;
         m_RaycastPyramidConstantBufferPtr = 0;
         m_BilateralFilterConstantBufferPtr = 0;
-        m_HierarchyConstantBufferPtr = 0;
         m_AtomicCounterBufferPtr = 0;
         m_IndexedIndirectBufferPtr = 0;
-        m_GridRasterizationBufferPtr = 0;
+
         m_VolumeQueueBufferPtr = 0;
         m_RootVolumeInstanceBufferPtr = 0;
         m_VolumeBuffers.m_RootVolumePoolPtr = 0;
@@ -664,7 +654,6 @@ namespace MR
 
         ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
         ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
-        ContextManager::SetConstantBuffer(2, m_GridRasterizationBufferPtr);
 
         ContextManager::SetImageTexture(0, m_RawVertexMapPtr);
 
@@ -1302,27 +1291,20 @@ namespace MR
         ConstantBufferDesc.m_NumberOfBytes = 16;
         ConstantBufferDesc.m_pBytes = &m_ReconstructionSettings.m_DepthThreshold;
         m_BilateralFilterConstantBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
-                
-        ConstantBufferDesc.m_Usage = CBuffer::GPURead;
-        ConstantBufferDesc.m_Binding = CBuffer::ConstantBuffer;
-        ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
-        ConstantBufferDesc.m_NumberOfBytes = sizeof(float) * MR::SReconstructionSettings::GRID_LEVELS;
-        ConstantBufferDesc.m_pBytes = &m_ReconstructionSettings.m_GridResolutions;
-        m_HierarchyConstantBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
-
+        
+        SIndirectBuffers ZeroIndirectData = {};
         ConstantBufferDesc.m_Usage = CBuffer::GPURead;
         ConstantBufferDesc.m_Binding = CBuffer::ResourceBuffer;
         ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
         ConstantBufferDesc.m_NumberOfBytes = sizeof(SIndirectBuffers);
+        ConstantBufferDesc.m_pBytes = &ZeroIndirectData;
         m_IndexedIndirectBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
-        
+
+        SPointRasterization ZeroPointRasterization = {};
         ConstantBufferDesc.m_Binding = CBuffer::ConstantBuffer;
         ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
-        ConstantBufferDesc.m_NumberOfBytes = sizeof(SGridRasterization);
-        ConstantBufferDesc.m_pBytes = nullptr;
+        ConstantBufferDesc.m_pBytes = &ZeroPointRasterization;
         ConstantBufferDesc.m_Usage = CBuffer::GPURead;
-        m_GridRasterizationBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
-
         ConstantBufferDesc.m_NumberOfBytes = sizeof(SPointRasterization);
         m_PointRasterizationBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
 
@@ -1334,7 +1316,6 @@ namespace MR
                                              ConstantBufferDesc.m_NumberOfBytes * sizeof(uint32_t);
         ConstantBufferDesc.m_pBytes = nullptr;
         ConstantBufferDesc.m_Usage = CBuffer::GPURead;
-        m_VolumeAtomicCounterBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
         m_VolumeQueueBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
         ConstantBufferDesc.m_NumberOfBytes = sizeof(uint32_t) * g_MaxVolumeInstanceCount;
         m_AtomicCounterBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
@@ -1355,12 +1336,18 @@ namespace MR
             m_VolumeBuffers.m_TSDFPoolPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
         }
 
+        uint32_t Zero[] = { 0, 0, 0, 0 };
+
+        ConstantBufferDesc.m_pBytes = Zero;
         ConstantBufferDesc.m_NumberOfBytes = sizeof(uint32_t) * 4;// m_ReconstructionSettings.GRID_LEVELS;
         m_VolumeBuffers.m_PoolItemCountBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
         
         ConstantBufferDesc.m_NumberOfBytes = sizeof(int32_t) * 4;// 16 bytes = minimum
         m_VolumeIndexBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
 
+        SScalableRaycastConstantBuffer ScalableRaycastZero = {};
+
+        ConstantBufferDesc.m_pBytes = &ScalableRaycastZero;
         ConstantBufferDesc.m_Binding = CBuffer::ConstantBuffer;
         ConstantBufferDesc.m_NumberOfBytes = sizeof(SScalableRaycastConstantBuffer);
         m_VolumeBuffers.m_AABBBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
@@ -1729,7 +1716,9 @@ namespace MR
         }
 
         BufferManager::UploadBufferData(m_VolumeBuffers.m_RootVolumePositionBufferPtr, Data.data());
-        ClearBuffer(m_VolumeBuffers.m_PoolItemCountBufferPtr);
+
+        uint32_t Zero[] = { 0, 0, 0, 0 };
+        BufferManager::UploadBufferData(m_VolumeBuffers.m_PoolItemCountBufferPtr, &Zero);
 
         std::memset(Data.data(), 0, DataSize);
         for (int i = 0; i < g_TSDFPoolSize / g_MegabyteSize; ++ i)

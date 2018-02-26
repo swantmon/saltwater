@@ -218,15 +218,12 @@ namespace MR
         Gfx::CBufferPtr m_TrackingDataConstantBufferPtr;
         Gfx::CBufferPtr m_RaycastPyramidConstantBufferPtr;
         Gfx::CBufferPtr m_BilateralFilterConstantBufferPtr;
-        Gfx::CBufferPtr m_HierarchyConstantBufferPtr;
 
         Gfx::CBufferPtr m_IndexedIndirectBufferPtr;
         
         Gfx::CBufferPtr m_RootVolumeInstanceBufferPtr;
-        Gfx::CBufferPtr m_VolumeAtomicCounterBufferPtr;
         Gfx::CBufferPtr m_VolumeQueueBufferPtr;
 
-        Gfx::CBufferPtr m_GridRasterizationBufferPtr;
         Gfx::CBufferPtr m_PointRasterizationBufferPtr;
 
         SScalableVolume m_VolumeBuffers;
