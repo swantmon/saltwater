@@ -189,6 +189,8 @@ namespace MR
         void ClearBuffer(Gfx::CBufferPtr BufferPtr, size_t Size);
         void ClearPool();
 
+        void ClearMarkerStatistics();
+
 		void SetupData();
         void SetupMeshes();
         void SetupRenderStates();

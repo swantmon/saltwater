@@ -1737,6 +1737,30 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
+    void CScalableSLAMReconstructor::ClearMarkerStatistics()
+    {
+        Performance::ResetEventStatistics("Rasterize point cloud");
+        Performance::ResetEventStatistics("Render single point cloud");
+        Performance::ResetEventStatistics("Gather point cloud data");
+        Performance::ResetEventStatistics("Fill indirect buffers");
+        Performance::ResetEventStatistics("Fill root grids");
+        Performance::ResetEventStatistics("Fill internal grids");
+        Performance::ResetEventStatistics("Compute new TSDF");
+        Performance::ResetEventStatistics("Check Root Volumes");
+        Performance::ResetEventStatistics("Update volume");
+        Performance::ResetEventStatistics("Create integration queues");
+        Performance::ResetEventStatistics("Integrate hierarchy");
+        Performance::ResetEventStatistics("Scalable Kinect Fusion");
+        Performance::ResetEventStatistics("Data Input");
+        Performance::ResetEventStatistics("Tracking");
+        Performance::ResetEventStatistics("TSDF Integration and Raycasting");
+        Performance::ResetEventStatistics("Updating root grid");
+        Performance::ResetEventStatistics("Raycasting for tracking");
+
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CScalableSLAMReconstructor::ResetReconstruction(const SReconstructionSettings* pReconstructionSettings)
     {
         m_RootVolumeMap.clear();
@@ -1755,6 +1779,8 @@ namespace MR
 		SetupShaders();
 
         ClearPool();
+
+        ClearMarkerStatistics();
     }
 
     // -----------------------------------------------------------------------------
