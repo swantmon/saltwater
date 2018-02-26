@@ -169,6 +169,8 @@ namespace MR
         CPlaneDetector& GetPlaneDetector();
 
         glm::int2 GetDepthImageSize();
+
+        float GetReconstructionSize();
         
     private:
 
@@ -311,5 +313,7 @@ namespace MR
         std::unique_ptr<CICPTracker> m_pTracker;
 
         std::vector<char> m_ClearVector;
+
+        float m_ReconstructionSize;
     };
 } // namespace MR

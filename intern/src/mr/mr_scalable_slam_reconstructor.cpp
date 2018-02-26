@@ -308,6 +308,8 @@ namespace MR
 
 	void CScalableSLAMReconstructor::SetupData()
 	{
+        m_ReconstructionSize = 0.0f;
+
         m_MinWeight = Base::CProgramParameters::GetInstance().Get("mr:slam:min_weight", 15);
 
         const int GridLevelCount = MR::SReconstructionSettings::GRID_LEVELS;
@@ -1487,6 +1489,12 @@ namespace MR
             BASE_CONSOLE_ERROR("TSDF pool buffer is full!");
         }
 
+        unsigned int ReconstructionSizeBytes = m_VolumeBuffers.m_RootGridPoolSize * m_ReconstructionSettings.m_VoxelsPerGrid[0] * sizeof(SGridPoolItem);
+        ReconstructionSizeBytes += m_VolumeBuffers.m_Level1PoolSize * m_ReconstructionSettings.m_VoxelsPerGrid[1] * sizeof(SGridPoolItem);
+        ReconstructionSizeBytes += m_VolumeBuffers.m_TSDFPoolSize * m_ReconstructionSettings.m_VoxelsPerGrid[2] * TSDFItemSize;
+
+        m_ReconstructionSize = static_cast<float>(ReconstructionSizeBytes) / g_MegabyteSize;
+
         //////////////////////////////////////////////////////////////////////////////////////
         // Integrate and raycast pyramid
         //////////////////////////////////////////////////////////////////////////////////////
@@ -1901,4 +1909,10 @@ namespace MR
         return glm::int2(Width, Height);
     }
     
+    // -----------------------------------------------------------------------------
+
+    float CScalableSLAMReconstructor::GetReconstructionSize()
+    {
+        return m_ReconstructionSize;
+    }
 } // namespace MR
