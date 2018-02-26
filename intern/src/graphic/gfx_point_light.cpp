@@ -1,11 +1,11 @@
 
 #include "graphic/gfx_precompiled.h"
 
-#include "graphic/gfx_point_light_component.h"
+#include "graphic/gfx_point_light.h"
 
 namespace Gfx
 {
-    CPointLightComponent::CPointLightComponent()
+    CPointLight::CPointLight()
         : m_TextureSMPtr ()
         , m_TextureRSMPtr()
         , m_CameraPtr    (0)
@@ -17,7 +17,7 @@ namespace Gfx
 
     // -----------------------------------------------------------------------------
 
-    CPointLightComponent::~CPointLightComponent()
+    CPointLight::~CPointLight()
     {
         m_TextureSMPtr = 0;
         m_CameraPtr    = 0;
@@ -25,35 +25,35 @@ namespace Gfx
 
     // -----------------------------------------------------------------------------
 
-    CTextureSetPtr CPointLightComponent::GetTextureSMSet() const
+    CTextureSetPtr CPointLight::GetTextureSMSet() const
     {
         return m_TextureSMPtr;
     }
 
     // -----------------------------------------------------------------------------
 
-    CTextureSetPtr CPointLightComponent::GetTextureRSMSet() const
+    CTextureSetPtr CPointLight::GetTextureRSMSet() const
     {
         return m_TextureRSMPtr;
     }
 
     // -----------------------------------------------------------------------------
 
-    CCameraPtr CPointLightComponent::GetCamera() const
+    CCameraPtr CPointLight::GetCamera() const
     {
         return m_CameraPtr;
     }
 
     // -----------------------------------------------------------------------------
 
-    unsigned int CPointLightComponent::GetShadowmapSize() const
+    unsigned int CPointLight::GetShadowmapSize() const
     {
         return m_ShadowmapSize;
     }
 
     // -----------------------------------------------------------------------------
 
-    Base::U64 CPointLightComponent::GetTimeStamp() const
+    Base::U64 CPointLight::GetTimeStamp() const
     {
         return m_TimeStamp;
     }

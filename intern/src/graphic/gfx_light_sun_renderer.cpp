@@ -17,7 +17,6 @@
 
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"
-#include "graphic/gfx_component.h"
 #include "graphic/gfx_histogram_renderer.h"
 #include "graphic/gfx_light_sun_renderer.h"
 #include "graphic/gfx_main.h"
@@ -26,7 +25,7 @@
 #include "graphic/gfx_sampler_manager.h"
 #include "graphic/gfx_shader_manager.h"
 #include "graphic/gfx_state_manager.h"
-#include "graphic/gfx_sun_component.h"
+#include "graphic/gfx_sun.h"
 #include "graphic/gfx_sun_manager.h"
 #include "graphic/gfx_target_set.h"
 #include "graphic/gfx_target_set_manager.h"
@@ -80,7 +79,7 @@ namespace
         struct SRenderJob
         {
             Dt::CSunComponent*  m_pDataSunLightFacet;
-            Gfx::CSunComponent* m_pGraphicSunLightFacet;
+            Gfx::CSun* m_pGraphicSunLightFacet;
         };
 
     private:
@@ -316,7 +315,7 @@ namespace
         for (; CurrentRenderJob != EndOfRenderJobs; ++CurrentRenderJob)
         {
         	Dt::CSunComponent* pDataSunFacet     = CurrentRenderJob->m_pDataSunLightFacet;
-        	Gfx::CSunComponent* pGraphicSunFacet = CurrentRenderJob->m_pGraphicSunLightFacet;
+        	Gfx::CSun* pGraphicSunFacet = CurrentRenderJob->m_pGraphicSunLightFacet;
 
         	// -----------------------------------------------------------------------------
             // Upload buffer data
@@ -392,10 +391,11 @@ namespace
 
         for (auto DataComponent : DataSunComponents)
         {
-            Dt::CSunComponent*  pDtComponent  = static_cast<Dt::CSunComponent*>(DataComponent);
-            Gfx::CSunComponent* pGfxComponent = CComponentManager::GetInstance().GetComponent<Gfx::CSunComponent>(pDtComponent->GetID());
+            Dt::CSunComponent* pDtComponent  = static_cast<Dt::CSunComponent*>(DataComponent);
 
             if (pDtComponent->IsActiveAndUsable() == false) continue;
+
+            Gfx::CSun* pGfxComponent = static_cast<Gfx::CSun*>(pDtComponent->GetFacet(Dt::CSunComponent::Graphic));
 
             // -----------------------------------------------------------------------------
             // Set sun into a new render job

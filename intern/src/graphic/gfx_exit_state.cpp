@@ -9,8 +9,6 @@
 #include "graphic/gfx_area_light_manager.h"
 #include "graphic/gfx_background_renderer.h"
 #include "graphic/gfx_buffer_manager.h"
-#include "graphic/gfx_camera_manager.h"
-#include "graphic/gfx_component.h"
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_debug_renderer.h"
 #include "graphic/gfx_exit_state.h"
@@ -80,7 +78,7 @@ namespace
         ShadowRenderer       ::OnExit();
         FogRenderer          ::OnExit();
         HistogramRenderer    ::OnExit();
-        MeshRenderer        ::OnExit();
+        MeshRenderer         ::OnExit();
         ARRenderer           ::OnExit();
         ParticleRenderer     ::OnExit();
         PostFXHDR            ::OnExit();
@@ -107,10 +105,10 @@ namespace
         AreaLightManager  ::OnExit();
         LightProbeManager ::OnExit();
         SkyManager        ::OnExit();
-        CameraManager     ::OnExit();
         SunManager        ::OnExit();
         MeshManager       ::OnExit();
         MaterialManager   ::OnExit();
+        ViewManager       ::OnExit();
 
         BASE_CONSOLE_STREAMINFO("Gfx> Finished exiting manager.");
 
@@ -126,7 +124,6 @@ namespace
         BufferManager   ::OnExit();
         TextureManager  ::OnExit();
         SamplerManager  ::OnExit();
-        ViewManager     ::OnExit();
 
         BASE_CONSOLE_STREAMINFO("Gfx> Finished exiting resource manager.");
 

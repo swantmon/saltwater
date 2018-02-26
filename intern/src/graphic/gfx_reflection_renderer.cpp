@@ -15,12 +15,11 @@
 #include "data/data_transformation_facet.h"
 
 #include "graphic/gfx_buffer_manager.h"
-#include "graphic/gfx_component.h"
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_debug_renderer.h"
 #include "graphic/gfx_histogram_renderer.h"
 #include "graphic/gfx_reflection_renderer.h"
-#include "graphic/gfx_light_probe_component.h"
+#include "graphic/gfx_light_probe.h"
 #include "graphic/gfx_light_probe_manager.h"
 #include "graphic/gfx_main.h"
 #include "graphic/gfx_mesh.h"
@@ -29,7 +28,7 @@
 #include "graphic/gfx_sampler_manager.h"
 #include "graphic/gfx_shader_manager.h"
 #include "graphic/gfx_state_manager.h"
-#include "graphic/gfx_sun_component.h"
+#include "graphic/gfx_sun.h"
 #include "graphic/gfx_target_set.h"
 #include "graphic/gfx_target_set_manager.h"
 #include "graphic/gfx_texture_manager.h"
@@ -1067,10 +1066,11 @@ namespace
 
         for (auto Component : DataComponents)
         {
-            Dt::CLightProbeComponent*  pDtComponent  = static_cast<Dt::CLightProbeComponent*>(Component);
-            Gfx::CLightProbeComponent* pGfxComponent = Gfx::CComponentManager::GetInstance().GetComponent<Gfx::CLightProbeComponent>(pDtComponent->GetID());
+            Dt::CLightProbeComponent* pDtComponent = static_cast<Dt::CLightProbeComponent*>(Component);
 
             if (pDtComponent->IsActiveAndUsable() == false) continue;
+
+            Gfx::CLightProbe* pGfxComponent = static_cast<Gfx::CLightProbe*>(pDtComponent->GetFacet(Dt::CLightProbeComponent::Graphic));
 
             // -----------------------------------------------------------------------------
             // Fill data

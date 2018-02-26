@@ -1,17 +1,16 @@
 #pragma once
 
 #include "graphic/gfx_camera.h"
-#include "graphic/gfx_component.h"
 #include "graphic/gfx_texture_set.h"
 
 namespace Gfx
 {
-    class CPointLightComponent : public CComponent<CPointLightComponent>
+    class CPointLight : public Base::CManagedPoolItemBase
     {
     public:
 
-        CPointLightComponent();
-        ~CPointLightComponent();
+        CPointLight();
+        ~CPointLight();
 
     public:
 
@@ -32,4 +31,9 @@ namespace Gfx
         unsigned int   m_ShadowmapSize;
         Base::U64      m_TimeStamp;
     };
+} // namespace Gfx
+
+namespace Gfx
+{
+    typedef Base::CManagedPoolItemPtr<CPointLight> CPointLightPtr;
 } // namespace Gfx

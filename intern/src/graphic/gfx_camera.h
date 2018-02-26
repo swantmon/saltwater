@@ -6,6 +6,7 @@
 #include "base/base_include_glm.h"
 #include "base/base_managed_pool.h"
 
+#include "graphic/gfx_texture.h"
 #include "graphic/gfx_view.h"
 
 namespace Gfx
@@ -18,6 +19,21 @@ namespace Gfx
         {
             Auto,
             Manual,
+        };
+
+    public:
+
+        struct SFace
+        {
+            enum Enum
+            {
+                Near = 0,
+                Far = 4,
+                Left = 0,
+                Right = 2,
+                Bottom = 0,
+                Top = 1
+            };
         };
 
     public:
@@ -104,51 +120,47 @@ namespace Gfx
 
     public:
 
-        struct SFace
-        {
-            enum Enum
-            {
-                Near   = 0,
-                Far    = 4,
-                Left   = 0,
-                Right  = 2,
-                Bottom = 0,
-                Top    = 1
-            };
-        };
+        void SetBackgroundTexture2D(CTexturePtr _Texture2DPtr);
+        CTexturePtr GetBackgroundTexture2D();
+
+        void SetTimeStamp(Base::U64 _TimeStamp);
+        Base::U64 GetTimeStamp();
 
     protected:
 
-        glm::mat4   m_ProjectionMatrix;
-        glm::mat4   m_ViewProjectionMatrix;
+        glm::mat4 m_ProjectionMatrix;
+        glm::mat4 m_ViewProjectionMatrix;
 
-        unsigned int     m_CullingMask;
-        float            m_Depth;
-        float            m_Left;
-        float            m_Right;
-        float            m_Bottom;
-        float            m_Top;
-        float            m_Near;
-        float            m_Far;
-        float            m_Radius;
-        float            m_ShutterSpeed;
-        float            m_Aperture;
-        float            m_ISO;
-        float            m_EC;
-        float            m_Size;
+        unsigned int m_CullingMask;
+        float        m_Depth;
+        float        m_Left;
+        float        m_Right;
+        float        m_Bottom;
+        float        m_Top;
+        float        m_Near;
+        float        m_Far;
+        float        m_Radius;
+        float        m_ShutterSpeed;
+        float        m_Aperture;
+        float        m_ISO;
+        float        m_EC;
+        float        m_Size;
 
-        ECameraMode      m_Mode;
+        ECameraMode m_Mode;
 
-        glm::vec3     m_BackgroundColor;
-        glm::vec3     m_ObjectSpaceFrustum[8];
-        glm::vec3     m_WorldSpaceFrustum [8];
+        glm::vec3 m_BackgroundColor;
+        glm::vec3 m_ObjectSpaceFrustum[8];
+        glm::vec3 m_WorldSpaceFrustum [8];
 
         Base::AABB3Float m_WorldAABB;
         Base::AABB2Float m_ViewportRect;
 
-        CCamera*         m_pSibling;
+        CCamera* m_pSibling;
 
-        CViewPtr         m_ViewPtr;
+        CViewPtr m_ViewPtr;
+
+        CTexturePtr m_BackgroundTexture2DPtr;
+        Base::U64   m_TimeStamp;
 
     protected:
 

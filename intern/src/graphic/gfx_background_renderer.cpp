@@ -20,18 +20,16 @@
 
 #include "graphic/gfx_background_renderer.h"
 #include "graphic/gfx_buffer_manager.h"
-#include "graphic/gfx_camera_component.h"
 #include "graphic/gfx_context_manager.h"
-#include "graphic/gfx_component.h"
 #include "graphic/gfx_histogram_renderer.h"
 #include "graphic/gfx_main.h"
 #include "graphic/gfx_mesh_manager.h"
 #include "graphic/gfx_performance.h"
 #include "graphic/gfx_sampler_manager.h"
 #include "graphic/gfx_shader_manager.h"
-#include "graphic/gfx_sky_component.h"
+#include "graphic/gfx_sky.h"
 #include "graphic/gfx_state_manager.h"
-#include "graphic/gfx_sun_component.h"
+#include "graphic/gfx_sun.h"
 #include "graphic/gfx_sun_manager.h"
 #include "graphic/gfx_target_set.h"
 #include "graphic/gfx_target_set_manager.h"
@@ -93,13 +91,13 @@ namespace
         struct SCameraRenderJob
         {
             Dt::CCameraComponent* m_pDtComponent;
-            Gfx::CCameraComponent* m_pGfxComponent;
+            Gfx::CCamera* m_pGfxComponent;
         };
 
         struct SSkyRenderJob
         {
             Dt::CSkyComponent* m_pDtComponent;
-            Gfx::CSkyComponent* m_pGfxComponent;
+            Gfx::CSky* m_pGfxComponent;
         };
 
         struct SSkytextureBufferPS
@@ -652,7 +650,7 @@ namespace
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
         ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
 
-        ContextManager::SetTexture(0, rRenderJob.m_pGfxComponent->GetBackgroundTextureSet()->GetTexture(0));
+        ContextManager::SetTexture(0, rRenderJob.m_pGfxComponent->GetBackgroundTexture2D());
         ContextManager::SetTexture(1, TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget());
 
         ContextManager::DrawIndexed(MeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
@@ -827,7 +825,7 @@ namespace
                 SCameraRenderJob NewRenderJob;
 
                 NewRenderJob.m_pDtComponent  = pDtComponent;
-                NewRenderJob.m_pGfxComponent = CComponentManager::GetInstance().GetComponent<Gfx::CCameraComponent>(pDtComponent->GetID());
+                NewRenderJob.m_pGfxComponent = static_cast<Gfx::CCamera*>(pDtComponent->GetFacet(Dt::CCameraComponent::Graphic));
 
                 m_CameraRenderJobs.push_back(NewRenderJob);
             }
@@ -848,7 +846,7 @@ namespace
             SSkyRenderJob NewRenderJob;
 
             NewRenderJob.m_pDtComponent  = pDtComponent;
-            NewRenderJob.m_pGfxComponent = CComponentManager::GetInstance().GetComponent<Gfx::CSkyComponent>(pDtComponent->GetID());
+            NewRenderJob.m_pGfxComponent = static_cast<Gfx::CSky*>(pDtComponent->GetFacet(Dt::CSkyComponent::Graphic));
 
             m_SkyRenderJobs.push_back(NewRenderJob);
         }

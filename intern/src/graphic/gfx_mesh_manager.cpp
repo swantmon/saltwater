@@ -18,10 +18,9 @@
 #include "data/data_mesh_component.h"
 
 #include "graphic/gfx_buffer_manager.h"
-#include "graphic/gfx_component.h"
 #include "graphic/gfx_input_layout.h"
 #include "graphic/gfx_material_manager.h"
-#include "graphic/gfx_mesh_component.h"
+#include "graphic/gfx_mesh.h"
 #include "graphic/gfx_mesh_manager.h"
 #include "graphic/gfx_shader.h"
 #include "graphic/gfx_shader_manager.h"
@@ -159,13 +158,6 @@ namespace
         CMeshPtr CreateRectangle(float _AxisX, float _AxisY, float _Width, float _Height);
 
     private:
-
-        class CInternMeshComponent : public CMeshComponent
-        {
-        private:
-
-            friend class CGfxMeshManager;
-        };
 
         class CInternMesh : public CMesh
         {
@@ -1173,9 +1165,7 @@ namespace
         {
             if (pMeshComponent->GetPredefinedMesh() == Dt::CMeshComponent::Nothing)
             {
-                auto pGfxMeshComponent = CComponentManager::GetInstance().Allocate<CInternMeshComponent>(pMeshComponent->GetID());
-
-                pGfxMeshComponent->SetMesh(CreateMeshFromFile(pMeshComponent->GetFilename().c_str(), pMeshComponent->GetGeneratorFlag()));
+                pMeshComponent->SetFacet(Dt::CMeshComponent::Graphic, CreateMeshFromFile(pMeshComponent->GetFilename().c_str(), pMeshComponent->GetGeneratorFlag()));
             }
             else
             {

@@ -7,8 +7,15 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
+#include "core/core_time.h"
+
+#include "data/data_component.h"
+#include "data/data_camera_component.h"
+#include "data/data_texture_manager.h"
+
 #include "graphic/gfx_main.h"
 #include "graphic/gfx_view_manager.h"
+#include "graphic/gfx_texture_manager.h"
 
 using namespace Gfx;
 
@@ -126,6 +133,8 @@ namespace
         
         void ResizeCameras(float _Width, float _Height);
         void ResizeViewPort(float _Width, float _Height);
+
+        void OnDirtyComponent(Base::IComponent* _pComponent);
         
     private:
         
@@ -216,6 +225,8 @@ namespace
             ResizeCameras(Width, Height);
             
             Gfx::Main::RegisterResizeHandler(GFX_BIND_RESIZE_METHOD(&CGfxViewManager::OnResize));
+
+            Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(BASE_DIRTY_COMPONENT_METHOD(&CGfxViewManager::OnDirtyComponent));
         }
         catch (...)
         {
@@ -313,8 +324,6 @@ namespace
         // Updating the view updates also all the cameras associated with this view.
         // -----------------------------------------------------------------------------
         GUIViewPtr->Update();
-        
-        
         
         // -----------------------------------------------------------------------------
         // Setup the post effect camera.
@@ -515,6 +524,62 @@ namespace
     CViewPortSetPtr CGfxViewManager::GetViewPortSet()
     {
         return m_ViewPortSetPtr;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxViewManager::OnDirtyComponent(Base::IComponent* _pComponent)
+    {
+        if (_pComponent->GetTypeID() != Base::CTypeInfo::GetTypeID<Dt::CCameraComponent>()) return;
+
+        Dt::CCameraComponent* pCameraComponent = static_cast<Dt::CCameraComponent*>(_pComponent);
+
+        // -----------------------------------------------------------------------------
+        // Dirty check
+        // -----------------------------------------------------------------------------
+        unsigned int DirtyFlags;
+
+        DirtyFlags = pCameraComponent->GetDirtyFlags();
+
+        // -----------------------------------------------------------------------------
+        // Check if it is a new actor
+        // -----------------------------------------------------------------------------
+        CInternCamera* pGraphicCamera = 0;
+
+        if ((DirtyFlags & Dt::CCameraComponent::DirtyCreate) != 0)
+        {
+            CViewPtr ViewPtr = CreateView();
+
+            pGraphicCamera = static_cast<CInternCamera*>(CreateCamera(ViewPtr).GetPtr());
+
+            pCameraComponent->SetFacet(Dt::CCameraComponent::Graphic, pGraphicCamera);
+        }
+        else if ((DirtyFlags & Dt::CCameraComponent::DirtyInfo) != 0)
+        {
+            pGraphicCamera = static_cast<CInternCamera*>(pCameraComponent->GetFacet(Dt::CCameraComponent::Graphic));
+        }
+
+        if (pGraphicCamera)
+        {
+            Base::U64 FrameTime = Core::Time::GetNumberOfFrame();
+
+            pGraphicCamera->SetTimeStamp(FrameTime);
+
+            if (pCameraComponent->GetClearFlag() == Dt::CCameraComponent::Texture)
+            {
+                if (pCameraComponent->GetTexture() != nullptr)
+                {
+                    unsigned int Hash = pCameraComponent->GetTexture()->GetHash();
+
+                    CTexturePtr BackgroundTexturePtr = TextureManager::GetTextureByHash(Hash);
+
+                    if (BackgroundTexturePtr.IsValid())
+                    {
+                        pGraphicCamera->SetBackgroundTexture2D(BackgroundTexturePtr);
+                    }
+                }
+            }
+        }
     }
 } // namespace
 

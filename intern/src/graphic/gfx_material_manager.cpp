@@ -13,10 +13,8 @@
 #include "data/data_component.h"
 #include "data/data_entity.h"
 #include "data/data_material_helper.h"
-#include "data/data_mesh_component.h"
 
-#include "graphic/gfx_component.h"
-#include "graphic/gfx_material_component.h"
+#include "graphic/gfx_material.h"
 #include "graphic/gfx_material_manager.h"
 #include "graphic/gfx_texture_manager.h"
 #include "graphic/gfx_sampler_manager.h"
@@ -142,13 +140,6 @@ namespace
         const CMaterialPtr GetDefaultMaterial();
 
     private:
-
-        class CInternMaterialComponent : public CMaterialComponent
-        {
-        private:
-
-            friend class CGfxMaterialManager;
-        };
 
         class CInternMaterial : public CMaterial
         {
@@ -307,23 +298,17 @@ namespace
         MaterialDescriptor.m_pAOMap        = pMaterialComponent->GetAmbientOcclusionTexture().length() > 0 ? pMaterialComponent->GetAmbientOcclusionTexture().c_str() : 0;
         MaterialDescriptor.m_pBumpMap      = pMaterialComponent->GetBumpTexture().length() > 0 ? pMaterialComponent->GetBumpTexture().c_str() : 0;
 
-        CInternMaterialComponent* pComponent = 0;
-
         CInternMaterial* pInternMaterial = 0;
 
-        if ((DirtyFlags & Dt::CMeshComponent::DirtyCreate) != 0)
+        if ((DirtyFlags & Dt::CMaterialComponent::DirtyCreate) != 0)
         {
-            pComponent = Gfx::CComponentManager::GetInstance().Allocate<CInternMaterialComponent>(ID);
-
             pInternMaterial = m_Materials.Allocate();
 
-            pComponent->SetMaterial(CMaterialPtr(pInternMaterial));
+            pMaterialComponent->SetFacet(Dt::CMaterialComponent::Graphic, pInternMaterial);
         }
-        else if ((DirtyFlags & Dt::CMeshComponent::DirtyInfo) != 0)
+        else if ((DirtyFlags & Dt::CMaterialComponent::DirtyInfo) != 0)
         {
-            pComponent = Gfx::CComponentManager::GetInstance().GetComponent<CInternMaterialComponent>(ID);
-
-            pInternMaterial = static_cast<CInternMaterial*>(pComponent->GetMaterial().GetPtr());
+            pInternMaterial = static_cast<CInternMaterial*>(pMaterialComponent->GetFacet(Dt::CMaterialComponent::Graphic));
         }
 
         if (pInternMaterial)

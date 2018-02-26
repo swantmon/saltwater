@@ -1,16 +1,15 @@
 #pragma once
 
-#include "graphic/gfx_component.h"
 #include "graphic/gfx_texture.h"
 
 namespace Gfx
 {
-    class CSkyComponent : public CComponent<CSkyComponent>
+    class CSky : public Base::CManagedPoolItemBase
     {
     public:
 
-        CSkyComponent();
-        ~CSkyComponent();
+        CSky();
+        ~CSky();
 
     public:
 
@@ -22,4 +21,9 @@ namespace Gfx
         CTexturePtr m_CubemapPtr;
         Base::U64   m_TimeStamp;
     };
+} // namespace Gfx
+
+namespace Gfx
+{
+    typedef Base::CManagedPoolItemPtr<CSky> CSkyPtr;
 } // namespace Gfx

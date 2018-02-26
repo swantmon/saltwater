@@ -19,16 +19,14 @@
 #include "data/data_transformation_facet.h"
 
 #include "graphic/gfx_buffer_manager.h"
-#include "graphic/gfx_component.h"
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_main.h"
 #include "graphic/gfx_mesh.h"
-#include "graphic/gfx_mesh_component.h"
 #include "graphic/gfx_performance.h"
 #include "graphic/gfx_sampler_manager.h"
 #include "graphic/gfx_shader_manager.h"
 #include "graphic/gfx_state_manager.h"
-#include "graphic/gfx_sun_component.h"
+#include "graphic/gfx_sun.h"
 #include "graphic/gfx_sun_manager.h"
 #include "graphic/gfx_target_set.h"
 #include "graphic/gfx_target_set_manager.h"
@@ -69,7 +67,7 @@ namespace
             glm::mat4 m_ModelMatrix;
         };
 
-        class CInternSunComponent : public CSunComponent
+        class CInternSunComponent : public CSun
         {
         public:
 
@@ -86,6 +84,12 @@ namespace
         };
 
     private:
+
+        typedef Base::CManagedPool<CInternSunComponent, 4, 0> CSuns;
+
+    private:
+
+        CSuns m_Suns;
 
         CShaderPtr m_ShadowShaderVSPtr;
         CShaderPtr m_ShadowSMShaderPSPtr;
@@ -105,7 +109,7 @@ namespace
 namespace
 {
     CGfxSunManager::CInternSunComponent::CInternSunComponent()
-        : CSunComponent     ()
+        : CSun              ()
         , m_RenderContextPtr()
     {
         
@@ -122,7 +126,8 @@ namespace
 namespace
 {
     CGfxSunManager::CGfxSunManager()
-        : m_ShadowShaderVSPtr     ()
+        : m_Suns                  ()
+        , m_ShadowShaderVSPtr     ()
         , m_ShadowSMShaderPSPtr   ()
         , m_LightCameraVSBufferPtr()
     {
@@ -183,6 +188,8 @@ namespace
     
     void CGfxSunManager::OnExit()
     {
+        m_Suns.Clear();
+
         m_ShadowShaderVSPtr      = 0;
         m_ShadowSMShaderPSPtr    = 0;
         m_LightCameraVSBufferPtr = 0;
@@ -200,7 +207,7 @@ namespace
 
             if (pDtComponent->IsActiveAndUsable() == false) continue;
 
-            CInternSunComponent* pGfxSunFacet = CComponentManager::GetInstance().GetComponent<CInternSunComponent>(pDtComponent->GetID());
+            CInternSunComponent* pGfxSunFacet = static_cast<CInternSunComponent*>(pDtComponent->GetFacet(Dt::CSunComponent::Graphic));
 
             assert(pGfxSunFacet != nullptr);
 
@@ -257,7 +264,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Create facet
             // -----------------------------------------------------------------------------
-            CInternSunComponent* pGfxSunFacet = CComponentManager::GetInstance().Allocate<CInternSunComponent>(pSunComponent->GetID());
+            CInternSunComponent* pGfxSunFacet = m_Suns.Allocate();
 
             // -----------------------------------------------------------------------------
             // Set shadow data
@@ -273,10 +280,15 @@ namespace
             // Set dirty
             // -----------------------------------------------------------------------------
             pGfxSunFacet->m_TimeStamp = Core::Time::GetNumberOfFrame() + 1;
+
+            // -----------------------------------------------------------------------------
+            // Link
+            // -----------------------------------------------------------------------------
+            pSunComponent->SetFacet(Dt::CSunComponent::Graphic, pGfxSunFacet);
         }
         else
         {
-            CInternSunComponent* pGfxSunFacet = CComponentManager::GetInstance().GetComponent<CInternSunComponent>(pSunComponent->GetID());
+            CInternSunComponent* pGfxSunFacet = static_cast<CInternSunComponent*>(pSunComponent->GetFacet(Dt::CSunComponent::Graphic));
 
             assert(pGfxSunFacet != nullptr);
 
@@ -403,9 +415,9 @@ namespace
 
             if (pDtComponent->IsActiveAndUsable() == false) continue;
 
-            CMeshComponent* pGfxComponent = CComponentManager::GetInstance().GetComponent<CMeshComponent>(pDtComponent->GetID());
+            CMesh* pGfxComponent = static_cast<CMesh*>(pDtComponent->GetFacet(Dt::CMeshComponent::Graphic));
 
-            CMeshPtr MeshPtr = pGfxComponent->GetMesh();
+            CMeshPtr MeshPtr = pGfxComponent;
 
             // -----------------------------------------------------------------------------
             // Upload model matrix to buffer

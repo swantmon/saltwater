@@ -19,7 +19,6 @@
 
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"
-#include "graphic/gfx_component.h"
 #include "graphic/gfx_fog_renderer.h"
 #include "graphic/gfx_histogram_renderer.h"
 #include "graphic/gfx_main.h"
@@ -28,7 +27,7 @@
 #include "graphic/gfx_sampler_manager.h"
 #include "graphic/gfx_shader_manager.h"
 #include "graphic/gfx_state_manager.h"
-#include "graphic/gfx_sun_component.h"
+#include "graphic/gfx_sun.h"
 #include "graphic/gfx_target_set.h"
 #include "graphic/gfx_target_set_manager.h"
 #include "graphic/gfx_texture_manager.h"
@@ -77,7 +76,7 @@ namespace
         {
             Dt::CVolumeFogComponent* m_pDtVolumeFogComponent;
             Dt::CSunComponent*       m_pDtSunComponent;
-            Gfx::CSunComponent*      m_pGfxSunComponent;
+            Gfx::CSun*      m_pGfxSunComponent;
         };
 
         struct SGaussianShaderProperties
@@ -605,7 +604,7 @@ namespace
         // Getting volume fog informations from render job
         // TODO: What happens if more then one DOF effect is available?
         // -----------------------------------------------------------------------------
-        Gfx::CSunComponent* pGfxSunFacet = m_VolumeFogRenderJobs[0].m_pGfxSunComponent;
+        Gfx::CSun* pGfxSunFacet = m_VolumeFogRenderJobs[0].m_pGfxSunComponent;
 
         assert(pGfxSunFacet != 0);
 
@@ -714,7 +713,7 @@ namespace
         // -----------------------------------------------------------------------------
         Dt::CVolumeFogComponent* pDtVolumeFogComponent = m_VolumeFogRenderJobs[0].m_pDtVolumeFogComponent;
         Dt::CSunComponent*       pDtSunComponent       = m_VolumeFogRenderJobs[0].m_pDtSunComponent;
-        Gfx::CSunComponent*      pGfxSunComponent      = m_VolumeFogRenderJobs[0].m_pGfxSunComponent;
+        Gfx::CSun*      pGfxSunComponent      = m_VolumeFogRenderJobs[0].m_pGfxSunComponent;
 
         assert(pDtVolumeFogComponent != 0 && pDtSunComponent != 0 && pGfxSunComponent != 0);
 
@@ -925,7 +924,7 @@ namespace
             // Looking for sun
             // -----------------------------------------------------------------------------
             const Dt::CSunComponent*  pDtSunComponent  = 0;
-            const Gfx::CSunComponent* pGfxSunComponent = 0;
+            const Gfx::CSun* pGfxSunComponent = 0;
 
             if (rCurrentEntity.GetComponentFacet()->HasComponent<Dt::CSunComponent>())
             {
@@ -943,7 +942,7 @@ namespace
 
             if (pDtSunComponent == nullptr) continue;
 
-            pGfxSunComponent = Gfx::CComponentManager::GetInstance().GetComponent<Gfx::CSunComponent>(pDtSunComponent->GetID());
+            pGfxSunComponent = static_cast<const Gfx::CSun*>(pDtSunComponent->GetFacet(Dt::CSunComponent::Graphic));
 
             // -----------------------------------------------------------------------------
             // Build job
@@ -951,7 +950,7 @@ namespace
             SVolumeFogRenderJob NewRenderJob;
 
             NewRenderJob.m_pDtVolumeFogComponent = pDtComponent;
-            NewRenderJob.m_pGfxSunComponent      = const_cast<Gfx::CSunComponent*>(pGfxSunComponent);
+            NewRenderJob.m_pGfxSunComponent      = const_cast<Gfx::CSun*>(pGfxSunComponent);
             NewRenderJob.m_pDtSunComponent       = const_cast<Dt::CSunComponent*>(pDtSunComponent);
 
             m_VolumeFogRenderJobs.push_back(NewRenderJob);

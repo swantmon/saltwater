@@ -20,14 +20,12 @@
 #include "data/data_transformation_facet.h"
 
 #include "graphic/gfx_buffer_manager.h"
-#include "graphic/gfx_component.h"
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_main.h"
-#include "graphic/gfx_material_component.h"
+#include "graphic/gfx_material.h"
 #include "graphic/gfx_mesh.h"
-#include "graphic/gfx_mesh_component.h"
 #include "graphic/gfx_performance.h"
-#include "graphic/gfx_point_light_component.h"
+#include "graphic/gfx_point_light.h"
 #include "graphic/gfx_point_light_manager.h"
 #include "graphic/gfx_sampler_manager.h"
 #include "graphic/gfx_shader_manager.h"
@@ -77,7 +75,7 @@ namespace
             glm::vec4 m_LightSettings; // InvSqrAttenuationRadius, AngleScale, AngleOffset, Has shadows
         };
 
-        class CInternComponent : public CPointLightComponent
+        class CInternComponent : public CPointLight
         {
         public:
 
@@ -96,6 +94,11 @@ namespace
 
     private:
 
+        typedef Base::CManagedPool<CInternComponent, 32, 0> CPointLights;
+
+    private:
+
+        CPointLights m_PointLights;
         CShaderPtr m_ShadowShaderVSPtr;
         CShaderPtr m_ShadowSMShaderPSPtr;
         CShaderPtr m_ShadowRSMShaderPSPtr;
@@ -118,7 +121,7 @@ namespace
 namespace 
 {
     CGfxPointLightManager::CInternComponent::CInternComponent()
-        : CPointLightComponent   ()
+        : CPointLight        ()
         , m_RenderContextPtr ()
         , m_CurrentShadowType(Dt::CPointLightComponent::NoShadows)
     {
@@ -136,7 +139,8 @@ namespace
 namespace 
 {
     CGfxPointLightManager::CGfxPointLightManager()
-        : m_ShadowShaderVSPtr      ()
+        : m_PointLights            ()
+        , m_ShadowShaderVSPtr      ()
         , m_ShadowSMShaderPSPtr    ()
         , m_ShadowRSMShaderPSPtr   ()
         , m_ShadowRSMTexShaderPSPtr()
@@ -232,6 +236,8 @@ namespace
 
     void CGfxPointLightManager::OnExit()
     {
+        m_PointLights.Clear();
+
         m_ShadowShaderVSPtr       = 0;
         m_ShadowSMShaderPSPtr     = 0;
         m_ShadowRSMShaderPSPtr    = 0;
@@ -255,15 +261,15 @@ namespace
 
             if (pDtComponent->IsActiveAndUsable() == false) continue;
 
-            CInternComponent* pGfxPointLightFacet = CComponentManager::GetInstance().GetComponent<CInternComponent>(pDtComponent->GetID());
+            CInternComponent* pGfxPointLight = static_cast<CInternComponent*>(pDtComponent->GetFacet(Dt::CPointLightComponent::Graphic));
 
             if (pDtComponent->GetRefreshMode() == Dt::CPointLightComponent::Dynamic)
             {
                 // -----------------------------------------------------------------------------
                 // Update views
                 // -----------------------------------------------------------------------------
-                Gfx::CViewPtr   ShadowViewPtr   = pGfxPointLightFacet->m_RenderContextPtr->GetCamera()->GetView();
-                Gfx::CCameraPtr ShadowCameraPtr = pGfxPointLightFacet->m_RenderContextPtr->GetCamera();
+                Gfx::CViewPtr   ShadowViewPtr   = pGfxPointLight->m_RenderContextPtr->GetCamera()->GetView();
+                Gfx::CCameraPtr ShadowCameraPtr = pGfxPointLight->m_RenderContextPtr->GetCamera();
 
                 glm::vec3 LightPosition  = pDtComponent->GetHostEntity()->GetWorldPosition();
                 glm::vec3 LightDirection = pDtComponent->GetDirection();
@@ -294,7 +300,7 @@ namespace
                 // -----------------------------------------------------------------------------
                 // Render
                 // -----------------------------------------------------------------------------
-                RenderShadows(*pGfxPointLightFacet, pDtComponent, LightPosition);
+                RenderShadows(*pGfxPointLight, pDtComponent, LightPosition);
             }
         }
     }
@@ -324,7 +330,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Create facet
             // -----------------------------------------------------------------------------
-            pGfxPointLightFacet = CComponentManager::GetInstance().Allocate<CInternComponent>(pPointLightComponent->GetID());
+            pGfxPointLightFacet = m_PointLights.Allocate();
 
             // -----------------------------------------------------------------------------
             // Set shadow data
@@ -345,10 +351,15 @@ namespace
             pGfxPointLightFacet->m_ShadowmapSize = ShadowmapSize;
 
             pGfxPointLightFacet->m_CurrentShadowType = ShadowType;
+
+            // -----------------------------------------------------------------------------
+            // Link
+            // -----------------------------------------------------------------------------
+            pPointLightComponent->SetFacet(Dt::CPointLightComponent::Graphic, pGfxPointLightFacet);
         }
         else if ((DirtyFlags & Dt::CPointLightComponent::DirtyInfo) != 0)
         {
-            pGfxPointLightFacet = CComponentManager::GetInstance().GetComponent<CInternComponent>(pPointLightComponent->GetID());
+            pGfxPointLightFacet = static_cast<CInternComponent*>(pPointLightComponent->GetFacet(Dt::CPointLightComponent::Graphic));
 
             assert(pGfxPointLightFacet);
 
@@ -371,7 +382,7 @@ namespace
         }
         else
         {
-            pGfxPointLightFacet = CComponentManager::GetInstance().GetComponent<CInternComponent>(pPointLightComponent->GetID());
+            pGfxPointLightFacet = static_cast<CInternComponent*>(pPointLightComponent->GetFacet(Dt::CPointLightComponent::Graphic));
         }
         
         assert(pGfxPointLightFacet);
@@ -634,9 +645,7 @@ namespace
 
             if (pDtComponent->IsActiveAndUsable() == false) continue;
 
-            CMeshComponent* pGfxComponent = CComponentManager::GetInstance().GetComponent<CMeshComponent>(pDtComponent->GetID());
-
-            CMeshPtr ModelPtr = pGfxComponent->GetMesh();
+            CMesh* pMesh = static_cast<CMesh*>(pDtComponent->GetFacet(Dt::CMeshComponent::Graphic));
 
             // -----------------------------------------------------------------------------
             // Upload model matrix to buffer
@@ -650,18 +659,18 @@ namespace
             // -----------------------------------------------------------------------------
             // Render surface of this entity
             // -----------------------------------------------------------------------------
-            CSurfacePtr SurfacePtr = ModelPtr->GetLOD(0)->GetSurface();
+            CSurfacePtr SurfacePtr = pMesh->GetLOD(0)->GetSurface();
 
             // -----------------------------------------------------------------------------
             // Set material
             // -----------------------------------------------------------------------------
-            CMaterialPtr MaterialPtr = SurfacePtr->GetMaterial();
+            const Gfx::CMaterial* pMaterial = SurfacePtr->GetMaterial();
 
             if (pDtComponent->GetHostEntity()->GetComponentFacet()->HasComponent<Dt::CMaterialComponent>())
             {
-                Base::ID MaterialID = pDtComponent->GetHostEntity()->GetComponentFacet()->GetComponent<Dt::CMaterialComponent>()->GetID();
+                auto pDtMaterialComponent = pDtComponent->GetHostEntity()->GetComponentFacet()->GetComponent<Dt::CMaterialComponent>();
 
-                MaterialPtr = Gfx::CComponentManager::GetInstance().GetComponent<Gfx::CMaterialComponent>(MaterialID)->GetMaterial();
+                pMaterial = static_cast<const Gfx::CMaterial*>(pDtMaterialComponent->GetFacet(Dt::CMaterialComponent::Graphic));
             }
 
             // -----------------------------------------------------------------------------
@@ -675,15 +684,15 @@ namespace
 
             if (_rInternLight.m_CurrentShadowType == Dt::CPointLightComponent::GlobalIllumination)
             {
-                if (MaterialPtr->GetKey().m_HasDiffuseTex)
+                if (pMaterial->GetKey().m_HasDiffuseTex)
                 {
                     ContextManager::SetShaderPS(m_ShadowRSMTexShaderPSPtr);
 
-                    for (unsigned int IndexOfTexture = 0; IndexOfTexture < MaterialPtr->GetTextureSetPS()->GetNumberOfTextures(); ++IndexOfTexture)
+                    for (unsigned int IndexOfTexture = 0; IndexOfTexture < pMaterial->GetTextureSetPS()->GetNumberOfTextures(); ++IndexOfTexture)
                     {
-                        ContextManager::SetSampler(IndexOfTexture, MaterialPtr->GetSamplerSetPS()->GetSampler(IndexOfTexture));
+                        ContextManager::SetSampler(IndexOfTexture, pMaterial->GetSamplerSetPS()->GetSampler(IndexOfTexture));
 
-                        ContextManager::SetTexture(IndexOfTexture, MaterialPtr->GetTextureSetPS()->GetTexture(IndexOfTexture));
+                        ContextManager::SetTexture(IndexOfTexture, pMaterial->GetTextureSetPS()->GetTexture(IndexOfTexture));
                     }
                 }
                 else
@@ -691,7 +700,7 @@ namespace
                     ContextManager::SetShaderPS(m_ShadowRSMShaderPSPtr);
                 }
 
-                BufferManager::UploadBufferData(m_RSMPSBuffer->GetBuffer(0), &MaterialPtr->GetMaterialAttributes());
+                BufferManager::UploadBufferData(m_RSMPSBuffer->GetBuffer(0), &pMaterial->GetMaterialAttributes());
 
                 // -----------------------------------------------------------------------------
 

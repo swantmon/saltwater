@@ -20,12 +20,9 @@
 #include "graphic/gfx_ar_renderer.h"
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"
-#include "graphic/gfx_component.h"
 #include "graphic/gfx_main.h"
 #include "graphic/gfx_material.h"
-#include "graphic/gfx_material_component.h"
 #include "graphic/gfx_mesh.h"
-#include "graphic/gfx_mesh_component.h"
 #include "graphic/gfx_mesh_manager.h"
 #include "graphic/gfx_performance.h"
 #include "graphic/gfx_state_manager.h"
@@ -90,10 +87,10 @@ namespace
 
         struct SRenderJob
         {
-            Base::ID     m_EntityID;
-            CSurfacePtr  m_SurfacePtr;
-            CMaterialPtr m_SurfaceMaterialPtr;
-            glm::mat4    m_ModelMatrix;
+            Base::ID         m_EntityID;
+            CSurfacePtr      m_SurfacePtr;
+            const CMaterial* m_SurfaceMaterialPtr;
+            glm::mat4        m_ModelMatrix;
         };
 
     private:
@@ -788,27 +785,25 @@ namespace
             // -----------------------------------------------------------------------------
             if (rCurrentEntity.GetLayer() == Dt::SEntityLayer::AR)
             {
-                Gfx::CMeshComponent* pGfxComponent = Gfx::CComponentManager::GetInstance().GetComponent<Gfx::CMeshComponent>(pDtComponent->GetID());
-
-                CMeshPtr MeshPtr = pGfxComponent->GetMesh();
+                Gfx::CMesh* pGfxComponent = static_cast<Gfx::CMesh*>(pDtComponent->GetFacet(Dt::CMeshComponent::Graphic));
 
                 // -----------------------------------------------------------------------------
                 // Surface
                 // -----------------------------------------------------------------------------
-                CSurfacePtr SurfacePtr = MeshPtr->GetLOD(0)->GetSurface();
+                CSurfacePtr SurfacePtr = pGfxComponent->GetLOD(0)->GetSurface();
 
                 if (SurfacePtr == nullptr)
                 {
                     break;
                 }
 
-                CMaterialPtr MaterialPtr = SurfacePtr->GetMaterial();
+                const CMaterial* pMaterial = SurfacePtr->GetMaterial();
                 
                 if (pDtComponent->GetHostEntity()->GetComponentFacet()->HasComponent<Dt::CMaterialComponent>())
                 {
-                    Base::ID MaterialID = pDtComponent->GetHostEntity()->GetComponentFacet()->GetComponent<Dt::CMaterialComponent>()->GetID();
+                    auto pDtMaterialComponent = pDtComponent->GetHostEntity()->GetComponentFacet()->GetComponent<Dt::CMaterialComponent>();
 
-                    MaterialPtr = Gfx::CComponentManager::GetInstance().GetComponent<Gfx::CMaterialComponent>(MaterialID)->GetMaterial();
+                    pMaterial = static_cast<const Gfx::CMaterial*>(pDtMaterialComponent->GetFacet(Dt::CMaterialComponent::Graphic));
                 }
 
                 // -----------------------------------------------------------------------------
@@ -818,7 +813,7 @@ namespace
 
                 NewRenderJob.m_EntityID           = rCurrentEntity.GetID();
                 NewRenderJob.m_SurfacePtr         = SurfacePtr;
-                NewRenderJob.m_SurfaceMaterialPtr = MaterialPtr;
+                NewRenderJob.m_SurfaceMaterialPtr = pMaterial;
                 NewRenderJob.m_ModelMatrix        = rCurrentEntity.GetTransformationFacet()->GetWorldMatrix();
 
                 m_RenderJobs.push_back(NewRenderJob);

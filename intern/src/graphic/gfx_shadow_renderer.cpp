@@ -17,7 +17,7 @@
 
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"
-#include "graphic/gfx_sun_component.h"
+#include "graphic/gfx_sun.h"
 #include "graphic/gfx_sun_manager.h"
 #include "graphic/gfx_main.h"
 #include "graphic/gfx_mesh.h"

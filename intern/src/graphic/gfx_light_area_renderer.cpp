@@ -11,10 +11,9 @@
 #include "data/data_entity.h"
 #include "data/data_map.h"
 
-#include "graphic/gfx_area_light_component.h"
+#include "graphic/gfx_area_light.h"
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"
-#include "graphic/gfx_component.h"
 #include "graphic/gfx_debug_renderer.h"
 #include "graphic/gfx_histogram_renderer.h"
 #include "graphic/gfx_light_area_renderer.h"
@@ -88,7 +87,7 @@ namespace
 
         struct SRenderJob
         {
-            Gfx::CAreaLightComponent* m_pGfxComponent;
+            Gfx::CAreaLight* m_pGfxComponent;
             Dt::CAreaLightComponent*  m_pDtComponent;
         };
 
@@ -441,7 +440,7 @@ namespace
         for (; CurrentRenderJob != EndOfRenderJobs; ++CurrentRenderJob)
         {
             Dt::CAreaLightComponent*  pDtComponent  = CurrentRenderJob->m_pDtComponent;
-            Gfx::CAreaLightComponent* pGfxComponent = CurrentRenderJob->m_pGfxComponent;
+            Gfx::CAreaLight* pGfxComponent = CurrentRenderJob->m_pGfxComponent;
 
             assert(pDtComponent && pGfxComponent);
 
@@ -536,7 +535,7 @@ namespace
         for (; CurrentRenderJob != EndOfRenderJobs; ++CurrentRenderJob)
         {
             Dt::CAreaLightComponent*  pDtComponent  = CurrentRenderJob->m_pDtComponent;
-            Gfx::CAreaLightComponent* pGfxComponent = CurrentRenderJob->m_pGfxComponent;
+            Gfx::CAreaLight* pGfxComponent = CurrentRenderJob->m_pGfxComponent;
 
             assert(pDtComponent && pGfxComponent);
 
@@ -620,7 +619,7 @@ namespace
             SRenderJob NewRenderJob;
 
             NewRenderJob.m_pDtComponent  = pDtComponent;
-            NewRenderJob.m_pGfxComponent = Gfx::CComponentManager::GetInstance().GetComponent<Gfx::CAreaLightComponent>(NewRenderJob.m_pDtComponent->GetID());
+            NewRenderJob.m_pGfxComponent = static_cast<Gfx::CAreaLight*>(pDtComponent->GetFacet(Dt::CAreaLightComponent::Graphic));
 
             m_RenderJobs.push_back(NewRenderJob);
         }

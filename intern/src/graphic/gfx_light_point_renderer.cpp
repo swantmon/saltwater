@@ -15,7 +15,6 @@
 
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"
-#include "graphic/gfx_component.h"
 #include "graphic/gfx_debug_renderer.h"
 #include "graphic/gfx_histogram_renderer.h"
 #include "graphic/gfx_light_point_renderer.h"
@@ -23,7 +22,7 @@
 #include "graphic/gfx_mesh.h"
 #include "graphic/gfx_mesh_manager.h"
 #include "graphic/gfx_performance.h"
-#include "graphic/gfx_point_light_component.h"
+#include "graphic/gfx_point_light.h"
 #include "graphic/gfx_sampler_manager.h"
 #include "graphic/gfx_shader_manager.h"
 #include "graphic/gfx_state_manager.h"
@@ -93,7 +92,7 @@ namespace
         struct SRenderJob
         {
             Dt::CPointLightComponent*  m_pDtComponent;
-            Gfx::CPointLightComponent* m_pGfxComponent;
+            Gfx::CPointLight* m_pGfxComponent;
         };
         
     private:
@@ -404,7 +403,7 @@ namespace
 
         for (; CurrentRenderJob != EndOfRenderJobs; ++ CurrentRenderJob)
         {
-            Gfx::CPointLightComponent* pGfxComponent = CurrentRenderJob->m_pGfxComponent;
+            Gfx::CPointLight* pGfxComponent = CurrentRenderJob->m_pGfxComponent;
             Dt::CPointLightComponent*  pDtComponent  = CurrentRenderJob->m_pDtComponent;
             
             assert(pDtComponent    != nullptr);
@@ -506,10 +505,11 @@ namespace
 
         for (auto Component : DataComponents)
         {
-            Dt::CPointLightComponent*  pDtComponent  = static_cast<Dt::CPointLightComponent*>(Component);
-            Gfx::CPointLightComponent* pGfxComponent = Gfx::CComponentManager::GetInstance().GetComponent<Gfx::CPointLightComponent>(pDtComponent->GetID());
+            Dt::CPointLightComponent* pDtComponent = static_cast<Dt::CPointLightComponent*>(Component);
 
             if (pDtComponent->IsActiveAndUsable() == false) continue;
+
+            Gfx::CPointLight* pGfxComponent = static_cast<Gfx::CPointLight*>(pDtComponent->GetFacet(Dt::CPointLightComponent::Graphic));
 
             SRenderJob NewRenderJob;
 

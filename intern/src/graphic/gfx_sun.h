@@ -4,17 +4,16 @@
 #include "base/base_typedef.h"
 
 #include "graphic/gfx_camera.h"
-#include "graphic/gfx_component.h"
 #include "graphic/gfx_texture_set.h"
 
 namespace Gfx
 {
-    class CSunComponent : public CComponent<CSunComponent>
+    class CSun : public Base::CManagedPoolItemBase
     {
     public:
 
-        CSunComponent();
-        ~CSunComponent();
+        CSun();
+        ~CSun();
 
     public:
 
@@ -30,4 +29,9 @@ namespace Gfx
         CCameraPtr  m_CameraPtr;
         Base::U64   m_TimeStamp;
     };
+} // namespace Gfx
+
+namespace Gfx
+{
+    typedef Base::CManagedPoolItemPtr<CSun> CSunPtr;
 } // namespace Gfx

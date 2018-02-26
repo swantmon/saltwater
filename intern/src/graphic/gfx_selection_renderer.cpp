@@ -21,13 +21,12 @@
 
 #include "graphic/gfx_ar_renderer.h"
 #include "graphic/gfx_buffer_manager.h"
-#include "graphic/gfx_component.h"
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_debug_renderer.h"
-#include "graphic/gfx_light_probe_component.h"
+#include "graphic/gfx_light_probe.h"
 #include "graphic/gfx_main.h"
-#include "graphic/gfx_material_component.h"
-#include "graphic/gfx_mesh_component.h"
+#include "graphic/gfx_material.h"
+#include "graphic/gfx_mesh.h"
 #include "graphic/gfx_mesh_manager.h"
 #include "graphic/gfx_mesh_renderer.h"
 #include "graphic/gfx_performance.h"
@@ -1024,12 +1023,13 @@ namespace
 
             if (_pEntity->GetComponentFacet()->HasComponent<Dt::CMeshComponent>())
             {
-                CMeshComponent* pGfxComponent = CComponentManager::GetInstance().GetComponent<CMeshComponent>(_pEntity->GetComponentFacet()->GetComponent<Dt::CMeshComponent>()->GetID());
-                CMaterialComponent* pGfxMaterialComponent = CComponentManager::GetInstance().GetComponent<CMaterialComponent>(_pEntity->GetComponentFacet()->GetComponent<Dt::CMaterialComponent>()->GetID());
+                CMesh* pGfxComponent = static_cast<CMesh*>(_pEntity->GetComponentFacet()->GetComponent<Dt::CMeshComponent>()->GetFacet(Dt::CMeshComponent::Graphic));
+
+                CMaterial* pGfxMaterialComponent = static_cast<CMaterial*>(_pEntity->GetComponentFacet()->GetComponent<Dt::CMaterialComponent>()->GetFacet(Dt::CMaterialComponent::Graphic));
 
                 assert(pGfxComponent != nullptr);
 
-                CMeshPtr MeshPtr = pGfxComponent->GetMesh();
+                CMeshPtr MeshPtr = pGfxComponent;
 
                 assert(MeshPtr.IsValid());
 
@@ -1042,7 +1042,7 @@ namespace
 
                 if (pGfxMaterialComponent != 0)
                 {
-                    MaterialPtr = pGfxMaterialComponent->GetMaterial();
+                    MaterialPtr = pGfxMaterialComponent;
                 }
                 else
                 {
@@ -1063,8 +1063,9 @@ namespace
             }
             else if (_pEntity->GetComponentFacet()->HasComponent<Dt::CLightProbeComponent>())
             {
-                Dt::CLightProbeComponent*  pDataComponent = _pEntity->GetComponentFacet()->GetComponent<Dt::CLightProbeComponent>();
-                Gfx::CLightProbeComponent* pGfxComponent  = CComponentManager::GetInstance().GetComponent<Gfx::CLightProbeComponent>(pDataComponent->GetID());
+                Dt::CLightProbeComponent* pDataComponent = _pEntity->GetComponentFacet()->GetComponent<Dt::CLightProbeComponent>();
+
+                Gfx::CLightProbe* pGfxComponent  = static_cast<Gfx::CLightProbe*>(pDataComponent->GetFacet(Dt::CLightProbeComponent::Graphic));
 
                 assert(pGfxComponent != nullptr);
 
