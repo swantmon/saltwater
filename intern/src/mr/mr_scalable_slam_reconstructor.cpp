@@ -467,7 +467,6 @@ namespace MR
         m_TrackingDataConstantBufferPtr = 0;
         m_RaycastPyramidConstantBufferPtr = 0;
         m_BilateralFilterConstantBufferPtr = 0;
-		m_PositionConstantBufferPtr = 0;
         m_HierarchyConstantBufferPtr = 0;
         m_AtomicCounterBufferPtr = 0;
         m_IndexedIndirectBufferPtr = 0;
@@ -1303,11 +1302,7 @@ namespace MR
         ConstantBufferDesc.m_NumberOfBytes = 16;
         ConstantBufferDesc.m_pBytes = &m_ReconstructionSettings.m_DepthThreshold;
         m_BilateralFilterConstantBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
-
-		ConstantBufferDesc.m_NumberOfBytes = sizeof(SPositionBuffer);
-		ConstantBufferDesc.m_pBytes = nullptr;
-		m_PositionConstantBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
-        
+                
         ConstantBufferDesc.m_Usage = CBuffer::GPURead;
         ConstantBufferDesc.m_Binding = CBuffer::ConstantBuffer;
         ConstantBufferDesc.m_Access = CBuffer::CPUWrite;

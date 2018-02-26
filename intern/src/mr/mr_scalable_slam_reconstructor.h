@@ -218,7 +218,6 @@ namespace MR
         Gfx::CBufferPtr m_TrackingDataConstantBufferPtr;
         Gfx::CBufferPtr m_RaycastPyramidConstantBufferPtr;
         Gfx::CBufferPtr m_BilateralFilterConstantBufferPtr;
-        Gfx::CBufferPtr m_PositionConstantBufferPtr;
         Gfx::CBufferPtr m_HierarchyConstantBufferPtr;
 
         Gfx::CBufferPtr m_IndexedIndirectBufferPtr;
