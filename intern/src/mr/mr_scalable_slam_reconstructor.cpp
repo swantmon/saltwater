@@ -1391,7 +1391,7 @@ namespace MR
 
         if (CaptureColor && !m_pRGBDCameraControl->GetCameraFrame(pColor))
         {
-        return;
+            return;
         }
         /*/
 #pragma message("Warning: Active polling of depth frame is active and could lead to an infinite loop!")
