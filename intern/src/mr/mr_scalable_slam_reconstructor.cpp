@@ -1225,6 +1225,8 @@ namespace MR
         m_EmptyFullVolumePtr = TargetSetManager::CreateEmptyTargetSet(VolumeWidth, VolumeWidth);
 
         m_EmptyTargetSetPtr = TargetSetManager::CreateEmptyTargetSet(m_pRGBDCameraControl->GetDepthWidth(), m_pRGBDCameraControl->GetDepthHeight());
+
+        Gfx::TextureManager::ClearTexture(m_FullVolumePtr);
     }
     
     // -----------------------------------------------------------------------------
