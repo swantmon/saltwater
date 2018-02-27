@@ -56,14 +56,12 @@ void main()
     {
         uint Index = atomicAdd(g_Level2Indirect.m_Indexed.m_InstanceCount, 1);
         g_Level2VolumeID[Index] = OffsetToIndex(vec3(gl_GlobalInvocationID), ROOT_RESOLUTION * LEVEL1_RESOLUTION);
-
-        IsTagged = atomicAdd(TaggedSum, 1);
-    }
-
-    if (IsTagged == 1)
-    {
-        uint Index = atomicAdd(g_Level1Indirect.m_Indexed.m_InstanceCount, 1);
-        g_Level1VolumeID[Index] = OffsetToIndex(vec3(gl_WorkGroupID), ROOT_RESOLUTION);
+        
+        if (atomicAdd(TaggedSum, 1) == 1)
+        {
+            uint Index = atomicAdd(g_Level1Indirect.m_Indexed.m_InstanceCount, 1);
+            g_Level1VolumeID[Index] = OffsetToIndex(vec3(gl_WorkGroupID), ROOT_RESOLUTION);
+        }
     }
 }
 
