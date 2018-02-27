@@ -129,10 +129,9 @@ namespace
 
     void CEntityHelper::OnLoadEntity(Edit::CMessage& _rMessage)
     {
-        BASE_UNUSED(_rMessage);
+        std::string Modelfile = _rMessage.Get<std::string>();
 
-        // TODO by tschwandt
-        // Add loading map from scene file
+        Dt::EntityManager::CreateEntitiesFromScene(Modelfile);
     }
 
     // -----------------------------------------------------------------------------

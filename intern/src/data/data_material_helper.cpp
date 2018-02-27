@@ -42,7 +42,6 @@ namespace
 
         const CMaterialComponent* GetDefaultMaterial() const;
 
-        
     private:
 
         typedef std::unordered_map<Base::BHash, CMaterialComponent*> CMaterialByHashs;

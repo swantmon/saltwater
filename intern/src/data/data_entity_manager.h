@@ -12,6 +12,7 @@
 #include "data/data_entity.h"
 
 #include <functional>
+#include <string>
 
 namespace Dt
 {
@@ -47,6 +48,8 @@ namespace EntityManager
     void Clear();
 
     CEntity& CreateEntity(const SEntityDescriptor& _rDescriptor, CEntity::BID _ID = CEntity::s_InvalidID);
+
+    void CreateEntitiesFromScene(const std::string& _rFile);
 
     void FreeEntity(CEntity& _rEntity);
 
