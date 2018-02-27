@@ -693,7 +693,6 @@ namespace MR
 
         Performance::BeginEvent("Rasterize point cloud");
 
-        ContextManager::SetTargetSet(m_FullVolumeTargetSetPtr);
         ContextManager::SetImageTexture(1, m_FullVolumePtr);
         ContextManager::SetViewPortSet(m_FullVolumeViewPort);
 
