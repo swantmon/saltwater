@@ -168,7 +168,7 @@ namespace MR
 
         CPlaneDetector& GetPlaneDetector();
 
-        glm::int2 GetDepthImageSize();
+        glm::ivec2 GetDepthImageSize();
 
         float GetReconstructionSize();
         
@@ -285,6 +285,8 @@ namespace MR
         
         std::vector<unsigned short> m_DepthPixels;
         std::vector<char> m_CameraPixels;
+
+        glm::ivec2 m_DepthImageSize;
 
         int m_RootVolumePoolItemCount;
 

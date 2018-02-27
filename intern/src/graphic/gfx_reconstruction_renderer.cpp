@@ -284,7 +284,7 @@ namespace
 		{
 			m_pScalableReconstructor->GetReconstructionSettings(&Settings);
 
-            glm::int2 DepthImageSize = m_pScalableReconstructor->GetDepthImageSize();
+            glm::ivec2 DepthImageSize = m_pScalableReconstructor->GetDepthImageSize();
 
 			std::stringstream DefineStream;
 
