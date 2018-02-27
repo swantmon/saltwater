@@ -223,7 +223,7 @@ namespace
 
         m_UseTrackingCamera     = Base::CProgramParameters::GetInstance().Get("mr:slam:rendering:use_tracking_camera", true);
         m_RenderVolume          = Base::CProgramParameters::GetInstance().Get("mr:slam:rendering:volume"             , true);
-        m_RenderVolumeVertexMap = Base::CProgramParameters::GetInstance().Get("mr:slam:rendering:volume_vertex_map"  , false);;
+        m_RenderVolumeVertexMap = Base::CProgramParameters::GetInstance().Get("mr:slam:rendering:volume_vertex_map"  , false);
         m_RenderVertexMap       = Base::CProgramParameters::GetInstance().Get("mr:slam:rendering:vertex_map"         , false);
         m_RenderRootQueue       = Base::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:root"        , false);
         m_RenderLevel1Queue     = Base::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:level1"      , false);
