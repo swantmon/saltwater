@@ -94,8 +94,11 @@ namespace Edit
         size_t NumberOfChars = _Value.length();
 
         Put(NumberOfChars);
-        
-        m_Bytes.insert(m_Bytes.end(), reinterpret_cast<const Base::U8*>(_Value.c_str()), reinterpret_cast<const Base::U8*>(_Value.c_str()) + sizeof(Base::Char) * NumberOfChars);
+
+        if (NumberOfChars > 0)
+        {
+            m_Bytes.insert(m_Bytes.end(), reinterpret_cast<const Base::U8*>(_Value.c_str()), reinterpret_cast<const Base::U8*>(_Value.c_str()) + sizeof(Base::Char) * NumberOfChars);
+        }
     }
 
     // -----------------------------------------------------------------------------
@@ -120,6 +123,8 @@ namespace Edit
         assert(m_Mode == Read);
 
         size_t NumberOfChars = Get<size_t>();
+
+        if (NumberOfChars == 0) return "";
 
         std::string ReturnValue(reinterpret_cast<const char*>(&(*m_Pos)), NumberOfChars);
 

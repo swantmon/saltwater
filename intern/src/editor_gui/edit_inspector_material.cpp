@@ -24,7 +24,7 @@ namespace Edit
     CInspectorMaterial::CInspectorMaterial(QWidget* _pParent)
         : QWidget          (_pParent)
         , m_CurrentEntityID(static_cast<unsigned int>(-1))
-        , m_MaterialHash   (0)
+        , m_MaterialID   (0)
     {
         // -----------------------------------------------------------------------------
         // Setup UI
@@ -117,6 +117,8 @@ namespace Edit
         float OffsetX = m_pOffsetXEdit->text().toFloat();
         float OffsetY = m_pOffsetYEdit->text().toFloat();
 
+        glm::vec4 TilingOffset = glm::vec4(TilingX, TilingY, OffsetX, OffsetY);
+
         // -----------------------------------------------------------------------------
         // Update related GUI
         // -----------------------------------------------------------------------------
@@ -138,92 +140,34 @@ namespace Edit
         // -----------------------------------------------------------------------------
         Edit::CMessage NewMessage;
 
-        NewMessage.Put(m_MaterialHash);
+        NewMessage.Put(m_MaterialID);
 
-        NewMessage.Put(AlbedoColor[0]);
-        NewMessage.Put(AlbedoColor[1]);
-        NewMessage.Put(AlbedoColor[2]);
+        NewMessage.Put(AlbedoColor);
 
-        NewMessage.Put(TilingX);
-        NewMessage.Put(TilingY);
-        NewMessage.Put(OffsetX);
-        NewMessage.Put(OffsetY);
+        NewMessage.Put(TilingOffset);
 
         NewMessage.Put(RoughnessValue);
         NewMessage.Put(ReflectanceValue);
         NewMessage.Put(MetallicValue);
         NewMessage.Put(BumpValue);
 
-        if (NewColorTexture.length() > 0)
-        {
-            NewMessage.Put(true);
+        std::string AlbedoTextureEdit = std::string(m_pAlbedoTextureEdit->GetTextureFile().toLatin1());
+        std::string NormalTextureEdit = std::string(m_pNormalTextureEdit->GetTextureFile().toLatin1());
+        std::string RoughnessTextureEdit = std::string(m_pRoughnessTextureEdit->GetTextureFile().toLatin1());
+        std::string MetallicTextureEdit = std::string(m_pMetallicTextureEdit->GetTextureFile().toLatin1());
+        std::string BumpTextureEdit = std::string(m_pBumpTextureEdit->GetTextureFile().toLatin1());
+        std::string AOTextureEdit = std::string(m_pAOTextureEdit->GetTextureFile().toLatin1());
 
-            NewMessage.Put(m_pAlbedoTextureEdit->GetTextureHash());
-        }
-        else
-        {
-            NewMessage.Put(false);
-        }
-
-        if (NewNormalTexture.length() > 0)
-        {
-            NewMessage.Put(true);
-
-            NewMessage.Put(m_pNormalTextureEdit->GetTextureHash());
-        }
-        else
-        {
-            NewMessage.Put(false);
-        }
-
-        if (NewRoughnessTexture.length() > 0)
-        {
-            NewMessage.Put(true);
-
-            NewMessage.Put(m_pRoughnessTextureEdit->GetTextureHash());
-        }
-        else
-        {
-            NewMessage.Put(false);
-        }
-
-        if (NewMetalicTexture.length() > 0)
-        {
-            NewMessage.Put(true);
-
-            NewMessage.Put(m_pMetallicTextureEdit->GetTextureHash());
-        }
-        else
-        {
-            NewMessage.Put(false);
-        }
-
-        if (NewBumpTexture.length() > 0)
-        {
-            NewMessage.Put(true);
-
-            NewMessage.Put(m_pBumpTextureEdit->GetTextureHash());
-        }
-        else
-        {
-            NewMessage.Put(false);
-        }
-
-        if (NewAOTexture.length() > 0)
-        {
-            NewMessage.Put(true);
-
-            NewMessage.Put(m_pAOTextureEdit->GetTextureHash());
-        }
-        else
-        {
-            NewMessage.Put(false);
-        }
+        NewMessage.Put(AlbedoTextureEdit);
+        NewMessage.Put(NormalTextureEdit);
+        NewMessage.Put(RoughnessTextureEdit);
+        NewMessage.Put(MetallicTextureEdit);
+        NewMessage.Put(BumpTextureEdit);
+        NewMessage.Put(AOTextureEdit);
 
         NewMessage.Reset();
 
         Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Material_Update, NewMessage);
-
     }
 
     // -----------------------------------------------------------------------------
@@ -312,14 +256,14 @@ namespace Edit
 
         if (Hash != -1)
         {
-            m_MaterialHash = static_cast<unsigned int>(Hash);
+            m_MaterialID = static_cast<unsigned int>(Hash);
 
             // -----------------------------------------------------------------------------
             // Request info of texture
             // -----------------------------------------------------------------------------
             Edit::CMessage RequestMessage;
 
-            RequestMessage.Put(m_MaterialHash);
+            RequestMessage.Put(m_MaterialID);
 
             RequestMessage.Reset();
 
@@ -394,13 +338,13 @@ namespace Edit
             return;
         }
 
-        int MaterialHash = _rMessage.Get<int>();
+        Base::ID MaterialID = _rMessage.Get<Base::ID>();
 
-        m_MaterialHash = static_cast<unsigned int>(MaterialHash);
+        m_MaterialID = static_cast<unsigned int>(MaterialID);
 
         CMessage NewMessage;
 
-        NewMessage.Put(MaterialHash);
+        NewMessage.Put(MaterialID);
 
         NewMessage.Reset();
 
@@ -411,89 +355,28 @@ namespace Edit
 
     void CInspectorMaterial::OnMaterialInfo(Edit::CMessage& _rMessage)
     {
-        float R, G, B;
-        float X, Y, Z, W;
-
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
-        int MaterialHash = _rMessage.Get<int>();
+        Base::ID MaterialID = _rMessage.Get<Base::ID>();
 
-        if (static_cast<unsigned int>(MaterialHash) != m_MaterialHash) return;
+        if (MaterialID != m_MaterialID) return;
 
-        bool HasColorMap     = false;
-        bool HasNormalMap    = false;
-        bool HasRoughnessMap = false;
-        bool HasMetalnessMap = false;
-        bool HasBumpMap      = false;
-        bool HasAOMap        = false;
+        glm::vec3 AlbedoColor = _rMessage.Get<glm::vec3>();
 
-        std::string ColorMapName;
-        std::string NormalMapName;
-        std::string RoughnessMapName;
-        std::string MetalMapName;
-        std::string BumpMapName;
-        std::string AOMapName;
-
-        R = _rMessage.Get<float>();
-        G = _rMessage.Get<float>();
-        B = _rMessage.Get<float>();
-
-        glm::vec3 AlbedoColor = glm::vec3(R, G, B);
-
-        X = _rMessage.Get<float>();
-        Y = _rMessage.Get<float>();
-        Z = _rMessage.Get<float>();
-        W = _rMessage.Get<float>();
-
-        glm::vec4 TilingOffset = glm::vec4(X, Y, Z, W);
+        glm::vec4 TilingOffset = _rMessage.Get<glm::vec4>();
 
         float Roughness   = _rMessage.Get<float>();
         float Reflectance = _rMessage.Get<float>();
         float Metalness   = _rMessage.Get<float>();
         float BumpFactor  = _rMessage.Get<float>();
 
-        HasColorMap = _rMessage.Get<bool>();
-
-        if (HasColorMap)
-        {
-            ColorMapName = _rMessage.Get<std::string>();
-        }
-
-        HasNormalMap = _rMessage.Get<bool>();
-
-        if (HasNormalMap)
-        {
-            NormalMapName = _rMessage.Get<std::string>();
-        }
-
-        HasRoughnessMap = _rMessage.Get<bool>();
-
-        if (HasRoughnessMap)
-        {
-            RoughnessMapName =_rMessage.Get<std::string>();
-        }
-
-        HasMetalnessMap = _rMessage.Get<bool>();
-
-        if (HasMetalnessMap)
-        {
-            MetalMapName = _rMessage.Get<std::string>();
-        }
-
-        HasBumpMap = _rMessage.Get<bool>();
-
-        if (HasBumpMap)
-        {
-            BumpMapName = _rMessage.Get<std::string>();
-        }
-
-        HasAOMap = _rMessage.Get<bool>();
-
-        if (HasAOMap)
-        {
-            AOMapName = _rMessage.Get<std::string>();
-        }
+        std::string ColorMapName     = _rMessage.Get<std::string>();
+        std::string NormalMapName    = _rMessage.Get<std::string>();
+        std::string RoughnessMapName = _rMessage.Get<std::string>();
+        std::string MetalMapName     = _rMessage.Get<std::string>();
+        std::string BumpMapName      = _rMessage.Get<std::string>();
+        std::string AOMapName        = _rMessage.Get<std::string>();
 
         // -----------------------------------------------------------------------------
         // Set values
