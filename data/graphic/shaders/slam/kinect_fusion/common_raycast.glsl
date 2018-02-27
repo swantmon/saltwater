@@ -71,7 +71,7 @@ float GetInterpolatedTSDF(vec3 Position, sampler3D Volume)
 
 vec3 GetPosition(vec3 CameraPosition, vec3 RayDirection, sampler3D Volume)
 {
-    const float StartLength = GetStartLength(CameraPosition, RayDirection);
+    const float StartLength = max(0.0f, GetStartLength(CameraPosition, RayDirection));
     const float EndLength = GetEndLength(CameraPosition, RayDirection);
     
     float Step = TRUNCATED_DISTANCE * 1000.0f * 0.001f * 0.8f;
