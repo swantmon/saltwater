@@ -198,7 +198,7 @@ namespace Dt
     {
         assert(_pComponent);
 
-        assert(_pComponent->GetHostEntity());
+        assert(_pComponent->GetHostEntity() == nullptr);
 
         _pComponent->m_pHostEntity = this;
 

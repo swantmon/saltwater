@@ -100,6 +100,10 @@ namespace
         // -----------------------------------------------------------------------------
         auto pComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CMaterialComponent>();
 
+        pComponent->SetFileName(PathToFile);
+
+        Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pComponent, Dt::CMaterialComponent::DirtyCreate);
+
         // -----------------------------------------------------------------------------
         // Set result as ID
         // -----------------------------------------------------------------------------

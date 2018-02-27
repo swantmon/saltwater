@@ -237,7 +237,7 @@ namespace
     {
         Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Base::ID MaterialHash = _rMessage.Get<int>();
+        Base::ID MaterialID = _rMessage.Get<Base::ID>();
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
@@ -245,7 +245,7 @@ namespace
 
         if (pComponent != nullptr)
         {
-            auto pNewComponent = Dt::CComponentManager::GetInstance().GetComponent<Dt::CMaterialComponent>(MaterialHash);
+            auto pNewComponent = Dt::CComponentManager::GetInstance().GetComponent<Dt::CMaterialComponent>(MaterialID);
 
             rCurrentEntity.DetachComponent(pComponent);
 

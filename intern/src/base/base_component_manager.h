@@ -102,6 +102,8 @@ namespace CON
     template<class T>
     T* CComponentManager::GetComponent(Base::ID _ID)
     {
+        if (m_ComponentByID.find(_ID) == m_ComponentByID.end()) return nullptr;
+
         return static_cast<T*>(m_ComponentByID[_ID]);
     }
 

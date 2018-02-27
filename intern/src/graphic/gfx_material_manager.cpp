@@ -422,12 +422,12 @@ namespace
         // -----------------------------------------------------------------------------
         // Textures
         // -----------------------------------------------------------------------------
-        MaterialDescriptor.m_pColorMap     = pElementColor->Attribute("Map");
-        MaterialDescriptor.m_pNormalMap    = pElementNormal->Attribute("Map");
-        MaterialDescriptor.m_pRoughnessMap = pElementRoughness->Attribute("Map");
-        MaterialDescriptor.m_pMetalMaskMap = pElementMetallic->Attribute("Map");
-        MaterialDescriptor.m_pBumpMap      = pElementBump->Attribute("Map");
-        MaterialDescriptor.m_pAOMap        = pElementAO->Attribute("Map");
+        MaterialDescriptor.m_pColorMap     = (pElementColor != nullptr)     ? pElementColor->Attribute("Map")     : 0;
+        MaterialDescriptor.m_pNormalMap    = (pElementNormal != nullptr)    ? pElementNormal->Attribute("Map")    : 0;
+        MaterialDescriptor.m_pRoughnessMap = (pElementRoughness != nullptr) ? pElementRoughness->Attribute("Map") : 0;
+        MaterialDescriptor.m_pMetalMaskMap = (pElementMetallic != nullptr)  ? pElementMetallic->Attribute("Map")  : 0;
+        MaterialDescriptor.m_pBumpMap      = (pElementBump != nullptr)      ? pElementBump->Attribute("Map")      : 0;
+        MaterialDescriptor.m_pAOMap        = (pElementAO != nullptr)        ? pElementAO->Attribute("Map")        : 0;
 
         // -----------------------------------------------------------------------------
         // Fill data

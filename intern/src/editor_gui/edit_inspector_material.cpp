@@ -24,7 +24,7 @@ namespace Edit
     CInspectorMaterial::CInspectorMaterial(QWidget* _pParent)
         : QWidget          (_pParent)
         , m_CurrentEntityID(static_cast<unsigned int>(-1))
-        , m_MaterialID   (0)
+        , m_MaterialID     (0)
     {
         // -----------------------------------------------------------------------------
         // Setup UI
@@ -248,7 +248,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         Edit::CMessage LoadMessage;
 
-        LoadMessage.Put(std::string(_rRelPathToTexture.toLatin1().data()));
+        LoadMessage.Put(std::string(_rRelPathToTexture.toLatin1()));
 
         LoadMessage.Reset();
 
@@ -256,7 +256,7 @@ namespace Edit
 
         if (Hash != -1)
         {
-            m_MaterialID = static_cast<unsigned int>(Hash);
+            m_MaterialID = static_cast<Base::ID>(Hash);
 
             // -----------------------------------------------------------------------------
             // Request info of texture
@@ -292,17 +292,15 @@ namespace Edit
 
         QString RelativePathToFile = pMimeData->data("SW_MATERIAL_REL_PATH");
 
-        QByteArray ModelFileBinary = RelativePathToFile.toLatin1();
-
         CMessage NewLoadMaterialMessage;
 
-        NewLoadMaterialMessage.Put(std::string(ModelFileBinary.data()));
+        NewLoadMaterialMessage.Put(std::string(RelativePathToFile.toLatin1()));
 
         NewLoadMaterialMessage.Reset();
 
-        int HashOfMaterial = Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Material_Load, NewLoadMaterialMessage);
+        int Result = Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Material_Load, NewLoadMaterialMessage);
 
-        if (HashOfMaterial == -1) return;
+        if (Result == -1) return;
 
         // -----------------------------------------------------------------------------
         // Set material to entity
@@ -311,7 +309,7 @@ namespace Edit
 
         NewApplyMessage.Put(m_CurrentEntityID);
 
-        NewApplyMessage.Put(HashOfMaterial);
+        NewApplyMessage.Put(static_cast<Base::ID>(Result));
 
         NewApplyMessage.Reset();
 

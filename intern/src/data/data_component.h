@@ -5,6 +5,8 @@
 #include "base/base_component.h"
 #include "base/base_component_manager.h"
 
+#include <array>
+
 #pragma warning(push)
 #pragma warning(disable : 4505)
 
@@ -95,9 +97,13 @@ namespace Dt
 
     private:
 
+        typedef std::array<void*, NumberOfFacets> CFacets;
+
+    private:
+
         SFlags             m_Flags;
         const Dt::CEntity* m_pHostEntity;
-        void*              m_pFacets[NumberOfFacets];
+        CFacets            m_Facets;
 
     private:
 
@@ -115,15 +121,13 @@ namespace Dt
 {
     template<class T>
     CComponent<T>::CComponent()
+        : m_pHostEntity(0)
     {
         m_Flags.m_Key = 0;
 
         m_Flags.m_IsActive = true;
 
-        for (int i = 0; i < NumberOfFacets; ++i)
-        {
-            m_pFacets[i] = 0;
-        }
+        for (auto Facet : m_Facets) Facet = 0;
     }
 
     // -----------------------------------------------------------------------------
@@ -197,7 +201,7 @@ namespace Dt
     template<class T>
     void CComponent<T>::SetFacet(unsigned int _Category, void* _pFacet)
     {
-        m_pFacets[_Category] = _pFacet;
+        m_Facets[_Category] = _pFacet;
     }
 
     // -----------------------------------------------------------------------------
@@ -205,7 +209,7 @@ namespace Dt
     template<class T>
     void* CComponent<T>::GetFacet(unsigned int _Category)
     {
-        return m_pFacets[_Category];
+        return m_Facets[_Category];
     }
 
     // -----------------------------------------------------------------------------
@@ -213,7 +217,7 @@ namespace Dt
     template<class T>
     const void* CComponent<T>::GetFacet(unsigned int _Category) const
     {
-        return m_pFacets[_Category];
+        return m_Facets[_Category];
     }
 } // namespace Dt
 
