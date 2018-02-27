@@ -13,6 +13,7 @@
 
 #include <functional>
 #include <string>
+#include <vector>
 
 namespace Dt
 {
@@ -49,7 +50,7 @@ namespace EntityManager
 
     CEntity& CreateEntity(const SEntityDescriptor& _rDescriptor, CEntity::BID _ID = CEntity::s_InvalidID);
 
-    void CreateEntitiesFromScene(const std::string& _rFile);
+    std::vector<CEntity*> CreateEntitiesFromScene(const std::string& _rFile);
 
     void FreeEntity(CEntity& _rEntity);
 

@@ -54,7 +54,7 @@ namespace
 
         CEntity& CreateEntity(const SEntityDescriptor& _rDescriptor, CEntity::BID _ID = CEntity::s_InvalidID);
 
-        void CreateEntitiesFromScene(const std::string& _rFile);
+        std::vector<CEntity*> CreateEntitiesFromScene(const std::string& _rFile);
 
         void FreeEntity(CEntity& _rEntity);
 
@@ -215,63 +215,70 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CDtLvlEntityManager::CreateEntitiesFromScene(const std::string& _rFile)
+    std::vector<CEntity*> CDtLvlEntityManager::CreateEntitiesFromScene(const std::string& _rFile)
     {
         Assimp::Importer Importer;
+
+        int GenerationFlag = 0;
+
+        // -----------------------------------------------------------------------------
+        // Create an vector of new entities
+        // -----------------------------------------------------------------------------
+        std::vector<CEntity*> VectorOfEntites;
 
         // -----------------------------------------------------------------------------
         // Build path to texture in file system and load scene
         // -----------------------------------------------------------------------------
         std::string PathToModel = Core::AssetManager::GetPathToAssets() + "/" + _rFile;
 
-        const aiScene* pScene = Importer.ReadFile(PathToModel.c_str(), 0);
+        const aiScene* pScene = Importer.ReadFile(PathToModel.c_str(), GenerationFlag);
 
         if (!pScene)
         {
             BASE_CONSOLE_ERRORV("Can't load scene file %s; Code: %s", _rFile.c_str(), Importer.GetErrorString());
 
-            return;
+            return VectorOfEntites;
         }
-
-        // -----------------------------------------------------------------------------
-        // Create root entity
-        // -----------------------------------------------------------------------------
-        SEntityDescriptor EntityDescriptor;
-
-        EntityDescriptor.m_EntityCategory = Dt::SEntityCategory::Dynamic;
-        EntityDescriptor.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
-
-        CInternEntity& rRootEntity = static_cast<CInternEntity&>(CreateEntity(EntityDescriptor));
 
         // -----------------------------------------------------------------------------
         // Create a new entity for each mesh
         // -----------------------------------------------------------------------------
+        Dt::SEntityDescriptor EntityDescriptor;
+
+        EntityDescriptor.m_EntityCategory = Dt::SEntityCategory::Dynamic;
+        EntityDescriptor.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
+
         int NumberOfMeshes = static_cast<int>(pScene->mNumMeshes);
 
         for (int IndexOfMesh = 0; IndexOfMesh < NumberOfMeshes; ++IndexOfMesh)
         {
-            CInternEntity& rChildEntity = static_cast<CInternEntity&>(CreateEntity(EntityDescriptor));
-
-            // -----------------------------------------------------------------------------
-            // Mesh
-            // -----------------------------------------------------------------------------
             aiMesh* pMesh = pScene->mMeshes[IndexOfMesh];
 
-            // auto pMeshComponent = Dt::MeshHelper::CreateMeshFromPtr(pMesh);
+            CInternEntity& rChildEntity = static_cast<CInternEntity&>(CreateEntity(EntityDescriptor));
 
-            // rChildEntity.AttachComponent(pMeshComponent);
+            rChildEntity.SetName(pMesh->mName.C_Str());
+
+            auto pMeshComponent = Dt::MeshHelper::CreateMeshFromAssimp(_rFile, GenerationFlag, IndexOfMesh);
+
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pMeshComponent, CMeshComponent::DirtyCreate);
+
+            rChildEntity.AttachComponent(pMeshComponent);
 
             // -----------------------------------------------------------------------------
             // Material
             // -----------------------------------------------------------------------------
-            aiMaterial* pMaterial = pScene->mMaterials[pMesh->mMaterialIndex];
+//             aiMaterial* pMaterial = pScene->mMaterials[pMesh->mMaterialIndex];
+// 
+//             auto pMaterialComponent = Dt::MaterialHelper::CreateMaterialFromPtr(pMaterial);
+// 
+//             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pMaterialComponent, Dt::CMaterialComponent::DirtyCreate);
+// 
+//             rChildEntity.AttachComponent(pMaterialComponent);
 
-            // auto pMaterialComponent = Dt::MaterialHelper::CreateMaterialFromPtr(pMaterial);
-
-            // rChildEntity.AttachComponent(pMaterialComponent);
-
-            rRootEntity.Attach(rChildEntity);
+            VectorOfEntites.push_back(&rChildEntity);
         }
+
+        return VectorOfEntites;
     }
 
     // -----------------------------------------------------------------------------
@@ -554,9 +561,9 @@ namespace EntityManager
 
     // -----------------------------------------------------------------------------
 
-    void CreateEntitiesFromScene(const std::string& _rFile)
+    std::vector<CEntity*> CreateEntitiesFromScene(const std::string& _rFile)
     {
-        CDtLvlEntityManager::GetInstance().CreateEntitiesFromScene(_rFile);
+        return CDtLvlEntityManager::GetInstance().CreateEntitiesFromScene(_rFile);
     }
 
     // -----------------------------------------------------------------------------

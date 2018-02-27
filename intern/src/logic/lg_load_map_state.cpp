@@ -468,6 +468,8 @@ void CLgLoadMapState::CreateDefaultScene()
 
             auto pMeshComponent = Dt::MeshHelper::CreateMeshFromFile("models/MatTester.obj", Dt::CMeshComponent::SGeneratorFlag::Default | Dt::CMeshComponent::SGeneratorFlag::FlipUVs);
 
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pMeshComponent, Dt::CMeshComponent::DirtyCreate);
+
             rEntity.AttachComponent(pMeshComponent);
 
             // -----------------------------------------------------------------------------
@@ -477,9 +479,9 @@ void CLgLoadMapState::CreateDefaultScene()
             pMaterialComponent->SetMaterialname("Red Sparrow");
             pMaterialComponent->SetColor(glm::vec3(1.0f, 0.0f, 0.0f));
 
-            rEntity.AttachComponent(pMaterialComponent);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pMaterialComponent, Dt::CMaterialComponent::DirtyCreate);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pMaterialComponent, Dt::CMeshComponent::DirtyCreate);
+            rEntity.AttachComponent(pMaterialComponent);
 
             // -----------------------------------------------------------------------------
 

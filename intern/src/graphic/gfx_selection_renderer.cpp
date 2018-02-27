@@ -1023,13 +1023,20 @@ namespace
 
             if (_pEntity->GetComponentFacet()->HasComponent<Dt::CMeshComponent>())
             {
-                CMesh* pGfxComponent = static_cast<CMesh*>(_pEntity->GetComponentFacet()->GetComponent<Dt::CMeshComponent>()->GetFacet(Dt::CMeshComponent::Graphic));
+                CMesh* pGfxMesh = static_cast<CMesh*>(_pEntity->GetComponentFacet()->GetComponent<Dt::CMeshComponent>()->GetFacet(Dt::CMeshComponent::Graphic));
 
-                CMaterial* pGfxMaterialComponent = static_cast<CMaterial*>(_pEntity->GetComponentFacet()->GetComponent<Dt::CMaterialComponent>()->GetFacet(Dt::CMaterialComponent::Graphic));
+                CMaterial* pMaterial = 0;
 
-                assert(pGfxComponent != nullptr);
+                auto pMaterialComponent = _pEntity->GetComponentFacet()->GetComponent<Dt::CMaterialComponent>();
 
-                CMeshPtr MeshPtr = pGfxComponent;
+                if (pMaterialComponent)
+                {
+                    pMaterial = static_cast<CMaterial*>(pMaterialComponent->GetFacet(Dt::CMaterialComponent::Graphic));
+                }
+ 
+                assert(pGfxMesh != nullptr);
+
+                CMeshPtr MeshPtr = pGfxMesh;
 
                 assert(MeshPtr.IsValid());
 
@@ -1038,15 +1045,11 @@ namespace
                 // -----------------------------------------------------------------------------
                 CSurfacePtr SurfacePtr = MeshPtr->GetLOD(0)->GetSurface();
 
-                CMaterialPtr MaterialPtr;
+                CMaterialPtr MaterialPtr = SurfacePtr->GetMaterial();
 
-                if (pGfxMaterialComponent != 0)
+                if (pMaterial != 0)
                 {
-                    MaterialPtr = pGfxMaterialComponent;
-                }
-                else
-                {
-                    MaterialPtr = SurfacePtr->GetMaterial();
+                    MaterialPtr = pMaterial;
                 }
 
                 assert(MaterialPtr != 0 && MaterialPtr.IsValid());

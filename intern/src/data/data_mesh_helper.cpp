@@ -36,7 +36,9 @@ namespace
         
     public:
 
-        CMeshComponent* CreateMeshFromFile(const Base::Char* _pFileName, int _GenFlag);
+        CMeshComponent* CreateMeshFromFile(const std::string& _rFileName, int _GenFlag);
+
+        CMeshComponent* CreateMeshFromAssimp(const std::string& _rFileName, int _GenFlag, int _MeshIndex);
 
     private:
         
@@ -66,14 +68,17 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    CMeshComponent* CDtMeshManager::CreateMeshFromFile(const Base::Char* _pFileName, int _GenFlag)
+    CMeshComponent* CDtMeshManager::CreateMeshFromFile(const std::string& _rFileName, int _GenFlag)
     {
-         if (_pFileName == 0)
-         {
-             BASE_THROWM("No filename set loading a mesh from file!")
-         }
+         unsigned int Hash = 0;
 
-         unsigned int Hash = Base::CRC32(_pFileName, static_cast<unsigned int>(strlen(_pFileName)));
+         Hash = Base::CRC32(Hash, _rFileName.c_str(), static_cast<unsigned int>(_rFileName.length()));
+
+         Hash = Base::CRC32(Hash, &_GenFlag, sizeof(_GenFlag));
+
+         int MeshIndex = 0;
+
+         Hash = Base::CRC32(Hash, &MeshIndex, sizeof(MeshIndex));
 
          if (m_MeshByID.find(Hash) != m_MeshByID.end())
          {
@@ -82,11 +87,39 @@ namespace
 
         auto pComponent = Dt::CComponentManager::GetInstance().Allocate<CMeshComponent>();
 
-        pComponent->SetFilename(_pFileName);
+        pComponent->SetFilename(_rFileName);
         pComponent->SetGeneratorFlag(_GenFlag);
-        pComponent->SetPredefinedMesh(CMeshComponent::Nothing);
+        pComponent->SetMeshType(CMeshComponent::File);
+        pComponent->SetMeshIndex(MeshIndex);
 
-        Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pComponent, CMeshComponent::DirtyCreate);
+        m_MeshByID[Hash] = pComponent;
+
+        return pComponent;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CMeshComponent* CDtMeshManager::CreateMeshFromAssimp(const std::string& _rFileName, int _GenFlag, int _MeshIndex)
+    {
+        unsigned int Hash = 0;
+        
+        Hash = Base::CRC32(Hash, _rFileName.c_str(), static_cast<unsigned int>(_rFileName.length()));
+
+        Hash = Base::CRC32(Hash, &_GenFlag, sizeof(_GenFlag));
+
+        Hash = Base::CRC32(Hash, &_MeshIndex, sizeof(_MeshIndex));
+
+        if (m_MeshByID.find(Hash) != m_MeshByID.end())
+        {
+            return m_MeshByID.at(Hash);
+        }
+
+        auto pComponent = Dt::CComponentManager::GetInstance().Allocate<CMeshComponent>();
+
+        pComponent->SetFilename(_rFileName);
+        pComponent->SetGeneratorFlag(_GenFlag);
+        pComponent->SetMeshType(CMeshComponent::File);
+        pComponent->SetMeshIndex(_MeshIndex);
 
         m_MeshByID[Hash] = pComponent;
 
@@ -98,9 +131,16 @@ namespace Dt
 {
 namespace MeshHelper
 {
-    CMeshComponent* CreateMeshFromFile(const Base::Char* _pFileName, int _GenFlag)
+    CMeshComponent* CreateMeshFromFile(const std::string& _rFileName, int _GenFlag)
     {
-        return CDtMeshManager::GetInstance().CreateMeshFromFile(_pFileName, _GenFlag);
+        return CDtMeshManager::GetInstance().CreateMeshFromFile(_rFileName, _GenFlag);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CMeshComponent* CreateMeshFromAssimp(const std::string& _rFileName, int _GenFlag, int _MeshIndex)
+    {
+        return CDtMeshManager::GetInstance().CreateMeshFromAssimp(_rFileName, _GenFlag, _MeshIndex);
     }
 } // namespace MeshHelper
 } // namespace Dt

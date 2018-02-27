@@ -134,7 +134,7 @@ namespace
 
         CMaterialPtr CreateMaterial(const SMaterialDescriptor& _rDescriptor);
 
-        CMaterialPtr CreateMaterialFromAssimp(const void* _pMaterialClass);
+        CMaterialPtr CreateMaterialFromPtr(const void* _pPtr, int _Importer);
 
         const CMaterialPtr GetDefaultMaterial();
 
@@ -235,13 +235,21 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    CMaterialPtr CGfxMaterialManager::CreateMaterialFromAssimp(const void* _pMaterialClass)
+    CMaterialPtr CGfxMaterialManager::CreateMaterialFromPtr(const void* _pPtr, int _Importer)
     {
-        if (_pMaterialClass != 0)
+        if (_pPtr != 0)
         {
             auto pMaterial = m_Materials.Allocate();
 
-            FillMaterialFromAssimp(pMaterial, static_cast<const aiMaterial*>(_pMaterialClass));
+            switch (_Importer)
+            {
+            case SExternalImporter::Assimp:
+                FillMaterialFromAssimp(pMaterial, static_cast<const aiMaterial*>(_pPtr));
+                break;
+            default:
+                BASE_CONSOLE_WARNING("Selected importer for material is not supported!");
+                break;
+            }
 
             return CMaterialPtr(pMaterial);
         }
@@ -718,9 +726,9 @@ namespace MaterialManager
 
     // -----------------------------------------------------------------------------
 
-    CMaterialPtr CreateMaterialFromAssimp(const void* _pMaterialClass)
+    CMaterialPtr CreateMaterialFromPtr(const void* _pPtr, int _Importer)
     {
-        return CGfxMaterialManager::GetInstance().CreateMaterialFromAssimp(_pMaterialClass);
+        return CGfxMaterialManager::GetInstance().CreateMaterialFromPtr(_pPtr, _Importer);
     }
 
     // -----------------------------------------------------------------------------

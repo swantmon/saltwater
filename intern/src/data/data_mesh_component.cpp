@@ -10,7 +10,8 @@ namespace Dt
     CMeshComponent::CMeshComponent()
         : m_Filename      ()
         , m_GeneratorFlag (SGeneratorFlag::Nothing)
-        , m_PredefinedMesh(EPredefinedMesh::Nothing)
+        , m_MeshIndex     (0)
+        , m_MeshType      (EMeshType::File)
     {
     }
 
@@ -50,15 +51,29 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CMeshComponent::SetPredefinedMesh(EPredefinedMesh _Value)
+    void CMeshComponent::SetMeshIndex(const int _Value)
     {
-        m_PredefinedMesh = _Value;
+        m_MeshIndex = _Value;
     }
 
     // -----------------------------------------------------------------------------
 
-    CMeshComponent::EPredefinedMesh CMeshComponent::GetPredefinedMesh() const
+    int CMeshComponent::GetMeshIndex() const
     {
-        return m_PredefinedMesh;
+        return m_MeshIndex;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMeshComponent::SetMeshType(EMeshType _Value)
+    {
+        m_MeshType = _Value;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CMeshComponent::EMeshType CMeshComponent::GetMeshType() const
+    {
+        return m_MeshType;
     }
 } // namespace Dt

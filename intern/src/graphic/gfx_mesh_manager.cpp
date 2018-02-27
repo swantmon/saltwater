@@ -150,7 +150,7 @@ namespace
         void OnStart();
         void OnExit();
         
-        CMeshPtr CreateMeshFromFile(const Base::Char* _pFilename, int _GenFlag);
+        CMeshPtr CreateMeshFromFile(const Base::Char* _pFilename, int _GenFlag, int _MeshIndex);
         CMeshPtr CreateBox(float _Width, float _Height, float _Depth);
         CMeshPtr CreateSphere(float _Radius, unsigned int _Stacks, unsigned int _Slices);
         CMeshPtr CreateSphereIsometric(float _Radius, unsigned int _Refinement);
@@ -202,7 +202,7 @@ namespace
 
         void OnDirtyComponent(Base::IComponent* _pComponent);
 
-        void FillMeshFromFile(CInternMesh* _pMesh, const Base::Char* _pFilename, int _GenFlag);
+        void FillMeshFromFile(CInternMesh* _pMesh, const Base::Char* _pFilename, int _GenFlag, int _MeshIndex);
 
         int ConvertGenerationPresets(int _Flags);
     };
@@ -246,12 +246,18 @@ namespace
     
     // -----------------------------------------------------------------------------
     
-    CMeshPtr CGfxMeshManager::CreateMeshFromFile(const Base::Char* _pFilename, int _GenFlag)
+    CMeshPtr CGfxMeshManager::CreateMeshFromFile(const Base::Char* _pFilename, int _GenFlag, int _MeshIndex)
     {
         // -----------------------------------------------------------------------------
         // Check existing model
         // -----------------------------------------------------------------------------
-        unsigned int Hash = Base::CRC32(_pFilename, static_cast<unsigned int>(strlen(_pFilename)));
+        unsigned int Hash = 0;
+        
+        Hash = Base::CRC32(Hash, _pFilename, static_cast<unsigned int>(strlen(_pFilename)));
+
+        Hash = Base::CRC32(Hash, &_GenFlag, sizeof(_GenFlag));
+
+        Hash = Base::CRC32(Hash, &_MeshIndex, sizeof(_MeshIndex));
 
         if (m_ModelByHash.find(Hash) != m_ModelByHash.end())
         {
@@ -263,7 +269,7 @@ namespace
         // -----------------------------------------------------------------------------
         auto MeshPtr = m_Meshes.Allocate();
 
-        FillMeshFromFile(MeshPtr, _pFilename, _GenFlag);
+        FillMeshFromFile(MeshPtr, _pFilename, _GenFlag, _MeshIndex);
                 
         // -----------------------------------------------------------------------------
         // Put this new model to hash list
@@ -1159,24 +1165,39 @@ namespace
         DirtyFlags = pMeshComponent->GetDirtyFlags();
 
         // -----------------------------------------------------------------------------
-        // Check if it is a new actor
+        // Check if it is a new mesh
         // -----------------------------------------------------------------------------
         if ((DirtyFlags & Dt::CMeshComponent::DirtyCreate) != 0)
         {
-            if (pMeshComponent->GetPredefinedMesh() == Dt::CMeshComponent::Nothing)
+            switch (pMeshComponent->GetMeshType())
             {
-                pMeshComponent->SetFacet(Dt::CMeshComponent::Graphic, CreateMeshFromFile(pMeshComponent->GetFilename().c_str(), pMeshComponent->GetGeneratorFlag()));
-            }
-            else
-            {
-                BASE_CONSOLE_ERROR("Predefined mesh components are currently not supported!");
+            case Dt::CMeshComponent::File:
+                pMeshComponent->SetFacet(Dt::CMeshComponent::Graphic, CreateMeshFromFile(pMeshComponent->GetFilename().c_str(), pMeshComponent->GetGeneratorFlag(), pMeshComponent->GetMeshIndex()));
+                break;
+            case Dt::CMeshComponent::Box:
+                pMeshComponent->SetFacet(Dt::CMeshComponent::Graphic, CreateBox(2.0f, 2.0f, 2.0f));
+                break;
+            case Dt::CMeshComponent::Sphere:
+                pMeshComponent->SetFacet(Dt::CMeshComponent::Graphic, CreateSphere(1.0f, 6, 6));
+                break;
+            case Dt::CMeshComponent::IsometricSphere:
+                pMeshComponent->SetFacet(Dt::CMeshComponent::Graphic, CreateSphereIsometric(1.0f, 6));
+                break;
+            case Dt::CMeshComponent::Cone:
+                pMeshComponent->SetFacet(Dt::CMeshComponent::Graphic, CreateCone(1.0f, 1.0f, 6));
+                break;
+            case Dt::CMeshComponent::Rectangle:
+                pMeshComponent->SetFacet(Dt::CMeshComponent::Graphic, CreateRectangle(0.0f, 0.0f, 1.0f, 1.0f));
+                break;
+            default:
+                BASE_CONSOLE_ERROR("The selected predefined mesh is currently not supported!");
             }
         }
     }
 
     // -----------------------------------------------------------------------------
 
-    void CGfxMeshManager::FillMeshFromFile(CInternMesh* _pMesh, const Base::Char* _pFilename, int _GenFlag)
+    void CGfxMeshManager::FillMeshFromFile(CInternMesh* _pMesh, const Base::Char* _pFilename, int _GenFlag, int _MeshIndex)
     {
         assert(_pFilename != 0);
 
@@ -1403,7 +1424,7 @@ namespace
 
                     if (pMaterial != 0)
                     {
-                        rSurface.m_MaterialPtr = MaterialManager::CreateMaterialFromAssimp(pMaterial);
+                        rSurface.m_MaterialPtr = MaterialManager::CreateMaterialFromPtr(pMaterial);
                     }
                 }
             }
@@ -1415,9 +1436,13 @@ namespace
         // -----------------------------------------------------------------------------
         unsigned int NumberOfMeshes = pScene->mNumMeshes;
 
-        if (NumberOfMeshes > 0)
+        if (NumberOfMeshes > _MeshIndex)
         {
-            FillMeshInComponent(_pMesh, pScene->mMeshes[0]);
+            FillMeshInComponent(_pMesh, pScene->mMeshes[_MeshIndex]);
+        }
+        else
+        {
+            BASE_CONSOLE_ERROR("The given mesh index to load mesh is higher as the number of available meshes in file.")
         }
     }
 
@@ -1469,9 +1494,9 @@ namespace MeshManager
     
     // -----------------------------------------------------------------------------
     
-    CMeshPtr CreateMeshFromFile(const Base::Char* _pFilename, int _GenFlag)
+    CMeshPtr CreateMeshFromFile(const Base::Char* _pFilename, int _GenFlag, int _MeshIndex)
     {
-        return CGfxMeshManager::GetInstance().CreateMeshFromFile(_pFilename, _GenFlag);
+        return CGfxMeshManager::GetInstance().CreateMeshFromFile(_pFilename, _GenFlag, _MeshIndex);
     }
 
     // -----------------------------------------------------------------------------

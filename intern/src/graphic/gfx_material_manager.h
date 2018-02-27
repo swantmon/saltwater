@@ -24,6 +24,14 @@ namespace Gfx
         glm::vec4         m_TilingOffset;
         const Base::Char* m_pFileName;
     };
+
+    struct SExternalImporter
+    {
+        enum EExternalImporter
+        {
+            Assimp,
+        };
+    };
 } // namespace Gfx
 
 namespace Gfx
@@ -35,7 +43,7 @@ namespace MaterialManager
 
     CMaterialPtr CreateMaterial(const SMaterialDescriptor& _rDescriptor);
 
-    CMaterialPtr CreateMaterialFromAssimp(const void* _pMaterialClass);
+    CMaterialPtr CreateMaterialFromPtr(const void* _pPtr, int _Importer = SExternalImporter::Assimp);
 
     const CMaterialPtr GetDefaultMaterial();
 } // namespace MaterialManager

@@ -22,9 +22,9 @@ namespace Dt
             };
         };
 
-        enum EPredefinedMesh
+        enum EMeshType
         {
-            Nothing,
+            File,
             Box,
             Sphere,
             IsometricSphere,
@@ -40,8 +40,11 @@ namespace Dt
         void SetGeneratorFlag(int _Flag);
         int GetGeneratorFlag() const;
 
-        void SetPredefinedMesh(EPredefinedMesh _Value);
-        EPredefinedMesh GetPredefinedMesh() const;
+        void SetMeshIndex(const int _Value);
+        int GetMeshIndex() const;
+
+        void SetMeshType(EMeshType _Value);
+        EMeshType GetMeshType() const;
 
     public:
 
@@ -50,8 +53,9 @@ namespace Dt
 
     private:
 
-        std::string     m_Filename;
-        int             m_GeneratorFlag;
-        EPredefinedMesh m_PredefinedMesh;
+        std::string m_Filename;
+        int         m_GeneratorFlag;
+        int         m_MeshIndex;
+        EMeshType   m_MeshType;
     };
 } // namespace Dt

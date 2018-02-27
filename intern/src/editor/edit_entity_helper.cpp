@@ -111,7 +111,7 @@ namespace
     {
         Dt::SEntityDescriptor EntityDesc;
 
-        EntityDesc.m_EntityCategory = 0;
+        EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
         EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
         Dt::CEntity& rNewEntity = Dt::EntityManager::CreateEntity(EntityDesc);
@@ -131,7 +131,30 @@ namespace
     {
         std::string Modelfile = _rMessage.Get<std::string>();
 
-        Dt::EntityManager::CreateEntitiesFromScene(Modelfile);
+        auto ListOfEntities = Dt::EntityManager::CreateEntitiesFromScene(Modelfile);
+
+        if (ListOfEntities.size() > 0)
+        {
+            Dt::SEntityDescriptor EntityDescriptor;
+
+            EntityDescriptor.m_EntityCategory = Dt::SEntityCategory::Dynamic;
+            EntityDescriptor.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
+
+            Dt::CEntity& rRootEntity = Dt::EntityManager::CreateEntity(EntityDescriptor);
+
+            rRootEntity.SetName(Modelfile);
+
+            for (auto SubEntity : ListOfEntities)
+            {
+                assert(SubEntity != nullptr);
+
+                Dt::EntityManager::MarkEntityAsDirty(*SubEntity, Dt::CEntity::DirtyCreate);
+
+                rRootEntity.Attach(*SubEntity);
+            }
+
+            Dt::EntityManager::MarkEntityAsDirty(rRootEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
     }
 
     // -----------------------------------------------------------------------------
