@@ -217,7 +217,8 @@ namespace MR
             return false;
         }
 
-        for (int i = 0; i < GetDepthPixelCount(); ++i)
+        const int PixelCount = GetDepthPixelCount();
+        for (int i = 0; i < PixelCount; ++i)
         {
             pBuffer[i] = pShortBuffer[i];
             m_DepthBuffer[i] = pShortBuffer[i];
