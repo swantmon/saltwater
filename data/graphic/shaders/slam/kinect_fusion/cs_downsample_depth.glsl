@@ -34,7 +34,7 @@ void main()
         for (int j = -1; j < 2; ++j)
         {
             float Sample = imageLoad(cs_InputTexture, SamplePos + ivec2(i, j)).x;
-            if (abs(Sample - Center) < TRUNCATED_DISTANCE)
+            if (abs(Sample - Center) < TRUNCATED_DISTANCE * 1000.0f)
             {
                 Sum += Sample;
                 ++Count;

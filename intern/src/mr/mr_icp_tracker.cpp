@@ -316,7 +316,7 @@ namespace MR
             << "#define DEPTH_IMAGE_WIDTH " << _Width << " \n"
             << "#define DEPTH_IMAGE_HEIGHT " << _Height << " \n"
             << "#define TILE_SIZE2D " << g_TileSize2D << " \n"
-            << "#define TRUNCATED_DISTANCE " << _Settings.m_TruncatedDistance << " \n"
+            << "#define TRUNCATED_DISTANCE " << _Settings.m_TruncatedDistance / 1000.0f << " \n"
             << "#define EPSILON_DISTANCE " << g_EpsilonDistance << " \n"
             << "#define EPSILON_ANGLE " << g_EpsilonAngle << " \n"
             << "#define ICP_VALUE_COUNT " << g_ICPValueCount << " \n"

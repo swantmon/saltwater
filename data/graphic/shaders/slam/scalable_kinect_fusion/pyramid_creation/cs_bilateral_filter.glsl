@@ -6,7 +6,7 @@
 // Constants
 // -----------------------------------------------------------------------------
 
-const float g_SigmaColor = TRUNCATED_DISTANCE; // in mm
+const float g_SigmaColor = TRUNCATED_DISTANCE * 1000.0f; // in mm
 const float g_SigmaSpace = 4.5f; //in pixels
 
 const float g_SigmaColor2 = g_SigmaColor * g_SigmaColor;

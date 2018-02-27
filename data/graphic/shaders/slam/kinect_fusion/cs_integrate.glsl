@@ -54,9 +54,10 @@ void main()
 
                 const float SDF = Depth - 1000.0f * length(CameraPosition - WSVoxelPosition) / Lambda;
                 
-                if (SDF >= -TRUNCATED_DISTANCE)
+                const float TruncatedDistance = TRUNCATED_DISTANCE * 1000.0f;
+                if (SDF >= -TruncatedDistance)
                 {
-                    const float TSDF = min(SDF / TRUNCATED_DISTANCE, 1.0f);
+                    const float TSDF = min(SDF / TruncatedDistance, 1.0f);
 
                     vec2 Voxel = imageLoad(cs_TSDFVolume, VoxelCoords).xy;
 

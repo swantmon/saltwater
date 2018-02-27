@@ -50,8 +50,8 @@ bool InBox()
 {
     vec3 AABBPosition = g_InstanceData[in_Index].m_Offset * VOLUME_SIZE;
     
-    vec3 AABBMin = AABBPosition - TRUNCATED_DISTANCE / 1000.0f;
-    vec3 AABBMax = AABBPosition + TRUNCATED_DISTANCE / 1000.0f + VOLUME_SIZE;
+    vec3 AABBMin = AABBPosition - TRUNCATED_DISTANCE;
+    vec3 AABBMax = AABBPosition + TRUNCATED_DISTANCE + VOLUME_SIZE;
 
     vec3 Vertex = imageLoad(cs_Vertex, ivec2(gl_FragCoord)).xyz;
     Vertex = (g_PoseMatrix * vec4(Vertex, 1.0f)).xyz; 

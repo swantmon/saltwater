@@ -28,13 +28,14 @@ void main()
     int Count = 0;
 
     const float Center = imageLoad(cs_InputTexture, SamplePos).x;
-
+    const float TruncatedDistance = TRUNCATED_DISTANCE * 1000.0f;
+    
     for (int i = -1; i < 2; ++i)
     {
         for (int j = -1; j < 2; ++j)
         {
             float Sample = imageLoad(cs_InputTexture, SamplePos + ivec2(i, j)).x;
-            if (abs(Sample - Center) < TRUNCATED_DISTANCE)
+            if (abs(Sample - Center) < TruncatedDistance)
             {
                 Sum += Sample;
                 ++Count;

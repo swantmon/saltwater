@@ -41,8 +41,8 @@ void main()
         AABBMin += g_Offset * VOLUME_SIZE;
         vec3 AABBMax = AABBMin + VOLUME_SIZE / float(g_Resolution);
 
-        AABBMin -= TRUNCATED_DISTANCE / 1000.0f;
-        AABBMax += TRUNCATED_DISTANCE / 1000.0f;
+        AABBMin -= TRUNCATED_DISTANCE;
+        AABBMax += TRUNCATED_DISTANCE;
 
         if (in_WSPosition.z > AABBMin.z && in_WSPosition.z < AABBMax.z)
         {

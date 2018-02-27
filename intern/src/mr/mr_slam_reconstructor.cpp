@@ -226,6 +226,8 @@ namespace MR
 
         const std::string InternalFormatString = g_UseHighPrecisionMaps ? "rgba32f" : "rgba16f";
 
+        const float TruncatedDistance = m_ReconstructionSettings.m_TruncatedDistance / 1000.0f;
+
         std::stringstream DefineStream;
 
         DefineStream
@@ -238,7 +240,7 @@ namespace MR
             << "#define TILE_SIZE1D "            << g_TileSize1D                                    << " \n"
             << "#define TILE_SIZE2D "            << g_TileSize2D                                    << " \n"
             << "#define TILE_SIZE3D "            << g_TileSize3D                                    << " \n"
-            << "#define TRUNCATED_DISTANCE "     << m_ReconstructionSettings.m_TruncatedDistance    << " \n"
+            << "#define TRUNCATED_DISTANCE "     << TruncatedDistance                               << " \n"
             << "#define MAX_INTEGRATION_WEIGHT " << m_ReconstructionSettings.m_MaxIntegrationWeight << " \n"
             << "#define EPSILON_DISTANCE "       << g_EpsilonDistance                               << " \n"
             << "#define EPSILON_ANGLE "          << g_EpsilonAngle                                  << " \n"

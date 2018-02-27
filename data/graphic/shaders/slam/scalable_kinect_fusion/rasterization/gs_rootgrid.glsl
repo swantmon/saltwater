@@ -61,8 +61,8 @@ void main()
         vec3 WSPosition = (g_PoseMatrix * vec4(Position, 1.0f)).xyz;
 
         vec3 AABBMin = g_Offset * VOLUME_SIZE;
-        vec3 AABBMax = AABBMin + VOLUME_SIZE + TRUNCATED_DISTANCE / 1000.0f;
-        AABBMin -= TRUNCATED_DISTANCE / 1000.0f;
+        vec3 AABBMax = AABBMin + VOLUME_SIZE + TRUNCATED_DISTANCE;
+        AABBMin -= TRUNCATED_DISTANCE;
 
         if (WSPosition.x > AABBMin.x && WSPosition.x < AABBMax.x &&
             WSPosition.y > AABBMin.y && WSPosition.y < AABBMax.y &&
@@ -71,8 +71,8 @@ void main()
             vec3 CameraDirection = normalize(WSPosition - g_PoseMatrix[3].xyz);
 
             vec3 WSLinePositions[2];
-            WSLinePositions[0] = WSPosition - CameraDirection * TRUNCATED_DISTANCE / 1000.0f;
-            WSLinePositions[1] = WSPosition + CameraDirection * TRUNCATED_DISTANCE / 1000.0f;
+            WSLinePositions[0] = WSPosition - CameraDirection * TRUNCATED_DISTANCE;
+            WSLinePositions[1] = WSPosition + CameraDirection * TRUNCATED_DISTANCE;
 
             vec3 VSLinePositions[2];
             for(int i = 0; i < 2; ++ i)
@@ -120,8 +120,8 @@ void main()
         vec3 WSPosition = (g_PoseMatrix * vec4(Position, 1.0f)).xyz;
 
         vec3 AABBMin = g_Offset * VOLUME_SIZE;
-        vec3 AABBMax = AABBMin + VOLUME_SIZE + TRUNCATED_DISTANCE / 1000.0f;
-        AABBMin -= TRUNCATED_DISTANCE / 1000.0f;
+        vec3 AABBMax = AABBMin + VOLUME_SIZE + TRUNCATED_DISTANCE;
+        AABBMin -= TRUNCATED_DISTANCE;
 
         if (WSPosition.x > AABBMin.x && WSPosition.x < AABBMax.x &&
             WSPosition.y > AABBMin.y && WSPosition.y < AABBMax.y &&
@@ -130,8 +130,8 @@ void main()
             vec3 CameraDirection = normalize(WSPosition - g_PoseMatrix[3].xyz);
 
             vec3 WSLinePositions[2];
-            WSLinePositions[0] = WSPosition - CameraDirection * TRUNCATED_DISTANCE / 1000.0f;
-            WSLinePositions[1] = WSPosition + CameraDirection * TRUNCATED_DISTANCE / 1000.0f;
+            WSLinePositions[0] = WSPosition - CameraDirection * TRUNCATED_DISTANCE;
+            WSLinePositions[1] = WSPosition + CameraDirection * TRUNCATED_DISTANCE;
 
             vec3 VSLinePositions[2];
             for(int i = 0; i < 2; ++ i)

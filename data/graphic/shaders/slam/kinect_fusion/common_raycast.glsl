@@ -74,7 +74,7 @@ vec3 GetPosition(vec3 CameraPosition, vec3 RayDirection, sampler3D Volume)
     const float StartLength = GetStartLength(CameraPosition, RayDirection);
     const float EndLength = GetEndLength(CameraPosition, RayDirection);
     
-    float Step = TRUNCATED_DISTANCE * 0.001f * 0.8f;
+    float Step = TRUNCATED_DISTANCE * 1000.0f * 0.001f * 0.8f;
     float RayLength = StartLength;
 
     vec2 Voxel = GetVoxel(GetVoxelCoords(CameraPosition + RayLength * RayDirection), Volume);

@@ -55,11 +55,11 @@ namespace
 
     const int g_MaxVolumeInstanceCount = 128;
 
-    /*
+    //*
     const unsigned int g_RootVolumePoolSize =        g_MegabyteSize;
     const unsigned int g_RootGridPoolSize   =  16u * g_MegabyteSize;
     const unsigned int g_Level1GridPoolSize =  64u * g_MegabyteSize;
-    const unsigned int g_TSDFPoolSize       = 512u * g_MegabyteSize;
+    const unsigned int g_TSDFPoolSize       = 128u * g_MegabyteSize;
     /*/
     const unsigned int g_RootVolumePoolSize =              g_MegabyteSize;
     const unsigned int g_RootGridPoolSize   =       128u * g_MegabyteSize;
@@ -482,6 +482,8 @@ namespace MR
 
         std::stringstream DefineStream;
 
+        const float TruncatedDistance = m_ReconstructionSettings.m_TruncatedDistance / 1000.0f;
+
         DefineStream
             << "#define PYRAMID_LEVELS "         << m_ReconstructionSettings.m_PyramidLevelCount    << " \n"
             << "#define VOXEL_SIZE "             << VoxelSize                                       << " \n"
@@ -491,7 +493,7 @@ namespace MR
             << "#define TILE_SIZE1D "            << g_TileSize1D                                    << " \n"
             << "#define TILE_SIZE2D "            << g_TileSize2D                                    << " \n"
             << "#define TILE_SIZE3D "            << g_TileSize3D                                    << " \n"
-            << "#define TRUNCATED_DISTANCE "     << m_ReconstructionSettings.m_TruncatedDistance    << " \n"
+            << "#define TRUNCATED_DISTANCE "     << TruncatedDistance                               << " \n"
             << "#define MAX_INTEGRATION_WEIGHT " << m_ReconstructionSettings.m_MaxIntegrationWeight << " \n"
             << "#define EPSILON_DISTANCE "       << g_EpsilonDistance                               << " \n"
             << "#define EPSILON_ANGLE "          << g_EpsilonAngle                                  << " \n"
