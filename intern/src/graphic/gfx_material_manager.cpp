@@ -113,7 +113,6 @@ namespace
 
 namespace
 {
-    std::string g_PathToAssets = "/assets/";
     std::string g_PathToDataModels = "/graphic/models/";
 } // namespace 
 
@@ -161,9 +160,9 @@ namespace
 
         void OnDirtyComponent(Base::IComponent* _pComponent);
 
-        void FillMaterialFromXML(CInternMaterial* _pMaterial, const Base::Char* _pFilename);
+        void FillMaterialFromXML(CInternMaterial* _pMaterial, const std::string& _rFilename);
 
-        void FillMaterialFromAssimp(CInternMaterial* _pMaterial, const Base::Char* _pFilename);
+        void FillMaterialFromAssimp(CInternMaterial* _pMaterial, const std::string& _rFilename);
 
         void FillMaterialFromAssimp(CInternMaterial* _pMaterial, const aiMaterial* _pAssimpMaterial);
 
@@ -215,15 +214,15 @@ namespace
 
         if (_rDescriptor.m_pFileName != 0)
         {
-            std::string MaterialExaminer = _rDescriptor.m_pFileName;
+            std::string MaterialFileName = _rDescriptor.m_pFileName;
 
-            if (MaterialExaminer.find(".mat") != std::string::npos)
+            if (MaterialFileName.find(".mat") != std::string::npos)
             {
-                FillMaterialFromXML(pMaterial, _rDescriptor.m_pFileName);
+                FillMaterialFromXML(pMaterial, MaterialFileName);
             }
             else
             {
-                FillMaterialFromAssimp(pMaterial, _rDescriptor.m_pFileName);
+                FillMaterialFromAssimp(pMaterial, MaterialFileName);
             }
         }
         else
@@ -335,16 +334,14 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxMaterialManager::FillMaterialFromXML(CInternMaterial* _pMaterial, const Base::Char* _pFilename)
+    void CGfxMaterialManager::FillMaterialFromXML(CInternMaterial* _pMaterial, const std::string& _rFilename)
     {
-        assert(_pFilename != 0);
-
         tinyxml2::XMLDocument MaterialFile;
 
         // -----------------------------------------------------------------------------
         // Build path to texture in file system
         // -----------------------------------------------------------------------------
-        std::string PathToMaterial = Core::AssetManager::GetPathToAssets() + "/" + _pFilename;
+        std::string PathToMaterial = Core::AssetManager::GetPathToAssets() + "/" + _rFilename;
 
         // -----------------------------------------------------------------------------
         // Load material file
@@ -422,12 +419,12 @@ namespace
         // -----------------------------------------------------------------------------
         // Textures
         // -----------------------------------------------------------------------------
-        MaterialDescriptor.m_pColorMap     = (pElementColor != nullptr)     ? pElementColor->Attribute("Map")     : 0;
-        MaterialDescriptor.m_pNormalMap    = (pElementNormal != nullptr)    ? pElementNormal->Attribute("Map")    : 0;
-        MaterialDescriptor.m_pRoughnessMap = (pElementRoughness != nullptr) ? pElementRoughness->Attribute("Map") : 0;
-        MaterialDescriptor.m_pMetalMaskMap = (pElementMetallic != nullptr)  ? pElementMetallic->Attribute("Map")  : 0;
-        MaterialDescriptor.m_pBumpMap      = (pElementBump != nullptr)      ? pElementBump->Attribute("Map")      : 0;
-        MaterialDescriptor.m_pAOMap        = (pElementAO != nullptr)        ? pElementAO->Attribute("Map")        : 0;
+        if (pElementColor != nullptr && pElementColor->Attribute("Map")) MaterialDescriptor.m_pColorMap = pElementColor->Attribute("Map");
+        if (pElementNormal != nullptr && pElementNormal->Attribute("Map")) MaterialDescriptor.m_pNormalMap = pElementNormal->Attribute("Map");
+        if (pElementRoughness != nullptr && pElementRoughness->Attribute("Map")) MaterialDescriptor.m_pRoughnessMap = pElementRoughness->Attribute("Map");
+        if (pElementMetallic != nullptr && pElementMetallic->Attribute("Map")) MaterialDescriptor.m_pMetalMaskMap = pElementMetallic->Attribute("Map");
+        if (pElementBump != nullptr && pElementBump->Attribute("Map")) MaterialDescriptor.m_pBumpMap = pElementBump->Attribute("Map");
+        if (pElementAO != nullptr && pElementAO->Attribute("Map")) MaterialDescriptor.m_pAOMap = pElementAO->Attribute("Map");
 
         // -----------------------------------------------------------------------------
         // Fill data
@@ -437,19 +434,17 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxMaterialManager::FillMaterialFromAssimp(CInternMaterial* _pMaterial, const Base::Char* _pFilename)
+    void CGfxMaterialManager::FillMaterialFromAssimp(CInternMaterial* _pMaterial, const std::string& _rFilename)
     {
-        assert(_pFilename != 0);
-
         Assimp::Importer Importer;
 
-        std::string PathToMaterial = Core::AssetManager::GetPathToAssets() + "/" + _pFilename;
+        std::string PathToMaterial = Core::AssetManager::GetPathToAssets() + "/" + _rFilename;
 
         const aiScene* pScene = Importer.ReadFile(PathToMaterial.c_str(), 0);
 
         if (!pScene)
         {
-            PathToMaterial = Core::AssetManager::GetPathToData() + g_PathToDataModels + _pFilename;
+            PathToMaterial = Core::AssetManager::GetPathToData() + g_PathToDataModels + _rFilename;
 
             pScene = Importer.ReadFile(PathToMaterial.c_str(), 0);
         }
@@ -479,9 +474,9 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxMaterialManager::FillMaterialFromAssimp(CInternMaterial* _pComponent, const aiMaterial* _pMaterial)
+    void CGfxMaterialManager::FillMaterialFromAssimp(CInternMaterial* _pComponent, const aiMaterial* _pAssimpMaterial)
     {
-        assert(_pMaterial);
+        assert(_pAssimpMaterial);
 
         // -----------------------------------------------------------------------------
         // Descriptor
@@ -508,24 +503,24 @@ namespace
         aiString  NativeString;
         aiColor4D DiffuseColor;
 
-        if (_pMaterial->Get(AI_MATKEY_NAME, NativeString) == AI_SUCCESS)
+        if (_pAssimpMaterial->Get(AI_MATKEY_NAME, NativeString) == AI_SUCCESS)
         {
             MaterialDescriptor.m_pMaterialName = NativeString.data;
         }
 
-        if (_pMaterial->Get(AI_MATKEY_COLOR_DIFFUSE, DiffuseColor) == AI_SUCCESS)
+        if (_pAssimpMaterial->Get(AI_MATKEY_COLOR_DIFFUSE, DiffuseColor) == AI_SUCCESS)
         {
             MaterialDescriptor.m_AlbedoColor[0] = DiffuseColor.r;
             MaterialDescriptor.m_AlbedoColor[1] = DiffuseColor.g;
             MaterialDescriptor.m_AlbedoColor[2] = DiffuseColor.b;
         }
 
-        if (_pMaterial->GetTexture(aiTextureType_DIFFUSE, 0, &NativeString) == AI_SUCCESS)
+        if (_pAssimpMaterial->GetTexture(aiTextureType_DIFFUSE, 0, &NativeString) == AI_SUCCESS)
         {
             MaterialDescriptor.m_pColorMap = NativeString.data;
         }
 
-        if (_pMaterial->GetTexture(aiTextureType_HEIGHT, 0, &NativeString) == AI_SUCCESS)
+        if (_pAssimpMaterial->GetTexture(aiTextureType_HEIGHT, 0, &NativeString) == AI_SUCCESS)
         {
             MaterialDescriptor.m_pNormalMap = NativeString.data;
         }

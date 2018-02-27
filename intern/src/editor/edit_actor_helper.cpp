@@ -135,30 +135,17 @@ namespace
 
         Dt::CMaterialComponent* pComponent = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CMaterialComponent>();
 
-        if (pComponent != nullptr)
-        {
-            // TODO by tschwandt
-            // Use material created by mesh if no material was defined material 
+        if (pComponent == nullptr) return;
 
-            Edit::CMessage NewMessage;
+        Edit::CMessage NewMessage;
 
-            NewMessage.Put(rCurrentEntity.GetID());
+        NewMessage.Put(rCurrentEntity.GetID());
 
-            if (pComponent)
-            {
-                NewMessage.Put(true);
+        NewMessage.Put(pComponent->GetID());
 
-                NewMessage.Put(pComponent->GetID());
-            }
-            else
-            {
-                NewMessage.Put(false);
-            }
+        NewMessage.Reset();
 
-            NewMessage.Reset();
-
-            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::Actor_Material_Info, NewMessage);
-        }
+        Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::Actor_Material_Info, NewMessage);
     }
 
     // -----------------------------------------------------------------------------

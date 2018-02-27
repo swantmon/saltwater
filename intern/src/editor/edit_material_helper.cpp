@@ -98,11 +98,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Material
         // -----------------------------------------------------------------------------
-        auto pComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CMaterialComponent>();
-
-        pComponent->SetFileName(PathToFile);
-
-        Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pComponent, Dt::CMaterialComponent::DirtyCreate);
+        auto pComponent = Dt::MaterialHelper::CreateMaterialFromFile(PathToFile);
 
         // -----------------------------------------------------------------------------
         // Set result as ID
@@ -114,7 +110,7 @@ namespace
 
     void CMaterialHelper::OnRequestMaterialInfo(Edit::CMessage& _rMessage)
     {
-        Base::ID MaterialID = _rMessage.Get<int>();
+        Base::ID MaterialID = _rMessage.Get<Base::ID>();
 
         auto pMaterial = Dt::CComponentManager::GetInstance().GetComponent<Dt::CMaterialComponent>(MaterialID);
 

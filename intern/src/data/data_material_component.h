@@ -40,6 +40,12 @@ namespace Dt
         void SetColor(const glm::vec3& _rValue);
         const glm::vec3& GetColor() const;
 
+        void SetTiling(const glm::vec2& _rValue);
+        const glm::vec2& GetTiling() const;
+
+        void SetOffset(const glm::vec2& _rValue);
+        const glm::vec2& GetOffset() const;
+
         void SetTilingOffset(const glm::vec4& _rValue);
         const glm::vec4& GetTilingOffset() const;
 

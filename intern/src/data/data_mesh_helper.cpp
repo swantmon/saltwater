@@ -86,10 +86,9 @@ namespace
         pComponent->SetGeneratorFlag(_GenFlag);
         pComponent->SetPredefinedMesh(CMeshComponent::Nothing);
 
-        if (Hash != 0)
-        {
-            m_MeshByID[Hash] = pComponent;
-        }       
+        Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pComponent, CMeshComponent::DirtyCreate);
+
+        m_MeshByID[Hash] = pComponent;
 
         return pComponent;
     }

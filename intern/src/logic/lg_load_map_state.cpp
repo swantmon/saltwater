@@ -470,8 +470,6 @@ void CLgLoadMapState::CreateDefaultScene()
 
             rEntity.AttachComponent(pMeshComponent);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pMeshComponent, Dt::CMeshComponent::DirtyCreate);
-
             // -----------------------------------------------------------------------------
 
             auto pMaterialComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CMaterialComponent>();

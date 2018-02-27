@@ -150,7 +150,6 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-
     void CMaterialComponent::SetColor(const glm::vec3& _rValue)
     {
         m_Color = _rValue;
@@ -165,6 +164,35 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
+    void CMaterialComponent::SetTiling(const glm::vec2& _rValue)
+    {
+        m_TilingOffset[0] = _rValue[0];
+        m_TilingOffset[1] = _rValue[1];
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const glm::vec2& CMaterialComponent::GetTiling() const
+    {
+        return glm::vec2(m_TilingOffset[0], m_TilingOffset[1]);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMaterialComponent::SetOffset(const glm::vec2& _rValue)
+    {
+        m_TilingOffset[2] = _rValue[0];
+        m_TilingOffset[3] = _rValue[1];
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const glm::vec2& CMaterialComponent::GetOffset() const
+    {
+        return glm::vec2(m_TilingOffset[2], m_TilingOffset[3]);
+    }
+
+    // -----------------------------------------------------------------------------
 
     void CMaterialComponent::SetTilingOffset(const glm::vec4& _rValue)
     {

@@ -329,20 +329,11 @@ namespace Edit
 
         if (EntityID != m_CurrentEntityID) return;
 
-        bool HasMaterial = _rMessage.Get<bool>();
-
-        if (HasMaterial == false)
-        {
-            return;
-        }
-
-        Base::ID MaterialID = _rMessage.Get<Base::ID>();
-
-        m_MaterialID = static_cast<unsigned int>(MaterialID);
+        m_MaterialID = _rMessage.Get<Base::ID>();
 
         CMessage NewMessage;
 
-        NewMessage.Put(MaterialID);
+        NewMessage.Put(m_MaterialID);
 
         NewMessage.Reset();
 
