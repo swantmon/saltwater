@@ -1606,8 +1606,8 @@ namespace MR
             const int PyramidWorkGroupsX = DivUp(m_DepthImageSize.x >> PyramidLevel, g_TileSize2D);
             const int PyramidWorkGroupsY = DivUp(m_DepthImageSize.y >> PyramidLevel, g_TileSize2D);
                         
-            ContextManager::SetImageTexture(0, static_cast<CTexturePtr>(m_ReferenceVertexMapPtr[PyramidLevel]));
-            ContextManager::SetImageTexture(1, static_cast<CTexturePtr>(m_ReferenceNormalMapPtr[PyramidLevel]));
+            ContextManager::SetImageTexture(0, m_ReferenceVertexMapPtr[PyramidLevel]);
+            ContextManager::SetImageTexture(1, m_ReferenceNormalMapPtr[PyramidLevel]);
             ContextManager::Barrier();
             ContextManager::Dispatch(PyramidWorkGroupsX, PyramidWorkGroupsY, 1);
         }
@@ -1630,16 +1630,16 @@ namespace MR
             BufferManager::UploadBufferData(m_RaycastPyramidConstantBufferPtr, &Normalized);
             
             ContextManager::Barrier();
-            ContextManager::SetImageTexture(0, static_cast<CTexturePtr>(m_RaycastVertexMapPtr[PyramidLevel - 1]));
-            ContextManager::SetImageTexture(1, static_cast<CTexturePtr>(m_RaycastVertexMapPtr[PyramidLevel]));
+            ContextManager::SetImageTexture(0, m_RaycastVertexMapPtr[PyramidLevel - 1]);
+            ContextManager::SetImageTexture(1, m_RaycastVertexMapPtr[PyramidLevel]);
             ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
 
             Normalized = 1.0f;
             BufferManager::UploadBufferData(m_RaycastPyramidConstantBufferPtr, &Normalized);
 
             ContextManager::Barrier();
-            ContextManager::SetImageTexture(0, static_cast<CTexturePtr>(m_RaycastNormalMapPtr[PyramidLevel - 1]));
-            ContextManager::SetImageTexture(1, static_cast<CTexturePtr>(m_RaycastNormalMapPtr[PyramidLevel]));
+            ContextManager::SetImageTexture(0, m_RaycastNormalMapPtr[PyramidLevel - 1]);
+            ContextManager::SetImageTexture(1, m_RaycastNormalMapPtr[PyramidLevel]);
             ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
         }
     }
@@ -1653,8 +1653,8 @@ namespace MR
 
         ContextManager::SetShaderCS(m_RaycastCSPtr);
         
-        ContextManager::SetImageTexture(1, static_cast<CTexturePtr>(m_RaycastVertexMapPtr[0]));
-        ContextManager::SetImageTexture(2, static_cast<CTexturePtr>(m_RaycastNormalMapPtr[0]));
+        ContextManager::SetImageTexture(1, m_RaycastVertexMapPtr[0]);
+        ContextManager::SetImageTexture(2, m_RaycastNormalMapPtr[0]);
 
         ContextManager::SetResourceBuffer(0, m_VolumeBuffers.m_RootVolumePoolPtr);
         ContextManager::SetResourceBuffer(1, m_VolumeBuffers.m_RootGridPoolPtr);
