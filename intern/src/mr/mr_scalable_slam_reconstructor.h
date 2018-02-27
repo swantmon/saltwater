@@ -290,6 +290,8 @@ namespace MR
         unsigned int m_Level1GridPoolSize;
         unsigned int m_TSDFPoolSize;
 
+        bool m_PoolFull;
+
         glm::ivec2 m_DepthImageSize;
 
         int m_RootVolumePoolItemCount;

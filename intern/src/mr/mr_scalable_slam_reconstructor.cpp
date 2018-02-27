@@ -239,9 +239,6 @@ namespace MR
         m_PlaneDetector.SetImages(m_ReferenceVertexMapPtr[2], m_ReferenceNormalMapPtr[2]);
 
         m_pTracker.reset(new CICPTracker(m_DepthImageSize.x, m_DepthImageSize.y, m_ReconstructionSettings));
-
-        m_IsIntegrationPaused = false;
-        m_IsTrackingPaused = false;
     }
 
     // -----------------------------------------------------------------------------
@@ -300,6 +297,11 @@ namespace MR
 
 	void CScalableSLAMReconstructor::SetupData()
 	{
+        m_IsIntegrationPaused = false;
+        m_IsTrackingPaused = false;
+
+        m_PoolFull = false;
+
         m_RootGridPoolSize = Base::CProgramParameters::GetInstance().Get("mr:slam:pool_sizes:level0", g_MaxRootGridPoolSize / g_MegabyteSize) * g_MegabyteSize;
         m_Level1GridPoolSize = Base::CProgramParameters::GetInstance().Get("mr:slam:pool_sizes:level1", g_MaxLevel1GridPoolSize / g_MegabyteSize) * g_MegabyteSize;
         m_TSDFPoolSize = Base::CProgramParameters::GetInstance().Get("mr:slam:pool_sizes:level2", g_MaxTSDFPoolSize / g_MegabyteSize) * g_MegabyteSize;
@@ -1381,14 +1383,17 @@ namespace MR
             return;
         }
 
-        if (CaptureColor && !m_pRGBDCameraControl->GetCameraFrame(pColor))
+        if (CaptureColor && !m_IsIntegrationPaused && !m_pRGBDCameraControl->GetCameraFrame(pColor))
         {
             return;
         }
         /*/
 #pragma message("Warning: Active polling of depth frame is active and could lead to an infinite loop!")
         while (!m_pRGBDCameraControl->GetDepthBuffer(pDepth));
-        while (CaptureColor && !m_pRGBDCameraControl->GetCameraFrame(pColor));
+        if (!m_IsIntegrationPaused)
+        {
+            while (CaptureColor && !m_pRGBDCameraControl->GetCameraFrame(pColor));
+        }
         //*/
         
         Performance::BeginEvent("Scalable Kinect Fusion");
@@ -1462,21 +1467,28 @@ namespace MR
         m_VolumeBuffers.m_TSDFPoolSize = pPoolSizes[2];
         BufferManager::UnmapBuffer(m_VolumeBuffers.m_PoolItemCountBufferPtr);
         
-        if (m_VolumeBuffers.m_RootGridPoolSize * m_ReconstructionSettings.m_VoxelsPerGrid[0] * sizeof(SGridPoolItem) > m_RootGridPoolSize)
-        {
-            m_IsIntegrationPaused = true;
-            BASE_CONSOLE_ERROR("Rootgrid pool is full!");
-        }
-        if (m_VolumeBuffers.m_Level1PoolSize * m_ReconstructionSettings.m_VoxelsPerGrid[1] * sizeof(SGridPoolItem) > m_Level1GridPoolSize)
-        {
-            m_IsIntegrationPaused = true;
-            BASE_CONSOLE_ERROR("Level1 pool is full!");
-        }
         const unsigned int TSDFItemSize = m_ReconstructionSettings.m_CaptureColor ? sizeof(STSDFColorPoolItem) : sizeof(STSDFPoolItem);
-        if (m_VolumeBuffers.m_TSDFPoolSize * m_ReconstructionSettings.m_VoxelsPerGrid[2] * TSDFItemSize > m_TSDFPoolSize)
+
+        if (!m_PoolFull)
         {
-            m_IsIntegrationPaused = true;
-            BASE_CONSOLE_ERROR("TSDF pool buffer is full!");
+            if (m_VolumeBuffers.m_RootGridPoolSize * m_ReconstructionSettings.m_VoxelsPerGrid[0] * sizeof(SGridPoolItem) > m_RootGridPoolSize)
+            {
+                m_PoolFull = true;
+                m_IsIntegrationPaused = true;
+                BASE_CONSOLE_ERROR("Rootgrid pool is full!");
+            }
+            if (m_VolumeBuffers.m_Level1PoolSize * m_ReconstructionSettings.m_VoxelsPerGrid[1] * sizeof(SGridPoolItem) > m_Level1GridPoolSize)
+            {
+                m_PoolFull = true;
+                m_IsIntegrationPaused = true;
+                BASE_CONSOLE_ERROR("Level1 pool is full!");
+            }
+            if (m_VolumeBuffers.m_TSDFPoolSize * m_ReconstructionSettings.m_VoxelsPerGrid[2] * TSDFItemSize > m_TSDFPoolSize)
+            {
+                m_PoolFull = true;
+                m_IsIntegrationPaused = true;
+                BASE_CONSOLE_ERROR("TSDF pool buffer is full!");
+            }
         }
 
         unsigned int ReconstructionSizeBytes = m_VolumeBuffers.m_RootGridPoolSize * m_ReconstructionSettings.m_VoxelsPerGrid[0] * sizeof(SGridPoolItem);
