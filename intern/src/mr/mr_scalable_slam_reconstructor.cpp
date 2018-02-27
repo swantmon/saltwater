@@ -227,8 +227,8 @@ namespace MR
         m_DepthPixels = std::vector<unsigned short>(m_DepthImageSize.x * m_DepthImageSize.y);
         m_CameraPixels = std::vector<char>(m_DepthImageSize.x * m_DepthImageSize.y * 4);
 
+        SetupData();
         SetupMeshes();
-		SetupData();
         SetupRenderStates();
 		SetupShaders();
 		SetupTextures();
