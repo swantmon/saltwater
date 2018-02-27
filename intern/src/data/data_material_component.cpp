@@ -15,7 +15,7 @@ namespace Dt
         , m_AOTexture       ()
         , m_BumpTexture     ()
         , m_Color           (1.0f, 1.0f, 1.0f)
-        , m_TilingOffset    (0.0f, 0.0f, 1.0f, 1.0f)
+        , m_TilingOffset    (1.0f, 1.0f, 0.0f, 0.0f)
         , m_Roughness       (1.0f)
         , m_Reflectance     (0.0f)
         , m_MetalMask       (0.0f)
