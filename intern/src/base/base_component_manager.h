@@ -29,9 +29,6 @@ namespace CON
         T* Allocate();
 
         template<class T>
-        T* Allocate(Base::ID _ID);
-
-        template<class T>
         T* GetComponent(Base::ID _ID);
 
         template<class T>
@@ -74,35 +71,6 @@ namespace CON
         T* pComponent = static_cast<T*>(m_Components.back().get());
 
         pComponent->m_ID = m_CurrentID++;
-
-        // -----------------------------------------------------------------------------
-        // Save component to organizer
-        // -----------------------------------------------------------------------------
-        m_ComponentByID[pComponent->m_ID] = pComponent;
-
-        m_ComponentsByType[Base::CTypeInfo::GetTypeID<T>()].emplace_back(pComponent);
-
-        return pComponent;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    template<class T>
-    T* CComponentManager::Allocate(Base::ID _ID)
-    {
-        if (m_ComponentByID.find(_ID) != m_ComponentByID.end())
-        {
-            return static_cast<T*>(m_ComponentByID.at(_ID));
-        }
-
-        // -----------------------------------------------------------------------------
-        // Allocate new component
-        // -----------------------------------------------------------------------------
-        m_Components.emplace_back(std::unique_ptr<T>(new T()));
-
-        T* pComponent = static_cast<T*>(m_Components.back().get());
-
-        pComponent->m_ID = _ID;
 
         // -----------------------------------------------------------------------------
         // Save component to organizer
