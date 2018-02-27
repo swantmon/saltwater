@@ -150,7 +150,7 @@ namespace
 
     private:
 
-        typedef Base::CManagedPool<CInternMaterial, 32, 0> CMaterials;
+        typedef Base::CManagedPool<CInternMaterial, 32, 1> CMaterials;
 
     private:
 
