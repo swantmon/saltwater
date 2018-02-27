@@ -34,7 +34,7 @@ namespace MR
         s_DefaultSettings.m_VolumeSize = Base::CProgramParameters::GetInstance().Get("mr:slam:metrics:volume_size", 4.0f);
         s_DefaultSettings.m_VolumeResolution = Base::CProgramParameters::GetInstance().Get("mr:slam:metrics:volume_resolution", 512);
 
-        s_DefaultSettings.m_PyramidLevelIterations = Base::CProgramParameters::GetInstance().Get("mr:slam:tracking_iterations", glm::ivec3(10, 5, 4));
+        s_DefaultSettings.m_PyramidLevelIterations = Base::CProgramParameters::GetInstance().Get("mr:slam:tracking_iterations", glm::ivec3(5, 5, 4));
         
         s_DefaultSettings.m_GridResolutions = glm::ivec3(16, 8, 8);
 
