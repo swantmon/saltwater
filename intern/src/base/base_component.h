@@ -23,7 +23,6 @@ namespace CON
 
         virtual ~IComponent() {};
 
-    
      private:
 
         Base::ID m_ID;

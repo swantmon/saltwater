@@ -29,6 +29,11 @@ namespace CON
         T* Allocate();
 
         template<class T>
+        void Deallocate(T* _pObject);
+
+        void Deallocate(Base::ID _ID);
+
+        template<class T>
         T* GetComponent(Base::ID _ID);
 
         template<class T>
@@ -80,6 +85,16 @@ namespace CON
         m_ComponentsByType[Base::CTypeInfo::GetTypeID<T>()].emplace_back(pComponent);
 
         return pComponent;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    template<class T>
+    void CComponentManager::Deallocate(T* _pObject)
+    {
+        if (_pObject == nullptr) return;
+
+        Deallocate(_pObject->GetID());
     }
 
     // -----------------------------------------------------------------------------
