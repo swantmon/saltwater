@@ -55,16 +55,16 @@ namespace
 
     const int g_MaxVolumeInstanceCount = 128;
 
-    //*
-    const unsigned int g_RootVolumePoolSize =        g_MegabyteSize;
-    const unsigned int g_RootGridPoolSize   =  16u * g_MegabyteSize;
-    const unsigned int g_Level1GridPoolSize =  64u * g_MegabyteSize;
-    const unsigned int g_TSDFPoolSize       = 128u * g_MegabyteSize;
+    /*
+    const unsigned int g_MaxRootVolumePoolSize =        g_MegabyteSize;
+    const unsigned int g_MaxRootGridPoolSize   =  16u * g_MegabyteSize;
+    const unsigned int g_MaxLevel1GridPoolSize =  64u * g_MegabyteSize;
+    const unsigned int g_MaxTSDFPoolSize       = 128u * g_MegabyteSize;
     /*/
-    const unsigned int g_RootVolumePoolSize =              g_MegabyteSize;
-    const unsigned int g_RootGridPoolSize   =       128u * g_MegabyteSize;
-    const unsigned int g_Level1GridPoolSize =       128u * g_MegabyteSize;
-    const unsigned int g_TSDFPoolSize       = 16u * 128u * g_MegabyteSize;
+    const unsigned int g_MaxRootVolumePoolSize =              g_MegabyteSize;
+    const unsigned int g_MaxRootGridPoolSize   =       128u * g_MegabyteSize;
+    const unsigned int g_MaxLevel1GridPoolSize =       128u * g_MegabyteSize;
+    const unsigned int g_MaxTSDFPoolSize       = 16u * 128u * g_MegabyteSize;
     //*/
             
     const float g_EpsilonDistance = 0.1f;
@@ -300,6 +300,10 @@ namespace MR
 
 	void CScalableSLAMReconstructor::SetupData()
 	{
+        m_RootGridPoolSize = Base::CProgramParameters::GetInstance().Get("mr:slam:pool_sizes:level0", g_MaxRootGridPoolSize / g_MegabyteSize) * g_MegabyteSize;
+        m_Level1GridPoolSize = Base::CProgramParameters::GetInstance().Get("mr:slam:pool_sizes:level1", g_MaxLevel1GridPoolSize / g_MegabyteSize) * g_MegabyteSize;
+        m_TSDFPoolSize = Base::CProgramParameters::GetInstance().Get("mr:slam:pool_sizes:level2", g_MaxTSDFPoolSize / g_MegabyteSize) * g_MegabyteSize;
+
         m_ReconstructionSize = 0.0f;
 
         m_MinWeight = Base::CProgramParameters::GetInstance().Get("mr:slam:min_weight", 15);
@@ -1330,13 +1334,13 @@ namespace MR
 
             ConstantBufferDesc.m_NumberOfBytes = RootVolumePositionBufferSize;
             m_VolumeBuffers.m_RootVolumePositionBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
-            ConstantBufferDesc.m_NumberOfBytes = g_RootVolumePoolSize;
+            ConstantBufferDesc.m_NumberOfBytes = g_MaxRootVolumePoolSize;
             m_VolumeBuffers.m_RootVolumePoolPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
-            ConstantBufferDesc.m_NumberOfBytes = g_RootGridPoolSize;
+            ConstantBufferDesc.m_NumberOfBytes = m_RootGridPoolSize;
             m_VolumeBuffers.m_RootGridPoolPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
-            ConstantBufferDesc.m_NumberOfBytes = g_Level1GridPoolSize;
+            ConstantBufferDesc.m_NumberOfBytes = m_Level1GridPoolSize;
             m_VolumeBuffers.m_Level1PoolPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
-            ConstantBufferDesc.m_NumberOfBytes = g_TSDFPoolSize;
+            ConstantBufferDesc.m_NumberOfBytes = m_TSDFPoolSize;
             m_VolumeBuffers.m_TSDFPoolPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
         }
 
@@ -1419,7 +1423,7 @@ namespace MR
         // Tracking
         //////////////////////////////////////////////////////////////////////////////////////
 
-        if (m_IntegratedFrameCount > 0)
+        if (m_IntegratedFrameCount > m_MinWeight + 10)
         {
             Performance::BeginEvent("Tracking");
 
@@ -1458,18 +1462,18 @@ namespace MR
         m_VolumeBuffers.m_TSDFPoolSize = pPoolSizes[2];
         BufferManager::UnmapBuffer(m_VolumeBuffers.m_PoolItemCountBufferPtr);
         
-        if (m_VolumeBuffers.m_RootGridPoolSize * m_ReconstructionSettings.m_VoxelsPerGrid[0] * sizeof(SGridPoolItem) > g_RootGridPoolSize)
+        if (m_VolumeBuffers.m_RootGridPoolSize * m_ReconstructionSettings.m_VoxelsPerGrid[0] * sizeof(SGridPoolItem) > m_RootGridPoolSize)
         {
             m_IsIntegrationPaused = true;
             BASE_CONSOLE_ERROR("Rootgrid pool is full!");
         }
-        if (m_VolumeBuffers.m_Level1PoolSize * m_ReconstructionSettings.m_VoxelsPerGrid[1] * sizeof(SGridPoolItem) > g_Level1GridPoolSize)
+        if (m_VolumeBuffers.m_Level1PoolSize * m_ReconstructionSettings.m_VoxelsPerGrid[1] * sizeof(SGridPoolItem) > m_Level1GridPoolSize)
         {
             m_IsIntegrationPaused = true;
             BASE_CONSOLE_ERROR("Level1 pool is full!");
         }
-        const int TSDFItemSize = m_ReconstructionSettings.m_CaptureColor ? sizeof(STSDFColorPoolItem) : sizeof(STSDFPoolItem);
-        if (m_VolumeBuffers.m_TSDFPoolSize * m_ReconstructionSettings.m_VoxelsPerGrid[2] * TSDFItemSize > g_TSDFPoolSize)
+        const unsigned int TSDFItemSize = m_ReconstructionSettings.m_CaptureColor ? sizeof(STSDFColorPoolItem) : sizeof(STSDFPoolItem);
+        if (m_VolumeBuffers.m_TSDFPoolSize * m_ReconstructionSettings.m_VoxelsPerGrid[2] * TSDFItemSize > m_TSDFPoolSize)
         {
             m_IsIntegrationPaused = true;
             BASE_CONSOLE_ERROR("TSDF pool buffer is full!");
@@ -1706,15 +1710,15 @@ namespace MR
         std::vector<int> Data(g_MegabyteSize / sizeof(int));
         std::memset(Data.data(), -1, DataSize);
 
-        for (int i = 0; i < g_RootVolumePoolSize / g_MegabyteSize; ++ i)
+        for (unsigned int i = 0; i < g_MaxRootVolumePoolSize / g_MegabyteSize; ++ i)
         {
             BufferManager::UploadBufferData(m_VolumeBuffers.m_RootVolumePoolPtr, Data.data(), i * DataSize, DataSize);
         }
-        for (int i = 0; i < g_RootGridPoolSize / g_MegabyteSize; ++ i)
+        for (unsigned int i = 0; i < m_RootGridPoolSize / g_MegabyteSize; ++ i)
         {
             BufferManager::UploadBufferData(m_VolumeBuffers.m_RootGridPoolPtr, Data.data(), i * DataSize, DataSize);
         }
-        for (int i = 0; i < g_Level1GridPoolSize / g_MegabyteSize; ++ i)
+        for (unsigned int i = 0; i < m_Level1GridPoolSize / g_MegabyteSize; ++ i)
         {
             BufferManager::UploadBufferData(m_VolumeBuffers.m_Level1PoolPtr, Data.data(), i * DataSize, DataSize);
         }
@@ -1725,7 +1729,7 @@ namespace MR
         BufferManager::UploadBufferData(m_VolumeBuffers.m_PoolItemCountBufferPtr, &Zero);
 
         std::memset(Data.data(), 0, DataSize);
-        for (int i = 0; i < g_TSDFPoolSize / g_MegabyteSize; ++ i)
+        for (unsigned int i = 0; i < m_TSDFPoolSize / g_MegabyteSize; ++ i)
         {
             BufferManager::UploadBufferData(m_VolumeBuffers.m_TSDFPoolPtr, Data.data(), i * DataSize, DataSize);
         }

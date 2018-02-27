@@ -286,6 +286,10 @@ namespace MR
         std::vector<unsigned short> m_DepthPixels;
         std::vector<char> m_CameraPixels;
 
+        unsigned int m_RootGridPoolSize;
+        unsigned int m_Level1GridPoolSize;
+        unsigned int m_TSDFPoolSize;
+
         glm::ivec2 m_DepthImageSize;
 
         int m_RootVolumePoolItemCount;
