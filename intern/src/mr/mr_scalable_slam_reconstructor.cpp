@@ -1212,14 +1212,13 @@ namespace MR
         TextureDescriptor.m_NumberOfPixelsU = VolumeWidth;
         TextureDescriptor.m_NumberOfPixelsV = VolumeWidth;
         TextureDescriptor.m_NumberOfPixelsW = VolumeWidth;
-        TextureDescriptor.m_Binding = CTexture::RenderTarget | CTexture::ShaderResource;
+        TextureDescriptor.m_Binding = CTexture::ShaderResource;
         TextureDescriptor.m_Access = CTexture::CPUWrite;
         TextureDescriptor.m_Usage = CTexture::GPUReadWrite;
         TextureDescriptor.m_Semantic = CTexture::UndefinedSemantic;
         TextureDescriptor.m_Format = CTexture::R8_UINT;
 
         m_FullVolumePtr = TextureManager::CreateTexture3D(TextureDescriptor);
-        m_FullVolumeTargetSetPtr = TargetSetManager::CreateTargetSet(m_FullVolumePtr);
 
         m_EmptyFullVolumePtr = TargetSetManager::CreateEmptyTargetSet(VolumeWidth, VolumeWidth);
 
