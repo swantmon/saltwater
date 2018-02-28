@@ -430,7 +430,6 @@ namespace MR
         m_IntegrateTSDFCSPtr = 0;
         m_RaycastCSPtr = 0;
         m_RaycastPyramidCSPtr = 0;
-		m_RootgridDepthCSPtr = 0;
         m_VolumeCountersCSPtr = 0;
         
         m_RasterizeRootVolumeVSPtr = 0;
@@ -529,10 +528,8 @@ namespace MR
         m_DownSampleDepthCSPtr     = ShaderManager::CompileCS("slam\\scalable_kinect_fusion\\pyramid_creation\\cs_downsample_depth.glsl"  , "main", DefineString.c_str());
         m_RaycastPyramidCSPtr      = ShaderManager::CompileCS("slam\\scalable_kinect_fusion\\pyramid_creation\\cs_raycast_pyramid.glsl"   , "main", DefineString.c_str());
         m_RaycastCSPtr             = ShaderManager::CompileCS("slam\\scalable_kinect_fusion\\cs_raycast.glsl"                             , "main", DefineString.c_str());
-		m_RootgridDepthCSPtr       = ShaderManager::CompileCS("slam\\scalable_kinect_fusion\\cs_rootgrid_depth.glsl"                      , "main", DefineString.c_str());
         m_ClearAtomicCountersCSPtr = ShaderManager::CompileCS("slam\\scalable_kinect_fusion\\cs_clear_atomic_buffer.glsl"                 , "main", DefineString.c_str());
         m_VolumeCountersCSPtr      = ShaderManager::CompileCS("slam\\scalable_kinect_fusion\\cs_volume_counters.glsl"                     , "main", DefineString.c_str());
-        m_GridCountersCSPtr        = ShaderManager::CompileCS("slam\\scalable_kinect_fusion\\cs_grid_counters.glsl"                       , "main", DefineString.c_str());
         m_RasterizeRootVolumeVSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rasterization\\vs_rasterize_rootvolume.glsl" , "main", DefineString.c_str());
         m_RasterizeRootVolumeFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rasterization\\fs_rasterize_rootvolume.glsl" , "main", DefineString.c_str());
         m_PointCloudVSPtr          = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rasterization\\vs_rootgrid.glsl"             , "main", DefineString.c_str());

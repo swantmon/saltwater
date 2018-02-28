@@ -239,11 +239,9 @@ namespace MR
         Gfx::CShaderPtr m_IntegrateTSDFCSPtr;
         Gfx::CShaderPtr m_RaycastCSPtr;
         Gfx::CShaderPtr m_RaycastPyramidCSPtr;
-		Gfx::CShaderPtr m_RootgridDepthCSPtr;
         Gfx::CShaderPtr m_VolumeCountersCSPtr;
         Gfx::CShaderPtr m_RasterizeRootVolumeVSPtr;
         Gfx::CShaderPtr m_RasterizeRootVolumeFSPtr;
-        Gfx::CShaderPtr m_GridCountersCSPtr;
         
         Gfx::CShaderPtr m_PointCloudVSPtr;
         Gfx::CShaderPtr m_PointCloudGSPtr;
