@@ -622,7 +622,7 @@ namespace MR
         ContextManager::Barrier();
         
         const unsigned int IndexCount = m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
-        const unsigned int InstanceCount = static_cast<unsigned int>(m_RootVolumeMap.size());
+        const unsigned int InstanceCount = static_cast<unsigned int>(m_RootVolumeVector.size());
         assert(InstanceCount < g_MaxVolumeInstanceCount);
         ClearBuffer(m_AtomicCounterBufferPtr, InstanceCount * sizeof(int32_t));
         ContextManager::DrawIndexedInstanced(IndexCount, InstanceCount, 0, 0, 0);
@@ -1032,14 +1032,17 @@ namespace MR
 
 			rRootGrid.m_IsVisible = RootGridInFrustum(rRootGrid.m_Offset);
             
-            m_RootVolumeVector.push_back(&rRootGrid);
+            if (rRootGrid.m_IsVisible)
+            {
+                m_RootVolumeVector.push_back(&rRootGrid);
 
-            SInstanceData InstanceData;
-            InstanceData.m_Offset = rRootGrid.m_Offset;
-            InstanceData.m_Index = 0; // todo: remove
+                SInstanceData InstanceData;
+                InstanceData.m_Offset = rRootGrid.m_Offset;
+                InstanceData.m_Index = 0; // todo: remove
 
-            *pInstanceData = InstanceData;
-            ++ pInstanceData;
+                *pInstanceData = InstanceData;
+                ++pInstanceData;
+            }
         }
 
         BufferManager::UnmapBuffer(m_RootVolumeInstanceBufferPtr);
@@ -1056,7 +1059,7 @@ namespace MR
         ContextManager::ResetShaderCS();
 
         RasterizeRootVolumes();
-        GatherVolumeCounters(static_cast<unsigned int>(m_RootVolumeMap.size()), m_AtomicCounterBufferPtr, m_VolumeQueueBufferPtr, m_IndexedIndirectBufferPtr);
+        GatherVolumeCounters(static_cast<unsigned int>(m_RootVolumeVector.size()), m_AtomicCounterBufferPtr, m_VolumeQueueBufferPtr, m_IndexedIndirectBufferPtr);
 
         Performance::EndEvent();
 
