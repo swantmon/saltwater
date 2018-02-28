@@ -236,7 +236,7 @@ namespace MR
 
         ClearPool();
 
-        m_PlaneDetector.SetImages(m_ReferenceVertexMapPtr[2], m_ReferenceNormalMapPtr[2]);
+        //m_PlaneDetector.SetImages(m_ReferenceVertexMapPtr[2], m_ReferenceNormalMapPtr[2]);
 
         m_pTracker.reset(new CICPTracker(m_DepthImageSize.x, m_DepthImageSize.y, m_ReconstructionSettings));
     }
