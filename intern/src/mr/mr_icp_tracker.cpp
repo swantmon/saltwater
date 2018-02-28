@@ -333,7 +333,7 @@ namespace MR
 
         if (m_UseShuffleIntrinsics)
         {
-            for (int i = 0; i < 3; ++i)
+            for (int i = 0; i < m_PyramidLevelCount; ++i)
             {
                 const int ReductionSummandsX = DivUp(m_Width >> i, g_TileSize2D);
                 const int ReductionSummandsY = DivUp(m_Height >> i, g_TileSize2D);
