@@ -19,6 +19,6 @@ namespace MeshHelper
 {
     CMeshComponent* CreateMeshFromFile(const std::string& _rFileName, int _GenFlag);
 
-    CMeshComponent* CreateMeshFromAssimp(const std::string& _pFileName, int _GenFlag, int _MeshIndex);
+    CMeshComponent* CreateMeshFromAssimp(const std::string& _pFileName, int _GenFlag, int _MeshIndex, const void* _pImporter);
 } // namespace MeshManager
 } // namespace Dt

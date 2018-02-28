@@ -11,17 +11,6 @@ namespace Dt
     {
     public:
 
-        struct SGeneratorFlag
-        {
-            enum
-            {
-                Nothing = 0x00,
-                Default = 0x01,
-                FlipUVs = 0x02,
-                RealtimeFast = 0x04
-            };
-        };
-
         enum EMeshType
         {
             File,
@@ -43,6 +32,9 @@ namespace Dt
         void SetMeshIndex(const int _Value);
         int GetMeshIndex() const;
 
+        void SetImporter(const void* _pImporter);
+        const void* GetImporter() const;
+
         void SetMeshType(EMeshType _Value);
         EMeshType GetMeshType() const;
 
@@ -56,6 +48,7 @@ namespace Dt
         std::string m_Filename;
         int         m_GeneratorFlag;
         int         m_MeshIndex;
+        const void* m_pImporter;
         EMeshType   m_MeshType;
     };
 } // namespace Dt

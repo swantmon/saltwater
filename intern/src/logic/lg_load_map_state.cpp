@@ -8,6 +8,8 @@
 #include "camera/cam_control_manager.h"
 #include "camera/cam_game_control.h"
 
+#include "core/core_asset_importer.h"
+
 #include "data/data_camera_component.h"
 #include "data/data_component.h"
 #include "data/data_component_facet.h"
@@ -466,7 +468,7 @@ void CLgLoadMapState::CreateDefaultScene()
 
             // -----------------------------------------------------------------------------
 
-            auto pMeshComponent = Dt::MeshHelper::CreateMeshFromFile("models/MatTester.obj", Dt::CMeshComponent::SGeneratorFlag::Default | Dt::CMeshComponent::SGeneratorFlag::FlipUVs);
+            auto pMeshComponent = Dt::MeshHelper::CreateMeshFromFile("models/MatTester.obj", Core::AssetImporter::SGeneratorFlag::Default | Core::AssetImporter::SGeneratorFlag::FlipUVs);
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pMeshComponent, Dt::CMeshComponent::DirtyCreate);
 

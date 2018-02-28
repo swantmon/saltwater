@@ -8,6 +8,7 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
+#include "core/core_asset_importer.h"
 #include "core/core_asset_manager.h"
 #include "core/core_time.h"
 
@@ -219,7 +220,7 @@ namespace
     {
         Assimp::Importer Importer;
 
-        int GenerationFlag = 0;
+        int GenerationFlag = Core::AssetImporter::ConvertGenerationFlags(Core::AssetImporter::SGeneratorFlag::Default);
 
         // -----------------------------------------------------------------------------
         // Create an vector of new entities
@@ -258,9 +259,11 @@ namespace
 
             rChildEntity.SetName(pMesh->mName.C_Str());
 
-            auto pMeshComponent = Dt::MeshHelper::CreateMeshFromAssimp(_rFile, GenerationFlag, IndexOfMesh);
+            auto pMeshComponent = Dt::MeshHelper::CreateMeshFromAssimp(_rFile, GenerationFlag, IndexOfMesh, pScene);
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pMeshComponent, CMeshComponent::DirtyCreate);
+
+            pMeshComponent->SetImporter(0);
 
             rChildEntity.AttachComponent(pMeshComponent);
 

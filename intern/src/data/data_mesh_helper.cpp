@@ -38,7 +38,7 @@ namespace
 
         CMeshComponent* CreateMeshFromFile(const std::string& _rFileName, int _GenFlag);
 
-        CMeshComponent* CreateMeshFromAssimp(const std::string& _rFileName, int _GenFlag, int _MeshIndex);
+        CMeshComponent* CreateMeshFromAssimp(const std::string& _rFileName, int _GenFlag, int _MeshIndex, const void* _pImporter);
 
     private:
         
@@ -99,7 +99,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    CMeshComponent* CDtMeshManager::CreateMeshFromAssimp(const std::string& _rFileName, int _GenFlag, int _MeshIndex)
+    CMeshComponent* CDtMeshManager::CreateMeshFromAssimp(const std::string& _rFileName, int _GenFlag, int _MeshIndex, const void* _pImporter)
     {
         unsigned int Hash = 0;
         
@@ -118,8 +118,9 @@ namespace
 
         pComponent->SetFilename(_rFileName);
         pComponent->SetGeneratorFlag(_GenFlag);
-        pComponent->SetMeshType(CMeshComponent::File);
         pComponent->SetMeshIndex(_MeshIndex);
+        pComponent->SetImporter(_pImporter);
+        pComponent->SetMeshType(CMeshComponent::File);
 
         m_MeshByID[Hash] = pComponent;
 
@@ -138,9 +139,9 @@ namespace MeshHelper
 
     // -----------------------------------------------------------------------------
 
-    CMeshComponent* CreateMeshFromAssimp(const std::string& _rFileName, int _GenFlag, int _MeshIndex)
+    CMeshComponent* CreateMeshFromAssimp(const std::string& _rFileName, int _GenFlag, int _MeshIndex, const void* _pImporter)
     {
-        return CDtMeshManager::GetInstance().CreateMeshFromAssimp(_rFileName, _GenFlag, _MeshIndex);
+        return CDtMeshManager::GetInstance().CreateMeshFromAssimp(_rFileName, _GenFlag, _MeshIndex, _pImporter);
     }
 } // namespace MeshHelper
 } // namespace Dt

@@ -11,6 +11,7 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
+#include "core/core_asset_importer.h"
 #include "core/core_asset_manager.h"
 
 #include "data/data_component.h"
@@ -150,7 +151,7 @@ namespace
         void OnStart();
         void OnExit();
         
-        CMeshPtr CreateMeshFromFile(const Base::Char* _pFilename, int _GenFlag, int _MeshIndex);
+        CMeshPtr CreateMeshFromFile(const Base::Char* _pFilename, int _GenFlag, int _MeshIndex, const void* _pImporter = 0);
         CMeshPtr CreateBox(float _Width, float _Height, float _Depth);
         CMeshPtr CreateSphere(float _Radius, unsigned int _Stacks, unsigned int _Slices);
         CMeshPtr CreateSphereIsometric(float _Radius, unsigned int _Refinement);
@@ -204,7 +205,7 @@ namespace
 
         void FillMeshFromFile(CInternMesh* _pMesh, const Base::Char* _pFilename, int _GenFlag, int _MeshIndex);
 
-        int ConvertGenerationPresets(int _Flags);
+        void FillMeshFromAssimp(CInternMesh* _pMesh, const aiScene* _pScene, int _MeshIndex);
     };
 } // namespace
 
@@ -246,7 +247,7 @@ namespace
     
     // -----------------------------------------------------------------------------
     
-    CMeshPtr CGfxMeshManager::CreateMeshFromFile(const Base::Char* _pFilename, int _GenFlag, int _MeshIndex)
+    CMeshPtr CGfxMeshManager::CreateMeshFromFile(const Base::Char* _pFilename, int _GenFlag, int _MeshIndex, const void* _pImporter)
     {
         // -----------------------------------------------------------------------------
         // Check existing model
@@ -269,7 +270,14 @@ namespace
         // -----------------------------------------------------------------------------
         auto MeshPtr = m_Meshes.Allocate();
 
-        FillMeshFromFile(MeshPtr, _pFilename, _GenFlag, _MeshIndex);
+        if (_pImporter != nullptr)
+        {
+            FillMeshFromAssimp(MeshPtr, static_cast<const aiScene*>(_pImporter), _MeshIndex);
+        }
+        else
+        {
+            FillMeshFromFile(MeshPtr, _pFilename, _GenFlag, _MeshIndex);
+        }
                 
         // -----------------------------------------------------------------------------
         // Put this new model to hash list
@@ -1172,7 +1180,14 @@ namespace
             switch (pMeshComponent->GetMeshType())
             {
             case Dt::CMeshComponent::File:
-                pMeshComponent->SetFacet(Dt::CMeshComponent::Graphic, CreateMeshFromFile(pMeshComponent->GetFilename().c_str(), pMeshComponent->GetGeneratorFlag(), pMeshComponent->GetMeshIndex()));
+                pMeshComponent->SetFacet(
+                    Dt::CMeshComponent::Graphic, 
+                    CreateMeshFromFile(
+                        pMeshComponent->GetFilename().c_str(), 
+                        pMeshComponent->GetGeneratorFlag(), 
+                        pMeshComponent->GetMeshIndex(), 
+                        pMeshComponent->GetImporter())
+                );
                 break;
             case Dt::CMeshComponent::Box:
                 pMeshComponent->SetFacet(Dt::CMeshComponent::Graphic, CreateBox(2.0f, 2.0f, 2.0f));
@@ -1206,7 +1221,7 @@ namespace
         // ----------------------------------------------------------------------------- 
         // Flags 
         // ----------------------------------------------------------------------------- 
-        int Flags = ConvertGenerationPresets(_GenFlag);
+        int Flags = Core::AssetImporter::ConvertGenerationFlags(_GenFlag);
 
         // -----------------------------------------------------------------------------
         // Build path to texture in file system and load model
@@ -1227,6 +1242,13 @@ namespace
             BASE_THROWV("Can't load model file %s; Code: %s", _pFilename, Importer.GetErrorString());
         }
 
+        FillMeshFromAssimp(_pMesh, pScene, _MeshIndex);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxMeshManager::FillMeshFromAssimp(CInternMesh* _pMesh, const aiScene* _pScene, int _MeshIndex)
+    {
         // -----------------------------------------------------------------------------
         // Fill mesh data from assimp into the component
         // -----------------------------------------------------------------------------
@@ -1262,8 +1284,8 @@ namespace
 
                 assert(_pAssimpMesh->mVertices != 0);
 
-                rSurface.m_SurfaceKey.m_HasNormal    = (_pAssimpMesh->mNormals != nullptr);
-                rSurface.m_SurfaceKey.m_HasTangent   = (_pAssimpMesh->mTangents != nullptr);
+                rSurface.m_SurfaceKey.m_HasNormal = (_pAssimpMesh->mNormals != nullptr);
+                rSurface.m_SurfaceKey.m_HasTangent = (_pAssimpMesh->mTangents != nullptr);
                 rSurface.m_SurfaceKey.m_HasBitangent = (_pAssimpMesh->mBitangents != nullptr);
                 rSurface.m_SurfaceKey.m_HasTexCoords = (_pAssimpMesh->mTextureCoords[0] != nullptr);
 
@@ -1280,34 +1302,34 @@ namespace
                 // -----------------------------------------------------------------------------
                 // Data
                 // -----------------------------------------------------------------------------
-                unsigned int NumberOfVertices           = _pAssimpMesh->mNumVertices;
-                unsigned int NumberOfFaces              = _pAssimpMesh->mNumFaces;
-                unsigned int NumberOfIndicesPerFace     = _pAssimpMesh->mFaces->mNumIndices;
-                unsigned int NumberOfIndices            = NumberOfFaces * NumberOfIndicesPerFace;
-                unsigned int NumberOfNormals            = NumberOfVertices * rSurface.m_SurfaceKey.m_HasNormal;
-                unsigned int NumberOfTagents            = NumberOfVertices * rSurface.m_SurfaceKey.m_HasTangent;
-                unsigned int NumberOfBitangents         = NumberOfVertices * rSurface.m_SurfaceKey.m_HasBitangent;
-                unsigned int NumberOfTexCoords          = NumberOfVertices * (rSurface.m_SurfaceKey.m_HasTexCoords >= 1);
-                unsigned int NumberOfVerticeElements    = 3 * rSurface.m_SurfaceKey.m_HasPosition;
-                unsigned int NumberOfNormalElements     = 3 * rSurface.m_SurfaceKey.m_HasNormal;
-                unsigned int NumberOfTagentsElements    = 3 * rSurface.m_SurfaceKey.m_HasTangent;
+                unsigned int NumberOfVertices = _pAssimpMesh->mNumVertices;
+                unsigned int NumberOfFaces = _pAssimpMesh->mNumFaces;
+                unsigned int NumberOfIndicesPerFace = _pAssimpMesh->mFaces->mNumIndices;
+                unsigned int NumberOfIndices = NumberOfFaces * NumberOfIndicesPerFace;
+                unsigned int NumberOfNormals = NumberOfVertices * rSurface.m_SurfaceKey.m_HasNormal;
+                unsigned int NumberOfTagents = NumberOfVertices * rSurface.m_SurfaceKey.m_HasTangent;
+                unsigned int NumberOfBitangents = NumberOfVertices * rSurface.m_SurfaceKey.m_HasBitangent;
+                unsigned int NumberOfTexCoords = NumberOfVertices * (rSurface.m_SurfaceKey.m_HasTexCoords >= 1);
+                unsigned int NumberOfVerticeElements = 3 * rSurface.m_SurfaceKey.m_HasPosition;
+                unsigned int NumberOfNormalElements = 3 * rSurface.m_SurfaceKey.m_HasNormal;
+                unsigned int NumberOfTagentsElements = 3 * rSurface.m_SurfaceKey.m_HasTangent;
                 unsigned int NumberOfBitangentsElements = 3 * rSurface.m_SurfaceKey.m_HasBitangent;
-                unsigned int NumberOfTexCoordElements   = 2 * (rSurface.m_SurfaceKey.m_HasTexCoords >= 1);
-                unsigned int NumberOfVertexElements     = NumberOfVertices * NumberOfVerticeElements + NumberOfNormals * NumberOfNormalElements + NumberOfTagents * NumberOfTagentsElements + NumberOfBitangents * NumberOfBitangentsElements + NumberOfTexCoords * NumberOfTexCoordElements;
+                unsigned int NumberOfTexCoordElements = 2 * (rSurface.m_SurfaceKey.m_HasTexCoords >= 1);
+                unsigned int NumberOfVertexElements = NumberOfVertices * NumberOfVerticeElements + NumberOfNormals * NumberOfNormalElements + NumberOfTagents * NumberOfTagentsElements + NumberOfBitangents * NumberOfBitangentsElements + NumberOfTexCoords * NumberOfTexCoordElements;
 
                 assert(NumberOfIndicesPerFace == 3);
 
-                unsigned int* pUploadIndexData  = static_cast<unsigned int*>(Base::CMemory::Allocate(sizeof(unsigned int) * NumberOfIndices));
+                unsigned int* pUploadIndexData = static_cast<unsigned int*>(Base::CMemory::Allocate(sizeof(unsigned int) * NumberOfIndices));
                 float*        pUploadVertexData = static_cast<float*>(Base::CMemory::Allocate(sizeof(float) * NumberOfVertexElements));
 
                 // -----------------------------------------------------------------------------
                 // Get data from file
                 // -----------------------------------------------------------------------------
-                aiVector3D* pVertexData    = _pAssimpMesh->mVertices;
-                aiVector3D* pNormalData    = _pAssimpMesh->mNormals;
-                aiVector3D* pTangentData   = _pAssimpMesh->mTangents;
+                aiVector3D* pVertexData = _pAssimpMesh->mVertices;
+                aiVector3D* pNormalData = _pAssimpMesh->mNormals;
+                aiVector3D* pTangentData = _pAssimpMesh->mTangents;
                 aiVector3D* pBitangentData = _pAssimpMesh->mBitangents;
-                aiVector3D* pTextureData   = _pAssimpMesh->mTextureCoords[0];
+                aiVector3D* pTextureData = _pAssimpMesh->mTextureCoords[0];
 
                 // -----------------------------------------------------------------------------
                 // Setup surface
@@ -1407,7 +1429,7 @@ namespace
                 // Set last data information of the surface
                 // -----------------------------------------------------------------------------
                 rSurface.m_NumberOfVertices = NumberOfVertices;
-                rSurface.m_NumberOfIndices  = NumberOfIndices;
+                rSurface.m_NumberOfIndices = NumberOfIndices;
 
                 // -----------------------------------------------------------------------------
                 // Delete allocated memory
@@ -1418,9 +1440,9 @@ namespace
                 // -----------------------------------------------------------------------------
                 // Load material from material manager
                 // -----------------------------------------------------------------------------
-                if (_pAssimpMesh->mMaterialIndex < pScene->mNumMaterials)
+                if (_pAssimpMesh->mMaterialIndex < _pScene->mNumMaterials)
                 {
-                    aiMaterial* pMaterial = pScene->mMaterials[_pAssimpMesh->mMaterialIndex];
+                    aiMaterial* pMaterial = _pScene->mMaterials[_pAssimpMesh->mMaterialIndex];
 
                     if (pMaterial != 0)
                     {
@@ -1434,46 +1456,17 @@ namespace
         // Only single meshes are currently supported!
         // Question: Do wee need multiple surfaces?
         // -----------------------------------------------------------------------------
-        unsigned int NumberOfMeshes = pScene->mNumMeshes;
+        unsigned int NumberOfMeshes = _pScene->mNumMeshes;
 
         if (NumberOfMeshes > _MeshIndex)
         {
-            FillMeshInComponent(_pMesh, pScene->mMeshes[_MeshIndex]);
+            FillMeshInComponent(_pMesh, _pScene->mMeshes[_MeshIndex]);
         }
         else
         {
             BASE_CONSOLE_ERROR("The given mesh index to load mesh is higher as the number of available meshes in file.")
         }
     }
-
-    // ----------------------------------------------------------------------------- 
-
-    int CGfxMeshManager::ConvertGenerationPresets(int _Flags)
-    {
-        int ReturnFlag = 0;
-
-        if ((_Flags & Dt::CMeshComponent::SGeneratorFlag::Nothing) == Dt::CMeshComponent::SGeneratorFlag::Nothing)
-        {
-            ReturnFlag |= aiProcess_Triangulate;
-        }
-
-        if ((_Flags & Dt::CMeshComponent::SGeneratorFlag::Default) == Dt::CMeshComponent::SGeneratorFlag::Default)
-        {
-            ReturnFlag |= aiProcess_CalcTangentSpace | aiProcess_GenNormals | aiProcess_Triangulate | aiProcess_JoinIdenticalVertices;
-        }
-
-        if ((_Flags & Dt::CMeshComponent::SGeneratorFlag::FlipUVs) == Dt::CMeshComponent::SGeneratorFlag::FlipUVs)
-        {
-            ReturnFlag |= aiProcess_FlipUVs;
-        }
-
-        if ((_Flags & Dt::CMeshComponent::SGeneratorFlag::RealtimeFast) == Dt::CMeshComponent::SGeneratorFlag::RealtimeFast)
-        {
-            ReturnFlag |= aiProcess_GenUVCoords | aiProcess_SortByPType;
-        }
-
-        return ReturnFlag;
-    };
 } // namespace
 
 namespace Gfx

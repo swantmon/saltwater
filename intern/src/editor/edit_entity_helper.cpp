@@ -148,8 +148,6 @@ namespace
             {
                 assert(SubEntity != nullptr);
 
-                Dt::EntityManager::MarkEntityAsDirty(*SubEntity, Dt::CEntity::DirtyCreate);
-
                 rRootEntity.Attach(*SubEntity);
             }
 

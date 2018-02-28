@@ -6,6 +6,8 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
+#include "core/core_asset_importer.h"
+
 #include "data/data_entity.h"
 #include "data/data_map.h"
 #include "data/data_mesh_helper.h"
@@ -450,7 +452,7 @@ namespace
 
         // -----------------------------------------------------------------------------
 
-        m_GizmoModelPtr = MeshManager::CreateMeshFromFile("gizmo.obj", Dt::CMeshComponent::SGeneratorFlag::Default | Dt::CMeshComponent::SGeneratorFlag::FlipUVs);
+        m_GizmoModelPtr = MeshManager::CreateMeshFromFile("gizmo.obj", Core::AssetImporter::SGeneratorFlag::Default | Core::AssetImporter::SGeneratorFlag::FlipUVs);
 
         // -----------------------------------------------------------------------------
 
