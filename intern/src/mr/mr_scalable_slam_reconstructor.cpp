@@ -733,14 +733,7 @@ namespace MR
             Performance::BeginEvent("Gather point cloud data");
 
             ContextManager::SetShaderCS(m_PointsFullCSPtr);
-
-            ContextManager::SetImageTexture(1, m_FullVolumePtr);
-
-            SPointRasterization BufferData;
-            BufferData.m_Offset = rRootVolume.m_Offset;
-            BufferData.m_BufferOffset = 0;
-            BufferManager::UploadBufferData(m_PointRasterizationBufferPtr, &BufferData);
-
+                        
             SIndirectBuffers IndirectBufferData = {};
             IndirectBufferData.m_Indexed.m_IndexCount = m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
             BufferManager::UploadBufferData(rRootVolume.m_IndirectLevel1Buffer, &IndirectBufferData);
