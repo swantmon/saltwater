@@ -419,34 +419,6 @@ void CLgLoadMapState::CreateDefaultScene()
             Dt::EntityManager::MarkEntityAsDirty(rEnvironmentEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
 
-        {
-            Dt::SEntityDescriptor EntityDesc;
-
-            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Static;
-            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
-
-            Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
-
-            rEntity.SetName("SSAO");
-
-            // -----------------------------------------------------------------------------
-            // Transformation
-            // -----------------------------------------------------------------------------
-            auto pTransformationFacet = rEntity.GetTransformationFacet();
-
-            pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
-            pTransformationFacet->SetScale   (glm::vec3(1.0f));
-            pTransformationFacet->SetRotation(glm::vec3(0.0f));
-
-            auto Component = Dt::CComponentManager::GetInstance().Allocate<Dt::CSSAOComponent>();
-
-            rEntity.AttachComponent(Component);
-
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(Component, Dt::CSSAOComponent::DirtyCreate);
-
-            Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
-        }
-
         // -----------------------------------------------------------------------------
         // Setup entities
         // -----------------------------------------------------------------------------
@@ -462,15 +434,11 @@ void CLgLoadMapState::CreateDefaultScene()
 
             Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
 
-            pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 0.1f));
+            pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 2.0f));
             pTransformationFacet->SetScale(glm::vec3(1.0f));
-            pTransformationFacet->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
+            pTransformationFacet->SetRotation(glm::vec3(glm::radians(45.0f), glm::radians(45.0f), 0.0f));
 
             // -----------------------------------------------------------------------------
-
-//             auto pMeshComponent = Dt::MeshHelper::CreateMeshFromFile("models/MatTester.obj", Core::AssetImporter::SGeneratorFlag::Default);
-// 
-//             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pMeshComponent, Dt::CMeshComponent::DirtyCreate);
 
             auto pMeshComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CMeshComponent>();
 
@@ -526,8 +494,8 @@ void CLgLoadMapState::CreateDefaultScene()
 
             auto pMaterialComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CMaterialComponent>();
 
-            pMaterialComponent->SetMaterialname("Grey Plane");
-            pMaterialComponent->SetColor(glm::vec3(0.4f, 0.4f, 0.4f));
+            pMaterialComponent->SetMaterialname("White Plane");
+            pMaterialComponent->SetColor(glm::vec3(1.0f));
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pMaterialComponent, Dt::CMaterialComponent::DirtyCreate);
 

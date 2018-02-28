@@ -172,7 +172,7 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    const glm::vec2& CMaterialComponent::GetTiling() const
+    const glm::vec2 CMaterialComponent::GetTiling() const
     {
         return glm::vec2(m_TilingOffset[0], m_TilingOffset[1]);
     }
@@ -187,7 +187,7 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    const glm::vec2& CMaterialComponent::GetOffset() const
+    const glm::vec2 CMaterialComponent::GetOffset() const
     {
         return glm::vec2(m_TilingOffset[2], m_TilingOffset[3]);
     }
