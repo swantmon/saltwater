@@ -335,69 +335,69 @@ namespace
         // -----------------------------------------------------------------------------
         // Create vertices's for a box
         // -----------------------------------------------------------------------------
-        pVertices[0][0] = -HalfWidth;
-        pVertices[0][1] = -HalfDepth;
-        pVertices[0][2] = -HalfHeight;
+        pVertices[0][0] =  HalfWidth;
+        pVertices[0][1] =  HalfDepth;
+        pVertices[0][2] =  HalfHeight;
 
-        pVertices[1][0] = -HalfWidth;
-        pVertices[1][1] = -HalfDepth;
-        pVertices[1][2] = -HalfHeight;
+        pVertices[1][0] =  HalfWidth;
+        pVertices[1][1] =  HalfDepth;
+        pVertices[1][2] =  HalfHeight;
 
-        pVertices[2][0] = -HalfWidth;
-        pVertices[2][1] = -HalfDepth;
-        pVertices[2][2] =  HalfHeight;
+        pVertices[2][0] =  HalfWidth;
+        pVertices[2][1] =  HalfDepth;
+        pVertices[2][2] = -HalfHeight;
 
-        pVertices[3][0] = -HalfWidth;
-        pVertices[3][1] = -HalfDepth;
-        pVertices[3][2] =  HalfHeight;
+        pVertices[3][0] = HalfWidth;
+        pVertices[3][1] = HalfDepth;
+        pVertices[3][2] = -HalfHeight;
 
-        pVertices[4][0] =  HalfWidth;
-        pVertices[4][1] = -HalfDepth;
-        pVertices[4][2] =  HalfHeight;
+        pVertices[4][0] = -HalfWidth;
+        pVertices[4][1] =  HalfDepth;
+        pVertices[4][2] = -HalfHeight;
 
-        pVertices[5][0] =  HalfWidth;
-        pVertices[5][1] = -HalfDepth;
-        pVertices[5][2] =  HalfHeight;
+        pVertices[5][0] = -HalfWidth;
+        pVertices[5][1] =  HalfDepth;
+        pVertices[5][2] = -HalfHeight;
 
-        pVertices[6][0] =  HalfWidth;
-        pVertices[6][1] = -HalfDepth;
-        pVertices[6][2] = -HalfHeight;
+        pVertices[6][0] = -HalfWidth;
+        pVertices[6][1] =  HalfDepth;
+        pVertices[6][2] =  HalfHeight;
 
-        pVertices[7][0] =  HalfWidth;
-        pVertices[7][1] = -HalfDepth;
-        pVertices[7][2] = -HalfHeight;
+        pVertices[7][0] = -HalfWidth;
+        pVertices[7][1] =  HalfDepth;
+        pVertices[7][2] =  HalfHeight;
 
-        pVertices[8][0] = -HalfWidth;
-        pVertices[8][1] =  HalfDepth;
-        pVertices[8][2] = -HalfHeight;
+        pVertices[8][0] =  HalfWidth;
+        pVertices[8][1] = -HalfDepth;
+        pVertices[8][2] =  HalfHeight;
 
-        pVertices[9][0] = -HalfWidth;
-        pVertices[9][1] =  HalfDepth;
-        pVertices[9][2] = -HalfHeight;
+        pVertices[9][0] =  HalfWidth;
+        pVertices[9][1] = -HalfDepth;
+        pVertices[9][2] =  HalfHeight;
 
-        pVertices[10][0] = -HalfWidth;
-        pVertices[10][1] =  HalfDepth;
-        pVertices[10][2] =  HalfHeight;
+        pVertices[10][0] =  HalfWidth;
+        pVertices[10][1] = -HalfDepth;
+        pVertices[10][2] = -HalfHeight;
 
-        pVertices[11][0] = -HalfWidth;
-        pVertices[11][1] =  HalfDepth;
-        pVertices[11][2] =  HalfHeight;
+        pVertices[11][0] =  HalfWidth;
+        pVertices[11][1] = -HalfDepth;
+        pVertices[11][2] = -HalfHeight;
 
-        pVertices[12][0] = HalfWidth;
-        pVertices[12][1] = HalfDepth;
-        pVertices[12][2] = HalfHeight;
+        pVertices[12][0] = -HalfWidth;
+        pVertices[12][1] = -HalfDepth;
+        pVertices[12][2] = -HalfHeight;
 
-        pVertices[13][0] = HalfWidth;
-        pVertices[13][1] = HalfDepth;
-        pVertices[13][2] = HalfHeight;
+        pVertices[13][0] = -HalfWidth;
+        pVertices[13][1] = -HalfDepth;
+        pVertices[13][2] = -HalfHeight;
 
-        pVertices[14][0] =  HalfWidth;
-        pVertices[14][1] =  HalfDepth;
-        pVertices[14][2] = -HalfHeight;
+        pVertices[14][0] = -HalfWidth;
+        pVertices[14][1] = -HalfDepth;
+        pVertices[14][2] =  HalfHeight;
 
-        pVertices[15][0] =  HalfWidth;
-        pVertices[15][1] =  HalfDepth;
-        pVertices[15][2] = -HalfHeight;
+        pVertices[15][0] = -HalfWidth;
+        pVertices[15][1] = -HalfDepth;
+        pVertices[15][2] =  HalfHeight;
 
         // -----------------------------------------------------------------------------
         // Create indices of box
@@ -861,18 +861,18 @@ namespace
 
         for (unsigned int IndexOfSlice = 0; IndexOfSlice < _Slices + 1; ++IndexOfSlice)
         {
-            assert(IndexOfVertex < NumberOfVertices);
+            assert(IndexOfVertex < NumberOfVertices * 2);
 
             float PHI = static_cast<float>(IndexOfSlice) / (_Slices)* glm::pi<float>() * 2.0f;
 
-            pVertices[IndexOfVertex][0] = glm::cos(PHI) * _Radius;
-            pVertices[IndexOfVertex][1] = glm::sin(PHI) * _Radius;
+            pVertices[IndexOfVertex][0] = -glm::cos(PHI) * _Radius;
+            pVertices[IndexOfVertex][1] =  glm::sin(PHI) * _Radius;
             pVertices[IndexOfVertex][2] = -_Height / 2.0f;
 
             ++IndexOfVertex;
 
-            pVertices[IndexOfVertex][0] = glm::cos(PHI) * _Radius;
-            pVertices[IndexOfVertex][1] = glm::sin(PHI) * _Radius;
+            pVertices[IndexOfVertex][0] = -glm::cos(PHI) * _Radius;
+            pVertices[IndexOfVertex][1] =  glm::sin(PHI) * _Radius;
             pVertices[IndexOfVertex][2] = -_Height / 2.0f;
 
             ++IndexOfVertex;
@@ -906,7 +906,6 @@ namespace
 
         assert(IndexOfIndex == NumberOfIndices);
 
-        
         // -----------------------------------------------------------------------------
         // Create buffer on graphic device and setup surface
         // -----------------------------------------------------------------------------
