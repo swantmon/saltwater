@@ -53,7 +53,7 @@ namespace
 
     const int g_AABB = 8;
 
-    const int g_MaxVolumeInstanceCount = 128;
+    const int g_MaxVolumeInstanceCount = 512;
 
     /*
     const unsigned int g_MaxRootVolumePoolSize =        g_MegabyteSize;
