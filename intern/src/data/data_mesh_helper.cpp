@@ -36,9 +36,7 @@ namespace
         
     public:
 
-        CMeshComponent* CreateMeshFromFile(const std::string& _rFileName, int _GenFlag);
-
-        CMeshComponent* CreateMeshFromAssimp(const std::string& _rFileName, int _GenFlag, int _MeshIndex, const void* _pImporter);
+        CMeshComponent* CreateMeshFromFile(const std::string& _rFileName, int _GenFlag, int _MeshIndex);
 
     private:
         
@@ -68,7 +66,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    CMeshComponent* CDtMeshManager::CreateMeshFromFile(const std::string& _rFileName, int _GenFlag)
+    CMeshComponent* CDtMeshManager::CreateMeshFromFile(const std::string& _rFileName, int _GenFlag, int _MeshIndex)
     {
          unsigned int Hash = 0;
 
@@ -76,9 +74,7 @@ namespace
 
          Hash = Base::CRC32(Hash, &_GenFlag, sizeof(_GenFlag));
 
-         int MeshIndex = 0;
-
-         Hash = Base::CRC32(Hash, &MeshIndex, sizeof(MeshIndex));
+         Hash = Base::CRC32(Hash, &_MeshIndex, sizeof(_MeshIndex));
 
          if (m_MeshByID.find(Hash) != m_MeshByID.end())
          {
@@ -89,38 +85,8 @@ namespace
 
         pComponent->SetFilename(_rFileName);
         pComponent->SetGeneratorFlag(_GenFlag);
-        pComponent->SetMeshType(CMeshComponent::File);
-        pComponent->SetMeshIndex(MeshIndex);
-
-        m_MeshByID[Hash] = pComponent;
-
-        return pComponent;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CMeshComponent* CDtMeshManager::CreateMeshFromAssimp(const std::string& _rFileName, int _GenFlag, int _MeshIndex, const void* _pImporter)
-    {
-        unsigned int Hash = 0;
-        
-        Hash = Base::CRC32(Hash, _rFileName.c_str(), static_cast<unsigned int>(_rFileName.length()));
-
-        Hash = Base::CRC32(Hash, &_GenFlag, sizeof(_GenFlag));
-
-        Hash = Base::CRC32(Hash, &_MeshIndex, sizeof(_MeshIndex));
-
-        if (m_MeshByID.find(Hash) != m_MeshByID.end())
-        {
-            return m_MeshByID.at(Hash);
-        }
-
-        auto pComponent = Dt::CComponentManager::GetInstance().Allocate<CMeshComponent>();
-
-        pComponent->SetFilename(_rFileName);
-        pComponent->SetGeneratorFlag(_GenFlag);
+        pComponent->SetMeshType(CMeshComponent::Asset);
         pComponent->SetMeshIndex(_MeshIndex);
-        pComponent->SetImporter(_pImporter);
-        pComponent->SetMeshType(CMeshComponent::File);
 
         m_MeshByID[Hash] = pComponent;
 
@@ -132,16 +98,9 @@ namespace Dt
 {
 namespace MeshHelper
 {
-    CMeshComponent* CreateMeshFromFile(const std::string& _rFileName, int _GenFlag)
+    CMeshComponent* CreateMeshFromFile(const std::string& _rFileName, int _GenFlag, int _MeshIndex)
     {
-        return CDtMeshManager::GetInstance().CreateMeshFromFile(_rFileName, _GenFlag);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CMeshComponent* CreateMeshFromAssimp(const std::string& _rFileName, int _GenFlag, int _MeshIndex, const void* _pImporter)
-    {
-        return CDtMeshManager::GetInstance().CreateMeshFromAssimp(_rFileName, _GenFlag, _MeshIndex, _pImporter);
+        return CDtMeshManager::GetInstance().CreateMeshFromFile(_rFileName, _GenFlag, _MeshIndex);
     }
 } // namespace MeshHelper
 } // namespace Dt

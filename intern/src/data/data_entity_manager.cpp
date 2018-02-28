@@ -218,10 +218,6 @@ namespace
 
     std::vector<CEntity*> CDtLvlEntityManager::CreateEntitiesFromScene(const std::string& _rFile)
     {
-        Assimp::Importer Importer;
-
-        int GenerationFlag = Core::AssetImporter::ConvertGenerationFlags(Core::AssetImporter::SGeneratorFlag::Default);
-
         // -----------------------------------------------------------------------------
         // Create an vector of new entities
         // -----------------------------------------------------------------------------
@@ -232,12 +228,16 @@ namespace
         // -----------------------------------------------------------------------------
         std::string PathToModel = Core::AssetManager::GetPathToAssets() + "/" + _rFile;
 
-        const aiScene* pScene = Importer.ReadFile(PathToModel.c_str(), GenerationFlag);
+        int GeneratorFlag = Core::AssetImporter::SGeneratorFlag::Default;
+
+        auto Importer = Core::AssetImporter::AllocateAssimpImporter(PathToModel, GeneratorFlag);
+
+        const Assimp::Importer* pImporter = static_cast<const Assimp::Importer*>(Core::AssetImporter::GetNativeAccessFromImporter(Importer));
+
+        const aiScene* pScene = pImporter->GetScene();
 
         if (!pScene)
         {
-            BASE_CONSOLE_ERRORV("Can't load scene file %s; Code: %s", _rFile.c_str(), Importer.GetErrorString());
-
             return VectorOfEntites;
         }
 
@@ -259,11 +259,9 @@ namespace
 
             rChildEntity.SetName(pMesh->mName.C_Str());
 
-            auto pMeshComponent = Dt::MeshHelper::CreateMeshFromAssimp(_rFile, GenerationFlag, IndexOfMesh, pScene);
+            auto pMeshComponent = Dt::MeshHelper::CreateMeshFromFile(_rFile, GeneratorFlag, IndexOfMesh);
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pMeshComponent, CMeshComponent::DirtyCreate);
-
-            pMeshComponent->SetImporter(0);
 
             rChildEntity.AttachComponent(pMeshComponent);
 
@@ -280,6 +278,11 @@ namespace
 
             VectorOfEntites.push_back(&rChildEntity);
         }
+
+        // -----------------------------------------------------------------------------
+        // Release importer
+        // -----------------------------------------------------------------------------
+        Core::AssetImporter::ReleaseImporter(Importer);
 
         return VectorOfEntites;
     }

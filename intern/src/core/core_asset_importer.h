@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <string>
+
 namespace Core
 {
 namespace AssetImporter
@@ -22,6 +24,14 @@ namespace Core
 {
 namespace AssetImporter
 {
+    const void* AllocateAssimpImporter(const std::string& _rFile, int _GeneratorFlag);
+
+    const void* AllocateTinyXMLImporter(const std::string& _rFile);
+
+    void* GetNativeAccessFromImporter(const void* _pImporter);
+
+    void ReleaseImporter(const void* _pImporter);
+
     int ConvertGenerationFlags(int _Flags);
 } // namespace AssetImporter
 } // namespace Core

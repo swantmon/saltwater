@@ -9,6 +9,7 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
+#include "core/core_asset_importer.h"
 #include "core/core_asset_manager.h"
 
 #include "data/data_component.h"
@@ -55,8 +56,6 @@ namespace
     private:
 
         void FillMaterialFromXML(CMaterialComponent* _pMaterial, const const std::string& _rFilename);
-
-        void FillMaterialFromAssimp(CMaterialComponent* _pMaterial, const const std::string& _rFilename);
     };
 } // namespace
 
@@ -80,9 +79,9 @@ namespace
     
     CMaterialComponent* CDtMaterialManager::CreateMaterialFromFile(const std::string& _rFilename)
     {
-        if (_rFilename.length() == 0)
+        if (_rFilename.find(".mat") != std::string::npos)
         {
-            BASE_THROWM("No material filename was given to load material.")
+            BASE_THROWM("Only internal materials are accepted.")
         }
 
         // -----------------------------------------------------------------------------
@@ -100,14 +99,7 @@ namespace
 
         auto pComponent = Dt::CComponentManager::GetInstance().Allocate<CMaterialComponent>();
 
-        if (_rFilename.find(".mat") != std::string::npos)
-        {
-            FillMaterialFromXML(pComponent, _rFilename);
-        }
-        else
-        {
-            FillMaterialFromAssimp(pComponent, _rFilename);
-        }
+        FillMaterialFromXML(pComponent, _rFilename);
 
         Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pComponent, CMaterialComponent::DirtyCreate);
 
@@ -127,8 +119,6 @@ namespace
 
     void CDtMaterialManager::FillMaterialFromXML(CMaterialComponent* _pMaterial, const std::string& _rFilename)
     {
-        tinyxml2::XMLDocument MaterialFile;
-
         // -----------------------------------------------------------------------------
         // Build path to texture in file system
         // -----------------------------------------------------------------------------
@@ -137,16 +127,11 @@ namespace
         // -----------------------------------------------------------------------------
         // Load material file
         // -----------------------------------------------------------------------------
-        int Error = MaterialFile.LoadFile(PathToMaterial.c_str());
+        auto Importer = Core::AssetImporter::AllocateTinyXMLImporter(PathToMaterial);
 
-        if (Error != tinyxml2::XML_SUCCESS)
-        {
-            BASE_CONSOLE_ERRORV("Loading material file '%s' failed.", PathToMaterial.c_str());
+        tinyxml2::XMLDocument* pMaterialFile = static_cast<tinyxml2::XMLDocument*>(Core::AssetImporter::GetNativeAccessFromImporter(Importer));
 
-            return;
-        }
-
-        tinyxml2::XMLElement* pElementDefinition  = MaterialFile.FirstChildElement("MaterialDefinition");
+        tinyxml2::XMLElement* pElementDefinition  = pMaterialFile->FirstChildElement("MaterialDefinition");
         tinyxml2::XMLElement* pElementColor       = pElementDefinition->FirstChildElement("Color");
         tinyxml2::XMLElement* pElementNormal      = pElementDefinition->FirstChildElement("Normal");
         tinyxml2::XMLElement* pElementRoughness   = pElementDefinition->FirstChildElement("Roughness");
@@ -195,65 +180,11 @@ namespace
         if (pElementMetallic != nullptr && pElementMetallic->Attribute("Map")) _pMaterial->SetMetalTexture(pElementMetallic->Attribute("Map"));
         if (pElementBump != nullptr && pElementBump->Attribute("Map")) _pMaterial->SetBumpTexture(pElementBump->Attribute("Map"));
         if (pElementAO != nullptr && pElementAO->Attribute("Map")) _pMaterial->SetAmbientOcclusionTexture(pElementAO->Attribute("Map"));
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CDtMaterialManager::FillMaterialFromAssimp(CMaterialComponent* _pMaterial, const const std::string& _rFilename)
-    {
-        Assimp::Importer Importer;
-
-        std::string PathToMaterial = Core::AssetManager::GetPathToAssets() + "/" + _rFilename;
-
-        const aiScene* pScene = Importer.ReadFile(PathToMaterial.c_str(), 0);
-
-        if (!pScene)
-        {
-            BASE_CONSOLE_ERRORV("Loading material file '%s' failed. Code: %s.", PathToMaterial.c_str(), Importer.GetErrorString());
-
-            return;
-        }
 
         // -----------------------------------------------------------------------------
-        // Only single materials are currently supported!
-        // Question: Do wee need multiple materials?
+        // Release importer
         // -----------------------------------------------------------------------------
-        unsigned int NumberOfMaterials = pScene->mNumMaterials;
-
-        assert(NumberOfMaterials == 1);
-
-        aiMaterial* pAssimpMaterial = pScene->mMaterials[0];
-
-        // -----------------------------------------------------------------------------
-        // Fill data
-        // -----------------------------------------------------------------------------
-        assert(_pMaterial);
-
-        // -----------------------------------------------------------------------------
-        // Values and textures
-        // -----------------------------------------------------------------------------
-        aiString  NativeString;
-        aiColor4D DiffuseColor;
-
-        if (pAssimpMaterial->Get(AI_MATKEY_NAME, NativeString) == AI_SUCCESS)
-        {
-            _pMaterial->SetMaterialname(NativeString.data);
-        }
-
-        if (pAssimpMaterial->Get(AI_MATKEY_COLOR_DIFFUSE, DiffuseColor) == AI_SUCCESS)
-        {
-            _pMaterial->SetColor(glm::vec3(DiffuseColor.r, DiffuseColor.g, DiffuseColor.b));
-        }
-
-        if (pAssimpMaterial->GetTexture(aiTextureType_DIFFUSE, 0, &NativeString) == AI_SUCCESS)
-        {
-            _pMaterial->SetColorTexture(NativeString.data);
-        }
-
-        if (pAssimpMaterial->GetTexture(aiTextureType_HEIGHT, 0, &NativeString) == AI_SUCCESS)
-        {
-            _pMaterial->SetNormalTexture(NativeString.data);
-        }
+        Core::AssetImporter::ReleaseImporter(Importer);
     }
 } // namespace
 

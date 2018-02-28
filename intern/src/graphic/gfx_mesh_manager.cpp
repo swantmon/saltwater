@@ -151,7 +151,7 @@ namespace
         void OnStart();
         void OnExit();
         
-        CMeshPtr CreateMeshFromFile(const Base::Char* _pFilename, int _GenFlag, int _MeshIndex, const void* _pImporter = 0);
+        CMeshPtr CreateMeshFromFile(const Base::Char* _pFilename, int _GenFlag, int _MeshIndex);
         CMeshPtr CreateBox(float _Width, float _Height, float _Depth);
         CMeshPtr CreateSphere(float _Radius, unsigned int _Stacks, unsigned int _Slices);
         CMeshPtr CreateSphereIsometric(float _Radius, unsigned int _Refinement);
@@ -247,7 +247,7 @@ namespace
     
     // -----------------------------------------------------------------------------
     
-    CMeshPtr CGfxMeshManager::CreateMeshFromFile(const Base::Char* _pFilename, int _GenFlag, int _MeshIndex, const void* _pImporter)
+    CMeshPtr CGfxMeshManager::CreateMeshFromFile(const Base::Char* _pFilename, int _GenFlag, int _MeshIndex)
     {
         // -----------------------------------------------------------------------------
         // Check existing model
@@ -270,14 +270,7 @@ namespace
         // -----------------------------------------------------------------------------
         auto MeshPtr = m_Meshes.Allocate();
 
-        if (_pImporter != nullptr)
-        {
-            FillMeshFromAssimp(MeshPtr, static_cast<const aiScene*>(_pImporter), _MeshIndex);
-        }
-        else
-        {
-            FillMeshFromFile(MeshPtr, _pFilename, _GenFlag, _MeshIndex);
-        }
+        FillMeshFromFile(MeshPtr, _pFilename, _GenFlag, _MeshIndex);
                 
         // -----------------------------------------------------------------------------
         // Put this new model to hash list
@@ -1179,14 +1172,13 @@ namespace
         {
             switch (pMeshComponent->GetMeshType())
             {
-            case Dt::CMeshComponent::File:
-                pMeshComponent->SetFacet(
-                    Dt::CMeshComponent::Graphic, 
+            case Dt::CMeshComponent::Asset:
+                pMeshComponent->SetFacet(Dt::CMeshComponent::Graphic, 
                     CreateMeshFromFile(
                         pMeshComponent->GetFilename().c_str(), 
                         pMeshComponent->GetGeneratorFlag(), 
-                        pMeshComponent->GetMeshIndex(), 
-                        pMeshComponent->GetImporter())
+                        pMeshComponent->GetMeshIndex()
+                    )
                 );
                 break;
             case Dt::CMeshComponent::Box:
@@ -1216,33 +1208,37 @@ namespace
     {
         assert(_pFilename != 0);
 
-        Assimp::Importer Importer;
-
-        // ----------------------------------------------------------------------------- 
-        // Flags 
-        // ----------------------------------------------------------------------------- 
-        int Flags = Core::AssetImporter::ConvertGenerationFlags(_GenFlag);
-
         // -----------------------------------------------------------------------------
         // Build path to texture in file system and load model
         // -----------------------------------------------------------------------------
         std::string PathToModel = Core::AssetManager::GetPathToAssets() + "/" + _pFilename;
 
-        const aiScene* pScene = Importer.ReadFile(PathToModel.c_str(), Flags);
+        auto Importer = Core::AssetImporter::AllocateAssimpImporter(PathToModel, _GenFlag);
 
-        if (!pScene)
+        const Assimp::Importer* pImporter = static_cast<const Assimp::Importer*>(Core::AssetImporter::GetNativeAccessFromImporter(Importer));
+
+        if (!pImporter)
         {
             PathToModel = Core::AssetManager::GetPathToData() + g_PathToDataModels + _pFilename;
 
-            pScene = Importer.ReadFile(PathToModel.c_str(), Flags);
+            Importer = Core::AssetImporter::AllocateAssimpImporter(PathToModel, _GenFlag);
+
+            pImporter = static_cast<const Assimp::Importer*>(Core::AssetImporter::GetNativeAccessFromImporter(Importer));
         }
 
-        if (!pScene)
+        if (!pImporter)
         {
-            BASE_THROWV("Can't load model file %s; Code: %s", _pFilename, Importer.GetErrorString());
+            return;
         }
+
+        const aiScene* pScene = pImporter->GetScene();
 
         FillMeshFromAssimp(_pMesh, pScene, _MeshIndex);
+
+        // -----------------------------------------------------------------------------
+        // Release importer
+        // -----------------------------------------------------------------------------
+        Core::AssetImporter::ReleaseImporter(Importer);
     }
 
     // -----------------------------------------------------------------------------

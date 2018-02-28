@@ -13,8 +13,7 @@ namespace Dt
         : m_Filename      ()
         , m_GeneratorFlag (Core::AssetImporter::SGeneratorFlag::Nothing)
         , m_MeshIndex     (0)
-        , m_pImporter     (nullptr)
-        , m_MeshType      (EMeshType::File)
+        , m_MeshType      (EMeshType::Asset)
     {
     }
 
@@ -64,20 +63,6 @@ namespace Dt
     int CMeshComponent::GetMeshIndex() const
     {
         return m_MeshIndex;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CMeshComponent::SetImporter(const void* _pImporter)
-    {
-        m_pImporter = _pImporter;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    const void* CMeshComponent::GetImporter() const
-    {
-        return m_pImporter;
     }
 
     // -----------------------------------------------------------------------------

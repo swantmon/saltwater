@@ -1,6 +1,9 @@
 
 #include "core/core_precompiled.h"
 
+#include "base/base_console.h"
+#include "base/base_crc.h"
+#include "base/base_memory.h"
 #include "base/base_uncopyable.h"
 #include "base/base_singleton.h"
 
@@ -9,6 +12,10 @@
 #include "assimp/Importer.hpp"
 #include "assimp/postprocess.h"
 #include "assimp/scene.h"
+
+#include "tinyxml2.h"
+
+#include <map>
 
 using namespace Core;
 using namespace Core::AssetImporter;
@@ -21,7 +28,52 @@ namespace
 
     public:
 
+        const void* AllocateAssimpImporter(const std::string& _rFile, int _GeneratorFlag);
+
+        const void* AllocateTinyXMLImporter(const std::string& _rFile);
+
+        void* GetNativeAccessFromImporter(const void* _pImporter);
+
+        void ReleaseImporter(const void* _pImporter);
+
         int ConvertGenerationFlags(int _Flags);
+
+    private:
+
+        class CImporterInfo
+        {
+        public:
+
+            enum EType
+            {
+                Assimp,
+                TinyXML,
+                NumberOfImporters
+            };
+
+            EType       m_Type;
+            void*       m_pAccess;
+            int         m_AllocateCount;
+            Base::BHash m_Hash;
+
+        public:
+
+            CImporterInfo()
+                : m_Type         (Assimp)
+                , m_pAccess      (0)
+                , m_AllocateCount(0)
+                , m_Hash         (0)
+            { 
+            }
+        };
+
+    private:
+
+        typedef std::map<Base::BHash, CImporterInfo> CImporterInfos;
+
+    private:
+
+        CImporterInfos m_ImporterInfos;
 
     private:
 
@@ -42,6 +94,157 @@ namespace
     CCoreAssetImporter::~CCoreAssetImporter()
     {
 
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const void* CCoreAssetImporter::AllocateAssimpImporter(const std::string& _rFile, int _GeneratorFlag)
+    {
+        // -----------------------------------------------------------------------------
+        // Create hash of file and test if importer is available
+        // -----------------------------------------------------------------------------
+        Base::BHash Hash = 0;
+        
+        Hash = Base::CRC32(Hash, _rFile.c_str(), static_cast<unsigned int>(_rFile.length()));
+
+        Hash = Base::CRC32(Hash, &_GeneratorFlag, sizeof(_GeneratorFlag));
+
+        if (m_ImporterInfos.find(Hash) != m_ImporterInfos.end())
+        {
+            auto& rInfo = m_ImporterInfos.at(Hash);
+
+            ++rInfo.m_AllocateCount;
+
+            return &rInfo;
+        }
+
+        // -----------------------------------------------------------------------------
+        // Generate object / importer
+        // -----------------------------------------------------------------------------
+        Assimp::Importer* pImporter;
+
+        pImporter = Base::CMemory::NewObject<Assimp::Importer>();
+
+        int GeneratorFlag = ConvertGenerationFlags(_GeneratorFlag);
+
+        const aiScene* pScene = pImporter->ReadFile(_rFile.c_str(), GeneratorFlag);
+
+        if (!pScene)
+        {
+            BASE_CONSOLE_ERRORV("Load file %s with assimp failed (Code: %s).", _rFile.c_str(), pImporter->GetErrorString());
+
+            return nullptr;
+        }
+
+        // -----------------------------------------------------------------------------
+        // Generate new info
+        // -----------------------------------------------------------------------------
+        auto& Info = m_ImporterInfos[Hash];
+
+        Info.m_Type          = CImporterInfo::Assimp;
+        Info.m_pAccess       = pImporter;
+        Info.m_AllocateCount = 1;
+        Info.m_Hash          = Hash;
+
+        // -----------------------------------------------------------------------------
+        // Return importer
+        // -----------------------------------------------------------------------------
+        return &Info;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const void* CCoreAssetImporter::AllocateTinyXMLImporter(const std::string& _rFile)
+    {
+        // -----------------------------------------------------------------------------
+        // Create hash of file and test if importer is available
+        // -----------------------------------------------------------------------------
+        Base::BHash Hash = Base::CRC32(_rFile.c_str(), static_cast<unsigned int>(_rFile.length()));
+
+        if (m_ImporterInfos.find(Hash) != m_ImporterInfos.end())
+        {
+            auto& rInfo = m_ImporterInfos.at(Hash);
+
+            ++rInfo.m_AllocateCount;
+
+            return &rInfo;
+        }
+
+        // -----------------------------------------------------------------------------
+        // Generate object
+        // -----------------------------------------------------------------------------
+        tinyxml2::XMLDocument* pMaterialFile;
+
+        pMaterialFile = Base::CMemory::NewObject<tinyxml2::XMLDocument>();
+
+        int Error = pMaterialFile->LoadFile(_rFile.c_str());
+
+        if (Error != tinyxml2::XML_SUCCESS)
+        {
+            BASE_CONSOLE_ERRORV("Loading xml file '%s' failed.", _rFile.c_str());
+
+            return nullptr;
+        }
+
+        // -----------------------------------------------------------------------------
+        // Generate new info
+        // -----------------------------------------------------------------------------
+        auto& Info = m_ImporterInfos[Hash];
+
+        Info.m_Type          = CImporterInfo::TinyXML;
+        Info.m_pAccess       = pMaterialFile;
+        Info.m_AllocateCount = 1;
+        Info.m_Hash          = Hash;
+
+        // -----------------------------------------------------------------------------
+        // Return importer
+        // -----------------------------------------------------------------------------
+        return &Info;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void* CCoreAssetImporter::GetNativeAccessFromImporter(const void* _pImporter)
+    {
+        if (_pImporter == nullptr) return nullptr;
+        
+        return static_cast<const CImporterInfo*>(_pImporter)->m_pAccess;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CCoreAssetImporter::ReleaseImporter(const void* _pImporter)
+    {
+        if (_pImporter == nullptr) return;
+        
+        // -----------------------------------------------------------------------------
+        // Get info
+        // -----------------------------------------------------------------------------
+        const CImporterInfo* pConstInfo = static_cast<const CImporterInfo*>(_pImporter);
+
+        Base::BHash Hash = pConstInfo->m_Hash;
+
+        if (m_ImporterInfos.find(Hash) == m_ImporterInfos.end())
+        {
+            return;
+        }
+
+        CImporterInfo& rInfo = m_ImporterInfos.at(Hash);
+
+        // -----------------------------------------------------------------------------
+        // Decrease allocate count
+        // -----------------------------------------------------------------------------
+        -- rInfo.m_AllocateCount;
+
+        // -----------------------------------------------------------------------------
+        // Release importer if allocate count is zero
+        // -----------------------------------------------------------------------------
+        if (rInfo.m_AllocateCount == 0)
+        {
+            Base::CMemory::DeleteObject(rInfo.m_pAccess);
+
+            m_ImporterInfos.erase(Hash);
+        }
     }
 
     // -----------------------------------------------------------------------------
@@ -78,6 +281,34 @@ namespace Core
 {
 namespace AssetImporter
 {
+    const void* AllocateAssimpImporter(const std::string& _rFile, int _GeneratorFlag)
+    {
+        return CCoreAssetImporter::GetInstance().AllocateAssimpImporter(_rFile, _GeneratorFlag);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const void* AllocateTinyXMLImporter(const std::string& _rFile)
+    {
+        return CCoreAssetImporter::GetInstance().AllocateTinyXMLImporter(_rFile);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void* GetNativeAccessFromImporter(const void* _pImporter)
+    {
+        return CCoreAssetImporter::GetInstance().GetNativeAccessFromImporter(_pImporter);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void ReleaseImporter(const void* _pImporter)
+    {
+        CCoreAssetImporter::GetInstance().ReleaseImporter(_pImporter);
+    }
+
+    // -----------------------------------------------------------------------------
+
     int ConvertGenerationFlags(int _Flags)
     {
         return CCoreAssetImporter::GetInstance().ConvertGenerationFlags(_Flags);

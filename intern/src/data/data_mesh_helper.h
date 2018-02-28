@@ -9,16 +9,6 @@ namespace Dt
 {
 namespace MeshHelper
 {
-    
-} // namespace MeshHelper
-} // namespace Dt
-
-namespace Dt
-{
-namespace MeshHelper
-{
-    CMeshComponent* CreateMeshFromFile(const std::string& _rFileName, int _GenFlag);
-
-    CMeshComponent* CreateMeshFromAssimp(const std::string& _pFileName, int _GenFlag, int _MeshIndex, const void* _pImporter);
+    CMeshComponent* CreateMeshFromFile(const std::string& _rFileName, int _GenFlag, int _MeshIndex = 0);
 } // namespace MeshManager
 } // namespace Dt

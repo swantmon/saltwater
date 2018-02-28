@@ -8,6 +8,7 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
+#include "core/core_asset_importer.h"
 #include "core/core_asset_manager.h"
 
 #include "data/data_component.h"
@@ -162,9 +163,9 @@ namespace
 
         void FillMaterialFromXML(CInternMaterial* _pMaterial, const std::string& _rFilename);
 
-        void FillMaterialFromAssimp(CInternMaterial* _pMaterial, const std::string& _rFilename);
+        void FillMaterialFromAssimpFile(CInternMaterial* _pMaterial, const std::string& _rFilename);
 
-        void FillMaterialFromAssimp(CInternMaterial* _pMaterial, const aiMaterial* _pAssimpMaterial);
+        void FillMaterialFromAssimpMaterial(CInternMaterial* _pMaterial, const aiMaterial* _pAssimpMaterial);
 
         void FillMaterialFromData(CInternMaterial* _pMaterial, const SMaterialDescriptor& _rDescription);
 
@@ -222,7 +223,7 @@ namespace
             }
             else
             {
-                FillMaterialFromAssimp(pMaterial, MaterialFileName);
+                FillMaterialFromAssimpFile(pMaterial, MaterialFileName);
             }
         }
         else
@@ -244,7 +245,7 @@ namespace
             switch (_Importer)
             {
             case SExternalImporter::Assimp:
-                FillMaterialFromAssimp(pMaterial, static_cast<const aiMaterial*>(_pPtr));
+                FillMaterialFromAssimpMaterial(pMaterial, static_cast<const aiMaterial*>(_pPtr));
                 break;
             default:
                 BASE_CONSOLE_WARNING("Selected importer for material is not supported!");
@@ -330,7 +331,7 @@ namespace
                 }
                 else
                 {
-                    FillMaterialFromAssimp(pInternMaterial, MaterialDescriptor.m_pFileName);
+                    FillMaterialFromAssimpFile(pInternMaterial, MaterialDescriptor.m_pFileName);
                 }
             }
             else
@@ -344,8 +345,6 @@ namespace
 
     void CGfxMaterialManager::FillMaterialFromXML(CInternMaterial* _pMaterial, const std::string& _rFilename)
     {
-        tinyxml2::XMLDocument MaterialFile;
-
         // -----------------------------------------------------------------------------
         // Build path to texture in file system
         // -----------------------------------------------------------------------------
@@ -354,16 +353,11 @@ namespace
         // -----------------------------------------------------------------------------
         // Load material file
         // -----------------------------------------------------------------------------
-        int Error = MaterialFile.LoadFile(PathToMaterial.c_str());
+        auto Importer = Core::AssetImporter::AllocateTinyXMLImporter(PathToMaterial);
 
-        if (Error != tinyxml2::XML_SUCCESS)
-        {
-            BASE_CONSOLE_ERRORV("Loading material file '%s' failed.", PathToMaterial.c_str());
+        tinyxml2::XMLDocument* pMaterialFile = static_cast<tinyxml2::XMLDocument*>(Core::AssetImporter::GetNativeAccessFromImporter(Importer));
 
-            return;
-        }
-
-        tinyxml2::XMLElement* pElementDefinition  = MaterialFile.FirstChildElement("MaterialDefinition");
+        tinyxml2::XMLElement* pElementDefinition  = pMaterialFile->FirstChildElement("MaterialDefinition");
         tinyxml2::XMLElement* pElementColor       = pElementDefinition->FirstChildElement("Color");
         tinyxml2::XMLElement* pElementNormal      = pElementDefinition->FirstChildElement("Normal");
         tinyxml2::XMLElement* pElementRoughness   = pElementDefinition->FirstChildElement("Roughness");
@@ -435,6 +429,11 @@ namespace
         if (pElementAO != nullptr && pElementAO->Attribute("Map")) MaterialDescriptor.m_pAOMap = pElementAO->Attribute("Map");
 
         // -----------------------------------------------------------------------------
+        // Release importer
+        // -----------------------------------------------------------------------------
+        Core::AssetImporter::ReleaseImporter(Importer);
+
+        // -----------------------------------------------------------------------------
         // Fill data
         // -----------------------------------------------------------------------------
         FillMaterialFromData(_pMaterial, MaterialDescriptor);
@@ -442,27 +441,29 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxMaterialManager::FillMaterialFromAssimp(CInternMaterial* _pMaterial, const std::string& _rFilename)
+    void CGfxMaterialManager::FillMaterialFromAssimpFile(CInternMaterial* _pMaterial, const std::string& _rFilename)
     {
-        Assimp::Importer Importer;
-
         std::string PathToMaterial = Core::AssetManager::GetPathToAssets() + "/" + _rFilename;
 
-        const aiScene* pScene = Importer.ReadFile(PathToMaterial.c_str(), 0);
+        auto Importer = Core::AssetImporter::AllocateAssimpImporter(PathToMaterial, Core::AssetImporter::SGeneratorFlag::Nothing);
 
-        if (!pScene)
+        const Assimp::Importer* pImporter = static_cast<const Assimp::Importer*>(Core::AssetImporter::GetNativeAccessFromImporter(Importer));
+
+        if (!pImporter)
         {
             PathToMaterial = Core::AssetManager::GetPathToData() + g_PathToDataModels + _rFilename;
 
-            pScene = Importer.ReadFile(PathToMaterial.c_str(), 0);
+            Importer = Core::AssetImporter::AllocateAssimpImporter(PathToMaterial, Core::AssetImporter::SGeneratorFlag::Nothing);
+
+            pImporter = static_cast<const Assimp::Importer*>(Core::AssetImporter::GetNativeAccessFromImporter(Importer));
         }
 
-        if (!pScene)
+        if (!pImporter)
         {
-            BASE_CONSOLE_ERRORV("Loading material file '%s' failed. Code: %s.", PathToMaterial.c_str(), Importer.GetErrorString());
-
             return;
         }
+
+        const aiScene* pScene = pImporter->GetScene();
 
         // -----------------------------------------------------------------------------
         // Only single materials are currently supported!
@@ -477,12 +478,17 @@ namespace
         // -----------------------------------------------------------------------------
         // Fill data
         // -----------------------------------------------------------------------------
-        FillMaterialFromAssimp(_pMaterial, pMaterial);
+        FillMaterialFromAssimpMaterial(_pMaterial, pMaterial);
+
+        // -----------------------------------------------------------------------------
+        // Release importer
+        // -----------------------------------------------------------------------------
+        Core::AssetImporter::ReleaseImporter(Importer);
     }
 
     // -----------------------------------------------------------------------------
 
-    void CGfxMaterialManager::FillMaterialFromAssimp(CInternMaterial* _pComponent, const aiMaterial* _pAssimpMaterial)
+    void CGfxMaterialManager::FillMaterialFromAssimpMaterial(CInternMaterial* _pComponent, const aiMaterial* _pAssimpMaterial)
     {
         assert(_pAssimpMaterial);
 
