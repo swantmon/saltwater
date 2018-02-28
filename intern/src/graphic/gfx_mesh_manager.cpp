@@ -30,6 +30,7 @@
 #include "assimp/postprocess.h"
 #include "assimp/scene.h"
 
+#include <array>
 #include <unordered_map>
 #include <functional>
 
@@ -314,7 +315,7 @@ namespace
         rSurface.m_SurfaceKey.m_HasNormal    = true;
         rSurface.m_SurfaceKey.m_HasTangent   = false;
         rSurface.m_SurfaceKey.m_HasBitangent = false;
-        rSurface.m_SurfaceKey.m_HasTexCoords = false;
+        rSurface.m_SurfaceKey.m_HasTexCoords = true;
 
         // -----------------------------------------------------------------------------
         // Calculate Data
@@ -323,102 +324,85 @@ namespace
         float HalfHeight = _Height / 2.0f;
         float HalfDepth  = _Depth  / 2.0f;
 
-        unsigned int NumberOfVertices = 8;
+        unsigned int NumberOfVertices = 36;
         unsigned int NumberOfIndices = 36;
 
-        glm::vec3* pVertices = static_cast<glm::vec3*>(Base::CMemory::Allocate(sizeof(glm::vec3) * NumberOfVertices * 2));
+        unsigned int NumberOfBytes = (2 * sizeof(glm::vec3) + sizeof(glm::vec2)) * NumberOfVertices;
+
+        float* pVertices = static_cast<float*>(Base::CMemory::Allocate(NumberOfBytes));
         unsigned int* pIndices  = static_cast<unsigned int*>(Base::CMemory::Allocate(sizeof(unsigned int) * NumberOfIndices));
 
         assert(pVertices);
         assert(pIndices);
 
-        // -----------------------------------------------------------------------------
-        // Create vertices's for a box
-        // -----------------------------------------------------------------------------
-        pVertices[0][0] =  HalfWidth;
-        pVertices[0][1] =  HalfDepth;
-        pVertices[0][2] =  HalfHeight;
+        std::array<glm::vec3, 8> Vertices;
+        std::array<glm::vec2, 4> UVs;
+        std::array<glm::vec3, 6> Normals;
+        std::array<std::array<glm::ivec3, 3>, 12> Triangles;
 
-        pVertices[1][0] =  HalfWidth;
-        pVertices[1][1] =  HalfDepth;
-        pVertices[1][2] =  HalfHeight;
+        Vertices[0] = glm::vec3(-HalfWidth, -HalfHeight,  HalfDepth);
+        Vertices[1] = glm::vec3( HalfWidth, -HalfHeight,  HalfDepth);
+        Vertices[2] = glm::vec3(-HalfWidth,  HalfHeight,  HalfDepth);
+        Vertices[3] = glm::vec3( HalfWidth,  HalfHeight,  HalfDepth);
+        Vertices[4] = glm::vec3(-HalfWidth,  HalfHeight, -HalfDepth);
+        Vertices[5] = glm::vec3( HalfWidth,  HalfHeight, -HalfDepth);
+        Vertices[6] = glm::vec3(-HalfWidth, -HalfHeight, -HalfDepth);
+        Vertices[7] = glm::vec3( HalfWidth, -HalfHeight, -HalfDepth);
 
-        pVertices[2][0] =  HalfWidth;
-        pVertices[2][1] =  HalfDepth;
-        pVertices[2][2] = -HalfHeight;
+        UVs[0] = glm::vec2(0.0f, 0.0f);
+        UVs[1] = glm::vec2(1.0f, 0.0f);
+        UVs[2] = glm::vec2(0.0f, 1.0f);
+        UVs[3] = glm::vec2(1.0f, 1.0f);
 
-        pVertices[3][0] = HalfWidth;
-        pVertices[3][1] = HalfDepth;
-        pVertices[3][2] = -HalfHeight;
+        Normals[0] = glm::vec3( 0.0f,  0.0f,  1.0f);
+        Normals[1] = glm::vec3( 0.0f,  1.0f,  0.0f);
+        Normals[2] = glm::vec3( 0.0f,  0.0f, -1.0f);
+        Normals[3] = glm::vec3( 0.0f, -1.0f,  0.0f);
+        Normals[4] = glm::vec3( 1.0f,  0.0f,  0.0f);
+        Normals[5] = glm::vec3(-1.0f,  0.0f,  0.0f);
 
-        pVertices[4][0] = -HalfWidth;
-        pVertices[4][1] =  HalfDepth;
-        pVertices[4][2] = -HalfHeight;
+        Triangles[0] = { glm::ivec3(0, 0, 0), glm::ivec3(1, 1, 0), glm::ivec3(2, 2, 0) };
+        Triangles[1] = { glm::ivec3(2, 2, 0), glm::ivec3(1, 1, 0), glm::ivec3(3, 3, 0) };
+        Triangles[2] = { glm::ivec3(2, 0, 1), glm::ivec3(3, 1, 1), glm::ivec3(4, 2, 1) };
+        Triangles[3] = { glm::ivec3(4, 2, 1), glm::ivec3(3, 1, 1), glm::ivec3(5, 3, 1) };
+        Triangles[4] = { glm::ivec3(4, 3, 2), glm::ivec3(5, 2, 2), glm::ivec3(6, 1, 2) };
+        Triangles[5] = { glm::ivec3(6, 1, 2), glm::ivec3(5, 2, 2), glm::ivec3(7, 0, 2) };
+        Triangles[6] = { glm::ivec3(6, 0, 3), glm::ivec3(7, 1, 3), glm::ivec3(0, 2, 3) };
+        Triangles[7] = { glm::ivec3(0, 2, 3), glm::ivec3(7, 1, 3), glm::ivec3(1, 3, 3) };
+        Triangles[8] = { glm::ivec3(1, 0, 4), glm::ivec3(7, 1, 4), glm::ivec3(3, 2, 4) };
+        Triangles[9] = { glm::ivec3(3, 2, 4), glm::ivec3(7, 1, 4), glm::ivec3(5, 3, 4) };
+        Triangles[10] = { glm::ivec3(6, 0, 5), glm::ivec3(0, 1, 5), glm::ivec3(4, 2, 5) };
+        Triangles[11] = { glm::ivec3(4, 2, 5), glm::ivec3(0, 1, 5), glm::ivec3(2, 3, 5) };
 
-        pVertices[5][0] = -HalfWidth;
-        pVertices[5][1] =  HalfDepth;
-        pVertices[5][2] = -HalfHeight;
+        unsigned int IndexOfVertex = 0;
 
-        pVertices[6][0] = -HalfWidth;
-        pVertices[6][1] =  HalfDepth;
-        pVertices[6][2] =  HalfHeight;
+        for (auto Triangle : Triangles)
+        {
+            for (auto Vertex : Triangle)
+            {
+                pVertices[IndexOfVertex + 0] = Vertices[Vertex[0]][0];
+                pVertices[IndexOfVertex + 1] = Vertices[Vertex[0]][1];
+                pVertices[IndexOfVertex + 2] = Vertices[Vertex[0]][2];
 
-        pVertices[7][0] = -HalfWidth;
-        pVertices[7][1] =  HalfDepth;
-        pVertices[7][2] =  HalfHeight;
+                IndexOfVertex += 3;
 
-        pVertices[8][0] =  HalfWidth;
-        pVertices[8][1] = -HalfDepth;
-        pVertices[8][2] =  HalfHeight;
+                pVertices[IndexOfVertex + 0] = Normals[Vertex[2]][0];
+                pVertices[IndexOfVertex + 1] = Normals[Vertex[2]][1];
+                pVertices[IndexOfVertex + 2] = Normals[Vertex[2]][2];
 
-        pVertices[9][0] =  HalfWidth;
-        pVertices[9][1] = -HalfDepth;
-        pVertices[9][2] =  HalfHeight;
+                IndexOfVertex += 3;
 
-        pVertices[10][0] =  HalfWidth;
-        pVertices[10][1] = -HalfDepth;
-        pVertices[10][2] = -HalfHeight;
+                pVertices[IndexOfVertex + 0] = UVs[Vertex[1]][0];
+                pVertices[IndexOfVertex + 1] = UVs[Vertex[1]][1];
 
-        pVertices[11][0] =  HalfWidth;
-        pVertices[11][1] = -HalfDepth;
-        pVertices[11][2] = -HalfHeight;
+                IndexOfVertex += 2;
+            }
+        }
 
-        pVertices[12][0] = -HalfWidth;
-        pVertices[12][1] = -HalfDepth;
-        pVertices[12][2] = -HalfHeight;
-
-        pVertices[13][0] = -HalfWidth;
-        pVertices[13][1] = -HalfDepth;
-        pVertices[13][2] = -HalfHeight;
-
-        pVertices[14][0] = -HalfWidth;
-        pVertices[14][1] = -HalfDepth;
-        pVertices[14][2] =  HalfHeight;
-
-        pVertices[15][0] = -HalfWidth;
-        pVertices[15][1] = -HalfDepth;
-        pVertices[15][2] =  HalfHeight;
-
-        // -----------------------------------------------------------------------------
-        // Create indices of box
-        // -----------------------------------------------------------------------------
-        pIndices[0] = 4; pIndices[1] = 0; pIndices[2] = 3;
-        pIndices[3] = 3; pIndices[4] = 7; pIndices[5] = 4;
-
-        pIndices[6] = 1; pIndices[7]  = 0; pIndices[8]  = 4;
-        pIndices[9] = 4; pIndices[10] = 5; pIndices[11] = 1;
-
-        pIndices[12] = 3; pIndices[13] = 2; pIndices[14] = 6;
-        pIndices[15] = 6; pIndices[16] = 7; pIndices[17] = 3;
-
-        pIndices[18] = 1; pIndices[19] = 5; pIndices[20] = 6;
-        pIndices[21] = 6; pIndices[22] = 2; pIndices[23] = 1;
-
-        pIndices[24] = 4; pIndices[25] = 7; pIndices[26] = 6;
-        pIndices[27] = 6; pIndices[28] = 5; pIndices[29] = 4;
-
-        pIndices[30] = 0; pIndices[31] = 1; pIndices[32] = 3;
-        pIndices[33] = 3; pIndices[34] = 1; pIndices[35] = 2;
+        for (int i = 0; i < NumberOfIndices; ++i)
+        {
+            pIndices[i] = i;
+        }
 
         // -----------------------------------------------------------------------------
         // Create buffer on graphic device and setup surface
@@ -429,7 +413,7 @@ namespace
         BufferDesc.m_Usage         = CBuffer::GPURead;
         BufferDesc.m_Binding       = CBuffer::VertexBuffer;
         BufferDesc.m_Access        = CBuffer::CPUWrite;
-        BufferDesc.m_NumberOfBytes = sizeof(glm::vec3) * NumberOfVertices * 2;
+        BufferDesc.m_NumberOfBytes = NumberOfBytes;
         BufferDesc.m_pBytes        = pVertices;
         BufferDesc.m_pClassKey     = 0;
         

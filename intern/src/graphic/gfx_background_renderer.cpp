@@ -226,22 +226,12 @@ namespace
         };
 
         CInputLayoutPtr P2SkytextureLayoutPtr = ShaderManager::CreateInputLayout(InputLayout, 1, SkytextureVSPtr);
-
-        // -----------------------------------------------------------------------------
-        
-        const SInputElementDescriptor TriangleInputLayout[] =
-        {
-            { "POSITION", 0, CInputLayout::Float3Format, 0,  0, 24, CInputLayout::PerVertex, 0, },
-            { "NORMAL"  , 0, CInputLayout::Float3Format, 0, 12, 24, CInputLayout::PerVertex, 0, },
-        };
-        
-        CInputLayoutPtr P3N3BoxLayoutPtr = ShaderManager::CreateInputLayout(TriangleInputLayout, 2, SkyboxVSPtr);
         
         // -----------------------------------------------------------------------------
 
         m_BackgroundFromSkybox.m_VSPtr          = SkyboxVSPtr;
         m_BackgroundFromSkybox.m_PSPtr          = SkyboxPSPtr;
-        m_BackgroundFromSkybox.m_InputLayoutPtr = P3N3BoxLayoutPtr;
+        m_BackgroundFromSkybox.m_InputLayoutPtr = nullptr;
 
         m_BackgroundFromTexture.m_VSPtr          = SkytextureVSPtr;
         m_BackgroundFromTexture.m_PSPtr          = SkytexturePSPtr;
@@ -517,7 +507,7 @@ namespace
         
         ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
         
-        ContextManager::SetInputLayout(InputLayoutPtr);
+        ContextManager::SetInputLayout(MeshPtr->GetLOD(0)->GetSurface()->GetShaderVS()->GetInputLayout());
         
         ContextManager::SetTopology(STopology::TriangleList);
         
