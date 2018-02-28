@@ -266,7 +266,7 @@ namespace
 
         if ((_Flags & SGeneratorFlag::Default) == SGeneratorFlag::Default)
         {
-            ReturnFlag |= aiProcess_CalcTangentSpace | aiProcess_GenNormals | aiProcess_Triangulate | aiProcess_JoinIdenticalVertices;
+            ReturnFlag |= aiProcess_CalcTangentSpace | aiProcess_GenNormals | aiProcess_Triangulate | aiProcess_GenUVCoords;
         }
 
         if ((_Flags & SGeneratorFlag::FlipUVs) == SGeneratorFlag::FlipUVs)
@@ -276,7 +276,7 @@ namespace
 
         if ((_Flags & SGeneratorFlag::RealtimeFast) == SGeneratorFlag::RealtimeFast)
         {
-            ReturnFlag |= aiProcess_GenUVCoords | aiProcess_SortByPType;
+            ReturnFlag |= aiProcess_JoinIdenticalVertices | aiProcess_SortByPType;
         }
 
         return ReturnFlag;
