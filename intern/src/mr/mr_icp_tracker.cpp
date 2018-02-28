@@ -167,7 +167,7 @@ namespace MR
 
     bool CICPTracker::CalculatePoseMatrix(glm::mat4& rIncPoseMatrix)
     {
-        typedef double Scalar;
+        typedef float Scalar;
 
         Scalar A[36];
         Scalar b[6];
