@@ -175,9 +175,7 @@ namespace Dt
     template<class T>
     bool CComponent<T>::IsActiveAndUsable() const
     {
-        assert(m_pHostEntity);
-
-        return m_Flags.m_IsActive == true && m_pHostEntity->IsActive() == true;
+        return m_Flags.m_IsActive == true && m_pHostEntity != nullptr && m_pHostEntity->IsActive() == true;
     }
 
     // -----------------------------------------------------------------------------

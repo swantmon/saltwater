@@ -420,7 +420,6 @@ namespace
         pIndices[30] = 0; pIndices[31] = 1; pIndices[32] = 3;
         pIndices[33] = 3; pIndices[34] = 1; pIndices[35] = 2;
 
-        
         // -----------------------------------------------------------------------------
         // Create buffer on graphic device and setup surface
         // -----------------------------------------------------------------------------
@@ -1450,11 +1449,11 @@ namespace
 
         // -----------------------------------------------------------------------------
         // Only single meshes are currently supported!
-        // Question: Do wee need multiple surfaces?
+        // Question: Do we need multiple surfaces?
         // -----------------------------------------------------------------------------
         unsigned int NumberOfMeshes = _pScene->mNumMeshes;
 
-        if (NumberOfMeshes > _MeshIndex)
+        if (NumberOfMeshes > static_cast<unsigned int>(_MeshIndex))
         {
             FillMeshInComponent(_pMesh, _pScene->mMeshes[_MeshIndex]);
         }

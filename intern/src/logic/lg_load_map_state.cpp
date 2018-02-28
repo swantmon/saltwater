@@ -458,17 +458,23 @@ void CLgLoadMapState::CreateDefaultScene()
 
             Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
 
-            rEntity.SetName("Sphere");
+            rEntity.SetName("Box");
 
             Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
 
             pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 0.1f));
-            pTransformationFacet->SetScale(glm::vec3(0.01f));
-            pTransformationFacet->SetRotation(glm::vec3(glm::radians(90.0f), 0.0f, 0.0f));
+            pTransformationFacet->SetScale(glm::vec3(1.0f));
+            pTransformationFacet->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
 
             // -----------------------------------------------------------------------------
 
-            auto pMeshComponent = Dt::MeshHelper::CreateMeshFromFile("models/MatTester.obj", Core::AssetImporter::SGeneratorFlag::Default | Core::AssetImporter::SGeneratorFlag::FlipUVs);
+//             auto pMeshComponent = Dt::MeshHelper::CreateMeshFromFile("models/MatTester.obj", Core::AssetImporter::SGeneratorFlag::Default);
+// 
+//             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pMeshComponent, Dt::CMeshComponent::DirtyCreate);
+
+            auto pMeshComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CMeshComponent>();
+
+            pMeshComponent->SetMeshType(Dt::CMeshComponent::Box);
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pMeshComponent, Dt::CMeshComponent::DirtyCreate);
 
@@ -480,6 +486,48 @@ void CLgLoadMapState::CreateDefaultScene()
 
             pMaterialComponent->SetMaterialname("Red Sparrow");
             pMaterialComponent->SetColor(glm::vec3(1.0f, 0.0f, 0.0f));
+
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pMaterialComponent, Dt::CMaterialComponent::DirtyCreate);
+
+            rEntity.AttachComponent(pMaterialComponent);
+
+            // -----------------------------------------------------------------------------
+
+            Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
+
+        {
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Static;
+            EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
+
+            Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+
+            rEntity.SetName("Plane");
+
+            Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
+
+            pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+            pTransformationFacet->SetScale(glm::vec3(4.0f, 4.0f, 0.1f));
+            pTransformationFacet->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
+
+            // -----------------------------------------------------------------------------
+
+            auto pMeshComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CMeshComponent>();
+
+            pMeshComponent->SetMeshType(Dt::CMeshComponent::Box);
+
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pMeshComponent, Dt::CMeshComponent::DirtyCreate);
+
+            rEntity.AttachComponent(pMeshComponent);
+
+            // -----------------------------------------------------------------------------
+
+            auto pMaterialComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CMaterialComponent>();
+
+            pMaterialComponent->SetMaterialname("Grey Plane");
+            pMaterialComponent->SetColor(glm::vec3(0.4f, 0.4f, 0.4f));
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pMaterialComponent, Dt::CMaterialComponent::DirtyCreate);
 
