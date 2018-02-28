@@ -103,7 +103,14 @@ namespace
         // -----------------------------------------------------------------------------
         // Set result as ID
         // -----------------------------------------------------------------------------
-        _rMessage.SetResult(static_cast<unsigned int>(pComponent->GetID()));
+        if (pComponent != nullptr)
+        {
+            _rMessage.SetResult(static_cast<unsigned int>(pComponent->GetID()));
+        }
+        else
+        {
+            _rMessage.SetResult(static_cast<unsigned int>(-1));
+        }
     }
 
     // -----------------------------------------------------------------------------

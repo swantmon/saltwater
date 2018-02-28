@@ -42,14 +42,8 @@ namespace
         CMaterialComponent* CreateMaterialFromFile(const std::string& _rFilename);
 
         const CMaterialComponent* GetDefaultMaterial() const;
-
-    private:
-
-        typedef std::unordered_map<Base::BHash, CMaterialComponent*> CMaterialByHashs;
         
     private:
-        
-        CMaterialByHashs m_MaterialByHashs;
 
         CMaterialComponent* m_pDefaultMaterial;
 
@@ -62,8 +56,7 @@ namespace
 namespace
 {
     CDtMaterialManager::CDtMaterialManager()
-        : m_MaterialByHashs ()
-        , m_pDefaultMaterial(0)
+        : m_pDefaultMaterial(0)
     {
         m_pDefaultMaterial = Dt::CComponentManager::GetInstance().Allocate<CMaterialComponent>();
     }
@@ -72,38 +65,27 @@ namespace
     
     CDtMaterialManager::~CDtMaterialManager()
     {
-        m_MaterialByHashs.clear();
     }
     
     // -----------------------------------------------------------------------------
     
     CMaterialComponent* CDtMaterialManager::CreateMaterialFromFile(const std::string& _rFilename)
     {
-        if (_rFilename.find(".mat") != std::string::npos)
+        if (_rFilename.find(".mat") == std::string::npos)
         {
-            BASE_THROWM("Only internal materials are accepted.")
+            BASE_CONSOLE_ERROR("Only internal materials are accepted.");
+
+            return nullptr;
         }
 
         // -----------------------------------------------------------------------------
         // Create hash value
         // -----------------------------------------------------------------------------
-        int NumberOfBytes = static_cast<unsigned int>(_rFilename.length() * sizeof(char));
-        const void* pData = static_cast<const void*>(_rFilename.c_str());
-
-        Base::BHash Hash = Base::CRC32(pData, NumberOfBytes);
-
-        if (m_MaterialByHashs.find(Hash) != m_MaterialByHashs.end())
-        {
-            return m_MaterialByHashs.at(Hash);
-        }
-
         auto pComponent = Dt::CComponentManager::GetInstance().Allocate<CMaterialComponent>();
 
         FillMaterialFromXML(pComponent, _rFilename);
 
         Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pComponent, CMaterialComponent::DirtyCreate);
-
-        m_MaterialByHashs[Hash] = pComponent;
 
         return pComponent;
     }

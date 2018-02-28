@@ -232,12 +232,12 @@ namespace
 
         if (pComponent != nullptr)
         {
-            auto pNewComponent = Dt::CComponentManager::GetInstance().GetComponent<Dt::CMaterialComponent>(MaterialID);
-
             rCurrentEntity.DetachComponent(pComponent);
-
-            rCurrentEntity.AttachComponent(pNewComponent);
         }
+
+        auto pNewComponent = Dt::CComponentManager::GetInstance().GetComponent<Dt::CMaterialComponent>(MaterialID);
+
+        rCurrentEntity.AttachComponent(pNewComponent);
     }
 
     // -----------------------------------------------------------------------------

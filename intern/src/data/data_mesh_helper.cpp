@@ -1,27 +1,15 @@
 
 #include "data/data_precompiled.h"
 
-#include "base/base_console.h"
-#include "base/base_crc.h"
-#include "base/base_exception.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
-
-#include "core/core_asset_manager.h"
 
 #include "data/data_component.h"
 #include "data/data_mesh_component.h"
 #include "data/data_mesh_helper.h"
 
-#include <unordered_map>
-
 using namespace Dt;
 using namespace Dt::MeshHelper;
-
-namespace
-{
-    std::string g_PathToDataModels = "/graphic/models/";
-} // namespace 
 
 namespace
 {
@@ -37,58 +25,31 @@ namespace
     public:
 
         CMeshComponent* CreateMeshFromFile(const std::string& _rFileName, int _GenFlag, int _MeshIndex);
-
-    private:
-        
-        typedef std::unordered_map<unsigned int, CMeshComponent*> CMeshByIDs;
-        typedef CMeshByIDs::iterator                              CMeshByIDPair;
-        
-    private:
-
-        CMeshByIDs m_MeshByID;
     };
 } // namespace
 
 namespace
 {
     CDtMeshManager::CDtMeshManager()
-        : m_MeshByID()
     {
-        m_MeshByID.reserve(64);
     }
     
     // -----------------------------------------------------------------------------
     
     CDtMeshManager::~CDtMeshManager()
     {
-        m_MeshByID.clear();
     }
 
     // -----------------------------------------------------------------------------
 
     CMeshComponent* CDtMeshManager::CreateMeshFromFile(const std::string& _rFileName, int _GenFlag, int _MeshIndex)
     {
-         unsigned int Hash = 0;
-
-         Hash = Base::CRC32(Hash, _rFileName.c_str(), static_cast<unsigned int>(_rFileName.length()));
-
-         Hash = Base::CRC32(Hash, &_GenFlag, sizeof(_GenFlag));
-
-         Hash = Base::CRC32(Hash, &_MeshIndex, sizeof(_MeshIndex));
-
-         if (m_MeshByID.find(Hash) != m_MeshByID.end())
-         {
-             return m_MeshByID.at(Hash);
-         }
-
         auto pComponent = Dt::CComponentManager::GetInstance().Allocate<CMeshComponent>();
 
         pComponent->SetFilename(_rFileName);
         pComponent->SetGeneratorFlag(_GenFlag);
         pComponent->SetMeshType(CMeshComponent::Asset);
         pComponent->SetMeshIndex(_MeshIndex);
-
-        m_MeshByID[Hash] = pComponent;
 
         return pComponent;
     }

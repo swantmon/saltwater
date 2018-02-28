@@ -36,8 +36,6 @@ namespace
 
         void ReleaseImporter(const void* _pImporter);
 
-        int ConvertGenerationFlags(int _Flags);
-
     private:
 
         class CImporterInfo
@@ -79,6 +77,10 @@ namespace
 
         CCoreAssetImporter();
         ~CCoreAssetImporter();
+
+    private:
+
+        int ConvertGenerationFlags(int _Flags);
     };
 } // namespace 
 
@@ -305,13 +307,6 @@ namespace AssetImporter
     void ReleaseImporter(const void* _pImporter)
     {
         CCoreAssetImporter::GetInstance().ReleaseImporter(_pImporter);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    int ConvertGenerationFlags(int _Flags)
-    {
-        return CCoreAssetImporter::GetInstance().ConvertGenerationFlags(_Flags);
     }
 } // namespace AssetImporter
 } // namespace Core

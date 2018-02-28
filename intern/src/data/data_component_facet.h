@@ -96,7 +96,8 @@ namespace Dt
     template<class T>
     void CComponentFacet::AddComponent(T* _pComponent)
     {
-        assert(_pComponent != nullptr);
+        if (_pComponent == nullptr || _pComponent->GetHostEntity() == nullptr) return;
+
         assert(_pComponent->GetHostEntity() != nullptr);
 
         m_Components.push_back(_pComponent);
@@ -107,8 +108,7 @@ namespace Dt
     template<class T>
     void CComponentFacet::RemoveComponent(T* _pComponent)
     {
-        assert(_pComponent != nullptr);
-        assert(_pComponent->GetHostEntity() == nullptr);
+        if (_pComponent == nullptr || _pComponent->GetHostEntity() != nullptr) return;
 
         m_Components.erase(std::find(m_Components.begin(), m_Components.end(), _pComponent));
     }

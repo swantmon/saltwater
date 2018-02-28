@@ -31,7 +31,5 @@ namespace AssetImporter
     void* GetNativeAccessFromImporter(const void* _pImporter);
 
     void ReleaseImporter(const void* _pImporter);
-
-    int ConvertGenerationFlags(int _Flags);
 } // namespace AssetImporter
 } // namespace Core

@@ -196,9 +196,7 @@ namespace Dt
     template<class T>
     void CEntity::AttachComponent(T* _pComponent)
     {
-        assert(_pComponent);
-
-        assert(_pComponent->GetHostEntity() == nullptr);
+        if (_pComponent == nullptr || _pComponent->GetHostEntity() != nullptr) return;
 
         _pComponent->m_pHostEntity = this;
 
@@ -210,9 +208,7 @@ namespace Dt
     template<class T>
     void CEntity::DetachComponent(T* _pComponent)
     {
-        assert(_pComponent);
-
-        assert(_pComponent->GetHostEntity() == this);
+        if (_pComponent == nullptr || _pComponent->GetHostEntity() != this) return;
 
         _pComponent->m_pHostEntity = 0;
 
