@@ -534,6 +534,21 @@ namespace
         }
 
         // -----------------------------------------------------------------------------
+        // Check diffuse material if a *.mat file is set
+        // -----------------------------------------------------------------------------
+        if (MaterialDescriptor.m_pColorMap != nullptr)
+        {
+            std::string MaterialExaminer = MaterialDescriptor.m_pColorMap;
+
+            if (MaterialExaminer.find(".mat") != std::string::npos)
+            {
+                FillMaterialFromXML(_pComponent, MaterialExaminer);
+
+                return;
+            }
+        }
+
+        // -----------------------------------------------------------------------------
         // Fill data
         // -----------------------------------------------------------------------------
         FillMaterialFromData(_pComponent, MaterialDescriptor);
