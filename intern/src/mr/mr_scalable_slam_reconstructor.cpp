@@ -1014,16 +1014,7 @@ namespace MR
         ////////////////////////////////////////////////////////////////////////////////
 
         m_RootVolumeVector.clear();
-
-        // todo: check if resizing is necessary
-        SBufferDescriptor ConstantBufferDesc = {};
-        ConstantBufferDesc.m_Binding = CBuffer::ResourceBuffer;
-        ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
-        ConstantBufferDesc.m_NumberOfBytes = sizeof(SInstanceData) * static_cast<unsigned int>(m_RootVolumeMap.size());
-        ConstantBufferDesc.m_pBytes = nullptr;
-        ConstantBufferDesc.m_Usage = CBuffer::GPURead;
-        m_RootVolumeInstanceBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
-
+        
         SInstanceData* pInstanceData = static_cast<SInstanceData*>(BufferManager::MapBuffer(m_RootVolumeInstanceBufferPtr, CBuffer::Write));
 
 		for (auto& rPair : m_RootVolumeMap)
@@ -1317,6 +1308,13 @@ namespace MR
         ConstantBufferDesc.m_Usage = CBuffer::GPURead;
         ConstantBufferDesc.m_NumberOfBytes = sizeof(SPointRasterization);
         m_PointRasterizationBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+
+        ConstantBufferDesc.m_Binding = CBuffer::ResourceBuffer;
+        ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(SInstanceData) * g_MaxVolumeInstanceCount;
+        ConstantBufferDesc.m_pBytes = nullptr;
+        ConstantBufferDesc.m_Usage = CBuffer::GPURead;
+        m_RootVolumeInstanceBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
 
         ConstantBufferDesc.m_Binding = CBuffer::ResourceBuffer;
         ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
