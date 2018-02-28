@@ -34,6 +34,8 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // User UI
         // -----------------------------------------------------------------------------
+        m_pGroupBox->setEnabled(false);
+
         m_pAlbedoTextureEdit   ->SetLayout((CTextureValue::NoPreview | CTextureValue::NoHash));
         m_pNormalTextureEdit   ->SetLayout((CTextureValue::NoPreview | CTextureValue::NoHash));
         m_pRoughnessTextureEdit->SetLayout((CTextureValue::NoPreview | CTextureValue::NoHash));
@@ -220,6 +222,8 @@ namespace Edit
         // -----------------------------------------------------------------------------
         setAcceptDrops(true);
 
+        m_pGroupBox->setEnabled(false);
+
         // -----------------------------------------------------------------------------
         // Load material from entity
         // -----------------------------------------------------------------------------
@@ -242,6 +246,8 @@ namespace Edit
         // Behavior
         // -----------------------------------------------------------------------------
         setAcceptDrops(false);
+
+        m_pGroupBox->setEnabled(false);
 
         // -----------------------------------------------------------------------------
         // Load material from file
@@ -370,7 +376,8 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Set values
         // -----------------------------------------------------------------------------
-        
+        m_pGroupBox->setEnabled(true);
+
         m_pRoughnessEdit    ->blockSignals(true);
         m_pMetallicEdit     ->blockSignals(true);
         m_pReflectanceEdit  ->blockSignals(true);

@@ -105,11 +105,11 @@ namespace
         // -----------------------------------------------------------------------------
         if (pComponent != nullptr)
         {
-            _rMessage.SetResult(static_cast<unsigned int>(pComponent->GetID()));
+            _rMessage.SetResult(static_cast<int>(pComponent->GetID()));
         }
         else
         {
-            _rMessage.SetResult(static_cast<unsigned int>(-1));
+            _rMessage.SetResult(-1);
         }
     }
 
