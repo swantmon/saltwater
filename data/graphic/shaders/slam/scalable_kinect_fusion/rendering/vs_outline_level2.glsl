@@ -29,6 +29,12 @@ out gl_PerVertex
 
 void main()
 {
+    mat3 Rot2 = mat3(
+        1.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 1.0f,
+        0.0f, -1.0f, 0.0f
+    );
+
     uint VolumeID = g_VolumeID[gl_InstanceID];
 
     vec3 Offset = IndexToOffset(VolumeID, ROOT_RESOLUTION * LEVEL1_RESOLUTION);
@@ -36,7 +42,7 @@ void main()
     Offset = Offset * (VOXEL_SIZE * LEVEL1_RESOLUTION);
 
     vec4 WSPosition = g_WorldMatrix * vec4(in_VertexPosition * VOXEL_SIZE * LEVEL1_RESOLUTION + Offset, 1.0f);
-    gl_Position = g_WorldToScreen * WSPosition;
+    gl_Position = g_WorldToScreen * vec4(Rot2 * WSPosition.xyz, 1.0f);
 }
 
 #endif // __INCLUDE_VS_OUTLINE_GLSL__

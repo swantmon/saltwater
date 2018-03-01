@@ -37,7 +37,7 @@ void main()
     WSPosition.w = 1.0f;
     WSPosition = g_WorldMatrix * vec4(Rot2 * WSPosition.xyz, 1.0f);
     gl_Position = g_WorldToScreen * WSPosition;
-    gl_PointSize = 5.0f;
+    gl_PointSize = 3.0f;
 }
 
 #endif // __INCLUDE_VS_POINT_CLOUD_GLSL__
