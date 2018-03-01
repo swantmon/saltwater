@@ -85,7 +85,7 @@ float GetShadowAtPosition(in vec3 _WSPosition, in mat4 _LightViewProjection, in 
 
 float GetShadowAtPosition(in vec3 _WSPosition, in mat4 _LightViewProjection, in sampler2D _Shadowmap)
 {
-    return GetShadowAtPosition(_WSPosition, _LightViewProjection, _Shadowmap, 0.001f);
+    return GetShadowAtPosition(_WSPosition, _LightViewProjection, _Shadowmap, 0.005f);
 }
 
 // -----------------------------------------------------------------------------
@@ -151,7 +151,7 @@ float GetShadowAtPositionWithPCF(in vec3 _WSPosition, in mat4 _LightViewProjecti
 
 float GetShadowAtPositionWithPCF(in vec3 _WSPosition, in mat4 _LightViewProjection, in sampler2DShadow _Shadowmap)
 {
-    return GetShadowAtPositionWithPCF(_WSPosition, _LightViewProjection, _Shadowmap, 0.001f);
+    return GetShadowAtPositionWithPCF(_WSPosition, _LightViewProjection, _Shadowmap, 0.005f);
 }
 
 // -----------------------------------------------------------------------------
