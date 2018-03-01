@@ -210,7 +210,7 @@ namespace
     
     void CGfxBackgroundRenderer::OnSetupShader()
     {
-        CShaderPtr SkytextureVSPtr = ShaderManager::CompileVS("vs_screen_p_quad.glsl", "main");;
+        CShaderPtr SkytextureVSPtr = ShaderManager::CompileVS("vs_fullscreen.glsl", "main");;
 
         CShaderPtr SkytexturePSPtr = ShaderManager::CompilePS("fs_atmosphere_texture.glsl", "main");
 
@@ -378,13 +378,9 @@ namespace
                
         // -----------------------------------------------------------------------------
 
-        CMeshPtr QuadModelPtr = MeshManager::CreateRectangle(0.0f, 0.0f, 1.0f, 1.0f);
-
-        // -----------------------------------------------------------------------------
-
         m_BackgroundFromSkybox.m_MeshPtr = SkyboxBoxPtr;
 
-        m_BackgroundFromTexture.m_MeshPtr = QuadModelPtr;
+        m_BackgroundFromTexture.m_MeshPtr = nullptr;
     }
     
     // -----------------------------------------------------------------------------
@@ -596,7 +592,6 @@ namespace
         CBufferSetPtr     VSBufferSetPtr   = m_BackgroundFromTexture.m_VSBufferSetPtr;
         CBufferSetPtr     PSBufferSetPtr   = m_BackgroundFromTexture.m_PSBufferSetPtr;
         CInputLayoutPtr   InputLayoutPtr   = m_BackgroundFromTexture.m_InputLayoutPtr;
-        CMeshPtr          MeshPtr          = m_BackgroundFromTexture.m_MeshPtr;
 
         // -----------------------------------------------------------------------------
         // Render sky texture
@@ -619,12 +614,6 @@ namespace
         // -----------------------------------------------------------------------------
         ContextManager::SetRenderContext(RenderContextPtr);
 
-        ContextManager::SetVertexBuffer(MeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
-
-        ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
-
-        ContextManager::SetInputLayout(InputLayoutPtr);
-
         ContextManager::SetTopology(STopology::TriangleList);
 
         ContextManager::SetShaderVS(VSPtr);
@@ -643,7 +632,7 @@ namespace
         ContextManager::SetTexture(0, rRenderJob.m_pCameraObject->GetBackgroundTexture2D());
         ContextManager::SetTexture(1, TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget());
 
-        ContextManager::DrawIndexed(MeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
+        ContextManager::Draw(3, 0);
 
         ContextManager::ResetTexture(0);
         ContextManager::ResetTexture(1);
@@ -658,12 +647,6 @@ namespace
         ContextManager::ResetResourceBuffer(0);
 
         ContextManager::ResetTopology();
-
-        ContextManager::ResetInputLayout();
-
-        ContextManager::ResetIndexBuffer();
-
-        ContextManager::ResetVertexBuffer();
 
         ContextManager::ResetShaderVS();
 

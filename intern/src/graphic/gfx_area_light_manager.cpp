@@ -242,7 +242,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Create facet
             // -----------------------------------------------------------------------------
-            CInternObject* pGfxComponent = m_AreaLights.Allocate();
+            pGfxLightFacet = m_AreaLights.Allocate();
 
             // -----------------------------------------------------------------------------
             // Buffer
@@ -270,7 +270,7 @@ namespace
             BufferDesc.m_pBytes        = &PlaneVertexBufferData[0];
             BufferDesc.m_pClassKey     = 0;
         
-            pGfxComponent->m_PlaneVertexBufferSetPtr = BufferManager::CreateBuffer(BufferDesc);
+            pGfxLightFacet->m_PlaneVertexBufferSetPtr = BufferManager::CreateBuffer(BufferDesc);
         
             // -----------------------------------------------------------------------------
         
@@ -282,18 +282,18 @@ namespace
             BufferDesc.m_pBytes        = &PlaneIndexBufferData[0];
             BufferDesc.m_pClassKey     = 0;
         
-            pGfxComponent->m_PlaneIndexBufferPtr = BufferManager::CreateBuffer(BufferDesc);
+            pGfxLightFacet->m_PlaneIndexBufferPtr = BufferManager::CreateBuffer(BufferDesc);
 
             // -----------------------------------------------------------------------------
             // Texture
             // -----------------------------------------------------------------------------
-            pGfxComponent->m_FilteredTexturePtr = 0;
-            pGfxComponent->m_TexturePtr         = 0;
+            pGfxLightFacet->m_FilteredTexturePtr = 0;
+            pGfxLightFacet->m_TexturePtr         = 0;
 
             // -----------------------------------------------------------------------------
             // Link
             // -----------------------------------------------------------------------------
-            pAreaLightComponent->SetFacet(Dt::CAreaLightComponent::Graphic, pGfxComponent);
+            pAreaLightComponent->SetFacet(Dt::CAreaLightComponent::Graphic, pGfxLightFacet);
         }
         else
         {
