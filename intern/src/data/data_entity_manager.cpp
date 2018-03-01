@@ -10,6 +10,7 @@
 
 #include "core/core_asset_importer.h"
 #include "core/core_asset_manager.h"
+#include "core/core_material_importer.h"
 #include "core/core_time.h"
 
 #include "data/data_component.h"
@@ -268,13 +269,16 @@ namespace
             // -----------------------------------------------------------------------------
             // Material
             // -----------------------------------------------------------------------------
-//             aiMaterial* pMaterial = pScene->mMaterials[pMesh->mMaterialIndex];
-// 
-//             auto pMaterialComponent = Dt::MaterialHelper::CreateMaterialFromPtr(pMaterial);
-// 
-//             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pMaterialComponent, Dt::CMaterialComponent::DirtyCreate);
-// 
-//             rChildEntity.AttachComponent(pMaterialComponent);
+            if (pMesh->mMaterialIndex > pScene->mNumMaterials)
+            {
+                auto MaterialDescriptor = Core::MaterialImporter::CreateDescriptionFromAssimpFile(PathToModel, pMesh->mMaterialIndex);
+
+                auto pMaterialComponent = Dt::MaterialHelper::CreateMaterial(MaterialDescriptor);
+
+                Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pMaterialComponent, Dt::CMaterialComponent::DirtyCreate);
+
+                rChildEntity.AttachComponent(pMaterialComponent);
+            }
 
             VectorOfEntites.push_back(&rChildEntity);
         }

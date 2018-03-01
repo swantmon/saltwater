@@ -39,17 +39,13 @@ namespace
         
     public:
 
-        CMaterialComponent* CreateMaterialFromFile(const std::string& _rFilename);
+        CMaterialComponent* CreateMaterial(const Core::MaterialImporter::SMaterialDescriptor _rDescriptor) const;
 
         const CMaterialComponent* GetDefaultMaterial() const;
         
     private:
 
         CMaterialComponent* m_pDefaultMaterial;
-
-    private:
-
-        void FillMaterialFromXML(CMaterialComponent* _pMaterial, const const std::string& _rFilename);
     };
 } // namespace
 
@@ -69,21 +65,26 @@ namespace
     
     // -----------------------------------------------------------------------------
     
-    CMaterialComponent* CDtMaterialManager::CreateMaterialFromFile(const std::string& _rFilename)
+    CMaterialComponent* CDtMaterialManager::CreateMaterial(const Core::MaterialImporter::SMaterialDescriptor _rDescriptor) const
     {
-        if (_rFilename.find(".mat") == std::string::npos)
-        {
-            BASE_CONSOLE_ERROR("Only internal materials are accepted.");
-
-            return nullptr;
-        }
-
         // -----------------------------------------------------------------------------
         // Create hash value
         // -----------------------------------------------------------------------------
         auto pComponent = Dt::CComponentManager::GetInstance().Allocate<CMaterialComponent>();
 
-        FillMaterialFromXML(pComponent, _rFilename);
+        pComponent->SetMaterialname(_rDescriptor.m_MaterialName);
+        pComponent->SetColorTexture(_rDescriptor.m_ColorTexture);
+        pComponent->SetNormalTexture(_rDescriptor.m_NormalTexture);
+        pComponent->SetRoughnessTexture(_rDescriptor.m_RoughnessTexture);
+        pComponent->SetMetalTexture(_rDescriptor.m_MetalTexture);
+        pComponent->SetAmbientOcclusionTexture(_rDescriptor.m_AmbientOcclusionTexture);
+        pComponent->SetBumpTexture(_rDescriptor.m_BumpTexture);
+        pComponent->SetRoughness(_rDescriptor.m_Roughness);
+        pComponent->SetReflectance(_rDescriptor.m_Reflectance);
+        pComponent->SetMetalness(_rDescriptor.m_MetalMask);
+        pComponent->SetDisplacement(_rDescriptor.m_Displacement);
+        pComponent->SetColor(_rDescriptor.m_AlbedoColor);
+        pComponent->SetTilingOffset(_rDescriptor.m_TilingOffset);
 
         Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pComponent, CMaterialComponent::DirtyCreate);
 
@@ -96,87 +97,15 @@ namespace
     {
         return m_pDefaultMaterial;
     }
-
-    // -----------------------------------------------------------------------------
-
-    void CDtMaterialManager::FillMaterialFromXML(CMaterialComponent* _pMaterial, const std::string& _rFilename)
-    {
-        // -----------------------------------------------------------------------------
-        // Build path to texture in file system
-        // -----------------------------------------------------------------------------
-        std::string PathToMaterial = Core::AssetManager::GetPathToAssets() + "/" + _rFilename;
-
-        // -----------------------------------------------------------------------------
-        // Load material file
-        // -----------------------------------------------------------------------------
-        auto Importer = Core::AssetImporter::AllocateTinyXMLImporter(PathToMaterial);
-
-        tinyxml2::XMLDocument* pMaterialFile = static_cast<tinyxml2::XMLDocument*>(Core::AssetImporter::GetNativeAccessFromImporter(Importer));
-
-        tinyxml2::XMLElement* pElementDefinition  = pMaterialFile->FirstChildElement("MaterialDefinition");
-        tinyxml2::XMLElement* pElementColor       = pElementDefinition->FirstChildElement("Color");
-        tinyxml2::XMLElement* pElementNormal      = pElementDefinition->FirstChildElement("Normal");
-        tinyxml2::XMLElement* pElementRoughness   = pElementDefinition->FirstChildElement("Roughness");
-        tinyxml2::XMLElement* pElementReflectance = pElementDefinition->FirstChildElement("Reflectance");
-        tinyxml2::XMLElement* pElementMetallic    = pElementDefinition->FirstChildElement("Metallic");
-        tinyxml2::XMLElement* pElementAO          = pElementDefinition->FirstChildElement("AO");
-        tinyxml2::XMLElement* pElementBump        = pElementDefinition->FirstChildElement("Bump");
-        tinyxml2::XMLElement* pElementTiling      = pElementDefinition->FirstChildElement("Tiling");
-        tinyxml2::XMLElement* pElementOffset      = pElementDefinition->FirstChildElement("Offset");
-
-        // -----------------------------------------------------------------------------
-        // Values
-        // -----------------------------------------------------------------------------
-        _pMaterial->SetMaterialname(pElementDefinition->Attribute("Name"));
-
-        if (pElementColor != 0)
-        {
-            float ColorR = pElementColor->FloatAttribute("R");
-            float ColorG = pElementColor->FloatAttribute("G");
-            float ColorB = pElementColor->FloatAttribute("B");
-
-            _pMaterial->SetColor(glm::vec3(ColorR, ColorG, ColorB));
-        }
-
-        if (pElementRoughness) _pMaterial->SetRoughness(pElementRoughness->FloatAttribute("V"));
-        if (pElementReflectance) _pMaterial->SetReflectance(pElementReflectance->FloatAttribute("V"));
-        if (pElementMetallic) _pMaterial->SetMetalness(pElementMetallic->FloatAttribute("V"));
-        if (pElementBump) _pMaterial->SetDisplacement(pElementBump->FloatAttribute("V"));
-
-        if (pElementTiling)
-        {
-            _pMaterial->SetTiling(glm::vec2(pElementTiling->FloatAttribute("X"), pElementTiling->FloatAttribute("Y")));
-        }
-
-        if (pElementOffset)
-        {
-            _pMaterial->SetOffset(glm::vec2(pElementOffset->FloatAttribute("X"), pElementOffset->FloatAttribute("Y")));
-        }
-
-        // -----------------------------------------------------------------------------
-        // Textures
-        // -----------------------------------------------------------------------------
-        if (pElementColor != nullptr && pElementColor->Attribute("Map")) _pMaterial->SetColorTexture(pElementColor->Attribute("Map"));
-        if (pElementNormal != nullptr && pElementNormal->Attribute("Map")) _pMaterial->SetNormalTexture(pElementNormal->Attribute("Map"));
-        if (pElementRoughness != nullptr && pElementRoughness->Attribute("Map")) _pMaterial->SetRoughnessTexture(pElementRoughness->Attribute("Map"));
-        if (pElementMetallic != nullptr && pElementMetallic->Attribute("Map")) _pMaterial->SetMetalTexture(pElementMetallic->Attribute("Map"));
-        if (pElementBump != nullptr && pElementBump->Attribute("Map")) _pMaterial->SetBumpTexture(pElementBump->Attribute("Map"));
-        if (pElementAO != nullptr && pElementAO->Attribute("Map")) _pMaterial->SetAmbientOcclusionTexture(pElementAO->Attribute("Map"));
-
-        // -----------------------------------------------------------------------------
-        // Release importer
-        // -----------------------------------------------------------------------------
-        Core::AssetImporter::ReleaseImporter(Importer);
-    }
 } // namespace
 
 namespace Dt
 {
 namespace MaterialHelper
 {
-    CMaterialComponent* CreateMaterialFromFile(const std::string& _rFilename)
+    CMaterialComponent* CreateMaterial(const Core::MaterialImporter::SMaterialDescriptor _rDescriptor)
     {
-        return CDtMaterialManager::GetInstance().CreateMaterialFromFile(_rFilename);
+        return CDtMaterialManager::GetInstance().CreateMaterial(_rDescriptor);
     }
 
     // -----------------------------------------------------------------------------

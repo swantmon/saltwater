@@ -399,7 +399,7 @@ namespace
             }
         }
 
-        for (int i = 0; i < NumberOfIndices; ++i)
+        for (int i = 0; i < static_cast<int>(NumberOfIndices); ++i)
         {
             pIndices[i] = i;
         }

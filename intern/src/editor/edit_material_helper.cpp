@@ -5,6 +5,8 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
+#include "core/core_material_importer.h"
+
 #include "data/data_component.h"
 #include "data/data_material_helper.h"
 #include "data/data_texture_manager.h"
@@ -98,7 +100,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Material
         // -----------------------------------------------------------------------------
-        auto pComponent = Dt::MaterialHelper::CreateMaterialFromFile(PathToFile);
+        auto MaterialDescriptor = Core::MaterialImporter::CreateDescriptionFromXML(PathToFile);
+
+        auto pComponent = Dt::MaterialHelper::CreateMaterial(MaterialDescriptor);
 
         // -----------------------------------------------------------------------------
         // Set result as ID
