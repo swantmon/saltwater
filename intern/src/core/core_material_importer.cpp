@@ -209,7 +209,9 @@ namespace
             {
                 if (MaterialDescriptor.m_ColorTexture.find(".mat") != std::string::npos)
                 {
-                    return CreateDescriptionFromXML(MaterialDescriptor.m_ColorTexture);
+                    std::string PathToMat = _rPathToFile.substr(0, _rPathToFile.find_last_of('/')) + "/" + MaterialDescriptor.m_ColorTexture;
+
+                    return CreateDescriptionFromXML(PathToMat);
                 }
             }
         }
