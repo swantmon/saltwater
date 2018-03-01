@@ -13,6 +13,7 @@ namespace Dt
     class CHierarchyFacet;
     class CTransformationFacet;
     class CComponentFacet;
+    class IComponent;
 } // namespace Dt
 
 namespace Dt
@@ -164,11 +165,8 @@ namespace Dt
         void Attach(CEntity& _rEntity);
         void Detach();
 
-        template<class T>
-        void AttachComponent(T* _pComponent);
-
-        template<class T>
-        void DetachComponent(T* _pComponent);
+        void AttachComponent(Dt::IComponent* _pComponent);
+        void DetachComponent(Dt::IComponent* _pComponent);
 
     protected:
         
@@ -189,29 +187,4 @@ namespace Dt
         CEntity();
         ~CEntity();
     };
-} // namespace Dt
-
-namespace Dt
-{
-    template<class T>
-    void CEntity::AttachComponent(T* _pComponent)
-    {
-        if (_pComponent == nullptr || _pComponent->GetHostEntity() != nullptr) return;
-
-        _pComponent->m_pHostEntity = this;
-
-        m_pComponentsFacet->AddComponent(_pComponent);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    template<class T>
-    void CEntity::DetachComponent(T* _pComponent)
-    {
-        if (_pComponent == nullptr || _pComponent->GetHostEntity() != this) return;
-
-        _pComponent->m_pHostEntity = 0;
-
-        m_pComponentsFacet->RemoveComponent(_pComponent);
-    }
 } // namespace Dt

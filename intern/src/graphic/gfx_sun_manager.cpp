@@ -12,6 +12,7 @@
 
 #include "data/data_component.h"
 #include "data/data_component_facet.h"
+#include "data/data_component_manager.h"
 #include "data/data_entity.h"
 #include "data/data_map.h"
 #include "data/data_mesh_component.h"
@@ -98,7 +99,7 @@ namespace
         
     private:
 
-        void OnDirtyComponent(Base::IComponent* _pComponent);
+        void OnDirtyComponent(Dt::IComponent* _pComponent);
 
         void CreateSM(unsigned int _Size, CInternSunComponent* _pInternLight);
 
@@ -246,7 +247,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxSunManager::OnDirtyComponent(Base::IComponent* _pComponent)
+    void CGfxSunManager::OnDirtyComponent(Dt::IComponent* _pComponent)
     {
         if (_pComponent->GetTypeID() != Base::CTypeInfo::GetTypeID<Dt::CSunComponent>()) return;
 

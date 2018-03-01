@@ -13,6 +13,7 @@
 
 #include "data/data_component.h"
 #include "data/data_component_facet.h"
+#include "data/data_component_manager.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_map.h"
@@ -196,7 +197,7 @@ namespace
 
     private:
 
-        void OnDirtyComponent(Base::IComponent* _pComponent);
+        void OnDirtyComponent(Dt::IComponent* _pComponent);
 
         void RenderSkybox(Dt::CSkyComponent* _pDataSkyFacet, CInternSkyFacet* _pOutput);
 
@@ -644,7 +645,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxSkyManager::OnDirtyComponent(Base::IComponent* _pComponent)
+    void CGfxSkyManager::OnDirtyComponent(Dt::IComponent* _pComponent)
     {
         if (_pComponent->GetTypeID() != Base::CTypeInfo::GetTypeID<Dt::CSkyComponent>()) return;
 

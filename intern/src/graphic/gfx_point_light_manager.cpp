@@ -10,6 +10,7 @@
 
 #include "data/data_component.h"
 #include "data/data_component_facet.h"
+#include "data/data_component_manager.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_map.h"
@@ -107,7 +108,7 @@ namespace
 
     private:
 
-        void OnDirtyComponent(Base::IComponent* _pComponent);
+        void OnDirtyComponent(Dt::IComponent* _pComponent);
 
         void CreateRSM(unsigned int _Size, CInternObject* _pInternLight);
 
@@ -306,7 +307,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxPointLightManager::OnDirtyComponent(Base::IComponent* _pComponent)
+    void CGfxPointLightManager::OnDirtyComponent(Dt::IComponent* _pComponent)
     {
         if (_pComponent->GetTypeID() != Base::CTypeInfo::GetTypeID<Dt::CPointLightComponent>()) return;
 

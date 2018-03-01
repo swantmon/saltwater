@@ -2,7 +2,6 @@
 #include "graphic/gfx_precompiled.h"
 
 #include "base/base_aabb3.h"
-#include "base/base_component_manager.h"
 #include "base/base_console.h"
 #include "base/base_crc.h"
 #include "base/base_exception.h"
@@ -15,6 +14,7 @@
 #include "core/core_asset_manager.h"
 
 #include "data/data_component.h"
+#include "data/data_component_manager.h"
 #include "data/data_entity.h"
 #include "data/data_mesh_component.h"
 
@@ -202,7 +202,7 @@ namespace
 
         void SetVertexShaderOfSurface(CInternSurface& _rSurface);
 
-        void OnDirtyComponent(Base::IComponent* _pComponent);
+        void OnDirtyComponent(Dt::IComponent* _pComponent);
 
         void FillMeshFromFile(CInternMesh* _pMesh, const std::string& _rFilename, int _GenFlag, int _MeshIndex);
 
@@ -1136,7 +1136,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxMeshManager::OnDirtyComponent(Base::IComponent* _pComponent)
+    void CGfxMeshManager::OnDirtyComponent(Dt::IComponent* _pComponent)
     {
         if (_pComponent->GetTypeID() != Base::CTypeInfo::GetTypeID<Dt::CMeshComponent>()) return;
 

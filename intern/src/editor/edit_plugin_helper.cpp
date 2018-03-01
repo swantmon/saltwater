@@ -10,6 +10,7 @@
 #include "data/data_camera_component.h"
 #include "data/data_component.h"
 #include "data/data_component_facet.h"
+#include "data/data_component_manager.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_texture_manager.h"

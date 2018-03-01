@@ -10,6 +10,7 @@
 
 #include "data/data_component.h"
 #include "data/data_component_facet.h"
+#include "data/data_component_manager.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_light_probe_component.h"
@@ -187,7 +188,7 @@ namespace
 
     private:
 
-        void OnDirtyComponent(Base::IComponent* _pComponent);
+        void OnDirtyComponent(Dt::IComponent* _pComponent);
 
         void FillLightProbe(CInternObject& _rInterLightProbeFacet, unsigned int _SpecularFaceSize, unsigned int _DiffuseFaceSize);
 
@@ -454,7 +455,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxLightProbeManager::OnDirtyComponent(Base::IComponent* _pComponent)
+    void CGfxLightProbeManager::OnDirtyComponent(Dt::IComponent* _pComponent)
     {
         if (_pComponent->GetTypeID() != Base::CTypeInfo::GetTypeID<Dt::CLightProbeComponent>()) return;
 

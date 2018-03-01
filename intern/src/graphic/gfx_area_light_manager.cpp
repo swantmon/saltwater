@@ -9,6 +9,7 @@
 #include "core/core_time.h"
 
 #include "data/data_component.h"
+#include "data/data_component_manager.h"
 #include "data/data_area_light_component.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
@@ -85,7 +86,7 @@ namespace
 
     private:
 
-        void OnDirtyComponent(Base::IComponent* _pComponent);
+        void OnDirtyComponent(Dt::IComponent* _pComponent);
 
         void FilterTexture(Gfx::CTexturePtr _TexturePtr, Gfx::CTexturePtr _OutputTexturePtr);
     };
@@ -215,7 +216,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxAreaLightManager::OnDirtyComponent(Base::IComponent* _pComponent)
+    void CGfxAreaLightManager::OnDirtyComponent(Dt::IComponent* _pComponent)
     {
         // -----------------------------------------------------------------------------
         // Vars

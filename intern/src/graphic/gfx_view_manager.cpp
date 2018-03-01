@@ -10,6 +10,7 @@
 #include "core/core_time.h"
 
 #include "data/data_component.h"
+#include "data/data_component_manager.h"
 #include "data/data_camera_component.h"
 #include "data/data_texture_manager.h"
 
@@ -134,7 +135,7 @@ namespace
         void ResizeCameras(float _Width, float _Height);
         void ResizeViewPort(float _Width, float _Height);
 
-        void OnDirtyComponent(Base::IComponent* _pComponent);
+        void OnDirtyComponent(Dt::IComponent* _pComponent);
         
     private:
         
@@ -528,7 +529,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxViewManager::OnDirtyComponent(Base::IComponent* _pComponent)
+    void CGfxViewManager::OnDirtyComponent(Dt::IComponent* _pComponent)
     {
         if (_pComponent->GetTypeID() != Base::CTypeInfo::GetTypeID<Dt::CCameraComponent>()) return;
 

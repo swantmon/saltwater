@@ -6,8 +6,9 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
-#include "data/data_component_facet.h"
 #include "data/data_component.h"
+#include "data/data_component_facet.h"
+#include "data/data_component_manager.h"
 #include "data/data_entity.h"
 #include "data/data_light_probe_component.h"
 #include "data/data_map.h"

@@ -8,6 +8,7 @@
 #include "core/core_asset_manager.h"
 
 #include "data/data_component.h"
+#include "data/data_component_manager.h"
 #include "data/data_material_component.h"
 #include "data/data_material_manager.h"
 #include "data/data_texture_manager.h"

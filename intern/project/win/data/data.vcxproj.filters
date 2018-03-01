@@ -98,6 +98,9 @@
     <ClInclude Include="..\..\..\src\data\data_material_manager.h">
       <Filter>materials</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_component_manager.h">
+      <Filter>map\entity\components</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\data\data_entity_manager.cpp">
@@ -184,6 +187,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\data\data_material_manager.cpp">
       <Filter>materials</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_component_manager.cpp">
+      <Filter>map\entity\components</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

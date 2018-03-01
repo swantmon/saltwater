@@ -17,9 +17,6 @@
     <ClCompile Include="..\..\..\src\base\base_getopt.cpp">
       <Filter>io</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\base\base_component_manager.cpp">
-      <Filter>container</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\base_aabb2.h">
@@ -192,12 +189,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\base_type_info.h">
       <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_component.h">
-      <Filter>container</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_component_manager.h">
-      <Filter>container</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

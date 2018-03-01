@@ -426,4 +426,26 @@ namespace Dt
         m_pTransformationFacet->SetRotation(glm::eulerAngles(Rotation));
         m_pTransformationFacet->SetScale(Scale);
     }
+    
+    // -----------------------------------------------------------------------------
+
+    void CEntity::AttachComponent(Dt::IComponent* _pComponent)
+    {
+        if (_pComponent == nullptr || _pComponent->GetHostEntity() != nullptr) return;
+
+        _pComponent->m_pHostEntity = this;
+
+        m_pComponentsFacet->AddComponent(_pComponent);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CEntity::DetachComponent(Dt::IComponent* _pComponent)
+    {
+        if (_pComponent == nullptr || _pComponent->GetHostEntity() != this) return;
+
+        _pComponent->m_pHostEntity = 0;
+
+        m_pComponentsFacet->RemoveComponent(_pComponent);
+    }
 } // namespace Dt

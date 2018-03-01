@@ -1,7 +1,6 @@
 
 #include "graphic/gfx_precompiled.h"
 
-#include "base/base_component_manager.h"
 #include "base/base_console.h"
 #include "base/base_crc.h"
 #include "base/base_exception.h"
@@ -12,6 +11,7 @@
 #include "core/core_asset_manager.h"
 
 #include "data/data_component.h"
+#include "data/data_component_manager.h"
 #include "data/data_entity.h"
 #include "data/data_material_component.h"
 #include "data/data_material_manager.h"
@@ -160,7 +160,7 @@ namespace
 
     private:
 
-        void OnDirtyComponent(Base::IComponent* _pComponent);
+        void OnDirtyComponent(Dt::IComponent* _pComponent);
 
         void FillMaterialFromData(CInternMaterial* _pMaterial, const SMaterialDescriptor& _rDescription);
 
@@ -264,7 +264,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxMaterialManager::OnDirtyComponent(Base::IComponent* _pComponent)
+    void CGfxMaterialManager::OnDirtyComponent(Dt::IComponent* _pComponent)
     {
         if (_pComponent->GetTypeID() != Base::CTypeInfo::GetTypeID<Dt::CMaterialComponent>()) return;
 

@@ -1,27 +1,27 @@
 
 #pragma once
 
-#include "base/base_component.h"
+#include "base/base_uncopyable.h"
 #include "base/base_defines.h"
+#include "base/base_singleton.h"
 #include "base/base_typedef.h"
+
+#include "data/data_component.h"
 
 #include <functional>
 #include <map>
 #include <memory>
 #include <vector>
 
-namespace CON
+namespace Dt
 {
-    class CComponentManager
+    class CComponentManager : Base::CUncopyable
     {
-    public:
-
-        CComponentManager();
-        ~CComponentManager();
+        BASE_SINGLETON_FUNC(CComponentManager)
 
     public:
 
-        typedef std::function<void(CON::IComponent* _pComponent)> CComponentDelegate;
+        typedef std::function<void(Dt::IComponent* _pComponent)> CComponentDelegate;
 
     public:
 
@@ -37,7 +37,7 @@ namespace CON
         T* GetComponent(Base::ID _ID);
 
         template<class T>
-        const std::vector<CON::IComponent*>& GetComponents();
+        const std::vector<Dt::IComponent*>& GetComponents();
 
         template<class T>
         void MarkComponentAsDirty(T* _pComponent, unsigned int _DirtyFlags);
@@ -46,10 +46,10 @@ namespace CON
 
     private:
 
-        typedef std::vector<std::unique_ptr<CON::IComponent>>     CComponents;
-        typedef std::map<Base::ID, CON::IComponent*>              CComponentsByID;
-        typedef std::map<Base::ID, std::vector<CON::IComponent*>> CComponentsByType;
-        typedef std::vector<CComponentDelegate>                   CComponentDelegates;
+        typedef std::vector<std::unique_ptr<Dt::IComponent>>     CComponents;
+        typedef std::map<Base::ID, Dt::IComponent*>              CComponentsByID;
+        typedef std::map<Base::ID, std::vector<Dt::IComponent*>> CComponentsByType;
+        typedef std::vector<CComponentDelegate>                  CComponentDelegates;
 
     private:
 
@@ -58,12 +58,17 @@ namespace CON
         CComponentsByType   m_ComponentsByType;
         CComponentDelegates m_ComponentDelegates;
         Base::ID            m_CurrentID;
+
+    private:
+
+        CComponentManager();
+        ~CComponentManager();
     };
-} // namespace CON
+} // namespace Dt
 
 #define BASE_DIRTY_COMPONENT_METHOD(_Method) std::bind(_Method, this, std::placeholders::_1)
 
-namespace CON
+namespace Dt
 {
     template<class T>
     T* CComponentManager::Allocate()
@@ -110,7 +115,7 @@ namespace CON
     // -----------------------------------------------------------------------------
 
     template<class T>
-    const std::vector<CON::IComponent*>& CComponentManager::GetComponents()
+    const std::vector<Dt::IComponent*>& CComponentManager::GetComponents()
     {
         return m_ComponentsByType[Base::CTypeInfo::GetTypeID<T>()];
     }
@@ -120,11 +125,11 @@ namespace CON
     template<class T>
     void CComponentManager::MarkComponentAsDirty(T* _pComponent, unsigned int _DirtyFlags)
     {
-        _pComponent->SetDirtyFlags(_DirtyFlags);
+        _pComponent->m_DirtyFlags = _DirtyFlags;
 
         for (auto Delegate : m_ComponentDelegates)
         {
             Delegate(_pComponent);
         }
     }
-} // namespace CON
+} // namespace Dt
