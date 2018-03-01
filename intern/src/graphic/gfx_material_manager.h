@@ -3,11 +3,9 @@
 
 #include "base/base_include_glm.h"
 
-#include <string>
+#include "graphic/gfx_material.h"
 
-namespace Core
-{
-namespace MaterialImporter
+namespace Gfx
 {
     struct SMaterialDescriptor
     {
@@ -25,15 +23,17 @@ namespace MaterialImporter
         glm::vec3   m_AlbedoColor;
         glm::vec4   m_TilingOffset;
     };
-} // namespace MaterialImporter
-} // namespace Core
+} // namespace Gfx
 
-namespace Core
+namespace Gfx
 {
-namespace MaterialImporter
+namespace MaterialManager
 {
-    SMaterialDescriptor CreateDescriptionFromXML(const std::string& _rPathToFile);
+    void OnStart();
+    void OnExit();
 
-    SMaterialDescriptor CreateDescriptionFromAssimp(const std::string& _rPathToFile, int _MaterialIndex = 0);
-} // namespace MaterialImporter
-} // namespace Core
+    CMaterialPtr CreateMaterial(const SMaterialDescriptor& _rDescriptor);
+
+    const CMaterialPtr GetDefaultMaterial();
+} // namespace MaterialManager
+} // namespace Gfx
