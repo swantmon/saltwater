@@ -315,7 +315,7 @@ namespace Edit
 
         NewApplyMessage.Put(m_CurrentEntityID);
 
-        NewApplyMessage.Put(static_cast<Base::ID>(Result));
+        NewApplyMessage.Put(static_cast<Base::BHash>(Result));
 
         NewApplyMessage.Reset();
 
@@ -353,7 +353,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
-        Base::ID MaterialID = _rMessage.Get<Base::BHash>();
+        Base::BHash MaterialID = _rMessage.Get<Base::BHash>();
 
         if (MaterialID != m_MaterialHash) return;
 

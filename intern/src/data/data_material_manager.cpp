@@ -295,7 +295,7 @@ namespace
 
     CMaterial* CDtMaterialManager::GetMaterialByHash(const CMaterial::BHash _Hash)
     {
-        if (m_MaterialsByHash.find(_Hash) == m_MaterialsByHash.end()) return nullptr;
+        if (m_MaterialsByHash.find(_Hash) == m_MaterialsByHash.end()) return m_pDefaultMaterial;
         
         return m_MaterialsByHash.at(_Hash);
     }
@@ -341,6 +341,11 @@ namespace
         rComponent.m_TilingOffset            = _rDescriptor.m_TilingOffset;
 
         rComponent.m_Hash = Hash;
+
+        // -----------------------------------------------------------------------------
+        // Add component to hash map
+        // -----------------------------------------------------------------------------
+        m_MaterialsByHash[Hash] = &rComponent;
 
         return &rComponent;
     }

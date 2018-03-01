@@ -12,7 +12,9 @@
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_map.h"
+#include "data/data_material.h"
 #include "data/data_material_component.h"
+#include "data/data_material_manager.h"
 #include "data/data_mesh_component.h"
 #include "data/data_texture_manager.h"
 #include "data/data_transformation_facet.h"
@@ -135,13 +137,13 @@ namespace
 
         Dt::CMaterialComponent* pComponent = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CMaterialComponent>();
 
-        if (pComponent == nullptr) return;
+        if (pComponent == nullptr || pComponent->GetMaterial() == nullptr) return;
 
         Edit::CMessage NewMessage;
 
         NewMessage.Put(rCurrentEntity.GetID());
 
-        NewMessage.Put(pComponent->GetID());
+        NewMessage.Put(pComponent->GetMaterial()->GetHash());
 
         NewMessage.Reset();
 
@@ -224,7 +226,7 @@ namespace
     {
         Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Base::ID MaterialID = _rMessage.Get<Base::ID>();
+        Base::BHash MaterialHash = _rMessage.Get<Base::BHash>();
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
@@ -232,12 +234,10 @@ namespace
 
         if (pComponent != nullptr)
         {
-            rCurrentEntity.DetachComponent(pComponent);
+            pComponent->SetMaterial(Dt::MaterialManager::GetMaterialByHash(MaterialHash));
+
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pComponent, Dt::CMaterialComponent::DirtyInfo);
         }
-
-        auto pNewComponent = Dt::CComponentManager::GetInstance().GetComponent<Dt::CMaterialComponent>(MaterialID);
-
-        rCurrentEntity.AttachComponent(pNewComponent);
     }
 
     // -----------------------------------------------------------------------------

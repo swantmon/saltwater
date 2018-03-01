@@ -126,6 +126,8 @@ namespace
 
         auto pMaterial = Dt::MaterialManager::GetMaterialByHash(MaterialHash);
 
+        if (pMaterial == nullptr) return;
+
         Edit::CMessage NewMessage;
 
         NewMessage.Put(pMaterial->GetHash());
