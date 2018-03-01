@@ -13,7 +13,8 @@
 
 #include "data/data_component.h"
 #include "data/data_entity.h"
-#include "data/data_material_helper.h"
+#include "data/data_material_component.h"
+#include "data/data_material_manager.h"
 
 #include "graphic/gfx_material.h"
 #include "graphic/gfx_material_manager.h"
@@ -133,7 +134,7 @@ namespace
         void OnStart();
         void OnExit();
 
-        CMaterialPtr CreateMaterial(const Core::MaterialImporter::SMaterialDescriptor& _rDescriptor);
+        CMaterialPtr CreateMaterial(const SMaterialDescriptor& _rDescriptor);
 
         const CMaterialPtr GetDefaultMaterial();
 
@@ -161,7 +162,7 @@ namespace
 
         void OnDirtyComponent(Base::IComponent* _pComponent);
 
-        void FillMaterialFromData(CInternMaterial* _pMaterial, const Core::MaterialImporter::SMaterialDescriptor& _rDescription);
+        void FillMaterialFromData(CInternMaterial* _pMaterial, const SMaterialDescriptor& _rDescription);
 
         void SetShaderOfMaterial(CInternMaterial& _rMaterial) const;
     };
@@ -191,9 +192,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Create default material
         // -----------------------------------------------------------------------------
-        Core::MaterialImporter::SMaterialDescriptor MaterialDescriptor;
+        SMaterialDescriptor MaterialDescriptor;
 
-        MaterialDescriptor.m_MaterialName            = "STATIC CONST DEFAULT GFX MATERIAL: default.mat"; 
+        MaterialDescriptor.m_MaterialName            = "STATIC CONST DEFAULT MATERIAL: default.mat"; 
         MaterialDescriptor.m_ColorTexture            = ""; 
         MaterialDescriptor.m_NormalTexture           = ""; 
         MaterialDescriptor.m_RoughnessTexture        = ""; 
@@ -227,12 +228,12 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    CMaterialPtr CGfxMaterialManager::CreateMaterial(const Core::MaterialImporter::SMaterialDescriptor& _rDescriptor)
+    CMaterialPtr CGfxMaterialManager::CreateMaterial(const SMaterialDescriptor& _rDescriptor)
     {
         // -----------------------------------------------------------------------------
         // Hash
         // -----------------------------------------------------------------------------
-        Base::BHash Hash = Base::CRC32(_rDescriptor.m_MaterialName.c_str(), _rDescriptor.m_MaterialName.length());
+        Base::BHash Hash = Base::CRC32(_rDescriptor.m_MaterialName.c_str(), static_cast<unsigned int>(_rDescriptor.m_MaterialName.length()));
 
         if (m_MaterialsByHash.find(Hash) != m_MaterialsByHash.end())
         {
@@ -269,6 +270,8 @@ namespace
 
         Dt::CMaterialComponent* pMaterialComponent = static_cast<Dt::CMaterialComponent*>(_pComponent);
 
+        const Dt::CMaterial* pMaterial = pMaterialComponent->GetMaterial();
+
         // -----------------------------------------------------------------------------
         // Dirty check
         // -----------------------------------------------------------------------------
@@ -279,23 +282,23 @@ namespace
         // -----------------------------------------------------------------------------
         // Material
         // -----------------------------------------------------------------------------
-        Core::MaterialImporter::SMaterialDescriptor MaterialDescriptor;
+        SMaterialDescriptor MaterialDescriptor;
 
-        MaterialDescriptor.m_MaterialName = pMaterialComponent->GetMaterialname();
+        MaterialDescriptor.m_MaterialName = pMaterial->GetMaterialname();
 
-        MaterialDescriptor.m_Roughness    = pMaterialComponent->GetRoughness();
-        MaterialDescriptor.m_Reflectance  = pMaterialComponent->GetReflectance();
-        MaterialDescriptor.m_MetalMask    = pMaterialComponent->GetMetalness();
-        MaterialDescriptor.m_Displacement = pMaterialComponent->GetDisplacement();
-        MaterialDescriptor.m_AlbedoColor  = pMaterialComponent->GetColor();
-        MaterialDescriptor.m_TilingOffset = pMaterialComponent->GetTilingOffset();
+        MaterialDescriptor.m_Roughness    = pMaterial->GetRoughness();
+        MaterialDescriptor.m_Reflectance  = pMaterial->GetReflectance();
+        MaterialDescriptor.m_MetalMask    = pMaterial->GetMetalness();
+        MaterialDescriptor.m_Displacement = pMaterial->GetDisplacement();
+        MaterialDescriptor.m_AlbedoColor  = pMaterial->GetColor();
+        MaterialDescriptor.m_TilingOffset = pMaterial->GetTilingOffset();
 
-        MaterialDescriptor.m_ColorTexture            = pMaterialComponent->GetColorTexture();
-        MaterialDescriptor.m_NormalTexture           = pMaterialComponent->GetNormalTexture();
-        MaterialDescriptor.m_RoughnessTexture        = pMaterialComponent->GetRoughnessTexture();
-        MaterialDescriptor.m_MetalTexture            = pMaterialComponent->GetMetalTexture();
-        MaterialDescriptor.m_AmbientOcclusionTexture = pMaterialComponent->GetAmbientOcclusionTexture();
-        MaterialDescriptor.m_BumpTexture             = pMaterialComponent->GetBumpTexture();
+        MaterialDescriptor.m_ColorTexture            = pMaterial->GetColorTexture();
+        MaterialDescriptor.m_NormalTexture           = pMaterial->GetNormalTexture();
+        MaterialDescriptor.m_RoughnessTexture        = pMaterial->GetRoughnessTexture();
+        MaterialDescriptor.m_MetalTexture            = pMaterial->GetMetalTexture();
+        MaterialDescriptor.m_AmbientOcclusionTexture = pMaterial->GetAmbientOcclusionTexture();
+        MaterialDescriptor.m_BumpTexture             = pMaterial->GetBumpTexture();
 
         CInternMaterial* pInternMaterial = 0;
 
@@ -318,7 +321,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxMaterialManager::FillMaterialFromData(CInternMaterial* _pComponent, const Core::MaterialImporter::SMaterialDescriptor& _rDescriptor)
+    void CGfxMaterialManager::FillMaterialFromData(CInternMaterial* _pComponent, const SMaterialDescriptor& _rDescriptor)
     {
         // -----------------------------------------------------------------------------
         // Values

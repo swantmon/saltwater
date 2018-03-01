@@ -8,8 +8,6 @@
 #include "data/data_component.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
-#include "data/data_material_helper.h"
-#include "data/data_mesh_helper.h"
 #include "data/data_texture_manager.h"
 
 #include "logic/lg_exit_state.h"

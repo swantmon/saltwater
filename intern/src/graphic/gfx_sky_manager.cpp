@@ -16,7 +16,6 @@
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_map.h"
-#include "data/data_mesh_helper.h"
 #include "data/data_sky_component.h"
 #include "data/data_sun_component.h"
 

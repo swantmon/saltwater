@@ -5,13 +5,14 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
+#include "core/core_asset_manager.h"
+
 #include "data/data_component_facet.h"
 #include "data/data_component.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_hierarchy_facet.h"
 #include "data/data_map.h"
-#include "data/data_mesh_helper.h"
 #include "data/data_transformation_facet.h"
 
 #include "editor/edit_entity_helper.h"
@@ -131,7 +132,9 @@ namespace
     {
         std::string Modelfile = _rMessage.Get<std::string>();
 
-        auto ListOfEntities = Dt::EntityManager::CreateEntitiesFromScene(Modelfile);
+        std::string PathToModel = Core::AssetManager::GetPathToAssets() + "/" + Modelfile;
+
+        auto ListOfEntities = Dt::EntityManager::CreateEntitiesFromScene(PathToModel);
 
         if (ListOfEntities.size() > 0)
         {

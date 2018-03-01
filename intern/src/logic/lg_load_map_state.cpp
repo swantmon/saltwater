@@ -18,9 +18,10 @@
 #include "data/data_hierarchy_facet.h"
 #include "data/data_light_probe_component.h"
 #include "data/data_map.h"
-#include "data/data_material_helper.h"
+#include "data/data_material.h"
+#include "data/data_material_component.h"
+#include "data/data_material_manager.h"
 #include "data/data_mesh_component.h"
-#include "data/data_mesh_helper.h"
 #include "data/data_sky_component.h"
 #include "data/data_ssao_component.h"
 #include "data/data_sun_component.h"
@@ -276,11 +277,11 @@ namespace
             MaterialFileDesc.m_AlbedoColor = glm::vec3(1.0f, 0.0f, 0.0f);
             MaterialFileDesc.m_TilingOffset = glm::vec4(1.0f, 1.0f, 0.0f, 0.0f);
 
-            Dt::CMaterial& rMaterial = Dt::MaterialHelper::CreateMaterial(MaterialFileDesc);
+            Dt::CMaterial& rMaterial = Dt::MaterialManager::CreateMaterial(MaterialFileDesc);
 
             pComponent->SetMaterial(0, &rMaterial);
 
-            Dt::MaterialHelper::MarkMaterialAsDirty(rMaterial, Dt::CMaterial::DirtyCreate);
+            Dt::MaterialManager::MarkMaterialAsDirty(rMaterial, Dt::CMaterial::DirtyCreate);
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pComponent, Dt::CMeshComponent::DirtyCreate);
 
@@ -450,10 +451,13 @@ void CLgLoadMapState::CreateDefaultScene()
 
             // -----------------------------------------------------------------------------
 
+            auto pMaterial = Dt::MaterialManager::CreateMaterialFromName("Red Sparrow");
+
+            pMaterial->SetColor(glm::vec3(1.0f, 0.0f, 0.0f));
+
             auto pMaterialComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CMaterialComponent>();
 
-            pMaterialComponent->SetMaterialname("Red Sparrow");
-            pMaterialComponent->SetColor(glm::vec3(1.0f, 0.0f, 0.0f));
+            pMaterialComponent->SetMaterial(pMaterial);
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pMaterialComponent, Dt::CMaterialComponent::DirtyCreate);
 
@@ -494,8 +498,7 @@ void CLgLoadMapState::CreateDefaultScene()
 
             auto pMaterialComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CMaterialComponent>();
 
-            pMaterialComponent->SetMaterialname("White Plane");
-            pMaterialComponent->SetColor(glm::vec3(1.0f));
+            pMaterialComponent->SetMaterial(Dt::MaterialManager::GetDefaultMaterial());
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pMaterialComponent, Dt::CMaterialComponent::DirtyCreate);
 

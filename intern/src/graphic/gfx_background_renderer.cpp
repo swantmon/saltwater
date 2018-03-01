@@ -15,7 +15,6 @@
 #include "data/data_component.h"
 #include "data/data_entity.h"
 #include "data/data_map.h"
-#include "data/data_mesh_helper.h"
 #include "data/data_sky_component.h"
 
 #include "graphic/gfx_background_renderer.h"

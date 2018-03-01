@@ -10,7 +10,6 @@
 
 #include "core/core_asset_importer.h"
 #include "core/core_asset_manager.h"
-#include "core/core_material_importer.h"
 #include "core/core_time.h"
 
 #include "data/data_component.h"
@@ -19,10 +18,10 @@
 #include "data/data_entity_manager.h"
 #include "data/data_hierarchy_facet.h"
 #include "data/data_map.h"
+#include "data/data_material.h"
 #include "data/data_material_component.h"
-#include "data/data_material_helper.h"
+#include "data/data_material_manager.h"
 #include "data/data_mesh_component.h"
-#include "data/data_mesh_helper.h"
 #include "data/data_transformation_facet.h"
 
 #include "assimp/Importer.hpp"
@@ -227,11 +226,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Build path to texture in file system and load scene
         // -----------------------------------------------------------------------------
-        std::string PathToModel = Core::AssetManager::GetPathToAssets() + "/" + _rFile;
-
         int GeneratorFlag = Core::AssetImporter::SGeneratorFlag::Default;
 
-        auto Importer = Core::AssetImporter::AllocateAssimpImporter(PathToModel, GeneratorFlag);
+        auto Importer = Core::AssetImporter::AllocateAssimpImporter(_rFile, GeneratorFlag);
 
         const Assimp::Importer* pImporter = static_cast<const Assimp::Importer*>(Core::AssetImporter::GetNativeAccessFromImporter(Importer));
 
@@ -260,7 +257,12 @@ namespace
 
             rChildEntity.SetName(pMesh->mName.C_Str());
 
-            auto pMeshComponent = Dt::MeshHelper::CreateMeshFromFile(_rFile, GeneratorFlag, IndexOfMesh);
+            auto pMeshComponent = Dt::CComponentManager::GetInstance().Allocate<CMeshComponent>();
+
+            pMeshComponent->SetFilename(_rFile);
+            pMeshComponent->SetGeneratorFlag(GeneratorFlag);
+            pMeshComponent->SetMeshType(CMeshComponent::Asset);
+            pMeshComponent->SetMeshIndex(IndexOfMesh);
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pMeshComponent, CMeshComponent::DirtyCreate);
 
@@ -271,9 +273,11 @@ namespace
             // -----------------------------------------------------------------------------
             if (pMesh->mMaterialIndex < pScene->mNumMaterials)
             {
-                auto MaterialDescriptor = Core::MaterialImporter::CreateDescriptionFromAssimp(PathToModel, pMesh->mMaterialIndex);
+                auto pMaterial = Dt::MaterialManager::CreateMaterialFromAssimp(_rFile, pMesh->mMaterialIndex);
 
-                auto pMaterialComponent = Dt::MaterialHelper::CreateMaterial(MaterialDescriptor);
+                auto pMaterialComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CMaterialComponent>();
+
+                pMaterialComponent->SetMaterial(pMaterial);
 
                 Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pMaterialComponent, Dt::CMaterialComponent::DirtyCreate);
 

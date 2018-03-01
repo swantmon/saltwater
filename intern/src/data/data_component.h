@@ -88,7 +88,7 @@ namespace Dt
         bool IsActive() const;
         bool IsActiveAndUsable() const;
 
-        void SetDirtyFlags(unsigned int _Flags);
+        void SetDirtyFlags(unsigned int _Flags) override;
         unsigned int GetDirtyFlags() const;
 
         void SetFacet(unsigned int _Category, void* _pFacet);

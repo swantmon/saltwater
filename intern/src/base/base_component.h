@@ -21,6 +21,8 @@ namespace CON
 
         virtual const Base::ID GetTypeID() const = 0;
 
+        virtual void SetDirtyFlags(unsigned int _Flags) = 0;
+
         virtual ~IComponent() {};
 
      private:

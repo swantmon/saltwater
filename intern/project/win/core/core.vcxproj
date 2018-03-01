@@ -22,14 +22,12 @@
     <ClInclude Include="..\..\..\src\core\core_asset_importer.h" />
     <ClInclude Include="..\..\..\src\core\core_asset_manager.h" />
     <ClInclude Include="..\..\..\src\core\core_config.h" />
-    <ClInclude Include="..\..\..\src\core\core_material_importer.h" />
     <ClInclude Include="..\..\..\src\core\core_precompiled.h" />
     <ClInclude Include="..\..\..\src\core\core_time.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\core\core_asset_importer.cpp" />
     <ClCompile Include="..\..\..\src\core\core_asset_manager.cpp" />
-    <ClCompile Include="..\..\..\src\core\core_material_importer.cpp" />
     <ClCompile Include="..\..\..\src\core\core_precompiled.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>

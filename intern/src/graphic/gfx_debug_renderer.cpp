@@ -10,7 +10,6 @@
 
 #include "data/data_entity.h"
 #include "data/data_map.h"
-#include "data/data_mesh_helper.h"
 
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"

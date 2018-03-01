@@ -24,7 +24,7 @@ namespace Edit
     CInspectorMaterial::CInspectorMaterial(QWidget* _pParent)
         : QWidget          (_pParent)
         , m_CurrentEntityID(static_cast<unsigned int>(-1))
-        , m_MaterialID     (0)
+        , m_MaterialHash   (0)
     {
         // -----------------------------------------------------------------------------
         // Setup UI
@@ -142,7 +142,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         Edit::CMessage NewMessage;
 
-        NewMessage.Put(m_MaterialID);
+        NewMessage.Put(m_MaterialHash);
 
         NewMessage.Put(AlbedoColor);
 
@@ -262,14 +262,14 @@ namespace Edit
 
         if (Hash != -1)
         {
-            m_MaterialID = static_cast<Base::ID>(Hash);
+            m_MaterialHash = static_cast<Base::BHash>(Hash);
 
             // -----------------------------------------------------------------------------
             // Request info of texture
             // -----------------------------------------------------------------------------
             Edit::CMessage RequestMessage;
 
-            RequestMessage.Put(m_MaterialID);
+            RequestMessage.Put(m_MaterialHash);
 
             RequestMessage.Reset();
 
@@ -335,11 +335,11 @@ namespace Edit
 
         if (EntityID != m_CurrentEntityID) return;
 
-        m_MaterialID = _rMessage.Get<Base::ID>();
+        m_MaterialHash = _rMessage.Get<Base::BHash>();
 
         CMessage NewMessage;
 
-        NewMessage.Put(m_MaterialID);
+        NewMessage.Put(m_MaterialHash);
 
         NewMessage.Reset();
 
@@ -353,9 +353,9 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
-        Base::ID MaterialID = _rMessage.Get<Base::ID>();
+        Base::ID MaterialID = _rMessage.Get<Base::BHash>();
 
-        if (MaterialID != m_MaterialID) return;
+        if (MaterialID != m_MaterialHash) return;
 
         glm::vec3 AlbedoColor = _rMessage.Get<glm::vec3>();
 

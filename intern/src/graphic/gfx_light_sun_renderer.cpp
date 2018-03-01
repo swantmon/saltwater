@@ -12,7 +12,6 @@
 #include "data/data_component.h"
 #include "data/data_entity.h"
 #include "data/data_map.h"
-#include "data/data_mesh_helper.h"
 #include "data/data_sun_component.h"
 
 #include "graphic/gfx_buffer_manager.h"

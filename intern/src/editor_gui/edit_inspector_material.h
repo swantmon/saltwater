@@ -36,7 +36,7 @@ namespace Edit
     private:
 
         Base::ID m_CurrentEntityID;
-        Base::ID m_MaterialID;
+        Base::BHash m_MaterialHash;
 
     private:
 

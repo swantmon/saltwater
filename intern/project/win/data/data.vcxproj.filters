@@ -86,17 +86,17 @@
     <ClInclude Include="..\..\..\src\data\data_component_facet.h">
       <Filter>map\entity\facets\components</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_mesh_helper.h">
-      <Filter>map\entity\helper\models</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_material_helper.h">
-      <Filter>map\entity\helper\materials</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\data\data_material_component.h">
       <Filter>map\entity\components\model</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\data\data_mesh_component.h">
       <Filter>map\entity\components\model</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_material.h">
+      <Filter>materials</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_material_manager.h">
+      <Filter>materials</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -173,17 +173,17 @@
     <ClCompile Include="..\..\..\src\data\data_component_facet.cpp">
       <Filter>map\entity\facets\components</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_mesh_helper.cpp">
-      <Filter>map\entity\helper\models</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_material_helper.cpp">
-      <Filter>map\entity\helper\materials</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\data\data_material_component.cpp">
       <Filter>map\entity\components\model</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\data\data_mesh_component.cpp">
       <Filter>map\entity\components\model</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_material.cpp">
+      <Filter>materials</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_material_manager.cpp">
+      <Filter>materials</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -220,20 +220,14 @@
     <Filter Include="map\entity\facets\components">
       <UniqueIdentifier>{2e1a7254-2026-4f68-b9c2-ff39ac63afd2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="map\entity\helper">
-      <UniqueIdentifier>{d2a24076-cd4f-4bfb-9767-8f1c13aba9d0}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="map\entity\helper\models">
-      <UniqueIdentifier>{07e34a49-6329-43c1-9b85-20225bbfc5ef}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="map\entity\helper\materials">
-      <UniqueIdentifier>{ccc2916e-d14c-45a4-ae67-e8fe96b262ea}</UniqueIdentifier>
-    </Filter>
     <Filter Include="map\entity\components\model">
       <UniqueIdentifier>{0fceb878-3205-4385-b80a-9d4b9624bbc7}</UniqueIdentifier>
     </Filter>
     <Filter Include="map\entity\components\camera">
       <UniqueIdentifier>{d34f13b4-e357-49b8-8290-e4c854b0353f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="materials">
+      <UniqueIdentifier>{ccc2916e-d14c-45a4-ae67-e8fe96b262ea}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
