@@ -146,6 +146,8 @@ public class GameActivity extends NativeActivity
         return Size.y;
     }
 
+    // -----------------------------------------------------------------------------
+
     public void RestoreTransparentBars()
     {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -158,7 +160,6 @@ public class GameActivity extends NativeActivity
                 | View.SYSTEM_UI_FLAG_FULLSCREEN
                 | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
     }
-
 
     // -----------------------------------------------------------------------------
     // Native functions

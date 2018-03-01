@@ -2,6 +2,12 @@
 cmake_minimum_required(VERSION 3.6.0)
 
 # ---------------------------------------
+# Import ARCore
+# ---------------------------------------
+add_library(arcore SHARED IMPORTED)
+set_target_properties(arcore PROPERTIES IMPORTED_LOCATION ${ARCORE_LIBPATH}/${ANDROID_ABI}/libarcore_sdk.so)
+
+# ---------------------------------------
 # Native App GLUE
 # ---------------------------------------
 add_library(native_app_glue STATIC ${ANDROID_NDK}/sources/android/native_app_glue/android_native_app_glue.c)
@@ -68,9 +74,6 @@ target_include_directories( graphic PRIVATE ${ExternDir}/assimp/include )
 target_include_directories( graphic PRIVATE ${ExternDir}/devil/include )
 target_include_directories( graphic PRIVATE ${ExternDir}/tinyxml2/include )
 
-target_include_directories( mr PRIVATE ${ExternDir}/arcore/include )
-
-link_directories ( ${ExternDir}/arcore/lib/${ANDROID_ABI} )
 link_directories ( ${ExternDir}/assimp/lib/${ANDROID_ABI} )
 link_directories ( ${ExternDir}/devil/lib/${ANDROID_ABI} )
 link_directories ( ${ExternDir}/tinyxml2/lib/${ANDROID_ABI} )
@@ -89,8 +92,8 @@ add_library( app_droid SHARED ${TargetSources} )
 
 target_include_directories( app_droid PRIVATE ${ANDROID_NDK}/sources/android/native_app_glue ${ExternDir}/glm/include ${ExternDir}/json/include )
 
-target_link_libraries( app_droid EGL GLESv3 arcore_sdk log android m native_app_glue)
+target_link_libraries( app_droid EGL GLESv3 log android m native_app_glue)
 
-target_link_libraries( app_droid assimp IL ILU tinyxml2)
+target_link_libraries( app_droid assimp IL ILU tinyxml2 arcore)
 
 target_link_libraries( app_droid ${MyLibraries} )
