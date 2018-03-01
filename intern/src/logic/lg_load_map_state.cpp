@@ -409,7 +409,7 @@ void CLgLoadMapState::CreateDefaultScene()
 
                 Component->SetRefreshMode(Dt::CSkyComponent::Static);
                 Component->SetType(Dt::CSkyComponent::Procedural);
-                Component->SetIntensity(40000.0f);
+                Component->SetIntensity(120000.0f);
 
                 rEnvironmentEntity.AttachComponent(Component);
 

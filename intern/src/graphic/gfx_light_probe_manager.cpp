@@ -184,8 +184,6 @@ namespace
         CBufferPtr m_GeometryVPBufferPtr;
         CBufferPtr m_GeometryMBufferPtr;
 
-        CInputLayoutPtr m_P3N3InputLayoutPtr;
-
         SLightJob m_LightJob;
 
     private:
@@ -248,7 +246,6 @@ namespace
         , m_FilteringSpecularPSPtr()
         , m_CubemapGSBufferPtr    ()
         , m_FilteringPSBufferPtr  ()
-        , m_P3N3InputLayoutPtr    ()
     {
 
     }
@@ -278,16 +275,6 @@ namespace
         m_CubemapVSPtr = ShaderManager::CompileVS("vs_p3.glsl", "main");
 
         m_CubemapPSPtr = ShaderManager::CompilePS("fs_lightprobe.glsl", "main");
-
-        // -----------------------------------------------------------------------------
-
-        const SInputElementDescriptor TriangleInputLayout[] =
-        {
-            { "POSITION", 0, CInputLayout::Float3Format, 0,  0, 24, CInputLayout::PerVertex, 0, },
-            { "NORMAL"  , 0, CInputLayout::Float3Format, 0, 12, 24, CInputLayout::PerVertex, 0, },
-        };
-
-        m_P3N3InputLayoutPtr = ShaderManager::CreateInputLayout(TriangleInputLayout, 2, m_CubemapVSPtr);
 
         // -----------------------------------------------------------------------------
         // Buffer
@@ -430,8 +417,6 @@ namespace
         m_ReflectionProbePropertiesBufferPtr = 0;
         m_GeometryVPBufferPtr = 0;
         m_GeometryMBufferPtr  = 0;
-
-        m_P3N3InputLayoutPtr = 0;
 
         for (unsigned int IndexOfTexture = 0; IndexOfTexture < s_MaxNumberOfLightsPerProbe; ++IndexOfTexture)
         {
@@ -781,7 +766,7 @@ namespace
 
             ContextManager::SetIndexBuffer(SurfacePtr->GetIndexBuffer(), 0);
 
-            ContextManager::SetInputLayout(m_P3N3InputLayoutPtr);
+            ContextManager::SetInputLayout(SurfacePtr->GetShaderVS()->GetInputLayout());
 
             ContextManager::DrawIndexed(SurfacePtr->GetNumberOfIndices(), 0, 0);
 
