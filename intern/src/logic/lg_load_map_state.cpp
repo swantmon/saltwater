@@ -434,7 +434,7 @@ void CLgLoadMapState::CreateDefaultScene()
 
             Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
 
-            pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 2.0f));
+            pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 4.0f));
             pTransformationFacet->SetScale(glm::vec3(1.0f));
             pTransformationFacet->SetRotation(glm::vec3(glm::radians(45.0f), glm::radians(45.0f), 0.0f));
 
@@ -472,12 +472,12 @@ void CLgLoadMapState::CreateDefaultScene()
 
             Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
 
-            rEntity.SetName("Box 2");
+            rEntity.SetName("Plane");
 
             Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
 
-            pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, -5.0f));
-            pTransformationFacet->SetScale(glm::vec3(4.0f, 4.0f, 4.0f));
+            pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+            pTransformationFacet->SetScale(glm::vec3(4.0f, 4.0f, 0.1f));
             pTransformationFacet->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
 
             // -----------------------------------------------------------------------------
