@@ -98,12 +98,9 @@ namespace
         
     private:
         
-        CMeshPtr m_QuadModelPtr;
-
         CBufferPtr m_AreaLightBufferPtr;
         CBufferPtr m_AreaLightbulbBufferPtr;
         
-        CInputLayoutPtr m_P2InputLayoutPtr;
         CInputLayoutPtr m_P3T2InputLayoutPtr;
         
         CShaderPtr m_PositionShaderPtr;
@@ -127,10 +124,8 @@ namespace
 namespace
 {
     CGfxAreaLightRenderer::CGfxAreaLightRenderer()
-        : m_QuadModelPtr            ()
-        , m_AreaLightBufferPtr      ()
+        : m_AreaLightBufferPtr      ()
         , m_AreaLightbulbBufferPtr  ()
-        , m_P2InputLayoutPtr        ()
         , m_P3T2InputLayoutPtr      ()
         , m_PositionShaderPtr       ()
         , m_ScreenQuadShaderPtr     ()
@@ -159,10 +154,8 @@ namespace
     
     void CGfxAreaLightRenderer::OnExit()
     {
-        m_QuadModelPtr             = 0;
         m_AreaLightBufferPtr       = 0;
         m_AreaLightbulbBufferPtr   = 0;
-        m_P2InputLayoutPtr         = 0;
         m_P3T2InputLayoutPtr       = 0;
         m_PositionShaderPtr        = 0;
         m_ScreenQuadShaderPtr      = 0;
@@ -181,26 +174,17 @@ namespace
     {
         m_PositionShaderPtr = ShaderManager::CompileVS("vs_p3t2.glsl", "main");
 
-        m_ScreenQuadShaderPtr = ShaderManager::CompileVS("vs_screen_p_quad.glsl", "main");
+        m_ScreenQuadShaderPtr = ShaderManager::CompileVS("vs_fullscreen.glsl", "main");
 
         m_LTCAreaLightShaderPtr = ShaderManager::CompilePS("fs_light_arealight.glsl" , "main");
 
         m_AreaLightbulbShaderPtr = ShaderManager::CompilePS("fs_light_arealight_bulb.glsl", "main");
-        
-        // -----------------------------------------------------------------------------
-        
-        const SInputElementDescriptor P2InputLayout[] =
-        {
-            { "POSITION", 0, CInputLayout::Float2Format, 0, 0, 8, CInputLayout::PerVertex, 0, },
-        };
 
         const SInputElementDescriptor P3T2InputLayout[] =
         {
             { "POSITION", 0, CInputLayout::Float3Format, 0,  0, 20, CInputLayout::PerVertex, 0, },
             { "TEXCOORD", 0, CInputLayout::Float2Format, 0, 12, 20, CInputLayout::PerVertex, 0, },
         };
-        
-        m_P2InputLayoutPtr = ShaderManager::CreateInputLayout(P2InputLayout, 1, m_ScreenQuadShaderPtr);
 
         m_P3T2InputLayoutPtr = ShaderManager::CreateInputLayout(P3T2InputLayout, 2, m_PositionShaderPtr);
     }
@@ -346,7 +330,6 @@ namespace
     
     void CGfxAreaLightRenderer::OnSetupModels()
     {
-        m_QuadModelPtr = MeshManager::CreateRectangle(0.0f, 0.0f, 1.0f, 1.0f);
     }
     
     // -----------------------------------------------------------------------------
@@ -399,12 +382,6 @@ namespace
         CRenderJobs::const_iterator EndOfRenderJobs;
 
         ContextManager::SetRenderContext(m_LightRenderContextPtr);
-
-        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
-
-        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
-
-        ContextManager::SetInputLayout(m_ScreenQuadShaderPtr->GetInputLayout());
 
         ContextManager::SetTopology(STopology::TriangleList);
 
@@ -473,7 +450,7 @@ namespace
                 ContextManager::SetTexture(6, static_cast<Gfx::CTexturePtr>(pGfxComponent->GetFilteredTexturePtr()));
             }
 
-            ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
+            ContextManager::Draw(3, 0);
         }
 
         // -----------------------------------------------------------------------------

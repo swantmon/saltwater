@@ -116,10 +116,6 @@ namespace
         
     private: 
 
-        CMeshPtr m_QuadModelPtr;
-
-        CInputLayoutPtr m_FullQuadInputLayoutPtr;
-
         CShaderPtr m_RectangleShaderVSPtr;
         CShaderPtr m_DownSampleShaderPSPtr;
         CShaderPtr m_GaussianBlurShaderPtr;
@@ -158,9 +154,7 @@ namespace
 namespace
 {
     CGfxPostFXHDRRenderer::CGfxPostFXHDRRenderer()
-        : m_QuadModelPtr                   ()
-        , m_FullQuadInputLayoutPtr         ()
-        , m_RectangleShaderVSPtr           ()
+        : m_RectangleShaderVSPtr           ()
         , m_DownSampleShaderPSPtr          ()
         , m_GaussianBlurShaderPtr          ()
         , m_BloomShaderPSPtr               ()
@@ -216,10 +210,6 @@ namespace
     
     void CGfxPostFXHDRRenderer::OnExit()
     {
-        m_QuadModelPtr = 0;
-
-        m_FullQuadInputLayoutPtr = 0;
-
         m_RectangleShaderVSPtr  = 0;
         m_DownSampleShaderPSPtr = 0;
         m_GaussianBlurShaderPtr = 0;
@@ -262,20 +252,11 @@ namespace
     
     void CGfxPostFXHDRRenderer::OnSetupShader()
     {   
-        m_RectangleShaderVSPtr  = ShaderManager::CompileVS("vs_screen_p_quad.glsl", "main");
+        m_RectangleShaderVSPtr  = ShaderManager::CompileVS("vs_fullscreen.glsl", "main");
         m_DownSampleShaderPSPtr = ShaderManager::CompilePS("fs_down_sample.glsl"  , "main");
         m_GaussianBlurShaderPtr = ShaderManager::CompileCS("cs_gaussian_blur.glsl", "main", "#define TILE_SIZE 8\n#define IMAGE_TYPE rgba16f");
         m_BloomShaderPSPtr      = ShaderManager::CompilePS("fs_bloom.glsl"        , "main");
-        m_PassThroughPSPtr       = ShaderManager::CompilePS("fs_pass_through.glsl", "main");
-
-        // -----------------------------------------------------------------------------
-
-        const SInputElementDescriptor InputLayout[] =
-        {
-            { "POSITION", 0, CInputLayout::Float2Format, 0, 0, 8, CInputLayout::PerVertex, 0, },
-        };
-
-        m_FullQuadInputLayoutPtr = ShaderManager::CreateInputLayout(InputLayout, 1, m_RectangleShaderVSPtr);
+        m_PassThroughPSPtr      = ShaderManager::CompilePS("fs_pass_through.glsl", "main");
     }
     
     // -----------------------------------------------------------------------------
@@ -530,7 +511,6 @@ namespace
     
     void CGfxPostFXHDRRenderer::OnSetupModels()
     {
-        m_QuadModelPtr = MeshManager::CreateRectangle(0.0f, 0.0f, 1.0f, 1.0f);
     }
     
     // -----------------------------------------------------------------------------
@@ -768,12 +748,6 @@ namespace
 
             ContextManager::SetRenderContext(m_DownSampleRenderContextPtrs[IndexOfDownSample]);
 
-            ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
-
-            ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
-
-            ContextManager::SetInputLayout(m_FullQuadInputLayoutPtr);
-
             ContextManager::SetTopology(STopology::TriangleList);
 
             ContextManager::SetShaderVS(m_RectangleShaderVSPtr);
@@ -788,7 +762,7 @@ namespace
 
             ContextManager::SetTexture(0, m_DownSampleTextureSetPtrs[IndexOfDownSample]->GetTexture(0));
 
-            ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
+            ContextManager::Draw(3, 0);
 
             ContextManager::ResetTexture(0);
 
@@ -799,12 +773,6 @@ namespace
             ContextManager::ResetConstantBuffer(1);
 
             ContextManager::ResetTopology();
-
-            ContextManager::ResetInputLayout();
-
-            ContextManager::ResetIndexBuffer();
-
-            ContextManager::ResetVertexBuffer();
 
             ContextManager::ResetShaderVS();
 
@@ -907,13 +875,7 @@ namespace
         // Rendering
         // -----------------------------------------------------------------------------
         ContextManager::SetRenderContext(m_SwapContextPtrs[NextSwapBufferCount]);
-        
-        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
-        
-        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
-        
-        ContextManager::SetInputLayout(m_FullQuadInputLayoutPtr);
-        
+                
         ContextManager::SetTopology(STopology::TriangleList);
         
         ContextManager::SetShaderVS(m_RectangleShaderVSPtr);
@@ -932,7 +894,7 @@ namespace
         ContextManager::SetTexture(1, m_SwapTexturePtrs[CurrentSwapBufferCount]->GetTexture(1));
         ContextManager::SetTexture(2, m_BlurStageFinalTextureSetPtrs[pDataBloomFacet->GetSize() - 1]->GetTexture(0));
         
-        ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
+        ContextManager::Draw(3, 0);
         
         ContextManager::ResetTexture(0);
         ContextManager::ResetTexture(1);
@@ -947,13 +909,7 @@ namespace
         ContextManager::ResetConstantBuffer(1);
         
         ContextManager::ResetTopology();
-        
-        ContextManager::ResetInputLayout();
-        
-        ContextManager::ResetIndexBuffer();
-        
-        ContextManager::ResetVertexBuffer();
-        
+                
         ContextManager::ResetShaderVS();
         
         ContextManager::ResetShaderPS();
@@ -984,12 +940,6 @@ namespace
         // Rendering
         // -----------------------------------------------------------------------------
         ContextManager::SetRenderContext(m_SwapContextPtrs[NextSwapBufferCount]);
-
-        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
-        
-        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
-        
-        ContextManager::SetInputLayout(m_FullQuadInputLayoutPtr);
         
         ContextManager::SetTopology(STopology::TriangleList);
         
@@ -1003,7 +953,7 @@ namespace
 
         ContextManager::SetTexture(0, m_SwapTexturePtrs[CurrentSwapBufferCount]->GetTexture(0));
         
-        ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
+        ContextManager::Draw(3, 0);
         
         ContextManager::ResetTexture(0);
 
@@ -1012,12 +962,6 @@ namespace
         ContextManager::ResetConstantBuffer(0);
         
         ContextManager::ResetTopology();
-        
-        ContextManager::ResetInputLayout();
-        
-        ContextManager::ResetIndexBuffer();
-        
-        ContextManager::ResetVertexBuffer();
         
         ContextManager::ResetShaderVS();
         

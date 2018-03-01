@@ -112,12 +112,8 @@ namespace
 
     private:
 
-        CMeshPtr m_QuadModelPtr;
-        
         CBufferPtr  m_GaussianBlurPropertiesCSBufferPtr;
         CBufferPtr  m_SSAOPropertiesPSBufferPtr;
-        
-        CInputLayoutPtr m_QuadInputLayoutPtr;
 
         CShaderPtr m_FullquadShaderVSPtr;
         CShaderPtr m_SSAOShaderPSPtrs[NumberOfSSAOs];
@@ -149,10 +145,8 @@ namespace
 namespace
 {
     CGfxShadowRenderer::CGfxShadowRenderer()
-        : m_QuadModelPtr                     ()
-        , m_SSAOPropertiesPSBufferPtr        ()
+        : m_SSAOPropertiesPSBufferPtr        ()
         , m_GaussianBlurPropertiesCSBufferPtr()
-        , m_QuadInputLayoutPtr               ()
         , m_FullquadShaderVSPtr              ()
         , m_GaussianBlurShaderCSPtr          ()
         , m_BilateralBlurHTextureSetPtr      ()
@@ -203,12 +197,10 @@ namespace
     
     void CGfxShadowRenderer::OnExit()
     {
-        m_QuadModelPtr                      = 0;
         m_GaussianBlurPropertiesCSBufferPtr = 0;
         m_SSAOPropertiesPSBufferPtr         = 0;
-        m_QuadInputLayoutPtr                = 0;
         m_FullquadShaderVSPtr               = 0;
-        m_GaussianBlurShaderCSPtr          = 0;
+        m_GaussianBlurShaderCSPtr           = 0;
         m_BilateralBlurHTextureSetPtr       = 0;
         m_BilateralBlurVTextureSetPtr       = 0;
         m_HalfRenderbufferPtr               = 0;
@@ -227,21 +219,12 @@ namespace
     
     void CGfxShadowRenderer::OnSetupShader()
     {
-        m_FullquadShaderVSPtr = ShaderManager::CompileVS("vs_screen_p_quad.glsl", "main");
+        m_FullquadShaderVSPtr = ShaderManager::CompileVS("vs_fullscreen.glsl", "main");
 
         m_SSAOShaderPSPtrs[SSAO]      = ShaderManager::CompilePS("fs_ssao.glsl"      , "main");
         m_SSAOShaderPSPtrs[SSAOApply] = ShaderManager::CompilePS("fs_ssao_apply.glsl", "main");
 
         m_GaussianBlurShaderCSPtr = ShaderManager::CompileCS("cs_gaussian_blur.glsl", "main", "#define TILE_SIZE 8\n#define IMAGE_TYPE rgba8");
-        
-        // -----------------------------------------------------------------------------
-        
-        const SInputElementDescriptor QuadInputLayout[] =
-        {
-            { "POSITION", 0, CInputLayout::Float2Format, 0, 0, 8, CInputLayout::PerVertex, 0, },
-        };
-        
-        m_QuadInputLayoutPtr = ShaderManager::CreateInputLayout(QuadInputLayout, 1, m_FullquadShaderVSPtr);
     }
     
     // -----------------------------------------------------------------------------
@@ -477,7 +460,6 @@ namespace
     
     void CGfxShadowRenderer::OnSetupModels()
     {
-        m_QuadModelPtr = MeshManager::CreateRectangle(0.0f, 0.0f, 1.0f, 1.0f);
     }
     
     // -----------------------------------------------------------------------------
@@ -632,12 +614,6 @@ namespace
         
         ContextManager::SetRenderContext(m_HalfContextPtr);
 
-        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
-
-        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
-
-        ContextManager::SetInputLayout(m_QuadInputLayoutPtr);
-
         ContextManager::SetTopology(STopology::TriangleList);
 
         ContextManager::SetShaderVS(m_FullquadShaderVSPtr);
@@ -670,7 +646,7 @@ namespace
         ContextManager::SetTexture(2, TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget());
         ContextManager::SetTexture(3, m_NoiseTexturePtr);
 
-        ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
+        ContextManager::Draw(3, 0);
 
         ContextManager::ResetTexture(0);
         ContextManager::ResetTexture(1);
@@ -687,12 +663,6 @@ namespace
         ContextManager::ResetConstantBuffer(1);
 
         ContextManager::ResetTopology();
-
-        ContextManager::ResetInputLayout();
-
-        ContextManager::ResetIndexBuffer();
-
-        ContextManager::ResetVertexBuffer();
 
         ContextManager::ResetShaderVS();
 
@@ -763,13 +733,7 @@ namespace
         // Apply SSAO on deferred buffer
         // -----------------------------------------------------------------------------        
         ContextManager::SetRenderContext(m_DeferredRenderContextPtr);
-        
-        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
-        
-        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
-        
-        ContextManager::SetInputLayout(m_QuadInputLayoutPtr);
-        
+                
         ContextManager::SetTopology(STopology::TriangleList);
         
         ContextManager::SetShaderVS(m_FullquadShaderVSPtr);
@@ -788,7 +752,7 @@ namespace
         ContextManager::SetTexture(2, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(2));
         ContextManager::SetTexture(3, m_HalfTexturePtrs[0]->GetTexture(0));
         
-        ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
+        ContextManager::Draw(3, 0);
         
         ContextManager::ResetTexture(0);
         ContextManager::ResetTexture(1);
@@ -803,13 +767,7 @@ namespace
         ContextManager::ResetConstantBuffer(0);
         
         ContextManager::ResetTopology();
-        
-        ContextManager::ResetInputLayout();
-        
-        ContextManager::ResetIndexBuffer();
-        
-        ContextManager::ResetVertexBuffer();
-        
+
         ContextManager::ResetShaderVS();
         
         ContextManager::ResetShaderPS();

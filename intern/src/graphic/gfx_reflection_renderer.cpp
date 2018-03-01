@@ -136,8 +136,6 @@ namespace
         
     private:
         
-        CMeshPtr          m_QuadModelPtr;
-
         CBufferPtr        m_ProbePropertiesBufferPtr;
         
         CBufferPtr        m_ImageLightBufferPtr;
@@ -145,8 +143,6 @@ namespace
         CBufferPtr        m_SSRLightBufferPtr;
                           
         CBufferPtr        m_HCBBufferPtr;
-        
-        CInputLayoutPtr   m_QuadInputLayoutPtr;
         
         CShaderPtr        m_RectangleShaderVSPtr;
         
@@ -188,12 +184,10 @@ namespace
 namespace
 {
     CGfxReflectionRenderer::CGfxReflectionRenderer()
-        : m_QuadModelPtr                     ()
-        , m_ProbePropertiesBufferPtr         ()
+        : m_ProbePropertiesBufferPtr         ()
         , m_ImageLightBufferPtr              ()
         , m_SSRLightBufferPtr                ()
         , m_HCBBufferPtr                     ()
-        , m_QuadInputLayoutPtr               ()
         , m_RectangleShaderVSPtr             ()
         , m_ImageLightShaderPSPtr            ()
         , m_SSRShaderPSPtr                   ()
@@ -231,12 +225,10 @@ namespace
     
     void CGfxReflectionRenderer::OnExit()
     {
-        m_QuadModelPtr                      = 0;
         m_ProbePropertiesBufferPtr          = 0;
         m_ImageLightBufferPtr               = 0;
         m_SSRLightBufferPtr                 = 0;
         m_HCBBufferPtr                      = 0;
-        m_QuadInputLayoutPtr                = 0;
         m_RectangleShaderVSPtr              = 0;
         m_ImageLightShaderPSPtr             = 0;
         m_SSRShaderPSPtr                    = 0;
@@ -266,7 +258,7 @@ namespace
     
     void CGfxReflectionRenderer::OnSetupShader()
     {
-        m_RectangleShaderVSPtr  = ShaderManager::CompileVS("vs_screen_p_quad.glsl", "main");
+        m_RectangleShaderVSPtr  = ShaderManager::CompileVS("vs_fullscreen.glsl", "main");
         
         m_ImageLightShaderPSPtr = ShaderManager::CompilePS("fs_light_imagelight.glsl" , "main");
 
@@ -275,15 +267,6 @@ namespace
         m_BRDFShaderPtr         = ShaderManager::CompileCS("cs_brdf.glsl", "main");
 
         m_HCBShaderPSPtr        = ShaderManager::CompilePS("fs_hcb_generation.glsl", "main");
-        
-        // -----------------------------------------------------------------------------
-        
-        const SInputElementDescriptor QuadInputLayout[] =
-        {
-            { "POSITION", 0, CInputLayout::Float2Format, 0, 0, 8, CInputLayout::PerVertex, 0, },
-        };
-        
-        m_QuadInputLayoutPtr = ShaderManager::CreateInputLayout(QuadInputLayout, 1, m_RectangleShaderVSPtr);
     }
     
     // -----------------------------------------------------------------------------
@@ -508,7 +491,6 @@ namespace
     
     void CGfxReflectionRenderer::OnSetupModels()
     {
-        m_QuadModelPtr = MeshManager::CreateRectangle(0.0f, 0.0f, 1.0f, 1.0f);
     }
     
     // -----------------------------------------------------------------------------
@@ -753,12 +735,6 @@ namespace
         
         ContextManager::SetShaderPS(m_ImageLightShaderPSPtr);
         
-        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
-        
-        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
-        
-        ContextManager::SetInputLayout(m_QuadInputLayoutPtr);
-
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
         ContextManager::SetConstantBuffer(1, m_ImageLightBufferPtr);
 
@@ -781,7 +757,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Draw
         // -----------------------------------------------------------------------------
-        ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
+        ContextManager::Draw(3, 0);
 
         // -----------------------------------------------------------------------------
         // Reset
@@ -806,18 +782,12 @@ namespace
         ContextManager::ResetSampler(7);
         ContextManager::ResetSampler(8);
         
-        ContextManager::ResetInputLayout();
-        
         ContextManager::ResetResourceBuffer(0);
         ContextManager::ResetResourceBuffer(1);
         
         ContextManager::ResetConstantBuffer(0);
         ContextManager::ResetConstantBuffer(1);
-        
-        ContextManager::ResetIndexBuffer();
-        
-        ContextManager::ResetVertexBuffer();
-        
+                
         ContextManager::ResetShaderVS();
         
         ContextManager::ResetShaderPS();
@@ -837,8 +807,6 @@ namespace
 
         Performance::BeginEvent("HCB");
 
-        
-
         ContextManager::SetBlendState(StateManager::GetBlendState(0));
 
         ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::NoDepth));
@@ -850,12 +818,6 @@ namespace
         ContextManager::SetShaderVS(m_RectangleShaderVSPtr);
 
         ContextManager::SetShaderPS(m_HCBShaderPSPtr);
-
-        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
-
-        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
-
-        ContextManager::SetInputLayout(m_QuadInputLayoutPtr);
 
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
 
@@ -886,22 +848,16 @@ namespace
 
             ContextManager::SetViewPortSet(m_HCBViewPortSetPtrs[IndexOfMipmap]);
 
-            ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
+            ContextManager::Draw(3, 0);
         }
 
         ContextManager::ResetTexture(0);
 
         ContextManager::ResetSampler(0);
 
-        ContextManager::ResetInputLayout();
-
         ContextManager::ResetConstantBuffer(0);
 
         ContextManager::ResetConstantBuffer(1);
-
-        ContextManager::ResetIndexBuffer();
-
-        ContextManager::ResetVertexBuffer();
 
         ContextManager::ResetShaderVS();
 
@@ -964,12 +920,6 @@ namespace
 
         ContextManager::SetShaderPS(m_SSRShaderPSPtr);
 
-        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
-
-        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
-
-        ContextManager::SetInputLayout(m_QuadInputLayoutPtr);
-
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
 
         ContextManager::SetConstantBuffer(1, m_SSRLightBufferPtr);
@@ -991,7 +941,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Draw
         // -----------------------------------------------------------------------------
-        ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
+        ContextManager::Draw(3, 0);
 
         // -----------------------------------------------------------------------------
         // Reset
@@ -1014,17 +964,11 @@ namespace
 
         ContextManager::ResetConstantBuffer(1);
 
-        ContextManager::ResetIndexBuffer();
-
-        ContextManager::ResetVertexBuffer();
-
         ContextManager::ResetShaderVS();
 
         ContextManager::ResetShaderPS();
 
         ContextManager::ResetTopology();
-
-        ContextManager::ResetInputLayout();
 
         ContextManager::ResetRenderContext();
 

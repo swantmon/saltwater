@@ -126,8 +126,7 @@ namespace
     private:
         
         CMeshPtr          m_ParticleModelPtr;
-        CMeshPtr          m_QuadModelPtr;
-        
+
         CBufferSetPtr     m_LiquidVSBufferPtr;
         CBufferSetPtr     m_LiquidPSBufferPtr;
         CBufferSetPtr     m_BilateralPSBufferPtr;
@@ -141,7 +140,6 @@ namespace
         CTargetSetPtr     m_LiquidTargetSetPtrs[3];
         CTextureSetPtr    m_TextureSetPtrs[4];
         
-        CInputLayoutPtr   m_QuadInputLayouPtr;
         CInputLayoutPtr   m_ParticleInputLayouPtr;
         
         CParticleEntities m_Particles;
@@ -158,7 +156,6 @@ namespace
 {
     CGfxParticleRenderer::CGfxParticleRenderer()
         : m_ParticleModelPtr            ()
-        , m_QuadModelPtr                ()
         , m_LiquidVSBufferPtr           ()
         , m_LiquidPSBufferPtr           ()
         , m_BilateralPSBufferPtr        ()
@@ -170,7 +167,6 @@ namespace
         , m_LiquidShaderPSPtrs          ()
         , m_LiquidTargetSetPtrs         ()
         , m_TextureSetPtrs              ()
-        , m_QuadInputLayouPtr           ()
         , m_ParticleInputLayouPtr       ()
         , m_Particles                   ()
         , m_Time                        (0.0f)
@@ -196,7 +192,6 @@ namespace
     void CGfxParticleRenderer::OnExit()
     {
         m_ParticleModelPtr             = 0;
-        m_QuadModelPtr                 = 0;
         m_LiquidVSBufferPtr            = 0;
         m_LiquidPSBufferPtr            = 0;
         m_BilateralPSBufferPtr         = 0;
@@ -204,7 +199,6 @@ namespace
         m_ShadingPSBufferPtr           = 0;
         m_ParticleInstanceBufferPtr    = 0;
         m_ParticleInstanceBufferSetPtr = 0;
-        m_QuadInputLayouPtr            = 0;
         m_ParticleInputLayouPtr        = 0;
         
         m_LiquidContextPtrs[0] = 0;
@@ -253,7 +247,7 @@ namespace
         
         // -----------------------------------------------------------------------------
         
-        ShaderVSPtr = ShaderManager::CompileVS("vs_screen_p_quad.glsl", "main");
+        ShaderVSPtr = ShaderManager::CompileVS("vs_fullscreen.glsl", "main");
         
         ShaderPSPtr = ShaderManager::CompilePS("fs_bilateral_blur.glsl", "main");
         
@@ -275,19 +269,12 @@ namespace
         m_LiquidShaderPSPtrs[Shading] = ShaderPSPtr;
         
         // -----------------------------------------------------------------------------
-        
-        const SInputElementDescriptor PositionInputLayout[] =
-        {
-            { "POSITION", 0, CInputLayout::Float2Format, 0, 0, 8, CInputLayout::PerVertex, 0, },
-        };
-        
+               
         const SInputElementDescriptor PositionOffsetInputLayout[] =
         {
             { "POSITION", 0, CInputLayout::Float2Format, 0, 0,  8, CInputLayout::PerVertex  , 0, },
             { "OFFSET"  , 0, CInputLayout::Float3Format, 1, 0, 12, CInputLayout::PerInstance, 1, },
         };
-        
-        m_QuadInputLayouPtr = ShaderManager::CreateInputLayout(PositionInputLayout, 1, m_LiquidShaderVSPtrs[BilateralBlur]);
         
         m_ParticleInputLayouPtr = ShaderManager::CreateInputLayout(PositionOffsetInputLayout, 2, m_LiquidShaderVSPtrs[Depth]);
     }
@@ -557,8 +544,6 @@ namespace
     void CGfxParticleRenderer::OnSetupModels()
     {
         m_ParticleModelPtr = MeshManager::CreateRectangle(-0.5f, -0.5f, 1.0f, 1.0f);
-        
-        m_QuadModelPtr     = MeshManager::CreateRectangle(0.0f, 0.0f, 1.0f, 1.0f);
     }
     
     // -----------------------------------------------------------------------------
@@ -786,12 +771,6 @@ namespace
 
         ContextManager::SetRenderContext(m_LiquidContextPtrs[2]);
 
-        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
-
-        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
-
-        ContextManager::SetInputLayout(m_QuadInputLayouPtr);
-
         ContextManager::SetTopology(STopology::TriangleList);
 
         ContextManager::SetShaderVS(m_LiquidShaderVSPtrs[BilateralBlur]);
@@ -810,7 +789,7 @@ namespace
 
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
-        ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
+        ContextManager::Draw(3, 0);
 
         ContextManager::ResetSampler(0);
 
@@ -821,12 +800,6 @@ namespace
 
         ContextManager::ResetTopology();
 
-        ContextManager::ResetInputLayout();
-
-        ContextManager::ResetIndexBuffer();
-
-        ContextManager::ResetVertexBuffer();
-
         ContextManager::ResetShaderVS();
 
         ContextManager::ResetShaderPS();
@@ -836,12 +809,6 @@ namespace
         // -----------------------------------------------------------------------------
 
         ContextManager::SetRenderContext(m_LiquidContextPtrs[3]);
-
-        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
-
-        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
-
-        ContextManager::SetInputLayout(m_QuadInputLayouPtr);
 
         ContextManager::SetTopology(STopology::TriangleList);
 
@@ -861,7 +828,7 @@ namespace
 
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
-        ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
+        ContextManager::Draw(3, 0);
 
         ContextManager::ResetTexture(0);
 
@@ -871,12 +838,6 @@ namespace
         ContextManager::ResetConstantBuffer(1);
 
         ContextManager::ResetTopology();
-
-        ContextManager::ResetInputLayout();
-
-        ContextManager::ResetIndexBuffer();
-
-        ContextManager::ResetVertexBuffer();
 
         ContextManager::ResetShaderVS();
 
@@ -899,12 +860,6 @@ namespace
 
         ContextManager::SetRenderContext(m_LiquidContextPtrs[2]);
 
-        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
-
-        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
-
-        ContextManager::SetInputLayout(m_QuadInputLayouPtr);
-
         ContextManager::SetTopology(STopology::TriangleList);
 
         ContextManager::SetShaderVS(m_LiquidShaderVSPtrs[GaussianBlur]);
@@ -923,7 +878,7 @@ namespace
 
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
-        ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
+        ContextManager::Draw(3, 0);
 
         ContextManager::ResetTexture(0);
 
@@ -934,12 +889,6 @@ namespace
 
         ContextManager::ResetTopology();
 
-        ContextManager::ResetInputLayout();
-
-        ContextManager::ResetIndexBuffer();
-
-        ContextManager::ResetVertexBuffer();
-
         ContextManager::ResetShaderVS();
 
         ContextManager::ResetShaderPS();
@@ -949,12 +898,6 @@ namespace
         // -----------------------------------------------------------------------------
 
         ContextManager::SetRenderContext(m_LiquidContextPtrs[4]);
-
-        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
-
-        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
-
-        ContextManager::SetInputLayout(m_QuadInputLayouPtr);
 
         ContextManager::SetTopology(STopology::TriangleList);
 
@@ -974,7 +917,7 @@ namespace
 
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
-        ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
+        ContextManager::Draw(3, 0);
 
         ContextManager::ResetTexture(0);
 
@@ -984,12 +927,6 @@ namespace
         ContextManager::ResetConstantBuffer(1);
 
         ContextManager::ResetTopology();
-
-        ContextManager::ResetInputLayout();
-
-        ContextManager::ResetIndexBuffer();
-
-        ContextManager::ResetVertexBuffer();
 
         ContextManager::ResetShaderVS();
 
@@ -1013,12 +950,6 @@ namespace
 
         ContextManager::SetRenderContext(m_LiquidContextPtrs[5]);
 
-        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
-
-        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
-
-        ContextManager::SetInputLayout(m_QuadInputLayouPtr);
-
         ContextManager::SetTopology(STopology::TriangleList);
 
         ContextManager::SetShaderVS(m_LiquidShaderVSPtrs[Shading]);
@@ -1036,7 +967,7 @@ namespace
         ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
         ContextManager::SetSampler(2, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
-        ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
+        ContextManager::Draw(3, 0);
 
         ContextManager::ResetSampler(0);
         ContextManager::ResetSampler(1);
@@ -1050,12 +981,6 @@ namespace
         ContextManager::ResetConstantBuffer(1);
 
         ContextManager::ResetTopology();
-
-        ContextManager::ResetInputLayout();
-
-        ContextManager::ResetIndexBuffer();
-
-        ContextManager::ResetVertexBuffer();
 
         ContextManager::ResetShaderVS();
 

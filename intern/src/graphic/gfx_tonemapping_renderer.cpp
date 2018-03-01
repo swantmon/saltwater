@@ -77,11 +77,7 @@ namespace
         
         SConstantBufferPS      m_ConstantBufferPS;
 
-        CMeshPtr               m_QuadModelPtr;
-       
         CBufferPtr             m_TonemapBufferPtr;
-        
-        CInputLayoutPtr        m_QuadInputLayoutPtr;
         
         CShaderPtr             m_FullquadShaderVSPtr;
         
@@ -97,9 +93,7 @@ namespace
 {
     CGfxShadingRenderer::CGfxShadingRenderer()
         : m_ConstantBufferPS      ()
-        , m_QuadModelPtr          ()
         , m_TonemapBufferPtr      ()
-        , m_QuadInputLayoutPtr    ()
         , m_FullquadShaderVSPtr   ()
         , m_ShadingPSPtr          ()
         , m_ColorGradingSettings  ()
@@ -124,9 +118,7 @@ namespace
     
     void CGfxShadingRenderer::OnExit()
     {
-        m_QuadModelPtr           = 0;
         m_TonemapBufferPtr       = 0;
-        m_QuadInputLayoutPtr     = 0;
         m_FullquadShaderVSPtr    = 0;
         m_ShadingPSPtr           = 0;
         m_ShadingContextPtr      = 0;
@@ -136,18 +128,9 @@ namespace
     
     void CGfxShadingRenderer::OnSetupShader()
     {
-        m_FullquadShaderVSPtr   = ShaderManager::CompileVS("vs_screen_p_quad.glsl" , "main");
+        m_FullquadShaderVSPtr   = ShaderManager::CompileVS("vs_fullscreen.glsl" , "main");
 
         m_ShadingPSPtr          = ShaderManager::CompilePS("fs_tone_mapping.glsl", "main");
-
-        // -----------------------------------------------------------------------------
-        
-        const SInputElementDescriptor QuadInputLayout[] =
-        {
-            { "POSITION", 0, CInputLayout::Float2Format, 0, 0, 8, CInputLayout::PerVertex, 0, },
-        };
-        
-        m_QuadInputLayoutPtr       = ShaderManager::CreateInputLayout(QuadInputLayout, 1, m_FullquadShaderVSPtr);
     }
     
     // -----------------------------------------------------------------------------
@@ -224,7 +207,6 @@ namespace
     
     void CGfxShadingRenderer::OnSetupModels()
     {
-        m_QuadModelPtr = MeshManager::CreateRectangle(0.0f, 0.0f, 1.0f, 1.0f);
     }
     
     // -----------------------------------------------------------------------------
@@ -290,12 +272,6 @@ namespace
 
         ContextManager::SetRenderContext(m_ShadingContextPtr);
 
-        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
-
-        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
-
-        ContextManager::SetInputLayout(m_QuadInputLayoutPtr);
-
         ContextManager::SetTopology(STopology::TriangleList);
 
         ContextManager::SetShaderVS(m_FullquadShaderVSPtr);
@@ -309,7 +285,7 @@ namespace
 
         ContextManager::SetTexture(0, TargetSetManager::GetLightAccumulationTargetSet()->GetRenderTarget(0));
 
-        ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
+        ContextManager::Draw(3, 0);
 
         ContextManager::ResetTexture(0);
 
@@ -319,12 +295,6 @@ namespace
         ContextManager::ResetConstantBuffer(1);
 
         ContextManager::ResetTopology();
-
-        ContextManager::ResetInputLayout();
-
-        ContextManager::ResetIndexBuffer();
-
-        ContextManager::ResetVertexBuffer();
 
         ContextManager::ResetSampler(0);
 

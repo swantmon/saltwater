@@ -120,16 +120,14 @@ namespace
         
     private:
         
-        CMeshPtr          m_QuadModelPtr;
         CBufferSetPtr     m_VolumeLightingCSBufferSetPtr;
-        CInputLayoutPtr   m_P2InputLayoutPtr;
         CShaderPtr        m_RectangleShaderVSPtr;
         CShaderPtr        m_ESMCSPtr;
         CShaderPtr        m_VolumeLightingCSPtr;
         CShaderPtr        m_VolumeScatteringCSPtr;
         CShaderPtr        m_ApplyPSPtr;
         CRenderContextPtr m_LightRenderContextPtr;
-        CTexturePtr     m_ESMTexturePtr;
+        CTexturePtr       m_ESMTexturePtr;
         CTextureSetPtr    m_ESMTextureSetPtr;
 
         CTexturePtr     m_VolumeTexturePtr;
@@ -163,9 +161,7 @@ namespace
 namespace
 {
     CGfxFogRenderer::CGfxFogRenderer()
-        : m_QuadModelPtr                        ()
-        , m_VolumeLightingCSBufferSetPtr        ()
-        , m_P2InputLayoutPtr                    ()
+        : m_VolumeLightingCSBufferSetPtr        ()
         , m_RectangleShaderVSPtr                ()
         , m_ESMCSPtr                            ()
         , m_VolumeLightingCSPtr                 ()
@@ -206,9 +202,7 @@ namespace
     
     void CGfxFogRenderer::OnExit()
     {
-        m_QuadModelPtr                  = 0;
         m_VolumeLightingCSBufferSetPtr  = 0;
-        m_P2InputLayoutPtr              = 0;
         m_RectangleShaderVSPtr          = 0;
         m_ESMCSPtr                      = 0;
         m_VolumeLightingCSPtr           = 0;
@@ -237,21 +231,12 @@ namespace
     
     void CGfxFogRenderer::OnSetupShader()
     {       
-        m_RectangleShaderVSPtr  = ShaderManager::CompileVS("vs_screen_p_quad.glsl", "main");
+        m_RectangleShaderVSPtr  = ShaderManager::CompileVS("vs_fullscreen.glsl", "main");
         m_ESMCSPtr              = ShaderManager::CompileCS("cs_esm.glsl", "main");  
         m_VolumeLightingCSPtr   = ShaderManager::CompileCS("cs_volume_lighting.glsl", "main");
         m_VolumeScatteringCSPtr = ShaderManager::CompileCS("cs_volume_scattering.glsl", "main");  
         m_ApplyPSPtr            = ShaderManager::CompilePS("fs_fog_apply.glsl", "main");  
         m_GaussianBlurShaderPtr = ShaderManager::CompileCS("cs_gaussian_blur.glsl", "main", "#define TILE_SIZE 8\n#define IMAGE_TYPE r32f");
-        
-        // -----------------------------------------------------------------------------
-        
-        const SInputElementDescriptor QuadInputLayout[] =
-        {
-            { "POSITION", 0, CInputLayout::Float2Format, 0, 0, 8, CInputLayout::PerVertex, 0, },
-        };
-        
-        m_P2InputLayoutPtr = ShaderManager::CreateInputLayout(QuadInputLayout, 1, m_RectangleShaderVSPtr);
     }
     
     // -----------------------------------------------------------------------------
@@ -540,7 +525,6 @@ namespace
     
     void CGfxFogRenderer::OnSetupModels()
     {
-        m_QuadModelPtr = MeshManager::CreateRectangle(0.0f, 0.0f, 1.0f, 1.0f);
     }
     
     // -----------------------------------------------------------------------------
@@ -849,12 +833,6 @@ namespace
 
         ContextManager::SetRenderContext(m_LightRenderContextPtr);
 
-        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
-
-        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
-
-        ContextManager::SetInputLayout(m_P2InputLayoutPtr);
-
         ContextManager::SetTopology(STopology::TriangleList);
 
         ContextManager::SetShaderVS(m_RectangleShaderVSPtr);
@@ -873,7 +851,7 @@ namespace
         ContextManager::SetTexture(1, TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget());
         ContextManager::SetTexture(2, static_cast<CTexturePtr>(m_ScatteringTexturePtr));
 
-        ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
+        ContextManager::Draw(3, 0);
 
         ContextManager::ResetTexture(0);
         ContextManager::ResetTexture(1);
@@ -888,12 +866,6 @@ namespace
         ContextManager::ResetConstantBuffer(1);
 
         ContextManager::ResetTopology();
-
-        ContextManager::ResetInputLayout();
-
-        ContextManager::ResetIndexBuffer();
-
-        ContextManager::ResetVertexBuffer();
 
         ContextManager::ResetShaderVS();
 

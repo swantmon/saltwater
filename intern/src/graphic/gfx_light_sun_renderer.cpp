@@ -88,9 +88,7 @@ namespace
         
     private:
         
-        CMeshPtr          m_QuadModelPtr;
         CBufferPtr        m_SunLightPSBufferPtr;
-        CInputLayoutPtr   m_P2InputLayoutPtr;
         CShaderPtr        m_RectangleShaderVSPtr;
         CShaderPtr        m_SunLightShaderPSPtr;
         CRenderContextPtr m_LightRenderContextPtr;
@@ -105,9 +103,7 @@ namespace
 namespace
 {
     CGfxLightSunRenderer::CGfxLightSunRenderer()
-        : m_QuadModelPtr           ()
-        , m_SunLightPSBufferPtr    ()
-        , m_P2InputLayoutPtr       ()
+        : m_SunLightPSBufferPtr    ()
         , m_SunLightShaderPSPtr    ()
         , m_RectangleShaderVSPtr   ()
         , m_LightRenderContextPtr  ()
@@ -133,9 +129,7 @@ namespace
     
     void CGfxLightSunRenderer::OnExit()
     {
-        m_QuadModelPtr          = 0;
         m_SunLightPSBufferPtr   = 0;
-        m_P2InputLayoutPtr      = 0;
         m_SunLightShaderPSPtr   = 0;
         m_RectangleShaderVSPtr  = 0;
         m_LightRenderContextPtr = 0;
@@ -145,18 +139,9 @@ namespace
     
     void CGfxLightSunRenderer::OnSetupShader()
     {       
-        m_RectangleShaderVSPtr = ShaderManager::CompileVS("vs_screen_p_quad.glsl", "main");
+        m_RectangleShaderVSPtr = ShaderManager::CompileVS("vs_fullscreen.glsl", "main");
         
         m_SunLightShaderPSPtr  = ShaderManager::CompilePS("fs_light_sunlight.glsl", "main");
-        
-        // -----------------------------------------------------------------------------
-        
-        const SInputElementDescriptor QuadInputLayout[] =
-        {
-            { "POSITION", 0, CInputLayout::Float2Format, 0, 0, 8, CInputLayout::PerVertex, 0, },
-        };
-        
-        m_P2InputLayoutPtr = ShaderManager::CreateInputLayout(QuadInputLayout, 1, m_RectangleShaderVSPtr);
     }
     
     // -----------------------------------------------------------------------------
@@ -226,7 +211,6 @@ namespace
     
     void CGfxLightSunRenderer::OnSetupModels()
     {
-        m_QuadModelPtr = MeshManager::CreateRectangle(0.0f, 0.0f, 1.0f, 1.0f);
     }
     
     // -----------------------------------------------------------------------------
@@ -277,12 +261,6 @@ namespace
         
 
         ContextManager::SetRenderContext(m_LightRenderContextPtr);
-
-        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
-
-        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
-
-        ContextManager::SetInputLayout(m_P2InputLayoutPtr);
 
         ContextManager::SetTopology(STopology::TriangleList);
 
@@ -338,7 +316,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Draw
             // -----------------------------------------------------------------------------
-            ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
+            ContextManager::Draw(3, 0);
         }
 
         // -----------------------------------------------------------------------------
@@ -362,12 +340,6 @@ namespace
         ContextManager::ResetSampler(4);
 
         ContextManager::ResetTopology();
-
-        ContextManager::ResetInputLayout();
-
-        ContextManager::ResetIndexBuffer();
-
-        ContextManager::ResetVertexBuffer();
 
         ContextManager::ResetShaderVS();
 

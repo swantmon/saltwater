@@ -100,8 +100,6 @@ namespace
 
     private:
 
-        CMeshPtr m_QuadModelPtr;
-
         CInputLayoutPtr m_FullQuadInputLayoutPtr;
 
         CBufferPtr m_ModelBufferPtr;
@@ -134,8 +132,7 @@ namespace
 namespace
 {
     CGfxARRenderer::CGfxARRenderer()
-        : m_QuadModelPtr                    ()
-        , m_FullQuadInputLayoutPtr          ()
+        : m_FullQuadInputLayoutPtr          ()
         , m_ModelBufferPtr                  ()
         , m_MaterialPSBufferPtr             ()
         , m_BilateralBlurCSBufferPtr        ()
@@ -176,7 +173,6 @@ namespace
 
     void CGfxARRenderer::OnExit()
     {
-        m_QuadModelPtr                     = 0;
         m_FullQuadInputLayoutPtr           = 0;
         m_ModelBufferPtr                   = 0;
         m_MaterialPSBufferPtr              = 0;
@@ -213,7 +209,7 @@ namespace
 
     void CGfxARRenderer::OnSetupShader()
     {
-        m_RectangleShaderVSPtr = ShaderManager::CompileVS("vs_screen_p_quad.glsl", "main");
+        m_RectangleShaderVSPtr = ShaderManager::CompileVS("vs_fullscreen.glsl", "main");
 
         m_BilateralBlurShaderCSPtr = ShaderManager::CompileCS("cs_bilateral_blur.glsl", "main");
 
@@ -373,7 +369,6 @@ namespace
 
     void CGfxARRenderer::OnSetupModels()
     {
-        m_QuadModelPtr = MeshManager::CreateRectangle(0.0f, 0.0f, 1.0f, 1.0f);
     }
 
     // -----------------------------------------------------------------------------
