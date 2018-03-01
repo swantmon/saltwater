@@ -777,7 +777,7 @@ namespace
             glm::decompose(PoseMatrix, Scale, Rotation, Position, Skew, Perspective);
 
             glm::mat4 RotationMatrix = glm::toMat4(Rotation);
-            RotationMatrix = glm::rotate(RotationMatrix, 3.14f, glm::vec3(1.0f, 0.0f, 0.0f));
+            RotationMatrix = glm::rotate(RotationMatrix, -3.14f / 2.0f, glm::vec3(1.0f, 0.0f, 0.0f));
             
             rControl.SetPosition(Position);
             rControl.SetRotation(RotationMatrix);

@@ -28,7 +28,20 @@ layout(location = 2) out vec4 out_GBuffer2;
 
 void main()
 {
-    vec3 RayDirection = normalize(in_WSRayDirection);
+    mat3 Rot = mat3(
+        1.0f, 0.0f,  0.0f,
+        0.0f, 0.0f, -1.0f,
+        0.0f, 1.0f,  0.0f
+    );
+
+    mat3 Rot2 = mat3(
+        1.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 1.0f,
+        0.0f, -1.0f, 0.0f
+    );
+
+    vec3 Cameraposition = Rot * g_ViewPosition.xyz;
+    vec3 RayDirection = Rot * normalize(in_WSRayDirection);
 
     RayDirection.x = RayDirection.x == 0.0f ? 1e-15f : RayDirection.x;
     RayDirection.y = RayDirection.y == 0.0f ? 1e-15f : RayDirection.y;
@@ -38,15 +51,14 @@ void main()
 
 #ifdef CAPTURE_COLOR
 
-    GetPositionAndColor(g_ViewPosition.xyz, RayDirection, WSPosition, Color);
+    GetPositionAndColor(Cameraposition, RayDirection, WSPosition, Color);
 
 #else
 
-    WSPosition = GetPosition(g_ViewPosition.xyz, RayDirection);
+    WSPosition = GetPosition(Cameraposition, RayDirection);
     Color = g_Color.rgb;
 
 #endif
-
 
     if (WSPosition.x != 0.0f && (Color.r != 0.0f || Color.g != 0.0f || Color.b != 0.0f))
     {
@@ -63,7 +75,7 @@ void main()
         out_GBuffer1 = GBuffer.m_Color1;
         out_GBuffer2 = GBuffer.m_Color2;
 
-        vec4 CSPosition = g_WorldToScreen * vec4(WSPosition, 1.0f);
+        vec4 CSPosition = g_WorldToScreen * vec4(Rot2 * WSPosition, 1.0f);
         gl_FragDepth = (CSPosition.z / CSPosition.w) * 0.5f + 0.5f;
 
         return;
