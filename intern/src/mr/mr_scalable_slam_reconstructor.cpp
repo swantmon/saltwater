@@ -1418,7 +1418,7 @@ namespace MR
         // Tracking
         //////////////////////////////////////////////////////////////////////////////////////
 
-        if (m_IntegratedFrameCount > 0)
+        if (m_IntegratedFrameCount > m_MinWeight)
         {
             Performance::BeginEvent("Tracking");
 
@@ -1535,6 +1535,11 @@ namespace MR
         ContextManager::ResetTexture(0);
 
         Performance::EndEvent();
+
+        if (m_IntegratedFrameCount == m_MinWeight)
+        {
+            ClearMarkerStatistics();
+        }
     }
 
     // -----------------------------------------------------------------------------
