@@ -781,7 +781,8 @@ namespace
             
             rControl.SetPosition(Position);
             rControl.SetRotation(RotationMatrix);
-        }        
+        }
+        glEnable(GL_PROGRAM_POINT_SIZE);
     }
     
     // -----------------------------------------------------------------------------
