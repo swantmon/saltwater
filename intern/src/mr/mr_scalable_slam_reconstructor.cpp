@@ -1880,7 +1880,7 @@ namespace MR
 
     Gfx::CTexturePtr CScalableSLAMReconstructor::GetVertexMap()
     {
-        return m_RaycastVertexMapPtr[0];
+        return m_RawVertexMapPtr;
     }
 
     // -----------------------------------------------------------------------------
