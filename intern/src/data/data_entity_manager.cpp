@@ -271,7 +271,7 @@ namespace
             // -----------------------------------------------------------------------------
             if (pMesh->mMaterialIndex < pScene->mNumMaterials)
             {
-                auto MaterialDescriptor = Core::MaterialImporter::CreateDescriptionFromAssimpFile(PathToModel, pMesh->mMaterialIndex);
+                auto MaterialDescriptor = Core::MaterialImporter::CreateDescriptionFromAssimp(PathToModel, pMesh->mMaterialIndex);
 
                 auto pMaterialComponent = Dt::MaterialHelper::CreateMaterial(MaterialDescriptor);
 

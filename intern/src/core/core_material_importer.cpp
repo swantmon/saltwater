@@ -228,7 +228,7 @@ namespace MaterialImporter
 
     // -----------------------------------------------------------------------------
 
-    SMaterialDescriptor CreateDescriptionFromAssimpFile(const std::string& _rPathToFile, int _MaterialIndex)
+    SMaterialDescriptor CreateDescriptionFromAssimp(const std::string& _rPathToFile, int _MaterialIndex)
     {
         return CCoreMaterialImporter::GetInstance().CreateDescriptionFromAssimpFile(_rPathToFile, _MaterialIndex);
     }

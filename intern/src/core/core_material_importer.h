@@ -34,6 +34,6 @@ namespace MaterialImporter
 {
     SMaterialDescriptor CreateDescriptionFromXML(const std::string& _rPathToFile);
 
-    SMaterialDescriptor CreateDescriptionFromAssimpFile(const std::string& _rPathToFile, int _MaterialIndex = 0);
+    SMaterialDescriptor CreateDescriptionFromAssimp(const std::string& _rPathToFile, int _MaterialIndex = 0);
 } // namespace MaterialImporter
 } // namespace Core
