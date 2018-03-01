@@ -4,7 +4,7 @@ apply plugin: 'com.android.application'
 The arcore aar library contains the native shared libraries.  These are
 extracted before building to a temporary directory.
  */
-def arcore_libpath = "${buildDir}/arcore-native"
+def external_libs = "${buildDir}/external_libs"
 
 // Create a configuration to mark which aars to extract .so files from
 configurations { natives }
@@ -20,7 +20,7 @@ android {
         externalNativeBuild {
             cmake {
                 cppFlags "-std=c++14", "-frtti", "-fexceptions"
-                arguments "-DANDROID_STL=c++_static", "-DARCORE_LIBPATH=${arcore_libpath}/jni"
+                arguments "-DANDROID_STL=c++_static", "-DEXTERNAL_LIBPATH=${external_libs}/jni"
             }
         }
         ndk {
@@ -63,7 +63,7 @@ task extractNativeLibraries() {
         configurations.natives.files.each { f ->
             copy {
                 from zipTree(f)
-                into arcore_libpath
+                into external_libs
                 include "jni/**/*"
             }
         }

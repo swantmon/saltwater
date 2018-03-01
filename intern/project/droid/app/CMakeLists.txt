@@ -5,7 +5,8 @@ cmake_minimum_required(VERSION 3.6.0)
 # Import ARCore
 # ---------------------------------------
 add_library(arcore SHARED IMPORTED)
-set_target_properties(arcore PROPERTIES IMPORTED_LOCATION ${ARCORE_LIBPATH}/${ANDROID_ABI}/libarcore_sdk.so)
+
+set_target_properties(arcore PROPERTIES IMPORTED_LOCATION ${EXTERNAL_LIBPATH}/${ANDROID_ABI}/libarcore_sdk.so)
 
 # ---------------------------------------
 # Native App GLUE
