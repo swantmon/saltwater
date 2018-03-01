@@ -127,7 +127,11 @@ namespace
         // -----------------------------------------------------------------------------
         Assimp::Importer* pImporter;
 
+#if  PLATFORM_ANDROID
+        pImporter = new Assimp::Importer();
+#else
         pImporter = Base::CMemory::NewObject<Assimp::Importer>();
+#endif
 
         int GeneratorFlag = ConvertGenerationFlags(_GeneratorFlag);
 
@@ -181,7 +185,11 @@ namespace
         // -----------------------------------------------------------------------------
         tinyxml2::XMLDocument* pMaterialFile;
 
+#if  PLATFORM_ANDROID
+        pMaterialFile = new tinyxml2::XMLDocument();
+#else
         pMaterialFile = Base::CMemory::NewObject<tinyxml2::XMLDocument>();
+#endif
 
         int Error = pMaterialFile->LoadFile(_rFile.c_str());
 
@@ -249,7 +257,11 @@ namespace
         // -----------------------------------------------------------------------------
         if (rInfo.m_AllocateCount == 0)
         {
+#if PLATFORM_ANDROID
+            delete rInfo.m_pAccess;
+#else
             Base::CMemory::DeleteObject(rInfo.m_pAccess);
+#endif
 
             m_ImporterInfos.erase(Hash);
         }

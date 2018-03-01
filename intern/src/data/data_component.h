@@ -3,6 +3,8 @@
 
 #include "base/base_type_info.h"
 
+#include "data/data_entity.h"
+
 #include <array>
 
 #pragma warning(push)
@@ -11,7 +13,6 @@
 namespace Dt
 {
     class CComponentManager;
-    class CEntity;
 } // namespace Dt
 
 namespace Dt
