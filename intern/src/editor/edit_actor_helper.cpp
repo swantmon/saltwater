@@ -7,13 +7,15 @@
 #include "base/base_uncopyable.h"
 
 #include "data/data_camera_component.h"
-#include "data/data_component_manager.h"
+#include "data/data_component.h"
 #include "data/data_component_facet.h"
+#include "data/data_component_manager.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_map.h"
+#include "data/data_material.h"
+#include "data/data_material_component.h"
 #include "data/data_material_manager.h"
-#include "data/data_mesh.h"
 #include "data/data_mesh_component.h"
 #include "data/data_texture_manager.h"
 #include "data/data_transformation_facet.h"
@@ -134,42 +136,19 @@ namespace
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-        Dt::CMeshComponent* pFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CMeshComponent>();
+        Dt::CMaterialComponent* pComponent = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CMaterialComponent>();
 
-        if (pFacet != nullptr)
-        {
-            // TODO by tschwandt
-            // different surfaces necessary?
+        if (pComponent == nullptr || pComponent->GetMaterial() == nullptr) return;
 
-            Dt::CMaterial* pMaterial = pFacet->GetMaterial(0);
+        Edit::CMessage NewMessage;
 
-            // TODO by tschwandt
-            // default material necessary?
+        NewMessage.Put(rCurrentEntity.GetID());
 
-            if (pMaterial == nullptr)
-            {
-                pMaterial = pFacet->GetMesh()->GetLOD(0)->GetSurface(0)->GetMaterial();
-            }
+        NewMessage.Put(pComponent->GetMaterial()->GetHash());
 
-            Edit::CMessage NewMessage;
+        NewMessage.Reset();
 
-            NewMessage.Put(rCurrentEntity.GetID());
-
-            if (pMaterial)
-            {
-                NewMessage.Put(true);
-
-                NewMessage.Put(pMaterial->GetHash());
-            }
-            else
-            {
-                NewMessage.Put(false);
-            }
-
-            NewMessage.Reset();
-
-            Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::Actor_Material_Info, NewMessage);
-        }
+        Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::Actor_Material_Info, NewMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -248,19 +227,17 @@ namespace
     {
         Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        int MaterialHash = _rMessage.Get<int>();
+        Base::BHash MaterialHash = _rMessage.Get<Base::BHash>();
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-        Dt::CMeshComponent* pFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CMeshComponent>();
+        auto pComponent = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CMaterialComponent>();
 
-        if (pFacet != nullptr)
+        if (pComponent != nullptr)
         {
-            Dt::CMaterial& rDtMaterial = Dt::MaterialManager::GetMaterialByHash(MaterialHash);
+            pComponent->SetMaterial(Dt::MaterialManager::GetMaterialByHash(MaterialHash));
 
-            pFacet->SetMaterial(0, &rDtMaterial);
-
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pFacet, Dt::CMeshComponent::DirtyInfo);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pComponent, Dt::CMaterialComponent::DirtyInfo);
         }
     }
 

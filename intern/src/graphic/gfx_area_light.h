@@ -1,21 +1,16 @@
 #pragma once
 
 #include "base/base_include_glm.h"
+#include "base/base_managed_pool.h"
 
-#include "graphic/gfx_component.h"
 #include "graphic/gfx_buffer.h"
 #include "graphic/gfx_buffer_set.h"
 #include "graphic/gfx_texture.h"
 
 namespace Gfx
 {
-    class CAreaLightComponent : public CComponent<CAreaLightComponent>
+    class CAreaLight : public Base::CManagedPoolItemBase
     {
-    public:
-
-        CAreaLightComponent();
-        ~CAreaLightComponent();
-
     public:
 
         CBufferPtr GetPlaneIndexBuffer() const;
@@ -34,6 +29,11 @@ namespace Gfx
 
     protected:
 
+        CAreaLight();
+        ~CAreaLight();
+
+    protected:
+
         CBufferPtr  m_PlaneIndexBufferPtr;
         CBufferPtr  m_PlaneVertexBufferSetPtr;
         CTexturePtr m_TexturePtr;
@@ -45,4 +45,9 @@ namespace Gfx
         float       m_HalfHeight;
         Base::U64   m_TimeStamp;
     };
+} // namespace Gfx
+
+namespace Gfx
+{
+    typedef Base::CManagedPoolItemPtr<CAreaLight> CAreaLightPtr;
 } // namespace Gfx

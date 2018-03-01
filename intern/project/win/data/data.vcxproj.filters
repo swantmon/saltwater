@@ -16,29 +16,11 @@
     <ClInclude Include="..\..\..\src\data\data_region.h">
       <Filter>map</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_model.h">
-      <Filter>models</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_model_manager.h">
-      <Filter>models</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_material.h">
-      <Filter>materials</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_material_manager.h">
-      <Filter>materials</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\data\data_transformation_facet.h">
       <Filter>map\entity\facets\transformation</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\data\data_hierarchy_facet.h">
       <Filter>map\entity\facets\hierarchy</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_lod.h">
-      <Filter>models</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_surface.h">
-      <Filter>models</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\data\data_texture_2d.h">
       <Filter>textures</Filter>
@@ -56,13 +38,7 @@
       <Filter>textures</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\data\data_precompiled.h" />
-    <ClInclude Include="..\..\..\src\data\data_mesh.h">
-      <Filter>models</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\data\data_component.h">
-      <Filter>map\entity\components</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_component_manager.h">
       <Filter>map\entity\components</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\data\data_ar_controller_component.h">
@@ -104,14 +80,26 @@
     <ClInclude Include="..\..\..\src\data\data_bloom_component.h">
       <Filter>map\entity\components\fx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_mesh_component.h">
-      <Filter>map\entity\components\actors</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\data\data_camera_component.h">
-      <Filter>map\entity\components\actors</Filter>
+      <Filter>map\entity\components\camera</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\data\data_component_facet.h">
       <Filter>map\entity\facets\components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_material_component.h">
+      <Filter>map\entity\components\model</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_mesh_component.h">
+      <Filter>map\entity\components\model</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_material.h">
+      <Filter>materials</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_material_manager.h">
+      <Filter>materials</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_component_manager.h">
+      <Filter>map\entity\components</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -120,12 +108,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\data\data_map.cpp">
       <Filter>map</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_model_manager.cpp">
-      <Filter>models</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_material_manager.cpp">
-      <Filter>materials</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\data\data_transformation_facet.cpp">
       <Filter>map\entity\facets\transformation</Filter>
@@ -149,24 +131,6 @@
       <Filter>textures</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\data\data_precompiled.cpp" />
-    <ClCompile Include="..\..\..\src\data\data_model.cpp">
-      <Filter>models</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_lod.cpp">
-      <Filter>models</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_surface.cpp">
-      <Filter>models</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_material.cpp">
-      <Filter>materials</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_mesh.cpp">
-      <Filter>models</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_component_manager.cpp">
-      <Filter>map\entity\components</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\data\data_ar_controller_component.cpp">
       <Filter>map\entity\components\plugins</Filter>
     </ClCompile>
@@ -206,14 +170,26 @@
     <ClCompile Include="..\..\..\src\data\data_bloom_component.cpp">
       <Filter>map\entity\components\fx</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_mesh_component.cpp">
-      <Filter>map\entity\components\actors</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\data\data_camera_component.cpp">
-      <Filter>map\entity\components\actors</Filter>
+      <Filter>map\entity\components\camera</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\data\data_component_facet.cpp">
       <Filter>map\entity\facets\components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_material_component.cpp">
+      <Filter>map\entity\components\model</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_mesh_component.cpp">
+      <Filter>map\entity\components\model</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_material.cpp">
+      <Filter>materials</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_material_manager.cpp">
+      <Filter>materials</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_component_manager.cpp">
+      <Filter>map\entity\components</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -232,12 +208,6 @@
     <Filter Include="map\entity\facets\hierarchy">
       <UniqueIdentifier>{b4ebd438-b7be-4be9-81c4-8f15b0d57b60}</UniqueIdentifier>
     </Filter>
-    <Filter Include="materials">
-      <UniqueIdentifier>{ccc2916e-d14c-45a4-ae67-e8fe96b262ea}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="models">
-      <UniqueIdentifier>{07e34a49-6329-43c1-9b85-20225bbfc5ef}</UniqueIdentifier>
-    </Filter>
     <Filter Include="textures">
       <UniqueIdentifier>{71afbfc9-2627-4eba-a9d3-f355b40c9a27}</UniqueIdentifier>
     </Filter>
@@ -253,11 +223,17 @@
     <Filter Include="map\entity\components\fx">
       <UniqueIdentifier>{1b041ed4-ca9c-472b-b2b9-017f5f782f57}</UniqueIdentifier>
     </Filter>
-    <Filter Include="map\entity\components\actors">
-      <UniqueIdentifier>{d34f13b4-e357-49b8-8290-e4c854b0353f}</UniqueIdentifier>
-    </Filter>
     <Filter Include="map\entity\facets\components">
       <UniqueIdentifier>{2e1a7254-2026-4f68-b9c2-ff39ac63afd2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\entity\components\model">
+      <UniqueIdentifier>{0fceb878-3205-4385-b80a-9d4b9624bbc7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\entity\components\camera">
+      <UniqueIdentifier>{d34f13b4-e357-49b8-8290-e4c854b0353f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="materials">
+      <UniqueIdentifier>{ccc2916e-d14c-45a4-ae67-e8fe96b262ea}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

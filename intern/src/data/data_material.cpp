@@ -6,39 +6,36 @@
 namespace Dt
 {
     CMaterial::CMaterial()
-        : m_Materialname     ()
-        , m_FileName         ()
-        , m_pColorTexture    (0)
-        , m_pNormalTexture   (0)
-        , m_pRoughnessTexture(0)
-        , m_pMetalTexture    (0)
-        , m_pAOTexture       (0)
-        , m_pBumpTexture     (0)
-        , m_Color            (1.0f, 1.0f, 1.0f)
-        , m_TilingOffset     (0.0f, 0.0f, 1.0f, 1.0f)
-        , m_Roughness        (1.0f)
-        , m_Reflectance      (0.0f)
-        , m_MetalMask        (0.0f)
-        , m_Displacement     (0.0f)
-        , m_Hash             (0)
-        , m_DirtyFlags       (0)
-        , m_DirtyTime        (0)
+        : m_Materialname("")
+        , m_FileName("")
+        , m_ColorTexture("")
+        , m_NormalTexture("")
+        , m_RoughnessTexture("")
+        , m_MetalTexture("")
+        , m_AmbientOcclusionTexture("")
+        , m_BumpTexture("")
+        , m_Color(1.0f, 1.0f, 1.0f)
+        , m_TilingOffset(1.0f, 1.0f, 0.0f, 0.0f)
+        , m_Roughness(1.0f)
+        , m_Reflectance(0.0f)
+        , m_MetalMask(0.0f)
+        , m_Displacement(0.0f)
+        , m_Hash(0)
     {
-
     }
 
     // -----------------------------------------------------------------------------
 
     CMaterial::~CMaterial()
     {
-        m_Materialname.clear();
+
     }
 
     // -----------------------------------------------------------------------------
 
-    void CMaterial::SetMaterialname(const std::string& _rMaterialname)
+    void CMaterial::SetMaterialname(const std::string& _rValue)
     {
-        m_Materialname = _rMaterialname;
+        m_Materialname = _rValue;
     }
 
     // -----------------------------------------------------------------------------
@@ -50,9 +47,9 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CMaterial::SetFilename(const std::string& _rFilename)
+    void CMaterial::SetFileName(const std::string& _rValue)
     {
-        m_FileName = _rFilename;
+        m_FileName = _rValue;
     }
 
     // -----------------------------------------------------------------------------
@@ -64,135 +61,99 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CMaterial::SetColorTexture(Dt::CTexture2D* _pColorTexture)
+
+    void CMaterial::SetColorTexture(const std::string& _rValue)
     {
-        m_pColorTexture = _pColorTexture;
+        m_ColorTexture = _rValue;
     }
 
     // -----------------------------------------------------------------------------
 
-    Dt::CTexture2D* CMaterial::GetColorTexture()
+    const std::string& CMaterial::GetColorTexture() const
     {
-        return m_pColorTexture;
+        return m_ColorTexture;
     }
 
     // -----------------------------------------------------------------------------
 
-    const Dt::CTexture2D* CMaterial::GetColorTexture() const
+
+    void CMaterial::SetNormalTexture(const std::string& _rValue)
     {
-        return m_pColorTexture;
+        m_NormalTexture = _rValue;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CMaterial::SetNormalTexture(Dt::CTexture2D* _pNormalTexture)
+    const std::string& CMaterial::GetNormalTexture() const
     {
-        m_pNormalTexture = _pNormalTexture;
+        return m_NormalTexture;
     }
 
     // -----------------------------------------------------------------------------
 
-    Dt::CTexture2D* CMaterial::GetNormalTexture()
+
+    void CMaterial::SetRoughnessTexture(const std::string& _rValue)
     {
-        return m_pNormalTexture;
+        m_RoughnessTexture = _rValue;
     }
 
     // -----------------------------------------------------------------------------
 
-    const Dt::CTexture2D* CMaterial::GetNormalTexture() const
+    const std::string& CMaterial::GetRoughnessTexture() const
     {
-        return m_pNormalTexture;
+        return m_RoughnessTexture;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CMaterial::SetRoughnessTexture(Dt::CTexture2D* _pRoughnessTexture)
+
+    void CMaterial::SetMetalTexture(const std::string& _rValue)
     {
-        m_pRoughnessTexture = _pRoughnessTexture;
+        m_MetalTexture = _rValue;
     }
 
     // -----------------------------------------------------------------------------
 
-    Dt::CTexture2D* CMaterial::GetRoughnessTexture()
+    const std::string& CMaterial::GetMetalTexture() const
     {
-        return m_pRoughnessTexture;
+        return m_MetalTexture;
     }
 
     // -----------------------------------------------------------------------------
 
-    const Dt::CTexture2D* CMaterial::GetRoughnessTexture() const
+
+    void CMaterial::SetAmbientOcclusionTexture(const std::string& _rValue)
     {
-        return m_pRoughnessTexture;
+        m_AmbientOcclusionTexture = _rValue;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CMaterial::SetMetalTexture(Dt::CTexture2D* _pMetalTexture)
+    const std::string& CMaterial::GetAmbientOcclusionTexture() const
     {
-        m_pMetalTexture = _pMetalTexture;
+        return m_AmbientOcclusionTexture;
     }
 
     // -----------------------------------------------------------------------------
 
-    Dt::CTexture2D* CMaterial::GetMetalTexture()
+
+    void CMaterial::SetBumpTexture(const std::string& _rValue)
     {
-        return m_pMetalTexture;
+        m_BumpTexture = _rValue;
     }
 
     // -----------------------------------------------------------------------------
 
-    const Dt::CTexture2D* CMaterial::GetMetalTexture() const
+    const std::string& CMaterial::GetBumpTexture() const
     {
-        return m_pMetalTexture;
+        return m_BumpTexture;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CMaterial::SetAmbientOcclusionTexture(Dt::CTexture2D* _pAmbientOcclusionTexture)
+    void CMaterial::SetColor(const glm::vec3& _rValue)
     {
-        m_pAOTexture = _pAmbientOcclusionTexture;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    Dt::CTexture2D* CMaterial::GetAmbientOcclusionTexture()
-    {
-        return m_pAOTexture;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    const Dt::CTexture2D* CMaterial::GetAmbientOcclusionTexture() const
-    {
-        return m_pAOTexture;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CMaterial::SetBumpTexture(Dt::CTexture2D* _pBumpTexture)
-    {
-        m_pBumpTexture = _pBumpTexture;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    Dt::CTexture2D* CMaterial::GetBumpTexture()
-    {
-        return m_pBumpTexture;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    const Dt::CTexture2D* CMaterial::GetBumpTexture() const
-    {
-        return m_pBumpTexture;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CMaterial::SetColor(const glm::vec3& _rColor)
-    {
-        m_Color = _rColor;
+        m_Color = _rValue;
     }
 
     // -----------------------------------------------------------------------------
@@ -204,9 +165,39 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CMaterial::SetTilingOffset(const glm::vec4& _rTilingOffset)
+    void CMaterial::SetTiling(const glm::vec2& _rValue)
     {
-        m_TilingOffset = _rTilingOffset;
+        m_TilingOffset[0] = _rValue[0];
+        m_TilingOffset[1] = _rValue[1];
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const glm::vec2 CMaterial::GetTiling() const
+    {
+        return glm::vec2(m_TilingOffset[0], m_TilingOffset[1]);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMaterial::SetOffset(const glm::vec2& _rValue)
+    {
+        m_TilingOffset[2] = _rValue[0];
+        m_TilingOffset[3] = _rValue[1];
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const glm::vec2 CMaterial::GetOffset() const
+    {
+        return glm::vec2(m_TilingOffset[2], m_TilingOffset[3]);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMaterial::SetTilingOffset(const glm::vec4& _rValue)
+    {
+        m_TilingOffset = _rValue;
     }
 
     // -----------------------------------------------------------------------------
@@ -218,9 +209,10 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CMaterial::SetRoughness(float _Roughness)
+
+    void CMaterial::SetRoughness(float _Value)
     {
-        m_Roughness = _Roughness;
+        m_Roughness = _Value;
     }
 
     // -----------------------------------------------------------------------------
@@ -232,23 +224,25 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CMaterial::SetSmoothness(float _Smoothness)
+
+    void CMaterial::SetSmoothness(float _Value)
     {
-        m_Roughness = 1.0f - _Smoothness;
+        m_Roughness = 1.0f - _Value;
     }
 
     // -----------------------------------------------------------------------------
 
     float CMaterial::GetSmoothness() const
     {
-        return 1.0f - m_Roughness;
+        return  1.0f - m_Roughness;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CMaterial::SetReflectance(float _Reflectance)
+
+    void CMaterial::SetReflectance(float _Value)
     {
-        m_Reflectance = _Reflectance;
+        m_Reflectance = _Value;
     }
 
     // -----------------------------------------------------------------------------
@@ -260,9 +254,10 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CMaterial::SetMetalness(float _Metalness)
+
+    void CMaterial::SetMetalness(float _Value)
     {
-        m_MetalMask = _Metalness;
+        m_MetalMask = _Value;
     }
 
     // -----------------------------------------------------------------------------
@@ -274,9 +269,10 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CMaterial::SetDisplacement(float _Displacement)
+
+    void CMaterial::SetDisplacement(float _Value)
     {
-        m_Displacement = _Displacement;
+        m_Displacement = _Value;
     }
 
     // -----------------------------------------------------------------------------
@@ -288,22 +284,8 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    unsigned int CMaterial::GetHash() const
+    CMaterial::BHash CMaterial::GetHash() const
     {
         return m_Hash;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    unsigned int CMaterial::GetDirtyFlags() const
-    {
-        return m_DirtyFlags;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    Base::U64 CMaterial::GetDirtyTime() const
-    {
-        return m_DirtyTime;
     }
 } // namespace Dt

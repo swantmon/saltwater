@@ -12,10 +12,12 @@
 #include "data/data_entity.h"
 
 #include <functional>
+#include <string>
+#include <vector>
 
 namespace Dt
 {
-    class CModel;
+    class CMesh;
 } // namespace Dt
 
 namespace Dt
@@ -46,9 +48,9 @@ namespace EntityManager
 
     void Clear();
 
-    CEntity& CreateEntityFromModel(const CModel& _rModel);
-
     CEntity& CreateEntity(const SEntityDescriptor& _rDescriptor, CEntity::BID _ID = CEntity::s_InvalidID);
+
+    std::vector<CEntity*> CreateEntitiesFromScene(const std::string& _rFile);
 
     void FreeEntity(CEntity& _rEntity);
 

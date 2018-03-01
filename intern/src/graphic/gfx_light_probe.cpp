@@ -1,11 +1,11 @@
 
 #include "graphic/gfx_precompiled.h"
 
-#include "graphic/gfx_light_probe_component.h"
+#include "graphic/gfx_light_probe.h"
 
 namespace Gfx
 {
-    CLightProbeComponent::CLightProbeComponent()
+    CLightProbe::CLightProbe()
         : m_DiffusePtr ()
         , m_SpecularPtr()
         , m_DepthPtr   ()
@@ -16,7 +16,7 @@ namespace Gfx
 
     // -----------------------------------------------------------------------------
 
-    CLightProbeComponent::~CLightProbeComponent()
+    CLightProbe::~CLightProbe()
     {
         m_DiffusePtr  = 0;
         m_SpecularPtr = 0;
@@ -25,28 +25,28 @@ namespace Gfx
 
     // -----------------------------------------------------------------------------
 
-    CTexturePtr CLightProbeComponent::GetDiffusePtr() const
+    CTexturePtr CLightProbe::GetDiffusePtr() const
     {
         return m_DiffusePtr;
     }
 
     // -----------------------------------------------------------------------------
 
-    CTexturePtr CLightProbeComponent::GetSpecularPtr() const
+    CTexturePtr CLightProbe::GetSpecularPtr() const
     {
         return m_SpecularPtr;
     }
 
     // -----------------------------------------------------------------------------
 
-    CTexturePtr CLightProbeComponent::GetDepthPtr() const
+    CTexturePtr CLightProbe::GetDepthPtr() const
     {
         return m_DepthPtr;
     }
 
     // -----------------------------------------------------------------------------
 
-    Base::U64 CLightProbeComponent::GetTimeStamp() const
+    Base::U64 CLightProbe::GetTimeStamp() const
     {
         return m_TimeStamp;
     }

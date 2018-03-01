@@ -7,22 +7,21 @@
 
 #include "camera/cam_control_manager.h"
 
+#include "data/data_component.h"
 #include "data/data_component_facet.h"
 #include "data/data_component_manager.h"
 #include "data/data_entity.h"
 #include "data/data_map.h"
-#include "data/data_model_manager.h"
 #include "data/data_point_light_component.h"
 
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"
-#include "graphic/gfx_component_manager.h"
 #include "graphic/gfx_histogram_renderer.h"
 #include "graphic/gfx_light_sun_renderer.h"
 #include "graphic/gfx_main.h"
 #include "graphic/gfx_mesh_manager.h"
 #include "graphic/gfx_performance.h"
-#include "graphic/gfx_point_light_component.h"
+#include "graphic/gfx_point_light.h"
 #include "graphic/gfx_point_light_manager.h"
 #include "graphic/gfx_sampler_manager.h"
 #include "graphic/gfx_shader_manager.h"
@@ -75,7 +74,7 @@ namespace
 
         struct SRenderJob
         {
-            Gfx::CPointLightComponent* m_pGraphicPointLightFacet;
+            Gfx::CPointLight* m_pGraphicPointLightFacet;
         };
 
     private:
@@ -276,9 +275,9 @@ namespace
 
         ContextManager::SetRenderContext(m_LightRenderContextPtr);
 
-        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
 
-        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
 
         ContextManager::SetInputLayout(m_P2InputLayoutPtr);
 
@@ -319,7 +318,7 @@ namespace
 
         for (; CurrentRenderJob != EndOfRenderJobs; ++CurrentRenderJob)
         {
-            Gfx::CPointLightComponent* pGfxPointLight = CurrentRenderJob->m_pGraphicPointLightFacet;
+            Gfx::CPointLight* pGfxPointLight = CurrentRenderJob->m_pGraphicPointLightFacet;
 
             assert(pGfxPointLight != nullptr);
 
@@ -354,7 +353,7 @@ namespace
                 // -----------------------------------------------------------------------------
                 // Draw
                 // -----------------------------------------------------------------------------
-                Gfx::ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+                Gfx::ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
             }
         }
 
@@ -413,7 +412,8 @@ namespace
         for (auto Component : DataComponents)
         {
             Dt::CPointLightComponent*  pDtComponent  = static_cast<Dt::CPointLightComponent*>(Component);
-            Gfx::CPointLightComponent* pGfxComponent = Gfx::CComponentManager::GetInstance().GetComponent<Gfx::CPointLightComponent>(pDtComponent->GetID());
+
+            Gfx::CPointLight* pGfxComponent =static_cast<Gfx::CPointLight*>(pDtComponent->GetFacet(Dt::CPointLightComponent::Graphic));
 
             if (pDtComponent->IsActiveAndUsable() == false) continue;
 

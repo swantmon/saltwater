@@ -5,11 +5,9 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
-#include "data/data_component_manager.h"
+#include "data/data_component.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
-#include "data/data_material_manager.h"
-#include "data/data_model_manager.h"
 
 #include "logic/lg_start_state.h"
 
@@ -37,9 +35,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Data
         // -----------------------------------------------------------------------------
-        Dt::EntityManager  ::OnStart();
-        Dt::ModelManager   ::OnStart();
-        Dt::MaterialManager::OnStart();
+        Dt::EntityManager::OnStart();
 
         // -----------------------------------------------------------------------------
         // External

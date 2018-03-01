@@ -3,29 +3,25 @@
 
 #include "base/base_include_glm.h"
 
-#include "data/data_material.h"
-
 #include "graphic/gfx_material.h"
-#include "graphic/gfx_surface.h"
 
 namespace Gfx
 {
     struct SMaterialDescriptor
     {
-        const char*       m_pMaterialName;
-        const char*       m_pColorMap;
-        const char*       m_pNormalMap;
-        const char*       m_pRoughnessMap;
-        const char*       m_pMetalMaskMap;
-        const char*       m_pAOMap;
-        const char*       m_pBumpMap;
-        float             m_Roughness;
-        float             m_Reflectance;
-        float             m_MetalMask;
-        float             m_Displacement;
-        glm::vec3         m_AlbedoColor;
-        glm::vec4         m_TilingOffset;
-        const Base::Char* m_pFileName;
+        std::string m_MaterialName;
+        std::string m_ColorTexture;
+        std::string m_NormalTexture;
+        std::string m_RoughnessTexture;
+        std::string m_MetalTexture;
+        std::string m_AmbientOcclusionTexture;
+        std::string m_BumpTexture;
+        float       m_Roughness;
+        float       m_Reflectance;
+        float       m_MetalMask;
+        float       m_Displacement;
+        glm::vec3   m_AlbedoColor;
+        glm::vec4   m_TilingOffset;
     };
 } // namespace Gfx
 
@@ -38,8 +34,6 @@ namespace MaterialManager
 
     CMaterialPtr CreateMaterial(const SMaterialDescriptor& _rDescriptor);
 
-    CMaterialPtr GetDefaultMaterial();
-
-    CMaterialPtr GetMaterialByHash(unsigned int _Hash);
+    const CMaterialPtr GetDefaultMaterial();
 } // namespace MaterialManager
 } // namespace Gfx

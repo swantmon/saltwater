@@ -8,20 +8,19 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
+#include "core/core_asset_manager.h"
 #include "core/core_time.h"
 
 #include "data/data_component.h"
-#include "data/data_component_manager.h"
 #include "data/data_component_facet.h"
+#include "data/data_component_manager.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_map.h"
-#include "data/data_model_manager.h"
 #include "data/data_sky_component.h"
 #include "data/data_sun_component.h"
 
 #include "graphic/gfx_buffer_manager.h"
-#include "graphic/gfx_component_manager.h"
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_main.h"
 #include "graphic/gfx_mesh_manager.h"
@@ -29,7 +28,7 @@
 #include "graphic/gfx_sampler_manager.h"
 #include "graphic/gfx_selection_renderer.h"
 #include "graphic/gfx_shader_manager.h"
-#include "graphic/gfx_sky_component.h"
+#include "graphic/gfx_sky.h"
 #include "graphic/gfx_sky_manager.h"
 #include "graphic/gfx_state_manager.h"
 #include "graphic/gfx_target_set.h"
@@ -153,7 +152,7 @@ namespace
             unsigned int ps_ExposureHistoryIndex;
         };
 
-        class CInternSkyFacet : public CSkyComponent
+        class CInternSkyFacet : public CSky
         {
         public:
 
@@ -172,7 +171,13 @@ namespace
             friend class CGfxSkyManager;
         };
 
-    private:
+        private:
+
+            typedef Base::CManagedPool<CInternSkyFacet, 1, 0> CSkies;
+
+        private:
+
+        CSkies m_Skies;
 
         SRenderContext    m_SkyboxFromAtmosphere;
         SRenderContext    m_SkyboxFromPanorama;
@@ -217,11 +222,11 @@ namespace
 namespace 
 {
     CGfxSkyManager::CInternSkyFacet::CInternSkyFacet()
-        : CSkyComponent           ()
-        , m_RenderContextPtr  ()
-        , m_TargetSetPtr      ()
-        , m_ViewPortSetPtr    ()
-        , m_InputTexturePtr   ()
+        : CSky              ()
+        , m_RenderContextPtr()
+        , m_TargetSetPtr    ()
+        , m_ViewPortSetPtr  ()
+        , m_InputTexturePtr ()
     {
 
     }
@@ -240,13 +245,14 @@ namespace
 namespace 
 {
     CGfxSkyManager::CGfxSkyManager()
-        : m_SkyboxFromPanorama ()
-        , m_SkyboxFromCubemap  ()
-        , m_SkyboxFromTexture  ()
-        , m_SkyboxFromGeometry ()
-        , m_SkyboxFromLUT      ()
-        , m_LookUpTexturePtr   (0)
-        , m_pSelectionTicket   (0)
+        : m_Skies             ()
+        , m_SkyboxFromPanorama()
+        , m_SkyboxFromCubemap ()
+        , m_SkyboxFromTexture ()
+        , m_SkyboxFromGeometry()
+        , m_SkyboxFromLUT     ()
+        , m_LookUpTexturePtr  (0)
+        , m_pSelectionTicket  (0)
     {
 
     }
@@ -509,17 +515,9 @@ namespace
 
         // -----------------------------------------------------------------------------
 
-        SMeshDescriptor ModelDescr;
-        Dt::SModelFileDescriptor ModelFileDesc;
+        std::string PathToModel = Core::AssetManager::GetPathToData() + "curvedplane.obj";
 
-        ModelFileDesc.m_pFileName = "curvedplane.obj";
-        ModelFileDesc.m_GenFlag = Dt::SGeneratorFlag::Nothing;
-
-        Dt::CModel& rCurvedPlaneModel = Dt::ModelManager::CreateModel(ModelFileDesc);
-
-        ModelDescr.m_pMesh = &rCurvedPlaneModel.GetMesh(0);
-
-        CMeshPtr CurvedPlanePtr = MeshManager::CreateMesh(ModelDescr);
+        CMeshPtr CurvedPlanePtr = MeshManager::CreateMeshFromFile(PathToModel, Core::AssetGenerator::SGeneratorFlag::Default);
 
         // -----------------------------------------------------------------------------
 
@@ -588,7 +586,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Register dirty entity handler for automatic sky creation
         // -----------------------------------------------------------------------------
-        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(DATA_DIRTY_COMPONENT_METHOD(&CGfxSkyManager::OnDirtyComponent));
+        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(BASE_DIRTY_COMPONENT_METHOD(&CGfxSkyManager::OnDirtyComponent));
 
         // -----------------------------------------------------------------------------
         // Acquire an selection ticket at selection renderer
@@ -605,6 +603,8 @@ namespace
 
     void CGfxSkyManager::OnExit()
     {
+        m_Skies.Clear();
+
         SelectionRenderer::Clear(*m_pSelectionTicket);
 
         ResetRenderContext();
@@ -636,7 +636,7 @@ namespace
 
             if (pDataSkyboxFacet->GetRefreshMode() == Dt::CSkyComponent::Dynamic)
             {
-                CInternSkyFacet* pGraphicSkyboxFacet = CComponentManager::GetInstance().GetComponent<CInternSkyFacet>(pDataSkyboxFacet->GetID());
+                CInternSkyFacet* pGraphicSkyboxFacet = static_cast<CInternSkyFacet*>(pDataSkyboxFacet->GetFacet(Dt::CSkyComponent::Graphic));
 
                 RenderSkybox(pDataSkyboxFacet, pGraphicSkyboxFacet);
             }
@@ -714,7 +714,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Create facet
             // -----------------------------------------------------------------------------
-            CInternSkyFacet* pGraphicSkyboxFacet = CComponentManager::GetInstance().Allocate<CInternSkyFacet>(pSkyComponent->GetID());
+            CInternSkyFacet* pGfxSkybox = m_Skies.Allocate();
 
             // -----------------------------------------------------------------------------
             // Cubemap
@@ -735,16 +735,16 @@ namespace
             TextureDescriptor.m_pPixels          = 0;
             TextureDescriptor.m_Format           = CTexture::R16G16B16A16_FLOAT;
         
-            pGraphicSkyboxFacet->m_CubemapPtr = TextureManager::CreateCubeTexture(TextureDescriptor);
+            pGfxSkybox->m_CubemapPtr = TextureManager::CreateCubeTexture(TextureDescriptor);
 
-            TextureManager::SetTextureLabel(pGraphicSkyboxFacet->m_CubemapPtr, "Sky Texture");
+            TextureManager::SetTextureLabel(pGfxSkybox->m_CubemapPtr, "Sky Texture");
 
             // -----------------------------------------------------------------------------
             // Target Set
             // -----------------------------------------------------------------------------
-            CTexturePtr FirstMipmapCubeTexture = TextureManager::GetMipmapFromTexture2D(pGraphicSkyboxFacet->m_CubemapPtr, 0);
+            CTexturePtr FirstMipmapCubeTexture = TextureManager::GetMipmapFromTexture2D(pGfxSkybox->m_CubemapPtr, 0);
 
-            pGraphicSkyboxFacet->m_TargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTexturePtr>(FirstMipmapCubeTexture));
+            pGfxSkybox->m_TargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTexturePtr>(FirstMipmapCubeTexture));
 
             // -----------------------------------------------------------------------------
             // Viewport
@@ -761,7 +761,7 @@ namespace
 
             CViewPortPtr MipMapViewPort = ViewManager::CreateViewPort(ViewPortDesc);
 
-            pGraphicSkyboxFacet->m_ViewPortSetPtr = ViewManager::CreateViewPortSet(MipMapViewPort);
+            pGfxSkybox->m_ViewPortSetPtr = ViewManager::CreateViewPortSet(MipMapViewPort);
 
             // -----------------------------------------------------------------------------
             // Render context
@@ -772,25 +772,27 @@ namespace
             CRenderContextPtr CubemapRenderContextPtr = ContextManager::CreateRenderContext();
 
             CubemapRenderContextPtr->SetCamera(CameraPtr);
-            CubemapRenderContextPtr->SetViewPortSet(pGraphicSkyboxFacet->m_ViewPortSetPtr);
-            CubemapRenderContextPtr->SetTargetSet(pGraphicSkyboxFacet->m_TargetSetPtr);
+            CubemapRenderContextPtr->SetViewPortSet(pGfxSkybox->m_ViewPortSetPtr);
+            CubemapRenderContextPtr->SetTargetSet(pGfxSkybox->m_TargetSetPtr);
             CubemapRenderContextPtr->SetRenderState(NoDepthStatePtr);
 
-            pGraphicSkyboxFacet->m_RenderContextPtr = CubemapRenderContextPtr;
+            pGfxSkybox->m_RenderContextPtr = CubemapRenderContextPtr;
 
             // -----------------------------------------------------------------------------
             // Update
             // -----------------------------------------------------------------------------
-            UpdateFacet(pSkyComponent, pGraphicSkyboxFacet);
+            UpdateFacet(pSkyComponent, pGfxSkybox);
 
             // -----------------------------------------------------------------------------
-            // Save facet
+            // Link to component
             // -----------------------------------------------------------------------------
-            pGraphicSkyboxFacet->m_TimeStamp = Core::Time::GetNumberOfFrame() + 1;
+            pSkyComponent->SetFacet(Dt::CSkyComponent::Graphic, pGfxSkybox);
+
+            pGfxSkybox->m_TimeStamp = Core::Time::GetNumberOfFrame() + 1;
         }
         else if ((DirtyFlags & Dt::CSkyComponent::DirtyInfo))
         {
-            CInternSkyFacet* pGraphicSkyboxFacet = CComponentManager::GetInstance().GetComponent<CInternSkyFacet>(pSkyComponent->GetID());
+            CInternSkyFacet* pGraphicSkyboxFacet = static_cast<CInternSkyFacet*>(pSkyComponent->GetFacet(Dt::CSkyComponent::Graphic));
 
             // -----------------------------------------------------------------------------
             // Update
@@ -881,11 +883,11 @@ namespace
 
         ContextManager::SetShaderPS(PSPtr);
 
-        ContextManager::SetVertexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+        ContextManager::SetVertexBuffer(MeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
 
-        ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+        ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
 
-        ContextManager::SetInputLayout(MeshPtr->GetLOD(0)->GetSurface(0)->GetMVPShaderVS()->GetInputLayout());
+        ContextManager::SetInputLayout(MeshPtr->GetLOD(0)->GetSurface()->GetMVPShaderVS()->GetInputLayout());
 
         ContextManager::SetConstantBuffer(2, GSBufferSetPtr->GetBuffer(0));
 
@@ -910,7 +912,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Draw
         // -----------------------------------------------------------------------------
-        ContextManager::DrawIndexed(MeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+        ContextManager::DrawIndexed(MeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
 
         // -----------------------------------------------------------------------------
         // Reset
@@ -996,11 +998,11 @@ namespace
 
         ContextManager::SetShaderPS(PSPtr);
 
-        ContextManager::SetVertexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+        ContextManager::SetVertexBuffer(MeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
 
-        ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+        ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
 
-        ContextManager::SetInputLayout(MeshPtr->GetLOD(0)->GetSurface(0)->GetMVPShaderVS()->GetInputLayout());
+        ContextManager::SetInputLayout(MeshPtr->GetLOD(0)->GetSurface()->GetMVPShaderVS()->GetInputLayout());
 
         ContextManager::SetConstantBuffer(2, GSBufferSetPtr->GetBuffer(0));
 
@@ -1013,7 +1015,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Draw
         // -----------------------------------------------------------------------------
-        ContextManager::DrawIndexed(MeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+        ContextManager::DrawIndexed(MeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
 
         // -----------------------------------------------------------------------------
         // Reset
@@ -1099,11 +1101,11 @@ namespace
 
         ContextManager::SetShaderPS(PSPtr);
 
-        ContextManager::SetVertexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+        ContextManager::SetVertexBuffer(MeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
 
-        ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+        ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
 
-        ContextManager::SetInputLayout(MeshPtr->GetLOD(0)->GetSurface(0)->GetMVPShaderVS()->GetInputLayout());
+        ContextManager::SetInputLayout(MeshPtr->GetLOD(0)->GetSurface()->GetMVPShaderVS()->GetInputLayout());
 
         ContextManager::SetConstantBuffer(2, GSBufferSetPtr->GetBuffer(0));
 
@@ -1116,7 +1118,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Draw
         // -----------------------------------------------------------------------------
-        ContextManager::DrawIndexed(MeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+        ContextManager::DrawIndexed(MeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
 
         // -----------------------------------------------------------------------------
         // Reset
@@ -1223,11 +1225,11 @@ namespace
 
         ContextManager::SetShaderPS(PSPtr);
 
-        ContextManager::SetVertexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+        ContextManager::SetVertexBuffer(MeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
 
-        ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+        ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
 
-        ContextManager::SetInputLayout(MeshPtr->GetLOD(0)->GetSurface(0)->GetMVPShaderVS()->GetInputLayout());
+        ContextManager::SetInputLayout(MeshPtr->GetLOD(0)->GetSurface()->GetMVPShaderVS()->GetInputLayout());
 
         ContextManager::SetConstantBuffer(1, VSBufferSetPtr->GetBuffer(0));
 
@@ -1243,7 +1245,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Draw
         // -----------------------------------------------------------------------------
-        ContextManager::DrawIndexed(MeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+        ContextManager::DrawIndexed(MeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
 
         // -----------------------------------------------------------------------------
         // Reset
@@ -1507,11 +1509,11 @@ namespace
 
         ContextManager::SetShaderPS(PSPtr);
 
-        ContextManager::SetVertexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+        ContextManager::SetVertexBuffer(MeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
 
-        ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+        ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
 
-        ContextManager::SetInputLayout(MeshPtr->GetLOD(0)->GetSurface(0)->GetMVPShaderVS()->GetInputLayout());
+        ContextManager::SetInputLayout(MeshPtr->GetLOD(0)->GetSurface()->GetMVPShaderVS()->GetInputLayout());
 
         ContextManager::SetConstantBuffer(2, GSBufferSetPtr->GetBuffer(0));
         ContextManager::SetConstantBuffer(3, GSBufferSetPtr->GetBuffer(1));
@@ -1527,7 +1529,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Draw
         // -----------------------------------------------------------------------------
-        ContextManager::DrawIndexed(MeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+        ContextManager::DrawIndexed(MeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
 
         // -----------------------------------------------------------------------------
         // Reset

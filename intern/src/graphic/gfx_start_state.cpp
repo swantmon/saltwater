@@ -9,7 +9,6 @@
 #include "graphic/gfx_area_light_manager.h"
 #include "graphic/gfx_background_renderer.h"
 #include "graphic/gfx_buffer_manager.h"
-#include "graphic/gfx_camera_manager.h"
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_debug_renderer.h"
 #include "graphic/gfx_fog_renderer.h"
@@ -79,7 +78,6 @@ namespace
         // -----------------------------------------------------------------------------
         BASE_CONSOLE_STREAMINFO("Gfx> Start manager...");
 
-        ViewManager     ::OnStart();
         StateManager    ::OnStart();
         ContextManager  ::OnStart();
         SamplerManager  ::OnStart();
@@ -91,21 +89,11 @@ namespace
         BASE_CONSOLE_STREAMINFO("Gfx> Finished starting manager.");
 
         // -----------------------------------------------------------------------------
-        // Prepare general graphic things needed by renderer
-        // -----------------------------------------------------------------------------
-        BASE_CONSOLE_STREAMINFO("Gfx> Create and upload global buffer.");
-
-        Main::CreatePerFrameConstantBuffers();
-        Main::UploadPerFrameConstantBuffers();
-
-        BASE_CONSOLE_STREAMINFO("Gfx> Finished create and upload global buffer.");
-
-        // -----------------------------------------------------------------------------
         // Start entity manager
         // -----------------------------------------------------------------------------
         BASE_CONSOLE_STREAMINFO("Gfx> Start entity/facet manager...");
 
-        CameraManager     ::OnStart();
+        ViewManager       ::OnStart();
         SunManager        ::OnStart();
         MeshManager       ::OnStart();
         MaterialManager   ::OnStart();
@@ -115,6 +103,16 @@ namespace
         AreaLightManager  ::OnStart();
 
         BASE_CONSOLE_STREAMINFO("Gfx> Finished starting entity/facet manager.");
+
+        // -----------------------------------------------------------------------------
+        // Prepare general graphic things needed by renderer
+        // -----------------------------------------------------------------------------
+        BASE_CONSOLE_STREAMINFO("Gfx> Create and upload global buffer.");
+
+        Main::CreatePerFrameConstantBuffers();
+        Main::UploadPerFrameConstantBuffers();
+
+        BASE_CONSOLE_STREAMINFO("Gfx> Finished create and upload global buffer.");
 
         // -----------------------------------------------------------------------------
         // Start renderer. It is not possible to setup all the data in the 'OnStart'

@@ -21,8 +21,8 @@ namespace Edit
 {
     CTextureValue::CTextureValue(QWidget* _pParent)
         : QWidget         (_pParent)
-        , m_File          ()
-        , m_Hash          ()
+        , m_File          ("")
+        , m_Hash          (0)
     {
         // -----------------------------------------------------------------------------
         // Setup UI

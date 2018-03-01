@@ -9,24 +9,23 @@
 #include "core/core_time.h"
 
 #include "data/data_component.h"
-#include "data/data_component_manager.h"
 #include "data/data_component_facet.h"
+#include "data/data_component_manager.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_map.h"
+#include "data/data_material_component.h"
 #include "data/data_mesh_component.h"
-#include "data/data_model_manager.h"
 #include "data/data_point_light_component.h"
 #include "data/data_transformation_facet.h"
 
 #include "graphic/gfx_buffer_manager.h"
-#include "graphic/gfx_component_manager.h"
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_main.h"
+#include "graphic/gfx_material.h"
 #include "graphic/gfx_mesh.h"
-#include "graphic/gfx_mesh_component.h"
 #include "graphic/gfx_performance.h"
-#include "graphic/gfx_point_light_component.h"
+#include "graphic/gfx_point_light.h"
 #include "graphic/gfx_point_light_manager.h"
 #include "graphic/gfx_sampler_manager.h"
 #include "graphic/gfx_shader_manager.h"
@@ -76,12 +75,12 @@ namespace
             glm::vec4 m_LightSettings; // InvSqrAttenuationRadius, AngleScale, AngleOffset, Has shadows
         };
 
-        class CInternComponent : public CPointLightComponent
+        class CInternObject : public CPointLight
         {
         public:
 
-            CInternComponent();
-            ~CInternComponent();
+            CInternObject();
+            ~CInternObject();
 
         public:
 
@@ -95,6 +94,11 @@ namespace
 
     private:
 
+        typedef Base::CManagedPool<CInternObject, 32, 0> CPointLights;
+
+    private:
+
+        CPointLights m_PointLights;
         CShaderPtr m_ShadowShaderVSPtr;
         CShaderPtr m_ShadowSMShaderPSPtr;
         CShaderPtr m_ShadowRSMShaderPSPtr;
@@ -106,18 +110,18 @@ namespace
 
         void OnDirtyComponent(Dt::IComponent* _pComponent);
 
-        void CreateRSM(unsigned int _Size, CInternComponent* _pInternLight);
+        void CreateRSM(unsigned int _Size, CInternObject* _pInternLight);
 
-        void CreateSM(unsigned int _Size, CInternComponent* _pInternLight);
+        void CreateSM(unsigned int _Size, CInternObject* _pInternLight);
 
-        void RenderShadows(CInternComponent& _rInternLight, const Dt::CPointLightComponent* _pDtPointLight, const glm::vec3& _rLightPosition);
+        void RenderShadows(CInternObject& _rInternLight, const Dt::CPointLightComponent* _pDtPointLight, const glm::vec3& _rLightPosition);
     };
 } // namespace 
 
 namespace 
 {
-    CGfxPointLightManager::CInternComponent::CInternComponent()
-        : CPointLightComponent   ()
+    CGfxPointLightManager::CInternObject::CInternObject()
+        : CPointLight        ()
         , m_RenderContextPtr ()
         , m_CurrentShadowType(Dt::CPointLightComponent::NoShadows)
     {
@@ -126,7 +130,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    CGfxPointLightManager::CInternComponent::~CInternComponent()
+    CGfxPointLightManager::CInternObject::~CInternObject()
     {
         m_RenderContextPtr = 0;
     }
@@ -135,7 +139,8 @@ namespace
 namespace 
 {
     CGfxPointLightManager::CGfxPointLightManager()
-        : m_ShadowShaderVSPtr      ()
+        : m_PointLights            ()
+        , m_ShadowShaderVSPtr      ()
         , m_ShadowSMShaderPSPtr    ()
         , m_ShadowRSMShaderPSPtr   ()
         , m_ShadowRSMTexShaderPSPtr()
@@ -224,13 +229,15 @@ namespace
         // -----------------------------------------------------------------------------
         // Register dirty entity handler for automatic sky creation
         // -----------------------------------------------------------------------------
-        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(DATA_DIRTY_COMPONENT_METHOD(&CGfxPointLightManager::OnDirtyComponent));
+        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(BASE_DIRTY_COMPONENT_METHOD(&CGfxPointLightManager::OnDirtyComponent));
     }
 
     // -----------------------------------------------------------------------------
 
     void CGfxPointLightManager::OnExit()
     {
+        m_PointLights.Clear();
+
         m_ShadowShaderVSPtr       = 0;
         m_ShadowSMShaderPSPtr     = 0;
         m_ShadowRSMShaderPSPtr    = 0;
@@ -254,15 +261,15 @@ namespace
 
             if (pDtComponent->IsActiveAndUsable() == false) continue;
 
-            CInternComponent* pGfxPointLightFacet = CComponentManager::GetInstance().GetComponent<CInternComponent>(pDtComponent->GetID());
+            CInternObject* pGfxPointLight = static_cast<CInternObject*>(pDtComponent->GetFacet(Dt::CPointLightComponent::Graphic));
 
             if (pDtComponent->GetRefreshMode() == Dt::CPointLightComponent::Dynamic)
             {
                 // -----------------------------------------------------------------------------
                 // Update views
                 // -----------------------------------------------------------------------------
-                Gfx::CViewPtr   ShadowViewPtr   = pGfxPointLightFacet->m_RenderContextPtr->GetCamera()->GetView();
-                Gfx::CCameraPtr ShadowCameraPtr = pGfxPointLightFacet->m_RenderContextPtr->GetCamera();
+                Gfx::CViewPtr   ShadowViewPtr   = pGfxPointLight->m_RenderContextPtr->GetCamera()->GetView();
+                Gfx::CCameraPtr ShadowCameraPtr = pGfxPointLight->m_RenderContextPtr->GetCamera();
 
                 glm::vec3 LightPosition  = pDtComponent->GetHostEntity()->GetWorldPosition();
                 glm::vec3 LightDirection = pDtComponent->GetDirection();
@@ -293,7 +300,7 @@ namespace
                 // -----------------------------------------------------------------------------
                 // Render
                 // -----------------------------------------------------------------------------
-                RenderShadows(*pGfxPointLightFacet, pDtComponent, LightPosition);
+                RenderShadows(*pGfxPointLight, pDtComponent, LightPosition);
             }
         }
     }
@@ -306,7 +313,7 @@ namespace
 
         Dt::CPointLightComponent* pPointLightComponent = static_cast<Dt::CPointLightComponent*>(_pComponent);
 
-        CInternComponent* pGfxPointLightFacet = 0;
+        CInternObject* pGfxPointLightFacet = 0;
         Dt::CPointLightComponent::EShadowType ShadowType;
         unsigned int ShadowmapSizes[Dt::CPointLightComponent::NumberOfQualities] = { 256, 512, 1024, 2048 };
         unsigned int ShadowmapSize = 0;
@@ -323,7 +330,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Create facet
             // -----------------------------------------------------------------------------
-            pGfxPointLightFacet = CComponentManager::GetInstance().Allocate<CInternComponent>(pPointLightComponent->GetID());
+            pGfxPointLightFacet = m_PointLights.Allocate();
 
             // -----------------------------------------------------------------------------
             // Set shadow data
@@ -344,10 +351,15 @@ namespace
             pGfxPointLightFacet->m_ShadowmapSize = ShadowmapSize;
 
             pGfxPointLightFacet->m_CurrentShadowType = ShadowType;
+
+            // -----------------------------------------------------------------------------
+            // Link
+            // -----------------------------------------------------------------------------
+            pPointLightComponent->SetFacet(Dt::CPointLightComponent::Graphic, pGfxPointLightFacet);
         }
         else if ((DirtyFlags & Dt::CPointLightComponent::DirtyInfo) != 0)
         {
-            pGfxPointLightFacet = CComponentManager::GetInstance().GetComponent<CInternComponent>(pPointLightComponent->GetID());
+            pGfxPointLightFacet = static_cast<CInternObject*>(pPointLightComponent->GetFacet(Dt::CPointLightComponent::Graphic));
 
             assert(pGfxPointLightFacet);
 
@@ -370,7 +382,7 @@ namespace
         }
         else
         {
-            pGfxPointLightFacet = CComponentManager::GetInstance().GetComponent<CInternComponent>(pPointLightComponent->GetID());
+            pGfxPointLightFacet = static_cast<CInternObject*>(pPointLightComponent->GetFacet(Dt::CPointLightComponent::Graphic));
         }
         
         assert(pGfxPointLightFacet);
@@ -422,7 +434,7 @@ namespace
 
     // -----------------------------------------------------------------------------
     
-    void CGfxPointLightManager::CreateRSM(unsigned int _Size, CInternComponent* _pInternLight)
+    void CGfxPointLightManager::CreateRSM(unsigned int _Size, CInternObject* _pInternLight)
     {
         unsigned int NumberOfShadowMapPixel = _Size;
         
@@ -520,7 +532,7 @@ namespace
 
     // -----------------------------------------------------------------------------
     
-    void CGfxPointLightManager::CreateSM(unsigned int _Size, CInternComponent* _pInternLight)
+    void CGfxPointLightManager::CreateSM(unsigned int _Size, CInternObject* _pInternLight)
     {
         unsigned int NumberOfShadowMapPixel = _Size;
         
@@ -597,7 +609,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxPointLightManager::RenderShadows(CInternComponent& _rInternLight, const Dt::CPointLightComponent* _pDtPointLight, const glm::vec3& _rLightPosition)
+    void CGfxPointLightManager::RenderShadows(CInternObject& _rInternLight, const Dt::CPointLightComponent* _pDtPointLight, const glm::vec3& _rLightPosition)
     {
         if (_rInternLight.m_CurrentShadowType == Dt::CPointLightComponent::NoShadows) return;
 
@@ -633,9 +645,7 @@ namespace
 
             if (pDtComponent->IsActiveAndUsable() == false) continue;
 
-            CMeshComponent* pGfxComponent = CComponentManager::GetInstance().GetComponent<CMeshComponent>(pDtComponent->GetID());
-
-            CMeshPtr ModelPtr = pGfxComponent->GetMesh();
+            CMesh* pMesh = static_cast<CMesh*>(pDtComponent->GetFacet(Dt::CMeshComponent::Graphic));
 
             // -----------------------------------------------------------------------------
             // Upload model matrix to buffer
@@ -647,110 +657,102 @@ namespace
             BufferManager::UploadBufferData(m_LightCameraVSBufferPtr->GetBuffer(1), &ModelBuffer);
 
             // -----------------------------------------------------------------------------
-            // Render every surface of this entity
+            // Render surface of this entity
             // -----------------------------------------------------------------------------
-            unsigned int NumberOfSurfaces = ModelPtr->GetLOD(0)->GetNumberOfSurfaces();
+            CSurfacePtr SurfacePtr = pMesh->GetLOD(0)->GetSurface();
 
-            for (unsigned int IndexOfSurface = 0; IndexOfSurface < NumberOfSurfaces; ++IndexOfSurface)
+            // -----------------------------------------------------------------------------
+            // Set material
+            // -----------------------------------------------------------------------------
+            const Gfx::CMaterial* pMaterial = SurfacePtr->GetMaterial();
+
+            if (pDtComponent->GetHostEntity()->GetComponentFacet()->HasComponent<Dt::CMaterialComponent>())
             {
-                CSurfacePtr SurfacePtr = ModelPtr->GetLOD(0)->GetSurface(IndexOfSurface);
+                auto pDtMaterialComponent = pDtComponent->GetHostEntity()->GetComponentFacet()->GetComponent<Dt::CMaterialComponent>();
 
-                if (SurfacePtr == nullptr)
+                pMaterial = static_cast<const Gfx::CMaterial*>(pDtMaterialComponent->GetFacet(Dt::CMaterialComponent::Graphic));
+            }
+
+            // -----------------------------------------------------------------------------
+            // Set shader + buffer
+            // -----------------------------------------------------------------------------
+            ContextManager::SetShaderVS(m_ShadowShaderVSPtr);
+
+            ContextManager::SetConstantBuffer(0, m_LightCameraVSBufferPtr->GetBuffer(0));
+
+            ContextManager::SetConstantBuffer(1, m_LightCameraVSBufferPtr->GetBuffer(1));
+
+            if (_rInternLight.m_CurrentShadowType == Dt::CPointLightComponent::GlobalIllumination)
+            {
+                if (pMaterial->GetKey().m_HasDiffuseTex)
                 {
-                    continue;
-                }
+                    ContextManager::SetShaderPS(m_ShadowRSMTexShaderPSPtr);
 
-                // -----------------------------------------------------------------------------
-                // Set material
-                // -----------------------------------------------------------------------------
-                CMaterialPtr MaterialPtr = SurfacePtr->GetMaterial();
-
-                if (pGfxComponent->GetMaterial(IndexOfSurface) != 0)
-                {
-                    MaterialPtr = pGfxComponent->GetMaterial(IndexOfSurface);
-                }
-
-                // -----------------------------------------------------------------------------
-                // Set shader + buffer
-                // -----------------------------------------------------------------------------
-                ContextManager::SetShaderVS(m_ShadowShaderVSPtr);
-
-                ContextManager::SetConstantBuffer(0, m_LightCameraVSBufferPtr->GetBuffer(0));
-
-                ContextManager::SetConstantBuffer(1, m_LightCameraVSBufferPtr->GetBuffer(1));
-
-                if (_rInternLight.m_CurrentShadowType == Dt::CPointLightComponent::GlobalIllumination)
-                {
-                    if (MaterialPtr->GetKey().m_HasDiffuseTex)
+                    for (unsigned int IndexOfTexture = 0; IndexOfTexture < pMaterial->GetTextureSetPS()->GetNumberOfTextures(); ++IndexOfTexture)
                     {
-                        ContextManager::SetShaderPS(m_ShadowRSMTexShaderPSPtr);
+                        ContextManager::SetSampler(IndexOfTexture, pMaterial->GetSamplerSetPS()->GetSampler(IndexOfTexture));
 
-                        for (unsigned int IndexOfTexture = 0; IndexOfTexture < MaterialPtr->GetTextureSetPS()->GetNumberOfTextures(); ++IndexOfTexture)
-                        {
-                            ContextManager::SetSampler(IndexOfTexture, MaterialPtr->GetSamplerSetPS()->GetSampler(IndexOfTexture));
-
-                            ContextManager::SetTexture(IndexOfTexture, MaterialPtr->GetTextureSetPS()->GetTexture(IndexOfTexture));
-                        }
+                        ContextManager::SetTexture(IndexOfTexture, pMaterial->GetTextureSetPS()->GetTexture(IndexOfTexture));
                     }
-                    else
-                    {
-                        ContextManager::SetShaderPS(m_ShadowRSMShaderPSPtr);
-                    }
-
-                    BufferManager::UploadBufferData(m_RSMPSBuffer->GetBuffer(0), &MaterialPtr->GetMaterialAttributes());
-
-                    // -----------------------------------------------------------------------------
-
-                    SPunctualLightProperties PunctualLightProperties;
-
-                    float InvSqrAttenuationRadius = _pDtPointLight->GetReciprocalSquaredAttenuationRadius();
-                    float AngleScale = _pDtPointLight->GetAngleScale();
-                    float AngleOffset = _pDtPointLight->GetAngleOffset();
-
-                    PunctualLightProperties.m_LightPosition = glm::vec4(_rLightPosition, 1.0f);
-                    PunctualLightProperties.m_LightDirection = glm::normalize(glm::vec4(_pDtPointLight->GetDirection(), 0.0f));
-                    PunctualLightProperties.m_LightColor = glm::vec4(_pDtPointLight->GetLightness(), 1.0f);
-                    PunctualLightProperties.m_LightSettings = glm::vec4(InvSqrAttenuationRadius, AngleScale, AngleOffset, 0.0f);
-
-                    BufferManager::UploadBufferData(m_RSMPSBuffer->GetBuffer(1), &PunctualLightProperties);
-
-                    ContextManager::SetConstantBuffer(2, m_RSMPSBuffer->GetBuffer(0));
-
-                    ContextManager::SetConstantBuffer(3, m_RSMPSBuffer->GetBuffer(1));
                 }
                 else
                 {
-                    ContextManager::SetShaderPS(m_ShadowSMShaderPSPtr);
+                    ContextManager::SetShaderPS(m_ShadowRSMShaderPSPtr);
                 }
 
-                // -----------------------------------------------------------------------------
-                // Get input layout from optimal shader
-                // -----------------------------------------------------------------------------
-                assert(SurfacePtr->GetKey().m_HasPosition);
-
-                CInputLayoutPtr LayoutPtr = SurfacePtr->GetShaderVS()->GetInputLayout();
+                BufferManager::UploadBufferData(m_RSMPSBuffer->GetBuffer(0), &pMaterial->GetMaterialAttributes());
 
                 // -----------------------------------------------------------------------------
-                // Set items to context manager
-                // -----------------------------------------------------------------------------
-                ContextManager::SetVertexBuffer(SurfacePtr->GetVertexBuffer());
 
-                ContextManager::SetIndexBuffer(SurfacePtr->GetIndexBuffer(), 0);
+                SPunctualLightProperties PunctualLightProperties;
 
-                ContextManager::SetInputLayout(LayoutPtr);
+                float InvSqrAttenuationRadius = _pDtPointLight->GetReciprocalSquaredAttenuationRadius();
+                float AngleScale = _pDtPointLight->GetAngleScale();
+                float AngleOffset = _pDtPointLight->GetAngleOffset();
 
-                ContextManager::SetTopology(STopology::TriangleList);
+                PunctualLightProperties.m_LightPosition  = glm::vec4(_rLightPosition, 1.0f);
+                PunctualLightProperties.m_LightDirection = glm::normalize(glm::vec4(_pDtPointLight->GetDirection(), 0.0f));
+                PunctualLightProperties.m_LightColor     = glm::vec4(_pDtPointLight->GetLightness(), 1.0f);
+                PunctualLightProperties.m_LightSettings  = glm::vec4(InvSqrAttenuationRadius, AngleScale, AngleOffset, 0.0f);
 
-                ContextManager::DrawIndexed(SurfacePtr->GetNumberOfIndices(), 0, 0);
+                BufferManager::UploadBufferData(m_RSMPSBuffer->GetBuffer(1), &PunctualLightProperties);
 
-                ContextManager::ResetTopology();
+                ContextManager::SetConstantBuffer(2, m_RSMPSBuffer->GetBuffer(0));
 
-                ContextManager::ResetInputLayout();
-
-                ContextManager::ResetIndexBuffer();
-
-                ContextManager::ResetVertexBuffer();
+                ContextManager::SetConstantBuffer(3, m_RSMPSBuffer->GetBuffer(1));
             }
+            else
+            {
+                ContextManager::SetShaderPS(m_ShadowSMShaderPSPtr);
+            }
+
+            // -----------------------------------------------------------------------------
+            // Get input layout from optimal shader
+            // -----------------------------------------------------------------------------
+            assert(SurfacePtr->GetKey().m_HasPosition);
+
+            CInputLayoutPtr LayoutPtr = SurfacePtr->GetShaderVS()->GetInputLayout();
+
+            // -----------------------------------------------------------------------------
+            // Set items to context manager
+            // -----------------------------------------------------------------------------
+            ContextManager::SetVertexBuffer(SurfacePtr->GetVertexBuffer());
+
+            ContextManager::SetIndexBuffer(SurfacePtr->GetIndexBuffer(), 0);
+
+            ContextManager::SetInputLayout(LayoutPtr);
+
+            ContextManager::SetTopology(STopology::TriangleList);
+
+            ContextManager::DrawIndexed(SurfacePtr->GetNumberOfIndices(), 0, 0);
+
+            ContextManager::ResetTopology();
+
+            ContextManager::ResetInputLayout();
+
+            ContextManager::ResetIndexBuffer();
+
+            ContextManager::ResetVertexBuffer();
         }
 
         ContextManager::ResetConstantBuffer(0);

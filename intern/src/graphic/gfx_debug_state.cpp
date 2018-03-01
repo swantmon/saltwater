@@ -10,7 +10,6 @@
 #include "graphic/gfx_ar_renderer.h"
 #include "graphic/gfx_area_light_manager.h"
 #include "graphic/gfx_background_renderer.h"
-#include "graphic/gfx_camera_manager.h"
 #include "graphic/gfx_debug_renderer.h"
 #include "graphic/gfx_debug_state.h"
 #include "graphic/gfx_fog_renderer.h"
@@ -73,7 +72,6 @@ namespace
     {
         Main::BeginFrame();
 
-        CameraManager     ::Update();
         SunManager        ::Update();
         SkyManager        ::Update();
         LightProbeManager ::Update();

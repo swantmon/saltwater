@@ -10,8 +10,9 @@
 
 #include "base/base_include_glm.h"
 
-#include "data/data_component_manager.h"
+#include "data/data_component.h"
 #include "data/data_component_facet.h"
+#include "data/data_component_manager.h"
 #include "data/data_entity.h"
 #include "data/data_map.h"
 #include "data/data_mesh_component.h"
@@ -19,16 +20,14 @@
 #include "data/data_transformation_facet.h"
 
 #include "graphic/gfx_buffer_manager.h"
-#include "graphic/gfx_component_manager.h"
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_main.h"
 #include "graphic/gfx_mesh.h"
-#include "graphic/gfx_mesh_component.h"
 #include "graphic/gfx_performance.h"
 #include "graphic/gfx_sampler_manager.h"
 #include "graphic/gfx_shader_manager.h"
 #include "graphic/gfx_state_manager.h"
-#include "graphic/gfx_sun_component.h"
+#include "graphic/gfx_sun.h"
 #include "graphic/gfx_sun_manager.h"
 #include "graphic/gfx_target_set.h"
 #include "graphic/gfx_target_set_manager.h"
@@ -69,7 +68,7 @@ namespace
             glm::mat4 m_ModelMatrix;
         };
 
-        class CInternSunComponent : public CSunComponent
+        class CInternSunComponent : public CSun
         {
         public:
 
@@ -86,6 +85,12 @@ namespace
         };
 
     private:
+
+        typedef Base::CManagedPool<CInternSunComponent, 4, 0> CSuns;
+
+    private:
+
+        CSuns m_Suns;
 
         CShaderPtr m_ShadowShaderVSPtr;
         CShaderPtr m_ShadowSMShaderPSPtr;
@@ -105,7 +110,7 @@ namespace
 namespace
 {
     CGfxSunManager::CInternSunComponent::CInternSunComponent()
-        : CSunComponent     ()
+        : CSun              ()
         , m_RenderContextPtr()
     {
         
@@ -122,7 +127,8 @@ namespace
 namespace
 {
     CGfxSunManager::CGfxSunManager()
-        : m_ShadowShaderVSPtr     ()
+        : m_Suns                  ()
+        , m_ShadowShaderVSPtr     ()
         , m_ShadowSMShaderPSPtr   ()
         , m_LightCameraVSBufferPtr()
     {
@@ -176,13 +182,15 @@ namespace
         // -----------------------------------------------------------------------------
         // On dirty stuff
         // -----------------------------------------------------------------------------
-        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(DATA_DIRTY_COMPONENT_METHOD(&CGfxSunManager::OnDirtyComponent));
+        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(BASE_DIRTY_COMPONENT_METHOD(&CGfxSunManager::OnDirtyComponent));
     }
     
     // -----------------------------------------------------------------------------
     
     void CGfxSunManager::OnExit()
     {
+        m_Suns.Clear();
+
         m_ShadowShaderVSPtr      = 0;
         m_ShadowSMShaderPSPtr    = 0;
         m_LightCameraVSBufferPtr = 0;
@@ -200,7 +208,7 @@ namespace
 
             if (pDtComponent->IsActiveAndUsable() == false) continue;
 
-            CInternSunComponent* pGfxSunFacet = CComponentManager::GetInstance().GetComponent<CInternSunComponent>(pDtComponent->GetID());
+            CInternSunComponent* pGfxSunFacet = static_cast<CInternSunComponent*>(pDtComponent->GetFacet(Dt::CSunComponent::Graphic));
 
             assert(pGfxSunFacet != nullptr);
 
@@ -257,7 +265,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Create facet
             // -----------------------------------------------------------------------------
-            CInternSunComponent* pGfxSunFacet = CComponentManager::GetInstance().Allocate<CInternSunComponent>(pSunComponent->GetID());
+            CInternSunComponent* pGfxSunFacet = m_Suns.Allocate();
 
             // -----------------------------------------------------------------------------
             // Set shadow data
@@ -273,10 +281,15 @@ namespace
             // Set dirty
             // -----------------------------------------------------------------------------
             pGfxSunFacet->m_TimeStamp = Core::Time::GetNumberOfFrame() + 1;
+
+            // -----------------------------------------------------------------------------
+            // Link
+            // -----------------------------------------------------------------------------
+            pSunComponent->SetFacet(Dt::CSunComponent::Graphic, pGfxSunFacet);
         }
         else
         {
-            CInternSunComponent* pGfxSunFacet = CComponentManager::GetInstance().GetComponent<CInternSunComponent>(pSunComponent->GetID());
+            CInternSunComponent* pGfxSunFacet = static_cast<CInternSunComponent*>(pSunComponent->GetFacet(Dt::CSunComponent::Graphic));
 
             assert(pGfxSunFacet != nullptr);
 
@@ -403,9 +416,9 @@ namespace
 
             if (pDtComponent->IsActiveAndUsable() == false) continue;
 
-            CMeshComponent* pGfxComponent = CComponentManager::GetInstance().GetComponent<CMeshComponent>(pDtComponent->GetID());
+            CMesh* pGfxComponent = static_cast<CMesh*>(pDtComponent->GetFacet(Dt::CMeshComponent::Graphic));
 
-            CMeshPtr MeshPtr = pGfxComponent->GetMesh();
+            CMeshPtr MeshPtr = pGfxComponent;
 
             // -----------------------------------------------------------------------------
             // Upload model matrix to buffer
@@ -419,45 +432,40 @@ namespace
             // -----------------------------------------------------------------------------
             // Render every surface of this entity
             // -----------------------------------------------------------------------------
-            unsigned int NumberOfSurfaces = MeshPtr->GetLOD(0)->GetNumberOfSurfaces();
+            CSurfacePtr SurfacePtr = MeshPtr->GetLOD(0)->GetSurface();
 
-            for (unsigned int IndexOfSurface = 0; IndexOfSurface < NumberOfSurfaces; ++IndexOfSurface)
+            if (SurfacePtr == nullptr)
             {
-                CSurfacePtr SurfacePtr = MeshPtr->GetLOD(0)->GetSurface(IndexOfSurface);
-
-                if (SurfacePtr == nullptr)
-                {
-                    continue;
-                }
-
-                // -----------------------------------------------------------------------------
-                // Get input layout from optimal shader
-                // -----------------------------------------------------------------------------
-                assert(SurfacePtr->GetKey().m_HasPosition);
-
-                CInputLayoutPtr LayoutPtr = SurfacePtr->GetShaderVS()->GetInputLayout();
-
-                // -----------------------------------------------------------------------------
-                // Set items to context manager
-                // -----------------------------------------------------------------------------
-                ContextManager::SetVertexBuffer(SurfacePtr->GetVertexBuffer());
-
-                ContextManager::SetIndexBuffer(SurfacePtr->GetIndexBuffer(), 0);
-
-                ContextManager::SetInputLayout(LayoutPtr);
-
-                ContextManager::SetTopology(STopology::TriangleList);
-
-                ContextManager::DrawIndexed(SurfacePtr->GetNumberOfIndices(), 0, 0);
-
-                ContextManager::ResetTopology();
-
-                ContextManager::ResetInputLayout();
-
-                ContextManager::ResetIndexBuffer();
-
-                ContextManager::ResetVertexBuffer();
+                continue;
             }
+
+            // -----------------------------------------------------------------------------
+            // Get input layout from optimal shader
+            // -----------------------------------------------------------------------------
+            assert(SurfacePtr->GetKey().m_HasPosition);
+
+            CInputLayoutPtr LayoutPtr = SurfacePtr->GetShaderVS()->GetInputLayout();
+
+            // -----------------------------------------------------------------------------
+            // Set items to context manager
+            // -----------------------------------------------------------------------------
+            ContextManager::SetVertexBuffer(SurfacePtr->GetVertexBuffer());
+
+            ContextManager::SetIndexBuffer(SurfacePtr->GetIndexBuffer(), 0);
+
+            ContextManager::SetInputLayout(LayoutPtr);
+
+            ContextManager::SetTopology(STopology::TriangleList);
+
+            ContextManager::DrawIndexed(SurfacePtr->GetNumberOfIndices(), 0, 0);
+
+            ContextManager::ResetTopology();
+
+            ContextManager::ResetInputLayout();
+
+            ContextManager::ResetIndexBuffer();
+
+            ContextManager::ResetVertexBuffer();
         }
 
         ContextManager::ResetConstantBuffer(0);

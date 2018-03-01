@@ -5,13 +5,14 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
+#include "core/core_asset_manager.h"
+
 #include "data/data_component_facet.h"
-#include "data/data_component_manager.h"
+#include "data/data_component.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_hierarchy_facet.h"
 #include "data/data_map.h"
-#include "data/data_model_manager.h"
 #include "data/data_transformation_facet.h"
 
 #include "editor/edit_entity_helper.h"
@@ -111,7 +112,7 @@ namespace
     {
         Dt::SEntityDescriptor EntityDesc;
 
-        EntityDesc.m_EntityCategory = 0;
+        EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
         EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
         Dt::CEntity& rNewEntity = Dt::EntityManager::CreateEntity(EntityDesc);
@@ -129,20 +130,32 @@ namespace
 
     void CEntityHelper::OnLoadEntity(Edit::CMessage& _rMessage)
     {
-        Dt::SModelFileDescriptor ModelFileDesc;
+        std::string Modelfile = _rMessage.Get<std::string>();
 
-        std::string PathToFile = _rMessage.Get<std::string>();
+        std::string PathToModel = Core::AssetManager::GetPathToAssets() + "/" + Modelfile;
 
-        ModelFileDesc.m_pFileName = PathToFile.c_str();
-        ModelFileDesc.m_GenFlag   = Dt::SGeneratorFlag::Default;
+        auto ListOfEntities = Dt::EntityManager::CreateEntitiesFromScene(PathToModel);
 
-        Dt::CModel& rModel = Dt::ModelManager::CreateModel(ModelFileDesc);
+        if (ListOfEntities.size() > 0)
+        {
+            Dt::SEntityDescriptor EntityDescriptor;
 
-        Dt::CEntity& rNewEntity = Dt::EntityManager::CreateEntityFromModel(rModel);
+            EntityDescriptor.m_EntityCategory = Dt::SEntityCategory::Dynamic;
+            EntityDescriptor.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
-        rNewEntity.SetName("New Prefab");
+            Dt::CEntity& rRootEntity = Dt::EntityManager::CreateEntity(EntityDescriptor);
 
-        Dt::EntityManager::MarkEntityAsDirty(rNewEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+            rRootEntity.SetName(Modelfile);
+
+            for (auto SubEntity : ListOfEntities)
+            {
+                assert(SubEntity != nullptr);
+
+                rRootEntity.Attach(*SubEntity);
+            }
+
+            Dt::EntityManager::MarkEntityAsDirty(rRootEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
     }
 
     // -----------------------------------------------------------------------------

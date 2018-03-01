@@ -5,6 +5,11 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
+#include "core/core_asset_manager.h"
+
+#include "data/data_component.h"
+#include "data/data_component_manager.h"
+#include "data/data_material_component.h"
 #include "data/data_material_manager.h"
 #include "data/data_texture_manager.h"
 
@@ -38,8 +43,6 @@ namespace
         void OnRequestMaterialInfo(Edit::CMessage& _rMessage);
 
         void OnMaterialUpdate(Edit::CMessage& _rMessage);
-
-        void OnDirtyMaterial(Dt::CMaterial* _pMaterial);
     };
 } // namespace
 
@@ -61,11 +64,6 @@ namespace
 
     void CMaterialHelper::OnStart()
     {
-        // -----------------------------------------------------------------------------
-        // Entity
-        // -----------------------------------------------------------------------------
-        Dt::MaterialManager::RegisterDirtyMaterialHandler(DATA_DIRTY_MATERIAL_METHOD(&CMaterialHelper::OnDirtyMaterial));
-
         // -----------------------------------------------------------------------------
         // Edit
         // -----------------------------------------------------------------------------
@@ -90,33 +88,6 @@ namespace
     void CMaterialHelper::OnNewMaterial(Edit::CMessage& _rMessage)
     {
         BASE_UNUSED(_rMessage);
-
-        // -----------------------------------------------------------------------------
-        // Material
-        // -----------------------------------------------------------------------------
-        Dt::SMaterialDescriptor MaterialDescriptor;
-
-        MaterialDescriptor.m_pMaterialName   = 0;
-        MaterialDescriptor.m_pColorMap       = 0;
-        MaterialDescriptor.m_pNormalMap      = 0;
-        MaterialDescriptor.m_pRoughnessMap   = 0;
-        MaterialDescriptor.m_pMetalMaskMap   = 0;
-        MaterialDescriptor.m_pAOMap          = 0;
-        MaterialDescriptor.m_pBumpMap        = 0;
-        MaterialDescriptor.m_Roughness       = 1.0f;
-        MaterialDescriptor.m_Reflectance     = 0.0f;
-        MaterialDescriptor.m_MetalMask       = 0.0f;
-        MaterialDescriptor.m_Displacement    = 0.0f;
-        MaterialDescriptor.m_AlbedoColor     = glm::vec3(1.0f);
-        MaterialDescriptor.m_TilingOffset    = glm::vec4(1.0f, 1.0f, 0.0f, 0.0f);
-        MaterialDescriptor.m_pFileName       = 0;
-        
-        Dt::CMaterial& rNewMaterial = Dt::MaterialManager::CreateMaterial(MaterialDescriptor);
-
-        // -----------------------------------------------------------------------------
-        // Add model to map
-        // -----------------------------------------------------------------------------
-        Dt::MaterialManager::MarkMaterialAsDirty(rNewMaterial, Dt::CMaterial::DirtyCreate);
     }
 
     // -----------------------------------------------------------------------------
@@ -131,127 +102,51 @@ namespace
         // -----------------------------------------------------------------------------
         // Material
         // -----------------------------------------------------------------------------
-        Dt::SMaterialDescriptor MaterialDescriptor;
+        std::string PathToMaterial = Core::AssetManager::GetPathToAssets() + "/" + PathToFile;
 
-        MaterialDescriptor.m_pMaterialName   = 0;
-        MaterialDescriptor.m_pColorMap       = 0;
-        MaterialDescriptor.m_pNormalMap      = 0;
-        MaterialDescriptor.m_pRoughnessMap   = 0;
-        MaterialDescriptor.m_pMetalMaskMap   = 0;
-        MaterialDescriptor.m_pAOMap          = 0;
-        MaterialDescriptor.m_pBumpMap        = 0;
-        MaterialDescriptor.m_Roughness       = 1.0f;
-        MaterialDescriptor.m_Reflectance     = 0.0f;
-        MaterialDescriptor.m_MetalMask       = 0.0f;
-        MaterialDescriptor.m_Displacement    = 0.0f;
-        MaterialDescriptor.m_AlbedoColor     = glm::vec3(1.0f);
-        MaterialDescriptor.m_TilingOffset    = glm::vec4(1.0f, 1.0f, 0.0f, 0.0f);
-        MaterialDescriptor.m_pFileName       = PathToFile.c_str();
-        
-        Dt::CMaterial& rNewMaterial = Dt::MaterialManager::CreateMaterial(MaterialDescriptor);
+        auto pComponent = Dt::MaterialManager::CreateMaterialFromXML(PathToMaterial);
 
         // -----------------------------------------------------------------------------
-        // Set result as hash
+        // Set result as ID
         // -----------------------------------------------------------------------------
-        _rMessage.SetResult(rNewMaterial.GetHash());
-
-        // -----------------------------------------------------------------------------
-        // Mark material as dirty
-        // -----------------------------------------------------------------------------
-        Dt::MaterialManager::MarkMaterialAsDirty(rNewMaterial, Dt::CMaterial::DirtyCreate);
+        if (pComponent != nullptr)
+        {
+            _rMessage.SetResult(static_cast<int>(pComponent->GetHash()));
+        }
+        else
+        {
+            _rMessage.SetResult(-1);
+        }
     }
 
     // -----------------------------------------------------------------------------
 
     void CMaterialHelper::OnRequestMaterialInfo(Edit::CMessage& _rMessage)
     {
-        int MaterialHash = _rMessage.Get<int>();
+        Base::BHash MaterialHash = _rMessage.Get<Base::BHash>();
 
-        Dt::CMaterial& rMaterial = Dt::MaterialManager::GetMaterialByHash(static_cast<unsigned int>(MaterialHash));
+        auto pMaterial = Dt::MaterialManager::GetMaterialByHash(MaterialHash);
+
+        if (pMaterial == nullptr) return;
 
         Edit::CMessage NewMessage;
 
-        NewMessage.Put(rMaterial.GetHash());
+        NewMessage.Put(pMaterial->GetHash());
 
-        NewMessage.Put(rMaterial.GetColor()[0]);
-        NewMessage.Put(rMaterial.GetColor()[1]);
-        NewMessage.Put(rMaterial.GetColor()[2]);
+        NewMessage.Put(pMaterial->GetColor());
+        NewMessage.Put(pMaterial->GetTilingOffset());
 
-        NewMessage.Put(rMaterial.GetTilingOffset()[0]);
-        NewMessage.Put(rMaterial.GetTilingOffset()[1]);
-        NewMessage.Put(rMaterial.GetTilingOffset()[2]);
-        NewMessage.Put(rMaterial.GetTilingOffset()[3]);
+        NewMessage.Put(pMaterial->GetRoughness());
+        NewMessage.Put(pMaterial->GetReflectance());
+        NewMessage.Put(pMaterial->GetMetalness());
+        NewMessage.Put(pMaterial->GetDisplacement());
 
-        NewMessage.Put(rMaterial.GetRoughness());
-        NewMessage.Put(rMaterial.GetReflectance());
-        NewMessage.Put(rMaterial.GetMetalness());
-        NewMessage.Put(rMaterial.GetDisplacement());
-
-        if (rMaterial.GetColorTexture())
-        {
-            NewMessage.Put(true);
-
-            NewMessage.Put(rMaterial.GetColorTexture()->GetFileName());
-        }
-        else
-        {
-            NewMessage.Put(false);
-        }
-
-        if (rMaterial.GetNormalTexture())
-        {
-            NewMessage.Put(true);
-
-            NewMessage.Put(rMaterial.GetNormalTexture()->GetFileName());
-        }
-        else
-        {
-            NewMessage.Put(false);
-        }
-
-        if (rMaterial.GetRoughnessTexture())
-        {
-            NewMessage.Put(true);
-
-            NewMessage.Put(rMaterial.GetRoughnessTexture()->GetFileName());
-        }
-        else
-        {
-            NewMessage.Put(false);
-        }
-
-        if (rMaterial.GetMetalTexture())
-        {
-            NewMessage.Put(true);
-
-            NewMessage.Put(rMaterial.GetMetalTexture()->GetFileName());
-        }
-        else
-        {
-            NewMessage.Put(false);
-        }
-
-        if (rMaterial.GetBumpTexture())
-        {
-            NewMessage.Put(true);
-
-            NewMessage.Put(rMaterial.GetBumpTexture()->GetFileName());
-        }
-        else
-        {
-            NewMessage.Put(false);
-        }
-
-        if (rMaterial.GetAmbientOcclusionTexture())
-        {
-            NewMessage.Put(true);
-
-            NewMessage.Put(rMaterial.GetAmbientOcclusionTexture()->GetFileName());
-        }
-        else
-        {
-            NewMessage.Put(false);
-        }
+        NewMessage.Put(pMaterial->GetColorTexture());
+        NewMessage.Put(pMaterial->GetNormalTexture());
+        NewMessage.Put(pMaterial->GetRoughnessTexture());
+        NewMessage.Put(pMaterial->GetMetalTexture());
+        NewMessage.Put(pMaterial->GetBumpTexture());
+        NewMessage.Put(pMaterial->GetAmbientOcclusionTexture());
 
         NewMessage.Reset();
 
@@ -262,196 +157,56 @@ namespace
 
     void CMaterialHelper::OnMaterialUpdate(Edit::CMessage& _rMessage)
     {
-        unsigned int MaterialHash = _rMessage.Get<int>();
+        Base::BHash MaterialHash = _rMessage.Get<Base::BHash>();
 
-        Dt::CMaterial& rMaterial = Dt::MaterialManager::GetMaterialByHash(MaterialHash);
-
-        float X, Y, Z, W;
-
-        bool HasColorMap     = false;
-        bool HasNormalMap    = false;
-        bool HasRoughnessMap = false;
-        bool HasMetalnessMap = false;
-        bool HasBumpMap      = false;
-        bool HasAOMap        = false;
-
-        unsigned int ColorMapName = 0;
-        unsigned int NormalMapName = 0;
-        unsigned int RoughnessMapName = 0;
-        unsigned int MetalMapName = 0;
-        unsigned int BumpMapName = 0;
-        unsigned int AOMapName = 0;
+        auto pMaterial = Dt::MaterialManager::GetMaterialByHash(MaterialHash);
 
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
-        X = _rMessage.Get<float>();
-        Y = _rMessage.Get<float>();
-        Z = _rMessage.Get<float>();
+        glm::vec3 Color = _rMessage.Get<glm::vec3>();
 
-        glm::vec3 Color = glm::vec3(X, Y, Z);
+        glm::vec4 TilingOffset = _rMessage.Get<glm::vec4>();
 
-        X = _rMessage.Get<float>();
-        Y = _rMessage.Get<float>();
-        Z = _rMessage.Get<float>();
-        W = _rMessage.Get<float>();
-
-        glm::vec4 TilingOffset = glm::vec4(X, Y, Z, W);
-
-        float Roughness = _rMessage.Get<float>();
-
-        float Reflectance = _rMessage.Get<float>();
-
-        float Metalness = _rMessage.Get<float>();
-
+        float Roughness    = _rMessage.Get<float>();
+        float Reflectance  = _rMessage.Get<float>();
+        float Metalness    = _rMessage.Get<float>();
         float Displacement = _rMessage.Get<float>();
 
-        HasColorMap = _rMessage.Get<bool>();
+        std::string ColorMapName     = _rMessage.Get<std::string>();
+        std::string NormalMapName    = _rMessage.Get<std::string>();
+        std::string RoughnessMapName = _rMessage.Get<std::string>();
+        std::string MetalMapName     = _rMessage.Get<std::string>();
+        std::string BumpMapName      = _rMessage.Get<std::string>();
+        std::string AOMapName        = _rMessage.Get<std::string>();
+ 
+        pMaterial->SetColor(Color);
+        pMaterial->SetTilingOffset(TilingOffset);
+        pMaterial->SetRoughness(Roughness);
+        pMaterial->SetReflectance(Reflectance);
+        pMaterial->SetMetalness(Metalness);
+        pMaterial->SetDisplacement(Displacement);
 
-        if (HasColorMap)
+        pMaterial->SetColorTexture(ColorMapName);
+        pMaterial->SetNormalTexture(NormalMapName);
+        pMaterial->SetRoughnessTexture(RoughnessMapName);
+        pMaterial->SetMetalTexture(MetalMapName);
+        pMaterial->SetBumpTexture(BumpMapName);
+        pMaterial->SetAmbientOcclusionTexture(AOMapName);
+
+        // -----------------------------------------------------------------------------
+        // Mark all material components related to this material as dirty
+        // -----------------------------------------------------------------------------
+        auto MaterialComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CMaterialComponent>();
+
+        for (auto Component : MaterialComponents)
         {
-            ColorMapName = _rMessage.Get<unsigned int>();
-        }
+            auto MaterialComponent = static_cast<Dt::CMaterialComponent*>(Component);
 
-        HasNormalMap = _rMessage.Get<bool>();
-
-        if (HasNormalMap)
-        {
-            NormalMapName = _rMessage.Get<unsigned int>();
-        }
-
-        HasRoughnessMap = _rMessage.Get<bool>();
-
-        if (HasRoughnessMap)
-        {
-            RoughnessMapName = _rMessage.Get<unsigned int>();
-        }
-
-        HasMetalnessMap = _rMessage.Get<bool>();
-
-        if (HasMetalnessMap)
-        {
-            MetalMapName = _rMessage.Get<unsigned int>();
-        }
-
-        HasBumpMap = _rMessage.Get<bool>();
-
-        if (HasBumpMap)
-        {
-            BumpMapName = _rMessage.Get<unsigned int>();
-        }
-
-        HasAOMap = _rMessage.Get<bool>();
-
-        if (HasAOMap)
-        {
-            AOMapName = _rMessage.Get<unsigned int>();
-        }
-
-        rMaterial.SetColor       (Color);
-        rMaterial.SetTilingOffset(TilingOffset);
-        rMaterial.SetRoughness   (Roughness);
-        rMaterial.SetReflectance (Reflectance);
-        rMaterial.SetMetalness   (Metalness);
-        rMaterial.SetDisplacement(Displacement);
-
-        if (HasColorMap)
-        {
-            Dt::CTexture2D* pTexture = Dt::TextureManager::GetTexture2DByHash(ColorMapName);
-
-            if (pTexture != nullptr)
+            if (MaterialComponent->GetMaterial()->GetHash() == MaterialHash)
             {
-                rMaterial.SetColorTexture(pTexture);
+                Dt::CComponentManager::GetInstance().MarkComponentAsDirty(MaterialComponent, Dt::CMaterialComponent::DirtyInfo);
             }
-        }
-        else
-        {
-            rMaterial.SetColorTexture(0);
-        }
-
-        if (HasNormalMap)
-        {
-            Dt::CTexture2D* pTexture = Dt::TextureManager::GetTexture2DByHash(NormalMapName);
-
-            if (pTexture != nullptr)
-            {
-                rMaterial.SetNormalTexture(pTexture);
-            }
-        }
-        else
-        {
-            rMaterial.SetNormalTexture(0);
-        }
-
-        if (HasRoughnessMap)
-        {
-            Dt::CTexture2D* pTexture = Dt::TextureManager::GetTexture2DByHash(RoughnessMapName);
-
-            if (pTexture != nullptr)
-            {
-                rMaterial.SetRoughnessTexture(pTexture);
-            }
-        }
-        else
-        {
-            rMaterial.SetRoughnessTexture(0);
-        }
-
-        if (HasMetalnessMap)
-        {
-            Dt::CTexture2D* pTexture = Dt::TextureManager::GetTexture2DByHash(MetalMapName);
-
-            if (pTexture != nullptr)
-            {
-                rMaterial.SetMetalTexture(pTexture);
-            }
-        }
-        else
-        {
-            rMaterial.SetMetalTexture(0);
-        }
-
-        if (HasBumpMap)
-        {
-            Dt::CTexture2D* pTexture = Dt::TextureManager::GetTexture2DByHash(BumpMapName);
-
-            if (pTexture != nullptr)
-            {
-                rMaterial.SetBumpTexture(pTexture);
-            }
-        }
-        else
-        {
-            rMaterial.SetBumpTexture(0);
-        }
-
-        if (HasAOMap)
-        {
-            Dt::CTexture2D* pTexture = Dt::TextureManager::GetTexture2DByHash(AOMapName);
-
-            if (pTexture != nullptr)
-            {
-                rMaterial.SetAmbientOcclusionTexture(pTexture);
-            }
-        }
-        else
-        {
-            rMaterial.SetAmbientOcclusionTexture(0);
-        }
-
-        Dt::MaterialManager::MarkMaterialAsDirty(rMaterial, Dt::CMaterial::DirtyData | Dt::CMaterial::DirtyTexture);
-    }
-
-
-    // -----------------------------------------------------------------------------
-
-    void CMaterialHelper::OnDirtyMaterial(Dt::CMaterial* _pMaterial)
-    {
-        assert(_pMaterial != nullptr);
-
-        if ((_pMaterial->GetDirtyFlags() & Dt::CMaterial::DirtyCreate) != 0)
-        {
-            
         }
     }
 } // namespace

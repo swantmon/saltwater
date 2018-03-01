@@ -5,20 +5,21 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
+#include "data/data_component.h"
 #include "data/data_component_facet.h"
 #include "data/data_component_manager.h"
 #include "data/data_entity.h"
 #include "data/data_map.h"
+#include "data/data_material_component.h"
 #include "data/data_mesh_component.h"
 #include "data/data_transformation_facet.h"
 
 #include "graphic/gfx_buffer_manager.h"
-#include "graphic/gfx_component_manager.h"
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_main.h"
+#include "graphic/gfx_material.h"
 #include "graphic/gfx_material_manager.h"
 #include "graphic/gfx_mesh.h"
-#include "graphic/gfx_mesh_component.h"
 #include "graphic/gfx_mesh_manager.h"
 #include "graphic/gfx_mesh_renderer.h"
 #include "graphic/gfx_performance.h"
@@ -82,11 +83,11 @@ namespace
 
         struct SRenderJob
         {
-            unsigned int m_SurfaceAttributes;
-            Base::ID     m_EntityID;
-            CSurfacePtr  m_SurfacePtr;
-            CMaterialPtr m_SurfaceMaterialPtr;
-            glm::mat4    m_ModelMatrix;
+            unsigned int     m_SurfaceAttributes;
+            Base::ID         m_EntityID;
+            CSurfacePtr      m_SurfacePtr;
+            const CMaterial* m_SurfaceMaterialPtr;
+            glm::mat4        m_ModelMatrix;
         };
 
     private:
@@ -330,30 +331,27 @@ namespace
         // -----------------------------------------------------------------------------
         // Prepare renderer
         // -----------------------------------------------------------------------------
-        
-
         ContextManager::SetRenderContext(m_DeferredContextPtr);
 
         // -----------------------------------------------------------------------------
-        // First pass: iterate throw render jobs and compute all meshes
+        // Iterate throw render jobs and render all meshes
         // -----------------------------------------------------------------------------
-        CRenderJobs::const_iterator EndOfRenderJobs = m_DeferredRenderJobs.end();
-
-        for (CRenderJobs::const_iterator CurrentRenderJob = m_DeferredRenderJobs.begin(); CurrentRenderJob != EndOfRenderJobs; ++CurrentRenderJob)
+        for (auto CurrentRenderJob : m_DeferredRenderJobs)
         {
-            CSurfacePtr  SurfacePtr  = CurrentRenderJob->m_SurfacePtr;
-            CMaterialPtr MaterialPtr = CurrentRenderJob->m_SurfaceMaterialPtr;
+            CSurfacePtr SurfacePtr = CurrentRenderJob.m_SurfacePtr;
+
+            const CMaterial* pMaterial = CurrentRenderJob.m_SurfaceMaterialPtr;
 
             // -----------------------------------------------------------------------------
             // Upload data to buffer
             // -----------------------------------------------------------------------------
             SPerDrawCallConstantBufferVS ModelBuffer;
 
-            ModelBuffer.m_ModelMatrix = CurrentRenderJob->m_ModelMatrix;
+            ModelBuffer.m_ModelMatrix = CurrentRenderJob.m_ModelMatrix;
 
             BufferManager::UploadBufferData(m_ModelBufferPtr, &ModelBuffer);
 
-            BufferManager::UploadBufferData(m_SurfaceMaterialBufferPtr, &MaterialPtr->GetMaterialAttributes());
+            BufferManager::UploadBufferData(m_SurfaceMaterialBufferPtr, &pMaterial->GetMaterialAttributes());
 
             // -----------------------------------------------------------------------------
             // Render
@@ -362,15 +360,15 @@ namespace
 
             ContextManager::SetShaderVS(SurfacePtr->GetShaderVS());
 
-            ContextManager::SetShaderGS(MaterialPtr->GetShaderGS());
+            ContextManager::SetShaderGS(pMaterial->GetShaderGS());
 
-            ContextManager::SetShaderPS(MaterialPtr->GetShaderPS());
+            ContextManager::SetShaderPS(pMaterial->GetShaderPS());
 
-            for (unsigned int IndexOfTexture = 0; IndexOfTexture < MaterialPtr->GetTextureSetPS()->GetNumberOfTextures(); ++IndexOfTexture)
+            for (unsigned int IndexOfTexture = 0; IndexOfTexture < pMaterial->GetTextureSetPS()->GetNumberOfTextures(); ++IndexOfTexture)
             {
-                ContextManager::SetSampler(IndexOfTexture, MaterialPtr->GetSamplerSetPS()->GetSampler(IndexOfTexture));
+                ContextManager::SetSampler(IndexOfTexture, pMaterial->GetSamplerSetPS()->GetSampler(IndexOfTexture));
 
-                ContextManager::SetTexture(IndexOfTexture, MaterialPtr->GetTextureSetPS()->GetTexture(IndexOfTexture));
+                ContextManager::SetTexture(IndexOfTexture, pMaterial->GetTextureSetPS()->GetTexture(IndexOfTexture));
             }
 
             ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
@@ -382,11 +380,11 @@ namespace
             // TODO: we have to set buffer to shader on model loading
             // TODO: remove GetHasBump()
             // -----------------------------------------------------------------------------
-            if (MaterialPtr->GetHasBump())
+            if (pMaterial->GetHasBump())
             {
-                ContextManager::SetShaderDS(MaterialPtr->GetShaderDS());
+                ContextManager::SetShaderDS(pMaterial->GetShaderDS());
 
-                ContextManager::SetShaderHS(MaterialPtr->GetShaderHS());
+                ContextManager::SetShaderHS(pMaterial->GetShaderHS());
 
                 ContextManager::SetTopology(STopology::Patches);
             }
@@ -402,23 +400,23 @@ namespace
 
             ContextManager::DrawIndexed(SurfacePtr->GetNumberOfIndices(), 0, 0);
 
-            for (unsigned int IndexOfTexture = 0; IndexOfTexture < MaterialPtr->GetTextureSetPS()->GetNumberOfTextures(); ++IndexOfTexture)
+            for (unsigned int IndexOfTexture = 0; IndexOfTexture < pMaterial->GetTextureSetPS()->GetNumberOfTextures(); ++IndexOfTexture)
             {
                 ContextManager::ResetSampler(IndexOfTexture);
 
                 ContextManager::ResetTexture(IndexOfTexture);
             }
-
-            ContextManager::ResetInputLayout();
-
-            ContextManager::ResetIndexBuffer();
-
-            ContextManager::ResetVertexBuffer();
-
-            ContextManager::ResetConstantBuffer(0);
-            ContextManager::ResetConstantBuffer(1);
-            ContextManager::ResetConstantBuffer(2);
         }
+
+        ContextManager::ResetInputLayout();
+
+        ContextManager::ResetIndexBuffer();
+
+        ContextManager::ResetVertexBuffer();
+
+        ContextManager::ResetConstantBuffer(0);
+        ContextManager::ResetConstantBuffer(1);
+        ContextManager::ResetConstantBuffer(2);
 
         ContextManager::ResetShaderVS();
 
@@ -445,34 +443,26 @@ namespace
 
         Performance::BeginEvent("Actors Hit Proxy");
 
-        // -----------------------------------------------------------------------------
-        // Prepare renderer
-        // -----------------------------------------------------------------------------
         ContextManager::SetRenderContext(m_HitProxyContextPtr);
 
         ContextManager::SetTopology(STopology::TriangleList);
 
-        // -----------------------------------------------------------------------------
-        // First pass: iterate throw render jobs and compute all meshes
-        // -----------------------------------------------------------------------------
-        CRenderJobs::const_iterator EndOfRenderJobs = m_DeferredRenderJobs.end();
-
-        for (CRenderJobs::const_iterator CurrentRenderJob = m_DeferredRenderJobs.begin(); CurrentRenderJob != EndOfRenderJobs; ++CurrentRenderJob)
+        for (auto CurrentRenderJob : m_DeferredRenderJobs)
         {
-            CSurfacePtr  SurfacePtr  = CurrentRenderJob->m_SurfacePtr;
+            CSurfacePtr  SurfacePtr  = CurrentRenderJob.m_SurfacePtr;
 
             // -----------------------------------------------------------------------------
             // Upload data to buffer
             // -----------------------------------------------------------------------------
             SPerDrawCallConstantBufferVS ModelBuffer;
 
-            ModelBuffer.m_ModelMatrix = CurrentRenderJob->m_ModelMatrix;
+            ModelBuffer.m_ModelMatrix = CurrentRenderJob.m_ModelMatrix;
 
             BufferManager::UploadBufferData(m_ModelBufferPtr, &ModelBuffer);
 
             SHitProxyProperties HitProxyProperties;
 
-            HitProxyProperties.m_ID = static_cast<unsigned int>(CurrentRenderJob->m_EntityID);
+            HitProxyProperties.m_ID = static_cast<unsigned int>(CurrentRenderJob.m_EntityID);
 
             BufferManager::UploadBufferData(m_HitProxyPassPSBufferPtr, &HitProxyProperties);
 
@@ -494,21 +484,21 @@ namespace
             ContextManager::SetInputLayout(SurfacePtr->GetShaderVS()->GetInputLayout());
 
             ContextManager::DrawIndexed(SurfacePtr->GetNumberOfIndices(), 0, 0);
-
-            ContextManager::ResetInputLayout();
-
-            ContextManager::ResetIndexBuffer();
-
-            ContextManager::ResetVertexBuffer();
-
-            ContextManager::ResetConstantBuffer(0);
-            ContextManager::ResetConstantBuffer(1);
-            ContextManager::ResetConstantBuffer(2);
-
-            ContextManager::ResetShaderPS();
-
-            ContextManager::ResetShaderVS();
         }
+
+        ContextManager::ResetInputLayout();
+
+        ContextManager::ResetIndexBuffer();
+
+        ContextManager::ResetVertexBuffer();
+
+        ContextManager::ResetConstantBuffer(0);
+        ContextManager::ResetConstantBuffer(1);
+        ContextManager::ResetConstantBuffer(2);
+
+        ContextManager::ResetShaderPS();
+
+        ContextManager::ResetShaderVS();
 
         ContextManager::ResetTopology();
 
@@ -554,50 +544,36 @@ namespace
             // -----------------------------------------------------------------------------
             if (rCurrentEntity.GetLayer() == Dt::SEntityLayer::Default)
             {
-                Gfx::CMeshComponent* pGfxComponent = Gfx::CComponentManager::GetInstance().GetComponent<Gfx::CMeshComponent>(pDtComponent->GetID());
-
-                CMeshPtr MeshPtr = pGfxComponent->GetMesh();
+                Gfx::CMesh* pGfxComponent = static_cast<Gfx::CMesh*>(pDtComponent->GetFacet(Dt::CMeshComponent::Graphic));
 
                 // -----------------------------------------------------------------------------
                 // Set every surface of this entity into a new render job
                 // -----------------------------------------------------------------------------
-                unsigned int NumberOfSurfaces = MeshPtr->GetLOD(0)->GetNumberOfSurfaces();
+                CSurfacePtr SurfacePtr = pGfxComponent->GetLOD(0)->GetSurface();
 
-                for (unsigned int IndexOfSurface = 0; IndexOfSurface < NumberOfSurfaces; ++IndexOfSurface)
+                const Gfx::CMaterial* pMaterial = SurfacePtr->GetMaterial();
+
+                if (pDtComponent->GetHostEntity()->GetComponentFacet()->HasComponent<Dt::CMaterialComponent>())
                 {
-                    CSurfacePtr SurfacePtr = MeshPtr->GetLOD(0)->GetSurface(IndexOfSurface);
+                    auto pMaterialComponent = pDtComponent->GetHostEntity()->GetComponentFacet()->GetComponent<Dt::CMaterialComponent>();
 
-                    if (SurfacePtr == nullptr)
-                    {
-                        break;
-                    }
-
-                    CMaterialPtr MaterialPtr;
-
-                    if (pGfxComponent->GetMaterial(IndexOfSurface) != 0)
-                    {
-                        MaterialPtr = pGfxComponent->GetMaterial(IndexOfSurface);
-                    }
-                    else
-                    {
-                        MaterialPtr = SurfacePtr->GetMaterial();
-                    }
-
-                    assert(MaterialPtr != 0 && MaterialPtr.IsValid());
-
-                    // -----------------------------------------------------------------------------
-                    // Set information to render job
-                    // -----------------------------------------------------------------------------
-                    SRenderJob NewRenderJob;
-
-                    NewRenderJob.m_SurfaceAttributes  = SurfacePtr->GetKey().m_Key;
-                    NewRenderJob.m_EntityID           = rCurrentEntity.GetID();
-                    NewRenderJob.m_SurfacePtr         = SurfacePtr;
-                    NewRenderJob.m_SurfaceMaterialPtr = MaterialPtr;
-                    NewRenderJob.m_ModelMatrix        = rCurrentEntity.GetTransformationFacet()->GetWorldMatrix();
-
-                    m_DeferredRenderJobs.push_back(NewRenderJob);
+                    pMaterial = static_cast<const Gfx::CMaterial*>(pMaterialComponent->GetFacet(Dt::CMaterialComponent::Graphic));
                 }
+
+                assert(pMaterial != 0);
+
+                // -----------------------------------------------------------------------------
+                // Set information to render job
+                // -----------------------------------------------------------------------------
+                SRenderJob NewRenderJob;
+
+                NewRenderJob.m_SurfaceAttributes  = SurfacePtr->GetKey().m_Key;
+                NewRenderJob.m_EntityID           = rCurrentEntity.GetID();
+                NewRenderJob.m_SurfacePtr         = SurfacePtr;
+                NewRenderJob.m_SurfaceMaterialPtr = pMaterial;
+                NewRenderJob.m_ModelMatrix        = rCurrentEntity.GetTransformationFacet()->GetWorldMatrix();
+
+                m_DeferredRenderJobs.push_back(NewRenderJob);
             }
         }
 

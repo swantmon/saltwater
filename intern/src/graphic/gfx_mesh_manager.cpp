@@ -4,27 +4,33 @@
 #include "base/base_aabb3.h"
 #include "base/base_console.h"
 #include "base/base_crc.h"
+#include "base/base_exception.h"
 #include "base/base_include_glm.h"
 #include "base/base_memory.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
+#include "core/core_asset_importer.h"
+#include "core/core_asset_manager.h"
+
 #include "data/data_component.h"
 #include "data/data_component_manager.h"
 #include "data/data_entity.h"
 #include "data/data_mesh_component.h"
-#include "data/data_model.h"
 
 #include "graphic/gfx_buffer_manager.h"
-#include "graphic/gfx_component.h"
-#include "graphic/gfx_component_manager.h"
 #include "graphic/gfx_input_layout.h"
 #include "graphic/gfx_material_manager.h"
-#include "graphic/gfx_mesh_component.h"
+#include "graphic/gfx_mesh.h"
 #include "graphic/gfx_mesh_manager.h"
 #include "graphic/gfx_shader.h"
 #include "graphic/gfx_shader_manager.h"
 
+#include "assimp/Importer.hpp"
+#include "assimp/postprocess.h"
+#include "assimp/scene.h"
+
+#include <array>
 #include <unordered_map>
 #include <functional>
 
@@ -127,6 +133,11 @@ namespace
 
 namespace
 {
+    std::string g_PathToDataModels = "/graphic/models/";
+} // namespace  
+
+namespace
+{
     class CGfxMeshManager : private Base::CUncopyable
     {
         BASE_SINGLETON_FUNC(CGfxMeshManager)
@@ -140,10 +151,8 @@ namespace
         
         void OnStart();
         void OnExit();
-
-        void Clear();
         
-        CMeshPtr CreateMesh(const SMeshDescriptor& _rDescriptor);
+        CMeshPtr CreateMeshFromFile(const std::string& _rPathToFile, int _GenFlag, int _MeshIndex);
         CMeshPtr CreateBox(float _Width, float _Height, float _Depth);
         CMeshPtr CreateSphere(float _Radius, unsigned int _Stacks, unsigned int _Slices);
         CMeshPtr CreateSphereIsometric(float _Radius, unsigned int _Refinement);
@@ -152,17 +161,10 @@ namespace
 
     private:
 
-        class CInternMeshComponent : public CMeshComponent
-        {
-        private:
-
-            friend class CGfxMeshManager;
-        };
-        
         class CInternMesh : public CMesh
         {
         private:
-            
+
             friend class CGfxMeshManager;
         };
         
@@ -182,12 +184,11 @@ namespace
         
     private:
         
-        typedef Base::CManagedPool<CInternMesh    , 64  , 1> CMeshes;
-        typedef Base::CManagedPool<CInternLOD     , 256 , 1> CLODs;
-        typedef Base::CManagedPool<CInternSurface , 1024, 1> CSurfaces;
+        typedef Base::CManagedPool<CInternMesh   , 64  , 1> CMeshes;
+        typedef Base::CManagedPool<CInternLOD    , 256 , 1> CLODs;
+        typedef Base::CManagedPool<CInternSurface, 1024, 1> CSurfaces;
         
-        typedef std::unordered_map<unsigned int, CInternMesh*> CModelByIDs;
-        typedef CModelByIDs::iterator                           CModelByIDPair;
+        typedef std::unordered_map<Base::BHash, CInternMesh*> CMeshByHash;
         
     private:
         
@@ -195,25 +196,29 @@ namespace
         CLODs      m_LODs;
         CSurfaces  m_Surfaces;
         
-        CModelByIDs m_ModelByID;
+        CMeshByHash m_ModelByHash;
 
     private:
 
         void SetVertexShaderOfSurface(CInternSurface& _rSurface);
 
         void OnDirtyComponent(Dt::IComponent* _pComponent);
+
+        void FillMeshFromFile(CInternMesh* _pMesh, const std::string& _rFilename, int _GenFlag, int _MeshIndex);
+
+        void FillMeshFromAssimp(CInternMesh* _pMesh, const aiScene* _pScene, int _MeshIndex);
     };
 } // namespace
 
 namespace
 {
     CGfxMeshManager::CGfxMeshManager()
-        : m_Meshes   ()
-        , m_LODs     ()
-        , m_Surfaces ()
-        , m_ModelByID()
+        : m_Meshes     ()
+        , m_LODs       ()
+        , m_Surfaces   ()
+        , m_ModelByHash()
     {
-        m_ModelByID.reserve(64);
+        m_ModelByHash.reserve(64);
     }
     
     // -----------------------------------------------------------------------------
@@ -227,274 +232,55 @@ namespace
     
     void CGfxMeshManager::OnStart()
     {
-        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(DATA_DIRTY_COMPONENT_METHOD(&CGfxMeshManager::OnDirtyComponent));
+        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(BASE_DIRTY_COMPONENT_METHOD(&CGfxMeshManager::OnDirtyComponent));
     }
     
     // -----------------------------------------------------------------------------
     
     void CGfxMeshManager::OnExit()
     {
-        Clear();
-    }
+        m_Meshes.Clear();
+        m_LODs.Clear();
+        m_Surfaces.Clear();
 
-    // -----------------------------------------------------------------------------
-
-    void CGfxMeshManager::Clear()
-    {
-        m_Meshes   .Clear();
-        m_LODs     .Clear();
-        m_Surfaces .Clear();
-
-        m_ModelByID.clear();
+        m_ModelByHash.clear();
     }
     
     // -----------------------------------------------------------------------------
     
-    CMeshPtr CGfxMeshManager::CreateMesh(const Gfx::SMeshDescriptor& _rDescriptor)
+    CMeshPtr CGfxMeshManager::CreateMeshFromFile(const std::string& _rPathToFile, int _GenFlag, int _MeshIndex)
     {
-        Dt::CMesh& rDataModel = *_rDescriptor.m_pMesh;
-        
+        if (_rPathToFile.length() == 0) return nullptr;
+
         // -----------------------------------------------------------------------------
         // Check existing model
         // -----------------------------------------------------------------------------
         unsigned int Hash = 0;
         
-        if (rDataModel.GetMeshname().length() > 0)
+        Hash = Base::CRC32(Hash, _rPathToFile.c_str(), static_cast<unsigned int>(_rPathToFile.length()));
+
+        Hash = Base::CRC32(Hash, &_GenFlag, sizeof(_GenFlag));
+
+        Hash = Base::CRC32(Hash, &_MeshIndex, sizeof(_MeshIndex));
+
+        if (m_ModelByHash.find(Hash) != m_ModelByHash.end())
         {
-            Hash = Base::CRC32(rDataModel.GetMeshname().c_str(), static_cast<unsigned int>(rDataModel.GetMeshname().length()));
-            
-            if (m_ModelByID.find(Hash) != m_ModelByID.end())
-            {
-                return CMeshPtr(m_ModelByID.at(Hash));
-            }
+            return m_ModelByHash.at(Hash);
         }
-        
+
         // -----------------------------------------------------------------------------
-        // Create model
+        // Entities with model data
         // -----------------------------------------------------------------------------
-        CMeshes::CPtr ModelPtr = m_Meshes.Allocate();
-        
-        CInternMesh& rModel = *ModelPtr;
-        
-        rModel.m_NumberOfLODs = rDataModel.GetNumberOfLODs();
-        
-        // -----------------------------------------------------------------------------
-        // For every LOD we have to create everything (data, material, informations,
-        // ...)
-        // -----------------------------------------------------------------------------
-        for (unsigned int IndexOfLOD = 0; IndexOfLOD < rDataModel.GetNumberOfLODs(); ++IndexOfLOD)
-        {
-            Dt::CLOD& rCurrentLOD = *rDataModel.GetLOD(IndexOfLOD);
-            
-            CLODs::CPtr LODPtr = m_LODs.Allocate();
-            
-            CInternLOD& rLOD = *LODPtr;
-            
-            rLOD.m_NumberOfSurfaces = rCurrentLOD.GetNumberOfSurfaces();
-            
-            // -----------------------------------------------------------------------------
-            // For every surface in model create material and surface informations
-            // -----------------------------------------------------------------------------
-            for (unsigned int IndexOfSurface = 0; IndexOfSurface < rCurrentLOD.GetNumberOfSurfaces(); ++IndexOfSurface)
-            {
-                // -----------------------------------------------------------------------------
-                // Create surface depending on data
-                // -----------------------------------------------------------------------------
-                Dt::CSurface& rCurrentSurface = *rCurrentLOD.GetSurface(IndexOfSurface);
-                
-                CSurfaces::CPtr SurfacePtr = m_Surfaces.Allocate();
-                
-                CInternSurface& rSurface = *SurfacePtr;
-                
-                // -----------------------------------------------------------------------------
-                // Surface attributes
-                // -----------------------------------------------------------------------------
-                rSurface.m_SurfaceKey.m_HasPosition  = true;
-                rSurface.m_SurfaceKey.m_HasNormal    = ((rCurrentSurface.GetElements() & Dt::CSurface::Normal)     == Dt::CSurface::Normal);
-                rSurface.m_SurfaceKey.m_HasTangent   = ((rCurrentSurface.GetElements() & Dt::CSurface::Tangent)    == Dt::CSurface::Tangent);
-                rSurface.m_SurfaceKey.m_HasBitangent = ((rCurrentSurface.GetElements() & Dt::CSurface::Tangent)    == Dt::CSurface::Tangent);
-                rSurface.m_SurfaceKey.m_HasTexCoords = ((rCurrentSurface.GetElements() & Dt::CSurface::TexCoord0)  == Dt::CSurface::TexCoord0);
+        auto MeshPtr = m_Meshes.Allocate();
 
-                // -----------------------------------------------------------------------------
-                // Set vertex shader
-                // -----------------------------------------------------------------------------
-                SetVertexShaderOfSurface(rSurface);
-
-                // -----------------------------------------------------------------------------
-                // Prepare mesh data for data alignment
-                // -----------------------------------------------------------------------------
-                unsigned int NumberOfVertices           = rCurrentSurface.GetNumberOfVertices() * rSurface.m_SurfaceKey.m_HasPosition;
-                unsigned int NumberOfNormals            = rCurrentSurface.GetNumberOfVertices() * rSurface.m_SurfaceKey.m_HasNormal;
-                unsigned int NumberOfTagents            = rCurrentSurface.GetNumberOfVertices() * rSurface.m_SurfaceKey.m_HasTangent;
-                unsigned int NumberOfBitangents         = rCurrentSurface.GetNumberOfVertices() * rSurface.m_SurfaceKey.m_HasBitangent;
-                unsigned int NumberOfTexCoords          = rCurrentSurface.GetNumberOfVertices() * (rSurface.m_SurfaceKey.m_HasTexCoords >= 1);
-                unsigned int NumberOfVerticeElements    = 3 * rSurface.m_SurfaceKey.m_HasPosition;
-                unsigned int NumberOfNormalElements     = 3 * rSurface.m_SurfaceKey.m_HasNormal;
-                unsigned int NumberOfTagentsElements    = 3 * rSurface.m_SurfaceKey.m_HasTangent;
-                unsigned int NumberOfBitangentsElements = 3 * rSurface.m_SurfaceKey.m_HasBitangent;
-                unsigned int NumberOfTexCoordElements   = 2 * (rSurface.m_SurfaceKey.m_HasTexCoords >= 1);
-                unsigned int NumberOfVertexElements     = NumberOfVertices * NumberOfVerticeElements + NumberOfNormals * NumberOfNormalElements + NumberOfTagents * NumberOfTagentsElements + NumberOfBitangents * NumberOfBitangentsElements + NumberOfTexCoords * NumberOfTexCoordElements;
-                unsigned int NumberOfElementsPerVertex  = NumberOfVerticeElements + NumberOfNormalElements + NumberOfTagentsElements + NumberOfBitangentsElements + NumberOfTexCoordElements;
-                unsigned int NumberOfIndices            = rCurrentSurface.GetNumberOfIndices();
+        FillMeshFromFile(MeshPtr, _rPathToFile, _GenFlag, _MeshIndex);
                 
-                // -----------------------------------------------------------------------------
-                // Prepare upload data of vertices
-                // -----------------------------------------------------------------------------
-                unsigned int* pUploadIndexData = static_cast<unsigned int* >(Base::CMemory::Allocate(sizeof(unsigned int) * NumberOfIndices));
-                float* pUploadVertexData = static_cast<float* >(Base::CMemory::Allocate(sizeof(float) * NumberOfVertexElements));
-
-                // -----------------------------------------------------------------------------
-                // Get data from data model
-                // -----------------------------------------------------------------------------
-                const glm::vec3* pPosition   = rCurrentSurface.GetPositions();
-                const glm::vec3* pNormals    = rCurrentSurface.GetNormals();
-                const glm::vec3* pTangents   = rCurrentSurface.GetTangents();
-                const glm::vec3* pBitangents = rCurrentSurface.GetBitangents();
-                const glm::vec2* pTexCoords  = rCurrentSurface.GetTexCoords();
-                const unsigned int* pIndices    = rCurrentSurface.GetIndices();
-
-                // -----------------------------------------------------------------------------
-                // Prepare AABB
-                // -----------------------------------------------------------------------------
-                glm::vec3 StartPosition(pPosition[0][0], pPosition[0][1], pPosition[0][2]);
-
-                rModel.m_AABB.SetMin(StartPosition);
-                rModel.m_AABB.SetMax(StartPosition);
-
-                // -----------------------------------------------------------------------------
-                // Copy indices
-                // -----------------------------------------------------------------------------
-                Base::CMemory::Copy(pUploadIndexData, pIndices, sizeof(unsigned int) * NumberOfIndices);
-                
-                // -----------------------------------------------------------------------------
-                // Iterate throw every vertex and put it into upload data
-                // -----------------------------------------------------------------------------
-                for (unsigned int CurrentVertex = 0; CurrentVertex < NumberOfVertices; ++CurrentVertex)
-                {
-                    unsigned int CurrentAlignIndex = CurrentVertex * NumberOfElementsPerVertex;
-                    
-                    glm::vec3 CurrentPosition(pPosition[CurrentVertex][0], pPosition[CurrentVertex][1], pPosition[CurrentVertex][2]);
-                    
-                    rModel.m_AABB.Extend(CurrentPosition);
-                    
-                    pUploadVertexData[CurrentAlignIndex + 0] = pPosition[CurrentVertex][0];
-                    pUploadVertexData[CurrentAlignIndex + 1] = pPosition[CurrentVertex][1];
-                    pUploadVertexData[CurrentAlignIndex + 2] = pPosition[CurrentVertex][2];
-                    
-                    CurrentAlignIndex += 3;
-                    
-                    if (rSurface.m_SurfaceKey.m_HasNormal)
-                    {
-                        pUploadVertexData[CurrentAlignIndex + 0] = pNormals[CurrentVertex][0];
-                        pUploadVertexData[CurrentAlignIndex + 1] = pNormals[CurrentVertex][1];
-                        pUploadVertexData[CurrentAlignIndex + 2] = pNormals[CurrentVertex][2];
-                        
-                        CurrentAlignIndex += 3;
-                    }
-                    
-                    if (rSurface.m_SurfaceKey.m_HasTangent)
-                    {
-                        pUploadVertexData[CurrentAlignIndex + 0] = pTangents[CurrentVertex][0];
-                        pUploadVertexData[CurrentAlignIndex + 1] = pTangents[CurrentVertex][1];
-                        pUploadVertexData[CurrentAlignIndex + 2] = pTangents[CurrentVertex][2];
-                        
-                        CurrentAlignIndex += 3;
-                    }
-                    
-                    if (rSurface.m_SurfaceKey.m_HasBitangent)
-                    {
-                        pUploadVertexData[CurrentAlignIndex + 0] = pBitangents[CurrentVertex][0];
-                        pUploadVertexData[CurrentAlignIndex + 1] = pBitangents[CurrentVertex][1];
-                        pUploadVertexData[CurrentAlignIndex + 2] = pBitangents[CurrentVertex][2];
-                        
-                        CurrentAlignIndex += 3;
-                    }
-                    
-                    if (rSurface.m_SurfaceKey.m_HasTexCoords >= 1)
-                    {
-                        pUploadVertexData[CurrentAlignIndex + 0] = pTexCoords[CurrentVertex][0];
-                        pUploadVertexData[CurrentAlignIndex + 1] = pTexCoords[CurrentVertex][1];
-                        
-                        CurrentAlignIndex += 2;
-                    }
-                }
-                
-                // -----------------------------------------------------------------------------
-                // Create buffer with vertices's and indices (setup surface data)
-                // -----------------------------------------------------------------------------
-                SBufferDescriptor VertexBufferDesc;
-                
-                VertexBufferDesc.m_Stride        = 0;
-                VertexBufferDesc.m_Usage         = CBuffer::GPURead;
-                VertexBufferDesc.m_Binding       = CBuffer::VertexBuffer;
-                VertexBufferDesc.m_Access        = CBuffer::CPUWrite;
-                VertexBufferDesc.m_NumberOfBytes = sizeof(float) * NumberOfVertexElements;
-                VertexBufferDesc.m_pBytes        = pUploadVertexData;
-                VertexBufferDesc.m_pClassKey     = 0;
-                
-                rSurface.m_VertexBufferPtr = BufferManager::CreateBuffer(VertexBufferDesc);
-                
-                // -----------------------------------------------------------------------------
-                
-                SBufferDescriptor IndexBufferDesc;
-                
-                IndexBufferDesc.m_Stride        = 0;
-                IndexBufferDesc.m_Usage         = CBuffer::GPURead;
-                IndexBufferDesc.m_Binding       = CBuffer::IndexBuffer;
-                IndexBufferDesc.m_Access        = CBuffer::CPUWrite;
-                IndexBufferDesc.m_NumberOfBytes = sizeof(unsigned int) * NumberOfIndices;
-                IndexBufferDesc.m_pBytes        = pUploadIndexData;
-                IndexBufferDesc.m_pClassKey     = 0;
-                
-                rSurface.m_IndexBufferPtr = BufferManager::CreateBuffer(IndexBufferDesc);
-                
-                // -----------------------------------------------------------------------------
-                // Set last data information of the surface
-                // -----------------------------------------------------------------------------
-                rSurface.m_NumberOfVertices = NumberOfVertices;
-                rSurface.m_NumberOfIndices  = NumberOfIndices;
-                
-                // -----------------------------------------------------------------------------
-                // Delete allocated memory
-                // -----------------------------------------------------------------------------
-                Base::CMemory::Free(pUploadIndexData);
-                Base::CMemory::Free(pUploadVertexData);
-                
-                // -----------------------------------------------------------------------------
-                // Materials
-                // -----------------------------------------------------------------------------
-                if (rCurrentSurface.GetMaterial())
-                {
-                    unsigned int MaterialHash = rCurrentSurface.GetMaterial()->GetHash();
-                    
-                    rSurface.m_MaterialPtr = Gfx::MaterialManager::GetMaterialByHash(MaterialHash);
-                }
-                else
-                {
-                    rSurface.m_MaterialPtr = Gfx::MaterialManager::GetDefaultMaterial();
-                }
-                
-                // -----------------------------------------------------------------------------
-                // Assign surface to current LOD
-                // -----------------------------------------------------------------------------
-                rLOD.m_Surfaces[IndexOfSurface] = SurfacePtr;
-            }
-            
-            // -----------------------------------------------------------------------------
-            // Assign this LOD to our model
-            // -----------------------------------------------------------------------------
-            rModel.m_LODs[IndexOfLOD] = LODPtr;
-        }
-        
         // -----------------------------------------------------------------------------
         // Put this new model to hash list
         // -----------------------------------------------------------------------------
-        if (Hash != 0)
-        {
-            m_ModelByID[Hash] = &rModel;
-        }
+        m_ModelByHash[Hash] = MeshPtr;
         
-        return CMeshPtr(ModelPtr);
+        return CMeshPtr(MeshPtr);
     }
 
     // -----------------------------------------------------------------------------
@@ -521,8 +307,7 @@ namespace
         rModel.m_NumberOfLODs = 1;
         rModel.m_LODs[0] = LODPtr;
 
-        rLOD.m_NumberOfSurfaces = 1;
-        rLOD.m_Surfaces[0] = SurfacePtr;
+        rLOD.m_Surface = SurfacePtr;
 
         // -----------------------------------------------------------------------------
         // Prepare surface
@@ -532,7 +317,7 @@ namespace
         rSurface.m_SurfaceKey.m_HasNormal    = true;
         rSurface.m_SurfaceKey.m_HasTangent   = false;
         rSurface.m_SurfaceKey.m_HasBitangent = false;
-        rSurface.m_SurfaceKey.m_HasTexCoords = false;
+        rSurface.m_SurfaceKey.m_HasTexCoords = true;
 
         // -----------------------------------------------------------------------------
         // Calculate Data
@@ -541,104 +326,86 @@ namespace
         float HalfHeight = _Height / 2.0f;
         float HalfDepth  = _Depth  / 2.0f;
 
-        unsigned int NumberOfVertices = 8;
+        unsigned int NumberOfVertices = 36;
         unsigned int NumberOfIndices = 36;
 
-        glm::vec3* pVertices = static_cast<glm::vec3*>(Base::CMemory::Allocate(sizeof(glm::vec3) * NumberOfVertices * 2));
+        unsigned int NumberOfBytes = (2 * sizeof(glm::vec3) + sizeof(glm::vec2)) * NumberOfVertices;
+
+        float* pVertices = static_cast<float*>(Base::CMemory::Allocate(NumberOfBytes));
         unsigned int* pIndices  = static_cast<unsigned int*>(Base::CMemory::Allocate(sizeof(unsigned int) * NumberOfIndices));
 
         assert(pVertices);
         assert(pIndices);
 
-        // -----------------------------------------------------------------------------
-        // Create vertices's for a box
-        // -----------------------------------------------------------------------------
-        pVertices[0][0] = -HalfWidth;
-        pVertices[0][1] = -HalfDepth;
-        pVertices[0][2] = -HalfHeight;
+        std::array<glm::vec3, 8> Vertices;
+        std::array<glm::vec2, 4> UVs;
+        std::array<glm::vec3, 6> Normals;
+        std::array<std::array<glm::ivec3, 3>, 12> Triangles;
 
-        pVertices[1][0] = -HalfWidth;
-        pVertices[1][1] = -HalfDepth;
-        pVertices[1][2] = -HalfHeight;
+        Vertices[0] = glm::vec3(-HalfWidth, -HalfHeight,  HalfDepth);
+        Vertices[1] = glm::vec3( HalfWidth, -HalfHeight,  HalfDepth);
+        Vertices[2] = glm::vec3(-HalfWidth,  HalfHeight,  HalfDepth);
+        Vertices[3] = glm::vec3( HalfWidth,  HalfHeight,  HalfDepth);
+        Vertices[4] = glm::vec3(-HalfWidth,  HalfHeight, -HalfDepth);
+        Vertices[5] = glm::vec3( HalfWidth,  HalfHeight, -HalfDepth);
+        Vertices[6] = glm::vec3(-HalfWidth, -HalfHeight, -HalfDepth);
+        Vertices[7] = glm::vec3( HalfWidth, -HalfHeight, -HalfDepth);
 
-        pVertices[2][0] = -HalfWidth;
-        pVertices[2][1] = -HalfDepth;
-        pVertices[2][2] =  HalfHeight;
+        UVs[0] = glm::vec2(0.0f, 0.0f);
+        UVs[1] = glm::vec2(1.0f, 0.0f);
+        UVs[2] = glm::vec2(0.0f, 1.0f);
+        UVs[3] = glm::vec2(1.0f, 1.0f);
 
-        pVertices[3][0] = -HalfWidth;
-        pVertices[3][1] = -HalfDepth;
-        pVertices[3][2] =  HalfHeight;
+        Normals[0] = glm::vec3( 0.0f,  0.0f,  1.0f);
+        Normals[1] = glm::vec3( 0.0f,  1.0f,  0.0f);
+        Normals[2] = glm::vec3( 0.0f,  0.0f, -1.0f);
+        Normals[3] = glm::vec3( 0.0f, -1.0f,  0.0f);
+        Normals[4] = glm::vec3( 1.0f,  0.0f,  0.0f);
+        Normals[5] = glm::vec3(-1.0f,  0.0f,  0.0f);
 
-        pVertices[4][0] =  HalfWidth;
-        pVertices[4][1] = -HalfDepth;
-        pVertices[4][2] =  HalfHeight;
+        Triangles[0] = { glm::ivec3(0, 0, 0), glm::ivec3(1, 1, 0), glm::ivec3(2, 2, 0) };
+        Triangles[1] = { glm::ivec3(2, 2, 0), glm::ivec3(1, 1, 0), glm::ivec3(3, 3, 0) };
+        Triangles[2] = { glm::ivec3(2, 0, 1), glm::ivec3(3, 1, 1), glm::ivec3(4, 2, 1) };
+        Triangles[3] = { glm::ivec3(4, 2, 1), glm::ivec3(3, 1, 1), glm::ivec3(5, 3, 1) };
+        Triangles[4] = { glm::ivec3(4, 3, 2), glm::ivec3(5, 2, 2), glm::ivec3(6, 1, 2) };
+        Triangles[5] = { glm::ivec3(6, 1, 2), glm::ivec3(5, 2, 2), glm::ivec3(7, 0, 2) };
+        Triangles[6] = { glm::ivec3(6, 0, 3), glm::ivec3(7, 1, 3), glm::ivec3(0, 2, 3) };
+        Triangles[7] = { glm::ivec3(0, 2, 3), glm::ivec3(7, 1, 3), glm::ivec3(1, 3, 3) };
+        Triangles[8] = { glm::ivec3(1, 0, 4), glm::ivec3(7, 1, 4), glm::ivec3(3, 2, 4) };
+        Triangles[9] = { glm::ivec3(3, 2, 4), glm::ivec3(7, 1, 4), glm::ivec3(5, 3, 4) };
+        Triangles[10] = { glm::ivec3(6, 0, 5), glm::ivec3(0, 1, 5), glm::ivec3(4, 2, 5) };
+        Triangles[11] = { glm::ivec3(4, 2, 5), glm::ivec3(0, 1, 5), glm::ivec3(2, 3, 5) };
 
-        pVertices[5][0] =  HalfWidth;
-        pVertices[5][1] = -HalfDepth;
-        pVertices[5][2] =  HalfHeight;
+        unsigned int IndexOfVertex = 0;
 
-        pVertices[6][0] =  HalfWidth;
-        pVertices[6][1] = -HalfDepth;
-        pVertices[6][2] = -HalfHeight;
+        for (auto Triangle : Triangles)
+        {
+            for (auto Vertex : Triangle)
+            {
+                pVertices[IndexOfVertex + 0] = Vertices[Vertex[0]][0];
+                pVertices[IndexOfVertex + 1] = Vertices[Vertex[0]][1];
+                pVertices[IndexOfVertex + 2] = Vertices[Vertex[0]][2];
 
-        pVertices[7][0] =  HalfWidth;
-        pVertices[7][1] = -HalfDepth;
-        pVertices[7][2] = -HalfHeight;
+                IndexOfVertex += 3;
 
-        pVertices[8][0] = -HalfWidth;
-        pVertices[8][1] =  HalfDepth;
-        pVertices[8][2] = -HalfHeight;
+                pVertices[IndexOfVertex + 0] = Normals[Vertex[2]][0];
+                pVertices[IndexOfVertex + 1] = Normals[Vertex[2]][1];
+                pVertices[IndexOfVertex + 2] = Normals[Vertex[2]][2];
 
-        pVertices[9][0] = -HalfWidth;
-        pVertices[9][1] =  HalfDepth;
-        pVertices[9][2] = -HalfHeight;
+                IndexOfVertex += 3;
 
-        pVertices[10][0] = -HalfWidth;
-        pVertices[10][1] =  HalfDepth;
-        pVertices[10][2] =  HalfHeight;
+                pVertices[IndexOfVertex + 0] = UVs[Vertex[1]][0];
+                pVertices[IndexOfVertex + 1] = UVs[Vertex[1]][1];
 
-        pVertices[11][0] = -HalfWidth;
-        pVertices[11][1] =  HalfDepth;
-        pVertices[11][2] =  HalfHeight;
+                IndexOfVertex += 2;
+            }
+        }
 
-        pVertices[12][0] = HalfWidth;
-        pVertices[12][1] = HalfDepth;
-        pVertices[12][2] = HalfHeight;
+        for (int i = 0; i < static_cast<int>(NumberOfIndices); ++i)
+        {
+            pIndices[i] = i;
+        }
 
-        pVertices[13][0] = HalfWidth;
-        pVertices[13][1] = HalfDepth;
-        pVertices[13][2] = HalfHeight;
-
-        pVertices[14][0] =  HalfWidth;
-        pVertices[14][1] =  HalfDepth;
-        pVertices[14][2] = -HalfHeight;
-
-        pVertices[15][0] =  HalfWidth;
-        pVertices[15][1] =  HalfDepth;
-        pVertices[15][2] = -HalfHeight;
-
-        // -----------------------------------------------------------------------------
-        // Create indices of box
-        // -----------------------------------------------------------------------------
-        pIndices[0] = 4; pIndices[1] = 0; pIndices[2] = 3;
-        pIndices[3] = 3; pIndices[4] = 7; pIndices[5] = 4;
-
-        pIndices[6] = 1; pIndices[7]  = 0; pIndices[8]  = 4;
-        pIndices[9] = 4; pIndices[10] = 5; pIndices[11] = 1;
-
-        pIndices[12] = 3; pIndices[13] = 2; pIndices[14] = 6;
-        pIndices[15] = 6; pIndices[16] = 7; pIndices[17] = 3;
-
-        pIndices[18] = 1; pIndices[19] = 5; pIndices[20] = 6;
-        pIndices[21] = 6; pIndices[22] = 2; pIndices[23] = 1;
-
-        pIndices[24] = 4; pIndices[25] = 7; pIndices[26] = 6;
-        pIndices[27] = 6; pIndices[28] = 5; pIndices[29] = 4;
-
-        pIndices[30] = 0; pIndices[31] = 1; pIndices[32] = 3;
-        pIndices[33] = 3; pIndices[34] = 1; pIndices[35] = 2;
-
-        
         // -----------------------------------------------------------------------------
         // Create buffer on graphic device and setup surface
         // -----------------------------------------------------------------------------
@@ -648,7 +415,7 @@ namespace
         BufferDesc.m_Usage         = CBuffer::GPURead;
         BufferDesc.m_Binding       = CBuffer::VertexBuffer;
         BufferDesc.m_Access        = CBuffer::CPUWrite;
-        BufferDesc.m_NumberOfBytes = sizeof(glm::vec3) * NumberOfVertices * 2;
+        BufferDesc.m_NumberOfBytes = NumberOfBytes;
         BufferDesc.m_pBytes        = pVertices;
         BufferDesc.m_pClassKey     = 0;
         
@@ -711,8 +478,7 @@ namespace
         rModel.m_NumberOfLODs = 1;
         rModel.m_LODs[0] = LODPtr;
 
-        rLOD.m_NumberOfSurfaces = 1;
-        rLOD.m_Surfaces[0] = SurfacePtr;
+        rLOD.m_Surface = SurfacePtr;
 
         // -----------------------------------------------------------------------------
         // Prepare surface
@@ -893,8 +659,7 @@ namespace
         rModel.m_NumberOfLODs = 1;
         rModel.m_LODs[0] = LODPtr;
 
-        rLOD.m_NumberOfSurfaces = 1;
-        rLOD.m_Surfaces[0] = SurfacePtr;
+        rLOD.m_Surface = SurfacePtr;
 
         // -----------------------------------------------------------------------------
         // Prepare surface
@@ -1044,8 +809,7 @@ namespace
         rModel.m_NumberOfLODs = 1;
         rModel.m_LODs[0] = LODPtr;
 
-        rLOD.m_NumberOfSurfaces = 1;
-        rLOD.m_Surfaces[0] = SurfacePtr;
+        rLOD.m_Surface = SurfacePtr;
 
         // -----------------------------------------------------------------------------
         // Prepare surface
@@ -1083,18 +847,18 @@ namespace
 
         for (unsigned int IndexOfSlice = 0; IndexOfSlice < _Slices + 1; ++IndexOfSlice)
         {
-            assert(IndexOfVertex < NumberOfVertices);
+            assert(IndexOfVertex < NumberOfVertices * 2);
 
             float PHI = static_cast<float>(IndexOfSlice) / (_Slices)* glm::pi<float>() * 2.0f;
 
-            pVertices[IndexOfVertex][0] = glm::cos(PHI) * _Radius;
-            pVertices[IndexOfVertex][1] = glm::sin(PHI) * _Radius;
+            pVertices[IndexOfVertex][0] = -glm::cos(PHI) * _Radius;
+            pVertices[IndexOfVertex][1] =  glm::sin(PHI) * _Radius;
             pVertices[IndexOfVertex][2] = -_Height / 2.0f;
 
             ++IndexOfVertex;
 
-            pVertices[IndexOfVertex][0] = glm::cos(PHI) * _Radius;
-            pVertices[IndexOfVertex][1] = glm::sin(PHI) * _Radius;
+            pVertices[IndexOfVertex][0] = -glm::cos(PHI) * _Radius;
+            pVertices[IndexOfVertex][1] =  glm::sin(PHI) * _Radius;
             pVertices[IndexOfVertex][2] = -_Height / 2.0f;
 
             ++IndexOfVertex;
@@ -1128,7 +892,6 @@ namespace
 
         assert(IndexOfIndex == NumberOfIndices);
 
-        
         // -----------------------------------------------------------------------------
         // Create buffer on graphic device and setup surface
         // -----------------------------------------------------------------------------
@@ -1201,8 +964,7 @@ namespace
         rModel.m_NumberOfLODs = 1;
         rModel.m_LODs[0] = LODPtr;
 
-        rLOD.m_NumberOfSurfaces = 1;
-        rLOD.m_Surfaces[0] = SurfacePtr;
+        rLOD.m_Surface = SurfacePtr;
 
         // -----------------------------------------------------------------------------
         // Prepare surface
@@ -1388,76 +1150,280 @@ namespace
         DirtyFlags = pMeshComponent->GetDirtyFlags();
 
         // -----------------------------------------------------------------------------
-        // Check if it is a new actor
+        // Check if it is a new mesh
         // -----------------------------------------------------------------------------
         if ((DirtyFlags & Dt::CMeshComponent::DirtyCreate) != 0)
         {
-            // -----------------------------------------------------------------------------
-            // Create facet
-            // -----------------------------------------------------------------------------
-            CInternMeshComponent* pGfxMeshComponent = CComponentManager::GetInstance().Allocate<CInternMeshComponent>(pMeshComponent->GetID());
-
-            // -----------------------------------------------------------------------------
-            // Prepare storage data : Mesh
-            // -----------------------------------------------------------------------------
-            SMeshDescriptor ModelDesc;
-
-            ModelDesc.m_pMesh = pMeshComponent->GetMesh();
-
-            CMeshPtr NewModelPtr = MeshManager::CreateMesh(ModelDesc);
-
-            pGfxMeshComponent->SetMesh(NewModelPtr);
-
-            // -----------------------------------------------------------------------------
-            // Prepare storage data : Material
-            // -----------------------------------------------------------------------------
-            CLODPtr ModelLODPtr = NewModelPtr->GetLOD(0);
-
-            for (unsigned int NumberOfSurface = 0; NumberOfSurface < ModelLODPtr->GetNumberOfSurfaces(); ++NumberOfSurface)
+            switch (pMeshComponent->GetMeshType())
             {
-                Dt::CMaterial* pDataMaterial = pMeshComponent->GetMaterial(NumberOfSurface);
-
-                if (pDataMaterial != 0)
-                {
-                    // -----------------------------------------------------------------------------
-                    // Create and set material
-                    // -----------------------------------------------------------------------------
-                    unsigned int Hash = pDataMaterial->GetHash();
-
-                    CMaterialPtr NewMaterialPtr = MaterialManager::GetMaterialByHash(Hash);
-
-                    pGfxMeshComponent->SetMaterial(NumberOfSurface, NewMaterialPtr);
-                }
+            case Dt::CMeshComponent::Asset:
+                pMeshComponent->SetFacet(Dt::CMeshComponent::Graphic, 
+                    CreateMeshFromFile(
+                        pMeshComponent->GetFilename().c_str(), 
+                        pMeshComponent->GetGeneratorFlag(), 
+                        pMeshComponent->GetMeshIndex()
+                    )
+                );
+                break;
+            case Dt::CMeshComponent::Box:
+                pMeshComponent->SetFacet(Dt::CMeshComponent::Graphic, CreateBox(2.0f, 2.0f, 2.0f));
+                break;
+            case Dt::CMeshComponent::Sphere:
+                pMeshComponent->SetFacet(Dt::CMeshComponent::Graphic, CreateSphere(1.0f, 6, 6));
+                break;
+            case Dt::CMeshComponent::IsometricSphere:
+                pMeshComponent->SetFacet(Dt::CMeshComponent::Graphic, CreateSphereIsometric(1.0f, 6));
+                break;
+            case Dt::CMeshComponent::Cone:
+                pMeshComponent->SetFacet(Dt::CMeshComponent::Graphic, CreateCone(1.0f, 1.0f, 6));
+                break;
+            case Dt::CMeshComponent::Rectangle:
+                pMeshComponent->SetFacet(Dt::CMeshComponent::Graphic, CreateRectangle(0.0f, 0.0f, 1.0f, 1.0f));
+                break;
+            default:
+                BASE_CONSOLE_ERROR("The selected predefined mesh is currently not supported!");
             }
         }
-        else if ((DirtyFlags & Dt::CMeshComponent::DirtyInfo) != 0)
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxMeshManager::FillMeshFromFile(CInternMesh* _pMesh, const std::string& _rPathToFile, int _GenFlag, int _MeshIndex)
+    {
+        // -----------------------------------------------------------------------------
+        // Build path to texture in file system and load model
+        // -----------------------------------------------------------------------------
+        auto Importer = Core::AssetImporter::AllocateAssimpImporter(_rPathToFile, _GenFlag);
+
+        const Assimp::Importer* pImporter = static_cast<const Assimp::Importer*>(Core::AssetImporter::GetNativeAccessFromImporter(Importer));
+
+        if (!pImporter)
+        {
+            return;
+        }
+
+        const aiScene* pScene = pImporter->GetScene();
+
+        FillMeshFromAssimp(_pMesh, pScene, _MeshIndex);
+
+        // -----------------------------------------------------------------------------
+        // Release importer
+        // -----------------------------------------------------------------------------
+        Core::AssetImporter::ReleaseImporter(Importer);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxMeshManager::FillMeshFromAssimp(CInternMesh* _pMesh, const aiScene* _pScene, int _MeshIndex)
+    {
+        // -----------------------------------------------------------------------------
+        // Fill mesh data from assimp into the component
+        // -----------------------------------------------------------------------------
+        auto FillMeshInComponent = [&](CInternMesh* _pMesh, const aiMesh* _pAssimpMesh)
         {
             // -----------------------------------------------------------------------------
-            // Get data
+            // Setup model
             // -----------------------------------------------------------------------------
-            CInternMeshComponent* pGfxActorModelFacet = CComponentManager::GetInstance().GetComponent<CInternMeshComponent>(pMeshComponent->GetID());
+            _pMesh->m_NumberOfLODs = 1;
 
-            // -----------------------------------------------------------------------------
-            // Update material
-            // -----------------------------------------------------------------------------
-            CLODPtr ModelLODPtr = pGfxActorModelFacet->GetMesh()->GetLOD(0);
-
-            for (unsigned int NumberOfSurface = 0; NumberOfSurface < ModelLODPtr->GetNumberOfSurfaces(); ++NumberOfSurface)
+            for (unsigned int IndexOfLOD = 0; IndexOfLOD < _pMesh->m_NumberOfLODs; IndexOfLOD++)
             {
-                Dt::CMaterial* pDataMaterial = pMeshComponent->GetMaterial(NumberOfSurface);
+                // -----------------------------------------------------------------------------
+                // Create LOD
+                // -----------------------------------------------------------------------------
+                CLODs::CPtr LODPtr = m_LODs.Allocate();
 
-                if (pDataMaterial != 0)
+                CInternLOD& rInternLOD = *LODPtr;
+
+                // -----------------------------------------------------------------------------
+                // Link
+                // -----------------------------------------------------------------------------
+                _pMesh->m_LODs[IndexOfLOD] = LODPtr;
+
+                // -----------------------------------------------------------------------------
+                // Create surface
+                // -----------------------------------------------------------------------------
+                CSurfaces::CPtr SurfacePtr = m_Surfaces.Allocate();
+
+                CInternSurface& rSurface = *SurfacePtr;
+
+                rSurface.m_SurfaceKey.m_HasPosition = true;
+
+                assert(_pAssimpMesh->mVertices != 0);
+
+                rSurface.m_SurfaceKey.m_HasNormal = (_pAssimpMesh->mNormals != nullptr);
+                rSurface.m_SurfaceKey.m_HasTangent = (_pAssimpMesh->mTangents != nullptr);
+                rSurface.m_SurfaceKey.m_HasBitangent = (_pAssimpMesh->mBitangents != nullptr);
+                rSurface.m_SurfaceKey.m_HasTexCoords = (_pAssimpMesh->mTextureCoords[0] != nullptr);
+
+                // -----------------------------------------------------------------------------
+                // Set vertex shader
+                // -----------------------------------------------------------------------------
+                SetVertexShaderOfSurface(rSurface);
+
+                // -----------------------------------------------------------------------------
+                // Link
+                // -----------------------------------------------------------------------------
+                rInternLOD.m_Surface = &rSurface;
+
+                // -----------------------------------------------------------------------------
+                // Data
+                // -----------------------------------------------------------------------------
+                unsigned int NumberOfVertices = _pAssimpMesh->mNumVertices;
+                unsigned int NumberOfFaces = _pAssimpMesh->mNumFaces;
+                unsigned int NumberOfIndicesPerFace = _pAssimpMesh->mFaces->mNumIndices;
+                unsigned int NumberOfIndices = NumberOfFaces * NumberOfIndicesPerFace;
+                unsigned int NumberOfNormals = NumberOfVertices * rSurface.m_SurfaceKey.m_HasNormal;
+                unsigned int NumberOfTagents = NumberOfVertices * rSurface.m_SurfaceKey.m_HasTangent;
+                unsigned int NumberOfBitangents = NumberOfVertices * rSurface.m_SurfaceKey.m_HasBitangent;
+                unsigned int NumberOfTexCoords = NumberOfVertices * (rSurface.m_SurfaceKey.m_HasTexCoords >= 1);
+                unsigned int NumberOfVerticeElements = 3 * rSurface.m_SurfaceKey.m_HasPosition;
+                unsigned int NumberOfNormalElements = 3 * rSurface.m_SurfaceKey.m_HasNormal;
+                unsigned int NumberOfTagentsElements = 3 * rSurface.m_SurfaceKey.m_HasTangent;
+                unsigned int NumberOfBitangentsElements = 3 * rSurface.m_SurfaceKey.m_HasBitangent;
+                unsigned int NumberOfTexCoordElements = 2 * (rSurface.m_SurfaceKey.m_HasTexCoords >= 1);
+                unsigned int NumberOfVertexElements = NumberOfVertices * NumberOfVerticeElements + NumberOfNormals * NumberOfNormalElements + NumberOfTagents * NumberOfTagentsElements + NumberOfBitangents * NumberOfBitangentsElements + NumberOfTexCoords * NumberOfTexCoordElements;
+
+                assert(NumberOfIndicesPerFace == 3);
+
+                unsigned int* pUploadIndexData = static_cast<unsigned int*>(Base::CMemory::Allocate(sizeof(unsigned int) * NumberOfIndices));
+                float*        pUploadVertexData = static_cast<float*>(Base::CMemory::Allocate(sizeof(float) * NumberOfVertexElements));
+
+                // -----------------------------------------------------------------------------
+                // Get data from file
+                // -----------------------------------------------------------------------------
+                aiVector3D* pVertexData = _pAssimpMesh->mVertices;
+                aiVector3D* pNormalData = _pAssimpMesh->mNormals;
+                aiVector3D* pTangentData = _pAssimpMesh->mTangents;
+                aiVector3D* pBitangentData = _pAssimpMesh->mBitangents;
+                aiVector3D* pTextureData = _pAssimpMesh->mTextureCoords[0];
+
+                // -----------------------------------------------------------------------------
+                // Setup surface
+                // -----------------------------------------------------------------------------
+                for (unsigned int IndexOfFace = 0; IndexOfFace < NumberOfFaces; ++IndexOfFace)
                 {
-                    // -----------------------------------------------------------------------------
-                    // Set material from material manager
-                    // -----------------------------------------------------------------------------
-                    unsigned int Hash = pDataMaterial->GetHash();
+                    aiFace CurrentFace = _pAssimpMesh->mFaces[IndexOfFace];
 
-                    CMaterialPtr NewMaterialPtr = MaterialManager::GetMaterialByHash(Hash);
-
-                    pGfxActorModelFacet->SetMaterial(NumberOfSurface, NewMaterialPtr);
+                    for (unsigned int IndexOfIndice = 0; IndexOfIndice < NumberOfIndicesPerFace; ++IndexOfIndice)
+                    {
+                        pUploadIndexData[IndexOfFace * NumberOfIndicesPerFace + IndexOfIndice] = CurrentFace.mIndices[IndexOfIndice];
+                    }
                 }
+
+                unsigned int VertexDataIndex = 0;
+
+                for (unsigned int CurrentVertex = 0; CurrentVertex < NumberOfVertices; ++CurrentVertex)
+                {
+                    pUploadVertexData[VertexDataIndex + 0] = pVertexData[CurrentVertex].x;
+                    pUploadVertexData[VertexDataIndex + 1] = pVertexData[CurrentVertex].y;
+                    pUploadVertexData[VertexDataIndex + 2] = pVertexData[CurrentVertex].z;
+
+                    VertexDataIndex += 3;
+
+                    if (rSurface.m_SurfaceKey.m_HasNormal)
+                    {
+                        pUploadVertexData[VertexDataIndex + 0] = pNormalData[CurrentVertex].x;
+                        pUploadVertexData[VertexDataIndex + 1] = pNormalData[CurrentVertex].y;
+                        pUploadVertexData[VertexDataIndex + 2] = pNormalData[CurrentVertex].z;
+
+                        VertexDataIndex += 3;
+                    }
+
+                    if (rSurface.m_SurfaceKey.m_HasTangent)
+                    {
+                        assert(pTangentData != 0);
+
+                        pUploadVertexData[VertexDataIndex + 0] = pTangentData[CurrentVertex].x;
+                        pUploadVertexData[VertexDataIndex + 1] = pTangentData[CurrentVertex].y;
+                        pUploadVertexData[VertexDataIndex + 2] = pTangentData[CurrentVertex].z;
+
+                        VertexDataIndex += 3;
+                    }
+
+                    if (rSurface.m_SurfaceKey.m_HasBitangent)
+                    {
+                        assert(pBitangentData != 0);
+
+                        pUploadVertexData[VertexDataIndex + 0] = pBitangentData[CurrentVertex].x;
+                        pUploadVertexData[VertexDataIndex + 1] = pBitangentData[CurrentVertex].y;
+                        pUploadVertexData[VertexDataIndex + 2] = pBitangentData[CurrentVertex].z;
+
+                        VertexDataIndex += 3;
+                    }
+
+                    if (rSurface.m_SurfaceKey.m_HasTexCoords)
+                    {
+                        pUploadVertexData[VertexDataIndex + 0] = pTextureData[CurrentVertex].x;
+                        pUploadVertexData[VertexDataIndex + 1] = pTextureData[CurrentVertex].y;
+
+                        VertexDataIndex += 2;
+                    }
+                }
+
+                assert(VertexDataIndex == NumberOfVertexElements);
+
+                // -----------------------------------------------------------------------------
+                // Create buffer with vertices's and indices (setup surface data)
+                // -----------------------------------------------------------------------------
+                SBufferDescriptor VertexBufferDesc;
+
+                VertexBufferDesc.m_Stride = 0;
+                VertexBufferDesc.m_Usage = CBuffer::GPURead;
+                VertexBufferDesc.m_Binding = CBuffer::VertexBuffer;
+                VertexBufferDesc.m_Access = CBuffer::CPUWrite;
+                VertexBufferDesc.m_NumberOfBytes = sizeof(float) * NumberOfVertexElements;
+                VertexBufferDesc.m_pBytes = pUploadVertexData;
+                VertexBufferDesc.m_pClassKey = 0;
+
+                rSurface.m_VertexBufferPtr = BufferManager::CreateBuffer(VertexBufferDesc);
+
+                // -----------------------------------------------------------------------------
+
+                SBufferDescriptor IndexBufferDesc;
+
+                IndexBufferDesc.m_Stride = 0;
+                IndexBufferDesc.m_Usage = CBuffer::GPURead;
+                IndexBufferDesc.m_Binding = CBuffer::IndexBuffer;
+                IndexBufferDesc.m_Access = CBuffer::CPUWrite;
+                IndexBufferDesc.m_NumberOfBytes = sizeof(unsigned int) * NumberOfIndices;
+                IndexBufferDesc.m_pBytes = pUploadIndexData;
+                IndexBufferDesc.m_pClassKey = 0;
+
+                rSurface.m_IndexBufferPtr = BufferManager::CreateBuffer(IndexBufferDesc);
+
+                // -----------------------------------------------------------------------------
+                // Set last data information of the surface
+                // -----------------------------------------------------------------------------
+                rSurface.m_NumberOfVertices = NumberOfVertices;
+                rSurface.m_NumberOfIndices = NumberOfIndices;
+
+                // -----------------------------------------------------------------------------
+                // Delete allocated memory
+                // -----------------------------------------------------------------------------
+                Base::CMemory::Free(pUploadIndexData);
+                Base::CMemory::Free(pUploadVertexData);
+
+                // -----------------------------------------------------------------------------
+                // Load default material from material manager
+                // -----------------------------------------------------------------------------
+                rSurface.m_MaterialPtr = MaterialManager::GetDefaultMaterial();
             }
+        };
+
+        // -----------------------------------------------------------------------------
+        // Only single meshes are currently supported!
+        // Question: Do we need multiple surfaces?
+        // -----------------------------------------------------------------------------
+        unsigned int NumberOfMeshes = _pScene->mNumMeshes;
+
+        if (NumberOfMeshes > static_cast<unsigned int>(_MeshIndex))
+        {
+            FillMeshInComponent(_pMesh, _pScene->mMeshes[_MeshIndex]);
+        }
+        else
+        {
+            BASE_CONSOLE_ERROR("The given mesh index to load mesh is higher as the number of available meshes in file.")
         }
     }
 } // namespace
@@ -1477,19 +1443,12 @@ namespace MeshManager
     {
         CGfxMeshManager::GetInstance().OnExit();
     }
-
-    // -----------------------------------------------------------------------------
-
-    void Clear()
-    {
-        CGfxMeshManager::GetInstance().Clear();
-    }
     
     // -----------------------------------------------------------------------------
     
-    CMeshPtr CreateMesh(const SMeshDescriptor& _rDescriptor)
+    CMeshPtr CreateMeshFromFile(const std::string& _rPathToFile, int _GenFlag, int _MeshIndex)
     {
-        return CGfxMeshManager::GetInstance().CreateMesh(_rDescriptor);
+        return CGfxMeshManager::GetInstance().CreateMeshFromFile(_rPathToFile, _GenFlag, _MeshIndex);
     }
 
     // -----------------------------------------------------------------------------

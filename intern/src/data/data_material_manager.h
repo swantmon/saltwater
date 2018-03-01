@@ -1,63 +1,24 @@
-//
-//  data_material_manager.h
-//  data
-//
-//  Created by Tobias Schwandt on 22/10/15.
-//  Copyright © 2015 TU Ilmenau. All rights reserved.
-//
 
 #pragma once
 
+#include "base/base_typedef.h"
+
 #include "data/data_material.h"
 
-#include <functional>
+#include <string>
 
 namespace Dt
 {
 namespace MaterialManager
 {
-    typedef std::function<void(Dt::CMaterial* _pMaterial)> CMaterialDelegate;
-} // namespace MaterialManager
-} // namespace Dt
+    CMaterial* CreateMaterialFromName(const std::string& _rMaterialname);
 
-#define DATA_DIRTY_MATERIAL_METHOD(_Method) std::bind(_Method, this, std::placeholders::_1)
+    CMaterial* CreateMaterialFromXML(const std::string& _rPathToFile);
 
-namespace Dt
-{
-	struct SMaterialDescriptor 
-	{
-        const char*       m_pMaterialName;
-        const char*       m_pColorMap;
-        const char*       m_pNormalMap;
-        const char*       m_pRoughnessMap;
-        const char*       m_pMetalMaskMap;
-        const char*       m_pAOMap;
-        const char*       m_pBumpMap;
-        float             m_Roughness;
-        float             m_Reflectance;
-        float             m_MetalMask;
-        float             m_Displacement;
-        glm::vec3         m_AlbedoColor;
-        glm::vec4         m_TilingOffset;
-        const Base::Char* m_pFileName;
-	};
-} // namespace Dt
+    CMaterial* CreateMaterialFromAssimp(const std::string& _rPathToFile, int _MaterialIndex);
 
-namespace Dt
-{
-namespace MaterialManager
-{
-    void OnStart();
-    void OnExit();
+    CMaterial* GetMaterialByHash(const CMaterial::BHash _Hash);
 
-    CMaterial& CreateMaterial(const SMaterialDescriptor& _rDescriptor);
-
-    CMaterial& GetDefaultMaterial();
-
-    CMaterial& GetMaterialByHash(unsigned int _Hash);
-
-    void MarkMaterialAsDirty(CMaterial& _rMaterial, unsigned int _DirtyFlags);
-
-    void RegisterDirtyMaterialHandler(CMaterialDelegate _NewDelegate);
+    CMaterial* GetDefaultMaterial();
 } // namespace MaterialManager
 } // namespace Dt

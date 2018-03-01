@@ -2,13 +2,8 @@
 #pragma once
 
 #include "data/data_component.h"
-#include "data/data_lod.h"
 
-namespace Dt
-{
-    class CMesh;
-    class CMaterial;
-} // namespace Dt
+#include <string>
 
 namespace Dt
 {
@@ -16,11 +11,29 @@ namespace Dt
     {
     public:
 
-        void SetMesh(CMesh* _pModel);
-        CMesh* GetMesh();
+        enum EMeshType
+        {
+            Asset,
+            Box,
+            Sphere,
+            IsometricSphere,
+            Cone,
+            Rectangle,
+        };
 
-        void SetMaterial(unsigned int _Surface, CMaterial* _pMaterial);
-        CMaterial* GetMaterial(unsigned int _Surface);
+    public:
+
+        void SetFilename(const std::string& _rValue);
+        const std::string& GetFilename() const;
+
+        void SetGeneratorFlag(int _Flag);
+        int GetGeneratorFlag() const;
+
+        void SetMeshIndex(const int _Value);
+        int GetMeshIndex() const;
+
+        void SetMeshType(EMeshType _Value);
+        EMeshType GetMeshType() const;
 
     public:
 
@@ -29,7 +42,9 @@ namespace Dt
 
     private:
 
-        CMesh*     m_pModel;
-        CMaterial* m_pMaterial[CLOD::s_NumberOfSurfaces];
+        std::string m_Filename;
+        int         m_GeneratorFlag;
+        int         m_MeshIndex;
+        EMeshType   m_MeshType;
     };
 } // namespace Dt

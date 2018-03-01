@@ -4,7 +4,7 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
-#include "data/data_component_manager.h"
+#include "data/data_component.h"
 #include "data/data_entity_manager.h"
 
 #include "logic/lg_edit_state.h"

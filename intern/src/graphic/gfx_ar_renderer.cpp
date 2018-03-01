@@ -9,20 +9,21 @@
 #include "camera/cam_control_manager.h"
 #include "camera/cam_game_control.h"
 
+#include "data/data_component.h"
 #include "data/data_component_facet.h"
 #include "data/data_component_manager.h"
 #include "data/data_entity.h"
 #include "data/data_map.h"
+#include "data/data_material_component.h"
 #include "data/data_mesh_component.h"
 #include "data/data_transformation_facet.h"
 
 #include "graphic/gfx_ar_renderer.h"
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"
-#include "graphic/gfx_component_manager.h"
 #include "graphic/gfx_main.h"
+#include "graphic/gfx_material.h"
 #include "graphic/gfx_mesh.h"
-#include "graphic/gfx_mesh_component.h"
 #include "graphic/gfx_mesh_manager.h"
 #include "graphic/gfx_performance.h"
 #include "graphic/gfx_state_manager.h"
@@ -87,10 +88,10 @@ namespace
 
         struct SRenderJob
         {
-            Base::ID     m_EntityID;
-            CSurfacePtr  m_SurfacePtr;
-            CMaterialPtr m_SurfaceMaterialPtr;
-            glm::mat4    m_ModelMatrix;
+            Base::ID         m_EntityID;
+            CSurfacePtr      m_SurfacePtr;
+            const CMaterial* m_SurfaceMaterialPtr;
+            glm::mat4        m_ModelMatrix;
         };
 
     private:
@@ -627,9 +628,9 @@ namespace
 //             // -----------------------------------------------------------------------------
 //             // Set items to context manager
 //             // -----------------------------------------------------------------------------
-//             ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+//             ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
 // 
-//             ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+//             ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
 // 
 //             ContextManager::SetInputLayout(m_FullQuadInputLayoutPtr);
 // 
@@ -643,7 +644,7 @@ namespace
 //             ContextManager::SetTexture(2, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(0));
 //             ContextManager::SetTexture(3, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(1));
 // 
-//             ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+//             ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
 // 
 //             ContextManager::ResetTexture(0);
 //             ContextManager::ResetTexture(1);
@@ -781,51 +782,42 @@ namespace
             const Dt::CEntity& rCurrentEntity = *pDtComponent->GetHostEntity();
 
             // -----------------------------------------------------------------------------
-            // Get graphic facet
+            // Get graphic
             // -----------------------------------------------------------------------------
             if (rCurrentEntity.GetLayer() == Dt::SEntityLayer::AR)
             {
-                Gfx::CMeshComponent* pGfxComponent = Gfx::CComponentManager::GetInstance().GetComponent<Gfx::CMeshComponent>(pDtComponent->GetID());
-
-                CMeshPtr MeshPtr = pGfxComponent->GetMesh();
+                Gfx::CMesh* pMeshObject = static_cast<Gfx::CMesh*>(pDtComponent->GetFacet(Dt::CMeshComponent::Graphic));
 
                 // -----------------------------------------------------------------------------
-                // Set every surface of this entity into a new render job
+                // Surface
                 // -----------------------------------------------------------------------------
-                unsigned int NumberOfSurfaces = MeshPtr->GetLOD(0)->GetNumberOfSurfaces();
+                CSurfacePtr SurfacePtr = pMeshObject->GetLOD(0)->GetSurface();
 
-                for (unsigned int IndexOfSurface = 0; IndexOfSurface < NumberOfSurfaces; ++IndexOfSurface)
+                if (SurfacePtr == nullptr)
                 {
-                    CSurfacePtr SurfacePtr = MeshPtr->GetLOD(0)->GetSurface(IndexOfSurface);
-
-                    if (SurfacePtr == nullptr)
-                    {
-                        break;
-                    }
-
-                    CMaterialPtr MaterialPtr;
-
-                    if (pGfxComponent->GetMaterial(IndexOfSurface) != 0)
-                    {
-                        MaterialPtr = pGfxComponent->GetMaterial(IndexOfSurface);
-                    }
-                    else
-                    {
-                        MaterialPtr = SurfacePtr->GetMaterial();
-                    }
-
-                    // -----------------------------------------------------------------------------
-                    // Set informations to render job
-                    // -----------------------------------------------------------------------------
-                    SRenderJob NewRenderJob;
-
-                    NewRenderJob.m_EntityID           = rCurrentEntity.GetID();
-                    NewRenderJob.m_SurfacePtr         = SurfacePtr;
-                    NewRenderJob.m_SurfaceMaterialPtr = MaterialPtr;
-                    NewRenderJob.m_ModelMatrix        = rCurrentEntity.GetTransformationFacet()->GetWorldMatrix();
-
-                    m_RenderJobs.push_back(NewRenderJob);
+                    break;
                 }
+
+                const CMaterial* pMaterial = SurfacePtr->GetMaterial();
+                
+                if (pDtComponent->GetHostEntity()->GetComponentFacet()->HasComponent<Dt::CMaterialComponent>())
+                {
+                    auto pDtMaterialComponent = pDtComponent->GetHostEntity()->GetComponentFacet()->GetComponent<Dt::CMaterialComponent>();
+
+                    pMaterial = static_cast<const Gfx::CMaterial*>(pDtMaterialComponent->GetFacet(Dt::CMaterialComponent::Graphic));
+                }
+
+                // -----------------------------------------------------------------------------
+                // Set informations to render job
+                // -----------------------------------------------------------------------------
+                SRenderJob NewRenderJob;
+
+                NewRenderJob.m_EntityID           = rCurrentEntity.GetID();
+                NewRenderJob.m_SurfacePtr         = SurfacePtr;
+                NewRenderJob.m_SurfaceMaterialPtr = pMaterial;
+                NewRenderJob.m_ModelMatrix        = rCurrentEntity.GetTransformationFacet()->GetWorldMatrix();
+
+                m_RenderJobs.push_back(NewRenderJob);
             }
         }
     }

@@ -11,27 +11,25 @@
 #include "core/core_time.h"
 
 #include "data/data_camera_component.h"
+#include "data/data_component.h"
 #include "data/data_component_facet.h"
 #include "data/data_component_manager.h"
 #include "data/data_entity.h"
 #include "data/data_map.h"
-#include "data/data_model_manager.h"
 #include "data/data_sky_component.h"
 
 #include "graphic/gfx_background_renderer.h"
 #include "graphic/gfx_buffer_manager.h"
-#include "graphic/gfx_camera_component.h"
 #include "graphic/gfx_context_manager.h"
-#include "graphic/gfx_component_manager.h"
 #include "graphic/gfx_histogram_renderer.h"
 #include "graphic/gfx_main.h"
 #include "graphic/gfx_mesh_manager.h"
 #include "graphic/gfx_performance.h"
 #include "graphic/gfx_sampler_manager.h"
 #include "graphic/gfx_shader_manager.h"
-#include "graphic/gfx_sky_component.h"
+#include "graphic/gfx_sky.h"
 #include "graphic/gfx_state_manager.h"
-#include "graphic/gfx_sun_component.h"
+#include "graphic/gfx_sun.h"
 #include "graphic/gfx_sun_manager.h"
 #include "graphic/gfx_target_set.h"
 #include "graphic/gfx_target_set_manager.h"
@@ -93,13 +91,13 @@ namespace
         struct SCameraRenderJob
         {
             Dt::CCameraComponent* m_pDtComponent;
-            Gfx::CCameraComponent* m_pGfxComponent;
+            Gfx::CCamera* m_pCameraObject;
         };
 
         struct SSkyRenderJob
         {
             Dt::CSkyComponent* m_pDtComponent;
-            Gfx::CSkyComponent* m_pGfxComponent;
+            Gfx::CSky* m_pSkyObject;
         };
 
         struct SSkytextureBufferPS
@@ -228,22 +226,12 @@ namespace
         };
 
         CInputLayoutPtr P2SkytextureLayoutPtr = ShaderManager::CreateInputLayout(InputLayout, 1, SkytextureVSPtr);
-
-        // -----------------------------------------------------------------------------
-        
-        const SInputElementDescriptor TriangleInputLayout[] =
-        {
-            { "POSITION", 0, CInputLayout::Float3Format, 0,  0, 24, CInputLayout::PerVertex, 0, },
-            { "NORMAL"  , 0, CInputLayout::Float3Format, 0, 12, 24, CInputLayout::PerVertex, 0, },
-        };
-        
-        CInputLayoutPtr P3N3BoxLayoutPtr = ShaderManager::CreateInputLayout(TriangleInputLayout, 2, SkyboxVSPtr);
         
         // -----------------------------------------------------------------------------
 
         m_BackgroundFromSkybox.m_VSPtr          = SkyboxVSPtr;
         m_BackgroundFromSkybox.m_PSPtr          = SkyboxPSPtr;
-        m_BackgroundFromSkybox.m_InputLayoutPtr = P3N3BoxLayoutPtr;
+        m_BackgroundFromSkybox.m_InputLayoutPtr = nullptr;
 
         m_BackgroundFromTexture.m_VSPtr          = SkytextureVSPtr;
         m_BackgroundFromTexture.m_PSPtr          = SkytexturePSPtr;
@@ -515,11 +503,11 @@ namespace
         // -----------------------------------------------------------------------------
         ContextManager::SetRenderContext(RenderContextPtr);
                 
-        ContextManager::SetVertexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+        ContextManager::SetVertexBuffer(MeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
         
-        ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+        ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
         
-        ContextManager::SetInputLayout(InputLayoutPtr);
+        ContextManager::SetInputLayout(MeshPtr->GetLOD(0)->GetSurface()->GetShaderVS()->GetInputLayout());
         
         ContextManager::SetTopology(STopology::TriangleList);
         
@@ -536,10 +524,10 @@ namespace
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
         ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
         
-        ContextManager::SetTexture(0, rCurrentJob.m_pGfxComponent->GetCubemapPtr());
+        ContextManager::SetTexture(0, rCurrentJob.m_pSkyObject->GetCubemapPtr());
         ContextManager::SetTexture(1, TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget());
         
-        ContextManager::DrawIndexed(MeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+        ContextManager::DrawIndexed(MeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
         
         ContextManager::ResetTexture(0);
         ContextManager::ResetTexture(1);
@@ -578,7 +566,7 @@ namespace
 
         SCameraRenderJob& rRenderJob = m_CameraRenderJobs[0];
 
-        if (rRenderJob.m_pGfxComponent->GetBackgroundTexture2D() == nullptr)
+        if (rRenderJob.m_pCameraObject->GetBackgroundTexture2D() == nullptr)
         {
             return;
         }
@@ -621,7 +609,7 @@ namespace
         SSkytextureBufferPS PSBuffer;
 
         PSBuffer.m_HDRFactor     = HDRIntensity;
-        PSBuffer.m_IsHDR         = rRenderJob.m_pGfxComponent->GetBackgroundTexture2D()->GetSemantic() == Dt::CTextureBase::HDR ? 1.0f : 0.0f;
+        PSBuffer.m_IsHDR         = rRenderJob.m_pCameraObject->GetBackgroundTexture2D()->GetSemantic() == Dt::CTextureBase::HDR ? 1.0f : 0.0f;
         PSBuffer.m_ExposureIndex = static_cast<float>(HistogramRenderer::GetLastExposureHistoryIndex());
 
         BufferManager::UploadBufferData(PSBufferSetPtr->GetBuffer(0), &PSBuffer);
@@ -631,9 +619,9 @@ namespace
         // -----------------------------------------------------------------------------
         ContextManager::SetRenderContext(RenderContextPtr);
 
-        ContextManager::SetVertexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+        ContextManager::SetVertexBuffer(MeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
 
-        ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+        ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
 
         ContextManager::SetInputLayout(InputLayoutPtr);
 
@@ -652,10 +640,10 @@ namespace
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
         ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
 
-        ContextManager::SetTexture(0, rRenderJob.m_pGfxComponent->GetBackgroundTextureSet()->GetTexture(0));
+        ContextManager::SetTexture(0, rRenderJob.m_pCameraObject->GetBackgroundTexture2D());
         ContextManager::SetTexture(1, TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget());
 
-        ContextManager::DrawIndexed(MeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+        ContextManager::DrawIndexed(MeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
 
         ContextManager::ResetTexture(0);
         ContextManager::ResetTexture(1);
@@ -753,9 +741,9 @@ namespace
         // -----------------------------------------------------------------------------
         ContextManager::SetRenderContext(RenderContextPtr);
 
-        ContextManager::SetVertexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+        ContextManager::SetVertexBuffer(MeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
 
-        ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+        ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
 
         ContextManager::SetInputLayout(InputLayoutPtr);
 
@@ -777,7 +765,7 @@ namespace
         ContextManager::SetTexture(0, m_WebcamTexturePtr);
         ContextManager::SetTexture(1, TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget());
 
-        ContextManager::DrawIndexed(MeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+        ContextManager::DrawIndexed(MeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
 
         ContextManager::ResetTexture(0);
         ContextManager::ResetTexture(1);
@@ -827,7 +815,7 @@ namespace
                 SCameraRenderJob NewRenderJob;
 
                 NewRenderJob.m_pDtComponent  = pDtComponent;
-                NewRenderJob.m_pGfxComponent = CComponentManager::GetInstance().GetComponent<Gfx::CCameraComponent>(pDtComponent->GetID());
+                NewRenderJob.m_pCameraObject = static_cast<Gfx::CCamera*>(pDtComponent->GetFacet(Dt::CCameraComponent::Graphic));
 
                 m_CameraRenderJobs.push_back(NewRenderJob);
             }
@@ -847,8 +835,8 @@ namespace
 
             SSkyRenderJob NewRenderJob;
 
-            NewRenderJob.m_pDtComponent  = pDtComponent;
-            NewRenderJob.m_pGfxComponent = CComponentManager::GetInstance().GetComponent<Gfx::CSkyComponent>(pDtComponent->GetID());
+            NewRenderJob.m_pDtComponent = pDtComponent;
+            NewRenderJob.m_pSkyObject   = static_cast<Gfx::CSky*>(pDtComponent->GetFacet(Dt::CSkyComponent::Graphic));
 
             m_SkyRenderJobs.push_back(NewRenderJob);
         }

@@ -4,6 +4,7 @@
 #include "base/base_pool.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
+#include "base/base_managed_pool.h"
 
 #include "core/core_time.h"
 
@@ -14,9 +15,7 @@
 #include "data/data_entity_manager.h"
 #include "data/data_map.h"
 
-#include "graphic/gfx_component.h"
-#include "graphic/gfx_component_manager.h"
-#include "graphic/gfx_area_light_component.h"
+#include "graphic/gfx_area_light.h"
 #include "graphic/gfx_area_light_manager.h"
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"
@@ -46,12 +45,12 @@ namespace
 
     private:
 
-        class CInternComponent : public CAreaLightComponent
+        class CInternObject : public CAreaLight
         {
         public:
 
-            CInternComponent();
-            ~CInternComponent();
+            CInternObject();
+            ~CInternObject();
 
         private:
 
@@ -70,6 +69,12 @@ namespace
         };
 
     private:
+
+        typedef Base::CManagedPool<CInternObject, 4, 0> CAreaLights;
+
+    private:
+
+        CAreaLights m_AreaLights;
         
         CShaderPtr  m_FilterShaderPtr;
         CShaderPtr  m_BackgroundBlurShaderPtr;
@@ -89,15 +94,15 @@ namespace
 
 namespace 
 {
-    CGfxAreaLightManager::CInternComponent::CInternComponent()
-        : CAreaLightComponent()
+    CGfxAreaLightManager::CInternObject::CInternObject()
+        : CAreaLight()
     {
 
     }
 
     // -----------------------------------------------------------------------------
 
-    CGfxAreaLightManager::CInternComponent::~CInternComponent()
+    CGfxAreaLightManager::CInternObject::~CInternObject()
     {
     }
 } // namespace 
@@ -105,7 +110,8 @@ namespace
 namespace 
 {
     CGfxAreaLightManager::CGfxAreaLightManager()
-        : m_FilterShaderPtr        (0)
+        : m_AreaLights             ( )
+        , m_FilterShaderPtr        (0)
         , m_BackgroundBlurShaderPtr(0)
         , m_CombineShaderPtr       (0)
         , m_ForegroundBlurShaderPtr(0)
@@ -184,13 +190,15 @@ namespace
         // -----------------------------------------------------------------------------
         // Register dirty entity handler for automatic sky creation
         // -----------------------------------------------------------------------------
-        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(DATA_DIRTY_COMPONENT_METHOD(&CGfxAreaLightManager::OnDirtyComponent));
+        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(BASE_DIRTY_COMPONENT_METHOD(&CGfxAreaLightManager::OnDirtyComponent));
     }
 
     // -----------------------------------------------------------------------------
 
     void CGfxAreaLightManager::OnExit()
     {
+        m_AreaLights.Clear();
+
         m_FilterShaderPtr         = 0;
         m_BackgroundBlurShaderPtr = 0;
         m_CombineShaderPtr        = 0;
@@ -213,7 +221,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Vars
         // -----------------------------------------------------------------------------
-        CInternComponent* pGfxLightFacet = 0;
+        CInternObject* pGfxLightFacet = 0;
 
         // -----------------------------------------------------------------------------
         // Only if component has changed
@@ -234,7 +242,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Create facet
             // -----------------------------------------------------------------------------
-            CInternComponent* pGfxComponent = CComponentManager::GetInstance().Allocate<CInternComponent>(pAreaLightComponent->GetID());
+            CInternObject* pGfxComponent = m_AreaLights.Allocate();
 
             // -----------------------------------------------------------------------------
             // Buffer
@@ -281,10 +289,15 @@ namespace
             // -----------------------------------------------------------------------------
             pGfxComponent->m_FilteredTexturePtr = 0;
             pGfxComponent->m_TexturePtr         = 0;
+
+            // -----------------------------------------------------------------------------
+            // Link
+            // -----------------------------------------------------------------------------
+            pAreaLightComponent->SetFacet(Dt::CAreaLightComponent::Graphic, pGfxComponent);
         }
         else
         {
-            pGfxLightFacet = CComponentManager::GetInstance().GetComponent<CInternComponent>(pAreaLightComponent->GetID());
+            pGfxLightFacet = static_cast<CInternObject*>(pAreaLightComponent->GetFacet(Dt::CAreaLightComponent::Graphic));
 
             if (pAreaLightComponent->GetHasTexture())
             {

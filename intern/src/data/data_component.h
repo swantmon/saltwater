@@ -3,12 +3,16 @@
 
 #include "base/base_type_info.h"
 
+#include "data/data_entity.h"
+
+#include <array>
+
 #pragma warning(push)
 #pragma warning(disable : 4505)
 
 namespace Dt
 {
-    class CEntity;
+    class CComponentManager;
 } // namespace Dt
 
 namespace Dt
@@ -17,24 +21,66 @@ namespace Dt
     {
     public:
 
+        enum EDirtyFlags
+        {
+            DirtyCreate = 0x01,
+            DirtyInfo = 0x02,
+            DirtyDestroy = 0x04,
+        };
+
+    public:
+
+        IComponent()
+            : m_ID(0)
+            , m_pHostEntity(0)
+            , m_DirtyFlags(0)
+        {};
+
+        const Base::ID GetID() const
+        {
+            return m_ID;
+        }
+
+        const Dt::CEntity* GetHostEntity() const
+        {
+            return m_pHostEntity;
+        }
+
+        unsigned int GetDirtyFlags() const
+        {
+            return m_DirtyFlags;
+        }
+
+    public:
+
         virtual const Base::ID GetTypeID() const = 0;
 
         virtual ~IComponent() {};
+
+    protected:
+
+        Base::ID m_ID;
+        Dt::CEntity* m_pHostEntity;
+        unsigned int m_DirtyFlags;
+
+    private:
+
+        friend class CEntity;
+        friend class CComponentManager;
     };
 } // namespace Dt
 
 namespace Dt
 {
     template<class T>
-    class CComponent : public IComponent
+    class CComponent : public Dt::IComponent
     {
     public:
 
-        enum EDirtyFlags
+        enum EFacets
         {
-            DirtyCreate  = 0x01,
-            DirtyInfo    = 0x02,
-            DirtyDestroy = 0x04,
+            Graphic,
+            NumberOfFacets
         };
 
     public:
@@ -52,9 +98,8 @@ namespace Dt
             {
                 struct
                 {
-                    unsigned int m_DirtyFlags : 8;        //< Dirty flags if something happens
                     unsigned int m_IsActive   : 1;        //< Either the component is active or not
-                    unsigned int m_Padding    : 23;
+                    unsigned int m_Padding    : 31;
                 };
 
                 unsigned int m_Key;
@@ -68,28 +113,24 @@ namespace Dt
         CComponent();
         ~CComponent();
 
-        const Base::ID GetID() const;
         const Base::ID GetTypeID() const override;
-
-        const Dt::CEntity* GetHostEntity() const;
 
         void SetActive(bool _Flag);
         bool IsActive() const;
         bool IsActiveAndUsable() const;
 
-        void SetDirtyFlags(unsigned int _Flags);
-        unsigned int GetDirtyFlags() const;
+        void SetFacet(unsigned int _Category, void* _pFacet);
+        void* GetFacet(unsigned int _Category);
+        const void* GetFacet(unsigned int _Category) const;
 
     private:
 
-        Base::ID           m_ID;
-        SFlags             m_Flags;
-        const Dt::CEntity* m_pHostEntity;
+        typedef std::array<void*, NumberOfFacets> CFacets;
 
     private:
 
-        friend class CComponentManager;
-        friend class CEntity;
+        SFlags  m_Flags;
+        CFacets m_Facets;
     };
 } // namespace Dt
 
@@ -107,6 +148,8 @@ namespace Dt
         m_Flags.m_Key = 0;
 
         m_Flags.m_IsActive = true;
+
+        for (auto Facet : m_Facets) Facet = 0;
     }
 
     // -----------------------------------------------------------------------------
@@ -120,25 +163,9 @@ namespace Dt
     // -----------------------------------------------------------------------------
 
     template<class T>
-    const Base::ID CComponent<T>::GetID() const
-    {
-        return m_ID;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    template<class T>
     const Base::ID CComponent<T>::GetTypeID() const
     {
         return STATIC_TYPE_ID;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    template<class T>
-    const Dt::CEntity* CComponent<T>::GetHostEntity() const
-    {
-        return m_pHostEntity;
     }
 
     // -----------------------------------------------------------------------------
@@ -162,25 +189,31 @@ namespace Dt
     template<class T>
     bool CComponent<T>::IsActiveAndUsable() const
     {
-        assert(m_pHostEntity);
-
-        return m_Flags.m_IsActive == true && m_pHostEntity->IsActive() == true;
+        return m_Flags.m_IsActive == true && m_pHostEntity != nullptr && m_pHostEntity->IsActive() == true;
     }
 
     // -----------------------------------------------------------------------------
 
     template<class T>
-    void CComponent<T>::SetDirtyFlags(unsigned int _Flags)
+    void CComponent<T>::SetFacet(unsigned int _Category, void* _pFacet)
     {
-        m_Flags.m_DirtyFlags = _Flags;
+        m_Facets[_Category] = _pFacet;
     }
 
     // -----------------------------------------------------------------------------
 
     template<class T>
-    unsigned int CComponent<T>::GetDirtyFlags() const
+    void* CComponent<T>::GetFacet(unsigned int _Category)
     {
-        return m_Flags.m_DirtyFlags;
+        return m_Facets[_Category];
+    }
+
+    // -----------------------------------------------------------------------------
+
+    template<class T>
+    const void* CComponent<T>::GetFacet(unsigned int _Category) const
+    {
+        return m_Facets[_Category];
     }
 } // namespace Dt
 

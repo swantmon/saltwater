@@ -15,17 +15,18 @@
 #include "data/data_entity_manager.h"
 #include "data/data_hierarchy_facet.h"
 #include "data/data_light_probe_component.h"
+#include "data/data_material_component.h"
 #include "data/data_mesh_component.h"
 #include "data/data_transformation_facet.h"
 
 #include "graphic/gfx_ar_renderer.h"
 #include "graphic/gfx_buffer_manager.h"
-#include "graphic/gfx_component_manager.h"
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_debug_renderer.h"
-#include "graphic/gfx_light_probe_component.h"
+#include "graphic/gfx_light_probe.h"
 #include "graphic/gfx_main.h"
-#include "graphic/gfx_mesh_component.h"
+#include "graphic/gfx_material.h"
+#include "graphic/gfx_mesh.h"
 #include "graphic/gfx_mesh_manager.h"
 #include "graphic/gfx_mesh_renderer.h"
 #include "graphic/gfx_performance.h"
@@ -824,7 +825,7 @@ namespace
 
         for (; CurrentProbeRenderJob != EndOfProbeRenderJobs; ++CurrentProbeRenderJob)
         {
-            CSurfacePtr SurfacePtr = m_SphereMeshPtr->GetLOD(0)->GetSurface(0);
+            CSurfacePtr SurfacePtr = m_SphereMeshPtr->GetLOD(0)->GetSurface();
 
             // -----------------------------------------------------------------------------
             // Upload data to buffer
@@ -865,7 +866,7 @@ namespace
 
         for (; CurrentProbeRenderJob != EndOfProbeRenderJobs; ++CurrentProbeRenderJob)
         {
-            CSurfacePtr SurfacePtr = m_BoxMeshPtr->GetLOD(0)->GetSurface(0);
+            CSurfacePtr SurfacePtr = m_BoxMeshPtr->GetLOD(0)->GetSurface();
 
             // -----------------------------------------------------------------------------
             // Upload data to buffer
@@ -1022,56 +1023,52 @@ namespace
 
             if (_pEntity->GetComponentFacet()->HasComponent<Dt::CMeshComponent>())
             {
-                CMeshComponent* pGfxComponent = CComponentManager::GetInstance().GetComponent<CMeshComponent>(_pEntity->GetComponentFacet()->GetComponent<Dt::CMeshComponent>()->GetID());
+                CMesh* pGfxMesh = static_cast<CMesh*>(_pEntity->GetComponentFacet()->GetComponent<Dt::CMeshComponent>()->GetFacet(Dt::CMeshComponent::Graphic));
 
-                assert(pGfxComponent != nullptr);
+                CMaterial* pMaterial = 0;
 
-                CMeshPtr MeshPtr = pGfxComponent->GetMesh();
+                auto pMaterialComponent = _pEntity->GetComponentFacet()->GetComponent<Dt::CMaterialComponent>();
+
+                if (pMaterialComponent)
+                {
+                    pMaterial = static_cast<CMaterial*>(pMaterialComponent->GetFacet(Dt::CMaterialComponent::Graphic));
+                }
+ 
+                assert(pGfxMesh != nullptr);
+
+                CMeshPtr MeshPtr = pGfxMesh;
 
                 assert(MeshPtr.IsValid());
 
                 // -----------------------------------------------------------------------------
                 // Set every surface of this entity into a new render job
                 // -----------------------------------------------------------------------------
-                unsigned int NumberOfSurfaces = MeshPtr->GetLOD(0)->GetNumberOfSurfaces();
+                CSurfacePtr SurfacePtr = MeshPtr->GetLOD(0)->GetSurface();
 
-                for (unsigned int IndexOfSurface = 0; IndexOfSurface < NumberOfSurfaces; ++IndexOfSurface)
+                CMaterialPtr MaterialPtr = SurfacePtr->GetMaterial();
+
+                if (pMaterial != 0)
                 {
-                    CSurfacePtr SurfacePtr = MeshPtr->GetLOD(0)->GetSurface(IndexOfSurface);
-
-                    if (SurfacePtr == nullptr)
-                    {
-                        break;
-                    }
-
-                    CMaterialPtr MaterialPtr;
-
-                    if (pGfxComponent->GetMaterial(IndexOfSurface) != 0)
-                    {
-                        MaterialPtr = pGfxComponent->GetMaterial(IndexOfSurface);
-                    }
-                    else
-                    {
-                        MaterialPtr = SurfacePtr->GetMaterial();
-                    }
-
-                    assert(MaterialPtr != 0 && MaterialPtr.IsValid());
-
-                    // -----------------------------------------------------------------------------
-                    // Set informations to render job
-                    // -----------------------------------------------------------------------------
-                    SSurfaceRenderJob NewRenderJob;
-
-                    NewRenderJob.m_SurfacePtr  = SurfacePtr;
-                    NewRenderJob.m_ModelMatrix = _pEntity->GetTransformationFacet()->GetWorldMatrix();
-
-                    m_SurfaceRenderJobs.push_back(NewRenderJob);
+                    MaterialPtr = pMaterial;
                 }
+
+                assert(MaterialPtr != 0 && MaterialPtr.IsValid());
+
+                // -----------------------------------------------------------------------------
+                // Set informations to render job
+                // -----------------------------------------------------------------------------
+                SSurfaceRenderJob NewRenderJob;
+
+                NewRenderJob.m_SurfacePtr  = SurfacePtr;
+                NewRenderJob.m_ModelMatrix = _pEntity->GetTransformationFacet()->GetWorldMatrix();
+
+                m_SurfaceRenderJobs.push_back(NewRenderJob);
             }
             else if (_pEntity->GetComponentFacet()->HasComponent<Dt::CLightProbeComponent>())
             {
-                Dt::CLightProbeComponent*  pDataComponent = _pEntity->GetComponentFacet()->GetComponent<Dt::CLightProbeComponent>();
-                Gfx::CLightProbeComponent* pGfxComponent  = CComponentManager::GetInstance().GetComponent<Gfx::CLightProbeComponent>(pDataComponent->GetID());
+                Dt::CLightProbeComponent* pDataComponent = _pEntity->GetComponentFacet()->GetComponent<Dt::CLightProbeComponent>();
+
+                Gfx::CLightProbe* pGfxComponent  = static_cast<Gfx::CLightProbe*>(pDataComponent->GetFacet(Dt::CLightProbeComponent::Graphic));
 
                 assert(pGfxComponent != nullptr);
 

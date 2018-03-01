@@ -18,13 +18,7 @@ namespace Gfx
     {
     public:
         
-        static const unsigned int s_NumberOfSurfaces = 16;
-        
-    public:
-        
-        unsigned int GetNumberOfSurfaces() const;
-        
-        CSurfacePtr GetSurface(unsigned int _Index) const;
+        CSurfacePtr GetSurface() const;
         
     protected:
         
@@ -33,8 +27,7 @@ namespace Gfx
         
     protected:
         
-        unsigned int m_NumberOfSurfaces;
-        CSurfacePtr  m_Surfaces[s_NumberOfSurfaces];
+        CSurfacePtr m_Surface;
     };
 } // namespace Gfx
 

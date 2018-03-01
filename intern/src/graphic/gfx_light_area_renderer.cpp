@@ -6,15 +6,15 @@
 #include "base/base_uncopyable.h"
 
 #include "data/data_area_light_component.h"
+#include "data/data_component.h"
 #include "data/data_component_facet.h"
 #include "data/data_component_manager.h"
 #include "data/data_entity.h"
 #include "data/data_map.h"
 
-#include "graphic/gfx_area_light_component.h"
+#include "graphic/gfx_area_light.h"
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"
-#include "graphic/gfx_component_manager.h"
 #include "graphic/gfx_debug_renderer.h"
 #include "graphic/gfx_histogram_renderer.h"
 #include "graphic/gfx_light_area_renderer.h"
@@ -88,7 +88,7 @@ namespace
 
         struct SRenderJob
         {
-            Gfx::CAreaLightComponent* m_pGfxComponent;
+            Gfx::CAreaLight* m_pGfxComponent;
             Dt::CAreaLightComponent*  m_pDtComponent;
         };
 
@@ -400,9 +400,9 @@ namespace
 
         ContextManager::SetRenderContext(m_LightRenderContextPtr);
 
-        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+        ContextManager::SetVertexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
 
-        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+        ContextManager::SetIndexBuffer(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
 
         ContextManager::SetInputLayout(m_ScreenQuadShaderPtr->GetInputLayout());
 
@@ -441,7 +441,7 @@ namespace
         for (; CurrentRenderJob != EndOfRenderJobs; ++CurrentRenderJob)
         {
             Dt::CAreaLightComponent*  pDtComponent  = CurrentRenderJob->m_pDtComponent;
-            Gfx::CAreaLightComponent* pGfxComponent = CurrentRenderJob->m_pGfxComponent;
+            Gfx::CAreaLight* pGfxComponent = CurrentRenderJob->m_pGfxComponent;
 
             assert(pDtComponent && pGfxComponent);
 
@@ -473,7 +473,7 @@ namespace
                 ContextManager::SetTexture(6, static_cast<Gfx::CTexturePtr>(pGfxComponent->GetFilteredTexturePtr()));
             }
 
-            ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+            ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
         }
 
         // -----------------------------------------------------------------------------
@@ -536,7 +536,7 @@ namespace
         for (; CurrentRenderJob != EndOfRenderJobs; ++CurrentRenderJob)
         {
             Dt::CAreaLightComponent*  pDtComponent  = CurrentRenderJob->m_pDtComponent;
-            Gfx::CAreaLightComponent* pGfxComponent = CurrentRenderJob->m_pGfxComponent;
+            Gfx::CAreaLight* pGfxComponent = CurrentRenderJob->m_pGfxComponent;
 
             assert(pDtComponent && pGfxComponent);
 
@@ -620,7 +620,7 @@ namespace
             SRenderJob NewRenderJob;
 
             NewRenderJob.m_pDtComponent  = pDtComponent;
-            NewRenderJob.m_pGfxComponent = Gfx::CComponentManager::GetInstance().GetComponent<Gfx::CAreaLightComponent>(NewRenderJob.m_pDtComponent->GetID());
+            NewRenderJob.m_pGfxComponent = static_cast<Gfx::CAreaLight*>(pDtComponent->GetFacet(Dt::CAreaLightComponent::Graphic));
 
             m_RenderJobs.push_back(NewRenderJob);
         }

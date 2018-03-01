@@ -6,6 +6,7 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
+#include "data/data_component.h"
 #include "data/data_component_facet.h"
 #include "data/data_component_manager.h"
 #include "data/data_entity.h"
@@ -15,7 +16,6 @@
 
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"
-#include "graphic/gfx_component_manager.h"
 #include "graphic/gfx_debug_renderer.h"
 #include "graphic/gfx_histogram_renderer.h"
 #include "graphic/gfx_light_point_renderer.h"
@@ -23,7 +23,7 @@
 #include "graphic/gfx_mesh.h"
 #include "graphic/gfx_mesh_manager.h"
 #include "graphic/gfx_performance.h"
-#include "graphic/gfx_point_light_component.h"
+#include "graphic/gfx_point_light.h"
 #include "graphic/gfx_sampler_manager.h"
 #include "graphic/gfx_shader_manager.h"
 #include "graphic/gfx_state_manager.h"
@@ -93,7 +93,7 @@ namespace
         struct SRenderJob
         {
             Dt::CPointLightComponent*  m_pDtComponent;
-            Gfx::CPointLightComponent* m_pGfxComponent;
+            Gfx::CPointLight* m_pGfxComponent;
         };
         
     private:
@@ -371,15 +371,15 @@ namespace
         // -----------------------------------------------------------------------------
         // Set static stuff
         // -----------------------------------------------------------------------------
-        ContextManager::SetShaderVS(m_SphereModelPtr->GetLOD(0)->GetSurface(0)->GetMVPShaderVS());
+        ContextManager::SetShaderVS(m_SphereModelPtr->GetLOD(0)->GetSurface()->GetMVPShaderVS());
 
         ContextManager::SetShaderPS(m_PunctualLightShaderPSPtr);
 
-        ContextManager::SetVertexBuffer(m_SphereModelPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+        ContextManager::SetVertexBuffer(m_SphereModelPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
 
-        ContextManager::SetIndexBuffer(m_SphereModelPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), 0);
+        ContextManager::SetIndexBuffer(m_SphereModelPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
 
-        ContextManager::SetInputLayout(m_SphereModelPtr->GetLOD(0)->GetSurface(0)->GetMVPShaderVS()->GetInputLayout());
+        ContextManager::SetInputLayout(m_SphereModelPtr->GetLOD(0)->GetSurface()->GetMVPShaderVS()->GetInputLayout());
 
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
 
@@ -404,7 +404,7 @@ namespace
 
         for (; CurrentRenderJob != EndOfRenderJobs; ++ CurrentRenderJob)
         {
-            Gfx::CPointLightComponent* pGfxComponent = CurrentRenderJob->m_pGfxComponent;
+            Gfx::CPointLight* pGfxComponent = CurrentRenderJob->m_pGfxComponent;
             Dt::CPointLightComponent*  pDtComponent  = CurrentRenderJob->m_pDtComponent;
             
             assert(pDtComponent    != nullptr);
@@ -459,7 +459,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Draw light
             // -----------------------------------------------------------------------------
-            ContextManager::DrawIndexed(m_SphereModelPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
+            ContextManager::DrawIndexed(m_SphereModelPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
         }
 
         ContextManager::ResetTexture(0);
@@ -506,10 +506,11 @@ namespace
 
         for (auto Component : DataComponents)
         {
-            Dt::CPointLightComponent*  pDtComponent  = static_cast<Dt::CPointLightComponent*>(Component);
-            Gfx::CPointLightComponent* pGfxComponent = Gfx::CComponentManager::GetInstance().GetComponent<Gfx::CPointLightComponent>(pDtComponent->GetID());
+            Dt::CPointLightComponent* pDtComponent = static_cast<Dt::CPointLightComponent*>(Component);
 
             if (pDtComponent->IsActiveAndUsable() == false) continue;
+
+            Gfx::CPointLight* pGfxComponent = static_cast<Gfx::CPointLight*>(pDtComponent->GetFacet(Dt::CPointLightComponent::Graphic));
 
             SRenderJob NewRenderJob;
 

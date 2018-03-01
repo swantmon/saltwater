@@ -1,11 +1,11 @@
 
 #include "graphic/gfx_precompiled.h"
 
-#include "graphic/gfx_area_light_component.h"
+#include "graphic/gfx_area_light.h"
 
 namespace Gfx
 {
-    CAreaLightComponent::CAreaLightComponent()
+    CAreaLight::CAreaLight()
         : m_PlaneIndexBufferPtr    (0)
         , m_PlaneVertexBufferSetPtr(0)
         , m_TexturePtr             (0)
@@ -22,76 +22,76 @@ namespace Gfx
 
     // -----------------------------------------------------------------------------
 
-    CAreaLightComponent::~CAreaLightComponent()
+    CAreaLight::~CAreaLight()
     {
     }
 
     // -----------------------------------------------------------------------------
 
-    CBufferPtr CAreaLightComponent::GetPlaneIndexBuffer() const
+    CBufferPtr CAreaLight::GetPlaneIndexBuffer() const
     {
         return m_PlaneIndexBufferPtr;
     }
 
     // -----------------------------------------------------------------------------
 
-    CBufferPtr CAreaLightComponent::GetPlaneVertexBuffer() const
+    CBufferPtr CAreaLight::GetPlaneVertexBuffer() const
     {
         return m_PlaneVertexBufferSetPtr;
     }
 
     // -----------------------------------------------------------------------------
 
-    glm::vec4 CAreaLightComponent::GetDirectionX() const
+    glm::vec4 CAreaLight::GetDirectionX() const
     {
         return m_DirectionX;
     }
 
     // -----------------------------------------------------------------------------
 
-    glm::vec4 CAreaLightComponent::GetDirectionY() const
+    glm::vec4 CAreaLight::GetDirectionY() const
     {
         return m_DirectionY;
     }
 
     // -----------------------------------------------------------------------------
 
-    glm::vec4 CAreaLightComponent::GetPlane() const
+    glm::vec4 CAreaLight::GetPlane() const
     {
         return m_Plane;
     }
 
     // -----------------------------------------------------------------------------
 
-    float CAreaLightComponent::GetHalfWidth() const
+    float CAreaLight::GetHalfWidth() const
     {
         return m_HalfWidth;
     }
 
     // -----------------------------------------------------------------------------
 
-    float CAreaLightComponent::GetHalfHeight() const
+    float CAreaLight::GetHalfHeight() const
     {
         return m_HalfHeight;
     }
 
     // -----------------------------------------------------------------------------
 
-    CTexturePtr CAreaLightComponent::GetTexturePtr() const
+    CTexturePtr CAreaLight::GetTexturePtr() const
     {
         return m_TexturePtr;
     }
 
     // -----------------------------------------------------------------------------
 
-    CTexturePtr CAreaLightComponent::GetFilteredTexturePtr() const
+    CTexturePtr CAreaLight::GetFilteredTexturePtr() const
     {
         return m_FilteredTexturePtr;
     }
 
     // -----------------------------------------------------------------------------
 
-    bool CAreaLightComponent::HasTexture() const
+    bool CAreaLight::HasTexture() const
     {
         return m_TexturePtr != 0 && m_FilteredTexturePtr != 0;
     }

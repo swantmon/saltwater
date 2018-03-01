@@ -1,52 +1,81 @@
 
 #include "data/data_precompiled.h"
 
+#include "core/core_asset_importer.h"
+
 #include "data/data_mesh_component.h"
+
+#include <assert.h>
 
 namespace Dt
 {
     CMeshComponent::CMeshComponent()
-        : m_pModel(nullptr)
+        : m_Filename      ()
+        , m_GeneratorFlag (Core::AssetGenerator::SGeneratorFlag::Nothing)
+        , m_MeshIndex     (0)
+        , m_MeshType      (EMeshType::Asset)
     {
-        Base::CMemory::Zero(m_pMaterial, sizeof(CMaterial*) * CLOD::s_NumberOfSurfaces);
     }
 
     // -----------------------------------------------------------------------------
 
     CMeshComponent::~CMeshComponent()
     {
-
     }
 
     // -----------------------------------------------------------------------------
 
-    void CMeshComponent::SetMesh(CMesh* _pModel)
+    void CMeshComponent::SetFilename(const std::string& _rValue)
     {
-        m_pModel = _pModel;
+        m_Filename = _rValue;
     }
 
     // -----------------------------------------------------------------------------
 
-    CMesh* CMeshComponent::GetMesh()
+    const std::string& CMeshComponent::GetFilename() const
     {
-        return m_pModel;
+        return m_Filename;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CMeshComponent::SetMaterial(unsigned int _Surface, CMaterial* _pMaterial)
+    void CMeshComponent::SetGeneratorFlag(int _Flag)
     {
-        assert(_Surface >= 0 && _Surface < CLOD::s_NumberOfSurfaces);
-
-        m_pMaterial[_Surface] = _pMaterial;
+        m_GeneratorFlag = _Flag;
     }
 
     // -----------------------------------------------------------------------------
 
-    CMaterial* CMeshComponent::GetMaterial(unsigned int _Surface)
+    int CMeshComponent::GetGeneratorFlag() const
     {
-        assert(_Surface >= 0 && _Surface < CLOD::s_NumberOfSurfaces);
+        return m_GeneratorFlag;
+    }
 
-        return m_pMaterial[_Surface];
+    // -----------------------------------------------------------------------------
+
+    void CMeshComponent::SetMeshIndex(const int _Value)
+    {
+        m_MeshIndex = _Value;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    int CMeshComponent::GetMeshIndex() const
+    {
+        return m_MeshIndex;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMeshComponent::SetMeshType(EMeshType _Value)
+    {
+        m_MeshType = _Value;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CMeshComponent::EMeshType CMeshComponent::GetMeshType() const
+    {
+        return m_MeshType;
     }
 } // namespace Dt

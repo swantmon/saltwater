@@ -5,32 +5,31 @@
 
 namespace Gfx
 {
-    // -------------------------
-    // Equals the camera lens
-    // -------------------------
     CCamera::CCamera()
-        : m_ProjectionMatrix    ()
-        , m_ViewProjectionMatrix()
-        , m_CullingMask         (0)
-        , m_Depth               (0)
-        , m_Left                (0.0f)
-        , m_Right               (0.0f)
-        , m_Bottom              (0.0f)
-        , m_Top                 (0.0f)
-        , m_Near                (0.0f)
-        , m_Far                 (0.0f)
-        , m_Radius              (0.0f)
-        , m_Mode                (Auto)
-        , m_ShutterSpeed        (0.0f)
-        , m_Aperture            (0.0f)
-        , m_ISO                 (0.0f)
-        , m_EC                  (0.0f)
-        , m_Size                (0.0f)
-        , m_BackgroundColor     (0.0f)
-        , m_WorldAABB           ()
-        , m_ViewportRect        ()
-        , m_pSibling            (nullptr)
-        , m_ViewPtr             (nullptr)
+        : m_ProjectionMatrix      ()
+        , m_ViewProjectionMatrix  ()
+        , m_CullingMask           (0)
+        , m_Depth                 (0)
+        , m_Left                  (0.0f)
+        , m_Right                 (0.0f)
+        , m_Bottom                (0.0f)
+        , m_Top                   (0.0f)
+        , m_Near                  (0.0f)
+        , m_Far                   (0.0f)
+        , m_Radius                (0.0f)
+        , m_Mode                  (Auto)
+        , m_ShutterSpeed          (0.0f)
+        , m_Aperture              (0.0f)
+        , m_ISO                   (0.0f)
+        , m_EC                    (0.0f)
+        , m_Size                  (0.0f)
+        , m_BackgroundColor       (0.0f)
+        , m_WorldAABB             ()
+        , m_ViewportRect          ()
+        , m_pSibling              (nullptr)
+        , m_ViewPtr               (nullptr)
+        , m_BackgroundTexture2DPtr(0)
+        , m_TimeStamp             (static_cast<Base::U64>(-1))
     {
     }
 
@@ -38,6 +37,7 @@ namespace Gfx
 
     CCamera::~CCamera()
     {
+        m_BackgroundTexture2DPtr = 0;
     }
 
     // --------------------------------------------------------------------------------
@@ -542,5 +542,33 @@ namespace Gfx
                 rMax[2] = m_WorldSpaceFrustum[IndexOfVertex][2];
             }
 		}
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CCamera::SetBackgroundTexture2D(CTexturePtr _Texture2DPtr)
+    {
+        m_BackgroundTexture2DPtr = _Texture2DPtr;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CTexturePtr CCamera::GetBackgroundTexture2D()
+    {
+        return m_BackgroundTexture2DPtr;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CCamera::SetTimeStamp(Base::U64 _TimeStamp)
+    {
+        m_TimeStamp = _TimeStamp;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    Base::U64 CCamera::GetTimeStamp()
+    {
+        return m_TimeStamp;
     }
 } // namespace Gfx

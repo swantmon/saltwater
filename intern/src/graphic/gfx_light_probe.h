@@ -1,16 +1,15 @@
 #pragma once
 
-#include "graphic/gfx_component.h"
 #include "graphic/gfx_texture.h"
 
 namespace Gfx
 {
-    class CLightProbeComponent : public CComponent<CLightProbeComponent>
+    class CLightProbe : public Base::CManagedPoolItemBase
     {
     public:
 
-        CLightProbeComponent();
-        ~CLightProbeComponent();
+        CLightProbe();
+        ~CLightProbe();
 
     public:
 
@@ -29,4 +28,9 @@ namespace Gfx
         CTexturePtr m_DepthPtr;
         Base::U64   m_TimeStamp;
     };
+} // namespace Gfx
+
+namespace Gfx
+{
+    typedef Base::CManagedPoolItemPtr<CLightProbe> CLightProbePtr;
 } // namespace Gfx
