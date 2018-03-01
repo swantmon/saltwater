@@ -42,7 +42,7 @@ namespace
 {
     const SMaterialDescriptor CCoreMaterialImporter::s_DefaultDescriptor =
     {
-        "", "", "", "", "", "", "",
+        "MATERIALNAME: PATHTOMATERIAL", "", "", "", "", "", "",
         1.0f, 0.0f, 0.0f, 0.0f,
         glm::vec3(1.0f),
         glm::vec4(1.0f, 1.0f, 0.0f, 0.0f)
@@ -96,7 +96,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Values
         // -----------------------------------------------------------------------------
-        MaterialDescriptor.m_MaterialName = pElementDefinition->Attribute("Name");
+        MaterialDescriptor.m_MaterialName = std::string(pElementDefinition->Attribute("Name")) + ": " + _rPathToFile;
 
         if (pElementColor != 0)
         {
@@ -172,9 +172,6 @@ namespace
             aiMaterial* pMaterial = pScene->mMaterials[_MaterialIndex];
 
             // -----------------------------------------------------------------------------
-            // Fill data
-            // -----------------------------------------------------------------------------
-            // -----------------------------------------------------------------------------
             // Values and textures
             // -----------------------------------------------------------------------------
             aiString  NativeString;
@@ -182,7 +179,7 @@ namespace
 
             if (pMaterial->Get(AI_MATKEY_NAME, NativeString) == AI_SUCCESS)
             {
-                MaterialDescriptor.m_MaterialName = NativeString.data;
+                MaterialDescriptor.m_MaterialName = std::string(NativeString.data) + ": " + _rPathToFile;
             }
 
             if (pMaterial->Get(AI_MATKEY_COLOR_DIFFUSE, DiffuseColor) == AI_SUCCESS)

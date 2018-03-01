@@ -5,6 +5,7 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
+#include "core/core_asset_manager.h"
 #include "core/core_material_importer.h"
 
 #include "data/data_component.h"
@@ -100,7 +101,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Material
         // -----------------------------------------------------------------------------
-        auto MaterialDescriptor = Core::MaterialImporter::CreateDescriptionFromXML(PathToFile);
+        std::string PathToMaterial = Core::AssetManager::GetPathToAssets() + "/" + PathToFile;
+
+        auto MaterialDescriptor = Core::MaterialImporter::CreateDescriptionFromXML(PathToMaterial);
 
         auto pComponent = Dt::MaterialHelper::CreateMaterial(MaterialDescriptor);
 
