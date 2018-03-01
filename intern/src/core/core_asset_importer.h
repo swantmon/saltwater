@@ -1,24 +1,9 @@
 
 #pragma once
 
-#include <string>
+#include "core/core_asset_generator.h"
 
-namespace Core
-{
-namespace AssetImporter
-{
-    struct SGeneratorFlag
-    {
-        enum
-        {
-            Nothing      = 0x00,
-            Default      = 0x01,
-            FlipUVs      = 0x02,
-            RealtimeFast = 0x04
-        };
-    };
-} // namespace AssetImporter
-} // namespace Core
+#include <string>
 
 namespace Core
 {

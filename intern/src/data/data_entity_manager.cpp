@@ -226,7 +226,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Build path to texture in file system and load scene
         // -----------------------------------------------------------------------------
-        int GeneratorFlag = Core::AssetImporter::SGeneratorFlag::Default;
+        int GeneratorFlag = Core::AssetGenerator::SGeneratorFlag::Default;
 
         auto Importer = Core::AssetImporter::AllocateAssimpImporter(_rFile, GeneratorFlag);
 

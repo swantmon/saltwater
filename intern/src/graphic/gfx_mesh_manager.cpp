@@ -152,7 +152,7 @@ namespace
         void OnStart();
         void OnExit();
         
-        CMeshPtr CreateMeshFromFile(const Base::Char* _pFilename, int _GenFlag, int _MeshIndex);
+        CMeshPtr CreateMeshFromFile(const std::string& _rPathToFile, int _GenFlag, int _MeshIndex);
         CMeshPtr CreateBox(float _Width, float _Height, float _Depth);
         CMeshPtr CreateSphere(float _Radius, unsigned int _Stacks, unsigned int _Slices);
         CMeshPtr CreateSphereIsometric(float _Radius, unsigned int _Refinement);
@@ -204,7 +204,7 @@ namespace
 
         void OnDirtyComponent(Base::IComponent* _pComponent);
 
-        void FillMeshFromFile(CInternMesh* _pMesh, const Base::Char* _pFilename, int _GenFlag, int _MeshIndex);
+        void FillMeshFromFile(CInternMesh* _pMesh, const std::string& _rFilename, int _GenFlag, int _MeshIndex);
 
         void FillMeshFromAssimp(CInternMesh* _pMesh, const aiScene* _pScene, int _MeshIndex);
     };
@@ -248,14 +248,16 @@ namespace
     
     // -----------------------------------------------------------------------------
     
-    CMeshPtr CGfxMeshManager::CreateMeshFromFile(const Base::Char* _pFilename, int _GenFlag, int _MeshIndex)
+    CMeshPtr CGfxMeshManager::CreateMeshFromFile(const std::string& _rPathToFile, int _GenFlag, int _MeshIndex)
     {
+        if (_rPathToFile.length() == 0) return nullptr;
+
         // -----------------------------------------------------------------------------
         // Check existing model
         // -----------------------------------------------------------------------------
         unsigned int Hash = 0;
         
-        Hash = Base::CRC32(Hash, _pFilename, static_cast<unsigned int>(strlen(_pFilename)));
+        Hash = Base::CRC32(Hash, _rPathToFile.c_str(), static_cast<unsigned int>(_rPathToFile.length()));
 
         Hash = Base::CRC32(Hash, &_GenFlag, sizeof(_GenFlag));
 
@@ -271,7 +273,7 @@ namespace
         // -----------------------------------------------------------------------------
         auto MeshPtr = m_Meshes.Allocate();
 
-        FillMeshFromFile(MeshPtr, _pFilename, _GenFlag, _MeshIndex);
+        FillMeshFromFile(MeshPtr, _rPathToFile, _GenFlag, _MeshIndex);
                 
         // -----------------------------------------------------------------------------
         // Put this new model to hash list
@@ -1186,27 +1188,14 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxMeshManager::FillMeshFromFile(CInternMesh* _pMesh, const Base::Char* _pFilename, int _GenFlag, int _MeshIndex)
+    void CGfxMeshManager::FillMeshFromFile(CInternMesh* _pMesh, const std::string& _rPathToFile, int _GenFlag, int _MeshIndex)
     {
-        assert(_pFilename != 0);
-
         // -----------------------------------------------------------------------------
         // Build path to texture in file system and load model
         // -----------------------------------------------------------------------------
-        std::string PathToModel = Core::AssetManager::GetPathToAssets() + "/" + _pFilename;
-
-        auto Importer = Core::AssetImporter::AllocateAssimpImporter(PathToModel, _GenFlag);
+        auto Importer = Core::AssetImporter::AllocateAssimpImporter(_rPathToFile, _GenFlag);
 
         const Assimp::Importer* pImporter = static_cast<const Assimp::Importer*>(Core::AssetImporter::GetNativeAccessFromImporter(Importer));
-
-        if (!pImporter)
-        {
-            PathToModel = Core::AssetManager::GetPathToData() + g_PathToDataModels + _pFilename;
-
-            Importer = Core::AssetImporter::AllocateAssimpImporter(PathToModel, _GenFlag);
-
-            pImporter = static_cast<const Assimp::Importer*>(Core::AssetImporter::GetNativeAccessFromImporter(Importer));
-        }
 
         if (!pImporter)
         {
@@ -1457,9 +1446,9 @@ namespace MeshManager
     
     // -----------------------------------------------------------------------------
     
-    CMeshPtr CreateMeshFromFile(const Base::Char* _pFilename, int _GenFlag, int _MeshIndex)
+    CMeshPtr CreateMeshFromFile(const std::string& _rPathToFile, int _GenFlag, int _MeshIndex)
     {
-        return CGfxMeshManager::GetInstance().CreateMeshFromFile(_pFilename, _GenFlag, _MeshIndex);
+        return CGfxMeshManager::GetInstance().CreateMeshFromFile(_rPathToFile, _GenFlag, _MeshIndex);
     }
 
     // -----------------------------------------------------------------------------

@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\src\core\core_asset_generator.h" />
     <ClInclude Include="..\..\..\src\core\core_asset_importer.h" />
     <ClInclude Include="..\..\..\src\core\core_asset_manager.h" />
     <ClInclude Include="..\..\..\src\core\core_config.h" />

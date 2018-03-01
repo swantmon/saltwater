@@ -3,7 +3,11 @@
 
 #include "base/base_typedef.h"
 
+#include "core/core_asset_generator.h"
+
 #include "graphic/gfx_mesh.h"
+
+#include <string>
 
 namespace Gfx
 {
@@ -12,7 +16,7 @@ namespace MeshManager
     void OnStart();
     void OnExit();
     
-    CMeshPtr CreateMeshFromFile(const Base::Char* _pFilename, int _GenFlag, int _MeshIndex = 0);
+    CMeshPtr CreateMeshFromFile(const std::string& _rPathToFile, int _GenFlag, int _MeshIndex = 0);
 
     CMeshPtr CreateBox(float _Width, float _Height, float _Depth);
     CMeshPtr CreateSphere(float _Radius, unsigned int _Stacks, unsigned int _Slices);

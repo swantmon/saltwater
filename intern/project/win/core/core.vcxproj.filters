@@ -12,6 +12,9 @@
     <ClInclude Include="..\..\..\src\core\core_asset_importer.h">
       <Filter>assets</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\core\core_asset_generator.h">
+      <Filter>assets</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\core\core_time.cpp">

@@ -8,7 +8,7 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
-#include "core/core_asset_importer.h"
+#include "core/core_asset_manager.h"
 #include "core/core_time.h"
 
 #include "data/data_component.h"
@@ -514,7 +514,9 @@ namespace
 
         // -----------------------------------------------------------------------------
 
-        CMeshPtr CurvedPlanePtr = MeshManager::CreateMeshFromFile("curvedplane.obj", Core::AssetImporter::SGeneratorFlag::Default);
+        std::string PathToModel = Core::AssetManager::GetPathToData() + "curvedplane.obj";
+
+        CMeshPtr CurvedPlanePtr = MeshManager::CreateMeshFromFile(PathToModel, Core::AssetGenerator::SGeneratorFlag::Default);
 
         // -----------------------------------------------------------------------------
 

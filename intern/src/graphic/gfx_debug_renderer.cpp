@@ -6,7 +6,7 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
-#include "core/core_asset_importer.h"
+#include "core/core_asset_manager.h"
 
 #include "data/data_entity.h"
 #include "data/data_map.h"
@@ -451,7 +451,9 @@ namespace
 
         // -----------------------------------------------------------------------------
 
-        m_GizmoModelPtr = MeshManager::CreateMeshFromFile("gizmo.obj", Core::AssetImporter::SGeneratorFlag::Default | Core::AssetImporter::SGeneratorFlag::FlipUVs);
+        std::string PathToModel = Core::AssetManager::GetPathToData() + "gizmo.obj";
+
+        m_GizmoModelPtr = MeshManager::CreateMeshFromFile(PathToModel, Core::AssetGenerator::SGeneratorFlag::Default | Core::AssetGenerator::SGeneratorFlag::FlipUVs);
 
         // -----------------------------------------------------------------------------
 

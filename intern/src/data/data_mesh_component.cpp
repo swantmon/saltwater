@@ -11,7 +11,7 @@ namespace Dt
 {
     CMeshComponent::CMeshComponent()
         : m_Filename      ()
-        , m_GeneratorFlag (Core::AssetImporter::SGeneratorFlag::Nothing)
+        , m_GeneratorFlag (Core::AssetGenerator::SGeneratorFlag::Nothing)
         , m_MeshIndex     (0)
         , m_MeshType      (EMeshType::Asset)
     {

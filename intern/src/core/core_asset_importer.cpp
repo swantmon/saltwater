@@ -8,6 +8,7 @@
 #include "base/base_singleton.h"
 
 #include "core/core_asset_importer.h"
+#include "core/core_asset_generator.h"
 
 #include "assimp/Importer.hpp"
 #include "assimp/postprocess.h"
@@ -19,6 +20,7 @@
 
 using namespace Core;
 using namespace Core::AssetImporter;
+using namespace Core::AssetGenerator;
 
 namespace 
 {

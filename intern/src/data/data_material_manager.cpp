@@ -224,7 +224,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Importer
         // -----------------------------------------------------------------------------
-        auto Importer = Core::AssetImporter::AllocateAssimpImporter(_rPathToFile, Core::AssetImporter::SGeneratorFlag::Nothing);
+        auto Importer = Core::AssetImporter::AllocateAssimpImporter(_rPathToFile, Core::AssetGenerator::SGeneratorFlag::Nothing);
 
         if (Importer == nullptr) return m_pDefaultMaterial;
 
