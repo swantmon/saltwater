@@ -301,8 +301,10 @@ namespace
                 << "#define VOXELS_PER_ROOTGRID "    << Settings.m_VoxelsPerGrid[0] << " \n"
                 << "#define VOXELS_PER_LEVEL1GRID "  << Settings.m_VoxelsPerGrid[1] << " \n"
                 << "#define VOXELS_PER_LEVEL2GRID "  << Settings.m_VoxelsPerGrid[2] << " \n"
-                << "#define MAP_TEXTURE_FORMAT "     << InternalFormatString << " \n";
-
+                << "#define MAP_TEXTURE_FORMAT "     << InternalFormatString << " \n"
+                << "#define RAYCAST_NEAR "           << 0.0f << " \n"
+                << "#define RAYCAST_FAR "            << 1000.0f << " \n";
+            
             if (Settings.m_CaptureColor)
             {
                 DefineStream << "#define CAPTURE_COLOR\n";

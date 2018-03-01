@@ -288,8 +288,8 @@ vec3 GetNormal(vec3 Vertex)
 
 vec3 GetPosition(vec3 CameraPosition, vec3 RayDirection)
 {
-    const float StartLength = max(0.0f, GetStartLength(CameraPosition, RayDirection, g_AABBMin, g_AABBMax));
-    const float EndLength = GetEndLength(CameraPosition, RayDirection, g_AABBMin, g_AABBMax);
+    const float StartLength = max(RAYCAST_NEAR, GetStartLength(CameraPosition, RayDirection, g_AABBMin, g_AABBMax));
+    const float EndLength = min(RAYCAST_FAR,GetEndLength(CameraPosition, RayDirection, g_AABBMin, g_AABBMax));
 
     float RayLength = StartLength;
     float Step = TRUNCATED_DISTANCE;

@@ -509,8 +509,10 @@ namespace MR
             << "#define LEVEL2_RESOLUTION "      << m_ReconstructionSettings.m_GridResolutions[2]   << " \n"
             << "#define VOXELS_PER_ROOTGRID "    << m_ReconstructionSettings.m_VoxelsPerGrid[0]     << " \n"
             << "#define VOXELS_PER_LEVEL1GRID "  << m_ReconstructionSettings.m_VoxelsPerGrid[1]     << " \n"
-            << "#define VOXELS_PER_LEVEL2GRID "  << m_ReconstructionSettings.m_VoxelsPerGrid[2]     << " \n";
-
+            << "#define VOXELS_PER_LEVEL2GRID "  << m_ReconstructionSettings.m_VoxelsPerGrid[2]     << " \n"
+            << "#define RAYCAST_NEAR "           << m_pRGBDCameraControl->GetMinDepth()             << " \n"
+            << "#define RAYCAST_FAR "            << m_pRGBDCameraControl->GetMaxDepth()             << " \n";
+        
         if (m_ReconstructionSettings.m_CaptureColor)
         {
             DefineStream << "#define CAPTURE_COLOR\n";
