@@ -135,7 +135,7 @@ namespace
 
         CMaterialPtr CreateMaterial(const SMaterialDescriptor& _rDescriptor);
 
-        CMaterialPtr CreateMaterialFromPtr(const void* _pPtr, int _Importer);
+        CMaterialPtr CreateMaterialFromFile(const Base::Char* _pFilename, int _MaterialIndex = 0);
 
         const CMaterialPtr GetDefaultMaterial();
 
@@ -163,7 +163,7 @@ namespace
 
         void FillMaterialFromXML(CInternMaterial* _pMaterial, const std::string& _rFilename);
 
-        void FillMaterialFromAssimpFile(CInternMaterial* _pMaterial, const std::string& _rFilename);
+        void FillMaterialFromAssimpFile(CInternMaterial* _pMaterial, const std::string& _rFilename, int _MaterialIndex);
 
         void FillMaterialFromAssimpMaterial(CInternMaterial* _pMaterial, const aiMaterial* _pAssimpMaterial);
 
@@ -193,6 +193,26 @@ namespace
     void CGfxMaterialManager::OnStart()
     {
         // -----------------------------------------------------------------------------
+        // Create default material
+        // -----------------------------------------------------------------------------
+        SMaterialDescriptor MaterialDescriptor;
+
+        MaterialDescriptor.m_pMaterialName = "STATIC CONST DEFAULT GFX MATERIAL"; 
+        MaterialDescriptor.m_pColorMap     = 0; 
+        MaterialDescriptor.m_pNormalMap    = 0; 
+        MaterialDescriptor.m_pRoughnessMap = 0; 
+        MaterialDescriptor.m_pMetalMaskMap = 0; 
+        MaterialDescriptor.m_pAOMap        = 0; 
+        MaterialDescriptor.m_pBumpMap      = 0; 
+        MaterialDescriptor.m_Roughness     = 1.0f; 
+        MaterialDescriptor.m_Reflectance   = 0.0f; 
+        MaterialDescriptor.m_MetalMask     = 0.0f; 
+        MaterialDescriptor.m_AlbedoColor   = glm::vec3(0.8f); 
+        MaterialDescriptor.m_TilingOffset  = glm::vec4(1.0f, 1.0f, 0.0f, 0.0f);
+
+        m_DefaultMaterialPtr = CreateMaterial(MaterialDescriptor);
+
+        // -----------------------------------------------------------------------------
         // Set dirty handler of data textures
         // -----------------------------------------------------------------------------
         Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(BASE_DIRTY_COMPONENT_METHOD(&CGfxMaterialManager::OnDirtyComponent));
@@ -213,9 +233,20 @@ namespace
     {
         auto pMaterial = m_Materials.Allocate();
 
-        if (_rDescriptor.m_pFileName != 0)
+        FillMaterialFromData(pMaterial, _rDescriptor);
+
+        return CMaterialPtr(pMaterial);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CMaterialPtr CGfxMaterialManager::CreateMaterialFromFile(const Base::Char* _pFilename, int _MaterialIndex)
+    {
+        if (_pFilename != 0)
         {
-            std::string MaterialFileName = _rDescriptor.m_pFileName;
+            auto pMaterial = m_Materials.Allocate();
+
+            std::string MaterialFileName = _pFilename;
 
             if (MaterialFileName.find(".mat") != std::string::npos)
             {
@@ -223,33 +254,7 @@ namespace
             }
             else
             {
-                FillMaterialFromAssimpFile(pMaterial, MaterialFileName);
-            }
-        }
-        else
-        {
-            FillMaterialFromData(pMaterial, _rDescriptor);
-        }
-
-        return CMaterialPtr(pMaterial);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CMaterialPtr CGfxMaterialManager::CreateMaterialFromPtr(const void* _pPtr, int _Importer)
-    {
-        if (_pPtr != 0)
-        {
-            auto pMaterial = m_Materials.Allocate();
-
-            switch (_Importer)
-            {
-            case SExternalImporter::Assimp:
-                FillMaterialFromAssimpMaterial(pMaterial, static_cast<const aiMaterial*>(_pPtr));
-                break;
-            default:
-                BASE_CONSOLE_WARNING("Selected importer for material is not supported!");
-                break;
+                FillMaterialFromAssimpFile(pMaterial, MaterialFileName, _MaterialIndex);
             }
 
             return CMaterialPtr(pMaterial);
@@ -287,25 +292,6 @@ namespace
 
         assert(ID != 0);
 
-        SMaterialDescriptor MaterialDescriptor;
-
-        MaterialDescriptor.m_pMaterialName = pMaterialComponent->GetMaterialname().length() > 0 ? pMaterialComponent->GetMaterialname().c_str() : 0;
-        MaterialDescriptor.m_pFileName     = pMaterialComponent->GetFileName().length()     > 0 ? pMaterialComponent->GetFileName().c_str() : 0;
-
-        MaterialDescriptor.m_Roughness    = pMaterialComponent->GetRoughness();
-        MaterialDescriptor.m_Reflectance  = pMaterialComponent->GetReflectance();
-        MaterialDescriptor.m_MetalMask    = pMaterialComponent->GetMetalness();
-        MaterialDescriptor.m_Displacement = pMaterialComponent->GetDisplacement();
-        MaterialDescriptor.m_AlbedoColor  = pMaterialComponent->GetColor();
-        MaterialDescriptor.m_TilingOffset = pMaterialComponent->GetTilingOffset();
-
-        MaterialDescriptor.m_pColorMap     = pMaterialComponent->GetColorTexture().length() > 0 ? pMaterialComponent->GetColorTexture().c_str() : 0;
-        MaterialDescriptor.m_pNormalMap    = pMaterialComponent->GetNormalTexture().length() > 0 ? pMaterialComponent->GetNormalTexture().c_str() : 0;
-        MaterialDescriptor.m_pRoughnessMap = pMaterialComponent->GetRoughnessTexture().length() > 0 ? pMaterialComponent->GetRoughnessTexture().c_str() : 0;
-        MaterialDescriptor.m_pMetalMaskMap = pMaterialComponent->GetMetalTexture().length() > 0 ? pMaterialComponent->GetMetalTexture().c_str() : 0;
-        MaterialDescriptor.m_pAOMap        = pMaterialComponent->GetAmbientOcclusionTexture().length() > 0 ? pMaterialComponent->GetAmbientOcclusionTexture().c_str() : 0;
-        MaterialDescriptor.m_pBumpMap      = pMaterialComponent->GetBumpTexture().length() > 0 ? pMaterialComponent->GetBumpTexture().c_str() : 0;
-
         CInternMaterial* pInternMaterial = 0;
 
         if ((DirtyFlags & Dt::CMaterialComponent::DirtyCreate) != 0)
@@ -321,21 +307,39 @@ namespace
 
         if (pInternMaterial)
         {
-            if (MaterialDescriptor.m_pFileName != 0)
+            if (pMaterialComponent->GetFileName().length() > 0)
             {
-                std::string MaterialExaminer = MaterialDescriptor.m_pFileName;
+                std::string MaterialExaminer = pMaterialComponent->GetFileName();
 
                 if (MaterialExaminer.find(".mat") != std::string::npos)
                 {
-                    FillMaterialFromXML(pInternMaterial, MaterialDescriptor.m_pFileName);
+                    FillMaterialFromXML(pInternMaterial, pMaterialComponent->GetFileName());
                 }
                 else
                 {
-                    FillMaterialFromAssimpFile(pInternMaterial, MaterialDescriptor.m_pFileName);
+                    FillMaterialFromAssimpFile(pInternMaterial, pMaterialComponent->GetFileName(), 0);
                 }
             }
             else
             {
+                SMaterialDescriptor MaterialDescriptor;
+
+                MaterialDescriptor.m_pMaterialName = pMaterialComponent->GetMaterialname().length() > 0 ? pMaterialComponent->GetMaterialname().c_str() : 0;
+
+                MaterialDescriptor.m_Roughness    = pMaterialComponent->GetRoughness();
+                MaterialDescriptor.m_Reflectance  = pMaterialComponent->GetReflectance();
+                MaterialDescriptor.m_MetalMask    = pMaterialComponent->GetMetalness();
+                MaterialDescriptor.m_Displacement = pMaterialComponent->GetDisplacement();
+                MaterialDescriptor.m_AlbedoColor  = pMaterialComponent->GetColor();
+                MaterialDescriptor.m_TilingOffset = pMaterialComponent->GetTilingOffset();
+
+                MaterialDescriptor.m_pColorMap     = pMaterialComponent->GetColorTexture().length() > 0 ? pMaterialComponent->GetColorTexture().c_str() : 0;
+                MaterialDescriptor.m_pNormalMap    = pMaterialComponent->GetNormalTexture().length() > 0 ? pMaterialComponent->GetNormalTexture().c_str() : 0;
+                MaterialDescriptor.m_pRoughnessMap = pMaterialComponent->GetRoughnessTexture().length() > 0 ? pMaterialComponent->GetRoughnessTexture().c_str() : 0;
+                MaterialDescriptor.m_pMetalMaskMap = pMaterialComponent->GetMetalTexture().length() > 0 ? pMaterialComponent->GetMetalTexture().c_str() : 0;
+                MaterialDescriptor.m_pAOMap        = pMaterialComponent->GetAmbientOcclusionTexture().length() > 0 ? pMaterialComponent->GetAmbientOcclusionTexture().c_str() : 0;
+                MaterialDescriptor.m_pBumpMap      = pMaterialComponent->GetBumpTexture().length() > 0 ? pMaterialComponent->GetBumpTexture().c_str() : 0;
+
                 FillMaterialFromData(pInternMaterial, MaterialDescriptor);
             }
         }
@@ -384,8 +388,7 @@ namespace
         MaterialDescriptor.m_Reflectance   = 0.0f; 
         MaterialDescriptor.m_MetalMask     = 0.0f; 
         MaterialDescriptor.m_AlbedoColor   = glm::vec3(1.0f); 
-        MaterialDescriptor.m_TilingOffset  = glm::vec4(1.0f, 1.0f, 0.0f, 0.0f); 
-        MaterialDescriptor.m_pFileName     = 0; 
+        MaterialDescriptor.m_TilingOffset  = glm::vec4(1.0f, 1.0f, 0.0f, 0.0f);
 
         // -----------------------------------------------------------------------------
         // Values
@@ -441,7 +444,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxMaterialManager::FillMaterialFromAssimpFile(CInternMaterial* _pMaterial, const std::string& _rFilename)
+    void CGfxMaterialManager::FillMaterialFromAssimpFile(CInternMaterial* _pMaterial, const std::string& _rFilename, int _MaterialIndex)
     {
         std::string PathToMaterial = Core::AssetManager::GetPathToAssets() + "/" + _rFilename;
 
@@ -471,14 +474,15 @@ namespace
         // -----------------------------------------------------------------------------
         unsigned int NumberOfMaterials = pScene->mNumMaterials;
 
-        assert(NumberOfMaterials == 1);
+        if (static_cast<unsigned int>(_MaterialIndex) < NumberOfMaterials)
+        {
+            aiMaterial* pMaterial = pScene->mMaterials[_MaterialIndex];
 
-        aiMaterial* pMaterial = pScene->mMaterials[0];
-
-        // -----------------------------------------------------------------------------
-        // Fill data
-        // -----------------------------------------------------------------------------
-        FillMaterialFromAssimpMaterial(_pMaterial, pMaterial);
+            // -----------------------------------------------------------------------------
+            // Fill data
+            // -----------------------------------------------------------------------------
+            FillMaterialFromAssimpMaterial(_pMaterial, pMaterial);
+        }
 
         // -----------------------------------------------------------------------------
         // Release importer
@@ -508,8 +512,7 @@ namespace
         MaterialDescriptor.m_Reflectance   = 0.0f; 
         MaterialDescriptor.m_MetalMask     = 0.0f; 
         MaterialDescriptor.m_AlbedoColor   = glm::vec3(1.0f); 
-        MaterialDescriptor.m_TilingOffset  = glm::vec4(1.0f, 1.0f, 0.0f, 0.0f); 
-        MaterialDescriptor.m_pFileName     = 0; 
+        MaterialDescriptor.m_TilingOffset  = glm::vec4(1.0f, 1.0f, 0.0f, 0.0f);
 
         // -----------------------------------------------------------------------------
         // Values and textures
@@ -747,9 +750,9 @@ namespace MaterialManager
 
     // -----------------------------------------------------------------------------
 
-    CMaterialPtr CreateMaterialFromPtr(const void* _pPtr, int _Importer)
+    CMaterialPtr CreateMaterialFromFile(const Base::Char* _pFilename, int _MaterialIndex)
     {
-        return CGfxMaterialManager::GetInstance().CreateMaterialFromPtr(_pPtr, _Importer);
+        return CGfxMaterialManager::GetInstance().CreateMaterialFromFile(_pFilename, _MaterialIndex);
     }
 
     // -----------------------------------------------------------------------------

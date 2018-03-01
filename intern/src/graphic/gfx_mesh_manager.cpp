@@ -1416,17 +1416,9 @@ namespace
                 Base::CMemory::Free(pUploadVertexData);
 
                 // -----------------------------------------------------------------------------
-                // Load material from material manager
+                // Load default material from material manager
                 // -----------------------------------------------------------------------------
-                if (_pAssimpMesh->mMaterialIndex < _pScene->mNumMaterials)
-                {
-                    aiMaterial* pMaterial = _pScene->mMaterials[_pAssimpMesh->mMaterialIndex];
-
-                    if (pMaterial != 0)
-                    {
-                        rSurface.m_MaterialPtr = MaterialManager::CreateMaterialFromPtr(pMaterial);
-                    }
-                }
+                rSurface.m_MaterialPtr = MaterialManager::GetDefaultMaterial();
             }
         };
 
