@@ -57,6 +57,9 @@ endforeach()
 # ---------------------------------------
 # Special dependencies / includes
 # ---------------------------------------
+target_include_directories( core PRIVATE ${ExternDir}/assimp/include )
+target_include_directories( core PRIVATE ${ExternDir}/tinyxml2/include )
+
 target_include_directories( data PRIVATE ${ExternDir}/assimp/include )
 target_include_directories( data PRIVATE ${ExternDir}/devil/include )
 target_include_directories( data PRIVATE ${ExternDir}/tinyxml2/include )
