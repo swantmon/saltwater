@@ -1418,7 +1418,7 @@ namespace MR
         // Tracking
         //////////////////////////////////////////////////////////////////////////////////////
 
-        if (m_IntegratedFrameCount > m_MinWeight + 10)
+        if (m_IntegratedFrameCount > 0)
         {
             Performance::BeginEvent("Tracking");
 
@@ -1758,7 +1758,6 @@ namespace MR
         Performance::ResetEventStatistics("TSDF Integration and Raycasting");
         Performance::ResetEventStatistics("Updating root grid");
         Performance::ResetEventStatistics("Raycasting for tracking");
-
     }
 
     // -----------------------------------------------------------------------------
