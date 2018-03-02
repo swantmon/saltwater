@@ -210,7 +210,7 @@ namespace
 
                 Component->SetRefreshMode(Dt::CSkyComponent::Static);
                 Component->SetType(Dt::CSkyComponent::Procedural);
-                Component->SetIntensity(120000.0f);
+                Component->SetIntensity(10000.0f);
 
                 rEnvironmentEntity.AttachComponent(Component);
 
