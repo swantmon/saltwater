@@ -16,6 +16,8 @@
 
 #include "mr/mr_control_manager.h"
 
+#include "android_native_app_glue.h"
+
 namespace App
 {
     CStartState& CStartState::GetInstance()
@@ -61,13 +63,16 @@ namespace App
         // -----------------------------------------------------------------------------
         // Setup mixed reality
         // -----------------------------------------------------------------------------
+        android_app* pAndroidApp = App::Application::GetAndroidApp();
+
         MR::ControlManager::SConfiguration Config;
 
-        Config.m_pEnv     = Core::JNI::GetJavaEnvironment();
-        Config.m_pContext = Core::JNI::GetContext();
-        Config.m_Rotation = static_cast<MR::ControlManager::SConfiguration::EDisplayRotation>(Core::JNI::GetDeviceRotation());
-        Config.m_Width    = Core::JNI::GetDeviceDimension()[0];
-        Config.m_Height   = Core::JNI::GetDeviceDimension()[1];
+        Config.m_pEnv      = Core::JNI::GetJavaEnvironment();
+        Config.m_pContext  = Core::JNI::GetContext();
+        Config.m_pActivity = Core::JNI::GetActivity();
+        Config.m_Rotation  = static_cast<MR::ControlManager::SConfiguration::EDisplayRotation>(Core::JNI::GetDeviceRotation());
+        Config.m_Width     = Core::JNI::GetDeviceDimension()[0];
+        Config.m_Height    = Core::JNI::GetDeviceDimension()[1];
 
         MR::ControlManager::OnStart(Config);
     }

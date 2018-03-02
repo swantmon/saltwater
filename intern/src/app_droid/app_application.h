@@ -18,5 +18,7 @@ namespace Application
     void OnRun();
 
     void ChangeState(unsigned int _State);
+
+    android_app* GetAndroidApp();
 } // namespace Application
 } // namespace App

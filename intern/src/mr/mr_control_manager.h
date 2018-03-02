@@ -17,6 +17,7 @@ namespace ControlManager
 
         void* m_pEnv;
         void* m_pContext;
+        void* m_pActivity;
 
         EDisplayRotation m_Rotation;
         int m_Width;

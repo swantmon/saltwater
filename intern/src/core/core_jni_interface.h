@@ -25,6 +25,8 @@ namespace JNI
 
     void* GetContext();
 
+    void* GetActivity();
+
     int GetDeviceRotation();
 
     const glm::ivec2& GetDeviceDimension();

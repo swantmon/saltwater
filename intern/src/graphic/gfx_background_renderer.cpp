@@ -686,7 +686,6 @@ namespace
         CBufferSetPtr     VSBufferSetPtr   = m_BackgroundFromTexture.m_VSBufferSetPtr;
         CBufferSetPtr     PSBufferSetPtr   = m_BackgroundFromTexture.m_PSBufferSetPtr;
         CInputLayoutPtr   InputLayoutPtr   = m_BackgroundFromTexture.m_InputLayoutPtr;
-        CMeshPtr          MeshPtr          = m_BackgroundFromTexture.m_MeshPtr;
 
         // -----------------------------------------------------------------------------
         // Render sky texture
@@ -724,12 +723,6 @@ namespace
         // -----------------------------------------------------------------------------
         ContextManager::SetRenderContext(RenderContextPtr);
 
-        ContextManager::SetVertexBuffer(MeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
-
-        ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
-
-        ContextManager::SetInputLayout(InputLayoutPtr);
-
         ContextManager::SetTopology(STopology::TriangleList);
 
         ContextManager::SetShaderVS(VSPtr);
@@ -748,7 +741,7 @@ namespace
         ContextManager::SetTexture(0, m_WebcamTexturePtr);
         ContextManager::SetTexture(1, TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget());
 
-        ContextManager::DrawIndexed(MeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
+        ContextManager::Draw(3, 0);
 
         ContextManager::ResetTexture(0);
         ContextManager::ResetTexture(1);
@@ -763,12 +756,6 @@ namespace
         ContextManager::ResetResourceBuffer(0);
 
         ContextManager::ResetTopology();
-
-        ContextManager::ResetInputLayout();
-
-        ContextManager::ResetIndexBuffer();
-
-        ContextManager::ResetVertexBuffer();
 
         ContextManager::ResetShaderVS();
 

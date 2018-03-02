@@ -22,6 +22,7 @@
 #include "mr/mr_control_manager.h"
 
 #include <array>
+#include <vector>
 
 #if PLATFORM_ANDROID
 #include "arcore_c_api.h"
@@ -299,13 +300,17 @@ namespace
 
     private:
 
-        typedef std::unordered_set<ArAnchor*> CTrackedObjects;
+        typedef std::vector<ArAnchor*> CTrackedObjects;
 
     private:
 
         static std::string s_Permissions[];
 
     private:
+
+        bool m_InstallRequested;
+
+        SConfiguration m_Configuration;
 
         ArSession* m_pARSession;
         ArFrame* m_pARFrame;
@@ -331,9 +336,11 @@ namespace
 namespace
 {
     CMRControlManager::CMRControlManager()
-            : m_pARSession        (0)
+            : m_InstallRequested  (false)
+            , m_Configuration     ( )
+            , m_pARSession        (0)
             , m_pARFrame          (0)
-            , m_TrackedObjects    ()
+            , m_TrackedObjects    ( )
             , m_ViewMatrix        (glm::mat4(1.0f))
             , m_ProjectionMatrix  (glm::mat4(1.0f))
             , m_pEntity           (0)
@@ -350,42 +357,10 @@ namespace
 
     void CMRControlManager::OnStart(const SConfiguration& _rConfiguration)
     {
-        Gui::EventHandler::RegisterDirectUserListener(GUI_BIND_INPUT_METHOD(&CMRControlManager::OnEvent));
-
-        Dt::EntityManager::RegisterDirtyEntityHandler(DATA_DIRTY_ENTITY_METHOD(&CMRControlManager::OnDirtyEntity));
-
         // -----------------------------------------------------------------------------
-        // AR session and frame
+        // Save configuration
         // -----------------------------------------------------------------------------
-        ArStatus Status;
-
-        Status = ArSession_create(_rConfiguration.m_pEnv, _rConfiguration.m_pContext, &m_pARSession);
-
-        if (Status != AR_SUCCESS) BASE_THROWM("Application has to be closed because of unsupported ArCore.");
-
-        assert(m_pARSession != 0);
-
-        ArConfig* ARConfig = 0;
-
-        ArConfig_create(m_pARSession, &ARConfig);
-
-        assert(ARConfig != 0);
-
-        Status = ArSession_checkSupported(m_pARSession, ARConfig);
-
-        assert(Status == AR_SUCCESS);
-
-        Status = ArSession_configure(m_pARSession, ARConfig);
-
-        assert(Status == AR_SUCCESS);
-
-        ArConfig_destroy(ARConfig);
-
-        ArFrame_create(m_pARSession, &m_pARFrame);
-
-        assert(m_pARFrame != 0);
-
-        ArSession_setDisplayGeometry(m_pARSession, _rConfiguration.m_Rotation, _rConfiguration.m_Width, _rConfiguration.m_Height);
+        m_Configuration = _rConfiguration;
 
         // -----------------------------------------------------------------------------
         // OpenGLES
@@ -409,8 +384,6 @@ namespace
         glBufferData(GL_ARRAY_BUFFER, sizeof(c_Uvs), &c_Uvs, GL_DYNAMIC_DRAW);
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-        ArSession_setCameraTextureName(m_pARSession, g_TextureID);
 
         // -----------------------------------------------------------------------------
 
@@ -443,6 +416,13 @@ namespace
         glBufferData(GL_ARRAY_BUFFER, s_MaxNumberOfVerticesPerPoint * sizeof(glm::vec3), 0, GL_DYNAMIC_DRAW);
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+        // -----------------------------------------------------------------------------
+        // Handler
+        // -----------------------------------------------------------------------------
+        Gui::EventHandler::RegisterDirectUserListener(GUI_BIND_INPUT_METHOD(&CMRControlManager::OnEvent));
+
+        Dt::EntityManager::RegisterDirtyEntityHandler(DATA_DIRTY_ENTITY_METHOD(&CMRControlManager::OnDirtyEntity));
     }
 
     // -----------------------------------------------------------------------------
@@ -470,7 +450,11 @@ namespace
 
     void CMRControlManager::Update()
     {
+        if (m_pARSession == nullptr) return;
+
         ArStatus Result;
+
+        ArSession_setCameraTextureName(m_pARSession, g_TextureID);
 
         Result = ArSession_update(m_pARSession, m_pARFrame);
 
@@ -495,11 +479,9 @@ namespace
 
         ArFrame_acquireCamera(m_pARSession, m_pARFrame, &pARCamera);
 
-        ArCamera_getViewMatrix(m_pARSession, pARCamera, &m_ViewMatrix[0][0]);
+        ArCamera_getViewMatrix(m_pARSession, pARCamera, glm::value_ptr(m_ViewMatrix));
 
-        ArCamera_getProjectionMatrix(m_pARSession, pARCamera, Near, Far, &m_ProjectionMatrix[0][0]);
-
-        ArCamera_release(pARCamera);
+        ArCamera_getProjectionMatrix(m_pARSession, pARCamera, Near, Far, glm::value_ptr(m_ProjectionMatrix));
 
         glm::decompose(m_ViewMatrix, Scale, Rotation, Translation, Skew, Perspective);
 
@@ -510,6 +492,14 @@ namespace
         Gfx::Cam::SetProjectionMatrix(m_ProjectionMatrix, Near, Far);
 
         Gfx::Cam::Update();
+
+        ArTrackingState CameraTrackingState;
+
+        ArCamera_getTrackingState(m_pARSession, pARCamera, &CameraTrackingState);
+
+        ArCamera_release(pARCamera);
+
+        if (CameraTrackingState != AR_TRACKING_STATE_TRACKING) return;
 
         // -----------------------------------------------------------------------------
         // Light estimation
@@ -546,13 +536,19 @@ namespace
         {
             ArTrackingState TrackingState = AR_TRACKING_STATE_STOPPED;
 
+            ArAnchor_getTrackingState(m_pARSession, rObject, &TrackingState);
+
+            if (TrackingState != AR_TRACKING_STATE_TRACKING) continue;
+
             ArPose* pARPose = 0;
 
             ArPose_create(m_pARSession, 0, &pARPose);
 
             ArAnchor_getPose(m_pARSession, rObject, pARPose);
 
-            ArPose_getMatrix(m_pARSession, pARPose, &ModelMatrix[0][0]);
+            ArPose_getMatrix(m_pARSession, pARPose, glm::value_ptr(ModelMatrix));
+
+            ArPose_destroy(pARPose);
 
             if (m_pEntity != 0)
             {
@@ -566,11 +562,7 @@ namespace
 
                 Dt::EntityManager::MarkEntityAsDirty(*m_pEntity, Dt::CEntity::DirtyMove);
             }
-
-            ArPose_destroy(pARPose);
         }
-
-        // TODO: render objects depending on the position / model matrix
     }
 
     // -----------------------------------------------------------------------------
@@ -589,6 +581,67 @@ namespace
             Core::JNI::AcquirePermissions(s_Permissions, 1);
         }
 
+        if (m_pARSession == nullptr && m_Configuration.m_pEnv != nullptr && m_Configuration.m_pActivity != nullptr)
+        {
+            ArStatus Status;
+
+            // -----------------------------------------------------------------------------
+            // AR installation
+            // -----------------------------------------------------------------------------
+            ArInstallStatus InstallStatus;
+
+            bool UserRequestedInstallation = !m_InstallRequested;
+
+            Status = ArCoreApk_requestInstall(m_Configuration.m_pEnv, m_Configuration.m_pActivity, UserRequestedInstallation, &InstallStatus);
+
+            if (Status != AR_SUCCESS) return;
+
+            switch (InstallStatus)
+            {
+                case AR_INSTALL_STATUS_INSTALLED:
+                    break;
+                case AR_INSTALL_STATUS_INSTALL_REQUESTED:
+                {
+                    BASE_CONSOLE_INFO("ArCore is not installed on this device.");
+
+                    m_InstallRequested = true;
+
+                    return;
+                } break;
+            }
+
+            // -----------------------------------------------------------------------------
+            // AR session and frame
+            // -----------------------------------------------------------------------------
+            Status = ArSession_create(m_Configuration.m_pEnv, m_Configuration.m_pContext, &m_pARSession);
+
+            if (Status != AR_SUCCESS) BASE_THROWM("Application has to be closed because of unsupported ArCore.");
+
+            assert(m_pARSession != 0);
+
+            ArConfig* ARConfig = 0;
+
+            ArConfig_create(m_pARSession, &ARConfig);
+
+            assert(ARConfig != 0);
+
+            Status = ArSession_checkSupported(m_pARSession, ARConfig);
+
+            assert(Status == AR_SUCCESS);
+
+            Status = ArSession_configure(m_pARSession, ARConfig);
+
+            assert(Status == AR_SUCCESS);
+
+            ArConfig_destroy(ARConfig);
+
+            ArFrame_create(m_pARSession, &m_pARFrame);
+
+            assert(m_pARFrame != 0);
+
+            ArSession_setDisplayGeometry(m_pARSession, m_Configuration.m_Rotation, m_Configuration.m_Width, m_Configuration.m_Height);
+        }
+
         ArSession_resume(m_pARSession);
     }
 
@@ -603,6 +656,9 @@ namespace
 
     void CMRControlManager::OnDraw()
     {
+        // -----------------------------------------------------------------------------
+        // Background
+        // -----------------------------------------------------------------------------
         int32_t HasGeometryChanged = 0;
 
         ArFrame_getDisplayGeometryChanged(m_pARSession, m_pARFrame, &HasGeometryChanged);
@@ -720,7 +776,7 @@ namespace
 
             ArPlane_getCenterPose(m_pARSession, _pPlane, Pose);
 
-            ArPose_getMatrix(m_pARSession, Pose, &PlaneModelMatrix[0][0]);
+            ArPose_getMatrix(m_pARSession, Pose, glm::value_ptr(PlaneModelMatrix));
 
             ArPose_destroy(Pose);
 
@@ -732,13 +788,13 @@ namespace
             // -----------------------------------------------------------------------------
             // Fill vertex 0 to 3, with alpha set to kAlpha.
             // -----------------------------------------------------------------------------
-            for (int i = 0; i < NumberOfVertices; ++i)
+            for (auto Vertex : VerticesRAW)
             {
-                glm::vec2 Direction = VerticesRAW[i] - CenterOfPlane;
+                glm::vec2 Direction = Vertex - CenterOfPlane;
 
-                float Scale = 1.0f - std::min((kFeatherLength / 2.0f), kFeatherScale);
+                float Scale = 1.0f - std::min((kFeatherLength / glm::length(Direction)), kFeatherScale);
 
-                glm::vec2 ResultVector = glm::vec2(Scale) * Direction + CenterOfPlane;
+                glm::vec2 ResultVector = Scale * Direction + CenterOfPlane;
 
                 PlaneVertices.push_back(glm::vec3(ResultVector[0], ResultVector[1], kInnerAlpha));
             }
@@ -796,16 +852,41 @@ namespace
         // -----------------------------------------------------------------------------
         for (int IndexOfPlane = 0; IndexOfPlane < NumberOfPlanes; ++IndexOfPlane)
         {
-            ArTrackable* TrackableItem = nullptr;
+            ArTrackable* pTrackableItem = nullptr;
 
-            ArTrackableList_acquireItem(m_pARSession, ListOfPlanes, IndexOfPlane, &TrackableItem);
+            ArTrackableList_acquireItem(m_pARSession, ListOfPlanes, IndexOfPlane, &pTrackableItem);
 
-            ArPlane* Plane = ArAsPlane(TrackableItem);
+            ArPlane* pPlane = ArAsPlane(pTrackableItem);
+
+            ArTrackingState TrackableTrackingState;
+
+            ArTrackable_getTrackingState(m_pARSession, pTrackableItem, &TrackableTrackingState);
+
+            ArPlane* pSubsumedPlane;
+
+            ArPlane_acquireSubsumedBy(m_pARSession, pPlane, &pSubsumedPlane);
+
+            if (pSubsumedPlane != nullptr)
+            {
+                ArTrackable_release(ArAsTrackable(pSubsumedPlane));
+
+                continue;
+            }
+
+            if (TrackableTrackingState != AR_TRACKING_STATE_TRACKING) continue;
+
+            ArTrackingState PlaneTrackingState;
+
+            ArTrackable_getTrackingState(m_pARSession, ArAsTrackable(pPlane), &PlaneTrackingState);
+
+            if (PlaneTrackingState != AR_TRACKING_STATE_TRACKING) continue;
+
+            ArTrackable_release(pTrackableItem);
 
             // -----------------------------------------------------------------------------
             // Generate planes and upload data
             // -----------------------------------------------------------------------------
-            UpdateGeometryForPlane(Plane);
+            UpdateGeometryForPlane(pPlane);
 
             if (PlaneIndices.size() == 0 || PlaneVertices.size() == 0) continue;
 
@@ -867,8 +948,6 @@ namespace
             glUseProgram(0);
 
             glDisable(GL_BLEND);
-
-            ArTrackable_release(TrackableItem);
         }
 
         ArTrackableList_destroy(ListOfPlanes);
@@ -971,62 +1050,85 @@ namespace
                 // increasing.  The first hit result will usually be the most relevant when
                 // responding to user input
                 // -----------------------------------------------------------------------------
+                ArHitResult* pHitResult = nullptr;
+
                 for (int IndexOfHit = 0; IndexOfHit < NumberOfHits; ++IndexOfHit)
                 {
-                    ArHitResult* pHitResult = nullptr;
+                    ArHitResult* pEstimatedHitResult = nullptr;
 
-                    ArHitResult_create(m_pARSession, &pHitResult);
+                    ArHitResult_create(m_pARSession, &pEstimatedHitResult);
 
-                    ArHitResultList_getItem(m_pARSession, pHitResultList, IndexOfHit, pHitResult);
+                    ArHitResultList_getItem(m_pARSession, pHitResultList, IndexOfHit, pEstimatedHitResult);
 
-                    if (pHitResult == nullptr)
+                    if (pEstimatedHitResult == nullptr)
                     {
                         return;
                     }
 
                     // -----------------------------------------------------------------------------
-                    // Only consider planes for this sample app.
+                    // Get trackables
                     // -----------------------------------------------------------------------------
                     ArTrackable* pTrackable = nullptr;
 
-                    ArHitResult_acquireTrackable(m_pARSession, pHitResult, &pTrackable);
+                    ArHitResult_acquireTrackable(m_pARSession, pEstimatedHitResult, &pTrackable);
 
                     ArTrackableType TrackableType = AR_TRACKABLE_NOT_VALID;
 
                     ArTrackable_getType(m_pARSession, pTrackable, &TrackableType);
 
-                    if (TrackableType != AR_TRACKABLE_PLANE)
+                    switch (TrackableType)
                     {
-                        ArTrackable_release(pTrackable);
+                        case AR_TRACKABLE_PLANE:
+                        {
+                            ArPose* pPose = nullptr;
 
-                        continue;
-                    }
+                            ArPose_create(m_pARSession, nullptr, &pPose);
 
-                    ArPose* pPose = nullptr;
+                            ArHitResult_getHitPose(m_pARSession, pEstimatedHitResult, pPose);
 
-                    ArPose_create(m_pARSession, nullptr, &pPose);
+                            int32_t IsPoseInPolygon = 0;
 
-                    ArHitResult_getHitPose(m_pARSession, pHitResult, pPose);
+                            ArPlane* pPlane = ArAsPlane(pTrackable);
 
-                    int32_t IsPoseInPolygon = 0;
+                            ArPlane_isPoseInPolygon(m_pARSession, pPlane, pPose, &IsPoseInPolygon);
 
-                    ArPlane* pPlane = ArAsPlane(pTrackable);
+                            ArTrackable_release(pTrackable);
 
-                    ArPlane_isPoseInPolygon(m_pARSession, pPlane, pPose, &IsPoseInPolygon);
+                            ArPose_destroy(pPose);
 
-                    ArTrackable_release(pTrackable);
+                            if (!IsPoseInPolygon)
+                            {
+                                continue;
+                            }
 
-                    ArPose_destroy(pPose);
+                            pHitResult = pEstimatedHitResult;
+                        } break;
 
-                    if (!IsPoseInPolygon)
-                    {
-                        continue;
-                    }
+                        case AR_TRACKABLE_POINT:
+                        {
+                            ArPoint* pPoint = ArAsPoint(pTrackable);
 
-                    // -----------------------------------------------------------------------------
-                    // Note that the application is responsible for releasing the pAnchor
-                    // pointer after using it. Call ArAnchor_release(pAnchor) to release.
-                    // -----------------------------------------------------------------------------
+                            ArPointOrientationMode OrientationMode;
+
+                            ArPoint_getOrientationMode(m_pARSession, pPoint, &OrientationMode);
+
+                            if (OrientationMode == AR_POINT_ORIENTATION_ESTIMATED_SURFACE_NORMAL)
+                            {
+                                pHitResult = pEstimatedHitResult;
+                            }
+                        } break;
+
+                        default:
+                        {
+                            ArTrackable_release(pTrackable);
+
+                            BASE_CONSOLE_INFO("Undefined trackable type found.")
+                        }
+                    };
+                }
+
+                if (pHitResult != nullptr)
+                {
                     ArAnchor* pAnchor = nullptr;
 
                     if (ArHitResult_acquireNewAnchor(m_pARSession, pHitResult, &pAnchor) != AR_SUCCESS)
@@ -1042,10 +1144,10 @@ namespace
                     {
                         ArAnchor_release(pAnchor);
 
-                        continue;
+                        return;
                     }
 
-                    m_TrackedObjects.insert(pAnchor);
+                    m_TrackedObjects.push_back(pAnchor);
 
                     ArHitResult_destroy(pHitResult);
 

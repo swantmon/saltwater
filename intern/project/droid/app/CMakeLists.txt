@@ -75,6 +75,8 @@ target_include_directories( graphic PRIVATE ${ExternDir}/assimp/include )
 target_include_directories( graphic PRIVATE ${ExternDir}/devil/include )
 target_include_directories( graphic PRIVATE ${ExternDir}/tinyxml2/include )
 
+target_include_directories( mr PRIVATE ${ExternDir}/arcore/include )
+
 link_directories ( ${ExternDir}/assimp/lib/${ANDROID_ABI} )
 link_directories ( ${ExternDir}/devil/lib/${ANDROID_ABI} )
 link_directories ( ${ExternDir}/tinyxml2/lib/${ANDROID_ABI} )
