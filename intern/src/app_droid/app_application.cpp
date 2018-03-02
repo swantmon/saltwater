@@ -462,10 +462,5 @@ namespace Application
     {
         CApplication::GetInstance().ChangeState(_State);
     }
-
-    android_app* GetAndroidApp()
-    {
-        return CApplication::GetInstance().GetAndroidApp();
-    }
 } // namespace Application
 } // namespace App

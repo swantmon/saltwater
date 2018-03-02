@@ -16,8 +16,6 @@
 
 #include "mr/mr_control_manager.h"
 
-#include "android_native_app_glue.h"
-
 namespace App
 {
     CStartState& CStartState::GetInstance()
@@ -63,8 +61,6 @@ namespace App
         // -----------------------------------------------------------------------------
         // Setup mixed reality
         // -----------------------------------------------------------------------------
-        android_app* pAndroidApp = App::Application::GetAndroidApp();
-
         MR::ControlManager::SConfiguration Config;
 
         Config.m_pEnv      = Core::JNI::GetJavaEnvironment();
