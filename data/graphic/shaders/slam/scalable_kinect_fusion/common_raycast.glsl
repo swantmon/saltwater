@@ -116,6 +116,8 @@ vec2 GetVoxelWithStep(vec3 Position, vec3 Direction, out float Step)
     // Index of the first element of the current rootgrid in the rootgrid pool
     int VolumeBufferOffset = GetRootVolumeBufferIndex(Position);
 
+    float FailedVolumeSize = VOLUME_SIZE;
+
     if (VolumeBufferOffset != -1)
     {
         // Global offset of the rootvolume
@@ -126,12 +128,16 @@ vec2 GetVoxelWithStep(vec3 Position, vec3 Direction, out float Step)
         
         if (RootGridItemBufferOffset != -1)
         {
+            FailedVolumeSize = VOLUME_SIZE / (ROOT_RESOLUTION);
+
             // Pool index of whole level 1 grid
             SGridPoolItem RootItem =  g_RootGridPool[RootGridItemBufferOffset];
             int Level1VolumeBufferOffset = RootItem.m_PoolIndex;
 
             if (Level1VolumeBufferOffset != -1 && RootItem.m_Weight > g_MinWeight)
             {
+                FailedVolumeSize = VOLUME_SIZE / (ROOT_RESOLUTION * LEVEL1_RESOLUTION);
+
                 // Offset of level 1 volume in rootgrid
                 ivec3 Level1VolumeOffset = ivec3(floor(Position * ROOT_RESOLUTION * LEVEL1_RESOLUTION));
                 Level1VolumeOffset %= LEVEL1_RESOLUTION;
@@ -154,45 +160,16 @@ vec2 GetVoxelWithStep(vec3 Position, vec3 Direction, out float Step)
                     
                     return UnpackVoxel(g_TSDFPool[TSDFBufferIndex]);
                 }
-                else
-                {
-                    Position *= VOLUME_SIZE;
-            
-                    vec3 AABBMin = Position - mod(Position, VOLUME_SIZE / (ROOT_RESOLUTION * LEVEL1_RESOLUTION));
-                    vec3 AABBMax = AABBMin + VOLUME_SIZE / (ROOT_RESOLUTION * LEVEL1_RESOLUTION);
-            
-                    Step = GetEndLength(Position, Direction, AABBMin, AABBMax);
-                }
             }
-            else
-            {
-                Position *= VOLUME_SIZE;
-            
-                vec3 AABBMin = Position - mod(Position, VOLUME_SIZE / (ROOT_RESOLUTION));
-                vec3 AABBMax = AABBMin + VOLUME_SIZE / (ROOT_RESOLUTION);
-            
-                Step = GetEndLength(Position, Direction, AABBMin, AABBMax);
-            }
-        }        
-        else
-        {
-            Position *= VOLUME_SIZE;
-            
-            vec3 AABBMin = Position - mod(Position, VOLUME_SIZE);
-            vec3 AABBMax = AABBMin + VOLUME_SIZE;
-            
-            Step = GetEndLength(Position, Direction, AABBMin, AABBMax);
         }
-    }    
-    else
-    {
-        Position *= VOLUME_SIZE;
-                
-        vec3 AABBMin = Position - mod(Position, VOLUME_SIZE);
-        vec3 AABBMax = AABBMin + VOLUME_SIZE;
-                
-        Step = GetEndLength(Position, Direction, AABBMin, AABBMax);
     }
+
+    Position *= VOLUME_SIZE;
+    
+    vec3 AABBMin = Position - mod(Position, FailedVolumeSize);
+    vec3 AABBMax = AABBMin + FailedVolumeSize;
+    
+    Step = GetEndLength(Position, Direction, AABBMin, AABBMax);
     
     return vec2(0.0f);
 }
