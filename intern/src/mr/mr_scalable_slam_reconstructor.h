@@ -316,5 +316,7 @@ namespace MR
         std::vector<char> m_ClearVector;
 
         float m_ReconstructionSize;
+
+        bool m_CreateNormalsFromTSDF;
     };
 } // namespace MR

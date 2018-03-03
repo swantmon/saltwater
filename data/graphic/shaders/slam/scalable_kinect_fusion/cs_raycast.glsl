@@ -45,10 +45,12 @@ void main()
     RayDirection.z = RayDirection.z == 0.0f ? 1e-15f : RayDirection.z;
     
     vec3 Vertex = GetPosition(CameraPosition, RayDirection);
-    vec3 Normal = GetNormal(Vertex);
-
     imageStore(cs_Vertex, VertexMapPosition, vec4(Vertex, 1.0f));
+
+#ifdef NORMAL_MAP_FROM_TSDF
+    vec3 Normal = GetNormal(Vertex);
     imageStore(cs_Normal, VertexMapPosition, vec4(Normal, 1.0f));
+#endif
 }
 
 #endif // __INCLUDE_CS_KINECT_INTEGRATE_VOLUME_GLSL__

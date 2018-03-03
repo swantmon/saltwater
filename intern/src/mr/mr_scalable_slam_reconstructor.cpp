@@ -302,6 +302,8 @@ namespace MR
 
         m_PoolFull = false;
 
+        m_CreateNormalsFromTSDF = Base::CProgramParameters::GetInstance().Get("mr:slam:normals_from_tsdf", false);
+
         m_RootGridPoolSize = Base::CProgramParameters::GetInstance().Get("mr:slam:pool_sizes:level0", g_MaxRootGridPoolSize / g_MegabyteSize) * g_MegabyteSize;
         m_Level1GridPoolSize = Base::CProgramParameters::GetInstance().Get("mr:slam:pool_sizes:level1", g_MaxLevel1GridPoolSize / g_MegabyteSize) * g_MegabyteSize;
         m_TSDFPoolSize = Base::CProgramParameters::GetInstance().Get("mr:slam:pool_sizes:level2", g_MaxTSDFPoolSize / g_MegabyteSize) * g_MegabyteSize;
@@ -520,6 +522,10 @@ namespace MR
         if (m_UseConservativeRasterization)
         {
             DefineStream << "#define CONSERVATIVE_RASTERIZATION_AVAILABLE\n";
+        }
+        if (m_CreateNormalsFromTSDF)
+        {
+            DefineStream << "#define NORMAL_MAP_FROM_TSDF\n";
         }
 
         std::string DefineString = DefineStream.str();
@@ -1632,6 +1638,27 @@ namespace MR
 
     void CScalableSLAMReconstructor::CreateRaycastPyramid()
     {
+        ////////////////////////////////////////////////////////////////////////////////////
+        // If the normal map is not generated from the TSDF
+        // generate it here from the vertex map
+        /////////////////////////////////////////////////////////////////////////////////////
+
+        if (!m_CreateNormalsFromTSDF)
+        {
+            ContextManager::SetShaderCS(m_NormalMapCSPtr);
+            const int WorkGroupsX = DivUp(m_DepthImageSize.x, g_TileSize2D);
+            const int WorkGroupsY = DivUp(m_DepthImageSize.y, g_TileSize2D);
+
+            ContextManager::SetImageTexture(0, m_RaycastVertexMapPtr[0]);
+            ContextManager::SetImageTexture(1, m_RaycastNormalMapPtr[0]);
+            ContextManager::Barrier();
+            ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+        }
+
+        /////////////////////////////////////////////////////////////////////////////////////
+        // Downsample vertex and normals maps to create the pyramid
+        /////////////////////////////////////////////////////////////////////////////////////
+
         ContextManager::SetShaderCS(m_RaycastPyramidCSPtr);
 
         ContextManager::SetConstantBuffer(0, m_RaycastPyramidConstantBufferPtr);

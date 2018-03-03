@@ -35,7 +35,13 @@ void main()
 	const vec3 One = vec3(1.0);	
 	bool IsValid = dot(Vertex0, One) != 0.0 && dot(Vertex1, One) != 0.0 && dot(Vertex2, One) != 0.0;
 	
-	imageStore(cs_NormalMap, ivec2(x, y), IsValid ? vec4(normalize(Normal), 0.0) : vec4(-1337.0));
+	
+
+#ifdef NORMAL_MAP_FROM_TSDF
+    imageStore(cs_NormalMap, ivec2(x, y), IsValid ? vec4(normalize(Normal), 0.0) : vec4(-1337.0));
+#else
+    imageStore(cs_NormalMap, ivec2(x, y), IsValid ? vec4(normalize(Normal), 0.0) : vec4(0.0));
+#endif
 }
 
 #endif // __INCLUDE_CS_NORMAL_MAP_GLSL__
