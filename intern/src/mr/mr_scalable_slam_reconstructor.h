@@ -318,5 +318,6 @@ namespace MR
         float m_ReconstructionSize;
 
         bool m_CreateNormalsFromTSDF;
+        bool m_RaycastBackSides;
     };
 } // namespace MR

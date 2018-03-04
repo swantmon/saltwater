@@ -303,6 +303,7 @@ namespace MR
         m_PoolFull = false;
 
         m_CreateNormalsFromTSDF = Base::CProgramParameters::GetInstance().Get("mr:slam:normals_from_tsdf", false);
+        m_RaycastBackSides = Base::CProgramParameters::GetInstance().Get("mr:slam:raycast_backsides", true);
 
         m_RootGridPoolSize = Base::CProgramParameters::GetInstance().Get("mr:slam:pool_sizes:level0", g_MaxRootGridPoolSize / g_MegabyteSize) * g_MegabyteSize;
         m_Level1GridPoolSize = Base::CProgramParameters::GetInstance().Get("mr:slam:pool_sizes:level1", g_MaxLevel1GridPoolSize / g_MegabyteSize) * g_MegabyteSize;
@@ -526,6 +527,10 @@ namespace MR
         if (m_CreateNormalsFromTSDF)
         {
             DefineStream << "#define NORMAL_MAP_FROM_TSDF\n";
+        }
+        if (m_RaycastBackSides)
+        {
+            DefineStream << "#define RAYCAST_BACKSIDES\n";
         }
 
         std::string DefineString = DefineStream.str();

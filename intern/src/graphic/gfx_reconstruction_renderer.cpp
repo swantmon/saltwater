@@ -171,6 +171,7 @@ namespace
         bool m_RenderLevel2Queue;
         bool m_RenderHistogram;
         bool m_RenderPlanes;
+        bool m_RenderBackSides;
     };
 } // namespace
 
@@ -230,6 +231,7 @@ namespace
         m_RenderLevel2Queue     = Base::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:level2"      , false);
         m_RenderHistogram       = Base::CProgramParameters::GetInstance().Get("mr:slam:rendering:histogram"          , false);
         m_RenderPlanes          = Base::CProgramParameters::GetInstance().Get("mr:slam:rendering:planes"             , false);
+        m_RenderBackSides       = Base::CProgramParameters::GetInstance().Get("mr:slam:rendering:backsides"          , true);
     }
 
     // -----------------------------------------------------------------------------
@@ -308,6 +310,10 @@ namespace
             if (Settings.m_CaptureColor)
             {
                 DefineStream << "#define CAPTURE_COLOR\n";
+            }
+            if (m_RenderBackSides)
+            {
+                DefineStream << "#define RAYCAST_BACKSIDES\n";
             }
 
 			std::string DefineString = DefineStream.str();

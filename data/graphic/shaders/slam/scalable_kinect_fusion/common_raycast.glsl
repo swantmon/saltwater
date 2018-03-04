@@ -296,7 +296,11 @@ vec3 GetPosition(vec3 CameraPosition, vec3 RayDirection)
         {
             RayLength += NewStep;
         }
+#ifdef RAYCAST_BACKSIDES
+        else if (CurrentTSDF * PreviousTSDF < 0.0f)
+#else
         else if (CurrentTSDF < 0.0f && PreviousTSDF > 0.0f)
+#endif
         {
             break;
         }
