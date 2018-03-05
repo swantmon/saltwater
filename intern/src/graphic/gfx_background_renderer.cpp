@@ -208,9 +208,9 @@ namespace
     
     void CGfxBackgroundRenderer::OnSetupShader()
     {
-        CShaderPtr SkytextureVSPtr = ShaderManager::CompileVS("vs_fullscreen.glsl", "main");;
+        CShaderPtr SkyTextureVSPtr = ShaderManager::CompileVS("vs_fullscreen.glsl", "main");;
 
-        CShaderPtr SkytexturePSPtr = ShaderManager::CompilePS("fs_atmosphere_texture.glsl", "main");
+        CShaderPtr SkyTexturePSPtr = ShaderManager::CompilePS("fs_atmosphere_texture.glsl", "main");
 
         CShaderPtr SkyboxVSPtr  = ShaderManager::CompileVS("vs_cubemap.glsl", "main");
         
@@ -223,7 +223,7 @@ namespace
             { "POSITION", 0, CInputLayout::Float2Format, 0, 0, 8, CInputLayout::PerVertex, 0, },
         };
 
-        CInputLayoutPtr P2SkytextureLayoutPtr = ShaderManager::CreateInputLayout(InputLayout, 1, SkytextureVSPtr);
+        CInputLayoutPtr P2SkytextureLayoutPtr = ShaderManager::CreateInputLayout(InputLayout, 1, SkyTextureVSPtr);
         
         // -----------------------------------------------------------------------------
 
@@ -231,8 +231,8 @@ namespace
         m_BackgroundFromSkybox.m_PSPtr          = SkyboxPSPtr;
         m_BackgroundFromSkybox.m_InputLayoutPtr = nullptr;
 
-        m_BackgroundFromWebcam.m_VSPtr          = SkytextureVSPtr;
-        m_BackgroundFromWebcam.m_PSPtr          = SkytexturePSPtr;
+        m_BackgroundFromWebcam.m_VSPtr          = SkyTextureVSPtr;
+        m_BackgroundFromWebcam.m_PSPtr          = SkyTexturePSPtr;
         m_BackgroundFromWebcam.m_InputLayoutPtr = P2SkytextureLayoutPtr;
     }
     
@@ -576,8 +576,6 @@ namespace
         CShaderPtr        PSPtr            = m_BackgroundFromWebcam.m_PSPtr;
         CBufferSetPtr     VSBufferSetPtr   = m_BackgroundFromWebcam.m_VSBufferSetPtr;
         CBufferSetPtr     PSBufferSetPtr   = m_BackgroundFromWebcam.m_PSBufferSetPtr;
-        CInputLayoutPtr   InputLayoutPtr   = m_BackgroundFromWebcam.m_InputLayoutPtr;
-        CMeshPtr          MeshPtr          = m_BackgroundFromWebcam.m_MeshPtr;
 
         // -----------------------------------------------------------------------------
         // Render sky texture
@@ -615,12 +613,6 @@ namespace
         // -----------------------------------------------------------------------------
         ContextManager::SetRenderContext(RenderContextPtr);
 
-        ContextManager::SetVertexBuffer(MeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
-
-        ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
-
-        ContextManager::SetInputLayout(InputLayoutPtr);
-
         ContextManager::SetTopology(STopology::TriangleList);
 
         ContextManager::SetShaderVS(VSPtr);
@@ -639,7 +631,7 @@ namespace
         ContextManager::SetTexture(0, m_WebcamTexturePtr);
         ContextManager::SetTexture(1, TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget());
 
-        ContextManager::DrawIndexed(MeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
+        ContextManager::Draw(3, 0);
 
         ContextManager::ResetTexture(0);
         ContextManager::ResetTexture(1);
@@ -654,12 +646,6 @@ namespace
         ContextManager::ResetResourceBuffer(0);
 
         ContextManager::ResetTopology();
-
-        ContextManager::ResetInputLayout();
-
-        ContextManager::ResetIndexBuffer();
-
-        ContextManager::ResetVertexBuffer();
 
         ContextManager::ResetShaderVS();
 
