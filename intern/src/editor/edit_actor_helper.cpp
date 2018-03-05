@@ -170,17 +170,6 @@ namespace
 
             NewMessage.Put(pFacet->GetClearFlag());
 
-            if (pFacet->GetHasTexture())
-            {
-                NewMessage.Put(true);
-
-                NewMessage.Put(pFacet->GetTexture());
-            }
-            else
-            {
-                NewMessage.Put(false);
-            }
-
             NewMessage.Put(pFacet->GetBackgroundColor()[0]);
             NewMessage.Put(pFacet->GetBackgroundColor()[1]);
             NewMessage.Put(pFacet->GetBackgroundColor()[2]);
@@ -262,15 +251,6 @@ namespace
 
             Dt::CCameraComponent::EClearFlag ClearFlag = static_cast<Dt::CCameraComponent::EClearFlag >(_rMessage.Get<int>());
 
-            bool HasTexture = _rMessage.Get<bool>();
-
-            std::string TextureHash = "";
-
-            if (HasTexture)
-            {
-                TextureHash = _rMessage.Get<std::string>();
-            }
-
             R = _rMessage.Get<float>();
             G = _rMessage.Get<float>();
             B = _rMessage.Get<float>();
@@ -310,15 +290,6 @@ namespace
             pFacet->SetMainCamera(IsMainCamera);
 
             pFacet->SetClearFlag(ClearFlag);
-
-            if (HasTexture)
-            {
-                pFacet->SetTexture(TextureHash);
-            }
-            else
-            {
-                pFacet->SetTexture("");
-            }
 
             pFacet->SetBackgroundColor(glm::vec3(R, G, B));
 

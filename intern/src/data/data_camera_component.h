@@ -20,7 +20,6 @@ namespace Dt
         enum EClearFlag
         {
             Skybox,
-            Texture,
             Webcam,
             SolidColor,
             DepthOnly,
@@ -47,11 +46,6 @@ namespace Dt
 
         void SetClearFlag(EClearFlag _ClearFlag);
         EClearFlag GetClearFlag() const;
-
-        void SetTexture(const std::string& _rTexture2D);
-        const std::string& GetTexture();
-
-        bool GetHasTexture() const;
 
         void SetBackgroundColor(const glm::vec3& _rBackgroundColor);
         glm::vec3& GetBackgroundColor();
@@ -120,7 +114,6 @@ namespace Dt
         float            m_Near;                            //< Near field of the camera
         float            m_Far;                             //< Far field of the camera
         glm::vec3        m_BackgroundColor;                 //< Default background color of the camera (depending on clear flag)
-        std::string      m_Texture2D;                      //< Background image of the camera (depending on clear flag)
         glm::mat3        m_ProjectionMatrix;                //< RAW projection matrix even RAW is active
         Base::AABB2Float m_ViewportRect;                    //< View port this camera should render
         EClearFlag       m_ClearFlag;                       //< Clear flag of the render target (@see EClearFlag)

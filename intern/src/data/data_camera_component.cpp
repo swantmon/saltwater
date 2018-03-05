@@ -20,7 +20,6 @@ namespace Dt
         , m_Near            (0.3f)
         , m_Far             (1000.0f)
         , m_BackgroundColor (glm::vec3(1.0f))
-        , m_Texture2D       ("")
         , m_ProjectionMatrix(glm::mat3(1.0f))
         , m_ViewportRect    ()
         , m_ClearFlag       (Skybox)
@@ -62,27 +61,6 @@ namespace Dt
     CCameraComponent::EClearFlag CCameraComponent::GetClearFlag() const
     {
         return m_ClearFlag;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CCameraComponent::SetTexture(const std::string& _rTexture2D)
-    {
-        m_Texture2D = _rTexture2D;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    const std::string& CCameraComponent::GetTexture()
-    {
-        return m_Texture2D;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    bool CCameraComponent::GetHasTexture() const
-    {
-        return m_Texture2D.length() > 0;
     }
 
     // -----------------------------------------------------------------------------
