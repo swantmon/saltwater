@@ -25,7 +25,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Signal / slots
         // -----------------------------------------------------------------------------
-        connect(m_pBackgroundTextureEdit, SIGNAL(hashChanged(unsigned int)), SLOT(valueChanged()));
+        connect(m_pBackgroundTextureEdit, SIGNAL(fileChanged(QString)), SLOT(valueChanged()));
 
         // -----------------------------------------------------------------------------
         // Color picker
@@ -63,7 +63,7 @@ namespace Edit
 
         int ClearFlag = m_pClearFlagCS->currentIndex();
 
-        int Hash = m_pBackgroundTextureEdit->GetTextureHash();
+        std::string Hash = std::string(m_pBackgroundTextureEdit->GetTextureFile().toLatin1());
 
         QPalette ButtonPalette = m_pSolidColorButton->palette();
 
@@ -120,7 +120,7 @@ namespace Edit
 
         NewMessage.Put(ClearFlag);
 
-        if (Hash != 0)
+        if (Hash.length() > 0)
         {
             NewMessage.Put(true);
 
@@ -233,11 +233,11 @@ namespace Edit
 
         bool HasTexture = _rMessage.Get<bool>();
 
-        int TextureHash = -1;
+        std::string TextureHash = "";
 
         if (HasTexture)
         {
-            TextureHash = _rMessage.Get<int>();
+            TextureHash = _rMessage.Get<std::string>();
         }
 
         R = _rMessage.Get<float>();
@@ -290,11 +290,11 @@ namespace Edit
 
         if (HasTexture)
         {
-            m_pBackgroundTextureEdit->SetTextureHash(TextureHash);
+            m_pBackgroundTextureEdit->SetTextureFile(QString(TextureHash.c_str()));
         }
         else
         {
-            m_pBackgroundTextureEdit->SetTextureHash(0);
+            m_pBackgroundTextureEdit->SetTextureFile("");
         }
 
         QPalette ButtonPalette = m_pSolidColorButton->palette();

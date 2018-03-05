@@ -53,18 +53,8 @@
          </property>
         </widget>
        </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="m_pHashLabel">
-         <property name="text">
-          <string>Hash</string>
-         </property>
-        </widget>
-       </item>
        <item row="0" column="1">
         <widget class="QLineEdit" name="m_pFileEdit"/>
-       </item>
-       <item row="1" column="1">
-        <widget class="QLineEdit" name="m_pHashEdit"/>
        </item>
       </layout>
      </item>

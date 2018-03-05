@@ -27,7 +27,6 @@
     <ClInclude Include="..\..\..\src\data\data_component.h" />
     <ClInclude Include="..\..\..\src\data\data_component_facet.h" />
     <ClInclude Include="..\..\..\src\data\data_component_manager.h" />
-    <ClInclude Include="..\..\..\src\data\data_data_behavior.h" />
     <ClInclude Include="..\..\..\src\data\data_dof_component.h" />
     <ClInclude Include="..\..\..\src\data\data_entity.h" />
     <ClInclude Include="..\..\..\src\data\data_entity_folder.h" />
@@ -47,10 +46,6 @@
     <ClInclude Include="..\..\..\src\data\data_ssao_component.h" />
     <ClInclude Include="..\..\..\src\data\data_ssr_component.h" />
     <ClInclude Include="..\..\..\src\data\data_sun_component.h" />
-    <ClInclude Include="..\..\..\src\data\data_texture_2d.h" />
-    <ClInclude Include="..\..\..\src\data\data_texture_base.h" />
-    <ClInclude Include="..\..\..\src\data\data_texture_cube.h" />
-    <ClInclude Include="..\..\..\src\data\data_texture_manager.h" />
     <ClInclude Include="..\..\..\src\data\data_transformation_facet.h" />
     <ClInclude Include="..\..\..\src\data\data_volume_fog_component.h" />
   </ItemGroup>
@@ -84,10 +79,6 @@
     <ClCompile Include="..\..\..\src\data\data_ssao_component.cpp" />
     <ClCompile Include="..\..\..\src\data\data_ssr_component.cpp" />
     <ClCompile Include="..\..\..\src\data\data_sun_component.cpp" />
-    <ClCompile Include="..\..\..\src\data\data_texture_2d.cpp" />
-    <ClCompile Include="..\..\..\src\data\data_texture_base.cpp" />
-    <ClCompile Include="..\..\..\src\data\data_texture_cube.cpp" />
-    <ClCompile Include="..\..\..\src\data\data_texture_manager.cpp" />
     <ClCompile Include="..\..\..\src\data\data_transformation_facet.cpp" />
     <ClCompile Include="..\..\..\src\data\data_volume_fog_component.cpp" />
   </ItemGroup>

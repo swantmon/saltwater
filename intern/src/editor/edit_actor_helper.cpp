@@ -17,7 +17,6 @@
 #include "data/data_material_component.h"
 #include "data/data_material_manager.h"
 #include "data/data_mesh_component.h"
-#include "data/data_texture_manager.h"
 #include "data/data_transformation_facet.h"
 
 #include "editor/edit_actor_helper.h"
@@ -175,7 +174,7 @@ namespace
             {
                 NewMessage.Put(true);
 
-                NewMessage.Put(pFacet->GetTexture()->GetHash());
+                NewMessage.Put(pFacet->GetTexture());
             }
             else
             {
@@ -265,11 +264,11 @@ namespace
 
             bool HasTexture = _rMessage.Get<bool>();
 
-            int TextureHash = -1;
+            std::string TextureHash = "";
 
             if (HasTexture)
             {
-                TextureHash = _rMessage.Get<int>();
+                TextureHash = _rMessage.Get<std::string>();
             }
 
             R = _rMessage.Get<float>();
@@ -314,13 +313,11 @@ namespace
 
             if (HasTexture)
             {
-                Dt::CTexture2D* pBackgroundTexture = Dt::TextureManager::GetTexture2DByHash(TextureHash);
-
-                pFacet->SetTexture(pBackgroundTexture);
+                pFacet->SetTexture(TextureHash);
             }
             else
             {
-                pFacet->SetTexture(nullptr);
+                pFacet->SetTexture("");
             }
 
             pFacet->SetBackgroundColor(glm::vec3(R, G, B));

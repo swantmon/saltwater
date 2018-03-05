@@ -3,6 +3,8 @@
 
 #include "data/data_camera_component.h"
 
+#include <string>
+
 namespace Dt
 {
     CCameraComponent::CCameraComponent()
@@ -18,7 +20,7 @@ namespace Dt
         , m_Near            (0.3f)
         , m_Far             (1000.0f)
         , m_BackgroundColor (glm::vec3(1.0f))
-        , m_pTexture2D      (nullptr)
+        , m_Texture2D       ("")
         , m_ProjectionMatrix(glm::mat3(1.0f))
         , m_ViewportRect    ()
         , m_ClearFlag       (Skybox)
@@ -64,23 +66,23 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CCameraComponent::SetTexture(Dt::CTexture2D* _pTexture2D)
+    void CCameraComponent::SetTexture(const std::string& _rTexture2D)
     {
-        m_pTexture2D = _pTexture2D;
+        m_Texture2D = _rTexture2D;
     }
 
     // -----------------------------------------------------------------------------
 
-    Dt::CTexture2D* CCameraComponent::GetTexture()
+    const std::string& CCameraComponent::GetTexture()
     {
-        return m_pTexture2D;
+        return m_Texture2D;
     }
 
     // -----------------------------------------------------------------------------
 
     bool CCameraComponent::GetHasTexture() const
     {
-        return m_pTexture2D != 0;
+        return m_Texture2D.length() > 0;
     }
 
     // -----------------------------------------------------------------------------

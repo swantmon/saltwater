@@ -451,7 +451,7 @@ namespace
 
         // -----------------------------------------------------------------------------
 
-        std::string PathToModel = Core::AssetManager::GetPathToData() + "gizmo.obj";
+        std::string PathToModel = Core::AssetManager::GetPathToData() + "/graphic/models/gizmo.obj";
 
         m_GizmoModelPtr = MeshManager::CreateMeshFromFile(PathToModel, Core::AssetGenerator::SGeneratorFlag::Default | Core::AssetGenerator::SGeneratorFlag::FlipUVs);
 

@@ -4,8 +4,6 @@
 #include "base/base_typedef.h"
 
 #include "data/data_component.h"
-#include "data/data_texture_2d.h"
-#include "data/data_texture_cube.h"
 
 namespace Dt
 {
@@ -37,17 +35,9 @@ namespace Dt
         void SetType(EType _Type);
         EType GetType() const;
 
-        void SetCubemap(Dt::CTextureCube* _rCubemap);
-        Dt::CTextureCube* GetCubemap();        
+        void SetTexture(const std::string& _rTexture2D);
+        const std::string& GetTexture();
 
-        void SetPanorama(Dt::CTexture2D* _pTexture2D);
-        Dt::CTexture2D* GetPanorama();
-
-        void SetTexture(Dt::CTexture2D* _pTexture2D);
-        Dt::CTexture2D* GetTexture();
-
-        bool GetHasCubemap() const;
-        bool GetHasPanorama() const;
         bool GetHasTexture() const;
 
         void SetIntensity(float _Intensity);
@@ -60,12 +50,10 @@ namespace Dt
 
     private:
 
-        ERefreshMode      m_RefreshMode;        //< Refresh mode of the sky
-        EType             m_Type;               //< Type of the skybox for procedural panorama or cubemap
-        bool              m_HasHDR;             //< Declares either the image consists of HDR values
-        Dt::CTextureCube* m_pCubemap;           //< Pointer to cubemap for cubemap skybox
-        Dt::CTexture2D*   m_pPanoramaTexture;   //< Pointer to a panorama texture
-        Dt::CTexture2D*   m_pTexture;           //< Pointer to a texture
-        float             m_Intensity;          //< Intensity of sky that is freely adjustable by artist (multiplier on the image)
+        ERefreshMode m_RefreshMode;        //< Refresh mode of the sky
+        EType        m_Type;               //< Type of the skybox for procedural panorama or cubemap
+        bool         m_HasHDR;             //< Declares either the image consists of HDR values
+        std::string  m_Texture;            //< Texture
+        float        m_Intensity;          //< Intensity of sky that is freely adjustable by artist (multiplier on the image)
     };
 } // namespace Dt

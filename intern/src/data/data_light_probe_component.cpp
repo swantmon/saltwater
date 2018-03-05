@@ -10,7 +10,7 @@ namespace Dt
         , m_Type              (Sky)
         , m_Quality           (PX128)
         , m_ClearFlag         (Skybox)
-        , m_pCubemap          ()
+        , m_Cubemap           ("")
         , m_Intensity         (0)
         , m_Near              (0.1f)
         , m_Far               (10.0f)
@@ -94,16 +94,16 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CLightProbeComponent::SetCubemap(Dt::CTextureCube* _pCubemap)
+    void CLightProbeComponent::SetCubemap(const std::string& _pCubemap)
     {
-        m_pCubemap = _pCubemap;
+        m_Cubemap = _pCubemap;
     }
 
     // -----------------------------------------------------------------------------
 
-    Dt::CTextureCube* CLightProbeComponent::GetCubemap()
+    const std::string& CLightProbeComponent::GetCubemap()
     {
-        return m_pCubemap;
+        return m_Cubemap;
     }
 
     // -----------------------------------------------------------------------------

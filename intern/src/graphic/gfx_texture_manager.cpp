@@ -12,9 +12,6 @@
 
 #include "core/core_asset_manager.h"
 
-#include "data/data_texture_manager.h"
-#include "data/data_texture_base.h"
-
 #include "graphic/gfx_main.h"
 #include "graphic/gfx_native_texture.h"
 #include "graphic/gfx_texture_manager.h"
@@ -130,8 +127,6 @@ namespace
 
     private:
 
-        void OnDirtyTexture(Dt::CTextureBase* _pTexture);
-
         CTexturePtr InternCreateTexture2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
         CTexturePtr InternCreateTexture3D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
 
@@ -145,11 +140,6 @@ namespace
 
         ILenum ConvertILImageFormat(Gfx::CTexture::EFormat _Format) const;
         ILenum ConvertILImageType(Gfx::CTexture::EFormat _Format) const;
-
-        Gfx::CTexture::EDimension ConvertDataDimension(Dt::CTextureBase::EDimension _Dimension);
-        Gfx::CTexture::EFormat ConvertDataFormat(Dt::CTextureBase::EFormat _Format);
-        Gfx::CTexture::ESemantic ConvertDataSemantic(Dt::CTextureBase::ESemantic _Semantic);
-        unsigned int ConvertDataBinding(unsigned int _Binding);
 
     private:
 
@@ -218,11 +208,6 @@ namespace
 #ifdef PLATFORM_WINDOWS
         glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 #endif // PLATFORM_WINDOWS
-
-        // -----------------------------------------------------------------------------
-        // Set dirty handler of data textures
-        // -----------------------------------------------------------------------------
-        Dt::TextureManager::RegisterDirtyTextureHandler(DATA_DIRTY_TEXTURE_METHOD(&CGfxTextureManager::OnDirtyTexture));
     }
 
     // -----------------------------------------------------------------------------
@@ -666,169 +651,6 @@ namespace
         glObjectLabel(GL_TEXTURE, pInternTexture->m_NativeTexture, -1, _pLabel);
     }
 
-    // -----------------------------------------------------------------------------
-
-    void CGfxTextureManager::OnDirtyTexture(Dt::CTextureBase* _pTexture)
-    {
-        if (_pTexture == nullptr) return;
-
-        unsigned int DirtyFlags = _pTexture->GetDirtyFlags();
-        unsigned int Hash       = _pTexture->GetHash();
-        unsigned int Binding    = _pTexture->GetBinding();
-
-        // -----------------------------------------------------------------------------
-        // Check if binding is related to graphics
-        // -----------------------------------------------------------------------------
-        if (Binding == Dt::CTextureBase::CPU) return;
-
-        // -----------------------------------------------------------------------------
-        // Create
-        // -----------------------------------------------------------------------------
-        if ((DirtyFlags & Dt::CTextureBase::DirtyCreate) != 0)
-        {
-            // -----------------------------------------------------------------------------
-            // Create descriptor
-            // -----------------------------------------------------------------------------
-            STextureDescriptor TextureDescriptor;
-
-            TextureDescriptor.m_NumberOfPixelsU  = 1;
-            TextureDescriptor.m_NumberOfPixelsV  = 1;
-            TextureDescriptor.m_NumberOfPixelsW  = 1;
-            TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_GenerateAllMipMaps;
-            TextureDescriptor.m_NumberOfTextures = 1;
-            TextureDescriptor.m_Access           = CTexture::CPUWrite;
-            TextureDescriptor.m_Usage            = CTexture::GPURead;
-            TextureDescriptor.m_Semantic         = ConvertDataSemantic(_pTexture->GetSemantic());
-            TextureDescriptor.m_pFileName        = 0;
-            TextureDescriptor.m_pPixels          = _pTexture->GetPixels();
-            TextureDescriptor.m_Binding          = ConvertDataBinding(_pTexture->GetBinding());
-            TextureDescriptor.m_Format           = ConvertDataFormat(_pTexture->GetFormat());
-
-            if (_pTexture->GetFileName().length() > 0) TextureDescriptor.m_pFileName = _pTexture->GetFileName().c_str();
-
-            // -----------------------------------------------------------------------------
-            // Depending on dimension create the texture
-            // -----------------------------------------------------------------------------
-            if (_pTexture->GetDimension() == Dt::CTextureBase::Dim2D)
-            {
-                CTexturePtr Texture2DPtr = nullptr;
-
-                if (m_TexturesByHash.find(Hash) != m_TexturesByHash.end())
-                {
-                    BASE_CONSOLE_STREAMWARNING("Trying to re-create an already created data texture in graphics texture manager. Creation aborted...");
-
-                    return ;
-                }
-
-                // -----------------------------------------------------------------------------
-                // Create
-                // -----------------------------------------------------------------------------
-                if (_pTexture->IsCube())
-                {
-                    Dt::CTextureCube* pDataTexture = static_cast<Dt::CTextureCube*>(_pTexture);
-
-                    TextureDescriptor.m_NumberOfPixelsU  = pDataTexture->GetNumberOfPixelsU();
-                    TextureDescriptor.m_NumberOfPixelsV  = pDataTexture->GetNumberOfPixelsV();
-                    TextureDescriptor.m_NumberOfTextures = 6;
-
-                    Texture2DPtr = InternCreateCubeTexture(TextureDescriptor, true, Gfx::SDataBehavior::LeftAlone);
-                }
-                else
-                {
-                    Dt::CTexture2D* pDataTexture = static_cast<Dt::CTexture2D*>(_pTexture);
-
-                    TextureDescriptor.m_NumberOfPixelsU = pDataTexture->GetNumberOfPixelsU();
-                    TextureDescriptor.m_NumberOfPixelsV = pDataTexture->GetNumberOfPixelsV();
-
-                    Texture2DPtr = InternCreateTexture2D(TextureDescriptor, true, Gfx::SDataBehavior::LeftAlone);
-                }
-
-                // -----------------------------------------------------------------------------
-                // Label if an identifier exists
-                // -----------------------------------------------------------------------------
-                const char* pLabel = _pTexture->GetIdentifier().length() > 0 ? _pTexture->GetIdentifier().c_str() : 0;
-
-                if (pLabel != 0)
-                {
-                    SetTextureLabel(Texture2DPtr, pLabel);
-                }
-
-                // -----------------------------------------------------------------------------
-                // Set to container
-                // -----------------------------------------------------------------------------
-                CInternTexture* pInternTexture2D = static_cast<CInternTexture*>(Texture2DPtr.GetPtr());
-
-                if (pInternTexture2D == nullptr)
-                {
-                    pInternTexture2D = static_cast<CInternTexture*>(m_Texture2DPtr.GetPtr());
-                }
-
-                if (Hash != 0)
-                {
-                    pInternTexture2D->m_Hash = Hash;
-
-                    m_TexturesByHash[Hash] = pInternTexture2D;
-                }
-            }
-            else if (_pTexture->GetDimension() == Dt::CTextureBase::Dim3D)
-            {
-                // TODO by tschwandt
-                // Not implemented yet
-
-                BASE_CONSOLE_STREAMWARNING("Texture 3D from data textures is not yet supported!");
-            }
-        }
-
-        // -----------------------------------------------------------------------------
-        // Data
-        // -----------------------------------------------------------------------------
-        if ((DirtyFlags & Dt::CTextureBase::DirtyData) != 0)
-        {
-            if (_pTexture->GetDimension() == Dt::CTextureBase::Dim2D)
-            {
-                if (m_TexturesByHash.find(Hash) == m_TexturesByHash.end())
-                {
-                    BASE_CONSOLE_STREAMWARNING("Data texture manager tried to update data from non-created graphic texture.");
-
-                    return;
-                }
-
-                if (_pTexture->IsCube())
-                {
-                    Gfx::CTexture*    pGraphicTexture = m_TexturesByHash.at(Hash);
-                    Dt::CTextureCube* pDataTexture    = static_cast<Dt::CTextureCube*>(_pTexture);
-
-                    glm::uvec2 CubemapResolution = glm::uvec2(pDataTexture->GetNumberOfPixelsU(), pDataTexture->GetNumberOfPixelsV());
-
-                    Base::AABB2UInt CubemapRect(glm::uvec2(0), CubemapResolution);
-
-                    CopyToTextureArray2D(pGraphicTexture, 0, CubemapRect, CubemapRect[1][0], pDataTexture->GetFace(Dt::CTextureCube::Right)->GetPixels(), false);
-                    CopyToTextureArray2D(pGraphicTexture, 1, CubemapRect, CubemapRect[1][0], pDataTexture->GetFace(Dt::CTextureCube::Left)->GetPixels(), false);
-                    CopyToTextureArray2D(pGraphicTexture, 2, CubemapRect, CubemapRect[1][0], pDataTexture->GetFace(Dt::CTextureCube::Top)->GetPixels(), false);
-                    CopyToTextureArray2D(pGraphicTexture, 3, CubemapRect, CubemapRect[1][0], pDataTexture->GetFace(Dt::CTextureCube::Bottom)->GetPixels(), false);
-                    CopyToTextureArray2D(pGraphicTexture, 4, CubemapRect, CubemapRect[1][0], pDataTexture->GetFace(Dt::CTextureCube::Front)->GetPixels(), false);
-                    CopyToTextureArray2D(pGraphicTexture, 5, CubemapRect, CubemapRect[1][0], pDataTexture->GetFace(Dt::CTextureCube::Back)->GetPixels(), false);
-
-                    UpdateMipmap(pGraphicTexture);
-                }
-                else
-                {
-                    Gfx::CTexture*  pGraphicTexture = m_TexturesByHash.at(Hash);
-                    Dt::CTexture2D* pDataTexture    = static_cast<Dt::CTexture2D*>(_pTexture);
-
-                    if (pDataTexture->GetPixels() != nullptr)
-                    {   
-                        glm::uvec2 TextureResolution = glm::uvec2(pDataTexture->GetNumberOfPixelsU(), pDataTexture->GetNumberOfPixelsV());
-
-                        Base::AABB2UInt TargetRect(glm::uvec2(0), TextureResolution);
-
-                        CopyToTexture2D(pGraphicTexture, TargetRect, TargetRect[1][0], pDataTexture->GetPixels(), true);
-                    }
-                }
-            }
-        }
-    }
-    
     // -----------------------------------------------------------------------------
 
     CTexturePtr CGfxTextureManager::InternCreateTexture2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
@@ -2195,140 +2017,6 @@ namespace
         };
 
         return s_NativeType[_Format];
-    }
-
-    // -----------------------------------------------------------------------------
-
-    Gfx::CTexture::EDimension CGfxTextureManager::ConvertDataDimension(Dt::CTextureBase::EDimension _Dimension)
-    {
-        static Gfx::CTexture::EDimension s_Types[] =
-        {
-            Gfx::CTexture::Dim2D,
-            Gfx::CTexture::Dim3D,
-        };
-
-        return s_Types[_Dimension];
-    }
-
-    // -----------------------------------------------------------------------------
-
-    Gfx::CTexture::EFormat CGfxTextureManager::ConvertDataFormat(Dt::CTextureBase::EFormat _Format)
-    {
-        static Gfx::CTexture::EFormat s_Types[] =
-        {
-            Gfx::CTexture::R8_BYTE,
-            Gfx::CTexture::R8G8_BYTE,
-            Gfx::CTexture::R8G8B8_BYTE,
-            Gfx::CTexture::R8G8B8A8_BYTE,
-            Gfx::CTexture::R8_UBYTE,
-            Gfx::CTexture::R8G8_UBYTE,
-            Gfx::CTexture::R8G8B8_UBYTE,
-            Gfx::CTexture::R8G8B8A8_UBYTE,
-            Gfx::CTexture::R8_SHORT,
-            Gfx::CTexture::R8G8_SHORT,
-            Gfx::CTexture::R8G8B8_SHORT,
-            Gfx::CTexture::R8G8B8A8_SHORT,
-            Gfx::CTexture::R8_USHORT,
-            Gfx::CTexture::R8G8_USHORT,
-            Gfx::CTexture::R8G8B8_USHORT,
-            Gfx::CTexture::R8G8B8A8_USHORT,
-            Gfx::CTexture::R8_INT,
-            Gfx::CTexture::R8G8_INT,
-            Gfx::CTexture::R8G8B8_INT,
-            Gfx::CTexture::R8G8B8A8_INT,
-            Gfx::CTexture::R8_UINT,
-            Gfx::CTexture::R8G8_UINT,
-            Gfx::CTexture::R8G8B8_UINT,
-            Gfx::CTexture::R8G8B8A8_UINT,
-
-            Gfx::CTexture::R16_BYTE,
-            Gfx::CTexture::R16G16_BYTE,
-            Gfx::CTexture::R16G16B16_BYTE,
-            Gfx::CTexture::R16G16B16A16_BYTE,
-            Gfx::CTexture::R16_UBYTE,
-            Gfx::CTexture::R16G16_UBYTE,
-            Gfx::CTexture::R16G16B16_UBYTE,
-            Gfx::CTexture::R16G16B16A16_UBYTE,
-            Gfx::CTexture::R16_SHORT,
-            Gfx::CTexture::R16G16_SHORT,
-            Gfx::CTexture::R16G16B16_SHORT,
-            Gfx::CTexture::R16G16B16A16_SHORT,
-            Gfx::CTexture::R16_USHORT,
-            Gfx::CTexture::R16G16_USHORT,
-            Gfx::CTexture::R16G16B16_USHORT,
-            Gfx::CTexture::R16G16B16A16_USHORT,
-            Gfx::CTexture::R16_INT,
-            Gfx::CTexture::R16G16_INT,
-            Gfx::CTexture::R16G16B16_INT,
-            Gfx::CTexture::R16G16B16A16_INT,
-            Gfx::CTexture::R16_UINT,
-            Gfx::CTexture::R16G16_UINT,
-            Gfx::CTexture::R16G16B16_UINT,
-            Gfx::CTexture::R16G16B16A16_UINT,
-            Gfx::CTexture::R16_FLOAT,
-            Gfx::CTexture::R16G16_FLOAT,
-            Gfx::CTexture::R16G16B16_FLOAT,
-            Gfx::CTexture::R16G16B16A16_FLOAT,
-
-            Gfx::CTexture::R32_INT,
-            Gfx::CTexture::R32G32_INT,
-            Gfx::CTexture::R32G32B32_INT,
-            Gfx::CTexture::R32G32B32A32_INT,
-            Gfx::CTexture::R32_UINT,
-            Gfx::CTexture::R32G32_UINT,
-            Gfx::CTexture::R32G32B32_UINT,
-            Gfx::CTexture::R32G32B32A32_UINT,
-            Gfx::CTexture::R32_FLOAT,
-            Gfx::CTexture::R32G32_FLOAT,
-            Gfx::CTexture::R32G32B32_FLOAT,
-            Gfx::CTexture::R32G32B32A32_FLOAT,
-
-            Gfx::CTexture::R3G3B2_UBYTE,
-            Gfx::CTexture::R4G4B4A4_USHORT,
-            Gfx::CTexture::R5G5G5A1_USHORT,
-            Gfx::CTexture::R10G10B10A2_UINT,
-        };
-
-        return s_Types[_Format];
-    }
-
-    // -----------------------------------------------------------------------------
-
-    Gfx::CTexture::ESemantic CGfxTextureManager::ConvertDataSemantic(Dt::CTextureBase::ESemantic _Semantic)
-    {
-        static Gfx::CTexture::ESemantic s_Types[] =
-        {
-            Gfx::CTexture::Diffuse,
-            Gfx::CTexture::Normal,
-            Gfx::CTexture::Height,
-            Gfx::CTexture::Diffuse,
-        };
-
-        return s_Types[_Semantic];
-    }
-
-    // -----------------------------------------------------------------------------
-
-    unsigned int CGfxTextureManager::ConvertDataBinding(unsigned int _Binding)
-    {
-        unsigned int Binding = 0;
-
-        if ((_Binding & Dt::CTextureBase::ShaderResource) != 0)
-        {
-            Binding |= Gfx::CTexture::ShaderResource;
-        }
-        
-        if ((_Binding & Dt::CTextureBase::RenderTarget) != 0)
-        {
-            Binding |= Gfx::CTexture::RenderTarget;
-        }
-
-        if ((_Binding & Dt::CTextureBase::DepthStencilTarget) != 0)
-        {
-            Binding |= Gfx::CTexture::DepthStencilTarget;
-        }
-
-        return Binding;
     }
 } // namespace
 
