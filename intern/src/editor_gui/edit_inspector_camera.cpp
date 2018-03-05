@@ -18,16 +18,6 @@ namespace Edit
         setupUi(this);
 
         // -----------------------------------------------------------------------------
-        // Setup user UI
-        // -----------------------------------------------------------------------------
-        m_pBackgroundTextureEdit->SetLayout(CTextureValue::NoPreview);
-
-        // -----------------------------------------------------------------------------
-        // Signal / slots
-        // -----------------------------------------------------------------------------
-        connect(m_pBackgroundTextureEdit, SIGNAL(hashChanged(unsigned int)), SLOT(valueChanged()));
-
-        // -----------------------------------------------------------------------------
         // Color picker
         // -----------------------------------------------------------------------------
         QPalette ButtonPalette = m_pSolidColorButton->palette();
@@ -62,8 +52,6 @@ namespace Edit
         bool IsMainCamera = m_pIsMainCameraCB->isChecked();
 
         int ClearFlag = m_pClearFlagCS->currentIndex();
-
-        int Hash = m_pBackgroundTextureEdit->GetTextureHash();
 
         QPalette ButtonPalette = m_pSolidColorButton->palette();
 
@@ -119,17 +107,6 @@ namespace Edit
         NewMessage.Put(IsMainCamera);
 
         NewMessage.Put(ClearFlag);
-
-        if (Hash != 0)
-        {
-            NewMessage.Put(true);
-
-            NewMessage.Put(Hash);
-        }
-        else
-        {
-            NewMessage.Put(false);
-        }
 
         NewMessage.Put(AlbedoColor[0]);
         NewMessage.Put(AlbedoColor[1]);
@@ -230,16 +207,7 @@ namespace Edit
         bool IsMainCamera = _rMessage.Get<bool>();
 
         int ClearFlag = _rMessage.Get<int>();
-
-        bool HasTexture = _rMessage.Get<bool>();
-
-        int TextureHash = -1;
-
-        if (HasTexture)
-        {
-            TextureHash = _rMessage.Get<int>();
-        }
-
+    
         R = _rMessage.Get<float>();
         G = _rMessage.Get<float>();
         B = _rMessage.Get<float>();
@@ -287,15 +255,6 @@ namespace Edit
         m_pIsMainCameraCB->setChecked(IsMainCamera);
 
         m_pClearFlagCS->setCurrentIndex(ClearFlag);
-
-        if (HasTexture)
-        {
-            m_pBackgroundTextureEdit->SetTextureHash(TextureHash);
-        }
-        else
-        {
-            m_pBackgroundTextureEdit->SetTextureHash(0);
-        }
 
         QPalette ButtonPalette = m_pSolidColorButton->palette();
 

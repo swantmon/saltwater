@@ -17,11 +17,12 @@
 #include "data/data_point_light_component.h"
 #include "data/data_sky_component.h"
 #include "data/data_sun_component.h"
-#include "data/data_texture_manager.h"
 #include "data/data_transformation_facet.h"
 
 #include "editor_port/edit_message.h"
 #include "editor_port/edit_message_manager.h"
+
+#include <string>
 
 namespace
 {
@@ -203,31 +204,12 @@ namespace
             rCurrentEntity.SetCategory(Dt::SEntityCategory::Dynamic);
 
             // -----------------------------------------------------------------------------
-            // Create facet and set it
-            // -----------------------------------------------------------------------------
-            Dt::STextureDescriptor TextureDescriptor;
-
-            TextureDescriptor.m_NumberOfPixelsU = Dt::STextureDescriptor::s_NumberOfPixelsFromSource;
-            TextureDescriptor.m_NumberOfPixelsV = Dt::STextureDescriptor::s_NumberOfPixelsFromSource;
-            TextureDescriptor.m_NumberOfPixelsW = 1;
-            TextureDescriptor.m_Format          = Dt::CTextureBase::R16G16B16_FLOAT;
-            TextureDescriptor.m_Semantic        = Dt::CTextureBase::HDR;
-            TextureDescriptor.m_Binding         = Dt::CTextureBase::ShaderResource;
-            TextureDescriptor.m_pPixels         = 0;
-            TextureDescriptor.m_pFileName       = "environments/PaperMill_E_3k.hdr";
-            TextureDescriptor.m_pIdentifier     = 0;
-
-            Dt::CTexture2D* pPanoramaTexture = Dt::TextureManager::CreateTexture2D(TextureDescriptor);
-
-            Dt::TextureManager::MarkTextureAsDirty(pPanoramaTexture, Dt::CTextureBase::DirtyCreate);
-
-            // -----------------------------------------------------------------------------
 
             Dt::CSkyComponent* pComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CSkyComponent>();
 
             pComponent->SetRefreshMode(Dt::CSkyComponent::Static);
             pComponent->SetType       (Dt::CSkyComponent::Panorama);
-            pComponent->SetPanorama   (pPanoramaTexture);
+            pComponent->SetTexture    ("environments/PaperMill_E_3k.hdr");
             pComponent->SetIntensity  (5000.0f);
 
             rCurrentEntity.AttachComponent(pComponent);
@@ -381,33 +363,6 @@ namespace
 
     void CLightHelper::OnRequestInfoEnvironment(Edit::CMessage& _rMessage)
     {
-        auto AddTextureToMessage = [&](const Dt::CTextureBase* _pTextureBase, Edit::CMessage& _rMessage)
-        {
-            if (_pTextureBase != 0)
-            {
-                if (_pTextureBase->GetFileName().length() > 0)
-                {
-                    _rMessage.Put(true);
-
-                    _rMessage.Put(_pTextureBase->GetFileName());
-                }
-                else
-                {
-                    _rMessage.Put(false);
-                }
-
-                _rMessage.Put(_pTextureBase->GetHash());
-            }
-            else
-            {
-                _rMessage.Put(false);
-
-                _rMessage.Put(0);
-            }
-        };
-
-        // -----------------------------------------------------------------------------
-
         Base::ID EntityID = _rMessage.Get<Base::ID>();
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
@@ -425,26 +380,12 @@ namespace
             if (pLightFacet->GetType() == Dt::CSkyComponent::Procedural)
             {
                 NewMessage.Put(false);
-
-                NewMessage.Put(0);
             }
-            else if (pLightFacet->GetType() == Dt::CSkyComponent::Panorama)
+            else
             {
                 NewMessage.Put(true);
 
-                AddTextureToMessage(pLightFacet->GetPanorama(), NewMessage);
-            }
-            else if (pLightFacet->GetType() == Dt::CSkyComponent::Cubemap)
-            {
-                NewMessage.Put(true);
-
-                AddTextureToMessage(pLightFacet->GetCubemap(), NewMessage);
-            }
-            else if (pLightFacet->GetType() == Dt::CSkyComponent::Texture || pLightFacet->GetType() == Dt::CSkyComponent::TextureGeometry || pLightFacet->GetType() == Dt::CSkyComponent::TextureLUT)
-            {
-                NewMessage.Put(true);
-
-                AddTextureToMessage(pLightFacet->GetTexture(), NewMessage);
+                NewMessage.Put(pLightFacet->GetTexture());
             }
 
             NewMessage.Put(pLightFacet->GetIntensity());
@@ -521,9 +462,7 @@ namespace
             {
                 NewMessage.Put(true);
 
-                NewMessage.Put(pLightFacet->GetTexture()->GetFileName());
-
-                NewMessage.Put(pLightFacet->GetTexture()->GetHash());
+                NewMessage.Put(pLightFacet->GetTexture());
             }
             else
             {
@@ -671,7 +610,7 @@ namespace
 
             int Type = _rMessage.Get<int>();
 
-            unsigned int TextureHash = _rMessage.Get<int>();
+            std::string Texture = _rMessage.Get<std::string>();
 
             float Intensity = _rMessage.Get<float>();
 
@@ -682,32 +621,9 @@ namespace
             pLightFacet->SetType       (static_cast<Dt::CSkyComponent::EType>(Type));
             pLightFacet->SetIntensity  (Intensity);
 
-            if (pLightFacet->GetType() == Dt::CSkyComponent::Cubemap)
+            if (pLightFacet->GetType() != Dt::CSkyComponent::Procedural)
             {
-                Dt::CTextureCube* pTextureCube = Dt::TextureManager::GetTextureCubeByHash(TextureHash);
-
-                if (pTextureCube != nullptr)
-                {
-                    pLightFacet->SetCubemap(pTextureCube);
-                }
-            }
-            else if (pLightFacet->GetType() == Dt::CSkyComponent::Panorama)
-            {
-                Dt::CTexture2D* pTexturePanorama = Dt::TextureManager::GetTexture2DByHash(TextureHash);
-
-                if (pTexturePanorama != nullptr)
-                {
-                    pLightFacet->SetPanorama(pTexturePanorama);
-                }
-            }
-            else if (pLightFacet->GetType() == Dt::CSkyComponent::Texture || pLightFacet->GetType() == Dt::CSkyComponent::TextureGeometry || pLightFacet->GetType() == Dt::CSkyComponent::TextureLUT)
-            {
-                Dt::CTexture2D* pTexture = Dt::TextureManager::GetTexture2DByHash(TextureHash);
-
-                if (pTexture != nullptr)
-                {
-                    pLightFacet->SetTexture(pTexture);
-                }
+                pLightFacet->SetTexture(Texture);
             }
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pLightFacet, Dt::CSkyComponent::DirtyInfo);
@@ -790,9 +706,7 @@ namespace
         {
             float R, G, B;
             float X, Y, Z;
-            unsigned int TextureHash;
-
-            TextureHash = 0;
+            std::string TextureFile;
 
             // -----------------------------------------------------------------------------
             // Read values
@@ -822,7 +736,7 @@ namespace
 
             if (HasTexture)
             {
-                TextureHash = _rMessage.Get<int>();
+                TextureFile = _rMessage.Get<std::string>();
             }
 
             // -----------------------------------------------------------------------------
@@ -840,16 +754,11 @@ namespace
 
             if (HasTexture)
             {
-                Dt::CTexture2D* pTexture = Dt::TextureManager::GetTexture2DByHash(TextureHash);
-
-                if (pTexture != nullptr)
-                {
-                    pLightFacet->SetTexture(pTexture);
-                }
+                pLightFacet->SetTexture(TextureFile);
             }
             else
             {
-                pLightFacet->SetTexture(0);
+                pLightFacet->SetTexture("");
             }
             
             pLightFacet->UpdateLightness();

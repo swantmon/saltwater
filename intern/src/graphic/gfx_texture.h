@@ -101,6 +101,7 @@ namespace Gfx
                 Specular,
                 Normal,
                 Height,
+                HDR,
                 NumberOfSemantics,
                 UndefinedSemantic = -1,
             };

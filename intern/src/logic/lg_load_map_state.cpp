@@ -26,7 +26,6 @@
 #include "data/data_sky_component.h"
 #include "data/data_ssao_component.h"
 #include "data/data_sun_component.h"
-#include "data/data_texture_manager.h"
 #include "data/data_transformation_facet.h"
 
 #include "logic/lg_load_map_state.h"

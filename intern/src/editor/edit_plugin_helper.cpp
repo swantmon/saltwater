@@ -13,7 +13,6 @@
 #include "data/data_component_manager.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
-#include "data/data_texture_manager.h"
 
 #include "editor/edit_plugin_helper.h"
 
@@ -101,56 +100,7 @@ namespace
 
     void CPluginHelper::OnNewPluginARController(Edit::CMessage& _rMessage)
     {
-        // -----------------------------------------------------------------------------
-        // Get entity and set type + category
-        // -----------------------------------------------------------------------------
-        Base::ID EntityID = _rMessage.Get<Base::ID>();
-
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
-
-        rCurrentEntity.SetCategory(Dt::SEntityCategory::Dynamic);
-
-        // -----------------------------------------------------------------------------
-        // Create facet and set it
-        // -----------------------------------------------------------------------------
-        Dt::STextureDescriptor TextureDescriptor;
-
-        TextureDescriptor.m_NumberOfPixelsU  = 1280;
-        TextureDescriptor.m_NumberOfPixelsV  = 720;
-        TextureDescriptor.m_NumberOfPixelsW  = 1;
-        TextureDescriptor.m_Format           = Dt::CTextureBase::R8G8B8_UBYTE;
-        TextureDescriptor.m_Semantic         = Dt::CTextureBase::Diffuse;
-        TextureDescriptor.m_Binding          = Dt::CTextureBase::ShaderResource;
-        TextureDescriptor.m_pPixels          = 0;
-        TextureDescriptor.m_pFileName        = 0;
-        TextureDescriptor.m_pIdentifier      = "AR_BACKGROUND_TEXTURE";
-
-        Dt::CTexture2D* pBackgroundTexture = Dt::TextureManager::CreateTexture2D(TextureDescriptor);
-
-        Dt::TextureManager::MarkTextureAsDirty(pBackgroundTexture, Dt::CTextureBase::DirtyCreate);
-
-        // -----------------------------------------------------------------------------
-
-        Dt::CARControllerPluginComponent* pFacet = Dt::CComponentManager::GetInstance().Allocate<Dt::CARControllerPluginComponent>();
-
-        pFacet->SetCameraEntity       (0);
-        pFacet->SetConfiguration      ("-device=WinDS -flipV");
-        pFacet->SetCameraParameterFile("ar/configurations/logitech_para.dat");
-        pFacet->SetOutputBackground   (pBackgroundTexture);
-        pFacet->SetDeviceType         (Dt::CARControllerPluginComponent::Webcam);
-        pFacet->SetNumberOfMarker     (1);
-        pFacet->SetFreezeOutput       (false);
-            
-        Dt::CARControllerPluginComponent::SMarker& rMarkerOne = pFacet->GetMarker(0);
-
-        rMarkerOne.m_UID          = 0;
-        rMarkerOne.m_Type         = Dt::CARControllerPluginComponent::SMarker::Square;
-        rMarkerOne.m_WidthInMeter = 0.08f;
-        rMarkerOne.m_PatternFile  = "ar/patterns/patt.hiro";
-
-        rCurrentEntity.AttachComponent(pFacet);
-
-        Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pFacet, Dt::CARControllerPluginComponent::DirtyCreate);
+        BASE_UNUSED(_rMessage);
     }
 
     // -----------------------------------------------------------------------------
@@ -183,8 +133,6 @@ namespace
                 CameraEntityID = pFacet->GetCameraEntity()->GetID();
             }
 
-            unsigned int OutputBackground = pFacet->GetOutputBackground()->GetHash();
-
             unsigned int NumberOfMarker = pFacet->GetNumberOfMarker();
 
             // -----------------------------------------------------------------------------
@@ -203,8 +151,6 @@ namespace
             NewMessage.Put(ParameterFile);
 
             NewMessage.Put(static_cast<int>(CameraEntityID));
-
-            NewMessage.Put(OutputBackground);
 
             NewMessage.Put(NumberOfMarker);
 

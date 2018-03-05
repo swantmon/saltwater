@@ -36,32 +36,21 @@ namespace Edit
         // -----------------------------------------------------------------------------
         m_pGroupBox->setEnabled(false);
 
-        m_pAlbedoTextureEdit   ->SetLayout((CTextureValue::NoPreview | CTextureValue::NoHash));
-        m_pNormalTextureEdit   ->SetLayout((CTextureValue::NoPreview | CTextureValue::NoHash));
-        m_pRoughnessTextureEdit->SetLayout((CTextureValue::NoPreview | CTextureValue::NoHash));
-        m_pMetallicTextureEdit ->SetLayout((CTextureValue::NoPreview | CTextureValue::NoHash));
-        m_pBumpTextureEdit     ->SetLayout((CTextureValue::NoPreview | CTextureValue::NoHash));
-        m_pAOTextureEdit       ->SetLayout((CTextureValue::NoPreview | CTextureValue::NoHash));
+        m_pAlbedoTextureEdit   ->SetLayout((CTextureValue::NoPreview));
+        m_pNormalTextureEdit   ->SetLayout((CTextureValue::NoPreview));
+        m_pRoughnessTextureEdit->SetLayout((CTextureValue::NoPreview));
+        m_pMetallicTextureEdit ->SetLayout((CTextureValue::NoPreview));
+        m_pBumpTextureEdit     ->SetLayout((CTextureValue::NoPreview));
+        m_pAOTextureEdit       ->SetLayout((CTextureValue::NoPreview));
 
         // -----------------------------------------------------------------------------
         // Signal / slots
         // -----------------------------------------------------------------------------
-        connect(m_pAlbedoTextureEdit, SIGNAL(hashChanged(unsigned int)), SLOT(valueChanged()));
         connect(m_pAlbedoTextureEdit, SIGNAL(fileChanged(QString)), SLOT(valueChanged()));
-
-        connect(m_pNormalTextureEdit, SIGNAL(hashChanged(unsigned int)), SLOT(valueChanged()));
         connect(m_pNormalTextureEdit, SIGNAL(fileChanged(QString)), SLOT(valueChanged()));
-
-        connect(m_pRoughnessTextureEdit, SIGNAL(hashChanged(unsigned int)), SLOT(valueChanged()));
         connect(m_pRoughnessTextureEdit, SIGNAL(fileChanged(QString)), SLOT(valueChanged()));
-
-        connect(m_pMetallicTextureEdit, SIGNAL(hashChanged(unsigned int)), SLOT(valueChanged()));
         connect(m_pMetallicTextureEdit, SIGNAL(fileChanged(QString)), SLOT(valueChanged()));
-
-        connect(m_pBumpTextureEdit, SIGNAL(hashChanged(unsigned int)), SLOT(valueChanged()));
         connect(m_pBumpTextureEdit, SIGNAL(fileChanged(QString)), SLOT(valueChanged()));
-
-        connect(m_pAOTextureEdit, SIGNAL(hashChanged(unsigned int)), SLOT(valueChanged()));
         connect(m_pAOTextureEdit, SIGNAL(fileChanged(QString)), SLOT(valueChanged()));
 
         // -----------------------------------------------------------------------------

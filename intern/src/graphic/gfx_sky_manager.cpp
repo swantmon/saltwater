@@ -515,7 +515,7 @@ namespace
 
         // -----------------------------------------------------------------------------
 
-        std::string PathToModel = Core::AssetManager::GetPathToData() + "curvedplane.obj";
+        std::string PathToModel = Core::AssetManager::GetPathToData() + "/graphic/models/curvedplane.obj";
 
         CMeshPtr CurvedPlanePtr = MeshManager::CreateMeshFromFile(PathToModel, Core::AssetGenerator::SGeneratorFlag::Default);
 
@@ -659,36 +659,43 @@ namespace
             // -----------------------------------------------------------------------------
             // Get hash
             // -----------------------------------------------------------------------------
-            Base::BHash Hash = 0;
+            Gfx::STextureDescriptor TextureDescriptor;
 
-            if (_pDataSkyboxFacet->GetType() == Dt::CSkyComponent::Panorama)
+            TextureDescriptor.m_NumberOfPixelsU  = STextureDescriptor::s_NumberOfPixelsFromSource;
+            TextureDescriptor.m_NumberOfPixelsV  = STextureDescriptor::s_NumberOfPixelsFromSource;
+            TextureDescriptor.m_NumberOfPixelsW  = 1;
+            TextureDescriptor.m_NumberOfMipMaps  = 1;
+            TextureDescriptor.m_NumberOfTextures = 1;
+            TextureDescriptor.m_Access           = CTexture::CPUWrite;
+            TextureDescriptor.m_Usage            = CTexture::GPURead;
+            TextureDescriptor.m_Semantic         = CTexture::Diffuse;
+            TextureDescriptor.m_pFileName        = 0;
+            TextureDescriptor.m_pPixels          = 0;
+            TextureDescriptor.m_Binding          = CTexture::ShaderResource;
+            TextureDescriptor.m_Format           = STextureDescriptor::s_FormatFromSource;
+            TextureDescriptor.m_pFileName        = _pDataSkyboxFacet->GetTexture().c_str();
+
+            CTexturePtr TexturePtr = nullptr;
+
+            if (_pDataSkyboxFacet->GetType() == Dt::CSkyComponent::Cubemap && _pDataSkyboxFacet->GetHasTexture())
             {
-                if (_pDataSkyboxFacet->GetHasPanorama()) Hash = _pDataSkyboxFacet->GetPanorama()->GetHash();
+                TexturePtr = TextureManager::CreateCubeTexture(TextureDescriptor);
             }
-            else if (_pDataSkyboxFacet->GetType() == Dt::CSkyComponent::Cubemap)
+            else if (_pDataSkyboxFacet->GetType() != Dt::CSkyComponent::Procedural && _pDataSkyboxFacet->GetHasTexture())
             {
-                if (_pDataSkyboxFacet->GetHasCubemap()) Hash = _pDataSkyboxFacet->GetCubemap()->GetHash();
-            }
-            else if (_pDataSkyboxFacet->GetType() == Dt::CSkyComponent::Texture || _pDataSkyboxFacet->GetType() == Dt::CSkyComponent::TextureGeometry || _pDataSkyboxFacet->GetType() == Dt::CSkyComponent::TextureLUT)
-            {
-                if (_pDataSkyboxFacet->GetHasTexture()) Hash = _pDataSkyboxFacet->GetTexture()->GetHash();
+                TexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
             }
 
             // -----------------------------------------------------------------------------
             // Check hash and update data + render
             // -----------------------------------------------------------------------------
-            if (Hash != 0)
+            if (TexturePtr.IsValid())
             {
-                CTexturePtr TexturePtr = TextureManager::GetTextureByHash(Hash);
-
-                if (TexturePtr.IsValid())
-                {
-                    _pGraphicSkyboxFacet->m_InputTexturePtr = TexturePtr;
-                }
-                else
-                {
-                    _pGraphicSkyboxFacet->m_InputTexturePtr = 0;
-                }
+                _pGraphicSkyboxFacet->m_InputTexturePtr = TexturePtr;
+            }
+            else
+            {
+                _pGraphicSkyboxFacet->m_InputTexturePtr = 0;
             }
 
             // -----------------------------------------------------------------------------
@@ -977,7 +984,7 @@ namespace
         SOutputBufferPS PSBuffer;
 
         PSBuffer.m_HDRFactor = _Intensity;
-        PSBuffer.m_IsHDR     = _pOutput->m_InputTexturePtr->GetSemantic() == Dt::CTextureBase::HDR ? 1.0f : 0.0f;
+        PSBuffer.m_IsHDR     = _pOutput->m_InputTexturePtr->GetSemantic() == Gfx::CTexture::HDR ? 1.0f : 0.0f;
 
         BufferManager::UploadBufferData(PSBufferSetPtr->GetBuffer(0), &PSBuffer);
 
@@ -1080,7 +1087,7 @@ namespace
         SOutputBufferPS PSBuffer;
 
         PSBuffer.m_HDRFactor = _Intensity;
-        PSBuffer.m_IsHDR     = _pOutput->m_InputTexturePtr->GetSemantic() == Dt::CTextureBase::HDR ? 1.0f : 0.0f;
+        PSBuffer.m_IsHDR     = _pOutput->m_InputTexturePtr->GetSemantic() == Gfx::CTexture::HDR ? 1.0f : 0.0f;
 
         BufferManager::UploadBufferData(PSBufferSetPtr->GetBuffer(0), &PSBuffer);
 
@@ -1204,7 +1211,7 @@ namespace
         SOutputBufferPS PSBuffer;
 
         PSBuffer.m_HDRFactor = _Intensity;
-        PSBuffer.m_IsHDR     = _pOutput->m_InputTexturePtr->GetSemantic() == Dt::CTextureBase::HDR ? 1.0f : 0.0f;
+        PSBuffer.m_IsHDR     = _pOutput->m_InputTexturePtr->GetSemantic() == Gfx::CTexture::HDR ? 1.0f : 0.0f;
 
         BufferManager::UploadBufferData(PSBufferSetPtr->GetBuffer(1), &PSBuffer);
 
@@ -1363,7 +1370,7 @@ namespace
         SOutputBufferPS PSBuffer;
 
         PSBuffer.m_HDRFactor = _Intensity;
-        PSBuffer.m_IsHDR = _pOutput->m_InputTexturePtr->GetSemantic() == Dt::CTextureBase::HDR ? 1.0f : 0.0f;
+        PSBuffer.m_IsHDR = _pOutput->m_InputTexturePtr->GetSemantic() == Gfx::CTexture::HDR ? 1.0f : 0.0f;
 
         BufferManager::UploadBufferData(PSBufferSetPtr->GetBuffer(1), &PSBuffer);
 
@@ -1487,7 +1494,7 @@ namespace
         SOutputBufferPS PSBuffer;
 
         PSBuffer.m_HDRFactor = _Intensity;
-        PSBuffer.m_IsHDR     = _pOutput->m_InputTexturePtr->GetSemantic() == Dt::CTextureBase::HDR ? 1.0f : 0.0f;
+        PSBuffer.m_IsHDR     = _pOutput->m_InputTexturePtr->GetSemantic() == Gfx::CTexture::HDR ? 1.0f : 0.0f;
 
         BufferManager::UploadBufferData(PSBufferSetPtr->GetBuffer(0), &PSBuffer);
 

@@ -22,21 +22,6 @@
     <ClInclude Include="..\..\..\src\data\data_hierarchy_facet.h">
       <Filter>map\entity\facets\hierarchy</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_texture_2d.h">
-      <Filter>textures</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_texture_base.h">
-      <Filter>textures</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_texture_cube.h">
-      <Filter>textures</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_texture_manager.h">
-      <Filter>textures</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_data_behavior.h">
-      <Filter>textures</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\data\data_precompiled.h" />
     <ClInclude Include="..\..\..\src\data\data_component.h">
       <Filter>map\entity\components</Filter>
@@ -118,18 +103,6 @@
     <ClCompile Include="..\..\..\src\data\data_entity.cpp">
       <Filter>map\entity</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_texture_2d.cpp">
-      <Filter>textures</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_texture_base.cpp">
-      <Filter>textures</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_texture_cube.cpp">
-      <Filter>textures</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_texture_manager.cpp">
-      <Filter>textures</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\data\data_precompiled.cpp" />
     <ClCompile Include="..\..\..\src\data\data_ar_controller_component.cpp">
       <Filter>map\entity\components\plugins</Filter>
@@ -207,9 +180,6 @@
     </Filter>
     <Filter Include="map\entity\facets\hierarchy">
       <UniqueIdentifier>{b4ebd438-b7be-4be9-81c4-8f15b0d57b60}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="textures">
-      <UniqueIdentifier>{71afbfc9-2627-4eba-a9d3-f355b40c9a27}</UniqueIdentifier>
     </Filter>
     <Filter Include="map\entity\components">
       <UniqueIdentifier>{d8ea709d-af56-47ad-9294-e3a6000c4096}</UniqueIdentifier>

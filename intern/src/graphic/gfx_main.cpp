@@ -12,7 +12,6 @@
 #include "core/core_config.h"
 
 #include "data/data_map.h"
-#include "data/data_texture_manager.h"
 
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_main.h"
@@ -683,6 +682,13 @@ namespace
 
     void CGfxMain::TakeScreenshot(unsigned int _WindowID, const char* _pPathToFile)
     {
+        BASE_UNUSED(_WindowID);
+        BASE_UNUSED(_pPathToFile);
+
+        BASE_CONSOLE_WARNING("Taking screenshots is currently not supported!");
+
+        return;
+
         assert(_WindowID < m_NumberOfWindows);
 
         unsigned int Width;
@@ -704,25 +710,6 @@ namespace
         // -----------------------------------------------------------------------------
         // Create texture
         // -----------------------------------------------------------------------------
-        Dt::STextureDescriptor TextureDesc;
-
-        TextureDesc.m_pIdentifier      = 0;
-        TextureDesc.m_NumberOfPixelsU  = Width;
-        TextureDesc.m_NumberOfPixelsV  = Height;
-        TextureDesc.m_NumberOfPixelsW  = 1;
-        TextureDesc.m_NumberOfTextures = 1;
-        TextureDesc.m_Format           = Dt::CTextureBase::R8G8B8_UBYTE;
-        TextureDesc.m_Semantic         = Dt::CTextureBase::Diffuse;
-        TextureDesc.m_Binding          = Dt::CTextureBase::CPU;
-        TextureDesc.m_pFileName        = 0;
-        TextureDesc.m_pPixels          = pPixels;
-
-        Dt::CTexture2D* pScreenshot = Dt::TextureManager::CreateTexture2D(TextureDesc);
-
-        // -----------------------------------------------------------------------------
-        // Save texture to file
-        // -----------------------------------------------------------------------------
-        Dt::TextureManager::SaveTexture2DToFile(pScreenshot, _pPathToFile);
 
         // -----------------------------------------------------------------------------
         // Free data

@@ -20,9 +20,8 @@
 namespace Edit
 {
     CTextureValue::CTextureValue(QWidget* _pParent)
-        : QWidget         (_pParent)
-        , m_File          ("")
-        , m_Hash          (0)
+        : QWidget(_pParent)
+        , m_File ("")
     {
         // -----------------------------------------------------------------------------
         // Setup UI
@@ -32,13 +31,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Signal / slots
         // -----------------------------------------------------------------------------
-        connect(m_pHashEdit, SIGNAL(textEdited(QString)), SLOT(hashValueChanged()));
         connect(m_pFileEdit, SIGNAL(textEdited(QString)), SLOT(fileValueChanged()));
-
-        // -----------------------------------------------------------------------------
-        // Messages
-        // -----------------------------------------------------------------------------
-        Edit::MessageManager::Register(Edit::SApplicationMessageType::Texture_Info, EDIT_RECEIVE_MESSAGE(&CTextureValue::OnTextureInfo));
     }
 
     // -----------------------------------------------------------------------------
@@ -56,8 +49,6 @@ namespace Edit
         // Reset default style
         // -----------------------------------------------------------------------------
         m_pPreviewGV->setVisible(true);
-        m_pHashLabel->setVisible(true);
-        m_pHashEdit ->setVisible(true);
         m_pFileLabel->setVisible(true);
         m_pFileEdit ->setVisible(true);
 
@@ -67,12 +58,6 @@ namespace Edit
         if ((_Layout & ELayout::NoPreview) != 0)
         {
             m_pPreviewGV->setVisible(false);
-        }
-
-        if ((_Layout & ELayout::NoHash) != 0)
-        {
-            m_pHashLabel->setVisible(false);
-            m_pHashEdit ->setVisible(false);
         }
 
         if ((_Layout & ELayout::NoFile) != 0)
@@ -96,35 +81,6 @@ namespace Edit
     const QString& CTextureValue::GetTextureFile() const
     {
         return m_File;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CTextureValue::SetTextureHash(unsigned int _Hash)
-    {
-        m_Hash = _Hash;
-
-        m_pHashEdit->setText(QString::number(m_Hash));
-    }
-
-    // -----------------------------------------------------------------------------
-
-    unsigned int CTextureValue::GetTextureHash() const
-    {
-        return m_Hash;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CTextureValue::hashValueChanged()
-    {
-        m_Hash = m_pHashEdit->text().toInt();
-
-        m_File = "";
-
-        m_pFileEdit->setText(m_File);
-
-        emit hashChanged(m_Hash);
     }
 
     // -----------------------------------------------------------------------------
@@ -175,50 +131,12 @@ namespace Edit
     void CTextureValue::LoadTexture(const QString& _rPathToTexture)
     {
         m_File = _rPathToTexture;
-        m_Hash = 0;
 
-        // -----------------------------------------------------------------------------
-        // Check emptiness
-        // -----------------------------------------------------------------------------
-        if (_rPathToTexture == "")
-        {
-            m_pFileEdit->setText(m_File);
-
-            m_pHashEdit->setText(QString::number(m_Hash));
-
-            // -----------------------------------------------------------------------------
-            // Emit info
-            // -----------------------------------------------------------------------------
-            emit fileChanged(m_File);
-
-            emit hashChanged(m_Hash);
-
-            return;
-        }
-
-        // -----------------------------------------------------------------------------
-        // Load texture
-        // -----------------------------------------------------------------------------
-        Edit::CMessage NewMessage;
-
-        NewMessage.Put(std::string(_rPathToTexture.toLatin1().data()));
-
-        NewMessage.Reset();
-
-        m_Hash = Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Texture_Load, NewMessage);
-
-        // -----------------------------------------------------------------------------
-        // Set UI
-        // -----------------------------------------------------------------------------
         m_pFileEdit->setText(m_File);
-
-        m_pHashEdit->setText(QString::number(m_Hash));
 
         // -----------------------------------------------------------------------------
         // Emit info
         // -----------------------------------------------------------------------------
         emit fileChanged(m_File);
-
-        emit hashChanged(m_Hash);
     }
 } // namespace Edit

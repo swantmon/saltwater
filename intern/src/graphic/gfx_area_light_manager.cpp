@@ -301,44 +301,55 @@ namespace
 
             if (pAreaLightComponent->GetHasTexture())
             {
-                if (pGfxLightFacet->m_TexturePtr == 0 || pGfxLightFacet->m_TexturePtr != 0 && pGfxLightFacet->m_TexturePtr->GetHash() != pAreaLightComponent->GetTexture()->GetHash())
+                STextureDescriptor TextureDescriptor;
+
+                TextureDescriptor.m_NumberOfPixelsU  = STextureDescriptor::s_NumberOfPixelsFromSource;
+                TextureDescriptor.m_NumberOfPixelsV  = STextureDescriptor::s_NumberOfPixelsFromSource;
+                TextureDescriptor.m_NumberOfPixelsW  = STextureDescriptor::s_NumberOfPixelsFromSource;
+                TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_GenerateAllMipMaps;
+                TextureDescriptor.m_NumberOfTextures = STextureDescriptor::s_NumberOfTexturesFromSource;
+                TextureDescriptor.m_Binding          = CTexture::ShaderResource;
+                TextureDescriptor.m_Access           = CTexture::CPUWrite;
+                TextureDescriptor.m_Format           = CTexture::Unknown;
+                TextureDescriptor.m_Usage            = CTexture::GPURead;
+                TextureDescriptor.m_Semantic         = CTexture::Diffuse;
+                TextureDescriptor.m_pPixels          = 0;
+                TextureDescriptor.m_Format           = STextureDescriptor::s_FormatFromSource;
+                TextureDescriptor.m_pFileName        = pAreaLightComponent->GetTexture().c_str();
+
+                Gfx::CTexturePtr GfxTexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
+
+                if (GfxTexturePtr != 0 && GfxTexturePtr.IsValid())
                 {
-                    Gfx::CTexturePtr GfxTexturePtr = Gfx::TextureManager::GetTextureByHash(pAreaLightComponent->GetTexture()->GetHash());
+                    // -----------------------------------------------------------------------------
+                    // Remove old
+                    // -----------------------------------------------------------------------------
+                    pGfxLightFacet->m_TexturePtr         = 0;
+                    pGfxLightFacet->m_FilteredTexturePtr = 0;
 
-                    if (GfxTexturePtr != 0 && GfxTexturePtr.IsValid())
-                    {
-                        // -----------------------------------------------------------------------------
-                        // Remove old
-                        // -----------------------------------------------------------------------------
-                        pGfxLightFacet->m_TexturePtr         = 0;
-                        pGfxLightFacet->m_FilteredTexturePtr = 0;
+                    // -----------------------------------------------------------------------------
+                    // Create new
+                    // -----------------------------------------------------------------------------
+                    TextureDescriptor.m_NumberOfPixelsU  = GfxTexturePtr->GetNumberOfPixelsU();
+                    TextureDescriptor.m_NumberOfPixelsV  = GfxTexturePtr->GetNumberOfPixelsV();
+                    TextureDescriptor.m_NumberOfPixelsW  = 1;
+                    TextureDescriptor.m_NumberOfMipMaps  = 0;
+                    TextureDescriptor.m_NumberOfTextures = STextureDescriptor::s_GenerateAllMipMaps;
+                    TextureDescriptor.m_Binding          = CTexture::ShaderResource;
+                    TextureDescriptor.m_Access           = CTexture::CPUWrite;
+                    TextureDescriptor.m_Format           = CTexture::Unknown;
+                    TextureDescriptor.m_Usage            = CTexture::GPUReadWrite;
+                    TextureDescriptor.m_Semantic         = CTexture::Diffuse;
+                    TextureDescriptor.m_pFileName        = 0;
+                    TextureDescriptor.m_pPixels          = 0;
+                    TextureDescriptor.m_Format           = CTexture::R8G8B8A8_UBYTE;
 
-                        // -----------------------------------------------------------------------------
-                        // Create new
-                        // -----------------------------------------------------------------------------
-                        STextureDescriptor TextureDescriptor;
+                    Gfx::CTexturePtr FilteredTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
 
-                        TextureDescriptor.m_NumberOfPixelsU  = GfxTexturePtr->GetNumberOfPixelsU();
-                        TextureDescriptor.m_NumberOfPixelsV  = GfxTexturePtr->GetNumberOfPixelsV();
-                        TextureDescriptor.m_NumberOfPixelsW  = 1;
-                        TextureDescriptor.m_NumberOfMipMaps  = 0;
-                        TextureDescriptor.m_NumberOfTextures = STextureDescriptor::s_GenerateAllMipMaps;
-                        TextureDescriptor.m_Binding          = CTexture::ShaderResource;
-                        TextureDescriptor.m_Access           = CTexture::CPUWrite;
-                        TextureDescriptor.m_Format           = CTexture::Unknown;
-                        TextureDescriptor.m_Usage            = CTexture::GPUReadWrite;
-                        TextureDescriptor.m_Semantic         = CTexture::Diffuse;
-                        TextureDescriptor.m_pFileName        = 0;
-                        TextureDescriptor.m_pPixels          = 0;
-                        TextureDescriptor.m_Format           = CTexture::R8G8B8A8_UBYTE;
+                    FilterTexture(GfxTexturePtr, FilteredTexturePtr);
 
-                        Gfx::CTexturePtr FilteredTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
-
-                        FilterTexture(GfxTexturePtr, FilteredTexturePtr);
-
-                        pGfxLightFacet->m_TexturePtr         = GfxTexturePtr;
-                        pGfxLightFacet->m_FilteredTexturePtr = FilteredTexturePtr;
-                    }
+                    pGfxLightFacet->m_TexturePtr         = GfxTexturePtr;
+                    pGfxLightFacet->m_FilteredTexturePtr = FilteredTexturePtr;
                 }
             }
             else
