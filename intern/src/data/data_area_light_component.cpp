@@ -3,6 +3,8 @@
 
 #include "data/data_area_light_component.h"
 
+#include <string>
+
 namespace Dt
 {
     CAreaLightComponent::CAreaLightComponent()
@@ -16,7 +18,7 @@ namespace Dt
         , m_Height        (0.0f)
         , m_IsTwoSided    (false)
         , m_HasTemperature(false)
-        , m_pTexture      (0)
+        , m_Texture       ("")
     {
 
     }
@@ -51,23 +53,23 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CAreaLightComponent::SetTexture(Dt::CTexture2D* _pTexture2D)
+    void CAreaLightComponent::SetTexture(const std::string& _rTexture2D)
     {
-        m_pTexture = _pTexture2D;
+        m_Texture = _rTexture2D;
     }
 
     // -----------------------------------------------------------------------------
 
-    Dt::CTexture2D* CAreaLightComponent::GetTexture()
+    const std::string& CAreaLightComponent::GetTexture()
     {
-        return m_pTexture;
+        return m_Texture;
     }
 
     // -----------------------------------------------------------------------------
 
     bool CAreaLightComponent::GetHasTexture() const
     {
-        return m_pTexture != 0;
+        return m_Texture.length() > 0;
     }
 
     // -----------------------------------------------------------------------------

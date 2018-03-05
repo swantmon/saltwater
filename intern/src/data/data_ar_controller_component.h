@@ -5,13 +5,9 @@
 
 #include "data/data_component.h"
 
-#include <string>
-
 namespace Dt
 {
     class CEntity;
-    class CTexture2D;
-    class CTextureCube;
 } // namespace Dt
 
 
@@ -71,10 +67,6 @@ namespace Dt
         void SetCameraParameterFile(const std::string& _rCameraParameterFile);
         const std::string& GetCameraParameterFile() const;
 
-        void SetOutputBackground(Dt::CTexture2D* _pOutputBackground);
-        Dt::CTexture2D* GetOutputBackground();
-        const Dt::CTexture2D* GetOutputBackground() const;
-
         void SetNumberOfMarker(unsigned int _NumberOfMarker);
         unsigned int GetNumberOfMarker() const;
 
@@ -88,13 +80,12 @@ namespace Dt
 
     private:
 
-        Dt::CEntity*    m_pCameraEntity;
-        Dt::CTexture2D* m_pOutputBackground;
-        EType           m_DeviceType;
-        bool            m_FreezeOutput;
-        unsigned int    m_NumberOfMarker;
-        std::string     m_CameraParameterFile;
-        std::string     m_Configuration;
-        SMarker         m_Marker[s_MaxNumberOfMarker];
+        Dt::CEntity* m_pCameraEntity;
+        EType        m_DeviceType;
+        bool         m_FreezeOutput;
+        unsigned int m_NumberOfMarker;
+        std::string  m_CameraParameterFile;
+        std::string  m_Configuration;
+        SMarker      m_Marker[s_MaxNumberOfMarker];
     };
 } // namespace Dt

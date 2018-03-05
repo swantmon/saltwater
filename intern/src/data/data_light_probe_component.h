@@ -5,7 +5,6 @@
 #include "base/base_typedef.h"
 
 #include "data/data_component.h"
-#include "data/data_texture_cube.h"
 
 namespace Dt
 {
@@ -60,8 +59,8 @@ namespace Dt
         void SetClearFlag(EClearFlag _ClearFlag);
         EClearFlag GetClearFlag() const;
 
-        void SetCubemap(Dt::CTextureCube* _rCubemap);
-        Dt::CTextureCube* GetCubemap();
+        void SetCubemap(const std::string& _rCubemap);
+        const std::string& GetCubemap();
 
         void SetIntensity(float _Intensity);
         float GetIntensity() const;
@@ -85,15 +84,15 @@ namespace Dt
 
     private:
 
-        ERefreshMode      m_RefreshMode;        //< Refresh mode of the light probe
-        EType             m_Type;               //< Type of the probe (@see EType)
-        EQuality          m_Quality;            //< Quality of the probe (@see EQuality)
-        EClearFlag        m_ClearFlag;          //< Clear flag of the reflection probe (@see EClearFlag)
-        Dt::CTextureCube* m_pCubemap;           //< Pointer to cube map for custom probe
-        float             m_Intensity;          //< Intensity of the light probe
-        float             m_Near;               //< Near clipping plane
-        float             m_Far;                //< Far clipping plane
-        bool              m_ParallaxCorrection; //< Use a parallax correction of the reflection
-        glm::vec3         m_BoxSize;            //< Size of the box around the probe that affects the objects
+        ERefreshMode m_RefreshMode;        //< Refresh mode of the light probe
+        EType        m_Type;               //< Type of the probe (@see EType)
+        EQuality     m_Quality;            //< Quality of the probe (@see EQuality)
+        EClearFlag   m_ClearFlag;          //< Clear flag of the reflection probe (@see EClearFlag)
+        std::string  m_Cubemap;            //< Pointer to cube map for custom probe
+        float        m_Intensity;          //< Intensity of the light probe
+        float        m_Near;               //< Near clipping plane
+        float        m_Far;                //< Far clipping plane
+        bool         m_ParallaxCorrection; //< Use a parallax correction of the reflection
+        glm::vec3    m_BoxSize;            //< Size of the box around the probe that affects the objects
     };
 } // namespace Dt

@@ -9,7 +9,6 @@ namespace Dt
 {
     CARControllerPluginComponent::CARControllerPluginComponent()
         : m_pCameraEntity      (nullptr)
-        , m_pOutputBackground  (nullptr)
         , m_DeviceType         (Undefined)
         , m_FreezeOutput       (false)
         , m_NumberOfMarker     (0)
@@ -102,27 +101,6 @@ namespace Dt
     const std::string& CARControllerPluginComponent::GetConfiguration() const
     {
         return m_Configuration;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CARControllerPluginComponent::SetOutputBackground(Dt::CTexture2D* _pOutputBackground)
-    {
-        m_pOutputBackground = _pOutputBackground;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    Dt::CTexture2D* CARControllerPluginComponent::GetOutputBackground()
-    {
-        return m_pOutputBackground;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    const Dt::CTexture2D* CARControllerPluginComponent::GetOutputBackground() const
-    {
-        return m_pOutputBackground;
     }
 
     // -----------------------------------------------------------------------------

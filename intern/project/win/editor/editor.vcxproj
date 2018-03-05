@@ -40,7 +40,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\..\..\src\editor\edit_start_state.cpp" />
-    <ClCompile Include="..\..\..\src\editor\edit_texture_helper.cpp" />
     <ClCompile Include="..\..\..\src\editor\edit_unload_map_state.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -60,7 +59,6 @@
     <ClInclude Include="..\..\..\src\editor\edit_precompiled.h" />
     <ClInclude Include="..\..\..\src\editor\edit_start_state.h" />
     <ClInclude Include="..\..\..\src\editor\edit_state.h" />
-    <ClInclude Include="..\..\..\src\editor\edit_texture_helper.h" />
     <ClInclude Include="..\..\..\src\editor\edit_unload_map_state.h" />
   </ItemGroup>
   <ItemGroup>

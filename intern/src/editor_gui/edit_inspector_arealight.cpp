@@ -21,12 +21,12 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // User UI
         // -----------------------------------------------------------------------------
-        m_pTextureEdit->SetLayout((CTextureValue::NoPreview | CTextureValue::NoHash));
+        m_pTextureEdit->SetLayout((CTextureValue::NoPreview));
 
         // -----------------------------------------------------------------------------
         // Signal / slots
         // -----------------------------------------------------------------------------
-        connect(m_pTextureEdit, SIGNAL(hashChanged(unsigned int)), SLOT(valueChanged()));
+        connect(m_pTextureEdit, SIGNAL(fileChanged(QString)), SLOT(valueChanged()));
 
         // -----------------------------------------------------------------------------
         // Color picker
@@ -106,7 +106,7 @@ namespace Edit
         {
             NewMessage.Put(true);
 
-            NewMessage.Put(m_pTextureEdit->GetTextureHash());
+            NewMessage.Put(std::string(m_pTextureEdit->GetTextureFile().toLatin1()));
         }
         else
         {
@@ -227,13 +227,9 @@ namespace Edit
 
         m_pTextureEdit->SetTextureFile("");
 
-        m_pTextureEdit->SetTextureHash(0);
-
         if (HasTexture)
         {
             m_pTextureEdit->SetTextureFile(QString(TextureName.c_str()));
-
-            m_pTextureEdit->SetTextureHash(TextureHash);
         }
 
         m_pColorModeCB    ->blockSignals(false);

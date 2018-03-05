@@ -3,16 +3,16 @@
 
 #include "data/data_sky_component.h"
 
+#include <string>
+
 namespace Dt
 {
     CSkyComponent::CSkyComponent()
-        : m_RefreshMode     (Static)
-        , m_Type            (Procedural)
-        , m_HasHDR          (true)
-        , m_pCubemap        (0)
-        , m_pPanoramaTexture(0)
-        , m_pTexture        (0)
-        , m_Intensity       (0.0f)
+        : m_RefreshMode(Static)
+        , m_Type       (Procedural)
+        , m_HasHDR     (true)
+        , m_Texture    ("")
+        , m_Intensity  (0.0f)
     {
 
     }
@@ -54,65 +54,23 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CSkyComponent::SetCubemap(Dt::CTextureCube* _rCubemap)
+    void CSkyComponent::SetTexture(const std::string& _pTexture2D)
     {
-        m_pCubemap = _rCubemap;
+        m_Texture = _pTexture2D;
     }
 
     // -----------------------------------------------------------------------------
 
-    Dt::CTextureCube* CSkyComponent::GetCubemap()
+    const std::string& CSkyComponent::GetTexture()
     {
-        return m_pCubemap;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CSkyComponent::SetPanorama(Dt::CTexture2D* _pTexture2D)
-    {
-        m_pPanoramaTexture = _pTexture2D;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    Dt::CTexture2D* CSkyComponent::GetPanorama()
-    {
-        return m_pPanoramaTexture;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CSkyComponent::SetTexture(Dt::CTexture2D* _pTexture2D)
-    {
-        m_pTexture = _pTexture2D;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    Dt::CTexture2D* CSkyComponent::GetTexture()
-    {
-        return m_pTexture;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    bool CSkyComponent::GetHasCubemap() const
-    {
-        return m_pCubemap != 0;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    bool CSkyComponent::GetHasPanorama() const
-    {
-        return m_pPanoramaTexture != 0;
+        return m_Texture;
     }
 
     // -----------------------------------------------------------------------------
 
     bool CSkyComponent::GetHasTexture() const
     {
-        return m_pTexture != 0;
+        return m_Texture.length() > 0;
     }
 
     // -----------------------------------------------------------------------------

@@ -12,7 +12,6 @@
 #include "data/data_component.h"
 #include "data/data_component_manager.h"
 #include "data/data_camera_component.h"
-#include "data/data_texture_manager.h"
 
 #include "graphic/gfx_main.h"
 #include "graphic/gfx_view_manager.h"
@@ -565,21 +564,6 @@ namespace
             Base::U64 FrameTime = Core::Time::GetNumberOfFrame();
 
             pGraphicCamera->SetTimeStamp(FrameTime);
-
-            if (pCameraComponent->GetClearFlag() == Dt::CCameraComponent::Texture)
-            {
-                if (pCameraComponent->GetTexture() != nullptr)
-                {
-                    unsigned int Hash = pCameraComponent->GetTexture()->GetHash();
-
-                    CTexturePtr BackgroundTexturePtr = TextureManager::GetTextureByHash(Hash);
-
-                    if (BackgroundTexturePtr.IsValid())
-                    {
-                        pGraphicCamera->SetBackgroundTexture2D(BackgroundTexturePtr);
-                    }
-                }
-            }
         }
     }
 } // namespace

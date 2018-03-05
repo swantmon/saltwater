@@ -26,7 +26,6 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Signal / slots
         // -----------------------------------------------------------------------------
-        connect(m_pTextureValue, SIGNAL(hashChanged(unsigned int)), SLOT(valueChanged()));
         connect(m_pTextureValue, SIGNAL(fileChanged(QString)), SLOT(valueChanged()));
 
         // -----------------------------------------------------------------------------
@@ -53,7 +52,7 @@ namespace Edit
         
         int Type = m_pTypeCB->currentIndex();
 
-        unsigned int TextureHash = m_pTextureValue->GetTextureHash();
+        std::string Texture = std::string(m_pTextureValue->GetTextureFile().toLatin1());
 
         float Intensity = m_pIntensityEdit->text().toFloat();
 
@@ -68,7 +67,7 @@ namespace Edit
 
         NewMessage.Put(Type);
 
-        NewMessage.Put(TextureHash);
+        NewMessage.Put(Texture);
 
         NewMessage.Put(Intensity);
 
@@ -121,8 +120,6 @@ namespace Edit
             }
         }
 
-        unsigned int TextureHash = _rMessage.Get<int>();
-
         float Intensity = _rMessage.Get<float>();
 
         // -----------------------------------------------------------------------------
@@ -139,8 +136,6 @@ namespace Edit
         {
             m_pTextureValue->SetTextureFile(QString(TextureName.c_str()));
         }
-
-        m_pTextureValue->SetTextureHash(TextureHash);
 
         m_pIntensityEdit->setText(QString::number(Intensity));
 

@@ -18,8 +18,7 @@ namespace Edit
         {
             All       = 0,
             NoPreview = 1,
-            NoHash    = 2,
-            NoFile    = 4,
+            NoFile    = 2
         };
 
     public:
@@ -34,23 +33,18 @@ namespace Edit
         void SetTextureFile(const QString& _rTextureFile);
         const QString& GetTextureFile() const;
 
-        void SetTextureHash(unsigned int _Hash);
-        unsigned int GetTextureHash() const;
 
     Q_SIGNALS:
 
-        void hashChanged(unsigned int _Hash);
         void fileChanged(const QString& _rFile);
 
     public Q_SLOTS:
 
-        void hashValueChanged();
         void fileValueChanged();
 
     private:
 
-        QString      m_File;
-        unsigned int m_Hash;
+        QString m_File;
 
     private:
 

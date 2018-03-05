@@ -100,7 +100,7 @@ namespace
             Gfx::CSky* m_pSkyObject;
         };
 
-        struct SSkytextureBufferPS
+        struct SSkyTextureBufferPS
         {
             float m_HDRFactor;
             float m_IsHDR;
@@ -132,7 +132,7 @@ namespace
     private:
 
         SRenderContext m_BackgroundFromSkybox;
-        SRenderContext m_BackgroundFromTexture;
+        SRenderContext m_BackgroundFromWebcam;
 
         CTexturePtr m_WebcamTexturePtr;
 
@@ -145,8 +145,6 @@ namespace
 
         void RenderBackgroundFromSkybox();
 
-        void RenderBackgroundFromTexture();
-
         void RenderBackgroundFromWebcam();
 
         void BuildRenderJobs();
@@ -157,7 +155,7 @@ namespace
 {
     CGfxBackgroundRenderer::CGfxBackgroundRenderer()
         : m_BackgroundFromSkybox       ()
-        , m_BackgroundFromTexture      ()
+        , m_BackgroundFromWebcam       ()
         , m_WebcamTexturePtr           ()
         , m_WebcamTargetSetPtr         ()
         , m_CameraRenderJobs           ()
@@ -189,13 +187,13 @@ namespace
         m_BackgroundFromSkybox.m_InputLayoutPtr   = 0;
         m_BackgroundFromSkybox.m_MeshPtr          = 0;
 
-        m_BackgroundFromTexture.m_RenderContextPtr = 0;
-        m_BackgroundFromTexture.m_VSPtr            = 0;
-        m_BackgroundFromTexture.m_PSPtr            = 0;
-        m_BackgroundFromTexture.m_VSBufferSetPtr   = 0;
-        m_BackgroundFromTexture.m_PSBufferSetPtr   = 0;
-        m_BackgroundFromTexture.m_InputLayoutPtr   = 0;
-        m_BackgroundFromTexture.m_MeshPtr          = 0;
+        m_BackgroundFromWebcam.m_RenderContextPtr = 0;
+        m_BackgroundFromWebcam.m_VSPtr            = 0;
+        m_BackgroundFromWebcam.m_PSPtr            = 0;
+        m_BackgroundFromWebcam.m_VSBufferSetPtr   = 0;
+        m_BackgroundFromWebcam.m_PSBufferSetPtr   = 0;
+        m_BackgroundFromWebcam.m_InputLayoutPtr   = 0;
+        m_BackgroundFromWebcam.m_MeshPtr          = 0;
 
         m_WebcamTexturePtr = 0;
 
@@ -210,9 +208,9 @@ namespace
     
     void CGfxBackgroundRenderer::OnSetupShader()
     {
-        CShaderPtr SkytextureVSPtr = ShaderManager::CompileVS("vs_fullscreen.glsl", "main");;
+        CShaderPtr SkyTextureVSPtr = ShaderManager::CompileVS("vs_fullscreen.glsl", "main");;
 
-        CShaderPtr SkytexturePSPtr = ShaderManager::CompilePS("fs_atmosphere_texture.glsl", "main");
+        CShaderPtr SkyTexturePSPtr = ShaderManager::CompilePS("fs_atmosphere_texture.glsl", "main");
 
         CShaderPtr SkyboxVSPtr  = ShaderManager::CompileVS("vs_cubemap.glsl", "main");
         
@@ -225,7 +223,7 @@ namespace
             { "POSITION", 0, CInputLayout::Float2Format, 0, 0, 8, CInputLayout::PerVertex, 0, },
         };
 
-        CInputLayoutPtr P2SkytextureLayoutPtr = ShaderManager::CreateInputLayout(InputLayout, 1, SkytextureVSPtr);
+        CInputLayoutPtr P2SkytextureLayoutPtr = ShaderManager::CreateInputLayout(InputLayout, 1, SkyTextureVSPtr);
         
         // -----------------------------------------------------------------------------
 
@@ -233,9 +231,9 @@ namespace
         m_BackgroundFromSkybox.m_PSPtr          = SkyboxPSPtr;
         m_BackgroundFromSkybox.m_InputLayoutPtr = nullptr;
 
-        m_BackgroundFromTexture.m_VSPtr          = SkytextureVSPtr;
-        m_BackgroundFromTexture.m_PSPtr          = SkytexturePSPtr;
-        m_BackgroundFromTexture.m_InputLayoutPtr = P2SkytextureLayoutPtr;
+        m_BackgroundFromWebcam.m_VSPtr          = SkyTextureVSPtr;
+        m_BackgroundFromWebcam.m_PSPtr          = SkyTexturePSPtr;
+        m_BackgroundFromWebcam.m_InputLayoutPtr = P2SkytextureLayoutPtr;
     }
     
     // -----------------------------------------------------------------------------
@@ -299,7 +297,7 @@ namespace
         
         m_BackgroundFromSkybox.m_RenderContextPtr = SkyRenderContextPtr;
 
-        m_BackgroundFromTexture.m_RenderContextPtr = SkyRenderContextPtr;
+        m_BackgroundFromWebcam.m_RenderContextPtr = SkyRenderContextPtr;
     }
     
     // -----------------------------------------------------------------------------
@@ -342,16 +340,16 @@ namespace
         ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
         ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
         ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
-        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SSkytextureBufferPS);
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SSkyTextureBufferPS);
         ConstanteBufferDesc.m_pBytes        = 0;
         ConstanteBufferDesc.m_pClassKey     = 0;
         
-        CBufferPtr SkytexturePSBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
+        CBufferPtr SkyTexturePSBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
        
         // -----------------------------------------------------------------------------
         
         CBufferSetPtr SkytextureVSBufferSetPtr = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBuffer());
-        CBufferSetPtr SkytexturePSBufferSetPtr = BufferManager::CreateBufferSet(SkytexturePSBuffer);
+        CBufferSetPtr SkytexturePSBufferSetPtr = BufferManager::CreateBufferSet(SkyTexturePSBuffer);
 
         CBufferSetPtr SkyboxVSBufferSetPtr = BufferManager::CreateBufferSet(SkyboxVSBuffer);
         CBufferSetPtr SkyboxPSBufferSetPtr = BufferManager::CreateBufferSet(SkyboxPSBuffer);
@@ -359,8 +357,8 @@ namespace
         m_BackgroundFromSkybox.m_VSBufferSetPtr = SkyboxVSBufferSetPtr;
         m_BackgroundFromSkybox.m_PSBufferSetPtr = SkyboxPSBufferSetPtr;
 
-        m_BackgroundFromTexture.m_VSBufferSetPtr = SkytextureVSBufferSetPtr;
-        m_BackgroundFromTexture.m_PSBufferSetPtr = SkytexturePSBufferSetPtr;
+        m_BackgroundFromWebcam.m_VSBufferSetPtr = SkytextureVSBufferSetPtr;
+        m_BackgroundFromWebcam.m_PSBufferSetPtr = SkytexturePSBufferSetPtr;
     }
     
     // -----------------------------------------------------------------------------
@@ -380,7 +378,7 @@ namespace
 
         m_BackgroundFromSkybox.m_MeshPtr = SkyboxBoxPtr;
 
-        m_BackgroundFromTexture.m_MeshPtr = nullptr;
+        m_BackgroundFromWebcam.m_MeshPtr = nullptr;
     }
     
     // -----------------------------------------------------------------------------
@@ -432,10 +430,6 @@ namespace
             if (rRenderJob.m_pDtComponent->GetClearFlag() == Dt::CCameraComponent::Skybox)
             {
                 RenderBackgroundFromSkybox();
-            }
-            else if (rRenderJob.m_pDtComponent->GetClearFlag() == Dt::CCameraComponent::Texture)
-            {
-                RenderBackgroundFromTexture();
             }
             else if (rRenderJob.m_pDtComponent->GetClearFlag() == Dt::CCameraComponent::Webcam)
             {
@@ -556,109 +550,6 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxBackgroundRenderer::RenderBackgroundFromTexture()
-    {
-        if (m_CameraRenderJobs.size() == 0) return;
-
-        SCameraRenderJob& rRenderJob = m_CameraRenderJobs[0];
-
-        if (rRenderJob.m_pCameraObject->GetBackgroundTexture2D() == nullptr)
-        {
-            return;
-        }
-
-        // -----------------------------------------------------------------------------
-        // Get HDR intensity from sky
-        // -----------------------------------------------------------------------------
-        float HDRIntensity = 1.0f;
-
-        if (m_SkyRenderJobs.size() > 0)
-        {
-            SSkyRenderJob& rCurrentJob = m_SkyRenderJobs[0];
-
-            Dt::CSkyComponent* pSkyComponent = rCurrentJob.m_pDtComponent;
-
-            assert(pSkyComponent);
-
-            HDRIntensity = pSkyComponent->GetIntensity();
-        }
-
-        // -----------------------------------------------------------------------------
-        // Prepare value from sky / environment
-        // -----------------------------------------------------------------------------
-        CRenderContextPtr RenderContextPtr = m_BackgroundFromTexture.m_RenderContextPtr;
-        CShaderPtr        VSPtr            = m_BackgroundFromTexture.m_VSPtr;
-        CShaderPtr        PSPtr            = m_BackgroundFromTexture.m_PSPtr;
-        CBufferSetPtr     VSBufferSetPtr   = m_BackgroundFromTexture.m_VSBufferSetPtr;
-        CBufferSetPtr     PSBufferSetPtr   = m_BackgroundFromTexture.m_PSBufferSetPtr;
-        CInputLayoutPtr   InputLayoutPtr   = m_BackgroundFromTexture.m_InputLayoutPtr;
-
-        // -----------------------------------------------------------------------------
-        // Render sky texture
-        // -----------------------------------------------------------------------------
-        Performance::BeginEvent("Background from Texture");
-        
-        // -----------------------------------------------------------------------------
-        // Data
-        // -----------------------------------------------------------------------------
-        SSkytextureBufferPS PSBuffer;
-
-        PSBuffer.m_HDRFactor     = HDRIntensity;
-        PSBuffer.m_IsHDR         = rRenderJob.m_pCameraObject->GetBackgroundTexture2D()->GetSemantic() == Dt::CTextureBase::HDR ? 1.0f : 0.0f;
-        PSBuffer.m_ExposureIndex = static_cast<float>(HistogramRenderer::GetLastExposureHistoryIndex());
-
-        BufferManager::UploadBufferData(PSBufferSetPtr->GetBuffer(0), &PSBuffer);
-
-        // -----------------------------------------------------------------------------
-        // Rendering
-        // -----------------------------------------------------------------------------
-        ContextManager::SetRenderContext(RenderContextPtr);
-
-        ContextManager::SetTopology(STopology::TriangleList);
-
-        ContextManager::SetShaderVS(VSPtr);
-
-        ContextManager::SetShaderPS(PSPtr);
-
-        ContextManager::SetConstantBuffer(0, VSBufferSetPtr->GetBuffer(0));
-
-        ContextManager::SetConstantBuffer(8, PSBufferSetPtr->GetBuffer(0));
-
-        ContextManager::SetResourceBuffer(0, HistogramRenderer::GetExposureHistoryBuffer());
-
-        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
-        ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
-
-        ContextManager::SetTexture(0, rRenderJob.m_pCameraObject->GetBackgroundTexture2D());
-        ContextManager::SetTexture(1, TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget());
-
-        ContextManager::Draw(3, 0);
-
-        ContextManager::ResetTexture(0);
-        ContextManager::ResetTexture(1);
-
-        ContextManager::ResetSampler(0);
-        ContextManager::ResetSampler(1);
-
-        ContextManager::ResetConstantBuffer(0);
-
-        ContextManager::ResetConstantBuffer(8);
-
-        ContextManager::ResetResourceBuffer(0);
-
-        ContextManager::ResetTopology();
-
-        ContextManager::ResetShaderVS();
-
-        ContextManager::ResetShaderPS();
-
-        ContextManager::ResetRenderContext();
-
-        Performance::EndEvent();
-    }
-
-    // -----------------------------------------------------------------------------
-
     void CGfxBackgroundRenderer::RenderBackgroundFromWebcam()
     {
         // -----------------------------------------------------------------------------
@@ -680,13 +571,11 @@ namespace
         // -----------------------------------------------------------------------------
         // Prepare value from sky / environment
         // -----------------------------------------------------------------------------
-        CRenderContextPtr RenderContextPtr = m_BackgroundFromTexture.m_RenderContextPtr;
-        CShaderPtr        VSPtr            = m_BackgroundFromTexture.m_VSPtr;
-        CShaderPtr        PSPtr            = m_BackgroundFromTexture.m_PSPtr;
-        CBufferSetPtr     VSBufferSetPtr   = m_BackgroundFromTexture.m_VSBufferSetPtr;
-        CBufferSetPtr     PSBufferSetPtr   = m_BackgroundFromTexture.m_PSBufferSetPtr;
-        CInputLayoutPtr   InputLayoutPtr   = m_BackgroundFromTexture.m_InputLayoutPtr;
-        CMeshPtr          MeshPtr          = m_BackgroundFromTexture.m_MeshPtr;
+        CRenderContextPtr RenderContextPtr = m_BackgroundFromWebcam.m_RenderContextPtr;
+        CShaderPtr        VSPtr            = m_BackgroundFromWebcam.m_VSPtr;
+        CShaderPtr        PSPtr            = m_BackgroundFromWebcam.m_PSPtr;
+        CBufferSetPtr     VSBufferSetPtr   = m_BackgroundFromWebcam.m_VSBufferSetPtr;
+        CBufferSetPtr     PSBufferSetPtr   = m_BackgroundFromWebcam.m_PSBufferSetPtr;
 
         // -----------------------------------------------------------------------------
         // Render sky texture
@@ -711,7 +600,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Data
         // -----------------------------------------------------------------------------
-        SSkytextureBufferPS PSBuffer;
+        SSkyTextureBufferPS PSBuffer;
 
         PSBuffer.m_HDRFactor     = HDRIntensity;
         PSBuffer.m_IsHDR         = 0.0f;
@@ -723,12 +612,6 @@ namespace
         // Rendering
         // -----------------------------------------------------------------------------
         ContextManager::SetRenderContext(RenderContextPtr);
-
-        ContextManager::SetVertexBuffer(MeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
-
-        ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
-
-        ContextManager::SetInputLayout(InputLayoutPtr);
 
         ContextManager::SetTopology(STopology::TriangleList);
 
@@ -748,7 +631,7 @@ namespace
         ContextManager::SetTexture(0, m_WebcamTexturePtr);
         ContextManager::SetTexture(1, TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget());
 
-        ContextManager::DrawIndexed(MeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
+        ContextManager::Draw(3, 0);
 
         ContextManager::ResetTexture(0);
         ContextManager::ResetTexture(1);
@@ -763,12 +646,6 @@ namespace
         ContextManager::ResetResourceBuffer(0);
 
         ContextManager::ResetTopology();
-
-        ContextManager::ResetInputLayout();
-
-        ContextManager::ResetIndexBuffer();
-
-        ContextManager::ResetVertexBuffer();
 
         ContextManager::ResetShaderVS();
 
