@@ -294,25 +294,17 @@ namespace
         {
             NewMessage.Put(true);
 
-            NewMessage.Put(pTransformationFacet->GetPosition()[0]);
-            NewMessage.Put(pTransformationFacet->GetPosition()[1]);
-            NewMessage.Put(pTransformationFacet->GetPosition()[2]);
+            NewMessage.Put(pTransformationFacet->GetPosition());
 
-            NewMessage.Put(glm::degrees(pTransformationFacet->GetRotation()[0]));
-            NewMessage.Put(glm::degrees(pTransformationFacet->GetRotation()[1]));
-            NewMessage.Put(glm::degrees(pTransformationFacet->GetRotation()[2]));
+            NewMessage.Put(glm::degrees(pTransformationFacet->GetRotation()));
 
-            NewMessage.Put(pTransformationFacet->GetScale()[0]);
-            NewMessage.Put(pTransformationFacet->GetScale()[1]);
-            NewMessage.Put(pTransformationFacet->GetScale()[2]);
+            NewMessage.Put(pTransformationFacet->GetScale());
         }
         else
         {
             NewMessage.Put(false);
 
-            NewMessage.Put(rCurrentEntity.GetWorldPosition()[0]);
-            NewMessage.Put(rCurrentEntity.GetWorldPosition()[1]);
-            NewMessage.Put(rCurrentEntity.GetWorldPosition()[2]);
+            NewMessage.Put(rCurrentEntity.GetWorldPosition());
         }
 
         NewMessage.Reset();
@@ -371,50 +363,26 @@ namespace
 
     void CEntityHelper::OnInfoTransformation(Edit::CMessage& _rMessage)
     {
-        float TranslationX;
-        float TranslationY;
-        float TranslationZ;
-        float RotationX;
-        float RotationY;
-        float RotationZ;
-        float ScaleX;
-        float ScaleY;
-        float ScaleZ;
-
         Base::ID EntityID = _rMessage.Get<Base::ID>();
 
         Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
         Dt::CTransformationFacet* pTransformationFacet = rCurrentEntity.GetTransformationFacet();
 
-        TranslationX = _rMessage.Get<float>();
-        TranslationY = _rMessage.Get<float>();
-        TranslationZ = _rMessage.Get<float>();
+        glm::vec3 Translation = _rMessage.Get<glm::vec3>();
 
         if (pTransformationFacet)
         {
-            RotationX = _rMessage.Get<float>();
-            RotationY = _rMessage.Get<float>();
-            RotationZ = _rMessage.Get<float>();
+            glm::vec3 Rotation = _rMessage.Get<glm::vec3>();
+            glm::vec3 Scale    = _rMessage.Get<glm::vec3>();
 
-            ScaleX = _rMessage.Get<float>();
-            ScaleY = _rMessage.Get<float>();
-            ScaleZ = _rMessage.Get<float>();
-
-
-            glm::vec3 Position(TranslationX, TranslationY, TranslationZ);
-            glm::vec3 Rotation(glm::radians(RotationX), glm::radians(RotationY), glm::radians(RotationZ));
-            glm::vec3 Scale(ScaleX, ScaleY, ScaleZ);
-
-            pTransformationFacet->SetPosition(Position);
+            pTransformationFacet->SetPosition(Translation);
             pTransformationFacet->SetScale(Scale);
             pTransformationFacet->SetRotation(Rotation);
         }
         else
         {
-            glm::vec3 Position(TranslationX, TranslationY, TranslationZ);
-
-            rCurrentEntity.SetWorldPosition(Position);
+            rCurrentEntity.SetWorldPosition(Translation);
         }
 
         Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyMove);

@@ -100,7 +100,6 @@ namespace
         typedef Base::CPool<CInternHierarchyFacet, 2048>      CHierarchyFacetPool;
         typedef Base::CPool<CInternTransformationFacet, 2048> CTransformationFacetPool;
         typedef Base::CPool<CInternComponentsFacet, 2048>     CComponentsFacetPool;
-        typedef std::vector<CEntity*>                         CEntityVector;
         typedef std::vector<CEntityDelegate>                  CEntityDelegates;
 
         typedef std::unordered_map<Base::ID, CInternEntity*> CEntityByIDs;
@@ -112,7 +111,6 @@ namespace
         CHierarchyFacetPool      m_HierarchyFacets;
         CTransformationFacetPool m_TransformationFacets;
         CComponentsFacetPool     m_ComponentsFacets;
-        CEntityVector            m_DirtyEntities;
         CEntityDelegates         m_EntityDelegates;
         CEntityByIDs             m_EntityByID;
         Base::ID                 m_EntityID;
@@ -132,12 +130,10 @@ namespace
         : m_Entities            ()
         , m_HierarchyFacets     ()
         , m_TransformationFacets()
-        , m_DirtyEntities       ()
         , m_EntityDelegates     ()
         , m_EntityByID          ()
         , m_EntityID            (0)
     {
-        m_DirtyEntities.reserve(65536);
     }
     
     // -----------------------------------------------------------------------------
@@ -167,8 +163,6 @@ namespace
         m_HierarchyFacets     .Clear();
         m_TransformationFacets.Clear();
         m_ComponentsFacets    .Clear();
-
-        m_DirtyEntities.clear();
 
         m_EntityByID.clear();
     }
@@ -336,8 +330,6 @@ namespace
         // -----------------------------------------------------------------------------
         _rEntity.SetDirtyFlags(_DirtyFlags);
 
-        m_DirtyEntities.push_back(&_rEntity);
-
         // -----------------------------------------------------------------------------
         // Add entity to map
         // -----------------------------------------------------------------------------
@@ -347,18 +339,7 @@ namespace
         }
 
         // -----------------------------------------------------------------------------
-        // Send new dirty entity to all handler
-        // -----------------------------------------------------------------------------
-        CEntityDelegates::iterator CurrentDirtyEntityDelegate = m_EntityDelegates.begin();
-        CEntityDelegates::iterator EndOfDirtyEntityDelegates = m_EntityDelegates.end();
-
-        for (; CurrentDirtyEntityDelegate != EndOfDirtyEntityDelegates; ++CurrentDirtyEntityDelegate)
-        {
-            (*CurrentDirtyEntityDelegate)(&_rEntity);
-        }
-
-        // -----------------------------------------------------------------------------
-        // Now: set every child to dirty
+        // Set every child to dirty
         // -----------------------------------------------------------------------------
         CEntity*         pChildEntity;
         CHierarchyFacet* pHierarchyFacet;
@@ -384,21 +365,27 @@ namespace
                 pChildEntity = pChildHierarchyFacet->GetSibling();
             }
         }
+
+        // -----------------------------------------------------------------------------
+        // Internal Update
+        // -----------------------------------------------------------------------------
+        UpdateEntity(_rEntity);
+
+        // -----------------------------------------------------------------------------
+        // Send new dirty entity to all handler
+        // -----------------------------------------------------------------------------
+        for (auto EntityDelegate : m_EntityDelegates)
+        {
+            (EntityDelegate)(&_rEntity);
+        }
+
+        _rEntity.SetDirtyFlags(0);
     }
 
     // -----------------------------------------------------------------------------
 
     void CDtLvlEntityManager::Update()
     {
-        CEntityVector::iterator CurrentDirtyEntity = m_DirtyEntities.begin();
-        CEntityVector::iterator EndOfDirtyEntities = m_DirtyEntities.end();
-
-        for (; CurrentDirtyEntity != EndOfDirtyEntities; ++ CurrentDirtyEntity)
-        {
-            UpdateEntity(**CurrentDirtyEntity);
-        }
-
-        m_DirtyEntities.clear();
     }
 
     // -----------------------------------------------------------------------------
@@ -456,8 +443,6 @@ namespace
         {
             Map::MoveEntity(_rEntity);
         }
-
-        _rEntity.SetDirtyFlags(0);
     }
 
     // -----------------------------------------------------------------------------
