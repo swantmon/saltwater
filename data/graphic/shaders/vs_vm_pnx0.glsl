@@ -12,13 +12,13 @@ layout(std140, binding = 1) uniform UB1
     mat4 m_ModelMatrix;
 };
 
-layout(location = 0) in vec3 VertexPosition;
-layout(location = 1) in vec3 VertexNormal;
-layout(location = 4) in vec2 VertexTexCoord;
+layout(location = 0) in vec3 in_Vertex;
+layout(location = 1) in vec3 in_Normal;
+layout(location = 4) in vec2 in_UV;
 
-layout(location = 0) out vec3 PSPosition;
-layout(location = 1) out vec3 PSNormal;
-layout(location = 2) out vec2 PSTexCoord;
+layout(location = 0) out vec3 out_WSPosition;
+layout(location = 1) out vec3 out_WSNormal;
+layout(location = 2) out vec2 out_UV;
 
 out gl_PerVertex
 {
@@ -27,12 +27,12 @@ out gl_PerVertex
 
 void main(void)
 {
-    vec4 WSPosition = m_ModelMatrix * vec4(VertexPosition, 1.0f);
-    vec4 WSNormal   = m_ModelMatrix * vec4(VertexNormal  , 0.0f);
+    vec4 WSPosition = m_ModelMatrix * vec4(in_Vertex, 1.0f);
+    vec4 WSNormal   = m_ModelMatrix * vec4(in_Normal, 0.0f);
     
-    PSPosition = WSPosition.xyz;
-    PSNormal   = WSNormal.xyz;
-    PSTexCoord = VertexTexCoord;
+    out_WSPosition = WSPosition.xyz;
+    out_WSNormal   = WSNormal.xyz;
+    out_UV         = in_UV;
     
     gl_Position = m_ViewProjection * WSPosition;
 }

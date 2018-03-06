@@ -19,19 +19,19 @@ layout(std140, binding = 2) uniform UB2
 // -----------------------------------------------------------------------------
 // Textures
 // -----------------------------------------------------------------------------
-layout(binding = 0) uniform sampler2D PSTextureDiffuse;
-layout(binding = 1) uniform sampler2D PSTextureNormal;
-layout(binding = 2) uniform sampler2D PSTextureRoughness;
-layout(binding = 3) uniform sampler2D PSTextureMetallic;
-layout(binding = 4) uniform sampler2D PSTextureAO;
+layout(binding = 0) uniform sampler2D in_TextureDiffuse;
+layout(binding = 1) uniform sampler2D in_TextureNormal;
+layout(binding = 2) uniform sampler2D in_TextureRoughness;
+layout(binding = 3) uniform sampler2D in_TextureMetallic;
+layout(binding = 4) uniform sampler2D in_TextureAO;
 
 // -----------------------------------------------------------------------------
 // Input to fragment from VS
 // -----------------------------------------------------------------------------
-layout(location = 0) in vec3 in_PSPosition;
-layout(location = 1) in vec3 in_PSNormal;
-layout(location = 2) in vec2 in_PSTexCoord;
-layout(location = 3) in mat3 in_PSWSNormalMatrix;
+layout(location = 0) in vec3 in_WSPosition;
+layout(location = 1) in vec3 in_WSNormal;
+layout(location = 2) in vec2 in_UV;
+layout(location = 3) in mat3 in_WSNormalMatrix;
 
 // -----------------------------------------------------------------------------
 // Output to fragment
@@ -50,31 +50,31 @@ void PSShaderMaterialDisney(void)
 {
     SGBuffer GBuffer;
 
-    vec2  UV        = in_PSTexCoord * ps_TilingOffset.xy + ps_TilingOffset.zw;
+    vec2  UV        = in_UV * ps_TilingOffset.xy + ps_TilingOffset.zw;
     vec3  Color     = ps_Color.xyz;
-    vec3  WSNormal  = in_PSNormal;
+    vec3  WSNormal  = in_WSNormal;
     float Roughness = ps_Roughness;
     float MetalMask = ps_MetalMask;
     float AO        = 1.0f;
 
 #ifdef USE_TEX_DIFFUSE
-    Color *= texture(PSTextureDiffuse, UV).rgb;
+    Color *= texture(in_TextureDiffuse, UV).rgb;
 #endif // USE_TEX_DIFFUSE
 
 #ifdef USE_TEX_NORMAL
-    WSNormal = in_PSWSNormalMatrix * (texture(PSTextureNormal, UV).rgb * 2.0f - 1.0f);
+    WSNormal = in_WSNormalMatrix * (texture(in_TextureNormal, UV).rgb * 2.0f - 1.0f);
 #endif // USE_TEX_NORMAL
 
 #ifdef USE_TEX_ROUGHNESS
-    Roughness *= texture(PSTextureRoughness, UV).r;
+    Roughness *= texture(in_TextureRoughness, UV).r;
 #endif // USE_TEX_ROUGHNESS
 
 #ifdef USE_TEX_METALLIC
-    MetalMask *= texture(PSTextureMetallic, UV).r;
+    MetalMask *= texture(in_TextureMetallic, UV).r;
 #endif // USE_TEX_METALLIC
 
 #ifdef USE_TEX_AO
-    AO *= texture(PSTextureAO, UV).r;
+    AO *= texture(in_TextureAO, UV).r;
 #endif // USE_TEX_AO
 
     PackGBuffer(Color, WSNormal, Roughness, vec3(ps_Reflectance), MetalMask, AO, GBuffer);
