@@ -1018,6 +1018,15 @@ namespace
 
     void CMRControlManager::OnDirtyEntity(Dt::CEntity* _pEntity)
     {
+        auto DirtyFlag = _pEntity->GetDirtyFlags();
+
+        if ((DirtyFlag & Dt::CEntity::DirtyAdd) != 0)
+        {
+            if (_pEntity->GetName() == "Box")
+            {
+                m_pEntity = _pEntity;
+            }
+        }
     }
 
     // -----------------------------------------------------------------------------
