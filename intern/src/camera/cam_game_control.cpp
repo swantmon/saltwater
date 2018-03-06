@@ -67,6 +67,12 @@ namespace Cam
 
         if (m_pMainCameraEntity != _pEntity) return;
 
+        auto pCameraComponent = m_pMainCameraEntity->GetComponentFacet()->GetComponent<Dt::CCameraComponent>();
+
+        assert(pCameraComponent != nullptr);
+
+        if (pCameraComponent->GetProjectionType() == Dt::CCameraComponent::External) return;
+
         if (m_pMainCameraEntity->GetDirtyFlags() & Dt::CEntity::DirtyMove)
         {
             Dt::CTransformationFacet* pTransformationFacet = m_pMainCameraEntity->GetTransformationFacet();
@@ -85,13 +91,6 @@ namespace Cam
 
             m_RotationMatrix = glm::eulerAngleXYZ(rRotationInDegree[0], rRotationInDegree[1], rRotationInDegree[2]);
         }
-
-        // -----------------------------------------------------------------------------
-        // Update camera depending on camera component
-        // -----------------------------------------------------------------------------
-        Dt::CCameraComponent* pCameraComponent = m_pMainCameraEntity->GetComponentFacet()->GetComponent<Dt::CCameraComponent>();
-
-        assert(pCameraComponent != nullptr);
 
         // -----------------------------------------------------------------------------
         // Projection

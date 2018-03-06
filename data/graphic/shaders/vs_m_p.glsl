@@ -9,9 +9,9 @@ layout(std140, binding = 1) uniform UB1
     mat4 m_ModelMatrix;
 };
 
-layout(location = 0) in vec3 VertexPosition;
+layout(location = 0) in vec3 in_Vertex;
 
-layout(location = 0) out vec3 PSPosition;
+layout(location = 0) out vec3 out_WSPosition;
 
 out gl_PerVertex
 {
@@ -20,9 +20,9 @@ out gl_PerVertex
 
 void main(void)
 {
-    vec4 WSPosition = m_ModelMatrix * vec4(VertexPosition.xyz, 1.0f);
+    vec4 WSPosition = m_ModelMatrix * vec4(in_Vertex.xyz, 1.0f);
     
-    PSPosition = WSPosition.xyz;
+    out_WSPosition = WSPosition.xyz;
     
     gl_Position = g_WorldToScreen * WSPosition;
 }

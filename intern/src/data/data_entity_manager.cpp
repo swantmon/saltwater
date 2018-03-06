@@ -374,9 +374,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Send new dirty entity to all handler
         // -----------------------------------------------------------------------------
-        for (auto EntityDelegate : m_EntityDelegates)
+        for (auto& rEntityDelegate : m_EntityDelegates)
         {
-            (EntityDelegate)(&_rEntity);
+            (rEntityDelegate)(&_rEntity);
         }
 
         _rEntity.SetDirtyFlags(0);

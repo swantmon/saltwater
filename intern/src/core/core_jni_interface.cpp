@@ -34,12 +34,13 @@ namespace
 
         void FindClassesAndMethods();
 
-        JNIEnv* GetJavaEnvironment();
+        JNIEnv* GetJavaEnvironment() const;
 
         void SetActivity(jobject _Activity);
+        jobject GetActivity() const;
 
         void SetContext(jobject _pContext);
-        jobject GetContext();
+        jobject GetContext() const;
 
         int GetDeviceRotation();
 
@@ -184,7 +185,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    JNIEnv* CJNIInterface::GetJavaEnvironment()
+    JNIEnv* CJNIInterface::GetJavaEnvironment() const
     {
         JNIEnv* pEnvironment = nullptr;
 
@@ -220,7 +221,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    jobject CJNIInterface::GetContext()
+    jobject CJNIInterface::GetContext() const
     {
         return m_pContext;
     };
@@ -230,6 +231,13 @@ namespace
     void CJNIInterface::SetActivity(jobject _Activity)
     {
         m_GameActivityThiz = _Activity;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    jobject CJNIInterface::GetActivity() const
+    {
+        return m_GameActivityThiz;
     }
 
     // -----------------------------------------------------------------------------
@@ -327,6 +335,13 @@ namespace JNI
     void* GetContext()
     {
         return CJNIInterface::GetInstance().GetContext();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void* GetActivity()
+    {
+        return CJNIInterface::GetInstance().GetActivity();
     }
 
     // -----------------------------------------------------------------------------

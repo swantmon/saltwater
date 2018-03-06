@@ -2,10 +2,10 @@
 #ifndef __INCLUDE_VS_P3_GLSL__
 #define __INCLUDE_VS_P3_GLSL__
 
-layout(location = 0) in vec3 in_Position;
+layout(location = 0) in vec3 in_Vertex;
 
-layout(location = 0) out vec3 out_Position;
-layout(location = 1) out vec3 out_Normal;
+layout(location = 0) out vec3 out_WSPosition;
+layout(location = 1) out vec3 out_WSNormal;
 layout(location = 2) out vec2 out_UV;
 layout(location = 3) out mat3 out_WSNormalMatrix;
 
@@ -16,11 +16,11 @@ out gl_PerVertex
 
 void main(void)
 {
-    gl_Position = vec4(in_Position.xyz, 1.0f);
+    gl_Position = vec4(in_Vertex.xyz, 1.0f);
 
-    out_Position = in_Position;
+    out_WSPosition = in_Vertex;
     
-    out_Normal = in_Position;
+    out_WSNormal = in_Vertex;
 
     out_UV = vec2(0.0f);
 

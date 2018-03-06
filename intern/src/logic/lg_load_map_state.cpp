@@ -209,7 +209,7 @@ namespace
 
                 Component->SetRefreshMode(Dt::CSkyComponent::Static);
                 Component->SetType(Dt::CSkyComponent::Procedural);
-                Component->SetIntensity(120000.0f);
+                Component->SetIntensity(10000.0f);
 
                 rEnvironmentEntity.AttachComponent(Component);
 
@@ -235,7 +235,7 @@ namespace
             Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
 
             pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 0.5f));
-            pTransformationFacet->SetScale(glm::vec3(1.0f));
+            pTransformationFacet->SetScale(glm::vec3(0.1f));
             pTransformationFacet->SetRotation(glm::vec3(0.0f));
 
             // -----------------------------------------------------------------------------

@@ -43,6 +43,8 @@ namespace
         void OnRun();
 
         void ChangeState(unsigned int _State);
+
+        android_app* GetAndroidApp();
         
     private:
         
@@ -262,6 +264,13 @@ namespace
     void CApplication::ChangeState(unsigned int _State)
     {
         m_RequestState = static_cast<App::CState::EStateType>(_State);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    android_app* CApplication::GetAndroidApp()
+    {
+        return m_AppSetup.m_pAndroidApp;
     }
     
     // -----------------------------------------------------------------------------
