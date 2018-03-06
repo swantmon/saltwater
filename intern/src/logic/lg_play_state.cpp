@@ -79,6 +79,11 @@ namespace
     int CLgPlayState::OnRun()
     {
         // -----------------------------------------------------------------------------
+        // Update data manager
+        // -----------------------------------------------------------------------------
+        Dt::EntityManager::Update();
+
+        // -----------------------------------------------------------------------------
         // Get main camera entity and set this entity to the camera project
         // as linked entity.
         // After the first main camera we can break the loop.
