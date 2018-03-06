@@ -1,5 +1,6 @@
 ﻿
 #include "base/base_console.h"
+#include "base/base_include_glm.h"
 
 #include "editor_gui/edit_inspector_transformation.h"
 
@@ -63,17 +64,11 @@ namespace Edit
 
         NewMessage.Put(m_CurrentEntityID);
 
-        NewMessage.Put(TranslationX);
-        NewMessage.Put(TranslationY);
-        NewMessage.Put(TranslationZ);
+        NewMessage.Put(glm::vec3(TranslationX, TranslationY, TranslationZ));
 
-        NewMessage.Put(RotationX);
-        NewMessage.Put(RotationY);
-        NewMessage.Put(RotationZ);
+        NewMessage.Put(glm::radians(glm::vec3(RotationX, RotationY, RotationZ)));
 
-        NewMessage.Put(ScaleX);
-        NewMessage.Put(ScaleY);
-        NewMessage.Put(ScaleZ);
+        NewMessage.Put(glm::vec3(ScaleX, ScaleY, ScaleZ));
 
         NewMessage.Reset();
 
@@ -216,15 +211,9 @@ namespace Edit
 
     void CInspectorTransformation::OnEntityInfoTransformation(Edit::CMessage& _rMessage)
     {
-        float TranslationX;
-        float TranslationY;
-        float TranslationZ;
-        float RotationX;
-        float RotationY;
-        float RotationZ;
-        float ScaleX;
-        float ScaleY;
-        float ScaleZ;
+        glm::vec3 Translation(0.0f);
+        glm::vec3 Rotation(0.0f);
+        glm::vec3 Scale(1.0f);
 
         bool  HasTransformation;
         
@@ -239,17 +228,9 @@ namespace Edit
 
         if (HasTransformation)
         {
-            TranslationX = _rMessage.Get<float>();
-            TranslationY = _rMessage.Get<float>();
-            TranslationZ = _rMessage.Get<float>();
-
-            RotationX = _rMessage.Get<float>();
-            RotationY = _rMessage.Get<float>();
-            RotationZ = _rMessage.Get<float>();
-
-            ScaleX = _rMessage.Get<float>();
-            ScaleY = _rMessage.Get<float>();
-            ScaleZ = _rMessage.Get<float>();
+            Translation = _rMessage.Get<glm::vec3>();
+            Rotation    = glm::degrees(_rMessage.Get<glm::vec3>());
+            Scale       = _rMessage.Get<glm::vec3>();
 
             m_pTransformationRotationX->setEnabled(true);
             m_pTransformationRotationY->setEnabled(true);
@@ -261,17 +242,7 @@ namespace Edit
         }
         else
         {
-            TranslationX = _rMessage.Get<float>();
-            TranslationY = _rMessage.Get<float>();
-            TranslationZ = _rMessage.Get<float>();
-
-            RotationX = 0.0f;
-            RotationY = 0.0f;
-            RotationZ = 0.0f;
-
-            ScaleX = 0.0f;
-            ScaleY = 0.0f;
-            ScaleZ = 0.0f;
+            Translation = _rMessage.Get<glm::vec3>();
 
             m_pTransformationRotationX->setEnabled(false);
             m_pTransformationRotationY->setEnabled(false);
@@ -282,16 +253,16 @@ namespace Edit
             m_pTransformationScaleZ->setEnabled(false);
         }
 
-        m_pTransformationPositionX->setText(QString::number(TranslationX));
-        m_pTransformationPositionY->setText(QString::number(TranslationY));
-        m_pTransformationPositionZ->setText(QString::number(TranslationZ));
+        m_pTransformationPositionX->setText(QString::number(Translation[0]));
+        m_pTransformationPositionY->setText(QString::number(Translation[1]));
+        m_pTransformationPositionZ->setText(QString::number(Translation[2]));
 
-        m_pTransformationRotationX->setText(QString::number(RotationX));
-        m_pTransformationRotationY->setText(QString::number(RotationY));
-        m_pTransformationRotationZ->setText(QString::number(RotationZ));
+        m_pTransformationRotationX->setText(QString::number(Rotation[0]));
+        m_pTransformationRotationY->setText(QString::number(Rotation[1]));
+        m_pTransformationRotationZ->setText(QString::number(Rotation[2]));
 
-        m_pTransformationScaleX->setText(QString::number(ScaleX));
-        m_pTransformationScaleY->setText(QString::number(ScaleY));
-        m_pTransformationScaleZ->setText(QString::number(ScaleZ));
+        m_pTransformationScaleX->setText(QString::number(Scale[0]));
+        m_pTransformationScaleY->setText(QString::number(Scale[1]));
+        m_pTransformationScaleZ->setText(QString::number(Scale[2]));
     }
 } // namespace Edit
