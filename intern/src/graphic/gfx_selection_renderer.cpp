@@ -460,7 +460,7 @@ namespace
 
     void CGfxSelectionRenderer::SelectEntity(Base::ID _EntityID)
     {
-        m_pSelectedEntity = &Dt::EntityManager::GetEntityByID(_EntityID);
+        m_pSelectedEntity = Dt::EntityManager::GetEntityByID(_EntityID);
 
         assert(m_pSelectedEntity != nullptr);
     }
@@ -615,7 +615,7 @@ namespace
         {
             rTicket.m_HitFlag = SHitFlag::Entity;
 
-            rTicket.m_pObject = &Dt::EntityManager::GetEntityByID(pOutput->m_EntityID);
+            rTicket.m_pObject = Dt::EntityManager::GetEntityByID(pOutput->m_EntityID);
         }
 
         BufferManager::UnmapBuffer(m_SelectionBufferSetPtrs[IndexOfBuffer]->GetBuffer(1));

@@ -30,8 +30,9 @@ namespace Cam
 
     private:
 
-        virtual void InternOnEvent(const Base::CInputEvent& _rEvent);
-        virtual void InternOnDirtyEntity(Dt::CEntity* _pEntity);
+        void InternOnEvent(const Base::CInputEvent& _rEvent) override;
+        void InternOnDirtyEntity(Dt::CEntity* _pEntity) override;
+        void InternOnDirtyComponent(Dt::IComponent* _pComponent) override;
 
     private:
 

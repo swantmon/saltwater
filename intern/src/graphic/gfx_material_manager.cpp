@@ -212,7 +212,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Set dirty handler of data textures
         // -----------------------------------------------------------------------------
-        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(BASE_DIRTY_COMPONENT_METHOD(&CGfxMaterialManager::OnDirtyComponent));
+        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(DATA_DIRTY_COMPONENT_METHOD(&CGfxMaterialManager::OnDirtyComponent));
     }
 
     // -----------------------------------------------------------------------------

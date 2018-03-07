@@ -84,37 +84,6 @@ namespace
         Dt::EntityManager::Update();
 
         // -----------------------------------------------------------------------------
-        // Get main camera entity and set this entity to the camera project
-        // as linked entity.
-        // After the first main camera we can break the loop.
-        // -----------------------------------------------------------------------------
-        Dt::Map::CEntityIterator CurrentEntity = Dt::Map::EntitiesBegin(Dt::SEntityCategory::Dynamic);
-        Dt::Map::CEntityIterator EndOfEntities = Dt::Map::EntitiesEnd();
-
-        for (; CurrentEntity != EndOfEntities; CurrentEntity = CurrentEntity.Next(Dt::SEntityCategory::Dynamic))
-        {
-            Dt::CEntity& rCurrentEntity = *CurrentEntity;
-
-            Dt::CCameraComponent* pCameraComponent = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CCameraComponent>();
-
-            if (pCameraComponent != nullptr)
-            {
-                if (pCameraComponent->IsMainCamera())
-                {
-                    Cam::CControl& rControl = Cam::ControlManager::GetActiveControl();
-
-                    assert(rControl.GetType() == Cam::CControl::GameControl);
-
-                    Cam::CGameControl& rGameControl = static_cast<Cam::CGameControl&>(rControl);
-
-                    rGameControl.SetEntity(rCurrentEntity);
-
-                    break;
-                }
-            }
-        }
-        
-        // -----------------------------------------------------------------------------
         // Return state changes
         // -----------------------------------------------------------------------------
         return m_State;

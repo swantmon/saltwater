@@ -126,15 +126,15 @@ namespace
             // -----------------------------------------------------------------------------
             Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-            Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+            Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-            rCurrentEntity.SetCategory(Dt::SEntityCategory::Dynamic);
+            pCurrentEntity->SetCategory(Dt::SEntityCategory::Dynamic);
 
             auto pComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CBloomComponent>();
 
-            rCurrentEntity.AttachComponent(pComponent);
+            pCurrentEntity->AttachComponent(pComponent);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pComponent, Dt::CBloomComponent::DirtyCreate);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Dt::CBloomComponent::DirtyCreate);
         }
     }
 
@@ -148,15 +148,15 @@ namespace
             // -----------------------------------------------------------------------------
             Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-            Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+            Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-            rCurrentEntity.SetCategory(Dt::SEntityCategory::Dynamic);
+            pCurrentEntity->SetCategory(Dt::SEntityCategory::Dynamic);
 
             auto pComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CDOFComponent>();
 
-            rCurrentEntity.AttachComponent(pComponent);
+            pCurrentEntity->AttachComponent(pComponent);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pComponent, Dt::CDOFComponent::DirtyCreate);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Dt::CDOFComponent::DirtyCreate);
         }
     }
 
@@ -170,15 +170,15 @@ namespace
             // -----------------------------------------------------------------------------
             Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-            Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+            Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-            rCurrentEntity.SetCategory(Dt::SEntityCategory::Dynamic);
+            pCurrentEntity->SetCategory(Dt::SEntityCategory::Dynamic);
 
             auto pComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CPostAAComponent>();
 
-            rCurrentEntity.AttachComponent(pComponent);
+            pCurrentEntity->AttachComponent(pComponent);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pComponent, Dt::CPostAAComponent::DirtyCreate);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Dt::CPostAAComponent::DirtyCreate);
         }
     }
 
@@ -192,15 +192,15 @@ namespace
             // -----------------------------------------------------------------------------
             Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-            Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+            Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-            rCurrentEntity.SetCategory(Dt::SEntityCategory::Dynamic);
+            pCurrentEntity->SetCategory(Dt::SEntityCategory::Dynamic);
 
             auto pComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CSSRComponent>();
 
-            rCurrentEntity.AttachComponent(pComponent);
+            pCurrentEntity->AttachComponent(pComponent);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pComponent, Dt::CSSRComponent::DirtyCreate);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Dt::CSSRComponent::DirtyCreate);
         }
     }
 
@@ -214,15 +214,15 @@ namespace
             // -----------------------------------------------------------------------------
             Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-            Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+            Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-            rCurrentEntity.SetCategory(Dt::SEntityCategory::Dynamic);
+            pCurrentEntity->SetCategory(Dt::SEntityCategory::Dynamic);
 
             auto pComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CVolumeFogComponent>();
 
-            rCurrentEntity.AttachComponent(pComponent);
+            pCurrentEntity->AttachComponent(pComponent);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pComponent, Dt::CVolumeFogComponent::DirtyCreate);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Dt::CVolumeFogComponent::DirtyCreate);
         }
     }
 
@@ -232,15 +232,15 @@ namespace
     {
         Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+        Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-        Dt::CBloomComponent* pFXFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CBloomComponent>();
+        Dt::CBloomComponent* pFXFacet = pCurrentEntity->GetComponentFacet()->GetComponent<Dt::CBloomComponent>();
 
         if (pFXFacet != nullptr)
         {
             Edit::CMessage NewMessage;
 
-            NewMessage.Put(rCurrentEntity.GetID());
+            NewMessage.Put(pCurrentEntity->GetID());
 
             NewMessage.Put(pFXFacet->GetTint()[0]);
             NewMessage.Put(pFXFacet->GetTint()[1]);
@@ -264,15 +264,15 @@ namespace
     {
         Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+        Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-        Dt::CDOFComponent* pFXFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CDOFComponent>();
+        Dt::CDOFComponent* pFXFacet = pCurrentEntity->GetComponentFacet()->GetComponent<Dt::CDOFComponent>();
 
         if (pFXFacet != nullptr)
         {
             Edit::CMessage NewMessage;
 
-            NewMessage.Put(rCurrentEntity.GetID());
+            NewMessage.Put(pCurrentEntity->GetID());
 
             NewMessage.Put(pFXFacet->GetNearDistance());
             NewMessage.Put(pFXFacet->GetFarDistance());
@@ -292,15 +292,15 @@ namespace
     {
         Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+        Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-        Dt::CPostAAComponent* pFXFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CPostAAComponent>();
+        Dt::CPostAAComponent* pFXFacet = pCurrentEntity->GetComponentFacet()->GetComponent<Dt::CPostAAComponent>();
 
         if (pFXFacet != nullptr)
         {
             Edit::CMessage NewMessage;
 
-            NewMessage.Put(rCurrentEntity.GetID());
+            NewMessage.Put(pCurrentEntity->GetID());
 
             NewMessage.Put(pFXFacet->GetType());
 
@@ -316,15 +316,15 @@ namespace
     {
         Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+        Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-        Dt::CSSRComponent* pFXFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CSSRComponent>();
+        Dt::CSSRComponent* pFXFacet = pCurrentEntity->GetComponentFacet()->GetComponent<Dt::CSSRComponent>();
 
         if (pFXFacet != nullptr)
         {
             Edit::CMessage NewMessage;
 
-            NewMessage.Put(rCurrentEntity.GetID());
+            NewMessage.Put(pCurrentEntity->GetID());
 
             NewMessage.Put(pFXFacet->GetIntensity());
             NewMessage.Put(pFXFacet->GetRoughnessMask());
@@ -343,15 +343,15 @@ namespace
     {
         Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+        Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-        Dt::CVolumeFogComponent* pFXFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CVolumeFogComponent>();
+        Dt::CVolumeFogComponent* pFXFacet = pCurrentEntity->GetComponentFacet()->GetComponent<Dt::CVolumeFogComponent>();
 
         if (pFXFacet != nullptr)
         {
             Edit::CMessage NewMessage;
 
-            NewMessage.Put(rCurrentEntity.GetID());
+            NewMessage.Put(pCurrentEntity->GetID());
 
             NewMessage.Put(pFXFacet->GetWindDirection()[0]);
             NewMessage.Put(pFXFacet->GetWindDirection()[1]);
@@ -382,9 +382,9 @@ namespace
     {
         Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+        Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-        Dt::CBloomComponent* pFXFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CBloomComponent>();
+        Dt::CBloomComponent* pFXFacet = pCurrentEntity->GetComponentFacet()->GetComponent<Dt::CBloomComponent>();
 
         if (pFXFacet != nullptr)
         {
@@ -420,7 +420,7 @@ namespace
 
             pFXFacet->UpdateEffect();
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pFXFacet, Dt::CBloomComponent::DirtyInfo);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pFXFacet, Dt::CBloomComponent::DirtyInfo);
         }
     }
 
@@ -430,9 +430,9 @@ namespace
     {
         Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+        Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-        Dt::CDOFComponent* pFXFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CDOFComponent>();
+        Dt::CDOFComponent* pFXFacet = pCurrentEntity->GetComponentFacet()->GetComponent<Dt::CDOFComponent>();
 
         if (pFXFacet != nullptr)
         {
@@ -460,7 +460,7 @@ namespace
 
             pFXFacet->UpdateEffect();
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pFXFacet, Dt::CDOFComponent::DirtyInfo);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pFXFacet, Dt::CDOFComponent::DirtyInfo);
         }
     }
 
@@ -470,9 +470,9 @@ namespace
     {
         Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+        Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-        Dt::CPostAAComponent* pFXFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CPostAAComponent>();
+        Dt::CPostAAComponent* pFXFacet = pCurrentEntity->GetComponentFacet()->GetComponent<Dt::CPostAAComponent>();
 
         if (pFXFacet != nullptr)
         {
@@ -490,7 +490,7 @@ namespace
 
             pFXFacet->UpdateEffect();
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pFXFacet, Dt::CPostAAComponent::DirtyInfo);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pFXFacet, Dt::CPostAAComponent::DirtyInfo);
         }
     }
 
@@ -500,9 +500,9 @@ namespace
     {
         Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+        Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-        Dt::CSSRComponent* pFXFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CSSRComponent>();
+        Dt::CSSRComponent* pFXFacet = pCurrentEntity->GetComponentFacet()->GetComponent<Dt::CSSRComponent>();
 
         if (pFXFacet != nullptr)
         {
@@ -527,7 +527,7 @@ namespace
 
             pFXFacet->UpdateEffect();
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pFXFacet, Dt::CSSRComponent::DirtyInfo);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pFXFacet, Dt::CSSRComponent::DirtyInfo);
         }
     }
 
@@ -537,9 +537,9 @@ namespace
     {
         Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+        Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-        Dt::CVolumeFogComponent* pFXFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CVolumeFogComponent>();
+        Dt::CVolumeFogComponent* pFXFacet = pCurrentEntity->GetComponentFacet()->GetComponent<Dt::CVolumeFogComponent>();
 
         if (pFXFacet != nullptr)
         {
@@ -589,7 +589,7 @@ namespace
 
             pFXFacet->SetDensityAttenuation(DensityAttenuation);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pFXFacet, Dt::CVolumeFogComponent::DirtyInfo);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pFXFacet, Dt::CVolumeFogComponent::DirtyInfo);
         }
     }
 

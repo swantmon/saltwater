@@ -12,6 +12,7 @@
 #include "camera/cam_game_control.h"
 
 #include "data/data_entity_manager.h"
+#include "data/data_component_manager.h"
 
 #include "gui/gui_event_handler.h"
 
@@ -42,6 +43,7 @@ namespace
 
         void OnEvent(const Base::CInputEvent& _rEvent);
         void OnDirtyEntity(Dt::CEntity* _pEntity);
+        void OnDirtyComponent(Dt::IComponent* _pComponent);
 
     public:
 
@@ -58,6 +60,11 @@ namespace
 {
     CCamControlManager::CCamControlManager()
     {
+        // -----------------------------------------------------------------------------
+        // register changing components
+        // -----------------------------------------------------------------------------
+        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(DATA_DIRTY_COMPONENT_METHOD(&CCamControlManager::OnDirtyComponent));
+
         // -----------------------------------------------------------------------------
         // register changing entities
         // -----------------------------------------------------------------------------
@@ -153,6 +160,16 @@ namespace
         if (m_pActiveControl != nullptr)
         {
             m_pActiveControl->OnDirtyEntity(_pEntity);
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CCamControlManager::OnDirtyComponent(Dt::IComponent* _pComponent)
+    {
+        if (m_pActiveControl != nullptr)
+        {
+            m_pActiveControl->OnDirtyComponent(_pComponent);
         }
     }
 

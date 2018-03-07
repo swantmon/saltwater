@@ -182,7 +182,7 @@ namespace
         // -----------------------------------------------------------------------------
         // On dirty stuff
         // -----------------------------------------------------------------------------
-        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(BASE_DIRTY_COMPONENT_METHOD(&CGfxSunManager::OnDirtyComponent));
+        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(DATA_DIRTY_COMPONENT_METHOD(&CGfxSunManager::OnDirtyComponent));
     }
     
     // -----------------------------------------------------------------------------

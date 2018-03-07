@@ -40,7 +40,7 @@ namespace Dt
         const std::vector<Dt::IComponent*>& GetComponents();
 
         template<class T>
-        void MarkComponentAsDirty(T* _pComponent, unsigned int _DirtyFlags);
+        void MarkComponentAsDirty(T& _rComponent, unsigned int _DirtyFlags);
 
         void RegisterDirtyComponentHandler(CComponentDelegate _NewDelegate);
 
@@ -66,7 +66,7 @@ namespace Dt
     };
 } // namespace Dt
 
-#define BASE_DIRTY_COMPONENT_METHOD(_Method) std::bind(_Method, this, std::placeholders::_1)
+#define DATA_DIRTY_COMPONENT_METHOD(_Method) std::bind(_Method, this, std::placeholders::_1)
 
 namespace Dt
 {
@@ -123,13 +123,13 @@ namespace Dt
     // -----------------------------------------------------------------------------
 
     template<class T>
-    void CComponentManager::MarkComponentAsDirty(T* _pComponent, unsigned int _DirtyFlags)
+    void CComponentManager::MarkComponentAsDirty(T& _rComponent, unsigned int _DirtyFlags)
     {
-        _pComponent->m_DirtyFlags = _DirtyFlags;
+        _rComponent.m_DirtyFlags = _DirtyFlags;
 
         for (auto Delegate : m_ComponentDelegates)
         {
-            Delegate(_pComponent);
+            Delegate(&_rComponent);
         }
     }
 } // namespace Dt

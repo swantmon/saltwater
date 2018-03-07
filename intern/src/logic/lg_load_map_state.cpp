@@ -118,7 +118,7 @@ namespace
 
             rEntity.AttachComponent(Component);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(Component, Dt::CCameraComponent::DirtyCreate);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*Component, Dt::CCameraComponent::DirtyCreate);
 
             Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
@@ -160,7 +160,7 @@ namespace
 
             rEntity.AttachComponent(Component);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(Component, Dt::CCameraComponent::DirtyCreate);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*Component, Dt::CCameraComponent::DirtyCreate);
 
             Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
@@ -201,7 +201,7 @@ namespace
 
                 rEnvironmentEntity.AttachComponent(SunComponent);
 
-                Dt::CComponentManager::GetInstance().MarkComponentAsDirty(SunComponent, Dt::CSunComponent::DirtyCreate);
+                Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*SunComponent, Dt::CSunComponent::DirtyCreate);
             }
 
             {
@@ -213,7 +213,7 @@ namespace
 
                 rEnvironmentEntity.AttachComponent(Component);
 
-                Dt::CComponentManager::GetInstance().MarkComponentAsDirty(Component, Dt::CSkyComponent::DirtyCreate);
+                Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*Component, Dt::CSkyComponent::DirtyCreate);
             }
 
             Dt::EntityManager::MarkEntityAsDirty(rEnvironmentEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
@@ -244,7 +244,7 @@ namespace
 
             pMeshComponent->SetMeshType(Dt::CMeshComponent::Box);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pMeshComponent, Dt::CMeshComponent::DirtyCreate);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pMeshComponent, Dt::CMeshComponent::DirtyCreate);
 
             rEntity.AttachComponent(pMeshComponent);
 
@@ -258,7 +258,7 @@ namespace
 
             pMaterialComponent->SetMaterial(pMaterial);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pMaterialComponent, Dt::CMaterialComponent::DirtyCreate);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pMaterialComponent, Dt::CMaterialComponent::DirtyCreate);
 
             rEntity.AttachComponent(pMaterialComponent);
 
@@ -302,7 +302,7 @@ void CLgLoadMapState::CreateDefaultScene()
 
             rEntity.AttachComponent(Component);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(Component, Dt::CCameraComponent::DirtyCreate);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*Component, Dt::CCameraComponent::DirtyCreate);
 
             Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
@@ -340,7 +340,7 @@ void CLgLoadMapState::CreateDefaultScene()
 
                 rLightingEntity.AttachComponent(LightProbeComponent);
 
-                Dt::CComponentManager::GetInstance().MarkComponentAsDirty(LightProbeComponent, Dt::CLightProbeComponent::DirtyCreate);
+                Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*LightProbeComponent, Dt::CLightProbeComponent::DirtyCreate);
             }
 
             Dt::EntityManager::MarkEntityAsDirty(rLightingEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
@@ -379,7 +379,7 @@ void CLgLoadMapState::CreateDefaultScene()
 
                 rEnvironmentEntity.AttachComponent(SunComponent);
 
-                Dt::CComponentManager::GetInstance().MarkComponentAsDirty(SunComponent, Dt::CSunComponent::DirtyCreate);
+                Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*SunComponent, Dt::CSunComponent::DirtyCreate);
             }
 
             {
@@ -391,7 +391,7 @@ void CLgLoadMapState::CreateDefaultScene()
 
                 rEnvironmentEntity.AttachComponent(Component);
 
-                Dt::CComponentManager::GetInstance().MarkComponentAsDirty(Component, Dt::CSkyComponent::DirtyCreate);
+                Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*Component, Dt::CSkyComponent::DirtyCreate);
             }
 
             Dt::EntityManager::MarkEntityAsDirty(rEnvironmentEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
@@ -422,7 +422,7 @@ void CLgLoadMapState::CreateDefaultScene()
 
             pMeshComponent->SetMeshType(Dt::CMeshComponent::Box);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pMeshComponent, Dt::CMeshComponent::DirtyCreate);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pMeshComponent, Dt::CMeshComponent::DirtyCreate);
 
             rEntity.AttachComponent(pMeshComponent);
 
@@ -436,7 +436,7 @@ void CLgLoadMapState::CreateDefaultScene()
 
             pMaterialComponent->SetMaterial(pMaterial);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pMaterialComponent, Dt::CMaterialComponent::DirtyCreate);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pMaterialComponent, Dt::CMaterialComponent::DirtyCreate);
 
             rEntity.AttachComponent(pMaterialComponent);
 
@@ -467,7 +467,7 @@ void CLgLoadMapState::CreateDefaultScene()
 
             pMeshComponent->SetMeshType(Dt::CMeshComponent::Box);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pMeshComponent, Dt::CMeshComponent::DirtyCreate);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pMeshComponent, Dt::CMeshComponent::DirtyCreate);
 
             rEntity.AttachComponent(pMeshComponent);
 
@@ -477,7 +477,7 @@ void CLgLoadMapState::CreateDefaultScene()
 
             pMaterialComponent->SetMaterial(Dt::MaterialManager::GetDefaultMaterial());
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pMaterialComponent, Dt::CMaterialComponent::DirtyCreate);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pMaterialComponent, Dt::CMaterialComponent::DirtyCreate);
 
             rEntity.AttachComponent(pMaterialComponent);
 
