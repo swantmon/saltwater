@@ -10,6 +10,8 @@
 
 #include "data/data_ar_controller_component.h"
 #include "data/data_camera_component.h"
+#include "data/data_component_facet.h"
+#include "data/data_component_manager.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_map.h"
@@ -320,10 +322,12 @@ namespace
         glm::mat4 m_ProjectionMatrix;
 
         Dt::CEntity* m_pEntity;
+        Dt::CEntity* m_pCameraEntity;
 
     private:
 
         void OnDirtyEntity(Dt::CEntity* _pEntity);
+        void OnDirtyComponent(Dt::IComponent* _pComponent);
         void OnEvent(const Base::CInputEvent& _rEvent);
     };
 } // namespace
@@ -336,14 +340,14 @@ namespace
 namespace
 {
     CMRControlManager::CMRControlManager()
-            : m_InstallRequested  (false)
-            , m_Configuration     ( )
-            , m_pARSession        (0)
-            , m_pARFrame          (0)
-            , m_TrackedObjects    ( )
-            , m_ViewMatrix        (glm::mat4(1.0f))
-            , m_ProjectionMatrix  (glm::mat4(1.0f))
-            , m_pEntity           (0)
+            : m_InstallRequested(false)
+            , m_Configuration   ( )
+            , m_pARSession      (0)
+            , m_pARFrame        (0)
+            , m_TrackedObjects  ( )
+            , m_ViewMatrix      (glm::mat4(1.0f))
+            , m_ProjectionMatrix(glm::mat4(1.0f))
+            , m_pEntity         (0)
     {
     }
 
@@ -423,6 +427,8 @@ namespace
         Gui::EventHandler::RegisterDirectUserListener(GUI_BIND_INPUT_METHOD(&CMRControlManager::OnEvent));
 
         Dt::EntityManager::RegisterDirtyEntityHandler(DATA_DIRTY_ENTITY_METHOD(&CMRControlManager::OnDirtyEntity));
+
+        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(DATA_DIRTY_COMPONENT_METHOD(&CMRControlManager::OnDirtyComponent));
     }
 
     // -----------------------------------------------------------------------------
@@ -485,13 +491,36 @@ namespace
 
         glm::decompose(m_ViewMatrix, Scale, Rotation, Translation, Skew, Perspective);
 
-        Gfx::Cam::SetPosition((Rotation * Translation) * -1.0f);
+        if (m_pCameraEntity != nullptr)
+        {
+            m_pCameraEntity->GetTransformationFacet()->SetPosition(m_ViewMatrix[3]);
 
-        Gfx::Cam::SetRotationMatrix(glm::toMat3(Rotation));
+            m_pCameraEntity->GetTransformationFacet()->SetScale(glm::vec3(1.0f));
 
-        Gfx::Cam::SetProjectionMatrix(m_ProjectionMatrix, Near, Far);
+            m_pCameraEntity->GetTransformationFacet()->SetRotation(glm::eulerAngles(glm::toQuat(m_ViewMatrix)));
 
-        Gfx::Cam::Update();
+            Dt::EntityManager::MarkEntityAsDirty(*m_pCameraEntity, Dt::CEntity::DirtyMove);
+
+            auto pCameraComponent = m_pCameraEntity->GetComponentFacet()->GetComponent<Dt::CCameraComponent>();
+
+            pCameraComponent->SetNear(Near);
+
+            pCameraComponent->SetNear(Far);
+
+            pCameraComponent->SetProjectionMatrix(m_ProjectionMatrix);
+
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pCameraComponent, Dt::CCameraComponent::DirtyInfo);
+        }
+        else
+        {
+            Gfx::Cam::SetPosition((Rotation * Translation) * -1.0f);
+
+            Gfx::Cam::SetRotationMatrix(glm::toMat3(Rotation));
+
+            Gfx::Cam::SetProjectionMatrix(m_ProjectionMatrix, Near, Far);
+
+            Gfx::Cam::Update();
+        }
 
         ArTrackingState CameraTrackingState;
 
@@ -581,7 +610,7 @@ namespace
             Core::JNI::AcquirePermissions(s_Permissions, 1);
         }
 
-        if (m_pARSession == nullptr && m_Configuration.m_pEnv != nullptr && m_Configuration.m_pActivity != nullptr)
+        if (m_pARSession == nullptr && m_Configuration.m_pEnv != nullptr && m_Configuration.m_pActivity != nullptr && Core::JNI::CheckPermission(s_Permissions[0]))
         {
             ArStatus Status;
 
@@ -1026,7 +1055,19 @@ namespace
             {
                 m_pEntity = _pEntity;
             }
+
+            if (_pEntity->GetComponentFacet()->HasComponent<Dt::CCameraComponent>())
+            {
+                m_pCameraEntity = _pEntity;
+            }
         }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMRControlManager::OnDirtyComponent(Dt::IComponent* _pComponent)
+    {
+        BASE_UNUSED(_pComponent);
     }
 
     // -----------------------------------------------------------------------------

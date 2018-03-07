@@ -209,11 +209,16 @@ namespace Cam
 
             if (pCameraComponent->IsActiveAndUsable())
             {
-                m_pRelatedEntity = Dt::EntityManager::GetEntityByID(pCameraComponent->GetHostEntity()->GetID());
+                Dt::CEntity* pNewEntity = Dt::EntityManager::GetEntityByID(pCameraComponent->GetHostEntity()->GetID());
 
-                UpdateTransformation(m_pRelatedEntity);
+                if (pNewEntity != nullptr && pNewEntity->IsInMap())
+                {
+                    m_pRelatedEntity = pNewEntity;
 
-                UpdateSettings(pCameraComponent);
+                    UpdateTransformation(m_pRelatedEntity);
+
+                    UpdateSettings(pCameraComponent);
+                }
 
                 break;
             }
