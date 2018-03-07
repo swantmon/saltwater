@@ -166,8 +166,6 @@ namespace
 
             NewMessage.Put(pCurrentEntity->GetID());
 
-            NewMessage.Put(pFacet->IsMainCamera());
-
             NewMessage.Put(pFacet->GetClearFlag());
 
             NewMessage.Put(pFacet->GetBackgroundColor()[0]);
@@ -247,8 +245,6 @@ namespace
             // -----------------------------------------------------------------------------
             // Get values
             // -----------------------------------------------------------------------------
-            bool IsMainCamera = _rMessage.Get<bool>();
-
             Dt::CCameraComponent::EClearFlag ClearFlag = static_cast<Dt::CCameraComponent::EClearFlag >(_rMessage.Get<int>());
 
             R = _rMessage.Get<float>();
@@ -287,8 +283,6 @@ namespace
             // -----------------------------------------------------------------------------
             // Set values
             // -----------------------------------------------------------------------------
-            pFacet->SetMainCamera(IsMainCamera);
-
             pFacet->SetClearFlag(ClearFlag);
 
             pFacet->SetBackgroundColor(glm::vec3(R, G, B));

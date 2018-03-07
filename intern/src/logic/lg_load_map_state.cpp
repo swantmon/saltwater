@@ -114,8 +114,6 @@ namespace
 
             auto Component = Dt::CComponentManager::GetInstance().Allocate<Dt::CCameraComponent>();
 
-            Component->SetMainCamera(true);
-
             rEntity.AttachComponent(Component);
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*Component, Dt::CCameraComponent::DirtyCreate);
@@ -296,7 +294,6 @@ void CLgLoadMapState::CreateDefaultScene()
 
             auto Component = Dt::CComponentManager::GetInstance().Allocate<Dt::CCameraComponent>();
 
-            Component->SetMainCamera(true);
             Component->SetProjectionType(Dt::CCameraComponent::Perspective);
             Component->SetClearFlag(Dt::CCameraComponent::Skybox);
 

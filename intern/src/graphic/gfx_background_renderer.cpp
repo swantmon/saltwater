@@ -670,24 +670,21 @@ namespace
 
             if (pDtComponent->IsActiveAndUsable() == false) continue;
 
-            if (pDtComponent->IsMainCamera())
-            {
-                SCameraRenderJob NewRenderJob;
+            SCameraRenderJob NewRenderJob;
 
-                NewRenderJob.m_pDtComponent  = pDtComponent;
-                NewRenderJob.m_pCameraObject = static_cast<Gfx::CCamera*>(pDtComponent->GetFacet(Dt::CCameraComponent::Graphic));
+            NewRenderJob.m_pDtComponent  = pDtComponent;
+            NewRenderJob.m_pCameraObject = static_cast<Gfx::CCamera*>(pDtComponent->GetFacet(Dt::CCameraComponent::Graphic));
 
-                m_CameraRenderJobs.push_back(NewRenderJob);
-            }
+            m_CameraRenderJobs.push_back(NewRenderJob);
         }
 
         // -----------------------------------------------------------------------------
 
         m_SkyRenderJobs.clear();
 
-        auto DataComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CSkyComponent>();
+        auto DataSkyComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CSkyComponent>();
 
-        for (auto Component : DataComponents)
+        for (auto Component : DataSkyComponents)
         {
             Dt::CSkyComponent* pDtComponent = static_cast<Dt::CSkyComponent*>(Component);
 

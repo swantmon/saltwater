@@ -49,8 +49,6 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
-        bool IsMainCamera = m_pIsMainCameraCB->isChecked();
-
         int ClearFlag = m_pClearFlagCS->currentIndex();
 
         QPalette ButtonPalette = m_pSolidColorButton->palette();
@@ -103,8 +101,6 @@ namespace Edit
         Edit::CMessage NewMessage;
 
         NewMessage.Put(m_CurrentEntityID);
-
-        NewMessage.Put(IsMainCamera);
 
         NewMessage.Put(ClearFlag);
 
@@ -204,8 +200,6 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Get values
         // -----------------------------------------------------------------------------
-        bool IsMainCamera = _rMessage.Get<bool>();
-
         int ClearFlag = _rMessage.Get<int>();
     
         R = _rMessage.Get<float>();
@@ -251,8 +245,6 @@ namespace Edit
         m_pClearFlagCS      ->blockSignals(true);
         m_pProjectionCB     ->blockSignals(true);
         m_pCameraModeCB     ->blockSignals(true);
-
-        m_pIsMainCameraCB->setChecked(IsMainCamera);
 
         m_pClearFlagCS->setCurrentIndex(ClearFlag);
 

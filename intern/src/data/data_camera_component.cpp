@@ -8,8 +8,7 @@
 namespace Dt
 {
     CCameraComponent::CCameraComponent()
-        : m_IsMainCamera    (false)
-        , m_CullingMask     (0)
+        : m_CullingMask     (0)
         , m_Depth           (-1)
         , m_ShutterSpeed    (1.0f / 125.0f)
         , m_Aperture        (16.0f)
@@ -33,20 +32,6 @@ namespace Dt
     CCameraComponent::~CCameraComponent()
     {
 
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CCameraComponent::SetMainCamera(bool _Flag)
-    {
-        m_IsMainCamera = _Flag;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    bool CCameraComponent::IsMainCamera() const
-    {
-        return m_IsMainCamera;
     }
 
     // -----------------------------------------------------------------------------

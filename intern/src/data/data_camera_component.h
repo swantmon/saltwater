@@ -41,9 +41,6 @@ namespace Dt
 
     public:
 
-        void SetMainCamera(bool _Flag);
-        bool IsMainCamera() const;
-
         void SetClearFlag(EClearFlag _ClearFlag);
         EClearFlag GetClearFlag() const;
 
@@ -102,7 +99,6 @@ namespace Dt
 
     private:
 
-        bool             m_IsMainCamera;                    //< Only one main camera can exist at once; first camera that is found will be used
         unsigned int     m_CullingMask;                     //< Culling camera against some objects in map (0 = everything)
         float            m_Depth;                           //< Depth of the depth buffer (maybe needed for some effects)
         float            m_ShutterSpeed;                    //< Shutter speed of the camera in seconds

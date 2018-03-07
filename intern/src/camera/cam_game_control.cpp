@@ -52,7 +52,7 @@ namespace Cam
             {
                 auto pCameraComponent = _pEntity->GetComponentFacet()->GetComponent<Dt::CCameraComponent>();
 
-                if (_pEntity->GetID() < m_pRelatedEntity->GetID())
+                if (m_pRelatedEntity == 0)
                 {
                     m_pRelatedEntity = _pEntity;
 
@@ -72,7 +72,7 @@ namespace Cam
 
         if ((DirtyFlag & Dt::CEntity::DirtyComponent) != 0 && m_pRelatedEntity == _pEntity)
         {
-            if (m_pRelatedEntity->GetComponentFacet()->HasComponent<Dt::CCameraComponent>() == false)
+            if (m_pRelatedEntity->GetComponentFacet()->HasComponent<Dt::CCameraComponent>() == false || m_pRelatedEntity->GetComponentFacet()->GetComponent<Dt::CCameraComponent>()->IsActiveAndUsable() == false)
             {
                 m_pRelatedEntity = 0;
 
@@ -106,11 +106,13 @@ namespace Cam
         {
             LookupNewRelatedEntity();
         }
+        else
+        {
+            Gfx::Cam::SetPosition(m_Position);
+            Gfx::Cam::SetRotationMatrix(m_RotationMatrix);
 
-        Gfx::Cam::SetPosition(m_Position);
-        Gfx::Cam::SetRotationMatrix(m_RotationMatrix);
-
-        Gfx::Cam::Update();
+            Gfx::Cam::Update();
+        }
     }
 
     // -----------------------------------------------------------------------------
