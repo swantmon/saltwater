@@ -491,13 +491,35 @@ namespace
 
         glm::decompose(m_ViewMatrix, Scale, Rotation, Translation, Skew, Perspective);
 
+        auto T1 = (Rotation * Translation) * -1.0f;
+        auto T2 = glm::toMat4(Rotation);
+
+        auto U1 = glm::eulerAngles(Rotation);
+        auto U2 = glm::eulerAngleXYZ(U1[0], U1[1], U1[2]);
+
+        float Pitch;
+        float Yaw;
+        float Roll;
+
+        glm::extractEulerAngleXYZ(T2, Pitch, Yaw, Roll);
+
+        auto U3 = glm::eulerAngleXYZ(Pitch, Yaw, Roll);
+
         if (m_pCameraEntity != nullptr)
         {
-            m_pCameraEntity->GetTransformationFacet()->SetPosition(m_ViewMatrix[3]);
+            m_pCameraEntity->SetWorldPosition((Rotation * Translation) * -1.0f);
+
+            m_pCameraEntity->GetTransformationFacet()->SetPosition((Rotation * Translation) * -1.0f);
 
             m_pCameraEntity->GetTransformationFacet()->SetScale(glm::vec3(1.0f));
 
-            m_pCameraEntity->GetTransformationFacet()->SetRotation(glm::eulerAngles(glm::toQuat(m_ViewMatrix)));
+            float Pitch;
+            float Yaw;
+            float Roll;
+
+            glm::extractEulerAngleXYZ(glm::toMat4(Rotation), Pitch, Yaw, Roll);
+
+            m_pCameraEntity->GetTransformationFacet()->SetRotation(glm::vec3(Pitch, Yaw, Roll));
 
             Dt::EntityManager::MarkEntityAsDirty(*m_pCameraEntity, Dt::CEntity::DirtyMove);
 
@@ -598,6 +620,8 @@ namespace
 
     void CMRControlManager::OnPause()
     {
+        if (m_pARSession == nullptr) return;
+
         ArSession_pause(m_pARSession);
     }
 
@@ -671,7 +695,10 @@ namespace
             ArSession_setDisplayGeometry(m_pARSession, m_Configuration.m_Rotation, m_Configuration.m_Width, m_Configuration.m_Height);
         }
 
-        ArSession_resume(m_pARSession);
+        if (m_pARSession != nullptr)
+        {
+            ArSession_resume(m_pARSession);
+        }
     }
 
     // -----------------------------------------------------------------------------
@@ -685,6 +712,8 @@ namespace
 
     void CMRControlManager::OnDraw()
     {
+        if (m_pARSession == nullptr) return;
+
         // -----------------------------------------------------------------------------
         // Background
         // -----------------------------------------------------------------------------
