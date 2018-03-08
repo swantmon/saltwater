@@ -310,7 +310,7 @@ namespace MR
         
         bool m_UseConservativeRasterization;
         
-        CPlaneDetector m_PlaneDetector;
+        std::unique_ptr<CPlaneDetector> m_pPlaneDetector;
         std::unique_ptr<CICPTracker> m_pTracker;
 
         std::vector<char> m_ClearVector;

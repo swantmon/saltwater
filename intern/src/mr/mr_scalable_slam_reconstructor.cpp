@@ -1925,7 +1925,8 @@ namespace MR
 
     CPlaneDetector& CScalableSLAMReconstructor::GetPlaneDetector()
     {
-        return m_PlaneDetector;
+        assert(m_pPlaneDetector != nullptr);
+        return *m_pPlaneDetector;
     }
 
     // -----------------------------------------------------------------------------
