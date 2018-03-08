@@ -729,6 +729,17 @@ namespace MR
         ContextManager::SetInputLayout(m_CubeInputLayoutPtr);
         ContextManager::SetTopology(STopology::PointList);
         
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
+
+        ContextManager::SetConstantBuffer(3, m_PointRasterizationBufferPtr);
+        ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
+
+        ContextManager::SetShaderVS(m_PointCloudVSPtr);
+        ContextManager::SetShaderGS(m_PointCloudGSPtr);
+        ContextManager::SetShaderPS(m_PointCloudFSPtr);
+
+        ContextManager::SetShaderCS(m_PointsFullCSPtr);
+
         if (m_UseConservativeRasterization)
         {
             glEnable(GL_CONSERVATIVE_RASTERIZATION_NV);
@@ -737,21 +748,24 @@ namespace MR
         {
             auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
 
-            Performance::BeginEvent("Render single point cloud");
-
-            RasterizePointCloud(rRootVolume);
-
-            Performance::EndEvent();
-
-            Performance::BeginEvent("Gather point cloud data");
-
-            ContextManager::SetShaderCS(m_PointsFullCSPtr);
-                        
             SIndirectBuffers IndirectBufferData = {};
             IndirectBufferData.m_Indexed.m_IndexCount = m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
             BufferManager::UploadBufferData(rRootVolume.m_IndirectLevel1Buffer, &IndirectBufferData);
             BufferManager::UploadBufferData(rRootVolume.m_IndirectLevel2Buffer, &IndirectBufferData);
+            
+            Performance::BeginEvent("Render single point cloud");
 
+            SPointRasterization BufferData;
+            BufferData.m_Offset = rRootVolume.m_Offset;
+            BufferData.m_BufferOffset = 0;
+            BufferManager::UploadBufferData(m_PointRasterizationBufferPtr, &BufferData);
+
+            ContextManager::Draw(m_DepthImageSize.x * m_DepthImageSize.y, 0);
+
+            Performance::EndEvent();
+
+            Performance::BeginEvent("Gather point cloud data");
+                        
             ContextManager::SetResourceBuffer(0, rRootVolume.m_IndirectLevel1Buffer);
             ContextManager::SetResourceBuffer(1, rRootVolume.m_IndirectLevel2Buffer);
             ContextManager::SetResourceBuffer(2, rRootVolume.m_Level1QueuePtr);
@@ -940,22 +954,6 @@ namespace MR
         ////////////////////////////////////////////////////////////////////////////////
         // Render point cloud into 3D texture
         ////////////////////////////////////////////////////////////////////////////////
-
-        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
-
-        ContextManager::SetShaderVS(m_PointCloudVSPtr);
-        ContextManager::SetShaderGS(m_PointCloudGSPtr);
-        ContextManager::SetShaderPS(m_PointCloudFSPtr);
-
-        SPointRasterization BufferData;
-        BufferData.m_Offset = rRootVolume.m_Offset;
-        BufferData.m_BufferOffset = 0;
-        BufferManager::UploadBufferData(m_PointRasterizationBufferPtr, &BufferData);
-
-        ContextManager::SetConstantBuffer(3, m_PointRasterizationBufferPtr);
-        ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
-
-        ContextManager::Draw(m_DepthImageSize.x * m_DepthImageSize.y, 0);
     }
 
     // -----------------------------------------------------------------------------
