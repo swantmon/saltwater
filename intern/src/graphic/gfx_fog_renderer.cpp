@@ -697,7 +697,7 @@ namespace
         // -----------------------------------------------------------------------------
         Dt::CVolumeFogComponent* pDtVolumeFogComponent = m_VolumeFogRenderJobs[0].m_pDtVolumeFogComponent;
         Dt::CSunComponent*       pDtSunComponent       = m_VolumeFogRenderJobs[0].m_pDtSunComponent;
-        Gfx::CSun*      pGfxSunComponent      = m_VolumeFogRenderJobs[0].m_pGfxSunComponent;
+        Gfx::CSun*               pGfxSunComponent      = m_VolumeFogRenderJobs[0].m_pGfxSunComponent;
 
         assert(pDtVolumeFogComponent != 0 && pDtSunComponent != 0 && pGfxSunComponent != 0);
 

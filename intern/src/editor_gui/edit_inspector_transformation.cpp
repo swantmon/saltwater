@@ -66,7 +66,7 @@ namespace Edit
 
         NewMessage.Put(glm::vec3(TranslationX, TranslationY, TranslationZ));
 
-        NewMessage.Put(glm::radians(glm::vec3(RotationX, RotationY, RotationZ)));
+        NewMessage.Put(glm::quat(glm::radians(glm::vec3(RotationX, RotationY, RotationZ))));
 
         NewMessage.Put(glm::vec3(ScaleX, ScaleY, ScaleZ));
 
@@ -229,7 +229,7 @@ namespace Edit
         if (HasTransformation)
         {
             Translation = _rMessage.Get<glm::vec3>();
-            Rotation    = glm::degrees(_rMessage.Get<glm::vec3>());
+            Rotation    = glm::degrees(glm::eulerAngles(_rMessage.Get<glm::quat>()));
             Scale       = _rMessage.Get<glm::vec3>();
 
             m_pTransformationRotationX->setEnabled(true);
