@@ -13,9 +13,9 @@ namespace Dt
         glm::vec3& GetPosition();
         const glm::vec3& GetPosition() const;
 
-        void SetRotation(const glm::vec3& _rRotation);
-        glm::vec3& GetRotation();
-        const glm::vec3& GetRotation() const;
+        void SetRotation(const glm::quat& _rRotation);
+        glm::quat& GetRotation();
+        const glm::quat& GetRotation() const;
 
         void SetScale(const glm::vec3& _rScale);
         glm::vec3& GetScale();
@@ -34,7 +34,7 @@ namespace Dt
 
         glm::mat4 m_WorldMatrix;           //< Absolute world matrix of the entity inside the map
         glm::vec3 m_Position;              //< Position of the entity to its parent
-        glm::vec3 m_Rotation;              //< Rotation of the entity to its parent
+        glm::quat m_Rotation;              //< Rotation of the entity to its parent
         glm::vec3 m_Scale;                 //< Scale of the entity to its parent
     };
 } // namespace Dt

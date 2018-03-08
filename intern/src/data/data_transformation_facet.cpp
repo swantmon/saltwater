@@ -8,7 +8,7 @@ namespace Dt
     CTransformationFacet::CTransformationFacet()
         : m_WorldMatrix(1.0f)
         , m_Position   (0.0f)
-        , m_Rotation   (0.0f)
+        , m_Rotation   (glm::vec3(0.0f))
         , m_Scale      (1.0f)
     {
 
@@ -45,21 +45,21 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CTransformationFacet::SetRotation(const glm::vec3& _rRotation)
+    void CTransformationFacet::SetRotation(const glm::quat& _rRotation)
     {
         m_Rotation = _rRotation;
     }
 
     // -----------------------------------------------------------------------------
 
-    glm::vec3& CTransformationFacet::GetRotation()
+    glm::quat& CTransformationFacet::GetRotation()
     {
         return m_Rotation;
     }
 
     // -----------------------------------------------------------------------------
 
-    const glm::vec3& CTransformationFacet::GetRotation() const
+    const glm::quat& CTransformationFacet::GetRotation() const
     {
         return m_Rotation;
     }

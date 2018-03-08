@@ -476,9 +476,7 @@ namespace
 
         glm::mat4 RotationMatrix;
 
-        const glm::vec3& rRotation = pTransformationFacet->GetRotation();
-
-        RotationMatrix = glm::eulerAngleXYZ(rRotation[0], rRotation[1], rRotation[2]);
+        RotationMatrix = glm::toMat4(pTransformationFacet->GetRotation());
 
         WorldMatrix = RotationMatrix * WorldMatrix;
 

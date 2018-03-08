@@ -133,9 +133,7 @@ namespace Cam
         // -----------------------------------------------------------------------------
         // Rotation
         // -----------------------------------------------------------------------------
-        glm::vec3& rRotation = pTransformationFacet->GetRotation();
-
-        m_RotationMatrix = glm::eulerAngleXYZ(rRotation[0], rRotation[1], rRotation[2]);
+        m_RotationMatrix = glm::toMat3(pTransformationFacet->GetRotation());
     }
 
     // -----------------------------------------------------------------------------

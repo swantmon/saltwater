@@ -117,12 +117,6 @@ namespace
 
         Dt::CEntity& rNewEntity = Dt::EntityManager::CreateEntity(EntityDesc);
 
-        Dt::CTransformationFacet* pTransformationFacet = rNewEntity.GetTransformationFacet();
-
-        pTransformationFacet->SetPosition(glm::vec3(0.0f));
-        pTransformationFacet->SetScale(glm::vec3(1.0f));
-        pTransformationFacet->SetRotation(glm::vec3(0.0f));
-
         _rMessage.SetResult(static_cast<int>(rNewEntity.GetID()));
     }
 
@@ -310,7 +304,7 @@ namespace
 
             NewMessage.Put(pTransformationFacet->GetPosition());
 
-            NewMessage.Put(glm::degrees(pTransformationFacet->GetRotation()));
+            NewMessage.Put(pTransformationFacet->GetRotation());
 
             NewMessage.Put(pTransformationFacet->GetScale());
         }
@@ -393,7 +387,7 @@ namespace
 
         if (pTransformationFacet)
         {
-            glm::vec3 Rotation = _rMessage.Get<glm::vec3>();
+            glm::quat Rotation = _rMessage.Get<glm::quat>();
             glm::vec3 Scale    = _rMessage.Get<glm::vec3>();
 
             pTransformationFacet->SetPosition(Translation);
