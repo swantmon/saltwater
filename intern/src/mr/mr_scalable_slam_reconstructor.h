@@ -185,8 +185,6 @@ namespace MR
         void CreateIntegrationQueues(std::vector<uint32_t>& rVolumeQueue);
         void IntegrateHierarchies(std::vector<uint32_t>& rVolumeQueue);
         
-        void RasterizePointCloud(SRootVolume& rRootGrid);
-
         void ClearBuffer(Gfx::CBufferPtr BufferPtr);
         void ClearBuffer(Gfx::CBufferPtr BufferPtr, size_t Size);
         void ClearPool();

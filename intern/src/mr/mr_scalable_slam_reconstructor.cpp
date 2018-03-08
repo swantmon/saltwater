@@ -949,16 +949,7 @@ namespace MR
 
         Performance::EndEvent();
     }
-
-    // -----------------------------------------------------------------------------
-
-    void CScalableSLAMReconstructor::RasterizePointCloud(SRootVolume& rRootVolume)
-    {
-        ////////////////////////////////////////////////////////////////////////////////
-        // Render point cloud into 3D texture
-        ////////////////////////////////////////////////////////////////////////////////
-    }
-
+    
     // -----------------------------------------------------------------------------
 
 	void CScalableSLAMReconstructor::UpdateRootrids()
