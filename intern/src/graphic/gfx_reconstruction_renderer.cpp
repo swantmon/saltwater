@@ -305,7 +305,8 @@ namespace
                 << "#define VOXELS_PER_LEVEL2GRID "  << Settings.m_VoxelsPerGrid[2] << " \n"
                 << "#define MAP_TEXTURE_FORMAT "     << InternalFormatString << " \n"
                 << "#define RAYCAST_NEAR "           << 0.0f << " \n"
-                << "#define RAYCAST_FAR "            << 1000.0f << " \n";
+                << "#define RAYCAST_FAR "            << 1000.0f << " \n"
+                << "#define MIN_TREE_WEIGHT "        << 0 << " \n";
             
             if (Settings.m_CaptureColor)
             {

@@ -134,7 +134,7 @@ vec2 GetVoxelWithStep(vec3 Position, vec3 Direction, out float Step)
             SGridPoolItem RootItem =  g_RootGridPool[RootGridItemBufferOffset];
             int Level1VolumeBufferOffset = RootItem.m_PoolIndex;
 
-            if (Level1VolumeBufferOffset != -1 && RootItem.m_Weight > g_MinWeight)
+            if (Level1VolumeBufferOffset != -1 && RootItem.m_Weight > MIN_TREE_WEIGHT)
             {
                 FailedVolumeSize = VOLUME_SIZE / (ROOT_RESOLUTION * LEVEL1_RESOLUTION);
 
@@ -148,7 +148,7 @@ vec2 GetVoxelWithStep(vec3 Position, vec3 Direction, out float Step)
                 SGridPoolItem Level1Item = g_Level1GridPool[Level1BufferIndex];
                 int TSDFVolumeBufferOffset = Level1Item.m_PoolIndex;
 
-                if (TSDFVolumeBufferOffset != -1 && Level1Item.m_Weight > g_MinWeight)
+                if (TSDFVolumeBufferOffset != -1 && Level1Item.m_Weight > MIN_TREE_WEIGHT)
                 {
                     float TotalResolution = ROOT_RESOLUTION * LEVEL1_RESOLUTION * LEVEL2_RESOLUTION;
 
