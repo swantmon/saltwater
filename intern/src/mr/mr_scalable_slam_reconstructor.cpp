@@ -313,6 +313,8 @@ namespace MR
 
         m_MinWeight = Base::CProgramParameters::GetInstance().Get("mr:slam:min_weight", 15);
 
+        m_VolumeDepthThreshold = Base::CProgramParameters::GetInstance().Get("mr:slam:volume_min_depth_count", 2000);
+
         const int GridLevelCount = MR::SReconstructionSettings::GRID_LEVELS;
 
         m_VolumeSizes.resize(GridLevelCount);
@@ -514,7 +516,8 @@ namespace MR
             << "#define VOXELS_PER_LEVEL1GRID "  << m_ReconstructionSettings.m_VoxelsPerGrid[1]     << " \n"
             << "#define VOXELS_PER_LEVEL2GRID "  << m_ReconstructionSettings.m_VoxelsPerGrid[2]     << " \n"
             << "#define RAYCAST_NEAR "           << m_pRGBDCameraControl->GetMinDepth()             << " \n"
-            << "#define RAYCAST_FAR "            << m_pRGBDCameraControl->GetMaxDepth()             << " \n";
+            << "#define RAYCAST_FAR "            << m_pRGBDCameraControl->GetMaxDepth()             << " \n"
+            << "#define VOLUME_DEPTH_THRESHLD "  << m_VolumeDepthThreshold                          << " \n";
         
         if (m_ReconstructionSettings.m_CaptureColor)
         {

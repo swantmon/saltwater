@@ -29,7 +29,7 @@ layout(std430, binding = 2) buffer VolumeQueue
 layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main()
 {
-    if (g_Counters[gl_GlobalInvocationID.x] > 100)
+    if (g_Counters[gl_GlobalInvocationID.x] > VOLUME_DEPTH_THRESHLD)
     {
         uint InstanceIndex = atomicAdd(g_Indirect.m_Indexed.m_InstanceCount, 1);
         g_VolumeID[InstanceIndex] = gl_GlobalInvocationID.x;
