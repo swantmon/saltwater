@@ -108,6 +108,12 @@ namespace Gfx
         glm::vec3 YAxis(m_RotationMatrix[1]);
         glm::vec3 ZAxis(m_RotationMatrix[2]);
 
+        BASE_CONSOLE_INFOV("GFX_POSE: %f, %f, %f", m_Position.x, m_Position.y, m_Position.z);
+
+        glm::quat Test = glm::toQuat(m_RotationMatrix);
+
+        BASE_CONSOLE_INFOV("GFX_ROT: %f, %f, %f, %f", Test.x, Test.y, Test.z, Test.w);
+
         // --------------------------------------------------------------------------------
         // Create the view matrix.
         // --------------------------------------------------------------------------------

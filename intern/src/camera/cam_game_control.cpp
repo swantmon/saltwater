@@ -46,23 +46,6 @@ namespace Cam
 
         auto DirtyFlag = _pEntity->GetDirtyFlags();
 
-        if ((DirtyFlag & Dt::CEntity::DirtyAdd) != 0)
-        {
-            if (_pEntity->GetComponentFacet()->HasComponent<Dt::CCameraComponent>())
-            {
-                auto pCameraComponent = _pEntity->GetComponentFacet()->GetComponent<Dt::CCameraComponent>();
-
-                if (m_pRelatedEntity == 0)
-                {
-                    m_pRelatedEntity = _pEntity;
-
-                    UpdateTransformation(m_pRelatedEntity);
-
-                    UpdateSettings(pCameraComponent);
-                }
-            }
-        }
-
         if ((DirtyFlag & Dt::CEntity::DirtyRemove) != 0 && _pEntity == m_pRelatedEntity)
         {
             m_pRelatedEntity = 0;

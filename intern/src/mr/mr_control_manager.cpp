@@ -491,35 +491,17 @@ namespace
 
         glm::decompose(m_ViewMatrix, Scale, Rotation, Translation, Skew, Perspective);
 
-        auto T1 = (Rotation * Translation) * -1.0f;
-        auto T2 = glm::toMat4(Rotation);
+        glm::vec3 WSPosition = (Rotation * Translation) * -1.0f;
 
-        auto U1 = glm::eulerAngles(Rotation);
-        auto U2 = glm::eulerAngleXYZ(U1[0], U1[1], U1[2]);
-
-        float Pitch;
-        float Yaw;
-        float Roll;
-
-        glm::extractEulerAngleXYZ(T2, Pitch, Yaw, Roll);
-
-        auto U3 = glm::eulerAngleXYZ(Pitch, Yaw, Roll);
-
-        if (m_pCameraEntity != nullptr)
+        if (m_pCameraEntity != nullptr && m_pCameraEntity->GetComponentFacet()->GetComponent<Dt::CCameraComponent>()->IsActiveAndUsable())
         {
-            m_pCameraEntity->SetWorldPosition((Rotation * Translation) * -1.0f);
+            m_pCameraEntity->SetWorldPosition(WSPosition);
 
-            m_pCameraEntity->GetTransformationFacet()->SetPosition((Rotation * Translation) * -1.0f);
+            m_pCameraEntity->GetTransformationFacet()->SetPosition(WSPosition);
 
             m_pCameraEntity->GetTransformationFacet()->SetScale(glm::vec3(1.0f));
 
-            float Pitch;
-            float Yaw;
-            float Roll;
-
-            glm::extractEulerAngleXYZ(glm::toMat4(Rotation), Pitch, Yaw, Roll);
-
-            m_pCameraEntity->GetTransformationFacet()->SetRotation(glm::vec3(Pitch, Yaw, Roll));
+            m_pCameraEntity->GetTransformationFacet()->SetRotation(Rotation);
 
             Dt::EntityManager::MarkEntityAsDirty(*m_pCameraEntity, Dt::CEntity::DirtyMove);
 
@@ -535,7 +517,7 @@ namespace
         }
         else
         {
-            Gfx::Cam::SetPosition((Rotation * Translation) * -1.0f);
+            Gfx::Cam::SetPosition(WSPosition);
 
             Gfx::Cam::SetRotationMatrix(glm::toMat3(Rotation));
 

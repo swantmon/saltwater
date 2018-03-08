@@ -146,12 +146,13 @@ namespace
 
             Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
 
-            pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 10.0f));
+            pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
             pTransformationFacet->SetScale(glm::vec3(1.0f));
             pTransformationFacet->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
 
             auto Component = Dt::CComponentManager::GetInstance().Allocate<Dt::CCameraComponent>();
 
+            Component->SetActive(false);
             Component->SetProjectionType(Dt::CCameraComponent::External);
             Component->SetClearFlag(Dt::CCameraComponent::Webcam);
 
@@ -189,6 +190,7 @@ namespace
 
                 SunComponent->EnableTemperature(false);
                 SunComponent->SetColor(glm::vec3(1.0f, 1.0f, 1.0f));
+
                 SunComponent->SetDirection(glm::vec3(0.0f, 0.01f, -1.0f));
                 SunComponent->SetIntensity(90600.0f);
                 SunComponent->SetTemperature(0);
