@@ -353,8 +353,12 @@ namespace MR
 
 		float x = (-0.50602675f) / 0.72113f;
 		float y = (-0.499133f) / 0.870799f;
+        
+        // TODO: use camera near parameter and find out why frustum culling does not work correctly
+        // Volumes that touch the pyramid top but are not between near and far are still valid hits for some reason
+        // and they are even pass the rasterization step even though they cannot contain valid samples
 
-		const float Near = m_pRGBDCameraControl->GetMinDepth();
+        const float Near = 2.0f; // m_pRGBDCameraControl->GetMinDepth();
 		const float Far = m_pRGBDCameraControl->GetMaxDepth();
 
 		// near
