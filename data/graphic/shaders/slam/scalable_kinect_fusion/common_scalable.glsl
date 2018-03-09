@@ -18,14 +18,22 @@ struct SGridPoolItem
     int m_Weight;
 };
 
+#ifdef CAPTURE_COLOR
+
+struct STSDFPoolItem
+{
+    float m_TSDF;
+    uint m_Color;
+};
+
+#else
 
 struct STSDFPoolItem
 {
     uint m_TSDF;
-#ifdef CAPTURE_COLOR
-    uint m_Color;
-#endif
 };
+
+#endif
 
 ////////////////////////////////////////////////////////////////////////
 // Pools
@@ -72,6 +80,35 @@ layout(std430, binding = 6) buffer RootVolumePositionBuffer
 // Pack and unpack voxels
 ////////////////////////////////////////////////////////////////////////
 
+#ifdef CAPTURE_COLOR
+
+STSDFPoolItem PackVoxel(float TSDF, float Weight, vec3 Color)
+{
+    STSDFPoolItem Voxel;
+    Voxel.m_TSDF = TSDF;
+    Voxel.m_Color = packUnorm4x8(vec4(Color, Weight / MAX_INTEGRATION_WEIGHT));
+
+    return Voxel;
+}
+
+vec2 UnpackVoxel(STSDFPoolItem Voxel, out vec3 Color)
+{
+    vec4 ColorData = unpackUnorm4x8(Voxel.m_Color);
+
+    Color = ColorData.rgb;
+
+    return vec2(Voxel.m_TSDF, ColorData.a * MAX_INTEGRATION_WEIGHT);
+}
+
+vec2 UnpackVoxel(STSDFPoolItem Voxel)
+{
+    vec4 ColorData = unpackUnorm4x8(Voxel.m_Color);
+
+    return vec2(Voxel.m_TSDF, ColorData.a * MAX_INTEGRATION_WEIGHT);
+}
+
+#else
+
 STSDFPoolItem PackVoxel(float TSDF, float Weight)
 {
     Weight /= MAX_INTEGRATION_WEIGHT;
@@ -79,39 +116,8 @@ STSDFPoolItem PackVoxel(float TSDF, float Weight)
     STSDFPoolItem Voxel;
     Voxel.m_TSDF = packSnorm2x16(vec2(TSDF, Weight));
 
-#ifdef CAPTURE_COLOR
-    Voxel.m_Color = packUnorm4x8(vec4(0.0f));
-#endif
-
     return Voxel;
 }
-
-#ifdef CAPTURE_COLOR
-
-STSDFPoolItem PackVoxel(float TSDF, float Weight, vec3 Color)
-{
-    Weight /= MAX_INTEGRATION_WEIGHT;
-
-    STSDFPoolItem Voxel;
-    Voxel.m_TSDF = packSnorm2x16(vec2(TSDF, Weight));
-    Voxel.m_Color = packUnorm4x8(vec4(Color, 1.0f));
-
-    return Voxel;
-}
-
-vec2 UnpackVoxel(STSDFPoolItem Voxel, out vec3 Color)
-{
-    vec2 Data = unpackSnorm2x16(Voxel.m_TSDF);
-
-    Data.y *= MAX_INTEGRATION_WEIGHT;
-
-    Color = unpackUnorm4x8(Voxel.m_Color).rgb;
-
-    return Data;
-}
-
-
-#endif
 
 vec2 UnpackVoxel(STSDFPoolItem Voxel)
 {
@@ -121,6 +127,8 @@ vec2 UnpackVoxel(STSDFPoolItem Voxel)
 
     return Data;
 }
+
+#endif
 
 ////////////////////////////////////////////////////////////////////////
 // Some helper functions
