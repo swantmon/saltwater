@@ -91,7 +91,7 @@ void main()
 
                 #ifdef CAPTURE_COLOR
                     vec3 Color = imageLoad(cs_Color, DepthCoords).rgb;
-                    Color = Color.x == 0.0f ? OldColor : Color;
+                    Color = Color.x == 0.0f ? OldColor : (OldColor * Voxel.y + Color) / (Voxel.y + 1.0f);
                     TSDFPoolValue = PackVoxel(Voxel.x, Voxel.y, Color);
                 #else
                     TSDFPoolValue = PackVoxel(Voxel.x, Voxel.y);
