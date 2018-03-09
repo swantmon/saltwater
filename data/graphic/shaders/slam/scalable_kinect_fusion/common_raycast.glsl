@@ -88,7 +88,7 @@ STSDFPoolItem GetRawVoxel(vec3 Position)
                     float TotalResolution = ROOT_RESOLUTION * LEVEL1_RESOLUTION * LEVEL2_RESOLUTION;
 
                     ivec3 TSDFVolumeOffset = ivec3(floor(Position * TotalResolution));
-                    TSDFVolumeOffset %= LEVEL1_RESOLUTION;
+                    TSDFVolumeOffset %= LEVEL2_RESOLUTION;
 
                     int TSDFBufferInnerOffset = OffsetToIndex(TSDFVolumeOffset, LEVEL2_RESOLUTION);
                     int TSDFBufferIndex = TSDFVolumeBufferOffset * VOXELS_PER_LEVEL2GRID + TSDFBufferInnerOffset;
