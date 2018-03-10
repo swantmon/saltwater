@@ -17,7 +17,8 @@ layout(std140, binding = 1) uniform PerDrawCallData
 
 layout(location = 0) in vec3 in_WSRayDirection;
 
-layout(location = 0) out vec4 out_Intermediate;
+layout(location = 0) out vec4 out_Intermediate0;
+layout(location = 1) out vec4 out_Intermediate1;
 
 // -----------------------------------------------------------------------------
 // Helper functions
@@ -52,12 +53,13 @@ void main()
 
 #else
 
-    WSPosition = GetPosition(Cameraposition, RayDirection);
+    WSPosition = Rot2 * GetPosition(Cameraposition, RayDirection);
     Color = g_Color.rgb;
 
 #endif
     
-    out_Intermediate = vec4(Rot2 * WSPosition, 1.0f);
+    out_Intermediate0 = vec4(Color, 1.0f);
+    out_Intermediate1 = vec4(WSPosition, 1.0f);
 }
 
 #endif // __INCLUDE_FS_RAYCAST_GLSL__

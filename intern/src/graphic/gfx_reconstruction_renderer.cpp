@@ -164,7 +164,8 @@ namespace
         CShaderPtr m_PointCloudVSPtr;
         CShaderPtr m_PointCloudFSPtr;
 
-        CTexturePtr m_IntermediateTargetPtr;
+        CTexturePtr m_IntermediateTargetPtr0;
+        CTexturePtr m_IntermediateTargetPtr1;
         CTargetSetPtr m_IntermediateTargetSetPtr;
 
         bool m_UseTrackingCamera;
@@ -281,7 +282,8 @@ namespace
         m_PointCloudVSPtr = 0;
         m_PointCloudFSPtr = 0;
 
-        m_IntermediateTargetPtr = nullptr;
+        m_IntermediateTargetPtr0 = nullptr;
+        m_IntermediateTargetPtr1 = nullptr;
         m_IntermediateTargetSetPtr = nullptr;
     }
     
@@ -440,9 +442,10 @@ namespace
         TextureDescriptor.m_Semantic = CTexture::UndefinedSemantic;
         TextureDescriptor.m_Format = CTexture::R16G16B16A16_FLOAT;
 
-        m_IntermediateTargetPtr = TextureManager::CreateTexture2D(TextureDescriptor);
+        m_IntermediateTargetPtr0 = TextureManager::CreateTexture2D(TextureDescriptor);
+        m_IntermediateTargetPtr1 = TextureManager::CreateTexture2D(TextureDescriptor);
 
-        m_IntermediateTargetSetPtr = TargetSetManager::CreateTargetSet(m_IntermediateTargetPtr);
+        m_IntermediateTargetSetPtr = TargetSetManager::CreateTargetSet(m_IntermediateTargetPtr0, m_IntermediateTargetPtr1);
     }
     
     // -----------------------------------------------------------------------------
@@ -807,9 +810,10 @@ namespace
         TextureDescriptor.m_Semantic = CTexture::UndefinedSemantic;
         TextureDescriptor.m_Format = CTexture::R16G16B16A16_FLOAT;
 
-        m_IntermediateTargetPtr = TextureManager::CreateTexture2D(TextureDescriptor);
+        m_IntermediateTargetPtr0 = TextureManager::CreateTexture2D(TextureDescriptor);
+        m_IntermediateTargetPtr1 = TextureManager::CreateTexture2D(TextureDescriptor);
 
-        m_IntermediateTargetSetPtr = TargetSetManager::CreateTargetSet(m_IntermediateTargetPtr);
+        m_IntermediateTargetSetPtr = TargetSetManager::CreateTargetSet(m_IntermediateTargetPtr0, m_IntermediateTargetPtr1);
     }
 
     // -----------------------------------------------------------------------------
@@ -1040,7 +1044,8 @@ namespace
         ContextManager::SetIndexBuffer(m_QuadMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
         ContextManager::SetInputLayout(m_QuadInputLayoutPtr);
 
-        ContextManager::SetImageTexture(0, m_IntermediateTargetPtr);
+        ContextManager::SetImageTexture(0, m_IntermediateTargetPtr0);
+        ContextManager::SetImageTexture(1, m_IntermediateTargetPtr1);
 
         ContextManager::SetTopology(STopology::TriangleStrip);
 

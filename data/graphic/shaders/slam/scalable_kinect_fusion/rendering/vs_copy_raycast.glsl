@@ -17,7 +17,7 @@ out gl_PerVertex
 
 void main()
 {
-    gl_Position = vec4(in_VertexPosition.xy * 2.0f - 1.0f, 0.0f, 1.0f);
+    gl_Position = vec4(in_VertexPosition * 2.0f - 1.0f, 1.0f);
 }
 
 #endif // __INCLUDE_VS_RAYCAST_GLSL__
