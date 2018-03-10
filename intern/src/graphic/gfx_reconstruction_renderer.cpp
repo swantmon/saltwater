@@ -161,6 +161,9 @@ namespace
         CShaderPtr m_PointCloudVSPtr;
         CShaderPtr m_PointCloudFSPtr;
 
+        CTexturePtr m_IntermediateTargetPtr;
+        CTargetSetPtr m_IntermediateTargetSetPtr;
+
         bool m_UseTrackingCamera;
 
         bool m_RenderVolumeVertexMap;
@@ -272,6 +275,9 @@ namespace
 
         m_PointCloudVSPtr = 0;
         m_PointCloudFSPtr = 0;
+
+        m_IntermediateTargetPtr = nullptr;
+        m_IntermediateTargetSetPtr = nullptr;
     }
     
     // -----------------------------------------------------------------------------
@@ -411,7 +417,24 @@ namespace
     
     void CGfxReconstructionRenderer::OnSetupTextures()
     {
+        glm::ivec2 Size = Main::GetActiveWindowSize();
 
+        STextureDescriptor TextureDescriptor = {};
+
+        TextureDescriptor.m_NumberOfPixelsU = Size.x;
+        TextureDescriptor.m_NumberOfPixelsV = Size.y;
+        TextureDescriptor.m_NumberOfPixelsW = 1;
+        TextureDescriptor.m_NumberOfMipMaps = 1;
+        TextureDescriptor.m_NumberOfTextures = 1;
+        TextureDescriptor.m_Binding = CTexture::ShaderResource | CTexture::RenderTarget;
+        TextureDescriptor.m_Access = CTexture::CPUWrite;
+        TextureDescriptor.m_Usage = CTexture::GPUReadWrite;
+        TextureDescriptor.m_Semantic = CTexture::UndefinedSemantic;
+        TextureDescriptor.m_Format = CTexture::R16G16B16A16_FLOAT;
+
+        m_IntermediateTargetPtr = TextureManager::CreateTexture2D(TextureDescriptor);
+
+        m_IntermediateTargetSetPtr = TargetSetManager::CreateTargetSet(m_IntermediateTargetPtr);
     }
     
     // -----------------------------------------------------------------------------
@@ -763,8 +786,22 @@ namespace
 
     void CGfxReconstructionRenderer::OnResize(unsigned int _Width, unsigned int _Height)
     {
-        BASE_UNUSED(_Width);
-        BASE_UNUSED(_Height);
+        STextureDescriptor TextureDescriptor = {};
+
+        TextureDescriptor.m_NumberOfPixelsU = _Width;
+        TextureDescriptor.m_NumberOfPixelsV = _Height;
+        TextureDescriptor.m_NumberOfPixelsW = 1;
+        TextureDescriptor.m_NumberOfMipMaps = 1;
+        TextureDescriptor.m_NumberOfTextures = 1;
+        TextureDescriptor.m_Binding = CTexture::ShaderResource | CTexture::RenderTarget;
+        TextureDescriptor.m_Access = CTexture::CPUWrite;
+        TextureDescriptor.m_Usage = CTexture::GPUReadWrite;
+        TextureDescriptor.m_Semantic = CTexture::UndefinedSemantic;
+        TextureDescriptor.m_Format = CTexture::R16G16B16A16_FLOAT;
+
+        m_IntermediateTargetPtr = TextureManager::CreateTexture2D(TextureDescriptor);
+
+        m_IntermediateTargetSetPtr = TargetSetManager::CreateTargetSet(m_IntermediateTargetPtr);
     }
 
     // -----------------------------------------------------------------------------
