@@ -53,13 +53,18 @@ void main()
 
 #else
 
-    WSPosition = Rot2 * GetPosition(Cameraposition, RayDirection);
+    WSPosition = GetPosition(Cameraposition, RayDirection);
     Color = g_Color.rgb;
 
 #endif
+
+    vec3 Normal = GetNormal(WSPosition);
+
+    Normal.x = -Normal.x;
+    Normal.z = -Normal.z;
     
-    out_Intermediate0 = vec4(Color, 1.0f);
-    out_Intermediate1 = vec4(WSPosition, 1.0f);
+    out_Intermediate0 = vec4(Normal, WSPosition.x == 0.0f ? -2.0f : distance(WSPosition, g_ViewPosition.xyz));
+    out_Intermediate1 = vec4(Rot2 * WSPosition, 1.0f);
 }
 
 #endif // __INCLUDE_FS_RAYCAST_GLSL__

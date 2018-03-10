@@ -31,11 +31,7 @@ layout(location = 2) out vec4 out_GBuffer2;
 
 vec3 GetNormal(ivec2 Position)
 {
-    vec3 Vertex0 = imageLoad(fs_Intermediate1, Position + ivec2(0, 0)).xyz;
-    vec3 Vertex1 = imageLoad(fs_Intermediate1, Position + ivec2(1, 0)).xyz;
-    vec3 Vertex2 = imageLoad(fs_Intermediate1, Position + ivec2(0, 1)).xyz;
-    
-    return normalize(cross(Vertex1 - Vertex0, Vertex2 - Vertex0));
+    return imageLoad(fs_Intermediate0, Position).xyz;
 }
 
 vec3 GetSmoothNormal(ivec2 Position)
@@ -57,16 +53,19 @@ vec3 GetSmoothNormal(ivec2 Position)
 
 void main()
 {
-    vec3 Color = imageLoad(fs_Intermediate0, ivec2(gl_FragCoord.xy)).xyz;
-    vec3 WSPosition = imageLoad(fs_Intermediate1, ivec2(gl_FragCoord.xy)).xyz;
+    ivec2 xy = ivec2(gl_FragCoord.xy);
     
-    vec3 Normal = GetSmoothNormal(ivec2(gl_FragCoord.xy));
-    
-    if (WSPosition.x != 0.0f)
+    vec4 Data0 = imageLoad(fs_Intermediate0, xy);
+
+    if (Data0.w > 0.0f)
     {
+        vec3 WSPosition = g_ViewPosition.xyz + normalize(in_WSRayDirection) * Data0.w;
+        
+        vec3 Normal = GetNormal(xy);
+        
         SGBuffer GBuffer;
 
-        PackGBuffer(Color, Normal, 0.5f, vec3(0.5f), 0.0f, 1.0f, GBuffer);
+        PackGBuffer(vec3(0.0f, 1.0f, 0.0f), Normal, 0.5f, vec3(0.5f), 0.0f, 1.0f, GBuffer);
 
         out_GBuffer0 = GBuffer.m_Color0;
         out_GBuffer1 = GBuffer.m_Color1;
