@@ -3,7 +3,6 @@
 #define __INCLUDE_FS_RAYCAST_GLSL__
 
 #include "common_global.glsl"
-#include "common_gbuffer.glsl"
 #include "slam/scalable_kinect_fusion/common_raycast.glsl"
 
 layout(std140, binding = 1) uniform PerDrawCallData
@@ -18,9 +17,7 @@ layout(std140, binding = 1) uniform PerDrawCallData
 
 layout(location = 0) in vec3 in_WSRayDirection;
 
-layout(location = 0) out vec4 out_GBuffer0;
-layout(location = 1) out vec4 out_GBuffer1;
-layout(location = 2) out vec4 out_GBuffer2;
+layout(location = 0) out vec4 out_Intermediate;
 
 // -----------------------------------------------------------------------------
 // Helper functions
@@ -59,29 +56,8 @@ void main()
     Color = g_Color.rgb;
 
 #endif
-
-    if (WSPosition.x != 0.0f && (Color.r != 0.0f || Color.g != 0.0f || Color.b != 0.0f))
-    {
-        vec3 WSNormal = GetNormal(WSPosition);
-        
-        WSNormal.x = -WSNormal.x;
-        WSNormal.z = -WSNormal.z;
-        
-        SGBuffer GBuffer;
-
-        PackGBuffer(Color, WSNormal, 0.5f, vec3(0.5f), 0.0f, 1.0f, GBuffer);
-
-        out_GBuffer0 = GBuffer.m_Color0;
-        out_GBuffer1 = GBuffer.m_Color1;
-        out_GBuffer2 = GBuffer.m_Color2;
-
-        vec4 CSPosition = g_WorldToScreen * vec4(Rot2 * WSPosition, 1.0f);
-        gl_FragDepth = (CSPosition.z / CSPosition.w) * 0.5f + 0.5f;
-
-        return;
-    }
-
-    discard;
+    
+    out_Intermediate = vec4(Rot2 * WSPosition, 1.0f);
 }
 
 #endif // __INCLUDE_FS_RAYCAST_GLSL__

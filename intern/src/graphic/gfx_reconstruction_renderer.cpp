@@ -136,6 +136,9 @@ namespace
         CShaderPtr m_RaycastVSPtr;
         CShaderPtr m_RaycastFSPtr;
 
+        CShaderPtr m_CopyRaycastVSPtr;
+        CShaderPtr m_CopyRaycastFSPtr;
+
         CShaderPtr m_HistogramVSPtr;
         CShaderPtr m_HistogramFSPtr;
 
@@ -249,6 +252,8 @@ namespace
         m_OutlineLevel2FSPtr = 0;
         m_RaycastVSPtr = 0;
         m_RaycastFSPtr = 0;
+        m_CopyRaycastVSPtr = 0;
+        m_CopyRaycastFSPtr = 0;
         m_HistogramVSPtr = 0;
         m_HistogramFSPtr = 0;
 
@@ -337,6 +342,9 @@ namespace
             
             m_RaycastVSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_raycast.glsl", "main", DefineString.c_str());
             m_RaycastFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_raycast.glsl", "main", DefineString.c_str());
+
+            m_CopyRaycastVSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_copy_raycast.glsl", "main", DefineString.c_str());
+            m_CopyRaycastFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_copy_raycast.glsl", "main", DefineString.c_str());
 
             m_HistogramVSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_histogram.glsl", "main", DefineString.c_str());
             m_HistogramFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_histogram.glsl", "main", DefineString.c_str());
@@ -946,6 +954,8 @@ namespace
 	{
         Performance::BeginEvent("Raycasting for rendering");
 
+        ContextManager::SetTargetSet(m_IntermediateTargetSetPtr);
+
         MR::CScalableSLAMReconstructor::SScalableVolume& rVolume = m_pScalableReconstructor->GetVolume();
 
         MR::SReconstructionSettings Settings;
@@ -1020,6 +1030,21 @@ namespace
         ContextManager::DrawIndexed(36, 0, 0);
 
         Performance::EndEvent();
+
+        ContextManager::SetTargetSet(TargetSetManager::GetDeferredTargetSet());
+
+        ContextManager::SetShaderVS(m_CopyRaycastVSPtr);
+        ContextManager::SetShaderPS(m_CopyRaycastFSPtr);
+
+        ContextManager::SetVertexBuffer(m_QuadMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+        ContextManager::SetIndexBuffer(m_QuadMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
+        ContextManager::SetInputLayout(m_QuadInputLayoutPtr);
+
+        ContextManager::SetImageTexture(0, m_IntermediateTargetPtr);
+
+        ContextManager::SetTopology(STopology::TriangleStrip);
+
+        ContextManager::Draw(4, 0);
 	}
     
 	// -----------------------------------------------------------------------------
