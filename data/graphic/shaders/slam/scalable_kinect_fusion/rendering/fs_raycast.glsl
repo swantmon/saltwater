@@ -63,7 +63,7 @@ void main()
     Normal.x = -Normal.x;
     Normal.z = -Normal.z;
     
-    out_Intermediate0 = vec4(Normal, WSPosition.x == 0.0f ? -2.0f : distance(WSPosition, g_ViewPosition.xyz));
+    out_Intermediate0 = vec4(Normal, WSPosition.x == 0.0f ? -2.0f : distance(Rot2 * WSPosition, g_ViewPosition.xyz));
     out_Intermediate1 = vec4(Rot2 * WSPosition, 1.0f);
 }
 
