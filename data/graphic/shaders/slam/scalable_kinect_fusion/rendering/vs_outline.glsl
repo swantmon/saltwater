@@ -23,14 +23,7 @@ out gl_PerVertex
 
 void main()
 {
-    mat4 Rot = mat4(
-        1.0f, 0.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 1.0f, 0.0f,
-        0.0f, -1.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 1.0f
-    );
-
-    vec4 WSPosition = Rot * g_WorldMatrix * vec4(in_VertexPosition, 1.0f);
+    vec4 WSPosition = g_WorldMatrix * vec4(in_VertexPosition, 1.0f);
     gl_Position = g_WorldToScreen * WSPosition;
 }
 

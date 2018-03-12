@@ -786,6 +786,7 @@ namespace
             glm::decompose(PoseMatrix, Scale, Rotation, Position, Skew, Perspective);
 
             glm::mat4 RotationMatrix = glm::toMat4(Rotation);
+            glm::vec3 Euler = glm::eulerAngles(Rotation);
             RotationMatrix = glm::rotate(RotationMatrix, -3.14f / 2.0f, glm::vec3(1.0f, 0.0f, 0.0f));
             
             rControl.SetPosition(Position);
@@ -1027,6 +1028,7 @@ namespace
                 Translation = glm::translate(Position);
 
                 BufferData.m_WorldMatrix = Translation * Scaling;
+                BufferData.m_WorldMatrix = glm::eulerAngleX(glm::radians(90.0f)) * BufferData.m_WorldMatrix;
                 BufferData.m_Color = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
 
                 BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
@@ -1078,6 +1080,7 @@ namespace
                 Translation = glm::translate(Position);
 
                 BufferData.m_WorldMatrix = Translation * Scaling;
+                BufferData.m_WorldMatrix = glm::eulerAngleX(glm::radians(90.0f)) * BufferData.m_WorldMatrix;
                 BufferData.m_Color = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
 
                 BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
@@ -1133,6 +1136,7 @@ namespace
                 Translation = glm::translate(Position);
 
                 BufferData.m_WorldMatrix = Translation;
+                BufferData.m_WorldMatrix = glm::eulerAngleX(glm::radians(90.0f)) * BufferData.m_WorldMatrix;
                 BufferData.m_Color = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
 
                 BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
@@ -1239,6 +1243,7 @@ namespace
 		SDrawCallConstantBuffer BufferData;
 
 		BufferData.m_WorldMatrix = (m_pScalableReconstructor != nullptr) ? m_pScalableReconstructor->GetPoseMatrix() : m_pReconstructor->GetPoseMatrix();
+        BufferData.m_WorldMatrix = glm::eulerAngleX(glm::radians(90.0f)) * BufferData.m_WorldMatrix;
 		BufferData.m_Color = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
 
 		BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
@@ -1269,6 +1274,7 @@ namespace
         SDrawCallConstantBuffer BufferData;
 
         BufferData.m_WorldMatrix = glm::mat4(1);
+        BufferData.m_WorldMatrix = BufferData.m_WorldMatrix * glm::eulerAngleX(glm::radians(90.0f));
         BufferData.m_Color = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
 
         BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);

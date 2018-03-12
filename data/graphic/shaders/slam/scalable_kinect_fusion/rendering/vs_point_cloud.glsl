@@ -24,18 +24,12 @@ out gl_PerVertex
 
 void main()
 {
-    mat3 Rot2 = mat3(
-        1.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, -1.0f,
-        0.0f, 1.0f, 0.0f
-    );
-
     ivec2 UV;
     UV.x = gl_VertexID % DEPTH_IMAGE_WIDTH;
     UV.y = gl_VertexID / DEPTH_IMAGE_WIDTH;
     vec4 WSPosition = imageLoad(cs_VertexMap, UV);
     WSPosition.w = 1.0f;
-    WSPosition = g_WorldMatrix * vec4(Rot2 * WSPosition.xyz, 1.0f);
+    WSPosition = g_WorldMatrix * vec4(WSPosition.xyz, 1.0f);
     gl_Position = g_WorldToScreen * WSPosition;
     gl_PointSize = 3.0f;
 }
