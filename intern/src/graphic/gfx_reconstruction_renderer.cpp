@@ -955,7 +955,8 @@ namespace
 	{
         Performance::BeginEvent("Raycasting for rendering");
 
-        ContextManager::SetTargetSet(m_IntermediateTargetSetPtr);
+        //ContextManager::SetTargetSet(m_IntermediateTargetSetPtr);
+        ContextManager::SetTargetSet(TargetSetManager::GetDeferredTargetSet());
 
         MR::CScalableSLAMReconstructor::SScalableVolume& rVolume = m_pScalableReconstructor->GetVolume();
 
@@ -994,7 +995,7 @@ namespace
             (rVolume.m_MaxOffset[2] + 1.0f) * Settings.m_VolumeSize
         );
 
-        glm::vec3 Vertices[8] =
+        /*glm::vec3 Vertices[8] =
         {
             glm::vec3(glm::eulerAngleX(glm::radians(90.0f)) * glm::vec4(Min[0], Min[1], Min[2], 1.0f)),
             glm::vec3(glm::eulerAngleX(glm::radians(90.0f)) * glm::vec4(Max[0], Min[1], Min[2], 1.0f)),
@@ -1004,9 +1005,9 @@ namespace
             glm::vec3(glm::eulerAngleX(glm::radians(90.0f)) * glm::vec4(Max[0], Min[1], Max[2], 1.0f)),
             glm::vec3(glm::eulerAngleX(glm::radians(90.0f)) * glm::vec4(Max[0], Max[1], Max[2], 1.0f)),
             glm::vec3(glm::eulerAngleX(glm::radians(90.0f)) * glm::vec4(Min[0], Max[1], Max[2], 1.0f))
-        };
+        };*/
 
-        /*glm::vec3 Vertices[8] =
+        glm::vec3 Vertices[8] =
         {
             glm::vec3(Min[0], Min[1], Min[2]),
             glm::vec3(Max[0], Min[1], Min[2]),
@@ -1016,7 +1017,7 @@ namespace
             glm::vec3(Max[0], Min[1], Max[2]),
             glm::vec3(Max[0], Max[1], Max[2]),
             glm::vec3(Min[0], Max[1], Max[2])
-        };*/
+        };
 
         glm::vec4 RaycastData[2];
         PoseMatrix = glm::translate(glm::vec3(RaycastData[0][0], RaycastData[0][1], RaycastData[0][2]));
@@ -1044,7 +1045,7 @@ namespace
 
         Performance::EndEvent();
 
-        ContextManager::SetTargetSet(TargetSetManager::GetDeferredTargetSet());
+        /*ContextManager::SetTargetSet(TargetSetManager::GetDeferredTargetSet());
 
         ContextManager::SetShaderVS(m_CopyRaycastVSPtr);
         ContextManager::SetShaderPS(m_CopyRaycastFSPtr);
@@ -1058,7 +1059,7 @@ namespace
 
         ContextManager::SetTopology(STopology::TriangleStrip);
 
-        ContextManager::Draw(4, 0);
+        ContextManager::Draw(4, 0);*/
 	}
     
 	// -----------------------------------------------------------------------------
