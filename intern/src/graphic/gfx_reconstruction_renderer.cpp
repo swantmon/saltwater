@@ -775,22 +775,18 @@ namespace
         {
             Cam::CControl& rControl = static_cast<Cam::CEditorControl&>(Cam::ControlManager::GetActiveControl());
             
-            glm::mat4 PoseMatrix = (m_pScalableReconstructor != nullptr) ? m_pScalableReconstructor->GetPoseMatrix() : m_pReconstructor->GetPoseMatrix();
-                        
-            glm::vec3 Scale;
-            glm::vec3 Position;
-            glm::quat Rotation;
-            glm::vec3 Skew;
-            glm::vec4 Perspective;
+            glm::mat4 PoseMatrix = ((m_pScalableReconstructor != nullptr) ? m_pScalableReconstructor->GetPoseMatrix() : m_pReconstructor->GetPoseMatrix());
+            PoseMatrix = glm::eulerAngleX(glm::radians(90.0f)) * PoseMatrix;
 
-            glm::decompose(PoseMatrix, Scale, Rotation, Position, Skew, Perspective);
+            glm::vec3 Eye = PoseMatrix * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+            glm::vec3 At = PoseMatrix * glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+            glm::vec3 Up = PoseMatrix * glm::vec4(0.0f, -1.0f, 0.0f, 0.0f);
 
-            glm::mat4 RotationMatrix = glm::toMat4(Rotation);
-            glm::vec3 Euler = glm::eulerAngles(Rotation);
-            RotationMatrix = glm::rotate(RotationMatrix, -3.14f / 2.0f, glm::vec3(1.0f, 0.0f, 0.0f));
-            
-            rControl.SetPosition(Position);
-            rControl.SetRotation(RotationMatrix);
+            glm::mat4 View = glm::lookAtRH(Eye, At, Up);
+
+            rControl.SetPosition(glm::vec4(Eye, 1.0f));
+            rControl.SetRotation(glm::mat4(glm::inverse(glm::mat3(View))));
+            rControl.Update();
         }
         glEnable(GL_PROGRAM_POINT_SIZE);
     }
