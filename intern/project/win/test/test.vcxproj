@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\test\base\test_base_aabb3.cpp" />
+    <ClCompile Include="..\..\..\test\base\test_base_coordinate_system.cpp" />
     <ClCompile Include="..\..\..\test\base\test_base_crc.cpp" />
     <ClCompile Include="..\..\..\test\base\test_base_exception.cpp" />
     <ClCompile Include="..\..\..\test\base\test_base_getopt.cpp" />
