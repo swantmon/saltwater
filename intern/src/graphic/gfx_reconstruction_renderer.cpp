@@ -949,6 +949,18 @@ namespace
 
         glm::vec3 Vertices[8] =
         {
+            glm::vec3(glm::eulerAngleX(glm::radians(90.0f)) * glm::vec4(Min[0], Min[1], Min[2], 1.0f)),
+            glm::vec3(glm::eulerAngleX(glm::radians(90.0f)) * glm::vec4(Max[0], Min[1], Min[2], 1.0f)),
+            glm::vec3(glm::eulerAngleX(glm::radians(90.0f)) * glm::vec4(Max[0], Max[1], Min[2], 1.0f)),
+            glm::vec3(glm::eulerAngleX(glm::radians(90.0f)) * glm::vec4(Min[0], Max[1], Min[2], 1.0f)),
+            glm::vec3(glm::eulerAngleX(glm::radians(90.0f)) * glm::vec4(Min[0], Min[1], Max[2], 1.0f)),
+            glm::vec3(glm::eulerAngleX(glm::radians(90.0f)) * glm::vec4(Max[0], Min[1], Max[2], 1.0f)),
+            glm::vec3(glm::eulerAngleX(glm::radians(90.0f)) * glm::vec4(Max[0], Max[1], Max[2], 1.0f)),
+            glm::vec3(glm::eulerAngleX(glm::radians(90.0f)) * glm::vec4(Min[0], Max[1], Max[2], 1.0f))
+        };
+
+        /*glm::vec3 Vertices[8] =
+        {
             glm::vec3(Min[0], Min[1], Min[2]),
             glm::vec3(Max[0], Min[1], Min[2]),
             glm::vec3(Max[0], Max[1], Min[2]),
@@ -956,8 +968,8 @@ namespace
             glm::vec3(Min[0], Min[1], Max[2]),
             glm::vec3(Max[0], Min[1], Max[2]),
             glm::vec3(Max[0], Max[1], Max[2]),
-            glm::vec3(Min[0], Max[1], Max[2]),
-        };
+            glm::vec3(Min[0], Max[1], Max[2])
+        };*/
 
         glm::vec4 RaycastData[2];
         PoseMatrix = glm::translate(glm::vec3(RaycastData[0][0], RaycastData[0][1], RaycastData[0][2]));
