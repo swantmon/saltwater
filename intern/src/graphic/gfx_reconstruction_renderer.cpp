@@ -136,6 +136,9 @@ namespace
         CShaderPtr m_RaycastVSPtr;
         CShaderPtr m_RaycastFSPtr;
 
+        CShaderPtr m_CopyRaycastVSPtr;
+        CShaderPtr m_CopyRaycastFSPtr;
+
         CShaderPtr m_HistogramVSPtr;
         CShaderPtr m_HistogramFSPtr;
 
@@ -160,6 +163,10 @@ namespace
         
         CShaderPtr m_PointCloudVSPtr;
         CShaderPtr m_PointCloudFSPtr;
+
+        CTexturePtr m_IntermediateTargetPtr0;
+        CTexturePtr m_IntermediateTargetPtr1;
+        CTargetSetPtr m_IntermediateTargetSetPtr;
 
         bool m_UseTrackingCamera;
 
@@ -246,6 +253,8 @@ namespace
         m_OutlineLevel2FSPtr = 0;
         m_RaycastVSPtr = 0;
         m_RaycastFSPtr = 0;
+        m_CopyRaycastVSPtr = 0;
+        m_CopyRaycastFSPtr = 0;
         m_HistogramVSPtr = 0;
         m_HistogramFSPtr = 0;
 
@@ -272,6 +281,10 @@ namespace
 
         m_PointCloudVSPtr = 0;
         m_PointCloudFSPtr = 0;
+
+        m_IntermediateTargetPtr0 = nullptr;
+        m_IntermediateTargetPtr1 = nullptr;
+        m_IntermediateTargetSetPtr = nullptr;
     }
     
     // -----------------------------------------------------------------------------
@@ -331,6 +344,9 @@ namespace
             
             m_RaycastVSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_raycast.glsl", "main", DefineString.c_str());
             m_RaycastFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_raycast.glsl", "main", DefineString.c_str());
+
+            m_CopyRaycastVSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_copy_raycast.glsl", "main", DefineString.c_str());
+            m_CopyRaycastFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_copy_raycast.glsl", "main", DefineString.c_str());
 
             m_HistogramVSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_histogram.glsl", "main", DefineString.c_str());
             m_HistogramFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_histogram.glsl", "main", DefineString.c_str());
@@ -411,7 +427,25 @@ namespace
     
     void CGfxReconstructionRenderer::OnSetupTextures()
     {
+        glm::ivec2 Size = Main::GetActiveWindowSize();
 
+        STextureDescriptor TextureDescriptor = {};
+
+        TextureDescriptor.m_NumberOfPixelsU = Size.x;
+        TextureDescriptor.m_NumberOfPixelsV = Size.y;
+        TextureDescriptor.m_NumberOfPixelsW = 1;
+        TextureDescriptor.m_NumberOfMipMaps = 1;
+        TextureDescriptor.m_NumberOfTextures = 1;
+        TextureDescriptor.m_Binding = CTexture::ShaderResource | CTexture::RenderTarget;
+        TextureDescriptor.m_Access = CTexture::CPUWrite;
+        TextureDescriptor.m_Usage = CTexture::GPUReadWrite;
+        TextureDescriptor.m_Semantic = CTexture::UndefinedSemantic;
+        TextureDescriptor.m_Format = CTexture::R16G16B16A16_FLOAT;
+
+        m_IntermediateTargetPtr0 = TextureManager::CreateTexture2D(TextureDescriptor);
+        m_IntermediateTargetPtr1 = TextureManager::CreateTexture2D(TextureDescriptor);
+
+        m_IntermediateTargetSetPtr = TargetSetManager::CreateTargetSet(m_IntermediateTargetPtr0, m_IntermediateTargetPtr1);
     }
     
     // -----------------------------------------------------------------------------
@@ -763,8 +797,23 @@ namespace
 
     void CGfxReconstructionRenderer::OnResize(unsigned int _Width, unsigned int _Height)
     {
-        BASE_UNUSED(_Width);
-        BASE_UNUSED(_Height);
+        STextureDescriptor TextureDescriptor = {};
+
+        TextureDescriptor.m_NumberOfPixelsU = _Width;
+        TextureDescriptor.m_NumberOfPixelsV = _Height;
+        TextureDescriptor.m_NumberOfPixelsW = 1;
+        TextureDescriptor.m_NumberOfMipMaps = 1;
+        TextureDescriptor.m_NumberOfTextures = 1;
+        TextureDescriptor.m_Binding = CTexture::ShaderResource | CTexture::RenderTarget;
+        TextureDescriptor.m_Access = CTexture::CPUWrite;
+        TextureDescriptor.m_Usage = CTexture::GPUReadWrite;
+        TextureDescriptor.m_Semantic = CTexture::UndefinedSemantic;
+        TextureDescriptor.m_Format = CTexture::R16G16B16A16_FLOAT;
+
+        m_IntermediateTargetPtr0 = TextureManager::CreateTexture2D(TextureDescriptor);
+        m_IntermediateTargetPtr1 = TextureManager::CreateTexture2D(TextureDescriptor);
+
+        m_IntermediateTargetSetPtr = TargetSetManager::CreateTargetSet(m_IntermediateTargetPtr0, m_IntermediateTargetPtr1);
     }
 
     // -----------------------------------------------------------------------------
@@ -906,6 +955,8 @@ namespace
 	{
         Performance::BeginEvent("Raycasting for rendering");
 
+        ContextManager::SetTargetSet(m_IntermediateTargetSetPtr);
+
         MR::CScalableSLAMReconstructor::SScalableVolume& rVolume = m_pScalableReconstructor->GetVolume();
 
         MR::SReconstructionSettings Settings;
@@ -992,6 +1043,22 @@ namespace
         ContextManager::DrawIndexed(36, 0, 0);
 
         Performance::EndEvent();
+
+        ContextManager::SetTargetSet(TargetSetManager::GetDeferredTargetSet());
+
+        ContextManager::SetShaderVS(m_CopyRaycastVSPtr);
+        ContextManager::SetShaderPS(m_CopyRaycastFSPtr);
+
+        ContextManager::SetVertexBuffer(m_QuadMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+        ContextManager::SetIndexBuffer(m_QuadMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
+        ContextManager::SetInputLayout(m_QuadInputLayoutPtr);
+
+        ContextManager::SetImageTexture(0, m_IntermediateTargetPtr0);
+        ContextManager::SetImageTexture(1, m_IntermediateTargetPtr1);
+
+        ContextManager::SetTopology(STopology::TriangleStrip);
+
+        ContextManager::Draw(4, 0);
 	}
     
 	// -----------------------------------------------------------------------------
