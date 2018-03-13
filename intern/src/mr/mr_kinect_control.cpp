@@ -122,6 +122,10 @@ namespace MR
                 }
             }
         }
+        if (g_StoreFrames)
+        {
+            TotalDepthBuffers.reserve(GetDepthPixelCount() * 2000);
+        }
     }
 
     // -----------------------------------------------------------------------------
