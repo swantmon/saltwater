@@ -1377,7 +1377,7 @@ namespace MR
             return;
         }
 
-        /*
+        //*
         if (!m_pRGBDCameraControl->GetDepthBuffer(pDepth))
         {
             return;
