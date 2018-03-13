@@ -9,74 +9,36 @@ namespace CORE
     {
     public:
 
-        enum ECoordinateSystem
-        {
-            Left,
-            Right,
-            YUp,
-            ZUp,
-        };
+        static glm::mat3 GetBaseMatrix(const glm::vec3& _rRight, const glm::vec3& _rUp, const glm::vec3& _rForword);
 
-    public:
+    private:
 
-        template <ECoordinateSystem SourceSystem, ECoordinateSystem TargetSystem>
-        static glm::mat3 GetBaseMatrix();
+        static glm::mat3 s_Reference;
     };
 } // namespace CORE
 
 namespace CORE
 {
-    template <ECoordinateSystem SourceSystem, ECoordinateSystem TargetSystem>
-    static glm::mat3 CCoordinateSystem::GetBaseMatrix()
-    {
-        assert("Undefined base matrix!");
-    }
+    glm::mat3 CCoordinateSystem::s_Reference(
+        glm::vec3(1.0f, 0.0f, 0.0f),
+        glm::vec3(0.0f, 0.0f, 1.0f),
+        glm::vec3(0.0f, 1.0f, 0.0f)
+    );
 
     // -----------------------------------------------------------------------------
 
-    template <>
-    static glm::mat3 CCoordinateSystem::GetBaseMatrix<CCoordinateSystem::ECoordinateSystem::Left, CCoordinateSystem::ECoordinateSystem::Right>()
+    glm::mat3 CCoordinateSystem::GetBaseMatrix(const glm::vec3& _rRight, const glm::vec3& _rUp, const glm::vec3& _rForword)
     {
-        return glm::mat3(
-            glm::vec3(-1.0f, 0.0f, 0.0f),
-            glm::vec3( 0.0f, 1.0f, 0.0f),
-            glm::vec3( 0.0f, 0.0f, 1.0f)
+        // -----------------------------------------------------------------------------
+        // Idea from:
+        // https://gamedev.stackexchange.com/questions/26084/how-to-get-the-rotation-matrix-to-transform-between-two-3d-cartesian-coordinate
+        // -----------------------------------------------------------------------------
+        glm::mat3 Target(
+            _rRight,
+            _rUp,
+            _rForword
         );
-    }
 
-    // -----------------------------------------------------------------------------
-
-    template <>
-    static glm::mat3 CCoordinateSystem::GetBaseMatrix<CCoordinateSystem::ECoordinateSystem::Right, CCoordinateSystem::ECoordinateSystem::Left>()
-    {
-        return glm::mat3(
-            glm::vec3(-1.0f, 0.0f, 0.0f),
-            glm::vec3( 0.0f, 1.0f, 0.0f),
-            glm::vec3( 0.0f, 0.0f, 1.0f)
-        );
-    }
-
-    // -----------------------------------------------------------------------------
-
-    template <>
-    static glm::mat3 CCoordinateSystem::GetBaseMatrix<CCoordinateSystem::ECoordinateSystem::YUp, CCoordinateSystem::ECoordinateSystem::ZUp>()
-    {
-        return glm::mat3(
-            glm::vec3(1.0f,  0.0f, 0.0f),
-            glm::vec3(0.0f,  0.0f, 1.0f),
-            glm::vec3(0.0f, -1.0f, 0.0f)
-        );
-    }
-
-    // -----------------------------------------------------------------------------
-
-    template <>
-    static glm::mat3 CCoordinateSystem::GetBaseMatrix<CCoordinateSystem::ECoordinateSystem::ZUp, CCoordinateSystem::ECoordinateSystem::YUp>()
-    {
-        return glm::mat3(
-            glm::vec3(1.0f, 0.0f,  0.0f),
-            glm::vec3(0.0f, 0.0f, -1.0f),
-            glm::vec3(0.0f, 1.0f,  0.0f)
-        );
+        return Target * glm::inverse(s_Reference);
     }
 } // namespace CORE
