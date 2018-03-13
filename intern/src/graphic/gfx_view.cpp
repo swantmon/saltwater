@@ -117,11 +117,11 @@ namespace Gfx
         // --------------------------------------------------------------------------------
         // Create the view matrix.
         // --------------------------------------------------------------------------------
-        m_ViewMatrix[0][0] = XAxis[0];                     m_ViewMatrix[0][1] = YAxis[0];                     m_ViewMatrix[0][2] = ZAxis[0];                     m_ViewMatrix[0][3] = 0.0f;
-        m_ViewMatrix[1][0] = XAxis[1];                     m_ViewMatrix[1][1] = YAxis[1];                     m_ViewMatrix[1][2] = ZAxis[1];                     m_ViewMatrix[1][3] = 0.0f;
-        m_ViewMatrix[2][0] = XAxis[2];                     m_ViewMatrix[2][1] = YAxis[2];                     m_ViewMatrix[2][2] = ZAxis[2];                     m_ViewMatrix[2][3] = 0.0f;
-        m_ViewMatrix[3][0] = -glm::dot(XAxis, m_Position); m_ViewMatrix[3][1] = -glm::dot(YAxis, m_Position); m_ViewMatrix[3][2] = -glm::dot(ZAxis, m_Position); m_ViewMatrix[3][3] = 1.0f;
-        
+        m_ViewMatrix[0][0] = XAxis[0]; m_ViewMatrix[1][0] = XAxis[1]; m_ViewMatrix[2][0] = XAxis[2]; m_ViewMatrix[3][0] = -glm::dot(XAxis, m_Position);
+        m_ViewMatrix[0][1] = YAxis[0]; m_ViewMatrix[1][1] = YAxis[1]; m_ViewMatrix[2][1] = YAxis[2]; m_ViewMatrix[3][1] = -glm::dot(YAxis, m_Position);
+        m_ViewMatrix[0][2] = ZAxis[0]; m_ViewMatrix[1][2] = ZAxis[1]; m_ViewMatrix[2][2] = ZAxis[2]; m_ViewMatrix[3][2] = -glm::dot(ZAxis, m_Position);
+        m_ViewMatrix[0][3] = 0.0f;     m_ViewMatrix[1][3] = 0.0f;     m_ViewMatrix[2][3] = 0.0f;     m_ViewMatrix[3][3] = 1.0f;
+
         // --------------------------------------------------------------------------------
         // Update all the cameras attached to the current view.
         // --------------------------------------------------------------------------------
