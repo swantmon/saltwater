@@ -319,7 +319,7 @@ namespace
                 << "#define MAP_TEXTURE_FORMAT "     << InternalFormatString << " \n"
                 << "#define RAYCAST_NEAR "           << 0.0f << " \n"
                 << "#define RAYCAST_FAR "            << 1000.0f << " \n"
-                << "#define MIN_TREE_WEIGHT "        << 0 << " \n";
+                << "#define MIN_TREE_WEIGHT "        << Base::CProgramParameters::GetInstance().Get("mr:slam:rendering:min_weight", 30) << " \n";
             
             if (Settings.m_CaptureColor)
             {
