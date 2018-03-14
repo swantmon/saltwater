@@ -51,11 +51,12 @@ namespace
     
     const unsigned int g_MegabyteSize = 1024u * 1024u;
 
-    const int g_AABB = 8;
+    const int g_AABB = 16;
 
     const int g_MaxVolumeInstanceCount = 512;
 
     /*
+
     const unsigned int g_MaxRootVolumePoolSize =        g_MegabyteSize;
     const unsigned int g_MaxRootGridPoolSize   =  16u * g_MegabyteSize;
     const unsigned int g_MaxLevel1GridPoolSize =  64u * g_MegabyteSize;
@@ -1490,7 +1491,7 @@ namespace MR
                 BASE_CONSOLE_ERROR("TSDF pool buffer is full!");
             }
         }
-
+         
         unsigned int ReconstructionSizeBytes = m_VolumeBuffers.m_RootGridPoolSize * m_ReconstructionSettings.m_VoxelsPerGrid[0] * sizeof(SGridPoolItem);
         ReconstructionSizeBytes += m_VolumeBuffers.m_Level1PoolSize * m_ReconstructionSettings.m_VoxelsPerGrid[1] * sizeof(SGridPoolItem);
         ReconstructionSizeBytes += m_VolumeBuffers.m_TSDFPoolSize * m_ReconstructionSettings.m_VoxelsPerGrid[2] * TSDFItemSize;
