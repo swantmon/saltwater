@@ -56,7 +56,7 @@ void main()
 #else
 
     WSPosition = GetPosition(Cameraposition, RayDirection);
-    Color = g_Color.rgb;
+    Color = vec3(1.0f, 1.0f, 1.0f); //g_Color.rgb; TODO: use color from buffer
  
 #endif
  

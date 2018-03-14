@@ -889,7 +889,7 @@ namespace
         }
         else
         {
-            RaycastData[1] = m_pReconstructor->IsTrackingLost() ? glm::vec4(1.0f, 0.0f, 0.0f, 1.0f) : glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
+            RaycastData[1] = m_pReconstructor->IsTrackingLost() ? glm::vec4(1.0f, 0.0f, 0.0f, 1.0f) : glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
         }
 
         BufferManager::UploadBufferData(m_RaycastConstantBufferPtr, RaycastData);
@@ -1028,7 +1028,7 @@ namespace
         }
         else
         {
-            RaycastData[1] = m_pScalableReconstructor->IsTrackingLost() ? glm::vec4(1.0f, 0.0f, 0.0f, 1.0f) : glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
+            RaycastData[1] = m_pScalableReconstructor->IsTrackingLost() ? glm::vec4(1.0f, 0.0f, 0.0f, 1.0f) : glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
         }
         BufferManager::UploadBufferData(m_RaycastConstantBufferPtr, RaycastData);
 
