@@ -194,11 +194,9 @@ namespace MR
             }
 
             const int PixelCount = GetDepthPixelCount();
-            for (int i = 0; i < PixelCount; ++i)
-            {
-                pBuffer[i] = pShortBuffer[i];
-                m_DepthBuffer[i] = pShortBuffer[i];
-            }
+            
+            std::memcpy(pBuffer, pShortBuffer, sizeof(pShortBuffer[0]) * PixelCount);
+            std::memcpy(m_DepthBuffer.data(), pShortBuffer, sizeof(pShortBuffer[0]) * PixelCount);
 
             pDepthFrame->Release();
             
