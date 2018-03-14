@@ -63,8 +63,8 @@ namespace MR
         std::vector<UINT16> m_DepthBuffer;
         std::vector<ColorSpacePoint> m_ColorSpacePoints;
 
-        bool g_StoreFrames;
-        bool g_LoadFrames;
+        bool m_StoreFrames;
+        bool m_LoadFrames;
 
         std::string m_DatasetPath;
     };

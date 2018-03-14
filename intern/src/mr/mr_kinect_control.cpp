@@ -64,10 +64,10 @@ namespace MR
     {
         int StoreMode = Base::CProgramParameters::GetInstance().Get("mr:slam:storing:mode", 0);
         m_DatasetPath = Base::CProgramParameters::GetInstance().Get("mr:slam:storing:path", "dataset");
-        g_StoreFrames = StoreMode == 1;
-        g_LoadFrames = StoreMode == 2;
+        m_StoreFrames = StoreMode == 1;
+        m_LoadFrames = StoreMode == 2;
 
-        assert(!(g_LoadFrames && g_StoreFrames));
+        assert(!(m_LoadFrames && m_StoreFrames));
 
         ////////////////////////////////////////////////////////////////////////////////////////////
         // Initialize kinect
@@ -98,7 +98,7 @@ namespace MR
         LoadedFrameCount = 0;
         CurrentLoadedFrame = 0;
 
-        if (g_LoadFrames)
+        if (m_LoadFrames)
         {
             for (;;)
             {
@@ -122,7 +122,7 @@ namespace MR
                 }
             }
         }
-        if (g_StoreFrames)
+        if (m_StoreFrames)
         {
             TotalDepthBuffers.reserve(GetDepthPixelCount() * 2000);
         }
@@ -140,7 +140,7 @@ namespace MR
         }
         SafeRelease(m_pKinect);
         
-        if (g_StoreFrames)
+        if (m_StoreFrames)
         {
             for (int FrameIndex = 0; FrameIndex < TotalDepthBuffers.size() / GetDepthPixelCount(); ++FrameIndex)
             {
@@ -158,7 +158,7 @@ namespace MR
 
     bool CKinectControl::GetDepthBuffer(unsigned short* pBuffer)
     {
-        if (g_LoadFrames)
+        if (m_LoadFrames)
         {
             if (CurrentLoadedFrame < LoadedFrameCount)
             {
@@ -200,7 +200,7 @@ namespace MR
 
             pDepthFrame->Release();
             
-            if (g_StoreFrames)
+            if (m_StoreFrames)
             {
                 for (auto Value : m_DepthBuffer)
                 {
