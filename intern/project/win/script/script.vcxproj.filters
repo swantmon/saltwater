@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\script\script_precompiled.cpp" />
+    <ClCompile Include="..\..\..\src\script\script_manager.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\src\script\script_precompiled.h" />
+    <ClInclude Include="..\..\..\src\script\script_manager.h" />
+    <ClInclude Include="..\..\..\src\script\script_camera_control_script.h">
+      <Filter>scripts</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\script\script_base_script.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="scripts">
+      <UniqueIdentifier>{fb0fddd0-7a83-44d7-8f58-0eb297a29921}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

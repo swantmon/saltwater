@@ -22,6 +22,8 @@
 
 #include "logic/lg_play_state.h"
 
+#include "script/script_manager.h"
+
 namespace
 {
     class CLgPlayState : private Base::CUncopyable
@@ -49,6 +51,8 @@ namespace
 {
     int CLgPlayState::OnEnter()
     {
+        Script::CScriptManager::GetInstance().OnStart();
+
         // -----------------------------------------------------------------------------
         // Define variables
         // -----------------------------------------------------------------------------
@@ -66,6 +70,8 @@ namespace
     
     int CLgPlayState::OnLeave()
     {        
+        Script::CScriptManager::GetInstance().OnExit();
+
         // -----------------------------------------------------------------------------
         // Unregister input event delegate @ gui event handler
         // -----------------------------------------------------------------------------
@@ -82,6 +88,8 @@ namespace
         // Update data manager
         // -----------------------------------------------------------------------------
         Dt::EntityManager::Update();
+
+        Script::CScriptManager::GetInstance().Update();
 
         // -----------------------------------------------------------------------------
         // Get main camera entity and set this entity to the camera project
