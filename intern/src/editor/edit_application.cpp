@@ -2,6 +2,7 @@
 #include "editor/edit_precompiled.h"
 
 #include "base/base_console.h"
+#include "base/base_exception.h"
 #include "base/base_input_event.h"
 #include "base/base_program_parameters.h"
 #include "base/base_uncopyable.h"
@@ -36,6 +37,8 @@
 
 #include "gui/gui_event_handler.h"
 
+#include "SDL2/SDL.h"
+
 namespace
 {
     class CApplication : private Base::CUncopyable
@@ -64,6 +67,8 @@ namespace
         Edit::CState::EStateType m_CurrentState;
         unsigned int             m_EditWindowID;
         glm::vec2             m_LatestMousePosition;
+
+        SDL_Joystick* m_pGamePad;
         
     private:
         
@@ -104,6 +109,7 @@ namespace
         : m_CurrentState       (Edit::CState::Start)
         , m_EditWindowID       (0)
         , m_LatestMousePosition(glm::vec2(0, 0))
+        , m_pGamePad(nullptr)
     { 
     }
     
@@ -116,7 +122,29 @@ namespace
     // -----------------------------------------------------------------------------
     
     void CApplication::OnStart(int& _rArgc, char** _ppArgv)
-    {   
+    {
+        // -----------------------------------------------------------------------------
+        // Init SDL for gamepad input
+        // -----------------------------------------------------------------------------
+        if (SDL_Init(SDL_INIT_JOYSTICK) < 0)
+        {
+            BASE_THROWM("Could not initialise SDL");
+        }
+
+        if (SDL_NumJoysticks() < 1)
+        {
+            BASE_CONSOLE_INFOV("No gamepads found");
+        }
+        else
+        {
+            m_pGamePad = SDL_JoystickOpen(0);
+            if (m_pGamePad == nullptr)
+            {
+                BASE_THROWM("Could not initialise controller");
+            }
+            BASE_CONSOLE_INFOV(SDL_JoystickName(m_pGamePad));
+        }
+
         // -----------------------------------------------------------------------------
         // Setup asset manager
         // -----------------------------------------------------------------------------
@@ -186,6 +214,9 @@ namespace
     
     void CApplication::OnExit()
     {
+        SDL_JoystickClose(m_pGamePad);
+        SDL_Quit();
+
         // -----------------------------------------------------------------------------
         // Exit the application
         // -----------------------------------------------------------------------------
@@ -222,6 +253,8 @@ namespace
             // Events
             // -----------------------------------------------------------------------------
             Edit::GUI::ProcessEvents();
+
+
 
             // -----------------------------------------------------------------------------
             // Time
