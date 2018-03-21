@@ -34,9 +34,10 @@ set( CMAKE_INCLUDE_CURRENT_DIR ON )
 # 05. graphic
 # 06. gui
 # 07. logic
-# 08. mr
+# 09. script
+# 10. mr
 # ---------------------------------------
-set( MyLibraries camera graphic logic mr core data gui base )
+set( MyLibraries camera graphic logic script mr core data gui base )
 
 include_directories( ${IncludeDir} )
 
