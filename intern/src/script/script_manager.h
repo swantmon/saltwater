@@ -37,8 +37,11 @@ namespace Script
     private:
 
         CScripts m_Scripts;
+        Base::ID m_CurrentID;
 
     private:
+
+        void OnDirtyComponent(Dt::IComponent* _pComponent);
 
         void OnInputEvent(const Base::CInputEvent& _rInputEvent);
     };
@@ -49,14 +52,14 @@ namespace Script
     template<class TScript>
     TScript* CScriptManager::AllocateScript(Dt::CEntity& _rEntity)
     {
-        // -----------------------------------------------------------------------------
-        // Allocate new script
-        // -----------------------------------------------------------------------------
         m_Scripts.emplace_back(std::unique_ptr<TScript>(new TScript()));
 
         TScript* pScript = static_cast<TScript*>(m_Scripts.back().get());
 
-        pScript->m_pEntity = &_rEntity;
+        pScript->m_ID        = m_CurrentID++;
+        pScript->m_pEntity   = &_rEntity;
+        pScript->m_IsActive  = true;
+        pScript->m_IsStarted = false;
 
         return pScript;
     }

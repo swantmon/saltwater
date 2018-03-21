@@ -1,6 +1,9 @@
 
 #include "script/script_precompiled.h"
 
+#include "data/data_script_component.h"
+#include "data/data_component_manager.h"
+
 #include "gui/gui_event_handler.h"
 
 #include "script/script_manager.h"
@@ -8,7 +11,9 @@
 namespace Script
 {
     CScriptManager::CScriptManager()
+        : m_CurrentID(0)
     {
+        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(BASE_DIRTY_COMPONENT_METHOD(&CScriptManager::OnDirtyComponent));
     }
 
     // -----------------------------------------------------------------------------
@@ -25,7 +30,11 @@ namespace Script
 
         for (auto& rScript : m_Scripts)
         {
+            if (!rScript->m_IsActive) continue;
+
             rScript->Start();
+
+            rScript->m_IsStarted = true;
         }
     }
 
@@ -35,6 +44,8 @@ namespace Script
     {
         for (auto& rScript : m_Scripts)
         {
+            if (!rScript->m_IsActive) continue;
+
             rScript->Exit();
         }
 
@@ -47,6 +58,15 @@ namespace Script
     {
         for (auto& rScript : m_Scripts)
         {
+            if (!rScript->m_IsActive) continue;
+
+            if (!rScript->m_IsStarted)
+            {
+                rScript->Start();
+
+                rScript->m_IsStarted = true;
+            }
+            
             rScript->Update();
         }
     }
@@ -61,6 +81,34 @@ namespace Script
 
     void CScriptManager::OnResume()
     {
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CScriptManager::OnDirtyComponent(Dt::IComponent* _pComponent)
+    {
+        // -----------------------------------------------------------------------------
+        // Only if component has changed
+        // -----------------------------------------------------------------------------
+        if (_pComponent->GetTypeID() != Base::CTypeInfo::GetTypeID<Dt::CScriptComponent>()) return;
+
+        Dt::CScriptComponent* pScriptComponent = static_cast<Dt::CScriptComponent*>(_pComponent);
+
+        // -----------------------------------------------------------------------------
+        // Dirty check
+        // -----------------------------------------------------------------------------
+        unsigned int DirtyFlags;
+
+        DirtyFlags = pScriptComponent->GetDirtyFlags();
+
+        if ((DirtyFlags & Dt::CScriptComponent::DirtyInfo) != 0)
+        {
+            assert(pScriptComponent->m_pScript);
+
+            CBaseScript* pInternScript = static_cast<CBaseScript*>(pScriptComponent->m_pScript);
+
+            pInternScript->m_IsActive = pScriptComponent->IsActiveAndUsable();
+        }
     }
 
     // -----------------------------------------------------------------------------
