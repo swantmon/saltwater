@@ -152,7 +152,7 @@ namespace
 
             auto Component = Dt::CComponentManager::GetInstance().Allocate<Dt::CCameraComponent>();
 
-            Component->SetActive(false);
+            Component->SetActive(true);
             Component->SetProjectionType(Dt::CCameraComponent::External);
             Component->SetClearFlag(Dt::CCameraComponent::Webcam);
 
@@ -241,7 +241,7 @@ namespace
 
             auto pMeshComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CMeshComponent>();
 
-            pMeshComponent->SetMeshType(Dt::CMeshComponent::Box);
+            pMeshComponent->SetMeshType(Dt::CMeshComponent::Cone);
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pMeshComponent, Dt::CMeshComponent::DirtyCreate);
 
@@ -412,13 +412,13 @@ void CLgLoadMapState::CreateDefaultScene()
 
             pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 4.0f));
             pTransformationFacet->SetScale(glm::vec3(1.0f));
-            pTransformationFacet->SetRotation(glm::vec3(glm::radians(45.0f), glm::radians(45.0f), 0.0f));
+            pTransformationFacet->SetRotation(glm::vec3(glm::radians(0.0f), glm::radians(0.0f), 0.0f));
 
             // -----------------------------------------------------------------------------
 
             auto pMeshComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CMeshComponent>();
 
-            pMeshComponent->SetMeshType(Dt::CMeshComponent::Box);
+            pMeshComponent->SetMeshType(Dt::CMeshComponent::Cone);
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pMeshComponent, Dt::CMeshComponent::DirtyCreate);
 

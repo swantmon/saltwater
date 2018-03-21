@@ -60,9 +60,9 @@ namespace Dt
         void SetFoV(float _FoV);
         float GetFoV() const;
 
-        void SetProjectionMatrix(const glm::mat3& _rProjection);
-        glm::mat3& GetProjectionMatrix();
-        const glm::mat3& GetProjectionMatrix() const;
+        void SetProjectionMatrix(const glm::mat4& _rProjection);
+        glm::mat4& GetProjectionMatrix();
+        const glm::mat4& GetProjectionMatrix() const;
 
         void SetNear(float _Near);
         float GetNear() const;
@@ -110,7 +110,7 @@ namespace Dt
         float            m_Near;                            //< Near field of the camera
         float            m_Far;                             //< Far field of the camera
         glm::vec3        m_BackgroundColor;                 //< Default background color of the camera (depending on clear flag)
-        glm::mat3        m_ProjectionMatrix;                //< RAW projection matrix even RAW is active
+        glm::mat4        m_ProjectionMatrix;                //< RAW projection matrix even RAW is active
         Base::AABB2Float m_ViewportRect;                    //< View port this camera should render
         EClearFlag       m_ClearFlag;                       //< Clear flag of the render target (@see EClearFlag)
         EProjectionType  m_ProjectionType;                  //< Camera can be orthographic or projection

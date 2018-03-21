@@ -1,6 +1,7 @@
 
 #include "mr/mr_precompiled.h"
 
+#include "base/base_coordinate_system.h"
 #include "base/base_input_event.h"
 #include "base/base_pool.h"
 #include "base/base_uncopyable.h"
@@ -114,7 +115,7 @@ namespace
 
         void main()
         {
-          gl_Position = m_MVP * vec4(in_Vertex.x, in_Vertex.y, 0.0f, 1.0f);
+          gl_Position = m_MVP * vec4(in_Vertex.x, 0.0f, in_Vertex.y, 1.0f);
 
           out_Alpha = in_Vertex.z;
         }
@@ -324,6 +325,8 @@ namespace
         Dt::CEntity* m_pEntity;
         Dt::CEntity* m_pCameraEntity;
 
+        glm::mat3 m_ARCToEngineMatrix;
+
     private:
 
         void OnDirtyEntity(Dt::CEntity* _pEntity);
@@ -340,15 +343,17 @@ namespace
 namespace
 {
     CMRControlManager::CMRControlManager()
-            : m_InstallRequested(false)
-            , m_Configuration   ( )
-            , m_pARSession      (0)
-            , m_pARFrame        (0)
-            , m_TrackedObjects  ( )
-            , m_ViewMatrix      (glm::mat4(1.0f))
-            , m_ProjectionMatrix(glm::mat4(1.0f))
-            , m_pEntity         (0)
+        : m_InstallRequested(false)
+        , m_Configuration    ( )
+        , m_pARSession       (0)
+        , m_pARFrame         (0)
+        , m_TrackedObjects   ( )
+        , m_ViewMatrix       (1.0f)
+        , m_ProjectionMatrix (1.0f)
+        , m_pEntity          (0)
+        , m_ARCToEngineMatrix(1.0f)
     {
+        m_ARCToEngineMatrix = Base::CCoordinateSystem::GetBaseMatrix(glm::vec3(1,0,0), glm::vec3(0,1,0), glm::vec3(0,0,-1));
     }
 
     // -----------------------------------------------------------------------------
@@ -467,15 +472,6 @@ namespace
         if (Result != AR_SUCCESS) return;
 
         // -----------------------------------------------------------------------------
-        // Variables for decompose
-        // -----------------------------------------------------------------------------
-        glm::vec3 Translation;
-        glm::quat Rotation;
-        glm::vec3 Scale;
-        glm::vec3 Skew;
-        glm::vec4 Perspective;
-
-        // -----------------------------------------------------------------------------
         // Update camera
         // -----------------------------------------------------------------------------
         float Near = Base::CProgramParameters::GetInstance().Get<float>("mr:ar:camera:near", 0.1f);
@@ -489,9 +485,9 @@ namespace
 
         ArCamera_getProjectionMatrix(m_pARSession, pARCamera, Near, Far, glm::value_ptr(m_ProjectionMatrix));
 
-        glm::decompose(m_ViewMatrix, Scale, Rotation, Translation, Skew, Perspective);
+        glm::mat3 WSRotation = m_ARCToEngineMatrix * glm::transpose(glm::mat3(m_ViewMatrix));
 
-        glm::vec3 WSPosition = (Rotation * Translation) * -1.0f;
+        glm::vec3 WSPosition = WSRotation * m_ViewMatrix[3] * -1.0f;
 
         if (m_pCameraEntity != nullptr && m_pCameraEntity->GetComponentFacet()->GetComponent<Dt::CCameraComponent>()->IsActiveAndUsable())
         {
@@ -501,7 +497,7 @@ namespace
 
             m_pCameraEntity->GetTransformationFacet()->SetScale(glm::vec3(1.0f));
 
-            m_pCameraEntity->GetTransformationFacet()->SetRotation(Rotation);
+            m_pCameraEntity->GetTransformationFacet()->SetRotation(glm::toQuat(WSRotation));
 
             Dt::EntityManager::MarkEntityAsDirty(*m_pCameraEntity, Dt::CEntity::DirtyMove);
 
@@ -514,16 +510,6 @@ namespace
             pCameraComponent->SetProjectionMatrix(m_ProjectionMatrix);
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pCameraComponent, Dt::CCameraComponent::DirtyInfo);
-        }
-        else
-        {
-            Gfx::Cam::SetPosition(WSPosition);
-
-            Gfx::Cam::SetRotationMatrix(glm::toMat3(Rotation));
-
-            Gfx::Cam::SetProjectionMatrix(m_ProjectionMatrix, Near, Far);
-
-            Gfx::Cam::Update();
         }
 
         ArTrackingState CameraTrackingState;
@@ -587,11 +573,9 @@ namespace
             {
                 Dt::CTransformationFacet* pTransformation = m_pEntity->GetTransformationFacet();
 
-                glm::decompose(ModelMatrix, Scale, Rotation, Translation, Skew, Perspective);
+                pTransformation->SetPosition(glm::mat4(m_ARCToEngineMatrix) * ModelMatrix[3]);
 
-                pTransformation->SetPosition(Translation);
-
-                pTransformation->SetRotation(glm::eulerAngles(Rotation));
+                pTransformation->SetRotation(glm::eulerAngles(glm::toQuat(glm::mat3(ModelMatrix))));
 
                 Dt::EntityManager::MarkEntityAsDirty(*m_pEntity, Dt::CEntity::DirtyMove);
             }
@@ -952,7 +936,7 @@ namespace
             // Prepare model-view-projection matrix
             // TODO: Change color depending on height of the plane
             // -----------------------------------------------------------------------------
-            glm::mat4 PlaneMVPMatrix = Gfx::Cam::GetProjectionMatrix() * Gfx::Cam::GetViewMatrix() * PlaneModelMatrix * glm::eulerAngleX(glm::radians(90.0f));
+            glm::mat4 PlaneMVPMatrix = Gfx::Cam::GetProjectionMatrix() * Gfx::Cam::GetViewMatrix() * glm::mat4(m_ARCToEngineMatrix) * PlaneModelMatrix;
 
             glm::vec4 Color = glm::vec4(GetPlaneColor(IndexOfPlane), 1.0f);
 
@@ -1026,7 +1010,7 @@ namespace
 
                 glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-                glm::mat4 PointMVPMatrix = Gfx::Cam::GetProjectionMatrix() * Gfx::Cam::GetViewMatrix();
+                glm::mat4 PointMVPMatrix = Gfx::Cam::GetProjectionMatrix() * Gfx::Cam::GetViewMatrix() * glm::mat4(m_ARCToEngineMatrix);
 
                 // -----------------------------------------------------------------------------
                 // Draw

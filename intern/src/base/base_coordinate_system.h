@@ -39,6 +39,6 @@ namespace CORE
             _rForword
         );
 
-        return Target * glm::inverse(s_Reference);
+        return glm::inverse(Target * glm::inverse(s_Reference));
     }
 } // namespace CORE

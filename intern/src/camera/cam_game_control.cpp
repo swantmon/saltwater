@@ -1,6 +1,7 @@
 
 #include "camera/cam_precompiled.h"
 
+#include "base/base_console.h"
 #include "base/base_include_glm.h"
 #include "base/base_type_info.h"
 
@@ -111,7 +112,7 @@ namespace Cam
         // -----------------------------------------------------------------------------
         // Position
         // -----------------------------------------------------------------------------
-        m_Position = m_pRelatedEntity->GetWorldPosition();
+        m_Position = pTransformationFacet->GetPosition();
 
         // -----------------------------------------------------------------------------
         // Rotation

@@ -127,21 +127,21 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CCameraComponent::SetProjectionMatrix(const glm::mat3& _rProjection)
+    void CCameraComponent::SetProjectionMatrix(const glm::mat4& _rProjection)
     {
         m_ProjectionMatrix = _rProjection;
     }
 
     // -----------------------------------------------------------------------------
 
-    glm::mat3& CCameraComponent::GetProjectionMatrix()
+    glm::mat4& CCameraComponent::GetProjectionMatrix()
     {
         return m_ProjectionMatrix;
     }
 
     // -----------------------------------------------------------------------------
 
-    const glm::mat3& CCameraComponent::GetProjectionMatrix() const
+    const glm::mat4& CCameraComponent::GetProjectionMatrix() const
     {
         return m_ProjectionMatrix;
     }
