@@ -30,7 +30,7 @@ namespace Scpt
 
         for (auto& rScript : m_Scripts)
         {
-            if (!rScript->m_IsActive) continue;
+            if (!rScript->m_IsActive && !rScript->m_IsStarted) continue;
 
             rScript->Start();
 
@@ -58,14 +58,7 @@ namespace Scpt
     {
         for (auto& rScript : m_Scripts)
         {
-            if (!rScript->m_IsActive) continue;
-
-            if (!rScript->m_IsStarted)
-            {
-                rScript->Start();
-
-                rScript->m_IsStarted = true;
-            }
+            if (!rScript->m_IsStarted || !rScript->m_IsActive) continue;
             
             rScript->Update();
         }
@@ -105,9 +98,16 @@ namespace Scpt
         {
             assert(pScriptComponent->m_pScript);
 
-            CScript* pInternScript = static_cast<CScript*>(pScriptComponent->m_pScript);
+            IScript* pInternScript = static_cast<IScript*>(pScriptComponent->m_pScript);
 
             pInternScript->m_IsActive = pScriptComponent->IsActiveAndUsable();
+
+            if (pInternScript->m_IsActive && !pInternScript->m_IsStarted)
+            {
+                pInternScript->Start();
+
+                pInternScript->m_IsStarted = true;
+            }
         }
     }
 

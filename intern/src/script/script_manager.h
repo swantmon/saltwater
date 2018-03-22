@@ -32,7 +32,7 @@ namespace Scpt
 
     private:
 
-        typedef std::vector<std::unique_ptr<CScript>> CScripts;
+        typedef std::vector<std::unique_ptr<IScript>> CScripts;
 
     private:
 

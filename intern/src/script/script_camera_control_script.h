@@ -11,7 +11,7 @@
 
 namespace Scpt
 {
-    class CCameraControlScript : public CScript
+    class CCameraControlScript : public IScript
     {
     public:
 
@@ -21,13 +21,15 @@ namespace Scpt
         unsigned int m_MoveDirection = 0;
         glm::mat3 m_RotationMatrix;
         glm::vec3 m_Position;
+        float m_MovingSpeed = 50.0f;
+        float m_RotationSpeed = 0.35f;
 
     public:
 
         void Start() override
         {
-            m_RotationMatrix = glm::toMat3(m_pEntity->GetTransformationFacet()->GetRotation());
-            m_Position       = m_pEntity->GetTransformationFacet()->GetPosition();
+            m_RotationMatrix = glm::toMat3(GetTransformation()->GetRotation());
+            m_Position       = GetTransformation()->GetPosition();
         }
 
         // -----------------------------------------------------------------------------
@@ -49,15 +51,15 @@ namespace Scpt
             Forward = m_RotationMatrix * Forward;
             Right   = m_RotationMatrix * Right;
 
-            if (m_MoveDirection & 0x01) m_Position += (Forward * 50.0f * DeltaTime);
-            if (m_MoveDirection & 0x02) m_Position -= (Forward * 50.0f * DeltaTime);
-            if (m_MoveDirection & 0x04) m_Position -= (Right   * 50.0f * DeltaTime);
-            if (m_MoveDirection & 0x08) m_Position += (Right   * 50.0f * DeltaTime);
+            if (m_MoveDirection & 0x01) m_Position += (Forward * m_MovingSpeed * DeltaTime);
+            if (m_MoveDirection & 0x02) m_Position -= (Forward * m_MovingSpeed * DeltaTime);
+            if (m_MoveDirection & 0x04) m_Position -= (Right   * m_MovingSpeed * DeltaTime);
+            if (m_MoveDirection & 0x08) m_Position += (Right   * m_MovingSpeed * DeltaTime);
 
-            m_pEntity->GetTransformationFacet()->SetPosition(m_Position);
-            m_pEntity->GetTransformationFacet()->SetRotation(glm::toQuat(m_RotationMatrix));
+            GetTransformation()->SetPosition(m_Position);
+            GetTransformation()->SetRotation(glm::toQuat(m_RotationMatrix));
 
-            Dt::EntityManager::MarkEntityAsDirty(*m_pEntity, Dt::CEntity::DirtyMove);
+            Dt::EntityManager::MarkEntityAsDirty(*GetEntity(), Dt::CEntity::DirtyMove);
         }
 
         // -----------------------------------------------------------------------------
@@ -100,7 +102,7 @@ namespace Scpt
                 {
                     const glm::vec2& rCursorPosition = _rEvent.GetCursorPosition();
 
-                    m_CurrentRotation -= (rCursorPosition - m_LastCursorPosition) * 0.35f;
+                    m_CurrentRotation -= (rCursorPosition - m_LastCursorPosition) * m_RotationSpeed;
 
                     m_RotationMatrix = glm::eulerAngleZX(glm::radians(m_CurrentRotation[0]), glm::radians(m_CurrentRotation[1]));
 
