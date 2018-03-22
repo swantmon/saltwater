@@ -1,6 +1,9 @@
 
 #include "script/script_precompiled.h"
 
+#include "base/base_singleton.h"
+#include "base/base_uncopyable.h"
+
 #include "data/data_script_component.h"
 #include "data/data_component_manager.h"
 
@@ -8,77 +11,101 @@
 
 #include "script/script_manager.h"
 
-namespace Scpt
+#include <vector>
+
+namespace 
 {
-    CScriptManager::CScriptManager()
-        : m_CurrentID(0)
+    class CScptScriptManager : Base::CUncopyable
     {
-        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(BASE_DIRTY_COMPONENT_METHOD(&CScriptManager::OnDirtyComponent));
+        BASE_SINGLETON_FUNC(CScptScriptManager)
+
+    public:
+
+        void OnStart();
+        void OnExit();
+        void Update();
+
+        void OnPause();
+        void OnResume();
+
+    private:
+
+        CScptScriptManager();
+        ~CScptScriptManager();
+
+    private:
+
+        typedef std::vector<Dt::CScriptComponent*> CScripts;
+
+    private:
+
+        CScripts m_Scripts;
+
+    private:
+
+        void OnDirtyComponent(Dt::IComponent* _pComponent);
+
+        void OnInputEvent(const Base::CInputEvent& _rInputEvent);
+    };
+} // namespace 
+
+namespace
+{
+    CScptScriptManager::CScptScriptManager()
+    {
+        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(BASE_DIRTY_COMPONENT_METHOD(&CScptScriptManager::OnDirtyComponent));
     }
 
     // -----------------------------------------------------------------------------
 
-    CScriptManager::~CScriptManager()
+    CScptScriptManager::~CScptScriptManager()
     {
     }
 
     // -----------------------------------------------------------------------------
 
-    void CScriptManager::OnStart()
+    void CScptScriptManager::OnStart()
     {
-        Gui::EventHandler::RegisterDirectUserListener(GUI_BIND_INPUT_METHOD(&CScriptManager::OnInputEvent));
+        Gui::EventHandler::RegisterDirectUserListener(GUI_BIND_INPUT_METHOD(&CScptScriptManager::OnInputEvent));
+    }
 
+    // -----------------------------------------------------------------------------
+
+    void CScptScriptManager::OnExit()
+    {
         for (auto& rScript : m_Scripts)
         {
-            if (!rScript->m_IsActive && !rScript->m_IsStarted) continue;
-
-            rScript->Start();
-
-            rScript->m_IsStarted = true;
-        }
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CScriptManager::OnExit()
-    {
-        for (auto& rScript : m_Scripts)
-        {
-            if (!rScript->m_IsActive) continue;
-
             rScript->Exit();
         }
 
-        Gui::EventHandler::UnregisterDirectUserListener(GUI_BIND_INPUT_METHOD(&CScriptManager::OnInputEvent));
+        Gui::EventHandler::UnregisterDirectUserListener(GUI_BIND_INPUT_METHOD(&CScptScriptManager::OnInputEvent));
     }
 
     // -----------------------------------------------------------------------------
 
-    void CScriptManager::Update()
+    void CScptScriptManager::Update()
     {
         for (auto& rScript : m_Scripts)
         {
-            if (!rScript->m_IsStarted || !rScript->m_IsActive) continue;
-            
             rScript->Update();
         }
     }
 
     // -----------------------------------------------------------------------------
 
-    void CScriptManager::OnPause()
+    void CScptScriptManager::OnPause()
     {
     }
 
     // -----------------------------------------------------------------------------
 
-    void CScriptManager::OnResume()
+    void CScptScriptManager::OnResume()
     {
     }
 
     // -----------------------------------------------------------------------------
 
-    void CScriptManager::OnDirtyComponent(Dt::IComponent* _pComponent)
+    void CScptScriptManager::OnDirtyComponent(Dt::IComponent* _pComponent)
     {
         // -----------------------------------------------------------------------------
         // Only if component has changed
@@ -94,30 +121,83 @@ namespace Scpt
 
         DirtyFlags = pScriptComponent->GetDirtyFlags();
 
+        if ((DirtyFlags & Dt::CScriptComponent::DirtyCreate) != 0)
+        {
+            if (pScriptComponent->IsActiveAndUsable())
+            {
+                pScriptComponent->Start();
+
+                m_Scripts.push_back(pScriptComponent);
+            }
+        }
+
         if ((DirtyFlags & Dt::CScriptComponent::DirtyInfo) != 0)
         {
-            assert(pScriptComponent->m_pScript);
+            // -----------------------------------------------------------------------------
+            // Get script from list
+            // -----------------------------------------------------------------------------
+            auto ScriptIter = std::find_if(m_Scripts.begin(), m_Scripts.end(), [&](Dt::CScriptComponent* _pObject) { return _pObject == pScriptComponent; });
 
-            IScript* pInternScript = static_cast<IScript*>(pScriptComponent->m_pScript);
-
-            pInternScript->m_IsActive = pScriptComponent->IsActiveAndUsable();
-
-            if (pInternScript->m_IsActive && !pInternScript->m_IsStarted)
+            if (!pScriptComponent->IsActiveAndUsable() && ScriptIter != m_Scripts.end())
             {
-                pInternScript->Start();
+                pScriptComponent->Exit();
+            }
 
-                pInternScript->m_IsStarted = true;
+            if (pScriptComponent->IsActiveAndUsable() && ScriptIter == m_Scripts.end())
+            {
+                pScriptComponent->Start();
+
+                m_Scripts.push_back(pScriptComponent);
             }
         }
     }
 
     // -----------------------------------------------------------------------------
 
-    void CScriptManager::OnInputEvent(const Base::CInputEvent& _rInputEvent)
+    void CScptScriptManager::OnInputEvent(const Base::CInputEvent& _rInputEvent)
     {
         for (auto& rScript : m_Scripts)
         {
             rScript->OnInput(_rInputEvent);
         }
     }
+} // namespace
+
+namespace Scpt
+{
+namespace ScriptManager
+{
+    void OnStart()
+    {
+        CScptScriptManager::GetInstance().OnStart();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void OnExit()
+    {
+        CScptScriptManager::GetInstance().OnExit();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void Update()
+    {
+        CScptScriptManager::GetInstance().Update();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void OnPause()
+    {
+        CScptScriptManager::GetInstance().OnPause();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void OnResume()
+    {
+        CScptScriptManager::GetInstance().OnResume();
+    }
+} // namespace ScriptManager
 } // namespace Scpt

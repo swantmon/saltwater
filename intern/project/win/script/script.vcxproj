@@ -31,7 +31,6 @@
     <ClInclude Include="..\..\..\src\script\script_camera_control_script.h" />
     <ClInclude Include="..\..\..\src\script\script_manager.h" />
     <ClInclude Include="..\..\..\src\script\script_precompiled.h" />
-    <ClInclude Include="..\..\..\src\script\script_script.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{3B1ACDCE-B96B-4A3D-80B5-2539D4CF480F}</ProjectGuid>

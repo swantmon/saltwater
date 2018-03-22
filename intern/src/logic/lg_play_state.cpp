@@ -51,8 +51,6 @@ namespace
 {
     int CLgPlayState::OnEnter()
     {
-        Scpt::CScriptManager::GetInstance().OnStart();
-
         // -----------------------------------------------------------------------------
         // Define variables
         // -----------------------------------------------------------------------------
@@ -70,8 +68,6 @@ namespace
     
     int CLgPlayState::OnLeave()
     {        
-        Scpt::CScriptManager::GetInstance().OnExit();
-
         // -----------------------------------------------------------------------------
         // Unregister input event delegate @ gui event handler
         // -----------------------------------------------------------------------------
@@ -89,7 +85,7 @@ namespace
         // -----------------------------------------------------------------------------
         Dt::EntityManager::Update();
 
-        Scpt::CScriptManager::GetInstance().Update();
+        Scpt::ScriptManager::Update();
 
         // -----------------------------------------------------------------------------
         // Get main camera entity and set this entity to the camera project

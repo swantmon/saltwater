@@ -308,13 +308,15 @@ void CLgLoadMapState::CreateDefaultScene()
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(Component, Dt::CCameraComponent::DirtyCreate);
 
-            auto ScriptComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CScriptComponent>();
+            // -----------------------------------------------------------------------------
 
-            ScriptComponent->m_pScript = Scpt::CScriptManager::GetInstance().AllocateScript<Scpt::CCameraControlScript>(rEntity);
+            auto ScriptComponent = Dt::CComponentManager::GetInstance().Allocate<Scpt::CCameraControlScript>();
 
             rEntity.AttachComponent(ScriptComponent);
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(ScriptComponent, Dt::CCameraComponent::DirtyCreate);
+
+            // -----------------------------------------------------------------------------
 
             Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }

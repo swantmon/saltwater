@@ -11,6 +11,8 @@
 
 #include "logic/lg_start_state.h"
 
+#include "script/script_manager.h"
+
 /*#include "mr/mr_control_manager.h"*/
 
 namespace
@@ -35,6 +37,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Data
         // -----------------------------------------------------------------------------
+        Scpt::ScriptManager::OnStart();
         Dt::EntityManager::OnStart();
 
         // -----------------------------------------------------------------------------

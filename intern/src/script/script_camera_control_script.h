@@ -6,12 +6,11 @@
 #include "core/core_time.h"
 
 #include "data/data_transformation_facet.h"
-
-#include "script/script_script.h"
+#include "data/data_script_component.h"
 
 namespace Scpt
 {
-    class CCameraControlScript : public IScript
+    class CCameraControlScript : public Dt::CScriptComponent
     {
     public:
 
