@@ -92,6 +92,9 @@
     <ProjectReference Include="..\mr\mr.vcxproj">
       <Project>{1bba2732-a51b-4ff0-8393-492884561668}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\script\script.vcxproj">
+      <Project>{3b1acdce-b96b-4a3d-80b5-2539d4cf480f}</Project>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{399D716C-0FEC-4D19-AA74-0C434B6C3047}</ProjectGuid>

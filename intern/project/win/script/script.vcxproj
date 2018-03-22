@@ -19,75 +19,26 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\src\data\data_area_light_component.h" />
-    <ClInclude Include="..\..\..\src\data\data_ar_controller_component.h" />
-    <ClInclude Include="..\..\..\src\data\data_ar_tracked_object_component.h" />
-    <ClInclude Include="..\..\..\src\data\data_bloom_component.h" />
-    <ClInclude Include="..\..\..\src\data\data_camera_component.h" />
-    <ClInclude Include="..\..\..\src\data\data_component.h" />
-    <ClInclude Include="..\..\..\src\data\data_component_facet.h" />
-    <ClInclude Include="..\..\..\src\data\data_component_manager.h" />
-    <ClInclude Include="..\..\..\src\data\data_dof_component.h" />
-    <ClInclude Include="..\..\..\src\data\data_entity.h" />
-    <ClInclude Include="..\..\..\src\data\data_entity_folder.h" />
-    <ClInclude Include="..\..\..\src\data\data_entity_manager.h" />
-    <ClInclude Include="..\..\..\src\data\data_material.h" />
-    <ClInclude Include="..\..\..\src\data\data_material_component.h" />
-    <ClInclude Include="..\..\..\src\data\data_post_aa_component.h" />
-    <ClInclude Include="..\..\..\src\data\data_hierarchy_facet.h" />
-    <ClInclude Include="..\..\..\src\data\data_light_probe_component.h" />
-    <ClInclude Include="..\..\..\src\data\data_map.h" />
-    <ClInclude Include="..\..\..\src\data\data_material_manager.h" />
-    <ClInclude Include="..\..\..\src\data\data_mesh_component.h" />
-    <ClInclude Include="..\..\..\src\data\data_point_light_component.h" />
-    <ClInclude Include="..\..\..\src\data\data_precompiled.h" />
-    <ClInclude Include="..\..\..\src\data\data_region.h" />
-    <ClInclude Include="..\..\..\src\data\data_script_component.h" />
-    <ClInclude Include="..\..\..\src\data\data_sky_component.h" />
-    <ClInclude Include="..\..\..\src\data\data_ssao_component.h" />
-    <ClInclude Include="..\..\..\src\data\data_ssr_component.h" />
-    <ClInclude Include="..\..\..\src\data\data_sun_component.h" />
-    <ClInclude Include="..\..\..\src\data\data_transformation_facet.h" />
-    <ClInclude Include="..\..\..\src\data\data_volume_fog_component.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\..\..\src\data\data_area_light_component.cpp" />
-    <ClCompile Include="..\..\..\src\data\data_ar_controller_component.cpp" />
-    <ClCompile Include="..\..\..\src\data\data_ar_tracked_object_component.cpp" />
-    <ClCompile Include="..\..\..\src\data\data_bloom_component.cpp" />
-    <ClCompile Include="..\..\..\src\data\data_camera_component.cpp" />
-    <ClCompile Include="..\..\..\src\data\data_component_facet.cpp" />
-    <ClCompile Include="..\..\..\src\data\data_component_manager.cpp" />
-    <ClCompile Include="..\..\..\src\data\data_dof_component.cpp" />
-    <ClCompile Include="..\..\..\src\data\data_entity.cpp" />
-    <ClCompile Include="..\..\..\src\data\data_entity_manager.cpp" />
-    <ClCompile Include="..\..\..\src\data\data_material.cpp" />
-    <ClCompile Include="..\..\..\src\data\data_material_component.cpp" />
-    <ClCompile Include="..\..\..\src\data\data_post_aa_component.cpp" />
-    <ClCompile Include="..\..\..\src\data\data_hierarchy_facet.cpp" />
-    <ClCompile Include="..\..\..\src\data\data_light_probe_component.cpp" />
-    <ClCompile Include="..\..\..\src\data\data_map.cpp" />
-    <ClCompile Include="..\..\..\src\data\data_material_manager.cpp" />
-    <ClCompile Include="..\..\..\src\data\data_mesh_component.cpp" />
-    <ClCompile Include="..\..\..\src\data\data_point_light_component.cpp" />
-    <ClCompile Include="..\..\..\src\data\data_precompiled.cpp">
+    <ClCompile Include="..\..\..\src\script\script_script_manager.cpp" />
+    <ClCompile Include="..\..\..\src\script\script_precompiled.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_sky_component.cpp" />
-    <ClCompile Include="..\..\..\src\data\data_ssao_component.cpp" />
-    <ClCompile Include="..\..\..\src\data\data_ssr_component.cpp" />
-    <ClCompile Include="..\..\..\src\data\data_sun_component.cpp" />
-    <ClCompile Include="..\..\..\src\data\data_transformation_facet.cpp" />
-    <ClCompile Include="..\..\..\src\data\data_volume_fog_component.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\src\script\script_camera_control_script.h" />
+    <ClInclude Include="..\..\..\src\script\script_script.h" />
+    <ClInclude Include="..\..\..\src\script\script_script_manager.h" />
+    <ClInclude Include="..\..\..\src\script\script_precompiled.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{969D14C4-1E9D-4FEB-BA0A-247F244871E6}</ProjectGuid>
+    <ProjectGuid>{3B1ACDCE-B96B-4A3D-80B5-2539D4CF480F}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>data</RootNamespace>
+    <RootNamespace>camera</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+    <ProjectName>script</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -134,6 +85,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IntDir>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\</IntDir>
     <TargetName>$(ProjectName)d</TargetName>
   </PropertyGroup>
@@ -144,6 +97,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IntDir>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\</IntDir>
     <TargetName>$(ProjectName)r</TargetName>
   </PropertyGroup>
@@ -158,9 +113,9 @@
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\assimp\include;..\..\..\..\extern\devil\include;..\..\..\..\extern\tinyxml2\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\artoolkit\include;..\..\..\..\extern\opencv\include;..\..\..\..\extern\kinect\include</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <PrecompiledHeaderFile>data/data_precompiled.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>script/script_precompiled.h</PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -180,9 +135,9 @@
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\assimp\include;..\..\..\..\extern\devil\include;..\..\..\..\extern\glm\include;..\..\..\..\extern\tinyxml2\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\glm\include;..\..\..\..\extern\json\include</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <PrecompiledHeaderFile>data/data_precompiled.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>script/script_precompiled.h</PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -204,9 +159,9 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>BASE_RELEASE;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\assimp\include;..\..\..\..\extern\devil\include;..\..\..\..\extern\tinyxml2\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\artoolkit\include;..\..\..\..\extern\opencv\include;..\..\..\..\extern\kinect\include</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <PrecompiledHeaderFile>data/data_precompiled.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>script/script_precompiled.h</PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -230,9 +185,9 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>BASE_RELEASE;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\assimp\include;..\..\..\..\extern\devil\include;..\..\..\..\extern\glm\include;..\..\..\..\extern\tinyxml2\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\glm\include;..\..\..\..\extern\json\include</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <PrecompiledHeaderFile>data/data_precompiled.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>script/script_precompiled.h</PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
