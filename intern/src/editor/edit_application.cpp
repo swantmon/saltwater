@@ -137,6 +137,7 @@ namespace
         }
         else
         {
+            SDL_JoystickEventState(SDL_ENABLE);
             m_pGamePad = SDL_JoystickOpen(0);
             if (m_pGamePad == nullptr)
             {
@@ -255,7 +256,54 @@ namespace
             Edit::GUI::ProcessEvents();
 
 
+            SDL_Event SDLEvent;
 
+            while (SDL_PollEvent(&SDLEvent))
+            {
+                switch (SDLEvent.type)
+                {
+                /*case SDL_JOYAXISMOTION:
+                    BASE_CONSOLE_INFO("Event");
+                    break;*/
+                case SDL_JOYBALLMOTION:
+                    BASE_CONSOLE_INFO("Event");
+                    break;
+                case SDL_JOYHATMOTION:
+                    BASE_CONSOLE_INFO("Event");
+                    break;
+                case SDL_JOYBUTTONDOWN:
+                    BASE_CONSOLE_INFO("Event");
+                    break;
+                case SDL_JOYBUTTONUP:
+                    BASE_CONSOLE_INFO("Event");
+                    break;
+                case SDL_JOYDEVICEADDED:
+
+                    if (m_pGamePad == nullptr)
+                    {
+                        SDL_JoystickEventState(SDL_ENABLE);
+                        m_pGamePad = SDL_JoystickOpen(0);
+                        if (m_pGamePad == nullptr)
+                        {
+                            BASE_THROWM("Could not initialise controller");
+                        }
+                        BASE_CONSOLE_INFOV(SDL_JoystickName(m_pGamePad));
+                    }
+                    break;
+                case SDL_JOYDEVICEREMOVED:
+                    BASE_CONSOLE_INFO("Event");
+                    break;
+                case SDL_CONTROLLERAXISMOTION:
+                    BASE_CONSOLE_INFO("Event");
+                    break;
+                case SDL_CONTROLLERBUTTONDOWN:
+                    BASE_CONSOLE_INFO("Event");
+                    break;
+                case SDL_CONTROLLERBUTTONUP:
+                    BASE_CONSOLE_INFO("Event");
+                    break;
+                }
+            }
             // -----------------------------------------------------------------------------
             // Time
             // -----------------------------------------------------------------------------
