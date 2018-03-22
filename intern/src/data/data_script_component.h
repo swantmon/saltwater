@@ -11,8 +11,7 @@ namespace Dt
     {
     public:
 
-        inline Dt::CEntity* GetEntity();
-        inline Dt::CTransformationFacet* GetTransformation();
+        virtual const Base::ID GetScriptTypeID() const = 0;
 
     public:
 
@@ -21,22 +20,7 @@ namespace Dt
         virtual void Update() = 0;
 
         virtual void OnInput(const Base::CInputEvent& _rEvent) = 0;
+
+        virtual ~CScriptComponent() {};
     };
-} // namespace Dt
-
-namespace Dt
-{
-    inline Dt::CEntity* CScriptComponent::GetEntity()
-    {
-        return m_pHostEntity;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    inline Dt::CTransformationFacet* CScriptComponent::GetTransformation()
-    {
-        if (m_pHostEntity == nullptr) return nullptr;
-
-        return m_pHostEntity->GetTransformationFacet();
-    }
 } // namespace Dt

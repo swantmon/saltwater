@@ -9,7 +9,7 @@
 
 #include "gui/gui_event_handler.h"
 
-#include "script/script_manager.h"
+#include "script/script_script_manager.h"
 
 #include <vector>
 

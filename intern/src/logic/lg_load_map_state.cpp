@@ -32,7 +32,7 @@
 #include "logic/lg_load_map_state.h"
 
 #include "script/script_camera_control_script.h"
-#include "script/script_manager.h"
+#include "script/script_script_manager.h"
 
 namespace
 {

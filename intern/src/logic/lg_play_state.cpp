@@ -22,7 +22,7 @@
 
 #include "logic/lg_play_state.h"
 
-#include "script/script_manager.h"
+#include "script/script_script_manager.h"
 
 namespace
 {

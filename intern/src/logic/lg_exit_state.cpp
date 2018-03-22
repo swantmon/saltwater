@@ -11,7 +11,7 @@
 
 #include "logic/lg_exit_state.h"
 
-#include "script/script_manager.h"
+#include "script/script_script_manager.h"
 
 namespace
 {
