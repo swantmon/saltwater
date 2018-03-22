@@ -86,6 +86,9 @@
     <ClInclude Include="..\..\..\src\data\data_component_manager.h">
       <Filter>map\entity\components</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_script_component.h">
+      <Filter>map\entity\components\scripts</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\data\data_entity_manager.cpp">
@@ -204,6 +207,9 @@
     </Filter>
     <Filter Include="materials">
       <UniqueIdentifier>{ccc2916e-d14c-45a4-ae67-e8fe96b262ea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="map\entity\components\scripts">
+      <UniqueIdentifier>{9c1217fd-bf3d-42b7-95d1-2003273cf94e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

@@ -22,6 +22,8 @@
 
 #include "logic/lg_play_state.h"
 
+#include "script/script_script_manager.h"
+
 namespace
 {
     class CLgPlayState : private Base::CUncopyable
@@ -82,6 +84,8 @@ namespace
         // Update data manager
         // -----------------------------------------------------------------------------
         Dt::EntityManager::Update();
+
+        Scpt::ScriptManager::Update();
 
         // -----------------------------------------------------------------------------
         // Return state changes

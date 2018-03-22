@@ -28,8 +28,7 @@ namespace Dt
         template<class T>
         T* Allocate();
 
-        template<class T>
-        void Deallocate(T* _pObject);
+        void Deallocate(Dt::IComponent* _pObject);
 
         void Deallocate(Base::ID _ID);
 
@@ -90,16 +89,6 @@ namespace Dt
         m_ComponentsByType[Base::CTypeInfo::GetTypeID<T>()].emplace_back(pComponent);
 
         return pComponent;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    template<class T>
-    void CComponentManager::Deallocate(T* _pObject)
-    {
-        if (_pObject == nullptr) return;
-
-        Deallocate(_pObject->GetID());
     }
 
     // -----------------------------------------------------------------------------
