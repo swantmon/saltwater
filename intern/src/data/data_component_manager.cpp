@@ -26,6 +26,15 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
+    void CComponentManager::Deallocate(Dt::IComponent* _pObject)
+    {
+        if (_pObject == nullptr) return;
+
+        Deallocate(_pObject->GetID());
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CComponentManager::Deallocate(Base::ID _ID)
     {
         // -----------------------------------------------------------------------------

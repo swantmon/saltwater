@@ -23,12 +23,16 @@
 #include "data/data_material_component.h"
 #include "data/data_material_manager.h"
 #include "data/data_mesh_component.h"
+#include "data/data_script_component.h"
 #include "data/data_sky_component.h"
 #include "data/data_ssao_component.h"
 #include "data/data_sun_component.h"
 #include "data/data_transformation_facet.h"
 
 #include "logic/lg_load_map_state.h"
+
+#include "script/script_camera_control_script.h"
+#include "script/script_script_manager.h"
 
 namespace
 {
@@ -303,6 +307,16 @@ void CLgLoadMapState::CreateDefaultScene()
             rEntity.AttachComponent(Component);
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(Component, Dt::CCameraComponent::DirtyCreate);
+
+            // -----------------------------------------------------------------------------
+
+            auto ScriptComponent = Dt::CComponentManager::GetInstance().Allocate<Scpt::CCameraControlScript>();
+
+            rEntity.AttachComponent(ScriptComponent);
+
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(ScriptComponent, Dt::CCameraComponent::DirtyCreate);
+
+            // -----------------------------------------------------------------------------
 
             Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }

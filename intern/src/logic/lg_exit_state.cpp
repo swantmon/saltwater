@@ -11,6 +11,8 @@
 
 #include "logic/lg_exit_state.h"
 
+#include "script/script_script_manager.h"
+
 namespace
 {
     class CLgExitState : private Base::CUncopyable
@@ -30,6 +32,8 @@ namespace
 {
     int CLgExitState::OnEnter()
     {
+        Scpt::ScriptManager::OnExit();
+
         // -----------------------------------------------------------------------------
         // Data
         // -----------------------------------------------------------------------------
