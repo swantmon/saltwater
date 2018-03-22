@@ -310,7 +310,7 @@ void CLgLoadMapState::CreateDefaultScene()
 
             auto ScriptComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CScriptComponent>();
 
-            ScriptComponent->m_pScript = Script::CScriptManager::GetInstance().AllocateScript<Script::CCameraControlScript>(rEntity);
+            ScriptComponent->m_pScript = Scpt::CScriptManager::GetInstance().AllocateScript<Scpt::CCameraControlScript>(rEntity);
 
             rEntity.AttachComponent(ScriptComponent);
 

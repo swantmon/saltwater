@@ -10,7 +10,7 @@
     <ClInclude Include="..\..\..\src\script\script_camera_control_script.h">
       <Filter>scripts</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\script\script_base_script.h" />
+    <ClInclude Include="..\..\..\src\script\script_script.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="scripts">

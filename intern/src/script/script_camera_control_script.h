@@ -7,11 +7,11 @@
 
 #include "data/data_transformation_facet.h"
 
-#include "script/script_base_script.h"
+#include "script/script_script.h"
 
-namespace Script
+namespace Scpt
 {
-    class CCameraControlScript : public CBaseScript
+    class CCameraControlScript : public CScript
     {
     public:
 
@@ -109,4 +109,4 @@ namespace Script
             }
         }
     };
-} // namespace Script
+} // namespace Scpt

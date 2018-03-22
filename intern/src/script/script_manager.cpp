@@ -8,7 +8,7 @@
 
 #include "script/script_manager.h"
 
-namespace Script
+namespace Scpt
 {
     CScriptManager::CScriptManager()
         : m_CurrentID(0)
@@ -105,7 +105,7 @@ namespace Script
         {
             assert(pScriptComponent->m_pScript);
 
-            CBaseScript* pInternScript = static_cast<CBaseScript*>(pScriptComponent->m_pScript);
+            CScript* pInternScript = static_cast<CScript*>(pScriptComponent->m_pScript);
 
             pInternScript->m_IsActive = pScriptComponent->IsActiveAndUsable();
         }
@@ -120,4 +120,4 @@ namespace Script
             rScript->OnInput(_rInputEvent);
         }
     }
-} // namespace Script
+} // namespace Scpt

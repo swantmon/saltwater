@@ -4,12 +4,12 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
-#include "script/script_base_script.h"
+#include "script/script_script.h"
 
 #include <memory>
 #include <vector>
 
-namespace Script
+namespace Scpt
 {
     class CScriptManager : Base::CUncopyable
     {
@@ -32,7 +32,7 @@ namespace Script
 
     private:
 
-        typedef std::vector<std::unique_ptr<CBaseScript>> CScripts;
+        typedef std::vector<std::unique_ptr<CScript>> CScripts;
 
     private:
 
@@ -45,9 +45,9 @@ namespace Script
 
         void OnInputEvent(const Base::CInputEvent& _rInputEvent);
     };
-} // namespace Script
+} // namespace Scpt
 
-namespace Script
+namespace Scpt
 {
     template<class TScript>
     TScript* CScriptManager::AllocateScript(Dt::CEntity& _rEntity)
@@ -63,4 +63,4 @@ namespace Script
 
         return pScript;
     }
-} // namespace Script
+} // namespace Scpt

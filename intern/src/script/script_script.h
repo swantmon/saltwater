@@ -4,9 +4,9 @@
 
 #include "data/data_entity.h"
 
-namespace Script
+namespace Scpt
 {
-    class CBaseScript
+    class CScript
     {
     public:
 
@@ -23,4 +23,4 @@ namespace Script
         bool         m_IsActive;
         bool         m_IsStarted;
     };
-} // namespace Script
+} // namespace Scpt
