@@ -28,6 +28,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\src\mr\mr_camera.h" />
     <ClInclude Include="..\..\..\src\mr\mr_control_manager.h" />
     <ClInclude Include="..\..\..\src\mr\mr_precompiled.h" />
   </ItemGroup>

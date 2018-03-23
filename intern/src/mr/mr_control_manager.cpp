@@ -301,6 +301,8 @@ namespace
 
         void OnDraw();
 
+        const CCamera& GetCamera();
+
     private:
 
         typedef std::vector<ArAnchor*> CTrackedObjects;
@@ -308,6 +310,15 @@ namespace
     private:
 
         static std::string s_Permissions[];
+
+    private:
+
+        class CInternCamera : public CCamera
+        {
+        private:
+
+            friend class CMRControlManager;
+        };
 
     private:
 
@@ -319,11 +330,9 @@ namespace
         ArFrame* m_pARFrame;
         CTrackedObjects m_TrackedObjects;
 
-        glm::mat4 m_ViewMatrix;
-        glm::mat4 m_ProjectionMatrix;
+        CInternCamera m_Camera;
 
         Dt::CEntity* m_pEntity;
-        Dt::CEntity* m_pCameraEntity;
 
         glm::mat3 m_ARCToEngineMatrix;
 
@@ -348,8 +357,6 @@ namespace
         , m_pARSession       (0)
         , m_pARFrame         (0)
         , m_TrackedObjects   ( )
-        , m_ViewMatrix       (1.0f)
-        , m_ProjectionMatrix (1.0f)
         , m_pEntity          (0)
         , m_ARCToEngineMatrix(1.0f)
     {
@@ -476,47 +483,40 @@ namespace
         // -----------------------------------------------------------------------------
         float Near = Base::CProgramParameters::GetInstance().Get<float>("mr:ar:camera:near", 0.1f);
         float Far  = Base::CProgramParameters::GetInstance().Get<float>("mr:ar:camera:far", 100.0f);
+        glm::mat4 ViewMatrix(1.0f);
+        glm::mat4 ProjectionMatrix(1.0f);
 
         ArCamera* pARCamera;
 
         ArFrame_acquireCamera(m_pARSession, m_pARFrame, &pARCamera);
 
-        ArCamera_getViewMatrix(m_pARSession, pARCamera, glm::value_ptr(m_ViewMatrix));
+        ArCamera_getViewMatrix(m_pARSession, pARCamera, glm::value_ptr(ViewMatrix));
 
-        ArCamera_getProjectionMatrix(m_pARSession, pARCamera, Near, Far, glm::value_ptr(m_ProjectionMatrix));
-
-        glm::mat3 WSRotation = m_ARCToEngineMatrix * glm::transpose(glm::mat3(m_ViewMatrix));
-
-        glm::vec3 WSPosition = WSRotation * m_ViewMatrix[3] * -1.0f;
-
-        if (m_pCameraEntity != nullptr && m_pCameraEntity->GetComponentFacet()->GetComponent<Dt::CCameraComponent>()->IsActiveAndUsable())
-        {
-            m_pCameraEntity->SetWorldPosition(WSPosition);
-
-            m_pCameraEntity->GetTransformationFacet()->SetPosition(WSPosition);
-
-            m_pCameraEntity->GetTransformationFacet()->SetScale(glm::vec3(1.0f));
-
-            m_pCameraEntity->GetTransformationFacet()->SetRotation(glm::toQuat(WSRotation));
-
-            Dt::EntityManager::MarkEntityAsDirty(*m_pCameraEntity, Dt::CEntity::DirtyMove);
-
-            auto pCameraComponent = m_pCameraEntity->GetComponentFacet()->GetComponent<Dt::CCameraComponent>();
-
-            pCameraComponent->SetNear(Near);
-
-            pCameraComponent->SetNear(Far);
-
-            pCameraComponent->SetProjectionMatrix(m_ProjectionMatrix);
-
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pCameraComponent, Dt::CCameraComponent::DirtyInfo);
-        }
+        ArCamera_getProjectionMatrix(m_pARSession, pARCamera, Near, Far, glm::value_ptr(ProjectionMatrix));
 
         ArTrackingState CameraTrackingState;
 
         ArCamera_getTrackingState(m_pARSession, pARCamera, &CameraTrackingState);
 
         ArCamera_release(pARCamera);
+
+        m_Camera.m_ViewMatrix       = ViewMatrix;
+        m_Camera.m_ProjectionMatrix = ProjectionMatrix;
+        m_Camera.m_Near             = Near;
+        m_Camera.m_Far              = Far;
+
+        switch(CameraTrackingState)
+        {
+            case AR_TRACKING_STATE_PAUSED:
+                m_Camera.m_TrackingState = CCamera::Paused;
+                break;
+            case AR_TRACKING_STATE_STOPPED:
+                m_Camera.m_TrackingState = CCamera::Stopped;
+                break;
+            case AR_TRACKING_STATE_TRACKING:
+                m_Camera.m_TrackingState = CCamera::Tracking;
+                break;
+        }
 
         if (CameraTrackingState != AR_TRACKING_STATE_TRACKING) return;
 
@@ -1040,6 +1040,13 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    const CCamera& CMRControlManager::GetCamera()
+    {
+        return m_Camera;
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CMRControlManager::OnDirtyEntity(Dt::CEntity* _pEntity)
     {
         auto DirtyFlag = _pEntity->GetDirtyFlags();
@@ -1049,11 +1056,6 @@ namespace
             if (_pEntity->GetName() == "Box")
             {
                 m_pEntity = _pEntity;
-            }
-
-            if (_pEntity->GetComponentFacet()->HasComponent<Dt::CCameraComponent>())
-            {
-                m_pCameraEntity = _pEntity;
             }
         }
     }
@@ -1209,53 +1211,62 @@ namespace
 
 namespace MR
 {
-    namespace ControlManager
+namespace ControlManager
+{
+    void OnStart(const SConfiguration& _rConfiguration)
     {
-        void OnStart(const SConfiguration& _rConfiguration)
-        {
-            CMRControlManager::GetInstance().OnStart(_rConfiguration);
-        }
+        CMRControlManager::GetInstance().OnStart(_rConfiguration);
+    }
 
-        // -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
 
-        void OnExit()
-        {
-            CMRControlManager::GetInstance().OnExit();
-        }
+    void OnExit()
+    {
+        CMRControlManager::GetInstance().OnExit();
+    }
 
-        // -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
 
-        void Update()
-        {
-            CMRControlManager::GetInstance().Update();
-        }
+    void Update()
+    {
+        CMRControlManager::GetInstance().Update();
+    }
 
-        // -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
 
-        void OnPause()
-        {
-            CMRControlManager::GetInstance().OnPause();
-        }
+    void OnPause()
+    {
+        CMRControlManager::GetInstance().OnPause();
+    }
 
-        // -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
 
-        void OnResume()
-        {
-            CMRControlManager::GetInstance().OnResume();
-        }
+    void OnResume()
+    {
+        CMRControlManager::GetInstance().OnResume();
+    }
 
-        // -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
 
-        void OnDisplayGeometryChanged(int _DisplayRotation, int _Width, int _Height)
-        {
-            CMRControlManager::GetInstance().OnDisplayGeometryChanged(_DisplayRotation, _Width, _Height);
-        }
+    void OnDisplayGeometryChanged(int _DisplayRotation, int _Width, int _Height)
+    {
+        CMRControlManager::GetInstance().OnDisplayGeometryChanged(_DisplayRotation, _Width, _Height);
+    }
 
-        void OnDraw()
-        {
-            CMRControlManager::GetInstance().OnDraw();
-        }
-    } // namespace ControlManager
+    // -----------------------------------------------------------------------------
+
+    void OnDraw()
+    {
+        CMRControlManager::GetInstance().OnDraw();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const CCamera& GetCamera()
+    {
+        return CMRControlManager::GetInstance().GetCamera();
+    }
+} // namespace ControlManager
 } // namespace MR
 #else // PLATFORM_ANDROID
 namespace MR
@@ -1300,8 +1311,17 @@ namespace ControlManager
         BASE_UNUSED(_Height);
     }
 
+    // -----------------------------------------------------------------------------
+
     void OnDraw()
     {
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const CCamera& GetCamera()
+    {
+        return CCamera();
     }
 } // namespace ControlManager
 } // namespace MR

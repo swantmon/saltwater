@@ -28,6 +28,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\src\script\script_ar_camera_control_script.h" />
     <ClInclude Include="..\..\..\src\script\script_camera_control_script.h" />
     <ClInclude Include="..\..\..\src\script\script_script.h" />
     <ClInclude Include="..\..\..\src\script\script_script_manager.h" />

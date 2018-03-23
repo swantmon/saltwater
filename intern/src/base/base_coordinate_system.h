@@ -9,26 +9,20 @@ namespace CORE
     {
     public:
 
-        static glm::mat3 GetBaseMatrix(const glm::vec3& _rRight, const glm::vec3& _rUp, const glm::vec3& _rForword);
-
-    private:
-
-        static glm::mat3 s_Reference;
+        inline static glm::mat3 GetBaseMatrix(const glm::vec3& _rRight, const glm::vec3& _rUp, const glm::vec3& _rForword);
     };
 } // namespace CORE
 
 namespace CORE
 {
-    glm::mat3 CCoordinateSystem::s_Reference(
-        glm::vec3(1.0f, 0.0f, 0.0f),
-        glm::vec3(0.0f, 0.0f, 1.0f),
-        glm::vec3(0.0f, 1.0f, 0.0f)
-    );
-
-    // -----------------------------------------------------------------------------
-
-    glm::mat3 CCoordinateSystem::GetBaseMatrix(const glm::vec3& _rRight, const glm::vec3& _rUp, const glm::vec3& _rForword)
+    inline glm::mat3 CCoordinateSystem::GetBaseMatrix(const glm::vec3& _rRight, const glm::vec3& _rUp, const glm::vec3& _rForword)
     {
+        static const glm::mat3 s_Reference(
+            glm::vec3(1.0f, 0.0f, 0.0f),
+            glm::vec3(0.0f, 0.0f, 1.0f),
+            glm::vec3(0.0f, 1.0f, 0.0f)
+        );
+
         // -----------------------------------------------------------------------------
         // Idea from:
         // https://gamedev.stackexchange.com/questions/26084/how-to-get-the-rotation-matrix-to-transform-between-two-3d-cartesian-coordinate

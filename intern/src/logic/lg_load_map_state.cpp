@@ -31,6 +31,7 @@
 
 #include "logic/lg_load_map_state.h"
 
+#include "script/script_ar_camera_control_script.h"
 #include "script/script_camera_control_script.h"
 #include "script/script_script_manager.h"
 
@@ -156,13 +157,18 @@ namespace
 
             auto Component = Dt::CComponentManager::GetInstance().Allocate<Dt::CCameraComponent>();
 
-            Component->SetActive(true);
             Component->SetProjectionType(Dt::CCameraComponent::External);
             Component->SetClearFlag(Dt::CCameraComponent::Webcam);
 
             rEntity.AttachComponent(Component);
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*Component, Dt::CCameraComponent::DirtyCreate);
+
+            auto ScriptComponent = Dt::CComponentManager::GetInstance().Allocate<Scpt::CARCameraControlScript>();
+
+            rEntity.AttachComponent(ScriptComponent);
+
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*ScriptComponent, Dt::CCameraComponent::DirtyCreate);
 
             Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }

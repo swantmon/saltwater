@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "mr/mr_camera.h"
+
 namespace MR
 {
 namespace ControlManager
@@ -40,5 +42,7 @@ namespace ControlManager
     void OnDisplayGeometryChanged(int _DisplayRotation, int _Width, int _Height);
 
     void OnDraw();
+
+    const CCamera& GetCamera();
 } // namespace ControlManager
 } // namespace MR
