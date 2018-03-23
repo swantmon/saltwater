@@ -312,7 +312,7 @@ void CLgLoadMapState::CreateDefaultScene()
 
             rEntity.AttachComponent(ScriptComponent);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(ScriptComponent, Dt::CCameraComponent::DirtyCreate);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*ScriptComponent, Dt::CCameraComponent::DirtyCreate);
 
             // -----------------------------------------------------------------------------
 
