@@ -22,6 +22,7 @@
     <ClCompile Include="..\..\..\src\mr\mr_camera.cpp" />
     <ClCompile Include="..\..\..\src\mr\mr_control_manager.cpp" />
     <ClCompile Include="..\..\..\src\mr\mr_light_estimation.cpp" />
+    <ClCompile Include="..\..\..\src\mr\mr_light_estimation_manager.cpp" />
     <ClCompile Include="..\..\..\src\mr\mr_marker.cpp" />
     <ClCompile Include="..\..\..\src\mr\mr_precompiled.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -34,6 +35,7 @@
     <ClInclude Include="..\..\..\src\mr\mr_camera.h" />
     <ClInclude Include="..\..\..\src\mr\mr_control_manager.h" />
     <ClInclude Include="..\..\..\src\mr\mr_light_estimation.h" />
+    <ClInclude Include="..\..\..\src\mr\mr_light_estimation_manager.h" />
     <ClInclude Include="..\..\..\src\mr\mr_marker.h" />
     <ClInclude Include="..\..\..\src\mr\mr_precompiled.h" />
   </ItemGroup>

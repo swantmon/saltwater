@@ -67,8 +67,6 @@ namespace Scpt
         {
             if (_rEvent.GetAction() == Base::CInputEvent::TouchPressed)
             {
-                Base::CInputEvent::EKey Key = static_cast<Base::CInputEvent::EKey>(_rEvent.GetKey());
-
                 float x = _rEvent.GetCursorPosition()[0];
                 float y = _rEvent.GetCursorPosition()[1];
 
