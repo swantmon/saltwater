@@ -3,10 +3,29 @@
   <ItemGroup>
     <ClCompile Include="..\..\..\src\mr\mr_control_manager.cpp" />
     <ClCompile Include="..\..\..\src\mr\mr_precompiled.cpp" />
+    <ClCompile Include="..\..\..\src\mr\mr_camera.cpp">
+      <Filter>camera</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\mr\mr_marker.cpp">
+      <Filter>marker</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\mr\mr_control_manager.h" />
     <ClInclude Include="..\..\..\src\mr\mr_precompiled.h" />
-    <ClInclude Include="..\..\..\src\mr\mr_camera.h" />
+    <ClInclude Include="..\..\..\src\mr\mr_camera.h">
+      <Filter>camera</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\mr\mr_marker.h">
+      <Filter>marker</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="camera">
+      <UniqueIdentifier>{e5a95318-7228-429f-9523-6da08a7174f0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="marker">
+      <UniqueIdentifier>{6b0d4c75-aa6f-457b-9db7-cd886370e617}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>

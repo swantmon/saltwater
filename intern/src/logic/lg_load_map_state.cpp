@@ -32,6 +32,7 @@
 #include "logic/lg_load_map_state.h"
 
 #include "script/script_ar_camera_control_script.h"
+#include "script/script_ar_place_object_on_touch_script.h"
 #include "script/script_camera_control_script.h"
 #include "script/script_script_manager.h"
 
@@ -168,7 +169,7 @@ namespace
 
             rEntity.AttachComponent(ScriptComponent);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*ScriptComponent, Dt::CCameraComponent::DirtyCreate);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*ScriptComponent, Dt::CScriptComponent::DirtyCreate);
 
             Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
@@ -253,9 +254,9 @@ namespace
 
             pMeshComponent->SetMeshType(Dt::CMeshComponent::Cone);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pMeshComponent, Dt::CMeshComponent::DirtyCreate);
-
             rEntity.AttachComponent(pMeshComponent);
+
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pMeshComponent, Dt::CMeshComponent::DirtyCreate);
 
             // -----------------------------------------------------------------------------
 
@@ -267,9 +268,17 @@ namespace
 
             pMaterialComponent->SetMaterial(pMaterial);
 
+            rEntity.AttachComponent(pMaterialComponent);
+
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pMaterialComponent, Dt::CMaterialComponent::DirtyCreate);
 
-            rEntity.AttachComponent(pMaterialComponent);
+            // -----------------------------------------------------------------------------
+
+            auto pScriptComponent = Dt::CComponentManager::GetInstance().Allocate<Scpt::CARPlaceObjectOnTouchScript>();
+
+            rEntity.AttachComponent(pScriptComponent);
+
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pScriptComponent, Dt::CScriptComponent::DirtyCreate);
 
             // -----------------------------------------------------------------------------
 
@@ -318,7 +327,7 @@ void CLgLoadMapState::CreateDefaultScene()
 
             rEntity.AttachComponent(ScriptComponent);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*ScriptComponent, Dt::CCameraComponent::DirtyCreate);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*ScriptComponent, Dt::CScriptComponent::DirtyCreate);
 
             // -----------------------------------------------------------------------------
 
