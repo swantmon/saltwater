@@ -9,6 +9,9 @@
     <ClCompile Include="..\..\..\src\mr\mr_marker.cpp">
       <Filter>marker</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\mr\mr_light_estimation.cpp">
+      <Filter>light</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\mr\mr_control_manager.h" />
@@ -19,6 +22,9 @@
     <ClInclude Include="..\..\..\src\mr\mr_marker.h">
       <Filter>marker</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\mr\mr_light_estimation.h">
+      <Filter>light</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="camera">
@@ -26,6 +32,9 @@
     </Filter>
     <Filter Include="marker">
       <UniqueIdentifier>{6b0d4c75-aa6f-457b-9db7-cd886370e617}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="light">
+      <UniqueIdentifier>{35399f82-6132-4b4c-8227-78ff7e010369}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

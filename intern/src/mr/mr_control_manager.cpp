@@ -303,6 +303,8 @@ namespace
 
         const CCamera& GetCamera();
 
+        const CLightEstimation& GetLightEstimation();
+
         const CMarker* AcquireNewMarker(float _X, float _Y);
         void ReleaseMarker(const CMarker* _pMarker);
 
@@ -313,6 +315,13 @@ namespace
     private:
 
         class CInternCamera : public CCamera
+        {
+        private:
+
+            friend class CMRControlManager;
+        };
+
+        class CInternLightEstimation : public CLightEstimation
         {
         private:
 
@@ -345,6 +354,8 @@ namespace
         CTrackedObjects m_TrackedObjects;
 
         CInternCamera m_Camera;
+
+        CInternLightEstimation m_LightEstimation;
 
         glm::mat3 m_ARCToEngineMatrix;
 
@@ -489,29 +500,22 @@ namespace
         // -----------------------------------------------------------------------------
         // Update camera
         // -----------------------------------------------------------------------------
-        float Near = Base::CProgramParameters::GetInstance().Get<float>("mr:ar:camera:near", 0.1f);
-        float Far  = Base::CProgramParameters::GetInstance().Get<float>("mr:ar:camera:far", 100.0f);
-        glm::mat4 ViewMatrix(1.0f);
-        glm::mat4 ProjectionMatrix(1.0f);
+        m_Camera.m_Near = Base::CProgramParameters::GetInstance().Get<float>("mr:ar:camera:near", 0.1f);
+        m_Camera.m_Far  = Base::CProgramParameters::GetInstance().Get<float>("mr:ar:camera:far", 100.0f);
 
         ArCamera* pARCamera;
 
         ArFrame_acquireCamera(m_pARSession, m_pARFrame, &pARCamera);
 
-        ArCamera_getViewMatrix(m_pARSession, pARCamera, glm::value_ptr(ViewMatrix));
+        ArCamera_getViewMatrix(m_pARSession, pARCamera, glm::value_ptr(m_Camera.m_ViewMatrix));
 
-        ArCamera_getProjectionMatrix(m_pARSession, pARCamera, Near, Far, glm::value_ptr(ProjectionMatrix));
+        ArCamera_getProjectionMatrix(m_pARSession, pARCamera, m_Camera.m_Near, m_Camera.m_Far, glm::value_ptr(m_Camera.m_ProjectionMatrix));
 
         ArTrackingState CameraTrackingState;
 
         ArCamera_getTrackingState(m_pARSession, pARCamera, &CameraTrackingState);
 
         ArCamera_release(pARCamera);
-
-        m_Camera.m_ViewMatrix       = ViewMatrix;
-        m_Camera.m_ProjectionMatrix = ProjectionMatrix;
-        m_Camera.m_Near             = Near;
-        m_Camera.m_Far              = Far;
 
         switch(CameraTrackingState)
         {
@@ -541,18 +545,18 @@ namespace
 
         ArLightEstimate_getState(m_pARSession, ARLightEstimate, &ARLightEstimateState);
 
-        float LightIntensity = 0.8f;
+        m_LightEstimation.m_EstimationState = CLightEstimation::NotValid;
 
         if (ARLightEstimateState == AR_LIGHT_ESTIMATE_STATE_VALID)
         {
-            ArLightEstimate_getPixelIntensity(m_pARSession, ARLightEstimate, &LightIntensity);
+            ArLightEstimate_getPixelIntensity(m_pARSession, ARLightEstimate, &m_LightEstimation.m_Intensity);
+
+            m_LightEstimation.m_EstimationState = CLightEstimation::Valid;
         }
 
         ArLightEstimate_destroy(ARLightEstimate);
 
         ARLightEstimate = nullptr;
-
-        // TODO: use light estimation for our lighting
 
         // -----------------------------------------------------------------------------
         // Use tracked objects matrices
@@ -1055,6 +1059,13 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    const CLightEstimation& CMRControlManager::GetLightEstimation()
+    {
+        return m_LightEstimation;
+    }
+
+    // -----------------------------------------------------------------------------
+
     const CMarker* CMRControlManager::AcquireNewMarker(float _X, float _Y)
     {
         CInternMarker* pReturnMarker = nullptr;
@@ -1284,6 +1295,13 @@ namespace ControlManager
 
     // -----------------------------------------------------------------------------
 
+    const CLightEstimation& GetLightEstimation()
+    {
+        return CMRControlManager::GetInstance().GetLightEstimation();
+    }
+
+    // -----------------------------------------------------------------------------
+
     const CMarker* AcquireNewMarker(float _X, float _Y)
     {
         return CMRControlManager::GetInstance().AcquireNewMarker(_X, _Y);
@@ -1351,6 +1369,13 @@ namespace ControlManager
     const CCamera& GetCamera()
     {
         return CCamera();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const CLightEstimation& GetLightEstimation()
+    {
+        return CLightEstimation();
     }
 
     // -----------------------------------------------------------------------------
