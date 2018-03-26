@@ -6,10 +6,6 @@ namespace MR
 {
 namespace CameraManager
 {
-    void OnStart();
-
-    void OnExit();
-
     void Update();
 
     const CCamera& GetCamera();

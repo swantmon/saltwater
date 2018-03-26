@@ -410,14 +410,6 @@ namespace
 #endif
 
         // -----------------------------------------------------------------------------
-        // Start manager
-        // -----------------------------------------------------------------------------
-        MR::SessionManager::OnStart();
-        MR::CameraManager::OnStart();
-        MR::MarkerManager::OnStart();
-        MR::LightEstimationManager::OnStart();
-
-        // -----------------------------------------------------------------------------
         // Handler
         // -----------------------------------------------------------------------------
         Dt::EntityManager::RegisterDirtyEntityHandler(DATA_DIRTY_ENTITY_METHOD(&CMRControlManager::OnDirtyEntity));
@@ -429,14 +421,6 @@ namespace
 
     void CMRControlManager::OnExit()
     {
-        // -----------------------------------------------------------------------------
-        // Exit manager
-        // -----------------------------------------------------------------------------
-        MR::SessionManager::OnExit();
-        MR::CameraManager::OnExit();
-        MR::MarkerManager::OnExit();
-        MR::LightEstimationManager::OnExit();
-
 #if PLATFORM_ANDROID
         // -----------------------------------------------------------------------------
         // OpenGLES
@@ -463,6 +447,7 @@ namespace
 
     void CMRControlManager::OnPause()
     {
+        MR::SessionManager::OnPause();
     }
 
     // -----------------------------------------------------------------------------
@@ -515,6 +500,8 @@ namespace
             MR::SessionManager::Initialize();
         }
 #endif
+
+        MR::SessionManager::OnResume();
     }
 
     // -----------------------------------------------------------------------------

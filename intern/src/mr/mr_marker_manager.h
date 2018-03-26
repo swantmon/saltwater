@@ -7,10 +7,6 @@ namespace MR
 {
 namespace MarkerManager
 {
-    void OnStart();
-
-    void OnExit();
-
     void Update();
 
     const CMarker* AcquireNewMarker(float _X, float _Y);

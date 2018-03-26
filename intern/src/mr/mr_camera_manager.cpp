@@ -25,9 +25,6 @@ namespace
 
     public:
 
-        void OnStart();
-        void OnExit();
-
         void Update();
 
         const CCamera& GetCamera();
@@ -57,20 +54,6 @@ namespace
     // -----------------------------------------------------------------------------
 
     CMRCameraManager::~CMRCameraManager()
-    {
-
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CMRCameraManager::OnStart()
-    {
-        
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CMRCameraManager::OnExit()
     {
 
     }
@@ -131,20 +114,6 @@ namespace MR
 {
 namespace CameraManager
 {
-    void OnStart()
-    {
-        CMRCameraManager::GetInstance().OnStart();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void OnExit()
-    {
-        CMRCameraManager::GetInstance().OnExit();
-    }
-
-    // -----------------------------------------------------------------------------
-
     void Update()
     {
         CMRCameraManager::GetInstance().Update();

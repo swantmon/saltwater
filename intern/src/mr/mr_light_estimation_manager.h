@@ -7,10 +7,6 @@ namespace MR
 {
 namespace LightEstimationManager
 {
-    void OnStart();
-
-    void OnExit();
-
     void Update();
 
     const CLightEstimation& GetLightEstimation();

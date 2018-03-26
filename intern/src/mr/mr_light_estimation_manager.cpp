@@ -24,9 +24,6 @@ namespace
 
     public:
 
-        void OnStart();
-        void OnExit();
-
         void Update();
 
         const CLightEstimation& GetLightEstimation();
@@ -56,20 +53,6 @@ namespace
     // -----------------------------------------------------------------------------
 
     CMRLightEstimationManager::~CMRLightEstimationManager()
-    {
-
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CMRLightEstimationManager::OnStart()
-    {
-        
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CMRLightEstimationManager::OnExit()
     {
 
     }
@@ -126,20 +109,6 @@ namespace MR
 {
 namespace LightEstimationManager
 {
-    void OnStart()
-    {
-        CMRLightEstimationManager::GetInstance().OnStart();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void OnExit()
-    {
-        CMRLightEstimationManager::GetInstance().OnExit();
-    }
-
-    // -----------------------------------------------------------------------------
-
     void Update()
     {
         CMRLightEstimationManager::GetInstance().Update();

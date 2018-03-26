@@ -30,8 +30,6 @@ namespace
 
     public:
 
-        void OnStart();
-        void OnExit();
         void Update();
 
         void Initialize();
@@ -52,6 +50,11 @@ namespace
         {
         public:
 
+            CInternSession();
+            ~CInternSession();
+
+        public:
+
             bool m_IsUVsInitialized;
             ArSession* m_pARSession;
             ArFrame* m_pARFrame;
@@ -69,6 +72,24 @@ namespace
 
 namespace
 {
+    CMRSessionManager::CInternSession::CInternSession()
+        : m_IsUVsInitialized(false)
+        , m_pARSession      (0)
+        , m_pARFrame        (0)
+    {
+
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CMRSessionManager::CInternSession::~CInternSession()
+    {
+
+    }
+} // namespace
+
+namespace
+{
     CMRSessionManager::CMRSessionManager()
     {
     }
@@ -76,19 +97,6 @@ namespace
     // -----------------------------------------------------------------------------
 
     CMRSessionManager::~CMRSessionManager()
-    {
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CMRSessionManager::OnStart()
-    {
-
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CMRSessionManager::OnExit()
     {
 #if PLATFORM_ANDROID
         if (m_Session.m_pARSession == nullptr) return;
@@ -168,10 +176,9 @@ namespace
     void CMRSessionManager::OnResume()
     {
 #ifdef PLATFORM_ANDROID
-        if (m_Session.m_pARSession != nullptr)
-        {
-            ArSession_resume(m_Session.m_pARSession);
-        }
+        if (m_Session.m_pARSession == nullptr) return;
+
+        ArSession_resume(m_Session.m_pARSession);
 #endif // PLATFORM_ANDROID
     }
 
@@ -227,6 +234,8 @@ namespace
 
         assert(m_Session.m_pARFrame != 0);
 
+        ArSession_setDisplayGeometry(m_Session.m_pARSession, 0, 2560, 1440);
+
         // -----------------------------------------------------------------------------
         // Set external vars
         // -----------------------------------------------------------------------------
@@ -260,20 +269,6 @@ namespace MR
 {
 namespace SessionManager
 {
-    void OnStart()
-    {
-        CMRSessionManager::GetInstance().OnStart();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void OnExit()
-    {
-        CMRSessionManager::GetInstance().OnExit();
-    }
-
-    // -----------------------------------------------------------------------------
-
     void Update()
     {
         CMRSessionManager::GetInstance().Update();

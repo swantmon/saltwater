@@ -28,9 +28,6 @@ namespace
 
     public:
 
-        void OnStart();
-        void OnExit();
-
         void Update();
 
         const CMarker* AcquireNewMarker(float _X, float _Y);
@@ -70,20 +67,6 @@ namespace
     // -----------------------------------------------------------------------------
 
     CMRMarkerManager::~CMRMarkerManager()
-    {
-
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CMRMarkerManager::OnStart()
-    {
-        
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CMRMarkerManager::OnExit()
     {
         m_TrackedObjects.clear();
     }
@@ -312,20 +295,6 @@ namespace MR
 {
 namespace MarkerManager
 {
-    void OnStart()
-    {
-        CMRMarkerManager::GetInstance().OnStart();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void OnExit()
-    {
-        CMRMarkerManager::GetInstance().OnExit();
-    }
-
-    // -----------------------------------------------------------------------------
-
     void Update()
     {
         CMRMarkerManager::GetInstance().Update();

@@ -24,11 +24,9 @@ namespace MR
 {
 namespace SessionManager
 {
-    void OnStart();
-    void OnExit();
-    void Update();
-
     void Initialize();
+
+    void Update();
 
     void SetTexture(int _TextureId);
 
