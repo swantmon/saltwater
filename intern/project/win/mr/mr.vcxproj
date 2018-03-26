@@ -30,6 +30,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\mr\mr_session.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\mr\mr_camera.h" />
@@ -38,6 +39,7 @@
     <ClInclude Include="..\..\..\src\mr\mr_light_estimation_manager.h" />
     <ClInclude Include="..\..\..\src\mr\mr_marker.h" />
     <ClInclude Include="..\..\..\src\mr\mr_precompiled.h" />
+    <ClInclude Include="..\..\..\src\mr\mr_session.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{1BBA2732-A51B-4FF0-8393-492884561668}</ProjectGuid>
@@ -119,7 +121,7 @@
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\artoolkit\include;..\..\..\..\extern\opencv\include;..\..\..\..\extern\kinect\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\arcore\include;..\..\..\..\extern\artoolkit\include;..\..\..\..\extern\opencv\include;..\..\..\..\extern\kinect\include</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <PrecompiledHeaderFile>mr/mr_precompiled.h</PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -141,7 +143,7 @@
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\glm\include;..\..\..\..\extern\json\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\arcore\include;..\..\..\..\extern\glm\include;..\..\..\..\extern\json\include</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <PrecompiledHeaderFile>mr/mr_precompiled.h</PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -165,7 +167,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>BASE_RELEASE;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\artoolkit\include;..\..\..\..\extern\opencv\include;..\..\..\..\extern\kinect\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\arcore\include;..\..\..\..\extern\artoolkit\include;..\..\..\..\extern\opencv\include;..\..\..\..\extern\kinect\include</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <PrecompiledHeaderFile>mr/mr_precompiled.h</PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -191,7 +193,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>BASE_RELEASE;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\glm\include;..\..\..\..\extern\json\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\arcore\include;..\..\..\..\extern\glm\include;..\..\..\..\extern\json\include</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <PrecompiledHeaderFile>mr/mr_precompiled.h</PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>

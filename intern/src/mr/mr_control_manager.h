@@ -4,6 +4,7 @@
 #include "mr/mr_camera.h"
 #include "mr/mr_light_estimation.h"
 #include "mr/mr_marker.h"
+#include "mr/mr_session.h"
 
 namespace MR
 {
@@ -44,6 +45,8 @@ namespace ControlManager
     void OnDisplayGeometryChanged(int _DisplayRotation, int _Width, int _Height);
 
     void OnDraw();
+
+    const CSession& GetActiveSession();
 
     const CCamera& GetCamera();
 

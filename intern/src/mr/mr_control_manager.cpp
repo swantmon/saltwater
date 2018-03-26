@@ -27,9 +27,9 @@
 #include <array>
 #include <vector>
 
-#if PLATFORM_ANDROID
 #include "arcore_c_api.h"
 
+#if PLATFORM_ANDROID
 #include "GLES3/gl32.h"
 
 #ifndef GL_OES_EGL_image_external
@@ -38,6 +38,7 @@
 #define GL_TEXTURE_BINDING_EXTERNAL_OES   0x8D67
 #define GL_REQUIRED_TEXTURE_IMAGE_UNITS_OES 0x8D68
 #endif /* GL_OES_EGL_image_external */
+#endif
 
 using namespace MR;
 using namespace MR::ControlManager;
@@ -170,6 +171,7 @@ namespace
         }
     )";
 
+#if PLATFORM_ANDROID
     static GLuint LoadShader(GLenum _Type, const char* _pSource)
     {
         GLuint Shader = glCreateShader(_Type);
@@ -259,6 +261,7 @@ namespace
 
         return Program;
     }
+#endif
 
     unsigned int g_ShaderProgramWebcam;
     unsigned int g_ShaderProgramPlane;
@@ -301,6 +304,8 @@ namespace
 
         void OnDraw();
 
+        const CSession& GetActiveSession();
+
         const CCamera& GetCamera();
 
         const CLightEstimation& GetLightEstimation();
@@ -313,6 +318,18 @@ namespace
         static std::string s_Permissions[];
 
     private:
+
+        class CInternSession : public CSession
+        {
+        public:
+
+            ArSession* m_pARSession;
+            ArFrame* m_pARFrame;
+
+        private:
+
+            friend class CMRControlManager;
+        };
 
         class CInternCamera : public CCamera
         {
@@ -349,9 +366,9 @@ namespace
 
         SConfiguration m_Configuration;
 
-        ArSession* m_pARSession;
-        ArFrame* m_pARFrame;
         CTrackedObjects m_TrackedObjects;
+
+        CInternSession m_Session;
 
         CInternCamera m_Camera;
 
@@ -376,8 +393,6 @@ namespace
     CMRControlManager::CMRControlManager()
         : m_InstallRequested(false)
         , m_Configuration    ( )
-        , m_pARSession       (0)
-        , m_pARFrame         (0)
         , m_TrackedObjects   ( )
         , m_ARCToEngineMatrix(1.0f)
     {
@@ -399,6 +414,7 @@ namespace
         // -----------------------------------------------------------------------------
         m_Configuration = _rConfiguration;
 
+#if PLATFORM_ANDROID
         // -----------------------------------------------------------------------------
         // OpenGLES
         // -----------------------------------------------------------------------------
@@ -453,6 +469,7 @@ namespace
         glBufferData(GL_ARRAY_BUFFER, s_MaxNumberOfVerticesPerPoint * sizeof(glm::vec3), 0, GL_DYNAMIC_DRAW);
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
+#endif
 
         // -----------------------------------------------------------------------------
         // Handler
@@ -466,14 +483,15 @@ namespace
 
     void CMRControlManager::OnExit()
     {
+#if PLATFORM_ANDROID
         m_TrackedObjects.clear();
 
         // -----------------------------------------------------------------------------
         // AR session and frame
         // -----------------------------------------------------------------------------
-        ArSession_destroy(m_pARSession);
+        ArSession_destroy(m_Session.m_pARSession);
 
-        ArFrame_destroy(m_pARFrame);
+        ArFrame_destroy(m_Session.m_pARFrame);
 
         // -----------------------------------------------------------------------------
         // OpenGLES
@@ -481,19 +499,21 @@ namespace
         glDeleteProgram(g_ShaderProgramWebcam);
 
         glDeleteTextures(1, &g_TextureID);
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     void CMRControlManager::Update()
     {
-        if (m_pARSession == nullptr) return;
+#if PLATFORM_ANDROID
+        if (m_Session.m_pARSession == nullptr) return;
 
         ArStatus Result;
 
-        ArSession_setCameraTextureName(m_pARSession, g_TextureID);
+        ArSession_setCameraTextureName(m_Session.m_pARSession, g_TextureID);
 
-        Result = ArSession_update(m_pARSession, m_pARFrame);
+        Result = ArSession_update(m_Session.m_pARSession, m_Session.m_pARFrame);
 
         if (Result != AR_SUCCESS) return;
 
@@ -505,15 +525,15 @@ namespace
 
         ArCamera* pARCamera;
 
-        ArFrame_acquireCamera(m_pARSession, m_pARFrame, &pARCamera);
+        ArFrame_acquireCamera(m_Session.m_pARSession, m_Session.m_pARFrame, &pARCamera);
 
-        ArCamera_getViewMatrix(m_pARSession, pARCamera, glm::value_ptr(m_Camera.m_ViewMatrix));
+        ArCamera_getViewMatrix(m_Session.m_pARSession, pARCamera, glm::value_ptr(m_Camera.m_ViewMatrix));
 
-        ArCamera_getProjectionMatrix(m_pARSession, pARCamera, m_Camera.m_Near, m_Camera.m_Far, glm::value_ptr(m_Camera.m_ProjectionMatrix));
+        ArCamera_getProjectionMatrix(m_Session.m_pARSession, pARCamera, m_Camera.m_Near, m_Camera.m_Far, glm::value_ptr(m_Camera.m_ProjectionMatrix));
 
         ArTrackingState CameraTrackingState;
 
-        ArCamera_getTrackingState(m_pARSession, pARCamera, &CameraTrackingState);
+        ArCamera_getTrackingState(m_Session.m_pARSession, pARCamera, &CameraTrackingState);
 
         ArCamera_release(pARCamera);
 
@@ -539,17 +559,17 @@ namespace
         ArLightEstimate* ARLightEstimate;
         ArLightEstimateState ARLightEstimateState;
 
-        ArLightEstimate_create(m_pARSession, &ARLightEstimate);
+        ArLightEstimate_create(m_Session.m_pARSession, &ARLightEstimate);
 
-        ArFrame_getLightEstimate(m_pARSession, m_pARFrame, ARLightEstimate);
+        ArFrame_getLightEstimate(m_Session.m_pARSession, m_Session.m_pARFrame, ARLightEstimate);
 
-        ArLightEstimate_getState(m_pARSession, ARLightEstimate, &ARLightEstimateState);
+        ArLightEstimate_getState(m_Session.m_pARSession, ARLightEstimate, &ARLightEstimateState);
 
         m_LightEstimation.m_EstimationState = CLightEstimation::NotValid;
 
         if (ARLightEstimateState == AR_LIGHT_ESTIMATE_STATE_VALID)
         {
-            ArLightEstimate_getPixelIntensity(m_pARSession, ARLightEstimate, &m_LightEstimation.m_Intensity);
+            ArLightEstimate_getPixelIntensity(m_Session.m_pARSession, ARLightEstimate, &m_LightEstimation.m_Intensity);
 
             m_LightEstimation.m_EstimationState = CLightEstimation::Valid;
         }
@@ -565,7 +585,7 @@ namespace
         {
             ArTrackingState TrackingState = AR_TRACKING_STATE_STOPPED;
 
-            ArAnchor_getTrackingState(m_pARSession, rObject.m_pAnchor, &TrackingState);
+            ArAnchor_getTrackingState(m_Session.m_pARSession, rObject.m_pAnchor, &TrackingState);
 
             switch(TrackingState)
             {
@@ -584,35 +604,39 @@ namespace
 
             ArPose* pARPose = 0;
 
-            ArPose_create(m_pARSession, 0, &pARPose);
+            ArPose_create(m_Session.m_pARSession, 0, &pARPose);
 
-            ArAnchor_getPose(m_pARSession, rObject.m_pAnchor, pARPose);
+            ArAnchor_getPose(m_Session.m_pARSession, rObject.m_pAnchor, pARPose);
 
-            ArPose_getMatrix(m_pARSession, pARPose, glm::value_ptr(rObject.m_ModelMatrix));
+            ArPose_getMatrix(m_Session.m_pARSession, pARPose, glm::value_ptr(rObject.m_ModelMatrix));
 
             ArPose_destroy(pARPose);
         }
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     void CMRControlManager::OnPause()
     {
-        if (m_pARSession == nullptr) return;
+#if PLATFORM_ANDROID
+        if (m_Session.m_pARSession == nullptr) return;
 
-        ArSession_pause(m_pARSession);
+        ArSession_pause(m_Session.m_pARSession);
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     void CMRControlManager::OnResume()
     {
+#ifdef PLATFORM_ANDROID
         if(!Core::JNI::CheckPermission(s_Permissions[0]))
         {
             Core::JNI::AcquirePermissions(s_Permissions, 1);
         }
 
-        if (m_pARSession == nullptr && m_Configuration.m_pEnv != nullptr && m_Configuration.m_pActivity != nullptr && Core::JNI::CheckPermission(s_Permissions[0]))
+        if (m_Session.m_pARSession == nullptr && m_Configuration.m_pEnv != nullptr && m_Configuration.m_pActivity != nullptr && Core::JNI::CheckPermission(s_Permissions[0]))
         {
             ArStatus Status;
 
@@ -644,64 +668,74 @@ namespace
             // -----------------------------------------------------------------------------
             // AR session and frame
             // -----------------------------------------------------------------------------
-            Status = ArSession_create(m_Configuration.m_pEnv, m_Configuration.m_pContext, &m_pARSession);
+            Status = ArSession_create(m_Configuration.m_pEnv, m_Configuration.m_pContext, &m_Session.m_pARSession);
 
             if (Status != AR_SUCCESS) BASE_THROWM("Application has to be closed because of unsupported ArCore.");
 
-            assert(m_pARSession != 0);
+            assert(m_Session.m_pARSession != 0);
 
             ArConfig* ARConfig = 0;
 
-            ArConfig_create(m_pARSession, &ARConfig);
+            ArConfig_create(m_Session.m_pARSession, &ARConfig);
 
             assert(ARConfig != 0);
 
-            Status = ArSession_checkSupported(m_pARSession, ARConfig);
+            Status = ArSession_checkSupported(m_Session.m_pARSession, ARConfig);
 
             assert(Status == AR_SUCCESS);
 
-            Status = ArSession_configure(m_pARSession, ARConfig);
+            Status = ArSession_configure(m_Session.m_pARSession, ARConfig);
 
             assert(Status == AR_SUCCESS);
 
             ArConfig_destroy(ARConfig);
 
-            ArFrame_create(m_pARSession, &m_pARFrame);
+            ArFrame_create(m_Session.m_pARSession, &m_Session.m_pARFrame);
 
-            assert(m_pARFrame != 0);
+            assert(m_Session.m_pARFrame != 0);
 
-            ArSession_setDisplayGeometry(m_pARSession, m_Configuration.m_Rotation, m_Configuration.m_Width, m_Configuration.m_Height);
+            ArSession_setDisplayGeometry(m_Session.m_pARSession, m_Configuration.m_Rotation, m_Configuration.m_Width, m_Configuration.m_Height);
+
+            // -----------------------------------------------------------------------------
+            // Set external vars
+            // -----------------------------------------------------------------------------
+            m_Session.m_pSession = m_Session.m_pARSession;
+            m_Session.m_pFrame = m_Session.m_pARFrame;
         }
 
-        if (m_pARSession != nullptr)
+        if (m_Session.m_pARSession != nullptr)
         {
-            ArSession_resume(m_pARSession);
+            ArSession_resume(m_Session.m_pARSession);
         }
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     void CMRControlManager::OnDisplayGeometryChanged(int _DisplayRotation, int _Width, int _Height)
     {
-        ArSession_setDisplayGeometry(m_pARSession, _DisplayRotation, _Width, _Height);
+#if PLATFORM_ANDROID
+        ArSession_setDisplayGeometry(m_Session.m_pARSession, _DisplayRotation, _Width, _Height);
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     void CMRControlManager::OnDraw()
     {
-        if (m_pARSession == nullptr) return;
+#if PLATFORM_ANDROID
+        if (m_Session.m_pARSession == nullptr) return;
 
         // -----------------------------------------------------------------------------
         // Background
         // -----------------------------------------------------------------------------
         int32_t HasGeometryChanged = 0;
 
-        ArFrame_getDisplayGeometryChanged(m_pARSession, m_pARFrame, &HasGeometryChanged);
+        ArFrame_getDisplayGeometryChanged(m_Session.m_pARSession, m_Session.m_pARFrame, &HasGeometryChanged);
 
         if (HasGeometryChanged != 0 || g_IsUVsInitialized == false)
         {
-            ArFrame_transformDisplayUvCoords(m_pARSession, m_pARFrame, s_NumberOfVertices * 2, c_Uvs, g_TransformedUVs);
+            ArFrame_transformDisplayUvCoords(m_Session.m_pARSession, m_Session.m_pARFrame, s_NumberOfVertices * 2, c_Uvs, g_TransformedUVs);
 
             glBindBuffer(GL_ARRAY_BUFFER, g_AttributeUVs);
 
@@ -785,13 +819,13 @@ namespace
 
             int LengthOfPolygon;
 
-            ArPlane_getPolygonSize(m_pARSession, _pPlane, &LengthOfPolygon);
+            ArPlane_getPolygonSize(m_Session.m_pARSession, _pPlane, &LengthOfPolygon);
 
             int NumberOfVertices = LengthOfPolygon / 2;
 
             std::vector<glm::vec2> VerticesRAW(NumberOfVertices);
 
-            ArPlane_getPolygon(m_pARSession, _pPlane, &VerticesRAW.front()[0]);
+            ArPlane_getPolygon(m_Session.m_pARSession, _pPlane, &VerticesRAW.front()[0]);
 
             // -----------------------------------------------------------------------------
             // Fill vertex 0 to 3. Note that the vertex.xy are used for x and z
@@ -808,11 +842,11 @@ namespace
             // -----------------------------------------------------------------------------
             ArPose* Pose;
 
-            ArPose_create(m_pARSession, nullptr, &Pose);
+            ArPose_create(m_Session.m_pARSession, nullptr, &Pose);
 
-            ArPlane_getCenterPose(m_pARSession, _pPlane, Pose);
+            ArPlane_getCenterPose(m_Session.m_pARSession, _pPlane, Pose);
 
-            ArPose_getMatrix(m_pARSession, Pose, glm::value_ptr(PlaneModelMatrix));
+            ArPose_getMatrix(m_Session.m_pARSession, Pose, glm::value_ptr(PlaneModelMatrix));
 
             ArPose_destroy(Pose);
 
@@ -873,15 +907,15 @@ namespace
         // -----------------------------------------------------------------------------
         ArTrackableList* ListOfPlanes = nullptr;
 
-        ArTrackableList_create(m_pARSession, &ListOfPlanes);
+        ArTrackableList_create(m_Session.m_pARSession, &ListOfPlanes);
 
         assert(ListOfPlanes != nullptr);
 
-        ArSession_getAllTrackables(m_pARSession, AR_TRACKABLE_PLANE, ListOfPlanes);
+        ArSession_getAllTrackables(m_Session.m_pARSession, AR_TRACKABLE_PLANE, ListOfPlanes);
 
         int NumberOfPlanes = 0;
 
-        ArTrackableList_getSize(m_pARSession, ListOfPlanes, &NumberOfPlanes);
+        ArTrackableList_getSize(m_Session.m_pARSession, ListOfPlanes, &NumberOfPlanes);
 
         // -----------------------------------------------------------------------------
         // Update every available plane
@@ -890,17 +924,17 @@ namespace
         {
             ArTrackable* pTrackableItem = nullptr;
 
-            ArTrackableList_acquireItem(m_pARSession, ListOfPlanes, IndexOfPlane, &pTrackableItem);
+            ArTrackableList_acquireItem(m_Session.m_pARSession, ListOfPlanes, IndexOfPlane, &pTrackableItem);
 
             ArPlane* pPlane = ArAsPlane(pTrackableItem);
 
             ArTrackingState TrackableTrackingState;
 
-            ArTrackable_getTrackingState(m_pARSession, pTrackableItem, &TrackableTrackingState);
+            ArTrackable_getTrackingState(m_Session.m_pARSession, pTrackableItem, &TrackableTrackingState);
 
             ArPlane* pSubsumedPlane;
 
-            ArPlane_acquireSubsumedBy(m_pARSession, pPlane, &pSubsumedPlane);
+            ArPlane_acquireSubsumedBy(m_Session.m_pARSession, pPlane, &pSubsumedPlane);
 
             if (pSubsumedPlane != nullptr)
             {
@@ -913,7 +947,7 @@ namespace
 
             ArTrackingState PlaneTrackingState;
 
-            ArTrackable_getTrackingState(m_pARSession, ArAsTrackable(pPlane), &PlaneTrackingState);
+            ArTrackable_getTrackingState(m_Session.m_pARSession, ArAsTrackable(pPlane), &PlaneTrackingState);
 
             if (PlaneTrackingState != AR_TRACKING_STATE_TRACKING) continue;
 
@@ -999,7 +1033,7 @@ namespace
 
         ArPointCloud* pPointCloud = nullptr;
 
-        ArStatus Status = ArFrame_acquirePointCloud(m_pARSession, m_pARFrame, &pPointCloud);
+        ArStatus Status = ArFrame_acquirePointCloud(m_Session.m_pARSession, m_Session.m_pARFrame, &pPointCloud);
 
         if (Status == AR_SUCCESS)
         {
@@ -1008,13 +1042,13 @@ namespace
             // -----------------------------------------------------------------------------
             int NumberOfPoints = 0;
 
-            ArPointCloud_getNumberOfPoints(m_pARSession, pPointCloud, &NumberOfPoints);
+            ArPointCloud_getNumberOfPoints(m_Session.m_pARSession, pPointCloud, &NumberOfPoints);
 
             if (NumberOfPoints > 0)
             {
                 const float* pPointCloudData;
 
-                ArPointCloud_getData(m_pARSession, pPointCloud, &pPointCloudData);
+                ArPointCloud_getData(m_Session.m_pARSession, pPointCloud, &pPointCloudData);
 
                 glBindBuffer(GL_ARRAY_BUFFER, g_AttributePointVertices);
 
@@ -1048,6 +1082,14 @@ namespace
                 ArPointCloud_release(pPointCloud);
             }
         }
+#endif
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const CSession& CMRControlManager::GetActiveSession()
+    {
+        return m_Session;
     }
 
     // -----------------------------------------------------------------------------
@@ -1068,21 +1110,22 @@ namespace
 
     const CMarker* CMRControlManager::AcquireNewMarker(float _X, float _Y)
     {
+#if PLATFORM_ANDROID
         CInternMarker* pReturnMarker = nullptr;
 
-        if (m_pARFrame != nullptr && m_pARSession != nullptr)
+        if (m_Session.m_pARFrame != nullptr && m_Session.m_pARSession != nullptr)
         {
             ArHitResultList* pHitResultList = 0;
 
-            ArHitResultList_create(m_pARSession, &pHitResultList);
+            ArHitResultList_create(m_Session.m_pARSession, &pHitResultList);
 
             assert(pHitResultList);
 
-            ArFrame_hitTest(m_pARSession, m_pARFrame, _X, _Y, pHitResultList);
+            ArFrame_hitTest(m_Session.m_pARSession, m_Session.m_pARFrame, _X, _Y, pHitResultList);
 
             int NumberOfHits = 0;
 
-            ArHitResultList_getSize(m_pARSession, pHitResultList, &NumberOfHits);
+            ArHitResultList_getSize(m_Session.m_pARSession, pHitResultList, &NumberOfHits);
 
             // -----------------------------------------------------------------------------
             // The hitTest method sorts the resulting list by distance from the camera,
@@ -1095,9 +1138,9 @@ namespace
             {
                 ArHitResult* pEstimatedHitResult = nullptr;
 
-                ArHitResult_create(m_pARSession, &pEstimatedHitResult);
+                ArHitResult_create(m_Session.m_pARSession, &pEstimatedHitResult);
 
-                ArHitResultList_getItem(m_pARSession, pHitResultList, IndexOfHit, pEstimatedHitResult);
+                ArHitResultList_getItem(m_Session.m_pARSession, pHitResultList, IndexOfHit, pEstimatedHitResult);
 
                 if (pEstimatedHitResult == nullptr)
                 {
@@ -1109,11 +1152,11 @@ namespace
                 // -----------------------------------------------------------------------------
                 ArTrackable* pTrackable = nullptr;
 
-                ArHitResult_acquireTrackable(m_pARSession, pEstimatedHitResult, &pTrackable);
+                ArHitResult_acquireTrackable(m_Session.m_pARSession, pEstimatedHitResult, &pTrackable);
 
                 ArTrackableType TrackableType = AR_TRACKABLE_NOT_VALID;
 
-                ArTrackable_getType(m_pARSession, pTrackable, &TrackableType);
+                ArTrackable_getType(m_Session.m_pARSession, pTrackable, &TrackableType);
 
                 switch (TrackableType)
                 {
@@ -1121,15 +1164,15 @@ namespace
                     {
                         ArPose* pPose = nullptr;
 
-                        ArPose_create(m_pARSession, nullptr, &pPose);
+                        ArPose_create(m_Session.m_pARSession, nullptr, &pPose);
 
-                        ArHitResult_getHitPose(m_pARSession, pEstimatedHitResult, pPose);
+                        ArHitResult_getHitPose(m_Session.m_pARSession, pEstimatedHitResult, pPose);
 
                         int32_t IsPoseInPolygon = 0;
 
                         ArPlane* pPlane = ArAsPlane(pTrackable);
 
-                        ArPlane_isPoseInPolygon(m_pARSession, pPlane, pPose, &IsPoseInPolygon);
+                        ArPlane_isPoseInPolygon(m_Session.m_pARSession, pPlane, pPose, &IsPoseInPolygon);
 
                         ArTrackable_release(pTrackable);
 
@@ -1149,7 +1192,7 @@ namespace
 
                         ArPointOrientationMode OrientationMode;
 
-                        ArPoint_getOrientationMode(m_pARSession, pPoint, &OrientationMode);
+                        ArPoint_getOrientationMode(m_Session.m_pARSession, pPoint, &OrientationMode);
 
                         if (OrientationMode == AR_POINT_ORIENTATION_ESTIMATED_SURFACE_NORMAL)
                         {
@@ -1170,14 +1213,14 @@ namespace
             {
                 ArAnchor* pAnchor = nullptr;
 
-                if (ArHitResult_acquireNewAnchor(m_pARSession, pHitResult, &pAnchor) != AR_SUCCESS)
+                if (ArHitResult_acquireNewAnchor(m_Session.m_pARSession, pHitResult, &pAnchor) != AR_SUCCESS)
                 {
                     return nullptr;
                 }
 
                 ArTrackingState TrackingState = AR_TRACKING_STATE_STOPPED;
 
-                ArAnchor_getTrackingState(m_pARSession, pAnchor, &TrackingState);
+                ArAnchor_getTrackingState(m_Session.m_pARSession, pAnchor, &TrackingState);
 
                 if (TrackingState != AR_TRACKING_STATE_TRACKING)
                 {
@@ -1203,12 +1246,16 @@ namespace
         }
 
         return pReturnMarker;
+#else 
+        return nullptr;
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     void CMRControlManager::ReleaseMarker(const CMarker* _pMarker)
     {
+#if PLATFORM_ANDROID
         auto MarkerIter = std::find_if(m_TrackedObjects.begin(), m_TrackedObjects.end(), [&](CInternMarker& _rObject) { return &_rObject == _pMarker; });
 
         if (MarkerIter == m_TrackedObjects.end()) return;
@@ -1218,6 +1265,7 @@ namespace
         ArAnchor_release(pInternMarker->m_pAnchor);
 
         m_TrackedObjects.erase(MarkerIter);
+#endif
     }
 
     // -----------------------------------------------------------------------------
@@ -1288,6 +1336,13 @@ namespace ControlManager
 
     // -----------------------------------------------------------------------------
 
+    const CSession& GetActiveSession()
+    {
+        return CMRControlManager::GetInstance().GetActiveSession();
+    }
+
+    // -----------------------------------------------------------------------------
+
     const CCamera& GetCamera()
     {
         return CMRControlManager::GetInstance().GetCamera();
@@ -1315,85 +1370,3 @@ namespace ControlManager
     }
 } // namespace ControlManager
 } // namespace MR
-#else // PLATFORM_ANDROID
-namespace MR
-{
-namespace ControlManager
-{
-    void OnStart(const SConfiguration& _rConfiguration)
-    {
-        BASE_UNUSED(_rConfiguration);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void OnExit()
-    {
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void Update()
-    {
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void OnPause()
-    {
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void OnResume()
-    {
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void OnDisplayGeometryChanged(int _DisplayRotation, int _Width, int _Height)
-    {
-        BASE_UNUSED(_DisplayRotation);
-        BASE_UNUSED(_Width);
-        BASE_UNUSED(_Height);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void OnDraw()
-    {
-    }
-
-    // -----------------------------------------------------------------------------
-
-    const CCamera& GetCamera()
-    {
-        return CCamera();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    const CLightEstimation& GetLightEstimation()
-    {
-        return CLightEstimation();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    const CMarker* AcquireNewMarker(float _X, float _Y)
-    {
-        BASE_UNUSED(_X);
-        BASE_UNUSED(_Y);
-
-        return nullptr;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void ReleaseMarker(const CMarker* _pMarker)
-    {
-        BASE_UNUSED(_pMarker);
-    }
-} // namespace ControlManager
-} // namespace MR
-#endif // !PLATFORM_ANDROID
