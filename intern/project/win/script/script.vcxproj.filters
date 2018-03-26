@@ -17,7 +17,7 @@
     <ClInclude Include="..\..\..\src\script\script_ar_place_object_on_touch_script.h">
       <Filter>scripts</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\src\script\script_ar_controller_script.h">
+    <ClInclude Include="..\..\..\src\script\script_ar_controller_script.h">
       <Filter>scripts</Filter>
     </ClInclude>
   </ItemGroup>

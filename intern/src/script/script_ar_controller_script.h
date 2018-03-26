@@ -39,6 +39,7 @@ namespace Scpt
         void Update() override
         {
             MR::ControlManager::Update();
+
             MR::SessionManager::Update();
             MR::CameraManager::Update();
             MR::MarkerManager::Update();

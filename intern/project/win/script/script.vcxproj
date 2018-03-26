@@ -28,8 +28,8 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\src\script\script_ar_controller_script.h" />
     <ClInclude Include="..\..\..\src\script\script_ar_camera_control_script.h" />
+    <ClInclude Include="..\..\..\src\script\script_ar_controller_script.h" />
     <ClInclude Include="..\..\..\src\script\script_ar_place_object_on_touch_script.h" />
     <ClInclude Include="..\..\..\src\script\script_camera_control_script.h" />
     <ClInclude Include="..\..\..\src\script\script_script.h" />
