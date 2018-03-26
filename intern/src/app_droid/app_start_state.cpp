@@ -14,8 +14,6 @@
 
 #include "logic/lg_start_state.h"
 
-#include "mr/mr_control_manager.h"
-
 namespace App
 {
     CStartState& CStartState::GetInstance()
@@ -57,11 +55,6 @@ namespace App
         Lg ::Start::OnEnter();
         Gui::Start::OnEnter();
         Gfx::Start::OnEnter();
-
-        // -----------------------------------------------------------------------------
-        // Setup mixed reality
-        // -----------------------------------------------------------------------------
-        MR::ControlManager::OnStart();
     }
 
     // -----------------------------------------------------------------------------

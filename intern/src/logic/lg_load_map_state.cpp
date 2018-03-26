@@ -32,6 +32,7 @@
 #include "logic/lg_load_map_state.h"
 
 #include "script/script_ar_camera_control_script.h"
+#include "script/script_ar_controller_script.h"
 #include "script/script_ar_place_object_on_touch_script.h"
 #include "script/script_camera_control_script.h"
 #include "script/script_script_manager.h"
@@ -136,6 +137,34 @@ namespace
         // Allocate a map
         // -----------------------------------------------------------------------------
         Dt::Map::AllocateMap(1, 1);
+
+        // -----------------------------------------------------------------------------
+        // Setup controller
+        // -----------------------------------------------------------------------------
+        {
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
+            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
+
+            Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+
+            rEntity.SetName("AR Controller");
+
+            Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
+
+            pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+            pTransformationFacet->SetScale(glm::vec3(1.0f));
+            pTransformationFacet->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
+
+            auto ScriptComponent = Dt::CComponentManager::GetInstance().Allocate<Scpt::CARControllerScript>();
+
+            rEntity.AttachComponent(ScriptComponent);
+
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*ScriptComponent, Dt::CScriptComponent::DirtyCreate);
+
+            Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
 
         // -----------------------------------------------------------------------------
         // Setup cameras

@@ -436,11 +436,6 @@ namespace
     void CMRControlManager::Update()
     {
         MR::SessionManager::SetTexture(g_TextureID);
-
-        MR::SessionManager::Update();
-        MR::CameraManager::Update();
-        MR::MarkerManager::Update();
-        MR::LightEstimationManager::Update();
     }
 
     // -----------------------------------------------------------------------------
