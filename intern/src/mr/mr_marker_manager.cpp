@@ -6,8 +6,8 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
-#include "mr/mr_control_manager.h"
 #include "mr/mr_marker_manager.h"
+#include "mr/mr_session_manager.h"
 
 #include "arcore_c_api.h"
 
@@ -46,7 +46,7 @@ namespace
 
         private:
 
-            friend class CMRControlManager;
+            friend class CMRMarkerManager;
         };
 
 
@@ -85,7 +85,7 @@ namespace
 
     void CMRMarkerManager::OnExit()
     {
-
+        m_TrackedObjects.clear();
     }
 
     // -----------------------------------------------------------------------------
@@ -93,7 +93,7 @@ namespace
     void CMRMarkerManager::Update()
     {
 #ifdef PLATFORM_ANDROID
-        const CSession& rActiveSession = MR::ControlManager::GetActiveSession();
+        const CSession& rActiveSession = MR::SessionManager::GetSession();
 
         if (rActiveSession.GetSessionState() != CSession::Success) return;
 
@@ -140,19 +140,26 @@ namespace
 #if PLATFORM_ANDROID
         CInternMarker* pReturnMarker = nullptr;
 
-        if (m_Session.m_pARFrame != nullptr && m_Session.m_pARSession != nullptr)
+        const CSession& rActiveSession = MR::SessionManager::GetSession();
+
+        if (rActiveSession.GetSessionState() != CSession::Success) return nullptr;
+
+        ArSession* pARSession = static_cast<ArSession*>(rActiveSession.GetSession());
+        ArFrame*   pARFrame = static_cast<ArFrame*>(rActiveSession.GetFrame());
+
+        if (pARSession != nullptr && pARFrame != nullptr)
         {
             ArHitResultList* pHitResultList = 0;
 
-            ArHitResultList_create(m_Session.m_pARSession, &pHitResultList);
+            ArHitResultList_create(pARSession, &pHitResultList);
 
             assert(pHitResultList);
 
-            ArFrame_hitTest(m_Session.m_pARSession, m_Session.m_pARFrame, _X, _Y, pHitResultList);
+            ArFrame_hitTest(pARSession, pARFrame, _X, _Y, pHitResultList);
 
             int NumberOfHits = 0;
 
-            ArHitResultList_getSize(m_Session.m_pARSession, pHitResultList, &NumberOfHits);
+            ArHitResultList_getSize(pARSession, pHitResultList, &NumberOfHits);
 
             // -----------------------------------------------------------------------------
             // The hitTest method sorts the resulting list by distance from the camera,
@@ -165,9 +172,9 @@ namespace
             {
                 ArHitResult* pEstimatedHitResult = nullptr;
 
-                ArHitResult_create(m_Session.m_pARSession, &pEstimatedHitResult);
+                ArHitResult_create(pARSession, &pEstimatedHitResult);
 
-                ArHitResultList_getItem(m_Session.m_pARSession, pHitResultList, IndexOfHit, pEstimatedHitResult);
+                ArHitResultList_getItem(pARSession, pHitResultList, IndexOfHit, pEstimatedHitResult);
 
                 if (pEstimatedHitResult == nullptr)
                 {
@@ -179,11 +186,11 @@ namespace
                 // -----------------------------------------------------------------------------
                 ArTrackable* pTrackable = nullptr;
 
-                ArHitResult_acquireTrackable(m_Session.m_pARSession, pEstimatedHitResult, &pTrackable);
+                ArHitResult_acquireTrackable(pARSession, pEstimatedHitResult, &pTrackable);
 
                 ArTrackableType TrackableType = AR_TRACKABLE_NOT_VALID;
 
-                ArTrackable_getType(m_Session.m_pARSession, pTrackable, &TrackableType);
+                ArTrackable_getType(pARSession, pTrackable, &TrackableType);
 
                 switch (TrackableType)
                 {
@@ -191,15 +198,15 @@ namespace
                 {
                     ArPose* pPose = nullptr;
 
-                    ArPose_create(m_Session.m_pARSession, nullptr, &pPose);
+                    ArPose_create(pARSession, nullptr, &pPose);
 
-                    ArHitResult_getHitPose(m_Session.m_pARSession, pEstimatedHitResult, pPose);
+                    ArHitResult_getHitPose(pARSession, pEstimatedHitResult, pPose);
 
                     int32_t IsPoseInPolygon = 0;
 
                     ArPlane* pPlane = ArAsPlane(pTrackable);
 
-                    ArPlane_isPoseInPolygon(m_Session.m_pARSession, pPlane, pPose, &IsPoseInPolygon);
+                    ArPlane_isPoseInPolygon(pARSession, pPlane, pPose, &IsPoseInPolygon);
 
                     ArTrackable_release(pTrackable);
 
@@ -219,7 +226,7 @@ namespace
 
                     ArPointOrientationMode OrientationMode;
 
-                    ArPoint_getOrientationMode(m_Session.m_pARSession, pPoint, &OrientationMode);
+                    ArPoint_getOrientationMode(pARSession, pPoint, &OrientationMode);
 
                     if (OrientationMode == AR_POINT_ORIENTATION_ESTIMATED_SURFACE_NORMAL)
                     {
@@ -240,14 +247,14 @@ namespace
             {
                 ArAnchor* pAnchor = nullptr;
 
-                if (ArHitResult_acquireNewAnchor(m_Session.m_pARSession, pHitResult, &pAnchor) != AR_SUCCESS)
+                if (ArHitResult_acquireNewAnchor(pARSession, pHitResult, &pAnchor) != AR_SUCCESS)
                 {
                     return nullptr;
                 }
 
                 ArTrackingState TrackingState = AR_TRACKING_STATE_STOPPED;
 
-                ArAnchor_getTrackingState(m_Session.m_pARSession, pAnchor, &TrackingState);
+                ArAnchor_getTrackingState(pARSession, pAnchor, &TrackingState);
 
                 if (TrackingState != AR_TRACKING_STATE_TRACKING)
                 {

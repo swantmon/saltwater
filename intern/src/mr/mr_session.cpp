@@ -6,11 +6,12 @@
 namespace MR
 {
     CSession::CSession()
-        : m_State   (Undefined)
-        , m_pSession(0)
-        , m_pFrame  (0)
+        : m_State             (Undefined)
+        , m_pSession          (0)
+        , m_pFrame            (0)
+        , m_HasGeometryChanged(false)
+        , m_UVs               ({ glm::vec2(0.0f, 1.0f), glm::vec2(1.0f, 1.0f), glm::vec2(0.0f, 0.0f), glm::vec2(1.0f, 0.0f) })
     {
-
     }
 
     // -----------------------------------------------------------------------------
@@ -39,5 +40,19 @@ namespace MR
     void* CSession::GetFrame() const
     {
         return m_pFrame;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    bool CSession::HasGeometryChanged() const
+    {
+        return m_HasGeometryChanged;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CSession::CUVs CSession::GetTransformedUVs() const
+    {
+        return m_UVs;
     }
 } // namespace MR

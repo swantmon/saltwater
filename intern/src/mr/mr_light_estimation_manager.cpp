@@ -4,7 +4,7 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
-#include "mr/mr_control_manager.h"
+#include "mr/mr_session_manager.h"
 #include "mr/mr_light_estimation_manager.h"
 
 #include "arcore_c_api.h"
@@ -37,7 +37,7 @@ namespace
         {
         private:
 
-            friend class CMRControlManager;
+            friend class CMRLightEstimationManager;
         };
 
     private:
@@ -79,7 +79,7 @@ namespace
     void CMRLightEstimationManager::Update()
     {
 #ifdef PLATFORM_ANDROID
-        const CSession& rActiveSession = MR::ControlManager::GetActiveSession();
+        const CSession& rActiveSession = MR::SessionManager::GetSession();
 
         if (rActiveSession.GetSessionState() != CSession::Success) return;
 

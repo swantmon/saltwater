@@ -22,7 +22,11 @@
 
 #include "gui/gui_event_handler.h"
 
+#include "mr/mr_camera_manager.h"
 #include "mr/mr_control_manager.h"
+#include "mr/mr_light_estimation_manager.h"
+#include "mr/mr_marker_manager.h"
+#include "mr/mr_session_manager.h"
 
 #include <array>
 #include <vector>
@@ -57,10 +61,6 @@ namespace
 
         return glm::vec3(((RGB >> 24) & 0xff) / 255.0f, ((RGB >> 16) & 0xff) / 255.0f, ((RGB >> 8) & 0xff) / 255.0f);
     }
-
-    const float c_Uvs[] = {
-            0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-    };
 
     constexpr char c_VertexShaderWebcam[] = R"(
         #version  320 es
@@ -276,8 +276,6 @@ namespace
     static constexpr int s_MaxNumberOfVerticesPerPoint = 512;
 
     static constexpr int s_NumberOfVertices = 4;
-    bool g_IsUVsInitialized = false;
-    float g_TransformedUVs[s_NumberOfVertices * 2];
 } // namespace
 
 namespace
@@ -293,7 +291,7 @@ namespace
 
     public:
 
-        void OnStart(const SConfiguration& _rConfiguration);
+        void OnStart();
         void OnExit();
         void Update();
 
@@ -303,8 +301,6 @@ namespace
         void OnDisplayGeometryChanged(int _DisplayRotation, int _Width, int _Height);
 
         void OnDraw();
-
-        const CSession& GetActiveSession();
 
     private:
 
@@ -328,10 +324,6 @@ namespace
 
         bool m_InstallRequested;
 
-        SConfiguration m_Configuration;
-
-        CInternSession m_Session;
-
         glm::mat3 m_ARCToEngineMatrix;
 
     private:
@@ -343,14 +335,8 @@ namespace
 
 namespace
 {
-    std::string CMRControlManager::s_Permissions[] = { "android.permission.CAMERA" };
-}
-
-namespace
-{
     CMRControlManager::CMRControlManager()
-        : m_InstallRequested(false)
-        , m_Configuration    ( )
+        : m_InstallRequested (false)
         , m_ARCToEngineMatrix(1.0f)
     {
         m_ARCToEngineMatrix = Base::CCoordinateSystem::GetBaseMatrix(glm::vec3(1,0,0), glm::vec3(0,1,0), glm::vec3(0,0,-1));
@@ -364,13 +350,8 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CMRControlManager::OnStart(const SConfiguration& _rConfiguration)
+    void CMRControlManager::OnStart()
     {
-        // -----------------------------------------------------------------------------
-        // Save configuration
-        // -----------------------------------------------------------------------------
-        m_Configuration = _rConfiguration;
-
 #if PLATFORM_ANDROID
         // -----------------------------------------------------------------------------
         // OpenGLES
@@ -391,7 +372,7 @@ namespace
 
         glBindBuffer(GL_ARRAY_BUFFER, g_AttributeUVs);
 
-        glBufferData(GL_ARRAY_BUFFER, sizeof(c_Uvs), &c_Uvs, GL_DYNAMIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 8, 0, GL_DYNAMIC_DRAW);
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -429,6 +410,14 @@ namespace
 #endif
 
         // -----------------------------------------------------------------------------
+        // Start manager
+        // -----------------------------------------------------------------------------
+        MR::SessionManager::OnStart();
+        MR::CameraManager::OnStart();
+        MR::MarkerManager::OnStart();
+        MR::LightEstimationManager::OnStart();
+
+        // -----------------------------------------------------------------------------
         // Handler
         // -----------------------------------------------------------------------------
         Dt::EntityManager::RegisterDirtyEntityHandler(DATA_DIRTY_ENTITY_METHOD(&CMRControlManager::OnDirtyEntity));
@@ -440,16 +429,15 @@ namespace
 
     void CMRControlManager::OnExit()
     {
+        // -----------------------------------------------------------------------------
+        // Exit manager
+        // -----------------------------------------------------------------------------
+        MR::SessionManager::OnExit();
+        MR::CameraManager::OnExit();
+        MR::MarkerManager::OnExit();
+        MR::LightEstimationManager::OnExit();
+
 #if PLATFORM_ANDROID
-        m_TrackedObjects.clear();
-
-        // -----------------------------------------------------------------------------
-        // AR session and frame
-        // -----------------------------------------------------------------------------
-        ArSession_destroy(m_Session.m_pARSession);
-
-        ArFrame_destroy(m_Session.m_pARFrame);
-
         // -----------------------------------------------------------------------------
         // OpenGLES
         // -----------------------------------------------------------------------------
@@ -463,28 +451,18 @@ namespace
 
     void CMRControlManager::Update()
     {
-#if PLATFORM_ANDROID
-        if (m_Session.m_pARSession == nullptr) return;
+        MR::SessionManager::SetTexture(g_TextureID);
 
-        ArStatus Result;
-
-        ArSession_setCameraTextureName(m_Session.m_pARSession, g_TextureID);
-
-        Result = ArSession_update(m_Session.m_pARSession, m_Session.m_pARFrame);
-
-        if (Result != AR_SUCCESS) return;
-#endif
+        MR::SessionManager::Update();
+        MR::CameraManager::Update();
+        MR::MarkerManager::Update();
+        MR::LightEstimationManager::Update();
     }
 
     // -----------------------------------------------------------------------------
 
     void CMRControlManager::OnPause()
     {
-#if PLATFORM_ANDROID
-        if (m_Session.m_pARSession == nullptr) return;
-
-        ArSession_pause(m_Session.m_pARSession);
-#endif
     }
 
     // -----------------------------------------------------------------------------
@@ -492,12 +470,17 @@ namespace
     void CMRControlManager::OnResume()
     {
 #ifdef PLATFORM_ANDROID
+        std::string s_Permissions[] = { "android.permission.CAMERA" };
+
+        void* pEnvironment = Core::JNI::GetJavaEnvironment();
+        void* pActivity    = Core::JNI::GetActivity();
+
         if(!Core::JNI::CheckPermission(s_Permissions[0]))
         {
             Core::JNI::AcquirePermissions(s_Permissions, 1);
         }
 
-        if (m_Session.m_pARSession == nullptr && m_Configuration.m_pEnv != nullptr && m_Configuration.m_pActivity != nullptr && Core::JNI::CheckPermission(s_Permissions[0]))
+        if (pEnvironment != nullptr && pActivity != nullptr && Core::JNI::CheckPermission(s_Permissions[0]))
         {
             ArStatus Status;
 
@@ -508,7 +491,7 @@ namespace
 
             bool UserRequestedInstallation = !m_InstallRequested;
 
-            Status = ArCoreApk_requestInstall(m_Configuration.m_pEnv, m_Configuration.m_pActivity, UserRequestedInstallation, &InstallStatus);
+            Status = ArCoreApk_requestInstall(pEnvironment, pActivity, UserRequestedInstallation, &InstallStatus);
 
             if (Status != AR_SUCCESS) return;
 
@@ -527,61 +510,19 @@ namespace
             }
 
             // -----------------------------------------------------------------------------
-            // AR session and frame
+            // Create session
             // -----------------------------------------------------------------------------
-            Status = ArSession_create(m_Configuration.m_pEnv, m_Configuration.m_pContext, &m_Session.m_pARSession);
-
-            if (Status != AR_SUCCESS) BASE_THROWM("Application has to be closed because of unsupported ArCore.");
-
-            assert(m_Session.m_pARSession != 0);
-
-            ArConfig* ARConfig = 0;
-
-            ArConfig_create(m_Session.m_pARSession, &ARConfig);
-
-            assert(ARConfig != 0);
-
-            Status = ArSession_checkSupported(m_Session.m_pARSession, ARConfig);
-
-            assert(Status == AR_SUCCESS);
-
-            Status = ArSession_configure(m_Session.m_pARSession, ARConfig);
-
-            assert(Status == AR_SUCCESS);
-
-            ArConfig_destroy(ARConfig);
-
-            ArFrame_create(m_Session.m_pARSession, &m_Session.m_pARFrame);
-
-            assert(m_Session.m_pARFrame != 0);
-
-            ArSession_setDisplayGeometry(m_Session.m_pARSession, m_Configuration.m_Rotation, m_Configuration.m_Width, m_Configuration.m_Height);
-
-            // -----------------------------------------------------------------------------
-            // Set external vars
-            // -----------------------------------------------------------------------------
-            m_Session.m_pSession = m_Session.m_pARSession;
-            m_Session.m_pFrame = m_Session.m_pARFrame;
-        }
-
-        if (m_Session.m_pARSession != nullptr)
-        {
-            ArSession_resume(m_Session.m_pARSession);
+            MR::SessionManager::Initialize();
         }
 #endif
     }
 
     // -----------------------------------------------------------------------------
 
+
     void CMRControlManager::OnDisplayGeometryChanged(int _DisplayRotation, int _Width, int _Height)
     {
-#if PLATFORM_ANDROID
-        ArSession_setDisplayGeometry(m_Session.m_pARSession, _DisplayRotation, _Width, _Height);
-#else
-        BASE_UNUSED(_DisplayRotation);
-        BASE_UNUSED(_Width);
-        BASE_UNUSED(_Height);
-#endif
+        SessionManager::OnDisplayGeometryChanged(static_cast<SessionManager::SDisplayRotation::EDisplayRotation>(_DisplayRotation), _Width, _Height);
     }
 
     // -----------------------------------------------------------------------------
@@ -589,26 +530,23 @@ namespace
     void CMRControlManager::OnDraw()
     {
 #if PLATFORM_ANDROID
-        if (m_Session.m_pARSession == nullptr) return;
+        const CSession& rActiveSession = SessionManager::GetSession();
+
+        if (rActiveSession.GetSessionState() != MR::CSession::Success) return;
+
+        ArSession* pARSession = static_cast<ArSession*>(rActiveSession.GetSession());
+        ArFrame*   pARFrame = static_cast<ArFrame*>(rActiveSession.GetFrame());
 
         // -----------------------------------------------------------------------------
         // Background
         // -----------------------------------------------------------------------------
-        int32_t HasGeometryChanged = 0;
-
-        ArFrame_getDisplayGeometryChanged(m_Session.m_pARSession, m_Session.m_pARFrame, &HasGeometryChanged);
-
-        if (HasGeometryChanged != 0 || g_IsUVsInitialized == false)
+        if (rActiveSession.HasGeometryChanged())
         {
-            ArFrame_transformDisplayUvCoords(m_Session.m_pARSession, m_Session.m_pARFrame, s_NumberOfVertices * 2, c_Uvs, g_TransformedUVs);
-
             glBindBuffer(GL_ARRAY_BUFFER, g_AttributeUVs);
 
-            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(g_TransformedUVs), &g_TransformedUVs);
+            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(MR::CSession::CUVs), &rActiveSession.GetTransformedUVs()[0]);
 
             glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-            g_IsUVsInitialized = true;
         }
 
         glUseProgram(g_ShaderProgramWebcam);
@@ -684,13 +622,13 @@ namespace
 
             int LengthOfPolygon;
 
-            ArPlane_getPolygonSize(m_Session.m_pARSession, _pPlane, &LengthOfPolygon);
+            ArPlane_getPolygonSize(pARSession, _pPlane, &LengthOfPolygon);
 
             int NumberOfVertices = LengthOfPolygon / 2;
 
             std::vector<glm::vec2> VerticesRAW(NumberOfVertices);
 
-            ArPlane_getPolygon(m_Session.m_pARSession, _pPlane, &VerticesRAW.front()[0]);
+            ArPlane_getPolygon(pARSession, _pPlane, &VerticesRAW.front()[0]);
 
             // -----------------------------------------------------------------------------
             // Fill vertex 0 to 3. Note that the vertex.xy are used for x and z
@@ -707,11 +645,11 @@ namespace
             // -----------------------------------------------------------------------------
             ArPose* Pose;
 
-            ArPose_create(m_Session.m_pARSession, nullptr, &Pose);
+            ArPose_create(pARSession, nullptr, &Pose);
 
-            ArPlane_getCenterPose(m_Session.m_pARSession, _pPlane, Pose);
+            ArPlane_getCenterPose(pARSession, _pPlane, Pose);
 
-            ArPose_getMatrix(m_Session.m_pARSession, Pose, glm::value_ptr(PlaneModelMatrix));
+            ArPose_getMatrix(pARSession, Pose, glm::value_ptr(PlaneModelMatrix));
 
             ArPose_destroy(Pose);
 
@@ -772,15 +710,15 @@ namespace
         // -----------------------------------------------------------------------------
         ArTrackableList* ListOfPlanes = nullptr;
 
-        ArTrackableList_create(m_Session.m_pARSession, &ListOfPlanes);
+        ArTrackableList_create(pARSession, &ListOfPlanes);
 
         assert(ListOfPlanes != nullptr);
 
-        ArSession_getAllTrackables(m_Session.m_pARSession, AR_TRACKABLE_PLANE, ListOfPlanes);
+        ArSession_getAllTrackables(pARSession, AR_TRACKABLE_PLANE, ListOfPlanes);
 
         int NumberOfPlanes = 0;
 
-        ArTrackableList_getSize(m_Session.m_pARSession, ListOfPlanes, &NumberOfPlanes);
+        ArTrackableList_getSize(pARSession, ListOfPlanes, &NumberOfPlanes);
 
         // -----------------------------------------------------------------------------
         // Update every available plane
@@ -789,17 +727,17 @@ namespace
         {
             ArTrackable* pTrackableItem = nullptr;
 
-            ArTrackableList_acquireItem(m_Session.m_pARSession, ListOfPlanes, IndexOfPlane, &pTrackableItem);
+            ArTrackableList_acquireItem(pARSession, ListOfPlanes, IndexOfPlane, &pTrackableItem);
 
             ArPlane* pPlane = ArAsPlane(pTrackableItem);
 
             ArTrackingState TrackableTrackingState;
 
-            ArTrackable_getTrackingState(m_Session.m_pARSession, pTrackableItem, &TrackableTrackingState);
+            ArTrackable_getTrackingState(pARSession, pTrackableItem, &TrackableTrackingState);
 
             ArPlane* pSubsumedPlane;
 
-            ArPlane_acquireSubsumedBy(m_Session.m_pARSession, pPlane, &pSubsumedPlane);
+            ArPlane_acquireSubsumedBy(pARSession, pPlane, &pSubsumedPlane);
 
             if (pSubsumedPlane != nullptr)
             {
@@ -812,7 +750,7 @@ namespace
 
             ArTrackingState PlaneTrackingState;
 
-            ArTrackable_getTrackingState(m_Session.m_pARSession, ArAsTrackable(pPlane), &PlaneTrackingState);
+            ArTrackable_getTrackingState(pARSession, ArAsTrackable(pPlane), &PlaneTrackingState);
 
             if (PlaneTrackingState != AR_TRACKING_STATE_TRACKING) continue;
 
@@ -898,7 +836,7 @@ namespace
 
         ArPointCloud* pPointCloud = nullptr;
 
-        ArStatus Status = ArFrame_acquirePointCloud(m_Session.m_pARSession, m_Session.m_pARFrame, &pPointCloud);
+        ArStatus Status = ArFrame_acquirePointCloud(pARSession, pARFrame, &pPointCloud);
 
         if (Status == AR_SUCCESS)
         {
@@ -907,13 +845,13 @@ namespace
             // -----------------------------------------------------------------------------
             int NumberOfPoints = 0;
 
-            ArPointCloud_getNumberOfPoints(m_Session.m_pARSession, pPointCloud, &NumberOfPoints);
+            ArPointCloud_getNumberOfPoints(pARSession, pPointCloud, &NumberOfPoints);
 
             if (NumberOfPoints > 0)
             {
                 const float* pPointCloudData;
 
-                ArPointCloud_getData(m_Session.m_pARSession, pPointCloud, &pPointCloudData);
+                ArPointCloud_getData(pARSession, pPointCloud, &pPointCloudData);
 
                 glBindBuffer(GL_ARRAY_BUFFER, g_AttributePointVertices);
 
@@ -952,13 +890,6 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    const CSession& CMRControlManager::GetActiveSession()
-    {
-        return m_Session;
-    }
-
-    // -----------------------------------------------------------------------------
-
     void CMRControlManager::OnDirtyEntity(Dt::CEntity* _pEntity)
     {
         BASE_UNUSED(_pEntity);
@@ -976,9 +907,9 @@ namespace MR
 {
 namespace ControlManager
 {
-    void OnStart(const SConfiguration& _rConfiguration)
+    void OnStart()
     {
-        CMRControlManager::GetInstance().OnStart(_rConfiguration);
+        CMRControlManager::GetInstance().OnStart();
     }
 
     // -----------------------------------------------------------------------------
@@ -1020,14 +951,7 @@ namespace ControlManager
 
     void OnDraw()
     {
-        CMRControlManager::GetInstance().OnDraw();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    const CSession& GetActiveSession()
-    {
-        return CMRControlManager::GetInstance().GetActiveSession();
+        return CMRControlManager::GetInstance().OnDraw();
     }
 } // namespace ControlManager
 } // namespace MR

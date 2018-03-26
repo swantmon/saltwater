@@ -24,6 +24,9 @@
     <ClCompile Include="..\..\..\src\mr\mr_marker_manager.cpp">
       <Filter>marker</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\mr\mr_session_manager.cpp">
+      <Filter>session</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\mr\mr_control_manager.h" />
@@ -48,6 +51,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\mr\mr_marker_manager.h">
       <Filter>marker</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\mr\mr_session_manager.h">
+      <Filter>session</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

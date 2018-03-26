@@ -33,6 +33,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\..\..\src\mr\mr_session.cpp" />
+    <ClCompile Include="..\..\..\src\mr\mr_session_manager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\mr\mr_camera.h" />
@@ -44,6 +45,7 @@
     <ClInclude Include="..\..\..\src\mr\mr_marker_manager.h" />
     <ClInclude Include="..\..\..\src\mr\mr_precompiled.h" />
     <ClInclude Include="..\..\..\src\mr\mr_session.h" />
+    <ClInclude Include="..\..\..\src\mr\mr_session_manager.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{1BBA2732-A51B-4FF0-8393-492884561668}</ProjectGuid>

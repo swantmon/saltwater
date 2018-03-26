@@ -61,16 +61,7 @@ namespace App
         // -----------------------------------------------------------------------------
         // Setup mixed reality
         // -----------------------------------------------------------------------------
-        MR::ControlManager::SConfiguration Config;
-
-        Config.m_pEnv      = Core::JNI::GetJavaEnvironment();
-        Config.m_pContext  = Core::JNI::GetContext();
-        Config.m_pActivity = Core::JNI::GetActivity();
-        Config.m_Rotation  = static_cast<MR::ControlManager::SConfiguration::EDisplayRotation>(Core::JNI::GetDeviceRotation());
-        Config.m_Width     = Core::JNI::GetDeviceDimension()[0];
-        Config.m_Height    = Core::JNI::GetDeviceDimension()[1];
-
-        MR::ControlManager::OnStart(Config);
+        MR::ControlManager::OnStart();
     }
 
     // -----------------------------------------------------------------------------

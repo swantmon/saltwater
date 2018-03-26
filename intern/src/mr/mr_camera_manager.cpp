@@ -6,7 +6,7 @@
 #include "base/base_uncopyable.h"
 
 #include "mr/mr_camera_manager.h"
-#include "mr/mr_control_manager.h"
+#include "mr/mr_session_manager.h"
 
 #include "arcore_c_api.h"
 
@@ -38,7 +38,7 @@ namespace
         {
         private:
 
-            friend class CMRControlManager;
+            friend class CMRCameraManager;
         };
 
     private:
@@ -80,7 +80,7 @@ namespace
     void CMRCameraManager::Update()
     {
 #if PLATFORM_ANDROID
-        const CSession& rActiveSession = MR::ControlManager::GetActiveSession();
+        const CSession& rActiveSession = MR::SessionManager::GetSession();
 
         if (rActiveSession.GetSessionState() != CSession::Success) return;
 
