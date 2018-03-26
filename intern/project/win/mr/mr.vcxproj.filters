@@ -18,6 +18,12 @@
     <ClCompile Include="..\..\..\src\mr\mr_session.cpp">
       <Filter>session</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\mr\mr_camera_manager.cpp">
+      <Filter>camera</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\mr\mr_marker_manager.cpp">
+      <Filter>marker</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\mr\mr_control_manager.h" />
@@ -36,6 +42,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\mr\mr_session.h">
       <Filter>session</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\mr\mr_camera_manager.h">
+      <Filter>camera</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\mr\mr_marker_manager.h">
+      <Filter>marker</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

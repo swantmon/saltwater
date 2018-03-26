@@ -306,13 +306,6 @@ namespace
 
         const CSession& GetActiveSession();
 
-        const CCamera& GetCamera();
-
-        const CLightEstimation& GetLightEstimation();
-
-        const CMarker* AcquireNewMarker(float _X, float _Y);
-        void ReleaseMarker(const CMarker* _pMarker);
-
     private:
 
         static std::string s_Permissions[];
@@ -331,48 +324,13 @@ namespace
             friend class CMRControlManager;
         };
 
-        class CInternCamera : public CCamera
-        {
-        private:
-
-            friend class CMRControlManager;
-        };
-
-        class CInternLightEstimation : public CLightEstimation
-        {
-        private:
-
-            friend class CMRControlManager;
-        };
-
-        class CInternMarker : public CMarker
-        {
-        public:
-
-            ArAnchor* m_pAnchor;
-
-        private:
-
-            friend class CMRControlManager;
-        };
-
-    private:
-
-        typedef std::vector<CInternMarker> CTrackedObjects;
-
     private:
 
         bool m_InstallRequested;
 
         SConfiguration m_Configuration;
 
-        CTrackedObjects m_TrackedObjects;
-
         CInternSession m_Session;
-
-        CInternCamera m_Camera;
-
-        CInternLightEstimation m_LightEstimation;
 
         glm::mat3 m_ARCToEngineMatrix;
 
@@ -393,7 +351,6 @@ namespace
     CMRControlManager::CMRControlManager()
         : m_InstallRequested(false)
         , m_Configuration    ( )
-        , m_TrackedObjects   ( )
         , m_ARCToEngineMatrix(1.0f)
     {
         m_ARCToEngineMatrix = Base::CCoordinateSystem::GetBaseMatrix(glm::vec3(1,0,0), glm::vec3(0,1,0), glm::vec3(0,0,-1));
@@ -516,102 +473,6 @@ namespace
         Result = ArSession_update(m_Session.m_pARSession, m_Session.m_pARFrame);
 
         if (Result != AR_SUCCESS) return;
-
-        // -----------------------------------------------------------------------------
-        // Update camera
-        // -----------------------------------------------------------------------------
-        m_Camera.m_Near = Base::CProgramParameters::GetInstance().Get<float>("mr:ar:camera:near", 0.1f);
-        m_Camera.m_Far  = Base::CProgramParameters::GetInstance().Get<float>("mr:ar:camera:far", 100.0f);
-
-        ArCamera* pARCamera;
-
-        ArFrame_acquireCamera(m_Session.m_pARSession, m_Session.m_pARFrame, &pARCamera);
-
-        ArCamera_getViewMatrix(m_Session.m_pARSession, pARCamera, glm::value_ptr(m_Camera.m_ViewMatrix));
-
-        ArCamera_getProjectionMatrix(m_Session.m_pARSession, pARCamera, m_Camera.m_Near, m_Camera.m_Far, glm::value_ptr(m_Camera.m_ProjectionMatrix));
-
-        ArTrackingState CameraTrackingState;
-
-        ArCamera_getTrackingState(m_Session.m_pARSession, pARCamera, &CameraTrackingState);
-
-        ArCamera_release(pARCamera);
-
-        switch(CameraTrackingState)
-        {
-            case AR_TRACKING_STATE_PAUSED:
-                m_Camera.m_TrackingState = CCamera::Paused;
-                break;
-            case AR_TRACKING_STATE_STOPPED:
-                m_Camera.m_TrackingState = CCamera::Stopped;
-                break;
-            case AR_TRACKING_STATE_TRACKING:
-                m_Camera.m_TrackingState = CCamera::Tracking;
-                break;
-        }
-
-        if (CameraTrackingState != AR_TRACKING_STATE_TRACKING) return;
-
-        // -----------------------------------------------------------------------------
-        // Light estimation
-        // Intensity value ranges from 0.0f to 1.0f.
-        // -----------------------------------------------------------------------------
-        ArLightEstimate* ARLightEstimate;
-        ArLightEstimateState ARLightEstimateState;
-
-        ArLightEstimate_create(m_Session.m_pARSession, &ARLightEstimate);
-
-        ArFrame_getLightEstimate(m_Session.m_pARSession, m_Session.m_pARFrame, ARLightEstimate);
-
-        ArLightEstimate_getState(m_Session.m_pARSession, ARLightEstimate, &ARLightEstimateState);
-
-        m_LightEstimation.m_EstimationState = CLightEstimation::NotValid;
-
-        if (ARLightEstimateState == AR_LIGHT_ESTIMATE_STATE_VALID)
-        {
-            ArLightEstimate_getPixelIntensity(m_Session.m_pARSession, ARLightEstimate, &m_LightEstimation.m_Intensity);
-
-            m_LightEstimation.m_EstimationState = CLightEstimation::Valid;
-        }
-
-        ArLightEstimate_destroy(ARLightEstimate);
-
-        ARLightEstimate = nullptr;
-
-        // -----------------------------------------------------------------------------
-        // Use tracked objects matrices
-        // -----------------------------------------------------------------------------
-        for (auto& rObject : m_TrackedObjects)
-        {
-            ArTrackingState TrackingState = AR_TRACKING_STATE_STOPPED;
-
-            ArAnchor_getTrackingState(m_Session.m_pARSession, rObject.m_pAnchor, &TrackingState);
-
-            switch(TrackingState)
-            {
-                case AR_TRACKING_STATE_PAUSED:
-                    rObject.m_TrackingState = CMarker::Paused;
-                    break;
-                case AR_TRACKING_STATE_STOPPED:
-                    rObject.m_TrackingState = CMarker::Stopped;
-                    break;
-                case AR_TRACKING_STATE_TRACKING:
-                    rObject.m_TrackingState = CMarker::Tracking;
-                    break;
-            }
-
-            if (TrackingState != AR_TRACKING_STATE_TRACKING) continue;
-
-            ArPose* pARPose = 0;
-
-            ArPose_create(m_Session.m_pARSession, 0, &pARPose);
-
-            ArAnchor_getPose(m_Session.m_pARSession, rObject.m_pAnchor, pARPose);
-
-            ArPose_getMatrix(m_Session.m_pARSession, pARPose, glm::value_ptr(rObject.m_ModelMatrix));
-
-            ArPose_destroy(pARPose);
-        }
 #endif
     }
 
@@ -716,6 +577,10 @@ namespace
     {
 #if PLATFORM_ANDROID
         ArSession_setDisplayGeometry(m_Session.m_pARSession, _DisplayRotation, _Width, _Height);
+#else
+        BASE_UNUSED(_DisplayRotation);
+        BASE_UNUSED(_Width);
+        BASE_UNUSED(_Height);
 #endif
     }
 
@@ -1094,182 +959,6 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    const CCamera& CMRControlManager::GetCamera()
-    {
-        return m_Camera;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    const CLightEstimation& CMRControlManager::GetLightEstimation()
-    {
-        return m_LightEstimation;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    const CMarker* CMRControlManager::AcquireNewMarker(float _X, float _Y)
-    {
-#if PLATFORM_ANDROID
-        CInternMarker* pReturnMarker = nullptr;
-
-        if (m_Session.m_pARFrame != nullptr && m_Session.m_pARSession != nullptr)
-        {
-            ArHitResultList* pHitResultList = 0;
-
-            ArHitResultList_create(m_Session.m_pARSession, &pHitResultList);
-
-            assert(pHitResultList);
-
-            ArFrame_hitTest(m_Session.m_pARSession, m_Session.m_pARFrame, _X, _Y, pHitResultList);
-
-            int NumberOfHits = 0;
-
-            ArHitResultList_getSize(m_Session.m_pARSession, pHitResultList, &NumberOfHits);
-
-            // -----------------------------------------------------------------------------
-            // The hitTest method sorts the resulting list by distance from the camera,
-            // increasing.  The first hit result will usually be the most relevant when
-            // responding to user input
-            // -----------------------------------------------------------------------------
-            ArHitResult* pHitResult = nullptr;
-
-            for (int IndexOfHit = 0; IndexOfHit < NumberOfHits; ++IndexOfHit)
-            {
-                ArHitResult* pEstimatedHitResult = nullptr;
-
-                ArHitResult_create(m_Session.m_pARSession, &pEstimatedHitResult);
-
-                ArHitResultList_getItem(m_Session.m_pARSession, pHitResultList, IndexOfHit, pEstimatedHitResult);
-
-                if (pEstimatedHitResult == nullptr)
-                {
-                    return nullptr;
-                }
-
-                // -----------------------------------------------------------------------------
-                // Get trackables
-                // -----------------------------------------------------------------------------
-                ArTrackable* pTrackable = nullptr;
-
-                ArHitResult_acquireTrackable(m_Session.m_pARSession, pEstimatedHitResult, &pTrackable);
-
-                ArTrackableType TrackableType = AR_TRACKABLE_NOT_VALID;
-
-                ArTrackable_getType(m_Session.m_pARSession, pTrackable, &TrackableType);
-
-                switch (TrackableType)
-                {
-                    case AR_TRACKABLE_PLANE:
-                    {
-                        ArPose* pPose = nullptr;
-
-                        ArPose_create(m_Session.m_pARSession, nullptr, &pPose);
-
-                        ArHitResult_getHitPose(m_Session.m_pARSession, pEstimatedHitResult, pPose);
-
-                        int32_t IsPoseInPolygon = 0;
-
-                        ArPlane* pPlane = ArAsPlane(pTrackable);
-
-                        ArPlane_isPoseInPolygon(m_Session.m_pARSession, pPlane, pPose, &IsPoseInPolygon);
-
-                        ArTrackable_release(pTrackable);
-
-                        ArPose_destroy(pPose);
-
-                        if (!IsPoseInPolygon)
-                        {
-                            continue;
-                        }
-
-                        pHitResult = pEstimatedHitResult;
-                    } break;
-
-                    case AR_TRACKABLE_POINT:
-                    {
-                        ArPoint* pPoint = ArAsPoint(pTrackable);
-
-                        ArPointOrientationMode OrientationMode;
-
-                        ArPoint_getOrientationMode(m_Session.m_pARSession, pPoint, &OrientationMode);
-
-                        if (OrientationMode == AR_POINT_ORIENTATION_ESTIMATED_SURFACE_NORMAL)
-                        {
-                            pHitResult = pEstimatedHitResult;
-                        }
-                    } break;
-
-                    default:
-                    {
-                        ArTrackable_release(pTrackable);
-
-                        BASE_CONSOLE_INFO("Undefined trackable type found.")
-                    }
-                };
-            }
-
-            if (pHitResult != nullptr)
-            {
-                ArAnchor* pAnchor = nullptr;
-
-                if (ArHitResult_acquireNewAnchor(m_Session.m_pARSession, pHitResult, &pAnchor) != AR_SUCCESS)
-                {
-                    return nullptr;
-                }
-
-                ArTrackingState TrackingState = AR_TRACKING_STATE_STOPPED;
-
-                ArAnchor_getTrackingState(m_Session.m_pARSession, pAnchor, &TrackingState);
-
-                if (TrackingState != AR_TRACKING_STATE_TRACKING)
-                {
-                    ArAnchor_release(pAnchor);
-
-                    return nullptr;
-                }
-
-                CInternMarker NewMarker;
-
-                NewMarker.m_pAnchor = pAnchor;
-
-                m_TrackedObjects.emplace_back(NewMarker);
-
-                pReturnMarker = &m_TrackedObjects.back();
-
-                ArHitResult_destroy(pHitResult);
-            }
-
-            ArHitResultList_destroy(pHitResultList);
-
-            pHitResultList = nullptr;
-        }
-
-        return pReturnMarker;
-#else 
-        return nullptr;
-#endif
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CMRControlManager::ReleaseMarker(const CMarker* _pMarker)
-    {
-#if PLATFORM_ANDROID
-        auto MarkerIter = std::find_if(m_TrackedObjects.begin(), m_TrackedObjects.end(), [&](CInternMarker& _rObject) { return &_rObject == _pMarker; });
-
-        if (MarkerIter == m_TrackedObjects.end()) return;
-
-        const CInternMarker* pInternMarker = static_cast<const CInternMarker*>(_pMarker);
-
-        ArAnchor_release(pInternMarker->m_pAnchor);
-
-        m_TrackedObjects.erase(MarkerIter);
-#endif
-    }
-
-    // -----------------------------------------------------------------------------
-
     void CMRControlManager::OnDirtyEntity(Dt::CEntity* _pEntity)
     {
         BASE_UNUSED(_pEntity);
@@ -1339,34 +1028,6 @@ namespace ControlManager
     const CSession& GetActiveSession()
     {
         return CMRControlManager::GetInstance().GetActiveSession();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    const CCamera& GetCamera()
-    {
-        return CMRControlManager::GetInstance().GetCamera();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    const CLightEstimation& GetLightEstimation()
-    {
-        return CMRControlManager::GetInstance().GetLightEstimation();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    const CMarker* AcquireNewMarker(float _X, float _Y)
-    {
-        return CMRControlManager::GetInstance().AcquireNewMarker(_X, _Y);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void ReleaseMarker(const CMarker* _pMarker)
-    {
-        CMRControlManager::GetInstance().ReleaseMarker(_pMarker);
     }
 } // namespace ControlManager
 } // namespace MR

@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "mr/mr_light_estimation.h"
+
 namespace MR
 {
 namespace LightEstimationManager
@@ -10,5 +12,7 @@ namespace LightEstimationManager
     void OnExit();
 
     void Update();
+
+    const CLightEstimation& GetLightEstimation();
 } // namespace LightEstimationManager
 } // namespace MR
