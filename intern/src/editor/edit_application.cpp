@@ -39,6 +39,8 @@
 
 #include "SDL2/SDL.h"
 
+#include <iostream>
+
 namespace
 {
     class CApplication : private Base::CUncopyable
@@ -89,6 +91,10 @@ namespace
         void OnResize(Edit::CMessage& _rMessage);
 
         void ProcessSDLEvents();
+        void ProcessGamepadEvents(const SDL_Event& _rSDLEvent);
+
+        Base::CInputEvent::EKey ConvertSDLKey(const SDL_Event& _rSDLEvent);
+        Base::CInputEvent::EKey ConvertSDLAxis(const SDL_Event& _rSDLEvent);
     };
 } // namespace
 
@@ -501,16 +507,8 @@ namespace
         {
             switch (SDLEvent.type)
             {
-            case SDL_JOYAXISMOTION:
-                BASE_CONSOLE_INFO("SDL_JOYAXISMOTION");
-                break;
-            case SDL_JOYBUTTONDOWN:
-                BASE_CONSOLE_INFO("SDL_JOYBUTTONDOWN");
-                break;
-            case SDL_JOYBUTTONUP:
-                BASE_CONSOLE_INFO("SDL_JOYBUTTONUP");
-                break;
             case SDL_JOYDEVICEADDED:
+
                 SDL_JoystickEventState(SDL_ENABLE);
                 m_pGamePad = SDL_JoystickOpen(0);
                 if (m_pGamePad == nullptr)
@@ -519,13 +517,99 @@ namespace
                 }
                 BASE_CONSOLE_INFOV(SDL_JoystickName(m_pGamePad));
                 break;
+
             case SDL_JOYDEVICEREMOVED:
+
                 BASE_CONSOLE_INFO("Gamepad disconnected");
                 break;
+
+            default:
+                ProcessGamepadEvents(SDLEvent);
             }
         }
     }
+
+    // -----------------------------------------------------------------------------
+
+    void CApplication::ProcessGamepadEvents(const SDL_Event& _rSDLEvent)
+    {
+        using Base::CInputEvent;
+        
+        CInputEvent Event(CInputEvent::Input);
+
+        switch (_rSDLEvent.type)
+        {
+        case SDL_JOYAXISMOTION:
+
+            if (_rSDLEvent.jaxis.value > m_AnalogStickDeadZone || _rSDLEvent.jaxis.value < -m_AnalogStickDeadZone)
+            {
+                Event = CInputEvent(CInputEvent::Input, CInputEvent::GamepadAxisMotion, ConvertSDLAxis(_rSDLEvent), 0, _rSDLEvent.jaxis.value / static_cast<float>(std::numeric_limits<int16_t>::max()));
+                //Gui::EventHandler::OnUserEvent(Event);
+            }
+            break;
+
+        case SDL_JOYBUTTONDOWN:
+
+            Event = CInputEvent(CInputEvent::Input, CInputEvent::GamepadKeyPressed, ConvertSDLKey(_rSDLEvent));
+            Gui::EventHandler::OnUserEvent(Event);
+            break;
+
+        case SDL_JOYBUTTONUP:
+
+            Event = CInputEvent(CInputEvent::Input, CInputEvent::GamepadKeyReleased, ConvertSDLKey(_rSDLEvent));
+            Gui::EventHandler::OnUserEvent(Event);
+            break;
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    Base::CInputEvent::EKey CApplication::ConvertSDLKey(const SDL_Event& _rSDLEvent)
+    {
+        using Base::CInputEvent;
+
+        CInputEvent::EKey Xbox360Keys[] =
+        {
+            CInputEvent::Up,
+            CInputEvent::Down,
+            CInputEvent::Left,
+            CInputEvent::Right,
+            CInputEvent::Start,
+            CInputEvent::Select,
+            CInputEvent::LeftStick,
+            CInputEvent::RightStick,
+            CInputEvent::LeftBumper,
+            CInputEvent::RightBumper,
+            CInputEvent::Key0, // A
+            CInputEvent::Key1, // B
+            CInputEvent::Key2, // X
+            CInputEvent::Key3, // Y
+        };
+
+        return Xbox360Keys[_rSDLEvent.jbutton.button];
+    }
+
+    // -----------------------------------------------------------------------------
+
+    Base::CInputEvent::EKey CApplication::ConvertSDLAxis(const SDL_Event& _rSDLEvent)
+    {
+        using Base::CInputEvent;
+
+        CInputEvent::EKey Xbox360Axis[] =
+        {
+            CInputEvent::LeftStick,
+            CInputEvent::LeftStick,
+            CInputEvent::RightStick,
+            CInputEvent::RightStick,
+            CInputEvent::LeftTrigger,
+            CInputEvent::RightTrigger,
+        };
+        
+        return Xbox360Axis[_rSDLEvent.jaxis.axis];
+    }
 }
+
+
 
 namespace Edit
 {

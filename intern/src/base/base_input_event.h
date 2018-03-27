@@ -112,6 +112,24 @@ namespace IO
             KeyW       = Native::s_KeyW      ,
             Mouse      = 0x00                ,
             Pointer    = 0x00                ,
+            Start,
+            Select,
+            Up,
+            Down,
+            Left,
+            Right,
+            LeftBumper,
+            RightBumper,
+            LeftStick,
+            RightStick,
+            LeftTrigger,
+            RightTrigger,
+        };
+
+        enum EAxis
+        {
+            Horizontal,
+            Vertical,
         };
         
         enum EKeyModifier
@@ -128,6 +146,10 @@ namespace IO
         inline CInputEvent(unsigned int _Type, unsigned int _Action, unsigned int _Key, unsigned int _KeyModifier);
         inline CInputEvent(unsigned int _Type, unsigned int _Action, unsigned int _Key, const glm::vec2& _rPointerPosition);
         inline CInputEvent(unsigned int _Type, unsigned int _Action, unsigned int _Key, const glm::vec2& _rPointerPosition, float _WheelDelta);
+
+        inline CInputEvent(unsigned int _Type, unsigned int _Action, unsigned int _Key);
+        inline CInputEvent(unsigned int _Type, unsigned int _Action, unsigned int _Key, unsigned int _Axis, float _Delta);
+
         inline CInputEvent(const CInputEvent& _rEvent);
         inline ~CInputEvent();
         
@@ -160,6 +182,7 @@ namespace IO
             unsigned int m_Key;
             unsigned int m_Type;
             unsigned int m_KeyModifier;
+            unsigned int m_Axis;
         };
         
     private:
@@ -218,6 +241,29 @@ namespace IO
         m_Bits.m_KeyModifier = 0;
     }
     
+    // -----------------------------------------------------------------------------
+
+    inline CInputEvent::CInputEvent(unsigned int _Type, unsigned int _Action, unsigned int _Key)
+    {
+        m_Bits.m_Type        = _Type;
+        m_Bits.m_Action      = _Action;
+        m_Bits.m_Key         = _Key;
+        m_Bits.m_KeyModifier = 0;
+    }
+
+    // -----------------------------------------------------------------------------
+
+
+    inline CInputEvent::CInputEvent(unsigned int _Type, unsigned int _Action, unsigned int _Key, unsigned int _Axis, float _Delta)
+    {
+        m_Bits.m_Type        = _Type;
+        m_Bits.m_Action      = _Action;
+        m_Bits.m_Key         = _Key;
+        m_Bits.m_KeyModifier = 0;
+        m_Bits.m_Axis        = _Axis;
+        m_WheelDelta         = _Delta;
+    }
+
     // -----------------------------------------------------------------------------
     
     inline CInputEvent::CInputEvent(const CInputEvent& _rEvent)
