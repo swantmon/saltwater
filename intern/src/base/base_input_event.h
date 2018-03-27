@@ -143,6 +143,7 @@ namespace IO
         inline CInputEvent(unsigned int _Type, unsigned int _Action, unsigned int _Key, const glm::vec2& _rPointerPosition, float _WheelDelta);
 
         inline CInputEvent(unsigned int _Type, unsigned int _Action, unsigned int _Key);
+        inline CInputEvent(unsigned int _Type, unsigned int _Action, unsigned int _Key, float _Delta);
         inline CInputEvent(unsigned int _Type, unsigned int _Action, unsigned int _Key, unsigned int _Axis, float _Delta);
 
         inline CInputEvent(const CInputEvent& _rEvent);
@@ -167,7 +168,7 @@ namespace IO
         
         inline const glm::vec2& GetCursorPosition() const;
         
-        inline float GetWheelDelta() const;
+        inline float GetDelta() const;
         
     private:
         
@@ -248,6 +249,16 @@ namespace IO
 
     // -----------------------------------------------------------------------------
 
+    inline CInputEvent::CInputEvent(unsigned int _Type, unsigned int _Action, unsigned int _Key, float _Delta)
+    {
+        m_Bits.m_Type        = _Type;
+        m_Bits.m_Action      = _Action;
+        m_Bits.m_Key         = _Key;
+        m_Bits.m_KeyModifier = 0;
+        m_WheelDelta         = _Delta;
+    }
+
+    // -----------------------------------------------------------------------------
 
     inline CInputEvent::CInputEvent(unsigned int _Type, unsigned int _Action, unsigned int _Key, unsigned int _Axis, float _Delta)
     {
@@ -349,7 +360,7 @@ namespace IO
     
     // -----------------------------------------------------------------------------
     
-    inline float CInputEvent::GetWheelDelta() const
+    inline float CInputEvent::GetDelta() const
     {
         return m_WheelDelta;
     }

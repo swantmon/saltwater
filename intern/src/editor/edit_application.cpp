@@ -546,9 +546,14 @@ namespace
                 float Strength = _rSDLEvent.jaxis.value / static_cast<float>(std::numeric_limits<int16_t>::max());
                 CInputEvent::EKey Axis = ConvertSDLAxis(_rSDLEvent);
                 
-                CInputEvent::EAction Action = (Axis == CInputEvent::LeftTrigger || Axis == CInputEvent::RightTrigger) ? CInputEvent::GamepadTriggerMotion : CInputEvent::GamepadAxisMotion;
-
-                Event = CInputEvent(CInputEvent::Input, Action, Axis, _rSDLEvent.jaxis.axis % 2, Strength);
+                if (Axis == CInputEvent::LeftTrigger || Axis == CInputEvent::RightTrigger)
+                {
+                    Event = CInputEvent(CInputEvent::Input, CInputEvent::GamepadTriggerMotion, Axis, Strength);
+                }
+                else
+                {
+                    Event = CInputEvent(CInputEvent::Input, CInputEvent::GamepadAxisMotion, Axis, _rSDLEvent.jaxis.axis % 2, Strength);
+                }
 
                 Gui::EventHandler::OnUserEvent(Event);
             }
