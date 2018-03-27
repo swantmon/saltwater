@@ -548,7 +548,7 @@ namespace
                 
                 if (Axis == CInputEvent::LeftTrigger || Axis == CInputEvent::RightTrigger)
                 {
-                    Event = CInputEvent(CInputEvent::Input, CInputEvent::GamepadTriggerMotion, Axis, Strength);
+                    Event = CInputEvent(CInputEvent::Input, CInputEvent::GamepadTriggerMotion, Axis, Strength * 0.5f + 0.5f);
                 }
                 else
                 {
