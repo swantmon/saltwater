@@ -60,6 +60,10 @@ namespace
     };
 
     constexpr char c_VertexShaderWebcam[] = R"(
+        #version  320 es
+
+        precision mediump float;
+
         layout(location = 0) in vec2 in_UV;
 
         layout(location = 0) out vec2 out_UV;
@@ -80,6 +84,8 @@ namespace
     )";
 
     constexpr char c_FragmentShaderWebcam[] = R"(
+        #version  320 es
+
         #extension GL_OES_EGL_image_external_essl3 : require
 
         precision mediump float;
@@ -97,6 +103,8 @@ namespace
     )";
 
     constexpr char c_VertexShaderPlane[] = R"(
+        #version  320 es
+
         precision highp float;
 
         layout(location = 0) uniform mat4 m_MVP;
@@ -114,6 +122,8 @@ namespace
     )";
 
     constexpr char c_FragmentShaderPlane[] = R"(
+        #version  320 es
+
         precision highp float;
 
         layout(location = 1) uniform vec4 m_Color;
@@ -133,6 +143,8 @@ namespace
     )";
 
     constexpr char c_VertexShaderPoint[] = R"(
+        #version  320 es
+
         layout(location = 0) uniform mat4 m_MVP;
 
         layout(location = 0) in vec4 in_Vertex;
@@ -146,6 +158,8 @@ namespace
     )";
 
     constexpr char c_FragmentShaderPoint[] = R"(
+        #version  320 es
+
         precision lowp float;
 
         layout(location = 0) out vec4 out_Output;
@@ -155,12 +169,6 @@ namespace
             out_Output = vec4(0.1215f, 0.7372f, 0.8235f, 1.0f);
         }
     )";
-
-    unsigned int g_TextureID;
-    unsigned int g_AttributeUVs;
-    unsigned int g_AttributePlaneVertices;
-    unsigned int g_AttributePointVertices;
-    unsigned int g_PlaneIndices;
 
     static constexpr int s_MaxNumberOfVerticesPerPlane = 1024;
     static constexpr int s_MaxNumberOfVerticesPerPoint = 512;
@@ -380,7 +388,7 @@ namespace
         ConstanteBufferDesc.m_Usage         = Gfx::CBuffer::GPURead;
         ConstanteBufferDesc.m_Binding       = Gfx::CBuffer::VertexBuffer;
         ConstanteBufferDesc.m_Access        = Gfx::CBuffer::CPUWrite;
-        ConstanteBufferDesc.m_NumberOfBytes = 8 * sizeof(float);
+        ConstanteBufferDesc.m_NumberOfBytes = 4 * sizeof(glm::vec2);
         ConstanteBufferDesc.m_pBytes        = 0;
         ConstanteBufferDesc.m_pClassKey     = 0;
         
@@ -418,7 +426,7 @@ namespace
 
         ConstanteBufferDesc.m_Stride        = 0;
         ConstanteBufferDesc.m_Usage         = Gfx::CBuffer::GPURead;
-        ConstanteBufferDesc.m_Binding       = Gfx::CBuffer::VertexBuffer;
+        ConstanteBufferDesc.m_Binding       = Gfx::CBuffer::ConstantBuffer;
         ConstanteBufferDesc.m_Access        = Gfx::CBuffer::CPUWrite;
         ConstanteBufferDesc.m_NumberOfBytes = sizeof(glm::mat4);
         ConstanteBufferDesc.m_pBytes        = 0;
@@ -428,7 +436,7 @@ namespace
 
         ConstanteBufferDesc.m_Stride        = 0;
         ConstanteBufferDesc.m_Usage         = Gfx::CBuffer::GPURead;
-        ConstanteBufferDesc.m_Binding       = Gfx::CBuffer::VertexBuffer;
+        ConstanteBufferDesc.m_Binding       = Gfx::CBuffer::ConstantBuffer;
         ConstanteBufferDesc.m_Access        = Gfx::CBuffer::CPUWrite;
         ConstanteBufferDesc.m_NumberOfBytes = sizeof(glm::vec4);
         ConstanteBufferDesc.m_pBytes        = 0;
@@ -474,6 +482,8 @@ namespace
         Result = ArSession_update(m_pARSession, m_pARFrame);
 
         if (Result != AR_SUCCESS) return;
+
+        OnDraw();
 
         // -----------------------------------------------------------------------------
         // Update camera
@@ -694,8 +704,6 @@ namespace
         // -----------------------------------------------------------------------------
         // Prepare
         // -----------------------------------------------------------------------------
-        Gfx::TargetSetManager::ClearTargetSet(m_BackgroundTargetSetPtr, glm::vec4(1.0f));
-
         Gfx::ContextManager::SetTargetSet(m_BackgroundTargetSetPtr);
 
         Gfx::ContextManager::SetBlendState(Gfx::StateManager::GetBlendState(Gfx::CBlendState::Default));
@@ -724,6 +732,8 @@ namespace
         }
 #endif // PLATFORM_ANDROID
 
+        Gfx::ContextManager::SetTopology(Gfx::STopology::TriangleStrip);
+
         Gfx::ContextManager::SetShaderVS(m_WebcamVSPtr);
 
         Gfx::ContextManager::SetShaderPS(m_WebcamPSPtr);
@@ -745,7 +755,7 @@ namespace
         if (RenderPlanes == false) return;
 
         std::vector<glm::vec3> PlaneVertices;
-        std::vector<GLushort> PlaneIndices;
+        std::vector<short> PlaneIndices;
 
         glm::mat4 PlaneModelMatrix = glm::mat4(1.0f);
 
@@ -1005,7 +1015,7 @@ namespace
                 // -----------------------------------------------------------------------------
                 Gfx::BufferManager::UploadBufferData(m_PointVerticesBufferPtr, pPointCloudData);
 
-                Gfx::BufferManager::UploadBufferData(m_MatrixBufferPtr, &PointMVPMatrix);
+                Gfx::BufferManager::UploadBufferData(m_MatrixBufferPtr, &PointMVPMatrix, 0, sizeof(float) * NumberOfPoints);
 
                 // -----------------------------------------------------------------------------
                 // Draw
@@ -1024,12 +1034,22 @@ namespace
 
                 Gfx::ContextManager::Draw(NumberOfPoints, 0);
 
-                Gfx::ContextManager::SetTopology(Gfx::STopology::TriangleList);
-
                 ArPointCloud_release(pPointCloud);
             }
         }
 #endif
+
+        Gfx::ContextManager::ResetShaderVS();
+
+        Gfx::ContextManager::ResetShaderPS();
+
+        Gfx::ContextManager::ResetVertexBuffer();
+
+        Gfx::ContextManager::ResetIndexBuffer();
+
+        Gfx::ContextManager::ResetInputLayout();
+
+        Gfx::ContextManager::ResetTexture(0);
 
         Gfx::ContextManager::ResetViewPortSet();
 
