@@ -339,12 +339,27 @@ namespace
 
         m_PointPS = Gfx::ShaderManager::CompilePS(c_FragmentShaderPoint, "main", nullptr, nullptr, 0, false, false, true);
 
-        const Gfx::SInputElementDescriptor InputLayout[] =
+        const Gfx::SInputElementDescriptor InputLayoutWebcam[] =
         {
             { "UV", 0, Gfx::CInputLayout::Float2Format, 0, 0, 8, Gfx::CInputLayout::PerVertex, 0, },
         };
 
-        Gfx::ShaderManager::CreateInputLayout(InputLayout, 1, m_WebcamVSPtr);
+        Gfx::ShaderManager::CreateInputLayout(InputLayoutWebcam, 1, m_WebcamVSPtr);
+
+        const Gfx::SInputElementDescriptor InputLayoutPlane[] =
+        {
+            { "VERTEX", 0, Gfx::CInputLayout::Float3Format, 0, 0, 12, Gfx::CInputLayout::PerVertex, 0, },
+        };
+
+        Gfx::ShaderManager::CreateInputLayout(InputLayoutPlane, 1, m_PlaneVS);
+
+        const Gfx::SInputElementDescriptor InputLayoutPoint[] =
+        {
+            { "POINT", 0, Gfx::CInputLayout::Float4Format, 0, 0, 16, Gfx::CInputLayout::PerVertex, 0, },
+        };
+
+        Gfx::ShaderManager::CreateInputLayout(InputLayoutPoint, 1, m_PointVS);
+
 
         // -----------------------------------------------------------------------------
         // Background texture
@@ -1013,9 +1028,9 @@ namespace
                 // -----------------------------------------------------------------------------
                 // Upload
                 // -----------------------------------------------------------------------------
-                Gfx::BufferManager::UploadBufferData(m_PointVerticesBufferPtr, pPointCloudData);
+                Gfx::BufferManager::UploadBufferData(m_PointVerticesBufferPtr, pPointCloudData, 0, sizeof(glm::vec3) * NumberOfPoints);
 
-                Gfx::BufferManager::UploadBufferData(m_MatrixBufferPtr, &PointMVPMatrix, 0, sizeof(float) * NumberOfPoints);
+                Gfx::BufferManager::UploadBufferData(m_MatrixBufferPtr, &PointMVPMatrix);
 
                 // -----------------------------------------------------------------------------
                 // Draw
@@ -1030,7 +1045,7 @@ namespace
 
                 Gfx::ContextManager::SetTopology(Gfx::STopology::PointList);
 
-                Gfx::ContextManager::SetInputLayout(m_PlaneVS->GetInputLayout());
+                Gfx::ContextManager::SetInputLayout(m_PointVS->GetInputLayout());
 
                 Gfx::ContextManager::Draw(NumberOfPoints, 0);
 
