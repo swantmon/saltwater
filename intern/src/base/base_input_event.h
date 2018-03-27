@@ -73,6 +73,9 @@ namespace IO
             TouchMove,
             TouchPressed,
             TouchReleased,
+            GamepadKeyPressed,
+            GamepadKeyReleased,
+            GamepadAxisMotion,
             UndefinedAction = -1,
         };
         

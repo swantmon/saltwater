@@ -87,7 +87,7 @@ namespace
         
         void OnResize(Edit::CMessage& _rMessage);
 
-        void HandleGamepadEvents();
+        void ProcessSDLEvents();
     };
 } // namespace
 
@@ -256,7 +256,7 @@ namespace
             // Events
             // -----------------------------------------------------------------------------
             Edit::GUI::ProcessEvents();
-            HandleGamepadEvents();
+            ProcessSDLEvents();
                                     
             // -----------------------------------------------------------------------------
             // Time
@@ -489,7 +489,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CApplication::HandleGamepadEvents()
+    void CApplication::ProcessSDLEvents()
     {
         SDL_Event SDLEvent;
 
@@ -513,7 +513,6 @@ namespace
                 BASE_CONSOLE_INFO("SDL_JOYBUTTONUP");
                 break;
             case SDL_JOYDEVICEADDED:
-
                 if (m_pGamePad == nullptr)
                 {
                     SDL_JoystickEventState(SDL_ENABLE);
