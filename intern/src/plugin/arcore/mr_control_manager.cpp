@@ -1,5 +1,5 @@
 
-#include "mr/mr_precompiled.h"
+#include "plugin/arcore/mr_precompiled.h"
 
 #include "base/base_input_event.h"
 #include "base/base_pool.h"
@@ -19,7 +19,7 @@
 
 #include "gui/gui_event_handler.h"
 
-#include "mr/mr_control_manager.h"
+#include "plugin/arcore/mr_control_manager.h"
 
 #include <array>
 #include <vector>

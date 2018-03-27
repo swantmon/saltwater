@@ -30,7 +30,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test", "test\test.vcxproj",
 		{BD2866F6-A265-40F7-92D0-AD067FE79F65} = {BD2866F6-A265-40F7-92D0-AD067FE79F65}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mr", "mr\mr.vcxproj", "{1BBA2732-A51B-4FF0-8393-492884561668}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "plugin_arcore", "mr\mr.vcxproj", "{1BBA2732-A51B-4FF0-8393-492884561668}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "editor_gui", "editor_gui\editor_gui.vcxproj", "{B12702AD-ABFB-343A-A199-8E24837244A3}"
 EndProject
@@ -53,6 +53,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "core", "core\core.vcxproj", "{8BF7FB01-1873-4CB2-85A8-57EF3ED5AFD4}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "script", "script\script.vcxproj", "{3B1ACDCE-B96B-4A3D-80B5-2539D4CF480F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "plugin", "plugin", "{F0542C3D-B5F9-4381-A027-10B1804A46EF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -185,6 +187,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{1BBA2732-A51B-4FF0-8393-492884561668} = {F0542C3D-B5F9-4381-A027-10B1804A46EF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {ABE024EA-EFBA-425A-9D54-106C60269005}
