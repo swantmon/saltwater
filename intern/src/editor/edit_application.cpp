@@ -84,8 +84,10 @@ namespace
         void OnMouseRightReleased(Edit::CMessage& _rMessage);
         void OnMouseMove(Edit::CMessage& _rMessage);
         void OnWheel(Edit::CMessage& _rMessage);
-
+        
         void OnResize(Edit::CMessage& _rMessage);
+
+        void HandleGamepadEvents();
     };
 } // namespace
 
@@ -254,56 +256,8 @@ namespace
             // Events
             // -----------------------------------------------------------------------------
             Edit::GUI::ProcessEvents();
-
-
-            SDL_Event SDLEvent;
-
-            while (SDL_PollEvent(&SDLEvent))
-            {
-                switch (SDLEvent.type)
-                {
-                /*case SDL_JOYAXISMOTION:
-                    BASE_CONSOLE_INFO("Event");
-                    break;*/
-                case SDL_JOYBALLMOTION:
-                    BASE_CONSOLE_INFO("Event");
-                    break;
-                case SDL_JOYHATMOTION:
-                    BASE_CONSOLE_INFO("Event");
-                    break;
-                case SDL_JOYBUTTONDOWN:
-                    BASE_CONSOLE_INFO("Event");
-                    break;
-                case SDL_JOYBUTTONUP:
-                    BASE_CONSOLE_INFO("Event");
-                    break;
-                case SDL_JOYDEVICEADDED:
-
-                    if (m_pGamePad == nullptr)
-                    {
-                        SDL_JoystickEventState(SDL_ENABLE);
-                        m_pGamePad = SDL_JoystickOpen(0);
-                        if (m_pGamePad == nullptr)
-                        {
-                            BASE_THROWM("Could not initialise controller");
-                        }
-                        BASE_CONSOLE_INFOV(SDL_JoystickName(m_pGamePad));
-                    }
-                    break;
-                case SDL_JOYDEVICEREMOVED:
-                    BASE_CONSOLE_INFO("Event");
-                    break;
-                case SDL_CONTROLLERAXISMOTION:
-                    BASE_CONSOLE_INFO("Event");
-                    break;
-                case SDL_CONTROLLERBUTTONDOWN:
-                    BASE_CONSOLE_INFO("Event");
-                    break;
-                case SDL_CONTROLLERBUTTONUP:
-                    BASE_CONSOLE_INFO("Event");
-                    break;
-                }
-            }
+            HandleGamepadEvents();
+                                    
             // -----------------------------------------------------------------------------
             // Time
             // -----------------------------------------------------------------------------
@@ -531,6 +485,60 @@ namespace
         int Height = _rMessage.Get<int>();
 
         Gfx::App::OnResize(m_EditWindowID, Width, Height);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CApplication::HandleGamepadEvents()
+    {
+        SDL_Event SDLEvent;
+
+        while (SDL_PollEvent(&SDLEvent))
+        {
+            switch (SDLEvent.type)
+            {
+            case SDL_JOYAXISMOTION:
+                BASE_CONSOLE_INFO("SDL_JOYAXISMOTION");
+                break;
+            case SDL_JOYBALLMOTION:
+                BASE_CONSOLE_INFO("SDL_JOYBALLMOTION");
+                break;
+            case SDL_JOYHATMOTION:
+                BASE_CONSOLE_INFO("SDL_JOYHATMOTION");
+                break;
+            case SDL_JOYBUTTONDOWN:
+                BASE_CONSOLE_INFO("SDL_JOYBUTTONDOWN");
+                break;
+            case SDL_JOYBUTTONUP:
+                BASE_CONSOLE_INFO("SDL_JOYBUTTONUP");
+                break;
+            case SDL_JOYDEVICEADDED:
+
+                if (m_pGamePad == nullptr)
+                {
+                    SDL_JoystickEventState(SDL_ENABLE);
+                    m_pGamePad = SDL_JoystickOpen(0);
+                    if (m_pGamePad == nullptr)
+                    {
+                        BASE_THROWM("Could not initialise controller");
+                    }
+                    BASE_CONSOLE_INFOV(SDL_JoystickName(m_pGamePad));
+                }
+                break;
+            case SDL_JOYDEVICEREMOVED:
+                BASE_CONSOLE_INFO("SDL_JOYDEVICEREMOVED");
+                break;
+            case SDL_CONTROLLERAXISMOTION:
+                BASE_CONSOLE_INFO("SDL_CONTROLLERAXISMOTION");
+                break;
+            case SDL_CONTROLLERBUTTONDOWN:
+                BASE_CONSOLE_INFO("SDL_CONTROLLERBUTTONDOWN");
+                break;
+            case SDL_CONTROLLERBUTTONUP:
+                BASE_CONSOLE_INFO("SDL_CONTROLLERBUTTONUP");
+                break;
+            }
+        }
     }
 }
 
