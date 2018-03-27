@@ -69,6 +69,7 @@ namespace
         glm::vec2             m_LatestMousePosition;
 
         SDL_Joystick* m_pGamePad;
+        int m_AnalogStickDeadZone;
         
     private:
         
@@ -128,6 +129,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Init SDL for gamepad input
         // -----------------------------------------------------------------------------
+
+        m_AnalogStickDeadZone = Base::CProgramParameters::GetInstance().Get("input:gamepad:deadzone", 3200);
+
         if (SDL_Init(SDL_INIT_JOYSTICK) < 0)
         {
             BASE_THROWM("Could not initialise SDL");
@@ -500,12 +504,6 @@ namespace
             case SDL_JOYAXISMOTION:
                 BASE_CONSOLE_INFO("SDL_JOYAXISMOTION");
                 break;
-            case SDL_JOYBALLMOTION:
-                BASE_CONSOLE_INFO("SDL_JOYBALLMOTION");
-                break;
-            case SDL_JOYHATMOTION:
-                BASE_CONSOLE_INFO("SDL_JOYHATMOTION");
-                break;
             case SDL_JOYBUTTONDOWN:
                 BASE_CONSOLE_INFO("SDL_JOYBUTTONDOWN");
                 break;
@@ -513,28 +511,16 @@ namespace
                 BASE_CONSOLE_INFO("SDL_JOYBUTTONUP");
                 break;
             case SDL_JOYDEVICEADDED:
+                SDL_JoystickEventState(SDL_ENABLE);
+                m_pGamePad = SDL_JoystickOpen(0);
                 if (m_pGamePad == nullptr)
                 {
-                    SDL_JoystickEventState(SDL_ENABLE);
-                    m_pGamePad = SDL_JoystickOpen(0);
-                    if (m_pGamePad == nullptr)
-                    {
-                        BASE_THROWM("Could not initialise controller");
-                    }
-                    BASE_CONSOLE_INFOV(SDL_JoystickName(m_pGamePad));
+                    BASE_THROWM("Could not initialise controller");
                 }
+                BASE_CONSOLE_INFOV(SDL_JoystickName(m_pGamePad));
                 break;
             case SDL_JOYDEVICEREMOVED:
-                BASE_CONSOLE_INFO("SDL_JOYDEVICEREMOVED");
-                break;
-            case SDL_CONTROLLERAXISMOTION:
-                BASE_CONSOLE_INFO("SDL_CONTROLLERAXISMOTION");
-                break;
-            case SDL_CONTROLLERBUTTONDOWN:
-                BASE_CONSOLE_INFO("SDL_CONTROLLERBUTTONDOWN");
-                break;
-            case SDL_CONTROLLERBUTTONUP:
-                BASE_CONSOLE_INFO("SDL_CONTROLLERBUTTONUP");
+                BASE_CONSOLE_INFO("Gamepad disconnected");
                 break;
             }
         }
