@@ -76,6 +76,7 @@ namespace IO
             GamepadKeyPressed,
             GamepadKeyReleased,
             GamepadAxisMotion,
+            GamepadTriggerMotion,
             UndefinedAction = -1,
         };
         
@@ -125,13 +126,7 @@ namespace IO
             LeftTrigger,
             RightTrigger,
         };
-
-        enum EAxis
-        {
-            Horizontal,
-            Vertical,
-        };
-        
+                
         enum EKeyModifier
         {
             KeyModifierAlt     = Native::s_KeyModifierAlt,

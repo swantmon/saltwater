@@ -543,8 +543,14 @@ namespace
 
             if (_rSDLEvent.jaxis.value > m_AnalogStickDeadZone || _rSDLEvent.jaxis.value < -m_AnalogStickDeadZone)
             {
-                Event = CInputEvent(CInputEvent::Input, CInputEvent::GamepadAxisMotion, ConvertSDLAxis(_rSDLEvent), 0, _rSDLEvent.jaxis.value / static_cast<float>(std::numeric_limits<int16_t>::max()));
-                //Gui::EventHandler::OnUserEvent(Event);
+                float Strength = _rSDLEvent.jaxis.value / static_cast<float>(std::numeric_limits<int16_t>::max());
+                CInputEvent::EKey Axis = ConvertSDLAxis(_rSDLEvent);
+                
+                CInputEvent::EAction Action = (Axis == CInputEvent::LeftTrigger || Axis == CInputEvent::RightTrigger) ? CInputEvent::GamepadTriggerMotion : CInputEvent::GamepadAxisMotion;
+
+                Event = CInputEvent(CInputEvent::Input, Action, Axis, _rSDLEvent.jaxis.axis % 2, Strength);
+
+                Gui::EventHandler::OnUserEvent(Event);
             }
             break;
 
