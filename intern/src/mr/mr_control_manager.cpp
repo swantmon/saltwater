@@ -72,8 +72,6 @@ namespace
     };
 
     constexpr char c_VertexShaderWebcam[] = R"(
-        #version  320 es
-
         layout(location = 0) in vec2 in_UV;
 
         layout(location = 0) out vec2 out_UV;
@@ -94,8 +92,6 @@ namespace
     )";
 
     constexpr char c_FragmentShaderWebcam[] = R"(
-        #version 320 es
-
         #extension GL_OES_EGL_image_external_essl3 : require
 
         precision mediump float;
@@ -113,8 +109,6 @@ namespace
     )";
 
     constexpr char c_VertexShaderPlane[] = R"(
-        #version 320 es
-
         precision highp float;
 
         layout(location = 0) uniform mat4 m_MVP;
@@ -132,8 +126,6 @@ namespace
     )";
 
     constexpr char c_FragmentShaderPlane[] = R"(
-        #version 320 es
-
         precision highp float;
 
         layout(location = 1) uniform vec4 m_Color;
@@ -153,8 +145,6 @@ namespace
     )";
 
     constexpr char c_VertexShaderPoint[] = R"(
-        #version 320 es
-
         layout(location = 0) uniform mat4 m_MVP;
 
         layout(location = 0) in vec4 in_Vertex;
@@ -168,8 +158,6 @@ namespace
     )";
 
     constexpr char c_FragmentShaderPoint[] = R"(
-        #version 320 es
-
         precision lowp float;
 
         layout(location = 0) out vec4 out_Output;

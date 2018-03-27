@@ -71,6 +71,20 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
+    void CCameraComponent::SetBackgroundTexture(Gfx::CTexturePtr _BackgroundTexturePtr)
+    {
+        m_pBackgroundTexture = _BackgroundTexturePtr;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    Gfx::CTexturePtr CCameraComponent::GetBackgroundTexture()
+    {
+        return m_pBackgroundTexture;
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CCameraComponent::SetCullingMask(unsigned int _CullingMask)
     {
         m_CullingMask = _CullingMask;

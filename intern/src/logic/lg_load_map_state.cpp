@@ -187,8 +187,8 @@ namespace
 
             auto Component = Dt::CComponentManager::GetInstance().Allocate<Dt::CCameraComponent>();
 
-            Component->SetProjectionType(Dt::CCameraComponent::External);
-            Component->SetClearFlag(Dt::CCameraComponent::Webcam);
+            Component->SetProjectionType(Dt::CCameraComponent::Perspective);
+            Component->SetClearFlag(Dt::CCameraComponent::Skybox);
 
             rEntity.AttachComponent(Component);
 

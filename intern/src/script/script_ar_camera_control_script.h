@@ -73,11 +73,17 @@ namespace Scpt
 
             if (m_pCameraComponent != nullptr)
             {
+                m_pCameraComponent->SetClearFlag(Dt::CCameraComponent::Texture);
+
+                m_pCameraComponent->SetProjectionType(Dt::CCameraComponent::External);
+
                 m_pCameraComponent->SetNear(rCamera.GetNear());
 
                 m_pCameraComponent->SetNear(rCamera.GetFar());
 
                 m_pCameraComponent->SetProjectionMatrix(rCamera.GetProjectionMatrix());
+
+                m_pCameraComponent->SetBackgroundTexture(MR::ControlManager::GetBackgroundTexture());
 
                 Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*m_pCameraComponent, Dt::CCameraComponent::DirtyInfo);
             }

@@ -6,6 +6,8 @@
 
 #include "data/data_component.h"
 
+#include "graphic/gfx_texture.h"
+
 namespace Dt
 {
     class CTexture2D;
@@ -20,7 +22,7 @@ namespace Dt
         enum EClearFlag
         {
             Skybox,
-            Webcam,
+            Texture,
             SolidColor,
             DepthOnly,
             DontClear,
@@ -47,6 +49,9 @@ namespace Dt
         void SetBackgroundColor(const glm::vec3& _rBackgroundColor);
         glm::vec3& GetBackgroundColor();
         const glm::vec3& GetBackgroundColor() const;
+
+        void SetBackgroundTexture(Gfx::CTexturePtr _BackgroundTexturePtr);
+        Gfx::CTexturePtr GetBackgroundTexture();
 
         void SetCullingMask(unsigned int _CullingMask);
         unsigned int GetCullingMask() const;
@@ -109,6 +114,7 @@ namespace Dt
         float            m_FoV;                             //< Field of view even projection is active
         float            m_Near;                            //< Near field of the camera
         float            m_Far;                             //< Far field of the camera
+        Gfx::CTexturePtr m_pBackgroundTexture;              //< Background texture
         glm::vec3        m_BackgroundColor;                 //< Default background color of the camera (depending on clear flag)
         glm::mat4        m_ProjectionMatrix;                //< RAW projection matrix even RAW is active
         Base::AABB2Float m_ViewportRect;                    //< View port this camera should render

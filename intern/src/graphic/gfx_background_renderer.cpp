@@ -145,7 +145,7 @@ namespace
 
         void RenderBackgroundFromSkybox();
 
-        void RenderBackgroundFromWebcam();
+        void RenderBackgroundFromTexture();
 
         void BuildRenderJobs();
     };
@@ -195,10 +195,6 @@ namespace
         m_BackgroundFromWebcam.m_InputLayoutPtr   = 0;
         m_BackgroundFromWebcam.m_MeshPtr          = 0;
 
-        m_WebcamTexturePtr = 0;
-
-        m_WebcamTargetSetPtr = 0;
-
         m_CameraRenderJobs.clear();
 
         m_SkyRenderJobs.clear();
@@ -247,33 +243,6 @@ namespace
     
     void CGfxBackgroundRenderer::OnSetupRenderTargets()
     {
-        STextureDescriptor TextureDesc;
-
-        TextureDesc.m_NumberOfPixelsU  = Gfx::Main::GetActiveWindowSize()[0];
-        TextureDesc.m_NumberOfPixelsV  = Gfx::Main::GetActiveWindowSize()[1];
-        TextureDesc.m_NumberOfPixelsW  = 1;
-        TextureDesc.m_NumberOfMipMaps  = 1;
-        TextureDesc.m_NumberOfTextures = 1;
-        TextureDesc.m_Binding          = CTexture::RenderTarget | CTexture::ShaderResource;
-        TextureDesc.m_Access           = CTexture::CPUWrite;
-        TextureDesc.m_Format           = CTexture::Unknown;
-        TextureDesc.m_Usage            = CTexture::GPURead;
-        TextureDesc.m_Semantic         = CTexture::Diffuse;
-        TextureDesc.m_pFileName        = 0;
-        TextureDesc.m_pPixels          = 0;
-        TextureDesc.m_Format           = CTexture::R8G8B8A8_UBYTE;
-
-        m_WebcamTexturePtr = TextureManager::CreateTexture2D(TextureDesc);
-
-        // -----------------------------------------------------------------------------
-        // Labels
-        // -----------------------------------------------------------------------------
-        TextureManager::SetTextureLabel(m_WebcamTexturePtr, "Webcam texture");
-
-        // -----------------------------------------------------------------------------
-        // Target sets & view ports
-        // -----------------------------------------------------------------------------
-        m_WebcamTargetSetPtr = TargetSetManager::CreateTargetSet(m_WebcamTexturePtr);
     }
     
     // -----------------------------------------------------------------------------
@@ -431,9 +400,9 @@ namespace
             {
                 RenderBackgroundFromSkybox();
             }
-            else if (rRenderJob.m_pDtComponent->GetClearFlag() == Dt::CCameraComponent::Webcam)
+            else if (rRenderJob.m_pDtComponent->GetClearFlag() == Dt::CCameraComponent::Texture)
             {
-                RenderBackgroundFromWebcam();
+                RenderBackgroundFromTexture();
             }
             else
             {
@@ -550,7 +519,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxBackgroundRenderer::RenderBackgroundFromWebcam()
+    void CGfxBackgroundRenderer::RenderBackgroundFromTexture()
     {
         // -----------------------------------------------------------------------------
         // Get HDR intensity from sky
@@ -580,22 +549,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Render sky texture
         // -----------------------------------------------------------------------------
-        Performance::BeginEvent("Background from Webcam");
-
-        // -----------------------------------------------------------------------------
-        // Render web cam to target set
-        // -----------------------------------------------------------------------------
-        TargetSetManager::ClearTargetSet(m_WebcamTargetSetPtr, glm::vec4(1.0f));
-
-        ContextManager::SetTargetSet(m_WebcamTargetSetPtr);
-
-        ContextManager::SetViewPortSet(ViewManager::GetViewPortSet());
-
-        MR::ControlManager::OnDraw();
-
-        ContextManager::ResetViewPortSet();
-
-        ContextManager::ResetRenderContext();
+        Performance::BeginEvent("Background from Texture");
 
         // -----------------------------------------------------------------------------
         // Data
@@ -628,7 +582,7 @@ namespace
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
         ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
 
-        ContextManager::SetTexture(0, m_WebcamTexturePtr);
+        ContextManager::SetTexture(0, m_CameraRenderJobs[0].m_pDtComponent->GetBackgroundTexture());
         ContextManager::SetTexture(1, TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget());
 
         ContextManager::Draw(3, 0);
