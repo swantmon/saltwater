@@ -169,6 +169,8 @@ namespace IO
         inline const glm::vec2& GetCursorPosition() const;
         
         inline float GetDelta() const;
+
+        inline int GetAxis() const;
         
     private:
         
@@ -178,7 +180,7 @@ namespace IO
             unsigned int m_Key;
             unsigned int m_Type;
             unsigned int m_KeyModifier;
-            unsigned int m_Axis;
+            int m_Axis;
         };
         
     private:
@@ -198,6 +200,7 @@ namespace IO
         m_Bits.m_Action      = 0;
         m_Bits.m_Key         = 0;
         m_Bits.m_Type        = _Type;
+        m_Bits.m_Axis        = -1;
         m_Bits.m_KeyModifier = 0;
     }
     
@@ -280,6 +283,7 @@ namespace IO
         m_Bits.m_Action      = _rEvent.m_Bits.m_Action;
         m_Bits.m_Key         = _rEvent.m_Bits.m_Key;
         m_Bits.m_KeyModifier = _rEvent.m_Bits.m_KeyModifier;
+        m_Bits.m_Axis        = _rEvent.m_Bits.m_Axis;
     }
     
     // -----------------------------------------------------------------------------
@@ -296,6 +300,7 @@ namespace IO
         m_Bits.m_Action      = _rEvent.m_Bits.m_Action;
         m_Bits.m_Key         = _rEvent.m_Bits.m_Key;
         m_Bits.m_KeyModifier = _rEvent.m_Bits.m_KeyModifier;
+        m_Bits.m_Axis        = _rEvent.m_Bits.m_Axis;
         m_PointerPosition    = _rEvent.m_PointerPosition;
         m_WheelDelta         = _rEvent.m_WheelDelta;
         
@@ -363,5 +368,14 @@ namespace IO
     inline float CInputEvent::GetDelta() const
     {
         return m_WheelDelta;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    inline int CInputEvent::GetAxis() const
+    {
+        assert(m_Bits.m_Axis == 0 || m_Bits.m_Axis == 1);
+
+        return m_Bits.m_Axis;
     }
 } // namespace IO
