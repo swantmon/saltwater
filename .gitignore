@@ -22,9 +22,9 @@ DerivedData
 *.ser
 .gradle 
 local.properties 
-.idea/misc.xml
-.idea/workspace.xml 
-.idea/libraries 
+/intern/project/droid/.idea/misc.xml
+/intern/project/droid/.idea/workspace.xml 
+/intern/project/droid/.idea/libraries 
 .DS_Store 
 build/
 captures/
