@@ -49,6 +49,8 @@ namespace TextureManager
     CTexturePtr CreateTexture3D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable = true, SDataBehavior::Enum _Behavior = SDataBehavior::LeftAlone);
 
     CTexturePtr CreateCubeTexture(const STextureDescriptor& _rDescriptor, bool _IsDeleteable = true, SDataBehavior::Enum _Behavior = SDataBehavior::LeftAlone);
+
+    CTexturePtr CreateExternalTexture();
     
     CTextureSetPtr CreateTextureSet(CTexturePtr _Texture1Ptr);
     CTextureSetPtr CreateTextureSet(CTexturePtr _Texture1Ptr, CTexturePtr _Texture2Ptr);

@@ -37,18 +37,6 @@
 
 #include "arcore_c_api.h"
 
-#if PLATFORM_ANDROID
-#include "GLES3/gl32.h"
-
-#ifndef GL_OES_EGL_image_external
-#define GL_OES_EGL_image_external 1
-#define GL_TEXTURE_EXTERNAL_OES           0x8D65
-#define GL_TEXTURE_BINDING_EXTERNAL_OES   0x8D67
-#define GL_REQUIRED_TEXTURE_IMAGE_UNITS_OES 0x8D68
-#endif /* GL_OES_EGL_image_external */
-
-#endif
-
 using namespace MR;
 using namespace MR::ControlManager;
 
@@ -266,6 +254,8 @@ namespace
 
         Gfx::CTexturePtr m_BackgroundTexturePtr;
 
+        Gfx::CTexturePtr m_ExternalTexturePtr;
+
         Gfx::CTargetSetPtr m_BackgroundTargetSetPtr;
 
         Gfx::CShaderPtr m_WebcamVSPtr;
@@ -369,6 +359,8 @@ namespace
 
         m_BackgroundTexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDesc);
 
+        m_ExternalTexturePtr = Gfx::TextureManager::CreateExternalTexture();
+
         // -----------------------------------------------------------------------------
         // Labels
         // -----------------------------------------------------------------------------
@@ -444,16 +436,6 @@ namespace
         
         m_ColorBufferPtr = Gfx::BufferManager::CreateBuffer(ConstanteBufferDesc);
 
-#ifdef PLATFORM_ANDROID
-        glGenTextures(1, &g_TextureID);
-
-        glBindTexture(GL_TEXTURE_EXTERNAL_OES, g_TextureID);
-
-        glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-        glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-#endif
-
         // -----------------------------------------------------------------------------
         // Handler
         // -----------------------------------------------------------------------------
@@ -475,11 +457,6 @@ namespace
         ArSession_destroy(m_pARSession);
 
         ArFrame_destroy(m_pARFrame);
-
-        // -----------------------------------------------------------------------------
-        // OpenGLES
-        // -----------------------------------------------------------------------------
-        glDeleteTextures(1, &g_TextureID);
 #endif
     }
 
@@ -492,7 +469,7 @@ namespace
 
         ArStatus Result;
 
-        ArSession_setCameraTextureName(m_pARSession, g_TextureID);
+        ArSession_setCameraTextureName(m_pARSession, m_ExternalTexturePtr->GetNativeHandle());
 
         Result = ArSession_update(m_pARSession, m_pARFrame);
 
@@ -755,11 +732,7 @@ namespace
 
         Gfx::ContextManager::SetInputLayout(m_WebcamVSPtr->GetInputLayout());
 
-#ifdef PLATFORM_ANDROID
-        glActiveTexture(GL_TEXTURE0);
-
-        glBindTexture(GL_TEXTURE_EXTERNAL_OES, g_TextureID);
-#endif // PLATFORM_ANDROID
+        Gfx::ContextManager::SetTexture(0, m_ExternalTexturePtr);
 
         Gfx::ContextManager::Draw(4, 0);
 

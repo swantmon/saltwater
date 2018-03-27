@@ -1264,8 +1264,8 @@ namespace
 
         CNativeTexture& rNativeTexture = *static_cast<CNativeTexture*>(_TextureBasePtr.GetPtr());
 
-        GLenum TextureBinding = rNativeTexture.m_NativeBinding;
-        GLuint TextureHandle  = rNativeTexture.m_NativeTexture;
+        GLenum TextureBinding = rNativeTexture.GetNativeBinding();
+        GLuint TextureHandle  = rNativeTexture.GetNativeHandle();
 
         glActiveTexture(GL_TEXTURE0 + _Unit);
 
@@ -1306,9 +1306,9 @@ namespace
 
         CNativeTexture& rNativeTexture = *static_cast<CNativeTexture*>(_TextureBasePtr.GetPtr());
 
-        GLuint TextureHandle = rNativeTexture.m_NativeTexture;
-        GLenum TextureUsage  = rNativeTexture.m_NativeUsage;
-        GLenum TextureFormat = rNativeTexture.m_NativeInternalFormat;
+        GLuint TextureHandle = rNativeTexture.GetNativeHandle();
+        GLenum TextureUsage  = rNativeTexture.GetNativeUsage();
+        GLenum TextureFormat = rNativeTexture.GetNativeInternalFormat();
 
         if (_TextureBasePtr->GetDimension() == CTexture::Dim3D) IsLayered = GL_TRUE;
 

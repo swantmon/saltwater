@@ -15,7 +15,8 @@ namespace Gfx
             enum EDimension
             {
                 Dim2D,
-                Dim3D
+                Dim3D,
+                External
             };
         
             enum EFormat
@@ -156,6 +157,8 @@ namespace Gfx
             const std::string& GetFileName() const;
 
             unsigned int GetHash() const;
+
+            virtual unsigned int GetNativeHandle() const = 0;
 
         protected:
 
