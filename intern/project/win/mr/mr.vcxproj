@@ -20,32 +20,22 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\mr\mr_camera.cpp" />
-    <ClCompile Include="..\..\..\src\mr\mr_camera_manager.cpp" />
     <ClCompile Include="..\..\..\src\mr\mr_control_manager.cpp" />
     <ClCompile Include="..\..\..\src\mr\mr_light_estimation.cpp" />
-    <ClCompile Include="..\..\..\src\mr\mr_light_estimation_manager.cpp" />
     <ClCompile Include="..\..\..\src\mr\mr_marker.cpp" />
-    <ClCompile Include="..\..\..\src\mr\mr_marker_manager.cpp" />
     <ClCompile Include="..\..\..\src\mr\mr_precompiled.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\mr\mr_session.cpp" />
-    <ClCompile Include="..\..\..\src\mr\mr_session_manager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\mr\mr_camera.h" />
-    <ClInclude Include="..\..\..\src\mr\mr_camera_manager.h" />
     <ClInclude Include="..\..\..\src\mr\mr_control_manager.h" />
     <ClInclude Include="..\..\..\src\mr\mr_light_estimation.h" />
-    <ClInclude Include="..\..\..\src\mr\mr_light_estimation_manager.h" />
     <ClInclude Include="..\..\..\src\mr\mr_marker.h" />
-    <ClInclude Include="..\..\..\src\mr\mr_marker_manager.h" />
     <ClInclude Include="..\..\..\src\mr\mr_precompiled.h" />
-    <ClInclude Include="..\..\..\src\mr\mr_session.h" />
-    <ClInclude Include="..\..\..\src\mr\mr_session_manager.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{1BBA2732-A51B-4FF0-8393-492884561668}</ProjectGuid>

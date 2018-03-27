@@ -12,21 +12,6 @@
     <ClCompile Include="..\..\..\src\mr\mr_light_estimation.cpp">
       <Filter>light</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\mr\mr_light_estimation_manager.cpp">
-      <Filter>light</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\mr\mr_session.cpp">
-      <Filter>session</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\mr\mr_camera_manager.cpp">
-      <Filter>camera</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\mr\mr_marker_manager.cpp">
-      <Filter>marker</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\mr\mr_session_manager.cpp">
-      <Filter>session</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\mr\mr_control_manager.h" />
@@ -40,21 +25,6 @@
     <ClInclude Include="..\..\..\src\mr\mr_light_estimation.h">
       <Filter>light</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\mr\mr_light_estimation_manager.h">
-      <Filter>light</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\mr\mr_session.h">
-      <Filter>session</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\mr\mr_camera_manager.h">
-      <Filter>camera</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\mr\mr_marker_manager.h">
-      <Filter>marker</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\mr\mr_session_manager.h">
-      <Filter>session</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="camera">
@@ -65,9 +35,6 @@
     </Filter>
     <Filter Include="light">
       <UniqueIdentifier>{35399f82-6132-4b4c-8227-78ff7e010369}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="session">
-      <UniqueIdentifier>{c7568f9d-b6d2-4707-8b25-18a595c42b48}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

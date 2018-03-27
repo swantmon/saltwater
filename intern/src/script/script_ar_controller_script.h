@@ -8,11 +8,7 @@
 #include "data/data_component_facet.h"
 #include "data/data_transformation_facet.h"
 
-#include "mr/mr_camera_manager.h"
 #include "mr/mr_control_manager.h"
-#include "mr/mr_light_estimation_manager.h"
-#include "mr/mr_marker_manager.h"
-#include "mr/mr_session_manager.h"
 
 #include "script/script_script.h"
 
@@ -39,17 +35,13 @@ namespace Scpt
         void Update() override
         {
             MR::ControlManager::Update();
-
-            MR::SessionManager::Update();
-            MR::CameraManager::Update();
-            MR::MarkerManager::Update();
-            MR::LightEstimationManager::Update();
         }
 
         // -----------------------------------------------------------------------------
 
         void OnInput(const Base::CInputEvent& _rEvent) override
         {
+            BASE_UNUSED(_rEvent);
         }
     };
 } // namespace Scpt

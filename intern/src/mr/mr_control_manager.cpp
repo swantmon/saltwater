@@ -22,11 +22,7 @@
 
 #include "gui/gui_event_handler.h"
 
-#include "mr/mr_camera_manager.h"
 #include "mr/mr_control_manager.h"
-#include "mr/mr_light_estimation_manager.h"
-#include "mr/mr_marker_manager.h"
-#include "mr/mr_session_manager.h"
 
 #include <array>
 #include <vector>
@@ -42,6 +38,7 @@
 #define GL_TEXTURE_BINDING_EXTERNAL_OES   0x8D67
 #define GL_REQUIRED_TEXTURE_IMAGE_UNITS_OES 0x8D68
 #endif /* GL_OES_EGL_image_external */
+
 #endif
 
 using namespace MR;
@@ -61,6 +58,10 @@ namespace
 
         return glm::vec3(((RGB >> 24) & 0xff) / 255.0f, ((RGB >> 16) & 0xff) / 255.0f, ((RGB >> 8) & 0xff) / 255.0f);
     }
+
+    const float c_Uvs[] = {
+            0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+    };
 
     constexpr char c_VertexShaderWebcam[] = R"(
         #version  320 es
@@ -276,6 +277,8 @@ namespace
     static constexpr int s_MaxNumberOfVerticesPerPoint = 512;
 
     static constexpr int s_NumberOfVertices = 4;
+    bool g_IsUVsInitialized = false;
+    float g_TransformedUVs[s_NumberOfVertices * 2];
 } // namespace
 
 namespace
@@ -302,18 +305,38 @@ namespace
 
         void OnDraw();
 
+        const CCamera& GetCamera();
+
+        const CLightEstimation& GetLightEstimation();
+
+        const CMarker* AcquireNewMarker(float _X, float _Y);
+        void ReleaseMarker(const CMarker* _pMarker);
+
     private:
 
         static std::string s_Permissions[];
 
     private:
 
-        class CInternSession : public CSession
+        class CInternCamera : public CCamera
+        {
+        private:
+
+            friend class CMRControlManager;
+        };
+
+        class CInternLightEstimation : public CLightEstimation
+        {
+        private:
+
+            friend class CMRControlManager;
+        };
+
+        class CInternMarker : public CMarker
         {
         public:
 
-            ArSession* m_pARSession;
-            ArFrame* m_pARFrame;
+            ArAnchor* m_pAnchor;
 
         private:
 
@@ -322,7 +345,19 @@ namespace
 
     private:
 
+        typedef std::vector<CInternMarker> CTrackedObjects;
+
+    private:
+
         bool m_InstallRequested;
+
+        ArSession* m_pARSession;
+        ArFrame* m_pARFrame;
+        CTrackedObjects m_TrackedObjects;
+
+        CInternCamera m_Camera;
+
+        CInternLightEstimation m_LightEstimation;
 
         glm::mat3 m_ARCToEngineMatrix;
 
@@ -335,8 +370,16 @@ namespace
 
 namespace
 {
+    std::string CMRControlManager::s_Permissions[] = { "android.permission.CAMERA" };
+}
+
+namespace
+{
     CMRControlManager::CMRControlManager()
-        : m_InstallRequested (false)
+        : m_InstallRequested(false)
+        , m_pARSession       (0)
+        , m_pARFrame         (0)
+        , m_TrackedObjects   ( )
         , m_ARCToEngineMatrix(1.0f)
     {
         m_ARCToEngineMatrix = Base::CCoordinateSystem::GetBaseMatrix(glm::vec3(1,0,0), glm::vec3(0,1,0), glm::vec3(0,0,-1));
@@ -352,7 +395,7 @@ namespace
 
     void CMRControlManager::OnStart()
     {
-#if PLATFORM_ANDROID
+#ifdef PLATFORM_ANDROID
         // -----------------------------------------------------------------------------
         // OpenGLES
         // -----------------------------------------------------------------------------
@@ -421,7 +464,16 @@ namespace
 
     void CMRControlManager::OnExit()
     {
-#if PLATFORM_ANDROID
+        m_TrackedObjects.clear();
+
+#ifdef PLATFORM_ANDROID
+        // -----------------------------------------------------------------------------
+        // AR session and frame
+        // -----------------------------------------------------------------------------
+        ArSession_destroy(m_pARSession);
+
+        ArFrame_destroy(m_pARFrame);
+
         // -----------------------------------------------------------------------------
         // OpenGLES
         // -----------------------------------------------------------------------------
@@ -435,14 +487,124 @@ namespace
 
     void CMRControlManager::Update()
     {
-        MR::SessionManager::SetTexture(g_TextureID);
+#ifdef PLATFORM_ANDROID
+        if (m_pARSession == nullptr) return;
+
+        ArStatus Result;
+
+        ArSession_setCameraTextureName(m_pARSession, g_TextureID);
+
+        Result = ArSession_update(m_pARSession, m_pARFrame);
+
+        if (Result != AR_SUCCESS) return;
+
+        // -----------------------------------------------------------------------------
+        // Update camera
+        // -----------------------------------------------------------------------------
+        m_Camera.m_Near = Base::CProgramParameters::GetInstance().Get<float>("mr:ar:camera:near", 0.1f);
+        m_Camera.m_Far  = Base::CProgramParameters::GetInstance().Get<float>("mr:ar:camera:far", 100.0f);
+
+        ArCamera* pARCamera;
+
+        ArFrame_acquireCamera(m_pARSession, m_pARFrame, &pARCamera);
+
+        ArCamera_getViewMatrix(m_pARSession, pARCamera, glm::value_ptr(m_Camera.m_ViewMatrix));
+
+        ArCamera_getProjectionMatrix(m_pARSession, pARCamera, m_Camera.m_Near, m_Camera.m_Far, glm::value_ptr(m_Camera.m_ProjectionMatrix));
+
+        ArTrackingState CameraTrackingState;
+
+        ArCamera_getTrackingState(m_pARSession, pARCamera, &CameraTrackingState);
+
+        ArCamera_release(pARCamera);
+
+        switch(CameraTrackingState)
+        {
+            case AR_TRACKING_STATE_PAUSED:
+                m_Camera.m_TrackingState = CCamera::Paused;
+                break;
+            case AR_TRACKING_STATE_STOPPED:
+                m_Camera.m_TrackingState = CCamera::Stopped;
+                break;
+            case AR_TRACKING_STATE_TRACKING:
+                m_Camera.m_TrackingState = CCamera::Tracking;
+                break;
+        }
+
+        if (CameraTrackingState != AR_TRACKING_STATE_TRACKING) return;
+
+        // -----------------------------------------------------------------------------
+        // Light estimation
+        // Intensity value ranges from 0.0f to 1.0f.
+        // -----------------------------------------------------------------------------
+        ArLightEstimate* ARLightEstimate;
+        ArLightEstimateState ARLightEstimateState;
+
+        ArLightEstimate_create(m_pARSession, &ARLightEstimate);
+
+        ArFrame_getLightEstimate(m_pARSession, m_pARFrame, ARLightEstimate);
+
+        ArLightEstimate_getState(m_pARSession, ARLightEstimate, &ARLightEstimateState);
+
+        m_LightEstimation.m_EstimationState = CLightEstimation::NotValid;
+
+        if (ARLightEstimateState == AR_LIGHT_ESTIMATE_STATE_VALID)
+        {
+            ArLightEstimate_getPixelIntensity(m_pARSession, ARLightEstimate, &m_LightEstimation.m_Intensity);
+
+            m_LightEstimation.m_EstimationState = CLightEstimation::Valid;
+        }
+
+        ArLightEstimate_destroy(ARLightEstimate);
+
+        ARLightEstimate = nullptr;
+
+        // -----------------------------------------------------------------------------
+        // Use tracked objects matrices
+        // -----------------------------------------------------------------------------
+        for (auto& rObject : m_TrackedObjects)
+        {
+            ArTrackingState TrackingState = AR_TRACKING_STATE_STOPPED;
+
+            ArAnchor_getTrackingState(m_pARSession, rObject.m_pAnchor, &TrackingState);
+
+            switch(TrackingState)
+            {
+                case AR_TRACKING_STATE_PAUSED:
+                    rObject.m_TrackingState = CMarker::Paused;
+                    break;
+                case AR_TRACKING_STATE_STOPPED:
+                    rObject.m_TrackingState = CMarker::Stopped;
+                    break;
+                case AR_TRACKING_STATE_TRACKING:
+                    rObject.m_TrackingState = CMarker::Tracking;
+                    break;
+            }
+
+            if (TrackingState != AR_TRACKING_STATE_TRACKING) continue;
+
+            ArPose* pARPose = 0;
+
+            ArPose_create(m_pARSession, 0, &pARPose);
+
+            ArAnchor_getPose(m_pARSession, rObject.m_pAnchor, pARPose);
+
+            ArPose_getMatrix(m_pARSession, pARPose, glm::value_ptr(rObject.m_ModelMatrix));
+
+            ArPose_destroy(pARPose);
+        }
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     void CMRControlManager::OnPause()
     {
-        MR::SessionManager::OnPause();
+#ifdef PLATFORM_ANDROID
+        if (m_pARSession == nullptr) return;
+
+        ArSession_pause(m_pARSession);
+#endif
     }
 
     // -----------------------------------------------------------------------------
@@ -450,17 +612,16 @@ namespace
     void CMRControlManager::OnResume()
     {
 #ifdef PLATFORM_ANDROID
-        std::string s_Permissions[] = { "android.permission.CAMERA" };
-
         void* pEnvironment = Core::JNI::GetJavaEnvironment();
         void* pActivity    = Core::JNI::GetActivity();
+        void* pContext     = Core::JNI::GetContext();
 
         if(!Core::JNI::CheckPermission(s_Permissions[0]))
         {
             Core::JNI::AcquirePermissions(s_Permissions, 1);
         }
 
-        if (pEnvironment != nullptr && pActivity != nullptr && Core::JNI::CheckPermission(s_Permissions[0]))
+        if (m_pARSession == nullptr && pEnvironment != nullptr && pActivity != nullptr && pContext != nullptr && Core::JNI::CheckPermission(s_Permissions[0]))
         {
             ArStatus Status;
 
@@ -492,11 +653,47 @@ namespace
             // -----------------------------------------------------------------------------
             // Create session
             // -----------------------------------------------------------------------------
-            MR::SessionManager::Initialize();
+            Status = ArSession_create(pEnvironment, pContext, &m_pARSession);
+
+            if (Status != AR_SUCCESS) BASE_THROWM("Application has to be closed because of unsupported ArCore.");
+
+            assert(m_pARSession != 0);
+
+            ArConfig* ARConfig = 0;
+
+            ArConfig_create(m_pARSession, &ARConfig);
+
+            assert(ARConfig != 0);
+
+            Status = ArSession_checkSupported(m_pARSession, ARConfig);
+
+            assert(Status == AR_SUCCESS);
+
+            Status = ArSession_configure(m_pARSession, ARConfig);
+
+            assert(Status == AR_SUCCESS);
+
+            ArConfig_destroy(ARConfig);
+
+            ArFrame_create(m_pARSession, &m_pARFrame);
+
+            assert(m_pARFrame != 0);
+
+            // -----------------------------------------------------------------------------
+            // Default geometry
+            // -----------------------------------------------------------------------------
+            int Rotation = Core::JNI::GetDeviceRotation();
+            int Width    = Core::JNI::GetDeviceDimension()[0];
+            int Height   = Core::JNI::GetDeviceDimension()[1];
+
+            ArSession_setDisplayGeometry(m_pARSession, Rotation, Width, Height);
+        }
+
+        if (m_pARSession != nullptr)
+        {
+            ArSession_resume(m_pARSession);
         }
 #endif
-
-        MR::SessionManager::OnResume();
     }
 
     // -----------------------------------------------------------------------------
@@ -504,31 +701,38 @@ namespace
 
     void CMRControlManager::OnDisplayGeometryChanged(int _DisplayRotation, int _Width, int _Height)
     {
-        SessionManager::OnDisplayGeometryChanged(static_cast<SessionManager::SDisplayRotation::EDisplayRotation>(_DisplayRotation), _Width, _Height);
+#ifdef PLATFORM_ANDROID
+        ArSession_setDisplayGeometry(m_pARSession, _DisplayRotation, _Width, _Height);
+#else
+        BASE_UNUSED(_DisplayRotation);
+        BASE_UNUSED(_Width);
+        BASE_UNUSED(_Height);
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     void CMRControlManager::OnDraw()
     {
-#if PLATFORM_ANDROID
-        const CSession& rActiveSession = SessionManager::GetSession();
-
-        if (rActiveSession.GetSessionState() != MR::CSession::Success) return;
-
-        ArSession* pARSession = static_cast<ArSession*>(rActiveSession.GetSession());
-        ArFrame*   pARFrame = static_cast<ArFrame*>(rActiveSession.GetFrame());
-
+#ifdef PLATFORM_ANDROID
         // -----------------------------------------------------------------------------
         // Background
         // -----------------------------------------------------------------------------
-        if (rActiveSession.HasGeometryChanged())
+        int32_t HasGeometryChanged = 0;
+
+        ArFrame_getDisplayGeometryChanged(m_pARSession, m_pARFrame, &HasGeometryChanged);
+
+        if (HasGeometryChanged != 0 || g_IsUVsInitialized == false)
         {
+            ArFrame_transformDisplayUvCoords(m_pARSession, m_pARFrame, s_NumberOfVertices * 2, c_Uvs, g_TransformedUVs);
+
             glBindBuffer(GL_ARRAY_BUFFER, g_AttributeUVs);
 
-            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(MR::CSession::CUVs), &rActiveSession.GetTransformedUVs()[0]);
+            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(g_TransformedUVs), &g_TransformedUVs);
 
             glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+            g_IsUVsInitialized = true;
         }
 
         glUseProgram(g_ShaderProgramWebcam);
@@ -604,13 +808,13 @@ namespace
 
             int LengthOfPolygon;
 
-            ArPlane_getPolygonSize(pARSession, _pPlane, &LengthOfPolygon);
+            ArPlane_getPolygonSize(m_pARSession, _pPlane, &LengthOfPolygon);
 
             int NumberOfVertices = LengthOfPolygon / 2;
 
             std::vector<glm::vec2> VerticesRAW(NumberOfVertices);
 
-            ArPlane_getPolygon(pARSession, _pPlane, &VerticesRAW.front()[0]);
+            ArPlane_getPolygon(m_pARSession, _pPlane, &VerticesRAW.front()[0]);
 
             // -----------------------------------------------------------------------------
             // Fill vertex 0 to 3. Note that the vertex.xy are used for x and z
@@ -627,11 +831,11 @@ namespace
             // -----------------------------------------------------------------------------
             ArPose* Pose;
 
-            ArPose_create(pARSession, nullptr, &Pose);
+            ArPose_create(m_pARSession, nullptr, &Pose);
 
-            ArPlane_getCenterPose(pARSession, _pPlane, Pose);
+            ArPlane_getCenterPose(m_pARSession, _pPlane, Pose);
 
-            ArPose_getMatrix(pARSession, Pose, glm::value_ptr(PlaneModelMatrix));
+            ArPose_getMatrix(m_pARSession, Pose, glm::value_ptr(PlaneModelMatrix));
 
             ArPose_destroy(Pose);
 
@@ -692,15 +896,15 @@ namespace
         // -----------------------------------------------------------------------------
         ArTrackableList* ListOfPlanes = nullptr;
 
-        ArTrackableList_create(pARSession, &ListOfPlanes);
+        ArTrackableList_create(m_pARSession, &ListOfPlanes);
 
         assert(ListOfPlanes != nullptr);
 
-        ArSession_getAllTrackables(pARSession, AR_TRACKABLE_PLANE, ListOfPlanes);
+        ArSession_getAllTrackables(m_pARSession, AR_TRACKABLE_PLANE, ListOfPlanes);
 
         int NumberOfPlanes = 0;
 
-        ArTrackableList_getSize(pARSession, ListOfPlanes, &NumberOfPlanes);
+        ArTrackableList_getSize(m_pARSession, ListOfPlanes, &NumberOfPlanes);
 
         // -----------------------------------------------------------------------------
         // Update every available plane
@@ -709,17 +913,17 @@ namespace
         {
             ArTrackable* pTrackableItem = nullptr;
 
-            ArTrackableList_acquireItem(pARSession, ListOfPlanes, IndexOfPlane, &pTrackableItem);
+            ArTrackableList_acquireItem(m_pARSession, ListOfPlanes, IndexOfPlane, &pTrackableItem);
 
             ArPlane* pPlane = ArAsPlane(pTrackableItem);
 
             ArTrackingState TrackableTrackingState;
 
-            ArTrackable_getTrackingState(pARSession, pTrackableItem, &TrackableTrackingState);
+            ArTrackable_getTrackingState(m_pARSession, pTrackableItem, &TrackableTrackingState);
 
             ArPlane* pSubsumedPlane;
 
-            ArPlane_acquireSubsumedBy(pARSession, pPlane, &pSubsumedPlane);
+            ArPlane_acquireSubsumedBy(m_pARSession, pPlane, &pSubsumedPlane);
 
             if (pSubsumedPlane != nullptr)
             {
@@ -732,7 +936,7 @@ namespace
 
             ArTrackingState PlaneTrackingState;
 
-            ArTrackable_getTrackingState(pARSession, ArAsTrackable(pPlane), &PlaneTrackingState);
+            ArTrackable_getTrackingState(m_pARSession, ArAsTrackable(pPlane), &PlaneTrackingState);
 
             if (PlaneTrackingState != AR_TRACKING_STATE_TRACKING) continue;
 
@@ -818,7 +1022,7 @@ namespace
 
         ArPointCloud* pPointCloud = nullptr;
 
-        ArStatus Status = ArFrame_acquirePointCloud(pARSession, pARFrame, &pPointCloud);
+        ArStatus Status = ArFrame_acquirePointCloud(m_pARSession, m_pARFrame, &pPointCloud);
 
         if (Status == AR_SUCCESS)
         {
@@ -827,13 +1031,13 @@ namespace
             // -----------------------------------------------------------------------------
             int NumberOfPoints = 0;
 
-            ArPointCloud_getNumberOfPoints(pARSession, pPointCloud, &NumberOfPoints);
+            ArPointCloud_getNumberOfPoints(m_pARSession, pPointCloud, &NumberOfPoints);
 
             if (NumberOfPoints > 0)
             {
                 const float* pPointCloudData;
 
-                ArPointCloud_getData(pARSession, pPointCloud, &pPointCloudData);
+                ArPointCloud_getData(m_pARSession, pPointCloud, &pPointCloudData);
 
                 glBindBuffer(GL_ARRAY_BUFFER, g_AttributePointVertices);
 
@@ -867,6 +1071,187 @@ namespace
                 ArPointCloud_release(pPointCloud);
             }
         }
+#endif
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const CCamera& CMRControlManager::GetCamera()
+    {
+        return m_Camera;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const CLightEstimation& CMRControlManager::GetLightEstimation()
+    {
+        return m_LightEstimation;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const CMarker* CMRControlManager::AcquireNewMarker(float _X, float _Y)
+    {
+#ifdef PLATFORM_ANDROID
+        CInternMarker* pReturnMarker = nullptr;
+
+        if (m_pARFrame != nullptr && m_pARSession != nullptr)
+        {
+            ArHitResultList* pHitResultList = 0;
+
+            ArHitResultList_create(m_pARSession, &pHitResultList);
+
+            assert(pHitResultList);
+
+            ArFrame_hitTest(m_pARSession, m_pARFrame, _X, _Y, pHitResultList);
+
+            int NumberOfHits = 0;
+
+            ArHitResultList_getSize(m_pARSession, pHitResultList, &NumberOfHits);
+
+            // -----------------------------------------------------------------------------
+            // The hitTest method sorts the resulting list by distance from the camera,
+            // increasing.  The first hit result will usually be the most relevant when
+            // responding to user input
+            // -----------------------------------------------------------------------------
+            ArHitResult* pHitResult = nullptr;
+
+            for (int IndexOfHit = 0; IndexOfHit < NumberOfHits; ++IndexOfHit)
+            {
+                ArHitResult* pEstimatedHitResult = nullptr;
+
+                ArHitResult_create(m_pARSession, &pEstimatedHitResult);
+
+                ArHitResultList_getItem(m_pARSession, pHitResultList, IndexOfHit, pEstimatedHitResult);
+
+                if (pEstimatedHitResult == nullptr)
+                {
+                    return nullptr;
+                }
+
+                // -----------------------------------------------------------------------------
+                // Get trackables
+                // -----------------------------------------------------------------------------
+                ArTrackable* pTrackable = nullptr;
+
+                ArHitResult_acquireTrackable(m_pARSession, pEstimatedHitResult, &pTrackable);
+
+                ArTrackableType TrackableType = AR_TRACKABLE_NOT_VALID;
+
+                ArTrackable_getType(m_pARSession, pTrackable, &TrackableType);
+
+                switch (TrackableType)
+                {
+                    case AR_TRACKABLE_PLANE:
+                    {
+                        ArPose* pPose = nullptr;
+
+                        ArPose_create(m_pARSession, nullptr, &pPose);
+
+                        ArHitResult_getHitPose(m_pARSession, pEstimatedHitResult, pPose);
+
+                        int32_t IsPoseInPolygon = 0;
+
+                        ArPlane* pPlane = ArAsPlane(pTrackable);
+
+                        ArPlane_isPoseInPolygon(m_pARSession, pPlane, pPose, &IsPoseInPolygon);
+
+                        ArTrackable_release(pTrackable);
+
+                        ArPose_destroy(pPose);
+
+                        if (!IsPoseInPolygon)
+                        {
+                            continue;
+                        }
+
+                        pHitResult = pEstimatedHitResult;
+                    } break;
+
+                    case AR_TRACKABLE_POINT:
+                    {
+                        ArPoint* pPoint = ArAsPoint(pTrackable);
+
+                        ArPointOrientationMode OrientationMode;
+
+                        ArPoint_getOrientationMode(m_pARSession, pPoint, &OrientationMode);
+
+                        if (OrientationMode == AR_POINT_ORIENTATION_ESTIMATED_SURFACE_NORMAL)
+                        {
+                            pHitResult = pEstimatedHitResult;
+                        }
+                    } break;
+
+                    default:
+                    {
+                        ArTrackable_release(pTrackable);
+
+                        BASE_CONSOLE_INFO("Undefined trackable type found.")
+                    }
+                };
+            }
+
+            if (pHitResult != nullptr)
+            {
+                ArAnchor* pAnchor = nullptr;
+
+                if (ArHitResult_acquireNewAnchor(m_pARSession, pHitResult, &pAnchor) != AR_SUCCESS)
+                {
+                    return nullptr;
+                }
+
+                ArTrackingState TrackingState = AR_TRACKING_STATE_STOPPED;
+
+                ArAnchor_getTrackingState(m_pARSession, pAnchor, &TrackingState);
+
+                if (TrackingState != AR_TRACKING_STATE_TRACKING)
+                {
+                    ArAnchor_release(pAnchor);
+
+                    return nullptr;
+                }
+
+                CInternMarker NewMarker;
+
+                NewMarker.m_pAnchor = pAnchor;
+
+                m_TrackedObjects.emplace_back(NewMarker);
+
+                pReturnMarker = &m_TrackedObjects.back();
+
+                ArHitResult_destroy(pHitResult);
+            }
+
+            ArHitResultList_destroy(pHitResultList);
+
+            pHitResultList = nullptr;
+        }
+
+        return pReturnMarker;
+#else
+        BASE_UNUSED(_X);
+        BASE_UNUSED(_Y);
+
+        return nullptr;
+#endif
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMRControlManager::ReleaseMarker(const CMarker* _pMarker)
+    {
+#ifdef PLATFORM_ANDROID
+        auto MarkerIter = std::find_if(m_TrackedObjects.begin(), m_TrackedObjects.end(), [&](CInternMarker& _rObject) { return &_rObject == _pMarker; });
+
+        if (MarkerIter == m_TrackedObjects.end()) return;
+
+        const CInternMarker* pInternMarker = static_cast<const CInternMarker*>(_pMarker);
+
+        ArAnchor_release(pInternMarker->m_pAnchor);
+
+        m_TrackedObjects.erase(MarkerIter);
+#else
+        BASE_UNUSED(_pMarker);
 #endif
     }
 
@@ -934,6 +1319,34 @@ namespace ControlManager
     void OnDraw()
     {
         return CMRControlManager::GetInstance().OnDraw();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const CCamera& GetCamera()
+    {
+        return CMRControlManager::GetInstance().GetCamera();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const CLightEstimation& GetLightEstimation()
+    {
+        return CMRControlManager::GetInstance().GetLightEstimation();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const CMarker* AcquireNewMarker(float _X, float _Y)
+    {
+        return CMRControlManager::GetInstance().AcquireNewMarker(_X, _Y);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void ReleaseMarker(const CMarker* _pMarker)
+    {
+        CMRControlManager::GetInstance().ReleaseMarker(_pMarker);
     }
 } // namespace ControlManager
 } // namespace MR

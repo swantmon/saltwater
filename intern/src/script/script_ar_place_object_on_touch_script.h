@@ -8,7 +8,7 @@
 #include "data/data_component_facet.h"
 #include "data/data_transformation_facet.h"
 
-#include "mr/mr_marker_manager.h"
+#include "mr/mr_control_manager.h"
 
 #include "script/script_script.h"
 
@@ -69,11 +69,11 @@ namespace Scpt
                 float x = _rEvent.GetCursorPosition()[0];
                 float y = _rEvent.GetCursorPosition()[1];
 
-                const MR::CMarker* pNewMarker = MR::MarkerManager::AcquireNewMarker(x, y);
+                const MR::CMarker* pNewMarker = MR::ControlManager::AcquireNewMarker(x, y);
 
                 if (pNewMarker != nullptr && m_pMarker != nullptr)
                 {
-                    MR::MarkerManager::ReleaseMarker(m_pMarker);
+                    MR::ControlManager::ReleaseMarker(m_pMarker);
                 }
 
                 if (pNewMarker != nullptr)
