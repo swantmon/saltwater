@@ -19,13 +19,15 @@ DerivedData
 
 ### Android Studio ###
 *.iml 
+*.ser
 .gradle 
-/local.properties 
-/.idea/workspace.xml 
-/.idea/libraries 
+local.properties 
+.idea/misc.xml
+.idea/workspace.xml 
+.idea/libraries 
 .DS_Store 
-/build 
-/captures 
+build/
+captures/
 .externalNativeBuild 
 
 ### VisualStudio ###
