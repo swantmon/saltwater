@@ -5,6 +5,8 @@
 #include "mr/mr_light_estimation.h"
 #include "mr/mr_marker.h"
 
+#include "graphic/gfx_texture.h"
+
 namespace MR
 {
 namespace ControlManager
@@ -26,5 +28,7 @@ namespace ControlManager
 
     const CMarker* AcquireNewMarker(float _X, float _Y);
     void ReleaseMarker(const CMarker* _pMarker);
+
+    Gfx::CTexturePtr GetBackgroundTexture();
 } // namespace ControlManager
 } // namespace MR

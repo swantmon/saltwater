@@ -18,7 +18,15 @@
 #include "data/data_map.h"
 #include "data/data_transformation_facet.h"
 
+#include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_camera_interface.h"
+#include "graphic/gfx_context_manager.h"
+#include "graphic/gfx_main.h"
+#include "graphic/gfx_shader_manager.h"
+#include "graphic/gfx_state_manager.h"
+#include "graphic/gfx_target_set_manager.h"
+#include "graphic/gfx_texture_manager.h"
+#include "graphic/gfx_view_manager.h"
 
 #include "gui/gui_event_handler.h"
 
@@ -172,101 +180,6 @@ namespace
         }
     )";
 
-#if PLATFORM_ANDROID
-    static GLuint LoadShader(GLenum _Type, const char* _pSource)
-    {
-        GLuint Shader = glCreateShader(_Type);
-
-        if (!Shader)
-        {
-            return Shader;
-        }
-
-        glShaderSource(Shader, 1, &_pSource, nullptr);
-
-        glCompileShader(Shader);
-
-        GLint CompileStatus = 0;
-
-        glGetShaderiv(Shader, GL_COMPILE_STATUS, &CompileStatus);
-
-        if (!CompileStatus)
-        {
-            GLint InfoLogLength = 0;
-
-            glGetShaderiv(Shader, GL_INFO_LOG_LENGTH, &InfoLogLength);
-
-            if (!InfoLogLength)
-            {
-                return Shader;
-            }
-
-            char* pBuffer = reinterpret_cast<char*>(malloc(InfoLogLength));
-
-            if (!pBuffer)
-            {
-                return Shader;
-            }
-
-            glGetShaderInfoLog(Shader, InfoLogLength, nullptr, pBuffer);
-
-            BASE_CONSOLE_WARNINGV("Could not compile shader in MR %d:\n%s\n", _Type, pBuffer);
-
-            free(pBuffer);
-
-            glDeleteShader(Shader);
-
-            Shader = 0;
-        }
-
-        return Shader;
-    }
-
-    static unsigned int CreateProgram(const char* _pVertexSource, const char* _pFragmentSource)
-    {
-        unsigned int VertexShader = LoadShader(GL_VERTEX_SHADER, _pVertexSource);
-
-        if (!VertexShader)
-        {
-            return 0;
-        }
-
-        unsigned int FragmentShader = LoadShader(GL_FRAGMENT_SHADER, _pFragmentSource);
-
-        if (!FragmentShader)
-        {
-            return 0;
-        }
-
-        unsigned int Program = glCreateProgram();
-
-        if (Program)
-        {
-            glAttachShader(Program, VertexShader);
-
-            glAttachShader(Program, FragmentShader);
-
-            glLinkProgram(Program);
-
-            GLint LinkStatus= GL_FALSE;
-
-            glGetProgramiv(Program, GL_LINK_STATUS, &LinkStatus);
-
-            if (LinkStatus != GL_TRUE)
-            {
-                glDeleteProgram(Program);
-
-                Program = 0;
-            }
-        }
-
-        return Program;
-    }
-#endif
-
-    unsigned int g_ShaderProgramWebcam;
-    unsigned int g_ShaderProgramPlane;
-    unsigned int g_ShaderProgramPoint;
     unsigned int g_TextureID;
     unsigned int g_AttributeUVs;
     unsigned int g_AttributePlaneVertices;
@@ -311,6 +224,8 @@ namespace
 
         const CMarker* AcquireNewMarker(float _X, float _Y);
         void ReleaseMarker(const CMarker* _pMarker);
+
+        Gfx::CTexturePtr GetBackgroundTexture();
 
     private:
 
@@ -361,6 +276,34 @@ namespace
 
         glm::mat3 m_ARCToEngineMatrix;
 
+        Gfx::CTexturePtr m_BackgroundTexturePtr;
+
+        Gfx::CTargetSetPtr m_BackgroundTargetSetPtr;
+
+        Gfx::CShaderPtr m_WebcamVSPtr;
+
+        Gfx::CShaderPtr m_WebcamPSPtr;
+
+        Gfx::CShaderPtr m_PlaneVS;
+
+        Gfx::CShaderPtr m_PlanePS;
+
+        Gfx::CShaderPtr m_PointVS;
+
+        Gfx::CShaderPtr m_PointPS;
+
+        Gfx::CBufferPtr m_WebcamUVBufferPtr;
+
+        Gfx::CBufferPtr m_PlaneVerticesBufferPtr;
+
+        Gfx::CBufferPtr m_PlaneIndicesBufferPtr;
+
+        Gfx::CBufferPtr m_PointVerticesBufferPtr;
+
+        Gfx::CBufferPtr m_MatrixBufferPtr;
+
+        Gfx::CBufferPtr m_ColorBufferPtr;
+
     private:
 
         void OnDirtyEntity(Dt::CEntity* _pEntity);
@@ -395,14 +338,125 @@ namespace
 
     void CMRControlManager::OnStart()
     {
+        // -----------------------------------------------------------------------------
+        // Shader for background and debug
+        // -----------------------------------------------------------------------------
+        m_WebcamVSPtr = Gfx::ShaderManager::CompileVS(c_VertexShaderWebcam, "main", nullptr, nullptr, 0, false, false, true);
+
+        m_WebcamPSPtr = Gfx::ShaderManager::CompilePS(c_FragmentShaderWebcam, "main", nullptr, nullptr, 0, false, false, true);
+
+        m_PlaneVS = Gfx::ShaderManager::CompileVS(c_VertexShaderPlane, "main", nullptr, nullptr, 0, false, false, true);
+
+        m_PlanePS = Gfx::ShaderManager::CompilePS(c_FragmentShaderPlane, "main", nullptr, nullptr, 0, false, false, true);
+
+        m_PointVS = Gfx::ShaderManager::CompileVS(c_VertexShaderPoint, "main", nullptr, nullptr, 0, false, false, true);
+
+        m_PointPS = Gfx::ShaderManager::CompilePS(c_FragmentShaderPoint, "main", nullptr, nullptr, 0, false, false, true);
+
+        const Gfx::SInputElementDescriptor InputLayout[] =
+        {
+            { "UV", 0, Gfx::CInputLayout::Float2Format, 0, 0, 8, Gfx::CInputLayout::PerVertex, 0, },
+        };
+
+        Gfx::ShaderManager::CreateInputLayout(InputLayout, 1, m_WebcamVSPtr);
+
+        // -----------------------------------------------------------------------------
+        // Background texture
+        // -----------------------------------------------------------------------------
+        Gfx::STextureDescriptor TextureDesc;
+
+        TextureDesc.m_NumberOfPixelsU  = Gfx::Main::GetActiveWindowSize()[0];
+        TextureDesc.m_NumberOfPixelsV  = Gfx::Main::GetActiveWindowSize()[1];
+        TextureDesc.m_NumberOfPixelsW  = 1;
+        TextureDesc.m_NumberOfMipMaps  = 1;
+        TextureDesc.m_NumberOfTextures = 1;
+        TextureDesc.m_Binding          = Gfx::CTexture::RenderTarget | Gfx::CTexture::ShaderResource;
+        TextureDesc.m_Access           = Gfx::CTexture::CPUWrite;
+        TextureDesc.m_Format           = Gfx::CTexture::Unknown;
+        TextureDesc.m_Usage            = Gfx::CTexture::GPURead;
+        TextureDesc.m_Semantic         = Gfx::CTexture::Diffuse;
+        TextureDesc.m_pFileName        = 0;
+        TextureDesc.m_pPixels          = 0;
+        TextureDesc.m_Format           = Gfx::CTexture::R8G8B8A8_UBYTE;
+
+        m_BackgroundTexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDesc);
+
+        // -----------------------------------------------------------------------------
+        // Labels
+        // -----------------------------------------------------------------------------
+        Gfx::TextureManager::SetTextureLabel(m_BackgroundTexturePtr, "Webcam texture");
+
+        // -----------------------------------------------------------------------------
+        // Target sets & view ports
+        // -----------------------------------------------------------------------------
+        m_BackgroundTargetSetPtr = Gfx::TargetSetManager::CreateTargetSet(m_BackgroundTexturePtr);
+
+        // -----------------------------------------------------------------------------
+        // Buffer
+        // -----------------------------------------------------------------------------
+        Gfx::SBufferDescriptor ConstanteBufferDesc;
+        
+        ConstanteBufferDesc.m_Stride        = 0;
+        ConstanteBufferDesc.m_Usage         = Gfx::CBuffer::GPURead;
+        ConstanteBufferDesc.m_Binding       = Gfx::CBuffer::VertexBuffer;
+        ConstanteBufferDesc.m_Access        = Gfx::CBuffer::CPUWrite;
+        ConstanteBufferDesc.m_NumberOfBytes = 8 * sizeof(float);
+        ConstanteBufferDesc.m_pBytes        = 0;
+        ConstanteBufferDesc.m_pClassKey     = 0;
+        
+        m_WebcamUVBufferPtr = Gfx::BufferManager::CreateBuffer(ConstanteBufferDesc);
+
+        ConstanteBufferDesc.m_Stride        = 0;
+        ConstanteBufferDesc.m_Usage         = Gfx::CBuffer::GPURead;
+        ConstanteBufferDesc.m_Binding       = Gfx::CBuffer::VertexBuffer;
+        ConstanteBufferDesc.m_Access        = Gfx::CBuffer::CPUWrite;
+        ConstanteBufferDesc.m_NumberOfBytes = s_MaxNumberOfVerticesPerPlane * sizeof(glm::vec3);
+        ConstanteBufferDesc.m_pBytes        = 0;
+        ConstanteBufferDesc.m_pClassKey     = 0;
+        
+        m_PlaneVerticesBufferPtr = Gfx::BufferManager::CreateBuffer(ConstanteBufferDesc);
+
+        ConstanteBufferDesc.m_Stride        = 0;
+        ConstanteBufferDesc.m_Usage         = Gfx::CBuffer::GPURead;
+        ConstanteBufferDesc.m_Binding       = Gfx::CBuffer::IndexBuffer;
+        ConstanteBufferDesc.m_Access        = Gfx::CBuffer::CPUWrite;
+        ConstanteBufferDesc.m_NumberOfBytes = s_MaxNumberOfVerticesPerPlane * 3 * sizeof(short);
+        ConstanteBufferDesc.m_pBytes        = 0;
+        ConstanteBufferDesc.m_pClassKey     = 0;
+        
+        m_PlaneIndicesBufferPtr = Gfx::BufferManager::CreateBuffer(ConstanteBufferDesc);
+
+        ConstanteBufferDesc.m_Stride        = 0;
+        ConstanteBufferDesc.m_Usage         = Gfx::CBuffer::GPURead;
+        ConstanteBufferDesc.m_Binding       = Gfx::CBuffer::VertexBuffer;
+        ConstanteBufferDesc.m_Access        = Gfx::CBuffer::CPUWrite;
+        ConstanteBufferDesc.m_NumberOfBytes = s_MaxNumberOfVerticesPerPoint * sizeof(glm::vec3);
+        ConstanteBufferDesc.m_pBytes        = 0;
+        ConstanteBufferDesc.m_pClassKey     = 0;
+        
+        m_PointVerticesBufferPtr = Gfx::BufferManager::CreateBuffer(ConstanteBufferDesc);
+
+        ConstanteBufferDesc.m_Stride        = 0;
+        ConstanteBufferDesc.m_Usage         = Gfx::CBuffer::GPURead;
+        ConstanteBufferDesc.m_Binding       = Gfx::CBuffer::VertexBuffer;
+        ConstanteBufferDesc.m_Access        = Gfx::CBuffer::CPUWrite;
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(glm::mat4);
+        ConstanteBufferDesc.m_pBytes        = 0;
+        ConstanteBufferDesc.m_pClassKey     = 0;
+        
+        m_MatrixBufferPtr = Gfx::BufferManager::CreateBuffer(ConstanteBufferDesc);
+
+        ConstanteBufferDesc.m_Stride        = 0;
+        ConstanteBufferDesc.m_Usage         = Gfx::CBuffer::GPURead;
+        ConstanteBufferDesc.m_Binding       = Gfx::CBuffer::VertexBuffer;
+        ConstanteBufferDesc.m_Access        = Gfx::CBuffer::CPUWrite;
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(glm::vec4);
+        ConstanteBufferDesc.m_pBytes        = 0;
+        ConstanteBufferDesc.m_pClassKey     = 0;
+        
+        m_ColorBufferPtr = Gfx::BufferManager::CreateBuffer(ConstanteBufferDesc);
+
 #ifdef PLATFORM_ANDROID
-        // -----------------------------------------------------------------------------
-        // OpenGLES
-        // -----------------------------------------------------------------------------
-        g_ShaderProgramWebcam = CreateProgram(c_VertexShaderWebcam, c_FragmentShaderWebcam);
-
-        if (g_ShaderProgramWebcam == 0) BASE_THROWM("Failed creating shader capturing webcam image.")
-
         glGenTextures(1, &g_TextureID);
 
         glBindTexture(GL_TEXTURE_EXTERNAL_OES, g_TextureID);
@@ -410,46 +464,6 @@ namespace
         glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
         glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-        glGenBuffers(1, &g_AttributeUVs);
-
-        glBindBuffer(GL_ARRAY_BUFFER, g_AttributeUVs);
-
-        glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 8, 0, GL_DYNAMIC_DRAW);
-
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-        // -----------------------------------------------------------------------------
-
-        g_ShaderProgramPlane = CreateProgram(c_VertexShaderPlane, c_FragmentShaderPlane);
-
-        glGenBuffers(1, &g_AttributePlaneVertices);
-
-        glBindBuffer(GL_ARRAY_BUFFER, g_AttributePlaneVertices);
-
-        glBufferData(GL_ARRAY_BUFFER, s_MaxNumberOfVerticesPerPlane * sizeof(glm::vec3), 0, GL_DYNAMIC_DRAW);
-
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-        glGenBuffers(1, &g_PlaneIndices);
-
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g_PlaneIndices);
-
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, s_MaxNumberOfVerticesPerPlane * 3 * sizeof(GLushort), 0, GL_DYNAMIC_DRAW);
-
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-        // -----------------------------------------------------------------------------
-
-        g_ShaderProgramPoint = CreateProgram(c_VertexShaderPoint, c_FragmentShaderPoint);
-
-        glGenBuffers(1, &g_AttributePointVertices);
-
-        glBindBuffer(GL_ARRAY_BUFFER, g_AttributePointVertices);
-
-        glBufferData(GL_ARRAY_BUFFER, s_MaxNumberOfVerticesPerPoint * sizeof(glm::vec3), 0, GL_DYNAMIC_DRAW);
-
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
 #endif
 
         // -----------------------------------------------------------------------------
@@ -477,8 +491,6 @@ namespace
         // -----------------------------------------------------------------------------
         // OpenGLES
         // -----------------------------------------------------------------------------
-        glDeleteProgram(g_ShaderProgramWebcam);
-
         glDeleteTextures(1, &g_TextureID);
 #endif
     }
@@ -714,10 +726,25 @@ namespace
 
     void CMRControlManager::OnDraw()
     {
+        // -----------------------------------------------------------------------------
+        // Prepare
+        // -----------------------------------------------------------------------------
+        Gfx::TargetSetManager::ClearTargetSet(m_BackgroundTargetSetPtr, glm::vec4(1.0f));
+
+        Gfx::ContextManager::SetTargetSet(m_BackgroundTargetSetPtr);
+
+        Gfx::ContextManager::SetBlendState(Gfx::StateManager::GetBlendState(Gfx::CBlendState::Default));
+
+        Gfx::ContextManager::SetDepthStencilState(Gfx::StateManager::GetDepthStencilState(Gfx::CDepthStencilState::NoDepth));
+
+        Gfx::ContextManager::SetRasterizerState(Gfx::StateManager::GetRasterizerState(Gfx::CRasterizerState::NoCull));
+
+        Gfx::ContextManager::SetViewPortSet(Gfx::ViewManager::GetViewPortSet());
+
+        // -----------------------------------------------------------------------------
+        // Background image from webcam
+        // -----------------------------------------------------------------------------
 #ifdef PLATFORM_ANDROID
-        // -----------------------------------------------------------------------------
-        // Background
-        // -----------------------------------------------------------------------------
         int32_t HasGeometryChanged = 0;
 
         ArFrame_getDisplayGeometryChanged(m_pARSession, m_pARFrame, &HasGeometryChanged);
@@ -726,45 +753,29 @@ namespace
         {
             ArFrame_transformDisplayUvCoords(m_pARSession, m_pARFrame, s_NumberOfVertices * 2, c_Uvs, g_TransformedUVs);
 
-            glBindBuffer(GL_ARRAY_BUFFER, g_AttributeUVs);
-
-            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(g_TransformedUVs), &g_TransformedUVs);
-
-            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            Gfx::BufferManager::UploadBufferData(m_WebcamUVBufferPtr, &g_TransformedUVs);
 
             g_IsUVsInitialized = true;
         }
+#endif // PLATFORM_ANDROID
 
-        glUseProgram(g_ShaderProgramWebcam);
+        Gfx::ContextManager::SetShaderVS(m_WebcamVSPtr);
 
-        glDisable(GL_DEPTH_TEST);
+        Gfx::ContextManager::SetShaderPS(m_WebcamPSPtr);
 
-        glDisable(GL_BLEND);
+        Gfx::ContextManager::SetVertexBuffer(m_WebcamUVBufferPtr);
 
-        glDisable(GL_CULL_FACE);
+        Gfx::ContextManager::SetInputLayout(m_WebcamVSPtr->GetInputLayout());
 
+#ifdef PLATFORM_ANDROID
         glActiveTexture(GL_TEXTURE0);
 
         glBindTexture(GL_TEXTURE_EXTERNAL_OES, g_TextureID);
+#endif // PLATFORM_ANDROID
 
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        Gfx::ContextManager::Draw(4, 0);
 
-        glBindBuffer(GL_ARRAY_BUFFER, g_AttributeUVs);
-
-        glEnableVertexAttribArray(0);
-
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
-
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-
-        glDisableVertexAttribArray(0);
-
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-        glBindTexture(GL_TEXTURE_EXTERNAL_OES, 0);
-
-        glUseProgram(0);
-
+#ifdef PLATFORM_ANDROID
         // -----------------------------------------------------------------------------
         // Render planes
         // -----------------------------------------------------------------------------
@@ -909,6 +920,22 @@ namespace
         // -----------------------------------------------------------------------------
         // Update every available plane
         // -----------------------------------------------------------------------------
+        Gfx::ContextManager::SetBlendState(Gfx::StateManager::GetBlendState(Gfx::CBlendState::AlphaBlend));
+
+        Gfx::ContextManager::SetShaderVS(m_PlaneVS);
+
+        Gfx::ContextManager::SetShaderPS(m_PlanePS);
+
+        Gfx::ContextManager::SetVertexBuffer(m_PlaneVerticesBufferPtr);
+
+        Gfx::ContextManager::SetIndexBuffer(m_PlaneIndicesBufferPtr, 0);
+
+        Gfx::ContextManager::SetConstantBuffer(0, m_MatrixBufferPtr);
+
+        Gfx::ContextManager::SetConstantBuffer(1, m_ColorBufferPtr);
+
+        Gfx::ContextManager::SetInputLayout(m_PlaneVS->GetInputLayout());
+
         for (int IndexOfPlane = 0; IndexOfPlane < NumberOfPlanes; ++IndexOfPlane)
         {
             ArTrackable* pTrackableItem = nullptr;
@@ -955,18 +982,6 @@ namespace
                 continue;
             }
 
-            glBindBuffer(GL_ARRAY_BUFFER, g_AttributePlaneVertices);
-
-            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec3) * PlaneVertices.size(), &PlaneVertices.front()[0]);
-
-            glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g_PlaneIndices);
-
-            glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(GLuint) * PlaneIndices.size(), &PlaneIndices.front());
-
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
             // -----------------------------------------------------------------------------
             // Prepare model-view-projection matrix
             // TODO: Change color depending on height of the plane
@@ -976,37 +991,20 @@ namespace
             glm::vec4 Color = glm::vec4(GetPlaneColor(IndexOfPlane), 1.0f);
 
             // -----------------------------------------------------------------------------
+            // Upload data
+            // -----------------------------------------------------------------------------
+            Gfx::BufferManager::UploadBufferData(m_PlaneVerticesBufferPtr, &PlaneVertices.front()[0]);
+
+            Gfx::BufferManager::UploadBufferData(m_PlaneIndicesBufferPtr, &PlaneIndices.front());
+
+            Gfx::BufferManager::UploadBufferData(m_MatrixBufferPtr, &PlaneMVPMatrix);
+
+            Gfx::BufferManager::UploadBufferData(m_ColorBufferPtr, &Color);
+
+            // -----------------------------------------------------------------------------
             // Draw
             // -----------------------------------------------------------------------------
-            glEnable(GL_BLEND);
-
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-            glUseProgram(g_ShaderProgramPlane);
-
-            glUniformMatrix4fv(0, 1, GL_FALSE, &(PlaneMVPMatrix[0][0]));
-
-            glUniform4fv(1, 1, &(Color[0]));
-
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g_PlaneIndices);
-
-            glBindBuffer(GL_ARRAY_BUFFER, g_AttributePlaneVertices);
-
-            glEnableVertexAttribArray(0);
-
-            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-            glDrawElements(GL_TRIANGLES, PlaneIndices.size(), GL_UNSIGNED_SHORT, 0);
-
-            glDisableVertexAttribArray(0);
-
-            glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-            glUseProgram(0);
-
-            glDisable(GL_BLEND);
+            Gfx::ContextManager::DrawIndexed(PlaneIndices.size(), 0, 0);
         }
 
         ArTrackableList_destroy(ListOfPlanes);
@@ -1039,39 +1037,42 @@ namespace
 
                 ArPointCloud_getData(m_pARSession, pPointCloud, &pPointCloudData);
 
-                glBindBuffer(GL_ARRAY_BUFFER, g_AttributePointVertices);
-
-                glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * NumberOfPoints, pPointCloudData);
-
-                glBindBuffer(GL_ARRAY_BUFFER, 0);
-
                 glm::mat4 PointMVPMatrix = Gfx::Cam::GetProjectionMatrix() * Gfx::Cam::GetViewMatrix() * glm::mat4(m_ARCToEngineMatrix);
+
+                // -----------------------------------------------------------------------------
+                // Upload
+                // -----------------------------------------------------------------------------
+                Gfx::BufferManager::UploadBufferData(m_PointVerticesBufferPtr, pPointCloudData);
+
+                Gfx::BufferManager::UploadBufferData(m_MatrixBufferPtr, &PointMVPMatrix);
 
                 // -----------------------------------------------------------------------------
                 // Draw
                 // -----------------------------------------------------------------------------
-                glUseProgram(g_ShaderProgramPoint);
+                Gfx::ContextManager::SetShaderVS(m_PointVS);
 
-                glUniformMatrix4fv(0, 1, GL_FALSE, &(PointMVPMatrix[0][0]));
+                Gfx::ContextManager::SetShaderPS(m_PointPS);
 
-                glBindBuffer(GL_ARRAY_BUFFER, g_AttributePointVertices);
+                Gfx::ContextManager::SetVertexBuffer(m_PointVerticesBufferPtr);
 
-                glEnableVertexAttribArray(0);
+                Gfx::ContextManager::SetConstantBuffer(0, m_MatrixBufferPtr);
 
-                glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+                Gfx::ContextManager::SetTopology(Gfx::STopology::PointList);
 
-                glDrawArrays(GL_POINTS, 0, NumberOfPoints);
+                Gfx::ContextManager::SetInputLayout(m_PlaneVS->GetInputLayout());
 
-                glDisableVertexAttribArray(0);
+                Gfx::ContextManager::Draw(NumberOfPoints, 0);
 
-                glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-                glUseProgram(0);
+                Gfx::ContextManager::SetTopology(Gfx::STopology::TriangleList);
 
                 ArPointCloud_release(pPointCloud);
             }
         }
 #endif
+
+        Gfx::ContextManager::ResetViewPortSet();
+
+        Gfx::ContextManager::ResetRenderContext();
     }
 
     // -----------------------------------------------------------------------------
@@ -1257,6 +1258,13 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    Gfx::CTexturePtr CMRControlManager::GetBackgroundTexture()
+    {
+        return m_BackgroundTexturePtr;
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CMRControlManager::OnDirtyEntity(Dt::CEntity* _pEntity)
     {
         BASE_UNUSED(_pEntity);
@@ -1347,6 +1355,13 @@ namespace ControlManager
     void ReleaseMarker(const CMarker* _pMarker)
     {
         CMRControlManager::GetInstance().ReleaseMarker(_pMarker);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    Gfx::CTexturePtr GetBackgroundTexture()
+    {
+        return CMRControlManager::GetInstance().GetBackgroundTexture();
     }
 } // namespace ControlManager
 } // namespace MR
