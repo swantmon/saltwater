@@ -158,9 +158,11 @@ namespace
     {
         Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+        Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-        Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyCreate);
+        if (pCurrentEntity == nullptr) return;
+
+        Dt::EntityManager::MarkEntityAsDirty(*pCurrentEntity, Dt::CEntity::DirtyCreate);
 
         _rMessage.SetResult(1);
     }
@@ -171,11 +173,13 @@ namespace
     {
         Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+        Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-        rCurrentEntity.SetActive(true);
+        if (pCurrentEntity == nullptr) return;
 
-        Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyAdd);
+        pCurrentEntity->SetActive(true);
+
+        Dt::EntityManager::MarkEntityAsDirty(*pCurrentEntity, Dt::CEntity::DirtyAdd);
 
         _rMessage.SetResult(1);
     }
@@ -186,11 +190,13 @@ namespace
     {
         Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+        Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-        rCurrentEntity.SetActive(false);
+        if (pCurrentEntity == nullptr) return;
 
-        Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyRemove);
+        pCurrentEntity->SetActive(false);
+
+        Dt::EntityManager::MarkEntityAsDirty(*pCurrentEntity, Dt::CEntity::DirtyRemove);
 
         _rMessage.SetResult(1);
     }
@@ -201,9 +207,11 @@ namespace
     {
         Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+        Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-        Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyRemove | Dt::CEntity::DirtyDestroy);
+        if (pCurrentEntity == nullptr) return;
+
+        Dt::EntityManager::MarkEntityAsDirty(*pCurrentEntity, Dt::CEntity::DirtyRemove | Dt::CEntity::DirtyDestroy);
 
         _rMessage.SetResult(1);
     }
@@ -214,15 +222,17 @@ namespace
     {
         Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+        Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+
+        if (pCurrentEntity == nullptr) return;
 
         Edit::CMessage NewMessage;
 
-        NewMessage.Put(rCurrentEntity.GetID());
+        NewMessage.Put(pCurrentEntity->GetID());
 
-        NewMessage.Put(rCurrentEntity.GetTransformationFacet() != nullptr);
+        NewMessage.Put(pCurrentEntity->GetTransformationFacet() != nullptr);
 
-        auto Components = rCurrentEntity.GetComponentFacet()->GetComponents();
+        auto Components = pCurrentEntity->GetComponentFacet()->GetComponents();
 
         NewMessage.Put(Components.size());
 
@@ -242,23 +252,25 @@ namespace
     {
         Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+        Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+
+        if (pCurrentEntity == nullptr) return;
            
         Edit::CMessage NewMessage;
 
-        NewMessage.Put(rCurrentEntity.GetID());
+        NewMessage.Put(pCurrentEntity->GetID());
 
-        NewMessage.Put(rCurrentEntity.IsInMap());
+        NewMessage.Put(pCurrentEntity->IsInMap());
 
-        NewMessage.Put(rCurrentEntity.GetLayer());
+        NewMessage.Put(pCurrentEntity->GetLayer());
 
-        NewMessage.Put(rCurrentEntity.GetCategory());
+        NewMessage.Put(pCurrentEntity->GetCategory());
 
-        if (rCurrentEntity.GetName().length() > 0)
+        if (pCurrentEntity->GetName().length() > 0)
         {
             NewMessage.Put(true);
 
-            NewMessage.Put(rCurrentEntity.GetName());
+            NewMessage.Put(pCurrentEntity->GetName());
         }
         else
         {
@@ -276,13 +288,15 @@ namespace
     {
         Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+        Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+
+        if (pCurrentEntity == nullptr) return;
 
         Edit::CMessage NewMessage;
 
-        Dt::CTransformationFacet* pTransformationFacet = rCurrentEntity.GetTransformationFacet();
+        Dt::CTransformationFacet* pTransformationFacet = pCurrentEntity->GetTransformationFacet();
 
-        NewMessage.Put(rCurrentEntity.GetID());
+        NewMessage.Put(pCurrentEntity->GetID());
 
         if (pTransformationFacet)
         {
@@ -298,7 +312,7 @@ namespace
         {
             NewMessage.Put(false);
 
-            NewMessage.Put(rCurrentEntity.GetWorldPosition());
+            NewMessage.Put(pCurrentEntity->GetWorldPosition());
         }
 
         NewMessage.Reset();
@@ -312,19 +326,21 @@ namespace
     {
         Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+        Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+
+        if (pCurrentEntity == nullptr) return;
 
         int Layer = _rMessage.Get<int>();
 
-        rCurrentEntity.SetLayer(Layer);
+        pCurrentEntity->SetLayer(Layer);
 
         int Category = _rMessage.Get<int>();
 
-        if(Category != static_cast<int>(rCurrentEntity.GetCategory())) return;
+        if(Category != static_cast<int>(pCurrentEntity->GetCategory())) return;
 
         std::string NewEntityName = _rMessage.Get<std::string>();
 
-        rCurrentEntity.SetName(NewEntityName);
+        pCurrentEntity->SetName(NewEntityName);
     }
 
     // -----------------------------------------------------------------------------
@@ -339,18 +355,20 @@ namespace
         // ----------------------------------------------------------------------------- 
         // Get source entity and hierarchy facet 
         // ----------------------------------------------------------------------------- 
-        Dt::CEntity& rSourceEntity = Dt::EntityManager::GetEntityByID(EntityIDSource);
+        Dt::CEntity* pSourceEntity = Dt::EntityManager::GetEntityByID(EntityIDSource);
 
-        rSourceEntity.Detach();
+        if (pSourceEntity == nullptr) return;
+
+        pSourceEntity->Detach();
 
         if (EntityIDDestination != -1)
         {
-            Dt::CEntity& rDestinationEntity = Dt::EntityManager::GetEntityByID(EntityIDDestination);
+            Dt::CEntity* pDestinationEntity = Dt::EntityManager::GetEntityByID(EntityIDDestination);
 
-            rDestinationEntity.Attach(rSourceEntity);
+            pDestinationEntity->Attach(*pSourceEntity);
         }
 
-        Dt::EntityManager::MarkEntityAsDirty(rSourceEntity, Dt::CEntity::DirtyMove);
+        Dt::EntityManager::MarkEntityAsDirty(*pSourceEntity, Dt::CEntity::DirtyMove);
     }
 
     // -----------------------------------------------------------------------------
@@ -359,9 +377,11 @@ namespace
     {
         Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+        Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-        Dt::CTransformationFacet* pTransformationFacet = rCurrentEntity.GetTransformationFacet();
+        if (pCurrentEntity == nullptr) return;
+
+        Dt::CTransformationFacet* pTransformationFacet = pCurrentEntity->GetTransformationFacet();
 
         glm::vec3 Translation = _rMessage.Get<glm::vec3>();
 
@@ -376,10 +396,10 @@ namespace
         }
         else
         {
-            rCurrentEntity.SetWorldPosition(Translation);
+            pCurrentEntity->SetWorldPosition(Translation);
         }
 
-        Dt::EntityManager::MarkEntityAsDirty(rCurrentEntity, Dt::CEntity::DirtyMove);
+        Dt::EntityManager::MarkEntityAsDirty(*pCurrentEntity, Dt::CEntity::DirtyMove);
     }
 
     // -----------------------------------------------------------------------------
@@ -390,22 +410,24 @@ namespace
         {
             Edit::CMessage NewMessage;
 
-            Dt::CEntity& rCurrentEntity = *_pEntity;
+            Dt::CEntity* pCurrentEntity = _pEntity;
+
+            if (pCurrentEntity == nullptr) return;
 
             // -----------------------------------------------------------------------------
             // ID
             // -----------------------------------------------------------------------------
-            NewMessage.Put(rCurrentEntity.GetID());
+            NewMessage.Put(pCurrentEntity->GetID());
 
             // -----------------------------------------------------------------------------
             // Name
             // -----------------------------------------------------------------------------
-            NewMessage.Put(rCurrentEntity.GetName());
+            NewMessage.Put(pCurrentEntity->GetName());
 
             // -----------------------------------------------------------------------------
             // Hierarchy
             // -----------------------------------------------------------------------------
-            Dt::CHierarchyFacet* pHierarchyFacet = rCurrentEntity.GetHierarchyFacet();
+            Dt::CHierarchyFacet* pHierarchyFacet = pCurrentEntity->GetHierarchyFacet();
 
             if (pHierarchyFacet)
             {

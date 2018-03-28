@@ -226,7 +226,7 @@ namespace
             
             Gfx::Main::RegisterResizeHandler(GFX_BIND_RESIZE_METHOD(&CGfxViewManager::OnResize));
 
-            Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(BASE_DIRTY_COMPONENT_METHOD(&CGfxViewManager::OnDirtyComponent));
+            Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(DATA_DIRTY_COMPONENT_METHOD(&CGfxViewManager::OnDirtyComponent));
         }
         catch (...)
         {

@@ -6,6 +6,8 @@
 
 #include "data/data_component.h"
 
+#include "graphic/gfx_texture.h"
+
 namespace Dt
 {
     class CTexture2D;
@@ -20,7 +22,7 @@ namespace Dt
         enum EClearFlag
         {
             Skybox,
-            Webcam,
+            Texture,
             SolidColor,
             DepthOnly,
             DontClear,
@@ -41,15 +43,15 @@ namespace Dt
 
     public:
 
-        void SetMainCamera(bool _Flag);
-        bool IsMainCamera() const;
-
         void SetClearFlag(EClearFlag _ClearFlag);
         EClearFlag GetClearFlag() const;
 
         void SetBackgroundColor(const glm::vec3& _rBackgroundColor);
         glm::vec3& GetBackgroundColor();
         const glm::vec3& GetBackgroundColor() const;
+
+        void SetBackgroundTexture(Gfx::CTexturePtr _BackgroundTexturePtr);
+        Gfx::CTexturePtr GetBackgroundTexture();
 
         void SetCullingMask(unsigned int _CullingMask);
         unsigned int GetCullingMask() const;
@@ -63,9 +65,9 @@ namespace Dt
         void SetFoV(float _FoV);
         float GetFoV() const;
 
-        void SetProjectionMatrix(const glm::mat3& _rProjection);
-        glm::mat3& GetProjectionMatrix();
-        const glm::mat3& GetProjectionMatrix() const;
+        void SetProjectionMatrix(const glm::mat4& _rProjection);
+        glm::mat4& GetProjectionMatrix();
+        const glm::mat4& GetProjectionMatrix() const;
 
         void SetNear(float _Near);
         float GetNear() const;
@@ -102,7 +104,6 @@ namespace Dt
 
     private:
 
-        bool             m_IsMainCamera;                    //< Only one main camera can exist at once; first camera that is found will be used
         unsigned int     m_CullingMask;                     //< Culling camera against some objects in map (0 = everything)
         float            m_Depth;                           //< Depth of the depth buffer (maybe needed for some effects)
         float            m_ShutterSpeed;                    //< Shutter speed of the camera in seconds
@@ -113,8 +114,9 @@ namespace Dt
         float            m_FoV;                             //< Field of view even projection is active
         float            m_Near;                            //< Near field of the camera
         float            m_Far;                             //< Far field of the camera
+        Gfx::CTexturePtr m_pBackgroundTexture;              //< Background texture
         glm::vec3        m_BackgroundColor;                 //< Default background color of the camera (depending on clear flag)
-        glm::mat3        m_ProjectionMatrix;                //< RAW projection matrix even RAW is active
+        glm::mat4        m_ProjectionMatrix;                //< RAW projection matrix even RAW is active
         Base::AABB2Float m_ViewportRect;                    //< View port this camera should render
         EClearFlag       m_ClearFlag;                       //< Clear flag of the render target (@see EClearFlag)
         EProjectionType  m_ProjectionType;                  //< Camera can be orthographic or projection

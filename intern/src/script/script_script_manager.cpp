@@ -53,7 +53,7 @@ namespace
 {
     CScptScriptManager::CScptScriptManager()
     {
-        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(BASE_DIRTY_COMPONENT_METHOD(&CScptScriptManager::OnDirtyComponent));
+        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(DATA_DIRTY_COMPONENT_METHOD(&CScptScriptManager::OnDirtyComponent));
     }
 
     // -----------------------------------------------------------------------------

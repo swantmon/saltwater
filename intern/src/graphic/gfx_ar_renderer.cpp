@@ -417,7 +417,7 @@ namespace
         // -----------------------------------------------------------------------------
 //         MR::CControl* pControl = MR::ControlManager::GetActiveControl();
 // 
-//         if (pControl != nullptr && pControl->GetType() == MR::CControl::Webcam)
+//         if (pControl != nullptr && pControl->GetType() == MR::CControl::Texture)
 //         {
 //             MR::CWebcamControl& rWebcamControl = static_cast<MR::CWebcamControl&>(*pControl);
 // 

@@ -232,7 +232,7 @@ namespace
     
     void CGfxMeshManager::OnStart()
     {
-        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(BASE_DIRTY_COMPONENT_METHOD(&CGfxMeshManager::OnDirtyComponent));
+        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(DATA_DIRTY_COMPONENT_METHOD(&CGfxMeshManager::OnDirtyComponent));
     }
     
     // -----------------------------------------------------------------------------

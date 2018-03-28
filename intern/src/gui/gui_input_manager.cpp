@@ -310,7 +310,7 @@ namespace
         }
         else if (_rEvent.GetAction() == Base::CInputEvent::MouseWheel)
         {
-            m_Mouse.m_ScrollDelta = _rEvent.GetWheelDelta();
+            m_Mouse.m_ScrollDelta = _rEvent.GetDelta();
         }
         else if (_rEvent.GetAction() == Base::CInputEvent::MouseMove)
         {

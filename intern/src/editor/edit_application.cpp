@@ -2,6 +2,7 @@
 #include "editor/edit_precompiled.h"
 
 #include "base/base_console.h"
+#include "base/base_exception.h"
 #include "base/base_input_event.h"
 #include "base/base_program_parameters.h"
 #include "base/base_uncopyable.h"
@@ -36,6 +37,10 @@
 
 #include "gui/gui_event_handler.h"
 
+#include "SDL2/SDL.h"
+
+#include <iostream>
+
 namespace
 {
     class CApplication : private Base::CUncopyable
@@ -64,6 +69,9 @@ namespace
         Edit::CState::EStateType m_CurrentState;
         unsigned int             m_EditWindowID;
         glm::vec2             m_LatestMousePosition;
+
+        SDL_Joystick* m_pGamePad;
+        int m_AnalogStickDeadZone;
         
     private:
         
@@ -79,8 +87,14 @@ namespace
         void OnMouseRightReleased(Edit::CMessage& _rMessage);
         void OnMouseMove(Edit::CMessage& _rMessage);
         void OnWheel(Edit::CMessage& _rMessage);
-
+        
         void OnResize(Edit::CMessage& _rMessage);
+
+        void ProcessSDLEvents();
+        void ProcessGamepadEvents(const SDL_Event& _rSDLEvent);
+
+        Base::CInputEvent::EKey ConvertSDLKey(const SDL_Event& _rSDLEvent);
+        Base::CInputEvent::EKey ConvertSDLAxis(const SDL_Event& _rSDLEvent);
     };
 } // namespace
 
@@ -104,6 +118,7 @@ namespace
         : m_CurrentState       (Edit::CState::Start)
         , m_EditWindowID       (0)
         , m_LatestMousePosition(glm::vec2(0, 0))
+        , m_pGamePad(nullptr)
     { 
     }
     
@@ -116,7 +131,33 @@ namespace
     // -----------------------------------------------------------------------------
     
     void CApplication::OnStart(int& _rArgc, char** _ppArgv)
-    {   
+    {
+        // -----------------------------------------------------------------------------
+        // Init SDL for gamepad input
+        // -----------------------------------------------------------------------------
+
+        m_AnalogStickDeadZone = Base::CProgramParameters::GetInstance().Get("input:gamepad:deadzone", 3200);
+
+        if (SDL_Init(SDL_INIT_JOYSTICK) < 0)
+        {
+            BASE_THROWM("Could not initialise SDL");
+        }
+
+        if (SDL_NumJoysticks() < 1)
+        {
+            BASE_CONSOLE_INFOV("No gamepads found");
+        }
+        else
+        {
+            SDL_JoystickEventState(SDL_ENABLE);
+            m_pGamePad = SDL_JoystickOpen(0);
+            if (m_pGamePad == nullptr)
+            {
+                BASE_THROWM("Could not initialise controller");
+            }
+            BASE_CONSOLE_INFOV(SDL_JoystickName(m_pGamePad));
+        }
+
         // -----------------------------------------------------------------------------
         // Setup asset manager
         // -----------------------------------------------------------------------------
@@ -186,6 +227,9 @@ namespace
     
     void CApplication::OnExit()
     {
+        SDL_JoystickClose(m_pGamePad);
+        SDL_Quit();
+
         // -----------------------------------------------------------------------------
         // Exit the application
         // -----------------------------------------------------------------------------
@@ -222,7 +266,8 @@ namespace
             // Events
             // -----------------------------------------------------------------------------
             Edit::GUI::ProcessEvents();
-
+            ProcessSDLEvents();
+                                    
             // -----------------------------------------------------------------------------
             // Time
             // -----------------------------------------------------------------------------
@@ -451,7 +496,132 @@ namespace
 
         Gfx::App::OnResize(m_EditWindowID, Width, Height);
     }
+
+    // -----------------------------------------------------------------------------
+
+    void CApplication::ProcessSDLEvents()
+    {
+        SDL_Event SDLEvent;
+
+        while (SDL_PollEvent(&SDLEvent))
+        {
+            switch (SDLEvent.type)
+            {
+            case SDL_JOYDEVICEADDED:
+
+                SDL_JoystickEventState(SDL_ENABLE);
+                m_pGamePad = SDL_JoystickOpen(0);
+                if (m_pGamePad == nullptr)
+                {
+                    BASE_THROWM("Could not initialise controller");
+                }
+                BASE_CONSOLE_INFOV(SDL_JoystickName(m_pGamePad));
+                break;
+
+            case SDL_JOYDEVICEREMOVED:
+
+                BASE_CONSOLE_INFO("Gamepad disconnected");
+                break;
+
+            default:
+                ProcessGamepadEvents(SDLEvent);
+            }
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CApplication::ProcessGamepadEvents(const SDL_Event& _rSDLEvent)
+    {
+        using Base::CInputEvent;
+        
+        CInputEvent Event(CInputEvent::Input);
+
+        switch (_rSDLEvent.type)
+        {
+        case SDL_JOYAXISMOTION:
+
+            if (_rSDLEvent.jaxis.value > m_AnalogStickDeadZone || _rSDLEvent.jaxis.value < -m_AnalogStickDeadZone)
+            {
+                float Strength = _rSDLEvent.jaxis.value / static_cast<float>(std::numeric_limits<int16_t>::max());
+                CInputEvent::EKey Key = ConvertSDLAxis(_rSDLEvent);
+                unsigned int Axis = static_cast<int>(_rSDLEvent.jaxis.axis) % 2;
+                
+                if (Key == CInputEvent::LeftTrigger || Key == CInputEvent::RightTrigger)
+                {
+                    Event = CInputEvent(CInputEvent::Input, CInputEvent::GamepadTriggerMotion, Key, Strength * 0.5f + 0.5f);
+                }
+                else
+                {
+                    Event = CInputEvent(CInputEvent::Input, CInputEvent::GamepadAxisMotion, Key, Axis, Strength);
+                }
+
+                Gui::EventHandler::OnUserEvent(Event);
+            }
+            break;
+
+        case SDL_JOYBUTTONDOWN:
+
+            Event = CInputEvent(CInputEvent::Input, CInputEvent::GamepadKeyPressed, ConvertSDLKey(_rSDLEvent));
+            Gui::EventHandler::OnUserEvent(Event);
+            break;
+
+        case SDL_JOYBUTTONUP:
+
+            Event = CInputEvent(CInputEvent::Input, CInputEvent::GamepadKeyReleased, ConvertSDLKey(_rSDLEvent));
+            Gui::EventHandler::OnUserEvent(Event);
+            break;
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    Base::CInputEvent::EKey CApplication::ConvertSDLKey(const SDL_Event& _rSDLEvent)
+    {
+        using Base::CInputEvent;
+
+        CInputEvent::EKey Xbox360Keys[] =
+        {
+            CInputEvent::Up,
+            CInputEvent::Down,
+            CInputEvent::Left,
+            CInputEvent::Right,
+            CInputEvent::Start,
+            CInputEvent::Select,
+            CInputEvent::LeftStick,
+            CInputEvent::RightStick,
+            CInputEvent::LeftBumper,
+            CInputEvent::RightBumper,
+            CInputEvent::Key0, // A
+            CInputEvent::Key1, // B
+            CInputEvent::Key2, // X
+            CInputEvent::Key3, // Y
+        };
+
+        return Xbox360Keys[_rSDLEvent.jbutton.button];
+    }
+
+    // -----------------------------------------------------------------------------
+
+    Base::CInputEvent::EKey CApplication::ConvertSDLAxis(const SDL_Event& _rSDLEvent)
+    {
+        using Base::CInputEvent;
+
+        CInputEvent::EKey Xbox360Axis[] =
+        {
+            CInputEvent::LeftStick,
+            CInputEvent::LeftStick,
+            CInputEvent::RightStick,
+            CInputEvent::RightStick,
+            CInputEvent::LeftTrigger,
+            CInputEvent::RightTrigger,
+        };
+        
+        return Xbox360Axis[_rSDLEvent.jaxis.axis];
+    }
 }
+
+
 
 namespace Edit
 {

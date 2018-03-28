@@ -87,7 +87,7 @@ namespace Cam
         {
             float WheelDelta;
 
-            WheelDelta = static_cast<float>(_rEvent.GetWheelDelta()) * s_MoveVelocityBorder[2];
+            WheelDelta = static_cast<float>(_rEvent.GetDelta()) * s_MoveVelocityBorder[2];
 
             m_MoveVelocity = glm::clamp(m_MoveVelocity + WheelDelta, s_MoveVelocityBorder[0], s_MoveVelocityBorder[1]);
         }
@@ -133,6 +133,13 @@ namespace Cam
     void CEditorControl::InternOnDirtyEntity(Dt::CEntity* _pEntity)
     {
         BASE_UNUSED(_pEntity);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CEditorControl::InternOnDirtyComponent(Dt::IComponent* _pComponent)
+    {
+        BASE_UNUSED(_pComponent);
     }
 
     // -----------------------------------------------------------------------------

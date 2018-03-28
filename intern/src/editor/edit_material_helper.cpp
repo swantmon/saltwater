@@ -204,7 +204,7 @@ namespace
 
             if (MaterialComponent->GetMaterial()->GetHash() == MaterialHash)
             {
-                Dt::CComponentManager::GetInstance().MarkComponentAsDirty(MaterialComponent, Dt::CMaterialComponent::DirtyInfo);
+                Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*MaterialComponent, Dt::CMaterialComponent::DirtyInfo);
             }
         }
     }

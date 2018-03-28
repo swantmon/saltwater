@@ -53,11 +53,12 @@ namespace Dt
 
         enum EDirtyFlags
         {
-            DirtyCreate  = 0x01,
-            DirtyAdd     = 0x02,
-            DirtyMove    = 0x04,
-            DirtyRemove  = 0x08,
-            DirtyDestroy = 0x10
+            DirtyCreate    = 0x01,
+            DirtyAdd       = 0x02,
+            DirtyMove      = 0x04,
+            DirtyComponent = 0x08,
+            DirtyRemove    = 0x10,
+            DirtyDestroy   = 0x20
         };
         
         enum EFacetFlags

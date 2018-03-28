@@ -3,6 +3,22 @@
 
 #include "base/base_console.h"
 
+// -----------------------------------------------------------------------------
+// Extension: OES_EGL_image_external
+// https://www.khronos.org/registry/OpenGL/extensions/OES/OES_EGL_image_external.txt
+// -----------------------------------------------------------------------------
+#ifndef GL_OES_EGL_image_external
+
+#define GL_OES_EGL_image_external 1
+#define GL_TEXTURE_EXTERNAL_OES           0x8D65
+#define GL_TEXTURE_BINDING_EXTERNAL_OES   0x8D67
+#define GL_REQUIRED_TEXTURE_IMAGE_UNITS_OES 0x8D68
+
+#endif /* GL_OES_EGL_image_external */
+
+// -----------------------------------------------------------------------------
+// Platform specific stuff
+// -----------------------------------------------------------------------------
 #ifdef PLATFORM_ANDROID
 
 #include <android/native_window.h>
