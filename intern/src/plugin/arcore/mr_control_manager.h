@@ -1,9 +1,9 @@
 
 #pragma once
 
-#include "mr/mr_camera.h"
-#include "mr/mr_light_estimation.h"
-#include "mr/mr_marker.h"
+#include "plugin/arcore/mr_camera.h"
+#include "plugin/arcore/mr_light_estimation.h"
+#include "plugin/arcore/mr_marker.h"
 
 #include "graphic/gfx_texture.h"
 

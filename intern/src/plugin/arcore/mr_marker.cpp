@@ -1,7 +1,7 @@
 
-#include "mr/mr_precompiled.h"
+#include "plugin/arcore/mr_precompiled.h"
 
-#include "mr/mr_marker.h"
+#include "plugin/arcore/mr_marker.h"
 
 namespace MR
 {

@@ -1,7 +1,7 @@
 
-#include "mr/mr_precompiled.h"
+#include "plugin/arcore/mr_precompiled.h"
 
-#include "mr/mr_light_estimation.h"
+#include "plugin/arcore/mr_light_estimation.h"
 
 namespace MR
 {

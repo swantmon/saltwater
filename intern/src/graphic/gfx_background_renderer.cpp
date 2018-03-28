@@ -36,8 +36,6 @@
 #include "graphic/gfx_texture_manager.h"
 #include "graphic/gfx_view_manager.h"
 
-#include "mr/mr_control_manager.h"
-
 #include <string>
 
 using namespace Gfx;
