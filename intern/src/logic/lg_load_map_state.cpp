@@ -31,6 +31,9 @@
 
 #include "logic/lg_load_map_state.h"
 
+#include "script/script_ar_camera_control_script.h"
+#include "script/script_ar_controller_script.h"
+#include "script/script_ar_place_object_on_touch_script.h"
 #include "script/script_camera_control_script.h"
 #include "script/script_script_manager.h"
 
@@ -118,11 +121,9 @@ namespace
 
             auto Component = Dt::CComponentManager::GetInstance().Allocate<Dt::CCameraComponent>();
 
-            Component->SetMainCamera(true);
-
             rEntity.AttachComponent(Component);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(Component, Dt::CCameraComponent::DirtyCreate);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*Component, Dt::CCameraComponent::DirtyCreate);
 
             Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
@@ -136,6 +137,34 @@ namespace
         // Allocate a map
         // -----------------------------------------------------------------------------
         Dt::Map::AllocateMap(1, 1);
+
+        // -----------------------------------------------------------------------------
+        // Setup controller
+        // -----------------------------------------------------------------------------
+        {
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
+            EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
+
+            Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+
+            rEntity.SetName("AR Controller");
+
+            Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
+
+            pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+            pTransformationFacet->SetScale(glm::vec3(1.0f));
+            pTransformationFacet->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
+
+            auto ScriptComponent = Dt::CComponentManager::GetInstance().Allocate<Scpt::CARControllerScript>();
+
+            rEntity.AttachComponent(ScriptComponent);
+
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*ScriptComponent, Dt::CScriptComponent::DirtyCreate);
+
+            Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
 
         // -----------------------------------------------------------------------------
         // Setup cameras
@@ -152,19 +181,24 @@ namespace
 
             Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
 
-            pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 10.0f));
+            pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
             pTransformationFacet->SetScale(glm::vec3(1.0f));
             pTransformationFacet->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
 
             auto Component = Dt::CComponentManager::GetInstance().Allocate<Dt::CCameraComponent>();
 
-            Component->SetMainCamera(true);
-            Component->SetProjectionType(Dt::CCameraComponent::External);
-            Component->SetClearFlag(Dt::CCameraComponent::Webcam);
+            Component->SetProjectionType(Dt::CCameraComponent::Perspective);
+            Component->SetClearFlag(Dt::CCameraComponent::Skybox);
 
             rEntity.AttachComponent(Component);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(Component, Dt::CCameraComponent::DirtyCreate);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*Component, Dt::CCameraComponent::DirtyCreate);
+
+            auto ScriptComponent = Dt::CComponentManager::GetInstance().Allocate<Scpt::CARCameraControlScript>();
+
+            rEntity.AttachComponent(ScriptComponent);
+
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*ScriptComponent, Dt::CScriptComponent::DirtyCreate);
 
             Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
@@ -196,6 +230,7 @@ namespace
 
                 SunComponent->EnableTemperature(false);
                 SunComponent->SetColor(glm::vec3(1.0f, 1.0f, 1.0f));
+
                 SunComponent->SetDirection(glm::vec3(0.0f, 0.01f, -1.0f));
                 SunComponent->SetIntensity(90600.0f);
                 SunComponent->SetTemperature(0);
@@ -205,7 +240,7 @@ namespace
 
                 rEnvironmentEntity.AttachComponent(SunComponent);
 
-                Dt::CComponentManager::GetInstance().MarkComponentAsDirty(SunComponent, Dt::CSunComponent::DirtyCreate);
+                Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*SunComponent, Dt::CSunComponent::DirtyCreate);
             }
 
             {
@@ -217,7 +252,7 @@ namespace
 
                 rEnvironmentEntity.AttachComponent(Component);
 
-                Dt::CComponentManager::GetInstance().MarkComponentAsDirty(Component, Dt::CSkyComponent::DirtyCreate);
+                Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*Component, Dt::CSkyComponent::DirtyCreate);
             }
 
             Dt::EntityManager::MarkEntityAsDirty(rEnvironmentEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
@@ -246,11 +281,11 @@ namespace
 
             auto pMeshComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CMeshComponent>();
 
-            pMeshComponent->SetMeshType(Dt::CMeshComponent::Box);
-
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pMeshComponent, Dt::CMeshComponent::DirtyCreate);
+            pMeshComponent->SetMeshType(Dt::CMeshComponent::Cone);
 
             rEntity.AttachComponent(pMeshComponent);
+
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pMeshComponent, Dt::CMeshComponent::DirtyCreate);
 
             // -----------------------------------------------------------------------------
 
@@ -262,9 +297,17 @@ namespace
 
             pMaterialComponent->SetMaterial(pMaterial);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pMaterialComponent, Dt::CMaterialComponent::DirtyCreate);
-
             rEntity.AttachComponent(pMaterialComponent);
+
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pMaterialComponent, Dt::CMaterialComponent::DirtyCreate);
+
+            // -----------------------------------------------------------------------------
+
+            auto pScriptComponent = Dt::CComponentManager::GetInstance().Allocate<Scpt::CARPlaceObjectOnTouchScript>();
+
+            rEntity.AttachComponent(pScriptComponent);
+
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pScriptComponent, Dt::CScriptComponent::DirtyCreate);
 
             // -----------------------------------------------------------------------------
 
@@ -300,13 +343,12 @@ void CLgLoadMapState::CreateDefaultScene()
 
             auto Component = Dt::CComponentManager::GetInstance().Allocate<Dt::CCameraComponent>();
 
-            Component->SetMainCamera(true);
             Component->SetProjectionType(Dt::CCameraComponent::Perspective);
             Component->SetClearFlag(Dt::CCameraComponent::Skybox);
 
             rEntity.AttachComponent(Component);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(Component, Dt::CCameraComponent::DirtyCreate);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*Component, Dt::CCameraComponent::DirtyCreate);
 
             // -----------------------------------------------------------------------------
 
@@ -314,7 +356,7 @@ void CLgLoadMapState::CreateDefaultScene()
 
             rEntity.AttachComponent(ScriptComponent);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(ScriptComponent, Dt::CCameraComponent::DirtyCreate);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*ScriptComponent, Dt::CScriptComponent::DirtyCreate);
 
             // -----------------------------------------------------------------------------
 
@@ -354,7 +396,7 @@ void CLgLoadMapState::CreateDefaultScene()
 
                 rLightingEntity.AttachComponent(LightProbeComponent);
 
-                Dt::CComponentManager::GetInstance().MarkComponentAsDirty(LightProbeComponent, Dt::CLightProbeComponent::DirtyCreate);
+                Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*LightProbeComponent, Dt::CLightProbeComponent::DirtyCreate);
             }
 
             Dt::EntityManager::MarkEntityAsDirty(rLightingEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
@@ -393,7 +435,7 @@ void CLgLoadMapState::CreateDefaultScene()
 
                 rEnvironmentEntity.AttachComponent(SunComponent);
 
-                Dt::CComponentManager::GetInstance().MarkComponentAsDirty(SunComponent, Dt::CSunComponent::DirtyCreate);
+                Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*SunComponent, Dt::CSunComponent::DirtyCreate);
             }
 
             {
@@ -405,7 +447,7 @@ void CLgLoadMapState::CreateDefaultScene()
 
                 rEnvironmentEntity.AttachComponent(Component);
 
-                Dt::CComponentManager::GetInstance().MarkComponentAsDirty(Component, Dt::CSkyComponent::DirtyCreate);
+                Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*Component, Dt::CSkyComponent::DirtyCreate);
             }
 
             Dt::EntityManager::MarkEntityAsDirty(rEnvironmentEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
@@ -428,15 +470,15 @@ void CLgLoadMapState::CreateDefaultScene()
 
             pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 4.0f));
             pTransformationFacet->SetScale(glm::vec3(1.0f));
-            pTransformationFacet->SetRotation(glm::vec3(glm::radians(45.0f), glm::radians(45.0f), 0.0f));
+            pTransformationFacet->SetRotation(glm::vec3(glm::radians(0.0f), glm::radians(0.0f), 0.0f));
 
             // -----------------------------------------------------------------------------
 
             auto pMeshComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CMeshComponent>();
 
-            pMeshComponent->SetMeshType(Dt::CMeshComponent::Box);
+            pMeshComponent->SetMeshType(Dt::CMeshComponent::Cone);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pMeshComponent, Dt::CMeshComponent::DirtyCreate);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pMeshComponent, Dt::CMeshComponent::DirtyCreate);
 
             rEntity.AttachComponent(pMeshComponent);
 
@@ -450,7 +492,7 @@ void CLgLoadMapState::CreateDefaultScene()
 
             pMaterialComponent->SetMaterial(pMaterial);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pMaterialComponent, Dt::CMaterialComponent::DirtyCreate);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pMaterialComponent, Dt::CMaterialComponent::DirtyCreate);
 
             rEntity.AttachComponent(pMaterialComponent);
 
@@ -481,7 +523,7 @@ void CLgLoadMapState::CreateDefaultScene()
 
             pMeshComponent->SetMeshType(Dt::CMeshComponent::Box);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pMeshComponent, Dt::CMeshComponent::DirtyCreate);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pMeshComponent, Dt::CMeshComponent::DirtyCreate);
 
             rEntity.AttachComponent(pMeshComponent);
 
@@ -491,7 +533,7 @@ void CLgLoadMapState::CreateDefaultScene()
 
             pMaterialComponent->SetMaterial(Dt::MaterialManager::GetDefaultMaterial());
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pMaterialComponent, Dt::CMaterialComponent::DirtyCreate);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pMaterialComponent, Dt::CMaterialComponent::DirtyCreate);
 
             rEntity.AttachComponent(pMaterialComponent);
 

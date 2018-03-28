@@ -115,15 +115,15 @@ namespace
             // -----------------------------------------------------------------------------
             Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-            Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+            Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-            rCurrentEntity.SetCategory(Dt::SEntityCategory::Dynamic);
+            pCurrentEntity->SetCategory(Dt::SEntityCategory::Dynamic);
 
             auto pComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CCameraComponent>();
 
-            rCurrentEntity.AttachComponent(pComponent);
+            pCurrentEntity->AttachComponent(pComponent);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pComponent, Dt::CCameraComponent::DirtyCreate);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Dt::CCameraComponent::DirtyCreate);
         }
     }
 
@@ -133,15 +133,15 @@ namespace
     {
         Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+        Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-        Dt::CMaterialComponent* pComponent = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CMaterialComponent>();
+        Dt::CMaterialComponent* pComponent = pCurrentEntity->GetComponentFacet()->GetComponent<Dt::CMaterialComponent>();
 
         if (pComponent == nullptr || pComponent->GetMaterial() == nullptr) return;
 
         Edit::CMessage NewMessage;
 
-        NewMessage.Put(rCurrentEntity.GetID());
+        NewMessage.Put(pCurrentEntity->GetID());
 
         NewMessage.Put(pComponent->GetMaterial()->GetHash());
 
@@ -156,17 +156,15 @@ namespace
     {
         Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+        Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-        Dt::CCameraComponent* pFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CCameraComponent>();
+        Dt::CCameraComponent* pFacet = pCurrentEntity->GetComponentFacet()->GetComponent<Dt::CCameraComponent>();
 
         if (pFacet != nullptr)
         {
             Edit::CMessage NewMessage;
 
-            NewMessage.Put(rCurrentEntity.GetID());
-
-            NewMessage.Put(pFacet->IsMainCamera());
+            NewMessage.Put(pCurrentEntity->GetID());
 
             NewMessage.Put(pFacet->GetClearFlag());
 
@@ -217,15 +215,15 @@ namespace
 
         Base::BHash MaterialHash = _rMessage.Get<Base::BHash>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+        Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-        auto pComponent = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CMaterialComponent>();
+        auto pComponent = pCurrentEntity->GetComponentFacet()->GetComponent<Dt::CMaterialComponent>();
 
         if (pComponent != nullptr)
         {
             pComponent->SetMaterial(Dt::MaterialManager::GetMaterialByHash(MaterialHash));
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pComponent, Dt::CMaterialComponent::DirtyInfo);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Dt::CMaterialComponent::DirtyInfo);
         }
     }
 
@@ -235,9 +233,9 @@ namespace
     {
         Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+        Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-        Dt::CCameraComponent* pFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CCameraComponent>();
+        Dt::CCameraComponent* pFacet = pCurrentEntity->GetComponentFacet()->GetComponent<Dt::CCameraComponent>();
 
         if (pFacet != nullptr)
         {
@@ -247,8 +245,6 @@ namespace
             // -----------------------------------------------------------------------------
             // Get values
             // -----------------------------------------------------------------------------
-            bool IsMainCamera = _rMessage.Get<bool>();
-
             Dt::CCameraComponent::EClearFlag ClearFlag = static_cast<Dt::CCameraComponent::EClearFlag >(_rMessage.Get<int>());
 
             R = _rMessage.Get<float>();
@@ -287,8 +283,6 @@ namespace
             // -----------------------------------------------------------------------------
             // Set values
             // -----------------------------------------------------------------------------
-            pFacet->SetMainCamera(IsMainCamera);
-
             pFacet->SetClearFlag(ClearFlag);
 
             pFacet->SetBackgroundColor(glm::vec3(R, G, B));
@@ -319,7 +313,7 @@ namespace
 
             pFacet->SetEC(EC);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pFacet, Dt::CCameraComponent::DirtyInfo);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pFacet, Dt::CCameraComponent::DirtyInfo);
         }
     }
 

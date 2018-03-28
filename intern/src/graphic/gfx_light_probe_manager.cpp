@@ -388,7 +388,7 @@ namespace
         // Register dirty handler for automatic light probe / reflection
         // creation
         // -----------------------------------------------------------------------------
-        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(BASE_DIRTY_COMPONENT_METHOD(&CGfxLightProbeManager::OnDirtyComponent));
+        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(DATA_DIRTY_COMPONENT_METHOD(&CGfxLightProbeManager::OnDirtyComponent));
     }
 
     // -----------------------------------------------------------------------------

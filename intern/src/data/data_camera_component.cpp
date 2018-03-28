@@ -8,8 +8,7 @@
 namespace Dt
 {
     CCameraComponent::CCameraComponent()
-        : m_IsMainCamera    (false)
-        , m_CullingMask     (0)
+        : m_CullingMask     (0)
         , m_Depth           (-1)
         , m_ShutterSpeed    (1.0f / 125.0f)
         , m_Aperture        (16.0f)
@@ -33,20 +32,6 @@ namespace Dt
     CCameraComponent::~CCameraComponent()
     {
 
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CCameraComponent::SetMainCamera(bool _Flag)
-    {
-        m_IsMainCamera = _Flag;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    bool CCameraComponent::IsMainCamera() const
-    {
-        return m_IsMainCamera;
     }
 
     // -----------------------------------------------------------------------------
@@ -82,6 +67,20 @@ namespace Dt
     const glm::vec3& CCameraComponent::GetBackgroundColor() const
     {
         return m_BackgroundColor;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CCameraComponent::SetBackgroundTexture(Gfx::CTexturePtr _BackgroundTexturePtr)
+    {
+        m_pBackgroundTexture = _BackgroundTexturePtr;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    Gfx::CTexturePtr CCameraComponent::GetBackgroundTexture()
+    {
+        return m_pBackgroundTexture;
     }
 
     // -----------------------------------------------------------------------------
@@ -142,21 +141,21 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CCameraComponent::SetProjectionMatrix(const glm::mat3& _rProjection)
+    void CCameraComponent::SetProjectionMatrix(const glm::mat4& _rProjection)
     {
         m_ProjectionMatrix = _rProjection;
     }
 
     // -----------------------------------------------------------------------------
 
-    glm::mat3& CCameraComponent::GetProjectionMatrix()
+    glm::mat4& CCameraComponent::GetProjectionMatrix()
     {
         return m_ProjectionMatrix;
     }
 
     // -----------------------------------------------------------------------------
 
-    const glm::mat3& CCameraComponent::GetProjectionMatrix() const
+    const glm::mat4& CCameraComponent::GetProjectionMatrix() const
     {
         return m_ProjectionMatrix;
     }

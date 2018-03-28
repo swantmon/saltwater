@@ -126,9 +126,9 @@ namespace
             // -----------------------------------------------------------------------------
             Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-            Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+            Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-            rCurrentEntity.SetCategory(Dt::SEntityCategory::Dynamic);
+            pCurrentEntity->SetCategory(Dt::SEntityCategory::Dynamic);
 
             // -----------------------------------------------------------------------------
             // Create facet and set it
@@ -149,9 +149,9 @@ namespace
 
             pComponent->UpdateLightness();
 
-            rCurrentEntity.AttachComponent(pComponent);
+            pCurrentEntity->AttachComponent(pComponent);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pComponent, Dt::CPointLightComponent::DirtyCreate);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Dt::CPointLightComponent::DirtyCreate);
         }
     }
 
@@ -165,9 +165,9 @@ namespace
             // -----------------------------------------------------------------------------
             Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-            Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+            Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-            rCurrentEntity.SetCategory(Dt::SEntityCategory::Dynamic);
+            pCurrentEntity->SetCategory(Dt::SEntityCategory::Dynamic);
 
             // -----------------------------------------------------------------------------
             // Create facet and set it
@@ -183,9 +183,9 @@ namespace
 
             pComponent->UpdateLightness();
 
-            rCurrentEntity.AttachComponent(pComponent);
+            pCurrentEntity->AttachComponent(pComponent);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pComponent, Dt::CSunComponent::DirtyCreate);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Dt::CSunComponent::DirtyCreate);
         }
     }
 
@@ -199,9 +199,9 @@ namespace
             // -----------------------------------------------------------------------------
             Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-            Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+            Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-            rCurrentEntity.SetCategory(Dt::SEntityCategory::Dynamic);
+            pCurrentEntity->SetCategory(Dt::SEntityCategory::Dynamic);
 
             // -----------------------------------------------------------------------------
 
@@ -212,9 +212,9 @@ namespace
             pComponent->SetTexture    ("environments/PaperMill_E_3k.hdr");
             pComponent->SetIntensity  (5000.0f);
 
-            rCurrentEntity.AttachComponent(pComponent);
+            pCurrentEntity->AttachComponent(pComponent);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pComponent, Dt::CSkyComponent::DirtyCreate);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Dt::CSkyComponent::DirtyCreate);
         }
     }
 
@@ -228,9 +228,9 @@ namespace
             // -----------------------------------------------------------------------------
             Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-            Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+            Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-            rCurrentEntity.SetCategory(Dt::SEntityCategory::Dynamic);
+            pCurrentEntity->SetCategory(Dt::SEntityCategory::Dynamic);
 
             // -----------------------------------------------------------------------------
             // Create facet and set it
@@ -247,9 +247,9 @@ namespace
             pComponent->SetParallaxCorrection(true);
             pComponent->SetBoxSize           (glm::vec3(10.0f));
 
-            rCurrentEntity.AttachComponent(pComponent);
+            pCurrentEntity->AttachComponent(pComponent);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pComponent, Dt::CLightProbeComponent::DirtyCreate);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Dt::CLightProbeComponent::DirtyCreate);
         }
     }
 
@@ -263,9 +263,9 @@ namespace
             // -----------------------------------------------------------------------------
             Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-            Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+            Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-            rCurrentEntity.SetCategory(Dt::SEntityCategory::Dynamic);
+            pCurrentEntity->SetCategory(Dt::SEntityCategory::Dynamic);
 
             // -----------------------------------------------------------------------------
             // Create facet and set it
@@ -284,9 +284,9 @@ namespace
 
             pComponent->UpdateLightness();
 
-            rCurrentEntity.AttachComponent(pComponent);
+            pCurrentEntity->AttachComponent(pComponent);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pComponent, Dt::CAreaLightComponent::DirtyCreate);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Dt::CAreaLightComponent::DirtyCreate);
         }
     }
 
@@ -296,15 +296,15 @@ namespace
     {
         Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+        Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-        Dt::CPointLightComponent* pPointLightFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CPointLightComponent>();
+        Dt::CPointLightComponent* pPointLightFacet = pCurrentEntity->GetComponentFacet()->GetComponent<Dt::CPointLightComponent>();
 
         if (pPointLightFacet != nullptr)
         {
             Edit::CMessage NewMessage;
 
-            NewMessage.Put(rCurrentEntity.GetID());
+            NewMessage.Put(pCurrentEntity->GetID());
             NewMessage.Put(static_cast<int>(pPointLightFacet->HasTemperature()));
             NewMessage.Put(pPointLightFacet->GetColor()[0]);
             NewMessage.Put(pPointLightFacet->GetColor()[1]);
@@ -333,15 +333,15 @@ namespace
     {
         Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+        Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-        Dt::CSunComponent* pLightFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CSunComponent>();
+        Dt::CSunComponent* pLightFacet = pCurrentEntity->GetComponentFacet()->GetComponent<Dt::CSunComponent>();
 
         if (pLightFacet != nullptr)
         {
             Edit::CMessage NewMessage;
 
-            NewMessage.Put(rCurrentEntity.GetID());
+            NewMessage.Put(pCurrentEntity->GetID());
             NewMessage.Put(static_cast<int>(pLightFacet->HasTemperature()));
             NewMessage.Put(pLightFacet->GetColor()[0]);
             NewMessage.Put(pLightFacet->GetColor()[1]);
@@ -365,15 +365,15 @@ namespace
     {
         Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+        Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-        Dt::CSkyComponent* pLightFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CSkyComponent>();
+        Dt::CSkyComponent* pLightFacet = pCurrentEntity->GetComponentFacet()->GetComponent<Dt::CSkyComponent>();
 
         if (pLightFacet != nullptr)
         {
             Edit::CMessage NewMessage;
 
-            NewMessage.Put(rCurrentEntity.GetID());
+            NewMessage.Put(pCurrentEntity->GetID());
             NewMessage.Put(static_cast<int>(pLightFacet->GetRefreshMode()));
             NewMessage.Put(static_cast<int>(pLightFacet->GetType()));
 
@@ -402,15 +402,15 @@ namespace
     {
         Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+        Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-        Dt::CLightProbeComponent* pLightFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CLightProbeComponent>();
+        Dt::CLightProbeComponent* pLightFacet = pCurrentEntity->GetComponentFacet()->GetComponent<Dt::CLightProbeComponent>();
 
         if (pLightFacet != nullptr)
         {
             Edit::CMessage NewMessage;
 
-            NewMessage.Put(rCurrentEntity.GetID());
+            NewMessage.Put(pCurrentEntity->GetID());
             NewMessage.Put(pLightFacet->GetRefreshMode());
             NewMessage.Put(pLightFacet->GetType());
             NewMessage.Put(pLightFacet->GetQuality());
@@ -435,15 +435,15 @@ namespace
     {
         Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+        Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-        Dt::CAreaLightComponent* pLightFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CAreaLightComponent>();
+        Dt::CAreaLightComponent* pLightFacet = pCurrentEntity->GetComponentFacet()->GetComponent<Dt::CAreaLightComponent>();
 
         if (pLightFacet != nullptr)
         {
             Edit::CMessage NewMessage;
 
-            NewMessage.Put(rCurrentEntity.GetID());
+            NewMessage.Put(pCurrentEntity->GetID());
             NewMessage.Put(static_cast<int>(pLightFacet->HasTemperature()));
             NewMessage.Put(pLightFacet->GetColor()[0]);
             NewMessage.Put(pLightFacet->GetColor()[1]);
@@ -481,9 +481,9 @@ namespace
     {
         Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+        Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-        Dt::CPointLightComponent* pLightFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CPointLightComponent>();
+        Dt::CPointLightComponent* pLightFacet = pCurrentEntity->GetComponentFacet()->GetComponent<Dt::CPointLightComponent>();
 
         if (pLightFacet != nullptr)
         {
@@ -534,7 +534,7 @@ namespace
             
             pLightFacet->UpdateLightness();
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pLightFacet, Dt::CPointLightComponent::DirtyInfo);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pLightFacet, Dt::CPointLightComponent::DirtyInfo);
         }
     }
 
@@ -544,9 +544,9 @@ namespace
     {
         Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+        Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-        Dt::CSunComponent* pLightFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CSunComponent>();
+        Dt::CSunComponent* pLightFacet = pCurrentEntity->GetComponentFacet()->GetComponent<Dt::CSunComponent>();
 
         if (pLightFacet != nullptr)
         {
@@ -587,7 +587,7 @@ namespace
 
             pLightFacet->UpdateLightness();
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pLightFacet, Dt::CSunComponent::DirtyInfo);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pLightFacet, Dt::CSunComponent::DirtyInfo);
         }
     }
 
@@ -597,9 +597,9 @@ namespace
     {
         Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+        Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-        Dt::CSkyComponent* pLightFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CSkyComponent>();
+        Dt::CSkyComponent* pLightFacet = pCurrentEntity->GetComponentFacet()->GetComponent<Dt::CSkyComponent>();
 
         if (pLightFacet != nullptr)
         {
@@ -626,7 +626,7 @@ namespace
                 pLightFacet->SetTexture(Texture);
             }
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pLightFacet, Dt::CSkyComponent::DirtyInfo);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pLightFacet, Dt::CSkyComponent::DirtyInfo);
         }
     }
 
@@ -636,9 +636,9 @@ namespace
     {
         Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+        Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-        Dt::CLightProbeComponent* pLightFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CLightProbeComponent>();
+        Dt::CLightProbeComponent* pLightFacet = pCurrentEntity->GetComponentFacet()->GetComponent<Dt::CLightProbeComponent>();
 
         if (pLightFacet != nullptr)
         {
@@ -688,7 +688,7 @@ namespace
 
             pLightFacet->SetBoxSize(glm::vec3(BoxSizeX, BoxSizeY, BoxSizeZ));
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pLightFacet, Dt::CLightProbeComponent::DirtyInfo);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pLightFacet, Dt::CLightProbeComponent::DirtyInfo);
         }
     }
 
@@ -698,9 +698,9 @@ namespace
     {
         Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+        Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-        Dt::CAreaLightComponent* pLightFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CAreaLightComponent>();
+        Dt::CAreaLightComponent* pLightFacet = pCurrentEntity->GetComponentFacet()->GetComponent<Dt::CAreaLightComponent>();
 
         if (pLightFacet != nullptr)
         {
@@ -763,7 +763,7 @@ namespace
             
             pLightFacet->UpdateLightness();
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pLightFacet, Dt::CAreaLightComponent::DirtyInfo);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pLightFacet, Dt::CAreaLightComponent::DirtyInfo);
         }
     }
 

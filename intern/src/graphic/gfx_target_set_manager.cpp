@@ -338,7 +338,7 @@ namespace
 
             CNativeTexture& rNativeTexture = *static_cast<CNativeTexture*>(TextureBasePtr.GetPtr());
 
-            TextureHandle = rNativeTexture.m_NativeTexture;
+            TextureHandle = rNativeTexture.GetNativeHandle();
 
             unsigned int MipmapLevel = TextureBasePtr->GetCurrentMipLevel();
 
@@ -627,7 +627,7 @@ namespace
         {
             CNativeTexture& rNativeTexture = *static_cast<CNativeTexture*>(_pTargetPtrs[IndexOfTexture].GetPtr());
 
-            GLuint TextureHandle = rNativeTexture.m_NativeTexture;
+            GLuint TextureHandle = rNativeTexture.GetNativeHandle();
 
             unsigned int MipmapLevel = rNativeTexture.GetCurrentMipLevel();
 

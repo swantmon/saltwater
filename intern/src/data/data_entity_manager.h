@@ -54,7 +54,7 @@ namespace EntityManager
 
     void FreeEntity(CEntity& _rEntity);
 
-    CEntity& GetEntityByID(CEntity::BID _ID);
+    CEntity* GetEntityByID(CEntity::BID _ID);
 
     void MarkEntityAsDirty(CEntity& _rEntity, unsigned int _DirtyFlags);
 

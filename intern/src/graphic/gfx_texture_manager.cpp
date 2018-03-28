@@ -55,6 +55,8 @@ namespace
 
         CTexturePtr CreateCubeTexture(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
 
+        CTexturePtr CreateExternalTexture();
+
         CTextureSetPtr CreateTextureSet(CTexturePtr* _pTexturePtrs, unsigned int _NumberOfTextures);
 
         CTexturePtr GetTextureByHash(unsigned int _Hash);
@@ -131,6 +133,8 @@ namespace
         CTexturePtr InternCreateTexture3D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
 
         CTexturePtr InternCreateCubeTexture(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior);
+
+        CTexturePtr InternCreateExternalTexture();
 
         int ConvertGLFormatToBytesPerPixel(Gfx::CTexture::EFormat _Format) const;
         int ConvertGLImageUsage(Gfx::CTexture::EUsage _Usage) const;
@@ -313,6 +317,13 @@ namespace
     CTexturePtr CGfxTextureManager::CreateCubeTexture(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
     {
         return InternCreateCubeTexture(_rDescriptor, _IsDeleteable, _Behavior);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CTexturePtr CGfxTextureManager::CreateExternalTexture()
+    {
+        return InternCreateExternalTexture();
     }
 
     // -----------------------------------------------------------------------------
@@ -1511,6 +1522,65 @@ namespace
         
         return Texture2DPtr;
     }
+
+    // -----------------------------------------------------------------------------
+
+    CTexturePtr CGfxTextureManager::InternCreateExternalTexture()
+    {
+        GLuint NativeTextureHandle;
+
+        // -----------------------------------------------------------------------------
+        // Generate OpenGL external texture
+        // -----------------------------------------------------------------------------
+        glGenTextures(1, &NativeTextureHandle);
+
+        glBindTexture(GL_TEXTURE_EXTERNAL_OES, NativeTextureHandle);
+
+        glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+        glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        glBindTexture(GL_TEXTURE_EXTERNAL_OES, 0);
+
+        // -----------------------------------------------------------------------------
+        // Generate texture inside texture manager
+        // -----------------------------------------------------------------------------
+        CTexturePtr Texture2DPtr = static_cast<CTexturePtr>(m_Textures.Allocate());
+
+        try
+        {
+            CInternTexture& rTexture = *static_cast<CInternTexture*>(Texture2DPtr.GetPtr());
+
+            rTexture.m_pPixels           = 0;
+            rTexture.m_NumberOfPixels[0] = 0;
+            rTexture.m_NumberOfPixels[1] = 0;
+            rTexture.m_Hash              = 0;
+
+            rTexture.m_Info.m_Access            = CTexture::CPUWrite;
+            rTexture.m_Info.m_Binding           = CTexture::ShaderResource;
+            rTexture.m_Info.m_Dimension         = CTexture::External;
+            rTexture.m_Info.m_Format            = CTexture::Unknown;
+            rTexture.m_Info.m_IsCubeTexture     = true;
+            rTexture.m_Info.m_IsDeletable       = false;
+            rTexture.m_Info.m_IsDummyTexture    = false;
+            rTexture.m_Info.m_NumberOfTextures  = 1;
+            rTexture.m_Info.m_NumberOfMipLevels = 1;
+            rTexture.m_Info.m_CurrentMipLevel   = 0;
+            rTexture.m_Info.m_Semantic          = CTexture::Diffuse;
+            rTexture.m_Info.m_Usage             = CTexture::GPUReadWrite;
+
+            rTexture.m_NativeTexture        = NativeTextureHandle;
+            rTexture.m_NativeUsage          = GL_READ_ONLY;
+            rTexture.m_NativeInternalFormat = GL_NONE;
+            rTexture.m_NativeBinding        = GL_TEXTURE_EXTERNAL_OES;
+        }
+        catch (...)
+        {
+            BASE_THROWM("Error creating texture in texture manager.");
+        }
+
+        return Texture2DPtr;
+    }
     
     // -----------------------------------------------------------------------------
     
@@ -2166,6 +2236,13 @@ namespace TextureManager
     CTexturePtr CreateCubeTexture(const STextureDescriptor& _rDescriptor, bool _IsDeleteable, SDataBehavior::Enum _Behavior)
     {
         return CGfxTextureManager::GetInstance().CreateCubeTexture(_rDescriptor, _IsDeleteable, _Behavior);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CTexturePtr CreateExternalTexture()
+    {
+        return CGfxTextureManager::GetInstance().CreateExternalTexture();
     }
 
     // -----------------------------------------------------------------------------

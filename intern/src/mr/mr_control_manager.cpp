@@ -1,6 +1,7 @@
 
 #include "mr/mr_precompiled.h"
 
+#include "base/base_coordinate_system.h"
 #include "base/base_input_event.h"
 #include "base/base_pool.h"
 #include "base/base_uncopyable.h"
@@ -10,12 +11,22 @@
 
 #include "data/data_ar_controller_component.h"
 #include "data/data_camera_component.h"
+#include "data/data_component_facet.h"
+#include "data/data_component_manager.h"
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 #include "data/data_map.h"
 #include "data/data_transformation_facet.h"
 
+#include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_camera_interface.h"
+#include "graphic/gfx_context_manager.h"
+#include "graphic/gfx_main.h"
+#include "graphic/gfx_shader_manager.h"
+#include "graphic/gfx_state_manager.h"
+#include "graphic/gfx_target_set_manager.h"
+#include "graphic/gfx_texture_manager.h"
+#include "graphic/gfx_view_manager.h"
 
 #include "gui/gui_event_handler.h"
 
@@ -24,17 +35,7 @@
 #include <array>
 #include <vector>
 
-#if PLATFORM_ANDROID
 #include "arcore_c_api.h"
-
-#include "GLES3/gl32.h"
-
-#ifndef GL_OES_EGL_image_external
-#define GL_OES_EGL_image_external 1
-#define GL_TEXTURE_EXTERNAL_OES           0x8D65
-#define GL_TEXTURE_BINDING_EXTERNAL_OES   0x8D67
-#define GL_REQUIRED_TEXTURE_IMAGE_UNITS_OES 0x8D68
-#endif /* GL_OES_EGL_image_external */
 
 using namespace MR;
 using namespace MR::ControlManager;
@@ -59,7 +60,9 @@ namespace
     };
 
     constexpr char c_VertexShaderWebcam[] = R"(
-        #version  320 es
+        #version 320 es
+
+        precision mediump float;
 
         layout(location = 0) in vec2 in_UV;
 
@@ -104,7 +107,7 @@ namespace
 
         precision highp float;
 
-        layout(location = 0) uniform mat4 m_MVP;
+        layout(std140, binding = 0) uniform UB0 { mat4 m_MVP; };
 
         layout(location = 0) in vec3 in_Vertex;
 
@@ -112,7 +115,7 @@ namespace
 
         void main()
         {
-          gl_Position = m_MVP * vec4(in_Vertex.x, in_Vertex.y, 0.0f, 1.0f);
+          gl_Position = m_MVP * vec4(in_Vertex.x, 0.0f, in_Vertex.y, 1.0f);
 
           out_Alpha = in_Vertex.z;
         }
@@ -123,7 +126,7 @@ namespace
 
         precision highp float;
 
-        layout(location = 1) uniform vec4 m_Color;
+        layout(binding = 1) uniform UB1 { vec4 m_Color; };
 
         layout(location = 0) in float in_Alpha;
 
@@ -142,7 +145,7 @@ namespace
     constexpr char c_VertexShaderPoint[] = R"(
         #version 320 es
 
-        layout(location = 0) uniform mat4 m_MVP;
+        layout(std140, binding = 0) uniform UB0 { mat4 m_MVP; };
 
         layout(location = 0) in vec4 in_Vertex;
 
@@ -155,7 +158,7 @@ namespace
     )";
 
     constexpr char c_FragmentShaderPoint[] = R"(
-        #version 320 es
+        #version  320 es
 
         precision lowp float;
 
@@ -167,107 +170,8 @@ namespace
         }
     )";
 
-    static GLuint LoadShader(GLenum _Type, const char* _pSource)
-    {
-        GLuint Shader = glCreateShader(_Type);
-
-        if (!Shader)
-        {
-            return Shader;
-        }
-
-        glShaderSource(Shader, 1, &_pSource, nullptr);
-
-        glCompileShader(Shader);
-
-        GLint CompileStatus = 0;
-
-        glGetShaderiv(Shader, GL_COMPILE_STATUS, &CompileStatus);
-
-        if (!CompileStatus)
-        {
-            GLint InfoLogLength = 0;
-
-            glGetShaderiv(Shader, GL_INFO_LOG_LENGTH, &InfoLogLength);
-
-            if (!InfoLogLength)
-            {
-                return Shader;
-            }
-
-            char* pBuffer = reinterpret_cast<char*>(malloc(InfoLogLength));
-
-            if (!pBuffer)
-            {
-                return Shader;
-            }
-
-            glGetShaderInfoLog(Shader, InfoLogLength, nullptr, pBuffer);
-
-            BASE_CONSOLE_WARNINGV("Could not compile shader in MR %d:\n%s\n", _Type, pBuffer);
-
-            free(pBuffer);
-
-            glDeleteShader(Shader);
-
-            Shader = 0;
-        }
-
-        return Shader;
-    }
-
-    static unsigned int CreateProgram(const char* _pVertexSource, const char* _pFragmentSource)
-    {
-        unsigned int VertexShader = LoadShader(GL_VERTEX_SHADER, _pVertexSource);
-
-        if (!VertexShader)
-        {
-            return 0;
-        }
-
-        unsigned int FragmentShader = LoadShader(GL_FRAGMENT_SHADER, _pFragmentSource);
-
-        if (!FragmentShader)
-        {
-            return 0;
-        }
-
-        unsigned int Program = glCreateProgram();
-
-        if (Program)
-        {
-            glAttachShader(Program, VertexShader);
-
-            glAttachShader(Program, FragmentShader);
-
-            glLinkProgram(Program);
-
-            GLint LinkStatus= GL_FALSE;
-
-            glGetProgramiv(Program, GL_LINK_STATUS, &LinkStatus);
-
-            if (LinkStatus != GL_TRUE)
-            {
-                glDeleteProgram(Program);
-
-                Program = 0;
-            }
-        }
-
-        return Program;
-    }
-
-    unsigned int g_ShaderProgramWebcam;
-    unsigned int g_ShaderProgramPlane;
-    unsigned int g_ShaderProgramPoint;
-    unsigned int g_TextureID;
-    unsigned int g_AttributeUVs;
-    unsigned int g_AttributePlaneVertices;
-    unsigned int g_AttributePointVertices;
-    unsigned int g_PlaneIndices;
-
     static constexpr int s_MaxNumberOfVerticesPerPlane = 1024;
-    static constexpr int s_MaxNumberOfVerticesPerPoint = 512;
+    static constexpr int s_MaxNumberOfPoints           = 1024;
 
     static constexpr int s_NumberOfVertices = 4;
     bool g_IsUVsInitialized = false;
@@ -287,7 +191,7 @@ namespace
 
     public:
 
-        void OnStart(const SConfiguration& _rConfiguration);
+        void OnStart();
         void OnExit();
         void Update();
 
@@ -296,11 +200,14 @@ namespace
 
         void OnDisplayGeometryChanged(int _DisplayRotation, int _Width, int _Height);
 
-        void OnDraw();
+        const CCamera& GetCamera();
 
-    private:
+        const CLightEstimation& GetLightEstimation();
 
-        typedef std::vector<ArAnchor*> CTrackedObjects;
+        const CMarker* AcquireNewMarker(float _X, float _Y);
+        void ReleaseMarker(const CMarker* _pMarker);
+
+        Gfx::CTexturePtr GetBackgroundTexture();
 
     private:
 
@@ -308,23 +215,85 @@ namespace
 
     private:
 
-        bool m_InstallRequested;
+        class CInternCamera : public CCamera
+        {
+        private:
 
-        SConfiguration m_Configuration;
+            friend class CMRControlManager;
+        };
+
+        class CInternLightEstimation : public CLightEstimation
+        {
+        private:
+
+            friend class CMRControlManager;
+        };
+
+        class CInternMarker : public CMarker
+        {
+        public:
+
+            ArAnchor* m_pAnchor;
+
+        private:
+
+            friend class CMRControlManager;
+        };
+
+    private:
+
+        typedef std::vector<CInternMarker> CTrackedObjects;
+
+    private:
+
+        bool m_InstallRequested;
 
         ArSession* m_pARSession;
         ArFrame* m_pARFrame;
         CTrackedObjects m_TrackedObjects;
 
-        glm::mat4 m_ViewMatrix;
-        glm::mat4 m_ProjectionMatrix;
+        CInternCamera m_Camera;
 
-        Dt::CEntity* m_pEntity;
+        CInternLightEstimation m_LightEstimation;
+
+        glm::mat3 m_ARCToEngineMatrix;
+
+        Gfx::CTexturePtr m_BackgroundTexturePtr;
+
+        Gfx::CTexturePtr m_ExternalTexturePtr;
+
+        Gfx::CTargetSetPtr m_BackgroundTargetSetPtr;
+
+        Gfx::CShaderPtr m_WebcamVSPtr;
+
+        Gfx::CShaderPtr m_WebcamPSPtr;
+
+        Gfx::CShaderPtr m_PlaneVS;
+
+        Gfx::CShaderPtr m_PlanePS;
+
+        Gfx::CShaderPtr m_PointVS;
+
+        Gfx::CShaderPtr m_PointPS;
+
+        Gfx::CBufferPtr m_WebcamUVBufferPtr;
+
+        Gfx::CBufferPtr m_PlaneVerticesBufferPtr;
+
+        Gfx::CBufferPtr m_PlaneIndicesBufferPtr;
+
+        Gfx::CBufferPtr m_PointVerticesBufferPtr;
+
+        Gfx::CBufferPtr m_MatrixBufferPtr;
+
+        Gfx::CBufferPtr m_ColorBufferPtr;
 
     private:
 
+        void Render();
+
         void OnDirtyEntity(Dt::CEntity* _pEntity);
-        void OnEvent(const Base::CInputEvent& _rEvent);
+        void OnDirtyComponent(Dt::IComponent* _pComponent);
     };
 } // namespace
 
@@ -336,15 +305,13 @@ namespace
 namespace
 {
     CMRControlManager::CMRControlManager()
-            : m_InstallRequested  (false)
-            , m_Configuration     ( )
-            , m_pARSession        (0)
-            , m_pARFrame          (0)
-            , m_TrackedObjects    ( )
-            , m_ViewMatrix        (glm::mat4(1.0f))
-            , m_ProjectionMatrix  (glm::mat4(1.0f))
-            , m_pEntity           (0)
+        : m_InstallRequested(false)
+        , m_pARSession       (0)
+        , m_pARFrame         (0)
+        , m_TrackedObjects   ( )
+        , m_ARCToEngineMatrix(1.0f)
     {
+        m_ARCToEngineMatrix = Base::CCoordinateSystem::GetBaseMatrix(glm::vec3(1,0,0), glm::vec3(0,1,0), glm::vec3(0,0,-1));
     }
 
     // -----------------------------------------------------------------------------
@@ -355,74 +322,149 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CMRControlManager::OnStart(const SConfiguration& _rConfiguration)
+    void CMRControlManager::OnStart()
     {
         // -----------------------------------------------------------------------------
-        // Save configuration
+        // Shader for background and debug
         // -----------------------------------------------------------------------------
-        m_Configuration = _rConfiguration;
+        m_WebcamVSPtr = Gfx::ShaderManager::CompileVS(c_VertexShaderWebcam, "main", nullptr, nullptr, 0, false, false, true);
 
-        // -----------------------------------------------------------------------------
-        // OpenGLES
-        // -----------------------------------------------------------------------------
-        g_ShaderProgramWebcam = CreateProgram(c_VertexShaderWebcam, c_FragmentShaderWebcam);
+        m_WebcamPSPtr = Gfx::ShaderManager::CompilePS(c_FragmentShaderWebcam, "main", nullptr, nullptr, 0, false, false, true);
 
-        if (g_ShaderProgramWebcam == 0) BASE_THROWM("Failed creating shader capturing webcam image.")
+        m_PlaneVS = Gfx::ShaderManager::CompileVS(c_VertexShaderPlane, "main", nullptr, nullptr, 0, false, false, true);
 
-        glGenTextures(1, &g_TextureID);
+        m_PlanePS = Gfx::ShaderManager::CompilePS(c_FragmentShaderPlane, "main", nullptr, nullptr, 0, false, false, true);
 
-        glBindTexture(GL_TEXTURE_EXTERNAL_OES, g_TextureID);
+        m_PointVS = Gfx::ShaderManager::CompileVS(c_VertexShaderPoint, "main", nullptr, nullptr, 0, false, false, true);
 
-        glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        m_PointPS = Gfx::ShaderManager::CompilePS(c_FragmentShaderPoint, "main", nullptr, nullptr, 0, false, false, true);
 
-        glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        const Gfx::SInputElementDescriptor InputLayoutWebcam[] =
+        {
+            { "UV", 0, Gfx::CInputLayout::Float2Format, 0, 0, 8, Gfx::CInputLayout::PerVertex, 0, },
+        };
 
-        glGenBuffers(1, &g_AttributeUVs);
+        Gfx::ShaderManager::CreateInputLayout(InputLayoutWebcam, 1, m_WebcamVSPtr);
 
-        glBindBuffer(GL_ARRAY_BUFFER, g_AttributeUVs);
+        const Gfx::SInputElementDescriptor InputLayoutPlane[] =
+        {
+            { "VERTEX", 0, Gfx::CInputLayout::Float3Format, 0, 0, 12, Gfx::CInputLayout::PerVertex, 0, },
+        };
 
-        glBufferData(GL_ARRAY_BUFFER, sizeof(c_Uvs), &c_Uvs, GL_DYNAMIC_DRAW);
+        Gfx::ShaderManager::CreateInputLayout(InputLayoutPlane, 1, m_PlaneVS);
 
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        const Gfx::SInputElementDescriptor InputLayoutPoint[] =
+        {
+            { "POINT", 0, Gfx::CInputLayout::Float4Format, 0, 0, 16, Gfx::CInputLayout::PerVertex, 0, },
+        };
 
-        // -----------------------------------------------------------------------------
+        Gfx::ShaderManager::CreateInputLayout(InputLayoutPoint, 1, m_PointVS);
 
-        g_ShaderProgramPlane = CreateProgram(c_VertexShaderPlane, c_FragmentShaderPlane);
-
-        glGenBuffers(1, &g_AttributePlaneVertices);
-
-        glBindBuffer(GL_ARRAY_BUFFER, g_AttributePlaneVertices);
-
-        glBufferData(GL_ARRAY_BUFFER, s_MaxNumberOfVerticesPerPlane * sizeof(glm::vec3), 0, GL_DYNAMIC_DRAW);
-
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-        glGenBuffers(1, &g_PlaneIndices);
-
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g_PlaneIndices);
-
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, s_MaxNumberOfVerticesPerPlane * 3 * sizeof(GLushort), 0, GL_DYNAMIC_DRAW);
-
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
         // -----------------------------------------------------------------------------
+        // Background texture
+        // -----------------------------------------------------------------------------
+        Gfx::STextureDescriptor TextureDesc;
 
-        g_ShaderProgramPoint = CreateProgram(c_VertexShaderPoint, c_FragmentShaderPoint);
+        TextureDesc.m_NumberOfPixelsU  = Gfx::Main::GetActiveWindowSize()[0];
+        TextureDesc.m_NumberOfPixelsV  = Gfx::Main::GetActiveWindowSize()[1];
+        TextureDesc.m_NumberOfPixelsW  = 1;
+        TextureDesc.m_NumberOfMipMaps  = 1;
+        TextureDesc.m_NumberOfTextures = 1;
+        TextureDesc.m_Binding          = Gfx::CTexture::RenderTarget | Gfx::CTexture::ShaderResource;
+        TextureDesc.m_Access           = Gfx::CTexture::CPUWrite;
+        TextureDesc.m_Format           = Gfx::CTexture::Unknown;
+        TextureDesc.m_Usage            = Gfx::CTexture::GPURead;
+        TextureDesc.m_Semantic         = Gfx::CTexture::Diffuse;
+        TextureDesc.m_pFileName        = 0;
+        TextureDesc.m_pPixels          = 0;
+        TextureDesc.m_Format           = Gfx::CTexture::R8G8B8A8_UBYTE;
 
-        glGenBuffers(1, &g_AttributePointVertices);
+        m_BackgroundTexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDesc);
 
-        glBindBuffer(GL_ARRAY_BUFFER, g_AttributePointVertices);
+        m_ExternalTexturePtr = Gfx::TextureManager::CreateExternalTexture();
 
-        glBufferData(GL_ARRAY_BUFFER, s_MaxNumberOfVerticesPerPoint * sizeof(glm::vec3), 0, GL_DYNAMIC_DRAW);
+        // -----------------------------------------------------------------------------
+        // Labels
+        // -----------------------------------------------------------------------------
+        Gfx::TextureManager::SetTextureLabel(m_BackgroundTexturePtr, "Webcam texture");
 
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        // -----------------------------------------------------------------------------
+        // Target sets & view ports
+        // -----------------------------------------------------------------------------
+        m_BackgroundTargetSetPtr = Gfx::TargetSetManager::CreateTargetSet(m_BackgroundTexturePtr);
+
+        // -----------------------------------------------------------------------------
+        // Buffer
+        // -----------------------------------------------------------------------------
+        Gfx::SBufferDescriptor ConstanteBufferDesc;
+        
+        ConstanteBufferDesc.m_Stride        = 0;
+        ConstanteBufferDesc.m_Usage         = Gfx::CBuffer::GPURead;
+        ConstanteBufferDesc.m_Binding       = Gfx::CBuffer::VertexBuffer;
+        ConstanteBufferDesc.m_Access        = Gfx::CBuffer::CPUWrite;
+        ConstanteBufferDesc.m_NumberOfBytes = 4 * sizeof(glm::vec2);
+        ConstanteBufferDesc.m_pBytes        = 0;
+        ConstanteBufferDesc.m_pClassKey     = 0;
+        
+        m_WebcamUVBufferPtr = Gfx::BufferManager::CreateBuffer(ConstanteBufferDesc);
+
+        ConstanteBufferDesc.m_Stride        = 0;
+        ConstanteBufferDesc.m_Usage         = Gfx::CBuffer::GPURead;
+        ConstanteBufferDesc.m_Binding       = Gfx::CBuffer::VertexBuffer;
+        ConstanteBufferDesc.m_Access        = Gfx::CBuffer::CPUWrite;
+        ConstanteBufferDesc.m_NumberOfBytes = s_MaxNumberOfVerticesPerPlane * sizeof(glm::vec3);
+        ConstanteBufferDesc.m_pBytes        = 0;
+        ConstanteBufferDesc.m_pClassKey     = 0;
+        
+        m_PlaneVerticesBufferPtr = Gfx::BufferManager::CreateBuffer(ConstanteBufferDesc);
+
+        ConstanteBufferDesc.m_Stride        = 0;
+        ConstanteBufferDesc.m_Usage         = Gfx::CBuffer::GPURead;
+        ConstanteBufferDesc.m_Binding       = Gfx::CBuffer::IndexBuffer;
+        ConstanteBufferDesc.m_Access        = Gfx::CBuffer::CPUWrite;
+        ConstanteBufferDesc.m_NumberOfBytes = s_MaxNumberOfVerticesPerPlane * sizeof(unsigned int);
+        ConstanteBufferDesc.m_pBytes        = 0;
+        ConstanteBufferDesc.m_pClassKey     = 0;
+        
+        m_PlaneIndicesBufferPtr = Gfx::BufferManager::CreateBuffer(ConstanteBufferDesc);
+
+        ConstanteBufferDesc.m_Stride        = 0;
+        ConstanteBufferDesc.m_Usage         = Gfx::CBuffer::GPURead;
+        ConstanteBufferDesc.m_Binding       = Gfx::CBuffer::VertexBuffer;
+        ConstanteBufferDesc.m_Access        = Gfx::CBuffer::CPUWrite;
+        ConstanteBufferDesc.m_NumberOfBytes = s_MaxNumberOfPoints * sizeof(glm::vec3);
+        ConstanteBufferDesc.m_pBytes        = 0;
+        ConstanteBufferDesc.m_pClassKey     = 0;
+        
+        m_PointVerticesBufferPtr = Gfx::BufferManager::CreateBuffer(ConstanteBufferDesc);
+
+        ConstanteBufferDesc.m_Stride        = 0;
+        ConstanteBufferDesc.m_Usage         = Gfx::CBuffer::GPURead;
+        ConstanteBufferDesc.m_Binding       = Gfx::CBuffer::ConstantBuffer;
+        ConstanteBufferDesc.m_Access        = Gfx::CBuffer::CPUWrite;
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(glm::mat4);
+        ConstanteBufferDesc.m_pBytes        = 0;
+        ConstanteBufferDesc.m_pClassKey     = 0;
+        
+        m_MatrixBufferPtr = Gfx::BufferManager::CreateBuffer(ConstanteBufferDesc);
+
+        ConstanteBufferDesc.m_Stride        = 0;
+        ConstanteBufferDesc.m_Usage         = Gfx::CBuffer::GPURead;
+        ConstanteBufferDesc.m_Binding       = Gfx::CBuffer::ConstantBuffer;
+        ConstanteBufferDesc.m_Access        = Gfx::CBuffer::CPUWrite;
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(glm::vec4);
+        ConstanteBufferDesc.m_pBytes        = 0;
+        ConstanteBufferDesc.m_pClassKey     = 0;
+        
+        m_ColorBufferPtr = Gfx::BufferManager::CreateBuffer(ConstanteBufferDesc);
 
         // -----------------------------------------------------------------------------
         // Handler
         // -----------------------------------------------------------------------------
-        Gui::EventHandler::RegisterDirectUserListener(GUI_BIND_INPUT_METHOD(&CMRControlManager::OnEvent));
-
         Dt::EntityManager::RegisterDirtyEntityHandler(DATA_DIRTY_ENTITY_METHOD(&CMRControlManager::OnDirtyEntity));
+
+        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(DATA_DIRTY_COMPONENT_METHOD(&CMRControlManager::OnDirtyComponent));
     }
 
     // -----------------------------------------------------------------------------
@@ -431,67 +473,44 @@ namespace
     {
         m_TrackedObjects.clear();
 
+#ifdef PLATFORM_ANDROID
         // -----------------------------------------------------------------------------
         // AR session and frame
         // -----------------------------------------------------------------------------
         ArSession_destroy(m_pARSession);
 
         ArFrame_destroy(m_pARFrame);
-
-        // -----------------------------------------------------------------------------
-        // OpenGLES
-        // -----------------------------------------------------------------------------
-        glDeleteProgram(g_ShaderProgramWebcam);
-
-        glDeleteTextures(1, &g_TextureID);
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     void CMRControlManager::Update()
     {
+#ifdef PLATFORM_ANDROID
         if (m_pARSession == nullptr) return;
 
         ArStatus Result;
 
-        ArSession_setCameraTextureName(m_pARSession, g_TextureID);
+        ArSession_setCameraTextureName(m_pARSession, m_ExternalTexturePtr->GetNativeHandle());
 
         Result = ArSession_update(m_pARSession, m_pARFrame);
 
         if (Result != AR_SUCCESS) return;
 
         // -----------------------------------------------------------------------------
-        // Variables for decompose
-        // -----------------------------------------------------------------------------
-        glm::vec3 Translation;
-        glm::quat Rotation;
-        glm::vec3 Scale;
-        glm::vec3 Skew;
-        glm::vec4 Perspective;
-
-        // -----------------------------------------------------------------------------
         // Update camera
         // -----------------------------------------------------------------------------
-        float Near = Base::CProgramParameters::GetInstance().Get<float>("mr:ar:camera:near", 0.1f);
-        float Far  = Base::CProgramParameters::GetInstance().Get<float>("mr:ar:camera:far", 100.0f);
+        m_Camera.m_Near = Base::CProgramParameters::GetInstance().Get<float>("mr:ar:camera:near", 0.1f);
+        m_Camera.m_Far  = Base::CProgramParameters::GetInstance().Get<float>("mr:ar:camera:far", 100.0f);
 
         ArCamera* pARCamera;
 
         ArFrame_acquireCamera(m_pARSession, m_pARFrame, &pARCamera);
 
-        ArCamera_getViewMatrix(m_pARSession, pARCamera, glm::value_ptr(m_ViewMatrix));
+        ArCamera_getViewMatrix(m_pARSession, pARCamera, glm::value_ptr(m_Camera.m_ViewMatrix));
 
-        ArCamera_getProjectionMatrix(m_pARSession, pARCamera, Near, Far, glm::value_ptr(m_ProjectionMatrix));
-
-        glm::decompose(m_ViewMatrix, Scale, Rotation, Translation, Skew, Perspective);
-
-        Gfx::Cam::SetPosition((Rotation * Translation) * -1.0f);
-
-        Gfx::Cam::SetRotationMatrix(glm::toMat3(Rotation));
-
-        Gfx::Cam::SetProjectionMatrix(m_ProjectionMatrix, Near, Far);
-
-        Gfx::Cam::Update();
+        ArCamera_getProjectionMatrix(m_pARSession, pARCamera, m_Camera.m_Near, m_Camera.m_Far, glm::value_ptr(m_Camera.m_ProjectionMatrix));
 
         ArTrackingState CameraTrackingState;
 
@@ -499,7 +518,18 @@ namespace
 
         ArCamera_release(pARCamera);
 
-        if (CameraTrackingState != AR_TRACKING_STATE_TRACKING) return;
+        switch(CameraTrackingState)
+        {
+            case AR_TRACKING_STATE_PAUSED:
+                m_Camera.m_TrackingState = CCamera::Paused;
+                break;
+            case AR_TRACKING_STATE_STOPPED:
+                m_Camera.m_TrackingState = CCamera::Stopped;
+                break;
+            case AR_TRACKING_STATE_TRACKING:
+                m_Camera.m_TrackingState = CCamera::Tracking;
+                break;
+        }
 
         // -----------------------------------------------------------------------------
         // Light estimation
@@ -514,29 +544,40 @@ namespace
 
         ArLightEstimate_getState(m_pARSession, ARLightEstimate, &ARLightEstimateState);
 
-        float LightIntensity = 0.8f;
+        m_LightEstimation.m_EstimationState = CLightEstimation::NotValid;
 
         if (ARLightEstimateState == AR_LIGHT_ESTIMATE_STATE_VALID)
         {
-            ArLightEstimate_getPixelIntensity(m_pARSession, ARLightEstimate, &LightIntensity);
+            ArLightEstimate_getPixelIntensity(m_pARSession, ARLightEstimate, &m_LightEstimation.m_Intensity);
+
+            m_LightEstimation.m_EstimationState = CLightEstimation::Valid;
         }
 
         ArLightEstimate_destroy(ARLightEstimate);
 
         ARLightEstimate = nullptr;
 
-        // TODO: use light estimation for our lighting
-
         // -----------------------------------------------------------------------------
         // Use tracked objects matrices
         // -----------------------------------------------------------------------------
-        glm::mat4 ModelMatrix = glm::mat4(1.0f);
-
-        for (const auto& rObject : m_TrackedObjects)
+        for (auto& rObject : m_TrackedObjects)
         {
             ArTrackingState TrackingState = AR_TRACKING_STATE_STOPPED;
 
-            ArAnchor_getTrackingState(m_pARSession, rObject, &TrackingState);
+            ArAnchor_getTrackingState(m_pARSession, rObject.m_pAnchor, &TrackingState);
+
+            switch(TrackingState)
+            {
+                case AR_TRACKING_STATE_PAUSED:
+                    rObject.m_TrackingState = CMarker::Paused;
+                    break;
+                case AR_TRACKING_STATE_STOPPED:
+                    rObject.m_TrackingState = CMarker::Stopped;
+                    break;
+                case AR_TRACKING_STATE_TRACKING:
+                    rObject.m_TrackingState = CMarker::Tracking;
+                    break;
+            }
 
             if (TrackingState != AR_TRACKING_STATE_TRACKING) continue;
 
@@ -544,44 +585,43 @@ namespace
 
             ArPose_create(m_pARSession, 0, &pARPose);
 
-            ArAnchor_getPose(m_pARSession, rObject, pARPose);
+            ArAnchor_getPose(m_pARSession, rObject.m_pAnchor, pARPose);
 
-            ArPose_getMatrix(m_pARSession, pARPose, glm::value_ptr(ModelMatrix));
+            ArPose_getMatrix(m_pARSession, pARPose, glm::value_ptr(rObject.m_ModelMatrix));
 
             ArPose_destroy(pARPose);
-
-            if (m_pEntity != 0)
-            {
-                Dt::CTransformationFacet* pTransformation = m_pEntity->GetTransformationFacet();
-
-                glm::decompose(ModelMatrix, Scale, Rotation, Translation, Skew, Perspective);
-
-                pTransformation->SetPosition(Translation);
-
-                pTransformation->SetRotation(glm::eulerAngles(Rotation));
-
-                Dt::EntityManager::MarkEntityAsDirty(*m_pEntity, Dt::CEntity::DirtyMove);
-            }
         }
+#endif
+
+        Render();
     }
 
     // -----------------------------------------------------------------------------
 
     void CMRControlManager::OnPause()
     {
+#ifdef PLATFORM_ANDROID
+        if (m_pARSession == nullptr) return;
+
         ArSession_pause(m_pARSession);
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
     void CMRControlManager::OnResume()
     {
+#ifdef PLATFORM_ANDROID
+        void* pEnvironment = Core::JNI::GetJavaEnvironment();
+        void* pActivity    = Core::JNI::GetActivity();
+        void* pContext     = Core::JNI::GetContext();
+
         if(!Core::JNI::CheckPermission(s_Permissions[0]))
         {
             Core::JNI::AcquirePermissions(s_Permissions, 1);
         }
 
-        if (m_pARSession == nullptr && m_Configuration.m_pEnv != nullptr && m_Configuration.m_pActivity != nullptr)
+        if (m_pARSession == nullptr && pEnvironment != nullptr && pActivity != nullptr && pContext != nullptr && Core::JNI::CheckPermission(s_Permissions[0]))
         {
             ArStatus Status;
 
@@ -592,7 +632,7 @@ namespace
 
             bool UserRequestedInstallation = !m_InstallRequested;
 
-            Status = ArCoreApk_requestInstall(m_Configuration.m_pEnv, m_Configuration.m_pActivity, UserRequestedInstallation, &InstallStatus);
+            Status = ArCoreApk_requestInstall(pEnvironment, pActivity, UserRequestedInstallation, &InstallStatus);
 
             if (Status != AR_SUCCESS) return;
 
@@ -611,9 +651,9 @@ namespace
             }
 
             // -----------------------------------------------------------------------------
-            // AR session and frame
+            // Create session
             // -----------------------------------------------------------------------------
-            Status = ArSession_create(m_Configuration.m_pEnv, m_Configuration.m_pContext, &m_pARSession);
+            Status = ArSession_create(pEnvironment, pContext, &m_pARSession);
 
             if (Status != AR_SUCCESS) BASE_THROWM("Application has to be closed because of unsupported ArCore.");
 
@@ -639,26 +679,246 @@ namespace
 
             assert(m_pARFrame != 0);
 
-            ArSession_setDisplayGeometry(m_pARSession, m_Configuration.m_Rotation, m_Configuration.m_Width, m_Configuration.m_Height);
+            // -----------------------------------------------------------------------------
+            // Default geometry
+            // -----------------------------------------------------------------------------
+            int Rotation = Core::JNI::GetDeviceRotation();
+            int Width    = Core::JNI::GetDeviceDimension()[0];
+            int Height   = Core::JNI::GetDeviceDimension()[1];
+
+            ArSession_setDisplayGeometry(m_pARSession, Rotation, Width, Height);
         }
 
-        ArSession_resume(m_pARSession);
+        if (m_pARSession != nullptr)
+        {
+            ArSession_resume(m_pARSession);
+        }
+#endif
     }
 
     // -----------------------------------------------------------------------------
+
 
     void CMRControlManager::OnDisplayGeometryChanged(int _DisplayRotation, int _Width, int _Height)
     {
+#ifdef PLATFORM_ANDROID
         ArSession_setDisplayGeometry(m_pARSession, _DisplayRotation, _Width, _Height);
+#else
+        BASE_UNUSED(_DisplayRotation);
+        BASE_UNUSED(_Width);
+        BASE_UNUSED(_Height);
+#endif
     }
 
     // -----------------------------------------------------------------------------
 
-    void CMRControlManager::OnDraw()
+    const CCamera& CMRControlManager::GetCamera()
+    {
+        return m_Camera;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const CLightEstimation& CMRControlManager::GetLightEstimation()
+    {
+        return m_LightEstimation;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const CMarker* CMRControlManager::AcquireNewMarker(float _X, float _Y)
+    {
+#ifdef PLATFORM_ANDROID
+        CInternMarker* pReturnMarker = nullptr;
+
+        if (m_pARFrame != nullptr && m_pARSession != nullptr)
+        {
+            ArHitResultList* pHitResultList = 0;
+
+            ArHitResultList_create(m_pARSession, &pHitResultList);
+
+            assert(pHitResultList);
+
+            ArFrame_hitTest(m_pARSession, m_pARFrame, _X, _Y, pHitResultList);
+
+            int NumberOfHits = 0;
+
+            ArHitResultList_getSize(m_pARSession, pHitResultList, &NumberOfHits);
+
+            // -----------------------------------------------------------------------------
+            // The hitTest method sorts the resulting list by distance from the camera,
+            // increasing.  The first hit result will usually be the most relevant when
+            // responding to user input
+            // -----------------------------------------------------------------------------
+            ArHitResult* pHitResult = nullptr;
+
+            for (int IndexOfHit = 0; IndexOfHit < NumberOfHits; ++IndexOfHit)
+            {
+                ArHitResult* pEstimatedHitResult = nullptr;
+
+                ArHitResult_create(m_pARSession, &pEstimatedHitResult);
+
+                ArHitResultList_getItem(m_pARSession, pHitResultList, IndexOfHit, pEstimatedHitResult);
+
+                if (pEstimatedHitResult == nullptr)
+                {
+                    return nullptr;
+                }
+
+                // -----------------------------------------------------------------------------
+                // Get trackables
+                // -----------------------------------------------------------------------------
+                ArTrackable* pTrackable = nullptr;
+
+                ArHitResult_acquireTrackable(m_pARSession, pEstimatedHitResult, &pTrackable);
+
+                ArTrackableType TrackableType = AR_TRACKABLE_NOT_VALID;
+
+                ArTrackable_getType(m_pARSession, pTrackable, &TrackableType);
+
+                switch (TrackableType)
+                {
+                    case AR_TRACKABLE_PLANE:
+                    {
+                        ArPose* pPose = nullptr;
+
+                        ArPose_create(m_pARSession, nullptr, &pPose);
+
+                        ArHitResult_getHitPose(m_pARSession, pEstimatedHitResult, pPose);
+
+                        int32_t IsPoseInPolygon = 0;
+
+                        ArPlane* pPlane = ArAsPlane(pTrackable);
+
+                        ArPlane_isPoseInPolygon(m_pARSession, pPlane, pPose, &IsPoseInPolygon);
+
+                        ArTrackable_release(pTrackable);
+
+                        ArPose_destroy(pPose);
+
+                        if (!IsPoseInPolygon)
+                        {
+                            continue;
+                        }
+
+                        pHitResult = pEstimatedHitResult;
+                    } break;
+
+                    case AR_TRACKABLE_POINT:
+                    {
+                        ArPoint* pPoint = ArAsPoint(pTrackable);
+
+                        ArPointOrientationMode OrientationMode;
+
+                        ArPoint_getOrientationMode(m_pARSession, pPoint, &OrientationMode);
+
+                        if (OrientationMode == AR_POINT_ORIENTATION_ESTIMATED_SURFACE_NORMAL)
+                        {
+                            pHitResult = pEstimatedHitResult;
+                        }
+                    } break;
+
+                    default:
+                    {
+                        ArTrackable_release(pTrackable);
+
+                        BASE_CONSOLE_INFO("Undefined trackable type found.")
+                    }
+                };
+            }
+
+            if (pHitResult != nullptr)
+            {
+                ArAnchor* pAnchor = nullptr;
+
+                if (ArHitResult_acquireNewAnchor(m_pARSession, pHitResult, &pAnchor) != AR_SUCCESS)
+                {
+                    return nullptr;
+                }
+
+                ArTrackingState TrackingState = AR_TRACKING_STATE_STOPPED;
+
+                ArAnchor_getTrackingState(m_pARSession, pAnchor, &TrackingState);
+
+                if (TrackingState != AR_TRACKING_STATE_TRACKING)
+                {
+                    ArAnchor_release(pAnchor);
+
+                    return nullptr;
+                }
+
+                CInternMarker NewMarker;
+
+                NewMarker.m_pAnchor = pAnchor;
+
+                m_TrackedObjects.emplace_back(NewMarker);
+
+                pReturnMarker = &m_TrackedObjects.back();
+
+                ArHitResult_destroy(pHitResult);
+            }
+
+            ArHitResultList_destroy(pHitResultList);
+
+            pHitResultList = nullptr;
+        }
+
+        return pReturnMarker;
+#else
+        BASE_UNUSED(_X);
+        BASE_UNUSED(_Y);
+
+        return nullptr;
+#endif
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMRControlManager::ReleaseMarker(const CMarker* _pMarker)
+    {
+#ifdef PLATFORM_ANDROID
+        auto MarkerIter = std::find_if(m_TrackedObjects.begin(), m_TrackedObjects.end(), [&](CInternMarker& _rObject) { return &_rObject == _pMarker; });
+
+        if (MarkerIter == m_TrackedObjects.end()) return;
+
+        const CInternMarker* pInternMarker = static_cast<const CInternMarker*>(_pMarker);
+
+        ArAnchor_release(pInternMarker->m_pAnchor);
+
+        m_TrackedObjects.erase(MarkerIter);
+#else
+        BASE_UNUSED(_pMarker);
+#endif
+    }
+
+    // -----------------------------------------------------------------------------
+
+    Gfx::CTexturePtr CMRControlManager::GetBackgroundTexture()
+    {
+        return m_BackgroundTexturePtr;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMRControlManager::Render()
     {
         // -----------------------------------------------------------------------------
-        // Background
+        // Prepare
         // -----------------------------------------------------------------------------
+        Gfx::ContextManager::SetTargetSet(m_BackgroundTargetSetPtr);
+
+        Gfx::ContextManager::SetBlendState(Gfx::StateManager::GetBlendState(Gfx::CBlendState::Default));
+
+        Gfx::ContextManager::SetDepthStencilState(Gfx::StateManager::GetDepthStencilState(Gfx::CDepthStencilState::NoDepth));
+
+        Gfx::ContextManager::SetRasterizerState(Gfx::StateManager::GetRasterizerState(Gfx::CRasterizerState::NoCull));
+
+        Gfx::ContextManager::SetViewPortSet(Gfx::ViewManager::GetViewPortSet());
+
+        // -----------------------------------------------------------------------------
+        // Background image from webcam
+        // -----------------------------------------------------------------------------
+#ifdef PLATFORM_ANDROID
         int32_t HasGeometryChanged = 0;
 
         ArFrame_getDisplayGeometryChanged(m_pARSession, m_pARFrame, &HasGeometryChanged);
@@ -667,45 +927,27 @@ namespace
         {
             ArFrame_transformDisplayUvCoords(m_pARSession, m_pARFrame, s_NumberOfVertices * 2, c_Uvs, g_TransformedUVs);
 
-            glBindBuffer(GL_ARRAY_BUFFER, g_AttributeUVs);
-
-            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(g_TransformedUVs), &g_TransformedUVs);
-
-            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            Gfx::BufferManager::UploadBufferData(m_WebcamUVBufferPtr, &g_TransformedUVs);
 
             g_IsUVsInitialized = true;
         }
+#endif // PLATFORM_ANDROID
 
-        glUseProgram(g_ShaderProgramWebcam);
+        Gfx::ContextManager::SetTopology(Gfx::STopology::TriangleStrip);
 
-        glDisable(GL_DEPTH_TEST);
+        Gfx::ContextManager::SetShaderVS(m_WebcamVSPtr);
 
-        glDisable(GL_BLEND);
+        Gfx::ContextManager::SetShaderPS(m_WebcamPSPtr);
 
-        glDisable(GL_CULL_FACE);
+        Gfx::ContextManager::SetVertexBuffer(m_WebcamUVBufferPtr);
 
-        glActiveTexture(GL_TEXTURE0);
+        Gfx::ContextManager::SetInputLayout(m_WebcamVSPtr->GetInputLayout());
 
-        glBindTexture(GL_TEXTURE_EXTERNAL_OES, g_TextureID);
+        Gfx::ContextManager::SetTexture(0, m_ExternalTexturePtr);
 
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        Gfx::ContextManager::Draw(4, 0);
 
-        glBindBuffer(GL_ARRAY_BUFFER, g_AttributeUVs);
-
-        glEnableVertexAttribArray(0);
-
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
-
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-
-        glDisableVertexAttribArray(0);
-
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-        glBindTexture(GL_TEXTURE_EXTERNAL_OES, 0);
-
-        glUseProgram(0);
-
+#ifdef PLATFORM_ANDROID
         // -----------------------------------------------------------------------------
         // Render planes
         // -----------------------------------------------------------------------------
@@ -714,7 +956,7 @@ namespace
         if (RenderPlanes == false) return;
 
         std::vector<glm::vec3> PlaneVertices;
-        std::vector<GLushort> PlaneIndices;
+        std::vector<unsigned int> PlaneIndices;
 
         glm::mat4 PlaneModelMatrix = glm::mat4(1.0f);
 
@@ -850,6 +1092,24 @@ namespace
         // -----------------------------------------------------------------------------
         // Update every available plane
         // -----------------------------------------------------------------------------
+        Gfx::ContextManager::SetBlendState(Gfx::StateManager::GetBlendState(Gfx::CBlendState::AlphaBlend));
+
+        Gfx::ContextManager::SetShaderVS(m_PlaneVS);
+
+        Gfx::ContextManager::SetShaderPS(m_PlanePS);
+
+        Gfx::ContextManager::SetVertexBuffer(m_PlaneVerticesBufferPtr);
+
+        Gfx::ContextManager::SetIndexBuffer(m_PlaneIndicesBufferPtr, 0);
+
+        Gfx::ContextManager::SetConstantBuffer(0, m_MatrixBufferPtr);
+
+        Gfx::ContextManager::SetConstantBuffer(1, m_ColorBufferPtr);
+
+        Gfx::ContextManager::SetInputLayout(m_PlaneVS->GetInputLayout());
+
+        Gfx::ContextManager::SetTopology(Gfx::STopology::TriangleList);
+
         for (int IndexOfPlane = 0; IndexOfPlane < NumberOfPlanes; ++IndexOfPlane)
         {
             ArTrackable* pTrackableItem = nullptr;
@@ -890,64 +1150,35 @@ namespace
 
             if (PlaneIndices.size() == 0 || PlaneVertices.size() == 0) continue;
 
-            if (PlaneVertices.size() >= s_MaxNumberOfVerticesPerPlane)
+            if (PlaneVertices.size() >= s_MaxNumberOfVerticesPerPlane || PlaneIndices.size() >= s_MaxNumberOfVerticesPerPlane)
             {
                 BASE_CONSOLE_WARNING("Plane could not be rendered because of too many vertices.");
                 continue;
             }
 
-            glBindBuffer(GL_ARRAY_BUFFER, g_AttributePlaneVertices);
-
-            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec3) * PlaneVertices.size(), &PlaneVertices.front()[0]);
-
-            glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g_PlaneIndices);
-
-            glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(GLuint) * PlaneIndices.size(), &PlaneIndices.front());
-
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
             // -----------------------------------------------------------------------------
             // Prepare model-view-projection matrix
             // TODO: Change color depending on height of the plane
             // -----------------------------------------------------------------------------
-            glm::mat4 PlaneMVPMatrix = Gfx::Cam::GetProjectionMatrix() * Gfx::Cam::GetViewMatrix() * PlaneModelMatrix * glm::eulerAngleX(glm::radians(90.0f));
+            glm::mat4 PlaneMVPMatrix = Gfx::Cam::GetProjectionMatrix() * Gfx::Cam::GetViewMatrix() * glm::mat4(m_ARCToEngineMatrix) * PlaneModelMatrix;
 
             glm::vec4 Color = glm::vec4(GetPlaneColor(IndexOfPlane), 1.0f);
 
             // -----------------------------------------------------------------------------
+            // Upload data
+            // -----------------------------------------------------------------------------
+            Gfx::BufferManager::UploadBufferData(m_PlaneVerticesBufferPtr, &PlaneVertices.front()[0], 0, PlaneVertices.size() * sizeof(glm::vec3));
+
+            Gfx::BufferManager::UploadBufferData(m_PlaneIndicesBufferPtr, &PlaneIndices.front(), 0, PlaneIndices.size() * sizeof(unsigned int));
+
+            Gfx::BufferManager::UploadBufferData(m_MatrixBufferPtr, &PlaneMVPMatrix);
+
+            Gfx::BufferManager::UploadBufferData(m_ColorBufferPtr, &Color);
+
+            // -----------------------------------------------------------------------------
             // Draw
             // -----------------------------------------------------------------------------
-            glEnable(GL_BLEND);
-
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-            glUseProgram(g_ShaderProgramPlane);
-
-            glUniformMatrix4fv(0, 1, GL_FALSE, &(PlaneMVPMatrix[0][0]));
-
-            glUniform4fv(1, 1, &(Color[0]));
-
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g_PlaneIndices);
-
-            glBindBuffer(GL_ARRAY_BUFFER, g_AttributePlaneVertices);
-
-            glEnableVertexAttribArray(0);
-
-            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-            glDrawElements(GL_TRIANGLES, PlaneIndices.size(), GL_UNSIGNED_SHORT, 0);
-
-            glDisableVertexAttribArray(0);
-
-            glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-            glUseProgram(0);
-
-            glDisable(GL_BLEND);
+            Gfx::ContextManager::DrawIndexed(PlaneIndices.size(), 0, 0);
         }
 
         ArTrackableList_destroy(ListOfPlanes);
@@ -980,293 +1211,146 @@ namespace
 
                 ArPointCloud_getData(m_pARSession, pPointCloud, &pPointCloudData);
 
-                glBindBuffer(GL_ARRAY_BUFFER, g_AttributePointVertices);
+                glm::mat4 PointMVPMatrix = Gfx::Cam::GetProjectionMatrix() * Gfx::Cam::GetViewMatrix() * glm::mat4(m_ARCToEngineMatrix);
 
-                glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * NumberOfPoints, pPointCloudData);
+                // -----------------------------------------------------------------------------
+                // Upload
+                // -----------------------------------------------------------------------------
+                Gfx::BufferManager::UploadBufferData(m_PointVerticesBufferPtr, pPointCloudData, 0, sizeof(glm::vec4) * glm::min(NumberOfPoints, s_MaxNumberOfPoints));
 
-                glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-                glm::mat4 PointMVPMatrix = Gfx::Cam::GetProjectionMatrix() * Gfx::Cam::GetViewMatrix();
+                Gfx::BufferManager::UploadBufferData(m_MatrixBufferPtr, &PointMVPMatrix);
 
                 // -----------------------------------------------------------------------------
                 // Draw
                 // -----------------------------------------------------------------------------
-                glUseProgram(g_ShaderProgramPoint);
+                Gfx::ContextManager::SetShaderVS(m_PointVS);
 
-                glUniformMatrix4fv(0, 1, GL_FALSE, &(PointMVPMatrix[0][0]));
+                Gfx::ContextManager::SetShaderPS(m_PointPS);
 
-                glBindBuffer(GL_ARRAY_BUFFER, g_AttributePointVertices);
+                Gfx::ContextManager::SetVertexBuffer(m_PointVerticesBufferPtr);
 
-                glEnableVertexAttribArray(0);
+                Gfx::ContextManager::SetConstantBuffer(0, m_MatrixBufferPtr);
 
-                glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+                Gfx::ContextManager::SetTopology(Gfx::STopology::PointList);
 
-                glDrawArrays(GL_POINTS, 0, NumberOfPoints);
+                Gfx::ContextManager::SetInputLayout(m_PointVS->GetInputLayout());
 
-                glDisableVertexAttribArray(0);
-
-                glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-                glUseProgram(0);
+                Gfx::ContextManager::Draw(NumberOfPoints, 0);
 
                 ArPointCloud_release(pPointCloud);
             }
         }
+#endif
+
+        Gfx::ContextManager::ResetShaderVS();
+
+        Gfx::ContextManager::ResetShaderPS();
+
+        Gfx::ContextManager::ResetVertexBuffer();
+
+        Gfx::ContextManager::ResetIndexBuffer();
+
+        Gfx::ContextManager::ResetInputLayout();
+
+        Gfx::ContextManager::ResetTexture(0);
+
+        Gfx::ContextManager::ResetViewPortSet();
+
+        Gfx::ContextManager::ResetRenderContext();
     }
 
     // -----------------------------------------------------------------------------
 
     void CMRControlManager::OnDirtyEntity(Dt::CEntity* _pEntity)
     {
-        auto DirtyFlag = _pEntity->GetDirtyFlags();
-
-        if ((DirtyFlag & Dt::CEntity::DirtyAdd) != 0)
-        {
-            if (_pEntity->GetName() == "Box")
-            {
-                m_pEntity = _pEntity;
-            }
-        }
+        BASE_UNUSED(_pEntity);
     }
 
     // -----------------------------------------------------------------------------
 
-    void CMRControlManager::OnEvent(const Base::CInputEvent& _rEvent)
+    void CMRControlManager::OnDirtyComponent(Dt::IComponent* _pComponent)
     {
-        if (_rEvent.GetAction() == Base::CInputEvent::TouchPressed)
-        {
-            Base::CInputEvent::EKey Key = static_cast<Base::CInputEvent::EKey>(_rEvent.GetKey());
-
-            float x = _rEvent.GetCursorPosition()[0];
-            float y = _rEvent.GetCursorPosition()[1];
-
-            if (m_pARFrame != nullptr && m_pARSession != nullptr)
-            {
-                ArHitResultList* pHitResultList = 0;
-
-                ArHitResultList_create(m_pARSession, &pHitResultList);
-
-                assert(pHitResultList);
-
-                ArFrame_hitTest(m_pARSession, m_pARFrame, x, y, pHitResultList);
-
-                int NumberOfHits = 0;
-
-                ArHitResultList_getSize(m_pARSession, pHitResultList, &NumberOfHits);
-
-                // -----------------------------------------------------------------------------
-                // The hitTest method sorts the resulting list by distance from the camera,
-                // increasing.  The first hit result will usually be the most relevant when
-                // responding to user input
-                // -----------------------------------------------------------------------------
-                ArHitResult* pHitResult = nullptr;
-
-                for (int IndexOfHit = 0; IndexOfHit < NumberOfHits; ++IndexOfHit)
-                {
-                    ArHitResult* pEstimatedHitResult = nullptr;
-
-                    ArHitResult_create(m_pARSession, &pEstimatedHitResult);
-
-                    ArHitResultList_getItem(m_pARSession, pHitResultList, IndexOfHit, pEstimatedHitResult);
-
-                    if (pEstimatedHitResult == nullptr)
-                    {
-                        return;
-                    }
-
-                    // -----------------------------------------------------------------------------
-                    // Get trackables
-                    // -----------------------------------------------------------------------------
-                    ArTrackable* pTrackable = nullptr;
-
-                    ArHitResult_acquireTrackable(m_pARSession, pEstimatedHitResult, &pTrackable);
-
-                    ArTrackableType TrackableType = AR_TRACKABLE_NOT_VALID;
-
-                    ArTrackable_getType(m_pARSession, pTrackable, &TrackableType);
-
-                    switch (TrackableType)
-                    {
-                        case AR_TRACKABLE_PLANE:
-                        {
-                            ArPose* pPose = nullptr;
-
-                            ArPose_create(m_pARSession, nullptr, &pPose);
-
-                            ArHitResult_getHitPose(m_pARSession, pEstimatedHitResult, pPose);
-
-                            int32_t IsPoseInPolygon = 0;
-
-                            ArPlane* pPlane = ArAsPlane(pTrackable);
-
-                            ArPlane_isPoseInPolygon(m_pARSession, pPlane, pPose, &IsPoseInPolygon);
-
-                            ArTrackable_release(pTrackable);
-
-                            ArPose_destroy(pPose);
-
-                            if (!IsPoseInPolygon)
-                            {
-                                continue;
-                            }
-
-                            pHitResult = pEstimatedHitResult;
-                        } break;
-
-                        case AR_TRACKABLE_POINT:
-                        {
-                            ArPoint* pPoint = ArAsPoint(pTrackable);
-
-                            ArPointOrientationMode OrientationMode;
-
-                            ArPoint_getOrientationMode(m_pARSession, pPoint, &OrientationMode);
-
-                            if (OrientationMode == AR_POINT_ORIENTATION_ESTIMATED_SURFACE_NORMAL)
-                            {
-                                pHitResult = pEstimatedHitResult;
-                            }
-                        } break;
-
-                        default:
-                        {
-                            ArTrackable_release(pTrackable);
-
-                            BASE_CONSOLE_INFO("Undefined trackable type found.")
-                        }
-                    };
-                }
-
-                if (pHitResult != nullptr)
-                {
-                    ArAnchor* pAnchor = nullptr;
-
-                    if (ArHitResult_acquireNewAnchor(m_pARSession, pHitResult, &pAnchor) != AR_SUCCESS)
-                    {
-                        return;
-                    }
-
-                    ArTrackingState TrackingState = AR_TRACKING_STATE_STOPPED;
-
-                    ArAnchor_getTrackingState(m_pARSession, pAnchor, &TrackingState);
-
-                    if (TrackingState != AR_TRACKING_STATE_TRACKING)
-                    {
-                        ArAnchor_release(pAnchor);
-
-                        return;
-                    }
-
-                    m_TrackedObjects.push_back(pAnchor);
-
-                    ArHitResult_destroy(pHitResult);
-
-                    pHitResult = nullptr;
-                }
-
-                ArHitResultList_destroy(pHitResultList);
-
-                pHitResultList = nullptr;
-            }
-        }
+        BASE_UNUSED(_pComponent);
     }
 } // namespace
 
 namespace MR
 {
-    namespace ControlManager
-    {
-        void OnStart(const SConfiguration& _rConfiguration)
-        {
-            CMRControlManager::GetInstance().OnStart(_rConfiguration);
-        }
-
-        // -----------------------------------------------------------------------------
-
-        void OnExit()
-        {
-            CMRControlManager::GetInstance().OnExit();
-        }
-
-        // -----------------------------------------------------------------------------
-
-        void Update()
-        {
-            CMRControlManager::GetInstance().Update();
-        }
-
-        // -----------------------------------------------------------------------------
-
-        void OnPause()
-        {
-            CMRControlManager::GetInstance().OnPause();
-        }
-
-        // -----------------------------------------------------------------------------
-
-        void OnResume()
-        {
-            CMRControlManager::GetInstance().OnResume();
-        }
-
-        // -----------------------------------------------------------------------------
-
-        void OnDisplayGeometryChanged(int _DisplayRotation, int _Width, int _Height)
-        {
-            CMRControlManager::GetInstance().OnDisplayGeometryChanged(_DisplayRotation, _Width, _Height);
-        }
-
-        void OnDraw()
-        {
-            CMRControlManager::GetInstance().OnDraw();
-        }
-    } // namespace ControlManager
-} // namespace MR
-#else // PLATFORM_ANDROID
-namespace MR
-{
 namespace ControlManager
 {
-    void OnStart(const SConfiguration& _rConfiguration)
+    void OnStart()
     {
-        BASE_UNUSED(_rConfiguration);
+        CMRControlManager::GetInstance().OnStart();
     }
 
     // -----------------------------------------------------------------------------
 
     void OnExit()
     {
+        CMRControlManager::GetInstance().OnExit();
     }
 
     // -----------------------------------------------------------------------------
 
     void Update()
     {
+        CMRControlManager::GetInstance().Update();
     }
 
     // -----------------------------------------------------------------------------
 
     void OnPause()
     {
+        CMRControlManager::GetInstance().OnPause();
     }
 
     // -----------------------------------------------------------------------------
 
     void OnResume()
     {
+        CMRControlManager::GetInstance().OnResume();
     }
 
     // -----------------------------------------------------------------------------
 
     void OnDisplayGeometryChanged(int _DisplayRotation, int _Width, int _Height)
     {
-        BASE_UNUSED(_DisplayRotation);
-        BASE_UNUSED(_Width);
-        BASE_UNUSED(_Height);
+        CMRControlManager::GetInstance().OnDisplayGeometryChanged(_DisplayRotation, _Width, _Height);
     }
 
-    void OnDraw()
+    // -----------------------------------------------------------------------------
+
+    const CCamera& GetCamera()
     {
+        return CMRControlManager::GetInstance().GetCamera();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const CLightEstimation& GetLightEstimation()
+    {
+        return CMRControlManager::GetInstance().GetLightEstimation();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const CMarker* AcquireNewMarker(float _X, float _Y)
+    {
+        return CMRControlManager::GetInstance().AcquireNewMarker(_X, _Y);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void ReleaseMarker(const CMarker* _pMarker)
+    {
+        CMRControlManager::GetInstance().ReleaseMarker(_pMarker);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    Gfx::CTexturePtr GetBackgroundTexture()
+    {
+        return CMRControlManager::GetInstance().GetBackgroundTexture();
     }
 } // namespace ControlManager
 } // namespace MR
-#endif // !PLATFORM_ANDROID

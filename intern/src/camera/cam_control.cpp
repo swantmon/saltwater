@@ -38,6 +38,13 @@ namespace Cam
 
     // -----------------------------------------------------------------------------
 
+    void CControl::OnDirtyComponent(Dt::IComponent* _pComponent)
+    {
+        InternOnDirtyComponent(_pComponent);
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CControl::Update()
     {
         m_HasPositionChanged     = false;

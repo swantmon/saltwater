@@ -60,7 +60,7 @@ namespace
 
         void FreeEntity(CEntity& _rEntity);
 
-        CEntity& GetEntityByID(CEntity::BID _ID);
+        CEntity* GetEntityByID(CEntity::BID _ID);
 
         void MarkEntityAsDirty(CEntity& _rEntity, unsigned int _DirtyFlags);
 
@@ -259,7 +259,7 @@ namespace
             pMeshComponent->SetMeshType(CMeshComponent::Asset);
             pMeshComponent->SetMeshIndex(IndexOfMesh);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pMeshComponent, CMeshComponent::DirtyCreate);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pMeshComponent, CMeshComponent::DirtyCreate);
 
             rChildEntity.AttachComponent(pMeshComponent);
 
@@ -274,7 +274,7 @@ namespace
 
                 pMaterialComponent->SetMaterial(pMaterial);
 
-                Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pMaterialComponent, Dt::CMaterialComponent::DirtyCreate);
+                Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pMaterialComponent, Dt::CMaterialComponent::DirtyCreate);
 
                 rChildEntity.AttachComponent(pMaterialComponent);
             }
@@ -316,9 +316,11 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    CEntity& CDtLvlEntityManager::GetEntityByID(CEntity::BID _ID)
+    CEntity* CDtLvlEntityManager::GetEntityByID(CEntity::BID _ID)
     {
-        return *m_EntityByID[_ID];
+        if (m_EntityByID.find(_ID) == m_EntityByID.end()) return nullptr;
+
+        return m_EntityByID.at(_ID);
     }
 
     // -----------------------------------------------------------------------------
@@ -573,7 +575,7 @@ namespace EntityManager
 
     // -----------------------------------------------------------------------------
 
-    CEntity& GetEntityByID(CEntity::BID _ID)
+    CEntity* GetEntityByID(CEntity::BID _ID)
     {
         return CDtLvlEntityManager::GetInstance().GetEntityByID(_ID);
     }

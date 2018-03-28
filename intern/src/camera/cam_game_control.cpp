@@ -1,6 +1,7 @@
 
 #include "camera/cam_precompiled.h"
 
+#include "base/base_console.h"
 #include "base/base_include_glm.h"
 #include "base/base_type_info.h"
 
@@ -10,7 +11,9 @@
 #include "data/data_camera_component.h"
 #include "data/data_component.h"
 #include "data/data_component_facet.h"
+#include "data/data_component_manager.h"
 #include "data/data_entity.h"
+#include "data/data_entity_manager.h"
 #include "data/data_transformation_facet.h"
 
 #include "graphic/gfx_camera_interface.h"
@@ -18,8 +21,8 @@
 namespace Cam
 {
     CGameControl::CGameControl()
-        : CControl           (CControl::GameControl)
-        , m_pMainCameraEntity(nullptr)
+        : CControl        (CControl::GameControl)
+        , m_pRelatedEntity(nullptr)
     {
     }
     
@@ -27,29 +30,6 @@ namespace Cam
     
     CGameControl::~CGameControl()
     {
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CGameControl::SetEntity(Dt::CEntity& _rEntity)
-    {
-        m_pMainCameraEntity = &_rEntity;
-
-        OnDirtyEntity(m_pMainCameraEntity);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    Dt::CEntity* CGameControl::GetEntity()
-    {
-        return m_pMainCameraEntity;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    const Dt::CEntity* CGameControl::GetEntity() const
-    {
-        return m_pMainCameraEntity;
     }
     
     // -----------------------------------------------------------------------------
@@ -65,30 +45,88 @@ namespace Cam
     {
         assert(_pEntity != 0);
 
-        if (m_pMainCameraEntity != _pEntity) return;
+        auto DirtyFlag = _pEntity->GetDirtyFlags();
 
-        auto pCameraComponent = m_pMainCameraEntity->GetComponentFacet()->GetComponent<Dt::CCameraComponent>();
-
-        assert(pCameraComponent != nullptr);
-
-        if (pCameraComponent->GetProjectionType() == Dt::CCameraComponent::External) return;
-
-        if (m_pMainCameraEntity->GetDirtyFlags() & Dt::CEntity::DirtyMove)
+        if ((DirtyFlag & Dt::CEntity::DirtyRemove) != 0 && _pEntity == m_pRelatedEntity)
         {
-            Dt::CTransformationFacet* pTransformationFacet = m_pMainCameraEntity->GetTransformationFacet();
+            m_pRelatedEntity = 0;
 
-            assert(pTransformationFacet != nullptr);
-
-            // -----------------------------------------------------------------------------
-            // Position
-            // -----------------------------------------------------------------------------
-            m_Position = m_pMainCameraEntity->GetWorldPosition();
-
-            // -----------------------------------------------------------------------------
-            // Rotation
-            // -----------------------------------------------------------------------------
-            m_RotationMatrix = glm::toMat3(pTransformationFacet->GetRotation());
+            LookupNewRelatedEntity();
         }
+
+        if ((DirtyFlag & Dt::CEntity::DirtyComponent) != 0 && m_pRelatedEntity == _pEntity)
+        {
+            if (m_pRelatedEntity->GetComponentFacet()->HasComponent<Dt::CCameraComponent>() == false || m_pRelatedEntity->GetComponentFacet()->GetComponent<Dt::CCameraComponent>()->IsActiveAndUsable() == false)
+            {
+                m_pRelatedEntity = 0;
+
+                LookupNewRelatedEntity();
+            }
+        }
+        
+        if ((DirtyFlag & Dt::CEntity::DirtyMove) != 0 && m_pRelatedEntity == _pEntity)
+        {
+            UpdateTransformation(m_pRelatedEntity);
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGameControl::InternOnDirtyComponent(Dt::IComponent* _pComponent)
+    {
+        if (_pComponent->GetTypeID() != Base::CTypeInfo::GetTypeID<Dt::CCameraComponent>()) return;
+
+        if (_pComponent->GetHostEntity() == m_pRelatedEntity)
+        {
+            UpdateSettings(_pComponent);
+        }
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    void CGameControl::InternUpdate()
+    {
+        if (m_pRelatedEntity == nullptr)
+        {
+            LookupNewRelatedEntity();
+        }
+        else
+        {
+            Gfx::Cam::SetPosition(m_Position);
+            Gfx::Cam::SetRotationMatrix(m_RotationMatrix);
+
+            Gfx::Cam::Update();
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGameControl::UpdateTransformation(Dt::CEntity* _pEntity)
+    {
+        assert(_pEntity != nullptr);
+
+        Dt::CTransformationFacet* pTransformationFacet = m_pRelatedEntity->GetTransformationFacet();
+
+        assert(pTransformationFacet != nullptr);
+
+        // -----------------------------------------------------------------------------
+        // Position
+        // -----------------------------------------------------------------------------
+        m_Position = pTransformationFacet->GetPosition();
+
+        // -----------------------------------------------------------------------------
+        // Rotation
+        // -----------------------------------------------------------------------------
+        m_RotationMatrix = glm::toMat3(pTransformationFacet->GetRotation());
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGameControl::UpdateSettings(Dt::IComponent* _pComponent)
+    {
+        assert(_pComponent != nullptr);
+
+        auto pCameraComponent = static_cast<Dt::CCameraComponent*>(_pComponent);
 
         // -----------------------------------------------------------------------------
         // Projection
@@ -103,15 +141,19 @@ namespace Cam
             float Right  =  pCameraComponent->GetSize() / 2.0f;
             float Bottom = -pCameraComponent->GetSize() / 2.0f;
             float Top    =  pCameraComponent->GetSize() / 2.0f;
-                
+
             Gfx::Cam::SetOrthographic(Left, Right, Bottom, Top, pCameraComponent->GetNear(), pCameraComponent->GetFar());
+        }
+        else if (pCameraComponent->GetProjectionType() == Dt::CCameraComponent::External)
+        {
+            Gfx::Cam::SetProjectionMatrix(pCameraComponent->GetProjectionMatrix(), pCameraComponent->GetNear(), pCameraComponent->GetFar());
         }
 
         // -----------------------------------------------------------------------------
         // Camera mode + variables
         // -----------------------------------------------------------------------------
         Gfx::Cam::SetAutoCameraMode();
-            
+
         if (pCameraComponent->GetCameraMode() == Dt::CCameraComponent::Manual)
         {
             Gfx::Cam::SetManualCameraMode();
@@ -129,28 +171,39 @@ namespace Cam
         // Other
         // -----------------------------------------------------------------------------
         Gfx::Cam::SetBackgroundColor(pCameraComponent->GetBackgroundColor());
-            
+
         Gfx::Cam::SetCullingMask(pCameraComponent->GetCullingMask());
 
         Gfx::Cam::SetViewportRect(pCameraComponent->GetViewportRect());
 
         Gfx::Cam::SetDepth(pCameraComponent->GetDepth());
     }
-    
+
     // -----------------------------------------------------------------------------
-    
-    void CGameControl::InternUpdate()
+
+    void CGameControl::LookupNewRelatedEntity()
     {
-        if (m_pMainCameraEntity != 0)
+        auto CameraComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CCameraComponent>();
+
+        for (auto pComponent : CameraComponents)
         {
-            Dt::CCameraComponent* pCameraComponent = m_pMainCameraEntity->GetComponentFacet()->GetComponent<Dt::CCameraComponent>();
+            auto* pCameraComponent = static_cast<Dt::CCameraComponent*>(pComponent);
 
-            if (pCameraComponent->GetProjectionType() == Dt::CCameraComponent::External) return;
+            if (pCameraComponent->IsActiveAndUsable())
+            {
+                Dt::CEntity* pNewEntity = Dt::EntityManager::GetEntityByID(pCameraComponent->GetHostEntity()->GetID());
+
+                if (pNewEntity != nullptr && pNewEntity->IsInMap())
+                {
+                    m_pRelatedEntity = pNewEntity;
+
+                    UpdateTransformation(m_pRelatedEntity);
+
+                    UpdateSettings(pCameraComponent);
+                }
+
+                break;
+            }
         }
-
-        Gfx::Cam::SetPosition(m_Position);
-        Gfx::Cam::SetRotationMatrix(m_RotationMatrix);
-
-        Gfx::Cam::Update();
     }
 } // namespace Cam

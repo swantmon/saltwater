@@ -13,24 +13,25 @@ namespace Cam
         
         CGameControl();
         ~CGameControl();
-        
-    public:
-        
-        void SetEntity(Dt::CEntity& _rEntity);
-        Dt::CEntity* GetEntity();
-        const Dt::CEntity* GetEntity() const;
 
     private:
 
-        Dt::CEntity* m_pMainCameraEntity;
+        Dt::CEntity* m_pRelatedEntity;
         
     private:
         
-        virtual void InternOnEvent(const Base::CInputEvent& _rEvent);
-        virtual void InternOnDirtyEntity(Dt::CEntity* _pEntity);
+        void InternOnEvent(const Base::CInputEvent& _rEvent) override;
+        void InternOnDirtyEntity(Dt::CEntity* _pEntity) override;
+        void InternOnDirtyComponent(Dt::IComponent* _pComponent) override;
         
     private:
         
         virtual void InternUpdate();
+
+    private:
+
+        void UpdateTransformation(Dt::CEntity* _pEntity);
+        void UpdateSettings(Dt::IComponent* _pComponent);
+        void LookupNewRelatedEntity();
     };
 }

@@ -12,8 +12,6 @@
 
 #include "logic/lg_play_state.h"
 
-#include "mr/mr_control_manager.h"
-
 namespace App
 {
     CPlayState& CPlayState::GetInstance()
@@ -73,11 +71,6 @@ namespace App
     void CPlayState::InternOnRun()
     {
         CState::EStateType NextState = CState::Play;
-
-        // -----------------------------------------------------------------------------
-        // Update
-        // -----------------------------------------------------------------------------
-        MR::ControlManager::Update();
 
         // -----------------------------------------------------------------------------
         // Update logic

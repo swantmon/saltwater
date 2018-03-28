@@ -137,6 +137,13 @@ namespace Cam
 
     // -----------------------------------------------------------------------------
 
+    void CEditorControl::InternOnDirtyComponent(Dt::IComponent* _pComponent)
+    {
+        BASE_UNUSED(_pComponent);
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CEditorControl::InternUpdate()
     {
         glm::vec3 Forward(0.0f, 0.0f, -1.0f);

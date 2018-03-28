@@ -7,13 +7,14 @@
 namespace Dt
 {
     class CEntity;
+    class IComponent;
 } // namespace Dt
 
 namespace Cam
 {
-	class CControl
-	{
-		public:
+    class CControl
+    {
+        public:
 
             enum EType
             {
@@ -31,6 +32,7 @@ namespace Cam
 
             void OnEvent(const Base::CInputEvent& _rEvent);
             void OnDirtyEntity(Dt::CEntity* _pEntity);
+            void OnDirtyComponent(Dt::IComponent* _pComponent);
 
         public:
 
@@ -76,6 +78,8 @@ namespace Cam
             virtual void InternOnEvent(const Base::CInputEvent& _rEvent) = 0;
 
             virtual void InternOnDirtyEntity(Dt::CEntity* _pEntity) = 0;
+
+            virtual void InternOnDirtyComponent(Dt::IComponent* _pComponent) = 0;
 
         private:
 

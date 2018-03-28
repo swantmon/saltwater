@@ -109,9 +109,9 @@ namespace
     {
         Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+        Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-        Dt::CARControllerPluginComponent* pFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CARControllerPluginComponent>();
+        Dt::CARControllerPluginComponent* pFacet = pCurrentEntity->GetComponentFacet()->GetComponent<Dt::CARControllerPluginComponent>();
 
         if (pFacet != nullptr)
         {
@@ -140,7 +140,7 @@ namespace
             // -----------------------------------------------------------------------------
             Edit::CMessage NewMessage;
 
-            NewMessage.Put(rCurrentEntity.GetID());
+            NewMessage.Put(pCurrentEntity->GetID());
 
             NewMessage.Put(Device);
 
@@ -166,9 +166,9 @@ namespace
     {
         Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+        Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-        Dt::CARControllerPluginComponent* pFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CARControllerPluginComponent>();
+        Dt::CARControllerPluginComponent* pFacet = pCurrentEntity->GetComponentFacet()->GetComponent<Dt::CARControllerPluginComponent>();
 
         if (pFacet != nullptr)
         {
@@ -192,7 +192,7 @@ namespace
             // -----------------------------------------------------------------------------
             Edit::CMessage NewMessage;
 
-            NewMessage.Put(rCurrentEntity.GetID());
+            NewMessage.Put(pCurrentEntity->GetID());
 
             NewMessage.Put(MarkerID);
 
@@ -216,9 +216,9 @@ namespace
     {
         Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+        Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
         
-        Dt::CARControllerPluginComponent* pFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CARControllerPluginComponent>();
+        Dt::CARControllerPluginComponent* pFacet = pCurrentEntity->GetComponentFacet()->GetComponent<Dt::CARControllerPluginComponent>();
 
         if (pFacet != nullptr)
         {
@@ -235,7 +235,7 @@ namespace
 
             unsigned int CameraEntityID = _rMessage.Get<int>();
 
-            Dt::CEntity& rCameraEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(CameraEntityID));
+            Dt::CEntity* pCameraEntity = Dt::EntityManager::GetEntityByID(static_cast<unsigned int>(CameraEntityID));
 
             unsigned int NumberOfMarker = _rMessage.Get<int>();
 
@@ -250,14 +250,14 @@ namespace
 
             pFacet->SetCameraParameterFile(ParameterFile);
 
-            if (rCameraEntity.GetComponentFacet()->HasComponent<Dt::CCameraComponent>())
+            if (pCameraEntity->GetComponentFacet()->HasComponent<Dt::CCameraComponent>())
             {
-                pFacet->SetCameraEntity(&rCameraEntity);
+                pFacet->SetCameraEntity(pCameraEntity);
             }
 
             pFacet->SetNumberOfMarker(NumberOfMarker);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pFacet, Dt::CARControllerPluginComponent::DirtyInfo);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pFacet, Dt::CARControllerPluginComponent::DirtyInfo);
         }
     }
 
@@ -267,9 +267,9 @@ namespace
     {
         Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-        Dt::CEntity& rCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+        Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-        Dt::CARControllerPluginComponent* pFacet = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CARControllerPluginComponent>();
+        Dt::CARControllerPluginComponent* pFacet = pCurrentEntity->GetComponentFacet()->GetComponent<Dt::CARControllerPluginComponent>();
 
         if (pFacet != nullptr)
         {
@@ -299,7 +299,7 @@ namespace
 
             rMarker.m_WidthInMeter = Width;
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(pFacet, Dt::CARControllerPluginComponent::DirtyInfo);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pFacet, Dt::CARControllerPluginComponent::DirtyInfo);
         }
     }
 
