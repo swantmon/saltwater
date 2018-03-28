@@ -5,6 +5,16 @@
 
 namespace Core
 {
+    #ifdef PLATFORM_WINDOWS
+    #ifndef PLATFORM_SHARED_LIBRARY
+    #define PLATFORM_EXTERN __declspec(dllexport)
+    #else
+    #define PLATFORM_EXTERN __declspec(dllimport)
+    #endif
+    #else
+    #define PLATFORM_EXTERN // nothing
+    #endif
+
     // -----------------------------------------------------------------------------
     // Plugin declaration
     // -----------------------------------------------------------------------------
@@ -23,7 +33,7 @@ namespace Core
     // -----------------------------------------------------------------------------
     // Plugin function
     // -----------------------------------------------------------------------------
-    typedef IPlugin& (*PluginInstance)();
+    BASE_EXTERN typedef IPlugin& (*PluginInstance)();
 
     // -----------------------------------------------------------------------------
     // Plugin info
@@ -37,4 +47,26 @@ namespace Core
         const char*    m_pPluginVersion;
         PluginInstance GetInstance;
     };
+
+    // -----------------------------------------------------------------------------
+    // Macro
+    // -----------------------------------------------------------------------------
+    #define CORE_PLUGIN(_ClassName, _PluginName, _PluginVersion)                   \
+    extern "C"                                                                     \
+    {                                                                              \
+        BASE_EXTERN Core::IPlugin& GetInstance()                                   \
+        {                                                                          \
+            static _ClassName s_Instance;                                          \
+            return s_Instance;                                                     \
+        }                                                                          \
+        BASE_EXTERN Core::SPluginInfo InfoExport =                                 \
+        {                                                                          \
+            CORE_PLUGIN_API_VERSION,                                               \
+            __FILE__,                                                              \
+            #_ClassName,                                                           \
+            _PluginName,                                                           \
+            _PluginVersion,                                                        \
+            GetInstance,                                                           \
+        };                                                                         \
+    }
 } // namespace Core
