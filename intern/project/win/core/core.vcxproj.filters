@@ -15,6 +15,15 @@
     <ClInclude Include="..\..\..\src\core\core_asset_generator.h">
       <Filter>assets</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\core\core_plugin_manager.h">
+      <Filter>plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\core\core_plugin.h">
+      <Filter>plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\core\core_plugin_config.h">
+      <Filter>plugins</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\core\core_time.cpp">
@@ -27,6 +36,9 @@
     <ClCompile Include="..\..\..\src\core\core_asset_importer.cpp">
       <Filter>assets</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\core\core_plugin_manager.cpp">
+      <Filter>plugins</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="time">
@@ -34,6 +46,9 @@
     </Filter>
     <Filter Include="assets">
       <UniqueIdentifier>{197f6d8a-8ad1-4341-a0e2-052ab55915df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="plugins">
+      <UniqueIdentifier>{c7d719f3-d559-414d-949f-42b93495467f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

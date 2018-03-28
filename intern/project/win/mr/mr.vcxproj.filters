@@ -23,6 +23,7 @@
     <ClCompile Include="..\..\..\src\plugin\arcore\mr_marker.cpp">
       <Filter>marker</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\plugin\arcore\mr_plugin_interface.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\plugin\arcore\mr_control_manager.h" />
@@ -36,5 +37,6 @@
     <ClInclude Include="..\..\..\src\plugin\arcore\mr_marker.h">
       <Filter>marker</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\plugin\arcore\mr_plugin_interface.h" />
   </ItemGroup>
 </Project>
