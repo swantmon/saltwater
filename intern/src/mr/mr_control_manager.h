@@ -20,8 +20,6 @@ namespace ControlManager
 
     void OnDisplayGeometryChanged(int _DisplayRotation, int _Width, int _Height);
 
-    void OnDraw();
-
     const CCamera& GetCamera();
 
     const CLightEstimation& GetLightEstimation();
