@@ -10,7 +10,6 @@
 
 #include "core/core_asset_manager.h"
 #include "core/core_config.h"
-#include "core/core_plugin_manager.h"
 #include "core/core_time.h"
 
 #include "editor/edit_actor_helper.h"
@@ -133,11 +132,6 @@ namespace
     
     void CApplication::OnStart(int& _rArgc, char** _ppArgv)
     {
-        // -----------------------------------------------------------------------------
-        // Load plugins
-        // -----------------------------------------------------------------------------
-        Core::PluginManager::LoadPlugin("arcore");
-
         // -----------------------------------------------------------------------------
         // Init SDL for gamepad input
         // -----------------------------------------------------------------------------

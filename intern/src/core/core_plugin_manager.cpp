@@ -91,6 +91,20 @@ namespace
     void CPluginManager::LoadPlugin(const char* _pName)
     {
         // -----------------------------------------------------------------------------
+        // Check if plugin is already loaded.
+        // -----------------------------------------------------------------------------
+        Base::BHash Hash = GenerateHash(_pName);
+
+        auto PluginIter = m_Plugins.find(Hash);
+
+        if (PluginIter != m_Plugins.end())
+        {
+            BASE_CONSOLE_ERRORV("Plugin '%s' is already loaded (V=%s).", PluginIter->second.m_pInfo->m_pPluginName, PluginIter->second.m_pInfo->m_pPluginVersion);
+
+            return;
+        }
+
+        // -----------------------------------------------------------------------------
         // Load library
         // -----------------------------------------------------------------------------
 #ifdef PLATFORM_WINDOWS
@@ -120,31 +134,13 @@ namespace
 
         if (pPluginInfo == NULL)
         {
-            BASE_CONSOLE_ERRORV("Loading plugin information of plugin '%s' failed.", _pName);
+            BASE_CONSOLE_ERROR("Loading plugin information failed.");
 
             FreeLibrary(Instance);
 
             return;
         }
 #endif // PLATFORM_WINDOWS
-
-        // -----------------------------------------------------------------------------
-        // Check if plugin is already loaded.
-        // -----------------------------------------------------------------------------
-        Base::BHash Hash = GenerateHash(pPluginInfo->m_pPluginName);
-
-        auto PluginIter = m_Plugins.find(Hash);
-
-        if (PluginIter != m_Plugins.end())
-        {
-            BASE_CONSOLE_ERRORV("Plugin '%s' is already loaded (V=%s).", pPluginInfo->m_pPluginName, pPluginInfo->m_pPluginVersion);
-
-#ifdef PLATFORM_WINDOWS
-            FreeLibrary(Instance);
-#endif // PLATFORM_WINDOWS
-
-            return;
-        }
 
         // BASE_CONSOLE_INFOV("API:            %i", pPluginInfo->m_APIversion);
         // BASE_CONSOLE_INFOV("File:           %s", pPluginInfo->m_pFileName);
@@ -155,12 +151,10 @@ namespace
         // -----------------------------------------------------------------------------
         // Save plugin
         // -----------------------------------------------------------------------------
-        CInternPlugin InternPlugin = m_Plugins[Hash];
-
-        InternPlugin.m_pInfo    = pPluginInfo;
+        m_Plugins[Hash].m_pInfo    = pPluginInfo;
 
 #ifdef PLATFORM_WINDOWS
-        InternPlugin.m_Instance = Instance;
+        m_Plugins[Hash].m_Instance = Instance;
 #endif // PLATFORM_WINDOWS
     }
 

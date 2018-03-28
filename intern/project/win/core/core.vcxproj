@@ -24,7 +24,6 @@
     <ClInclude Include="..\..\..\src\core\core_asset_manager.h" />
     <ClInclude Include="..\..\..\src\core\core_config.h" />
     <ClInclude Include="..\..\..\src\core\core_plugin.h" />
-    <ClInclude Include="..\..\..\src\core\core_plugin_config.h" />
     <ClInclude Include="..\..\..\src\core\core_plugin_manager.h" />
     <ClInclude Include="..\..\..\src\core\core_precompiled.h" />
     <ClInclude Include="..\..\..\src\core\core_time.h" />

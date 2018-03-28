@@ -5,6 +5,8 @@
 
 #include "camera/cam_control_manager.h"
 
+#include "core/core_plugin_manager.h"
+
 #include "data/data_entity.h"
 
 #include "editor/edit_edit_state.h"
@@ -58,6 +60,15 @@ namespace Edit
     
     CState::EStateType CEditState::InternOnEnter()
     {
+        // -----------------------------------------------------------------------------
+        // Load plugins
+        // -----------------------------------------------------------------------------
+        Core::PluginManager::LoadPlugin("arcore");
+
+        auto& Plugin = Core::PluginManager::GetPlugin("arcore");
+
+        Plugin.OnStart();
+
         BASE_CONSOLE_STREAMINFO("Edit> Enter edit state.");
 
         // -----------------------------------------------------------------------------

@@ -4,7 +4,7 @@
 #include "plugin/arcore/mr_control_manager.h"
 #include "plugin/arcore/mr_plugin_interface.h"
 
-CORE_PLUGIN(MR::CPluginInterface, "ArCore", "1.0")
+CORE_PLUGIN_INFO(MR::CPluginInterface, "ArCore", "1.0")
 
 namespace MR
 {

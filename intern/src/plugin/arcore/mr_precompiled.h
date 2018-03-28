@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include "base/base_defines.h"
 #include "base/base_console.h"
 #include "base/base_exception.h"
 #include "base/base_include_glm.h"

@@ -1,22 +1,17 @@
 
 #pragma once
 
-#include "core/core_plugin_config.h"
+#include "base/base_defines.h"
 
 namespace Core
 {
-    #ifdef PLATFORM_WINDOWS
-    #ifndef PLATFORM_SHARED_LIBRARY
-    #define PLATFORM_EXTERN __declspec(dllexport)
-    #else
-    #define PLATFORM_EXTERN __declspec(dllimport)
-    #endif
-    #else
-    #define PLATFORM_EXTERN // nothing
-    #endif
+    // -----------------------------------------------------------------------------
+    // Config
+    // -----------------------------------------------------------------------------
+    #define CORE_PLUGIN_API_VERSION 1
 
     // -----------------------------------------------------------------------------
-    // Plugin declaration
+    // Plugin interface
     // -----------------------------------------------------------------------------
     class IPlugin
     {
@@ -33,7 +28,7 @@ namespace Core
     // -----------------------------------------------------------------------------
     // Plugin function
     // -----------------------------------------------------------------------------
-    BASE_EXTERN typedef IPlugin& (*PluginInstance)();
+    BASE_LIB_EXTERN typedef IPlugin& (*PluginInstance)();
 
     // -----------------------------------------------------------------------------
     // Plugin info
@@ -51,15 +46,15 @@ namespace Core
     // -----------------------------------------------------------------------------
     // Macro
     // -----------------------------------------------------------------------------
-    #define CORE_PLUGIN(_ClassName, _PluginName, _PluginVersion)                   \
+    #define CORE_PLUGIN_INFO(_ClassName, _PluginName, _PluginVersion)              \
     extern "C"                                                                     \
     {                                                                              \
-        BASE_EXTERN Core::IPlugin& GetInstance()                                   \
+        BASE_LIB_EXTERN Core::IPlugin& GetInstance()                               \
         {                                                                          \
             static _ClassName s_Instance;                                          \
             return s_Instance;                                                     \
         }                                                                          \
-        BASE_EXTERN Core::SPluginInfo InfoExport =                                 \
+        BASE_LIB_EXTERN Core::SPluginInfo InfoExport =                             \
         {                                                                          \
             CORE_PLUGIN_API_VERSION,                                               \
             __FILE__,                                                              \
