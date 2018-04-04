@@ -233,7 +233,7 @@
       <AdditionalLibraryDirectories>..\..\..\build\x64;..\..\..\..\extern\assimp\lib\x64;..\..\..\..\extern\devil\lib\x64;..\..\..\..\extern\glew\lib\x64;..\..\..\..\extern\tinyxml2\lib\x64</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>copy ..\..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\*.dll ..\..\bin</Command>
+      <Command>copy ..\..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\*.dll ..\..\..\..\bin</Command>
     </PostBuildEvent>
     <Lib>
       <OutputFile>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\\$(TargetFileName)</OutputFile>

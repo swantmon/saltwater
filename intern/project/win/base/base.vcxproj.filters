@@ -193,6 +193,7 @@
     <ClInclude Include="..\..\..\src\base\base_coordinate_system.h">
       <Filter>math</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_export.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="container">

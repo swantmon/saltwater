@@ -1,15 +1,17 @@
 
 #pragma once
 
+#include "base/base_export.h"
+
 namespace IO
 {
-    int GetOption(int _Argc, char* _pArgv[], char* _pOptions);
+    BASE_API int GetOption(int _Argc, char* _pArgv[], char* _pOptions);
 
-    const char* GetArgument();
+    BASE_API const char* GetArgument();
 
-    int GetOptionIndex();
+    BASE_API int GetOptionIndex();
 
-    int GetOptionError();
+    BASE_API int GetOptionError();
 
-    int GetOptionName();
+    BASE_API int GetOptionName();
 } // namespace IO

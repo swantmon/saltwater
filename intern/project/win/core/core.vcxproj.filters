@@ -21,6 +21,7 @@
     <ClInclude Include="..\..\..\src\core\core_plugin.h">
       <Filter>plugins</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\core\core_export.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\core\core_time.cpp">

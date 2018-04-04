@@ -3,17 +3,19 @@
 
 #include "base/base_typedef.h"
 
+#include "core/core_export.h"
+
 namespace Core
 {
 namespace Time
 {
-    void OnStart();
-    void OnExit();
+    CORE_API void OnStart();
+    CORE_API void OnExit();
 
-    void Update();
+    CORE_API void Update();
     
-    double GetDeltaTimeLastFrame();
+    CORE_API double GetDeltaTimeLastFrame();
     
-    Base::U64 GetNumberOfFrame();
+    CORE_API Base::U64 GetNumberOfFrame();
 } // namespace Time
 } // namespace Core

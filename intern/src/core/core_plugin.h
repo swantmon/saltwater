@@ -9,6 +9,7 @@ namespace Core
     // Config
     // -----------------------------------------------------------------------------
     #define CORE_PLUGIN_API_VERSION 1
+    #define CORE_PLUGIN_API_EXPORT __declspec(dllexport)
 
     // -----------------------------------------------------------------------------
     // Plugin interface
@@ -28,7 +29,7 @@ namespace Core
     // -----------------------------------------------------------------------------
     // Plugin function
     // -----------------------------------------------------------------------------
-    typedef IPlugin& (*PluginInstance)();
+    CORE_PLUGIN_API_EXPORT typedef IPlugin& (*PluginInstance)();
 
     // -----------------------------------------------------------------------------
     // Plugin info
@@ -49,12 +50,12 @@ namespace Core
     #define CORE_PLUGIN_INFO(_ClassName, _PluginName, _PluginVersion)              \
     extern "C"                                                                     \
     {                                                                              \
-        Core::IPlugin& GetInstance()                                               \
+        CORE_PLUGIN_API_EXPORT Core::IPlugin& GetInstance()                        \
         {                                                                          \
             static _ClassName s_Instance;                                          \
             return s_Instance;                                                     \
         }                                                                          \
-        Core::SPluginInfo InfoExport =                                             \
+        CORE_PLUGIN_API_EXPORT Core::SPluginInfo InfoExport =                      \
         {                                                                          \
             CORE_PLUGIN_API_VERSION,                                               \
             __FILE__,                                                              \

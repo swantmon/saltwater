@@ -3,13 +3,14 @@
 
 #include "base/base_console.h"
 #include "base/base_exception.h"
+#include "base/base_export.h"
 #include "base/base_json.h"
 
 #include <string>
 
 namespace IO
 {
-    class CProgramParameters
+    class BASE_API CProgramParameters
     {
     public:
 

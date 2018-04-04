@@ -1,8 +1,10 @@
 
 #pragma once
 
-#include "base/base_defines.h"
 #include "base/base_clock.h"
+#include "base/base_defines.h"
+#include "base/base_export.h"
+#include "base/base_uncopyable.h"
 
 #include <sstream>
 
@@ -26,8 +28,7 @@
 
 namespace IO
 {
-
-    class CConsole
+    class CConsole : public Base::CUncopyable
     {
     
     public:
@@ -43,23 +44,23 @@ namespace IO
 
     public:
 
-        static CConsole& GetInstance();
+        BASE_API static CConsole& GetInstance();
 
     public:
 
-        void Entry(EConsoleLevel _ConsoleLevel, const Char* _pText);
-        void Entry(EConsoleLevel _ConsoleLevel, Char*, const Char* _pFormat, ...);
-        std::ostringstream& StreamEntry(EConsoleLevel _ConsoleLevel);
+        BASE_API void Entry(EConsoleLevel _ConsoleLevel, const Char* _pText);
+        BASE_API void Entry(EConsoleLevel _ConsoleLevel, Char*, const Char* _pFormat, ...);
+        BASE_API std::ostringstream& StreamEntry(EConsoleLevel _ConsoleLevel);
 
-        void SetVerbosityLevel(int _Level);
+        BASE_API void SetVerbosityLevel(int _Level);
         
     public:
         
-        const Char* GetText() const;
+        BASE_API const Char* GetText() const;
         
     public:
         
-        void Clear();
+        BASE_API void Clear();
         
     private:
         
