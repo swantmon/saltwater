@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include "graphic/gfx_export.h"
+
 namespace Base
 {
     class CTextWriter;
@@ -19,8 +21,8 @@ namespace Gfx
 {
 namespace UnloadMap
 {
-    void OnEnter(Base::CTextWriter& _rSerializer);
-    void OnLeave();
-    void OnRun();
+    GFX_API void OnEnter(Base::CTextWriter& _rSerializer);
+    GFX_API void OnLeave();
+    GFX_API void OnRun();
 } // namespace UnloadMap
 } // namespace Gfx

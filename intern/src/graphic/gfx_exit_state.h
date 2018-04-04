@@ -9,12 +9,14 @@
 
 #pragma once
 
+#include "graphic/gfx_export.h"
+
 namespace Gfx
 {
 namespace Exit
 {
-    void OnEnter();
-    void OnLeave();
-    void OnRun();
+    GFX_API void OnEnter();
+    GFX_API void OnLeave();
+    GFX_API void OnRun();
 } // namespace Exit
 } // namespace Gfx

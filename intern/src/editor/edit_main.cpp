@@ -10,6 +10,8 @@
 
 #include <string>
 
+#include "windows.h"
+
 int main(int _Argc, char* _pArgv[])
 {
     const std::string VerbosityNameString = "console:verbose";
@@ -56,6 +58,9 @@ int main(int _Argc, char* _pArgv[])
     }
 
     Base::CConsole::GetInstance().SetVerbosityLevel(VerbosityLevel);
+
+
+    HINSTANCE Instance = LoadLibraryExW(L"graphicd.dll", NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
 
     try
     {

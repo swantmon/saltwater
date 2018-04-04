@@ -5,6 +5,7 @@
 #include "base/base_typedef.h"
 
 #include "graphic/gfx_buffer_set.h"
+#include "graphic/gfx_export.h"
 #include "graphic/gfx_input_layout.h"
 
 #include <string>
@@ -54,19 +55,19 @@ namespace Gfx
 
     public:
 
-        unsigned int GetID() const;
-        EType GetType() const;
-        const std::string& GetFileName() const;
-        const std::string& GetShaderName() const;
-        const std::string& GetShaderDefines() const;
+        GFX_API unsigned int GetID() const;
+        GFX_API EType GetType() const;
+        GFX_API const std::string& GetFileName() const;
+        GFX_API const std::string& GetShaderName() const;
+        GFX_API const std::string& GetShaderDefines() const;
 
     public:
 
-        bool HasAlpha() const;
+        GFX_API bool HasAlpha() const;
 
     public:
 
-        CInputLayoutPtr GetInputLayout();
+        GFX_API CInputLayoutPtr GetInputLayout();
 
     protected:
 

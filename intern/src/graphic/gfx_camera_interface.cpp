@@ -2,6 +2,7 @@
 #include "graphic/gfx_precompiled.h"
 
 #include "graphic/gfx_camera.h"
+#include "graphic/gfx_camera_interface.h"
 #include "graphic/gfx_main.h"
 #include "graphic/gfx_render_state.h"
 #include "graphic/gfx_state_manager.h"

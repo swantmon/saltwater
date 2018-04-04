@@ -3,6 +3,7 @@
 
 #include "base/base_managed_pool.h"
 
+#include "graphic/gfx_export.h"
 #include "graphic/gfx_view_port.h"
 
 namespace Gfx
@@ -15,12 +16,12 @@ namespace Gfx
 
         public:
 
-            unsigned int GetNumberOfViewPorts() const;
+            GFX_API unsigned int GetNumberOfViewPorts() const;
 
         public:
 
-            CViewPortPtr* GetViewPorts();
-            const CViewPortPtr* GetViewPorts() const;
+            GFX_API CViewPortPtr* GetViewPorts();
+            GFX_API const CViewPortPtr* GetViewPorts() const;
 
         protected:
 

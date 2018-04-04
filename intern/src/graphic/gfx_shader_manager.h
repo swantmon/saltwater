@@ -3,6 +3,7 @@
 
 #include "base/base_typedef.h"
 
+#include "graphic/gfx_export.h"
 #include "graphic/gfx_input_layout.h"
 #include "graphic/gfx_shader.h"
 
@@ -25,21 +26,21 @@ namespace Gfx
 {
 namespace ShaderManager
 {
-    void OnStart();
-    void OnExit();
+    GFX_API void OnStart();
+    GFX_API void OnExit();
 
-    CShaderPtr CompileVS(const Base::Char* _pFileName, const Base::Char* _pShaderName, const Base::Char* _pShaderDefines = nullptr, const Base::Char* _pShaderDescription = nullptr, unsigned int _Categories = 0, bool _HasAlpha = false, bool _Debug = false, bool _IsCode = false);
-    CShaderPtr CompileGS(const Base::Char* _pFileName, const Base::Char* _pShaderName, const Base::Char* _pShaderDefines = nullptr, const Base::Char* _pShaderDescription = nullptr, unsigned int _Categories = 0, bool _HasAlpha = false, bool _Debug = false, bool _IsCode = false);
-    CShaderPtr CompileDS(const Base::Char* _pFileName, const Base::Char* _pShaderName, const Base::Char* _pShaderDefines = nullptr, const Base::Char* _pShaderDescription = nullptr, unsigned int _Categories = 0, bool _HasAlpha = false, bool _Debug = false, bool _IsCode = false);
-    CShaderPtr CompileHS(const Base::Char* _pFileName, const Base::Char* _pShaderName, const Base::Char* _pShaderDefines = nullptr, const Base::Char* _pShaderDescription = nullptr, unsigned int _Categories = 0, bool _HasAlpha = false, bool _Debug = false, bool _IsCode = false);
-    CShaderPtr CompilePS(const Base::Char* _pFileName, const Base::Char* _pShaderName, const Base::Char* _pShaderDefines = nullptr, const Base::Char* _pShaderDescription = nullptr, unsigned int _Categories = 0, bool _HasAlpha = false, bool _Debug = false, bool _IsCode = false);
-    CShaderPtr CompileCS(const Base::Char* _pFileName, const Base::Char* _pShaderName, const Base::Char* _pShaderDefines = nullptr, const Base::Char* _pShaderDescription = nullptr, unsigned int _Categories = 0, bool _HasAlpha = false, bool _Debug = false, bool _IsCode = false);
+    GFX_API CShaderPtr CompileVS(const Base::Char* _pFileName, const Base::Char* _pShaderName, const Base::Char* _pShaderDefines = nullptr, const Base::Char* _pShaderDescription = nullptr, unsigned int _Categories = 0, bool _HasAlpha = false, bool _Debug = false, bool _IsCode = false);
+    GFX_API CShaderPtr CompileGS(const Base::Char* _pFileName, const Base::Char* _pShaderName, const Base::Char* _pShaderDefines = nullptr, const Base::Char* _pShaderDescription = nullptr, unsigned int _Categories = 0, bool _HasAlpha = false, bool _Debug = false, bool _IsCode = false);
+    GFX_API CShaderPtr CompileDS(const Base::Char* _pFileName, const Base::Char* _pShaderName, const Base::Char* _pShaderDefines = nullptr, const Base::Char* _pShaderDescription = nullptr, unsigned int _Categories = 0, bool _HasAlpha = false, bool _Debug = false, bool _IsCode = false);
+    GFX_API CShaderPtr CompileHS(const Base::Char* _pFileName, const Base::Char* _pShaderName, const Base::Char* _pShaderDefines = nullptr, const Base::Char* _pShaderDescription = nullptr, unsigned int _Categories = 0, bool _HasAlpha = false, bool _Debug = false, bool _IsCode = false);
+    GFX_API CShaderPtr CompilePS(const Base::Char* _pFileName, const Base::Char* _pShaderName, const Base::Char* _pShaderDefines = nullptr, const Base::Char* _pShaderDescription = nullptr, unsigned int _Categories = 0, bool _HasAlpha = false, bool _Debug = false, bool _IsCode = false);
+    GFX_API CShaderPtr CompileCS(const Base::Char* _pFileName, const Base::Char* _pShaderName, const Base::Char* _pShaderDefines = nullptr, const Base::Char* _pShaderDescription = nullptr, unsigned int _Categories = 0, bool _HasAlpha = false, bool _Debug = false, bool _IsCode = false);
 
-    void ReloadShader(CShaderPtr _ShaderPtr);
-    void ReloadAllShaders();
+    GFX_API void ReloadShader(CShaderPtr _ShaderPtr);
+    GFX_API void ReloadAllShaders();
 
-    CInputLayoutPtr CreateInputLayout(const SInputElementDescriptor* _pDescriptors, unsigned int _NumberOfDescriptors, CShaderPtr _ShaderVSPtr);
+    GFX_API CInputLayoutPtr CreateInputLayout(const SInputElementDescriptor* _pDescriptors, unsigned int _NumberOfDescriptors, CShaderPtr _ShaderVSPtr);
 
-	void SetShaderLabel(CShaderPtr _ShaderPtr, const char* _pLabel);
+    GFX_API void SetShaderLabel(CShaderPtr _ShaderPtr, const char* _pLabel);
 } // namespace ShaderManager
 } // namespace Gfx

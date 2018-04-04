@@ -1,17 +1,10 @@
 
-//
-//  gfx_main.h
-//  gfx
-//
-//  Created by Tobias Schwandt on 18/09/14.
-//  Copyright (c) 2014 TU Ilmenau. All rights reserved.
-//
-
 #pragma once
 
 #include "base/base_include_glm.h"
 
 #include "graphic/gfx_buffer.h"
+#include "graphic/gfx_export.h"
 #include "graphic/gfx_graphics_info.h"
 
 #include <functional>
@@ -30,37 +23,37 @@ namespace Gfx
 {
 namespace Main
 {
-    void OnStart();
-    void OnExit();
+    GFX_API void OnStart();
+    GFX_API void OnExit();
 
-    void RegisterResizeHandler(CResizeDelegate _NewDelgate);
+    GFX_API void RegisterResizeHandler(CResizeDelegate _NewDelgate);
 
-    unsigned int RegisterWindow(void* _pWindow, int _VSync = 1);
+    GFX_API unsigned int RegisterWindow(void* _pWindow, int _VSync = 1);
 
-    unsigned int GetNumberOfWindows();
+    GFX_API unsigned int GetNumberOfWindows();
 
-    void ActivateWindow(unsigned int _WindowID);
+    GFX_API void ActivateWindow(unsigned int _WindowID);
 
-    const glm::ivec2& GetActiveWindowSize();
-    const glm::ivec2& GetWindowSize(unsigned int _WindowID);
+    GFX_API const glm::ivec2& GetActiveWindowSize();
+    GFX_API const glm::ivec2& GetWindowSize(unsigned int _WindowID);
 
-    const glm::ivec2& GetActiveNativeWindowSize();
-    const glm::ivec2& GetNativeWindowSize(unsigned int _WindowID);
+    GFX_API const glm::ivec2& GetActiveNativeWindowSize();
+    GFX_API const glm::ivec2& GetNativeWindowSize(unsigned int _WindowID);
 
-    void OnResize(unsigned int _WindowID, unsigned int _Width, unsigned int _Height);
+    GFX_API void OnResize(unsigned int _WindowID, unsigned int _Width, unsigned int _Height);
 
-    void TakeScreenshot(unsigned int _WindowID, const char* _pPathToFile);
+    GFX_API void TakeScreenshot(unsigned int _WindowID, const char* _pPathToFile);
 
-    const CGraphicsInfo& GetGraphicsAPI();
-    bool IsExtensionAvailable(const std::string& _Name);
+    GFX_API const CGraphicsInfo& GetGraphicsAPI();
+    GFX_API bool IsExtensionAvailable(const std::string& _Name);
 
-    void BeginFrame();
-    void EndFrame();
+    GFX_API void BeginFrame();
+    GFX_API void EndFrame();
     
-    void CreatePerFrameConstantBuffers();
-    void DestroyPerFrameConstantBuffers();
-    void UploadPerFrameConstantBuffers();
+    GFX_API void CreatePerFrameConstantBuffers();
+    GFX_API void DestroyPerFrameConstantBuffers();
+    GFX_API void UploadPerFrameConstantBuffers();
     
-    CBufferPtr GetPerFrameConstantBuffer();
+    GFX_API CBufferPtr GetPerFrameConstantBuffer();
 } // namespace Main
 } // namespace Gfx

@@ -2,6 +2,7 @@
 #pragma once
 
 #include "graphic/gfx_buffer.h"
+#include "graphic/gfx_export.h"
 
 namespace Gfx
 {
@@ -41,14 +42,14 @@ namespace HistogramRenderer
     void Update();
     void Render();
 
-    void ResetSettings();
-    void SetSettings(const SHistogramSettings& _rSettings);
-    const SHistogramSettings& GetSettings();
+    GFX_API void ResetSettings();
+    GFX_API void SetSettings(const SHistogramSettings& _rSettings);
+    GFX_API const SHistogramSettings& GetSettings();
 
-    CBufferPtr GetExposureHistoryBuffer();
-    unsigned int GetCurrentExposureHistoryIndex();
-    unsigned int GetLastExposureHistoryIndex();
+    GFX_API CBufferPtr GetExposureHistoryBuffer();
+    GFX_API unsigned int GetCurrentExposureHistoryIndex();
+    GFX_API unsigned int GetLastExposureHistoryIndex();
     
-    void ResetEyeAdaption();
+    GFX_API void ResetEyeAdaption();
 } // namespace HistogramRenderer
 } // namespace Gfx

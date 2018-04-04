@@ -63,7 +63,7 @@ namespace
 
 namespace
 {
-    class BASE_APP_EXTERN CGfxMain : private Base::CUncopyable
+    class CGfxMain : private Base::CUncopyable
     {
         BASE_SINGLETON_FUNC(CGfxMain)
         

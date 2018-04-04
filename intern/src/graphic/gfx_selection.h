@@ -38,8 +38,8 @@ namespace Gfx
     public:
 
         SHitFlag::Enum m_HitFlag;
-        glm::vec3   m_WSPosition;
-        glm::vec3   m_WSNormal;
+        glm::vec3      m_WSPosition;
+        glm::vec3      m_WSNormal;
         float          m_Depth;
         void*          m_pObject;
     };

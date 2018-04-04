@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include "graphic/gfx_export.h"
+
 namespace Base
 {
     class CTextReader;
@@ -18,8 +20,8 @@ namespace Gfx
 {
 namespace LoadMap
 {
-    void OnEnter(Base::CTextReader& _rSerializer);
-    void OnLeave();
-    void OnRun();
+    GFX_API void OnEnter(Base::CTextReader& _rSerializer);
+    GFX_API void OnLeave();
+    GFX_API void OnRun();
 } // namespace LoadMap
 } // namespace Gfx

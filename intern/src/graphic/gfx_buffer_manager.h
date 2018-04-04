@@ -6,6 +6,7 @@
 #include "graphic/gfx_buffer.h"
 #include "graphic/gfx_buffer_set.h"
 #include "graphic/gfx_data_behavior.h"
+#include "graphic/gfx_export.h"
 
 #include <typeinfo>
 #include <typeindex>
@@ -28,28 +29,28 @@ namespace Gfx
 {
 namespace BufferManager
 {
-    void OnStart();
-    void OnExit();
+    GFX_API void OnStart();
+    GFX_API void OnExit();
 
-    CBufferPtr CreateBuffer(const SBufferDescriptor& _rDescriptor, SDataBehavior::Enum _Behavior = SDataBehavior::LeftAlone);
-    CBufferPtr GetBuffer(std::type_index _ClassKey);
+    GFX_API CBufferPtr CreateBuffer(const SBufferDescriptor& _rDescriptor, SDataBehavior::Enum _Behavior = SDataBehavior::LeftAlone);
+    GFX_API CBufferPtr GetBuffer(std::type_index _ClassKey);
 
-    CBufferSetPtr CreateBufferSet(CBufferPtr _Buffer1Ptr);
-    CBufferSetPtr CreateBufferSet(CBufferPtr _Buffer1Ptr, CBufferPtr _Buffer2Ptr);
-    CBufferSetPtr CreateBufferSet(CBufferPtr _Buffer1Ptr, CBufferPtr _Buffer2Ptr, CBufferPtr _Buffer3Ptr);
-    CBufferSetPtr CreateBufferSet(CBufferPtr _Buffer1Ptr, CBufferPtr _Buffer2Ptr, CBufferPtr _Buffer3Ptr, CBufferPtr _Buffer4Ptr);
-    CBufferSetPtr CreateBufferSet(CBufferPtr* _pBufferPtrs, unsigned int _NumberOfBuffers);
+    GFX_API CBufferSetPtr CreateBufferSet(CBufferPtr _Buffer1Ptr);
+    GFX_API CBufferSetPtr CreateBufferSet(CBufferPtr _Buffer1Ptr, CBufferPtr _Buffer2Ptr);
+    GFX_API CBufferSetPtr CreateBufferSet(CBufferPtr _Buffer1Ptr, CBufferPtr _Buffer2Ptr, CBufferPtr _Buffer3Ptr);
+    GFX_API CBufferSetPtr CreateBufferSet(CBufferPtr _Buffer1Ptr, CBufferPtr _Buffer2Ptr, CBufferPtr _Buffer3Ptr, CBufferPtr _Buffer4Ptr);
+    GFX_API CBufferSetPtr CreateBufferSet(CBufferPtr* _pBufferPtrs, unsigned int _NumberOfBuffers);
     
-    void CopyBufferToBuffer(CBufferPtr _TargetBufferPtr, CBufferPtr _SourceBufferPtr);
-    void CopyBufferToBuffer(CBufferPtr _TargetBufferPtr, CBufferPtr _SourceBufferPtr, unsigned int _ReadOffset, unsigned int _WriteOffset, unsigned int _Range);
+    GFX_API void CopyBufferToBuffer(CBufferPtr _TargetBufferPtr, CBufferPtr _SourceBufferPtr);
+    GFX_API void CopyBufferToBuffer(CBufferPtr _TargetBufferPtr, CBufferPtr _SourceBufferPtr, unsigned int _ReadOffset, unsigned int _WriteOffset, unsigned int _Range);
     
-    void* MapBuffer(CBufferPtr _BufferPtr, CBuffer::EMap _Map);
-    void* MapBufferRange(CBufferPtr _BufferPtr, CBuffer::EMap _Map, unsigned int _Offset, unsigned int _Range);
-    void UnmapBuffer(CBufferPtr _BufferPtr);
+    GFX_API void* MapBuffer(CBufferPtr _BufferPtr, CBuffer::EMap _Map);
+    GFX_API void* MapBufferRange(CBufferPtr _BufferPtr, CBuffer::EMap _Map, unsigned int _Offset, unsigned int _Range);
+    GFX_API void UnmapBuffer(CBufferPtr _BufferPtr);
     
-    void UploadBufferData(CBufferPtr _BufferPtr, const void* _pData);
-    void UploadBufferData(CBufferPtr _BufferPtr, const void* _pData, unsigned int _Offset, unsigned int _Range);
+    GFX_API void UploadBufferData(CBufferPtr _BufferPtr, const void* _pData);
+    GFX_API void UploadBufferData(CBufferPtr _BufferPtr, const void* _pData, unsigned int _Offset, unsigned int _Range);
 
-	void SetBufferLabel(CBufferPtr _BufferPtr, const char* _pLabel);
+    GFX_API void SetBufferLabel(CBufferPtr _BufferPtr, const char* _pLabel);
 } // namespace BufferManager
 } // namespace Gfx

@@ -28,7 +28,7 @@ namespace Core
     // -----------------------------------------------------------------------------
     // Plugin function
     // -----------------------------------------------------------------------------
-    BASE_LIB_EXTERN typedef IPlugin& (*PluginInstance)();
+    typedef IPlugin& (*PluginInstance)();
 
     // -----------------------------------------------------------------------------
     // Plugin info
@@ -49,12 +49,12 @@ namespace Core
     #define CORE_PLUGIN_INFO(_ClassName, _PluginName, _PluginVersion)              \
     extern "C"                                                                     \
     {                                                                              \
-        BASE_LIB_EXTERN Core::IPlugin& GetInstance()                               \
+        Core::IPlugin& GetInstance()                                               \
         {                                                                          \
             static _ClassName s_Instance;                                          \
             return s_Instance;                                                     \
         }                                                                          \
-        BASE_LIB_EXTERN Core::SPluginInfo InfoExport =                             \
+        Core::SPluginInfo InfoExport =                                             \
         {                                                                          \
             CORE_PLUGIN_API_VERSION,                                               \
             __FILE__,                                                              \

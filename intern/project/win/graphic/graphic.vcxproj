@@ -105,6 +105,7 @@
     <ClInclude Include="..\..\..\src\graphic\gfx_area_light.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_area_light_manager.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_edit_state.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_export.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_graphics_info.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_light_indirect_renderer.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_light_probe.h" />
@@ -262,6 +263,29 @@
     <None Include="..\..\..\..\data\graphic\shaders\vs_vm_pc.glsl" />
     <None Include="..\..\..\..\data\graphic\shaders\vs_vm_pnx0.glsl" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\base\base.vcxproj">
+      <Project>{f00b40d7-026a-45ae-a0db-126dbabc483d}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\camera\camera.vcxproj">
+      <Project>{bd2866f6-a265-40f7-92d0-ad067fe79f65}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\core\core.vcxproj">
+      <Project>{8bf7fb01-1873-4cb2-85a8-57ef3ed5afd4}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\data\data.vcxproj">
+      <Project>{969d14c4-1e9d-4feb-ba0a-247f244871e6}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\gui\gui.vcxproj">
+      <Project>{7d68649a-94cb-47ce-b2ac-ec0fc44333e4}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\logic\logic.vcxproj">
+      <Project>{bce4cc5a-541e-4838-94d1-73b962a02fbc}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\script\script.vcxproj">
+      <Project>{3b1acdce-b96b-4a3d-80b5-2539d4cf480f}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{CCA65C12-1AB6-4E15-9DA2-630AA1D60B2F}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
@@ -271,26 +295,26 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v141</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v141</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v141</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
@@ -341,7 +365,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GFX_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\assimp\include;..\..\..\..\extern\devil\include;..\..\..\..\extern\glew\include;..\..\..\..\extern\tinyxml2\include</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <PrecompiledHeaderFile>graphic/gfx_precompiled.h</PrecompiledHeaderFile>
@@ -350,9 +374,11 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>assimp.lib;DevIL.lib;ILU.lib;ILUT.lib;glew32.lib;SDL2.lib;SDL2main.lib;SDL2test.lib;</AdditionalDependencies>
+      <OutputFile>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\\$(TargetFileName)</OutputFile>
     </Link>
     <PostBuildEvent>
-      <Command>copy ..\..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\*.lib ..\..\..\build\$(Platform)</Command>
+      <Command>copy ..\..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\*.dll ..\..\..\..\bin</Command>
     </PostBuildEvent>
     <Lib>
       <OutputFile>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\\$(TargetFileName)</OutputFile>
@@ -363,7 +389,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GFX_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\assimp\include;..\..\..\..\extern\devil\include;..\..\..\..\extern\glew\include;..\..\..\..\extern\glm\include;..\..\..\..\extern\json\include;..\..\..\..\extern\tinyxml2\include</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <PrecompiledHeaderFile>graphic/gfx_precompiled.h</PrecompiledHeaderFile>
@@ -372,9 +398,12 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>assimp.lib;DevIL.lib;ILU.lib;ILUT.lib;glew32.lib;SDL2.lib;SDL2main.lib;SDL2test.lib;tinyxml2d.lib;opengl32.lib;glu32.lib;Qt5Core.lib;Qt5Gui.lib;Qt5Widgets.lib;qtmain.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\\$(TargetFileName)</OutputFile>
+      <AdditionalLibraryDirectories>..\..\..\..\extern\sdl2\lib\x64;..\..\..\build\x64;..\..\..\..\extern\assimp\lib\x64;..\..\..\..\extern\devil\lib\x64;..\..\..\..\extern\glew\lib\x64;..\..\..\..\extern\qt\lib\x64;..\..\..\..\extern\tinyxml2\lib\x64</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>copy ..\..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\*.lib ..\..\..\build\$(Platform)</Command>
+      <Command>copy ..\..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\*.dll ..\..\..\..\bin</Command>
     </PostBuildEvent>
     <Lib>
       <OutputFile>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\\$(TargetFileName)</OutputFile>
@@ -397,6 +426,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>assimp.lib;DevIL.lib;ILU.lib;ILUT.lib;glew32.lib;SDL2.lib;SDL2main.lib;SDL2test.lib;</AdditionalDependencies>
+      <OutputFile>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\\$(TargetFileName)</OutputFile>
     </Link>
     <PostBuildEvent>
       <Command>copy ..\..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\*.lib ..\..\..\build\$(Platform)</Command>
@@ -422,6 +453,9 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>assimp.lib;DevIL.lib;ILU.lib;ILUT.lib;glew32.lib;SDL2.lib;SDL2main.lib;SDL2test.lib;tinyxml2.lib;opengl32.lib;glu32.lib;Qt5Core.lib;Qt5Gui.lib;Qt5Widgets.lib;qtmain.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\\$(TargetFileName)</OutputFile>
+      <AdditionalLibraryDirectories>..\..\..\..\extern\assimp\lib\x64;..\..\..\..\extern\devil\lib\x64;..\..\..\..\extern\glew\lib\x64</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>copy ..\..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\*.lib ..\..\..\build\$(Platform)</Command>

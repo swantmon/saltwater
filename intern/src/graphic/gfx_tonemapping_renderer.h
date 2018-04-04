@@ -3,6 +3,8 @@
 
 #include "base/base_include_glm.h"
 
+#include "graphic/gfx_export.h"
+
 namespace Gfx
 {
     struct SColorGradingSettings
@@ -46,8 +48,8 @@ namespace TonemappingRenderer
     void Update();
     void Render();
 
-    void ResetSettings();
-    void SetSettings(const SColorGradingSettings& _rSettings);
-    const SColorGradingSettings& GetSettings();
+    GFX_API void ResetSettings();
+    GFX_API void SetSettings(const SColorGradingSettings& _rSettings);
+    GFX_API const SColorGradingSettings& GetSettings();
 } // namespace TonemappingRenderer
 } // namespace Gfx

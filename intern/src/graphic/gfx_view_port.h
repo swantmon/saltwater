@@ -3,6 +3,8 @@
 
 #include "base/base_managed_pool.h"
 
+#include "graphic/gfx_export.h"
+
 namespace Gfx
 {
     class CViewPort : public Base::CManagedPoolItemBase
@@ -14,15 +16,15 @@ namespace Gfx
             
         public:
 
-            float GetWidth() const;
-            float GetHeight() const;
+            GFX_API float GetWidth() const;
+            GFX_API float GetHeight() const;
 
-            float GetMinDepth() const;
-            float GetMaxDepth() const;
+            GFX_API float GetMinDepth() const;
+            GFX_API float GetMaxDepth() const;
 
-            float GetTopLeftX() const;
-            float GetTopLeftY() const;
-		
+            GFX_API float GetTopLeftX() const;
+            GFX_API float GetTopLeftY() const;
+
         public:
 
             struct SPort

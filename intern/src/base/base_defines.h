@@ -15,21 +15,6 @@
 #endif
 
 // -----------------------------------------------------------------------------
-// Shared library
-// -----------------------------------------------------------------------------
-#ifdef PLATFORM_WINDOWS
-#ifdef _WINDLL
-#define BASE_APP_EXTERN __declspec(dllimport)
-#define BASE_LIB_EXTERN __declspec(dllexport)
-#else
-#define BASE_APP_EXTERN __declspec(dllexport)
-#define BASE_LIB_EXTERN __declspec(dllimport)
-#endif
-#else
-#define BASE_EXTERN // nothing
-#endif
-
-// -----------------------------------------------------------------------------
 // Used variable macro
 // -----------------------------------------------------------------------------
 #define BASE_UNUSED(Argument)           ((void) & Argument)

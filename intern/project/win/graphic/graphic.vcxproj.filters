@@ -503,6 +503,7 @@
     <ClInclude Include="..\..\..\src\graphic\gfx_view_manager.h">
       <Filter>map\view</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_export.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="interface">
