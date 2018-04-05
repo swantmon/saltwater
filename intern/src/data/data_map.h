@@ -1,11 +1,7 @@
-//
-//  data_map.h
-//
-//  Created by Tobias Schwandt.
-//  Copyright (c) 2015 TU Ilmenau. All rights reserved.
-//
 
 #pragma once
+
+#include "engine/engine_config.h"
 
 #include "base/base_aabb3.h"
 #include "base/base_include_glm.h"
@@ -84,9 +80,9 @@ namespace Dt
 {
 namespace Map
 {
-    void AllocateMap(Base::Size _NumberOfRegionsX, Base::Size _NumberOfRegionsY);
-    void FreeMap();
-    bool HasMap();
+    ENGINE_API void AllocateMap(Base::Size _NumberOfRegionsX, Base::Size _NumberOfRegionsY);
+    ENGINE_API void FreeMap();
+    ENGINE_API bool HasMap();
 
     CRegion* GetRegions();                                                                                                                                          ///< Returns a pointer to the region array.
     CRegion& GetRegionByID(unsigned int _RegionID);                                                                                                                 ///< Returns the regions with the passed ID.

@@ -1,15 +1,17 @@
 
 #pragma once
 
+#include "engine/engine_config.h"
+
 namespace Scpt
 {
 namespace ScriptManager
 {
-    void OnStart();
-    void OnExit();
-    void Update();
+    ENGINE_API void OnStart();
+    ENGINE_API void OnExit();
+    ENGINE_API void Update();
 
-    void OnPause();
-    void OnResume();
+    ENGINE_API void OnPause();
+    ENGINE_API void OnResume();
 } // namespace ScriptManager
 } // namespace Scpt

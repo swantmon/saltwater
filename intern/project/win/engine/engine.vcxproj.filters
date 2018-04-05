@@ -193,9 +193,6 @@
     <Filter Include="graphic\ogl\textures">
       <UniqueIdentifier>{0b496bda-ad1c-45eb-9082-f9ee435b155e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="graphic\states">
-      <UniqueIdentifier>{8e84443b-abc8-448a-996b-e080555af484}</UniqueIdentifier>
-    </Filter>
     <Filter Include="gui">
       <UniqueIdentifier>{b533b512-ca15-40aa-8ac2-d98e7345dea9}</UniqueIdentifier>
     </Filter>
@@ -208,17 +205,8 @@
     <Filter Include="gui\interface\events">
       <UniqueIdentifier>{3badebfc-d1c1-450f-b351-725e635d4218}</UniqueIdentifier>
     </Filter>
-    <Filter Include="gui\states">
-      <UniqueIdentifier>{b6e03b35-ac61-4f10-a98d-4c945fbdad86}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="logic">
-      <UniqueIdentifier>{7f0c1e72-d5fa-4bc3-a75c-2d364bc3dfde}</UniqueIdentifier>
-    </Filter>
     <Filter Include="script">
       <UniqueIdentifier>{d9d67453-aac7-4e66-8f42-12a6a1655290}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="logic\states">
-      <UniqueIdentifier>{a483fb26-ed14-438c-8596-3a570dae37ab}</UniqueIdentifier>
     </Filter>
     <Filter Include="script\scripts">
       <UniqueIdentifier>{cf520dd1-7b9b-4730-84d8-54af3974c916}</UniqueIdentifier>
@@ -528,92 +516,11 @@
     <ClCompile Include="..\..\..\src\graphic\gfx_texture_manager.cpp">
       <Filter>graphic\ogl\textures</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_edit_state.cpp">
-      <Filter>graphic\states</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_debug_state.cpp">
-      <Filter>graphic\states</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_exit_state.cpp">
-      <Filter>graphic\states</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_intro_state.cpp">
-      <Filter>graphic\states</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_load_map_state.cpp">
-      <Filter>graphic\states</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_main_menu_state.cpp">
-      <Filter>graphic\states</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_play_state.cpp">
-      <Filter>graphic\states</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_start_state.cpp">
-      <Filter>graphic\states</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_unload_map_state.cpp">
-      <Filter>graphic\states</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\gui\gui_input_manager.cpp">
       <Filter>gui\input</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\gui\gui_event_handler.cpp">
       <Filter>gui\interface\events</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\gui\gui_debug_state.cpp">
-      <Filter>gui\states</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\gui\gui_edit_state.cpp">
-      <Filter>gui\states</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\gui\gui_exit_state.cpp">
-      <Filter>gui\states</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\gui\gui_intro_state.cpp">
-      <Filter>gui\states</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\gui\gui_load_map_state.cpp">
-      <Filter>gui\states</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\gui\gui_main_menu_state.cpp">
-      <Filter>gui\states</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\gui\gui_play_state.cpp">
-      <Filter>gui\states</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\gui\gui_start_state.cpp">
-      <Filter>gui\states</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\gui\gui_unload_map_state.cpp">
-      <Filter>gui\states</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\logic\lg_debug_state.cpp">
-      <Filter>logic\states</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\logic\lg_edit_state.cpp">
-      <Filter>logic\states</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\logic\lg_exit_state.cpp">
-      <Filter>logic\states</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\logic\lg_intro_state.cpp">
-      <Filter>logic\states</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\logic\lg_load_map_state.cpp">
-      <Filter>logic\states</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\logic\lg_main_menu_state.cpp">
-      <Filter>logic\states</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\logic\lg_play_state.cpp">
-      <Filter>logic\states</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\logic\lg_start_state.cpp">
-      <Filter>logic\states</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\logic\lg_unload_map_state.cpp">
-      <Filter>logic\states</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\script\script_script_manager.cpp">
       <Filter>script</Filter>
@@ -630,6 +537,10 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\camera\cam_control.cpp">
       <Filter>camera</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\engine\engine.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_engine.cpp">
+      <Filter>graphic</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1158,33 +1069,6 @@
     <ClInclude Include="..\..\..\src\graphic\gfx_native_texture.h">
       <Filter>graphic\ogl\textures</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_edit_state.h">
-      <Filter>graphic\states</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_debug_state.h">
-      <Filter>graphic\states</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_exit_state.h">
-      <Filter>graphic\states</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_intro_state.h">
-      <Filter>graphic\states</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_load_map_state.h">
-      <Filter>graphic\states</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_main_menu_state.h">
-      <Filter>graphic\states</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_play_state.h">
-      <Filter>graphic\states</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_start_state.h">
-      <Filter>graphic\states</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_unload_map_state.h">
-      <Filter>graphic\states</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\gui\gui_input_manager.h">
       <Filter>gui\input</Filter>
     </ClInclude>
@@ -1193,60 +1077,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\gui\gui_event_handler.h">
       <Filter>gui\interface\events</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\gui\gui_debug_state.h">
-      <Filter>gui\states</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\gui\gui_edit_state.h">
-      <Filter>gui\states</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\gui\gui_exit_state.h">
-      <Filter>gui\states</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\gui\gui_intro_state.h">
-      <Filter>gui\states</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\gui\gui_load_map_state.h">
-      <Filter>gui\states</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\gui\gui_main_menu_state.h">
-      <Filter>gui\states</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\gui\gui_play_state.h">
-      <Filter>gui\states</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\gui\gui_start_state.h">
-      <Filter>gui\states</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\gui\gui_unload_map_state.h">
-      <Filter>gui\states</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\logic\lg_debug_state.h">
-      <Filter>logic\states</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\logic\lg_edit_state.h">
-      <Filter>logic\states</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\logic\lg_exit_state.h">
-      <Filter>logic\states</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\logic\lg_intro_state.h">
-      <Filter>logic\states</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\logic\lg_load_map_state.h">
-      <Filter>logic\states</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\logic\lg_main_menu_state.h">
-      <Filter>logic\states</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\logic\lg_play_state.h">
-      <Filter>logic\states</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\logic\lg_start_state.h">
-      <Filter>logic\states</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\logic\lg_unload_map_state.h">
-      <Filter>logic\states</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\script\script_ar_camera_control_script.h">
       <Filter>script\scripts</Filter>
@@ -1285,6 +1115,10 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\base_defines.h">
       <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\engine\engine.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_engine.h">
+      <Filter>graphic</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

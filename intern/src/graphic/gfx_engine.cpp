@@ -11,6 +11,7 @@
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_debug_renderer.h"
+#include "graphic/gfx_engine.h"
 #include "graphic/gfx_fog_renderer.h"
 #include "graphic/gfx_histogram_renderer.h"
 #include "graphic/gfx_light_area_renderer.h"
@@ -33,7 +34,6 @@
 #include "graphic/gfx_shader_manager.h"
 #include "graphic/gfx_shadow_renderer.h"
 #include "graphic/gfx_sky_manager.h"
-#include "graphic/gfx_start_state.h"
 #include "graphic/gfx_state_manager.h"
 #include "graphic/gfx_sun_manager.h"
 #include "graphic/gfx_target_set_manager.h"
@@ -43,24 +43,11 @@
 
 using namespace Gfx;
 
-namespace
+namespace Gfx
 {
-    class CGfxStartState : private Base::CUncopyable
-    {
-        BASE_SINGLETON_FUNC(CGfxStartState)
-        
-    public:
-        
-        void OnEnter();
-        void OnLeave();
-        void OnRun();
-        
-    };
-} // namespace
-
-namespace
+namespace Engine
 {
-    void CGfxStartState::OnEnter()
+    void OnStart()
     {
         // -----------------------------------------------------------------------------
         // Start engine
@@ -337,43 +324,180 @@ namespace
 
         BASE_CONSOLE_STREAMINFO("Gfx> Finished renderer starting.");
     }
-    
-    // -----------------------------------------------------------------------------
-    
-    void CGfxStartState::OnLeave()
-    {
-        
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    void CGfxStartState::OnRun()
-    {
-        
-    }
-} // namespace
 
-namespace Gfx
-{
-namespace Start
-{
-    void OnEnter()
-    {
-        CGfxStartState::GetInstance().OnEnter();
-    }
-    
     // -----------------------------------------------------------------------------
-    
-    void OnLeave()
+
+    void OnExit()
     {
-        CGfxStartState::GetInstance().OnLeave();
+        // -----------------------------------------------------------------------------
+        // Exit renderer. Now it isn't necessary to do this in a specific direction.
+        // -----------------------------------------------------------------------------
+        BASE_CONSOLE_STREAMINFO("Gfx> Exit renderer...");
+
+        BackgroundRenderer   ::OnExit();
+        DebugRenderer        ::OnExit();
+        SelectionRenderer    ::OnExit();
+        LightAreaRenderer    ::OnExit();
+        ReflectionRenderer   ::OnExit();
+        LightPointRenderer   ::OnExit();
+        LightSunRenderer     ::OnExit();
+        LightIndirectRenderer::OnExit();
+        ShadowRenderer       ::OnExit();
+        FogRenderer          ::OnExit();
+        HistogramRenderer    ::OnExit();
+        MeshRenderer         ::OnExit();
+        ARRenderer           ::OnExit();
+        ParticleRenderer     ::OnExit();
+        PostFXHDR            ::OnExit();
+        PostFX               ::OnExit();
+        TonemappingRenderer  ::OnExit();
+
+        BASE_CONSOLE_STREAMINFO("Gfx> Finished exit of renderer.");
+        
+        // -----------------------------------------------------------------------------
+        // Destroy main graphic data
+        // -----------------------------------------------------------------------------
+        BASE_CONSOLE_STREAMINFO("Gfx> Destroy global constant buffer.");
+
+        Main::DestroyPerFrameConstantBuffers();   
+
+        BASE_CONSOLE_STREAMINFO("Gfx> Global constant buffer destroyed.");
+        
+        // -----------------------------------------------------------------------------
+        // Exit manager
+        // -----------------------------------------------------------------------------
+        BASE_CONSOLE_STREAMINFO("Gfx> Exit manager...");
+
+        PointLightManager ::OnExit();
+        AreaLightManager  ::OnExit();
+        LightProbeManager ::OnExit();
+        SkyManager        ::OnExit();
+        SunManager        ::OnExit();
+        MeshManager       ::OnExit();
+        MaterialManager   ::OnExit();
+        ViewManager       ::OnExit();
+
+        BASE_CONSOLE_STREAMINFO("Gfx> Finished exiting manager.");
+
+        // -----------------------------------------------------------------------------
+        // Exit graphic resources
+        // -----------------------------------------------------------------------------
+        BASE_CONSOLE_STREAMINFO("Gfx> Exit resource manager.");
+
+        TargetSetManager::OnExit();
+        ContextManager  ::OnExit();
+        StateManager    ::OnExit();
+        ShaderManager   ::OnExit();
+        BufferManager   ::OnExit();
+        TextureManager  ::OnExit();
+        SamplerManager  ::OnExit();
+
+        BASE_CONSOLE_STREAMINFO("Gfx> Finished exiting resource manager.");
+
+        // -----------------------------------------------------------------------------
+        // Exit performance tools
+        // -----------------------------------------------------------------------------
+        Performance::OnExit();
+
+        // -----------------------------------------------------------------------------
+        // Exit engine
+        // -----------------------------------------------------------------------------
+        Main::OnExit();
     }
-    
+
     // -----------------------------------------------------------------------------
-    
-    void OnRun()
+
+    void Render()
     {
-        CGfxStartState::GetInstance().OnRun();
+        // -----------------------------------------------------------------------------
+        // Begin frame
+        // -----------------------------------------------------------------------------
+        Main::BeginFrame();
+
+        Performance::Update();
+
+        // -----------------------------------------------------------------------------
+        // Update graphic entities
+        // -----------------------------------------------------------------------------
+        SunManager        ::Update();
+        SkyManager        ::Update();
+        LightProbeManager ::Update();
+        PointLightManager ::Update();
+        AreaLightManager  ::Update();
+
+        // -----------------------------------------------------------------------------
+        // Update graphic
+        // -----------------------------------------------------------------------------
+        Main::UploadPerFrameConstantBuffers();
+        
+        // -----------------------------------------------------------------------------
+        // Update renderer to prepare for rendering
+        // -----------------------------------------------------------------------------
+        ARRenderer           ::Update();
+        MeshRenderer         ::Update();
+        FogRenderer          ::Update();
+        ShadowRenderer       ::Update();
+        LightAreaRenderer    ::Update();
+        LightPointRenderer   ::Update();
+        LightSunRenderer     ::Update();
+        LightIndirectRenderer::Update();
+        ReflectionRenderer   ::Update();
+        BackgroundRenderer   ::Update();
+        HistogramRenderer    ::Update();
+        TonemappingRenderer  ::Update();
+        PostFXHDR            ::Update();
+        PostFX               ::Update();
+        SelectionRenderer    ::Update();
+
+        // -----------------------------------------------------------------------------
+        // Creation Pass
+        // -----------------------------------------------------------------------------
+        Performance::BeginEvent("Creation Pass");
+
+        ARRenderer  ::Render();
+        MeshRenderer::Render();
+
+        Performance::EndEvent();
+        
+        // -----------------------------------------------------------------------------
+        // Lighting Pass
+        // -----------------------------------------------------------------------------
+        Performance::BeginEvent("Lighting Pass");
+
+        ShadowRenderer       ::Render();
+        LightSunRenderer     ::Render();
+        LightAreaRenderer    ::Render();
+        LightPointRenderer   ::Render();
+        LightIndirectRenderer::Render();
+        ReflectionRenderer   ::Render();
+        BackgroundRenderer   ::Render();
+        FogRenderer          ::Render();
+
+        HistogramRenderer::Render();
+
+        PostFXHDR::Render();
+
+        Performance::EndEvent();
+
+        // -----------------------------------------------------------------------------
+        // Shading Pass
+        // -----------------------------------------------------------------------------
+        Performance::BeginEvent("Shading Pass");
+        
+        TonemappingRenderer::Render();
+
+        LightAreaRenderer::RenderBulbs();
+
+        SelectionRenderer::Render();
+
+        PostFX::Render();
+
+        Performance::EndEvent();
+
+        // -----------------------------------------------------------------------------
+        // End
+        // -----------------------------------------------------------------------------
+        Main::EndFrame();
     }
-} // namespace Start
+} // namespace Engine
 } // namespace Gfx

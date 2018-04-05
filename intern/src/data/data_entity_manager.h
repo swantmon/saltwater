@@ -45,12 +45,12 @@ namespace Dt
 {
 namespace EntityManager
 {
-    void OnStart();
-    void OnExit();
+    ENGINE_API void OnStart();
+    ENGINE_API void OnExit();
 
-    void Update();
+    ENGINE_API void Update();
 
-    void Clear();
+    ENGINE_API void Clear();
 
     ENGINE_API CEntity& CreateEntity(const SEntityDescriptor& _rDescriptor, CEntity::BID _ID = CEntity::s_InvalidID);
 
