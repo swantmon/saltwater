@@ -1,5 +1,7 @@
 
-#include "core/core_precompiled.h"
+#include "engine/engine_precompiled.h"
+
+#include "engine/engine_config.h"
 
 #include "base/base_console.h"
 #include "base/base_crc.h"
@@ -8,7 +10,6 @@
 #include "base/base_uncopyable.h"
 #include "base/base_singleton.h"
 
-#include "core/core_config.h"
 #include "core/core_plugin_manager.h"
 
 #include <map>

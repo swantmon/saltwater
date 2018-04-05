@@ -1,11 +1,13 @@
 
 #pragma once
 
+#include "engine/engine_config.h"
+
 #include "base/base_include_glm.h"
 
 namespace Dt
 {
-    class CTransformationFacet
+    class ENGINE_API CTransformationFacet
     {
     public:
 

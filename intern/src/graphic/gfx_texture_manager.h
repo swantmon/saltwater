@@ -1,11 +1,12 @@
 
 #pragma once
 
+#include "engine/engine_config.h"
+
 #include "base/base_aabb2.h"
 #include "base/base_typedef.h"
 
 #include "graphic/gfx_data_behavior.h"
-#include "graphic/gfx_export.h"
 #include "graphic/gfx_target_set.h"
 #include "graphic/gfx_texture.h"
 #include "graphic/gfx_texture_set.h"
@@ -39,39 +40,39 @@ namespace Gfx
 {
 namespace TextureManager
 {
-    GFX_API void OnStart();
-    GFX_API void OnExit();
+    void OnStart();
+    void OnExit();
 
-    GFX_API CTexturePtr GetDummyTexture2D();
-    GFX_API CTexturePtr GetDummyTexture3D();
-    GFX_API CTexturePtr GetDummyCubeTexture();
+    ENGINE_API CTexturePtr GetDummyTexture2D();
+    ENGINE_API CTexturePtr GetDummyTexture3D();
+    ENGINE_API CTexturePtr GetDummyCubeTexture();
 
-    GFX_API CTexturePtr CreateTexture2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable = true, SDataBehavior::Enum _Behavior = SDataBehavior::LeftAlone);
-    GFX_API CTexturePtr CreateTexture3D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable = true, SDataBehavior::Enum _Behavior = SDataBehavior::LeftAlone);
+    ENGINE_API CTexturePtr CreateTexture2D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable = true, SDataBehavior::Enum _Behavior = SDataBehavior::LeftAlone);
+    ENGINE_API CTexturePtr CreateTexture3D(const STextureDescriptor& _rDescriptor, bool _IsDeleteable = true, SDataBehavior::Enum _Behavior = SDataBehavior::LeftAlone);
 
-    GFX_API CTexturePtr CreateCubeTexture(const STextureDescriptor& _rDescriptor, bool _IsDeleteable = true, SDataBehavior::Enum _Behavior = SDataBehavior::LeftAlone);
+    ENGINE_API CTexturePtr CreateCubeTexture(const STextureDescriptor& _rDescriptor, bool _IsDeleteable = true, SDataBehavior::Enum _Behavior = SDataBehavior::LeftAlone);
 
-    GFX_API CTexturePtr CreateExternalTexture();
+    ENGINE_API CTexturePtr CreateExternalTexture();
     
-    GFX_API CTextureSetPtr CreateTextureSet(CTexturePtr _Texture1Ptr);
-    GFX_API CTextureSetPtr CreateTextureSet(CTexturePtr _Texture1Ptr, CTexturePtr _Texture2Ptr);
-    GFX_API CTextureSetPtr CreateTextureSet(CTexturePtr _Texture1Ptr, CTexturePtr _Texture2Ptr, CTexturePtr _Texture3Ptr);
-    GFX_API CTextureSetPtr CreateTextureSet(CTexturePtr _Texture1Ptr, CTexturePtr _Texture2Ptr, CTexturePtr _Texture3Ptr, CTexturePtr _Texture4Ptr);
-    GFX_API CTextureSetPtr CreateTextureSet(CTexturePtr* _pTexturePtrs, unsigned int _NumberOfTextures);
+    ENGINE_API CTextureSetPtr CreateTextureSet(CTexturePtr _Texture1Ptr);
+    ENGINE_API CTextureSetPtr CreateTextureSet(CTexturePtr _Texture1Ptr, CTexturePtr _Texture2Ptr);
+    ENGINE_API CTextureSetPtr CreateTextureSet(CTexturePtr _Texture1Ptr, CTexturePtr _Texture2Ptr, CTexturePtr _Texture3Ptr);
+    ENGINE_API CTextureSetPtr CreateTextureSet(CTexturePtr _Texture1Ptr, CTexturePtr _Texture2Ptr, CTexturePtr _Texture3Ptr, CTexturePtr _Texture4Ptr);
+    ENGINE_API CTextureSetPtr CreateTextureSet(CTexturePtr* _pTexturePtrs, unsigned int _NumberOfTextures);
 
-    GFX_API CTexturePtr GetTextureByHash(unsigned int _Hash);
+    ENGINE_API CTexturePtr GetTextureByHash(unsigned int _Hash);
 
-    GFX_API void ClearTextureLayer(CTexturePtr _TexturePtr, const void* _pData = nullptr, int _Layer = 0);
-    GFX_API void ClearTexture(CTexturePtr _TexturePtr, const void* _pData = nullptr);
+    ENGINE_API void ClearTextureLayer(CTexturePtr _TexturePtr, const void* _pData = nullptr, int _Layer = 0);
+    ENGINE_API void ClearTexture(CTexturePtr _TexturePtr, const void* _pData = nullptr);
 
-    GFX_API void CopyToTexture2D(CTexturePtr _TexturePtr, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, void* _pBytes, bool _UpdateMipLevels = false);
-    GFX_API void CopyToTextureArray2D(CTexturePtr _TextureArrayPtr, unsigned int _IndexOfSlice, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, void* _pBytes, bool _UpdateMipLevels = false);
-    GFX_API void CopyToTextureArray2D(CTexturePtr _TextureArrayPtr, unsigned int _IndexOfSlice, CTexturePtr _TexturePtr, bool _UpdateMipLevels = false);
+    ENGINE_API void CopyToTexture2D(CTexturePtr _TexturePtr, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, void* _pBytes, bool _UpdateMipLevels = false);
+    ENGINE_API void CopyToTextureArray2D(CTexturePtr _TextureArrayPtr, unsigned int _IndexOfSlice, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, void* _pBytes, bool _UpdateMipLevels = false);
+    ENGINE_API void CopyToTextureArray2D(CTexturePtr _TextureArrayPtr, unsigned int _IndexOfSlice, CTexturePtr _TexturePtr, bool _UpdateMipLevels = false);
 
-    GFX_API CTexturePtr GetMipmapFromTexture2D(CTexturePtr _TexturePtr, unsigned int _Mipmap);
+    ENGINE_API CTexturePtr GetMipmapFromTexture2D(CTexturePtr _TexturePtr, unsigned int _Mipmap);
     
-    GFX_API void UpdateMipmap(CTexturePtr _TexturePtr);
+    ENGINE_API void UpdateMipmap(CTexturePtr _TexturePtr);
 
-    GFX_API void SetTextureLabel(CTexturePtr _TexturePtr, const char* _pLabel);
+    ENGINE_API void SetTextureLabel(CTexturePtr _TexturePtr, const char* _pLabel);
 } // namespace TextureManager
 } // namespace Gfx

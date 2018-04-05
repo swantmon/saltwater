@@ -1,7 +1,7 @@
 
-#include "plugin/arcore/mr_precompiled.h"
+#include "plugin_arcore/mr_precompiled.h"
 
-#include "plugin/arcore/mr_camera.h"
+#include "plugin_arcore/mr_camera.h"
 
 namespace MR
 {

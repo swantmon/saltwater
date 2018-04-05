@@ -1,8 +1,9 @@
 
 #pragma once
 
+#include "engine/engine_config.h"
+
 #include "graphic/gfx_buffer.h"
-#include "graphic/gfx_export.h"
 
 namespace Gfx
 {
@@ -42,14 +43,14 @@ namespace HistogramRenderer
     void Update();
     void Render();
 
-    GFX_API void ResetSettings();
-    GFX_API void SetSettings(const SHistogramSettings& _rSettings);
-    GFX_API const SHistogramSettings& GetSettings();
+    ENGINE_API void ResetSettings();
+    ENGINE_API void SetSettings(const SHistogramSettings& _rSettings);
+    ENGINE_API const SHistogramSettings& GetSettings();
 
-    GFX_API CBufferPtr GetExposureHistoryBuffer();
-    GFX_API unsigned int GetCurrentExposureHistoryIndex();
-    GFX_API unsigned int GetLastExposureHistoryIndex();
+    ENGINE_API CBufferPtr GetExposureHistoryBuffer();
+    ENGINE_API unsigned int GetCurrentExposureHistoryIndex();
+    ENGINE_API unsigned int GetLastExposureHistoryIndex();
     
-    GFX_API void ResetEyeAdaption();
+    ENGINE_API void ResetEyeAdaption();
 } // namespace HistogramRenderer
 } // namespace Gfx

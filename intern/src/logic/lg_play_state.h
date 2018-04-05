@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include "engine/engine_config.h"
+
 namespace Lg
 {
 namespace Play
@@ -23,8 +25,8 @@ namespace Play
         };;
     };
     
-    int OnEnter();
-    int OnLeave();
-    int OnRun();
+    ENGINE_API int OnEnter();
+    ENGINE_API int OnLeave();
+    ENGINE_API int OnRun();
 } // namespace Play
 } // namespace Lg

@@ -1,7 +1,50 @@
 
 #pragma once
 
+// -----------------------------------------------------------------------------
+// STL includes
+// -----------------------------------------------------------------------------
+#include <sstream> 
+#include <fstream> 
+#include <iostream> 
+#include <stdarg.h> 
+#include <assert.h> 
+#include <exception> 
+#include <memory.h> 
+#include <new> 
+#include <stdlib.h> 
+#include <chrono> 
+#include <algorithm> 
+#include <random> 
+
+#define _USE_MATH_DEFINES 
+#define NOMINMAX
+#include <cmath> 
+
+// -----------------------------------------------------------------------------
+// Base includes
+// -----------------------------------------------------------------------------
+#include "base/base_include_glm.h"
 #include "base/base_console.h"
+#include "base/base_defines.h"
+
+// -----------------------------------------------------------------------------
+// Platform specific includes
+// -----------------------------------------------------------------------------
+#ifdef PLATFORM_ANDROID
+
+#include <jni.h> 
+#include <android/native_window.h>
+
+#else  // PLATFORM_ANDROID
+
+#include <windows.h>
+
+#endif
+
+// -----------------------------------------------------------------------------
+// Graphic
+// -----------------------------------------------------------------------------
 
 // -----------------------------------------------------------------------------
 // Extension: OES_EGL_image_external
@@ -16,12 +59,7 @@
 
 #endif /* GL_OES_EGL_image_external */
 
-// -----------------------------------------------------------------------------
-// Platform specific stuff
-// -----------------------------------------------------------------------------
 #ifdef PLATFORM_ANDROID
-
-#include <android/native_window.h>
 
 #define GL_GLEXT_PROTOTYPES
 
@@ -50,7 +88,6 @@
 
 typedef void (GFX_APIENTRY *GfxBufferStorageEXT)(GLenum target, GLsizeiptr size, const void * data, GLbitfield flags);
 
-
 // -----------------------------------------------------------------------------
 // Extension: EXT_disjoint_timer_query
 // -----------------------------------------------------------------------------
@@ -78,8 +115,6 @@ typedef void (GFX_APIENTRY *GfxGetQueryObjectui64vEXT)(GLuint id, GLenum pname, 
 
 #include "GL/glew.h"
 #include "GL/wglew.h"
-
-#include <windows.h>
 
 // -----------------------------------------------------------------------------
 // Global defines

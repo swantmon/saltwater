@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include "engine/engine_config.h"
+
 namespace Lg
 {
 namespace Intro
@@ -22,8 +24,8 @@ namespace Intro
         };
     };
     
-    int OnEnter();
-    int OnLeave();
-    int OnRun();
+    ENGINE_API int OnEnter();
+    ENGINE_API int OnLeave();
+    ENGINE_API int OnRun();
 } // namespace Intro
 } // namespace Lg

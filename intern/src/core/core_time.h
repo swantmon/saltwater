@@ -1,21 +1,21 @@
 
 #pragma once
 
-#include "base/base_typedef.h"
+#include "engine/engine_config.h"
 
-#include "core/core_export.h"
+#include "base/base_typedef.h"
 
 namespace Core
 {
 namespace Time
 {
-    CORE_API void OnStart();
-    CORE_API void OnExit();
+    ENGINE_API void OnStart();
+    ENGINE_API void OnExit();
 
-    CORE_API void Update();
+    ENGINE_API void Update();
     
-    CORE_API double GetDeltaTimeLastFrame();
+    ENGINE_API double GetDeltaTimeLastFrame();
     
-    CORE_API Base::U64 GetNumberOfFrame();
+    ENGINE_API Base::U64 GetNumberOfFrame();
 } // namespace Time
 } // namespace Core

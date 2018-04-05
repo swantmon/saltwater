@@ -1,13 +1,15 @@
 
 #pragma once
 
+#include "engine/engine_config.h"
+
 #include "data/data_component.h"
 
 #include <string>
 
 namespace Dt
 {
-    class CMeshComponent : public CComponent<CMeshComponent>
+    class ENGINE_API CMeshComponent : public CComponent<CMeshComponent>
     {
     public:
 

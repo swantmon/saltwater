@@ -1,0 +1,1290 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="base">
+      <UniqueIdentifier>{ecce0d69-8a05-45ef-bee3-3936eb6f89f8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="base\container">
+      <UniqueIdentifier>{56f8bf64-e62e-47bd-a10a-f07eb78f55d8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="base\core">
+      <UniqueIdentifier>{6f7b1719-33d2-4516-95a7-e16ab19e2a62}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="base\core\native">
+      <UniqueIdentifier>{2f777c14-3d29-466d-8cc4-c35e7f066a3b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="base\encryption">
+      <UniqueIdentifier>{3ce5cf1c-8211-4862-b9d1-1ade230de80b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="base\includes">
+      <UniqueIdentifier>{7394caf7-1fcc-48a8-8072-91eb790e8114}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="base\io">
+      <UniqueIdentifier>{1a4bc650-b54c-4fca-8c45-5685b86ee20e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="base\math">
+      <UniqueIdentifier>{67deaa37-3679-4c6c-b4f9-9d60e17b14de}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="base\memory">
+      <UniqueIdentifier>{f85480b6-92a7-45e9-b9e7-7d27329a5ccc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="base\pattern">
+      <UniqueIdentifier>{065b714d-7d5b-45a4-bf7e-06a1cc701370}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="base\serialization">
+      <UniqueIdentifier>{0fd8c5c1-137d-40d4-9651-29776f166267}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="base\tests">
+      <UniqueIdentifier>{bc5b0f5e-3dfd-448d-b196-c553c8586874}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core">
+      <UniqueIdentifier>{e8ccf9e8-f422-4dba-8d89-e88932b344b0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\assets">
+      <UniqueIdentifier>{1be215ae-61d3-4e95-8ad1-19b32d459b01}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\plugins">
+      <UniqueIdentifier>{263364b0-177a-4044-87f0-a635fb04a72e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\time">
+      <UniqueIdentifier>{9ca09289-cfdd-42f2-a54a-c31dbfa0103e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="data">
+      <UniqueIdentifier>{29b50be3-b87b-4de9-ba9e-ef058cc72853}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="data\map">
+      <UniqueIdentifier>{e94eaeb7-7e30-4cb6-964a-a20693eea8a5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="data\map\entity">
+      <UniqueIdentifier>{5b88d449-a795-45f8-9131-f7d08820a8e2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="data\map\entity\facets">
+      <UniqueIdentifier>{e3d9a41b-98dc-44f1-aa19-b9f4c30a02b1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="data\map\entity\facets\transformation">
+      <UniqueIdentifier>{ccafc8c6-70d7-41cf-a693-c5707891daab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="data\map\entity\facets\hierarchy">
+      <UniqueIdentifier>{763826de-94cc-4980-841f-1ec0693efb6b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="data\map\entity\facets\components">
+      <UniqueIdentifier>{c5f07969-b00b-4fb7-b889-123a73695e9d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="data\map\entity\components">
+      <UniqueIdentifier>{466ec029-4113-4b1e-90ec-c70308f53c6b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="data\map\entity\components\lights">
+      <UniqueIdentifier>{1a172747-90cd-4e12-962b-b057a1c69cae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="data\map\entity\components\plugins">
+      <UniqueIdentifier>{e646aab9-72ef-405b-9fa2-8679da0e5706}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="data\map\entity\components\fx">
+      <UniqueIdentifier>{cd82ade6-9fcc-4715-9f66-69a6cb70ab9f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="data\map\entity\components\model">
+      <UniqueIdentifier>{a52e66f8-7530-4bda-afe6-bd7c4d987dd2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="data\map\entity\components\camera">
+      <UniqueIdentifier>{1279d6aa-c7a1-4160-8536-7b6eb19e0e3a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="data\map\entity\components\scripts">
+      <UniqueIdentifier>{b3d687b0-64c4-47eb-a5d1-7e1ab39277a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="data\materials">
+      <UniqueIdentifier>{65b5089e-40fd-40a7-9e32-7e94d37aa14f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphic">
+      <UniqueIdentifier>{4736580d-51a3-4fbd-be18-dc596dc2dd3e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphic\engine">
+      <UniqueIdentifier>{0319edd1-736d-4bf7-8375-7caab8265e24}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphic\engine\renderer">
+      <UniqueIdentifier>{03013e6b-76c5-4709-b5d8-1f1aba6c3bd1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphic\engine\buffers">
+      <UniqueIdentifier>{b0e852a5-3b32-4efb-b945-895bbc97ca15}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphic\engine\context">
+      <UniqueIdentifier>{aa7ced3e-79ff-47ab-85b3-3780468f28cf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphic\engine\layout">
+      <UniqueIdentifier>{33339045-bb87-42b4-830e-845ceae1cf42}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphic\engine\shaders">
+      <UniqueIdentifier>{08f56763-bb63-4637-8a79-df1535bd2a27}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphic\engine\states">
+      <UniqueIdentifier>{53eb1cbd-61d3-47c9-9df3-498ddd9d4ac3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphic\engine\states\description">
+      <UniqueIdentifier>{51835457-6ded-4f28-9911-1b8ba5d183c5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphic\engine\target sets">
+      <UniqueIdentifier>{284c6e23-6c43-41c7-a530-a03862f7a40c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphic\engine\textures">
+      <UniqueIdentifier>{f72a1c77-55ff-4283-b44f-2a68346ea63b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphic\engine\view ports">
+      <UniqueIdentifier>{3a010a50-d894-4b33-a998-28f6173c632f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphic\engine\memory">
+      <UniqueIdentifier>{639aeb74-1ddb-4ca8-be7f-872484fd3935}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphic\engine\topology">
+      <UniqueIdentifier>{38eca52f-c95d-4451-8b21-c40575becb82}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphic\engine\samplers">
+      <UniqueIdentifier>{83d7ed92-51c7-4558-a46c-9c9b5d33ec78}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphic\interface">
+      <UniqueIdentifier>{559aa0d9-abe5-4ca5-985e-b3a457c14fdc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphic\interface\camera">
+      <UniqueIdentifier>{d0732389-ebe8-4a8c-a511-4c80ea0c8cc2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphic\interface\app">
+      <UniqueIdentifier>{9d32a652-c229-48b2-b649-b98cdf7cf9d9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphic\interface\renderer">
+      <UniqueIdentifier>{aea5186d-5c98-427e-b8f8-5e7229ba7464}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphic\interface\manager">
+      <UniqueIdentifier>{453270dc-d270-47db-98e2-e6929939ee5b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphic\map">
+      <UniqueIdentifier>{dfadd90a-b894-4e12-bd19-67d07ccd8e67}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphic\map\lights">
+      <UniqueIdentifier>{18edfb93-39ba-44e1-a2c1-38ae772608c3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphic\map\models">
+      <UniqueIdentifier>{d295b2c1-1585-47fb-9254-58ad6f07421f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphic\map\view">
+      <UniqueIdentifier>{169cdf92-bbd6-406e-b324-15a54a277a3d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphic\ogl">
+      <UniqueIdentifier>{51022a9a-40b0-4d25-a91f-ff67a5166b27}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphic\ogl\memory">
+      <UniqueIdentifier>{af365d46-ca6c-4a54-a285-d8f681b26782}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphic\ogl\buffers">
+      <UniqueIdentifier>{6dfc8479-a18e-40ee-bda4-f967f1a0d903}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphic\ogl\context">
+      <UniqueIdentifier>{72c60125-37d6-494e-86b8-cba44107daea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphic\ogl\samplers">
+      <UniqueIdentifier>{61b4c2e7-6498-4c46-9a70-928a95635b43}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphic\ogl\shaders">
+      <UniqueIdentifier>{bcc3711f-363e-423f-85ed-64406ca221f0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphic\ogl\states">
+      <UniqueIdentifier>{6efc186f-16e2-471c-81c2-b33d176ca3a3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphic\ogl\target sets">
+      <UniqueIdentifier>{28326efd-7345-4698-a4f9-cde93e33601c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphic\ogl\textures">
+      <UniqueIdentifier>{0b496bda-ad1c-45eb-9082-f9ee435b155e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphic\states">
+      <UniqueIdentifier>{8e84443b-abc8-448a-996b-e080555af484}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gui">
+      <UniqueIdentifier>{b533b512-ca15-40aa-8ac2-d98e7345dea9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gui\input">
+      <UniqueIdentifier>{89805e48-bf36-486a-b368-9e8297dbad09}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gui\interface">
+      <UniqueIdentifier>{3c4f86fe-8f01-4e27-bfd8-194a9774ba1b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gui\interface\events">
+      <UniqueIdentifier>{3badebfc-d1c1-450f-b351-725e635d4218}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gui\states">
+      <UniqueIdentifier>{b6e03b35-ac61-4f10-a98d-4c945fbdad86}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="logic">
+      <UniqueIdentifier>{7f0c1e72-d5fa-4bc3-a75c-2d364bc3dfde}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="script">
+      <UniqueIdentifier>{d9d67453-aac7-4e66-8f42-12a6a1655290}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="logic\states">
+      <UniqueIdentifier>{a483fb26-ed14-438c-8596-3a570dae37ab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="script\scripts">
+      <UniqueIdentifier>{cf520dd1-7b9b-4730-84d8-54af3974c916}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="camera">
+      <UniqueIdentifier>{d64b0357-6226-4ec7-95b4-95397a29a21a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="camera\controls">
+      <UniqueIdentifier>{5d231366-c7fd-4b2d-8a2a-61e4839f9a10}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\base\base_tokenizer.cpp">
+      <Filter>base\container</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\base_console.cpp">
+      <Filter>base\io</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\base_getopt.cpp">
+      <Filter>base\io</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\base_program_parameters.cpp">
+      <Filter>base\io</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\base_test_suite.cpp">
+      <Filter>base\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\core\core_asset_importer.cpp">
+      <Filter>core\assets</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\core\core_asset_manager.cpp">
+      <Filter>core\assets</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\core\core_plugin_manager.cpp">
+      <Filter>core\plugins</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\core\core_time.cpp">
+      <Filter>core\time</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_map.cpp">
+      <Filter>data\map</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_entity.cpp">
+      <Filter>data\map\entity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_entity_manager.cpp">
+      <Filter>data\map\entity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_transformation_facet.cpp">
+      <Filter>data\map\entity\facets\transformation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_hierarchy_facet.cpp">
+      <Filter>data\map\entity\facets\hierarchy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_component_facet.cpp">
+      <Filter>data\map\entity\facets\components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_component_manager.cpp">
+      <Filter>data\map\entity\components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_area_light_component.cpp">
+      <Filter>data\map\entity\components\lights</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_light_probe_component.cpp">
+      <Filter>data\map\entity\components\lights</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_point_light_component.cpp">
+      <Filter>data\map\entity\components\lights</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_sky_component.cpp">
+      <Filter>data\map\entity\components\lights</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_sun_component.cpp">
+      <Filter>data\map\entity\components\lights</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_ar_controller_component.cpp">
+      <Filter>data\map\entity\components\plugins</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_ar_tracked_object_component.cpp">
+      <Filter>data\map\entity\components\plugins</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_bloom_component.cpp">
+      <Filter>data\map\entity\components\fx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_dof_component.cpp">
+      <Filter>data\map\entity\components\fx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_post_aa_component.cpp">
+      <Filter>data\map\entity\components\fx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_ssao_component.cpp">
+      <Filter>data\map\entity\components\fx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_ssr_component.cpp">
+      <Filter>data\map\entity\components\fx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_volume_fog_component.cpp">
+      <Filter>data\map\entity\components\fx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_material_component.cpp">
+      <Filter>data\map\entity\components\model</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_mesh_component.cpp">
+      <Filter>data\map\entity\components\model</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_camera_component.cpp">
+      <Filter>data\map\entity\components\camera</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_material.cpp">
+      <Filter>data\materials</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\data\data_material_manager.cpp">
+      <Filter>data\materials</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_ar_renderer.cpp">
+      <Filter>graphic\engine\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_light_indirect_renderer.cpp">
+      <Filter>graphic\engine\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_light_area_renderer.cpp">
+      <Filter>graphic\engine\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_light_sun_renderer.cpp">
+      <Filter>graphic\engine\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_fog_renderer.cpp">
+      <Filter>graphic\engine\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_histogram_renderer.cpp">
+      <Filter>graphic\engine\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_postfx_hdr_renderer.cpp">
+      <Filter>graphic\engine\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_selection_renderer.cpp">
+      <Filter>graphic\engine\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_background_renderer.cpp">
+      <Filter>graphic\engine\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_reflection_renderer.cpp">
+      <Filter>graphic\engine\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_debug_renderer.cpp">
+      <Filter>graphic\engine\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_mesh_renderer.cpp">
+      <Filter>graphic\engine\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_particle_renderer.cpp">
+      <Filter>graphic\engine\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_postfx_renderer.cpp">
+      <Filter>graphic\engine\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_light_point_renderer.cpp">
+      <Filter>graphic\engine\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_tonemapping_renderer.cpp">
+      <Filter>graphic\engine\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_shadow_renderer.cpp">
+      <Filter>graphic\engine\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_buffer.cpp">
+      <Filter>graphic\engine\buffers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_buffer_set.cpp">
+      <Filter>graphic\engine\buffers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_render_context.cpp">
+      <Filter>graphic\engine\context</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_input_layout.cpp">
+      <Filter>graphic\engine\layout</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_shader.cpp">
+      <Filter>graphic\engine\shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_blend_state.cpp">
+      <Filter>graphic\engine\states</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_depth_stencil_state.cpp">
+      <Filter>graphic\engine\states</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_rasterizer_state.cpp">
+      <Filter>graphic\engine\states</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_render_state.cpp">
+      <Filter>graphic\engine\states</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_target_set.cpp">
+      <Filter>graphic\engine\target sets</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_texture.cpp">
+      <Filter>graphic\engine\textures</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_texture_set.cpp">
+      <Filter>graphic\engine\textures</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_view_port.cpp">
+      <Filter>graphic\engine\view ports</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_view_port_set.cpp">
+      <Filter>graphic\engine\view ports</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_sampler.cpp">
+      <Filter>graphic\engine\samplers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_sampler_set.cpp">
+      <Filter>graphic\engine\samplers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_camera_interface.cpp">
+      <Filter>graphic\interface\camera</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_application_interface.cpp">
+      <Filter>graphic\interface\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_renderer_interface.cpp">
+      <Filter>graphic\interface\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_manager_interface.cpp">
+      <Filter>graphic\interface\manager</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_area_light.cpp">
+      <Filter>graphic\map\lights</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_area_light_manager.cpp">
+      <Filter>graphic\map\lights</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_light_probe.cpp">
+      <Filter>graphic\map\lights</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_light_probe_manager.cpp">
+      <Filter>graphic\map\lights</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_point_light.cpp">
+      <Filter>graphic\map\lights</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_point_light_manager.cpp">
+      <Filter>graphic\map\lights</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_sky.cpp">
+      <Filter>graphic\map\lights</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_sky_manager.cpp">
+      <Filter>graphic\map\lights</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_sun.cpp">
+      <Filter>graphic\map\lights</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_sun_manager.cpp">
+      <Filter>graphic\map\lights</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_material.cpp">
+      <Filter>graphic\map\models</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_mesh.cpp">
+      <Filter>graphic\map\models</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_material_manager.cpp">
+      <Filter>graphic\map\models</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_lod.cpp">
+      <Filter>graphic\map\models</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_mesh_manager.cpp">
+      <Filter>graphic\map\models</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_surface.cpp">
+      <Filter>graphic\map\models</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_camera.cpp">
+      <Filter>graphic\map\view</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_view.cpp">
+      <Filter>graphic\map\view</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_view_manager.cpp">
+      <Filter>graphic\map\view</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_performance.cpp">
+      <Filter>graphic\ogl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_main.cpp">
+      <Filter>graphic\ogl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_buffer_manager.cpp">
+      <Filter>graphic\ogl\buffers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_context_manager.cpp">
+      <Filter>graphic\ogl\context</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_sampler_manager.cpp">
+      <Filter>graphic\ogl\samplers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_shader_manager.cpp">
+      <Filter>graphic\ogl\shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_state_manager.cpp">
+      <Filter>graphic\ogl\states</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_target_set_manager.cpp">
+      <Filter>graphic\ogl\target sets</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_texture_manager.cpp">
+      <Filter>graphic\ogl\textures</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_edit_state.cpp">
+      <Filter>graphic\states</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_debug_state.cpp">
+      <Filter>graphic\states</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_exit_state.cpp">
+      <Filter>graphic\states</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_intro_state.cpp">
+      <Filter>graphic\states</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_load_map_state.cpp">
+      <Filter>graphic\states</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_main_menu_state.cpp">
+      <Filter>graphic\states</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_play_state.cpp">
+      <Filter>graphic\states</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_start_state.cpp">
+      <Filter>graphic\states</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_unload_map_state.cpp">
+      <Filter>graphic\states</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\gui_input_manager.cpp">
+      <Filter>gui\input</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\gui_event_handler.cpp">
+      <Filter>gui\interface\events</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\gui_debug_state.cpp">
+      <Filter>gui\states</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\gui_edit_state.cpp">
+      <Filter>gui\states</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\gui_exit_state.cpp">
+      <Filter>gui\states</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\gui_intro_state.cpp">
+      <Filter>gui\states</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\gui_load_map_state.cpp">
+      <Filter>gui\states</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\gui_main_menu_state.cpp">
+      <Filter>gui\states</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\gui_play_state.cpp">
+      <Filter>gui\states</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\gui_start_state.cpp">
+      <Filter>gui\states</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\gui_unload_map_state.cpp">
+      <Filter>gui\states</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\logic\lg_debug_state.cpp">
+      <Filter>logic\states</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\logic\lg_edit_state.cpp">
+      <Filter>logic\states</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\logic\lg_exit_state.cpp">
+      <Filter>logic\states</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\logic\lg_intro_state.cpp">
+      <Filter>logic\states</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\logic\lg_load_map_state.cpp">
+      <Filter>logic\states</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\logic\lg_main_menu_state.cpp">
+      <Filter>logic\states</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\logic\lg_play_state.cpp">
+      <Filter>logic\states</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\logic\lg_start_state.cpp">
+      <Filter>logic\states</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\logic\lg_unload_map_state.cpp">
+      <Filter>logic\states</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\script\script_script_manager.cpp">
+      <Filter>script</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\engine\engine_precompiled.cpp" />
+    <ClCompile Include="..\..\..\src\camera\cam_editor_control.cpp">
+      <Filter>camera\controls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\camera\cam_game_control.cpp">
+      <Filter>camera\controls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\camera\cam_control_manager.cpp">
+      <Filter>camera</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\camera\cam_control.cpp">
+      <Filter>camera</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\src\base\base_event_queue.h">
+      <Filter>base\container</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_tokenizer.h">
+      <Filter>base\container</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_managed_pool.h">
+      <Filter>base\container</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_pool.h">
+      <Filter>base\container</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_singleton_pool.h">
+      <Filter>base\container</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_clock.h">
+      <Filter>base\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_exception.h">
+      <Filter>base\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_is_array.h">
+      <Filter>base\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_is_bool.h">
+      <Filter>base\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_is_class.h">
+      <Filter>base\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_is_floating_point.h">
+      <Filter>base\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_is_integral.h">
+      <Filter>base\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_is_pointer.h">
+      <Filter>base\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_is_primitive.h">
+      <Filter>base\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_is_reference.h">
+      <Filter>base\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_is_std.h">
+      <Filter>base\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_is_union.h">
+      <Filter>base\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_remove_const.h">
+      <Filter>base\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_remove_pointer.h">
+      <Filter>base\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_remove_qualifier.h">
+      <Filter>base\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_remove_volatile.h">
+      <Filter>base\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_timer.h">
+      <Filter>base\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_typedef.h">
+      <Filter>base\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_type_info.h">
+      <Filter>base\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_basic.h">
+      <Filter>base\core\native</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_crc.h">
+      <Filter>base\encryption</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_include_glm.h">
+      <Filter>base\includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_json.h">
+      <Filter>base\includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_console.h">
+      <Filter>base\io</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_getopt.h">
+      <Filter>base\io</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_program_parameters.h">
+      <Filter>base\io</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_input_event.h">
+      <Filter>base\io</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_aabb2.h">
+      <Filter>base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_aabb3.h">
+      <Filter>base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_circle.h">
+      <Filter>base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_coordinate_system.h">
+      <Filter>base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_frustum.h">
+      <Filter>base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_logical_arithmetic.h">
+      <Filter>base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_plane.h">
+      <Filter>base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_sphere.h">
+      <Filter>base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_math_limits.h">
+      <Filter>base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_memory.h">
+      <Filter>base\memory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_singleton.h">
+      <Filter>base\pattern</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_uncopyable.h">
+      <Filter>base\pattern</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_serialize.h">
+      <Filter>base\serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_serialize_access.h">
+      <Filter>base\serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_serialize_archive.h">
+      <Filter>base\serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_serialize_binary_reader.h">
+      <Filter>base\serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_serialize_binary_writer.h">
+      <Filter>base\serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_serialize_splitter.h">
+      <Filter>base\serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_serialize_std_string.h">
+      <Filter>base\serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_serialize_std_vector.h">
+      <Filter>base\serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_serialize_text_codec.h">
+      <Filter>base\serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_serialize_text_reader.h">
+      <Filter>base\serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_serialize_text_writer.h">
+      <Filter>base\serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_test_defines.h">
+      <Filter>base\tests</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_test_suite.h">
+      <Filter>base\tests</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\core\core_asset_generator.h">
+      <Filter>core\assets</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\core\core_asset_importer.h">
+      <Filter>core\assets</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\core\core_asset_manager.h">
+      <Filter>core\assets</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\core\core_plugin.h">
+      <Filter>core\plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\core\core_plugin_manager.h">
+      <Filter>core\plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\core\core_time.h">
+      <Filter>core\time</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_entity_folder.h">
+      <Filter>data\map</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_map.h">
+      <Filter>data\map</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_region.h">
+      <Filter>data\map</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_entity.h">
+      <Filter>data\map\entity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_entity_manager.h">
+      <Filter>data\map\entity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_transformation_facet.h">
+      <Filter>data\map\entity\facets\transformation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_hierarchy_facet.h">
+      <Filter>data\map\entity\facets\hierarchy</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_component_facet.h">
+      <Filter>data\map\entity\facets\components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_component.h">
+      <Filter>data\map\entity\components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_component_manager.h">
+      <Filter>data\map\entity\components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_area_light_component.h">
+      <Filter>data\map\entity\components\lights</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_light_probe_component.h">
+      <Filter>data\map\entity\components\lights</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_point_light_component.h">
+      <Filter>data\map\entity\components\lights</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_sky_component.h">
+      <Filter>data\map\entity\components\lights</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_sun_component.h">
+      <Filter>data\map\entity\components\lights</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_ar_controller_component.h">
+      <Filter>data\map\entity\components\plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_ar_tracked_object_component.h">
+      <Filter>data\map\entity\components\plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_bloom_component.h">
+      <Filter>data\map\entity\components\fx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_dof_component.h">
+      <Filter>data\map\entity\components\fx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_post_aa_component.h">
+      <Filter>data\map\entity\components\fx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_ssao_component.h">
+      <Filter>data\map\entity\components\fx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_ssr_component.h">
+      <Filter>data\map\entity\components\fx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_volume_fog_component.h">
+      <Filter>data\map\entity\components\fx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_material_component.h">
+      <Filter>data\map\entity\components\model</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_mesh_component.h">
+      <Filter>data\map\entity\components\model</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_camera_component.h">
+      <Filter>data\map\entity\components\camera</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_script_component.h">
+      <Filter>data\map\entity\components\scripts</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_material.h">
+      <Filter>data\materials</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\data\data_material_manager.h">
+      <Filter>data\materials</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_graphics_info.h">
+      <Filter>graphic\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_performance.h">
+      <Filter>graphic\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_main.h">
+      <Filter>graphic\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_light_indirect_renderer.h">
+      <Filter>graphic\engine\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_ltc_look_up_textures.h">
+      <Filter>graphic\engine\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_selection.h">
+      <Filter>graphic\engine\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_light_area_renderer.h">
+      <Filter>graphic\engine\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_smaa_look_up_textures.h">
+      <Filter>graphic\engine\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_ar_renderer.h">
+      <Filter>graphic\engine\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_light_sun_renderer.h">
+      <Filter>graphic\engine\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_fog_renderer.h">
+      <Filter>graphic\engine\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_histogram_renderer.h">
+      <Filter>graphic\engine\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_postfx_hdr_renderer.h">
+      <Filter>graphic\engine\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_selection_renderer.h">
+      <Filter>graphic\engine\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_background_renderer.h">
+      <Filter>graphic\engine\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_reflection_renderer.h">
+      <Filter>graphic\engine\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_debug_renderer.h">
+      <Filter>graphic\engine\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_mesh_renderer.h">
+      <Filter>graphic\engine\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_particle_renderer.h">
+      <Filter>graphic\engine\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_postfx_renderer.h">
+      <Filter>graphic\engine\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_light_point_renderer.h">
+      <Filter>graphic\engine\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_tonemapping_renderer.h">
+      <Filter>graphic\engine\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_shadow_renderer.h">
+      <Filter>graphic\engine\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_buffer.h">
+      <Filter>graphic\engine\buffers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_buffer_manager.h">
+      <Filter>graphic\engine\buffers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_buffer_set.h">
+      <Filter>graphic\engine\buffers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_context_manager.h">
+      <Filter>graphic\engine\context</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_render_context.h">
+      <Filter>graphic\engine\context</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_input_layout.h">
+      <Filter>graphic\engine\layout</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_shader.h">
+      <Filter>graphic\engine\shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_shader_manager.h">
+      <Filter>graphic\engine\shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_blend_state.h">
+      <Filter>graphic\engine\states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_depth_stencil_state.h">
+      <Filter>graphic\engine\states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_rasterizer_state.h">
+      <Filter>graphic\engine\states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_render_state.h">
+      <Filter>graphic\engine\states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_state_manager.h">
+      <Filter>graphic\engine\states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_blend_description.h">
+      <Filter>graphic\engine\states\description</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_depth_description.h">
+      <Filter>graphic\engine\states\description</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_rasterizer_description.h">
+      <Filter>graphic\engine\states\description</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_target_set.h">
+      <Filter>graphic\engine\target sets</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_target_set_manager.h">
+      <Filter>graphic\engine\target sets</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_texture.h">
+      <Filter>graphic\engine\textures</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_texture_manager.h">
+      <Filter>graphic\engine\textures</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_texture_set.h">
+      <Filter>graphic\engine\textures</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_view_port.h">
+      <Filter>graphic\engine\view ports</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_view_port_set.h">
+      <Filter>graphic\engine\view ports</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_data_behavior.h">
+      <Filter>graphic\engine\memory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_topology.h">
+      <Filter>graphic\engine\topology</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_sampler.h">
+      <Filter>graphic\engine\samplers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_sampler_manager.h">
+      <Filter>graphic\engine\samplers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_sampler_set.h">
+      <Filter>graphic\engine\samplers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_camera_interface.h">
+      <Filter>graphic\interface\camera</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_application_interface.h">
+      <Filter>graphic\interface\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_renderer_interface.h">
+      <Filter>graphic\interface\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_manager_interface.h">
+      <Filter>graphic\interface\manager</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_area_light.h">
+      <Filter>graphic\map\lights</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_area_light_manager.h">
+      <Filter>graphic\map\lights</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_light_probe.h">
+      <Filter>graphic\map\lights</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_light_probe_manager.h">
+      <Filter>graphic\map\lights</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_point_light.h">
+      <Filter>graphic\map\lights</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_point_light_manager.h">
+      <Filter>graphic\map\lights</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_sky.h">
+      <Filter>graphic\map\lights</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_sky_manager.h">
+      <Filter>graphic\map\lights</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_sun.h">
+      <Filter>graphic\map\lights</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_sun_manager.h">
+      <Filter>graphic\map\lights</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_material.h">
+      <Filter>graphic\map\models</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_mesh.h">
+      <Filter>graphic\map\models</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_material_manager.h">
+      <Filter>graphic\map\models</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_lod.h">
+      <Filter>graphic\map\models</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_mesh_manager.h">
+      <Filter>graphic\map\models</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_surface.h">
+      <Filter>graphic\map\models</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_camera.h">
+      <Filter>graphic\map\view</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_view.h">
+      <Filter>graphic\map\view</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_view_manager.h">
+      <Filter>graphic\map\view</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_native_types.h">
+      <Filter>graphic\ogl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_release.h">
+      <Filter>graphic\ogl\memory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_native_buffer.h">
+      <Filter>graphic\ogl\buffers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_native_buffer_set.h">
+      <Filter>graphic\ogl\buffers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_native_sampler.h">
+      <Filter>graphic\ogl\samplers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_native_sampler_set.h">
+      <Filter>graphic\ogl\samplers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_native_shader.h">
+      <Filter>graphic\ogl\shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_native_target_set.h">
+      <Filter>graphic\ogl\target sets</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_native_texture.h">
+      <Filter>graphic\ogl\textures</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_edit_state.h">
+      <Filter>graphic\states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_debug_state.h">
+      <Filter>graphic\states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_exit_state.h">
+      <Filter>graphic\states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_intro_state.h">
+      <Filter>graphic\states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_load_map_state.h">
+      <Filter>graphic\states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_main_menu_state.h">
+      <Filter>graphic\states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_play_state.h">
+      <Filter>graphic\states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_start_state.h">
+      <Filter>graphic\states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\graphic\gfx_unload_map_state.h">
+      <Filter>graphic\states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\gui_input_manager.h">
+      <Filter>gui\input</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\gui_event_delegate.h">
+      <Filter>gui\interface\events</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\gui_event_handler.h">
+      <Filter>gui\interface\events</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\gui_debug_state.h">
+      <Filter>gui\states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\gui_edit_state.h">
+      <Filter>gui\states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\gui_exit_state.h">
+      <Filter>gui\states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\gui_intro_state.h">
+      <Filter>gui\states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\gui_load_map_state.h">
+      <Filter>gui\states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\gui_main_menu_state.h">
+      <Filter>gui\states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\gui_play_state.h">
+      <Filter>gui\states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\gui_start_state.h">
+      <Filter>gui\states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\gui_unload_map_state.h">
+      <Filter>gui\states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\logic\lg_debug_state.h">
+      <Filter>logic\states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\logic\lg_edit_state.h">
+      <Filter>logic\states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\logic\lg_exit_state.h">
+      <Filter>logic\states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\logic\lg_intro_state.h">
+      <Filter>logic\states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\logic\lg_load_map_state.h">
+      <Filter>logic\states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\logic\lg_main_menu_state.h">
+      <Filter>logic\states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\logic\lg_play_state.h">
+      <Filter>logic\states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\logic\lg_start_state.h">
+      <Filter>logic\states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\logic\lg_unload_map_state.h">
+      <Filter>logic\states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\script\script_ar_camera_control_script.h">
+      <Filter>script\scripts</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\script\script_ar_controller_script.h">
+      <Filter>script\scripts</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\script\script_ar_place_object_on_touch_script.h">
+      <Filter>script\scripts</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\script\script_camera_control_script.h">
+      <Filter>script\scripts</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\script\script_script.h">
+      <Filter>script</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\script\script_script_manager.h">
+      <Filter>script</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\engine\engine_precompiled.h" />
+    <ClInclude Include="..\..\..\src\engine\engine_config.h" />
+    <ClInclude Include="..\..\..\src\camera\cam_editor_control.h">
+      <Filter>camera\controls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\camera\cam_game_control.h">
+      <Filter>camera\controls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\camera\cam_control.h">
+      <Filter>camera</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\camera\cam_control_manager.h">
+      <Filter>camera</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_config.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_defines.h">
+      <Filter>base</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

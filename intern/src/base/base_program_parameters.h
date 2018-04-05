@@ -1,16 +1,17 @@
 
 #pragma once
 
+#include "engine/engine_config.h"
+
 #include "base/base_console.h"
 #include "base/base_exception.h"
-#include "base/base_export.h"
 #include "base/base_json.h"
 
 #include <string>
 
 namespace IO
 {
-    class BASE_API CProgramParameters
+    class ENGINE_API CProgramParameters
     {
     public:
 

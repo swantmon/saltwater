@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "engine/engine_config.h"
+
 #include "base/base_uncopyable.h"
 #include "base/base_defines.h"
 #include "base/base_singleton.h"
@@ -15,7 +17,7 @@
 
 namespace Dt
 {
-    class CComponentManager : Base::CUncopyable
+    class ENGINE_API CComponentManager : Base::CUncopyable
     {
         BASE_SINGLETON_FUNC(CComponentManager)
 

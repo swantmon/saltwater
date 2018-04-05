@@ -1,10 +1,11 @@
 
 #pragma once
 
+#include "engine/engine_config.h"
+
 #include "base/base_include_glm.h"
 
 #include "graphic/gfx_buffer.h"
-#include "graphic/gfx_export.h"
 #include "graphic/gfx_graphics_info.h"
 
 #include <functional>
@@ -23,37 +24,37 @@ namespace Gfx
 {
 namespace Main
 {
-    GFX_API void OnStart();
-    GFX_API void OnExit();
+    ENGINE_API void OnStart();
+    ENGINE_API void OnExit();
 
-    GFX_API void RegisterResizeHandler(CResizeDelegate _NewDelgate);
+    ENGINE_API void RegisterResizeHandler(CResizeDelegate _NewDelgate);
 
-    GFX_API unsigned int RegisterWindow(void* _pWindow, int _VSync = 1);
+    ENGINE_API unsigned int RegisterWindow(void* _pWindow, int _VSync = 1);
 
-    GFX_API unsigned int GetNumberOfWindows();
+    ENGINE_API unsigned int GetNumberOfWindows();
 
-    GFX_API void ActivateWindow(unsigned int _WindowID);
+    ENGINE_API void ActivateWindow(unsigned int _WindowID);
 
-    GFX_API const glm::ivec2& GetActiveWindowSize();
-    GFX_API const glm::ivec2& GetWindowSize(unsigned int _WindowID);
+    ENGINE_API const glm::ivec2& GetActiveWindowSize();
+    ENGINE_API const glm::ivec2& GetWindowSize(unsigned int _WindowID);
 
-    GFX_API const glm::ivec2& GetActiveNativeWindowSize();
-    GFX_API const glm::ivec2& GetNativeWindowSize(unsigned int _WindowID);
+    ENGINE_API const glm::ivec2& GetActiveNativeWindowSize();
+    ENGINE_API const glm::ivec2& GetNativeWindowSize(unsigned int _WindowID);
 
-    GFX_API void OnResize(unsigned int _WindowID, unsigned int _Width, unsigned int _Height);
+    ENGINE_API void OnResize(unsigned int _WindowID, unsigned int _Width, unsigned int _Height);
 
-    GFX_API void TakeScreenshot(unsigned int _WindowID, const char* _pPathToFile);
+    ENGINE_API void TakeScreenshot(unsigned int _WindowID, const char* _pPathToFile);
 
-    GFX_API const CGraphicsInfo& GetGraphicsAPI();
-    GFX_API bool IsExtensionAvailable(const std::string& _Name);
+    ENGINE_API const CGraphicsInfo& GetGraphicsAPI();
+    ENGINE_API bool IsExtensionAvailable(const std::string& _Name);
 
-    GFX_API void BeginFrame();
-    GFX_API void EndFrame();
+    ENGINE_API void BeginFrame();
+    ENGINE_API void EndFrame();
     
-    GFX_API void CreatePerFrameConstantBuffers();
-    GFX_API void DestroyPerFrameConstantBuffers();
-    GFX_API void UploadPerFrameConstantBuffers();
+    ENGINE_API void CreatePerFrameConstantBuffers();
+    ENGINE_API void DestroyPerFrameConstantBuffers();
+    ENGINE_API void UploadPerFrameConstantBuffers();
     
-    GFX_API CBufferPtr GetPerFrameConstantBuffer();
+    ENGINE_API CBufferPtr GetPerFrameConstantBuffer();
 } // namespace Main
 } // namespace Gfx

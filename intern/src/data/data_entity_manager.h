@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include "engine/engine_config.h"
+
 #include "data/data_entity.h"
 
 #include <functional>
@@ -46,20 +48,20 @@ namespace EntityManager
     void OnStart();
     void OnExit();
 
-    void Clear();
-
-    CEntity& CreateEntity(const SEntityDescriptor& _rDescriptor, CEntity::BID _ID = CEntity::s_InvalidID);
-
-    std::vector<CEntity*> CreateEntitiesFromScene(const std::string& _rFile);
-
-    void FreeEntity(CEntity& _rEntity);
-
-    CEntity* GetEntityByID(CEntity::BID _ID);
-
-    void MarkEntityAsDirty(CEntity& _rEntity, unsigned int _DirtyFlags);
-
     void Update();
 
-    void RegisterDirtyEntityHandler(CEntityDelegate _NewDelegate);
+    void Clear();
+
+    ENGINE_API CEntity& CreateEntity(const SEntityDescriptor& _rDescriptor, CEntity::BID _ID = CEntity::s_InvalidID);
+
+    ENGINE_API std::vector<CEntity*> CreateEntitiesFromScene(const std::string& _rFile);
+
+    ENGINE_API void FreeEntity(CEntity& _rEntity);
+
+    ENGINE_API CEntity* GetEntityByID(CEntity::BID _ID);
+
+    ENGINE_API void MarkEntityAsDirty(CEntity& _rEntity, unsigned int _DirtyFlags);
+
+    ENGINE_API void RegisterDirtyEntityHandler(CEntityDelegate _NewDelegate);
 } // namespace EntityManager
 } // namespace Dt

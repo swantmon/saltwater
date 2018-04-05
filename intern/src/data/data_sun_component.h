@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "engine/engine_config.h"
+
 #include "base/base_include_glm.h"
 #include "base/base_typedef.h"
 
@@ -8,7 +10,7 @@
 
 namespace Dt
 {
-    class CSunComponent : public CComponent<CSunComponent>
+    class ENGINE_API CSunComponent : public CComponent<CSunComponent>
     {
     public:
 

@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include "engine/engine_config.h"
+
 namespace Lg
 {
 namespace MainMenu
@@ -22,8 +24,8 @@ namespace MainMenu
         };;
     };
     
-    int OnEnter();
-    int OnLeave();
-    int OnRun();
+    ENGINE_API int OnEnter();
+    ENGINE_API int OnLeave();
+    ENGINE_API int OnRun();
 } // namespace MainMenu
 } // namespace Lg

@@ -1,9 +1,9 @@
 
 #pragma once
 
-#include "base/base_managed_pool.h"
+#include "engine/engine_config.h"
 
-#include "graphic/gfx_export.h"
+#include "base/base_managed_pool.h"
 
 namespace Gfx
 {
@@ -16,14 +16,14 @@ namespace Gfx
             
         public:
 
-            GFX_API float GetWidth() const;
-            GFX_API float GetHeight() const;
+            ENGINE_API float GetWidth() const;
+            ENGINE_API float GetHeight() const;
 
-            GFX_API float GetMinDepth() const;
-            GFX_API float GetMaxDepth() const;
+            ENGINE_API float GetMinDepth() const;
+            ENGINE_API float GetMaxDepth() const;
 
-            GFX_API float GetTopLeftX() const;
-            GFX_API float GetTopLeftY() const;
+            ENGINE_API float GetTopLeftX() const;
+            ENGINE_API float GetTopLeftY() const;
 
         public:
 

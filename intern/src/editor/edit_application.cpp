@@ -9,7 +9,6 @@
 #include "base/base_singleton.h"
 
 #include "core/core_asset_manager.h"
-#include "core/core_config.h"
 #include "core/core_time.h"
 
 #include "editor/edit_actor_helper.h"

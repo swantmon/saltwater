@@ -1,11 +1,13 @@
 
 #pragma once
 
+#include "engine/engine_config.h"
+
 #include "data/data_component.h"
 
 namespace Dt
 {
-    class CARTrackedObjectPluginComponent : public CComponent<CARTrackedObjectPluginComponent>
+    class ENGINE_API CARTrackedObjectPluginComponent : public CComponent<CARTrackedObjectPluginComponent>
     {
     public:
 

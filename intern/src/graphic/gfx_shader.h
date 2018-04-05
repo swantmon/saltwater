@@ -1,11 +1,12 @@
 
 #pragma once
 
+#include "engine/engine_config.h"
+
 #include "base/base_managed_pool.h"
 #include "base/base_typedef.h"
 
 #include "graphic/gfx_buffer_set.h"
-#include "graphic/gfx_export.h"
 #include "graphic/gfx_input_layout.h"
 
 #include <string>
@@ -55,19 +56,19 @@ namespace Gfx
 
     public:
 
-        GFX_API unsigned int GetID() const;
-        GFX_API EType GetType() const;
-        GFX_API const std::string& GetFileName() const;
-        GFX_API const std::string& GetShaderName() const;
-        GFX_API const std::string& GetShaderDefines() const;
+        ENGINE_API unsigned int GetID() const;
+        ENGINE_API EType GetType() const;
+        ENGINE_API const std::string& GetFileName() const;
+        ENGINE_API const std::string& GetShaderName() const;
+        ENGINE_API const std::string& GetShaderDefines() const;
 
     public:
 
-        GFX_API bool HasAlpha() const;
+        ENGINE_API bool HasAlpha() const;
 
     public:
 
-        GFX_API CInputLayoutPtr GetInputLayout();
+        ENGINE_API CInputLayoutPtr GetInputLayout();
 
     protected:
 

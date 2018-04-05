@@ -1,6 +1,6 @@
 #pragma once
 
-#include "core/core_export.h"
+#include "engine/engine_config.h"
 
 #include <string>
 
@@ -8,10 +8,10 @@ namespace Core
 {
 namespace AssetManager
 {
-    CORE_API void SetFilePath(const std::string& _rPath);
+    ENGINE_API void SetFilePath(const std::string& _rPath);
 
-    CORE_API const std::string GetPathToFiles();
-    CORE_API const std::string GetPathToAssets();
-    CORE_API const std::string GetPathToData();
+    ENGINE_API const std::string GetPathToFiles();
+    ENGINE_API const std::string GetPathToAssets();
+    ENGINE_API const std::string GetPathToData();
 } // namespace AssetManager
 } // namespace Core

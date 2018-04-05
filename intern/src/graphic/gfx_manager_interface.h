@@ -1,12 +1,12 @@
 
 #pragma once
 
-#include "graphic/gfx_export.h"
+#include "engine/engine_config.h"
 
 namespace Gfx
 {
 namespace Manager
 {
-    GFX_API void ReloadAllShaders();
+    ENGINE_API void ReloadAllShaders();
 } // namespace Manager
 } // namespace Gfx

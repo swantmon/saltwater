@@ -1,9 +1,10 @@
 
 #pragma once
 
+#include "engine/engine_config.h"
+
 #include "base/base_clock.h"
 #include "base/base_defines.h"
-#include "base/base_export.h"
 #include "base/base_uncopyable.h"
 
 #include <sstream>
@@ -44,23 +45,23 @@ namespace IO
 
     public:
 
-        BASE_API static CConsole& GetInstance();
+        ENGINE_API static CConsole& GetInstance();
 
     public:
 
-        BASE_API void Entry(EConsoleLevel _ConsoleLevel, const Char* _pText);
-        BASE_API void Entry(EConsoleLevel _ConsoleLevel, Char*, const Char* _pFormat, ...);
-        BASE_API std::ostringstream& StreamEntry(EConsoleLevel _ConsoleLevel);
+        ENGINE_API void Entry(EConsoleLevel _ConsoleLevel, const Char* _pText);
+        ENGINE_API void Entry(EConsoleLevel _ConsoleLevel, Char*, const Char* _pFormat, ...);
+        ENGINE_API std::ostringstream& StreamEntry(EConsoleLevel _ConsoleLevel);
 
-        BASE_API void SetVerbosityLevel(int _Level);
+        ENGINE_API void SetVerbosityLevel(int _Level);
         
     public:
         
-        BASE_API const Char* GetText() const;
+        ENGINE_API const Char* GetText() const;
         
     public:
         
-        BASE_API void Clear();
+        ENGINE_API void Clear();
         
     private:
         

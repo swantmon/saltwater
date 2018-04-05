@@ -1,0 +1,562 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\base\base_console.cpp" />
+    <ClCompile Include="..\..\..\src\base\base_getopt.cpp" />
+    <ClCompile Include="..\..\..\src\base\base_program_parameters.cpp" />
+    <ClCompile Include="..\..\..\src\base\base_test_suite.cpp" />
+    <ClCompile Include="..\..\..\src\base\base_tokenizer.cpp" />
+    <ClCompile Include="..\..\..\src\camera\cam_control.cpp" />
+    <ClCompile Include="..\..\..\src\camera\cam_control_manager.cpp" />
+    <ClCompile Include="..\..\..\src\camera\cam_editor_control.cpp" />
+    <ClCompile Include="..\..\..\src\camera\cam_game_control.cpp" />
+    <ClCompile Include="..\..\..\src\core\core_asset_importer.cpp" />
+    <ClCompile Include="..\..\..\src\core\core_asset_manager.cpp" />
+    <ClCompile Include="..\..\..\src\core\core_plugin_manager.cpp" />
+    <ClCompile Include="..\..\..\src\core\core_time.cpp" />
+    <ClCompile Include="..\..\..\src\data\data_area_light_component.cpp" />
+    <ClCompile Include="..\..\..\src\data\data_ar_controller_component.cpp" />
+    <ClCompile Include="..\..\..\src\data\data_ar_tracked_object_component.cpp" />
+    <ClCompile Include="..\..\..\src\data\data_bloom_component.cpp" />
+    <ClCompile Include="..\..\..\src\data\data_camera_component.cpp" />
+    <ClCompile Include="..\..\..\src\data\data_component_facet.cpp" />
+    <ClCompile Include="..\..\..\src\data\data_component_manager.cpp" />
+    <ClCompile Include="..\..\..\src\data\data_dof_component.cpp" />
+    <ClCompile Include="..\..\..\src\data\data_entity.cpp" />
+    <ClCompile Include="..\..\..\src\data\data_entity_manager.cpp" />
+    <ClCompile Include="..\..\..\src\data\data_hierarchy_facet.cpp" />
+    <ClCompile Include="..\..\..\src\data\data_light_probe_component.cpp" />
+    <ClCompile Include="..\..\..\src\data\data_map.cpp" />
+    <ClCompile Include="..\..\..\src\data\data_material.cpp" />
+    <ClCompile Include="..\..\..\src\data\data_material_component.cpp" />
+    <ClCompile Include="..\..\..\src\data\data_material_manager.cpp" />
+    <ClCompile Include="..\..\..\src\data\data_mesh_component.cpp" />
+    <ClCompile Include="..\..\..\src\data\data_point_light_component.cpp" />
+    <ClCompile Include="..\..\..\src\data\data_post_aa_component.cpp" />
+    <ClCompile Include="..\..\..\src\data\data_sky_component.cpp" />
+    <ClCompile Include="..\..\..\src\data\data_ssao_component.cpp" />
+    <ClCompile Include="..\..\..\src\data\data_ssr_component.cpp" />
+    <ClCompile Include="..\..\..\src\data\data_sun_component.cpp" />
+    <ClCompile Include="..\..\..\src\data\data_transformation_facet.cpp" />
+    <ClCompile Include="..\..\..\src\data\data_volume_fog_component.cpp" />
+    <ClCompile Include="..\..\..\src\engine\engine_precompiled.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </PrecompiledHeaderFile>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </PrecompiledHeaderFile>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\graphic\gfx_application_interface.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_area_light.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_area_light_manager.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_ar_renderer.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_background_renderer.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_blend_state.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_buffer.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_buffer_manager.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_buffer_set.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_camera.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_camera_interface.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_context_manager.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_debug_renderer.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_debug_state.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_depth_stencil_state.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_edit_state.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_exit_state.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_fog_renderer.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_histogram_renderer.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_input_layout.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_intro_state.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_light_area_renderer.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_light_indirect_renderer.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_light_point_renderer.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_light_probe.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_light_probe_manager.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_light_sun_renderer.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_load_map_state.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_lod.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_main.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_main_menu_state.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_manager_interface.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_material.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_material_manager.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_mesh.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_mesh_manager.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_mesh_renderer.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_particle_renderer.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_performance.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_play_state.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_point_light.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_point_light_manager.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_postfx_hdr_renderer.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_postfx_renderer.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_rasterizer_state.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_reflection_renderer.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_renderer_interface.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_render_context.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_render_state.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_sampler.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_sampler_manager.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_sampler_set.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_selection_renderer.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_shader.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_shader_manager.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_shadow_renderer.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_sky.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_sky_manager.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_start_state.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_state_manager.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_sun.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_sun_manager.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_surface.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_target_set.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_target_set_manager.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_texture.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_texture_manager.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_texture_set.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_tonemapping_renderer.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_unload_map_state.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_view.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_view_manager.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_view_port.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_view_port_set.cpp" />
+    <ClCompile Include="..\..\..\src\gui\gui_debug_state.cpp" />
+    <ClCompile Include="..\..\..\src\gui\gui_edit_state.cpp" />
+    <ClCompile Include="..\..\..\src\gui\gui_event_handler.cpp" />
+    <ClCompile Include="..\..\..\src\gui\gui_exit_state.cpp" />
+    <ClCompile Include="..\..\..\src\gui\gui_input_manager.cpp" />
+    <ClCompile Include="..\..\..\src\gui\gui_intro_state.cpp" />
+    <ClCompile Include="..\..\..\src\gui\gui_load_map_state.cpp" />
+    <ClCompile Include="..\..\..\src\gui\gui_main_menu_state.cpp" />
+    <ClCompile Include="..\..\..\src\gui\gui_play_state.cpp" />
+    <ClCompile Include="..\..\..\src\gui\gui_start_state.cpp" />
+    <ClCompile Include="..\..\..\src\gui\gui_unload_map_state.cpp" />
+    <ClCompile Include="..\..\..\src\logic\lg_debug_state.cpp" />
+    <ClCompile Include="..\..\..\src\logic\lg_edit_state.cpp" />
+    <ClCompile Include="..\..\..\src\logic\lg_exit_state.cpp" />
+    <ClCompile Include="..\..\..\src\logic\lg_intro_state.cpp" />
+    <ClCompile Include="..\..\..\src\logic\lg_load_map_state.cpp" />
+    <ClCompile Include="..\..\..\src\logic\lg_main_menu_state.cpp" />
+    <ClCompile Include="..\..\..\src\logic\lg_play_state.cpp" />
+    <ClCompile Include="..\..\..\src\logic\lg_start_state.cpp" />
+    <ClCompile Include="..\..\..\src\logic\lg_unload_map_state.cpp" />
+    <ClCompile Include="..\..\..\src\script\script_script_manager.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\src\base\base_aabb2.h" />
+    <ClInclude Include="..\..\..\src\base\base_aabb3.h" />
+    <ClInclude Include="..\..\..\src\base\base_basic.h" />
+    <ClInclude Include="..\..\..\src\base\base_circle.h" />
+    <ClInclude Include="..\..\..\src\base\base_clock.h" />
+    <ClInclude Include="..\..\..\src\base\base_config.h" />
+    <ClInclude Include="..\..\..\src\base\base_console.h" />
+    <ClInclude Include="..\..\..\src\base\base_coordinate_system.h" />
+    <ClInclude Include="..\..\..\src\base\base_crc.h" />
+    <ClInclude Include="..\..\..\src\base\base_defines.h" />
+    <ClInclude Include="..\..\..\src\base\base_event_queue.h" />
+    <ClInclude Include="..\..\..\src\base\base_exception.h" />
+    <ClInclude Include="..\..\..\src\base\base_frustum.h" />
+    <ClInclude Include="..\..\..\src\base\base_getopt.h" />
+    <ClInclude Include="..\..\..\src\base\base_include_glm.h" />
+    <ClInclude Include="..\..\..\src\base\base_input_event.h" />
+    <ClInclude Include="..\..\..\src\base\base_is_array.h" />
+    <ClInclude Include="..\..\..\src\base\base_is_bool.h" />
+    <ClInclude Include="..\..\..\src\base\base_is_class.h" />
+    <ClInclude Include="..\..\..\src\base\base_is_floating_point.h" />
+    <ClInclude Include="..\..\..\src\base\base_is_integral.h" />
+    <ClInclude Include="..\..\..\src\base\base_is_pointer.h" />
+    <ClInclude Include="..\..\..\src\base\base_is_primitive.h" />
+    <ClInclude Include="..\..\..\src\base\base_is_reference.h" />
+    <ClInclude Include="..\..\..\src\base\base_is_std.h" />
+    <ClInclude Include="..\..\..\src\base\base_is_union.h" />
+    <ClInclude Include="..\..\..\src\base\base_json.h" />
+    <ClInclude Include="..\..\..\src\base\base_logical_arithmetic.h" />
+    <ClInclude Include="..\..\..\src\base\base_managed_pool.h" />
+    <ClInclude Include="..\..\..\src\base\base_math_limits.h" />
+    <ClInclude Include="..\..\..\src\base\base_memory.h" />
+    <ClInclude Include="..\..\..\src\base\base_plane.h" />
+    <ClInclude Include="..\..\..\src\base\base_pool.h" />
+    <ClInclude Include="..\..\..\src\base\base_program_parameters.h" />
+    <ClInclude Include="..\..\..\src\base\base_remove_const.h" />
+    <ClInclude Include="..\..\..\src\base\base_remove_pointer.h" />
+    <ClInclude Include="..\..\..\src\base\base_remove_qualifier.h" />
+    <ClInclude Include="..\..\..\src\base\base_remove_volatile.h" />
+    <ClInclude Include="..\..\..\src\base\base_serialize.h" />
+    <ClInclude Include="..\..\..\src\base\base_serialize_access.h" />
+    <ClInclude Include="..\..\..\src\base\base_serialize_archive.h" />
+    <ClInclude Include="..\..\..\src\base\base_serialize_binary_reader.h" />
+    <ClInclude Include="..\..\..\src\base\base_serialize_binary_writer.h" />
+    <ClInclude Include="..\..\..\src\base\base_serialize_splitter.h" />
+    <ClInclude Include="..\..\..\src\base\base_serialize_std_string.h" />
+    <ClInclude Include="..\..\..\src\base\base_serialize_std_vector.h" />
+    <ClInclude Include="..\..\..\src\base\base_serialize_text_codec.h" />
+    <ClInclude Include="..\..\..\src\base\base_serialize_text_reader.h" />
+    <ClInclude Include="..\..\..\src\base\base_serialize_text_writer.h" />
+    <ClInclude Include="..\..\..\src\base\base_singleton.h" />
+    <ClInclude Include="..\..\..\src\base\base_singleton_pool.h" />
+    <ClInclude Include="..\..\..\src\base\base_sphere.h" />
+    <ClInclude Include="..\..\..\src\base\base_test_defines.h" />
+    <ClInclude Include="..\..\..\src\base\base_test_suite.h" />
+    <ClInclude Include="..\..\..\src\base\base_timer.h" />
+    <ClInclude Include="..\..\..\src\base\base_tokenizer.h" />
+    <ClInclude Include="..\..\..\src\base\base_typedef.h" />
+    <ClInclude Include="..\..\..\src\base\base_type_info.h" />
+    <ClInclude Include="..\..\..\src\base\base_uncopyable.h" />
+    <ClInclude Include="..\..\..\src\camera\cam_control.h" />
+    <ClInclude Include="..\..\..\src\camera\cam_control_manager.h" />
+    <ClInclude Include="..\..\..\src\camera\cam_editor_control.h" />
+    <ClInclude Include="..\..\..\src\camera\cam_game_control.h" />
+    <ClInclude Include="..\..\..\src\core\core_asset_generator.h" />
+    <ClInclude Include="..\..\..\src\core\core_asset_importer.h" />
+    <ClInclude Include="..\..\..\src\core\core_asset_manager.h" />
+    <ClInclude Include="..\..\..\src\core\core_plugin.h" />
+    <ClInclude Include="..\..\..\src\core\core_plugin_manager.h" />
+    <ClInclude Include="..\..\..\src\core\core_time.h" />
+    <ClInclude Include="..\..\..\src\data\data_area_light_component.h" />
+    <ClInclude Include="..\..\..\src\data\data_ar_controller_component.h" />
+    <ClInclude Include="..\..\..\src\data\data_ar_tracked_object_component.h" />
+    <ClInclude Include="..\..\..\src\data\data_bloom_component.h" />
+    <ClInclude Include="..\..\..\src\data\data_camera_component.h" />
+    <ClInclude Include="..\..\..\src\data\data_component.h" />
+    <ClInclude Include="..\..\..\src\data\data_component_facet.h" />
+    <ClInclude Include="..\..\..\src\data\data_component_manager.h" />
+    <ClInclude Include="..\..\..\src\data\data_dof_component.h" />
+    <ClInclude Include="..\..\..\src\data\data_entity.h" />
+    <ClInclude Include="..\..\..\src\data\data_entity_folder.h" />
+    <ClInclude Include="..\..\..\src\data\data_entity_manager.h" />
+    <ClInclude Include="..\..\..\src\data\data_hierarchy_facet.h" />
+    <ClInclude Include="..\..\..\src\data\data_light_probe_component.h" />
+    <ClInclude Include="..\..\..\src\data\data_map.h" />
+    <ClInclude Include="..\..\..\src\data\data_material.h" />
+    <ClInclude Include="..\..\..\src\data\data_material_component.h" />
+    <ClInclude Include="..\..\..\src\data\data_material_manager.h" />
+    <ClInclude Include="..\..\..\src\data\data_mesh_component.h" />
+    <ClInclude Include="..\..\..\src\data\data_point_light_component.h" />
+    <ClInclude Include="..\..\..\src\data\data_post_aa_component.h" />
+    <ClInclude Include="..\..\..\src\data\data_region.h" />
+    <ClInclude Include="..\..\..\src\data\data_script_component.h" />
+    <ClInclude Include="..\..\..\src\data\data_sky_component.h" />
+    <ClInclude Include="..\..\..\src\data\data_ssao_component.h" />
+    <ClInclude Include="..\..\..\src\data\data_ssr_component.h" />
+    <ClInclude Include="..\..\..\src\data\data_sun_component.h" />
+    <ClInclude Include="..\..\..\src\data\data_transformation_facet.h" />
+    <ClInclude Include="..\..\..\src\data\data_volume_fog_component.h" />
+    <ClInclude Include="..\..\..\src\engine\engine_config.h" />
+    <ClInclude Include="..\..\..\src\engine\engine_precompiled.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_application_interface.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_area_light.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_area_light_manager.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_ar_renderer.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_background_renderer.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_blend_description.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_blend_state.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_buffer.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_buffer_manager.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_buffer_set.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_camera.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_camera_interface.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_context_manager.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_data_behavior.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_debug_renderer.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_debug_state.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_depth_description.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_depth_stencil_state.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_edit_state.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_exit_state.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_fog_renderer.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_graphics_info.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_histogram_renderer.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_input_layout.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_intro_state.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_light_area_renderer.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_light_indirect_renderer.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_light_point_renderer.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_light_probe.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_light_probe_manager.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_light_sun_renderer.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_load_map_state.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_lod.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_ltc_look_up_textures.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_main.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_main_menu_state.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_manager_interface.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_material.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_material_manager.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_mesh.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_mesh_manager.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_mesh_renderer.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_native_buffer.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_native_buffer_set.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_native_sampler.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_native_sampler_set.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_native_shader.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_native_target_set.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_native_texture.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_native_types.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_particle_renderer.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_performance.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_play_state.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_point_light.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_point_light_manager.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_postfx_hdr_renderer.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_postfx_renderer.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_rasterizer_description.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_rasterizer_state.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_reflection_renderer.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_release.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_renderer_interface.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_render_context.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_render_state.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_sampler.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_sampler_manager.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_sampler_set.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_selection.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_selection_renderer.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_shader.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_shader_manager.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_shadow_renderer.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_sky.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_sky_manager.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_smaa_look_up_textures.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_start_state.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_state_manager.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_sun.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_sun_manager.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_surface.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_target_set.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_target_set_manager.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_texture.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_texture_manager.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_texture_set.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_tonemapping_renderer.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_topology.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_unload_map_state.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_view.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_view_manager.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_view_port.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_view_port_set.h" />
+    <ClInclude Include="..\..\..\src\gui\gui_debug_state.h" />
+    <ClInclude Include="..\..\..\src\gui\gui_edit_state.h" />
+    <ClInclude Include="..\..\..\src\gui\gui_event_delegate.h" />
+    <ClInclude Include="..\..\..\src\gui\gui_event_handler.h" />
+    <ClInclude Include="..\..\..\src\gui\gui_exit_state.h" />
+    <ClInclude Include="..\..\..\src\gui\gui_input_manager.h" />
+    <ClInclude Include="..\..\..\src\gui\gui_intro_state.h" />
+    <ClInclude Include="..\..\..\src\gui\gui_load_map_state.h" />
+    <ClInclude Include="..\..\..\src\gui\gui_main_menu_state.h" />
+    <ClInclude Include="..\..\..\src\gui\gui_play_state.h" />
+    <ClInclude Include="..\..\..\src\gui\gui_start_state.h" />
+    <ClInclude Include="..\..\..\src\gui\gui_unload_map_state.h" />
+    <ClInclude Include="..\..\..\src\logic\lg_debug_state.h" />
+    <ClInclude Include="..\..\..\src\logic\lg_edit_state.h" />
+    <ClInclude Include="..\..\..\src\logic\lg_exit_state.h" />
+    <ClInclude Include="..\..\..\src\logic\lg_intro_state.h" />
+    <ClInclude Include="..\..\..\src\logic\lg_load_map_state.h" />
+    <ClInclude Include="..\..\..\src\logic\lg_main_menu_state.h" />
+    <ClInclude Include="..\..\..\src\logic\lg_play_state.h" />
+    <ClInclude Include="..\..\..\src\logic\lg_start_state.h" />
+    <ClInclude Include="..\..\..\src\logic\lg_unload_map_state.h" />
+    <ClInclude Include="..\..\..\src\script\script_ar_camera_control_script.h" />
+    <ClInclude Include="..\..\..\src\script\script_ar_controller_script.h" />
+    <ClInclude Include="..\..\..\src\script\script_ar_place_object_on_touch_script.h" />
+    <ClInclude Include="..\..\..\src\script\script_camera_control_script.h" />
+    <ClInclude Include="..\..\..\src\script\script_script.h" />
+    <ClInclude Include="..\..\..\src\script\script_script_manager.h" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{E481E898-C074-4491-BC6E-93844BFAFF74}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>camera</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+    <ProjectName>engine</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IntDir>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)d</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <TargetName>$(ProjectName)d</TargetName>
+    <OutDir>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IntDir>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)r</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <TargetName>$(ProjectName)r</TargetName>
+    <OutDir>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\lua\include</AdditionalIncludeDirectories>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <PrecompiledHeaderFile>engine/engine_precompiled.h</PrecompiledHeaderFile>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy ..\..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\*.dll ..\..\..\build\$(Platform)</Command>
+    </PostBuildEvent>
+    <Lib>
+      <OutputFile>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\\$(TargetFileName)</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>ENGINE_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\assimp\include;..\..\..\..\extern\devil\include;..\..\..\..\extern\glew\include;..\..\..\..\extern\glm\include;..\..\..\..\extern\json\include;..\..\..\..\extern\tinyxml2\include</AdditionalIncludeDirectories>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <PrecompiledHeaderFile>engine/engine_precompiled.h</PrecompiledHeaderFile>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>..\..\..\..\extern\sdl2\lib\x64;..\..\..\build\x64;..\..\..\..\extern\assimp\lib\x64;..\..\..\..\extern\devil\lib\x64;..\..\..\..\extern\glew\lib\x64;..\..\..\..\extern\qt\lib\x64;..\..\..\..\extern\tinyxml2\lib\x64</AdditionalLibraryDirectories>
+      <AdditionalDependencies>assimp.lib;DevIL.lib;ILU.lib;ILUT.lib;glew32.lib;tinyxml2d.lib;opengl32.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy ..\..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\*.dll ..\..\..\..\bin\</Command>
+    </PostBuildEvent>
+    <Lib>
+      <OutputFile>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\\$(TargetFileName)</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\lua\include</AdditionalIncludeDirectories>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <PrecompiledHeaderFile>engine/engine_precompiled.h</PrecompiledHeaderFile>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy ..\..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\*.dll ..\..\..\build\$(Platform)</Command>
+    </PostBuildEvent>
+    <Lib>
+      <OutputFile>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\\$(TargetFileName)</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>ENGINE_EXPORT;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\assimp\include;..\..\..\..\extern\devil\include;..\..\..\..\extern\glew\include;..\..\..\..\extern\glm\include;..\..\..\..\extern\json\include;..\..\..\..\extern\tinyxml2\include</AdditionalIncludeDirectories>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <PrecompiledHeaderFile>engine/engine_precompiled.h</PrecompiledHeaderFile>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>..\..\..\..\extern\sdl2\lib\x64;..\..\..\build\x64;..\..\..\..\extern\assimp\lib\x64;..\..\..\..\extern\devil\lib\x64;..\..\..\..\extern\glew\lib\x64;..\..\..\..\extern\qt\lib\x64;..\..\..\..\extern\tinyxml2\lib\x64</AdditionalLibraryDirectories>
+      <AdditionalDependencies>assimp.lib;DevIL.lib;ILU.lib;ILUT.lib;glew32.lib;tinyxml2.lib;opengl32.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy ..\..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\*.dll ..\..\..\..\bin\</Command>
+    </PostBuildEvent>
+    <Lib>
+      <OutputFile>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\\$(TargetFileName)</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

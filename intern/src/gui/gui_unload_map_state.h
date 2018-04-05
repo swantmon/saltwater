@@ -9,18 +9,19 @@
 
 #pragma once
 
+#include "engine/engine_config.h"
+
 namespace Base
 {
     class CTextWriter;
 } // namespace Base
 
-
 namespace Gui
 {
 namespace UnloadMap
 {
-    void OnEnter(Base::CTextWriter& _rSerializer);
-    void OnLeave();
-    void OnRun();
+    ENGINE_API void OnEnter(Base::CTextWriter& _rSerializer);
+    ENGINE_API void OnLeave();
+    ENGINE_API void OnRun();
 } // namespace UnloadMap
 } // namespace Gui

@@ -1,12 +1,12 @@
 
 #pragma once
 
-#include "gfx_export.h"
+#include "engine/engine_config.h"
 
 namespace Gfx
 {
 namespace Renderer
 {
-    GFX_API void ReloadRenderer();
+    ENGINE_API void ReloadRenderer();
 } // namespace Renderer
 } // namespace Gfx

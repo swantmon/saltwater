@@ -8,14 +8,14 @@
 
 #pragma once
 
-#include "graphic/gfx_export.h"
+#include "engine/engine_config.h"
 
 namespace Gfx
 {
 namespace MainMenu
 {
-    GFX_API void OnEnter();
-    GFX_API void OnLeave();
-    GFX_API void OnRun();
+    ENGINE_API void OnEnter();
+    ENGINE_API void OnLeave();
+    ENGINE_API void OnRun();
 } // namespace MainMenu
 } // namespace Gfx

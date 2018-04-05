@@ -1,13 +1,15 @@
 
 #pragma once
 
+#include "engine/engine_config.h"
+
 #include "base/base_include_glm.h"
 
 #include "data/data_component.h"
 
 namespace Dt
 {
-    class CVolumeFogComponent : public CComponent<CVolumeFogComponent>
+    class ENGINE_API CVolumeFogComponent : public CComponent<CVolumeFogComponent>
     {
     public:
 

@@ -9,12 +9,14 @@
 
 #pragma once
 
+#include "engine/engine_config.h"
+
 namespace Gui
 {
 namespace Intro
 {
-    void OnEnter();
-    void OnLeave();
-    void OnRun();
+    ENGINE_API void OnEnter();
+    ENGINE_API void OnLeave();
+    ENGINE_API void OnRun();
 } // namespace Intro
 } // namespace Gui

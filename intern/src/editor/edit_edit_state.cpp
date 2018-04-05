@@ -67,7 +67,7 @@ namespace Edit
 
         auto& Plugin = Core::PluginManager::GetPlugin("arcore");
 
-        Plugin.OnStart();
+        // Plugin.OnStart();
 
         BASE_CONSOLE_STREAMINFO("Edit> Enter edit state.");
 

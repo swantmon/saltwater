@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "engine/engine_config.h"
+
 #include "base/base_type_info.h"
 
 #include "data/data_entity.h"

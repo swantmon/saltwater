@@ -8,7 +8,7 @@
 #include "data/data_component_facet.h"
 #include "data/data_transformation_facet.h"
 
-#include "plugin/arcore/mr_control_manager.h"
+#include "plugin_arcore/mr_control_manager.h"
 
 #include "script/script_script.h"
 

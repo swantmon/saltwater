@@ -1,9 +1,10 @@
 
 #pragma once
 
+#include "engine/engine_config.h"
+
 #include "base/base_include_glm.h"
 
-#include "graphic/gfx_export.h"
 #include "graphic/gfx_material.h"
 
 namespace Gfx
@@ -30,11 +31,11 @@ namespace Gfx
 {
 namespace MaterialManager
 {
-    GFX_API void OnStart();
-    GFX_API void OnExit();
+    void OnStart();
+    void OnExit();
 
-    GFX_API CMaterialPtr CreateMaterial(const SMaterialDescriptor& _rDescriptor);
+    ENGINE_API CMaterialPtr CreateMaterial(const SMaterialDescriptor& _rDescriptor);
 
-    GFX_API const CMaterialPtr GetDefaultMaterial();
+    ENGINE_API const CMaterialPtr GetDefaultMaterial();
 } // namespace MaterialManager
 } // namespace Gfx

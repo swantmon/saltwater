@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include "engine/engine_config.h"
+
 namespace Base
 {
     class CTextReader;
@@ -27,8 +29,8 @@ namespace LoadMap
         };
     };
     
-    int OnEnter(Base::CTextReader& _rSerializer);
-    int OnLeave();
-    int OnRun();
+    ENGINE_API int OnEnter(Base::CTextReader& _rSerializer);
+    ENGINE_API int OnLeave();
+    ENGINE_API int OnRun();
 } // namespace LoadMap
 } // namespace Lg

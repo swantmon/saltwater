@@ -1,9 +1,10 @@
 
 #pragma once
 
+#include "engine/engine_config.h"
+
 #include "base/base_managed_pool.h"
 
-#include "graphic/gfx_export.h"
 #include "graphic/gfx_view_port.h"
 
 namespace Gfx
@@ -16,12 +17,12 @@ namespace Gfx
 
         public:
 
-            GFX_API unsigned int GetNumberOfViewPorts() const;
+            ENGINE_API unsigned int GetNumberOfViewPorts() const;
 
         public:
 
-            GFX_API CViewPortPtr* GetViewPorts();
-            GFX_API const CViewPortPtr* GetViewPorts() const;
+            ENGINE_API CViewPortPtr* GetViewPorts();
+            ENGINE_API const CViewPortPtr* GetViewPorts() const;
 
         protected:
 

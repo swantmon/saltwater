@@ -1,8 +1,9 @@
 
 #pragma once
 
+#include "engine/engine_config.h"
+
 #include "graphic/gfx_camera.h"
-#include "graphic/gfx_export.h"
 #include "graphic/gfx_view.h"
 #include "graphic/gfx_view_port.h"
 #include "graphic/gfx_view_port_set.h"
@@ -24,27 +25,27 @@ namespace Gfx
 {
 namespace ViewManager
 {
-    GFX_API void OnStart();
-    GFX_API void OnExit();
+    void OnStart();
+    void OnExit();
     
-    GFX_API CViewPtr CreateView();
-    GFX_API CCameraPtr CreateCamera(CViewPtr _ViewPtr);
+    CViewPtr CreateView();
+    CCameraPtr CreateCamera(CViewPtr _ViewPtr);
     
-    GFX_API CViewPortPtr CreateViewPort(const SViewPortDescriptor& _rDescriptor);
+    CViewPortPtr CreateViewPort(const SViewPortDescriptor& _rDescriptor);
     
-    GFX_API CViewPortSetPtr CreateViewPortSet(CViewPortPtr _ViewPort1Ptr);
-    GFX_API CViewPortSetPtr CreateViewPortSet(CViewPortPtr _ViewPort1Ptr, CViewPortPtr _ViewPort2Ptr);
-    GFX_API CViewPortSetPtr CreateViewPortSet(CViewPortPtr _ViewPort1Ptr, CViewPortPtr _ViewPort2Ptr, CViewPortPtr _ViewPort3Ptr);
-    GFX_API CViewPortSetPtr CreateViewPortSet(CViewPortPtr _ViewPort1Ptr, CViewPortPtr _ViewPort2Ptr, CViewPortPtr _ViewPort3Ptr, CViewPortPtr _ViewPort4Ptr);
-    GFX_API CViewPortSetPtr CreateViewPortSet(CViewPortPtr* _pViewPortPtrs, unsigned int _NumberOfViewPorts);
+    CViewPortSetPtr CreateViewPortSet(CViewPortPtr _ViewPort1Ptr);
+    CViewPortSetPtr CreateViewPortSet(CViewPortPtr _ViewPort1Ptr, CViewPortPtr _ViewPort2Ptr);
+    CViewPortSetPtr CreateViewPortSet(CViewPortPtr _ViewPort1Ptr, CViewPortPtr _ViewPort2Ptr, CViewPortPtr _ViewPort3Ptr);
+    CViewPortSetPtr CreateViewPortSet(CViewPortPtr _ViewPort1Ptr, CViewPortPtr _ViewPort2Ptr, CViewPortPtr _ViewPort3Ptr, CViewPortPtr _ViewPort4Ptr);
+    CViewPortSetPtr CreateViewPortSet(CViewPortPtr* _pViewPortPtrs, unsigned int _NumberOfViewPorts);
     
-    GFX_API CCameraPtr GetMainCamera();
-    GFX_API CCameraPtr GetDebugCamera();
-    GFX_API CCameraPtr GetDecalCamera();
-    GFX_API CCameraPtr GetGUICamera();
-    GFX_API CCameraPtr GetFullQuadCamera();
+    ENGINE_API CCameraPtr GetMainCamera();
+    CCameraPtr GetDebugCamera();
+    CCameraPtr GetDecalCamera();
+    CCameraPtr GetGUICamera();
+    CCameraPtr GetFullQuadCamera();
     
-    GFX_API CViewPortPtr GetViewPort();
-    GFX_API CViewPortSetPtr GetViewPortSet();
+    ENGINE_API CViewPortPtr GetViewPort();
+    ENGINE_API CViewPortSetPtr GetViewPortSet();
 } // ViewManager
 } // namespace Gfx

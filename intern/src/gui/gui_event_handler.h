@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "engine/engine_config.h"
+
 #include "gui/gui_event_delegate.h"
 
 namespace Base
@@ -12,7 +14,7 @@ namespace Gui
 {
 namespace EventHandler
 {
-    void OnUserEvent(const Base::CInputEvent& _rEvent);
+    ENGINE_API void OnUserEvent(const Base::CInputEvent& _rEvent);
 
     void RegisterDirectUserListener(const CInputEventDelegate& _rListener);
     void UnregisterDirectUserListener(const CInputEventDelegate& _rListener);

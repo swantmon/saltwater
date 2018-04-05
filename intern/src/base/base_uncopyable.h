@@ -8,11 +8,13 @@
 
 #pragma once
 
+#include "engine/engine_config.h"
+
 #include "base/base_defines.h"
 
 namespace PAT
 {
-    class CUncopyable
+    class ENGINE_API CUncopyable
     {
     protected:
         

@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include "engine/engine_config.h"
+
 namespace Base
 {
     class CTextWriter;
@@ -27,8 +29,8 @@ namespace UnloadMap
         };
     };
     
-    int OnEnter(Base::CTextWriter& _rSerializer);
-    int OnLeave();
-    int OnRun();
+    ENGINE_API int OnEnter(Base::CTextWriter& _rSerializer);
+    ENGINE_API int OnLeave();
+    ENGINE_API int OnRun();
 } // namespace UnloadMap
 } // namespace Lg
