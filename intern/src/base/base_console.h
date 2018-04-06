@@ -29,7 +29,7 @@
 
 namespace IO
 {
-    class CConsole : public Base::CUncopyable
+    class ENGINE_API CConsole : public Base::CUncopyable
     {
     
     public:
@@ -45,23 +45,23 @@ namespace IO
 
     public:
 
-        ENGINE_API static CConsole& GetInstance();
+        static CConsole& GetInstance();
 
     public:
 
-        ENGINE_API void Entry(EConsoleLevel _ConsoleLevel, const Char* _pText);
-        ENGINE_API void Entry(EConsoleLevel _ConsoleLevel, Char*, const Char* _pFormat, ...);
-        ENGINE_API std::ostringstream& StreamEntry(EConsoleLevel _ConsoleLevel);
+        void Entry(EConsoleLevel _ConsoleLevel, const Char* _pText);
+        void Entry(EConsoleLevel _ConsoleLevel, Char*, const Char* _pFormat, ...);
+        std::ostringstream& StreamEntry(EConsoleLevel _ConsoleLevel);
 
-        ENGINE_API void SetVerbosityLevel(int _Level);
+        void SetVerbosityLevel(int _Level);
         
     public:
         
-        ENGINE_API const Char* GetText() const;
+        const Char* GetText() const;
         
     public:
         
-        ENGINE_API void Clear();
+        void Clear();
         
     private:
         
