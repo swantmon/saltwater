@@ -26,6 +26,14 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
+    CComponentManager& CComponentManager::GetInstance()
+    {
+        static CComponentManager s_Instance;
+        return s_Instance;
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CComponentManager::Deallocate(Dt::IComponent* _pObject)
     {
         if (_pObject == nullptr) return;

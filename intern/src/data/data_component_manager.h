@@ -19,7 +19,9 @@ namespace Dt
 {
     class ENGINE_API CComponentManager : Base::CUncopyable
     {
-        BASE_SINGLETON_FUNC(CComponentManager)
+    public:             
+
+        static CComponentManager& GetInstance();
 
     public:
 
