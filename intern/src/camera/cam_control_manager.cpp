@@ -16,8 +16,6 @@
 
 #include "gui/gui_event_handler.h"
 
-#include "graphic/gfx_camera_interface.h"
-
 using namespace Cam;
 
 namespace

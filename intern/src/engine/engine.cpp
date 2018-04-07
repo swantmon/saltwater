@@ -8,7 +8,7 @@
 
 #include "data/data_entity_manager.h"
 
-#include "graphic/gfx_engine.h"
+#include "graphic/gfx_pipeline.h"
 
 #include "gui/gui_input_manager.h"
 
@@ -26,7 +26,7 @@ namespace Engine
 
         Gui::InputManager::OnStart();
 
-        Gfx::Engine::OnStart();
+        Gfx::Pipeline::OnStart();
     }
 
     // -----------------------------------------------------------------------------
@@ -39,7 +39,7 @@ namespace Engine
 
         Gui::InputManager::OnExit();
 
-        Gfx::Engine::OnExit();
+        Gfx::Pipeline::OnExit();
 
         Core::Time::OnExit();
     }
@@ -60,6 +60,6 @@ namespace Engine
 
         Gui::InputManager::Update();
 
-        Gfx::Engine::Render();
+        Gfx::Pipeline::Render();
     }
-} // namespace Engine
+} // namespace Pipeline

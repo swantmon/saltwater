@@ -139,21 +139,6 @@
     <Filter Include="graphic\engine\samplers">
       <UniqueIdentifier>{83d7ed92-51c7-4558-a46c-9c9b5d33ec78}</UniqueIdentifier>
     </Filter>
-    <Filter Include="graphic\interface">
-      <UniqueIdentifier>{559aa0d9-abe5-4ca5-985e-b3a457c14fdc}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="graphic\interface\camera">
-      <UniqueIdentifier>{d0732389-ebe8-4a8c-a511-4c80ea0c8cc2}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="graphic\interface\app">
-      <UniqueIdentifier>{9d32a652-c229-48b2-b649-b98cdf7cf9d9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="graphic\interface\renderer">
-      <UniqueIdentifier>{aea5186d-5c98-427e-b8f8-5e7229ba7464}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="graphic\interface\manager">
-      <UniqueIdentifier>{453270dc-d270-47db-98e2-e6929939ee5b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="graphic\map">
       <UniqueIdentifier>{dfadd90a-b894-4e12-bd19-67d07ccd8e67}</UniqueIdentifier>
     </Filter>
@@ -420,18 +405,6 @@
     <ClCompile Include="..\..\..\src\graphic\gfx_sampler_set.cpp">
       <Filter>graphic\engine\samplers</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_camera_interface.cpp">
-      <Filter>graphic\interface\camera</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_application_interface.cpp">
-      <Filter>graphic\interface\app</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_renderer_interface.cpp">
-      <Filter>graphic\interface\renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_manager_interface.cpp">
-      <Filter>graphic\interface\manager</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\graphic\gfx_area_light.cpp">
       <Filter>graphic\map\lights</Filter>
     </ClCompile>
@@ -539,7 +512,7 @@
       <Filter>camera</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\engine\engine.cpp" />
-    <ClCompile Include="..\..\..\src\graphic\gfx_engine.cpp">
+    <ClCompile Include="..\..\..\src\graphic\gfx_pipeline.cpp">
       <Filter>graphic</Filter>
     </ClCompile>
   </ItemGroup>
@@ -973,18 +946,6 @@
     <ClInclude Include="..\..\..\src\graphic\gfx_sampler_set.h">
       <Filter>graphic\engine\samplers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_camera_interface.h">
-      <Filter>graphic\interface\camera</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_application_interface.h">
-      <Filter>graphic\interface\app</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_renderer_interface.h">
-      <Filter>graphic\interface\renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_manager_interface.h">
-      <Filter>graphic\interface\manager</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\graphic\gfx_area_light.h">
       <Filter>graphic\map\lights</Filter>
     </ClInclude>
@@ -1117,7 +1078,7 @@
       <Filter>base</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\engine\engine.h" />
-    <ClInclude Include="..\..\..\src\graphic\gfx_engine.h">
+    <ClInclude Include="..\..\..\src\graphic\gfx_pipeline.h">
       <Filter>graphic</Filter>
     </ClInclude>
   </ItemGroup>

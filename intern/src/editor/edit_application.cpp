@@ -34,7 +34,7 @@
 
 #include "engine/engine.h"
 
-#include "graphic/gfx_application_interface.h"
+#include "graphic/gfx_pipeline.h"
 
 #include "gui/gui_event_handler.h"
 
@@ -184,9 +184,9 @@ namespace
         // -----------------------------------------------------------------------------
         int VSync = Base::CProgramParameters::GetInstance().Get("graphics:vsync_interval", 0);
 
-        m_EditWindowID = Gfx::App::RegisterWindow(Edit::GUI::GetEditorWindowHandle(), VSync);
+        m_EditWindowID = Gfx::Pipeline::RegisterWindow(Edit::GUI::GetEditorWindowHandle(), VSync);
 
-        Gfx::App::ActivateWindow(m_EditWindowID);
+        Gfx::Pipeline::ActivateWindow(m_EditWindowID);
 
         // -----------------------------------------------------------------------------
         // From now on we can start the state engine and enter the first state
@@ -500,7 +500,7 @@ namespace
         int Width  = _rMessage.Get<int>();
         int Height = _rMessage.Get<int>();
 
-        Gfx::App::OnResize(m_EditWindowID, Width, Height);
+        Gfx::Pipeline::OnResize(m_EditWindowID, Width, Height);
     }
 
     // -----------------------------------------------------------------------------

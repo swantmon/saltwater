@@ -11,7 +11,6 @@
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_debug_renderer.h"
-#include "graphic/gfx_engine.h"
 #include "graphic/gfx_fog_renderer.h"
 #include "graphic/gfx_histogram_renderer.h"
 #include "graphic/gfx_light_area_renderer.h"
@@ -25,6 +24,7 @@
 #include "graphic/gfx_mesh_renderer.h"
 #include "graphic/gfx_particle_renderer.h"
 #include "graphic/gfx_performance.h"
+#include "graphic/gfx_pipeline.h"
 #include "graphic/gfx_point_light_manager.h"
 #include "graphic/gfx_postfx_hdr_renderer.h"
 #include "graphic/gfx_postfx_renderer.h"
@@ -45,7 +45,7 @@ using namespace Gfx;
 
 namespace Gfx
 {
-namespace Engine
+namespace Pipeline
 {
     void OnStart()
     {
@@ -499,5 +499,28 @@ namespace Engine
         // -----------------------------------------------------------------------------
         Main::EndFrame();
     }
-} // namespace Engine
+
+    // -----------------------------------------------------------------------------
+
+    unsigned int RegisterWindow(void* _pWindow, int _VSync)
+    {
+        assert(_pWindow != 0);
+
+        return Main::RegisterWindow(_pWindow, _VSync);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void ActivateWindow(unsigned int _WindowID)
+    {
+        Main::ActivateWindow(_WindowID);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void OnResize(unsigned int _WindowID, unsigned int _Width, unsigned int _Height)
+    {
+        Main::OnResize(_WindowID, _Width, _Height);
+    }
+} // namespace Pipeline
 } // namespace Gfx

@@ -66,7 +66,6 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
       </PrecompiledHeaderFile>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_application_interface.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_area_light.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_area_light_manager.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_ar_renderer.cpp" />
@@ -76,11 +75,10 @@
     <ClCompile Include="..\..\..\src\graphic\gfx_buffer_manager.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_buffer_set.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_camera.cpp" />
-    <ClCompile Include="..\..\..\src\graphic\gfx_camera_interface.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_context_manager.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_debug_renderer.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_depth_stencil_state.cpp" />
-    <ClCompile Include="..\..\..\src\graphic\gfx_engine.cpp" />
+    <ClCompile Include="..\..\..\src\graphic\gfx_pipeline.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_fog_renderer.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_histogram_renderer.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_input_layout.cpp" />
@@ -92,7 +90,6 @@
     <ClCompile Include="..\..\..\src\graphic\gfx_light_sun_renderer.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_lod.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_main.cpp" />
-    <ClCompile Include="..\..\..\src\graphic\gfx_manager_interface.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_material.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_material_manager.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_mesh.cpp" />
@@ -106,7 +103,6 @@
     <ClCompile Include="..\..\..\src\graphic\gfx_postfx_renderer.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_rasterizer_state.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_reflection_renderer.cpp" />
-    <ClCompile Include="..\..\..\src\graphic\gfx_renderer_interface.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_render_context.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_render_state.cpp" />
     <ClCompile Include="..\..\..\src\graphic\gfx_sampler.cpp" />
@@ -238,7 +234,6 @@
     <ClInclude Include="..\..\..\src\engine\engine_config.h" />
     <ClInclude Include="..\..\..\src\engine\engine.h" />
     <ClInclude Include="..\..\..\src\engine\engine_precompiled.h" />
-    <ClInclude Include="..\..\..\src\graphic\gfx_application_interface.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_area_light.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_area_light_manager.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_ar_renderer.h" />
@@ -249,13 +244,12 @@
     <ClInclude Include="..\..\..\src\graphic\gfx_buffer_manager.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_buffer_set.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_camera.h" />
-    <ClInclude Include="..\..\..\src\graphic\gfx_camera_interface.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_context_manager.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_data_behavior.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_debug_renderer.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_depth_description.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_depth_stencil_state.h" />
-    <ClInclude Include="..\..\..\src\graphic\gfx_engine.h" />
+    <ClInclude Include="..\..\..\src\graphic\gfx_pipeline.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_fog_renderer.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_graphics_info.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_histogram_renderer.h" />
@@ -269,7 +263,6 @@
     <ClInclude Include="..\..\..\src\graphic\gfx_lod.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_ltc_look_up_textures.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_main.h" />
-    <ClInclude Include="..\..\..\src\graphic\gfx_manager_interface.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_material.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_material_manager.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_mesh.h" />
@@ -293,7 +286,6 @@
     <ClInclude Include="..\..\..\src\graphic\gfx_rasterizer_state.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_reflection_renderer.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_release.h" />
-    <ClInclude Include="..\..\..\src\graphic\gfx_renderer_interface.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_render_context.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_render_state.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_sampler.h" />

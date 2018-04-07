@@ -37,11 +37,11 @@ namespace ShaderManager
     ENGINE_API CShaderPtr CompilePS(const Base::Char* _pFileName, const Base::Char* _pShaderName, const Base::Char* _pShaderDefines = nullptr, const Base::Char* _pShaderDescription = nullptr, unsigned int _Categories = 0, bool _HasAlpha = false, bool _Debug = false, bool _IsCode = false);
     ENGINE_API CShaderPtr CompileCS(const Base::Char* _pFileName, const Base::Char* _pShaderName, const Base::Char* _pShaderDefines = nullptr, const Base::Char* _pShaderDescription = nullptr, unsigned int _Categories = 0, bool _HasAlpha = false, bool _Debug = false, bool _IsCode = false);
 
-    void ReloadShader(CShaderPtr _ShaderPtr);
-    void ReloadAllShaders();
+    ENGINE_API void ReloadShader(CShaderPtr _ShaderPtr);
+    ENGINE_API void ReloadAllShaders();
 
     ENGINE_API CInputLayoutPtr CreateInputLayout(const SInputElementDescriptor* _pDescriptors, unsigned int _NumberOfDescriptors, CShaderPtr _ShaderVSPtr);
 
-    void SetShaderLabel(CShaderPtr _ShaderPtr, const char* _pLabel);
+    ENGINE_API void SetShaderLabel(CShaderPtr _ShaderPtr, const char* _pLabel);
 } // namespace ShaderManager
 } // namespace Gfx

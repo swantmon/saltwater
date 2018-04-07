@@ -6,8 +6,7 @@
 #include "base/base_uncopyable.h"
 
 #include "graphic/gfx_histogram_renderer.h"
-#include "graphic/gfx_manager_interface.h"
-#include "graphic/gfx_renderer_interface.h"
+#include "graphic/gfx_shader_manager.h"
 #include "graphic/gfx_tonemapping_renderer.h"
 
 #include "editor/edit_graphic_helper.h"
@@ -196,8 +195,6 @@ namespace
     void CGraphicHelper::OnReloadAllRenderer(Edit::CMessage& _rMessage)
     {
         BASE_UNUSED(_rMessage);
-
-        Gfx::Renderer::ReloadRenderer();
     }
 
     // -----------------------------------------------------------------------------
@@ -206,7 +203,7 @@ namespace
     {
         BASE_UNUSED(_rMessage);
 
-        Gfx::Manager::ReloadAllShaders();
+        Gfx::ShaderManager::ReloadAllShaders();
     }
 } // namespace
 
