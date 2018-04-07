@@ -1,12 +1,13 @@
 
 #include "engine/engine_precompiled.h"
 
-#include "base/base_console.h"
 #include "base/base_include_glm.h"
 #include "base/base_type_info.h"
 
 #include "camera/cam_control_manager.h"
 #include "camera/cam_game_control.h"
+
+#include "core/core_console.h"
 
 #include "data/data_camera_component.h"
 #include "data/data_component.h"

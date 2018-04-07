@@ -1,9 +1,10 @@
 
 #include "editor/edit_precompiled.h"
 
-#include "base/base_console.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
+
+#include "core/core_console.h"
 
 #include "graphic/gfx_histogram_renderer.h"
 #include "graphic/gfx_shader_manager.h"

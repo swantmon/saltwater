@@ -1,7 +1,6 @@
 
 #include "engine/engine_precompiled.h"
 
-#include "base/base_console.h"
 #include "base/base_exception.h"
 #include "base/base_include_glm.h"
 #include "base/base_pool.h"
@@ -10,6 +9,7 @@
 
 #include "core/core_asset_importer.h"
 #include "core/core_asset_manager.h"
+#include "core/core_console.h"
 #include "core/core_time.h"
 
 #include "data/data_component.h"

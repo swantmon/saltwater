@@ -1,14 +1,14 @@
 
 #include "editor/edit_precompiled.h"
 
-#include "base/base_console.h"
 #include "base/base_exception.h"
 #include "base/base_input_event.h"
-#include "base/base_program_parameters.h"
 #include "base/base_uncopyable.h"
 #include "base/base_singleton.h"
 
 #include "core/core_asset_manager.h"
+#include "core/core_console.h"
+#include "core/core_program_parameters.h"
 #include "core/core_time.h"
 
 #include "editor/edit_actor_helper.h"

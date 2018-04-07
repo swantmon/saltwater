@@ -1,10 +1,11 @@
 
 #include "editor/edit_precompiled.h"
 
-#include "base/base_console.h"
 #include "base/base_exception.h"
 #include "base/base_getopt.h"
-#include "base/base_program_parameters.h"
+
+#include "core/core_console.h"
+#include "core/core_program_parameters.h"
 
 #include "editor/edit_application.h"
 

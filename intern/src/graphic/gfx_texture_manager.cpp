@@ -4,7 +4,6 @@
 #include "app_droid/app_application.h"
 
 #include "base/base_crc.h"
-#include "base/base_console.h"
 #include "base/base_exception.h"
 #include "base/base_include_glm.h"
 #include "base/base_singleton.h"

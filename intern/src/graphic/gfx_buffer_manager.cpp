@@ -1,13 +1,14 @@
 
 #include "engine/engine_precompiled.h"
 
-#include "base/base_console.h"
 #include "base/base_exception.h"
 #include "base/base_managed_pool.h"
 #include "base/base_memory.h"
 #include "base/base_typedef.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
+
+#include "core/core_console.h"
 
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_main.h"

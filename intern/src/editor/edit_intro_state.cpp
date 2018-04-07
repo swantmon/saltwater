@@ -1,7 +1,7 @@
 
 #include "editor/edit_precompiled.h"
 
-#include "base/base_console.h"
+#include "core/core_console.h"
 
 #include "editor/edit_intro_state.h"
 

@@ -3,9 +3,10 @@
 
 #include "engine/engine_config.h"
 
-#include "base/base_console.h"
 #include "base/base_exception.h"
 #include "base/base_json.h"
+
+#include "core/core_console.h"
 
 #include <string>
 

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27004.2009
+VisualStudioVersion = 15.0.27004.2005
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test", "test\test.vcxproj", "{470B0BE6-8875-4485-9B04-C6CC9914834D}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -24,6 +24,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "engine", "engine\engine.vcxproj", "{E481E898-C074-4491-BC6E-93844BFAFF74}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "plugin_arcore", "plugin_arcore\plugin_arcore.vcxproj", "{1BBA2732-A51B-4FF0-8393-492884561668}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "base", "base\base.vcxproj", "{3A61E67A-052F-4A68-B8DB-771C8CD0D2EE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -81,6 +83,14 @@ Global
 		{1BBA2732-A51B-4FF0-8393-492884561668}.Release|x64.Build.0 = Release|x64
 		{1BBA2732-A51B-4FF0-8393-492884561668}.Release|x86.ActiveCfg = Release|Win32
 		{1BBA2732-A51B-4FF0-8393-492884561668}.Release|x86.Build.0 = Release|Win32
+		{3A61E67A-052F-4A68-B8DB-771C8CD0D2EE}.Debug|x64.ActiveCfg = Debug|x64
+		{3A61E67A-052F-4A68-B8DB-771C8CD0D2EE}.Debug|x64.Build.0 = Debug|x64
+		{3A61E67A-052F-4A68-B8DB-771C8CD0D2EE}.Debug|x86.ActiveCfg = Debug|Win32
+		{3A61E67A-052F-4A68-B8DB-771C8CD0D2EE}.Debug|x86.Build.0 = Debug|Win32
+		{3A61E67A-052F-4A68-B8DB-771C8CD0D2EE}.Release|x64.ActiveCfg = Release|x64
+		{3A61E67A-052F-4A68-B8DB-771C8CD0D2EE}.Release|x64.Build.0 = Release|x64
+		{3A61E67A-052F-4A68-B8DB-771C8CD0D2EE}.Release|x86.ActiveCfg = Release|Win32
+		{3A61E67A-052F-4A68-B8DB-771C8CD0D2EE}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

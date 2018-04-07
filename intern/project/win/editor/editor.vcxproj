@@ -62,6 +62,9 @@
     <ClInclude Include="..\..\..\src\editor\edit_unload_map_state.h" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\base\base.vcxproj">
+      <Project>{3a61e67a-052f-4a68-b8db-771c8cd0d2ee}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\editor_gui\editor_gui.vcxproj">
       <Project>{b12702ad-abfb-343a-a199-8e24837244a3}</Project>
     </ProjectReference>

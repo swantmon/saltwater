@@ -1,10 +1,9 @@
 
 #include "editor/edit_precompiled.h"
 
-#include "base/base_console.h"
-
 #include "camera/cam_control_manager.h"
 
+#include "core/core_console.h"
 #include "core/core_plugin_manager.h"
 
 #include "data/data_entity.h"

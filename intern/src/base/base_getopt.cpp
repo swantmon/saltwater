@@ -3,9 +3,9 @@
 // Code based on: http://note.sonots.com/Comp/CompLang/cpp/getopt.html
 // -----------------------------------------------------------------------------
 
-#include "engine/engine_precompiled.h"
+#include "base/base_precompiled.h"
 
-#include "base/base_console.h"
+#include "base/base_exception.h"
 #include "base/base_getopt.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
@@ -67,7 +67,7 @@ namespace
         {
             if (m_OptionError)
             {
-				BASE_CONSOLE_ERRORV("Getting argument \"%c\" failed with message: %s", static_cast<char>(_Argument), _pDescription);
+				BASE_THROWV("Getting argument \"%c\" failed with message: %s", static_cast<char>(_Argument), _pDescription);
             }
         };
 

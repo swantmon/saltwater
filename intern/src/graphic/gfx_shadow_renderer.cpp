@@ -1,11 +1,11 @@
 
 #include "engine/engine_precompiled.h"
 
-#include "base/base_console.h"
 #include "base/base_include_glm.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
+#include "core/core_console.h"
 #include "core/core_time.h"
 
 #include "data/data_component.h"

@@ -1,9 +1,10 @@
 
 #include "editor/edit_precompiled.h"
 
-#include "base/base_console.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
+
+#include "core/core_console.h"
 
 #include "data/data_ar_controller_component.h"
 #include "data/data_ar_tracked_object_component.h"

@@ -1,11 +1,11 @@
 
 #include "editor/edit_precompiled.h"
 
-#include "base/base_console.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
 #include "core/core_asset_manager.h"
+#include "core/core_console.h"
 
 #include "data/data_component.h"
 #include "data/data_component_manager.h"

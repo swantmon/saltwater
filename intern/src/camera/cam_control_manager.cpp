@@ -1,11 +1,12 @@
 
 #include "engine/engine_precompiled.h"
 
-#include "base/base_console.h"
 #include "base/base_input_event.h"
 #include "base/base_memory.h"
 #include "base/base_uncopyable.h"
 #include "base/base_singleton.h"
+
+#include "core/core_console.h"
 
 #include "camera/cam_control_manager.h"
 #include "camera/cam_editor_control.h"

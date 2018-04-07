@@ -23,7 +23,6 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-
     void CTransformationFacet::SetPosition(const glm::vec3& _rPosition)
     {
         m_Position = _rPosition;

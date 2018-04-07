@@ -1,9 +1,10 @@
 
 #include "engine/engine_precompiled.h"
 
-#include "base/base_console.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
+
+#include "core/core_console.h"
 
 #include "graphic/gfx_context_manager.h"
 #include "graphic/gfx_main.h"

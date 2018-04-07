@@ -1,7 +1,7 @@
 
 #include "engine/engine_precompiled.h"
 
-#include "base/base_program_parameters.h"
+#include "core/core_program_parameters.h"
 
 #include <sstream>
 

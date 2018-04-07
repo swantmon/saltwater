@@ -1,42 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="base">
-      <UniqueIdentifier>{ecce0d69-8a05-45ef-bee3-3936eb6f89f8}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="base\container">
-      <UniqueIdentifier>{56f8bf64-e62e-47bd-a10a-f07eb78f55d8}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="base\core">
-      <UniqueIdentifier>{6f7b1719-33d2-4516-95a7-e16ab19e2a62}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="base\core\native">
-      <UniqueIdentifier>{2f777c14-3d29-466d-8cc4-c35e7f066a3b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="base\encryption">
-      <UniqueIdentifier>{3ce5cf1c-8211-4862-b9d1-1ade230de80b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="base\includes">
-      <UniqueIdentifier>{7394caf7-1fcc-48a8-8072-91eb790e8114}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="base\io">
-      <UniqueIdentifier>{1a4bc650-b54c-4fca-8c45-5685b86ee20e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="base\math">
-      <UniqueIdentifier>{67deaa37-3679-4c6c-b4f9-9d60e17b14de}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="base\memory">
-      <UniqueIdentifier>{f85480b6-92a7-45e9-b9e7-7d27329a5ccc}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="base\pattern">
-      <UniqueIdentifier>{065b714d-7d5b-45a4-bf7e-06a1cc701370}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="base\serialization">
-      <UniqueIdentifier>{0fd8c5c1-137d-40d4-9651-29776f166267}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="base\tests">
-      <UniqueIdentifier>{bc5b0f5e-3dfd-448d-b196-c553c8586874}</UniqueIdentifier>
-    </Filter>
     <Filter Include="core">
       <UniqueIdentifier>{e8ccf9e8-f422-4dba-8d89-e88932b344b0}</UniqueIdentifier>
     </Filter>
@@ -184,12 +148,6 @@
     <Filter Include="gui\input">
       <UniqueIdentifier>{89805e48-bf36-486a-b368-9e8297dbad09}</UniqueIdentifier>
     </Filter>
-    <Filter Include="gui\interface">
-      <UniqueIdentifier>{3c4f86fe-8f01-4e27-bfd8-194a9774ba1b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="gui\interface\events">
-      <UniqueIdentifier>{3badebfc-d1c1-450f-b351-725e635d4218}</UniqueIdentifier>
-    </Filter>
     <Filter Include="script">
       <UniqueIdentifier>{d9d67453-aac7-4e66-8f42-12a6a1655290}</UniqueIdentifier>
     </Filter>
@@ -202,23 +160,17 @@
     <Filter Include="camera\controls">
       <UniqueIdentifier>{5d231366-c7fd-4b2d-8a2a-61e4839f9a10}</UniqueIdentifier>
     </Filter>
+    <Filter Include="gui\events">
+      <UniqueIdentifier>{3badebfc-d1c1-450f-b351-725e635d4218}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\console">
+      <UniqueIdentifier>{00af2610-01ad-43ab-8b83-8fe402c3494e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\program_parameters">
+      <UniqueIdentifier>{ceef442b-4418-4dad-9283-e4a163698b40}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\src\base\base_tokenizer.cpp">
-      <Filter>base\container</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\base_console.cpp">
-      <Filter>base\io</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\base_getopt.cpp">
-      <Filter>base\io</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\base_program_parameters.cpp">
-      <Filter>base\io</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\base_test_suite.cpp">
-      <Filter>base\tests</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\core\core_asset_importer.cpp">
       <Filter>core\assets</Filter>
     </ClCompile>
@@ -493,7 +445,7 @@
       <Filter>gui\input</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\gui\gui_event_handler.cpp">
-      <Filter>gui\interface\events</Filter>
+      <Filter>gui\events</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\script\script_script_manager.cpp">
       <Filter>script</Filter>
@@ -515,179 +467,14 @@
     <ClCompile Include="..\..\..\src\graphic\gfx_pipeline.cpp">
       <Filter>graphic</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\core\core_console.cpp">
+      <Filter>core\console</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\core\core_program_parameters.cpp">
+      <Filter>core\program_parameters</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\src\base\base_event_queue.h">
-      <Filter>base\container</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_tokenizer.h">
-      <Filter>base\container</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_managed_pool.h">
-      <Filter>base\container</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_pool.h">
-      <Filter>base\container</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_singleton_pool.h">
-      <Filter>base\container</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_clock.h">
-      <Filter>base\core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_exception.h">
-      <Filter>base\core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_is_array.h">
-      <Filter>base\core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_is_bool.h">
-      <Filter>base\core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_is_class.h">
-      <Filter>base\core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_is_floating_point.h">
-      <Filter>base\core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_is_integral.h">
-      <Filter>base\core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_is_pointer.h">
-      <Filter>base\core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_is_primitive.h">
-      <Filter>base\core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_is_reference.h">
-      <Filter>base\core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_is_std.h">
-      <Filter>base\core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_is_union.h">
-      <Filter>base\core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_remove_const.h">
-      <Filter>base\core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_remove_pointer.h">
-      <Filter>base\core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_remove_qualifier.h">
-      <Filter>base\core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_remove_volatile.h">
-      <Filter>base\core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_timer.h">
-      <Filter>base\core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_typedef.h">
-      <Filter>base\core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_type_info.h">
-      <Filter>base\core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_basic.h">
-      <Filter>base\core\native</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_crc.h">
-      <Filter>base\encryption</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_include_glm.h">
-      <Filter>base\includes</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_json.h">
-      <Filter>base\includes</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_console.h">
-      <Filter>base\io</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_getopt.h">
-      <Filter>base\io</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_program_parameters.h">
-      <Filter>base\io</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_input_event.h">
-      <Filter>base\io</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_aabb2.h">
-      <Filter>base\math</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_aabb3.h">
-      <Filter>base\math</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_circle.h">
-      <Filter>base\math</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_coordinate_system.h">
-      <Filter>base\math</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_frustum.h">
-      <Filter>base\math</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_logical_arithmetic.h">
-      <Filter>base\math</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_plane.h">
-      <Filter>base\math</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_sphere.h">
-      <Filter>base\math</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_math_limits.h">
-      <Filter>base\math</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_memory.h">
-      <Filter>base\memory</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_singleton.h">
-      <Filter>base\pattern</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_uncopyable.h">
-      <Filter>base\pattern</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_serialize.h">
-      <Filter>base\serialization</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_serialize_access.h">
-      <Filter>base\serialization</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_serialize_archive.h">
-      <Filter>base\serialization</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_serialize_binary_reader.h">
-      <Filter>base\serialization</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_serialize_binary_writer.h">
-      <Filter>base\serialization</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_serialize_splitter.h">
-      <Filter>base\serialization</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_serialize_std_string.h">
-      <Filter>base\serialization</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_serialize_std_vector.h">
-      <Filter>base\serialization</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_serialize_text_codec.h">
-      <Filter>base\serialization</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_serialize_text_reader.h">
-      <Filter>base\serialization</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_serialize_text_writer.h">
-      <Filter>base\serialization</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_test_defines.h">
-      <Filter>base\tests</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_test_suite.h">
-      <Filter>base\tests</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\core\core_asset_generator.h">
       <Filter>core\assets</Filter>
     </ClInclude>
@@ -1034,10 +821,10 @@
       <Filter>gui\input</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\gui\gui_event_delegate.h">
-      <Filter>gui\interface\events</Filter>
+      <Filter>gui\events</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\gui\gui_event_handler.h">
-      <Filter>gui\interface\events</Filter>
+      <Filter>gui\events</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\script\script_ar_camera_control_script.h">
       <Filter>script\scripts</Filter>
@@ -1071,15 +858,15 @@
     <ClInclude Include="..\..\..\src\camera\cam_control_manager.h">
       <Filter>camera</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_config.h">
-      <Filter>base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\base_defines.h">
-      <Filter>base</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\engine\engine.h" />
     <ClInclude Include="..\..\..\src\graphic\gfx_pipeline.h">
       <Filter>graphic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\core\core_program_parameters.h">
+      <Filter>core\program_parameters</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\core\core_console.h">
+      <Filter>core\console</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

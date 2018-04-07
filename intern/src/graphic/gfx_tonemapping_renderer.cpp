@@ -1,11 +1,10 @@
 
 #include "engine/engine_precompiled.h"
 
-#include "base/base_console.h"
-#include "base/base_include_glm.h"
-#include "base/base_program_parameters.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
+
+#include "core/core_program_parameters.h"
 
 #include "graphic/gfx_buffer_manager.h"
 #include "graphic/gfx_context_manager.h"

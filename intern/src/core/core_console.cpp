@@ -1,7 +1,7 @@
 
 #include "engine/engine_precompiled.h"
 
-#include "base/base_console.h"
+#include "core/core_console.h"
 
 #include <stdarg.h>
 

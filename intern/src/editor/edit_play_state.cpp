@@ -1,9 +1,9 @@
 
 #include "editor/edit_precompiled.h"
 
-#include "base/base_console.h"
-
 #include "camera/cam_control_manager.h"
+
+#include "core/core_console.h"
 
 #include "editor/edit_play_state.h"
 #include "editor/edit_unload_map_state.h"

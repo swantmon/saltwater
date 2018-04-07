@@ -1,8 +1,9 @@
 
 #include "editor/edit_precompiled.h"
 
-#include "base/base_console.h"
 #include "base/base_serialize_text_reader.h"
+
+#include "core/core_console.h"
 
 #include "data/data_camera_component.h"
 #include "data/data_component.h"
