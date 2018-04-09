@@ -31,7 +31,7 @@ namespace Engine
 
     // -----------------------------------------------------------------------------
 
-    void Exit()
+    void Shutdown()
     {
         Scpt::ScriptManager::OnExit();
 
