@@ -8,7 +8,6 @@ namespace Core
     // -----------------------------------------------------------------------------
     // Config
     // -----------------------------------------------------------------------------
-    #define CORE_PLUGIN_API_VERSION 1
     #define CORE_PLUGIN_API_EXPORT __declspec(dllexport)
 
     // -----------------------------------------------------------------------------
@@ -36,9 +35,8 @@ namespace Core
     // -----------------------------------------------------------------------------
     struct SPluginInfo
     {
-        int            m_APIversion;
-        const char*    m_pFileName;
-        const char*    m_pClassName;
+        int            m_APIMajorVersion;
+        int            m_APIMinorVersion;
         const char*    m_pPluginName;
         const char*    m_pPluginVersion;
         PluginInstance GetInstance;
@@ -57,9 +55,8 @@ namespace Core
         }                                                                          \
         CORE_PLUGIN_API_EXPORT Core::SPluginInfo InfoExport =                      \
         {                                                                          \
-            CORE_PLUGIN_API_VERSION,                                               \
-            __FILE__,                                                              \
-            #_ClassName,                                                           \
+            ENGINE_MAJOR_VERSION,                                                  \
+            ENGINE_MINOR_VERSION,                                                  \
             _PluginName,                                                           \
             _PluginVersion,                                                        \
             GetInstance,                                                           \

@@ -59,15 +59,15 @@ namespace Edit
     
     CState::EStateType CEditState::InternOnEnter()
     {
-        // -----------------------------------------------------------------------------
-        // Load plugins
-        // -----------------------------------------------------------------------------
-        Core::PluginManager::LoadPlugin("arcore");
+        Core::PluginManager::LoadPlugin("plugin_arcored");
 
-        auto& Plugin = Core::PluginManager::GetPlugin("arcore");
+        auto& Plugin = Core::PluginManager::GetPlugin("plugin_arcored");
 
         // Plugin.OnStart();
 
+        // -----------------------------------------------------------------------------
+        // Load plugins
+        // -----------------------------------------------------------------------------
         BASE_CONSOLE_STREAMINFO("Edit> Enter edit state.");
 
         // -----------------------------------------------------------------------------

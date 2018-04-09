@@ -113,12 +113,7 @@ namespace
 
         MultiByteToWideChar(CP_UTF8, 0, _pName, -1, FileName, 32768);
 
-#if APP_DEBUG_MODE == 1
-        std::wstring PluginFile = L"plugin_" + std::wstring(FileName) + L"d.dll";
-#else
-        std::wstring PluginFile = L"plugin_" + std::wstring(FileName) + L"r.dll";
-#endif // APP_DEBUG_MODE
-        
+        std::wstring PluginFile = std::wstring(FileName) + L".dll";
 
         HINSTANCE Instance = LoadLibraryExW(PluginFile.c_str(), NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
 
@@ -143,11 +138,18 @@ namespace
         }
 #endif // PLATFORM_WINDOWS
 
-        // BASE_CONSOLE_INFOV("API:            %i", pPluginInfo->m_APIversion);
+        BASE_CONSOLE_INFOV("Plugin name:    %s"   , pPluginInfo->m_pPluginName);
+        BASE_CONSOLE_INFOV("Plugin version: %s"   , pPluginInfo->m_pPluginVersion);
+        BASE_CONSOLE_INFOV("Plugin API:     %i.%i", pPluginInfo->m_APIMajorVersion, pPluginInfo->m_APIMinorVersion);
         // BASE_CONSOLE_INFOV("File:           %s", pPluginInfo->m_pFileName);
         // BASE_CONSOLE_INFOV("Class:          %s", pPluginInfo->m_pClassName);
-        BASE_CONSOLE_INFOV("Plugin name:    %s", pPluginInfo->m_pPluginName);
-        BASE_CONSOLE_INFOV("Plugin version: %s", pPluginInfo->m_pPluginVersion);
+
+        if (pPluginInfo->m_APIMajorVersion < ENGINE_MAJOR_VERSION || (pPluginInfo->m_APIMajorVersion == ENGINE_MAJOR_VERSION && pPluginInfo->m_APIMinorVersion < ENGINE_MINOR_VERSION))
+        {
+            BASE_CONSOLE_ERRORV("Plugin '%s' is out-dated (Current API version is %i.%i).", PluginIter->second.m_pInfo->m_pPluginName, ENGINE_MAJOR_VERSION, ENGINE_MINOR_VERSION);
+
+            return;
+        }
 
         // -----------------------------------------------------------------------------
         // Save plugin
