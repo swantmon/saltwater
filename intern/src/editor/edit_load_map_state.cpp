@@ -220,7 +220,7 @@ namespace Edit
                 LightProbeComponent->SetType(Dt::CLightProbeComponent::Sky);
                 LightProbeComponent->SetQuality(Dt::CLightProbeComponent::PX256);
                 LightProbeComponent->SetIntensity(1.0f);
-                LightProbeComponent->SetRefreshMode(Dt::CLightProbeComponent::Static);
+                LightProbeComponent->SetRefreshMode(Dt::CLightProbeComponent::Dynamic);
                 LightProbeComponent->SetNear(0.01f);
                 LightProbeComponent->SetFar(1024.0f);
                 LightProbeComponent->SetParallaxCorrection(false);
