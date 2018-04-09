@@ -54,13 +54,13 @@ namespace Dt
 
         m_ComponentByID.erase(_ID);
 
-        auto ComponentTypeVector = m_ComponentsByType[Component->GetTypeID()];
+        auto& rComponentTypeVector = m_ComponentsByType[Component->GetTypeID()];
 
-        auto ComponentTypeVectorIter = std::find(ComponentTypeVector.begin(), ComponentTypeVector.end(), Component);
+        auto ComponentTypeVectorIter = std::find(rComponentTypeVector.begin(), rComponentTypeVector.end(), Component);
 
-        if (ComponentTypeVectorIter == ComponentTypeVector.end()) return;
+        if (ComponentTypeVectorIter == rComponentTypeVector.end()) return;
 
-        ComponentTypeVector.erase(ComponentTypeVectorIter);
+        rComponentTypeVector.erase(ComponentTypeVectorIter);
 
         // -----------------------------------------------------------------------------
         // Remove unique_ptr

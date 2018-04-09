@@ -150,6 +150,18 @@ namespace
                 m_Scripts.push_back(pScriptComponent);
             }
         }
+
+        if ((DirtyFlags & Dt::CScriptComponent::DirtyDestroy) != 0)
+        {
+            auto ScriptIter = std::find_if(m_Scripts.begin(), m_Scripts.end(), [&](Dt::CScriptComponent* _pObject) { return _pObject == pScriptComponent; });
+
+            if (ScriptIter != m_Scripts.end())
+            {
+                pScriptComponent->Exit();
+
+                m_Scripts.erase(ScriptIter);
+            }
+        }
     }
 
     // -----------------------------------------------------------------------------

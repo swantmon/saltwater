@@ -90,7 +90,7 @@ namespace Dt
         // -----------------------------------------------------------------------------
         m_ComponentByID[pComponent->m_ID] = pComponent;
 
-        m_ComponentsByType[Base::CTypeInfo::GetTypeID<T>()].emplace_back(pComponent);
+        m_ComponentsByType[pComponent->GetTypeID()].emplace_back(pComponent);
 
         return pComponent;
     }

@@ -1,7 +1,9 @@
 
 #include "engine/engine_precompiled.h"
 
+#include "data/data_component.h"
 #include "data/data_component_facet.h"
+#include "data/data_component_manager.h"
 
 namespace Dt
 {
@@ -14,7 +16,14 @@ namespace Dt
 
     CComponentFacet::~CComponentFacet()
     {
+        for (auto Component : m_Components)
+        {
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*Component, Dt::IComponent::DirtyDestroy);
 
+            Dt::CComponentManager::GetInstance().Deallocate(Component->GetID());
+        }
+
+        m_Components.clear();
     }
 
     // -----------------------------------------------------------------------------
