@@ -192,6 +192,14 @@ namespace Edit
 
             // -----------------------------------------------------------------------------
 
+            auto ScriptComponent2 = Dt::CComponentManager::GetInstance().Allocate<Scpt::CARControllerScript>();
+
+            rEntity.AttachComponent(ScriptComponent2);
+
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*ScriptComponent2, Dt::CScriptComponent::DirtyCreate);
+
+            // -----------------------------------------------------------------------------
+
             Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
 

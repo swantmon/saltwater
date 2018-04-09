@@ -29,11 +29,13 @@ namespace
 
     public:
 
-        void LoadPlugin(const char* _pName);
+        SPluginInfo* LoadPlugin(const std::string& _rLibrary);
 
-        bool HasPlugin(const char* _pName);
+        bool HasPlugin(const std::string& _rName);
 
-        IPlugin& GetPlugin(const char* _pName);
+        IPlugin* GetPlugin(const std::string& _rName);
+
+        void* GetPluginFunction(const std::string& _rName, const std::string& _rMethod);
 
     private:
 
@@ -89,29 +91,15 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CPluginManager::LoadPlugin(const char* _pName)
+    SPluginInfo* CPluginManager::LoadPlugin(const std::string& _rLibrary)
     {
-        // -----------------------------------------------------------------------------
-        // Check if plugin is already loaded.
-        // -----------------------------------------------------------------------------
-        Base::BHash Hash = GenerateHash(_pName);
-
-        auto PluginIter = m_Plugins.find(Hash);
-
-        if (PluginIter != m_Plugins.end())
-        {
-            BASE_CONSOLE_ERRORV("Plugin '%s' is already loaded (V=%s).", PluginIter->second.m_pInfo->m_pPluginName, PluginIter->second.m_pInfo->m_pPluginVersion);
-
-            return;
-        }
-
         // -----------------------------------------------------------------------------
         // Load library
         // -----------------------------------------------------------------------------
 #ifdef PLATFORM_WINDOWS
         WCHAR FileName[32768];
 
-        MultiByteToWideChar(CP_UTF8, 0, _pName, -1, FileName, 32768);
+        MultiByteToWideChar(CP_UTF8, 0, _rLibrary.c_str(), -1, FileName, 32768);
 
         std::wstring PluginFile = std::wstring(FileName) + L".dll";
 
@@ -119,24 +107,38 @@ namespace
 
         if (Instance == NULL)
         {
-            BASE_CONSOLE_ERRORV("Loading plugin '%s' failed.", _pName);
+            BASE_CONSOLE_ERRORV("Loading library '%s' failed.", _rLibrary.c_str());
 
-            return;
+            return nullptr;
         }
 
-        BASE_CONSOLE_INFOV("Loading plugin '%s' successful.", _pName);
+        BASE_CONSOLE_INFOV("Loading library '%s' successful.", _rLibrary.c_str());
 
         SPluginInfo* pPluginInfo = (SPluginInfo*)GetProcAddress(Instance, "InfoExport");
 
         if (pPluginInfo == NULL)
         {
-            BASE_CONSOLE_ERROR("Loading plugin information failed.");
+            BASE_CONSOLE_ERRORV("Loading library information failed (Error: %i).", GetLastError());
 
             FreeLibrary(Instance);
 
-            return;
+            return nullptr;
         }
 #endif // PLATFORM_WINDOWS
+
+        // -----------------------------------------------------------------------------
+        // Check if plugin is already loaded.
+        // -----------------------------------------------------------------------------
+        Base::BHash Hash = GenerateHash(pPluginInfo->m_pPluginName);
+
+        auto PluginIter = m_Plugins.find(Hash);
+
+        if (PluginIter != m_Plugins.end())
+        {
+            BASE_CONSOLE_ERRORV("Plugin '%s' is already loaded (V=%s).", PluginIter->second.m_pInfo->m_pPluginName, PluginIter->second.m_pInfo->m_pPluginVersion);
+
+            return PluginIter->second.m_pInfo;
+        }
 
         BASE_CONSOLE_INFOV("Plugin name:    %s"   , pPluginInfo->m_pPluginName);
         BASE_CONSOLE_INFOV("Plugin version: %s"   , pPluginInfo->m_pPluginVersion);
@@ -148,39 +150,65 @@ namespace
         {
             BASE_CONSOLE_ERRORV("Plugin '%s' is out-dated (Current API version is %i.%i).", PluginIter->second.m_pInfo->m_pPluginName, ENGINE_MAJOR_VERSION, ENGINE_MINOR_VERSION);
 
-            return;
+            return nullptr;
         }
 
         // -----------------------------------------------------------------------------
         // Save plugin
         // -----------------------------------------------------------------------------
-        m_Plugins[Hash].m_pInfo    = pPluginInfo;
+        m_Plugins[Hash].m_pInfo = pPluginInfo;
 
 #ifdef PLATFORM_WINDOWS
         m_Plugins[Hash].m_Instance = Instance;
 #endif // PLATFORM_WINDOWS
+
+        return m_Plugins[Hash].m_pInfo;
     }
 
     // -----------------------------------------------------------------------------
 
-    bool CPluginManager::HasPlugin(const char* _pName)
+    bool CPluginManager::HasPlugin(const std::string& _rName)
     {
-        Base::BHash Hash = GenerateHash(_pName);
+        Base::BHash Hash = GenerateHash(_rName.c_str());
 
         return m_Plugins.find(Hash) != m_Plugins.end();
     }
 
     // -----------------------------------------------------------------------------
 
-    IPlugin& CPluginManager::GetPlugin(const char* _pName)
+    IPlugin* CPluginManager::GetPlugin(const std::string& _rName)
     {
-        Base::BHash Hash = GenerateHash(_pName);
+        Base::BHash Hash = GenerateHash(_rName.c_str());
 
         auto PluginIter = m_Plugins.find(Hash);
 
-        if (PluginIter == m_Plugins.end()) BASE_THROWV("Plugin '%s' is not registered.", _pName);
+        if (PluginIter == m_Plugins.end())
+        {
+            BASE_CONSOLE_ERRORV("Plugin '%s' is not registered.", _rName.c_str());
 
-        return PluginIter->second.m_pInfo->GetInstance();
+            return nullptr;
+        }
+
+        return &PluginIter->second.m_pInfo->GetInstance();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void* CPluginManager::GetPluginFunction(const std::string& _rName, const std::string& _rFunction)
+    {
+        Base::BHash Hash = GenerateHash(_rName.c_str());
+
+        auto PluginIter = m_Plugins.find(Hash);
+
+        if (PluginIter == m_Plugins.end()) return nullptr;
+
+        void* pMethod = nullptr;
+
+#ifdef PLATFORM_WINDOWS
+        pMethod = (void*)GetProcAddress(m_Plugins[Hash].m_Instance, _rFunction.c_str());
+#endif // PLATFORM_WINDOWS
+
+        return pMethod;
     }
 
     // -----------------------------------------------------------------------------
@@ -195,23 +223,30 @@ namespace Core
 {
 namespace PluginManager
 {
-    void LoadPlugin(const char* _pName)
+    SPluginInfo* LoadPlugin(const std::string& _rLibrary)
     {
-        CPluginManager::GetInstance().LoadPlugin(_pName);
+        return CPluginManager::GetInstance().LoadPlugin(_rLibrary);
     }
 
     // -----------------------------------------------------------------------------
 
-    bool HasPlugin(const char* _pName)
+    bool HasPlugin(const std::string& _rName)
     {
-        return CPluginManager::GetInstance().HasPlugin(_pName);
+        return CPluginManager::GetInstance().HasPlugin(_rName);
     }
 
     // -----------------------------------------------------------------------------
 
-    IPlugin& GetPlugin(const char* _pName)
+    IPlugin* GetPlugin(const std::string& _rName)
     {
-        return CPluginManager::GetInstance().GetPlugin(_pName);
+        return CPluginManager::GetInstance().GetPlugin(_rName);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void* GetPluginFunction(const std::string& _rName, const std::string& _rFunction)
+    {
+        return CPluginManager::GetInstance().GetPluginFunction(_rName, _rFunction);
     }
 } // namespace PluginManager
 } // namespace Core

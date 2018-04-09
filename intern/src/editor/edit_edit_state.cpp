@@ -3,9 +3,6 @@
 
 #include "camera/cam_control_manager.h"
 
-#include "core/core_console.h"
-#include "core/core_plugin_manager.h"
-
 #include "data/data_entity.h"
 #include "data/data_entity_manager.h"
 
@@ -59,17 +56,6 @@ namespace Edit
     
     CState::EStateType CEditState::InternOnEnter()
     {
-        Core::PluginManager::LoadPlugin("plugin_arcored");
-
-        auto& Plugin = Core::PluginManager::GetPlugin("plugin_arcored");
-
-        // Plugin.OnStart();
-
-        // -----------------------------------------------------------------------------
-        // Load plugins
-        // -----------------------------------------------------------------------------
-        BASE_CONSOLE_STREAMINFO("Edit> Enter edit state.");
-
         // -----------------------------------------------------------------------------
         // Acquire an selection ticket at selection renderer
         // -----------------------------------------------------------------------------

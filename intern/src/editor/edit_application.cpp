@@ -8,6 +8,7 @@
 
 #include "core/core_asset_manager.h"
 #include "core/core_console.h"
+#include "core/core_plugin_manager.h"
 #include "core/core_program_parameters.h"
 #include "core/core_time.h"
 
@@ -67,9 +68,10 @@ namespace
         
     private:
         
-        Edit::CState::EStateType m_CurrentState;
-        unsigned int             m_EditWindowID;
-        glm::vec2             m_LatestMousePosition;
+        Edit::CState::EStateType    m_CurrentState;
+        unsigned int                m_EditWindowID;
+        glm::vec2                   m_LatestMousePosition;
+        std::vector<Core::IPlugin*> m_AvailablePlugins;
 
         SDL_Joystick* m_pGamePad;
         int m_AnalogStickDeadZone;
@@ -199,6 +201,23 @@ namespace
         Engine::Startup();
 
         // -----------------------------------------------------------------------------
+        // Plugins
+        // -----------------------------------------------------------------------------
+        auto SelectedPlugins = Base::CProgramParameters::GetInstance().Get("plugins:selection", std::vector<std::string>());
+
+        for (auto SelectedPlugin : SelectedPlugins)
+        {
+            auto Plugin = Core::PluginManager::LoadPlugin(SelectedPlugin);
+
+            if (Plugin == nullptr)
+            {
+                m_AvailablePlugins.push_back(&Plugin->GetInstance());
+
+                Plugin->GetInstance().OnStart();
+            }
+        }
+
+        // -----------------------------------------------------------------------------
         // Register messages
         // -----------------------------------------------------------------------------
         Edit::MessageManager::Register(Edit::SGUIMessageType::Input_KeyPressed         , EDIT_RECEIVE_MESSAGE(&CApplication::OnKeyPressed));
@@ -245,6 +264,11 @@ namespace
         Edit::Helper::Plugin  ::OnExit();
 
         // -----------------------------------------------------------------------------
+        // Plugins
+        // -----------------------------------------------------------------------------
+        for (auto Plugin : m_AvailablePlugins) Plugin->OnExit();
+
+        // -----------------------------------------------------------------------------
         // Start engine
         // -----------------------------------------------------------------------------
         Engine::Shutdown();
@@ -288,6 +312,11 @@ namespace
             Edit::CState::EStateType NextState;
 
             NextState = s_pStates[m_CurrentState]->OnRun();
+
+            // -----------------------------------------------------------------------------
+            // Plugins
+            // -----------------------------------------------------------------------------
+            for (auto Plugin : m_AvailablePlugins) Plugin->Update();
 
             // -----------------------------------------------------------------------------
             // Update engine
