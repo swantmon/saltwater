@@ -14,16 +14,19 @@
 #include "base/base_input_event.h"
 #include "base/base_uncopyable.h"
 #include "base/base_singleton.h"
+#include "base/base_include_glm.h"
 
 #include "core/core_asset_manager.h"
 #include "core/core_jni_interface.h"
 #include "core/core_time.h"
+#include "core/core_plugin_manager.h"
+#include "core/core_program_parameters.h"
 
-#include "graphic/gfx_application_interface.h"
+#include "engine/engine.h"
+
+#include "graphic/gfx_pipeline.h"
 
 #include "gui/gui_event_handler.h"
-
-#include "mr/mr_control_manager.h"
 
 namespace
 {
@@ -67,10 +70,11 @@ namespace
         
     private:
         
-        App::CState::EStateType m_CurrentState;
-        App::CState::EStateType m_RequestState;
-        SApplicationSetup       m_AppSetup;
-        std::string             m_ParameterFile;
+        App::CState::EStateType     m_CurrentState;
+        App::CState::EStateType     m_RequestState;
+        SApplicationSetup           m_AppSetup;
+        std::string                 m_ParameterFile;
+        std::vector<Core::IPlugin*> m_AvailablePlugins;
         
     private:
         
@@ -154,9 +158,26 @@ namespace
         Core::AssetManager::SetFilePath(_pAndroidApp->activity->externalDataPath);
 
         // -----------------------------------------------------------------------------
-        // Start timing
+        // Start engine
         // -----------------------------------------------------------------------------
-        Core::Time::OnStart();
+        Engine::Startup();
+
+        // -----------------------------------------------------------------------------
+        // Plugins
+        // -----------------------------------------------------------------------------
+        auto SelectedPlugins = Base::CProgramParameters::GetInstance().Get("plugins:selection", std::vector<std::string>());
+
+        for (auto SelectedPlugin : SelectedPlugins)
+        {
+            auto Plugin = Core::PluginManager::LoadPlugin(SelectedPlugin);
+
+            if (Plugin == nullptr)
+            {
+                m_AvailablePlugins.push_back(&Plugin->GetInstance());
+
+                Plugin->GetInstance().OnStart();
+            }
+        }
 
         // -----------------------------------------------------------------------------
         // From now on we can start the state engine and enter the first state
@@ -184,9 +205,14 @@ namespace
         s_pStates[m_CurrentState]->OnLeave();
 
         // -----------------------------------------------------------------------------
-        // Stop timing
+        // Plugins
         // -----------------------------------------------------------------------------
-        Core::Time::OnExit();
+        for (auto Plugin : m_AvailablePlugins) Plugin->OnExit();
+
+        // -----------------------------------------------------------------------------
+        // Start engine
+        // -----------------------------------------------------------------------------
+        Engine::Shutdown();
 
         // -----------------------------------------------------------------------------
         // Save configuration
@@ -242,15 +268,23 @@ namespace
             if (m_AppSetup.m_Animating)
             {
                 // -----------------------------------------------------------------------------
-                // Time
-                // -----------------------------------------------------------------------------
-                Core::Time::Update();
-
-                // -----------------------------------------------------------------------------
                 // States
                 // -----------------------------------------------------------------------------
                 s_pStates[m_CurrentState]->OnRun();
 
+                // -----------------------------------------------------------------------------
+                // Plugins
+                // -----------------------------------------------------------------------------
+                for (auto Plugin : m_AvailablePlugins) Plugin->Update();
+
+                // -----------------------------------------------------------------------------
+                // Update engine
+                // -----------------------------------------------------------------------------
+                Engine::Update();
+
+                // -----------------------------------------------------------------------------
+                // Check state
+                // -----------------------------------------------------------------------------
                 if (m_RequestState != m_CurrentState)
                 {
                     OnTranslation(m_RequestState);
@@ -358,9 +392,9 @@ namespace
                 // -----------------------------------------------------------------------------
                 if (AppSetup->m_pAndroidApp->window != NULL)
                 {
-                    unsigned int WindowID = Gfx::App::RegisterWindow(AppSetup->m_pAndroidApp->window);
+                    unsigned int WindowID = Gfx::Pipeline::RegisterWindow(AppSetup->m_pAndroidApp->window);
 
-                    Gfx::App::ActivateWindow(WindowID);
+                    Gfx::Pipeline::ActivateWindow(WindowID);
 
                     AppSetup->m_WindowID = WindowID;
 
@@ -390,9 +424,9 @@ namespace
                     // -----------------------------------------------------------------------------
                     // Inform all libs
                     // -----------------------------------------------------------------------------
-                    MR::ControlManager::OnDisplayGeometryChanged(Rotation, Width, Height);
+                    // MR::ControlManager::OnDisplayGeometryChanged(Rotation, Width, Height);
 
-                    Gfx::App::OnResize(AppSetup->m_WindowID, Width, Height);
+                    Gfx::Pipeline::OnResize(AppSetup->m_WindowID, Width, Height);
                 }
                 break;
 
@@ -400,7 +434,7 @@ namespace
                 // -----------------------------------------------------------------------------
                 // When our app gains focus, we start monitoring the accelerometer.
                 // -----------------------------------------------------------------------------
-                MR::ControlManager::OnResume();
+                // MR::ControlManager::OnResume();
 
                 if (AppSetup->m_AccelerometerSensor != NULL)
                 {
@@ -420,7 +454,7 @@ namespace
                 // When our app loses focus, we stop monitoring the accelerometer.
                 // This is to avoid consuming battery while not being used.
                 // -----------------------------------------------------------------------------
-                MR::ControlManager::OnPause();
+                // MR::ControlManager::OnPause();
 
                 if (AppSetup->m_AccelerometerSensor != NULL)
                 {
