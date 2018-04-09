@@ -8,7 +8,11 @@ namespace Core
     // -----------------------------------------------------------------------------
     // Config
     // -----------------------------------------------------------------------------
+#ifdef PLATFORM_WINDOWS
     #define CORE_PLUGIN_API_EXPORT __declspec(dllexport)
+#elif PLATFORM_ANDROID
+    #define CORE_PLUGIN_API_EXPORT
+#endif
 
     // -----------------------------------------------------------------------------
     // Plugin interface

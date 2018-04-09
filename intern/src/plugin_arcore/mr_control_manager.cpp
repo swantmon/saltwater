@@ -1159,7 +1159,9 @@ namespace
             // Prepare model-view-projection matrix
             // TODO: Change color depending on height of the plane
             // -----------------------------------------------------------------------------
-            glm::mat4 PlaneMVPMatrix = Gfx::Cam::GetProjectionMatrix() * Gfx::Cam::GetViewMatrix() * glm::mat4(m_ARCToEngineMatrix) * PlaneModelMatrix;
+            auto MainCameraPtr = Gfx::ViewManager::GetMainCamera();
+
+            glm::mat4 PlaneMVPMatrix = MainCameraPtr->GetViewProjectionMatrix() * glm::mat4(m_ARCToEngineMatrix) * PlaneModelMatrix;
 
             glm::vec4 Color = glm::vec4(GetPlaneColor(IndexOfPlane), 1.0f);
 
@@ -1210,7 +1212,9 @@ namespace
 
                 ArPointCloud_getData(m_pARSession, pPointCloud, &pPointCloudData);
 
-                glm::mat4 PointMVPMatrix = Gfx::Cam::GetProjectionMatrix() * Gfx::Cam::GetViewMatrix() * glm::mat4(m_ARCToEngineMatrix);
+                auto MainCameraPtr = Gfx::ViewManager::GetMainCamera();
+
+                glm::mat4 PointMVPMatrix = MainCameraPtr->GetViewProjectionMatrix() * glm::mat4(m_ARCToEngineMatrix);
 
                 // -----------------------------------------------------------------------------
                 // Upload

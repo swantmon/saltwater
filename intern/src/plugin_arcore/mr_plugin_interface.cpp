@@ -29,12 +29,12 @@ namespace MR
     }
 } // namespace MR
 
-extern "C" __declspec(dllexport) const MR::CCamera* GetCamera()
+extern "C" CORE_PLUGIN_API_EXPORT const MR::CCamera* GetCamera()
 {
     return &MR::ControlManager::GetCamera();
 }
 
-extern "C" __declspec(dllexport) MR::CCamera::ETrackingState GetCameraTrackingState(const MR::CCamera* _pCamera)
+extern "C" CORE_PLUGIN_API_EXPORT MR::CCamera::ETrackingState GetCameraTrackingState(const MR::CCamera* _pCamera)
 {
     return _pCamera->GetTackingState();
 }

@@ -17,6 +17,8 @@
 
 #ifdef PLATFORM_WINDOWS
 #include "windows.h"
+#elif PLATFORM_ANDROID
+#include <dlfcn.h>
 #endif
 
 using namespace Core;
@@ -43,9 +45,12 @@ namespace
         {
         public:
 #ifdef PLATFORM_WINDOWS
-            HINSTANCE m_Instance;
+            typedef HINSTANCE CInstance;
+#elif PLATFORM_ANDROID
+            typedef void* CInstance;
 #endif // PLATFORM_WINDOWS
 
+            CInstance m_Instance;
             SPluginInfo* m_pInfo;
         };
 
@@ -79,10 +84,12 @@ namespace
     {
         for (auto Plugin : m_Plugins)
         {
-#ifdef PLATFORM_WINDOWS
-            HINSTANCE Instance = Plugin.second.m_Instance;
+            CInternPlugin::CInstance Instance = Plugin.second.m_Instance;
 
+#ifdef PLATFORM_WINDOWS
             FreeLibrary(Instance);
+#elif PLATFORM_ANDROID
+            dlclose(Instance);
 #endif // PLATFORM_WINDOWS
         }
 
@@ -96,6 +103,10 @@ namespace
         // -----------------------------------------------------------------------------
         // Load library
         // -----------------------------------------------------------------------------
+        SPluginInfo* pPluginInfo = 0;
+        CInternPlugin::CInstance Instance;
+
+
 #ifdef PLATFORM_WINDOWS
         WCHAR FileName[32768];
 
@@ -103,7 +114,10 @@ namespace
 
         std::wstring PluginFile = std::wstring(FileName) + L".dll";
 
-        HINSTANCE Instance = LoadLibraryExW(PluginFile.c_str(), NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
+        Instance = LoadLibraryExW(PluginFile.c_str(), NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
+#elif PLATFORM_ANDROID
+        Instance = dlopen(_rLibrary.c_str(), RTLD_NOW);
+#endif // PLATFORM_WINDOWS
 
         if (Instance == NULL)
         {
@@ -114,17 +128,26 @@ namespace
 
         BASE_CONSOLE_INFOV("Loading library '%s' successful.", _rLibrary.c_str());
 
-        SPluginInfo* pPluginInfo = (SPluginInfo*)GetProcAddress(Instance, "InfoExport");
+#ifdef PLATFORM_WINDOWS
+        pPluginInfo = (SPluginInfo*)GetProcAddress(Instance, "InfoExport");
+#elif PLATFORM_ANDROID
+        pPluginInfo = (SPluginInfo*)dlsym(Instance, "InfoExport");
+#endif // PLATFORM_WINDOWS
 
         if (pPluginInfo == NULL)
         {
+#ifdef PLATFORM_WINDOWS
             BASE_CONSOLE_ERRORV("Loading library information failed (Error: %i).", GetLastError());
 
             FreeLibrary(Instance);
+#elif PLATFORM_ANDROID
+            BASE_CONSOLE_ERRORV("Loading library information failed (Error: %i).", dlerror());
+
+            dlclose(Instance);
+#endif // PLATFORM_WINDOWS
 
             return nullptr;
         }
-#endif // PLATFORM_WINDOWS
 
         // -----------------------------------------------------------------------------
         // Check if plugin is already loaded.
@@ -156,11 +179,8 @@ namespace
         // -----------------------------------------------------------------------------
         // Save plugin
         // -----------------------------------------------------------------------------
-        m_Plugins[Hash].m_pInfo = pPluginInfo;
-
-#ifdef PLATFORM_WINDOWS
+        m_Plugins[Hash].m_pInfo    = pPluginInfo;
         m_Plugins[Hash].m_Instance = Instance;
-#endif // PLATFORM_WINDOWS
 
         return m_Plugins[Hash].m_pInfo;
     }
@@ -206,6 +226,8 @@ namespace
 
 #ifdef PLATFORM_WINDOWS
         pMethod = (void*)GetProcAddress(m_Plugins[Hash].m_Instance, _rFunction.c_str());
+#elif PLATFORM_ANDROID
+        pMethod = (void*)dlsym(m_Plugins[Hash].m_Instance, _rFunction.c_str());
 #endif // PLATFORM_WINDOWS
 
         return pMethod;
