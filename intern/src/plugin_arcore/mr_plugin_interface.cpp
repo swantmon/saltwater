@@ -42,13 +42,3 @@ namespace MR
         MR::ControlManager::OnResume();
     }
 } // namespace MR
-
-extern "C" CORE_PLUGIN_API_EXPORT const MR::CCamera* GetCamera()
-{
-    return &MR::ControlManager::GetCamera();
-}
-
-extern "C" CORE_PLUGIN_API_EXPORT MR::CCamera::ETrackingState GetCameraTrackingState(const MR::CCamera* _pCamera)
-{
-    return _pCamera->GetTackingState();
-}

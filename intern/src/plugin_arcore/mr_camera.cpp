@@ -1,6 +1,8 @@
 
 #include "plugin_arcore/mr_precompiled.h"
 
+#include "core/core_plugin.h"
+
 #include "plugin_arcore/mr_camera.h"
 
 namespace MR
@@ -57,3 +59,28 @@ namespace MR
         return m_Far;
     }
 } // namespace MR
+
+extern "C" CORE_PLUGIN_API_EXPORT MR::CCamera::ETrackingState GetCameraTrackingState(const MR::CCamera* _pCamera)
+{
+    return _pCamera->GetTackingState();
+}
+
+extern "C" CORE_PLUGIN_API_EXPORT glm::mat4 GetCameraViewMatrix(const MR::CCamera* _pCamera)
+{
+    return _pCamera->GetViewMatrix();
+}
+
+extern "C" CORE_PLUGIN_API_EXPORT glm::mat4 GetCameraProjectionMatrix(const MR::CCamera* _pCamera)
+{
+    return _pCamera->GetProjectionMatrix();
+}
+
+extern "C" CORE_PLUGIN_API_EXPORT float GetCameraNear(const MR::CCamera* _pCamera)
+{
+    return _pCamera->GetNear();
+}
+
+extern "C" CORE_PLUGIN_API_EXPORT float GetCameraFar(const MR::CCamera* _pCamera)
+{
+    return _pCamera->GetFar();
+}

@@ -4,11 +4,11 @@
 #include "base/base_coordinate_system.h"
 #include "base/base_include_glm.h"
 
+#include "core/core_plugin_manager.h"
+
 #include "data/data_camera_component.h"
 #include "data/data_component_facet.h"
 #include "data/data_transformation_facet.h"
-
-#include "plugin_arcore/mr_control_manager.h"
 
 #include "script/script_script.h"
 
@@ -18,8 +18,27 @@ namespace Scpt
     {
     public:
 
+        typedef const void* (*ArCoreGetCameraFunc)();
+        typedef int (*ArCoreGetCameraTrackingStateFunc)(const void* _pCamera);
+        typedef glm::mat4 (*ArCoreGetCameraViewMatrixFunc)(const void* _pCamera);
+        typedef glm::mat4 (*ArCoreGetCameraProjectionMatrixFunc)(const void* _pCamera);
+        typedef float (*ArCoreGetCameraNearFunc)(const void* _pCamera);
+        typedef float (*ArCoreGetCameraFarFunc)(const void* _pCamera);
+        typedef Gfx::CTexturePtr (*ArCoreGetBackgroundTextureFunc)();
+
+        ArCoreGetCameraFunc ArCoreGetCamera;
+        ArCoreGetCameraTrackingStateFunc ArCoreGetCameraTrackingState;
+        ArCoreGetCameraViewMatrixFunc GetCameraViewMatrix;
+        ArCoreGetCameraProjectionMatrixFunc GetCameraProjectionMatrix;
+        ArCoreGetCameraNearFunc GetCameraNear;
+        ArCoreGetCameraFarFunc GetCameraFar;
+        ArCoreGetBackgroundTextureFunc GetBackgroundTexture;
+
+    public:
+
         Dt::CEntity* m_pCameraEntity = nullptr;
         Dt::CCameraComponent* m_pCameraComponent = nullptr;
+        bool m_ArCoreAvailable = false;
 
     private:
 
@@ -37,6 +56,16 @@ namespace Scpt
             }
 
             m_MRToEngineMatrix = Base::CCoordinateSystem::GetBaseMatrix(glm::vec3(1, 0, 0), glm::vec3(0, 1, 0), glm::vec3(0, 0, -1));
+
+            m_ArCoreAvailable = Core::PluginManager::HasPlugin("ArCore");
+
+            ArCoreGetCamera = (ArCoreGetCameraFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetCamera"));
+            ArCoreGetCameraTrackingState = (ArCoreGetCameraTrackingStateFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetCameraTrackingState"));
+            GetCameraViewMatrix = (ArCoreGetCameraViewMatrixFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetCameraViewMatrix"));
+            GetCameraProjectionMatrix = (ArCoreGetCameraProjectionMatrixFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetCameraProjectionMatrix"));
+            GetCameraNear = (ArCoreGetCameraNearFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetCameraNear"));
+            GetCameraFar = (ArCoreGetCameraFarFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetCameraFar"));
+            GetBackgroundTexture = (ArCoreGetBackgroundTextureFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetBackgroundTexture"));
         }
 
         // -----------------------------------------------------------------------------
@@ -50,16 +79,19 @@ namespace Scpt
 
         void Update() override
         {
-            /*
-            const MR::CCamera& rCamera = MR::ControlManager::GetCamera();
+            if (!m_ArCoreAvailable) return;
 
-            if (rCamera.GetTackingState() != MR::CCamera::Tracking) return;
+            const void* rCamera = ArCoreGetCamera();
+
+            if (ArCoreGetCameraTrackingState(rCamera) != 2) return;
 
             if (m_pCameraEntity != nullptr)
             {
-                glm::mat3 WSRotation = m_MRToEngineMatrix * glm::transpose(glm::mat3(rCamera.GetViewMatrix()));
+                glm::mat4 CameraViewMatrix = GetCameraViewMatrix(rCamera);
 
-                glm::vec3 WSPosition = WSRotation * rCamera.GetViewMatrix()[3] * -1.0f;
+                glm::mat3 WSRotation = m_MRToEngineMatrix * glm::transpose(glm::mat3(CameraViewMatrix));
+
+                glm::vec3 WSPosition = WSRotation * CameraViewMatrix[3] * -1.0f;
 
                 m_pCameraEntity->SetWorldPosition(WSPosition);
 
@@ -78,17 +110,16 @@ namespace Scpt
 
                 m_pCameraComponent->SetProjectionType(Dt::CCameraComponent::External);
 
-                m_pCameraComponent->SetNear(rCamera.GetNear());
+                m_pCameraComponent->SetNear(GetCameraNear(rCamera));
 
-                m_pCameraComponent->SetNear(rCamera.GetFar());
+                m_pCameraComponent->SetNear(GetCameraFar(rCamera));
 
-                m_pCameraComponent->SetProjectionMatrix(rCamera.GetProjectionMatrix());
+                m_pCameraComponent->SetProjectionMatrix(GetCameraProjectionMatrix(rCamera));
 
-                m_pCameraComponent->SetBackgroundTexture(MR::ControlManager::GetBackgroundTexture());
+                m_pCameraComponent->SetBackgroundTexture(GetBackgroundTexture());
 
                 Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*m_pCameraComponent, Dt::CCameraComponent::DirtyInfo);
             }
-            */
         }
 
         // -----------------------------------------------------------------------------

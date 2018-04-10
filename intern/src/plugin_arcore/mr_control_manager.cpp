@@ -7,6 +7,7 @@
 #include "base/base_uncopyable.h"
 #include "base/base_singleton.h"
 
+#include "core/core_plugin.h"
 #include "core/core_jni_interface.h"
 
 #include "data/data_ar_controller_component.h"
@@ -197,8 +198,6 @@ namespace
         void OnPause();
         void OnResume();
 
-        void OnResize(int _Width, int _Height);
-
         const CCamera& GetCamera();
 
         const CLightEstimation& GetLightEstimation();
@@ -291,6 +290,7 @@ namespace
 
         void Render();
 
+        void OnResize(int _Width, int _Height);
         void OnDirtyEntity(Dt::CEntity* _pEntity);
         void OnDirtyComponent(Dt::IComponent* _pComponent);
     };
@@ -474,21 +474,18 @@ namespace
     {
         m_TrackedObjects.clear();
 
-#ifdef PLATFORM_ANDROID
         // -----------------------------------------------------------------------------
         // AR session and frame
         // -----------------------------------------------------------------------------
         ArSession_destroy(m_pARSession);
 
         ArFrame_destroy(m_pARFrame);
-#endif
     }
 
     // -----------------------------------------------------------------------------
 
     void CMRControlManager::Update()
     {
-#ifdef PLATFORM_ANDROID
         if (m_pARSession == nullptr) return;
 
         ArStatus Result;
@@ -592,7 +589,6 @@ namespace
 
             ArPose_destroy(pARPose);
         }
-#endif
 
         Render();
     }
@@ -601,18 +597,15 @@ namespace
 
     void CMRControlManager::OnPause()
     {
-#ifdef PLATFORM_ANDROID
         if (m_pARSession == nullptr) return;
 
         ArSession_pause(m_pARSession);
-#endif
     }
 
     // -----------------------------------------------------------------------------
 
     void CMRControlManager::OnResume()
     {
-#ifdef PLATFORM_ANDROID
         void* pEnvironment = Core::JNI::GetJavaEnvironment();
         void* pActivity    = Core::JNI::GetActivity();
         void* pContext     = Core::JNI::GetContext();
@@ -694,7 +687,6 @@ namespace
         {
             ArSession_resume(m_pARSession);
         }
-#endif
     }
 
     // -----------------------------------------------------------------------------
@@ -725,7 +717,6 @@ namespace
 
     const CMarker* CMRControlManager::AcquireNewMarker(float _X, float _Y)
     {
-#ifdef PLATFORM_ANDROID
         CInternMarker* pReturnMarker = nullptr;
 
         if (m_pARFrame != nullptr && m_pARSession != nullptr)
@@ -861,19 +852,12 @@ namespace
         }
 
         return pReturnMarker;
-#else
-        BASE_UNUSED(_X);
-        BASE_UNUSED(_Y);
-
-        return nullptr;
-#endif
     }
 
     // -----------------------------------------------------------------------------
 
     void CMRControlManager::ReleaseMarker(const CMarker* _pMarker)
     {
-#ifdef PLATFORM_ANDROID
         auto MarkerIter = std::find_if(m_TrackedObjects.begin(), m_TrackedObjects.end(), [&](CInternMarker& _rObject) { return &_rObject == _pMarker; });
 
         if (MarkerIter == m_TrackedObjects.end()) return;
@@ -883,9 +867,6 @@ namespace
         ArAnchor_release(pInternMarker->m_pAnchor);
 
         m_TrackedObjects.erase(MarkerIter);
-#else
-        BASE_UNUSED(_pMarker);
-#endif
     }
 
     // -----------------------------------------------------------------------------
@@ -915,7 +896,6 @@ namespace
         // -----------------------------------------------------------------------------
         // Background image from webcam
         // -----------------------------------------------------------------------------
-#ifdef PLATFORM_ANDROID
         int32_t HasGeometryChanged = 0;
 
         ArFrame_getDisplayGeometryChanged(m_pARSession, m_pARFrame, &HasGeometryChanged);
@@ -928,7 +908,6 @@ namespace
 
             g_IsUVsInitialized = true;
         }
-#endif // PLATFORM_ANDROID
 
         Gfx::ContextManager::SetTopology(Gfx::STopology::TriangleStrip);
 
@@ -944,7 +923,6 @@ namespace
 
         Gfx::ContextManager::Draw(4, 0);
 
-#ifdef PLATFORM_ANDROID
         // -----------------------------------------------------------------------------
         // Render planes
         // -----------------------------------------------------------------------------
@@ -1241,7 +1219,6 @@ namespace
                 ArPointCloud_release(pPointCloud);
             }
         }
-#endif
 
         Gfx::ContextManager::ResetShaderVS();
 
@@ -1348,3 +1325,23 @@ namespace ControlManager
     }
 } // namespace ControlManager
 } // namespace MR
+
+extern "C" CORE_PLUGIN_API_EXPORT const MR::CCamera* GetCamera()
+{
+    return &MR::ControlManager::GetCamera();
+}
+
+extern "C" CORE_PLUGIN_API_EXPORT const MR::CMarker* AcquireNewMarker(float _X, float _Y)
+{
+    return MR::ControlManager::AcquireNewMarker(_X, _Y);
+}
+
+extern "C" CORE_PLUGIN_API_EXPORT void ReleaseMarker(const MR::CMarker* _pMarker)
+{
+    return MR::ControlManager::ReleaseMarker(_pMarker);
+}
+
+extern "C" CORE_PLUGIN_API_EXPORT Gfx::CTexturePtr GetBackgroundTexture()
+{
+    return MR::ControlManager::GetBackgroundTexture();
+}
