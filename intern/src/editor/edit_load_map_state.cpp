@@ -68,7 +68,7 @@ namespace Edit
     
     void CLoadMapState::SetMapfile(const char* _pFilename)
     {
-        BASE_CONSOLE_STREAMINFO("Edit> Setting load level to " << _pFilename);
+        ENGINE_CONSOLE_STREAMINFO("Edit> Setting load level to " << _pFilename);
 
         m_pMapfile = _pFilename;
     }

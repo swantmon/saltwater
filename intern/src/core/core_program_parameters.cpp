@@ -5,7 +5,7 @@
 
 #include <sstream>
 
-namespace IO
+namespace Core
 {
     CProgramParameters& CProgramParameters::GetInstance()
     {
@@ -13,11 +13,11 @@ namespace IO
 
         return s_Sinstance;
     }
-} // namespace IO
+} // namespace Core
 
 using namespace nlohmann;
 
-namespace IO
+namespace Core
 {
     CProgramParameters::CProgramParameters()
     {
@@ -40,13 +40,13 @@ namespace IO
         }
         catch (const json::exception& _rException)
         {
-            BASE_CONSOLE_ERRORV("Failed parsing JSON with reason \"%s\". Container will be empty.", _rException.what());
+            ENGINE_CONSOLE_ERRORV("Failed parsing JSON with reason \"%s\". Container will be empty.", _rException.what());
 
             ParseJSON("{ }");
         }
         catch (...)
         {
-            BASE_CONSOLE_ERROR("An undefined exception got up while parsing JSON file.");
+            ENGINE_CONSOLE_ERROR("An undefined exception got up while parsing JSON file.");
 
             ParseJSON("{ }");
         }
@@ -68,7 +68,7 @@ namespace IO
         }
         else
         {
-            BASE_CONSOLE_WARNINGV("Config file %s could not be opened or does not exist! Container will be empty.", _rFile.c_str());
+            ENGINE_CONSOLE_WARNINGV("Config file %s could not be opened or does not exist! Container will be empty.", _rFile.c_str());
 
             ParseJSON("{ }");
         }
@@ -90,7 +90,7 @@ namespace IO
         }
         else
         {
-            BASE_CONSOLE_ERRORV("Save file %s could not be opened. No changes will be saved.", _rFile.c_str());
+            ENGINE_CONSOLE_ERRORV("Save file %s could not be opened. No changes will be saved.", _rFile.c_str());
         }
     }
 
@@ -125,4 +125,4 @@ namespace IO
     {
         return Get(_rOption, std::string(_Default));
     }
-} // namespace IO
+} // namespace Core

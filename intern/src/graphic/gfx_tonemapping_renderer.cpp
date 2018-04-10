@@ -310,22 +310,22 @@ namespace
 
     void CGfxShadingRenderer::ResetSettings()
     {
-        BASE_CONSOLE_STREAMINFO("Gfx> Loading default settings for final shading & tone mapping");
+        ENGINE_CONSOLE_STREAMINFO("Gfx> Loading default settings for final shading & tone mapping");
         
         SColorGradingSettings Settings;
 
-        Settings.m_Tint             = Base::CProgramParameters::GetInstance().Get("graphics:tone_mapping:tint", glm::vec3(1.0f));
-        Settings.m_DarkTint         = Base::CProgramParameters::GetInstance().Get("graphics:tone_mapping:dark_tint:color", glm::vec3(0.2f));
-        Settings.m_DarkTintBlend    = Base::CProgramParameters::GetInstance().Get("graphics:tone_mapping:dark_tint:blend", 0.5f);
-        Settings.m_DarkTintStrength = Base::CProgramParameters::GetInstance().Get("graphics:tone_mapping:dark_tint:strength", 0.5f);
-        Settings.m_Saturation       = Base::CProgramParameters::GetInstance().Get("graphics:tone_mapping:saturation", 1.0f);
-        Settings.m_Contrast         = Base::CProgramParameters::GetInstance().Get("graphics:tone_mapping:contrast", 0.05f);
-        Settings.m_DynamicRange     = Base::CProgramParameters::GetInstance().Get("graphics:tone_mapping:dynamic_range", 4.0f);
-        Settings.m_CrushBrights     = Base::CProgramParameters::GetInstance().Get("graphics:tone_mapping:crush_brights", 0.18f);
-        Settings.m_CrushDarks       = Base::CProgramParameters::GetInstance().Get("graphics:tone_mapping:crush_darks", 1.0f);
-        Settings.m_Red              = Base::CProgramParameters::GetInstance().Get("graphics:tone_mapping:red", glm::vec3(1.0f, 0.0f, 0.0f));
-        Settings.m_Green            = Base::CProgramParameters::GetInstance().Get("graphics:tone_mapping:green", glm::vec3(0.0f, 1.0f, 0.0f));
-        Settings.m_Blue             = Base::CProgramParameters::GetInstance().Get("graphics:tone_mapping:blue", glm::vec3(0.0f, 0.0f, 1.0f));
+        Settings.m_Tint             = Core::CProgramParameters::GetInstance().Get("graphics:tone_mapping:tint", glm::vec3(1.0f));
+        Settings.m_DarkTint         = Core::CProgramParameters::GetInstance().Get("graphics:tone_mapping:dark_tint:color", glm::vec3(0.2f));
+        Settings.m_DarkTintBlend    = Core::CProgramParameters::GetInstance().Get("graphics:tone_mapping:dark_tint:blend", 0.5f);
+        Settings.m_DarkTintStrength = Core::CProgramParameters::GetInstance().Get("graphics:tone_mapping:dark_tint:strength", 0.5f);
+        Settings.m_Saturation       = Core::CProgramParameters::GetInstance().Get("graphics:tone_mapping:saturation", 1.0f);
+        Settings.m_Contrast         = Core::CProgramParameters::GetInstance().Get("graphics:tone_mapping:contrast", 0.05f);
+        Settings.m_DynamicRange     = Core::CProgramParameters::GetInstance().Get("graphics:tone_mapping:dynamic_range", 4.0f);
+        Settings.m_CrushBrights     = Core::CProgramParameters::GetInstance().Get("graphics:tone_mapping:crush_brights", 0.18f);
+        Settings.m_CrushDarks       = Core::CProgramParameters::GetInstance().Get("graphics:tone_mapping:crush_darks", 1.0f);
+        Settings.m_Red              = Core::CProgramParameters::GetInstance().Get("graphics:tone_mapping:red", glm::vec3(1.0f, 0.0f, 0.0f));
+        Settings.m_Green            = Core::CProgramParameters::GetInstance().Get("graphics:tone_mapping:green", glm::vec3(0.0f, 1.0f, 0.0f));
+        Settings.m_Blue             = Core::CProgramParameters::GetInstance().Get("graphics:tone_mapping:blue", glm::vec3(0.0f, 0.0f, 1.0f));
 
         SetSettings(Settings);
     }

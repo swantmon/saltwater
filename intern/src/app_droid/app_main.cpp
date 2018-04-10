@@ -17,14 +17,14 @@ void android_main(android_app* _pAndroidApp)
     }
     catch (const Base::CException& _rException)
     {
-        BASE_CONSOLE_ERROR("An Exception stops application");
-        BASE_CONSOLE_INFOV(" > Reason:   %s", _rException.GetText());
-        BASE_CONSOLE_INFOV(" > Code:     %i", _rException.GetCode());
-        BASE_CONSOLE_INFOV(" > Location: %s:%i", _rException.GetFile(), _rException.GetLine());
+        ENGINE_CONSOLE_ERROR("An Exception stops application");
+        ENGINE_CONSOLE_INFOV(" > Reason:   %s", _rException.GetText());
+        ENGINE_CONSOLE_INFOV(" > Code:     %i", _rException.GetCode());
+        ENGINE_CONSOLE_INFOV(" > Location: %s:%i", _rException.GetFile(), _rException.GetLine());
     }
     catch (...)
     {
-        BASE_CONSOLE_ERROR("An undefined exception stops application");
+        ENGINE_CONSOLE_ERROR("An undefined exception stops application");
     }
 
     try
@@ -33,13 +33,13 @@ void android_main(android_app* _pAndroidApp)
     }
     catch (const Base::CException& _rException)
     {
-        BASE_CONSOLE_ERROR("An Exception stops application");
-        BASE_CONSOLE_INFOV(" > Reason:   %s", _rException.GetText());
-        BASE_CONSOLE_INFOV(" > Code:     %i", _rException.GetCode());
-        BASE_CONSOLE_INFOV(" > Location: %s:%i", _rException.GetFile(), _rException.GetLine());
+        ENGINE_CONSOLE_ERROR("An Exception stops application");
+        ENGINE_CONSOLE_INFOV(" > Reason:   %s", _rException.GetText());
+        ENGINE_CONSOLE_INFOV(" > Code:     %i", _rException.GetCode());
+        ENGINE_CONSOLE_INFOV(" > Location: %s:%i", _rException.GetFile(), _rException.GetLine());
     }
     catch (...)
     {
-        BASE_CONSOLE_ERROR("An undefined exception stops application");
+        ENGINE_CONSOLE_ERROR("An undefined exception stops application");
     }
 }

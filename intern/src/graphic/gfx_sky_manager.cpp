@@ -963,7 +963,7 @@ namespace
     {
         if (_pOutput->m_InputTexturePtr == 0)
         {
-            BASE_CONSOLE_INFO("Skybox can't be rendered from panorama because of missing image.");
+            ENGINE_CONSOLE_INFO("Skybox can't be rendered from panorama because of missing image.");
             return;
         }
 
@@ -1066,7 +1066,7 @@ namespace
     {
         if (_pOutput->m_InputTexturePtr == 0)
         {
-            BASE_CONSOLE_INFO("Skybox can't be rendered from cube map because of missing image.");
+            ENGINE_CONSOLE_INFO("Skybox can't be rendered from cube map because of missing image.");
             return;
         }
 
@@ -1169,7 +1169,7 @@ namespace
     {
         if (_pOutput->m_InputTexturePtr == 0)
         {
-            BASE_CONSOLE_INFO("Skybox can't be rendered from texture because of missing image.");
+            ENGINE_CONSOLE_INFO("Skybox can't be rendered from texture because of missing image.");
             return;
         }
 
@@ -1298,7 +1298,7 @@ namespace
     {
         if(_pOutput->m_InputTexturePtr == 0)
         {
-            BASE_CONSOLE_INFO("Skybox can't be rendered from geometry beacuse of missing image.");
+            ENGINE_CONSOLE_INFO("Skybox can't be rendered from geometry beacuse of missing image.");
             return;
         }
 
@@ -1458,7 +1458,7 @@ namespace
     {
         if (_pOutput->m_InputTexturePtr == 0)
         {
-            BASE_CONSOLE_INFO("Skybox can't be rendered from LUT because of missing image.");
+            ENGINE_CONSOLE_INFO("Skybox can't be rendered from LUT because of missing image.");
             return;
         }
 
@@ -1587,7 +1587,7 @@ namespace
 
         const int DefaultOrderCount = (Main::GetGraphicsAPI().m_GraphicsAPI == CGraphicsInfo::OpenGL) ? 4 : 0;
 
-        const int OrderCount = Base::CProgramParameters::GetInstance().Get("graphics:atmosphere:order_count", DefaultOrderCount);
+        const int OrderCount = Core::CProgramParameters::GetInstance().Get("graphics:atmosphere:order_count", DefaultOrderCount);
 
         // -----------------------------------------------------------------------------
         // Textures

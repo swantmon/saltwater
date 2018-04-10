@@ -37,7 +37,7 @@ namespace Edit
     
     CState::EStateType CIntroState::InternOnEnter()
     {
-        BASE_CONSOLE_STREAMINFO("Edit> Enter intro state.");
+        ENGINE_CONSOLE_STREAMINFO("Edit> Enter intro state.");
 
         // -----------------------------------------------------------------------------
         // Load default state behavior

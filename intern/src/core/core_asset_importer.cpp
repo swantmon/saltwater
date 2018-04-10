@@ -139,12 +139,12 @@ namespace
 
         if (!pScene)
         {
-            BASE_CONSOLE_STREAMWARNING("Loading file '" << _rFile << "' with assimp failed (Code: " << pImporter->GetErrorString() << ").");
+            ENGINE_CONSOLE_STREAMWARNING("Loading file '" << _rFile << "' with assimp failed (Code: " << pImporter->GetErrorString() << ").");
 
             return nullptr;
         }
 
-        BASE_CONSOLE_STREAMINFO("Loading file '" << _rFile << "' with assimp succeeded.");
+        ENGINE_CONSOLE_STREAMINFO("Loading file '" << _rFile << "' with assimp succeeded.");
 
         // -----------------------------------------------------------------------------
         // Generate new info
@@ -195,12 +195,12 @@ namespace
 
         if (Error != tinyxml2::XML_SUCCESS)
         {
-            BASE_CONSOLE_STREAMWARNING("Loading xml file '" << _rFile << "' failed.");
+            ENGINE_CONSOLE_STREAMWARNING("Loading xml file '" << _rFile << "' failed.");
 
             return nullptr;
         }
 
-        BASE_CONSOLE_STREAMINFO("Loading xml file '" << _rFile << "' succeeded.");
+        ENGINE_CONSOLE_STREAMINFO("Loading xml file '" << _rFile << "' succeeded.");
 
         // -----------------------------------------------------------------------------
         // Generate new info

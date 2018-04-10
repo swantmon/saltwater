@@ -10,7 +10,7 @@
 
 #include <string>
 
-namespace IO
+namespace Core
 {
     class ENGINE_API CProgramParameters
     {
@@ -53,14 +53,14 @@ namespace IO
 
         nlohmann::json::json_pointer ConvertOptionToJSONPointer(const std::string& _rOption);
     };
-} // namespace IO
+} // namespace Core
 
-namespace IO
+namespace Core
 {
     template<typename T>
     void CProgramParameters::Add(const std::string& _rOption, const T _Parameter)
     {
-        BASE_CONSOLE_INFOV("Creating new config parameter %s", _rOption.c_str());
+        ENGINE_CONSOLE_INFOV("Creating new config parameter %s", _rOption.c_str());
 
         m_Container[ConvertOptionToJSONPointer(_rOption)] = _Parameter;
     }
@@ -83,9 +83,9 @@ namespace IO
         }
         catch (const nlohmann::json::exception& _rException)
         {
-            BASE_CONSOLE_ERRORV("Getting value of option \"%s\" from program parameters failed with error: \"%s\"", _rOption.c_str(), _rException.what());
+            ENGINE_CONSOLE_ERRORV("Getting value of option \"%s\" from program parameters failed with error: \"%s\"", _rOption.c_str(), _rException.what());
         }
 
         return _Default;
     }
-} // namespace IO
+} // namespace Core

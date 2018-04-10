@@ -124,15 +124,15 @@ namespace
         if (Instance == NULL)
         {
 #ifdef PLATFORM_WINDOWS
-            BASE_CONSOLE_ERRORV("Plugin '%s' not found.", _rLibrary.c_str());
+            ENGINE_CONSOLE_ERRORV("Plugin '%s' not found.", _rLibrary.c_str());
 #elif PLATFORM_ANDROID
-            BASE_CONSOLE_ERRORV("Plugin '%s' not found (Error: '%s').", _rLibrary.c_str(), dlerror());
+            ENGINE_CONSOLE_ERRORV("Plugin '%s' not found (Error: '%s').", _rLibrary.c_str(), dlerror());
 #endif // PLATFORM_WINDOWS
 
             return nullptr;
         }
 
-        BASE_CONSOLE_INFOV("Loading plugin '%s' successful.", _rLibrary.c_str());
+        ENGINE_CONSOLE_INFOV("Loading plugin '%s' successful.", _rLibrary.c_str());
 
 #ifdef PLATFORM_WINDOWS
         pPluginInfo = (SPluginInfo*)GetProcAddress(Instance, "InfoExport");
@@ -143,11 +143,11 @@ namespace
         if (pPluginInfo == NULL)
         {
 #ifdef PLATFORM_WINDOWS
-            BASE_CONSOLE_ERRORV("Loading plugin information failed (Error: %i).", GetLastError());
+            ENGINE_CONSOLE_ERRORV("Loading plugin information failed (Error: %i).", GetLastError());
 
             FreeLibrary(Instance);
 #elif PLATFORM_ANDROID
-            BASE_CONSOLE_ERRORV("Loading plugin information failed (Error: '%s').", dlerror());
+            ENGINE_CONSOLE_ERRORV("Loading plugin information failed (Error: '%s').", dlerror());
 
             dlclose(Instance);
 #endif // PLATFORM_WINDOWS
@@ -164,19 +164,19 @@ namespace
 
         if (PluginIter != m_Plugins.end())
         {
-            BASE_CONSOLE_ERRORV("Plugin '%s' is already loaded (V=%s).", PluginIter->second.m_pInfo->m_pPluginName, PluginIter->second.m_pInfo->m_pPluginVersion);
+            ENGINE_CONSOLE_ERRORV("Plugin '%s' is already loaded (V=%s).", PluginIter->second.m_pInfo->m_pPluginName, PluginIter->second.m_pInfo->m_pPluginVersion);
 
             return PluginIter->second.m_pInfo;
         }
 
-        BASE_CONSOLE_INFOV("Plugin name:        %s"   , pPluginInfo->m_pPluginName);
-        BASE_CONSOLE_INFOV("Plugin version:     %s"   , pPluginInfo->m_pPluginVersion);
-        BASE_CONSOLE_INFOV("Plugin description: %s"   , pPluginInfo->m_pPluginDescription);
-        BASE_CONSOLE_INFOV("Plugin API:         %i.%i", pPluginInfo->m_APIMajorVersion, pPluginInfo->m_APIMinorVersion);
+        ENGINE_CONSOLE_INFOV("Plugin name:        %s"   , pPluginInfo->m_pPluginName);
+        ENGINE_CONSOLE_INFOV("Plugin version:     %s"   , pPluginInfo->m_pPluginVersion);
+        ENGINE_CONSOLE_INFOV("Plugin description: %s"   , pPluginInfo->m_pPluginDescription);
+        ENGINE_CONSOLE_INFOV("Plugin API:         %i.%i", pPluginInfo->m_APIMajorVersion, pPluginInfo->m_APIMinorVersion);
 
         if (pPluginInfo->m_APIMajorVersion < ENGINE_MAJOR_VERSION || (pPluginInfo->m_APIMajorVersion == ENGINE_MAJOR_VERSION && pPluginInfo->m_APIMinorVersion < ENGINE_MINOR_VERSION))
         {
-            BASE_CONSOLE_ERRORV("Plugin '%s' is out-dated (Current API version is %i.%i).", PluginIter->second.m_pInfo->m_pPluginName, ENGINE_MAJOR_VERSION, ENGINE_MINOR_VERSION);
+            ENGINE_CONSOLE_ERRORV("Plugin '%s' is out-dated (Current API version is %i.%i).", PluginIter->second.m_pInfo->m_pPluginName, ENGINE_MAJOR_VERSION, ENGINE_MINOR_VERSION);
 
             return nullptr;
         }
@@ -209,7 +209,7 @@ namespace
 
         if (PluginIter == m_Plugins.end())
         {
-            BASE_CONSOLE_ERRORV("Plugin '%s' is not registered.", _rName.c_str());
+            ENGINE_CONSOLE_ERRORV("Plugin '%s' is not registered.", _rName.c_str());
 
             return nullptr;
         }

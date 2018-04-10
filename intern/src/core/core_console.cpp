@@ -9,7 +9,7 @@
 #include "android/log.h"
 #endif // PLATFORM_ANDROID
 
-namespace IO
+namespace Core
 {
 
 	CConsole& CConsole::GetInstance()
@@ -37,7 +37,7 @@ namespace IO
     
     // -----------------------------------------------------------------------------
     
-    void CConsole::Entry(EConsoleLevel _ConsoleLevel, const Char* _pText)
+    void CConsole::Entry(EConsoleLevel _ConsoleLevel, const char* _pText)
     {
         if (m_VerbosityLevel >= _ConsoleLevel)
         {
@@ -47,7 +47,7 @@ namespace IO
     
     // -----------------------------------------------------------------------------
     
-    void CConsole::Entry(EConsoleLevel _ConsoleLevel, Char*, const Char* _pFormat, ...)
+    void CConsole::Entry(EConsoleLevel _ConsoleLevel, char*, const char* _pFormat, ...)
     {
         if (m_VerbosityLevel >= _ConsoleLevel)
         {
@@ -103,7 +103,7 @@ namespace IO
 
     // -----------------------------------------------------------------------------
     
-    const Char* CConsole::GetText() const
+    const char* CConsole::GetText() const
     {
         return m_OutputStream.str().c_str();
     }
@@ -133,7 +133,7 @@ namespace IO
 
     // -----------------------------------------------------------------------------
 
-    void CConsole::Out(EConsoleLevel _ConsoleLevel, const Char* _pText) const
+    void CConsole::Out(EConsoleLevel _ConsoleLevel, const char* _pText) const
     {
 #ifdef PLATFORM_ANDROID
         static const int s_LogLevel[] =
@@ -152,4 +152,4 @@ namespace IO
         fflush(stdout);
 #endif // PLATFORM_ANDROID
     }
-} // namespace IO
+} // namespace Core

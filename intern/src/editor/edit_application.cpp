@@ -138,7 +138,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Init SDL for gamepad input
         // -----------------------------------------------------------------------------
-        m_AnalogStickDeadZone = Base::CProgramParameters::GetInstance().Get("input:gamepad:deadzone", 3200);
+        m_AnalogStickDeadZone = Core::CProgramParameters::GetInstance().Get("input:gamepad:deadzone", 3200);
 
         if (SDL_Init(SDL_INIT_JOYSTICK) < 0)
         {
@@ -147,7 +147,7 @@ namespace
 
         if (SDL_NumJoysticks() < 1)
         {
-            BASE_CONSOLE_INFOV("No gamepads found");
+            ENGINE_CONSOLE_INFOV("No gamepads found");
         }
         else
         {
@@ -157,7 +157,7 @@ namespace
             {
                 BASE_THROWM("Could not initialise controller");
             }
-            BASE_CONSOLE_INFOV(SDL_JoystickName(m_pGamePad));
+            ENGINE_CONSOLE_INFOV(SDL_JoystickName(m_pGamePad));
         }
 
         // -----------------------------------------------------------------------------
@@ -184,7 +184,7 @@ namespace
         // Now we get the information of the window handle and set this to
         // the graphic part and active this window.
         // -----------------------------------------------------------------------------
-        int VSync = Base::CProgramParameters::GetInstance().Get("graphics:vsync_interval", 0);
+        int VSync = Core::CProgramParameters::GetInstance().Get("graphics:vsync_interval", 0);
 
         m_EditWindowID = Gfx::Pipeline::RegisterWindow(Edit::GUI::GetEditorWindowHandle(), VSync);
 
@@ -203,7 +203,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Plugins
         // -----------------------------------------------------------------------------
-        auto SelectedPlugins = Base::CProgramParameters::GetInstance().Get("plugins:selection", std::vector<std::string>());
+        auto SelectedPlugins = Core::CProgramParameters::GetInstance().Get("plugins:selection", std::vector<std::string>());
 
         for (auto SelectedPlugin : SelectedPlugins)
         {
@@ -549,12 +549,12 @@ namespace
                 {
                     BASE_THROWM("Could not initialise controller");
                 }
-                BASE_CONSOLE_INFOV(SDL_JoystickName(m_pGamePad));
+                ENGINE_CONSOLE_INFOV(SDL_JoystickName(m_pGamePad));
                 break;
 
             case SDL_JOYDEVICEREMOVED:
 
-                BASE_CONSOLE_INFO("Gamepad disconnected");
+                ENGINE_CONSOLE_INFO("Gamepad disconnected");
                 break;
 
             default:

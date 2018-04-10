@@ -64,7 +64,7 @@ namespace Pipeline
         // Start manager. We have to take care on a specific order because of
         // dependencies.
         // -----------------------------------------------------------------------------
-        BASE_CONSOLE_STREAMINFO("Gfx> Start manager...");
+        ENGINE_CONSOLE_STREAMINFO("Gfx> Start manager...");
 
         StateManager    ::OnStart();
         ContextManager  ::OnStart();
@@ -74,12 +74,12 @@ namespace Pipeline
         ShaderManager   ::OnStart();
         TargetSetManager::OnStart();
 
-        BASE_CONSOLE_STREAMINFO("Gfx> Finished starting manager.");
+        ENGINE_CONSOLE_STREAMINFO("Gfx> Finished starting manager.");
 
         // -----------------------------------------------------------------------------
         // Start entity manager
         // -----------------------------------------------------------------------------
-        BASE_CONSOLE_STREAMINFO("Gfx> Start entity/facet manager...");
+        ENGINE_CONSOLE_STREAMINFO("Gfx> Start entity/facet manager...");
 
         ViewManager       ::OnStart();
         SunManager        ::OnStart();
@@ -90,17 +90,17 @@ namespace Pipeline
         PointLightManager ::OnStart();
         AreaLightManager  ::OnStart();
 
-        BASE_CONSOLE_STREAMINFO("Gfx> Finished starting entity/facet manager.");
+        ENGINE_CONSOLE_STREAMINFO("Gfx> Finished starting entity/facet manager.");
 
         // -----------------------------------------------------------------------------
         // Prepare general graphic things needed by renderer
         // -----------------------------------------------------------------------------
-        BASE_CONSOLE_STREAMINFO("Gfx> Create and upload global buffer.");
+        ENGINE_CONSOLE_STREAMINFO("Gfx> Create and upload global buffer.");
 
         Main::CreatePerFrameConstantBuffers();
         Main::UploadPerFrameConstantBuffers();
 
-        BASE_CONSOLE_STREAMINFO("Gfx> Finished create and upload global buffer.");
+        ENGINE_CONSOLE_STREAMINFO("Gfx> Finished create and upload global buffer.");
 
         // -----------------------------------------------------------------------------
         // Start renderer. It is not possible to setup all the data in the 'OnStart'
@@ -113,7 +113,7 @@ namespace Pipeline
         //    shader should exist before loading the material library and the materials
         //    should exist before loading a model.
         // -----------------------------------------------------------------------------
-        BASE_CONSOLE_STREAMINFO("Gfx> Start renderer...");
+        ENGINE_CONSOLE_STREAMINFO("Gfx> Start renderer...");
 
         HistogramRenderer    ::OnStart();
         BackgroundRenderer   ::OnStart();
@@ -323,7 +323,7 @@ namespace Pipeline
         SelectionRenderer    ::OnSetupEnd();
         TonemappingRenderer  ::OnSetupEnd();
 
-        BASE_CONSOLE_STREAMINFO("Gfx> Finished renderer starting.");
+        ENGINE_CONSOLE_STREAMINFO("Gfx> Finished renderer starting.");
     }
 
     // -----------------------------------------------------------------------------
@@ -333,7 +333,7 @@ namespace Pipeline
         // -----------------------------------------------------------------------------
         // Exit renderer. Now it isn't necessary to do this in a specific direction.
         // -----------------------------------------------------------------------------
-        BASE_CONSOLE_STREAMINFO("Gfx> Exit renderer...");
+        ENGINE_CONSOLE_STREAMINFO("Gfx> Exit renderer...");
 
         BackgroundRenderer   ::OnExit();
         DebugRenderer        ::OnExit();
@@ -353,21 +353,21 @@ namespace Pipeline
         PostFX               ::OnExit();
         TonemappingRenderer  ::OnExit();
 
-        BASE_CONSOLE_STREAMINFO("Gfx> Finished exit of renderer.");
+        ENGINE_CONSOLE_STREAMINFO("Gfx> Finished exit of renderer.");
         
         // -----------------------------------------------------------------------------
         // Destroy main graphic data
         // -----------------------------------------------------------------------------
-        BASE_CONSOLE_STREAMINFO("Gfx> Destroy global constant buffer.");
+        ENGINE_CONSOLE_STREAMINFO("Gfx> Destroy global constant buffer.");
 
         Main::DestroyPerFrameConstantBuffers();   
 
-        BASE_CONSOLE_STREAMINFO("Gfx> Global constant buffer destroyed.");
+        ENGINE_CONSOLE_STREAMINFO("Gfx> Global constant buffer destroyed.");
         
         // -----------------------------------------------------------------------------
         // Exit manager
         // -----------------------------------------------------------------------------
-        BASE_CONSOLE_STREAMINFO("Gfx> Exit manager...");
+        ENGINE_CONSOLE_STREAMINFO("Gfx> Exit manager...");
 
         PointLightManager ::OnExit();
         AreaLightManager  ::OnExit();
@@ -378,12 +378,12 @@ namespace Pipeline
         MaterialManager   ::OnExit();
         ViewManager       ::OnExit();
 
-        BASE_CONSOLE_STREAMINFO("Gfx> Finished exiting manager.");
+        ENGINE_CONSOLE_STREAMINFO("Gfx> Finished exiting manager.");
 
         // -----------------------------------------------------------------------------
         // Exit graphic resources
         // -----------------------------------------------------------------------------
-        BASE_CONSOLE_STREAMINFO("Gfx> Exit resource manager.");
+        ENGINE_CONSOLE_STREAMINFO("Gfx> Exit resource manager.");
 
         TargetSetManager::OnExit();
         ContextManager  ::OnExit();
@@ -393,7 +393,7 @@ namespace Pipeline
         TextureManager  ::OnExit();
         SamplerManager  ::OnExit();
 
-        BASE_CONSOLE_STREAMINFO("Gfx> Finished exiting resource manager.");
+        ENGINE_CONSOLE_STREAMINFO("Gfx> Finished exiting resource manager.");
 
         // -----------------------------------------------------------------------------
         // Exit performance tools

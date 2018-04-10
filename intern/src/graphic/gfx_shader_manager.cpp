@@ -422,11 +422,11 @@ namespace
                 char* pErrorInfo = new char[InfoLength];
                 glGetShaderInfoLog(NativeShaderHandle, InfoLength, &InfoLength, pErrorInfo);
 
-                BASE_CONSOLE_ERRORV("Error creating shader '%s' with error log:\n%s\n", ShaderLabel.c_str(), pErrorInfo);
+                ENGINE_CONSOLE_ERRORV("Error creating shader '%s' with error log:\n%s\n", ShaderLabel.c_str(), pErrorInfo);
 
 // #define GFX_SHADER_SHOW_SOURCE_ON_ERROR
 #ifdef GFX_SHADER_SHOW_SOURCE_ON_ERROR
-                BASE_CONSOLE_INFO("Full source code of shader:");
+                ENGINE_CONSOLE_INFO("Full source code of shader:");
                 std::stringstream Line;
                 int LineNumber = 0;
 
@@ -434,7 +434,7 @@ namespace
                 {
                     if (pRAW[i] == '\n')
                     {
-                        BASE_CONSOLE_INFOV("%i: %s", LineNumber, Line.str().c_str());
+                        ENGINE_CONSOLE_INFOV("%i: %s", LineNumber, Line.str().c_str());
 
                         Line.str("");
 
@@ -479,7 +479,7 @@ namespace
                     char* pErrorInfo = new char[InfoLength];
                     glGetProgramInfoLog(NativeProgramHandle, InfoLength, &InfoLength, pErrorInfo);
 
-                    BASE_CONSOLE_ERRORV("Error creating a shader program for '%s' and linking shader: \n %s", ShaderLabel.c_str(), pErrorInfo);
+                    ENGINE_CONSOLE_ERRORV("Error creating a shader program for '%s' and linking shader: \n %s", ShaderLabel.c_str(), pErrorInfo);
 
                     delete[] pErrorInfo;
 
@@ -595,7 +595,7 @@ namespace
                 char* pErrorInfo = new char[InfoLength];
                 glGetShaderInfoLog(NativeShaderHandle, InfoLength, &InfoLength, pErrorInfo);
 
-                BASE_CONSOLE_ERRORV("Error creating shader '%s' with info: \n %s", PathToShader.c_str(), pErrorInfo);
+                ENGINE_CONSOLE_ERRORV("Error creating shader '%s' with info: \n %s", PathToShader.c_str(), pErrorInfo);
 
                 delete[] pErrorInfo;
             }
@@ -629,7 +629,7 @@ namespace
                     char* pErrorInfo = new char[InfoLength];
                     glGetProgramInfoLog(NativeProgramHandle, InfoLength, &InfoLength, pErrorInfo);
 
-                    BASE_CONSOLE_ERRORV("Error creating a shader program for '%s' and linking shader: \n %s", PathToShader.c_str(), pErrorInfo);
+                    ENGINE_CONSOLE_ERRORV("Error creating a shader program for '%s' and linking shader: \n %s", PathToShader.c_str(), pErrorInfo);
 
                     delete[] pErrorInfo;
 

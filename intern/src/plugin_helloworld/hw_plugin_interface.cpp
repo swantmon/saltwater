@@ -11,14 +11,14 @@ namespace HW
 {
     void CPluginInterface::OnStart()
     {
-        BASE_CONSOLE_INFOV("Hello world plugin started!");
+        ENGINE_CONSOLE_INFOV("Hello world plugin started!");
     }
 
     // -----------------------------------------------------------------------------
 
     void CPluginInterface::OnExit()
     {
-        BASE_CONSOLE_INFOV("Hello world plugin exited!");
+        ENGINE_CONSOLE_INFOV("Hello world plugin exited!");
     }
 
     // -----------------------------------------------------------------------------
@@ -31,18 +31,18 @@ namespace HW
 
     void CPluginInterface::OnPause()
     {
-        BASE_CONSOLE_INFOV("Hello world plugin paused!");
+        ENGINE_CONSOLE_INFOV("Hello world plugin paused!");
     }
 
     // -----------------------------------------------------------------------------
 
     void CPluginInterface::OnResume()
     {
-        BASE_CONSOLE_INFOV("Hello world plugin resumed!");
+        ENGINE_CONSOLE_INFOV("Hello world plugin resumed!");
     }
 } // namespace HW
 
 extern "C" CORE_PLUGIN_API_EXPORT void SayHelloWorld()
 {
-    BASE_CONSOLE_INFOV("Hello world!");
+    ENGINE_CONSOLE_INFOV("Hello world!");
 }
