@@ -46,6 +46,6 @@ namespace App
 
     void CIntroState::InternOnRun()
     {
-        App::Application::ChangeState(CState::Intro);
+        App::Application::ChangeState(CState::LoadMap);
     }
 } // namespace App
