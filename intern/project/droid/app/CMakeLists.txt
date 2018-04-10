@@ -65,7 +65,7 @@ target_include_directories( engine PRIVATE ${ExternDir}/assimp/include )
 target_include_directories( engine PRIVATE ${ExternDir}/devil/include )
 target_include_directories( engine PRIVATE ${ExternDir}/tinyxml2/include )
 
-target_link_libraries( engine log android m EGL GLESv3 m )
+target_link_libraries( engine log android m EGL GLESv3 )
 target_link_libraries( engine assimp IL ILU tinyxml2 )
 target_link_libraries( engine base)
 
@@ -98,8 +98,8 @@ foreach( MyLibrary IN ITEMS ${MyLibraries} )
     target_include_directories( ${TargetName} PRIVATE ${ExternDir}/glm/include )
     target_include_directories( ${TargetName} PRIVATE ${ExternDir}/json/include )
 
-    target_link_libraries( ${TargetName} log android m EGL GLESv3 m )
-    target_link_libraries( ${TargetName} assimp IL ILU tinyxml2 )
+    target_link_libraries( ${TargetName} log android m )
+    target_link_libraries( ${TargetName} tinyxml2 )
     target_link_libraries( ${TargetName} base engine )
 
 endforeach()
@@ -128,6 +128,6 @@ target_include_directories( app_droid PRIVATE ${ANDROID_NDK}/sources/android/nat
 target_include_directories( app_droid PRIVATE ${ExternDir}/glm/include )
 target_include_directories( app_droid PRIVATE ${ExternDir}/json/include )
 
-target_link_libraries( app_droid log android m EGL GLESv3 m native_app_glue )
-target_link_libraries( app_droid assimp IL ILU tinyxml2 )
+target_link_libraries( app_droid log android native_app_glue )
+target_link_libraries( app_droid tinyxml2 )
 target_link_libraries( app_droid base engine )
