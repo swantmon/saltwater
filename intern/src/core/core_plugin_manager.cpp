@@ -116,17 +116,23 @@ namespace
 
         Instance = LoadLibraryExW(PluginFile.c_str(), NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
 #elif PLATFORM_ANDROID
-        Instance = dlopen(_rLibrary.c_str(), RTLD_NOW);
+        std::string PluginFile = "lib" + _rLibrary + ".so";
+
+        Instance = dlopen(PluginFile.c_str(), RTLD_NOW);
 #endif // PLATFORM_WINDOWS
 
         if (Instance == NULL)
         {
-            BASE_CONSOLE_ERRORV("Loading library '%s' failed.", _rLibrary.c_str());
+#ifdef PLATFORM_WINDOWS
+            BASE_CONSOLE_ERRORV("Plugin '%s' not found.", _rLibrary.c_str());
+#elif PLATFORM_ANDROID
+            BASE_CONSOLE_ERRORV("Plugin '%s' not found (Error: '%s').", _rLibrary.c_str(), dlerror());
+#endif // PLATFORM_WINDOWS
 
             return nullptr;
         }
 
-        BASE_CONSOLE_INFOV("Loading library '%s' successful.", _rLibrary.c_str());
+        BASE_CONSOLE_INFOV("Loading plugin '%s' successful.", _rLibrary.c_str());
 
 #ifdef PLATFORM_WINDOWS
         pPluginInfo = (SPluginInfo*)GetProcAddress(Instance, "InfoExport");
@@ -137,11 +143,11 @@ namespace
         if (pPluginInfo == NULL)
         {
 #ifdef PLATFORM_WINDOWS
-            BASE_CONSOLE_ERRORV("Loading library information failed (Error: %i).", GetLastError());
+            BASE_CONSOLE_ERRORV("Loading plugin information failed (Error: %i).", GetLastError());
 
             FreeLibrary(Instance);
 #elif PLATFORM_ANDROID
-            BASE_CONSOLE_ERRORV("Loading library information failed (Error: %i).", dlerror());
+            BASE_CONSOLE_ERRORV("Loading plugin information failed (Error: '%s').", dlerror());
 
             dlclose(Instance);
 #endif // PLATFORM_WINDOWS
