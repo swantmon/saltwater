@@ -1,13 +1,15 @@
 
 #pragma once
 
+#include "engine/engine_config.h"
+
 #include "base/base_include_glm.h"
 
 #include "data/data_component.h"
 
 namespace Dt
 {
-    class CDOFComponent : public CComponent<CDOFComponent>
+    class ENGINE_API CDOFComponent : public CComponent<CDOFComponent>
     {
     public:
 

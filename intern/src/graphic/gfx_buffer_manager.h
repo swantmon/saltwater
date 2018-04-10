@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "engine/engine_config.h"
+
 #include "base/base_typedef.h"
 
 #include "graphic/gfx_buffer.h"
@@ -31,25 +33,25 @@ namespace BufferManager
     void OnStart();
     void OnExit();
 
-    CBufferPtr CreateBuffer(const SBufferDescriptor& _rDescriptor, SDataBehavior::Enum _Behavior = SDataBehavior::LeftAlone);
-    CBufferPtr GetBuffer(std::type_index _ClassKey);
+    ENGINE_API CBufferPtr CreateBuffer(const SBufferDescriptor& _rDescriptor, SDataBehavior::Enum _Behavior = SDataBehavior::LeftAlone);
+    ENGINE_API CBufferPtr GetBuffer(std::type_index _ClassKey);
 
-    CBufferSetPtr CreateBufferSet(CBufferPtr _Buffer1Ptr);
-    CBufferSetPtr CreateBufferSet(CBufferPtr _Buffer1Ptr, CBufferPtr _Buffer2Ptr);
-    CBufferSetPtr CreateBufferSet(CBufferPtr _Buffer1Ptr, CBufferPtr _Buffer2Ptr, CBufferPtr _Buffer3Ptr);
-    CBufferSetPtr CreateBufferSet(CBufferPtr _Buffer1Ptr, CBufferPtr _Buffer2Ptr, CBufferPtr _Buffer3Ptr, CBufferPtr _Buffer4Ptr);
-    CBufferSetPtr CreateBufferSet(CBufferPtr* _pBufferPtrs, unsigned int _NumberOfBuffers);
+    ENGINE_API CBufferSetPtr CreateBufferSet(CBufferPtr _Buffer1Ptr);
+    ENGINE_API CBufferSetPtr CreateBufferSet(CBufferPtr _Buffer1Ptr, CBufferPtr _Buffer2Ptr);
+    ENGINE_API CBufferSetPtr CreateBufferSet(CBufferPtr _Buffer1Ptr, CBufferPtr _Buffer2Ptr, CBufferPtr _Buffer3Ptr);
+    ENGINE_API CBufferSetPtr CreateBufferSet(CBufferPtr _Buffer1Ptr, CBufferPtr _Buffer2Ptr, CBufferPtr _Buffer3Ptr, CBufferPtr _Buffer4Ptr);
+    ENGINE_API CBufferSetPtr CreateBufferSet(CBufferPtr* _pBufferPtrs, unsigned int _NumberOfBuffers);
     
-    void CopyBufferToBuffer(CBufferPtr _TargetBufferPtr, CBufferPtr _SourceBufferPtr);
-    void CopyBufferToBuffer(CBufferPtr _TargetBufferPtr, CBufferPtr _SourceBufferPtr, unsigned int _ReadOffset, unsigned int _WriteOffset, unsigned int _Range);
+    ENGINE_API void CopyBufferToBuffer(CBufferPtr _TargetBufferPtr, CBufferPtr _SourceBufferPtr);
+    ENGINE_API void CopyBufferToBuffer(CBufferPtr _TargetBufferPtr, CBufferPtr _SourceBufferPtr, unsigned int _ReadOffset, unsigned int _WriteOffset, unsigned int _Range);
     
-    void* MapBuffer(CBufferPtr _BufferPtr, CBuffer::EMap _Map);
-    void* MapBufferRange(CBufferPtr _BufferPtr, CBuffer::EMap _Map, unsigned int _Offset, unsigned int _Range);
-    void UnmapBuffer(CBufferPtr _BufferPtr);
+    ENGINE_API void* MapBuffer(CBufferPtr _BufferPtr, CBuffer::EMap _Map);
+    ENGINE_API void* MapBufferRange(CBufferPtr _BufferPtr, CBuffer::EMap _Map, unsigned int _Offset, unsigned int _Range);
+    ENGINE_API void UnmapBuffer(CBufferPtr _BufferPtr);
     
-    void UploadBufferData(CBufferPtr _BufferPtr, const void* _pData);
-    void UploadBufferData(CBufferPtr _BufferPtr, const void* _pData, unsigned int _Offset, unsigned int _Range);
+    ENGINE_API void UploadBufferData(CBufferPtr _BufferPtr, const void* _pData);
+    ENGINE_API void UploadBufferData(CBufferPtr _BufferPtr, const void* _pData, unsigned int _Offset, unsigned int _Range);
 
-	void SetBufferLabel(CBufferPtr _BufferPtr, const char* _pLabel);
+    ENGINE_API void SetBufferLabel(CBufferPtr _BufferPtr, const char* _pLabel);
 } // namespace BufferManager
 } // namespace Gfx

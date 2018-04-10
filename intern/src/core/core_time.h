@@ -1,19 +1,21 @@
 
 #pragma once
 
+#include "engine/engine_config.h"
+
 #include "base/base_typedef.h"
 
 namespace Core
 {
 namespace Time
 {
-    void OnStart();
-    void OnExit();
+    ENGINE_API void OnStart();
+    ENGINE_API void OnExit();
 
-    void Update();
+    ENGINE_API void Update();
     
-    double GetDeltaTimeLastFrame();
+    ENGINE_API double GetDeltaTimeLastFrame();
     
-    Base::U64 GetNumberOfFrame();
+    ENGINE_API Base::U64 GetNumberOfFrame();
 } // namespace Time
 } // namespace Core

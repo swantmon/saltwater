@@ -1,12 +1,13 @@
 
-#include "camera/cam_precompiled.h"
+#include "engine/engine_precompiled.h"
 
-#include "base/base_console.h"
 #include "base/base_include_glm.h"
 #include "base/base_type_info.h"
 
 #include "camera/cam_control_manager.h"
 #include "camera/cam_game_control.h"
+
+#include "core/core_console.h"
 
 #include "data/data_camera_component.h"
 #include "data/data_component.h"
@@ -16,7 +17,8 @@
 #include "data/data_entity_manager.h"
 #include "data/data_transformation_facet.h"
 
-#include "graphic/gfx_camera_interface.h"
+#include "graphic/gfx_camera.h"
+#include "graphic/gfx_view_manager.h"
 
 namespace Cam
 {
@@ -92,10 +94,13 @@ namespace Cam
         }
         else
         {
-            Gfx::Cam::SetPosition(m_Position);
-            Gfx::Cam::SetRotationMatrix(m_RotationMatrix);
+            Gfx::CCamera& rCamera = *Gfx::ViewManager::GetMainCamera();
+            Gfx::CView&   rView   = *rCamera.GetView();
 
-            Gfx::Cam::Update();
+            rView.SetPosition(m_Position);
+            rView.SetRotationMatrix(m_RotationMatrix);
+
+            rView.Update();
         }
     }
 
@@ -128,12 +133,14 @@ namespace Cam
 
         auto pCameraComponent = static_cast<Dt::CCameraComponent*>(_pComponent);
 
+        Gfx::CCamera& rCamera = *Gfx::ViewManager::GetMainCamera();
+
         // -----------------------------------------------------------------------------
         // Projection
         // -----------------------------------------------------------------------------
         if (pCameraComponent->GetProjectionType() == Dt::CCameraComponent::Perspective)
         {
-            Gfx::Cam::SetFieldOfView(pCameraComponent->GetFoV(), pCameraComponent->GetNear(), pCameraComponent->GetFar());
+            rCamera.SetFieldOfView(pCameraComponent->GetFoV(), rCamera.GetAspectRatio(), pCameraComponent->GetNear(), pCameraComponent->GetFar());
         }
         else if (pCameraComponent->GetProjectionType() == Dt::CCameraComponent::Orthographic)
         {
@@ -142,41 +149,41 @@ namespace Cam
             float Bottom = -pCameraComponent->GetSize() / 2.0f;
             float Top    =  pCameraComponent->GetSize() / 2.0f;
 
-            Gfx::Cam::SetOrthographic(Left, Right, Bottom, Top, pCameraComponent->GetNear(), pCameraComponent->GetFar());
+            rCamera.SetOrthographic(Left, Right, Bottom, Top, pCameraComponent->GetNear(), pCameraComponent->GetFar());
         }
         else if (pCameraComponent->GetProjectionType() == Dt::CCameraComponent::External)
         {
-            Gfx::Cam::SetProjectionMatrix(pCameraComponent->GetProjectionMatrix(), pCameraComponent->GetNear(), pCameraComponent->GetFar());
+            rCamera.SetProjectionMatrix(pCameraComponent->GetProjectionMatrix(), pCameraComponent->GetNear(), pCameraComponent->GetFar());
         }
 
         // -----------------------------------------------------------------------------
         // Camera mode + variables
         // -----------------------------------------------------------------------------
-        Gfx::Cam::SetAutoCameraMode();
+        rCamera.SetCameraMode(Gfx::CCamera::Auto);
 
         if (pCameraComponent->GetCameraMode() == Dt::CCameraComponent::Manual)
         {
-            Gfx::Cam::SetManualCameraMode();
+            rCamera.SetCameraMode(Gfx::CCamera::Manual);
 
-            Gfx::Cam::SetShutterSpeed(pCameraComponent->GetShutterSpeed());
+            rCamera.SetShutterSpeed(pCameraComponent->GetShutterSpeed());
 
-            Gfx::Cam::SetAperture(pCameraComponent->GetAperture());
+            rCamera.SetAperture(pCameraComponent->GetAperture());
 
-            Gfx::Cam::SetISO(pCameraComponent->GetISO());
+            rCamera.SetISO(pCameraComponent->GetISO());
 
-            Gfx::Cam::SetEC(pCameraComponent->GetEC());
+            rCamera.SetEC(pCameraComponent->GetEC());
         }
 
         // -----------------------------------------------------------------------------
         // Other
         // -----------------------------------------------------------------------------
-        Gfx::Cam::SetBackgroundColor(pCameraComponent->GetBackgroundColor());
+        rCamera.SetBackgroundColor(pCameraComponent->GetBackgroundColor());
 
-        Gfx::Cam::SetCullingMask(pCameraComponent->GetCullingMask());
+        rCamera.SetCullingMask(pCameraComponent->GetCullingMask());
 
-        Gfx::Cam::SetViewportRect(pCameraComponent->GetViewportRect());
+        rCamera.SetViewportRect(pCameraComponent->GetViewportRect());
 
-        Gfx::Cam::SetDepth(pCameraComponent->GetDepth());
+        rCamera.SetDepth(pCameraComponent->GetDepth());
     }
 
     // -----------------------------------------------------------------------------

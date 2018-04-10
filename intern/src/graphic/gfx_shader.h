@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "engine/engine_config.h"
+
 #include "base/base_managed_pool.h"
 #include "base/base_typedef.h"
 
@@ -54,19 +56,19 @@ namespace Gfx
 
     public:
 
-        unsigned int GetID() const;
-        EType GetType() const;
-        const std::string& GetFileName() const;
-        const std::string& GetShaderName() const;
-        const std::string& GetShaderDefines() const;
+        ENGINE_API unsigned int GetID() const;
+        ENGINE_API EType GetType() const;
+        ENGINE_API const std::string& GetFileName() const;
+        ENGINE_API const std::string& GetShaderName() const;
+        ENGINE_API const std::string& GetShaderDefines() const;
 
     public:
 
-        bool HasAlpha() const;
+        ENGINE_API bool HasAlpha() const;
 
     public:
 
-        CInputLayoutPtr GetInputLayout();
+        ENGINE_API CInputLayoutPtr GetInputLayout();
 
     protected:
 

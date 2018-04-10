@@ -1,12 +1,12 @@
 
-#include "graphic/gfx_precompiled.h"
+#include "engine/engine_precompiled.h"
 
-#include "base/base_console.h"
 #include "base/base_exception.h"
-#include "base/base_program_parameters.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
+#include "core/core_console.h"
+#include "core/core_program_parameters.h"
 #include "core/core_time.h"
 
 #include "graphic/gfx_main.h"

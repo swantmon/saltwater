@@ -1,16 +1,18 @@
 
 #pragma once
 
+#include "engine/engine_config.h"
+
 #include "camera/cam_control.h"
 
 namespace Cam
 {
 namespace ControlManager
 {
-    void CreateControl(CControl::EType _Type);
-    void SetActiveControl(CControl::EType _Type);
-    CControl& GetActiveControl();
+    ENGINE_API void CreateControl(CControl::EType _Type);
+    ENGINE_API void SetActiveControl(CControl::EType _Type);
+    ENGINE_API CControl& GetActiveControl();
 
-    void Update();
+    ENGINE_API void Update();
 } // namespace ControlManager
 } // namespace Cam

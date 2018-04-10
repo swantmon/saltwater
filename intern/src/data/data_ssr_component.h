@@ -1,11 +1,13 @@
 
 #pragma once
 
+#include "engine/engine_config.h"
+
 #include "data/data_component.h"
 
 namespace Dt
 {
-    class CSSRComponent : public CComponent<CSSRComponent>
+    class ENGINE_API CSSRComponent : public CComponent<CSSRComponent>
     {
     public:
 

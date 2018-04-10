@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "engine/engine_config.h"
+
 #include "base/base_include_glm.h"
 
 #include "data/data_component.h"
@@ -13,7 +15,7 @@ namespace Dt
 
 namespace Dt
 {
-    class CARControllerPluginComponent : public CComponent<CARControllerPluginComponent>
+    class ENGINE_API CARControllerPluginComponent : public CComponent<CARControllerPluginComponent>
     {
     public:
 

@@ -1,15 +1,17 @@
 #pragma once
 
+#include "engine/engine_config.h"
+
 #include <string>
 
 namespace Core
 {
 namespace AssetManager
 {
-    void SetFilePath(const std::string& _rPath);
+    ENGINE_API void SetFilePath(const std::string& _rPath);
 
-    const std::string GetPathToFiles();
-    const std::string GetPathToAssets();
-    const std::string GetPathToData();
+    ENGINE_API const std::string GetPathToFiles();
+    ENGINE_API const std::string GetPathToAssets();
+    ENGINE_API const std::string GetPathToData();
 } // namespace AssetManager
 } // namespace Core

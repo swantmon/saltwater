@@ -1,10 +1,3 @@
-//
-//  base_uncopyable.h
-//  base
-//
-//  Created by Tobias Schwandt on 09/03/15.
-//  Copyright (c) 2015 TU Ilmenau. All rights reserved.
-//
 
 #pragma once
 

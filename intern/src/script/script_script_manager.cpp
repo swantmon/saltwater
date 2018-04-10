@@ -1,5 +1,5 @@
 
-#include "script/script_precompiled.h"
+#include "engine/engine_precompiled.h"
 
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
@@ -148,6 +148,18 @@ namespace
                 pScriptComponent->Start();
 
                 m_Scripts.push_back(pScriptComponent);
+            }
+        }
+
+        if ((DirtyFlags & Dt::CScriptComponent::DirtyDestroy) != 0)
+        {
+            auto ScriptIter = std::find_if(m_Scripts.begin(), m_Scripts.end(), [&](Dt::CScriptComponent* _pObject) { return _pObject == pScriptComponent; });
+
+            if (ScriptIter != m_Scripts.end())
+            {
+                pScriptComponent->Exit();
+
+                m_Scripts.erase(ScriptIter);
             }
         }
     }

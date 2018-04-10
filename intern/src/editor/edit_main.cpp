@@ -1,14 +1,17 @@
 
 #include "editor/edit_precompiled.h"
 
-#include "base/base_console.h"
 #include "base/base_exception.h"
 #include "base/base_getopt.h"
-#include "base/base_program_parameters.h"
+
+#include "core/core_console.h"
+#include "core/core_program_parameters.h"
 
 #include "editor/edit_application.h"
 
 #include <string>
+
+#include "windows.h"
 
 int main(int _Argc, char* _pArgv[])
 {
@@ -56,6 +59,9 @@ int main(int _Argc, char* _pArgv[])
     }
 
     Base::CConsole::GetInstance().SetVerbosityLevel(VerbosityLevel);
+
+
+    HINSTANCE Instance = LoadLibraryExW(L"graphicd.dll", NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
 
     try
     {

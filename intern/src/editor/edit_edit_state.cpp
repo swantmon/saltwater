@@ -1,11 +1,10 @@
 
 #include "editor/edit_precompiled.h"
 
-#include "base/base_console.h"
-
 #include "camera/cam_control_manager.h"
 
 #include "data/data_entity.h"
+#include "data/data_entity_manager.h"
 
 #include "editor/edit_edit_state.h"
 #include "editor/edit_unload_map_state.h"
@@ -13,12 +12,11 @@
 #include "editor_port/edit_message.h"
 #include "editor_port/edit_message_manager.h"
 
-#include "graphic/gfx_edit_state.h"
 #include "graphic/gfx_selection_renderer.h"
 
-#include "gui/gui_edit_state.h"
+#include "gui/gui_input_manager.h"
 
-#include "logic/lg_edit_state.h"
+#include "script/script_script_manager.h"
 
 namespace Edit
 {
@@ -58,8 +56,6 @@ namespace Edit
     
     CState::EStateType CEditState::InternOnEnter()
     {
-        BASE_CONSOLE_STREAMINFO("Edit> Enter edit state.");
-
         // -----------------------------------------------------------------------------
         // Acquire an selection ticket at selection renderer
         // -----------------------------------------------------------------------------
@@ -73,13 +69,6 @@ namespace Edit
         Cam::ControlManager::SetActiveControl(Cam::CControl::EditorControl);
 
         // Cam::ControlManager::GetActiveControl().SetPosition(glm::vec3(0.0f, 0.0f, 10.0f));
-
-        // -----------------------------------------------------------------------------
-        // Running states
-        // -----------------------------------------------------------------------------
-        Lg ::Edit::OnEnter();
-        Gui::Edit::OnEnter();
-        Gfx::Edit::OnEnter();        
         
         return Edit::CState::Edit;
     }
@@ -104,15 +93,6 @@ namespace Edit
         // Reset action
         // -----------------------------------------------------------------------------
         m_Action = CState::Edit;
-
-        // -----------------------------------------------------------------------------
-        // Running states
-        // -----------------------------------------------------------------------------
-        Gfx::Edit::OnLeave();
-        Gui::Edit::OnLeave();
-        Lg ::Edit::OnLeave();
-
-        BASE_CONSOLE_STREAMINFO("Edit> Leave edit state.");
         
         return Edit::CState::Edit;
     }
@@ -161,22 +141,6 @@ namespace Edit
                 Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::Entity_Selected, NewMessage);
             }
         }
-
-        // -----------------------------------------------------------------------------
-        // Update logic
-        // -----------------------------------------------------------------------------
-        Lg::Edit::OnRun();
-
-        // -----------------------------------------------------------------------------
-        // Update cameras and views depending on logic and world
-        // -----------------------------------------------------------------------------
-        Cam::ControlManager::Update();
-
-        // -----------------------------------------------------------------------------
-        // Update graphic and GUI
-        // -----------------------------------------------------------------------------
-        Gui::Edit::OnRun();
-        Gfx::Edit::OnRun();
 
         return NextState;
     }

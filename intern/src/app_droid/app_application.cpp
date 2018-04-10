@@ -14,16 +14,19 @@
 #include "base/base_input_event.h"
 #include "base/base_uncopyable.h"
 #include "base/base_singleton.h"
+#include "base/base_include_glm.h"
 
 #include "core/core_asset_manager.h"
 #include "core/core_jni_interface.h"
 #include "core/core_time.h"
+#include "core/core_plugin_manager.h"
+#include "core/core_program_parameters.h"
 
-#include "graphic/gfx_application_interface.h"
+#include "engine/engine.h"
+
+#include "graphic/gfx_pipeline.h"
 
 #include "gui/gui_event_handler.h"
-
-#include "mr/mr_control_manager.h"
 
 namespace
 {
@@ -63,6 +66,7 @@ namespace
             unsigned int m_WindowID;
             bool m_TerminateRequested;
             int m_Animating;
+            std::vector<Core::IPlugin*> m_AvailablePlugins;
         };
         
     private:
@@ -154,11 +158,6 @@ namespace
         Core::AssetManager::SetFilePath(_pAndroidApp->activity->externalDataPath);
 
         // -----------------------------------------------------------------------------
-        // Start timing
-        // -----------------------------------------------------------------------------
-        Core::Time::OnStart();
-
-        // -----------------------------------------------------------------------------
         // From now on we can start the state engine and enter the first state
         // -----------------------------------------------------------------------------        
         s_pStates[m_CurrentState]->OnEnter();
@@ -184,9 +183,14 @@ namespace
         s_pStates[m_CurrentState]->OnLeave();
 
         // -----------------------------------------------------------------------------
-        // Stop timing
+        // Plugins
         // -----------------------------------------------------------------------------
-        Core::Time::OnExit();
+        for (auto Plugin : m_AppSetup.m_AvailablePlugins) Plugin->OnExit();
+
+        // -----------------------------------------------------------------------------
+        // Start engine
+        // -----------------------------------------------------------------------------
+        Engine::Shutdown();
 
         // -----------------------------------------------------------------------------
         // Save configuration
@@ -242,15 +246,26 @@ namespace
             if (m_AppSetup.m_Animating)
             {
                 // -----------------------------------------------------------------------------
-                // Time
-                // -----------------------------------------------------------------------------
-                Core::Time::Update();
-
-                // -----------------------------------------------------------------------------
                 // States
                 // -----------------------------------------------------------------------------
                 s_pStates[m_CurrentState]->OnRun();
 
+                if (m_CurrentState != App::CState::Init)
+                {
+                    // -----------------------------------------------------------------------------
+                    // Plugins
+                    // -----------------------------------------------------------------------------
+                    for (auto Plugin : m_AppSetup.m_AvailablePlugins) Plugin->Update();
+
+                    // -----------------------------------------------------------------------------
+                    // Update engine
+                    // -----------------------------------------------------------------------------
+                    Engine::Update();
+                }
+
+                // -----------------------------------------------------------------------------
+                // Check state
+                // -----------------------------------------------------------------------------
                 if (m_RequestState != m_CurrentState)
                 {
                     OnTranslation(m_RequestState);
@@ -358,12 +373,39 @@ namespace
                 // -----------------------------------------------------------------------------
                 if (AppSetup->m_pAndroidApp->window != NULL)
                 {
-                    unsigned int WindowID = Gfx::App::RegisterWindow(AppSetup->m_pAndroidApp->window);
+                    // -----------------------------------------------------------------------------
+                    // Register window
+                    // -----------------------------------------------------------------------------
+                    unsigned int WindowID = Gfx::Pipeline::RegisterWindow(AppSetup->m_pAndroidApp->window);
 
-                    Gfx::App::ActivateWindow(WindowID);
+                    Gfx::Pipeline::ActivateWindow(WindowID);
 
                     AppSetup->m_WindowID = WindowID;
 
+                    // -----------------------------------------------------------------------------
+                    // Start engine
+                    // -----------------------------------------------------------------------------
+                    Engine::Startup();
+
+                    // -----------------------------------------------------------------------------
+                    // Plugins
+                    // -----------------------------------------------------------------------------
+                    auto SelectedPlugins = Base::CProgramParameters::GetInstance().Get("plugins:selection", std::vector<std::string>());
+
+                    for (auto SelectedPlugin : SelectedPlugins)
+                    {
+                        auto Plugin = Core::PluginManager::LoadPlugin(SelectedPlugin);
+
+                        if (Plugin == nullptr) continue;
+
+                        AppSetup->m_AvailablePlugins.push_back(&Plugin->GetInstance());
+
+                        Plugin->GetInstance().OnStart();
+                    }
+
+                    // -----------------------------------------------------------------------------
+                    // Change state
+                    // -----------------------------------------------------------------------------
                     App::Application::ChangeState(App::CState::Start);
                 }
                 break;
@@ -385,14 +427,10 @@ namespace
                     int Width  = glm::abs(Rectangle.left   - Rectangle.right);
                     int Height = glm::abs(Rectangle.bottom - Rectangle.top);
 
-                    int Rotation = Core::JNI::GetDeviceRotation();
-
                     // -----------------------------------------------------------------------------
                     // Inform all libs
                     // -----------------------------------------------------------------------------
-                    MR::ControlManager::OnDisplayGeometryChanged(Rotation, Width, Height);
-
-                    Gfx::App::OnResize(AppSetup->m_WindowID, Width, Height);
+                    Gfx::Pipeline::OnResize(AppSetup->m_WindowID, Width, Height);
                 }
                 break;
 
@@ -400,7 +438,7 @@ namespace
                 // -----------------------------------------------------------------------------
                 // When our app gains focus, we start monitoring the accelerometer.
                 // -----------------------------------------------------------------------------
-                MR::ControlManager::OnResume();
+                for (auto Plugin : AppSetup->m_AvailablePlugins) Plugin->OnResume();
 
                 if (AppSetup->m_AccelerometerSensor != NULL)
                 {
@@ -420,7 +458,7 @@ namespace
                 // When our app loses focus, we stop monitoring the accelerometer.
                 // This is to avoid consuming battery while not being used.
                 // -----------------------------------------------------------------------------
-                MR::ControlManager::OnPause();
+                for (auto Plugin : AppSetup->m_AvailablePlugins) Plugin->OnPause();
 
                 if (AppSetup->m_AccelerometerSensor != NULL)
                 {

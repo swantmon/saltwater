@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "engine/engine_config.h"
+
 #include "base/base_managed_pool.h"
 
 namespace Gfx
@@ -14,15 +16,15 @@ namespace Gfx
             
         public:
 
-            float GetWidth() const;
-            float GetHeight() const;
+            ENGINE_API float GetWidth() const;
+            ENGINE_API float GetHeight() const;
 
-            float GetMinDepth() const;
-            float GetMaxDepth() const;
+            ENGINE_API float GetMinDepth() const;
+            ENGINE_API float GetMaxDepth() const;
 
-            float GetTopLeftX() const;
-            float GetTopLeftY() const;
-		
+            ENGINE_API float GetTopLeftX() const;
+            ENGINE_API float GetTopLeftY() const;
+
         public:
 
             struct SPort

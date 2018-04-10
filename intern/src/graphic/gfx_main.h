@@ -1,13 +1,7 @@
 
-//
-//  gfx_main.h
-//  gfx
-//
-//  Created by Tobias Schwandt on 18/09/14.
-//  Copyright (c) 2014 TU Ilmenau. All rights reserved.
-//
-
 #pragma once
+
+#include "engine/engine_config.h"
 
 #include "base/base_include_glm.h"
 
@@ -30,37 +24,37 @@ namespace Gfx
 {
 namespace Main
 {
-    void OnStart();
-    void OnExit();
+    ENGINE_API void OnStart();
+    ENGINE_API void OnExit();
 
-    void RegisterResizeHandler(CResizeDelegate _NewDelgate);
+    ENGINE_API void RegisterResizeHandler(CResizeDelegate _NewDelgate);
 
-    unsigned int RegisterWindow(void* _pWindow, int _VSync = 1);
+    ENGINE_API unsigned int RegisterWindow(void* _pWindow, int _VSync = 1);
 
-    unsigned int GetNumberOfWindows();
+    ENGINE_API unsigned int GetNumberOfWindows();
 
-    void ActivateWindow(unsigned int _WindowID);
+    ENGINE_API void ActivateWindow(unsigned int _WindowID);
 
-    const glm::ivec2& GetActiveWindowSize();
-    const glm::ivec2& GetWindowSize(unsigned int _WindowID);
+    ENGINE_API const glm::ivec2& GetActiveWindowSize();
+    ENGINE_API const glm::ivec2& GetWindowSize(unsigned int _WindowID);
 
-    const glm::ivec2& GetActiveNativeWindowSize();
-    const glm::ivec2& GetNativeWindowSize(unsigned int _WindowID);
+    ENGINE_API const glm::ivec2& GetActiveNativeWindowSize();
+    ENGINE_API const glm::ivec2& GetNativeWindowSize(unsigned int _WindowID);
 
-    void OnResize(unsigned int _WindowID, unsigned int _Width, unsigned int _Height);
+    ENGINE_API void OnResize(unsigned int _WindowID, unsigned int _Width, unsigned int _Height);
 
-    void TakeScreenshot(unsigned int _WindowID, const char* _pPathToFile);
+    ENGINE_API void TakeScreenshot(unsigned int _WindowID, const char* _pPathToFile);
 
-    const CGraphicsInfo& GetGraphicsAPI();
-    bool IsExtensionAvailable(const std::string& _Name);
+    ENGINE_API const CGraphicsInfo& GetGraphicsAPI();
+    ENGINE_API bool IsExtensionAvailable(const std::string& _Name);
 
-    void BeginFrame();
-    void EndFrame();
+    ENGINE_API void BeginFrame();
+    ENGINE_API void EndFrame();
     
-    void CreatePerFrameConstantBuffers();
-    void DestroyPerFrameConstantBuffers();
-    void UploadPerFrameConstantBuffers();
+    ENGINE_API void CreatePerFrameConstantBuffers();
+    ENGINE_API void DestroyPerFrameConstantBuffers();
+    ENGINE_API void UploadPerFrameConstantBuffers();
     
-    CBufferPtr GetPerFrameConstantBuffer();
+    ENGINE_API CBufferPtr GetPerFrameConstantBuffer();
 } // namespace Main
 } // namespace Gfx

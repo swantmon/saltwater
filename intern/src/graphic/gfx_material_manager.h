@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "engine/engine_config.h"
+
 #include "base/base_include_glm.h"
 
 #include "graphic/gfx_material.h"
@@ -32,8 +34,8 @@ namespace MaterialManager
     void OnStart();
     void OnExit();
 
-    CMaterialPtr CreateMaterial(const SMaterialDescriptor& _rDescriptor);
+    ENGINE_API CMaterialPtr CreateMaterial(const SMaterialDescriptor& _rDescriptor);
 
-    const CMaterialPtr GetDefaultMaterial();
+    ENGINE_API const CMaterialPtr GetDefaultMaterial();
 } // namespace MaterialManager
 } // namespace Gfx

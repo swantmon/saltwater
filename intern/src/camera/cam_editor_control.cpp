@@ -1,5 +1,5 @@
 
-#include "camera/cam_precompiled.h"
+#include "engine/engine_precompiled.h"
 
 #include "base/base_include_glm.h"
 
@@ -10,7 +10,8 @@
 #include "camera/cam_control_manager.h"
 #include "camera/cam_editor_control.h"
 
-#include "graphic/gfx_camera_interface.h"
+#include "graphic/gfx_camera.h"
+#include "graphic/gfx_view_manager.h"
 
 #include <cmath>
 #include <iostream>
@@ -159,8 +160,12 @@ namespace Cam
         if (m_MoveDirection & 0x04) m_Position -= (Right   * m_MoveVelocity * DeltaTime);
         if (m_MoveDirection & 0x08) m_Position += (Right   * m_MoveVelocity * DeltaTime);
 
-        Gfx::Cam::SetPosition(m_Position);
-        Gfx::Cam::SetRotationMatrix(m_RotationMatrix);
-        Gfx::Cam::Update();
+        Gfx::CCamera& rCamera = *Gfx::ViewManager::GetMainCamera();
+        Gfx::CView&   rView = *rCamera.GetView();
+
+        rView.SetPosition(m_Position);
+        rView.SetRotationMatrix(m_RotationMatrix);
+
+        rView.Update();
     }
 } // namespace Cam

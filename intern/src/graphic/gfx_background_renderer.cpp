@@ -1,13 +1,13 @@
 
-#include "graphic/gfx_precompiled.h"
+#include "engine/engine_precompiled.h"
 
-#include "base/base_console.h"
 #include "base/base_include_glm.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
 #include "camera/cam_control_manager.h"
 
+#include "core/core_console.h"
 #include "core/core_time.h"
 
 #include "data/data_camera_component.h"
@@ -35,8 +35,6 @@
 #include "graphic/gfx_target_set_manager.h"
 #include "graphic/gfx_texture_manager.h"
 #include "graphic/gfx_view_manager.h"
-
-#include "mr/mr_control_manager.h"
 
 #include <string>
 

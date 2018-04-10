@@ -35,7 +35,7 @@ android {
     }
     sourceSets {
         main {
-            jniLibs.srcDirs = ['../../../../extern/assimp/lib', '../../../../extern/devil/lib', '../../../../extern/tinyxml2/lib']
+            jniLibs.srcDirs = ['../../../../extern/assimp/lib', '../../../../extern/devil/lib', '../../../../extern/tinyxml2/lib', 'build/intermediates/cmake/debug/obj/arm64-v8a']
         }
     }
     externalNativeBuild {

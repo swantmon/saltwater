@@ -1,15 +1,15 @@
 
 #include "editor/edit_precompiled.h"
 
-#include "base/base_console.h"
 #include "base/base_exception.h"
 #include "base/base_input_event.h"
-#include "base/base_program_parameters.h"
 #include "base/base_uncopyable.h"
 #include "base/base_singleton.h"
 
 #include "core/core_asset_manager.h"
-#include "core/core_config.h"
+#include "core/core_console.h"
+#include "core/core_plugin_manager.h"
+#include "core/core_program_parameters.h"
 #include "core/core_time.h"
 
 #include "editor/edit_actor_helper.h"
@@ -33,7 +33,9 @@
 #include "editor_port/edit_message.h"
 #include "editor_port/edit_message_manager.h"
 
-#include "graphic/gfx_application_interface.h"
+#include "engine/engine.h"
+
+#include "graphic/gfx_pipeline.h"
 
 #include "gui/gui_event_handler.h"
 
@@ -66,9 +68,10 @@ namespace
         
     private:
         
-        Edit::CState::EStateType m_CurrentState;
-        unsigned int             m_EditWindowID;
-        glm::vec2             m_LatestMousePosition;
+        Edit::CState::EStateType    m_CurrentState;
+        unsigned int                m_EditWindowID;
+        glm::vec2                   m_LatestMousePosition;
+        std::vector<Core::IPlugin*> m_AvailablePlugins;
 
         SDL_Joystick* m_pGamePad;
         int m_AnalogStickDeadZone;
@@ -118,7 +121,7 @@ namespace
         : m_CurrentState       (Edit::CState::Start)
         , m_EditWindowID       (0)
         , m_LatestMousePosition(glm::vec2(0, 0))
-        , m_pGamePad(nullptr)
+        , m_pGamePad           (nullptr)
     { 
     }
     
@@ -135,7 +138,6 @@ namespace
         // -----------------------------------------------------------------------------
         // Init SDL for gamepad input
         // -----------------------------------------------------------------------------
-
         m_AnalogStickDeadZone = Base::CProgramParameters::GetInstance().Get("input:gamepad:deadzone", 3200);
 
         if (SDL_Init(SDL_INIT_JOYSTICK) < 0)
@@ -184,16 +186,35 @@ namespace
         // -----------------------------------------------------------------------------
         int VSync = Base::CProgramParameters::GetInstance().Get("graphics:vsync_interval", 0);
 
-        m_EditWindowID = Gfx::App::RegisterWindow(Edit::GUI::GetEditorWindowHandle(), VSync);
+        m_EditWindowID = Gfx::Pipeline::RegisterWindow(Edit::GUI::GetEditorWindowHandle(), VSync);
 
-        Gfx::App::ActivateWindow(m_EditWindowID);
+        Gfx::Pipeline::ActivateWindow(m_EditWindowID);
 
         // -----------------------------------------------------------------------------
         // From now on we can start the state engine and enter the first state
         // -----------------------------------------------------------------------------
         s_pStates[m_CurrentState]->OnEnter();
 
-        Core::Time::OnStart();
+        // -----------------------------------------------------------------------------
+        // Start engine
+        // -----------------------------------------------------------------------------
+        Engine::Startup();
+
+        // -----------------------------------------------------------------------------
+        // Plugins
+        // -----------------------------------------------------------------------------
+        auto SelectedPlugins = Base::CProgramParameters::GetInstance().Get("plugins:selection", std::vector<std::string>());
+
+        for (auto SelectedPlugin : SelectedPlugins)
+        {
+            auto Plugin = Core::PluginManager::LoadPlugin(SelectedPlugin);
+
+            if (Plugin == nullptr) continue;
+
+            m_AvailablePlugins.push_back(&Plugin->GetInstance());
+
+            Plugin->GetInstance().OnStart();
+        }
 
         // -----------------------------------------------------------------------------
         // Register messages
@@ -231,11 +252,6 @@ namespace
         SDL_Quit();
 
         // -----------------------------------------------------------------------------
-        // Exit the application
-        // -----------------------------------------------------------------------------
-        Core::Time::OnExit();
-
-        // -----------------------------------------------------------------------------
         // Helper
         // -----------------------------------------------------------------------------
         Edit::Helper::Actor   ::OnExit();
@@ -245,6 +261,16 @@ namespace
         Edit::Helper::Light   ::OnExit();
         Edit::Helper::Material::OnExit();
         Edit::Helper::Plugin  ::OnExit();
+
+        // -----------------------------------------------------------------------------
+        // Plugins
+        // -----------------------------------------------------------------------------
+        for (auto Plugin : m_AvailablePlugins) Plugin->OnExit();
+
+        // -----------------------------------------------------------------------------
+        // Start engine
+        // -----------------------------------------------------------------------------
+        Engine::Shutdown();
 
         // -----------------------------------------------------------------------------
         // At the end we have to clean our context and windows.
@@ -267,11 +293,6 @@ namespace
             // -----------------------------------------------------------------------------
             Edit::GUI::ProcessEvents();
             ProcessSDLEvents();
-                                    
-            // -----------------------------------------------------------------------------
-            // Time
-            // -----------------------------------------------------------------------------
-            Core::Time::Update();
 
             // -----------------------------------------------------------------------------
             // Send FPS to editor
@@ -291,6 +312,19 @@ namespace
 
             NextState = s_pStates[m_CurrentState]->OnRun();
 
+            // -----------------------------------------------------------------------------
+            // Plugins
+            // -----------------------------------------------------------------------------
+            for (auto Plugin : m_AvailablePlugins) Plugin->Update();
+
+            // -----------------------------------------------------------------------------
+            // Update engine
+            // -----------------------------------------------------------------------------
+            Engine::Update();
+
+            // -----------------------------------------------------------------------------
+            // Check state
+            // -----------------------------------------------------------------------------
             if (NextState != m_CurrentState)
             {
                 OnTranslation(NextState);
@@ -494,7 +528,7 @@ namespace
         int Width  = _rMessage.Get<int>();
         int Height = _rMessage.Get<int>();
 
-        Gfx::App::OnResize(m_EditWindowID, Width, Height);
+        Gfx::Pipeline::OnResize(m_EditWindowID, Width, Height);
     }
 
     // -----------------------------------------------------------------------------

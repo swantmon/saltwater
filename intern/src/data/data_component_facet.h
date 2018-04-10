@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "engine/engine_config.h"
+
 #include "base/base_typedef.h"
 
 #include "data/data_component.h"
@@ -9,7 +11,7 @@
 
 namespace Dt
 {
-    class CComponentFacet
+    class ENGINE_API CComponentFacet
     {
     public:
 

@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "engine/engine_config.h"
+
 #include "graphic/gfx_blend_state.h"
 #include "graphic/gfx_depth_stencil_state.h"
 #include "graphic/gfx_rasterizer_state.h"
@@ -13,10 +15,10 @@ namespace StateManager
     void OnStart();
     void OnExit();
 
-    CBlendStatePtr GetBlendState(unsigned int _Flags);
-    CDepthStencilStatePtr GetDepthStencilState(unsigned int _Flags);
-    CRasterizerStatePtr GetRasterizerState(unsigned int _Flags);
-    CRenderStatePtr GetRenderState(unsigned int _Flags);
+    ENGINE_API CBlendStatePtr GetBlendState(unsigned int _Flags);
+    ENGINE_API CDepthStencilStatePtr GetDepthStencilState(unsigned int _Flags);
+    ENGINE_API CRasterizerStatePtr GetRasterizerState(unsigned int _Flags);
+    ENGINE_API CRenderStatePtr GetRenderState(unsigned int _Flags);
 } // StateManager
 } // namespace Gfx
 

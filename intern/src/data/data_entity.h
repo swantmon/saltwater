@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "engine/engine_config.h"
+
 #include "base/base_aabb3.h"
 #include "base/base_typedef.h"
 
@@ -47,7 +49,7 @@ namespace Dt
 
 namespace Dt
 {
-    class CEntity
+    class ENGINE_API CEntity
     {
     public:
 

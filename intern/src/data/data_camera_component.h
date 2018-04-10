@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "engine/engine_config.h"
+
 #include "base/base_aabb2.h"
 #include "base/base_include_glm.h"
 
@@ -15,7 +17,7 @@ namespace Dt
 
 namespace Dt
 {
-    class CCameraComponent : public CComponent<CCameraComponent>
+    class ENGINE_API CCameraComponent : public CComponent<CCameraComponent>
     {
     public:
 

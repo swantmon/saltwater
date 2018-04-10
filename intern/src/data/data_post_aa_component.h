@@ -1,11 +1,13 @@
 
 #pragma once
 
+#include "engine/engine_config.h"
+
 #include "data/data_component.h"
 
 namespace Dt
 {
-    class CPostAAComponent : public CComponent<CPostAAComponent>
+    class ENGINE_API CPostAAComponent : public CComponent<CPostAAComponent>
     {
     public:
 

@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "engine/engine_config.h"
+
 #include "base/base_typedef.h"
 
 namespace Dt
@@ -10,7 +12,7 @@ namespace Dt
 
 namespace Dt
 {
-    class CHierarchyFacet
+    class ENGINE_API CHierarchyFacet
     {
     public:
 

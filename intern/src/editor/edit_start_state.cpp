@@ -1,18 +1,13 @@
 
 #include "editor/edit_precompiled.h"
 
-#include "base/base_console.h"
-
 #include "camera/cam_control_manager.h"
+
+#include "core/core_console.h"
 
 #include "editor/edit_start_state.h"
 
-#include "graphic/gfx_main.h"
-#include "graphic/gfx_start_state.h"
-
-#include "gui/gui_start_state.h"
-
-#include "logic/lg_start_state.h"
+#include "engine/engine.h"
 
 namespace Edit
 {
@@ -45,18 +40,11 @@ namespace Edit
         BASE_CONSOLE_STREAMINFO("Edit> Enter start state.");
 
         // -----------------------------------------------------------------------------
-        // Start engine
+        // Prepare controls
         // -----------------------------------------------------------------------------
         Cam::ControlManager::CreateControl(Cam::CControl::EditorControl);
         Cam::ControlManager::CreateControl(Cam::CControl::GameControl);
-        
-        // -----------------------------------------------------------------------------
-        // Start normal states
-        // -----------------------------------------------------------------------------
-        Lg ::Start::OnEnter();
-        Gfx::Start::OnEnter();
-        Gui::Start::OnEnter();
-        
+
         return Edit::CState::Start;
     }
     
@@ -64,12 +52,6 @@ namespace Edit
     
     CState::EStateType CStartState::InternOnLeave()
     {
-        Gui::Start::OnLeave();
-        Gfx::Start::OnLeave();
-        Lg ::Start::OnLeave();
-
-        BASE_CONSOLE_STREAMINFO("Edit> Leave start state.");
-        
         return Edit::CState::Start;
     }
     
@@ -77,12 +59,6 @@ namespace Edit
     
     CState::EStateType CStartState::InternOnRun()
     {
-        CState::EStateType NextState = CState::Intro;
-        
-        Lg ::Start::OnRun();
-        Gfx::Start::OnRun();
-        Gui::Start::OnRun();
-        
-        return NextState;
+        return CState::Intro;
     }
 } // namespace Edit

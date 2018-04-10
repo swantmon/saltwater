@@ -1,11 +1,12 @@
 
-#include "camera/cam_precompiled.h"
+#include "engine/engine_precompiled.h"
 
-#include "base/base_console.h"
 #include "base/base_input_event.h"
 #include "base/base_memory.h"
 #include "base/base_uncopyable.h"
 #include "base/base_singleton.h"
+
+#include "core/core_console.h"
 
 #include "camera/cam_control_manager.h"
 #include "camera/cam_editor_control.h"
@@ -15,8 +16,6 @@
 #include "data/data_component_manager.h"
 
 #include "gui/gui_event_handler.h"
-
-#include "graphic/gfx_camera_interface.h"
 
 using namespace Cam;
 

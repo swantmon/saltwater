@@ -1,13 +1,15 @@
 
 #pragma once
 
+#include "engine/engine_config.h"
+
 #include "base/base_input_event.h"
 
 #include "data/data_component.h"
 
 namespace Dt
 {
-    class CScriptComponent : public CComponent<CScriptComponent>
+    class ENGINE_API CScriptComponent : public CComponent<CScriptComponent>
     {
     public:
 

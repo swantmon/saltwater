@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include "engine/engine_config.h"
+
 #include "data/data_entity.h"
 
 #include <functional>
@@ -43,23 +45,23 @@ namespace Dt
 {
 namespace EntityManager
 {
-    void OnStart();
-    void OnExit();
+    ENGINE_API void OnStart();
+    ENGINE_API void OnExit();
 
-    void Clear();
+    ENGINE_API void Update();
 
-    CEntity& CreateEntity(const SEntityDescriptor& _rDescriptor, CEntity::BID _ID = CEntity::s_InvalidID);
+    ENGINE_API void Clear();
 
-    std::vector<CEntity*> CreateEntitiesFromScene(const std::string& _rFile);
+    ENGINE_API CEntity& CreateEntity(const SEntityDescriptor& _rDescriptor, CEntity::BID _ID = CEntity::s_InvalidID);
 
-    void FreeEntity(CEntity& _rEntity);
+    ENGINE_API std::vector<CEntity*> CreateEntitiesFromScene(const std::string& _rFile);
 
-    CEntity* GetEntityByID(CEntity::BID _ID);
+    ENGINE_API void FreeEntity(CEntity& _rEntity);
 
-    void MarkEntityAsDirty(CEntity& _rEntity, unsigned int _DirtyFlags);
+    ENGINE_API CEntity* GetEntityByID(CEntity::BID _ID);
 
-    void Update();
+    ENGINE_API void MarkEntityAsDirty(CEntity& _rEntity, unsigned int _DirtyFlags);
 
-    void RegisterDirtyEntityHandler(CEntityDelegate _NewDelegate);
+    ENGINE_API void RegisterDirtyEntityHandler(CEntityDelegate _NewDelegate);
 } // namespace EntityManager
 } // namespace Dt

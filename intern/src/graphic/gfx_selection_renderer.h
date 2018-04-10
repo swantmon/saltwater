@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "engine/engine_config.h"
+
 #include "base/base_include_glm.h"
 
 #include "graphic/gfx_selection.h"
@@ -37,23 +39,23 @@ namespace SelectionRenderer
     void Update();
     void Render();
 
-    void SelectEntity(Base::ID _EntityID);
-    void UnselectEntity();
+    ENGINE_API void SelectEntity(Base::ID _EntityID);
+    ENGINE_API void UnselectEntity();
 
-    CSelectionTicket& AcquireTicket(int _OffsetX, int _OffsetY, int _SizeX, int _SizeY, unsigned int _Flags = SPickFlag::Nothing);
-    void ReleaseTicket(CSelectionTicket& _rTicket);
+    ENGINE_API CSelectionTicket& AcquireTicket(int _OffsetX, int _OffsetY, int _SizeX, int _SizeY, unsigned int _Flags = SPickFlag::Nothing);
+    ENGINE_API void ReleaseTicket(CSelectionTicket& _rTicket);
 
-    void PushPick(CSelectionTicket& _rTicket, const glm::ivec2& _rCursor);
-    bool PopPick(CSelectionTicket& _rTicket);
+    ENGINE_API void PushPick(CSelectionTicket& _rTicket, const glm::ivec2& _rCursor);
+    ENGINE_API bool PopPick(CSelectionTicket& _rTicket);
 
-    void Clear(CSelectionTicket& _rTicket);
+    ENGINE_API void Clear(CSelectionTicket& _rTicket);
 
-    bool IsEmpty(const CSelectionTicket& _rTicket);
+    ENGINE_API bool IsEmpty(const CSelectionTicket& _rTicket);
 
-    bool IsValid(const CSelectionTicket& _rTicket);
+    ENGINE_API bool IsValid(const CSelectionTicket& _rTicket);
 
-    void ResetSettings();
-    void SetSettings(const SSelectionSettings& _rSettings);
-    const SSelectionSettings& GetSettings();
+    ENGINE_API void ResetSettings();
+    ENGINE_API void SetSettings(const SSelectionSettings& _rSettings);
+    ENGINE_API const SSelectionSettings& GetSettings();
 } // namespace SelectionRenderer
 } // namespace Gfx

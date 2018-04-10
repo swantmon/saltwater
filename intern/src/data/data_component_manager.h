@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "engine/engine_config.h"
+
 #include "base/base_uncopyable.h"
 #include "base/base_defines.h"
 #include "base/base_singleton.h"
@@ -15,9 +17,11 @@
 
 namespace Dt
 {
-    class CComponentManager : Base::CUncopyable
+    class ENGINE_API CComponentManager : Base::CUncopyable
     {
-        BASE_SINGLETON_FUNC(CComponentManager)
+    public:             
+
+        static CComponentManager& GetInstance();
 
     public:
 
@@ -86,7 +90,7 @@ namespace Dt
         // -----------------------------------------------------------------------------
         m_ComponentByID[pComponent->m_ID] = pComponent;
 
-        m_ComponentsByType[Base::CTypeInfo::GetTypeID<T>()].emplace_back(pComponent);
+        m_ComponentsByType[pComponent->GetTypeID()].emplace_back(pComponent);
 
         return pComponent;
     }

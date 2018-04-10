@@ -1,11 +1,13 @@
 
 #pragma once
 
+#include "engine/engine_config.h"
+
 #include "data/data_component.h"
 
 namespace Dt
 {
-    class CSSAOComponent : public CComponent<CSSAOComponent>
+    class ENGINE_API CSSAOComponent : public CComponent<CSSAOComponent>
     {
     public:
 

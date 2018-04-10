@@ -1,13 +1,15 @@
 
 #pragma once
 
+#include "engine/engine_config.h"
+
 #include "base/base_typedef.h"
 
 #include "data/data_component.h"
 
 namespace Dt
 {
-    class CSkyComponent : public CComponent<CSkyComponent>
+    class ENGINE_API CSkyComponent : public CComponent<CSkyComponent>
     {
     public:
 

@@ -1,5 +1,4 @@
 ﻿
-#include "base/base_console.h"
 #include "base/base_include_glm.h"
 
 #include "editor_gui/edit_inspector_transformation.h"

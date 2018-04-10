@@ -1,13 +1,15 @@
 
 #pragma once
 
+#include "engine/engine_config.h"
+
 #include "base/base_include_glm.h"
 
 #include "data/data_component.h"
 
 namespace Dt
 {
-    class CBloomComponent : public CComponent<CBloomComponent>
+    class ENGINE_API CBloomComponent : public CComponent<CBloomComponent>
     {
     public:
 

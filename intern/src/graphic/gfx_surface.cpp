@@ -6,7 +6,7 @@
 //  Copyright (c) 2014 TU Ilmenau. All rights reserved.
 //
 
-#include "graphic/gfx_precompiled.h"
+#include "engine/engine_precompiled.h"
 
 #include "gfx_surface.h"
 

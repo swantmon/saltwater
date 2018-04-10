@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "engine/engine_config.h"
+
 #include "base/base_include_glm.h"
 
 namespace Gfx
@@ -46,8 +48,8 @@ namespace TonemappingRenderer
     void Update();
     void Render();
 
-    void ResetSettings();
-    void SetSettings(const SColorGradingSettings& _rSettings);
-    const SColorGradingSettings& GetSettings();
+    ENGINE_API void ResetSettings();
+    ENGINE_API void SetSettings(const SColorGradingSettings& _rSettings);
+    ENGINE_API const SColorGradingSettings& GetSettings();
 } // namespace TonemappingRenderer
 } // namespace Gfx

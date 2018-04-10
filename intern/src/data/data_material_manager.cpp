@@ -1,7 +1,6 @@
 
-#include "data/data_precompiled.h"
+#include "engine/engine_precompiled.h"
 
-#include "base/base_console.h"
 #include "base/base_crc.h"
 #include "base/base_exception.h"
 #include "base/base_include_glm.h"
@@ -11,6 +10,7 @@
 #include "base/base_uncopyable.h"
 
 #include "core/core_asset_importer.h"
+#include "core/core_console.h"
 
 #include "data/data_material.h"
 #include "data/data_material_manager.h"

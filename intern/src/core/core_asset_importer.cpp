@@ -1,7 +1,6 @@
 
-#include "core/core_precompiled.h"
+#include "engine/engine_precompiled.h"
 
-#include "base/base_console.h"
 #include "base/base_crc.h"
 #include "base/base_memory.h"
 #include "base/base_uncopyable.h"
@@ -9,6 +8,7 @@
 
 #include "core/core_asset_importer.h"
 #include "core/core_asset_generator.h"
+#include "core/core_console.h"
 
 #include "assimp/Importer.hpp"
 #include "assimp/postprocess.h"

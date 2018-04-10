@@ -1,12 +1,7 @@
-//
-//  gfx_view_manager.h
-//  graphic
-//
-//  Created by Tobias Schwandt on 23/10/14.
-//  Copyright (c) 2014 TU Ilmenau. All rights reserved.
-//
 
 #pragma once
+
+#include "engine/engine_config.h"
 
 #include "graphic/gfx_camera.h"
 #include "graphic/gfx_view.h"
@@ -44,13 +39,13 @@ namespace ViewManager
     CViewPortSetPtr CreateViewPortSet(CViewPortPtr _ViewPort1Ptr, CViewPortPtr _ViewPort2Ptr, CViewPortPtr _ViewPort3Ptr, CViewPortPtr _ViewPort4Ptr);
     CViewPortSetPtr CreateViewPortSet(CViewPortPtr* _pViewPortPtrs, unsigned int _NumberOfViewPorts);
     
-    CCameraPtr GetMainCamera();
+    ENGINE_API CCameraPtr GetMainCamera();
     CCameraPtr GetDebugCamera();
     CCameraPtr GetDecalCamera();
     CCameraPtr GetGUICamera();
     CCameraPtr GetFullQuadCamera();
     
-    CViewPortPtr GetViewPort();
-    CViewPortSetPtr GetViewPortSet();
+    ENGINE_API CViewPortPtr GetViewPort();
+    ENGINE_API CViewPortSetPtr GetViewPortSet();
 } // ViewManager
 } // namespace Gfx
