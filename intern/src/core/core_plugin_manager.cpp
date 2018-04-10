@@ -169,11 +169,10 @@ namespace
             return PluginIter->second.m_pInfo;
         }
 
-        BASE_CONSOLE_INFOV("Plugin name:    %s"   , pPluginInfo->m_pPluginName);
-        BASE_CONSOLE_INFOV("Plugin version: %s"   , pPluginInfo->m_pPluginVersion);
-        BASE_CONSOLE_INFOV("Plugin API:     %i.%i", pPluginInfo->m_APIMajorVersion, pPluginInfo->m_APIMinorVersion);
-        // BASE_CONSOLE_INFOV("File:           %s", pPluginInfo->m_pFileName);
-        // BASE_CONSOLE_INFOV("Class:          %s", pPluginInfo->m_pClassName);
+        BASE_CONSOLE_INFOV("Plugin name:        %s"   , pPluginInfo->m_pPluginName);
+        BASE_CONSOLE_INFOV("Plugin version:     %s"   , pPluginInfo->m_pPluginVersion);
+        BASE_CONSOLE_INFOV("Plugin description: %s"   , pPluginInfo->m_pPluginDescription);
+        BASE_CONSOLE_INFOV("Plugin API:         %i.%i", pPluginInfo->m_APIMajorVersion, pPluginInfo->m_APIMinorVersion);
 
         if (pPluginInfo->m_APIMajorVersion < ENGINE_MAJOR_VERSION || (pPluginInfo->m_APIMajorVersion == ENGINE_MAJOR_VERSION && pPluginInfo->m_APIMinorVersion < ENGINE_MINOR_VERSION))
         {

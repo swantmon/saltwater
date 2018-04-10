@@ -3,7 +3,7 @@
 
 #include "core/core_plugin_manager.h"
 
-namespace MR
+namespace HW
 {
     class CPluginInterface : public Core::IPlugin
     {
@@ -15,4 +15,4 @@ namespace MR
         void OnResume() override;
         void Update() override;
     };
-} // namespace MR
+} // namespace HW

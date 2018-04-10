@@ -427,13 +427,9 @@ namespace
                     int Width  = glm::abs(Rectangle.left   - Rectangle.right);
                     int Height = glm::abs(Rectangle.bottom - Rectangle.top);
 
-                    int Rotation = Core::JNI::GetDeviceRotation();
-
                     // -----------------------------------------------------------------------------
                     // Inform all libs
                     // -----------------------------------------------------------------------------
-                    // MR::ControlManager::OnDisplayGeometryChanged(Rotation, Width, Height);
-
                     Gfx::Pipeline::OnResize(AppSetup->m_WindowID, Width, Height);
                 }
                 break;
@@ -442,7 +438,7 @@ namespace
                 // -----------------------------------------------------------------------------
                 // When our app gains focus, we start monitoring the accelerometer.
                 // -----------------------------------------------------------------------------
-                // MR::ControlManager::OnResume();
+                for (auto Plugin : AppSetup->m_AvailablePlugins) Plugin->OnResume();
 
                 if (AppSetup->m_AccelerometerSensor != NULL)
                 {
@@ -462,7 +458,7 @@ namespace
                 // When our app loses focus, we stop monitoring the accelerometer.
                 // This is to avoid consuming battery while not being used.
                 // -----------------------------------------------------------------------------
-                // MR::ControlManager::OnPause();
+                for (auto Plugin : AppSetup->m_AvailablePlugins) Plugin->OnPause();
 
                 if (AppSetup->m_AccelerometerSensor != NULL)
                 {

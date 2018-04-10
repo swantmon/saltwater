@@ -26,6 +26,9 @@ namespace Core
 
         virtual void OnStart() = 0;
         virtual void OnExit() = 0;
+        virtual void OnPause() = 0;
+        virtual void OnResume() = 0;
+
         virtual void Update() = 0;
     };
 
@@ -43,13 +46,14 @@ namespace Core
         int            m_APIMinorVersion;
         const char*    m_pPluginName;
         const char*    m_pPluginVersion;
+        const char*    m_pPluginDescription;
         PluginInstance GetInstance;
     };
 
     // -----------------------------------------------------------------------------
     // Macro
     // -----------------------------------------------------------------------------
-    #define CORE_PLUGIN_INFO(_ClassName, _PluginName, _PluginVersion)              \
+    #define CORE_PLUGIN_INFO(_ClassName, _PluginName, _PluginVersion, _PluginDesc) \
     extern "C"                                                                     \
     {                                                                              \
         CORE_PLUGIN_API_EXPORT Core::IPlugin& GetInstance()                        \
@@ -63,6 +67,7 @@ namespace Core
             ENGINE_MINOR_VERSION,                                                  \
             _PluginName,                                                           \
             _PluginVersion,                                                        \
+            _PluginDesc,                                                           \
             GetInstance,                                                           \
         };                                                                         \
     }

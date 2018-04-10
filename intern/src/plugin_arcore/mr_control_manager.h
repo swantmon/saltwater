@@ -18,8 +18,6 @@ namespace ControlManager
     void OnPause();
     void OnResume();
 
-    void OnDisplayGeometryChanged(int _DisplayRotation, int _Width, int _Height);
-
     const CCamera& GetCamera();
 
     const CLightEstimation& GetLightEstimation();

@@ -197,7 +197,7 @@ namespace
         void OnPause();
         void OnResume();
 
-        void OnDisplayGeometryChanged(int _DisplayRotation, int _Width, int _Height);
+        void OnResize(int _Width, int _Height);
 
         const CCamera& GetCamera();
 
@@ -311,6 +311,8 @@ namespace
         , m_ARCToEngineMatrix(1.0f)
     {
         m_ARCToEngineMatrix = Base::CCoordinateSystem::GetBaseMatrix(glm::vec3(1,0,0), glm::vec3(0,1,0), glm::vec3(0,0,-1));
+
+        Gfx::Main::RegisterResizeHandler(GFX_BIND_RESIZE_METHOD(&CMRControlManager::OnResize));
     }
 
     // -----------------------------------------------------------------------------
@@ -698,15 +700,11 @@ namespace
     // -----------------------------------------------------------------------------
 
 
-    void CMRControlManager::OnDisplayGeometryChanged(int _DisplayRotation, int _Width, int _Height)
+    void CMRControlManager::OnResize(int _Width, int _Height)
     {
-#ifdef PLATFORM_ANDROID
-        ArSession_setDisplayGeometry(m_pARSession, _DisplayRotation, _Width, _Height);
-#else
-        BASE_UNUSED(_DisplayRotation);
-        BASE_UNUSED(_Width);
-        BASE_UNUSED(_Height);
-#endif
+        int Rotation = Core::JNI::GetDeviceRotation();
+
+        ArSession_setDisplayGeometry(m_pARSession, Rotation, _Width, _Height);
     }
 
     // -----------------------------------------------------------------------------
@@ -1312,13 +1310,6 @@ namespace ControlManager
     void OnResume()
     {
         CMRControlManager::GetInstance().OnResume();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void OnDisplayGeometryChanged(int _DisplayRotation, int _Width, int _Height)
-    {
-        CMRControlManager::GetInstance().OnDisplayGeometryChanged(_DisplayRotation, _Width, _Height);
     }
 
     // -----------------------------------------------------------------------------

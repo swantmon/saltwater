@@ -19,24 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\src\plugin_arcore\mr_camera.cpp" />
-    <ClCompile Include="..\..\..\src\plugin_arcore\mr_control_manager.cpp" />
-    <ClCompile Include="..\..\..\src\plugin_arcore\mr_light_estimation.cpp" />
-    <ClCompile Include="..\..\..\src\plugin_arcore\mr_marker.cpp" />
-    <ClCompile Include="..\..\..\src\plugin_arcore\mr_plugin_interface.cpp" />
-    <ClCompile Include="..\..\..\src\plugin_arcore\mr_precompiled.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\..\src\plugin_arcore\mr_camera.h" />
-    <ClInclude Include="..\..\..\src\plugin_arcore\mr_control_manager.h" />
-    <ClInclude Include="..\..\..\src\plugin_arcore\mr_light_estimation.h" />
-    <ClInclude Include="..\..\..\src\plugin_arcore\mr_marker.h" />
-    <ClInclude Include="..\..\..\src\plugin_arcore\mr_plugin_interface.h" />
-    <ClInclude Include="..\..\..\src\plugin_arcore\mr_precompiled.h" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\base\base.vcxproj">
       <Project>{3a61e67a-052f-4a68-b8db-771c8cd0d2ee}</Project>
     </ProjectReference>
@@ -44,12 +26,26 @@
       <Project>{e481e898-c074-4491-bc6e-93844bfaff74}</Project>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\plugin_helloworld\hw_plugin_interface.cpp">
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">plugin_helloworld/hw_precompiled.h</PrecompiledHeaderFile>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\plugin_helloworld\hw_precompiled.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\src\plugin_helloworld\hw_plugin_interface.h" />
+    <ClInclude Include="..\..\..\src\plugin_helloworld\hw_precompiled.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{1BBA2732-A51B-4FF0-8393-492884561668}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>camera</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
-    <ProjectName>plugin_arcore</ProjectName>
+    <ProjectName>plugin_helloworld</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -126,7 +122,7 @@
       <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\arcore\include;..\..\..\..\extern\artoolkit\include;..\..\..\..\extern\opencv\include;..\..\..\..\extern\kinect\include</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <PrecompiledHeaderFile>plugin/arcore/mr_precompiled.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>plugin_helloworld/hw_precompiled.h</PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -148,7 +144,7 @@
       <PreprocessorDefinitions>ISDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\arcore\include;..\..\..\..\extern\glm\include;..\..\..\..\extern\json\include;..\..\..\..\extern\assimp\include;..\..\..\..\extern\devil\include;..\..\..\..\extern\glew\include;..\..\..\..\extern\tinyxml2\include</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <PrecompiledHeaderFile>plugin_arcore/mr_precompiled.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>plugin_helloworld/hw_precompiled.h</PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -174,7 +170,7 @@
       <PreprocessorDefinitions>BASE_RELEASE;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\arcore\include;..\..\..\..\extern\artoolkit\include;..\..\..\..\extern\opencv\include;..\..\..\..\extern\kinect\include</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <PrecompiledHeaderFile>plugin/arcore/mr_precompiled.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>plugin_helloworld/hw_precompiled.h</PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -200,7 +196,7 @@
       <PreprocessorDefinitions>ISDLL;BASE_RELEASE;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\arcore\include;..\..\..\..\extern\glm\include;..\..\..\..\extern\json\include;..\..\..\..\extern\assimp\include;..\..\..\..\extern\devil\include;..\..\..\..\extern\glew\include;..\..\..\..\extern\tinyxml2\include</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <PrecompiledHeaderFile>plugin/arcore/mr_precompiled.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>plugin_helloworld/hw_precompiled.h</PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
