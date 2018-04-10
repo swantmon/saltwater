@@ -396,12 +396,11 @@ namespace
                     {
                         auto Plugin = Core::PluginManager::LoadPlugin(SelectedPlugin);
 
-                        if (Plugin == nullptr)
-                        {
-                            AppSetup->m_AvailablePlugins.push_back(&Plugin->GetInstance());
+                        if (Plugin == nullptr) continue;
 
-                            Plugin->GetInstance().OnStart();
-                        }
+                        AppSetup->m_AvailablePlugins.push_back(&Plugin->GetInstance());
+
+                        Plugin->GetInstance().OnStart();
                     }
 
                     // -----------------------------------------------------------------------------
