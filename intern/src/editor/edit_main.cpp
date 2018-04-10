@@ -60,9 +60,6 @@ int main(int _Argc, char* _pArgv[])
 
     Core::CConsole::GetInstance().SetVerbosityLevel(VerbosityLevel);
 
-
-    HINSTANCE Instance = LoadLibraryExW(L"graphicd.dll", NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
-
     try
     {
         Edit::Application::OnStart(_Argc, _pArgv);

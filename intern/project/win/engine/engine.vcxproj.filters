@@ -829,9 +829,6 @@
     <ClInclude Include="..\..\..\src\script\script_ar_camera_control_script.h">
       <Filter>script\scripts</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\script\script_ar_controller_script.h">
-      <Filter>script\scripts</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\script\script_ar_place_object_on_touch_script.h">
       <Filter>script\scripts</Filter>
     </ClInclude>
