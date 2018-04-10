@@ -146,11 +146,11 @@ namespace
 
         int VerbosityLevel = 0;
 
-        Base::CProgramParameters::GetInstance().ParseFile(m_AppSetup.m_pAndroidApp->activity->externalDataPath + m_ParameterFile);
+        Core::CProgramParameters::GetInstance().ParseFile(m_AppSetup.m_pAndroidApp->activity->externalDataPath + m_ParameterFile);
 
-        VerbosityLevel = Base::CProgramParameters::GetInstance().Get<int>(VerbosityNameString, 3);
+        VerbosityLevel = Core::CProgramParameters::GetInstance().Get<int>(VerbosityNameString, 3);
 
-        Base::CConsole::GetInstance().SetVerbosityLevel(VerbosityLevel);
+        Core::CConsole::GetInstance().SetVerbosityLevel(VerbosityLevel);
 
         // -----------------------------------------------------------------------------
         // Setup asset manager
@@ -195,7 +195,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Save configuration
         // -----------------------------------------------------------------------------
-        Base::CProgramParameters::GetInstance().WriteFile(m_AppSetup.m_pAndroidApp->activity->externalDataPath + m_ParameterFile);
+        Core::CProgramParameters::GetInstance().WriteFile(m_AppSetup.m_pAndroidApp->activity->externalDataPath + m_ParameterFile);
     }
     
     // -----------------------------------------------------------------------------
@@ -390,7 +390,7 @@ namespace
                     // -----------------------------------------------------------------------------
                     // Plugins
                     // -----------------------------------------------------------------------------
-                    auto SelectedPlugins = Base::CProgramParameters::GetInstance().Get("plugins:selection", std::vector<std::string>());
+                    auto SelectedPlugins = Core::CProgramParameters::GetInstance().Get("plugins:selection", std::vector<std::string>());
 
                     for (auto SelectedPlugin : SelectedPlugins)
                     {

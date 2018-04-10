@@ -38,19 +38,19 @@ namespace
         switch (_Type)
         {
         case GL_DEBUG_TYPE_ERROR:
-            BASE_CONSOLE_ERRORV("%s", _pMessage);
+            ENGINE_CONSOLE_ERRORV("%s", _pMessage);
             break;
         case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
-            BASE_CONSOLE_WARNINGV("%s", _pMessage);
+            ENGINE_CONSOLE_WARNINGV("%s", _pMessage);
             break;
         case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
-            BASE_CONSOLE_WARNINGV("%s", _pMessage);
+            ENGINE_CONSOLE_WARNINGV("%s", _pMessage);
             break;
         case GL_DEBUG_TYPE_PORTABILITY:
-            BASE_CONSOLE_INFOV("%s", _pMessage);
+            ENGINE_CONSOLE_INFOV("%s", _pMessage);
             break;
         case GL_DEBUG_TYPE_PERFORMANCE:
-            BASE_CONSOLE_DEBUGV("%s", _pMessage);
+            ENGINE_CONSOLE_DEBUGV("%s", _pMessage);
             break;
         case GL_DEBUG_TYPE_OTHER:
             // -----------------------------------------------------------------------------
@@ -234,19 +234,19 @@ namespace
         // Load graphics API settings
         // -----------------------------------------------------------------------------
 #ifdef PLATFORM_ANDROID
-        m_GraphicsInfo.m_GraphicsAPI  = Base::CProgramParameters::GetInstance().Get("graphics:api:type", CGraphicsInfo::OpenGLES);
-        m_GraphicsInfo.m_MajorVersion = Base::CProgramParameters::GetInstance().Get("graphics:api:major_version", 3);
-        m_GraphicsInfo.m_MinorVersion = Base::CProgramParameters::GetInstance().Get("graphics:api:minor_version", 2);
+        m_GraphicsInfo.m_GraphicsAPI  = Core::CProgramParameters::GetInstance().Get("graphics:api:type", CGraphicsInfo::OpenGLES);
+        m_GraphicsInfo.m_MajorVersion = Core::CProgramParameters::GetInstance().Get("graphics:api:major_version", 3);
+        m_GraphicsInfo.m_MinorVersion = Core::CProgramParameters::GetInstance().Get("graphics:api:minor_version", 2);
 #else
-        m_GraphicsInfo.m_GraphicsAPI  = Base::CProgramParameters::GetInstance().Get("graphics:api:type", CGraphicsInfo::OpenGL);
-        m_GraphicsInfo.m_MajorVersion = Base::CProgramParameters::GetInstance().Get("graphics:api:major_version", 4);
-        m_GraphicsInfo.m_MinorVersion = Base::CProgramParameters::GetInstance().Get("graphics:api:minor_version", 5);
+        m_GraphicsInfo.m_GraphicsAPI  = Core::CProgramParameters::GetInstance().Get("graphics:api:type", CGraphicsInfo::OpenGL);
+        m_GraphicsInfo.m_MajorVersion = Core::CProgramParameters::GetInstance().Get("graphics:api:major_version", 4);
+        m_GraphicsInfo.m_MinorVersion = Core::CProgramParameters::GetInstance().Get("graphics:api:minor_version", 5);
 #endif        
 
         // -----------------------------------------------------------------------------
         // Load pixel matching behavior
         // -----------------------------------------------------------------------------
-        m_GraphicsInfo.m_PixelMatching = static_cast<CInternGraphicsInfo::EPixelMatching>(Base::CProgramParameters::GetInstance().Get("graphics:pixel_matching:type", 0));
+        m_GraphicsInfo.m_PixelMatching = static_cast<CInternGraphicsInfo::EPixelMatching>(Core::CProgramParameters::GetInstance().Get("graphics:pixel_matching:type", 0));
 
         // -----------------------------------------------------------------------------
         // Show information of windows and initialize them
@@ -541,11 +541,11 @@ namespace
 
             assert(pInfoGLVersion && pInfoGLGLSLVersion && pInfoGLVendor && pInfoGLRenderer);
 
-            BASE_CONSOLE_INFOV("Window ID: %i", IndexOfWindow);
-            BASE_CONSOLE_INFOV("GL:        %s", pInfoGLVersion);
-            BASE_CONSOLE_INFOV("GLSL:      %s", pInfoGLGLSLVersion);
-            BASE_CONSOLE_INFOV("Vendor:    %s", pInfoGLVendor);
-            BASE_CONSOLE_INFOV("Renderer:  %s", pInfoGLRenderer);
+            ENGINE_CONSOLE_INFOV("Window ID: %i", IndexOfWindow);
+            ENGINE_CONSOLE_INFOV("GL:        %s", pInfoGLVersion);
+            ENGINE_CONSOLE_INFOV("GLSL:      %s", pInfoGLGLSLVersion);
+            ENGINE_CONSOLE_INFOV("Vendor:    %s", pInfoGLVendor);
+            ENGINE_CONSOLE_INFOV("Renderer:  %s", pInfoGLRenderer);
 
             // -----------------------------------------------------------------------------
             // Extensions
@@ -685,7 +685,7 @@ namespace
         BASE_UNUSED(_WindowID);
         BASE_UNUSED(_pPathToFile);
 
-        BASE_CONSOLE_WARNING("Taking screenshots is currently not supported!");
+        ENGINE_CONSOLE_WARNING("Taking screenshots is currently not supported!");
 
         return;
 
@@ -931,7 +931,7 @@ namespace
         {
         case CInternGraphicsInfo::Scale:
         {
-            float Scale = Base::CProgramParameters::GetInstance().Get<float>("graphics:pixel_matching:scale", 1.0f);
+            float Scale = Core::CProgramParameters::GetInstance().Get<float>("graphics:pixel_matching:scale", 1.0f);
 
             _pWindowInfo->m_InternalWindowSize[0] = static_cast<int>(static_cast<float>(_pWindowInfo->m_NativeWindowSize[0]) * Scale);
             _pWindowInfo->m_InternalWindowSize[1] = static_cast<int>(static_cast<float>(_pWindowInfo->m_NativeWindowSize[1]) * Scale);
@@ -939,8 +939,8 @@ namespace
         break;
         case CInternGraphicsInfo::Fix:
         {
-            _pWindowInfo->m_InternalWindowSize[0] = Base::CProgramParameters::GetInstance().Get<unsigned int>("graphics:pixel_matching:fixed:w", _Width);
-            _pWindowInfo->m_InternalWindowSize[1] = Base::CProgramParameters::GetInstance().Get<unsigned int>("graphics:pixel_matching:fixed:h", _Height);
+            _pWindowInfo->m_InternalWindowSize[0] = Core::CProgramParameters::GetInstance().Get<unsigned int>("graphics:pixel_matching:fixed:w", _Width);
+            _pWindowInfo->m_InternalWindowSize[1] = Core::CProgramParameters::GetInstance().Get<unsigned int>("graphics:pixel_matching:fixed:h", _Height);
         }
         break;
         };

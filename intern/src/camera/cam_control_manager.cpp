@@ -109,7 +109,7 @@ namespace
                     
                     
                 default:
-                    BASE_CONSOLE_STREAMWARNING("Can't create camera control of type " << _Type);
+                    ENGINE_CONSOLE_STREAMWARNING("Can't create camera control of type " << _Type);
                 break;
             }
         }

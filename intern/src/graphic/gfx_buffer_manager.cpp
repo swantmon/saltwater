@@ -373,7 +373,7 @@ namespace
                 break;
                     
                 default:
-                    BASE_CONSOLE_STREAMWARNING("Undefined buffer behavior while creating an buffer.");
+                    ENGINE_CONSOLE_STREAMWARNING("Undefined buffer behavior while creating an buffer.");
                 break;
             }
         }

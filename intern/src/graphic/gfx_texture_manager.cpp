@@ -370,7 +370,7 @@ namespace
     void CGfxTextureManager::ClearTextureLayer(CTexturePtr _TexturePtr, const void* _pData, int _Layer)
     {
 #ifdef PLATFORM_ANDROID
-        BASE_CONSOLE_ERROR("Clearing textures is currently not supported on Android");
+        ENGINE_CONSOLE_ERROR("Clearing textures is currently not supported on Android");
         assert(false); // TODO: implement
 #else
         // TODO: Remove dummy
@@ -409,7 +409,7 @@ namespace
     void CGfxTextureManager::ClearTexture(CTexturePtr _TexturePtr, const void* _pData)
     {
 #ifdef PLATFORM_ANDROID
-        BASE_CONSOLE_ERROR("Clearing textures is currently not supported on Android");
+        ENGINE_CONSOLE_ERROR("Clearing textures is currently not supported on Android");
         assert(false); // TODO: implement
 #else
         // TODO: Remove dummy
@@ -523,7 +523,7 @@ namespace
             // TODO by tschwandt
             // Do this not only for cubemaps!
 
-            BASE_CONSOLE_STREAMWARNING("Copy to texture array is actually not supported.");
+            ENGINE_CONSOLE_STREAMWARNING("Copy to texture array is actually not supported.");
         }
     }
 
@@ -568,7 +568,7 @@ namespace
             // TODO by tschwandt
             // Do this not only for cubemaps!
 
-            BASE_CONSOLE_STREAMWARNING("Copy to texture array is actually not supported.");
+            ENGINE_CONSOLE_STREAMWARNING("Copy to texture array is actually not supported.");
         }
     }
 
@@ -772,7 +772,7 @@ namespace
             }
             else
             {
-                BASE_CONSOLE_STREAMERROR("Failed loading image '" << PathToTexture.c_str() << "' from file.");
+                ENGINE_CONSOLE_STREAMERROR("Failed loading image '" << PathToTexture.c_str() << "' from file.");
 
                 ilDeleteImage(NativeImageName);
 
@@ -963,7 +963,7 @@ namespace
                 break;
                     
                 default:
-                    BASE_CONSOLE_STREAMWARNING("Undefined texture data behavior while creating an texture.");
+                    ENGINE_CONSOLE_STREAMWARNING("Undefined texture data behavior while creating an texture.");
                     break;
             }
 
@@ -1178,7 +1178,7 @@ namespace
                 break;
                     
                 default:
-                    BASE_CONSOLE_STREAMWARNING("Undefined texture data behavior while creating an texture.");
+                    ENGINE_CONSOLE_STREAMWARNING("Undefined texture data behavior while creating an texture.");
                     break;
             }
         }
@@ -1311,7 +1311,7 @@ namespace
             }
             else
             {
-                BASE_CONSOLE_STREAMERROR("Failed loading cubemap '" << PathToTexture.c_str() << "' from file.");
+                ENGINE_CONSOLE_STREAMERROR("Failed loading cubemap '" << PathToTexture.c_str() << "' from file.");
 
                 ilDeleteImage(NativeImageName);
 
@@ -1500,7 +1500,7 @@ namespace
                 break;
                     
                 default:
-                    BASE_CONSOLE_STREAMWARNING("Undefined texture data behavior while creating an texture.");
+                    ENGINE_CONSOLE_STREAMWARNING("Undefined texture data behavior while creating an texture.");
                     break;
             }
 

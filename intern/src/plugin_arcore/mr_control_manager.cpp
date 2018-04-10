@@ -499,8 +499,8 @@ namespace
         // -----------------------------------------------------------------------------
         // Update camera
         // -----------------------------------------------------------------------------
-        m_Camera.m_Near = Base::CProgramParameters::GetInstance().Get<float>("mr:ar:camera:near", 0.1f);
-        m_Camera.m_Far  = Base::CProgramParameters::GetInstance().Get<float>("mr:ar:camera:far", 100.0f);
+        m_Camera.m_Near = Core::CProgramParameters::GetInstance().Get<float>("mr:ar:camera:near", 0.1f);
+        m_Camera.m_Far  = Core::CProgramParameters::GetInstance().Get<float>("mr:ar:camera:far", 100.0f);
 
         ArCamera* pARCamera;
 
@@ -636,7 +636,7 @@ namespace
                     break;
                 case AR_INSTALL_STATUS_INSTALL_REQUESTED:
                 {
-                    BASE_CONSOLE_INFO("ArCore is not installed on this device.");
+                    ENGINE_CONSOLE_INFO("ArCore is not installed on this device.");
 
                     m_InstallRequested = true;
 
@@ -810,7 +810,7 @@ namespace
                     {
                         ArTrackable_release(pTrackable);
 
-                        BASE_CONSOLE_INFO("Undefined trackable type found.")
+                        ENGINE_CONSOLE_INFO("Undefined trackable type found.")
                     }
                 };
             }
@@ -926,7 +926,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Render planes
         // -----------------------------------------------------------------------------
-        bool RenderPlanes = Base::CProgramParameters::GetInstance().Get<bool>("mr:ar:debug:render_planes", true);
+        bool RenderPlanes = Core::CProgramParameters::GetInstance().Get<bool>("mr:ar:debug:render_planes", true);
 
         if (RenderPlanes == false) return;
 
@@ -1127,7 +1127,7 @@ namespace
 
             if (PlaneVertices.size() >= s_MaxNumberOfVerticesPerPlane || PlaneIndices.size() >= s_MaxNumberOfVerticesPerPlane)
             {
-                BASE_CONSOLE_WARNING("Plane could not be rendered because of too many vertices.");
+                ENGINE_CONSOLE_WARNING("Plane could not be rendered because of too many vertices.");
                 continue;
             }
 
@@ -1165,7 +1165,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Render planes
         // -----------------------------------------------------------------------------
-        bool RenderPoints = Base::CProgramParameters::GetInstance().Get<bool>("mr:ar:debug:render_points", true);
+        bool RenderPoints = Core::CProgramParameters::GetInstance().Get<bool>("mr:ar:debug:render_points", true);
 
         if (RenderPoints == false) return;
 

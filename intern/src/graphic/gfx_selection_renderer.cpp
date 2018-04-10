@@ -658,9 +658,9 @@ namespace
     {
         SSelectionSettings Settings;
 
-        Settings.m_HighlightColor = Base::CProgramParameters::GetInstance().Get("graphics:selection:highlight:color", glm::vec4(0.31f, 0.45f, 0.64f, 0.4f));
-        Settings.m_HighlightUseDepth = Base::CProgramParameters::GetInstance().Get("graphics:selection:highlight:use_depth", true);
-        Settings.m_HighlightUseWireframe = Base::CProgramParameters::GetInstance().Get("graphics:selection:highlight:use_wireframe", true);
+        Settings.m_HighlightColor = Core::CProgramParameters::GetInstance().Get("graphics:selection:highlight:color", glm::vec4(0.31f, 0.45f, 0.64f, 0.4f));
+        Settings.m_HighlightUseDepth = Core::CProgramParameters::GetInstance().Get("graphics:selection:highlight:use_depth", true);
+        Settings.m_HighlightUseWireframe = Core::CProgramParameters::GetInstance().Get("graphics:selection:highlight:use_wireframe", true);
 
         SetSettings(Settings);
     }

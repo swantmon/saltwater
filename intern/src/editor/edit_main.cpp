@@ -42,23 +42,23 @@ int main(int _Argc, char* _pArgv[])
             std::string Option = Argument.substr(0, PositionOfSpace);
             std::string Value  = Argument.substr(PositionOfSpace + 1, Argument.length());
 
-            Base::CProgramParameters::GetInstance().Add(Option, Value);
+            Core::CProgramParameters::GetInstance().Add(Option, Value);
             break;
         }
     }
 
     if (VerbosityLevel == 0)
     {
-        Base::CProgramParameters::GetInstance().ParseFile(ParameterFile);
-        VerbosityLevel = Base::CProgramParameters::GetInstance().Get(VerbosityNameString, 3);
+        Core::CProgramParameters::GetInstance().ParseFile(ParameterFile);
+        VerbosityLevel = Core::CProgramParameters::GetInstance().Get(VerbosityNameString, 3);
     }
     else
     {
-        VerbosityLevel = Base::CProgramParameters::GetInstance().Get(VerbosityNameString, VerbosityLevel);
-        Base::CProgramParameters::GetInstance().ParseFile(ParameterFile);
+        VerbosityLevel = Core::CProgramParameters::GetInstance().Get(VerbosityNameString, VerbosityLevel);
+        Core::CProgramParameters::GetInstance().ParseFile(ParameterFile);
     }
 
-    Base::CConsole::GetInstance().SetVerbosityLevel(VerbosityLevel);
+    Core::CConsole::GetInstance().SetVerbosityLevel(VerbosityLevel);
 
 
     HINSTANCE Instance = LoadLibraryExW(L"graphicd.dll", NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
@@ -71,14 +71,14 @@ int main(int _Argc, char* _pArgv[])
     }
     catch (const Base::CException& _rException)
     {
-        BASE_CONSOLE_ERROR("An Exception stops application");
-        BASE_CONSOLE_INFOV(" > Reason:   %s"   , _rException.GetText());
-        BASE_CONSOLE_INFOV(" > Code:     %i"   , _rException.GetCode());
-        BASE_CONSOLE_INFOV(" > Location: %s:%i", _rException.GetFile(), _rException.GetLine());
+        ENGINE_CONSOLE_ERROR("An Exception stops application");
+        ENGINE_CONSOLE_INFOV(" > Reason:   %s"   , _rException.GetText());
+        ENGINE_CONSOLE_INFOV(" > Code:     %i"   , _rException.GetCode());
+        ENGINE_CONSOLE_INFOV(" > Location: %s:%i", _rException.GetFile(), _rException.GetLine());
     }
     catch (...)
     {
-        BASE_CONSOLE_ERROR("An undefined exception stops application");
+        ENGINE_CONSOLE_ERROR("An undefined exception stops application");
     }
 
     try
@@ -87,17 +87,17 @@ int main(int _Argc, char* _pArgv[])
     }
     catch (const Base::CException& _rException)
     {
-        BASE_CONSOLE_ERROR("An Exception stops application");
-        BASE_CONSOLE_INFOV(" > Reason:   %s", _rException.GetText());
-        BASE_CONSOLE_INFOV(" > Code:     %i", _rException.GetCode());
-        BASE_CONSOLE_INFOV(" > Location: %s:%i", _rException.GetFile(), _rException.GetLine());
+        ENGINE_CONSOLE_ERROR("An Exception stops application");
+        ENGINE_CONSOLE_INFOV(" > Reason:   %s", _rException.GetText());
+        ENGINE_CONSOLE_INFOV(" > Code:     %i", _rException.GetCode());
+        ENGINE_CONSOLE_INFOV(" > Location: %s:%i", _rException.GetFile(), _rException.GetLine());
     }
     catch (...)
     {
-        BASE_CONSOLE_ERROR("An undefined exception stops application");
+        ENGINE_CONSOLE_ERROR("An undefined exception stops application");
     }
 
-    Base::CProgramParameters::GetInstance().WriteFile(ParameterFile);
+    Core::CProgramParameters::GetInstance().WriteFile(ParameterFile);
 
     return 0;
 }

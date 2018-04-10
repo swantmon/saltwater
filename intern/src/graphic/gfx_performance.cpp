@@ -112,7 +112,7 @@ namespace
 
     void CGfxPerformance::OnStart()
     {
-        m_QueryPerformanceMarkers = Base::CProgramParameters::GetInstance().Get("graphics:performance:enable_statistics", true);
+        m_QueryPerformanceMarkers = Core::CProgramParameters::GetInstance().Get("graphics:performance:enable_statistics", true);
 
 #ifdef PLATFORM_ANDROID
         if (Gfx::Main::IsExtensionAvailable("GL_EXT_disjoint_timer_query"))
@@ -124,7 +124,7 @@ namespace
         {
             m_QueryPerformanceMarkers = false;
 
-            BASE_CONSOLE_WARNING("GL_EXT_disjoint_timer_query is not available. So, time measurements can not be computed!");
+            ENGINE_CONSOLE_WARNING("GL_EXT_disjoint_timer_query is not available. So, time measurements can not be computed!");
         }
 #endif
     }
@@ -152,7 +152,7 @@ namespace
             typedef std::pair<std::string, SPerformanceMarker> SMarkerPair;
 
             std::vector<SMarkerPair> ActiveDurationMarkers;
-            set<string> DurationQueries = Base::CProgramParameters::GetInstance().Get<set<string>>("graphics:performance:markers", {});
+            set<string> DurationQueries = Core::CProgramParameters::GetInstance().Get<set<string>>("graphics:performance:markers", {});
 
             for (auto& rItemPair : m_PerformanceMarkerTimings)
             {
@@ -191,7 +191,7 @@ namespace
                     << rItem.second.m_NumberOfMarkers << " Times called\n"
                     << rItem.second.m_AccumulatedTime / rItem.second.m_NumberOfMarkers << " ms average time\n";
 
-                BASE_CONSOLE_STREAMINFO(Stream.str());
+                ENGINE_CONSOLE_STREAMINFO(Stream.str());
             }
         }
     }

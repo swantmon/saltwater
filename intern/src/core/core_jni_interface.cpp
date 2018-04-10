@@ -197,14 +197,14 @@ namespace
 
             if (AttachResult == JNI_ERR)
             {
-                BASE_CONSOLE_ERROR("Failed to attach thread to get the JNI environment!");
+                ENGINE_CONSOLE_ERROR("Failed to attach thread to get the JNI environment!");
 
                 return nullptr;
             }
         }
         else if (GetResult != JNI_OK)
         {
-            BASE_CONSOLE_ERRORV("Failed to get the JNI environment! Result = %d", GetResult);
+            ENGINE_CONSOLE_ERRORV("Failed to get the JNI environment! Result = %d", GetResult);
 
             return nullptr;
         }

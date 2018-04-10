@@ -150,7 +150,7 @@ namespace
         // -----------------------------------------------------------------------------
         try
         {
-            BASE_CONSOLE_STREAMINFO("Data> Create new map with regions: x=" << _NumberOfRegionsX << ", y=" << _NumberOfRegionsY);
+            ENGINE_CONSOLE_STREAMINFO("Data> Create new map with regions: x=" << _NumberOfRegionsX << ", y=" << _NumberOfRegionsY);
 
             m_NumberOfRegions  = _NumberOfRegionsX * _NumberOfRegionsY;
             m_NumberOfRegionsX = _NumberOfRegionsX;
@@ -206,7 +206,7 @@ namespace
 
     void CDtLvlMap::FreeMap()
     {
-        BASE_CONSOLE_STREAMINFO("Data> Free current map.");
+        ENGINE_CONSOLE_STREAMINFO("Data> Free current map.");
 
         Base::Size IndexOfRegion;
 

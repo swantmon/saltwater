@@ -37,7 +37,7 @@ namespace Edit
     
     CState::EStateType CStartState::InternOnEnter()
     {
-        BASE_CONSOLE_STREAMINFO("Edit> Enter start state.");
+        ENGINE_CONSOLE_STREAMINFO("Edit> Enter start state.");
 
         // -----------------------------------------------------------------------------
         // Prepare controls

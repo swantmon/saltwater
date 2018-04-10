@@ -844,7 +844,7 @@ namespace
 
             if (rElement.GetInputSlot() != 0)
             {
-                BASE_CONSOLE_WARNING("Multiple vertex buffer objects are currently not supported. Undefined behavior expected.");
+                ENGINE_CONSOLE_WARNING("Multiple vertex buffer objects are currently not supported. Undefined behavior expected.");
             }
 
             glEnableVertexAttribArray(IndexOfElement);
@@ -1637,7 +1637,7 @@ namespace
 
             GLchar* pInfoLog = new char[LogLength];
             glGetProgramPipelineInfoLog(m_NativeShaderPipeline, LogLength, &LogLength, pInfoLog);
-            BASE_CONSOLE_ERROR(pInfoLog);
+            ENGINE_CONSOLE_ERROR(pInfoLog);
             delete[] pInfoLog;
         }
 #endif

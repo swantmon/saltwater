@@ -357,7 +357,7 @@ namespace
             }
             else
             {
-                BASE_CONSOLE_STREAMWARNING("Tried to bind a texture to frame buffer (target set) without subsided binding.");
+                ENGINE_CONSOLE_STREAMWARNING("Tried to bind a texture to frame buffer (target set) without subsided binding.");
             }
         }
             
@@ -652,7 +652,7 @@ namespace
             }
             else
             {
-                BASE_CONSOLE_STREAMWARNING("Tried to bind a texture to frame buffer (target set) without subsided binding.");
+                ENGINE_CONSOLE_STREAMWARNING("Tried to bind a texture to frame buffer (target set) without subsided binding.");
             }
         }
 

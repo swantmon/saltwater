@@ -484,19 +484,19 @@ namespace
 
     void CGfxHistogramRenderer::ResetSettings()
     {
-        BASE_CONSOLE_STREAMINFO("Gfx> Loading default settings for histogram");
+        ENGINE_CONSOLE_STREAMINFO("Gfx> Loading default settings for histogram");
         
         SHistogramSettings Settings;
 
-        glm::vec2 Bounds = Base::CProgramParameters::GetInstance().Get("graphics:histogram:bounds", glm::vec2(0.80f, 0.983f));
+        glm::vec2 Bounds = Core::CProgramParameters::GetInstance().Get("graphics:histogram:bounds", glm::vec2(0.80f, 0.983f));
         Settings.m_HistogramLowerBound  = Bounds.x;
         Settings.m_HistogramUpperBound  = Bounds.y;
 
-        glm::vec2 LogRange = Base::CProgramParameters::GetInstance().Get("graphics:histogram:log_range", glm::vec2(-8.00f, 12.00f));
+        glm::vec2 LogRange = Core::CProgramParameters::GetInstance().Get("graphics:histogram:log_range", glm::vec2(-8.00f, 12.00f));
         Settings.m_HistogramLogMin      = LogRange.x;
         Settings.m_HistogramLogMax      = LogRange.y;
 
-        glm::vec2 EyeAdaptionSpeed = Base::CProgramParameters::GetInstance().Get("graphics:histogram:eye_adaption_speeds", glm::vec2(0.25f, 0.25f));
+        glm::vec2 EyeAdaptionSpeed = Core::CProgramParameters::GetInstance().Get("graphics:histogram:eye_adaption_speeds", glm::vec2(0.25f, 0.25f));
         Settings.m_EyeAdaptionSpeedUp   = EyeAdaptionSpeed.x;
         Settings.m_EyeAdaptionSpeedDown = EyeAdaptionSpeed.y;
         Settings.m_ResetEyeAdaption     = true;

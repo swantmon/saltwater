@@ -1181,7 +1181,7 @@ namespace
                 pMeshComponent->SetFacet(Dt::CMeshComponent::Graphic, CreateRectangle(0.0f, 0.0f, 1.0f, 1.0f));
                 break;
             default:
-                BASE_CONSOLE_ERROR("The selected predefined mesh is currently not supported!");
+                ENGINE_CONSOLE_ERROR("The selected predefined mesh is currently not supported!");
             }
         }
     }
@@ -1423,7 +1423,7 @@ namespace
         }
         else
         {
-            BASE_CONSOLE_ERROR("The given mesh index to load mesh is higher as the number of available meshes in file.")
+            ENGINE_CONSOLE_ERROR("The given mesh index to load mesh is higher as the number of available meshes in file.")
         }
     }
 } // namespace
