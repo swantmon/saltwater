@@ -6,12 +6,6 @@
 
 #include "camera/cam_control_manager.h"
 
-#include "graphic/gfx_play_state.h"
-
-#include "gui/gui_play_state.h"
-
-#include "logic/lg_play_state.h"
-
 namespace App
 {
     CPlayState& CPlayState::GetInstance()

@@ -66,15 +66,15 @@ namespace
             unsigned int m_WindowID;
             bool m_TerminateRequested;
             int m_Animating;
+            std::vector<Core::IPlugin*> m_AvailablePlugins;
         };
         
     private:
         
-        App::CState::EStateType     m_CurrentState;
-        App::CState::EStateType     m_RequestState;
-        SApplicationSetup           m_AppSetup;
-        std::string                 m_ParameterFile;
-        std::vector<Core::IPlugin*> m_AvailablePlugins;
+        App::CState::EStateType m_CurrentState;
+        App::CState::EStateType m_RequestState;
+        SApplicationSetup       m_AppSetup;
+        std::string             m_ParameterFile;
         
     private:
         
@@ -158,28 +158,6 @@ namespace
         Core::AssetManager::SetFilePath(_pAndroidApp->activity->externalDataPath);
 
         // -----------------------------------------------------------------------------
-        // Start engine
-        // -----------------------------------------------------------------------------
-        Engine::Startup();
-
-        // -----------------------------------------------------------------------------
-        // Plugins
-        // -----------------------------------------------------------------------------
-        auto SelectedPlugins = Base::CProgramParameters::GetInstance().Get("plugins:selection", std::vector<std::string>());
-
-        for (auto SelectedPlugin : SelectedPlugins)
-        {
-            auto Plugin = Core::PluginManager::LoadPlugin(SelectedPlugin);
-
-            if (Plugin == nullptr)
-            {
-                m_AvailablePlugins.push_back(&Plugin->GetInstance());
-
-                Plugin->GetInstance().OnStart();
-            }
-        }
-
-        // -----------------------------------------------------------------------------
         // From now on we can start the state engine and enter the first state
         // -----------------------------------------------------------------------------        
         s_pStates[m_CurrentState]->OnEnter();
@@ -207,7 +185,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Plugins
         // -----------------------------------------------------------------------------
-        for (auto Plugin : m_AvailablePlugins) Plugin->OnExit();
+        for (auto Plugin : m_AppSetup.m_AvailablePlugins) Plugin->OnExit();
 
         // -----------------------------------------------------------------------------
         // Start engine
@@ -272,15 +250,18 @@ namespace
                 // -----------------------------------------------------------------------------
                 s_pStates[m_CurrentState]->OnRun();
 
-                // -----------------------------------------------------------------------------
-                // Plugins
-                // -----------------------------------------------------------------------------
-                for (auto Plugin : m_AvailablePlugins) Plugin->Update();
+                if (m_CurrentState != App::CState::Init)
+                {
+                    // -----------------------------------------------------------------------------
+                    // Plugins
+                    // -----------------------------------------------------------------------------
+                    for (auto Plugin : m_AppSetup.m_AvailablePlugins) Plugin->Update();
 
-                // -----------------------------------------------------------------------------
-                // Update engine
-                // -----------------------------------------------------------------------------
-                Engine::Update();
+                    // -----------------------------------------------------------------------------
+                    // Update engine
+                    // -----------------------------------------------------------------------------
+                    Engine::Update();
+                }
 
                 // -----------------------------------------------------------------------------
                 // Check state
@@ -392,12 +373,40 @@ namespace
                 // -----------------------------------------------------------------------------
                 if (AppSetup->m_pAndroidApp->window != NULL)
                 {
+                    // -----------------------------------------------------------------------------
+                    // Register window
+                    // -----------------------------------------------------------------------------
                     unsigned int WindowID = Gfx::Pipeline::RegisterWindow(AppSetup->m_pAndroidApp->window);
 
                     Gfx::Pipeline::ActivateWindow(WindowID);
 
                     AppSetup->m_WindowID = WindowID;
 
+                    // -----------------------------------------------------------------------------
+                    // Start engine
+                    // -----------------------------------------------------------------------------
+                    Engine::Startup();
+
+                    // -----------------------------------------------------------------------------
+                    // Plugins
+                    // -----------------------------------------------------------------------------
+                    auto SelectedPlugins = Base::CProgramParameters::GetInstance().Get("plugins:selection", std::vector<std::string>());
+
+                    for (auto SelectedPlugin : SelectedPlugins)
+                    {
+                        auto Plugin = Core::PluginManager::LoadPlugin(SelectedPlugin);
+
+                        if (Plugin == nullptr)
+                        {
+                            AppSetup->m_AvailablePlugins.push_back(&Plugin->GetInstance());
+
+                            Plugin->GetInstance().OnStart();
+                        }
+                    }
+
+                    // -----------------------------------------------------------------------------
+                    // Change state
+                    // -----------------------------------------------------------------------------
                     App::Application::ChangeState(App::CState::Start);
                 }
                 break;

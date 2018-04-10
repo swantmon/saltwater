@@ -50,6 +50,7 @@ namespace Scpt
 
         void Update() override
         {
+            /*
             const MR::CCamera& rCamera = MR::ControlManager::GetCamera();
 
             if (rCamera.GetTackingState() != MR::CCamera::Tracking) return;
@@ -87,6 +88,7 @@ namespace Scpt
 
                 Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*m_pCameraComponent, Dt::CCameraComponent::DirtyInfo);
             }
+            */
         }
 
         // -----------------------------------------------------------------------------

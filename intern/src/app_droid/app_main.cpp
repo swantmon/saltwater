@@ -1,8 +1,9 @@
 
 #include "app_droid/app_application.h"
 
-#include "base/base_console.h"
 #include "base/base_exception.h"
+
+#include "core/core_console.h"
 
 #include <android_native_app_glue.h>
 

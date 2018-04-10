@@ -4,12 +4,6 @@
 #include "app_droid/app_application.h"
 #include "app_droid/app_main_menu_state.h"
 
-#include "graphic/gfx_main_menu_state.h"
-
-#include "gui/gui_main_menu_state.h"
-
-#include "logic/lg_main_menu_state.h"
-
 namespace App
 {
     CMainMenuState& CMainMenuState::GetInstance()

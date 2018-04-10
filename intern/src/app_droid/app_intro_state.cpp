@@ -4,12 +4,6 @@
 #include "app_droid/app_application.h"
 #include "app_droid/app_intro_state.h"
 
-#include "graphic/gfx_intro_state.h"
-
-#include "gui/gui_intro_state.h"
-
-#include "logic/lg_intro_state.h"
-
 namespace App
 {
     CIntroState& CIntroState::GetInstance()

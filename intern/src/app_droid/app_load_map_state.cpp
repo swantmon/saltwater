@@ -30,7 +30,6 @@
 #include "script/script_ar_camera_control_script.h"
 #include "script/script_ar_controller_script.h"
 #include "script/script_ar_place_object_on_touch_script.h"
-#include "script/script_camera_control_script.h"
 #include "script/script_script_manager.h"
 
 #include <assert.h>

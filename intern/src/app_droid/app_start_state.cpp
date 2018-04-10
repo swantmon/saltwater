@@ -6,14 +6,6 @@
 
 #include "camera/cam_control_manager.h"
 
-#include "core/core_jni_interface.h"
-
-#include "graphic/gfx_start_state.h"
-
-#include "gui/gui_start_state.h"
-
-#include "logic/lg_start_state.h"
-
 namespace App
 {
     CStartState& CStartState::GetInstance()

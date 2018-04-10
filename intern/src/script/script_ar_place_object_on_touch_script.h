@@ -45,6 +45,7 @@ namespace Scpt
 
         void Update() override
         {
+            /*
             if (m_pEntity == nullptr || m_pMarker == nullptr) return;
 
             if (m_pMarker->GetTackingState() != MR::CCamera::Tracking) return;
@@ -58,6 +59,7 @@ namespace Scpt
             pTransformation->SetRotation(glm::eulerAngles(glm::toQuat(glm::mat3(ModelMatrix))));
 
             Dt::EntityManager::MarkEntityAsDirty(*m_pEntity, Dt::CEntity::DirtyMove);
+             */
         }
 
         // -----------------------------------------------------------------------------
@@ -69,16 +71,16 @@ namespace Scpt
                 float x = _rEvent.GetCursorPosition()[0];
                 float y = _rEvent.GetCursorPosition()[1];
 
-                const MR::CMarker* pNewMarker = MR::ControlManager::AcquireNewMarker(x, y);
+                //const MR::CMarker* pNewMarker = MR::ControlManager::AcquireNewMarker(x, y);
 
-                if (pNewMarker != nullptr && m_pMarker != nullptr)
+                //if (pNewMarker != nullptr && m_pMarker != nullptr)
                 {
-                    MR::ControlManager::ReleaseMarker(m_pMarker);
+                    //MR::ControlManager::ReleaseMarker(m_pMarker);
                 }
 
-                if (pNewMarker != nullptr)
+                //if (pNewMarker != nullptr)
                 {
-                    m_pMarker = pNewMarker;
+                    //m_pMarker = pNewMarker;
                 }
             }
         }
