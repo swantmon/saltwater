@@ -26,9 +26,6 @@
 
 #include "editor/edit_load_map_state.h"
 
-#include "script/script_ar_camera_control_script.h"
-#include "script/script_ar_controller_script.h"
-#include "script/script_ar_place_object_on_touch_script.h"
 #include "script/script_camera_control_script.h"
 #include "script/script_script_manager.h"
 
@@ -189,14 +186,6 @@ namespace Edit
             rEntity.AttachComponent(ScriptComponent);
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*ScriptComponent, Dt::CScriptComponent::DirtyCreate);
-
-            // -----------------------------------------------------------------------------
-
-            auto ScriptComponent2 = Dt::CComponentManager::GetInstance().Allocate<Scpt::CARControllerScript>();
-
-            rEntity.AttachComponent(ScriptComponent2);
-
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*ScriptComponent2, Dt::CScriptComponent::DirtyCreate);
 
             // -----------------------------------------------------------------------------
 
