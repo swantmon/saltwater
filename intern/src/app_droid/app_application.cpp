@@ -16,17 +16,17 @@
 #include "base/base_singleton.h"
 #include "base/base_include_glm.h"
 
-#include "core/core_asset_manager.h"
-#include "core/core_jni_interface.h"
-#include "core/core_time.h"
-#include "core/core_plugin_manager.h"
-#include "core/core_program_parameters.h"
+#include "engine/core/core_asset_manager.h"
+#include "engine/core/core_jni_interface.h"
+#include "engine/core/core_time.h"
+#include "engine/core/core_plugin_manager.h"
+#include "engine/core/core_program_parameters.h"
 
 #include "engine/engine.h"
 
-#include "graphic/gfx_pipeline.h"
+#include "engine/graphic/gfx_pipeline.h"
 
-#include "gui/gui_event_handler.h"
+#include "engine/gui/gui_event_handler.h"
 
 namespace
 {

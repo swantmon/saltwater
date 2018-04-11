@@ -1,15 +1,13 @@
 
 #include "editor/edit_precompiled.h"
 
-#include "camera/cam_control_manager.h"
-
-#include "core/core_console.h"
-
 #include "editor/edit_play_state.h"
 #include "editor/edit_unload_map_state.h"
 
 #include "editor_port/edit_message.h"
 #include "editor_port/edit_message_manager.h"
+
+#include "engine/camera/cam_control_manager.h"
 
 namespace Edit
 {
@@ -49,8 +47,6 @@ namespace Edit
         // -----------------------------------------------------------------------------
         Cam::ControlManager::SetActiveControl(Cam::CControl::GameControl);
 
-        // Cam::ControlManager::GetActiveControl().SetPosition(glm::vec3(0.0f, 0.0f, 10.0f));
-        
         return Edit::CState::Play;
     }
     

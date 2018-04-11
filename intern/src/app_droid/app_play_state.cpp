@@ -4,7 +4,7 @@
 #include "app_droid/app_application.h"
 #include "app_droid/app_play_state.h"
 
-#include "camera/cam_control_manager.h"
+#include "engine/camera/cam_control_manager.h"
 
 namespace App
 {

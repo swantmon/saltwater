@@ -3,31 +3,29 @@
 
 #include "base/base_serialize_text_reader.h"
 
-#include "core/core_console.h"
-
-#include "data/data_camera_component.h"
-#include "data/data_component.h"
-#include "data/data_component_facet.h"
-#include "data/data_component_manager.h"
-#include "data/data_entity.h"
-#include "data/data_entity_manager.h"
-#include "data/data_hierarchy_facet.h"
-#include "data/data_light_probe_component.h"
-#include "data/data_map.h"
-#include "data/data_material.h"
-#include "data/data_material_component.h"
-#include "data/data_material_manager.h"
-#include "data/data_mesh_component.h"
-#include "data/data_script_component.h"
-#include "data/data_sky_component.h"
-#include "data/data_ssao_component.h"
-#include "data/data_sun_component.h"
-#include "data/data_transformation_facet.h"
-
 #include "editor/edit_load_map_state.h"
 
-#include "script/script_camera_control_script.h"
-#include "script/script_script_manager.h"
+#include "engine/data/data_camera_component.h"
+#include "engine/data/data_component.h"
+#include "engine/data/data_component_facet.h"
+#include "engine/data/data_component_manager.h"
+#include "engine/data/data_entity.h"
+#include "engine/data/data_entity_manager.h"
+#include "engine/data/data_hierarchy_facet.h"
+#include "engine/data/data_light_probe_component.h"
+#include "engine/data/data_map.h"
+#include "engine/data/data_material.h"
+#include "engine/data/data_material_component.h"
+#include "engine/data/data_material_manager.h"
+#include "engine/data/data_mesh_component.h"
+#include "engine/data/data_script_component.h"
+#include "engine/data/data_sky_component.h"
+#include "engine/data/data_ssao_component.h"
+#include "engine/data/data_sun_component.h"
+#include "engine/data/data_transformation_facet.h"
+
+#include "engine/script/script_camera_control_script.h"
+#include "engine/script/script_script_manager.h"
 
 #include <assert.h>
 #include <fstream>
@@ -68,8 +66,6 @@ namespace Edit
     
     void CLoadMapState::SetMapfile(const char* _pFilename)
     {
-        ENGINE_CONSOLE_STREAMINFO("Edit> Setting load level to " << _pFilename);
-
         m_pMapfile = _pFilename;
     }
     

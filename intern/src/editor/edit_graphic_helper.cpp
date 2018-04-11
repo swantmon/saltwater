@@ -4,11 +4,11 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
-#include "core/core_console.h"
+#include "engine/core/core_console.h"
 
-#include "graphic/gfx_histogram_renderer.h"
-#include "graphic/gfx_shader_manager.h"
-#include "graphic/gfx_tonemapping_renderer.h"
+#include "engine/graphic/gfx_histogram_renderer.h"
+#include "engine/graphic/gfx_shader_manager.h"
+#include "engine/graphic/gfx_tonemapping_renderer.h"
 
 #include "editor/edit_graphic_helper.h"
 

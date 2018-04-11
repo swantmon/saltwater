@@ -1,22 +1,22 @@
 
 #include "editor/edit_precompiled.h"
 
-#include "camera/cam_control_manager.h"
-
-#include "data/data_entity.h"
-#include "data/data_entity_manager.h"
-
 #include "editor/edit_edit_state.h"
 #include "editor/edit_unload_map_state.h"
 
 #include "editor_port/edit_message.h"
 #include "editor_port/edit_message_manager.h"
 
-#include "graphic/gfx_selection_renderer.h"
+#include "engine/camera/cam_control_manager.h"
 
-#include "gui/gui_input_manager.h"
+#include "engine/data/data_entity.h"
+#include "engine/data/data_entity_manager.h"
 
-#include "script/script_script_manager.h"
+#include "engine/graphic/gfx_selection_renderer.h"
+
+#include "engine/gui/gui_input_manager.h"
+
+#include "engine/script/script_script_manager.h"
 
 namespace Edit
 {

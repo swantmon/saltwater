@@ -171,699 +171,699 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\src\core\core_asset_importer.cpp">
+    <ClCompile Include="..\..\..\src\engine\core\core_asset_importer.cpp">
       <Filter>core\assets</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\core\core_asset_manager.cpp">
+    <ClCompile Include="..\..\..\src\engine\core\core_asset_manager.cpp">
       <Filter>core\assets</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\core\core_plugin_manager.cpp">
+    <ClCompile Include="..\..\..\src\engine\core\core_plugin_manager.cpp">
       <Filter>core\plugins</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\core\core_time.cpp">
+    <ClCompile Include="..\..\..\src\engine\core\core_time.cpp">
       <Filter>core\time</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_map.cpp">
+    <ClCompile Include="..\..\..\src\engine\data\data_map.cpp">
       <Filter>data\map</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_entity.cpp">
+    <ClCompile Include="..\..\..\src\engine\data\data_entity.cpp">
       <Filter>data\map\entity</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_entity_manager.cpp">
+    <ClCompile Include="..\..\..\src\engine\data\data_entity_manager.cpp">
       <Filter>data\map\entity</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_transformation_facet.cpp">
+    <ClCompile Include="..\..\..\src\engine\data\data_transformation_facet.cpp">
       <Filter>data\map\entity\facets\transformation</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_hierarchy_facet.cpp">
+    <ClCompile Include="..\..\..\src\engine\data\data_hierarchy_facet.cpp">
       <Filter>data\map\entity\facets\hierarchy</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_component_facet.cpp">
+    <ClCompile Include="..\..\..\src\engine\data\data_component_facet.cpp">
       <Filter>data\map\entity\facets\components</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_component_manager.cpp">
+    <ClCompile Include="..\..\..\src\engine\data\data_component_manager.cpp">
       <Filter>data\map\entity\components</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_area_light_component.cpp">
+    <ClCompile Include="..\..\..\src\engine\data\data_area_light_component.cpp">
       <Filter>data\map\entity\components\lights</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_light_probe_component.cpp">
+    <ClCompile Include="..\..\..\src\engine\data\data_light_probe_component.cpp">
       <Filter>data\map\entity\components\lights</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_point_light_component.cpp">
+    <ClCompile Include="..\..\..\src\engine\data\data_point_light_component.cpp">
       <Filter>data\map\entity\components\lights</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_sky_component.cpp">
+    <ClCompile Include="..\..\..\src\engine\data\data_sky_component.cpp">
       <Filter>data\map\entity\components\lights</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_sun_component.cpp">
+    <ClCompile Include="..\..\..\src\engine\data\data_sun_component.cpp">
       <Filter>data\map\entity\components\lights</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_ar_controller_component.cpp">
+    <ClCompile Include="..\..\..\src\engine\data\data_ar_controller_component.cpp">
       <Filter>data\map\entity\components\plugins</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_ar_tracked_object_component.cpp">
+    <ClCompile Include="..\..\..\src\engine\data\data_ar_tracked_object_component.cpp">
       <Filter>data\map\entity\components\plugins</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_bloom_component.cpp">
+    <ClCompile Include="..\..\..\src\engine\data\data_bloom_component.cpp">
       <Filter>data\map\entity\components\fx</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_dof_component.cpp">
+    <ClCompile Include="..\..\..\src\engine\data\data_dof_component.cpp">
       <Filter>data\map\entity\components\fx</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_post_aa_component.cpp">
+    <ClCompile Include="..\..\..\src\engine\data\data_post_aa_component.cpp">
       <Filter>data\map\entity\components\fx</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_ssao_component.cpp">
+    <ClCompile Include="..\..\..\src\engine\data\data_ssao_component.cpp">
       <Filter>data\map\entity\components\fx</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_ssr_component.cpp">
+    <ClCompile Include="..\..\..\src\engine\data\data_ssr_component.cpp">
       <Filter>data\map\entity\components\fx</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_volume_fog_component.cpp">
+    <ClCompile Include="..\..\..\src\engine\data\data_volume_fog_component.cpp">
       <Filter>data\map\entity\components\fx</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_material_component.cpp">
+    <ClCompile Include="..\..\..\src\engine\data\data_material_component.cpp">
       <Filter>data\map\entity\components\model</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_mesh_component.cpp">
+    <ClCompile Include="..\..\..\src\engine\data\data_mesh_component.cpp">
       <Filter>data\map\entity\components\model</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_camera_component.cpp">
+    <ClCompile Include="..\..\..\src\engine\data\data_camera_component.cpp">
       <Filter>data\map\entity\components\camera</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_material.cpp">
+    <ClCompile Include="..\..\..\src\engine\data\data_material.cpp">
       <Filter>data\materials</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\data\data_material_manager.cpp">
+    <ClCompile Include="..\..\..\src\engine\data\data_material_manager.cpp">
       <Filter>data\materials</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_ar_renderer.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_ar_renderer.cpp">
       <Filter>graphic\engine\renderer</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_light_indirect_renderer.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_light_indirect_renderer.cpp">
       <Filter>graphic\engine\renderer</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_light_area_renderer.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_light_area_renderer.cpp">
       <Filter>graphic\engine\renderer</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_light_sun_renderer.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_light_sun_renderer.cpp">
       <Filter>graphic\engine\renderer</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_fog_renderer.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_fog_renderer.cpp">
       <Filter>graphic\engine\renderer</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_histogram_renderer.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_histogram_renderer.cpp">
       <Filter>graphic\engine\renderer</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_postfx_hdr_renderer.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_postfx_hdr_renderer.cpp">
       <Filter>graphic\engine\renderer</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_selection_renderer.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_selection_renderer.cpp">
       <Filter>graphic\engine\renderer</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_background_renderer.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_background_renderer.cpp">
       <Filter>graphic\engine\renderer</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_reflection_renderer.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_reflection_renderer.cpp">
       <Filter>graphic\engine\renderer</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_debug_renderer.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_debug_renderer.cpp">
       <Filter>graphic\engine\renderer</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_mesh_renderer.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_mesh_renderer.cpp">
       <Filter>graphic\engine\renderer</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_particle_renderer.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_particle_renderer.cpp">
       <Filter>graphic\engine\renderer</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_postfx_renderer.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_postfx_renderer.cpp">
       <Filter>graphic\engine\renderer</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_light_point_renderer.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_light_point_renderer.cpp">
       <Filter>graphic\engine\renderer</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_tonemapping_renderer.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_tonemapping_renderer.cpp">
       <Filter>graphic\engine\renderer</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_shadow_renderer.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_shadow_renderer.cpp">
       <Filter>graphic\engine\renderer</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_buffer.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_buffer.cpp">
       <Filter>graphic\engine\buffers</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_buffer_set.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_buffer_set.cpp">
       <Filter>graphic\engine\buffers</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_render_context.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_render_context.cpp">
       <Filter>graphic\engine\context</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_input_layout.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_input_layout.cpp">
       <Filter>graphic\engine\layout</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_shader.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_shader.cpp">
       <Filter>graphic\engine\shaders</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_blend_state.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_blend_state.cpp">
       <Filter>graphic\engine\states</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_depth_stencil_state.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_depth_stencil_state.cpp">
       <Filter>graphic\engine\states</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_rasterizer_state.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_rasterizer_state.cpp">
       <Filter>graphic\engine\states</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_render_state.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_render_state.cpp">
       <Filter>graphic\engine\states</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_target_set.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_target_set.cpp">
       <Filter>graphic\engine\target sets</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_texture.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_texture.cpp">
       <Filter>graphic\engine\textures</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_texture_set.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_texture_set.cpp">
       <Filter>graphic\engine\textures</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_view_port.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_view_port.cpp">
       <Filter>graphic\engine\view ports</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_view_port_set.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_view_port_set.cpp">
       <Filter>graphic\engine\view ports</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_sampler.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_sampler.cpp">
       <Filter>graphic\engine\samplers</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_sampler_set.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_sampler_set.cpp">
       <Filter>graphic\engine\samplers</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_area_light.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_area_light.cpp">
       <Filter>graphic\map\lights</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_area_light_manager.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_area_light_manager.cpp">
       <Filter>graphic\map\lights</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_light_probe.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_light_probe.cpp">
       <Filter>graphic\map\lights</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_light_probe_manager.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_light_probe_manager.cpp">
       <Filter>graphic\map\lights</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_point_light.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_point_light.cpp">
       <Filter>graphic\map\lights</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_point_light_manager.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_point_light_manager.cpp">
       <Filter>graphic\map\lights</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_sky.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_sky.cpp">
       <Filter>graphic\map\lights</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_sky_manager.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_sky_manager.cpp">
       <Filter>graphic\map\lights</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_sun.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_sun.cpp">
       <Filter>graphic\map\lights</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_sun_manager.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_sun_manager.cpp">
       <Filter>graphic\map\lights</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_material.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_material.cpp">
       <Filter>graphic\map\models</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_mesh.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_mesh.cpp">
       <Filter>graphic\map\models</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_material_manager.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_material_manager.cpp">
       <Filter>graphic\map\models</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_lod.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_lod.cpp">
       <Filter>graphic\map\models</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_mesh_manager.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_mesh_manager.cpp">
       <Filter>graphic\map\models</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_surface.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_surface.cpp">
       <Filter>graphic\map\models</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_camera.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_camera.cpp">
       <Filter>graphic\map\view</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_view.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_view.cpp">
       <Filter>graphic\map\view</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_view_manager.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_view_manager.cpp">
       <Filter>graphic\map\view</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_performance.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_performance.cpp">
       <Filter>graphic\ogl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_main.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_main.cpp">
       <Filter>graphic\ogl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_buffer_manager.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_buffer_manager.cpp">
       <Filter>graphic\ogl\buffers</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_context_manager.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_context_manager.cpp">
       <Filter>graphic\ogl\context</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_sampler_manager.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_sampler_manager.cpp">
       <Filter>graphic\ogl\samplers</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_shader_manager.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_shader_manager.cpp">
       <Filter>graphic\ogl\shaders</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_state_manager.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_state_manager.cpp">
       <Filter>graphic\ogl\states</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_target_set_manager.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_target_set_manager.cpp">
       <Filter>graphic\ogl\target sets</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\graphic\gfx_texture_manager.cpp">
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_texture_manager.cpp">
       <Filter>graphic\ogl\textures</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\gui\gui_input_manager.cpp">
+    <ClCompile Include="..\..\..\src\engine\gui\gui_input_manager.cpp">
       <Filter>gui\input</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\gui\gui_event_handler.cpp">
+    <ClCompile Include="..\..\..\src\engine\gui\gui_event_handler.cpp">
       <Filter>gui\events</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\script\script_script_manager.cpp">
+    <ClCompile Include="..\..\..\src\engine\script\script_script_manager.cpp">
       <Filter>script</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\engine\engine_precompiled.cpp" />
-    <ClCompile Include="..\..\..\src\camera\cam_editor_control.cpp">
+    <ClCompile Include="..\..\..\src\engine\camera\cam_editor_control.cpp">
       <Filter>camera\controls</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\camera\cam_game_control.cpp">
+    <ClCompile Include="..\..\..\src\engine\camera\cam_game_control.cpp">
       <Filter>camera\controls</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\camera\cam_control_manager.cpp">
+    <ClCompile Include="..\..\..\src\engine\camera\cam_control_manager.cpp">
       <Filter>camera</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\camera\cam_control.cpp">
+    <ClCompile Include="..\..\..\src\engine\camera\cam_control.cpp">
       <Filter>camera</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_pipeline.cpp">
+      <Filter>graphic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\engine\core\core_console.cpp">
+      <Filter>core\console</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\engine\core\core_program_parameters.cpp">
+      <Filter>core\program_parameters</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\engine\engine.cpp" />
-    <ClCompile Include="..\..\..\src\graphic\gfx_pipeline.cpp">
-      <Filter>graphic</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\core\core_console.cpp">
-      <Filter>core\console</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\core\core_program_parameters.cpp">
-      <Filter>core\program_parameters</Filter>
-    </ClCompile>
+    <ClCompile Include="..\..\..\src\engine\engine_precompiled.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\src\core\core_asset_generator.h">
+    <ClInclude Include="..\..\..\src\engine\core\core_asset_generator.h">
       <Filter>core\assets</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\core\core_asset_importer.h">
+    <ClInclude Include="..\..\..\src\engine\core\core_asset_importer.h">
       <Filter>core\assets</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\core\core_asset_manager.h">
+    <ClInclude Include="..\..\..\src\engine\core\core_asset_manager.h">
       <Filter>core\assets</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\core\core_plugin.h">
+    <ClInclude Include="..\..\..\src\engine\core\core_plugin.h">
       <Filter>core\plugins</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\core\core_plugin_manager.h">
+    <ClInclude Include="..\..\..\src\engine\core\core_plugin_manager.h">
       <Filter>core\plugins</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\core\core_time.h">
+    <ClInclude Include="..\..\..\src\engine\core\core_time.h">
       <Filter>core\time</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_entity_folder.h">
+    <ClInclude Include="..\..\..\src\engine\data\data_entity_folder.h">
       <Filter>data\map</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_map.h">
+    <ClInclude Include="..\..\..\src\engine\data\data_map.h">
       <Filter>data\map</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_region.h">
+    <ClInclude Include="..\..\..\src\engine\data\data_region.h">
       <Filter>data\map</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_entity.h">
+    <ClInclude Include="..\..\..\src\engine\data\data_entity.h">
       <Filter>data\map\entity</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_entity_manager.h">
+    <ClInclude Include="..\..\..\src\engine\data\data_entity_manager.h">
       <Filter>data\map\entity</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_transformation_facet.h">
+    <ClInclude Include="..\..\..\src\engine\data\data_transformation_facet.h">
       <Filter>data\map\entity\facets\transformation</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_hierarchy_facet.h">
+    <ClInclude Include="..\..\..\src\engine\data\data_hierarchy_facet.h">
       <Filter>data\map\entity\facets\hierarchy</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_component_facet.h">
+    <ClInclude Include="..\..\..\src\engine\data\data_component_facet.h">
       <Filter>data\map\entity\facets\components</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_component.h">
+    <ClInclude Include="..\..\..\src\engine\data\data_component.h">
       <Filter>data\map\entity\components</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_component_manager.h">
+    <ClInclude Include="..\..\..\src\engine\data\data_component_manager.h">
       <Filter>data\map\entity\components</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_area_light_component.h">
+    <ClInclude Include="..\..\..\src\engine\data\data_area_light_component.h">
       <Filter>data\map\entity\components\lights</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_light_probe_component.h">
+    <ClInclude Include="..\..\..\src\engine\data\data_light_probe_component.h">
       <Filter>data\map\entity\components\lights</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_point_light_component.h">
+    <ClInclude Include="..\..\..\src\engine\data\data_point_light_component.h">
       <Filter>data\map\entity\components\lights</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_sky_component.h">
+    <ClInclude Include="..\..\..\src\engine\data\data_sky_component.h">
       <Filter>data\map\entity\components\lights</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_sun_component.h">
+    <ClInclude Include="..\..\..\src\engine\data\data_sun_component.h">
       <Filter>data\map\entity\components\lights</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_ar_controller_component.h">
+    <ClInclude Include="..\..\..\src\engine\data\data_ar_controller_component.h">
       <Filter>data\map\entity\components\plugins</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_ar_tracked_object_component.h">
+    <ClInclude Include="..\..\..\src\engine\data\data_ar_tracked_object_component.h">
       <Filter>data\map\entity\components\plugins</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_bloom_component.h">
+    <ClInclude Include="..\..\..\src\engine\data\data_bloom_component.h">
       <Filter>data\map\entity\components\fx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_dof_component.h">
+    <ClInclude Include="..\..\..\src\engine\data\data_dof_component.h">
       <Filter>data\map\entity\components\fx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_post_aa_component.h">
+    <ClInclude Include="..\..\..\src\engine\data\data_post_aa_component.h">
       <Filter>data\map\entity\components\fx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_ssao_component.h">
+    <ClInclude Include="..\..\..\src\engine\data\data_ssao_component.h">
       <Filter>data\map\entity\components\fx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_ssr_component.h">
+    <ClInclude Include="..\..\..\src\engine\data\data_ssr_component.h">
       <Filter>data\map\entity\components\fx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_volume_fog_component.h">
+    <ClInclude Include="..\..\..\src\engine\data\data_volume_fog_component.h">
       <Filter>data\map\entity\components\fx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_material_component.h">
+    <ClInclude Include="..\..\..\src\engine\data\data_material_component.h">
       <Filter>data\map\entity\components\model</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_mesh_component.h">
+    <ClInclude Include="..\..\..\src\engine\data\data_mesh_component.h">
       <Filter>data\map\entity\components\model</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_camera_component.h">
+    <ClInclude Include="..\..\..\src\engine\data\data_camera_component.h">
       <Filter>data\map\entity\components\camera</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_script_component.h">
+    <ClInclude Include="..\..\..\src\engine\data\data_script_component.h">
       <Filter>data\map\entity\components\scripts</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_material.h">
+    <ClInclude Include="..\..\..\src\engine\data\data_material.h">
       <Filter>data\materials</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\data\data_material_manager.h">
+    <ClInclude Include="..\..\..\src\engine\data\data_material_manager.h">
       <Filter>data\materials</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_graphics_info.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_graphics_info.h">
       <Filter>graphic\engine</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_performance.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_performance.h">
       <Filter>graphic\engine</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_main.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_main.h">
       <Filter>graphic\engine</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_light_indirect_renderer.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_light_indirect_renderer.h">
       <Filter>graphic\engine\renderer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_ltc_look_up_textures.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_ltc_look_up_textures.h">
       <Filter>graphic\engine\renderer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_selection.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_selection.h">
       <Filter>graphic\engine\renderer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_light_area_renderer.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_light_area_renderer.h">
       <Filter>graphic\engine\renderer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_smaa_look_up_textures.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_smaa_look_up_textures.h">
       <Filter>graphic\engine\renderer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_ar_renderer.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_ar_renderer.h">
       <Filter>graphic\engine\renderer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_light_sun_renderer.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_light_sun_renderer.h">
       <Filter>graphic\engine\renderer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_fog_renderer.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_fog_renderer.h">
       <Filter>graphic\engine\renderer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_histogram_renderer.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_histogram_renderer.h">
       <Filter>graphic\engine\renderer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_postfx_hdr_renderer.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_postfx_hdr_renderer.h">
       <Filter>graphic\engine\renderer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_selection_renderer.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_selection_renderer.h">
       <Filter>graphic\engine\renderer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_background_renderer.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_background_renderer.h">
       <Filter>graphic\engine\renderer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_reflection_renderer.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_reflection_renderer.h">
       <Filter>graphic\engine\renderer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_debug_renderer.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_debug_renderer.h">
       <Filter>graphic\engine\renderer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_mesh_renderer.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_mesh_renderer.h">
       <Filter>graphic\engine\renderer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_particle_renderer.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_particle_renderer.h">
       <Filter>graphic\engine\renderer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_postfx_renderer.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_postfx_renderer.h">
       <Filter>graphic\engine\renderer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_light_point_renderer.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_light_point_renderer.h">
       <Filter>graphic\engine\renderer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_tonemapping_renderer.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_tonemapping_renderer.h">
       <Filter>graphic\engine\renderer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_shadow_renderer.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_shadow_renderer.h">
       <Filter>graphic\engine\renderer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_buffer.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_buffer.h">
       <Filter>graphic\engine\buffers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_buffer_manager.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_buffer_manager.h">
       <Filter>graphic\engine\buffers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_buffer_set.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_buffer_set.h">
       <Filter>graphic\engine\buffers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_context_manager.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_context_manager.h">
       <Filter>graphic\engine\context</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_render_context.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_render_context.h">
       <Filter>graphic\engine\context</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_input_layout.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_input_layout.h">
       <Filter>graphic\engine\layout</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_shader.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_shader.h">
       <Filter>graphic\engine\shaders</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_shader_manager.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_shader_manager.h">
       <Filter>graphic\engine\shaders</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_blend_state.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_blend_state.h">
       <Filter>graphic\engine\states</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_depth_stencil_state.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_depth_stencil_state.h">
       <Filter>graphic\engine\states</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_rasterizer_state.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_rasterizer_state.h">
       <Filter>graphic\engine\states</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_render_state.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_render_state.h">
       <Filter>graphic\engine\states</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_state_manager.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_state_manager.h">
       <Filter>graphic\engine\states</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_blend_description.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_blend_description.h">
       <Filter>graphic\engine\states\description</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_depth_description.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_depth_description.h">
       <Filter>graphic\engine\states\description</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_rasterizer_description.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_rasterizer_description.h">
       <Filter>graphic\engine\states\description</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_target_set.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_target_set.h">
       <Filter>graphic\engine\target sets</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_target_set_manager.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_target_set_manager.h">
       <Filter>graphic\engine\target sets</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_texture.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_texture.h">
       <Filter>graphic\engine\textures</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_texture_manager.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_texture_manager.h">
       <Filter>graphic\engine\textures</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_texture_set.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_texture_set.h">
       <Filter>graphic\engine\textures</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_view_port.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_view_port.h">
       <Filter>graphic\engine\view ports</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_view_port_set.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_view_port_set.h">
       <Filter>graphic\engine\view ports</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_data_behavior.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_data_behavior.h">
       <Filter>graphic\engine\memory</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_topology.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_topology.h">
       <Filter>graphic\engine\topology</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_sampler.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_sampler.h">
       <Filter>graphic\engine\samplers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_sampler_manager.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_sampler_manager.h">
       <Filter>graphic\engine\samplers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_sampler_set.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_sampler_set.h">
       <Filter>graphic\engine\samplers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_area_light.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_area_light.h">
       <Filter>graphic\map\lights</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_area_light_manager.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_area_light_manager.h">
       <Filter>graphic\map\lights</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_light_probe.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_light_probe.h">
       <Filter>graphic\map\lights</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_light_probe_manager.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_light_probe_manager.h">
       <Filter>graphic\map\lights</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_point_light.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_point_light.h">
       <Filter>graphic\map\lights</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_point_light_manager.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_point_light_manager.h">
       <Filter>graphic\map\lights</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_sky.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_sky.h">
       <Filter>graphic\map\lights</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_sky_manager.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_sky_manager.h">
       <Filter>graphic\map\lights</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_sun.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_sun.h">
       <Filter>graphic\map\lights</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_sun_manager.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_sun_manager.h">
       <Filter>graphic\map\lights</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_material.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_material.h">
       <Filter>graphic\map\models</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_mesh.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_mesh.h">
       <Filter>graphic\map\models</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_material_manager.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_material_manager.h">
       <Filter>graphic\map\models</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_lod.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_lod.h">
       <Filter>graphic\map\models</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_mesh_manager.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_mesh_manager.h">
       <Filter>graphic\map\models</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_surface.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_surface.h">
       <Filter>graphic\map\models</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_camera.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_camera.h">
       <Filter>graphic\map\view</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_view.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_view.h">
       <Filter>graphic\map\view</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_view_manager.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_view_manager.h">
       <Filter>graphic\map\view</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_native_types.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_native_types.h">
       <Filter>graphic\ogl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_release.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_release.h">
       <Filter>graphic\ogl\memory</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_native_buffer.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_native_buffer.h">
       <Filter>graphic\ogl\buffers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_native_buffer_set.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_native_buffer_set.h">
       <Filter>graphic\ogl\buffers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_native_sampler.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_native_sampler.h">
       <Filter>graphic\ogl\samplers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_native_sampler_set.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_native_sampler_set.h">
       <Filter>graphic\ogl\samplers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_native_shader.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_native_shader.h">
       <Filter>graphic\ogl\shaders</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_native_target_set.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_native_target_set.h">
       <Filter>graphic\ogl\target sets</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\graphic\gfx_native_texture.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_native_texture.h">
       <Filter>graphic\ogl\textures</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\gui\gui_input_manager.h">
+    <ClInclude Include="..\..\..\src\engine\gui\gui_input_manager.h">
       <Filter>gui\input</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\gui\gui_event_delegate.h">
+    <ClInclude Include="..\..\..\src\engine\gui\gui_event_delegate.h">
       <Filter>gui\events</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\gui\gui_event_handler.h">
+    <ClInclude Include="..\..\..\src\engine\gui\gui_event_handler.h">
       <Filter>gui\events</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\script\script_ar_camera_control_script.h">
+    <ClInclude Include="..\..\..\src\engine\script\script_ar_camera_control_script.h">
       <Filter>script\scripts</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\script\script_ar_place_object_on_touch_script.h">
+    <ClInclude Include="..\..\..\src\engine\script\script_ar_place_object_on_touch_script.h">
       <Filter>script\scripts</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\script\script_camera_control_script.h">
+    <ClInclude Include="..\..\..\src\engine\script\script_camera_control_script.h">
       <Filter>script\scripts</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\script\script_script.h">
+    <ClInclude Include="..\..\..\src\engine\script\script_script.h">
       <Filter>script</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\script\script_script_manager.h">
+    <ClInclude Include="..\..\..\src\engine\script\script_script_manager.h">
       <Filter>script</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\engine\engine_precompiled.h" />
-    <ClInclude Include="..\..\..\src\engine\engine_config.h" />
-    <ClInclude Include="..\..\..\src\camera\cam_editor_control.h">
+    <ClInclude Include="..\..\..\src\engine\camera\cam_editor_control.h">
       <Filter>camera\controls</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\camera\cam_game_control.h">
+    <ClInclude Include="..\..\..\src\engine\camera\cam_game_control.h">
       <Filter>camera\controls</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\camera\cam_control.h">
+    <ClInclude Include="..\..\..\src\engine\camera\cam_control.h">
       <Filter>camera</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\camera\cam_control_manager.h">
+    <ClInclude Include="..\..\..\src\engine\camera\cam_control_manager.h">
       <Filter>camera</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\engine\engine.h" />
-    <ClInclude Include="..\..\..\src\graphic\gfx_pipeline.h">
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_pipeline.h">
       <Filter>graphic</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\core\core_program_parameters.h">
+    <ClInclude Include="..\..\..\src\engine\core\core_program_parameters.h">
       <Filter>core\program_parameters</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\core\core_console.h">
+    <ClInclude Include="..\..\..\src\engine\core\core_console.h">
       <Filter>core\console</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\engine\engine.h" />
+    <ClInclude Include="..\..\..\src\engine\engine_config.h" />
+    <ClInclude Include="..\..\..\src\engine\engine_precompiled.h" />
   </ItemGroup>
 </Project>

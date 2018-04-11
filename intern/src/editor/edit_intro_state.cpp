@@ -1,8 +1,6 @@
 
 #include "editor/edit_precompiled.h"
 
-#include "core/core_console.h"
-
 #include "editor/edit_intro_state.h"
 
 #include "editor_port/edit_message_manager.h"
@@ -37,8 +35,6 @@ namespace Edit
     
     CState::EStateType CIntroState::InternOnEnter()
     {
-        ENGINE_CONSOLE_STREAMINFO("Edit> Enter intro state.");
-
         // -----------------------------------------------------------------------------
         // Load default state behavior
         // -----------------------------------------------------------------------------
