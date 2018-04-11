@@ -6,7 +6,7 @@
 
 namespace Gfx
 {
-    class CInputLayout : public Base::CManagedPoolItemBase
+    class ENGINE_API CInputLayout : public Base::CManagedPoolItemBase
     {
     public:
 

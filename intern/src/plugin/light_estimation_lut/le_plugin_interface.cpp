@@ -165,8 +165,8 @@ namespace LE
         // -----------------------------------------------------------------------------
         Gfx::STextureDescriptor TextureDescriptor;
 
-        TextureDescriptor.m_NumberOfPixelsU  = 256;
-        TextureDescriptor.m_NumberOfPixelsV  = 256;
+        TextureDescriptor.m_NumberOfPixelsU  = 512;
+        TextureDescriptor.m_NumberOfPixelsV  = 512;
         TextureDescriptor.m_NumberOfPixelsW  = 1;
         TextureDescriptor.m_NumberOfMipMaps  = Gfx::STextureDescriptor::s_GenerateAllMipMaps;
         TextureDescriptor.m_NumberOfTextures = 6;
@@ -185,21 +185,49 @@ namespace LE
 
         // -----------------------------------------------------------------------------
 
-        TextureDescriptor.m_NumberOfPixelsU  = 256;
-        TextureDescriptor.m_NumberOfPixelsV  = 256;
+        TextureDescriptor.m_NumberOfPixelsU  = 512;
+        TextureDescriptor.m_NumberOfPixelsV  = 512;
         TextureDescriptor.m_NumberOfPixelsW  = 1;
         TextureDescriptor.m_NumberOfMipMaps  = Gfx::STextureDescriptor::s_GenerateAllMipMaps;
-        TextureDescriptor.m_NumberOfTextures = 1;
+        TextureDescriptor.m_NumberOfTextures = 6;
         TextureDescriptor.m_Binding          = Gfx::CTexture::ShaderResource;
         TextureDescriptor.m_Access           = Gfx::CTexture::CPUWrite;
         TextureDescriptor.m_Format           = Gfx::CTexture::Unknown;
         TextureDescriptor.m_Usage            = Gfx::CTexture::GPURead;
         TextureDescriptor.m_Semantic         = Gfx::CTexture::Diffuse;
         TextureDescriptor.m_pFileName        = 0;
-        TextureDescriptor.m_pPixels          = 0; // TODO
-        TextureDescriptor.m_Format           = Gfx::CTexture::R8G8B8A8_BYTE;
+        TextureDescriptor.m_pPixels          = 0;
+        TextureDescriptor.m_Format           = Gfx::CTexture::R8G8B8A8_UBYTE;
 
-        m_LookUpTexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
+        m_LookUpTexturePtr = Gfx::TextureManager::CreateCubeTexture(TextureDescriptor);
+
+        Gfx::TextureManager::SetTextureLabel(m_LookUpTexturePtr, "LUT");
+
+        TextureDescriptor.m_pFileName        = "face_x.png";
+        TextureDescriptor.m_NumberOfTextures = 1;
+        Gfx::CTexturePtr FaceXP = Gfx::TextureManager::CreateTexture2D(TextureDescriptor, true, Gfx::SDataBehavior::Copy);
+
+        TextureDescriptor.m_pFileName = "face_xm.png";
+        Gfx::CTexturePtr FaceXM = Gfx::TextureManager::CreateTexture2D(TextureDescriptor, true, Gfx::SDataBehavior::Copy);
+
+        TextureDescriptor.m_pFileName = "face_y.png";
+        Gfx::CTexturePtr FaceYP = Gfx::TextureManager::CreateTexture2D(TextureDescriptor, true, Gfx::SDataBehavior::Copy);
+
+        TextureDescriptor.m_pFileName = "face_ym.png";
+        Gfx::CTexturePtr FaceYM = Gfx::TextureManager::CreateTexture2D(TextureDescriptor, true, Gfx::SDataBehavior::Copy);
+
+        TextureDescriptor.m_pFileName = "face_z.png";
+        Gfx::CTexturePtr FaceZP = Gfx::TextureManager::CreateTexture2D(TextureDescriptor, true, Gfx::SDataBehavior::Copy);
+
+        TextureDescriptor.m_pFileName = "face_zm.png";
+        Gfx::CTexturePtr FaceZM = Gfx::TextureManager::CreateTexture2D(TextureDescriptor, true, Gfx::SDataBehavior::Copy);
+
+        Gfx::TextureManager::CopyToTextureArray2D(m_LookUpTexturePtr, 0, FaceXP);
+        Gfx::TextureManager::CopyToTextureArray2D(m_LookUpTexturePtr, 1, FaceXM);
+        Gfx::TextureManager::CopyToTextureArray2D(m_LookUpTexturePtr, 2, FaceYP);
+        Gfx::TextureManager::CopyToTextureArray2D(m_LookUpTexturePtr, 3, FaceYM);
+        Gfx::TextureManager::CopyToTextureArray2D(m_LookUpTexturePtr, 4, FaceZP);
+        Gfx::TextureManager::CopyToTextureArray2D(m_LookUpTexturePtr, 5, FaceZM);
 
         // -----------------------------------------------------------------------------
 
@@ -251,7 +279,7 @@ namespace LE
 
     void CPluginInterface::Update()
     {
-        if (m_InputTexturePtr == nullptr) return;
+        //if (m_InputTexturePtr == nullptr) return;
 
         Gfx::Performance::BeginEvent("Light estimation from LUT");
 
@@ -283,6 +311,8 @@ namespace LE
         Gfx::ContextManager::SetShaderVS(m_CubemapVSPtr);
 
         Gfx::ContextManager::SetShaderGS(m_CubemapGSPtr);
+
+        Gfx::ContextManager::SetShaderPS(m_CubemapPSPtr);
 
         Gfx::ContextManager::SetVertexBuffer(m_MeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
 
@@ -366,3 +396,13 @@ namespace LE
         return m_OutputCubemapPtr;
     }
 } // namespace LE
+
+extern "C" CORE_PLUGIN_API_EXPORT void SetInputTexture(Gfx::CTexturePtr _InputTexturePtr)
+{
+    LE::CPluginInterface::GetInstance().SetInputTexture(_InputTexturePtr);
+}
+
+extern "C" CORE_PLUGIN_API_EXPORT Gfx::CTexturePtr GetOutputCubemap()
+{
+    return LE::CPluginInterface::GetInstance().GetOutputCubemap();
+}

@@ -15,8 +15,8 @@ namespace Gfx
 {
 namespace MeshManager
 {
-    void OnStart();
-    void OnExit();
+    ENGINE_API void OnStart();
+    ENGINE_API void OnExit();
     
     ENGINE_API CMeshPtr CreateMeshFromFile(const std::string& _rPathToFile, int _GenFlag, int _MeshIndex = 0);
 

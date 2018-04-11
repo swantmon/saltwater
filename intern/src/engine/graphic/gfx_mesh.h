@@ -8,7 +8,7 @@
 
 namespace Gfx
 {
-    class CMesh : public Base::CManagedPoolItemBase
+    class ENGINE_API CMesh : public Base::CManagedPoolItemBase
     {
     public:
         

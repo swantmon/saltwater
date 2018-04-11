@@ -17,7 +17,7 @@
 
 namespace Gfx
 {
-    class CRenderContext : public Base::CManagedPoolItemBase
+    class ENGINE_API CRenderContext : public Base::CManagedPoolItemBase
     {
     public:
         

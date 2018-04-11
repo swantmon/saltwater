@@ -11,7 +11,7 @@ namespace Gfx
 
 namespace Gfx
 {
-    class CView : public Base::CManagedPoolItemBase
+    class ENGINE_API CView : public Base::CManagedPoolItemBase
     {
         public:
 

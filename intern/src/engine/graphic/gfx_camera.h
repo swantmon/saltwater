@@ -11,7 +11,7 @@
 
 namespace Gfx
 {
-    class CCamera : public Base::CManagedPoolItemBase
+    class ENGINE_API CCamera : public Base::CManagedPoolItemBase
     {
     public:
 

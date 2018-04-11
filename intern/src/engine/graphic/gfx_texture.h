@@ -8,7 +8,7 @@
 
 namespace Gfx
 {
-    class CTexture : public Base::CManagedPoolItemBase
+    class ENGINE_API CTexture : public Base::CManagedPoolItemBase
     {
         public:
         

@@ -14,7 +14,7 @@
 
 namespace Gfx
 {
-    class CLOD : public Base::CManagedPoolItemBase
+    class ENGINE_API CLOD : public Base::CManagedPoolItemBase
     {
     public:
         

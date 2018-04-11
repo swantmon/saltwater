@@ -25,6 +25,7 @@
 #include "engine/data/data_transformation_facet.h"
 
 #include "engine/script/script_camera_control_script.h"
+#include "engine/script/script_light_estimation.h"
 #include "engine/script/script_script_manager.h"
 
 #include <assert.h>
@@ -269,6 +270,14 @@ namespace Edit
                 Component->SetRefreshMode(Dt::CSkyComponent::Static);
                 Component->SetType(Dt::CSkyComponent::Procedural);
                 Component->SetIntensity(120000.0f);
+
+                rEnvironmentEntity.AttachComponent(Component);
+
+                Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*Component, Dt::CSkyComponent::DirtyCreate);
+            }
+
+            {
+                auto Component = Dt::CComponentManager::GetInstance().Allocate<Scpt::CLightEstimationScript>();
 
                 rEnvironmentEntity.AttachComponent(Component);
 
