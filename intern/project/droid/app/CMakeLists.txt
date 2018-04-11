@@ -48,16 +48,9 @@ link_directories ( ${ExternDir}/assimp/lib/${ANDROID_ABI} )
 link_directories ( ${ExternDir}/devil/lib/${ANDROID_ABI} )
 link_directories ( ${ExternDir}/tinyxml2/lib/${ANDROID_ABI} )
 
-file( GLOB TargetSourcesCamera ${SourceDir}camera/*.c* ${SourceDir}camera/*.h* )
-file( GLOB TargetSourcesGraphic ${SourceDir}graphic/*.c* ${SourceDir}graphic/*.h* )
-file( GLOB TargetSourcesLogic ${SourceDir}logic/*.c* ${SourceDir}logic/*.h* )
-file( GLOB TargetSourcesScript ${SourceDir}script/*.c* ${SourceDir}script/*.h* )
-file( GLOB TargetSourcesCore ${SourceDir}core/*.c* ${SourceDir}core/*.h* )
-file( GLOB TargetSourcesData ${SourceDir}data/*.c* ${SourceDir}data/*.h* )
-file( GLOB TargetSourcesGUI ${SourceDir}gui/*.c* ${SourceDir}gui/*.h* )
-file( GLOB TargetSourcesEngine ${SourceDir}engine/*.c* ${SourceDir}engine/*.h* )
+file( GLOB_RECURSE TargetSources LIST_DIRECTORIES false ${SourceDir}engine/*.c* ${SourceDir}engine/*.h* )
 
-add_library( engine SHARED ${TargetSourcesCamera} ${TargetSourcesGraphic} ${TargetSourcesLogic} ${TargetSourcesScript} ${TargetSourcesCore} ${TargetSourcesData} ${TargetSourcesGUI} ${TargetSourcesEngine} )
+add_library( engine SHARED ${TargetSources} )
 
 target_include_directories( engine PRIVATE ${ExternDir}/glm/include )
 target_include_directories( engine PRIVATE ${ExternDir}/json/include )
@@ -70,43 +63,25 @@ target_link_libraries( engine assimp IL ILU tinyxml2 )
 target_link_libraries( engine base)
 
 # ---------------------------------------
-# Plugins
-# 01. plugin_arcore
+# Plugin ARCore
 # ---------------------------------------
-set( MyLibraries plugin_arcore )
-
 include_directories( ${IncludeDir} )
 
 link_directories ( ${ExternDir}/assimp/lib/${ANDROID_ABI} )
 link_directories ( ${ExternDir}/devil/lib/${ANDROID_ABI} )
 link_directories ( ${ExternDir}/tinyxml2/lib/${ANDROID_ABI} )
 
-foreach( MyLibrary IN ITEMS ${MyLibraries} )
+file( GLOB_RECURSE TargetSources LIST_DIRECTORIES false ${SourceDir}plugin/arcore/*.c* ${SourceDir}engine/*.h* )
 
-    set( TargetName ${MyLibrary} )
-    set( TargetSourceDir ${SourceDir}${TargetName} )
+add_library( plugin_arcore SHARED ${TargetSources} )
 
-    file(
-        GLOB_RECURSE TargetSources
-        LIST_DIRECTORIES false
-        ${TargetSourceDir}/*.c*
-        ${TargetSourceDir}/*.h*
-    )
-
-    add_library( ${TargetName} SHARED ${TargetSources} )
-
-    target_include_directories( ${TargetName} PRIVATE ${ExternDir}/glm/include )
-    target_include_directories( ${TargetName} PRIVATE ${ExternDir}/json/include )
-
-    target_link_libraries( ${TargetName} log android m )
-    target_link_libraries( ${TargetName} tinyxml2 )
-    target_link_libraries( ${TargetName} base engine )
-
-endforeach()
-
+target_include_directories( plugin_arcore PRIVATE ${ExternDir}/glm/include )
+target_include_directories( plugin_arcore PRIVATE ${ExternDir}/json/include )
 target_include_directories( plugin_arcore PRIVATE ${ExternDir}/arcore/include )
 
-target_link_libraries( plugin_arcore arcore)
+target_link_libraries( plugin_arcore log android m )
+target_link_libraries( plugin_arcore tinyxml2 arcore)
+target_link_libraries( plugin_arcore base engine )
 
 # ---------------------------------------
 # Java Interface

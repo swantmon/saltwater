@@ -4,10 +4,10 @@
 #include "base/base_exception.h"
 #include "base/base_getopt.h"
 
-#include "core/core_console.h"
-#include "core/core_program_parameters.h"
-
 #include "editor/edit_application.h"
+
+#include "engine/core/core_console.h"
+#include "engine/core/core_program_parameters.h"
 
 #include <string>
 

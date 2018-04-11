@@ -6,12 +6,6 @@
 #include "base/base_uncopyable.h"
 #include "base/base_singleton.h"
 
-#include "core/core_asset_manager.h"
-#include "core/core_console.h"
-#include "core/core_plugin_manager.h"
-#include "core/core_program_parameters.h"
-#include "core/core_time.h"
-
 #include "editor/edit_actor_helper.h"
 #include "editor/edit_application.h"
 #include "editor/edit_edit_state.h"
@@ -33,11 +27,17 @@
 #include "editor_port/edit_message.h"
 #include "editor_port/edit_message_manager.h"
 
+#include "engine/core/core_asset_manager.h"
+#include "engine/core/core_console.h"
+#include "engine/core/core_plugin_manager.h"
+#include "engine/core/core_program_parameters.h"
+#include "engine/core/core_time.h"
+
 #include "engine/engine.h"
 
-#include "graphic/gfx_pipeline.h"
+#include "engine/graphic/gfx_pipeline.h"
 
-#include "gui/gui_event_handler.h"
+#include "engine/gui/gui_event_handler.h"
 
 #include "SDL2/SDL.h"
 

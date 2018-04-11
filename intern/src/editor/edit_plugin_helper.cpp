@@ -4,16 +4,16 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
-#include "core/core_console.h"
+#include "engine/core/core_console.h"
 
-#include "data/data_ar_controller_component.h"
-#include "data/data_ar_tracked_object_component.h"
-#include "data/data_camera_component.h"
-#include "data/data_component.h"
-#include "data/data_component_facet.h"
-#include "data/data_component_manager.h"
-#include "data/data_entity.h"
-#include "data/data_entity_manager.h"
+#include "engine/data/data_ar_controller_component.h"
+#include "engine/data/data_ar_tracked_object_component.h"
+#include "engine/data/data_camera_component.h"
+#include "engine/data/data_component.h"
+#include "engine/data/data_component_facet.h"
+#include "engine/data/data_component_manager.h"
+#include "engine/data/data_entity.h"
+#include "engine/data/data_entity_manager.h"
 
 #include "editor/edit_plugin_helper.h"
 

@@ -1,26 +1,17 @@
 
 #include "editor/edit_precompiled.h"
 
-#include "base/base_serialize_text_writer.h"
-
-#include "core/core_console.h"
-
-#include "data/data_entity_manager.h"
-#include "data/data_map.h"
-
 #include "editor/edit_unload_map_state.h"
 
-#include <assert.h>
-#include <fstream>
-#include <string>
-
+#include "engine/data/data_entity_manager.h"
+#include "engine/data/data_map.h"
 
 namespace Edit
 {
     CUnloadMapState& CUnloadMapState::GetInstance()
     {
         static CUnloadMapState s_Singleton;
-        
+
         return s_Singleton;
     }
 } // namespace Edit
@@ -30,14 +21,14 @@ namespace Edit
     CUnloadMapState::CUnloadMapState()
         : m_NextState(CState::UnloadMap)
     {
-        
+
     }
     
     // -----------------------------------------------------------------------------
     
     CUnloadMapState::~CUnloadMapState()
     {
-        
+
     }
 
     // -----------------------------------------------------------------------------

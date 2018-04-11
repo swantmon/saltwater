@@ -2,17 +2,17 @@
 #include "engine/engine_precompiled.h"
 #include "engine/engine.h"
 
-#include "camera/cam_control_manager.h"
+#include "engine/camera/cam_control_manager.h"
 
-#include "core/core_time.h"
+#include "engine/core/core_time.h"
 
-#include "data/data_entity_manager.h"
+#include "engine/data/data_entity_manager.h"
 
-#include "graphic/gfx_pipeline.h"
+#include "engine/graphic/gfx_pipeline.h"
 
-#include "gui/gui_input_manager.h"
+#include "engine/gui/gui_input_manager.h"
 
-#include "script/script_script_manager.h"
+#include "engine/script/script_script_manager.h"
 
 namespace Engine
 {

@@ -1,11 +1,11 @@
 
 #include "editor/edit_precompiled.h"
 
-#include "camera/cam_control_manager.h"
-
-#include "core/core_console.h"
-
 #include "editor/edit_start_state.h"
+
+#include "engine/camera/cam_control_manager.h"
+
+#include "engine/core/core_console.h"
 
 #include "engine/engine.h"
 
@@ -37,8 +37,6 @@ namespace Edit
     
     CState::EStateType CStartState::InternOnEnter()
     {
-        ENGINE_CONSOLE_STREAMINFO("Edit> Enter start state.");
-
         // -----------------------------------------------------------------------------
         // Prepare controls
         // -----------------------------------------------------------------------------
