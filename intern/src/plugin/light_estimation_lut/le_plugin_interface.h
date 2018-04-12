@@ -31,24 +31,24 @@ namespace LE
 
     private:
 
-        struct SModelMatrixBuffer
-        {
-            glm::mat4 m_ModelMatrix;
-        };
-
-        struct SCubemapBufferGS
+        struct SCubemapBuffer
         {
             glm::mat4 m_CubeProjectionMatrix;
             glm::mat4 m_CubeViewMatrix[6];
         };
 
+        struct SModelMatrixBuffer
+        {
+            glm::mat4 m_ModelMatrix;
+        };
+
     private:
 
-        Gfx::CShaderPtr m_CubemapVSPtr;
-        Gfx::CShaderPtr m_CubemapGSPtr;
-        Gfx::CShaderPtr m_CubemapPSPtr;
+        Gfx::CShaderPtr m_VSPtr;
+        Gfx::CShaderPtr m_GSPtr;
+        Gfx::CShaderPtr m_PSPtr;
 
-        Gfx::CBufferPtr m_CubemapGSWorldRotatedBuffer;
+        Gfx::CBufferPtr m_CubemapBufferPtr;
         Gfx::CBufferPtr m_ModelMatrixBufferPtr;
 
         Gfx::CMeshPtr m_MeshPtr;

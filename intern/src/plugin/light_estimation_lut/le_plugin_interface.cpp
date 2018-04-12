@@ -20,14 +20,149 @@ CORE_PLUGIN_INFO(LE::CPluginInterface, "Light Estimation LUT", "1.0", "This plug
 
 namespace LE
 {
+    const char c_VS[] = R"(
+        // -----------------------------------------------------------------------------
+        // Built-In variables
+        // -----------------------------------------------------------------------------
+        out gl_PerVertex
+        {
+            vec4 gl_Position;
+        };
+
+        // -----------------------------------------------------------------------------
+        // Input from buffer
+        // -----------------------------------------------------------------------------
+        layout(location = 0) in vec3 VertexPosition;
+
+        // -----------------------------------------------------------------------------
+        // Output to next stage
+        // -----------------------------------------------------------------------------
+        layout(location = 0) out vec3 out_Normal;
+
+        // -----------------------------------------------------------------------------
+        // Main
+        // -----------------------------------------------------------------------------
+        void main(void)
+        {
+            vec4 WSPosition = vec4(VertexPosition.xyz, 1.0f);
+    
+            out_Normal = normalize(WSPosition.xyz);
+    
+            gl_Position = WSPosition;
+        }
+    )";
+
+    const char c_GS[] = R"(
+        // -----------------------------------------------------------------------------
+        // Built-In variables
+        // -----------------------------------------------------------------------------
+        in gl_PerVertex
+        {
+            vec4  gl_Position;
+        } gl_in[];
+
+        out gl_PerVertex
+        {
+            vec4 gl_Position;
+        };
+
+        // -----------------------------------------------------------------------------
+        // Geometry definition
+        // -----------------------------------------------------------------------------
+        layout(triangles) in;
+        layout(triangle_strip, max_vertices = 18) out;
+
+        // -----------------------------------------------------------------------------
+        // Input from engine
+        // -----------------------------------------------------------------------------
+        layout(std140, binding = 0) uniform UB0
+        {
+            mat4 m_CubeProjectionMatrix;
+            mat4 m_CubeViewMatrix[6];
+        };
+
+        layout(std140, binding = 1) uniform UB1
+        {
+            mat4 m_ModelMatrix;
+        };
+
+        // -----------------------------------------------------------------------------
+        // Input from previous stage
+        // -----------------------------------------------------------------------------
+        layout(location = 0) in vec3 in_Normal[];
+        layout(location = 1) in vec2 in_UV[];
+
+        // -----------------------------------------------------------------------------
+        // Output to next stage
+        // -----------------------------------------------------------------------------
+        layout(location = 0) out vec3 out_Normal;
+        layout(location = 1) out vec2 out_UV;
+
+        // -----------------------------------------------------------------------------
+        // Main
+        // -----------------------------------------------------------------------------
+        void main() 
+        {
+            for( int FaceIndex = 0; FaceIndex < 6; ++FaceIndex )
+            {
+                for( int IndexOfVertex = 0; IndexOfVertex < 3; IndexOfVertex++ )
+                {
+                    gl_Layer = FaceIndex;
+            
+                    out_Normal  = -in_Normal[IndexOfVertex];
+                    out_UV      = in_UV[IndexOfVertex];
+                    gl_Position = m_CubeProjectionMatrix * m_CubeViewMatrix[FaceIndex] * m_ModelMatrix * gl_in[IndexOfVertex].gl_Position;
+
+                    EmitVertex();
+                }
+
+                EndPrimitive();
+            }
+        }
+    )";
+
+    const char c_FS[] = R"(
+        // -----------------------------------------------------------------------------
+        // Input from engine
+        // -----------------------------------------------------------------------------
+        layout(binding = 0) uniform sampler2D in_InputTexture;
+        layout(binding = 1) uniform samplerCube in_LookUpTexture;
+
+        // -----------------------------------------------------------------------------
+        // Input to fragment from VS
+        // -----------------------------------------------------------------------------
+        layout(location = 0) in vec3 in_Normal;
+        layout(location = 1) in vec2 in_UV;
+
+        // -----------------------------------------------------------------------------
+        // Output to fragment
+        // -----------------------------------------------------------------------------
+        layout(location = 0) out vec4 out_Output;
+
+        // -----------------------------------------------------------------------------
+        // Main
+        // -----------------------------------------------------------------------------
+        void main(void)
+        {
+            vec4 LookUp = textureLod(in_LookUpTexture, in_Normal, 0.0f);
+
+            vec4 FinalColor = texture(in_InputTexture, LookUp.xy);
+        
+            out_Output = vec4(LookUp.xyz, 1.0f);
+        }
+    )";
+} // namespace LE
+
+namespace LE
+{
     void CPluginInterface::OnStart()
     {
         // -----------------------------------------------------------------------------
         // Shader
         // -----------------------------------------------------------------------------
-        m_CubemapVSPtr = Gfx::ShaderManager::CompileVS("vs_spherical_env_cubemap_generation.glsl", "main");;
-        m_CubemapGSPtr = Gfx::ShaderManager::CompileGS("gs_spherical_rotate_env_cubemap_generation.glsl", "main");
-        m_CubemapPSPtr = Gfx::ShaderManager::CompilePS("fs_lut_env_cubemap_generation.glsl", "main");
+        m_VSPtr = Gfx::ShaderManager::CompileVS(c_VS, "main", nullptr, nullptr, 0, false, false, true);
+        m_GSPtr = Gfx::ShaderManager::CompileGS(c_GS, "main", nullptr, nullptr, 0, false, false, true);
+        m_PSPtr = Gfx::ShaderManager::CompilePS(c_FS, "main", nullptr, nullptr, 0, false, false, true);
 
         // -----------------------------------------------------------------------------
         // Buffer
@@ -38,7 +173,7 @@ namespace LE
         glm::vec3 UpDirection;
         glm::vec3 LookDirection;
         
-        SCubemapBufferGS DefaultGSValues;
+        SCubemapBuffer DefaultGSValues;
         
         DefaultGSValues.m_CubeProjectionMatrix = glm::perspective(glm::half_pi<float>(), 1.0f, 0.1f, 20000.0f);
         
@@ -137,11 +272,11 @@ namespace LE
         ConstanteBufferDesc.m_Usage         = Gfx::CBuffer::GPURead;
         ConstanteBufferDesc.m_Binding       = Gfx::CBuffer::ConstantBuffer;
         ConstanteBufferDesc.m_Access        = Gfx::CBuffer::CPUWrite;
-        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SCubemapBufferGS);
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SCubemapBuffer);
         ConstanteBufferDesc.m_pBytes        = &DefaultGSValues;
         ConstanteBufferDesc.m_pClassKey     = 0;
         
-        m_CubemapGSWorldRotatedBuffer = Gfx::BufferManager::CreateBuffer(ConstanteBufferDesc);
+        m_CubemapBufferPtr = Gfx::BufferManager::CreateBuffer(ConstanteBufferDesc);
 
         // -----------------------------------------------------------------------------
 
@@ -181,7 +316,7 @@ namespace LE
 
         m_OutputCubemapPtr = Gfx::TextureManager::CreateCubeTexture(TextureDescriptor);
 
-        Gfx::TextureManager::SetTextureLabel(m_OutputCubemapPtr, "Pre-LUT Light");
+        Gfx::TextureManager::SetTextureLabel(m_OutputCubemapPtr, "Sky cubemap from image");
 
         // -----------------------------------------------------------------------------
 
@@ -201,7 +336,7 @@ namespace LE
 
         m_LookUpTexturePtr = Gfx::TextureManager::CreateCubeTexture(TextureDescriptor);
 
-        Gfx::TextureManager::SetTextureLabel(m_LookUpTexturePtr, "LUT");
+        Gfx::TextureManager::SetTextureLabel(m_LookUpTexturePtr, "Sky LUT");
 
         TextureDescriptor.m_pFileName        = "face_x.png";
         TextureDescriptor.m_NumberOfTextures = 1;
@@ -262,10 +397,10 @@ namespace LE
 
     void CPluginInterface::OnExit()
     {
-        m_CubemapVSPtr = 0;
-        m_CubemapGSPtr = 0;
-        m_CubemapPSPtr = 0;
-        m_CubemapGSWorldRotatedBuffer = 0;
+        m_VSPtr = 0;
+        m_GSPtr = 0;
+        m_PSPtr = 0;
+        m_CubemapBufferPtr = 0;
         m_ModelMatrixBufferPtr = 0;
         m_MeshPtr = 0;
         m_InputTexturePtr = 0;
@@ -279,7 +414,7 @@ namespace LE
 
     void CPluginInterface::Update()
     {
-        if (m_InputTexturePtr == nullptr) return;
+        //if (m_InputTexturePtr == nullptr) return;
 
         Gfx::Performance::BeginEvent("Light estimation from LUT");
 
@@ -308,11 +443,11 @@ namespace LE
 
         Gfx::ContextManager::SetTopology(Gfx::STopology::TriangleList);
 
-        Gfx::ContextManager::SetShaderVS(m_CubemapVSPtr);
+        Gfx::ContextManager::SetShaderVS(m_VSPtr);
 
-        Gfx::ContextManager::SetShaderGS(m_CubemapGSPtr);
+        Gfx::ContextManager::SetShaderGS(m_GSPtr);
 
-        Gfx::ContextManager::SetShaderPS(m_CubemapPSPtr);
+        Gfx::ContextManager::SetShaderPS(m_PSPtr);
 
         Gfx::ContextManager::SetVertexBuffer(m_MeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
 
@@ -320,8 +455,8 @@ namespace LE
 
         Gfx::ContextManager::SetInputLayout(m_MeshPtr->GetLOD(0)->GetSurface()->GetMVPShaderVS()->GetInputLayout());
 
-        Gfx::ContextManager::SetConstantBuffer(2, m_CubemapGSWorldRotatedBuffer);
-        Gfx::ContextManager::SetConstantBuffer(3, m_ModelMatrixBufferPtr);
+        Gfx::ContextManager::SetConstantBuffer(0, m_CubemapBufferPtr);
+        Gfx::ContextManager::SetConstantBuffer(1, m_ModelMatrixBufferPtr);
 
         Gfx::ContextManager::SetSampler(0, Gfx::SamplerManager::GetSampler(Gfx::CSampler::MinMagMipLinearClamp));
         Gfx::ContextManager::SetSampler(1, Gfx::SamplerManager::GetSampler(Gfx::CSampler::MinMagMipLinearClamp));
