@@ -29,7 +29,7 @@ void main(void)
 
     vec4 FinalColor = texture(in_InputTexture, LookUp.xy);
         
-    out_Output = vec4(LookUp.xyz, 1.0f);
+    out_Output = vec4(FinalColor.xyz, 1.0f);
 }
 
 #endif // __INCLUDE_FS_LUT_ENV_CUBEMAP_GENERATION_GLSL__

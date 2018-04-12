@@ -343,8 +343,8 @@ namespace LE
         Gfx::ContextManager::ResetSampler(0);
         Gfx::ContextManager::ResetSampler(1);
 
-        Gfx::ContextManager::ResetConstantBuffer(2);
-        Gfx::ContextManager::ResetConstantBuffer(3);
+        Gfx::ContextManager::ResetConstantBuffer(0);
+        Gfx::ContextManager::ResetConstantBuffer(1);
 
         Gfx::ContextManager::ResetInputLayout();
 
