@@ -683,11 +683,7 @@ namespace
             TextureDescriptor.m_Semantic         = CTexture::Diffuse;
             TextureDescriptor.m_pFileName        = 0;
             TextureDescriptor.m_pPixels          = 0;
-#if PLATFORM_WINDOWS
-            TextureDescriptor.m_Format           = CTexture::R16G16B16A16_FLOAT;
-#elif PLATFORM_ANDROID
             TextureDescriptor.m_Format           = CTexture::R16G16B16_FLOAT;
-#endif
         
             _pInternSky->m_CubemapPtr = TextureManager::CreateCubeTexture(TextureDescriptor);
 
