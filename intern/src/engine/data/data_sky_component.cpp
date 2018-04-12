@@ -9,6 +9,7 @@ namespace Dt
 {
     CSkyComponent::CSkyComponent()
         : m_RefreshMode(Static)
+        , m_Quality    (PX1024)
         , m_Type       (Procedural)
         , m_HasHDR     (true)
         , m_TexturePtr (nullptr)
@@ -50,6 +51,29 @@ namespace Dt
     CSkyComponent::EType CSkyComponent::GetType() const
     {
         return m_Type;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CSkyComponent::SetQuality(EQuality _Quality)
+    {
+        m_Quality = _Quality;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CSkyComponent::EQuality CSkyComponent::GetQuality() const
+    {
+        return m_Quality;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    unsigned int CSkyComponent::GetQualityInPixel() const
+    {
+        static unsigned int s_QualityInPixel[s_NumberOfQualities] = { 128, 256, 512, 1024, 2048 };
+
+        return s_QualityInPixel[m_Quality];
     }
 
     // -----------------------------------------------------------------------------

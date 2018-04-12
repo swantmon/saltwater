@@ -62,6 +62,8 @@ namespace Scpt
 
             if (Core::PluginManager::HasPlugin("Light Estimation LUT") && Core::PluginManager::HasPlugin("ArCore"))
             {
+                m_pSkyComponent->SetQuality(Dt::CSkyComponent::PX128);
+
                 SetInputTexture(GetBackgroundTexture());
             }
             else

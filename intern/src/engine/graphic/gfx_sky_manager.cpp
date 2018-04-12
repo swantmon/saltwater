@@ -694,8 +694,8 @@ namespace
             // -----------------------------------------------------------------------------
             STextureDescriptor TextureDescriptor;
 
-            TextureDescriptor.m_NumberOfPixelsU  = 2048;
-            TextureDescriptor.m_NumberOfPixelsV  = 2048;
+            TextureDescriptor.m_NumberOfPixelsU  = pSkyComponent->GetQualityInPixel();
+            TextureDescriptor.m_NumberOfPixelsV  = pSkyComponent->GetQualityInPixel();
             TextureDescriptor.m_NumberOfPixelsW  = 1;
             TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_GenerateAllMipMaps;
             TextureDescriptor.m_NumberOfTextures = 6;
