@@ -7,6 +7,8 @@
 
 #include "engine/data/data_component.h"
 
+#include "engine/graphic/gfx_texture.h"
+
 namespace Dt
 {
     class ENGINE_API CSkyComponent : public CComponent<CSkyComponent>
@@ -37,10 +39,11 @@ namespace Dt
         void SetType(EType _Type);
         EType GetType() const;
 
-        void SetTexture(const std::string& _rTexture2D);
-        const std::string& GetTexture();
+        void SetTexture(Gfx::CTexturePtr _TexturePtr);
+        Gfx::CTexturePtr GetTexture();
+        const Gfx::CTexturePtr GetTexture() const;
 
-        bool GetHasTexture() const;
+        bool HasTexture() const;
 
         void SetIntensity(float _Intensity);
         float GetIntensity() const;
@@ -52,10 +55,10 @@ namespace Dt
 
     private:
 
-        ERefreshMode m_RefreshMode;        //< Refresh mode of the sky
-        EType        m_Type;               //< Type of the skybox for procedural panorama or cubemap
-        bool         m_HasHDR;             //< Declares either the image consists of HDR values
-        std::string  m_Texture;            //< Texture
-        float        m_Intensity;          //< Intensity of sky that is freely adjustable by artist (multiplier on the image)
+        ERefreshMode     m_RefreshMode;        //< Refresh mode of the sky
+        EType            m_Type;               //< Type of the skybox for procedural panorama or cubemap
+        bool             m_HasHDR;             //< Declares either the image consists of HDR values
+        Gfx::CTexturePtr m_TexturePtr;         //< Texture
+        float            m_Intensity;          //< Intensity of sky that is freely adjustable by artist (multiplier on the image)
     };
 } // namespace Dt

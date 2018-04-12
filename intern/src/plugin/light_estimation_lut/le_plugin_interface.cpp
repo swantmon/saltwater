@@ -279,7 +279,7 @@ namespace LE
 
     void CPluginInterface::Update()
     {
-        //if (m_InputTexturePtr == nullptr) return;
+        if (m_InputTexturePtr == nullptr) return;
 
         Gfx::Performance::BeginEvent("Light estimation from LUT");
 
@@ -320,8 +320,8 @@ namespace LE
 
         Gfx::ContextManager::SetInputLayout(m_MeshPtr->GetLOD(0)->GetSurface()->GetMVPShaderVS()->GetInputLayout());
 
-        Gfx::ContextManager::SetConstantBuffer(0, m_CubemapGSWorldRotatedBuffer);
-        Gfx::ContextManager::SetConstantBuffer(1, m_ModelMatrixBufferPtr);
+        Gfx::ContextManager::SetConstantBuffer(2, m_CubemapGSWorldRotatedBuffer);
+        Gfx::ContextManager::SetConstantBuffer(3, m_ModelMatrixBufferPtr);
 
         Gfx::ContextManager::SetSampler(0, Gfx::SamplerManager::GetSampler(Gfx::CSampler::MinMagMipLinearClamp));
         Gfx::ContextManager::SetSampler(1, Gfx::SamplerManager::GetSampler(Gfx::CSampler::MinMagMipLinearClamp));
@@ -343,8 +343,8 @@ namespace LE
         Gfx::ContextManager::ResetSampler(0);
         Gfx::ContextManager::ResetSampler(1);
 
-        Gfx::ContextManager::ResetConstantBuffer(0);
-        Gfx::ContextManager::ResetConstantBuffer(1);
+        Gfx::ContextManager::ResetConstantBuffer(2);
+        Gfx::ContextManager::ResetConstantBuffer(3);
 
         Gfx::ContextManager::ResetInputLayout();
 
@@ -399,10 +399,10 @@ namespace LE
 
 extern "C" CORE_PLUGIN_API_EXPORT void SetInputTexture(Gfx::CTexturePtr _InputTexturePtr)
 {
-    LE::CPluginInterface::GetInstance().SetInputTexture(_InputTexturePtr);
+    static_cast<LE::CPluginInterface&>(GetInstance()).SetInputTexture(_InputTexturePtr);
 }
 
 extern "C" CORE_PLUGIN_API_EXPORT Gfx::CTexturePtr GetOutputCubemap()
 {
-    return LE::CPluginInterface::GetInstance().GetOutputCubemap();
+    return static_cast<LE::CPluginInterface&>(GetInstance()).GetOutputCubemap();
 }

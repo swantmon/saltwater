@@ -20,6 +20,8 @@
 #include "engine/data/data_sun_component.h"
 #include "engine/data/data_transformation_facet.h"
 
+#include "engine/graphic/gfx_texture_manager.h"
+
 #include "editor_port/edit_message.h"
 #include "editor_port/edit_message_manager.h"
 
@@ -209,9 +211,8 @@ namespace
             Dt::CSkyComponent* pComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CSkyComponent>();
 
             pComponent->SetRefreshMode(Dt::CSkyComponent::Static);
-            pComponent->SetType       (Dt::CSkyComponent::Panorama);
-            pComponent->SetTexture    ("environments/PaperMill_E_3k.hdr");
-            pComponent->SetIntensity  (5000.0f);
+            pComponent->SetType       (Dt::CSkyComponent::Procedural);
+            pComponent->SetIntensity  (60000.0f);
 
             pCurrentEntity->AttachComponent(pComponent);
 
@@ -622,9 +623,34 @@ namespace
             pLightFacet->SetType       (static_cast<Dt::CSkyComponent::EType>(Type));
             pLightFacet->SetIntensity  (Intensity);
 
-            if (pLightFacet->GetType() != Dt::CSkyComponent::Procedural)
+            if (Texture.length() > 0)
             {
-                pLightFacet->SetTexture(Texture);
+                Gfx::STextureDescriptor TextureDescriptor; 
+ 
+                TextureDescriptor.m_NumberOfPixelsU  = Gfx::STextureDescriptor::s_NumberOfPixelsFromSource; 
+                TextureDescriptor.m_NumberOfPixelsV  = Gfx::STextureDescriptor::s_NumberOfPixelsFromSource; 
+                TextureDescriptor.m_NumberOfPixelsW  = 1;
+                TextureDescriptor.m_NumberOfMipMaps  = 1;
+                TextureDescriptor.m_NumberOfTextures = 1;
+                TextureDescriptor.m_Access           = Gfx::CTexture::CPUWrite; 
+                TextureDescriptor.m_Usage            = Gfx::CTexture::GPURead; 
+                TextureDescriptor.m_Semantic         = Gfx::CTexture::Diffuse; 
+                TextureDescriptor.m_pFileName        = 0; 
+                TextureDescriptor.m_pPixels          = 0; 
+                TextureDescriptor.m_Binding          = Gfx::CTexture::ShaderResource;
+                TextureDescriptor.m_Format           = Gfx::STextureDescriptor::s_FormatFromSource;
+                TextureDescriptor.m_pFileName        = Texture.c_str();
+
+                if (pLightFacet->GetType() == Dt::CSkyComponent::Cubemap)
+                {
+                    TextureDescriptor.m_NumberOfTextures = 6;
+
+                    pLightFacet->SetTexture(Gfx::TextureManager::CreateCubeTexture(TextureDescriptor));
+                }
+                else
+                {
+                    pLightFacet->SetTexture(Gfx::TextureManager::CreateTexture2D(TextureDescriptor));
+                }
             }
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pLightFacet, Dt::CSkyComponent::DirtyInfo);

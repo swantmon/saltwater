@@ -4,7 +4,6 @@
 #include "engine/core/core_plugin_manager.h"
 
 #include "base/base_include_glm.h"
-#include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
 #include "engine/graphic/gfx_buffer.h"
@@ -18,8 +17,6 @@ namespace LE
 {
     class CPluginInterface : private Base::CUncopyable, public Core::IPlugin
     {
-        BASE_SINGLETON_FUNC(CPluginInterface)
-
     public:
 
         void OnStart() override;

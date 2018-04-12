@@ -657,46 +657,11 @@ namespace
         // -----------------------------------------------------------------------------
         auto UpdateFacet = [&](Dt::CSkyComponent* _pDataSkyboxFacet, CInternSkyFacet* _pGraphicSkyboxFacet)->void
         {
-            // -----------------------------------------------------------------------------
-            // Get hash
-            // -----------------------------------------------------------------------------
-            Gfx::STextureDescriptor TextureDescriptor;
+            _pGraphicSkyboxFacet->m_InputTexturePtr = 0;
 
-            TextureDescriptor.m_NumberOfPixelsU  = STextureDescriptor::s_NumberOfPixelsFromSource;
-            TextureDescriptor.m_NumberOfPixelsV  = STextureDescriptor::s_NumberOfPixelsFromSource;
-            TextureDescriptor.m_NumberOfPixelsW  = 1;
-            TextureDescriptor.m_NumberOfMipMaps  = 1;
-            TextureDescriptor.m_NumberOfTextures = 1;
-            TextureDescriptor.m_Access           = CTexture::CPUWrite;
-            TextureDescriptor.m_Usage            = CTexture::GPURead;
-            TextureDescriptor.m_Semantic         = CTexture::Diffuse;
-            TextureDescriptor.m_pFileName        = 0;
-            TextureDescriptor.m_pPixels          = 0;
-            TextureDescriptor.m_Binding          = CTexture::ShaderResource;
-            TextureDescriptor.m_Format           = STextureDescriptor::s_FormatFromSource;
-            TextureDescriptor.m_pFileName        = _pDataSkyboxFacet->GetTexture().c_str();
-
-            CTexturePtr TexturePtr = nullptr;
-
-            if (_pDataSkyboxFacet->GetType() == Dt::CSkyComponent::Cubemap && _pDataSkyboxFacet->GetHasTexture())
+            if (_pDataSkyboxFacet->HasTexture())
             {
-                TexturePtr = TextureManager::CreateCubeTexture(TextureDescriptor);
-            }
-            else if (_pDataSkyboxFacet->GetType() != Dt::CSkyComponent::Procedural && _pDataSkyboxFacet->GetHasTexture())
-            {
-                TexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
-            }
-
-            // -----------------------------------------------------------------------------
-            // Check hash and update data + render
-            // -----------------------------------------------------------------------------
-            if (TexturePtr.IsValid())
-            {
-                _pGraphicSkyboxFacet->m_InputTexturePtr = TexturePtr;
-            }
-            else
-            {
-                _pGraphicSkyboxFacet->m_InputTexturePtr = 0;
+                _pGraphicSkyboxFacet->m_InputTexturePtr = _pDataSkyboxFacet->GetTexture();
             }
 
             // -----------------------------------------------------------------------------
@@ -774,8 +739,8 @@ namespace
             // -----------------------------------------------------------------------------
             // Render context
             // -----------------------------------------------------------------------------
-            CCameraPtr          CameraPtr       = ViewManager::GetMainCamera();
-            CRenderStatePtr     NoDepthStatePtr = StateManager::GetRenderState(CRenderState::NoDepth | CRenderState::NoCull | CRenderState::AlphaBlend);
+            CCameraPtr      CameraPtr       = ViewManager::GetMainCamera();
+            CRenderStatePtr NoDepthStatePtr = StateManager::GetRenderState(CRenderState::NoDepth | CRenderState::NoCull | CRenderState::AlphaBlend);
 
             CRenderContextPtr CubemapRenderContextPtr = ContextManager::CreateRenderContext();
 

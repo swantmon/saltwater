@@ -49,6 +49,14 @@ namespace Scpt
 
             SetInputTexture  = (LightEstimationLUTSetInputTextureFunc)(Core::PluginManager::GetPluginFunction("Light Estimation LUT", "SetInputTexture"));
             GetOutputCubemap = (LightEstimationLUTGetOutputCubemapFunc)(Core::PluginManager::GetPluginFunction("Light Estimation LUT", "GetOutputCubemap"));
+
+            if (m_PluginAvailable)
+            {
+                m_pSkyComponent->SetType(Dt::CSkyComponent::Cubemap);
+                m_pSkyComponent->SetTexture(GetOutputCubemap());
+
+                Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*m_pSkyComponent, Dt::CSkyComponent::DirtyInfo);
+            }
         }
 
         // -----------------------------------------------------------------------------
