@@ -382,9 +382,12 @@ namespace
             ShaderContent = std::string(_pShaderDefines) + "\n" + ShaderContent;
         }
 
-        ShaderContent = "#define " + std::string(_pShaderName) + " main\n" + ShaderContent;
+        if (!_IsCode)
+        {
+            ShaderContent = "#define " + std::string(_pShaderName) + " main\n" + ShaderContent;
 
-        PreprocessorShader(ShaderContent, true);
+            PreprocessorShader(ShaderContent, true);
+        }
 
         const char* pRAW = ShaderContent.c_str();
 

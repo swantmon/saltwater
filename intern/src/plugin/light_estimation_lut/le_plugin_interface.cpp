@@ -20,149 +20,14 @@ CORE_PLUGIN_INFO(LE::CPluginInterface, "Light Estimation LUT", "1.0", "This plug
 
 namespace LE
 {
-    const char c_VS[] = R"(
-        // -----------------------------------------------------------------------------
-        // Built-In variables
-        // -----------------------------------------------------------------------------
-        out gl_PerVertex
-        {
-            vec4 gl_Position;
-        };
-
-        // -----------------------------------------------------------------------------
-        // Input from buffer
-        // -----------------------------------------------------------------------------
-        layout(location = 0) in vec3 VertexPosition;
-
-        // -----------------------------------------------------------------------------
-        // Output to next stage
-        // -----------------------------------------------------------------------------
-        layout(location = 0) out vec3 out_Normal;
-
-        // -----------------------------------------------------------------------------
-        // Main
-        // -----------------------------------------------------------------------------
-        void main(void)
-        {
-            vec4 WSPosition = vec4(VertexPosition.xyz, 1.0f);
-    
-            out_Normal = normalize(WSPosition.xyz);
-    
-            gl_Position = WSPosition;
-        }
-    )";
-
-    const char c_GS[] = R"(
-        // -----------------------------------------------------------------------------
-        // Built-In variables
-        // -----------------------------------------------------------------------------
-        in gl_PerVertex
-        {
-            vec4  gl_Position;
-        } gl_in[];
-
-        out gl_PerVertex
-        {
-            vec4 gl_Position;
-        };
-
-        // -----------------------------------------------------------------------------
-        // Geometry definition
-        // -----------------------------------------------------------------------------
-        layout(triangles) in;
-        layout(triangle_strip, max_vertices = 18) out;
-
-        // -----------------------------------------------------------------------------
-        // Input from engine
-        // -----------------------------------------------------------------------------
-        layout(std140, binding = 0) uniform UB0
-        {
-            mat4 m_CubeProjectionMatrix;
-            mat4 m_CubeViewMatrix[6];
-        };
-
-        layout(std140, binding = 1) uniform UB1
-        {
-            mat4 m_ModelMatrix;
-        };
-
-        // -----------------------------------------------------------------------------
-        // Input from previous stage
-        // -----------------------------------------------------------------------------
-        layout(location = 0) in vec3 in_Normal[];
-        layout(location = 1) in vec2 in_UV[];
-
-        // -----------------------------------------------------------------------------
-        // Output to next stage
-        // -----------------------------------------------------------------------------
-        layout(location = 0) out vec3 out_Normal;
-        layout(location = 1) out vec2 out_UV;
-
-        // -----------------------------------------------------------------------------
-        // Main
-        // -----------------------------------------------------------------------------
-        void main() 
-        {
-            for( int FaceIndex = 0; FaceIndex < 6; ++FaceIndex )
-            {
-                for( int IndexOfVertex = 0; IndexOfVertex < 3; IndexOfVertex++ )
-                {
-                    gl_Layer = FaceIndex;
-            
-                    out_Normal  = -in_Normal[IndexOfVertex];
-                    out_UV      = in_UV[IndexOfVertex];
-                    gl_Position = m_CubeProjectionMatrix * m_CubeViewMatrix[FaceIndex] * m_ModelMatrix * gl_in[IndexOfVertex].gl_Position;
-
-                    EmitVertex();
-                }
-
-                EndPrimitive();
-            }
-        }
-    )";
-
-    const char c_FS[] = R"(
-        // -----------------------------------------------------------------------------
-        // Input from engine
-        // -----------------------------------------------------------------------------
-        layout(binding = 0) uniform sampler2D in_InputTexture;
-        layout(binding = 1) uniform samplerCube in_LookUpTexture;
-
-        // -----------------------------------------------------------------------------
-        // Input to fragment from VS
-        // -----------------------------------------------------------------------------
-        layout(location = 0) in vec3 in_Normal;
-        layout(location = 1) in vec2 in_UV;
-
-        // -----------------------------------------------------------------------------
-        // Output to fragment
-        // -----------------------------------------------------------------------------
-        layout(location = 0) out vec4 out_Output;
-
-        // -----------------------------------------------------------------------------
-        // Main
-        // -----------------------------------------------------------------------------
-        void main(void)
-        {
-            vec4 LookUp = textureLod(in_LookUpTexture, in_Normal, 0.0f);
-
-            vec4 FinalColor = texture(in_InputTexture, LookUp.xy);
-        
-            out_Output = vec4(LookUp.xyz, 1.0f);
-        }
-    )";
-} // namespace LE
-
-namespace LE
-{
     void CPluginInterface::OnStart()
     {
         // -----------------------------------------------------------------------------
         // Shader
         // -----------------------------------------------------------------------------
-        m_VSPtr = Gfx::ShaderManager::CompileVS(c_VS, "main", nullptr, nullptr, 0, false, false, true);
-        m_GSPtr = Gfx::ShaderManager::CompileGS(c_GS, "main", nullptr, nullptr, 0, false, false, true);
-        m_PSPtr = Gfx::ShaderManager::CompilePS(c_FS, "main", nullptr, nullptr, 0, false, false, true);
+        m_VSPtr = Gfx::ShaderManager::CompileVS("../../plugins/light_estimation_lut/vs.glsl", "main");;
+        m_GSPtr = Gfx::ShaderManager::CompileGS("../../plugins/light_estimation_lut/gs.glsl", "main");
+        m_PSPtr = Gfx::ShaderManager::CompilePS("../../plugins/light_estimation_lut/fs.glsl", "main");
 
         // -----------------------------------------------------------------------------
         // Buffer
@@ -338,23 +203,23 @@ namespace LE
 
         Gfx::TextureManager::SetTextureLabel(m_LookUpTexturePtr, "Sky LUT");
 
-        TextureDescriptor.m_pFileName        = "face_x.png";
+        TextureDescriptor.m_pFileName        = "../../plugins/light_estimation_lut/face_x.png";
         TextureDescriptor.m_NumberOfTextures = 1;
         Gfx::CTexturePtr FaceXP = Gfx::TextureManager::CreateTexture2D(TextureDescriptor, true, Gfx::SDataBehavior::Copy);
 
-        TextureDescriptor.m_pFileName = "face_xm.png";
+        TextureDescriptor.m_pFileName = "../../plugins/light_estimation_lut/face_xm.png";
         Gfx::CTexturePtr FaceXM = Gfx::TextureManager::CreateTexture2D(TextureDescriptor, true, Gfx::SDataBehavior::Copy);
 
-        TextureDescriptor.m_pFileName = "face_y.png";
+        TextureDescriptor.m_pFileName = "../../plugins/light_estimation_lut/face_y.png";
         Gfx::CTexturePtr FaceYP = Gfx::TextureManager::CreateTexture2D(TextureDescriptor, true, Gfx::SDataBehavior::Copy);
 
-        TextureDescriptor.m_pFileName = "face_ym.png";
+        TextureDescriptor.m_pFileName = "../../plugins/light_estimation_lut/face_ym.png";
         Gfx::CTexturePtr FaceYM = Gfx::TextureManager::CreateTexture2D(TextureDescriptor, true, Gfx::SDataBehavior::Copy);
 
-        TextureDescriptor.m_pFileName = "face_z.png";
+        TextureDescriptor.m_pFileName = "../../plugins/light_estimation_lut/face_z.png";
         Gfx::CTexturePtr FaceZP = Gfx::TextureManager::CreateTexture2D(TextureDescriptor, true, Gfx::SDataBehavior::Copy);
 
-        TextureDescriptor.m_pFileName = "face_zm.png";
+        TextureDescriptor.m_pFileName = "../../plugins/light_estimation_lut/face_zm.png";
         Gfx::CTexturePtr FaceZM = Gfx::TextureManager::CreateTexture2D(TextureDescriptor, true, Gfx::SDataBehavior::Copy);
 
         Gfx::TextureManager::CopyToTextureArray2D(m_LookUpTexturePtr, 0, FaceXP);
