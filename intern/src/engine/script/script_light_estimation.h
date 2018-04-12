@@ -56,15 +56,14 @@ namespace Scpt
                 m_pSkyComponent->SetType(Dt::CSkyComponent::Cubemap);
                 m_pSkyComponent->SetTexture(GetOutputCubemap());
                 m_pSkyComponent->SetRefreshMode(Dt::CSkyComponent::Dynamic);
+                m_pSkyComponent->SetQuality(Dt::CSkyComponent::PX128);
 
                 Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*m_pSkyComponent, Dt::CSkyComponent::DirtyInfo);
             }
 
             if (Core::PluginManager::HasPlugin("Light Estimation LUT") && Core::PluginManager::HasPlugin("ArCore"))
             {
-                m_pSkyComponent->SetQuality(Dt::CSkyComponent::PX128);
-
-                SetInputTexture(GetBackgroundTexture());
+                 SetInputTexture(GetBackgroundTexture());
             }
             else
             {

@@ -179,6 +179,7 @@ namespace App
                 Component->SetRefreshMode(Dt::CSkyComponent::Static);
                 Component->SetType(Dt::CSkyComponent::Procedural);
                 Component->SetIntensity(10000.0f);
+                Component->SetQuality(Dt::CSkyComponent::PX128);
 
                 rEnvironmentEntity.AttachComponent(Component);
 

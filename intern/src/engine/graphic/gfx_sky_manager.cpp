@@ -153,12 +153,12 @@ namespace
             unsigned int ps_ExposureHistoryIndex;
         };
 
-        class CInternSkyFacet : public CSky
+        class CInternSky : public CSky
         {
         public:
 
-            CInternSkyFacet();
-            ~CInternSkyFacet();
+            CInternSky();
+            ~CInternSky();
 
         public:
 
@@ -174,7 +174,7 @@ namespace
 
         private:
 
-            typedef Base::CManagedPool<CInternSkyFacet, 1, 0> CSkies;
+            typedef Base::CManagedPool<CInternSky, 1, 0> CSkies;
 
         private:
 
@@ -200,19 +200,19 @@ namespace
 
         void OnDirtyComponent(Dt::IComponent* _pComponent);
 
-        void RenderSkybox(Dt::CSkyComponent* _pDataSkyFacet, CInternSkyFacet* _pOutput);
+        void RenderSkybox(Dt::CSkyComponent* _pDataSkyFacet, CInternSky* _pOutput);
 
-        void RenderSkyboxFromAtmopsphericScattering(CInternSkyFacet* _pOutput, float _Intensity = 1.0f);
+        void RenderSkyboxFromAtmopsphericScattering(CInternSky* _pOutput, float _Intensity = 1.0f);
 
-        void RenderSkyboxFromPanorama(CInternSkyFacet* _pOutput, float _Intensity = 1.0f);
+        void RenderSkyboxFromPanorama(CInternSky* _pOutput, float _Intensity = 1.0f);
 
-        void RenderSkyboxFromCubemap(CInternSkyFacet* _pOutput, float _Intensity = 1.0f);
+        void RenderSkyboxFromCubemap(CInternSky* _pOutput, float _Intensity = 1.0f);
 
-        void RenderSkyboxFromTexture(CInternSkyFacet* _pOutput, float _Intensity = 1.0f);
+        void RenderSkyboxFromTexture(CInternSky* _pOutput, float _Intensity = 1.0f);
 
-        void RenderSkyboxFromGeometry(CInternSkyFacet* _pOutput, float _Intensity = 1.0f);
+        void RenderSkyboxFromGeometry(CInternSky* _pOutput, float _Intensity = 1.0f);
 
-        void RenderSkyboxFromLUT(CInternSkyFacet* _pOutput, float _Intensity = 1.0f);
+        void RenderSkyboxFromLUT(CInternSky* _pOutput, float _Intensity = 1.0f);
 
         void PrecomputeScattering();
 
@@ -222,7 +222,7 @@ namespace
 
 namespace 
 {
-    CGfxSkyManager::CInternSkyFacet::CInternSkyFacet()
+    CGfxSkyManager::CInternSky::CInternSky()
         : CSky              ()
         , m_RenderContextPtr()
         , m_TargetSetPtr    ()
@@ -234,7 +234,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    CGfxSkyManager::CInternSkyFacet::~CInternSkyFacet()
+    CGfxSkyManager::CInternSky::~CInternSky()
     {
         m_RenderContextPtr   = 0;
         m_TargetSetPtr       = 0;
@@ -637,7 +637,7 @@ namespace
 
             if (pDataSkyboxFacet->GetRefreshMode() == Dt::CSkyComponent::Dynamic)
             {
-                CInternSkyFacet* pGraphicSkyboxFacet = static_cast<CInternSkyFacet*>(pDataSkyboxFacet->GetFacet(Dt::CSkyComponent::Graphic));
+                CInternSky* pGraphicSkyboxFacet = static_cast<CInternSky*>(pDataSkyboxFacet->GetFacet(Dt::CSkyComponent::Graphic));
 
                 RenderSkybox(pDataSkyboxFacet, pGraphicSkyboxFacet);
             }
@@ -655,42 +655,19 @@ namespace
         // -----------------------------------------------------------------------------
         // Lamda function
         // -----------------------------------------------------------------------------
-        auto UpdateFacet = [&](Dt::CSkyComponent* _pDataSkyboxFacet, CInternSkyFacet* _pGraphicSkyboxFacet)->void
-        {
-            _pGraphicSkyboxFacet->m_InputTexturePtr = 0;
-
-            if (_pDataSkyboxFacet->HasTexture())
-            {
-                _pGraphicSkyboxFacet->m_InputTexturePtr = _pDataSkyboxFacet->GetTexture();
-            }
-
-            // -----------------------------------------------------------------------------
-            // Render sky because of the change
-            // -----------------------------------------------------------------------------
-            RenderSkybox(_pDataSkyboxFacet, _pGraphicSkyboxFacet);
-
-            // -----------------------------------------------------------------------------
-            // Set time
-            // -----------------------------------------------------------------------------
-            _pGraphicSkyboxFacet->m_TimeStamp = Core::Time::GetNumberOfFrame();
-        };
-
-        // -----------------------------------------------------------------------------
-        // Dirty check
-        // -----------------------------------------------------------------------------
-        unsigned int DirtyFlags;
-
-        DirtyFlags = pSkyComponent->GetDirtyFlags();
-
-        if ((DirtyFlags & Dt::CSkyComponent::DirtyCreate))
+        auto UpdateCubemap = [&](Dt::CSkyComponent* _pSkyComponent, CInternSky* _pInternSky)->void
         {
             // -----------------------------------------------------------------------------
-            // Create facet
+            // Reset
             // -----------------------------------------------------------------------------
-            CInternSkyFacet* pGfxSkybox = m_Skies.Allocate();
+            _pInternSky->m_RenderContextPtr->SetViewPortSet(0);
+            _pInternSky->m_RenderContextPtr->SetTargetSet(0);
+            _pInternSky->m_ViewPortSetPtr = 0;
+            _pInternSky->m_TargetSetPtr = 0;
+            _pInternSky->m_CubemapPtr = 0;
 
             // -----------------------------------------------------------------------------
-            // Cubemap
+            // Create new environment map
             // -----------------------------------------------------------------------------
             STextureDescriptor TextureDescriptor;
 
@@ -706,18 +683,22 @@ namespace
             TextureDescriptor.m_Semantic         = CTexture::Diffuse;
             TextureDescriptor.m_pFileName        = 0;
             TextureDescriptor.m_pPixels          = 0;
+#if PLATFORM_WINDOWS
             TextureDescriptor.m_Format           = CTexture::R16G16B16A16_FLOAT;
+#elif PLATFORM_ANDROID
+            TextureDescriptor.m_Format           = CTexture::R16G16B16_FLOAT;
+#endif
         
-            pGfxSkybox->m_CubemapPtr = TextureManager::CreateCubeTexture(TextureDescriptor);
+            _pInternSky->m_CubemapPtr = TextureManager::CreateCubeTexture(TextureDescriptor);
 
-            TextureManager::SetTextureLabel(pGfxSkybox->m_CubemapPtr, "Sky Texture");
+            TextureManager::SetTextureLabel(_pInternSky->m_CubemapPtr, "Sky Texture");
 
             // -----------------------------------------------------------------------------
             // Target Set
             // -----------------------------------------------------------------------------
-            CTexturePtr FirstMipmapCubeTexture = TextureManager::GetMipmapFromTexture2D(pGfxSkybox->m_CubemapPtr, 0);
+            CTexturePtr FirstMipmapCubeTexture = TextureManager::GetMipmapFromTexture2D(_pInternSky->m_CubemapPtr, 0);
 
-            pGfxSkybox->m_TargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTexturePtr>(FirstMipmapCubeTexture));
+            _pInternSky->m_TargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTexturePtr>(FirstMipmapCubeTexture));
 
             // -----------------------------------------------------------------------------
             // Viewport
@@ -734,54 +715,101 @@ namespace
 
             CViewPortPtr MipMapViewPort = ViewManager::CreateViewPort(ViewPortDesc);
 
-            pGfxSkybox->m_ViewPortSetPtr = ViewManager::CreateViewPortSet(MipMapViewPort);
+            _pInternSky->m_ViewPortSetPtr = ViewManager::CreateViewPortSet(MipMapViewPort);
 
             // -----------------------------------------------------------------------------
             // Render context
             // -----------------------------------------------------------------------------
-            CCameraPtr      CameraPtr       = ViewManager::GetMainCamera();
+            _pInternSky->m_RenderContextPtr->SetViewPortSet(_pInternSky->m_ViewPortSetPtr);
+            _pInternSky->m_RenderContextPtr->SetTargetSet(_pInternSky->m_TargetSetPtr);
+        };
+
+        auto UpdateContent = [&](Dt::CSkyComponent* _pSkyComponent, CInternSky* _pGfxSkybox)->void
+        {
+            _pGfxSkybox->m_InputTexturePtr = 0;
+
+            if (_pSkyComponent->HasTexture())
+            {
+                _pGfxSkybox->m_InputTexturePtr = _pSkyComponent->GetTexture();
+            }
+
+            // -----------------------------------------------------------------------------
+            // Render sky because of the change
+            // -----------------------------------------------------------------------------
+            RenderSkybox(_pSkyComponent, _pGfxSkybox);
+        };
+
+        // -----------------------------------------------------------------------------
+        // Dirty check
+        // -----------------------------------------------------------------------------
+        unsigned int DirtyFlags;
+
+        DirtyFlags = pSkyComponent->GetDirtyFlags();
+
+        if ((DirtyFlags & Dt::CSkyComponent::DirtyCreate))
+        {
+            // -----------------------------------------------------------------------------
+            // Create facet
+            // -----------------------------------------------------------------------------
+            CInternSky* pInternSky = m_Skies.Allocate();
+
+            // -----------------------------------------------------------------------------
+            // Render context
+            // -----------------------------------------------------------------------------
+            CCameraPtr      CameraPtr = ViewManager::GetMainCamera();
             CRenderStatePtr NoDepthStatePtr = StateManager::GetRenderState(CRenderState::NoDepth | CRenderState::NoCull | CRenderState::AlphaBlend);
 
             CRenderContextPtr CubemapRenderContextPtr = ContextManager::CreateRenderContext();
 
             CubemapRenderContextPtr->SetCamera(CameraPtr);
-            CubemapRenderContextPtr->SetViewPortSet(pGfxSkybox->m_ViewPortSetPtr);
-            CubemapRenderContextPtr->SetTargetSet(pGfxSkybox->m_TargetSetPtr);
             CubemapRenderContextPtr->SetRenderState(NoDepthStatePtr);
 
-            pGfxSkybox->m_RenderContextPtr = CubemapRenderContextPtr;
+            pInternSky->m_RenderContextPtr = CubemapRenderContextPtr;
 
             // -----------------------------------------------------------------------------
-            // Update
+            // Cubemap
             // -----------------------------------------------------------------------------
-            UpdateFacet(pSkyComponent, pGfxSkybox);
+            UpdateCubemap(pSkyComponent, pInternSky);
+
+            // -----------------------------------------------------------------------------
+            // Content
+            // -----------------------------------------------------------------------------
+            UpdateContent(pSkyComponent, pInternSky);
 
             // -----------------------------------------------------------------------------
             // Link to component
             // -----------------------------------------------------------------------------
-            pSkyComponent->SetFacet(Dt::CSkyComponent::Graphic, pGfxSkybox);
+            pSkyComponent->SetFacet(Dt::CSkyComponent::Graphic, pInternSky);
 
-            pGfxSkybox->m_TimeStamp = Core::Time::GetNumberOfFrame() + 1;
+            pInternSky->m_TimeStamp = Core::Time::GetNumberOfFrame() + 1;
         }
         else if ((DirtyFlags & Dt::CSkyComponent::DirtyInfo))
         {
-            CInternSkyFacet* pGraphicSkyboxFacet = static_cast<CInternSkyFacet*>(pSkyComponent->GetFacet(Dt::CSkyComponent::Graphic));
+            CInternSky* pInternSky = static_cast<CInternSky*>(pSkyComponent->GetFacet(Dt::CSkyComponent::Graphic));
 
             // -----------------------------------------------------------------------------
-            // Update
+            // Check cubemap quality
             // -----------------------------------------------------------------------------
-            UpdateFacet(pSkyComponent, pGraphicSkyboxFacet);
+            if (pInternSky->m_CubemapPtr->GetNumberOfPixelsU() != pSkyComponent->GetQualityInPixel())
+            {
+                //UpdateCubemap(pSkyComponent, pInternSky);
+            }
+
+            // -----------------------------------------------------------------------------
+            // Content
+            // -----------------------------------------------------------------------------
+            UpdateContent(pSkyComponent, pInternSky);
 
             // -----------------------------------------------------------------------------
             // Set time
             // -----------------------------------------------------------------------------
-            pGraphicSkyboxFacet->m_TimeStamp = Core::Time::GetNumberOfFrame() + 1;
+            pInternSky->m_TimeStamp = Core::Time::GetNumberOfFrame() + 1;
         }
     }
 
     // -----------------------------------------------------------------------------
 
-    void CGfxSkyManager::RenderSkybox(Dt::CSkyComponent* _pDataSkyFacet, CInternSkyFacet* _pOutput)
+    void CGfxSkyManager::RenderSkybox(Dt::CSkyComponent* _pDataSkyFacet, CInternSky* _pOutput)
     {
         switch (_pDataSkyFacet->GetType())
         {
@@ -796,7 +824,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxSkyManager::RenderSkyboxFromAtmopsphericScattering(CInternSkyFacet* _pOutput, float _Intensity)
+    void CGfxSkyManager::RenderSkyboxFromAtmopsphericScattering(CInternSky* _pOutput, float _Intensity)
     {
         CRenderContextPtr RenderContextPtr = _pOutput->m_RenderContextPtr;
         CShaderPtr        VSPtr            = m_SkyboxFromAtmosphere.m_VSPtr;
@@ -924,7 +952,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxSkyManager::RenderSkyboxFromPanorama(CInternSkyFacet* _pOutput, float _Intensity)
+    void CGfxSkyManager::RenderSkyboxFromPanorama(CInternSky* _pOutput, float _Intensity)
     {
         if (_pOutput->m_InputTexturePtr == 0)
         {
@@ -1027,7 +1055,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxSkyManager::RenderSkyboxFromCubemap(CInternSkyFacet* _pOutput, float _Intensity)
+    void CGfxSkyManager::RenderSkyboxFromCubemap(CInternSky* _pOutput, float _Intensity)
     {
         if (_pOutput->m_InputTexturePtr == 0)
         {
@@ -1130,7 +1158,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxSkyManager::RenderSkyboxFromTexture(CInternSkyFacet* _pOutput, float _Intensity)
+    void CGfxSkyManager::RenderSkyboxFromTexture(CInternSky* _pOutput, float _Intensity)
     {
         if (_pOutput->m_InputTexturePtr == 0)
         {
@@ -1259,7 +1287,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxSkyManager::RenderSkyboxFromGeometry(CInternSkyFacet* _pOutput, float _Intensity)
+    void CGfxSkyManager::RenderSkyboxFromGeometry(CInternSky* _pOutput, float _Intensity)
     {
         if(_pOutput->m_InputTexturePtr == 0)
         {
@@ -1419,7 +1447,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxSkyManager::RenderSkyboxFromLUT(CInternSkyFacet* _pOutput, float _Intensity)
+    void CGfxSkyManager::RenderSkyboxFromLUT(CInternSky* _pOutput, float _Intensity)
     {
         if (_pOutput->m_InputTexturePtr == 0)
         {
