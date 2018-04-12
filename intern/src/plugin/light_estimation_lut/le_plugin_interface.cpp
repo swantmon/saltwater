@@ -85,28 +85,28 @@ namespace LE
         // -> Viewer is inside the cube > LHS
         // -----------------------------------------------------------------------------
         LookDirection = EyePosition + glm::vec3(1.0f, 0.0f, 0.0f);
-        UpDirection   = glm::vec3(0.0f, -1.0f, 0.0f);
+        UpDirection   = glm::vec3(0.0f, 0.0f, 1.0f);
         
         DefaultGSValues.m_CubeViewMatrix[0] = glm::lookAt(EyePosition, LookDirection, UpDirection);
         
         // -----------------------------------------------------------------------------
         
         LookDirection = EyePosition - glm::vec3(1.0f, 0.0f, 0.0f);
-        UpDirection   = glm::vec3(0.0f, -1.0f, 0.0f);
+        UpDirection   = glm::vec3(0.0f, 0.0f, 1.0f);
         
         DefaultGSValues.m_CubeViewMatrix[1] = glm::lookAt(EyePosition, LookDirection, UpDirection);
         
         // -----------------------------------------------------------------------------
         
         LookDirection = EyePosition + glm::vec3(0.0f, 1.0f, 0.0f);
-        UpDirection   = -glm::vec3(0.0f, 0.0f, -1.0f);;
+        UpDirection   = -glm::vec3(0.0f, 0.0f, 1.0f);
         
         DefaultGSValues.m_CubeViewMatrix[2] = glm::lookAt(EyePosition, LookDirection, UpDirection);
         
         // -----------------------------------------------------------------------------
         
         LookDirection = EyePosition - glm::vec3(0.0f, 1.0f, 0.0f);
-        UpDirection   = glm::vec3(0.0f, 0.0f, -1.0f);;
+        UpDirection   = glm::vec3(0.0f, 0.0f, 1.0f);
         
         DefaultGSValues.m_CubeViewMatrix[3] = glm::lookAt(EyePosition, LookDirection, UpDirection);
         
@@ -120,7 +120,7 @@ namespace LE
         // -----------------------------------------------------------------------------
         
         LookDirection = EyePosition - glm::vec3(0.0f, 0.0f, 1.0f);
-        UpDirection   = glm::vec3(0.0f, -1.0f, 0.0f);
+        UpDirection   = glm::vec3(0.0f, 1.0f, 0.0f);
         
         DefaultGSValues.m_CubeViewMatrix[5] = glm::lookAt(EyePosition, LookDirection, UpDirection);
         
@@ -128,7 +128,7 @@ namespace LE
         
         for (unsigned int IndexOfCubeface = 0; IndexOfCubeface < 6; ++ IndexOfCubeface)
         {
-            DefaultGSValues.m_CubeViewMatrix[IndexOfCubeface] *= glm::eulerAngleX(glm::radians(-90.0f));
+            //DefaultGSValues.m_CubeViewMatrix[IndexOfCubeface] *= glm::eulerAngleX(glm::radians(-90.0f));
         }
         
         // -----------------------------------------------------------------------------
