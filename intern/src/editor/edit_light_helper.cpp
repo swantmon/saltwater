@@ -379,15 +379,11 @@ namespace
             NewMessage.Put(static_cast<int>(pLightFacet->GetRefreshMode()));
             NewMessage.Put(static_cast<int>(pLightFacet->GetType()));
 
-            if (pLightFacet->GetType() == Dt::CSkyComponent::Procedural)
-            {
-                NewMessage.Put(false);
-            }
-            else
-            {
-                NewMessage.Put(true);
+            NewMessage.Put(pLightFacet->HasTexture());
 
-                NewMessage.Put(pLightFacet->GetTexture());
+            if (pLightFacet->HasTexture())
+            {
+                NewMessage.Put(pLightFacet->GetTexture()->GetFileName());
             }
 
             NewMessage.Put(pLightFacet->GetIntensity());
