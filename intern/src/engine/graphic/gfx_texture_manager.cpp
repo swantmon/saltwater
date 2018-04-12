@@ -741,7 +741,6 @@ namespace
                 pPathToTexture = reinterpret_cast<const wchar_t*>(PathToTexture.c_str());
 #endif
 
-
                 Result = ilLoadImage(pPathToTexture) == IL_TRUE;
             }
 
@@ -767,7 +766,7 @@ namespace
             }
             else
             {
-                ENGINE_CONSOLE_STREAMERROR("Failed loading image '" << PathToTexture.c_str() << "' from file.");
+                ENGINE_CONSOLE_ERRORV("Failed loading image '%s' from file.", PathToTexture.c_str());
 
                 ilDeleteImage(NativeImageName);
 
