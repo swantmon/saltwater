@@ -788,7 +788,7 @@ namespace
             // -----------------------------------------------------------------------------
             if (pInternSky->m_CubemapPtr->GetNumberOfPixelsU() != pSkyComponent->GetQualityInPixel())
             {
-                //UpdateCubemap(pSkyComponent, pInternSky);
+                UpdateCubemap(pSkyComponent, pInternSky);
             }
 
             // -----------------------------------------------------------------------------
@@ -809,12 +809,9 @@ namespace
     {
         switch (_pDataSkyFacet->GetType())
         {
-            case Dt::CSkyComponent::Procedural:      RenderSkyboxFromAtmopsphericScattering(_pOutput, _pDataSkyFacet->GetIntensity()); break;
-            case Dt::CSkyComponent::Panorama:        RenderSkyboxFromPanorama(_pOutput, _pDataSkyFacet->GetIntensity()); break;
-            case Dt::CSkyComponent::Cubemap:         RenderSkyboxFromCubemap(_pOutput, _pDataSkyFacet->GetIntensity()); break;
-            case Dt::CSkyComponent::Texture:         RenderSkyboxFromTexture(_pOutput, _pDataSkyFacet->GetIntensity()); break;
-            case Dt::CSkyComponent::TextureGeometry: RenderSkyboxFromGeometry(_pOutput, _pDataSkyFacet->GetIntensity()); break;
-            case Dt::CSkyComponent::TextureLUT:      RenderSkyboxFromLUT(_pOutput, _pDataSkyFacet->GetIntensity()); break;
+            case Dt::CSkyComponent::Procedural: RenderSkyboxFromAtmopsphericScattering(_pOutput, _pDataSkyFacet->GetIntensity()); break;
+            case Dt::CSkyComponent::Panorama:   RenderSkyboxFromPanorama(_pOutput, _pDataSkyFacet->GetIntensity()); break;
+            case Dt::CSkyComponent::Cubemap:    RenderSkyboxFromCubemap(_pOutput, _pDataSkyFacet->GetIntensity()); break;
         }
     }
 

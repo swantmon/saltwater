@@ -310,7 +310,7 @@ namespace Edit
 
             auto pMeshComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CMeshComponent>();
 
-            pMeshComponent->SetMeshType(Dt::CMeshComponent::Cone);
+            pMeshComponent->SetMeshType(Dt::CMeshComponent::Sphere);
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pMeshComponent, Dt::CMeshComponent::DirtyCreate);
 
@@ -320,7 +320,9 @@ namespace Edit
 
             auto pMaterial = Dt::MaterialManager::CreateMaterialFromName("Red Sparrow");
 
-            pMaterial->SetColor(glm::vec3(1.0f, 0.0f, 0.0f));
+            pMaterial->SetColor(glm::vec3(1.0f, 1.0f, 1.0f));
+            pMaterial->SetMetalness(1.0f);
+            pMaterial->SetRoughness(0.05f);
 
             auto pMaterialComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CMaterialComponent>();
 
