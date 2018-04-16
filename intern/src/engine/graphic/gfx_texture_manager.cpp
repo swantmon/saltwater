@@ -514,9 +514,9 @@ namespace
         // -----------------------------------------------------------------------------
         if (pInternTextureArray->m_Info.m_IsCubeTexture)
         {
-            glBindTexture(GL_TEXTURE_2D, TextureHandle);
+            glBindTexture(GL_TEXTURE_CUBE_MAP, _TextureArrayPtr->GetNativeHandle());
 
-            glTexSubImage3D(GL_TEXTURE_2D, 0, Offset[0], Offset[1], _IndexOfSlice, UpdateSize[0], UpdateSize[1], 1, Format, Type, _pBytes);
+            glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + _IndexOfSlice, 0, Offset[0], Offset[1], UpdateSize[0], UpdateSize[1], Format, Type, _pBytes);
         }
         else
         {

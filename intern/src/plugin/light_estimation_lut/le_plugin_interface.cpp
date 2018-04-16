@@ -16,8 +16,35 @@
 
 #include "plugin/light_estimation_lut/le_plugin_interface.h"
 
+#include <array>
+
+// -----------------------------------------------------------------------------
+// Register plugin
+// -----------------------------------------------------------------------------
 CORE_PLUGIN_INFO(LE::CPluginInterface, "Light Estimation LUT", "1.0", "This plugin generates a cubemap based on a precomputed look-up texture.")
 
+// -----------------------------------------------------------------------------
+// Settings
+// -----------------------------------------------------------------------------
+#define USE_CALCULATE_LUT 1
+// 0: LUT is used from texture
+// 1: LUT is calculated
+
+#if USE_CALCULATE_LUT == 1
+#include "opencv2/opencv.hpp"
+#endif
+
+// -----------------------------------------------------------------------------
+// Definitions
+// -----------------------------------------------------------------------------
+namespace 
+{
+    Gfx::CTexturePtr PrecomputeLUT();
+} // namespace 
+
+// -----------------------------------------------------------------------------
+// Implementation
+// -----------------------------------------------------------------------------
 namespace LE
 {
     void CPluginInterface::OnStart()
@@ -32,107 +59,38 @@ namespace LE
         // -----------------------------------------------------------------------------
         // Buffer
         // -----------------------------------------------------------------------------
-        Gfx::SBufferDescriptor ConstanteBufferDesc;
-
-        glm::vec3 EyePosition = glm::vec3(0.0f);
-        glm::vec3 UpDirection;
-        glm::vec3 LookDirection;
-        
         SCubemapBuffer DefaultGSValues;
         
-        DefaultGSValues.m_CubeProjectionMatrix = glm::perspective(glm::half_pi<float>(), 1.0f, 0.1f, 20000.0f);
-        
-        // -----------------------------------------------------------------------------
-        // By creating a cube map in OpenGL, several facts should be considered:
-        //  1. OpenGL cubemaps has an left handed coord system inside the cube and
-        //    right handed coord system outside the cube
-        //  2. Texcoords starts in the upper left corner (normally in the lower left 
-        //     corner)
-        //
-        // RHS:
-        //          +--------+
-        //          |        |
-        //          |   Y+   |
-        //          |        |
-        // +--------+--------+--------+--------+
-        // |        |        |        |        |
-        // |   X-   |   Z+   |   X+   |   Z-   |
-        // |        |        |        |        |
-        // +--------+--------+--------+--------+
-        //          |        |
-        //          |   Y-   |
-        //          |        |
-        //          +--------+
-        //
-        // LHS:
-        //          +--------+
-        //          |        |
-        //          |   Y+   |
-        //          |        |
-        // +--------+--------+--------+--------+
-        // |        |        |        |        |
-        // |   X-   |   Z-   |   X+   |   Z+   |
-        // |        |        |        |        |
-        // +--------+--------+--------+--------+
-        //          |        |
-        //          |   Y-   |
-        //          |        |
-        //          +--------+
-        // -----------------------------------------------------------------------------
+        std::array<glm::vec3, 6> LookDirections = {
+            glm::vec3(+1.0f,  0.0f,  0.0f),
+            glm::vec3(-1.0f,  0.0f,  0.0f),
+            glm::vec3( 0.0f, +1.0f,  0.0f),
+            glm::vec3( 0.0f, -1.0f,  0.0f),
+            glm::vec3( 0.0f,  0.0f, +1.0f),
+            glm::vec3( 0.0f,  0.0f, -1.0f),
+        };
 
-        // -----------------------------------------------------------------------------
-        // Creating VS matrix for spherical image to cube map:
-        // -> Viewer is inside the cube > LHS
-        // -----------------------------------------------------------------------------
-        LookDirection = EyePosition + glm::vec3(1.0f, 0.0f, 0.0f);
-        UpDirection   = glm::vec3(0.0f, 0.0f, 1.0f);
-        
-        DefaultGSValues.m_CubeViewMatrix[0] = glm::lookAt(EyePosition, LookDirection, UpDirection);
-        
-        // -----------------------------------------------------------------------------
-        
-        LookDirection = EyePosition - glm::vec3(1.0f, 0.0f, 0.0f);
-        UpDirection   = glm::vec3(0.0f, 0.0f, 1.0f);
-        
-        DefaultGSValues.m_CubeViewMatrix[1] = glm::lookAt(EyePosition, LookDirection, UpDirection);
-        
-        // -----------------------------------------------------------------------------
-        
-        LookDirection = EyePosition + glm::vec3(0.0f, 1.0f, 0.0f);
-        UpDirection   = -glm::vec3(0.0f, 0.0f, 1.0f);
-        
-        DefaultGSValues.m_CubeViewMatrix[2] = glm::lookAt(EyePosition, LookDirection, UpDirection);
-        
-        // -----------------------------------------------------------------------------
-        
-        LookDirection = EyePosition - glm::vec3(0.0f, 1.0f, 0.0f);
-        UpDirection   = glm::vec3(0.0f, 0.0f, 1.0f);
-        
-        DefaultGSValues.m_CubeViewMatrix[3] = glm::lookAt(EyePosition, LookDirection, UpDirection);
-        
-        // -----------------------------------------------------------------------------
-        
-        LookDirection = EyePosition + glm::vec3(0.0f, 0.0f, 1.0f);
-        UpDirection   = glm::vec3(0.0f, -1.0f, 0.0f);
-        
-        DefaultGSValues.m_CubeViewMatrix[4] = glm::lookAt(EyePosition, LookDirection, UpDirection);
+        std::array<glm::vec3, 6> UpDirections = {
+            glm::vec3(0.0f, 1.0f,  0.0f),
+            glm::vec3(0.0f, 1.0f,  0.0f),
+            glm::vec3(0.0f, 0.0f, -1.0f),
+            glm::vec3(0.0f, 0.0f,  1.0f),
+            glm::vec3(0.0f, 1.0f,  0.0f),
+            glm::vec3(0.0f, 1.0f,  0.0f),
+        };
 
-        // -----------------------------------------------------------------------------
-        
-        LookDirection = EyePosition - glm::vec3(0.0f, 0.0f, 1.0f);
-        UpDirection   = glm::vec3(0.0f, 1.0f, 0.0f);
-        
-        DefaultGSValues.m_CubeViewMatrix[5] = glm::lookAt(EyePosition, LookDirection, UpDirection);
-        
-        // -----------------------------------------------------------------------------
-        
-        for (unsigned int IndexOfCubeface = 0; IndexOfCubeface < 6; ++ IndexOfCubeface)
+        DefaultGSValues.m_CubeProjectionMatrix = glm::perspective(glm::half_pi<float>(), 1.0f, 0.1f, 1.0f);
+
+        for (int IndexOfCubeface = 0; IndexOfCubeface < 6; ++IndexOfCubeface)
         {
-            //DefaultGSValues.m_CubeViewMatrix[IndexOfCubeface] *= glm::eulerAngleX(glm::radians(-90.0f));
+            DefaultGSValues.m_CubeViewMatrix[IndexOfCubeface]  = glm::lookAt(glm::vec3(0.0f), LookDirections[IndexOfCubeface], UpDirections[IndexOfCubeface]);
+            DefaultGSValues.m_CubeViewMatrix[IndexOfCubeface] *= glm::eulerAngleX(glm::radians(-90.0f));
         }
         
         // -----------------------------------------------------------------------------
-        
+
+        Gfx::SBufferDescriptor ConstanteBufferDesc;
+
         ConstanteBufferDesc.m_Stride        = 0;
         ConstanteBufferDesc.m_Usage         = Gfx::CBuffer::GPURead;
         ConstanteBufferDesc.m_Binding       = Gfx::CBuffer::ConstantBuffer;
@@ -185,6 +143,7 @@ namespace LE
 
         // -----------------------------------------------------------------------------
 
+#if USE_CALCULATE_LUT == 0
         TextureDescriptor.m_NumberOfPixelsU  = 512;
         TextureDescriptor.m_NumberOfPixelsV  = 512;
         TextureDescriptor.m_NumberOfPixelsW  = 1;
@@ -228,6 +187,9 @@ namespace LE
         Gfx::TextureManager::CopyToTextureArray2D(m_LookUpTexturePtr, 3, FaceYM);
         Gfx::TextureManager::CopyToTextureArray2D(m_LookUpTexturePtr, 4, FaceZP);
         Gfx::TextureManager::CopyToTextureArray2D(m_LookUpTexturePtr, 5, FaceZM);
+#else
+        m_LookUpTexturePtr = PrecomputeLUT();
+#endif
 
         // -----------------------------------------------------------------------------
 
@@ -406,3 +368,298 @@ extern "C" CORE_PLUGIN_API_EXPORT Gfx::CTexturePtr GetOutputCubemap()
 {
     return static_cast<LE::CPluginInterface&>(GetInstance()).GetOutputCubemap();
 }
+
+#if USE_CALCULATE_LUT == 1
+namespace 
+{
+    Gfx::CTexturePtr PrecomputeLUT()
+    {
+        using namespace cv;
+
+#define CROP_PERCENTAGE 0.8f
+#define IMAGE_EDGE_LENGTH 512
+
+        auto CropImage = [&](const Mat& _rOriginal, Mat& _rCroppedImage, Mat& _rLeftPart, Mat& _rRightPart, Mat& _rTopPart, Mat& _rBottomPart)
+        {
+            int LengthX;
+            int LengthY;
+            int ShortedLength;
+            int PercentualShortedLength;
+
+            LengthX = _rOriginal.size[0];
+            LengthY = _rOriginal.size[1];
+
+            ShortedLength = LengthX < LengthY ? LengthX : LengthY;
+
+            PercentualShortedLength = static_cast<int>(static_cast<float>(ShortedLength) * CROP_PERCENTAGE);
+
+            unsigned int X = (LengthX - PercentualShortedLength) / 2;
+            unsigned int Y = (LengthY - PercentualShortedLength) / 2;
+
+            Rect CroppedRectangel(Y, X, PercentualShortedLength, PercentualShortedLength);
+
+            _rCroppedImage = _rOriginal(CroppedRectangel);
+
+            resize(_rCroppedImage, _rCroppedImage, Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH));
+
+            // -----------------------------------------------------------------------------
+
+            _rLeftPart = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, _rOriginal.type());
+            _rRightPart = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, _rOriginal.type());
+            _rTopPart = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, _rOriginal.type());
+            _rBottomPart = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, _rOriginal.type());
+
+            // -----------------------------------------------------------------------------
+
+            Point2f MaskPoints[4];
+            Point2f DestPoints[4];
+            Mat     WarpMat;
+
+            DestPoints[0] = Point2f(static_cast<float>(0), static_cast<float>(0));
+            DestPoints[1] = Point2f(static_cast<float>(0), static_cast<float>(IMAGE_EDGE_LENGTH - 1));
+            DestPoints[2] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH - 1), static_cast<float>(IMAGE_EDGE_LENGTH - 1));
+            DestPoints[3] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH - 1), static_cast<float>(0));
+
+            // -----------------------------------------------------------------------------
+
+            MaskPoints[0] = Point2f(static_cast<float>(0), static_cast<float>(0));
+            MaskPoints[1] = Point2f(static_cast<float>(0), static_cast<float>(LengthX - 1));
+            MaskPoints[2] = Point2f(static_cast<float>(Y - 1), static_cast<float>(X + PercentualShortedLength - 1));
+            MaskPoints[3] = Point2f(static_cast<float>(Y - 1), static_cast<float>(X - 1));
+
+            WarpMat = getPerspectiveTransform(MaskPoints, DestPoints);
+
+            warpPerspective(_rOriginal, _rLeftPart, WarpMat, _rLeftPart.size());
+
+            // -----------------------------------------------------------------------------
+
+            MaskPoints[0] = Point2f(static_cast<float>(Y + PercentualShortedLength - 1), static_cast<float>(X - 1));
+            MaskPoints[1] = Point2f(static_cast<float>(Y + PercentualShortedLength - 1), static_cast<float>(X + PercentualShortedLength - 1));
+            MaskPoints[2] = Point2f(static_cast<float>(LengthY - 1), static_cast<float>(LengthX - 1));
+            MaskPoints[3] = Point2f(static_cast<float>(LengthY - 1), static_cast<float>(0));
+
+            WarpMat = getPerspectiveTransform(MaskPoints, DestPoints);
+
+            warpPerspective(_rOriginal, _rRightPart, WarpMat, _rRightPart.size());
+
+            // -----------------------------------------------------------------------------
+
+            MaskPoints[0] = Point2f(static_cast<float>(0), static_cast<float>(0));
+            MaskPoints[1] = Point2f(static_cast<float>(Y - 1), static_cast<float>(X - 1));
+            MaskPoints[2] = Point2f(static_cast<float>(Y + PercentualShortedLength - 1), static_cast<float>(X - 1));
+            MaskPoints[3] = Point2f(static_cast<float>(LengthY - 1), static_cast<float>(0));
+
+            WarpMat = getPerspectiveTransform(MaskPoints, DestPoints);
+
+            warpPerspective(_rOriginal, _rTopPart, WarpMat, _rTopPart.size());
+
+            // -----------------------------------------------------------------------------
+
+            MaskPoints[0] = Point2f(static_cast<float>(Y - 1), static_cast<float>(X + PercentualShortedLength - 1));
+            MaskPoints[1] = Point2f(static_cast<float>(0), static_cast<float>(LengthX - 1));
+            MaskPoints[2] = Point2f(static_cast<float>(LengthY - 1), static_cast<float>(LengthX - 1));
+            MaskPoints[3] = Point2f(static_cast<float>(Y + PercentualShortedLength - 1), static_cast<float>(X + PercentualShortedLength - 1));
+
+            WarpMat = getPerspectiveTransform(MaskPoints, DestPoints);
+
+            warpPerspective(_rOriginal, _rBottomPart, WarpMat, _rBottomPart.size());
+        };
+
+        // -----------------------------------------------------------------------------
+
+        auto CombineFaces = [&](const Mat& _rOne, const Mat& _rTwo, const Point2f* _pDestinationOne, const Point2f* _pDestinationTwo)->cv::Mat
+        {
+            Mat CombinedOne, CombinedTwo;
+
+            CombinedOne = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, _rOne.type());
+            CombinedTwo = Mat::zeros(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH, _rOne.type());
+
+            // -----------------------------------------------------------------------------
+
+            Point2f MaskPoints[3];
+
+            MaskPoints[0] = Point2f(static_cast<float>(0), static_cast<float>(0));
+            MaskPoints[1] = Point2f(static_cast<float>(0), static_cast<float>(IMAGE_EDGE_LENGTH));
+            MaskPoints[2] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH), static_cast<float>(IMAGE_EDGE_LENGTH));
+
+            Mat WarpMat;
+
+            // -----------------------------------------------------------------------------
+
+            WarpMat = getAffineTransform(MaskPoints, _pDestinationOne);
+
+            warpAffine(_rOne, CombinedOne, WarpMat, CombinedOne.size());
+
+            // -----------------------------------------------------------------------------
+
+            WarpMat = getAffineTransform(MaskPoints, _pDestinationTwo);
+
+            warpAffine(_rTwo, CombinedTwo, WarpMat, CombinedTwo.size());
+
+            return CombinedOne + CombinedTwo;
+        };
+
+        // -----------------------------------------------------------------------------
+
+        auto CombineRightFaces = [&](const Mat& _rOne, const Mat& _rTwo)->cv::Mat
+        {
+            Point2f DestPointsOne[3];
+            Point2f DestPointsTwo[3];
+
+            DestPointsOne[0] = Point2f(static_cast<float>(0), static_cast<float>(0));
+            DestPointsOne[1] = Point2f(static_cast<float>(0), static_cast<float>(IMAGE_EDGE_LENGTH));
+            DestPointsOne[2] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH / 2), static_cast<float>(IMAGE_EDGE_LENGTH));
+
+            DestPointsTwo[0] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH / 2), static_cast<float>(0));
+            DestPointsTwo[1] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH / 2), static_cast<float>(IMAGE_EDGE_LENGTH));
+            DestPointsTwo[2] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH), static_cast<float>(IMAGE_EDGE_LENGTH));
+
+            Mat Combination = CombineFaces(_rOne, _rTwo, DestPointsOne, DestPointsTwo);
+
+            return Combination;
+        };
+
+        // -----------------------------------------------------------------------------
+
+        auto CombineLeftFaces = [&](const Mat& _rOne, const Mat& _rTwo)->cv::Mat
+        {
+            Point2f DestPointsOne[3];
+            Point2f DestPointsTwo[3];
+
+            DestPointsOne[0] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH / 2), static_cast<float>(0));
+            DestPointsOne[1] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH / 2), static_cast<float>(IMAGE_EDGE_LENGTH));
+            DestPointsOne[2] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH), static_cast<float>(IMAGE_EDGE_LENGTH));
+
+            DestPointsTwo[0] = Point2f(static_cast<float>(0), static_cast<float>(0));
+            DestPointsTwo[1] = Point2f(static_cast<float>(0), static_cast<float>(IMAGE_EDGE_LENGTH));
+            DestPointsTwo[2] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH / 2), static_cast<float>(IMAGE_EDGE_LENGTH));
+
+            Mat Combination = CombineFaces(_rOne, _rTwo, DestPointsOne, DestPointsTwo);
+
+            return Combination;
+        };
+
+        // -----------------------------------------------------------------------------
+
+        auto CombineTopFaces = [&](const Mat& _rOne, const Mat& _rTwo)->cv::Mat
+        {
+            Point2f DestPointsOne[3];
+            Point2f DestPointsTwo[3];
+
+            DestPointsOne[0] = Point2f(static_cast<float>(0), static_cast<float>(IMAGE_EDGE_LENGTH / 2));
+            DestPointsOne[1] = Point2f(static_cast<float>(0), static_cast<float>(IMAGE_EDGE_LENGTH));
+            DestPointsOne[2] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH), static_cast<float>(IMAGE_EDGE_LENGTH));
+
+            DestPointsTwo[0] = Point2f(static_cast<float>(0), static_cast<float>(0));
+            DestPointsTwo[1] = Point2f(static_cast<float>(0), static_cast<float>(IMAGE_EDGE_LENGTH / 2));
+            DestPointsTwo[2] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH), static_cast<float>(IMAGE_EDGE_LENGTH / 2));
+
+            Mat Combination = CombineFaces(_rOne, _rTwo, DestPointsOne, DestPointsTwo);
+
+            return Combination;
+        };
+
+        // -----------------------------------------------------------------------------
+
+        auto CombineBottomFaces = [&](const Mat& _rOne, const Mat& _rTwo)->cv::Mat
+        {
+            Point2f DestPointsOne[3];
+            Point2f DestPointsTwo[3];
+
+            DestPointsOne[0] = Point2f(static_cast<float>(0), static_cast<float>(0));
+            DestPointsOne[1] = Point2f(static_cast<float>(0), static_cast<float>(IMAGE_EDGE_LENGTH / 2));
+            DestPointsOne[2] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH), static_cast<float>(IMAGE_EDGE_LENGTH / 2));
+
+            DestPointsTwo[0] = Point2f(static_cast<float>(0), static_cast<float>(IMAGE_EDGE_LENGTH / 2));
+            DestPointsTwo[1] = Point2f(static_cast<float>(0), static_cast<float>(IMAGE_EDGE_LENGTH));
+            DestPointsTwo[2] = Point2f(static_cast<float>(IMAGE_EDGE_LENGTH), static_cast<float>(IMAGE_EDGE_LENGTH));
+
+            Mat Combination = CombineFaces(_rOne, _rTwo, DestPointsOne, DestPointsTwo);
+
+            return Combination;
+        };
+
+        cv::Mat OriginalFrontImage, FrontCroped, FrontLeftPart, FrontRightPart, FrontTopPart, FrontBottomPart;
+        cv::Mat OriginalBackImage, BackCroped, BackLeftPart, BackRightPart, BackTopPart, BackBottomPart;
+
+        cv::Mat CombinedRight, CombinedLeft, CombinedTop, CombinedBottom;
+
+        CombinedRight.create(cv::Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH), CV_32FC2);
+        CombinedLeft.create(cv::Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH), CV_32FC2);
+        CombinedTop.create(cv::Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH), CV_32FC2);
+        CombinedBottom.create(cv::Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH), CV_32FC2);
+        FrontCroped.create(cv::Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH), CV_32FC2);
+        BackCroped.create(cv::Size(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH), CV_32FC2);
+
+        OriginalFrontImage.create(cv::Size(1280, 720), CV_32FC2);
+
+        for (int CurrentY = 0; CurrentY < OriginalFrontImage.rows; CurrentY++)
+        {
+            for (int CurrentX = 0; CurrentX < OriginalFrontImage.cols; CurrentX++)
+            {
+                OriginalFrontImage.at<Vec2f>(Point(CurrentX, CurrentY)) = cv::Vec2f(static_cast<float>(CurrentX) / static_cast<float>(OriginalFrontImage.cols), static_cast<float>(CurrentY) / static_cast<float>(OriginalFrontImage.rows));
+            }
+        }
+
+        // -----------------------------------------------------------------------------
+
+        flip(OriginalFrontImage, OriginalBackImage, 1);
+
+        // -----------------------------------------------------------------------------
+        // Crop front image
+        // -----------------------------------------------------------------------------
+        CropImage(OriginalFrontImage, FrontCroped, FrontLeftPart, FrontRightPart, FrontTopPart, FrontBottomPart);
+        CropImage(OriginalBackImage, BackCroped, BackLeftPart, BackRightPart, BackTopPart, BackBottomPart);
+
+        // -----------------------------------------------------------------------------
+        // Flip back images because of negative direction on back face
+        // -----------------------------------------------------------------------------
+        flip(BackTopPart, BackTopPart, -1);
+        flip(BackBottomPart, BackBottomPart, -1);
+
+        // -----------------------------------------------------------------------------
+        // Fill Images
+        // -----------------------------------------------------------------------------
+        CombinedRight = CombineRightFaces(FrontRightPart, BackLeftPart);
+        CombinedLeft = CombineLeftFaces(FrontLeftPart, BackRightPart);
+        CombinedTop = CombineTopFaces(FrontTopPart, BackTopPart);
+        CombinedBottom = CombineBottomFaces(FrontBottomPart, BackBottomPart);
+
+        // -----------------------------------------------------------------------------
+        // Create and update texture
+        // -----------------------------------------------------------------------------
+        Gfx::STextureDescriptor TextureDescriptor;
+
+        TextureDescriptor.m_NumberOfPixelsU  = IMAGE_EDGE_LENGTH;
+        TextureDescriptor.m_NumberOfPixelsV  = IMAGE_EDGE_LENGTH;
+        TextureDescriptor.m_NumberOfPixelsW  = 1;
+        TextureDescriptor.m_NumberOfMipMaps  = Gfx::STextureDescriptor::s_GenerateAllMipMaps;
+        TextureDescriptor.m_NumberOfTextures = 6;
+        TextureDescriptor.m_Binding          = Gfx::CTexture::ShaderResource;
+        TextureDescriptor.m_Access           = Gfx::CTexture::CPUWrite;
+        TextureDescriptor.m_Format           = Gfx::CTexture::Unknown;
+        TextureDescriptor.m_Usage            = Gfx::CTexture::GPURead;
+        TextureDescriptor.m_Semantic         = Gfx::CTexture::Diffuse;
+        TextureDescriptor.m_pFileName        = 0;
+        TextureDescriptor.m_pPixels          = 0;
+        TextureDescriptor.m_Format           = Gfx::CTexture::R32G32_FLOAT;
+
+        Gfx::CTexturePtr LookUpTexturePtr = Gfx::TextureManager::CreateCubeTexture(TextureDescriptor);
+
+        glm::ivec2 CubemapResolution = glm::ivec2(IMAGE_EDGE_LENGTH, IMAGE_EDGE_LENGTH);
+
+        Base::AABB2UInt CubemapRect(glm::ivec2(0), CubemapResolution);
+
+        Gfx::TextureManager::CopyToTextureArray2D(LookUpTexturePtr, 0, CubemapRect, CubemapRect[1][0], CombinedRight.data, false);
+        Gfx::TextureManager::CopyToTextureArray2D(LookUpTexturePtr, 1, CubemapRect, CubemapRect[1][0], CombinedLeft.data, false);
+        Gfx::TextureManager::CopyToTextureArray2D(LookUpTexturePtr, 2, CubemapRect, CubemapRect[1][0], CombinedTop.data, false);
+        Gfx::TextureManager::CopyToTextureArray2D(LookUpTexturePtr, 3, CubemapRect, CubemapRect[1][0], CombinedBottom.data, false);
+        Gfx::TextureManager::CopyToTextureArray2D(LookUpTexturePtr, 4, CubemapRect, CubemapRect[1][0], FrontCroped.data, false);
+        Gfx::TextureManager::CopyToTextureArray2D(LookUpTexturePtr, 5, CubemapRect, CubemapRect[1][0], BackCroped.data, false);
+
+        Gfx::TextureManager::UpdateMipmap(LookUpTexturePtr);
+
+        return LookUpTexturePtr;
+    }
+} // namespace 
+#endif
