@@ -1,4 +1,17 @@
 
+// -----------------------------------------------------------------------------
+// Settings
+// 0: LUT is used from cube map texture
+// 1: LUT is calculated using OPENCV
+// -----------------------------------------------------------------------------
+#define LOAD_LUT_CUBEMAP 0
+#define LOAD_LUT_OPENCV 1
+
+#define LOAD_LUT_INDICATOR LOAD_LUT_OPENCV
+
+// -----------------------------------------------------------------------------
+// Includes
+// -----------------------------------------------------------------------------
 #include "plugin/light_estimation_lut/le_precompiled.h"
 
 #include "engine/core/core_console.h"
@@ -16,6 +29,10 @@
 
 #include "plugin/light_estimation_lut/le_plugin_interface.h"
 
+#if LOAD_LUT_INDICATOR == LOAD_LUT_OPENCV
+#include "opencv2/opencv.hpp"
+#endif
+
 #include <array>
 
 // -----------------------------------------------------------------------------
@@ -24,22 +41,13 @@
 CORE_PLUGIN_INFO(LE::CPluginInterface, "Light Estimation LUT", "1.0", "This plugin generates a cubemap based on a precomputed look-up texture.")
 
 // -----------------------------------------------------------------------------
-// Settings
-// -----------------------------------------------------------------------------
-#define USE_CALCULATE_LUT 1
-// 0: LUT is used from texture
-// 1: LUT is calculated
-
-#if USE_CALCULATE_LUT == 1
-#include "opencv2/opencv.hpp"
-#endif
-
-// -----------------------------------------------------------------------------
 // Definitions
 // -----------------------------------------------------------------------------
 namespace 
 {
-    Gfx::CTexturePtr PrecomputeLUT();
+    Gfx::CTexturePtr CreateLookUpTexture();
+    Gfx::CTexturePtr CreateLUTFromCubemap();
+    Gfx::CTexturePtr CreateLUTFromAlgorithm();
 } // namespace 
 
 // -----------------------------------------------------------------------------
@@ -66,17 +74,17 @@ namespace LE
             glm::vec3(-1.0f,  0.0f,  0.0f),
             glm::vec3( 0.0f, +1.0f,  0.0f),
             glm::vec3( 0.0f, -1.0f,  0.0f),
-            glm::vec3( 0.0f,  0.0f, +1.0f),
             glm::vec3( 0.0f,  0.0f, -1.0f),
+            glm::vec3( 0.0f,  0.0f, +1.0f),
         };
 
         std::array<glm::vec3, 6> UpDirections = {
-            glm::vec3(0.0f, 1.0f,  0.0f),
-            glm::vec3(0.0f, 1.0f,  0.0f),
-            glm::vec3(0.0f, 0.0f, -1.0f),
-            glm::vec3(0.0f, 0.0f,  1.0f),
-            glm::vec3(0.0f, 1.0f,  0.0f),
-            glm::vec3(0.0f, 1.0f,  0.0f),
+            glm::vec3(0.0f,  1.0f,  0.0f),
+            glm::vec3(0.0f,  1.0f,  0.0f),
+            glm::vec3(0.0f,  0.0f, -1.0f),
+            glm::vec3(0.0f,  0.0f, +1.0f),
+            glm::vec3(0.0f,  1.0f,  0.0f),
+            glm::vec3(0.0f,  1.0f,  0.0f),
         };
 
         DefaultGSValues.m_CubeProjectionMatrix = glm::perspective(glm::half_pi<float>(), 1.0f, 0.1f, 1.0f);
@@ -84,7 +92,7 @@ namespace LE
         for (int IndexOfCubeface = 0; IndexOfCubeface < 6; ++IndexOfCubeface)
         {
             DefaultGSValues.m_CubeViewMatrix[IndexOfCubeface]  = glm::lookAt(glm::vec3(0.0f), LookDirections[IndexOfCubeface], UpDirections[IndexOfCubeface]);
-            DefaultGSValues.m_CubeViewMatrix[IndexOfCubeface] *= glm::eulerAngleX(glm::radians(-90.0f));
+            //DefaultGSValues.m_CubeViewMatrix[IndexOfCubeface] *= glm::eulerAngleX(glm::radians(-90.0f));
         }
         
         // -----------------------------------------------------------------------------
@@ -116,7 +124,7 @@ namespace LE
         // -----------------------------------------------------------------------------
         // Mesh
         // -----------------------------------------------------------------------------
-        m_MeshPtr = Gfx::MeshManager::CreateSphereIsometric(1.0f, 3);
+        m_MeshPtr = Gfx::MeshManager::CreateSphereIsometric(1.0f, 2);
 
         // -----------------------------------------------------------------------------
         // Texture
@@ -143,53 +151,9 @@ namespace LE
 
         // -----------------------------------------------------------------------------
 
-#if USE_CALCULATE_LUT == 0
-        TextureDescriptor.m_NumberOfPixelsU  = 512;
-        TextureDescriptor.m_NumberOfPixelsV  = 512;
-        TextureDescriptor.m_NumberOfPixelsW  = 1;
-        TextureDescriptor.m_NumberOfMipMaps  = Gfx::STextureDescriptor::s_GenerateAllMipMaps;
-        TextureDescriptor.m_NumberOfTextures = 6;
-        TextureDescriptor.m_Binding          = Gfx::CTexture::ShaderResource;
-        TextureDescriptor.m_Access           = Gfx::CTexture::CPUWrite;
-        TextureDescriptor.m_Format           = Gfx::CTexture::Unknown;
-        TextureDescriptor.m_Usage            = Gfx::CTexture::GPURead;
-        TextureDescriptor.m_Semantic         = Gfx::CTexture::Diffuse;
-        TextureDescriptor.m_pFileName        = 0;
-        TextureDescriptor.m_pPixels          = 0;
-        TextureDescriptor.m_Format           = Gfx::CTexture::R8G8B8A8_UBYTE;
-
-        m_LookUpTexturePtr = Gfx::TextureManager::CreateCubeTexture(TextureDescriptor);
+        m_LookUpTexturePtr = CreateLookUpTexture();
 
         Gfx::TextureManager::SetTextureLabel(m_LookUpTexturePtr, "Sky LUT");
-
-        TextureDescriptor.m_pFileName        = "../../plugins/light_estimation_lut/face_x.png";
-        TextureDescriptor.m_NumberOfTextures = 1;
-        Gfx::CTexturePtr FaceXP = Gfx::TextureManager::CreateTexture2D(TextureDescriptor, true, Gfx::SDataBehavior::Copy);
-
-        TextureDescriptor.m_pFileName = "../../plugins/light_estimation_lut/face_xm.png";
-        Gfx::CTexturePtr FaceXM = Gfx::TextureManager::CreateTexture2D(TextureDescriptor, true, Gfx::SDataBehavior::Copy);
-
-        TextureDescriptor.m_pFileName = "../../plugins/light_estimation_lut/face_y.png";
-        Gfx::CTexturePtr FaceYP = Gfx::TextureManager::CreateTexture2D(TextureDescriptor, true, Gfx::SDataBehavior::Copy);
-
-        TextureDescriptor.m_pFileName = "../../plugins/light_estimation_lut/face_ym.png";
-        Gfx::CTexturePtr FaceYM = Gfx::TextureManager::CreateTexture2D(TextureDescriptor, true, Gfx::SDataBehavior::Copy);
-
-        TextureDescriptor.m_pFileName = "../../plugins/light_estimation_lut/face_z.png";
-        Gfx::CTexturePtr FaceZP = Gfx::TextureManager::CreateTexture2D(TextureDescriptor, true, Gfx::SDataBehavior::Copy);
-
-        TextureDescriptor.m_pFileName = "../../plugins/light_estimation_lut/face_zm.png";
-        Gfx::CTexturePtr FaceZM = Gfx::TextureManager::CreateTexture2D(TextureDescriptor, true, Gfx::SDataBehavior::Copy);
-
-        Gfx::TextureManager::CopyToTextureArray2D(m_LookUpTexturePtr, 0, FaceXP);
-        Gfx::TextureManager::CopyToTextureArray2D(m_LookUpTexturePtr, 1, FaceXM);
-        Gfx::TextureManager::CopyToTextureArray2D(m_LookUpTexturePtr, 2, FaceYP);
-        Gfx::TextureManager::CopyToTextureArray2D(m_LookUpTexturePtr, 3, FaceYM);
-        Gfx::TextureManager::CopyToTextureArray2D(m_LookUpTexturePtr, 4, FaceZP);
-        Gfx::TextureManager::CopyToTextureArray2D(m_LookUpTexturePtr, 5, FaceZM);
-#else
-        m_LookUpTexturePtr = PrecomputeLUT();
-#endif
 
         // -----------------------------------------------------------------------------
 
@@ -369,10 +333,68 @@ extern "C" CORE_PLUGIN_API_EXPORT Gfx::CTexturePtr GetOutputCubemap()
     return static_cast<LE::CPluginInterface&>(GetInstance()).GetOutputCubemap();
 }
 
-#if USE_CALCULATE_LUT == 1
 namespace 
 {
-    Gfx::CTexturePtr PrecomputeLUT()
+    Gfx::CTexturePtr CreateLookUpTexture()
+    {
+#if LOAD_LUT_INDICATOR == LOAD_LUT_CUBEMAP
+        return CreateLUTFromCubemap();
+#elif LOAD_LUT_INDICATOR == LOAD_LUT_OPENCV
+        return CreateLUTFromAlgorithm();
+#endif
+    }
+
+#if LOAD_LUT_INDICATOR == LOAD_LUT_CUBEMAP
+    Gfx::CTexturePtr CreateLUTFromCubemap()
+    {
+        Gfx::STextureDescriptor TextureDescriptor;
+
+        TextureDescriptor.m_NumberOfPixelsU  = 512;
+        TextureDescriptor.m_NumberOfPixelsV  = 512;
+        TextureDescriptor.m_NumberOfPixelsW  = 1;
+        TextureDescriptor.m_NumberOfMipMaps  = Gfx::STextureDescriptor::s_GenerateAllMipMaps;
+        TextureDescriptor.m_NumberOfTextures = 6;
+        TextureDescriptor.m_Binding          = Gfx::CTexture::ShaderResource;
+        TextureDescriptor.m_Access           = Gfx::CTexture::CPUWrite;
+        TextureDescriptor.m_Format           = Gfx::CTexture::Unknown;
+        TextureDescriptor.m_Usage            = Gfx::CTexture::GPURead;
+        TextureDescriptor.m_Semantic         = Gfx::CTexture::Diffuse;
+        TextureDescriptor.m_pFileName        = 0;
+        TextureDescriptor.m_pPixels          = 0;
+        TextureDescriptor.m_Format           = Gfx::CTexture::R8G8B8A8_UBYTE;
+
+        Gfx::CTexturePtr LookUpTexturePtr = Gfx::TextureManager::CreateCubeTexture(TextureDescriptor);
+
+        TextureDescriptor.m_pFileName        = "../../plugins/light_estimation_lut/face_x.png";
+        TextureDescriptor.m_NumberOfTextures = 1;
+        Gfx::CTexturePtr FaceXP = Gfx::TextureManager::CreateTexture2D(TextureDescriptor, true, Gfx::SDataBehavior::Copy);
+
+        TextureDescriptor.m_pFileName = "../../plugins/light_estimation_lut/face_xm.png";
+        Gfx::CTexturePtr FaceXM = Gfx::TextureManager::CreateTexture2D(TextureDescriptor, true, Gfx::SDataBehavior::Copy);
+
+        TextureDescriptor.m_pFileName = "../../plugins/light_estimation_lut/face_y.png";
+        Gfx::CTexturePtr FaceYP = Gfx::TextureManager::CreateTexture2D(TextureDescriptor, true, Gfx::SDataBehavior::Copy);
+
+        TextureDescriptor.m_pFileName = "../../plugins/light_estimation_lut/face_ym.png";
+        Gfx::CTexturePtr FaceYM = Gfx::TextureManager::CreateTexture2D(TextureDescriptor, true, Gfx::SDataBehavior::Copy);
+
+        TextureDescriptor.m_pFileName = "../../plugins/light_estimation_lut/face_z.png";
+        Gfx::CTexturePtr FaceZP = Gfx::TextureManager::CreateTexture2D(TextureDescriptor, true, Gfx::SDataBehavior::Copy);
+
+        TextureDescriptor.m_pFileName = "../../plugins/light_estimation_lut/face_zm.png";
+        Gfx::CTexturePtr FaceZM = Gfx::TextureManager::CreateTexture2D(TextureDescriptor, true, Gfx::SDataBehavior::Copy);
+
+        Gfx::TextureManager::CopyToTextureArray2D(LookUpTexturePtr, 0, FaceXP);
+        Gfx::TextureManager::CopyToTextureArray2D(LookUpTexturePtr, 1, FaceXM);
+        Gfx::TextureManager::CopyToTextureArray2D(LookUpTexturePtr, 2, FaceYP);
+        Gfx::TextureManager::CopyToTextureArray2D(LookUpTexturePtr, 3, FaceYM);
+        Gfx::TextureManager::CopyToTextureArray2D(LookUpTexturePtr, 4, FaceZP);
+        Gfx::TextureManager::CopyToTextureArray2D(LookUpTexturePtr, 5, FaceZM);
+
+        return LookUpTexturePtr;
+    }
+#elif LOAD_LUT_INDICATOR == LOAD_LUT_OPENCV
+    Gfx::CTexturePtr CreateLUTFromAlgorithm()
     {
         using namespace cv;
 
@@ -661,5 +683,5 @@ namespace
 
         return LookUpTexturePtr;
     }
-} // namespace 
 #endif
+} // namespace 
