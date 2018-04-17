@@ -223,7 +223,6 @@
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_rasterizer_description.h" />
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_rasterizer_state.h" />
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_reflection_renderer.h" />
-    <ClInclude Include="..\..\..\src\engine\graphic\gfx_release.h" />
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_render_context.h" />
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_render_state.h" />
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_sampler.h" />
