@@ -1379,7 +1379,7 @@ namespace
 
                 pTextureData = ilGetData();
 
-                glTexSubImage3D(GL_TEXTURE_CUBE_MAP, 0, 0, 0, IndexOfFace, ImageWidth, ImageHeight, 1, GLFormat, GLType, pTextureData);
+                glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + IndexOfFace, 0, 0, 0, ImageWidth, ImageHeight, GLFormat, GLType, pTextureData);
             }
         }
 
