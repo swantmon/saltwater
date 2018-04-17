@@ -434,6 +434,8 @@ namespace Pipeline
         // -----------------------------------------------------------------------------
         // Update renderer to prepare for rendering
         // -----------------------------------------------------------------------------
+        Performance::BeginEvent("Update Pass");
+
         ARRenderer           ::Update();
         MeshRenderer         ::Update();
         FogRenderer          ::Update();
@@ -449,6 +451,8 @@ namespace Pipeline
         PostFXHDR            ::Update();
         PostFX               ::Update();
         SelectionRenderer    ::Update();
+
+        Performance::EndEvent();
 
         // -----------------------------------------------------------------------------
         // Creation Pass
