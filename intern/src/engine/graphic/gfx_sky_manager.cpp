@@ -185,7 +185,6 @@ namespace
         SRenderContext    m_SkyboxFromCubemap;
         SRenderContext    m_SkyboxFromTexture;
         SRenderContext    m_SkyboxFromGeometry;
-        SRenderContext    m_SkyboxFromLUT;
         CTexturePtr       m_LookUpTexturePtr;
         CInputLayoutPtr   m_P3T2CubemapInputLayoutPtr;
         CSelectionTicket* m_pSelectionTicket;
@@ -211,8 +210,6 @@ namespace
         void RenderSkyboxFromTexture(CInternSky* _pOutput, float _Intensity = 1.0f);
 
         void RenderSkyboxFromGeometry(CInternSky* _pOutput, float _Intensity = 1.0f);
-
-        void RenderSkyboxFromLUT(CInternSky* _pOutput, float _Intensity = 1.0f);
 
         void PrecomputeScattering();
 
@@ -251,7 +248,6 @@ namespace
         , m_SkyboxFromCubemap ()
         , m_SkyboxFromTexture ()
         , m_SkyboxFromGeometry()
-        , m_SkyboxFromLUT     ()
         , m_LookUpTexturePtr  (0)
         , m_pSelectionTicket  (0)
     {
@@ -317,106 +313,39 @@ namespace
         m_SkyboxFromGeometry.m_GSPtr          = CubemapGSPtr;
         m_SkyboxFromGeometry.m_PSPtr          = CubemapTexturePSPtr;
 
-        m_SkyboxFromLUT.m_VSPtr          = CubemapVSPtr;
-        m_SkyboxFromLUT.m_GSPtr          = CubemapRotateGSPtr;
-        m_SkyboxFromLUT.m_PSPtr          = CubemapLUTPSPtr;
-
         // -----------------------------------------------------------------------------
         // Buffer
         // -----------------------------------------------------------------------------
-        SBufferDescriptor ConstanteBufferDesc;
-
-        glm::vec3 EyePosition = glm::vec3(0.0f);
-        glm::vec3 UpDirection;
-        glm::vec3 LookDirection;
-        
         SCubemapBufferGS DefaultGSValues;
         
-        DefaultGSValues.m_CubeProjectionMatrix = glm::perspective(glm::half_pi<float>(), 1.0f, 0.1f, 20000.0f);
-        
-        // -----------------------------------------------------------------------------
-        // By creating a cube map in OpenGL, several facts should be considered:
-        //  1. OpenGL cubemaps has an left handed coord system inside the cube and
-        //    right handed coord system outside the cube
-        //  2. Texcoords starts in the upper left corner (normally in the lower left 
-        //     corner)
-        //
-        // RHS:
-        //          +--------+
-        //          |        |
-        //          |   Y+   |
-        //          |        |
-        // +--------+--------+--------+--------+
-        // |        |        |        |        |
-        // |   X-   |   Z+   |   X+   |   Z-   |
-        // |        |        |        |        |
-        // +--------+--------+--------+--------+
-        //          |        |
-        //          |   Y-   |
-        //          |        |
-        //          +--------+
-        //
-        // LHS:
-        //          +--------+
-        //          |        |
-        //          |   Y+   |
-        //          |        |
-        // +--------+--------+--------+--------+
-        // |        |        |        |        |
-        // |   X-   |   Z-   |   X+   |   Z+   |
-        // |        |        |        |        |
-        // +--------+--------+--------+--------+
-        //          |        |
-        //          |   Y-   |
-        //          |        |
-        //          +--------+
-        // -----------------------------------------------------------------------------
+        std::array<glm::vec3, 6> LookDirections = {
+            glm::vec3(+1.0f,  0.0f,  0.0f),
+            glm::vec3(-1.0f,  0.0f,  0.0f),
+            glm::vec3( 0.0f, +1.0f,  0.0f),
+            glm::vec3( 0.0f, -1.0f,  0.0f),
+            glm::vec3( 0.0f,  0.0f, +1.0f),
+            glm::vec3( 0.0f,  0.0f, -1.0f),
+        };
+
+        std::array<glm::vec3, 6> UpDirections = {
+            glm::vec3(0.0f, -1.0f,  0.0f),
+            glm::vec3(0.0f, -1.0f,  0.0f),
+            glm::vec3(0.0f,  0.0f, +1.0f),
+            glm::vec3(0.0f,  0.0f, -1.0f),
+            glm::vec3(0.0f, -1.0f,  0.0f),
+            glm::vec3(0.0f, -1.0f,  0.0f),
+        };
+
+        DefaultGSValues.m_CubeProjectionMatrix = glm::perspective(glm::half_pi<float>(), 1.0f, 0.1f, 200000.0f);
+
+        for (int IndexOfCubeface = 0; IndexOfCubeface < 6; ++IndexOfCubeface)
+        {
+            DefaultGSValues.m_CubeViewMatrix[IndexOfCubeface] = glm::lookAt(glm::vec3(0.0f), LookDirections[IndexOfCubeface], UpDirections[IndexOfCubeface]);
+        }
 
         // -----------------------------------------------------------------------------
-        // Creating VS matrix for spherical image to cube map:
-        // -> Viewer is inside the cube > LHS
-        // -----------------------------------------------------------------------------
-        LookDirection = EyePosition + glm::vec3(1.0f, 0.0f, 0.0f);
-        UpDirection   = glm::vec3(0.0f, -1.0f, 0.0f);
-        
-        DefaultGSValues.m_CubeViewMatrix[0] = glm::lookAt(EyePosition, LookDirection, UpDirection);
-        
-        // -----------------------------------------------------------------------------
-        
-        LookDirection = EyePosition - glm::vec3(1.0f, 0.0f, 0.0f);
-        UpDirection   = glm::vec3(0.0f, -1.0f, 0.0f);
-        
-        DefaultGSValues.m_CubeViewMatrix[1] = glm::lookAt(EyePosition, LookDirection, UpDirection);
-        
-        // -----------------------------------------------------------------------------
-        
-        LookDirection = EyePosition + glm::vec3(0.0f, 1.0f, 0.0f);
-        UpDirection   = -glm::vec3(0.0f, 0.0f, -1.0f);;
-        
-        DefaultGSValues.m_CubeViewMatrix[2] = glm::lookAt(EyePosition, LookDirection, UpDirection);
-        
-        // -----------------------------------------------------------------------------
-        
-        LookDirection = EyePosition - glm::vec3(0.0f, 1.0f, 0.0f);
-        UpDirection   = glm::vec3(0.0f, 0.0f, -1.0f);;
-        
-        DefaultGSValues.m_CubeViewMatrix[3] = glm::lookAt(EyePosition, LookDirection, UpDirection);
-        
-        // -----------------------------------------------------------------------------
-        
-        LookDirection = EyePosition + glm::vec3(0.0f, 0.0f, 1.0f);
-        UpDirection   = glm::vec3(0.0f, -1.0f, 0.0f);
-        
-        DefaultGSValues.m_CubeViewMatrix[4] = glm::lookAt(EyePosition, LookDirection, UpDirection);
 
-        // -----------------------------------------------------------------------------
-        
-        LookDirection = EyePosition - glm::vec3(0.0f, 0.0f, 1.0f);
-        UpDirection   = glm::vec3(0.0f, -1.0f, 0.0f);
-        
-        DefaultGSValues.m_CubeViewMatrix[5] = glm::lookAt(EyePosition, LookDirection, UpDirection);
-
-        // -----------------------------------------------------------------------------
+        SBufferDescriptor ConstanteBufferDesc;
 
         ConstanteBufferDesc.m_Stride        = 0;
         ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
@@ -494,7 +423,7 @@ namespace
         m_SkyboxFromPanorama.m_PSBufferSetPtr = BufferManager::CreateBufferSet(OuputPSBufferPtr);
 
         m_SkyboxFromCubemap.m_VSBufferSetPtr = 0;
-        m_SkyboxFromCubemap.m_GSBufferSetPtr = BufferManager::CreateBufferSet(CubemapGSWorldRotatedBuffer);
+        m_SkyboxFromCubemap.m_GSBufferSetPtr = BufferManager::CreateBufferSet(CubemapGSWorldUnrotatedBuffer);
         m_SkyboxFromCubemap.m_PSBufferSetPtr = BufferManager::CreateBufferSet(OuputPSBufferPtr);
 
         m_SkyboxFromTexture.m_VSBufferSetPtr = BufferManager::CreateBufferSet(ModelMatrixBufferPtr);
@@ -505,14 +434,10 @@ namespace
         m_SkyboxFromGeometry.m_GSBufferSetPtr = BufferManager::CreateBufferSet(CubemapGSWorldUnrotatedBuffer);
         m_SkyboxFromGeometry.m_PSBufferSetPtr = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBuffer(), OuputPSBufferPtr);
 
-        m_SkyboxFromLUT.m_VSBufferSetPtr = 0;
-        m_SkyboxFromLUT.m_GSBufferSetPtr = BufferManager::CreateBufferSet(CubemapGSWorldRotatedBuffer, ModelMatrixBufferPtr);
-        m_SkyboxFromLUT.m_PSBufferSetPtr = BufferManager::CreateBufferSet(OuputPSBufferPtr);
-
         // -----------------------------------------------------------------------------
         // Models
         // -----------------------------------------------------------------------------
-        CMeshPtr CubemapTextureSpherePtr = MeshManager::CreateSphereIsometric(1.0f, 3);
+        CMeshPtr CubemapTextureSpherePtr = MeshManager::CreateSphereIsometric(1.0f, 2);
 
         // -----------------------------------------------------------------------------
 
@@ -579,10 +504,6 @@ namespace
         m_SkyboxFromGeometry.m_MeshPtr            = 0;
         m_SkyboxFromGeometry.m_VertexBufferSetPtr = PlanePositionBufferPtr;
         m_SkyboxFromGeometry.m_IndexBufferPtr     = PlaneIndexBufferPtr;
-
-        m_SkyboxFromLUT.m_MeshPtr            = CubemapTextureSpherePtr;
-        m_SkyboxFromLUT.m_VertexBufferSetPtr = 0;
-        m_SkyboxFromLUT.m_IndexBufferPtr     = 0;
 
         // -----------------------------------------------------------------------------
         // Register dirty entity handler for automatic sky creation
@@ -1440,132 +1361,6 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxSkyManager::RenderSkyboxFromLUT(CInternSky* _pOutput, float _Intensity)
-    {
-        if (_pOutput->m_InputTexturePtr == 0)
-        {
-            ENGINE_CONSOLE_INFO("Skybox can't be rendered from LUT because of missing image.");
-            return;
-        }
-
-        // -----------------------------------------------------------------------------
-
-        CRenderContextPtr RenderContextPtr = _pOutput->m_RenderContextPtr;
-        CShaderPtr        VSPtr            = m_SkyboxFromLUT.m_VSPtr;
-        CShaderPtr        GSPtr            = m_SkyboxFromLUT.m_GSPtr;
-        CShaderPtr        PSPtr            = m_SkyboxFromLUT.m_PSPtr;
-        CBufferSetPtr     VSBufferSetPtr   = m_SkyboxFromLUT.m_VSBufferSetPtr;
-        CBufferSetPtr     GSBufferSetPtr   = m_SkyboxFromLUT.m_GSBufferSetPtr;
-        CBufferSetPtr     PSBufferSetPtr   = m_SkyboxFromLUT.m_PSBufferSetPtr;
-        CMeshPtr          MeshPtr          = m_SkyboxFromLUT.m_MeshPtr;
-
-        Performance::BeginEvent("Skybox from LUT");
-
-        // -----------------------------------------------------------------------------
-        // Setup constant buffer
-        // TODO: Currently it is not totally clear how to rotate the sphere
-        // to get a proper environment without env. rotation. Now the rotation works 
-        // only if the camera is inside the playing area.
-        // Otherwise we have an gimbal lock.
-        // -----------------------------------------------------------------------------
-        SModelMatrixBuffer ViewBuffer;
-
-        ViewBuffer.m_ModelMatrix  = glm::mat4(1.0f);
-        ViewBuffer.m_ModelMatrix *= glm::mat4(ViewManager::GetMainCamera()->GetView()->GetRotationMatrix());
-
-        BufferManager::UploadBufferData(GSBufferSetPtr->GetBuffer(1), &ViewBuffer);
-
-        // -----------------------------------------------------------------------------
-        // Setup constant buffer
-        // -----------------------------------------------------------------------------
-        SOutputBufferPS PSBuffer;
-
-        PSBuffer.m_HDRFactor = _Intensity;
-        PSBuffer.m_IsHDR     = _pOutput->m_InputTexturePtr->GetSemantic() == Gfx::CTexture::HDR ? 1.0f : 0.0f;
-
-        BufferManager::UploadBufferData(PSBufferSetPtr->GetBuffer(0), &PSBuffer);
-
-        // -----------------------------------------------------------------------------
-        // Environment to cube map
-        // -----------------------------------------------------------------------------           
-        
-
-        // -----------------------------------------------------------------------------
-        // Setup
-        // -----------------------------------------------------------------------------
-        ContextManager::SetRenderContext(RenderContextPtr);
-
-        ContextManager::SetTopology(STopology::TriangleList);
-
-        ContextManager::SetShaderVS(VSPtr);
-
-        ContextManager::SetShaderGS(GSPtr);
-
-        ContextManager::SetShaderPS(PSPtr);
-
-        ContextManager::SetVertexBuffer(MeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
-
-        ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
-
-        ContextManager::SetInputLayout(MeshPtr->GetLOD(0)->GetSurface()->GetMVPShaderVS()->GetInputLayout());
-
-        ContextManager::SetConstantBuffer(2, GSBufferSetPtr->GetBuffer(0));
-        ContextManager::SetConstantBuffer(3, GSBufferSetPtr->GetBuffer(1));
-
-        ContextManager::SetConstantBuffer(4, PSBufferSetPtr->GetBuffer(0));
-
-        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
-        ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
-
-        ContextManager::SetTexture(0, static_cast<CTexturePtr>(_pOutput->m_InputTexturePtr));
-        ContextManager::SetTexture(1, static_cast<CTexturePtr>(m_LookUpTexturePtr));
-
-        // -----------------------------------------------------------------------------
-        // Draw
-        // -----------------------------------------------------------------------------
-        ContextManager::DrawIndexed(MeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
-
-        // -----------------------------------------------------------------------------
-        // Reset
-        // -----------------------------------------------------------------------------
-        ContextManager::ResetTexture(0);
-        ContextManager::ResetTexture(1);
-
-        ContextManager::ResetSampler(0);
-        ContextManager::ResetSampler(1);
-
-        ContextManager::ResetConstantBuffer(1);
-
-        ContextManager::ResetConstantBuffer(2);
-
-        ContextManager::ResetConstantBuffer(4);
-
-        ContextManager::ResetInputLayout();
-
-        ContextManager::ResetIndexBuffer();
-
-        ContextManager::ResetVertexBuffer();
-
-        ContextManager::ResetShaderVS();
-
-        ContextManager::ResetShaderGS();
-
-        ContextManager::ResetShaderPS();
-
-        ContextManager::ResetTopology();
-
-        ContextManager::ResetRenderContext();
-
-        // -----------------------------------------------------------------------------
-        // Update mip maps
-        // -----------------------------------------------------------------------------
-        TextureManager::UpdateMipmap(_pOutput->m_CubemapPtr);
-
-        Performance::EndEvent();
-    }
-
-    // -----------------------------------------------------------------------------
-
     void CGfxSkyManager::PrecomputeScattering()
     {
         // Determine the number of steps for multiple scattering
@@ -2202,16 +1997,6 @@ namespace
         m_SkyboxFromGeometry.m_MeshPtr            = 0;
         m_SkyboxFromGeometry.m_VertexBufferSetPtr = 0;
         m_SkyboxFromGeometry.m_IndexBufferPtr     = 0;
-
-        m_SkyboxFromLUT.m_VSPtr              = 0;
-        m_SkyboxFromLUT.m_GSPtr              = 0;
-        m_SkyboxFromLUT.m_PSPtr              = 0;
-        m_SkyboxFromLUT.m_VSBufferSetPtr     = 0;
-        m_SkyboxFromLUT.m_GSBufferSetPtr     = 0;
-        m_SkyboxFromLUT.m_PSBufferSetPtr     = 0;
-        m_SkyboxFromLUT.m_MeshPtr            = 0;
-        m_SkyboxFromLUT.m_VertexBufferSetPtr = 0;
-        m_SkyboxFromLUT.m_IndexBufferPtr     = 0;
     }
 } // namespace 
 
