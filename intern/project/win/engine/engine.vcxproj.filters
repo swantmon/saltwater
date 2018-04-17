@@ -118,9 +118,6 @@
     <Filter Include="graphic\ogl">
       <UniqueIdentifier>{51022a9a-40b0-4d25-a91f-ff67a5166b27}</UniqueIdentifier>
     </Filter>
-    <Filter Include="graphic\ogl\memory">
-      <UniqueIdentifier>{af365d46-ca6c-4a54-a285-d8f681b26782}</UniqueIdentifier>
-    </Filter>
     <Filter Include="graphic\ogl\buffers">
       <UniqueIdentifier>{6dfc8479-a18e-40ee-bda4-f967f1a0d903}</UniqueIdentifier>
     </Filter>
@@ -792,9 +789,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_native_types.h">
       <Filter>graphic\ogl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\engine\graphic\gfx_release.h">
-      <Filter>graphic\ogl\memory</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_native_buffer.h">
       <Filter>graphic\ogl\buffers</Filter>
