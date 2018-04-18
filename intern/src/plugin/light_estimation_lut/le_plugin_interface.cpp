@@ -63,19 +63,19 @@ namespace LE
         SCubemapBuffer DefaultGSValues;
         
         std::array<glm::vec3, 6> LookDirections = {
-            glm::vec3(+1.0f,  0.0f,  0.0f),
             glm::vec3(-1.0f,  0.0f,  0.0f),
+            glm::vec3(+1.0f,  0.0f,  0.0f),
             glm::vec3( 0.0f, -1.0f,  0.0f),
             glm::vec3( 0.0f, +1.0f,  0.0f),
-            glm::vec3( 0.0f,  0.0f, -1.0f),
             glm::vec3( 0.0f,  0.0f, +1.0f),
+            glm::vec3( 0.0f,  0.0f, -1.0f),
         };
 
         std::array<glm::vec3, 6> UpDirections = {
             glm::vec3(0.0f, 1.0f,  0.0f),
             glm::vec3(0.0f, 1.0f,  0.0f),
-            glm::vec3(0.0f, 0.0f, -1.0f),
             glm::vec3(0.0f, 0.0f, +1.0f),
+            glm::vec3(0.0f, 0.0f, -1.0f),
             glm::vec3(0.0f, 1.0f,  0.0f),
             glm::vec3(0.0f, 1.0f,  0.0f),
         };
