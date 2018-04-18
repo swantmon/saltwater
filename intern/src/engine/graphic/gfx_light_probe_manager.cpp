@@ -1315,59 +1315,33 @@ namespace
 
     void CGfxLightProbeManager::UpdateGeometryBuffer(const glm::vec3& _rPosition, float _Near, float _Far)
     {
-        glm::vec3 EyePosition = _rPosition;
-        glm::vec3 UpDirection;
-        glm::vec3 TargetPosition;
+        std::array<glm::vec3, 6> LookDirections = {
+            glm::vec3(+1.0f,  0.0f,  0.0f),
+            glm::vec3(-1.0f,  0.0f,  0.0f),
+            glm::vec3( 0.0f, -1.0f,  0.0f),
+            glm::vec3( 0.0f, +1.0f,  0.0f),
+            glm::vec3( 0.0f,  0.0f, -1.0f),
+            glm::vec3( 0.0f,  0.0f, +1.0f),
+        };
+
+        std::array<glm::vec3, 6> UpDirections = {
+            glm::vec3(0.0f, 1.0f,  0.0f),
+            glm::vec3(0.0f, 1.0f,  0.0f),
+            glm::vec3(0.0f, 0.0f, -1.0f),
+            glm::vec3(0.0f, 0.0f, +1.0f),
+            glm::vec3(0.0f, 1.0f,  0.0f),
+            glm::vec3(0.0f, 1.0f,  0.0f),
+        };
 
         SCubemapGeometryBuffer Values;
 
         Values.m_CubeProjectionMatrix = glm::perspective(glm::half_pi<float>(), 1.0f, _Near, _Far);
 
-        // -----------------------------------------------------------------------------
+        for (int i = 0; i < 6; ++i)
+        {
+            Values.m_CubeViewMatrix[i] = glm::lookAt(_rPosition, _rPosition + LookDirections[i], UpDirections[i]);
+        }
 
-        TargetPosition = EyePosition + glm::vec3(1.0f, 0.0f, 0.0f);
-        UpDirection    = glm::vec3(0.0f, 1.0f, 0.0f);
-
-        Values.m_CubeViewMatrix[0] = glm::lookAt(EyePosition, TargetPosition, UpDirection);
-
-        // -----------------------------------------------------------------------------
-
-        TargetPosition = EyePosition - glm::vec3(1.0f, 0.0f, 0.0f);
-        UpDirection    = glm::vec3(0.0f, 1.0f, 0.0f);
-
-        Values.m_CubeViewMatrix[1] = glm::lookAt(EyePosition, TargetPosition, UpDirection);
-
-        // -----------------------------------------------------------------------------
-
-        TargetPosition = EyePosition + glm::vec3(0.0f, 1.0f, 0.0f);
-        UpDirection    = -glm::vec3(0.0f, 0.0f, 1.0f);
-
-        Values.m_CubeViewMatrix[2] = glm::lookAt(EyePosition, TargetPosition, UpDirection);
-
-        // -----------------------------------------------------------------------------
-
-        TargetPosition = EyePosition - glm::vec3(0.0f, 1.0f, 0.0f);
-        UpDirection    = glm::vec3(0.0f, 0.0f, 1.0f);
-
-        Values.m_CubeViewMatrix[3] = glm::lookAt(EyePosition, TargetPosition, UpDirection);
-
-        // -----------------------------------------------------------------------------
-
-        TargetPosition = EyePosition + glm::vec3(0.0f, 0.0f, 1.0f);
-        UpDirection    = glm::vec3(0.0f, 1.0f, 0.0f);
-
-        Values.m_CubeViewMatrix[4] = glm::lookAt(EyePosition, TargetPosition, UpDirection);
-
-        // -----------------------------------------------------------------------------
-
-        TargetPosition = EyePosition - glm::vec3(0.0f, 0.0f, 1.0f);
-        UpDirection    = glm::vec3(0.0f, 1.0f, 0.0f);
-
-        Values.m_CubeViewMatrix[5] = glm::lookAt(EyePosition, TargetPosition, UpDirection);
-
-        // -----------------------------------------------------------------------------
-        // Upload data
-        // -----------------------------------------------------------------------------
         BufferManager::UploadBufferData(m_CubemapGSBufferPtr, &Values);
     }
 } // namespace 

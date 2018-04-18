@@ -321,28 +321,28 @@ namespace
         std::array<glm::vec3, 6> LookDirections = {
             glm::vec3(+1.0f,  0.0f,  0.0f),
             glm::vec3(-1.0f,  0.0f,  0.0f),
-            glm::vec3( 0.0f, +1.0f,  0.0f),
             glm::vec3( 0.0f, -1.0f,  0.0f),
-            glm::vec3( 0.0f,  0.0f, +1.0f),
+            glm::vec3( 0.0f, +1.0f,  0.0f),
             glm::vec3( 0.0f,  0.0f, -1.0f),
+            glm::vec3( 0.0f,  0.0f, +1.0f),
         };
 
         std::array<glm::vec3, 6> UpDirections = {
-            glm::vec3(0.0f, -1.0f,  0.0f),
-            glm::vec3(0.0f, -1.0f,  0.0f),
-            glm::vec3(0.0f,  0.0f, +1.0f),
-            glm::vec3(0.0f,  0.0f, -1.0f),
-            glm::vec3(0.0f, -1.0f,  0.0f),
-            glm::vec3(0.0f, -1.0f,  0.0f),
+            glm::vec3(0.0f, 1.0f,  0.0f),
+            glm::vec3(0.0f, 1.0f,  0.0f),
+            glm::vec3(0.0f, 0.0f, -1.0f),
+            glm::vec3(0.0f, 0.0f, +1.0f),
+            glm::vec3(0.0f, 1.0f,  0.0f),
+            glm::vec3(0.0f, 1.0f,  0.0f),
         };
 
-        DefaultGSValues.m_CubeProjectionMatrix = glm::perspective(glm::half_pi<float>(), 1.0f, 0.1f, 200000.0f);
+        DefaultGSValues.m_CubeProjectionMatrix = glm::perspective(glm::half_pi<float>(), 1.0f, 0.1f, 1.0f);
 
         for (int IndexOfCubeface = 0; IndexOfCubeface < 6; ++IndexOfCubeface)
         {
             DefaultGSValues.m_CubeViewMatrix[IndexOfCubeface] = glm::lookAt(glm::vec3(0.0f), LookDirections[IndexOfCubeface], UpDirections[IndexOfCubeface]);
 
-            DefaultGSValues.m_CubeViewMatrix[IndexOfCubeface] *= glm::eulerAngleX(glm::radians(-90.0f));
+            DefaultGSValues.m_CubeViewMatrix[IndexOfCubeface] *= glm::eulerAngleX(glm::radians(90.0f));
         }
 
         // -----------------------------------------------------------------------------
@@ -420,7 +420,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Models
         // -----------------------------------------------------------------------------
-        CMeshPtr CubemapTextureSpherePtr = MeshManager::CreateBox(1.0f, 1.0f, 1.0f);
+        CMeshPtr CubemapTextureSpherePtr = MeshManager::CreateSphereIsometric(1.0f, 2);
 
         // -----------------------------------------------------------------------------
 
