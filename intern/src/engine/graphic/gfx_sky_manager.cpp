@@ -420,7 +420,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Models
         // -----------------------------------------------------------------------------
-        CMeshPtr CubemapTextureSpherePtr = MeshManager::CreateSphereIsometric(1.0f, 2);
+        CMeshPtr CubemapTextureSpherePtr = MeshManager::CreateBox(1.0f, 1.0f, 1.0f);
 
         // -----------------------------------------------------------------------------
 
