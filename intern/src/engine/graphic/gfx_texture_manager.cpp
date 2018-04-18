@@ -1372,7 +1372,7 @@ namespace
 
                 iluGetImageInfo(&NativeILImageInfo);
 
-                if (NativeILImageInfo.Origin != IL_ORIGIN_UPPER_LEFT)
+                if (NativeILImageInfo.Origin == IL_ORIGIN_UPPER_LEFT)
                 {
                     iluFlipImage();
                 }
