@@ -382,7 +382,7 @@ namespace
         // -----------------------------------------------------------------------------
         m_EnvironmentSpherePtr = MeshManager::CreateSphereIsometric(1.0f, 3);
 
-        m_SkyboxBoxPtr = MeshManager::CreateBox(2.0f, 2.0f, 2.0f);
+        m_SkyboxBoxPtr = MeshManager::CreateBox(1.0f, 1.0f, 1.0f);
 
         // -----------------------------------------------------------------------------
         // Register dirty handler for automatic light probe / reflection

@@ -686,8 +686,6 @@ namespace
 
         Performance::BeginEvent("IBL");
 
-        
-
         // -----------------------------------------------------------------------------
         // IBL data
         // -----------------------------------------------------------------------------
@@ -701,17 +699,12 @@ namespace
         // -----------------------------------------------------------------------------
         // Bind shadow and reflection textures
         // -----------------------------------------------------------------------------
-        CLightProbeRenderJobs::const_iterator CurrentLightJob = m_LightProbeRenderJobs.begin();
-        CLightProbeRenderJobs::const_iterator EndOfLightJobs  = m_LightProbeRenderJobs.end();
-
         unsigned int IndexOfSpecularCubemap = 6;
         unsigned int IndexOfDiffuseCubemap  = IndexOfSpecularCubemap + s_MaxNumberOfProbes;
         unsigned int IndexOfShadowCubemap   = IndexOfDiffuseCubemap  + s_MaxNumberOfProbes;
 
-        for (; CurrentLightJob != EndOfLightJobs; ++ CurrentLightJob)
+        for (const auto& rJob : m_LightProbeRenderJobs)
         {
-            const SLightProbeRenderJob& rJob = *CurrentLightJob;
-
             ContextManager::SetSampler(IndexOfSpecularCubemap, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
             ContextManager::SetSampler(IndexOfDiffuseCubemap, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
             ContextManager::SetSampler(IndexOfShadowCubemap, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));

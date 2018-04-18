@@ -51,43 +51,17 @@ namespace Scpt
             GetOutputCubemap     = (LightEstimationLUTGetOutputCubemapFunc)(Core::PluginManager::GetPluginFunction("Light Estimation LUT", "GetOutputCubemap"));
             GetBackgroundTexture = (ArCoreGetBackgroundTextureFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetBackgroundTexture"));
 
-            if (Core::PluginManager::HasPlugin("Light Estimation LUT"))
+            if (Core::PluginManager::HasPlugin("Light Estimation LUT") && Core::PluginManager::HasPlugin("ArCore"))
             {
                 m_pSkyComponent->SetType(Dt::CSkyComponent::Cubemap);
                 m_pSkyComponent->SetTexture(GetOutputCubemap());
                 m_pSkyComponent->SetRefreshMode(Dt::CSkyComponent::Dynamic);
                 m_pSkyComponent->SetQuality(Dt::CSkyComponent::PX128);
+                m_pSkyComponent->SetIntensity(12000);
 
                 Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*m_pSkyComponent, Dt::CSkyComponent::DirtyInfo);
-            }
 
-            if (Core::PluginManager::HasPlugin("Light Estimation LUT") && Core::PluginManager::HasPlugin("ArCore"))
-            {
-                 SetInputTexture(GetBackgroundTexture());
-            }
-            else
-            {
-                Gfx::STextureDescriptor TextureDescriptor;
-
-                TextureDescriptor.m_NumberOfPixelsU  = 512;
-                TextureDescriptor.m_NumberOfPixelsV  = 512;
-                TextureDescriptor.m_NumberOfPixelsW  = 1;
-                TextureDescriptor.m_NumberOfMipMaps  = Gfx::STextureDescriptor::s_GenerateAllMipMaps;
-                TextureDescriptor.m_NumberOfTextures = 1;
-                TextureDescriptor.m_Binding          = Gfx::CTexture::ShaderResource;
-                TextureDescriptor.m_Access           = Gfx::CTexture::CPUWrite;
-                TextureDescriptor.m_Format           = Gfx::CTexture::Unknown;
-                TextureDescriptor.m_Usage            = Gfx::CTexture::GPURead;
-                TextureDescriptor.m_Semantic         = Gfx::CTexture::Diffuse;
-                TextureDescriptor.m_pFileName        = "../../plugins/light_estimation_lut/face_x.png";
-                TextureDescriptor.m_pPixels          = 0;
-                TextureDescriptor.m_Format           = Gfx::CTexture::R8G8B8A8_UBYTE;
-
-                Gfx::CTexturePtr m_InputTexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
-
-                Gfx::TextureManager::SetTextureLabel(m_InputTexturePtr, "INPUT");
-
-                SetInputTexture(m_InputTexturePtr);
+                SetInputTexture(GetBackgroundTexture());
             }
         }
 
