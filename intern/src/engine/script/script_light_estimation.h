@@ -63,6 +63,37 @@ namespace Scpt
 
                 SetInputTexture(GetBackgroundTexture());
             }
+
+            if (Core::PluginManager::HasPlugin("Light Estimation LUT") && !Core::PluginManager::HasPlugin("ArCore"))
+            {
+                Gfx::STextureDescriptor TextureDescriptor;
+
+                TextureDescriptor.m_NumberOfPixelsU  = Gfx::STextureDescriptor::s_NumberOfPixelsFromSource;
+                TextureDescriptor.m_NumberOfPixelsV  = Gfx::STextureDescriptor::s_NumberOfPixelsFromSource;
+                TextureDescriptor.m_NumberOfPixelsW  = 1;
+                TextureDescriptor.m_NumberOfMipMaps  = Gfx::STextureDescriptor::s_GenerateAllMipMaps;
+                TextureDescriptor.m_NumberOfTextures = 1;
+                TextureDescriptor.m_Binding          = Gfx::CTexture::ShaderResource;
+                TextureDescriptor.m_Access           = Gfx::CTexture::CPUWrite;
+                TextureDescriptor.m_Format           = Gfx::CTexture::Unknown;
+                TextureDescriptor.m_Usage            = Gfx::CTexture::GPURead;
+                TextureDescriptor.m_Semantic         = Gfx::CTexture::Diffuse;
+                TextureDescriptor.m_pFileName        = "environments/IMG_20180417_145116.jpg";
+                TextureDescriptor.m_pPixels          = 0;
+                TextureDescriptor.m_Format           = Gfx::CTexture::R8G8B8A8_UBYTE;
+
+                Gfx::CTexturePtr OutputPtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
+
+                m_pSkyComponent->SetType(Dt::CSkyComponent::Cubemap);
+                m_pSkyComponent->SetTexture(GetOutputCubemap());
+                m_pSkyComponent->SetRefreshMode(Dt::CSkyComponent::Dynamic);
+                //m_pSkyComponent->SetQuality(Dt::CSkyComponent::PX1024);
+                m_pSkyComponent->SetIntensity(12000);
+
+                Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*m_pSkyComponent, Dt::CSkyComponent::DirtyInfo);
+
+                SetInputTexture(OutputPtr);
+            }
         }
 
         // -----------------------------------------------------------------------------
