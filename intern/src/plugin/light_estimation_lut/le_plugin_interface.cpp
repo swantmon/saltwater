@@ -40,8 +40,6 @@ CORE_PLUGIN_INFO(LE::CPluginInterface, "Light Estimation LUT", "1.0", "This plug
 // -----------------------------------------------------------------------------
 namespace 
 {
-    Gfx::CTexturePtr CreateLookUpTexture();
-    Gfx::CTexturePtr CreateLUTFromCubemap();
     Gfx::CTexturePtr CreateLUTFromOpenCV();
 } // namespace 
 
@@ -259,8 +257,8 @@ namespace LE
 
         Gfx::ContextManager::SetInputLayout(m_MeshPtr->GetLOD(0)->GetSurface()->GetMVPShaderVS()->GetInputLayout());
 
-        Gfx::ContextManager::SetConstantBuffer(0, m_CubemapBufferPtr);
-        Gfx::ContextManager::SetConstantBuffer(1, m_ModelMatrixBufferPtr);
+        Gfx::ContextManager::SetConstantBuffer(0, m_ModelMatrixBufferPtr);
+        Gfx::ContextManager::SetConstantBuffer(1, m_CubemapBufferPtr);
 
         Gfx::ContextManager::SetSampler(0, Gfx::SamplerManager::GetSampler(Gfx::CSampler::MinMagMipLinearClamp));
         Gfx::ContextManager::SetSampler(1, Gfx::SamplerManager::GetSampler(Gfx::CSampler::MinMagMipLinearClamp));
