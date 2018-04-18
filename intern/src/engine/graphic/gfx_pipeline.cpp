@@ -410,16 +410,23 @@ namespace Pipeline
 
     void Render()
     {
+        Performance::Update();
+
+        // -----------------------------------------------------------------------------
+        // Update graphic
+        // -----------------------------------------------------------------------------
+        Main::UploadPerFrameConstantBuffers();
+
         // -----------------------------------------------------------------------------
         // Begin frame
         // -----------------------------------------------------------------------------
         Main::BeginFrame();
 
-        Performance::Update();
-
         // -----------------------------------------------------------------------------
         // Update graphic entities
         // -----------------------------------------------------------------------------
+        Performance::BeginEvent("Update Pass");
+
         SunManager        ::Update();
         SkyManager        ::Update();
         LightProbeManager ::Update();
@@ -427,15 +434,8 @@ namespace Pipeline
         AreaLightManager  ::Update();
 
         // -----------------------------------------------------------------------------
-        // Update graphic
-        // -----------------------------------------------------------------------------
-        Main::UploadPerFrameConstantBuffers();
-        
-        // -----------------------------------------------------------------------------
         // Update renderer to prepare for rendering
         // -----------------------------------------------------------------------------
-        Performance::BeginEvent("Update Pass");
-
         ARRenderer           ::Update();
         MeshRenderer         ::Update();
         FogRenderer          ::Update();

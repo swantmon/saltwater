@@ -69,15 +69,10 @@ Global
 		{1BBA2732-A51B-4FF0-8393-492884561668}.Debug|x64.Build.0 = Debug|x64
 		{1BBA2732-A51B-4FF0-8393-492884561668}.Release|x64.ActiveCfg = Release|x64
 		{1BBA2732-A51B-4FF0-8393-492884561668}.Release|x64.Build.0 = Release|x64
-<<<<<<< Updated upstream
-		{1BBA2732-A51B-4FF0-8393-492884561668}.Release|x86.ActiveCfg = Release|Win32
-		{1BBA2732-A51B-4FF0-8393-492884561668}.Release|x86.Build.0 = Release|Win32
-=======
 		{AA2AF386-CC0D-49D3-AFCF-42045A0476FE}.Debug|x64.ActiveCfg = Debug|x64
 		{AA2AF386-CC0D-49D3-AFCF-42045A0476FE}.Debug|x64.Build.0 = Debug|x64
 		{AA2AF386-CC0D-49D3-AFCF-42045A0476FE}.Release|x64.ActiveCfg = Release|x64
 		{AA2AF386-CC0D-49D3-AFCF-42045A0476FE}.Release|x64.Build.0 = Release|x64
->>>>>>> Stashed changes
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
