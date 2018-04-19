@@ -154,10 +154,12 @@ void main()
     
     // -----------------------------------------------------------------------------
     // Compute lighting for sphere lights
+    // TODO: Is the clamping correct? If I use a clamping between 0.0 and 1.0 some
+    // black bars exists inside the image.
     // -----------------------------------------------------------------------------
     vec3  WSViewDirection = normalize(Data.m_WSPosition - g_ViewPosition.xyz);
     vec3  WSReflectVector = normalize(reflect(WSViewDirection, Data.m_WSNormal));
-    float NdotV           = clamp( dot( Data.m_WSNormal, -WSViewDirection ), 0.0, 1.0f);
+    float NdotV           = clamp( dot( Data.m_WSNormal, -WSViewDirection ), 0.01f, 0.99f);
 
     // -----------------------------------------------------------------------------
     // Rebuild the function
