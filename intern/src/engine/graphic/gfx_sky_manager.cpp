@@ -153,12 +153,12 @@ namespace
             unsigned int ps_ExposureHistoryIndex;
         };
 
-        class CInternSkyFacet : public CSky
+        class CInternSky : public CSky
         {
         public:
 
-            CInternSkyFacet();
-            ~CInternSkyFacet();
+            CInternSky();
+            ~CInternSky();
 
         public:
 
@@ -174,7 +174,7 @@ namespace
 
         private:
 
-            typedef Base::CManagedPool<CInternSkyFacet, 1, 0> CSkies;
+            typedef Base::CManagedPool<CInternSky, 1, 0> CSkies;
 
         private:
 
@@ -185,7 +185,6 @@ namespace
         SRenderContext    m_SkyboxFromCubemap;
         SRenderContext    m_SkyboxFromTexture;
         SRenderContext    m_SkyboxFromGeometry;
-        SRenderContext    m_SkyboxFromLUT;
         CTexturePtr       m_LookUpTexturePtr;
         CInputLayoutPtr   m_P3T2CubemapInputLayoutPtr;
         CSelectionTicket* m_pSelectionTicket;
@@ -200,19 +199,17 @@ namespace
 
         void OnDirtyComponent(Dt::IComponent* _pComponent);
 
-        void RenderSkybox(Dt::CSkyComponent* _pDataSkyFacet, CInternSkyFacet* _pOutput);
+        void RenderSkybox(Dt::CSkyComponent* _pDataSkyFacet, CInternSky* _pOutput);
 
-        void RenderSkyboxFromAtmopsphericScattering(CInternSkyFacet* _pOutput, float _Intensity = 1.0f);
+        void RenderSkyboxFromAtmopsphericScattering(CInternSky* _pOutput, float _Intensity = 1.0f);
 
-        void RenderSkyboxFromPanorama(CInternSkyFacet* _pOutput, float _Intensity = 1.0f);
+        void RenderSkyboxFromPanorama(CInternSky* _pOutput, float _Intensity = 1.0f);
 
-        void RenderSkyboxFromCubemap(CInternSkyFacet* _pOutput, float _Intensity = 1.0f);
+        void RenderSkyboxFromCubemap(CInternSky* _pOutput, float _Intensity = 1.0f);
 
-        void RenderSkyboxFromTexture(CInternSkyFacet* _pOutput, float _Intensity = 1.0f);
+        void RenderSkyboxFromTexture(CInternSky* _pOutput, float _Intensity = 1.0f);
 
-        void RenderSkyboxFromGeometry(CInternSkyFacet* _pOutput, float _Intensity = 1.0f);
-
-        void RenderSkyboxFromLUT(CInternSkyFacet* _pOutput, float _Intensity = 1.0f);
+        void RenderSkyboxFromGeometry(CInternSky* _pOutput, float _Intensity = 1.0f);
 
         void PrecomputeScattering();
 
@@ -222,7 +219,7 @@ namespace
 
 namespace 
 {
-    CGfxSkyManager::CInternSkyFacet::CInternSkyFacet()
+    CGfxSkyManager::CInternSky::CInternSky()
         : CSky              ()
         , m_RenderContextPtr()
         , m_TargetSetPtr    ()
@@ -234,7 +231,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    CGfxSkyManager::CInternSkyFacet::~CInternSkyFacet()
+    CGfxSkyManager::CInternSky::~CInternSky()
     {
         m_RenderContextPtr   = 0;
         m_TargetSetPtr       = 0;
@@ -251,7 +248,6 @@ namespace
         , m_SkyboxFromCubemap ()
         , m_SkyboxFromTexture ()
         , m_SkyboxFromGeometry()
-        , m_SkyboxFromLUT     ()
         , m_LookUpTexturePtr  (0)
         , m_pSelectionTicket  (0)
     {
@@ -317,125 +313,41 @@ namespace
         m_SkyboxFromGeometry.m_GSPtr          = CubemapGSPtr;
         m_SkyboxFromGeometry.m_PSPtr          = CubemapTexturePSPtr;
 
-        m_SkyboxFromLUT.m_VSPtr          = CubemapVSPtr;
-        m_SkyboxFromLUT.m_GSPtr          = CubemapRotateGSPtr;
-        m_SkyboxFromLUT.m_PSPtr          = CubemapLUTPSPtr;
-
         // -----------------------------------------------------------------------------
         // Buffer
         // -----------------------------------------------------------------------------
-        SBufferDescriptor ConstanteBufferDesc;
-
-        glm::vec3 EyePosition = glm::vec3(0.0f);
-        glm::vec3 UpDirection;
-        glm::vec3 LookDirection;
-        
         SCubemapBufferGS DefaultGSValues;
         
-        DefaultGSValues.m_CubeProjectionMatrix = glm::perspective(glm::half_pi<float>(), 1.0f, 0.1f, 20000.0f);
-        
-        // -----------------------------------------------------------------------------
-        // By creating a cube map in OpenGL, several facts should be considered:
-        //  1. OpenGL cubemaps has an left handed coord system inside the cube and
-        //    right handed coord system outside the cube
-        //  2. Texcoords starts in the upper left corner (normally in the lower left 
-        //     corner)
-        //
-        // RHS:
-        //          +--------+
-        //          |        |
-        //          |   Y+   |
-        //          |        |
-        // +--------+--------+--------+--------+
-        // |        |        |        |        |
-        // |   X-   |   Z+   |   X+   |   Z-   |
-        // |        |        |        |        |
-        // +--------+--------+--------+--------+
-        //          |        |
-        //          |   Y-   |
-        //          |        |
-        //          +--------+
-        //
-        // LHS:
-        //          +--------+
-        //          |        |
-        //          |   Y+   |
-        //          |        |
-        // +--------+--------+--------+--------+
-        // |        |        |        |        |
-        // |   X-   |   Z-   |   X+   |   Z+   |
-        // |        |        |        |        |
-        // +--------+--------+--------+--------+
-        //          |        |
-        //          |   Y-   |
-        //          |        |
-        //          +--------+
-        // -----------------------------------------------------------------------------
+        std::array<glm::vec3, 6> LookDirections = {
+            glm::vec3(+1.0f,  0.0f,  0.0f),
+            glm::vec3(-1.0f,  0.0f,  0.0f),
+            glm::vec3( 0.0f, -1.0f,  0.0f),
+            glm::vec3( 0.0f, +1.0f,  0.0f),
+            glm::vec3( 0.0f,  0.0f, -1.0f),
+            glm::vec3( 0.0f,  0.0f, +1.0f),
+        };
 
-        // -----------------------------------------------------------------------------
-        // Creating VS matrix for spherical image to cube map:
-        // -> Viewer is inside the cube > LHS
-        // -----------------------------------------------------------------------------
-        LookDirection = EyePosition + glm::vec3(1.0f, 0.0f, 0.0f);
-        UpDirection   = glm::vec3(0.0f, -1.0f, 0.0f);
-        
-        DefaultGSValues.m_CubeViewMatrix[0] = glm::lookAt(EyePosition, LookDirection, UpDirection);
-        
-        // -----------------------------------------------------------------------------
-        
-        LookDirection = EyePosition - glm::vec3(1.0f, 0.0f, 0.0f);
-        UpDirection   = glm::vec3(0.0f, -1.0f, 0.0f);
-        
-        DefaultGSValues.m_CubeViewMatrix[1] = glm::lookAt(EyePosition, LookDirection, UpDirection);
-        
-        // -----------------------------------------------------------------------------
-        
-        LookDirection = EyePosition + glm::vec3(0.0f, 1.0f, 0.0f);
-        UpDirection   = -glm::vec3(0.0f, 0.0f, -1.0f);;
-        
-        DefaultGSValues.m_CubeViewMatrix[2] = glm::lookAt(EyePosition, LookDirection, UpDirection);
-        
-        // -----------------------------------------------------------------------------
-        
-        LookDirection = EyePosition - glm::vec3(0.0f, 1.0f, 0.0f);
-        UpDirection   = glm::vec3(0.0f, 0.0f, -1.0f);;
-        
-        DefaultGSValues.m_CubeViewMatrix[3] = glm::lookAt(EyePosition, LookDirection, UpDirection);
-        
-        // -----------------------------------------------------------------------------
-        
-        LookDirection = EyePosition + glm::vec3(0.0f, 0.0f, 1.0f);
-        UpDirection   = glm::vec3(0.0f, -1.0f, 0.0f);
-        
-        DefaultGSValues.m_CubeViewMatrix[4] = glm::lookAt(EyePosition, LookDirection, UpDirection);
+        std::array<glm::vec3, 6> UpDirections = {
+            glm::vec3(0.0f, 1.0f,  0.0f),
+            glm::vec3(0.0f, 1.0f,  0.0f),
+            glm::vec3(0.0f, 0.0f, -1.0f),
+            glm::vec3(0.0f, 0.0f, +1.0f),
+            glm::vec3(0.0f, 1.0f,  0.0f),
+            glm::vec3(0.0f, 1.0f,  0.0f),
+        };
 
-        // -----------------------------------------------------------------------------
-        
-        LookDirection = EyePosition - glm::vec3(0.0f, 0.0f, 1.0f);
-        UpDirection   = glm::vec3(0.0f, -1.0f, 0.0f);
-        
-        DefaultGSValues.m_CubeViewMatrix[5] = glm::lookAt(EyePosition, LookDirection, UpDirection);
+        DefaultGSValues.m_CubeProjectionMatrix = glm::perspective(glm::half_pi<float>(), 1.0f, 0.1f, 1.0f);
 
-        // -----------------------------------------------------------------------------
-
-        ConstanteBufferDesc.m_Stride        = 0;
-        ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
-        ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
-        ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
-        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SCubemapBufferGS);
-        ConstanteBufferDesc.m_pBytes        = &DefaultGSValues;
-        ConstanteBufferDesc.m_pClassKey     = 0;
-        
-        CBufferPtr CubemapGSWorldUnrotatedBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
-        
-        // -----------------------------------------------------------------------------
-        
-        for (unsigned int IndexOfCubeface = 0; IndexOfCubeface < 6; ++ IndexOfCubeface)
+        for (int IndexOfCubeface = 0; IndexOfCubeface < 6; ++IndexOfCubeface)
         {
-            DefaultGSValues.m_CubeViewMatrix[IndexOfCubeface] *= glm::eulerAngleX(glm::radians(-90.0f));
+            DefaultGSValues.m_CubeViewMatrix[IndexOfCubeface] = glm::lookAt(glm::vec3(0.0f), LookDirections[IndexOfCubeface], UpDirections[IndexOfCubeface]);
+
+            DefaultGSValues.m_CubeViewMatrix[IndexOfCubeface] *= glm::eulerAngleX(glm::radians(90.0f));
         }
-        
+
         // -----------------------------------------------------------------------------
+
+        SBufferDescriptor ConstanteBufferDesc;
         
         ConstanteBufferDesc.m_Stride        = 0;
         ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
@@ -498,21 +410,17 @@ namespace
         m_SkyboxFromCubemap.m_PSBufferSetPtr = BufferManager::CreateBufferSet(OuputPSBufferPtr);
 
         m_SkyboxFromTexture.m_VSBufferSetPtr = BufferManager::CreateBufferSet(ModelMatrixBufferPtr);
-        m_SkyboxFromTexture.m_GSBufferSetPtr = BufferManager::CreateBufferSet(CubemapGSWorldUnrotatedBuffer);
+        //m_SkyboxFromTexture.m_GSBufferSetPtr = BufferManager::CreateBufferSet(CubemapGSWorldUnrotatedBuffer);
         m_SkyboxFromTexture.m_PSBufferSetPtr = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBuffer(), OuputPSBufferPtr);
 
         m_SkyboxFromGeometry.m_VSBufferSetPtr = BufferManager::CreateBufferSet(ModelMatrixBufferPtr);
-        m_SkyboxFromGeometry.m_GSBufferSetPtr = BufferManager::CreateBufferSet(CubemapGSWorldUnrotatedBuffer);
+        //m_SkyboxFromGeometry.m_GSBufferSetPtr = BufferManager::CreateBufferSet(CubemapGSWorldUnrotatedBuffer);
         m_SkyboxFromGeometry.m_PSBufferSetPtr = BufferManager::CreateBufferSet(Main::GetPerFrameConstantBuffer(), OuputPSBufferPtr);
-
-        m_SkyboxFromLUT.m_VSBufferSetPtr = 0;
-        m_SkyboxFromLUT.m_GSBufferSetPtr = BufferManager::CreateBufferSet(CubemapGSWorldRotatedBuffer, ModelMatrixBufferPtr);
-        m_SkyboxFromLUT.m_PSBufferSetPtr = BufferManager::CreateBufferSet(OuputPSBufferPtr);
 
         // -----------------------------------------------------------------------------
         // Models
         // -----------------------------------------------------------------------------
-        CMeshPtr CubemapTextureSpherePtr = MeshManager::CreateSphereIsometric(1.0f, 3);
+        CMeshPtr CubemapTextureSpherePtr = MeshManager::CreateSphereIsometric(1.0f, 2);
 
         // -----------------------------------------------------------------------------
 
@@ -580,10 +488,6 @@ namespace
         m_SkyboxFromGeometry.m_VertexBufferSetPtr = PlanePositionBufferPtr;
         m_SkyboxFromGeometry.m_IndexBufferPtr     = PlaneIndexBufferPtr;
 
-        m_SkyboxFromLUT.m_MeshPtr            = CubemapTextureSpherePtr;
-        m_SkyboxFromLUT.m_VertexBufferSetPtr = 0;
-        m_SkyboxFromLUT.m_IndexBufferPtr     = 0;
-
         // -----------------------------------------------------------------------------
         // Register dirty entity handler for automatic sky creation
         // -----------------------------------------------------------------------------
@@ -637,7 +541,7 @@ namespace
 
             if (pDataSkyboxFacet->GetRefreshMode() == Dt::CSkyComponent::Dynamic)
             {
-                CInternSkyFacet* pGraphicSkyboxFacet = static_cast<CInternSkyFacet*>(pDataSkyboxFacet->GetFacet(Dt::CSkyComponent::Graphic));
+                CInternSky* pGraphicSkyboxFacet = static_cast<CInternSky*>(pDataSkyboxFacet->GetFacet(Dt::CSkyComponent::Graphic));
 
                 RenderSkybox(pDataSkyboxFacet, pGraphicSkyboxFacet);
             }
@@ -655,82 +559,24 @@ namespace
         // -----------------------------------------------------------------------------
         // Lamda function
         // -----------------------------------------------------------------------------
-        auto UpdateFacet = [&](Dt::CSkyComponent* _pDataSkyboxFacet, CInternSkyFacet* _pGraphicSkyboxFacet)->void
+        auto UpdateCubemap = [&](Dt::CSkyComponent* _pSkyComponent, CInternSky* _pInternSky)->void
         {
             // -----------------------------------------------------------------------------
-            // Get hash
+            // Reset
             // -----------------------------------------------------------------------------
-            Gfx::STextureDescriptor TextureDescriptor;
-
-            TextureDescriptor.m_NumberOfPixelsU  = STextureDescriptor::s_NumberOfPixelsFromSource;
-            TextureDescriptor.m_NumberOfPixelsV  = STextureDescriptor::s_NumberOfPixelsFromSource;
-            TextureDescriptor.m_NumberOfPixelsW  = 1;
-            TextureDescriptor.m_NumberOfMipMaps  = 1;
-            TextureDescriptor.m_NumberOfTextures = 1;
-            TextureDescriptor.m_Access           = CTexture::CPUWrite;
-            TextureDescriptor.m_Usage            = CTexture::GPURead;
-            TextureDescriptor.m_Semantic         = CTexture::Diffuse;
-            TextureDescriptor.m_pFileName        = 0;
-            TextureDescriptor.m_pPixels          = 0;
-            TextureDescriptor.m_Binding          = CTexture::ShaderResource;
-            TextureDescriptor.m_Format           = STextureDescriptor::s_FormatFromSource;
-            TextureDescriptor.m_pFileName        = _pDataSkyboxFacet->GetTexture().c_str();
-
-            CTexturePtr TexturePtr = nullptr;
-
-            if (_pDataSkyboxFacet->GetType() == Dt::CSkyComponent::Cubemap && _pDataSkyboxFacet->GetHasTexture())
-            {
-                TexturePtr = TextureManager::CreateCubeTexture(TextureDescriptor);
-            }
-            else if (_pDataSkyboxFacet->GetType() != Dt::CSkyComponent::Procedural && _pDataSkyboxFacet->GetHasTexture())
-            {
-                TexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
-            }
+            _pInternSky->m_RenderContextPtr->SetViewPortSet(0);
+            _pInternSky->m_RenderContextPtr->SetTargetSet(0);
+            _pInternSky->m_ViewPortSetPtr = 0;
+            _pInternSky->m_TargetSetPtr = 0;
+            _pInternSky->m_CubemapPtr = 0;
 
             // -----------------------------------------------------------------------------
-            // Check hash and update data + render
-            // -----------------------------------------------------------------------------
-            if (TexturePtr.IsValid())
-            {
-                _pGraphicSkyboxFacet->m_InputTexturePtr = TexturePtr;
-            }
-            else
-            {
-                _pGraphicSkyboxFacet->m_InputTexturePtr = 0;
-            }
-
-            // -----------------------------------------------------------------------------
-            // Render sky because of the change
-            // -----------------------------------------------------------------------------
-            RenderSkybox(_pDataSkyboxFacet, _pGraphicSkyboxFacet);
-
-            // -----------------------------------------------------------------------------
-            // Set time
-            // -----------------------------------------------------------------------------
-            _pGraphicSkyboxFacet->m_TimeStamp = Core::Time::GetNumberOfFrame();
-        };
-
-        // -----------------------------------------------------------------------------
-        // Dirty check
-        // -----------------------------------------------------------------------------
-        unsigned int DirtyFlags;
-
-        DirtyFlags = pSkyComponent->GetDirtyFlags();
-
-        if ((DirtyFlags & Dt::CSkyComponent::DirtyCreate))
-        {
-            // -----------------------------------------------------------------------------
-            // Create facet
-            // -----------------------------------------------------------------------------
-            CInternSkyFacet* pGfxSkybox = m_Skies.Allocate();
-
-            // -----------------------------------------------------------------------------
-            // Cubemap
+            // Create new environment map
             // -----------------------------------------------------------------------------
             STextureDescriptor TextureDescriptor;
 
-            TextureDescriptor.m_NumberOfPixelsU  = 2048;
-            TextureDescriptor.m_NumberOfPixelsV  = 2048;
+            TextureDescriptor.m_NumberOfPixelsU  = pSkyComponent->GetQualityInPixel();
+            TextureDescriptor.m_NumberOfPixelsV  = pSkyComponent->GetQualityInPixel();
             TextureDescriptor.m_NumberOfPixelsW  = 1;
             TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_GenerateAllMipMaps;
             TextureDescriptor.m_NumberOfTextures = 6;
@@ -741,18 +587,18 @@ namespace
             TextureDescriptor.m_Semantic         = CTexture::Diffuse;
             TextureDescriptor.m_pFileName        = 0;
             TextureDescriptor.m_pPixels          = 0;
-            TextureDescriptor.m_Format           = CTexture::R16G16B16A16_FLOAT;
+            TextureDescriptor.m_Format           = CTexture::R16G16B16_FLOAT;
         
-            pGfxSkybox->m_CubemapPtr = TextureManager::CreateCubeTexture(TextureDescriptor);
+            _pInternSky->m_CubemapPtr = TextureManager::CreateCubeTexture(TextureDescriptor);
 
-            TextureManager::SetTextureLabel(pGfxSkybox->m_CubemapPtr, "Sky Texture");
+            TextureManager::SetTextureLabel(_pInternSky->m_CubemapPtr, "Sky Texture");
 
             // -----------------------------------------------------------------------------
             // Target Set
             // -----------------------------------------------------------------------------
-            CTexturePtr FirstMipmapCubeTexture = TextureManager::GetMipmapFromTexture2D(pGfxSkybox->m_CubemapPtr, 0);
+            CTexturePtr FirstMipmapCubeTexture = TextureManager::GetMipmapFromTexture2D(_pInternSky->m_CubemapPtr, 0);
 
-            pGfxSkybox->m_TargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTexturePtr>(FirstMipmapCubeTexture));
+            _pInternSky->m_TargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTexturePtr>(FirstMipmapCubeTexture));
 
             // -----------------------------------------------------------------------------
             // Viewport
@@ -769,69 +615,113 @@ namespace
 
             CViewPortPtr MipMapViewPort = ViewManager::CreateViewPort(ViewPortDesc);
 
-            pGfxSkybox->m_ViewPortSetPtr = ViewManager::CreateViewPortSet(MipMapViewPort);
+            _pInternSky->m_ViewPortSetPtr = ViewManager::CreateViewPortSet(MipMapViewPort);
 
             // -----------------------------------------------------------------------------
             // Render context
             // -----------------------------------------------------------------------------
-            CCameraPtr          CameraPtr       = ViewManager::GetMainCamera();
-            CRenderStatePtr     NoDepthStatePtr = StateManager::GetRenderState(CRenderState::NoDepth | CRenderState::NoCull | CRenderState::AlphaBlend);
+            _pInternSky->m_RenderContextPtr->SetViewPortSet(_pInternSky->m_ViewPortSetPtr);
+            _pInternSky->m_RenderContextPtr->SetTargetSet(_pInternSky->m_TargetSetPtr);
+        };
+
+        auto UpdateContent = [&](Dt::CSkyComponent* _pSkyComponent, CInternSky* _pGfxSkybox)->void
+        {
+            _pGfxSkybox->m_InputTexturePtr = 0;
+
+            if (_pSkyComponent->HasTexture())
+            {
+                _pGfxSkybox->m_InputTexturePtr = _pSkyComponent->GetTexture();
+            }
+
+            // -----------------------------------------------------------------------------
+            // Render sky because of the change
+            // -----------------------------------------------------------------------------
+            RenderSkybox(_pSkyComponent, _pGfxSkybox);
+        };
+
+        // -----------------------------------------------------------------------------
+        // Dirty check
+        // -----------------------------------------------------------------------------
+        unsigned int DirtyFlags;
+
+        DirtyFlags = pSkyComponent->GetDirtyFlags();
+
+        if ((DirtyFlags & Dt::CSkyComponent::DirtyCreate))
+        {
+            // -----------------------------------------------------------------------------
+            // Create facet
+            // -----------------------------------------------------------------------------
+            CInternSky* pInternSky = m_Skies.Allocate();
+
+            // -----------------------------------------------------------------------------
+            // Render context
+            // -----------------------------------------------------------------------------
+            CCameraPtr      CameraPtr = ViewManager::GetMainCamera();
+            CRenderStatePtr NoDepthStatePtr = StateManager::GetRenderState(CRenderState::NoDepth | CRenderState::NoCull | CRenderState::AlphaBlend);
 
             CRenderContextPtr CubemapRenderContextPtr = ContextManager::CreateRenderContext();
 
             CubemapRenderContextPtr->SetCamera(CameraPtr);
-            CubemapRenderContextPtr->SetViewPortSet(pGfxSkybox->m_ViewPortSetPtr);
-            CubemapRenderContextPtr->SetTargetSet(pGfxSkybox->m_TargetSetPtr);
             CubemapRenderContextPtr->SetRenderState(NoDepthStatePtr);
 
-            pGfxSkybox->m_RenderContextPtr = CubemapRenderContextPtr;
+            pInternSky->m_RenderContextPtr = CubemapRenderContextPtr;
 
             // -----------------------------------------------------------------------------
-            // Update
+            // Cubemap
             // -----------------------------------------------------------------------------
-            UpdateFacet(pSkyComponent, pGfxSkybox);
+            UpdateCubemap(pSkyComponent, pInternSky);
+
+            // -----------------------------------------------------------------------------
+            // Content
+            // -----------------------------------------------------------------------------
+            UpdateContent(pSkyComponent, pInternSky);
 
             // -----------------------------------------------------------------------------
             // Link to component
             // -----------------------------------------------------------------------------
-            pSkyComponent->SetFacet(Dt::CSkyComponent::Graphic, pGfxSkybox);
+            pSkyComponent->SetFacet(Dt::CSkyComponent::Graphic, pInternSky);
 
-            pGfxSkybox->m_TimeStamp = Core::Time::GetNumberOfFrame() + 1;
+            pInternSky->m_TimeStamp = Core::Time::GetNumberOfFrame() + 1;
         }
         else if ((DirtyFlags & Dt::CSkyComponent::DirtyInfo))
         {
-            CInternSkyFacet* pGraphicSkyboxFacet = static_cast<CInternSkyFacet*>(pSkyComponent->GetFacet(Dt::CSkyComponent::Graphic));
+            CInternSky* pInternSky = static_cast<CInternSky*>(pSkyComponent->GetFacet(Dt::CSkyComponent::Graphic));
 
             // -----------------------------------------------------------------------------
-            // Update
+            // Check cubemap quality
             // -----------------------------------------------------------------------------
-            UpdateFacet(pSkyComponent, pGraphicSkyboxFacet);
+            if (pInternSky->m_CubemapPtr->GetNumberOfPixelsU() != pSkyComponent->GetQualityInPixel())
+            {
+                UpdateCubemap(pSkyComponent, pInternSky);
+            }
+
+            // -----------------------------------------------------------------------------
+            // Content
+            // -----------------------------------------------------------------------------
+            UpdateContent(pSkyComponent, pInternSky);
 
             // -----------------------------------------------------------------------------
             // Set time
             // -----------------------------------------------------------------------------
-            pGraphicSkyboxFacet->m_TimeStamp = Core::Time::GetNumberOfFrame() + 1;
+            pInternSky->m_TimeStamp = Core::Time::GetNumberOfFrame() + 1;
         }
     }
 
     // -----------------------------------------------------------------------------
 
-    void CGfxSkyManager::RenderSkybox(Dt::CSkyComponent* _pDataSkyFacet, CInternSkyFacet* _pOutput)
+    void CGfxSkyManager::RenderSkybox(Dt::CSkyComponent* _pDataSkyFacet, CInternSky* _pOutput)
     {
         switch (_pDataSkyFacet->GetType())
         {
-            case Dt::CSkyComponent::Procedural:      RenderSkyboxFromAtmopsphericScattering(_pOutput, _pDataSkyFacet->GetIntensity()); break;
-            case Dt::CSkyComponent::Panorama:        RenderSkyboxFromPanorama(_pOutput, _pDataSkyFacet->GetIntensity()); break;
-            case Dt::CSkyComponent::Cubemap:         RenderSkyboxFromCubemap(_pOutput, _pDataSkyFacet->GetIntensity()); break;
-            case Dt::CSkyComponent::Texture:         RenderSkyboxFromTexture(_pOutput, _pDataSkyFacet->GetIntensity()); break;
-            case Dt::CSkyComponent::TextureGeometry: RenderSkyboxFromGeometry(_pOutput, _pDataSkyFacet->GetIntensity()); break;
-            case Dt::CSkyComponent::TextureLUT:      RenderSkyboxFromLUT(_pOutput, _pDataSkyFacet->GetIntensity()); break;
+            case Dt::CSkyComponent::Procedural: RenderSkyboxFromAtmopsphericScattering(_pOutput, _pDataSkyFacet->GetIntensity()); break;
+            case Dt::CSkyComponent::Panorama:   RenderSkyboxFromPanorama(_pOutput, _pDataSkyFacet->GetIntensity()); break;
+            case Dt::CSkyComponent::Cubemap:    RenderSkyboxFromCubemap(_pOutput, _pDataSkyFacet->GetIntensity()); break;
         }
     }
 
     // -----------------------------------------------------------------------------
 
-    void CGfxSkyManager::RenderSkyboxFromAtmopsphericScattering(CInternSkyFacet* _pOutput, float _Intensity)
+    void CGfxSkyManager::RenderSkyboxFromAtmopsphericScattering(CInternSky* _pOutput, float _Intensity)
     {
         CRenderContextPtr RenderContextPtr = _pOutput->m_RenderContextPtr;
         CShaderPtr        VSPtr            = m_SkyboxFromAtmosphere.m_VSPtr;
@@ -959,7 +849,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxSkyManager::RenderSkyboxFromPanorama(CInternSkyFacet* _pOutput, float _Intensity)
+    void CGfxSkyManager::RenderSkyboxFromPanorama(CInternSky* _pOutput, float _Intensity)
     {
         if (_pOutput->m_InputTexturePtr == 0)
         {
@@ -1062,7 +952,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxSkyManager::RenderSkyboxFromCubemap(CInternSkyFacet* _pOutput, float _Intensity)
+    void CGfxSkyManager::RenderSkyboxFromCubemap(CInternSky* _pOutput, float _Intensity)
     {
         if (_pOutput->m_InputTexturePtr == 0)
         {
@@ -1165,7 +1055,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxSkyManager::RenderSkyboxFromTexture(CInternSkyFacet* _pOutput, float _Intensity)
+    void CGfxSkyManager::RenderSkyboxFromTexture(CInternSky* _pOutput, float _Intensity)
     {
         if (_pOutput->m_InputTexturePtr == 0)
         {
@@ -1294,7 +1184,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxSkyManager::RenderSkyboxFromGeometry(CInternSkyFacet* _pOutput, float _Intensity)
+    void CGfxSkyManager::RenderSkyboxFromGeometry(CInternSky* _pOutput, float _Intensity)
     {
         if(_pOutput->m_InputTexturePtr == 0)
         {
@@ -1421,132 +1311,6 @@ namespace
         ContextManager::ResetTexture(0);
 
         ContextManager::ResetSampler(0);
-
-        ContextManager::ResetConstantBuffer(1);
-
-        ContextManager::ResetConstantBuffer(2);
-
-        ContextManager::ResetConstantBuffer(4);
-
-        ContextManager::ResetInputLayout();
-
-        ContextManager::ResetIndexBuffer();
-
-        ContextManager::ResetVertexBuffer();
-
-        ContextManager::ResetShaderVS();
-
-        ContextManager::ResetShaderGS();
-
-        ContextManager::ResetShaderPS();
-
-        ContextManager::ResetTopology();
-
-        ContextManager::ResetRenderContext();
-
-        // -----------------------------------------------------------------------------
-        // Update mip maps
-        // -----------------------------------------------------------------------------
-        TextureManager::UpdateMipmap(_pOutput->m_CubemapPtr);
-
-        Performance::EndEvent();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CGfxSkyManager::RenderSkyboxFromLUT(CInternSkyFacet* _pOutput, float _Intensity)
-    {
-        if (_pOutput->m_InputTexturePtr == 0)
-        {
-            ENGINE_CONSOLE_INFO("Skybox can't be rendered from LUT because of missing image.");
-            return;
-        }
-
-        // -----------------------------------------------------------------------------
-
-        CRenderContextPtr RenderContextPtr = _pOutput->m_RenderContextPtr;
-        CShaderPtr        VSPtr            = m_SkyboxFromLUT.m_VSPtr;
-        CShaderPtr        GSPtr            = m_SkyboxFromLUT.m_GSPtr;
-        CShaderPtr        PSPtr            = m_SkyboxFromLUT.m_PSPtr;
-        CBufferSetPtr     VSBufferSetPtr   = m_SkyboxFromLUT.m_VSBufferSetPtr;
-        CBufferSetPtr     GSBufferSetPtr   = m_SkyboxFromLUT.m_GSBufferSetPtr;
-        CBufferSetPtr     PSBufferSetPtr   = m_SkyboxFromLUT.m_PSBufferSetPtr;
-        CMeshPtr          MeshPtr          = m_SkyboxFromLUT.m_MeshPtr;
-
-        Performance::BeginEvent("Skybox from LUT");
-
-        // -----------------------------------------------------------------------------
-        // Setup constant buffer
-        // TODO: Currently it is not totally clear how to rotate the sphere
-        // to get a proper environment without env. rotation. Now the rotation works 
-        // only if the camera is inside the playing area.
-        // Otherwise we have an gimbal lock.
-        // -----------------------------------------------------------------------------
-        SModelMatrixBuffer ViewBuffer;
-
-        ViewBuffer.m_ModelMatrix  = glm::mat4(1.0f);
-        ViewBuffer.m_ModelMatrix *= glm::mat4(ViewManager::GetMainCamera()->GetView()->GetRotationMatrix());
-
-        BufferManager::UploadBufferData(GSBufferSetPtr->GetBuffer(1), &ViewBuffer);
-
-        // -----------------------------------------------------------------------------
-        // Setup constant buffer
-        // -----------------------------------------------------------------------------
-        SOutputBufferPS PSBuffer;
-
-        PSBuffer.m_HDRFactor = _Intensity;
-        PSBuffer.m_IsHDR     = _pOutput->m_InputTexturePtr->GetSemantic() == Gfx::CTexture::HDR ? 1.0f : 0.0f;
-
-        BufferManager::UploadBufferData(PSBufferSetPtr->GetBuffer(0), &PSBuffer);
-
-        // -----------------------------------------------------------------------------
-        // Environment to cube map
-        // -----------------------------------------------------------------------------           
-        
-
-        // -----------------------------------------------------------------------------
-        // Setup
-        // -----------------------------------------------------------------------------
-        ContextManager::SetRenderContext(RenderContextPtr);
-
-        ContextManager::SetTopology(STopology::TriangleList);
-
-        ContextManager::SetShaderVS(VSPtr);
-
-        ContextManager::SetShaderGS(GSPtr);
-
-        ContextManager::SetShaderPS(PSPtr);
-
-        ContextManager::SetVertexBuffer(MeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
-
-        ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
-
-        ContextManager::SetInputLayout(MeshPtr->GetLOD(0)->GetSurface()->GetMVPShaderVS()->GetInputLayout());
-
-        ContextManager::SetConstantBuffer(2, GSBufferSetPtr->GetBuffer(0));
-        ContextManager::SetConstantBuffer(3, GSBufferSetPtr->GetBuffer(1));
-
-        ContextManager::SetConstantBuffer(4, PSBufferSetPtr->GetBuffer(0));
-
-        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
-        ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
-
-        ContextManager::SetTexture(0, static_cast<CTexturePtr>(_pOutput->m_InputTexturePtr));
-        ContextManager::SetTexture(1, static_cast<CTexturePtr>(m_LookUpTexturePtr));
-
-        // -----------------------------------------------------------------------------
-        // Draw
-        // -----------------------------------------------------------------------------
-        ContextManager::DrawIndexed(MeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
-
-        // -----------------------------------------------------------------------------
-        // Reset
-        // -----------------------------------------------------------------------------
-        ContextManager::ResetTexture(0);
-        ContextManager::ResetTexture(1);
-
-        ContextManager::ResetSampler(0);
-        ContextManager::ResetSampler(1);
 
         ContextManager::ResetConstantBuffer(1);
 
@@ -2216,16 +1980,6 @@ namespace
         m_SkyboxFromGeometry.m_MeshPtr            = 0;
         m_SkyboxFromGeometry.m_VertexBufferSetPtr = 0;
         m_SkyboxFromGeometry.m_IndexBufferPtr     = 0;
-
-        m_SkyboxFromLUT.m_VSPtr              = 0;
-        m_SkyboxFromLUT.m_GSPtr              = 0;
-        m_SkyboxFromLUT.m_PSPtr              = 0;
-        m_SkyboxFromLUT.m_VSBufferSetPtr     = 0;
-        m_SkyboxFromLUT.m_GSBufferSetPtr     = 0;
-        m_SkyboxFromLUT.m_PSBufferSetPtr     = 0;
-        m_SkyboxFromLUT.m_MeshPtr            = 0;
-        m_SkyboxFromLUT.m_VertexBufferSetPtr = 0;
-        m_SkyboxFromLUT.m_IndexBufferPtr     = 0;
     }
 } // namespace 
 

@@ -25,6 +25,7 @@
 #include "engine/data/data_transformation_facet.h"
 
 #include "engine/script/script_camera_control_script.h"
+#include "engine/script/script_light_estimation.h"
 #include "engine/script/script_script_manager.h"
 
 #include <assert.h>
@@ -275,6 +276,14 @@ namespace Edit
                 Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*Component, Dt::CSkyComponent::DirtyCreate);
             }
 
+//             {
+//                 auto Component = Dt::CComponentManager::GetInstance().Allocate<Scpt::CLightEstimationScript>();
+// 
+//                 rEnvironmentEntity.AttachComponent(Component);
+// 
+//                 Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*Component, Dt::CSkyComponent::DirtyCreate);
+//             }
+
             Dt::EntityManager::MarkEntityAsDirty(rEnvironmentEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
 
@@ -301,7 +310,7 @@ namespace Edit
 
             auto pMeshComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CMeshComponent>();
 
-            pMeshComponent->SetMeshType(Dt::CMeshComponent::Cone);
+            pMeshComponent->SetMeshType(Dt::CMeshComponent::Sphere);
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pMeshComponent, Dt::CMeshComponent::DirtyCreate);
 
@@ -311,7 +320,9 @@ namespace Edit
 
             auto pMaterial = Dt::MaterialManager::CreateMaterialFromName("Red Sparrow");
 
-            pMaterial->SetColor(glm::vec3(1.0f, 0.0f, 0.0f));
+            pMaterial->SetColor(glm::vec3(1.0f, 1.0f, 1.0f));
+            pMaterial->SetMetalness(1.0f);
+            pMaterial->SetRoughness(0.05f);
 
             auto pMaterialComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CMaterialComponent>();
 

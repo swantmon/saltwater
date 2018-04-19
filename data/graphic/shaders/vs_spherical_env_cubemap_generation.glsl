@@ -27,7 +27,7 @@ void main(void)
 {
     vec4 WSPosition = vec4(VertexPosition.xyz, 1.0f);
     
-    out_Normal = normalize(WSPosition.xyz);
+    out_Normal = -normalize(WSPosition.xyz);
     
     gl_Position = WSPosition;
 }

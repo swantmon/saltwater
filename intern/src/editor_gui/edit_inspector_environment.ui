@@ -67,21 +67,6 @@
             <string>Cubemap</string>
            </property>
           </item>
-          <item>
-           <property name="text">
-            <string>Texture</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Texture Geometry</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Texture LUT</string>
-           </property>
-          </item>
          </widget>
         </item>
         <item row="2" column="1">

@@ -40,8 +40,8 @@ namespace Gfx
 {
 namespace TextureManager
 {
-    void OnStart();
-    void OnExit();
+    ENGINE_API void OnStart();
+    ENGINE_API void OnExit();
 
     ENGINE_API CTexturePtr GetDummyTexture2D();
     ENGINE_API CTexturePtr GetDummyTexture3D();

@@ -7,19 +7,8 @@
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
-layout(std140, binding = 4) uniform UB4
-{
-    vec4 m_ConstantBufferData0;
-};
-
-layout(binding = 0) uniform sampler2D PSBackgroundTexture;
-layout(binding = 1) uniform samplerCube PSLookUpTexture;
-
-// -----------------------------------------------------------------------------
-// Easy access defines
-// -----------------------------------------------------------------------------
-#define m_HDRConvertFactor  m_ConstantBufferData0.x
-#define m_IsHDR             m_ConstantBufferData0.y
+layout(binding = 0) uniform sampler2D in_InputTexture;
+layout(binding = 1) uniform samplerCube in_LookUpTexture;
 
 // -----------------------------------------------------------------------------
 // Input to fragment from VS
@@ -37,16 +26,11 @@ layout(location = 0) out vec4 out_Output;
 // -----------------------------------------------------------------------------
 void main(void)
 {
-	vec4 LookUp = textureLod(PSLookUpTexture, in_Normal, 0.0f);
+	vec4 LookUp = textureLod(in_LookUpTexture, in_Normal, 0.0f);
 
-    vec4 FinalColor = texture(PSBackgroundTexture, LookUp.xy);
-    
-    if (m_IsHDR == 0.0f)
-    {
-        FinalColor = InverseToneMapping(FinalColor);
-    }
-    
-    out_Output = vec4(clamp(FinalColor.xyz * m_HDRConvertFactor, 0.0f, F16_MAX), 1.0f);
+    vec4 FinalColor = texture(in_InputTexture, LookUp.xy);
+        
+    out_Output = vec4(FinalColor.xyz, 1.0f);
 }
 
 #endif // __INCLUDE_FS_LUT_ENV_CUBEMAP_GENERATION_GLSL__

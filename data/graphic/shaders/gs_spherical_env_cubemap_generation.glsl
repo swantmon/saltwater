@@ -51,7 +51,7 @@ void main()
         {
             gl_Layer = FaceIndex;
 
-            out_Normal  = -in_Normal[IndexOfVertex];
+            out_Normal  = in_Normal[IndexOfVertex];
             gl_Position = m_CubeProjectionMatrix * m_CubeViewMatrix[FaceIndex] * gl_in[IndexOfVertex].gl_Position;
 
             EmitVertex();

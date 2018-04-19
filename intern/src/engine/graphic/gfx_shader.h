@@ -14,7 +14,7 @@
 
 namespace Gfx
 {
-    class CShader : public Base::CManagedPoolItemBase
+    class ENGINE_API CShader : public Base::CManagedPoolItemBase
     {
     public:
     
@@ -56,19 +56,19 @@ namespace Gfx
 
     public:
 
-        ENGINE_API unsigned int GetID() const;
-        ENGINE_API EType GetType() const;
-        ENGINE_API const std::string& GetFileName() const;
-        ENGINE_API const std::string& GetShaderName() const;
-        ENGINE_API const std::string& GetShaderDefines() const;
+        unsigned int GetID() const;
+        EType GetType() const;
+        const std::string& GetFileName() const;
+        const std::string& GetShaderName() const;
+        const std::string& GetShaderDefines() const;
 
     public:
 
-        ENGINE_API bool HasAlpha() const;
+        bool HasAlpha() const;
 
     public:
 
-        ENGINE_API CInputLayoutPtr GetInputLayout();
+        CInputLayoutPtr GetInputLayout();
 
     protected:
 

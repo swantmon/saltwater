@@ -859,5 +859,8 @@
     <ClInclude Include="..\..\..\src\engine\engine.h" />
     <ClInclude Include="..\..\..\src\engine\engine_config.h" />
     <ClInclude Include="..\..\..\src\engine\engine_precompiled.h" />
+    <ClInclude Include="..\..\..\src\engine\script\script_light_estimation.h">
+      <Filter>script\scripts</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

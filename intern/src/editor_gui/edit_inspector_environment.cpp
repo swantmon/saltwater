@@ -112,12 +112,7 @@ namespace Edit
 
         if (HasTexture)
         {
-            bool HasName = _rMessage.Get<bool>();
-
-            if (HasName)
-            {
-                TextureName = _rMessage.Get<std::string>();
-            }
+            TextureName = _rMessage.Get<std::string>();
         }
 
         float Intensity = _rMessage.Get<float>();

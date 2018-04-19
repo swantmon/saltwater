@@ -9,7 +9,7 @@
 
 namespace Gfx
 {
-    class CSurface : public Base::CManagedPoolItemBase
+    class ENGINE_API CSurface : public Base::CManagedPoolItemBase
     {
     public:
         

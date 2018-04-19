@@ -27,6 +27,7 @@
 
 #include "engine/script/script_ar_camera_control_script.h"
 #include "engine/script/script_ar_place_object_on_touch_script.h"
+#include "engine/script/script_light_estimation.h"
 #include "engine/script/script_script_manager.h"
 
 namespace App
@@ -178,6 +179,15 @@ namespace App
                 Component->SetRefreshMode(Dt::CSkyComponent::Static);
                 Component->SetType(Dt::CSkyComponent::Procedural);
                 Component->SetIntensity(10000.0f);
+                Component->SetQuality(Dt::CSkyComponent::PX128);
+
+                rEnvironmentEntity.AttachComponent(Component);
+
+                Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*Component, Dt::CSkyComponent::DirtyCreate);
+            }
+
+            {
+                auto Component = Dt::CComponentManager::GetInstance().Allocate<Scpt::CLightEstimationScript>();
 
                 rEnvironmentEntity.AttachComponent(Component);
 
@@ -185,6 +195,42 @@ namespace App
             }
 
             Dt::EntityManager::MarkEntityAsDirty(rEnvironmentEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
+
+        {
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
+            EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
+
+            Dt::CEntity& rLightingEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+
+            rLightingEntity.SetName("Local light probe");
+
+            Dt::CTransformationFacet* pTransformationFacet = rLightingEntity.GetTransformationFacet();
+
+            pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+            pTransformationFacet->SetScale(glm::vec3(1.0f));
+            pTransformationFacet->SetRotation(glm::vec3(0.0f));
+
+            {
+                auto LightProbeComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CLightProbeComponent>();
+
+                LightProbeComponent->SetType(Dt::CLightProbeComponent::Sky);
+                LightProbeComponent->SetQuality(Dt::CLightProbeComponent::PX128);
+                LightProbeComponent->SetIntensity(1.0f);
+                LightProbeComponent->SetRefreshMode(Dt::CLightProbeComponent::Dynamic);
+                LightProbeComponent->SetNear(0.01f);
+                LightProbeComponent->SetFar(1024.0f);
+                LightProbeComponent->SetParallaxCorrection(false);
+                LightProbeComponent->SetBoxSize(glm::vec3(1024.0f));
+
+                rLightingEntity.AttachComponent(LightProbeComponent);
+
+                Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*LightProbeComponent, Dt::CLightProbeComponent::DirtyCreate);
+            }
+
+            Dt::EntityManager::MarkEntityAsDirty(rLightingEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
 
         // -----------------------------------------------------------------------------
@@ -210,7 +256,7 @@ namespace App
 
             auto pMeshComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CMeshComponent>();
 
-            pMeshComponent->SetMeshType(Dt::CMeshComponent::Cone);
+            pMeshComponent->SetMeshType(Dt::CMeshComponent::Sphere);
 
             rEntity.AttachComponent(pMeshComponent);
 
@@ -220,7 +266,9 @@ namespace App
 
             auto pMaterial = Dt::MaterialManager::CreateMaterialFromName("Red Sparrow");
 
-            pMaterial->SetColor(glm::vec3(1.0f, 0.0f, 0.0f));
+            pMaterial->SetColor(glm::vec3(1.0f, 1.0f, 1.0f));
+            pMaterial->SetMetalness(1.0f);
+            pMaterial->SetRoughness(0.05f);
 
             auto pMaterialComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CMaterialComponent>();
 

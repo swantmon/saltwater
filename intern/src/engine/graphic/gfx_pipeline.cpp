@@ -410,27 +410,29 @@ namespace Pipeline
 
     void Render()
     {
+        Performance::Update();
+
+        // -----------------------------------------------------------------------------
+        // Update graphic
+        // -----------------------------------------------------------------------------
+        Main::UploadPerFrameConstantBuffers();
+
         // -----------------------------------------------------------------------------
         // Begin frame
         // -----------------------------------------------------------------------------
         Main::BeginFrame();
 
-        Performance::Update();
-
         // -----------------------------------------------------------------------------
         // Update graphic entities
         // -----------------------------------------------------------------------------
+        Performance::BeginEvent("Update Pass");
+
         SunManager        ::Update();
         SkyManager        ::Update();
         LightProbeManager ::Update();
         PointLightManager ::Update();
         AreaLightManager  ::Update();
 
-        // -----------------------------------------------------------------------------
-        // Update graphic
-        // -----------------------------------------------------------------------------
-        Main::UploadPerFrameConstantBuffers();
-        
         // -----------------------------------------------------------------------------
         // Update renderer to prepare for rendering
         // -----------------------------------------------------------------------------
@@ -449,6 +451,8 @@ namespace Pipeline
         PostFXHDR            ::Update();
         PostFX               ::Update();
         SelectionRenderer    ::Update();
+
+        Performance::EndEvent();
 
         // -----------------------------------------------------------------------------
         // Creation Pass

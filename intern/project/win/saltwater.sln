@@ -33,6 +33,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "base", "base\base.vcxproj",
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "plugin_helloworld", "plugin_helloworld\plugin_helloworld.vcxproj", "{1BBA2732-A51B-4FF0-8393-492884561668}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "plugin_light_estimation_lut", "plugin_light_estimation_lut\plugin_light_estimation_lut.vcxproj", "{AA2AF386-CC0D-49D3-AFCF-42045A0476FE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -67,21 +69,17 @@ Global
 		{1BBA2732-A51B-4FF0-8393-492884561668}.Debug|x64.Build.0 = Debug|x64
 		{1BBA2732-A51B-4FF0-8393-492884561668}.Release|x64.ActiveCfg = Release|x64
 		{1BBA2732-A51B-4FF0-8393-492884561668}.Release|x64.Build.0 = Release|x64
-<<<<<<< Updated upstream
-		{1BBA2732-A51B-4FF0-8393-492884561668}.Release|x86.ActiveCfg = Release|Win32
-		{1BBA2732-A51B-4FF0-8393-492884561668}.Release|x86.Build.0 = Release|Win32
-=======
 		{AA2AF386-CC0D-49D3-AFCF-42045A0476FE}.Debug|x64.ActiveCfg = Debug|x64
 		{AA2AF386-CC0D-49D3-AFCF-42045A0476FE}.Debug|x64.Build.0 = Debug|x64
 		{AA2AF386-CC0D-49D3-AFCF-42045A0476FE}.Release|x64.ActiveCfg = Release|x64
 		{AA2AF386-CC0D-49D3-AFCF-42045A0476FE}.Release|x64.Build.0 = Release|x64
->>>>>>> Stashed changes
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{1BBA2732-A51B-4FF0-8393-492884561668} = {F0542C3D-B5F9-4381-A027-10B1804A46EF}
+		{AA2AF386-CC0D-49D3-AFCF-42045A0476FE} = {F0542C3D-B5F9-4381-A027-10B1804A46EF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {ABE024EA-EFBA-425A-9D54-106C60269005}

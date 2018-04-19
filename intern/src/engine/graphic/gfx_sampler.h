@@ -5,7 +5,7 @@
 
 namespace Gfx
 {
-    class CSampler : public Base::CManagedPoolItemBase
+    class ENGINE_API CSampler : public Base::CManagedPoolItemBase
     {
         public:
 
@@ -86,7 +86,7 @@ namespace Gfx
 
             ESampler GetType() const;
 
-			const char* GetName() const;
+            const char* GetName() const;
 
         protected:
 

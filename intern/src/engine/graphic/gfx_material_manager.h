@@ -31,8 +31,8 @@ namespace Gfx
 {
 namespace MaterialManager
 {
-    void OnStart();
-    void OnExit();
+    ENGINE_API void OnStart();
+    ENGINE_API void OnExit();
 
     ENGINE_API CMaterialPtr CreateMaterial(const SMaterialDescriptor& _rDescriptor);
 

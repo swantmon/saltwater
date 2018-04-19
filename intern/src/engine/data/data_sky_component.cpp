@@ -9,9 +9,10 @@ namespace Dt
 {
     CSkyComponent::CSkyComponent()
         : m_RefreshMode(Static)
+        , m_Quality    (PX1024)
         , m_Type       (Procedural)
         , m_HasHDR     (true)
-        , m_Texture    ("")
+        , m_TexturePtr (nullptr)
         , m_Intensity  (0.0f)
     {
 
@@ -54,23 +55,53 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CSkyComponent::SetTexture(const std::string& _pTexture2D)
+    void CSkyComponent::SetQuality(EQuality _Quality)
     {
-        m_Texture = _pTexture2D;
+        m_Quality = _Quality;
     }
 
     // -----------------------------------------------------------------------------
 
-    const std::string& CSkyComponent::GetTexture()
+    CSkyComponent::EQuality CSkyComponent::GetQuality() const
     {
-        return m_Texture;
+        return m_Quality;
     }
 
     // -----------------------------------------------------------------------------
 
-    bool CSkyComponent::GetHasTexture() const
+    unsigned int CSkyComponent::GetQualityInPixel() const
     {
-        return m_Texture.length() > 0;
+        static unsigned int s_QualityInPixel[s_NumberOfQualities] = { 128, 256, 512, 1024, 2048 };
+
+        return s_QualityInPixel[m_Quality];
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CSkyComponent::SetTexture(Gfx::CTexturePtr _TexturePtr)
+    {
+        m_TexturePtr = _TexturePtr;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    Gfx::CTexturePtr CSkyComponent::GetTexture()
+    {
+        return m_TexturePtr;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const Gfx::CTexturePtr CSkyComponent::GetTexture() const
+    {
+        return m_TexturePtr;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    bool CSkyComponent::HasTexture() const
+    {
+        return m_TexturePtr != nullptr;
     }
 
     // -----------------------------------------------------------------------------

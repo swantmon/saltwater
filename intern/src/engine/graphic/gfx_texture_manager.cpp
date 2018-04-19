@@ -514,9 +514,9 @@ namespace
         // -----------------------------------------------------------------------------
         if (pInternTextureArray->m_Info.m_IsCubeTexture)
         {
-            glBindTexture(GL_TEXTURE_2D, TextureHandle);
+            glBindTexture(GL_TEXTURE_CUBE_MAP, _TextureArrayPtr->GetNativeHandle());
 
-            glTexSubImage3D(GL_TEXTURE_2D, 0, Offset[0], Offset[1], _IndexOfSlice, UpdateSize[0], UpdateSize[1], 1, Format, Type, _pBytes);
+            glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + _IndexOfSlice, 0, Offset[0], Offset[1], UpdateSize[0], UpdateSize[1], Format, Type, _pBytes);
         }
         else
         {
@@ -545,23 +545,18 @@ namespace
         
         assert(_TexturePtr->GetNumberOfPixelsU() <= UpdateSize[0] + Offset[0]);
         assert(_TexturePtr->GetNumberOfPixelsV() <= UpdateSize[1] + Offset[1]);
-        
-        CInternTexture* pInternTextureArray = static_cast<CInternTexture*>(_TextureArrayPtr.GetPtr());
-        CInternTexture* pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
-        
-        Gfx::CNativeTextureHandle TextureHandle = pInternTextureArray->m_NativeTexture;
-        
-        int Format = ConvertGLImageFormat(pInternTextureArray->GetFormat());
-        int Type   = ConvertGLImageType  (pInternTextureArray->GetFormat());
+
+        int Format = ConvertGLImageFormat(_TextureArrayPtr->GetFormat());
+        int Type   = ConvertGLImageType(_TextureArrayPtr->GetFormat());
         
         // -----------------------------------------------------------------------------
         // Upload data to texture
         // -----------------------------------------------------------------------------
-        if (pInternTextureArray->m_Info.m_IsCubeTexture)
+        if (_TextureArrayPtr->IsCube())
         {
-            glBindTexture(GL_TEXTURE_2D, TextureHandle);
+            glBindTexture(GL_TEXTURE_CUBE_MAP, _TextureArrayPtr->GetNativeHandle());
 
-            glTexSubImage3D(GL_TEXTURE_2D, 0, Offset[0], Offset[1], _IndexOfSlice, UpdateSize[0], UpdateSize[1], 1, Format, Type, pInternTexture->GetPixels());
+            glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + _IndexOfSlice, 0, Offset[0], Offset[1], UpdateSize[0], UpdateSize[1], Format, Type, _TexturePtr->GetPixels());
         }
         else
         {
@@ -746,7 +741,6 @@ namespace
                 pPathToTexture = reinterpret_cast<const wchar_t*>(PathToTexture.c_str());
 #endif
 
-
                 Result = ilLoadImage(pPathToTexture) == IL_TRUE;
             }
 
@@ -772,7 +766,7 @@ namespace
             }
             else
             {
-                ENGINE_CONSOLE_STREAMERROR("Failed loading image '" << PathToTexture.c_str() << "' from file.");
+                ENGINE_CONSOLE_ERRORV("Failed loading image '%s' from file.", PathToTexture.c_str());
 
                 ilDeleteImage(NativeImageName);
 
@@ -1385,7 +1379,7 @@ namespace
 
                 pTextureData = ilGetData();
 
-                glTexSubImage3D(GL_TEXTURE_CUBE_MAP, 0, 0, 0, IndexOfFace, ImageWidth, ImageHeight, 1, GLFormat, GLType, pTextureData);
+                glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + IndexOfFace, 0, 0, 0, ImageWidth, ImageHeight, GLFormat, GLType, pTextureData);
             }
         }
 

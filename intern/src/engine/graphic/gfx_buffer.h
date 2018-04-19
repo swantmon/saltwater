@@ -5,7 +5,7 @@
 
 namespace Gfx
 {
-    class CBuffer : public Base::CManagedPoolItemBase
+    class ENGINE_API CBuffer : public Base::CManagedPoolItemBase
     {
         public:
 
