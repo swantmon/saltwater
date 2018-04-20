@@ -862,5 +862,8 @@
     <ClInclude Include="..\..\..\src\engine\script\script_light_estimation.h">
       <Filter>script\scripts</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\engine\script\script_easyar_camera_control_script.h">
+      <Filter>script\scripts</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
