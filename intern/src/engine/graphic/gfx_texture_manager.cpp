@@ -1652,6 +1652,7 @@ namespace
             2,
             2,
             4,
+            3
         };
         
         return s_NativeFormat[_Format];
@@ -1749,6 +1750,7 @@ namespace
             GL_RGBA4,
             GL_RGB5_A1,
             GL_RGB10_A2,
+            GL_RGB8,
         };
         
         return s_NativeFormat[_Format];
@@ -1831,6 +1833,7 @@ namespace
             GL_RGBA,
             GL_RGBA,
             GL_RGBA,
+            GL_BGR
         };
         
         return s_NativeFormat[_Format];
@@ -1912,7 +1915,8 @@ namespace
             GL_NONE, //GL_UNSIGNED_BYTE_3_3_2,
             GL_UNSIGNED_SHORT_4_4_4_4,
             GL_UNSIGNED_SHORT_5_5_5_1,
-            GL_NONE, //GL_UNSIGNED_INT_10_10_10_2,
+            GL_NONE, //GL_UNSIGNED_INT_10_10_10_2, 
+            GL_UNSIGNED_BYTE
         };
         
         return s_NativeType[_Format];
@@ -1995,6 +1999,7 @@ namespace
             IL_RGBA,
             IL_RGBA,
             IL_RGBA,
+            IL_BGR
         };
 
         return s_NativeFormat[_Format];
@@ -2077,6 +2082,7 @@ namespace
             0,
             0,
             0,
+            IL_UNSIGNED_BYTE
         };
 
         return s_NativeType[_Format];

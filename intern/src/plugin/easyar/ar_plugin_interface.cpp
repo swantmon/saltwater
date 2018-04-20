@@ -68,7 +68,7 @@ namespace AR
 
         easyar::CameraDeviceType CameraDeviceType = Core::CProgramParameters::GetInstance().Get("mr:camera:device_type", easyar::CameraDeviceType::Default);
 
-        bool CameraFlipHoizontal = Core::CProgramParameters::GetInstance().Get("mr:camera:flip_horizontal", true);
+        bool CameraFlipHorizontal = Core::CProgramParameters::GetInstance().Get("mr:camera:flip_horizontal", true);
 
         float CameraFPS = Core::CProgramParameters::GetInstance().Get("mr:camera:FPS", 30.0f);
 
@@ -100,7 +100,7 @@ namespace AR
         // -----------------------------------------------------------------------------
         m_Camera->setFocusMode(CameraFocusMode);
         m_Camera->setSize(easyar::Vec2I{ { m_CameraSize[0], m_CameraSize[1] } });
-        m_Camera->setHorizontalFlip(CameraFlipHoizontal);
+        m_Camera->setHorizontalFlip(CameraFlipHorizontal);
         m_Camera->setFrameRate(CameraFPS);
         m_Camera->open(static_cast<int>(CameraDeviceType));
 
@@ -149,7 +149,7 @@ namespace AR
         TextureDescriptor.m_Semantic         = Gfx::CTexture::Diffuse;
         TextureDescriptor.m_pFileName        = 0;
         TextureDescriptor.m_pPixels          = 0;
-        TextureDescriptor.m_Format           = Gfx::CTexture::R8G8B8_UBYTE;
+        TextureDescriptor.m_Format           = Gfx::CTexture::B8G8R8_UBYTE;
 
         m_BackgroundTexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
 
