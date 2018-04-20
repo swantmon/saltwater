@@ -68,7 +68,7 @@ namespace AR
 
         easyar::CameraDeviceType CameraDeviceType = Core::CProgramParameters::GetInstance().Get("mr:camera:device_type", easyar::CameraDeviceType::Default);
 
-        bool CameraFlipHorizontal = Core::CProgramParameters::GetInstance().Get("mr:camera:flip_horizontal", true);
+        bool CameraFlipHorizontal = Core::CProgramParameters::GetInstance().Get("mr:camera:flip_horizontal", false);
 
         float CameraFPS = Core::CProgramParameters::GetInstance().Get("mr:camera:FPS", 30.0f);
 
@@ -86,7 +86,6 @@ namespace AR
         // -----------------------------------------------------------------------------
         m_Camera = std::make_shared<easyar::CameraDevice>();
 
-        m_Camera->setFocusMode(easyar::CameraDeviceFocusMode::Continousauto);
 
         // -----------------------------------------------------------------------------
         // Frame Streamer
@@ -96,13 +95,17 @@ namespace AR
         m_CameraFrameStreamer->attachCamera(m_Camera);
 
         // -----------------------------------------------------------------------------
-        // Prepare camera
+        // Open camera
+        // -----------------------------------------------------------------------------
+        m_Camera->open(static_cast<int>(CameraDeviceType));
+
+        // -----------------------------------------------------------------------------
+        // Set settings to camera
         // -----------------------------------------------------------------------------
         m_Camera->setFocusMode(CameraFocusMode);
         m_Camera->setSize(easyar::Vec2I{ { m_CameraSize[0], m_CameraSize[1] } });
         m_Camera->setHorizontalFlip(CameraFlipHorizontal);
         m_Camera->setFrameRate(CameraFPS);
-        m_Camera->open(static_cast<int>(CameraDeviceType));
 
         // -----------------------------------------------------------------------------
         // Image tracker + default targets
