@@ -71,6 +71,8 @@ namespace Scpt
 
                 m_pCameraComponent->SetBackgroundTexture(GetBackgroundTexture());
 
+                m_pCameraComponent->SetFlipVertical(true);
+
                 Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*m_pCameraComponent, Dt::CCameraComponent::DirtyInfo);
             }
         }

@@ -102,6 +102,7 @@ namespace
         {
             float m_HDRFactor;
             float m_IsHDR;
+            float m_FlipY;
             float m_ExposureIndex;
         };
 
@@ -556,6 +557,7 @@ namespace
 
         PSBuffer.m_HDRFactor     = HDRIntensity;
         PSBuffer.m_IsHDR         = 0.0f;
+        PSBuffer.m_FlipY         = m_CameraRenderJobs[0].m_pDtComponent->IsFlipVertical() ? 1.0f : 0.0f;
         PSBuffer.m_ExposureIndex = static_cast<float>(HistogramRenderer::GetLastExposureHistoryIndex());
 
         BufferManager::UploadBufferData(PSBufferSetPtr->GetBuffer(0), &PSBuffer);
@@ -577,7 +579,7 @@ namespace
 
         ContextManager::SetResourceBuffer(0, HistogramRenderer::GetExposureHistoryBuffer());
 
-        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearMirror));
         ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
 
         ContextManager::SetTexture(0, m_CameraRenderJobs[0].m_pDtComponent->GetBackgroundTexture());

@@ -99,6 +99,9 @@ namespace Dt
         void SetEC(float _EC);
         float GetEC() const;
 
+        void SetFlipVertical(bool _Flag);
+        bool IsFlipVertical() const;
+
     public:
 
         CCameraComponent();
@@ -116,6 +119,7 @@ namespace Dt
         float            m_FoV;                             //< Field of view even projection is active
         float            m_Near;                            //< Near field of the camera
         float            m_Far;                             //< Far field of the camera
+        bool             m_FlipBackgroundVertical;          //< The background has to be flipped vertically
         Gfx::CTexturePtr m_pBackgroundTexture;              //< Background texture
         glm::vec3        m_BackgroundColor;                 //< Default background color of the camera (depending on clear flag)
         glm::mat4        m_ProjectionMatrix;                //< RAW projection matrix even RAW is active

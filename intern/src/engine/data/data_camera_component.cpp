@@ -8,22 +8,23 @@
 namespace Dt
 {
     CCameraComponent::CCameraComponent()
-        : m_CullingMask     (0)
-        , m_Depth           (-1)
-        , m_ShutterSpeed    (1.0f / 125.0f)
-        , m_Aperture        (16.0f)
-        , m_ISO             (100.0f)
-        , m_EC              (0.0f)
-        , m_Size            (5.0f)
-        , m_FoV             (60.0f)
-        , m_Near            (0.3f)
-        , m_Far             (1000.0f)
-        , m_BackgroundColor (glm::vec3(1.0f))
-        , m_ProjectionMatrix(glm::mat3(1.0f))
-        , m_ViewportRect    ()
-        , m_ClearFlag       (Skybox)
-        , m_ProjectionType  (Perspective)
-        , m_CameraMode      (Auto)
+        : m_CullingMask           (0)
+        , m_Depth                 (-1)
+        , m_ShutterSpeed          (1.0f / 125.0f)
+        , m_Aperture              (16.0f)
+        , m_ISO                   (100.0f)
+        , m_EC                    (0.0f)
+        , m_Size                  (5.0f)
+        , m_FoV                   (60.0f)
+        , m_Near                  (0.3f)
+        , m_Far                   (1000.0f)
+        , m_FlipBackgroundVertical(false)
+        , m_BackgroundColor       (glm::vec3(1.0f))
+        , m_ProjectionMatrix      (glm::mat3(1.0f))
+        , m_ViewportRect          ()
+        , m_ClearFlag             (Skybox)
+        , m_ProjectionType        (Perspective)
+        , m_CameraMode            (Auto)
     {
     }
 
@@ -186,6 +187,20 @@ namespace Dt
     float CCameraComponent::GetFar() const
     {
         return m_Far;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CCameraComponent::SetFlipVertical(bool _Flag)
+    {
+        m_FlipBackgroundVertical = _Flag;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    bool CCameraComponent::IsFlipVertical() const
+    {
+        return m_FlipBackgroundVertical;
     }
 
     // -----------------------------------------------------------------------------
