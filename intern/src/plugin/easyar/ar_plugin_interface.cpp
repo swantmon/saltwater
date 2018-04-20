@@ -4,6 +4,7 @@
 #include "base/base_include_glm.h"
 
 #include "engine/core/core_console.h"
+#include "engine/core/core_program_parameters.h"
 
 #include "plugin/easyar/ar_plugin_interface.h"
 
@@ -18,11 +19,22 @@ namespace HW
     void CPluginInterface::OnStart()
     {
         // -----------------------------------------------------------------------------
+        // Parameters
+        // -----------------------------------------------------------------------------
+        std::string Key = Core::CProgramParameters::GetInstance().Get("mr:plugin:easyar:key", "<INSERT YOUR EASYAR KEY HERE>");
+
+        easyar::CameraDeviceFocusMode CameraFocusMode = Core::CProgramParameters::GetInstance().Get("mr:camera:focus_mode", easyar::CameraDeviceFocusMode::Normal);
+
+        easyar::CameraDeviceType CameraDeviceType = Core::CProgramParameters::GetInstance().Get("mr:camera:device_type", easyar::CameraDeviceType::Default);
+
+        glm::ivec2 CameraSize = Core::CProgramParameters::GetInstance().Get("mr:camera:size", glm::ivec2(1280, 720));
+
+        // -----------------------------------------------------------------------------
         // Engine
         // -----------------------------------------------------------------------------
         m_Engine = std::make_shared<easyar::Engine>();
 
-        m_Engine->initialize("vMBusxFqGilqdUO2ApXVEwDmEAj1uGi6UJ1hrHNUKGm9f2DpzIcsCnXwXESx25AKbGht2CILIs2t1UEAeXFUS5did4IUWlxb2vizoKIfK2i6znxkCWEn6a8uiWmWUPKbYAbWfeo9FXsqu0kFAz4qw2rg6piPrqfdFm6ZUpxlkRZf1Nqr8u90kedBnXORmv0dlDoEm2uZ");
+        m_Engine->initialize(Key);
 
         // -----------------------------------------------------------------------------
         // Camera
@@ -41,9 +53,9 @@ namespace HW
         // -----------------------------------------------------------------------------
         // Prepare camera
         // -----------------------------------------------------------------------------
-        m_Camera->setFocusMode(easyar::CameraDeviceFocusMode::Continousauto);
-        m_Camera->setSize(easyar::Vec2I{ { 1280, 720 } });
-        m_Camera->open(static_cast<int>(easyar::CameraDeviceType::Default));
+        m_Camera->setFocusMode(CameraFocusMode);
+        m_Camera->setSize(easyar::Vec2I{ { CameraSize[0], CameraSize[1] } });
+        m_Camera->open(static_cast<int>(CameraDeviceType));
 
         // -----------------------------------------------------------------------------
         // Start everything
