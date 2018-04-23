@@ -112,6 +112,13 @@ namespace AR
         m_Camera.m_Native->open(static_cast<int>(CameraDeviceType));
 
         // -----------------------------------------------------------------------------
+        // Set default marker
+        // -----------------------------------------------------------------------------
+        const CTarget* pTarget = AcquireNewTarget("coord_system.png");
+
+        SetCoordinateSystemTarget(pTarget);
+
+        // -----------------------------------------------------------------------------
         // Set settings to camera
         // -----------------------------------------------------------------------------
         m_Camera.m_Native->setFocusMode(CameraFocusMode);
@@ -206,14 +213,11 @@ namespace AR
 
             if (TargetStatus == easyar::TargetStatus::Tracked)
             {
-                if (m_TrackedTargets.count(ImageTarget->runtimeID()) == 0)
-                {
-                    m_TrackedTargets[ImageTarget->runtimeID()].m_Native = ImageTarget;
-                }
-
                 PossibleLostTargets.erase(ImageTarget->runtimeID());
 
                 auto InternImageTarget = m_TrackedTargets[ImageTarget->runtimeID()];
+
+                InternImageTarget.m_Native = ImageTarget;
 
                 InternImageTarget.m_TrackingState = CInternTarget::Tracking;
 
@@ -232,10 +236,7 @@ namespace AR
         {
             auto ImageTarget = LostTarget.second;
 
-            if (m_TrackedTargets.count(ImageTarget.m_Native->runtimeID()) > 0)
-            {
-                ImageTarget.m_TrackingState = CInternTarget::Lost;
-            }
+            ImageTarget.m_TrackingState = CInternTarget::Lost;
         }
 
         // -----------------------------------------------------------------------------
