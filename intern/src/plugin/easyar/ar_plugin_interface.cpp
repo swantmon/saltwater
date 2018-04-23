@@ -3,6 +3,7 @@
 
 #include "base/base_include_glm.h"
 
+#include "engine/core/core_asset_manager.h"
 #include "engine/core/core_console.h"
 #include "engine/core/core_program_parameters.h"
 
@@ -18,9 +19,10 @@ CORE_PLUGIN_INFO(AR::CPluginInterface, "EasyAR", "2.2.0", "This plugin enables t
 
 namespace 
 {
-    void loadFromImage(std::shared_ptr<easyar::ImageTracker> tracker, const std::string& path)
+    auto loadFromImage(std::shared_ptr<easyar::ImageTracker> tracker, const std::string& path)
     {
         auto target = std::make_shared<easyar::ImageTarget>();
+
         std::string jstr = "{\n"
             "  \"images\" :\n"
             "  [\n"
@@ -30,10 +32,15 @@ namespace
             "    }\n"
             "  ]\n"
             "}";
+
         target->setup(jstr.c_str(), static_cast<int>(easyar::StorageType::Assets) | static_cast<int>(easyar::StorageType::Json), "");
-        tracker->loadTarget(target, [](std::shared_ptr<easyar::Target> target, bool status) {
+
+        tracker->loadTarget(target, [](std::shared_ptr<easyar::Target> target, bool status) 
+        {
             std::printf("load target (%d): %s (%d)\n", status, target->name().c_str(), target->runtimeID());
         });
+
+        return target;
     }
 
     void loadFromJsonFile(std::shared_ptr<easyar::ImageTracker> tracker, const std::string& path, const std::string& targetname)
@@ -74,6 +81,12 @@ namespace AR
 
         m_CameraSize = Core::CProgramParameters::GetInstance().Get("mr:camera:size", glm::ivec2(1280, 720));
 
+        float CameraNear = Core::CProgramParameters::GetInstance().Get("mr:camera:projection:near", 0.1f);
+
+        float CameraFar = Core::CProgramParameters::GetInstance().Get("mr:camera:projection:far", 100.0f);
+
+        glm::mat4 CameraInitialPose = Core::CProgramParameters::GetInstance().Get("mr:camera:initial_pose", glm::mat4(1.0f));
+
         // -----------------------------------------------------------------------------
         // Engine
         // -----------------------------------------------------------------------------
@@ -84,43 +97,41 @@ namespace AR
         // -----------------------------------------------------------------------------
         // Camera
         // -----------------------------------------------------------------------------
-        m_Camera = std::make_shared<easyar::CameraDevice>();
+        m_Camera.m_Native = std::make_shared<easyar::CameraDevice>();
 
         // -----------------------------------------------------------------------------
         // Frame Streamer
         // -----------------------------------------------------------------------------
         m_CameraFrameStreamer = std::make_shared<easyar::CameraFrameStreamer>();
 
-        m_CameraFrameStreamer->attachCamera(m_Camera);
+        m_CameraFrameStreamer->attachCamera(m_Camera.m_Native);
 
         // -----------------------------------------------------------------------------
         // Open camera
         // -----------------------------------------------------------------------------
-        m_Camera->open(static_cast<int>(CameraDeviceType));
+        m_Camera.m_Native->open(static_cast<int>(CameraDeviceType));
 
         // -----------------------------------------------------------------------------
         // Set settings to camera
         // -----------------------------------------------------------------------------
-        m_Camera->setFocusMode(CameraFocusMode);
-        m_Camera->setSize(easyar::Vec2I{ { m_CameraSize[0], m_CameraSize[1] } });
-        m_Camera->setHorizontalFlip(CameraFlipHorizontal);
-        m_Camera->setFrameRate(CameraFPS);
+        m_Camera.m_Native->setFocusMode(CameraFocusMode);
+        m_Camera.m_Native->setSize(easyar::Vec2I{ { m_CameraSize[0], m_CameraSize[1] } });
+        m_Camera.m_Native->setHorizontalFlip(CameraFlipHorizontal);
+        m_Camera.m_Native->setFrameRate(CameraFPS);
 
-        // -----------------------------------------------------------------------------
-        // Image tracker + default targets
-        // -----------------------------------------------------------------------------
-        auto ImageTracker = std::make_shared<easyar::ImageTracker>();
+        m_Camera.m_ViewMatrix    = CameraInitialPose;
+        m_Camera.m_Near          = CameraNear;
+        m_Camera.m_Far           = CameraFar;
+        m_Camera.m_TrackingState = CInternCamera::Tracking;
 
-        ImageTracker->attachStreamer(m_CameraFrameStreamer);
+        auto Pose = m_Camera.m_Native->projectionGL(m_Camera.m_Near, m_Camera.m_Far);
 
-        loadFromImage(ImageTracker, "../data/plugins/easyar/namecard.jpg");
-
-        m_ImageTrackers.push_back(ImageTracker);
+        Base::CMemory::Copy(glm::value_ptr(m_Camera.m_ProjectionMatrix), &Pose.data[0], sizeof(easyar::Matrix44F));
 
         // -----------------------------------------------------------------------------
         // Start everything
         // -----------------------------------------------------------------------------
-        m_Camera->start();
+        m_Camera.m_Native->start();
         m_CameraFrameStreamer->start();
 
         for (auto&& rrTracker : m_ImageTrackers)
@@ -131,8 +142,8 @@ namespace AR
         // -----------------------------------------------------------------------------
         // Check data
         // -----------------------------------------------------------------------------
-        m_CameraSize[0] = m_Camera->size().data[0];
-        m_CameraSize[1] = m_Camera->size().data[1];
+        m_CameraSize[0] = m_Camera.m_Native->size().data[0];
+        m_CameraSize[1] = m_Camera.m_Native->size().data[1];
 
         // -----------------------------------------------------------------------------
         // Texture
@@ -167,7 +178,7 @@ namespace AR
             rrTracker->stop();
         }
 
-        m_Camera->stop();
+        m_Camera.m_Native->stop();
         m_CameraFrameStreamer->stop();
     }
 
@@ -197,14 +208,23 @@ namespace AR
             {
                 if (m_TrackedTargets.count(ImageTarget->runtimeID()) == 0)
                 {
-                    m_TrackedTargets[ImageTarget->runtimeID()] = ImageTarget;
+                    m_TrackedTargets[ImageTarget->runtimeID()].m_Native = ImageTarget;
                 }
 
                 PossibleLostTargets.erase(ImageTarget->runtimeID());
 
+                auto InternImageTarget = m_TrackedTargets[ImageTarget->runtimeID()];
+
+                InternImageTarget.m_TrackingState = CInternTarget::Tracking;
+
                 auto Pose = rrTargetInstance->poseGL();
 
-                // ...
+                Base::CMemory::Copy(glm::value_ptr(InternImageTarget.m_ModelMatrix), &Pose.data[0], sizeof(easyar::Matrix44F));
+
+                if (&InternImageTarget == m_Camera.m_pTarget)
+                {
+                    m_Camera.m_ViewMatrix = glm::inverse(InternImageTarget.m_ModelMatrix);
+                }
             }
         }
 
@@ -212,9 +232,9 @@ namespace AR
         {
             auto ImageTarget = LostTarget.second;
 
-            if (m_TrackedTargets.count(ImageTarget->runtimeID()) > 0)
+            if (m_TrackedTargets.count(ImageTarget.m_Native->runtimeID()) > 0)
             {
-                m_TrackedTargets.erase(ImageTarget->runtimeID());
+                ImageTarget.m_TrackingState = CInternTarget::Lost;
             }
         }
 
@@ -231,6 +251,8 @@ namespace AR
 
     void CPluginInterface::OnPause()
     {
+        m_Camera.m_TrackingState = CCamera::Paused;
+
         m_Engine->onPause();
     }
 
@@ -239,6 +261,46 @@ namespace AR
     void CPluginInterface::OnResume()
     {
         m_Engine->onResume();
+
+        m_Camera.m_TrackingState = CCamera::Tracking;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const CCamera& CPluginInterface::GetCamera()
+    {
+        return m_Camera;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CPluginInterface::SetCoordinateSystemTarget(const CTarget* _pTarget)
+    {
+        m_Camera.m_pTarget = _pTarget;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const CTarget* CPluginInterface::AcquireNewTarget(const std::string& _rPathToFile)
+    {
+        auto ImageTracker = std::make_shared<easyar::ImageTracker>();
+
+        ImageTracker->attachStreamer(m_CameraFrameStreamer);
+
+        auto Target = loadFromImage(ImageTracker, Core::AssetManager::GetPathToAssets() + _rPathToFile);
+
+        m_ImageTrackers.push_back(ImageTracker);
+
+        m_TrackedTargets[Target->runtimeID()].m_TrackingState = CInternTarget::Lost;
+
+        return &m_TrackedTargets[Target->runtimeID()];
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CPluginInterface::ReleaseTarget(const CTarget* _pTarget)
+    {
+
     }
 
     // -----------------------------------------------------------------------------
@@ -248,6 +310,21 @@ namespace AR
         return m_BackgroundTexturePtr;
     }
 } // namespace AR
+
+extern "C" CORE_PLUGIN_API_EXPORT const AR::CCamera* GetCamera()
+{
+    return &static_cast<AR::CPluginInterface&>(GetInstance()).GetCamera();
+}
+
+extern "C" CORE_PLUGIN_API_EXPORT const AR::CTarget* AcquireNewMarker(const std::string _rPathToFile)
+{
+    return static_cast<AR::CPluginInterface&>(GetInstance()).AcquireNewTarget(_rPathToFile);
+}
+
+extern "C" CORE_PLUGIN_API_EXPORT void ReleaseMarker(const AR::CTarget* _pTarget)
+{
+    return static_cast<AR::CPluginInterface&>(GetInstance()).ReleaseTarget(_pTarget);
+}
 
 extern "C" CORE_PLUGIN_API_EXPORT Gfx::CTexturePtr GetBackgroundTexture()
 {

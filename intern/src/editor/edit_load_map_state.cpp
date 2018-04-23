@@ -25,7 +25,7 @@
 #include "engine/data/data_transformation_facet.h"
 
 #include "engine/script/script_camera_control_script.h"
-#include "engine/script/script_easyar_camera_control_script.h"
+#include "engine/script/script_ar_camera_control_script.h"
 #include "engine/script/script_light_estimation.h"
 #include "engine/script/script_script_manager.h"
 
@@ -180,7 +180,9 @@ namespace Edit
             // -----------------------------------------------------------------------------
 
             //auto ScriptComponent = Dt::CComponentManager::GetInstance().Allocate<Scpt::CCameraControlScript>();
-            auto ScriptComponent = Dt::CComponentManager::GetInstance().Allocate<Scpt::CEasyARCameraControlScript>();
+            auto ScriptComponent = Dt::CComponentManager::GetInstance().Allocate<Scpt::CARCameraControlScript>();
+
+            ScriptComponent->m_FlipVertical = true;
 
             rEntity.AttachComponent(ScriptComponent);
 

@@ -16,6 +16,13 @@ namespace Scpt
 {
     class CARCameraControlScript : public CScript<CARCameraControlScript>
     {
+#ifdef PLATFORM_ANDROID
+        std::string PluginName = "ArCore";
+#else
+        std::string PluginName = "EasyAR";
+#endif // PLATFORM_ANDROID
+
+
     public:
 
         typedef const void* (*ArCoreGetCameraFunc)();
@@ -39,6 +46,7 @@ namespace Scpt
         Dt::CEntity* m_pCameraEntity = nullptr;
         Dt::CCameraComponent* m_pCameraComponent = nullptr;
         bool m_ArCoreAvailable = false;
+        bool m_FlipVertical = false;
 
     private:
 
@@ -57,15 +65,15 @@ namespace Scpt
 
             m_MRToEngineMatrix = Base::CCoordinateSystem::GetBaseMatrix(glm::vec3(1, 0, 0), glm::vec3(0, 1, 0), glm::vec3(0, 0, -1));
 
-            m_ArCoreAvailable = Core::PluginManager::HasPlugin("ArCore");
+            m_ArCoreAvailable = Core::PluginManager::HasPlugin(PluginName);
 
-            ArCoreGetCamera = (ArCoreGetCameraFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetCamera"));
-            ArCoreGetCameraTrackingState = (ArCoreGetCameraTrackingStateFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetCameraTrackingState"));
-            GetCameraViewMatrix = (ArCoreGetCameraViewMatrixFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetCameraViewMatrix"));
-            GetCameraProjectionMatrix = (ArCoreGetCameraProjectionMatrixFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetCameraProjectionMatrix"));
-            GetCameraNear = (ArCoreGetCameraNearFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetCameraNear"));
-            GetCameraFar = (ArCoreGetCameraFarFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetCameraFar"));
-            GetBackgroundTexture = (ArCoreGetBackgroundTextureFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetBackgroundTexture"));
+            ArCoreGetCamera = (ArCoreGetCameraFunc)(Core::PluginManager::GetPluginFunction(PluginName, "GetCamera"));
+            ArCoreGetCameraTrackingState = (ArCoreGetCameraTrackingStateFunc)(Core::PluginManager::GetPluginFunction(PluginName, "GetCameraTrackingState"));
+            GetCameraViewMatrix = (ArCoreGetCameraViewMatrixFunc)(Core::PluginManager::GetPluginFunction(PluginName, "GetCameraViewMatrix"));
+            GetCameraProjectionMatrix = (ArCoreGetCameraProjectionMatrixFunc)(Core::PluginManager::GetPluginFunction(PluginName, "GetCameraProjectionMatrix"));
+            GetCameraNear = (ArCoreGetCameraNearFunc)(Core::PluginManager::GetPluginFunction(PluginName, "GetCameraNear"));
+            GetCameraFar = (ArCoreGetCameraFarFunc)(Core::PluginManager::GetPluginFunction(PluginName, "GetCameraFar"));
+            GetBackgroundTexture = (ArCoreGetBackgroundTextureFunc)(Core::PluginManager::GetPluginFunction(PluginName, "GetBackgroundTexture"));
         }
 
         // -----------------------------------------------------------------------------
@@ -115,6 +123,8 @@ namespace Scpt
                 m_pCameraComponent->SetNear(GetCameraFar(rCamera));
 
                 m_pCameraComponent->SetProjectionMatrix(GetCameraProjectionMatrix(rCamera));
+
+                m_pCameraComponent->SetFlipVertical(m_FlipVertical);
 
                 m_pCameraComponent->SetBackgroundTexture(GetBackgroundTexture());
 

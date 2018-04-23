@@ -27,15 +27,19 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\src\plugin\easyar\ar_camera.cpp" />
     <ClCompile Include="..\..\..\src\plugin\easyar\ar_plugin_interface.cpp" />
     <ClCompile Include="..\..\..\src\plugin\easyar\ar_precompiled.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\plugin\easyar\ar_target.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\src\plugin\easyar\ar_camera.h" />
     <ClInclude Include="..\..\..\src\plugin\easyar\ar_plugin_interface.h" />
     <ClInclude Include="..\..\..\src\plugin\easyar\ar_precompiled.h" />
+    <ClInclude Include="..\..\..\src\plugin\easyar\ar_target.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{408E3CC7-D558-431C-9CB1-32094DCCB6B5}</ProjectGuid>
