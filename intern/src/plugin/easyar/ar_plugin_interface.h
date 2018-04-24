@@ -37,10 +37,8 @@ namespace AR
 
         const CCamera& GetCamera();
 
-        void SetCoordinateSystemTarget(const CTarget* _pTarget);
-
-        const CTarget* AcquireNewTarget(const std::string& _rPathToFile);
-        void ReleaseTarget(const CTarget* _pTarget);
+        CTarget* AcquireNewTarget(const std::string& _rPathToFile);
+        void ReleaseTarget(CTarget* _pTarget);
 
         Gfx::CTexturePtr GetBackgroundTexture();
 
@@ -50,7 +48,6 @@ namespace AR
         {
         public:
 
-            const CTarget* m_pTarget;
             std::shared_ptr<easyar::CameraDevice> m_Native;
 
         private:

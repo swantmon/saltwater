@@ -18,8 +18,10 @@ namespace Scpt
     {
 #ifdef PLATFORM_ANDROID
         std::string PluginName = "ArCore";
+        glm::mat3 MRToEngineMatrix = Base::CCoordinateSystem::GetBaseMatrix(glm::vec3(1, 0, 0), glm::vec3(0, 1, 0), glm::vec3(0, 0, -1));
 #else
         std::string PluginName = "EasyAR";
+        glm::mat3 MRToEngineMatrix = Base::CCoordinateSystem::GetBaseMatrix(glm::vec3(-1, 0, 0), glm::vec3(0, 0, 1), glm::vec3(0, 1, 0));
 #endif // PLATFORM_ANDROID
 
 
@@ -48,10 +50,6 @@ namespace Scpt
         bool m_ArCoreAvailable = false;
         bool m_FlipVertical = false;
 
-    private:
-
-        glm::mat3 m_MRToEngineMatrix = glm::mat3(1.0f);
-
     public:
 
         void Start() override
@@ -62,8 +60,6 @@ namespace Scpt
             {
                 m_pCameraComponent = m_pCameraEntity->GetComponentFacet()->GetComponent<Dt::CCameraComponent>();
             }
-
-            m_MRToEngineMatrix = Base::CCoordinateSystem::GetBaseMatrix(glm::vec3(1, 0, 0), glm::vec3(0, 1, 0), glm::vec3(0, 0, -1));
 
             m_ArCoreAvailable = Core::PluginManager::HasPlugin(PluginName);
 
@@ -97,7 +93,7 @@ namespace Scpt
             {
                 glm::mat4 CameraViewMatrix = GetCameraViewMatrix(rCamera);
 
-                glm::mat3 WSRotation = m_MRToEngineMatrix * glm::transpose(glm::mat3(CameraViewMatrix));
+                glm::mat3 WSRotation = MRToEngineMatrix * glm::transpose(glm::mat3(CameraViewMatrix));
 
                 glm::vec3 WSPosition = WSRotation * CameraViewMatrix[3] * -1.0f;
 

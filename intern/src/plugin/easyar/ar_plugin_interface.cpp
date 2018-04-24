@@ -129,13 +129,6 @@ namespace AR
         m_Camera.m_Native->open(static_cast<int>(CameraDeviceType));
 
         // -----------------------------------------------------------------------------
-        // Set default marker
-        // -----------------------------------------------------------------------------
-        const CTarget* pTarget = AcquireNewTarget("coord_system.png");
-
-        SetCoordinateSystemTarget(pTarget);
-
-        // -----------------------------------------------------------------------------
         // Set settings to camera
         // -----------------------------------------------------------------------------
         m_Camera.m_Native->setFocusMode(CameraFocusMode);
@@ -148,9 +141,14 @@ namespace AR
         m_Camera.m_Far           = CameraFar;
         m_Camera.m_TrackingState = CInternCamera::Tracking;
 
-        auto Pose = m_Camera.m_Native->projectionGL(m_Camera.m_Near, m_Camera.m_Far);
+        auto Projection = m_Camera.m_Native->projectionGL(m_Camera.m_Near, m_Camera.m_Far);
 
-        Base::CMemory::Copy(glm::value_ptr(m_Camera.m_ProjectionMatrix), &Pose.data[0], sizeof(easyar::Matrix44F));
+        Base::CMemory::Copy(glm::value_ptr(m_Camera.m_ProjectionMatrix), &Projection.data[0], sizeof(easyar::Matrix44F));
+
+        // -----------------------------------------------------------------------------
+        // Set default marker
+        // -----------------------------------------------------------------------------
+        CInternTarget* pTarget = static_cast<CInternTarget*>(AcquireNewTarget("/marker/namecard.jpg"));
 
         // -----------------------------------------------------------------------------
         // Start everything
@@ -244,12 +242,7 @@ namespace AR
 
                 auto Pose = rrTargetInstance->poseGL();
 
-                Base::CMemory::Copy(glm::value_ptr(InternImageTarget.m_ModelMatrix), &Pose.data[0], sizeof(easyar::Matrix44F));
-
-                if (&InternImageTarget == m_Camera.m_pTarget)
-                {
-                    m_Camera.m_ViewMatrix = glm::inverse(InternImageTarget.m_ModelMatrix);
-                }
+                Base::CMemory::Copy(glm::value_ptr(m_Camera.m_ViewMatrix), &Pose.data[0], sizeof(easyar::Matrix44F));
             }
         }
 
@@ -300,14 +293,7 @@ namespace AR
 
     // -----------------------------------------------------------------------------
 
-    void CPluginInterface::SetCoordinateSystemTarget(const CTarget* _pTarget)
-    {
-        m_Camera.m_pTarget = _pTarget;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    const CTarget* CPluginInterface::AcquireNewTarget(const std::string& _rPathToFile)
+    CTarget* CPluginInterface::AcquireNewTarget(const std::string& _rPathToFile)
     {
         auto ImageTracker = std::make_shared<easyar::ImageTracker>();
 
@@ -324,7 +310,7 @@ namespace AR
 
     // -----------------------------------------------------------------------------
 
-    void CPluginInterface::ReleaseTarget(const CTarget* _pTarget)
+    void CPluginInterface::ReleaseTarget(CTarget* _pTarget)
     {
 
     }
@@ -342,12 +328,12 @@ extern "C" CORE_PLUGIN_API_EXPORT const AR::CCamera* GetCamera()
     return &static_cast<AR::CPluginInterface&>(GetInstance()).GetCamera();
 }
 
-extern "C" CORE_PLUGIN_API_EXPORT const AR::CTarget* AcquireNewMarker(const std::string _rPathToFile)
+extern "C" CORE_PLUGIN_API_EXPORT AR::CTarget* AcquireNewMarker(const std::string _rPathToFile)
 {
     return static_cast<AR::CPluginInterface&>(GetInstance()).AcquireNewTarget(_rPathToFile);
 }
 
-extern "C" CORE_PLUGIN_API_EXPORT void ReleaseMarker(const AR::CTarget* _pTarget)
+extern "C" CORE_PLUGIN_API_EXPORT void ReleaseMarker(AR::CTarget* _pTarget)
 {
     return static_cast<AR::CPluginInterface&>(GetInstance()).ReleaseTarget(_pTarget);
 }
