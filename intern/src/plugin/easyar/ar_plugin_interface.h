@@ -22,6 +22,11 @@ namespace AR
     {
     public:
 
+        CPluginInterface();
+        ~CPluginInterface();
+
+    public:
+
         void OnStart() override;
         void OnExit() override;
         void OnPause() override;
@@ -65,6 +70,8 @@ namespace AR
         };
 
     private:
+
+        bool m_IsActive;
 
         CInternCamera m_Camera;
         std::unordered_map<int, CInternTarget> m_TrackedTargets;

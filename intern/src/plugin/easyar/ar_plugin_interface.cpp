@@ -64,6 +64,21 @@ namespace
 
 namespace AR
 {
+    CPluginInterface::CPluginInterface()
+        : m_IsActive(false)
+    {
+
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CPluginInterface::~CPluginInterface()
+    {
+
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CPluginInterface::OnStart()
     {
         // -----------------------------------------------------------------------------
@@ -92,7 +107,9 @@ namespace AR
         // -----------------------------------------------------------------------------
         m_Engine = std::make_shared<easyar::Engine>();
 
-        m_Engine->initialize(Key);
+        m_IsActive = m_Engine->initialize(Key);
+
+        if (m_IsActive == false) return;
 
         // -----------------------------------------------------------------------------
         // Camera
@@ -182,17 +199,21 @@ namespace AR
     {
         for (auto&& rrTracker : m_ImageTrackers)
         {
-            rrTracker->stop();
+            if(rrTracker) rrTracker->stop();
         }
 
-        m_Camera.m_Native->stop();
-        m_CameraFrameStreamer->stop();
+        if(m_Camera.m_Native) m_Camera.m_Native->stop();
+        if(m_CameraFrameStreamer) m_CameraFrameStreamer->stop();
+
+        m_BackgroundTexturePtr = 0;
     }
 
     // -----------------------------------------------------------------------------
 
     void CPluginInterface::Update()
     {
+        if (m_IsActive == false) return;
+
         // -----------------------------------------------------------------------------
         // Frame
         // -----------------------------------------------------------------------------
@@ -255,6 +276,8 @@ namespace AR
         m_Camera.m_TrackingState = CCamera::Paused;
 
         m_Engine->onPause();
+
+        m_IsActive = false;
     }
 
     // -----------------------------------------------------------------------------
@@ -264,6 +287,8 @@ namespace AR
         m_Engine->onResume();
 
         m_Camera.m_TrackingState = CCamera::Tracking;
+
+        m_IsActive = true;
     }
 
     // -----------------------------------------------------------------------------
