@@ -92,6 +92,7 @@ namespace Gfx
                 R4G4B4A4_USHORT,
                 R5G5G5A1_USHORT,
                 R10G10B10A2_UINT,
+                B8G8R8_UBYTE,
                 
                 Unknown = -1,
             };

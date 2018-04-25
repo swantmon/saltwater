@@ -25,6 +25,8 @@
 #include "engine/data/data_transformation_facet.h"
 
 #include "engine/script/script_camera_control_script.h"
+#include "engine/script/script_ar_camera_control_script.h"
+#include "engine/script/script_easyar_target_script.h"
 #include "engine/script/script_light_estimation.h"
 #include "engine/script/script_script_manager.h"
 
@@ -186,6 +188,16 @@ namespace Edit
 
             // -----------------------------------------------------------------------------
 
+            auto ScriptComponent2 = Dt::CComponentManager::GetInstance().Allocate<Scpt::CEasyARTargetScript>();
+
+            ScriptComponent2->m_TargetFile = "/../data/marker/world_center.png";
+
+            rEntity.AttachComponent(ScriptComponent2);
+
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*ScriptComponent2, Dt::CScriptComponent::DirtyCreate);
+
+            // -----------------------------------------------------------------------------
+
             Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
 
@@ -269,20 +281,20 @@ namespace Edit
 
                 Component->SetRefreshMode(Dt::CSkyComponent::Static);
                 Component->SetType(Dt::CSkyComponent::Procedural);
-                Component->SetIntensity(120000.0f);
+                Component->SetIntensity(10000.0f);
 
                 rEnvironmentEntity.AttachComponent(Component);
 
                 Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*Component, Dt::CSkyComponent::DirtyCreate);
             }
 
-//             {
-//                 auto Component = Dt::CComponentManager::GetInstance().Allocate<Scpt::CLightEstimationScript>();
-// 
-//                 rEnvironmentEntity.AttachComponent(Component);
-// 
-//                 Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*Component, Dt::CSkyComponent::DirtyCreate);
-//             }
+            {
+                auto Component = Dt::CComponentManager::GetInstance().Allocate<Scpt::CLightEstimationScript>();
+
+                rEnvironmentEntity.AttachComponent(Component);
+
+                Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*Component, Dt::CSkyComponent::DirtyCreate);
+            }
 
             Dt::EntityManager::MarkEntityAsDirty(rEnvironmentEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }

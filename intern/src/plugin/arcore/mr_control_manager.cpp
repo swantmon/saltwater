@@ -499,8 +499,8 @@ namespace
         // -----------------------------------------------------------------------------
         // Update camera
         // -----------------------------------------------------------------------------
-        m_Camera.m_Near = Core::CProgramParameters::GetInstance().Get<float>("mr:ar:camera:near", 0.1f);
-        m_Camera.m_Far  = Core::CProgramParameters::GetInstance().Get<float>("mr:ar:camera:far", 100.0f);
+        m_Camera.m_Near = Core::CProgramParameters::GetInstance().Get<float>("mr:camera:projection:near", 0.1f);
+        m_Camera.m_Far  = Core::CProgramParameters::GetInstance().Get<float>("mr:camera:projection:far", 100.0f);
 
         ArCamera* pARCamera;
 
