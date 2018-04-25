@@ -180,10 +180,7 @@ namespace Edit
 
             // -----------------------------------------------------------------------------
 
-            //auto ScriptComponent = Dt::CComponentManager::GetInstance().Allocate<Scpt::CCameraControlScript>();
-            auto ScriptComponent = Dt::CComponentManager::GetInstance().Allocate<Scpt::CARCameraControlScript>();
-
-            ScriptComponent->m_FlipVertical = true;
+            auto ScriptComponent = Dt::CComponentManager::GetInstance().Allocate<Scpt::CCameraControlScript>();
 
             rEntity.AttachComponent(ScriptComponent);
 
