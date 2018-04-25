@@ -36,12 +36,12 @@ namespace AR
     }
 } // namespace AR
 
-extern "C" CORE_PLUGIN_API_EXPORT AR::CTarget::ETrackingState GetMarkerTrackingState(const AR::CTarget* _pMarker)
+extern "C" CORE_PLUGIN_API_EXPORT AR::CTarget::ETrackingState GetTargetTrackingState(const AR::CTarget* _pTarget)
 {
-    return _pMarker->GetTackingState();
+    return _pTarget->GetTackingState();
 }
 
-extern "C" CORE_PLUGIN_API_EXPORT glm::mat4 GetMarkerModelMatrix(const AR::CTarget* _pMarker)
+extern "C" CORE_PLUGIN_API_EXPORT glm::mat4 GetTargetModelMatrix(const AR::CTarget* _pTarget)
 {
-    return _pMarker->GetModelMatrix();
+    return _pTarget->GetModelMatrix();
 }

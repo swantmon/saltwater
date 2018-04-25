@@ -104,6 +104,8 @@ namespace AR
 
         bool ShowSupportedProperties = Core::CProgramParameters::GetInstance().Get("mr:camera:show_supported_properties", false);
 
+        m_FirstTargetIsWorldCenter = Core::CProgramParameters::GetInstance().Get("mr:camera:first_marker_is_world_center", true);
+
         // -----------------------------------------------------------------------------
         // Engine
         // -----------------------------------------------------------------------------
@@ -146,11 +148,6 @@ namespace AR
         auto Projection = m_Camera.m_Native->projectionGL(m_Camera.m_Near, m_Camera.m_Far);
 
         Base::CMemory::Copy(glm::value_ptr(m_Camera.m_ProjectionMatrix), &Projection.data[0], sizeof(easyar::Matrix44F));
-
-        // -----------------------------------------------------------------------------
-        // Set default marker
-        // -----------------------------------------------------------------------------
-        CInternTarget* pTarget = static_cast<CInternTarget*>(AcquireNewTarget("/marker/namecard.jpg"));
 
         // -----------------------------------------------------------------------------
         // Start everything
@@ -260,8 +257,10 @@ namespace AR
         auto Frame = m_CameraFrameStreamer->peek();
 
         // -----------------------------------------------------------------------------
-        // Targets
+        // Targets + camera
         // -----------------------------------------------------------------------------
+        int NumberOfFoundTargets = 0;
+
         auto PossibleLostTargets = m_TrackedTargets;
 
         for (auto&& rrTargetInstance : Frame->targetInstances())
@@ -284,8 +283,26 @@ namespace AR
 
                 auto Pose = rrTargetInstance->poseGL();
 
-                Base::CMemory::Copy(glm::value_ptr(m_Camera.m_ViewMatrix), &Pose.data[0], sizeof(easyar::Matrix44F));
+                if (m_FirstTargetIsWorldCenter && NumberOfFoundTargets == 0)
+                {
+                    m_Camera.m_TrackingState = CInternCamera::Tracking;
+
+                    Base::CMemory::Copy(glm::value_ptr(m_Camera.m_ViewMatrix), &Pose.data[0], sizeof(easyar::Matrix44F));
+
+                    InternImageTarget.m_ModelMatrix = glm::mat4(1.0f);
+                }
+                else
+                {
+                    Base::CMemory::Copy(glm::value_ptr(InternImageTarget.m_ModelMatrix), &Pose.data[0], sizeof(easyar::Matrix44F));
+                }
+
+                ++ NumberOfFoundTargets;
             }
+        }
+
+        if (m_FirstTargetIsWorldCenter && NumberOfFoundTargets == 0)
+        {
+            m_Camera.m_TrackingState = CInternCamera::Undefined;
         }
 
         for (auto LostTarget : PossibleLostTargets)
@@ -321,8 +338,6 @@ namespace AR
     {
         m_Engine->onResume();
 
-        m_Camera.m_TrackingState = CCamera::Tracking;
-
         m_IsActive = true;
     }
 
@@ -342,6 +357,8 @@ namespace AR
         ImageTracker->attachStreamer(m_CameraFrameStreamer);
 
         auto Target = loadFromImage(ImageTracker, Core::AssetManager::GetPathToAssets() + _rPathToFile);
+
+        ImageTracker->start();
 
         m_ImageTrackers.push_back(ImageTracker);
 
@@ -370,12 +387,12 @@ extern "C" CORE_PLUGIN_API_EXPORT const AR::CCamera* GetCamera()
     return &static_cast<AR::CPluginInterface&>(GetInstance()).GetCamera();
 }
 
-extern "C" CORE_PLUGIN_API_EXPORT AR::CTarget* AcquireNewMarker(const std::string _rPathToFile)
+extern "C" CORE_PLUGIN_API_EXPORT AR::CTarget* AcquireNewTarget(const std::string _rPathToFile)
 {
     return static_cast<AR::CPluginInterface&>(GetInstance()).AcquireNewTarget(_rPathToFile);
 }
 
-extern "C" CORE_PLUGIN_API_EXPORT void ReleaseMarker(AR::CTarget* _pTarget)
+extern "C" CORE_PLUGIN_API_EXPORT void ReleaseTarget(AR::CTarget* _pTarget)
 {
     return static_cast<AR::CPluginInterface&>(GetInstance()).ReleaseTarget(_pTarget);
 }

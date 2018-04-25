@@ -26,6 +26,7 @@
 
 #include "engine/script/script_camera_control_script.h"
 #include "engine/script/script_ar_camera_control_script.h"
+#include "engine/script/script_easyar_target_script.h"
 #include "engine/script/script_light_estimation.h"
 #include "engine/script/script_script_manager.h"
 
@@ -187,6 +188,16 @@ namespace Edit
             rEntity.AttachComponent(ScriptComponent);
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*ScriptComponent, Dt::CScriptComponent::DirtyCreate);
+
+            // -----------------------------------------------------------------------------
+
+            auto ScriptComponent2 = Dt::CComponentManager::GetInstance().Allocate<Scpt::CEasyARTargetScript>();
+
+            ScriptComponent2->m_TargetFile = "/../data/marker/world_center.png";
+
+            rEntity.AttachComponent(ScriptComponent2);
+
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*ScriptComponent2, Dt::CScriptComponent::DirtyCreate);
 
             // -----------------------------------------------------------------------------
 

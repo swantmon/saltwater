@@ -87,9 +87,7 @@ namespace Scpt
 
             const void* rCamera = ArCoreGetCamera();
 
-            if (ArCoreGetCameraTrackingState(rCamera) != 2) return;
-
-            if (m_pCameraEntity != nullptr)
+            if (m_pCameraEntity != nullptr && ArCoreGetCameraTrackingState(rCamera) == 2)
             {
                 glm::mat4 CameraViewMatrix = GetCameraViewMatrix(rCamera);
 

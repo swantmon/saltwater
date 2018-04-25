@@ -69,6 +69,7 @@ namespace AR
     private:
 
         bool m_IsActive;
+        bool m_FirstTargetIsWorldCenter;
 
         CInternCamera m_Camera;
         std::unordered_map<int, CInternTarget> m_TrackedTargets;
