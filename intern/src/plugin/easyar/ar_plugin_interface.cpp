@@ -102,6 +102,8 @@ namespace AR
 
         glm::mat4 CameraInitialPose = Core::CProgramParameters::GetInstance().Get("mr:camera:initial_pose", glm::mat4(1.0f));
 
+        bool ShowSupportedProperties = Core::CProgramParameters::GetInstance().Get("mr:camera:show_supported_properties", false);
+
         // -----------------------------------------------------------------------------
         // Engine
         // -----------------------------------------------------------------------------
@@ -189,6 +191,46 @@ namespace AR
         m_BackgroundTexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
 
         Gfx::TextureManager::SetTextureLabel(m_BackgroundTexturePtr, "EasyAR camera texture");
+
+        // -----------------------------------------------------------------------------
+        // Check supported properties
+        // -----------------------------------------------------------------------------
+        if (ShowSupportedProperties)
+        {
+            int NumberOfElements = m_Camera.m_Native->supportedFrameRateCount();
+
+            if (NumberOfElements == 0)
+            {
+                ENGINE_CONSOLE_INFOV("Supported FPS data is not available.");
+            }
+            else
+            {
+                ENGINE_CONSOLE_INFOV("Supported FPS (count=%i):", NumberOfElements);
+
+                for (int i = 0; i < NumberOfElements; ++i)
+                {
+                    ENGINE_CONSOLE_INFOV(" [%i]> %f FPS", i, m_Camera.m_Native->supportedFrameRate(i));
+                }
+            }
+
+            // -----------------------------------------------------------------------------
+
+            NumberOfElements = m_Camera.m_Native->supportedSizeCount();
+
+            if (NumberOfElements == 0)
+            {
+                ENGINE_CONSOLE_INFOV("Supported sizes data is not available.");
+            }
+            else
+            {
+                ENGINE_CONSOLE_INFOV("Supported sizes (count=%i):", NumberOfElements);
+
+                for (int i = 0; i < NumberOfElements; ++i)
+                {
+                    ENGINE_CONSOLE_INFOV(" [%i]> %i x %i", i, m_Camera.m_Native->supportedSize(i).data[0], m_Camera.m_Native->supportedSize(i).data[1]);
+                }
+            }
+        }
     }
 
     // -----------------------------------------------------------------------------
