@@ -85,11 +85,7 @@ namespace LE
         for (int IndexOfCubeface = 0; IndexOfCubeface < 6; ++IndexOfCubeface)
         {
             DefaultGSValues.m_CubeViewMatrix[IndexOfCubeface]  = glm::lookAt(glm::vec3(0.0f), LookDirections[IndexOfCubeface], UpDirections[IndexOfCubeface]);
-#ifdef PLATFORM_WINDOWS
-            DefaultGSValues.m_CubeViewMatrix[IndexOfCubeface] *= glm::eulerAngleX(glm::radians(90.0f));
-#else
             DefaultGSValues.m_CubeViewMatrix[IndexOfCubeface] *= glm::eulerAngleX(glm::radians(-90.0f));
-#endif // PLATFORM_WINDOWS
         }
         
         // -----------------------------------------------------------------------------
@@ -117,6 +113,24 @@ namespace LE
         ConstanteBufferDesc.m_pClassKey     = 0;
         
         m_ModelMatrixBufferPtr = Gfx::BufferManager::CreateBuffer(ConstanteBufferDesc);
+
+        // -----------------------------------------------------------------------------
+
+#ifdef PLATFORM_WINDOWS
+        glm::vec2 DefaultProperties(0.0f, 1.0f);
+#else
+        glm::vec2 DefaultProperties(0.0f, 0.0f);
+#endif // PLATFORM_WINDOWS
+
+        ConstanteBufferDesc.m_Stride        = 0;
+        ConstanteBufferDesc.m_Usage         = Gfx::CBuffer::GPURead;
+        ConstanteBufferDesc.m_Binding       = Gfx::CBuffer::ConstantBuffer;
+        ConstanteBufferDesc.m_Access        = Gfx::CBuffer::CPUWrite;
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(glm::vec2);
+        ConstanteBufferDesc.m_pBytes        = &DefaultProperties;
+        ConstanteBufferDesc.m_pClassKey     = 0;
+        
+        m_PropertiesBufferPtr = Gfx::BufferManager::CreateBuffer(ConstanteBufferDesc);
 
         // -----------------------------------------------------------------------------
         // Mesh
@@ -208,6 +222,7 @@ namespace LE
         m_PSPtr = 0;
         m_CubemapBufferPtr = 0;
         m_ModelMatrixBufferPtr = 0;
+        m_PropertiesBufferPtr = 0;
         m_MeshPtr = 0;
         m_InputTexturePtr = 0;
         m_LookUpTexturePtr = 0;
@@ -262,8 +277,9 @@ namespace LE
 
         Gfx::ContextManager::SetConstantBuffer(0, m_ModelMatrixBufferPtr);
         Gfx::ContextManager::SetConstantBuffer(1, m_CubemapBufferPtr);
+        Gfx::ContextManager::SetConstantBuffer(2, m_PropertiesBufferPtr);
 
-        Gfx::ContextManager::SetSampler(0, Gfx::SamplerManager::GetSampler(Gfx::CSampler::MinMagMipLinearClamp));
+        Gfx::ContextManager::SetSampler(0, Gfx::SamplerManager::GetSampler(Gfx::CSampler::MinMagMipLinearMirror));
         Gfx::ContextManager::SetSampler(1, Gfx::SamplerManager::GetSampler(Gfx::CSampler::MinMagMipLinearClamp));
 
         Gfx::ContextManager::SetTexture(0, m_InputTexturePtr);
@@ -285,6 +301,7 @@ namespace LE
 
         Gfx::ContextManager::ResetConstantBuffer(0);
         Gfx::ContextManager::ResetConstantBuffer(1);
+        Gfx::ContextManager::ResetConstantBuffer(2);
 
         Gfx::ContextManager::ResetInputLayout();
 
