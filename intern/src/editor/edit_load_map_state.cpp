@@ -316,8 +316,8 @@ namespace Edit
 
             Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
 
-            pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 4.0f));
-            pTransformationFacet->SetScale(glm::vec3(1.0f));
+            pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 1.0f));
+            pTransformationFacet->SetScale(glm::vec3(0.25f));
             pTransformationFacet->SetRotation(glm::vec3(glm::radians(0.0f), glm::radians(0.0f), 0.0f));
 
             // -----------------------------------------------------------------------------
@@ -364,7 +364,7 @@ namespace Edit
             Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
 
             pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
-            pTransformationFacet->SetScale(glm::vec3(4.0f, 4.0f, 0.1f));
+            pTransformationFacet->SetScale(glm::vec3(1.0f, 1.0f, 0.01f));
             pTransformationFacet->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
 
             // -----------------------------------------------------------------------------
