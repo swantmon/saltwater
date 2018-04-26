@@ -11,33 +11,24 @@ out gl_PerVertex
 };
 
 // -----------------------------------------------------------------------------
-// Input from engine
-// -----------------------------------------------------------------------------
-layout(std140, binding = 0) uniform UB0
-{
-    mat4 m_ModelMatrix;
-};
-
-// -----------------------------------------------------------------------------
 // Input from buffer
 // -----------------------------------------------------------------------------
-layout(location = 0) in vec3 VertexPosition;
+layout(location = 0) in vec3 in_WSPosition;
+layout(location = 2) in vec2 in_UV;
 
 // -----------------------------------------------------------------------------
 // Output to next stage
 // -----------------------------------------------------------------------------
-layout(location = 0) out vec3 out_Normal;
+layout(location = 0) out vec2 out_UV;
 
 // -----------------------------------------------------------------------------
 // Main
 // -----------------------------------------------------------------------------
 void main(void)
 {
-    vec4 WSPosition = vec4(VertexPosition.xyz, 1.0f);
+    out_UV = vec2(in_UV.x, 1.0f - in_UV.y);
     
-    out_Normal = normalize(WSPosition.xyz);
-    
-    gl_Position = m_ModelMatrix * WSPosition;
+    gl_Position = vec4(in_WSPosition.xyz, 1.0f);
 }
 
 #endif // __INCLUDE_VS_SPHERICAL_ENV_CUBEMAP_GENERATION_GLSL__

@@ -33,12 +33,12 @@ layout(std140, binding = 1) uniform UB1
 // -----------------------------------------------------------------------------
 // Input from previous stage
 // -----------------------------------------------------------------------------
-layout(location = 0) in vec3 in_Normal[];
+layout(location = 0) in vec2 in_UV[];
 
 // -----------------------------------------------------------------------------
 // Output to next stage
 // -----------------------------------------------------------------------------
-layout(location = 0) out vec3 out_Normal;
+layout(location = 0) out vec2 out_UV;
 
 // -----------------------------------------------------------------------------
 // Main
@@ -51,7 +51,7 @@ void main()
         {
             gl_Layer = FaceIndex;
             
-            out_Normal  = in_Normal[IndexOfVertex];
+            out_UV      = in_UV[IndexOfVertex];
             gl_Position = m_CubeProjectionMatrix * m_CubeViewMatrix[FaceIndex] * gl_in[IndexOfVertex].gl_Position;
 
             EmitVertex();

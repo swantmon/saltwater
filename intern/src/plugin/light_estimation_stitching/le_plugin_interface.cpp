@@ -8,6 +8,7 @@
 
 #include "engine/graphic/gfx_buffer_manager.h"
 #include "engine/graphic/gfx_context_manager.h"
+#include "engine/graphic/gfx_main.h"
 #include "engine/graphic/gfx_mesh_manager.h"
 #include "engine/graphic/gfx_performance.h"
 #include "engine/graphic/gfx_sampler_manager.h"
@@ -44,9 +45,20 @@ namespace LE
         // -----------------------------------------------------------------------------
         // Shader
         // -----------------------------------------------------------------------------
-        m_VSPtr = Gfx::ShaderManager::CompileVS("../../plugins/light_estimation_stitching/vs.glsl", "main");;
+        m_VSPtr = Gfx::ShaderManager::CompileVS("../../plugins/light_estimation_stitching/vs.glsl", "main");
         m_GSPtr = Gfx::ShaderManager::CompileGS("../../plugins/light_estimation_stitching/gs.glsl", "main");
         m_PSPtr = Gfx::ShaderManager::CompilePS("../../plugins/light_estimation_stitching/fs.glsl", "main");
+
+        // -----------------------------------------------------------------------------
+        // Input layout
+        // -----------------------------------------------------------------------------
+        const Gfx::SInputElementDescriptor P3T2InputLayout[] =
+        {
+            { "POSITION", 0, Gfx::CInputLayout::Float3Format, 0,  0, 20, Gfx::CInputLayout::PerVertex, 0 },
+            { "TEXCOORD", 0, Gfx::CInputLayout::Float2Format, 0, 12, 20, Gfx::CInputLayout::PerVertex, 0 },
+        };
+
+        Gfx::ShaderManager::CreateInputLayout(P3T2InputLayout, 2, m_VSPtr);
 
         // -----------------------------------------------------------------------------
         // Buffer
@@ -98,21 +110,43 @@ namespace LE
         m_CubemapBufferPtr = Gfx::BufferManager::CreateBuffer(ConstanteBufferDesc);
 
         // -----------------------------------------------------------------------------
-
-        ConstanteBufferDesc.m_Stride        = 0;
-        ConstanteBufferDesc.m_Usage         = Gfx::CBuffer::GPURead;
-        ConstanteBufferDesc.m_Binding       = Gfx::CBuffer::ConstantBuffer;
-        ConstanteBufferDesc.m_Access        = Gfx::CBuffer::CPUWrite;
-        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SModelMatrixBuffer);
-        ConstanteBufferDesc.m_pBytes        = 0;
-        ConstanteBufferDesc.m_pClassKey     = 0;
-        
-        m_ModelMatrixBufferPtr = Gfx::BufferManager::CreateBuffer(ConstanteBufferDesc);
-
-        // -----------------------------------------------------------------------------
         // Mesh
         // -----------------------------------------------------------------------------
-        m_MeshPtr = Gfx::MeshManager::CreateBox(1.0f, 1.0f, 1.0f);
+        static float PlaneVertexBufferData[] =
+        {
+          //x   , y   , z   , tx  , ty
+            0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+            1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+            1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+        };
+        
+        static unsigned int PlaneIndexBufferData[] =
+        {
+            0, 1, 2, 0, 2, 3,
+        };
+        
+        ConstanteBufferDesc.m_Stride        = 0;
+        ConstanteBufferDesc.m_Usage         = Gfx::CBuffer::GPURead;
+        ConstanteBufferDesc.m_Binding       = Gfx::CBuffer::VertexBuffer;
+        ConstanteBufferDesc.m_Access        = Gfx::CBuffer::CPUWrite;
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(PlaneVertexBufferData);
+        ConstanteBufferDesc.m_pBytes        = &PlaneVertexBufferData[0];
+        ConstanteBufferDesc.m_pClassKey     = 0;
+        
+        m_VertexBufferPtr = Gfx::BufferManager::CreateBuffer(ConstanteBufferDesc);
+        
+        // -----------------------------------------------------------------------------
+        
+        ConstanteBufferDesc.m_Stride        = 0;
+        ConstanteBufferDesc.m_Usage         = Gfx::CBuffer::GPURead;
+        ConstanteBufferDesc.m_Binding       = Gfx::CBuffer::IndexBuffer;
+        ConstanteBufferDesc.m_Access        = Gfx::CBuffer::CPUWrite;
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(PlaneIndexBufferData);
+        ConstanteBufferDesc.m_pBytes        = &PlaneIndexBufferData[0];
+        ConstanteBufferDesc.m_pClassKey     = 0;
+        
+        m_IndexBufferPtr = Gfx::BufferManager::CreateBuffer(ConstanteBufferDesc);
 
         // -----------------------------------------------------------------------------
         // Texture
@@ -131,7 +165,7 @@ namespace LE
         TextureDescriptor.m_Semantic         = Gfx::CTexture::Diffuse;
         TextureDescriptor.m_pFileName        = 0;
         TextureDescriptor.m_pPixels          = 0;
-        TextureDescriptor.m_Format           = Gfx::CTexture::R8G8B8_BYTE;
+        TextureDescriptor.m_Format           = Gfx::CTexture::R8G8B8A8_BYTE;
 
         m_OutputCubemapPtr = Gfx::TextureManager::CreateCubeTexture(TextureDescriptor);
 
@@ -174,8 +208,8 @@ namespace LE
         m_GSPtr = 0;
         m_PSPtr = 0;
         m_CubemapBufferPtr = 0;
-        m_ModelMatrixBufferPtr = 0;
-        m_MeshPtr = 0;
+        m_VertexBufferPtr = 0;
+        m_IndexBufferPtr = 0;
         m_InputTexturePtr = 0;
         m_OutputCubemapPtr = 0;
         m_TargetSetPtr = 0;
@@ -188,16 +222,48 @@ namespace LE
     {
         if (m_InputTexturePtr == nullptr) return;
 
-        Gfx::Performance::BeginEvent("Light estimation from LUT");
+        Gfx::Performance::BeginEvent("Light estimation from far plane");
+
+        Gfx::CCameraPtr MainCameraPtr = Gfx::ViewManager::GetMainCamera();
+        Gfx::CViewPtr   MainViewPtr = MainCameraPtr->GetView();
+
+        const glm::vec3* pWorldSpaceCameraFrustum = MainCameraPtr->GetWorldSpaceFrustum();
+
+        glm::vec3 FarBottomLeft = pWorldSpaceCameraFrustum[4];
+        glm::vec3 FarTopLeft = pWorldSpaceCameraFrustum[5];
+        glm::vec3 FarBottomRight = pWorldSpaceCameraFrustum[6];
+        glm::vec3 FarTopRight = pWorldSpaceCameraFrustum[7];
 
         // -----------------------------------------------------------------------------
-        // Setup constant buffer
+        // Calculate far plane and setup plane
         // -----------------------------------------------------------------------------
-        SModelMatrixBuffer ViewBuffer;
+        float PlaneGeometryBuffer[20];
 
-        ViewBuffer.m_ModelMatrix = glm::mat4(Gfx::ViewManager::GetMainCamera()->GetView()->GetRotationMatrix());
+        PlaneGeometryBuffer[0] = FarTopLeft[0];
+        PlaneGeometryBuffer[1] = FarTopLeft[1];
+        PlaneGeometryBuffer[2] = FarTopLeft[2];
+        PlaneGeometryBuffer[3] = 0.0f;
+        PlaneGeometryBuffer[4] = 1.0f;
 
-        Gfx::BufferManager::UploadBufferData(m_ModelMatrixBufferPtr, &ViewBuffer);
+        PlaneGeometryBuffer[5] = FarTopRight[0];
+        PlaneGeometryBuffer[6] = FarTopRight[1];
+        PlaneGeometryBuffer[7] = FarTopRight[2];
+        PlaneGeometryBuffer[8] = 1.0f;
+        PlaneGeometryBuffer[9] = 1.0f;
+
+        PlaneGeometryBuffer[10] = FarBottomRight[0];
+        PlaneGeometryBuffer[11] = FarBottomRight[1];
+        PlaneGeometryBuffer[12] = FarBottomRight[2];
+        PlaneGeometryBuffer[13] = 1.0f;
+        PlaneGeometryBuffer[14] = 0.0f;
+
+        PlaneGeometryBuffer[15] = FarBottomLeft[0];
+        PlaneGeometryBuffer[16] = FarBottomLeft[1];
+        PlaneGeometryBuffer[17] = FarBottomLeft[2];
+        PlaneGeometryBuffer[18] = 0.0f;
+        PlaneGeometryBuffer[19] = 0.0f;
+
+        Gfx::BufferManager::UploadBufferData(m_VertexBufferPtr, &PlaneGeometryBuffer);
 
         // -----------------------------------------------------------------------------
         // Setup
@@ -208,7 +274,7 @@ namespace LE
 
         Gfx::ContextManager::SetDepthStencilState(Gfx::StateManager::GetDepthStencilState(Gfx::CDepthStencilState::NoDepth));
 
-        Gfx::ContextManager::SetBlendState(Gfx::StateManager::GetBlendState(Gfx::CBlendState::Default));
+        Gfx::ContextManager::SetBlendState(Gfx::StateManager::GetBlendState(Gfx::CBlendState::AlphaBlend));
 
         Gfx::ContextManager::SetRasterizerState(Gfx::StateManager::GetRasterizerState(Gfx::CRasterizerState::NoCull));
 
@@ -220,36 +286,34 @@ namespace LE
 
         Gfx::ContextManager::SetShaderPS(m_PSPtr);
 
-        Gfx::ContextManager::SetVertexBuffer(m_MeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
+        Gfx::ContextManager::SetVertexBuffer(m_VertexBufferPtr);
 
-        Gfx::ContextManager::SetIndexBuffer(m_MeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
+        Gfx::ContextManager::SetIndexBuffer(m_IndexBufferPtr, 0);
 
-        Gfx::ContextManager::SetInputLayout(m_MeshPtr->GetLOD(0)->GetSurface()->GetMVPShaderVS()->GetInputLayout());
+        Gfx::ContextManager::SetInputLayout(m_VSPtr->GetInputLayout());
 
-        Gfx::ContextManager::SetConstantBuffer(0, m_ModelMatrixBufferPtr);
+        Gfx::ContextManager::SetConstantBuffer(0, Gfx::Main::GetPerFrameConstantBuffer());
         Gfx::ContextManager::SetConstantBuffer(1, m_CubemapBufferPtr);
 
         Gfx::ContextManager::SetSampler(0, Gfx::SamplerManager::GetSampler(Gfx::CSampler::MinMagMipLinearClamp));
-        Gfx::ContextManager::SetSampler(1, Gfx::SamplerManager::GetSampler(Gfx::CSampler::MinMagMipLinearClamp));
 
         Gfx::ContextManager::SetTexture(0, m_InputTexturePtr);
 
         // -----------------------------------------------------------------------------
         // Draw
         // -----------------------------------------------------------------------------
-        Gfx::ContextManager::DrawIndexed(m_MeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
+        Gfx::ContextManager::DrawIndexed(6, 0, 0);
 
         // -----------------------------------------------------------------------------
         // Reset
         // -----------------------------------------------------------------------------
         Gfx::ContextManager::ResetTexture(0);
-        Gfx::ContextManager::ResetTexture(1);
 
         Gfx::ContextManager::ResetSampler(0);
-        Gfx::ContextManager::ResetSampler(1);
 
         Gfx::ContextManager::ResetConstantBuffer(0);
         Gfx::ContextManager::ResetConstantBuffer(1);
+        Gfx::ContextManager::ResetConstantBuffer(2);
 
         Gfx::ContextManager::ResetInputLayout();
 
