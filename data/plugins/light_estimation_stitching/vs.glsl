@@ -14,7 +14,7 @@ out gl_PerVertex
 // Input from buffer
 // -----------------------------------------------------------------------------
 layout(location = 0) in vec3 in_WSPosition;
-layout(location = 2) in vec2 in_UV;
+layout(location = 1) in vec2 in_UV;
 
 // -----------------------------------------------------------------------------
 // Output to next stage
