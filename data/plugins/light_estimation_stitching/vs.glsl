@@ -26,7 +26,7 @@ layout(location = 0) out vec2 out_UV;
 // -----------------------------------------------------------------------------
 void main(void)
 {
-    out_UV = vec2(in_UV.x, 1.0f - in_UV.y);
+    out_UV = vec2(in_UV.x, in_UV.y);
     
     gl_Position = vec4(in_WSPosition.xyz, 1.0f);
 }
