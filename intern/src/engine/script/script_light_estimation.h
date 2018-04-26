@@ -24,10 +24,12 @@ namespace Scpt
         typedef void (*LightEstimationLUTSetInputTextureFunc)(Gfx::CTexturePtr);
         typedef Gfx::CTexturePtr (*LightEstimationLUTGetOutputCubemapFunc)();
         typedef Gfx::CTexturePtr (*GetBackgroundTextureFunc)();
+        typedef void (*SetFlipVerticalFunc)(bool _Value);
 
         LightEstimationLUTSetInputTextureFunc SetInputTexture;
         LightEstimationLUTGetOutputCubemapFunc GetOutputCubemap;
         GetBackgroundTextureFunc GetBackgroundTexture;
+        SetFlipVerticalFunc SetFlipVertical;
 
     public:
 
@@ -51,6 +53,13 @@ namespace Scpt
             {
                 SetInputTexture  = (LightEstimationLUTSetInputTextureFunc)(Core::PluginManager::GetPluginFunction("Light Estimation LUT", "SetInputTexture"));
                 GetOutputCubemap = (LightEstimationLUTGetOutputCubemapFunc)(Core::PluginManager::GetPluginFunction("Light Estimation LUT", "GetOutputCubemap"));
+                SetFlipVertical = (SetFlipVerticalFunc)(Core::PluginManager::GetPluginFunction("Light Estimation LUT", "SetFlipVertical"));
+
+#ifdef PLATFORM_WINDOWS
+                SetFlipVertical(true);
+#else
+                SetFlipVertical(false);
+#endif // PLATFORM_WINDOWS
             }
             else
             {
