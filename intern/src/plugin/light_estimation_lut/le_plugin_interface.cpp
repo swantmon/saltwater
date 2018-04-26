@@ -116,11 +116,7 @@ namespace LE
 
         // -----------------------------------------------------------------------------
 
-#ifdef PLATFORM_WINDOWS
-        glm::vec2 DefaultProperties(0.0f, 1.0f);
-#else
         glm::vec2 DefaultProperties(0.0f, 0.0f);
-#endif // PLATFORM_WINDOWS
 
         ConstanteBufferDesc.m_Stride        = 0;
         ConstanteBufferDesc.m_Usage         = Gfx::CBuffer::GPURead;
@@ -352,6 +348,15 @@ namespace LE
     {
         return m_OutputCubemapPtr;
     }
+
+    // -----------------------------------------------------------------------------
+
+    void CPluginInterface::SetFlipVertical(bool _Value)
+    {
+        glm::vec2 Properties = _Value ? glm::vec2(0.0f, 1.0f) : glm::vec2(0.0f, 0.0f);
+        
+        Gfx::BufferManager::UploadBufferData(m_PropertiesBufferPtr, &Properties);
+    }
 } // namespace LE
 
 extern "C" CORE_PLUGIN_API_EXPORT void SetInputTexture(Gfx::CTexturePtr _InputTexturePtr)
@@ -362,6 +367,11 @@ extern "C" CORE_PLUGIN_API_EXPORT void SetInputTexture(Gfx::CTexturePtr _InputTe
 extern "C" CORE_PLUGIN_API_EXPORT Gfx::CTexturePtr GetOutputCubemap()
 {
     return static_cast<LE::CPluginInterface&>(GetInstance()).GetOutputCubemap();
+}
+
+extern "C" CORE_PLUGIN_API_EXPORT void SetFlipVertical(bool _Value)
+{
+    static_cast<LE::CPluginInterface&>(GetInstance()).SetFlipVertical(_Value);
 }
 
 #if HAS_OPENCV_SUPPORT == 1
