@@ -49,11 +49,16 @@ namespace Scpt
 
             if (m_pSkyComponent == nullptr) return;
 
-            if (Core::PluginManager::HasPlugin("Light Estimation LUT"))
+            if (Core::PluginManager::HasPlugin("Light Estimation Stitching"))
+            {
+                SetInputTexture  = (LightEstimationLUTSetInputTextureFunc)(Core::PluginManager::GetPluginFunction("Light Estimation Stitching", "SetInputTexture"));
+                GetOutputCubemap = (LightEstimationLUTGetOutputCubemapFunc)(Core::PluginManager::GetPluginFunction("Light Estimation Stitching", "GetOutputCubemap"));
+            }
+            else if(Core::PluginManager::HasPlugin("Light Estimation LUT"))
             {
                 SetInputTexture  = (LightEstimationLUTSetInputTextureFunc)(Core::PluginManager::GetPluginFunction("Light Estimation LUT", "SetInputTexture"));
                 GetOutputCubemap = (LightEstimationLUTGetOutputCubemapFunc)(Core::PluginManager::GetPluginFunction("Light Estimation LUT", "GetOutputCubemap"));
-                SetFlipVertical = (SetFlipVerticalFunc)(Core::PluginManager::GetPluginFunction("Light Estimation LUT", "SetFlipVertical"));
+                SetFlipVertical  = (SetFlipVerticalFunc)(Core::PluginManager::GetPluginFunction("Light Estimation LUT", "SetFlipVertical"));
 
 #ifdef PLATFORM_WINDOWS
                 SetFlipVertical(true);
