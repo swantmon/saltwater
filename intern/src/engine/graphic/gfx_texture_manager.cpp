@@ -1833,7 +1833,11 @@ namespace
             GL_RGBA,
             GL_RGBA,
             GL_RGBA,
+#ifdef PLATFORM_WINDOWS
             GL_BGR
+#else
+            GL_RGB
+#endif // PLATFORM_WINDOWS
         };
         
         return s_NativeFormat[_Format];

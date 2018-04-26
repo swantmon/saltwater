@@ -136,7 +136,7 @@ namespace LE
         TextureDescriptor.m_Semantic         = Gfx::CTexture::Diffuse;
         TextureDescriptor.m_pFileName        = 0;
         TextureDescriptor.m_pPixels          = 0;
-        TextureDescriptor.m_Format           = Gfx::CTexture::R8G8B8A8_BYTE;
+        TextureDescriptor.m_Format           = Gfx::CTexture::R8G8B8_BYTE;
 
         m_OutputCubemapPtr = Gfx::TextureManager::CreateCubeTexture(TextureDescriptor);
 
@@ -225,8 +225,7 @@ namespace LE
         // -----------------------------------------------------------------------------
         SModelMatrixBuffer ViewBuffer;
 
-        ViewBuffer.m_ModelMatrix  = glm::mat4(1.0f);
-        ViewBuffer.m_ModelMatrix *= glm::mat4(Gfx::ViewManager::GetMainCamera()->GetView()->GetRotationMatrix());
+        ViewBuffer.m_ModelMatrix = glm::mat4(Gfx::ViewManager::GetMainCamera()->GetView()->GetRotationMatrix());
 
         Gfx::BufferManager::UploadBufferData(m_ModelMatrixBufferPtr, &ViewBuffer);
 
