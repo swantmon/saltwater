@@ -33,6 +33,18 @@ namespace Scpt
 
     public:
 
+        enum EEstimationType
+        {
+            Stitching,
+            LUT
+        };
+
+    public:
+
+        EEstimationType m_EstimationType = Stitching;
+
+    public:
+
         Dt::CEntity* m_pSkyEntity = nullptr;
         Dt::CSkyComponent* m_pSkyComponent = nullptr;
 
@@ -49,12 +61,12 @@ namespace Scpt
 
             if (m_pSkyComponent == nullptr) return;
 
-            if (Core::PluginManager::HasPlugin("Light Estimation Stitching"))
+            if (Core::PluginManager::HasPlugin("Light Estimation Stitching") && m_EstimationType == Stitching)
             {
                 SetInputTexture  = (LightEstimationLUTSetInputTextureFunc)(Core::PluginManager::GetPluginFunction("Light Estimation Stitching", "SetInputTexture"));
                 GetOutputCubemap = (LightEstimationLUTGetOutputCubemapFunc)(Core::PluginManager::GetPluginFunction("Light Estimation Stitching", "GetOutputCubemap"));
             }
-            else if(Core::PluginManager::HasPlugin("Light Estimation LUT"))
+            else if(Core::PluginManager::HasPlugin("Light Estimation LUT") && m_EstimationType == LUT)
             {
                 SetInputTexture  = (LightEstimationLUTSetInputTextureFunc)(Core::PluginManager::GetPluginFunction("Light Estimation LUT", "SetInputTexture"));
                 GetOutputCubemap = (LightEstimationLUTGetOutputCubemapFunc)(Core::PluginManager::GetPluginFunction("Light Estimation LUT", "GetOutputCubemap"));
