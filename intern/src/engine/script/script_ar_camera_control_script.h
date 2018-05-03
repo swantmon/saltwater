@@ -114,7 +114,7 @@ namespace Scpt
 
                 m_pCameraComponent->SetNear(GetCameraNear(rCamera));
 
-                m_pCameraComponent->SetNear(GetCameraFar(rCamera));
+                m_pCameraComponent->SetFar(GetCameraFar(rCamera));
 
                 m_pCameraComponent->SetProjectionMatrix(GetCameraProjectionMatrix(rCamera));
 

@@ -81,7 +81,7 @@ namespace Gfx
         // --------------------------------------------------------------------------------
         m_Left   = _Left;
 		m_Right  = _Right;
-		m_Bottom = _Bottom;        
+		m_Bottom = _Bottom;
         m_Top    = _Top;
         m_Near   = _Near;
         m_Far    = _Far;
@@ -168,46 +168,6 @@ namespace Gfx
         // Compute the projection matrix.
         // --------------------------------------------------------------------------------
         m_ProjectionMatrix = glm::orthoRH(_Left, _Right, _Bottom, _Top, _Near, _Far);
-    }
-
-    // --------------------------------------------------------------------------------
-
-    void CCamera::SetProjectionMatrix(const glm::mat4& _rProjectionMatrix, float _Near, float _Far)
-    {
-        m_ProjectionMatrix = _rProjectionMatrix;
-
-        // -----------------------------------------------------------------------------
-        // Decompose left, right, top, bottom, near and far from projection
-        // matrix:
-        // Near = ProjectionMatrix[2][3] / (ProjectionMatrix[2][2] - 1);
-        // Far  = ProjectionMatrix[2][3] / (ProjectionMatrix[2][2] + 1);
-        // -----------------------------------------------------------------------------
-        float Bottom = _Near * (m_ProjectionMatrix[2][1] - 1.0f) / m_ProjectionMatrix[1][1];
-        float Top    = _Near * (m_ProjectionMatrix[2][1] + 1.0f) / m_ProjectionMatrix[1][1];
-        float Left   = _Near * (m_ProjectionMatrix[2][0] - 1.0f) / m_ProjectionMatrix[0][0];
-        float Right  = _Near * (m_ProjectionMatrix[2][0] + 1.0f) / m_ProjectionMatrix[0][0];
-
-        // --------------------------------------------------------------------------------
-        // Save the dimensions.
-        // --------------------------------------------------------------------------------
-        m_Left   = Left;
-        m_Right  = Right;
-        m_Bottom = Bottom;
-        m_Top    = Top;
-        m_Near   = _Near;
-        m_Far    = _Far;
-
-        // --------------------------------------------------------------------------------
-        // Compute the cubic view frustum in object space coordinates.
-        // --------------------------------------------------------------------------------
-        m_ObjectSpaceFrustum[SFace::Near | SFace::Left  | SFace::Bottom] = glm::vec3(Left , Bottom, -_Near);
-        m_ObjectSpaceFrustum[SFace::Near | SFace::Left  | SFace::Top   ] = glm::vec3(Left , Top   , -_Near);
-        m_ObjectSpaceFrustum[SFace::Near | SFace::Right | SFace::Bottom] = glm::vec3(Right, Bottom, -_Near);
-        m_ObjectSpaceFrustum[SFace::Near | SFace::Right | SFace::Top   ] = glm::vec3(Right, Top   , -_Near);
-        m_ObjectSpaceFrustum[SFace::Far  | SFace::Left  | SFace::Bottom] = glm::vec3(Left , Bottom, -_Far );
-        m_ObjectSpaceFrustum[SFace::Far  | SFace::Left  | SFace::Top   ] = glm::vec3(Left , Top   , -_Far );
-        m_ObjectSpaceFrustum[SFace::Far  | SFace::Right | SFace::Bottom] = glm::vec3(Right, Bottom, -_Far );
-        m_ObjectSpaceFrustum[SFace::Far  | SFace::Right | SFace::Top   ] = glm::vec3(Right, Top   , -_Far );
     }
 
     // -----------------------------------------------------------------------------
