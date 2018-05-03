@@ -317,14 +317,14 @@ namespace Edit
             Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
 
             pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 1.0f));
-            pTransformationFacet->SetScale(glm::vec3(0.25f));
+            pTransformationFacet->SetScale(glm::vec3(0.5f));
             pTransformationFacet->SetRotation(glm::vec3(glm::radians(0.0f), glm::radians(0.0f), 0.0f));
 
             // -----------------------------------------------------------------------------
 
             auto pMeshComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CMeshComponent>();
 
-            pMeshComponent->SetMeshType(Dt::CMeshComponent::Sphere);
+            pMeshComponent->SetMeshType(Dt::CMeshComponent::Box);
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pMeshComponent, Dt::CMeshComponent::DirtyCreate);
 
