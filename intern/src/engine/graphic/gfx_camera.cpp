@@ -439,15 +439,15 @@ namespace Gfx
         // --------------------------------------------------------------------------------
         // Compute the model of the camera in world space.
         // --------------------------------------------------------------------------------
-        m_WorldSpaceFrustum[SFace::Near | SFace::Left  | SFace::Bottom] = m_ViewPtr->m_Position + m_ObjectSpaceFrustum[SFace::Near | SFace::Left  | SFace::Bottom] * m_ViewPtr->m_RotationMatrix;
-        m_WorldSpaceFrustum[SFace::Near | SFace::Left  | SFace::Top   ] = m_ViewPtr->m_Position + m_ObjectSpaceFrustum[SFace::Near | SFace::Left  | SFace::Top   ] * m_ViewPtr->m_RotationMatrix;
-        m_WorldSpaceFrustum[SFace::Near | SFace::Right | SFace::Bottom] = m_ViewPtr->m_Position + m_ObjectSpaceFrustum[SFace::Near | SFace::Right | SFace::Bottom] * m_ViewPtr->m_RotationMatrix;
-        m_WorldSpaceFrustum[SFace::Near | SFace::Right | SFace::Top   ] = m_ViewPtr->m_Position + m_ObjectSpaceFrustum[SFace::Near | SFace::Right | SFace::Top   ] * m_ViewPtr->m_RotationMatrix;
+        m_WorldSpaceFrustum[SFace::Near | SFace::Left  | SFace::Bottom] = m_ViewPtr->m_Position + m_ViewPtr->m_RotationMatrix * m_ObjectSpaceFrustum[SFace::Near | SFace::Left  | SFace::Bottom];
+        m_WorldSpaceFrustum[SFace::Near | SFace::Left  | SFace::Top   ] = m_ViewPtr->m_Position + m_ViewPtr->m_RotationMatrix * m_ObjectSpaceFrustum[SFace::Near | SFace::Left  | SFace::Top   ];
+        m_WorldSpaceFrustum[SFace::Near | SFace::Right | SFace::Bottom] = m_ViewPtr->m_Position + m_ViewPtr->m_RotationMatrix * m_ObjectSpaceFrustum[SFace::Near | SFace::Right | SFace::Bottom];
+        m_WorldSpaceFrustum[SFace::Near | SFace::Right | SFace::Top   ] = m_ViewPtr->m_Position + m_ViewPtr->m_RotationMatrix * m_ObjectSpaceFrustum[SFace::Near | SFace::Right | SFace::Top   ];
 
-        m_WorldSpaceFrustum[SFace::Far  | SFace::Left  | SFace::Bottom] = m_ViewPtr->m_Position + m_ObjectSpaceFrustum[SFace::Far  | SFace::Left  | SFace::Bottom] * m_ViewPtr->m_RotationMatrix;
-        m_WorldSpaceFrustum[SFace::Far  | SFace::Left  | SFace::Top   ] = m_ViewPtr->m_Position + m_ObjectSpaceFrustum[SFace::Far  | SFace::Left  | SFace::Top   ] * m_ViewPtr->m_RotationMatrix;
-        m_WorldSpaceFrustum[SFace::Far  | SFace::Right | SFace::Bottom] = m_ViewPtr->m_Position + m_ObjectSpaceFrustum[SFace::Far  | SFace::Right | SFace::Bottom] * m_ViewPtr->m_RotationMatrix;
-        m_WorldSpaceFrustum[SFace::Far  | SFace::Right | SFace::Top   ] = m_ViewPtr->m_Position + m_ObjectSpaceFrustum[SFace::Far  | SFace::Right | SFace::Top   ] * m_ViewPtr->m_RotationMatrix;
+        m_WorldSpaceFrustum[SFace::Far  | SFace::Left  | SFace::Bottom] = m_ViewPtr->m_Position + m_ViewPtr->m_RotationMatrix * m_ObjectSpaceFrustum[SFace::Far  | SFace::Left  | SFace::Bottom];
+        m_WorldSpaceFrustum[SFace::Far  | SFace::Left  | SFace::Top   ] = m_ViewPtr->m_Position + m_ViewPtr->m_RotationMatrix * m_ObjectSpaceFrustum[SFace::Far  | SFace::Left  | SFace::Top   ];
+        m_WorldSpaceFrustum[SFace::Far  | SFace::Right | SFace::Bottom] = m_ViewPtr->m_Position + m_ViewPtr->m_RotationMatrix * m_ObjectSpaceFrustum[SFace::Far  | SFace::Right | SFace::Bottom];
+        m_WorldSpaceFrustum[SFace::Far  | SFace::Right | SFace::Top   ] = m_ViewPtr->m_Position + m_ViewPtr->m_RotationMatrix * m_ObjectSpaceFrustum[SFace::Far  | SFace::Right | SFace::Top   ];
     }
 
 	// --------------------------------------------------------------------------------
