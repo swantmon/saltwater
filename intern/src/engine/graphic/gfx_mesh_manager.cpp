@@ -133,11 +133,6 @@ namespace
 
 namespace
 {
-    std::string g_PathToDataModels = "/graphic/models/";
-} // namespace  
-
-namespace
-{
     class CGfxMeshManager : private Base::CUncopyable
     {
         BASE_SINGLETON_FUNC(CGfxMeshManager)
@@ -1159,7 +1154,7 @@ namespace
             case Dt::CMeshComponent::Asset:
                 pMeshComponent->SetFacet(Dt::CMeshComponent::Graphic, 
                     CreateMeshFromFile(
-                        pMeshComponent->GetFilename().c_str(), 
+                        Core::AssetManager::GetPathToAssets() + pMeshComponent->GetFilename().c_str(),
                         pMeshComponent->GetGeneratorFlag(), 
                         pMeshComponent->GetMeshIndex()
                     )
