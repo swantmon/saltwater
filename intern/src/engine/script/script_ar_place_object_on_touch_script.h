@@ -20,11 +20,13 @@ namespace Scpt
         typedef const void (*ArCoreReleaseMarkerFunc)(const void* _pMarker);
         typedef int (*ArCoreGetMarkerTrackingStateFunc)(const void* _pMarker);
         typedef glm::mat4 (*ArCoreGetMarkerModelMatrixFunc)(const void* _pMarker);
+        typedef bool (*ArCoreSetSettingsFunc)(bool _ShowPlanes, bool _ShowPoints);
 
         ArCoreAcquireNewMarkerFunc AcquireNewMarker;
         ArCoreReleaseMarkerFunc ReleaseMarker;
         ArCoreGetMarkerTrackingStateFunc GetMarkerTrackingState;
         ArCoreGetMarkerModelMatrixFunc GetMarkerModelMatrix;
+        ArCoreSetSettingsFunc SetSettings;
 
     public:
 
@@ -51,6 +53,8 @@ namespace Scpt
 
             GetMarkerTrackingState = (ArCoreGetMarkerTrackingStateFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetMarkerTrackingState"));
             GetMarkerModelMatrix = (ArCoreGetMarkerModelMatrixFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetMarkerModelMatrix"));
+
+            SetSettings = (ArCoreSetSettingsFunc)(Core::PluginManager::GetPluginFunction("ArCore", "SetSettings"));
         }
 
         // -----------------------------------------------------------------------------
@@ -98,6 +102,8 @@ namespace Scpt
                 if (pNewMarker != nullptr)
                 {
                     m_pMarker = pNewMarker;
+
+                    SetSettings(false, false);
                 }
             }
         }

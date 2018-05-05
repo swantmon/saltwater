@@ -7,6 +7,21 @@
 
 #include "engine/graphic/gfx_texture.h"
 
+
+namespace MR
+{
+namespace ControlManager
+{
+    struct SSettings
+    {
+        bool m_ShowPlanes;
+        bool m_ShowPoints;
+        float m_Near;
+        float m_Far;
+    };
+} // namespace ControlManager
+} // namespace MR
+
 namespace MR
 {
 namespace ControlManager
@@ -26,5 +41,9 @@ namespace ControlManager
     void ReleaseMarker(const CMarker* _pMarker);
 
     Gfx::CTexturePtr GetBackgroundTexture();
+
+    const SSettings& GetSettings();
+    void SetSettings(const SSettings& _rSettings);
+    void ResetSettings();
 } // namespace ControlManager
 } // namespace MR
