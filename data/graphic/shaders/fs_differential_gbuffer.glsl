@@ -23,12 +23,15 @@ layout(std140, binding = 2) uniform UB2
 layout (binding = 0) uniform sampler2D ps_BackgroundColor;
 
 // -----------------------------------------------------------------------------
-// Input to fragment from VS
+// Input from previous stage
 // -----------------------------------------------------------------------------
-layout(location = 1) in vec3 in_PSNormal;
+layout(location = 0) in vec3 in_WSPosition;
+layout(location = 1) in vec3 in_WSNormal;
+layout(location = 2) in vec2 in_UV;
+layout(location = 3) in mat3 in_WSNormalMatrix;
 
 // -----------------------------------------------------------------------------
-// Output to fragment
+// Output
 // -----------------------------------------------------------------------------
 layout(location = 0) out vec4 out_GBuffer0;
 layout(location = 1) out vec4 out_GBuffer1;
@@ -48,7 +51,7 @@ void main(void)
 
     SGBuffer GBuffer;
     
-    PackGBuffer(Color, in_PSNormal, ps_Roughness, vec3(ps_Reflectance), ps_MetalMask, 1.0f, GBuffer);
+    PackGBuffer(Color, in_WSNormal, ps_Roughness, vec3(ps_Reflectance), ps_MetalMask, 1.0f, GBuffer);
 
     out_GBuffer0 = GBuffer.m_Color0;
     out_GBuffer1 = GBuffer.m_Color1;
