@@ -1154,7 +1154,7 @@ namespace
             case Dt::CMeshComponent::Asset:
                 pMeshComponent->SetFacet(Dt::CMeshComponent::Graphic, 
                     CreateMeshFromFile(
-                        Core::AssetManager::GetPathToAssets() + pMeshComponent->GetFilename().c_str(),
+                        pMeshComponent->GetFilename().c_str(),
                         pMeshComponent->GetGeneratorFlag(), 
                         pMeshComponent->GetMeshIndex()
                     )
