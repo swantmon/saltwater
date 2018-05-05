@@ -421,6 +421,15 @@ namespace
             CMeshPtr MeshPtr = pGfxComponent;
 
             // -----------------------------------------------------------------------------
+            // Render every surface of this entity
+            // -----------------------------------------------------------------------------
+            if (MeshPtr->GetLOD(0) == nullptr) continue;
+
+            CSurfacePtr SurfacePtr = MeshPtr->GetLOD(0)->GetSurface();
+
+            if (SurfacePtr == nullptr) continue;
+
+            // -----------------------------------------------------------------------------
             // Upload model matrix to buffer
             // -----------------------------------------------------------------------------
             SPerDrawCallConstantBuffer ModelBuffer;
@@ -428,16 +437,6 @@ namespace
             ModelBuffer.m_ModelMatrix = pDtComponent->GetHostEntity()->GetTransformationFacet()->GetWorldMatrix();
 
             BufferManager::UploadBufferData(m_LightCameraVSBufferPtr->GetBuffer(1), &ModelBuffer);
-
-            // -----------------------------------------------------------------------------
-            // Render every surface of this entity
-            // -----------------------------------------------------------------------------
-            CSurfacePtr SurfacePtr = MeshPtr->GetLOD(0)->GetSurface();
-
-            if (SurfacePtr == nullptr)
-            {
-                continue;
-            }
 
             // -----------------------------------------------------------------------------
             // Get input layout from optimal shader

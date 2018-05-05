@@ -550,7 +550,11 @@ namespace
                 // -----------------------------------------------------------------------------
                 // Set every surface of this entity into a new render job
                 // -----------------------------------------------------------------------------
+                if (pGfxComponent->GetLOD(0) == nullptr) continue;
+
                 CSurfacePtr SurfacePtr = pGfxComponent->GetLOD(0)->GetSurface();
+
+                if (SurfacePtr == nullptr) continue;
 
                 const Gfx::CMaterial* pMaterial = SurfacePtr->GetMaterial();
 
