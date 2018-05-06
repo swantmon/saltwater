@@ -71,7 +71,7 @@ namespace Dt
 
     unsigned int CSkyComponent::GetQualityInPixel() const
     {
-        static unsigned int s_QualityInPixel[s_NumberOfQualities] = { 128, 256, 512, 1024, 2048 };
+        static unsigned int s_QualityInPixel[s_NumberOfQualities] = { 64, 128, 256, 512, 1024, 2048 };
 
         return s_QualityInPixel[m_Quality];
     }

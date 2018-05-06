@@ -14,7 +14,7 @@ namespace Dt
     {
     public:
 
-        static const unsigned int s_NumberOfQualities = 6;
+        static const unsigned int s_NumberOfQualities = 7;
 
     public:
 
@@ -27,6 +27,7 @@ namespace Dt
 
         enum EQuality
         {
+            PX32,        //< Use cubemap resolution quality of 32px
             PX64,        //< Use cubemap resolution quality of 64px
             PX128,       //< Use cubemap resolution quality of 128px
             PX256,       //< Use cubemap resolution quality of 256px
