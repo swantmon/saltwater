@@ -145,6 +145,20 @@ namespace LE
         m_IndexBufferPtr = Gfx::BufferManager::CreateBuffer(ConstanteBufferDesc);
 
         // -----------------------------------------------------------------------------
+
+        glm::vec2 DefaultProperties(0.0f, 0.0f);
+
+        ConstanteBufferDesc.m_Stride        = 0;
+        ConstanteBufferDesc.m_Usage         = Gfx::CBuffer::GPURead;
+        ConstanteBufferDesc.m_Binding       = Gfx::CBuffer::ConstantBuffer;
+        ConstanteBufferDesc.m_Access        = Gfx::CBuffer::CPUWrite;
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(glm::vec2);
+        ConstanteBufferDesc.m_pBytes        = &DefaultProperties;
+        ConstanteBufferDesc.m_pClassKey     = 0;
+        
+        m_PropertiesBufferPtr = Gfx::BufferManager::CreateBuffer(ConstanteBufferDesc);
+
+        // -----------------------------------------------------------------------------
         // Texture
         // -----------------------------------------------------------------------------
         Gfx::STextureDescriptor TextureDescriptor;
@@ -290,6 +304,7 @@ namespace LE
 
         Gfx::ContextManager::SetConstantBuffer(0, Gfx::Main::GetPerFrameConstantBuffer());
         Gfx::ContextManager::SetConstantBuffer(1, m_CubemapBufferPtr);
+        Gfx::ContextManager::SetConstantBuffer(2, m_PropertiesBufferPtr);
 
         Gfx::ContextManager::SetSampler(0, Gfx::SamplerManager::GetSampler(Gfx::CSampler::MinMagMipLinearClamp));
 
@@ -309,6 +324,7 @@ namespace LE
 
         Gfx::ContextManager::ResetConstantBuffer(0);
         Gfx::ContextManager::ResetConstantBuffer(1);
+        Gfx::ContextManager::ResetConstantBuffer(2);
 
         Gfx::ContextManager::ResetInputLayout();
 
@@ -359,6 +375,15 @@ namespace LE
     {
         return m_OutputCubemapPtr;
     }
+
+    // -----------------------------------------------------------------------------
+
+    void CPluginInterface::SetFlipVertical(bool _Value)
+    {
+        glm::vec2 Properties = _Value ? glm::vec2(0.0f, 1.0f) : glm::vec2(0.0f, 0.0f);
+
+        Gfx::BufferManager::UploadBufferData(m_PropertiesBufferPtr, &Properties);
+    }
 } // namespace LE
 
 extern "C" CORE_PLUGIN_API_EXPORT void SetInputTexture(Gfx::CTexturePtr _InputTexturePtr)
@@ -369,4 +394,9 @@ extern "C" CORE_PLUGIN_API_EXPORT void SetInputTexture(Gfx::CTexturePtr _InputTe
 extern "C" CORE_PLUGIN_API_EXPORT Gfx::CTexturePtr GetOutputCubemap()
 {
     return static_cast<LE::CPluginInterface&>(GetInstance()).GetOutputCubemap();
+}
+
+extern "C" CORE_PLUGIN_API_EXPORT void SetFlipVertical(bool _Value)
+{
+    static_cast<LE::CPluginInterface&>(GetInstance()).SetFlipVertical(_Value);
 }
