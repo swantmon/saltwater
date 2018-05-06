@@ -322,11 +322,6 @@ namespace
 
     void CGfxARRenderer::Update()
     {
-        // -----------------------------------------------------------------------------
-        // Set render jobs depending on camera. At the end we have to iterate throw
-        // the map only once. Then we can order the render jobs and we get as less
-        // state changes as possible.
-        // -----------------------------------------------------------------------------
         BuildRenderJobs();
     }
 
@@ -430,11 +425,15 @@ namespace
         // -----------------------------------------------------------------------------
         // Prepare renderer
         // -----------------------------------------------------------------------------
-        
-
         ContextManager::SetRenderContext(m_HitProxyContextPtr);
 
         ContextManager::SetTopology(STopology::TriangleList);
+
+        ContextManager::SetShaderPS(m_HitProxyShaderPtr);
+
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+        ContextManager::SetConstantBuffer(1, m_ModelBufferPtr);
+        ContextManager::SetConstantBuffer(2, m_HitProxyPassPSBufferPtr);
 
         // -----------------------------------------------------------------------------
         // First pass: iterate throw render jobs and compute all meshes
@@ -445,9 +444,6 @@ namespace
         {
             CSurfacePtr  SurfacePtr = CurrentRenderJob->m_SurfacePtr;
 
-            // -----------------------------------------------------------------------------
-            // Upload data to buffer
-            // -----------------------------------------------------------------------------
             SPerDrawCallConstantBufferVS ModelBuffer;
 
             ModelBuffer.m_ModelMatrix = CurrentRenderJob->m_ModelMatrix;
@@ -460,16 +456,7 @@ namespace
 
             BufferManager::UploadBufferData(m_HitProxyPassPSBufferPtr, &HitProxyProperties);
 
-            // -----------------------------------------------------------------------------
-            // Render
-            // -----------------------------------------------------------------------------
             ContextManager::SetShaderVS(SurfacePtr->GetShaderVS());
-
-            ContextManager::SetShaderPS(m_HitProxyShaderPtr);
-
-            ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
-            ContextManager::SetConstantBuffer(1, m_ModelBufferPtr);
-            ContextManager::SetConstantBuffer(2, m_HitProxyPassPSBufferPtr);
 
             ContextManager::SetVertexBuffer(SurfacePtr->GetVertexBuffer());
 
@@ -478,21 +465,21 @@ namespace
             ContextManager::SetInputLayout(SurfacePtr->GetShaderVS()->GetInputLayout());
 
             ContextManager::DrawIndexed(SurfacePtr->GetNumberOfIndices(), 0, 0);
-
-            ContextManager::ResetInputLayout();
-
-            ContextManager::ResetIndexBuffer();
-
-            ContextManager::ResetVertexBuffer();
-
-            ContextManager::ResetConstantBuffer(0);
-            ContextManager::ResetConstantBuffer(1);
-            ContextManager::ResetConstantBuffer(2);
-
-            ContextManager::ResetShaderPS();
-
-            ContextManager::ResetShaderVS();
         }
+
+        ContextManager::ResetInputLayout();
+
+        ContextManager::ResetIndexBuffer();
+
+        ContextManager::ResetVertexBuffer();
+
+        ContextManager::ResetConstantBuffer(0);
+        ContextManager::ResetConstantBuffer(1);
+        ContextManager::ResetConstantBuffer(2);
+
+        ContextManager::ResetShaderPS();
+
+        ContextManager::ResetShaderVS();
 
         ContextManager::ResetTopology();
 
@@ -505,9 +492,6 @@ namespace
 
     void CGfxARRenderer::BuildRenderJobs()
     {
-        // -----------------------------------------------------------------------------
-        // Clear current render jobs
-        // -----------------------------------------------------------------------------
         m_RenderJobs.clear();
 
         auto DataMeshComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CMeshComponent>();
@@ -520,9 +504,6 @@ namespace
 
             const Dt::CEntity& rCurrentEntity = *pDtComponent->GetHostEntity();
 
-            // -----------------------------------------------------------------------------
-            // Get graphic
-            // -----------------------------------------------------------------------------
             if (rCurrentEntity.GetLayer() == Dt::SEntityLayer::AR)
             {
                 Gfx::CMesh* pMeshObject = static_cast<Gfx::CMesh*>(pDtComponent->GetFacet(Dt::CMeshComponent::Graphic));
@@ -547,7 +528,7 @@ namespace
                 }
 
                 // -----------------------------------------------------------------------------
-                // Set informations to render job
+                // Set information to render job
                 // -----------------------------------------------------------------------------
                 SRenderJob NewRenderJob;
 
@@ -561,7 +542,6 @@ namespace
         }
     }
 } // namespace
-
 
 namespace Gfx
 {
