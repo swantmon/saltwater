@@ -88,7 +88,7 @@ namespace LE
         for (int IndexOfCubeface = 0; IndexOfCubeface < 6; ++IndexOfCubeface)
         {
             DefaultGSValues.m_CubeViewMatrix[IndexOfCubeface]  = glm::lookAt(glm::vec3(0.0f), LookDirections[IndexOfCubeface], UpDirections[IndexOfCubeface]);
-            DefaultGSValues.m_CubeViewMatrix[IndexOfCubeface] *= glm::eulerAngleX(glm::radians(-90.0f));
+            //DefaultGSValues.m_CubeViewMatrix[IndexOfCubeface] *= glm::eulerAngleX(glm::radians(-90.0f));
         }
         
         // -----------------------------------------------------------------------------
@@ -117,11 +117,6 @@ namespace LE
             0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
         };
         
-        static unsigned int PlaneIndexBufferData[] =
-        {
-            0, 1, 2, 0, 2, 3,
-        };
-        
         ConstanteBufferDesc.m_Stride        = 0;
         ConstanteBufferDesc.m_Usage         = Gfx::CBuffer::GPURead;
         ConstanteBufferDesc.m_Binding       = Gfx::CBuffer::VertexBuffer;
@@ -131,18 +126,6 @@ namespace LE
         ConstanteBufferDesc.m_pClassKey     = 0;
         
         m_VertexBufferPtr = Gfx::BufferManager::CreateBuffer(ConstanteBufferDesc);
-        
-        // -----------------------------------------------------------------------------
-        
-        ConstanteBufferDesc.m_Stride        = 0;
-        ConstanteBufferDesc.m_Usage         = Gfx::CBuffer::GPURead;
-        ConstanteBufferDesc.m_Binding       = Gfx::CBuffer::IndexBuffer;
-        ConstanteBufferDesc.m_Access        = Gfx::CBuffer::CPUWrite;
-        ConstanteBufferDesc.m_NumberOfBytes = sizeof(PlaneIndexBufferData);
-        ConstanteBufferDesc.m_pBytes        = &PlaneIndexBufferData[0];
-        ConstanteBufferDesc.m_pClassKey     = 0;
-        
-        m_IndexBufferPtr = Gfx::BufferManager::CreateBuffer(ConstanteBufferDesc);
 
         // -----------------------------------------------------------------------------
 
@@ -219,7 +202,7 @@ namespace LE
         m_PSPtr = 0;
         m_CubemapBufferPtr = 0;
         m_VertexBufferPtr = 0;
-        m_IndexBufferPtr = 0;
+        m_PropertiesBufferPtr = 0;
         m_InputTexturePtr = 0;
         m_OutputCubemapPtr = 0;
         m_TargetSetPtr = 0;
@@ -249,23 +232,23 @@ namespace LE
         // -----------------------------------------------------------------------------
         float PlaneGeometryBuffer[20];
 
-        PlaneGeometryBuffer[0] = FarTopLeft[0];
-        PlaneGeometryBuffer[1] = FarTopLeft[1];
-        PlaneGeometryBuffer[2] = FarTopLeft[2];
-        PlaneGeometryBuffer[3] = 0.0f;
+        PlaneGeometryBuffer[0] = FarTopRight[0];
+        PlaneGeometryBuffer[1] = FarTopRight[1];
+        PlaneGeometryBuffer[2] = FarTopRight[2];
+        PlaneGeometryBuffer[3] = 1.0f;
         PlaneGeometryBuffer[4] = 1.0f;
 
-        PlaneGeometryBuffer[5] = FarTopRight[0];
-        PlaneGeometryBuffer[6] = FarTopRight[1];
-        PlaneGeometryBuffer[7] = FarTopRight[2];
+        PlaneGeometryBuffer[5] = FarBottomRight[0];
+        PlaneGeometryBuffer[6] = FarBottomRight[1];
+        PlaneGeometryBuffer[7] = FarBottomRight[2];
         PlaneGeometryBuffer[8] = 1.0f;
-        PlaneGeometryBuffer[9] = 1.0f;
+        PlaneGeometryBuffer[9] = 0.0f;
 
-        PlaneGeometryBuffer[10] = FarBottomRight[0];
-        PlaneGeometryBuffer[11] = FarBottomRight[1];
-        PlaneGeometryBuffer[12] = FarBottomRight[2];
-        PlaneGeometryBuffer[13] = 1.0f;
-        PlaneGeometryBuffer[14] = 0.0f;
+        PlaneGeometryBuffer[10] = FarTopLeft[0];
+        PlaneGeometryBuffer[11] = FarTopLeft[1];
+        PlaneGeometryBuffer[12] = FarTopLeft[2];
+        PlaneGeometryBuffer[13] = 0.0f;
+        PlaneGeometryBuffer[14] = 1.0f;
 
         PlaneGeometryBuffer[15] = FarBottomLeft[0];
         PlaneGeometryBuffer[16] = FarBottomLeft[1];
@@ -288,7 +271,7 @@ namespace LE
 
         Gfx::ContextManager::SetRasterizerState(Gfx::StateManager::GetRasterizerState(Gfx::CRasterizerState::NoCull));
 
-        Gfx::ContextManager::SetTopology(Gfx::STopology::TriangleList);
+        Gfx::ContextManager::SetTopology(Gfx::STopology::TriangleStrip);
 
         Gfx::ContextManager::SetShaderVS(m_VSPtr);
 
@@ -297,8 +280,6 @@ namespace LE
         Gfx::ContextManager::SetShaderPS(m_PSPtr);
 
         Gfx::ContextManager::SetVertexBuffer(m_VertexBufferPtr);
-
-        Gfx::ContextManager::SetIndexBuffer(m_IndexBufferPtr, 0);
 
         Gfx::ContextManager::SetInputLayout(m_VSPtr->GetInputLayout());
 
@@ -313,7 +294,7 @@ namespace LE
         // -----------------------------------------------------------------------------
         // Draw
         // -----------------------------------------------------------------------------
-        Gfx::ContextManager::DrawIndexed(6, 0, 0);
+        Gfx::ContextManager::Draw(4, 0);
 
         // -----------------------------------------------------------------------------
         // Reset

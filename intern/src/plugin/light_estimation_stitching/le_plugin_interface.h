@@ -53,7 +53,6 @@ namespace LE
         Gfx::CBufferPtr m_CubemapBufferPtr;
 
         Gfx::CBufferPtr m_VertexBufferPtr;
-        Gfx::CBufferPtr m_IndexBufferPtr;
         Gfx::CBufferPtr m_PropertiesBufferPtr;
 
         Gfx::CTexturePtr m_InputTexturePtr;
