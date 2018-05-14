@@ -3,9 +3,9 @@
 
 #include "base/base_test_defines.h"
 
-#include "base/base_program_parameters.h"
+#include "engine/core/core_program_parameters.h"
 
-using namespace Base;
+using namespace Core;
 
 BASE_TEST(ProgramParametersDefault)
 {
