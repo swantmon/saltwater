@@ -87,13 +87,33 @@ namespace Scpt
             if (Core::PluginManager::HasPlugin("ArCore"))
             {
                 GetBackgroundTexture = (GetBackgroundTextureFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetBackgroundTexture"));
+
+                SetInputTexture(GetBackgroundTexture());
             }
             else if (Core::PluginManager::HasPlugin("EasyAR"))
             {
                 GetBackgroundTexture = (GetBackgroundTextureFunc)(Core::PluginManager::GetPluginFunction("EasyAR", "GetBackgroundTexture"));
+
+                SetInputTexture(GetBackgroundTexture());
             }
             else
             {
+//                 Gfx::STextureDescriptor TextureDescriptor;
+// 
+//                 TextureDescriptor.m_Format           = Gfx::CTexture::R8G8B8A8_UBYTE;
+//                 TextureDescriptor.m_NumberOfPixelsU  = Gfx::STextureDescriptor::s_FormatFromSource;
+//                 TextureDescriptor.m_NumberOfPixelsV  = Gfx::STextureDescriptor::s_FormatFromSource;
+//                 TextureDescriptor.m_NumberOfPixelsW  = 1;
+//                 TextureDescriptor.m_NumberOfTextures = 1;
+//                 TextureDescriptor.m_NumberOfMipMaps  = Gfx::STextureDescriptor::s_GenerateAllMipMaps;
+//                 TextureDescriptor.m_Usage            = Gfx::CTexture::GPURead;
+//                 TextureDescriptor.m_Access           = Gfx::CTexture::CPUWrite;
+//                 TextureDescriptor.m_Semantic         = Gfx::CTexture::Diffuse;
+//                 TextureDescriptor.m_pFileName        = "environments/Lobby-Center_2k.hdr";
+//                 TextureDescriptor.m_pPixels          = 0;
+// 
+//                 SetInputTexture(Gfx::TextureManager::CreateTexture2D(TextureDescriptor));
+
                 return;
             }
 
@@ -104,8 +124,6 @@ namespace Scpt
             m_pSkyComponent->SetIntensity(12000);
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*m_pSkyComponent, Dt::CSkyComponent::DirtyInfo);
-
-            SetInputTexture(GetBackgroundTexture());
         }
 
         // -----------------------------------------------------------------------------

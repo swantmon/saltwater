@@ -88,7 +88,8 @@ namespace LE
         for (int IndexOfCubeface = 0; IndexOfCubeface < 6; ++IndexOfCubeface)
         {
             DefaultGSValues.m_CubeViewMatrix[IndexOfCubeface]  = glm::lookAt(glm::vec3(0.0f), LookDirections[IndexOfCubeface], UpDirections[IndexOfCubeface]);
-            //DefaultGSValues.m_CubeViewMatrix[IndexOfCubeface] *= glm::eulerAngleX(glm::radians(-90.0f));
+            DefaultGSValues.m_CubeViewMatrix[IndexOfCubeface] *= glm::eulerAngleX(glm::radians(90.0f));
+            DefaultGSValues.m_CubeViewMatrix[IndexOfCubeface] *= glm::scale(glm::vec3(1.0f, -1.0f, 1.0f));
         }
         
         // -----------------------------------------------------------------------------
@@ -219,6 +220,8 @@ namespace LE
 
         Gfx::CCameraPtr MainCameraPtr = Gfx::ViewManager::GetMainCamera();
         Gfx::CViewPtr   MainViewPtr = MainCameraPtr->GetView();
+
+        //ENGINE_CONSOLE_INFOV("Camera pos = %f, %f, %f", MainViewPtr->GetPosition().x, MainViewPtr->GetPosition().y, MainViewPtr->GetPosition().z);
 
         const glm::vec3* pWorldSpaceCameraFrustum = MainCameraPtr->GetWorldSpaceFrustum();
 
