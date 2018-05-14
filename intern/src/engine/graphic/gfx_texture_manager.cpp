@@ -488,7 +488,7 @@ namespace
         BASE_UNUSED(_NumberOfBytesPerLine);
                 
         // -----------------------------------------------------------------------------
-        // Get informations
+        // Get information
         // -----------------------------------------------------------------------------
         glm::uvec2 Size = _rTargetRect.Size();
 
@@ -503,9 +503,7 @@ namespace
         assert(Size[1] <= UpdateSize[1] + Offset[1]);
         
         CInternTexture* pInternTextureArray = static_cast<CInternTexture*>(_TextureArrayPtr.GetPtr());
-
-        Gfx::CNativeTextureHandle TextureHandle = pInternTextureArray->m_NativeTexture;
-
+        
         int Format = ConvertGLImageFormat(pInternTextureArray->GetFormat());
         int Type   = ConvertGLImageType  (pInternTextureArray->GetFormat());
         
@@ -1552,9 +1550,9 @@ namespace
             rTexture.m_Info.m_Access            = CTexture::CPUWrite;
             rTexture.m_Info.m_Binding           = CTexture::ShaderResource;
             rTexture.m_Info.m_Dimension         = CTexture::External;
-            rTexture.m_Info.m_Format            = CTexture::Unknown;
+            rTexture.m_Info.m_Format            = 255; // TODO: should be CTexture::Unknown but since m_Format is 8 bit unsigned it cannot store -1
             rTexture.m_Info.m_IsCubeTexture     = true;
-            rTexture.m_Info.m_IsDeletable       = false;
+            rTexture.m_Info.m_IsDeletable       = Base::U32(false);
             rTexture.m_Info.m_IsDummyTexture    = false;
             rTexture.m_Info.m_NumberOfTextures  = 1;
             rTexture.m_Info.m_NumberOfMipLevels = 1;
