@@ -2,7 +2,7 @@
 // -----------------------------------------------------------------------------
 // Settings
 // -----------------------------------------------------------------------------
-#define HAS_OPENCV_SUPPORT 0
+
 
 // -----------------------------------------------------------------------------
 // Includes
@@ -359,17 +359,17 @@ namespace LE
     }
 } // namespace LE
 
-extern "C" CORE_PLUGIN_API_EXPORT void SetInputTexture(Gfx::CTexturePtr _InputTexturePtr)
+CORE_PLUGIN_API_EXPORT void SetInputTexture(Gfx::CTexturePtr _InputTexturePtr)
 {
     static_cast<LE::CPluginInterface&>(GetInstance()).SetInputTexture(_InputTexturePtr);
 }
 
-extern "C" CORE_PLUGIN_API_EXPORT Gfx::CTexturePtr GetOutputCubemap()
+CORE_PLUGIN_API_EXPORT Gfx::CTexturePtr GetOutputCubemap()
 {
     return static_cast<LE::CPluginInterface&>(GetInstance()).GetOutputCubemap();
 }
 
-extern "C" CORE_PLUGIN_API_EXPORT void SetFlipVertical(bool _Value)
+CORE_PLUGIN_API_EXPORT void SetFlipVertical(bool _Value)
 {
     static_cast<LE::CPluginInterface&>(GetInstance()).SetFlipVertical(_Value);
 }
