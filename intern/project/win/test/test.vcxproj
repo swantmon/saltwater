@@ -43,6 +43,14 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\test\test_precompiled.h" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\base\base.vcxproj">
+      <Project>{3a61e67a-052f-4a68-b8db-771c8cd0d2ee}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\engine\engine.vcxproj">
+      <Project>{e481e898-c074-4491-bc6e-93844bfaff74}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{470B0BE6-8875-4485-9B04-C6CC9914834D}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
