@@ -185,6 +185,8 @@
       <AdditionalIncludeDirectories>..\..\..\..\extern\sdl2\include;..\..\..\src;..\..\..\..\extern\glm\include;..\..\..\..\extern\json\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeaderFile>editor/edit_precompiled.h</PrecompiledHeaderFile>
+      <DisableSpecificWarnings>
+      </DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -236,6 +238,8 @@
       <AdditionalIncludeDirectories>..\..\..\..\extern\sdl2\include;..\..\..\src;..\..\..\..\extern\glm\include;..\..\..\..\extern\json\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeaderFile>editor/edit_precompiled.h</PrecompiledHeaderFile>
+      <DisableSpecificWarnings>
+      </DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

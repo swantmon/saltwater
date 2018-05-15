@@ -687,9 +687,7 @@ namespace
 
         ENGINE_CONSOLE_WARNING("Taking screenshots is currently not supported!");
 
-        return;
-
-        assert(_WindowID < m_NumberOfWindows);
+        /*assert(_WindowID < m_NumberOfWindows);
 
         unsigned int Width;
         unsigned int Height;
@@ -714,7 +712,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Free data
         // -----------------------------------------------------------------------------
-        Base::CMemory::Free(pPixels);
+        Base::CMemory::Free(pPixels);*/
     }
     
     // -----------------------------------------------------------------------------
