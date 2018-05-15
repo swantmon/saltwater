@@ -189,7 +189,7 @@ namespace App
             {
                 auto Component = Dt::CComponentManager::GetInstance().Allocate<Scpt::CLightEstimationScript>();
 
-                Component->m_EstimationType = Scpt::CLightEstimationScript::Stitching;
+                Component->m_EstimationType = Scpt::CLightEstimationScript::LUT;
 
                 rEnvironmentEntity.AttachComponent(Component);
 
@@ -297,7 +297,7 @@ namespace App
 
             pMaterial->SetColor(glm::vec3(1.0f, 1.0f, 1.0f));
             pMaterial->SetMetalness(1.0f);
-            pMaterial->SetRoughness(0.25f);
+            pMaterial->SetRoughness(0.15f);
 
             auto pMaterialComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CMaterialComponent>();
 
@@ -328,7 +328,7 @@ namespace App
             Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
 
             pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
-            pTransformationFacet->SetScale(glm::vec3(0.8f, 0.8f, 0.001f));
+            pTransformationFacet->SetScale(glm::vec3(1000.0f, 1000.0f, 0.0001f));
             pTransformationFacet->SetRotation(glm::vec3(0.0f));
 
             // -----------------------------------------------------------------------------

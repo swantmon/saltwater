@@ -50,7 +50,6 @@ namespace Scpt
         Dt::CEntity* m_pCameraEntity = nullptr;
         Dt::CCameraComponent* m_pCameraComponent = nullptr;
         bool m_ArCoreAvailable = false;
-        bool m_FlipVertical = false;
 
     public:
 
@@ -72,9 +71,10 @@ namespace Scpt
             GetCameraNear = (ArCoreGetCameraNearFunc)(Core::PluginManager::GetPluginFunction(PluginName, "GetCameraNear"));
             GetCameraFar = (ArCoreGetCameraFarFunc)(Core::PluginManager::GetPluginFunction(PluginName, "GetCameraFar"));
             GetBackgroundTexture = (ArCoreGetBackgroundTextureFunc)(Core::PluginManager::GetPluginFunction(PluginName, "GetBackgroundTexture"));
-            SetFlipVertical = (ArSetFlipVerticalFunc)(Core::PluginManager::GetPluginFunction(PluginName, "SetFlipVertical"));
 
 #if PLATFORM_WINDOWS
+            SetFlipVertical = (ArSetFlipVerticalFunc)(Core::PluginManager::GetPluginFunction(PluginName, "SetFlipVertical"));
+
             SetFlipVertical(m_FlipVertical);
 #endif
         }
