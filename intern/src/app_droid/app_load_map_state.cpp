@@ -6,8 +6,6 @@
 
 #include "base/base_include_glm.h"
 
-#include "engine/core/core_asset_manager.h"
-
 #include "engine/data/data_camera_component.h"
 #include "engine/data/data_component.h"
 #include "engine/data/data_component_facet.h"
@@ -153,7 +151,7 @@ namespace App
             // -----------------------------------------------------------------------------
             Dt::CTransformationFacet* pTransformationFacet = rEnvironmentEntity.GetTransformationFacet();
 
-            pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 25.0f));
+            pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 20.0f));
             pTransformationFacet->SetScale   (glm::vec3(1.0f));
             pTransformationFacet->SetRotation(glm::vec3(0.0f));
 
@@ -221,7 +219,7 @@ namespace App
                 auto LightProbeComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CLightProbeComponent>();
 
                 LightProbeComponent->SetType(Dt::CLightProbeComponent::Sky);
-                LightProbeComponent->SetQuality(Dt::CLightProbeComponent::PX64);
+                LightProbeComponent->SetQuality(Dt::CLightProbeComponent::PX128);
                 LightProbeComponent->SetIntensity(1.0f);
                 LightProbeComponent->SetRefreshMode(Dt::CLightProbeComponent::Dynamic);
                 LightProbeComponent->SetNear(0.01f);
@@ -275,13 +273,10 @@ namespace App
 
             Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
 
-            rEntity.SetName("Head");
+            rEntity.SetName("Box");
 
             Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
 
-            //pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 0.75f));
-            //pTransformationFacet->SetScale(glm::vec3(2.0f));
-            //pTransformationFacet->SetRotation(glm::vec3(glm::radians(-90.0f), 0.0f, 0.0f));
             pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 1.0f));
             pTransformationFacet->SetScale(glm::vec3(0.50f));
             pTransformationFacet->SetRotation(glm::vec3(0.0f));
@@ -290,7 +285,6 @@ namespace App
 
             auto pMeshComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CMeshComponent>();
 
-            //pMeshComponent->SetFilename(Core::AssetManager::GetPathToAssets() + "/models/head.dae");
             pMeshComponent->SetMeshType(Dt::CMeshComponent::Box);
 
             rEntity.AttachComponent(pMeshComponent);
@@ -299,11 +293,11 @@ namespace App
 
             // -----------------------------------------------------------------------------
 
-            auto pMaterial = Dt::MaterialManager::CreateMaterialFromName("Chrome Sparrow");
+            auto pMaterial = Dt::MaterialManager::CreateMaterialFromName("Red Sparrow");
 
             pMaterial->SetColor(glm::vec3(1.0f, 1.0f, 1.0f));
             pMaterial->SetMetalness(1.0f);
-            pMaterial->SetRoughness(0.05f);
+            pMaterial->SetRoughness(0.15f);
 
             auto pMaterialComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CMaterialComponent>();
 
@@ -315,9 +309,10 @@ namespace App
 
             // -----------------------------------------------------------------------------
 
-            auto pScriptComponent = Dt::CComponentManager::GetInstance().Allocate<Scpt::CARPlaceObjectOnTouchScript>();
+            Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
 
-            rEntity.AttachComponent(pScriptComponent);
+            rRootEntity.Attach(rEntity);
+        }
 
         {
             Dt::SEntityDescriptor EntityDesc;
@@ -338,7 +333,35 @@ namespace App
 
             // -----------------------------------------------------------------------------
 
+            auto pMeshComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CMeshComponent>();
+
+            pMeshComponent->SetMeshType(Dt::CMeshComponent::Box);
+
+            rEntity.AttachComponent(pMeshComponent);
+
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pMeshComponent, Dt::CMeshComponent::DirtyCreate);
+
+            // -----------------------------------------------------------------------------
+
+            auto pMaterial = Dt::MaterialManager::CreateMaterialFromName("Plane");
+
+            pMaterial->SetColor(glm::vec3(1.0f, 1.0f, 1.0f));
+            pMaterial->SetMetalness(0.0f);
+            pMaterial->SetRoughness(1.0f);
+
+            auto pMaterialComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CMaterialComponent>();
+
+            pMaterialComponent->SetMaterial(pMaterial);
+
+            rEntity.AttachComponent(pMaterialComponent);
+
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pMaterialComponent, Dt::CMaterialComponent::DirtyCreate);
+
+            // -----------------------------------------------------------------------------
+
             Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+
+            rRootEntity.Attach(rEntity);
         }
     }
 } //namespace App
