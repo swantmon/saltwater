@@ -43,7 +43,6 @@ namespace Scpt
         ArCoreGetCameraNearFunc GetCameraNear;
         ArCoreGetCameraFarFunc GetCameraFar;
         ArCoreGetBackgroundTextureFunc GetBackgroundTexture;
-        ArSetFlipVerticalFunc SetFlipVertical;
 
     public:
 
@@ -73,9 +72,11 @@ namespace Scpt
             GetBackgroundTexture = (ArCoreGetBackgroundTextureFunc)(Core::PluginManager::GetPluginFunction(PluginName, "GetBackgroundTexture"));
 
 #if PLATFORM_WINDOWS
+            ArSetFlipVerticalFunc SetFlipVertical;
+
             SetFlipVertical = (ArSetFlipVerticalFunc)(Core::PluginManager::GetPluginFunction(PluginName, "SetFlipVertical"));
 
-            SetFlipVertical(m_FlipVertical);
+            SetFlipVertical(true);
 #endif
         }
 
