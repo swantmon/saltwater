@@ -16,6 +16,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
+        android:launchMode="singleTask"
         android:hasCode="true">
 
         <meta-data android:name="com.google.ar.core" android:value="optional" />
