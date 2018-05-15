@@ -293,6 +293,8 @@ namespace Edit
             {
                 auto Component = Dt::CComponentManager::GetInstance().Allocate<Scpt::CLightEstimationScript>();
 
+                Component->m_EstimationType = Scpt::CLightEstimationScript::LUT;
+
                 rEnvironmentEntity.AttachComponent(Component);
 
                 Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*Component, Dt::CSkyComponent::DirtyCreate);
@@ -331,7 +333,7 @@ namespace Edit
 
             Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
 
-            rEntity.SetName("Box");
+            rEntity.SetName("Sphere");
 
             Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
 
@@ -343,7 +345,7 @@ namespace Edit
 
             auto pMeshComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CMeshComponent>();
 
-            pMeshComponent->SetMeshType(Dt::CMeshComponent::Box);
+            pMeshComponent->SetMeshType(Dt::CMeshComponent::Sphere);
 
             rEntity.AttachComponent(pMeshComponent);
 
