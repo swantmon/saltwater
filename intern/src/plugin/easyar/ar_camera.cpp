@@ -60,27 +60,27 @@ namespace AR
     }
 } // namespace AR
 
-CORE_PLUGIN_API_EXPORT AR::CCamera::ETrackingState GetCameraTrackingState(const AR::CCamera* _pCamera)
+extern "C" CORE_PLUGIN_API_EXPORT AR::CCamera::ETrackingState GetCameraTrackingState(const AR::CCamera* _pCamera)
 {
     return _pCamera->GetTackingState();
 }
 
-CORE_PLUGIN_API_EXPORT glm::mat4 GetCameraViewMatrix(const AR::CCamera* _pCamera)
+extern "C" CORE_PLUGIN_API_EXPORT glm::mat4 GetCameraViewMatrix(const AR::CCamera* _pCamera)
 {
     return _pCamera->GetViewMatrix();
 }
 
-CORE_PLUGIN_API_EXPORT glm::mat4 GetCameraProjectionMatrix(const AR::CCamera* _pCamera)
+extern "C" CORE_PLUGIN_API_EXPORT glm::mat4 GetCameraProjectionMatrix(const AR::CCamera* _pCamera)
 {
     return _pCamera->GetProjectionMatrix();
 }
 
-CORE_PLUGIN_API_EXPORT float GetCameraNear(const AR::CCamera* _pCamera)
+extern "C" CORE_PLUGIN_API_EXPORT float GetCameraNear(const AR::CCamera* _pCamera)
 {
     return _pCamera->GetNear();
 }
 
-CORE_PLUGIN_API_EXPORT float GetCameraFar(const AR::CCamera* _pCamera)
+extern "C" CORE_PLUGIN_API_EXPORT float GetCameraFar(const AR::CCamera* _pCamera)
 {
     return _pCamera->GetFar();
 }

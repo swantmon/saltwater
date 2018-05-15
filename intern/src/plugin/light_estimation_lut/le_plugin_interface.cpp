@@ -334,12 +334,12 @@ namespace LE
     }
 } // namespace LE
 
-CORE_PLUGIN_API_EXPORT void SetInputTexture(Gfx::CTexturePtr _InputTexturePtr)
+extern "C" CORE_PLUGIN_API_EXPORT void SetInputTexture(Gfx::CTexturePtr _InputTexturePtr)
 {
     static_cast<LE::CPluginInterface&>(GetInstance()).SetInputTexture(_InputTexturePtr);
 }
 
-CORE_PLUGIN_API_EXPORT Gfx::CTexturePtr GetOutputCubemap()
+extern "C" CORE_PLUGIN_API_EXPORT Gfx::CTexturePtr GetOutputCubemap()
 {
     return static_cast<LE::CPluginInterface&>(GetInstance()).GetOutputCubemap();
 }

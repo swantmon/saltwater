@@ -419,22 +419,22 @@ namespace AR
     }
 } // namespace AR
 
-CORE_PLUGIN_API_EXPORT const AR::CCamera* GetCamera()
+extern "C" CORE_PLUGIN_API_EXPORT const AR::CCamera* GetCamera()
 {
     return &static_cast<AR::CPluginInterface&>(GetInstance()).GetCamera();
 }
 
-CORE_PLUGIN_API_EXPORT AR::CTarget* AcquireNewTarget(const std::string _rPathToFile)
+extern "C" CORE_PLUGIN_API_EXPORT AR::CTarget* AcquireNewTarget(const std::string _rPathToFile)
 {
     return static_cast<AR::CPluginInterface&>(GetInstance()).AcquireNewTarget(_rPathToFile);
 }
 
-CORE_PLUGIN_API_EXPORT void ReleaseTarget(AR::CTarget* _pTarget)
+extern "C" CORE_PLUGIN_API_EXPORT void ReleaseTarget(AR::CTarget* _pTarget)
 {
     return static_cast<AR::CPluginInterface&>(GetInstance()).ReleaseTarget(_pTarget);
 }
 
-CORE_PLUGIN_API_EXPORT Gfx::CTexturePtr GetBackgroundTexture()
+extern "C" CORE_PLUGIN_API_EXPORT Gfx::CTexturePtr GetBackgroundTexture()
 {
     return static_cast<AR::CPluginInterface&>(GetInstance()).GetBackgroundTexture();
 }
