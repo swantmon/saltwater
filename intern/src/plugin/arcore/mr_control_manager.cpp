@@ -671,10 +671,6 @@ namespace
 
             assert(ARConfig != 0);
 
-            Status = ArSession_checkSupported(m_pARSession, ARConfig);
-
-            assert(Status == AR_SUCCESS);
-
             Status = ArSession_configure(m_pARSession, ARConfig);
 
             assert(Status == AR_SUCCESS);
