@@ -8,8 +8,6 @@
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
-layout(std140, binding = 2) uniform UB2 { vec2 m_FlipUV; };
-
 layout(binding = 0) uniform sampler2D in_InputTexture;
 
 // -----------------------------------------------------------------------------
@@ -30,7 +28,7 @@ void main(void)
 	vec2  SSUV   = -1.0f + 2.0f * in_UV;
     float Radius = min(sqrt(dot(SSUV, SSUV)), 1.0f);
 
-    vec4 FinalColor = texture(in_InputTexture, m_FlipUV + in_UV);
+    vec4 FinalColor = texture(in_InputTexture, in_UV);
         
     out_Output = vec4(FinalColor.xyz, min((1.0f - Radius) + g_FrameDeltaTime, 1.0f));
 }

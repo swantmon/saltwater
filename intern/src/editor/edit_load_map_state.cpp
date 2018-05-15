@@ -304,6 +304,25 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Setup entities
         // -----------------------------------------------------------------------------
+        Dt::SEntityDescriptor EntityDesc;
+
+        EntityDesc.m_EntityCategory = Dt::SEntityCategory::Static;
+        EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
+
+        Dt::CEntity& rRootEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+
+        rRootEntity.SetName("Root");
+
+        Dt::CTransformationFacet* pTransformationFacet = rRootEntity.GetTransformationFacet();
+
+        pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+        pTransformationFacet->SetScale(glm::vec3(1.0f));
+        pTransformationFacet->SetRotation(glm::vec3(0.0f));
+
+        // -----------------------------------------------------------------------------
+
+        Dt::EntityManager::MarkEntityAsDirty(rRootEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+
         {
             Dt::SEntityDescriptor EntityDesc;
 
@@ -317,8 +336,8 @@ namespace Edit
             Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
 
             pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 1.0f));
-            pTransformationFacet->SetScale(glm::vec3(0.5f));
-            pTransformationFacet->SetRotation(glm::vec3(glm::radians(0.0f), glm::radians(0.0f), 0.0f));
+            pTransformationFacet->SetScale(glm::vec3(0.50f));
+            pTransformationFacet->SetRotation(glm::vec3(0.0f));
 
             // -----------------------------------------------------------------------------
 
@@ -326,9 +345,9 @@ namespace Edit
 
             pMeshComponent->SetMeshType(Dt::CMeshComponent::Box);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pMeshComponent, Dt::CMeshComponent::DirtyCreate);
-
             rEntity.AttachComponent(pMeshComponent);
+
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pMeshComponent, Dt::CMeshComponent::DirtyCreate);
 
             // -----------------------------------------------------------------------------
 
@@ -336,19 +355,21 @@ namespace Edit
 
             pMaterial->SetColor(glm::vec3(1.0f, 1.0f, 1.0f));
             pMaterial->SetMetalness(1.0f);
-            pMaterial->SetRoughness(0.05f);
+            pMaterial->SetRoughness(0.25f);
 
             auto pMaterialComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CMaterialComponent>();
 
             pMaterialComponent->SetMaterial(pMaterial);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pMaterialComponent, Dt::CMaterialComponent::DirtyCreate);
-
             rEntity.AttachComponent(pMaterialComponent);
+
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pMaterialComponent, Dt::CMaterialComponent::DirtyCreate);
 
             // -----------------------------------------------------------------------------
 
             Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+
+            rRootEntity.Attach(rEntity);
         }
 
         {
@@ -360,12 +381,13 @@ namespace Edit
             Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
 
             rEntity.SetName("Plane");
+            rEntity.SetLayer(Dt::SEntityLayer::AR);
 
             Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
 
             pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
-            pTransformationFacet->SetScale(glm::vec3(1.0f, 1.0f, 0.01f));
-            pTransformationFacet->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
+            pTransformationFacet->SetScale(glm::vec3(1.0f, 1.0f, 0.001f));
+            pTransformationFacet->SetRotation(glm::vec3(0.0f));
 
             // -----------------------------------------------------------------------------
 
@@ -373,23 +395,31 @@ namespace Edit
 
             pMeshComponent->SetMeshType(Dt::CMeshComponent::Box);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pMeshComponent, Dt::CMeshComponent::DirtyCreate);
-
             rEntity.AttachComponent(pMeshComponent);
+
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pMeshComponent, Dt::CMeshComponent::DirtyCreate);
 
             // -----------------------------------------------------------------------------
 
+            auto pMaterial = Dt::MaterialManager::CreateMaterialFromName("Plane");
+
+            pMaterial->SetColor(glm::vec3(1.0f, 1.0f, 1.0f));
+            pMaterial->SetMetalness(0.0f);
+            pMaterial->SetRoughness(1.0f);
+
             auto pMaterialComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CMaterialComponent>();
 
-            pMaterialComponent->SetMaterial(Dt::MaterialManager::GetDefaultMaterial());
-
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pMaterialComponent, Dt::CMaterialComponent::DirtyCreate);
+            pMaterialComponent->SetMaterial(pMaterial);
 
             rEntity.AttachComponent(pMaterialComponent);
+
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pMaterialComponent, Dt::CMaterialComponent::DirtyCreate);
 
             // -----------------------------------------------------------------------------
 
             Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+
+            rRootEntity.Attach(rEntity);
         }
     }
 } // namespace Edit

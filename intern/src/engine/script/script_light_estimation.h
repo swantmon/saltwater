@@ -24,12 +24,10 @@ namespace Scpt
         typedef void (*LightEstimationLUTSetInputTextureFunc)(Gfx::CTexturePtr);
         typedef Gfx::CTexturePtr (*LightEstimationLUTGetOutputCubemapFunc)();
         typedef Gfx::CTexturePtr (*GetBackgroundTextureFunc)();
-        typedef void (*SetFlipVerticalFunc)(bool _Value);
 
         LightEstimationLUTSetInputTextureFunc SetInputTexture;
         LightEstimationLUTGetOutputCubemapFunc GetOutputCubemap;
         GetBackgroundTextureFunc GetBackgroundTexture;
-        SetFlipVerticalFunc SetFlipVertical;
 
     public:
 
@@ -65,24 +63,16 @@ namespace Scpt
             {
                 SetInputTexture  = (LightEstimationLUTSetInputTextureFunc)(Core::PluginManager::GetPluginFunction("Light Estimation Stitching", "SetInputTexture"));
                 GetOutputCubemap = (LightEstimationLUTGetOutputCubemapFunc)(Core::PluginManager::GetPluginFunction("Light Estimation Stitching", "GetOutputCubemap"));
-                SetFlipVertical  = (SetFlipVerticalFunc)(Core::PluginManager::GetPluginFunction("Light Estimation Stitching", "SetFlipVertical"));
             }
             else if(Core::PluginManager::HasPlugin("Light Estimation LUT") && m_EstimationType == LUT)
             {
                 SetInputTexture  = (LightEstimationLUTSetInputTextureFunc)(Core::PluginManager::GetPluginFunction("Light Estimation LUT", "SetInputTexture"));
                 GetOutputCubemap = (LightEstimationLUTGetOutputCubemapFunc)(Core::PluginManager::GetPluginFunction("Light Estimation LUT", "GetOutputCubemap"));
-                SetFlipVertical  = (SetFlipVerticalFunc)(Core::PluginManager::GetPluginFunction("Light Estimation LUT", "SetFlipVertical"));
             }
             else
             {
                 return;
             }
-
-#ifdef PLATFORM_WINDOWS
-            SetFlipVertical(true);
-#else
-            SetFlipVertical(false);
-#endif // PLATFORM_WINDOWS
 
             if (Core::PluginManager::HasPlugin("ArCore"))
             {

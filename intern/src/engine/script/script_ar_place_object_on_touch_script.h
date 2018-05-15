@@ -78,7 +78,7 @@ namespace Scpt
 
             pTransformation->SetPosition(glm::mat4(m_MRToEngineMatrix) * ModelMatrix[3]);
 
-            pTransformation->SetRotation(glm::eulerAngles(glm::toQuat(glm::mat3(ModelMatrix))));
+            //pTransformation->SetRotation(glm::eulerAngles(glm::toQuat(glm::mat3(ModelMatrix))));
 
             Dt::EntityManager::MarkEntityAsDirty(*m_pEntity, Dt::CEntity::DirtyMove);
         }

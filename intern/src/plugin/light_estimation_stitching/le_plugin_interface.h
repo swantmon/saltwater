@@ -29,8 +29,6 @@ namespace LE
 
         Gfx::CTexturePtr GetOutputCubemap();
 
-        void SetFlipVertical(bool _Value);
-
     private:
 
         struct SCubemapBuffer
@@ -53,7 +51,6 @@ namespace LE
         Gfx::CBufferPtr m_CubemapBufferPtr;
 
         Gfx::CBufferPtr m_VertexBufferPtr;
-        Gfx::CBufferPtr m_PropertiesBufferPtr;
 
         Gfx::CTexturePtr m_InputTexturePtr;
         Gfx::CTexturePtr m_OutputCubemapPtr;

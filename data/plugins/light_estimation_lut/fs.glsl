@@ -7,8 +7,6 @@
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
-layout(std140, binding = 2) uniform UB2 { vec2 m_FlipUV; };
-
 layout(binding = 0) uniform sampler2D in_InputTexture;
 layout(binding = 1) uniform samplerCube in_LookUpTexture;
 
@@ -29,7 +27,7 @@ void main(void)
 {
 	vec4 LookUp = textureLod(in_LookUpTexture, in_Normal, 0.0f);
 
-    vec4 FinalColor = texture(in_InputTexture, m_FlipUV + LookUp.xy);
+    vec4 FinalColor = texture(in_InputTexture, LookUp.xy);
         
     out_Output = vec4(FinalColor.xyz, 1.0f);
 }

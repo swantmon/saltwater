@@ -45,9 +45,9 @@ void main(void)
     // -----------------------------------------------------------------------------
     // Define tex coords from system input
     // -----------------------------------------------------------------------------
-    vec2 TexCoord = vec2(gl_FragCoord.x * g_InvertedScreensizeAndScreensize.x, 1.0f - gl_FragCoord.y * g_InvertedScreensizeAndScreensize.y);
+    vec2 UV = vec2(gl_FragCoord.xy * g_InvertedScreensizeAndScreensize.xy);
     
-    vec3 Color = texture(ps_BackgroundColor, TexCoord).rgb * ps_Color;
+    vec3 Color = texture(ps_BackgroundColor, UV).rgb * ps_Color;
 
     SGBuffer GBuffer;
     

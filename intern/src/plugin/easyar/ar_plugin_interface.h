@@ -42,6 +42,8 @@ namespace AR
 
         Gfx::CTexturePtr GetBackgroundTexture();
 
+        void SetFlipVertical(bool _Flag);
+
     private:
 
         class CInternCamera : public CCamera
@@ -80,5 +82,9 @@ namespace AR
 
         Gfx::CTexturePtr m_BackgroundTexturePtr;
         glm::ivec2 m_CameraSize;
+        void* m_pCameraImageData;
+        void* m_pCameraTempImageLineData;
+
+        bool m_FlipVertical;
     };
 } // namespace AR

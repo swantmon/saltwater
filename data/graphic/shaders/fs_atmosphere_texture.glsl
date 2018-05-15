@@ -25,8 +25,7 @@ layout(binding = 1) uniform sampler2D ps_Depth;
 // -----------------------------------------------------------------------------
 #define m_HDRConvertFactor  m_ConstantBufferData0.x
 #define m_IsHDR             m_ConstantBufferData0.y
-#define m_FlipY             m_ConstantBufferData0.z
-#define m_ExposureIndex     m_ConstantBufferData0.w
+#define m_ExposureIndex     m_ConstantBufferData0.z
 
 // -----------------------------------------------------------------------------
 // Input
@@ -61,9 +60,7 @@ void main(void)
     // -----------------------------------------------------------------------------
     // Lighting only if depth is infinity
     // -----------------------------------------------------------------------------
-    vec2 UV = vec2(in_UV.x, m_FlipY + in_UV.y);
-
-    vec4 FinalColor = texture(ps_EnvironmentTexture, UV);
+    vec4 FinalColor = texture(ps_EnvironmentTexture, in_UV);
 
     if (m_IsHDR == 0.0f)
     {
