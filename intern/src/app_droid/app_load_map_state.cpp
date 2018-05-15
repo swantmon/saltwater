@@ -6,6 +6,8 @@
 
 #include "base/base_include_glm.h"
 
+#include "engine/core/core_asset_manager.h"
+
 #include "engine/data/data_camera_component.h"
 #include "engine/data/data_component.h"
 #include "engine/data/data_component_facet.h"
@@ -29,6 +31,8 @@
 #include "engine/script/script_ar_place_object_on_touch_script.h"
 #include "engine/script/script_light_estimation.h"
 #include "engine/script/script_script_manager.h"
+
+#define USE_HEAD_MODEL 0
 
 namespace App
 {
@@ -273,19 +277,29 @@ namespace App
 
             Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
 
-            rEntity.SetName("Box");
+            rEntity.SetName("Object");
 
             Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
 
+#if USE_HEAD_MODEL == 1
+            pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 0.75f));
+            pTransformationFacet->SetScale(glm::vec3(2.0f));
+            pTransformationFacet->SetRotation(glm::vec3(glm::radians(-90.0f), 0.0f, 0.0f));
+#else
             pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 1.0f));
             pTransformationFacet->SetScale(glm::vec3(0.50f));
             pTransformationFacet->SetRotation(glm::vec3(0.0f));
+#endif
 
             // -----------------------------------------------------------------------------
 
             auto pMeshComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CMeshComponent>();
 
+#if USE_HEAD_MODEL == 1
+            pMeshComponent->SetFilename(Core::AssetManager::GetPathToAssets() + "/models/head.dae");
+#else
             pMeshComponent->SetMeshType(Dt::CMeshComponent::Box);
+#endif
 
             rEntity.AttachComponent(pMeshComponent);
 
@@ -293,7 +307,7 @@ namespace App
 
             // -----------------------------------------------------------------------------
 
-            auto pMaterial = Dt::MaterialManager::CreateMaterialFromName("Red Sparrow");
+            auto pMaterial = Dt::MaterialManager::CreateMaterialFromName("Chrome Sparrow");
 
             pMaterial->SetColor(glm::vec3(1.0f, 1.0f, 1.0f));
             pMaterial->SetMetalness(1.0f);
