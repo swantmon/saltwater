@@ -32,7 +32,7 @@
 #include "engine/script/script_light_estimation.h"
 #include "engine/script/script_script_manager.h"
 
-#define USE_HEAD_MODEL 0
+#define USE_HEAD_MODEL 1
 
 namespace App
 {
@@ -183,7 +183,7 @@ namespace App
                 Component->SetRefreshMode(Dt::CSkyComponent::Static);
                 Component->SetType(Dt::CSkyComponent::Procedural);
                 Component->SetIntensity(10000.0f);
-                Component->SetQuality(Dt::CSkyComponent::PX256);
+                Component->SetQuality(Dt::CSkyComponent::PX128);
 
                 rEnvironmentEntity.AttachComponent(Component);
 
@@ -192,8 +192,6 @@ namespace App
 
             {
                 auto Component = Dt::CComponentManager::GetInstance().Allocate<Scpt::CLightEstimationScript>();
-
-                Component->m_EstimationType = Scpt::CLightEstimationScript::LUT;
 
                 rEnvironmentEntity.AttachComponent(Component);
 
@@ -311,7 +309,7 @@ namespace App
 
             pMaterial->SetColor(glm::vec3(1.0f, 1.0f, 1.0f));
             pMaterial->SetMetalness(1.0f);
-            pMaterial->SetRoughness(0.15f);
+            pMaterial->SetRoughness(0.25f);
 
             auto pMaterialComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CMaterialComponent>();
 
