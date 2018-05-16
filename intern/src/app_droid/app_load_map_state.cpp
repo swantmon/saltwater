@@ -280,12 +280,12 @@ namespace App
             Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
 
 #if USE_HEAD_MODEL == 1
-            pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 0.75f));
+            pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 1.0f));
             pTransformationFacet->SetScale(glm::vec3(2.0f));
             pTransformationFacet->SetRotation(glm::vec3(glm::radians(-90.0f), 0.0f, 0.0f));
 #else
             pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 1.0f));
-            pTransformationFacet->SetScale(glm::vec3(0.50f));
+            pTransformationFacet->SetScale(glm::vec3(0.40f));
             pTransformationFacet->SetRotation(glm::vec3(0.0f));
 #endif
 
@@ -296,7 +296,7 @@ namespace App
 #if USE_HEAD_MODEL == 1
             pMeshComponent->SetFilename(Core::AssetManager::GetPathToAssets() + "/models/head.dae");
 #else
-            pMeshComponent->SetMeshType(Dt::CMeshComponent::Box);
+            pMeshComponent->SetMeshType(Dt::CMeshComponent::Sphere);
 #endif
 
             rEntity.AttachComponent(pMeshComponent);
@@ -340,7 +340,7 @@ namespace App
             Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
 
             pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
-            pTransformationFacet->SetScale(glm::vec3(1000.0f, 1000.0f, 0.0001f));
+            pTransformationFacet->SetScale(glm::vec3(100000.0f, 100000.0f, 0.0001f));
             pTransformationFacet->SetRotation(glm::vec3(0.0f));
 
             // -----------------------------------------------------------------------------
