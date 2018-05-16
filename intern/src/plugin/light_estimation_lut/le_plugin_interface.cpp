@@ -122,31 +122,11 @@ namespace LE
         // -----------------------------------------------------------------------------
         // Texture
         // -----------------------------------------------------------------------------
-        Gfx::STextureDescriptor TextureDescriptor;
-
-        TextureDescriptor.m_NumberOfPixelsU  = 512;
-        TextureDescriptor.m_NumberOfPixelsV  = 512;
-        TextureDescriptor.m_NumberOfPixelsW  = 1;
-        TextureDescriptor.m_NumberOfMipMaps  = Gfx::STextureDescriptor::s_GenerateAllMipMaps;
-        TextureDescriptor.m_NumberOfTextures = 6;
-        TextureDescriptor.m_Binding          = Gfx::CTexture::ShaderResource | Gfx::CTexture::RenderTarget;
-        TextureDescriptor.m_Access           = Gfx::CTexture::CPUWrite;
-        TextureDescriptor.m_Format           = Gfx::CTexture::Unknown;
-        TextureDescriptor.m_Usage            = Gfx::CTexture::GPURead;
-        TextureDescriptor.m_Semantic         = Gfx::CTexture::Diffuse;
-        TextureDescriptor.m_pFileName        = 0;
-        TextureDescriptor.m_pPixels          = 0;
-        TextureDescriptor.m_Format           = Gfx::CTexture::R8G8B8_BYTE;
-
-        m_OutputCubemapPtr = Gfx::TextureManager::CreateCubeTexture(TextureDescriptor);
-
-        Gfx::TextureManager::SetTextureLabel(m_OutputCubemapPtr, "Sky cubemap from image");
-
-        // -----------------------------------------------------------------------------
-
 #if HAS_OPENCV_SUPPORT == 1
         m_LookUpTexturePtr = CreateLUTFromOpenCV();
 #else
+        Gfx::STextureDescriptor TextureDescriptor;
+
         TextureDescriptor.m_NumberOfPixelsU  = Gfx::STextureDescriptor::s_NumberOfPixelsFromSource;
         TextureDescriptor.m_NumberOfPixelsV  = Gfx::STextureDescriptor::s_NumberOfPixelsFromSource;
         TextureDescriptor.m_NumberOfPixelsW  = 1;
@@ -169,30 +149,7 @@ namespace LE
         // -----------------------------------------------------------------------------
 
         m_InputTexturePtr = 0;
-
-        // -----------------------------------------------------------------------------
-        // Target Set
-        // -----------------------------------------------------------------------------
-        Gfx::CTexturePtr FirstMipmapCubeTexture = Gfx::TextureManager::GetMipmapFromTexture2D(m_OutputCubemapPtr, 0);
-
-        m_TargetSetPtr = Gfx::TargetSetManager::CreateTargetSet(FirstMipmapCubeTexture);
-
-        // -----------------------------------------------------------------------------
-        // Viewport
-        // -----------------------------------------------------------------------------
-        Gfx::SViewPortDescriptor ViewPortDesc;
-
-        ViewPortDesc.m_TopLeftX = 0.0f;
-        ViewPortDesc.m_TopLeftY = 0.0f;
-        ViewPortDesc.m_MinDepth = 0.0f;
-        ViewPortDesc.m_MaxDepth = 1.0f;
-
-        ViewPortDesc.m_Width  = static_cast<float>(FirstMipmapCubeTexture->GetNumberOfPixelsU());
-        ViewPortDesc.m_Height = static_cast<float>(FirstMipmapCubeTexture->GetNumberOfPixelsV());
-
-        Gfx::CViewPortPtr MipMapViewPort = Gfx::ViewManager::CreateViewPort(ViewPortDesc);
-
-        m_ViewPortSetPtr = Gfx::ViewManager::CreateViewPortSet(MipMapViewPort);
+        m_OutputCubemapPtr = 0;
     }
 
     // -----------------------------------------------------------------------------
@@ -216,7 +173,7 @@ namespace LE
 
     void CPluginInterface::Update()
     {
-        if (m_InputTexturePtr == nullptr) return;
+        if (m_IsActive == false || m_InputTexturePtr == 0 || m_OutputCubemapPtr == 0) return;
 
         Gfx::Performance::BeginEvent("Light estimation from LUT");
 
@@ -311,12 +268,14 @@ namespace LE
 
     void CPluginInterface::OnPause()
     {
+        m_IsActive = false;
     }
 
     // -----------------------------------------------------------------------------
 
     void CPluginInterface::OnResume()
     {
+        m_IsActive = true;
     }
 
     // -----------------------------------------------------------------------------
@@ -324,6 +283,39 @@ namespace LE
     void CPluginInterface::SetInputTexture(Gfx::CTexturePtr _InputTexturePtr)
     {
         m_InputTexturePtr = _InputTexturePtr;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CPluginInterface::SetOutputCubemap(Gfx::CTexturePtr _OutputCubemapPtr)
+    {
+        if (_OutputCubemapPtr == nullptr) return;
+
+        m_OutputCubemapPtr = _OutputCubemapPtr;
+
+        // -----------------------------------------------------------------------------
+        // Target Set
+        // -----------------------------------------------------------------------------
+        Gfx::CTexturePtr FirstMipmapCubeTexture = Gfx::TextureManager::GetMipmapFromTexture2D(_OutputCubemapPtr, 0);
+
+        m_TargetSetPtr = Gfx::TargetSetManager::CreateTargetSet(FirstMipmapCubeTexture);
+
+        // -----------------------------------------------------------------------------
+        // Viewport
+        // -----------------------------------------------------------------------------
+        Gfx::SViewPortDescriptor ViewPortDesc;
+
+        ViewPortDesc.m_TopLeftX = 0.0f;
+        ViewPortDesc.m_TopLeftY = 0.0f;
+        ViewPortDesc.m_MinDepth = 0.0f;
+        ViewPortDesc.m_MaxDepth = 1.0f;
+
+        ViewPortDesc.m_Width = static_cast<float>(FirstMipmapCubeTexture->GetNumberOfPixelsU());
+        ViewPortDesc.m_Height = static_cast<float>(FirstMipmapCubeTexture->GetNumberOfPixelsV());
+
+        Gfx::CViewPortPtr MipMapViewPort = Gfx::ViewManager::CreateViewPort(ViewPortDesc);
+
+        m_ViewPortSetPtr = Gfx::ViewManager::CreateViewPortSet(MipMapViewPort);
     }
 
     // -----------------------------------------------------------------------------
@@ -337,6 +329,11 @@ namespace LE
 extern "C" CORE_PLUGIN_API_EXPORT void SetInputTexture(Gfx::CTexturePtr _InputTexturePtr)
 {
     static_cast<LE::CPluginInterface&>(GetInstance()).SetInputTexture(_InputTexturePtr);
+}
+
+extern "C" CORE_PLUGIN_API_EXPORT void SetOutputCubemap(Gfx::CTexturePtr _OutputCubemapPtr)
+{
+    static_cast<LE::CPluginInterface&>(GetInstance()).SetOutputCubemap(_OutputCubemapPtr);
 }
 
 extern "C" CORE_PLUGIN_API_EXPORT Gfx::CTexturePtr GetOutputCubemap()

@@ -21,35 +21,45 @@ namespace Scpt
     {
     public:
 
-        typedef void (*LightEstimationLUTSetInputTextureFunc)(Gfx::CTexturePtr);
-        typedef Gfx::CTexturePtr (*LightEstimationLUTGetOutputCubemapFunc)();
-        typedef Gfx::CTexturePtr (*GetBackgroundTextureFunc)();
-
-        LightEstimationLUTSetInputTextureFunc SetInputTexture;
-        LightEstimationLUTGetOutputCubemapFunc GetOutputCubemap;
-        GetBackgroundTextureFunc GetBackgroundTexture;
-
-    public:
-
         enum EEstimationType
         {
             Stitching,
-            LUT
+            LUT,
+            NumberOfEstimationTypes,
         };
-
-    public:
-
-        EEstimationType m_EstimationType = Stitching;
 
     public:
 
         Dt::CEntity* m_pSkyEntity = nullptr;
         Dt::CSkyComponent* m_pSkyComponent = nullptr;
 
+    private:
+
+        typedef void(*LESetInputTextureFunc)(Gfx::CTexturePtr);
+        typedef void(*LESetOutputCubemapFunc)(Gfx::CTexturePtr);
+        typedef Gfx::CTexturePtr(*LEGetOutputCubemapFunc)();
+        typedef Gfx::CTexturePtr(*ARGetBackgroundTextureFunc)();
+
+        LESetInputTextureFunc SetInputTexture;
+        LESetOutputCubemapFunc SetOutputCubemap;
+        LEGetOutputCubemapFunc GetOutputCubemap;
+        ARGetBackgroundTextureFunc GetBackgroundTexture;
+
+        Gfx::CTexturePtr m_OutputCubemapPtr;
+
+        std::string m_PluginNames[NumberOfEstimationTypes] = { "Light Estimation Stitching", "Light Estimation LUT" };
+
+        Core::IPlugin* m_pCurrentPluginPtr = nullptr;
+
+        int m_Mode;
+
     public:
 
         void Start() override
         {
+            // -----------------------------------------------------------------------------
+            // Prepare sky entity
+            // -----------------------------------------------------------------------------
             m_pSkyEntity = GetEntity();
 
             if (m_pSkyEntity != nullptr)
@@ -59,32 +69,16 @@ namespace Scpt
 
             if (m_pSkyComponent == nullptr) return;
 
-            if (Core::PluginManager::HasPlugin("Light Estimation Stitching") && m_EstimationType == Stitching)
-            {
-                SetInputTexture  = (LightEstimationLUTSetInputTextureFunc)(Core::PluginManager::GetPluginFunction("Light Estimation Stitching", "SetInputTexture"));
-                GetOutputCubemap = (LightEstimationLUTGetOutputCubemapFunc)(Core::PluginManager::GetPluginFunction("Light Estimation Stitching", "GetOutputCubemap"));
-            }
-            else if(Core::PluginManager::HasPlugin("Light Estimation LUT") && m_EstimationType == LUT)
-            {
-                SetInputTexture  = (LightEstimationLUTSetInputTextureFunc)(Core::PluginManager::GetPluginFunction("Light Estimation LUT", "SetInputTexture"));
-                GetOutputCubemap = (LightEstimationLUTGetOutputCubemapFunc)(Core::PluginManager::GetPluginFunction("Light Estimation LUT", "GetOutputCubemap"));
-            }
-            else
-            {
-                return;
-            }
-
+            // -----------------------------------------------------------------------------
+            // Input
+            // -----------------------------------------------------------------------------
             if (Core::PluginManager::HasPlugin("ArCore"))
             {
-                GetBackgroundTexture = (GetBackgroundTextureFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetBackgroundTexture"));
-
-                SetInputTexture(GetBackgroundTexture());
+                GetBackgroundTexture = (ARGetBackgroundTextureFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetBackgroundTexture"));
             }
             else if (Core::PluginManager::HasPlugin("EasyAR"))
             {
-                GetBackgroundTexture = (GetBackgroundTextureFunc)(Core::PluginManager::GetPluginFunction("EasyAR", "GetBackgroundTexture"));
-
-                SetInputTexture(GetBackgroundTexture());
+                GetBackgroundTexture = (ARGetBackgroundTextureFunc)(Core::PluginManager::GetPluginFunction("EasyAR", "GetBackgroundTexture"));
             }
             else
             {
@@ -107,20 +101,51 @@ namespace Scpt
                 return;
             }
 
+            // -----------------------------------------------------------------------------
+            // Output cube map texture
+            // -----------------------------------------------------------------------------
+            Gfx::STextureDescriptor TextureDescriptor;
+
+            TextureDescriptor.m_NumberOfPixelsU  = 512;
+            TextureDescriptor.m_NumberOfPixelsV  = 512;
+            TextureDescriptor.m_NumberOfPixelsW  = 1;
+            TextureDescriptor.m_NumberOfMipMaps  = Gfx::STextureDescriptor::s_GenerateAllMipMaps;
+            TextureDescriptor.m_NumberOfTextures = 6;
+            TextureDescriptor.m_Binding          = Gfx::CTexture::ShaderResource | Gfx::CTexture::RenderTarget;
+            TextureDescriptor.m_Access           = Gfx::CTexture::CPUWrite;
+            TextureDescriptor.m_Format           = Gfx::CTexture::Unknown;
+            TextureDescriptor.m_Usage            = Gfx::CTexture::GPURead;
+            TextureDescriptor.m_Semantic         = Gfx::CTexture::Diffuse;
+            TextureDescriptor.m_pFileName        = 0;
+            TextureDescriptor.m_pPixels          = 0;
+            TextureDescriptor.m_Format           = Gfx::CTexture::R8G8B8A8_BYTE;
+
+            m_OutputCubemapPtr = Gfx::TextureManager::CreateCubeTexture(TextureDescriptor);
+
+            Gfx::TextureManager::SetTextureLabel(m_OutputCubemapPtr, "Sky cubemap from image");
+
+            // -----------------------------------------------------------------------------
+            // Setup sky
+            // -----------------------------------------------------------------------------
             m_pSkyComponent->SetType(Dt::CSkyComponent::Cubemap);
-            m_pSkyComponent->SetTexture(GetOutputCubemap());
+            m_pSkyComponent->SetTexture(m_OutputCubemapPtr);
             m_pSkyComponent->SetRefreshMode(Dt::CSkyComponent::Dynamic);
             m_pSkyComponent->SetQuality(Dt::CSkyComponent::PX128);
             m_pSkyComponent->SetIntensity(12000);
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*m_pSkyComponent, Dt::CSkyComponent::DirtyInfo);
+
+            // -----------------------------------------------------------------------------
+            // Prepare light estimation
+            // -----------------------------------------------------------------------------
+            SwitchLightEstimation(Stitching);
         }
 
         // -----------------------------------------------------------------------------
 
         void Exit() override
         {
-
+            m_OutputCubemapPtr = 0;
         }
 
         // -----------------------------------------------------------------------------
@@ -133,7 +158,50 @@ namespace Scpt
 
         void OnInput(const Base::CInputEvent& _rEvent) override
         {
-            BASE_UNUSED(_rEvent);
+            if (_rEvent.GetAction() == Base::CInputEvent::TouchPressed || 
+                (_rEvent.GetAction() == Base::CInputEvent::KeyReleased && _rEvent.GetKey() == Base::CInputEvent::Key0))
+            {
+                m_Mode = (m_Mode + 1) % NumberOfEstimationTypes;
+
+                SwitchLightEstimation((EEstimationType)m_Mode);
+            }
+        }
+
+        // -----------------------------------------------------------------------------
+
+        void SwitchLightEstimation(EEstimationType _EstimationType)
+        {
+            m_Mode = _EstimationType;
+
+            // -----------------------------------------------------------------------------
+            // Is plugin available/loaded?
+            // -----------------------------------------------------------------------------
+            std::string CurrentPluginName = m_PluginNames[_EstimationType];
+
+            if (!Core::PluginManager::HasPlugin(CurrentPluginName))
+            {
+                return;
+            }
+
+            // -----------------------------------------------------------------------------
+            // Pause old plugin
+            // -----------------------------------------------------------------------------
+            if (m_pCurrentPluginPtr) m_pCurrentPluginPtr->OnPause();
+
+            // -----------------------------------------------------------------------------
+            // Prepare new plugin
+            // -----------------------------------------------------------------------------
+            SetInputTexture  = (LESetInputTextureFunc)(Core::PluginManager::GetPluginFunction(CurrentPluginName, "SetInputTexture"));
+            SetOutputCubemap = (LESetOutputCubemapFunc)(Core::PluginManager::GetPluginFunction(CurrentPluginName, "SetOutputCubemap"));
+            GetOutputCubemap = (LEGetOutputCubemapFunc)(Core::PluginManager::GetPluginFunction(CurrentPluginName, "GetOutputCubemap"));
+
+            m_pCurrentPluginPtr = Core::PluginManager::GetPlugin(CurrentPluginName);
+
+            m_pCurrentPluginPtr->OnResume();
+
+            SetInputTexture(GetBackgroundTexture());
+
+            SetOutputCubemap(m_OutputCubemapPtr);
         }
     };
 } // namespace Scpt

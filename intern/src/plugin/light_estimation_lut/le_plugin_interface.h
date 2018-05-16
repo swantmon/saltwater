@@ -27,6 +27,7 @@ namespace LE
 
         void SetInputTexture(Gfx::CTexturePtr _InputTexturePtr);
 
+        void SetOutputCubemap(Gfx::CTexturePtr _OutputCubemapPtr);
         Gfx::CTexturePtr GetOutputCubemap();
 
     private:
@@ -60,5 +61,7 @@ namespace LE
         Gfx::CTargetSetPtr m_TargetSetPtr;
 
         Gfx::CViewPortSetPtr m_ViewPortSetPtr;
+
+        bool m_IsActive;
     };
 } // namespace LE

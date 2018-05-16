@@ -291,8 +291,6 @@ namespace Edit
             {
                 auto Component = Dt::CComponentManager::GetInstance().Allocate<Scpt::CLightEstimationScript>();
 
-                Component->m_EstimationType = Scpt::CLightEstimationScript::LUT;
-
                 rEnvironmentEntity.AttachComponent(Component);
 
                 Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*Component, Dt::CSkyComponent::DirtyCreate);
