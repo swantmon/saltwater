@@ -158,8 +158,20 @@ namespace Scpt
 
         void OnInput(const Base::CInputEvent& _rEvent) override
         {
-            if (_rEvent.GetAction() == Base::CInputEvent::TouchPressed || 
-                (_rEvent.GetAction() == Base::CInputEvent::KeyReleased && _rEvent.GetKey() == Base::CInputEvent::Key0))
+            if (_rEvent.GetAction() == Base::CInputEvent::TouchReleased)
+            {
+                float x = _rEvent.GetCursorPosition()[0];
+                float y = _rEvent.GetCursorPosition()[1];
+
+                if (x < 200.0f && y < 200.0f)
+                {
+                    m_Mode = (m_Mode + 1) % NumberOfEstimationTypes;
+
+                    SwitchLightEstimation((EEstimationType)m_Mode);
+                }
+            }
+
+            if (_rEvent.GetAction() == Base::CInputEvent::KeyReleased && _rEvent.GetKey() == Base::CInputEvent::Key0)
             {
                 m_Mode = (m_Mode + 1) % NumberOfEstimationTypes;
 
