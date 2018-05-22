@@ -180,21 +180,11 @@ namespace Edit
 
             // -----------------------------------------------------------------------------
 
-            auto ScriptComponent = Dt::CComponentManager::GetInstance().Allocate<Scpt::CARCameraControlScript>();
+            auto ScriptComponent = Dt::CComponentManager::GetInstance().Allocate<Scpt::CCameraControlScript>();
 
             rEntity.AttachComponent(ScriptComponent);
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*ScriptComponent, Dt::CScriptComponent::DirtyCreate);
-
-            // -----------------------------------------------------------------------------
-
-            auto ScriptComponent2 = Dt::CComponentManager::GetInstance().Allocate<Scpt::CEasyARTargetScript>();
-
-            ScriptComponent2->m_TargetFile = "/../data/marker/world_center.png";
-
-            rEntity.AttachComponent(ScriptComponent2);
-
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*ScriptComponent2, Dt::CScriptComponent::DirtyCreate);
 
             // -----------------------------------------------------------------------------
 
@@ -281,15 +271,7 @@ namespace Edit
 
                 Component->SetRefreshMode(Dt::CSkyComponent::Static);
                 Component->SetType(Dt::CSkyComponent::Procedural);
-                Component->SetIntensity(10000.0f);
-
-                rEnvironmentEntity.AttachComponent(Component);
-
-                Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*Component, Dt::CSkyComponent::DirtyCreate);
-            }
-
-            {
-                auto Component = Dt::CComponentManager::GetInstance().Allocate<Scpt::CLightEstimationScript>();
+                Component->SetIntensity(100000.0f);
 
                 rEnvironmentEntity.AttachComponent(Component);
 
@@ -333,8 +315,8 @@ namespace Edit
 
             Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
 
-            pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 1.0f));
-            pTransformationFacet->SetScale(glm::vec3(0.50f));
+            pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 2.0f));
+            pTransformationFacet->SetScale(glm::vec3(1.0f));
             pTransformationFacet->SetRotation(glm::vec3(0.0f));
 
             // -----------------------------------------------------------------------------
@@ -379,12 +361,11 @@ namespace Edit
             Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
 
             rEntity.SetName("Plane");
-            rEntity.SetLayer(Dt::SEntityLayer::AR);
 
             Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
 
             pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
-            pTransformationFacet->SetScale(glm::vec3(1.0f, 1.0f, 0.001f));
+            pTransformationFacet->SetScale(glm::vec3(4.0f, 4.0f, 0.001f));
             pTransformationFacet->SetRotation(glm::vec3(0.0f));
 
             // -----------------------------------------------------------------------------
