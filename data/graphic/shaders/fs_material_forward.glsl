@@ -163,7 +163,7 @@ void main(void)
             // -----------------------------------------------------------------------------
             float Attenuation = 1.0f;
             Attenuation *= Data.m_AmbientOcclusion;
-            Attenuation *= GetShadowAtPosition(Data.m_WSPosition, transpose(LightProb.ps_LightViewProjection), ps_ShadowTexture[IndexOfLight]);
+            Attenuation *= GetShadowAtPosition(Data.m_WSPosition, LightProb.ps_LightViewProjection, ps_ShadowTexture[IndexOfLight]);
 
             // -----------------------------------------------------------------------------
             // Apply light luminance
