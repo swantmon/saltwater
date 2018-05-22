@@ -133,11 +133,6 @@ namespace
 
 namespace
 {
-    std::string g_PathToDataModels = "/graphic/models/";
-} // namespace  
-
-namespace
-{
     class CGfxMeshManager : private Base::CUncopyable
     {
         BASE_SINGLETON_FUNC(CGfxMeshManager)
@@ -1159,7 +1154,7 @@ namespace
             case Dt::CMeshComponent::Asset:
                 pMeshComponent->SetFacet(Dt::CMeshComponent::Graphic, 
                     CreateMeshFromFile(
-                        pMeshComponent->GetFilename().c_str(), 
+                        pMeshComponent->GetFilename().c_str(),
                         pMeshComponent->GetGeneratorFlag(), 
                         pMeshComponent->GetMeshIndex()
                     )
@@ -1169,13 +1164,13 @@ namespace
                 pMeshComponent->SetFacet(Dt::CMeshComponent::Graphic, CreateBox(1.0f, 1.0f, 1.0f));
                 break;
             case Dt::CMeshComponent::Sphere:
-                pMeshComponent->SetFacet(Dt::CMeshComponent::Graphic, CreateSphere(1.0f, 12, 12));
+                pMeshComponent->SetFacet(Dt::CMeshComponent::Graphic, CreateSphere(1.0f, 24, 24));
                 break;
             case Dt::CMeshComponent::IsometricSphere:
-                pMeshComponent->SetFacet(Dt::CMeshComponent::Graphic, CreateSphereIsometric(1.0f, 6));
+                pMeshComponent->SetFacet(Dt::CMeshComponent::Graphic, CreateSphereIsometric(1.0f, 8));
                 break;
             case Dt::CMeshComponent::Cone:
-                pMeshComponent->SetFacet(Dt::CMeshComponent::Graphic, CreateCone(1.0f, 1.0f, 12));
+                pMeshComponent->SetFacet(Dt::CMeshComponent::Graphic, CreateCone(1.0f, 1.0f, 24));
                 break;
             case Dt::CMeshComponent::Rectangle:
                 pMeshComponent->SetFacet(Dt::CMeshComponent::Graphic, CreateRectangle(0.0f, 0.0f, 1.0f, 1.0f));

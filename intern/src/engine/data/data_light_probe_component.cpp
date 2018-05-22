@@ -73,7 +73,7 @@ namespace Dt
 
     unsigned int CLightProbeComponent::GetQualityInPixel() const
     {
-        static unsigned int s_QualityInPixel[s_NumberOfQualities] = { 128, 256, 512, 1024, 2048 };
+        static unsigned int s_QualityInPixel[s_NumberOfQualities] = { 32, 64, 128, 256, 512, 1024, 2048 };
 
         return s_QualityInPixel[m_Quality];
     }

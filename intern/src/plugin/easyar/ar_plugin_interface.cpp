@@ -65,7 +65,10 @@ namespace
 namespace AR
 {
     CPluginInterface::CPluginInterface()
-        : m_IsActive(false)
+        : m_IsActive                (false)
+        , m_FlipVertical            (false)
+        , m_pCameraImageData        (0)
+        , m_pCameraTempImageLineData(0)
     {
 
     }
@@ -189,6 +192,10 @@ namespace AR
 
         Gfx::TextureManager::SetTextureLabel(m_BackgroundTexturePtr, "EasyAR camera texture");
 
+        m_pCameraImageData = Base::CMemory::Allocate(m_CameraSize[0] * m_CameraSize[1] * 3 * sizeof(Base::U8));
+
+        m_pCameraTempImageLineData = Base::CMemory::Allocate(m_CameraSize[0] * 3 * sizeof(Base::U8));
+
         // -----------------------------------------------------------------------------
         // Check supported properties
         // -----------------------------------------------------------------------------
@@ -243,6 +250,10 @@ namespace AR
         if(m_CameraFrameStreamer) m_CameraFrameStreamer->stop();
 
         m_BackgroundTexturePtr = 0;
+
+        Base::CMemory::Free(m_pCameraImageData);
+
+        Base::CMemory::Free(m_pCameraTempImageLineData);
     }
 
     // -----------------------------------------------------------------------------
@@ -317,7 +328,26 @@ namespace AR
         // -----------------------------------------------------------------------------
         for (auto Image : Frame->images())
         {
-            Gfx::TextureManager::CopyToTexture2D(m_BackgroundTexturePtr, Base::AABB2UInt(glm::uvec2(0.0f, 0.0f), glm::uvec2(m_CameraSize)), 0, Image->data());
+            Base::CMemory::Copy(m_pCameraImageData, Image->data(), m_CameraSize[0] * m_CameraSize[1] * 3 * sizeof(Base::U8));
+
+            if (m_FlipVertical)
+            {
+                int NumberOfBytesPerLine = m_CameraSize[0] * 3 * sizeof(Base::U8);
+
+                for (int y = 0; y < m_CameraSize[1] / 2; ++y)
+                {
+                    void* pFirstLine = (Base::U8*)m_pCameraImageData + (y * m_CameraSize[0] * 3);
+                    void* pLastLine  = (Base::U8*)m_pCameraImageData + ((m_CameraSize[1] - y - 1) * m_CameraSize[0] * 3);
+
+                    Base::CMemory::Copy(m_pCameraTempImageLineData, pFirstLine, NumberOfBytesPerLine);
+
+                    Base::CMemory::Copy(pFirstLine, pLastLine, NumberOfBytesPerLine);
+
+                    Base::CMemory::Copy(pLastLine, m_pCameraTempImageLineData, NumberOfBytesPerLine);
+                }
+            }
+
+            Gfx::TextureManager::CopyToTexture2D(m_BackgroundTexturePtr, Base::AABB2UInt(glm::uvec2(0.0f, 0.0f), glm::uvec2(m_CameraSize)), 0, m_pCameraImageData);
         }
     }
 
@@ -380,24 +410,36 @@ namespace AR
     {
         return m_BackgroundTexturePtr;
     }
+
+    // -----------------------------------------------------------------------------
+
+    void CPluginInterface::SetFlipVertical(bool _Flag)
+    {
+        m_FlipVertical = _Flag;
+    }
 } // namespace AR
 
-CORE_PLUGIN_API_EXPORT const AR::CCamera* GetCamera()
+extern "C" CORE_PLUGIN_API_EXPORT const AR::CCamera* GetCamera()
 {
     return &static_cast<AR::CPluginInterface&>(GetInstance()).GetCamera();
 }
 
-CORE_PLUGIN_API_EXPORT AR::CTarget* AcquireNewTarget(const std::string _rPathToFile)
+extern "C" CORE_PLUGIN_API_EXPORT AR::CTarget* AcquireNewTarget(const std::string _rPathToFile)
 {
     return static_cast<AR::CPluginInterface&>(GetInstance()).AcquireNewTarget(_rPathToFile);
 }
 
-CORE_PLUGIN_API_EXPORT void ReleaseTarget(AR::CTarget* _pTarget)
+extern "C" CORE_PLUGIN_API_EXPORT void ReleaseTarget(AR::CTarget* _pTarget)
 {
     return static_cast<AR::CPluginInterface&>(GetInstance()).ReleaseTarget(_pTarget);
 }
 
-CORE_PLUGIN_API_EXPORT Gfx::CTexturePtr GetBackgroundTexture()
+extern "C" CORE_PLUGIN_API_EXPORT Gfx::CTexturePtr GetBackgroundTexture()
 {
     return static_cast<AR::CPluginInterface&>(GetInstance()).GetBackgroundTexture();
+}
+
+extern "C" CORE_PLUGIN_API_EXPORT void SetFlipVertical(bool _Flag)
+{
+    static_cast<AR::CPluginInterface&>(GetInstance()).SetFlipVertical(_Flag);
 }

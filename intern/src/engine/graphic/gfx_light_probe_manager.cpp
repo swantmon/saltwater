@@ -477,7 +477,7 @@ namespace
             // -----------------------------------------------------------------------------
             pGfxComponent = m_LightProbes.Allocate();
 
-            FillLightProbe(*pGfxComponent, pLightProbeComponent->GetQualityInPixel(), 128);
+            FillLightProbe(*pGfxComponent, pLightProbeComponent->GetQualityInPixel(), glm::min(pLightProbeComponent->GetQualityInPixel(), 128u));
 
             pLightProbeComponent->SetFacet(Dt::CLightProbeComponent::Graphic, pGfxComponent);
         }

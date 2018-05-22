@@ -49,8 +49,6 @@ namespace Gfx
         void SetOrthographic(float _Width, float _Height, float _Near, float _Far);
         void SetOrthographic(float _Left, float _Right, float _Bottom, float _Top, float _Near, float _Far);
 
-        void SetProjectionMatrix(const glm::mat4& _rProjectionMatrix, float _Near, float _Far);
-
     public:
 
         void SetAspectRatio(float _Aspect);

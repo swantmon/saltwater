@@ -20,11 +20,13 @@ namespace Scpt
         typedef const void (*ArCoreReleaseMarkerFunc)(const void* _pMarker);
         typedef int (*ArCoreGetMarkerTrackingStateFunc)(const void* _pMarker);
         typedef glm::mat4 (*ArCoreGetMarkerModelMatrixFunc)(const void* _pMarker);
+        typedef bool (*ArCoreSetSettingsFunc)(bool _ShowPlanes, bool _ShowPoints);
 
         ArCoreAcquireNewMarkerFunc AcquireNewMarker;
         ArCoreReleaseMarkerFunc ReleaseMarker;
         ArCoreGetMarkerTrackingStateFunc GetMarkerTrackingState;
         ArCoreGetMarkerModelMatrixFunc GetMarkerModelMatrix;
+        ArCoreSetSettingsFunc SetSettings;
 
     public:
 
@@ -51,6 +53,8 @@ namespace Scpt
 
             GetMarkerTrackingState = (ArCoreGetMarkerTrackingStateFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetMarkerTrackingState"));
             GetMarkerModelMatrix = (ArCoreGetMarkerModelMatrixFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetMarkerModelMatrix"));
+
+            SetSettings = (ArCoreSetSettingsFunc)(Core::PluginManager::GetPluginFunction("ArCore", "SetSettings"));
         }
 
         // -----------------------------------------------------------------------------
@@ -74,7 +78,7 @@ namespace Scpt
 
             pTransformation->SetPosition(glm::mat4(m_MRToEngineMatrix) * ModelMatrix[3]);
 
-            pTransformation->SetRotation(glm::eulerAngles(glm::toQuat(glm::mat3(ModelMatrix))));
+            //pTransformation->SetRotation(glm::eulerAngles(glm::toQuat(glm::mat3(ModelMatrix))));
 
             Dt::EntityManager::MarkEntityAsDirty(*m_pEntity, Dt::CEntity::DirtyMove);
         }
@@ -88,6 +92,8 @@ namespace Scpt
                 float x = _rEvent.GetCursorPosition()[0];
                 float y = _rEvent.GetCursorPosition()[1];
 
+                if (x < 200.0f || y < 200.0f) return;
+
                 const void* pNewMarker = AcquireNewMarker(x, y);
 
                 if (pNewMarker != nullptr && m_pMarker != nullptr)
@@ -98,6 +104,8 @@ namespace Scpt
                 if (pNewMarker != nullptr)
                 {
                     m_pMarker = pNewMarker;
+
+                    SetSettings(false, false);
                 }
             }
         }

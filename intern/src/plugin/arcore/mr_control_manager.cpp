@@ -207,6 +207,10 @@ namespace
 
         Gfx::CTexturePtr GetBackgroundTexture();
 
+        const SSettings& GetSettings();
+        void SetSettings(const SSettings& _rSettings);
+        void ResetSettings();
+
     private:
 
         static std::string s_Permissions[];
@@ -245,6 +249,8 @@ namespace
     private:
 
         bool m_InstallRequested;
+
+        SSettings m_Settings;
 
         ArSession* m_pARSession;
         ArFrame* m_pARFrame;
@@ -304,13 +310,17 @@ namespace
 namespace
 {
     CMRControlManager::CMRControlManager()
-        : m_InstallRequested(false)
+        : m_InstallRequested (false)
+        , m_Settings         ( )
         , m_pARSession       (0)
         , m_pARFrame         (0)
         , m_TrackedObjects   ( )
         , m_ARCToEngineMatrix(1.0f)
     {
         m_ARCToEngineMatrix = Base::CCoordinateSystem::GetBaseMatrix(glm::vec3(1,0,0), glm::vec3(0,1,0), glm::vec3(0,0,-1));
+
+        m_Settings.m_ShowPlanes = false;
+        m_Settings.m_ShowPoints = false;
 
         Gfx::Main::RegisterResizeHandler(GFX_BIND_RESIZE_METHOD(&CMRControlManager::OnResize));
     }
@@ -466,6 +476,11 @@ namespace
         Dt::EntityManager::RegisterDirtyEntityHandler(DATA_DIRTY_ENTITY_METHOD(&CMRControlManager::OnDirtyEntity));
 
         Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(DATA_DIRTY_COMPONENT_METHOD(&CMRControlManager::OnDirtyComponent));
+
+        // -----------------------------------------------------------------------------
+        // Settings
+        // -----------------------------------------------------------------------------
+        ResetSettings();
     }
 
     // -----------------------------------------------------------------------------
@@ -499,16 +514,13 @@ namespace
         // -----------------------------------------------------------------------------
         // Update camera
         // -----------------------------------------------------------------------------
-        m_Camera.m_Near = Core::CProgramParameters::GetInstance().Get<float>("mr:camera:projection:near", 0.1f);
-        m_Camera.m_Far  = Core::CProgramParameters::GetInstance().Get<float>("mr:camera:projection:far", 100.0f);
-
         ArCamera* pARCamera;
 
         ArFrame_acquireCamera(m_pARSession, m_pARFrame, &pARCamera);
 
         ArCamera_getViewMatrix(m_pARSession, pARCamera, glm::value_ptr(m_Camera.m_ViewMatrix));
 
-        ArCamera_getProjectionMatrix(m_pARSession, pARCamera, m_Camera.m_Near, m_Camera.m_Far, glm::value_ptr(m_Camera.m_ProjectionMatrix));
+        ArCamera_getProjectionMatrix(m_pARSession, pARCamera, m_Settings.m_Near, m_Settings.m_Far, glm::value_ptr(m_Camera.m_ProjectionMatrix));
 
         ArTrackingState CameraTrackingState;
 
@@ -658,10 +670,6 @@ namespace
             ArConfig_create(m_pARSession, &ARConfig);
 
             assert(ARConfig != 0);
-
-            Status = ArSession_checkSupported(m_pARSession, ARConfig);
-
-            assert(Status == AR_SUCCESS);
 
             Status = ArSession_configure(m_pARSession, ARConfig);
 
@@ -878,6 +886,30 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    const SSettings& CMRControlManager::GetSettings()
+    {
+        return m_Settings;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMRControlManager::SetSettings(const SSettings& _rSettings)
+    {
+        m_Settings = _rSettings;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMRControlManager::ResetSettings()
+    {
+        m_Settings.m_Near       = Core::CProgramParameters::GetInstance().Get<float>("mr:camera:projection:near", 0.1f);
+        m_Settings.m_Far        = Core::CProgramParameters::GetInstance().Get<float>("mr:camera:projection:far", 100.0f);
+        m_Settings.m_ShowPlanes = Core::CProgramParameters::GetInstance().Get<bool>("mr:ar:debug:render_planes", true);
+        m_Settings.m_ShowPoints = Core::CProgramParameters::GetInstance().Get<bool>("mr:ar:debug:render_points", true);
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CMRControlManager::Render()
     {
         // -----------------------------------------------------------------------------
@@ -926,297 +958,296 @@ namespace
         // -----------------------------------------------------------------------------
         // Render planes
         // -----------------------------------------------------------------------------
-        bool RenderPlanes = Core::CProgramParameters::GetInstance().Get<bool>("mr:ar:debug:render_planes", true);
-
-        if (RenderPlanes == false) return;
-
-        std::vector<glm::vec3> PlaneVertices;
-        std::vector<unsigned int> PlaneIndices;
-
-        glm::mat4 PlaneModelMatrix = glm::mat4(1.0f);
-
-        auto UpdateGeometryForPlane = [&](const ArPlane* _pPlane)
+        if (m_Settings.m_ShowPlanes)
         {
-            // -----------------------------------------------------------------------------
-            // Settings:
-            // Feather distance 0.2 meters.
-            // Feather scale over the distance between plane center and vertices.
-            // -----------------------------------------------------------------------------
-            const float kFeatherLength = 0.2f;
-            const float kFeatherScale  = 0.2f;
-            const float kOuterAlpha    = 0.8f;
-            const float kInnerAlpha    = 0.8f;
+            std::vector<glm::vec3> PlaneVertices;
+            std::vector<unsigned int> PlaneIndices;
 
-            // -----------------------------------------------------------------------------
-            // The following code generates a triangle mesh filling a convex polygon,
-            // including a feathered edge for blending.
-            //
-            // The indices shown in the diagram are used in comments below.
-            // _______________     0_______________1
-            // |             |      |4___________5|
-            // |             |      | |         | |
-            // |             | =>   | |         | |
-            // |             |      | |         | |
-            // |             |      |7-----------6|
-            // ---------------     3---------------2
-            // -----------------------------------------------------------------------------
+            glm::mat4 PlaneModelMatrix = glm::mat4(1.0f);
 
-            PlaneVertices.clear();
-            PlaneIndices .clear();
-
-            int LengthOfPolygon;
-
-            ArPlane_getPolygonSize(m_pARSession, _pPlane, &LengthOfPolygon);
-
-            int NumberOfVertices = LengthOfPolygon / 2;
-
-            std::vector<glm::vec2> VerticesRAW(NumberOfVertices);
-
-            ArPlane_getPolygon(m_pARSession, _pPlane, &VerticesRAW.front()[0]);
-
-            // -----------------------------------------------------------------------------
-            // Fill vertex 0 to 3. Note that the vertex.xy are used for x and z
-            // position. vertex.z is used for alpha. The outter polygon's alpha
-            // is 0.
-            // -----------------------------------------------------------------------------
-            for (int IndexOfVertex = 0; IndexOfVertex < NumberOfVertices; ++IndexOfVertex)
+            auto UpdateGeometryForPlane = [&](const ArPlane *_pPlane)
             {
-                PlaneVertices.push_back(glm::vec3(VerticesRAW[IndexOfVertex][0], VerticesRAW[IndexOfVertex][1], kOuterAlpha));
-            }
+                // -----------------------------------------------------------------------------
+                // Settings:
+                // Feather distance 0.2 meters.
+                // Feather scale over the distance between plane center and vertices.
+                // -----------------------------------------------------------------------------
+                const float kFeatherLength = 0.2f;
+                const float kFeatherScale = 0.2f;
+                const float kOuterAlpha = 0.8f;
+                const float kInnerAlpha = 0.8f;
+
+                // -----------------------------------------------------------------------------
+                // The following code generates a triangle mesh filling a convex polygon,
+                // including a feathered edge for blending.
+                //
+                // The indices shown in the diagram are used in comments below.
+                // _______________     0_______________1
+                // |             |      |4___________5|
+                // |             |      | |         | |
+                // |             | =>   | |         | |
+                // |             |      | |         | |
+                // |             |      |7-----------6|
+                // ---------------     3---------------2
+                // -----------------------------------------------------------------------------
+
+                PlaneVertices.clear();
+                PlaneIndices.clear();
+
+                int LengthOfPolygon;
+
+                ArPlane_getPolygonSize(m_pARSession, _pPlane, &LengthOfPolygon);
+
+                int NumberOfVertices = LengthOfPolygon / 2;
+
+                std::vector<glm::vec2> VerticesRAW(NumberOfVertices);
+
+                ArPlane_getPolygon(m_pARSession, _pPlane, &VerticesRAW.front()[0]);
+
+                // -----------------------------------------------------------------------------
+                // Fill vertex 0 to 3. Note that the vertex.xy are used for x and z
+                // position. vertex.z is used for alpha. The outter polygon's alpha
+                // is 0.
+                // -----------------------------------------------------------------------------
+                for (int IndexOfVertex = 0; IndexOfVertex < NumberOfVertices; ++IndexOfVertex)
+                {
+                    PlaneVertices.push_back(glm::vec3(VerticesRAW[IndexOfVertex][0], VerticesRAW[IndexOfVertex][1], kOuterAlpha));
+                }
+
+                // -----------------------------------------------------------------------------
+                // Generate pose and get model matrix
+                // -----------------------------------------------------------------------------
+                ArPose *Pose;
+
+                ArPose_create(m_pARSession, nullptr, &Pose);
+
+                ArPlane_getCenterPose(m_pARSession, _pPlane, Pose);
+
+                ArPose_getMatrix(m_pARSession, Pose, glm::value_ptr(PlaneModelMatrix));
+
+                ArPose_destroy(Pose);
+
+                // -----------------------------------------------------------------------------
+                // Get plane center in XZ axis.
+                // -----------------------------------------------------------------------------
+                glm::vec2 CenterOfPlane = glm::vec2(PlaneModelMatrix[3][0], PlaneModelMatrix[3][2]);
+
+                // -----------------------------------------------------------------------------
+                // Fill vertex 0 to 3, with alpha set to kAlpha.
+                // -----------------------------------------------------------------------------
+                for (auto Vertex : VerticesRAW)
+                {
+                    glm::vec2 Direction = Vertex - CenterOfPlane;
+
+                    float Scale = 1.0f - std::min((kFeatherLength / glm::length(Direction)), kFeatherScale);
+
+                    glm::vec2 ResultVector = Scale * Direction + CenterOfPlane;
+
+                    PlaneVertices.push_back(glm::vec3(ResultVector[0], ResultVector[1], kInnerAlpha));
+                }
+
+                // -----------------------------------------------------------------------------
+                // Generate vertices / triangles
+                // -----------------------------------------------------------------------------
+                NumberOfVertices = PlaneVertices.size();
+
+                int NumberOfVerticesHalf = NumberOfVertices / 2.0f;
+
+                // -----------------------------------------------------------------------------
+                // Generate triangle (4, 5, 6) and (4, 6, 7).
+                // -----------------------------------------------------------------------------
+                for (int IndexOfIndice = NumberOfVerticesHalf + 1; IndexOfIndice < NumberOfVertices - 1; ++IndexOfIndice)
+                {
+                    PlaneIndices.push_back(NumberOfVerticesHalf);
+                    PlaneIndices.push_back(IndexOfIndice);
+                    PlaneIndices.push_back(IndexOfIndice + 1);
+                }
+
+                // -----------------------------------------------------------------------------
+                // Generate triangle (0, 1, 4), (4, 1, 5), (5, 1, 2), (5, 2, 6),
+                // (6, 2, 3), (6, 3, 7), (7, 3, 0), (7, 0, 4)
+                // -----------------------------------------------------------------------------
+                for (int IndexOfIndice = 0; IndexOfIndice < NumberOfVerticesHalf; ++IndexOfIndice)
+                {
+                    PlaneIndices.push_back(IndexOfIndice);
+                    PlaneIndices.push_back((IndexOfIndice + 1) % NumberOfVerticesHalf);
+                    PlaneIndices.push_back(IndexOfIndice + NumberOfVerticesHalf);
+
+                    PlaneIndices.push_back(IndexOfIndice + NumberOfVerticesHalf);
+                    PlaneIndices.push_back((IndexOfIndice + 1) % NumberOfVerticesHalf);
+                    PlaneIndices.push_back((IndexOfIndice + NumberOfVerticesHalf + 1) % NumberOfVerticesHalf + NumberOfVerticesHalf);
+                }
+            };
 
             // -----------------------------------------------------------------------------
-            // Generate pose and get model matrix
+            // Get trackable planes
             // -----------------------------------------------------------------------------
-            ArPose* Pose;
+            ArTrackableList *ListOfPlanes = nullptr;
 
-            ArPose_create(m_pARSession, nullptr, &Pose);
+            ArTrackableList_create(m_pARSession, &ListOfPlanes);
 
-            ArPlane_getCenterPose(m_pARSession, _pPlane, Pose);
+            assert(ListOfPlanes != nullptr);
 
-            ArPose_getMatrix(m_pARSession, Pose, glm::value_ptr(PlaneModelMatrix));
+            ArSession_getAllTrackables(m_pARSession, AR_TRACKABLE_PLANE, ListOfPlanes);
 
-            ArPose_destroy(Pose);
+            int NumberOfPlanes = 0;
 
-            // -----------------------------------------------------------------------------
-            // Get plane center in XZ axis.
-            // -----------------------------------------------------------------------------
-            glm::vec2 CenterOfPlane = glm::vec2(PlaneModelMatrix[3][0], PlaneModelMatrix[3][2]);
+            ArTrackableList_getSize(m_pARSession, ListOfPlanes, &NumberOfPlanes);
 
             // -----------------------------------------------------------------------------
-            // Fill vertex 0 to 3, with alpha set to kAlpha.
+            // Update every available plane
             // -----------------------------------------------------------------------------
-            for (auto Vertex : VerticesRAW)
+            Gfx::ContextManager::SetBlendState(Gfx::StateManager::GetBlendState(Gfx::CBlendState::AlphaBlend));
+
+            Gfx::ContextManager::SetShaderVS(m_PlaneVS);
+
+            Gfx::ContextManager::SetShaderPS(m_PlanePS);
+
+            Gfx::ContextManager::SetVertexBuffer(m_PlaneVerticesBufferPtr);
+
+            Gfx::ContextManager::SetIndexBuffer(m_PlaneIndicesBufferPtr, 0);
+
+            Gfx::ContextManager::SetConstantBuffer(0, m_MatrixBufferPtr);
+
+            Gfx::ContextManager::SetConstantBuffer(1, m_ColorBufferPtr);
+
+            Gfx::ContextManager::SetInputLayout(m_PlaneVS->GetInputLayout());
+
+            Gfx::ContextManager::SetTopology(Gfx::STopology::TriangleList);
+
+            for (int IndexOfPlane = 0; IndexOfPlane < NumberOfPlanes; ++IndexOfPlane)
             {
-                glm::vec2 Direction = Vertex - CenterOfPlane;
+                ArTrackable *pTrackableItem = nullptr;
 
-                float Scale = 1.0f - std::min((kFeatherLength / glm::length(Direction)), kFeatherScale);
+                ArTrackableList_acquireItem(m_pARSession, ListOfPlanes, IndexOfPlane, &pTrackableItem);
 
-                glm::vec2 ResultVector = Scale * Direction + CenterOfPlane;
+                ArPlane *pPlane = ArAsPlane(pTrackableItem);
 
-                PlaneVertices.push_back(glm::vec3(ResultVector[0], ResultVector[1], kInnerAlpha));
-            }
+                ArTrackingState TrackableTrackingState;
 
-            // -----------------------------------------------------------------------------
-            // Generate vertices / triangles
-            // -----------------------------------------------------------------------------
-            NumberOfVertices = PlaneVertices.size();
+                ArTrackable_getTrackingState(m_pARSession, pTrackableItem, &TrackableTrackingState);
 
-            int NumberOfVerticesHalf = NumberOfVertices / 2.0f;
+                ArPlane *pSubsumedPlane;
 
-            // -----------------------------------------------------------------------------
-            // Generate triangle (4, 5, 6) and (4, 6, 7).
-            // -----------------------------------------------------------------------------
-            for (int IndexOfIndice = NumberOfVerticesHalf + 1; IndexOfIndice < NumberOfVertices - 1; ++IndexOfIndice)
-            {
-                PlaneIndices.push_back(NumberOfVerticesHalf);
-                PlaneIndices.push_back(IndexOfIndice);
-                PlaneIndices.push_back(IndexOfIndice + 1);
-            }
+                ArPlane_acquireSubsumedBy(m_pARSession, pPlane, &pSubsumedPlane);
 
-            // -----------------------------------------------------------------------------
-            // Generate triangle (0, 1, 4), (4, 1, 5), (5, 1, 2), (5, 2, 6),
-            // (6, 2, 3), (6, 3, 7), (7, 3, 0), (7, 0, 4)
-            // -----------------------------------------------------------------------------
-            for (int IndexOfIndice = 0; IndexOfIndice < NumberOfVerticesHalf; ++IndexOfIndice)
-            {
-                PlaneIndices.push_back(IndexOfIndice);
-                PlaneIndices.push_back((IndexOfIndice + 1) % NumberOfVerticesHalf);
-                PlaneIndices.push_back(IndexOfIndice + NumberOfVerticesHalf);
+                if (pSubsumedPlane != nullptr)
+                {
+                    ArTrackable_release(ArAsTrackable(pSubsumedPlane));
 
-                PlaneIndices.push_back(IndexOfIndice + NumberOfVerticesHalf);
-                PlaneIndices.push_back((IndexOfIndice + 1) % NumberOfVerticesHalf);
-                PlaneIndices.push_back((IndexOfIndice + NumberOfVerticesHalf + 1) % NumberOfVerticesHalf + NumberOfVerticesHalf);
-            }
-        };
+                    continue;
+                }
 
-        // -----------------------------------------------------------------------------
-        // Get trackable planes
-        // -----------------------------------------------------------------------------
-        ArTrackableList* ListOfPlanes = nullptr;
+                if (TrackableTrackingState != AR_TRACKING_STATE_TRACKING) continue;
 
-        ArTrackableList_create(m_pARSession, &ListOfPlanes);
+                ArTrackingState PlaneTrackingState;
 
-        assert(ListOfPlanes != nullptr);
+                ArTrackable_getTrackingState(m_pARSession, ArAsTrackable(pPlane), &PlaneTrackingState);
 
-        ArSession_getAllTrackables(m_pARSession, AR_TRACKABLE_PLANE, ListOfPlanes);
+                if (PlaneTrackingState != AR_TRACKING_STATE_TRACKING) continue;
 
-        int NumberOfPlanes = 0;
+                ArTrackable_release(pTrackableItem);
 
-        ArTrackableList_getSize(m_pARSession, ListOfPlanes, &NumberOfPlanes);
+                // -----------------------------------------------------------------------------
+                // Generate planes and upload data
+                // -----------------------------------------------------------------------------
+                UpdateGeometryForPlane(pPlane);
 
-        // -----------------------------------------------------------------------------
-        // Update every available plane
-        // -----------------------------------------------------------------------------
-        Gfx::ContextManager::SetBlendState(Gfx::StateManager::GetBlendState(Gfx::CBlendState::AlphaBlend));
+                if (PlaneIndices.size() == 0 || PlaneVertices.size() == 0) continue;
 
-        Gfx::ContextManager::SetShaderVS(m_PlaneVS);
+                if (PlaneVertices.size() >= s_MaxNumberOfVerticesPerPlane || PlaneIndices.size() >= s_MaxNumberOfVerticesPerPlane)
+                {
+                    ENGINE_CONSOLE_WARNING("Plane could not be rendered because of too many vertices.");
+                    continue;
+                }
 
-        Gfx::ContextManager::SetShaderPS(m_PlanePS);
-
-        Gfx::ContextManager::SetVertexBuffer(m_PlaneVerticesBufferPtr);
-
-        Gfx::ContextManager::SetIndexBuffer(m_PlaneIndicesBufferPtr, 0);
-
-        Gfx::ContextManager::SetConstantBuffer(0, m_MatrixBufferPtr);
-
-        Gfx::ContextManager::SetConstantBuffer(1, m_ColorBufferPtr);
-
-        Gfx::ContextManager::SetInputLayout(m_PlaneVS->GetInputLayout());
-
-        Gfx::ContextManager::SetTopology(Gfx::STopology::TriangleList);
-
-        for (int IndexOfPlane = 0; IndexOfPlane < NumberOfPlanes; ++IndexOfPlane)
-        {
-            ArTrackable* pTrackableItem = nullptr;
-
-            ArTrackableList_acquireItem(m_pARSession, ListOfPlanes, IndexOfPlane, &pTrackableItem);
-
-            ArPlane* pPlane = ArAsPlane(pTrackableItem);
-
-            ArTrackingState TrackableTrackingState;
-
-            ArTrackable_getTrackingState(m_pARSession, pTrackableItem, &TrackableTrackingState);
-
-            ArPlane* pSubsumedPlane;
-
-            ArPlane_acquireSubsumedBy(m_pARSession, pPlane, &pSubsumedPlane);
-
-            if (pSubsumedPlane != nullptr)
-            {
-                ArTrackable_release(ArAsTrackable(pSubsumedPlane));
-
-                continue;
-            }
-
-            if (TrackableTrackingState != AR_TRACKING_STATE_TRACKING) continue;
-
-            ArTrackingState PlaneTrackingState;
-
-            ArTrackable_getTrackingState(m_pARSession, ArAsTrackable(pPlane), &PlaneTrackingState);
-
-            if (PlaneTrackingState != AR_TRACKING_STATE_TRACKING) continue;
-
-            ArTrackable_release(pTrackableItem);
-
-            // -----------------------------------------------------------------------------
-            // Generate planes and upload data
-            // -----------------------------------------------------------------------------
-            UpdateGeometryForPlane(pPlane);
-
-            if (PlaneIndices.size() == 0 || PlaneVertices.size() == 0) continue;
-
-            if (PlaneVertices.size() >= s_MaxNumberOfVerticesPerPlane || PlaneIndices.size() >= s_MaxNumberOfVerticesPerPlane)
-            {
-                ENGINE_CONSOLE_WARNING("Plane could not be rendered because of too many vertices.");
-                continue;
-            }
-
-            // -----------------------------------------------------------------------------
-            // Prepare model-view-projection matrix
-            // TODO: Change color depending on height of the plane
-            // -----------------------------------------------------------------------------
-            auto MainCameraPtr = Gfx::ViewManager::GetMainCamera();
-
-            glm::mat4 PlaneMVPMatrix = MainCameraPtr->GetViewProjectionMatrix() * glm::mat4(m_ARCToEngineMatrix) * PlaneModelMatrix;
-
-            glm::vec4 Color = glm::vec4(GetPlaneColor(IndexOfPlane), 1.0f);
-
-            // -----------------------------------------------------------------------------
-            // Upload data
-            // -----------------------------------------------------------------------------
-            Gfx::BufferManager::UploadBufferData(m_PlaneVerticesBufferPtr, &PlaneVertices.front()[0], 0, PlaneVertices.size() * sizeof(glm::vec3));
-
-            Gfx::BufferManager::UploadBufferData(m_PlaneIndicesBufferPtr, &PlaneIndices.front(), 0, PlaneIndices.size() * sizeof(unsigned int));
-
-            Gfx::BufferManager::UploadBufferData(m_MatrixBufferPtr, &PlaneMVPMatrix);
-
-            Gfx::BufferManager::UploadBufferData(m_ColorBufferPtr, &Color);
-
-            // -----------------------------------------------------------------------------
-            // Draw
-            // -----------------------------------------------------------------------------
-            Gfx::ContextManager::DrawIndexed(PlaneIndices.size(), 0, 0);
-        }
-
-        ArTrackableList_destroy(ListOfPlanes);
-
-        ListOfPlanes = nullptr;
-
-        // -----------------------------------------------------------------------------
-        // Render planes
-        // -----------------------------------------------------------------------------
-        bool RenderPoints = Core::CProgramParameters::GetInstance().Get<bool>("mr:ar:debug:render_points", true);
-
-        if (RenderPoints == false) return;
-
-        ArPointCloud* pPointCloud = nullptr;
-
-        ArStatus Status = ArFrame_acquirePointCloud(m_pARSession, m_pARFrame, &pPointCloud);
-
-        if (Status == AR_SUCCESS)
-        {
-            // -----------------------------------------------------------------------------
-            // Generate points and upload data
-            // -----------------------------------------------------------------------------
-            int NumberOfPoints = 0;
-
-            ArPointCloud_getNumberOfPoints(m_pARSession, pPointCloud, &NumberOfPoints);
-
-            if (NumberOfPoints > 0)
-            {
-                const float* pPointCloudData;
-
-                ArPointCloud_getData(m_pARSession, pPointCloud, &pPointCloudData);
-
+                // -----------------------------------------------------------------------------
+                // Prepare model-view-projection matrix
+                // TODO: Change color depending on height of the plane
+                // -----------------------------------------------------------------------------
                 auto MainCameraPtr = Gfx::ViewManager::GetMainCamera();
 
-                glm::mat4 PointMVPMatrix = MainCameraPtr->GetViewProjectionMatrix() * glm::mat4(m_ARCToEngineMatrix);
+                glm::mat4 PlaneMVPMatrix = MainCameraPtr->GetViewProjectionMatrix() * glm::mat4(m_ARCToEngineMatrix) * PlaneModelMatrix;
+
+                glm::vec4 Color = glm::vec4(GetPlaneColor(IndexOfPlane), 1.0f);
 
                 // -----------------------------------------------------------------------------
-                // Upload
+                // Upload data
                 // -----------------------------------------------------------------------------
-                Gfx::BufferManager::UploadBufferData(m_PointVerticesBufferPtr, pPointCloudData, 0, sizeof(glm::vec4) * glm::min(NumberOfPoints, s_MaxNumberOfPoints));
+                Gfx::BufferManager::UploadBufferData(m_PlaneVerticesBufferPtr, &PlaneVertices.front()[0], 0, PlaneVertices.size() * sizeof(glm::vec3));
 
-                Gfx::BufferManager::UploadBufferData(m_MatrixBufferPtr, &PointMVPMatrix);
+                Gfx::BufferManager::UploadBufferData(m_PlaneIndicesBufferPtr, &PlaneIndices.front(), 0, PlaneIndices.size() * sizeof(unsigned int));
+
+                Gfx::BufferManager::UploadBufferData(m_MatrixBufferPtr, &PlaneMVPMatrix);
+
+                Gfx::BufferManager::UploadBufferData(m_ColorBufferPtr, &Color);
 
                 // -----------------------------------------------------------------------------
                 // Draw
                 // -----------------------------------------------------------------------------
-                Gfx::ContextManager::SetShaderVS(m_PointVS);
+                Gfx::ContextManager::DrawIndexed(PlaneIndices.size(), 0, 0);
+            }
 
-                Gfx::ContextManager::SetShaderPS(m_PointPS);
+            ArTrackableList_destroy(ListOfPlanes);
 
-                Gfx::ContextManager::SetVertexBuffer(m_PointVerticesBufferPtr);
+            ListOfPlanes = nullptr;
+        }
 
-                Gfx::ContextManager::SetConstantBuffer(0, m_MatrixBufferPtr);
+        // -----------------------------------------------------------------------------
+        // Render points
+        // -----------------------------------------------------------------------------
+        if (m_Settings.m_ShowPoints)
+        {
+            ArPointCloud *pPointCloud = nullptr;
 
-                Gfx::ContextManager::SetTopology(Gfx::STopology::PointList);
+            ArStatus Status = ArFrame_acquirePointCloud(m_pARSession, m_pARFrame, &pPointCloud);
 
-                Gfx::ContextManager::SetInputLayout(m_PointVS->GetInputLayout());
+            if (Status == AR_SUCCESS)
+            {
+                // -----------------------------------------------------------------------------
+                // Generate points and upload data
+                // -----------------------------------------------------------------------------
+                int NumberOfPoints = 0;
 
-                Gfx::ContextManager::Draw(NumberOfPoints, 0);
+                ArPointCloud_getNumberOfPoints(m_pARSession, pPointCloud, &NumberOfPoints);
 
-                ArPointCloud_release(pPointCloud);
+                if (NumberOfPoints > 0)
+                {
+                    const float *pPointCloudData;
+
+                    ArPointCloud_getData(m_pARSession, pPointCloud, &pPointCloudData);
+
+                    auto MainCameraPtr = Gfx::ViewManager::GetMainCamera();
+
+                    glm::mat4 PointMVPMatrix = MainCameraPtr->GetViewProjectionMatrix() *
+                                               glm::mat4(m_ARCToEngineMatrix);
+
+                    // -----------------------------------------------------------------------------
+                    // Upload
+                    // -----------------------------------------------------------------------------
+                    Gfx::BufferManager::UploadBufferData(m_PointVerticesBufferPtr, pPointCloudData, 0, sizeof(glm::vec4) * glm::min(NumberOfPoints, s_MaxNumberOfPoints));
+
+                    Gfx::BufferManager::UploadBufferData(m_MatrixBufferPtr, &PointMVPMatrix);
+
+                    // -----------------------------------------------------------------------------
+                    // Draw
+                    // -----------------------------------------------------------------------------
+                    Gfx::ContextManager::SetShaderVS(m_PointVS);
+
+                    Gfx::ContextManager::SetShaderPS(m_PointPS);
+
+                    Gfx::ContextManager::SetVertexBuffer(m_PointVerticesBufferPtr);
+
+                    Gfx::ContextManager::SetConstantBuffer(0, m_MatrixBufferPtr);
+
+                    Gfx::ContextManager::SetTopology(Gfx::STopology::PointList);
+
+                    Gfx::ContextManager::SetInputLayout(m_PointVS->GetInputLayout());
+
+                    Gfx::ContextManager::Draw(NumberOfPoints, 0);
+
+                    ArPointCloud_release(pPointCloud);
+                }
             }
         }
 
@@ -1323,6 +1354,27 @@ namespace ControlManager
     {
         return CMRControlManager::GetInstance().GetBackgroundTexture();
     }
+
+    // -----------------------------------------------------------------------------
+
+    const SSettings& GetSettings()
+    {
+        return CMRControlManager::GetInstance().GetSettings();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void SetSettings(const SSettings& _rSettings)
+    {
+        CMRControlManager::GetInstance().SetSettings(_rSettings);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void ResetSettings()
+    {
+        CMRControlManager::GetInstance().ResetSettings();
+    }
 } // namespace ControlManager
 } // namespace MR
 
@@ -1344,4 +1396,14 @@ extern "C" CORE_PLUGIN_API_EXPORT void ReleaseMarker(const MR::CMarker* _pMarker
 extern "C" CORE_PLUGIN_API_EXPORT Gfx::CTexturePtr GetBackgroundTexture()
 {
     return MR::ControlManager::GetBackgroundTexture();
+}
+
+extern "C" CORE_PLUGIN_API_EXPORT void SetSettings(bool _ShowPlanes, bool _ShowPoints)
+{
+    MR::ControlManager::SSettings Settings = MR::ControlManager::GetSettings();
+
+    Settings.m_ShowPlanes = _ShowPlanes;
+    Settings.m_ShowPoints = _ShowPoints;
+
+    MR::ControlManager::SetSettings(Settings);
 }

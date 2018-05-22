@@ -153,7 +153,21 @@ namespace Cam
         }
         else if (pCameraComponent->GetProjectionType() == Dt::CCameraComponent::External)
         {
-            rCamera.SetProjectionMatrix(pCameraComponent->GetProjectionMatrix(), pCameraComponent->GetNear(), pCameraComponent->GetFar());
+            glm::mat4& rProjectionMatrix = pCameraComponent->GetProjectionMatrix();
+
+            // -----------------------------------------------------------------------------
+            // Decompose left, right, top, bottom, near and far from projection
+            // matrix:
+            // -----------------------------------------------------------------------------
+            float Near = rProjectionMatrix[2][3] / (rProjectionMatrix[2][2] - 1.0f);
+            float Far  = rProjectionMatrix[2][3] / (rProjectionMatrix[2][2] + 1.0f);
+
+            float Bottom = Near * (rProjectionMatrix[2][1] - 1.0f) / rProjectionMatrix[1][1];
+            float Top    = Near * (rProjectionMatrix[2][1] + 1.0f) / rProjectionMatrix[1][1];
+            float Left   = Near * (rProjectionMatrix[2][0] - 1.0f) / rProjectionMatrix[0][0];
+            float Right  = Near * (rProjectionMatrix[2][0] + 1.0f) / rProjectionMatrix[0][0];
+
+            rCamera.SetPerspective(Left, Right, Bottom, Top, Near, Far);
         }
 
         // -----------------------------------------------------------------------------

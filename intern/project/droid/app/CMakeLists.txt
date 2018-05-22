@@ -94,14 +94,34 @@ link_directories ( ${ExternDir}/tinyxml2/lib/${ANDROID_ABI} )
 
 file( GLOB_RECURSE TargetSources LIST_DIRECTORIES false ${SourceDir}plugin/light_estimation_lut/*.c* ${SourceDir}/plugin/light_estimation_lut/*.h* )
 
-add_library( light_estimation_lut SHARED ${TargetSources} )
+add_library( plugin_light_estimation_lut SHARED ${TargetSources} )
 
-target_include_directories( light_estimation_lut PRIVATE ${ExternDir}/glm/include )
-target_include_directories( light_estimation_lut PRIVATE ${ExternDir}/json/include )
+target_include_directories( plugin_light_estimation_lut PRIVATE ${ExternDir}/glm/include )
+target_include_directories( plugin_light_estimation_lut PRIVATE ${ExternDir}/json/include )
 
-target_link_libraries( light_estimation_lut log android m )
-target_link_libraries( light_estimation_lut tinyxml2)
-target_link_libraries( light_estimation_lut base engine )
+target_link_libraries( plugin_light_estimation_lut log android m )
+target_link_libraries( plugin_light_estimation_lut tinyxml2)
+target_link_libraries( plugin_light_estimation_lut base engine )
+
+# ---------------------------------------
+# Plugin Light Estimation Stitching
+# ---------------------------------------
+include_directories( ${IncludeDir} )
+
+link_directories ( ${ExternDir}/assimp/lib/${ANDROID_ABI} )
+link_directories ( ${ExternDir}/devil/lib/${ANDROID_ABI} )
+link_directories ( ${ExternDir}/tinyxml2/lib/${ANDROID_ABI} )
+
+file( GLOB_RECURSE TargetSources LIST_DIRECTORIES false ${SourceDir}plugin/light_estimation_stitching/*.c* ${SourceDir}/plugin/light_estimation_stitching/*.h* )
+
+add_library( plugin_light_estimation_stitching SHARED ${TargetSources} )
+
+target_include_directories( plugin_light_estimation_stitching PRIVATE ${ExternDir}/glm/include )
+target_include_directories( plugin_light_estimation_stitching PRIVATE ${ExternDir}/json/include )
+
+target_link_libraries( plugin_light_estimation_stitching log android m )
+target_link_libraries( plugin_light_estimation_stitching tinyxml2)
+target_link_libraries( plugin_light_estimation_stitching base engine )
 
 # ---------------------------------------
 # Java Interface

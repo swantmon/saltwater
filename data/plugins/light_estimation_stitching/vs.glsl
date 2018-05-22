@@ -1,35 +1,34 @@
 
-#ifndef __INCLUDE_FS_LUT_ENV_CUBEMAP_GENERATION_GLSL__
-#define __INCLUDE_FS_LUT_ENV_CUBEMAP_GENERATION_GLSL__
-
-#include "common.glsl"
+#ifndef __INCLUDE_VS_SPHERICAL_ENV_CUBEMAP_GENERATION_GLSL__
+#define __INCLUDE_VS_SPHERICAL_ENV_CUBEMAP_GENERATION_GLSL__
 
 // -----------------------------------------------------------------------------
-// Input from engine
+// Built-In variables
 // -----------------------------------------------------------------------------
-layout(binding = 0) uniform sampler2D in_InputTexture;
-layout(binding = 1) uniform samplerCube in_LookUpTexture;
+out gl_PerVertex
+{
+    vec4 gl_Position;
+};
 
 // -----------------------------------------------------------------------------
-// Input to fragment from VS
+// Input from buffer
 // -----------------------------------------------------------------------------
-layout(location = 0) in vec3 in_Normal;
+layout(location = 0) in vec3 in_WSPosition;
+layout(location = 1) in vec2 in_UV;
 
 // -----------------------------------------------------------------------------
-// Output to fragment
+// Output to next stage
 // -----------------------------------------------------------------------------
-layout(location = 0) out vec4 out_Output;
+layout(location = 0) out vec2 out_UV;
 
 // -----------------------------------------------------------------------------
 // Main
 // -----------------------------------------------------------------------------
 void main(void)
 {
-	vec4 LookUp = textureLod(in_LookUpTexture, in_Normal, 0.0f);
-
-    vec4 FinalColor = texture(in_InputTexture, LookUp.xy);
-        
-    out_Output = vec4(FinalColor.xyz, 1.0f);
+    out_UV = vec2(in_UV.x, in_UV.y);
+    
+    gl_Position = vec4(in_WSPosition.xyz, 1.0f);
 }
 
-#endif // __INCLUDE_FS_LUT_ENV_CUBEMAP_GENERATION_GLSL__
+#endif // __INCLUDE_VS_SPHERICAL_ENV_CUBEMAP_GENERATION_GLSL__

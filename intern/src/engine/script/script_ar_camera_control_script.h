@@ -34,6 +34,7 @@ namespace Scpt
         typedef float (*ArCoreGetCameraNearFunc)(const void* _pCamera);
         typedef float (*ArCoreGetCameraFarFunc)(const void* _pCamera);
         typedef Gfx::CTexturePtr (*ArCoreGetBackgroundTextureFunc)();
+        typedef void(*ArSetFlipVerticalFunc)(bool _Flag);
 
         ArCoreGetCameraFunc ArCoreGetCamera;
         ArCoreGetCameraTrackingStateFunc ArCoreGetCameraTrackingState;
@@ -48,7 +49,6 @@ namespace Scpt
         Dt::CEntity* m_pCameraEntity = nullptr;
         Dt::CCameraComponent* m_pCameraComponent = nullptr;
         bool m_ArCoreAvailable = false;
-        bool m_FlipVertical = false;
 
     public:
 
@@ -70,6 +70,14 @@ namespace Scpt
             GetCameraNear = (ArCoreGetCameraNearFunc)(Core::PluginManager::GetPluginFunction(PluginName, "GetCameraNear"));
             GetCameraFar = (ArCoreGetCameraFarFunc)(Core::PluginManager::GetPluginFunction(PluginName, "GetCameraFar"));
             GetBackgroundTexture = (ArCoreGetBackgroundTextureFunc)(Core::PluginManager::GetPluginFunction(PluginName, "GetBackgroundTexture"));
+
+#if PLATFORM_WINDOWS
+            ArSetFlipVerticalFunc SetFlipVertical;
+
+            SetFlipVertical = (ArSetFlipVerticalFunc)(Core::PluginManager::GetPluginFunction(PluginName, "SetFlipVertical"));
+
+            SetFlipVertical(true);
+#endif
         }
 
         // -----------------------------------------------------------------------------
@@ -114,11 +122,9 @@ namespace Scpt
 
                 m_pCameraComponent->SetNear(GetCameraNear(rCamera));
 
-                m_pCameraComponent->SetNear(GetCameraFar(rCamera));
+                m_pCameraComponent->SetFar(GetCameraFar(rCamera));
 
                 m_pCameraComponent->SetProjectionMatrix(GetCameraProjectionMatrix(rCamera));
-
-                m_pCameraComponent->SetFlipVertical(m_FlipVertical);
 
                 m_pCameraComponent->SetBackgroundTexture(GetBackgroundTexture());
 

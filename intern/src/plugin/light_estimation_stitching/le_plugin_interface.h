@@ -50,12 +50,10 @@ namespace LE
         Gfx::CShaderPtr m_PSPtr;
 
         Gfx::CBufferPtr m_CubemapBufferPtr;
-        Gfx::CBufferPtr m_ModelMatrixBufferPtr;
 
-        Gfx::CMeshPtr m_MeshPtr;
+        Gfx::CBufferPtr m_VertexBufferPtr;
 
         Gfx::CTexturePtr m_InputTexturePtr;
-        Gfx::CTexturePtr m_LookUpTexturePtr;
         Gfx::CTexturePtr m_OutputCubemapPtr;
 
         Gfx::CTargetSetPtr m_TargetSetPtr;

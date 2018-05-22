@@ -18,7 +18,6 @@ namespace Dt
         , m_FoV                   (60.0f)
         , m_Near                  (0.3f)
         , m_Far                   (1000.0f)
-        , m_FlipBackgroundVertical(false)
         , m_BackgroundColor       (glm::vec3(1.0f))
         , m_ProjectionMatrix      (glm::mat3(1.0f))
         , m_ViewportRect          ()
@@ -187,20 +186,6 @@ namespace Dt
     float CCameraComponent::GetFar() const
     {
         return m_Far;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CCameraComponent::SetFlipVertical(bool _Flag)
-    {
-        m_FlipBackgroundVertical = _Flag;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    bool CCameraComponent::IsFlipVertical() const
-    {
-        return m_FlipBackgroundVertical;
     }
 
     // -----------------------------------------------------------------------------
