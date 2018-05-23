@@ -1,7 +1,7 @@
 
-#include "mr/mr_precompiled.h"
+#include "plugin/slam/slam_precompiled.h"
 
-#include "base/base_program_parameters.h"
+#include "engine/core/core_program_parameters.h"
 
 #include "mr_slam_reconstruction_settings.h"
 
@@ -28,13 +28,13 @@ namespace MR
         s_DefaultSettings.m_PyramidLevelCount = 3;
         s_DefaultSettings.m_DepthThreshold = glm::ivec2(500, 8000);
 
-        s_DefaultSettings.m_IsScalable = Base::CProgramParameters::GetInstance().Get("mr:slam:scalable", true);
+        s_DefaultSettings.m_IsScalable = Core::CProgramParameters::GetInstance().Get("mr:slam:scalable", true);
 
-        s_DefaultSettings.m_VoxelSize = Base::CProgramParameters::GetInstance().Get("mr:slam:metrics:voxel_size", 0.004f);
-        s_DefaultSettings.m_VolumeSize = Base::CProgramParameters::GetInstance().Get("mr:slam:metrics:volume_size", 4.0f);
-        s_DefaultSettings.m_VolumeResolution = Base::CProgramParameters::GetInstance().Get("mr:slam:metrics:volume_resolution", 512);
+        s_DefaultSettings.m_VoxelSize = Core::CProgramParameters::GetInstance().Get("mr:slam:metrics:voxel_size", 0.004f);
+        s_DefaultSettings.m_VolumeSize = Core::CProgramParameters::GetInstance().Get("mr:slam:metrics:volume_size", 4.0f);
+        s_DefaultSettings.m_VolumeResolution = Core::CProgramParameters::GetInstance().Get("mr:slam:metrics:volume_resolution", 512);
 
-        s_DefaultSettings.m_PyramidLevelIterations = Base::CProgramParameters::GetInstance().Get("mr:slam:tracking_iterations", glm::ivec3(5, 5, 4));
+        s_DefaultSettings.m_PyramidLevelIterations = Core::CProgramParameters::GetInstance().Get("mr:slam:tracking_iterations", glm::ivec3(5, 5, 4));
         
         s_DefaultSettings.m_GridResolutions = glm::ivec3(16, 8, 8);
 
@@ -56,7 +56,7 @@ namespace MR
             }
         }
 
-        s_DefaultSettings.m_CaptureColor = Base::CProgramParameters::GetInstance().Get("mr:slam:capture_color", false);
+        s_DefaultSettings.m_CaptureColor = Core::CProgramParameters::GetInstance().Get("mr:slam:capture_color", false);
 
         s_IsInitialized = true;
     }

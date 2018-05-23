@@ -1,32 +1,31 @@
 
-#include "mr/mr_precompiled.h"
+#include "plugin/slam/slam_precompiled.h"
 
 #include "base/base_include_glm.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
-#include "core/core_time.h"
+#include "engine/core/core_console.h"
+#include "engine/core/core_program_parameters.h"
+#include "engine/core/core_time.h"
 
-#include "graphic/gfx_buffer_manager.h"
-#include "graphic/gfx_context_manager.h"
-#include "graphic/gfx_main.h"
-#include "graphic/gfx_mesh_manager.h"
-#include "graphic/gfx_performance.h"
-#include "graphic/gfx_sampler_manager.h"
-#include "graphic/gfx_shader_manager.h"
-#include "graphic/gfx_state_manager.h"
-#include "graphic/gfx_target_set.h"
-#include "graphic/gfx_target_set_manager.h"
-#include "graphic/gfx_texture.h"
-#include "graphic/gfx_texture_manager.h"
-#include "graphic/gfx_view_manager.h"
+#include "engine/graphic/gfx_buffer_manager.h"
+#include "engine/graphic/gfx_context_manager.h"
+#include "engine/graphic/gfx_main.h"
+#include "engine/graphic/gfx_mesh_manager.h"
+#include "engine/graphic/gfx_performance.h"
+#include "engine/graphic/gfx_sampler_manager.h"
+#include "engine/graphic/gfx_shader_manager.h"
+#include "engine/graphic/gfx_state_manager.h"
+#include "engine/graphic/gfx_target_set.h"
+#include "engine/graphic/gfx_target_set_manager.h"
+#include "engine/graphic/gfx_texture.h"
+#include "engine/graphic/gfx_texture_manager.h"
+#include "engine/graphic/gfx_view_manager.h"
 
-#include "base/base_console.h"
-#include "base/base_program_parameters.h"
-
-#include "mr/mr_slam_reconstructor.h"
-#include "mr/mr_rgbd_camera_control.h"
-#include "mr/mr_kinect_control.h"
+#include "plugin/slam/mr_slam_reconstructor.h"
+#include "plugin/slam/mr_rgbd_camera_control.h"
+#include "plugin/slam/mr_kinect_control.h"
 
 #include <gl/glew.h>
 
@@ -150,7 +149,7 @@ namespace MR
     void CSLAMReconstructor::Start()
     {
         m_pRGBDCameraControl.reset(new MR::CKinectControl);
-        BASE_CONSOLE_INFO("Using Kinect for SLAM");
+        ENGINE_CONSOLE_INFO("Using Kinect for SLAM");
 
         m_DepthPixels = std::vector<unsigned short>(m_pRGBDCameraControl->GetDepthPixelCount());
         m_CameraPixels = std::vector<char>(m_pRGBDCameraControl->GetDepthPixelCount() * 4);

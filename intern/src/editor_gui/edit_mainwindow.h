@@ -46,7 +46,6 @@ namespace Edit
         void createNewEntitySSR();
         void createNewEntityVolumeFog();
         void createNewPluginARController();
-        void createNewSLAMReconstruction();
         void reloadRenderer();
         void reloadAllShader();
         void changeHistogramSettings();

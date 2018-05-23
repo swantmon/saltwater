@@ -1,22 +1,14 @@
-//
-//  mr_scalable_slam_reconstructor.h
-//  graphic
-//
-//  Created by Tobias Schwandt on 12/12/14.
-//  Copyright (c) 2014 TU Ilmenau. All rights reserved.
-//
 
 #pragma once
 
 #include "base/base_uncopyable.h"
 #include "base/base_include_glm.h"
 
-#include "mr/mr_plane_detector.h"
-#include "mr/mr_slam_reconstruction_settings.h"
-#include "mr/mr_icp_tracker.h"
+#include "plugin/slam/mr_slam_reconstruction_settings.h"
+#include "plugin/slam/mr_icp_tracker.h"
 
-#include "graphic/gfx_shader.h"
-#include "graphic/gfx_texture.h"
+#include "engine/graphic/gfx_shader.h"
+#include "engine/graphic/gfx_texture.h"
 
 #include <array>
 #include <map>
@@ -166,8 +158,6 @@ namespace MR
         Gfx::CTexturePtr GetVertexMap();
         Gfx::CTexturePtr GetNormalMap();
 
-        CPlaneDetector& GetPlaneDetector();
-
         glm::ivec2 GetDepthImageSize();
 
         float GetReconstructionSize();
@@ -309,8 +299,7 @@ namespace MR
 		std::array<glm::vec4, 6> m_FrustumPlanes;
         
         bool m_UseConservativeRasterization;
-        
-        std::unique_ptr<CPlaneDetector> m_pPlaneDetector;
+
         std::unique_ptr<CICPTracker> m_pTracker;
 
         std::vector<char> m_ClearVector;

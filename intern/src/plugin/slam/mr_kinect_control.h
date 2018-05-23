@@ -3,7 +3,7 @@
 
 #include "mr_rgbd_camera_control.h"
 
-#include "base/base_console.h"
+#include "engine/core/core_console.h"
 
 #define NOMINMAX
 #include <windows.h>
@@ -12,6 +12,7 @@
 
 #include <cassert>
 #include <mutex>
+#include <vector>
 
 namespace MR
 {

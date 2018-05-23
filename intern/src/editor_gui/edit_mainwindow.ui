@@ -138,7 +138,6 @@
      </property>
      <addaction name="m_pActionEmpty"/>
      <addaction name="m_pActionCamera"/>
-     <addaction name="m_pActionSLAM"/>
     </widget>
     <widget class="QMenu" name="menuLights">
      <property name="title">
@@ -668,11 +667,6 @@
     <string>Ctrl+4</string>
    </property>
   </action>
-  <action name="m_pActionSLAM">
-   <property name="text">
-    <string>SLAM</string>
-   </property>
-  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -1180,22 +1174,6 @@
    </hints>
   </connection>
   <connection>
-   <sender>m_pActionSLAM</sender>
-   <signal>triggered()</signal>
-   <receiver>CMainWindow</receiver>
-   <slot>createNewSLAMReconstruction()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>961</x>
-     <y>490</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>m_pResolutionCB</sender>
    <signal>currentIndexChanged(int)</signal>
    <receiver>CMainWindow</receiver>
@@ -1252,7 +1230,6 @@
   <slot>createNewLightArea()</slot>
   <slot>reloadRenderer()</slot>
   <slot>reloadAllShader()</slot>
-  <slot>createNewSLAMReconstruction()</slot>
   <slot>changeResolution(int)</slot>
   <slot>toggleToneMappingDock()</slot>
  </slots>

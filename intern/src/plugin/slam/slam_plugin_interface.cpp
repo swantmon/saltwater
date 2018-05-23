@@ -5,26 +5,46 @@
 
 #include "plugin/slam/slam_plugin_interface.h"
 
+#include "plugin/slam/gfx_reconstruction_renderer.h"
+
 CORE_PLUGIN_INFO(HW::CPluginInterface, "SLAM", "1.0", "This plugin use an awesome Simultaneous Localization and Mapping.")
 
 namespace HW
 {
     void CPluginInterface::OnStart()
     {
-        ENGINE_CONSOLE_INFOV("SLAM plugin started!");
+        Gfx::ReconstructionRenderer::OnStart();
+        Gfx::ReconstructionRenderer::OnSetupShader();
+        Gfx::ReconstructionRenderer::OnSetupKernels();
+        Gfx::ReconstructionRenderer::OnSetupRenderTargets();
+        Gfx::ReconstructionRenderer::OnSetupStates();
+        Gfx::ReconstructionRenderer::OnSetupTextures();
+        Gfx::ReconstructionRenderer::OnSetupBuffers();
+        Gfx::ReconstructionRenderer::OnSetupResources();
+        Gfx::ReconstructionRenderer::OnSetupModels();
+        Gfx::ReconstructionRenderer::OnSetupEnd();
     }
 
     // -----------------------------------------------------------------------------
 
     void CPluginInterface::OnExit()
     {
-        ENGINE_CONSOLE_INFOV("SLAM plugin exited!");
+        Gfx::ReconstructionRenderer::OnExit();
     }
 
     // -----------------------------------------------------------------------------
 
     void CPluginInterface::Update()
     {
+        static int i = 0;
+
+        ++i;
+
+        if (i <= 10) return;
+
+        Gfx::ReconstructionRenderer::Update();
+
+        Gfx::ReconstructionRenderer::Render(0);
     }
 
     // -----------------------------------------------------------------------------

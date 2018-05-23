@@ -1,33 +1,33 @@
 
-#include "graphic/gfx_precompiled.h"
+#include "plugin/slam/slam_precompiled.h"
 
 #include "base/base_include_glm.h"
-#include "base/base_program_parameters.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
-#include "camera/cam_control_manager.h"
-#include "camera/cam_editor_control.h"
+#include "engine/camera/cam_control_manager.h"
+#include "engine/camera/cam_editor_control.h"
 
-#include "core/core_time.h"
+#include "engine/core/core_program_parameters.h"
+#include "engine/core/core_time.h"
 
-#include "graphic/gfx_buffer_manager.h"
-#include "graphic/gfx_context_manager.h"
-#include "graphic/gfx_main.h"
-#include "graphic/gfx_mesh_manager.h"
-#include "graphic/gfx_performance.h"
-#include "graphic/gfx_reconstruction_renderer.h"
-#include "graphic/gfx_sampler_manager.h"
-#include "graphic/gfx_shader_manager.h"
-#include "graphic/gfx_state_manager.h"
-#include "graphic/gfx_target_set.h"
-#include "graphic/gfx_target_set_manager.h"
-#include "graphic/gfx_texture.h"
-#include "graphic/gfx_texture_manager.h"
-#include "graphic/gfx_view_manager.h"
+#include "engine/graphic/gfx_buffer_manager.h"
+#include "engine/graphic/gfx_context_manager.h"
+#include "engine/graphic/gfx_main.h"
+#include "engine/graphic/gfx_mesh_manager.h"
+#include "engine/graphic/gfx_performance.h"
+#include "engine/graphic/gfx_sampler_manager.h"
+#include "engine/graphic/gfx_shader_manager.h"
+#include "engine/graphic/gfx_state_manager.h"
+#include "engine/graphic/gfx_target_set.h"
+#include "engine/graphic/gfx_target_set_manager.h"
+#include "engine/graphic/gfx_texture.h"
+#include "engine/graphic/gfx_texture_manager.h"
+#include "engine/graphic/gfx_view_manager.h"
 
-#include "mr/mr_slam_reconstructor.h"
-#include "mr/mr_scalable_slam_reconstructor.h"
+#include "plugin/slam/gfx_reconstruction_renderer.h"
+#include "plugin/slam/mr_slam_reconstructor.h"
+#include "plugin/slam/mr_scalable_slam_reconstructor.h"
 
 #include "GL/glew.h"
 
@@ -109,13 +109,9 @@ namespace
         void RenderQueuedLevel1Grids();
         void RenderQueuedLevel2Grids();
 
-        void RenderHistogram();
-
         void RenderCamera();
 
         void RenderVertexMap();
-        
-        void RenderPlanes();
 
     private:
 
@@ -229,16 +225,16 @@ namespace
 			m_pScalableReconstructor = nullptr;
 		}
 
-        m_UseTrackingCamera     = Base::CProgramParameters::GetInstance().Get("mr:slam:rendering:use_tracking_camera", true);
-        m_RenderVolume          = Base::CProgramParameters::GetInstance().Get("mr:slam:rendering:volume"             , true);
-        m_RenderVolumeVertexMap = Base::CProgramParameters::GetInstance().Get("mr:slam:rendering:volume_vertex_map"  , false);
-        m_RenderVertexMap       = Base::CProgramParameters::GetInstance().Get("mr:slam:rendering:vertex_map"         , false);
-        m_RenderRootQueue       = Base::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:root"        , false);
-        m_RenderLevel1Queue     = Base::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:level1"      , false);
-        m_RenderLevel2Queue     = Base::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:level2"      , false);
-        m_RenderHistogram       = Base::CProgramParameters::GetInstance().Get("mr:slam:rendering:histogram"          , false);
-        m_RenderPlanes          = Base::CProgramParameters::GetInstance().Get("mr:slam:rendering:planes"             , false);
-        m_RenderBackSides       = Base::CProgramParameters::GetInstance().Get("mr:slam:rendering:backsides"          , true);
+        m_UseTrackingCamera     = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:use_tracking_camera", true);
+        m_RenderVolume          = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:volume"             , true);
+        m_RenderVolumeVertexMap = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:volume_vertex_map"  , false);
+        m_RenderVertexMap       = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:vertex_map"         , false);
+        m_RenderRootQueue       = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:root"        , false);
+        m_RenderLevel1Queue     = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:level1"      , false);
+        m_RenderLevel2Queue     = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:level2"      , false);
+        m_RenderHistogram       = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:histogram"          , false);
+        m_RenderPlanes          = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:planes"             , false);
+        m_RenderBackSides       = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:backsides"          , true);
     }
 
     // -----------------------------------------------------------------------------
@@ -293,7 +289,7 @@ namespace
     {
 		MR::SReconstructionSettings Settings;
 
-        const std::string InternalFormatString = Base::CProgramParameters::GetInstance().Get("mr:slam:map_format", "rgba16f");
+        const std::string InternalFormatString = Core::CProgramParameters::GetInstance().Get("mr:slam:map_format", "rgba16f");
 
 		if (m_pScalableReconstructor != nullptr)
 		{
@@ -319,7 +315,7 @@ namespace
                 << "#define MAP_TEXTURE_FORMAT "     << InternalFormatString << " \n"
                 << "#define RAYCAST_NEAR "           << 0.0f << " \n"
                 << "#define RAYCAST_FAR "            << 1000.0f << " \n"
-                << "#define MIN_TREE_WEIGHT "        << Base::CProgramParameters::GetInstance().Get("mr:slam:rendering:min_weight", 30) << " \n";
+                << "#define MIN_TREE_WEIGHT "        << Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:min_weight", 30) << " \n";
             
             if (Settings.m_CaptureColor)
             {
@@ -522,210 +518,25 @@ namespace
         ////////////////////////////////////////////////////////////////////////////////
         // Create cube mesh
         ////////////////////////////////////////////////////////////////////////////////
+        m_CameraMeshPtr = MeshManager::CreateBox(1.0f, 1.0f, 1.0f);
 
-        Dt::CSurface* pSurface = new Dt::CSurface;
-        Dt::CLOD* pLOD = new Dt::CLOD;
-        Dt::CMesh* pMesh = new Dt::CMesh;
-
-        pSurface->SetPositions(CameraLines);
-        pSurface->SetNumberOfVertices(sizeof(CameraLines) / sizeof(CameraLines[0]));
-        pSurface->SetIndices(nullptr);
-        pSurface->SetNumberOfIndices(0);
-        pSurface->SetElements(0);
-
-        pLOD->SetSurface(0, pSurface);
-        pLOD->SetNumberOfSurfaces(1);
-        
-        pMesh->SetLOD(0, pLOD);
-        pMesh->SetNumberOfLODs(1);
-
-        SMeshDescriptor MeshDesc =
-        {
-            pMesh
-        };
-
-        m_CameraMeshPtr = MeshManager::CreateMesh(MeshDesc);
-
-		glm::vec3 CubeLines[24] =
-		{
-			g_CubeVertices[0], g_CubeVertices[1],
-			g_CubeVertices[1], g_CubeVertices[2],
-			g_CubeVertices[2], g_CubeVertices[3],
-			g_CubeVertices[3], g_CubeVertices[0],
-
-			g_CubeVertices[0], g_CubeVertices[4],
-			g_CubeVertices[1], g_CubeVertices[5],
-			g_CubeVertices[2], g_CubeVertices[6],
-			g_CubeVertices[3], g_CubeVertices[7],
-
-			g_CubeVertices[4], g_CubeVertices[5],
-			g_CubeVertices[5], g_CubeVertices[6],
-			g_CubeVertices[6], g_CubeVertices[7],
-			g_CubeVertices[7], g_CubeVertices[4],
-		};
-
-        unsigned int CubeIndices[] =
-        {
-            0, 1, 2,
-            0, 2, 3,
-
-            5, 2, 1,
-            5, 6, 2,
-
-            4, 5, 1,
-            4, 1, 0,
-
-            4, 0, 7,
-            0, 3, 7,
-
-            7, 2, 6,
-            7, 3, 2,
-
-            4, 7, 6,
-            4, 6, 5,
-        };
-
-        pSurface = new Dt::CSurface;
-        pLOD = new Dt::CLOD;
-        pMesh = new Dt::CMesh;
-
-        pSurface->SetPositions(g_CubeVertices);
-        pSurface->SetNumberOfVertices(sizeof(g_CubeVertices) / sizeof(g_CubeVertices[0]));
-        pSurface->SetIndices(CubeIndices);
-        pSurface->SetNumberOfIndices(sizeof(CubeIndices) / sizeof(CubeIndices[0]));
-        pSurface->SetElements(0);
-
-        pLOD->SetSurface(0, pSurface);
-        pLOD->SetNumberOfSurfaces(1);
-
-        pMesh->SetLOD(0, pLOD);
-        pMesh->SetNumberOfLODs(1);
-
-        MeshDesc.m_pMesh = pMesh;
-
-        m_VolumeMeshPtr = MeshManager::CreateMesh(MeshDesc);
+        m_VolumeMeshPtr = MeshManager::CreateBox(1.0f, 1.0f, 1.0f);
 
         ////////////////////////////////////////////////////////////////////////////////
         // Create cube outline mesh
         ////////////////////////////////////////////////////////////////////////////////
-
-		pSurface = new Dt::CSurface;
-		pLOD = new Dt::CLOD;
-		pMesh = new Dt::CMesh;
-
-		pSurface->SetPositions(CubeLines);
-		pSurface->SetNumberOfVertices(sizeof(CubeLines) / sizeof(CubeLines[0]));
-		pSurface->SetIndices(nullptr);
-		pSurface->SetNumberOfIndices(0);
-		pSurface->SetElements(0);
-
-		pLOD->SetSurface(0, pSurface);
-		pLOD->SetNumberOfSurfaces(1);
-
-		pMesh->SetLOD(0, pLOD);
-		pMesh->SetNumberOfLODs(1);
-
-		MeshDesc.m_pMesh = pMesh;
-
-		m_CubeOutlineMeshPtr = MeshManager::CreateMesh(MeshDesc);
+        m_CubeOutlineMeshPtr = MeshManager::CreateBox(1.0f, 1.0f, 1.0f);
 
         ////////////////////////////////////////////////////////////////////////////////
         // Create quad mesh
         ////////////////////////////////////////////////////////////////////////////////
 
-        glm::vec3 QuadLines[4] =
-        {
-            glm::vec3(0.0f, 1.0f, 0.0f),
-            glm::vec3(0.0f, 0.0f, 0.0f),
-            glm::vec3(1.0f, 1.0f, 0.0f),
-            glm::vec3(1.0f, 0.0f, 0.0f),
-        };
-
-        pSurface = new Dt::CSurface;
-        pLOD = new Dt::CLOD;
-        pMesh = new Dt::CMesh;
-
-        pSurface->SetPositions(QuadLines);
-        pSurface->SetNumberOfVertices(sizeof(QuadLines) / sizeof(QuadLines[0]));
-        pSurface->SetIndices(nullptr);
-        pSurface->SetNumberOfIndices(0);
-        pSurface->SetElements(0);
-
-        pLOD->SetSurface(0, pSurface);
-        pLOD->SetNumberOfSurfaces(1);
-
-        pMesh->SetLOD(0, pLOD);
-        pMesh->SetNumberOfLODs(1);
-
-        MeshDesc.m_pMesh = pMesh;
-
-        m_QuadMeshPtr = MeshManager::CreateMesh(MeshDesc);
+        m_QuadMeshPtr = MeshManager::CreateRectangle(0.0f, 0.0f, 1.0f, 1.0f);
 
         ////////////////////////////////////////////////////////////////////////////////
         // Create plane mesh
         ////////////////////////////////////////////////////////////////////////////////
-
-        std::vector<glm::vec3> PlaneVertices;
-
-        const int PlaneSize = 3;
-
-        for (int x = -PlaneSize; x <= PlaneSize; ++ x)
-        {
-            for (int y = -PlaneSize; y <= PlaneSize; ++ y)
-            {
-                glm::vec3 NewVertices[4] =
-                {
-                    QuadLines[0],
-                    QuadLines[1],
-                    QuadLines[2],
-                    QuadLines[3],
-                };
-
-                for (int i = 0; i < 4; ++ i)
-                {
-                    NewVertices[i][0] += x;
-                    NewVertices[i][1] += y;
-
-                    PlaneVertices.push_back(NewVertices[i]);
-                }
-            }
-        }
-
-        uint32_t BaseIndices[] =
-        {
-            0, 1, 2,
-            1, 2, 3,
-        };
-
-        std::vector<uint32_t> Indices;
-
-        for (int i = 0; i < static_cast<int>(PlaneVertices.size()) / 4; ++ i)
-        {
-            for (int j = 0; j < 6; ++ j)
-            {
-                Indices.push_back(BaseIndices[j] + i * 4);
-            }
-        }
-
-        pSurface = new Dt::CSurface;
-        pLOD = new Dt::CLOD;
-        pMesh = new Dt::CMesh;
-
-        pSurface->SetPositions(PlaneVertices.data());
-        pSurface->SetNumberOfVertices(int(PlaneVertices.size()));
-        pSurface->SetIndices(&Indices[0]);
-        pSurface->SetNumberOfIndices(static_cast<int>(Indices.size()));
-        pSurface->SetElements(0);
-
-        pLOD->SetSurface(0, pSurface);
-        pLOD->SetNumberOfSurfaces(1);
-
-        pMesh->SetLOD(0, pLOD);
-        pMesh->SetNumberOfLODs(1);
-
-        MeshDesc.m_pMesh = pMesh;
-
-        m_PlaneMeshPtr = MeshManager::CreateMesh(MeshDesc);
+        m_PlaneMeshPtr = MeshManager::CreateRectangle(0.0f, 0.0f, 1.0f, 1.0f);
     }
     
     // -----------------------------------------------------------------------------
@@ -775,7 +586,7 @@ namespace
 			m_pReconstructor->ResetReconstruction(&_Settings);
 		}
 
-        BufferManager::UploadBufferData(m_VolumeMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &g_CubeVertices);
+        BufferManager::UploadBufferData(m_VolumeMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer(), &g_CubeVertices);
         OnSetupShader();
     }
     
@@ -859,8 +670,8 @@ namespace
         ContextManager::SetImageTexture(1, m_pScalableReconstructor->GetNormalMap());
 
         const unsigned int Offset = 0;
-        ContextManager::SetVertexBuffer(m_QuadMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
-        ContextManager::SetIndexBuffer(m_QuadMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
+        ContextManager::SetVertexBuffer(m_QuadMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
+        ContextManager::SetIndexBuffer(m_QuadMeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
 
         ContextManager::SetInputLayout(m_QuadInputLayoutPtr);
         ContextManager::SetTopology(STopology::TriangleStrip);
@@ -915,8 +726,8 @@ namespace
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
         
         const unsigned int Offset = 0;
-        ContextManager::SetVertexBuffer(m_VolumeMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
-        ContextManager::SetIndexBuffer(m_VolumeMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
+        ContextManager::SetVertexBuffer(m_VolumeMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
+        ContextManager::SetIndexBuffer(m_VolumeMeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
         ContextManager::SetInputLayout(m_VolumeInputLayoutPtr);
         
         ContextManager::SetTopology(STopology::TriangleList);
@@ -941,12 +752,12 @@ namespace
 		ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
 		ContextManager::SetConstantBuffer(1, m_DrawCallConstantBufferPtr);
 		
-		ContextManager::SetVertexBuffer(m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+		ContextManager::SetVertexBuffer(m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
 		ContextManager::SetInputLayout(m_CubeOutlineInputLayoutPtr);
 
 		ContextManager::SetTopology(STopology::LineList);
 
-		ContextManager::Draw(m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfVertices(), 0);
+		ContextManager::Draw(m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface()->GetNumberOfVertices(), 0);
     }
 
 	// -----------------------------------------------------------------------------
@@ -1032,11 +843,11 @@ namespace
         }
         BufferManager::UploadBufferData(m_RaycastConstantBufferPtr, RaycastData);
 
-        BufferManager::UploadBufferData(m_VolumeMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer(), &Vertices);
+        BufferManager::UploadBufferData(m_VolumeMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer(), &Vertices);
 
         const unsigned int Offset = 0;
-        ContextManager::SetVertexBuffer(m_VolumeMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
-        ContextManager::SetIndexBuffer(m_VolumeMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
+        ContextManager::SetVertexBuffer(m_VolumeMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
+        ContextManager::SetIndexBuffer(m_VolumeMeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
         ContextManager::SetInputLayout(m_VolumeInputLayoutPtr);
 
         ContextManager::SetTopology(STopology::TriangleList);
@@ -1050,8 +861,8 @@ namespace
         ContextManager::SetShaderVS(m_CopyRaycastVSPtr);
         ContextManager::SetShaderPS(m_CopyRaycastFSPtr);
 
-        ContextManager::SetVertexBuffer(m_QuadMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
-        ContextManager::SetIndexBuffer(m_QuadMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
+        ContextManager::SetVertexBuffer(m_QuadMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
+        ContextManager::SetIndexBuffer(m_QuadMeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
         ContextManager::SetInputLayout(m_QuadInputLayoutPtr);
 
         ContextManager::SetImageTexture(0, m_IntermediateTargetPtr0);
@@ -1077,7 +888,7 @@ namespace
 
 		SDrawCallConstantBuffer BufferData;
 
-		ContextManager::SetVertexBuffer(m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+		ContextManager::SetVertexBuffer(m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
 		ContextManager::SetInputLayout(m_CubeOutlineInputLayoutPtr);
 
 		ContextManager::SetTopology(STopology::LineList);
@@ -1109,7 +920,7 @@ namespace
 
                 BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
 
-                ContextManager::Draw(m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfVertices(), 0);
+                ContextManager::Draw(m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface()->GetNumberOfVertices(), 0);
 			}
 		}
 	}
@@ -1129,7 +940,7 @@ namespace
 
         SDrawCallConstantBuffer BufferData;
 
-        ContextManager::SetVertexBuffer(m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+        ContextManager::SetVertexBuffer(m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
         ContextManager::SetInputLayout(m_CubeOutlineInputLayoutPtr);
 
         ContextManager::SetTopology(STopology::LineList);
@@ -1164,7 +975,7 @@ namespace
                 assert(rRootGrid.m_Level1QueuePtr != nullptr);
                 ContextManager::SetResourceBuffer(2, rRootGrid.m_Level1QueuePtr);
 
-                int VertexCount = m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfVertices();
+                int VertexCount = m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface()->GetNumberOfVertices();
                 BufferManager::UploadBufferData(rRootGrid.m_IndirectLevel1Buffer, &VertexCount, 0, sizeof(uint32_t));
 
                 ContextManager::DrawIndirect(rRootGrid.m_IndirectLevel1Buffer, MR::CScalableSLAMReconstructor::SIndirectBuffers::s_DrawOffset);
@@ -1187,7 +998,7 @@ namespace
 
         SDrawCallConstantBuffer BufferData;
 
-        ContextManager::SetVertexBuffer(m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
+        ContextManager::SetVertexBuffer(m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
         ContextManager::SetInputLayout(m_CubeOutlineInputLayoutPtr);
 
         ContextManager::SetTopology(STopology::LineList);
@@ -1220,90 +1031,12 @@ namespace
                 assert(rRootGrid.m_Level2QueuePtr != nullptr);
                 ContextManager::SetResourceBuffer(2, rRootGrid.m_Level2QueuePtr);
 
-                int VertexCount = m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfVertices();
+                int VertexCount = m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface()->GetNumberOfVertices();
                 BufferManager::UploadBufferData(rRootGrid.m_IndirectLevel2Buffer, &VertexCount, 0, sizeof(uint32_t));
 
                 ContextManager::DrawIndirect(rRootGrid.m_IndirectLevel2Buffer, MR::CScalableSLAMReconstructor::SIndirectBuffers::s_DrawOffset);
             }
         }
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CGfxReconstructionRenderer::RenderHistogram()
-    {
-        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
-
-        ContextManager::SetRenderContext(m_OutlineRenderContextPtr);
-        ContextManager::SetShaderVS(m_HistogramVSPtr);
-        ContextManager::SetShaderPS(m_HistogramFSPtr);
-        
-        ContextManager::SetImageTexture(0, m_pScalableReconstructor->GetPlaneDetector().GetNormalHistogram());
-
-        const unsigned int Offset = 0;
-        ContextManager::SetVertexBuffer(m_QuadMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
-        ContextManager::SetIndexBuffer(m_QuadMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
-
-        ContextManager::SetInputLayout(m_QuadInputLayoutPtr);
-        ContextManager::SetTopology(STopology::TriangleStrip);
-
-        ContextManager::Draw(4, 0);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CGfxReconstructionRenderer::RenderPlanes()
-    {
-        Performance::BeginEvent("Plane Rendering");
-
-        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Wireframe));
-
-        ContextManager::SetRenderContext(m_OutlineRenderContextPtr);
-        ContextManager::SetShaderVS(m_OutlineVSPtr);
-        ContextManager::SetShaderPS(m_OutlineFSPtr);
-
-        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
-        ContextManager::SetConstantBuffer(1, m_DrawCallConstantBufferPtr);
-
-        const unsigned int Offset = 0;
-        ContextManager::SetVertexBuffer(m_PlaneMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
-        ContextManager::SetIndexBuffer(m_PlaneMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
-
-        ContextManager::SetInputLayout(m_CameraInputLayoutPtr);
-        ContextManager::SetTopology(STopology::TriangleList);
-        
-        SDrawCallConstantBuffer BufferData;
-
-        auto& Planes = m_pScalableReconstructor->GetPlaneDetector().GetPlanes();
-
-        for (auto rPlane : Planes)
-        {
-            glm::vec3 PlaneNormal = glm::normalize(glm::vec3(rPlane));
-
-            glm::vec3 Vertex0 = glm::vec3(0.0f);
-            glm::vec3 Vertex1 = glm::vec3(1.0f);
-
-            Vertex0[2] = -rPlane[3] / PlaneNormal[2];
-            Vertex1[2] = (-rPlane[3] - PlaneNormal[0] - PlaneNormal[1]) / PlaneNormal[2];
-
-            glm::vec3 Binormal = glm::normalize(Vertex1 - Vertex0);
-            glm::vec3 Tangent = glm::normalize(glm::cross(PlaneNormal, Binormal));
-
-            glm::mat4 Translation;
-            glm::mat4 Rotation;
-
-            Translation = glm::translate(Vertex0);
-            Rotation = glm::lookAt(Vertex0, Vertex0 + PlaneNormal, glm::vec3(0.0f, 1.0f, 0.0f));
-
-            BufferData.m_WorldMatrix = Translation * Rotation;
-            BufferData.m_Color = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
-
-            BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
-
-            ContextManager::DrawIndexed(m_PlaneMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices(), 0, 0);
-        }
-
-        Performance::EndEvent();
     }
 
     // -----------------------------------------------------------------------------
@@ -1328,13 +1061,13 @@ namespace
         ContextManager::SetConstantBuffer(1, m_DrawCallConstantBufferPtr);
 
         const unsigned int Offset = 0;
-        ContextManager::SetVertexBuffer(m_CameraMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
-        ContextManager::SetIndexBuffer(m_CameraMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
+        ContextManager::SetVertexBuffer(m_CameraMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
+        ContextManager::SetIndexBuffer(m_CameraMeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
 
         ContextManager::SetInputLayout(m_CameraInputLayoutPtr);
         ContextManager::SetTopology(STopology::LineList);
 
-        ContextManager::Draw(m_CameraMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfVertices(), 0);
+        ContextManager::Draw(m_CameraMeshPtr->GetLOD(0)->GetSurface()->GetNumberOfVertices(), 0);
     }
 
     // -----------------------------------------------------------------------------
@@ -1361,8 +1094,8 @@ namespace
         ContextManager::SetImageTexture(0, m_pScalableReconstructor->GetVertexMap());
 
         const unsigned int Offset = 0;
-        ContextManager::SetVertexBuffer(m_CameraMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
-        ContextManager::SetIndexBuffer(m_CameraMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
+        ContextManager::SetVertexBuffer(m_CameraMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
+        ContextManager::SetIndexBuffer(m_CameraMeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
 
         ContextManager::SetInputLayout(m_CameraInputLayoutPtr);
         ContextManager::SetTopology(STopology::PointList);
@@ -1427,16 +1160,6 @@ namespace
                 if (m_RenderLevel2Queue)
                 {
                     RenderQueuedLevel2Grids();
-                }
-
-                if (m_RenderHistogram)
-                {
-                    RenderHistogram();
-                }
-
-                if (m_RenderPlanes)
-                {
-                    RenderPlanes();
                 }
             }
             else

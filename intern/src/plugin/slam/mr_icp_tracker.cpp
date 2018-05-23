@@ -1,16 +1,16 @@
 
-#include "mr/mr_precompiled.h"
+#include "plugin/slam/slam_precompiled.h"
 
-#include "mr/mr_icp_tracker.h"
+#include "engine/core/core_program_parameters.h"
 
-#include "base/base_program_parameters.h"
+#include "engine/graphic/gfx_buffer_manager.h"
+#include "engine/graphic/gfx_context_manager.h"
+#include "engine/graphic/gfx_main.h"
+#include "engine/graphic/gfx_performance.h"
+#include "engine/graphic/gfx_shader_manager.h"
+#include "engine/graphic/gfx_texture_manager.h"
 
-#include "graphic/gfx_buffer_manager.h"
-#include "graphic/gfx_context_manager.h"
-#include "graphic/gfx_main.h"
-#include "graphic/gfx_performance.h"
-#include "graphic/gfx_shader_manager.h"
-#include "graphic/gfx_texture_manager.h"
+#include "plugin/slam/mr_icp_tracker.h"
 
 #include <cassert>
 #include <sstream>
@@ -256,7 +256,7 @@ namespace MR
 
         m_UseShuffleIntrinsics = false;
 
-        const bool EnableShuffleIntrinsics = Base::CProgramParameters::GetInstance().Get("mr:slam:shuffle_intrinsics_enable", true);
+        const bool EnableShuffleIntrinsics = Core::CProgramParameters::GetInstance().Get("mr:slam:shuffle_intrinsics_enable", true);
 
         if (EnableShuffleIntrinsics)
         {
@@ -264,7 +264,7 @@ namespace MR
 
             if (!m_UseShuffleIntrinsics)
             {
-                BASE_CONSOLE_INFO("Shuffle intrinsics are not available. Will use fallback method");
+                ENGINE_CONSOLE_INFO("Shuffle intrinsics are not available. Will use fallback method");
             }
         }
 
@@ -307,7 +307,7 @@ namespace MR
 
         const int Summands = SummandsX * SummandsY;
 
-        const std::string InternalFormatString = Base::CProgramParameters::GetInstance().Get("mr:slam:map_format", "rgba16f");
+        const std::string InternalFormatString = Core::CProgramParameters::GetInstance().Get("mr:slam:map_format", "rgba16f");
 
         std::stringstream DefineStream;
 

@@ -1,9 +1,9 @@
 
-#include "mr/mr_precompiled.h"
+#include "plugin/slam/slam_precompiled.h"
 
-#include "mr/mr_kinect_control.h"
+#include "plugin/slam/mr_kinect_control.h"
 
-#include "base/base_program_parameters.h"
+#include "engine/core/core_program_parameters.h"
 
 #include <fstream>
 #include <iostream>
@@ -25,7 +25,7 @@ namespace
     {
         if (Result != S_OK)
         {
-            BASE_CONSOLE_ERROR(pMessage);
+            ENGINE_CONSOLE_ERROR(pMessage);
             throw std::exception(pMessage);
         }
     }
@@ -62,8 +62,8 @@ namespace MR
 
     void CKinectControl::Start()
     {
-        int StoreMode = Base::CProgramParameters::GetInstance().Get("mr:slam:storing:mode", 0);
-        m_DatasetPath = Base::CProgramParameters::GetInstance().Get("mr:slam:storing:path", "dataset");
+        int StoreMode = Core::CProgramParameters::GetInstance().Get("mr:slam:storing:mode", 0);
+        m_DatasetPath = Core::CProgramParameters::GetInstance().Get("mr:slam:storing:path", "dataset");
         m_StoreFrames = StoreMode == 1;
         m_LoadFrames = StoreMode == 2;
 
@@ -189,7 +189,7 @@ namespace MR
 
             if (pDepthFrame->AccessUnderlyingBuffer(&BufferSize, &pShortBuffer) != S_OK)
             {
-                BASE_CONSOLE_ERROR("Failed to access underlying buffer");
+                ENGINE_CONSOLE_ERROR("Failed to access underlying buffer");
                 return false;
             }
 

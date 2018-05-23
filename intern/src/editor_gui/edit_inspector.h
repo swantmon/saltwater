@@ -18,7 +18,6 @@
 #include "editor_gui/edit_inspector_texture.h"
 #include "editor_gui/edit_inspector_transformation.h"
 #include "editor_gui/edit_inspector_volumefog.h"
-#include "editor_gui/edit_inspector_slam.h"
 
 #include "editor_port/edit_message.h"
 
@@ -65,7 +64,6 @@ namespace Edit
         CInspectorCamera*         m_pCameraWidget;
         CInspectorARController*   m_pARControllerWidget;
         CInspectorTexture*        m_pTextureWidget;
-        CInspectorSLAM*           m_pSlamWidget;
         Base::ID                  m_ActiveEntityID;
 
     private:

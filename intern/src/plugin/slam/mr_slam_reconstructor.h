@@ -1,21 +1,14 @@
-//
-//  mr_slam_reconstructor.h
-//  graphic
-//
-//  Created by Tobias Schwandt on 12/12/14.
-//  Copyright (c) 2014 TU Ilmenau. All rights reserved.
-//
 
 #pragma once
 
 #include "base/base_uncopyable.h"
 #include "base/base_include_glm.h"
-#include "mr/mr_slam_reconstruction_settings.h"
 
-#include "graphic/gfx_shader.h"
-#include "graphic/gfx_texture.h"
+#include "engine/graphic/gfx_shader.h"
+#include "engine/graphic/gfx_texture.h"
 
-#include "mr/mr_icp_tracker.h"
+#include "plugin/slam/mr_icp_tracker.h"
+#include "plugin/slam/mr_slam_reconstruction_settings.h"
 
 #include <memory>
 #include <vector>

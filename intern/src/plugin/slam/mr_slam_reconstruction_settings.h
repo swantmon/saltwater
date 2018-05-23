@@ -1,16 +1,7 @@
-//
-//  mr_slam_reconstructor.h
-//  graphic
-//
-//  Created by Tobias Schwandt on 12/12/14.
-//  Copyright (c) 2014 TU Ilmenau. All rights reserved.
-//
 
 #pragma once
 
 #include "base/base_include_glm.h"
-
-#include <array>
 
 namespace MR
 {

@@ -3,11 +3,11 @@
 
 #include "base/base_include_glm.h"
 
-#include "graphic/gfx_buffer.h"
-#include "graphic/gfx_shader.h"
-#include "graphic/gfx_texture.h"
+#include "engine/graphic/gfx_buffer.h"
+#include "engine/graphic/gfx_shader.h"
+#include "engine/graphic/gfx_texture.h"
 
-#include "mr/mr_slam_reconstruction_settings.h"
+#include "plugin/slam/mr_slam_reconstruction_settings.h"
 
 #include <vector>
 

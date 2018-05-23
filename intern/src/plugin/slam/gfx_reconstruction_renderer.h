@@ -1,14 +1,6 @@
-//
-//  gfx_reconstruction_renderer.h
-//  graphic
-//
-//  Created by Tobias Schwandt on 12/12/14.
-//  Copyright (c) 2014 TU Ilmenau. All rights reserved.
-//
-
 #pragma once
 
-#include "mr/mr_slam_reconstructor.h"
+#include "plugin/slam/mr_slam_reconstructor.h"
 
 namespace Gfx
 {

@@ -1,31 +1,31 @@
 
-#include "mr/mr_precompiled.h"
+#include "plugin/slam/slam_precompiled.h"
 
-#include "base/base_console.h"
 #include "base/base_include_glm.h"
-#include "base/base_program_parameters.h"
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
-#include "core/core_time.h"
+#include "engine/core/core_console.h"
+#include "engine/core/core_program_parameters.h"
+#include "engine/core/core_time.h"
 
-#include "graphic/gfx_buffer_manager.h"
-#include "graphic/gfx_context_manager.h"
-#include "graphic/gfx_main.h"
-#include "graphic/gfx_mesh_manager.h"
-#include "graphic/gfx_performance.h"
-#include "graphic/gfx_sampler_manager.h"
-#include "graphic/gfx_shader_manager.h"
-#include "graphic/gfx_state_manager.h"
-#include "graphic/gfx_target_set.h"
-#include "graphic/gfx_target_set_manager.h"
-#include "graphic/gfx_texture.h"
-#include "graphic/gfx_texture_manager.h"
-#include "graphic/gfx_view_manager.h"
+#include "engine/graphic/gfx_buffer_manager.h"
+#include "engine/graphic/gfx_context_manager.h"
+#include "engine/graphic/gfx_main.h"
+#include "engine/graphic/gfx_mesh_manager.h"
+#include "engine/graphic/gfx_performance.h"
+#include "engine/graphic/gfx_sampler_manager.h"
+#include "engine/graphic/gfx_shader_manager.h"
+#include "engine/graphic/gfx_state_manager.h"
+#include "engine/graphic/gfx_target_set.h"
+#include "engine/graphic/gfx_target_set_manager.h"
+#include "engine/graphic/gfx_texture.h"
+#include "engine/graphic/gfx_texture_manager.h"
+#include "engine/graphic/gfx_view_manager.h"
 
-#include "mr/mr_scalable_slam_reconstructor.h"
-#include "mr/mr_rgbd_camera_control.h"
-#include "mr/mr_kinect_control.h"
+#include "plugin/slam/mr_scalable_slam_reconstructor.h"
+#include "plugin/slam/mr_rgbd_camera_control.h"
+#include "plugin/slam/mr_kinect_control.h"
 
 #include <iostream>
 #include <limits>
@@ -34,7 +34,7 @@
 
 #include <gl/glew.h>
 
-#include "graphic/gfx_native_buffer.h"
+#include "engine/graphic/gfx_native_buffer.h"
 
 using namespace MR;
 using namespace Gfx;
@@ -201,7 +201,7 @@ namespace MR
         // Check if conservative rasterization is available
         ////////////////////////////////////////////////////////////////////////////////
 
-        const bool EnableConservativeRaster = Base::CProgramParameters::GetInstance().Get("mr:slam:conservative_raster_enable", true);
+        const bool EnableConservativeRaster = Core::CProgramParameters::GetInstance().Get("mr:slam:conservative_raster_enable", true);
 
         m_UseConservativeRasterization = false;
 
@@ -211,7 +211,7 @@ namespace MR
 
             if (!m_UseConservativeRasterization)
             {
-                BASE_CONSOLE_INFO("Conservative rasterization is not available. Will use fallback method");
+                ENGINE_CONSOLE_INFO("Conservative rasterization is not available. Will use fallback method");
             }
         }
 
@@ -220,7 +220,7 @@ namespace MR
         ////////////////////////////////////////////////////////////////////////////////
 
         m_pRGBDCameraControl.reset(new MR::CKinectControl);
-        BASE_CONSOLE_INFO("Using Kinect for SLAM");
+        ENGINE_CONSOLE_INFO("Using Kinect for SLAM");
 
         m_DepthImageSize.x = m_pRGBDCameraControl->GetDepthWidth();
         m_DepthImageSize.y = m_pRGBDCameraControl->GetDepthHeight();
@@ -272,26 +272,7 @@ namespace MR
 
     void CScalableSLAMReconstructor::SetupMeshes()
     {
-        Dt::CSurface* pSurface = new Dt::CSurface;
-        Dt::CLOD* pLOD = new Dt::CLOD;
-        Dt::CMesh* pMesh = new Dt::CMesh;
-
-        pSurface->SetPositions(CubeVertices);
-        pSurface->SetNumberOfVertices(sizeof(CubeVertices) / sizeof(CubeVertices[0]));
-        pSurface->SetIndices(CubeIndices);
-        pSurface->SetNumberOfIndices(sizeof(CubeIndices) / sizeof(CubeIndices[0]));
-        pSurface->SetElements(0);
-
-        pLOD->SetSurface(0, pSurface);
-        pLOD->SetNumberOfSurfaces(1);
-
-        pMesh->SetLOD(0, pLOD);
-        pMesh->SetNumberOfLODs(1);
-
-        SMeshDescriptor MeshDesc = {};
-        MeshDesc.m_pMesh = pMesh;
-
-        m_CubeMeshPtr = MeshManager::CreateMesh(MeshDesc);
+        m_CubeMeshPtr = Gfx::MeshManager::CreateBox(1.0f, 1.0f, 1.0f);
     }
     
 	// -----------------------------------------------------------------------------
@@ -303,18 +284,18 @@ namespace MR
 
         m_PoolFull = false;
 
-        m_CreateNormalsFromTSDF = Base::CProgramParameters::GetInstance().Get("mr:slam:normals_from_tsdf", false);
-        m_RaycastBackSides = Base::CProgramParameters::GetInstance().Get("mr:slam:raycast_backsides", true);
+        m_CreateNormalsFromTSDF = Core::CProgramParameters::GetInstance().Get("mr:slam:normals_from_tsdf", false);
+        m_RaycastBackSides = Core::CProgramParameters::GetInstance().Get("mr:slam:raycast_backsides", true);
 
-        m_RootGridPoolSize = Base::CProgramParameters::GetInstance().Get("mr:slam:pool_sizes:level0", g_MaxRootGridPoolSize / g_MegabyteSize) * g_MegabyteSize;
-        m_Level1GridPoolSize = Base::CProgramParameters::GetInstance().Get("mr:slam:pool_sizes:level1", g_MaxLevel1GridPoolSize / g_MegabyteSize) * g_MegabyteSize;
-        m_TSDFPoolSize = Base::CProgramParameters::GetInstance().Get("mr:slam:pool_sizes:level2", g_MaxTSDFPoolSize / g_MegabyteSize) * g_MegabyteSize;
+        m_RootGridPoolSize = Core::CProgramParameters::GetInstance().Get("mr:slam:pool_sizes:level0", g_MaxRootGridPoolSize / g_MegabyteSize) * g_MegabyteSize;
+        m_Level1GridPoolSize = Core::CProgramParameters::GetInstance().Get("mr:slam:pool_sizes:level1", g_MaxLevel1GridPoolSize / g_MegabyteSize) * g_MegabyteSize;
+        m_TSDFPoolSize = Core::CProgramParameters::GetInstance().Get("mr:slam:pool_sizes:level2", g_MaxTSDFPoolSize / g_MegabyteSize) * g_MegabyteSize;
 
         m_ReconstructionSize = 0.0f;
 
-        m_MinWeight = Base::CProgramParameters::GetInstance().Get("mr:slam:min_weight", 15);
+        m_MinWeight = Core::CProgramParameters::GetInstance().Get("mr:slam:min_weight", 15);
 
-        m_VolumeDepthThreshold = Base::CProgramParameters::GetInstance().Get("mr:slam:volume_min_depth_count", 2000);
+        m_VolumeDepthThreshold = Core::CProgramParameters::GetInstance().Get("mr:slam:volume_min_depth_count", 2000);
 
         const int GridLevelCount = MR::SReconstructionSettings::GRID_LEVELS;
 
@@ -429,9 +410,9 @@ namespace MR
 
         BufferManager::UnmapBuffer(m_VolumeBuffers.m_PoolItemCountBufferPtr);
 
-        BASE_CONSOLE_INFO(Stream[0].str().c_str());
-        BASE_CONSOLE_INFO(Stream[1].str().c_str());
-        BASE_CONSOLE_INFO(Stream[2].str().c_str());
+        ENGINE_CONSOLE_INFO(Stream[0].str().c_str());
+        ENGINE_CONSOLE_INFO(Stream[1].str().c_str());
+        ENGINE_CONSOLE_INFO(Stream[2].str().c_str());
 
         m_BilateralFilterCSPtr = 0;
         m_VertexMapCSPtr = 0;
@@ -493,7 +474,7 @@ namespace MR
     {
         const float VoxelSize = m_ReconstructionSettings.m_VoxelSize;
 
-        const std::string InternalFormatString = Base::CProgramParameters::GetInstance().Get("mr:slam:map_format", "rgba16f");
+        const std::string InternalFormatString = Core::CProgramParameters::GetInstance().Get("mr:slam:map_format", "rgba16f");
 
         std::stringstream DefineStream;
 
@@ -625,8 +606,8 @@ namespace MR
     void CScalableSLAMReconstructor::RasterizeRootVolumes()
     {
         const unsigned int Offset = 0;
-        ContextManager::SetVertexBuffer(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
-        ContextManager::SetIndexBuffer(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
+        ContextManager::SetVertexBuffer(m_CubeMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
+        ContextManager::SetIndexBuffer(m_CubeMeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
         ContextManager::SetInputLayout(m_CubeInputLayoutPtr);
         ContextManager::SetTopology(STopology::TriangleList);
 
@@ -643,7 +624,7 @@ namespace MR
 
         ContextManager::Barrier();
         
-        const unsigned int IndexCount = m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
+        const unsigned int IndexCount = m_CubeMeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices();
         const unsigned int InstanceCount = static_cast<unsigned int>(m_RootVolumeVector.size());
         assert(InstanceCount < g_MaxVolumeInstanceCount);
         ClearBuffer(m_AtomicCounterBufferPtr, InstanceCount * sizeof(int32_t));
@@ -733,8 +714,8 @@ namespace MR
         glDisable(GL_DEPTH_TEST);
         glDisable(GL_MULTISAMPLE);
         // Just set a dummy mesh
-        ContextManager::SetVertexBuffer(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetVertexBuffer());
-        ContextManager::SetIndexBuffer(m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetIndexBuffer(), Offset);
+        ContextManager::SetVertexBuffer(m_CubeMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
+        ContextManager::SetIndexBuffer(m_CubeMeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
         ContextManager::SetInputLayout(m_CubeInputLayoutPtr);
         ContextManager::SetTopology(STopology::PointList);
         
@@ -758,7 +739,7 @@ namespace MR
             auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
 
             SIndirectBuffers IndirectBufferData = {};
-            IndirectBufferData.m_Indexed.m_IndexCount = m_CubeMeshPtr->GetLOD(0)->GetSurface(0)->GetNumberOfIndices();
+            IndirectBufferData.m_Indexed.m_IndexCount = m_CubeMeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices();
             BufferManager::UploadBufferData(rRootVolume.m_IndirectLevel1Buffer, &IndirectBufferData);
             BufferManager::UploadBufferData(rRootVolume.m_IndirectLevel2Buffer, &IndirectBufferData);
             
@@ -1152,7 +1133,7 @@ namespace MR
         m_RaycastVertexMapPtr.resize(m_ReconstructionSettings.m_PyramidLevelCount);
         m_RaycastNormalMapPtr.resize(m_ReconstructionSettings.m_PyramidLevelCount);
 
-        std::string MapFormatString = Base::CProgramParameters::GetInstance().Get("mr:slam:map_format", "rgba16f");
+        std::string MapFormatString = Core::CProgramParameters::GetInstance().Get("mr:slam:map_format", "rgba16f");
         assert(MapFormatString == "rgba16f" || MapFormatString == "rgba32f");
         CTexture::EFormat MapFormat = MapFormatString == "rgba16f" ? CTexture::R16G16B16A16_FLOAT : CTexture::R32G32B32A32_FLOAT;
 
@@ -1476,19 +1457,19 @@ namespace MR
             {
                 m_PoolFull = true;
                 m_IsIntegrationPaused = true;
-                BASE_CONSOLE_ERROR("Rootgrid pool is full!");
+                ENGINE_CONSOLE_ERROR("Rootgrid pool is full!");
             }
             if (m_VolumeBuffers.m_Level1PoolSize * m_ReconstructionSettings.m_VoxelsPerGrid[1] * sizeof(SGridPoolItem) > m_Level1GridPoolSize)
             {
                 m_PoolFull = true;
                 m_IsIntegrationPaused = true;
-                BASE_CONSOLE_ERROR("Level1 pool is full!");
+                ENGINE_CONSOLE_ERROR("Level1 pool is full!");
             }
             if (m_VolumeBuffers.m_TSDFPoolSize * m_ReconstructionSettings.m_VoxelsPerGrid[2] * TSDFItemSize > m_TSDFPoolSize)
             {
                 m_PoolFull = true;
                 m_IsIntegrationPaused = true;
-                BASE_CONSOLE_ERROR("TSDF pool buffer is full!");
+                ENGINE_CONSOLE_ERROR("TSDF pool buffer is full!");
             }
         }
          
@@ -1920,14 +1901,6 @@ namespace MR
     Gfx::CTexturePtr CScalableSLAMReconstructor::GetNormalMap()
     {
         return m_RaycastNormalMapPtr[0];
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CPlaneDetector& CScalableSLAMReconstructor::GetPlaneDetector()
-    {
-        assert(m_pPlaneDetector != nullptr);
-        return *m_pPlaneDetector;
     }
 
     // -----------------------------------------------------------------------------

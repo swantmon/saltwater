@@ -185,12 +185,6 @@
     <ClCompile Include="..\..\..\src\editor_gui\moc_edit_mainwindow.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\editor_gui\edit_inspector_slam.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\editor_gui\moc_edit_inspector_slam.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\editor_gui\edit_gui.h" />
@@ -349,14 +343,8 @@
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_area_light.ui">
       <Filter>Form Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_slam.ui">
-      <Filter>Form Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_tone_mapping.ui">
       <Filter>Form Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_slam.h">
-      <Filter>Generated Files</Filter>
     </CustomBuild>
   </ItemGroup>
 </Project>

@@ -126,13 +126,6 @@ namespace Edit
             Graphic_ReloadRenderer,
             Graphic_ReloadAllShader,
 
-            MR_SLAM_NewReconstruction,
-            MR_SLAM_Reconstruction_Update,
-            MR_SLAM_Reconstruction_Pause_Integration,
-            MR_SLAM_Reconstruction_Pause_Tracking,
-            MR_SLAM_Reconstruction_Change_Camera,
-            MR_SLAM_Reconstruction_Memory_Update,
-
             NumberOfMembers,
             Undefined = -1,
         };
