@@ -39,6 +39,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\editor\edit_slam_helper.cpp" />
     <ClCompile Include="..\..\..\src\editor\edit_start_state.cpp" />
     <ClCompile Include="..\..\..\src\editor\edit_unload_map_state.cpp" />
   </ItemGroup>
@@ -57,6 +58,7 @@
     <ClInclude Include="..\..\..\src\editor\edit_play_state.h" />
     <ClInclude Include="..\..\..\src\editor\edit_plugin_helper.h" />
     <ClInclude Include="..\..\..\src\editor\edit_precompiled.h" />
+    <ClInclude Include="..\..\..\src\editor\edit_slam_helper.h" />
     <ClInclude Include="..\..\..\src\editor\edit_start_state.h" />
     <ClInclude Include="..\..\..\src\editor\edit_state.h" />
     <ClInclude Include="..\..\..\src\editor\edit_unload_map_state.h" />

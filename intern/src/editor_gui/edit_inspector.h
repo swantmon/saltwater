@@ -18,6 +18,7 @@
 #include "editor_gui/edit_inspector_texture.h"
 #include "editor_gui/edit_inspector_transformation.h"
 #include "editor_gui/edit_inspector_volumefog.h"
+#include "editor_gui/edit_inspector_slam.h"
 
 #include "editor_port/edit_message.h"
 
@@ -57,13 +58,14 @@ namespace Edit
         CInspectorLightProbe*     m_pLightProbeWidget;
         CInspectorBloom*          m_pBloomWidget;
         CInspectorDOF*            m_pDOFWidget;
-        CInspectorPostAA*         m_pFXAAWidget;
+        CInspectorPostAA*         m_pPostAAWidget;
         CInspectorSSR*            m_pSSRWidget;
         CInspectorVolumeFog*      m_pVolumeFogWidget;
         CInspectorMaterial*       m_pMaterialWidget;
         CInspectorCamera*         m_pCameraWidget;
         CInspectorARController*   m_pARControllerWidget;
         CInspectorTexture*        m_pTextureWidget;
+        CInspectorSLAM*           m_pSlamWidget;
         Base::ID                  m_ActiveEntityID;
 
     private:
