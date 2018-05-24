@@ -631,7 +631,7 @@ namespace
 
     void CGfxReconstructionRenderer::Update()
     {
-        if (m_UseTrackingCamera)
+        if (false) // TODO: use script to update renderer
         {
             Cam::CControl& rControl = static_cast<Cam::CEditorControl&>(Cam::ControlManager::GetActiveControl());
             
