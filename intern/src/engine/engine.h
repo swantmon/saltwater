@@ -9,9 +9,7 @@ namespace Engine
 {
     enum 
     {
-        Gfx_OnStart,
         Gfx_OnUpdate,
-        Gfx_OnExit,
         Gfx_OnRenderGBuffer,
         Gfx_OnRenderLighting,
         Gfx_OnRenderForward,

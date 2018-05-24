@@ -16,8 +16,12 @@ namespace MR
         // -----------------------------------------------------------------------------
         // Hooks
         // -----------------------------------------------------------------------------
-        Engine::RegisterEventHandler(Engine::Gfx_OnStart, ENGINE_BIND_EVENT_METHOD(&CPluginInterface::Gfx_OnStart));
         Engine::RegisterEventHandler(Engine::Gfx_OnUpdate, ENGINE_BIND_EVENT_METHOD(&CPluginInterface::Gfx_OnUpdate));
+
+        // -----------------------------------------------------------------------------
+        // Control manager
+        // -----------------------------------------------------------------------------
+        MR::ControlManager::OnStart();
     }
 
     // -----------------------------------------------------------------------------
@@ -45,13 +49,6 @@ namespace MR
     void CPluginInterface::OnResume()
     {
         MR::ControlManager::OnResume();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CPluginInterface::Gfx_OnStart()
-    {
-        MR::ControlManager::OnStart();
     }
 
     // -----------------------------------------------------------------------------
