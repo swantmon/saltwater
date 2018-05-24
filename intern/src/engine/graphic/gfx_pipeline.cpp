@@ -6,6 +6,8 @@
 
 #include "engine/core/core_console.h"
 
+#include "engine/engine.h"
+
 #include "engine/graphic/gfx_ar_renderer.h"
 #include "engine/graphic/gfx_area_light_manager.h"
 #include "engine/graphic/gfx_background_renderer.h"
@@ -324,12 +326,22 @@ namespace Pipeline
         TonemappingRenderer  ::OnSetupEnd();
 
         ENGINE_CONSOLE_STREAMINFO("Gfx> Finished renderer starting.");
+
+        // -----------------------------------------------------------------------------
+        // Raise a event
+        // -----------------------------------------------------------------------------
+        Engine::RaiseEvent(Engine::Gfx_OnStart);
     }
 
     // -----------------------------------------------------------------------------
 
     void OnExit()
     {
+        // -----------------------------------------------------------------------------
+        // Raise a event
+        // -----------------------------------------------------------------------------
+        Engine::RaiseEvent(Engine::Gfx_OnExit);
+
         // -----------------------------------------------------------------------------
         // Exit renderer. Now it isn't necessary to do this in a specific direction.
         // -----------------------------------------------------------------------------
@@ -452,6 +464,8 @@ namespace Pipeline
         PostFX               ::Update();
         SelectionRenderer    ::Update();
 
+        Engine::RaiseEvent(Engine::Gfx_OnUpdate);
+
         Performance::EndEvent();
 
         // -----------------------------------------------------------------------------
@@ -461,6 +475,8 @@ namespace Pipeline
 
         ARRenderer  ::Render();
         MeshRenderer::Render();
+
+        Engine::RaiseEvent(Engine::Gfx_OnRenderGBuffer);
 
         Performance::EndEvent();
         
@@ -478,9 +494,16 @@ namespace Pipeline
         BackgroundRenderer   ::Render();
         FogRenderer          ::Render();
 
-        HistogramRenderer::Render();
+        Engine::RaiseEvent(Engine::Gfx_OnRenderLighting);
 
-        PostFXHDR::Render();
+        Performance::EndEvent();
+
+        // -----------------------------------------------------------------------------
+        // Forward Pass
+        // -----------------------------------------------------------------------------
+        Performance::BeginEvent("Forward Pass");
+
+        Engine::RaiseEvent(Engine::Gfx_OnRenderForward);
 
         Performance::EndEvent();
 
@@ -488,7 +511,11 @@ namespace Pipeline
         // Shading Pass
         // -----------------------------------------------------------------------------
         Performance::BeginEvent("Shading Pass");
-        
+
+        HistogramRenderer::Render();
+
+        PostFXHDR::Render();
+
         TonemappingRenderer::Render();
 
         LightAreaRenderer::RenderBulbs();
@@ -496,6 +523,15 @@ namespace Pipeline
         SelectionRenderer::Render();
 
         PostFX::Render();
+
+        Performance::EndEvent();
+
+        // -----------------------------------------------------------------------------
+        // UI Pass
+        // -----------------------------------------------------------------------------
+        Performance::BeginEvent("UI Pass");
+
+        Engine::RaiseEvent(Engine::Gfx_OnRenderUI);
 
         Performance::EndEvent();
 
