@@ -86,5 +86,9 @@ namespace AR
         void* m_pCameraTempImageLineData;
 
         bool m_FlipVertical;
+
+    private:
+
+        void Gfx_OnStart();
     };
 } // namespace AR
