@@ -14,5 +14,10 @@ namespace MR
         void OnPause() override;
         void OnResume() override;
         void Update() override;
+
+    private:
+
+        void Gfx_OnStart();
+        void Gfx_OnUpdate();
     };
 } // namespace MR

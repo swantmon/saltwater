@@ -1,6 +1,8 @@
 
 #include "plugin/arcore/mr_precompiled.h"
 
+#include "engine/engine.h"
+
 #include "plugin/arcore/mr_camera.h"
 #include "plugin/arcore/mr_control_manager.h"
 #include "plugin/arcore/mr_plugin_interface.h"
@@ -11,7 +13,11 @@ namespace MR
 {
     void CPluginInterface::OnStart()
     {
-        MR::ControlManager::OnStart();
+        // -----------------------------------------------------------------------------
+        // Hooks
+        // -----------------------------------------------------------------------------
+        Engine::RegisterEventHandler(Engine::Gfx_OnStart, ENGINE_BIND_EVENT_METHOD(&CPluginInterface::Gfx_OnStart));
+        Engine::RegisterEventHandler(Engine::Gfx_OnUpdate, ENGINE_BIND_EVENT_METHOD(&CPluginInterface::Gfx_OnUpdate));
     }
 
     // -----------------------------------------------------------------------------
@@ -25,7 +31,6 @@ namespace MR
 
     void CPluginInterface::Update()
     {
-        MR::ControlManager::Update();
     }
 
     // -----------------------------------------------------------------------------
@@ -40,5 +45,19 @@ namespace MR
     void CPluginInterface::OnResume()
     {
         MR::ControlManager::OnResume();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CPluginInterface::Gfx_OnStart()
+    {
+        MR::ControlManager::OnStart();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CPluginInterface::Gfx_OnUpdate()
+    {
+        MR::ControlManager::Update();
     }
 } // namespace MR

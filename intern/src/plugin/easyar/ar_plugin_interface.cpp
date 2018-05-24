@@ -7,6 +7,8 @@
 #include "engine/core/core_console.h"
 #include "engine/core/core_program_parameters.h"
 
+#include "engine/engine.h"
+
 #include "engine/graphic/gfx_texture_manager.h"
 
 #include "plugin/easyar/ar_plugin_interface.h"
@@ -84,6 +86,12 @@ namespace AR
 
     void CPluginInterface::OnStart()
     {
+        // -----------------------------------------------------------------------------
+        // Hooks
+        // -----------------------------------------------------------------------------
+        Engine::RegisterEventHandler(Engine::Gfx_OnStart, ENGINE_BIND_EVENT_METHOD(&CPluginInterface::Gfx_OnStart));
+        Engine::RegisterEventHandler(Engine::Gfx_OnUpdate, ENGINE_BIND_EVENT_METHOD(&CPluginInterface::Gfx_OnUpdate));
+
         // -----------------------------------------------------------------------------
         // Parameters
         // -----------------------------------------------------------------------------
@@ -170,28 +178,8 @@ namespace AR
         m_CameraSize[1] = m_Camera.m_Native->size().data[1];
 
         // -----------------------------------------------------------------------------
-        // Texture
+        // Camera data
         // -----------------------------------------------------------------------------
-        Gfx::STextureDescriptor TextureDescriptor;
-
-        TextureDescriptor.m_NumberOfPixelsU  = m_CameraSize[0];
-        TextureDescriptor.m_NumberOfPixelsV  = m_CameraSize[1];
-        TextureDescriptor.m_NumberOfPixelsW  = 1;
-        TextureDescriptor.m_NumberOfMipMaps  = 1;
-        TextureDescriptor.m_NumberOfTextures = 1;
-        TextureDescriptor.m_Binding          = Gfx::CTexture::ShaderResource;
-        TextureDescriptor.m_Access           = Gfx::CTexture::CPUWrite;
-        TextureDescriptor.m_Format           = Gfx::CTexture::Unknown;
-        TextureDescriptor.m_Usage            = Gfx::CTexture::GPURead;
-        TextureDescriptor.m_Semantic         = Gfx::CTexture::Diffuse;
-        TextureDescriptor.m_pFileName        = 0;
-        TextureDescriptor.m_pPixels          = 0;
-        TextureDescriptor.m_Format           = Gfx::CTexture::B8G8R8_UBYTE;
-
-        m_BackgroundTexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
-
-        Gfx::TextureManager::SetTextureLabel(m_BackgroundTexturePtr, "EasyAR camera texture");
-
         m_pCameraImageData = Base::CMemory::Allocate(m_CameraSize[0] * m_CameraSize[1] * 3 * sizeof(Base::U8));
 
         m_pCameraTempImageLineData = Base::CMemory::Allocate(m_CameraSize[0] * 3 * sizeof(Base::U8));
@@ -322,33 +310,6 @@ namespace AR
 
             ImageTarget.m_TrackingState = CInternTarget::Lost;
         }
-
-        // -----------------------------------------------------------------------------
-        // Background image
-        // -----------------------------------------------------------------------------
-        for (auto Image : Frame->images())
-        {
-            Base::CMemory::Copy(m_pCameraImageData, Image->data(), m_CameraSize[0] * m_CameraSize[1] * 3 * sizeof(Base::U8));
-
-            if (m_FlipVertical)
-            {
-                int NumberOfBytesPerLine = m_CameraSize[0] * 3 * sizeof(Base::U8);
-
-                for (int y = 0; y < m_CameraSize[1] / 2; ++y)
-                {
-                    void* pFirstLine = (Base::U8*)m_pCameraImageData + (y * m_CameraSize[0] * 3);
-                    void* pLastLine  = (Base::U8*)m_pCameraImageData + ((m_CameraSize[1] - y - 1) * m_CameraSize[0] * 3);
-
-                    Base::CMemory::Copy(m_pCameraTempImageLineData, pFirstLine, NumberOfBytesPerLine);
-
-                    Base::CMemory::Copy(pFirstLine, pLastLine, NumberOfBytesPerLine);
-
-                    Base::CMemory::Copy(pLastLine, m_pCameraTempImageLineData, NumberOfBytesPerLine);
-                }
-            }
-
-            Gfx::TextureManager::CopyToTexture2D(m_BackgroundTexturePtr, Base::AABB2UInt(glm::uvec2(0.0f, 0.0f), glm::uvec2(m_CameraSize)), 0, m_pCameraImageData);
-        }
     }
 
     // -----------------------------------------------------------------------------
@@ -416,6 +377,68 @@ namespace AR
     void CPluginInterface::SetFlipVertical(bool _Flag)
     {
         m_FlipVertical = _Flag;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CPluginInterface::Gfx_OnStart()
+    {
+        // -----------------------------------------------------------------------------
+        // Texture
+        // -----------------------------------------------------------------------------
+        Gfx::STextureDescriptor TextureDescriptor;
+
+        TextureDescriptor.m_NumberOfPixelsU  = m_CameraSize[0];
+        TextureDescriptor.m_NumberOfPixelsV  = m_CameraSize[1];
+        TextureDescriptor.m_NumberOfPixelsW  = 1;
+        TextureDescriptor.m_NumberOfMipMaps  = 1;
+        TextureDescriptor.m_NumberOfTextures = 1;
+        TextureDescriptor.m_Binding          = Gfx::CTexture::ShaderResource;
+        TextureDescriptor.m_Access           = Gfx::CTexture::CPUWrite;
+        TextureDescriptor.m_Format           = Gfx::CTexture::Unknown;
+        TextureDescriptor.m_Usage            = Gfx::CTexture::GPURead;
+        TextureDescriptor.m_Semantic         = Gfx::CTexture::Diffuse;
+        TextureDescriptor.m_pFileName        = 0;
+        TextureDescriptor.m_pPixels          = 0;
+        TextureDescriptor.m_Format           = Gfx::CTexture::B8G8R8_UBYTE;
+
+        m_BackgroundTexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
+
+        Gfx::TextureManager::SetTextureLabel(m_BackgroundTexturePtr, "EasyAR camera texture");
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CPluginInterface::Gfx_OnUpdate()
+    {
+        // -----------------------------------------------------------------------------
+        // Frame
+        // -----------------------------------------------------------------------------
+        auto Frame = m_CameraFrameStreamer->peek();
+
+        for (auto Image : Frame->images())
+        {
+            Base::CMemory::Copy(m_pCameraImageData, Image->data(), m_CameraSize[0] * m_CameraSize[1] * 3 * sizeof(Base::U8));
+
+            if (m_FlipVertical)
+            {
+                int NumberOfBytesPerLine = m_CameraSize[0] * 3 * sizeof(Base::U8);
+
+                for (int y = 0; y < m_CameraSize[1] / 2; ++y)
+                {
+                    void* pFirstLine = (Base::U8*)m_pCameraImageData + (y * m_CameraSize[0] * 3);
+                    void* pLastLine = (Base::U8*)m_pCameraImageData + ((m_CameraSize[1] - y - 1) * m_CameraSize[0] * 3);
+
+                    Base::CMemory::Copy(m_pCameraTempImageLineData, pFirstLine, NumberOfBytesPerLine);
+
+                    Base::CMemory::Copy(pFirstLine, pLastLine, NumberOfBytesPerLine);
+
+                    Base::CMemory::Copy(pLastLine, m_pCameraTempImageLineData, NumberOfBytesPerLine);
+                }
+            }
+
+            Gfx::TextureManager::CopyToTexture2D(m_BackgroundTexturePtr, Base::AABB2UInt(glm::uvec2(0.0f, 0.0f), glm::uvec2(m_CameraSize)), 0, m_pCameraImageData);
+        }
     }
 } // namespace AR
 

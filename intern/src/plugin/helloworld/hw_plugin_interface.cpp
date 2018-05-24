@@ -3,6 +3,8 @@
 
 #include "engine/core/core_console.h"
 
+#include "engine/engine.h"
+
 #include "plugin/helloworld/hw_plugin_interface.h"
 
 CORE_PLUGIN_INFO(HW::CPluginInterface, "Hello World", "1.0", "This is an example plugin w/o any useful features.")
@@ -12,6 +14,8 @@ namespace HW
     void CPluginInterface::OnStart()
     {
         ENGINE_CONSOLE_INFOV("Hello world plugin started!");
+
+        Engine::RegisterEventHandler(Engine::Gfx_OnStart, ENGINE_BIND_EVENT_METHOD(&CPluginInterface::EventHook));
     }
 
     // -----------------------------------------------------------------------------
@@ -39,6 +43,13 @@ namespace HW
     void CPluginInterface::OnResume()
     {
         ENGINE_CONSOLE_INFOV("Hello world plugin resumed!");
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CPluginInterface::EventHook()
+    {
+        ENGINE_CONSOLE_INFOV("Oh hello. An event has been raised!");
     }
 } // namespace HW
 

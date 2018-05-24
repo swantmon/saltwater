@@ -66,7 +66,6 @@ namespace
             unsigned int m_WindowID;
             bool m_TerminateRequested;
             int m_Animating;
-            std::vector<Core::IPlugin*> m_AvailablePlugins;
         };
         
     private:
@@ -183,11 +182,6 @@ namespace
         s_pStates[m_CurrentState]->OnLeave();
 
         // -----------------------------------------------------------------------------
-        // Plugins
-        // -----------------------------------------------------------------------------
-        for (auto Plugin : m_AppSetup.m_AvailablePlugins) Plugin->OnExit();
-
-        // -----------------------------------------------------------------------------
         // Start engine
         // -----------------------------------------------------------------------------
         Engine::Shutdown();
@@ -252,14 +246,6 @@ namespace
 
                 if (m_CurrentState != App::CState::Init)
                 {
-                    // -----------------------------------------------------------------------------
-                    // Plugins
-                    // -----------------------------------------------------------------------------
-                    for (auto Plugin : m_AppSetup.m_AvailablePlugins) Plugin->Update();
-
-                    // -----------------------------------------------------------------------------
-                    // Update engine
-                    // -----------------------------------------------------------------------------
                     Engine::Update();
                 }
 
@@ -390,22 +376,6 @@ namespace
                     Engine::Startup();
 
                     // -----------------------------------------------------------------------------
-                    // Plugins
-                    // -----------------------------------------------------------------------------
-                    auto SelectedPlugins = Core::CProgramParameters::GetInstance().Get("plugins:selection", std::vector<std::string>());
-
-                    for (auto SelectedPlugin : SelectedPlugins)
-                    {
-                        auto Plugin = Core::PluginManager::LoadPlugin(SelectedPlugin);
-
-                        if (Plugin == nullptr) continue;
-
-                        AppSetup->m_AvailablePlugins.push_back(&Plugin->GetInstance());
-
-                        Plugin->GetInstance().OnStart();
-                    }
-
-                    // -----------------------------------------------------------------------------
                     // Change state
                     // -----------------------------------------------------------------------------
                     App::Application::ChangeState(App::CState::Start);
@@ -440,7 +410,7 @@ namespace
                 // -----------------------------------------------------------------------------
                 // When our app gains focus, we start monitoring the accelerometer.
                 // -----------------------------------------------------------------------------
-                for (auto Plugin : AppSetup->m_AvailablePlugins) Plugin->OnResume();
+                Engine::Resume();
 
                 if (AppSetup->m_AccelerometerSensor != NULL)
                 {
@@ -460,7 +430,7 @@ namespace
                 // When our app loses focus, we stop monitoring the accelerometer.
                 // This is to avoid consuming battery while not being used.
                 // -----------------------------------------------------------------------------
-                for (auto Plugin : AppSetup->m_AvailablePlugins) Plugin->OnPause();
+                Engine::Pause();
 
                 if (AppSetup->m_AccelerometerSensor != NULL)
                 {

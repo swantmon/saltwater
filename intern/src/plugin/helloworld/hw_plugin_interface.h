@@ -14,5 +14,9 @@ namespace HW
         void OnPause() override;
         void OnResume() override;
         void Update() override;
+
+    public:
+
+        void EventHook();
     };
 } // namespace HW
