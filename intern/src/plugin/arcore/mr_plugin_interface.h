@@ -17,7 +17,6 @@ namespace MR
 
     private:
 
-        void Gfx_OnStart();
         void Gfx_OnUpdate();
     };
 } // namespace MR
