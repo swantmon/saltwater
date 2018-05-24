@@ -81,6 +81,19 @@ namespace
     void CEngine::Startup()
     {
         // -----------------------------------------------------------------------------
+        // Engine
+        // -----------------------------------------------------------------------------
+        Core::Time::OnStart();
+
+        Scpt::ScriptManager::OnStart();
+
+        Dt::EntityManager::OnStart();
+
+        Gui::InputManager::OnStart();
+
+        Gfx::Pipeline::OnStart();
+
+        // -----------------------------------------------------------------------------
         // Plugins
         // -----------------------------------------------------------------------------
         auto SelectedPlugins = Core::CProgramParameters::GetInstance().Get("plugins:selection", std::vector<std::string>());
@@ -95,19 +108,6 @@ namespace
 
             Plugin->GetInstance().OnStart();
         }
-
-        // -----------------------------------------------------------------------------
-        // Engine
-        // -----------------------------------------------------------------------------
-        Core::Time::OnStart();
-
-        Scpt::ScriptManager::OnStart();
-
-        Dt::EntityManager::OnStart();
-
-        Gui::InputManager::OnStart();
-
-        Gfx::Pipeline::OnStart();
     }
 
     // -----------------------------------------------------------------------------

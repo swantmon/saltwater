@@ -89,7 +89,6 @@ namespace AR
         // -----------------------------------------------------------------------------
         // Hooks
         // -----------------------------------------------------------------------------
-        Engine::RegisterEventHandler(Engine::Gfx_OnStart, ENGINE_BIND_EVENT_METHOD(&CPluginInterface::Gfx_OnStart));
         Engine::RegisterEventHandler(Engine::Gfx_OnUpdate, ENGINE_BIND_EVENT_METHOD(&CPluginInterface::Gfx_OnUpdate));
 
         // -----------------------------------------------------------------------------
@@ -176,6 +175,29 @@ namespace AR
         // -----------------------------------------------------------------------------
         m_CameraSize[0] = m_Camera.m_Native->size().data[0];
         m_CameraSize[1] = m_Camera.m_Native->size().data[1];
+
+        // -----------------------------------------------------------------------------
+        // Texture
+        // -----------------------------------------------------------------------------
+        Gfx::STextureDescriptor TextureDescriptor;
+
+        TextureDescriptor.m_NumberOfPixelsU  = m_CameraSize[0];
+        TextureDescriptor.m_NumberOfPixelsV  = m_CameraSize[1];
+        TextureDescriptor.m_NumberOfPixelsW  = 1;
+        TextureDescriptor.m_NumberOfMipMaps  = 1;
+        TextureDescriptor.m_NumberOfTextures = 1;
+        TextureDescriptor.m_Binding          = Gfx::CTexture::ShaderResource;
+        TextureDescriptor.m_Access           = Gfx::CTexture::CPUWrite;
+        TextureDescriptor.m_Format           = Gfx::CTexture::Unknown;
+        TextureDescriptor.m_Usage            = Gfx::CTexture::GPURead;
+        TextureDescriptor.m_Semantic         = Gfx::CTexture::Diffuse;
+        TextureDescriptor.m_pFileName        = 0;
+        TextureDescriptor.m_pPixels          = 0;
+        TextureDescriptor.m_Format           = Gfx::CTexture::B8G8R8_UBYTE;
+
+        m_BackgroundTexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
+
+        Gfx::TextureManager::SetTextureLabel(m_BackgroundTexturePtr, "EasyAR camera texture");
 
         // -----------------------------------------------------------------------------
         // Camera data
@@ -377,34 +399,6 @@ namespace AR
     void CPluginInterface::SetFlipVertical(bool _Flag)
     {
         m_FlipVertical = _Flag;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CPluginInterface::Gfx_OnStart()
-    {
-        // -----------------------------------------------------------------------------
-        // Texture
-        // -----------------------------------------------------------------------------
-        Gfx::STextureDescriptor TextureDescriptor;
-
-        TextureDescriptor.m_NumberOfPixelsU  = m_CameraSize[0];
-        TextureDescriptor.m_NumberOfPixelsV  = m_CameraSize[1];
-        TextureDescriptor.m_NumberOfPixelsW  = 1;
-        TextureDescriptor.m_NumberOfMipMaps  = 1;
-        TextureDescriptor.m_NumberOfTextures = 1;
-        TextureDescriptor.m_Binding          = Gfx::CTexture::ShaderResource;
-        TextureDescriptor.m_Access           = Gfx::CTexture::CPUWrite;
-        TextureDescriptor.m_Format           = Gfx::CTexture::Unknown;
-        TextureDescriptor.m_Usage            = Gfx::CTexture::GPURead;
-        TextureDescriptor.m_Semantic         = Gfx::CTexture::Diffuse;
-        TextureDescriptor.m_pFileName        = 0;
-        TextureDescriptor.m_pPixels          = 0;
-        TextureDescriptor.m_Format           = Gfx::CTexture::B8G8R8_UBYTE;
-
-        m_BackgroundTexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
-
-        Gfx::TextureManager::SetTextureLabel(m_BackgroundTexturePtr, "EasyAR camera texture");
     }
 
     // -----------------------------------------------------------------------------

@@ -64,7 +64,6 @@ namespace LE
 
     private:
 
-        void Gfx_OnStart();
         void Gfx_OnUpdate();
     };
 } // namespace LE

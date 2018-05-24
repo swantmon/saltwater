@@ -55,99 +55,8 @@ namespace LE
         // -----------------------------------------------------------------------------
         // Hooks
         // -----------------------------------------------------------------------------
-        Engine::RegisterEventHandler(Engine::Gfx_OnStart, ENGINE_BIND_EVENT_METHOD(&CPluginInterface::Gfx_OnStart));
         Engine::RegisterEventHandler(Engine::Gfx_OnUpdate, ENGINE_BIND_EVENT_METHOD(&CPluginInterface::Gfx_OnUpdate));
-    }
 
-    // -----------------------------------------------------------------------------
-
-    void CPluginInterface::OnExit()
-    {
-        m_VSPtr = 0;
-        m_GSPtr = 0;
-        m_PSPtr = 0;
-        m_CubemapBufferPtr = 0;
-        m_ModelMatrixBufferPtr = 0;
-        m_MeshPtr = 0;
-        m_InputTexturePtr = 0;
-        m_LookUpTexturePtr = 0;
-        m_OutputCubemapPtr = 0;
-        m_TargetSetPtr = 0;
-        m_ViewPortSetPtr = 0;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CPluginInterface::Update()
-    {
-        
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CPluginInterface::OnPause()
-    {
-        m_IsActive = false;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CPluginInterface::OnResume()
-    {
-        m_IsActive = true;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CPluginInterface::SetInputTexture(Gfx::CTexturePtr _InputTexturePtr)
-    {
-        m_InputTexturePtr = _InputTexturePtr;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CPluginInterface::SetOutputCubemap(Gfx::CTexturePtr _OutputCubemapPtr)
-    {
-        if (_OutputCubemapPtr == nullptr) return;
-
-        m_OutputCubemapPtr = _OutputCubemapPtr;
-
-        // -----------------------------------------------------------------------------
-        // Target Set
-        // -----------------------------------------------------------------------------
-        Gfx::CTexturePtr FirstMipmapCubeTexture = Gfx::TextureManager::GetMipmapFromTexture2D(_OutputCubemapPtr, 0);
-
-        m_TargetSetPtr = Gfx::TargetSetManager::CreateTargetSet(FirstMipmapCubeTexture);
-
-        // -----------------------------------------------------------------------------
-        // Viewport
-        // -----------------------------------------------------------------------------
-        Gfx::SViewPortDescriptor ViewPortDesc;
-
-        ViewPortDesc.m_TopLeftX = 0.0f;
-        ViewPortDesc.m_TopLeftY = 0.0f;
-        ViewPortDesc.m_MinDepth = 0.0f;
-        ViewPortDesc.m_MaxDepth = 1.0f;
-
-        ViewPortDesc.m_Width = static_cast<float>(FirstMipmapCubeTexture->GetNumberOfPixelsU());
-        ViewPortDesc.m_Height = static_cast<float>(FirstMipmapCubeTexture->GetNumberOfPixelsV());
-
-        Gfx::CViewPortPtr MipMapViewPort = Gfx::ViewManager::CreateViewPort(ViewPortDesc);
-
-        m_ViewPortSetPtr = Gfx::ViewManager::CreateViewPortSet(MipMapViewPort);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    Gfx::CTexturePtr CPluginInterface::GetOutputCubemap()
-    {
-        return m_OutputCubemapPtr;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CPluginInterface::Gfx_OnStart()
-    {
         // -----------------------------------------------------------------------------
         // Shader
         // -----------------------------------------------------------------------------
@@ -248,6 +157,91 @@ namespace LE
 
         m_InputTexturePtr = 0;
         m_OutputCubemapPtr = 0;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CPluginInterface::OnExit()
+    {
+        m_VSPtr = 0;
+        m_GSPtr = 0;
+        m_PSPtr = 0;
+        m_CubemapBufferPtr = 0;
+        m_ModelMatrixBufferPtr = 0;
+        m_MeshPtr = 0;
+        m_InputTexturePtr = 0;
+        m_LookUpTexturePtr = 0;
+        m_OutputCubemapPtr = 0;
+        m_TargetSetPtr = 0;
+        m_ViewPortSetPtr = 0;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CPluginInterface::Update()
+    {
+        
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CPluginInterface::OnPause()
+    {
+        m_IsActive = false;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CPluginInterface::OnResume()
+    {
+        m_IsActive = true;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CPluginInterface::SetInputTexture(Gfx::CTexturePtr _InputTexturePtr)
+    {
+        m_InputTexturePtr = _InputTexturePtr;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CPluginInterface::SetOutputCubemap(Gfx::CTexturePtr _OutputCubemapPtr)
+    {
+        if (_OutputCubemapPtr == nullptr) return;
+
+        m_OutputCubemapPtr = _OutputCubemapPtr;
+
+        // -----------------------------------------------------------------------------
+        // Target Set
+        // -----------------------------------------------------------------------------
+        Gfx::CTexturePtr FirstMipmapCubeTexture = Gfx::TextureManager::GetMipmapFromTexture2D(_OutputCubemapPtr, 0);
+
+        m_TargetSetPtr = Gfx::TargetSetManager::CreateTargetSet(FirstMipmapCubeTexture);
+
+        // -----------------------------------------------------------------------------
+        // Viewport
+        // -----------------------------------------------------------------------------
+        Gfx::SViewPortDescriptor ViewPortDesc;
+
+        ViewPortDesc.m_TopLeftX = 0.0f;
+        ViewPortDesc.m_TopLeftY = 0.0f;
+        ViewPortDesc.m_MinDepth = 0.0f;
+        ViewPortDesc.m_MaxDepth = 1.0f;
+
+        ViewPortDesc.m_Width = static_cast<float>(FirstMipmapCubeTexture->GetNumberOfPixelsU());
+        ViewPortDesc.m_Height = static_cast<float>(FirstMipmapCubeTexture->GetNumberOfPixelsV());
+
+        Gfx::CViewPortPtr MipMapViewPort = Gfx::ViewManager::CreateViewPort(ViewPortDesc);
+
+        m_ViewPortSetPtr = Gfx::ViewManager::CreateViewPortSet(MipMapViewPort);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    Gfx::CTexturePtr CPluginInterface::GetOutputCubemap()
+    {
+        return m_OutputCubemapPtr;
     }
 
     // -----------------------------------------------------------------------------
