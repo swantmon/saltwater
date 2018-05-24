@@ -61,5 +61,10 @@ namespace LE
         Gfx::CViewPortSetPtr m_ViewPortSetPtr;
 
         bool m_IsActive;
+
+    private:
+
+        void Gfx_OnStart();
+        void Gfx_OnUpdate();
     };
 } // namespace LE
