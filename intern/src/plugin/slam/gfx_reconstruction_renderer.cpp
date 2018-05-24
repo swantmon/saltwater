@@ -1350,9 +1350,9 @@ namespace ReconstructionRenderer
     
     // -----------------------------------------------------------------------------
     
-    void Render(int _Pass)
+    void Render()
     {
-        CGfxReconstructionRenderer::GetInstance().Render(_Pass);
+        CGfxReconstructionRenderer::GetInstance().Render(0);
     }
     
     // -----------------------------------------------------------------------------

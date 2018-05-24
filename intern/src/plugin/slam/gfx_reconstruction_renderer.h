@@ -25,7 +25,7 @@ namespace ReconstructionRenderer
     void OnUnloadMap();
     
     void Update();
-    void Render(int _Pass);
+    void Render();
     void PauseIntegration(bool _Paused);
     void PauseTracking(bool _Paused);
     void ChangeCamera(bool _IsTrackingCamera);

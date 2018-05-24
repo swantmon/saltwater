@@ -2,6 +2,7 @@
 #include "plugin/slam/slam_precompiled.h"
 
 #include "engine/core/core_console.h"
+#include "engine/engine.h"
 
 #include "plugin/slam/slam_plugin_interface.h"
 
@@ -23,6 +24,9 @@ namespace HW
         Gfx::ReconstructionRenderer::OnSetupResources();
         Gfx::ReconstructionRenderer::OnSetupModels();
         Gfx::ReconstructionRenderer::OnSetupEnd();
+
+        Engine::RegisterEventHandler(Engine::Gfx_OnUpdate, Gfx::ReconstructionRenderer::Update);
+        Engine::RegisterEventHandler(Engine::Gfx_OnRenderGBuffer, Gfx::ReconstructionRenderer::Render);
     }
 
     // -----------------------------------------------------------------------------
@@ -36,15 +40,6 @@ namespace HW
 
     void CPluginInterface::Update()
     {
-        static int i = 0;
-
-        ++i;
-
-        if (i <= 10) return;
-
-        Gfx::ReconstructionRenderer::Update();
-
-        Gfx::ReconstructionRenderer::Render(0);
     }
 
     // -----------------------------------------------------------------------------
