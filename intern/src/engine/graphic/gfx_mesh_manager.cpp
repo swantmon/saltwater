@@ -148,6 +148,8 @@ namespace
         void OnExit();
         
         CMeshPtr CreateMeshFromFile(const std::string& _rPathToFile, int _GenFlag, int _MeshIndex);
+        CMeshPtr CreateMesh(const std::vector<glm::vec3> _rVertices, const std::vector<uint32_t> _rIndices);
+        CMeshPtr CreateMesh(const glm::vec3* _rVertices, int _NumberOfVertices, const uint32_t* _rIndices, int _NumberOfIndices);
         CMeshPtr CreateBox(float _Width, float _Height, float _Depth);
         CMeshPtr CreateSphere(float _Radius, unsigned int _Stacks, unsigned int _Slices);
         CMeshPtr CreateSphereIsometric(float _Radius, unsigned int _Refinement);
@@ -276,6 +278,91 @@ namespace
         m_ModelByHash[Hash] = MeshPtr;
         
         return CMeshPtr(MeshPtr);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CMeshPtr CGfxMeshManager::CreateMesh(const std::vector<glm::vec3> _rVertices, const std::vector<uint32_t> _rIndices)
+    {
+        return CreateMesh(_rVertices.data(), static_cast<int>(_rVertices.size()), _rIndices.data(), static_cast<int>(_rIndices.size()));
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CMeshPtr CGfxMeshManager::CreateMesh(const glm::vec3* _rVertices, int _NumberOfVertices, const uint32_t* _rIndices, int _NumberOfIndices)
+    {
+        // -----------------------------------------------------------------------------
+        // Create model with LOD, surface and materials
+        // -----------------------------------------------------------------------------
+        CMeshes::CPtr ModelPtr = m_Meshes.Allocate();
+
+        CInternMesh& rModel = *ModelPtr;
+
+        CLODs::CPtr LODPtr = m_LODs.Allocate();
+
+        CInternLOD& rLOD = *LODPtr;
+
+        CSurfaces::CPtr SurfacePtr = m_Surfaces.Allocate();
+
+        CInternSurface& rSurface = *SurfacePtr;
+
+        rSurface.m_MaterialPtr = nullptr;
+
+        rModel.m_NumberOfLODs = 1;
+        rModel.m_LODs[0] = LODPtr;
+
+        rLOD.m_Surface = SurfacePtr;
+
+        // -----------------------------------------------------------------------------
+        // Prepare surface
+        // -----------------------------------------------------------------------------
+        rSurface.m_SurfaceKey.m_Key = 0;
+        rSurface.m_SurfaceKey.m_HasPosition = true;
+        rSurface.m_SurfaceKey.m_HasNormal = true;
+        rSurface.m_SurfaceKey.m_HasTangent = false;
+        rSurface.m_SurfaceKey.m_HasBitangent = false;
+        rSurface.m_SurfaceKey.m_HasTexCoords = true;
+
+        // -----------------------------------------------------------------------------
+        // Create buffer on graphic device and setup surface
+        // -----------------------------------------------------------------------------
+        SBufferDescriptor BufferDesc;
+
+        BufferDesc.m_Stride = 0;
+        BufferDesc.m_Usage = CBuffer::GPURead;
+        BufferDesc.m_Binding = CBuffer::VertexBuffer;
+        BufferDesc.m_Access = CBuffer::CPUWrite;
+        BufferDesc.m_NumberOfBytes = _NumberOfVertices * sizeof(_rVertices[0]);
+        BufferDesc.m_pBytes = const_cast<glm::vec3*>(_rVertices);
+        BufferDesc.m_pClassKey = 0;
+
+        rSurface.m_VertexBufferPtr = BufferManager::CreateBuffer(BufferDesc);
+        rSurface.m_NumberOfVertices = static_cast<unsigned>(_NumberOfVertices);
+
+        // -----------------------------------------------------------------------------
+
+        BufferDesc.m_Stride = 0;
+        BufferDesc.m_Usage = CBuffer::GPURead;
+        BufferDesc.m_Binding = CBuffer::IndexBuffer;
+        BufferDesc.m_Access = CBuffer::CPUWrite;
+        BufferDesc.m_NumberOfBytes = _NumberOfIndices * sizeof(_rIndices[0]);
+        BufferDesc.m_pBytes = const_cast<uint32_t*>(_rIndices);
+        BufferDesc.m_pClassKey = 0;
+
+        rSurface.m_IndexBufferPtr = BufferManager::CreateBuffer(BufferDesc);
+        rSurface.m_NumberOfIndices = static_cast<unsigned>(_NumberOfIndices);
+
+        // -----------------------------------------------------------------------------
+        // Vertex Shader
+        // -----------------------------------------------------------------------------
+        SetVertexShaderOfSurface(rSurface);
+
+        // -----------------------------------------------------------------------------
+        // Material
+        // -----------------------------------------------------------------------------
+        rSurface.m_MaterialPtr = Gfx::MaterialManager::GetDefaultMaterial();
+
+        return CMeshPtr(ModelPtr);
     }
 
     // -----------------------------------------------------------------------------
@@ -1444,6 +1531,20 @@ namespace MeshManager
     CMeshPtr CreateMeshFromFile(const std::string& _rPathToFile, int _GenFlag, int _MeshIndex)
     {
         return CGfxMeshManager::GetInstance().CreateMeshFromFile(_rPathToFile, _GenFlag, _MeshIndex);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CMeshPtr CreateMesh(const std::vector<glm::vec3> _rVertices, const std::vector<uint32_t> _rIndices)
+    {
+        return CGfxMeshManager::GetInstance().CreateMesh(_rVertices, _rIndices);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CMeshPtr CreateMesh(const glm::vec3* _rVertices, int _NumberOfVertices, const uint32_t* _rIndices, int _NumberOfIndices)
+    {
+        return CGfxMeshManager::GetInstance().CreateMesh(_rVertices, _NumberOfVertices, _rIndices, _NumberOfIndices);
     }
 
     // -----------------------------------------------------------------------------
