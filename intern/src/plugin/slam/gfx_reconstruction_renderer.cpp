@@ -479,11 +479,11 @@ namespace
         // Create camera frustum mesh
         ////////////////////////////////////////////////////////////////////////////////
 
-		//Todo: remove magic numbers (focal length/point, max/min depth)
+        //Todo: remove magic numbers (focal length/point, max/min depth)
 
-		float Focalx = (-0.50602675f) / 0.72113f;
-		float Focaly = (-0.499133f) / 0.870799f;
-		
+        float Focalx = (-0.50602675f) / 0.72113f;
+        float Focaly = (-0.499133f) / 0.870799f;
+
         glm::vec3 CameraVertices[] =
         {
             glm::vec3(-Focalx * 8.0f, -Focaly * 8.0f, 8.0f),
@@ -491,54 +491,239 @@ namespace
             glm::vec3( Focalx * 8.0f,  Focaly * 8.0f, 8.0f),
             glm::vec3(-Focalx * 8.0f,  Focaly * 8.0f, 8.0f),
             glm::vec3(          0.0f,           0.0f, 0.0f),
-			glm::vec3(-Focalx * 0.5f, -Focaly * 0.5f, 0.5f),
-			glm::vec3( Focalx * 0.5f, -Focaly * 0.5f, 0.5f),
-			glm::vec3( Focalx * 0.5f,  Focaly * 0.5f, 0.5f),
-			glm::vec3(-Focalx * 0.5f,  Focaly * 0.5f, 0.5f),
+            glm::vec3(-Focalx * 0.5f, -Focaly * 0.5f, 0.5f),
+            glm::vec3( Focalx * 0.5f, -Focaly * 0.5f, 0.5f),
+            glm::vec3( Focalx * 0.5f,  Focaly * 0.5f, 0.5f),
+            glm::vec3(-Focalx * 0.5f,  Focaly * 0.5f, 0.5f),
         };
 
         glm::vec3 CameraLines[24] =
         {
-			CameraVertices[4], CameraVertices[0],
-			CameraVertices[4], CameraVertices[1],
-			CameraVertices[4], CameraVertices[2],
-			CameraVertices[4], CameraVertices[3],
+            CameraVertices[4], CameraVertices[0],
+            CameraVertices[4], CameraVertices[1],
+            CameraVertices[4], CameraVertices[2],
+            CameraVertices[4], CameraVertices[3],
 
-			CameraVertices[0], CameraVertices[1],
-			CameraVertices[1], CameraVertices[2],
-			CameraVertices[2], CameraVertices[3],
-			CameraVertices[3], CameraVertices[0],
+            CameraVertices[0], CameraVertices[1],
+            CameraVertices[1], CameraVertices[2],
+            CameraVertices[2], CameraVertices[3],
+            CameraVertices[3], CameraVertices[0],
 
-			CameraVertices[5], CameraVertices[6],
-			CameraVertices[6], CameraVertices[7],
-			CameraVertices[7], CameraVertices[8],
-			CameraVertices[8], CameraVertices[5],
+            CameraVertices[5], CameraVertices[6],
+            CameraVertices[6], CameraVertices[7],
+            CameraVertices[7], CameraVertices[8],
+            CameraVertices[8], CameraVertices[5],
         };
-        
+
         ////////////////////////////////////////////////////////////////////////////////
         // Create cube mesh
         ////////////////////////////////////////////////////////////////////////////////
-        m_CameraMeshPtr = MeshManager::CreateBox(1.0f, 1.0f, 1.0f);
 
-        m_VolumeMeshPtr = MeshManager::CreateBox(1.0f, 1.0f, 1.0f);
+        Dt::CSurface* pSurface = new Dt::CSurface;
+        Dt::CLOD* pLOD = new Dt::CLOD;
+        Dt::CMesh* pMesh = new Dt::CMesh;
+
+        pSurface->SetPositions(CameraLines);
+        pSurface->SetNumberOfVertices(sizeof(CameraLines) / sizeof(CameraLines[0]));
+        pSurface->SetIndices(nullptr);
+        pSurface->SetNumberOfIndices(0);
+        pSurface->SetElements(0);
+
+        pLOD->SetSurface(0, pSurface);
+        pLOD->SetNumberOfSurfaces(1);
+
+        pMesh->SetLOD(0, pLOD);
+        pMesh->SetNumberOfLODs(1);
+
+        SMeshDescriptor MeshDesc =
+        {
+            pMesh
+        };
+
+        m_CameraMeshPtr = MeshManager::CreateMesh(MeshDesc);
+
+        glm::vec3 CubeLines[24] =
+        {
+            g_CubeVertices[0], g_CubeVertices[1],
+            g_CubeVertices[1], g_CubeVertices[2],
+            g_CubeVertices[2], g_CubeVertices[3],
+            g_CubeVertices[3], g_CubeVertices[0],
+
+            g_CubeVertices[0], g_CubeVertices[4],
+            g_CubeVertices[1], g_CubeVertices[5],
+            g_CubeVertices[2], g_CubeVertices[6],
+            g_CubeVertices[3], g_CubeVertices[7],
+
+            g_CubeVertices[4], g_CubeVertices[5],
+            g_CubeVertices[5], g_CubeVertices[6],
+            g_CubeVertices[6], g_CubeVertices[7],
+            g_CubeVertices[7], g_CubeVertices[4],
+        };
+
+        unsigned int CubeIndices[] =
+        {
+            0, 1, 2,
+            0, 2, 3,
+
+            5, 2, 1,
+            5, 6, 2,
+
+            4, 5, 1,
+            4, 1, 0,
+
+            4, 0, 7,
+            0, 3, 7,
+
+            7, 2, 6,
+            7, 3, 2,
+
+            4, 7, 6,
+            4, 6, 5,
+        };
+
+        pSurface = new Dt::CSurface;
+        pLOD = new Dt::CLOD;
+        pMesh = new Dt::CMesh;
+
+        pSurface->SetPositions(g_CubeVertices);
+        pSurface->SetNumberOfVertices(sizeof(g_CubeVertices) / sizeof(g_CubeVertices[0]));
+        pSurface->SetIndices(CubeIndices);
+        pSurface->SetNumberOfIndices(sizeof(CubeIndices) / sizeof(CubeIndices[0]));
+        pSurface->SetElements(0);
+
+        pLOD->SetSurface(0, pSurface);
+        pLOD->SetNumberOfSurfaces(1);
+
+        pMesh->SetLOD(0, pLOD);
+        pMesh->SetNumberOfLODs(1);
+
+        MeshDesc.m_pMesh = pMesh;
+
+        m_VolumeMeshPtr = MeshManager::CreateMesh(MeshDesc);
 
         ////////////////////////////////////////////////////////////////////////////////
         // Create cube outline mesh
         ////////////////////////////////////////////////////////////////////////////////
-        m_CubeOutlineMeshPtr = MeshManager::CreateBox(1.0f, 1.0f, 1.0f);
+
+        pSurface = new Dt::CSurface;
+        pLOD = new Dt::CLOD;
+        pMesh = new Dt::CMesh;
+
+        pSurface->SetPositions(CubeLines);
+        pSurface->SetNumberOfVertices(sizeof(CubeLines) / sizeof(CubeLines[0]));
+        pSurface->SetIndices(nullptr);
+        pSurface->SetNumberOfIndices(0);
+        pSurface->SetElements(0);
+
+        pLOD->SetSurface(0, pSurface);
+        pLOD->SetNumberOfSurfaces(1);
+
+        pMesh->SetLOD(0, pLOD);
+        pMesh->SetNumberOfLODs(1);
+
+        MeshDesc.m_pMesh = pMesh;
+
+        m_CubeOutlineMeshPtr = MeshManager::CreateMesh(MeshDesc);
 
         ////////////////////////////////////////////////////////////////////////////////
         // Create quad mesh
         ////////////////////////////////////////////////////////////////////////////////
 
-        m_QuadMeshPtr = MeshManager::CreateRectangle(0.0f, 0.0f, 1.0f, 1.0f);
+        glm::vec3 QuadLines[4] =
+        {
+            glm::vec3(0.0f, 1.0f, 0.0f),
+            glm::vec3(0.0f, 0.0f, 0.0f),
+            glm::vec3(1.0f, 1.0f, 0.0f),
+            glm::vec3(1.0f, 0.0f, 0.0f),
+        };
+
+        pSurface = new Dt::CSurface;
+        pLOD = new Dt::CLOD;
+        pMesh = new Dt::CMesh;
+
+        pSurface->SetPositions(QuadLines);
+        pSurface->SetNumberOfVertices(sizeof(QuadLines) / sizeof(QuadLines[0]));
+        pSurface->SetIndices(nullptr);
+        pSurface->SetNumberOfIndices(0);
+        pSurface->SetElements(0);
+
+        pLOD->SetSurface(0, pSurface);
+        pLOD->SetNumberOfSurfaces(1);
+
+        pMesh->SetLOD(0, pLOD);
+        pMesh->SetNumberOfLODs(1);
+
+        MeshDesc.m_pMesh = pMesh;
+
+        m_QuadMeshPtr = MeshManager::CreateMesh(MeshDesc);
 
         ////////////////////////////////////////////////////////////////////////////////
         // Create plane mesh
         ////////////////////////////////////////////////////////////////////////////////
-        m_PlaneMeshPtr = MeshManager::CreateRectangle(0.0f, 0.0f, 1.0f, 1.0f);
+
+        std::vector<glm::vec3> PlaneVertices;
+
+        const int PlaneSize = 3;
+
+        for (int x = -PlaneSize; x <= PlaneSize; ++x)
+        {
+            for (int y = -PlaneSize; y <= PlaneSize; ++y)
+            {
+                glm::vec3 NewVertices[4] =
+                {
+                    QuadLines[0],
+                    QuadLines[1],
+                    QuadLines[2],
+                    QuadLines[3],
+                };
+
+                for (int i = 0; i < 4; ++i)
+                {
+                    NewVertices[i][0] += x;
+                    NewVertices[i][1] += y;
+
+                    PlaneVertices.push_back(NewVertices[i]);
+                }
+            }
+        }
+
+        uint32_t BaseIndices[] =
+        {
+            0, 1, 2,
+            1, 2, 3,
+        };
+
+        std::vector<uint32_t> Indices;
+
+        for (int i = 0; i < static_cast<int>(PlaneVertices.size()) / 4; ++i)
+        {
+            for (int j = 0; j < 6; ++j)
+            {
+                Indices.push_back(BaseIndices[j] + i * 4);
+            }
+        }
+
+        pSurface = new Dt::CSurface;
+        pLOD = new Dt::CLOD;
+        pMesh = new Dt::CMesh;
+
+        pSurface->SetPositions(PlaneVertices.data());
+        pSurface->SetNumberOfVertices(int(PlaneVertices.size()));
+        pSurface->SetIndices(&Indices[0]);
+        pSurface->SetNumberOfIndices(static_cast<int>(Indices.size()));
+        pSurface->SetElements(0);
+
+        pLOD->SetSurface(0, pSurface);
+        pLOD->SetNumberOfSurfaces(1);
+
+        pMesh->SetLOD(0, pLOD);
+        pMesh->SetNumberOfLODs(1);
+
+        MeshDesc.m_pMesh = pMesh;
+
+        m_PlaneMeshPtr = MeshManager::CreateMesh(MeshDesc);
     }
-    
+
     // -----------------------------------------------------------------------------
     
     void CGfxReconstructionRenderer::OnSetupEnd()
