@@ -26,6 +26,7 @@
     <ClCompile Include="..\..\..\src\engine\core\core_asset_importer.cpp" />
     <ClCompile Include="..\..\..\src\engine\core\core_asset_manager.cpp" />
     <ClCompile Include="..\..\..\src\engine\core\core_console.cpp" />
+    <ClCompile Include="..\..\..\src\engine\core\core_network.cpp" />
     <ClCompile Include="..\..\..\src\engine\core\core_plugin_manager.cpp" />
     <ClCompile Include="..\..\..\src\engine\core\core_program_parameters.cpp" />
     <ClCompile Include="..\..\..\src\engine\core\core_time.cpp" />
@@ -136,6 +137,7 @@
     <ClInclude Include="..\..\..\src\engine\core\core_asset_importer.h" />
     <ClInclude Include="..\..\..\src\engine\core\core_asset_manager.h" />
     <ClInclude Include="..\..\..\src\engine\core\core_console.h" />
+    <ClInclude Include="..\..\..\src\engine\core\core_network.h" />
     <ClInclude Include="..\..\..\src\engine\core\core_plugin.h" />
     <ClInclude Include="..\..\..\src\engine\core\core_plugin_manager.h" />
     <ClInclude Include="..\..\..\src\engine\core\core_program_parameters.h" />
