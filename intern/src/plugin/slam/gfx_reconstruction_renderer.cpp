@@ -560,7 +560,7 @@ namespace
             g_CubeVertices[7], g_CubeVertices[4],
         };
 
-        unsigned int CubeIndices[] =
+        uint32_t CubeIndices[] =
         {
             0, 1, 2,
             0, 2, 3,
