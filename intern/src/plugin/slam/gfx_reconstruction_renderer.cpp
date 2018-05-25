@@ -515,32 +515,11 @@ namespace
             CameraVertices[8], CameraVertices[5],
         };
 
+        m_CameraMeshPtr = MeshManager::CreateMesh(CameraLines, sizeof(CameraLines) / sizeof(CameraLines[0]), nullptr, 0);
+
         ////////////////////////////////////////////////////////////////////////////////
         // Create cube mesh
         ////////////////////////////////////////////////////////////////////////////////
-
-        Dt::CSurface* pSurface = new Dt::CSurface;
-        Dt::CLOD* pLOD = new Dt::CLOD;
-        Dt::CMesh* pMesh = new Dt::CMesh;
-
-        pSurface->SetPositions(CameraLines);
-        pSurface->SetNumberOfVertices(sizeof(CameraLines) / sizeof(CameraLines[0]));
-        pSurface->SetIndices(nullptr);
-        pSurface->SetNumberOfIndices(0);
-        pSurface->SetElements(0);
-
-        pLOD->SetSurface(0, pSurface);
-        pLOD->SetNumberOfSurfaces(1);
-
-        pMesh->SetLOD(0, pLOD);
-        pMesh->SetNumberOfLODs(1);
-
-        SMeshDescriptor MeshDesc =
-        {
-            pMesh
-        };
-
-        m_CameraMeshPtr = MeshManager::CreateMesh(MeshDesc);
 
         glm::vec3 CubeLines[24] =
         {
@@ -580,50 +559,14 @@ namespace
             4, 7, 6,
             4, 6, 5,
         };
-
-        pSurface = new Dt::CSurface;
-        pLOD = new Dt::CLOD;
-        pMesh = new Dt::CMesh;
-
-        pSurface->SetPositions(g_CubeVertices);
-        pSurface->SetNumberOfVertices(sizeof(g_CubeVertices) / sizeof(g_CubeVertices[0]));
-        pSurface->SetIndices(CubeIndices);
-        pSurface->SetNumberOfIndices(sizeof(CubeIndices) / sizeof(CubeIndices[0]));
-        pSurface->SetElements(0);
-
-        pLOD->SetSurface(0, pSurface);
-        pLOD->SetNumberOfSurfaces(1);
-
-        pMesh->SetLOD(0, pLOD);
-        pMesh->SetNumberOfLODs(1);
-
-        MeshDesc.m_pMesh = pMesh;
-
-        m_VolumeMeshPtr = MeshManager::CreateMesh(MeshDesc);
+        
+        m_VolumeMeshPtr = MeshManager::CreateMesh(g_CubeVertices, sizeof(g_CubeVertices) / sizeof(g_CubeVertices[0]), CubeIndices, sizeof(CubeIndices) / sizeof(CubeIndices[0]));
 
         ////////////////////////////////////////////////////////////////////////////////
         // Create cube outline mesh
         ////////////////////////////////////////////////////////////////////////////////
 
-        pSurface = new Dt::CSurface;
-        pLOD = new Dt::CLOD;
-        pMesh = new Dt::CMesh;
-
-        pSurface->SetPositions(CubeLines);
-        pSurface->SetNumberOfVertices(sizeof(CubeLines) / sizeof(CubeLines[0]));
-        pSurface->SetIndices(nullptr);
-        pSurface->SetNumberOfIndices(0);
-        pSurface->SetElements(0);
-
-        pLOD->SetSurface(0, pSurface);
-        pLOD->SetNumberOfSurfaces(1);
-
-        pMesh->SetLOD(0, pLOD);
-        pMesh->SetNumberOfLODs(1);
-
-        MeshDesc.m_pMesh = pMesh;
-
-        m_CubeOutlineMeshPtr = MeshManager::CreateMesh(MeshDesc);
+        m_CubeOutlineMeshPtr = MeshManager::CreateMesh(CubeLines, sizeof(CubeLines) / sizeof(CubeLines[0]), nullptr, 0);
 
         ////////////////////////////////////////////////////////////////////////////////
         // Create quad mesh
@@ -637,25 +580,7 @@ namespace
             glm::vec3(1.0f, 0.0f, 0.0f),
         };
 
-        pSurface = new Dt::CSurface;
-        pLOD = new Dt::CLOD;
-        pMesh = new Dt::CMesh;
-
-        pSurface->SetPositions(QuadLines);
-        pSurface->SetNumberOfVertices(sizeof(QuadLines) / sizeof(QuadLines[0]));
-        pSurface->SetIndices(nullptr);
-        pSurface->SetNumberOfIndices(0);
-        pSurface->SetElements(0);
-
-        pLOD->SetSurface(0, pSurface);
-        pLOD->SetNumberOfSurfaces(1);
-
-        pMesh->SetLOD(0, pLOD);
-        pMesh->SetNumberOfLODs(1);
-
-        MeshDesc.m_pMesh = pMesh;
-
-        m_QuadMeshPtr = MeshManager::CreateMesh(MeshDesc);
+        m_QuadMeshPtr = MeshManager::CreateMesh(QuadLines, sizeof(QuadLines) / sizeof(QuadLines[0]), nullptr, 0);
 
         ////////////////////////////////////////////////////////////////////////////////
         // Create plane mesh
@@ -703,25 +628,7 @@ namespace
             }
         }
 
-        pSurface = new Dt::CSurface;
-        pLOD = new Dt::CLOD;
-        pMesh = new Dt::CMesh;
-
-        pSurface->SetPositions(PlaneVertices.data());
-        pSurface->SetNumberOfVertices(int(PlaneVertices.size()));
-        pSurface->SetIndices(&Indices[0]);
-        pSurface->SetNumberOfIndices(static_cast<int>(Indices.size()));
-        pSurface->SetElements(0);
-
-        pLOD->SetSurface(0, pSurface);
-        pLOD->SetNumberOfSurfaces(1);
-
-        pMesh->SetLOD(0, pLOD);
-        pMesh->SetNumberOfLODs(1);
-
-        MeshDesc.m_pMesh = pMesh;
-
-        m_PlaneMeshPtr = MeshManager::CreateMesh(MeshDesc);
+        m_PlaneMeshPtr = MeshManager::CreateMesh(PlaneVertices, Indices);
     }
 
     // -----------------------------------------------------------------------------
