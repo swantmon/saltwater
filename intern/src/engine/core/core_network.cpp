@@ -13,8 +13,6 @@ namespace Core
     }
 } // namespace Core
 
-using namespace nlohmann;
-
 namespace Core
 {
     CNetwork::CNetwork()
