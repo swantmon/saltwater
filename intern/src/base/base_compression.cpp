@@ -5,6 +5,8 @@
 
 #include <zlib.h>
 
+#include <cassert>
+
 namespace
 {
     void CheckResult(int _Result)
@@ -18,8 +20,10 @@ namespace
 
 namespace Base
 {
-    void Decompress(const std::vector<char> _rCompressedData, std::vector<char> _rDecompressedData)
+    void Decompress(const std::vector<char>& _rCompressedData, std::vector<char>& _rDecompressedData)
     {
+        assert(_rDecompressedData.size() >= _rCompressedData.size()); // TODO: allow empty result vector and figure out output length with zlib
+
         z_stream infstream;
         infstream.zalloc = Z_NULL;
         infstream.zfree = Z_NULL;
