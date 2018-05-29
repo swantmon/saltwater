@@ -94,6 +94,8 @@ namespace
 
         Gui::InputManager::OnStart();
 
+        Net::CNetworkManager::GetInstance().OnStart();
+
         Gfx::Pipeline::OnStart();
 
         // -----------------------------------------------------------------------------
@@ -131,6 +133,8 @@ namespace
 
         Gui::InputManager::OnExit();
 
+        Net::CNetworkManager::GetInstance().OnExit();
+
         Gfx::Pipeline::OnExit();
 
         Core::Time::OnExit();
@@ -159,6 +163,8 @@ namespace
         Cam::ControlManager::Update();
 
         Gui::InputManager::Update();
+
+        Net::CNetworkManager::GetInstance().Update();
 
         Gfx::Pipeline::Render();
     }

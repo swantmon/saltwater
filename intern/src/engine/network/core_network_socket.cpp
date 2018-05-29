@@ -13,13 +13,13 @@ namespace Net
     CServerSocket::CServerSocket(int _Port)
         : m_Port(_Port)
     {
-
+        CNetworkManager::GetInstance().RegisterSocket(*this);
     }
 
     // -----------------------------------------------------------------------------
 
     CServerSocket::~CServerSocket()
     {
-
+        CNetworkManager::GetInstance().UnregisterSocket(*this);
     }
 } // namespace Net

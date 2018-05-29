@@ -3,31 +3,41 @@
 
 #include "engine/engine_config.h"
 
-#include "engine/network/core_network_socket.h"
+#include "base/base_uncopyable.h"
+#include "base/base_singleton.h"
 
-#include <string>
+#include <vector>
 
 namespace Net
 {
-    class ENGINE_API CNetworkManager
+    class ENGINE_API CNetworkManager : private Base::CUncopyable
     {
     public:
 
-        static CNetworkManager& GetInstance();
+        BASE_SINGLETON_FUNC(CNetworkManager)
 
     public:
 
         void OnStart();
-        void OnUpdate();
+        void Update();
         void OnExit();
-        
+
     private:
-        
+
+        friend class CServerSocket;
+
+        void RegisterSocket(const CServerSocket& _rSocket);
+        void UnregisterSocket(const CServerSocket& _rSocket);
+
+    private:
+
         CNetworkManager();
         ~CNetworkManager();
 
     private:
 
+        std::vector<const CServerSocket*> m_Sockets;
+
         asio::io_service m_IOService;
     };
-} // namespace Core
+} // namespace Net

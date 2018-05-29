@@ -5,18 +5,7 @@
 
 #include "engine/network/core_network_manager.h"
 
-#include <functional>
-#include <iostream>
-
-namespace Net
-{
-    CNetworkManager& CNetworkManager::GetInstance()
-    {
-        static CNetworkManager s_Sinstance;
-
-        return s_Sinstance;
-    }
-} // namespace Net
+#include <algorithm>
 
 namespace Net
 {
@@ -27,7 +16,7 @@ namespace Net
 
     // -----------------------------------------------------------------------------
 
-    void CNetworkManager::OnUpdate()
+    void CNetworkManager::Update()
     {
 
     }
@@ -37,6 +26,20 @@ namespace Net
     void CNetworkManager::OnExit()
     {
 
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CNetworkManager::RegisterSocket(const CServerSocket& _rSocket)
+    {
+        m_Sockets.push_back(&_rSocket);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CNetworkManager::UnregisterSocket(const CServerSocket& _rSocket)
+    {
+        m_Sockets.erase(std::remove(m_Sockets.begin(), m_Sockets.end(), &_rSocket));
     }
 
     // -----------------------------------------------------------------------------

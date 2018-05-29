@@ -19,7 +19,10 @@ namespace Net
 
     public:
 
-
+        // dummies
+        void RegisterDelegate();
+        void UnregisterDelegate();
+        void SendMessage();
 
     private:
 
