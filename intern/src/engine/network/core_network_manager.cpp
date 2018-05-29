@@ -22,6 +22,7 @@ namespace Net
         while (m_IsRunning)
         {
             m_IOService.run();
+            m_IOService.reset();
         }
     }
 
