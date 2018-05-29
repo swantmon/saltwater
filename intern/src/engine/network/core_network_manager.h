@@ -6,6 +6,7 @@
 #include "base/base_uncopyable.h"
 #include "base/base_singleton.h"
 
+#include <atomic>
 #include <thread>
 #include <vector>
 
@@ -44,6 +45,8 @@ namespace Net
 
         std::vector<const CServerSocket*> m_Sockets;
         std::thread m_WorkerThread;
+
+        std::atomic_bool m_IsRunning;
 
         asio::io_service m_IOService;
     };
