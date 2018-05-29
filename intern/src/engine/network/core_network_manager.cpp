@@ -11,7 +11,14 @@ namespace Net
 {
     void CNetworkManager::OnStart()
     {
+        m_WorkerThread = std::thread(std::bind(&CNetworkManager::Run, this));
+    }
 
+    // -----------------------------------------------------------------------------
+
+    void CNetworkManager::Run()
+    {
+        m_IOService.run();
     }
 
     // -----------------------------------------------------------------------------
@@ -25,7 +32,7 @@ namespace Net
 
     void CNetworkManager::OnExit()
     {
-
+        m_WorkerThread.join();
     }
 
     // -----------------------------------------------------------------------------

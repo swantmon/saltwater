@@ -6,6 +6,7 @@
 #include "base/base_uncopyable.h"
 #include "base/base_singleton.h"
 
+#include <thread>
 #include <vector>
 
 namespace Net
@@ -24,6 +25,9 @@ namespace Net
 
     private:
 
+
+        void Run();
+
         friend class CServerSocket;
 
         void RegisterSocket(const CServerSocket& _rSocket);
@@ -39,6 +43,7 @@ namespace Net
     private:
 
         std::vector<const CServerSocket*> m_Sockets;
+        std::thread m_WorkerThread;
 
         asio::io_service m_IOService;
     };
