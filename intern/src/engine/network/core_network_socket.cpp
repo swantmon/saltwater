@@ -35,6 +35,7 @@ namespace Net
 
     CServerSocket::~CServerSocket()
     {
+        m_pSocket->close();
         CNetworkManager::GetInstance().UnregisterSocket(*this);
     }
 } // namespace Net
