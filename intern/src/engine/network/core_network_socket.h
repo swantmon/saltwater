@@ -26,6 +26,8 @@ namespace Net
 
     private:
 
+        void OnAccept(const std::system_error& _rError);
+
         int m_Port;
         
         std::unique_ptr<asio::ip::tcp::endpoint> m_pEndpoint;

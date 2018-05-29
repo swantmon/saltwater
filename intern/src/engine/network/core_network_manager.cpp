@@ -44,6 +44,13 @@ namespace Net
 
     // -----------------------------------------------------------------------------
 
+    asio::io_service& CNetworkManager::GetIOService()
+    {
+        return m_IOService;
+    }
+
+    // -----------------------------------------------------------------------------
+
     CNetworkManager::CNetworkManager()
     {
 

@@ -29,6 +29,8 @@ namespace Net
         void RegisterSocket(const CServerSocket& _rSocket);
         void UnregisterSocket(const CServerSocket& _rSocket);
 
+        asio::io_service& GetIOService();
+
     private:
 
         CNetworkManager();
