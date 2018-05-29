@@ -13,11 +13,6 @@ namespace Net
     {
 
     public:
-        
-        CServerSocket(int _Port);
-        ~CServerSocket();
-
-    public:
 
         // dummies
         void RegisterDelegate();
@@ -26,6 +21,8 @@ namespace Net
 
     private:
 
+        friend class CNetworkManager;
+
         void OnAccept(const std::system_error& _rError);
 
         int m_Port;
@@ -33,5 +30,16 @@ namespace Net
         std::unique_ptr<asio::ip::tcp::endpoint> m_pEndpoint;
         std::unique_ptr<asio::ip::tcp::acceptor> m_pAcceptor;
         std::unique_ptr<asio::ip::tcp::socket> m_pSocket;
+
+    private:
+
+        // shared_ptr cannot access the destructor so we use a custom deleter
+        friend void SocketDeleter(Net::CServerSocket* _pSocket)
+        {
+            delete _pSocket;
+        }
+
+        CServerSocket(int _Port);
+        ~CServerSocket();
     };
 } // namespace Net

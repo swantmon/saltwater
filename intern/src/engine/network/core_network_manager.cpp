@@ -44,6 +44,15 @@ namespace Net
 
     // -----------------------------------------------------------------------------
 
+    CServerSocketPtr CNetworkManager::CreateServerSocket(int _Port)
+    {
+        std::shared_ptr<CServerSocket> pSocket(new CServerSocket(_Port), SocketDeleter);
+
+        return pSocket;
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CNetworkManager::RegisterSocket(const CServerSocket& _rSocket)
     {
         m_Sockets.push_back(&_rSocket);
