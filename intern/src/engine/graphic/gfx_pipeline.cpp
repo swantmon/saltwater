@@ -44,8 +44,6 @@
 #include "engine/graphic/gfx_tonemapping_renderer.h"
 #include "engine/graphic/gfx_view_manager.h"
 
-#include "engine/core/core_network.h"
-
 using namespace Gfx;
 
 namespace Gfx
@@ -54,8 +52,6 @@ namespace Pipeline
 {
     void OnStart()
     {
-        auto& net = Core::CNetwork::GetInstance();
-
         // -----------------------------------------------------------------------------
         // Start engine
         // -----------------------------------------------------------------------------

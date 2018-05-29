@@ -4,6 +4,9 @@
 #include "base/base_uncopyable.h"
 #include "base/base_singleton.h"
 
+#include "engine/network/core_network_manager.h"
+#include "engine/network/core_network_socket.h"
+
 #include "engine/camera/cam_control_manager.h"
 
 #include "engine/core/core_plugin_manager.h"

@@ -166,7 +166,7 @@
     <Filter Include="core\program_parameters">
       <UniqueIdentifier>{ceef442b-4418-4dad-9283-e4a163698b40}</UniqueIdentifier>
     </Filter>
-    <Filter Include="core\network">
+    <Filter Include="network">
       <UniqueIdentifier>{e9e54e8a-9d7c-43f0-b6c0-50bb3034ffdb}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -473,8 +473,11 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\engine\engine.cpp" />
     <ClCompile Include="..\..\..\src\engine\engine_precompiled.cpp" />
-    <ClCompile Include="..\..\..\src\engine\core\core_network.cpp">
-      <Filter>core\network</Filter>
+    <ClCompile Include="..\..\..\src\engine\network\core_network_manager.cpp">
+      <Filter>network</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\engine\network\core_network_socket.cpp">
+      <Filter>network</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -871,8 +874,11 @@
     <ClInclude Include="..\..\..\src\engine\script\script_easyar_target_script.h">
       <Filter>script\scripts</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\engine\core\core_network.h">
-      <Filter>core\network</Filter>
+    <ClInclude Include="..\..\..\src\engine\network\core_network_manager.h">
+      <Filter>network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\engine\network\core_network_socket.h">
+      <Filter>network</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
