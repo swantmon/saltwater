@@ -21,6 +21,12 @@ namespace Net
 
     private:
 
+        void StartListening();
+        void ReceiveHeader(const std::error_code& error, size_t bytes_transferred);
+        void ReceivePayload(const std::error_code& error, size_t bytes_transferred);
+
+    private:
+
         friend class CNetworkManager;
 
         void OnAccept(const std::system_error& _rError);
@@ -30,6 +36,9 @@ namespace Net
         std::unique_ptr<asio::ip::tcp::endpoint> m_pEndpoint;
         std::unique_ptr<asio::ip::tcp::acceptor> m_pAcceptor;
         std::unique_ptr<asio::ip::tcp::socket> m_pSocket;
+
+        std::vector<char> m_Header;
+        std::vector<char> m_Payload;
 
     private:
 
