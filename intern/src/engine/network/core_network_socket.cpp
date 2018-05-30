@@ -15,11 +15,9 @@ namespace Net
         std::cout << "Received message\n";
 
         int32_t MessageLength = *reinterpret_cast<int32_t*>(m_Header.data());
-
         m_Payload.resize(MessageLength);
 
         auto Callback = std::bind(&CServerSocket::ReceivePayload, this, std::placeholders::_1, std::placeholders::_2);
-
         asio::async_read(*m_pSocket, asio::buffer(m_Payload), asio::transfer_exactly(MessageLength), Callback);
     }
 
@@ -47,7 +45,8 @@ namespace Net
 
     void CServerSocket::StartListening()
     {
-        asio::async_read(*m_pSocket, asio::buffer(m_Payload), std::bind(&CServerSocket::ReceiveHeader, this, std::placeholders::_1, std::placeholders::_2));
+        auto callback = std::bind(&CServerSocket::ReceiveHeader, this, std::placeholders::_1, std::placeholders::_2);
+        asio::async_read(*m_pSocket, asio::buffer(m_Header), asio::transfer_exactly(s_HeaderSize), callback);
     }
 
     // -----------------------------------------------------------------------------
@@ -63,7 +62,7 @@ namespace Net
         m_pAcceptor.reset(new asio::ip::tcp::acceptor(IOService, *m_pEndpoint));
         m_pSocket.reset(new asio::ip::tcp::socket(IOService));
 
-        m_Header.resize(8);
+        m_Header.resize(s_HeaderSize);
 
         m_pAcceptor->async_accept(*m_pSocket, *m_pEndpoint, std::bind(&CServerSocket::OnAccept, this, std::placeholders::_1));
     }
