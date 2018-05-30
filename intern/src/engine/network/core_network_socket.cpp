@@ -12,6 +12,8 @@ namespace Net
 {
     void CServerSocket::ReceiveHeader(const std::error_code& error, size_t bytes_transferred)
     {
+        assert(bytes_transferred > 0); // TODO: check error code
+
         std::cout << "Received message\n";
 
         int32_t MessageLength = *reinterpret_cast<int32_t*>(m_Header.data());
@@ -25,6 +27,8 @@ namespace Net
 
     void CServerSocket::ReceivePayload(const std::error_code& error, size_t bytes_transferred)
     {
+        assert(bytes_transferred > 0); // TODO: check error code
+
         std::cout << "Received message\n";
 
         StartListening();
@@ -36,7 +40,7 @@ namespace Net
     {
         BASE_UNUSED(_rError);
 
-        std::cout << "Accepted on port " << m_Port << '\n';
+        std::cout << "Client connected on port " << m_Port << '\n';
         
         StartListening();
     }
