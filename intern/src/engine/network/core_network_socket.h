@@ -42,6 +42,8 @@ namespace Net
 
     private:
 
+        int s_HeaderSize = 8;
+
         // shared_ptr cannot access the destructor so we use a custom deleter
         friend void SocketDeleter(Net::CServerSocket* _pSocket)
         {
