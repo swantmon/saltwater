@@ -12,26 +12,40 @@ namespace Net
 {
     void CServerSocket::ReceiveHeader(const std::error_code& error, size_t bytes_transferred)
     {
-        assert(bytes_transferred > 0); // TODO: check error code
+        if (!error)
+        {
+            assert(bytes_transferred > 0);
 
-        std::cout << "Received message\n";
+            std::cout << "Received message\n";
 
-        int32_t MessageLength = *reinterpret_cast<int32_t*>(m_Header.data());
-        m_Payload.resize(MessageLength);
+            int32_t MessageLength = *reinterpret_cast<int32_t*>(m_Header.data());
+            m_Payload.resize(MessageLength);
 
-        auto Callback = std::bind(&CServerSocket::ReceivePayload, this, std::placeholders::_1, std::placeholders::_2);
-        asio::async_read(*m_pSocket, asio::buffer(m_Payload), asio::transfer_exactly(MessageLength), Callback);
+            auto Callback = std::bind(&CServerSocket::ReceivePayload, this, std::placeholders::_1, std::placeholders::_2);
+            asio::async_read(*m_pSocket, asio::buffer(m_Payload), asio::transfer_exactly(MessageLength), Callback);
+        }
+        else
+        {
+            HandleDisconnect();
+        }
     }
 
     // -----------------------------------------------------------------------------
 
     void CServerSocket::ReceivePayload(const std::error_code& error, size_t bytes_transferred)
     {
-        assert(bytes_transferred > 0); // TODO: check error code
+        if (!error)
+        {
+            assert(bytes_transferred > 0);
 
-        std::cout << "Received message\n";
+            std::cout << "Received message\n";
 
-        StartListening();
+            StartListening();
+        }
+        else
+        {
+            HandleDisconnect();
+        }
     }
 
     // -----------------------------------------------------------------------------
@@ -51,6 +65,14 @@ namespace Net
     {
         auto callback = std::bind(&CServerSocket::ReceiveHeader, this, std::placeholders::_1, std::placeholders::_2);
         asio::async_read(*m_pSocket, asio::buffer(m_Header), asio::transfer_exactly(s_HeaderSize), callback);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CServerSocket::HandleDisconnect()
+    {
+        std::cout << "Connection to client on port " << m_Port << " lost\n";
+        m_pAcceptor->async_accept(*m_pSocket, *m_pEndpoint, std::bind(&CServerSocket::OnAccept, this, std::placeholders::_1));
     }
 
     // -----------------------------------------------------------------------------
