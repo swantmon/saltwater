@@ -25,7 +25,7 @@ namespace Net
         void ReceiveHeader(const std::error_code& error, size_t bytes_transferred);
         void ReceivePayload(const std::error_code& error, size_t bytes_transferred);
 
-        void HandleDisconnect();
+        void AsyncConnect();
 
     private:
 

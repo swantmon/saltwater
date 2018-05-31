@@ -26,7 +26,7 @@ namespace Net
         }
         else
         {
-            HandleDisconnect();
+            AsyncConnect();
         }
     }
 
@@ -44,7 +44,7 @@ namespace Net
         }
         else
         {
-            HandleDisconnect();
+            AsyncConnect();
         }
     }
 
@@ -69,8 +69,9 @@ namespace Net
 
     // -----------------------------------------------------------------------------
 
-    void CServerSocket::HandleDisconnect()
+    void CServerSocket::AsyncConnect()
     {
+        m_pSocket->close();
         std::cout << "Connection to client on port " << m_Port << " lost\n";
         m_pAcceptor->async_accept(*m_pSocket, *m_pEndpoint, std::bind(&CServerSocket::OnAccept, this, std::placeholders::_1));
     }
