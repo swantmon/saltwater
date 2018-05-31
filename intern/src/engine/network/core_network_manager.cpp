@@ -30,7 +30,10 @@ namespace Net
 
     void CNetworkManager::Update()
     {
-
+        for (auto& pSocket : m_Sockets)
+        {
+            pSocket->CallDelegates();
+        }
     }
 
     // -----------------------------------------------------------------------------

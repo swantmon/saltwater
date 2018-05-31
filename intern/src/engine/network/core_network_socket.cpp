@@ -2,6 +2,8 @@
 #include "engine/engine_precompiled.h"
 
 #include "base/base_exception.h"
+
+#include "engine/core/core_console.h"
 #include "engine/network/core_network_manager.h"
 #include "engine/network/core_network_socket.h"
 
@@ -10,14 +12,17 @@
 
 namespace Net
 {
-    void CServerSocket::ReceiveHeader(const std::error_code& error, size_t bytes_transferred)
+    void CServerSocket::CallDelegates() const
     {
-        if (!error)
-        {
-            assert(bytes_transferred > 0);
 
-            std::cout << "Received message\n";
+    }
 
+    void CServerSocket::ReceiveHeader(const std::error_code& _rError, size_t _TransferredBytes)
+    {
+        BASE_UNUSED(_TransferredBytes);
+
+        if (!_rError)
+        {            
             int32_t MessageLength = *reinterpret_cast<int32_t*>(m_Header.data());
             m_Payload.resize(MessageLength);
 
@@ -32,14 +37,12 @@ namespace Net
 
     // -----------------------------------------------------------------------------
 
-    void CServerSocket::ReceivePayload(const std::error_code& error, size_t bytes_transferred)
+    void CServerSocket::ReceivePayload(const std::error_code& _rError, size_t _TransferredBytes)
     {
-        if (!error)
-        {
-            assert(bytes_transferred > 0);
+        BASE_UNUSED(_TransferredBytes);
 
-            std::cout << "Received message\n";
-
+        if (!_rError)
+        {            
             StartListening();
         }
         else
@@ -52,10 +55,8 @@ namespace Net
 
     void CServerSocket::OnAccept(const std::system_error& _rError)
     {
-        BASE_UNUSED(_rError);
-
-        std::cout << "Client connected on port " << m_Port << '\n';
-        
+        BASE_UNUSED(_rError);                
+        ENGINE_CONSOLE_INFOV("Connected on port %i", m_Port);
         StartListening();
     }
 
@@ -63,8 +64,8 @@ namespace Net
 
     void CServerSocket::StartListening()
     {
-        auto callback = std::bind(&CServerSocket::ReceiveHeader, this, std::placeholders::_1, std::placeholders::_2);
-        asio::async_read(*m_pSocket, asio::buffer(m_Header), asio::transfer_exactly(s_HeaderSize), callback);
+        auto Callback = std::bind(&CServerSocket::ReceiveHeader, this, std::placeholders::_1, std::placeholders::_2);
+        asio::async_read(*m_pSocket, asio::buffer(m_Header), asio::transfer_exactly(s_HeaderSize), Callback);
     }
 
     // -----------------------------------------------------------------------------
@@ -72,7 +73,7 @@ namespace Net
     void CServerSocket::AsyncConnect()
     {
         m_pSocket->close();
-        std::cout << "Connection to client on port " << m_Port << " lost\n";
+        ENGINE_CONSOLE_INFOV("Connection lost on port %i", m_Port);
         m_pAcceptor->async_accept(*m_pSocket, *m_pEndpoint, std::bind(&CServerSocket::OnAccept, this, std::placeholders::_1));
     }
 

@@ -22,10 +22,12 @@ namespace Net
     private:
 
         void StartListening();
-        void ReceiveHeader(const std::error_code& error, size_t bytes_transferred);
-        void ReceivePayload(const std::error_code& error, size_t bytes_transferred);
+        void ReceiveHeader(const std::error_code& _rError, size_t _TransferredBytes);
+        void ReceivePayload(const std::error_code& _rError, size_t _TransferredBytes);
 
         void AsyncConnect();
+
+        void CallDelegates() const;
 
     private:
 
