@@ -82,8 +82,6 @@ namespace Net
     CServerSocket::CServerSocket(int _Port)
         : m_Port(_Port)
     {
-        CNetworkManager::GetInstance().RegisterSocket(*this);
-
         auto& IOService = CNetworkManager::GetInstance().GetIOService();
 
         m_pEndpoint.reset(new asio::ip::tcp::endpoint(asio::ip::tcp::v4(), static_cast<unsigned short>(_Port)));
@@ -100,6 +98,5 @@ namespace Net
     CServerSocket::~CServerSocket()
     {
         m_pSocket->close();
-        CNetworkManager::GetInstance().UnregisterSocket(*this);
     }
 } // namespace Net

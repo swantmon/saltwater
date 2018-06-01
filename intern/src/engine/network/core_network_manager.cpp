@@ -30,10 +30,10 @@ namespace Net
 
     void CNetworkManager::Update()
     {
-        for (auto& pSocket : m_Sockets)
+        /*for (auto& pSocket : m_Sockets)
         {
             pSocket->CallDelegates();
-        }
+        }*/
     }
 
     // -----------------------------------------------------------------------------
@@ -43,6 +43,20 @@ namespace Net
         m_IsRunning = false;
         m_IOService.stop();
         m_WorkerThread.join();
+
+        m_Sockets.clear();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CServerSocket& CNetworkManager::GetSocket(int _Port)
+    {
+        if (m_Sockets.count(_Port) == 0)
+        {
+            m_Sockets[_Port].reset(new CServerSocket(_Port));
+        }
+
+        return *m_Sockets[_Port];
     }
     
     // -----------------------------------------------------------------------------
@@ -50,6 +64,8 @@ namespace Net
     void CNetworkManager::RegisterMessageHandler(int _MessageID, CNetworkMessageDelegate, int _Port)
     {
         int Port = _Port == 0 ? Core::CProgramParameters::GetInstance().Get("network:default_port", s_DefaultPort) : _Port;
+
+        CServerSocket& rSocket = GetSocket(Port);
     }
 
     // -----------------------------------------------------------------------------
@@ -57,20 +73,8 @@ namespace Net
     void CNetworkManager::UnregisterMessageHandler(int _MessageID, CNetworkMessageDelegate, int _Port)
     {
         int Port = _Port == 0 ? Core::CProgramParameters::GetInstance().Get("network:default_port", s_DefaultPort) : _Port;
-    }
 
-    // -----------------------------------------------------------------------------
-
-    void CNetworkManager::RegisterSocket(const CServerSocket& _rSocket)
-    {
-        m_Sockets.push_back(&_rSocket);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CNetworkManager::UnregisterSocket(const CServerSocket& _rSocket)
-    {
-        m_Sockets.erase(std::remove(m_Sockets.begin(), m_Sockets.end(), &_rSocket));
+        CServerSocket& rSocket = GetSocket(Port);
     }
 
     // -----------------------------------------------------------------------------

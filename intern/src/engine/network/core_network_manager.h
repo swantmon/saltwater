@@ -9,13 +9,13 @@
 #include "engine/network/core_network_socket.h"
 
 #include <atomic>
+#include <map>
 #include <memory>
 #include <thread>
 #include <vector>
 
 namespace Net
 {
-    typedef std::shared_ptr<Net::CServerSocket> CServerSocketPtr;
     typedef std::function<void(int, const std::vector<char>&)> CNetworkMessageDelegate;
 
     class ENGINE_API CNetworkManager : private Base::CUncopyable
@@ -38,9 +38,8 @@ namespace Net
         void Run();
 
         friend class CServerSocket;
-
-        void RegisterSocket(const CServerSocket& _rSocket);
-        void UnregisterSocket(const CServerSocket& _rSocket);
+        
+        CServerSocket& GetSocket(int _Port);
 
         asio::io_service& GetIOService();
 
@@ -51,7 +50,16 @@ namespace Net
 
     private:
 
-        std::vector<const CServerSocket*> m_Sockets;
+        struct SocketDeleter
+        {
+            void operator()(CServerSocket* _pSocket)
+            {
+                delete _pSocket;
+            }
+        };
+        
+        std::map<int, std::unique_ptr<CServerSocket, SocketDeleter>> m_Sockets;
+        
         std::vector<CNetworkMessageDelegate> m_MessageDelegates;
         std::thread m_WorkerThread;
 
