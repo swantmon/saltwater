@@ -11,6 +11,7 @@ namespace Net
 {
     void CNetworkManager::OnStart()
     {
+        m_DefaultPort = Core::CProgramParameters::GetInstance().Get("network:default_port", 12345);
         m_IsRunning = true;
         m_WorkerThread = std::thread(std::bind(&CNetworkManager::Run, this));
     }
@@ -63,7 +64,7 @@ namespace Net
 
     void CNetworkManager::RegisterMessageHandler(int _MessageID, CNetworkMessageDelegate, int _Port)
     {
-        int Port = _Port == 0 ? Core::CProgramParameters::GetInstance().Get("network:default_port", s_DefaultPort) : _Port;
+        int Port = _Port == 0 ? m_DefaultPort : _Port;
 
         CServerSocket& rSocket = GetSocket(Port);
     }
@@ -72,7 +73,7 @@ namespace Net
 
     void CNetworkManager::UnregisterMessageHandler(int _MessageID, CNetworkMessageDelegate, int _Port)
     {
-        int Port = _Port == 0 ? Core::CProgramParameters::GetInstance().Get("network:default_port", s_DefaultPort) : _Port;
+        int Port = _Port == 0 ? m_DefaultPort : _Port;
 
         CServerSocket& rSocket = GetSocket(Port);
     }

@@ -16,7 +16,7 @@
 
 namespace Net
 {
-    typedef std::function<void(int, const std::vector<char>&)> CNetworkMessageDelegate;
+    typedef std::function<void(int, const std::vector<char>&, int)> CNetworkMessageDelegate;
 
     class ENGINE_API CNetworkManager : private Base::CUncopyable
     {
@@ -67,6 +67,6 @@ namespace Net
 
         asio::io_service m_IOService;
 
-        const static int s_DefaultPort = 12345;
+        int m_DefaultPort;
     };
 } // namespace Net
