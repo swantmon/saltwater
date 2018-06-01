@@ -14,10 +14,7 @@ namespace Net
 
     public:
 
-        // dummies
-        void RegisterDelegate();
-        void UnregisterDelegate();
-        void SendMessage();
+        void SendMessage(const std::vector<char>& _rMessage);
 
     private:
 

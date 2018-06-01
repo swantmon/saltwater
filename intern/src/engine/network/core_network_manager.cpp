@@ -2,7 +2,7 @@
 #include "engine/engine_precompiled.h"
 
 #include "base/base_exception.h"
-
+#include "engine/core/core_program_parameters.h"
 #include "engine/network/core_network_manager.h"
 
 #include <algorithm>
@@ -47,16 +47,16 @@ namespace Net
     
     // -----------------------------------------------------------------------------
 
-    void CNetworkManager::RegisterMessageHandler(int _MessageID, CNetworkMessageDelegate)
+    void CNetworkManager::RegisterMessageHandler(int _MessageID, CNetworkMessageDelegate, int _Port)
     {
-
+        int Port = _Port == 0 ? Core::CProgramParameters::GetInstance().Get("network:default_port", s_DefaultPort) : _Port;
     }
 
     // -----------------------------------------------------------------------------
 
-    void UnregisterMessageHandler(int _MessageID, CNetworkMessageDelegate)
+    void CNetworkManager::UnregisterMessageHandler(int _MessageID, CNetworkMessageDelegate, int _Port)
     {
-
+        int Port = _Port == 0 ? Core::CProgramParameters::GetInstance().Get("network:default_port", s_DefaultPort) : _Port;
     }
 
     // -----------------------------------------------------------------------------

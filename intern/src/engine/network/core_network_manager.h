@@ -16,7 +16,7 @@
 namespace Net
 {
     typedef std::shared_ptr<Net::CServerSocket> CServerSocketPtr;
-    typedef std::function<void(int, int, std::vector<char>)> CNetworkMessageDelegate;
+    typedef std::function<void(int, const std::vector<char>&)> CNetworkMessageDelegate;
 
     class ENGINE_API CNetworkManager : private Base::CUncopyable
     {
@@ -30,11 +30,11 @@ namespace Net
         void Update();
         void OnExit();
 
-        void RegisterMessageHandler(int _MessageID, CNetworkMessageDelegate);
-        void UnregisterMessageHandler(int _MessageID, CNetworkMessageDelegate);
+        void RegisterMessageHandler(int _MessageID, CNetworkMessageDelegate, int _Port = 0);
+        void UnregisterMessageHandler(int _MessageID, CNetworkMessageDelegate, int _Port = 0);
 
     private:
-        
+
         void Run();
 
         friend class CServerSocket;
@@ -58,5 +58,7 @@ namespace Net
         std::atomic_bool m_IsRunning;
 
         asio::io_service m_IOService;
+
+        const static int s_DefaultPort = 12345;
     };
 } // namespace Net
