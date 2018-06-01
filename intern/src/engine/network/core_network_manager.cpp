@@ -44,14 +44,19 @@ namespace Net
         m_IOService.stop();
         m_WorkerThread.join();
     }
+    
+    // -----------------------------------------------------------------------------
+
+    void CNetworkManager::RegisterMessageHandler(int _MessageID, CNetworkMessageDelegate)
+    {
+
+    }
 
     // -----------------------------------------------------------------------------
 
-    CServerSocketPtr CNetworkManager::CreateServerSocket(int _Port)
+    void UnregisterMessageHandler(int _MessageID, CNetworkMessageDelegate)
     {
-        std::shared_ptr<CServerSocket> pSocket(new CServerSocket(_Port), SocketDeleter);
 
-        return pSocket;
     }
 
     // -----------------------------------------------------------------------------
