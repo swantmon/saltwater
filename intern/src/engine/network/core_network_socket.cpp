@@ -22,7 +22,7 @@ namespace Net
         BASE_UNUSED(_TransferredBytes);
 
         if (!_rError)
-        {            
+        {
             int32_t MessageLength = *reinterpret_cast<int32_t*>(m_Header.data());
             m_Payload.resize(MessageLength);
 
@@ -42,7 +42,7 @@ namespace Net
         BASE_UNUSED(_TransferredBytes);
 
         if (!_rError)
-        {            
+        {
             StartListening();
         }
         else
