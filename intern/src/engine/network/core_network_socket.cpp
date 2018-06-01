@@ -31,7 +31,7 @@ namespace Net
         }
         else
         {
-            AsyncConnect();
+            AsyncReconnect();
         }
     }
 
@@ -47,7 +47,7 @@ namespace Net
         }
         else
         {
-            AsyncConnect();
+            AsyncReconnect();
         }
     }
 
@@ -70,7 +70,7 @@ namespace Net
 
     // -----------------------------------------------------------------------------
 
-    void CServerSocket::AsyncConnect()
+    void CServerSocket::AsyncReconnect()
     {
         m_pSocket->close();
         ENGINE_CONSOLE_INFOV("Connection lost on port %i", m_Port);

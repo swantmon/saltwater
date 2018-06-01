@@ -25,7 +25,7 @@ namespace Net
         void ReceiveHeader(const std::error_code& _rError, size_t _TransferredBytes);
         void ReceivePayload(const std::error_code& _rError, size_t _TransferredBytes);
 
-        void AsyncConnect();
+        void AsyncReconnect();
 
         void CallDelegates() const;
 
