@@ -62,7 +62,7 @@ namespace Net
     
     // -----------------------------------------------------------------------------
 
-    void CNetworkManager::RegisterMessageHandler(int _MessageID, CNetworkMessageDelegate, int _Port)
+    void CNetworkManager::RegisterMessageHandler(int _MessageID, CMessageDelegate, int _Port)
     {
         int Port = _Port == 0 ? m_DefaultPort : _Port;
 
@@ -71,7 +71,7 @@ namespace Net
 
     // -----------------------------------------------------------------------------
 
-    void CNetworkManager::UnregisterMessageHandler(int _MessageID, CNetworkMessageDelegate, int _Port)
+    void CNetworkManager::UnregisterMessageHandler(int _MessageID, CMessageDelegate, int _Port)
     {
         int Port = _Port == 0 ? m_DefaultPort : _Port;
 

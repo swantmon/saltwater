@@ -256,6 +256,7 @@
     <ClInclude Include="..\..\..\src\engine\gui\gui_event_delegate.h" />
     <ClInclude Include="..\..\..\src\engine\gui\gui_event_handler.h" />
     <ClInclude Include="..\..\..\src\engine\gui\gui_input_manager.h" />
+    <ClInclude Include="..\..\..\src\engine\network\core_network_common.h" />
     <ClInclude Include="..\..\..\src\engine\network\core_network_manager.h" />
     <ClInclude Include="..\..\..\src\engine\network\core_network_socket.h" />
     <ClInclude Include="..\..\..\src\engine\script\script_ar_camera_control_script.h" />

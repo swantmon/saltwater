@@ -5,13 +5,16 @@
 
 #include "engine/engine_config.h"
 
+#include "engine/network/core_network_common.h"
+#include "engine/network/core_network_manager.h"
+
 #include <memory>
+#include <vector>
 
 namespace Net
 {
     class ENGINE_API CServerSocket
     {
-
     public:
 
         void SendMessage(const std::vector<char>& _rMessage);
@@ -40,6 +43,8 @@ namespace Net
 
         std::vector<char> m_Header;
         std::vector<char> m_Payload;
+
+        CMessageDelegateVector m_Delegates;
 
     private:
 

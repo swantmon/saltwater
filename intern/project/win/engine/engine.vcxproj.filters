@@ -880,5 +880,8 @@
     <ClInclude Include="..\..\..\src\engine\network\core_network_socket.h">
       <Filter>network</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\engine\network\core_network_common.h">
+      <Filter>network</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

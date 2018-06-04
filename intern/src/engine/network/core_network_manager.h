@@ -6,6 +6,7 @@
 #include "base/base_uncopyable.h"
 #include "base/base_singleton.h"
 
+#include "engine/network/core_network_common.h"
 #include "engine/network/core_network_socket.h"
 
 #include <atomic>
@@ -16,8 +17,6 @@
 
 namespace Net
 {
-    typedef std::function<void(int, const std::vector<char>&, int)> CNetworkMessageDelegate;
-
     class ENGINE_API CNetworkManager : private Base::CUncopyable
     {
     public:
@@ -30,8 +29,8 @@ namespace Net
         void Update();
         void OnExit();
 
-        void RegisterMessageHandler(int _MessageID, CNetworkMessageDelegate, int _Port = 0);
-        void UnregisterMessageHandler(int _MessageID, CNetworkMessageDelegate, int _Port = 0);
+        void RegisterMessageHandler(int _MessageID, CMessageDelegate, int _Port = 0);
+        void UnregisterMessageHandler(int _MessageID, CMessageDelegate, int _Port = 0);
 
     private:
 
@@ -60,7 +59,7 @@ namespace Net
         
         std::map<int, std::unique_ptr<CServerSocket, SocketDeleter>> m_Sockets;
         
-        std::vector<CNetworkMessageDelegate> m_MessageDelegates;
+        std::vector<CMessageDelegate> m_MessageDelegates;
         std::thread m_WorkerThread;
 
         std::atomic_bool m_IsRunning;
