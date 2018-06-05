@@ -14,18 +14,21 @@ namespace Net
 {
     void CServerSocket::Update()
     {
-        auto& rMessage = m_MessageQueue.front();
-
-        int ID = rMessage.m_ID;
-
-        auto Range = m_Delegates.equal_range(ID);
-        for (auto Iterator = Range.first; Iterator != Range.second; ++ Iterator)
+        while (!m_MessageQueue.empty())
         {
-            auto Delegate = Iterator->second.lock();
-            (*Delegate)(ID, rMessage.m_Payload, m_Port);
-        }
+            auto& rMessage = m_MessageQueue.front();
 
-        m_MessageQueue.pop();
+            int ID = rMessage.m_ID;
+
+            auto Range = m_Delegates.equal_range(ID);
+            for (auto Iterator = Range.first; Iterator != Range.second; ++Iterator)
+            {
+                auto Delegate = Iterator->second.lock();
+                (*Delegate)(ID, rMessage.m_Payload, m_Port);
+            }
+
+            m_MessageQueue.pop();
+        }
     }
 
     // -----------------------------------------------------------------------------
