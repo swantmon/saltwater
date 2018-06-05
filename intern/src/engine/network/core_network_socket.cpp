@@ -25,15 +25,15 @@ namespace Net
             auto Range = m_Delegates.equal_range(ID);
             for (auto Iterator = Range.first; Iterator != Range.second; )
             {
-                if (Iterator->second.expired())
+                auto Delegate = Iterator->second.lock();
+                if (Delegate == nullptr)
                 {
                     Iterator = m_Delegates.erase(Iterator);
                 }
                 else
                 {
-                    auto Delegate = Iterator->second.lock();
                     (*Delegate)(ID, rMessage.m_Payload, m_Port);
-                    ++Iterator;
+                    ++ Iterator;
                 }
             }
 
