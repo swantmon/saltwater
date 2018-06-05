@@ -8,17 +8,13 @@
 #include "engine/network/core_network_common.h"
 #include "engine/network/core_network_manager.h"
 
+#include <map>
 #include <memory>
-#include <vector>
 
 namespace Net
 {
     class ENGINE_API CServerSocket
     {
-    public:
-
-        void SendMessage(const std::vector<char>& _rMessage);
-
     private:
 
         void StartListening();
@@ -27,7 +23,9 @@ namespace Net
 
         void AsyncReconnect();
 
-        void CallDelegates() const;
+        void Update();
+
+        void RegisterMessageHandler(int _MessageID, std::shared_ptr<CMessageDelegate> _pDelegate);
 
     private:
 
@@ -44,7 +42,7 @@ namespace Net
         std::vector<char> m_Header;
         std::vector<char> m_Payload;
 
-        CMessageDelegateVector m_Delegates;
+        std::multimap<int, std::weak_ptr<CMessageDelegate>> m_Delegates;
 
     private:
 

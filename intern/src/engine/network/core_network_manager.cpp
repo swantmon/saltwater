@@ -31,10 +31,10 @@ namespace Net
 
     void CNetworkManager::Update()
     {
-        /*for (auto& pSocket : m_Sockets)
+        for (auto Iterator = m_Sockets.begin(); Iterator != m_Sockets.end(); ++ Iterator)
         {
-            pSocket->CallDelegates();
-        }*/
+            Iterator->second->Update();
+        }
     }
 
     // -----------------------------------------------------------------------------
@@ -62,22 +62,14 @@ namespace Net
     
     // -----------------------------------------------------------------------------
 
-    void CNetworkManager::RegisterMessageHandler(int _MessageID, CMessageDelegate, int _Port)
+    void CNetworkManager::RegisterMessageHandler(int _MessageID, std::shared_ptr<CMessageDelegate> _Delegate, int _Port)
     {
         int Port = _Port == 0 ? m_DefaultPort : _Port;
 
         CServerSocket& rSocket = GetSocket(Port);
+        rSocket.RegisterMessageHandler(_MessageID, _Delegate);
     }
-
-    // -----------------------------------------------------------------------------
-
-    void CNetworkManager::UnregisterMessageHandler(int _MessageID, CMessageDelegate, int _Port)
-    {
-        int Port = _Port == 0 ? m_DefaultPort : _Port;
-
-        CServerSocket& rSocket = GetSocket(Port);
-    }
-
+    
     // -----------------------------------------------------------------------------
 
     asio::io_service& CNetworkManager::GetIOService()

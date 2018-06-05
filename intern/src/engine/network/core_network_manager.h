@@ -29,8 +29,7 @@ namespace Net
         void Update();
         void OnExit();
 
-        void RegisterMessageHandler(int _MessageID, CMessageDelegate, int _Port = 0);
-        void UnregisterMessageHandler(int _MessageID, CMessageDelegate, int _Port = 0);
+        void RegisterMessageHandler(int _MessageID, std::shared_ptr<CMessageDelegate> _Delegate, int _Port = 0);
 
     private:
 

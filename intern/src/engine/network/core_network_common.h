@@ -11,5 +11,4 @@
 namespace Net
 {
     typedef std::function<void(int, const std::vector<char>&, int)> CMessageDelegate;
-    typedef std::vector<CMessageDelegate> CMessageDelegateVector;
 } // namespace Net

@@ -12,10 +12,32 @@
 
 namespace Net
 {
-    void CServerSocket::CallDelegates() const
+    void CServerSocket::Update()
     {
-
+        auto Iterator = m_Delegates.begin();
+        while (Iterator != m_Delegates.end())
+        {
+            if (Iterator->second.expired())
+            {
+                Iterator = m_Delegates.erase(Iterator);
+            }
+            else
+            {
+                auto Delegate = Iterator->second.lock();
+                (*Delegate)(1337, m_Header, m_Port);
+                ++Iterator;
+            }
+        }
     }
+
+    // -----------------------------------------------------------------------------
+
+    void CServerSocket::RegisterMessageHandler(int _MessageID, std::shared_ptr<CMessageDelegate> _Delegate)
+    {
+        m_Delegates.insert(std::make_pair(_MessageID, _Delegate));
+    }
+
+    // -----------------------------------------------------------------------------
 
     void CServerSocket::ReceiveHeader(const std::error_code& _rError, size_t _TransferredBytes)
     {
