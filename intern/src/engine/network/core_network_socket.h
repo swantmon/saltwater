@@ -10,6 +10,7 @@
 
 #include <map>
 #include <memory>
+#include <queue>
 
 namespace Net
 {
@@ -43,6 +44,15 @@ namespace Net
         std::vector<char> m_Payload;
 
         std::multimap<int, std::weak_ptr<CMessageDelegate>> m_Delegates;
+
+        struct CMessage
+        {
+            int m_ID;
+            std::vector<char> m_Header;
+            std::vector<char> m_Payload;
+        };
+
+        std::queue<CMessage> m_MessageQueue;
 
     private:
 
