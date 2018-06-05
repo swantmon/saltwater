@@ -14,6 +14,8 @@ namespace Net
 {
     void CServerSocket::Update()
     {
+        m_Mutex.lock();
+
         while (!m_MessageQueue.empty())
         {
             auto& rMessage = m_MessageQueue.front();
@@ -21,14 +23,24 @@ namespace Net
             int ID = rMessage.m_ID;
 
             auto Range = m_Delegates.equal_range(ID);
-            for (auto Iterator = Range.first; Iterator != Range.second; ++Iterator)
+            for (auto Iterator = Range.first; Iterator != Range.second; )
             {
-                auto Delegate = Iterator->second.lock();
-                (*Delegate)(ID, rMessage.m_Payload, m_Port);
+                if (Iterator->second.expired())
+                {
+                    Iterator = m_Delegates.erase(Iterator);
+                }
+                else
+                {
+                    auto Delegate = Iterator->second.lock();
+                    (*Delegate)(ID, rMessage.m_Payload, m_Port);
+                    ++Iterator;
+                }
             }
 
             m_MessageQueue.pop();
         }
+
+        m_Mutex.unlock();
     }
 
     // -----------------------------------------------------------------------------
@@ -51,6 +63,16 @@ namespace Net
 
             auto Callback = std::bind(&CServerSocket::ReceivePayload, this, std::placeholders::_1, std::placeholders::_2);
             asio::async_read(*m_pSocket, asio::buffer(m_Payload), asio::transfer_exactly(MessageLength), Callback);
+
+            CMessage Message;
+            Message.m_ID = 0;
+            Message.m_Payload = m_Payload;
+
+            m_Mutex.lock();
+
+            m_MessageQueue.push(std::move(Message));
+
+            m_Mutex.unlock();
         }
         else
         {
