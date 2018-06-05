@@ -33,9 +33,9 @@ namespace Net
 
     // -----------------------------------------------------------------------------
 
-    void CServerSocket::RegisterMessageHandler(int _MessageID, std::shared_ptr<CMessageDelegate> _Delegate)
+    void CServerSocket::RegisterMessageHandler(int _MessageID, const std::shared_ptr<CMessageDelegate>& _rDelegate)
     {
-        m_Delegates.insert(std::make_pair(_MessageID, _Delegate));
+        m_Delegates.insert(std::make_pair(_MessageID, _rDelegate));
     }
 
     // -----------------------------------------------------------------------------

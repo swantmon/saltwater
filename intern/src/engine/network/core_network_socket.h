@@ -26,7 +26,7 @@ namespace Net
 
         void Update();
 
-        void RegisterMessageHandler(int _MessageID, std::shared_ptr<CMessageDelegate> _pDelegate);
+        void RegisterMessageHandler(int _MessageID, const std::shared_ptr<CMessageDelegate>& _rpDelegate);
 
     private:
 
