@@ -58,6 +58,9 @@ namespace Net
 
         if (!_rError)
         {
+            assert(_TransferredBytes == m_Header.size());
+            assert(_TransferredBytes == s_HeaderSize);
+
             int32_t MessageLength = *reinterpret_cast<int32_t*>(m_Header.data());
             m_Payload.resize(MessageLength);
 
