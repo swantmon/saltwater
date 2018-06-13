@@ -68,6 +68,7 @@ namespace
 
         void Update();
         void Render();
+        void RenderForward();
         void RenderHitProxy();
 
     private:
@@ -438,6 +439,13 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    void CGfxMeshRenderer::RenderForward()
+    {
+
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CGfxMeshRenderer::RenderHitProxy()
     {
         if (m_DeferredRenderJobs.size() == 0) return;
@@ -702,6 +710,13 @@ namespace MeshRenderer
     void Render()
     {
         CGfxMeshRenderer::GetInstance().Render();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void RenderForward()
+    {
+        CGfxMeshRenderer::GetInstance().RenderForward();
     }
 
     // -----------------------------------------------------------------------------

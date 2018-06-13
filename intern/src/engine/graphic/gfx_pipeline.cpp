@@ -505,6 +505,8 @@ namespace Pipeline
         // -----------------------------------------------------------------------------
         Performance::BeginEvent("Forward Pass");
 
+        MeshRenderer::RenderForward();
+
         Engine::RaiseEvent(Engine::Gfx_OnRenderForward);
 
         Performance::EndEvent();
