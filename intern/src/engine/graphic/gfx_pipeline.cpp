@@ -12,6 +12,7 @@
 #include "engine/graphic/gfx_area_light_manager.h"
 #include "engine/graphic/gfx_background_renderer.h"
 #include "engine/graphic/gfx_buffer_manager.h"
+#include "engine/graphic/gfx_caustic_renderer.h"
 #include "engine/graphic/gfx_context_manager.h"
 #include "engine/graphic/gfx_debug_renderer.h"
 #include "engine/graphic/gfx_fog_renderer.h"
@@ -134,7 +135,7 @@ namespace Pipeline
         DebugRenderer        ::OnStart();
         SelectionRenderer    ::OnStart();
         TonemappingRenderer  ::OnStart();
-        
+        CausticRenderer      ::OnStart();
         
         // -----------------------------------------------------------------------------
         // Setup the shader of all renderer
@@ -156,6 +157,7 @@ namespace Pipeline
         DebugRenderer        ::OnSetupShader();
         SelectionRenderer    ::OnSetupShader();
         TonemappingRenderer  ::OnSetupShader();
+        CausticRenderer      ::OnSetupShader();
         
         // -----------------------------------------------------------------------------
         // Setup the kernels of all renderer
@@ -177,6 +179,7 @@ namespace Pipeline
         DebugRenderer        ::OnSetupKernels();
         SelectionRenderer    ::OnSetupKernels();
         TonemappingRenderer  ::OnSetupKernels();
+        CausticRenderer      ::OnSetupKernels();
         
         // -----------------------------------------------------------------------------
         // Setup the render targets of all renderer
@@ -198,6 +201,7 @@ namespace Pipeline
         DebugRenderer        ::OnSetupRenderTargets();
         SelectionRenderer    ::OnSetupRenderTargets();
         TonemappingRenderer  ::OnSetupRenderTargets();
+        CausticRenderer      ::OnSetupRenderTargets();
         
         // -----------------------------------------------------------------------------
         // Setup the states of all renderer
@@ -219,6 +223,7 @@ namespace Pipeline
         DebugRenderer        ::OnSetupStates();
         SelectionRenderer    ::OnSetupStates();
         TonemappingRenderer  ::OnSetupStates();
+        CausticRenderer      ::OnSetupStates();
         
         // -----------------------------------------------------------------------------
         // Setup the textures of all renderer
@@ -240,6 +245,7 @@ namespace Pipeline
         DebugRenderer        ::OnSetupTextures();
         SelectionRenderer    ::OnSetupTextures();
         TonemappingRenderer  ::OnSetupTextures();
+        CausticRenderer      ::OnSetupTextures();
         
         // -----------------------------------------------------------------------------
         // Setup the buffers of all renderer
@@ -261,6 +267,7 @@ namespace Pipeline
         DebugRenderer        ::OnSetupBuffers();
         SelectionRenderer    ::OnSetupBuffers();
         TonemappingRenderer  ::OnSetupBuffers();
+        CausticRenderer      ::OnSetupBuffers();
         
         // -----------------------------------------------------------------------------
         // Setup the resources of all renderer
@@ -282,6 +289,7 @@ namespace Pipeline
         DebugRenderer        ::OnSetupResources();
         SelectionRenderer    ::OnSetupResources();
         TonemappingRenderer  ::OnSetupResources();
+        CausticRenderer      ::OnSetupResources();
         
         // -----------------------------------------------------------------------------
         // Setup the models of all renderer
@@ -303,6 +311,7 @@ namespace Pipeline
         DebugRenderer        ::OnSetupModels();
         SelectionRenderer    ::OnSetupModels();
         TonemappingRenderer  ::OnSetupModels();
+        CausticRenderer      ::OnSetupModels();
         
         // -----------------------------------------------------------------------------
         // Setup ends with a last call
@@ -324,6 +333,7 @@ namespace Pipeline
         DebugRenderer        ::OnSetupEnd();
         SelectionRenderer    ::OnSetupEnd();
         TonemappingRenderer  ::OnSetupEnd();
+        CausticRenderer      ::OnSetupEnd();
 
         ENGINE_CONSOLE_STREAMINFO("Gfx> Finished renderer starting.");
     }
@@ -354,6 +364,7 @@ namespace Pipeline
         PostFXHDR            ::OnExit();
         PostFX               ::OnExit();
         TonemappingRenderer  ::OnExit();
+        CausticRenderer      ::OnExit();
 
         ENGINE_CONSOLE_STREAMINFO("Gfx> Finished exit of renderer.");
         
@@ -483,6 +494,7 @@ namespace Pipeline
         ReflectionRenderer   ::Render();
         BackgroundRenderer   ::Render();
         FogRenderer          ::Render();
+        CausticRenderer      ::Render();
 
         Engine::RaiseEvent(Engine::Gfx_OnRenderLighting);
 

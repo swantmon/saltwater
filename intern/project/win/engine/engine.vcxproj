@@ -70,6 +70,7 @@
     <ClCompile Include="..\..\..\src\engine\graphic\gfx_buffer_manager.cpp" />
     <ClCompile Include="..\..\..\src\engine\graphic\gfx_buffer_set.cpp" />
     <ClCompile Include="..\..\..\src\engine\graphic\gfx_camera.cpp" />
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_caustic_renderer.cpp" />
     <ClCompile Include="..\..\..\src\engine\graphic\gfx_context_manager.cpp" />
     <ClCompile Include="..\..\..\src\engine\graphic\gfx_debug_renderer.cpp" />
     <ClCompile Include="..\..\..\src\engine\graphic\gfx_depth_stencil_state.cpp" />
@@ -182,6 +183,7 @@
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_buffer_manager.h" />
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_buffer_set.h" />
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_camera.h" />
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_caustic_renderer.h" />
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_context_manager.h" />
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_data_behavior.h" />
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_debug_renderer.h" />
