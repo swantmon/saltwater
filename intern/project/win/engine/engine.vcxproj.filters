@@ -464,6 +464,9 @@
     <ClCompile Include="..\..\..\src\engine\graphic\gfx_debug.cpp">
       <Filter>graphic\ogl</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_caustic_renderer.cpp">
+      <Filter>graphic\engine\renderer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\engine\core\core_asset_generator.h">
@@ -855,6 +858,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_debug.h">
       <Filter>graphic\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_caustic_renderer.h">
+      <Filter>graphic\engine\renderer</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
