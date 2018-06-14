@@ -55,16 +55,17 @@ layout(std430, binding = 1) readonly buffer BB1
     SLightProperties ps_LightProperties[MAX_NUMBER_OF_LIGHTS];
 };
 
-layout(binding = 0) uniform sampler2D   ps_DiffuseTexture;
-layout(binding = 1) uniform sampler2D   ps_NormalTexture;
-layout(binding = 2) uniform sampler2D   ps_RougnessTexture;
-layout(binding = 3) uniform sampler2D   ps_Metaltexture;
-layout(binding = 4) uniform sampler2D   ps_AOTexture;
+layout(binding =  0) uniform sampler2D   ps_DiffuseTexture;
+layout(binding =  1) uniform sampler2D   ps_NormalTexture;
+layout(binding =  2) uniform sampler2D   ps_RougnessTexture;
+layout(binding =  3) uniform sampler2D   ps_Metaltexture;
+layout(binding =  4) uniform sampler2D   ps_AOTexture;
 // binding 5 is reserved for bump texture
-layout(binding = 6) uniform sampler2D   ps_BRDF;
-layout(binding = 7) uniform samplerCube ps_SpecularCubemap;
-layout(binding = 8) uniform samplerCube ps_DiffuseCubemap;
-layout(binding = 9) uniform sampler2DShadow ps_ShadowTexture[MAX_NUMBER_OF_LIGHTS];
+// binding 6 is reserved for alpha texture
+layout(binding =  7) uniform sampler2D   ps_BRDF;
+layout(binding =  8) uniform samplerCube ps_SpecularCubemap;
+layout(binding =  9) uniform samplerCube ps_DiffuseCubemap;
+layout(binding = 10) uniform sampler2DShadow ps_ShadowTexture[MAX_NUMBER_OF_LIGHTS];
 
 // -----------------------------------------------------------------------------
 // Input to fragment from previous stage
@@ -218,8 +219,19 @@ void main(void)
             // Compute lighting for sphere lights
             // -----------------------------------------------------------------------------
             vec3  WSViewDirection = normalize(Data.m_WSPosition - ps_CameraPosition.xyz);
-            vec3  WSReflectVector = normalize(reflect(WSViewDirection, Data.m_WSNormal));
+            vec3  WSReflectVector = vec3(0.0f);
             float NdotV           = clamp( dot( Data.m_WSNormal, -WSViewDirection ), 0.0, 1.0f);
+
+            if (Alpha < 1.0f)
+            {
+                float Ratio = clamp(1.0f - Data.m_Roughness, 0.01f, 0.41f);
+
+                WSReflectVector = normalize(refract(WSViewDirection, Data.m_WSNormal, Ratio)); 
+            }
+            else
+            {
+                WSReflectVector = normalize(reflect(WSViewDirection, Data.m_WSNormal));
+            }
 
             // -----------------------------------------------------------------------------
             // Rebuild the function
