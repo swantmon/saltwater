@@ -333,7 +333,7 @@ namespace Edit
 
             auto pMaterial = Dt::MaterialManager::CreateMaterialFromName("Red Sparrow");
 
-            pMaterial->SetColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+            pMaterial->SetColor(glm::vec4(1.0f, 1.0f, 1.0f, 0.8f));
             pMaterial->SetMetalness(1.0f);
             pMaterial->SetRoughness(0.25f);
 

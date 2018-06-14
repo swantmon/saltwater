@@ -109,6 +109,12 @@ namespace
             unsigned int m_Padding2;
         };
 
+        struct SForwardPassProperties
+        {
+            glm::vec4    m_CameraPosition;
+            unsigned int m_ExposureHistoryIndex;
+        };
+
         struct SRenderJob
         {
             unsigned int     m_SurfaceAttributes;
@@ -135,6 +141,7 @@ namespace
         CBufferPtr        m_ModelBufferPtr;
         CBufferPtr        m_SurfaceMaterialBufferPtr;
         CBufferPtr        m_HitProxyPassPSBufferPtr;
+        CBufferPtr        m_ForwardPassBufferPtr;
         CBufferPtr        m_LightPropertiesBufferPtr;
         CShaderPtr        m_HitProxyShaderPtr;
         CRenderContextPtr m_DeferredContextPtr;
@@ -156,6 +163,7 @@ namespace
         : m_ModelBufferPtr          ()
         , m_SurfaceMaterialBufferPtr()
         , m_HitProxyPassPSBufferPtr ()
+        , m_ForwardPassBufferPtr  ()
         , m_LightPropertiesBufferPtr()
         , m_HitProxyShaderPtr       ()
         , m_DeferredContextPtr      ()
@@ -192,6 +200,7 @@ namespace
         m_ModelBufferPtr           = 0;
         m_SurfaceMaterialBufferPtr = 0;
         m_HitProxyPassPSBufferPtr  = 0;
+        m_ForwardPassBufferPtr   = 0;
         m_LightPropertiesBufferPtr = 0;
         m_HitProxyShaderPtr        = 0;
         m_DeferredContextPtr       = 0;
@@ -302,6 +311,8 @@ namespace
 
         m_ModelBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
+        BufferManager::SetBufferLabel(m_ModelBufferPtr, "Model Matrix");
+
         // -----------------------------------------------------------------------------
 
         ConstanteBufferDesc.m_Stride        = 0;
@@ -313,6 +324,8 @@ namespace
         ConstanteBufferDesc.m_pClassKey     = 0;
 
         m_SurfaceMaterialBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
+
+        BufferManager::SetBufferLabel(m_SurfaceMaterialBufferPtr, "Surface Material Attributes");
 
         // -----------------------------------------------------------------------------
 
@@ -326,17 +339,35 @@ namespace
 
         m_HitProxyPassPSBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
+        BufferManager::SetBufferLabel(m_HitProxyPassPSBufferPtr, "Hit Proxy Properties");
+
+        // -----------------------------------------------------------------------------
+
+        ConstanteBufferDesc.m_Stride        = 0;
+        ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
+        ConstanteBufferDesc.m_Binding       = CBuffer::ResourceBuffer;
+        ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SLightProperties) * s_MaxNumberOfLights;
+        ConstanteBufferDesc.m_pBytes        = 0;
+        ConstanteBufferDesc.m_pClassKey     = 0;
+
+        m_LightPropertiesBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
+
+        BufferManager::SetBufferLabel(m_LightPropertiesBufferPtr, "Light Properties");
+
         // -----------------------------------------------------------------------------
 
         ConstanteBufferDesc.m_Stride        = 0;
         ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
         ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
         ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
-        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SLightProperties);
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SForwardPassProperties);
         ConstanteBufferDesc.m_pBytes        = 0;
         ConstanteBufferDesc.m_pClassKey     = 0;
 
-        m_LightPropertiesBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
+        m_ForwardPassBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
+
+        BufferManager::SetBufferLabel(m_ForwardPassBufferPtr, "Forward Pass Properties");
     }
 
     // -----------------------------------------------------------------------------
@@ -528,9 +559,10 @@ namespace
 
         ContextManager::SetTopology(STopology::TriangleList);
 
-        ContextManager::SetConstantBuffer(0, m_ModelBufferPtr);
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+        ContextManager::SetConstantBuffer(1, m_ModelBufferPtr);
         ContextManager::SetConstantBuffer(3, m_SurfaceMaterialBufferPtr);
-        ContextManager::SetConstantBuffer(4, Main::GetPerFrameConstantBuffer());
+        ContextManager::SetConstantBuffer(4, m_ForwardPassBufferPtr);
 
         ContextManager::SetResourceBuffer(0, HistogramRenderer::GetExposureHistoryBuffer());
         ContextManager::SetResourceBuffer(1, m_LightPropertiesBufferPtr);
@@ -567,6 +599,16 @@ namespace
         }
 
         // -----------------------------------------------------------------------------
+        // Forward pass properties
+        // -----------------------------------------------------------------------------
+        SForwardPassProperties ForwardPassProperties;
+
+        ForwardPassProperties.m_CameraPosition       = glm::vec4(ViewManager::GetMainCamera()->GetView()->GetPosition(), 1.0f);
+        ForwardPassProperties.m_ExposureHistoryIndex = HistogramRenderer::GetCurrentExposureHistoryIndex();
+
+        BufferManager::UploadBufferData(m_ForwardPassBufferPtr, &ForwardPassProperties);
+
+        // -----------------------------------------------------------------------------
         // Actors
         // -----------------------------------------------------------------------------
         for (auto RenderJob : m_ForwardRenderJobs)
@@ -592,7 +634,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Set shader
             // -----------------------------------------------------------------------------
-            ContextManager::SetShaderVS(SurfacePtr->GetMVPShaderVS());
+            ContextManager::SetShaderVS(SurfacePtr->GetShaderVS());
 
             ContextManager::SetShaderPS(pMaterial->GetForwardShaderPS());
 
@@ -752,6 +794,8 @@ namespace
         // Clear current render jobs
         // -----------------------------------------------------------------------------
         m_DeferredRenderJobs.clear();
+
+        m_ForwardRenderJobs.clear();
 
         auto DataMeshComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CMeshComponent>();
 
@@ -947,6 +991,9 @@ namespace
             LightProperties[IndexOfLight].m_LightSettings  = glm::vec4(static_cast<float>(pGfxComponent->GetSpecularPtr()->GetNumberOfMipLevels() - 1), 0.0f, 0.0f, 0.0f);
 
             LightProperties[IndexOfLight].m_LightViewProjection = glm::mat4(1.0f);
+
+            m_ForwardLightTextures.m_SpecularTexturePtr = pGfxComponent->GetSpecularPtr();
+            m_ForwardLightTextures.m_DiffuseTexturePtr  = pGfxComponent->GetDiffusePtr();
 
             ++IndexOfLight;
         }

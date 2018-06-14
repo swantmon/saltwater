@@ -90,6 +90,7 @@ void main(void)
     float Roughness = ps_Roughness;
     float MetalMask = ps_MetalMask;
     float AO        = 1.0f;
+    float Alpha     = ps_Color.w;
     vec3 Luminance  = vec3(0.0f);
 
 #ifdef USE_TEX_DIFFUSE
@@ -243,7 +244,7 @@ void main(void)
         }
     }
 
-    out_Output = vec4(Luminance, 0.0f);
+    out_Output = vec4(Luminance, Alpha);
 }
 
 #endif // __INCLUDE_FS_MATERIAL_FORWARD_GLSL__
