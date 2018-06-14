@@ -64,7 +64,7 @@ layout(binding = 4) uniform sampler2D   ps_AOTexture;
 layout(binding = 6) uniform sampler2D   ps_BRDF;
 layout(binding = 7) uniform samplerCube ps_SpecularCubemap;
 layout(binding = 8) uniform samplerCube ps_DiffuseCubemap;
-layout(binding = 9) uniform sampler2D   ps_ShadowTexture[MAX_NUMBER_OF_LIGHTS];
+layout(binding = 9) uniform sampler2DShadow ps_ShadowTexture[MAX_NUMBER_OF_LIGHTS];
 
 // -----------------------------------------------------------------------------
 // Input to fragment from previous stage
@@ -164,7 +164,7 @@ void main(void)
             // -----------------------------------------------------------------------------
             float Attenuation = 1.0f;
             Attenuation *= Data.m_AmbientOcclusion;
-            Attenuation *= GetShadowAtPosition(Data.m_WSPosition, LightProb.ps_LightViewProjection, ps_ShadowTexture[IndexOfLight]);
+            Attenuation *= GetShadowAtPositionWithPCF(Data.m_WSPosition, LightProb.ps_LightViewProjection, ps_ShadowTexture[IndexOfLight]);
 
             // -----------------------------------------------------------------------------
             // Apply light luminance
@@ -200,7 +200,7 @@ void main(void)
             // Shadowing
             // -----------------------------------------------------------------------------
             Attenuation *= Data.m_AmbientOcclusion;
-            Attenuation *= LightHasShadows == 1.0f ? GetShadowAtPosition(Data.m_WSPosition, LightProb.ps_LightViewProjection, ps_ShadowTexture[IndexOfLight]) : 1.0f;
+            Attenuation *= LightHasShadows == 1.0f ? GetShadowAtPositionWithPCF(Data.m_WSPosition, LightProb.ps_LightViewProjection, ps_ShadowTexture[IndexOfLight]) : 1.0f;
             
             // -----------------------------------------------------------------------------
             // Apply light luminance and shading

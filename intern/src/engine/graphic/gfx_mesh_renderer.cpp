@@ -592,7 +592,7 @@ namespace
         {
             if (m_ForwardLightTextures.m_ShadowTexturePtrs[IndexOfTexture] != 0)
             {
-                ContextManager::SetSampler(9 + IndexOfTexture, SamplerManager::GetSampler(CSampler::MinMagLinearMipPointClamp));
+                ContextManager::SetSampler(9 + IndexOfTexture, SamplerManager::GetSampler(CSampler::PCF));
 
                 ContextManager::SetTexture(9 + IndexOfTexture, m_ForwardLightTextures.m_ShadowTexturePtrs[IndexOfTexture]);
             }

@@ -876,7 +876,7 @@ namespace
         {
             if (m_LightJob.m_ShadowTexturePtrs[IndexOfTexture] != 0)
             {
-                ContextManager::SetSampler(9 + IndexOfTexture, SamplerManager::GetSampler(CSampler::MinMagLinearMipPointClamp));
+                ContextManager::SetSampler(9 + IndexOfTexture, SamplerManager::GetSampler(CSampler::PCF));
 
                 ContextManager::SetTexture(9 + IndexOfTexture, m_LightJob.m_ShadowTexturePtrs[IndexOfTexture]);
             }
