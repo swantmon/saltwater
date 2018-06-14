@@ -333,7 +333,7 @@ namespace Edit
 
             auto pMaterial = Dt::MaterialManager::CreateMaterialFromName("Red Sparrow");
 
-            pMaterial->SetColor(glm::vec3(1.0f, 1.0f, 1.0f));
+            pMaterial->SetColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
             pMaterial->SetMetalness(1.0f);
             pMaterial->SetRoughness(0.25f);
 
@@ -382,7 +382,7 @@ namespace Edit
 
             auto pMaterial = Dt::MaterialManager::CreateMaterialFromName("Plane");
 
-            pMaterial->SetColor(glm::vec3(1.0f, 1.0f, 1.0f));
+            pMaterial->SetColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
             pMaterial->SetMetalness(0.0f);
             pMaterial->SetRoughness(1.0f);
 

@@ -146,6 +146,7 @@ namespace
         NewMessage.Put(pMaterial->GetMetalTexture());
         NewMessage.Put(pMaterial->GetBumpTexture());
         NewMessage.Put(pMaterial->GetAmbientOcclusionTexture());
+        NewMessage.Put(pMaterial->GetAlphaTexture());
 
         NewMessage.Reset();
 
@@ -163,7 +164,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
-        glm::vec3 Color = _rMessage.Get<glm::vec3>();
+        glm::vec4 Color = _rMessage.Get<glm::vec4>();
 
         glm::vec4 TilingOffset = _rMessage.Get<glm::vec4>();
 
@@ -178,6 +179,7 @@ namespace
         std::string MetalMapName     = _rMessage.Get<std::string>();
         std::string BumpMapName      = _rMessage.Get<std::string>();
         std::string AOMapName        = _rMessage.Get<std::string>();
+        std::string AlphaMapName     = _rMessage.Get<std::string>();
  
         pMaterial->SetColor(Color);
         pMaterial->SetTilingOffset(TilingOffset);
@@ -192,6 +194,7 @@ namespace
         pMaterial->SetMetalTexture(MetalMapName);
         pMaterial->SetBumpTexture(BumpMapName);
         pMaterial->SetAmbientOcclusionTexture(AOMapName);
+        pMaterial->SetAlphaTexture(AlphaMapName);
 
         // -----------------------------------------------------------------------------
         // Mark all material components related to this material as dirty

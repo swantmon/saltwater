@@ -59,11 +59,12 @@ namespace
             std::string m_MetalTexture;
             std::string m_AmbientOcclusionTexture;
             std::string m_BumpTexture;
+            std::string m_AlphaTexture;
             float       m_Roughness;
             float       m_Reflectance;
             float       m_MetalMask;
             float       m_Displacement;
-            glm::vec3   m_AlbedoColor;
+            glm::vec4   m_AlbedoColor;
             glm::vec4   m_TilingOffset;
         };
 
@@ -100,9 +101,9 @@ namespace
 {
     const CDtMaterialManager::SMaterialDescriptor CDtMaterialManager::s_DefaultDescriptor =
     {
-        "STATIC CONST DEFAULT MATERIAL: default.mat", "", "", "", "", "", "",
+        "STATIC CONST DEFAULT MATERIAL: default.mat", "", "", "", "", "", "", "",
         1.0f, 0.0f, 0.0f, 0.0f,
-        glm::vec3(0.8f),
+        glm::vec4(glm::vec3(0.8f), 1.0f),
         glm::vec4(1.0f, 1.0f, 0.0f, 0.0f)
     };
 } // namespace 
@@ -165,6 +166,7 @@ namespace
         tinyxml2::XMLElement* pElementMetallic    = pElementDefinition->FirstChildElement("Metallic");
         tinyxml2::XMLElement* pElementAO          = pElementDefinition->FirstChildElement("AO");
         tinyxml2::XMLElement* pElementBump        = pElementDefinition->FirstChildElement("Bump");
+        tinyxml2::XMLElement* pElementAlpha       = pElementDefinition->FirstChildElement("Alpha");
         tinyxml2::XMLElement* pElementTiling      = pElementDefinition->FirstChildElement("Tiling");
         tinyxml2::XMLElement* pElementOffset      = pElementDefinition->FirstChildElement("Offset");
 
@@ -175,17 +177,19 @@ namespace
 
         if (pElementColor != 0)
         {
-            float ColorR = pElementColor->FloatAttribute("R");
-            float ColorG = pElementColor->FloatAttribute("G");
-            float ColorB = pElementColor->FloatAttribute("B");
+            float ColorR = pElementColor->FloatAttribute("R", 0.0f);
+            float ColorG = pElementColor->FloatAttribute("G", 0.0f);
+            float ColorB = pElementColor->FloatAttribute("B", 0.0f);
+            float ColorA = pElementColor->FloatAttribute("A", 1.0f);
 
-            MaterialDescriptor.m_AlbedoColor = glm::vec3(ColorR, ColorG, ColorB);
+            MaterialDescriptor.m_AlbedoColor = glm::vec4(ColorR, ColorG, ColorB, ColorA);
         }
 
         if (pElementRoughness) MaterialDescriptor.m_Roughness = pElementRoughness->FloatAttribute("V");
         if (pElementReflectance) MaterialDescriptor.m_Reflectance = pElementReflectance->FloatAttribute("V");
         if (pElementMetallic) MaterialDescriptor.m_MetalMask = pElementMetallic->FloatAttribute("V");
         if (pElementBump) MaterialDescriptor.m_Displacement = pElementBump->FloatAttribute("V");
+        if (pElementAlpha) MaterialDescriptor.m_AlbedoColor[3] = pElementAlpha->FloatAttribute("V", MaterialDescriptor.m_AlbedoColor[3]);
 
         if (pElementTiling)
         {
@@ -208,6 +212,7 @@ namespace
         if (pElementMetallic != nullptr && pElementMetallic->Attribute("Map")) MaterialDescriptor.m_MetalTexture = pElementMetallic->Attribute("Map");
         if (pElementBump != nullptr && pElementBump->Attribute("Map")) MaterialDescriptor.m_BumpTexture = pElementBump->Attribute("Map");
         if (pElementAO != nullptr && pElementAO->Attribute("Map")) MaterialDescriptor.m_AmbientOcclusionTexture = pElementAO->Attribute("Map");
+        if (pElementAlpha != nullptr && pElementAlpha->Attribute("Map")) MaterialDescriptor.m_AlphaTexture = pElementAlpha->Attribute("Map");
 
         return CreateMaterialFromDescription(MaterialDescriptor);
     }
@@ -274,6 +279,11 @@ namespace
                 MaterialDescriptor.m_NormalTexture = NativeString.data;
             }
 
+            if (pMaterial->GetTexture(aiTextureType_OPACITY, 0, &NativeString) == AI_SUCCESS)
+            {
+                MaterialDescriptor.m_AlphaTexture = NativeString.data;
+            }
+
             // -----------------------------------------------------------------------------
             // Check diffuse material if a *.mat file is set
             // -----------------------------------------------------------------------------
@@ -333,6 +343,7 @@ namespace
         rComponent.m_MetalTexture            = _rDescriptor.m_MetalTexture;
         rComponent.m_AmbientOcclusionTexture = _rDescriptor.m_AmbientOcclusionTexture;
         rComponent.m_BumpTexture             = _rDescriptor.m_BumpTexture;
+        rComponent.m_AlphaTexture            = _rDescriptor.m_AlphaTexture;
         rComponent.m_Roughness               = _rDescriptor.m_Roughness;
         rComponent.m_Reflectance             = _rDescriptor.m_Reflectance;
         rComponent.m_MetalMask               = _rDescriptor.m_MetalMask;

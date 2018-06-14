@@ -14,7 +14,8 @@ namespace Dt
         , m_MetalTexture("")
         , m_AmbientOcclusionTexture("")
         , m_BumpTexture("")
-        , m_Color(1.0f, 1.0f, 1.0f)
+        , m_AlphaTexture("")
+        , m_Color(1.0f, 1.0f, 1.0f, 1.0f)
         , m_TilingOffset(1.0f, 1.0f, 0.0f, 0.0f)
         , m_Roughness(1.0f)
         , m_Reflectance(0.0f)
@@ -136,7 +137,6 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-
     void CMaterial::SetBumpTexture(const std::string& _rValue)
     {
         m_BumpTexture = _rValue;
@@ -151,14 +151,28 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CMaterial::SetColor(const glm::vec3& _rValue)
+    void CMaterial::SetAlphaTexture(const std::string& _rValue)
+    {
+        m_AlphaTexture = _rValue;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const std::string& CMaterial::GetAlphaTexture() const
+    {
+        return m_AlphaTexture;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMaterial::SetColor(const glm::vec4& _rValue)
     {
         m_Color = _rValue;
     }
 
     // -----------------------------------------------------------------------------
 
-    const glm::vec3& CMaterial::GetColor() const
+    const glm::vec4& CMaterial::GetColor() const
     {
         return m_Color;
     }
@@ -280,6 +294,20 @@ namespace Dt
     float CMaterial::GetDisplacement() const
     {
         return m_Displacement;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMaterial::SetAlpha(float _Value)
+    {
+        m_Color[3] = _Value;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    float CMaterial::GetAlpha() const
+    {
+        return m_Color[3];
     }
 
     // -----------------------------------------------------------------------------

@@ -18,11 +18,12 @@ namespace Gfx
         std::string m_MetalTexture;
         std::string m_AmbientOcclusionTexture;
         std::string m_BumpTexture;
+        std::string m_AlphaTexture;
         float       m_Roughness;
         float       m_Reflectance;
         float       m_MetalMask;
         float       m_Displacement;
-        glm::vec3   m_AlbedoColor;
+        glm::vec4   m_AlbedoColor;
         glm::vec4   m_TilingOffset;
     };
 } // namespace Gfx

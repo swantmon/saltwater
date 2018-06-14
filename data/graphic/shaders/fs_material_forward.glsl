@@ -33,7 +33,7 @@ struct SLightProperties
 layout(std140, binding = 3) uniform UB3
 {
     vec4  ps_TilingOffset;
-    vec3  ps_Color;
+    vec4  ps_Color;
     float ps_Roughness;
     float ps_Reflectance;
     float ps_MetalMask;

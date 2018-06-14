@@ -110,6 +110,7 @@ namespace
         "#define USE_TEX_METALLIC\n" ,
         "#define USE_TEX_AO\n"       ,
         "#define USE_TEX_BUMP\n"     ,
+        "#define USE_TEX_ALPHA\n"    ,
     };
 } // namespace
 
@@ -201,10 +202,11 @@ namespace
         MaterialDescriptor.m_MetalTexture            = ""; 
         MaterialDescriptor.m_AmbientOcclusionTexture = ""; 
         MaterialDescriptor.m_BumpTexture             = ""; 
+        MaterialDescriptor.m_AlphaTexture            = ""; 
         MaterialDescriptor.m_Roughness               = 1.0f; 
         MaterialDescriptor.m_Reflectance             = 0.0f; 
         MaterialDescriptor.m_MetalMask               = 0.0f; 
-        MaterialDescriptor.m_AlbedoColor             = glm::vec3(0.8f); 
+        MaterialDescriptor.m_AlbedoColor             = glm::vec4(glm::vec3(0.8f), 1.0f);
         MaterialDescriptor.m_TilingOffset            = glm::vec4(1.0f, 1.0f, 0.0f, 0.0f);
 
         m_DefaultMaterialPtr = CreateMaterial(MaterialDescriptor);
@@ -343,6 +345,7 @@ namespace
         TexturePtrs[3] = 0;
         TexturePtrs[4] = 0;
         TexturePtrs[5] = 0;
+        TexturePtrs[6] = 0;
 
         _pComponent->m_MaterialKey.m_HasDiffuseTex   = _rDescriptor.m_ColorTexture.length() > 0;
         _pComponent->m_MaterialKey.m_HasNormalTex    = _rDescriptor.m_NormalTexture.length() > 0;
@@ -350,9 +353,7 @@ namespace
         _pComponent->m_MaterialKey.m_HasMetallicTex  = _rDescriptor.m_MetalTexture.length() > 0;
         _pComponent->m_MaterialKey.m_HasAOTex        = _rDescriptor.m_AmbientOcclusionTexture.length() > 0;
         _pComponent->m_MaterialKey.m_HasBumpTex      = _rDescriptor.m_BumpTexture.length() > 0;
-
-        _pComponent->m_HasAlpha = false;
-        _pComponent->m_HasBump = _pComponent->m_MaterialKey.m_HasBumpTex;
+        _pComponent->m_MaterialKey.m_HasAlphaTex     = _rDescriptor.m_AlphaTexture.length() > 0;
 
         const char* pColorMap     = _rDescriptor.m_ColorTexture.c_str();
         const char* pNormalMap    = _rDescriptor.m_NormalTexture.c_str();
@@ -360,6 +361,7 @@ namespace
         const char* pMetalMaskMap = _rDescriptor.m_MetalTexture.c_str();
         const char* pAOMap        = _rDescriptor.m_AmbientOcclusionTexture.c_str();
         const char* pBumpMap      = _rDescriptor.m_BumpTexture.c_str();
+        const char* pAlphaMap     = _rDescriptor.m_AlphaTexture.c_str();
 
         STextureDescriptor TextureDescriptor;
 
@@ -420,6 +422,15 @@ namespace
             TexturePtrs[5] = TextureManager::CreateTexture2D(TextureDescriptor);
         }
 
+        if (_pComponent->m_MaterialKey.m_HasAlphaTex)
+        {
+            TextureDescriptor.m_NumberOfPixelsW = 1;
+            TextureDescriptor.m_Format          = CTexture::R8_UBYTE;
+            TextureDescriptor.m_pFileName       = pAlphaMap;
+
+            TexturePtrs[6] = TextureManager::CreateTexture2D(TextureDescriptor);
+        }
+
         _pComponent->m_TextureSetPtr = TextureManager::CreateTextureSet(TexturePtrs, CMaterial::SMaterialKey::s_NumberOfTextures);
 
         // -----------------------------------------------------------------------------
@@ -433,6 +444,7 @@ namespace
         SamplerPtrs[3] = SamplerManager::GetSampler(CSampler::MinMagMipLinearWrap);
         SamplerPtrs[4] = SamplerManager::GetSampler(CSampler::MinMagMipLinearWrap);
         SamplerPtrs[5] = SamplerManager::GetSampler(CSampler::MinMagMipLinearWrap);
+        SamplerPtrs[6] = SamplerManager::GetSampler(CSampler::MinMagMipLinearWrap);
 
         _pComponent->m_SamplerSetPtr = SamplerManager::CreateSamplerSet(SamplerPtrs, CMaterial::SMaterialKey::s_NumberOfTextures);
 
@@ -454,6 +466,7 @@ namespace
         if (_rMaterial.m_MaterialKey.m_HasMetallicTex)  Defines += g_pShaderAttributeDefines[3];
         if (_rMaterial.m_MaterialKey.m_HasAOTex)        Defines += g_pShaderAttributeDefines[4];
         if (_rMaterial.m_MaterialKey.m_HasBumpTex)      Defines += g_pShaderAttributeDefines[5];
+        if (_rMaterial.m_MaterialKey.m_HasAlphaTex)     Defines += g_pShaderAttributeDefines[6];
 
         const char* pDefineString = 0;
 
@@ -465,7 +478,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Bump Mapping
         // -----------------------------------------------------------------------------
-        if (_rMaterial.m_HasBump)
+        if (_rMaterial.GetHasBump())
         {
             _rMaterial.m_ShaderPtrs[CShader::Hull] = Gfx::ShaderManager::CompileHS(g_pShaderFilenameHS[0], g_pShaderNamesHS[0], pDefineString);
 

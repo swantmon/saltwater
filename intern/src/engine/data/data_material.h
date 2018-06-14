@@ -42,8 +42,11 @@ namespace Dt
         void SetBumpTexture(const std::string& _rValue);
         const std::string& GetBumpTexture() const;
 
-        void SetColor(const glm::vec3& _rValue);
-        const glm::vec3& GetColor() const;
+        void SetAlphaTexture(const std::string& _rValue);
+        const std::string& GetAlphaTexture() const;
+
+        void SetColor(const glm::vec4& _rValue);
+        const glm::vec4& GetColor() const;
 
         void SetTiling(const glm::vec2& _rValue);
         const glm::vec2 GetTiling() const;
@@ -69,6 +72,9 @@ namespace Dt
         void SetDisplacement(float _Value);
         float GetDisplacement() const;
 
+        void SetAlpha(float _Value);
+        float GetAlpha() const;
+
         BHash GetHash() const;
 
     protected:
@@ -86,7 +92,8 @@ namespace Dt
         std::string  m_MetalTexture;
         std::string  m_AmbientOcclusionTexture;
         std::string  m_BumpTexture;
-        glm::vec3    m_Color;
+        std::string  m_AlphaTexture;
+        glm::vec4    m_Color;
         glm::vec4    m_TilingOffset;
         float        m_Roughness;
         float        m_Reflectance;

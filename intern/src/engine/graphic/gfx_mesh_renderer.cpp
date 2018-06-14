@@ -403,7 +403,7 @@ namespace
     {
         if (m_DeferredRenderJobs.size() == 0) return;
 
-        Performance::BeginEvent("Actors");
+        Performance::BeginEvent("Meshes");
 
         // -----------------------------------------------------------------------------
         // Prepare renderer
@@ -518,7 +518,7 @@ namespace
     {
         if (m_ForwardRenderJobs.size() == 0) return;
 
-        Performance::BeginEvent("Actors");
+        Performance::BeginEvent("Meshes");
 
         ContextManager::SetTargetSet(TargetSetManager::GetLightAccumulationTargetSet());
         ContextManager::SetViewPortSet(ViewManager::GetViewPortSet());

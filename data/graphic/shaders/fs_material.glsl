@@ -10,7 +10,7 @@
 layout(std140, binding = 2) uniform UB2
 {
     vec4  ps_TilingOffset;
-    vec3  ps_Color;
+    vec4  ps_Color;
     float ps_Roughness;
     float ps_Reflectance;
     float ps_MetalMask;

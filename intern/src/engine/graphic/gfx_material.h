@@ -19,7 +19,7 @@ namespace Gfx
 #pragma warning(disable:4201)
         struct SMaterialKey
         {
-            static const unsigned int s_NumberOfTextures = 6;
+            static const unsigned int s_NumberOfTextures = 7;
 
             typedef unsigned char BMaterialID;
 
@@ -33,7 +33,7 @@ namespace Gfx
                     BMaterialID m_HasMetallicTex  : 1;        //< Defines either a metallic texture is set
                     BMaterialID m_HasAOTex        : 1;        //< Defines either a ambient occlusion texture is set
                     BMaterialID m_HasBumpTex      : 1;        //< Defines either a bump/displacement texture is set
-                    BMaterialID m_Padding         : 1;
+                    BMaterialID m_HasAlphaTex     : 1;        //< Defines either a alpha texture is set
                 };
                 BMaterialID m_Key;
             };
@@ -43,7 +43,7 @@ namespace Gfx
         struct SMaterialAttributes
         {
             glm::vec4 m_TilingOffset;
-            glm::vec3 m_Color;
+            glm::vec4 m_Color;
             float     m_Roughness;
             float     m_Reflectance;
             float     m_MetalMask;
@@ -94,9 +94,6 @@ namespace Gfx
 
         SMaterialAttributes m_MaterialAttributes;
         SMaterialKey        m_MaterialKey;
-
-        bool m_HasAlpha;
-        bool m_HasBump;
 
         unsigned int m_Hash;
     };
