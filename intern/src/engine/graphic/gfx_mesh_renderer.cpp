@@ -10,14 +10,19 @@
 #include "engine/data/data_component_facet.h"
 #include "engine/data/data_component_manager.h"
 #include "engine/data/data_entity.h"
+#include "engine/data/data_light_probe_component.h"
 #include "engine/data/data_map.h"
 #include "engine/data/data_material_component.h"
 #include "engine/data/data_mesh_component.h"
+#include "engine/data/data_point_light_component.h"
+#include "engine/data/data_sky_component.h"
+#include "engine/data/data_sun_component.h"
 #include "engine/data/data_transformation_facet.h"
 
 #include "engine/graphic/gfx_buffer_manager.h"
 #include "engine/graphic/gfx_context_manager.h"
 #include "engine/graphic/gfx_histogram_renderer.h"
+#include "engine/graphic/gfx_light_probe.h"
 #include "engine/graphic/gfx_main.h"
 #include "engine/graphic/gfx_material.h"
 #include "engine/graphic/gfx_material_manager.h"
@@ -25,10 +30,12 @@
 #include "engine/graphic/gfx_mesh_manager.h"
 #include "engine/graphic/gfx_mesh_renderer.h"
 #include "engine/graphic/gfx_performance.h"
+#include "engine/graphic/gfx_point_light.h"
 #include "engine/graphic/gfx_reflection_renderer.h"
 #include "engine/graphic/gfx_sampler_manager.h"
 #include "engine/graphic/gfx_shader_manager.h"
 #include "engine/graphic/gfx_state_manager.h"
+#include "engine/graphic/gfx_sun.h"
 #include "engine/graphic/gfx_target_set_manager.h"
 #include "engine/graphic/gfx_texture_manager.h"
 #include "engine/graphic/gfx_view_manager.h"
@@ -134,11 +141,12 @@ namespace
         CRenderContextPtr m_HitProxyContextPtr;
         CRenderJobs       m_DeferredRenderJobs;
         CRenderJobs       m_ForwardRenderJobs;
-        SLightJob         m_ForwardLightJobs;
+        SLightJob         m_ForwardLightTextures;
 
     private:
 
         void BuildRenderJobs();
+        void UpdateLightProperties();
     };
 } // namespace
 
@@ -154,7 +162,7 @@ namespace
         , m_HitProxyContextPtr      ()
         , m_DeferredRenderJobs      ()
         , m_ForwardRenderJobs       ()
-        , m_ForwardLightJobs        ()
+        , m_ForwardLightTextures        ()
     {
         // -----------------------------------------------------------------------------
         // Reserve some jobs
@@ -212,11 +220,11 @@ namespace
 
         for (unsigned int IndexOfTexture = 0; IndexOfTexture < s_MaxNumberOfLights; ++IndexOfTexture)
         {
-            m_ForwardLightJobs.m_ShadowTexturePtrs[IndexOfTexture] = nullptr;
+            m_ForwardLightTextures.m_ShadowTexturePtrs[IndexOfTexture] = nullptr;
         }
 
-        m_ForwardLightJobs.m_DiffuseTexturePtr  = nullptr;
-        m_ForwardLightJobs.m_SpecularTexturePtr = nullptr;
+        m_ForwardLightTextures.m_DiffuseTexturePtr  = nullptr;
+        m_ForwardLightTextures.m_SpecularTexturePtr = nullptr;
     }
 
     // -----------------------------------------------------------------------------
@@ -382,6 +390,11 @@ namespace
         // state changes as possible.
         // -----------------------------------------------------------------------------
         BuildRenderJobs();
+
+        // -----------------------------------------------------------------------------
+        // Update light properties
+        // -----------------------------------------------------------------------------
+        UpdateLightProperties();
     }
 
     // -----------------------------------------------------------------------------
@@ -503,7 +516,7 @@ namespace
 
     void CGfxMeshRenderer::RenderForward()
     {
-        return;
+        if (m_ForwardRenderJobs.size() == 0) return;
 
         Performance::BeginEvent("Actors");
 
@@ -529,27 +542,27 @@ namespace
 
         ContextManager::SetTexture(6, ReflectionRenderer::GetBRDF());
 
-        if (m_ForwardLightJobs.m_SpecularTexturePtr != 0)
+        if (m_ForwardLightTextures.m_SpecularTexturePtr != 0)
         {
             ContextManager::SetSampler(7, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
-            ContextManager::SetTexture(7, m_ForwardLightJobs.m_SpecularTexturePtr);
+            ContextManager::SetTexture(7, m_ForwardLightTextures.m_SpecularTexturePtr);
         }
 
-        if (m_ForwardLightJobs.m_DiffuseTexturePtr != 0)
+        if (m_ForwardLightTextures.m_DiffuseTexturePtr != 0)
         {
             ContextManager::SetSampler(8, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
-            ContextManager::SetTexture(8, m_ForwardLightJobs.m_DiffuseTexturePtr);
+            ContextManager::SetTexture(8, m_ForwardLightTextures.m_DiffuseTexturePtr);
         }
 
         for (unsigned int IndexOfTexture = 0; IndexOfTexture < s_MaxNumberOfLights; ++IndexOfTexture)
         {
-            if (m_ForwardLightJobs.m_ShadowTexturePtrs[IndexOfTexture] != 0)
+            if (m_ForwardLightTextures.m_ShadowTexturePtrs[IndexOfTexture] != 0)
             {
                 ContextManager::SetSampler(9 + IndexOfTexture, SamplerManager::GetSampler(CSampler::MinMagLinearMipPointClamp));
 
-                ContextManager::SetTexture(9 + IndexOfTexture, m_ForwardLightJobs.m_ShadowTexturePtrs[IndexOfTexture]);
+                ContextManager::SetTexture(9 + IndexOfTexture, m_ForwardLightTextures.m_ShadowTexturePtrs[IndexOfTexture]);
             }
         }
 
@@ -750,9 +763,6 @@ namespace
 
             const Dt::CEntity& rCurrentEntity = *pDtComponent->GetHostEntity();
 
-            // -----------------------------------------------------------------------------
-            // Get graphic facet
-            // -----------------------------------------------------------------------------
             if (rCurrentEntity.GetLayer() == Dt::SEntityLayer::Default)
             {
                 Gfx::CMesh* pGfxComponent = static_cast<Gfx::CMesh*>(pDtComponent->GetFacet(Dt::CMeshComponent::Graphic));
@@ -803,6 +813,150 @@ namespace
         // Now we order our render jobs
         // -----------------------------------------------------------------------------
         std::sort(m_DeferredRenderJobs.begin(), m_DeferredRenderJobs.end(), SortObject);
+
+        std::sort(m_ForwardRenderJobs.begin(), m_ForwardRenderJobs.end(), SortObject);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxMeshRenderer::UpdateLightProperties()
+    {
+        SLightProperties LightProperties[s_MaxNumberOfLights];
+        unsigned int     IndexOfLight;
+
+        // -----------------------------------------------------------------------------
+        // Clear textures
+        // -----------------------------------------------------------------------------
+        m_ForwardLightTextures.m_SpecularTexturePtr = nullptr;
+        m_ForwardLightTextures.m_DiffuseTexturePtr  = nullptr;
+
+        for (unsigned int IndexOfTexture = 0; IndexOfTexture < s_MaxNumberOfLights; ++IndexOfTexture)
+        {
+            m_ForwardLightTextures.m_ShadowTexturePtrs[IndexOfTexture] = nullptr;
+        }
+
+        // -----------------------------------------------------------------------------
+        // Initiate light properties buffer
+        // -----------------------------------------------------------------------------
+        Base::CMemory::Zero(&LightProperties, sizeof(SLightProperties) * s_MaxNumberOfLights);
+
+        // -----------------------------------------------------------------------------
+        // Fill with data
+        // -----------------------------------------------------------------------------
+        IndexOfLight = 0;
+
+        // -----------------------------------------------------------------------------
+        // Suns
+        // -----------------------------------------------------------------------------
+        auto DataComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CSunComponent>();
+
+        for (auto Component : DataComponents)
+        {
+            if (IndexOfLight == s_MaxNumberOfLights) break;
+
+            Dt::CSunComponent* pDtComponent = static_cast<Dt::CSunComponent*>(Component);
+
+            if (pDtComponent->IsActiveAndUsable() == false) continue;
+
+            Gfx::CSun* pGfxComponent = static_cast<Gfx::CSun*>(pDtComponent->GetFacet(Dt::CSunComponent::Graphic));
+
+            float SunAngularRadius = 0.27f * glm::pi<float>() / 180.0f;
+            float HasShadows       = 1.0f;
+
+            LightProperties[IndexOfLight].m_LightType           = 1;
+            LightProperties[IndexOfLight].m_LightViewProjection = pGfxComponent->GetCamera()->GetViewProjectionMatrix();
+            LightProperties[IndexOfLight].m_LightDirection      = glm::normalize(glm::vec4(pDtComponent->GetDirection(), 0.0f));
+            LightProperties[IndexOfLight].m_LightColor          = glm::vec4(pDtComponent->GetLightness(), 1.0f);
+            LightProperties[IndexOfLight].m_LightSettings       = glm::vec4(SunAngularRadius, 0.0f, 0.0f, HasShadows);
+
+            // -----------------------------------------------------------------------------
+
+            m_ForwardLightTextures.m_ShadowTexturePtrs[IndexOfLight] = pGfxComponent->GetShadowMapPtr();
+
+            // -----------------------------------------------------------------------------
+
+            ++IndexOfLight;
+        }
+
+        // -----------------------------------------------------------------------------
+        // Point lights
+        // -----------------------------------------------------------------------------
+        DataComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CPointLightComponent>();
+
+        for (auto Component : DataComponents)
+        {
+            if (IndexOfLight == s_MaxNumberOfLights) break;
+
+            Dt::CPointLightComponent* pDtComponent = static_cast<Dt::CPointLightComponent*>(Component);
+
+            if (pDtComponent->IsActiveAndUsable() == false) continue;
+
+            Gfx::CPointLight* pGfxComponent = static_cast<Gfx::CPointLight*>(pDtComponent->GetFacet(Dt::CPointLightComponent::Graphic));
+
+            float InvSqrAttenuationRadius = pDtComponent->GetReciprocalSquaredAttenuationRadius();
+            float AngleScale              = pDtComponent->GetAngleScale();
+            float AngleOffset             = pDtComponent->GetAngleOffset();
+            float HasShadows              = pDtComponent->GetShadowType() != Dt::CPointLightComponent::NoShadows ? 1.0f : 0.0f;
+
+            LightProperties[IndexOfLight].m_LightType      = 2;
+            LightProperties[IndexOfLight].m_LightPosition  = glm::vec4(pDtComponent->GetHostEntity()->GetWorldPosition(), 1.0f);
+            LightProperties[IndexOfLight].m_LightDirection = glm::normalize(glm::vec4(pDtComponent->GetDirection(), 0.0f));
+            LightProperties[IndexOfLight].m_LightColor     = glm::vec4(pDtComponent->GetLightness(), 1.0f);
+            LightProperties[IndexOfLight].m_LightSettings  = glm::vec4(InvSqrAttenuationRadius, AngleScale, AngleOffset, HasShadows);
+
+            LightProperties[IndexOfLight].m_LightViewProjection = glm::mat4(1.0f);
+
+            if (pDtComponent->GetShadowType() != Dt::CPointLightComponent::NoShadows)
+            {
+                assert(pGfxComponent->GetCamera().IsValid());
+
+                LightProperties[IndexOfLight].m_LightViewProjection = pGfxComponent->GetCamera()->GetViewProjectionMatrix();
+            }
+
+            // -----------------------------------------------------------------------------
+
+            if (pDtComponent->GetShadowType() != Dt::CPointLightComponent::NoShadows)
+            {
+                m_ForwardLightTextures.m_ShadowTexturePtrs[IndexOfLight] = pGfxComponent->GetTextureSMSet()->GetTexture(0);
+            }
+
+            // -----------------------------------------------------------------------------
+
+            ++IndexOfLight;
+        }
+
+        // -----------------------------------------------------------------------------
+        // Light probe
+        // -----------------------------------------------------------------------------
+        DataComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CLightProbeComponent>();
+
+        for (auto Component : DataComponents)
+        {
+            if (IndexOfLight == s_MaxNumberOfLights) break;
+
+            Dt::CLightProbeComponent* pDtComponent = static_cast<Dt::CLightProbeComponent*>(Component);
+
+            if (pDtComponent->IsActiveAndUsable() == false) continue;
+
+            Gfx::CLightProbe* pGfxComponent = static_cast<Gfx::CLightProbe*>(pDtComponent->GetFacet(Dt::CLightProbeComponent::Graphic));
+
+            LightProperties[IndexOfLight].m_LightType      = 3;
+            LightProperties[IndexOfLight].m_LightPosition  = glm::vec4(pDtComponent->GetHostEntity()->GetWorldPosition(), 1.0f);
+            LightProperties[IndexOfLight].m_LightDirection = glm::vec4(0.0f);
+            LightProperties[IndexOfLight].m_LightColor     = glm::vec4(0.0f);
+            LightProperties[IndexOfLight].m_LightSettings  = glm::vec4(static_cast<float>(pGfxComponent->GetSpecularPtr()->GetNumberOfMipLevels() - 1), 0.0f, 0.0f, 0.0f);
+
+            LightProperties[IndexOfLight].m_LightViewProjection = glm::mat4(1.0f);
+
+            ++IndexOfLight;
+        }
+
+        BufferManager::UploadBufferData(m_LightPropertiesBufferPtr, &LightProperties);
+
+
+        // TODO by tschwandt (2018/06/14)
+        // 1. There is no check included if the light has an effect on the object!
+        // 2. Area lights are not supported!
     }
 } // namespace
 

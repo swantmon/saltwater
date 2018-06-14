@@ -1179,7 +1179,7 @@ namespace
 
         for (unsigned int IndexOfTexture = 0; IndexOfTexture < s_MaxNumberOfLightsPerProbe; ++IndexOfTexture)
         {
-            m_LightJob.m_ShadowTexturePtrs[IndexOfTexture];
+            m_LightJob.m_ShadowTexturePtrs[IndexOfTexture] = 0;
         }
 
         // -----------------------------------------------------------------------------
