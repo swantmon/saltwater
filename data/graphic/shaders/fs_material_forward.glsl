@@ -61,7 +61,7 @@ layout(binding =  2) uniform sampler2D   ps_RougnessTexture;
 layout(binding =  3) uniform sampler2D   ps_Metaltexture;
 layout(binding =  4) uniform sampler2D   ps_AOTexture;
 // binding 5 is reserved for bump texture
-// binding 6 is reserved for alpha texture
+layout(binding =  6) uniform sampler2D   ps_AlphaTexture;
 layout(binding =  7) uniform sampler2D   ps_BRDF;
 layout(binding =  8) uniform samplerCube ps_SpecularCubemap;
 layout(binding =  9) uniform samplerCube ps_DiffuseCubemap;
@@ -112,6 +112,10 @@ void main(void)
 
 #ifdef USE_TEX_AO
     AO *= texture(ps_AOTexture, UV).r;
+#endif // USE_TEX_AO
+
+#ifdef USE_TEX_ALPHA
+    Alpha *= texture(ps_AlphaTexture, UV).r;
 #endif // USE_TEX_AO
 
     // -----------------------------------------------------------------------------

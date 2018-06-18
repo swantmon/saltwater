@@ -482,6 +482,7 @@ namespace
         MaterialDescriptor.m_MetalTexture            = pMaterialComponent->GetMetalTexture();
         MaterialDescriptor.m_AmbientOcclusionTexture = pMaterialComponent->GetAmbientOcclusionTexture();
         MaterialDescriptor.m_BumpTexture             = pMaterialComponent->GetBumpTexture();
+        MaterialDescriptor.m_AlphaTexture            = pMaterialComponent->GetAlphaTexture();
 
         CInternMaterial* pInternMaterial = 0;
 
@@ -621,21 +622,27 @@ namespace
 
         if (_pComponent->m_MaterialKey.m_HasRoughnessTex)
         {
-            TextureDescriptor.m_pFileName = pRoughnessMap;
+            TextureDescriptor.m_NumberOfPixelsW = 1;
+            TextureDescriptor.m_Format          = CTexture::R8G8B8_UBYTE;
+            TextureDescriptor.m_pFileName       = pRoughnessMap;
 
             TexturePtrs[2] = TextureManager::CreateTexture2D(TextureDescriptor);
         }
 
         if (_pComponent->m_MaterialKey.m_HasMetallicTex)
         {
-            TextureDescriptor.m_pFileName = pMetalMaskMap;
+            TextureDescriptor.m_NumberOfPixelsW = 1;
+            TextureDescriptor.m_Format          = CTexture::R8G8B8_UBYTE;
+            TextureDescriptor.m_pFileName       = pMetalMaskMap;
 
             TexturePtrs[3] = TextureManager::CreateTexture2D(TextureDescriptor);
         }
 
         if (_pComponent->m_MaterialKey.m_HasAOTex)
         {
-            TextureDescriptor.m_pFileName = pAOMap;
+            TextureDescriptor.m_NumberOfPixelsW = 1;
+            TextureDescriptor.m_Format          = CTexture::R8G8B8_UBYTE;
+            TextureDescriptor.m_pFileName       = pAOMap;
 
             TexturePtrs[4] = TextureManager::CreateTexture2D(TextureDescriptor);
         }
@@ -643,8 +650,8 @@ namespace
         if (_pComponent->m_MaterialKey.m_HasBumpTex)
         {
             TextureDescriptor.m_NumberOfPixelsW = 1;
-            TextureDescriptor.m_Format = CTexture::R8_UBYTE;
-            TextureDescriptor.m_pFileName = pBumpMap;
+            TextureDescriptor.m_Format          = CTexture::R8_UBYTE;
+            TextureDescriptor.m_pFileName       = pBumpMap;
 
             TexturePtrs[5] = TextureManager::CreateTexture2D(TextureDescriptor);
         }
