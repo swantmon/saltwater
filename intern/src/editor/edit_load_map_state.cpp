@@ -333,7 +333,7 @@ namespace Edit
 
             auto pMaterialComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CMaterialComponent>();
 
-            pMaterialComponent->SetMaterialname("Red Sparrow");
+            pMaterialComponent->SetMaterialname("Chrome Sparrow");
             pMaterialComponent->SetColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
             pMaterialComponent->SetMetalness(1.0f);
             pMaterialComponent->SetRoughness(0.25f);
@@ -383,7 +383,6 @@ namespace Edit
             pMaterialComponent->SetColor(glm::vec4(1.0f, 1.0f, 1.0f, 0.8f));
             pMaterialComponent->SetMetalness(0.0f);
             pMaterialComponent->SetRoughness(1.0f);
-            pMaterialComponent->SetAlphaTexture(Core::AssetManager::GetPathToAssets() + "/sponza_thorn_mask.png");
 
             rEntity.AttachComponent(pMaterialComponent);
 
