@@ -622,7 +622,7 @@ namespace
             if (Texture.length() > 0)
             {
                 Gfx::STextureDescriptor TextureDescriptor; 
- 
+
                 TextureDescriptor.m_NumberOfPixelsU  = Gfx::STextureDescriptor::s_NumberOfPixelsFromSource; 
                 TextureDescriptor.m_NumberOfPixelsV  = Gfx::STextureDescriptor::s_NumberOfPixelsFromSource; 
                 TextureDescriptor.m_NumberOfPixelsW  = 1;

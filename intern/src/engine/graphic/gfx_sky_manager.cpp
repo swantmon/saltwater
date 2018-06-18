@@ -199,10 +199,6 @@ namespace
 
         void RenderSkyboxFromCubemap(CInternSky* _pOutput, float _Intensity = 1.0f);
 
-        void RenderSkyboxFromTexture(CInternSky* _pOutput, float _Intensity = 1.0f);
-
-        void RenderSkyboxFromGeometry(CInternSky* _pOutput, float _Intensity = 1.0f);
-
         void PrecomputeScattering();
 
         void ResetRenderContext();
