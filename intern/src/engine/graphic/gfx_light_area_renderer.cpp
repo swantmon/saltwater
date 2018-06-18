@@ -64,7 +64,7 @@ namespace
         
         void Update();
         void Render();
-        void RenderBulbs();
+        void RenderForward();
         
     private:
                 
@@ -464,15 +464,14 @@ namespace
     
     // -----------------------------------------------------------------------------
     
-    void CGfxAreaLightRenderer::RenderBulbs()
+    void CGfxAreaLightRenderer::RenderForward()
     {
         Performance::BeginEvent("Area Lights Bulbs");
 
         // -----------------------------------------------------------------------------
         // Render
         // -----------------------------------------------------------------------------
-        
-        ContextManager::SetTargetSet(TargetSetManager::GetDefaultTargetSet());
+        ContextManager::SetTargetSet(TargetSetManager::GetLightAccumulationTargetSet());
 
         ContextManager::SetViewPortSet(ViewManager::GetViewPortSet());
 
@@ -691,9 +690,9 @@ namespace LightAreaRenderer
 
     // -----------------------------------------------------------------------------
 
-    void RenderBulbs()
+    void RenderForward()
     {
-        CGfxAreaLightRenderer::GetInstance().RenderBulbs();
+        CGfxAreaLightRenderer::GetInstance().RenderForward();
     }
 } // namespace LightAreaRenderer
 } // namespace Gfx

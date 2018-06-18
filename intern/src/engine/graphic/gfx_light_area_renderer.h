@@ -1,10 +1,3 @@
-//
-//  gfx_area_light_renderer.h
-//  graphic
-//
-//  Created by Tobias Schwandt on 26/05/15.
-//  Copyright (c) 2014 TU Ilmenau. All rights reserved.
-//
 
 #pragma once
 
@@ -31,6 +24,6 @@ namespace LightAreaRenderer
     
     void Update();
     void Render();
-    void RenderBulbs();
+    void RenderForward();
 } // namespace LightAreaRenderer
 } // namespace Gfx
