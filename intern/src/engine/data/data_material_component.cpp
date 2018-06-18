@@ -1,11 +1,11 @@
 
 #include "engine/engine_precompiled.h"
 
-#include "engine/data/data_material.h"
+#include "engine/data/data_material_component.h"
 
 namespace Dt
 {
-    CMaterial::CMaterial()
+    CMaterialComponent::CMaterialComponent()
         : m_Materialname("")
         , m_FileName("")
         , m_ColorTexture("")
@@ -21,41 +21,40 @@ namespace Dt
         , m_Reflectance(0.0f)
         , m_MetalMask(0.0f)
         , m_Displacement(0.0f)
-        , m_Hash(0)
     {
     }
 
     // -----------------------------------------------------------------------------
 
-    CMaterial::~CMaterial()
+    CMaterialComponent::~CMaterialComponent()
     {
 
     }
 
     // -----------------------------------------------------------------------------
 
-    void CMaterial::SetMaterialname(const std::string& _rValue)
+    void CMaterialComponent::SetMaterialname(const std::string& _rValue)
     {
         m_Materialname = _rValue;
     }
 
     // -----------------------------------------------------------------------------
 
-    const std::string& CMaterial::GetMaterialname() const
+    const std::string& CMaterialComponent::GetMaterialname() const
     {
         return m_Materialname;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CMaterial::SetFileName(const std::string& _rValue)
+    void CMaterialComponent::SetFileName(const std::string& _rValue)
     {
         m_FileName = _rValue;
     }
 
     // -----------------------------------------------------------------------------
 
-    const std::string& CMaterial::GetFileName() const
+    const std::string& CMaterialComponent::GetFileName() const
     {
         return m_FileName;
     }
@@ -63,14 +62,14 @@ namespace Dt
     // -----------------------------------------------------------------------------
 
 
-    void CMaterial::SetColorTexture(const std::string& _rValue)
+    void CMaterialComponent::SetColorTexture(const std::string& _rValue)
     {
         m_ColorTexture = _rValue;
     }
 
     // -----------------------------------------------------------------------------
 
-    const std::string& CMaterial::GetColorTexture() const
+    const std::string& CMaterialComponent::GetColorTexture() const
     {
         return m_ColorTexture;
     }
@@ -78,14 +77,14 @@ namespace Dt
     // -----------------------------------------------------------------------------
 
 
-    void CMaterial::SetNormalTexture(const std::string& _rValue)
+    void CMaterialComponent::SetNormalTexture(const std::string& _rValue)
     {
         m_NormalTexture = _rValue;
     }
 
     // -----------------------------------------------------------------------------
 
-    const std::string& CMaterial::GetNormalTexture() const
+    const std::string& CMaterialComponent::GetNormalTexture() const
     {
         return m_NormalTexture;
     }
@@ -93,14 +92,14 @@ namespace Dt
     // -----------------------------------------------------------------------------
 
 
-    void CMaterial::SetRoughnessTexture(const std::string& _rValue)
+    void CMaterialComponent::SetRoughnessTexture(const std::string& _rValue)
     {
         m_RoughnessTexture = _rValue;
     }
 
     // -----------------------------------------------------------------------------
 
-    const std::string& CMaterial::GetRoughnessTexture() const
+    const std::string& CMaterialComponent::GetRoughnessTexture() const
     {
         return m_RoughnessTexture;
     }
@@ -108,14 +107,14 @@ namespace Dt
     // -----------------------------------------------------------------------------
 
 
-    void CMaterial::SetMetalTexture(const std::string& _rValue)
+    void CMaterialComponent::SetMetalTexture(const std::string& _rValue)
     {
         m_MetalTexture = _rValue;
     }
 
     // -----------------------------------------------------------------------------
 
-    const std::string& CMaterial::GetMetalTexture() const
+    const std::string& CMaterialComponent::GetMetalTexture() const
     {
         return m_MetalTexture;
     }
@@ -123,63 +122,63 @@ namespace Dt
     // -----------------------------------------------------------------------------
 
 
-    void CMaterial::SetAmbientOcclusionTexture(const std::string& _rValue)
+    void CMaterialComponent::SetAmbientOcclusionTexture(const std::string& _rValue)
     {
         m_AmbientOcclusionTexture = _rValue;
     }
 
     // -----------------------------------------------------------------------------
 
-    const std::string& CMaterial::GetAmbientOcclusionTexture() const
+    const std::string& CMaterialComponent::GetAmbientOcclusionTexture() const
     {
         return m_AmbientOcclusionTexture;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CMaterial::SetBumpTexture(const std::string& _rValue)
+    void CMaterialComponent::SetBumpTexture(const std::string& _rValue)
     {
         m_BumpTexture = _rValue;
     }
 
     // -----------------------------------------------------------------------------
 
-    const std::string& CMaterial::GetBumpTexture() const
+    const std::string& CMaterialComponent::GetBumpTexture() const
     {
         return m_BumpTexture;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CMaterial::SetAlphaTexture(const std::string& _rValue)
+    void CMaterialComponent::SetAlphaTexture(const std::string& _rValue)
     {
         m_AlphaTexture = _rValue;
     }
 
     // -----------------------------------------------------------------------------
 
-    const std::string& CMaterial::GetAlphaTexture() const
+    const std::string& CMaterialComponent::GetAlphaTexture() const
     {
         return m_AlphaTexture;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CMaterial::SetColor(const glm::vec4& _rValue)
+    void CMaterialComponent::SetColor(const glm::vec4& _rValue)
     {
         m_Color = _rValue;
     }
 
     // -----------------------------------------------------------------------------
 
-    const glm::vec4& CMaterial::GetColor() const
+    const glm::vec4& CMaterialComponent::GetColor() const
     {
         return m_Color;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CMaterial::SetTiling(const glm::vec2& _rValue)
+    void CMaterialComponent::SetTiling(const glm::vec2& _rValue)
     {
         m_TilingOffset[0] = _rValue[0];
         m_TilingOffset[1] = _rValue[1];
@@ -187,14 +186,14 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    const glm::vec2 CMaterial::GetTiling() const
+    const glm::vec2 CMaterialComponent::GetTiling() const
     {
         return glm::vec2(m_TilingOffset[0], m_TilingOffset[1]);
     }
 
     // -----------------------------------------------------------------------------
 
-    void CMaterial::SetOffset(const glm::vec2& _rValue)
+    void CMaterialComponent::SetOffset(const glm::vec2& _rValue)
     {
         m_TilingOffset[2] = _rValue[0];
         m_TilingOffset[3] = _rValue[1];
@@ -202,21 +201,21 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    const glm::vec2 CMaterial::GetOffset() const
+    const glm::vec2 CMaterialComponent::GetOffset() const
     {
         return glm::vec2(m_TilingOffset[2], m_TilingOffset[3]);
     }
 
     // -----------------------------------------------------------------------------
 
-    void CMaterial::SetTilingOffset(const glm::vec4& _rValue)
+    void CMaterialComponent::SetTilingOffset(const glm::vec4& _rValue)
     {
         m_TilingOffset = _rValue;
     }
 
     // -----------------------------------------------------------------------------
 
-    const glm::vec4& CMaterial::GetTilingOffset() const
+    const glm::vec4& CMaterialComponent::GetTilingOffset() const
     {
         return m_TilingOffset;
     }
@@ -224,14 +223,14 @@ namespace Dt
     // -----------------------------------------------------------------------------
 
 
-    void CMaterial::SetRoughness(float _Value)
+    void CMaterialComponent::SetRoughness(float _Value)
     {
         m_Roughness = _Value;
     }
 
     // -----------------------------------------------------------------------------
 
-    float CMaterial::GetRoughness() const
+    float CMaterialComponent::GetRoughness() const
     {
         return m_Roughness;
     }
@@ -239,14 +238,14 @@ namespace Dt
     // -----------------------------------------------------------------------------
 
 
-    void CMaterial::SetSmoothness(float _Value)
+    void CMaterialComponent::SetSmoothness(float _Value)
     {
         m_Roughness = 1.0f - _Value;
     }
 
     // -----------------------------------------------------------------------------
 
-    float CMaterial::GetSmoothness() const
+    float CMaterialComponent::GetSmoothness() const
     {
         return  1.0f - m_Roughness;
     }
@@ -254,14 +253,14 @@ namespace Dt
     // -----------------------------------------------------------------------------
 
 
-    void CMaterial::SetReflectance(float _Value)
+    void CMaterialComponent::SetReflectance(float _Value)
     {
         m_Reflectance = _Value;
     }
 
     // -----------------------------------------------------------------------------
 
-    float CMaterial::GetReflectance() const
+    float CMaterialComponent::GetReflectance() const
     {
         return m_Reflectance;
     }
@@ -269,14 +268,14 @@ namespace Dt
     // -----------------------------------------------------------------------------
 
 
-    void CMaterial::SetMetalness(float _Value)
+    void CMaterialComponent::SetMetalness(float _Value)
     {
         m_MetalMask = _Value;
     }
 
     // -----------------------------------------------------------------------------
 
-    float CMaterial::GetMetalness() const
+    float CMaterialComponent::GetMetalness() const
     {
         return m_MetalMask;
     }
@@ -284,36 +283,29 @@ namespace Dt
     // -----------------------------------------------------------------------------
 
 
-    void CMaterial::SetDisplacement(float _Value)
+    void CMaterialComponent::SetDisplacement(float _Value)
     {
         m_Displacement = _Value;
     }
 
     // -----------------------------------------------------------------------------
 
-    float CMaterial::GetDisplacement() const
+    float CMaterialComponent::GetDisplacement() const
     {
         return m_Displacement;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CMaterial::SetAlpha(float _Value)
+    void CMaterialComponent::SetAlpha(float _Value)
     {
         m_Color[3] = _Value;
     }
 
     // -----------------------------------------------------------------------------
 
-    float CMaterial::GetAlpha() const
+    float CMaterialComponent::GetAlpha() const
     {
         return m_Color[3];
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CMaterial::BHash CMaterial::GetHash() const
-    {
-        return m_Hash;
     }
 } // namespace Dt

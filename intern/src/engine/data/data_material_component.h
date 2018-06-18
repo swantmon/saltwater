@@ -4,13 +4,19 @@
 #include "engine/engine_config.h"
 
 #include "base/base_include_glm.h"
-#include "base/base_typedef.h"
+
+#include "engine/data/data_component.h"
 
 #include <string>
 
 namespace Dt
 {
-    class ENGINE_API CMaterial
+    class CMaterial;
+} // namespace Dt
+
+namespace Dt
+{
+    class ENGINE_API CMaterialComponent : public CComponent<CMaterialComponent>
     {
     public:
 
@@ -75,30 +81,27 @@ namespace Dt
         void SetAlpha(float _Value);
         float GetAlpha() const;
 
-        BHash GetHash() const;
+    public:
 
-    protected:
+        CMaterialComponent();
+        ~CMaterialComponent();
 
-        CMaterial();
-        ~CMaterial();
+    private:
 
-    protected:
-
-        std::string  m_Materialname;
-        std::string  m_FileName;
-        std::string  m_ColorTexture;
-        std::string  m_NormalTexture;
-        std::string  m_RoughnessTexture;
-        std::string  m_MetalTexture;
-        std::string  m_AmbientOcclusionTexture;
-        std::string  m_BumpTexture;
-        std::string  m_AlphaTexture;
-        glm::vec4    m_Color;
-        glm::vec4    m_TilingOffset;
-        float        m_Roughness;
-        float        m_Reflectance;
-        float        m_MetalMask;
-        float        m_Displacement;
-        BHash        m_Hash;
+        std::string m_Materialname;
+        std::string m_FileName;
+        std::string m_ColorTexture;
+        std::string m_NormalTexture;
+        std::string m_RoughnessTexture;
+        std::string m_MetalTexture;
+        std::string m_AmbientOcclusionTexture;
+        std::string m_BumpTexture;
+        std::string m_AlphaTexture;
+        glm::vec4   m_Color;
+        glm::vec4   m_TilingOffset;
+        float       m_Roughness;
+        float       m_Reflectance;
+        float       m_MetalMask;
+        float       m_Displacement;
     };
 } // namespace Dt
