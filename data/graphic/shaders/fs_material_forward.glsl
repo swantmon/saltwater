@@ -116,7 +116,7 @@ void main(void)
 
 #ifdef USE_TEX_ALPHA
     Alpha *= texture(ps_AlphaTexture, UV).r;
-#endif // USE_TEX_AO
+#endif // USE_TEX_ALPHA
 
     // -----------------------------------------------------------------------------
     // Surface data
