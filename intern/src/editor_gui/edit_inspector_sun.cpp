@@ -73,16 +73,12 @@ namespace Edit
 
         NewMessage.Put(ColorMode);
 
-        NewMessage.Put(Color[0]);
-        NewMessage.Put(Color[1]);
-        NewMessage.Put(Color[2]);
+        NewMessage.Put(Color);
 
         NewMessage.Put(Temperature);
         NewMessage.Put(Intensity);
 
-        NewMessage.Put(Direction[0]);
-        NewMessage.Put(Direction[1]);
-        NewMessage.Put(Direction[2]);
+        NewMessage.Put(Direction);
 
         NewMessage.Put(ShadowRefresh);
 
@@ -128,8 +124,6 @@ namespace Edit
 
     void CInspectorSun::OnEntityInfoSun(Edit::CMessage& _rMessage)
     {
-        float X, Y, Z;
-
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
@@ -138,20 +132,14 @@ namespace Edit
 
         BASE_UNUSED(EntityID);
 
-        X = _rMessage.Get<float>();
-        Y = _rMessage.Get<float>();
-        Z = _rMessage.Get<float>();
+        glm::vec3 MsgColor = _rMessage.Get<glm::vec3>();
 
-        glm::ivec3 Color = glm::ivec3(X * 255, Y * 255, Z * 255);
+        glm::ivec3 Color = glm::ivec3(MsgColor.r * 255, MsgColor.g * 255, MsgColor.b * 255);
 
         float Temperature = _rMessage.Get<float>();
         float Intensity   = _rMessage.Get<float>();
 
-        X = _rMessage.Get<float>();
-        Y = _rMessage.Get<float>();
-        Z = _rMessage.Get<float>();
-
-        glm::vec3 Direction = glm::vec3(X, Y, Z);
+        glm::vec3 Direction = _rMessage.Get<glm::vec3>();
 
         int ShadowRefresh = _rMessage.Get<int>();
 

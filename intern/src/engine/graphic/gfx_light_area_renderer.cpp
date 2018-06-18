@@ -245,7 +245,7 @@ namespace
         
         CTexturePtr LTCMagTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
 
-		TextureManager::SetTextureLabel(LTCMagTexturePtr, "Area light LTC Mag Texture");
+        TextureManager::SetTextureLabel(LTCMagTexturePtr, "Area light LTC Mag Texture");
 
         // -----------------------------------------------------------------------------
 
@@ -385,13 +385,10 @@ namespace
         // -----------------------------------------------------------------------------
         // Render
         // -----------------------------------------------------------------------------
-        CurrentRenderJob = m_RenderJobs.begin();
-        EndOfRenderJobs  = m_RenderJobs.end();
-
-        for (; CurrentRenderJob != EndOfRenderJobs; ++CurrentRenderJob)
+        for (auto& rCurrentRenderJob : m_RenderJobs)
         {
-            Dt::CAreaLightComponent*  pDtComponent  = CurrentRenderJob->m_pDtComponent;
-            Gfx::CAreaLight* pGfxComponent = CurrentRenderJob->m_pGfxComponent;
+            Dt::CAreaLightComponent* pDtComponent  = rCurrentRenderJob.m_pDtComponent;
+            Gfx::CAreaLight*         pGfxComponent = rCurrentRenderJob.m_pGfxComponent;
 
             assert(pDtComponent && pGfxComponent);
 
@@ -472,48 +469,36 @@ namespace
         Performance::BeginEvent("Area Lights Bulbs");
 
         // -----------------------------------------------------------------------------
-        // Rendering
-        // -----------------------------------------------------------------------------
-        CRenderJobs::const_iterator CurrentRenderJob;
-        CRenderJobs::const_iterator EndOfRenderJobs;
-
-        // -----------------------------------------------------------------------------
         // Render
         // -----------------------------------------------------------------------------
-        CurrentRenderJob = m_RenderJobs.begin();
-        EndOfRenderJobs  = m_RenderJobs.end();
+        
+        ContextManager::SetTargetSet(TargetSetManager::GetDefaultTargetSet());
 
-        for (; CurrentRenderJob != EndOfRenderJobs; ++CurrentRenderJob)
+        ContextManager::SetViewPortSet(ViewManager::GetViewPortSet());
+
+        ContextManager::SetBlendState(StateManager::GetBlendState(CBlendState::Default));
+
+        ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::Default));
+
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::NoCull));
+
+        ContextManager::SetInputLayout(m_PositionShaderPtr->GetInputLayout());
+
+        ContextManager::SetTopology(STopology::TriangleList);
+
+        ContextManager::SetShaderVS(m_PositionShaderPtr);
+
+        ContextManager::SetShaderPS(m_AreaLightbulbShaderPtr);
+
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+        ContextManager::SetConstantBuffer(1, m_AreaLightbulbBufferPtr);
+
+        for (auto& rCurrentRenderJob : m_RenderJobs)
         {
-            Dt::CAreaLightComponent*  pDtComponent  = CurrentRenderJob->m_pDtComponent;
-            Gfx::CAreaLight* pGfxComponent = CurrentRenderJob->m_pGfxComponent;
+            Dt::CAreaLightComponent* pDtComponent  = rCurrentRenderJob.m_pDtComponent;
+            Gfx::CAreaLight*         pGfxComponent = rCurrentRenderJob.m_pGfxComponent;
 
             assert(pDtComponent && pGfxComponent);
-
-            ContextManager::SetTargetSet(TargetSetManager::GetDefaultTargetSet());
-
-            ContextManager::SetViewPortSet(ViewManager::GetViewPortSet());
-
-            ContextManager::SetBlendState(StateManager::GetBlendState(CBlendState::Default));
-
-            ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::Default));
-
-            ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::NoCull));
-
-            ContextManager::SetVertexBuffer(pGfxComponent->GetPlaneVertexBuffer());
-
-            ContextManager::SetIndexBuffer(pGfxComponent->GetPlaneIndexBuffer(), 0);
-
-            ContextManager::SetInputLayout(m_PositionShaderPtr->GetInputLayout());
-
-            ContextManager::SetTopology(STopology::TriangleList);
-
-            ContextManager::SetShaderVS(m_PositionShaderPtr);
-
-            ContextManager::SetShaderPS(m_AreaLightbulbShaderPtr);
-
-            ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
-            ContextManager::SetConstantBuffer(1, m_AreaLightbulbBufferPtr);
 
             // -----------------------------------------------------------------------------
 
@@ -522,6 +507,12 @@ namespace
             LightBuffer.m_Color = glm::vec4(pDtComponent->GetColor(), pGfxComponent->HasTexture() ? 1.0f : 0.0f);
 
             BufferManager::UploadBufferData(m_AreaLightbulbBufferPtr, &LightBuffer);
+
+            // -----------------------------------------------------------------------------
+
+            ContextManager::SetVertexBuffer(pGfxComponent->GetPlaneVertexBuffer());
+
+            ContextManager::SetIndexBuffer(pGfxComponent->GetPlaneIndexBuffer(), 0);
 
             // -----------------------------------------------------------------------------
 
@@ -535,29 +526,28 @@ namespace
             // -----------------------------------------------------------------------------
 
             ContextManager::DrawIndexed(6, 0, 0);
-
-            // -----------------------------------------------------------------------------
-            // Reset everything
-            // -----------------------------------------------------------------------------
-            ContextManager::ResetConstantBuffer(0);
-            ContextManager::ResetConstantBuffer(1);
-
-            ContextManager::ResetTopology();
-
-            ContextManager::ResetInputLayout();
-
-            ContextManager::ResetIndexBuffer();
-
-            ContextManager::ResetVertexBuffer();
-
-            ContextManager::ResetShaderVS();
-
-            ContextManager::ResetShaderPS();
-
-            ContextManager::ResetRenderContext();
         }
 
-        
+        // -----------------------------------------------------------------------------
+        // Reset everything
+        // -----------------------------------------------------------------------------
+        ContextManager::ResetConstantBuffer(0);
+        ContextManager::ResetConstantBuffer(1);
+
+        ContextManager::ResetTopology();
+
+        ContextManager::ResetInputLayout();
+
+        ContextManager::ResetIndexBuffer();
+
+        ContextManager::ResetVertexBuffer();
+
+        ContextManager::ResetShaderVS();
+
+        ContextManager::ResetShaderPS();
+
+        ContextManager::ResetRenderContext();
+
         Performance::EndEvent();
     }
 

@@ -117,6 +117,8 @@ namespace
 
         Dt::CEntity& rNewEntity = Dt::EntityManager::CreateEntity(EntityDesc);
 
+        rNewEntity.SetName("New entity");
+
         _rMessage.SetResult(static_cast<int>(rNewEntity.GetID()));
     }
 

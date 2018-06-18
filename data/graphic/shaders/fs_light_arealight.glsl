@@ -326,7 +326,7 @@ void main()
     // -----------------------------------------------------------------------------
     // Check if light bulb is visible
     // -----------------------------------------------------------------------------
-    out_Output = vec4(Luminance * AverageExposure, 0.0f);
+    out_Output = vec4(Luminance * AverageExposure, 1.0f);
 }
 
 #endif // __INCLUDE_FS_LIGHT_AREALIGHT_GLSL__

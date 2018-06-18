@@ -253,7 +253,7 @@ void main()
     // -------------------------------------------------------------------------------------
     // Output
     // -------------------------------------------------------------------------------------    
-    out_Output = vec4(SpecularLighting.rgb, 0.0f);
+    out_Output = vec4(SpecularLighting.rgb, 1.0f);
 }
 
 #endif // __INCLUDE_FS_LIGHT_IMAGELIGHT_GLSL__

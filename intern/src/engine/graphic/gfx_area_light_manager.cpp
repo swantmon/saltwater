@@ -9,6 +9,7 @@
 #include "engine/core/core_time.h"
 
 #include "engine/data/data_component.h"
+#include "engine/data/data_component_facet.h"
 #include "engine/data/data_component_manager.h"
 #include "engine/data/data_area_light_component.h"
 #include "engine/data/data_entity.h"
@@ -85,6 +86,8 @@ namespace
         CBufferPtr  m_FilterPropertiesPtr;
 
     private:
+
+        void OnDirtyEntity(Dt::CEntity* _pEntity);
 
         void OnDirtyComponent(Dt::IComponent* _pComponent);
 
@@ -191,6 +194,8 @@ namespace
         // Register dirty entity handler for automatic sky creation
         // -----------------------------------------------------------------------------
         Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(DATA_DIRTY_COMPONENT_METHOD(&CGfxAreaLightManager::OnDirtyComponent));
+
+        Dt::EntityManager::RegisterDirtyEntityHandler(DATA_DIRTY_ENTITY_METHOD(&CGfxAreaLightManager::OnDirtyEntity));
     }
 
     // -----------------------------------------------------------------------------
@@ -216,6 +221,27 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    void CGfxAreaLightManager::OnDirtyEntity(Dt::CEntity* _pEntity)
+    {
+        if (_pEntity->GetDirtyFlags() != Dt::CEntity::DirtyMove) return;
+
+        auto ComponentFacet = _pEntity->GetComponentFacet();
+
+        if (!ComponentFacet->HasComponent<Dt::CAreaLightComponent>()) return;
+
+        auto AreaLightComponents = ComponentFacet->GetComponents();
+
+        for (auto pComponent : AreaLightComponents)
+        {
+            if (pComponent->GetTypeID() == Base::CTypeInfo::GetTypeID<Dt::CAreaLightComponent>())
+            {
+                Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Dt::CAreaLightComponent::DirtyInfo);
+            }
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CGfxAreaLightManager::OnDirtyComponent(Dt::IComponent* _pComponent)
     {
         // -----------------------------------------------------------------------------
@@ -228,7 +254,7 @@ namespace
         // -----------------------------------------------------------------------------
         if (_pComponent->GetTypeID() != Base::CTypeInfo::GetTypeID<Dt::CAreaLightComponent>()) return;
 
-        Dt::CAreaLightComponent* pAreaLightComponent = static_cast<Dt::CAreaLightComponent*>(_pComponent);
+        auto pAreaLightComponent = static_cast<Dt::CAreaLightComponent*>(_pComponent);
 
         // -----------------------------------------------------------------------------
         // Dirty check

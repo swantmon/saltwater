@@ -104,7 +104,7 @@ void main()
 
 //    AverageExposure = 0.0f;
 
-    out_Output = vec4(Luminance * AverageExposure, 0.0f);
+    out_Output = vec4(Luminance * AverageExposure, 1.0f);
 }
 
 #endif // __INCLUDE_FS_LIGHT_SUNLIGHT_GLSL__

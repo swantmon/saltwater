@@ -87,9 +87,7 @@ namespace Edit
 
         NewMessage.Put(ColorMode);
 
-        NewMessage.Put(Color.x);
-        NewMessage.Put(Color.y);
-        NewMessage.Put(Color.z);
+        NewMessage.Put(Color);
 
         NewMessage.Put(Temperature);
         NewMessage.Put(Intensity);
@@ -155,8 +153,6 @@ namespace Edit
 
     void CInspectorArealight::OnEntityInfoArealight(Edit::CMessage& _rMessage)
     {
-        float R, G, B;
-        float X, Y, Z;
         bool HasTexture = false;
         std::string TextureName;
         unsigned int TextureHash = 0;
@@ -170,11 +166,9 @@ namespace Edit
 
         int ColorMode = _rMessage.Get<int>();
 
-        R = _rMessage.Get<float>();
-        G = _rMessage.Get<float>();
-        B = _rMessage.Get<float>();
+        glm::vec3 MsgColor = _rMessage.Get<glm::vec3>();
 
-        glm::ivec3 Color = glm::ivec3(R * 255, G * 255, B * 255);
+        glm::ivec3 Color = glm::ivec3(MsgColor.r * 255, MsgColor.g * 255, MsgColor.b * 255);
 
         float Temperature = _rMessage.Get<float>();
         float Intensity   = _rMessage.Get<float>();
@@ -183,11 +177,7 @@ namespace Edit
         float Height      = _rMessage.Get<float>();
         bool  IsTwoSided  = _rMessage.Get<bool>();
 
-        X = _rMessage.Get<float>();
-        Y = _rMessage.Get<float>();
-        Z = _rMessage.Get<float>();
-
-        glm::vec3 Direction = glm::vec3(X, Y, Z);
+        glm::vec3 Direction = _rMessage.Get<glm::vec3>();
 
         HasTexture = _rMessage.Get<bool>();
 
