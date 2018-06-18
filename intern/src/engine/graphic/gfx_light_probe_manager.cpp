@@ -854,31 +854,31 @@ namespace
         // -----------------------------------------------------------------------------
         // Bind shadow and reflection textures
         // -----------------------------------------------------------------------------
-        ContextManager::SetSampler(6, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+        ContextManager::SetSampler(7, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
-        ContextManager::SetTexture(6, ReflectionRenderer::GetBRDF());
+        ContextManager::SetTexture(7, ReflectionRenderer::GetBRDF());
 
         if (m_LightJob.m_SpecularTexturePtr != 0)
         {
-            ContextManager::SetSampler(7, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+            ContextManager::SetSampler(8, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
-            ContextManager::SetTexture(7, m_LightJob.m_SpecularTexturePtr);
+            ContextManager::SetTexture(8, m_LightJob.m_SpecularTexturePtr);
         }
 
         if (m_LightJob.m_DiffuseTexturePtr != 0)
         {
-            ContextManager::SetSampler(8, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+            ContextManager::SetSampler(9, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
-            ContextManager::SetTexture(8, m_LightJob.m_DiffuseTexturePtr);
+            ContextManager::SetTexture(9, m_LightJob.m_DiffuseTexturePtr);
         }
 
         for (unsigned int IndexOfTexture = 0; IndexOfTexture < s_MaxNumberOfLightsPerProbe; ++IndexOfTexture)
         {
             if (m_LightJob.m_ShadowTexturePtrs[IndexOfTexture] != 0)
             {
-                ContextManager::SetSampler(9 + IndexOfTexture, SamplerManager::GetSampler(CSampler::MinMagLinearMipPointClamp));
+                ContextManager::SetSampler(10 + IndexOfTexture, SamplerManager::GetSampler(CSampler::PCF));
 
-                ContextManager::SetTexture(9 + IndexOfTexture, m_LightJob.m_ShadowTexturePtrs[IndexOfTexture]);
+                ContextManager::SetTexture(10 + IndexOfTexture, m_LightJob.m_ShadowTexturePtrs[IndexOfTexture]);
             }
         }
 
@@ -1179,7 +1179,7 @@ namespace
 
         for (unsigned int IndexOfTexture = 0; IndexOfTexture < s_MaxNumberOfLightsPerProbe; ++IndexOfTexture)
         {
-            m_LightJob.m_ShadowTexturePtrs[IndexOfTexture];
+            m_LightJob.m_ShadowTexturePtrs[IndexOfTexture] = 0;
         }
 
         // -----------------------------------------------------------------------------

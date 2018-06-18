@@ -111,8 +111,6 @@ namespace
         
         CShaderPtr        m_PunctualLightShaderPSPtr;
 
-        CRenderContextPtr m_LightRenderContextPtr;
-
         CRenderJobs       m_PunctualLightRenderJobs;
         
     private:
@@ -150,11 +148,10 @@ namespace
     
     void CGfxPointLightRenderer::OnExit()
     {
-        m_SphereModelPtr                    = 0;
-        m_MainVSBufferPtr                   = 0;
-        m_PunctualLightPSBufferPtr          = 0;
-        m_PunctualLightShaderPSPtr          = 0;
-        m_LightRenderContextPtr             = 0;
+        m_SphereModelPtr           = 0;
+        m_MainVSBufferPtr          = 0;
+        m_PunctualLightPSBufferPtr = 0;
+        m_PunctualLightShaderPSPtr = 0;
         
         m_PunctualLightRenderJobs.clear();
     }
@@ -184,24 +181,6 @@ namespace
     
     void CGfxPointLightRenderer::OnSetupStates()
     {
-        CCameraPtr          MainCameraPtr      = ViewManager     ::GetMainCamera();
-
-        CViewPortSetPtr     ViewPortSetPtr     = ViewManager     ::GetViewPortSet();
-
-        CRenderStatePtr     LightStatePtr      = StateManager    ::GetRenderState(CRenderState::AdditionBlend | CRenderState::NoCull);
-
-        CTargetSetPtr       LightTargetSetPtr  = TargetSetManager::GetLightAccumulationTargetSet();
-
-        // -----------------------------------------------------------------------------
-        
-        CRenderContextPtr LightContextPtr = ContextManager::CreateRenderContext();
-        
-        LightContextPtr->SetCamera(MainCameraPtr);
-        LightContextPtr->SetViewPortSet(ViewPortSetPtr);
-        LightContextPtr->SetTargetSet(LightTargetSetPtr);
-        LightContextPtr->SetRenderState(LightStatePtr);
-        
-        m_LightRenderContextPtr = LightContextPtr;
     }
     
     // -----------------------------------------------------------------------------
@@ -359,7 +338,15 @@ namespace
         // -----------------------------------------------------------------------------
         // Rendering of light sources point
         // -----------------------------------------------------------------------------
-        ContextManager::SetRenderContext(m_LightRenderContextPtr);
+        ContextManager::SetTargetSet(TargetSetManager::GetLightAccumulationTargetSet());
+
+        ContextManager::SetViewPortSet(ViewManager::GetViewPortSet());
+
+        ContextManager::SetBlendState(StateManager::GetBlendState(CBlendState::AdditionBlend));
+
+        ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::NoWriteDepth));
+
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::NoCull));
 
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
         ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));

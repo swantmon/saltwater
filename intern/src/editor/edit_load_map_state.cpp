@@ -5,6 +5,8 @@
 
 #include "editor/edit_load_map_state.h"
 
+#include "engine/core/core_asset_manager.h"
+
 #include "engine/data/data_camera_component.h"
 #include "engine/data/data_component.h"
 #include "engine/data/data_component_facet.h"
@@ -14,9 +16,7 @@
 #include "engine/data/data_hierarchy_facet.h"
 #include "engine/data/data_light_probe_component.h"
 #include "engine/data/data_map.h"
-#include "engine/data/data_material.h"
 #include "engine/data/data_material_component.h"
-#include "engine/data/data_material_manager.h"
 #include "engine/data/data_mesh_component.h"
 #include "engine/data/data_script_component.h"
 #include "engine/data/data_sky_component.h"
@@ -331,15 +331,12 @@ namespace Edit
 
             // -----------------------------------------------------------------------------
 
-            auto pMaterial = Dt::MaterialManager::CreateMaterialFromName("Red Sparrow");
-
-            pMaterial->SetColor(glm::vec3(1.0f, 1.0f, 1.0f));
-            pMaterial->SetMetalness(1.0f);
-            pMaterial->SetRoughness(0.25f);
-
             auto pMaterialComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CMaterialComponent>();
 
-            pMaterialComponent->SetMaterial(pMaterial);
+            pMaterialComponent->SetMaterialname("Red Sparrow");
+            pMaterialComponent->SetColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+            pMaterialComponent->SetMetalness(1.0f);
+            pMaterialComponent->SetRoughness(0.25f);
 
             rEntity.AttachComponent(pMaterialComponent);
 
@@ -380,15 +377,13 @@ namespace Edit
 
             // -----------------------------------------------------------------------------
 
-            auto pMaterial = Dt::MaterialManager::CreateMaterialFromName("Plane");
-
-            pMaterial->SetColor(glm::vec3(1.0f, 1.0f, 1.0f));
-            pMaterial->SetMetalness(0.0f);
-            pMaterial->SetRoughness(1.0f);
-
             auto pMaterialComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CMaterialComponent>();
 
-            pMaterialComponent->SetMaterial(pMaterial);
+            pMaterialComponent->SetMaterialname("Plane");
+            pMaterialComponent->SetColor(glm::vec4(1.0f, 1.0f, 1.0f, 0.8f));
+            pMaterialComponent->SetMetalness(0.0f);
+            pMaterialComponent->SetRoughness(1.0f);
+            pMaterialComponent->SetAlphaTexture(Core::AssetManager::GetPathToAssets() + "/sponza_thorn_mask.png");
 
             rEntity.AttachComponent(pMaterialComponent);
 

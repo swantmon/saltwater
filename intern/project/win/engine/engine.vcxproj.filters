@@ -55,9 +55,6 @@
     <Filter Include="data\map\entity\components\scripts">
       <UniqueIdentifier>{b3d687b0-64c4-47eb-a5d1-7e1ab39277a9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="data\materials">
-      <UniqueIdentifier>{65b5089e-40fd-40a7-9e32-7e94d37aa14f}</UniqueIdentifier>
-    </Filter>
     <Filter Include="graphic">
       <UniqueIdentifier>{4736580d-51a3-4fbd-be18-dc596dc2dd3e}</UniqueIdentifier>
     </Filter>
@@ -248,12 +245,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\engine\data\data_camera_component.cpp">
       <Filter>data\map\entity\components\camera</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\engine\data\data_material.cpp">
-      <Filter>data\materials</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\engine\data\data_material_manager.cpp">
-      <Filter>data\materials</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\engine\graphic\gfx_ar_renderer.cpp">
       <Filter>graphic\engine\renderer</Filter>
@@ -570,12 +561,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\engine\data\data_script_component.h">
       <Filter>data\map\entity\components\scripts</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\engine\data\data_material.h">
-      <Filter>data\materials</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\engine\data\data_material_manager.h">
-      <Filter>data\materials</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_graphics_info.h">
       <Filter>graphic\engine</Filter>

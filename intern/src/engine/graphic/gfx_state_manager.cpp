@@ -116,7 +116,7 @@ namespace
     private:
 
         static const unsigned int s_NumberOfBlendStates        = 1 + Gfx::CBlendState::DestinationBlend;
-        static const unsigned int s_NumberOfDepthStencilStates = 1 + Gfx::CDepthStencilState::LessEqualDepth;
+        static const unsigned int s_NumberOfDepthStencilStates = 1 + Gfx::CDepthStencilState::NoWriteDepth;
         static const unsigned int s_NumberOfRasterizerStates   = 1 + Gfx::CRasterizerState::Wireframe + CRasterizerState::NoCull;
         static const unsigned int s_NumberOfRenderStates       = 1 + Gfx::CRenderState::AlphaBlend + Gfx::CRenderState::NoDepth + CRenderState::Wireframe + CRenderState::NoCull + CRenderState::EqualDepth + CRenderState::LessEqualDepth + CRenderState::AdditionBlend + CRenderState::DestinationBlend;
 
@@ -232,6 +232,7 @@ namespace
         { GL_FALSE, 1, GL_LESS  , GL_FALSE, 1, 1, GL_KEEP, GL_KEEP, GL_KEEP, GL_ALWAYS, },
         { GL_TRUE , 1, GL_EQUAL , GL_FALSE, 1, 1, GL_KEEP, GL_KEEP, GL_KEEP, GL_ALWAYS, },
         { GL_TRUE , 1, GL_LEQUAL, GL_FALSE, 1, 1, GL_KEEP, GL_KEEP, GL_KEEP, GL_ALWAYS, },
+        { GL_TRUE , 0, GL_LESS  , GL_FALSE, 1, 1, GL_KEEP, GL_KEEP, GL_KEEP, GL_ALWAYS, },
     };
 } // namespace
 

@@ -33,7 +33,7 @@ struct SLightProperties
 layout(std140, binding = 3) uniform UB3
 {
     vec4  ps_TilingOffset;
-    vec3  ps_Color;
+    vec4  ps_Color;
     float ps_Roughness;
     float ps_Reflectance;
     float ps_MetalMask;
@@ -55,16 +55,17 @@ layout(std430, binding = 1) readonly buffer BB1
     SLightProperties ps_LightProperties[MAX_NUMBER_OF_LIGHTS];
 };
 
-layout(binding = 0) uniform sampler2D   ps_DiffuseTexture;
-layout(binding = 1) uniform sampler2D   ps_NormalTexture;
-layout(binding = 2) uniform sampler2D   ps_RougnessTexture;
-layout(binding = 3) uniform sampler2D   ps_Metaltexture;
-layout(binding = 4) uniform sampler2D   ps_AOTexture;
+layout(binding =  0) uniform sampler2D   ps_DiffuseTexture;
+layout(binding =  1) uniform sampler2D   ps_NormalTexture;
+layout(binding =  2) uniform sampler2D   ps_RougnessTexture;
+layout(binding =  3) uniform sampler2D   ps_Metaltexture;
+layout(binding =  4) uniform sampler2D   ps_AOTexture;
 // binding 5 is reserved for bump texture
-layout(binding = 6) uniform sampler2D   ps_BRDF;
-layout(binding = 7) uniform samplerCube ps_SpecularCubemap;
-layout(binding = 8) uniform samplerCube ps_DiffuseCubemap;
-layout(binding = 9) uniform sampler2D   ps_ShadowTexture[MAX_NUMBER_OF_LIGHTS];
+layout(binding =  6) uniform sampler2D   ps_AlphaTexture;
+layout(binding =  7) uniform sampler2D   ps_BRDF;
+layout(binding =  8) uniform samplerCube ps_SpecularCubemap;
+layout(binding =  9) uniform samplerCube ps_DiffuseCubemap;
+layout(binding = 10) uniform sampler2DShadow ps_ShadowTexture[MAX_NUMBER_OF_LIGHTS];
 
 // -----------------------------------------------------------------------------
 // Input to fragment from previous stage
@@ -90,6 +91,7 @@ void main(void)
     float Roughness = ps_Roughness;
     float MetalMask = ps_MetalMask;
     float AO        = 1.0f;
+    float Alpha     = ps_Color.w;
     vec3 Luminance  = vec3(0.0f);
 
 #ifdef USE_TEX_DIFFUSE
@@ -111,6 +113,10 @@ void main(void)
 #ifdef USE_TEX_AO
     AO *= texture(ps_AOTexture, UV).r;
 #endif // USE_TEX_AO
+
+#ifdef USE_TEX_ALPHA
+    Alpha *= texture(ps_AlphaTexture, UV).r;
+#endif // USE_TEX_ALPHA
 
     // -----------------------------------------------------------------------------
     // Surface data
@@ -163,7 +169,7 @@ void main(void)
             // -----------------------------------------------------------------------------
             float Attenuation = 1.0f;
             Attenuation *= Data.m_AmbientOcclusion;
-            Attenuation *= GetShadowAtPosition(Data.m_WSPosition, LightProb.ps_LightViewProjection, ps_ShadowTexture[IndexOfLight]);
+            Attenuation *= GetShadowAtPositionWithPCF(Data.m_WSPosition, LightProb.ps_LightViewProjection, ps_ShadowTexture[IndexOfLight]);
 
             // -----------------------------------------------------------------------------
             // Apply light luminance
@@ -199,7 +205,7 @@ void main(void)
             // Shadowing
             // -----------------------------------------------------------------------------
             Attenuation *= Data.m_AmbientOcclusion;
-            Attenuation *= LightHasShadows == 1.0f ? GetShadowAtPosition(Data.m_WSPosition, LightProb.ps_LightViewProjection, ps_ShadowTexture[IndexOfLight]) : 1.0f;
+            Attenuation *= LightHasShadows == 1.0f ? GetShadowAtPositionWithPCF(Data.m_WSPosition, LightProb.ps_LightViewProjection, ps_ShadowTexture[IndexOfLight]) : 1.0f;
             
             // -----------------------------------------------------------------------------
             // Apply light luminance and shading
@@ -243,7 +249,7 @@ void main(void)
         }
     }
 
-    out_Output = vec4(Luminance, 0.0f);
+    out_Output = vec4(Luminance, Alpha);
 }
 
 #endif // __INCLUDE_FS_MATERIAL_FORWARD_GLSL__

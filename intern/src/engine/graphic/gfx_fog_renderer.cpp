@@ -120,15 +120,14 @@ namespace
         
     private:
         
-        CBufferSetPtr     m_VolumeLightingCSBufferSetPtr;
-        CShaderPtr        m_RectangleShaderVSPtr;
-        CShaderPtr        m_ESMCSPtr;
-        CShaderPtr        m_VolumeLightingCSPtr;
-        CShaderPtr        m_VolumeScatteringCSPtr;
-        CShaderPtr        m_ApplyPSPtr;
-        CRenderContextPtr m_LightRenderContextPtr;
-        CTexturePtr       m_ESMTexturePtr;
-        CTextureSetPtr    m_ESMTextureSetPtr;
+        CBufferSetPtr  m_VolumeLightingCSBufferSetPtr;
+        CShaderPtr     m_RectangleShaderVSPtr;
+        CShaderPtr     m_ESMCSPtr;
+        CShaderPtr     m_VolumeLightingCSPtr;
+        CShaderPtr     m_VolumeScatteringCSPtr;
+        CShaderPtr     m_ApplyPSPtr;
+        CTexturePtr    m_ESMTexturePtr;
+        CTextureSetPtr m_ESMTextureSetPtr;
 
         CTexturePtr     m_VolumeTexturePtr;
         CTextureSetPtr    m_VolumeTextureSetPtr;
@@ -167,7 +166,6 @@ namespace
         , m_VolumeLightingCSPtr                 ()
         , m_VolumeScatteringCSPtr               ()
         , m_ApplyPSPtr                          ()
-        , m_LightRenderContextPtr               ()
         , m_ESMTexturePtr                       ()
         , m_ESMTextureSetPtr                    ()
         , m_VolumeTexturePtr                    ()
@@ -208,7 +206,6 @@ namespace
         m_VolumeLightingCSPtr           = 0;
         m_VolumeScatteringCSPtr         = 0;
         m_ApplyPSPtr                    = 0;
-        m_LightRenderContextPtr         = 0;
         m_ESMTexturePtr                 = 0;
         m_ESMTextureSetPtr              = 0;
         m_VolumeTexturePtr              = 0;
@@ -257,19 +254,6 @@ namespace
     
     void CGfxFogRenderer::OnSetupStates()
     {
-        CCameraPtr      QuadCameraPtr  = ViewManager     ::GetFullQuadCamera();
-        CViewPortSetPtr ViewPortSetPtr = ViewManager     ::GetViewPortSet();
-        CRenderStatePtr LightStatePtr  = StateManager    ::GetRenderState(CRenderState::AdditionBlend);
-        CTargetSetPtr   TargetSetPtr   = TargetSetManager::GetLightAccumulationTargetSet();
-       
-        // -----------------------------------------------------------------------------
-
-        m_LightRenderContextPtr = ContextManager::CreateRenderContext();
-
-        m_LightRenderContextPtr->SetCamera(QuadCameraPtr);
-        m_LightRenderContextPtr->SetViewPortSet(ViewPortSetPtr);
-        m_LightRenderContextPtr->SetTargetSet(TargetSetPtr);
-        m_LightRenderContextPtr->SetRenderState(LightStatePtr);
     }
     
     // -----------------------------------------------------------------------------
@@ -829,9 +813,15 @@ namespace
         // -----------------------------------------------------------------------------
         // Rendering
         // -----------------------------------------------------------------------------
-        
+        ContextManager::SetTargetSet(TargetSetManager::GetLightAccumulationTargetSet());
 
-        ContextManager::SetRenderContext(m_LightRenderContextPtr);
+        ContextManager::SetViewPortSet(ViewManager::GetViewPortSet());
+
+        ContextManager::SetBlendState(StateManager::GetBlendState(CBlendState::AdditionBlend));
+
+        ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::NoDepth));
+
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
 
         ContextManager::SetTopology(STopology::TriangleList);
 
