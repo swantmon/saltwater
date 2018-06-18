@@ -163,14 +163,14 @@ namespace
         : m_ModelBufferPtr          ()
         , m_SurfaceMaterialBufferPtr()
         , m_HitProxyPassPSBufferPtr ()
-        , m_ForwardPassBufferPtr  ()
+        , m_ForwardPassBufferPtr    ()
         , m_LightPropertiesBufferPtr()
         , m_HitProxyShaderPtr       ()
         , m_DeferredContextPtr      ()
         , m_HitProxyContextPtr      ()
         , m_DeferredRenderJobs      ()
         , m_ForwardRenderJobs       ()
-        , m_ForwardLightTextures        ()
+        , m_ForwardLightTextures    ()
     {
         // -----------------------------------------------------------------------------
         // Reserve some jobs
@@ -557,7 +557,7 @@ namespace
 
         ContextManager::SetBlendState(StateManager::GetBlendState(CBlendState::AlphaBlend));
 
-        ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::Default));
+        ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::NoWriteDepth));
 
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
 
@@ -785,14 +785,26 @@ namespace
         // That is an sort object for sorting render jobs. They will be sorted from
         // lower number to higher number. The surface attribute is symbol for
         // complexity.
+        // In the case of forward rendering jobs we sort the jobs depending on the
+        // distance between main camera and object.
         // -----------------------------------------------------------------------------
-        struct SSortObject
+        struct SSurfaceSortObject
         {
             bool operator() (SRenderJob& _rLeft, SRenderJob& _rRight)
             {
                 return (_rLeft.m_SurfaceAttributes < _rRight.m_SurfaceAttributes);
             }
-        } SortObject;
+        } SurfaceSortObject;
+
+        struct SDistanceSortObject
+        {
+            bool operator() (SRenderJob& _rLeft, SRenderJob& _rRight)
+            {
+                glm::vec4 ViewPosition = glm::vec4(ViewManager::GetMainCamera()->GetView()->GetPosition(), 1.0f);
+
+                return (glm::distance(_rLeft.m_ModelMatrix[3], ViewPosition) > glm::distance(_rRight.m_ModelMatrix[3], ViewPosition));
+            }
+        } DistanceSortObject;
 
         // -----------------------------------------------------------------------------
         // Clear current render jobs
@@ -858,11 +870,11 @@ namespace
         }
 
         // -----------------------------------------------------------------------------
-        // Now we order our render jobs
+        // Now we sort the render jobs
         // -----------------------------------------------------------------------------
-        std::sort(m_DeferredRenderJobs.begin(), m_DeferredRenderJobs.end(), SortObject);
+        std::sort(m_DeferredRenderJobs.begin(), m_DeferredRenderJobs.end(), SurfaceSortObject);
 
-        std::sort(m_ForwardRenderJobs.begin(), m_ForwardRenderJobs.end(), SortObject);
+        std::sort(m_ForwardRenderJobs.begin(), m_ForwardRenderJobs.end(), DistanceSortObject);
     }
 
     // -----------------------------------------------------------------------------
