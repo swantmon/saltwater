@@ -77,7 +77,6 @@ namespace
 
         struct SRenderContext
         {
-            CRenderContextPtr m_RenderContextPtr;
             CShaderPtr        m_VSPtr;
             CShaderPtr        m_PSPtr;
             CBufferSetPtr     m_VSBufferSetPtr;
@@ -177,7 +176,6 @@ namespace
     
     void CGfxBackgroundRenderer::OnExit()
     {
-        m_BackgroundFromSkybox.m_RenderContextPtr = 0;
         m_BackgroundFromSkybox.m_VSPtr            = 0;
         m_BackgroundFromSkybox.m_PSPtr            = 0;
         m_BackgroundFromSkybox.m_VSBufferSetPtr   = 0;
@@ -185,7 +183,6 @@ namespace
         m_BackgroundFromSkybox.m_InputLayoutPtr   = 0;
         m_BackgroundFromSkybox.m_MeshPtr          = 0;
 
-        m_BackgroundFromWebcam.m_RenderContextPtr = 0;
         m_BackgroundFromWebcam.m_VSPtr            = 0;
         m_BackgroundFromWebcam.m_PSPtr            = 0;
         m_BackgroundFromWebcam.m_VSBufferSetPtr   = 0;
@@ -247,24 +244,6 @@ namespace
     
     void CGfxBackgroundRenderer::OnSetupStates()
     {
-        CCameraPtr          CameraPtr          = ViewManager     ::GetMainCamera();
-        CCameraPtr          QuadCameraPtr      = ViewManager     ::GetFullQuadCamera();
-        CViewPortSetPtr     ViewPortSetPtr     = ViewManager     ::GetViewPortSet();
-        CRenderStatePtr     NoDepthStatePtr    = StateManager    ::GetRenderState(CRenderState::NoDepth | CRenderState::NoCull);
-        CTargetSetPtr       TargetSetPtr       = TargetSetManager::GetLightAccumulationTargetSet();
-                
-        CRenderContextPtr SkyRenderContextPtr = ContextManager::CreateRenderContext();
-        
-        SkyRenderContextPtr->SetCamera(CameraPtr);
-        SkyRenderContextPtr->SetViewPortSet(ViewPortSetPtr);
-        SkyRenderContextPtr->SetTargetSet(TargetSetPtr);
-        SkyRenderContextPtr->SetRenderState(NoDepthStatePtr);
-
-        // -----------------------------------------------------------------------------
-        
-        m_BackgroundFromSkybox.m_RenderContextPtr = SkyRenderContextPtr;
-
-        m_BackgroundFromWebcam.m_RenderContextPtr = SkyRenderContextPtr;
     }
     
     // -----------------------------------------------------------------------------
@@ -417,7 +396,6 @@ namespace
     {
         if (m_SkyRenderJobs.size() == 0) return;
 
-        CRenderContextPtr RenderContextPtr = m_BackgroundFromSkybox.m_RenderContextPtr;
         CShaderPtr        VSPtr            = m_BackgroundFromSkybox.m_VSPtr;
         CShaderPtr        PSPtr            = m_BackgroundFromSkybox.m_PSPtr;
         CBufferSetPtr     VSBufferSetPtr   = m_BackgroundFromSkybox.m_VSBufferSetPtr;
@@ -435,7 +413,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Upload dynamic data
         // -----------------------------------------------------------------------------
-        CCameraPtr CameraPtr = RenderContextPtr->GetCamera();
+        CCameraPtr CameraPtr = ViewManager::GetMainCamera();
 
         SSkyboxVSBuffer ViewBuffer;
 
@@ -458,8 +436,16 @@ namespace
         // -----------------------------------------------------------------------------
         // Render sky box in background
         // -----------------------------------------------------------------------------
-        ContextManager::SetRenderContext(RenderContextPtr);
-                
+        ContextManager::SetTargetSet(TargetSetManager::GetLightAccumulationTargetSet());
+
+        ContextManager::SetViewPortSet(ViewManager::GetViewPortSet());
+
+        ContextManager::SetBlendState(StateManager::GetBlendState(CBlendState::Default));
+
+        ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::LessEqualDepth));
+
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::NoCull));
+
         ContextManager::SetVertexBuffer(MeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
         
         ContextManager::SetIndexBuffer(MeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
@@ -538,7 +524,6 @@ namespace
         // -----------------------------------------------------------------------------
         // Prepare value from sky / environment
         // -----------------------------------------------------------------------------
-        CRenderContextPtr RenderContextPtr = m_BackgroundFromWebcam.m_RenderContextPtr;
         CShaderPtr        VSPtr            = m_BackgroundFromWebcam.m_VSPtr;
         CShaderPtr        PSPtr            = m_BackgroundFromWebcam.m_PSPtr;
         CBufferSetPtr     VSBufferSetPtr   = m_BackgroundFromWebcam.m_VSBufferSetPtr;
@@ -563,7 +548,15 @@ namespace
         // -----------------------------------------------------------------------------
         // Rendering
         // -----------------------------------------------------------------------------
-        ContextManager::SetRenderContext(RenderContextPtr);
+        ContextManager::SetTargetSet(TargetSetManager::GetLightAccumulationTargetSet());
+
+        ContextManager::SetViewPortSet(ViewManager::GetViewPortSet());
+
+        ContextManager::SetBlendState(StateManager::GetBlendState(CBlendState::Default));
+
+        ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::LessEqualDepth));
+
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::NoCull));
 
         ContextManager::SetTopology(STopology::TriangleList);
 

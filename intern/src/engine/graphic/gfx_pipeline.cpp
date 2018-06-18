@@ -481,8 +481,8 @@ namespace Pipeline
         LightPointRenderer   ::Render();
         LightIndirectRenderer::Render();
         ReflectionRenderer   ::Render();
-        BackgroundRenderer   ::Render();
         FogRenderer          ::Render();
+        BackgroundRenderer   ::Render();
 
         Engine::RaiseEvent(Engine::Gfx_OnRenderLighting);
 

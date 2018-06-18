@@ -111,9 +111,6 @@ namespace
         
         CTextureSetPtr m_LTCTextureSetPtr;
 
-        CRenderContextPtr m_DefaultRenderContextPtr;
-        CRenderContextPtr m_LightRenderContextPtr;
-
         CRenderJobs m_RenderJobs;
 
     private:
@@ -132,8 +129,6 @@ namespace
         , m_ScreenQuadShaderPtr     ()
         , m_LTCAreaLightShaderPtr   ()
         , m_AreaLightbulbShaderPtr  ()
-        , m_DefaultRenderContextPtr ()
-        , m_LightRenderContextPtr   ()
         , m_RenderJobs              ()
     {
     }
@@ -163,8 +158,6 @@ namespace
         m_LTCAreaLightShaderPtr    = 0;
         m_AreaLightbulbShaderPtr   = 0;
         m_LTCTextureSetPtr         = 0;
-        m_DefaultRenderContextPtr  = 0;
-        m_LightRenderContextPtr    = 0;
 
         m_RenderJobs.clear();
     }
@@ -208,35 +201,6 @@ namespace
     
     void CGfxAreaLightRenderer::OnSetupStates()
     {
-        CCameraPtr          MainCameraPtr      = ViewManager     ::GetMainCamera();
-
-        CViewPortSetPtr     ViewPortSetPtr     = ViewManager     ::GetViewPortSet();
-
-        CTargetSetPtr       LightTargetSetPtr   = TargetSetManager::GetLightAccumulationTargetSet();
-        CTargetSetPtr       DefaultTargetSetPtr = TargetSetManager::GetDefaultTargetSet();
-
-        CRenderStatePtr     DefaultStatePtr = StateManager::GetRenderState(CRenderState::NoCull);
-        CRenderStatePtr     LightStatePtr   = StateManager::GetRenderState(CRenderState::AdditionBlend);
-
-        // -----------------------------------------------------------------------------
-        
-        CRenderContextPtr DefaultContextPtr = ContextManager::CreateRenderContext();
-        
-        DefaultContextPtr->SetCamera(MainCameraPtr);
-        DefaultContextPtr->SetViewPortSet(ViewPortSetPtr);
-        DefaultContextPtr->SetTargetSet(DefaultTargetSetPtr);
-        DefaultContextPtr->SetRenderState(DefaultStatePtr);
-        
-        m_DefaultRenderContextPtr = DefaultContextPtr;
-        
-        CRenderContextPtr LightContextPtr = ContextManager::CreateRenderContext();
-        
-        LightContextPtr->SetCamera(MainCameraPtr);
-        LightContextPtr->SetViewPortSet(ViewPortSetPtr);
-        LightContextPtr->SetTargetSet(LightTargetSetPtr);
-        LightContextPtr->SetRenderState(LightStatePtr);
-        
-        m_LightRenderContextPtr = LightContextPtr;
     }
     
     // -----------------------------------------------------------------------------
@@ -382,7 +346,15 @@ namespace
         CRenderJobs::const_iterator CurrentRenderJob;
         CRenderJobs::const_iterator EndOfRenderJobs;
 
-        ContextManager::SetRenderContext(m_LightRenderContextPtr);
+        ContextManager::SetTargetSet(TargetSetManager::GetLightAccumulationTargetSet());
+
+        ContextManager::SetViewPortSet(ViewManager::GetViewPortSet());
+
+        ContextManager::SetBlendState(StateManager::GetBlendState(CBlendState::AdditionBlend));
+
+        ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::NoDepth));
+
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
 
         ContextManager::SetTopology(STopology::TriangleList);
 
@@ -518,7 +490,15 @@ namespace
 
             assert(pDtComponent && pGfxComponent);
 
-            ContextManager::SetRenderContext(m_DefaultRenderContextPtr);
+            ContextManager::SetTargetSet(TargetSetManager::GetDefaultTargetSet());
+
+            ContextManager::SetViewPortSet(ViewManager::GetViewPortSet());
+
+            ContextManager::SetBlendState(StateManager::GetBlendState(CBlendState::Default));
+
+            ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::Default));
+
+            ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::NoCull));
 
             ContextManager::SetVertexBuffer(pGfxComponent->GetPlaneVertexBuffer());
 

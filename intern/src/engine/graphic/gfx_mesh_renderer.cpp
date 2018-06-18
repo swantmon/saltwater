@@ -552,10 +552,14 @@ namespace
         Performance::BeginEvent("Meshes");
 
         ContextManager::SetTargetSet(TargetSetManager::GetLightAccumulationTargetSet());
+
         ContextManager::SetViewPortSet(ViewManager::GetViewPortSet());
+
         ContextManager::SetBlendState(StateManager::GetBlendState(CBlendState::AlphaBlend));
-        ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(0));
-        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(0));
+
+        ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::Default));
+
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
 
         ContextManager::SetTopology(STopology::TriangleList);
 

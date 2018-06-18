@@ -84,11 +84,10 @@ namespace
         
     private:
         
-        CBufferPtr        m_IndirectLightPSBufferPtr;
-        CShaderPtr        m_RectangleShaderVSPtr;
-        CShaderPtr        m_IndirectLightShaderPSPtr;
-        CRenderContextPtr m_LightRenderContextPtr;
-        CRenderJobs       m_RenderJobs;
+        CBufferPtr  m_IndirectLightPSBufferPtr;
+        CShaderPtr  m_RectangleShaderVSPtr;
+        CShaderPtr  m_IndirectLightShaderPSPtr;
+        CRenderJobs m_RenderJobs;
 
     private:
 
@@ -102,7 +101,6 @@ namespace
         : m_IndirectLightPSBufferPtr()
         , m_IndirectLightShaderPSPtr()
         , m_RectangleShaderVSPtr    ()
-        , m_LightRenderContextPtr   ()
         , m_RenderJobs		        ()
     {
         m_RenderJobs.reserve(4);
@@ -128,7 +126,6 @@ namespace
         m_IndirectLightPSBufferPtr = 0;
         m_IndirectLightShaderPSPtr = 0;
         m_RectangleShaderVSPtr     = 0;
-        m_LightRenderContextPtr    = 0;
     }
     
     // -----------------------------------------------------------------------------
@@ -158,19 +155,6 @@ namespace
     
     void CGfxLightIndirectRenderer::OnSetupStates()
     {
-        CCameraPtr      QuadCameraPtr  = ViewManager     ::GetFullQuadCamera();
-        CViewPortSetPtr ViewPortSetPtr = ViewManager     ::GetViewPortSet();
-        CRenderStatePtr LightStatePtr  = StateManager    ::GetRenderState(CRenderState::AdditionBlend);
-        CTargetSetPtr   TargetSetPtr   = TargetSetManager::GetLightAccumulationTargetSet();
-       
-        // -----------------------------------------------------------------------------
-
-        m_LightRenderContextPtr = ContextManager::CreateRenderContext();
-
-        m_LightRenderContextPtr->SetCamera(QuadCameraPtr);
-        m_LightRenderContextPtr->SetViewPortSet(ViewPortSetPtr);
-        m_LightRenderContextPtr->SetTargetSet(TargetSetPtr);
-        m_LightRenderContextPtr->SetRenderState(LightStatePtr);
     }
     
     // -----------------------------------------------------------------------------
@@ -256,9 +240,15 @@ namespace
         // -----------------------------------------------------------------------------
         // Rendering
         // -----------------------------------------------------------------------------
-        
+        ContextManager::SetTargetSet(TargetSetManager::GetLightAccumulationTargetSet());
 
-        ContextManager::SetRenderContext(m_LightRenderContextPtr);
+        ContextManager::SetViewPortSet(ViewManager::GetViewPortSet());
+
+        ContextManager::SetBlendState(StateManager::GetBlendState(CBlendState::AdditionBlend));
+
+        ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::NoDepth));
+
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
 
         ContextManager::SetTopology(STopology::TriangleList);
 
