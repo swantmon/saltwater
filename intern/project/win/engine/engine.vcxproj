@@ -42,9 +42,7 @@
     <ClCompile Include="..\..\..\src\engine\data\data_hierarchy_facet.cpp" />
     <ClCompile Include="..\..\..\src\engine\data\data_light_probe_component.cpp" />
     <ClCompile Include="..\..\..\src\engine\data\data_map.cpp" />
-    <ClCompile Include="..\..\..\src\engine\data\data_material.cpp" />
     <ClCompile Include="..\..\..\src\engine\data\data_material_component.cpp" />
-    <ClCompile Include="..\..\..\src\engine\data\data_material_manager.cpp" />
     <ClCompile Include="..\..\..\src\engine\data\data_mesh_component.cpp" />
     <ClCompile Include="..\..\..\src\engine\data\data_point_light_component.cpp" />
     <ClCompile Include="..\..\..\src\engine\data\data_post_aa_component.cpp" />
@@ -155,9 +153,7 @@
     <ClInclude Include="..\..\..\src\engine\data\data_hierarchy_facet.h" />
     <ClInclude Include="..\..\..\src\engine\data\data_light_probe_component.h" />
     <ClInclude Include="..\..\..\src\engine\data\data_map.h" />
-    <ClInclude Include="..\..\..\src\engine\data\data_material.h" />
     <ClInclude Include="..\..\..\src\engine\data\data_material_component.h" />
-    <ClInclude Include="..\..\..\src\engine\data\data_material_manager.h" />
     <ClInclude Include="..\..\..\src\engine\data\data_mesh_component.h" />
     <ClInclude Include="..\..\..\src\engine\data\data_point_light_component.h" />
     <ClInclude Include="..\..\..\src\engine\data\data_post_aa_component.h" />

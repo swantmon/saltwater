@@ -219,19 +219,8 @@ void main(void)
             // Compute lighting for sphere lights
             // -----------------------------------------------------------------------------
             vec3  WSViewDirection = normalize(Data.m_WSPosition - ps_CameraPosition.xyz);
-            vec3  WSReflectVector = vec3(0.0f);
+            vec3  WSReflectVector = normalize(reflect(WSViewDirection, Data.m_WSNormal));
             float NdotV           = clamp( dot( Data.m_WSNormal, -WSViewDirection ), 0.0, 1.0f);
-
-            if (Alpha < 1.0f)
-            {
-                float Ratio = clamp(1.0f - Data.m_Roughness, 0.01f, 0.41f);
-
-                WSReflectVector = normalize(refract(WSViewDirection, Data.m_WSNormal, Ratio)); 
-            }
-            else
-            {
-                WSReflectVector = normalize(reflect(WSViewDirection, Data.m_WSNormal));
-            }
 
             // -----------------------------------------------------------------------------
             // Rebuild the function

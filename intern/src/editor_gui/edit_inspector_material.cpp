@@ -256,7 +256,7 @@ namespace Edit
 
         if (Hash != -1)
         {
-            m_MaterialHash = static_cast<Base::BHash>(Hash);
+            m_MaterialHash = static_cast<Base::ID>(Hash);
 
             // -----------------------------------------------------------------------------
             // Request info of texture
@@ -309,7 +309,7 @@ namespace Edit
 
         NewApplyMessage.Put(m_CurrentEntityID);
 
-        NewApplyMessage.Put(static_cast<Base::BHash>(Result));
+        NewApplyMessage.Put(static_cast<Base::ID>(Result));
 
         NewApplyMessage.Reset();
 
@@ -329,7 +329,7 @@ namespace Edit
 
         if (EntityID != m_CurrentEntityID) return;
 
-        m_MaterialHash = _rMessage.Get<Base::BHash>();
+        m_MaterialHash = _rMessage.Get<Base::ID>();
 
         CMessage NewMessage;
 
@@ -347,7 +347,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
-        Base::BHash MaterialID = _rMessage.Get<Base::BHash>();
+        Base::ID MaterialID = _rMessage.Get<Base::ID>();
 
         if (MaterialID != m_MaterialHash) return;
 

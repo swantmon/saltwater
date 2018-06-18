@@ -134,7 +134,7 @@ namespace Gfx
 
     // -----------------------------------------------------------------------------
 
-    unsigned int CMaterial::GetHash() const
+    CMaterial::BHash CMaterial::GetHash() const
     {
         return m_Hash;
     }

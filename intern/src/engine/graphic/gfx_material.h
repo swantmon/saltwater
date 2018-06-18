@@ -15,6 +15,10 @@ namespace Gfx
     {
     public:
 
+        typedef unsigned int BHash;
+
+    public:
+
 #pragma warning(push)
 #pragma warning(disable:4201)
         struct SMaterialKey
@@ -75,7 +79,7 @@ namespace Gfx
         bool GetHasAlpha() const;
         bool GetHasBump() const;
 
-        unsigned int GetHash() const;
+        BHash GetHash() const;
 
     protected:
 
@@ -95,7 +99,7 @@ namespace Gfx
         SMaterialAttributes m_MaterialAttributes;
         SMaterialKey        m_MaterialKey;
 
-        unsigned int m_Hash;
+        BHash m_Hash;
     };
 } // namespace Gfx
 
