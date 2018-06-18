@@ -82,11 +82,6 @@ namespace
             unsigned int m_ExposureHistoryIndex;
         };
 
-        struct SAreaLightbulbProperties
-        {
-            glm::vec4 m_Color;
-        };
-
         struct SRenderJob
         {
             Gfx::CAreaLight* m_pGfxComponent;
@@ -270,18 +265,6 @@ namespace
         ConstantBufferDesc.m_pClassKey     = 0;
         
         m_AreaLightBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
-
-        // -----------------------------------------------------------------------------
-
-        ConstantBufferDesc.m_Stride        = 0;
-        ConstantBufferDesc.m_Usage         = CBuffer::GPUReadWrite;
-        ConstantBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
-        ConstantBufferDesc.m_Access        = CBuffer::CPUWrite;
-        ConstantBufferDesc.m_NumberOfBytes = sizeof(SAreaLightbulbProperties);
-        ConstantBufferDesc.m_pBytes        = 0;
-        ConstantBufferDesc.m_pClassKey     = 0;
-
-        m_AreaLightbulbBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
     }
     
     // -----------------------------------------------------------------------------
@@ -490,7 +473,9 @@ namespace
         ContextManager::SetShaderPS(m_AreaLightbulbShaderPtr);
 
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
-        ContextManager::SetConstantBuffer(1, m_AreaLightbulbBufferPtr);
+        ContextManager::SetConstantBuffer(1, m_AreaLightBufferPtr);
+
+        ContextManager::SetResourceBuffer(0, HistogramRenderer::GetExposureHistoryBuffer());
 
         for (auto& rCurrentRenderJob : m_RenderJobs)
         {
@@ -500,12 +485,22 @@ namespace
             assert(pDtComponent && pGfxComponent);
 
             // -----------------------------------------------------------------------------
+            // Update data
+            // -----------------------------------------------------------------------------
+            SAreaLightProperties LightBuffer;
 
-            SAreaLightbulbProperties LightBuffer;
+            LightBuffer.m_Color                = glm::vec4(pDtComponent->GetLightness(), pDtComponent->GetIntensity());
+            LightBuffer.m_Position             = glm::vec4(pDtComponent->GetHostEntity()->GetWorldPosition(), 1.0f);
+            LightBuffer.m_DirectionX           = pGfxComponent->GetDirectionX();
+            LightBuffer.m_DirectionY           = pGfxComponent->GetDirectionY();
+            LightBuffer.m_HalfWidth            = pGfxComponent->GetHalfWidth();
+            LightBuffer.m_HalfHeight           = pGfxComponent->GetHalfHeight();
+            LightBuffer.m_Plane                = pGfxComponent->GetPlane();
+            LightBuffer.m_IsTwoSided           = pDtComponent->GetIsTwoSided() ? 1.0f : 0.0f;
+            LightBuffer.m_IsTextured           = pGfxComponent->HasTexture() ? 1.0f : 0.0f;
+            LightBuffer.m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
 
-            LightBuffer.m_Color = glm::vec4(pDtComponent->GetColor(), pGfxComponent->HasTexture() ? 1.0f : 0.0f);
-
-            BufferManager::UploadBufferData(m_AreaLightbulbBufferPtr, &LightBuffer);
+            BufferManager::UploadBufferData(m_AreaLightBufferPtr, &LightBuffer);
 
             // -----------------------------------------------------------------------------
 
