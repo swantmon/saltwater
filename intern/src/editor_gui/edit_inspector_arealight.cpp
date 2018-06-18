@@ -184,8 +184,6 @@ namespace Edit
         if (HasTexture)
         {
             TextureName = _rMessage.Get<std::string>();
-
-            TextureHash = _rMessage.Get<int>();
         }
 
         // -----------------------------------------------------------------------------
