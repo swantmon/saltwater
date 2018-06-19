@@ -137,9 +137,9 @@ namespace
     
     void CGfxLightSunRenderer::OnSetupShader()
     {       
-        m_RectangleShaderVSPtr = ShaderManager::CompileVS("vs_fullscreen.glsl", "main");
+        m_RectangleShaderVSPtr = ShaderManager::CompileVS("system/vs_fullscreen.glsl", "main");
         
-        m_SunLightShaderPSPtr  = ShaderManager::CompilePS("fs_light_sunlight.glsl", "main");
+        m_SunLightShaderPSPtr  = ShaderManager::CompilePS("sun_light/fs_light_sunlight.glsl", "main");
     }
     
     // -----------------------------------------------------------------------------

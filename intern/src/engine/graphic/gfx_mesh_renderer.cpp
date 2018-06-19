@@ -240,7 +240,7 @@ namespace
 
     void CGfxMeshRenderer::OnSetupShader()
     {
-        m_HitProxyShaderPtr = ShaderManager::CompilePS("fs_hitproxy.glsl", "main");
+        m_HitProxyShaderPtr = ShaderManager::CompilePS("picking/fs_hitproxy.glsl", "main");
     }
 
     // -----------------------------------------------------------------------------

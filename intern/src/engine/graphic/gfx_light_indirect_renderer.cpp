@@ -132,9 +132,9 @@ namespace
     
     void CGfxLightIndirectRenderer::OnSetupShader()
     {       
-        m_RectangleShaderVSPtr = ShaderManager::CompileVS("vs_fullscreen.glsl", "main");
+        m_RectangleShaderVSPtr = ShaderManager::CompileVS("system/vs_fullscreen.glsl", "main");
         
-        m_IndirectLightShaderPSPtr = ShaderManager::CompilePS("fs_light_indirectlight.glsl", "main");
+        m_IndirectLightShaderPSPtr = ShaderManager::CompilePS("indirect_light/fs_light_indirectlight.glsl", "main");
     }
     
     // -----------------------------------------------------------------------------

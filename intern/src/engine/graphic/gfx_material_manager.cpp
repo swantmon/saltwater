@@ -41,7 +41,7 @@ namespace
     // -----------------------------------------------------------------------------
     const Base::Char* g_pShaderFilenameHS[] =
     {
-        "tcs_test.glsl",
+        "material/tcs_test.glsl",
     };
 
     const Base::Char* g_pShaderNamesHS[] =
@@ -54,7 +54,7 @@ namespace
     // -----------------------------------------------------------------------------
     const Base::Char* g_pShaderFilenameDS[] =
     {
-        "tes_test.glsl",
+        "material/tes_test.glsl",
     };
 
     const Base::Char* g_pShaderNamesDS[] =
@@ -67,7 +67,7 @@ namespace
     // -----------------------------------------------------------------------------
     const Base::Char* g_pShaderFilenameGS[] =
     {
-        "gs_test.glsl",
+        "material/gs_test.glsl",
     };
 
     const Base::Char* g_pShaderNamesGS[] =
@@ -80,7 +80,7 @@ namespace
     // -----------------------------------------------------------------------------
     const char* g_pShaderFilenamePS[] =
     {
-        "fs_material.glsl",
+        "material/fs_material.glsl",
     };
 
     const char* g_pShaderNamesPS[] =
@@ -90,7 +90,7 @@ namespace
 
     const char* g_pForwardShaderFilenamePS[] =
     {
-        "fs_material_forward.glsl",
+        "material/fs_material_forward.glsl",
     };
 
     const char* g_pForwardShaderNamesPS[] =

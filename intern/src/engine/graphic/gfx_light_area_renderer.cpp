@@ -161,13 +161,13 @@ namespace
     
     void CGfxAreaLightRenderer::OnSetupShader()
     {
-        m_PositionShaderPtr = ShaderManager::CompileVS("vs_p3t2.glsl", "main");
+        m_PositionShaderPtr = ShaderManager::CompileVS("area_light/vs_p3t2.glsl", "main");
 
-        m_ScreenQuadShaderPtr = ShaderManager::CompileVS("vs_fullscreen.glsl", "main");
+        m_ScreenQuadShaderPtr = ShaderManager::CompileVS("system/vs_fullscreen.glsl", "main");
 
-        m_LTCAreaLightShaderPtr = ShaderManager::CompilePS("fs_light_arealight.glsl" , "main");
+        m_LTCAreaLightShaderPtr = ShaderManager::CompilePS("area_light/fs_light_arealight.glsl" , "main");
 
-        m_AreaLightbulbShaderPtr = ShaderManager::CompilePS("fs_light_arealight_bulb.glsl", "main");
+        m_AreaLightbulbShaderPtr = ShaderManager::CompilePS("area_light/fs_light_arealight_bulb.glsl", "main");
 
         const SInputElementDescriptor P3T2InputLayout[] =
         {

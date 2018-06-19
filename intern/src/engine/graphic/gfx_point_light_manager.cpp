@@ -166,10 +166,10 @@ namespace
         // -----------------------------------------------------------------------------
         // Shader
         // -----------------------------------------------------------------------------
-        m_ShadowShaderVSPtr       = ShaderManager::CompileVS("vs_vm_pnx0.glsl", "main");
-        m_ShadowSMShaderPSPtr     = ShaderManager::CompilePS("fs_shadow.glsl", "SM");
-        m_ShadowRSMShaderPSPtr    = ShaderManager::CompilePS("fs_shadow.glsl", "RSM_COLOR");
-        m_ShadowRSMTexShaderPSPtr = ShaderManager::CompilePS("fs_shadow.glsl", "RSM_TEX");
+        m_ShadowShaderVSPtr       = ShaderManager::CompileVS("shadow/vs_vm_pnx0.glsl", "main");
+        m_ShadowSMShaderPSPtr     = ShaderManager::CompilePS("shadow/fs_shadow.glsl", "SM");
+        m_ShadowRSMShaderPSPtr    = ShaderManager::CompilePS("shadow/fs_shadow.glsl", "RSM_COLOR");
+        m_ShadowRSMTexShaderPSPtr = ShaderManager::CompilePS("shadow/fs_shadow.glsl", "RSM_TEX");
 
         // -----------------------------------------------------------------------------
         // Buffer

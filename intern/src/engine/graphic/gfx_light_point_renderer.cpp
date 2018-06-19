@@ -160,7 +160,7 @@ namespace
     
     void CGfxPointLightRenderer::OnSetupShader()
     {
-        m_PunctualLightShaderPSPtr = ShaderManager::CompilePS("fs_light_punctuallight.glsl", "main");
+        m_PunctualLightShaderPSPtr = ShaderManager::CompilePS("punctual_light/fs_light_punctuallight.glsl", "main");
     }
     
     // -----------------------------------------------------------------------------

@@ -228,12 +228,13 @@ namespace
     
     void CGfxFogRenderer::OnSetupShader()
     {       
-        m_RectangleShaderVSPtr  = ShaderManager::CompileVS("vs_fullscreen.glsl", "main");
-        m_ESMCSPtr              = ShaderManager::CompileCS("cs_esm.glsl", "main");  
-        m_VolumeLightingCSPtr   = ShaderManager::CompileCS("cs_volume_lighting.glsl", "main");
-        m_VolumeScatteringCSPtr = ShaderManager::CompileCS("cs_volume_scattering.glsl", "main");  
-        m_ApplyPSPtr            = ShaderManager::CompilePS("fs_fog_apply.glsl", "main");  
-        m_GaussianBlurShaderPtr = ShaderManager::CompileCS("cs_gaussian_blur.glsl", "main", "#define TILE_SIZE 8\n#define IMAGE_TYPE r32f");
+        m_RectangleShaderVSPtr  = ShaderManager::CompileVS("system/vs_fullscreen.glsl", "main");
+        m_ESMCSPtr              = ShaderManager::CompileCS("fog/cs_esm.glsl", "main");  
+        m_VolumeLightingCSPtr   = ShaderManager::CompileCS("fog/cs_volume_lighting.glsl", "main");
+        m_VolumeScatteringCSPtr = ShaderManager::CompileCS("fog/cs_volume_scattering.glsl", "main");  
+        m_ApplyPSPtr            = ShaderManager::CompilePS("fog/fs_fog_apply.glsl", "main");
+
+        m_GaussianBlurShaderPtr = ShaderManager::CompileCS("filter/cs_gaussian_blur.glsl", "main", "#define TILE_SIZE 8\n#define IMAGE_TYPE r32f");
     }
     
     // -----------------------------------------------------------------------------

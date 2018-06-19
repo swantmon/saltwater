@@ -257,10 +257,10 @@ namespace
         // -----------------------------------------------------------------------------
         // Shader
         // -----------------------------------------------------------------------------
-        CShaderPtr CubemapVSPtr           = ShaderManager::CompileVS("vs_spherical_env_cubemap_generation.glsl", "main");
-        CShaderPtr CubemapGSPtr           = ShaderManager::CompileGS("gs_spherical_env_cubemap_generation.glsl", "main");
-        CShaderPtr CubemapPanoramaPSPtr   = ShaderManager::CompilePS("fs_spherical_env_cubemap_generation.glsl", "main");
-        CShaderPtr CubemapCubemapPSPtr    = ShaderManager::CompilePS("fs_cubemap_env_cubemap_generation.glsl", "main");
+        CShaderPtr CubemapVSPtr           = ShaderManager::CompileVS("atmosphere/vs_spherical_env_cubemap_generation.glsl", "main");
+        CShaderPtr CubemapGSPtr           = ShaderManager::CompileGS("atmosphere/gs_spherical_env_cubemap_generation.glsl", "main");
+        CShaderPtr CubemapPanoramaPSPtr   = ShaderManager::CompilePS("atmosphere/fs_spherical_env_cubemap_generation.glsl", "main");
+        CShaderPtr CubemapCubemapPSPtr    = ShaderManager::CompilePS("atmosphere/fs_cubemap_env_cubemap_generation.glsl", "main");
         CShaderPtr CubemapScatteringPSPtr = ShaderManager::CompilePS("scattering/scattering_post_effect.glsl", "main");
 
         m_SkyboxFromAtmosphere.m_VSPtr = CubemapVSPtr;

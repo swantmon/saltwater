@@ -255,15 +255,15 @@ namespace
     
     void CGfxReflectionRenderer::OnSetupShader()
     {
-        m_RectangleShaderVSPtr  = ShaderManager::CompileVS("vs_fullscreen.glsl", "main");
+        m_RectangleShaderVSPtr  = ShaderManager::CompileVS("system/vs_fullscreen.glsl", "main");
         
-        m_ImageLightShaderPSPtr = ShaderManager::CompilePS("fs_light_imagelight.glsl" , "main");
+        m_ImageLightShaderPSPtr = ShaderManager::CompilePS("image_light/fs_light_imagelight.glsl" , "main");
 
-        m_SSRShaderPSPtr        = ShaderManager::CompilePS("fs_ssr.glsl", "main");
+        m_SSRShaderPSPtr        = ShaderManager::CompilePS("ssr/fs_ssr.glsl", "main");
 
-        m_BRDFShaderPtr         = ShaderManager::CompileCS("cs_brdf.glsl", "main");
+        m_HCBShaderPSPtr        = ShaderManager::CompilePS("ssr/fs_hcb_generation.glsl", "main");
 
-        m_HCBShaderPSPtr        = ShaderManager::CompilePS("fs_hcb_generation.glsl", "main");
+        m_BRDFShaderPtr         = ShaderManager::CompileCS("pbs/cs_brdf.glsl", "main");
     }
     
     // -----------------------------------------------------------------------------
