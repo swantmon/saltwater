@@ -150,7 +150,7 @@ void main()
     // -----------------------------------------------------------------------------
     // Output final color
     // -----------------------------------------------------------------------------
-    out_Output = vec4((Diffuse + Specular), 1.0f);
+    out_Output = vec4((Diffuse + Specular), 0.0f);
 }
 
 #endif // __INCLUDE_FS_LIGHT_INDIRECTLIGHT_GLSL__
