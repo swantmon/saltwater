@@ -14,6 +14,7 @@
 #include "engine/data/data_component_facet.h"
 #include "engine/data/data_component_manager.h"
 #include "engine/data/data_entity.h"
+#include "engine/data/data_entity_manager.h"
 #include "engine/data/data_map.h"
 #include "engine/data/data_mesh_component.h"
 #include "engine/data/data_sun_component.h"
@@ -99,6 +100,8 @@ namespace
         
     private:
 
+        void OnDirtyEntity(Dt::CEntity* _pEntity);
+
         void OnDirtyComponent(Dt::IComponent* _pComponent);
 
         void CreateSM(unsigned int _Size, CInternSunComponent* _pInternLight);
@@ -183,6 +186,8 @@ namespace
         // On dirty stuff
         // -----------------------------------------------------------------------------
         Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(DATA_DIRTY_COMPONENT_METHOD(&CGfxSunManager::OnDirtyComponent));
+
+        Dt::EntityManager::RegisterDirtyEntityHandler(DATA_DIRTY_ENTITY_METHOD(&CGfxSunManager::OnDirtyEntity));
     }
     
     // -----------------------------------------------------------------------------
@@ -241,6 +246,27 @@ namespace
                 // Render
                 // -----------------------------------------------------------------------------
                 RenderShadows(pGfxSunFacet);
+            }
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxSunManager::OnDirtyEntity(Dt::CEntity* _pEntity)
+    {
+        if (_pEntity->GetDirtyFlags() != Dt::CEntity::DirtyMove) return;
+
+        auto ComponentFacet = _pEntity->GetComponentFacet();
+
+        if (!ComponentFacet->HasComponent<Dt::CSunComponent>()) return;
+
+        auto AreaLightComponents = ComponentFacet->GetComponents();
+
+        for (auto pComponent : AreaLightComponents)
+        {
+            if (pComponent->GetTypeID() == Base::CTypeInfo::GetTypeID<Dt::CSunComponent>())
+            {
+                Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Dt::CSunComponent::DirtyInfo);
             }
         }
     }
