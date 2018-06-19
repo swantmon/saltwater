@@ -17,7 +17,7 @@ void main()
     Vertices[1] = vec2( 3.0f, -1.0f);
     Vertices[2] = vec2(-1.0f,  3.0f);
 
-    out_UV      = Vertices[gl_VertexID] / vec2(2.0f) + 0.5f;
+    out_UV      = Vertices[gl_VertexID] * 0.5f + 0.5f;
     gl_Position = vec4(Vertices[gl_VertexID], 0.0f, 1.0f);
 }
 
