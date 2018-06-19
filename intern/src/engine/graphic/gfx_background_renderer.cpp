@@ -199,13 +199,13 @@ namespace
     
     void CGfxBackgroundRenderer::OnSetupShader()
     {
-        CShaderPtr SkyTextureVSPtr = ShaderManager::CompileVS("vs_fullscreen.glsl", "main");;
+        CShaderPtr SkyTextureVSPtr = ShaderManager::CompileVS("atmosphere/vs_fullscreen.glsl", "main");;
 
-        CShaderPtr SkyTexturePSPtr = ShaderManager::CompilePS("fs_atmosphere_texture.glsl", "main");
+        CShaderPtr SkyTexturePSPtr = ShaderManager::CompilePS("atmosphere/fs_atmosphere_texture.glsl", "main");
 
-        CShaderPtr SkyboxVSPtr  = ShaderManager::CompileVS("vs_cubemap.glsl", "main");
+        CShaderPtr SkyboxVSPtr  = ShaderManager::CompileVS("atmosphere/vs_cubemap.glsl", "main");
         
-        CShaderPtr SkyboxPSPtr  = ShaderManager::CompilePS("fs_atmosphere_cubemap.glsl", "main");
+        CShaderPtr SkyboxPSPtr  = ShaderManager::CompilePS("atmosphere/fs_atmosphere_cubemap.glsl", "main");
 
         // -----------------------------------------------------------------------------
 

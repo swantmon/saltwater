@@ -195,9 +195,9 @@ namespace
     
     void CGfxHistogramRenderer::OnSetupShader()
     {
-        m_HistogramShaderPtrs[HistogramBuild]    = ShaderManager::CompileCS("cs_histogram_build.glsl"   , "main");
-        m_HistogramShaderPtrs[HistogramMerge]    = ShaderManager::CompileCS("cs_histogram_merge.glsl"   , "main");
-        m_HistogramShaderPtrs[HistogramEvaluate] = ShaderManager::CompileCS("cs_histogram_evaluate.glsl", "main");
+        m_HistogramShaderPtrs[HistogramBuild]    = ShaderManager::CompileCS("histogram/cs_histogram_build.glsl"   , "main");
+        m_HistogramShaderPtrs[HistogramMerge]    = ShaderManager::CompileCS("histogram/cs_histogram_merge.glsl"   , "main");
+        m_HistogramShaderPtrs[HistogramEvaluate] = ShaderManager::CompileCS("histogram/cs_histogram_evaluate.glsl", "main");
     }
     
     // -----------------------------------------------------------------------------

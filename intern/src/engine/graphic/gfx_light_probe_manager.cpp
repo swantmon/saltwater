@@ -264,17 +264,17 @@ namespace
         // -----------------------------------------------------------------------------
         // Shader
         // -----------------------------------------------------------------------------
-        m_FilteringVSPtr = ShaderManager::CompileVS("vs_lightprobe_sampling.glsl", "main");
+        m_FilteringVSPtr = ShaderManager::CompileVS("light_probe/vs_lightprobe_sampling.glsl", "main");
 
-        m_FilteringDiffusePSPtr = ShaderManager::CompilePS("fs_lightprobe_diffuse_sampling.glsl", "main");
+        m_FilteringDiffusePSPtr = ShaderManager::CompilePS("light_probe/fs_lightprobe_diffuse_sampling.glsl", "main");
 
-        m_FilteringSpecularPSPtr = ShaderManager::CompilePS("fs_lightprobe_specular_sampling.glsl", "main");
+        m_FilteringSpecularPSPtr = ShaderManager::CompilePS("light_probe/fs_lightprobe_specular_sampling.glsl", "main");
 
-        m_CubemapGSPtr = ShaderManager::CompileGS("gs_lightprobe_sampling.glsl", "main");
+        m_CubemapGSPtr = ShaderManager::CompileGS("light_probe/gs_lightprobe_sampling.glsl", "main");
 
-        m_CubemapVSPtr = ShaderManager::CompileVS("vs_p3.glsl", "main");
+        m_CubemapVSPtr = ShaderManager::CompileVS("light_probe/vs_p3.glsl", "main");
 
-        m_CubemapPSPtr = ShaderManager::CompilePS("fs_lightprobe.glsl", "main");
+        m_CubemapPSPtr = ShaderManager::CompilePS("light_probe/fs_lightprobe.glsl", "main");
 
         // -----------------------------------------------------------------------------
         // Buffer

@@ -260,18 +260,20 @@ namespace
     
     void CGfxPostFXRenderer::OnSetupShader()
     {
-        CShaderPtr ShaderVSPtr                = ShaderManager::CompileVS("vs_fullscreen.glsl", "main");
+        CShaderPtr ShaderVSPtr = ShaderManager::CompileVS("system/vs_fullscreen.glsl", "main");
 
-        CShaderPtr ShaderDOFDownVSPtr         = ShaderManager::CompileVS("dof/vs_dof_down_sample.glsl", "main");
-        CShaderPtr ShaderDOFNearBlurVSPtr     = ShaderManager::CompileVS("dof/vs_dof_near_blur.glsl"  , "main");
-        CShaderPtr ShaderDOFDownPSPtr         = ShaderManager::CompilePS("dof/fs_dof_down_sample.glsl", "main");
-        CShaderPtr ShaderDOFNearBlurPSPtr     = ShaderManager::CompilePS("dof/fs_dof_near_blur.glsl"  , "main");
-        CShaderPtr ShaderDOFNearPSPtr         = ShaderManager::CompilePS("dof/fs_dof_near.glsl"       , "main");
-        CShaderPtr ShaderDOFApplyPSPtr        = ShaderManager::CompilePS("dof/fs_dof_apply.glsl"      , "main");
+        CShaderPtr PassThroughPSPtr = ShaderManager::CompilePS("system/fs_pass_through.glsl", "main");
 
-        CShaderPtr PassThroughPSPtr           = ShaderManager::CompilePS("fs_pass_through.glsl" , "main");
-        CShaderPtr ShaderGaussianBlurPSPtr    = ShaderManager::CompilePS("fs_gaussian_blur.glsl", "main");
-        CShaderPtr ShaderFXAAPSPtr            = ShaderManager::CompilePS("fs_fxaa.glsl"         , "main");
+        CShaderPtr ShaderDOFDownVSPtr     = ShaderManager::CompileVS("dof/vs_dof_down_sample.glsl", "main");
+        CShaderPtr ShaderDOFNearBlurVSPtr = ShaderManager::CompileVS("dof/vs_dof_near_blur.glsl"  , "main");
+        CShaderPtr ShaderDOFDownPSPtr     = ShaderManager::CompilePS("dof/fs_dof_down_sample.glsl", "main");
+        CShaderPtr ShaderDOFNearBlurPSPtr = ShaderManager::CompilePS("dof/fs_dof_near_blur.glsl"  , "main");
+        CShaderPtr ShaderDOFNearPSPtr     = ShaderManager::CompilePS("dof/fs_dof_near.glsl"       , "main");
+        CShaderPtr ShaderDOFApplyPSPtr    = ShaderManager::CompilePS("dof/fs_dof_apply.glsl"      , "main");
+
+        CShaderPtr ShaderGaussianBlurPSPtr = ShaderManager::CompilePS("filter/fs_gaussian_blur.glsl", "main");
+        
+        CShaderPtr ShaderFXAAPSPtr = ShaderManager::CompilePS("fxaa/fs_fxaa.glsl", "main");
 
         glm::ivec2 WindowSize = Gfx::Main::GetActiveWindowSize();
 
@@ -285,12 +287,12 @@ namespace
         
         const char* pDefine = SMAADefineString.c_str();
 
-        CShaderPtr ShaderSMAAEdgeDetectVSPtr  = ShaderManager::CompileVS("vs_smaa_edge_detect.glsl" , "main", pDefine);
-        CShaderPtr ShaderSMAAEdgeDetectPSPtr  = ShaderManager::CompilePS("fs_smaa_edge_detect.glsl" , "main", pDefine);
-        CShaderPtr ShaderSMAAWeightsCalcVSPtr = ShaderManager::CompileVS("vs_smaa_weights_calc.glsl", "main", pDefine);
-        CShaderPtr ShaderSMAAWeightsCalcPSPtr = ShaderManager::CompilePS("fs_smaa_weights_calc.glsl", "main", pDefine);
-        CShaderPtr ShaderSMAABlendingVSPtr    = ShaderManager::CompileVS("vs_smaa_blending.glsl"    , "main", pDefine);
-        CShaderPtr ShaderSMAABlendingPSPtr    = ShaderManager::CompilePS("fs_smaa_blending.glsl"    , "main", pDefine);
+        CShaderPtr ShaderSMAAEdgeDetectVSPtr  = ShaderManager::CompileVS("smaa/vs_smaa_edge_detect.glsl" , "main", pDefine);
+        CShaderPtr ShaderSMAAEdgeDetectPSPtr  = ShaderManager::CompilePS("smaa/fs_smaa_edge_detect.glsl" , "main", pDefine);
+        CShaderPtr ShaderSMAAWeightsCalcVSPtr = ShaderManager::CompileVS("smaa/vs_smaa_weights_calc.glsl", "main", pDefine);
+        CShaderPtr ShaderSMAAWeightsCalcPSPtr = ShaderManager::CompilePS("smaa/fs_smaa_weights_calc.glsl", "main", pDefine);
+        CShaderPtr ShaderSMAABlendingVSPtr    = ShaderManager::CompileVS("smaa/vs_smaa_blending.glsl"    , "main", pDefine);
+        CShaderPtr ShaderSMAABlendingPSPtr    = ShaderManager::CompilePS("smaa/fs_smaa_blending.glsl"    , "main", pDefine);
         
         m_RectangleShaderVSPtr   = ShaderVSPtr;
         m_PassThroughShaderPSPtr = PassThroughPSPtr;
@@ -833,12 +835,12 @@ namespace
 
         const char* pDefine = SMAADefineString.c_str();
 
-        CShaderPtr ShaderSMAAEdgeDetectVSPtr  = ShaderManager::CompileVS("vs_smaa_edge_detect.glsl" , "main", pDefine);
-        CShaderPtr ShaderSMAAEdgeDetectPSPtr  = ShaderManager::CompilePS("fs_smaa_edge_detect.glsl" , "main", pDefine);
-        CShaderPtr ShaderSMAAWeightsCalcVSPtr = ShaderManager::CompileVS("vs_smaa_weights_calc.glsl", "main", pDefine);
-        CShaderPtr ShaderSMAAWeightsCalcPSPtr = ShaderManager::CompilePS("fs_smaa_weights_calc.glsl", "main", pDefine);
-        CShaderPtr ShaderSMAABlendingVSPtr    = ShaderManager::CompileVS("vs_smaa_blending.glsl"    , "main", pDefine);
-        CShaderPtr ShaderSMAABlendingPSPtr    = ShaderManager::CompilePS("fs_smaa_blending.glsl"    , "main", pDefine);
+        CShaderPtr ShaderSMAAEdgeDetectVSPtr  = ShaderManager::CompileVS("smaa/vs_smaa_edge_detect.glsl" , "main", pDefine);
+        CShaderPtr ShaderSMAAEdgeDetectPSPtr  = ShaderManager::CompilePS("smaa/fs_smaa_edge_detect.glsl" , "main", pDefine);
+        CShaderPtr ShaderSMAAWeightsCalcVSPtr = ShaderManager::CompileVS("smaa/vs_smaa_weights_calc.glsl", "main", pDefine);
+        CShaderPtr ShaderSMAAWeightsCalcPSPtr = ShaderManager::CompilePS("smaa/fs_smaa_weights_calc.glsl", "main", pDefine);
+        CShaderPtr ShaderSMAABlendingVSPtr    = ShaderManager::CompileVS("smaa/vs_smaa_blending.glsl"    , "main", pDefine);
+        CShaderPtr ShaderSMAABlendingPSPtr    = ShaderManager::CompilePS("smaa/fs_smaa_blending.glsl"    , "main", pDefine);
 
         // -----------------------------------------------------------------------------
 

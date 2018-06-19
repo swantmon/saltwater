@@ -156,13 +156,13 @@ namespace
 
         // -----------------------------------------------------------------------------
 
-        m_FilterShaderPtr = ShaderManager::CompileCS("cs_light_arealight_filter.glsl", "Filter", "#define TILE_SIZE 1\n");
+        m_FilterShaderPtr = ShaderManager::CompileCS("area_light/cs_light_arealight_filter.glsl", "Filter", "#define TILE_SIZE 1\n");
 
-        m_BackgroundBlurShaderPtr = ShaderManager::CompileCS("cs_light_arealight_filter.glsl", "BlurBackground", "#define TILE_SIZE 8\n");
+        m_BackgroundBlurShaderPtr = ShaderManager::CompileCS("area_light/cs_light_arealight_filter.glsl", "BlurBackground", "#define TILE_SIZE 8\n");
 
-        m_ForegroundBlurShaderPtr = ShaderManager::CompileCS("cs_light_arealight_filter.glsl", "BlurForeground", "#define TILE_SIZE 8\n");
+        m_ForegroundBlurShaderPtr = ShaderManager::CompileCS("area_light/cs_light_arealight_filter.glsl", "BlurForeground", "#define TILE_SIZE 8\n");
 
-        m_CombineShaderPtr = ShaderManager::CompileCS("cs_light_arealight_filter.glsl", "Combine", "#define TILE_SIZE 1\n");
+        m_CombineShaderPtr = ShaderManager::CompileCS("area_light/cs_light_arealight_filter.glsl", "Combine", "#define TILE_SIZE 1\n");
 
         // -----------------------------------------------------------------------------
 

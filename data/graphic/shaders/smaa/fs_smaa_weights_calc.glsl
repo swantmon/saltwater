@@ -5,7 +5,7 @@
 #define SMAA_GLSL_4
 #define SMAA_PRESET_ULTRA
 #define SMAA_INCLUDE_PS 1
-#include "smaa.glsl"
+#include "smaa/smaa.glsl"
 
 // -----------------------------------------------------------------------------
 // Defines / Settings

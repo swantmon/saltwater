@@ -269,9 +269,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Position
         // -----------------------------------------------------------------------------
-        ShaderVSPtr = ShaderManager::CompileVS("vs_non_p.glsl", "main");
+        ShaderVSPtr = ShaderManager::CompileVS("debug/vs_non_p.glsl", "main");
         
-        ShaderPSPtr = ShaderManager::CompilePS("fs_color_alpha.glsl", "main");
+        ShaderPSPtr = ShaderManager::CompilePS("debug/fs_color_alpha.glsl", "main");
         
         ShaderManager::CreateInputLayout(PositionInputLayout, 1, ShaderVSPtr);
         
@@ -281,9 +281,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Position + Color
         // -----------------------------------------------------------------------------
-        ShaderVSPtr = ShaderManager::CompileVS("vs_vm_p.glsl", "main");
+        ShaderVSPtr = ShaderManager::CompileVS("debug/vs_vm_p.glsl", "main");
         
-        ShaderPSPtr = ShaderManager::CompilePS("fs_color.glsl", "main");
+        ShaderPSPtr = ShaderManager::CompilePS("debug/fs_color.glsl", "main");
         
         ShaderManager::CreateInputLayout(PositionColorInputLayout, 2, ShaderVSPtr);
         
@@ -293,9 +293,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Quad + Texture
         // -----------------------------------------------------------------------------
-        ShaderVSPtr = ShaderManager::CompileVS("vs_m_p_quad.glsl", "main");
+        ShaderVSPtr = ShaderManager::CompileVS("debug/vs_m_p_quad.glsl", "main");
 
-        ShaderPSPtr = ShaderManager::CompilePS("fs_texture.glsl", "main");
+        ShaderPSPtr = ShaderManager::CompilePS("debug/fs_texture.glsl", "main");
 
         ShaderManager::CreateInputLayout(QuadPositionInputLayout, 1, ShaderVSPtr);
 
@@ -305,9 +305,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Quad (Instanced) + Text
         // -----------------------------------------------------------------------------
-        ShaderVSPtr = ShaderManager::CompileVS("vs_text.glsl", "main");
+        ShaderVSPtr = ShaderManager::CompileVS("debug/vs_text.glsl", "main");
         
-        ShaderPSPtr = ShaderManager::CompilePS("fs_text.glsl", "main");
+        ShaderPSPtr = ShaderManager::CompilePS("debug/fs_text.glsl", "main");
 
         ShaderManager::CreateInputLayout(TextOffsetInputLayout, 4, ShaderVSPtr);
 

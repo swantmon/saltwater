@@ -52,9 +52,9 @@ namespace
     // -----------------------------------------------------------------------------
     const Base::Char* g_pShaderFilenameVS[] =
     {
-        "vs_m_pn.glsl",
-        "vs_m_pnx0.glsl",
-        "vs_m_pntbx0.glsl",
+        "geometry/vs_m_pn.glsl",
+        "geometry/vs_m_pnx0.glsl",
+        "geometry/vs_m_pntbx0.glsl",
     };
 
     const Base::Char* g_pShaderNamesVS[] =
@@ -66,9 +66,9 @@ namespace
 
     const Base::Char* g_pMVPShaderFilenameVS[] =
     {
-        "vs_mvp_pn.glsl",
-        "vs_mvp_pnx0.glsl",
-        "vs_mvp_pntbx0.glsl",
+        "geometry/vs_mvp_pn.glsl",
+        "geometry/vs_mvp_pnx0.glsl",
+        "geometry/vs_mvp_pntbx0.glsl",
     };
 
     const Base::Char* g_pMVPShaderNamesVS[] =
