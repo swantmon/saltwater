@@ -70,17 +70,17 @@ namespace
 
         struct SSunLightProperties
         {
-            glm::mat4 m_LightViewProjection;
-            glm::vec4   m_LightDirection;
-            glm::vec4   m_LightColor;
-            float          m_SunAngularRadius;
-            unsigned int   m_ExposureHistoryIndex;
+            glm::mat4    m_LightViewProjection;
+            glm::vec4    m_LightDirection;
+            glm::vec4    m_LightColor;
+            float        m_SunAngularRadius;
+            unsigned int m_ExposureHistoryIndex;
         };
 
         struct SRenderJob
         {
-            Dt::CSunComponent*  m_pDataSunLightFacet;
-            Gfx::CSun* m_pGraphicSunLightFacet;
+            Dt::CSunComponent* m_pDataSunLightFacet;
+            Gfx::CSun*         m_pGraphicSunLightFacet;
         };
 
     private:
@@ -106,7 +106,7 @@ namespace
         : m_SunLightPSBufferPtr    ()
         , m_SunLightShaderPSPtr    ()
         , m_RectangleShaderVSPtr   ()
-        , m_RenderJobs		       ()
+        , m_RenderJobs             ()
     {
         m_RenderJobs.reserve(4);
     }
