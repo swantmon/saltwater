@@ -221,7 +221,7 @@ namespace
                 // -----------------------------------------------------------------------------
                 float Radius = glm::max(Dt::Map::GetNumberOfMetersX(), Dt::Map::GetNumberOfMetersY());
                 float Near   = 1.0f;
-                float Far    = Radius * 2.0f;
+                float Far    = Radius * 3.14f;
 
                 pGfxSunFacet->m_RenderContextPtr->GetCamera()->SetOrthographic(-Radius, Radius, -Radius, Radius, Near, Far);
 
