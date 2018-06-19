@@ -55,7 +55,6 @@ namespace Edit
         NewMessage.Reset();
 
         Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Effect_SSR_Update, NewMessage);
-
     }
 
     // -----------------------------------------------------------------------------
@@ -80,11 +79,11 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
-        int   EntityID             = _rMessage.Get<int>();
-        float Intensity            = _rMessage.Get<float>();
-        float RoughnessMask        = _rMessage.Get<float>();
-        float Distance             = _rMessage.Get<float>();
-        bool  UseDoubleReflections = _rMessage.Get<bool>();
+        Base::ID EntityID             = _rMessage.Get<Base::ID>();
+        float    Intensity            = _rMessage.Get<float>();
+        float    RoughnessMask        = _rMessage.Get<float>();
+        float    Distance             = _rMessage.Get<float>();
+        bool     UseDoubleReflections = _rMessage.Get<bool>();
 
         BASE_UNUSED(EntityID);
 

@@ -108,6 +108,8 @@ namespace
 
     private:
 
+        void OnDirtyEntity(Dt::CEntity* _pEntity);
+
         void OnDirtyComponent(Dt::IComponent* _pComponent);
 
         void CreateRSM(unsigned int _Size, CInternObject* _pInternLight);
@@ -230,6 +232,8 @@ namespace
         // Register dirty entity handler for automatic sky creation
         // -----------------------------------------------------------------------------
         Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(DATA_DIRTY_COMPONENT_METHOD(&CGfxPointLightManager::OnDirtyComponent));
+
+        Dt::EntityManager::RegisterDirtyEntityHandler(DATA_DIRTY_ENTITY_METHOD(&CGfxPointLightManager::OnDirtyEntity));
     }
 
     // -----------------------------------------------------------------------------
@@ -301,6 +305,27 @@ namespace
                 // Render
                 // -----------------------------------------------------------------------------
                 RenderShadows(*pGfxPointLight, pDtComponent, LightPosition);
+            }
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxPointLightManager::OnDirtyEntity(Dt::CEntity* _pEntity)
+    {
+        if (_pEntity->GetDirtyFlags() != Dt::CEntity::DirtyMove) return;
+
+        auto ComponentFacet = _pEntity->GetComponentFacet();
+
+        if (!ComponentFacet->HasComponent<Dt::CPointLightComponent>()) return;
+
+        auto AreaLightComponents = ComponentFacet->GetComponents();
+
+        for (auto pComponent : AreaLightComponents)
+        {
+            if (pComponent->GetTypeID() == Base::CTypeInfo::GetTypeID<Dt::CPointLightComponent>())
+            {
+                Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Dt::CPointLightComponent::DirtyInfo);
             }
         }
     }

@@ -36,7 +36,7 @@ layout(binding = 0) uniform sampler2D ps_GBuffer0;
 layout(binding = 1) uniform sampler2D ps_GBuffer1;
 layout(binding = 2) uniform sampler2D ps_GBuffer2;
 layout(binding = 3) uniform sampler2D ps_Depth;
-layout(binding = 4) uniform sampler2D ps_Shadowmap;
+layout(binding = 4) uniform sampler2DShadow ps_ShadowTexture;
 
 // -----------------------------------------------------------------------------
 // Output
@@ -110,7 +110,7 @@ void main()
     // Shadowing
     // -----------------------------------------------------------------------------
     Attenuation *= Data.m_AmbientOcclusion;
-    Attenuation *= LightHasShadows == 1.0f ? GetShadowAtPosition(Data.m_WSPosition, ps_LightViewProjection, ps_Shadowmap) : 1.0f;
+    Attenuation *= LightHasShadows == 1.0f ? GetShadowAtPositionWithPCF(Data.m_WSPosition, ps_LightViewProjection, ps_ShadowTexture) : 1.0f;
     
     // -----------------------------------------------------------------------------
     // Apply light luminance and shading

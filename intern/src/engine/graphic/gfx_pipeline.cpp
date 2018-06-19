@@ -493,6 +493,8 @@ namespace Pipeline
         // -----------------------------------------------------------------------------
         Performance::BeginEvent("Forward Pass");
 
+        LightAreaRenderer::RenderForward();
+
         MeshRenderer::RenderForward();
 
         Engine::RaiseEvent(Engine::Gfx_OnRenderForward);
@@ -509,8 +511,6 @@ namespace Pipeline
         PostFXHDR::Render();
 
         TonemappingRenderer::Render();
-
-        LightAreaRenderer::RenderBulbs();
 
         SelectionRenderer::Render();
 

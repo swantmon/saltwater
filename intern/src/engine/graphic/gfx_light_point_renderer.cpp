@@ -325,11 +325,9 @@ namespace
         
         SCameraProperties CameraProperties;
         
-        glm::vec3 Position = CameraPtr->GetView()->GetPosition();
-        
         CameraProperties.m_InverseCameraProjection = glm::inverse(CameraPtr->GetProjectionMatrix());
         CameraProperties.m_InverseCameraView       = glm::inverse(CameraPtr->GetView()->GetViewMatrix());
-        CameraProperties.m_CameraPosition          = glm::vec4(Position[0], Position[1], Position[2], 1.0f);
+        CameraProperties.m_CameraPosition          = glm::vec4(CameraPtr->GetView()->GetPosition(), 1.0f);
         CameraProperties.m_InvertedScreenSize      = glm::vec4(1.0f / Main::GetActiveWindowSize()[0], 1.0f / Main::GetActiveWindowSize()[1], 0, 0);
         CameraProperties.m_ExposureHistoryIndex    = HistogramRenderer::GetLastExposureHistoryIndex();
         
@@ -344,7 +342,7 @@ namespace
 
         ContextManager::SetBlendState(StateManager::GetBlendState(CBlendState::AdditionBlend));
 
-        ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::NoWriteDepth));
+        ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::NoDepth));
 
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::NoCull));
 
@@ -352,14 +350,14 @@ namespace
         ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
         ContextManager::SetSampler(2, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
         ContextManager::SetSampler(3, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
-        ContextManager::SetSampler(4, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+        ContextManager::SetSampler(4, SamplerManager::GetSampler(CSampler::PCF));
 
         ContextManager::SetTopology(STopology::TriangleList);
 
         // -----------------------------------------------------------------------------
         // Set static stuff
         // -----------------------------------------------------------------------------
-        ContextManager::SetShaderVS(m_SphereModelPtr->GetLOD(0)->GetSurface()->GetMVPShaderVS());
+        ContextManager::SetShaderVS(m_SphereModelPtr->GetLOD(0)->GetSurface()->GetShaderVS());
 
         ContextManager::SetShaderPS(m_PunctualLightShaderPSPtr);
 
@@ -367,7 +365,7 @@ namespace
 
         ContextManager::SetIndexBuffer(m_SphereModelPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
 
-        ContextManager::SetInputLayout(m_SphereModelPtr->GetLOD(0)->GetSurface()->GetMVPShaderVS()->GetInputLayout());
+        ContextManager::SetInputLayout(m_SphereModelPtr->GetLOD(0)->GetSurface()->GetShaderVS()->GetInputLayout());
 
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
 

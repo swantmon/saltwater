@@ -78,9 +78,7 @@ namespace Edit
 
         NewMessage.Put(ColorMode);
 
-        NewMessage.Put(Color[0]);
-        NewMessage.Put(Color[1]);
-        NewMessage.Put(Color[2]);
+        NewMessage.Put(Color);
 
         NewMessage.Put(Temperature);
         NewMessage.Put(Intensity);
@@ -88,9 +86,7 @@ namespace Edit
         NewMessage.Put(InnerConeAngle);
         NewMessage.Put(OuterConeAngle);
 
-        NewMessage.Put(Direction[0]);
-        NewMessage.Put(Direction[1]);
-        NewMessage.Put(Direction[2]);
+        NewMessage.Put(Direction);
 
         NewMessage.Put(ShadowType);
         NewMessage.Put(ShadowQuality);
@@ -138,22 +134,17 @@ namespace Edit
 
     void CInspectorPointlight::OnEntityInfoPointlight(Edit::CMessage& _rMessage)
     {
-        float R, G, B;
-        float X, Y, Z;
-
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
-        int EntityID  = _rMessage.Get<int>();
+        int EntityID  = _rMessage.Get<Base::ID>();
         int ColorMode = _rMessage.Get<int>();
 
         BASE_UNUSED(EntityID);
 
-        R = _rMessage.Get<float>();
-        G = _rMessage.Get<float>();
-        B = _rMessage.Get<float>();
+        glm::vec3 MsgColor = _rMessage.Get<glm::vec3>();
 
-        glm::ivec3 Color = glm::ivec3(R * 255, G * 255, B * 255);
+        glm::ivec3 Color = glm::ivec3(MsgColor.r * 255, MsgColor.g * 255, MsgColor.b * 255);
 
         float Temperature       = _rMessage.Get<float>();
         float Intensity         = _rMessage.Get<float>();
@@ -161,11 +152,7 @@ namespace Edit
         float InnerConeAngle    = _rMessage.Get<float>();
         float OuterConeAngle    = _rMessage.Get<float>();
 
-        X = _rMessage.Get<float>();
-        Y = _rMessage.Get<float>();
-        Z = _rMessage.Get<float>();
-
-        glm::vec3 Direction = glm::vec3(X, Y, Z);
+        glm::vec3 Direction = _rMessage.Get<glm::vec3>();
 
         int ShadowType    = _rMessage.Get<int>();
         int ShadowQuality = _rMessage.Get<int>();
