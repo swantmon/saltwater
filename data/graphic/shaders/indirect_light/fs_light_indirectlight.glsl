@@ -120,7 +120,7 @@ void main()
         // -----------------------------------------------------------------------------
         // Build normal angles
         // -----------------------------------------------------------------------------
-        float CosThetaI = clamp(dot(LightNormal, Reflection), 0.0f, 1.0f);
+        float CosThetaI = clamp(dot(-LightNormal, Reflection), 0.0f, 1.0f);
         float CosThetaJ = clamp(dot(Data.m_WSNormal, Reflection), 0.0f, 1.0f);
         
         float Fij = CosThetaI * CosThetaJ * lR;
