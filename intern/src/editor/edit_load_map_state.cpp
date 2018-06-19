@@ -18,6 +18,7 @@
 #include "engine/data/data_map.h"
 #include "engine/data/data_material_component.h"
 #include "engine/data/data_mesh_component.h"
+#include "engine/data/data_post_aa_component.h"
 #include "engine/data/data_script_component.h"
 #include "engine/data/data_sky_component.h"
 #include "engine/data/data_ssao_component.h"
@@ -187,6 +188,32 @@ namespace Edit
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*ScriptComponent, Dt::CScriptComponent::DirtyCreate);
 
             // -----------------------------------------------------------------------------
+
+            Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
+
+        // -----------------------------------------------------------------------------
+        // Effects
+        // -----------------------------------------------------------------------------
+        {
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
+            EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
+
+            Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+
+            rEntity.SetName("AA");
+
+            {
+                auto Component = Dt::CComponentManager::GetInstance().Allocate<Dt::CPostAAComponent>();
+
+                Component->SetType(Dt::CPostAAComponent::SMAA);
+
+                rEntity.AttachComponent(Component);
+
+                Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*Component, Dt::CLightProbeComponent::DirtyCreate);
+            }
 
             Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
