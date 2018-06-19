@@ -489,7 +489,7 @@ namespace
             // -----------------------------------------------------------------------------
             SAreaLightProperties LightBuffer;
 
-            LightBuffer.m_Color                = glm::vec4(pDtComponent->GetLightness(), pDtComponent->GetIntensity());
+            LightBuffer.m_Color                = glm::vec4(pDtComponent->GetLightness(), pDtComponent->GetIntensity() * 0.00001f);
             LightBuffer.m_Position             = glm::vec4(pDtComponent->GetHostEntity()->GetWorldPosition(), 1.0f);
             LightBuffer.m_DirectionX           = pGfxComponent->GetDirectionX();
             LightBuffer.m_DirectionY           = pGfxComponent->GetDirectionY();

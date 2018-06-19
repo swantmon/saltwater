@@ -48,7 +48,7 @@ void main(void)
 		Output *= texture(ps_Map, in_UV);
 	} 
 
-    out_Color = Output * m_Color.w * ps_ExposureHistory[m_ExposureHistoryIndex] * 0.01f;
+    out_Color = Output * m_Color.w * ps_ExposureHistory[m_ExposureHistoryIndex];
 }
 
 #endif // __INCLUDE_FS_LIGHT_AREALIGHT_BULB_GLSL_
