@@ -4,8 +4,6 @@
 
 #include "common_global.glsl"
 
-layout(location = 0) in vec3 VertexPosition;
-
 struct SPixelCoords
 {
     vec4 m_TexCoords;
@@ -20,18 +18,22 @@ out gl_PerVertex
 
 void main()
 {
-    vec4 Position = vec4(VertexPosition.xyz, 1.0f);
+    vec2 Vertices[3];
     
-    vec2 TexCoord = vec2(Position.x, 1.0f - Position.y);
+    Vertices[0] = vec2(-1.0f, -1.0f);
+    Vertices[1] = vec2( 3.0f, -1.0f);
+    Vertices[2] = vec2(-1.0f,  3.0f);
+
+    vec2 UV = Vertices[gl_VertexID] * 0.5f + 0.5f;
     
     // -----------------------------------------------------------------------------
     
     vec4 HalfPixel          = vec4(-0.5f, 0.5f, -0.5f, 0.5f);
-    PSTexCoords.m_TexCoords = TexCoord.xxyy + HalfPixel * vec4(g_InvertedScreensizeAndScreensize.xy / 4.0f, g_InvertedScreensizeAndScreensize.xy / 4.0f);
+    PSTexCoords.m_TexCoords = UV.xxyy + HalfPixel * vec4(g_InvertedScreensizeAndScreensize.xy / 4.0f, g_InvertedScreensizeAndScreensize.xy / 4.0f);
     
     // -----------------------------------------------------------------------------
     
-    gl_Position = g_WorldToQuad * Position;
+    gl_Position = vec4(Vertices[gl_VertexID], 0.0f, 1.0f);
 }
 
 #endif // __INCLUDE_VS_DOF_NEAR_BLUR_GLSL__

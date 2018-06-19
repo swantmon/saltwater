@@ -109,7 +109,7 @@ vec4 ApplyDepthOfField(vec2 _TexCoords)
     // -----------------------------------------------------------------------------
     Depth = ConvertToLinearDepth(texture(ps_Depth, _TexCoords).r, g_CameraParameterNear, g_CameraParameterFar);
     
-    if (Depth > 1.0f)
+    if (Depth > 0.98f)
     {
         Coc = NearCoc;
     }

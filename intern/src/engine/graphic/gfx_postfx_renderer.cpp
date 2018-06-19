@@ -260,16 +260,18 @@ namespace
     
     void CGfxPostFXRenderer::OnSetupShader()
     {
-        CShaderPtr ShaderVSPtr                = ShaderManager::CompileVS("vs_fullscreen.glsl"    , "main");
-        CShaderPtr ShaderDOFDownVSPtr         = ShaderManager::CompileVS("vs_dof_down_sample.glsl"  , "main");
-        CShaderPtr ShaderDOFNearBlurVSPtr     = ShaderManager::CompileVS("vs_dof_near_blur.glsl"    , "main");
-        CShaderPtr PassThroughPSPtr           = ShaderManager::CompilePS("fs_pass_through.glsl"     , "main");
-        CShaderPtr ShaderDOFDownPSPtr         = ShaderManager::CompilePS("fs_dof_down_sample.glsl"  , "main");
-        CShaderPtr ShaderDOFNearBlurPSPtr     = ShaderManager::CompilePS("fs_dof_near_blur.glsl"    , "main");
-        CShaderPtr ShaderDOFNearPSPtr         = ShaderManager::CompilePS("fs_dof_near.glsl"         , "main");
-        CShaderPtr ShaderDOFApplyPSPtr        = ShaderManager::CompilePS("fs_dof_apply.glsl"        , "main");
-        CShaderPtr ShaderGaussianBlurPSPtr    = ShaderManager::CompilePS("fs_gaussian_blur.glsl"    , "main");
-        CShaderPtr ShaderFXAAPSPtr            = ShaderManager::CompilePS("fs_fxaa.glsl"             , "main");
+        CShaderPtr ShaderVSPtr                = ShaderManager::CompileVS("vs_fullscreen.glsl", "main");
+
+        CShaderPtr ShaderDOFDownVSPtr         = ShaderManager::CompileVS("dof/vs_dof_down_sample.glsl", "main");
+        CShaderPtr ShaderDOFNearBlurVSPtr     = ShaderManager::CompileVS("dof/vs_dof_near_blur.glsl"  , "main");
+        CShaderPtr ShaderDOFDownPSPtr         = ShaderManager::CompilePS("dof/fs_dof_down_sample.glsl", "main");
+        CShaderPtr ShaderDOFNearBlurPSPtr     = ShaderManager::CompilePS("dof/fs_dof_near_blur.glsl"  , "main");
+        CShaderPtr ShaderDOFNearPSPtr         = ShaderManager::CompilePS("dof/fs_dof_near.glsl"       , "main");
+        CShaderPtr ShaderDOFApplyPSPtr        = ShaderManager::CompilePS("dof/fs_dof_apply.glsl"      , "main");
+
+        CShaderPtr PassThroughPSPtr           = ShaderManager::CompilePS("fs_pass_through.glsl" , "main");
+        CShaderPtr ShaderGaussianBlurPSPtr    = ShaderManager::CompilePS("fs_gaussian_blur.glsl", "main");
+        CShaderPtr ShaderFXAAPSPtr            = ShaderManager::CompilePS("fs_fxaa.glsl"         , "main");
 
         glm::ivec2 WindowSize = Gfx::Main::GetActiveWindowSize();
 
@@ -1727,9 +1729,13 @@ namespace
 
         for (auto Component : DataComponents)
         {
+            Dt::CDOFComponent* pDtComponent = static_cast<Dt::CDOFComponent*>(Component);
+
+            if (pDtComponent->IsActiveAndUsable() == false) continue;
+
             SDOFRenderJob NewRenderJob;
 
-            NewRenderJob.m_pDataDOFFacet = static_cast<Dt::CDOFComponent*>(Component);
+            NewRenderJob.m_pDataDOFFacet = pDtComponent;
 
             m_DOFRenderJobs.push_back(NewRenderJob);
         }
