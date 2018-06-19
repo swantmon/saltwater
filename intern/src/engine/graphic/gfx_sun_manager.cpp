@@ -61,7 +61,8 @@ namespace
 
         struct SPerLightConstantBuffer
         {
-            glm::mat4 vs_ViewProjectionMatrix;
+            glm::mat4 vs_ProjectionMatrix;
+            glm::mat4 vs_ViewMatrix;
         };
 
         struct SPerDrawCallConstantBuffer
@@ -93,7 +94,6 @@ namespace
 
         CSuns m_Suns;
 
-        CShaderPtr m_ShadowShaderVSPtr;
         CShaderPtr m_ShadowSMShaderPSPtr;
         
         CBufferSetPtr m_LightCameraVSBufferPtr;
@@ -131,7 +131,6 @@ namespace
 {
     CGfxSunManager::CGfxSunManager()
         : m_Suns                  ()
-        , m_ShadowShaderVSPtr     ()
         , m_ShadowSMShaderPSPtr   ()
         , m_LightCameraVSBufferPtr()
     {
@@ -150,7 +149,6 @@ namespace
         // -----------------------------------------------------------------------------
         // Shader
         // -----------------------------------------------------------------------------
-        m_ShadowShaderVSPtr   = ShaderManager::CompileVS("shadow/vs_vm_pnx0.glsl", "main");
         m_ShadowSMShaderPSPtr = ShaderManager::CompilePS("shadow/fs_shadow.glsl", "SM");
 
         // -----------------------------------------------------------------------------
@@ -196,7 +194,6 @@ namespace
     {
         m_Suns.Clear();
 
-        m_ShadowShaderVSPtr      = 0;
         m_ShadowSMShaderPSPtr    = 0;
         m_LightCameraVSBufferPtr = 0;
     }
@@ -222,23 +219,22 @@ namespace
                 // -----------------------------------------------------------------------------
                 // Calculate near and far plane
                 // -----------------------------------------------------------------------------
-                float Radius = 30.0f;
+                float Radius = glm::max(Dt::Map::GetNumberOfMetersX(), Dt::Map::GetNumberOfMetersY());
                 float Near   = 1.0f;
                 float Far    = Radius * 2.0f;
 
                 pGfxSunFacet->m_RenderContextPtr->GetCamera()->SetOrthographic(-Radius, Radius, -Radius, Radius, Near, Far);
 
                 // -----------------------------------------------------------------------------
-                // Set view
+                // Set view depending on direction of the sun
                 // -----------------------------------------------------------------------------
-                glm::vec3 SunPosition    = pDtComponent->GetHostEntity()->GetWorldPosition();
-                glm::vec3 SunRotation    = pDtComponent->GetDirection();
-                glm::mat3 RotationMatrix = glm::lookAtRH(SunPosition, SunPosition + SunRotation, glm::vec3(0.0f, 0.0f, 1.0f));
+                glm::vec3 SunPosition    = glm::vec3(Radius / 2.0f, Radius / 2.0f, 0.0f) - glm::normalize(pDtComponent->GetDirection()) * Radius;
+                glm::mat3 RotationMatrix = glm::lookAt(SunPosition, glm::vec3(Radius / 2.0f, Radius / 2.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 
                 Gfx::CViewPtr ShadowViewPtr = pGfxSunFacet->m_RenderContextPtr->GetCamera()->GetView();
 
                 ShadowViewPtr->SetPosition(SunPosition);
-                ShadowViewPtr->SetRotationMatrix(RotationMatrix);
+                ShadowViewPtr->SetRotationMatrix(glm::transpose(RotationMatrix));
 
                 ShadowViewPtr->Update();
 
@@ -412,8 +408,6 @@ namespace
         // -----------------------------------------------------------------------------
         // Set shader
         // -----------------------------------------------------------------------------
-        ContextManager::SetShaderVS(m_ShadowShaderVSPtr);
-            
         ContextManager::SetShaderPS(m_ShadowSMShaderPSPtr);
             
         // -----------------------------------------------------------------------------
@@ -427,7 +421,8 @@ namespace
         // -----------------------------------------------------------------------------
         SPerLightConstantBuffer ViewBuffer;
 
-        ViewBuffer.vs_ViewProjectionMatrix = _pInternLight->m_RenderContextPtr->GetCamera()->GetViewProjectionMatrix();
+        ViewBuffer.vs_ProjectionMatrix = _pInternLight->m_RenderContextPtr->GetCamera()->GetProjectionMatrix();
+        ViewBuffer.vs_ViewMatrix       = _pInternLight->m_RenderContextPtr->GetCamera()->GetView()->GetViewMatrix();
             
         BufferManager::UploadBufferData(m_LightCameraVSBufferPtr->GetBuffer(0), &ViewBuffer);
             
@@ -469,8 +464,6 @@ namespace
             // -----------------------------------------------------------------------------
             assert(SurfacePtr->GetKey().m_HasPosition);
 
-            CInputLayoutPtr LayoutPtr = SurfacePtr->GetShaderVS()->GetInputLayout();
-
             // -----------------------------------------------------------------------------
             // Set items to context manager
             // -----------------------------------------------------------------------------
@@ -478,20 +471,22 @@ namespace
 
             ContextManager::SetIndexBuffer(SurfacePtr->GetIndexBuffer(), 0);
 
-            ContextManager::SetInputLayout(LayoutPtr);
+            ContextManager::SetShaderVS(SurfacePtr->GetMVPShaderVS());
+
+            ContextManager::SetInputLayout(SurfacePtr->GetMVPShaderVS()->GetInputLayout());
 
             ContextManager::SetTopology(STopology::TriangleList);
 
             ContextManager::DrawIndexed(SurfacePtr->GetNumberOfIndices(), 0, 0);
-
-            ContextManager::ResetTopology();
-
-            ContextManager::ResetInputLayout();
-
-            ContextManager::ResetIndexBuffer();
-
-            ContextManager::ResetVertexBuffer();
         }
+
+        ContextManager::ResetTopology();
+
+        ContextManager::ResetInputLayout();
+
+        ContextManager::ResetIndexBuffer();
+
+        ContextManager::ResetVertexBuffer();
 
         ContextManager::ResetConstantBuffer(0);
         ContextManager::ResetConstantBuffer(1);

@@ -59,7 +59,8 @@ namespace
 
         struct SPerLightConstantBuffer
         {
-            glm::mat4 vs_ViewProjectionMatrix;
+            glm::mat4 vs_ProjectionMatrix;
+            glm::mat4 vs_ViewMatrix;
         };
 
         struct SPerDrawCallConstantBuffer
@@ -99,7 +100,6 @@ namespace
     private:
 
         CPointLights m_PointLights;
-        CShaderPtr m_ShadowShaderVSPtr;
         CShaderPtr m_ShadowSMShaderPSPtr;
         CShaderPtr m_ShadowRSMShaderPSPtr;
         CShaderPtr m_ShadowRSMTexShaderPSPtr;
@@ -142,7 +142,6 @@ namespace
 {
     CGfxPointLightManager::CGfxPointLightManager()
         : m_PointLights            ()
-        , m_ShadowShaderVSPtr      ()
         , m_ShadowSMShaderPSPtr    ()
         , m_ShadowRSMShaderPSPtr   ()
         , m_ShadowRSMTexShaderPSPtr()
@@ -166,7 +165,6 @@ namespace
         // -----------------------------------------------------------------------------
         // Shader
         // -----------------------------------------------------------------------------
-        m_ShadowShaderVSPtr       = ShaderManager::CompileVS("shadow/vs_vm_pnx0.glsl", "main");
         m_ShadowSMShaderPSPtr     = ShaderManager::CompilePS("shadow/fs_shadow.glsl", "SM");
         m_ShadowRSMShaderPSPtr    = ShaderManager::CompilePS("shadow/fs_shadow.glsl", "RSM_COLOR");
         m_ShadowRSMTexShaderPSPtr = ShaderManager::CompilePS("shadow/fs_shadow.glsl", "RSM_TEX");
@@ -242,7 +240,6 @@ namespace
     {
         m_PointLights.Clear();
 
-        m_ShadowShaderVSPtr       = 0;
         m_ShadowSMShaderPSPtr     = 0;
         m_ShadowRSMShaderPSPtr    = 0;
         m_ShadowRSMTexShaderPSPtr = 0;
@@ -286,7 +283,7 @@ namespace
                 RotationMatrix = glm::lookAt(LightPosition, LightPosition + LightDirection, glm::vec3(0.0f, 0.0f, 1.0f));
 
                 ShadowViewPtr->SetPosition(LightPosition);
-                ShadowViewPtr->SetRotationMatrix(RotationMatrix);
+                ShadowViewPtr->SetRotationMatrix(glm::transpose(RotationMatrix));
 
                 // -----------------------------------------------------------------------------
                 // Calculate near and far plane
@@ -429,7 +426,7 @@ namespace
         RotationMatrix = glm::lookAt(LightPosition, LightPosition + LightDirection, glm::vec3(0.0f, 0.0f, 1.0f));
 
         ShadowViewPtr->SetPosition(LightPosition);
-        ShadowViewPtr->SetRotationMatrix(RotationMatrix);
+        ShadowViewPtr->SetRotationMatrix(glm::transpose(RotationMatrix));
 
         // -----------------------------------------------------------------------------
         // Calculate near and far plane
@@ -655,7 +652,8 @@ namespace
         // -----------------------------------------------------------------------------
         SPerLightConstantBuffer ViewBuffer;
             
-        ViewBuffer.vs_ViewProjectionMatrix = _rInternLight.m_RenderContextPtr->GetCamera()->GetViewProjectionMatrix();
+        ViewBuffer.vs_ProjectionMatrix = _rInternLight.m_RenderContextPtr->GetCamera()->GetProjectionMatrix();
+        ViewBuffer.vs_ViewMatrix       = _rInternLight.m_RenderContextPtr->GetCamera()->GetView()->GetViewMatrix();
             
         BufferManager::UploadBufferData(m_LightCameraVSBufferPtr->GetBuffer(0), &ViewBuffer);
             
@@ -701,7 +699,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Set shader + buffer
             // -----------------------------------------------------------------------------
-            ContextManager::SetShaderVS(m_ShadowShaderVSPtr);
+            ContextManager::SetShaderVS(SurfacePtr->GetMVPShaderVS());
 
             ContextManager::SetConstantBuffer(0, m_LightCameraVSBufferPtr->GetBuffer(0));
 
@@ -756,8 +754,6 @@ namespace
             // -----------------------------------------------------------------------------
             assert(SurfacePtr->GetKey().m_HasPosition);
 
-            CInputLayoutPtr LayoutPtr = SurfacePtr->GetShaderVS()->GetInputLayout();
-
             // -----------------------------------------------------------------------------
             // Set items to context manager
             // -----------------------------------------------------------------------------
@@ -765,7 +761,7 @@ namespace
 
             ContextManager::SetIndexBuffer(SurfacePtr->GetIndexBuffer(), 0);
 
-            ContextManager::SetInputLayout(LayoutPtr);
+            ContextManager::SetInputLayout(SurfacePtr->GetMVPShaderVS()->GetInputLayout());
 
             ContextManager::SetTopology(STopology::TriangleList);
 
