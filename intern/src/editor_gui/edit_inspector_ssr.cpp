@@ -55,7 +55,6 @@ namespace Edit
         NewMessage.Reset();
 
         Edit::MessageManager::SendMessage(Edit::SGUIMessageType::Effect_SSR_Update, NewMessage);
-
     }
 
     // -----------------------------------------------------------------------------

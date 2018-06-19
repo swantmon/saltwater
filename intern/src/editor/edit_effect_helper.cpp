@@ -121,110 +121,100 @@ namespace
 
     void CEffectHelper::OnNewBloom(Edit::CMessage& _rMessage)
     {
-        {
-            // -----------------------------------------------------------------------------
-            // Get entity and set type + category
-            // -----------------------------------------------------------------------------
-            Base::ID EntityID = _rMessage.Get<Base::ID>();
+        // -----------------------------------------------------------------------------
+        // Get entity and set type + category
+        // -----------------------------------------------------------------------------
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-            Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+        Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-            pCurrentEntity->SetCategory(Dt::SEntityCategory::Dynamic);
+        pCurrentEntity->SetCategory(Dt::SEntityCategory::Dynamic);
 
-            auto pComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CBloomComponent>();
+        auto pComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CBloomComponent>();
 
-            pCurrentEntity->AttachComponent(pComponent);
+        pCurrentEntity->AttachComponent(pComponent);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Dt::CBloomComponent::DirtyCreate);
-        }
+        Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Dt::CBloomComponent::DirtyCreate);
     }
 
     // -----------------------------------------------------------------------------
 
     void CEffectHelper::OnNewDOF(Edit::CMessage& _rMessage)
     {
-        {
-            // -----------------------------------------------------------------------------
-            // Get entity and set type + category
-            // -----------------------------------------------------------------------------
-            Base::ID EntityID = _rMessage.Get<Base::ID>();
+        // -----------------------------------------------------------------------------
+        // Get entity and set type + category
+        // -----------------------------------------------------------------------------
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-            Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+        Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-            pCurrentEntity->SetCategory(Dt::SEntityCategory::Dynamic);
+        pCurrentEntity->SetCategory(Dt::SEntityCategory::Dynamic);
 
-            auto pComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CDOFComponent>();
+        auto pComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CDOFComponent>();
 
-            pCurrentEntity->AttachComponent(pComponent);
+        pCurrentEntity->AttachComponent(pComponent);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Dt::CDOFComponent::DirtyCreate);
-        }
+        Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Dt::CDOFComponent::DirtyCreate);
     }
 
     // -----------------------------------------------------------------------------
 
     void CEffectHelper::OnNewPostAA(Edit::CMessage& _rMessage)
     {
-        {
-            // -----------------------------------------------------------------------------
-            // Get entity and set type + category
-            // -----------------------------------------------------------------------------
-            Base::ID EntityID = _rMessage.Get<Base::ID>();
+        // -----------------------------------------------------------------------------
+        // Get entity and set type + category
+        // -----------------------------------------------------------------------------
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-            Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+        Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-            pCurrentEntity->SetCategory(Dt::SEntityCategory::Dynamic);
+        pCurrentEntity->SetCategory(Dt::SEntityCategory::Dynamic);
 
-            auto pComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CPostAAComponent>();
+        auto pComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CPostAAComponent>();
 
-            pCurrentEntity->AttachComponent(pComponent);
+        pCurrentEntity->AttachComponent(pComponent);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Dt::CPostAAComponent::DirtyCreate);
-        }
+        Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Dt::CPostAAComponent::DirtyCreate);
     }
 
     // -----------------------------------------------------------------------------
 
     void CEffectHelper::OnNewSSR(Edit::CMessage& _rMessage)
     {
-        {
-            // -----------------------------------------------------------------------------
-            // Get entity and set type + category
-            // -----------------------------------------------------------------------------
-            Base::ID EntityID = _rMessage.Get<Base::ID>();
+        // -----------------------------------------------------------------------------
+        // Get entity and set type + category
+        // -----------------------------------------------------------------------------
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-            Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+        Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-            pCurrentEntity->SetCategory(Dt::SEntityCategory::Dynamic);
+        pCurrentEntity->SetCategory(Dt::SEntityCategory::Dynamic);
 
-            auto pComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CSSRComponent>();
+        auto pComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CSSRComponent>();
 
-            pCurrentEntity->AttachComponent(pComponent);
+        pCurrentEntity->AttachComponent(pComponent);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Dt::CSSRComponent::DirtyCreate);
-        }
+        Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Dt::CSSRComponent::DirtyCreate);
     }
 
     // -----------------------------------------------------------------------------
 
     void CEffectHelper::OnNewVolumeFog(Edit::CMessage& _rMessage)
     {
-        {
-            // -----------------------------------------------------------------------------
-            // Get entity and set type + category
-            // -----------------------------------------------------------------------------
-            Base::ID EntityID = _rMessage.Get<Base::ID>();
+        // -----------------------------------------------------------------------------
+        // Get entity and set type + category
+        // -----------------------------------------------------------------------------
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-            Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+        Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-            pCurrentEntity->SetCategory(Dt::SEntityCategory::Dynamic);
+        pCurrentEntity->SetCategory(Dt::SEntityCategory::Dynamic);
 
-            auto pComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CVolumeFogComponent>();
+        auto pComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CVolumeFogComponent>();
 
-            pCurrentEntity->AttachComponent(pComponent);
+        pCurrentEntity->AttachComponent(pComponent);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Dt::CVolumeFogComponent::DirtyCreate);
-        }
+        Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Dt::CVolumeFogComponent::DirtyCreate);
     }
 
     // -----------------------------------------------------------------------------
@@ -336,7 +326,7 @@ namespace
 
             Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::Effect_SSR_Info, NewMessage);
         }
-            }
+    }
 
     // -----------------------------------------------------------------------------
 
