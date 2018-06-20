@@ -717,44 +717,51 @@ namespace
 
         ContextManager::SetTopology(STopology::TriangleList);
 
-        for (auto CurrentRenderJob : m_DeferredRenderJobs)
+        auto RenderJobs = [&](const auto _ListOfJobs)->void
         {
-            CSurfacePtr  SurfacePtr  = CurrentRenderJob.m_SurfacePtr;
+            for (auto CurrentRenderJob : _ListOfJobs)
+            {
+                CSurfacePtr  SurfacePtr = CurrentRenderJob.m_SurfacePtr;
 
-            // -----------------------------------------------------------------------------
-            // Upload data to buffer
-            // -----------------------------------------------------------------------------
-            SPerDrawCallConstantBufferVS ModelBuffer;
+                // -----------------------------------------------------------------------------
+                // Upload data to buffer
+                // -----------------------------------------------------------------------------
+                SPerDrawCallConstantBufferVS ModelBuffer;
 
-            ModelBuffer.m_ModelMatrix = CurrentRenderJob.m_ModelMatrix;
+                ModelBuffer.m_ModelMatrix = CurrentRenderJob.m_ModelMatrix;
 
-            BufferManager::UploadBufferData(m_ModelBufferPtr, &ModelBuffer);
+                BufferManager::UploadBufferData(m_ModelBufferPtr, &ModelBuffer);
 
-            SHitProxyProperties HitProxyProperties;
+                SHitProxyProperties HitProxyProperties;
 
-            HitProxyProperties.m_ID = static_cast<unsigned int>(CurrentRenderJob.m_EntityID);
+                HitProxyProperties.m_ID = static_cast<unsigned int>(CurrentRenderJob.m_EntityID);
 
-            BufferManager::UploadBufferData(m_HitProxyPassPSBufferPtr, &HitProxyProperties);
+                BufferManager::UploadBufferData(m_HitProxyPassPSBufferPtr, &HitProxyProperties);
 
-            // -----------------------------------------------------------------------------
-            // Render
-            // -----------------------------------------------------------------------------
-            ContextManager::SetShaderVS(SurfacePtr->GetShaderVS());
+                // -----------------------------------------------------------------------------
+                // Render
+                // -----------------------------------------------------------------------------
+                ContextManager::SetShaderVS(SurfacePtr->GetShaderVS());
 
-            ContextManager::SetShaderPS(m_HitProxyShaderPtr);
+                ContextManager::SetShaderPS(m_HitProxyShaderPtr);
 
-            ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
-            ContextManager::SetConstantBuffer(1, m_ModelBufferPtr);
-            ContextManager::SetConstantBuffer(2, m_HitProxyPassPSBufferPtr);
+                ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+                ContextManager::SetConstantBuffer(1, m_ModelBufferPtr);
+                ContextManager::SetConstantBuffer(2, m_HitProxyPassPSBufferPtr);
 
-            ContextManager::SetVertexBuffer(SurfacePtr->GetVertexBuffer());
+                ContextManager::SetVertexBuffer(SurfacePtr->GetVertexBuffer());
 
-            ContextManager::SetIndexBuffer(SurfacePtr->GetIndexBuffer(), 0);
+                ContextManager::SetIndexBuffer(SurfacePtr->GetIndexBuffer(), 0);
 
-            ContextManager::SetInputLayout(SurfacePtr->GetShaderVS()->GetInputLayout());
+                ContextManager::SetInputLayout(SurfacePtr->GetShaderVS()->GetInputLayout());
 
-            ContextManager::DrawIndexed(SurfacePtr->GetNumberOfIndices(), 0, 0);
-        }
+                ContextManager::DrawIndexed(SurfacePtr->GetNumberOfIndices(), 0, 0);
+            }
+        };
+        
+        RenderJobs(m_DeferredRenderJobs);
+
+        RenderJobs(m_ForwardRenderJobs);
 
         ContextManager::ResetInputLayout();
 
