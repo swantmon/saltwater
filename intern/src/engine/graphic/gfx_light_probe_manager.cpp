@@ -24,6 +24,7 @@
 
 #include "engine/graphic/gfx_buffer_manager.h"
 #include "engine/graphic/gfx_context_manager.h"
+#include "engine/graphic/gfx_debug.h"
 #include "engine/graphic/gfx_histogram_renderer.h"
 #include "engine/graphic/gfx_light_probe.h"
 #include "engine/graphic/gfx_light_probe_manager.h"
@@ -817,6 +818,8 @@ namespace
     {
         Performance::BeginEvent("Render Entities");
 
+        Debug::Push(131222);
+
         // -----------------------------------------------------------------------------
         // Prepare renderer
         // -----------------------------------------------------------------------------
@@ -1007,6 +1010,8 @@ namespace
         ContextManager::ResetViewPortSet();
 
         ContextManager::ResetTargetSet();
+
+        Debug::Pop();
 
         Performance::EndEvent();
     }

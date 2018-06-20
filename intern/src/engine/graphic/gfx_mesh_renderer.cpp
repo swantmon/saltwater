@@ -21,6 +21,7 @@
 
 #include "engine/graphic/gfx_buffer_manager.h"
 #include "engine/graphic/gfx_context_manager.h"
+#include "engine/graphic/gfx_debug.h"
 #include "engine/graphic/gfx_histogram_renderer.h"
 #include "engine/graphic/gfx_light_probe.h"
 #include "engine/graphic/gfx_main.h"
@@ -551,6 +552,8 @@ namespace
 
         Performance::BeginEvent("Meshes");
 
+        Debug::Push(131222);
+
         ContextManager::SetTargetSet(TargetSetManager::GetLightAccumulationTargetSet());
 
         ContextManager::SetViewPortSet(ViewManager::GetViewPortSet());
@@ -701,6 +704,8 @@ namespace
         ContextManager::ResetViewPortSet();
 
         ContextManager::ResetTargetSet();
+
+        Debug::Pop();
 
         Performance::EndEvent();
     }

@@ -461,6 +461,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\engine\engine.cpp" />
     <ClCompile Include="..\..\..\src\engine\engine_precompiled.cpp" />
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_debug.cpp">
+      <Filter>graphic\ogl</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\engine\core\core_asset_generator.h">
@@ -849,6 +852,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\engine\script\script_easyar_target_script.h">
       <Filter>script\scripts</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_debug.h">
+      <Filter>graphic\engine</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

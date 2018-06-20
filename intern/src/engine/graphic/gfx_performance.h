@@ -1,12 +1,4 @@
 
-//
-//  gfx_performance.h
-//  gfx
-//
-//  Created by Tobias Schwandt on 13/11/15.
-//  Copyright (c) 2015 TU Ilmenau. All rights reserved.
-//
-
 #pragma once
 
 #include "base/base_typedef.h"
@@ -21,9 +13,9 @@ namespace Performance
 {
     typedef std::function<void(Base::U32, Base::F32, Base::U64)> CDurationQueryDelegate;
 
-    ENGINE_API void OnStart();
-    ENGINE_API void Update();
-    ENGINE_API void OnExit();
+    void OnStart();
+    void Update();
+    void OnExit();
 
     ENGINE_API void BeginEvent(const Base::Char* _pEventName);
     ENGINE_API void ResetEventStatistics(const Base::Char* _pEventName);
