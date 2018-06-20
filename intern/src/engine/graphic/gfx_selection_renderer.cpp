@@ -320,9 +320,9 @@ namespace
     
     void CGfxSelectionRenderer::OnSetupShader()
     {
-        m_HighlightPSPtr   = ShaderManager::CompilePS("fs_highlight.glsl", "main");
-        m_TextureCubePSPtr = ShaderManager::CompilePS("fs_texture_cube.glsl", "main");
-        m_SelectionCSPtr   = ShaderManager::CompileCS("cs_selection.glsl", "main");
+        m_HighlightPSPtr   = ShaderManager::CompilePS("picking/fs_highlight.glsl", "main");
+        m_TextureCubePSPtr = ShaderManager::CompilePS("picking/fs_texture_cube.glsl", "main");
+        m_SelectionCSPtr   = ShaderManager::CompileCS("picking/cs_selection.glsl", "main");
     }
     
     // -----------------------------------------------------------------------------

@@ -37,5 +37,9 @@ namespace Edit
 
         void OnSceneGraphChanged(Edit::CMessage& _rMessage);
         void OnEntitySelected(Edit::CMessage& _rMessage);
+
+    private:
+
+        std::vector<QTreeWidgetItem*> m_UnfoundChildItems;
     };
 } // namespace Edit

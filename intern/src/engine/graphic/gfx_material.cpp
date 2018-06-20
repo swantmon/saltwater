@@ -8,13 +8,12 @@
 namespace Gfx
 {
     CMaterial::CMaterial()
-        : m_HasAlpha(false)
-        , m_HasBump(false)
-        , m_Hash(0)
+        : m_Hash(0)
     {
         m_MaterialAttributes.m_Color[0] = 1.0f;
         m_MaterialAttributes.m_Color[1] = 1.0f;
         m_MaterialAttributes.m_Color[2] = 1.0f;
+        m_MaterialAttributes.m_Color[3] = 1.0f;
         m_MaterialAttributes.m_Roughness = 0.0f;
         m_MaterialAttributes.m_Reflectance = 0.0f;
         m_MaterialAttributes.m_MetalMask = 0.0f;
@@ -123,19 +122,19 @@ namespace Gfx
 
     bool CMaterial::GetHasAlpha() const
     {
-        return m_HasAlpha;
+        return m_MaterialAttributes.m_Color[3] < 1.0f || m_MaterialKey.m_HasAlphaTex;
     }
 
     // -----------------------------------------------------------------------------
 
     bool CMaterial::GetHasBump() const
     {
-        return m_HasBump && m_MaterialAttributes.m_Displacement > 0.0f;
+        return m_MaterialAttributes.m_Displacement > 0.0f && m_MaterialKey.m_HasBumpTex;
     }
 
     // -----------------------------------------------------------------------------
 
-    unsigned int CMaterial::GetHash() const
+    CMaterial::BHash CMaterial::GetHash() const
     {
         return m_Hash;
     }

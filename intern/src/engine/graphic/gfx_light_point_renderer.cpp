@@ -111,8 +111,6 @@ namespace
         
         CShaderPtr        m_PunctualLightShaderPSPtr;
 
-        CRenderContextPtr m_LightRenderContextPtr;
-
         CRenderJobs       m_PunctualLightRenderJobs;
         
     private:
@@ -150,11 +148,10 @@ namespace
     
     void CGfxPointLightRenderer::OnExit()
     {
-        m_SphereModelPtr                    = 0;
-        m_MainVSBufferPtr                   = 0;
-        m_PunctualLightPSBufferPtr          = 0;
-        m_PunctualLightShaderPSPtr          = 0;
-        m_LightRenderContextPtr             = 0;
+        m_SphereModelPtr           = 0;
+        m_MainVSBufferPtr          = 0;
+        m_PunctualLightPSBufferPtr = 0;
+        m_PunctualLightShaderPSPtr = 0;
         
         m_PunctualLightRenderJobs.clear();
     }
@@ -163,7 +160,7 @@ namespace
     
     void CGfxPointLightRenderer::OnSetupShader()
     {
-        m_PunctualLightShaderPSPtr = ShaderManager::CompilePS("fs_light_punctuallight.glsl", "main");
+        m_PunctualLightShaderPSPtr = ShaderManager::CompilePS("punctual_light/fs_light_punctuallight.glsl", "main");
     }
     
     // -----------------------------------------------------------------------------
@@ -184,24 +181,6 @@ namespace
     
     void CGfxPointLightRenderer::OnSetupStates()
     {
-        CCameraPtr          MainCameraPtr      = ViewManager     ::GetMainCamera();
-
-        CViewPortSetPtr     ViewPortSetPtr     = ViewManager     ::GetViewPortSet();
-
-        CRenderStatePtr     LightStatePtr      = StateManager    ::GetRenderState(CRenderState::AdditionBlend | CRenderState::NoCull);
-
-        CTargetSetPtr       LightTargetSetPtr  = TargetSetManager::GetLightAccumulationTargetSet();
-
-        // -----------------------------------------------------------------------------
-        
-        CRenderContextPtr LightContextPtr = ContextManager::CreateRenderContext();
-        
-        LightContextPtr->SetCamera(MainCameraPtr);
-        LightContextPtr->SetViewPortSet(ViewPortSetPtr);
-        LightContextPtr->SetTargetSet(LightTargetSetPtr);
-        LightContextPtr->SetRenderState(LightStatePtr);
-        
-        m_LightRenderContextPtr = LightContextPtr;
     }
     
     // -----------------------------------------------------------------------------
@@ -346,11 +325,9 @@ namespace
         
         SCameraProperties CameraProperties;
         
-        glm::vec3 Position = CameraPtr->GetView()->GetPosition();
-        
         CameraProperties.m_InverseCameraProjection = glm::inverse(CameraPtr->GetProjectionMatrix());
         CameraProperties.m_InverseCameraView       = glm::inverse(CameraPtr->GetView()->GetViewMatrix());
-        CameraProperties.m_CameraPosition          = glm::vec4(Position[0], Position[1], Position[2], 1.0f);
+        CameraProperties.m_CameraPosition          = glm::vec4(CameraPtr->GetView()->GetPosition(), 1.0f);
         CameraProperties.m_InvertedScreenSize      = glm::vec4(1.0f / Main::GetActiveWindowSize()[0], 1.0f / Main::GetActiveWindowSize()[1], 0, 0);
         CameraProperties.m_ExposureHistoryIndex    = HistogramRenderer::GetLastExposureHistoryIndex();
         
@@ -359,20 +336,28 @@ namespace
         // -----------------------------------------------------------------------------
         // Rendering of light sources point
         // -----------------------------------------------------------------------------
-        ContextManager::SetRenderContext(m_LightRenderContextPtr);
+        ContextManager::SetTargetSet(TargetSetManager::GetLightAccumulationTargetSet());
+
+        ContextManager::SetViewPortSet(ViewManager::GetViewPortSet());
+
+        ContextManager::SetBlendState(StateManager::GetBlendState(CBlendState::AdditionBlend));
+
+        ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::NoDepth));
+
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::NoCull));
 
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
         ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
         ContextManager::SetSampler(2, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
         ContextManager::SetSampler(3, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
-        ContextManager::SetSampler(4, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+        ContextManager::SetSampler(4, SamplerManager::GetSampler(CSampler::PCF));
 
         ContextManager::SetTopology(STopology::TriangleList);
 
         // -----------------------------------------------------------------------------
         // Set static stuff
         // -----------------------------------------------------------------------------
-        ContextManager::SetShaderVS(m_SphereModelPtr->GetLOD(0)->GetSurface()->GetMVPShaderVS());
+        ContextManager::SetShaderVS(m_SphereModelPtr->GetLOD(0)->GetSurface()->GetShaderVS());
 
         ContextManager::SetShaderPS(m_PunctualLightShaderPSPtr);
 
@@ -380,7 +365,7 @@ namespace
 
         ContextManager::SetIndexBuffer(m_SphereModelPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), 0);
 
-        ContextManager::SetInputLayout(m_SphereModelPtr->GetLOD(0)->GetSurface()->GetMVPShaderVS()->GetInputLayout());
+        ContextManager::SetInputLayout(m_SphereModelPtr->GetLOD(0)->GetSurface()->GetShaderVS()->GetInputLayout());
 
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
 

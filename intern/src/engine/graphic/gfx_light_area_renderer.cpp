@@ -64,7 +64,7 @@ namespace
         
         void Update();
         void Render();
-        void RenderBulbs();
+        void RenderForward();
         
     private:
                 
@@ -80,11 +80,6 @@ namespace
             float        m_IsTwoSided;
             float        m_IsTextured;
             unsigned int m_ExposureHistoryIndex;
-        };
-
-        struct SAreaLightbulbProperties
-        {
-            glm::vec4 m_Color;
         };
 
         struct SRenderJob
@@ -111,9 +106,6 @@ namespace
         
         CTextureSetPtr m_LTCTextureSetPtr;
 
-        CRenderContextPtr m_DefaultRenderContextPtr;
-        CRenderContextPtr m_LightRenderContextPtr;
-
         CRenderJobs m_RenderJobs;
 
     private:
@@ -132,8 +124,6 @@ namespace
         , m_ScreenQuadShaderPtr     ()
         , m_LTCAreaLightShaderPtr   ()
         , m_AreaLightbulbShaderPtr  ()
-        , m_DefaultRenderContextPtr ()
-        , m_LightRenderContextPtr   ()
         , m_RenderJobs              ()
     {
     }
@@ -163,8 +153,6 @@ namespace
         m_LTCAreaLightShaderPtr    = 0;
         m_AreaLightbulbShaderPtr   = 0;
         m_LTCTextureSetPtr         = 0;
-        m_DefaultRenderContextPtr  = 0;
-        m_LightRenderContextPtr    = 0;
 
         m_RenderJobs.clear();
     }
@@ -173,13 +161,13 @@ namespace
     
     void CGfxAreaLightRenderer::OnSetupShader()
     {
-        m_PositionShaderPtr = ShaderManager::CompileVS("vs_p3t2.glsl", "main");
+        m_PositionShaderPtr = ShaderManager::CompileVS("area_light/vs_p3t2.glsl", "main");
 
-        m_ScreenQuadShaderPtr = ShaderManager::CompileVS("vs_fullscreen.glsl", "main");
+        m_ScreenQuadShaderPtr = ShaderManager::CompileVS("system/vs_fullscreen.glsl", "main");
 
-        m_LTCAreaLightShaderPtr = ShaderManager::CompilePS("fs_light_arealight.glsl" , "main");
+        m_LTCAreaLightShaderPtr = ShaderManager::CompilePS("area_light/fs_light_arealight.glsl" , "main");
 
-        m_AreaLightbulbShaderPtr = ShaderManager::CompilePS("fs_light_arealight_bulb.glsl", "main");
+        m_AreaLightbulbShaderPtr = ShaderManager::CompilePS("area_light/fs_light_arealight_bulb.glsl", "main");
 
         const SInputElementDescriptor P3T2InputLayout[] =
         {
@@ -208,35 +196,6 @@ namespace
     
     void CGfxAreaLightRenderer::OnSetupStates()
     {
-        CCameraPtr          MainCameraPtr      = ViewManager     ::GetMainCamera();
-
-        CViewPortSetPtr     ViewPortSetPtr     = ViewManager     ::GetViewPortSet();
-
-        CTargetSetPtr       LightTargetSetPtr   = TargetSetManager::GetLightAccumulationTargetSet();
-        CTargetSetPtr       DefaultTargetSetPtr = TargetSetManager::GetDefaultTargetSet();
-
-        CRenderStatePtr     DefaultStatePtr = StateManager::GetRenderState(CRenderState::NoCull);
-        CRenderStatePtr     LightStatePtr   = StateManager::GetRenderState(CRenderState::AdditionBlend);
-
-        // -----------------------------------------------------------------------------
-        
-        CRenderContextPtr DefaultContextPtr = ContextManager::CreateRenderContext();
-        
-        DefaultContextPtr->SetCamera(MainCameraPtr);
-        DefaultContextPtr->SetViewPortSet(ViewPortSetPtr);
-        DefaultContextPtr->SetTargetSet(DefaultTargetSetPtr);
-        DefaultContextPtr->SetRenderState(DefaultStatePtr);
-        
-        m_DefaultRenderContextPtr = DefaultContextPtr;
-        
-        CRenderContextPtr LightContextPtr = ContextManager::CreateRenderContext();
-        
-        LightContextPtr->SetCamera(MainCameraPtr);
-        LightContextPtr->SetViewPortSet(ViewPortSetPtr);
-        LightContextPtr->SetTargetSet(LightTargetSetPtr);
-        LightContextPtr->SetRenderState(LightStatePtr);
-        
-        m_LightRenderContextPtr = LightContextPtr;
     }
     
     // -----------------------------------------------------------------------------
@@ -281,7 +240,7 @@ namespace
         
         CTexturePtr LTCMagTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
 
-		TextureManager::SetTextureLabel(LTCMagTexturePtr, "Area light LTC Mag Texture");
+        TextureManager::SetTextureLabel(LTCMagTexturePtr, "Area light LTC Mag Texture");
 
         // -----------------------------------------------------------------------------
 
@@ -306,18 +265,6 @@ namespace
         ConstantBufferDesc.m_pClassKey     = 0;
         
         m_AreaLightBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
-
-        // -----------------------------------------------------------------------------
-
-        ConstantBufferDesc.m_Stride        = 0;
-        ConstantBufferDesc.m_Usage         = CBuffer::GPUReadWrite;
-        ConstantBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
-        ConstantBufferDesc.m_Access        = CBuffer::CPUWrite;
-        ConstantBufferDesc.m_NumberOfBytes = sizeof(SAreaLightbulbProperties);
-        ConstantBufferDesc.m_pBytes        = 0;
-        ConstantBufferDesc.m_pClassKey     = 0;
-
-        m_AreaLightbulbBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
     }
     
     // -----------------------------------------------------------------------------
@@ -382,7 +329,15 @@ namespace
         CRenderJobs::const_iterator CurrentRenderJob;
         CRenderJobs::const_iterator EndOfRenderJobs;
 
-        ContextManager::SetRenderContext(m_LightRenderContextPtr);
+        ContextManager::SetTargetSet(TargetSetManager::GetLightAccumulationTargetSet());
+
+        ContextManager::SetViewPortSet(ViewManager::GetViewPortSet());
+
+        ContextManager::SetBlendState(StateManager::GetBlendState(CBlendState::AdditionBlend));
+
+        ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::NoDepth));
+
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
 
         ContextManager::SetTopology(STopology::TriangleList);
 
@@ -413,13 +368,10 @@ namespace
         // -----------------------------------------------------------------------------
         // Render
         // -----------------------------------------------------------------------------
-        CurrentRenderJob = m_RenderJobs.begin();
-        EndOfRenderJobs  = m_RenderJobs.end();
-
-        for (; CurrentRenderJob != EndOfRenderJobs; ++CurrentRenderJob)
+        for (auto& rCurrentRenderJob : m_RenderJobs)
         {
-            Dt::CAreaLightComponent*  pDtComponent  = CurrentRenderJob->m_pDtComponent;
-            Gfx::CAreaLight* pGfxComponent = CurrentRenderJob->m_pGfxComponent;
+            Dt::CAreaLightComponent* pDtComponent  = rCurrentRenderJob.m_pDtComponent;
+            Gfx::CAreaLight*         pGfxComponent = rCurrentRenderJob.m_pGfxComponent;
 
             assert(pDtComponent && pGfxComponent);
 
@@ -495,53 +447,68 @@ namespace
     
     // -----------------------------------------------------------------------------
     
-    void CGfxAreaLightRenderer::RenderBulbs()
+    void CGfxAreaLightRenderer::RenderForward()
     {
-        Performance::BeginEvent("Area Lights Bulbs");
+        if (m_RenderJobs.size() == 0) return;
 
-        // -----------------------------------------------------------------------------
-        // Rendering
-        // -----------------------------------------------------------------------------
-        CRenderJobs::const_iterator CurrentRenderJob;
-        CRenderJobs::const_iterator EndOfRenderJobs;
+        Performance::BeginEvent("Area Lights Bulbs");
 
         // -----------------------------------------------------------------------------
         // Render
         // -----------------------------------------------------------------------------
-        CurrentRenderJob = m_RenderJobs.begin();
-        EndOfRenderJobs  = m_RenderJobs.end();
+        ContextManager::SetTargetSet(TargetSetManager::GetLightAccumulationTargetSet());
 
-        for (; CurrentRenderJob != EndOfRenderJobs; ++CurrentRenderJob)
+        ContextManager::SetViewPortSet(ViewManager::GetViewPortSet());
+
+        ContextManager::SetBlendState(StateManager::GetBlendState(CBlendState::Default));
+
+        ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::Default));
+
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::NoCull));
+
+        ContextManager::SetTopology(STopology::TriangleList);
+
+        ContextManager::SetShaderVS(m_PositionShaderPtr);
+
+        ContextManager::SetShaderPS(m_AreaLightbulbShaderPtr);
+
+        ContextManager::SetInputLayout(m_PositionShaderPtr->GetInputLayout());
+
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+        ContextManager::SetConstantBuffer(1, m_AreaLightBufferPtr);
+
+        ContextManager::SetResourceBuffer(0, HistogramRenderer::GetExposureHistoryBuffer());
+
+        for (auto& rCurrentRenderJob : m_RenderJobs)
         {
-            Dt::CAreaLightComponent*  pDtComponent  = CurrentRenderJob->m_pDtComponent;
-            Gfx::CAreaLight* pGfxComponent = CurrentRenderJob->m_pGfxComponent;
+            Dt::CAreaLightComponent* pDtComponent  = rCurrentRenderJob.m_pDtComponent;
+            Gfx::CAreaLight*         pGfxComponent = rCurrentRenderJob.m_pGfxComponent;
 
             assert(pDtComponent && pGfxComponent);
 
-            ContextManager::SetRenderContext(m_DefaultRenderContextPtr);
+            // -----------------------------------------------------------------------------
+            // Update data
+            // -----------------------------------------------------------------------------
+            SAreaLightProperties LightBuffer;
+
+            LightBuffer.m_Color                = glm::vec4(pDtComponent->GetLightness(), pDtComponent->GetIntensity() * 0.00001f);
+            LightBuffer.m_Position             = glm::vec4(pDtComponent->GetHostEntity()->GetWorldPosition(), 1.0f);
+            LightBuffer.m_DirectionX           = pGfxComponent->GetDirectionX();
+            LightBuffer.m_DirectionY           = pGfxComponent->GetDirectionY();
+            LightBuffer.m_HalfWidth            = pGfxComponent->GetHalfWidth();
+            LightBuffer.m_HalfHeight           = pGfxComponent->GetHalfHeight();
+            LightBuffer.m_Plane                = pGfxComponent->GetPlane();
+            LightBuffer.m_IsTwoSided           = pDtComponent->GetIsTwoSided() ? 1.0f : 0.0f;
+            LightBuffer.m_IsTextured           = pGfxComponent->HasTexture() ? 1.0f : 0.0f;
+            LightBuffer.m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
+
+            BufferManager::UploadBufferData(m_AreaLightBufferPtr, &LightBuffer);
+
+            // -----------------------------------------------------------------------------
 
             ContextManager::SetVertexBuffer(pGfxComponent->GetPlaneVertexBuffer());
 
             ContextManager::SetIndexBuffer(pGfxComponent->GetPlaneIndexBuffer(), 0);
-
-            ContextManager::SetInputLayout(m_PositionShaderPtr->GetInputLayout());
-
-            ContextManager::SetTopology(STopology::TriangleList);
-
-            ContextManager::SetShaderVS(m_PositionShaderPtr);
-
-            ContextManager::SetShaderPS(m_AreaLightbulbShaderPtr);
-
-            ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
-            ContextManager::SetConstantBuffer(1, m_AreaLightbulbBufferPtr);
-
-            // -----------------------------------------------------------------------------
-
-            SAreaLightbulbProperties LightBuffer;
-
-            LightBuffer.m_Color = glm::vec4(pDtComponent->GetColor(), pGfxComponent->HasTexture() ? 1.0f : 0.0f);
-
-            BufferManager::UploadBufferData(m_AreaLightbulbBufferPtr, &LightBuffer);
 
             // -----------------------------------------------------------------------------
 
@@ -555,29 +522,28 @@ namespace
             // -----------------------------------------------------------------------------
 
             ContextManager::DrawIndexed(6, 0, 0);
-
-            // -----------------------------------------------------------------------------
-            // Reset everything
-            // -----------------------------------------------------------------------------
-            ContextManager::ResetConstantBuffer(0);
-            ContextManager::ResetConstantBuffer(1);
-
-            ContextManager::ResetTopology();
-
-            ContextManager::ResetInputLayout();
-
-            ContextManager::ResetIndexBuffer();
-
-            ContextManager::ResetVertexBuffer();
-
-            ContextManager::ResetShaderVS();
-
-            ContextManager::ResetShaderPS();
-
-            ContextManager::ResetRenderContext();
         }
 
-        
+        // -----------------------------------------------------------------------------
+        // Reset everything
+        // -----------------------------------------------------------------------------
+        ContextManager::ResetConstantBuffer(0);
+        ContextManager::ResetConstantBuffer(1);
+
+        ContextManager::ResetTopology();
+
+        ContextManager::ResetInputLayout();
+
+        ContextManager::ResetIndexBuffer();
+
+        ContextManager::ResetVertexBuffer();
+
+        ContextManager::ResetShaderVS();
+
+        ContextManager::ResetShaderPS();
+
+        ContextManager::ResetRenderContext();
+
         Performance::EndEvent();
     }
 
@@ -721,9 +687,9 @@ namespace LightAreaRenderer
 
     // -----------------------------------------------------------------------------
 
-    void RenderBulbs()
+    void RenderForward()
     {
-        CGfxAreaLightRenderer::GetInstance().RenderBulbs();
+        CGfxAreaLightRenderer::GetInstance().RenderForward();
     }
 } // namespace LightAreaRenderer
 } // namespace Gfx

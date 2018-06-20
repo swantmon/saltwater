@@ -24,43 +24,6 @@
 
 using namespace Gfx;
 
-namespace 
-{
-    void GFX_APIENTRY OpenGLDebugCallback(GLenum _Source, GLenum _Type, GLuint _Id, GLenum _Severity, GLsizei _Length, const GLchar* _pMessage, const GLvoid* _pUserParam)
-    {
-        BASE_UNUSED(_Source);
-        BASE_UNUSED(_Type);
-        BASE_UNUSED(_Id);
-        BASE_UNUSED(_Severity);
-        BASE_UNUSED(_Length);
-        BASE_UNUSED(_pUserParam);
-
-        switch (_Type)
-        {
-        case GL_DEBUG_TYPE_ERROR:
-            ENGINE_CONSOLE_ERRORV("%s", _pMessage);
-            break;
-        case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
-            ENGINE_CONSOLE_WARNINGV("%s", _pMessage);
-            break;
-        case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
-            ENGINE_CONSOLE_WARNINGV("%s", _pMessage);
-            break;
-        case GL_DEBUG_TYPE_PORTABILITY:
-            ENGINE_CONSOLE_INFOV("%s", _pMessage);
-            break;
-        case GL_DEBUG_TYPE_PERFORMANCE:
-            ENGINE_CONSOLE_DEBUGV("%s", _pMessage);
-            break;
-        case GL_DEBUG_TYPE_OTHER:
-            // -----------------------------------------------------------------------------
-            // Nothing to output here because that is only resource creation thing
-            // -----------------------------------------------------------------------------
-            break;
-        }
-    }
-} // namespace 
-
 namespace
 {
     class CGfxMain : private Base::CUncopyable
@@ -522,16 +485,6 @@ namespace
 #endif
 
             // -----------------------------------------------------------------------------
-            // DEBUG
-            // -----------------------------------------------------------------------------
-#if APP_DEBUG_MODE == 1
-            glDebugMessageCallback(OpenGLDebugCallback, NULL);
-
-            glEnable(GL_DEBUG_OUTPUT);
-            glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-#endif
-
-            // -----------------------------------------------------------------------------
             // Check specific OpenGL(ES) versions and availability
             // -----------------------------------------------------------------------------
             const unsigned char* pInfoGLVersion     = glGetString(GL_VERSION);                  //< Returns a version or release number.
@@ -841,6 +794,7 @@ namespace
         float WorldNumberOfMetersZ;
         float FrameNumber;
         float FrameDeltaTime;
+        float FrameTotalTime;
         
         CCameraPtr MainCameraPtr   = ViewManager::GetMainCamera ();
         CCameraPtr DecalCameraPtr  = ViewManager::GetDecalCamera();
@@ -871,6 +825,7 @@ namespace
 
         FrameNumber    = static_cast<float>(Core::Time::GetNumberOfFrame());
         FrameDeltaTime = static_cast<float>(Core::Time::GetDeltaTimeLastFrame());
+        FrameTotalTime = static_cast<float>(Core::Time::GetTime());
 
         // -----------------------------------------------------------------------------
         // Set previous values
@@ -897,7 +852,7 @@ namespace
         m_PerFrameConstantBuffer.m_ScreenPositionScaleBias         = glm::vec4(0.5f, 0.5f, 0.5f, 0.5f);
         m_PerFrameConstantBuffer.m_CameraParameters0               = glm::vec4(Near, Far, 0.0f, 0.0f);
         m_PerFrameConstantBuffer.m_WorldParameters0                = glm::vec4(WorldNumberOfMetersX, WorldNumberOfMetersY, WorldNumberOfMetersZ, 0.0f);
-        m_PerFrameConstantBuffer.m_FrameParameters0                = glm::vec4(FrameNumber, FrameDeltaTime, 0.0f, 0.0f);
+        m_PerFrameConstantBuffer.m_FrameParameters0                = glm::vec4(FrameNumber, FrameDeltaTime, FrameTotalTime, 0.0f);
         
         BufferManager::UploadBufferData(m_PerFrameConstantBufferBufferPtr, &m_PerFrameConstantBuffer);
     }

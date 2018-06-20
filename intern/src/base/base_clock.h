@@ -62,7 +62,7 @@ namespace CORE
 
         inline double GetTime() const;
         inline double GetDurationOfFrame() const;
-        inline double GetNumberOfFrame() const;
+        inline Size GetNumberOfFrame() const;
         inline float GetFrameRate() const;
         
     private:
@@ -246,7 +246,7 @@ namespace CORE
     // -----------------------------------------------------------------------------
 
     template <Size TMaxNumberOfDurations>
-    inline double CClock<TMaxNumberOfDurations>::GetNumberOfFrame() const
+    inline Size CClock<TMaxNumberOfDurations>::GetNumberOfFrame() const
     {
         return m_NumberOfFrames;
     }

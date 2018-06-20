@@ -59,7 +59,8 @@ namespace
 
         struct SPerLightConstantBuffer
         {
-            glm::mat4 vs_ViewProjectionMatrix;
+            glm::mat4 vs_ProjectionMatrix;
+            glm::mat4 vs_ViewMatrix;
         };
 
         struct SPerDrawCallConstantBuffer
@@ -99,7 +100,6 @@ namespace
     private:
 
         CPointLights m_PointLights;
-        CShaderPtr m_ShadowShaderVSPtr;
         CShaderPtr m_ShadowSMShaderPSPtr;
         CShaderPtr m_ShadowRSMShaderPSPtr;
         CShaderPtr m_ShadowRSMTexShaderPSPtr;
@@ -107,6 +107,8 @@ namespace
         CBufferSetPtr m_RSMPSBuffer;
 
     private:
+
+        void OnDirtyEntity(Dt::CEntity* _pEntity);
 
         void OnDirtyComponent(Dt::IComponent* _pComponent);
 
@@ -140,7 +142,6 @@ namespace
 {
     CGfxPointLightManager::CGfxPointLightManager()
         : m_PointLights            ()
-        , m_ShadowShaderVSPtr      ()
         , m_ShadowSMShaderPSPtr    ()
         , m_ShadowRSMShaderPSPtr   ()
         , m_ShadowRSMTexShaderPSPtr()
@@ -164,10 +165,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Shader
         // -----------------------------------------------------------------------------
-        m_ShadowShaderVSPtr       = ShaderManager::CompileVS("vs_vm_pnx0.glsl", "main");
-        m_ShadowSMShaderPSPtr     = ShaderManager::CompilePS("fs_shadow.glsl", "SM");
-        m_ShadowRSMShaderPSPtr    = ShaderManager::CompilePS("fs_shadow.glsl", "RSM_COLOR");
-        m_ShadowRSMTexShaderPSPtr = ShaderManager::CompilePS("fs_shadow.glsl", "RSM_TEX");
+        m_ShadowSMShaderPSPtr     = ShaderManager::CompilePS("shadow/fs_shadow.glsl", "SM");
+        m_ShadowRSMShaderPSPtr    = ShaderManager::CompilePS("shadow/fs_shadow.glsl", "RSM_COLOR");
+        m_ShadowRSMTexShaderPSPtr = ShaderManager::CompilePS("shadow/fs_shadow.glsl", "RSM_TEX");
 
         // -----------------------------------------------------------------------------
         // Buffer
@@ -230,6 +230,8 @@ namespace
         // Register dirty entity handler for automatic sky creation
         // -----------------------------------------------------------------------------
         Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(DATA_DIRTY_COMPONENT_METHOD(&CGfxPointLightManager::OnDirtyComponent));
+
+        Dt::EntityManager::RegisterDirtyEntityHandler(DATA_DIRTY_ENTITY_METHOD(&CGfxPointLightManager::OnDirtyEntity));
     }
 
     // -----------------------------------------------------------------------------
@@ -238,7 +240,6 @@ namespace
     {
         m_PointLights.Clear();
 
-        m_ShadowShaderVSPtr       = 0;
         m_ShadowSMShaderPSPtr     = 0;
         m_ShadowRSMShaderPSPtr    = 0;
         m_ShadowRSMTexShaderPSPtr = 0;
@@ -282,7 +283,7 @@ namespace
                 RotationMatrix = glm::lookAt(LightPosition, LightPosition + LightDirection, glm::vec3(0.0f, 0.0f, 1.0f));
 
                 ShadowViewPtr->SetPosition(LightPosition);
-                ShadowViewPtr->SetRotationMatrix(RotationMatrix);
+                ShadowViewPtr->SetRotationMatrix(glm::transpose(RotationMatrix));
 
                 // -----------------------------------------------------------------------------
                 // Calculate near and far plane
@@ -301,6 +302,27 @@ namespace
                 // Render
                 // -----------------------------------------------------------------------------
                 RenderShadows(*pGfxPointLight, pDtComponent, LightPosition);
+            }
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxPointLightManager::OnDirtyEntity(Dt::CEntity* _pEntity)
+    {
+        if (_pEntity->GetDirtyFlags() != Dt::CEntity::DirtyMove) return;
+
+        auto ComponentFacet = _pEntity->GetComponentFacet();
+
+        if (!ComponentFacet->HasComponent<Dt::CPointLightComponent>()) return;
+
+        auto AreaLightComponents = ComponentFacet->GetComponents();
+
+        for (auto pComponent : AreaLightComponents)
+        {
+            if (pComponent->GetTypeID() == Base::CTypeInfo::GetTypeID<Dt::CPointLightComponent>())
+            {
+                Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Dt::CPointLightComponent::DirtyInfo);
             }
         }
     }
@@ -394,7 +416,7 @@ namespace
         Gfx::CCameraPtr ShadowCameraPtr = pGfxPointLightFacet->m_RenderContextPtr->GetCamera();
 
         glm::vec3 LightPosition  = pPointLightComponent->GetHostEntity()->GetWorldPosition();
-        glm::vec3 LightDirection = pPointLightComponent->GetDirection();
+        glm::vec3 LightDirection = glm::normalize(pPointLightComponent->GetDirection());
 
         // -----------------------------------------------------------------------------
         // Set view
@@ -404,7 +426,7 @@ namespace
         RotationMatrix = glm::lookAt(LightPosition, LightPosition + LightDirection, glm::vec3(0.0f, 0.0f, 1.0f));
 
         ShadowViewPtr->SetPosition(LightPosition);
-        ShadowViewPtr->SetRotationMatrix(RotationMatrix);
+        ShadowViewPtr->SetRotationMatrix(glm::transpose(RotationMatrix));
 
         // -----------------------------------------------------------------------------
         // Calculate near and far plane
@@ -630,7 +652,8 @@ namespace
         // -----------------------------------------------------------------------------
         SPerLightConstantBuffer ViewBuffer;
             
-        ViewBuffer.vs_ViewProjectionMatrix = _rInternLight.m_RenderContextPtr->GetCamera()->GetViewProjectionMatrix();
+        ViewBuffer.vs_ProjectionMatrix = _rInternLight.m_RenderContextPtr->GetCamera()->GetProjectionMatrix();
+        ViewBuffer.vs_ViewMatrix       = _rInternLight.m_RenderContextPtr->GetCamera()->GetView()->GetViewMatrix();
             
         BufferManager::UploadBufferData(m_LightCameraVSBufferPtr->GetBuffer(0), &ViewBuffer);
             
@@ -676,7 +699,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Set shader + buffer
             // -----------------------------------------------------------------------------
-            ContextManager::SetShaderVS(m_ShadowShaderVSPtr);
+            ContextManager::SetShaderVS(SurfacePtr->GetMVPShaderVS());
 
             ContextManager::SetConstantBuffer(0, m_LightCameraVSBufferPtr->GetBuffer(0));
 
@@ -731,8 +754,6 @@ namespace
             // -----------------------------------------------------------------------------
             assert(SurfacePtr->GetKey().m_HasPosition);
 
-            CInputLayoutPtr LayoutPtr = SurfacePtr->GetShaderVS()->GetInputLayout();
-
             // -----------------------------------------------------------------------------
             // Set items to context manager
             // -----------------------------------------------------------------------------
@@ -740,7 +761,7 @@ namespace
 
             ContextManager::SetIndexBuffer(SurfacePtr->GetIndexBuffer(), 0);
 
-            ContextManager::SetInputLayout(LayoutPtr);
+            ContextManager::SetInputLayout(SurfacePtr->GetMVPShaderVS()->GetInputLayout());
 
             ContextManager::SetTopology(STopology::TriangleList);
 

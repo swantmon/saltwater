@@ -10,13 +10,20 @@
 #include "engine/data/data_component_facet.h"
 #include "engine/data/data_component_manager.h"
 #include "engine/data/data_entity.h"
+#include "engine/data/data_light_probe_component.h"
 #include "engine/data/data_map.h"
 #include "engine/data/data_material_component.h"
 #include "engine/data/data_mesh_component.h"
+#include "engine/data/data_point_light_component.h"
+#include "engine/data/data_sky_component.h"
+#include "engine/data/data_sun_component.h"
 #include "engine/data/data_transformation_facet.h"
 
 #include "engine/graphic/gfx_buffer_manager.h"
 #include "engine/graphic/gfx_context_manager.h"
+#include "engine/graphic/gfx_debug.h"
+#include "engine/graphic/gfx_histogram_renderer.h"
+#include "engine/graphic/gfx_light_probe.h"
 #include "engine/graphic/gfx_main.h"
 #include "engine/graphic/gfx_material.h"
 #include "engine/graphic/gfx_material_manager.h"
@@ -24,9 +31,12 @@
 #include "engine/graphic/gfx_mesh_manager.h"
 #include "engine/graphic/gfx_mesh_renderer.h"
 #include "engine/graphic/gfx_performance.h"
+#include "engine/graphic/gfx_point_light.h"
+#include "engine/graphic/gfx_reflection_renderer.h"
 #include "engine/graphic/gfx_sampler_manager.h"
 #include "engine/graphic/gfx_shader_manager.h"
 #include "engine/graphic/gfx_state_manager.h"
+#include "engine/graphic/gfx_sun.h"
 #include "engine/graphic/gfx_target_set_manager.h"
 #include "engine/graphic/gfx_texture_manager.h"
 #include "engine/graphic/gfx_view_manager.h"
@@ -68,7 +78,12 @@ namespace
 
         void Update();
         void Render();
+        void RenderForward();
         void RenderHitProxy();
+
+    private:
+
+        static const unsigned int s_MaxNumberOfLights = 4;
 
     private:
 
@@ -82,6 +97,25 @@ namespace
             unsigned int m_ID;
         };
 
+        struct SLightProperties
+        {
+            glm::mat4    m_LightViewProjection;
+            glm::vec4    m_LightPosition;
+            glm::vec4    m_LightDirection;
+            glm::vec4    m_LightColor;
+            glm::vec4    m_LightSettings;
+            unsigned int m_LightType;
+            unsigned int m_Padding0;
+            unsigned int m_Padding1;
+            unsigned int m_Padding2;
+        };
+
+        struct SForwardPassProperties
+        {
+            glm::vec4    m_CameraPosition;
+            unsigned int m_ExposureHistoryIndex;
+        };
+
         struct SRenderJob
         {
             unsigned int     m_SurfaceAttributes;
@@ -91,23 +125,36 @@ namespace
             glm::mat4        m_ModelMatrix;
         };
 
+        struct SLightJob
+        {
+            CTexturePtr m_ShadowTexturePtrs[s_MaxNumberOfLights];
+            CTexturePtr m_SpecularTexturePtr;
+            CTexturePtr m_DiffuseTexturePtr;
+        };
+
     private:
 
         typedef std::vector<SRenderJob> CRenderJobs;
+        typedef std::vector<SLightJob> CLightJobs;
 
     private:
 
         CBufferPtr        m_ModelBufferPtr;
         CBufferPtr        m_SurfaceMaterialBufferPtr;
         CBufferPtr        m_HitProxyPassPSBufferPtr;
+        CBufferPtr        m_ForwardPassBufferPtr;
+        CBufferPtr        m_LightPropertiesBufferPtr;
         CShaderPtr        m_HitProxyShaderPtr;
         CRenderContextPtr m_DeferredContextPtr;
         CRenderContextPtr m_HitProxyContextPtr;
         CRenderJobs       m_DeferredRenderJobs;
+        CRenderJobs       m_ForwardRenderJobs;
+        SLightJob         m_ForwardLightTextures;
 
     private:
 
         void BuildRenderJobs();
+        void UpdateLightProperties();
     };
 } // namespace
 
@@ -117,15 +164,20 @@ namespace
         : m_ModelBufferPtr          ()
         , m_SurfaceMaterialBufferPtr()
         , m_HitProxyPassPSBufferPtr ()
+        , m_ForwardPassBufferPtr    ()
+        , m_LightPropertiesBufferPtr()
         , m_HitProxyShaderPtr       ()
         , m_DeferredContextPtr      ()
         , m_HitProxyContextPtr      ()
         , m_DeferredRenderJobs      ()
+        , m_ForwardRenderJobs       ()
+        , m_ForwardLightTextures    ()
     {
         // -----------------------------------------------------------------------------
         // Reserve some jobs
         // -----------------------------------------------------------------------------
-        m_DeferredRenderJobs.reserve(1024);
+        m_DeferredRenderJobs.reserve(256);
+        m_ForwardRenderJobs.reserve(32);
     }
 
     // -----------------------------------------------------------------------------
@@ -149,6 +201,8 @@ namespace
         m_ModelBufferPtr           = 0;
         m_SurfaceMaterialBufferPtr = 0;
         m_HitProxyPassPSBufferPtr  = 0;
+        m_ForwardPassBufferPtr   = 0;
+        m_LightPropertiesBufferPtr = 0;
         m_HitProxyShaderPtr        = 0;
         m_DeferredContextPtr       = 0;
         m_HitProxyContextPtr       = 0;
@@ -156,23 +210,38 @@ namespace
         // -----------------------------------------------------------------------------
         // Iterate throw render jobs to release managed pointer
         // -----------------------------------------------------------------------------
-        CRenderJobs::const_iterator EndOfRenderJobs;
-
-        EndOfRenderJobs  = m_DeferredRenderJobs.end();
-
-        for (CRenderJobs::iterator CurrentRenderJob = m_DeferredRenderJobs.begin(); CurrentRenderJob != EndOfRenderJobs; ++ CurrentRenderJob)
+        for (auto CurrentRenderJob : m_DeferredRenderJobs)
         {
-            CurrentRenderJob->m_SurfacePtr = nullptr;
+            CurrentRenderJob.m_SurfacePtr = nullptr;
         }
 
         m_DeferredRenderJobs.clear();
+
+        // -----------------------------------------------------------------------------
+
+        for (auto CurrentRenderJob : m_ForwardRenderJobs)
+        {
+            CurrentRenderJob.m_SurfacePtr = nullptr;
+        }
+
+        m_ForwardRenderJobs.clear();
+
+        // -----------------------------------------------------------------------------
+
+        for (unsigned int IndexOfTexture = 0; IndexOfTexture < s_MaxNumberOfLights; ++IndexOfTexture)
+        {
+            m_ForwardLightTextures.m_ShadowTexturePtrs[IndexOfTexture] = nullptr;
+        }
+
+        m_ForwardLightTextures.m_DiffuseTexturePtr  = nullptr;
+        m_ForwardLightTextures.m_SpecularTexturePtr = nullptr;
     }
 
     // -----------------------------------------------------------------------------
 
     void CGfxMeshRenderer::OnSetupShader()
     {
-        m_HitProxyShaderPtr = ShaderManager::CompilePS("fs_hitproxy.glsl", "main");
+        m_HitProxyShaderPtr = ShaderManager::CompilePS("picking/fs_hitproxy.glsl", "main");
     }
 
     // -----------------------------------------------------------------------------
@@ -243,6 +312,8 @@ namespace
 
         m_ModelBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
+        BufferManager::SetBufferLabel(m_ModelBufferPtr, "Model Matrix");
+
         // -----------------------------------------------------------------------------
 
         ConstanteBufferDesc.m_Stride        = 0;
@@ -255,6 +326,8 @@ namespace
 
         m_SurfaceMaterialBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
+        BufferManager::SetBufferLabel(m_SurfaceMaterialBufferPtr, "Surface Material Attributes");
+
         // -----------------------------------------------------------------------------
 
         ConstanteBufferDesc.m_Stride        = 0;
@@ -266,6 +339,36 @@ namespace
         ConstanteBufferDesc.m_pClassKey     = 0;
 
         m_HitProxyPassPSBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
+
+        BufferManager::SetBufferLabel(m_HitProxyPassPSBufferPtr, "Hit Proxy Properties");
+
+        // -----------------------------------------------------------------------------
+
+        ConstanteBufferDesc.m_Stride        = 0;
+        ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
+        ConstanteBufferDesc.m_Binding       = CBuffer::ResourceBuffer;
+        ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SLightProperties) * s_MaxNumberOfLights;
+        ConstanteBufferDesc.m_pBytes        = 0;
+        ConstanteBufferDesc.m_pClassKey     = 0;
+
+        m_LightPropertiesBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
+
+        BufferManager::SetBufferLabel(m_LightPropertiesBufferPtr, "Light Properties");
+
+        // -----------------------------------------------------------------------------
+
+        ConstanteBufferDesc.m_Stride        = 0;
+        ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
+        ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
+        ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SForwardPassProperties);
+        ConstanteBufferDesc.m_pBytes        = 0;
+        ConstanteBufferDesc.m_pClassKey     = 0;
+
+        m_ForwardPassBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
+
+        BufferManager::SetBufferLabel(m_ForwardPassBufferPtr, "Forward Pass Properties");
     }
 
     // -----------------------------------------------------------------------------
@@ -319,6 +422,11 @@ namespace
         // state changes as possible.
         // -----------------------------------------------------------------------------
         BuildRenderJobs();
+
+        // -----------------------------------------------------------------------------
+        // Update light properties
+        // -----------------------------------------------------------------------------
+        UpdateLightProperties();
     }
 
     // -----------------------------------------------------------------------------
@@ -327,7 +435,7 @@ namespace
     {
         if (m_DeferredRenderJobs.size() == 0) return;
 
-        Performance::BeginEvent("Actors");
+        Performance::BeginEvent("Meshes");
 
         // -----------------------------------------------------------------------------
         // Prepare renderer
@@ -438,6 +546,172 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    void CGfxMeshRenderer::RenderForward()
+    {
+        if (m_ForwardRenderJobs.size() == 0) return;
+
+        Performance::BeginEvent("Meshes");
+
+        Debug::Push(131222);
+
+        ContextManager::SetTargetSet(TargetSetManager::GetLightAccumulationTargetSet());
+
+        ContextManager::SetViewPortSet(ViewManager::GetViewPortSet());
+
+        ContextManager::SetBlendState(StateManager::GetBlendState(CBlendState::AlphaBlend));
+
+        ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::Default));
+
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
+
+        ContextManager::SetTopology(STopology::TriangleList);
+
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+        ContextManager::SetConstantBuffer(1, m_ModelBufferPtr);
+        ContextManager::SetConstantBuffer(3, m_SurfaceMaterialBufferPtr);
+        ContextManager::SetConstantBuffer(4, m_ForwardPassBufferPtr);
+
+        ContextManager::SetResourceBuffer(0, HistogramRenderer::GetExposureHistoryBuffer());
+        ContextManager::SetResourceBuffer(1, m_LightPropertiesBufferPtr);
+
+        // -----------------------------------------------------------------------------
+        // Bind shadow and reflection textures
+        // -----------------------------------------------------------------------------
+        ContextManager::SetSampler(7, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+
+        ContextManager::SetTexture(7, ReflectionRenderer::GetBRDF());
+
+        if (m_ForwardLightTextures.m_SpecularTexturePtr != 0)
+        {
+            ContextManager::SetSampler(8, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+
+            ContextManager::SetTexture(8, m_ForwardLightTextures.m_SpecularTexturePtr);
+        }
+
+        if (m_ForwardLightTextures.m_DiffuseTexturePtr != 0)
+        {
+            ContextManager::SetSampler(9, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+
+            ContextManager::SetTexture(9, m_ForwardLightTextures.m_DiffuseTexturePtr);
+        }
+
+        for (unsigned int IndexOfTexture = 0; IndexOfTexture < s_MaxNumberOfLights; ++IndexOfTexture)
+        {
+            if (m_ForwardLightTextures.m_ShadowTexturePtrs[IndexOfTexture] != 0)
+            {
+                ContextManager::SetSampler(10 + IndexOfTexture, SamplerManager::GetSampler(CSampler::PCF));
+
+                ContextManager::SetTexture(10 + IndexOfTexture, m_ForwardLightTextures.m_ShadowTexturePtrs[IndexOfTexture]);
+            }
+        }
+
+        // -----------------------------------------------------------------------------
+        // Forward pass properties
+        // -----------------------------------------------------------------------------
+        SForwardPassProperties ForwardPassProperties;
+
+        ForwardPassProperties.m_CameraPosition       = glm::vec4(ViewManager::GetMainCamera()->GetView()->GetPosition(), 1.0f);
+        ForwardPassProperties.m_ExposureHistoryIndex = HistogramRenderer::GetCurrentExposureHistoryIndex();
+
+        BufferManager::UploadBufferData(m_ForwardPassBufferPtr, &ForwardPassProperties);
+
+        // -----------------------------------------------------------------------------
+        // Actors
+        // -----------------------------------------------------------------------------
+        for (auto RenderJob : m_ForwardRenderJobs)
+        {
+            const CMaterial* pMaterial = RenderJob.m_SurfaceMaterialPtr;
+
+            // -----------------------------------------------------------------------------
+            // Upload data to buffer
+            // -----------------------------------------------------------------------------
+            SPerDrawCallConstantBufferVS ModelBuffer;
+
+            ModelBuffer.m_ModelMatrix = RenderJob.m_ModelMatrix;
+
+            BufferManager::UploadBufferData(m_ModelBufferPtr, &ModelBuffer);
+
+            BufferManager::UploadBufferData(m_SurfaceMaterialBufferPtr, &pMaterial->GetMaterialAttributes());
+
+            // -----------------------------------------------------------------------------
+            // Surface
+            // -----------------------------------------------------------------------------
+            CSurfacePtr SurfacePtr = RenderJob.m_SurfacePtr;
+
+            // -----------------------------------------------------------------------------
+            // Set shader
+            // -----------------------------------------------------------------------------
+            ContextManager::SetShaderVS(SurfacePtr->GetShaderVS());
+
+            ContextManager::SetShaderPS(pMaterial->GetForwardShaderPS());
+
+            // -----------------------------------------------------------------------------
+            // Set textures
+            // -----------------------------------------------------------------------------
+            for (unsigned int IndexOfTexture = 0; IndexOfTexture < pMaterial->GetTextureSetPS()->GetNumberOfTextures(); ++IndexOfTexture)
+            {
+                ContextManager::SetSampler(IndexOfTexture, pMaterial->GetSamplerSetPS()->GetSampler(IndexOfTexture));
+
+                ContextManager::SetTexture(IndexOfTexture, pMaterial->GetTextureSetPS()->GetTexture(IndexOfTexture));
+            }
+
+            // -----------------------------------------------------------------------------
+            // Render
+            // -----------------------------------------------------------------------------
+            ContextManager::SetVertexBuffer(SurfacePtr->GetVertexBuffer());
+
+            ContextManager::SetIndexBuffer(SurfacePtr->GetIndexBuffer(), 0);
+
+            ContextManager::SetInputLayout(SurfacePtr->GetMVPShaderVS()->GetInputLayout());
+
+            ContextManager::DrawIndexed(SurfacePtr->GetNumberOfIndices(), 0, 0);
+        }
+
+        for (unsigned int IndexOfTexture = 0; IndexOfTexture < 16; ++IndexOfTexture)
+        {
+            ContextManager::ResetSampler(IndexOfTexture);
+
+            ContextManager::ResetTexture(IndexOfTexture);
+        }
+
+        ContextManager::ResetInputLayout();
+
+        ContextManager::ResetIndexBuffer();
+
+        ContextManager::ResetVertexBuffer();
+
+        ContextManager::ResetConstantBuffer(0);
+        ContextManager::ResetConstantBuffer(1);
+        ContextManager::ResetConstantBuffer(2);
+        ContextManager::ResetConstantBuffer(3);
+
+        ContextManager::ResetShaderVS();
+
+        ContextManager::ResetShaderDS();
+
+        ContextManager::ResetShaderHS();
+
+        ContextManager::ResetShaderGS();
+
+        ContextManager::ResetShaderPS();
+
+        ContextManager::ResetTopology();
+
+        ContextManager::ResetRasterizerState();
+
+        ContextManager::ResetDepthStencilState();
+
+        ContextManager::ResetViewPortSet();
+
+        ContextManager::ResetTargetSet();
+
+        Debug::Pop();
+
+        Performance::EndEvent();
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CGfxMeshRenderer::RenderHitProxy()
     {
         if (m_DeferredRenderJobs.size() == 0) return;
@@ -448,44 +722,51 @@ namespace
 
         ContextManager::SetTopology(STopology::TriangleList);
 
-        for (auto CurrentRenderJob : m_DeferredRenderJobs)
+        auto RenderJobs = [&](const auto _ListOfJobs)->void
         {
-            CSurfacePtr  SurfacePtr  = CurrentRenderJob.m_SurfacePtr;
+            for (auto CurrentRenderJob : _ListOfJobs)
+            {
+                CSurfacePtr  SurfacePtr = CurrentRenderJob.m_SurfacePtr;
 
-            // -----------------------------------------------------------------------------
-            // Upload data to buffer
-            // -----------------------------------------------------------------------------
-            SPerDrawCallConstantBufferVS ModelBuffer;
+                // -----------------------------------------------------------------------------
+                // Upload data to buffer
+                // -----------------------------------------------------------------------------
+                SPerDrawCallConstantBufferVS ModelBuffer;
 
-            ModelBuffer.m_ModelMatrix = CurrentRenderJob.m_ModelMatrix;
+                ModelBuffer.m_ModelMatrix = CurrentRenderJob.m_ModelMatrix;
 
-            BufferManager::UploadBufferData(m_ModelBufferPtr, &ModelBuffer);
+                BufferManager::UploadBufferData(m_ModelBufferPtr, &ModelBuffer);
 
-            SHitProxyProperties HitProxyProperties;
+                SHitProxyProperties HitProxyProperties;
 
-            HitProxyProperties.m_ID = static_cast<unsigned int>(CurrentRenderJob.m_EntityID);
+                HitProxyProperties.m_ID = static_cast<unsigned int>(CurrentRenderJob.m_EntityID);
 
-            BufferManager::UploadBufferData(m_HitProxyPassPSBufferPtr, &HitProxyProperties);
+                BufferManager::UploadBufferData(m_HitProxyPassPSBufferPtr, &HitProxyProperties);
 
-            // -----------------------------------------------------------------------------
-            // Render
-            // -----------------------------------------------------------------------------
-            ContextManager::SetShaderVS(SurfacePtr->GetShaderVS());
+                // -----------------------------------------------------------------------------
+                // Render
+                // -----------------------------------------------------------------------------
+                ContextManager::SetShaderVS(SurfacePtr->GetShaderVS());
 
-            ContextManager::SetShaderPS(m_HitProxyShaderPtr);
+                ContextManager::SetShaderPS(m_HitProxyShaderPtr);
 
-            ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
-            ContextManager::SetConstantBuffer(1, m_ModelBufferPtr);
-            ContextManager::SetConstantBuffer(2, m_HitProxyPassPSBufferPtr);
+                ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+                ContextManager::SetConstantBuffer(1, m_ModelBufferPtr);
+                ContextManager::SetConstantBuffer(2, m_HitProxyPassPSBufferPtr);
 
-            ContextManager::SetVertexBuffer(SurfacePtr->GetVertexBuffer());
+                ContextManager::SetVertexBuffer(SurfacePtr->GetVertexBuffer());
 
-            ContextManager::SetIndexBuffer(SurfacePtr->GetIndexBuffer(), 0);
+                ContextManager::SetIndexBuffer(SurfacePtr->GetIndexBuffer(), 0);
 
-            ContextManager::SetInputLayout(SurfacePtr->GetShaderVS()->GetInputLayout());
+                ContextManager::SetInputLayout(SurfacePtr->GetShaderVS()->GetInputLayout());
 
-            ContextManager::DrawIndexed(SurfacePtr->GetNumberOfIndices(), 0, 0);
-        }
+                ContextManager::DrawIndexed(SurfacePtr->GetNumberOfIndices(), 0, 0);
+            }
+        };
+        
+        RenderJobs(m_DeferredRenderJobs);
+
+        RenderJobs(m_ForwardRenderJobs);
 
         ContextManager::ResetInputLayout();
 
@@ -516,19 +797,33 @@ namespace
         // That is an sort object for sorting render jobs. They will be sorted from
         // lower number to higher number. The surface attribute is symbol for
         // complexity.
+        // In the case of forward rendering jobs we sort the jobs depending on the
+        // distance between main camera and object.
         // -----------------------------------------------------------------------------
-        struct SSortObject
+        struct SSurfaceSortObject
         {
             bool operator() (SRenderJob& _rLeft, SRenderJob& _rRight)
             {
                 return (_rLeft.m_SurfaceAttributes < _rRight.m_SurfaceAttributes);
             }
-        } SortObject;
+        } SurfaceSortObject;
+
+        struct SDistanceSortObject
+        {
+            bool operator() (SRenderJob& _rLeft, SRenderJob& _rRight)
+            {
+                glm::vec4 ViewPosition = glm::vec4(ViewManager::GetMainCamera()->GetView()->GetPosition(), 1.0f);
+
+                return (glm::distance(_rLeft.m_ModelMatrix[3], ViewPosition) > glm::distance(_rRight.m_ModelMatrix[3], ViewPosition));
+            }
+        } DistanceSortObject;
 
         // -----------------------------------------------------------------------------
         // Clear current render jobs
         // -----------------------------------------------------------------------------
         m_DeferredRenderJobs.clear();
+
+        m_ForwardRenderJobs.clear();
 
         auto DataMeshComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CMeshComponent>();
 
@@ -540,9 +835,6 @@ namespace
 
             const Dt::CEntity& rCurrentEntity = *pDtComponent->GetHostEntity();
 
-            // -----------------------------------------------------------------------------
-            // Get graphic facet
-            // -----------------------------------------------------------------------------
             if (rCurrentEntity.GetLayer() == Dt::SEntityLayer::Default)
             {
                 Gfx::CMesh* pGfxComponent = static_cast<Gfx::CMesh*>(pDtComponent->GetFacet(Dt::CMeshComponent::Graphic));
@@ -578,14 +870,167 @@ namespace
                 NewRenderJob.m_SurfaceMaterialPtr = pMaterial;
                 NewRenderJob.m_ModelMatrix        = rCurrentEntity.GetTransformationFacet()->GetWorldMatrix();
 
-                m_DeferredRenderJobs.push_back(NewRenderJob);
+                if (pMaterial->GetHasAlpha())
+                {
+                    m_ForwardRenderJobs.push_back(NewRenderJob);
+                }
+                else
+                {
+                    m_DeferredRenderJobs.push_back(NewRenderJob);
+                }
             }
         }
 
         // -----------------------------------------------------------------------------
-        // Now we order our render jobs
+        // Now we sort the render jobs
         // -----------------------------------------------------------------------------
-        std::sort(m_DeferredRenderJobs.begin(), m_DeferredRenderJobs.end(), SortObject);
+        std::sort(m_DeferredRenderJobs.begin(), m_DeferredRenderJobs.end(), SurfaceSortObject);
+
+        std::sort(m_ForwardRenderJobs.begin(), m_ForwardRenderJobs.end(), DistanceSortObject);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxMeshRenderer::UpdateLightProperties()
+    {
+        SLightProperties LightProperties[s_MaxNumberOfLights];
+        unsigned int     IndexOfLight;
+
+        // -----------------------------------------------------------------------------
+        // Clear textures
+        // -----------------------------------------------------------------------------
+        m_ForwardLightTextures.m_SpecularTexturePtr = nullptr;
+        m_ForwardLightTextures.m_DiffuseTexturePtr  = nullptr;
+
+        for (unsigned int IndexOfTexture = 0; IndexOfTexture < s_MaxNumberOfLights; ++IndexOfTexture)
+        {
+            m_ForwardLightTextures.m_ShadowTexturePtrs[IndexOfTexture] = nullptr;
+        }
+
+        // -----------------------------------------------------------------------------
+        // Initiate light properties buffer
+        // -----------------------------------------------------------------------------
+        Base::CMemory::Zero(&LightProperties, sizeof(SLightProperties) * s_MaxNumberOfLights);
+
+        // -----------------------------------------------------------------------------
+        // Fill with data
+        // -----------------------------------------------------------------------------
+        IndexOfLight = 0;
+
+        // -----------------------------------------------------------------------------
+        // Suns
+        // -----------------------------------------------------------------------------
+        auto DataComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CSunComponent>();
+
+        for (auto Component : DataComponents)
+        {
+            if (IndexOfLight == s_MaxNumberOfLights) break;
+
+            Dt::CSunComponent* pDtComponent = static_cast<Dt::CSunComponent*>(Component);
+
+            if (pDtComponent->IsActiveAndUsable() == false) continue;
+
+            Gfx::CSun* pGfxComponent = static_cast<Gfx::CSun*>(pDtComponent->GetFacet(Dt::CSunComponent::Graphic));
+
+            float HasShadows = 1.0f;
+
+            LightProperties[IndexOfLight].m_LightType           = 1;
+            LightProperties[IndexOfLight].m_LightViewProjection = pGfxComponent->GetCamera()->GetViewProjectionMatrix();
+            LightProperties[IndexOfLight].m_LightDirection      = glm::normalize(glm::vec4(pDtComponent->GetDirection(), 0.0f));
+            LightProperties[IndexOfLight].m_LightColor          = glm::vec4(pDtComponent->GetLightness(), 1.0f);
+            LightProperties[IndexOfLight].m_LightSettings       = glm::vec4(pDtComponent->GetSunAngularRadius(), 0.0f, 0.0f, HasShadows);
+
+            // -----------------------------------------------------------------------------
+
+            m_ForwardLightTextures.m_ShadowTexturePtrs[IndexOfLight] = pGfxComponent->GetShadowMapPtr();
+
+            // -----------------------------------------------------------------------------
+
+            ++IndexOfLight;
+        }
+
+        // -----------------------------------------------------------------------------
+        // Point lights
+        // -----------------------------------------------------------------------------
+        DataComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CPointLightComponent>();
+
+        for (auto Component : DataComponents)
+        {
+            if (IndexOfLight == s_MaxNumberOfLights) break;
+
+            Dt::CPointLightComponent* pDtComponent = static_cast<Dt::CPointLightComponent*>(Component);
+
+            if (pDtComponent->IsActiveAndUsable() == false) continue;
+
+            Gfx::CPointLight* pGfxComponent = static_cast<Gfx::CPointLight*>(pDtComponent->GetFacet(Dt::CPointLightComponent::Graphic));
+
+            float InvSqrAttenuationRadius = pDtComponent->GetReciprocalSquaredAttenuationRadius();
+            float AngleScale              = pDtComponent->GetAngleScale();
+            float AngleOffset             = pDtComponent->GetAngleOffset();
+            float HasShadows              = pDtComponent->GetShadowType() != Dt::CPointLightComponent::NoShadows ? 1.0f : 0.0f;
+
+            LightProperties[IndexOfLight].m_LightType      = 2;
+            LightProperties[IndexOfLight].m_LightPosition  = glm::vec4(pDtComponent->GetHostEntity()->GetWorldPosition(), 1.0f);
+            LightProperties[IndexOfLight].m_LightDirection = glm::normalize(glm::vec4(pDtComponent->GetDirection(), 0.0f));
+            LightProperties[IndexOfLight].m_LightColor     = glm::vec4(pDtComponent->GetLightness(), 1.0f);
+            LightProperties[IndexOfLight].m_LightSettings  = glm::vec4(InvSqrAttenuationRadius, AngleScale, AngleOffset, HasShadows);
+
+            LightProperties[IndexOfLight].m_LightViewProjection = glm::mat4(1.0f);
+
+            if (pDtComponent->GetShadowType() != Dt::CPointLightComponent::NoShadows)
+            {
+                assert(pGfxComponent->GetCamera().IsValid());
+
+                LightProperties[IndexOfLight].m_LightViewProjection = pGfxComponent->GetCamera()->GetViewProjectionMatrix();
+            }
+
+            // -----------------------------------------------------------------------------
+
+            if (pDtComponent->GetShadowType() != Dt::CPointLightComponent::NoShadows)
+            {
+                m_ForwardLightTextures.m_ShadowTexturePtrs[IndexOfLight] = pGfxComponent->GetTextureSMSet()->GetTexture(0);
+            }
+
+            // -----------------------------------------------------------------------------
+
+            ++IndexOfLight;
+        }
+
+        // -----------------------------------------------------------------------------
+        // Light probe
+        // -----------------------------------------------------------------------------
+        DataComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CLightProbeComponent>();
+
+        for (auto Component : DataComponents)
+        {
+            if (IndexOfLight == s_MaxNumberOfLights) break;
+
+            Dt::CLightProbeComponent* pDtComponent = static_cast<Dt::CLightProbeComponent*>(Component);
+
+            if (pDtComponent->IsActiveAndUsable() == false) continue;
+
+            Gfx::CLightProbe* pGfxComponent = static_cast<Gfx::CLightProbe*>(pDtComponent->GetFacet(Dt::CLightProbeComponent::Graphic));
+
+            LightProperties[IndexOfLight].m_LightType      = 3;
+            LightProperties[IndexOfLight].m_LightPosition  = glm::vec4(pDtComponent->GetHostEntity()->GetWorldPosition(), 1.0f);
+            LightProperties[IndexOfLight].m_LightDirection = glm::vec4(0.0f);
+            LightProperties[IndexOfLight].m_LightColor     = glm::vec4(0.0f);
+            LightProperties[IndexOfLight].m_LightSettings  = glm::vec4(static_cast<float>(pGfxComponent->GetSpecularPtr()->GetNumberOfMipLevels() - 1), 0.0f, 0.0f, 0.0f);
+
+            LightProperties[IndexOfLight].m_LightViewProjection = glm::mat4(1.0f);
+
+            m_ForwardLightTextures.m_SpecularTexturePtr = pGfxComponent->GetSpecularPtr();
+            m_ForwardLightTextures.m_DiffuseTexturePtr  = pGfxComponent->GetDiffusePtr();
+
+            ++IndexOfLight;
+        }
+
+        BufferManager::UploadBufferData(m_LightPropertiesBufferPtr, &LightProperties);
+
+
+        // TODO by tschwandt (2018/06/14)
+        // 1. There is no check included if the light has an effect on the object!
+        // 2. Area lights are not supported!
     }
 } // namespace
 
@@ -702,6 +1147,13 @@ namespace MeshRenderer
     void Render()
     {
         CGfxMeshRenderer::GetInstance().Render();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void RenderForward()
+    {
+        CGfxMeshRenderer::GetInstance().RenderForward();
     }
 
     // -----------------------------------------------------------------------------

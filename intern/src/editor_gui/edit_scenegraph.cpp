@@ -157,6 +157,11 @@ namespace Edit
         pNewItem->setText(0, QString(EntityName.c_str()));
 
         // -----------------------------------------------------------------------------
+        // Parent
+        // -----------------------------------------------------------------------------
+        pNewItem->setText(2, "0");
+
+        // -----------------------------------------------------------------------------
         // Hierarchy
         // -----------------------------------------------------------------------------
         bool HasHierachy = _rMessage.Get<bool>();
@@ -167,9 +172,9 @@ namespace Edit
 
             if (HasParent)
             {
-                Base::ID ParentID = _rMessage.Get<Base::ID>();
+                pNewItem->setText(2, QString::number(_rMessage.Get<Base::ID>()));
 
-                QList<QTreeWidgetItem*> ListOfEntities = findItems(QString::number(ParentID), Qt::MatchContains | Qt::MatchRecursive, 1);
+                QList<QTreeWidgetItem*> ListOfEntities = findItems(pNewItem->text(2), Qt::MatchContains | Qt::MatchRecursive, 1);
 
                 if (ListOfEntities.size() > 0)
                 {
@@ -177,7 +182,7 @@ namespace Edit
                 }
                 else
                 {
-                    addTopLevelItem(pNewItem);
+                    m_UnfoundChildItems.push_back(pNewItem);
                 }
             }
             else
@@ -188,6 +193,25 @@ namespace Edit
         else
         {
             addTopLevelItem(pNewItem);
+        }
+
+        // -----------------------------------------------------------------------------
+        // Try to find unfound items
+        // -----------------------------------------------------------------------------
+        for (auto pItemIterator = m_UnfoundChildItems.begin(); pItemIterator != m_UnfoundChildItems.end(); )
+        {
+            QList<QTreeWidgetItem*> ListOfEntities = findItems((*pItemIterator)->text(2), Qt::MatchContains | Qt::MatchRecursive, 1);
+
+            if (ListOfEntities.size() > 0)
+            {
+                ListOfEntities[0]->addChild((*pItemIterator));
+
+                pItemIterator = m_UnfoundChildItems.erase(pItemIterator);
+            }
+            else
+            {
+                ++pItemIterator;
+            }
         }
 
         // -----------------------------------------------------------------------------

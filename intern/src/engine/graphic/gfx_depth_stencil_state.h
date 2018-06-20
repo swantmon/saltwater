@@ -17,6 +17,7 @@ namespace Gfx
             NoDepth,
             EqualDepth,
             LessEqualDepth,
+            NoWriteDepth,
             NumberOfStates,
             UndefinedState = -1,
         };

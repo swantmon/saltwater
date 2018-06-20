@@ -70,17 +70,17 @@ namespace
 
         struct SSunLightProperties
         {
-            glm::mat4 m_LightViewProjection;
-            glm::vec4   m_LightDirection;
-            glm::vec4   m_LightColor;
-            float          m_SunAngularRadius;
-            unsigned int   m_ExposureHistoryIndex;
+            glm::mat4    m_LightViewProjection;
+            glm::vec4    m_LightDirection;
+            glm::vec4    m_LightColor;
+            float        m_SunAngularRadius;
+            unsigned int m_ExposureHistoryIndex;
         };
 
         struct SRenderJob
         {
-            Dt::CSunComponent*  m_pDataSunLightFacet;
-            Gfx::CSun* m_pGraphicSunLightFacet;
+            Dt::CSunComponent* m_pDataSunLightFacet;
+            Gfx::CSun*         m_pGraphicSunLightFacet;
         };
 
     private:
@@ -89,11 +89,10 @@ namespace
         
     private:
         
-        CBufferPtr        m_SunLightPSBufferPtr;
-        CShaderPtr        m_RectangleShaderVSPtr;
-        CShaderPtr        m_SunLightShaderPSPtr;
-        CRenderContextPtr m_LightRenderContextPtr;
-        CRenderJobs       m_RenderJobs;
+        CBufferPtr  m_SunLightPSBufferPtr;
+        CShaderPtr  m_RectangleShaderVSPtr;
+        CShaderPtr  m_SunLightShaderPSPtr;
+        CRenderJobs m_RenderJobs;
 
     private:
 
@@ -107,8 +106,7 @@ namespace
         : m_SunLightPSBufferPtr    ()
         , m_SunLightShaderPSPtr    ()
         , m_RectangleShaderVSPtr   ()
-        , m_LightRenderContextPtr  ()
-        , m_RenderJobs		       ()
+        , m_RenderJobs             ()
     {
         m_RenderJobs.reserve(4);
     }
@@ -130,19 +128,18 @@ namespace
     
     void CGfxLightSunRenderer::OnExit()
     {
-        m_SunLightPSBufferPtr   = 0;
-        m_SunLightShaderPSPtr   = 0;
-        m_RectangleShaderVSPtr  = 0;
-        m_LightRenderContextPtr = 0;
+        m_SunLightPSBufferPtr  = 0;
+        m_SunLightShaderPSPtr  = 0;
+        m_RectangleShaderVSPtr = 0;
     }
     
     // -----------------------------------------------------------------------------
     
     void CGfxLightSunRenderer::OnSetupShader()
     {       
-        m_RectangleShaderVSPtr = ShaderManager::CompileVS("vs_fullscreen.glsl", "main");
+        m_RectangleShaderVSPtr = ShaderManager::CompileVS("system/vs_fullscreen.glsl", "main");
         
-        m_SunLightShaderPSPtr  = ShaderManager::CompilePS("fs_light_sunlight.glsl", "main");
+        m_SunLightShaderPSPtr  = ShaderManager::CompilePS("sun_light/fs_light_sunlight.glsl", "main");
     }
     
     // -----------------------------------------------------------------------------
@@ -163,19 +160,6 @@ namespace
     
     void CGfxLightSunRenderer::OnSetupStates()
     {
-        CCameraPtr      QuadCameraPtr  = ViewManager     ::GetFullQuadCamera();
-        CViewPortSetPtr ViewPortSetPtr = ViewManager     ::GetViewPortSet();
-        CRenderStatePtr LightStatePtr  = StateManager    ::GetRenderState(CRenderState::AdditionBlend);
-        CTargetSetPtr   TargetSetPtr   = TargetSetManager::GetLightAccumulationTargetSet();
-       
-        // -----------------------------------------------------------------------------
-
-        m_LightRenderContextPtr = ContextManager::CreateRenderContext();
-
-        m_LightRenderContextPtr->SetCamera(QuadCameraPtr);
-        m_LightRenderContextPtr->SetViewPortSet(ViewPortSetPtr);
-        m_LightRenderContextPtr->SetTargetSet(TargetSetPtr);
-        m_LightRenderContextPtr->SetRenderState(LightStatePtr);
     }
     
     // -----------------------------------------------------------------------------
@@ -259,9 +243,15 @@ namespace
         // -----------------------------------------------------------------------------
         // Rendering
         // -----------------------------------------------------------------------------
-        
+        ContextManager::SetTargetSet(TargetSetManager::GetLightAccumulationTargetSet());
 
-        ContextManager::SetRenderContext(m_LightRenderContextPtr);
+        ContextManager::SetViewPortSet(ViewManager::GetViewPortSet());
+
+        ContextManager::SetBlendState(StateManager::GetBlendState(CBlendState::AdditionBlend));
+
+        ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::NoDepth));
+
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
 
         ContextManager::SetTopology(STopology::TriangleList);
 

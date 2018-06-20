@@ -24,6 +24,7 @@
 
 #include "engine/graphic/gfx_buffer_manager.h"
 #include "engine/graphic/gfx_context_manager.h"
+#include "engine/graphic/gfx_debug.h"
 #include "engine/graphic/gfx_histogram_renderer.h"
 #include "engine/graphic/gfx_light_probe.h"
 #include "engine/graphic/gfx_light_probe_manager.h"
@@ -264,17 +265,17 @@ namespace
         // -----------------------------------------------------------------------------
         // Shader
         // -----------------------------------------------------------------------------
-        m_FilteringVSPtr = ShaderManager::CompileVS("vs_lightprobe_sampling.glsl", "main");
+        m_FilteringVSPtr = ShaderManager::CompileVS("light_probe/vs_lightprobe_sampling.glsl", "main");
 
-        m_FilteringDiffusePSPtr = ShaderManager::CompilePS("fs_lightprobe_diffuse_sampling.glsl", "main");
+        m_FilteringDiffusePSPtr = ShaderManager::CompilePS("light_probe/fs_lightprobe_diffuse_sampling.glsl", "main");
 
-        m_FilteringSpecularPSPtr = ShaderManager::CompilePS("fs_lightprobe_specular_sampling.glsl", "main");
+        m_FilteringSpecularPSPtr = ShaderManager::CompilePS("light_probe/fs_lightprobe_specular_sampling.glsl", "main");
 
-        m_CubemapGSPtr = ShaderManager::CompileGS("gs_lightprobe_sampling.glsl", "main");
+        m_CubemapGSPtr = ShaderManager::CompileGS("light_probe/gs_lightprobe_sampling.glsl", "main");
 
-        m_CubemapVSPtr = ShaderManager::CompileVS("vs_p3.glsl", "main");
+        m_CubemapVSPtr = ShaderManager::CompileVS("light_probe/vs_p3.glsl", "main");
 
-        m_CubemapPSPtr = ShaderManager::CompilePS("fs_lightprobe.glsl", "main");
+        m_CubemapPSPtr = ShaderManager::CompilePS("light_probe/fs_lightprobe.glsl", "main");
 
         // -----------------------------------------------------------------------------
         // Buffer
@@ -817,6 +818,8 @@ namespace
     {
         Performance::BeginEvent("Render Entities");
 
+        Debug::Push(131222);
+
         // -----------------------------------------------------------------------------
         // Prepare renderer
         // -----------------------------------------------------------------------------
@@ -854,31 +857,31 @@ namespace
         // -----------------------------------------------------------------------------
         // Bind shadow and reflection textures
         // -----------------------------------------------------------------------------
-        ContextManager::SetSampler(6, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+        ContextManager::SetSampler(7, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
-        ContextManager::SetTexture(6, ReflectionRenderer::GetBRDF());
+        ContextManager::SetTexture(7, ReflectionRenderer::GetBRDF());
 
         if (m_LightJob.m_SpecularTexturePtr != 0)
         {
-            ContextManager::SetSampler(7, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+            ContextManager::SetSampler(8, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
-            ContextManager::SetTexture(7, m_LightJob.m_SpecularTexturePtr);
+            ContextManager::SetTexture(8, m_LightJob.m_SpecularTexturePtr);
         }
 
         if (m_LightJob.m_DiffuseTexturePtr != 0)
         {
-            ContextManager::SetSampler(8, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+            ContextManager::SetSampler(9, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
-            ContextManager::SetTexture(8, m_LightJob.m_DiffuseTexturePtr);
+            ContextManager::SetTexture(9, m_LightJob.m_DiffuseTexturePtr);
         }
 
         for (unsigned int IndexOfTexture = 0; IndexOfTexture < s_MaxNumberOfLightsPerProbe; ++IndexOfTexture)
         {
             if (m_LightJob.m_ShadowTexturePtrs[IndexOfTexture] != 0)
             {
-                ContextManager::SetSampler(9 + IndexOfTexture, SamplerManager::GetSampler(CSampler::MinMagLinearMipPointClamp));
+                ContextManager::SetSampler(10 + IndexOfTexture, SamplerManager::GetSampler(CSampler::PCF));
 
-                ContextManager::SetTexture(9 + IndexOfTexture, m_LightJob.m_ShadowTexturePtrs[IndexOfTexture]);
+                ContextManager::SetTexture(10 + IndexOfTexture, m_LightJob.m_ShadowTexturePtrs[IndexOfTexture]);
             }
         }
 
@@ -1007,6 +1010,8 @@ namespace
         ContextManager::ResetViewPortSet();
 
         ContextManager::ResetTargetSet();
+
+        Debug::Pop();
 
         Performance::EndEvent();
     }
@@ -1179,7 +1184,7 @@ namespace
 
         for (unsigned int IndexOfTexture = 0; IndexOfTexture < s_MaxNumberOfLightsPerProbe; ++IndexOfTexture)
         {
-            m_LightJob.m_ShadowTexturePtrs[IndexOfTexture];
+            m_LightJob.m_ShadowTexturePtrs[IndexOfTexture] = 0;
         }
 
         // -----------------------------------------------------------------------------
@@ -1217,14 +1222,13 @@ namespace
 
             Gfx::CSun* pGfxComponent = static_cast<Gfx::CSun*>(pDtComponent->GetFacet(Dt::CSunComponent::Graphic));
 
-            float SunAngularRadius = 0.27f * glm::pi<float>() / 180.0f;
-            float HasShadows       = 1.0f;
+            float HasShadows = 1.0f;
 
             LightBuffer[IndexOfLight].m_LightType           = 1;
             LightBuffer[IndexOfLight].m_LightViewProjection = pGfxComponent->GetCamera()->GetViewProjectionMatrix();
             LightBuffer[IndexOfLight].m_LightDirection      = glm::normalize(glm::vec4(pDtComponent->GetDirection(), 0.0f));
             LightBuffer[IndexOfLight].m_LightColor          = glm::vec4(pDtComponent->GetLightness(), 1.0f);
-            LightBuffer[IndexOfLight].m_LightSettings       = glm::vec4(SunAngularRadius, 0.0f, 0.0f, HasShadows);
+            LightBuffer[IndexOfLight].m_LightSettings       = glm::vec4(pDtComponent->GetSunAngularRadius(), 0.0f, 0.0f, HasShadows);
 
             // -----------------------------------------------------------------------------
 

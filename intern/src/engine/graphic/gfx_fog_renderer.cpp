@@ -88,25 +88,25 @@ namespace
 
         struct SSunLightProperties
         {
-            glm::mat4 m_LightViewProjection;
-            glm::vec4   m_LightDirection;
-            glm::vec4   m_LightColor;
-            float          m_SunAngularRadius;
-            unsigned int   m_ExposureHistoryIndex;
-            float          m_Padding[2];
+            glm::mat4    m_LightViewProjection;
+            glm::vec4    m_LightDirection;
+            glm::vec4    m_LightColor;
+            float        m_SunAngularRadius;
+            unsigned int m_ExposureHistoryIndex;
+            float        m_Padding[2];
         };
 
         struct SVolumeLightingProperties
         {
             glm::vec4 m_WindDirection;
             glm::vec4 m_FogColor;
-            float        m_FrustumDepthInMeter;
-            float        m_ShadowIntensity;
-            float        m_VolumetricFogScatteringCoefficient;
-            float        m_VolumetricFogAbsorptionCoefficient;
-            float        m_DensityLevel;
-            float        m_DensityAttenuation;
-            float        m_Padding[2];
+            float     m_FrustumDepthInMeter;
+            float     m_ShadowIntensity;
+            float     m_VolumetricFogScatteringCoefficient;
+            float     m_VolumetricFogAbsorptionCoefficient;
+            float     m_DensityLevel;
+            float     m_DensityAttenuation;
+            float     m_Padding[2];
         };
 
         struct SFogApplyProperties
@@ -120,15 +120,14 @@ namespace
         
     private:
         
-        CBufferSetPtr     m_VolumeLightingCSBufferSetPtr;
-        CShaderPtr        m_RectangleShaderVSPtr;
-        CShaderPtr        m_ESMCSPtr;
-        CShaderPtr        m_VolumeLightingCSPtr;
-        CShaderPtr        m_VolumeScatteringCSPtr;
-        CShaderPtr        m_ApplyPSPtr;
-        CRenderContextPtr m_LightRenderContextPtr;
-        CTexturePtr       m_ESMTexturePtr;
-        CTextureSetPtr    m_ESMTextureSetPtr;
+        CBufferSetPtr  m_VolumeLightingCSBufferSetPtr;
+        CShaderPtr     m_RectangleShaderVSPtr;
+        CShaderPtr     m_ESMCSPtr;
+        CShaderPtr     m_VolumeLightingCSPtr;
+        CShaderPtr     m_VolumeScatteringCSPtr;
+        CShaderPtr     m_ApplyPSPtr;
+        CTexturePtr    m_ESMTexturePtr;
+        CTextureSetPtr m_ESMTextureSetPtr;
 
         CTexturePtr     m_VolumeTexturePtr;
         CTextureSetPtr    m_VolumeTextureSetPtr;
@@ -167,7 +166,6 @@ namespace
         , m_VolumeLightingCSPtr                 ()
         , m_VolumeScatteringCSPtr               ()
         , m_ApplyPSPtr                          ()
-        , m_LightRenderContextPtr               ()
         , m_ESMTexturePtr                       ()
         , m_ESMTextureSetPtr                    ()
         , m_VolumeTexturePtr                    ()
@@ -208,7 +206,6 @@ namespace
         m_VolumeLightingCSPtr           = 0;
         m_VolumeScatteringCSPtr         = 0;
         m_ApplyPSPtr                    = 0;
-        m_LightRenderContextPtr         = 0;
         m_ESMTexturePtr                 = 0;
         m_ESMTextureSetPtr              = 0;
         m_VolumeTexturePtr              = 0;
@@ -231,12 +228,13 @@ namespace
     
     void CGfxFogRenderer::OnSetupShader()
     {       
-        m_RectangleShaderVSPtr  = ShaderManager::CompileVS("vs_fullscreen.glsl", "main");
-        m_ESMCSPtr              = ShaderManager::CompileCS("cs_esm.glsl", "main");  
-        m_VolumeLightingCSPtr   = ShaderManager::CompileCS("cs_volume_lighting.glsl", "main");
-        m_VolumeScatteringCSPtr = ShaderManager::CompileCS("cs_volume_scattering.glsl", "main");  
-        m_ApplyPSPtr            = ShaderManager::CompilePS("fs_fog_apply.glsl", "main");  
-        m_GaussianBlurShaderPtr = ShaderManager::CompileCS("cs_gaussian_blur.glsl", "main", "#define TILE_SIZE 8\n#define IMAGE_TYPE r32f");
+        m_RectangleShaderVSPtr  = ShaderManager::CompileVS("system/vs_fullscreen.glsl", "main");
+        m_ESMCSPtr              = ShaderManager::CompileCS("fog/cs_esm.glsl", "main");  
+        m_VolumeLightingCSPtr   = ShaderManager::CompileCS("fog/cs_volume_lighting.glsl", "main");
+        m_VolumeScatteringCSPtr = ShaderManager::CompileCS("fog/cs_volume_scattering.glsl", "main");  
+        m_ApplyPSPtr            = ShaderManager::CompilePS("fog/fs_fog_apply.glsl", "main");
+
+        m_GaussianBlurShaderPtr = ShaderManager::CompileCS("filter/cs_gaussian_blur.glsl", "main", "#define TILE_SIZE 8\n#define IMAGE_TYPE r32f");
     }
     
     // -----------------------------------------------------------------------------
@@ -257,19 +255,6 @@ namespace
     
     void CGfxFogRenderer::OnSetupStates()
     {
-        CCameraPtr      QuadCameraPtr  = ViewManager     ::GetFullQuadCamera();
-        CViewPortSetPtr ViewPortSetPtr = ViewManager     ::GetViewPortSet();
-        CRenderStatePtr LightStatePtr  = StateManager    ::GetRenderState(CRenderState::AdditionBlend);
-        CTargetSetPtr   TargetSetPtr   = TargetSetManager::GetLightAccumulationTargetSet();
-       
-        // -----------------------------------------------------------------------------
-
-        m_LightRenderContextPtr = ContextManager::CreateRenderContext();
-
-        m_LightRenderContextPtr->SetCamera(QuadCameraPtr);
-        m_LightRenderContextPtr->SetViewPortSet(ViewPortSetPtr);
-        m_LightRenderContextPtr->SetTargetSet(TargetSetPtr);
-        m_LightRenderContextPtr->SetRenderState(LightStatePtr);
     }
     
     // -----------------------------------------------------------------------------
@@ -706,7 +691,7 @@ namespace
         LightBuffer.m_LightViewProjection  = pGfxSunComponent->GetCamera()->GetViewProjectionMatrix();
         LightBuffer.m_LightDirection       = glm::normalize(glm::vec4(pDtSunComponent->GetDirection(), 0.0f));
         LightBuffer.m_LightColor           = glm::vec4(pDtSunComponent->GetLightness(), 1.0f);
-        LightBuffer.m_SunAngularRadius     = 0.27f * glm::pi<float>() / 180.0f;
+        LightBuffer.m_SunAngularRadius     = pDtSunComponent->GetSunAngularRadius();
         LightBuffer.m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
 
         BufferManager::UploadBufferData(m_VolumeLightingCSBufferSetPtr->GetBuffer(0), &LightBuffer);
@@ -829,9 +814,15 @@ namespace
         // -----------------------------------------------------------------------------
         // Rendering
         // -----------------------------------------------------------------------------
-        
+        ContextManager::SetTargetSet(TargetSetManager::GetLightAccumulationTargetSet());
 
-        ContextManager::SetRenderContext(m_LightRenderContextPtr);
+        ContextManager::SetViewPortSet(ViewManager::GetViewPortSet());
+
+        ContextManager::SetBlendState(StateManager::GetBlendState(CBlendState::AdditionBlend));
+
+        ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::NoDepth));
+
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
 
         ContextManager::SetTopology(STopology::TriangleList);
 

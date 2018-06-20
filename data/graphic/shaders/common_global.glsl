@@ -34,5 +34,6 @@ layout(std140, binding = 0) uniform UB0
 
 #define g_FrameNumber    g_FrameParameters0.x
 #define g_FrameDeltaTime g_FrameParameters0.y
+#define g_Time           g_FrameParameters0.z
 
 #endif // __INCLUDE_COMMON_GLOBAL_GLSL__

@@ -232,39 +232,39 @@ namespace
         CShaderPtr ShaderVSPtr;
         CShaderPtr ShaderPSPtr;
         
-        ShaderVSPtr = ShaderManager::CompileVS("vs_liquid_particle.glsl", "main");
+        ShaderVSPtr = ShaderManager::CompileVS("particle/vs_liquid_particle.glsl", "main");
         
-        ShaderPSPtr = ShaderManager::CompilePS("fs_liquid_depth.glsl", "main");
+        ShaderPSPtr = ShaderManager::CompilePS("particle/fs_liquid_depth.glsl", "main");
         
         m_LiquidShaderVSPtrs[Depth] = ShaderVSPtr;
         m_LiquidShaderPSPtrs[Depth] = ShaderPSPtr;
         
         // -----------------------------------------------------------------------------
         
-        ShaderPSPtr = ShaderManager::CompilePS("fs_liquid_thickness.glsl", "main");
+        ShaderPSPtr = ShaderManager::CompilePS("particle/fs_liquid_thickness.glsl", "main");
         
         m_LiquidShaderVSPtrs[Thickness] = ShaderVSPtr;
         m_LiquidShaderPSPtrs[Thickness] = ShaderPSPtr;
         
         // -----------------------------------------------------------------------------
         
-        ShaderVSPtr = ShaderManager::CompileVS("vs_fullscreen.glsl", "main");
+        ShaderVSPtr = ShaderManager::CompileVS("system/vs_fullscreen.glsl", "main");
         
-        ShaderPSPtr = ShaderManager::CompilePS("fs_bilateral_blur.glsl", "main");
+        ShaderPSPtr = ShaderManager::CompilePS("filter/fs_bilateral_blur.glsl", "main");
         
         m_LiquidShaderVSPtrs[BilateralBlur] = ShaderVSPtr;
         m_LiquidShaderPSPtrs[BilateralBlur] = ShaderPSPtr;
         
         // -----------------------------------------------------------------------------
         
-        ShaderPSPtr = ShaderManager::CompilePS("fs_gaussian_blur.glsl", "main");
+        ShaderPSPtr = ShaderManager::CompilePS("filter/fs_gaussian_blur.glsl", "main");
         
         m_LiquidShaderVSPtrs[GaussianBlur] = ShaderVSPtr;
         m_LiquidShaderPSPtrs[GaussianBlur] = ShaderPSPtr;
         
         // -----------------------------------------------------------------------------
         
-        ShaderPSPtr = ShaderManager::CompilePS("fs_liquid_shading.glsl", "main");
+        ShaderPSPtr = ShaderManager::CompilePS("particle/fs_liquid_shading.glsl", "main");
         
         m_LiquidShaderVSPtrs[Shading] = ShaderVSPtr;
         m_LiquidShaderPSPtrs[Shading] = ShaderPSPtr;

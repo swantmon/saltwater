@@ -219,12 +219,12 @@ namespace
     
     void CGfxShadowRenderer::OnSetupShader()
     {
-        m_FullquadShaderVSPtr = ShaderManager::CompileVS("vs_fullscreen.glsl", "main");
+        m_FullquadShaderVSPtr = ShaderManager::CompileVS("system/vs_fullscreen.glsl", "main");
 
-        m_SSAOShaderPSPtrs[SSAO]      = ShaderManager::CompilePS("fs_ssao.glsl"      , "main");
-        m_SSAOShaderPSPtrs[SSAOApply] = ShaderManager::CompilePS("fs_ssao_apply.glsl", "main");
+        m_SSAOShaderPSPtrs[SSAO]      = ShaderManager::CompilePS("ssao/fs_ssao.glsl"      , "main");
+        m_SSAOShaderPSPtrs[SSAOApply] = ShaderManager::CompilePS("ssao/fs_ssao_apply.glsl", "main");
 
-        m_GaussianBlurShaderCSPtr = ShaderManager::CompileCS("cs_gaussian_blur.glsl", "main", "#define TILE_SIZE 8\n#define IMAGE_TYPE rgba8");
+        m_GaussianBlurShaderCSPtr = ShaderManager::CompileCS("filter/cs_gaussian_blur.glsl", "main", "#define TILE_SIZE 8\n#define IMAGE_TYPE rgba8");
     }
     
     // -----------------------------------------------------------------------------
