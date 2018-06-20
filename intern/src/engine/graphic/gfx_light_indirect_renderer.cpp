@@ -7,6 +7,7 @@
 #include "engine/camera/cam_control_manager.h"
 
 #include "engine/core/core_console.h"
+#include "engine/core/core_program_parameters.h"
 
 #include "engine/data/data_component.h"
 #include "engine/data/data_component_facet.h"
@@ -18,7 +19,7 @@
 #include "engine/graphic/gfx_buffer_manager.h"
 #include "engine/graphic/gfx_context_manager.h"
 #include "engine/graphic/gfx_histogram_renderer.h"
-#include "engine/graphic/gfx_light_sun_renderer.h"
+#include "engine/graphic/gfx_light_indirect_renderer.h"
 #include "engine/graphic/gfx_main.h"
 #include "engine/graphic/gfx_mesh_manager.h"
 #include "engine/graphic/gfx_performance.h"
@@ -64,6 +65,10 @@ namespace
         
         void Update();
         void Render();
+
+        void ResetSettings();
+        void SetSettings(const SIndirectLightSettings& _rSettings);
+        const SIndirectLightSettings& GetSettings();
         
     private:
 
@@ -89,6 +94,8 @@ namespace
         CShaderPtr  m_IndirectLightShaderPSPtr;
         CRenderJobs m_RenderJobs;
 
+        SIndirectLightSettings m_IndirectLightSettings;
+
     private:
 
         void BuildRenderJobs();
@@ -101,7 +108,7 @@ namespace
         : m_IndirectLightPSBufferPtr()
         , m_IndirectLightShaderPSPtr()
         , m_RectangleShaderVSPtr    ()
-        , m_RenderJobs		        ()
+        , m_RenderJobs              ()
     {
         m_RenderJobs.reserve(4);
     }
@@ -117,6 +124,7 @@ namespace
     
     void CGfxLightIndirectRenderer::OnStart()
     {
+        ResetSettings();
     }
     
     // -----------------------------------------------------------------------------
@@ -285,9 +293,9 @@ namespace
         CRenderJobs::const_iterator CurrentRenderJob = m_RenderJobs.begin();
         CRenderJobs::const_iterator EndOfRenderJobs  = m_RenderJobs.end();
 
-        for (; CurrentRenderJob != EndOfRenderJobs; ++CurrentRenderJob)
+        for (auto CurrentRenderJob : m_RenderJobs)
         {
-            Gfx::CPointLight* pGfxPointLight = CurrentRenderJob->m_pGraphicPointLightFacet;
+            Gfx::CPointLight* pGfxPointLight = CurrentRenderJob.m_pGraphicPointLightFacet;
 
             assert(pGfxPointLight != nullptr);
 
@@ -299,17 +307,16 @@ namespace
             Gfx::ContextManager::SetTexture(6, pGfxPointLight->GetTextureRSMSet()->GetTexture(2));
             Gfx::ContextManager::SetTexture(7, pGfxPointLight->GetTextureRSMSet()->GetTexture(3));
 
-            unsigned int HeightOfShadowmap = static_cast<unsigned int>(pGfxPointLight->GetShadowmapSize()) / 8;
-            unsigned int WidthOfShadowmap  = static_cast<unsigned int>(pGfxPointLight->GetShadowmapSize()) / 8;
+            unsigned int HeightOfShadowmap = pGfxPointLight->GetShadowmapSize() / static_cast<unsigned int>(m_IndirectLightSettings.m_RSMSplitting);
 
-            for (unsigned int IndexOfRSMDataY = 0; IndexOfRSMDataY < HeightOfShadowmap; ++IndexOfRSMDataY)
+            for (int IndexOfRSMDataY = 0; IndexOfRSMDataY < HeightOfShadowmap; ++IndexOfRSMDataY)
             {
                 // -----------------------------------------------------------------------------
                 // Upload buffer data
                 // -----------------------------------------------------------------------------
                 SIndirectLightProperties IndirectLightBuffer;
 
-                float SSWidthOfShadowmap = static_cast<float>(WidthOfShadowmap);
+                float SSWidthOfShadowmap = static_cast<float>(HeightOfShadowmap);
 
                 IndirectLightBuffer.m_RSMSettings[0] = 1.0f / SSWidthOfShadowmap;
                 IndirectLightBuffer.m_RSMSettings[1] = static_cast<float>(IndexOfRSMDataY) * 1.0f / SSWidthOfShadowmap;
@@ -362,6 +369,31 @@ namespace
         ContextManager::ResetRenderContext();
 
         Performance::EndEvent();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxLightIndirectRenderer::ResetSettings()
+    {
+        SIndirectLightSettings Settings;
+
+        Settings.m_RSMSplitting = Core::CProgramParameters::GetInstance().Get("graphics:indirect_light:RSM_splitting", 8.0f);
+
+        SetSettings(Settings);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxLightIndirectRenderer::SetSettings(const SIndirectLightSettings& _rSettings)
+    {
+        m_IndirectLightSettings = _rSettings;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const SIndirectLightSettings& CGfxLightIndirectRenderer::GetSettings()
+    {
+        return m_IndirectLightSettings;
     }
 
     // -----------------------------------------------------------------------------
@@ -504,6 +536,27 @@ namespace LightIndirectRenderer
     void Render()
     {
         CGfxLightIndirectRenderer::GetInstance().Render();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void ResetSettings()
+    {
+        CGfxLightIndirectRenderer::GetInstance().ResetSettings();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void SetSettings(const SIndirectLightSettings& _rSettings)
+    {
+        CGfxLightIndirectRenderer::GetInstance().SetSettings(_rSettings);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const SIndirectLightSettings& GetSettings()
+    {
+        return CGfxLightIndirectRenderer::GetInstance().GetSettings();
     }
 } // namespace LightIndirectRenderer
 } // namespace Gfx

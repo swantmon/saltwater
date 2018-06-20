@@ -1,6 +1,6 @@
 
-#ifndef __INCLUDE_VS_SPHERICAL_ENV_CUBEMAP_GENERATION_GLSL__
-#define __INCLUDE_VS_SPHERICAL_ENV_CUBEMAP_GENERATION_GLSL__
+#ifndef __INCLUDE_VS_CUBEMAP_GENERATION_GLSL__
+#define __INCLUDE_VS_CUBEMAP_GENERATION_GLSL__
 
 // -----------------------------------------------------------------------------
 // Built-In variables
