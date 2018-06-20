@@ -293,9 +293,9 @@ namespace
         CRenderJobs::const_iterator CurrentRenderJob = m_RenderJobs.begin();
         CRenderJobs::const_iterator EndOfRenderJobs  = m_RenderJobs.end();
 
-        for (auto CurrentRenderJob : m_RenderJobs)
+        for (auto& rCurrentRenderJob : m_RenderJobs)
         {
-            Gfx::CPointLight* pGfxPointLight = CurrentRenderJob.m_pGraphicPointLightFacet;
+            Gfx::CPointLight* pGfxPointLight = rCurrentRenderJob.m_pGraphicPointLightFacet;
 
             assert(pGfxPointLight != nullptr);
 
@@ -307,7 +307,7 @@ namespace
             Gfx::ContextManager::SetTexture(6, pGfxPointLight->GetTextureRSMSet()->GetTexture(2));
             Gfx::ContextManager::SetTexture(7, pGfxPointLight->GetTextureRSMSet()->GetTexture(3));
 
-            unsigned int HeightOfShadowmap = pGfxPointLight->GetShadowmapSize() / static_cast<unsigned int>(m_IndirectLightSettings.m_RSMSplitting);
+            int HeightOfShadowmap = static_cast<int>(pGfxPointLight->GetShadowmapSize()) / static_cast<int>(m_IndirectLightSettings.m_RSMSplitting);
 
             for (int IndexOfRSMDataY = 0; IndexOfRSMDataY < HeightOfShadowmap; ++IndexOfRSMDataY)
             {

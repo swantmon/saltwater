@@ -449,6 +449,8 @@ namespace
     
     void CGfxAreaLightRenderer::RenderForward()
     {
+        if (m_RenderJobs.size() == 0) return;
+
         Performance::BeginEvent("Area Lights Bulbs");
 
         // -----------------------------------------------------------------------------
@@ -464,13 +466,13 @@ namespace
 
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::NoCull));
 
-        ContextManager::SetInputLayout(m_PositionShaderPtr->GetInputLayout());
-
         ContextManager::SetTopology(STopology::TriangleList);
 
         ContextManager::SetShaderVS(m_PositionShaderPtr);
 
         ContextManager::SetShaderPS(m_AreaLightbulbShaderPtr);
+
+        ContextManager::SetInputLayout(m_PositionShaderPtr->GetInputLayout());
 
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
         ContextManager::SetConstantBuffer(1, m_AreaLightBufferPtr);
