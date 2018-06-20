@@ -140,7 +140,7 @@ float GetDensityAtPosition(in vec3 _WSPosition)
     vec3 InverseMapSize = vec3(1.0f / g_WorldSizeX, 1.0f / g_WorldSizeY, 1.0f / g_WorldSizeZ);
     
     vec3 Seed = _WSPosition.xyz * InverseMapSize;
-    Seed += cs_WindDirection.xyz;
+    Seed += g_Time * cs_WindDirection.xyz;
 
     float PerlinNoise = abs(ImprovedPerlinNoise3D(Seed));
     

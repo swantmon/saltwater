@@ -794,6 +794,7 @@ namespace
         float WorldNumberOfMetersZ;
         float FrameNumber;
         float FrameDeltaTime;
+        float FrameTotalTime;
         
         CCameraPtr MainCameraPtr   = ViewManager::GetMainCamera ();
         CCameraPtr DecalCameraPtr  = ViewManager::GetDecalCamera();
@@ -824,6 +825,7 @@ namespace
 
         FrameNumber    = static_cast<float>(Core::Time::GetNumberOfFrame());
         FrameDeltaTime = static_cast<float>(Core::Time::GetDeltaTimeLastFrame());
+        FrameTotalTime = static_cast<float>(Core::Time::GetTime());
 
         // -----------------------------------------------------------------------------
         // Set previous values
@@ -850,7 +852,7 @@ namespace
         m_PerFrameConstantBuffer.m_ScreenPositionScaleBias         = glm::vec4(0.5f, 0.5f, 0.5f, 0.5f);
         m_PerFrameConstantBuffer.m_CameraParameters0               = glm::vec4(Near, Far, 0.0f, 0.0f);
         m_PerFrameConstantBuffer.m_WorldParameters0                = glm::vec4(WorldNumberOfMetersX, WorldNumberOfMetersY, WorldNumberOfMetersZ, 0.0f);
-        m_PerFrameConstantBuffer.m_FrameParameters0                = glm::vec4(FrameNumber, FrameDeltaTime, 0.0f, 0.0f);
+        m_PerFrameConstantBuffer.m_FrameParameters0                = glm::vec4(FrameNumber, FrameDeltaTime, FrameTotalTime, 0.0f);
         
         BufferManager::UploadBufferData(m_PerFrameConstantBufferBufferPtr, &m_PerFrameConstantBuffer);
     }

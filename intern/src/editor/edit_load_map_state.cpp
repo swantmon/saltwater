@@ -331,8 +331,6 @@ namespace Edit
         Dt::EntityManager::MarkEntityAsDirty(rRootEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
 
         {
-            Dt::SEntityDescriptor EntityDesc;
-
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Static;
             EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
@@ -340,7 +338,7 @@ namespace Edit
 
             rEntity.SetName("Sphere");
 
-            Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
+            pTransformationFacet = rEntity.GetTransformationFacet();
 
             pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 2.0f));
             pTransformationFacet->SetScale(glm::vec3(1.0f));
@@ -377,8 +375,6 @@ namespace Edit
         }
 
         {
-            Dt::SEntityDescriptor EntityDesc;
-
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Static;
             EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
@@ -386,7 +382,7 @@ namespace Edit
 
             rEntity.SetName("Plane");
 
-            Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
+            pTransformationFacet = rEntity.GetTransformationFacet();
 
             pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
             pTransformationFacet->SetScale(glm::vec3(4.0f, 4.0f, 0.001f));

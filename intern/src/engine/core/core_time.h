@@ -15,7 +15,9 @@ namespace Time
     ENGINE_API void Update();
     
     ENGINE_API double GetDeltaTimeLastFrame();
+
+    ENGINE_API double GetTime();
     
-    ENGINE_API Base::U64 GetNumberOfFrame();
+    ENGINE_API Base::Size GetNumberOfFrame();
 } // namespace Time
 } // namespace Core
