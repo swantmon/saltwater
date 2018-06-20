@@ -307,7 +307,7 @@ namespace
             Gfx::ContextManager::SetTexture(6, pGfxPointLight->GetTextureRSMSet()->GetTexture(2));
             Gfx::ContextManager::SetTexture(7, pGfxPointLight->GetTextureRSMSet()->GetTexture(3));
 
-            unsigned int HeightOfShadowmap = pGfxPointLight->GetShadowmapSize() / static_cast<unsigned int>(m_IndirectLightSettings.m_RSMDivision);
+            unsigned int HeightOfShadowmap = pGfxPointLight->GetShadowmapSize() / static_cast<unsigned int>(m_IndirectLightSettings.m_RSMSplitting);
 
             for (int IndexOfRSMDataY = 0; IndexOfRSMDataY < HeightOfShadowmap; ++IndexOfRSMDataY)
             {
@@ -377,7 +377,7 @@ namespace
     {
         SIndirectLightSettings Settings;
 
-        Settings.m_RSMDivision = Core::CProgramParameters::GetInstance().Get("graphics:indirect_light:RSM_devision", 8.0f);
+        Settings.m_RSMSplitting = Core::CProgramParameters::GetInstance().Get("graphics:indirect_light:RSM_splitting", 8.0f);
 
         SetSettings(Settings);
     }

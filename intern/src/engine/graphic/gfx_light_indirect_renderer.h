@@ -5,7 +5,7 @@ namespace Gfx
 {
     struct SIndirectLightSettings
     {
-        float m_RSMDivision;
+        float m_RSMSplitting;
     };
 } // namespace Gfx
 
