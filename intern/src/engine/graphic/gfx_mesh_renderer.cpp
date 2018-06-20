@@ -920,14 +920,13 @@ namespace
 
             Gfx::CSun* pGfxComponent = static_cast<Gfx::CSun*>(pDtComponent->GetFacet(Dt::CSunComponent::Graphic));
 
-            float SunAngularRadius = 0.27f * glm::pi<float>() / 180.0f;
-            float HasShadows       = 1.0f;
+            float HasShadows = 1.0f;
 
             LightProperties[IndexOfLight].m_LightType           = 1;
             LightProperties[IndexOfLight].m_LightViewProjection = pGfxComponent->GetCamera()->GetViewProjectionMatrix();
             LightProperties[IndexOfLight].m_LightDirection      = glm::normalize(glm::vec4(pDtComponent->GetDirection(), 0.0f));
             LightProperties[IndexOfLight].m_LightColor          = glm::vec4(pDtComponent->GetLightness(), 1.0f);
-            LightProperties[IndexOfLight].m_LightSettings       = glm::vec4(SunAngularRadius, 0.0f, 0.0f, HasShadows);
+            LightProperties[IndexOfLight].m_LightSettings       = glm::vec4(pDtComponent->GetSunAngularRadius(), 0.0f, 0.0f, HasShadows);
 
             // -----------------------------------------------------------------------------
 

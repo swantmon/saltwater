@@ -88,25 +88,25 @@ namespace
 
         struct SSunLightProperties
         {
-            glm::mat4 m_LightViewProjection;
-            glm::vec4   m_LightDirection;
-            glm::vec4   m_LightColor;
-            float          m_SunAngularRadius;
-            unsigned int   m_ExposureHistoryIndex;
-            float          m_Padding[2];
+            glm::mat4    m_LightViewProjection;
+            glm::vec4    m_LightDirection;
+            glm::vec4    m_LightColor;
+            float        m_SunAngularRadius;
+            unsigned int m_ExposureHistoryIndex;
+            float        m_Padding[2];
         };
 
         struct SVolumeLightingProperties
         {
             glm::vec4 m_WindDirection;
             glm::vec4 m_FogColor;
-            float        m_FrustumDepthInMeter;
-            float        m_ShadowIntensity;
-            float        m_VolumetricFogScatteringCoefficient;
-            float        m_VolumetricFogAbsorptionCoefficient;
-            float        m_DensityLevel;
-            float        m_DensityAttenuation;
-            float        m_Padding[2];
+            float     m_FrustumDepthInMeter;
+            float     m_ShadowIntensity;
+            float     m_VolumetricFogScatteringCoefficient;
+            float     m_VolumetricFogAbsorptionCoefficient;
+            float     m_DensityLevel;
+            float     m_DensityAttenuation;
+            float     m_Padding[2];
         };
 
         struct SFogApplyProperties
@@ -691,7 +691,7 @@ namespace
         LightBuffer.m_LightViewProjection  = pGfxSunComponent->GetCamera()->GetViewProjectionMatrix();
         LightBuffer.m_LightDirection       = glm::normalize(glm::vec4(pDtSunComponent->GetDirection(), 0.0f));
         LightBuffer.m_LightColor           = glm::vec4(pDtSunComponent->GetLightness(), 1.0f);
-        LightBuffer.m_SunAngularRadius     = 0.27f * glm::pi<float>() / 180.0f;
+        LightBuffer.m_SunAngularRadius     = pDtSunComponent->GetSunAngularRadius();
         LightBuffer.m_ExposureHistoryIndex = HistogramRenderer::GetLastExposureHistoryIndex();
 
         BufferManager::UploadBufferData(m_VolumeLightingCSBufferSetPtr->GetBuffer(0), &LightBuffer);

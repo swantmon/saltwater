@@ -124,6 +124,13 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
+    float CSunComponent::GetSunAngularRadius() const
+    {
+        return 0.27f * glm::pi<float>() / 180.0f;
+    }
+
+    // -----------------------------------------------------------------------------
+
     glm::vec3& CSunComponent::GetLightness()
     {
         return m_Lightness;
