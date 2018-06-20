@@ -692,8 +692,8 @@ namespace
 
         CTexturePtr TexturePtrs[2][5] =
         {
-            { ColorOneTexturePtr, EdgesTexPtr, WeightsTexPtr, static_cast<CTexturePtr>(m_SMAAAreaTexture), static_cast<CTexturePtr>(m_SMAASearchTexture) },
-            { ColorTwoTexturePtr, EdgesTexPtr, WeightsTexPtr, static_cast<CTexturePtr>(m_SMAAAreaTexture), static_cast<CTexturePtr>(m_SMAASearchTexture) }
+            { ColorOneTexturePtr, EdgesTexPtr, WeightsTexPtr, m_SMAAAreaTexture, m_SMAASearchTexture },
+            { ColorTwoTexturePtr, EdgesTexPtr, WeightsTexPtr, m_SMAAAreaTexture, m_SMAASearchTexture }
         };
 
         m_SMAATextureSetPtr[0] = TextureManager::CreateTextureSet(TexturePtrs[0], 5);
@@ -809,6 +809,9 @@ namespace
 
     void CGfxPostFXRenderer::OnResize(unsigned int _Width, unsigned int _Height)
     {
+        // -----------------------------------------------------------------------------
+        // Deallocate all resources
+        // -----------------------------------------------------------------------------
         m_SwapTargetSetPtrs[0] = 0;
         m_SwapTargetSetPtrs[1] = 0;
         
@@ -824,34 +827,34 @@ namespace
         m_SMAAWeightsCalcTargetSetPtr = 0;
 
         // -----------------------------------------------------------------------------
-
-        std::stringstream SMAADefineStream;
-
-        SMAADefineStream << "#define SMAA_RT_METRICS " << "vec4(1.0f / "
-            << _Width << ".0f, 1.0f / " << _Height << ".0f, "
-            << _Width << ".0f, " << _Height << ".0f)";
-
-        std::string SMAADefineString = SMAADefineStream.str();
-
-        const char* pDefine = SMAADefineString.c_str();
-
-        CShaderPtr ShaderSMAAEdgeDetectVSPtr  = ShaderManager::CompileVS("smaa/vs_smaa_edge_detect.glsl" , "main", pDefine);
-        CShaderPtr ShaderSMAAEdgeDetectPSPtr  = ShaderManager::CompilePS("smaa/fs_smaa_edge_detect.glsl" , "main", pDefine);
-        CShaderPtr ShaderSMAAWeightsCalcVSPtr = ShaderManager::CompileVS("smaa/vs_smaa_weights_calc.glsl", "main", pDefine);
-        CShaderPtr ShaderSMAAWeightsCalcPSPtr = ShaderManager::CompilePS("smaa/fs_smaa_weights_calc.glsl", "main", pDefine);
-        CShaderPtr ShaderSMAABlendingVSPtr    = ShaderManager::CompileVS("smaa/vs_smaa_blending.glsl"    , "main", pDefine);
-        CShaderPtr ShaderSMAABlendingPSPtr    = ShaderManager::CompilePS("smaa/fs_smaa_blending.glsl"    , "main", pDefine);
-
-        // -----------------------------------------------------------------------------
-
-        // -----------------------------------------------------------------------------
         // Initiate target set
         // -----------------------------------------------------------------------------
         glm::ivec2 Size(_Width, _Height);
-        
-        glm::ivec2 HalfSize   (Size[0] / 2, Size[1] / 2);
+
+        glm::ivec2 HalfSize(Size[0] / 2, Size[1] / 2);
+
         glm::ivec2 QuarterSize(Size[0] / 4, Size[1] / 4);
-        
+
+        // -----------------------------------------------------------------------------
+        // Reload some shader
+        // -----------------------------------------------------------------------------
+        std::stringstream SMAADefineStream;
+
+        SMAADefineStream << "#define SMAA_RT_METRICS " << "vec4(1.0f / "
+            << Size[0] << ".0f, 1.0f / " << Size[1] << ".0f, "
+            << Size[0] << ".0f, " << Size[1] << ".0f)";
+
+        std::string SMAADefineString = SMAADefineStream.str();
+
+        m_PostEffectShaderVSPtrs[SMAAEdgeDetect]  = ShaderManager::CompileVS("smaa/vs_smaa_edge_detect.glsl" , "main", SMAADefineString.c_str());
+        m_PostEffectShaderPSPtrs[SMAAEdgeDetect]  = ShaderManager::CompilePS("smaa/fs_smaa_edge_detect.glsl" , "main", SMAADefineString.c_str());
+        m_PostEffectShaderVSPtrs[SMAAWeightsCalc] = ShaderManager::CompileVS("smaa/vs_smaa_weights_calc.glsl", "main", SMAADefineString.c_str());
+        m_PostEffectShaderPSPtrs[SMAAWeightsCalc] = ShaderManager::CompilePS("smaa/fs_smaa_weights_calc.glsl", "main", SMAADefineString.c_str());
+        m_PostEffectShaderVSPtrs[SMAABlending]    = ShaderManager::CompileVS("smaa/vs_smaa_blending.glsl"    , "main", SMAADefineString.c_str());
+        m_PostEffectShaderPSPtrs[SMAABlending]    = ShaderManager::CompilePS("smaa/fs_smaa_blending.glsl"    , "main", SMAADefineString.c_str());
+
+        // -----------------------------------------------------------------------------
+
         // -----------------------------------------------------------------------------
         // Create render target textures
         // -----------------------------------------------------------------------------
@@ -972,22 +975,20 @@ namespace
 
         TextureManager::SetTextureLabel(BlendWeightsTexturePtr, "SMAA Blend Weights Texture");
 
-        m_SMAAEdgeTargetSetPtr        = TargetSetManager::CreateTargetSet(static_cast<CTexturePtr>(EdgesTexturePtr));
-        m_SMAAWeightsCalcTargetSetPtr = TargetSetManager::CreateTargetSet(static_cast<CTexturePtr>(BlendWeightsTexturePtr));
+        m_SMAAEdgeTargetSetPtr        = TargetSetManager::CreateTargetSet(EdgesTexturePtr);
+        m_SMAAWeightsCalcTargetSetPtr = TargetSetManager::CreateTargetSet(BlendWeightsTexturePtr);
 
         // -----------------------------------------------------------------------------
 
         // -----------------------------------------------------------------------------
         // Build view ports
         // -----------------------------------------------------------------------------
-        glm::ivec2 NativeSize = Main::GetActiveNativeWindowSize();
-
         SViewPortDescriptor ViewPortDesc;
 
         ViewPortDesc.m_TopLeftX = 0.0f;
         ViewPortDesc.m_TopLeftY = 0.0f;
-        ViewPortDesc.m_Width    = static_cast<float>(NativeSize[0]);
-        ViewPortDesc.m_Height   = static_cast<float>(NativeSize[1]);
+        ViewPortDesc.m_Width    = static_cast<float>(Size[0]);
+        ViewPortDesc.m_Height   = static_cast<float>(Size[1]);
         ViewPortDesc.m_MinDepth = 0.0f;
         ViewPortDesc.m_MaxDepth = 1.0f;
 
