@@ -1,5 +1,7 @@
 #pragma once
 
+#include "engine/engine_config.h"
+
 #include "engine/core/core_plugin.h"
 
 #include <string>

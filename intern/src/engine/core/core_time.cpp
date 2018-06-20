@@ -25,21 +25,24 @@ namespace
         void Update();
                 
         double GetDeltaTimeLastFrame();
+
+        double GetTime();
         
-        Base::U64 GetNumberOfFrame() const;
+        Base::Size GetNumberOfFrame() const;
                 
     private:
         
         Base::CPerformanceClock m_Clock;
-        Base::U64               m_NumberOfFrame;
+        Base::Size              m_NumberOfFrame;
+        double                  m_ActiveTime;
     };
 } // namespace
 
 namespace
 {
     CTime::CTime()
-        : m_Clock          ()
-        , m_NumberOfFrame  (0)
+        : m_Clock     ()
+        , m_ActiveTime(0.0)
     {
     }
     
@@ -52,6 +55,7 @@ namespace
     
     void CTime::OnStart()
     {
+        
     }
     
     // -----------------------------------------------------------------------------
@@ -65,8 +69,6 @@ namespace
     void CTime::Update()
     {
         m_Clock.OnFrame();
-                
-        ++ m_NumberOfFrame;
     }
     
     // -----------------------------------------------------------------------------
@@ -75,12 +77,19 @@ namespace
     {
         return m_Clock.GetDurationOfFrame();
     }
+
+    // -----------------------------------------------------------------------------
+
+    double CTime::GetTime()
+    {
+        return m_Clock.GetTime();
+    }
     
     // -----------------------------------------------------------------------------
     
-    Base::U64 CTime::GetNumberOfFrame() const
+    Base::Size CTime::GetNumberOfFrame() const
     {
-        return m_NumberOfFrame;
+        return m_Clock.GetNumberOfFrame();
     }
 }
 
@@ -112,6 +121,13 @@ namespace Time
     double GetDeltaTimeLastFrame()
     {
         return CTime::GetInstance().GetDeltaTimeLastFrame();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    double GetTime()
+    {
+        return CTime::GetInstance().GetTime();
     }
     
     // -----------------------------------------------------------------------------

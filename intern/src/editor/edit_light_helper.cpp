@@ -691,8 +691,6 @@ namespace
 
         if (pLightFacet != nullptr)
         {
-            float R, G, B;
-            float X, Y, Z;
             std::string TextureFile;
 
             // -----------------------------------------------------------------------------

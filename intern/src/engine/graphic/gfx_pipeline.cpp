@@ -486,7 +486,6 @@ namespace Pipeline
         LightPointRenderer   ::Render();
         LightIndirectRenderer::Render();
         ReflectionRenderer   ::Render();
-        FogRenderer          ::Render();
         BackgroundRenderer   ::Render();
 
         Engine::RaiseEvent(Engine::Gfx_OnRenderLighting);
@@ -507,15 +506,31 @@ namespace Pipeline
         Performance::EndEvent();
 
         // -----------------------------------------------------------------------------
+        // HDR Effect Pass
+        // -----------------------------------------------------------------------------
+        Performance::BeginEvent("HDR Effect Pass");
+
+        FogRenderer::Render();
+
+        PostFXHDR::Render();
+
+        Performance::EndEvent();
+
+        // -----------------------------------------------------------------------------
         // Shading Pass
         // -----------------------------------------------------------------------------
         Performance::BeginEvent("Shading Pass");
 
         HistogramRenderer::Render();
 
-        PostFXHDR::Render();
-
         TonemappingRenderer::Render();
+
+        Performance::EndEvent();
+
+        // -----------------------------------------------------------------------------
+        // LDR Effect Pass
+        // -----------------------------------------------------------------------------
+        Performance::BeginEvent("LDR Effect Pass");
 
         SelectionRenderer::Render();
 
