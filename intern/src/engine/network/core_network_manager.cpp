@@ -50,6 +50,26 @@ namespace Net
 
     // -----------------------------------------------------------------------------
 
+    bool CNetworkManager::IsConnected(int _Port /* = 0 */) const
+    {
+        if (_Port == 0)
+        {
+            _Port = m_DefaultPort;
+        }
+
+        if (m_Sockets.count(_Port) == 0)
+        {
+            if (m_Sockets.at(_Port)->IsOpen())
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    // -----------------------------------------------------------------------------
+
     CServerSocket& CNetworkManager::GetSocket(int _Port)
     {
         if (m_Sockets.count(_Port) == 0)

@@ -25,7 +25,7 @@ namespace Net
 
         void AsyncReconnect();
 
-        void IsOpen();
+        bool IsOpen() const;
 
         void Update();
 

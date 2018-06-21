@@ -129,7 +129,7 @@ namespace Net
 
     // -----------------------------------------------------------------------------
 
-    void CServerSocket::IsOpen()
+    bool CServerSocket::IsOpen() const
     {
         return m_IsOpen;
     }

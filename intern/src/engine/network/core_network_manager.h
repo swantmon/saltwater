@@ -29,6 +29,8 @@ namespace Net
         void Update();
         void OnExit();
 
+        bool IsConnected(int _Port = 0) const;
+
         void RegisterMessageHandler(int _MessageID, const std::shared_ptr<CMessageDelegate>& _rDelegate, int _Port = 0);
 
     private:
