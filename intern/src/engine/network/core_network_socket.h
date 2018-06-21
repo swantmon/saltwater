@@ -30,13 +30,14 @@ namespace Net
         void Update();
 
         void RegisterMessageHandler(int _MessageID, const std::shared_ptr<CMessageDelegate>& _rpDelegate);
-        bool SendMessage(int _MessageID, const std::vector<char>& _rData, int _Length);
+        bool SendMessage(int _MessageID, const std::vector<char>& _rData, int _Length = 0);
 
     private:
 
         friend class CNetworkManager;
 
         void OnAccept(const std::system_error& _rError);
+        void OnSendComplete();
 
         int m_Port;
         

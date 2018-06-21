@@ -51,12 +51,35 @@ namespace Net
     }
 
     // -----------------------------------------------------------------------------
+
+    void CServerSocket::OnSendComplete()
+    {
+        ENGINE_CONSOLE_INFOV("Send complete");
+    }
+
+    // -----------------------------------------------------------------------------
     
-    bool CServerSocket::SendMessage(int _MessageID, const std::vector<char>& _rData, int _Length)
+    bool CServerSocket::SendMessage(int _MessageID, const std::vector<char>& _rData, int _MessageLength)
     {
         if (IsOpen())
         {
+            if (_MessageLength == 0)
+            {
+                _MessageLength = static_cast<int>(_rData.size());
+            }
 
+            int DataLength = _MessageLength + sizeof(int32_t);
+
+            std::vector<char> Data;
+            Data.resize(DataLength);
+
+            int32_t MessageID = static_cast<int32_t>(_MessageID);
+            std::memcpy(Data.data(), &MessageID, sizeof(MessageID));
+            std::memcpy(Data.data() + sizeof(int32_t), _rData.data(), _MessageLength);
+
+            m_pSocket->async_send(asio::buffer(Data, DataLength), std::bind(&CServerSocket::OnSendComplete, this));
+
+            return true;
         }
         else
         {
