@@ -43,6 +43,11 @@ namespace Edit
         Cam::ControlManager::CreateControl(Cam::CControl::EditorControl);
         Cam::ControlManager::CreateControl(Cam::CControl::GameControl);
 
+        // -----------------------------------------------------------------------------
+        // Set editor camera in edit state as starting control
+        // -----------------------------------------------------------------------------
+        Cam::ControlManager::SetActiveControl(Cam::CControl::EditorControl);
+
         return Edit::CState::Start;
     }
     

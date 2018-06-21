@@ -62,13 +62,6 @@ namespace Edit
         assert(m_pSelectionTicket == 0);
 
         m_pSelectionTicket = &Gfx::SelectionRenderer::AcquireTicket(-1, -1, 1, 1, Gfx::SPickFlag::Actor);
-
-        // -----------------------------------------------------------------------------
-        // Set editor camera in edit state
-        // -----------------------------------------------------------------------------
-        Cam::ControlManager::SetActiveControl(Cam::CControl::EditorControl);
-
-        // Cam::ControlManager::GetActiveControl().SetPosition(glm::vec3(0.0f, 0.0f, 10.0f));
         
         return Edit::CState::Edit;
     }
