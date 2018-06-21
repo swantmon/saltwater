@@ -25,6 +25,8 @@ namespace Net
 
         void AsyncReconnect();
 
+        void IsOpen();
+
         void Update();
 
         void RegisterMessageHandler(int _MessageID, const std::shared_ptr<CMessageDelegate>& _rpDelegate);
@@ -37,6 +39,8 @@ namespace Net
 
         int m_Port;
         
+        bool m_IsOpen;
+
         std::unique_ptr<asio::ip::tcp::endpoint> m_pEndpoint;
         std::unique_ptr<asio::ip::tcp::acceptor> m_pAcceptor;
         std::unique_ptr<asio::ip::tcp::socket> m_pSocket;

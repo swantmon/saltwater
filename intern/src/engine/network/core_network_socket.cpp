@@ -95,6 +95,7 @@ namespace Net
         }
         else
         {
+            m_IsOpen = false;
             AsyncReconnect();
         }
     }
@@ -103,6 +104,7 @@ namespace Net
 
     void CServerSocket::OnAccept(const std::system_error& _rError)
     {
+        m_IsOpen = true;
         BASE_UNUSED(_rError);                
         ENGINE_CONSOLE_INFOV("Connected on port %i", m_Port);
         StartListening();
@@ -127,8 +129,16 @@ namespace Net
 
     // -----------------------------------------------------------------------------
 
+    void CServerSocket::IsOpen()
+    {
+        return m_IsOpen;
+    }
+
+    // -----------------------------------------------------------------------------
+
     CServerSocket::CServerSocket(int _Port)
         : m_Port(_Port)
+        , m_IsOpen(false)
     {
         auto& IOService = CNetworkManager::GetInstance().GetIOService();
 
