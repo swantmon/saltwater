@@ -12,7 +12,7 @@ namespace Dt
 
 namespace Cam
 {
-    class CControl
+    class ENGINE_API CControl
     {
         public:
 

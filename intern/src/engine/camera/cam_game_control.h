@@ -7,7 +7,7 @@
 
 namespace Cam
 {
-    class CGameControl : public CControl
+    class ENGINE_API CGameControl : public CControl
     {
     public:
         

@@ -8,7 +8,7 @@
 
 namespace Cam
 {
-    class CEditorControl : public CControl
+    class ENGINE_API CEditorControl : public CControl
     {
     public:
 
