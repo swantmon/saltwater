@@ -409,42 +409,45 @@ namespace
         
         assert(pGfxPointLightFacet);
 
-        // -----------------------------------------------------------------------------
-        // Update views
-        // -----------------------------------------------------------------------------
-        Gfx::CViewPtr   ShadowViewPtr   = pGfxPointLightFacet->m_RenderContextPtr->GetCamera()->GetView();
-        Gfx::CCameraPtr ShadowCameraPtr = pGfxPointLightFacet->m_RenderContextPtr->GetCamera();
+        if (pPointLightComponent->GetShadowType() != Dt::CPointLightComponent::NoShadows)
+        {
+            // -----------------------------------------------------------------------------
+            // Update views
+            // -----------------------------------------------------------------------------
+            Gfx::CViewPtr   ShadowViewPtr = pGfxPointLightFacet->m_RenderContextPtr->GetCamera()->GetView();
+            Gfx::CCameraPtr ShadowCameraPtr = pGfxPointLightFacet->m_RenderContextPtr->GetCamera();
 
-        glm::vec3 LightPosition  = pPointLightComponent->GetHostEntity()->GetWorldPosition();
-        glm::vec3 LightDirection = glm::normalize(pPointLightComponent->GetDirection());
+            glm::vec3 LightPosition = pPointLightComponent->GetHostEntity()->GetWorldPosition();
+            glm::vec3 LightDirection = glm::normalize(pPointLightComponent->GetDirection());
 
-        // -----------------------------------------------------------------------------
-        // Set view
-        // -----------------------------------------------------------------------------
-        glm::mat3 RotationMatrix = glm::mat3(1.0f);
+            // -----------------------------------------------------------------------------
+            // Set view
+            // -----------------------------------------------------------------------------
+            glm::mat3 RotationMatrix = glm::mat3(1.0f);
 
-        RotationMatrix = glm::lookAt(LightPosition, LightPosition + LightDirection, glm::vec3(0.0f, 0.0f, 1.0f));
+            RotationMatrix = glm::lookAt(LightPosition, LightPosition + LightDirection, glm::vec3(0.0f, 0.0f, 1.0f));
 
-        ShadowViewPtr->SetPosition(LightPosition);
-        ShadowViewPtr->SetRotationMatrix(glm::transpose(RotationMatrix));
+            ShadowViewPtr->SetPosition(LightPosition);
+            ShadowViewPtr->SetRotationMatrix(glm::transpose(RotationMatrix));
 
-        // -----------------------------------------------------------------------------
-        // Calculate near and far plane
-        // -----------------------------------------------------------------------------
-        float Near = 0.1f;
-        float Far = pPointLightComponent->GetAttenuationRadius() + Near;
+            // -----------------------------------------------------------------------------
+            // Calculate near and far plane
+            // -----------------------------------------------------------------------------
+            float Near = 0.1f;
+            float Far = pPointLightComponent->GetAttenuationRadius() + Near;
 
-        // -----------------------------------------------------------------------------
-        // Set matrix
-        // -----------------------------------------------------------------------------
-        ShadowCameraPtr->SetFieldOfView(glm::degrees(pPointLightComponent->GetOuterConeAngle()), 1.0f, Near, Far);
+            // -----------------------------------------------------------------------------
+            // Set matrix
+            // -----------------------------------------------------------------------------
+            ShadowCameraPtr->SetFieldOfView(glm::degrees(pPointLightComponent->GetOuterConeAngle()), 1.0f, Near, Far);
 
-        ShadowViewPtr->Update();
+            ShadowViewPtr->Update();
 
-        // -----------------------------------------------------------------------------
-        // Render shadows
-        // -----------------------------------------------------------------------------
-        RenderShadows(*pGfxPointLightFacet, pPointLightComponent, LightPosition);
+            // -----------------------------------------------------------------------------
+            // Render shadows
+            // -----------------------------------------------------------------------------
+            RenderShadows(*pGfxPointLightFacet, pPointLightComponent, LightPosition);
+        }
 
         // -----------------------------------------------------------------------------
         // Set time
