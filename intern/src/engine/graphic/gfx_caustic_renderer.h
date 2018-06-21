@@ -3,6 +3,14 @@
 
 namespace Gfx
 {
+    struct SCausticSettings
+    {
+
+    };
+} // namespace Gfx
+
+namespace Gfx
+{
 namespace CausticRenderer
 {
     void OnStart();
@@ -22,5 +30,9 @@ namespace CausticRenderer
     
     void Update();
     void Render();
+
+    void ResetSettings();
+    void SetSetting(const SCausticSettings& _rSettings);
+    const SCausticSettings& GetSettings();
 } // namespace CausticRenderer
 } // namespace Gfx

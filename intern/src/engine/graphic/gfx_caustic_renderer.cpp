@@ -53,6 +53,14 @@ namespace
         
         void Update();
         void Render();
+
+        void ResetSettings();
+        void SetSetting(const SCausticSettings& _rSettings);
+        const SCausticSettings& GetSettings();
+
+    private:
+
+        SCausticSettings m_Settings;
     };
 } // namespace
 
@@ -73,7 +81,7 @@ namespace
     
     void CGfxCausticRenderer::OnStart()
     {
-        
+        ResetSettings();
     }
     
     // -----------------------------------------------------------------------------
@@ -155,6 +163,27 @@ namespace
     
     void CGfxCausticRenderer::Render()
     {
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxCausticRenderer::ResetSettings()
+    {
+
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxCausticRenderer::SetSetting(const SCausticSettings& _rSettings)
+    {
+        m_Settings = _rSettings;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const SCausticSettings& CGfxCausticRenderer::GetSettings()
+    {
+        return m_Settings;
     }
 } // namespace
 
@@ -258,6 +287,27 @@ namespace CausticRenderer
     void Render()
     {
         CGfxCausticRenderer::GetInstance().Render();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void ResetSettings()
+    {
+        CGfxCausticRenderer::GetInstance().ResetSettings();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void SetSetting(const SCausticSettings& _rSettings)
+    {
+        CGfxCausticRenderer::GetInstance().SetSetting(_rSettings);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const SCausticSettings& GetSettings()
+    {
+        return CGfxCausticRenderer::GetInstance().GetSettings();
     }
 } // namespace CausticRenderer
 } // namespace Gfx
