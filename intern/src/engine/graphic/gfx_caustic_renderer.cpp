@@ -80,6 +80,14 @@ namespace
             glm::mat4 vs_ModelMatrix;
         };
 
+        struct SLightProperties
+        {
+            glm::vec4 m_LightPosition;
+            glm::vec4 m_LightDirection;
+            glm::vec4 m_LightColor;
+            glm::vec4 m_LightSettings; // InvSqrAttenuationRadius, AngleScale, AngleOffset, Has shadows
+        };
+
     private:
 
         SCausticSettings m_Settings;
@@ -98,6 +106,8 @@ namespace
 
         CBufferPtr m_PerLightConstantBufferPtr;
         CBufferPtr m_PerMeshConstantBuffer;
+        CBufferPtr m_LightProperties;
+        CBufferPtr m_SurfaceMaterialBufferPtr;
     };
 } // namespace
 
@@ -135,6 +145,8 @@ namespace
         m_ViewportSetPtr = 0;
         m_PerLightConstantBufferPtr = 0;
         m_PerMeshConstantBuffer = 0;
+        m_LightProperties = 0;
+        m_SurfaceMaterialBufferPtr = 0;
     }
     
     // -----------------------------------------------------------------------------
@@ -262,6 +274,8 @@ namespace
         
         m_PerLightConstantBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
+        // -----------------------------------------------------------------------------
+
         ConstanteBufferDesc.m_Stride        = 0;
         ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
         ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
@@ -271,6 +285,30 @@ namespace
         ConstanteBufferDesc.m_pClassKey     = 0;
         
         m_PerMeshConstantBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
+
+        // -----------------------------------------------------------------------------
+
+        ConstanteBufferDesc.m_Stride        = 0;
+        ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
+        ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
+        ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SLightProperties);
+        ConstanteBufferDesc.m_pBytes        = 0;
+        ConstanteBufferDesc.m_pClassKey     = 0;
+        
+        m_LightProperties = BufferManager::CreateBuffer(ConstanteBufferDesc);
+
+        // -----------------------------------------------------------------------------
+
+        ConstanteBufferDesc.m_Stride        = 0;
+        ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
+        ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
+        ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(CMaterial::SMaterialAttributes);
+        ConstanteBufferDesc.m_pBytes        = 0;
+        ConstanteBufferDesc.m_pClassKey     = 0;
+
+        m_SurfaceMaterialBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
     }
     
     // -----------------------------------------------------------------------------
@@ -332,6 +370,21 @@ namespace
 
             // -----------------------------------------------------------------------------
 
+            SLightProperties LightProperties;
+
+            float InvSqrAttenuationRadius = pPointLightComponent->GetReciprocalSquaredAttenuationRadius();
+            float AngleScale = pPointLightComponent->GetAngleScale();
+            float AngleOffset = pPointLightComponent->GetAngleOffset();
+
+            LightProperties.m_LightPosition  = glm::vec4(pPointLightComponent->GetHostEntity()->GetWorldPosition(), 1.0f);
+            LightProperties.m_LightDirection = glm::normalize(glm::vec4(pPointLightComponent->GetDirection(), 0.0f));
+            LightProperties.m_LightColor     = glm::vec4(pPointLightComponent->GetLightness(), 1.0f);
+            LightProperties.m_LightSettings  = glm::vec4(InvSqrAttenuationRadius, AngleScale, AngleOffset, 0.0f);
+
+            BufferManager::UploadBufferData(m_LightProperties, &LightProperties);
+
+            // -----------------------------------------------------------------------------
+
             Performance::BeginEvent("Emission");
 
             TargetSetManager::ClearTargetSet(m_TargetSetPtr);
@@ -349,6 +402,10 @@ namespace
             ContextManager::SetConstantBuffer(0, m_PerLightConstantBufferPtr);
 
             ContextManager::SetConstantBuffer(1, m_PerMeshConstantBuffer);
+
+            ContextManager::SetConstantBuffer(2, m_LightProperties);
+
+            ContextManager::SetConstantBuffer(3, m_SurfaceMaterialBufferPtr);
 
             ContextManager::SetShaderPS(m_PhotonEmissionPSPtr);
 
@@ -377,9 +434,18 @@ namespace
                     pMaterial = static_cast<const Gfx::CMaterial*>(pDtMaterialComponent->GetFacet(Dt::CMaterialComponent::Graphic));
                 }
 
+                for (int Index = 0; Index < pMaterial->GetTextureSetPS()->GetNumberOfTextures(); ++Index)
+                {
+                    ContextManager::SetSampler(Index, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+
+                    ContextManager::SetTexture(Index, pMaterial->GetTextureSetPS()->GetTexture(Index));
+                }
+
                 // -----------------------------------------------------------------------------
 
                 BufferManager::UploadBufferData(m_PerMeshConstantBuffer, &pDtComponent->GetHostEntity()->GetTransformationFacet()->GetWorldMatrix());
+
+                BufferManager::UploadBufferData(m_SurfaceMaterialBufferPtr, &pMaterial->GetMaterialAttributes());
 
                 // -----------------------------------------------------------------------------
 
