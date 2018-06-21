@@ -51,6 +51,20 @@ namespace Net
     }
 
     // -----------------------------------------------------------------------------
+    
+    bool CServerSocket::SendMessage(int _MessageID, const std::vector<char>& _rData, int _Length)
+    {
+        if (IsOpen())
+        {
+
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    // -----------------------------------------------------------------------------
 
     void CServerSocket::ReceiveHeader(const std::error_code& _rError, size_t _TransferredBytes)
     {

@@ -92,6 +92,18 @@ namespace Net
     
     // -----------------------------------------------------------------------------
 
+    bool CNetworkManager::SendMessage(int _MessageID, const std::vector<char>& _rData, int _Length, int _Port)
+    {
+        if (_Port == 0)
+        {
+            _Port = m_DefaultPort;
+        }
+
+        return m_Sockets[_Port]->SendMessage(_MessageID, _rData, _Length);
+    }
+
+    // -----------------------------------------------------------------------------
+
     asio::io_service& CNetworkManager::GetIOService()
     {
         return m_IOService;

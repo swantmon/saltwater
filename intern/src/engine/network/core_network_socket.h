@@ -30,6 +30,7 @@ namespace Net
         void Update();
 
         void RegisterMessageHandler(int _MessageID, const std::shared_ptr<CMessageDelegate>& _rpDelegate);
+        bool SendMessage(int _MessageID, const std::vector<char>& _rData, int _Length);
 
     private:
 
