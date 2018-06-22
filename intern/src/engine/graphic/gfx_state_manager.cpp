@@ -115,9 +115,9 @@ namespace
 
     private:
 
-        static const unsigned int s_NumberOfBlendStates        = 1 + Gfx::CBlendState::DestinationBlend;
-        static const unsigned int s_NumberOfDepthStencilStates = 1 + Gfx::CDepthStencilState::NoWriteDepth;
-        static const unsigned int s_NumberOfRasterizerStates   = 1 + Gfx::CRasterizerState::Wireframe + CRasterizerState::NoCull;
+        static const unsigned int s_NumberOfBlendStates        = Gfx::CBlendState::NumberOfStates;
+        static const unsigned int s_NumberOfDepthStencilStates = Gfx::CDepthStencilState::NumberOfStates;
+        static const unsigned int s_NumberOfRasterizerStates   = Gfx::CRasterizerState::NumberOfStates;
         static const unsigned int s_NumberOfRenderStates       = 1 + Gfx::CRenderState::AlphaBlend + Gfx::CRenderState::NoDepth + CRenderState::Wireframe + CRenderState::NoCull + CRenderState::EqualDepth + CRenderState::LessEqualDepth + CRenderState::AdditionBlend + CRenderState::DestinationBlend;
 
         static SBlendDescription      s_NativeBlendStateDescriptors       [s_NumberOfBlendStates];
@@ -259,15 +259,15 @@ namespace
         // https://www.opengl.org/sdk/docs/man/docbook4/xhtml/glPolygonMode.xml
         // -----------------------------------------------------------------------------
 #ifdef PLATFORM_ANDROID
-        { GL_TRUE , GL_NONE, GL_BACK, GL_CCW, 0, 0.0f, 0.0f, GL_TRUE, GL_FALSE, GL_FALSE, GL_FALSE, },
-        { GL_TRUE , GL_NONE, GL_BACK, GL_CCW, 0, 0.0f, 0.0f, GL_TRUE, GL_FALSE, GL_FALSE, GL_FALSE, },
-        { GL_FALSE, GL_NONE, GL_BACK, GL_CCW, 0, 0.0f, 0.0f, GL_TRUE, GL_FALSE, GL_FALSE, GL_FALSE, },
-        { GL_FALSE, GL_NONE, GL_BACK, GL_CCW, 0, 0.0f, 0.0f, GL_TRUE, GL_FALSE, GL_FALSE, GL_FALSE, },
+        { GL_TRUE , GL_NONE, GL_BACK , GL_CCW, 0, 0.0f, 0.0f, GL_TRUE, GL_FALSE, GL_FALSE, GL_FALSE, },
+        { GL_FALSE, GL_NONE, GL_BACK , GL_CCW, 0, 0.0f, 0.0f, GL_TRUE, GL_FALSE, GL_FALSE, GL_FALSE, },
+        { GL_TRUE , GL_NONE, GL_FRONT, GL_CCW, 0, 0.0f, 0.0f, GL_TRUE, GL_FALSE, GL_FALSE, GL_FALSE, },
+        { GL_TRUE , GL_NONE, GL_BACK , GL_CCW, 0, 0.0f, 0.0f, GL_TRUE, GL_FALSE, GL_FALSE, GL_FALSE, },
 #else
-        { GL_TRUE , GL_FILL, GL_BACK, GL_CCW, 0, 0.0f, 0.0f, GL_TRUE, GL_FALSE, GL_FALSE, GL_FALSE, },
-        { GL_TRUE , GL_LINE, GL_BACK, GL_CCW, 0, 0.0f, 0.0f, GL_TRUE, GL_FALSE, GL_FALSE, GL_FALSE, },
-        { GL_FALSE, GL_FILL, GL_BACK, GL_CCW, 0, 0.0f, 0.0f, GL_TRUE, GL_FALSE, GL_FALSE, GL_FALSE, },
-        { GL_FALSE, GL_LINE, GL_BACK, GL_CCW, 0, 0.0f, 0.0f, GL_TRUE, GL_FALSE, GL_FALSE, GL_FALSE, },
+        { GL_TRUE , GL_FILL, GL_BACK , GL_CCW, 0, 0.0f, 0.0f, GL_TRUE, GL_FALSE, GL_FALSE, GL_FALSE, },
+        { GL_FALSE, GL_FILL, GL_BACK , GL_CCW, 0, 0.0f, 0.0f, GL_TRUE, GL_FALSE, GL_FALSE, GL_FALSE, },
+        { GL_TRUE , GL_FILL, GL_FRONT, GL_CCW, 0, 0.0f, 0.0f, GL_TRUE, GL_FALSE, GL_FALSE, GL_FALSE, },
+        { GL_TRUE , GL_LINE, GL_BACK , GL_CCW, 0, 0.0f, 0.0f, GL_TRUE, GL_FALSE, GL_FALSE, GL_FALSE, },
 #endif // PLATFORM_ANDROID
     };
 } // namespace

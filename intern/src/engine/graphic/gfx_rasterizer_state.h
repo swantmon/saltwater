@@ -14,8 +14,9 @@ namespace Gfx
         enum EState
         {
             Default,
-            Wireframe,
             NoCull,
+            FrontCull,
+            Wireframe,
             NumberOfStates,
             UndefinedState = -1,
         };
