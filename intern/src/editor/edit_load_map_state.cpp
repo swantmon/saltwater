@@ -775,8 +775,8 @@ namespace Edit
 
             auto pMaterialComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CMaterialComponent>();
 
-            pMaterialComponent->SetMaterialname("Chrome Sparrow");
-            pMaterialComponent->SetColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+            pMaterialComponent->SetMaterialname("Glass");
+            pMaterialComponent->SetColor(glm::vec4(1.0f, 1.0f, 1.0f, 0.4f));
             pMaterialComponent->SetMetalness(1.0f);
             pMaterialComponent->SetRoughness(0.25f);
 
