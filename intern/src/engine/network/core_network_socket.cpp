@@ -9,6 +9,7 @@
 
 #include <functional>
 #include <iostream>
+#include <memory>
 
 namespace Net
 {
@@ -52,7 +53,7 @@ namespace Net
 
     // -----------------------------------------------------------------------------
 
-    void CServerSocket::OnSendComplete()
+    void CServerSocket::OnSendComplete(std::shared_ptr<std::vector<char>> _Data)
     {
         ENGINE_CONSOLE_INFOV("Send complete");
     }
@@ -70,14 +71,15 @@ namespace Net
 
             int DataLength = _MessageLength + sizeof(int32_t);
 
-            std::vector<char> Data;
-            Data.resize(DataLength);
+            std::shared_ptr<std::vector<char>> pData = std::make_shared<std::vector<char>>();
+
+            pData->resize(DataLength);
 
             int32_t MessageID = static_cast<int32_t>(_MessageID);
-            std::memcpy(Data.data(), &MessageID, sizeof(MessageID));
-            std::memcpy(Data.data() + sizeof(int32_t), _rData.data(), _MessageLength);
+            std::memcpy(pData->data(), &MessageID, sizeof(MessageID));
+            std::memcpy(pData->data() + sizeof(int32_t), _rData.data(), _MessageLength);
 
-            m_pSocket->async_send(asio::buffer(Data, DataLength), std::bind(&CServerSocket::OnSendComplete, this));
+            m_pSocket->async_send(asio::buffer(*pData, DataLength), std::bind(&CServerSocket::OnSendComplete, this, pData));
 
             return true;
         }
