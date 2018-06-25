@@ -697,37 +697,39 @@ namespace
             }
 
             Performance::EndEvent();
+
+            Performance::BeginEvent("Gathering");
+
+            TargetSetManager::ClearTargetSet(m_PhotonGatheringTargetSetPtr);
+
+            ContextManager::SetTargetSet(m_PhotonGatheringTargetSetPtr);
+
+            ContextManager::SetViewPortSet(m_ViewportSetPtr);
+
+            ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::NoDepth));
+
+            ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
+
+            ContextManager::SetBlendState(StateManager::GetBlendState(CBlendState::AdditionBlend));
+
+            ContextManager::SetConstantBuffer(0, m_PerLightConstantBufferPtr);
+
+            ContextManager::SetShaderVS(m_PhotonGatheringVSPtr);
+
+            ContextManager::SetShaderPS(m_PhotonGatheringPSPtr);
+
+            ContextManager::SetTopology(STopology::PointList);
+
+            ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+
+            ContextManager::SetTexture(0, m_PhotonLocationTexturePtr);
+
+            ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+
+            ContextManager::Draw(s_TextureSize * s_TextureSize, 0);
+
+            Performance::EndEvent();
         }
-
-        Performance::BeginEvent("Gathering");
-
-        TargetSetManager::ClearTargetSet(m_PhotonGatheringTargetSetPtr);
-
-        ContextManager::SetTargetSet(m_PhotonGatheringTargetSetPtr);
-
-        ContextManager::SetViewPortSet(m_ViewportSetPtr);
-
-        ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::NoDepth));
-
-        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
-
-        ContextManager::SetBlendState(StateManager::GetBlendState(CBlendState::AdditionBlend));
-
-        ContextManager::SetShaderVS(m_PhotonGatheringVSPtr);
-
-        ContextManager::SetShaderPS(m_PhotonGatheringPSPtr);
-
-        ContextManager::SetTopology(STopology::PointList);
-
-        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
-
-        ContextManager::SetTexture(0, m_PhotonLocationTexturePtr);
-
-        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
-
-        ContextManager::Draw(s_TextureSize * s_TextureSize, 0);
-
-        Performance::EndEvent();
 
 //         Performance::BeginEvent("Apply");
 // 

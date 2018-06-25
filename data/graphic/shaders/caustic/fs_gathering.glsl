@@ -12,7 +12,7 @@ layout(location = 0) out vec4 out_Output;
 // -----------------------------------------------------------------------------
 void main(void)
 {
-    out_Output = vec4(10000.0f);
+    out_Output = vec4(1.0f);
 }
 
 #endif // __INCLUDE_FS_GATHERING_GLSL__
