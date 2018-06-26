@@ -233,6 +233,7 @@ namespace
         { GL_TRUE , 1, GL_EQUAL , GL_FALSE, 1, 1, GL_KEEP, GL_KEEP, GL_KEEP, GL_ALWAYS, },
         { GL_TRUE , 1, GL_LEQUAL, GL_FALSE, 1, 1, GL_KEEP, GL_KEEP, GL_KEEP, GL_ALWAYS, },
         { GL_TRUE , 0, GL_LESS  , GL_FALSE, 1, 1, GL_KEEP, GL_KEEP, GL_KEEP, GL_ALWAYS, },
+        { GL_TRUE , 1, GL_GEQUAL, GL_FALSE, 1, 1, GL_KEEP, GL_KEEP, GL_KEEP, GL_ALWAYS, },
     };
 } // namespace
 
