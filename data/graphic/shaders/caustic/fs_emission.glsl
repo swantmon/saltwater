@@ -8,10 +8,7 @@ layout(std140, binding = 3) uniform UB3
 {
     mat4 ps_LightProjectionMatrix;
     mat4 ps_InverseLightViewMatrix;
-    vec4 ps_LightPosition;
-    vec4 ps_LightDirection;
-    vec4 ps_LightColor;
-    vec4 ps_LightSettings; // InvSqrAttenuationRadius, AngleScale, AngleOffset, Unused
+    uint ps_ExposureHistoryIndex;
 };
 
 layout(binding = 0) uniform sampler2D ps_RefractiveNormal;

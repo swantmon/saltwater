@@ -19,6 +19,7 @@
 #include "engine/graphic/gfx_buffer_manager.h"
 #include "engine/graphic/gfx_caustic_renderer.h"
 #include "engine/graphic/gfx_context_manager.h"
+#include "engine/graphic/gfx_histogram_renderer.h"
 #include "engine/graphic/gfx_main.h"
 #include "engine/graphic/gfx_mesh_manager.h"
 #include "engine/graphic/gfx_performance.h"
@@ -88,10 +89,7 @@ namespace
         {
             glm::mat4 m_LightProjectionMatrix;
             glm::mat4 m_InverseLightViewMatrix;
-            glm::vec4 m_LightPosition;
-            glm::vec4 m_LightDirection;
-            glm::vec4 m_LightColor;
-            glm::vec4 m_LightSettings; // InvSqrAttenuationRadius, AngleScale, AngleOffset, Has shadows
+            int       m_ExposureHistoryIndex;
         };
 
     private:
@@ -442,10 +440,7 @@ namespace
  
             LightProperties.m_LightProjectionMatrix  = pPointLight->GetCamera()->GetProjectionMatrix();
             LightProperties.m_InverseLightViewMatrix = glm::inverse(pPointLight->GetCamera()->GetView()->GetViewMatrix());
-            LightProperties.m_LightPosition          = glm::vec4(pPointLightComponent->GetHostEntity()->GetWorldPosition(), 1.0f); 
-            LightProperties.m_LightDirection         = glm::normalize(glm::vec4(pPointLightComponent->GetDirection(), 0.0f)); 
-            LightProperties.m_LightColor             = glm::vec4(pPointLightComponent->GetLightness(), 1.0f); 
-            LightProperties.m_LightSettings          = glm::vec4(InvSqrAttenuationRadius, AngleScale, AngleOffset, 0.0f); 
+            LightProperties.m_ExposureHistoryIndex   = HistogramRenderer::GetCurrentExposureHistoryIndex();
  
             BufferManager::UploadBufferData(m_LightPropertiesPtr, &LightProperties); 
 
@@ -727,35 +722,43 @@ namespace
             ContextManager::Draw(s_TextureSize * s_TextureSize, 0);
 
             Performance::EndEvent();
+
+            Performance::BeginEvent("Apply caustic");
+
+            ContextManager::SetTargetSet(TargetSetManager::GetLightAccumulationTargetSet());
+
+            ContextManager::SetViewPortSet(ViewManager::GetViewPortSet());
+
+            ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::NoDepth));
+
+            ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
+
+            ContextManager::SetBlendState(StateManager::GetBlendState(CBlendState::AdditionBlend));
+
+            ContextManager::SetShaderVS(m_FullscreenVSPtr);
+
+            ContextManager::SetShaderPS(m_PhotonApplyPSPtr);
+
+            ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+
+            ContextManager::SetConstantBuffer(1, m_LightPropertiesPtr);
+
+            ContextManager::SetResourceBuffer(0, HistogramRenderer::GetExposureHistoryBuffer());
+
+            ContextManager::SetTopology(STopology::TriangleList);
+
+            ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+
+            ContextManager::SetTexture(0, TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget());
+
+            ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+
+            ContextManager::SetTexture(1, m_PhotonGatheringTexturePtr);
+
+            ContextManager::Draw(3, 0);
+
+            Performance::EndEvent();
         }
-
-        Performance::BeginEvent("Apply");
-
-        ContextManager::SetTargetSet(TargetSetManager::GetLightAccumulationTargetSet());
-
-        ContextManager::SetViewPortSet(ViewManager::GetViewPortSet());
-
-        ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::NoDepth));
-
-        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
-
-        ContextManager::SetBlendState(StateManager::GetBlendState(CBlendState::AdditionBlend));
-
-        ContextManager::SetShaderVS(m_FullscreenVSPtr);
-
-        ContextManager::SetShaderPS(m_PhotonApplyPSPtr);
-
-        ContextManager::SetTopology(STopology::TriangleList);
-
-        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
-
-        ContextManager::SetTexture(0, m_PhotonGatheringTexturePtr);
-
-        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
-
-        ContextManager::Draw(3, 0);
-
-        Performance::EndEvent();
 
         ContextManager::ResetTopology();
 
