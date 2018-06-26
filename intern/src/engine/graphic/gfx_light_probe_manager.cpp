@@ -921,6 +921,8 @@ namespace
             // -----------------------------------------------------------------------------
             // Surface
             // -----------------------------------------------------------------------------
+            if (MeshPtr->GetNumberOfLODs() == 0) continue;
+
             CSurfacePtr SurfacePtr = MeshPtr->GetLOD(0)->GetSurface();
 
             if (SurfacePtr == 0)
