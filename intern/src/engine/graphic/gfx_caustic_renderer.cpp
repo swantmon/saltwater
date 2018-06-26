@@ -724,8 +724,6 @@ namespace
 
             ContextManager::SetTexture(0, m_PhotonLocationTexturePtr);
 
-            ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
-
             ContextManager::Draw(s_TextureSize * s_TextureSize, 0);
 
             Performance::EndEvent();

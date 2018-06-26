@@ -75,7 +75,7 @@ float m32 = -ps_LightProjectionMatrix[3][2];
 float near = 0.1f;//(2.0f*m32)/(2.0f*m22-2.0f);
 float far  = 20.1f;//((m22-1.0f)*near)/(m22+1.0);
 
-float indexOfRefraction = 1.46f;
+float indexOfRefraction = 0.46f;
 
 
 vec4 local1 = vec4(near*far, far-near, far+near, far);
