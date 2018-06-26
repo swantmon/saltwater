@@ -1,4 +1,3 @@
-
 #ifndef __INCLUDE_VS_GATHERING_GLSL__
 #define __INCLUDE_VS_GATHERING_GLSL__
 
@@ -9,6 +8,8 @@ layout(std140, binding = 0) uniform UB0
 };
 
 layout(binding = 0) uniform sampler2D ps_PhotonPosition;
+
+layout(location = 0) out vec4 out_NormalizedCoords;
 
 out gl_PerVertex
 {
@@ -27,10 +28,12 @@ void main()
 
     vec4 PhotonPosition = texture(ps_PhotonPosition, UV);
 
-    if (PhotonPosition.a < 0.0f) return;
+    if (PhotonPosition.a < 0.0f) return;    
 
     gl_PointSize = 3.0f;
     gl_Position  = m_ProjectionMatrix * m_ViewMatrix * vec4(PhotonPosition.xyz, 1.0f);
+
+    out_NormalizedCoords = gl_Position / gl_Position.w;
 }
 
 #endif // __INCLUDE_VS_GATHERING_GLSL__
