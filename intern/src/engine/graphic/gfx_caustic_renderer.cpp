@@ -729,34 +729,33 @@ namespace
             Performance::EndEvent();
         }
 
-//         Performance::BeginEvent("Apply");
-// 
-//         ContextManager::SetTargetSet(TargetSetManager::GetLightAccumulationTargetSet());
-// 
-//         ContextManager::SetViewPortSet(ViewManager::GetViewPortSet());
-// 
-//         ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::NoDepth));
-// 
-//         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
-// 
-//         ContextManager::SetBlendState(StateManager::GetBlendState(CBlendState::AdditionBlend));
-// 
-//         ContextManager::SetShaderVS(m_FullscreenVSPtr);
-// 
-//         ContextManager::SetShaderPS(m_PhotonApplyPSPtr);
-// 
-//         ContextManager::SetTopology(STopology::TriangleList);
-// 
-//         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
-// 
-//         ContextManager::SetTexture(0, m_PhotonGatheringTexturePtr);
-// 
-//         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
-// 
-//         ContextManager::Draw(3, 0);
-// 
-//         Performance::EndEvent();
+        Performance::BeginEvent("Apply");
 
+        ContextManager::SetTargetSet(TargetSetManager::GetLightAccumulationTargetSet());
+
+        ContextManager::SetViewPortSet(ViewManager::GetViewPortSet());
+
+        ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::NoDepth));
+
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
+
+        ContextManager::SetBlendState(StateManager::GetBlendState(CBlendState::AdditionBlend));
+
+        ContextManager::SetShaderVS(m_FullscreenVSPtr);
+
+        ContextManager::SetShaderPS(m_PhotonApplyPSPtr);
+
+        ContextManager::SetTopology(STopology::TriangleList);
+
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+
+        ContextManager::SetTexture(0, m_PhotonGatheringTexturePtr);
+
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+
+        ContextManager::Draw(3, 0);
+
+        Performance::EndEvent();
 
         ContextManager::ResetTopology();
 

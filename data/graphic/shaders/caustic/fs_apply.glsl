@@ -12,6 +12,7 @@ layout(location = 0) out vec4 out_Output;
 // -----------------------------------------------------------------------------
 void main(void)
 {
+    out_Output = vec4(0.0f);
 }
 
 #endif // __INCLUDE_FS_APPLY_GLSL__
