@@ -103,7 +103,7 @@ vec4 local2 = vec4(1.0/indexOfRefraction, 1.0/(indexOfRefraction*indexOfRefracti
     vec4 P_2_tilde = vec4( T_1 * d_V + VSPosition.xyz, 1.0);
     vec3 N_2 = texture2D( ps_RefractiveNormal, ProjectToTexCoord( P_2_tilde ) ).xyz;
     float dotN2 = dot( N_2.xyz, N_2.xyz );
-    N_2 = normalize( 2.0*N_2-1.0 );
+    N_2 = normalize( N_2 );
 
     // What happens if we lie in a black-texel?  Means no normal!  Conceptually,
     //   this means we pass thru "side" of object.  Use norm perpindicular to view
