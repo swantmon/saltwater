@@ -457,13 +457,13 @@ namespace
 
             Performance::BeginEvent("Refraction");
 
-            TargetSetManager::ClearTargetSet(m_RefractionTargetSetPtr);
+            TargetSetManager::ClearTargetSet(m_RefractionTargetSetPtr, glm::vec4(0.0f), 0.0f);
 
             ContextManager::SetTargetSet(m_RefractionTargetSetPtr);
 
             ContextManager::SetViewPortSet(m_ViewportSetPtr);
 
-            ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::Default));
+            ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::EState::GreatEqualDepth));
 
             ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::FrontCull));
 
@@ -488,6 +488,8 @@ namespace
                 CMesh* pMesh = static_cast<CMesh*>(pDtComponent->GetFacet(Dt::CMeshComponent::Graphic));
 
                 // -----------------------------------------------------------------------------
+
+                if (pMesh->GetNumberOfLODs() == 0) continue;
 
                 CSurfacePtr SurfacePtr = pMesh->GetLOD(0)->GetSurface();
 
@@ -577,6 +579,8 @@ namespace
 
                 // -----------------------------------------------------------------------------
 
+                if (pMesh->GetNumberOfLODs() == 0) continue;
+
                 CSurfacePtr SurfacePtr = pMesh->GetLOD(0)->GetSurface();
 
                 const Gfx::CMaterial* pMaterial = SurfacePtr->GetMaterial();
@@ -658,6 +662,8 @@ namespace
                 CMesh* pMesh = static_cast<CMesh*>(pDtComponent->GetFacet(Dt::CMeshComponent::Graphic));
 
                 // -----------------------------------------------------------------------------
+
+                if (pMesh->GetNumberOfLODs() == 0) continue;
 
                 CSurfacePtr SurfacePtr = pMesh->GetLOD(0)->GetSurface();
 
