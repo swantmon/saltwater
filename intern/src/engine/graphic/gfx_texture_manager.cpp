@@ -747,9 +747,21 @@ namespace
                 ILenum CheckILFormat = ilGetInteger(IL_IMAGE_FORMAT);
                 ILenum CheckILType   = ilGetInteger(IL_IMAGE_TYPE);
 
-                if (CheckILFormat != NativeILFormat || CheckILType != NativeILType)
+                if (_rDescriptor.m_Format != STextureDescriptor::s_FormatFromSource)
                 {
-                    ilConvertImage(NativeILFormat, NativeILType);
+                    if (CheckILFormat != NativeILFormat || CheckILType != NativeILType)
+                    {
+                        ilConvertImage(NativeILFormat, NativeILType);
+                    }
+                }
+                else
+                {
+                    NativeILFormat = CheckILFormat;
+                    NativeILType   = CheckILType;
+
+                    GLInternalFormat = ilGetInteger(IL_IMAGE_CHANNELS) == 4 ? GL_RGBA8 : GL_RGB8;
+                    GLFormat         = NativeILFormat;
+                    GLType           = NativeILType;
                 }
 
                 pTextureData = ilGetData();
@@ -819,7 +831,7 @@ namespace
         {
             glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, ImageWidth, ImageHeight, GLFormat, GLType, pTextureData);
 
-            if (_rDescriptor.m_NumberOfMipMaps == STextureDescriptor::s_NumberOfMipMapsFromSource && NumberOfMipmaps > 1)
+            if (_rDescriptor.m_NumberOfMipMaps == STextureDescriptor::s_NumberOfMipMapsFromSource && NumberOfMipmaps > 1 && _rDescriptor.m_pFileName != nullptr)
             {
                 for (unsigned int IndexOfMipMap = 1; IndexOfMipMap < NumberOfMipmaps; ++IndexOfMipMap)
                 {

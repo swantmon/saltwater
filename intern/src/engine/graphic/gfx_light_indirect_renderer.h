@@ -1,12 +1,13 @@
-//
-//  gfx_light_indirect_renderer.h
-//  graphic
-//
-//  Created by Tobias Schwandt on 02/12/16.
-//  Copyright (c) 2016 TU Ilmenau. All rights reserved.
-//
 
 #pragma once
+
+namespace Gfx
+{
+    struct SIndirectLightSettings
+    {
+        float m_RSMSplitting;
+    };
+} // namespace Gfx
 
 namespace Gfx
 {
@@ -31,5 +32,9 @@ namespace LightIndirectRenderer
     
     void Update();
     void Render();
+
+    ENGINE_API void ResetSettings();
+    ENGINE_API void SetSettings(const SIndirectLightSettings& _rSettings);
+    ENGINE_API const SIndirectLightSettings& GetSettings();
 } // namespace LightIndirectRenderer
 } // namespace Gfx

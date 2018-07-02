@@ -19,11 +19,11 @@
 #include "engine/data/data_entity_manager.h"
 #include "engine/data/data_hierarchy_facet.h"
 #include "engine/data/data_map.h"
-#include "engine/data/data_material.h"
 #include "engine/data/data_material_component.h"
-#include "engine/data/data_material_manager.h"
 #include "engine/data/data_mesh_component.h"
 #include "engine/data/data_transformation_facet.h"
+
+#include "engine/graphic/gfx_material_manager.h"
 
 #include "assimp/Importer.hpp"
 #include "assimp/postprocess.h"
@@ -268,11 +268,9 @@ namespace
             // -----------------------------------------------------------------------------
             if (pMesh->mMaterialIndex < pScene->mNumMaterials)
             {
-                auto pMaterial = Dt::MaterialManager::CreateMaterialFromAssimp(_rFile, pMesh->mMaterialIndex);
-
                 auto pMaterialComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CMaterialComponent>();
 
-                pMaterialComponent->SetMaterial(pMaterial);
+                Gfx::MaterialManager::CreateMaterialFromAssimp(_rFile, pMesh->mMaterialIndex, pMaterialComponent);
 
                 Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pMaterialComponent, Dt::CMaterialComponent::DirtyCreate);
 

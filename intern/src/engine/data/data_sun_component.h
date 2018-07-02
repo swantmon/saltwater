@@ -42,6 +42,8 @@ namespace Dt
         void SetIntensity(float _Intensity);
         float GetIntensity() const;
 
+        float GetSunAngularRadius() const;
+
         glm::vec3& GetLightness();
         const glm::vec3& GetLightness() const;
 

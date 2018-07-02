@@ -55,9 +55,6 @@
     <Filter Include="data\map\entity\components\scripts">
       <UniqueIdentifier>{b3d687b0-64c4-47eb-a5d1-7e1ab39277a9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="data\materials">
-      <UniqueIdentifier>{65b5089e-40fd-40a7-9e32-7e94d37aa14f}</UniqueIdentifier>
-    </Filter>
     <Filter Include="graphic">
       <UniqueIdentifier>{4736580d-51a3-4fbd-be18-dc596dc2dd3e}</UniqueIdentifier>
     </Filter>
@@ -166,6 +163,9 @@
     <Filter Include="core\program_parameters">
       <UniqueIdentifier>{ceef442b-4418-4dad-9283-e4a163698b40}</UniqueIdentifier>
     </Filter>
+    <Filter Include="network">
+      <UniqueIdentifier>{e9e54e8a-9d7c-43f0-b6c0-50bb3034ffdb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\engine\core\core_asset_importer.cpp">
@@ -248,12 +248,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\engine\data\data_camera_component.cpp">
       <Filter>data\map\entity\components\camera</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\engine\data\data_material.cpp">
-      <Filter>data\materials</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\engine\data\data_material_manager.cpp">
-      <Filter>data\materials</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\engine\graphic\gfx_ar_renderer.cpp">
       <Filter>graphic\engine\renderer</Filter>
@@ -470,6 +464,15 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\engine\engine.cpp" />
     <ClCompile Include="..\..\..\src\engine\engine_precompiled.cpp" />
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_debug.cpp">
+      <Filter>graphic\ogl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\engine\network\core_network_manager.cpp">
+      <Filter>network</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\engine\network\core_network_socket.cpp">
+      <Filter>network</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\engine\core\core_asset_generator.h">
@@ -570,12 +573,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\engine\data\data_script_component.h">
       <Filter>data\map\entity\components\scripts</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\engine\data\data_material.h">
-      <Filter>data\materials</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\engine\data\data_material_manager.h">
-      <Filter>data\materials</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_graphics_info.h">
       <Filter>graphic\engine</Filter>
@@ -864,6 +861,18 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\engine\script\script_easyar_target_script.h">
       <Filter>script\scripts</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_debug.h">
+      <Filter>graphic\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\engine\network\core_network_manager.h">
+      <Filter>network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\engine\network\core_network_socket.h">
+      <Filter>network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\engine\network\core_network_common.h">
+      <Filter>network</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

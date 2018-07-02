@@ -242,11 +242,12 @@ namespace
         // -----------------------------------------------------------------------------
         // Create light accumulation target set
         // -----------------------------------------------------------------------------
-        CTexturePtr LightAccumulationRenderbuffer[1];
+        CTexturePtr LightAccumulationRenderbuffer[2];
         
         LightAccumulationRenderbuffer[0] = LightAccumulationTexturePtr;
+        LightAccumulationRenderbuffer[1] = DepthTexturePtr;
 
-        m_LightAccumulationTargetSet = CreateTargetSet(LightAccumulationRenderbuffer, 1);
+        m_LightAccumulationTargetSet = CreateTargetSet(LightAccumulationRenderbuffer, 2);
 
         SetTargetSetLabel(m_LightAccumulationTargetSet, "FB: Light Accumulation");
 
@@ -592,11 +593,12 @@ namespace
         // -----------------------------------------------------------------------------
         // Create light accumulation target set
         // -----------------------------------------------------------------------------
-        CTexturePtr LightAccumulationRenderbuffer[1];
+        CTexturePtr LightAccumulationRenderbuffer[2];
         
         LightAccumulationRenderbuffer[0] = LightAccumulationTexturePtr;
+        LightAccumulationRenderbuffer[1] = DepthTexturePtr;
 
-        ResizeTargetSet(m_LightAccumulationTargetSet, LightAccumulationRenderbuffer, 1);
+        ResizeTargetSet(m_LightAccumulationTargetSet, LightAccumulationRenderbuffer, 2);
 
         // -----------------------------------------------------------------------------
         // Create hit proxy target set

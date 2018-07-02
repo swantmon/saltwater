@@ -543,6 +543,12 @@ namespace
     void CGfxContextManager::ResetDepthStencilState()
     {
         m_DepthStencilStatePtr = nullptr;
+
+        glEnable(GL_DEPTH_TEST);
+        
+        glDepthFunc(GL_LESS);
+
+        glDepthMask(GL_TRUE);
     }
 
     // -----------------------------------------------------------------------------

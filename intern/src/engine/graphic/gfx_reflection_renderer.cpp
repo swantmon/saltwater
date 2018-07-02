@@ -161,8 +161,6 @@ namespace
 
         CTargetSetPtr     m_SSRTargetSetPtr;
         
-        CRenderContextPtr m_LightAccumulationRenderContextPtr;
-
         std::vector<CTexturePtr>   m_HCBTexturePtrs;
 
         std::vector<CTargetSetPtr>     m_HCBTargetSetPtrs;
@@ -197,7 +195,6 @@ namespace
         , m_BRDFTexture2DPtr                 ()
         , m_HCBTexture2DPtr                  ()
         , m_SSRTargetSetPtr                  ()
-        , m_LightAccumulationRenderContextPtr()
         , m_LightProbeRenderJobs             ()
         , m_SSRRenderJobs                    ()
     {
@@ -238,7 +235,6 @@ namespace
         m_BRDFTexture2DPtr                  = 0;
         m_HCBTexture2DPtr                   = 0;
         m_SSRTargetSetPtr                   = 0;
-        m_LightAccumulationRenderContextPtr = 0;
 
         for (unsigned int IndexOfElement = 0; IndexOfElement < m_HCBTexturePtrs.size(); ++IndexOfElement)
         {
@@ -259,15 +255,15 @@ namespace
     
     void CGfxReflectionRenderer::OnSetupShader()
     {
-        m_RectangleShaderVSPtr  = ShaderManager::CompileVS("vs_fullscreen.glsl", "main");
+        m_RectangleShaderVSPtr  = ShaderManager::CompileVS("system/vs_fullscreen.glsl", "main");
         
-        m_ImageLightShaderPSPtr = ShaderManager::CompilePS("fs_light_imagelight.glsl" , "main");
+        m_ImageLightShaderPSPtr = ShaderManager::CompilePS("image_light/fs_light_imagelight.glsl" , "main");
 
-        m_SSRShaderPSPtr        = ShaderManager::CompilePS("fs_ssr.glsl", "main");
+        m_SSRShaderPSPtr        = ShaderManager::CompilePS("ssr/fs_ssr.glsl", "main");
 
-        m_BRDFShaderPtr         = ShaderManager::CompileCS("cs_brdf.glsl", "main");
+        m_HCBShaderPSPtr        = ShaderManager::CompilePS("ssr/fs_hcb_generation.glsl", "main");
 
-        m_HCBShaderPSPtr        = ShaderManager::CompilePS("fs_hcb_generation.glsl", "main");
+        m_BRDFShaderPtr         = ShaderManager::CompileCS("pbs/cs_brdf.glsl", "main");
     }
     
     // -----------------------------------------------------------------------------
@@ -375,22 +371,6 @@ namespace
     
     void CGfxReflectionRenderer::OnSetupStates()
     {
-        CCameraPtr          MainCameraPtr      = ViewManager     ::GetFullQuadCamera();
-        
-        CViewPortSetPtr     ViewPortSetPtr     = ViewManager     ::GetViewPortSet();
-        
-        CTargetSetPtr       LightTargetSetPtr  = TargetSetManager::GetLightAccumulationTargetSet();
-        
-        CRenderStatePtr     LightStatePtr      = StateManager::GetRenderState(CRenderState::AdditionBlend);
-
-        // -----------------------------------------------------------------------------
-        
-        m_LightAccumulationRenderContextPtr = ContextManager::CreateRenderContext();
-        
-        m_LightAccumulationRenderContextPtr->SetCamera(MainCameraPtr);
-        m_LightAccumulationRenderContextPtr->SetViewPortSet(ViewPortSetPtr);
-        m_LightAccumulationRenderContextPtr->SetTargetSet(LightTargetSetPtr);
-        m_LightAccumulationRenderContextPtr->SetRenderState(LightStatePtr);
     }
     
     // -----------------------------------------------------------------------------
@@ -721,7 +701,15 @@ namespace
         // -----------------------------------------------------------------------------
         // Render probes together with SSR result
         // -----------------------------------------------------------------------------
-        ContextManager::SetRenderContext(m_LightAccumulationRenderContextPtr);
+        ContextManager::SetTargetSet(TargetSetManager::GetLightAccumulationTargetSet());
+
+        ContextManager::SetViewPortSet(ViewManager::GetViewPortSet());
+
+        ContextManager::SetBlendState(StateManager::GetBlendState(CBlendState::AdditionBlend));
+
+        ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::NoDepth));
+
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
         
         ContextManager::SetTopology(STopology::TriangleList);
         

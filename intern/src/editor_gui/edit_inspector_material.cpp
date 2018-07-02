@@ -42,6 +42,7 @@ namespace Edit
         m_pMetallicTextureEdit ->SetLayout((CTextureValue::NoPreview));
         m_pBumpTextureEdit     ->SetLayout((CTextureValue::NoPreview));
         m_pAOTextureEdit       ->SetLayout((CTextureValue::NoPreview));
+        m_pAlphaTextureEdit    ->SetLayout((CTextureValue::NoPreview));
 
         // -----------------------------------------------------------------------------
         // Signal / slots
@@ -52,6 +53,7 @@ namespace Edit
         connect(m_pMetallicTextureEdit, SIGNAL(fileChanged(QString)), SLOT(valueChanged()));
         connect(m_pBumpTextureEdit, SIGNAL(fileChanged(QString)), SLOT(valueChanged()));
         connect(m_pAOTextureEdit, SIGNAL(fileChanged(QString)), SLOT(valueChanged()));
+        connect(m_pAlphaTextureEdit, SIGNAL(fileChanged(QString)), SLOT(valueChanged()));
 
         // -----------------------------------------------------------------------------
         // Color picker
@@ -89,7 +91,7 @@ namespace Edit
 
         QColor RGB = ButtonPalette.color(QPalette::Button);
 
-        glm::vec3 AlbedoColor = glm::vec3(RGB.red() / 255.0f, RGB.green() / 255.0f, RGB.blue() / 255.0f);
+        glm::vec4 AlbedoColor = glm::vec4(RGB.red() / 255.0f, RGB.green() / 255.0f, RGB.blue() / 255.0f, RGB.alpha() / 255.0f);
 
         QString NewColorTexture     = m_pAlbedoTextureEdit->GetTextureFile();
         QString NewNormalTexture    = m_pNormalTextureEdit->GetTextureFile();
@@ -97,6 +99,7 @@ namespace Edit
         QString NewMetalicTexture   = m_pMetallicTextureEdit->GetTextureFile();
         QString NewBumpTexture      = m_pBumpTextureEdit->GetTextureFile();
         QString NewAOTexture        = m_pAOTextureEdit->GetTextureFile();
+        QString NewAlphaTexture     = m_pAlphaTextureEdit->GetTextureFile();
 
         float RoughnessValue   = m_pRoughnessEdit->text().toFloat();
         float MetallicValue    = m_pMetallicEdit->text().toFloat();
@@ -148,6 +151,7 @@ namespace Edit
         std::string MetallicTextureEdit = std::string(m_pMetallicTextureEdit->GetTextureFile().toLatin1());
         std::string BumpTextureEdit = std::string(m_pBumpTextureEdit->GetTextureFile().toLatin1());
         std::string AOTextureEdit = std::string(m_pAOTextureEdit->GetTextureFile().toLatin1());
+        std::string AlphaTextureEdit = std::string(m_pAlphaTextureEdit->GetTextureFile().toLatin1());
 
         NewMessage.Put(AlbedoTextureEdit);
         NewMessage.Put(NormalTextureEdit);
@@ -155,6 +159,7 @@ namespace Edit
         NewMessage.Put(MetallicTextureEdit);
         NewMessage.Put(BumpTextureEdit);
         NewMessage.Put(AOTextureEdit);
+        NewMessage.Put(AlphaTextureEdit);
 
         NewMessage.Reset();
 
@@ -191,7 +196,7 @@ namespace Edit
 
         QColor RGB = ButtonPalette.color(QPalette::Button);
 
-        QColor NewColor = QColorDialog::getColor(RGB);
+        QColor NewColor = QColorDialog::getColor(RGB, nullptr, QString(), QColorDialog::ShowAlphaChannel);
 
         ButtonPalette.setColor(QPalette::Button, NewColor);
 
@@ -251,7 +256,7 @@ namespace Edit
 
         if (Hash != -1)
         {
-            m_MaterialHash = static_cast<Base::BHash>(Hash);
+            m_MaterialHash = static_cast<Base::ID>(Hash);
 
             // -----------------------------------------------------------------------------
             // Request info of texture
@@ -304,7 +309,7 @@ namespace Edit
 
         NewApplyMessage.Put(m_CurrentEntityID);
 
-        NewApplyMessage.Put(static_cast<Base::BHash>(Result));
+        NewApplyMessage.Put(static_cast<Base::ID>(Result));
 
         NewApplyMessage.Reset();
 
@@ -324,7 +329,7 @@ namespace Edit
 
         if (EntityID != m_CurrentEntityID) return;
 
-        m_MaterialHash = _rMessage.Get<Base::BHash>();
+        m_MaterialHash = _rMessage.Get<Base::ID>();
 
         CMessage NewMessage;
 
@@ -342,11 +347,11 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
-        Base::BHash MaterialID = _rMessage.Get<Base::BHash>();
+        Base::ID MaterialID = _rMessage.Get<Base::ID>();
 
         if (MaterialID != m_MaterialHash) return;
 
-        glm::vec3 AlbedoColor = _rMessage.Get<glm::vec3>();
+        glm::vec4 AlbedoColor = _rMessage.Get<glm::vec4>();
 
         glm::vec4 TilingOffset = _rMessage.Get<glm::vec4>();
 
@@ -361,6 +366,7 @@ namespace Edit
         std::string MetalMapName     = _rMessage.Get<std::string>();
         std::string BumpMapName      = _rMessage.Get<std::string>();
         std::string AOMapName        = _rMessage.Get<std::string>();
+        std::string AlphaMapName     = _rMessage.Get<std::string>();
 
         // -----------------------------------------------------------------------------
         // Set values
@@ -380,7 +386,7 @@ namespace Edit
 
         QPalette ButtonPalette = m_pAlbedoColorButton->palette();
 
-        ButtonPalette.setColor(QPalette::Button, QColor(AlbedoColor[0] * 255.0f, AlbedoColor[1] * 255.0f, AlbedoColor[2] * 255.0f));
+        ButtonPalette.setColor(QPalette::Button, QColor(AlbedoColor[0] * 255.0f, AlbedoColor[1] * 255.0f, AlbedoColor[2] * 255.0f, AlbedoColor[3] * 255.0f));
 
         m_pAlbedoColorButton->setPalette(ButtonPalette);
 
@@ -421,6 +427,10 @@ namespace Edit
         // -----------------------------------------------------------------------------
 
         m_pAOTextureEdit->SetTextureFile(QString(AOMapName.c_str()));
+
+        // -----------------------------------------------------------------------------
+
+        m_pAlphaTextureEdit->SetTextureFile(QString(AlphaMapName.c_str()));
 
         // -----------------------------------------------------------------------------
 

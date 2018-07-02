@@ -182,9 +182,9 @@ namespace
 
     void CGfxARRenderer::OnSetupShader()
     {
-        m_DifferentialGBufferShaderPSPtr = ShaderManager::CompilePS("fs_differential_gbuffer.glsl", "main");
+        m_DifferentialGBufferShaderPSPtr = ShaderManager::CompilePS("ar/fs_differential_gbuffer.glsl", "main");
 
-        m_HitProxyShaderPtr = ShaderManager::CompilePS("fs_hitproxy.glsl", "main");
+        m_HitProxyShaderPtr = ShaderManager::CompilePS("picking/fs_hitproxy.glsl", "main");
     }
 
     // -----------------------------------------------------------------------------

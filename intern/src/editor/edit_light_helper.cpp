@@ -259,37 +259,35 @@ namespace
 
     void CLightHelper::OnNewArealight(Edit::CMessage& _rMessage)
     {
-        {
-            // -----------------------------------------------------------------------------
-            // Get entity and set type + category
-            // -----------------------------------------------------------------------------
-            Base::ID EntityID = _rMessage.Get<Base::ID>();
+        // -----------------------------------------------------------------------------
+        // Get entity and set type + category
+        // -----------------------------------------------------------------------------
+        Base::ID EntityID = _rMessage.Get<Base::ID>();
 
-            Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
+        Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(EntityID);
 
-            pCurrentEntity->SetCategory(Dt::SEntityCategory::Dynamic);
+        pCurrentEntity->SetCategory(Dt::SEntityCategory::Dynamic);
 
-            // -----------------------------------------------------------------------------
-            // Create facet and set it
-            // -----------------------------------------------------------------------------
-            Dt::CAreaLightComponent* pComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CAreaLightComponent>();
+        // -----------------------------------------------------------------------------
+        // Create facet and set it
+        // -----------------------------------------------------------------------------
+        Dt::CAreaLightComponent* pComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CAreaLightComponent>();
 
-            pComponent->EnableTemperature   (false);
-            pComponent->SetColor            (glm::vec3(1.0f, 1.0f, 1.0f));
-            pComponent->SetRotation         (0.0f);
-            pComponent->SetWidth            (8.0f);
-            pComponent->SetHeight           (8.0f);
-            pComponent->SetDirection        (glm::vec3(-0.01f, 0.01f, -1.0f));
-            pComponent->SetIntensity        (1200.0f);
-            pComponent->SetTemperature      (0);
-            pComponent->SetIsTwoSided       (false);
+        pComponent->EnableTemperature   (false);
+        pComponent->SetColor            (glm::vec3(1.0f, 1.0f, 1.0f));
+        pComponent->SetRotation         (0.0f);
+        pComponent->SetWidth            (8.0f);
+        pComponent->SetHeight           (8.0f);
+        pComponent->SetDirection        (glm::vec3(-0.01f, 0.01f, -1.0f));
+        pComponent->SetIntensity        (1200.0f);
+        pComponent->SetTemperature      (0);
+        pComponent->SetIsTwoSided       (false);
 
-            pComponent->UpdateLightness();
+        pComponent->UpdateLightness();
 
-            pCurrentEntity->AttachComponent(pComponent);
+        pCurrentEntity->AttachComponent(pComponent);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Dt::CAreaLightComponent::DirtyCreate);
-        }
+        Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Dt::CAreaLightComponent::DirtyCreate);
     }
 
     // -----------------------------------------------------------------------------
@@ -308,17 +306,13 @@ namespace
 
             NewMessage.Put(pCurrentEntity->GetID());
             NewMessage.Put(static_cast<int>(pPointLightFacet->HasTemperature()));
-            NewMessage.Put(pPointLightFacet->GetColor()[0]);
-            NewMessage.Put(pPointLightFacet->GetColor()[1]);
-            NewMessage.Put(pPointLightFacet->GetColor()[2]);
+            NewMessage.Put(pPointLightFacet->GetColor());
             NewMessage.Put(pPointLightFacet->GetTemperature());
             NewMessage.Put(pPointLightFacet->GetIntensity());
             NewMessage.Put(pPointLightFacet->GetAttenuationRadius());
             NewMessage.Put(glm::degrees(pPointLightFacet->GetInnerConeAngle()));
             NewMessage.Put(glm::degrees(pPointLightFacet->GetOuterConeAngle()));
-            NewMessage.Put(pPointLightFacet->GetDirection()[0]);
-            NewMessage.Put(pPointLightFacet->GetDirection()[1]);
-            NewMessage.Put(pPointLightFacet->GetDirection()[2]);
+            NewMessage.Put(pPointLightFacet->GetDirection());
             NewMessage.Put(static_cast<int>(pPointLightFacet->GetShadowType()));
             NewMessage.Put(static_cast<int>(pPointLightFacet->GetShadowQuality()));
             NewMessage.Put(static_cast<int>(pPointLightFacet->GetRefreshMode()));
@@ -345,14 +339,10 @@ namespace
 
             NewMessage.Put(pCurrentEntity->GetID());
             NewMessage.Put(static_cast<int>(pLightFacet->HasTemperature()));
-            NewMessage.Put(pLightFacet->GetColor()[0]);
-            NewMessage.Put(pLightFacet->GetColor()[1]);
-            NewMessage.Put(pLightFacet->GetColor()[2]);
+            NewMessage.Put(pLightFacet->GetColor());
             NewMessage.Put(pLightFacet->GetTemperature());
             NewMessage.Put(pLightFacet->GetIntensity());
-            NewMessage.Put(pLightFacet->GetDirection()[0]);
-            NewMessage.Put(pLightFacet->GetDirection()[1]);
-            NewMessage.Put(pLightFacet->GetDirection()[2]);
+            NewMessage.Put(pLightFacet->GetDirection());
             NewMessage.Put(static_cast<int>(pLightFacet->GetRefreshMode()));
 
             NewMessage.Reset();
@@ -443,18 +433,14 @@ namespace
 
             NewMessage.Put(pCurrentEntity->GetID());
             NewMessage.Put(static_cast<int>(pLightFacet->HasTemperature()));
-            NewMessage.Put(pLightFacet->GetColor()[0]);
-            NewMessage.Put(pLightFacet->GetColor()[1]);
-            NewMessage.Put(pLightFacet->GetColor()[2]);
+            NewMessage.Put(pLightFacet->GetColor());
             NewMessage.Put(pLightFacet->GetTemperature());
             NewMessage.Put(pLightFacet->GetIntensity());
             NewMessage.Put(glm::degrees(pLightFacet->GetRotation()));
             NewMessage.Put(pLightFacet->GetWidth());
             NewMessage.Put(pLightFacet->GetHeight());
             NewMessage.Put(pLightFacet->GetIsTwoSided());
-            NewMessage.Put(pLightFacet->GetDirection()[0]);
-            NewMessage.Put(pLightFacet->GetDirection()[1]);
-            NewMessage.Put(pLightFacet->GetDirection()[2]);
+            NewMessage.Put(pLightFacet->GetDirection());
 
             if (pLightFacet->GetHasTexture())
             {
@@ -485,19 +471,12 @@ namespace
 
         if (pLightFacet != nullptr)
         {
-            float R, G, B;
-            float X, Y, Z;
-
             // -----------------------------------------------------------------------------
             // Read values
             // -----------------------------------------------------------------------------
             int ColorMode = _rMessage.Get<int>();
 
-            R = _rMessage.Get<float>();
-            G = _rMessage.Get<float>();
-            B = _rMessage.Get<float>();
-
-            glm::vec3 Color = glm::vec3(R, G, B);
+            glm::vec3 Color = _rMessage.Get<glm::vec3>();
 
             float Temperature       = _rMessage.Get<float>();
             float Intensity         = _rMessage.Get<float>();
@@ -505,11 +484,7 @@ namespace
             float InnerConeAngle    = glm::radians(_rMessage.Get<float>());
             float OuterConeAngle    = glm::radians(_rMessage.Get<float>());
 
-            X = _rMessage.Get<float>();
-            Y = _rMessage.Get<float>();
-            Z = _rMessage.Get<float>();
-
-            glm::vec3 Direction = glm::vec3(X, Y, Z);
+            glm::vec3 Direction = _rMessage.Get<glm::vec3>();
 
             int ShadowType    = _rMessage.Get<int>();
             int ShadowQuality = _rMessage.Get<int>();
@@ -548,28 +523,17 @@ namespace
 
         if (pLightFacet != nullptr)
         {
-            float R, G, B;
-            float X, Y, Z;
-
             // -----------------------------------------------------------------------------
             // Read values
             // -----------------------------------------------------------------------------
             int ColorMode = _rMessage.Get<int>();
 
-            R = _rMessage.Get<float>();
-            G = _rMessage.Get<float>();
-            B = _rMessage.Get<float>();
-
-            glm::vec3 Color = glm::vec3(R, G, B);
+            glm::vec3 Color = _rMessage.Get<glm::vec3>();
 
             float Temperature = _rMessage.Get<float>();
             float Intensity = _rMessage.Get<float>();
 
-            X = _rMessage.Get<float>();
-            Y = _rMessage.Get<float>();
-            Z = _rMessage.Get<float>();
-
-            glm::vec3 Direction = glm::vec3(X, Y, Z);
+            glm::vec3 Direction = _rMessage.Get<glm::vec3>();
 
             int ShadowRefresh = _rMessage.Get<int>();
 
@@ -622,7 +586,7 @@ namespace
             if (Texture.length() > 0)
             {
                 Gfx::STextureDescriptor TextureDescriptor; 
- 
+
                 TextureDescriptor.m_NumberOfPixelsU  = Gfx::STextureDescriptor::s_NumberOfPixelsFromSource; 
                 TextureDescriptor.m_NumberOfPixelsV  = Gfx::STextureDescriptor::s_NumberOfPixelsFromSource; 
                 TextureDescriptor.m_NumberOfPixelsW  = 1;
@@ -727,8 +691,6 @@ namespace
 
         if (pLightFacet != nullptr)
         {
-            float R, G, B;
-            float X, Y, Z;
             std::string TextureFile;
 
             // -----------------------------------------------------------------------------
@@ -736,11 +698,7 @@ namespace
             // -----------------------------------------------------------------------------
             int ColorMode = _rMessage.Get<int>();
 
-            R = _rMessage.Get<float>();
-            G = _rMessage.Get<float>();
-            B = _rMessage.Get<float>();
-
-            glm::vec3 Color = glm::vec3(R, G, B);
+            glm::vec3 Color = _rMessage.Get<glm::vec3>();
 
             float Temperature = _rMessage.Get<float>();
             float Intensity   = _rMessage.Get<float>();
@@ -749,11 +707,7 @@ namespace
             float Height      = _rMessage.Get<float>();
             bool  IsTwoSided  = _rMessage.Get<bool>();
 
-            X = _rMessage.Get<float>();
-            Y = _rMessage.Get<float>();
-            Z = _rMessage.Get<float>();
-
-            glm::vec3 Direction = glm::vec3(X, Y, Z);
+            glm::vec3 Direction = _rMessage.Get<glm::vec3>();
 
             bool HasTexture = _rMessage.Get<bool>();
 

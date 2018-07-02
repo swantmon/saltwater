@@ -252,11 +252,15 @@ namespace
     
     void CGfxPostFXHDRRenderer::OnSetupShader()
     {   
-        m_RectangleShaderVSPtr  = ShaderManager::CompileVS("vs_fullscreen.glsl", "main");
-        m_DownSampleShaderPSPtr = ShaderManager::CompilePS("fs_down_sample.glsl"  , "main");
-        m_GaussianBlurShaderPtr = ShaderManager::CompileCS("cs_gaussian_blur.glsl", "main", "#define TILE_SIZE 8\n#define IMAGE_TYPE rgba16f");
-        m_BloomShaderPSPtr      = ShaderManager::CompilePS("fs_bloom.glsl"        , "main");
-        m_PassThroughPSPtr      = ShaderManager::CompilePS("fs_pass_through.glsl", "main");
+        m_RectangleShaderVSPtr  = ShaderManager::CompileVS("system/vs_fullscreen.glsl" , "main");
+
+        m_DownSampleShaderPSPtr = ShaderManager::CompilePS("filter/fs_down_sample.glsl", "main");
+
+        m_GaussianBlurShaderPtr = ShaderManager::CompileCS("filter/cs_gaussian_blur.glsl", "main", "#define TILE_SIZE 8\n#define IMAGE_TYPE rgba16f");
+
+        m_BloomShaderPSPtr      = ShaderManager::CompilePS("bloom/fs_bloom.glsl", "main");
+
+        m_PassThroughPSPtr      = ShaderManager::CompilePS("system/fs_pass_through.glsl", "main");
     }
     
     // -----------------------------------------------------------------------------

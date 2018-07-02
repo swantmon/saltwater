@@ -10,7 +10,8 @@
 #include "engine/data/data_component.h"
 #include "engine/data/data_component_manager.h"
 #include "engine/data/data_material_component.h"
-#include "engine/data/data_material_manager.h"
+
+#include "engine/graphic/gfx_material_manager.h"
 
 #include "editor/edit_material_helper.h"
 
@@ -103,14 +104,18 @@ namespace
         // -----------------------------------------------------------------------------
         std::string PathToMaterial = Core::AssetManager::GetPathToAssets() + "/" + PathToFile;
 
-        auto pComponent = Dt::MaterialManager::CreateMaterialFromXML(PathToMaterial);
+        auto pComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CMaterialComponent>();
+
+        Gfx::MaterialManager::CreateMaterialFromXML(PathToMaterial, pComponent);
+
+        Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Dt::CMaterialComponent::DirtyCreate);
 
         // -----------------------------------------------------------------------------
         // Set result as ID
         // -----------------------------------------------------------------------------
         if (pComponent != nullptr)
         {
-            _rMessage.SetResult(static_cast<int>(pComponent->GetHash()));
+            _rMessage.SetResult(static_cast<int>(pComponent->GetID()));
         }
         else
         {
@@ -122,15 +127,15 @@ namespace
 
     void CMaterialHelper::OnRequestMaterialInfo(Edit::CMessage& _rMessage)
     {
-        Base::BHash MaterialHash = _rMessage.Get<Base::BHash>();
+        Base::ID MaterialHash = _rMessage.Get<Base::ID>();
 
-        auto pMaterial = Dt::MaterialManager::GetMaterialByHash(MaterialHash);
+        auto pMaterial = Dt::CComponentManager::GetInstance().GetComponent<Dt::CMaterialComponent>(MaterialHash);
 
         if (pMaterial == nullptr) return;
 
         Edit::CMessage NewMessage;
 
-        NewMessage.Put(pMaterial->GetHash());
+        NewMessage.Put(pMaterial->GetID());
 
         NewMessage.Put(pMaterial->GetColor());
         NewMessage.Put(pMaterial->GetTilingOffset());
@@ -146,6 +151,7 @@ namespace
         NewMessage.Put(pMaterial->GetMetalTexture());
         NewMessage.Put(pMaterial->GetBumpTexture());
         NewMessage.Put(pMaterial->GetAmbientOcclusionTexture());
+        NewMessage.Put(pMaterial->GetAlphaTexture());
 
         NewMessage.Reset();
 
@@ -156,14 +162,14 @@ namespace
 
     void CMaterialHelper::OnMaterialUpdate(Edit::CMessage& _rMessage)
     {
-        Base::BHash MaterialHash = _rMessage.Get<Base::BHash>();
+        Base::ID MaterialHash = _rMessage.Get<Base::ID>();
 
-        auto pMaterial = Dt::MaterialManager::GetMaterialByHash(MaterialHash);
+        auto pMaterial = Dt::CComponentManager::GetInstance().GetComponent<Dt::CMaterialComponent>(MaterialHash);
 
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
-        glm::vec3 Color = _rMessage.Get<glm::vec3>();
+        glm::vec4 Color = _rMessage.Get<glm::vec4>();
 
         glm::vec4 TilingOffset = _rMessage.Get<glm::vec4>();
 
@@ -178,6 +184,7 @@ namespace
         std::string MetalMapName     = _rMessage.Get<std::string>();
         std::string BumpMapName      = _rMessage.Get<std::string>();
         std::string AOMapName        = _rMessage.Get<std::string>();
+        std::string AlphaMapName     = _rMessage.Get<std::string>();
  
         pMaterial->SetColor(Color);
         pMaterial->SetTilingOffset(TilingOffset);
@@ -192,21 +199,12 @@ namespace
         pMaterial->SetMetalTexture(MetalMapName);
         pMaterial->SetBumpTexture(BumpMapName);
         pMaterial->SetAmbientOcclusionTexture(AOMapName);
+        pMaterial->SetAlphaTexture(AlphaMapName);
 
         // -----------------------------------------------------------------------------
         // Mark all material components related to this material as dirty
         // -----------------------------------------------------------------------------
-        auto MaterialComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CMaterialComponent>();
-
-        for (auto Component : MaterialComponents)
-        {
-            auto MaterialComponent = static_cast<Dt::CMaterialComponent*>(Component);
-
-            if (MaterialComponent->GetMaterial()->GetHash() == MaterialHash)
-            {
-                Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*MaterialComponent, Dt::CMaterialComponent::DirtyInfo);
-            }
-        }
+        Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pMaterial, Dt::CMaterialComponent::DirtyInfo);
     }
 } // namespace
 

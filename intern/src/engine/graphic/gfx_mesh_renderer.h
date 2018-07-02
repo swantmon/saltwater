@@ -24,6 +24,7 @@ namespace MeshRenderer
     
     void Update();
     void Render();
+    void RenderForward();
     void RenderHitProxy();
 } // namespace MeshRenderer
 } // namespace Gfx

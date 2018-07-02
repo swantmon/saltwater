@@ -13,6 +13,7 @@
 #include "engine/graphic/gfx_background_renderer.h"
 #include "engine/graphic/gfx_buffer_manager.h"
 #include "engine/graphic/gfx_context_manager.h"
+#include "engine/graphic/gfx_debug.h"
 #include "engine/graphic/gfx_debug_renderer.h"
 #include "engine/graphic/gfx_fog_renderer.h"
 #include "engine/graphic/gfx_histogram_renderer.h"
@@ -58,8 +59,10 @@ namespace Pipeline
         Main::OnStart();
 
         // -----------------------------------------------------------------------------
-        // Start performance tools
+        // Start performance and debug tools
         // -----------------------------------------------------------------------------
+        Debug::OnStart();
+
         Performance::OnStart();
 
         // -----------------------------------------------------------------------------
@@ -398,9 +401,11 @@ namespace Pipeline
         ENGINE_CONSOLE_STREAMINFO("Gfx> Finished exiting resource manager.");
 
         // -----------------------------------------------------------------------------
-        // Exit performance tools
+        // Exit performance and debug tools
         // -----------------------------------------------------------------------------
         Performance::OnExit();
+
+        Debug::OnExit();
 
         // -----------------------------------------------------------------------------
         // Exit engine
@@ -482,7 +487,6 @@ namespace Pipeline
         LightIndirectRenderer::Render();
         ReflectionRenderer   ::Render();
         BackgroundRenderer   ::Render();
-        FogRenderer          ::Render();
 
         Engine::RaiseEvent(Engine::Gfx_OnRenderLighting);
 
@@ -493,7 +497,22 @@ namespace Pipeline
         // -----------------------------------------------------------------------------
         Performance::BeginEvent("Forward Pass");
 
+        LightAreaRenderer::RenderForward();
+
+        MeshRenderer::RenderForward();
+
         Engine::RaiseEvent(Engine::Gfx_OnRenderForward);
+
+        Performance::EndEvent();
+
+        // -----------------------------------------------------------------------------
+        // HDR Effect Pass
+        // -----------------------------------------------------------------------------
+        Performance::BeginEvent("HDR Effect Pass");
+
+        FogRenderer::Render();
+
+        PostFXHDR::Render();
 
         Performance::EndEvent();
 
@@ -504,11 +523,14 @@ namespace Pipeline
 
         HistogramRenderer::Render();
 
-        PostFXHDR::Render();
-
         TonemappingRenderer::Render();
 
-        LightAreaRenderer::RenderBulbs();
+        Performance::EndEvent();
+
+        // -----------------------------------------------------------------------------
+        // LDR Effect Pass
+        // -----------------------------------------------------------------------------
+        Performance::BeginEvent("LDR Effect Pass");
 
         SelectionRenderer::Render();
 

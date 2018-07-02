@@ -127,9 +127,9 @@ namespace
     
     void CGfxShadingRenderer::OnSetupShader()
     {
-        m_FullquadShaderVSPtr   = ShaderManager::CompileVS("vs_fullscreen.glsl" , "main");
+        m_FullquadShaderVSPtr   = ShaderManager::CompileVS("system/vs_fullscreen.glsl" , "main");
 
-        m_ShadingPSPtr          = ShaderManager::CompilePS("fs_tone_mapping.glsl", "main");
+        m_ShadingPSPtr          = ShaderManager::CompilePS("tone_mapping/fs_tone_mapping.glsl", "main");
     }
     
     // -----------------------------------------------------------------------------
