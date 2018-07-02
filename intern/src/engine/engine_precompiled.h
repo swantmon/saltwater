@@ -1,6 +1,19 @@
 
 #pragma once
 
+#define _WIN32_WINNT 0x0501
+#define ASIO_STANDALONE
+#define ASIO_HAS_STD_ADDRESSOF
+#define ASIO_HAS_STD_ARRAY
+#define ASIO_HAS_CSTDINT
+#define ASIO_HAS_STD_SHARED_PTR
+#define ASIO_HAS_STD_TYPE_TRAITS
+
+#define ASIO_HAS_VARIADIC_TEMPLATES
+#define ASIO_HAS_STD_FUNCTION
+#define ASIO_HAS_STD_CHRONO
+#include "asio.hpp"
+
 // -----------------------------------------------------------------------------
 // STL includes
 // -----------------------------------------------------------------------------
@@ -18,8 +31,10 @@
 #include <random> 
 
 #define _USE_MATH_DEFINES 
+#ifndef NOMINMAX
 #define NOMINMAX
-#include <cmath> 
+#endif // !NOMINMAX
+#include <cmath>
 
 // -----------------------------------------------------------------------------
 // Base includes
