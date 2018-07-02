@@ -55,7 +55,7 @@ namespace Net
 
     void CServerSocket::OnSendComplete(std::shared_ptr<std::vector<char>> _Data)
     {
-        ENGINE_CONSOLE_INFOV("Send complete");
+        //ENGINE_CONSOLE_INFOV("Send complete");
     }
 
     // -----------------------------------------------------------------------------
@@ -69,15 +69,18 @@ namespace Net
                 _MessageLength = static_cast<int>(_rData.size());
             }
 
-            int DataLength = _MessageLength + sizeof(int32_t);
+            int DataLength = _MessageLength + 2 * sizeof(int32_t);
 
             std::shared_ptr<std::vector<char>> pData = std::make_shared<std::vector<char>>();
 
             pData->resize(DataLength);
 
             int32_t MessageID = static_cast<int32_t>(_MessageID);
+            int32_t MessageLength = static_cast<int32_t>(_MessageLength);
+
             std::memcpy(pData->data(), &MessageID, sizeof(MessageID));
-            std::memcpy(pData->data() + sizeof(int32_t), _rData.data(), _MessageLength);
+            std::memcpy(pData->data() + sizeof(int32_t), &MessageLength, sizeof(MessageLength));
+            std::memcpy(pData->data() + 2 * sizeof(int32_t), _rData.data(), _MessageLength);
 
             m_pSocket->async_send(asio::buffer(*pData, DataLength), std::bind(&CServerSocket::OnSendComplete, this, pData));
 
