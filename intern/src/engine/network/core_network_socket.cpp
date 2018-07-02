@@ -161,6 +161,7 @@ namespace Net
 
     void CServerSocket::AsyncReconnect()
     {
+        m_IsOpen = false;
         m_pSocket->close();
         ENGINE_CONSOLE_INFOV("Connection lost on port %i", m_Port);
         m_pAcceptor->async_accept(*m_pSocket, *m_pEndpoint, std::bind(&CServerSocket::OnAccept, this, std::placeholders::_1));
