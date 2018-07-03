@@ -41,12 +41,12 @@ namespace Scpt
             {
                  //(ARGetBackgroundTextureFunc)(Core::PluginManager::GetPluginFunction("SLAM", "GetBackgroundTexture"));
 
-                Net::CMessageDelegate Lambda = [](auto _ID, auto _Message, auto _Port)
+                Net::CMessageDelegate Lambda = [](const Net::CMessage& _rMessage, auto _Port)
                 {
-                    std::cout << "Received message with ID " << _ID << " on port " << _Port << " with length " << _Message.size() << '\n';
+                    std::cout << "Received message with ID " << _rMessage.m_ID << " on port " << _Port << " with length " << _rMessage.m_CompressedSize << '\n';
 
                     std::stringstream StringStream;
-                    StringStream << "Received message with ID " << _ID << " on port " << _Port << " with length " << _Message.size();
+                    StringStream << "Received message with ID " << _rMessage.m_ID << " on port " << _Port << " with length " << _rMessage.m_CompressedSize;
                     std::string String = StringStream.str();
                     std::vector<char> Data(String.length());
                     std::memcpy(Data.data(), String.c_str(), String.length());
@@ -57,6 +57,11 @@ namespace Scpt
                 m_NetworkDelegate = std::shared_ptr<Net::CMessageDelegate>(new Net::CMessageDelegate(Lambda));
 
                 Net::CNetworkManager::GetInstance().RegisterMessageHandler(0, m_NetworkDelegate);
+                Net::CNetworkManager::GetInstance().RegisterMessageHandler(1, m_NetworkDelegate);
+                Net::CNetworkManager::GetInstance().RegisterMessageHandler(2, m_NetworkDelegate);
+                Net::CNetworkManager::GetInstance().RegisterMessageHandler(3, m_NetworkDelegate);
+                Net::CNetworkManager::GetInstance().RegisterMessageHandler(4, m_NetworkDelegate);
+                Net::CNetworkManager::GetInstance().RegisterMessageHandler(5, m_NetworkDelegate);
             }
             else
             {
