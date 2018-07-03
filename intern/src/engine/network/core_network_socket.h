@@ -57,7 +57,8 @@ namespace Net
         struct CMessage
         {
             int m_ID;
-            std::vector<char> m_Header;
+            int m_CompressedSize;
+            int m_UncompressedSize;
             std::vector<char> m_Payload;
         };
 
@@ -65,7 +66,7 @@ namespace Net
 
     private:
 
-        int s_HeaderSize = 8;
+        int s_HeaderSize = 12;
 
         // shared_ptr cannot access the destructor so we use a custom deleter
         friend void SocketDeleter(Net::CServerSocket* _pSocket)

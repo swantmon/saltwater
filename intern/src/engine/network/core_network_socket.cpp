@@ -103,14 +103,18 @@ namespace Net
             assert(_TransferredBytes == m_Header.size());
             assert(_TransferredBytes == s_HeaderSize);
 
-            int32_t MessageLength = *reinterpret_cast<int32_t*>(m_Header.data());
-            m_Payload.resize(MessageLength);
+            int32_t MessageID = *reinterpret_cast<int32_t*>(m_Header.data());
+            int32_t CompressedMessageLength = *reinterpret_cast<int32_t*>(m_Header.data() + sizeof(int32_t));
+            int32_t UncompressedMessageLength = *reinterpret_cast<int32_t*>(m_Header.data() + 2 * sizeof(int32_t));
+            m_Payload.resize(CompressedMessageLength);
 
             auto Callback = std::bind(&CServerSocket::ReceivePayload, this, std::placeholders::_1, std::placeholders::_2);
-            asio::async_read(*m_pSocket, asio::buffer(m_Payload), asio::transfer_exactly(MessageLength), Callback);
+            asio::async_read(*m_pSocket, asio::buffer(m_Payload), asio::transfer_exactly(CompressedMessageLength), Callback);
 
             CMessage Message;
-            Message.m_ID = 0;
+            Message.m_ID = MessageID;
+            Message.m_CompressedSize = CompressedMessageLength;
+            Message.m_UncompressedSize = UncompressedMessageLength;
             Message.m_Payload = m_Payload;
 
             m_Mutex.lock();
