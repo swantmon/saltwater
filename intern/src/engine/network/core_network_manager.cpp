@@ -111,6 +111,14 @@ namespace Net
 
     // -----------------------------------------------------------------------------
 
+    CNetworkManager& CNetworkManager::GetInstance()
+    {
+        static CNetworkManager s_Instance;
+        return s_Instance;
+    }
+
+    // -----------------------------------------------------------------------------
+
     CNetworkManager::CNetworkManager()
     {
 

@@ -21,7 +21,7 @@ namespace Net
     {
     public:
 
-        BASE_SINGLETON_FUNC(CNetworkManager)
+        static CNetworkManager& GetInstance();
 
     public:
 
