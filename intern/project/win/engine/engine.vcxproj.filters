@@ -874,5 +874,8 @@
     <ClInclude Include="..\..\..\src\engine\network\core_network_common.h">
       <Filter>network</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\engine\script\script_slam.h">
+      <Filter>script\scripts</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

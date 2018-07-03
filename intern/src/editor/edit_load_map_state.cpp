@@ -29,6 +29,7 @@
 #include "engine/script/script_ar_camera_control_script.h"
 #include "engine/script/script_easyar_target_script.h"
 #include "engine/script/script_light_estimation.h"
+#include "engine/script/script_slam.h"
 #include "engine/script/script_script_manager.h"
 
 #include <assert.h>
@@ -416,6 +417,30 @@ namespace Edit
             Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
 
             rRootEntity.Attach(rEntity);
+        }
+
+        // -----------------------------------------------------------------------------
+        // Setup slam
+        // -----------------------------------------------------------------------------
+        {
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
+            EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
+
+            Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+
+            rEntity.SetName("SLAM");
+
+            // -----------------------------------------------------------------------------
+
+            auto ScriptComponent = Dt::CComponentManager::GetInstance().Allocate<Scpt::CSLAMScript>();
+
+            rEntity.AttachComponent(ScriptComponent);
+
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*ScriptComponent, Dt::CScriptComponent::DirtyCreate);
+
+            // -----------------------------------------------------------------------------
+
+            Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
     }
 } // namespace Edit
