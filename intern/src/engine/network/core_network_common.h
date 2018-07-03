@@ -10,5 +10,13 @@
 
 namespace Net
 {
-    typedef std::function<void(int, const std::vector<char>&, int)> CMessageDelegate;
+    struct CMessage
+    {
+        int m_ID;
+        int m_CompressedSize;
+        int m_UncompressedSize;
+        std::vector<char> m_Payload;
+    };
+
+    typedef std::function<void(const CMessage& _rMessage, int)> CMessageDelegate;
 } // namespace Net

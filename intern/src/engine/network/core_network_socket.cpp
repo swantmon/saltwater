@@ -33,7 +33,7 @@ namespace Net
                 }
                 else
                 {
-                    (*Delegate)(ID, rMessage.m_Payload, m_Port);
+                    (*Delegate)(rMessage, m_Port);
                     ++ Iterator;
                 }
             }
