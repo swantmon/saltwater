@@ -54,14 +54,6 @@ namespace Net
 
         std::mutex m_Mutex;
 
-        struct CMessage
-        {
-            int m_ID;
-            int m_CompressedSize;
-            int m_UncompressedSize;
-            std::vector<char> m_Payload;
-        };
-
         std::queue<CMessage> m_MessageQueue;
 
     private:
