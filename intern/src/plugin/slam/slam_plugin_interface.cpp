@@ -8,7 +8,7 @@
 
 #include "plugin/slam/gfx_reconstruction_renderer.h"
 
-CORE_PLUGIN_INFO(HW::CPluginInterface, "SLAM", "1.0", "This plugin use an awesome Simultaneous Localization and Mapping.")
+CORE_PLUGIN_INFO(HW::CPluginInterface, "SLAM", "1.0", "This plugin provides Simultaneous Localization and Mapping based on a TSDF.")
 
 namespace HW
 {
