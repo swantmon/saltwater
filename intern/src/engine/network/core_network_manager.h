@@ -31,8 +31,8 @@ namespace Net
 
         bool IsConnected(int _Port = 0) const;
 
-        void RegisterMessageHandler(int _MessageID, const std::shared_ptr<CMessageDelegate>& _rDelegate, int _Port = 0);
-        bool SendMessage(int _MessageID, const std::vector<char>& _rData, int _Length = 0, int _Port = 0);
+        void RegisterMessageHandler(int _MessageCategory, const std::shared_ptr<CMessageDelegate>& _rDelegate, int _Port = 0);
+        bool SendMessage(int _MessageCategory, const std::vector<char>& _rData, int _Length = 0, int _Port = 0);
 
     private:
 

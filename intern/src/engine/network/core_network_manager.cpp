@@ -82,24 +82,24 @@ namespace Net
     
     // -----------------------------------------------------------------------------
 
-    void CNetworkManager::RegisterMessageHandler(int _MessageID, const std::shared_ptr<CMessageDelegate>& _rDelegate, int _Port)
+    void CNetworkManager::RegisterMessageHandler(int _MessageCategory, const std::shared_ptr<CMessageDelegate>& _rDelegate, int _Port)
     {
         int Port = _Port == 0 ? m_DefaultPort : _Port;
 
         CServerSocket& rSocket = GetSocket(Port);
-        rSocket.RegisterMessageHandler(_MessageID, _rDelegate);
+        rSocket.RegisterMessageHandler(_MessageCategory, _rDelegate);
     }
     
     // -----------------------------------------------------------------------------
 
-    bool CNetworkManager::SendMessage(int _MessageID, const std::vector<char>& _rData, int _Length, int _Port)
+    bool CNetworkManager::SendMessage(int _MessageCategory, const std::vector<char>& _rData, int _Length, int _Port)
     {
         if (_Port == 0)
         {
             _Port = m_DefaultPort;
         }
 
-        return m_Sockets[_Port]->SendMessage(_MessageID, _rData, _Length);
+        return m_Sockets[_Port]->SendMessage(_MessageCategory, _rData, _Length);
     }
 
     // -----------------------------------------------------------------------------

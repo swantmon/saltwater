@@ -21,9 +21,9 @@ namespace Net
         {
             auto& rMessage = m_MessageQueue.front();
 
-            int ID = rMessage.m_ID;
+            int MessageCategory = rMessage.m_Category;
 
-            auto Range = m_Delegates.equal_range(ID);
+            auto Range = m_Delegates.equal_range(MessageCategory);
             for (auto Iterator = Range.first; Iterator != Range.second; )
             {
                 auto Delegate = Iterator->second.lock();
@@ -46,9 +46,9 @@ namespace Net
 
     // -----------------------------------------------------------------------------
 
-    void CServerSocket::RegisterMessageHandler(int _MessageID, const std::shared_ptr<CMessageDelegate>& _rDelegate)
+    void CServerSocket::RegisterMessageHandler(int _MessageCategory, const std::shared_ptr<CMessageDelegate>& _rDelegate)
     {
-        m_Delegates.insert(std::make_pair(_MessageID, _rDelegate));
+        m_Delegates.insert(std::make_pair(_MessageCategory, _rDelegate));
     }
 
     // -----------------------------------------------------------------------------
@@ -60,7 +60,7 @@ namespace Net
 
     // -----------------------------------------------------------------------------
     
-    bool CServerSocket::SendMessage(int _MessageID, const std::vector<char>& _rData, int _MessageLength)
+    bool CServerSocket::SendMessage(int _MessageCategory, const std::vector<char>& _rData, int _MessageLength)
     {
         if (IsOpen())
         {
@@ -75,7 +75,7 @@ namespace Net
 
             pData->resize(DataLength);
 
-            int32_t MessageID = static_cast<int32_t>(_MessageID);
+            int32_t MessageID = static_cast<int32_t>(_MessageCategory);
             int32_t MessageLength = static_cast<int32_t>(_MessageLength);
 
             std::memcpy(pData->data(), &MessageID, sizeof(MessageID));
@@ -112,7 +112,7 @@ namespace Net
             asio::async_read(*m_pSocket, asio::buffer(m_Payload), asio::transfer_exactly(CompressedMessageLength), Callback);
 
             CMessage Message;
-            Message.m_ID = MessageID;
+            Message.m_Category = MessageID;
             Message.m_CompressedSize = CompressedMessageLength;
             Message.m_UncompressedSize = UncompressedMessageLength;
             Message.m_Payload = m_Payload;
