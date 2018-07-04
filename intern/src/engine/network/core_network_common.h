@@ -12,7 +12,7 @@ namespace Net
 {
     struct CMessage
     {
-        int m_ID;
+        int m_Category;
         int m_CompressedSize;
         int m_UncompressedSize;
         std::vector<char> m_Payload;
