@@ -43,7 +43,7 @@ namespace Scpt
                 
                 m_NetworkDelegate = std::shared_ptr<Net::CMessageDelegate>(new Net::CMessageDelegate(std::bind(&CSLAMScript::OnNewMessage, this, std::placeholders::_1, std::placeholders::_2)));
 
-                Net::CNetworkManager::GetInstance().RegisterMessageHandler(1, m_NetworkDelegate);
+                Net::CNetworkManager::GetInstance().RegisterMessageHandler(0, m_NetworkDelegate);
             }
             else
             {
@@ -84,7 +84,7 @@ namespace Scpt
             std::vector<char> Data(String.length());
             std::memcpy(Data.data(), String.c_str(), String.length());
 
-            Net::CNetworkManager::GetInstance().SendMessage(1, Data);
+            Net::CNetworkManager::GetInstance().SendMessage(0, Data);
         }
     };
 } // namespace Scpt
