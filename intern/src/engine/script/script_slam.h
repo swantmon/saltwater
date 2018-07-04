@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include "base/base_compression.h"
 #include "base/base_exception.h"
 #include "base/base_include_glm.h"
 
@@ -76,15 +77,12 @@ namespace Scpt
 
         void OnNewMessage(const Net::CMessage& _rMessage, int _Port)
         {
-            std::cout << "Received message with ID " << _rMessage.m_Category << " on port " << _Port << " with length " << _rMessage.m_CompressedSize << '\n';
-
-            std::stringstream StringStream;
-            StringStream << "Received message with ID " << _rMessage.m_Category << " on port " << _Port << " with length " << _rMessage.m_CompressedSize;
-            std::string String = StringStream.str();
-            std::vector<char> Data(String.length());
-            std::memcpy(Data.data(), String.c_str(), String.length());
-
-            Net::CNetworkManager::GetInstance().SendMessage(0, Data);
+            if (_rMessage.m_CompressedSize != _rMessage.m_DecompressedSize)
+            {
+                std::vector<char> Decompressed(_rMessage.m_DecompressedSize);
+                
+                Base::Decompress(_rMessage.m_Payload, Decompressed);
+            }
         }
     };
 } // namespace Scpt
