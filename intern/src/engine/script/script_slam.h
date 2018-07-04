@@ -76,10 +76,10 @@ namespace Scpt
 
         void OnNewMessage(const Net::CMessage& _rMessage, int _Port)
         {
-            std::cout << "Received message with ID " << _rMessage.m_ID << " on port " << _Port << " with length " << _rMessage.m_CompressedSize << '\n';
+            std::cout << "Received message with ID " << _rMessage.m_Category << " on port " << _Port << " with length " << _rMessage.m_CompressedSize << '\n';
 
             std::stringstream StringStream;
-            StringStream << "Received message with ID " << _rMessage.m_ID << " on port " << _Port << " with length " << _rMessage.m_CompressedSize;
+            StringStream << "Received message with ID " << _rMessage.m_Category << " on port " << _Port << " with length " << _rMessage.m_CompressedSize;
             std::string String = StringStream.str();
             std::vector<char> Data(String.length());
             std::memcpy(Data.data(), String.c_str(), String.length());
