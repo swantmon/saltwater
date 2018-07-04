@@ -105,7 +105,7 @@ namespace Net
 
             int32_t MessageID = *reinterpret_cast<int32_t*>(m_Header.data());
             int32_t CompressedMessageLength = *reinterpret_cast<int32_t*>(m_Header.data() + sizeof(int32_t));
-            int32_t UncompressedMessageLength = *reinterpret_cast<int32_t*>(m_Header.data() + 2 * sizeof(int32_t));
+            int32_t DecompressedMessageLength = *reinterpret_cast<int32_t*>(m_Header.data() + 2 * sizeof(int32_t));
             m_Payload.resize(CompressedMessageLength);
 
             auto Callback = std::bind(&CServerSocket::ReceivePayload, this, std::placeholders::_1, std::placeholders::_2);
@@ -114,7 +114,7 @@ namespace Net
             CMessage Message;
             Message.m_Category = MessageID;
             Message.m_CompressedSize = CompressedMessageLength;
-            Message.m_UncompressedSize = UncompressedMessageLength;
+            Message.m_DecompressedSize = DecompressedMessageLength;
             Message.m_Payload = m_Payload;
 
             m_Mutex.lock();
