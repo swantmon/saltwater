@@ -14,7 +14,7 @@ namespace Net
     {
         int m_Category;
         int m_CompressedSize;
-        int m_UncompressedSize;
+        int m_DecompressedSize;
         std::vector<char> m_Payload;
     };
 
