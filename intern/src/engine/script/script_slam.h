@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "base/base_coordinate_system.h"
+#include "base/base_exception.h"
 #include "base/base_include_glm.h"
 
 #include "engine/core/core_plugin_manager.h"
@@ -40,32 +40,14 @@ namespace Scpt
             if (Core::PluginManager::HasPlugin("SLAM"))
             {
                  //(ARGetBackgroundTextureFunc)(Core::PluginManager::GetPluginFunction("SLAM", "GetBackgroundTexture"));
+                
+                m_NetworkDelegate = std::shared_ptr<Net::CMessageDelegate>(new Net::CMessageDelegate(std::bind(&CSLAMScript::OnNewMessage, this, std::placeholders::_1, std::placeholders::_2)));
 
-                Net::CMessageDelegate Lambda = [](const Net::CMessage& _rMessage, auto _Port)
-                {
-                    std::cout << "Received message with ID " << _rMessage.m_ID << " on port " << _Port << " with length " << _rMessage.m_CompressedSize << '\n';
-
-                    std::stringstream StringStream;
-                    StringStream << "Received message with ID " << _rMessage.m_ID << " on port " << _Port << " with length " << _rMessage.m_CompressedSize;
-                    std::string String = StringStream.str();
-                    std::vector<char> Data(String.length());
-                    std::memcpy(Data.data(), String.c_str(), String.length());
-
-                    Net::CNetworkManager::GetInstance().SendMessage(1, Data);
-                };
-
-                m_NetworkDelegate = std::shared_ptr<Net::CMessageDelegate>(new Net::CMessageDelegate(Lambda));
-
-                Net::CNetworkManager::GetInstance().RegisterMessageHandler(0, m_NetworkDelegate);
                 Net::CNetworkManager::GetInstance().RegisterMessageHandler(1, m_NetworkDelegate);
-                Net::CNetworkManager::GetInstance().RegisterMessageHandler(2, m_NetworkDelegate);
-                Net::CNetworkManager::GetInstance().RegisterMessageHandler(3, m_NetworkDelegate);
-                Net::CNetworkManager::GetInstance().RegisterMessageHandler(4, m_NetworkDelegate);
-                Net::CNetworkManager::GetInstance().RegisterMessageHandler(5, m_NetworkDelegate);
             }
             else
             {
-
+                throw Base::CException(__FILE__, __LINE__, "SLAM plugin was not loaded");
             }
         }
 
@@ -90,5 +72,19 @@ namespace Scpt
 
         }
 
+    private:
+
+        void OnNewMessage(const Net::CMessage& _rMessage, int _Port)
+        {
+            std::cout << "Received message with ID " << _rMessage.m_ID << " on port " << _Port << " with length " << _rMessage.m_CompressedSize << '\n';
+
+            std::stringstream StringStream;
+            StringStream << "Received message with ID " << _rMessage.m_ID << " on port " << _Port << " with length " << _rMessage.m_CompressedSize;
+            std::string String = StringStream.str();
+            std::vector<char> Data(String.length());
+            std::memcpy(Data.data(), String.c_str(), String.length());
+
+            Net::CNetworkManager::GetInstance().SendMessage(1, Data);
+        }
     };
 } // namespace Scpt
