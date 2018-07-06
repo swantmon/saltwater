@@ -11,7 +11,7 @@ namespace
 {
     void CheckResult(int _Result)
     {
-        if (_Result != Z_OK)
+        if (_Result != Z_OK && _Result != Z_STREAM_END)
         {
             throw Base::CException(__FILE__, __LINE__, "Failed to decompress");
         }

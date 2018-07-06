@@ -111,17 +111,9 @@ namespace Net
             auto Callback = std::bind(&CServerSocket::ReceivePayload, this, std::placeholders::_1, std::placeholders::_2);
             asio::async_read(*m_pSocket, asio::buffer(m_Payload), asio::transfer_exactly(CompressedMessageLength), Callback);
 
-            CMessage Message;
-            Message.m_Category = MessageID;
-            Message.m_CompressedSize = CompressedMessageLength;
-            Message.m_DecompressedSize = DecompressedMessageLength;
-            Message.m_Payload = m_Payload;
-
-            m_Mutex.lock();
-
-            m_MessageQueue.push(std::move(Message));
-
-            m_Mutex.unlock();
+            m_PendingMessage.m_Category = MessageID;
+            m_PendingMessage.m_CompressedSize = CompressedMessageLength;
+            m_PendingMessage.m_DecompressedSize = DecompressedMessageLength;
         }
         else
         {
@@ -134,6 +126,14 @@ namespace Net
     void CServerSocket::ReceivePayload(const std::error_code& _rError, size_t _TransferredBytes)
     {
         BASE_UNUSED(_TransferredBytes);
+
+        m_PendingMessage.m_Payload = std::move(m_Payload);
+
+        m_Mutex.lock();
+
+        m_MessageQueue.push(std::move(m_PendingMessage));
+
+        m_Mutex.unlock();
 
         if (!_rError)
         {
