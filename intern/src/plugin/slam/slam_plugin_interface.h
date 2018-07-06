@@ -3,10 +3,16 @@
 
 #include "engine/core/core_plugin_manager.h"
 
-namespace HW
+#include "plugin/slam/mr_scalable_slam_reconstructor.h"
+
+namespace SLAM
 {
     class CPluginInterface : public Core::IPlugin
     {
+    public:
+
+        void OnNewDepthFrame(const uint16_t* pBuffer);
+
     public:
 
         void OnStart() override;
@@ -14,5 +20,9 @@ namespace HW
         void OnPause() override;
         void OnResume() override;
         void Update() override;
+
+    private:
+
+
     };
 } // namespace HW

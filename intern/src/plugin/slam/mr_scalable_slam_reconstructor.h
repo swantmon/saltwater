@@ -7,8 +7,11 @@
 #include "plugin/slam/mr_slam_reconstruction_settings.h"
 #include "plugin/slam/mr_icp_tracker.h"
 
+#include "engine/graphic/gfx_mesh.h"
 #include "engine/graphic/gfx_shader.h"
+#include "engine/graphic/gfx_target_set.h"
 #include "engine/graphic/gfx_texture.h"
+#include "engine/graphic/gfx_view_port_set.h"
 
 #include <array>
 #include <map>
@@ -138,7 +141,6 @@ namespace MR
 
     public:
 
-        void Update();
         void ResetReconstruction(const SReconstructionSettings* pReconstructionSettings = nullptr);
 
         void PauseIntegration(bool _Paused);
@@ -161,6 +163,8 @@ namespace MR
         glm::ivec2 GetDepthImageSize();
 
         float GetReconstructionSize();
+
+        void OnNewDepthFrame(const uint16_t* pBuffer);
         
     private:
 
@@ -264,7 +268,11 @@ namespace MR
 		CRootVolumeMap m_RootVolumeMap;
         CRootVolumeVector m_RootVolumeVector;
 
-        std::unique_ptr<MR::IRGBDCameraControl> m_pRGBDCameraControl;
+        glm::ivec2 m_DepthFrameSize;
+        glm::ivec2 m_ColorFrameSize;
+        glm::vec2 m_FocalLength;
+        glm::vec2 m_FocalPoint;
+        glm::vec2 m_DepthBounds;
 
         glm::mat4 m_PoseMatrix;
         
@@ -278,9 +286,7 @@ namespace MR
         unsigned int m_TSDFPoolSize;
 
         bool m_PoolFull;
-
-        glm::ivec2 m_DepthImageSize;
-
+        
         int m_RootVolumePoolItemCount;
 
         int m_IntegratedFrameCount;

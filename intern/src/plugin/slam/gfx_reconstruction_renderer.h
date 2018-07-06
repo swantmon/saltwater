@@ -2,6 +2,8 @@
 
 #include "plugin/slam/mr_slam_reconstructor.h"
 
+#include "mr_scalable_slam_reconstructor.h"
+
 namespace Gfx
 {
 namespace ReconstructionRenderer
@@ -30,5 +32,7 @@ namespace ReconstructionRenderer
     void PauseTracking(bool _Paused);
     void ChangeCamera(bool _IsTrackingCamera);
     float GetReconstructionSize();
+
+    MR::CScalableSLAMReconstructor& GetReconstructor();
 } // namespace ReconstructionRenderer
 } // namespace Gfx

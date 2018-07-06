@@ -218,15 +218,9 @@ namespace MR
         ////////////////////////////////////////////////////////////////////////////////
         // Setup data, buffer etc.
         ////////////////////////////////////////////////////////////////////////////////
-
-        m_pRGBDCameraControl.reset(new MR::CKinectControl);
-        ENGINE_CONSOLE_INFO("Using Kinect for SLAM");
-
-        m_DepthImageSize.x = m_pRGBDCameraControl->GetDepthWidth();
-        m_DepthImageSize.y = m_pRGBDCameraControl->GetDepthHeight();
-
-        m_DepthPixels = std::vector<unsigned short>(m_DepthImageSize.x * m_DepthImageSize.y);
-        m_CameraPixels = std::vector<char>(m_DepthImageSize.x * m_DepthImageSize.y * 4);
+        
+        m_DepthPixels = std::vector<unsigned short>(m_DepthFrameSize.x * m_DepthFrameSize.y);
+        m_CameraPixels = std::vector<char>(m_DepthFrameSize.x * m_DepthFrameSize.y * 4);
 
         SetupData();
         SetupMeshes();
@@ -239,7 +233,7 @@ namespace MR
 
         //m_PlaneDetector.SetImages(m_ReferenceVertexMapPtr[2], m_ReferenceNormalMapPtr[2]);
 
-        m_pTracker.reset(new CICPTracker(m_DepthImageSize.x, m_DepthImageSize.y, m_ReconstructionSettings));
+        m_pTracker.reset(new CICPTracker(m_DepthFrameSize.x, m_DepthFrameSize.y, m_ReconstructionSettings));
     }
 
     // -----------------------------------------------------------------------------
@@ -252,8 +246,8 @@ namespace MR
         ViewPortDescriptor.m_MaxDepth = 1.0f;
         ViewPortDescriptor.m_TopLeftX = 0.0f;
         ViewPortDescriptor.m_TopLeftY = 0.0f;
-        ViewPortDescriptor.m_Width = static_cast<float>(m_DepthImageSize.x);
-        ViewPortDescriptor.m_Height = static_cast<float>(m_DepthImageSize.y);
+        ViewPortDescriptor.m_Width = static_cast<float>(m_DepthFrameSize.x);
+        ViewPortDescriptor.m_Height = static_cast<float>(m_DepthFrameSize.y);
 
         Gfx::CViewPortPtr DepthViewPort = ViewManager::CreateViewPort(ViewPortDescriptor);
 
@@ -341,7 +335,7 @@ namespace MR
         // and they are even pass the rasterization step even though they cannot contain valid samples
 
         const float Near = 2.0f; // m_pRGBDCameraControl->GetMinDepth();
-		const float Far = m_pRGBDCameraControl->GetMaxDepth();
+		const float Far = m_DepthBounds.y;
 
 		// near
 
@@ -484,8 +478,8 @@ namespace MR
             << "#define PYRAMID_LEVELS "         << m_ReconstructionSettings.m_PyramidLevelCount    << " \n"
             << "#define VOXEL_SIZE "             << VoxelSize                                       << " \n"
             << "#define VOLUME_SIZE "            << m_VolumeSizes[0]                                << " \n"
-            << "#define DEPTH_IMAGE_WIDTH "      << m_DepthImageSize.x                              << " \n"
-            << "#define DEPTH_IMAGE_HEIGHT "     << m_DepthImageSize.y                              << " \n"
+            << "#define DEPTH_IMAGE_WIDTH "      << m_DepthFrameSize.x                              << " \n"
+            << "#define DEPTH_IMAGE_HEIGHT "     << m_DepthFrameSize.y                              << " \n"
             << "#define TILE_SIZE1D "            << g_TileSize1D                                    << " \n"
             << "#define TILE_SIZE2D "            << g_TileSize2D                                    << " \n"
             << "#define TILE_SIZE3D "            << g_TileSize3D                                    << " \n"
@@ -501,8 +495,8 @@ namespace MR
             << "#define VOXELS_PER_ROOTGRID "    << m_ReconstructionSettings.m_VoxelsPerGrid[0]     << " \n"
             << "#define VOXELS_PER_LEVEL1GRID "  << m_ReconstructionSettings.m_VoxelsPerGrid[1]     << " \n"
             << "#define VOXELS_PER_LEVEL2GRID "  << m_ReconstructionSettings.m_VoxelsPerGrid[2]     << " \n"
-            << "#define RAYCAST_NEAR "           << m_pRGBDCameraControl->GetMinDepth()             << " \n"
-            << "#define RAYCAST_FAR "            << m_pRGBDCameraControl->GetMaxDepth()             << " \n"
+            << "#define RAYCAST_NEAR "           << m_DepthBounds.x                                 << " \n"
+            << "#define RAYCAST_FAR "            << m_DepthBounds.y                                 << " \n"
             << "#define VOLUME_DEPTH_THRESHLD "  << m_VolumeDepthThreshold                          << " \n"
             << "#define MIN_TREE_WEIGHT "        << m_MinWeight                                     << " \n";
         
@@ -750,7 +744,7 @@ namespace MR
             BufferData.m_BufferOffset = 0;
             BufferManager::UploadBufferData(m_PointRasterizationBufferPtr, &BufferData);
 
-            ContextManager::Draw(m_DepthImageSize.x * m_DepthImageSize.y, 0);
+            ContextManager::Draw(m_DepthFrameSize.x * m_DepthFrameSize.y, 0);
 
             Performance::EndEvent();
 
@@ -1141,8 +1135,8 @@ namespace MR
         
         for (int i = 0; i < m_ReconstructionSettings.m_PyramidLevelCount; ++i)
         {
-            TextureDescriptor.m_NumberOfPixelsU = m_DepthImageSize.x >> i;
-            TextureDescriptor.m_NumberOfPixelsV = m_DepthImageSize.y >> i;
+            TextureDescriptor.m_NumberOfPixelsU = m_DepthFrameSize.x >> i;
+            TextureDescriptor.m_NumberOfPixelsV = m_DepthFrameSize.y >> i;
             TextureDescriptor.m_NumberOfPixelsW = 1;
             TextureDescriptor.m_NumberOfMipMaps = 1;
             TextureDescriptor.m_NumberOfTextures = 1;
@@ -1164,8 +1158,8 @@ namespace MR
             m_RaycastNormalMapPtr[i] = TextureManager::CreateTexture2D(TextureDescriptor);
         }
 
-        TextureDescriptor.m_NumberOfPixelsU = m_DepthImageSize.x;
-        TextureDescriptor.m_NumberOfPixelsV = m_DepthImageSize.y;
+        TextureDescriptor.m_NumberOfPixelsU = m_DepthFrameSize.x;
+        TextureDescriptor.m_NumberOfPixelsV = m_DepthFrameSize.y;
         TextureDescriptor.m_NumberOfPixelsW = 1;
         TextureDescriptor.m_NumberOfMipMaps = 1;
         TextureDescriptor.m_NumberOfTextures = 1;
@@ -1185,8 +1179,8 @@ namespace MR
 
 		if (m_ReconstructionSettings.m_CaptureColor)
 		{
-			TextureDescriptor.m_NumberOfPixelsU = m_DepthImageSize.x;
-			TextureDescriptor.m_NumberOfPixelsV = m_DepthImageSize.y;
+			TextureDescriptor.m_NumberOfPixelsU = m_DepthFrameSize.x;
+			TextureDescriptor.m_NumberOfPixelsV = m_DepthFrameSize.y;
 			TextureDescriptor.m_Format = CTexture::R8G8B8A8_UBYTE;
 
 			m_RawCameraFramePtr = TextureManager::CreateTexture2D(TextureDescriptor);
@@ -1207,7 +1201,7 @@ namespace MR
 
         m_EmptyFullVolumePtr = TargetSetManager::CreateEmptyTargetSet(VolumeWidth, VolumeWidth);
 
-        m_EmptyTargetSetPtr = TargetSetManager::CreateEmptyTargetSet(m_DepthImageSize.x, m_DepthImageSize.y);
+        m_EmptyTargetSetPtr = TargetSetManager::CreateEmptyTargetSet(m_DepthFrameSize.x, m_DepthFrameSize.y);
 
         Gfx::TextureManager::ClearTexture(m_FullVolumePtr);
     }
@@ -1216,10 +1210,10 @@ namespace MR
     
     void CScalableSLAMReconstructor::SetupBuffers(bool _CreatePool)
     {
-        const float FocalLengthX0 = m_pRGBDCameraControl->GetDepthFocalLengthX();
-        const float FocalLengthY0 = m_pRGBDCameraControl->GetDepthFocalLengthY();
-        const float FocalPointX0 = m_pRGBDCameraControl->GetDepthFocalPointX();
-        const float FocalPointY0 = m_pRGBDCameraControl->GetDepthFocalPointY();
+        const float FocalLengthX0 = m_FocalLength.x;
+        const float FocalLengthY0 = m_FocalLength.y;
+        const float FocalPointX0 = m_FocalPoint.x;
+        const float FocalPointY0 = m_FocalPoint.y;
         
         std::vector<SIntrinsics> Intrinsics(m_ReconstructionSettings.m_PyramidLevelCount);
 
@@ -1344,52 +1338,32 @@ namespace MR
         ConstantBufferDesc.m_NumberOfBytes = sizeof(SScalableRaycastConstantBuffer);
         m_VolumeBuffers.m_AABBBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
     }
-
+    
     // -----------------------------------------------------------------------------
 
-    void CScalableSLAMReconstructor::Update()
+    void CScalableSLAMReconstructor::OnNewDepthFrame(const uint16_t* pDepth)
     {
         const bool CaptureColor = m_ReconstructionSettings.m_CaptureColor;
         
-        unsigned short* pDepth = m_DepthPixels.data();
         char* pColor = m_CameraPixels.data();
 
         if (m_IsTrackingPaused)
         {
             return;
         }
-
-        //*
-        if (!m_pRGBDCameraControl->GetDepthBuffer(pDepth))
-        {
-            return;
-        }
-
-        if (CaptureColor && !m_IsIntegrationPaused && !m_pRGBDCameraControl->GetCameraFrame(pColor))
-        {
-            return;
-        }
-        /*/
-#pragma message("Warning: Active polling of depth frame is active and could lead to an infinite loop!")
-        while (!m_pRGBDCameraControl->GetDepthBuffer(pDepth));
-        if (!m_IsIntegrationPaused)
-        {
-            while (CaptureColor && !m_pRGBDCameraControl->GetCameraFrame(pColor));
-        }
-        //*/
-        
+                
         Performance::BeginEvent("Scalable Kinect Fusion");
 
         Performance::BeginEvent("Data Input");
 
         Base::AABB2UInt TargetRect;
-        TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_DepthImageSize.x, m_DepthImageSize.y));
-        TextureManager::CopyToTexture2D(m_RawDepthBufferPtr, TargetRect, m_DepthImageSize.x, pDepth);
+        TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_DepthFrameSize.x, m_DepthFrameSize.y));
+        TextureManager::CopyToTexture2D(m_RawDepthBufferPtr, TargetRect, m_DepthFrameSize.x, const_cast<uint16_t*>(pDepth));
 
         if (CaptureColor)
         {
-            TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_DepthImageSize.x, m_DepthImageSize.y));
-            TextureManager::CopyToTexture2D(m_RawCameraFramePtr, TargetRect, m_DepthImageSize.x, pColor);
+            TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_DepthFrameSize.x, m_DepthFrameSize.y));
+            TextureManager::CopyToTexture2D(m_RawCameraFramePtr, TargetRect, m_DepthFrameSize.x, pColor);
         }
 
         //////////////////////////////////////////////////////////////////////////////////////
@@ -1538,8 +1512,8 @@ namespace MR
 
     void CScalableSLAMReconstructor::CreateReferencePyramid()
     {
-        const int WorkGroupsX = DivUp(m_DepthImageSize.x, g_TileSize2D);
-        const int WorkGroupsY = DivUp(m_DepthImageSize.y, g_TileSize2D);
+        const int WorkGroupsX = DivUp(m_DepthFrameSize.x, g_TileSize2D);
+        const int WorkGroupsY = DivUp(m_DepthFrameSize.y, g_TileSize2D);
 
         //////////////////////////////////////////////////////////////////////////////////////
         // Bilateral Filter
@@ -1559,8 +1533,8 @@ namespace MR
 
         for (int PyramidLevel = 1; PyramidLevel < m_ReconstructionSettings.m_PyramidLevelCount; ++ PyramidLevel)
         {
-            const int PyramidWorkGroupsX = DivUp(m_DepthImageSize.x >> PyramidLevel, g_TileSize2D);
-            const int PyramidWorkGroupsY = DivUp(m_DepthImageSize.y >> PyramidLevel, g_TileSize2D);
+            const int PyramidWorkGroupsX = DivUp(m_DepthFrameSize.x >> PyramidLevel, g_TileSize2D);
+            const int PyramidWorkGroupsY = DivUp(m_DepthFrameSize.y >> PyramidLevel, g_TileSize2D);
             
             ContextManager::SetShaderCS(m_DownSampleDepthCSPtr);
 
@@ -1581,8 +1555,8 @@ namespace MR
         ContextManager::SetShaderCS(m_VertexMapCSPtr);
         for (int PyramidLevel = 0; PyramidLevel < m_ReconstructionSettings.m_PyramidLevelCount; ++ PyramidLevel)
         {
-            const int PyramidWorkGroupsX = DivUp(m_DepthImageSize.x >> PyramidLevel, g_TileSize2D);
-            const int PyramidWorkGroupsY = DivUp(m_DepthImageSize.y >> PyramidLevel, g_TileSize2D);
+            const int PyramidWorkGroupsX = DivUp(m_DepthFrameSize.x >> PyramidLevel, g_TileSize2D);
+            const int PyramidWorkGroupsY = DivUp(m_DepthFrameSize.y >> PyramidLevel, g_TileSize2D);
 
             ContextManager::SetImageTexture(0, m_SmoothDepthBufferPtr[PyramidLevel]);
             ContextManager::SetImageTexture(1, m_ReferenceVertexMapPtr[PyramidLevel]);
@@ -1608,8 +1582,8 @@ namespace MR
         ContextManager::SetShaderCS(m_NormalMapCSPtr);
         for (int PyramidLevel = 0; PyramidLevel < m_ReconstructionSettings.m_PyramidLevelCount; ++ PyramidLevel)
         {
-            const int PyramidWorkGroupsX = DivUp(m_DepthImageSize.x >> PyramidLevel, g_TileSize2D);
-            const int PyramidWorkGroupsY = DivUp(m_DepthImageSize.y >> PyramidLevel, g_TileSize2D);
+            const int PyramidWorkGroupsX = DivUp(m_DepthFrameSize.x >> PyramidLevel, g_TileSize2D);
+            const int PyramidWorkGroupsY = DivUp(m_DepthFrameSize.y >> PyramidLevel, g_TileSize2D);
                         
             ContextManager::SetImageTexture(0, m_ReferenceVertexMapPtr[PyramidLevel]);
             ContextManager::SetImageTexture(1, m_ReferenceNormalMapPtr[PyramidLevel]);
@@ -1630,8 +1604,8 @@ namespace MR
         if (!m_CreateNormalsFromTSDF)
         {
             ContextManager::SetShaderCS(m_NormalMapCSPtr);
-            const int WorkGroupsX = DivUp(m_DepthImageSize.x, g_TileSize2D);
-            const int WorkGroupsY = DivUp(m_DepthImageSize.y, g_TileSize2D);
+            const int WorkGroupsX = DivUp(m_DepthFrameSize.x, g_TileSize2D);
+            const int WorkGroupsY = DivUp(m_DepthFrameSize.y, g_TileSize2D);
 
             ContextManager::SetImageTexture(0, m_RaycastVertexMapPtr[0]);
             ContextManager::SetImageTexture(1, m_RaycastNormalMapPtr[0]);
@@ -1649,8 +1623,8 @@ namespace MR
         
         for (int PyramidLevel = 1; PyramidLevel < m_ReconstructionSettings.m_PyramidLevelCount; ++PyramidLevel)
         {
-            const int WorkGroupsX = DivUp(m_DepthImageSize.x >> PyramidLevel, g_TileSize2D);
-            const int WorkGroupsY = DivUp(m_DepthImageSize.y >> PyramidLevel, g_TileSize2D);
+            const int WorkGroupsX = DivUp(m_DepthFrameSize.x >> PyramidLevel, g_TileSize2D);
+            const int WorkGroupsY = DivUp(m_DepthFrameSize.y >> PyramidLevel, g_TileSize2D);
 
             float Normalized = 0.0f;
             BufferManager::UploadBufferData(m_RaycastPyramidConstantBufferPtr, &Normalized);
@@ -1674,8 +1648,8 @@ namespace MR
 
     void CScalableSLAMReconstructor::Raycast()
     {
-        const int WorkGroupsX = DivUp(m_DepthImageSize.x, g_TileSize2D);
-        const int WorkGroupsY = DivUp(m_DepthImageSize.y, g_TileSize2D);
+        const int WorkGroupsX = DivUp(m_DepthFrameSize.x, g_TileSize2D);
+        const int WorkGroupsY = DivUp(m_DepthFrameSize.y, g_TileSize2D);
 
         ContextManager::SetShaderCS(m_RaycastCSPtr);
         
@@ -1907,7 +1881,7 @@ namespace MR
 
     glm::ivec2 CScalableSLAMReconstructor::GetDepthImageSize()
     {
-        return m_DepthImageSize;
+        return m_DepthFrameSize;
     }
     
     // -----------------------------------------------------------------------------

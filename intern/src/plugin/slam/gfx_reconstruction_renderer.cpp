@@ -96,6 +96,8 @@ namespace
         void ChangeCamera(bool _IsTrackingCamera);
         float GetReconstructionSize();
 
+        MR::CScalableSLAMReconstructor& GetReconstructor();
+
         void OnReconstructionUpdate(const MR::SReconstructionSettings& _Settings);
 
     private:
@@ -1203,7 +1205,7 @@ namespace
 		{
             if (m_pScalableReconstructor != nullptr)
             {
-                m_pScalableReconstructor->Update();
+                //m_pScalableReconstructor->Update();
             }
             else
             {
@@ -1322,6 +1324,13 @@ namespace
             int Resolution = Settings.m_VolumeResolution;
             return Resolution * Resolution * Resolution * sizeof(uint32_t) / (1024.0f * 1024.0f);
         }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    MR::CScalableSLAMReconstructor& CGfxReconstructionRenderer::GetReconstructor()
+    {
+        return *m_pScalableReconstructor;
     }
 
 } // namespace
@@ -1473,6 +1482,13 @@ namespace ReconstructionRenderer
     float GetReconstructionSize()
     {
         return CGfxReconstructionRenderer::GetInstance().GetReconstructionSize();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    MR::CScalableSLAMReconstructor& GetReconstructor()
+    {
+        return CGfxReconstructionRenderer::GetInstance().GetReconstructor();
     }
 
 } // namespace Voxel

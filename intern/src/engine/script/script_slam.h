@@ -22,11 +22,20 @@ namespace Scpt
 {
     class CSLAMScript : public CScript<CSLAMScript>
     {
-    public:
+    private:
 
-        Dt::CEntity* m_pSkyEntity = nullptr;
-        Dt::CSkyComponent* m_pSkyComponent = nullptr;
+        enum EMessageType
+        {
+            COMMAND,
+            TRANSFORM,
+            DEPTHFRAME,
+            COLORFRAME
+        };
 
+        typedef void(*DepthFrameCallBack)(const uint16_t*);
+
+        DepthFrameCallBack OnNewDepthFrame;
+        
     private:
         
         std::shared_ptr<Net::CMessageDelegate> m_NetworkDelegate;
@@ -39,12 +48,12 @@ namespace Scpt
             // Input
             // -----------------------------------------------------------------------------
             if (Core::PluginManager::HasPlugin("SLAM"))
-            {
-                 //(ARGetBackgroundTextureFunc)(Core::PluginManager::GetPluginFunction("SLAM", "GetBackgroundTexture"));
-                
+            {                
                 m_NetworkDelegate = std::shared_ptr<Net::CMessageDelegate>(new Net::CMessageDelegate(std::bind(&CSLAMScript::OnNewMessage, this, std::placeholders::_1, std::placeholders::_2)));
 
                 Net::CNetworkManager::GetInstance().RegisterMessageHandler(0, m_NetworkDelegate);
+                
+                OnNewDepthFrame = (DepthFrameCallBack)(Core::PluginManager::GetPluginFunction("SLAM", "OnNewDepthFrame"));
             }
             else
             {
@@ -77,11 +86,25 @@ namespace Scpt
 
         void OnNewMessage(const Net::CMessage& _rMessage, int _Port)
         {
+            std::vector<char> Decompressed(_rMessage.m_DecompressedSize);
+
             if (_rMessage.m_CompressedSize != _rMessage.m_DecompressedSize)
-            {
-                std::vector<char> Decompressed(_rMessage.m_DecompressedSize);
-                
+            {   
                 Base::Decompress(_rMessage.m_Payload, Decompressed);
+            }
+            else
+            {
+                std::memcpy(Decompressed.data(), _rMessage.m_Payload.data(), Decompressed.size());
+            }
+
+            int32_t MessageType = *reinterpret_cast<int32_t*>(Decompressed.data());
+            
+            if (MessageType = DEPTHFRAME)
+            {
+                int32_t Width = *reinterpret_cast<int32_t*>(Decompressed.data() + sizeof(int32_t));
+                int32_t Height = *reinterpret_cast<int32_t*>(Decompressed.data() + 2 * sizeof(int32_t));
+
+                OnNewDepthFrame(reinterpret_cast<uint16_t*>(Decompressed.data() + 3 * sizeof(int32_t)));
             }
         }
     };
