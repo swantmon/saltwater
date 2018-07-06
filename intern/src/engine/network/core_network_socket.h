@@ -50,6 +50,8 @@ namespace Net
         std::vector<char> m_Header;
         std::vector<char> m_Payload;
 
+        CMessage m_PendingMessage;
+
         std::multimap<int, std::weak_ptr<CMessageDelegate>> m_Delegates;
 
         std::mutex m_Mutex;
