@@ -197,6 +197,12 @@ namespace MR
 
     void CScalableSLAMReconstructor::Start()
     {
+        assert(m_DepthFrameSize.x != 0 && m_DepthFrameSize.y != 0);
+        assert(m_ColorFrameSize.x != 0 && m_ColorFrameSize.y != 0);
+        assert(m_FocalLength.x != 0 && m_FocalLength.y != 0);
+        assert(m_FocalPoint.x != 0.0f && m_FocalPoint.y != 0.0f);
+        assert(m_DepthBounds.x != 0.0f && m_DepthBounds.y != 0.0f);
+
         ////////////////////////////////////////////////////////////////////////////////
         // Check if conservative rasterization is available
         ////////////////////////////////////////////////////////////////////////////////
@@ -1341,6 +1347,22 @@ namespace MR
     
     // -----------------------------------------------------------------------------
 
+    void CScalableSLAMReconstructor::SetImageSizes(glm::ivec2 _DepthFrameSize, glm::ivec2 _ColorFrameSize)
+    {
+        m_DepthFrameSize = _DepthFrameSize;
+        m_ColorFrameSize = _ColorFrameSize;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CScalableSLAMReconstructor::SetIntrinsics(glm::vec2 _FocalLength, glm::vec2 _FocalPoint)
+    {
+        m_FocalLength = _FocalLength;
+        m_FocalPoint = _FocalPoint;
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CScalableSLAMReconstructor::OnNewDepthFrame(const uint16_t* pDepth)
     {
         const bool CaptureColor = m_ReconstructionSettings.m_CaptureColor;
@@ -1780,6 +1802,12 @@ namespace MR
 
     CScalableSLAMReconstructor::CScalableSLAMReconstructor(const SReconstructionSettings* pReconstructionSettings)
     {
+        m_DepthFrameSize = glm::ivec2(0);
+        m_ColorFrameSize = glm::ivec2(0);
+        m_FocalLength = glm::vec2(0.0f);
+        m_FocalPoint = glm::vec2(0.0f);
+        m_DepthBounds = glm::vec2(0.0f);
+
         if (pReconstructionSettings != nullptr)
         {
             assert(pReconstructionSettings->m_IsScalable);
@@ -1789,7 +1817,6 @@ namespace MR
         {
             SReconstructionSettings::SetDefaultSettings(m_ReconstructionSettings);
         }
-        Start();
     }
 
     // -----------------------------------------------------------------------------

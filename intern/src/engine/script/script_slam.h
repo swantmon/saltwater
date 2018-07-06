@@ -32,9 +32,13 @@ namespace Scpt
             COLORFRAME
         };
 
-        typedef void(*DepthFrameCallBack)(const uint16_t*);
+        typedef void(*InitializeCallback)(void);
+        typedef void(*DepthFrameCallback)(const uint16_t*);
+        typedef void(*SizeAndIntrinsicsCallback)(glm::vec4, glm::vec4);
 
-        DepthFrameCallBack OnNewDepthFrame;
+        InitializeCallback OnInitializeReconstructor;
+        DepthFrameCallback OnNewDepthFrame;
+        SizeAndIntrinsicsCallback OnSetImageSizesAndIntrinsics;
         
     private:
         
@@ -53,7 +57,9 @@ namespace Scpt
 
                 Net::CNetworkManager::GetInstance().RegisterMessageHandler(0, m_NetworkDelegate);
                 
-                OnNewDepthFrame = (DepthFrameCallBack)(Core::PluginManager::GetPluginFunction("SLAM", "OnNewDepthFrame"));
+                OnNewDepthFrame = (DepthFrameCallback)(Core::PluginManager::GetPluginFunction("SLAM", "OnNewDepthFrame"));
+                OnInitializeReconstructor = (InitializeCallback)(Core::PluginManager::GetPluginFunction("SLAM", "InitializeReconstructor"));
+                OnSetImageSizesAndIntrinsics = (SizeAndIntrinsicsCallback)(Core::PluginManager::GetPluginFunction("SLAM", "SetImageSizesAndIntrinsicData"));
             }
             else
             {
@@ -79,13 +85,15 @@ namespace Scpt
 
         void OnInput(const Base::CInputEvent& _rEvent) override
         {
-
+            BASE_UNUSED(_rEvent);
         }
 
     private:
 
         void OnNewMessage(const Net::CMessage& _rMessage, int _Port)
         {
+            BASE_UNUSED(_Port);
+
             std::vector<char> Decompressed(_rMessage.m_DecompressedSize);
 
             if (_rMessage.m_CompressedSize != _rMessage.m_DecompressedSize)
@@ -99,10 +107,10 @@ namespace Scpt
 
             int32_t MessageType = *reinterpret_cast<int32_t*>(Decompressed.data());
             
-            if (MessageType = DEPTHFRAME)
+            if (MessageType == DEPTHFRAME)
             {
-                int32_t Width = *reinterpret_cast<int32_t*>(Decompressed.data() + sizeof(int32_t));
-                int32_t Height = *reinterpret_cast<int32_t*>(Decompressed.data() + 2 * sizeof(int32_t));
+                //int32_t Width = *reinterpret_cast<int32_t*>(Decompressed.data() + sizeof(int32_t));
+                //int32_t Height = *reinterpret_cast<int32_t*>(Decompressed.data() + 2 * sizeof(int32_t));
 
                 OnNewDepthFrame(reinterpret_cast<uint16_t*>(Decompressed.data() + 3 * sizeof(int32_t)));
             }

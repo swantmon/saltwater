@@ -11,7 +11,9 @@ namespace SLAM
     {
     public:
 
+        void InitializeReconstructor();
         void OnNewDepthFrame(const uint16_t* pBuffer);
+        void SetImageSizesAndIntrinsicData(glm::vec4 _ImageSizes, glm::vec4 _Intrinsics);
 
     public:
 

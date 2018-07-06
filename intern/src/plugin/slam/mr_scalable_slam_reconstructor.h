@@ -164,12 +164,15 @@ namespace MR
 
         float GetReconstructionSize();
 
+        void SetImageSizes(glm::ivec2 _DepthFrameSize, glm::ivec2 _ColorFrameSize);
+        void SetIntrinsics(glm::vec2 _FocalLength, glm::vec2 _FocalPoint);
+
         void OnNewDepthFrame(const uint16_t* pBuffer);
         
-    private:
-
         void Start();
         void Exit();
+
+    private:
 
 		glm::vec4 GetHessianNormalForm(const glm::vec3& rA, const glm::vec3& rB, const glm::vec3& rC);
 		float GetPointPlaneDistance(const glm::vec3& rPoint, const glm::vec4& rPlane);

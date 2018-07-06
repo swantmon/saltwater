@@ -14,9 +14,30 @@ CORE_PLUGIN_INFO(SLAM::CPluginInterface, "SLAM", "1.0", "This plugin provides Si
 
 namespace SLAM
 {
+    void CPluginInterface::InitializeReconstructor()
+    {
+        Gfx::ReconstructionRenderer::GetReconstructor().Start();
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CPluginInterface::OnNewDepthFrame(const uint16_t* pBuffer)
     {
         Gfx::ReconstructionRenderer::GetReconstructor().OnNewDepthFrame(pBuffer);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CPluginInterface::SetImageSizesAndIntrinsicData(glm::vec4 _ImageSizes, glm::vec4 _Intrinsics)
+    {
+        glm::ivec2 DepthSize = glm::ivec2(_ImageSizes.x, _ImageSizes.y);
+        glm::ivec2 ColorSize = glm::ivec2(_ImageSizes.z, _ImageSizes.w);
+
+        glm::vec2 FocalLength = glm::vec2(_Intrinsics.x, _Intrinsics.y);
+        glm::vec2 FocalPoint = glm::vec2(_Intrinsics.z, _Intrinsics.w);
+
+        Gfx::ReconstructionRenderer::GetReconstructor().SetImageSizes(DepthSize, ColorSize);
+        Gfx::ReconstructionRenderer::GetReconstructor().SetIntrinsics(FocalLength, FocalPoint);
     }
 
     // -----------------------------------------------------------------------------
@@ -66,7 +87,17 @@ namespace SLAM
     }
 } // namespace HW
 
+extern "C" CORE_PLUGIN_API_EXPORT void InitializeReconstructor()
+{
+    static_cast<SLAM::CPluginInterface&>(GetInstance()).InitializeReconstructor();
+}
+
 extern "C" CORE_PLUGIN_API_EXPORT void OnNewDepthFrame(const uint16_t* pBuffer)
 {
     static_cast<SLAM::CPluginInterface&>(GetInstance()).OnNewDepthFrame(pBuffer);
+}
+
+extern "C" CORE_PLUGIN_API_EXPORT void SetImageSizesAndIntrinsicData(glm::vec4 _ImageSizes, glm::vec4 _Intrinsics)
+{
+    static_cast<SLAM::CPluginInterface&>(GetInstance()).SetImageSizesAndIntrinsicData(_ImageSizes, _Intrinsics);
 }
