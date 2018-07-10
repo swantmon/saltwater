@@ -85,7 +85,7 @@ namespace Edit
     
     CState::EStateType CLoadMapState::InternOnEnter()
     {
-        CreateDefaultARScene();
+        CreateDefaultScene();
         
         return Edit::CState::LoadMap;
     }
