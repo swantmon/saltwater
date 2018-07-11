@@ -36,6 +36,7 @@ layout(binding = 0) uniform sampler2D in_PSTextureDiffuse;
 layout(location = 0) in vec3 in_WSPosition;
 layout(location = 1) in vec3 in_WSNormal;
 layout(location = 2) in vec2 in_UV;
+layout(location = 3) in mat3 in_WSNormalMatrix;
 
 // -----------------------------------------------------------------------------
 // Output to fragment
