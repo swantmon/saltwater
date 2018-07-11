@@ -243,7 +243,7 @@ namespace Scpt
 
         void SaveCubemap()
         {
-            Gfx::TextureManager::SaveTexture(m_OutputCubemapPtr, Core::AssetManager::GetPathToFiles() + "/env_cubemap/env_cubemap.ppm");
+            Gfx::TextureManager::SaveTexture(m_OutputCubemapPtr, Core::AssetManager::GetPathToFiles() + "/env_cubemap.ppm");
         }
     };
 } // namespace Scpt
