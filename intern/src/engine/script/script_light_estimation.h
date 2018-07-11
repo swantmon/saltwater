@@ -190,7 +190,7 @@ namespace Scpt
                 float x = _rEvent.GetCursorPosition()[0];
                 float y = _rEvent.GetCursorPosition()[1];
 
-                if (x < Gfx::Main::GetActiveWindowSize()[0] - 200.0f && y < Gfx::Main::GetActiveWindowSize()[1] - 200.0f)
+                if (x > Gfx::Main::GetActiveNativeWindowSize()[0] - 200.0f && y > Gfx::Main::GetActiveNativeWindowSize()[1] - 200.0f)
                 {
                     SaveCubemap();
                 }
