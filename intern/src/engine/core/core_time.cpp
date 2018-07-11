@@ -132,7 +132,7 @@ namespace Time
     
     // -----------------------------------------------------------------------------
     
-    Base::U64 GetNumberOfFrame()
+    Base::Size GetNumberOfFrame()
     {
         return CTime::GetInstance().GetNumberOfFrame();
     }
