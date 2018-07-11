@@ -673,6 +673,12 @@ namespace
             return;
         }
 
+#if PLATFORM_ANDROID
+        static const int s_NumberOfChannels = 4;
+#else
+        static const int s_NumberOfChannels = 3;
+#endif
+
         // -----------------------------------------------------------------------------
         // Save data to PPM function
         // -----------------------------------------------------------------------------
@@ -680,7 +686,7 @@ namespace
         {
             std::ofstream PPMOutput;
 
-            PPMOutput.open(_rPathToFile, 'w');
+            PPMOutput.open(_rPathToFile, std::ofstream::out);
 
             PPMOutput << "P3" << std::endl;
 
@@ -690,7 +696,7 @@ namespace
 
             for (int IndexOfPixel = 0; IndexOfPixel < _Width * _Height; ++IndexOfPixel)
             {
-                int Index = IndexOfPixel * 3;
+                int Index = IndexOfPixel * s_NumberOfChannels;
 
                 PPMOutput << ((char*)_pBytes)[Index + 0] % 255 << " ";
                 PPMOutput << ((char*)_pBytes)[Index + 1] % 255 << " ";
@@ -704,7 +710,7 @@ namespace
         // Allocate memory
         // -----------------------------------------------------------------------------
         int NumberOfPixel = pInternTexture->GetNumberOfPixelsU() * pInternTexture->GetNumberOfPixelsV();
-        int NumberOfBytes = NumberOfPixel * 3 * sizeof(char);
+        int NumberOfBytes = NumberOfPixel * s_NumberOfChannels * sizeof(char);
 
         void* pBytes = Base::CMemory::Allocate(NumberOfBytes);
 
@@ -715,9 +721,25 @@ namespace
 
         if (pInternTexture->IsCube())
         {
+#if PLATFORM_ANDROID
+            GLuint Framebuffer;
+
+            glGenFramebuffers(1, &Framebuffer);
+
+            glBindFramebuffer(GL_FRAMEBUFFER, Framebuffer);
+#endif
+
             for (int i = 0; i < 6; i++)
             {
+#if PLATFORM_ANDROID
+                glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, pInternTexture->m_NativeTexture, 0);
+
+                GLenum Status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+
+                glReadPixels(0, 0, pInternTexture->GetNumberOfPixelsU(), pInternTexture->GetNumberOfPixelsV(), GL_RGBA, GL_UNSIGNED_BYTE, pBytes);
+#else
                 glGetTexImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, GL_BYTE, pBytes);
+#endif
 
                 std::string PathToFilePerFace = _rPathToFile.substr(0, _rPathToFile.find_last_of('.'));
 
@@ -725,10 +747,28 @@ namespace
 
                 SaveBytesToPPM(PathToFilePerFace, pInternTexture->GetNumberOfPixelsU(), pInternTexture->GetNumberOfPixelsV(), pBytes);
             }
+
+#if PLATFORM_ANDROID
+            glDeleteFramebuffers(1, &Framebuffer);
+#endif
         }
         else
         {
+#if PLATFORM_ANDROID
+            GLuint Framebuffer;
+
+            glGenFramebuffers(1, &Framebuffer);
+
+            glBindFramebuffer(GL_FRAMEBUFFER, Framebuffer);
+
+            glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, pInternTexture->m_NativeTexture, 0);
+
+            glReadPixels(0, 0, pInternTexture->GetNumberOfPixelsU(), pInternTexture->GetNumberOfPixelsV(), GL_RGB, GL_BYTE, pBytes);
+
+            glDeleteFramebuffers(1, &Framebuffer);
+#else
             glGetTexImage(pInternTexture->m_NativeBinding, 0, GL_RGB, GL_BYTE, pBytes);
+#endif
 
             SaveBytesToPPM(_rPathToFile, pInternTexture->GetNumberOfPixelsU(), pInternTexture->GetNumberOfPixelsV(), pBytes);
         }
