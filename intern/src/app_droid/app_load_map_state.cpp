@@ -17,9 +17,7 @@
 #include "engine/data/data_hierarchy_facet.h"
 #include "engine/data/data_light_probe_component.h"
 #include "engine/data/data_map.h"
-#include "engine/data/data_material.h"
 #include "engine/data/data_material_component.h"
-#include "engine/data/data_material_manager.h"
 #include "engine/data/data_mesh_component.h"
 #include "engine/data/data_script_component.h"
 #include "engine/data/data_sky_component.h"
@@ -305,15 +303,11 @@ namespace App
 
             // -----------------------------------------------------------------------------
 
-            auto pMaterial = Dt::MaterialManager::CreateMaterialFromName("Chrome Sparrow");
-
-            pMaterial->SetColor(glm::vec3(1.0f, 1.0f, 1.0f));
-            pMaterial->SetMetalness(1.0f);
-            pMaterial->SetRoughness(0.25f);
-
             auto pMaterialComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CMaterialComponent>();
 
-            pMaterialComponent->SetMaterial(pMaterial);
+            pMaterialComponent->SetColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+            pMaterialComponent->SetMetalness(1.0f);
+            pMaterialComponent->SetRoughness(0.25f);
 
             rEntity.AttachComponent(pMaterialComponent);
 
@@ -355,15 +349,11 @@ namespace App
 
             // -----------------------------------------------------------------------------
 
-            auto pMaterial = Dt::MaterialManager::CreateMaterialFromName("Plane");
-
-            pMaterial->SetColor(glm::vec3(1.0f, 1.0f, 1.0f));
-            pMaterial->SetMetalness(0.0f);
-            pMaterial->SetRoughness(1.0f);
-
             auto pMaterialComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CMaterialComponent>();
 
-            pMaterialComponent->SetMaterial(pMaterial);
+            pMaterialComponent->SetColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+            pMaterialComponent->SetMetalness(0.0f);
+            pMaterialComponent->SetRoughness(1.0f);
 
             rEntity.AttachComponent(pMaterialComponent);
 

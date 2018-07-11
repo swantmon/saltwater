@@ -52,6 +52,7 @@ file( GLOB_RECURSE TargetSources LIST_DIRECTORIES false ${SourceDir}engine/*.c* 
 
 add_library( engine SHARED ${TargetSources} )
 
+target_include_directories( engine PRIVATE ${ExternDir}/asio/include )
 target_include_directories( engine PRIVATE ${ExternDir}/glm/include )
 target_include_directories( engine PRIVATE ${ExternDir}/json/include )
 target_include_directories( engine PRIVATE ${ExternDir}/assimp/include )
