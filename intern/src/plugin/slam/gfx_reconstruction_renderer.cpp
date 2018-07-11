@@ -219,6 +219,13 @@ namespace
 		if (DefaultSettings.m_IsScalable)
 		{
 			m_pScalableReconstructor.reset(new MR::CScalableSLAMReconstructor);
+
+#pragma message ("Just for testing. Remove later")
+            m_pScalableReconstructor->SetImageSizes(glm::ivec2(640, 480), glm::ivec2(640, 480));
+            m_pScalableReconstructor->SetIntrinsics(glm::vec2(570.013184f, 568.727722f), glm::vec2(317.644318f, 233.15361f));
+            m_pScalableReconstructor->SetDepthBounds(0.5f, 8.0f);
+            m_pScalableReconstructor->Start();
+
 			m_pReconstructor = nullptr;
 		}
 		else
