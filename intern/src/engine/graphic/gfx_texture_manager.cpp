@@ -668,7 +668,7 @@ namespace
 
         if (_rPathToFile.find_last_of('.') == -1 || _rPathToFile.substr(_rPathToFile.find_last_of('.')) != ".ppm")
         {
-            ENGINE_CONSOLE_WARNING("No or unsupported image extension found. Use .ppm to save textures.");
+            ENGINE_CONSOLE_WARNING("No or unsupported image extension found. Use Portable Pixmap (.ppm) to save textures.");
 
             return;
         }
