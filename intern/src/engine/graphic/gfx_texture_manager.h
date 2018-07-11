@@ -73,6 +73,8 @@ namespace TextureManager
     
     ENGINE_API void UpdateMipmap(CTexturePtr _TexturePtr);
 
+    ENGINE_API void SaveTexture(CTexturePtr _TexturePtr, const std::string& _rPathToFile, bool _Overwrite = true);
+
     ENGINE_API void SetTextureLabel(CTexturePtr _TexturePtr, const char* _pLabel);
 } // namespace TextureManager
 } // namespace Gfx

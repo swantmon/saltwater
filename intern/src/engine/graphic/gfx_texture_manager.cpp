@@ -71,6 +71,8 @@ namespace
         
         void UpdateMipmap(CTexturePtr _TexturePtr);
 
+        void SaveTexture(CTexturePtr _TexturePtr, const std::string& _rPathToFile, bool _Overwrite);
+
         void SetTextureLabel(CTexturePtr _TexturePtr, const char* _pLabel);
 
     private:
@@ -643,6 +645,62 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    void CGfxTextureManager::SaveTexture(CTexturePtr _TexturePtr, const std::string& _rPathToFile, bool _Overwrite)
+    {
+        // -----------------------------------------------------------------------------
+        // Get data
+        // -----------------------------------------------------------------------------
+        assert(_TexturePtr != 0);
+
+        CInternTexture* pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
+
+        assert(pInternTexture);
+
+        // -----------------------------------------------------------------------------
+        // Calculate necessary native data
+        // -----------------------------------------------------------------------------
+        int NumberOfPixel = pInternTexture->GetNumberOfPixelsU() * pInternTexture->GetNumberOfPixelsV() * pInternTexture->GetNumberOfPixelsW();
+        int NumberOfBytes = ConvertGLFormatToBytesPerPixel(pInternTexture->GetFormat()) * NumberOfPixel * 6;
+        int GLFormat      = ConvertGLImageFormat(pInternTexture->GetFormat());
+        int GLType        = ConvertGLImageType(pInternTexture->GetFormat());
+        int ILFormat      = ConvertILImageFormat(pInternTexture->GetFormat());
+        int ILType        = ConvertILImageType(pInternTexture->GetFormat());
+
+        // -----------------------------------------------------------------------------
+        // Allocate memory
+        // -----------------------------------------------------------------------------
+        void* pBytes = Base::CMemory::Allocate(NumberOfBytes);
+
+        // -----------------------------------------------------------------------------
+        // Get data from GPU
+        // -----------------------------------------------------------------------------
+        glGetTextureSubImage(pInternTexture->m_NativeTexture, 0, 0, 0, 0, pInternTexture->GetNumberOfPixelsU(), pInternTexture->GetNumberOfPixelsV(), pInternTexture->GetNumberOfPixelsW(), GLFormat, GLType, NumberOfBytes, pBytes);
+
+        // -----------------------------------------------------------------------------
+        // Save data
+        // -----------------------------------------------------------------------------
+        ilEnable(IL_FILE_OVERWRITE);
+
+        ILuint ImgId = 0;
+
+        ilGenImages(1, &ImgId);
+
+        ilBindImage(ImgId);
+
+        ilCopyPixels(0, 0, 0, 512, 512, 1, ILFormat, ILType, pBytes);
+
+        ilSaveImage((wchar_t *)_rPathToFile.c_str());
+
+        ilDeleteImages(1, &ImgId);
+
+        // -----------------------------------------------------------------------------
+        // Release memory
+        // -----------------------------------------------------------------------------
+        Base::CMemory::Free(pBytes);
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CGfxTextureManager::SetTextureLabel(CTexturePtr _TexturePtr, const char* _pLabel)
     {
         assert(_pLabel != nullptr);
@@ -813,16 +871,10 @@ namespace
         // -----------------------------------------------------------------------------
         if (_rDescriptor.m_Binding & Gfx::CTexture::DepthStencilTarget)
         {
-            glTexStorage2D(GL_TEXTURE_2D, NumberOfMipmaps, GL_DEPTH_COMPONENT32F, ImageWidth, ImageHeight);
+            GLInternalFormat = GL_DEPTH_COMPONENT32F;
         }
-        else if (_rDescriptor.m_Binding & Gfx::CTexture::RenderTarget)
-        {   
-            glTexStorage2D(GL_TEXTURE_2D, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight);
-        }
-        else
-        {
-            glTexStorage2D(GL_TEXTURE_2D, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight);
-        }
+
+        glTexStorage2D(GL_TEXTURE_2D, NumberOfMipmaps, GLInternalFormat, ImageWidth, ImageHeight);
 
         // -----------------------------------------------------------------------------
         // Is data available, then upload it to graphic card
@@ -1425,6 +1477,7 @@ namespace
             rTexture.m_pPixels           = _rDescriptor.m_pPixels;
             rTexture.m_NumberOfPixels[0] = static_cast<Gfx::CTexture::BPixels>(ImageWidth);
             rTexture.m_NumberOfPixels[1] = static_cast<Gfx::CTexture::BPixels>(ImageHeight);
+            rTexture.m_NumberOfPixels[2] = static_cast<Gfx::CTexture::BPixels>(1);
             rTexture.m_Hash              = 0;
             
             rTexture.m_Info.m_Access            = _rDescriptor.m_Access;
@@ -2355,6 +2408,13 @@ namespace TextureManager
     void UpdateMipmap(CTexturePtr _TexturePtr)
     {
         CGfxTextureManager::GetInstance().UpdateMipmap(_TexturePtr);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void SaveTexture(CTexturePtr _TexturePtr, const std::string& _rPathToFile, bool _Overwrite)
+    {
+        CGfxTextureManager::GetInstance().SaveTexture(_TexturePtr, _rPathToFile, _Overwrite);
     }
 
     // -----------------------------------------------------------------------------
