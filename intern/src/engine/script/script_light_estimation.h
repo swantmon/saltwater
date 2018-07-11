@@ -177,6 +177,11 @@ namespace Scpt
 
                 SwitchLightEstimation((EEstimationType)m_Mode);
             }
+
+            if (_rEvent.GetAction() == Base::CInputEvent::KeyReleased && _rEvent.GetKey() == Base::CInputEvent::Key1)
+            {
+                SaveCubemap();
+            }
         }
 
         // -----------------------------------------------------------------------------
@@ -214,6 +219,13 @@ namespace Scpt
             SetInputTexture(GetBackgroundTexture());
 
             SetOutputCubemap(m_OutputCubemapPtr);
+        }
+
+        // -----------------------------------------------------------------------------
+
+        void SaveCubemap()
+        {
+            Gfx::TextureManager::SaveTexture(m_OutputCubemapPtr, Core::AssetManager::GetPathToFiles() + "/env_cubemap.ppm");
         }
     };
 } // namespace Scpt

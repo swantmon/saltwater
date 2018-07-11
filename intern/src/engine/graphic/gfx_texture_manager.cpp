@@ -71,7 +71,7 @@ namespace
         
         void UpdateMipmap(CTexturePtr _TexturePtr);
 
-        void SaveTexture(CTexturePtr _TexturePtr, const std::string& _rPathToFile, bool _Overwrite);
+        void SaveTexture(CTexturePtr _TexturePtr, const std::string& _rPathToFile);
 
         void SetTextureLabel(CTexturePtr _TexturePtr, const char* _pLabel);
 
@@ -645,7 +645,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxTextureManager::SaveTexture(CTexturePtr _TexturePtr, const std::string& _rPathToFile, bool _Overwrite)
+    void CGfxTextureManager::SaveTexture(CTexturePtr _TexturePtr, const std::string& _rPathToFile)
     {
         // -----------------------------------------------------------------------------
         // Get data
@@ -657,41 +657,81 @@ namespace
         assert(pInternTexture);
 
         // -----------------------------------------------------------------------------
-        // Calculate necessary native data
+        // Handle error cases
         // -----------------------------------------------------------------------------
-        int NumberOfPixel = pInternTexture->GetNumberOfPixelsU() * pInternTexture->GetNumberOfPixelsV() * pInternTexture->GetNumberOfPixelsW();
-        int NumberOfBytes = ConvertGLFormatToBytesPerPixel(pInternTexture->GetFormat()) * NumberOfPixel * 6;
-        int GLFormat      = ConvertGLImageFormat(pInternTexture->GetFormat());
-        int GLType        = ConvertGLImageType(pInternTexture->GetFormat());
-        int ILFormat      = ConvertILImageFormat(pInternTexture->GetFormat());
-        int ILType        = ConvertILImageType(pInternTexture->GetFormat());
+        if (pInternTexture->GetNumberOfPixelsW() > 1)
+        {
+            ENGINE_CONSOLE_WARNING("Saving 3D textures is not suported. Saving aborted!");
+
+            return;
+        }
+
+        if (_rPathToFile.find_last_of('.') == -1 || _rPathToFile.substr(_rPathToFile.find_last_of('.')) != ".ppm")
+        {
+            ENGINE_CONSOLE_WARNING("No or unsupported image extension found. Use .ppm to save textures.");
+
+            return;
+        }
+
+        // -----------------------------------------------------------------------------
+        // Save data to PPM function
+        // -----------------------------------------------------------------------------
+        auto SaveBytesToPPM = [](const std::string& _rPathToFile, int _Width, int _Height, void* _pBytes)
+        {
+            std::ofstream PPMOutput;
+
+            PPMOutput.open(_rPathToFile, 'w');
+
+            PPMOutput << "P3" << std::endl;
+
+            PPMOutput << _Width << " " << _Height << std::endl;
+
+            PPMOutput << "255" << std::endl;
+
+            for (int IndexOfPixel = 0; IndexOfPixel < _Width * _Height; ++IndexOfPixel)
+            {
+                int Index = IndexOfPixel * 3;
+
+                PPMOutput << ((char*)_pBytes)[Index + 0] % 255 << " ";
+                PPMOutput << ((char*)_pBytes)[Index + 1] % 255 << " ";
+                PPMOutput << ((char*)_pBytes)[Index + 2] % 255 << " ";
+            }
+
+            PPMOutput.close();
+        };
 
         // -----------------------------------------------------------------------------
         // Allocate memory
         // -----------------------------------------------------------------------------
+        int NumberOfPixel = pInternTexture->GetNumberOfPixelsU() * pInternTexture->GetNumberOfPixelsV();
+        int NumberOfBytes = NumberOfPixel * 3 * sizeof(char);
+
         void* pBytes = Base::CMemory::Allocate(NumberOfBytes);
 
         // -----------------------------------------------------------------------------
         // Get data from GPU
         // -----------------------------------------------------------------------------
-        glGetTextureSubImage(pInternTexture->m_NativeTexture, 0, 0, 0, 0, pInternTexture->GetNumberOfPixelsU(), pInternTexture->GetNumberOfPixelsV(), pInternTexture->GetNumberOfPixelsW(), GLFormat, GLType, NumberOfBytes, pBytes);
+        glBindTexture(pInternTexture->m_NativeBinding, pInternTexture->m_NativeTexture);
 
-        // -----------------------------------------------------------------------------
-        // Save data
-        // -----------------------------------------------------------------------------
-        ilEnable(IL_FILE_OVERWRITE);
+        if (pInternTexture->IsCube())
+        {
+            for (int i = 0; i < 6; i++)
+            {
+                glGetTexImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, GL_BYTE, pBytes);
 
-        ILuint ImgId = 0;
+                std::string PathToFilePerFace = _rPathToFile.substr(0, _rPathToFile.find_last_of('.'));
 
-        ilGenImages(1, &ImgId);
+                PathToFilePerFace += "_" + std::to_string(i) + _rPathToFile.substr(_rPathToFile.find_last_of('.'));
 
-        ilBindImage(ImgId);
+                SaveBytesToPPM(PathToFilePerFace, pInternTexture->GetNumberOfPixelsU(), pInternTexture->GetNumberOfPixelsV(), pBytes);
+            }
+        }
+        else
+        {
+            glGetTexImage(pInternTexture->m_NativeBinding, 0, GL_RGB, GL_BYTE, pBytes);
 
-        ilCopyPixels(0, 0, 0, 512, 512, 1, ILFormat, ILType, pBytes);
-
-        ilSaveImage((wchar_t *)_rPathToFile.c_str());
-
-        ilDeleteImages(1, &ImgId);
+            SaveBytesToPPM(_rPathToFile, pInternTexture->GetNumberOfPixelsU(), pInternTexture->GetNumberOfPixelsV(), pBytes);
+        }
 
         // -----------------------------------------------------------------------------
         // Release memory
@@ -2412,9 +2452,9 @@ namespace TextureManager
 
     // -----------------------------------------------------------------------------
 
-    void SaveTexture(CTexturePtr _TexturePtr, const std::string& _rPathToFile, bool _Overwrite)
+    void SaveTexture(CTexturePtr _TexturePtr, const std::string& _rPathToFile)
     {
-        CGfxTextureManager::GetInstance().SaveTexture(_TexturePtr, _rPathToFile, _Overwrite);
+        CGfxTextureManager::GetInstance().SaveTexture(_TexturePtr, _rPathToFile);
     }
 
     // -----------------------------------------------------------------------------
