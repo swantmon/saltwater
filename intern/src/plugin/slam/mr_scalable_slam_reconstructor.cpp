@@ -1363,6 +1363,13 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
+    void CScalableSLAMReconstructor::SetDepthBounds(float _Min, float _Max)
+    {
+        m_DepthBounds = glm::vec2(_Min, _Max);
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CScalableSLAMReconstructor::OnNewDepthFrame(const uint16_t* pDepth)
     {
         const bool CaptureColor = m_ReconstructionSettings.m_CaptureColor;
