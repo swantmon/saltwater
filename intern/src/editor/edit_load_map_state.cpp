@@ -333,7 +333,7 @@ namespace Edit
         Dt::EntityManager::MarkEntityAsDirty(rRootEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
 
         {
-            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Static;
+            /*EntityDesc.m_EntityCategory = Dt::SEntityCategory::Static;
             EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
             Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
@@ -373,11 +373,11 @@ namespace Edit
 
             Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
 
-            rRootEntity.Attach(rEntity);
+            rRootEntity.Attach(rEntity);*/
         }
 
         {
-            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Static;
+            /*EntityDesc.m_EntityCategory = Dt::SEntityCategory::Static;
             EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
             Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
@@ -417,7 +417,7 @@ namespace Edit
 
             Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
 
-            rRootEntity.Attach(rEntity);
+            rRootEntity.Attach(rEntity);*/
         }
 
         // -----------------------------------------------------------------------------
