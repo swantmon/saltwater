@@ -24,9 +24,6 @@ namespace Scpt
     {
     private:
 
-        uint16_t* LinearizeBuffer;
-        uint16_t* LinearBuffer;
-
         enum EMessageType
         {
             COMMAND,
@@ -60,16 +57,6 @@ namespace Scpt
 
                 Net::CNetworkManager::GetInstance().RegisterMessageHandler(0, m_NetworkDelegate);
                 
-                LinearizeBuffer = new uint16_t[2050];
-                LinearBuffer = new uint16_t[640 * 480];
-
-                for (int i = 0; i < 2050; ++i)
-                {
-                    float v = i / static_cast<float>(2048);
-                    v = powf(v, 3) * 6;
-                    LinearizeBuffer[i] = static_cast<uint16_t>(v * 6 * 256);
-                }
-
                 OnNewDepthFrame = (DepthFrameCallback)(Core::PluginManager::GetPluginFunction("SLAM", "OnNewDepthFrame"));
                 OnInitializeReconstructor = (InitializeCallback)(Core::PluginManager::GetPluginFunction("SLAM", "InitializeReconstructor"));
                 OnSetImageSizesAndIntrinsics = (SizeAndIntrinsicsCallback)(Core::PluginManager::GetPluginFunction("SLAM", "SetImageSizesAndIntrinsicData"));
@@ -125,14 +112,16 @@ namespace Scpt
                 //int32_t Width = *reinterpret_cast<int32_t*>(Decompressed.data() + sizeof(int32_t));
                 //int32_t Height = *reinterpret_cast<int32_t*>(Decompressed.data() + 2 * sizeof(int32_t));
 
-                const uint16_t* pBuffer = reinterpret_cast<uint16_t*>(Decompressed.data() + 3 * sizeof(int32_t));
-                
+                std::vector<uint16_t> Buffer;
+
+                const float* RawBuffer = reinterpret_cast<float*>(Decompressed.data() + 3 * sizeof(int32_t));
+
                 for (int i = 0; i < 640 * 480; ++ i)
                 {
-                    LinearBuffer[i] = LinearizeBuffer[pBuffer[i]];
+                    Buffer.push_back(static_cast<uint16_t>(RawBuffer[i]));
                 }
 
-                OnNewDepthFrame(LinearBuffer);
+                OnNewDepthFrame(Buffer.data());
             }
         }
     };
