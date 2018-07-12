@@ -10,6 +10,7 @@
 #include "engine/data/data_sky_component.h"
 #include "engine/data/data_transformation_facet.h"
 
+#include "engine/graphic/gfx_main.h"
 #include "engine/graphic/gfx_texture.h"
 #include "engine/graphic/gfx_texture_manager.h"
 
@@ -158,6 +159,9 @@ namespace Scpt
 
         void OnInput(const Base::CInputEvent& _rEvent) override
         {
+            // -----------------------------------------------------------------------------
+            // Switch mode
+            // -----------------------------------------------------------------------------
             if (_rEvent.GetAction() == Base::CInputEvent::TouchReleased)
             {
                 float x = _rEvent.GetCursorPosition()[0];
@@ -176,6 +180,25 @@ namespace Scpt
                 m_Mode = (m_Mode + 1) % NumberOfEstimationTypes;
 
                 SwitchLightEstimation((EEstimationType)m_Mode);
+            }
+
+            // -----------------------------------------------------------------------------
+            // Save textures
+            // -----------------------------------------------------------------------------
+            if (_rEvent.GetAction() == Base::CInputEvent::TouchReleased)
+            {
+                float x = _rEvent.GetCursorPosition()[0];
+                float y = _rEvent.GetCursorPosition()[1];
+
+                if (x > Gfx::Main::GetActiveNativeWindowSize()[0] - 200.0f && y > Gfx::Main::GetActiveNativeWindowSize()[1] - 200.0f)
+                {
+                    SaveCubemap();
+                }
+            }
+
+            if (_rEvent.GetAction() == Base::CInputEvent::KeyReleased && _rEvent.GetKey() == Base::CInputEvent::Key1)
+            {
+                SaveCubemap();
             }
         }
 
@@ -214,6 +237,13 @@ namespace Scpt
             SetInputTexture(GetBackgroundTexture());
 
             SetOutputCubemap(m_OutputCubemapPtr);
+        }
+
+        // -----------------------------------------------------------------------------
+
+        void SaveCubemap()
+        {
+            Gfx::TextureManager::SaveTexture(m_OutputCubemapPtr, Core::AssetManager::GetPathToFiles() + "/env_cubemap.ppm");
         }
     };
 } // namespace Scpt
