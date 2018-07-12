@@ -26,6 +26,8 @@ namespace Scpt
 
         uint16_t* Buffer;
 
+        glm::mat4 PoseMatrix;
+
         enum EMessageType
         {
             COMMAND,
@@ -35,7 +37,7 @@ namespace Scpt
         };
 
         typedef void(*InitializeCallback)(void);
-        typedef void(*DepthFrameCallback)(const uint16_t*);
+        typedef void(*DepthFrameCallback)(const uint16_t*, const char*, const glm::mat4*);
         typedef void(*SizeAndIntrinsicsCallback)(glm::vec4, glm::vec4);
 
         InitializeCallback OnInitializeReconstructor;
@@ -111,7 +113,11 @@ namespace Scpt
 
             int32_t MessageType = *reinterpret_cast<int32_t*>(Decompressed.data());
             
-            if (MessageType == DEPTHFRAME)
+            if (MessageType == TRANSFORM)
+            {
+                PoseMatrix = *reinterpret_cast<glm::mat4*>(Decompressed.data() + sizeof(int32_t));
+            }
+            else if (MessageType == DEPTHFRAME)
             {
                 int32_t Width = *reinterpret_cast<int32_t*>(Decompressed.data() + sizeof(int32_t));
                 int32_t Height = *reinterpret_cast<int32_t*>(Decompressed.data() + 2 * sizeof(int32_t));
@@ -126,7 +132,7 @@ namespace Scpt
                     }
                 }
 
-                OnNewDepthFrame(Buffer);
+                OnNewDepthFrame(Buffer, nullptr, &PoseMatrix);
             }
         }
     };

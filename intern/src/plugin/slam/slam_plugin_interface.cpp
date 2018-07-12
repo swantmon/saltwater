@@ -21,9 +21,9 @@ namespace SLAM
 
     // -----------------------------------------------------------------------------
 
-    void CPluginInterface::OnNewDepthFrame(const uint16_t* pBuffer)
+    void CPluginInterface::OnNewFrame(const uint16_t* pDepthBuffer, const char* pColorBuffer, const glm::mat4* pTransform)
     {
-        Gfx::ReconstructionRenderer::GetReconstructor().OnNewDepthFrame(pBuffer);
+        Gfx::ReconstructionRenderer::GetReconstructor().OnNewFrame(pDepthBuffer, pColorBuffer, pTransform);
     }
 
     // -----------------------------------------------------------------------------
@@ -92,9 +92,9 @@ extern "C" CORE_PLUGIN_API_EXPORT void InitializeReconstructor()
     static_cast<SLAM::CPluginInterface&>(GetInstance()).InitializeReconstructor();
 }
 
-extern "C" CORE_PLUGIN_API_EXPORT void OnNewDepthFrame(const uint16_t* pBuffer)
+extern "C" CORE_PLUGIN_API_EXPORT void OnNewDepthFrame(const uint16_t* pDepthBuffer, const char* pColorBuffer, const glm::mat4* pTransform)
 {
-    static_cast<SLAM::CPluginInterface&>(GetInstance()).OnNewDepthFrame(pBuffer);
+    static_cast<SLAM::CPluginInterface&>(GetInstance()).OnNewFrame(pDepthBuffer, pColorBuffer, pTransform);
 }
 
 extern "C" CORE_PLUGIN_API_EXPORT void SetImageSizesAndIntrinsicData(glm::vec4 _ImageSizes, glm::vec4 _Intrinsics)

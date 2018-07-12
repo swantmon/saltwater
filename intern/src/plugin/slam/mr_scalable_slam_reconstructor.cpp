@@ -338,6 +338,9 @@ namespace MR
 
         float x = (-317.644318f / m_DepthFrameSize.x) / (570.013184f / m_DepthFrameSize.x);
         float y = (-233.153610f / m_DepthFrameSize.y) / (568.727722f / m_DepthFrameSize.y);
+
+        x = (-m_FocalPoint.x / m_DepthFrameSize.x) / (m_FocalLength.x / m_DepthFrameSize.x);
+        y = (-m_FocalPoint.y / m_DepthFrameSize.y) / (m_FocalLength.y / m_DepthFrameSize.y);
                 
         // TODO: use camera near parameter and find out why frustum culling does not work correctly
         // Volumes that touch the pyramid top but are not between near and far are still valid hits for some reason
@@ -1373,8 +1376,10 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CScalableSLAMReconstructor::OnNewDepthFrame(const uint16_t* pDepth)
+    void CScalableSLAMReconstructor::OnNewFrame(const uint16_t* pDepthBuffer, const char* pColorBuffer, const glm::mat4* pTransform)
     {
+        BASE_UNUSED(pColorBuffer);
+
         const bool CaptureColor = m_ReconstructionSettings.m_CaptureColor;
         
         char* pColor = m_CameraPixels.data();
@@ -1390,7 +1395,7 @@ namespace MR
 
         Base::AABB2UInt TargetRect;
         TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_DepthFrameSize.x, m_DepthFrameSize.y));
-        TextureManager::CopyToTexture2D(m_RawDepthBufferPtr, TargetRect, m_DepthFrameSize.x, const_cast<uint16_t*>(pDepth));
+        TextureManager::CopyToTexture2D(m_RawDepthBufferPtr, TargetRect, m_DepthFrameSize.x, const_cast<uint16_t*>(pDepthBuffer));
 
         if (CaptureColor)
         {
@@ -1416,7 +1421,7 @@ namespace MR
         // Tracking
         //////////////////////////////////////////////////////////////////////////////////////
 
-        if (m_IntegratedFrameCount > m_MinWeight)
+        if (m_IntegratedFrameCount > m_MinWeight && pTransform == nullptr)
         {
             Performance::BeginEvent("Tracking");
 
@@ -1442,6 +1447,18 @@ namespace MR
             }
 
             Performance::EndEvent();
+        }
+        else
+        {
+            m_TrackingLost = false;
+
+            m_PoseMatrix = *pTransform;
+
+            STrackingData TrackingData;
+            TrackingData.m_PoseMatrix = *pTransform;
+            TrackingData.m_InvPoseMatrix = glm::inverse(*pTransform);
+
+            BufferManager::UploadBufferData(m_TrackingDataConstantBufferPtr, &TrackingData);
         }
 
         //////////////////////////////////////////////////////////////////////////////////////
