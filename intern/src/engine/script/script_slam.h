@@ -24,6 +24,8 @@ namespace Scpt
     {
     private:
 
+        uint16_t* Buffer;
+
         enum EMessageType
         {
             COMMAND,
@@ -60,6 +62,8 @@ namespace Scpt
                 OnNewDepthFrame = (DepthFrameCallback)(Core::PluginManager::GetPluginFunction("SLAM", "OnNewDepthFrame"));
                 OnInitializeReconstructor = (InitializeCallback)(Core::PluginManager::GetPluginFunction("SLAM", "InitializeReconstructor"));
                 OnSetImageSizesAndIntrinsics = (SizeAndIntrinsicsCallback)(Core::PluginManager::GetPluginFunction("SLAM", "SetImageSizesAndIntrinsicData"));
+
+                Buffer = new uint16_t[640 * 480];
             }
             else
             {
@@ -109,19 +113,20 @@ namespace Scpt
             
             if (MessageType == DEPTHFRAME)
             {
-                //int32_t Width = *reinterpret_cast<int32_t*>(Decompressed.data() + sizeof(int32_t));
-                //int32_t Height = *reinterpret_cast<int32_t*>(Decompressed.data() + 2 * sizeof(int32_t));
-
-                std::vector<uint16_t> Buffer;
-
+                int32_t Width = *reinterpret_cast<int32_t*>(Decompressed.data() + sizeof(int32_t));
+                int32_t Height = *reinterpret_cast<int32_t*>(Decompressed.data() + 2 * sizeof(int32_t));
+                
                 const float* RawBuffer = reinterpret_cast<float*>(Decompressed.data() + 3 * sizeof(int32_t));
 
-                for (int i = 0; i < 640 * 480; ++ i)
+                for (int i = 0; i < Width; ++ i)
                 {
-                    Buffer.push_back(static_cast<uint16_t>(RawBuffer[i]));
+                    for (int j = 0; j < Height; ++ j)
+                    {
+                        Buffer[i * Height + j] = static_cast<uint16_t>(RawBuffer[i * Height + j]);
+                    }
                 }
 
-                OnNewDepthFrame(Buffer.data());
+                OnNewDepthFrame(Buffer);
             }
         }
     };
