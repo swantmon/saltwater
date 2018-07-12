@@ -1183,7 +1183,7 @@ namespace
 
         SDrawCallConstantBuffer BufferData;
 
-        BufferData.m_WorldMatrix = glm::mat4(1);
+        BufferData.m_WorldMatrix = m_pScalableReconstructor->GetPoseMatrix();
         BufferData.m_WorldMatrix = BufferData.m_WorldMatrix * glm::eulerAngleX(glm::radians(90.0f));
         BufferData.m_Color = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
 
@@ -1201,7 +1201,8 @@ namespace
         ContextManager::SetInputLayout(m_CameraInputLayoutPtr);
         ContextManager::SetTopology(STopology::PointList);
 
-        ContextManager::Draw(512 * 424, 0);
+#pragma message("Remove magic numbers")
+        ContextManager::Draw(640 * 480, 0);
     }
 
     // -----------------------------------------------------------------------------
