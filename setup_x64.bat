@@ -9,7 +9,7 @@ set BuildMode=x64
 @echo "Start downloading dependencies..."
 
 @echo off
-if not exist "tmp_dependencies.zip" curl http://data.tobias-schwandt.de/dependencies_win32_x64.zip --output tmp_dependencies.zip
+if not exist "tmp_dependencies_x64_arm64.zip" curl http://data.tobias-schwandt.de/dependencies_x64_arm64.zip --output tmp_dependencies_x64_arm64.zip
 @echo on
 
 @echo "Downloading dependencies finished"
@@ -19,9 +19,9 @@ if not exist "tmp_dependencies.zip" curl http://data.tobias-schwandt.de/dependen
 @echo "Start unzipping dependencies..."
 
 @echo off
-Call :UnZipFile "%cd%\" "%cd%\tmp_dependencies.zip"
+Call :UnZipFile "%cd%\extern\" "%cd%\tmp_dependencies_x64_arm64.zip"
 
-del tmp_dependencies.zip
+del tmp_dependencies_x64_arm64.zip
 @echo on
 
 @echo "Unzipping dependencies finished"

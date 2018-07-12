@@ -123,7 +123,12 @@ namespace AR
 
         m_IsActive = m_Engine->initialize(Key);
 
-        if (m_IsActive == false) return;
+        if (m_IsActive == false)
+        {
+            ENGINE_CONSOLE_ERRORV("Failed initializing EasyAR engine. Maybe the key '%s' is not valid.", Key);
+
+            return;
+        }
 
         // -----------------------------------------------------------------------------
         // Camera
@@ -140,7 +145,14 @@ namespace AR
         // -----------------------------------------------------------------------------
         // Open camera
         // -----------------------------------------------------------------------------
-        m_Camera.m_Native->open(static_cast<int>(CameraDeviceType));
+        m_IsActive = m_Camera.m_Native->open(static_cast<int>(CameraDeviceType));
+
+        if (m_IsActive == false)
+        {
+            ENGINE_CONSOLE_ERROR("Failed opening camera device.");
+
+            return;
+        }
 
         // -----------------------------------------------------------------------------
         // Set settings to camera
