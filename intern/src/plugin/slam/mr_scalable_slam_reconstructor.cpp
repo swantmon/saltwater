@@ -333,9 +333,12 @@ namespace MR
 	{
 		//Todo: remove magic numbers (focal length/point)
 
-		float x = (-0.50602675f) / 0.72113f;
-		float y = (-0.499133f) / 0.870799f;
-        
+		//float x = (-0.50602675f) / 0.72113f;
+		//float y = (-0.499133f) / 0.870799f;
+
+        float x = (-317.644318f / m_DepthFrameSize.x) / (570.013184f / m_DepthFrameSize.x);
+        float y = (-233.153610f / m_DepthFrameSize.y) / (568.727722f / m_DepthFrameSize.y);
+                
         // TODO: use camera near parameter and find out why frustum culling does not work correctly
         // Volumes that touch the pyramid top but are not between near and far are still valid hits for some reason
         // and they are even pass the rasterization step even though they cannot contain valid samples
