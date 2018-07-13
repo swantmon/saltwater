@@ -335,12 +335,9 @@ namespace MR
 
 		//float x = (-0.50602675f) / 0.72113f;
 		//float y = (-0.499133f) / 0.870799f;
-
-        float x = (-317.644318f / m_DepthFrameSize.x) / (570.013184f / m_DepthFrameSize.x);
-        float y = (-233.153610f / m_DepthFrameSize.y) / (568.727722f / m_DepthFrameSize.y);
-
-        x = (-m_FocalPoint.x / m_DepthFrameSize.x) / (m_FocalLength.x / m_DepthFrameSize.x);
-        y = (-m_FocalPoint.y / m_DepthFrameSize.y) / (m_FocalLength.y / m_DepthFrameSize.y);
+        
+        float x = (-m_FocalPoint.x / m_DepthFrameSize.x) / (m_FocalLength.x / m_DepthFrameSize.x);
+        float y = (-m_FocalPoint.y / m_DepthFrameSize.y) / (m_FocalLength.y / m_DepthFrameSize.y);
                 
         // TODO: use camera near parameter and find out why frustum culling does not work correctly
         // Volumes that touch the pyramid top but are not between near and far are still valid hits for some reason
