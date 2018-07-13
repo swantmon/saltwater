@@ -2,6 +2,12 @@
 #define __INCLUDE_FS_CAUSTIC_EMISSION_GLSL__
 
 // -----------------------------------------------------------------------------
+// Original approach:
+// "Interactive image-space techniques for approximating caustics"
+// Chris Wyman, Scott Davis (2006)
+// -----------------------------------------------------------------------------
+
+// -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
 layout(std140, binding = 3) uniform UB3
@@ -31,8 +37,6 @@ layout(location = 0) out vec4 out_PhotonLocation;
 // -----------------------------------------------------------------------------
 // Function
 // -----------------------------------------------------------------------------
-
-
 vec2 ProjectToTexCoord( vec4 eyeSpacePos )
 {
     vec4 projLoc = ps_LightProjectionMatrix * eyeSpacePos;
@@ -72,16 +76,9 @@ vec4 local2 = vec4(1.0/indexOfRefraction, 1.0/(indexOfRefraction*indexOfRefracti
 
 
 
-
-
-
-
     // Stuff that we know from the beginning
     vec3 N_1 = normalize( VSNormal );   // Surface Normal
     vec3 V   = normalize( VSPosition  );   // View direction
-    
-    // Find the relective (.x) and refractive (.y) fresnel coefficients 
-    //vec2 fresnel = fresnelApprox( dot( -V, N_1 ) );
 
     // Find the distance to front & back surface, first as normalized [0..1] values, than unprojected
     vec2 Dist = vec2( texture(ps_RefractiveDepth, SSPosition.xy).x, SSPosition.z );
