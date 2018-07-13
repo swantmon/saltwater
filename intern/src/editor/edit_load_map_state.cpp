@@ -1035,9 +1035,13 @@ namespace Edit
 
             Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
 
-            pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 1.5f));
-            pTransformationFacet->SetScale(glm::vec3(1.0f));
-            pTransformationFacet->SetRotation(glm::vec3(0.0f));
+            pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 1.0f));
+            pTransformationFacet->SetScale(glm::vec3(2.5f));
+            pTransformationFacet->SetRotation(glm::vec3(glm::radians(90.0f), 0.0f, 0.0f));
+
+//             pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 1.0f));
+//             pTransformationFacet->SetScale(glm::vec3(1.0f));
+//             pTransformationFacet->SetRotation(glm::vec3(0.0f));
 
             // -----------------------------------------------------------------------------
 
@@ -1050,7 +1054,7 @@ namespace Edit
             LightProbeComponent->SetRefreshMode(Dt::CLightProbeComponent::Dynamic);
             LightProbeComponent->SetNear(0.01f);
             LightProbeComponent->SetFar(1024.0f);
-            LightProbeComponent->SetParallaxCorrection(false);
+            LightProbeComponent->SetParallaxCorrection(true);
             LightProbeComponent->SetBoxSize(glm::vec3(1024.0f));
 
             rEntity.AttachComponent(LightProbeComponent);
@@ -1061,7 +1065,10 @@ namespace Edit
 
             auto pMeshComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CMeshComponent>();
 
-            pMeshComponent->SetMeshType(Dt::CMeshComponent::Sphere);
+            pMeshComponent->SetMeshType(Dt::CMeshComponent::Asset);
+            pMeshComponent->SetFilename(Core::AssetManager::GetPathToAssets() + "/models/bunny.dae");
+
+/*            pMeshComponent->SetMeshType(Dt::CMeshComponent::Sphere);*/
 
             rEntity.AttachComponent(pMeshComponent);
 
@@ -1141,8 +1148,8 @@ namespace Edit
             {
                 auto LightComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CPointLightComponent>();
 
-                LightComponent->SetOuterConeAngle(glm::radians(160.0f));
-                LightComponent->SetInnerConeAngle(glm::radians(140.0f));
+                LightComponent->SetOuterConeAngle(glm::radians(100.0f));
+                LightComponent->SetInnerConeAngle(glm::radians(90.0f));
                 LightComponent->SetShadowQuality(Dt::CPointLightComponent::VeryHigh);
                 LightComponent->SetRefreshMode(Dt::CPointLightComponent::Dynamic);
 
