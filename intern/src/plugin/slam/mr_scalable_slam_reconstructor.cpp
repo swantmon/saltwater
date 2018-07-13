@@ -1418,7 +1418,7 @@ namespace MR
         // Tracking
         //////////////////////////////////////////////////////////////////////////////////////
 
-        if (m_IntegratedFrameCount > m_MinWeight && pTransform == nullptr)
+        if (m_IntegratedFrameCount > m_MinWeight || pTransform == nullptr)
         {
             Performance::BeginEvent("Tracking");
 
