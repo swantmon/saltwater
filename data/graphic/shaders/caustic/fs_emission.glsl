@@ -66,7 +66,7 @@ void main(void)
 
 float near = 0.1f;
 float far  = 20.1f;
-float indexOfRefraction = 1.01f;
+float indexOfRefraction = 1.41f;
 vec4 local1 = vec4(near*far, far-near, far+near, far);
 vec4 local2 = vec4(1.0/indexOfRefraction, 1.0/(indexOfRefraction*indexOfRefraction), indexOfRefraction, indexOfRefraction*indexOfRefraction);
 

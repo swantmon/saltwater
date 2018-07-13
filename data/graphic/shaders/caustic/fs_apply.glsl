@@ -10,7 +10,7 @@
 layout(std140, binding = 1) uniform UB1
 {
     mat4 ps_LightProjectionMatrix;
-    mat4 ps_InverseLightViewMatrix;
+    mat4 ps_LightViewMatrix;
     uint ps_ExposureHistoryIndex;
 };
 
@@ -63,7 +63,7 @@ void main(void)
     // -----------------------------------------------------------------------------
     vec4 LSPosition;
     
-    LSPosition = inverse(ps_LightProjectionMatrix) * ps_InverseLightViewMatrix * vec4(WSPosition, 1.0f);
+    LSPosition = ps_LightProjectionMatrix * ps_LightViewMatrix * vec4(WSPosition, 1.0f);
     
     // -----------------------------------------------------------------------------
     // Divide xyz by w to get the position in light view's clip space.
