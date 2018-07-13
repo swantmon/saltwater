@@ -490,9 +490,9 @@ namespace
 
         //Todo: remove magic numbers (focal length/point, max/min depth)
 
-        float Focalx = (-0.50602675f) / 0.72113f;
-        float Focaly = (-0.499133f) / 0.870799f;
-
+        float Focalx = (-317.644318f / 640.0f) / (570.013184f / 640.0f);
+        float Focaly = (-233.153610f / 480.0f) / (568.727722f / 480.0f);
+        
         glm::vec3 CameraVertices[] =
         {
             glm::vec3(-Focalx * 8.0f, -Focaly * 8.0f, 8.0f),
