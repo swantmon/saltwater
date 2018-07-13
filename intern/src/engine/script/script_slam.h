@@ -26,7 +26,7 @@ namespace Scpt
 
         uint16_t* Buffer;
 
-        glm::mat4 PoseMatrix;
+        glm::mat4 m_PoseMatrix;
 
         enum EMessageType
         {
@@ -37,11 +37,13 @@ namespace Scpt
         };
 
         typedef void(*InitializeCallback)(void);
+        typedef void(*ResetCallback)(void);
         typedef void(*DepthFrameCallback)(const uint16_t*, const char*, const glm::mat4*);
         typedef void(*SizeAndIntrinsicsCallback)(glm::vec4, glm::vec4);
 
+        ResetCallback OnResetReconstruction;
         InitializeCallback OnInitializeReconstructor;
-        DepthFrameCallback OnNewDepthFrame;
+        DepthFrameCallback OnNewFrame;
         SizeAndIntrinsicsCallback OnSetImageSizesAndIntrinsics;
         
     private:
@@ -61,9 +63,10 @@ namespace Scpt
 
                 Net::CNetworkManager::GetInstance().RegisterMessageHandler(0, m_NetworkDelegate);
                 
-                OnNewDepthFrame = (DepthFrameCallback)(Core::PluginManager::GetPluginFunction("SLAM", "OnNewDepthFrame"));
+                OnNewFrame = (DepthFrameCallback)(Core::PluginManager::GetPluginFunction("SLAM", "OnNewDepthFrame"));
                 OnInitializeReconstructor = (InitializeCallback)(Core::PluginManager::GetPluginFunction("SLAM", "InitializeReconstructor"));
                 OnSetImageSizesAndIntrinsics = (SizeAndIntrinsicsCallback)(Core::PluginManager::GetPluginFunction("SLAM", "SetImageSizesAndIntrinsicData"));
+                OnResetReconstruction = (ResetCallback)(Core::PluginManager::GetPluginFunction("SLAM", "ResetReconstruction"));
 
                 Buffer = new uint16_t[640 * 480];
             }
@@ -113,9 +116,13 @@ namespace Scpt
 
             int32_t MessageType = *reinterpret_cast<int32_t*>(Decompressed.data());
             
-            if (MessageType == TRANSFORM)
+            if (MessageType == COMMAND)
             {
-                PoseMatrix = *reinterpret_cast<glm::mat4*>(Decompressed.data() + sizeof(int32_t));
+                OnResetReconstruction();
+            }
+            else if (MessageType == TRANSFORM)
+            {
+                m_PoseMatrix = *reinterpret_cast<glm::mat4*>(Decompressed.data() + sizeof(int32_t));
             }
             else if (MessageType == DEPTHFRAME)
             {
@@ -132,7 +139,7 @@ namespace Scpt
                     }
                 }
 
-                OnNewDepthFrame(Buffer, nullptr, &PoseMatrix);
+                OnNewFrame(Buffer, nullptr, &m_PoseMatrix);
             }
         }
     };
