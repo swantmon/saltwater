@@ -42,6 +42,13 @@ namespace SLAM
 
     // -----------------------------------------------------------------------------
 
+    void CPluginInterface::ResetReconstruction()
+    {
+        Gfx::ReconstructionRenderer::GetReconstructor().ResetReconstruction();
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CPluginInterface::OnStart()
     {
         Gfx::ReconstructionRenderer::OnStart();
@@ -100,4 +107,9 @@ extern "C" CORE_PLUGIN_API_EXPORT void OnNewDepthFrame(const uint16_t* pDepthBuf
 extern "C" CORE_PLUGIN_API_EXPORT void SetImageSizesAndIntrinsicData(glm::vec4 _ImageSizes, glm::vec4 _Intrinsics)
 {
     static_cast<SLAM::CPluginInterface&>(GetInstance()).SetImageSizesAndIntrinsicData(_ImageSizes, _Intrinsics);
+}
+
+extern "C" CORE_PLUGIN_API_EXPORT void ResetReconstruction()
+{
+    static_cast<SLAM::CPluginInterface&>(GetInstance()).ResetReconstruction();
 }
