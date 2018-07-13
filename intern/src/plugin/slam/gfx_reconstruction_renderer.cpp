@@ -1152,7 +1152,12 @@ namespace
 
 		SDrawCallConstantBuffer BufferData;
 
-		BufferData.m_WorldMatrix = (m_pScalableReconstructor != nullptr) ? m_pScalableReconstructor->GetPoseMatrix() : m_pReconstructor->GetPoseMatrix();
+        glm::mat4 PoseMatrix = (m_pScalableReconstructor != nullptr) ? m_pScalableReconstructor->GetPoseMatrix() : m_pReconstructor->GetPoseMatrix();
+        PoseMatrix = glm::scale(glm::vec3(1.0f, -1.0f, 1.0f)) * PoseMatrix;
+        PoseMatrix[3] = -PoseMatrix[3];
+        PoseMatrix[3].w = 1.0f;
+
+        BufferData.m_WorldMatrix = PoseMatrix;
         BufferData.m_WorldMatrix = glm::eulerAngleX(glm::radians(90.0f)) * BufferData.m_WorldMatrix;
 		BufferData.m_Color = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
 
@@ -1183,8 +1188,13 @@ namespace
 
         SDrawCallConstantBuffer BufferData;
 
-        BufferData.m_WorldMatrix = m_pScalableReconstructor->GetPoseMatrix();
-        BufferData.m_WorldMatrix = BufferData.m_WorldMatrix * glm::eulerAngleX(glm::radians(90.0f));
+        glm::mat4 PoseMatrix = (m_pScalableReconstructor != nullptr) ? m_pScalableReconstructor->GetPoseMatrix() : m_pReconstructor->GetPoseMatrix();
+        PoseMatrix = glm::scale(glm::vec3(1.0f, -1.0f, 1.0f)) * PoseMatrix;
+        PoseMatrix[3] = -PoseMatrix[3];
+        PoseMatrix[3].w = 1.0f;
+
+        BufferData.m_WorldMatrix = PoseMatrix;
+        BufferData.m_WorldMatrix = glm::eulerAngleX(glm::radians(90.0f)) * BufferData.m_WorldMatrix;
         BufferData.m_Color = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
 
         BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
