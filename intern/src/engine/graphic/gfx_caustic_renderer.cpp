@@ -456,8 +456,8 @@ namespace
              SLightProperties LightProperties; 
  
             float InvSqrAttenuationRadius = pPointLightComponent->GetReciprocalSquaredAttenuationRadius(); 
-            float AngleScale = pPointLightComponent->GetAngleScale(); 
-            float AngleOffset = pPointLightComponent->GetAngleOffset(); 
+            float AngleScale              = pPointLightComponent->GetAngleScale(); 
+            float AngleOffset             = pPointLightComponent->GetAngleOffset(); 
  
             LightProperties.m_LightProjectionMatrix  = pPointLight->GetCamera()->GetProjectionMatrix();
             LightProperties.m_LightViewMatrix        = pPointLight->GetCamera()->GetView()->GetViewMatrix();

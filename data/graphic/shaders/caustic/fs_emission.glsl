@@ -136,19 +136,6 @@ vec4 local2 = vec4(1.0/indexOfRefraction, 1.0/(indexOfRefraction*indexOfRefracti
 
     out_PhotonLocation.xyz = P_2_tilde.xyz + distOld * scaled_T_2.xyz;
     out_PhotonLocation.w   = TotalInternalReflectionTIR;
-
-
-
-
-
-
-
-
-    //out_PhotonLocation.xyz = vec3(d_V);
-    //out_PhotonLocation.xyz = vec3(Dist, 1.0f);
-    //out_PhotonLocation.xyz = vec3(vec2( texture( ps_RefractiveDepth, SSPosition.xy ).r, SSPosition.z ), 1.0f);
-    //out_PhotonLocation.xyz = SSPosition;
-    //out_PhotonLocation = gl_FragCoord;
 }
 
 #endif // __INCLUDE_FS_CAUSTIC_EMISSION_GLSL__
