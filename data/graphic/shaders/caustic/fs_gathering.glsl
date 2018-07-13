@@ -18,7 +18,7 @@ void main(void)
     float isInsideGaussian = 0.0;
 
 vec2 causticMapResolution = vec2(1024.0f);
-float photonResolutionMultiplier = 100.0f;
+float photonResolutionMultiplier = 1.0f;
  
     // We need to compute how far this fragment is from the center of the point.  We could do
     //    this using point sprites, but the __final__ framerate is 10x faster this way.

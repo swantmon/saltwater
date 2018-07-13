@@ -31,7 +31,7 @@ void main()
     if (PhotonPosition.a < 0.0f) return;    
 
     gl_PointSize = 3.0f;
-    gl_Position  = m_ProjectionMatrix * m_ViewMatrix * vec4(PhotonPosition.xyz, 1.0f);
+    gl_Position  = m_ProjectionMatrix * vec4(PhotonPosition.xyz, 1.0f);
 
     out_NormalizedCoords = gl_Position / gl_Position.w;
 }

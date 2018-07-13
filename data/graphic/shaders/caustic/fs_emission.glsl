@@ -7,7 +7,7 @@
 layout(std140, binding = 3) uniform UB3
 {
     mat4 ps_LightProjectionMatrix;
-    mat4 ps_InverseLightViewMatrix;
+    mat4 ps_LightViewMatrix;
     uint ps_ExposureHistoryIndex;
 };
 
@@ -53,8 +53,7 @@ vec4 refraction( vec3 incident, vec3 normal, float ni_nt, float ni_nt_sqr )
 void main(void)
 {
     vec3 WSNormal = in_Normal;
-    vec3 VSNormal = (ps_InverseLightViewMatrix * vec4(WSNormal, 0.0f)).xyz;
-    vec3 FinalNormal = WSNormal;
+    vec3 VSNormal = (ps_LightViewMatrix * vec4(WSNormal, 0.0f)).xyz;
 
     vec3 SSPosition;
 
@@ -62,25 +61,23 @@ void main(void)
     SSPosition.z  = gl_FragCoord.z;
 
     vec3 WSPosition = in_WSPosition;
-    vec3 VSPosition = (ps_InverseLightViewMatrix * vec4(WSPosition, 1.0f)).xyz;
+    vec3 VSPosition = (ps_LightViewMatrix * vec4(WSPosition, 1.0f)).xyz;
+ 
 
-    
-
-float m22 = -ps_LightProjectionMatrix[2][2];
-float m32 = -ps_LightProjectionMatrix[3][2];    
-
-float near = 0.1f;//(2.0f*m32)/(2.0f*m22-2.0f);
-float far  = 20.1f;//((m22-1.0f)*near)/(m22+1.0);
-
-float indexOfRefraction = 0.46f;
-
-
+float near = 0.1f;
+float far  = 20.1f;
+float indexOfRefraction = 1.01f;
 vec4 local1 = vec4(near*far, far-near, far+near, far);
 vec4 local2 = vec4(1.0/indexOfRefraction, 1.0/(indexOfRefraction*indexOfRefraction), indexOfRefraction, indexOfRefraction*indexOfRefraction);
 
 
+
+
+
+
+
     // Stuff that we know from the beginning
-    vec3 N_1 = normalize( FinalNormal );   // Surface Normal
+    vec3 N_1 = normalize( VSNormal );   // Surface Normal
     vec3 V   = normalize( VSPosition  );   // View direction
     
     // Find the relective (.x) and refractive (.y) fresnel coefficients 
@@ -99,6 +96,9 @@ vec4 local2 = vec4(1.0/indexOfRefraction, 1.0/(indexOfRefraction*indexOfRefracti
     //vec4 P_2_tilde = vec4( T_1 * d_V * multiplier + gl_TexCoord[2].xyz, 1.0);
     vec4 P_2_tilde = vec4( T_1 * d_V + VSPosition.xyz, 1.0);
     vec3 N_2 = texture2D( ps_RefractiveNormal, ProjectToTexCoord( P_2_tilde ) ).xyz;
+
+    N_2 = (ps_LightViewMatrix * vec4(N_2, 0.0f)).xyz;
+
     float dotN2 = dot( N_2.xyz, N_2.xyz );
     N_2 = normalize( N_2 );
 
@@ -136,6 +136,13 @@ vec4 local2 = vec4(1.0/indexOfRefraction, 1.0/(indexOfRefraction*indexOfRefracti
 
     out_PhotonLocation.xyz = P_2_tilde.xyz + distOld * scaled_T_2.xyz;
     out_PhotonLocation.w   = TotalInternalReflectionTIR;
+
+
+
+
+
+
+
 
     //out_PhotonLocation.xyz = vec3(d_V);
     //out_PhotonLocation.xyz = vec3(Dist, 1.0f);

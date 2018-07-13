@@ -88,7 +88,7 @@ namespace
         struct SLightProperties
         {
             glm::mat4 m_LightProjectionMatrix;
-            glm::mat4 m_InverseLightViewMatrix;
+            glm::mat4 m_LightViewMatrix;
             int       m_ExposureHistoryIndex;
         };
 
@@ -107,6 +107,7 @@ namespace
         CTexturePtr m_RefractiveNormalTexturePtr;
         CTexturePtr m_RefractiveDepthTexturePtr;
         CTexturePtr m_BackgroundDepthTexturePtr;
+        CTexturePtr m_PhotonEmissionDepthTexturePtr;
 
         CTexturePtr m_PhotonLocationTexturePtr;
         CTexturePtr m_PhotonGatheringTexturePtr;
@@ -161,6 +162,7 @@ namespace
         m_BackgroundDepthTexturePtr = 0;
         m_PhotonLocationTexturePtr = 0;
         m_PhotonGatheringTexturePtr = 0;
+        m_PhotonEmissionDepthTexturePtr = 0;
         m_RefractionTargetSetPtr = 0;
         m_BackgroundTargetSetPtr = 0;
         m_PhotonEmissionTargetSetPtr = 0;
@@ -261,6 +263,25 @@ namespace
         TextureDescriptor.m_pFileName        = 0;
         TextureDescriptor.m_pPixels          = 0;
         
+        m_PhotonEmissionDepthTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
+
+        TextureManager::SetTextureLabel(m_RefractiveDepthTexturePtr, "Photon Emission Depth");
+
+        // -----------------------------------------------------------------------------
+
+        TextureDescriptor.m_NumberOfPixelsU  = s_TextureSize;
+        TextureDescriptor.m_NumberOfPixelsV  = s_TextureSize;
+        TextureDescriptor.m_NumberOfPixelsW  = 1;
+        TextureDescriptor.m_NumberOfMipMaps  = 1;
+        TextureDescriptor.m_NumberOfTextures = 1;
+        TextureDescriptor.m_Binding          = CTexture::ShaderResource | CTexture::DepthStencilTarget;
+        TextureDescriptor.m_Access           = CTexture::CPUWrite;
+        TextureDescriptor.m_Format           = CTexture::R32_FLOAT;
+        TextureDescriptor.m_Usage            = CTexture::GPUReadWrite;
+        TextureDescriptor.m_Semantic         = CTexture::Diffuse;
+        TextureDescriptor.m_pFileName        = 0;
+        TextureDescriptor.m_pPixels          = 0;
+        
         m_BackgroundDepthTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
 
         TextureManager::SetTextureLabel(m_BackgroundDepthTexturePtr, "Background Depth");
@@ -310,7 +331,7 @@ namespace
 
         m_BackgroundTargetSetPtr = TargetSetManager::CreateTargetSet(m_BackgroundDepthTexturePtr);
 
-        m_PhotonEmissionTargetSetPtr = TargetSetManager::CreateTargetSet(m_PhotonLocationTexturePtr);
+        m_PhotonEmissionTargetSetPtr = TargetSetManager::CreateTargetSet(m_PhotonLocationTexturePtr, m_PhotonEmissionDepthTexturePtr);
 
         m_PhotonGatheringTargetSetPtr = TargetSetManager::CreateTargetSet(m_PhotonGatheringTexturePtr);
 
@@ -439,7 +460,7 @@ namespace
             float AngleOffset = pPointLightComponent->GetAngleOffset(); 
  
             LightProperties.m_LightProjectionMatrix  = pPointLight->GetCamera()->GetProjectionMatrix();
-            LightProperties.m_InverseLightViewMatrix = glm::inverse(pPointLight->GetCamera()->GetView()->GetViewMatrix());
+            LightProperties.m_LightViewMatrix        = pPointLight->GetCamera()->GetView()->GetViewMatrix();
             LightProperties.m_ExposureHistoryIndex   = HistogramRenderer::GetCurrentExposureHistoryIndex();
  
             BufferManager::UploadBufferData(m_LightPropertiesPtr, &LightProperties); 
