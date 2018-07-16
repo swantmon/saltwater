@@ -1418,32 +1418,35 @@ namespace MR
         // Tracking
         //////////////////////////////////////////////////////////////////////////////////////
 
-        if (m_IntegratedFrameCount > m_MinWeight || pTransform == nullptr)
+        if (pTransform == nullptr)
         {
-            Performance::BeginEvent("Tracking");
-
-            glm::mat4 NewPoseMatrix = m_pTracker->Track(m_PoseMatrix,
-                m_ReferenceVertexMapPtr,
-                m_ReferenceNormalMapPtr,
-                m_RaycastVertexMapPtr,
-                m_RaycastNormalMapPtr,
-                m_IntrinsicsConstantBufferPtr
-            );
-
-            m_TrackingLost = m_pTracker->IsTrackingLost();
-
-            if (!m_TrackingLost)
+            if (m_IntegratedFrameCount > m_MinWeight)
             {
-                m_PoseMatrix = NewPoseMatrix;
+                Performance::BeginEvent("Tracking");
 
-                STrackingData TrackingData;
-                TrackingData.m_PoseMatrix = NewPoseMatrix;
-                TrackingData.m_InvPoseMatrix = glm::inverse(NewPoseMatrix);
+                glm::mat4 NewPoseMatrix = m_pTracker->Track(m_PoseMatrix,
+                    m_ReferenceVertexMapPtr,
+                    m_ReferenceNormalMapPtr,
+                    m_RaycastVertexMapPtr,
+                    m_RaycastNormalMapPtr,
+                    m_IntrinsicsConstantBufferPtr
+                );
 
-                BufferManager::UploadBufferData(m_TrackingDataConstantBufferPtr, &TrackingData);
+                m_TrackingLost = m_pTracker->IsTrackingLost();
+
+                if (!m_TrackingLost)
+                {
+                    m_PoseMatrix = NewPoseMatrix;
+
+                    STrackingData TrackingData;
+                    TrackingData.m_PoseMatrix = NewPoseMatrix;
+                    TrackingData.m_InvPoseMatrix = glm::inverse(NewPoseMatrix);
+
+                    BufferManager::UploadBufferData(m_TrackingDataConstantBufferPtr, &TrackingData);
+                }
+
+                Performance::EndEvent();
             }
-
-            Performance::EndEvent();
         }
         else
         {
