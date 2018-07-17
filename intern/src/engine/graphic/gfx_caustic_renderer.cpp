@@ -70,7 +70,7 @@ namespace
 
     private:
 
-        static const int s_TextureSize = 1024;
+        static const int s_CausticMapSize = 2048;
 
     private:
 
@@ -186,12 +186,16 @@ namespace
     
     void CGfxCausticRenderer::OnSetupShader()
     {
+        std::string Define = "";
+        Define += "#define CAUSTIC_MAP_RESOLUTION " + std::to_string(s_CausticMapSize) + "\n";
+        Define += "#define PHOTON_RESOLUTION_MULTIPLIER 1.0f\n";
+
         m_FullscreenVSPtr = ShaderManager::CompileVS("system/vs_fullscreen.glsl", "main");
         m_NormalPSPtr = ShaderManager::CompilePS("caustic/fs_normal.glsl", "main");
         m_NormalTexPSPtr = ShaderManager::CompilePS("caustic/fs_normal.glsl", "main", "#define USE_TEX_NORMAL\n");
-        m_PhotonEmissionPSPtr = ShaderManager::CompilePS("caustic/fs_emission.glsl", "main");
-        m_PhotonGatheringVSPtr = ShaderManager::CompileVS("caustic/vs_gathering.glsl", "main");
-        m_PhotonGatheringPSPtr = ShaderManager::CompilePS("caustic/fs_gathering.glsl", "main");
+        m_PhotonEmissionPSPtr = ShaderManager::CompilePS("caustic/fs_emission.glsl", "main", Define.c_str());
+        m_PhotonGatheringVSPtr = ShaderManager::CompileVS("caustic/vs_gathering.glsl", "main", Define.c_str());
+        m_PhotonGatheringPSPtr = ShaderManager::CompilePS("caustic/fs_gathering.glsl", "main", Define.c_str());
         m_PhotonApplyPSPtr = ShaderManager::CompilePS("caustic/fs_apply.glsl", "main");
     }
     
@@ -220,8 +224,8 @@ namespace
     {
         STextureDescriptor TextureDescriptor;
 
-        TextureDescriptor.m_NumberOfPixelsU  = s_TextureSize;
-        TextureDescriptor.m_NumberOfPixelsV  = s_TextureSize;
+        TextureDescriptor.m_NumberOfPixelsU  = s_CausticMapSize;
+        TextureDescriptor.m_NumberOfPixelsV  = s_CausticMapSize;
         TextureDescriptor.m_NumberOfPixelsW  = 1;
         TextureDescriptor.m_NumberOfMipMaps  = 1;
         TextureDescriptor.m_NumberOfTextures = 1;
@@ -239,8 +243,8 @@ namespace
 
         // -----------------------------------------------------------------------------
 
-        TextureDescriptor.m_NumberOfPixelsU  = s_TextureSize;
-        TextureDescriptor.m_NumberOfPixelsV  = s_TextureSize;
+        TextureDescriptor.m_NumberOfPixelsU  = s_CausticMapSize;
+        TextureDescriptor.m_NumberOfPixelsV  = s_CausticMapSize;
         TextureDescriptor.m_NumberOfPixelsW  = 1;
         TextureDescriptor.m_NumberOfMipMaps  = 1;
         TextureDescriptor.m_NumberOfTextures = 1;
@@ -258,8 +262,8 @@ namespace
 
         // -----------------------------------------------------------------------------
 
-        TextureDescriptor.m_NumberOfPixelsU  = s_TextureSize;
-        TextureDescriptor.m_NumberOfPixelsV  = s_TextureSize;
+        TextureDescriptor.m_NumberOfPixelsU  = s_CausticMapSize;
+        TextureDescriptor.m_NumberOfPixelsV  = s_CausticMapSize;
         TextureDescriptor.m_NumberOfPixelsW  = 1;
         TextureDescriptor.m_NumberOfMipMaps  = 1;
         TextureDescriptor.m_NumberOfTextures = 1;
@@ -277,8 +281,8 @@ namespace
 
         // -----------------------------------------------------------------------------
 
-        TextureDescriptor.m_NumberOfPixelsU  = s_TextureSize;
-        TextureDescriptor.m_NumberOfPixelsV  = s_TextureSize;
+        TextureDescriptor.m_NumberOfPixelsU  = s_CausticMapSize;
+        TextureDescriptor.m_NumberOfPixelsV  = s_CausticMapSize;
         TextureDescriptor.m_NumberOfPixelsW  = 1;
         TextureDescriptor.m_NumberOfMipMaps  = 1;
         TextureDescriptor.m_NumberOfTextures = 1;
@@ -296,8 +300,8 @@ namespace
 
         // -----------------------------------------------------------------------------
 
-        TextureDescriptor.m_NumberOfPixelsU  = s_TextureSize;
-        TextureDescriptor.m_NumberOfPixelsV  = s_TextureSize;
+        TextureDescriptor.m_NumberOfPixelsU  = s_CausticMapSize;
+        TextureDescriptor.m_NumberOfPixelsV  = s_CausticMapSize;
         TextureDescriptor.m_NumberOfPixelsW  = 1;
         TextureDescriptor.m_NumberOfMipMaps  = 1;
         TextureDescriptor.m_NumberOfTextures = 1;
@@ -315,8 +319,8 @@ namespace
 
         // -----------------------------------------------------------------------------
 
-        TextureDescriptor.m_NumberOfPixelsU  = s_TextureSize;
-        TextureDescriptor.m_NumberOfPixelsV  = s_TextureSize;
+        TextureDescriptor.m_NumberOfPixelsU  = s_CausticMapSize;
+        TextureDescriptor.m_NumberOfPixelsV  = s_CausticMapSize;
         TextureDescriptor.m_NumberOfPixelsW  = 1;
         TextureDescriptor.m_NumberOfMipMaps  = 1;
         TextureDescriptor.m_NumberOfTextures = 1;
@@ -350,8 +354,8 @@ namespace
         
         ViewPortDesc.m_TopLeftX = 0.0f;
         ViewPortDesc.m_TopLeftY = 0.0f;
-        ViewPortDesc.m_Width    = static_cast<float>(s_TextureSize);
-        ViewPortDesc.m_Height   = static_cast<float>(s_TextureSize);
+        ViewPortDesc.m_Width    = static_cast<float>(s_CausticMapSize);
+        ViewPortDesc.m_Height   = static_cast<float>(s_CausticMapSize);
         ViewPortDesc.m_MinDepth = 0.0f;
         ViewPortDesc.m_MaxDepth = 1.0f;
         
@@ -779,7 +783,7 @@ namespace
 
             ContextManager::SetTexture(0, m_PhotonLocationTexturePtr);
 
-            ContextManager::Draw(s_TextureSize * s_TextureSize, 0);
+            ContextManager::Draw(s_CausticMapSize * s_CausticMapSize, 0);
 
             Performance::EndEvent();
 

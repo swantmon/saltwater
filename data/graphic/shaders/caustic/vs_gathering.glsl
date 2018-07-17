@@ -1,6 +1,20 @@
 #ifndef __INCLUDE_VS_GATHERING_GLSL__
 #define __INCLUDE_VS_GATHERING_GLSL__
 
+// -----------------------------------------------------------------------------
+// Defines
+// -----------------------------------------------------------------------------
+#ifndef CAUSTIC_MAP_RESOLUTION 
+    #define CAUSTIC_MAP_RESOLUTION 1024.0f
+#endif
+
+#ifndef PHOTON_RESOLUTION_MULTIPLIER 
+    #define PHOTON_RESOLUTION_MULTIPLIER 1.0f
+#endif
+
+// -----------------------------------------------------------------------------
+// Input
+// -----------------------------------------------------------------------------
 layout(std140, binding = 0) uniform UB0
 {
     mat4 m_ProjectionMatrix;
@@ -9,6 +23,9 @@ layout(std140, binding = 0) uniform UB0
 
 layout(binding = 0) uniform sampler2D ps_PhotonPosition;
 
+// -----------------------------------------------------------------------------
+// Output
+// -----------------------------------------------------------------------------
 layout(location = 0) out vec4 out_NormalizedCoords;
 
 out gl_PerVertex
@@ -17,14 +34,17 @@ out gl_PerVertex
     float gl_PointSize;
 };
 
+// -----------------------------------------------------------------------------
+// Function
+// -----------------------------------------------------------------------------
 void main()
 {
     vec2 UV;
 
-    UV.x = gl_VertexID % 1024;
-    UV.y = gl_VertexID / 1024;
+    UV.x = gl_VertexID % int(CAUSTIC_MAP_RESOLUTION);
+    UV.y = gl_VertexID / int(CAUSTIC_MAP_RESOLUTION);
 
-    UV /= vec2(1024.0f);
+    UV /= vec2(CAUSTIC_MAP_RESOLUTION);
 
     vec4 PhotonPosition = texture(ps_PhotonPosition, UV);
 

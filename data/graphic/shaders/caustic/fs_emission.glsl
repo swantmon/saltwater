@@ -8,6 +8,13 @@
 // -----------------------------------------------------------------------------
 
 // -----------------------------------------------------------------------------
+// Defines
+// -----------------------------------------------------------------------------
+#ifndef CAUSTIC_MAP_RESOLUTION 
+    #define CAUSTIC_MAP_RESOLUTION 1024.0f
+#endif
+
+// -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
 layout(std140, binding = 3) uniform UB3
@@ -67,7 +74,7 @@ void main(void)
 
     vec3 SSPosition;
 
-    SSPosition.xy = gl_FragCoord.xy / vec2(1024.0f);
+    SSPosition.xy = gl_FragCoord.xy / vec2(CAUSTIC_MAP_RESOLUTION);
     SSPosition.z  = gl_FragCoord.z;
 
     vec3 WSPosition = in_WSPosition;

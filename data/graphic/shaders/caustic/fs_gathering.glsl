@@ -1,6 +1,26 @@
 #ifndef __INCLUDE_FS_GATHERING_GLSL__
 #define __INCLUDE_FS_GATHERING_GLSL__
 
+// -----------------------------------------------------------------------------
+// Original approach:
+// "Interactive image-space techniques for approximating caustics"
+// Chris Wyman, Scott Davis (2006)
+// -----------------------------------------------------------------------------
+
+// -----------------------------------------------------------------------------
+// Defines
+// -----------------------------------------------------------------------------
+#ifndef CAUSTIC_MAP_RESOLUTION 
+    #define CAUSTIC_MAP_RESOLUTION 1024.0f
+#endif
+
+#ifndef PHOTON_RESOLUTION_MULTIPLIER 
+    #define PHOTON_RESOLUTION_MULTIPLIER 1.0f
+#endif
+
+// -----------------------------------------------------------------------------
+// Input from prev. stage
+// -----------------------------------------------------------------------------
 layout(location = 0) in vec4 in_NormalizedCoords;
 
 // -----------------------------------------------------------------------------
@@ -16,14 +36,11 @@ void main(void)
     float splatSize = 2.5;
     float sizeSqr = splatSize*splatSize;
     float isInsideGaussian = 0.0;
-
-vec2 causticMapResolution = vec2(1024.0f);
-float photonResolutionMultiplier = 1.0f;
  
     // We need to compute how far this fragment is from the center of the point.  We could do
     //    this using point sprites, but the __final__ framerate is 10x faster this way.
     vec2 fragLocation = gl_FragCoord.xy;
-    vec2 pointLocation = (in_NormalizedCoords.xy * 0.5 + 0.5) * causticMapResolution;
+    vec2 pointLocation = (in_NormalizedCoords.xy * 0.5 + 0.5) * vec2(CAUSTIC_MAP_RESOLUTION);
     
     // Gaussian from Graphics Gems I, "Convenient anti-aliaseing filters that minimize bumpy sampling"
     float alpha = 0.918;
@@ -37,7 +54,7 @@ float photonResolutionMultiplier = 1.0f;
     float normalizeFactor = 10.5 * sizeSqr / 25.0;
     
     expResults = alpha + alpha*((expResults-1.0)/denom);
-    out_Output = vec4(1.0f) * vec4( photonResolutionMultiplier * isInsideGaussian * expResults / normalizeFactor );
+    out_Output = vec4(1.0f) * vec4( PHOTON_RESOLUTION_MULTIPLIER * isInsideGaussian * expResults / normalizeFactor );
 }
 
 #endif // __INCLUDE_FS_GATHERING_GLSL__
