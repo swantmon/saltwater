@@ -89,6 +89,7 @@ namespace
         {
             glm::mat4 m_LightProjectionMatrix;
             glm::mat4 m_LightViewMatrix;
+            glm::vec4 m_LightColor;
             int       m_ExposureHistoryIndex;
         };
 
@@ -188,7 +189,7 @@ namespace
     {
         std::string Define = "";
         Define += "#define CAUSTIC_MAP_RESOLUTION " + std::to_string(s_CausticMapSize) + "\n";
-        Define += "#define PHOTON_RESOLUTION_MULTIPLIER 1.0f\n";
+        Define += "#define PHOTON_RESOLUTION_MULTIPLIER 0.001f\n";
 
         m_FullscreenVSPtr = ShaderManager::CompileVS("system/vs_fullscreen.glsl", "main");
         m_NormalPSPtr = ShaderManager::CompilePS("caustic/fs_normal.glsl", "main");
@@ -483,9 +484,10 @@ namespace
             float AngleScale              = pPointLightComponent->GetAngleScale(); 
             float AngleOffset             = pPointLightComponent->GetAngleOffset(); 
  
-            LightProperties.m_LightProjectionMatrix  = pPointLight->GetCamera()->GetProjectionMatrix();
-            LightProperties.m_LightViewMatrix        = pPointLight->GetCamera()->GetView()->GetViewMatrix();
-            LightProperties.m_ExposureHistoryIndex   = HistogramRenderer::GetCurrentExposureHistoryIndex();
+            LightProperties.m_LightProjectionMatrix = pPointLight->GetCamera()->GetProjectionMatrix();
+            LightProperties.m_LightViewMatrix       = pPointLight->GetCamera()->GetView()->GetViewMatrix();
+            LightProperties.m_LightColor            = glm::vec4(pPointLightComponent->GetLightness(), 1.0f);
+            LightProperties.m_ExposureHistoryIndex  = HistogramRenderer::GetCurrentExposureHistoryIndex();
  
             BufferManager::UploadBufferData(m_LightPropertiesBufferPtr, &LightProperties); 
 

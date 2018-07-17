@@ -11,6 +11,7 @@ layout(std140, binding = 1) uniform UB1
 {
     mat4 ps_LightProjectionMatrix;
     mat4 ps_LightViewMatrix;
+    vec4 ps_LightColor;
     uint ps_ExposureHistoryIndex;
 };
 
@@ -80,7 +81,7 @@ void main(void)
     LSUV.x = LSPosition.x * 0.5f + 0.5f;
     LSUV.y = LSPosition.y * 0.5f + 0.5f;
 
-    vec3 Illumination = texture(ps_PhotonTexture, LSUV).xyz;
+    vec3 Illumination = ps_LightColor.xyz * texture(ps_PhotonTexture, LSUV).xyz;
 
     out_Output = vec4(Illumination * AverageExposure, 0.0f);
 }

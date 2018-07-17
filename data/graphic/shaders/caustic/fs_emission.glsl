@@ -21,6 +21,7 @@ layout(std140, binding = 3) uniform UB3
 {
     mat4 ps_LightProjectionMatrix;
     mat4 ps_LightViewMatrix;
+    vec4 ps_LightColor;
     uint ps_ExposureHistoryIndex;
 };
 

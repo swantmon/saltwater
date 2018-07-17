@@ -15,7 +15,7 @@
 #endif
 
 #ifndef PHOTON_RESOLUTION_MULTIPLIER 
-    #define PHOTON_RESOLUTION_MULTIPLIER 1.0f
+    #define PHOTON_RESOLUTION_MULTIPLIER 0.001f
 #endif
 
 // -----------------------------------------------------------------------------
@@ -54,7 +54,7 @@ void main(void)
     float normalizeFactor = 10.5 * sizeSqr / 25.0;
     
     expResults = alpha + alpha*((expResults-1.0)/denom);
-    out_Output = vec4(1.0f) * vec4( PHOTON_RESOLUTION_MULTIPLIER * isInsideGaussian * expResults / normalizeFactor );
+    out_Output = vec4(PHOTON_RESOLUTION_MULTIPLIER * isInsideGaussian * expResults / normalizeFactor);
 }
 
 #endif // __INCLUDE_FS_GATHERING_GLSL__
