@@ -5,6 +5,8 @@
 #include "base/base_exception.h"
 #include "base/base_include_glm.h"
 
+#include "engine/core/core_program_parameters.h"
+
 #include "engine/core/core_plugin_manager.h"
 
 #include "engine/data/data_component_facet.h"
@@ -58,17 +60,30 @@ namespace Scpt
             // Input
             // -----------------------------------------------------------------------------
             if (Core::PluginManager::HasPlugin("SLAM"))
-            {                
-                m_NetworkDelegate = std::shared_ptr<Net::CMessageDelegate>(new Net::CMessageDelegate(std::bind(&CSLAMScript::OnNewMessage, this, std::placeholders::_1, std::placeholders::_2)));
+            {
+                std::string DataSource = Core::CProgramParameters::GetInstance().Get("mr:slam:data_source", "network");
 
-                Net::CNetworkManager::GetInstance().RegisterMessageHandler(0, m_NetworkDelegate);
-                
-                OnNewFrame = (DepthFrameCallback)(Core::PluginManager::GetPluginFunction("SLAM", "OnNewDepthFrame"));
-                OnInitializeReconstructor = (InitializeCallback)(Core::PluginManager::GetPluginFunction("SLAM", "InitializeReconstructor"));
-                OnSetImageSizesAndIntrinsics = (SizeAndIntrinsicsCallback)(Core::PluginManager::GetPluginFunction("SLAM", "SetImageSizesAndIntrinsicData"));
-                OnResetReconstruction = (ResetCallback)(Core::PluginManager::GetPluginFunction("SLAM", "ResetReconstruction"));
+                if (DataSource == "network")
+                {
+                    m_NetworkDelegate = std::shared_ptr<Net::CMessageDelegate>(new Net::CMessageDelegate(std::bind(&CSLAMScript::OnNewMessage, this, std::placeholders::_1, std::placeholders::_2)));
 
-                Buffer = new uint16_t[640 * 480];
+                    Net::CNetworkManager::GetInstance().RegisterMessageHandler(0, m_NetworkDelegate);
+
+                    OnNewFrame = (DepthFrameCallback)(Core::PluginManager::GetPluginFunction("SLAM", "OnNewDepthFrame"));
+                    OnInitializeReconstructor = (InitializeCallback)(Core::PluginManager::GetPluginFunction("SLAM", "InitializeReconstructor"));
+                    OnSetImageSizesAndIntrinsics = (SizeAndIntrinsicsCallback)(Core::PluginManager::GetPluginFunction("SLAM", "SetImageSizesAndIntrinsicData"));
+                    OnResetReconstruction = (ResetCallback)(Core::PluginManager::GetPluginFunction("SLAM", "ResetReconstruction"));
+
+                    Buffer = new uint16_t[640 * 480];
+                }
+                else if (DataSource == "kinect")
+                {
+                    throw Base::CException(__FILE__, __LINE__, "Kinect as data source for SLAM plugin currently not supported");
+                }
+                else
+                {
+                    throw Base::CException(__FILE__, __LINE__, "Unknown data source for SLAM plugin");
+                }
             }
             else
             {
