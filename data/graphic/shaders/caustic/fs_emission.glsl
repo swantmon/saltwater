@@ -17,6 +17,12 @@ layout(std140, binding = 3) uniform UB3
     uint ps_ExposureHistoryIndex;
 };
 
+layout(std140, binding = 4) uniform UB4
+{
+    vec4 ps_RefractionIndices;
+    vec4 ps_DepthLinearization;
+};
+
 layout(binding = 0) uniform sampler2D ps_RefractiveNormal;
 layout(binding = 1) uniform sampler2D ps_RefractiveDepth;
 layout(binding = 2) uniform sampler2D ps_BackgroundDepth;
@@ -68,13 +74,6 @@ void main(void)
     vec3 VSPosition = (ps_LightViewMatrix * vec4(WSPosition, 1.0f)).xyz;
  
 
-float near = 0.1f;
-float far  = 20.1f;
-float indexOfRefraction = 1.41f;
-vec4 local1 = vec4(near*far, far-near, far+near, far);
-vec4 local2 = vec4(1.0/indexOfRefraction, 1.0/(indexOfRefraction*indexOfRefraction), indexOfRefraction, indexOfRefraction*indexOfRefraction);
-
-
 
     // Stuff that we know from the beginning
     vec3 N_1 = normalize( VSNormal );   // Surface Normal
@@ -82,10 +81,10 @@ vec4 local2 = vec4(1.0/indexOfRefraction, 1.0/(indexOfRefraction*indexOfRefracti
 
     // Find the distance to front & back surface, first as normalized [0..1] values, than unprojected
     vec2 Dist = vec2( texture(ps_RefractiveDepth, SSPosition.xy).x, SSPosition.z );
-    Dist = local1.x / (Dist * local1.y - local1.z );
+    Dist = ps_DepthLinearization.x / (Dist * ps_DepthLinearization.y - ps_DepthLinearization.z );
     
     // find the refraction direction
-    vec3 T_1 = refraction( V, N_1, local2.x, local2.y ).xyz; 
+    vec3 T_1 = refraction( V, N_1, ps_RefractionIndices.x, ps_RefractionIndices.y ).xyz; 
 
     float d_V = Dist.y - Dist.x;
 
@@ -105,7 +104,7 @@ vec4 local2 = vec4(1.0/indexOfRefraction, 1.0/(indexOfRefraction*indexOfRefracti
         N_2 = normalize( vec3( T_1.x, T_1.y, 0 ) );
 
     // Refract at the second surface
-    vec4 T_2 = refraction( T_1, -N_2, local2.z, local2.w );
+    vec4 T_2 = refraction( T_1, -N_2, ps_RefractionIndices.z, ps_RefractionIndices.w );
     float TotalInternalReflectionTIR = T_2.w;
     
     // Scale the vector so that it's got a unit-length z-component
@@ -116,7 +115,7 @@ vec4 local2 = vec4(1.0/indexOfRefraction, 1.0/(indexOfRefraction*indexOfRefracti
     for (index = 0.0; index < 2.0; index += 1.0)
     {
         float texel = texture2D( ps_BackgroundDepth, ProjectToTexCoord( P_2_tilde + scaled_T_2 * index ) ).x;
-        float distA = -(local1.x / (texel * local1.y - local1.w)) + P_2_tilde.z;
+        float distA = -(ps_DepthLinearization.x / (texel * ps_DepthLinearization.y - ps_DepthLinearization.w)) + P_2_tilde.z;
         if ( abs(distA-index) < deltaDist )
         {
             deltaDist = abs(distA-index);
@@ -128,7 +127,7 @@ vec4 local2 = vec4(1.0/indexOfRefraction, 1.0/(indexOfRefraction*indexOfRefracti
     for (index = 0.0; index < 10.0; index += 1.0)
     {
         float texel1 = texture2D( ps_BackgroundDepth, ProjectToTexCoord( P_2_tilde + distOld * scaled_T_2 ) ).x;
-        distOld = -(local1.x / (texel1 * local1.y - local1.w)) + P_2_tilde.z;
+        distOld = -(ps_DepthLinearization.x / (texel1 * ps_DepthLinearization.y - ps_DepthLinearization.w)) + P_2_tilde.z;
     }
 
     out_PhotonLocation.xyz = P_2_tilde.xyz + distOld * scaled_T_2.xyz;

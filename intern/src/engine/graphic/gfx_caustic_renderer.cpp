@@ -85,11 +85,17 @@ namespace
             glm::mat4 vs_ModelMatrix;
         };
 
-        struct SLightProperties
+        struct SLightPropertiesBuffer
         {
             glm::mat4 m_LightProjectionMatrix;
             glm::mat4 m_LightViewMatrix;
             int       m_ExposureHistoryIndex;
+        };
+
+        struct SCausticSettingsBuffer
+        {
+            glm::vec4 m_RefractionIndices;
+            glm::vec4 m_DepthLinearization;
         };
 
     private:
@@ -120,9 +126,10 @@ namespace
         CViewPortSetPtr m_ViewportSetPtr;
 
         CBufferPtr m_PerLightConstantBufferPtr;
-        CBufferPtr m_PerMeshConstantBuffer;
-        CBufferPtr m_LightPropertiesPtr;
+        CBufferPtr m_PerMeshConstantBufferPtr;
+        CBufferPtr m_LightPropertiesBufferPtr;
         CBufferPtr m_SurfaceMaterialBufferPtr;
+        CBufferPtr m_CausticSettingsBufferPtr;
     };
 } // namespace
 
@@ -169,9 +176,10 @@ namespace
         m_PhotonGatheringTargetSetPtr = 0;
         m_ViewportSetPtr = 0;
         m_PerLightConstantBufferPtr = 0;
-        m_PerMeshConstantBuffer = 0;
-        m_LightPropertiesPtr = 0;
+        m_PerMeshConstantBufferPtr = 0;
+        m_LightPropertiesBufferPtr = 0;
         m_SurfaceMaterialBufferPtr = 0;
+        m_CausticSettingsBufferPtr = 0;
     }
     
     // -----------------------------------------------------------------------------
@@ -376,7 +384,7 @@ namespace
         ConstanteBufferDesc.m_pBytes        = 0;
         ConstanteBufferDesc.m_pClassKey     = 0;
         
-        m_PerMeshConstantBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
+        m_PerMeshConstantBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
         // -----------------------------------------------------------------------------
 
@@ -384,11 +392,11 @@ namespace
         ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
         ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
         ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
-        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SLightProperties);
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SLightPropertiesBuffer);
         ConstanteBufferDesc.m_pBytes        = 0;
         ConstanteBufferDesc.m_pClassKey     = 0;
         
-        m_LightPropertiesPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
+        m_LightPropertiesBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
         // -----------------------------------------------------------------------------
 
@@ -401,6 +409,18 @@ namespace
         ConstanteBufferDesc.m_pClassKey     = 0;
 
         m_SurfaceMaterialBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
+
+        // -----------------------------------------------------------------------------
+
+        ConstanteBufferDesc.m_Stride        = 0;
+        ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
+        ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
+        ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SCausticSettingsBuffer);
+        ConstanteBufferDesc.m_pBytes        = 0;
+        ConstanteBufferDesc.m_pClassKey     = 0;
+
+        m_CausticSettingsBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
     }
     
     // -----------------------------------------------------------------------------
@@ -453,7 +473,7 @@ namespace
 
             // -----------------------------------------------------------------------------
 
-             SLightProperties LightProperties; 
+             SLightPropertiesBuffer LightProperties; 
  
             float InvSqrAttenuationRadius = pPointLightComponent->GetReciprocalSquaredAttenuationRadius(); 
             float AngleScale              = pPointLightComponent->GetAngleScale(); 
@@ -463,7 +483,7 @@ namespace
             LightProperties.m_LightViewMatrix        = pPointLight->GetCamera()->GetView()->GetViewMatrix();
             LightProperties.m_ExposureHistoryIndex   = HistogramRenderer::GetCurrentExposureHistoryIndex();
  
-            BufferManager::UploadBufferData(m_LightPropertiesPtr, &LightProperties); 
+            BufferManager::UploadBufferData(m_LightPropertiesBufferPtr, &LightProperties); 
 
             // -----------------------------------------------------------------------------
 
@@ -492,7 +512,7 @@ namespace
 
             ContextManager::SetConstantBuffer(0, m_PerLightConstantBufferPtr);
 
-            ContextManager::SetConstantBuffer(1, m_PerMeshConstantBuffer);
+            ContextManager::SetConstantBuffer(1, m_PerMeshConstantBufferPtr);
 
             ContextManager::SetConstantBuffer(2, m_SurfaceMaterialBufferPtr);
 
@@ -545,7 +565,7 @@ namespace
 
                 // -----------------------------------------------------------------------------
 
-                BufferManager::UploadBufferData(m_PerMeshConstantBuffer, &pDtComponent->GetHostEntity()->GetTransformationFacet()->GetWorldMatrix());
+                BufferManager::UploadBufferData(m_PerMeshConstantBufferPtr, &pDtComponent->GetHostEntity()->GetTransformationFacet()->GetWorldMatrix());
 
                 BufferManager::UploadBufferData(m_SurfaceMaterialBufferPtr, &pMaterial->GetMaterialAttributes());
 
@@ -582,7 +602,7 @@ namespace
 
             ContextManager::SetConstantBuffer(0, m_PerLightConstantBufferPtr);
 
-            ContextManager::SetConstantBuffer(1, m_PerMeshConstantBuffer);
+            ContextManager::SetConstantBuffer(1, m_PerMeshConstantBufferPtr);
 
             ContextManager::SetConstantBuffer(2, m_SurfaceMaterialBufferPtr);
 
@@ -617,7 +637,7 @@ namespace
 
                 // -----------------------------------------------------------------------------
 
-                BufferManager::UploadBufferData(m_PerMeshConstantBuffer, &pDtComponent->GetHostEntity()->GetTransformationFacet()->GetWorldMatrix());
+                BufferManager::UploadBufferData(m_PerMeshConstantBufferPtr, &pDtComponent->GetHostEntity()->GetTransformationFacet()->GetWorldMatrix());
 
                 BufferManager::UploadBufferData(m_SurfaceMaterialBufferPtr, &pMaterial->GetMaterialAttributes());
 
@@ -654,9 +674,11 @@ namespace
 
             ContextManager::SetConstantBuffer(0, m_PerLightConstantBufferPtr);
 
-            ContextManager::SetConstantBuffer(1, m_PerMeshConstantBuffer);
+            ContextManager::SetConstantBuffer(1, m_PerMeshConstantBufferPtr);
 
-            ContextManager::SetConstantBuffer(3, m_LightPropertiesPtr);
+            ContextManager::SetConstantBuffer(3, m_LightPropertiesBufferPtr);
+
+            ContextManager::SetConstantBuffer(4, m_CausticSettingsBufferPtr);
 
             ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
@@ -701,9 +723,20 @@ namespace
 
                 // -----------------------------------------------------------------------------
 
-                BufferManager::UploadBufferData(m_PerMeshConstantBuffer, &pDtComponent->GetHostEntity()->GetTransformationFacet()->GetWorldMatrix());
+                BufferManager::UploadBufferData(m_PerMeshConstantBufferPtr, &pDtComponent->GetHostEntity()->GetTransformationFacet()->GetWorldMatrix());
 
-                BufferManager::UploadBufferData(m_SurfaceMaterialBufferPtr, &pMaterial->GetMaterialAttributes());
+                // -----------------------------------------------------------------------------
+
+                float Near = 0.1f;
+                float Far = 20.1f;
+                float IndexOfRefraction = 1.41f;
+
+                SCausticSettingsBuffer CausticSettingsBuffer;
+
+                CausticSettingsBuffer.m_RefractionIndices  = glm::vec4(1.0f / IndexOfRefraction, 1.0f / (IndexOfRefraction * IndexOfRefraction), IndexOfRefraction, IndexOfRefraction * IndexOfRefraction);
+                CausticSettingsBuffer.m_DepthLinearization = glm::vec4(Near * Far, Far - Near, Far + Near, Far);
+
+                BufferManager::UploadBufferData(m_CausticSettingsBufferPtr, &CausticSettingsBuffer);
 
                 // -----------------------------------------------------------------------------
 
@@ -768,7 +801,7 @@ namespace
 
             ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
 
-            ContextManager::SetConstantBuffer(1, m_LightPropertiesPtr);
+            ContextManager::SetConstantBuffer(1, m_LightPropertiesBufferPtr);
 
             ContextManager::SetResourceBuffer(0, HistogramRenderer::GetExposureHistoryBuffer());
 
@@ -802,6 +835,8 @@ namespace
         ContextManager::ResetConstantBuffer(2);
 
         ContextManager::ResetConstantBuffer(3);
+
+        ContextManager::ResetConstantBuffer(4);
 
         ContextManager::ResetShaderVS();
 
