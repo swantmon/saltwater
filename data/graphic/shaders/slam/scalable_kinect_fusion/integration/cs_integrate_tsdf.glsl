@@ -71,7 +71,7 @@ void main()
                 const float SDF = Depth - 1000.0f * length(CameraPosition - WSVoxelPosition) / Lambda;
                 
                 const float TruncatedDistance = TRUNCATED_DISTANCE * 1000.0f;
-                if (SDF >= -(TruncatedDistance * 1000.0f))
+                if (SDF >= -(TruncatedDistance))
                 {
                     const float TSDF = min(SDF / TruncatedDistance, 1.0f);
 
