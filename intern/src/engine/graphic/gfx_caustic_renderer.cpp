@@ -733,8 +733,8 @@ namespace
 
                 // -----------------------------------------------------------------------------
 
-                float Near = 0.1f;
-                float Far = 20.1f;
+                float Near              = pPointLight->GetCamera()->GetNear();
+                float Far               = pPointLight->GetCamera()->GetFar();
                 float IndexOfRefraction = pMaterial->GetMaterialRefractionAttributes().m_IndexOfRefraction;
 
                 SCausticSettingsBuffer CausticSettingsBuffer;
