@@ -33,28 +33,36 @@ layout(location = 0) out vec4 out_Output;
 // -----------------------------------------------------------------------------
 void main(void)
 {
-    float splatSize = 2.5;
-    float sizeSqr = splatSize*splatSize;
-    float isInsideGaussian = 0.0;
+    float SizeOfSplat      = 2.5f;
+    float SizeOfSplatSqr   = SizeOfSplat * SizeOfSplat;
+    float IsInsideGaussian = 0.0f;
  
-    // We need to compute how far this fragment is from the center of the point.  We could do
-    //    this using point sprites, but the __final__ framerate is 10x faster this way.
-    vec2 fragLocation = gl_FragCoord.xy;
-    vec2 pointLocation = (in_NormalizedCoords.xy * 0.5 + 0.5) * vec2(CAUSTIC_MAP_RESOLUTION);
+    // -----------------------------------------------------------------------------
+    // We need to compute how far this fragment is from the center of the point.  
+    // We could do this using point sprites, but the final framerate is 10x 
+    // faster this way.
+    // -----------------------------------------------------------------------------
+    vec2 FragmentLocation = gl_FragCoord.xy;
+    vec2 PointLocation    = (in_NormalizedCoords.xy * 0.5f + 0.5f) * vec2(CAUSTIC_MAP_RESOLUTION);
     
-    // Gaussian from Graphics Gems I, "Convenient anti-aliaseing filters that minimize bumpy sampling"
-    float alpha = 0.918;
-    float beta_x2 = 3.906;     // == beta*2 == 1.953 * 2; 
-    float denom = 0.858152111; // == 1 - exp(-beta);
+    // -----------------------------------------------------------------------------
+    // Gaussian from Graphics Gems I, "Convenient anti-aliasing filters that 
+    // minimize bumpy sampling"
+    // -----------------------------------------------------------------------------
+    float Alpha       = 0.918f;
+    float Beta2       = 3.906f;       // == beta*2 == 1.953 * 2; 
+    float Denominator = 0.858152111f; // == 1 - exp(-beta);
     
-    float distSqrToSplatCtr = dot(fragLocation - pointLocation, fragLocation - pointLocation);
-    float expResults = exp( -beta_x2*distSqrToSplatCtr/sizeSqr );
+    float DistanceSqrToSplatCtr = dot(FragmentLocation - PointLocation, FragmentLocation - PointLocation);
+    float ResultExp             = exp(-Beta2 * DistanceSqrToSplatCtr / SizeOfSplatSqr);
     
-    isInsideGaussian = ( distSqrToSplatCtr/sizeSqr < 0.25 ? 1.0 : 0.0 ) ;
-    float normalizeFactor = 10.5 * sizeSqr / 25.0;
+    IsInsideGaussian = DistanceSqrToSplatCtr/SizeOfSplatSqr < 0.25f ? 1.0f : 0.0f;
+
+    float NormalizeFactor = 10.5f * SizeOfSplatSqr / 25.0f;
     
-    expResults = alpha + alpha*((expResults-1.0)/denom);
-    out_Output = vec4(PHOTON_RESOLUTION_MULTIPLIER * isInsideGaussian * expResults / normalizeFactor);
+    ResultExp = Alpha + Alpha * ((ResultExp - 1.0f) / Denominator);
+
+    out_Output = vec4(PHOTON_RESOLUTION_MULTIPLIER * IsInsideGaussian * ResultExp / NormalizeFactor);
 }
 
 #endif // __INCLUDE_FS_GATHERING_GLSL__

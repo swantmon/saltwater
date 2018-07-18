@@ -2,7 +2,7 @@
 #define __INCLUDE_FS_CAUSTIC_EMISSION_GLSL__
 
 // -----------------------------------------------------------------------------
-// Original approach:
+// Original approach and comments:
 // "Interactive image-space techniques for approximating caustics"
 // Chris Wyman, Scott Davis (2006)
 // -----------------------------------------------------------------------------
@@ -51,21 +51,22 @@ layout(location = 0) out vec4 out_PhotonLocation;
 // -----------------------------------------------------------------------------
 // Function
 // -----------------------------------------------------------------------------
-vec2 ProjectToTexCoord( vec4 eyeSpacePos )
+vec2 GetUVFromVSPosition( in vec4 _VSPosition )
 {
-    vec4 projLoc = ps_LightProjectionMatrix * eyeSpacePos;
-    return ( 0.5*(projLoc.xy / projLoc.w) + 0.5 );
+    vec4 SSPosition = ps_LightProjectionMatrix * _VSPosition;
+
+    return 0.5f * (SSPosition.xy / SSPosition.w) + 0.5f;
 }
 
-vec4 refraction( vec3 incident, vec3 normal, float ni_nt, float ni_nt_sqr )
+vec4 GetRefraction( vec3 _IncidentRay, vec3 _VSNormal, float _RefractionIndex, float _RefractionIndexSqr )
 {
-    vec4 returnVal;
-    float IdotN = dot( -incident, normal );
-    float cosSqr = 1.0 - ni_nt_sqr*(1.0 - IdotN*IdotN);
-    return ( cosSqr <= 0.0 ? 
-             vec4( reflect( incident, normal ).xyz, -1 ) : 
-             vec4( normalize( ni_nt * incident + (ni_nt * IdotN - sqrt( cosSqr )) * normal ).xyz, 1) 
-           ); 
+    float IdotN = dot( -_IncidentRay, _VSNormal );
+
+    float CosineSqr = 1.0f - _RefractionIndexSqr * (1.0f - IdotN * IdotN);
+
+    return CosineSqr <= 0.0 ? 
+        vec4( reflect( _IncidentRay, _VSNormal ).xyz, -1.0f ) : 
+        vec4( normalize( _RefractionIndex * _IncidentRay + (_RefractionIndex * IdotN - sqrt( CosineSqr )) * _VSNormal ).xyz, 1.0f); 
 }
 
 void main(void)
@@ -81,64 +82,89 @@ void main(void)
     vec3 WSPosition = in_WSPosition;
     vec3 VSPosition = (ps_LightViewMatrix * vec4(WSPosition, 1.0f)).xyz;
  
-
-
+    // -----------------------------------------------------------------------------
     // Stuff that we know from the beginning
-    vec3 N_1 = normalize( VSNormal );   // Surface Normal
-    vec3 V   = normalize( VSPosition  );   // View direction
+    // -----------------------------------------------------------------------------
+    vec3 VSNormalSurface1 = normalize(VSNormal);
+    vec3 ViewDirection    = normalize(VSPosition);
 
-    // Find the distance to front & back surface, first as normalized [0..1] values, than unprojected
-    vec2 Dist = vec2( texture(ps_RefractiveDepth, SSPosition.xy).x, SSPosition.z );
-    Dist = ps_DepthLinearization.x / (Dist * ps_DepthLinearization.y - ps_DepthLinearization.z );
+    // -----------------------------------------------------------------------------
+    // Find the distance to front & back surface, first as normalized [0..1] 
+    // values, than unprojected
+    // -----------------------------------------------------------------------------
+    vec2 DepthOfBackAndObject = vec2( texture(ps_RefractiveDepth, SSPosition.xy).x, SSPosition.z );
+
+    DepthOfBackAndObject = ps_DepthLinearization.x / (DepthOfBackAndObject * ps_DepthLinearization.y - ps_DepthLinearization.z );
+
+    float Distance = DepthOfBackAndObject.y - DepthOfBackAndObject.x;
     
-    // find the refraction direction
-    vec3 T_1 = refraction( V, N_1, ps_RefractionIndices.x, ps_RefractionIndices.y ).xyz; 
+    // -----------------------------------------------------------------------------
+    // Find the refraction direction of first surface
+    // -----------------------------------------------------------------------------
+    vec3 RefractionSurface1 = GetRefraction( ViewDirection, VSNormalSurface1, ps_RefractionIndices.x, ps_RefractionIndices.y ).xyz; 
 
-    float d_V = Dist.y - Dist.x;
-
+    // -----------------------------------------------------------------------------
     // Compute approximate exitant location & surface normal
-    //vec4 P_2_tilde = vec4( T_1 * d_V * multiplier + gl_TexCoord[2].xyz, 1.0);
-    vec4 P_2_tilde = vec4( T_1 * d_V + VSPosition.xyz, 1.0);
-    vec3 N_2 = texture2D( ps_RefractiveNormal, ProjectToTexCoord( P_2_tilde ) ).xyz;
+    // -----------------------------------------------------------------------------
+    vec4 VSExitantLocation = vec4( RefractionSurface1 * Distance + VSPosition.xyz, 1.0f);
 
-    N_2 = (ps_LightViewMatrix * vec4(N_2, 0.0f)).xyz;
+    vec3 WSNormalSurf2 = texture(ps_RefractiveNormal, GetUVFromVSPosition(VSExitantLocation)).xyz;
 
-    float dotN2 = dot( N_2.xyz, N_2.xyz );
-    N_2 = normalize( N_2 );
+    vec3 VSNormalSurface2 = (ps_LightViewMatrix * vec4(WSNormalSurf2, 0.0f)).xyz;
 
+    float NdotN = dot( VSNormalSurface2.xyz, VSNormalSurface2.xyz );
+
+    VSNormalSurface2 = normalize( VSNormalSurface2 );
+
+    // -----------------------------------------------------------------------------
     // What happens if we lie in a black-texel?  Means no normal!  Conceptually,
-    //   this means we pass thru "side" of object.  Use norm perpindicular to view
-    if ( dotN2 == 0.0 )
-        N_2 = normalize( vec3( T_1.x, T_1.y, 0 ) );
-
-    // Refract at the second surface
-    vec4 T_2 = refraction( T_1, -N_2, ps_RefractionIndices.z, ps_RefractionIndices.w );
-    float TotalInternalReflectionTIR = T_2.w;
-    
-    // Scale the vector so that it's got a unit-length z-component
-    vec4 scaled_T_2 = vec4(T_2.xyz,0) / -T_2.z;
-
-    // Compute the texture locations of ctrPlusT2 and refractToNear.
-    float index, minDist = 1000.0, deltaDist = 1000.0;
-    for (index = 0.0; index < 2.0; index += 1.0)
+    // this means we pass thru "side" of object.  Use norm perpindicular to view
+    // -----------------------------------------------------------------------------
+    if ( NdotN == 0.0 )
     {
-        float texel = texture2D( ps_BackgroundDepth, ProjectToTexCoord( P_2_tilde + scaled_T_2 * index ) ).x;
-        float distA = -(ps_DepthLinearization.x / (texel * ps_DepthLinearization.y - ps_DepthLinearization.w)) + P_2_tilde.z;
-        if ( abs(distA-index) < deltaDist )
+        VSNormalSurface2 = normalize(vec3(RefractionSurface1.x, RefractionSurface1.y, 0.0f));
+    }
+
+    // -----------------------------------------------------------------------------
+    // Refract at the second surface
+    // -----------------------------------------------------------------------------
+    vec4 RefractionSurface2 = GetRefraction(RefractionSurface1, -VSNormalSurface2, ps_RefractionIndices.z, ps_RefractionIndices.w );
+    float TotalInternalReflectionTIR = RefractionSurface2.w;
+    
+    // -----------------------------------------------------------------------------
+    // Scale the vector so that it's got a unit-length z-component
+    // -----------------------------------------------------------------------------
+    vec4 ScaledRefractionSurface2 = vec4(RefractionSurface2.xyz, 0.0f) / -RefractionSurface2.z;
+
+    // -----------------------------------------------------------------------------
+    // Compute the texture locations of ctrPlusT2 and refractToNear.
+    // -----------------------------------------------------------------------------
+    float Index;
+    float MinimalDistance = 1000.0f;
+    float DeltaDistance   = 1000.0f;
+
+    for (Index = 0.0f; Index < 2.0f; Index += 1.0f)
+    {
+        float BackgroundDepth      = texture(ps_BackgroundDepth, GetUVFromVSPosition(VSExitantLocation + ScaledRefractionSurface2 * Index)).x;
+        float DistanceToBackground = -(ps_DepthLinearization.x / (BackgroundDepth * ps_DepthLinearization.y - ps_DepthLinearization.w)) + VSExitantLocation.z;
+
+        if (abs(DistanceToBackground - Index) < DeltaDistance )
         {
-            deltaDist = abs(distA-index);
-            minDist = index;
+            DeltaDistance   = abs(DistanceToBackground - Index);
+            MinimalDistance = Index;
         }
     }
     
-    float distOld = minDist;    
-    for (index = 0.0; index < 10.0; index += 1.0)
+    float DistanceToBackground = MinimalDistance;
+
+    for (Index = 0.0f; Index < 10.0f; Index += 1.0f)
     {
-        float texel1 = texture2D( ps_BackgroundDepth, ProjectToTexCoord( P_2_tilde + distOld * scaled_T_2 ) ).x;
-        distOld = -(ps_DepthLinearization.x / (texel1 * ps_DepthLinearization.y - ps_DepthLinearization.w)) + P_2_tilde.z;
+        float BackgroundDepth = texture(ps_BackgroundDepth, GetUVFromVSPosition(VSExitantLocation + DistanceToBackground * ScaledRefractionSurface2)).x;
+
+        DistanceToBackground = -(ps_DepthLinearization.x / (BackgroundDepth * ps_DepthLinearization.y - ps_DepthLinearization.w)) + VSExitantLocation.z;
     }
 
-    out_PhotonLocation.xyz = P_2_tilde.xyz + distOld * scaled_T_2.xyz;
+    out_PhotonLocation.xyz = VSExitantLocation.xyz + DistanceToBackground * ScaledRefractionSurface2.xyz;
     out_PhotonLocation.w   = TotalInternalReflectionTIR;
 }
 
