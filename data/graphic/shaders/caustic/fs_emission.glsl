@@ -14,6 +14,10 @@
     #define CAUSTIC_MAP_RESOLUTION 1024.0f
 #endif
 
+#ifndef DISCARD_TIR 
+    #define DISCARD_TIR true
+#endif
+
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
@@ -58,6 +62,8 @@ vec2 GetUVFromVSPosition( in vec4 _VSPosition )
     return 0.5f * (SSPosition.xy / SSPosition.w) + 0.5f;
 }
 
+// -----------------------------------------------------------------------------
+
 vec4 GetRefraction( vec3 _IncidentRay, vec3 _VSNormal, float _RefractionIndex, float _RefractionIndexSqr )
 {
     float IdotN = dot( -_IncidentRay, _VSNormal );
@@ -68,6 +74,8 @@ vec4 GetRefraction( vec3 _IncidentRay, vec3 _VSNormal, float _RefractionIndex, f
         vec4( reflect( _IncidentRay, _VSNormal ).xyz, -1.0f ) : 
         vec4( normalize( _RefractionIndex * _IncidentRay + (_RefractionIndex * IdotN - sqrt( CosineSqr )) * _VSNormal ).xyz, 1.0f); 
 }
+
+// -----------------------------------------------------------------------------
 
 void main(void)
 {
@@ -92,7 +100,7 @@ void main(void)
     // Find the distance to front & back surface, first as normalized [0..1] 
     // values, than unprojected
     // -----------------------------------------------------------------------------
-    vec2 DepthOfBackAndObject = vec2( texture(ps_RefractiveDepth, SSPosition.xy).x, SSPosition.z );
+    vec2 DepthOfBackAndObject = vec2(texture(ps_RefractiveDepth, SSPosition.xy).x, SSPosition.z);
 
     DepthOfBackAndObject = ps_DepthLinearization.x / (DepthOfBackAndObject * ps_DepthLinearization.y - ps_DepthLinearization.z );
 
@@ -106,13 +114,13 @@ void main(void)
     // -----------------------------------------------------------------------------
     // Compute approximate exitant location & surface normal
     // -----------------------------------------------------------------------------
-    vec4 VSExitantLocation = vec4( RefractionSurface1 * Distance + VSPosition.xyz, 1.0f);
+    vec4 VSExitantLocation = vec4(RefractionSurface1 * Distance + VSPosition.xyz, 1.0f);
 
     vec3 WSNormalSurf2 = texture(ps_RefractiveNormal, GetUVFromVSPosition(VSExitantLocation)).xyz;
 
     vec3 VSNormalSurface2 = (ps_LightViewMatrix * vec4(WSNormalSurf2, 0.0f)).xyz;
 
-    float NdotN = dot( VSNormalSurface2.xyz, VSNormalSurface2.xyz );
+    float NdotN = dot(VSNormalSurface2.xyz, VSNormalSurface2.xyz);
 
     VSNormalSurface2 = normalize( VSNormalSurface2 );
 
@@ -129,7 +137,11 @@ void main(void)
     // Refract at the second surface
     // -----------------------------------------------------------------------------
     vec4 RefractionSurface2 = GetRefraction(RefractionSurface1, -VSNormalSurface2, ps_RefractionIndices.z, ps_RefractionIndices.w );
-    float TotalInternalReflectionTIR = RefractionSurface2.w;
+
+    // -----------------------------------------------------------------------------
+    // If we have an total internal reflection we discard the pixel
+    // -----------------------------------------------------------------------------
+    if (RefractionSurface2.w < 0.0f && DISCARD_TIR) discard;
     
     // -----------------------------------------------------------------------------
     // Scale the vector so that it's got a unit-length z-component
@@ -165,7 +177,7 @@ void main(void)
     }
 
     out_PhotonLocation.xyz = VSExitantLocation.xyz + DistanceToBackground * ScaledRefractionSurface2.xyz;
-    out_PhotonLocation.w   = TotalInternalReflectionTIR;
+    out_PhotonLocation.w   = RefractionSurface2.w;
 }
 
 #endif // __INCLUDE_FS_CAUSTIC_EMISSION_GLSL__
