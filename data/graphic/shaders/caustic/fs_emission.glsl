@@ -55,7 +55,7 @@ layout(location = 0) out vec4 out_PhotonLocation;
 // -----------------------------------------------------------------------------
 // Function
 // -----------------------------------------------------------------------------
-vec2 GetUVFromVSPosition( in vec4 _VSPosition )
+vec2 GetUVFromVSPosition(in vec4 _VSPosition)
 {
     vec4 SSPosition = ps_LightProjectionMatrix * _VSPosition;
 
@@ -64,7 +64,7 @@ vec2 GetUVFromVSPosition( in vec4 _VSPosition )
 
 // -----------------------------------------------------------------------------
 
-vec4 GetRefraction( vec3 _IncidentRay, vec3 _VSNormal, float _RefractionIndex, float _RefractionIndexSqr )
+vec4 GetRefraction(in vec3 _IncidentRay, in vec3 _VSNormal, in float _RefractionIndex, in float _RefractionIndexSqr )
 {
     float IdotN = dot(-_IncidentRay, _VSNormal);
 
@@ -109,7 +109,7 @@ void main(void)
     // -----------------------------------------------------------------------------
     // Find the refraction direction of first surface
     // -----------------------------------------------------------------------------
-    vec3 RefractionSurface1 = GetRefraction( ViewDirection, VSNormalSurface1, ps_RefractionIndices.x, ps_RefractionIndices.y ).xyz; 
+    vec3 RefractionSurface1 = GetRefraction(ViewDirection, VSNormalSurface1, ps_RefractionIndices.x, ps_RefractionIndices.y).xyz; 
 
     // -----------------------------------------------------------------------------
     // Compute approximate exitant location & surface normal
@@ -125,13 +125,10 @@ void main(void)
     VSNormalSurface2 = normalize( VSNormalSurface2 );
 
     // -----------------------------------------------------------------------------
-    // What happens if we lie in a black-texel?  Means no normal!  Conceptually,
-    // this means we pass thru "side" of object.  Use norm perpindicular to view
+    // What happens if we lie in a black-texel? Means no normal! Conceptually,
+    // this means we pass thru "side" of object. Use norm perpindicular to view
     // -----------------------------------------------------------------------------
-    if ( NdotN == 0.0 )
-    {
-        VSNormalSurface2 = normalize(vec3(RefractionSurface1.x, RefractionSurface1.y, 0.0f));
-    }
+    if (NdotN == 0.0f) VSNormalSurface2 = normalize(vec3(RefractionSurface1.x, RefractionSurface1.y, 0.0f));
 
     // -----------------------------------------------------------------------------
     // Refract at the second surface
