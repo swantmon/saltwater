@@ -549,7 +549,7 @@ namespace
                     pMaterial = static_cast<const Gfx::CMaterial*>(pDtMaterialComponent->GetFacet(Dt::CMaterialComponent::Graphic));
                 }
 
-                if (!pMaterial->GetHasAlpha()) continue;
+                if (!pMaterial->HasRefraction()) continue;
 
                 for (int Index = 0; Index < pMaterial->GetTextureSetPS()->GetNumberOfTextures(); ++Index)
                 {
@@ -639,7 +639,7 @@ namespace
                     pMaterial = static_cast<const Gfx::CMaterial*>(pDtMaterialComponent->GetFacet(Dt::CMaterialComponent::Graphic));
                 }
 
-                if (pMaterial->GetHasAlpha()) continue;
+                if (pMaterial->HasRefraction()) continue;
 
                 // -----------------------------------------------------------------------------
 
@@ -725,7 +725,7 @@ namespace
                     pMaterial = static_cast<const Gfx::CMaterial*>(pDtMaterialComponent->GetFacet(Dt::CMaterialComponent::Graphic));
                 }
 
-                if (!pMaterial->GetHasAlpha()) continue;
+                if (!pMaterial->HasRefraction()) continue;
 
                 // -----------------------------------------------------------------------------
 
@@ -735,7 +735,7 @@ namespace
 
                 float Near = 0.1f;
                 float Far = 20.1f;
-                float IndexOfRefraction = 1.41f;
+                float IndexOfRefraction = pMaterial->GetMaterialRefractionAttributes().m_IndexOfRefraction;
 
                 SCausticSettingsBuffer CausticSettingsBuffer;
 

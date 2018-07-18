@@ -149,6 +149,7 @@ namespace
         CRenderContextPtr m_HitProxyContextPtr;
         CRenderJobs       m_DeferredRenderJobs;
         CRenderJobs       m_ForwardRenderJobs;
+        CRenderJobs       m_RefractionRenderJobs;
         SLightJob         m_ForwardLightTextures;
 
     private:
@@ -178,6 +179,7 @@ namespace
         // -----------------------------------------------------------------------------
         m_DeferredRenderJobs.reserve(256);
         m_ForwardRenderJobs.reserve(32);
+        m_RefractionRenderJobs.reserve(4);
     }
 
     // -----------------------------------------------------------------------------
@@ -201,7 +203,7 @@ namespace
         m_ModelBufferPtr           = 0;
         m_SurfaceMaterialBufferPtr = 0;
         m_HitProxyPassPSBufferPtr  = 0;
-        m_ForwardPassBufferPtr   = 0;
+        m_ForwardPassBufferPtr     = 0;
         m_LightPropertiesBufferPtr = 0;
         m_HitProxyShaderPtr        = 0;
         m_DeferredContextPtr       = 0;
@@ -489,7 +491,7 @@ namespace
             // TODO: we have to set buffer to shader on model loading
             // TODO: remove GetHasBump()
             // -----------------------------------------------------------------------------
-            if (pMaterial->GetHasBump())
+            if (pMaterial->HasBump())
             {
                 ContextManager::SetShaderDS(pMaterial->GetShaderDS());
 
@@ -716,7 +718,7 @@ namespace
     {
         if (m_DeferredRenderJobs.size() == 0) return;
 
-        Performance::BeginEvent("Actors Hit Proxy");
+        Performance::BeginEvent("Mesh Hit Proxy");
 
         ContextManager::SetRenderContext(m_HitProxyContextPtr);
 
@@ -767,6 +769,8 @@ namespace
         RenderJobs(m_DeferredRenderJobs);
 
         RenderJobs(m_ForwardRenderJobs);
+
+        RenderJobs(m_RefractionRenderJobs);
 
         ContextManager::ResetInputLayout();
 
@@ -825,6 +829,8 @@ namespace
 
         m_ForwardRenderJobs.clear();
 
+        m_RefractionRenderJobs.clear();
+
         auto DataMeshComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CMeshComponent>();
 
         for (auto Component : DataMeshComponents)
@@ -870,7 +876,11 @@ namespace
                 NewRenderJob.m_SurfaceMaterialPtr = pMaterial;
                 NewRenderJob.m_ModelMatrix        = rCurrentEntity.GetTransformationFacet()->GetWorldMatrix();
 
-                if (pMaterial->GetHasAlpha())
+                if (pMaterial->HasRefraction())
+                {
+                    m_RefractionRenderJobs.push_back(NewRenderJob);
+                }
+                else if(pMaterial->HasAlpha())
                 {
                     m_ForwardRenderJobs.push_back(NewRenderJob);
                 }

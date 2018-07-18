@@ -54,6 +54,11 @@ namespace Gfx
             float     m_Displacement;
         };
 
+        struct SRefractionAttributes
+        {
+            float m_IndexOfRefraction;
+        };
+
     public:
 
         CShaderPtr GetShaderGS() const;
@@ -74,10 +79,13 @@ namespace Gfx
 
         const SMaterialAttributes& GetMaterialAttributes() const;
 
+        const SRefractionAttributes& GetMaterialRefractionAttributes() const;
+
         const SMaterialKey& GetKey() const;
 
-        bool GetHasAlpha() const;
-        bool GetHasBump() const;
+        bool HasAlpha() const;
+        bool HasBump() const;
+        bool HasRefraction() const;
 
         BHash GetHash() const;
 
@@ -97,7 +105,10 @@ namespace Gfx
         CTextureSetPtr m_TextureSetPtr;
 
         SMaterialAttributes m_MaterialAttributes;
-        SMaterialKey        m_MaterialKey;
+
+        SRefractionAttributes m_MaterialRefractionAttributes;
+
+        SMaterialKey m_MaterialKey;
 
         BHash m_Hash;
     };

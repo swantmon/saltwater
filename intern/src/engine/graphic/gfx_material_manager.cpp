@@ -160,6 +160,7 @@ namespace
             float       m_Reflectance;
             float       m_MetalMask;
             float       m_Displacement;
+            float       m_RefractionIndex;
             glm::vec4   m_AlbedoColor;
             glm::vec4   m_TilingOffset;
         };
@@ -205,7 +206,7 @@ namespace
     const CGfxMaterialManager::SMaterialDescriptor CGfxMaterialManager::s_DefaultDescriptor =
     {
         "STATIC CONST DEFAULT MATERIAL: default.mat", "", "", "", "", "", "", "",
-        1.0f, 0.0f, 0.0f, 0.0f,
+        1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
         glm::vec4(glm::vec3(0.8f), 1.0f),
         glm::vec4(1.0f, 1.0f, 0.0f, 0.0f)
     };
@@ -294,6 +295,7 @@ namespace
         tinyxml2::XMLElement* pElementRoughness   = pElementDefinition->FirstChildElement("Roughness");
         tinyxml2::XMLElement* pElementReflectance = pElementDefinition->FirstChildElement("Reflectance");
         tinyxml2::XMLElement* pElementMetallic    = pElementDefinition->FirstChildElement("Metallic");
+        tinyxml2::XMLElement* pElementRefraction  = pElementDefinition->FirstChildElement("Refraction");
         tinyxml2::XMLElement* pElementAO          = pElementDefinition->FirstChildElement("AO");
         tinyxml2::XMLElement* pElementBump        = pElementDefinition->FirstChildElement("Bump");
         tinyxml2::XMLElement* pElementAlpha       = pElementDefinition->FirstChildElement("Alpha");
@@ -320,6 +322,7 @@ namespace
         if (pElementMetallic) MaterialDescriptor.m_MetalMask = pElementMetallic->FloatAttribute("V");
         if (pElementBump) MaterialDescriptor.m_Displacement = pElementBump->FloatAttribute("V");
         if (pElementAlpha) MaterialDescriptor.m_AlbedoColor[3] = pElementAlpha->FloatAttribute("V", MaterialDescriptor.m_AlbedoColor[3]);
+        if (pElementRefraction) MaterialDescriptor.m_RefractionIndex = pElementRefraction->FloatAttribute("V", 1.0f);
 
         if (pElementTiling)
         {
@@ -469,12 +472,13 @@ namespace
 
         MaterialDescriptor.m_MaterialName = pMaterialComponent->GetMaterialname();
 
-        MaterialDescriptor.m_Roughness    = pMaterialComponent->GetRoughness();
-        MaterialDescriptor.m_Reflectance  = pMaterialComponent->GetReflectance();
-        MaterialDescriptor.m_MetalMask    = pMaterialComponent->GetMetalness();
-        MaterialDescriptor.m_Displacement = pMaterialComponent->GetDisplacement();
-        MaterialDescriptor.m_AlbedoColor  = pMaterialComponent->GetColor();
-        MaterialDescriptor.m_TilingOffset = pMaterialComponent->GetTilingOffset();
+        MaterialDescriptor.m_Roughness       = pMaterialComponent->GetRoughness();
+        MaterialDescriptor.m_Reflectance     = pMaterialComponent->GetReflectance();
+        MaterialDescriptor.m_MetalMask       = pMaterialComponent->GetMetalness();
+        MaterialDescriptor.m_Displacement    = pMaterialComponent->GetDisplacement();
+        MaterialDescriptor.m_RefractionIndex = pMaterialComponent->GetRefractionIndex();
+        MaterialDescriptor.m_AlbedoColor     = pMaterialComponent->GetColor();
+        MaterialDescriptor.m_TilingOffset    = pMaterialComponent->GetTilingOffset();
 
         MaterialDescriptor.m_ColorTexture            = pMaterialComponent->GetColorTexture();
         MaterialDescriptor.m_NormalTexture           = pMaterialComponent->GetNormalTexture();
@@ -561,6 +565,11 @@ namespace
         _pComponent->m_MaterialAttributes.m_Reflectance  = _rDescriptor.m_Reflectance;
         _pComponent->m_MaterialAttributes.m_MetalMask    = _rDescriptor.m_MetalMask;
         _pComponent->m_MaterialAttributes.m_TilingOffset = _rDescriptor.m_TilingOffset;
+
+        // -----------------------------------------------------------------------------
+        // Refraction values
+        // -----------------------------------------------------------------------------
+        _pComponent->m_MaterialRefractionAttributes.m_IndexOfRefraction = _rDescriptor.m_RefractionIndex;
 
         // -----------------------------------------------------------------------------
         // Textures
@@ -712,7 +721,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Bump Mapping
         // -----------------------------------------------------------------------------
-        if (_rMaterial.GetHasBump())
+        if (_rMaterial.HasBump())
         {
             _rMaterial.m_ShaderPtrs[CShader::Hull] = Gfx::ShaderManager::CompileHS(g_pShaderFilenameHS[0], g_pShaderNamesHS[0], pDefineString);
 
