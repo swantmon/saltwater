@@ -150,7 +150,7 @@ namespace Scpt
                 {
                     for (int j = 0; j < Height; ++ j)
                     {
-                        Buffer[i * Height + j] = static_cast<uint16_t>(RawBuffer[i * Height + j]);
+                        Buffer[j * Width + i] = static_cast<uint16_t>(RawBuffer[j * Width + (Width - 1 - i)]);
                     }
                 }
 
