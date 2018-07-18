@@ -66,11 +66,11 @@ vec2 GetUVFromVSPosition( in vec4 _VSPosition )
 
 vec4 GetRefraction( vec3 _IncidentRay, vec3 _VSNormal, float _RefractionIndex, float _RefractionIndexSqr )
 {
-    float IdotN = dot( -_IncidentRay, _VSNormal );
+    float IdotN = dot(-_IncidentRay, _VSNormal);
 
     float CosineSqr = 1.0f - _RefractionIndexSqr * (1.0f - IdotN * IdotN);
 
-    return CosineSqr <= 0.0 ? 
+    return CosineSqr <= 0.0f ? 
         vec4( reflect( _IncidentRay, _VSNormal ).xyz, -1.0f ) : 
         vec4( normalize( _RefractionIndex * _IncidentRay + (_RefractionIndex * IdotN - sqrt( CosineSqr )) * _VSNormal ).xyz, 1.0f); 
 }
@@ -151,11 +151,10 @@ void main(void)
     // -----------------------------------------------------------------------------
     // Compute the texture locations of ctrPlusT2 and refractToNear.
     // -----------------------------------------------------------------------------
-    float Index;
     float MinimalDistance = 1000.0f;
     float DeltaDistance   = 1000.0f;
 
-    for (Index = 0.0f; Index < 2.0f; Index += 1.0f)
+    for (float Index = 0.0f; Index < 2.0f; Index += 1.0f)
     {
         float BackgroundDepth      = texture(ps_BackgroundDepth, GetUVFromVSPosition(VSExitantLocation + ScaledRefractionSurface2 * Index)).x;
         float DistanceToBackground = -(ps_DepthLinearization.x / (BackgroundDepth * ps_DepthLinearization.y - ps_DepthLinearization.w)) + VSExitantLocation.z;
@@ -169,7 +168,7 @@ void main(void)
     
     float DistanceToBackground = MinimalDistance;
 
-    for (Index = 0.0f; Index < 10.0f; Index += 1.0f)
+    for (float Index = 0.0f; Index < 10.0f; Index += 1.0f)
     {
         float BackgroundDepth = texture(ps_BackgroundDepth, GetUVFromVSPosition(VSExitantLocation + DistanceToBackground * ScaledRefractionSurface2)).x;
 
