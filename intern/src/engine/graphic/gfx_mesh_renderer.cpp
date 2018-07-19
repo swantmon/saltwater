@@ -112,12 +112,6 @@ namespace
             unsigned int m_Padding2;
         };
 
-        struct SProbeLightProperties
-        {
-            glm::vec4 m_LightPosition;
-            glm::vec4 m_LightSettings;
-        };
-
         struct SForwardPassProperties
         {
             glm::vec4    m_CameraPosition;
@@ -161,7 +155,6 @@ namespace
         CShaderPtr        m_RefractionApplyPSPtr;
         CTargetSetPtr     m_RefractionTargetSetPtr;
         CBufferPtr        m_CausticSettingsBufferPtr;
-        CBufferPtr        m_ProbeLightBufferPtr;
 
         CBufferPtr        m_ModelBufferPtr;
         CBufferPtr        m_SurfaceMaterialBufferPtr;
@@ -240,7 +233,6 @@ namespace
         m_RefractionApplyPSPtr = 0;
         m_RefractionTargetSetPtr = 0;
         m_CausticSettingsBufferPtr = 0;
-        m_ProbeLightBufferPtr = 0;
 
         m_ModelBufferPtr           = 0;
         m_SurfaceMaterialBufferPtr = 0;
@@ -473,20 +465,6 @@ namespace
         m_CausticSettingsBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
         BufferManager::SetBufferLabel(m_CausticSettingsBufferPtr, "Caustic Settings Properties");
-
-        // -----------------------------------------------------------------------------
-
-        ConstanteBufferDesc.m_Stride        = 0;
-        ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
-        ConstanteBufferDesc.m_Binding       = CBuffer::ResourceBuffer;
-        ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
-        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SProbeLightProperties);
-        ConstanteBufferDesc.m_pBytes        = 0;
-        ConstanteBufferDesc.m_pClassKey     = 0;
-
-        m_ProbeLightBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
-
-        BufferManager::SetBufferLabel(m_ProbeLightBufferPtr, "Probe Light Properties");
     }
 
     // -----------------------------------------------------------------------------
@@ -759,6 +737,8 @@ namespace
 
         Performance::BeginEvent("Apply");
 
+        Debug::Push(131222);
+
         ContextManager::SetTargetSet(TargetSetManager::GetLightAccumulationTargetSet());
 
         ContextManager::SetViewPortSet(ViewManager::GetViewPortSet());
@@ -778,7 +758,7 @@ namespace
         ContextManager::SetConstantBuffer(5, m_CausticSettingsBufferPtr);
 
         ContextManager::SetResourceBuffer(0, HistogramRenderer::GetExposureHistoryBuffer());
-        ContextManager::SetResourceBuffer(1, m_ProbeLightBufferPtr);
+        ContextManager::SetResourceBuffer(1, m_LightPropertiesBufferPtr);
 
         // -----------------------------------------------------------------------------
         // Bind shadow and reflection textures
@@ -807,6 +787,16 @@ namespace
             ContextManager::SetSampler(11, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
             ContextManager::SetTexture(11, m_ForwardLightTextures.m_DiffuseTexturePtr);
+        }
+
+        for (unsigned int IndexOfTexture = 0; IndexOfTexture < s_MaxNumberOfLights; ++IndexOfTexture)
+        {
+            if (m_ForwardLightTextures.m_ShadowTexturePtrs[IndexOfTexture] != 0)
+            {
+                ContextManager::SetSampler(12 + IndexOfTexture, SamplerManager::GetSampler(CSampler::PCF));
+
+                ContextManager::SetTexture(12 + IndexOfTexture, m_ForwardLightTextures.m_ShadowTexturePtrs[IndexOfTexture]);
+            }
         }
 
         // -----------------------------------------------------------------------------
@@ -881,6 +871,8 @@ namespace
 
             ContextManager::DrawIndexed(SurfacePtr->GetNumberOfIndices(), 0, 0);
         }
+
+        Debug::Pop();
 
         Performance::EndEvent();
 
@@ -1272,7 +1264,6 @@ namespace
 
     void CGfxMeshRenderer::UpdateLightProperties()
     {
-        SProbeLightProperties ProbeLightProperties;
         SLightProperties LightProperties[s_MaxNumberOfLights];
         unsigned int     IndexOfLight;
 
@@ -1402,15 +1393,10 @@ namespace
             m_ForwardLightTextures.m_SpecularTexturePtr = pGfxComponent->GetSpecularPtr();
             m_ForwardLightTextures.m_DiffuseTexturePtr  = pGfxComponent->GetDiffusePtr();
 
-            ProbeLightProperties.m_LightPosition = glm::vec4(pDtComponent->GetHostEntity()->GetWorldPosition(), 1.0f);
-            ProbeLightProperties.m_LightSettings = glm::vec4(static_cast<float>(pGfxComponent->GetSpecularPtr()->GetNumberOfMipLevels() - 1), 0.0f, 0.0f, 0.0f);
-
             ++IndexOfLight;
         }
 
         BufferManager::UploadBufferData(m_LightPropertiesBufferPtr, &LightProperties);
-
-        BufferManager::UploadBufferData(m_ProbeLightBufferPtr, &ProbeLightProperties);
 
 
         // TODO by tschwandt (2018/06/14)

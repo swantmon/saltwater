@@ -9,6 +9,25 @@
 #include "common_material.glsl"
 
 // -----------------------------------------------------------------------------
+// Definitions
+// -----------------------------------------------------------------------------
+#define MAX_NUMBER_OF_LIGHTS 4
+
+#define SUN_LIGHT 1u
+#define POINT_LIGHT 2u
+#define LIGHT_PROBE 3u
+
+struct SLightProperties
+{
+    mat4 ps_LightViewProjection;
+    vec4 ps_LightPosition;
+    vec4 ps_LightDirection;
+    vec4 ps_LightColor;
+    vec4 ps_LightSettings;
+    uint ps_LightType;
+};
+
+// -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
 layout(std140, binding = 3) uniform UB3
@@ -39,8 +58,7 @@ layout(std430, binding = 0) readonly buffer BB0
 
 layout(std430, binding = 1) readonly buffer BB1
 {
-    vec4 ps_LightPosition;
-    vec4 ps_LightSettings;
+    SLightProperties ps_LightProperties[MAX_NUMBER_OF_LIGHTS];
 };
 
 layout(binding =  0) uniform sampler2D ps_DiffuseTexture;
@@ -57,6 +75,7 @@ layout(binding =  8) uniform sampler2D ps_RefractiveDepth;
 layout(binding =  9) uniform sampler2D   ps_BRDF;
 layout(binding = 10) uniform samplerCube ps_SpecularCubemap;
 layout(binding = 11) uniform samplerCube ps_DiffuseCubemap;
+layout(binding = 12) uniform sampler2DShadow ps_ShadowTexture[MAX_NUMBER_OF_LIGHTS];
 
 // -----------------------------------------------------------------------------
 // Input to fragment from previous stage
@@ -198,34 +217,120 @@ void main(void)
     vec4 WSRefraction = g_ViewToWorld * vec4(RefractionSurface2.xyz, 0.0f);
 
     // -----------------------------------------------------------------------------
-    // Light data
+    // Forward pass for each light
     // -----------------------------------------------------------------------------
-    float NumberOfMiplevels = ps_LightSettings.x;
+    #pragma unroll
+    for (int IndexOfLight = 0; IndexOfLight < MAX_NUMBER_OF_LIGHTS; ++ IndexOfLight)
+    {
+        SLightProperties LightProb = ps_LightProperties[IndexOfLight];
 
-    // -----------------------------------------------------------------------------
-    // Compute lighting for sphere lights
-    // -----------------------------------------------------------------------------
-    vec3  WSViewDirection = normalize(Data.m_WSPosition - ps_CameraPosition.xyz);
-    float NdotV           = clamp( dot( Data.m_WSNormal, -WSViewDirection ), 0.0, 1.0f);
+        if (LightProb.ps_LightType == SUN_LIGHT)
+        {
+            // -----------------------------------------------------------------------------
+            // Compute lighting for sun light
+            // -----------------------------------------------------------------------------
+            vec3 WSLightDirection  = -LightProb.ps_LightDirection.xyz;
+            vec3 WSViewDirection   = normalize(ps_CameraPosition.xyz - Data.m_WSPosition);
+            
+            float NdotV = dot(Data.m_WSNormal, WSViewDirection);
+            
+            vec3 ViewMirrorUnitDir = 2.0f * NdotV * Data.m_WSNormal - WSViewDirection;
 
-    // -----------------------------------------------------------------------------
-    // Rebuild the function
-    // -----------------------------------------------------------------------------
-    ivec2 DFGSize = textureSize(ps_BRDF, 0);
+            // -----------------------------------------------------------------------------
+            // Compute sun data
+            // -----------------------------------------------------------------------------
+            float r = sin(LightProb.ps_LightSettings[0]);
+            float d = cos(LightProb.ps_LightSettings[0]);
 
-    float ClampNdotV = max(NdotV, 0.5f / float(DFGSize.x));
-    
-    // -----------------------------------------------------------------------------
-    // Get data
-    // -----------------------------------------------------------------------------
-    vec3 PreDFGF = textureLod(ps_BRDF, vec2(NdotV, Data.m_Roughness), 0.0f).rgb;
-    
-    vec3 DiffuseIBL  = EvaluateDiffuseIBL(ps_DiffuseCubemap, Data, WSViewDirection, PreDFGF.z, NdotV);
-    vec3 SpecularIBL = EvaluateSpecularIBL(ps_SpecularCubemap, Data, normalize(WSRefraction.xyz), PreDFGF.xy, ClampNdotV, NumberOfMiplevels);
+            float DdotR = dot(WSLightDirection, ViewMirrorUnitDir);
+            vec3  S     = ViewMirrorUnitDir - DdotR * WSLightDirection;
+            vec3  L     = DdotR < d ? normalize(d * WSLightDirection + normalize(S) * r) : ViewMirrorUnitDir;
+            
+            // -----------------------------------------------------------------------------
+            // Compute attenuation
+            // -----------------------------------------------------------------------------
+            float Attenuation = 1.0f;
+            Attenuation *= Data.m_AmbientOcclusion;
+            Attenuation *= GetShadowAtPositionWithPCF(Data.m_WSPosition, LightProb.ps_LightViewProjection, ps_ShadowTexture[IndexOfLight]);
 
-    vec3 Illuminance = DiffuseIBL.rgb + SpecularIBL.rgb;
+            // -----------------------------------------------------------------------------
+            // Apply light luminance
+            // -----------------------------------------------------------------------------
+            Luminance += BRDF(L, WSViewDirection, Data.m_WSNormal, Data) * clamp(dot(Data.m_WSNormal, L), 0.0f, 1.0f) * LightProb.ps_LightColor.xyz * Attenuation * AverageExposure;
+        }
+        else if (LightProb.ps_LightType == POINT_LIGHT)
+        {
+            // -----------------------------------------------------------------------------
+            // Light data
+            // -----------------------------------------------------------------------------
+            float LightInvSqrAttenuationRadius = LightProb.ps_LightSettings.x;
+            float LightAngleScale              = LightProb.ps_LightSettings.y;
+            float LightAngleOffset             = LightProb.ps_LightSettings.z;
+            float LightHasShadows              = LightProb.ps_LightSettings.w;
 
-    out_Output = vec4(Illuminance, 1.0f);
+            // -----------------------------------------------------------------------------
+            // Compute lighting for punctual lights
+            // -----------------------------------------------------------------------------
+            vec3 UnnormalizedLightVector = LightProb.ps_LightPosition.xyz - Data.m_WSPosition;
+            vec3 NormalizedLightVector   = normalize(UnnormalizedLightVector);
+            vec3 WSViewDirection         = normalize(ps_CameraPosition.xyz - Data.m_WSPosition);
+
+            // -----------------------------------------------------------------------------
+            // Compute attenuation
+            // -----------------------------------------------------------------------------
+            float Attenuation = 1.0f;
+
+            Attenuation *= GetDistanceAttenuation(UnnormalizedLightVector, LightInvSqrAttenuationRadius);
+            Attenuation *= GetAngleAttenuation(NormalizedLightVector, -LightProb.ps_LightDirection.xyz, LightAngleScale, LightAngleOffset);
+
+            // -----------------------------------------------------------------------------
+            // Shadowing
+            // -----------------------------------------------------------------------------
+            Attenuation *= Data.m_AmbientOcclusion;
+            Attenuation *= LightHasShadows == 1.0f ? GetShadowAtPositionWithPCF(Data.m_WSPosition, LightProb.ps_LightViewProjection, ps_ShadowTexture[IndexOfLight]) : 1.0f;
+            
+            // -----------------------------------------------------------------------------
+            // Apply light luminance and shading
+            // -----------------------------------------------------------------------------
+            Luminance += BRDF(NormalizedLightVector, WSViewDirection, Data.m_WSNormal, Data) * clamp(dot(Data.m_WSNormal, NormalizedLightVector), 0.0f, 1.0f) * LightProb.ps_LightColor.xyz * Attenuation * AverageExposure;
+        }
+        else if (LightProb.ps_LightType == LIGHT_PROBE)
+        {
+            // -----------------------------------------------------------------------------
+            // Light data
+            // -----------------------------------------------------------------------------
+            float NumberOfMiplevels = LightProb.ps_LightSettings.x;
+
+            // -----------------------------------------------------------------------------
+            // Compute lighting for sphere lights
+            // -----------------------------------------------------------------------------
+            vec3  WSViewDirection = normalize(Data.m_WSPosition - ps_CameraPosition.xyz);
+            float NdotV           = clamp( dot( Data.m_WSNormal, -WSViewDirection ), 0.0, 1.0f);
+
+            // -----------------------------------------------------------------------------
+            // Rebuild the function
+            // -----------------------------------------------------------------------------
+            ivec2 DFGSize = textureSize(ps_BRDF, 0);
+
+            float ClampNdotV = max(NdotV, 0.5f / float(DFGSize.x));
+            
+            // -----------------------------------------------------------------------------
+            // Get data
+            // -----------------------------------------------------------------------------
+            vec3 PreDFGF = textureLod(ps_BRDF, vec2(NdotV, Data.m_Roughness), 0.0f).rgb;
+            
+            vec3 DiffuseIBL  = EvaluateDiffuseIBL(ps_DiffuseCubemap, Data, WSViewDirection, PreDFGF.z, NdotV);
+            vec3 SpecularIBL = EvaluateSpecularIBL(ps_SpecularCubemap, Data, normalize(WSRefraction.xyz), PreDFGF.xy, ClampNdotV, NumberOfMiplevels);
+            
+            // -------------------------------------------------------------------------------------
+            // Combination of lighting
+            // Multiplication with average exposure is not necessary because it is already included
+            // -------------------------------------------------------------------------------------
+            Luminance += (DiffuseIBL.rgb + SpecularIBL.rgb);
+        }
+    }
+
+    out_Output = vec4(Luminance, 1.0f);
 }
 
 #endif // __INCLUDE_FS_APPLY_GLSL__
