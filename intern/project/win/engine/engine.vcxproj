@@ -98,6 +98,7 @@
     <ClCompile Include="..\..\..\src\engine\graphic\gfx_postfx_renderer.cpp" />
     <ClCompile Include="..\..\..\src\engine\graphic\gfx_rasterizer_state.cpp" />
     <ClCompile Include="..\..\..\src\engine\graphic\gfx_reflection_renderer.cpp" />
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_refraction_renderer.cpp" />
     <ClCompile Include="..\..\..\src\engine\graphic\gfx_render_context.cpp" />
     <ClCompile Include="..\..\..\src\engine\graphic\gfx_render_state.cpp" />
     <ClCompile Include="..\..\..\src\engine\graphic\gfx_sampler.cpp" />
@@ -225,6 +226,7 @@
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_rasterizer_description.h" />
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_rasterizer_state.h" />
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_reflection_renderer.h" />
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_refraction_renderer.h" />
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_render_context.h" />
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_render_state.h" />
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_sampler.h" />
