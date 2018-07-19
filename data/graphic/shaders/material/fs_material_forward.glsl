@@ -191,7 +191,7 @@ void main(void)
             // -----------------------------------------------------------------------------
             vec3 UnnormalizedLightVector = LightProb.ps_LightPosition.xyz - Data.m_WSPosition;
             vec3 NormalizedLightVector   = normalize(UnnormalizedLightVector);
-            vec3 WSViewDirection         = normalize(Data.m_WSPosition - ps_CameraPosition.xyz);
+            vec3 WSViewDirection         = normalize(ps_CameraPosition.xyz - Data.m_WSPosition);
 
             // -----------------------------------------------------------------------------
             // Compute attenuation
