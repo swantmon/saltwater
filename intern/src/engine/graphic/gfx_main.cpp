@@ -736,6 +736,8 @@ namespace
         
         m_PerFrameConstantBufferBufferPtr = BufferManager::CreateBuffer(BufferDescription);
 
+        BufferManager::SetBufferLabel(m_PerFrameConstantBufferBufferPtr, "Global Constant Buffer");
+
         // -----------------------------------------------------------------------------
         // Setup default values
         // -----------------------------------------------------------------------------

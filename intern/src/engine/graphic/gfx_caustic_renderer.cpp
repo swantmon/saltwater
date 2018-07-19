@@ -240,7 +240,7 @@ namespace
         
         m_RefractiveNormalTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
 
-        TextureManager::SetTextureLabel(m_RefractiveNormalTexturePtr, "Refractive Normal");
+        TextureManager::SetTextureLabel(m_RefractiveNormalTexturePtr, "Light Refractive Normal");
 
         // -----------------------------------------------------------------------------
 
@@ -259,7 +259,7 @@ namespace
         
         m_RefractiveDepthTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
 
-        TextureManager::SetTextureLabel(m_RefractiveDepthTexturePtr, "Refractive Depth");
+        TextureManager::SetTextureLabel(m_RefractiveDepthTexturePtr, "Light Refractive Depth");
 
         // -----------------------------------------------------------------------------
 

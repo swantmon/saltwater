@@ -1,48 +1,67 @@
-#ifndef __INCLUDE_FS_CAUSTIC_EMISSION_GLSL__
-#define __INCLUDE_FS_CAUSTIC_EMISSION_GLSL__
 
-// -----------------------------------------------------------------------------
-// Original approach and comments:
-// "Interactive image-space techniques for approximating caustics"
-// Chris Wyman, Scott Davis (2006)
-// -----------------------------------------------------------------------------
+#ifndef __INCLUDE_FS_APPLY_GLSL__
+#define __INCLUDE_FS_APPLY_GLSL__
 
-// -----------------------------------------------------------------------------
-// Defines
-// -----------------------------------------------------------------------------
-#ifndef CAUSTIC_MAP_RESOLUTION 
-    #define CAUSTIC_MAP_RESOLUTION 1024.0f
-#endif
-
-#ifndef DISCARD_TIR 
-    #define DISCARD_TIR true
-#endif
+#include "common.glsl"
+#include "common_light.glsl"
+#include "common_global.glsl"
+#include "common_gbuffer.glsl"
+#include "common_material.glsl"
 
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
 layout(std140, binding = 3) uniform UB3
 {
-    mat4 ps_LightProjectionMatrix;
-    mat4 ps_LightViewMatrix;
-    vec4 ps_LightColor;
-    uint ps_ExposureHistoryIndex;
+    vec4  ps_TilingOffset;
+    vec4  ps_Color;
+    float ps_Roughness;
+    float ps_Reflectance;
+    float ps_MetalMask;
 };
 
 layout(std140, binding = 4) uniform UB4
+{
+    vec4 ps_CameraPosition;
+    uint ps_ExposureHistoryIndex;
+};
+
+layout(std140, binding = 5) uniform UB5
 {
     vec4 ps_RefractionIndices;
     vec4 ps_DepthLinearization;
 };
 
-layout(binding = 0) uniform sampler2D ps_RefractiveNormal;
-layout(binding = 1) uniform sampler2D ps_RefractiveDepth;
-layout(binding = 2) uniform sampler2D ps_BackgroundDepth;
+layout(std430, binding = 0) readonly buffer BB0
+{
+    float ps_ExposureHistory[8];
+};
+
+layout(std430, binding = 1) readonly buffer BB1
+{
+    vec4 ps_LightPosition;
+    vec4 ps_LightSettings;
+};
+
+layout(binding =  0) uniform sampler2D ps_DiffuseTexture;
+layout(binding =  1) uniform sampler2D ps_NormalTexture;
+layout(binding =  2) uniform sampler2D ps_RougnessTexture;
+layout(binding =  3) uniform sampler2D ps_Metaltexture;
+layout(binding =  4) uniform sampler2D ps_AOTexture;
+// binding 5 is reserved for bump texture
+layout(binding =  6) uniform sampler2D ps_AlphaTexture;
+
+layout(binding =  7) uniform sampler2D ps_RefractiveNormal;
+layout(binding =  8) uniform sampler2D ps_RefractiveDepth;
+
+layout(binding =  9) uniform sampler2D   ps_BRDF;
+layout(binding = 10) uniform samplerCube ps_SpecularCubemap;
+layout(binding = 11) uniform samplerCube ps_DiffuseCubemap;
 
 // -----------------------------------------------------------------------------
 // Input to fragment from previous stage
 // -----------------------------------------------------------------------------
-layout(location = 0) in vec3 in_WSPosition;
+layout(location = 0) in vec3 in_Position;
 layout(location = 1) in vec3 in_Normal;
 layout(location = 2) in vec2 in_UV;
 layout(location = 3) in mat3 in_WSNormalMatrix;
@@ -50,14 +69,14 @@ layout(location = 3) in mat3 in_WSNormalMatrix;
 // -----------------------------------------------------------------------------
 // Output to fragment
 // -----------------------------------------------------------------------------
-layout(location = 0) out vec4 out_PhotonLocation;
+layout(location = 0) out vec4 out_Output;
 
 // -----------------------------------------------------------------------------
-// Function
+// Main
 // -----------------------------------------------------------------------------
 vec2 GetUVFromVSPosition(in vec4 _VSPosition)
 {
-    vec4 SSPosition = ps_LightProjectionMatrix * _VSPosition;
+    vec4 SSPosition = g_ViewToScreen * _VSPosition;
 
     return 0.5f * (SSPosition.xy / SSPosition.w) + 0.5f;
 }
@@ -78,21 +97,62 @@ vec4 GetRefraction(in vec3 _IncidentRay, in vec3 _VSNormal, in float _Refraction
 // -----------------------------------------------------------------------------
 
 void main(void)
-{
-    vec3 WSNormal = in_Normal;
-    vec3 VSNormal = (ps_LightViewMatrix * vec4(WSNormal, 0.0f)).xyz;
+{    
+    vec2  UV        = in_UV * ps_TilingOffset.xy + ps_TilingOffset.zw;
+    vec3  Color     = ps_Color.xyz;
+    vec3  WSNormal  = in_Normal;
+    float Roughness = ps_Roughness;
+    float MetalMask = ps_MetalMask;
+    float AO        = 1.0f;
+    float Alpha     = ps_Color.w;
+    vec3 Luminance  = vec3(0.0f);
 
-    vec3 SSPosition;
+#ifdef USE_TEX_DIFFUSE
+    Color *= texture(ps_DiffuseTexture, UV).rgb;
+#endif // USE_TEX_DIFFUSE
 
-    SSPosition.xy = gl_FragCoord.xy / vec2(CAUSTIC_MAP_RESOLUTION);
-    SSPosition.z  = gl_FragCoord.z;
+#ifdef USE_TEX_NORMAL
+    WSNormal = in_WSNormalMatrix * (texture(ps_NormalTexture, UV).rgb * 2.0f - 1.0f);
+#endif // USE_TEX_NORMAL
 
-    vec3 WSPosition = in_WSPosition;
-    vec3 VSPosition = (ps_LightViewMatrix * vec4(WSPosition, 1.0f)).xyz;
+#ifdef USE_TEX_ROUGHNESS
+    Roughness *= texture(ps_RougnessTexture, UV).r;
+#endif // USE_TEX_ROUGHNESS
+
+#ifdef USE_TEX_METALLIC
+    MetalMask *= texture(ps_Metaltexture, UV).r;
+#endif // USE_TEX_METALLIC
+
+#ifdef USE_TEX_AO
+    AO *= texture(ps_AOTexture, UV).r;
+#endif // USE_TEX_AO
+
+#ifdef USE_TEX_ALPHA
+    Alpha *= texture(ps_AlphaTexture, UV).r;
+#endif // USE_TEX_ALPHA
+
+    // -----------------------------------------------------------------------------
+    // Surface data
+    // -----------------------------------------------------------------------------
+    SGBuffer GBuffer;
+
+    PackGBuffer(Color, WSNormal, Roughness, vec3(ps_Reflectance), MetalMask, AO, GBuffer);
+
+    SSurfaceData Data;
+
+    UnpackGBuffer(GBuffer.m_Color0, GBuffer.m_Color1, GBuffer.m_Color2, in_Position.xyz, gl_FragCoord.z, Data);
+
+    // -----------------------------------------------------------------------------
+    // Exposure data
+    // -----------------------------------------------------------------------------
+    float AverageExposure = ps_ExposureHistory[ps_ExposureHistoryIndex];
  
     // -----------------------------------------------------------------------------
     // Stuff that we know from the beginning
     // -----------------------------------------------------------------------------
+    vec3 VSNormal   = (g_WorldToView * vec4(WSNormal, 0.0f)).xyz;
+    vec3 VSPosition = (g_WorldToView * vec4(Data.m_WSPosition, 1.0f)).xyz;
+
     vec3 VSNormalSurface1 = normalize(VSNormal);
     vec3 ViewDirection    = normalize(VSPosition);
 
@@ -100,7 +160,7 @@ void main(void)
     // Find the distance to front & back surface, first as normalized [0..1] 
     // values, than unprojected
     // -----------------------------------------------------------------------------
-    vec2 DepthOfBackAndObject = vec2(texture(ps_RefractiveDepth, SSPosition.xy).x, SSPosition.z);
+    vec2 DepthOfBackAndObject = vec2(texture(ps_RefractiveDepth, UV).x, Data.m_VSDepth);
 
     DepthOfBackAndObject = ps_DepthLinearization.x / (DepthOfBackAndObject * ps_DepthLinearization.y - ps_DepthLinearization.z );
 
@@ -118,7 +178,7 @@ void main(void)
 
     vec3 WSNormalSurf2 = texture(ps_RefractiveNormal, GetUVFromVSPosition(VSExitantLocation)).xyz;
 
-    vec3 VSNormalSurface2 = (ps_LightViewMatrix * vec4(WSNormalSurf2, 0.0f)).xyz;
+    vec3 VSNormalSurface2 = (g_WorldToView * vec4(WSNormalSurf2, 0.0f)).xyz;
 
     float NdotN = dot(VSNormalSurface2.xyz, VSNormalSurface2.xyz);
 
@@ -135,45 +195,37 @@ void main(void)
     // -----------------------------------------------------------------------------
     vec4 RefractionSurface2 = GetRefraction(RefractionSurface1, -VSNormalSurface2, ps_RefractionIndices.z, ps_RefractionIndices.w );
 
+    vec4 WSRefraction = g_ViewToWorld * vec4(RefractionSurface2.xyz, 0.0f);
+
     // -----------------------------------------------------------------------------
-    // If we have an total internal reflection, we discard the pixel
+    // Light data
     // -----------------------------------------------------------------------------
-    if (RefractionSurface2.w < 0.0f && DISCARD_TIR) discard;
+    float NumberOfMiplevels = ps_LightSettings.x;
+
+    // -----------------------------------------------------------------------------
+    // Compute lighting for sphere lights
+    // -----------------------------------------------------------------------------
+    vec3  WSViewDirection = normalize(Data.m_WSPosition - ps_CameraPosition.xyz);
+    float NdotV           = clamp( dot( Data.m_WSNormal, -WSViewDirection ), 0.0, 1.0f);
+
+    // -----------------------------------------------------------------------------
+    // Rebuild the function
+    // -----------------------------------------------------------------------------
+    ivec2 DFGSize = textureSize(ps_BRDF, 0);
+
+    float ClampNdotV = max(NdotV, 0.5f / float(DFGSize.x));
     
     // -----------------------------------------------------------------------------
-    // Scale the vector so that it's got a unit-length z-component
+    // Get data
     // -----------------------------------------------------------------------------
-    vec4 ScaledRefractionSurface2 = vec4(RefractionSurface2.xyz, 0.0f) / -RefractionSurface2.z;
-
-    // -----------------------------------------------------------------------------
-    // Compute the texture locations of ctrPlusT2 and refractToNear.
-    // -----------------------------------------------------------------------------
-    float MinimalDistance = 1000.0f;
-    float DeltaDistance   = 1000.0f;
-
-    for (float Index = 0.0f; Index < 2.0f; Index += 1.0f)
-    {
-        float BackgroundDepth      = texture(ps_BackgroundDepth, GetUVFromVSPosition(VSExitantLocation + ScaledRefractionSurface2 * Index)).x;
-        float DistanceToBackground = -(ps_DepthLinearization.x / (BackgroundDepth * ps_DepthLinearization.y - ps_DepthLinearization.w)) + VSExitantLocation.z;
-
-        if (abs(DistanceToBackground - Index) < DeltaDistance )
-        {
-            DeltaDistance   = abs(DistanceToBackground - Index);
-            MinimalDistance = Index;
-        }
-    }
+    vec3 PreDFGF = textureLod(ps_BRDF, vec2(NdotV, Data.m_Roughness), 0.0f).rgb;
     
-    float DistanceToBackground = MinimalDistance;
+    vec3 DiffuseIBL  = EvaluateDiffuseIBL(ps_DiffuseCubemap, Data, WSViewDirection, PreDFGF.z, NdotV);
+    vec3 SpecularIBL = EvaluateSpecularIBL(ps_SpecularCubemap, Data, normalize(WSRefraction.xyz), PreDFGF.xy, ClampNdotV, NumberOfMiplevels);
 
-    for (float Index = 0.0f; Index < 10.0f; Index += 1.0f)
-    {
-        float BackgroundDepth = texture(ps_BackgroundDepth, GetUVFromVSPosition(VSExitantLocation + DistanceToBackground * ScaledRefractionSurface2)).x;
+    vec3 Illuminance = DiffuseIBL.rgb + SpecularIBL.rgb;
 
-        DistanceToBackground = -(ps_DepthLinearization.x / (BackgroundDepth * ps_DepthLinearization.y - ps_DepthLinearization.w)) + VSExitantLocation.z;
-    }
-
-    out_PhotonLocation.xyz = VSExitantLocation.xyz + DistanceToBackground * ScaledRefractionSurface2.xyz;
-    out_PhotonLocation.w   = RefractionSurface2.w;
+    out_Output = vec4(Illuminance, 1.0f);
 }
 
-#endif // __INCLUDE_FS_CAUSTIC_EMISSION_GLSL__
+#endif // __INCLUDE_FS_APPLY_GLSL__

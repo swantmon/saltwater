@@ -76,6 +76,8 @@ namespace
         void OnNewMap();
         void OnUnloadMap();
 
+        void OnResize(unsigned int _Width, unsigned int _Height);
+
         void Update();
         void Render();
         void RenderForward();
@@ -110,10 +112,22 @@ namespace
             unsigned int m_Padding2;
         };
 
+        struct SProbeLightProperties
+        {
+            glm::vec4 m_LightPosition;
+            glm::vec4 m_LightSettings;
+        };
+
         struct SForwardPassProperties
         {
             glm::vec4    m_CameraPosition;
             unsigned int m_ExposureHistoryIndex;
+        };
+
+        struct SCausticSettingsBuffer
+        {
+            glm::vec4 m_RefractionIndices;
+            glm::vec4 m_DepthLinearization;
         };
 
         struct SRenderJob
@@ -139,6 +153,16 @@ namespace
 
     private:
 
+        CTexturePtr       m_RefractiveNormalTexturePtr;
+        CTexturePtr       m_RefractiveDepthTexturePtr;
+        CShaderPtr        m_FullscreenVSPtr;
+        CShaderPtr        m_NormalPSPtr;
+        CShaderPtr        m_NormalTexPSPtr;
+        CShaderPtr        m_RefractionApplyPSPtr;
+        CTargetSetPtr     m_RefractionTargetSetPtr;
+        CBufferPtr        m_CausticSettingsBufferPtr;
+        CBufferPtr        m_ProbeLightBufferPtr;
+
         CBufferPtr        m_ModelBufferPtr;
         CBufferPtr        m_SurfaceMaterialBufferPtr;
         CBufferPtr        m_HitProxyPassPSBufferPtr;
@@ -153,6 +177,9 @@ namespace
         SLightJob         m_ForwardLightTextures;
 
     private:
+
+        void RenderRefraction();
+        void RenderTransparent();
 
         void BuildRenderJobs();
         void UpdateLightProperties();
@@ -180,6 +207,11 @@ namespace
         m_DeferredRenderJobs.reserve(256);
         m_ForwardRenderJobs.reserve(32);
         m_RefractionRenderJobs.reserve(4);
+
+        // -----------------------------------------------------------------------------
+        // Register for resizing events
+        // -----------------------------------------------------------------------------
+        Main::RegisterResizeHandler(GFX_BIND_RESIZE_METHOD(&CGfxMeshRenderer::OnResize));
     }
 
     // -----------------------------------------------------------------------------
@@ -200,6 +232,16 @@ namespace
 
     void CGfxMeshRenderer::OnExit()
     {
+        m_RefractiveNormalTexturePtr = 0;
+        m_RefractiveDepthTexturePtr = 0;
+        m_FullscreenVSPtr = 0;
+        m_NormalPSPtr = 0;
+        m_NormalTexPSPtr = 0;
+        m_RefractionApplyPSPtr = 0;
+        m_RefractionTargetSetPtr = 0;
+        m_CausticSettingsBufferPtr = 0;
+        m_ProbeLightBufferPtr = 0;
+
         m_ModelBufferPtr           = 0;
         m_SurfaceMaterialBufferPtr = 0;
         m_HitProxyPassPSBufferPtr  = 0;
@@ -243,6 +285,11 @@ namespace
 
     void CGfxMeshRenderer::OnSetupShader()
     {
+        m_FullscreenVSPtr = ShaderManager::CompileVS("system/vs_fullscreen.glsl", "main");
+        m_NormalPSPtr = ShaderManager::CompilePS("refraction/fs_normal.glsl", "main");
+        m_NormalTexPSPtr = ShaderManager::CompilePS("refraction/fs_normal.glsl", "main", "#define USE_TEX_NORMAL\n");
+        m_RefractionApplyPSPtr = ShaderManager::CompilePS("refraction/fs_apply.glsl", "main");
+
         m_HitProxyShaderPtr = ShaderManager::CompilePS("picking/fs_hitproxy.glsl", "main");
     }
 
@@ -295,7 +342,48 @@ namespace
 
     void CGfxMeshRenderer::OnSetupTextures()
     {
+        STextureDescriptor TextureDescriptor;
 
+        TextureDescriptor.m_NumberOfPixelsU  = Main::GetActiveWindowSize()[0];
+        TextureDescriptor.m_NumberOfPixelsV  = Main::GetActiveWindowSize()[1];
+        TextureDescriptor.m_NumberOfPixelsW  = 1;
+        TextureDescriptor.m_NumberOfMipMaps  = 1;
+        TextureDescriptor.m_NumberOfTextures = 1;
+        TextureDescriptor.m_Binding          = CTexture::ShaderResource | CTexture::RenderTarget;
+        TextureDescriptor.m_Access           = CTexture::CPUWrite;
+        TextureDescriptor.m_Format           = CTexture::R32G32B32_FLOAT;
+        TextureDescriptor.m_Usage            = CTexture::GPUReadWrite;
+        TextureDescriptor.m_Semantic         = CTexture::Diffuse;
+        TextureDescriptor.m_pFileName        = 0;
+        TextureDescriptor.m_pPixels          = 0;
+        
+        m_RefractiveNormalTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
+
+        TextureManager::SetTextureLabel(m_RefractiveNormalTexturePtr, "Camera Refractive Normal");
+
+        // -----------------------------------------------------------------------------
+
+        TextureDescriptor.m_NumberOfPixelsU  = Main::GetActiveWindowSize()[0];
+        TextureDescriptor.m_NumberOfPixelsV  = Main::GetActiveWindowSize()[1];
+        TextureDescriptor.m_NumberOfPixelsW  = 1;
+        TextureDescriptor.m_NumberOfMipMaps  = 1;
+        TextureDescriptor.m_NumberOfTextures = 1;
+        TextureDescriptor.m_Binding          = CTexture::ShaderResource | CTexture::DepthStencilTarget;
+        TextureDescriptor.m_Access           = CTexture::CPUWrite;
+        TextureDescriptor.m_Format           = CTexture::R32_FLOAT;
+        TextureDescriptor.m_Usage            = CTexture::GPUReadWrite;
+        TextureDescriptor.m_Semantic         = CTexture::Diffuse;
+        TextureDescriptor.m_pFileName        = 0;
+        TextureDescriptor.m_pPixels          = 0;
+        
+        m_RefractiveDepthTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
+
+        TextureManager::SetTextureLabel(m_RefractiveDepthTexturePtr, "Camera Refractive Depth");
+
+        // -----------------------------------------------------------------------------
+        // Target Set
+        // -----------------------------------------------------------------------------
+        m_RefractionTargetSetPtr = TargetSetManager::CreateTargetSet(m_RefractiveNormalTexturePtr, m_RefractiveDepthTexturePtr);
     }
 
     // -----------------------------------------------------------------------------
@@ -371,6 +459,34 @@ namespace
         m_ForwardPassBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
         BufferManager::SetBufferLabel(m_ForwardPassBufferPtr, "Forward Pass Properties");
+
+        // -----------------------------------------------------------------------------
+
+        ConstanteBufferDesc.m_Stride        = 0;
+        ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
+        ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
+        ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SCausticSettingsBuffer);
+        ConstanteBufferDesc.m_pBytes        = 0;
+        ConstanteBufferDesc.m_pClassKey     = 0;
+
+        m_CausticSettingsBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
+
+        BufferManager::SetBufferLabel(m_CausticSettingsBufferPtr, "Caustic Settings Properties");
+
+        // -----------------------------------------------------------------------------
+
+        ConstanteBufferDesc.m_Stride        = 0;
+        ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
+        ConstanteBufferDesc.m_Binding       = CBuffer::ResourceBuffer;
+        ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SProbeLightProperties);
+        ConstanteBufferDesc.m_pBytes        = 0;
+        ConstanteBufferDesc.m_pClassKey     = 0;
+
+        m_ProbeLightBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
+
+        BufferManager::SetBufferLabel(m_ProbeLightBufferPtr, "Probe Light Properties");
     }
 
     // -----------------------------------------------------------------------------
@@ -412,6 +528,13 @@ namespace
     void CGfxMeshRenderer::OnUnloadMap()
     {
 
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxMeshRenderer::OnResize(unsigned int _Width, unsigned int _Height)
+    {
+        OnSetupTextures();
     }
 
     // -----------------------------------------------------------------------------
@@ -550,9 +673,262 @@ namespace
 
     void CGfxMeshRenderer::RenderForward()
     {
+        RenderRefraction();
+
+        RenderTransparent();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxMeshRenderer::RenderRefraction()
+    {
+        if (m_RefractionRenderJobs.size() == 0) return;
+
+        Performance::BeginEvent("Refractive Meshes");
+
+        Performance::BeginEvent("Background");
+
+        TargetSetManager::ClearTargetSet(m_RefractionTargetSetPtr, glm::vec4(0.0f), 0.0f);
+
+        ContextManager::SetTargetSet(m_RefractionTargetSetPtr);
+
+        ContextManager::SetViewPortSet(ViewManager::GetViewPortSet());
+
+        ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::EState::GreatEqualDepth));
+
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::FrontCull));
+
+        ContextManager::SetBlendState(StateManager::GetBlendState(CBlendState::Default));
+
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+
+        ContextManager::SetConstantBuffer(1, m_ModelBufferPtr);
+
+        ContextManager::SetConstantBuffer(2, m_SurfaceMaterialBufferPtr);
+
+        ContextManager::SetTopology(STopology::TriangleList);
+
+        for (auto RenderJob : m_RefractionRenderJobs)
+        {
+            CSurfacePtr SurfacePtr = RenderJob.m_SurfacePtr;
+
+            const Gfx::CMaterial* pMaterial = RenderJob.m_SurfaceMaterialPtr;
+
+            // -----------------------------------------------------------------------------
+
+            ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+
+            ContextManager::SetTexture(1, pMaterial->GetTextureSetPS()->GetTexture(1));
+
+            // -----------------------------------------------------------------------------
+
+            if (pMaterial->GetKey().m_HasNormalTex)
+            {
+                ContextManager::SetShaderPS(m_NormalTexPSPtr);
+            }
+            else
+            {
+                ContextManager::SetShaderPS(m_NormalPSPtr);
+            }
+
+            // -----------------------------------------------------------------------------
+            // Upload data to buffer
+            // -----------------------------------------------------------------------------
+            SPerDrawCallConstantBufferVS ModelBuffer;
+
+            ModelBuffer.m_ModelMatrix = RenderJob.m_ModelMatrix;
+
+            BufferManager::UploadBufferData(m_ModelBufferPtr, &ModelBuffer);
+
+            BufferManager::UploadBufferData(m_SurfaceMaterialBufferPtr, &pMaterial->GetMaterialAttributes());
+
+            // -----------------------------------------------------------------------------
+
+            ContextManager::SetShaderVS(SurfacePtr->GetShaderVS());
+
+            ContextManager::SetVertexBuffer(SurfacePtr->GetVertexBuffer());
+
+            ContextManager::SetIndexBuffer(SurfacePtr->GetIndexBuffer(), 0);
+
+            ContextManager::SetInputLayout(SurfacePtr->GetMVPShaderVS()->GetInputLayout());
+
+            ContextManager::DrawIndexed(SurfacePtr->GetNumberOfIndices(), 0, 0);
+        }
+
+        Performance::EndEvent();
+
+        Performance::BeginEvent("Apply");
+
+        ContextManager::SetTargetSet(TargetSetManager::GetLightAccumulationTargetSet());
+
+        ContextManager::SetViewPortSet(ViewManager::GetViewPortSet());
+
+        ContextManager::SetBlendState(StateManager::GetBlendState(CBlendState::AlphaBlend));
+
+        ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::Default));
+
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
+
+        ContextManager::SetTopology(STopology::TriangleList);
+
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+        ContextManager::SetConstantBuffer(1, m_ModelBufferPtr);
+        ContextManager::SetConstantBuffer(3, m_SurfaceMaterialBufferPtr);
+        ContextManager::SetConstantBuffer(4, m_ForwardPassBufferPtr);
+        ContextManager::SetConstantBuffer(5, m_CausticSettingsBufferPtr);
+
+        ContextManager::SetResourceBuffer(0, HistogramRenderer::GetExposureHistoryBuffer());
+        ContextManager::SetResourceBuffer(1, m_ProbeLightBufferPtr);
+
+        // -----------------------------------------------------------------------------
+        // Bind shadow and reflection textures
+        // -----------------------------------------------------------------------------
+        ContextManager::SetSampler(7, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+
+        ContextManager::SetTexture(7, m_RefractiveNormalTexturePtr);
+
+        ContextManager::SetSampler(8, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+
+        ContextManager::SetTexture(8, m_RefractiveDepthTexturePtr);
+
+        ContextManager::SetSampler(9, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+
+        ContextManager::SetTexture(9, ReflectionRenderer::GetBRDF());
+
+        if (m_ForwardLightTextures.m_SpecularTexturePtr != 0)
+        {
+            ContextManager::SetSampler(10, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+
+            ContextManager::SetTexture(10, m_ForwardLightTextures.m_SpecularTexturePtr);
+        }
+
+        if (m_ForwardLightTextures.m_DiffuseTexturePtr != 0)
+        {
+            ContextManager::SetSampler(11, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+
+            ContextManager::SetTexture(11, m_ForwardLightTextures.m_DiffuseTexturePtr);
+        }
+
+        // -----------------------------------------------------------------------------
+        // Refraction pass properties
+        // -----------------------------------------------------------------------------
+        SForwardPassProperties ForwardPassProperties;
+
+        ForwardPassProperties.m_CameraPosition = glm::vec4(ViewManager::GetMainCamera()->GetView()->GetPosition(), 1.0f);
+        ForwardPassProperties.m_ExposureHistoryIndex = HistogramRenderer::GetCurrentExposureHistoryIndex();
+
+        BufferManager::UploadBufferData(m_ForwardPassBufferPtr, &ForwardPassProperties);
+
+        // -----------------------------------------------------------------------------
+        // Actors
+        // -----------------------------------------------------------------------------
+        for (auto RenderJob : m_RefractionRenderJobs)
+        {
+            const CMaterial* pMaterial = RenderJob.m_SurfaceMaterialPtr;
+
+            // -----------------------------------------------------------------------------
+            // Upload data to buffer
+            // -----------------------------------------------------------------------------
+            SPerDrawCallConstantBufferVS ModelBuffer;
+
+            ModelBuffer.m_ModelMatrix = RenderJob.m_ModelMatrix;
+
+            BufferManager::UploadBufferData(m_ModelBufferPtr, &ModelBuffer);
+
+            BufferManager::UploadBufferData(m_SurfaceMaterialBufferPtr, &pMaterial->GetMaterialAttributes());
+
+            float Near              = ViewManager::GetMainCamera()->GetNear();
+            float Far               = ViewManager::GetMainCamera()->GetFar();
+            float IndexOfRefraction = pMaterial->GetMaterialRefractionAttributes().m_IndexOfRefraction;
+
+            SCausticSettingsBuffer CausticSettingsBuffer;
+
+            CausticSettingsBuffer.m_RefractionIndices  = glm::vec4(1.0f / IndexOfRefraction, 1.0f / (IndexOfRefraction * IndexOfRefraction), IndexOfRefraction, IndexOfRefraction * IndexOfRefraction);
+            CausticSettingsBuffer.m_DepthLinearization = glm::vec4(Near * Far, Far - Near, Far + Near, Far);
+
+            BufferManager::UploadBufferData(m_CausticSettingsBufferPtr, &CausticSettingsBuffer);
+
+            // -----------------------------------------------------------------------------
+            // Surface
+            // -----------------------------------------------------------------------------
+            CSurfacePtr SurfacePtr = RenderJob.m_SurfacePtr;
+
+            // -----------------------------------------------------------------------------
+            // Set shader
+            // -----------------------------------------------------------------------------
+            ContextManager::SetShaderVS(SurfacePtr->GetShaderVS());
+
+            ContextManager::SetShaderPS(m_RefractionApplyPSPtr);
+
+            // -----------------------------------------------------------------------------
+            // Set textures
+            // -----------------------------------------------------------------------------
+            for (unsigned int IndexOfTexture = 0; IndexOfTexture < pMaterial->GetTextureSetPS()->GetNumberOfTextures(); ++IndexOfTexture)
+            {
+                ContextManager::SetSampler(IndexOfTexture, pMaterial->GetSamplerSetPS()->GetSampler(IndexOfTexture));
+
+                ContextManager::SetTexture(IndexOfTexture, pMaterial->GetTextureSetPS()->GetTexture(IndexOfTexture));
+            }
+
+            // -----------------------------------------------------------------------------
+            // Render
+            // -----------------------------------------------------------------------------
+            ContextManager::SetVertexBuffer(SurfacePtr->GetVertexBuffer());
+
+            ContextManager::SetIndexBuffer(SurfacePtr->GetIndexBuffer(), 0);
+
+            ContextManager::SetInputLayout(SurfacePtr->GetMVPShaderVS()->GetInputLayout());
+
+            ContextManager::DrawIndexed(SurfacePtr->GetNumberOfIndices(), 0, 0);
+        }
+
+        Performance::EndEvent();
+
+        ContextManager::ResetSampler(0);
+
+        ContextManager::ResetTexture(0);
+
+        ContextManager::ResetInputLayout();
+
+        ContextManager::ResetIndexBuffer();
+
+        ContextManager::ResetVertexBuffer();
+
+        ContextManager::ResetConstantBuffer(0);
+        ContextManager::ResetConstantBuffer(1);
+        ContextManager::ResetConstantBuffer(2);
+        ContextManager::ResetConstantBuffer(3);
+
+        ContextManager::ResetShaderVS();
+
+        ContextManager::ResetShaderDS();
+
+        ContextManager::ResetShaderHS();
+
+        ContextManager::ResetShaderGS();
+
+        ContextManager::ResetShaderPS();
+
+        ContextManager::ResetTopology();
+
+        ContextManager::ResetRasterizerState();
+
+        ContextManager::ResetDepthStencilState();
+
+        ContextManager::ResetViewPortSet();
+
+        ContextManager::ResetTargetSet();
+
+        Performance::EndEvent();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxMeshRenderer::RenderTransparent()
+    {
         if (m_ForwardRenderJobs.size() == 0) return;
 
-        Performance::BeginEvent("Meshes");
+        Performance::BeginEvent("Transparent Meshes");
 
         Debug::Push(131222);
 
@@ -876,18 +1252,9 @@ namespace
                 NewRenderJob.m_SurfaceMaterialPtr = pMaterial;
                 NewRenderJob.m_ModelMatrix        = rCurrentEntity.GetTransformationFacet()->GetWorldMatrix();
 
-                if (pMaterial->HasRefraction())
-                {
-                    m_RefractionRenderJobs.push_back(NewRenderJob);
-                }
-                else if(pMaterial->HasAlpha())
-                {
-                    m_ForwardRenderJobs.push_back(NewRenderJob);
-                }
-                else
-                {
-                    m_DeferredRenderJobs.push_back(NewRenderJob);
-                }
+                if (pMaterial->HasRefraction()) m_RefractionRenderJobs.push_back(NewRenderJob);
+                else if(pMaterial->HasAlpha())  m_ForwardRenderJobs.push_back(NewRenderJob);
+                else                            m_DeferredRenderJobs.push_back(NewRenderJob);
             }
         }
 
@@ -897,12 +1264,15 @@ namespace
         std::sort(m_DeferredRenderJobs.begin(), m_DeferredRenderJobs.end(), SurfaceSortObject);
 
         std::sort(m_ForwardRenderJobs.begin(), m_ForwardRenderJobs.end(), DistanceSortObject);
+
+        std::sort(m_RefractionRenderJobs.begin(), m_RefractionRenderJobs.end(), DistanceSortObject);
     }
 
     // -----------------------------------------------------------------------------
 
     void CGfxMeshRenderer::UpdateLightProperties()
     {
+        SProbeLightProperties ProbeLightProperties;
         SLightProperties LightProperties[s_MaxNumberOfLights];
         unsigned int     IndexOfLight;
 
@@ -1032,10 +1402,15 @@ namespace
             m_ForwardLightTextures.m_SpecularTexturePtr = pGfxComponent->GetSpecularPtr();
             m_ForwardLightTextures.m_DiffuseTexturePtr  = pGfxComponent->GetDiffusePtr();
 
+            ProbeLightProperties.m_LightPosition = glm::vec4(pDtComponent->GetHostEntity()->GetWorldPosition(), 1.0f);
+            ProbeLightProperties.m_LightSettings = glm::vec4(static_cast<float>(pGfxComponent->GetSpecularPtr()->GetNumberOfMipLevels() - 1), 0.0f, 0.0f, 0.0f);
+
             ++IndexOfLight;
         }
 
         BufferManager::UploadBufferData(m_LightPropertiesBufferPtr, &LightProperties);
+
+        BufferManager::UploadBufferData(m_ProbeLightBufferPtr, &ProbeLightProperties);
 
 
         // TODO by tschwandt (2018/06/14)
