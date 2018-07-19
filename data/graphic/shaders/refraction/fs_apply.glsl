@@ -305,6 +305,7 @@ void main(void)
             // Compute lighting for sphere lights
             // -----------------------------------------------------------------------------
             vec3  WSViewDirection = normalize(Data.m_WSPosition - ps_CameraPosition.xyz);
+            vec3  WSReflectVector = normalize(reflect(WSViewDirection, Data.m_WSNormal));
             float NdotV           = clamp( dot( Data.m_WSNormal, -WSViewDirection ), 0.0, 1.0f);
 
             // -----------------------------------------------------------------------------
@@ -319,14 +320,15 @@ void main(void)
             // -----------------------------------------------------------------------------
             vec3 PreDFGF = textureLod(ps_BRDF, vec2(NdotV, Data.m_Roughness), 0.0f).rgb;
             
-            vec3 DiffuseIBL  = EvaluateDiffuseIBL(ps_DiffuseCubemap, Data, WSViewDirection, PreDFGF.z, NdotV);
-            vec3 SpecularIBL = EvaluateSpecularIBL(ps_SpecularCubemap, Data, normalize(WSRefraction.xyz), PreDFGF.xy, ClampNdotV, NumberOfMiplevels);
+            vec3 DiffuseIBL        = EvaluateDiffuseIBL(ps_DiffuseCubemap, Data, WSViewDirection, PreDFGF.z, NdotV);
+            vec3 SpecularIBLRefract = EvaluateSpecularIBL(ps_SpecularCubemap, Data, normalize(WSRefraction.xyz), PreDFGF.xy, ClampNdotV, NumberOfMiplevels);
+            vec3 SpecularIBLReflect = EvaluateSpecularIBL(ps_SpecularCubemap, Data, WSReflectVector, PreDFGF.xy, ClampNdotV, NumberOfMiplevels);
             
             // -------------------------------------------------------------------------------------
             // Combination of lighting
             // Multiplication with average exposure is not necessary because it is already included
             // -------------------------------------------------------------------------------------
-            Luminance += (DiffuseIBL.rgb + SpecularIBL.rgb);
+            Luminance += (DiffuseIBL.rgb + mix(SpecularIBLRefract.rgb, SpecularIBLReflect.rgb, NdotV));
         }
     }
 
