@@ -330,7 +330,7 @@ void main(void)
         }
     }
 
-    out_Output = vec4(Luminance, 1.0f);
+    out_Output = vec4(Luminance, Alpha);
 }
 
 #endif // __INCLUDE_FS_APPLY_GLSL__
