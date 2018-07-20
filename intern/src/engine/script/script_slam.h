@@ -210,7 +210,7 @@ namespace Scpt
             }
             else if (MessageType == TRANSFORM)
             {
-                m_PoseMatrix = *reinterpret_cast<glm::mat4*>(Decompressed.data() + sizeof(int32_t));
+                m_PoseMatrix = *reinterpret_cast<glm::mat4*>(Decompressed.data() + sizeof(int32_t)) * glm::eulerAngleX(3.14f);
             }
             else if (MessageType == DEPTHFRAME)
             {
