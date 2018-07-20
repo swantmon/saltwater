@@ -506,7 +506,7 @@ namespace MR
             << "#define VOXELS_PER_LEVEL2GRID "  << m_ReconstructionSettings.m_VoxelsPerGrid[2]     << " \n"
             << "#define RAYCAST_NEAR "           << m_DepthBounds.x                                 << " \n"
             << "#define RAYCAST_FAR "            << m_DepthBounds.y                                 << " \n"
-            << "#define VOLUME_DEPTH_THRESHLD "  << m_VolumeDepthThreshold                          << " \n"
+            << "#define VOLUME_DEPTH_THRESHOLD " << m_VolumeDepthThreshold                          << " \n"
             << "#define MIN_TREE_WEIGHT "        << m_MinWeight                                     << " \n";
         
         if (m_ReconstructionSettings.m_CaptureColor)
