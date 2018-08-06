@@ -34,7 +34,7 @@ void main()
     const ivec2 DepthPos = ivec2(ImageSize.x - ImagePos.x, ImagePos.y);
     const float Depth = imageLoad(cs_DepthBuffer, DepthPos).x / 1000.0f;
     
-    vec4 Vertex = vec4(0.0f);   
+    vec4 Vertex = vec4(0.0f);
     
     bool IsValid = true;
 
