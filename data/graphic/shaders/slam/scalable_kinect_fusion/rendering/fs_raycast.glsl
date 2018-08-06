@@ -28,20 +28,20 @@ layout(location = 2) out vec4 out_GBuffer2;
  
 void main()
 {
-    mat3 Rot = mat3(
+    mat3 SaltwaterToReconstruction = mat3(
         1.0f, 0.0f,  0.0f,
         0.0f, 0.0f, -1.0f,
         0.0f, 1.0f,  0.0f
     );
  
-    mat3 Rot2 = mat3(
+    mat3 ReconstructionToSaltwater = mat3(
         1.0f, 0.0f, 0.0f,
         0.0f, 0.0f, 1.0f,
         0.0f, -1.0f, 0.0f
     );
  
-    vec3 Cameraposition = Rot * g_ViewPosition.xyz;
-    vec3 RayDirection = Rot * normalize(in_WSRayDirection);
+    vec3 Cameraposition = SaltwaterToReconstruction * g_ViewPosition.xyz;
+    vec3 RayDirection = SaltwaterToReconstruction * normalize(in_WSRayDirection);
  
     RayDirection.x = RayDirection.x == 0.0f ? 1e-15f : RayDirection.x;
     RayDirection.y = RayDirection.y == 0.0f ? 1e-15f : RayDirection.y;
@@ -62,11 +62,9 @@ void main()
  
     if (WSPosition.x != 0.0f && (Color.r != 0.0f || Color.g != 0.0f || Color.b != 0.0f))
     {
-        vec3 WSNormal = GetNormal(WSPosition);
-        
-        WSNormal.x = -WSNormal.x;
-        WSNormal.z = -WSNormal.z;
-        
+        vec3 WSNormal = mat3(ReconstructionToSaltwater) * GetNormal(WSPosition);
+        WSNormal *= -1.0f;
+
         SGBuffer GBuffer;
  
         PackGBuffer(Color, WSNormal, 0.5f, vec3(0.5f), 0.0f, 1.0f, GBuffer);
@@ -75,7 +73,7 @@ void main()
         out_GBuffer1 = GBuffer.m_Color1;
         out_GBuffer2 = GBuffer.m_Color2;
  
-        vec4 CSPosition = g_WorldToScreen * vec4(Rot2 * WSPosition, 1.0f);
+        vec4 CSPosition = g_WorldToScreen * vec4(ReconstructionToSaltwater * WSPosition, 1.0f);
         gl_FragDepth = (CSPosition.z / CSPosition.w) * 0.5f + 0.5f;
  
         return;
