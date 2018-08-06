@@ -918,14 +918,14 @@ namespace
 
         glm::vec3 Vertices[8] =
         {
-            glm::vec3(glm::eulerAngleX(glm::radians(90.0f)) * glm::vec4(Min[0], Min[1], Min[2], 1.0f)),
-            glm::vec3(glm::eulerAngleX(glm::radians(90.0f)) * glm::vec4(Max[0], Min[1], Min[2], 1.0f)),
-            glm::vec3(glm::eulerAngleX(glm::radians(90.0f)) * glm::vec4(Max[0], Max[1], Min[2], 1.0f)),
-            glm::vec3(glm::eulerAngleX(glm::radians(90.0f)) * glm::vec4(Min[0], Max[1], Min[2], 1.0f)),
-            glm::vec3(glm::eulerAngleX(glm::radians(90.0f)) * glm::vec4(Min[0], Min[1], Max[2], 1.0f)),
-            glm::vec3(glm::eulerAngleX(glm::radians(90.0f)) * glm::vec4(Max[0], Min[1], Max[2], 1.0f)),
-            glm::vec3(glm::eulerAngleX(glm::radians(90.0f)) * glm::vec4(Max[0], Max[1], Max[2], 1.0f)),
-            glm::vec3(glm::eulerAngleX(glm::radians(90.0f)) * glm::vec4(Min[0], Max[1], Max[2], 1.0f))
+            glm::vec3(glm::eulerAngleX(glm::half_pi<float>()) * glm::vec4(Min[0], Min[1], Min[2], 1.0f)),
+            glm::vec3(glm::eulerAngleX(glm::half_pi<float>()) * glm::vec4(Max[0], Min[1], Min[2], 1.0f)),
+            glm::vec3(glm::eulerAngleX(glm::half_pi<float>()) * glm::vec4(Max[0], Max[1], Min[2], 1.0f)),
+            glm::vec3(glm::eulerAngleX(glm::half_pi<float>()) * glm::vec4(Min[0], Max[1], Min[2], 1.0f)),
+            glm::vec3(glm::eulerAngleX(glm::half_pi<float>()) * glm::vec4(Min[0], Min[1], Max[2], 1.0f)),
+            glm::vec3(glm::eulerAngleX(glm::half_pi<float>()) * glm::vec4(Max[0], Min[1], Max[2], 1.0f)),
+            glm::vec3(glm::eulerAngleX(glm::half_pi<float>()) * glm::vec4(Max[0], Max[1], Max[2], 1.0f)),
+            glm::vec3(glm::eulerAngleX(glm::half_pi<float>()) * glm::vec4(Min[0], Max[1], Max[2], 1.0f))
         };
 
         /*glm::vec3 Vertices[8] =
