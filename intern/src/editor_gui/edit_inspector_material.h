@@ -27,6 +27,8 @@ namespace Edit
 
         void reflectanceValueChanged(int _Value);
 
+        void refractionValueChanged(int _Value);
+
         void pickColorFromDialog();
 
         void RequestInformation(Base::ID _EntityID);

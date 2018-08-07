@@ -473,6 +473,12 @@
     <ClCompile Include="..\..\..\src\engine\network\core_network_socket.cpp">
       <Filter>network</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_caustic_renderer.cpp">
+      <Filter>graphic\engine\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_refraction_renderer.cpp">
+      <Filter>graphic\engine\renderer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\engine\core\core_asset_generator.h">
@@ -873,6 +879,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\engine\network\core_network_common.h">
       <Filter>network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_caustic_renderer.h">
+      <Filter>graphic\engine\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_refraction_renderer.h">
+      <Filter>graphic\engine\renderer</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

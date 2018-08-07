@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>343</width>
+    <width>536</width>
     <height>647</height>
    </rect>
   </property>
@@ -32,46 +32,31 @@
       <item row="8" column="1">
        <widget class="Edit::CTextureValue" name="m_pNormalTextureEdit" native="true"/>
       </item>
-      <item row="13" column="1">
-       <widget class="Edit::CTextureValue" name="m_pRoughnessTextureEdit" native="true"/>
-      </item>
       <item row="16" column="1">
        <widget class="Edit::CTextureValue" name="m_pMetallicTextureEdit" native="true"/>
       </item>
-      <item row="2" column="1">
-       <widget class="Edit::CTextureValue" name="m_pAlbedoTextureEdit" native="true"/>
+      <item row="13" column="1">
+       <widget class="Edit::CTextureValue" name="m_pRoughnessTextureEdit" native="true"/>
       </item>
       <item row="23" column="1">
        <widget class="Edit::CTextureValue" name="m_pAOTextureEdit" native="true"/>
       </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="label_3">
-        <property name="text">
-         <string>Color</string>
-        </property>
-       </widget>
+      <item row="2" column="1">
+       <widget class="Edit::CTextureValue" name="m_pAlbedoTextureEdit" native="true"/>
       </item>
-      <item row="18" column="0">
-       <widget class="QLabel" name="label_10">
-        <property name="styleSheet">
-         <string notr="true">font-weight:bold;</string>
-        </property>
-        <property name="text">
-         <string>Reflectance</string>
-        </property>
-       </widget>
+      <item row="25" column="1">
+       <widget class="Edit::CTextureValue" name="m_pAlphaTextureEdit" native="true"/>
       </item>
-      <item row="23" column="0">
-       <widget class="QLabel" name="label_24">
-        <property name="text">
-         <string>Texture</string>
+      <item row="26" column="0">
+       <widget class="QLabel" name="label_27">
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
         </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="label_2">
         <property name="text">
-         <string>Texture</string>
+         <string>Refraction</string>
         </property>
        </widget>
       </item>
@@ -105,7 +90,31 @@
         </item>
        </layout>
       </item>
-      <item row="27" column="0">
+      <item row="23" column="0">
+       <widget class="QLabel" name="label_24">
+        <property name="text">
+         <string>Texture</string>
+        </property>
+       </widget>
+      </item>
+      <item row="18" column="0">
+       <widget class="QLabel" name="label_10">
+        <property name="styleSheet">
+         <string notr="true">font-weight:bold;</string>
+        </property>
+        <property name="text">
+         <string>Reflectance</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Texture</string>
+        </property>
+       </widget>
+      </item>
+      <item row="29" column="0">
        <widget class="QLabel" name="label_12">
         <property name="styleSheet">
          <string notr="true">font-weight:bold;</string>
@@ -132,7 +141,27 @@
         </property>
        </widget>
       </item>
-      <item row="28" column="1">
+      <item row="3" column="0">
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>Color</string>
+        </property>
+       </widget>
+      </item>
+      <item row="24" column="0">
+       <widget class="QLabel" name="label_26">
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Alpha</string>
+        </property>
+       </widget>
+      </item>
+      <item row="30" column="1">
        <layout class="QHBoxLayout" name="horizontalLayout_4">
         <item>
          <widget class="QLabel" name="label_15">
@@ -164,20 +193,10 @@
         </item>
        </layout>
       </item>
-      <item row="13" column="0">
-       <widget class="QLabel" name="label_7">
+      <item row="11" column="0">
+       <widget class="QLabel" name="label_22">
         <property name="text">
          <string>Texture</string>
-        </property>
-       </widget>
-      </item>
-      <item row="12" column="0">
-       <widget class="QLabel" name="label_6">
-        <property name="styleSheet">
-         <string notr="true">font-weight:bold;</string>
-        </property>
-        <property name="text">
-         <string>Roughness</string>
         </property>
        </widget>
       </item>
@@ -188,194 +207,6 @@
         </property>
         <property name="text">
          <string>Metallic</string>
-        </property>
-       </widget>
-      </item>
-      <item row="29" column="1">
-       <layout class="QHBoxLayout" name="horizontalLayout_5">
-        <item>
-         <widget class="QLabel" name="label_17">
-          <property name="text">
-           <string>X</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLineEdit" name="m_pOffsetXEdit">
-          <property name="text">
-           <string>1</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="label_18">
-          <property name="text">
-           <string>Y</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLineEdit" name="m_pOffsetYEdit">
-          <property name="text">
-           <string>1</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item row="7" column="0">
-       <widget class="QLabel" name="label_4">
-        <property name="styleSheet">
-         <string notr="true">font-weight:bold;</string>
-        </property>
-        <property name="text">
-         <string>Normal</string>
-        </property>
-       </widget>
-      </item>
-      <item row="19" column="0">
-       <widget class="QLabel" name="label_19">
-        <property name="text">
-         <string>Value</string>
-        </property>
-       </widget>
-      </item>
-      <item row="16" column="0">
-       <widget class="QLabel" name="label_11">
-        <property name="text">
-         <string>Texture</string>
-        </property>
-       </widget>
-      </item>
-      <item row="22" column="0">
-       <widget class="QLabel" name="label_23">
-        <property name="styleSheet">
-         <string notr="true">font-weight: bold;</string>
-        </property>
-        <property name="text">
-         <string>AO</string>
-        </property>
-       </widget>
-      </item>
-      <item row="17" column="0">
-       <widget class="QLabel" name="label_20">
-        <property name="text">
-         <string>Value</string>
-        </property>
-       </widget>
-      </item>
-      <item row="14" column="1">
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
-        <item>
-         <widget class="QSlider" name="m_pRoughnessSlider">
-          <property name="maximum">
-           <number>100</number>
-          </property>
-          <property name="value">
-           <number>100</number>
-          </property>
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLineEdit" name="m_pRoughnessEdit">
-          <property name="maximumSize">
-           <size>
-            <width>30</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>1</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item row="8" column="0">
-       <widget class="QLabel" name="label_5">
-        <property name="text">
-         <string>Texture</string>
-        </property>
-       </widget>
-      </item>
-      <item row="29" column="0">
-       <widget class="QLabel" name="label_14">
-        <property name="text">
-         <string>Offset</string>
-        </property>
-       </widget>
-      </item>
-      <item row="17" column="1">
-       <layout class="QHBoxLayout" name="horizontalLayout_6">
-        <item>
-         <widget class="QSlider" name="m_pMetallicSlider">
-          <property name="maximum">
-           <number>100</number>
-          </property>
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLineEdit" name="m_pMetallicEdit">
-          <property name="maximumSize">
-           <size>
-            <width>30</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>0</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item row="11" column="0">
-       <widget class="QLabel" name="label_22">
-        <property name="text">
-         <string>Texture</string>
-        </property>
-       </widget>
-      </item>
-      <item row="28" column="0">
-       <widget class="QLabel" name="label_13">
-        <property name="text">
-         <string>Tiling</string>
-        </property>
-       </widget>
-      </item>
-      <item row="11" column="1">
-       <layout class="QHBoxLayout" name="horizontalLayout_7">
-        <item>
-         <widget class="Edit::CTextureValue" name="m_pBumpTextureEdit" native="true"/>
-        </item>
-        <item>
-         <widget class="QLineEdit" name="m_pBumpEdit">
-          <property name="maximumSize">
-           <size>
-            <width>30</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>0</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item row="9" column="0">
-       <widget class="QLabel" name="label_21">
-        <property name="styleSheet">
-         <string notr="true">font-weight: bold;</string>
-        </property>
-        <property name="text">
-         <string>Bump</string>
         </property>
        </widget>
       </item>
@@ -449,8 +280,203 @@
         </item>
        </layout>
       </item>
-      <item row="25" column="1">
-       <widget class="Edit::CTextureValue" name="m_pAlphaTextureEdit" native="true"/>
+      <item row="14" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QSlider" name="m_pRoughnessSlider">
+          <property name="maximum">
+           <number>100</number>
+          </property>
+          <property name="value">
+           <number>100</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="m_pRoughnessEdit">
+          <property name="maximumSize">
+           <size>
+            <width>30</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>1</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="30" column="0">
+       <widget class="QLabel" name="label_13">
+        <property name="text">
+         <string>Tiling</string>
+        </property>
+       </widget>
+      </item>
+      <item row="17" column="0">
+       <widget class="QLabel" name="label_20">
+        <property name="text">
+         <string>Value</string>
+        </property>
+       </widget>
+      </item>
+      <item row="22" column="0">
+       <widget class="QLabel" name="label_23">
+        <property name="styleSheet">
+         <string notr="true">font-weight: bold;</string>
+        </property>
+        <property name="text">
+         <string>AO</string>
+        </property>
+       </widget>
+      </item>
+      <item row="17" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout_6">
+        <item>
+         <widget class="QSlider" name="m_pMetallicSlider">
+          <property name="maximum">
+           <number>100</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="m_pMetallicEdit">
+          <property name="maximumSize">
+           <size>
+            <width>30</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>0</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="11" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout_7">
+        <item>
+         <widget class="Edit::CTextureValue" name="m_pBumpTextureEdit" native="true"/>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="m_pBumpEdit">
+          <property name="maximumSize">
+           <size>
+            <width>30</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>0</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="31" column="0">
+       <widget class="QLabel" name="label_14">
+        <property name="text">
+         <string>Offset</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="0">
+       <widget class="QLabel" name="label_4">
+        <property name="styleSheet">
+         <string notr="true">font-weight:bold;</string>
+        </property>
+        <property name="text">
+         <string>Normal</string>
+        </property>
+       </widget>
+      </item>
+      <item row="13" column="0">
+       <widget class="QLabel" name="label_7">
+        <property name="text">
+         <string>Texture</string>
+        </property>
+       </widget>
+      </item>
+      <item row="16" column="0">
+       <widget class="QLabel" name="label_11">
+        <property name="text">
+         <string>Texture</string>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="0">
+       <widget class="QLabel" name="label_5">
+        <property name="text">
+         <string>Texture</string>
+        </property>
+       </widget>
+      </item>
+      <item row="12" column="0">
+       <widget class="QLabel" name="label_6">
+        <property name="styleSheet">
+         <string notr="true">font-weight:bold;</string>
+        </property>
+        <property name="text">
+         <string>Roughness</string>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="0">
+       <widget class="QLabel" name="label_21">
+        <property name="styleSheet">
+         <string notr="true">font-weight: bold;</string>
+        </property>
+        <property name="text">
+         <string>Bump</string>
+        </property>
+       </widget>
+      </item>
+      <item row="19" column="0">
+       <widget class="QLabel" name="label_19">
+        <property name="text">
+         <string>Value</string>
+        </property>
+       </widget>
+      </item>
+      <item row="31" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout_5">
+        <item>
+         <widget class="QLabel" name="label_17">
+          <property name="text">
+           <string>X</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="m_pOffsetXEdit">
+          <property name="text">
+           <string>1</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_18">
+          <property name="text">
+           <string>Y</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="m_pOffsetYEdit">
+          <property name="text">
+           <string>1</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item row="25" column="0">
        <widget class="QLabel" name="label_25">
@@ -459,18 +485,42 @@
         </property>
        </widget>
       </item>
-      <item row="24" column="0">
-       <widget class="QLabel" name="label_26">
-        <property name="font">
-         <font>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
+      <item row="27" column="0">
+       <widget class="QLabel" name="label_28">
         <property name="text">
-         <string>Alpha</string>
+         <string>Value</string>
         </property>
        </widget>
+      </item>
+      <item row="27" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout_8">
+        <item>
+         <widget class="QSlider" name="m_pRefractionSlider">
+          <property name="minimum">
+           <number>100</number>
+          </property>
+          <property name="maximum">
+           <number>200</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="m_pRefractionEdit">
+          <property name="maximumSize">
+           <size>
+            <width>30</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>1</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
      </layout>
     </widget>
@@ -509,7 +559,7 @@
    <slot>pickColorFromDialog()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>322</x>
+     <x>486</x>
      <y>96</y>
     </hint>
     <hint type="destinationlabel">
@@ -542,7 +592,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>210</x>
-     <y>481</y>
+     <y>598</y>
     </hint>
     <hint type="destinationlabel">
      <x>342</x>
@@ -557,8 +607,8 @@
    <slot>valueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>322</x>
-     <y>481</y>
+     <x>371</x>
+     <y>598</y>
     </hint>
     <hint type="destinationlabel">
      <x>342</x>
@@ -574,7 +624,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>210</x>
-     <y>509</y>
+     <y>626</y>
     </hint>
     <hint type="destinationlabel">
      <x>342</x>
@@ -589,8 +639,8 @@
    <slot>valueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>322</x>
-     <y>509</y>
+     <x>371</x>
+     <y>626</y>
     </hint>
     <hint type="destinationlabel">
      <x>342</x>
@@ -605,8 +655,8 @@
    <slot>valueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>322</x>
-     <y>250</y>
+     <x>486</x>
+     <y>273</y>
     </hint>
     <hint type="destinationlabel">
      <x>342</x>
@@ -621,8 +671,8 @@
    <slot>valueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>322</x>
-     <y>325</y>
+     <x>486</x>
+     <y>348</y>
     </hint>
     <hint type="destinationlabel">
      <x>342</x>
@@ -637,8 +687,8 @@
    <slot>valueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>322</x>
-     <y>374</y>
+     <x>486</x>
+     <y>401</y>
     </hint>
     <hint type="destinationlabel">
      <x>342</x>
@@ -654,7 +704,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>286</x>
-     <y>251</y>
+     <y>274</y>
     </hint>
     <hint type="destinationlabel">
      <x>342</x>
@@ -670,7 +720,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>286</x>
-     <y>326</y>
+     <y>349</y>
     </hint>
     <hint type="destinationlabel">
      <x>342</x>
@@ -686,7 +736,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>286</x>
-     <y>375</y>
+     <y>402</y>
     </hint>
     <hint type="destinationlabel">
      <x>342</x>
@@ -701,12 +751,44 @@
    <slot>valueChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>300</x>
+     <x>486</x>
      <y>181</y>
     </hint>
     <hint type="destinationlabel">
      <x>337</x>
      <y>197</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pRefractionSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>InspectorMaterial</receiver>
+   <slot>refractionValueChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>168</x>
+     <y>540</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>531</x>
+     <y>534</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>m_pRefractionEdit</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>InspectorMaterial</receiver>
+   <slot>valueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>504</x>
+     <y>539</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>533</x>
+     <y>514</y>
     </hint>
    </hints>
   </connection>
@@ -719,5 +801,6 @@
   <slot>reflectanceValueChanged(int)</slot>
   <slot>newMaterial()</slot>
   <slot>loadMaterial()</slot>
+  <slot>refractionValueChanged(int)</slot>
  </slots>
 </ui>

@@ -344,6 +344,11 @@ namespace
         glGenBuffers(1, &m_EmptyVertexBuffer);
 
         glBindBuffer(GL_ARRAY_BUFFER, m_EmptyVertexBuffer);
+
+        // -----------------------------------------------------------------------------
+        // Enable various OpenGL capabilities
+        // -----------------------------------------------------------------------------
+        glEnable(GL_PROGRAM_POINT_SIZE);
     }
 
     // -----------------------------------------------------------------------------

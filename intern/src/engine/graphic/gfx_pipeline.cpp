@@ -12,6 +12,7 @@
 #include "engine/graphic/gfx_area_light_manager.h"
 #include "engine/graphic/gfx_background_renderer.h"
 #include "engine/graphic/gfx_buffer_manager.h"
+#include "engine/graphic/gfx_caustic_renderer.h"
 #include "engine/graphic/gfx_context_manager.h"
 #include "engine/graphic/gfx_debug.h"
 #include "engine/graphic/gfx_debug_renderer.h"
@@ -32,6 +33,7 @@
 #include "engine/graphic/gfx_point_light_manager.h"
 #include "engine/graphic/gfx_postfx_hdr_renderer.h"
 #include "engine/graphic/gfx_postfx_renderer.h"
+#include "engine/graphic/gfx_refraction_renderer.h"
 #include "engine/graphic/gfx_reflection_renderer.h"
 #include "engine/graphic/gfx_sampler_manager.h"
 #include "engine/graphic/gfx_selection_renderer.h"
@@ -137,7 +139,8 @@ namespace Pipeline
         DebugRenderer        ::OnStart();
         SelectionRenderer    ::OnStart();
         TonemappingRenderer  ::OnStart();
-        
+        CausticRenderer      ::OnStart();
+        RefractionRenderer   ::OnStart();
         
         // -----------------------------------------------------------------------------
         // Setup the shader of all renderer
@@ -159,6 +162,8 @@ namespace Pipeline
         DebugRenderer        ::OnSetupShader();
         SelectionRenderer    ::OnSetupShader();
         TonemappingRenderer  ::OnSetupShader();
+        CausticRenderer      ::OnSetupShader();
+        RefractionRenderer   ::OnSetupShader();
         
         // -----------------------------------------------------------------------------
         // Setup the kernels of all renderer
@@ -180,6 +185,8 @@ namespace Pipeline
         DebugRenderer        ::OnSetupKernels();
         SelectionRenderer    ::OnSetupKernels();
         TonemappingRenderer  ::OnSetupKernels();
+        CausticRenderer      ::OnSetupKernels();
+        RefractionRenderer   ::OnSetupKernels();
         
         // -----------------------------------------------------------------------------
         // Setup the render targets of all renderer
@@ -201,6 +208,8 @@ namespace Pipeline
         DebugRenderer        ::OnSetupRenderTargets();
         SelectionRenderer    ::OnSetupRenderTargets();
         TonemappingRenderer  ::OnSetupRenderTargets();
+        CausticRenderer      ::OnSetupRenderTargets();
+        RefractionRenderer   ::OnSetupRenderTargets();
         
         // -----------------------------------------------------------------------------
         // Setup the states of all renderer
@@ -222,6 +231,8 @@ namespace Pipeline
         DebugRenderer        ::OnSetupStates();
         SelectionRenderer    ::OnSetupStates();
         TonemappingRenderer  ::OnSetupStates();
+        CausticRenderer      ::OnSetupStates();
+        RefractionRenderer   ::OnSetupStates();
         
         // -----------------------------------------------------------------------------
         // Setup the textures of all renderer
@@ -243,6 +254,8 @@ namespace Pipeline
         DebugRenderer        ::OnSetupTextures();
         SelectionRenderer    ::OnSetupTextures();
         TonemappingRenderer  ::OnSetupTextures();
+        CausticRenderer      ::OnSetupTextures();
+        RefractionRenderer   ::OnSetupTextures();
         
         // -----------------------------------------------------------------------------
         // Setup the buffers of all renderer
@@ -264,6 +277,8 @@ namespace Pipeline
         DebugRenderer        ::OnSetupBuffers();
         SelectionRenderer    ::OnSetupBuffers();
         TonemappingRenderer  ::OnSetupBuffers();
+        CausticRenderer      ::OnSetupBuffers();
+        RefractionRenderer   ::OnSetupBuffers();
         
         // -----------------------------------------------------------------------------
         // Setup the resources of all renderer
@@ -285,6 +300,8 @@ namespace Pipeline
         DebugRenderer        ::OnSetupResources();
         SelectionRenderer    ::OnSetupResources();
         TonemappingRenderer  ::OnSetupResources();
+        CausticRenderer      ::OnSetupResources();
+        RefractionRenderer   ::OnSetupResources();
         
         // -----------------------------------------------------------------------------
         // Setup the models of all renderer
@@ -306,6 +323,8 @@ namespace Pipeline
         DebugRenderer        ::OnSetupModels();
         SelectionRenderer    ::OnSetupModels();
         TonemappingRenderer  ::OnSetupModels();
+        CausticRenderer      ::OnSetupModels();
+        RefractionRenderer   ::OnSetupModels();
         
         // -----------------------------------------------------------------------------
         // Setup ends with a last call
@@ -327,6 +346,8 @@ namespace Pipeline
         DebugRenderer        ::OnSetupEnd();
         SelectionRenderer    ::OnSetupEnd();
         TonemappingRenderer  ::OnSetupEnd();
+        CausticRenderer      ::OnSetupEnd();
+        RefractionRenderer   ::OnSetupEnd();
 
         ENGINE_CONSOLE_STREAMINFO("Gfx> Finished renderer starting.");
     }
@@ -357,6 +378,8 @@ namespace Pipeline
         PostFXHDR            ::OnExit();
         PostFX               ::OnExit();
         TonemappingRenderer  ::OnExit();
+        CausticRenderer      ::OnExit();
+        RefractionRenderer   ::OnExit();
 
         ENGINE_CONSOLE_STREAMINFO("Gfx> Finished exit of renderer.");
         
@@ -458,6 +481,8 @@ namespace Pipeline
         PostFXHDR            ::Update();
         PostFX               ::Update();
         SelectionRenderer    ::Update();
+        CausticRenderer      ::Update();
+        RefractionRenderer   ::Update();
 
         Engine::RaiseEvent(Engine::Gfx_OnUpdate);
 
@@ -487,6 +512,7 @@ namespace Pipeline
         LightIndirectRenderer::Render();
         ReflectionRenderer   ::Render();
         BackgroundRenderer   ::Render();
+        CausticRenderer      ::Render();
 
         Engine::RaiseEvent(Engine::Gfx_OnRenderLighting);
 
@@ -500,6 +526,8 @@ namespace Pipeline
         LightAreaRenderer::RenderForward();
 
         MeshRenderer::RenderForward();
+
+        RefractionRenderer::RenderForward();
 
         Engine::RaiseEvent(Engine::Gfx_OnRenderForward);
 
