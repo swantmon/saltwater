@@ -44,8 +44,8 @@ void main()
     
 	const float Depth = float(imageLoad(cs_InputTexture, ivec2(x, y)).x);
 
-	float Sum1 = 0.0;
-	float Sum2 = 0.0;
+	float Sum1 = 0.0f;
+	float Sum2 = 0.0f;
 
     const float ReferenceDepth = float(imageLoad(cs_InputTexture, ivec2(x, y)).x);
 
