@@ -44,7 +44,7 @@ void main()
         {
             float Sample = imageLoad(cs_DepthBuffer, DepthPos + ivec2(x, y)).x / 1000.0f;
 
-            if (Sample < 0.5f)
+            if (Sample < MIN_DEPTH || Sample > MAX_DEPTH)
             {
                 IsValid = false;
             }
