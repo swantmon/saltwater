@@ -24,7 +24,7 @@ namespace MR
     void SReconstructionSettings::SetupDefaultSettings()
     {
         s_DefaultSettings.m_TruncatedDistance = 30.0f;
-        s_DefaultSettings.m_MaxIntegrationWeight = 200;
+        s_DefaultSettings.m_MaxIntegrationWeight = Core::CProgramParameters::GetInstance().Get("mr:slam:max_weight", 200);
         s_DefaultSettings.m_PyramidLevelCount = 3;
         s_DefaultSettings.m_DepthThreshold = glm::ivec2(500, 8000);
 
