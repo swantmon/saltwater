@@ -146,8 +146,6 @@ namespace Scpt
                     OnInitializeReconstructor = (InitializeCallback)(Core::PluginManager::GetPluginFunction("SLAM", "InitializeReconstructor"));
                     OnSetImageSizesAndIntrinsics = (SizeAndIntrinsicsCallback)(Core::PluginManager::GetPluginFunction("SLAM", "SetImageSizesAndIntrinsicData"));
                     OnResetReconstruction = (ResetCallback)(Core::PluginManager::GetPluginFunction("SLAM", "ResetReconstruction"));
-
-                    Buffer = new uint16_t[640 * 480];
                 }
                 else if (DataSource == "kinect")
                 {
@@ -206,7 +204,24 @@ namespace Scpt
             
             if (MessageType == COMMAND)
             {
-                OnResetReconstruction();
+                const int MessageID = *reinterpret_cast<int32_t*>(Decompressed.data() + sizeof(int32_t));
+
+                if (MessageID == 0)
+                {
+                    OnResetReconstruction();
+                }
+                else if(MessageID == 1)
+                {
+                    glm::vec2 FocalLength = *reinterpret_cast<glm::vec2*>(Decompressed.data() + sizeof(int32_t) * 2);
+                    glm::vec2 FocalPoint = *reinterpret_cast<glm::vec2*>(Decompressed.data() + sizeof(int32_t) * 2 + sizeof(glm::vec2));
+                    glm::ivec2 Size = *reinterpret_cast<glm::ivec2*>(Decompressed.data() + sizeof(int32_t) * 2 + sizeof(glm::vec2) * 2);
+
+                    OnSetImageSizesAndIntrinsics(glm::vec4(Size, Size), glm::vec4(FocalLength, FocalPoint));
+
+                    OnInitializeReconstructor();
+
+                    Buffer = new uint16_t[Size.x * Size.y];
+                }
             }
             else if (MessageType == TRANSFORM)
             {
