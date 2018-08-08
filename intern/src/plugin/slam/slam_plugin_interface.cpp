@@ -21,6 +21,13 @@ namespace SLAM
 
     // -----------------------------------------------------------------------------
 
+    void CPluginInterface::TerminateReconstructor()
+    {
+        Gfx::ReconstructionRenderer::GetReconstructor().Exit();
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CPluginInterface::OnNewFrame(const uint16_t* pDepthBuffer, const char* pColorBuffer, const glm::mat4* pTransform)
     {
         Gfx::ReconstructionRenderer::GetReconstructor().OnNewFrame(pDepthBuffer, pColorBuffer, pTransform);
@@ -98,6 +105,12 @@ extern "C" CORE_PLUGIN_API_EXPORT void InitializeReconstructor()
 {
     static_cast<SLAM::CPluginInterface&>(GetInstance()).InitializeReconstructor();
 }
+
+extern "C" CORE_PLUGIN_API_EXPORT void TerminateReconstructor()
+{
+    static_cast<SLAM::CPluginInterface&>(GetInstance()).TerminateReconstructor();
+}
+
 
 extern "C" CORE_PLUGIN_API_EXPORT void OnNewDepthFrame(const uint16_t* pDepthBuffer, const char* pColorBuffer, const glm::mat4* pTransform)
 {

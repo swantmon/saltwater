@@ -1852,7 +1852,6 @@ namespace MR
 
     CScalableSLAMReconstructor::~CScalableSLAMReconstructor()
     {
-        Exit();
     }
 
     // -----------------------------------------------------------------------------
