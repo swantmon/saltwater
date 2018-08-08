@@ -68,7 +68,7 @@ void main()
                 const vec2 LambdaPoint = (CSVoxelPosition.xy - g_Intrinsics[0].m_FocalPoint) * g_Intrinsics[0].m_InvFocalLength;
                 const float Lambda = length(vec3(LambdaPoint, 1.0f));
 
-                const float SDF = Depth - 1000.0f * length(CameraPosition - WSVoxelPosition) / Lambda;
+                const float SDF = Depth - 1000.0f * distance(CameraPosition, WSVoxelPosition) / Lambda;
                 
                 const float TruncatedDistance = TRUNCATED_DISTANCE * 1000.0f;
                 if (SDF >= -TruncatedDistance)
