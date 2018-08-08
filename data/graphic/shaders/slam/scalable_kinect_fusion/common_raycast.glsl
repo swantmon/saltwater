@@ -108,6 +108,11 @@ vec2 GetVoxel(vec3 Position)
     return UnpackVoxel(GetRawVoxel(Position));
 }
 
+vec2 GetVoxelFromIndex(ivec3 Pos)
+{
+    return GetVoxel(Pos * VOXEL_SIZE);
+}
+
 vec2 GetVoxelWithStep(vec3 Position, vec3 Direction, out float Step)
 {
     Step = -1.0f;   
@@ -176,7 +181,7 @@ vec2 GetVoxelWithStep(vec3 Position, vec3 Direction, out float Step)
 
 float GetInterpolatedTSDF(vec3 Position)
 {
-    vec3 g = ivec3(floor(Position / VOXEL_SIZE));
+    ivec3 g = ivec3(floor(Position / VOXEL_SIZE));
 
     const float vx = (g.x + 0.5f) * VOXEL_SIZE;
     const float vy = (g.y + 0.5f) * VOXEL_SIZE;
@@ -190,17 +195,15 @@ float GetInterpolatedTSDF(vec3 Position)
     const float b = (Position.y - (g.y + 0.5f) * VOXEL_SIZE) / VOXEL_SIZE;
     const float c = (Position.z - (g.z + 0.5f) * VOXEL_SIZE) / VOXEL_SIZE;
 
-    g = g * VOXEL_SIZE;
-
     const float result =
-    GetVoxel(vec3(g.x             , g.y             , g.z             )).x * (1.0f - a) * (1.0f - b) * (1.0f - c) +
-    GetVoxel(vec3(g.x             , g.y             , g.z + VOXEL_SIZE)).x * (1.0f - a) * (1.0f - b) *         c  +
-    GetVoxel(vec3(g.x             , g.y + VOXEL_SIZE, g.z             )).x * (1.0f - a) *         b  * (1.0f - c) +
-    GetVoxel(vec3(g.x             , g.y + VOXEL_SIZE, g.z + VOXEL_SIZE)).x * (1.0f - a) *         b  *         c  +
-    GetVoxel(vec3(g.x + VOXEL_SIZE, g.y             , g.z             )).x *         a  * (1.0f - b) * (1.0f - c) +
-    GetVoxel(vec3(g.x + VOXEL_SIZE, g.y             , g.z + VOXEL_SIZE)).x *         a  * (1.0f - b) *         c  +
-    GetVoxel(vec3(g.x + VOXEL_SIZE, g.y + VOXEL_SIZE, g.z             )).x *         a  *         b  * (1.0f - c) +
-    GetVoxel(vec3(g.x + VOXEL_SIZE, g.y + VOXEL_SIZE, g.z + VOXEL_SIZE)).x *         a  *         b  *         c;
+    GetVoxelFromIndex(ivec3(g.x    , g.y    , g.z    )).x * (1.0f - a) * (1.0f - b) * (1.0f - c) +
+    GetVoxelFromIndex(ivec3(g.x    , g.y    , g.z + 1)).x * (1.0f - a) * (1.0f - b) *         c  +
+    GetVoxelFromIndex(ivec3(g.x    , g.y + 1, g.z    )).x * (1.0f - a) *         b  * (1.0f - c) +
+    GetVoxelFromIndex(ivec3(g.x    , g.y + 1, g.z + 1)).x * (1.0f - a) *         b  *         c  +
+    GetVoxelFromIndex(ivec3(g.x + 1, g.y    , g.z    )).x *         a  * (1.0f - b) * (1.0f - c) +
+    GetVoxelFromIndex(ivec3(g.x + 1, g.y    , g.z + 1)).x *         a  * (1.0f - b) *         c  +
+    GetVoxelFromIndex(ivec3(g.x + 1, g.y + 1, g.z    )).x *         a  *         b  * (1.0f - c) +
+    GetVoxelFromIndex(ivec3(g.x + 1, g.y + 1, g.z + 1)).x *         a  *         b  *         c;
 
     return result;
 }
