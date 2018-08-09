@@ -15,12 +15,6 @@
 
 namespace
 {
-    std::string g_FilePath = "..//data//slam//datasets//";
-
-    std::vector<UINT16> TotalDepthBuffers;
-    int LoadedFrameCount = 0;
-    int CurrentLoadedFrame = 0;
-
     void CheckResult(HRESULT Result, char* pMessage)
     {
         if (Result != S_OK)
@@ -62,13 +56,6 @@ namespace MR
 
     void CKinectControl::Start()
     {
-        int StoreMode = Core::CProgramParameters::GetInstance().Get("mr:slam:storing:mode", 0);
-        m_DatasetPath = Core::CProgramParameters::GetInstance().Get("mr:slam:storing:path", "dataset");
-        m_StoreFrames = StoreMode == 1;
-        m_LoadFrames = StoreMode == 2;
-
-        assert(!(m_LoadFrames && m_StoreFrames));
-
         ////////////////////////////////////////////////////////////////////////////////////////////
         // Initialize kinect
         ////////////////////////////////////////////////////////////////////////////////////////////
@@ -94,38 +81,6 @@ namespace MR
         m_CameraFrameBuffer = std::vector<Byte4>(GetCameraWidth() * GetCameraHeight());
         m_DepthBuffer = std::vector<UINT16>(GetDepthWidth() * GetDepthHeight());
         m_ColorSpacePoints = std::vector<ColorSpacePoint>(GetDepthWidth() * GetDepthHeight());
-
-        LoadedFrameCount = 0;
-        CurrentLoadedFrame = 0;
-
-        if (m_LoadFrames)
-        {
-            for (;;)
-            {
-                std::stringstream FileName;
-                FileName << g_FilePath << m_DatasetPath << LoadedFrameCount << ".txt";
-
-                std::ifstream File;
-                File.open(FileName.str(), std::ios::binary);
-
-                if (File.is_open())
-                {
-                    ++LoadedFrameCount;
-                    TotalDepthBuffers.resize(LoadedFrameCount * GetDepthPixelCount());
-
-                    int TotalIndex = (LoadedFrameCount - 1) * GetDepthPixelCount();
-                    File.read(reinterpret_cast<char*>(&TotalDepthBuffers[TotalIndex]), sizeof(TotalDepthBuffers[0]) * GetDepthPixelCount());
-                }
-                else
-                {
-                    break;
-                }
-            }
-        }
-        if (m_StoreFrames)
-        {
-            TotalDepthBuffers.reserve(GetDepthPixelCount() * 2000);
-        }
     }
 
     // -----------------------------------------------------------------------------
@@ -139,77 +94,35 @@ namespace MR
             m_pKinect->Close();
         }
         SafeRelease(m_pKinect);
-        
-        if (m_StoreFrames)
-        {
-            for (int FrameIndex = 0; FrameIndex < TotalDepthBuffers.size() / GetDepthPixelCount(); ++FrameIndex)
-            {
-                std::stringstream FileName;
-                FileName << g_FilePath << m_DatasetPath << FrameIndex << ".txt";
-
-                std::ofstream File(FileName.str(), std::ios::binary);
-
-                File.write(reinterpret_cast<char*>(&TotalDepthBuffers[FrameIndex * GetDepthPixelCount()]), sizeof(TotalDepthBuffers[0]) * GetDepthPixelCount());
-            }
-        }
     }
 
     // -----------------------------------------------------------------------------
 
     bool CKinectControl::GetDepthBuffer(unsigned short* pBuffer)
     {
-        if (m_LoadFrames)
+        IDepthFrame* pDepthFrame = nullptr;
+        unsigned int BufferSize;
+        unsigned short* pShortBuffer;
+
+        if (m_pDepthFrameReader->AcquireLatestFrame(&pDepthFrame) != S_OK)
         {
-            if (CurrentLoadedFrame < LoadedFrameCount)
-            {
-                for (int i = 0; i < GetDepthPixelCount(); ++i)
-                {
-                    pBuffer[i] = TotalDepthBuffers[CurrentLoadedFrame * GetDepthPixelCount() + i];
-                }
-
-                ++CurrentLoadedFrame;
-
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return false;
         }
-        else
+
+        if (pDepthFrame->AccessUnderlyingBuffer(&BufferSize, &pShortBuffer) != S_OK)
         {
-            IDepthFrame* pDepthFrame = nullptr;
-            unsigned int BufferSize;
-            unsigned short* pShortBuffer;
-
-            if (m_pDepthFrameReader->AcquireLatestFrame(&pDepthFrame) != S_OK)
-            {
-                return false;
-            }
-
-            if (pDepthFrame->AccessUnderlyingBuffer(&BufferSize, &pShortBuffer) != S_OK)
-            {
-                ENGINE_CONSOLE_ERROR("Failed to access underlying buffer");
-                return false;
-            }
-
-            const int PixelCount = GetDepthPixelCount();
-            
-            std::memcpy(pBuffer, pShortBuffer, sizeof(pShortBuffer[0]) * PixelCount);
-            std::memcpy(m_DepthBuffer.data(), pShortBuffer, sizeof(pShortBuffer[0]) * PixelCount);
-
-            pDepthFrame->Release();
-            
-            if (m_StoreFrames)
-            {
-                for (auto Value : m_DepthBuffer)
-                {
-                    TotalDepthBuffers.push_back(Value);
-                }
-            }
-
-            return true;
+            ENGINE_CONSOLE_ERROR("Failed to access underlying buffer");
+            return false;
         }
+
+        const int PixelCount = GetDepthPixelCount();
+
+        std::memcpy(pBuffer, pShortBuffer, sizeof(pShortBuffer[0]) * PixelCount);
+        std::memcpy(m_DepthBuffer.data(), pShortBuffer, sizeof(pShortBuffer[0]) * PixelCount);
+
+        pDepthFrame->Release();
+        
+        return true;
     }
 
     // -----------------------------------------------------------------------------

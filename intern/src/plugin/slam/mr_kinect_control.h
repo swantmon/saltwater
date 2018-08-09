@@ -63,10 +63,5 @@ namespace MR
         std::vector<Byte4> m_CameraFrameBuffer;
         std::vector<UINT16> m_DepthBuffer;
         std::vector<ColorSpacePoint> m_ColorSpacePoints;
-
-        bool m_StoreFrames;
-        bool m_LoadFrames;
-
-        std::string m_DatasetPath;
     };
 } // namespace MR
