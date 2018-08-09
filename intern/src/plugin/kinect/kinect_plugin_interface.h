@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "base/base_include_glm.h"
+
 #include "engine/core/core_plugin_manager.h"
 
 #include "plugin/kinect/kinect_control.h"
@@ -19,8 +21,10 @@ namespace HW
         void OnResume() override;
         void Update() override;
 
-        void GetDepthBuffer(unsigned short* pBuffer);
+        bool GetDepthBuffer(unsigned short* pBuffer);
         void GetColorBuffer(char* pBuffer);
+
+        void GetIntrinsics(glm::vec2& FocalLength, glm::vec2& FocalPoint, glm::ivec2& Size);
 
     private:
 

@@ -42,9 +42,9 @@ namespace HW
 
     // -----------------------------------------------------------------------------
 
-    void CPluginInterface::GetDepthBuffer(unsigned short* pBuffer)
+    bool CPluginInterface::GetDepthBuffer(unsigned short* pBuffer)
     {
-        m_pControl->GetDepthBuffer(pBuffer);
+        return m_pControl->GetDepthBuffer(pBuffer);
     }
 
     // -----------------------------------------------------------------------------
@@ -53,6 +53,15 @@ namespace HW
     {
         m_pControl->GetCameraFrame(pBuffer);
     }
+
+    // -----------------------------------------------------------------------------
+
+    void CPluginInterface::GetIntrinsics(glm::vec2& FocalLength, glm::vec2& FocalPoint, glm::ivec2& Size)
+    {
+        FocalLength = glm::vec2(m_pControl->GetDepthFocalLengthX(), m_pControl->GetDepthFocalLengthY());
+        FocalPoint = glm::vec2(m_pControl->GetDepthFocalPointX(), m_pControl->GetDepthFocalPointY());
+        Size = glm::ivec2(m_pControl->GetDepthWidth(), m_pControl->GetDepthHeight());
+    }
 } // namespace HW
 
 extern "C" CORE_PLUGIN_API_EXPORT void GetColorBuffer(char* pBuffer)
@@ -60,7 +69,12 @@ extern "C" CORE_PLUGIN_API_EXPORT void GetColorBuffer(char* pBuffer)
     static_cast<HW::CPluginInterface&>(GetInstance()).GetColorBuffer(pBuffer);
 }
 
-extern "C" CORE_PLUGIN_API_EXPORT void GetDepthBuffer(unsigned short* pBuffer)
+extern "C" CORE_PLUGIN_API_EXPORT bool GetDepthBuffer(unsigned short* pBuffer)
 {
-    static_cast<HW::CPluginInterface&>(GetInstance()).GetDepthBuffer(pBuffer);
+    return static_cast<HW::CPluginInterface&>(GetInstance()).GetDepthBuffer(pBuffer);
+}
+
+extern "C" CORE_PLUGIN_API_EXPORT void GetIntrinsics(glm::vec2& FocalLength, glm::vec2& FocalPoint, glm::ivec2& Size)
+{
+    static_cast<HW::CPluginInterface&>(GetInstance()).GetIntrinsics(FocalLength, FocalPoint, Size);
 }

@@ -99,7 +99,7 @@ namespace Scpt
     {
     private:
 
-        uint16_t* Buffer;
+        uint16_t* m_Buffer;
 
         glm::mat4 m_PoseMatrix;
 
@@ -135,7 +135,17 @@ namespace Scpt
 
         EDATASOURCE m_DataSource;
         
+        // -----------------------------------------------------------------------------
+        // Stuff for network data source
+        // -----------------------------------------------------------------------------
+
         std::shared_ptr<Net::CMessageDelegate> m_NetworkDelegate;
+
+        // -----------------------------------------------------------------------------
+        // Stuff for Kinect data source
+        // -----------------------------------------------------------------------------
+        typedef bool(*GetDepthBufferFunc)(uint16_t*);
+        GetDepthBufferFunc GetDepthBuffer;
 
     public:
 
@@ -182,6 +192,26 @@ namespace Scpt
                 }
 
                 m_DataSource = KINECT;
+
+                typedef void(*GetIntrinsicsFunc)(glm::vec2&, glm::vec2&, glm::ivec2&);
+
+                GetIntrinsicsFunc GetIntrinsics = (GetIntrinsicsFunc)(Core::PluginManager::GetPluginFunction("Kinect", "GetIntrinsics"));
+
+                glm::vec2 FocalLength;
+                glm::vec2 FocalPoint;
+                glm::ivec2 ImageSize;
+
+                GetIntrinsics(FocalLength, FocalPoint, ImageSize);
+
+                OnSetImageSizesAndIntrinsics(glm::vec4(ImageSize, ImageSize), glm::vec4(FocalLength, FocalPoint));
+
+                OnInitializeReconstructor();
+
+                IsReconstructorInitialized = true;
+
+                m_Buffer = new uint16_t[ImageSize.x * ImageSize.y];
+
+                GetDepthBuffer = (GetDepthBufferFunc)(Core::PluginManager::GetPluginFunction("Kinect", "GetDepthBuffer"));
             }
             else
             {
@@ -203,7 +233,10 @@ namespace Scpt
 
         void Update() override
         {
-
+            if (GetDepthBuffer(m_Buffer))
+            {
+                OnNewFrame(m_Buffer, nullptr, nullptr);
+            }
         }
 
         // -----------------------------------------------------------------------------
@@ -244,15 +277,15 @@ namespace Scpt
                 {
                     glm::vec2 FocalLength = *reinterpret_cast<glm::vec2*>(Decompressed.data() + sizeof(int32_t) * 2);
                     glm::vec2 FocalPoint = *reinterpret_cast<glm::vec2*>(Decompressed.data() + sizeof(int32_t) * 2 + sizeof(glm::vec2));
-                    glm::ivec2 Size = *reinterpret_cast<glm::ivec2*>(Decompressed.data() + sizeof(int32_t) * 2 + sizeof(glm::vec2) * 2);
+                    glm::ivec2 ImageSize = *reinterpret_cast<glm::ivec2*>(Decompressed.data() + sizeof(int32_t) * 2 + sizeof(glm::vec2) * 2);
 
-                    OnSetImageSizesAndIntrinsics(glm::vec4(Size, Size), glm::vec4(FocalLength, FocalPoint));
+                    OnSetImageSizesAndIntrinsics(glm::vec4(ImageSize, ImageSize), glm::vec4(FocalLength, FocalPoint));
 
                     OnInitializeReconstructor();
 
                     IsReconstructorInitialized = true;
 
-                    Buffer = new uint16_t[Size.x * Size.y];
+                    m_Buffer = new uint16_t[ImageSize.x * ImageSize.y];
                 }
             }
             else if (MessageType == TRANSFORM)
@@ -270,11 +303,11 @@ namespace Scpt
                 {
                     for (int j = 0; j < Height; ++ j)
                     {
-                        Buffer[j * Width + i] = shift2depth(RawBuffer[j * Width + (Width - 1 - i)]);
+                        m_Buffer[j * Width + i] = shift2depth(RawBuffer[j * Width + (Width - 1 - i)]);
                     }
                 }
 
-                OnNewFrame(Buffer, nullptr, &m_PoseMatrix);
+                OnNewFrame(m_Buffer, nullptr, &m_PoseMatrix);
             }
         }
     };
