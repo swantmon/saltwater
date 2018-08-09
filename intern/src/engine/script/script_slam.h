@@ -233,7 +233,7 @@ namespace Scpt
 
         void Update() override
         {
-            if (GetDepthBuffer(m_Buffer))
+            if (m_DataSource == KINECT && GetDepthBuffer(m_Buffer))
             {
                 OnNewFrame(m_Buffer, nullptr, nullptr);
             }
