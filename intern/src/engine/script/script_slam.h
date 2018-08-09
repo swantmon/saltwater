@@ -134,36 +134,46 @@ namespace Scpt
         void Start() override
         {
             // -----------------------------------------------------------------------------
-            // Input
+            // Load SLAM plugin
             // -----------------------------------------------------------------------------
-            if (Core::PluginManager::HasPlugin("SLAM"))
+            if (!Core::PluginManager::HasPlugin("SLAM"))
             {
-                std::string DataSource = Core::CProgramParameters::GetInstance().Get("mr:slam:data_source", "network");
+                throw Base::CException(__FILE__, __LINE__, "SLAM plugin was not loaded");
+            }
 
-                if (DataSource == "network")
-                {
-                    m_NetworkDelegate = std::shared_ptr<Net::CMessageDelegate>(new Net::CMessageDelegate(std::bind(&CSLAMScript::OnNewMessage, this, std::placeholders::_1, std::placeholders::_2)));
+            OnNewFrame = (DepthFrameCallback)(Core::PluginManager::GetPluginFunction("SLAM", "OnNewDepthFrame"));
+            OnInitializeReconstructor = (InitializeCallback)(Core::PluginManager::GetPluginFunction("SLAM", "InitializeReconstructor"));
+            OnTerminateReconstructor = (TerminateCallback)(Core::PluginManager::GetPluginFunction("SLAM", "TerminateReconstructor"));
+            OnSetImageSizesAndIntrinsics = (SizeAndIntrinsicsCallback)(Core::PluginManager::GetPluginFunction("SLAM", "SetImageSizesAndIntrinsicData"));
+            OnResetReconstruction = (ResetCallback)(Core::PluginManager::GetPluginFunction("SLAM", "ResetReconstruction"));
 
-                    Net::CNetworkManager::GetInstance().RegisterMessageHandler(0, m_NetworkDelegate);
+            // -----------------------------------------------------------------------------
+            // Determine where we get our data from
+            // -----------------------------------------------------------------------------
+            std::string DataSource = Core::CProgramParameters::GetInstance().Get("mr:slam:data_source", "network");
 
-                    OnNewFrame = (DepthFrameCallback)(Core::PluginManager::GetPluginFunction("SLAM", "OnNewDepthFrame"));
-                    OnInitializeReconstructor = (InitializeCallback)(Core::PluginManager::GetPluginFunction("SLAM", "InitializeReconstructor"));
-                    OnTerminateReconstructor = (TerminateCallback)(Core::PluginManager::GetPluginFunction("SLAM", "TerminateReconstructor"));
-                    OnSetImageSizesAndIntrinsics = (SizeAndIntrinsicsCallback)(Core::PluginManager::GetPluginFunction("SLAM", "SetImageSizesAndIntrinsicData"));
-                    OnResetReconstruction = (ResetCallback)(Core::PluginManager::GetPluginFunction("SLAM", "ResetReconstruction"));
-                }
-                else if (DataSource == "kinect")
+            if (DataSource == "network")
+            {
+                // -----------------------------------------------------------------------------
+                // Create network connection
+                // -----------------------------------------------------------------------------
+                m_NetworkDelegate = std::shared_ptr<Net::CMessageDelegate>(new Net::CMessageDelegate(std::bind(&CSLAMScript::OnNewMessage, this, std::placeholders::_1, std::placeholders::_2)));
+
+                Net::CNetworkManager::GetInstance().RegisterMessageHandler(0, m_NetworkDelegate);
+            }
+            else if (DataSource == "kinect")
+            {
+                // -----------------------------------------------------------------------------
+                // Load Kinect plugin
+                // -----------------------------------------------------------------------------
+                if (!Core::PluginManager::HasPlugin("Kinect"))
                 {
-                    throw Base::CException(__FILE__, __LINE__, "Kinect as data source for SLAM plugin currently not supported");
-                }
-                else
-                {
-                    throw Base::CException(__FILE__, __LINE__, "Unknown data source for SLAM plugin");
+                    throw Base::CException(__FILE__, __LINE__, "Kinect plugin was not loaded");
                 }
             }
             else
             {
-                throw Base::CException(__FILE__, __LINE__, "SLAM plugin was not loaded");
+                throw Base::CException(__FILE__, __LINE__, "Unknown data source for SLAM plugin");
             }
         }
 
