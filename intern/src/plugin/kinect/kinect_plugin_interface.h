@@ -20,6 +20,7 @@ namespace HW
         void Update() override;
 
         void GetDepthBuffer(unsigned short* pBuffer);
+        void GetColorBuffer(char* pBuffer);
 
     private:
 

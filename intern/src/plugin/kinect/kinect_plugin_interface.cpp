@@ -46,7 +46,19 @@ namespace HW
     {
         m_pControl->GetDepthBuffer(pBuffer);
     }
+
+    // -----------------------------------------------------------------------------
+
+    void CPluginInterface::GetColorBuffer(char* pBuffer)
+    {
+        m_pControl->GetCameraFrame(pBuffer);
+    }
 } // namespace HW
+
+extern "C" CORE_PLUGIN_API_EXPORT void GetColorBuffer(char* pBuffer)
+{
+    static_cast<HW::CPluginInterface&>(GetInstance()).GetColorBuffer(pBuffer);
+}
 
 extern "C" CORE_PLUGIN_API_EXPORT void GetDepthBuffer(unsigned short* pBuffer)
 {
