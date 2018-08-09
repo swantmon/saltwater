@@ -3,6 +3,10 @@
 
 #include "engine/core/core_plugin_manager.h"
 
+#include "plugin/kinect/kinect_control.h"
+
+#include <memory>
+
 namespace HW
 {
     class CPluginInterface : public Core::IPlugin
@@ -14,5 +18,11 @@ namespace HW
         void OnPause() override;
         void OnResume() override;
         void Update() override;
+
+        void GetDepthBuffer(unsigned short* pBuffer);
+
+    private:
+
+        std::unique_ptr<MR::CKinectControl> m_pControl;
     };
 } // namespace HW

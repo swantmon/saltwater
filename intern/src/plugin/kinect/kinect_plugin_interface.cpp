@@ -11,14 +11,13 @@ namespace HW
 {
     void CPluginInterface::OnStart()
     {
-        ENGINE_CONSOLE_INFOV("Kinect plugin started!");
+        m_pControl.reset(new MR::CKinectControl);
     }
 
     // -----------------------------------------------------------------------------
 
     void CPluginInterface::OnExit()
     {
-        ENGINE_CONSOLE_INFOV("Kinect plugin exited!");
     }
 
     // -----------------------------------------------------------------------------
@@ -40,9 +39,16 @@ namespace HW
     {
         ENGINE_CONSOLE_INFOV("Kinect plugin resumed!");
     }
+
+    // -----------------------------------------------------------------------------
+
+    void CPluginInterface::GetDepthBuffer(unsigned short* pBuffer)
+    {
+        m_pControl->GetDepthBuffer(pBuffer);
+    }
 } // namespace HW
 
-extern "C" CORE_PLUGIN_API_EXPORT void SayHelloWorld()
+extern "C" CORE_PLUGIN_API_EXPORT void GetDepthBuffer(unsigned short* pBuffer)
 {
-    ENGINE_CONSOLE_INFOV("Kinect!");
+    static_cast<HW::CPluginInterface&>(GetInstance()).GetDepthBuffer(pBuffer);
 }
