@@ -41,7 +41,7 @@ namespace
 {
 	//*
 	const glm::vec3 g_InitialCameraPosition = glm::vec3(0.0f, 0.0f, 0.0f);
-	const glm::vec3 g_InitialCameraRotation = glm::vec3(0.0f, 0.0f, 0.0f);
+	const glm::vec3 g_InitialCameraRotation = glm::vec3(3.14f, 0.0f, 0.0f);
 	/*/
 	const glm::vec3 g_InitialCameraPosition = glm::vec3(0.5f, 0.5f, -0.5f);
 	const glm::vec3 g_InitialCameraRotation = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -64,12 +64,7 @@ namespace
     const unsigned int g_MaxLevel1GridPoolSize =       128u * g_MegabyteSize;
     const unsigned int g_MaxTSDFPoolSize       = 16u * 128u * g_MegabyteSize;
     //*/
-            
-    const float g_EpsilonDistance = 0.1f;
-    const float g_EpsilonAngle = 0.75f;
     
-    const int g_ICPValueCount = 27;
-
     const int g_TileSize1D = 64;
     const int g_TileSize2D = 16;
     const int g_TileSize3D = 8;
@@ -491,9 +486,6 @@ namespace MR
             << "#define TILE_SIZE3D "            << g_TileSize3D                                          << " \n"
             << "#define TRUNCATED_DISTANCE "     << TruncatedDistance                                     << " \n"
             << "#define MAX_INTEGRATION_WEIGHT " << m_ReconstructionSettings.m_MaxIntegrationWeight       << " \n"
-            << "#define EPSILON_DISTANCE "       << g_EpsilonDistance                                     << " \n"
-            << "#define EPSILON_ANGLE "          << g_EpsilonAngle                                        << " \n"
-            << "#define ICP_VALUE_COUNT "        << g_ICPValueCount                                       << " \n"
             << "#define MAP_TEXTURE_FORMAT "     << InternalFormatString                                  << " \n"
             << "#define ROOT_RESOLUTION "        << m_ReconstructionSettings.m_GridResolutions[0]         << " \n"
             << "#define LEVEL1_RESOLUTION "      << m_ReconstructionSettings.m_GridResolutions[1]         << " \n"
