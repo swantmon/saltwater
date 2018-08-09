@@ -127,7 +127,13 @@ namespace Scpt
         
     private:
 
-        std::string m_DataSource;
+        enum EDATASOURCE
+        {
+            NETWORK,
+            KINECT
+        };
+
+        EDATASOURCE m_DataSource;
         
         std::shared_ptr<Net::CMessageDelegate> m_NetworkDelegate;
 
@@ -152,9 +158,9 @@ namespace Scpt
             // -----------------------------------------------------------------------------
             // Determine where we get our data from
             // -----------------------------------------------------------------------------
-            m_DataSource = Core::CProgramParameters::GetInstance().Get("mr:slam:data_source", "network");
+            std::string DataSource = Core::CProgramParameters::GetInstance().Get("mr:slam:data_source", "network");
 
-            if (m_DataSource == "network")
+            if (DataSource == "network")
             {
                 // -----------------------------------------------------------------------------
                 // Create network connection
@@ -162,8 +168,10 @@ namespace Scpt
                 m_NetworkDelegate = std::shared_ptr<Net::CMessageDelegate>(new Net::CMessageDelegate(std::bind(&CSLAMScript::OnNewMessage, this, std::placeholders::_1, std::placeholders::_2)));
 
                 Net::CNetworkManager::GetInstance().RegisterMessageHandler(0, m_NetworkDelegate);
+
+                m_DataSource = NETWORK;
             }
-            else if (m_DataSource == "kinect")
+            else if (DataSource == "kinect")
             {
                 // -----------------------------------------------------------------------------
                 // Load Kinect plugin
@@ -172,6 +180,8 @@ namespace Scpt
                 {
                     throw Base::CException(__FILE__, __LINE__, "Kinect plugin was not loaded");
                 }
+
+                m_DataSource = KINECT;
             }
             else
             {
