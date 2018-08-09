@@ -308,7 +308,8 @@ vec3 GetPosition(vec3 CameraPosition, vec3 RayDirection)
             break;
         }
         
-        Step = CurrentTSDF < 1.0f ? VOXEL_SIZE : TRUNCATED_DISTANCE;
+        //Step = CurrentTSDF < 1.0f ? VOXEL_SIZE : TRUNCATED_DISTANCE;
+        Step = VOXEL_SIZE;
     }
 
     if (RayLength < EndLength)
