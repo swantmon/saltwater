@@ -279,9 +279,9 @@ vec3 GetPosition(vec3 CameraPosition, vec3 RayDirection)
     RayLength += Step;
 
     vec3 Vertex = vec3(0.0f);
-        
-    float NewStep;
 
+    float NewStep;
+    
     vec3 PreviousPosition;
     vec3 CurrentPosition;
 
