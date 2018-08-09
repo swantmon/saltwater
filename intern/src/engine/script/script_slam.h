@@ -126,6 +126,8 @@ namespace Scpt
         bool IsReconstructorInitialized = false;
         
     private:
+
+        std::string m_DataSource;
         
         std::shared_ptr<Net::CMessageDelegate> m_NetworkDelegate;
 
@@ -150,9 +152,9 @@ namespace Scpt
             // -----------------------------------------------------------------------------
             // Determine where we get our data from
             // -----------------------------------------------------------------------------
-            std::string DataSource = Core::CProgramParameters::GetInstance().Get("mr:slam:data_source", "network");
+            m_DataSource = Core::CProgramParameters::GetInstance().Get("mr:slam:data_source", "network");
 
-            if (DataSource == "network")
+            if (m_DataSource == "network")
             {
                 // -----------------------------------------------------------------------------
                 // Create network connection
@@ -161,7 +163,7 @@ namespace Scpt
 
                 Net::CNetworkManager::GetInstance().RegisterMessageHandler(0, m_NetworkDelegate);
             }
-            else if (DataSource == "kinect")
+            else if (m_DataSource == "kinect")
             {
                 // -----------------------------------------------------------------------------
                 // Load Kinect plugin
