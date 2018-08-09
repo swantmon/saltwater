@@ -7,6 +7,7 @@
 #include "engine/graphic/gfx_shader.h"
 #include "engine/graphic/gfx_texture.h"
 
+#include "plugin/slam/mr_kinect_control.h"
 #include "plugin/slam/mr_icp_tracker.h"
 #include "plugin/slam/mr_slam_reconstruction_settings.h"
 
@@ -87,7 +88,7 @@ namespace MR
         Gfx::CTexturePtr m_TSDFVolumePtr;
         Gfx::CTexturePtr m_ColorVolumePtr;
         
-        std::unique_ptr<MR::IRGBDCameraControl> m_pRGBDCameraControl;
+        std::unique_ptr<MR::CKinectControl> m_pKinectControl;
 
         glm::mat4 m_PoseMatrix;
         

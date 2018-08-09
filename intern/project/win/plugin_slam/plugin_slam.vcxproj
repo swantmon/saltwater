@@ -43,11 +43,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\plugin\slam\gfx_reconstruction_renderer.h" />
-    <ClInclude Include="..\..\..\src\plugin\slam\mr_camera_control.h" />
-    <ClInclude Include="..\..\..\src\plugin\slam\mr_depth_sensor_control.h" />
     <ClInclude Include="..\..\..\src\plugin\slam\mr_icp_tracker.h" />
     <ClInclude Include="..\..\..\src\plugin\slam\mr_kinect_control.h" />
-    <ClInclude Include="..\..\..\src\plugin\slam\mr_rgbd_camera_control.h" />
     <ClInclude Include="..\..\..\src\plugin\slam\mr_scalable_slam_reconstructor.h" />
     <ClInclude Include="..\..\..\src\plugin\slam\mr_slam_reconstruction_settings.h" />
     <ClInclude Include="..\..\..\src\plugin\slam\mr_slam_reconstructor.h" />

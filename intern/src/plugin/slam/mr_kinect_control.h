@@ -1,8 +1,6 @@
 
 #pragma once
 
-#include "mr_rgbd_camera_control.h"
-
 #include "engine/core/core_console.h"
 
 #define NOMINMAX
@@ -15,34 +13,34 @@
 
 namespace MR
 {
-    class CKinectControl : public IRGBDCameraControl
+    class CKinectControl
     {
     public:
 
-        virtual int GetCameraWidth() const;
-        virtual int GetCameraHeight() const;
-        virtual int GetCameraPixelCount() const;
-        virtual float GetCameraFocalLengthX() const;
-        virtual float GetCameraFocalLengthY() const;
-        virtual float GetCameraFocalPointX() const;
-        virtual float GetCameraFocalPointY() const;
-        virtual bool GetCameraFrame(char* pBuffer);
+        int GetCameraWidth() const;
+        int GetCameraHeight() const;
+        int GetCameraPixelCount() const;
+        float GetCameraFocalLengthX() const;
+        float GetCameraFocalLengthY() const;
+        float GetCameraFocalPointX() const;
+        float GetCameraFocalPointY() const;
+        bool GetCameraFrame(char* pBuffer);
                 
-        virtual int GetDepthWidth() const override;
-        virtual int GetDepthHeight() const override;
-        virtual int GetDepthPixelCount() const override;
-        virtual float GetDepthFocalLengthX() const override;
-        virtual float GetDepthFocalLengthY() const override;
-        virtual float GetDepthFocalPointX() const override;
-        virtual float GetDepthFocalPointY() const override;
-		virtual float GetMinDepth() const override;
-		virtual float GetMaxDepth() const override;
-        virtual bool GetDepthBuffer(unsigned short* pBuffer) override;
+        int GetDepthWidth() const;
+        int GetDepthHeight() const;
+        int GetDepthPixelCount() const;
+        float GetDepthFocalLengthX() const;
+        float GetDepthFocalLengthY() const;
+        float GetDepthFocalPointX() const;
+        float GetDepthFocalPointY() const;
+		float GetMinDepth() const;
+		float GetMaxDepth() const;
+        bool GetDepthBuffer(unsigned short* pBuffer);
 
     public:
 
         CKinectControl();
-        virtual ~CKinectControl() override;
+       ~CKinectControl();
 
 	private:
 

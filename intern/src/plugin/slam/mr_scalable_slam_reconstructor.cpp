@@ -24,8 +24,6 @@
 #include "engine/graphic/gfx_view_manager.h"
 
 #include "plugin/slam/mr_scalable_slam_reconstructor.h"
-#include "plugin/slam/mr_rgbd_camera_control.h"
-#include "plugin/slam/mr_kinect_control.h"
 
 #include <iostream>
 #include <limits>
@@ -56,7 +54,6 @@ namespace
     const int g_MaxVolumeInstanceCount = 512;
 
     /*
-
     const unsigned int g_MaxRootVolumePoolSize =        g_MegabyteSize;
     const unsigned int g_MaxRootGridPoolSize   =  16u * g_MegabyteSize;
     const unsigned int g_MaxLevel1GridPoolSize =  64u * g_MegabyteSize;
