@@ -29,10 +29,8 @@
   <ItemGroup>
     <ClCompile Include="..\..\..\src\plugin\slam\gfx_reconstruction_renderer.cpp" />
     <ClCompile Include="..\..\..\src\plugin\slam\mr_icp_tracker.cpp" />
-    <ClCompile Include="..\..\..\src\plugin\slam\mr_kinect_control.cpp" />
     <ClCompile Include="..\..\..\src\plugin\slam\mr_scalable_slam_reconstructor.cpp" />
     <ClCompile Include="..\..\..\src\plugin\slam\mr_slam_reconstruction_settings.cpp" />
-    <ClCompile Include="..\..\..\src\plugin\slam\mr_slam_reconstructor.cpp" />
     <ClCompile Include="..\..\..\src\plugin\slam\slam_plugin_interface.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -44,10 +42,8 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\src\plugin\slam\gfx_reconstruction_renderer.h" />
     <ClInclude Include="..\..\..\src\plugin\slam\mr_icp_tracker.h" />
-    <ClInclude Include="..\..\..\src\plugin\slam\mr_kinect_control.h" />
     <ClInclude Include="..\..\..\src\plugin\slam\mr_scalable_slam_reconstructor.h" />
     <ClInclude Include="..\..\..\src\plugin\slam\mr_slam_reconstruction_settings.h" />
-    <ClInclude Include="..\..\..\src\plugin\slam\mr_slam_reconstructor.h" />
     <ClInclude Include="..\..\..\src\plugin\slam\slam_plugin_interface.h" />
     <ClInclude Include="..\..\..\src\plugin\slam\slam_precompiled.h" />
   </ItemGroup>
@@ -153,7 +149,7 @@
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>ISDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\kinect\include;..\..\..\..\extern\glm\include;..\..\..\..\extern\json\include;..\..\..\..\extern\assimp\include;..\..\..\..\extern\devil\include;..\..\..\..\extern\glew\include;..\..\..\..\extern\tinyxml2\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\glm\include;..\..\..\..\extern\json\include;..\..\..\..\extern\assimp\include;..\..\..\..\extern\devil\include;..\..\..\..\extern\glew\include;..\..\..\..\extern\tinyxml2\include</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <PrecompiledHeaderFile>plugin/slam/slam_precompiled.h</PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -162,8 +158,8 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>assimp.lib;DevIL.lib;ILU.lib;ILUT.lib;glew32.lib;Kinect20.lib;tinyxml2d.lib;opengl32.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\..\..\build\x64;..\..\..\..\extern\assimp\lib\x64;..\..\..\..\extern\devil\lib\x64;..\..\..\..\extern\glew\lib\x64;..\..\..\..\extern\kinect\lib\x64;..\..\..\..\extern\tinyxml2\lib\x64</AdditionalLibraryDirectories>
+      <AdditionalDependencies>assimp.lib;DevIL.lib;ILU.lib;ILUT.lib;glew32.lib;tinyxml2d.lib;opengl32.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\..\build\x64;..\..\..\..\extern\assimp\lib\x64;..\..\..\..\extern\devil\lib\x64;..\..\..\..\extern\glew\lib\x64;..\..\..\..\extern\tinyxml2\lib\x64</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>copy ..\..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\*.dll ..\..\..\..\bin</Command>
@@ -206,7 +202,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>ISDLL;BASE_RELEASE;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\kinect\include;..\..\..\..\extern\glm\include;..\..\..\..\extern\json\include;..\..\..\..\extern\assimp\include;..\..\..\..\extern\devil\include;..\..\..\..\extern\glew\include;..\..\..\..\extern\tinyxml2\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\glm\include;..\..\..\..\extern\json\include;..\..\..\..\extern\assimp\include;..\..\..\..\extern\devil\include;..\..\..\..\extern\glew\include;..\..\..\..\extern\tinyxml2\include</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <PrecompiledHeaderFile>plugin/slam/slam_precompiled.h</PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -217,8 +213,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>assimp.lib;DevIL.lib;ILU.lib;ILUT.lib;glew32.lib;Kinect20.lib;tinyxml2.lib;opengl32.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\..\..\build\x64;..\..\..\..\extern\assimp\lib\x64;..\..\..\..\extern\devil\lib\x64;..\..\..\..\extern\glew\lib\x64;..\..\..\..\extern\kinect\lib\x64;..\..\..\..\extern\tinyxml2\lib\x64</AdditionalLibraryDirectories>
+      <AdditionalDependencies>assimp.lib;DevIL.lib;ILU.lib;ILUT.lib;glew32.lib;tinyxml2.lib;opengl32.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\..\build\x64;..\..\..\..\extern\assimp\lib\x64;..\..\..\..\extern\devil\lib\x64;..\..\..\..\extern\glew\lib\x64;..\..\..\..\extern\tinyxml2\lib\x64</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>copy ..\..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\*.dll ..\..\..\..\bin</Command>

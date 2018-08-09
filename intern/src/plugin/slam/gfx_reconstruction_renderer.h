@@ -1,7 +1,5 @@
 #pragma once
 
-#include "plugin/slam/mr_slam_reconstructor.h"
-
 #include "mr_scalable_slam_reconstructor.h"
 
 namespace Gfx

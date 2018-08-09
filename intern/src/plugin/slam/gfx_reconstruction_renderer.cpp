@@ -26,7 +26,6 @@
 #include "engine/graphic/gfx_view_manager.h"
 
 #include "plugin/slam/gfx_reconstruction_renderer.h"
-#include "plugin/slam/mr_slam_reconstructor.h"
 #include "plugin/slam/mr_scalable_slam_reconstructor.h"
 
 #include "GL/glew.h"
@@ -103,7 +102,6 @@ namespace
     private:
 
         void RenderVolumeVertexMap();
-		void RaycastVolume();
 
 		void RaycastScalableVolume();
         
@@ -117,7 +115,6 @@ namespace
 
     private:
 
-		std::unique_ptr<MR::CSLAMReconstructor> m_pReconstructor;
 		std::unique_ptr<MR::CScalableSLAMReconstructor> m_pScalableReconstructor;
         
         CShaderPtr m_OutlineVSPtr;
@@ -216,33 +213,23 @@ namespace
 		MR::SReconstructionSettings DefaultSettings;
         MR::SReconstructionSettings::SetDefaultSettings(DefaultSettings);
 
-		if (DefaultSettings.m_IsScalable)
-		{
-			m_pScalableReconstructor.reset(new MR::CScalableSLAMReconstructor);
+        m_pScalableReconstructor.reset(new MR::CScalableSLAMReconstructor);
 
 #pragma message ("Just for testing. Remove later")
-//             m_pScalableReconstructor->SetImageSizes(glm::ivec2(640, 480), glm::ivec2(640, 480));
-//             m_pScalableReconstructor->SetIntrinsics(glm::vec2(570.013184f, 568.727722f), glm::vec2(317.644318f, 233.153610f));
-//             m_pScalableReconstructor->SetDepthBounds(0.5f, 8.0f);
+        //             m_pScalableReconstructor->SetImageSizes(glm::ivec2(640, 480), glm::ivec2(640, 480));
+        //             m_pScalableReconstructor->SetIntrinsics(glm::vec2(570.013184f, 568.727722f), glm::vec2(317.644318f, 233.153610f));
+        //             m_pScalableReconstructor->SetDepthBounds(0.5f, 8.0f);
 
-//             m_pScalableReconstructor->SetImageSizes(glm::ivec2(640, 480), glm::ivec2(640, 480));
-//             m_pScalableReconstructor->SetIntrinsics(glm::vec2(573.191345f, 573.191345f), glm::vec2(320.107849f, 240.107849f));
-            m_pScalableReconstructor->SetDepthBounds(0.5f, 3.0f);
+        //             m_pScalableReconstructor->SetImageSizes(glm::ivec2(640, 480), glm::ivec2(640, 480));
+        //             m_pScalableReconstructor->SetIntrinsics(glm::vec2(573.191345f, 573.191345f), glm::vec2(320.107849f, 240.107849f));
+        m_pScalableReconstructor->SetDepthBounds(0.5f, 3.0f);
 
-//             m_pScalableReconstructor->SetImageSizes(glm::ivec2(512, 424), glm::ivec2(512, 424));
-//             m_pScalableReconstructor->SetIntrinsics(glm::vec2(0.72113f * 512, 0.870799f * 424), glm::vec2(0.50602675f * 512, 0.499133f * 424));
-//             m_pScalableReconstructor->SetDepthBounds(0.5f, 8.0f);
+        //             m_pScalableReconstructor->SetImageSizes(glm::ivec2(512, 424), glm::ivec2(512, 424));
+        //             m_pScalableReconstructor->SetIntrinsics(glm::vec2(0.72113f * 512, 0.870799f * 424), glm::vec2(0.50602675f * 512, 0.499133f * 424));
+        //             m_pScalableReconstructor->SetDepthBounds(0.5f, 8.0f);
 
-            //m_pScalableReconstructor->Start();
-
-			m_pReconstructor = nullptr;
-		}
-		else
-		{
-			m_pReconstructor.reset(new MR::CSLAMReconstructor);
-			m_pScalableReconstructor = nullptr;
-		}
-
+        //m_pScalableReconstructor->Start();
+        
         m_UseTrackingCamera     = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:use_tracking_camera", true);
         m_RenderVolume          = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:volume"             , true);
         m_RenderVolumeVertexMap = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:volume_vertex_map"  , false);
@@ -274,10 +261,10 @@ namespace
 
         m_VolumeVertexMapVSPtr = 0;
         m_VolumeVertexMapFSPtr = 0;
-                
+        
         m_RaycastConstantBufferPtr = 0;
         m_DrawCallConstantBufferPtr = 0;
-                
+        
         m_CameraMeshPtr = 0;
         m_VolumeMeshPtr = 0;
         m_QuadMeshPtr = 0;
@@ -290,7 +277,6 @@ namespace
 
         m_OutlineRenderContextPtr = 0;
 
-		m_pReconstructor = nullptr;
 		m_pScalableReconstructor = nullptr;
 
         m_PointCloudVSPtr = 0;
@@ -309,90 +295,62 @@ namespace
 
         const std::string InternalFormatString = Core::CProgramParameters::GetInstance().Get("mr:slam:map_format", "rgba16f");
 
-		if (m_pScalableReconstructor != nullptr)
-		{
-			m_pScalableReconstructor->GetReconstructionSettings(&Settings);
+        m_pScalableReconstructor->GetReconstructionSettings(&Settings);
 
-            glm::ivec2 DepthImageSize = m_pScalableReconstructor->GetDepthImageSize();
+        glm::ivec2 DepthImageSize = m_pScalableReconstructor->GetDepthImageSize();
 
-			std::stringstream DefineStream;
+        std::stringstream DefineStream;
 
-            DefineStream
-                << "#define TRUNCATED_DISTANCE "     << Settings.m_TruncatedDistance / 1000.0f << " \n"
-                << "#define VOLUME_SIZE "            << Settings.m_VolumeSize << " \n"
-                << "#define VOXEL_SIZE "             << Settings.m_VoxelSize << " \n"
-                << "#define MAX_INTEGRATION_WEIGHT " << Settings.m_MaxIntegrationWeight << '\n'
-                << "#define DEPTH_IMAGE_WIDTH "      << DepthImageSize.x << '\n'
-                << "#define DEPTH_IMAGE_HEIGHT "     << DepthImageSize.y << '\n'
-                << "#define ROOT_RESOLUTION "        << Settings.m_GridResolutions[0] << '\n'
-                << "#define LEVEL1_RESOLUTION "      << Settings.m_GridResolutions[1] << '\n'
-                << "#define LEVEL2_RESOLUTION "      << Settings.m_GridResolutions[2] << '\n'
-                << "#define VOXELS_PER_ROOTGRID "    << Settings.m_VoxelsPerGrid[0] << " \n"
-                << "#define VOXELS_PER_LEVEL1GRID "  << Settings.m_VoxelsPerGrid[1] << " \n"
-                << "#define VOXELS_PER_LEVEL2GRID "  << Settings.m_VoxelsPerGrid[2] << " \n"
-                << "#define MAP_TEXTURE_FORMAT "     << InternalFormatString << " \n"
-                << "#define RAYCAST_NEAR "           << 0.0f << " \n"
-                << "#define RAYCAST_FAR "            << 1000.0f << " \n"
-                << "#define MIN_TREE_WEIGHT "        << Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:min_weight", 30) << " \n";
-            
-            if (Settings.m_CaptureColor)
-            {
-                DefineStream << "#define CAPTURE_COLOR\n";
-            }
-            if (m_RenderBackSides)
-            {
-                DefineStream << "#define RAYCAST_BACKSIDES\n";
-            }
+        DefineStream
+            << "#define TRUNCATED_DISTANCE " << Settings.m_TruncatedDistance / 1000.0f << " \n"
+            << "#define VOLUME_SIZE " << Settings.m_VolumeSize << " \n"
+            << "#define VOXEL_SIZE " << Settings.m_VoxelSize << " \n"
+            << "#define MAX_INTEGRATION_WEIGHT " << Settings.m_MaxIntegrationWeight << '\n'
+            << "#define DEPTH_IMAGE_WIDTH " << DepthImageSize.x << '\n'
+            << "#define DEPTH_IMAGE_HEIGHT " << DepthImageSize.y << '\n'
+            << "#define ROOT_RESOLUTION " << Settings.m_GridResolutions[0] << '\n'
+            << "#define LEVEL1_RESOLUTION " << Settings.m_GridResolutions[1] << '\n'
+            << "#define LEVEL2_RESOLUTION " << Settings.m_GridResolutions[2] << '\n'
+            << "#define VOXELS_PER_ROOTGRID " << Settings.m_VoxelsPerGrid[0] << " \n"
+            << "#define VOXELS_PER_LEVEL1GRID " << Settings.m_VoxelsPerGrid[1] << " \n"
+            << "#define VOXELS_PER_LEVEL2GRID " << Settings.m_VoxelsPerGrid[2] << " \n"
+            << "#define MAP_TEXTURE_FORMAT " << InternalFormatString << " \n"
+            << "#define RAYCAST_NEAR " << 0.0f << " \n"
+            << "#define RAYCAST_FAR " << 1000.0f << " \n"
+            << "#define MIN_TREE_WEIGHT " << Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:min_weight", 30) << " \n";
 
-			std::string DefineString = DefineStream.str();
-
-			m_OutlineVSPtr       = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_outline.glsl"       , "main", DefineString.c_str());
-			m_OutlineFSPtr       = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_outline.glsl"       , "main", DefineString.c_str());
-            m_OutlineLevel1VSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_outline_level1.glsl", "main", DefineString.c_str());
-            m_OutlineLevel1FSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_outline_level1.glsl", "main", DefineString.c_str());
-            m_OutlineLevel2VSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_outline_level2.glsl", "main", DefineString.c_str());
-            m_OutlineLevel2FSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_outline_level2.glsl", "main", DefineString.c_str());
-			
-            m_PointCloudVSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_point_cloud.glsl", "main", DefineString.c_str());
-            m_PointCloudFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_point_cloud.glsl", "main", DefineString.c_str());
-            
-            m_RaycastVSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_raycast.glsl", "main", DefineString.c_str());
-            m_RaycastFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_raycast.glsl", "main", DefineString.c_str());
-
-            m_CopyRaycastVSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_copy_raycast.glsl", "main", DefineString.c_str());
-            m_CopyRaycastFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_copy_raycast.glsl", "main", DefineString.c_str());
-
-            m_HistogramVSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_histogram.glsl", "main", DefineString.c_str());
-            m_HistogramFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_histogram.glsl", "main", DefineString.c_str());
-
-            m_VolumeVertexMapVSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_volume_vertex_map.glsl", "main", DefineString.c_str());
-            m_VolumeVertexMapFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_volume_vertex_map.glsl", "main", DefineString.c_str());
+        if (Settings.m_CaptureColor)
+        {
+            DefineStream << "#define CAPTURE_COLOR\n";
         }
-		else
-		{
-			m_pReconstructor->GetReconstructionSettings(&Settings);
+        if (m_RenderBackSides)
+        {
+            DefineStream << "#define RAYCAST_BACKSIDES\n";
+        }
 
-			std::stringstream DefineStream;
+        std::string DefineString = DefineStream.str();
 
-			DefineStream
-				<< "#define VOLUME_RESOLUTION "  << Settings.m_VolumeResolution << " \n"
-				<< "#define TRUNCATED_DISTANCE " << Settings.m_TruncatedDistance / 1000.0f << " \n"
-				<< "#define VOLUME_SIZE "        << Settings.m_VolumeSize << " \n"
-				<< "#define VOXEL_SIZE "         << Settings.m_VolumeSize / Settings.m_VolumeResolution << " \n"
-                << "#define MAP_TEXTURE_FORMAT " << InternalFormatString << " \n";
+        m_OutlineVSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_outline.glsl", "main", DefineString.c_str());
+        m_OutlineFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_outline.glsl", "main", DefineString.c_str());
+        m_OutlineLevel1VSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_outline_level1.glsl", "main", DefineString.c_str());
+        m_OutlineLevel1FSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_outline_level1.glsl", "main", DefineString.c_str());
+        m_OutlineLevel2VSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_outline_level2.glsl", "main", DefineString.c_str());
+        m_OutlineLevel2FSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_outline_level2.glsl", "main", DefineString.c_str());
 
-			if (Settings.m_CaptureColor)
-			{
-				DefineStream << "#define CAPTURE_COLOR\n";
-			}
+        m_PointCloudVSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_point_cloud.glsl", "main", DefineString.c_str());
+        m_PointCloudFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_point_cloud.glsl", "main", DefineString.c_str());
 
-			std::string DefineString = DefineStream.str();
+        m_RaycastVSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_raycast.glsl", "main", DefineString.c_str());
+        m_RaycastFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_raycast.glsl", "main", DefineString.c_str());
 
-			m_OutlineVSPtr = ShaderManager::CompileVS("slam\\kinect_fusion\\vs_outline.glsl", "main", DefineString.c_str());
-			m_OutlineFSPtr = ShaderManager::CompilePS("slam\\kinect_fusion\\fs_outline.glsl", "main", DefineString.c_str());
-			m_RaycastVSPtr = ShaderManager::CompileVS("slam\\kinect_fusion\\vs_raycast.glsl", "main", DefineString.c_str());
-			m_RaycastFSPtr = ShaderManager::CompilePS("slam\\kinect_fusion\\fs_raycast.glsl", "main", DefineString.c_str());
-		}
+        m_CopyRaycastVSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_copy_raycast.glsl", "main", DefineString.c_str());
+        m_CopyRaycastFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_copy_raycast.glsl", "main", DefineString.c_str());
+
+        m_HistogramVSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_histogram.glsl", "main", DefineString.c_str());
+        m_HistogramFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_histogram.glsl", "main", DefineString.c_str());
+
+        m_VolumeVertexMapVSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_volume_vertex_map.glsl", "main", DefineString.c_str());
+        m_VolumeVertexMapFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_volume_vertex_map.glsl", "main", DefineString.c_str());
         
         SInputElementDescriptor InputLayoutDesc = {};
 
@@ -660,14 +618,7 @@ namespace
     
     void CGfxReconstructionRenderer::OnReload()
     {
-        if (m_pScalableReconstructor != nullptr)
-        {
-			m_pScalableReconstructor->ResetReconstruction();
-        }
-		else
-		{
-			m_pReconstructor->ResetReconstruction();
-		}
+        m_pScalableReconstructor->ResetReconstruction();
 
         OnSetupShader();
     }
@@ -676,25 +627,7 @@ namespace
 
     void CGfxReconstructionRenderer::OnReconstructionUpdate(const MR::SReconstructionSettings& _Settings)
     {
-		if (_Settings.m_IsScalable && m_pScalableReconstructor == nullptr)
-		{
-			m_pReconstructor = nullptr;
-			m_pScalableReconstructor.reset(new MR::CScalableSLAMReconstructor);
-		}
-		else if (!_Settings.m_IsScalable && m_pReconstructor == nullptr)
-		{
-			m_pScalableReconstructor = nullptr;
-			m_pReconstructor.reset(new MR::CSLAMReconstructor);
-		}
-
-		if (m_pScalableReconstructor != nullptr)
-		{
-			m_pScalableReconstructor->ResetReconstruction(&_Settings);
-		}
-		else
-		{
-			m_pReconstructor->ResetReconstruction(&_Settings);
-		}
+        m_pScalableReconstructor->ResetReconstruction(&_Settings);
 
         BufferManager::UploadBufferData(m_VolumeMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer(), &g_CubeVertices);
         OnSetupShader();
@@ -745,7 +678,7 @@ namespace
         {
             Cam::CControl& rControl = static_cast<Cam::CEditorControl&>(Cam::ControlManager::GetActiveControl());
             
-            glm::mat4 PoseMatrix = ((m_pScalableReconstructor != nullptr) ? m_pScalableReconstructor->GetPoseMatrix() : m_pReconstructor->GetPoseMatrix());
+            glm::mat4 PoseMatrix = m_pScalableReconstructor->GetPoseMatrix();
             PoseMatrix = glm::eulerAngleX(glm::radians(90.0f)) * PoseMatrix;
 
             glm::vec3 Eye = PoseMatrix * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
@@ -790,86 +723,7 @@ namespace
 
         //glViewport(OldViewPort[0], OldViewPort[1], OldViewPort[2], OldViewPort[3]);
     }
-
-    // -----------------------------------------------------------------------------
     
-    void CGfxReconstructionRenderer::RaycastVolume()
-    {
-        MR::SReconstructionSettings Settings;
-        m_pReconstructor->GetReconstructionSettings(&Settings);
-
-        glm::mat4 PoseMatrix = m_pReconstructor->GetPoseMatrix();
-
-        glm::vec4 RaycastData[2];
-        PoseMatrix = glm::translate(glm::vec3(RaycastData[0][0], RaycastData[0][1], RaycastData[0][2]));
-        
-        RaycastData[0][3] = 1.0f;
-        if (Settings.m_CaptureColor)
-        {
-            RaycastData[1] = m_pReconstructor->IsTrackingLost() ? glm::vec4(1.0f, 0.0f, 0.0f, 1.0f) : glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-        }
-        else
-        {
-            RaycastData[1] = m_pReconstructor->IsTrackingLost() ? glm::vec4(1.0f, 0.0f, 0.0f, 1.0f) : glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-        }
-
-        BufferManager::UploadBufferData(m_RaycastConstantBufferPtr, RaycastData);
-        
-        ContextManager::SetShaderVS(m_RaycastVSPtr);
-        ContextManager::SetShaderPS(m_RaycastFSPtr);
-
-        ContextManager::SetTexture(0, m_pReconstructor->GetTSDFVolume());
-        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::ESampler::MinMagMipLinearClamp));
-
-        if (Settings.m_CaptureColor)
-        {
-            ContextManager::SetTexture(1, m_pReconstructor->GetColorVolume());
-            ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::ESampler::MinMagMipLinearClamp));
-        }
-
-        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
-        ContextManager::SetConstantBuffer(1, m_RaycastConstantBufferPtr);
-
-        ContextManager::Barrier();
-
-        ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::Default));
-        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
-        
-        const unsigned int Offset = 0;
-        ContextManager::SetVertexBuffer(m_VolumeMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
-        ContextManager::SetIndexBuffer(m_VolumeMeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
-        ContextManager::SetInputLayout(m_VolumeInputLayoutPtr);
-        
-        ContextManager::SetTopology(STopology::TriangleList);
-
-        ContextManager::DrawIndexed(36, 0, 0);
-
-		// Render volume box
-
-		ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Wireframe));
-
-		ContextManager::SetRenderContext(m_OutlineRenderContextPtr);
-		ContextManager::SetShaderVS(m_OutlineVSPtr);
-		ContextManager::SetShaderPS(m_OutlineFSPtr);
-
-		SDrawCallConstantBuffer BufferData;
-
-		BufferData.m_WorldMatrix = glm::scale(glm::vec3(Settings.m_VolumeSize));
-		BufferData.m_Color = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
-
-		BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
-
-		ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
-		ContextManager::SetConstantBuffer(1, m_DrawCallConstantBufferPtr);
-		
-		ContextManager::SetVertexBuffer(m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
-		ContextManager::SetInputLayout(m_CubeOutlineInputLayoutPtr);
-
-		ContextManager::SetTopology(STopology::LineList);
-
-		ContextManager::Draw(m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface()->GetNumberOfVertices(), 0);
-    }
-
 	// -----------------------------------------------------------------------------
 
 	void CGfxReconstructionRenderer::RaycastScalableVolume()
@@ -1161,7 +1015,7 @@ namespace
 
 		SDrawCallConstantBuffer BufferData;
 
-        glm::mat4 PoseMatrix = (m_pScalableReconstructor != nullptr) ? m_pScalableReconstructor->GetPoseMatrix() : m_pReconstructor->GetPoseMatrix();
+        glm::mat4 PoseMatrix = m_pScalableReconstructor->GetPoseMatrix();
         
         BufferData.m_WorldMatrix = glm::eulerAngleX(glm::half_pi<float>()) * PoseMatrix;
 		BufferData.m_Color = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
@@ -1193,7 +1047,7 @@ namespace
 
         SDrawCallConstantBuffer BufferData;
 
-        glm::mat4 PoseMatrix = (m_pScalableReconstructor != nullptr) ? m_pScalableReconstructor->GetPoseMatrix() : m_pReconstructor->GetPoseMatrix();
+        glm::mat4 PoseMatrix = m_pScalableReconstructor->GetPoseMatrix();
         
         BufferData.m_WorldMatrix = glm::eulerAngleX(glm::half_pi<float>()) * PoseMatrix;
         BufferData.m_Color = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
@@ -1222,15 +1076,6 @@ namespace
     {
 		if (_Pass == 0)
 		{
-            if (m_pScalableReconstructor != nullptr)
-            {
-                //m_pScalableReconstructor->Update();
-            }
-            else
-            {
-                m_pReconstructor->Update();
-            }
-
             Performance::BeginEvent("SLAM Reconstruction Rendering");
 
             ContextManager::SetViewPortSet(ViewManager::GetViewPortSet());
@@ -1243,41 +1088,34 @@ namespace
                 RenderCamera();
             }
 
-            if (m_pScalableReconstructor != nullptr)
+            if (m_RenderVolumeVertexMap)
             {
-                if (m_RenderVolumeVertexMap)
-                {
-                    RenderVolumeVertexMap();
-                }
-
-                if (m_RenderVolume)
-                {
-                    RaycastScalableVolume();
-                }
-
-                if (m_RenderVertexMap)
-                {
-                    RenderVertexMap();
-                }
-
-                if (m_RenderRootQueue)
-                {
-                    RenderQueuedRootVolumes();
-                }
-
-                if (m_RenderLevel1Queue)
-                {
-                    RenderQueuedLevel1Grids();
-                }
-
-                if (m_RenderLevel2Queue)
-                {
-                    RenderQueuedLevel2Grids();
-                }
+                RenderVolumeVertexMap();
             }
-            else
+
+            if (m_RenderVolume)
             {
-                RaycastVolume();
+                RaycastScalableVolume();
+            }
+
+            if (m_RenderVertexMap)
+            {
+                RenderVertexMap();
+            }
+
+            if (m_RenderRootQueue)
+            {
+                RenderQueuedRootVolumes();
+            }
+
+            if (m_RenderLevel1Queue)
+            {
+                RenderQueuedLevel1Grids();
+            }
+
+            if (m_RenderLevel2Queue)
+            {
+                RenderQueuedLevel2Grids();
             }
 
             Performance::EndEvent();
@@ -1298,28 +1136,14 @@ namespace
 
     void CGfxReconstructionRenderer::PauseIntegration(bool _Paused)
     {
-		if (m_pScalableReconstructor != nullptr)
-		{
-			m_pScalableReconstructor->PauseIntegration(_Paused);
-		}
-		else
-		{
-			m_pReconstructor->PauseIntegration(_Paused);
-		}
+        m_pScalableReconstructor->PauseIntegration(_Paused);
     }
     
     // -----------------------------------------------------------------------------
 
     void CGfxReconstructionRenderer::PauseTracking(bool _Paused)
     {
-		if (m_pScalableReconstructor != nullptr)
-		{
-			m_pScalableReconstructor->PauseTracking(_Paused);
-		}
-		else
-		{
-			m_pReconstructor->PauseTracking(_Paused);
-		}        
+		m_pScalableReconstructor->PauseTracking(_Paused);
     }
 
     // -----------------------------------------------------------------------------
@@ -1331,18 +1155,7 @@ namespace
 
     float CGfxReconstructionRenderer::GetReconstructionSize()
     {
-        if (m_pScalableReconstructor != nullptr)
-        {
-            return m_pScalableReconstructor->GetReconstructionSize();
-        }
-        else
-        {
-            MR::SReconstructionSettings Settings;
-            m_pReconstructor->GetReconstructionSettings(&Settings);
-
-            int Resolution = Settings.m_VolumeResolution;
-            return Resolution * Resolution * Resolution * sizeof(uint32_t) / (1024.0f * 1024.0f);
-        }
+        return m_pScalableReconstructor->GetReconstructionSize();
     }
 
     // -----------------------------------------------------------------------------
