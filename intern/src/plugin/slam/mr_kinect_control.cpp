@@ -75,7 +75,7 @@ namespace MR
         
         SafeRelease(pColorFrameSource);
         SafeRelease(pDepthFrameSource);
-                
+        
         m_pKinect->get_CoordinateMapper(&m_pMapper);
 
         m_CameraFrameBuffer = std::vector<Byte4>(GetCameraWidth() * GetCameraHeight());

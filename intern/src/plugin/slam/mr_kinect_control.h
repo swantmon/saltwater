@@ -11,7 +11,6 @@
 #include <NuiKinectFusionApi.h>
 
 #include <cassert>
-#include <mutex>
 #include <vector>
 
 namespace MR
