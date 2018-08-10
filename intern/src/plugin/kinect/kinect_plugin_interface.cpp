@@ -5,7 +5,7 @@
 
 #include "plugin/kinect/kinect_plugin_interface.h"
 
-CORE_PLUGIN_INFO(HW::CPluginInterface, "Kinect", "1.0", "This plugin gives access to the MS Kinect.")
+CORE_PLUGIN_INFO(HW::CPluginInterface, "Kinect", "1.0", "This plugin gives access to the MS Kinect v2.")
 
 namespace HW
 {
@@ -30,14 +30,14 @@ namespace HW
 
     void CPluginInterface::OnPause()
     {
-        ENGINE_CONSOLE_INFOV("Kinect plugin paused!");
+
     }
 
     // -----------------------------------------------------------------------------
 
     void CPluginInterface::OnResume()
     {
-        ENGINE_CONSOLE_INFOV("Kinect plugin resumed!");
+
     }
 
     // -----------------------------------------------------------------------------
