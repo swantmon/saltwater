@@ -105,6 +105,7 @@ namespace Edit
         float MetallicValue    = m_pMetallicEdit->text().toFloat();
         float ReflectanceValue = m_pReflectanceEdit->text().toFloat();
         float BumpValue        = m_pBumpEdit->text().toFloat();
+        float RefractionValue  = m_pRefractionEdit->text().toFloat();
 
         float TilingX = m_pTilingXEdit->text().toFloat();
         float TilingY = m_pTilingYEdit->text().toFloat();
@@ -119,15 +120,17 @@ namespace Edit
         m_pRoughnessSlider  ->blockSignals(true);
         m_pMetallicSlider   ->blockSignals(true);
         m_pReflectanceSlider->blockSignals(true);
+        m_pRefractionSlider ->blockSignals(true);
 
         m_pRoughnessSlider  ->setValue(static_cast<int>(RoughnessValue   * 100.0f));
         m_pMetallicSlider   ->setValue(static_cast<int>(MetallicValue    * 100.0f));
         m_pReflectanceSlider->setValue(static_cast<int>(ReflectanceValue * 100.0f));
+        m_pRefractionSlider->setValue(static_cast<int>(RefractionValue  * 100.0f));
 
         m_pRoughnessSlider  ->blockSignals(false);
         m_pMetallicSlider   ->blockSignals(false);
         m_pReflectanceSlider->blockSignals(false);
-
+        m_pRefractionSlider ->blockSignals(false);
 
         // -----------------------------------------------------------------------------
         // Send message
@@ -144,6 +147,7 @@ namespace Edit
         NewMessage.Put(ReflectanceValue);
         NewMessage.Put(MetallicValue);
         NewMessage.Put(BumpValue);
+        NewMessage.Put(RefractionValue);
 
         std::string AlbedoTextureEdit = std::string(m_pAlbedoTextureEdit->GetTextureFile().toLatin1());
         std::string NormalTextureEdit = std::string(m_pNormalTextureEdit->GetTextureFile().toLatin1());
@@ -186,6 +190,14 @@ namespace Edit
     void CInspectorMaterial::reflectanceValueChanged(int _Value)
     {
         m_pReflectanceEdit->setText(QString::number(_Value / 100.0f));
+    }
+
+    // -----------------------------------------------------------------------------
+
+
+    void CInspectorMaterial::refractionValueChanged(int _Value)
+    {
+        m_pRefractionEdit->setText(QString::number(_Value / 100.0f));
     }
 
     // -----------------------------------------------------------------------------
@@ -359,6 +371,7 @@ namespace Edit
         float Reflectance = _rMessage.Get<float>();
         float Metalness   = _rMessage.Get<float>();
         float BumpFactor  = _rMessage.Get<float>();
+        float Refraction  = _rMessage.Get<float>();
 
         std::string ColorMapName     = _rMessage.Get<std::string>();
         std::string NormalMapName    = _rMessage.Get<std::string>();
@@ -431,6 +444,12 @@ namespace Edit
         // -----------------------------------------------------------------------------
 
         m_pAlphaTextureEdit->SetTextureFile(QString(AlphaMapName.c_str()));
+
+        // -----------------------------------------------------------------------------
+
+        m_pRefractionSlider->setValue(static_cast<int>(Refraction * 100.0f));
+
+        m_pRefractionEdit->setText(QString::number(Refraction));
 
         // -----------------------------------------------------------------------------
 

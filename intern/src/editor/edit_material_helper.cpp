@@ -144,6 +144,7 @@ namespace
         NewMessage.Put(pMaterial->GetReflectance());
         NewMessage.Put(pMaterial->GetMetalness());
         NewMessage.Put(pMaterial->GetDisplacement());
+        NewMessage.Put(pMaterial->GetRefractionIndex());
 
         NewMessage.Put(pMaterial->GetColorTexture());
         NewMessage.Put(pMaterial->GetNormalTexture());
@@ -177,6 +178,7 @@ namespace
         float Reflectance  = _rMessage.Get<float>();
         float Metalness    = _rMessage.Get<float>();
         float Displacement = _rMessage.Get<float>();
+        float Refraction   = _rMessage.Get<float>();
 
         std::string ColorMapName     = _rMessage.Get<std::string>();
         std::string NormalMapName    = _rMessage.Get<std::string>();
@@ -192,6 +194,7 @@ namespace
         pMaterial->SetReflectance(Reflectance);
         pMaterial->SetMetalness(Metalness);
         pMaterial->SetDisplacement(Displacement);
+        pMaterial->SetRefractionIndex(Refraction);
 
         pMaterial->SetColorTexture(ColorMapName);
         pMaterial->SetNormalTexture(NormalMapName);

@@ -81,6 +81,9 @@ namespace Dt
         void SetAlpha(float _Value);
         float GetAlpha() const;
 
+        void SetRefractionIndex(float _Value);
+        float GetRefractionIndex() const;
+
     public:
 
         CMaterialComponent();
@@ -103,5 +106,6 @@ namespace Dt
         float       m_Reflectance;
         float       m_MetalMask;
         float       m_Displacement;
+        float       m_RefractionIndex;
     };
 } // namespace Dt

@@ -9,22 +9,22 @@ namespace Dt
 {
     CPointLightComponent::CPointLightComponent()
         : m_RefreshMode                        (Static)
-        , m_ShadowType                         (NoShadows)
-        , m_ShadowQuality                      (Low)
-        , m_Direction                          (0.0f, 0.0f, -1.0f)
-        , m_Color                              ()
+        , m_ShadowType                         (HardShadows)
+        , m_ShadowQuality                      (Medium)
+        , m_Direction                          (0.0f, 0.01f, -1.0f)
+        , m_Color                              (1.0f)
         , m_Lightness                          ()
         , m_Temperature                        (0.0f)
-        , m_Intensity                          (0.0f)
-        , m_AttentuationRadius                 (0.0f)
+        , m_Intensity                          (1200.0f)
+        , m_AttentuationRadius                 (20.0f)
         , m_ReciprocalSquaredAttentuationRadius(0.0f)
-        , m_InnerConeAngle                     (0.0f)
-        , m_OuterConeAngle                     (0.0f)
+        , m_InnerConeAngle                     (glm::radians(60.0f))
+        , m_OuterConeAngle                     (glm::radians(90.0f))
         , m_AngleScale                         (0.0f)
         , m_AngleOffset                        (1.0f)
         , m_HasTemperature                     (false)
     {
-
+        UpdateLightness();
     }
 
     // -----------------------------------------------------------------------------

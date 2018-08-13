@@ -1,6 +1,6 @@
 
-#ifndef __INCLUDE_FS_MATERIAL_FORWARD_GLSL__
-#define __INCLUDE_FS_MATERIAL_FORWARD_GLSL__
+#ifndef __INCLUDE_FS_APPLY_GLSL__
+#define __INCLUDE_FS_APPLY_GLSL__
 
 #include "common.glsl"
 #include "common_light.glsl"
@@ -45,6 +45,12 @@ layout(std140, binding = 4) uniform UB4
     uint ps_ExposureHistoryIndex;
 };
 
+layout(std140, binding = 5) uniform UB5
+{
+    vec4 ps_RefractionIndices;
+    vec4 ps_DepthLinearization;
+};
+
 layout(std430, binding = 0) readonly buffer BB0
 {
     float ps_ExposureHistory[8];
@@ -55,17 +61,21 @@ layout(std430, binding = 1) readonly buffer BB1
     SLightProperties ps_LightProperties[MAX_NUMBER_OF_LIGHTS];
 };
 
-layout(binding =  0) uniform sampler2D   ps_DiffuseTexture;
-layout(binding =  1) uniform sampler2D   ps_NormalTexture;
-layout(binding =  2) uniform sampler2D   ps_RougnessTexture;
-layout(binding =  3) uniform sampler2D   ps_Metaltexture;
-layout(binding =  4) uniform sampler2D   ps_AOTexture;
+layout(binding =  0) uniform sampler2D ps_DiffuseTexture;
+layout(binding =  1) uniform sampler2D ps_NormalTexture;
+layout(binding =  2) uniform sampler2D ps_RougnessTexture;
+layout(binding =  3) uniform sampler2D ps_Metaltexture;
+layout(binding =  4) uniform sampler2D ps_AOTexture;
 // binding 5 is reserved for bump texture
-layout(binding =  6) uniform sampler2D   ps_AlphaTexture;
-layout(binding =  7) uniform sampler2D   ps_BRDF;
-layout(binding =  8) uniform samplerCube ps_SpecularCubemap;
-layout(binding =  9) uniform samplerCube ps_DiffuseCubemap;
-layout(binding = 10) uniform sampler2DShadow ps_ShadowTexture[MAX_NUMBER_OF_LIGHTS];
+layout(binding =  6) uniform sampler2D ps_AlphaTexture;
+
+layout(binding =  7) uniform sampler2D ps_RefractiveNormal;
+layout(binding =  8) uniform sampler2D ps_RefractiveDepth;
+
+layout(binding =  9) uniform sampler2D   ps_BRDF;
+layout(binding = 10) uniform samplerCube ps_SpecularCubemap;
+layout(binding = 11) uniform samplerCube ps_DiffuseCubemap;
+layout(binding = 12) uniform sampler2DShadow ps_ShadowTexture[MAX_NUMBER_OF_LIGHTS];
 
 // -----------------------------------------------------------------------------
 // Input to fragment from previous stage
@@ -83,6 +93,28 @@ layout(location = 0) out vec4 out_Output;
 // -----------------------------------------------------------------------------
 // Main
 // -----------------------------------------------------------------------------
+vec2 GetUVFromVSPosition(in vec4 _VSPosition)
+{
+    vec4 SSPosition = g_ViewToScreen * _VSPosition;
+
+    return 0.5f * (SSPosition.xy / SSPosition.w) + 0.5f;
+}
+
+// -----------------------------------------------------------------------------
+
+vec4 GetRefraction(in vec3 _IncidentRay, in vec3 _VSNormal, in float _RefractionIndex, in float _RefractionIndexSqr )
+{
+    float IdotN = dot(-_IncidentRay, _VSNormal);
+
+    float CosineSqr = 1.0f - _RefractionIndexSqr * (1.0f - IdotN * IdotN);
+
+    return CosineSqr <= 0.0f ? 
+        vec4( reflect( _IncidentRay, _VSNormal ).xyz, -1.0f ) : 
+        vec4( normalize( _RefractionIndex * _IncidentRay + (_RefractionIndex * IdotN - sqrt( CosineSqr )) * _VSNormal ).xyz, 1.0f); 
+}
+
+// -----------------------------------------------------------------------------
+
 void main(void)
 {    
     vec2  UV        = in_UV * ps_TilingOffset.xy + ps_TilingOffset.zw;
@@ -133,6 +165,56 @@ void main(void)
     // Exposure data
     // -----------------------------------------------------------------------------
     float AverageExposure = ps_ExposureHistory[ps_ExposureHistoryIndex];
+ 
+    // -----------------------------------------------------------------------------
+    // Stuff that we know from the beginning
+    // -----------------------------------------------------------------------------
+    vec3 VSNormal   = (g_WorldToView * vec4(WSNormal, 0.0f)).xyz;
+    vec3 VSPosition = (g_WorldToView * vec4(Data.m_WSPosition, 1.0f)).xyz;
+
+    vec3 VSNormalSurface1 = normalize(VSNormal);
+    vec3 ViewDirection    = normalize(VSPosition);
+
+    // -----------------------------------------------------------------------------
+    // Find the distance to front & back surface, first as normalized [0..1] 
+    // values, than unprojected
+    // -----------------------------------------------------------------------------
+    vec2 DepthOfBackAndObject = vec2(texture(ps_RefractiveDepth, UV).x, Data.m_VSDepth);
+
+    DepthOfBackAndObject = ps_DepthLinearization.x / (DepthOfBackAndObject * ps_DepthLinearization.y - ps_DepthLinearization.z );
+
+    float Distance = DepthOfBackAndObject.y - DepthOfBackAndObject.x;
+    
+    // -----------------------------------------------------------------------------
+    // Find the refraction direction of first surface
+    // -----------------------------------------------------------------------------
+    vec3 RefractionSurface1 = GetRefraction(ViewDirection, VSNormalSurface1, ps_RefractionIndices.x, ps_RefractionIndices.y).xyz; 
+
+    // -----------------------------------------------------------------------------
+    // Compute approximate exitant location & surface normal
+    // -----------------------------------------------------------------------------
+    vec4 VSExitantLocation = vec4(RefractionSurface1 * Distance + VSPosition.xyz, 1.0f);
+
+    vec3 WSNormalSurf2 = texture(ps_RefractiveNormal, GetUVFromVSPosition(VSExitantLocation)).xyz;
+
+    vec3 VSNormalSurface2 = (g_WorldToView * vec4(WSNormalSurf2, 0.0f)).xyz;
+
+    float NdotN = dot(VSNormalSurface2.xyz, VSNormalSurface2.xyz);
+
+    VSNormalSurface2 = normalize( VSNormalSurface2 );
+
+    // -----------------------------------------------------------------------------
+    // What happens if we lie in a black-texel? Means no normal! Conceptually,
+    // this means we pass thru "side" of object. Use norm perpindicular to view
+    // -----------------------------------------------------------------------------
+    if (NdotN == 0.0f) VSNormalSurface2 = normalize(vec3(RefractionSurface1.x, RefractionSurface1.y, 0.0f));
+
+    // -----------------------------------------------------------------------------
+    // Refract at the second surface
+    // -----------------------------------------------------------------------------
+    vec4 RefractionSurface2 = GetRefraction(RefractionSurface1, -VSNormalSurface2, ps_RefractionIndices.z, ps_RefractionIndices.w );
+
+    vec4 WSRefraction = g_ViewToWorld * vec4(RefractionSurface2.xyz, 0.0f);
 
     // -----------------------------------------------------------------------------
     // Forward pass for each light
@@ -238,18 +320,19 @@ void main(void)
             // -----------------------------------------------------------------------------
             vec3 PreDFGF = textureLod(ps_BRDF, vec2(NdotV, Data.m_Roughness), 0.0f).rgb;
             
-            vec3 DiffuseIBL  = EvaluateDiffuseIBL(ps_DiffuseCubemap, Data, WSViewDirection, PreDFGF.z, NdotV);
-            vec3 SpecularIBL = EvaluateSpecularIBL(ps_SpecularCubemap, Data, WSReflectVector, PreDFGF.xy, ClampNdotV, NumberOfMiplevels);
+            vec3 DiffuseIBL        = EvaluateDiffuseIBL(ps_DiffuseCubemap, Data, WSViewDirection, PreDFGF.z, NdotV);
+            vec3 SpecularIBLRefract = EvaluateSpecularIBL(ps_SpecularCubemap, Data, normalize(WSRefraction.xyz), PreDFGF.xy, ClampNdotV, NumberOfMiplevels);
+            vec3 SpecularIBLReflect = EvaluateSpecularIBL(ps_SpecularCubemap, Data, WSReflectVector, PreDFGF.xy, ClampNdotV, NumberOfMiplevels);
             
             // -------------------------------------------------------------------------------------
             // Combination of lighting
             // Multiplication with average exposure is not necessary because it is already included
             // -------------------------------------------------------------------------------------
-            Luminance += (DiffuseIBL.rgb + SpecularIBL.rgb);
+            Luminance += (DiffuseIBL.rgb + mix(SpecularIBLRefract.rgb, SpecularIBLReflect.rgb, NdotV));
         }
     }
 
     out_Output = vec4(Luminance, Alpha);
 }
 
-#endif // __INCLUDE_FS_MATERIAL_FORWARD_GLSL__
+#endif // __INCLUDE_FS_APPLY_GLSL__

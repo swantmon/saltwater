@@ -23,6 +23,8 @@ namespace Gfx
         m_MaterialAttributes.m_TilingOffset[2] = 0.0f;
         m_MaterialAttributes.m_TilingOffset[3] = 0.0f;
 
+        m_MaterialRefractionAttributes.m_IndexOfRefraction = 1.0f;
+
         m_MaterialKey.m_Key = 0;
 
         m_ShaderPtrs[CShader::Vertex] = 0;
@@ -113,6 +115,13 @@ namespace Gfx
 
     // -----------------------------------------------------------------------------
 
+    const CMaterial::SRefractionAttributes& CMaterial::GetMaterialRefractionAttributes() const
+    {
+        return m_MaterialRefractionAttributes;
+    }
+
+    // -----------------------------------------------------------------------------
+
     const CMaterial::SMaterialKey& CMaterial::GetKey() const
     {
         return m_MaterialKey;
@@ -120,16 +129,23 @@ namespace Gfx
 
     // -----------------------------------------------------------------------------
 
-    bool CMaterial::GetHasAlpha() const
+    bool CMaterial::HasAlpha() const
     {
         return m_MaterialAttributes.m_Color[3] < 1.0f || m_MaterialKey.m_HasAlphaTex;
     }
 
     // -----------------------------------------------------------------------------
 
-    bool CMaterial::GetHasBump() const
+    bool CMaterial::HasBump() const
     {
         return m_MaterialAttributes.m_Displacement > 0.0f && m_MaterialKey.m_HasBumpTex;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    bool CMaterial::HasRefraction() const
+    {
+        return m_MaterialRefractionAttributes.m_IndexOfRefraction != 1.0f;
     }
 
     // -----------------------------------------------------------------------------

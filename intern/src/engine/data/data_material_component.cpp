@@ -21,6 +21,7 @@ namespace Dt
         , m_Reflectance(0.0f)
         , m_MetalMask(0.0f)
         , m_Displacement(0.0f)
+        , m_RefractionIndex(1.0f)
     {
     }
 
@@ -307,5 +308,19 @@ namespace Dt
     float CMaterialComponent::GetAlpha() const
     {
         return m_Color[3];
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CMaterialComponent::SetRefractionIndex(float _Value)
+    {
+        m_RefractionIndex = _Value;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    float CMaterialComponent::GetRefractionIndex() const
+    {
+        return m_RefractionIndex;
     }
 } // namespace Dt
