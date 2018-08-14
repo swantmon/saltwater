@@ -1523,10 +1523,17 @@ namespace MR
 
         BufferManager::UploadBufferData(m_VolumeBuffers.m_AABBBufferPtr, &Data);
 
-        Raycast();
+        if (pTransform == nullptr)
+        {
+            Raycast();
+        }
+
         Performance::EndEvent();
 
-        CreateRaycastPyramid();
+        if (pTransform == nullptr)
+        {
+            CreateRaycastPyramid();
+        }
 
         Performance::EndEvent();
 
