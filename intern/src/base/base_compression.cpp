@@ -16,6 +16,14 @@ namespace
             throw Base::CException(__FILE__, __LINE__, "Failed to decompress");
         }
     }
+
+    const int CompressionLevels[] =
+    {
+        Z_NO_COMPRESSION,
+        Z_BEST_SPEED,
+        Z_BEST_COMPRESSION,
+        Z_DEFAULT_COMPRESSION
+    };
 }
 
 namespace Base
@@ -37,4 +45,25 @@ namespace Base
         CheckResult(inflate(&infstream, Z_SYNC_FLUSH));
         CheckResult(inflateEnd(&infstream));
     }
+
+    void Compress(const std::vector<char>& _rDecompressedData, std::vector<char>& _rCompressedData, int _Level = 1)
+    {
+        _rCompressedData.resize(_rDecompressedData.size());
+
+        z_stream defstream;
+        defstream.zalloc = Z_NULL;
+        defstream.zfree = Z_NULL;
+        defstream.opaque = Z_NULL;
+        defstream.avail_in = static_cast<uInt>(_rDecompressedData.size());
+        defstream.next_in = const_cast<Bytef*>(reinterpret_cast<const Bytef*>(_rDecompressedData.data()));
+        defstream.avail_out = static_cast<uInt>(_rCompressedData.size());
+        defstream.next_out = reinterpret_cast<Bytef*>(_rCompressedData.data());
+
+        CheckResult(deflateInit2(&defstream, CompressionLevels[_Level], Z_DEFLATED, 15 + 16, 8, Z_DEFAULT_STRATEGY));
+        CheckResult(deflate(&defstream, Z_FINISH));
+        CheckResult(deflateEnd(&defstream));
+
+        _rCompressedData.resize(defstream.total_out);
+    }
+
 } // namespace Base
