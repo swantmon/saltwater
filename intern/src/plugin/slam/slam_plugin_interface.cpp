@@ -38,11 +38,11 @@ namespace SLAM
     void CPluginInterface::SetImageSizesAndIntrinsicData(glm::vec4 _ImageSizes, glm::vec4 _Intrinsics)
     {
         glm::ivec2 DepthSize = glm::ivec2(_ImageSizes.x, _ImageSizes.y);
-        glm::ivec2 ColorSize = glm::ivec2(_ImageSizes.z, _ImageSizes.w);
+        glm::ivec2 ColorSize = glm::ivec2(glm::max(_ImageSizes.z, 1.0f), glm::max(_ImageSizes.w, 1.0f));
 
         glm::vec2 FocalLength = glm::vec2(_Intrinsics.x, _Intrinsics.y);
         glm::vec2 FocalPoint = glm::vec2(_Intrinsics.z, _Intrinsics.w);
-
+        
         Gfx::ReconstructionRenderer::GetReconstructor().SetImageSizes(DepthSize, ColorSize);
         Gfx::ReconstructionRenderer::GetReconstructor().SetIntrinsics(FocalLength, FocalPoint);
     }
