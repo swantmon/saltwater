@@ -204,15 +204,16 @@ namespace Scpt
                 {
                     glm::vec2 FocalLength = *reinterpret_cast<glm::vec2*>(Decompressed.data() + sizeof(int32_t) * 2);
                     glm::vec2 FocalPoint = *reinterpret_cast<glm::vec2*>(Decompressed.data() + sizeof(int32_t) * 2 + sizeof(glm::vec2));
-                    glm::ivec2 ImageSize = *reinterpret_cast<glm::ivec2*>(Decompressed.data() + sizeof(int32_t) * 2 + sizeof(glm::vec2) * 2);
+                    glm::ivec2 DepthSize = *reinterpret_cast<glm::ivec2*>(Decompressed.data() + sizeof(int32_t) * 2 + sizeof(glm::vec2) * 2);
+                    glm::ivec2 ColorSize = *reinterpret_cast<glm::ivec2*>(Decompressed.data() + sizeof(int32_t) * 2 + sizeof(glm::vec2) * 2 + sizeof(glm::ivec2));
 
-                    OnSetImageSizesAndIntrinsics(glm::vec4(ImageSize, ImageSize), glm::vec4(FocalLength, FocalPoint));
+                    OnSetImageSizesAndIntrinsics(glm::vec4(DepthSize, ColorSize), glm::vec4(FocalLength, FocalPoint));
 
                     OnInitializeReconstructor();
 
                     IsReconstructorInitialized = true;
 
-                    m_Buffer = new uint16_t[ImageSize.x * ImageSize.y];
+                    m_Buffer = new uint16_t[DepthSize.x * DepthSize.y];
                 }
             }
             else if (MessageType == TRANSFORM)
