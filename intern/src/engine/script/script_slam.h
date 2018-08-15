@@ -226,15 +226,22 @@ namespace Scpt
                 
                 const uint16_t* RawBuffer = reinterpret_cast<uint16_t*>(Decompressed.data() + 3 * sizeof(int32_t));
 
+                std::vector<char> Message(640 * 480);
+
                 for (int i = 0; i < Width; ++ i)
                 {
                     for (int j = 0; j < Height; ++ j)
                     {
                         m_Buffer[j * Width + i] = shift2depth(RawBuffer[j * Width + (Width - 1 - i)]);
+                        Message[(Height - j - 1) * Width + (Width - i - 1)] = static_cast<char>((m_Buffer[j * Width + i] / 3000.0f) * 255.0f);
                     }
                 }
 
                 OnNewFrame(m_Buffer, nullptr, &m_PoseMatrix);
+                
+                /*std::vector<char> Compressed;
+                Base::Compress(Message, Compressed, 1);
+                Net::CNetworkManager::GetInstance().SendMessage(0, Compressed);*/
             }
         }
 
