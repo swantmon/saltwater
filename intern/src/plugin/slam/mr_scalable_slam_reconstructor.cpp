@@ -1387,8 +1387,8 @@ namespace MR
 
         if (CaptureColor)
         {
-            TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_DepthFrameSize.x, m_DepthFrameSize.y));
-            TextureManager::CopyToTexture2D(m_RawCameraFramePtr, TargetRect, m_DepthFrameSize.x, pColor);
+            TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_ColorFrameSize.x, m_ColorFrameSize.y));
+            TextureManager::CopyToTexture2D(m_RawCameraFramePtr, TargetRect, m_ColorFrameSize.x, pColor);
         }
 
         //////////////////////////////////////////////////////////////////////////////////////
