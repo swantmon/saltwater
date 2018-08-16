@@ -1370,8 +1370,6 @@ namespace MR
 
         const bool CaptureColor = m_ReconstructionSettings.m_CaptureColor;
         
-        char* pColor = m_CameraPixels.data();
-
         if (m_IsTrackingPaused)
         {
             return;
@@ -1388,7 +1386,7 @@ namespace MR
         if (CaptureColor)
         {
             TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_ColorFrameSize.x, m_ColorFrameSize.y));
-            TextureManager::CopyToTexture2D(m_RawCameraFramePtr, TargetRect, m_ColorFrameSize.x, pColor);
+            TextureManager::CopyToTexture2D(m_RawCameraFramePtr, TargetRect, m_ColorFrameSize.x, const_cast<char*>(pColorBuffer));
         }
 
         //////////////////////////////////////////////////////////////////////////////////////
