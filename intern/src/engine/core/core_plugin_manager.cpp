@@ -112,7 +112,11 @@ namespace
 
         MultiByteToWideChar(CP_UTF8, 0, _rLibrary.c_str(), -1, FileName, 32768);
 
-        std::wstring PluginFile = std::wstring(FileName) + L".dll";
+#ifdef ENGINE_DEBUG_MODE
+        std::wstring PluginFile = std::wstring(FileName) + L"d.dll";
+#else
+        std::wstring PluginFile = std::wstring(FileName) + L"r.dll";
+#endif // APP_DEBUG_MODE
 
         Instance = LoadLibraryExW(PluginFile.c_str(), NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
 #elif PLATFORM_ANDROID
