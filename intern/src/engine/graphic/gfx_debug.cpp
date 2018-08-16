@@ -72,7 +72,7 @@ namespace
         // -----------------------------------------------------------------------------
         // DEBUG
         // -----------------------------------------------------------------------------
-#if APP_DEBUG_MODE == 1
+#ifdef ENGINE_DEBUG_MODE
         glDebugMessageCallback(OpenGLDebugCallback, NULL);
 
         glEnable(GL_DEBUG_OUTPUT);
