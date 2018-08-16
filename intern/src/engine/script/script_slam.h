@@ -238,11 +238,57 @@ namespace Scpt
                     }
                 }
 
-                OnNewFrame(m_Buffer, nullptr, &m_PoseMatrix);
+                //OnNewFrame(m_Buffer, nullptr, &m_PoseMatrix);
                 
                 /*std::vector<char> Compressed;
                 Base::Compress(Message, Compressed, 1);
                 Net::CNetworkManager::GetInstance().SendMessage(0, Compressed);*/
+            }
+            else if (MessageType == COLORFRAME)
+            {
+                int32_t Width = *reinterpret_cast<int32_t*>(Decompressed.data() + sizeof(int32_t));
+                int32_t Height = *reinterpret_cast<int32_t*>(Decompressed.data() + 2 * sizeof(int32_t));
+                
+                struct char2
+                {
+                    char x, y;
+                };
+
+                struct char4
+                {
+                    char x, y, z, w;
+                };
+
+                const char* YData = Decompressed.data() + 3 * sizeof(int32_t);
+                const char2* UVData = reinterpret_cast<char2*>(Decompressed.data() + 3 * sizeof(int32_t) + Width * Height);
+
+                std::vector<char4> RGBData(Width * Height);
+
+                for (int x = 0; x < Width; ++x)
+                {
+                    for (int y = 0; y < Height; ++y)
+                    {
+                        float Y = YData[x * Height + y] / 255.0f;
+                        char2 UVRaw = UVData[(x * Height) + y / 2];
+                        glm::vec2 UV = glm::vec2(UVRaw.x, UVRaw.y) / 255.0f;
+
+                        glm::mat4 YCbCrToRGBTransform = glm::mat4(
+                            glm::vec4(+1.0000f, +1.0000f, +1.0000f, +0.0000f),
+                            glm::vec4(+0.0000f, -0.3441f, +1.7720f, +0.0000f),
+                            glm::vec4(+1.4020f, -0.7141f, +0.0000f, +0.0000f),
+                            glm::vec4(-0.7010f, +0.5291f, -0.8860f, +1.0000f)
+                        );
+
+                        glm::vec4 RGBColor = YCbCrToRGBTransform * glm::vec4(Y, UV, 1.0f);
+
+                        RGBData[x * Height + y].x = static_cast<char>(RGBColor.x * 255.0f);
+                        RGBData[x * Height + y].y = static_cast<char>(RGBColor.y * 255.0f);
+                        RGBData[x * Height + y].z = static_cast<char>(RGBColor.z * 255.0f);
+                        RGBData[x * Height + y].w = 255;
+                    }
+                }
+
+                OnNewFrame(m_Buffer, reinterpret_cast<char*>(RGBData.data()), &m_PoseMatrix);
             }
         }
 
