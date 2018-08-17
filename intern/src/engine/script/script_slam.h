@@ -202,10 +202,13 @@ namespace Scpt
                 }
                 else if(MessageID == 1)
                 {
-                    glm::vec2 FocalLength = *reinterpret_cast<glm::vec2*>(Decompressed.data() + sizeof(int32_t) * 2);
-                    glm::vec2 FocalPoint = *reinterpret_cast<glm::vec2*>(Decompressed.data() + sizeof(int32_t) * 2 + sizeof(glm::vec2));
-                    glm::ivec2 DepthSize = *reinterpret_cast<glm::ivec2*>(Decompressed.data() + sizeof(int32_t) * 2 + sizeof(glm::vec2) * 2);
-                    glm::ivec2 ColorSize = *reinterpret_cast<glm::ivec2*>(Decompressed.data() + sizeof(int32_t) * 2 + sizeof(glm::vec2) * 2 + sizeof(glm::ivec2));
+                    ENGINE_CONSOLE_INFO("Initializing reconstructor");
+
+                    glm::vec2 FocalLength = *reinterpret_cast<glm::vec2* >(Decompressed.data() + sizeof(int32_t) * 2);
+                    glm::vec2 FocalPoint  = *reinterpret_cast<glm::vec2* >(Decompressed.data() + sizeof(int32_t) * 2 + sizeof(glm::vec2));
+                    glm::ivec2 DepthSize  = *reinterpret_cast<glm::ivec2*>(Decompressed.data() + sizeof(int32_t) * 2 + sizeof(glm::vec2) * 2);
+                    //glm::ivec2 ColorSize  = *reinterpret_cast<glm::ivec2*>(Decompressed.data() + sizeof(int32_t) * 2 + sizeof(glm::vec2) * 2 + sizeof(glm::ivec2));
+                    glm::ivec2 ColorSize = glm::ivec2(640, 360);
 
                     OnSetImageSizesAndIntrinsics(glm::vec4(DepthSize, ColorSize), glm::vec4(FocalLength, FocalPoint));
 
@@ -214,6 +217,8 @@ namespace Scpt
                     IsReconstructorInitialized = true;
 
                     m_Buffer = new uint16_t[DepthSize.x * DepthSize.y];
+
+                    ENGINE_CONSOLE_INFO("Initialization complete");
                 }
             }
             else if (MessageType == TRANSFORM)
@@ -246,8 +251,8 @@ namespace Scpt
             }
             else if (MessageType == COLORFRAME)
             {
-                int32_t Width = *reinterpret_cast<int32_t*>(Decompressed.data() + sizeof(int32_t));
-                int32_t Height = *reinterpret_cast<int32_t*>(Decompressed.data() + 2 * sizeof(int32_t));
+                const int32_t Width = *reinterpret_cast<int32_t*>(Decompressed.data() + sizeof(int32_t));
+                const int32_t Height = *reinterpret_cast<int32_t*>(Decompressed.data() + 2 * sizeof(int32_t));
                 
                 struct char2
                 {
@@ -260,31 +265,38 @@ namespace Scpt
                 };
 
                 const char* YData = Decompressed.data() + 3 * sizeof(int32_t);
-                const char2* UVData = reinterpret_cast<char2*>(Decompressed.data() + 3 * sizeof(int32_t) + Width * Height);
+                const char2* UVData = reinterpret_cast<const char2*>(YData + Width * Height);
 
                 std::vector<char4> RGBData(Width * Height);
 
-                for (int x = 0; x < Width; ++x)
+                const glm::mat4 YCbCrToRGBTransform = glm::mat4(
+                    glm::vec4(+1.0000f, +1.0000f, +1.0000f, +0.0000f),
+                    glm::vec4(+0.0000f, -0.3441f, +1.7720f, +0.0000f),
+                    glm::vec4(+1.4020f, -0.7141f, +0.0000f, +0.0000f),
+                    glm::vec4(-0.7010f, +0.5291f, -0.8860f, +1.0000f)
+                );
+
+                for (int x = 0; x < Width; ++ x)
                 {
-                    for (int y = 0; y < Height; ++y)
+                    for (int y = 0; y < Height; ++ y)
                     {
-                        float Y = YData[x * Height + y] / 255.0f;
-                        char2 UVRaw = UVData[(x * Height) + y / 2];
-                        glm::vec2 UV = glm::vec2(UVRaw.x, UVRaw.y) / 255.0f;
-
-                        glm::mat4 YCbCrToRGBTransform = glm::mat4(
-                            glm::vec4(+1.0000f, +1.0000f, +1.0000f, +0.0000f),
-                            glm::vec4(+0.0000f, -0.3441f, +1.7720f, +0.0000f),
-                            glm::vec4(+1.4020f, -0.7141f, +0.0000f, +0.0000f),
-                            glm::vec4(-0.7010f, +0.5291f, -0.8860f, +1.0000f)
-                        );
-
-                        glm::vec4 RGBColor = YCbCrToRGBTransform * glm::vec4(Y, UV, 1.0f);
-
-                        RGBData[x * Height + y].x = static_cast<char>(RGBColor.x * 255.0f);
-                        RGBData[x * Height + y].y = static_cast<char>(RGBColor.y * 255.0f);
-                        RGBData[x * Height + y].z = static_cast<char>(RGBColor.z * 255.0f);
+                        float Y = YData[x * Height + y];
+                        
+                        RGBData[x * Height + y].x = Y;
+                        RGBData[x * Height + y].y = 0;
+                        RGBData[x * Height + y].z = 0;
                         RGBData[x * Height + y].w = 255;
+                    }
+                }
+
+                for (int x = 0; x < Width / 2; ++ x)
+                {
+                    for (int y = 0; y < Height / 2; ++ y)
+                    {
+                        char2 UV = UVData[x * Height + y];
+
+                        RGBData[x + y * Width / 2].y = UV.x;
+                        RGBData[x + y * Width / 2].z = UV.y;
                     }
                 }
 
