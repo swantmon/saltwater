@@ -1179,8 +1179,8 @@ namespace MR
 
 		if (m_ReconstructionSettings.m_CaptureColor)
 		{
-			TextureDescriptor.m_NumberOfPixelsU = m_DepthFrameSize.x;
-			TextureDescriptor.m_NumberOfPixelsV = m_DepthFrameSize.y;
+			TextureDescriptor.m_NumberOfPixelsU = m_ColorFrameSize.x;
+			TextureDescriptor.m_NumberOfPixelsV = m_ColorFrameSize.y;
 			TextureDescriptor.m_Format = CTexture::R8G8B8A8_UBYTE;
 
 			m_RawCameraFramePtr = TextureManager::CreateTexture2D(TextureDescriptor);
@@ -1366,8 +1366,6 @@ namespace MR
 
     void CScalableSLAMReconstructor::OnNewFrame(const uint16_t* pDepthBuffer, const char* pColorBuffer, const glm::mat4* pTransform)
     {
-        BASE_UNUSED(pColorBuffer);
-
         const bool CaptureColor = m_ReconstructionSettings.m_CaptureColor;
         
         if (m_IsTrackingPaused)
