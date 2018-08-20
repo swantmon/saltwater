@@ -299,14 +299,11 @@ namespace Scpt
                 
                 const uint16_t* RawBuffer = reinterpret_cast<uint16_t*>(Decompressed.data() + 3 * sizeof(int32_t));
 
-                std::vector<char> Message(640 * 480);
-
                 for (int i = 0; i < Width; ++ i)
                 {
                     for (int j = 0; j < Height; ++ j)
                     {
                         m_DepthBuffer[j * Width + i] = shift2depth(RawBuffer[j * Width + (Width - 1 - i)]);
-                        Message[(Height - j - 1) * Width + (Width - i - 1)] = static_cast<char>((m_DepthBuffer[j * Width + i] / 3000.0f) * 255.0f);
                     }
                 }
 
