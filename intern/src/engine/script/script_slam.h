@@ -314,7 +314,7 @@ namespace Scpt
                 TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(Width, Height));
                 Gfx::TextureManager::CopyToTexture2D(m_DepthTexture, TargetRect, Width, const_cast<uint16_t*>(m_DepthBuffer));
 
-                OnNewFrame(m_DepthTexture, nullptr, &m_PoseMatrix);
+                //OnNewFrame(m_DepthTexture, nullptr, &m_PoseMatrix);
                 
                 /*std::vector<char> Compressed;
                 Base::Compress(Message, Compressed, 1);
@@ -342,7 +342,7 @@ namespace Scpt
 
                 Gfx::ContextManager::Dispatch(DivUp(m_ColorSize.x, m_TileSize2D), DivUp(m_ColorSize.y, m_TileSize2D), 1);
 
-                //OnNewFrame(m_DepthTexture, m_ColorTexture, &m_PoseMatrix);
+                OnNewFrame(m_DepthTexture, m_RGBTexture, &m_PoseMatrix);
             }
         }
 
