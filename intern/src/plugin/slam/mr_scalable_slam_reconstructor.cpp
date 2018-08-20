@@ -1364,7 +1364,7 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CScalableSLAMReconstructor::OnNewFrame(const uint16_t* pDepthBuffer, const char* pColorBuffer, const glm::mat4* pTransform)
+    void CScalableSLAMReconstructor::OnNewFrame(Gfx::CTexturePtr DepthBuffer, const char* pColorBuffer, const glm::mat4* pTransform)
     {
         const bool CaptureColor = m_ReconstructionSettings.m_CaptureColor;
         
@@ -1377,9 +1377,11 @@ namespace MR
 
         Performance::BeginEvent("Data Input");
 
+        m_RawDepthBufferPtr = DepthBuffer;
+
         Base::AABB2UInt TargetRect;
-        TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_DepthFrameSize.x, m_DepthFrameSize.y));
-        TextureManager::CopyToTexture2D(m_RawDepthBufferPtr, TargetRect, m_DepthFrameSize.x, const_cast<uint16_t*>(pDepthBuffer));
+        /*TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_DepthFrameSize.x, m_DepthFrameSize.y));
+        TextureManager::CopyToTexture2D(m_RawDepthBufferPtr, TargetRect, m_DepthFrameSize.x, const_cast<uint16_t*>(pDepthBuffer));*/
 
         if (CaptureColor)
         {

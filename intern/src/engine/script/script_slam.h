@@ -26,10 +26,6 @@ namespace Scpt
     {
     private:
 
-        uint16_t* m_Buffer;
-
-        glm::mat4 m_PoseMatrix;
-
         enum EMessageType
         {
             COMMAND,
@@ -41,7 +37,7 @@ namespace Scpt
         typedef void(*InitializeCallback)(void);
         typedef void(*TerminateCallback)(void);
         typedef void(*ResetCallback)(void);
-        typedef void(*DepthFrameCallback)(const uint16_t*, const char*, const glm::mat4*);
+        typedef void(*DepthFrameCallback)(Gfx::CTexturePtr, const char*, const glm::mat4*);
         typedef void(*SizeAndIntrinsicsCallback)(glm::vec4, glm::vec4);
 
         ResetCallback OnResetReconstruction;
@@ -50,8 +46,6 @@ namespace Scpt
         DepthFrameCallback OnNewFrame;
         SizeAndIntrinsicsCallback OnSetImageSizesAndIntrinsics;
 
-        bool IsReconstructorInitialized = false;
-        
     private:
 
         enum EDATASOURCE
@@ -62,10 +56,18 @@ namespace Scpt
 
         EDATASOURCE m_DataSource;
         
+        Gfx::CTexturePtr m_DepthBuffer;
+        uint16_t* m_Buffer;
+        glm::mat4 m_PoseMatrix;
+
+        glm::ivec2 m_DepthSize;
+        glm::ivec2 m_ColorSize;
+
+        bool IsReconstructorInitialized = false;
+
         // -----------------------------------------------------------------------------
         // Stuff for network data source
         // -----------------------------------------------------------------------------
-
         std::shared_ptr<Net::CMessageDelegate> m_NetworkDelegate;
 
         // -----------------------------------------------------------------------------
@@ -126,17 +128,34 @@ namespace Scpt
 
                 glm::vec2 FocalLength;
                 glm::vec2 FocalPoint;
-                glm::ivec2 ImageSize;
+                
+                GetIntrinsics(FocalLength, FocalPoint, m_DepthSize);
+                m_ColorSize = m_DepthSize;
 
-                GetIntrinsics(FocalLength, FocalPoint, ImageSize);
-
-                OnSetImageSizesAndIntrinsics(glm::vec4(ImageSize, ImageSize), glm::vec4(FocalLength, FocalPoint));
+                OnSetImageSizesAndIntrinsics(glm::vec4(m_DepthSize, m_ColorSize), glm::vec4(FocalLength, FocalPoint));
 
                 OnInitializeReconstructor();
 
                 IsReconstructorInitialized = true;
 
-                m_Buffer = new uint16_t[ImageSize.x * ImageSize.y];
+                m_Buffer = new uint16_t[m_DepthSize.x * m_DepthSize.y];
+
+                Gfx::STextureDescriptor TextureDescriptor = {};
+
+                TextureDescriptor.m_NumberOfPixelsU = m_DepthSize.x;
+                TextureDescriptor.m_NumberOfPixelsV = m_DepthSize.y;
+                TextureDescriptor.m_NumberOfPixelsW = 1;
+                TextureDescriptor.m_NumberOfMipMaps = 1;
+                TextureDescriptor.m_NumberOfTextures = 1;
+                TextureDescriptor.m_Binding = Gfx::CTexture::ShaderResource;
+                TextureDescriptor.m_Access = Gfx::CTexture::CPUWrite;
+                TextureDescriptor.m_Usage = Gfx::CTexture::GPUReadWrite;
+                TextureDescriptor.m_Semantic = Gfx::CTexture::UndefinedSemantic;
+                TextureDescriptor.m_pFileName = nullptr;
+                TextureDescriptor.m_pPixels = 0;
+                TextureDescriptor.m_Format = Gfx::CTexture::R16_UINT;
+
+                m_DepthBuffer = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
 
                 GetDepthBuffer = (GetDepthBufferFunc)(Core::PluginManager::GetPluginFunction("Kinect", "GetDepthBuffer"));
             }
@@ -162,7 +181,11 @@ namespace Scpt
         {
             if (m_DataSource == KINECT && GetDepthBuffer(m_Buffer))
             {
-                OnNewFrame(m_Buffer, nullptr, nullptr);
+                Base::AABB2UInt TargetRect;
+                TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_DepthSize.x, m_DepthSize.y));
+                Gfx::TextureManager::CopyToTexture2D(m_DepthBuffer, TargetRect, m_DepthSize.x, const_cast<uint16_t*>(m_Buffer));
+
+                OnNewFrame(m_DepthBuffer, nullptr, nullptr);
             }
         }
 
@@ -206,17 +229,34 @@ namespace Scpt
 
                     glm::vec2 FocalLength = *reinterpret_cast<glm::vec2* >(Decompressed.data() + sizeof(int32_t) * 2);
                     glm::vec2 FocalPoint  = *reinterpret_cast<glm::vec2* >(Decompressed.data() + sizeof(int32_t) * 2 + sizeof(glm::vec2));
-                    glm::ivec2 DepthSize  = *reinterpret_cast<glm::ivec2*>(Decompressed.data() + sizeof(int32_t) * 2 + sizeof(glm::vec2) * 2);
-                    //glm::ivec2 ColorSize  = *reinterpret_cast<glm::ivec2*>(Decompressed.data() + sizeof(int32_t) * 2 + sizeof(glm::vec2) * 2 + sizeof(glm::ivec2));
-                    glm::ivec2 ColorSize = glm::ivec2(640, 360);
+                    m_DepthSize  = *reinterpret_cast<glm::ivec2*>(Decompressed.data() + sizeof(int32_t) * 2 + sizeof(glm::vec2) * 2);
+                    //m_ColorSize  = *reinterpret_cast<glm::ivec2*>(Decompressed.data() + sizeof(int32_t) * 2 + sizeof(glm::vec2) * 2 + sizeof(glm::ivec2));
+                    m_ColorSize = glm::ivec2(640, 360);
 
-                    OnSetImageSizesAndIntrinsics(glm::vec4(DepthSize, ColorSize), glm::vec4(FocalLength, FocalPoint));
+                    OnSetImageSizesAndIntrinsics(glm::vec4(m_DepthSize, m_ColorSize), glm::vec4(FocalLength, FocalPoint));
 
                     OnInitializeReconstructor();
 
                     IsReconstructorInitialized = true;
 
-                    m_Buffer = new uint16_t[DepthSize.x * DepthSize.y];
+                    m_Buffer = new uint16_t[m_DepthSize.x * m_DepthSize.y];
+
+                    Gfx::STextureDescriptor TextureDescriptor = {};
+
+                    TextureDescriptor.m_NumberOfPixelsU = m_DepthSize.x;
+                    TextureDescriptor.m_NumberOfPixelsV = m_DepthSize.y;
+                    TextureDescriptor.m_NumberOfPixelsW = 1;
+                    TextureDescriptor.m_NumberOfMipMaps = 1;
+                    TextureDescriptor.m_NumberOfTextures = 1;
+                    TextureDescriptor.m_Binding = Gfx::CTexture::ShaderResource;
+                    TextureDescriptor.m_Access = Gfx::CTexture::CPUWrite;
+                    TextureDescriptor.m_Usage = Gfx::CTexture::GPUReadWrite;
+                    TextureDescriptor.m_Semantic = Gfx::CTexture::UndefinedSemantic;
+                    TextureDescriptor.m_pFileName = nullptr;
+                    TextureDescriptor.m_pPixels = 0;
+                    TextureDescriptor.m_Format = Gfx::CTexture::R16_UINT;
+
+                    m_DepthBuffer = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
 
                     ENGINE_CONSOLE_INFO("Initialization complete");
                 }
@@ -243,7 +283,11 @@ namespace Scpt
                     }
                 }
 
-                //OnNewFrame(m_Buffer, nullptr, &m_PoseMatrix);
+                Base::AABB2UInt TargetRect;
+                TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(Width, Height));
+                Gfx::TextureManager::CopyToTexture2D(m_DepthBuffer, TargetRect, Width, const_cast<uint16_t*>(m_Buffer));
+
+                OnNewFrame(m_DepthBuffer, nullptr, &m_PoseMatrix);
                 
                 /*std::vector<char> Compressed;
                 Base::Compress(Message, Compressed, 1);
@@ -251,6 +295,8 @@ namespace Scpt
             }
             else if (MessageType == COLORFRAME)
             {
+                return;
+
                 const int32_t Width = *reinterpret_cast<int32_t*>(Decompressed.data() + sizeof(int32_t));
                 const int32_t Height = *reinterpret_cast<int32_t*>(Decompressed.data() + 2 * sizeof(int32_t));
                 
@@ -300,7 +346,7 @@ namespace Scpt
                     }
                 }
 
-                OnNewFrame(m_Buffer, reinterpret_cast<char*>(RGBData.data()), &m_PoseMatrix);
+                OnNewFrame(m_DepthBuffer, reinterpret_cast<char*>(RGBData.data()), &m_PoseMatrix);
             }
         }
 
