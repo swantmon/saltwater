@@ -13,7 +13,7 @@ namespace SLAM
 
         void InitializeReconstructor();
         void TerminateReconstructor();
-        void OnNewFrame(Gfx::CTexturePtr, const char* pColorBuffer, const glm::mat4* pTransform);
+        void OnNewFrame(Gfx::CTexturePtr, Gfx::CTexturePtr ColorBuffer, const glm::mat4* pTransform);
         void SetImageSizesAndIntrinsicData(glm::vec4 _ImageSizes, glm::vec4 _Intrinsics);
         void ResetReconstruction();
 

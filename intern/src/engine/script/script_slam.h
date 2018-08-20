@@ -37,7 +37,7 @@ namespace Scpt
         typedef void(*InitializeCallback)(void);
         typedef void(*TerminateCallback)(void);
         typedef void(*ResetCallback)(void);
-        typedef void(*DepthFrameCallback)(Gfx::CTexturePtr, const char*, const glm::mat4*);
+        typedef void(*DepthFrameCallback)(Gfx::CTexturePtr, Gfx::CTexturePtr, const glm::mat4*);
         typedef void(*SizeAndIntrinsicsCallback)(glm::vec4, glm::vec4);
 
         ResetCallback OnResetReconstruction;
@@ -56,8 +56,11 @@ namespace Scpt
 
         EDATASOURCE m_DataSource;
         
-        Gfx::CTexturePtr m_DepthBuffer;
-        uint16_t* m_Buffer;
+        Gfx::CTexturePtr m_DepthTexture;
+        Gfx::CTexturePtr m_RGBTexture;
+        Gfx::CTexturePtr m_YTexture;
+        Gfx::CTexturePtr m_UVTexture;
+        uint16_t* m_DepthBuffer;
         glm::mat4 m_PoseMatrix;
 
         glm::ivec2 m_DepthSize;
@@ -138,7 +141,7 @@ namespace Scpt
 
                 IsReconstructorInitialized = true;
 
-                m_Buffer = new uint16_t[m_DepthSize.x * m_DepthSize.y];
+                m_DepthBuffer = new uint16_t[m_DepthSize.x * m_DepthSize.y];
 
                 Gfx::STextureDescriptor TextureDescriptor = {};
 
@@ -155,7 +158,7 @@ namespace Scpt
                 TextureDescriptor.m_pPixels = 0;
                 TextureDescriptor.m_Format = Gfx::CTexture::R16_UINT;
 
-                m_DepthBuffer = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
+                m_DepthTexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
 
                 GetDepthBuffer = (GetDepthBufferFunc)(Core::PluginManager::GetPluginFunction("Kinect", "GetDepthBuffer"));
             }
@@ -179,13 +182,13 @@ namespace Scpt
 
         void Update() override
         {
-            if (m_DataSource == KINECT && GetDepthBuffer(m_Buffer))
+            if (m_DataSource == KINECT && GetDepthBuffer(m_DepthBuffer))
             {
                 Base::AABB2UInt TargetRect;
                 TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_DepthSize.x, m_DepthSize.y));
-                Gfx::TextureManager::CopyToTexture2D(m_DepthBuffer, TargetRect, m_DepthSize.x, const_cast<uint16_t*>(m_Buffer));
+                Gfx::TextureManager::CopyToTexture2D(m_DepthTexture, TargetRect, m_DepthSize.x, const_cast<uint16_t*>(m_DepthBuffer));
 
-                OnNewFrame(m_DepthBuffer, nullptr, nullptr);
+                OnNewFrame(m_DepthTexture, nullptr, nullptr);
             }
         }
 
@@ -239,7 +242,7 @@ namespace Scpt
 
                     IsReconstructorInitialized = true;
 
-                    m_Buffer = new uint16_t[m_DepthSize.x * m_DepthSize.y];
+                    m_DepthBuffer = new uint16_t[m_DepthSize.x * m_DepthSize.y];
 
                     Gfx::STextureDescriptor TextureDescriptor = {};
 
@@ -255,8 +258,20 @@ namespace Scpt
                     TextureDescriptor.m_pFileName = nullptr;
                     TextureDescriptor.m_pPixels = 0;
                     TextureDescriptor.m_Format = Gfx::CTexture::R16_UINT;
+                    m_DepthTexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
 
-                    m_DepthBuffer = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
+                    TextureDescriptor.m_NumberOfPixelsU = m_ColorSize.x;
+                    TextureDescriptor.m_NumberOfPixelsV = m_ColorSize.y;
+                    TextureDescriptor.m_Format = Gfx::CTexture::R8G8B8A8_UBYTE;
+                    m_RGBTexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
+
+                    TextureDescriptor.m_Format = Gfx::CTexture::R8_UBYTE;
+                    m_YTexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
+
+                    TextureDescriptor.m_NumberOfPixelsU = m_ColorSize.x / 2;
+                    TextureDescriptor.m_NumberOfPixelsV = m_ColorSize.y / 2;
+                    TextureDescriptor.m_Format = Gfx::CTexture::R8G8_UBYTE;
+                    m_UVTexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
 
                     ENGINE_CONSOLE_INFO("Initialization complete");
                 }
@@ -278,16 +293,16 @@ namespace Scpt
                 {
                     for (int j = 0; j < Height; ++ j)
                     {
-                        m_Buffer[j * Width + i] = shift2depth(RawBuffer[j * Width + (Width - 1 - i)]);
-                        Message[(Height - j - 1) * Width + (Width - i - 1)] = static_cast<char>((m_Buffer[j * Width + i] / 3000.0f) * 255.0f);
+                        m_DepthBuffer[j * Width + i] = shift2depth(RawBuffer[j * Width + (Width - 1 - i)]);
+                        Message[(Height - j - 1) * Width + (Width - i - 1)] = static_cast<char>((m_DepthBuffer[j * Width + i] / 3000.0f) * 255.0f);
                     }
                 }
 
                 Base::AABB2UInt TargetRect;
                 TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(Width, Height));
-                Gfx::TextureManager::CopyToTexture2D(m_DepthBuffer, TargetRect, Width, const_cast<uint16_t*>(m_Buffer));
+                Gfx::TextureManager::CopyToTexture2D(m_DepthTexture, TargetRect, Width, const_cast<uint16_t*>(m_DepthBuffer));
 
-                OnNewFrame(m_DepthBuffer, nullptr, &m_PoseMatrix);
+                OnNewFrame(m_DepthTexture, nullptr, &m_PoseMatrix);
                 
                 /*std::vector<char> Compressed;
                 Base::Compress(Message, Compressed, 1);
@@ -300,53 +315,19 @@ namespace Scpt
                 const int32_t Width = *reinterpret_cast<int32_t*>(Decompressed.data() + sizeof(int32_t));
                 const int32_t Height = *reinterpret_cast<int32_t*>(Decompressed.data() + 2 * sizeof(int32_t));
                 
-                struct char2
-                {
-                    char x, y;
-                };
-
-                struct char4
-                {
-                    char x, y, z, w;
-                };
-
                 const char* YData = Decompressed.data() + 3 * sizeof(int32_t);
-                const char2* UVData = reinterpret_cast<const char2*>(YData + Width * Height);
+                const char* UVData = YData + Width * Height;
 
-                std::vector<char4> RGBData(Width * Height);
+                Base::AABB2UInt TargetRect;
+                TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_ColorSize.x, m_ColorSize.y));
+                Gfx::TextureManager::CopyToTexture2D(m_YTexture, TargetRect, m_ColorSize.x, const_cast<char*>(YData));
 
-                const glm::mat4 YCbCrToRGBTransform = glm::mat4(
-                    glm::vec4(+1.0000f, +1.0000f, +1.0000f, +0.0000f),
-                    glm::vec4(+0.0000f, -0.3441f, +1.7720f, +0.0000f),
-                    glm::vec4(+1.4020f, -0.7141f, +0.0000f, +0.0000f),
-                    glm::vec4(-0.7010f, +0.5291f, -0.8860f, +1.0000f)
-                );
+                TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_ColorSize.x / 2, m_ColorSize.y / 2));
+                Gfx::TextureManager::CopyToTexture2D(m_UVTexture, TargetRect, m_ColorSize.x / 2, const_cast<char*>(UVData));
 
-                for (int x = 0; x < Width; ++ x)
-                {
-                    for (int y = 0; y < Height; ++ y)
-                    {
-                        float Y = YData[x * Height + y];
-                        
-                        RGBData[x * Height + y].x = Y;
-                        RGBData[x * Height + y].y = 0;
-                        RGBData[x * Height + y].z = 0;
-                        RGBData[x * Height + y].w = 255;
-                    }
-                }
 
-                for (int x = 0; x < Width / 2; ++ x)
-                {
-                    for (int y = 0; y < Height / 2; ++ y)
-                    {
-                        char2 UV = UVData[x * Height + y];
 
-                        RGBData[x + y * Width / 2].y = UV.x;
-                        RGBData[x + y * Width / 2].z = UV.y;
-                    }
-                }
-
-                OnNewFrame(m_DepthBuffer, reinterpret_cast<char*>(RGBData.data()), &m_PoseMatrix);
+                //OnNewFrame(m_DepthTexture, m_ColorTexture, &m_PoseMatrix);
             }
         }
 
