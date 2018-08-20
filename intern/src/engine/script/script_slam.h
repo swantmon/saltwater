@@ -60,8 +60,6 @@ namespace Scpt
         
         Gfx::CTexturePtr m_DepthTexture;
         Gfx::CTexturePtr m_RGBTexture;
-        Gfx::CTexturePtr m_YTexture;
-        Gfx::CTexturePtr m_UVTexture;
         uint16_t* m_DepthBuffer;
         glm::mat4 m_PoseMatrix;
 
@@ -78,6 +76,12 @@ namespace Scpt
         std::shared_ptr<Net::CMessageDelegate> m_NetworkDelegate;
 
         Gfx::CShaderPtr m_YUVtoRGBCSPtr;
+        Gfx::CTexturePtr m_YTexture;
+        Gfx::CTexturePtr m_UVTexture;
+
+        Gfx::CTexturePtr m_ShiftTexture;
+        Gfx::CShaderPtr m_ShiftDepthCSPtr;
+        Gfx::CTexturePtr m_ShiftLUTPtr;
 
         // -----------------------------------------------------------------------------
         // Stuff for Kinect data source
@@ -118,6 +122,15 @@ namespace Scpt
                 Net::CNetworkManager::GetInstance().RegisterMessageHandler(0, m_NetworkDelegate);
 
                 m_DataSource = NETWORK;
+
+                std::stringstream DefineStream;
+                DefineStream
+                    << "#define TILE_SIZE_2D " << m_TileSize2D << " \n";
+                std::string DefineString = DefineStream.str();
+                m_YUVtoRGBCSPtr = Gfx::ShaderManager::CompileCS("slam\\cs_yuv_to_rgb.glsl", "main", DefineString.c_str());
+                m_ShiftDepthCSPtr = Gfx::ShaderManager::CompileCS("slam\\cs_shift_depth.glsl", "main", DefineString.c_str());
+
+                CreateShiftLUTTexture();
             }
             else if (DataSource == "kinect")
             {
@@ -265,6 +278,7 @@ namespace Scpt
                     TextureDescriptor.m_pPixels = 0;
                     TextureDescriptor.m_Format = Gfx::CTexture::R16_UINT;
                     m_DepthTexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
+                    m_ShiftTexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
 
                     TextureDescriptor.m_NumberOfPixelsU = m_ColorSize.x;
                     TextureDescriptor.m_NumberOfPixelsV = m_ColorSize.y;
@@ -278,12 +292,6 @@ namespace Scpt
                     TextureDescriptor.m_NumberOfPixelsV = m_ColorSize.y / 2;
                     TextureDescriptor.m_Format = Gfx::CTexture::R8G8_UBYTE;
                     m_UVTexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
-
-                    std::stringstream DefineStream;
-                    DefineStream
-                        << "#define TILE_SIZE_2D " << m_TileSize2D << " \n";
-                    std::string DefineString = DefineStream.str();
-                    m_YUVtoRGBCSPtr = Gfx::ShaderManager::CompileCS("slam\\cs_yuv_to_rgb.glsl", "main", DefineString.c_str());
 
                     ENGINE_CONSOLE_INFO("Initialization complete");
                 }
@@ -299,17 +307,16 @@ namespace Scpt
                 
                 const uint16_t* RawBuffer = reinterpret_cast<uint16_t*>(Decompressed.data() + 3 * sizeof(int32_t));
 
-                for (int i = 0; i < Width; ++ i)
-                {
-                    for (int j = 0; j < Height; ++ j)
-                    {
-                        m_DepthBuffer[j * Width + i] = shift2depth(RawBuffer[j * Width + (Width - 1 - i)]);
-                    }
-                }
-
                 Base::AABB2UInt TargetRect;
                 TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(Width, Height));
-                Gfx::TextureManager::CopyToTexture2D(m_DepthTexture, TargetRect, Width, const_cast<uint16_t*>(m_DepthBuffer));
+                Gfx::TextureManager::CopyToTexture2D(m_ShiftTexture, TargetRect, Width, const_cast<uint16_t*>(RawBuffer));
+
+                Gfx::ContextManager::SetShaderCS(m_ShiftDepthCSPtr);
+                Gfx::ContextManager::SetImageTexture(0, m_ShiftTexture);
+                Gfx::ContextManager::SetImageTexture(1, m_DepthTexture);
+                Gfx::ContextManager::SetImageTexture(2, m_ShiftLUTPtr);
+
+                Gfx::ContextManager::Dispatch(DivUp(m_DepthSize.x, m_TileSize2D), DivUp(m_DepthSize.y, m_TileSize2D), 1);
 
                 //OnNewFrame(m_DepthTexture, nullptr, &m_PoseMatrix);
                 
@@ -343,9 +350,9 @@ namespace Scpt
             }
         }
 
-        uint16_t shift2depth(uint16_t shift)
+        void CreateShiftLUTTexture()
         {
-            static const uint16_t table[] = { 0,
+            static const uint16_t LUT[] = { 0,
                 264, 264, 265, 265, 265, 265, 265, 266, 266, 266, 266, 267, 267, 267, 267, 268, 268, 268,
                 268, 269, 269, 269, 269, 270, 270, 270, 270, 271, 271, 271, 271, 272, 272, 272, 272, 273,
                 273, 273, 273, 274, 274, 274, 274, 275, 275, 275, 275, 276, 276, 276, 276, 277, 277, 277,
@@ -413,7 +420,27 @@ namespace Scpt
                 8612, 8866, 9137, 9424, 9729
             };
 
-            return shift < (sizeof(table) / sizeof(table[0])) ? table[shift] : 0;
+            const int Count = sizeof(LUT) / sizeof(LUT[0]);
+
+            Gfx::STextureDescriptor TextureDescriptor = {};
+
+            TextureDescriptor.m_NumberOfPixelsU = Count;
+            TextureDescriptor.m_NumberOfPixelsV = 1;
+            TextureDescriptor.m_NumberOfPixelsW = 1;
+            TextureDescriptor.m_NumberOfMipMaps = 1;
+            TextureDescriptor.m_NumberOfTextures = 1;
+            TextureDescriptor.m_Binding = Gfx::CTexture::ShaderResource;
+            TextureDescriptor.m_Access = Gfx::CTexture::CPUWrite;
+            TextureDescriptor.m_Usage = Gfx::CTexture::GPUReadWrite;
+            TextureDescriptor.m_Semantic = Gfx::CTexture::UndefinedSemantic;
+            TextureDescriptor.m_pFileName = nullptr;
+            TextureDescriptor.m_pPixels = 0;
+            TextureDescriptor.m_Format = Gfx::CTexture::R16_UINT;
+            m_ShiftLUTPtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
+
+            Base::AABB2UInt TargetRect;
+            TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(Count, 1));
+            Gfx::TextureManager::CopyToTexture2D(m_ShiftLUTPtr, TargetRect, Count, const_cast<uint16_t*>(LUT));
         }
 
         int DivUp(int TotalShaderCount, int WorkGroupSize)
