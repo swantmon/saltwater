@@ -91,6 +91,7 @@ void main()
 
                 #ifdef CAPTURE_COLOR
                     ivec2 ColorCoords = DepthCoords;
+                    ColorCoords.x = 640 - ColorCoords.x;
                     ColorCoords.y -= 60;
                     vec3 Color = imageLoad(cs_Color, ColorCoords).rgb;
                     Color = Color.x == 0.0f ? OldColor : (OldColor * Voxel.y + Color) / (Voxel.y + 1.0f);
