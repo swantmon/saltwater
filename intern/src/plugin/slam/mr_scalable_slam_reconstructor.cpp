@@ -228,9 +228,7 @@ namespace MR
 		SetupBuffers();
 
         ClearPool();
-
-        //m_PlaneDetector.SetImages(m_ReferenceVertexMapPtr[2], m_ReferenceNormalMapPtr[2]);
-
+        
         m_pTracker.reset(new CICPTracker(m_DepthFrameSize.x, m_DepthFrameSize.y, m_ReconstructionSettings));
     }
 
@@ -1379,10 +1377,6 @@ namespace MR
 
         m_RawDepthBufferPtr = DepthBuffer;
 
-        Base::AABB2UInt TargetRect;
-        /*TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_DepthFrameSize.x, m_DepthFrameSize.y));
-        TextureManager::CopyToTexture2D(m_RawDepthBufferPtr, TargetRect, m_DepthFrameSize.x, const_cast<uint16_t*>(pDepthBuffer));*/
-
         if (CaptureColor)
         {
             m_RawCameraFramePtr = ColorBuffer;
@@ -1395,12 +1389,6 @@ namespace MR
         CreateReferencePyramid();
 
         Performance::EndEvent();
-
-        //////////////////////////////////////////////////////////////////////////////////////
-        // Detect Planes
-        //////////////////////////////////////////////////////////////////////////////////////
-        
-        //m_PlaneDetector.DetectPlanes(m_PoseMatrix);
 
         //////////////////////////////////////////////////////////////////////////////////////
         // Tracking
