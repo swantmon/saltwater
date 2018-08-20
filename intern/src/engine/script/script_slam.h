@@ -13,6 +13,8 @@
 #include "engine/data/data_sky_component.h"
 #include "engine/data/data_transformation_facet.h"
 
+#include "engine/graphic/gfx_context_manager.h"
+#include "engine/graphic/gfx_shader_manager.h"
 #include "engine/graphic/gfx_texture.h"
 #include "engine/graphic/gfx_texture_manager.h"
 
@@ -68,10 +70,14 @@ namespace Scpt
 
         bool IsReconstructorInitialized = false;
 
+        const int m_TileSize2D = 16;
+
         // -----------------------------------------------------------------------------
         // Stuff for network data source
         // -----------------------------------------------------------------------------
         std::shared_ptr<Net::CMessageDelegate> m_NetworkDelegate;
+
+        Gfx::CShaderPtr m_YUVtoRGBCSPtr;
 
         // -----------------------------------------------------------------------------
         // Stuff for Kinect data source
@@ -273,6 +279,12 @@ namespace Scpt
                     TextureDescriptor.m_Format = Gfx::CTexture::R8G8_UBYTE;
                     m_UVTexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
 
+                    std::stringstream DefineStream;
+                    DefineStream
+                        << "#define TILE_SIZE_2D " << m_TileSize2D << " \n";
+                    std::string DefineString = DefineStream.str();
+                    m_YUVtoRGBCSPtr = Gfx::ShaderManager::CompileCS("slam\\cs_yuv_to_rgb.glsl", "main", DefineString.c_str());
+
                     ENGINE_CONSOLE_INFO("Initialization complete");
                 }
             }
@@ -310,8 +322,6 @@ namespace Scpt
             }
             else if (MessageType == COLORFRAME)
             {
-                return;
-
                 const int32_t Width = *reinterpret_cast<int32_t*>(Decompressed.data() + sizeof(int32_t));
                 const int32_t Height = *reinterpret_cast<int32_t*>(Decompressed.data() + 2 * sizeof(int32_t));
                 
@@ -325,7 +335,12 @@ namespace Scpt
                 TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_ColorSize.x / 2, m_ColorSize.y / 2));
                 Gfx::TextureManager::CopyToTexture2D(m_UVTexture, TargetRect, m_ColorSize.x / 2, const_cast<char*>(UVData));
 
+                Gfx::ContextManager::SetShaderCS(m_YUVtoRGBCSPtr);
+                Gfx::ContextManager::SetImageTexture(0, m_YTexture);
+                Gfx::ContextManager::SetImageTexture(1, m_UVTexture);
+                Gfx::ContextManager::SetImageTexture(2, m_RGBTexture);
 
+                Gfx::ContextManager::Dispatch(DivUp(m_ColorSize.x, m_TileSize2D), DivUp(m_ColorSize.y, m_TileSize2D), 1);
 
                 //OnNewFrame(m_DepthTexture, m_ColorTexture, &m_PoseMatrix);
             }
@@ -402,6 +417,11 @@ namespace Scpt
             };
 
             return shift < (sizeof(table) / sizeof(table[0])) ? table[shift] : 0;
+        }
+
+        int DivUp(int TotalShaderCount, int WorkGroupSize)
+        {
+            return (TotalShaderCount + WorkGroupSize - 1) / WorkGroupSize;
         }
     };
 } // namespace Scpt
