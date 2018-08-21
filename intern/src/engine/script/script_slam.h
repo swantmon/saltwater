@@ -251,9 +251,8 @@ namespace Scpt
 
                     glm::vec2 FocalLength = *reinterpret_cast<glm::vec2* >(Decompressed.data() + sizeof(int32_t) * 2);
                     glm::vec2 FocalPoint  = *reinterpret_cast<glm::vec2* >(Decompressed.data() + sizeof(int32_t) * 2 + sizeof(glm::vec2));
-                    m_DepthSize  = *reinterpret_cast<glm::ivec2*>(Decompressed.data() + sizeof(int32_t) * 2 + sizeof(glm::vec2) * 2);
-                    //m_ColorSize  = *reinterpret_cast<glm::ivec2*>(Decompressed.data() + sizeof(int32_t) * 2 + sizeof(glm::vec2) * 2 + sizeof(glm::ivec2));
-                    m_ColorSize = glm::ivec2(640, 360);
+                    m_DepthSize           = *reinterpret_cast<glm::ivec2*>(Decompressed.data() + sizeof(int32_t) * 2 + sizeof(glm::vec2) * 2);
+                    m_ColorSize           = *reinterpret_cast<glm::ivec2*>(Decompressed.data() + sizeof(int32_t) * 2 + sizeof(glm::vec2) * 2 + sizeof(glm::ivec2));
 
                     OnSetImageSizesAndIntrinsics(glm::vec4(m_DepthSize, m_ColorSize), glm::vec4(FocalLength, FocalPoint));
 
