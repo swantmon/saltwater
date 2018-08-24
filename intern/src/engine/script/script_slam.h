@@ -5,6 +5,9 @@
 #include "base/base_exception.h"
 #include "base/base_include_glm.h"
 
+#include "engine/camera/cam_control_manager.h"
+#include "engine/camera/cam_editor_control.h"
+
 #include "engine/core/core_program_parameters.h"
 
 #include "engine/core/core_plugin_manager.h"
@@ -208,6 +211,24 @@ namespace Scpt
                 Gfx::TextureManager::CopyToTexture2D(m_DepthTexture, TargetRect, m_DepthSize.x, const_cast<uint16_t*>(m_DepthBuffer));
 
                 OnNewFrame(m_DepthTexture, nullptr, nullptr);
+            }
+
+            if (true)
+            {
+                Cam::CControl& rControl = static_cast<Cam::CEditorControl&>(Cam::ControlManager::GetActiveControl());
+
+                glm::mat4 PoseMatrix = m_PoseMatrix;
+                PoseMatrix = glm::eulerAngleX(glm::radians(90.0f)) * PoseMatrix;
+
+                glm::vec3 Eye = PoseMatrix * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+                glm::vec3 At = PoseMatrix * glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+                glm::vec3 Up = PoseMatrix * glm::vec4(0.0f, -1.0f, 0.0f, 0.0f);
+
+                glm::mat4 View = glm::lookAtRH(Eye, At, Up);
+
+                rControl.SetPosition(glm::vec4(Eye, 1.0f));
+                rControl.SetRotation(glm::mat4(glm::inverse(glm::mat3(View))));
+                rControl.Update();
             }
         }
 

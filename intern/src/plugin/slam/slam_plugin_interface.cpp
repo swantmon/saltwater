@@ -56,6 +56,13 @@ namespace SLAM
 
     // -----------------------------------------------------------------------------
 
+    glm::mat4 CPluginInterface::GetPoseMatrix()
+    {
+        return Gfx::ReconstructionRenderer::GetReconstructor().GetPoseMatrix();
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CPluginInterface::OnStart()
     {
         Gfx::ReconstructionRenderer::OnStart();
@@ -124,4 +131,9 @@ extern "C" CORE_PLUGIN_API_EXPORT void SetImageSizesAndIntrinsicData(glm::vec4 _
 extern "C" CORE_PLUGIN_API_EXPORT void ResetReconstruction()
 {
     static_cast<SLAM::CPluginInterface&>(GetInstance()).ResetReconstruction();
+}
+
+extern "C" CORE_PLUGIN_API_EXPORT void GetPoseMatrix(glm::mat4& _PoseMatrix)
+{
+    _PoseMatrix = static_cast<SLAM::CPluginInterface&>(GetInstance()).GetPoseMatrix();
 }

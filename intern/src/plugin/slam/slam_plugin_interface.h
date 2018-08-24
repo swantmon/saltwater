@@ -16,6 +16,7 @@ namespace SLAM
         void OnNewFrame(Gfx::CTexturePtr, Gfx::CTexturePtr ColorBuffer, const glm::mat4* pTransform);
         void SetImageSizesAndIntrinsicData(glm::vec4 _ImageSizes, glm::vec4 _Intrinsics);
         void ResetReconstruction();
+        glm::mat4 GetPoseMatrix();
 
     public:
 
