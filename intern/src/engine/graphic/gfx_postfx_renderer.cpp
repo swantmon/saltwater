@@ -5,6 +5,8 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
+#include "engine/core/core_program_parameters.h"
+
 #include "engine/data/data_component.h"
 #include "engine/data/data_component_facet.h"
 #include "engine/data/data_component_manager.h"
@@ -160,6 +162,8 @@ namespace
         CDOFRenderJobs  m_DOFRenderJobs;
         
         unsigned int m_SwapCounter;
+
+        bool m_DebugAlbedo;
         
     private:
         
@@ -189,6 +193,7 @@ namespace
         , m_PostAARenderJobs                 ()
         , m_DOFRenderJobs                    ()
         , m_SwapCounter                      (0)
+        , m_DebugAlbedo                      (false)
     {
         m_PostAARenderJobs.reserve(2);
         m_DOFRenderJobs   .reserve(2);
@@ -206,6 +211,7 @@ namespace
     
     void CGfxPostFXRenderer::OnStart()
     {
+        m_DebugAlbedo = Core::CProgramParameters::GetInstance().Get("graphics:debug:render_albedo", false);
     }
     
     // -----------------------------------------------------------------------------
@@ -1676,8 +1682,15 @@ namespace
 
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
-        ContextManager::SetTexture(0, m_SwapTextureSetPtrs[CurrentSwapBufferCount]->GetTexture(0));
-
+        if (m_DebugAlbedo)
+        {
+            ContextManager::SetTexture(0, TargetSetManager::GetDeferredTargetSet()->GetRenderTarget(1));
+        }
+        else
+        {
+            ContextManager::SetTexture(0, m_SwapTextureSetPtrs[CurrentSwapBufferCount]->GetTexture(0));
+        }
+        
         ContextManager::Draw(3, 0);
 
         ContextManager::ResetTexture(0);
