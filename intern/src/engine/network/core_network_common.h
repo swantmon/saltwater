@@ -13,6 +13,7 @@ namespace Net
     struct CMessage
     {
         int m_Category;
+        int m_MessageType;
         int m_CompressedSize;
         int m_DecompressedSize;
         std::vector<char> m_Payload;
