@@ -55,7 +55,16 @@ namespace Net
 
     void CServerSocket::OnSendComplete(std::shared_ptr<std::vector<char>> _Data)
     {
-        //ENGINE_CONSOLE_INFOV("Send complete");
+        BASE_UNUSED(_Data);
+
+        CMessage Message;
+        Message.m_MessageType = 1;
+        
+        m_Mutex.lock();
+
+        m_MessageQueue.push(std::move(Message));
+
+        m_Mutex.unlock();
     }
 
     // -----------------------------------------------------------------------------
@@ -112,6 +121,7 @@ namespace Net
             asio::async_read(*m_pSocket, asio::buffer(m_Payload), asio::transfer_exactly(CompressedMessageLength), Callback);
 
             m_PendingMessage.m_Category = MessageID;
+            m_PendingMessage.m_MessageType = 0;
             m_PendingMessage.m_CompressedSize = CompressedMessageLength;
             m_PendingMessage.m_DecompressedSize = DecompressedMessageLength;
         }
@@ -141,7 +151,6 @@ namespace Net
         }
         else
         {
-            m_IsOpen = false;
             AsyncReconnect();
         }
     }
@@ -168,6 +177,20 @@ namespace Net
 
     void CServerSocket::AsyncReconnect()
     {
+        // Notify listener that the connection was lost
+        CMessage Message;
+        Message.m_Category = 0;
+        Message.m_MessageType = 2;
+        Message.m_CompressedSize = 0;
+        Message.m_DecompressedSize = 0;
+
+        m_Mutex.lock();
+
+        m_MessageQueue.push(std::move(Message));
+
+        m_Mutex.unlock();
+
+        // Try to reconnect
         m_IsOpen = false;
         m_pSocket->close();
         ENGINE_CONSOLE_INFOV("Connection lost on port %i", m_Port);
