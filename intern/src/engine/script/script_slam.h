@@ -382,7 +382,7 @@ namespace Scpt
             }
             else if (_rMessage.m_MessageType == 2)
             {
-                // Enable mouse control after reconnect
+                // Enable mouse control after disconnect
                 m_UseTrackingCamera = false;
             }
         }
