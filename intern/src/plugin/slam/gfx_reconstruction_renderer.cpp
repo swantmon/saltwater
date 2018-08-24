@@ -113,6 +113,8 @@ namespace
 
         void RenderVertexMap();
 
+        glm::vec3 Pick(const glm::ivec2& _rCursorPosition);
+
     private:
 
 		std::unique_ptr<MR::CScalableSLAMReconstructor> m_pScalableReconstructor;
@@ -158,6 +160,8 @@ namespace
         
         CShaderPtr m_PointCloudVSPtr;
         CShaderPtr m_PointCloudFSPtr;
+
+        CShaderPtr m_PickingCSPtr;
 
         CTexturePtr m_IntermediateTargetPtr0;
         CTexturePtr m_IntermediateTargetPtr1;
@@ -352,6 +356,8 @@ namespace
         m_VolumeVertexMapVSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_volume_vertex_map.glsl", "main", DefineString.c_str());
         m_VolumeVertexMapFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_volume_vertex_map.glsl", "main", DefineString.c_str());
         
+        m_PickingCSPtr = ShaderManager::CompileCS("slam\\scalable_kinect_fusion\\cs_picking.glsl", "main", DefineString.c_str());
+
         SInputElementDescriptor InputLayoutDesc = {};
 
         InputLayoutDesc.m_pSemanticName        = "POSITION";
@@ -730,7 +736,6 @@ namespace
 	{
         Performance::BeginEvent("Raycasting for rendering");
 
-        //ContextManager::SetTargetSet(m_IntermediateTargetSetPtr);
         ContextManager::SetTargetSet(TargetSetManager::GetDeferredTargetSet());
 
         MR::CScalableSLAMReconstructor::SScalableVolume& rVolume = m_pScalableReconstructor->GetVolume();
@@ -782,18 +787,6 @@ namespace
             glm::vec3(glm::eulerAngleX(glm::half_pi<float>()) * glm::vec4(Min[0], Max[1], Max[2], 1.0f))
         };
 
-        /*glm::vec3 Vertices[8] =
-        {
-            glm::vec3(Min[0], Min[1], Min[2]),
-            glm::vec3(Max[0], Min[1], Min[2]),
-            glm::vec3(Max[0], Max[1], Min[2]),
-            glm::vec3(Min[0], Max[1], Min[2]),
-            glm::vec3(Min[0], Min[1], Max[2]),
-            glm::vec3(Max[0], Min[1], Max[2]),
-            glm::vec3(Max[0], Max[1], Max[2]),
-            glm::vec3(Min[0], Max[1], Max[2])
-        };*/
-
         glm::vec4 RaycastData[2];
         PoseMatrix = glm::translate(glm::vec3(RaycastData[0][0], RaycastData[0][1], RaycastData[0][2]));
         RaycastData[0][3] = 1.0f;
@@ -819,22 +812,6 @@ namespace
         ContextManager::DrawIndexed(36, 0, 0);
 
         Performance::EndEvent();
-
-        /*ContextManager::SetTargetSet(TargetSetManager::GetDeferredTargetSet());
-
-        ContextManager::SetShaderVS(m_CopyRaycastVSPtr);
-        ContextManager::SetShaderPS(m_CopyRaycastFSPtr);
-
-        ContextManager::SetVertexBuffer(m_QuadMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
-        ContextManager::SetIndexBuffer(m_QuadMeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
-        ContextManager::SetInputLayout(m_QuadInputLayoutPtr);
-
-        ContextManager::SetImageTexture(0, m_IntermediateTargetPtr0);
-        ContextManager::SetImageTexture(1, m_IntermediateTargetPtr1);
-
-        ContextManager::SetTopology(STopology::TriangleStrip);
-
-        ContextManager::Draw(4, 0);*/
 	}
     
 	// -----------------------------------------------------------------------------
@@ -1072,8 +1049,41 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    glm::vec3 CGfxReconstructionRenderer::Pick(const glm::ivec2& _rCursorPosition)
+    {
+        Performance::BeginEvent("Picking TSDF");
+        
+        MR::CScalableSLAMReconstructor::SScalableVolume& rVolume = m_pScalableReconstructor->GetVolume();
+
+        glm::ivec2 WindowSize = Gfx::Main::GetActiveWindowSize();
+
+        ContextManager::SetShaderCS(m_PickingCSPtr);
+
+        ContextManager::SetResourceBuffer(0, rVolume.m_RootVolumePoolPtr);
+        ContextManager::SetResourceBuffer(1, rVolume.m_RootGridPoolPtr);
+        ContextManager::SetResourceBuffer(2, rVolume.m_Level1PoolPtr);
+        ContextManager::SetResourceBuffer(3, rVolume.m_TSDFPoolPtr);
+        ContextManager::SetResourceBuffer(6, rVolume.m_RootVolumePositionBufferPtr);
+
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+        ContextManager::SetConstantBuffer(1, m_RaycastConstantBufferPtr);
+        ContextManager::SetConstantBuffer(2, rVolume.m_AABBBufferPtr);
+
+        ContextManager::Barrier();
+        
+        ContextManager::Dispatch(1, 1, 1);
+
+        Performance::EndEvent();
+
+        return glm::vec3(0.0f);
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CGfxReconstructionRenderer::Render(int _Pass)
     {
+        glm::ivec3 Dummy = Pick(glm::ivec2(0 ));
+
 		if (_Pass == 0)
 		{
             Performance::BeginEvent("SLAM Reconstruction Rendering");
