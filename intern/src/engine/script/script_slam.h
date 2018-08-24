@@ -69,6 +69,8 @@ namespace Scpt
         glm::ivec2 m_DepthSize;
         glm::ivec2 m_ColorSize;
 
+        bool m_UseTrackingCamera = false;
+
         bool IsReconstructorInitialized = false;
 
         const int m_TileSize2D = 16;
@@ -213,7 +215,7 @@ namespace Scpt
                 OnNewFrame(m_DepthTexture, nullptr, nullptr);
             }
 
-            if (true)
+            if (m_UseTrackingCamera)
             {
                 Cam::CControl& rControl = static_cast<Cam::CEditorControl&>(Cam::ControlManager::GetActiveControl());
 
@@ -241,14 +243,12 @@ namespace Scpt
 
     private:
 
-        void OnNewMessage(const Net::CMessage& _rMessage, int _Port)
+        void HandleMessage(const Net::CMessage& _rMessage)
         {
-            BASE_UNUSED(_Port);
-
             std::vector<char> Decompressed(_rMessage.m_DecompressedSize);
 
             if (_rMessage.m_CompressedSize != _rMessage.m_DecompressedSize)
-            {   
+            {
                 Base::Decompress(_rMessage.m_Payload, Decompressed);
             }
             else
@@ -257,7 +257,7 @@ namespace Scpt
             }
 
             int32_t MessageType = *reinterpret_cast<int32_t*>(Decompressed.data());
-            
+
             if (MessageType == COMMAND)
             {
                 const int MessageID = *reinterpret_cast<int32_t*>(Decompressed.data() + sizeof(int32_t));
@@ -266,14 +266,14 @@ namespace Scpt
                 {
                     OnResetReconstruction();
                 }
-                else if(MessageID == 1)
+                else if (MessageID == 1)
                 {
                     ENGINE_CONSOLE_INFO("Initializing reconstructor");
 
-                    glm::vec2 FocalLength = *reinterpret_cast<glm::vec2* >(Decompressed.data() + sizeof(int32_t) * 2);
-                    glm::vec2 FocalPoint  = *reinterpret_cast<glm::vec2* >(Decompressed.data() + sizeof(int32_t) * 2 + sizeof(glm::vec2));
-                    m_DepthSize           = *reinterpret_cast<glm::ivec2*>(Decompressed.data() + sizeof(int32_t) * 2 + sizeof(glm::vec2) * 2);
-                    m_ColorSize           = *reinterpret_cast<glm::ivec2*>(Decompressed.data() + sizeof(int32_t) * 2 + sizeof(glm::vec2) * 2 + sizeof(glm::ivec2));
+                    glm::vec2 FocalLength = *reinterpret_cast<glm::vec2*>(Decompressed.data() + sizeof(int32_t) * 2);
+                    glm::vec2 FocalPoint = *reinterpret_cast<glm::vec2*>(Decompressed.data() + sizeof(int32_t) * 2 + sizeof(glm::vec2));
+                    m_DepthSize = *reinterpret_cast<glm::ivec2*>(Decompressed.data() + sizeof(int32_t) * 2 + sizeof(glm::vec2) * 2);
+                    m_ColorSize = *reinterpret_cast<glm::ivec2*>(Decompressed.data() + sizeof(int32_t) * 2 + sizeof(glm::vec2) * 2 + sizeof(glm::ivec2));
 
                     OnSetImageSizesAndIntrinsics(glm::vec4(m_DepthSize, m_ColorSize), glm::vec4(FocalLength, FocalPoint));
 
@@ -313,6 +313,8 @@ namespace Scpt
                     TextureDescriptor.m_Format = Gfx::CTexture::R8G8_UBYTE;
                     m_UVTexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
 
+                    m_UseTrackingCamera = true;
+
                     ENGINE_CONSOLE_INFO("Initialization complete");
                 }
             }
@@ -324,7 +326,7 @@ namespace Scpt
             {
                 int32_t Width = *reinterpret_cast<int32_t*>(Decompressed.data() + sizeof(int32_t));
                 int32_t Height = *reinterpret_cast<int32_t*>(Decompressed.data() + 2 * sizeof(int32_t));
-                
+
                 const uint16_t* RawBuffer = reinterpret_cast<uint16_t*>(Decompressed.data() + 3 * sizeof(int32_t));
 
                 Base::AABB2UInt TargetRect;
@@ -339,7 +341,7 @@ namespace Scpt
                 Gfx::ContextManager::Dispatch(DivUp(m_DepthSize.x, m_TileSize2D), DivUp(m_DepthSize.y, m_TileSize2D), 1);
 
                 //OnNewFrame(m_DepthTexture, nullptr, &m_PoseMatrix);
-                
+
                 /*std::vector<char> Compressed;
                 Base::Compress(Message, Compressed, 1);
                 Net::CNetworkManager::GetInstance().SendMessage(0, Compressed);*/
@@ -348,7 +350,7 @@ namespace Scpt
             {
                 const int32_t Width = *reinterpret_cast<int32_t*>(Decompressed.data() + sizeof(int32_t));
                 const int32_t Height = *reinterpret_cast<int32_t*>(Decompressed.data() + 2 * sizeof(int32_t));
-                
+
                 const char* YData = Decompressed.data() + 3 * sizeof(int32_t);
                 const char* UVData = YData + Width * Height;
 
@@ -367,6 +369,21 @@ namespace Scpt
                 Gfx::ContextManager::Dispatch(DivUp(m_ColorSize.x, m_TileSize2D), DivUp(m_ColorSize.y, m_TileSize2D), 1);
 
                 OnNewFrame(m_DepthTexture, m_RGBTexture, &m_PoseMatrix);
+            }
+        }
+
+        void OnNewMessage(const Net::CMessage& _rMessage, int _Port)
+        {
+            BASE_UNUSED(_Port);
+
+            if (_rMessage.m_MessageType == 0)
+            {
+                HandleMessage(_rMessage);
+            }
+            else if (_rMessage.m_MessageType == 2)
+            {
+                // Enable mouse control after reconnect
+                m_UseTrackingCamera = false;
             }
         }
 
