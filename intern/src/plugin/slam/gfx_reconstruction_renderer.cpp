@@ -317,8 +317,9 @@ namespace
             << "#define VOLUME_SIZE " << Settings.m_VolumeSize << " \n"
             << "#define VOXEL_SIZE " << Settings.m_VoxelSize << " \n"
             << "#define MAX_INTEGRATION_WEIGHT " << Settings.m_MaxIntegrationWeight << '\n'
-            << "#define DEPTH_IMAGE_WIDTH " << DepthImageSize.x << '\n'
-            << "#define DEPTH_IMAGE_HEIGHT " << DepthImageSize.y << '\n'
+#pragma message ("Remove magic numbers")
+            << "#define DEPTH_IMAGE_WIDTH " << 640 << '\n'
+            << "#define DEPTH_IMAGE_HEIGHT " << 480 << '\n'
             << "#define ROOT_RESOLUTION " << Settings.m_GridResolutions[0] << '\n'
             << "#define LEVEL1_RESOLUTION " << Settings.m_GridResolutions[1] << '\n'
             << "#define LEVEL2_RESOLUTION " << Settings.m_GridResolutions[2] << '\n'
