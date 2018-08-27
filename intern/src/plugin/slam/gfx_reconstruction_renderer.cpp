@@ -695,8 +695,7 @@ namespace
 
     void CGfxReconstructionRenderer::Update()
     {
-        glm::ivec3 Dummy = Pick(glm::ivec2(600, 315));
-        //std::cout << Dummy.x << '\n' << Dummy.y << '\n' << Dummy.z << "\n\n";
+        glm::vec3 Dummy = Pick(glm::ivec2(600, 315));
     }
     
     // -----------------------------------------------------------------------------
@@ -1052,6 +1051,18 @@ namespace
     {
         Performance::BeginEvent("Picking TSDF");
         
+        glm::mat3 SaltwaterToReconstruction = glm::mat3(
+            1.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, -1.0f,
+            0.0f, 1.0f, 0.0f
+        );
+
+        glm::mat3 ReconstructionToSaltwater = glm::mat3(
+            1.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 1.0f,
+            0.0f, -1.0f, 0.0f
+        );
+
         MR::CScalableSLAMReconstructor::SScalableVolume& rVolume = m_pScalableReconstructor->GetVolume();
 
         const glm::vec2 WindowSize = glm::vec2(Gfx::Main::GetActiveWindowSize());
@@ -1065,8 +1076,8 @@ namespace
         WSCursorPosition /= WSCursorPosition.w;
 
         SPickingBuffer PickingData;
-        PickingData.m_RayStart = glm::vec4(CameraPosition, 1.0f);
-        PickingData.m_RayDirection = glm::vec4(glm::normalize(glm::vec3(WSCursorPosition) - CameraPosition), 0.0f);
+        PickingData.m_RayStart = glm::vec4(SaltwaterToReconstruction * CameraPosition, 1.0f);
+        PickingData.m_RayDirection = glm::vec4(SaltwaterToReconstruction * glm::normalize(glm::vec3(WSCursorPosition) - CameraPosition), 0.0f);
         PickingData.m_WorldHitPosition = glm::vec4(0.0f);
         BufferManager::UploadBufferData(m_PickingBuffer, &PickingData);
 
