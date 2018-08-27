@@ -1079,8 +1079,6 @@ namespace
         ContextManager::SetResourceBuffer(6, rVolume.m_RootVolumePositionBufferPtr);
         ContextManager::SetResourceBuffer(7, m_PickingBuffer);
 
-        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
-        ContextManager::SetConstantBuffer(1, m_RaycastConstantBufferPtr);
         ContextManager::SetConstantBuffer(2, rVolume.m_AABBBufferPtr);
 
         ContextManager::Barrier();
