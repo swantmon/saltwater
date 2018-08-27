@@ -58,6 +58,13 @@ namespace
 		glm::vec4 m_Color;
 	};
 
+    struct SPickingBuffer
+    {
+        glm::vec4 m_RayStart;
+        glm::vec4 m_RayDirection;
+        glm::vec4 m_WorldHitPosition;
+    };
+
     class CGfxReconstructionRenderer : private Base::CUncopyable
     {
         BASE_SINGLETON_FUNC(CGfxReconstructionRenderer)
@@ -164,6 +171,8 @@ namespace
         CTexturePtr m_IntermediateTargetPtr1;
         CTargetSetPtr m_IntermediateTargetSetPtr;
 
+        CBufferPtr m_PickingBuffer;
+
         bool m_UseTrackingCamera;
 
         bool m_RenderVolumeVertexMap;
@@ -262,6 +271,8 @@ namespace
         m_VolumeVertexMapVSPtr = 0;
         m_VolumeVertexMapFSPtr = 0;
         
+        m_PickingBuffer = 0;
+
         m_RaycastConstantBufferPtr = 0;
         m_DrawCallConstantBufferPtr = 0;
         
@@ -426,7 +437,7 @@ namespace
         SBufferDescriptor ConstantBufferDesc = {};
 
         ConstantBufferDesc.m_Stride = 0;
-        ConstantBufferDesc.m_Usage = CBuffer::EUsage::GPURead;
+        ConstantBufferDesc.m_Usage = CBuffer::GPURead;
         ConstantBufferDesc.m_Binding = CBuffer::ConstantBuffer;
         ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
         ConstantBufferDesc.m_NumberOfBytes = sizeof(glm::vec4) * 2;
@@ -437,6 +448,16 @@ namespace
         
         ConstantBufferDesc.m_NumberOfBytes = sizeof(SDrawCallConstantBuffer);
         m_DrawCallConstantBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+
+        ConstantBufferDesc.m_Stride = 0;
+        ConstantBufferDesc.m_Usage = CBuffer::GPUToCPU;
+        ConstantBufferDesc.m_Binding = CBuffer::ResourceBuffer;
+        ConstantBufferDesc.m_Access = CBuffer::CPUReadWrite;
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(SPickingBuffer);
+        ConstantBufferDesc.m_pBytes = nullptr;
+        ConstantBufferDesc.m_pClassKey = 0;
+
+        m_PickingBuffer = BufferManager::CreateBuffer(ConstantBufferDesc);
     }
     
     // -----------------------------------------------------------------------------
@@ -1048,7 +1069,21 @@ namespace
         
         MR::CScalableSLAMReconstructor::SScalableVolume& rVolume = m_pScalableReconstructor->GetVolume();
 
-        glm::ivec2 WindowSize = Gfx::Main::GetActiveWindowSize();
+        const glm::vec2 WindowSize = glm::vec2(Gfx::Main::GetActiveWindowSize());
+        const glm::vec3 CameraPosition = Gfx::ViewManager::GetMainCamera()->GetView()->GetPosition();
+        const glm::mat4 ViewProjectionMatrix = Gfx::ViewManager::GetMainCamera()->GetViewProjectionMatrix();
+
+        glm::vec4 CSCursorPosition = glm::vec4(glm::vec2(_rCursorPosition) / WindowSize * 2.0f - 1.0f, 1.0f, 1.0f);
+        glm::mat4 InvViewProjectionMatrix = glm::inverse(ViewProjectionMatrix);
+
+        glm::vec4 WSCursorPosition = InvViewProjectionMatrix * CSCursorPosition;
+        WSCursorPosition /= WSCursorPosition.w;
+
+        SPickingBuffer PickingData;
+        PickingData.m_RayStart = glm::vec4(CameraPosition, 1.0f);
+        PickingData.m_RayDirection = glm::vec4(glm::normalize(glm::vec3(WSCursorPosition) - CameraPosition), 0.0f);
+        PickingData.m_WorldHitPosition = glm::vec4(0.0f);
+        BufferManager::UploadBufferData(m_PickingBuffer, &PickingData);
 
         ContextManager::SetShaderCS(m_PickingCSPtr);
 
@@ -1057,6 +1092,7 @@ namespace
         ContextManager::SetResourceBuffer(2, rVolume.m_Level1PoolPtr);
         ContextManager::SetResourceBuffer(3, rVolume.m_TSDFPoolPtr);
         ContextManager::SetResourceBuffer(6, rVolume.m_RootVolumePositionBufferPtr);
+        ContextManager::SetResourceBuffer(7, m_PickingBuffer);
 
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
         ContextManager::SetConstantBuffer(1, m_RaycastConstantBufferPtr);
@@ -1068,14 +1104,18 @@ namespace
 
         Performance::EndEvent();
 
-        return glm::vec3(0.0f);
+        void* pBufferData = BufferManager::MapBuffer(m_PickingBuffer, Gfx::CBuffer::Read);
+        PickingData = *(static_cast<SPickingBuffer*>(pBufferData));
+        BufferManager::UnmapBuffer(m_PickingBuffer);
+
+        return glm::vec3(PickingData.m_WorldHitPosition);
     }
 
     // -----------------------------------------------------------------------------
 
     void CGfxReconstructionRenderer::Render(int _Pass)
     {
-        glm::ivec3 Dummy = Pick(glm::ivec2(0 ));
+        glm::ivec3 Dummy = Pick(glm::ivec2(600, 315));
 
 		if (_Pass == 0)
 		{
