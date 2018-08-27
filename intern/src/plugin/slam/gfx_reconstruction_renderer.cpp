@@ -135,10 +135,7 @@ namespace
 
         CShaderPtr m_CopyRaycastVSPtr;
         CShaderPtr m_CopyRaycastFSPtr;
-
-        CShaderPtr m_HistogramVSPtr;
-        CShaderPtr m_HistogramFSPtr;
-
+        
         CBufferPtr m_RaycastConstantBufferPtr;
         CBufferPtr m_DrawCallConstantBufferPtr;
                 
@@ -260,8 +257,7 @@ namespace
         m_RaycastFSPtr = 0;
         m_CopyRaycastVSPtr = 0;
         m_CopyRaycastFSPtr = 0;
-        m_HistogramVSPtr = 0;
-        m_HistogramFSPtr = 0;
+        m_PickingCSPtr = 0;
 
         m_VolumeVertexMapVSPtr = 0;
         m_VolumeVertexMapFSPtr = 0;
@@ -349,9 +345,6 @@ namespace
 
         m_CopyRaycastVSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_copy_raycast.glsl", "main", DefineString.c_str());
         m_CopyRaycastFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_copy_raycast.glsl", "main", DefineString.c_str());
-
-        m_HistogramVSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_histogram.glsl", "main", DefineString.c_str());
-        m_HistogramFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_histogram.glsl", "main", DefineString.c_str());
 
         m_VolumeVertexMapVSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_volume_vertex_map.glsl", "main", DefineString.c_str());
         m_VolumeVertexMapFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_volume_vertex_map.glsl", "main", DefineString.c_str());
