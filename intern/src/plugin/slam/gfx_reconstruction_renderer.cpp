@@ -694,24 +694,8 @@ namespace
 
     void CGfxReconstructionRenderer::Update()
     {
-        if (false) // TODO: use script to update renderer
-        {
-            Cam::CControl& rControl = static_cast<Cam::CEditorControl&>(Cam::ControlManager::GetActiveControl());
-            
-            glm::mat4 PoseMatrix = m_pScalableReconstructor->GetPoseMatrix();
-            PoseMatrix = glm::eulerAngleX(glm::radians(90.0f)) * PoseMatrix;
-
-            glm::vec3 Eye = PoseMatrix * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-            glm::vec3 At = PoseMatrix * glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
-            glm::vec3 Up = PoseMatrix * glm::vec4(0.0f, -1.0f, 0.0f, 0.0f);
-
-            glm::mat4 View = glm::lookAtRH(Eye, At, Up);
-
-            rControl.SetPosition(glm::vec4(Eye, 1.0f));
-            rControl.SetRotation(glm::mat4(glm::inverse(glm::mat3(View))));
-            rControl.Update();
-        }
-        glEnable(GL_PROGRAM_POINT_SIZE);
+        glm::ivec3 Dummy = Pick(glm::ivec2(600, 315));
+        //std::cout << Dummy.x << '\n' << Dummy.y << '\n' << Dummy.z << "\n\n";
     }
     
     // -----------------------------------------------------------------------------
@@ -1108,6 +1092,8 @@ namespace
         PickingData = *(static_cast<SPickingBuffer*>(pBufferData));
         BufferManager::UnmapBuffer(m_PickingBuffer);
 
+        ContextManager::ResetShaderCS();
+
         return glm::vec3(PickingData.m_WorldHitPosition);
     }
 
@@ -1115,8 +1101,7 @@ namespace
 
     void CGfxReconstructionRenderer::Render(int _Pass)
     {
-        glm::ivec3 Dummy = Pick(glm::ivec2(600, 315));
-
+        glEnable(GL_PROGRAM_POINT_SIZE);
 		if (_Pass == 0)
 		{
             Performance::BeginEvent("SLAM Reconstruction Rendering");
