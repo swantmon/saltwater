@@ -77,6 +77,9 @@ namespace Scpt
 
         const int m_TileSize2D = 16;
         
+        // -----------------------------------------------------------------------------
+        // Stuff for selection box
+        // -----------------------------------------------------------------------------
         glm::vec3 m_SelectionBoxAnchor0;
         glm::vec3 m_SelectionBoxAnchor1;
         float m_SelectionBoxHeight;
