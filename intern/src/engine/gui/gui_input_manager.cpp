@@ -314,7 +314,7 @@ namespace
         }
         else if (_rEvent.GetAction() == Base::CInputEvent::MouseMove)
         {
-            m_Mouse.m_LatestMousePosition = _rEvent.GetCursorPosition();
+            m_Mouse.m_LatestMousePosition = _rEvent.GetGlobalCursorPosition();
         }
     }
 } // namespace 
