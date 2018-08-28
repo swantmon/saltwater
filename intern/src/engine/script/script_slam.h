@@ -238,7 +238,18 @@ namespace Scpt
 
         void OnInput(const Base::CInputEvent& _rEvent) override
         {
-            BASE_UNUSED(_rEvent);
+            if (_rEvent.GetAction() == Base::CInputEvent::MouseLeftPressed)
+            {
+                
+            }
+            else if (_rEvent.GetAction() == Base::CInputEvent::MouseLeftReleased)
+            {
+                
+            }
+            else if (_rEvent.GetAction() == Base::CInputEvent::MouseMove)
+            {
+                
+            }
         }
 
     private:
