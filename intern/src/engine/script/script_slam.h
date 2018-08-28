@@ -71,9 +71,11 @@ namespace Scpt
 
         bool m_UseTrackingCamera = false;
 
-        bool IsReconstructorInitialized = false;
+        bool m_IsReconstructorInitialized = false;
 
         const int m_TileSize2D = 16;
+        
+
 
         // -----------------------------------------------------------------------------
         // Stuff for network data source
@@ -163,7 +165,7 @@ namespace Scpt
 
                 OnInitializeReconstructor();
 
-                IsReconstructorInitialized = true;
+                m_IsReconstructorInitialized = true;
 
                 m_DepthBuffer = new uint16_t[m_DepthSize.x * m_DepthSize.y];
 
@@ -196,7 +198,7 @@ namespace Scpt
 
         void Exit() override
         {
-            if (IsReconstructorInitialized)
+            if (m_IsReconstructorInitialized)
             {
                 OnTerminateReconstructor();
             }
@@ -290,7 +292,7 @@ namespace Scpt
 
                     OnInitializeReconstructor();
 
-                    IsReconstructorInitialized = true;
+                    m_IsReconstructorInitialized = true;
 
                     m_DepthBuffer = new uint16_t[m_DepthSize.x * m_DepthSize.y];
 
