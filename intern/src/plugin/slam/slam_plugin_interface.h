@@ -17,6 +17,7 @@ namespace SLAM
         void SetImageSizesAndIntrinsicData(glm::vec4 _ImageSizes, glm::vec4 _Intrinsics);
         void ResetReconstruction();
         glm::mat4 GetPoseMatrix();
+        glm::vec3 Pick(const glm::ivec2 _rCursor);
 
     public:
 

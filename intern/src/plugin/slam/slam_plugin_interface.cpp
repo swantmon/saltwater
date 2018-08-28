@@ -63,6 +63,13 @@ namespace SLAM
 
     // -----------------------------------------------------------------------------
 
+    glm::vec3 CPluginInterface::Pick(const glm::ivec2 _rCursor)
+    {
+        return Gfx::ReconstructionRenderer::Pick(_rCursor);
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CPluginInterface::OnStart()
     {
         Gfx::ReconstructionRenderer::OnStart();
@@ -136,4 +143,9 @@ extern "C" CORE_PLUGIN_API_EXPORT void ResetReconstruction()
 extern "C" CORE_PLUGIN_API_EXPORT void GetPoseMatrix(glm::mat4& _PoseMatrix)
 {
     _PoseMatrix = static_cast<SLAM::CPluginInterface&>(GetInstance()).GetPoseMatrix();
+}
+
+extern "C" CORE_PLUGIN_API_EXPORT void Pick(const glm::ivec2& _rCursor, glm::vec3 _rHit)
+{
+    _rHit = static_cast<SLAM::CPluginInterface&>(GetInstance()).Pick(_rCursor);
 }

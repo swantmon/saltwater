@@ -106,6 +106,8 @@ namespace
 
         void OnReconstructionUpdate(const MR::SReconstructionSettings& _Settings);
 
+        glm::vec3 Pick(const glm::ivec2& _rCursorPosition);
+
     private:
 
         void RenderVolumeVertexMap();
@@ -119,8 +121,6 @@ namespace
         void RenderCamera();
 
         void RenderVertexMap();
-
-        glm::vec3 Pick(const glm::ivec2& _rCursorPosition);
 
     private:
 
@@ -1359,6 +1359,13 @@ namespace ReconstructionRenderer
     MR::CScalableSLAMReconstructor& GetReconstructor()
     {
         return CGfxReconstructionRenderer::GetInstance().GetReconstructor();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    glm::vec3 Pick(const glm::ivec2& _rCursor)
+    {
+        return CGfxReconstructionRenderer::GetInstance().Pick(_rCursor);
     }
 
 } // namespace Voxel

@@ -32,5 +32,6 @@ namespace ReconstructionRenderer
     float GetReconstructionSize();
 
     MR::CScalableSLAMReconstructor& GetReconstructor();
+    glm::vec3 Pick(const glm::ivec2& _rCursor);
 } // namespace ReconstructionRenderer
 } // namespace Gfx

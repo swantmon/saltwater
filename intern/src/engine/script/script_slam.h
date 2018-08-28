@@ -44,12 +44,14 @@ namespace Scpt
         typedef void(*ResetCallback)(void);
         typedef void(*DepthFrameCallback)(Gfx::CTexturePtr, Gfx::CTexturePtr, const glm::mat4*);
         typedef void(*SizeAndIntrinsicsCallback)(glm::vec4, glm::vec4);
+        typedef void(*PickCallback)(const glm::ivec2&, glm::vec3&);
 
         ResetCallback OnResetReconstruction;
         InitializeCallback OnInitializeReconstructor;
         TerminateCallback OnTerminateReconstructor;
         DepthFrameCallback OnNewFrame;
         SizeAndIntrinsicsCallback OnSetImageSizesAndIntrinsics;
+        PickCallback Pick;
 
     private:
 
@@ -75,7 +77,9 @@ namespace Scpt
 
         const int m_TileSize2D = 16;
         
-
+        glm::vec3 m_SelectionBoxAnchor0;
+        glm::vec3 m_SelectionBoxAnchor1;
+        float m_SelectionBoxHeight;
 
         // -----------------------------------------------------------------------------
         // Stuff for network data source
@@ -100,6 +104,10 @@ namespace Scpt
 
         void Start() override
         {
+            m_SelectionBoxAnchor0 = glm::vec3(0.0f);
+            m_SelectionBoxAnchor1 = glm::vec3(0.0f);
+            m_SelectionBoxHeight = 0.0f;
+
             // -----------------------------------------------------------------------------
             // Load SLAM plugin
             // -----------------------------------------------------------------------------
@@ -113,6 +121,7 @@ namespace Scpt
             OnTerminateReconstructor = (TerminateCallback)(Core::PluginManager::GetPluginFunction("SLAM", "TerminateReconstructor"));
             OnSetImageSizesAndIntrinsics = (SizeAndIntrinsicsCallback)(Core::PluginManager::GetPluginFunction("SLAM", "SetImageSizesAndIntrinsicData"));
             OnResetReconstruction = (ResetCallback)(Core::PluginManager::GetPluginFunction("SLAM", "ResetReconstruction"));
+            Pick = (PickCallback)(Core::PluginManager::GetPluginFunction("SLAM", "Pick"));
 
             // -----------------------------------------------------------------------------
             // Determine where we get our data from
@@ -242,7 +251,8 @@ namespace Scpt
         {
             if (_rEvent.GetAction() == Base::CInputEvent::MouseLeftPressed)
             {
-                
+                glm::vec3 Hit;
+                Pick(_rEvent.GetCursorPosition(), Hit);
             }
             else if (_rEvent.GetAction() == Base::CInputEvent::MouseLeftReleased)
             {
