@@ -124,6 +124,8 @@ namespace
 
         void RenderVertexMap();
 
+        void RenderSelectionBox();
+
     private:
 
 		std::unique_ptr<MR::CScalableSLAMReconstructor> m_pScalableReconstructor;
@@ -186,6 +188,11 @@ namespace
         bool m_RenderHistogram;
         bool m_RenderPlanes;
         bool m_RenderBackSides;
+
+        glm::vec3 m_SelectionAnchor0;
+        glm::vec3 m_SelectionAnchor1;
+        float m_SelectionHeight;
+        int m_SelectionState;
     };
 } // namespace
 
@@ -252,6 +259,11 @@ namespace
         m_RenderHistogram       = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:histogram"          , false);
         m_RenderPlanes          = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:planes"             , false);
         m_RenderBackSides       = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:backsides"          , true);
+
+        m_SelectionAnchor0 = glm::vec3(0.0f);
+        m_SelectionAnchor1 = glm::vec3(0.0f);
+        m_SelectionHeight = 0.0f;
+        m_SelectionState = 0;
     }
 
     // -----------------------------------------------------------------------------
@@ -697,9 +709,45 @@ namespace
 
     void CGfxReconstructionRenderer::Update()
     {
-        glm::vec3 Dummy = Pick(glm::ivec2(600, 315));
+
     }
     
+    // -----------------------------------------------------------------------------
+
+    void CGfxReconstructionRenderer::RenderSelectionBox()
+    {
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
+
+        ContextManager::SetRenderContext(m_OutlineRenderContextPtr);
+        ContextManager::SetShaderVS(m_OutlineVSPtr);
+        ContextManager::SetShaderPS(m_OutlineFSPtr);
+
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+        ContextManager::SetConstantBuffer(1, m_DrawCallConstantBufferPtr);
+
+        SDrawCallConstantBuffer BufferData;
+
+        ContextManager::SetVertexBuffer(m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
+        ContextManager::SetInputLayout(m_CubeOutlineInputLayoutPtr);
+
+        ContextManager::SetTopology(STopology::LineList);
+
+        glm::vec3 Position = m_SelectionAnchor0;
+        glm::mat4 Scaling;
+        glm::mat4 Translation;
+                
+        Scaling = glm::scale(glm::vec3(1));
+        Translation = glm::translate(Position);
+
+        BufferData.m_WorldMatrix = Translation * Scaling;
+        BufferData.m_WorldMatrix = glm::eulerAngleX(glm::radians(90.0f)) * BufferData.m_WorldMatrix;
+        BufferData.m_Color = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+
+        BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
+
+        ContextManager::Draw(m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface()->GetNumberOfVertices(), 0);
+    }
+
     // -----------------------------------------------------------------------------
 
     void CGfxReconstructionRenderer::RenderVolumeVertexMap()
@@ -1113,7 +1161,10 @@ namespace
 
     void CGfxReconstructionRenderer::SetSelectionBox(const glm::vec3& _rAnchor0, const glm::vec3& _rAnchor1, float _Height, int _State)
     {
-        
+        m_SelectionAnchor0 = _rAnchor0;
+        m_SelectionAnchor1 = _rAnchor1;
+        m_SelectionHeight = _Height;
+        m_SelectionState = _State;
     }
 
     // -----------------------------------------------------------------------------
@@ -1164,6 +1215,8 @@ namespace
             {
                 RenderQueuedLevel2Grids();
             }
+
+            RenderSelectionBox();
 
             Performance::EndEvent();
 		}
