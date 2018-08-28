@@ -1115,11 +1115,15 @@ namespace
 
         MR::CScalableSLAMReconstructor::SScalableVolume& rVolume = m_pScalableReconstructor->GetVolume();
 
-        const glm::vec2 WindowSize = glm::vec2(Gfx::Main::GetActiveWindowSize());
+        const glm::ivec2 WindowSize = Gfx::Main::GetActiveWindowSize();
         const glm::vec3 CameraPosition = Gfx::ViewManager::GetMainCamera()->GetView()->GetPosition();
         const glm::mat4 ViewProjectionMatrix = Gfx::ViewManager::GetMainCamera()->GetViewProjectionMatrix();
 
-        glm::vec4 CSCursorPosition = glm::vec4(glm::vec2(_rCursorPosition) / WindowSize * 2.0f - 1.0f, 1.0f, 1.0f);
+        glm::ivec2 Cursor;
+        Cursor.x = _rCursorPosition.y;
+        Cursor.y = WindowSize.y - _rCursorPosition.x;
+
+        glm::vec4 CSCursorPosition = glm::vec4(glm::vec2(Cursor) / glm::vec2(WindowSize) * 2.0f - 1.0f, 1.0f, 1.0f);
         glm::mat4 InvViewProjectionMatrix = glm::inverse(ViewProjectionMatrix);
 
         glm::vec4 WSCursorPosition = InvViewProjectionMatrix * CSCursorPosition;
