@@ -144,21 +144,21 @@ namespace
             {
                 BASE_THROWM("Could not initialise SDL");
             }
-        }
 
-        if (SDL_NumJoysticks() < 1)
-        {
-            ENGINE_CONSOLE_INFOV("No gamepads found");
-        }
-        else
-        {
-            SDL_JoystickEventState(SDL_ENABLE);
-            m_pGamePad = SDL_JoystickOpen(0);
-            if (m_pGamePad == nullptr)
+            if (SDL_NumJoysticks() < 1)
             {
-                BASE_THROWM("Could not initialise controller");
+                ENGINE_CONSOLE_INFOV("No gamepads found");
             }
-            ENGINE_CONSOLE_INFOV(SDL_JoystickName(m_pGamePad));
+            else
+            {
+                SDL_JoystickEventState(SDL_ENABLE);
+                m_pGamePad = SDL_JoystickOpen(0);
+                if (m_pGamePad == nullptr)
+                {
+                    BASE_THROWM("Could not initialise controller");
+                }
+                ENGINE_CONSOLE_INFOV(SDL_JoystickName(m_pGamePad));
+            }
         }
 
         // -----------------------------------------------------------------------------
