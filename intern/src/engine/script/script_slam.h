@@ -252,7 +252,7 @@ namespace Scpt
             if (_rEvent.GetAction() == Base::CInputEvent::MouseLeftPressed)
             {
                 glm::vec3 Hit;
-                Pick(_rEvent.GetCursorPosition(), Hit);
+                Pick(_rEvent.GetLocalCursorPosition(), Hit);
             }
             else if (_rEvent.GetAction() == Base::CInputEvent::MouseLeftReleased)
             {
