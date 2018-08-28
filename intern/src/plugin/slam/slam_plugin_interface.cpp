@@ -68,6 +68,11 @@ namespace SLAM
         return Gfx::ReconstructionRenderer::Pick(_rCursor);
     }
 
+    void CPluginInterface::SetSelectionBox(const glm::vec3& _rAnchor0, const glm::vec3& _rAnchor1, float _Height, int _State)
+    {
+        Gfx::ReconstructionRenderer::SetSelectionBox(_rAnchor0, _rAnchor1, _Height, _State);
+    }
+
     // -----------------------------------------------------------------------------
 
     void CPluginInterface::OnStart()
@@ -148,4 +153,9 @@ extern "C" CORE_PLUGIN_API_EXPORT void GetPoseMatrix(glm::mat4& _PoseMatrix)
 extern "C" CORE_PLUGIN_API_EXPORT void Pick(const glm::ivec2& _rCursor, glm::vec3 _rHit)
 {
     _rHit = static_cast<SLAM::CPluginInterface&>(GetInstance()).Pick(_rCursor);
+}
+
+extern "C" CORE_PLUGIN_API_EXPORT void UpdateSelectionBox(const glm::vec3& _rAnchor0, const glm::vec3& _rAnchor1, float _Height, int _State)
+{
+    static_cast<SLAM::CPluginInterface&>(GetInstance()).SetSelectionBox(_rAnchor0, _rAnchor1, _Height, _State);
 }

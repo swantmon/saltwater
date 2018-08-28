@@ -108,6 +108,8 @@ namespace
 
         glm::vec3 Pick(const glm::ivec2& _rCursorPosition);
 
+        void SetSelectionBox(const glm::vec3& _rAnchor0, const glm::vec3& _rAnchor1, float _Height, int _State);
+
     private:
 
         void RenderVolumeVertexMap();
@@ -1109,6 +1111,13 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    void CGfxReconstructionRenderer::SetSelectionBox(const glm::vec3& _rAnchor0, const glm::vec3& _rAnchor1, float _Height, int _State)
+    {
+        
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CGfxReconstructionRenderer::Render(int _Pass)
     {
         glEnable(GL_PROGRAM_POINT_SIZE);
@@ -1366,6 +1375,13 @@ namespace ReconstructionRenderer
     glm::vec3 Pick(const glm::ivec2& _rCursor)
     {
         return CGfxReconstructionRenderer::GetInstance().Pick(_rCursor);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void SetSelectionBox(const glm::vec3& _rAnchor0, const glm::vec3& _rAnchor1, float _Height, int _State)
+    {
+        CGfxReconstructionRenderer::GetInstance().SetSelectionBox(_rAnchor0, _rAnchor1, _Height, _State);
     }
 
 } // namespace Voxel
