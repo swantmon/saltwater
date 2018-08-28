@@ -164,8 +164,8 @@ namespace Scpt
             // -----------------------------------------------------------------------------
             if (_rEvent.GetAction() == Base::CInputEvent::TouchReleased)
             {
-                float x = _rEvent.GetCursorPosition()[0];
-                float y = _rEvent.GetCursorPosition()[1];
+                float x = _rEvent.GetGlobalCursorPosition()[0];
+                float y = _rEvent.GetGlobalCursorPosition()[1];
 
                 if (x < 200.0f && y < 200.0f)
                 {
@@ -187,8 +187,8 @@ namespace Scpt
             // -----------------------------------------------------------------------------
             if (_rEvent.GetAction() == Base::CInputEvent::TouchReleased)
             {
-                float x = _rEvent.GetCursorPosition()[0];
-                float y = _rEvent.GetCursorPosition()[1];
+                float x = _rEvent.GetGlobalCursorPosition()[0];
+                float y = _rEvent.GetGlobalCursorPosition()[1];
 
                 if (x > Gfx::Main::GetActiveNativeWindowSize()[0] - 200.0f && y > Gfx::Main::GetActiveNativeWindowSize()[1] - 200.0f)
                 {

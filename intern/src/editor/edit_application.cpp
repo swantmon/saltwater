@@ -387,7 +387,9 @@ namespace
         m_LatestMousePosition[0] = static_cast<float>(MousePositionX);
         m_LatestMousePosition[1] = static_cast<float>(MousePositionY);
 
-        Base::CInputEvent NewInput(Base::CInputEvent::Input, Base::CInputEvent::MouseLeftPressed, Base::CInputEvent::Mouse, m_LatestMousePosition);
+        glm::vec2 LocalMouse = glm::vec2(_rMessage.Get<int>(), _rMessage.Get<int>());
+
+        Base::CInputEvent NewInput(Base::CInputEvent::Input, Base::CInputEvent::MouseLeftPressed, Base::CInputEvent::Mouse, m_LatestMousePosition, LocalMouse);
 
         Gui::EventHandler::OnUserEvent(NewInput);
     }
@@ -402,7 +404,9 @@ namespace
         m_LatestMousePosition[0] = static_cast<float>(MousePositionX);
         m_LatestMousePosition[1] = static_cast<float>(MousePositionY);
 
-        Base::CInputEvent NewInput(Base::CInputEvent::Input, Base::CInputEvent::MouseLeftReleased, Base::CInputEvent::Mouse, m_LatestMousePosition);
+        glm::vec2 LocalMouse = glm::vec2(_rMessage.Get<int>(), _rMessage.Get<int>());
+
+        Base::CInputEvent NewInput(Base::CInputEvent::Input, Base::CInputEvent::MouseLeftReleased, Base::CInputEvent::Mouse, m_LatestMousePosition, LocalMouse);
 
         Gui::EventHandler::OnUserEvent(NewInput);
     }
@@ -417,7 +421,9 @@ namespace
         m_LatestMousePosition[0] = static_cast<float>(MousePositionX);
         m_LatestMousePosition[1] = static_cast<float>(MousePositionY);
 
-        Base::CInputEvent NewInput(Base::CInputEvent::Input, Base::CInputEvent::MouseMiddlePressed, Base::CInputEvent::Mouse, m_LatestMousePosition);
+        glm::vec2 LocalMouse = glm::vec2(_rMessage.Get<int>(), _rMessage.Get<int>());
+
+        Base::CInputEvent NewInput(Base::CInputEvent::Input, Base::CInputEvent::MouseMiddlePressed, Base::CInputEvent::Mouse, m_LatestMousePosition, LocalMouse);
 
         Gui::EventHandler::OnUserEvent(NewInput);
     }
@@ -432,7 +438,9 @@ namespace
         m_LatestMousePosition[0] = static_cast<float>(MousePositionX);
         m_LatestMousePosition[1] = static_cast<float>(MousePositionY);
 
-        Base::CInputEvent NewInput(Base::CInputEvent::Input, Base::CInputEvent::MouseMiddleReleased, Base::CInputEvent::Mouse, m_LatestMousePosition);
+        glm::vec2 LocalMouse = glm::vec2(_rMessage.Get<int>(), _rMessage.Get<int>());
+
+        Base::CInputEvent NewInput(Base::CInputEvent::Input, Base::CInputEvent::MouseMiddleReleased, Base::CInputEvent::Mouse, m_LatestMousePosition, LocalMouse);
 
         Gui::EventHandler::OnUserEvent(NewInput);
     }
@@ -447,7 +455,9 @@ namespace
         m_LatestMousePosition[0] = static_cast<float>(MousePositionX);
         m_LatestMousePosition[1] = static_cast<float>(MousePositionY);
 
-        Base::CInputEvent NewInput(Base::CInputEvent::Input, Base::CInputEvent::MouseRightPressed, Base::CInputEvent::Mouse, m_LatestMousePosition);
+        glm::vec2 LocalMouse = glm::vec2(_rMessage.Get<int>(), _rMessage.Get<int>());
+
+        Base::CInputEvent NewInput(Base::CInputEvent::Input, Base::CInputEvent::MouseRightPressed, Base::CInputEvent::Mouse, m_LatestMousePosition, LocalMouse);
 
         Gui::EventHandler::OnUserEvent(NewInput);
     }
@@ -462,7 +472,9 @@ namespace
         m_LatestMousePosition[0] = static_cast<float>(MousePositionX);
         m_LatestMousePosition[1] = static_cast<float>(MousePositionY);
 
-        Base::CInputEvent NewInput(Base::CInputEvent::Input, Base::CInputEvent::MouseRightReleased, Base::CInputEvent::Mouse, m_LatestMousePosition);
+        glm::vec2 LocalMouse = glm::vec2(_rMessage.Get<int>(), _rMessage.Get<int>());
+
+        Base::CInputEvent NewInput(Base::CInputEvent::Input, Base::CInputEvent::MouseRightReleased, Base::CInputEvent::Mouse, m_LatestMousePosition, LocalMouse);
 
         Gui::EventHandler::OnUserEvent(NewInput);
     }
@@ -477,7 +489,9 @@ namespace
         m_LatestMousePosition[0] = static_cast<float>(MousePositionX);
         m_LatestMousePosition[1] = static_cast<float>(MousePositionY);
 
-        Base::CInputEvent NewInput(Base::CInputEvent::Input, Base::CInputEvent::MouseMove, Base::CInputEvent::Mouse, m_LatestMousePosition);
+        glm::vec2 LocalMouse = glm::vec2(_rMessage.Get<int>(), _rMessage.Get<int>());
+
+        Base::CInputEvent NewInput(Base::CInputEvent::Input, Base::CInputEvent::MouseMove, Base::CInputEvent::Mouse, m_LatestMousePosition, LocalMouse);
 
         Gui::EventHandler::OnUserEvent(NewInput);
     }

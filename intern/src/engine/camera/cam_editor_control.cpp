@@ -51,13 +51,13 @@ namespace Cam
         {
             m_IsDragging = true;
 
-            m_LastCursorPosition = _rEvent.GetCursorPosition();
+            m_LastCursorPosition = _rEvent.GetGlobalCursorPosition();
         }
         else if (_rEvent.GetAction() == Base::CInputEvent::MouseRightPressed && !m_IsDragging)
         {
             m_IsFlying = true;
 
-            m_LastCursorPosition = _rEvent.GetCursorPosition();
+            m_LastCursorPosition = _rEvent.GetGlobalCursorPosition();
         }
         else if (_rEvent.GetAction() == Base::CInputEvent::MouseMiddleReleased || _rEvent.GetAction() == Base::CInputEvent::MouseRightReleased)
         {
@@ -100,7 +100,7 @@ namespace Cam
                 glm::vec3 Right(1.0f, 0.0f, 0.0f);
                 glm::vec3 Up(0.0f, 0.0f, 1.0f);
 
-                const glm::vec2& rCursorPosition = _rEvent.GetCursorPosition();
+                const glm::vec2& rCursorPosition = _rEvent.GetGlobalCursorPosition();
 
                 float DeltaTime = static_cast<float>(Core::Time::GetDeltaTimeLastFrame());
 
@@ -118,7 +118,7 @@ namespace Cam
 
             if (m_IsFlying)
             {
-                const glm::vec2& rCursorPosition = _rEvent.GetCursorPosition();
+                const glm::vec2& rCursorPosition = _rEvent.GetGlobalCursorPosition();
 
                 m_CurrentRotation -= (rCursorPosition - m_LastCursorPosition) * s_RotationVelocity;
 

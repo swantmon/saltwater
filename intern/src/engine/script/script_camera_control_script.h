@@ -70,7 +70,7 @@ namespace Scpt
             {
                 m_IsFlying = true;
 
-                m_LastCursorPosition = _rEvent.GetCursorPosition();
+                m_LastCursorPosition = _rEvent.GetGlobalCursorPosition();
             }
             else if (_rEvent.GetAction() == Base::CInputEvent::MouseRightReleased)
             {
@@ -100,7 +100,7 @@ namespace Scpt
             {
                 if (m_IsFlying)
                 {
-                    const glm::vec2& rCursorPosition = _rEvent.GetCursorPosition();
+                    const glm::vec2& rCursorPosition = _rEvent.GetGlobalCursorPosition();
 
                     m_CurrentRotation -= (rCursorPosition - m_LastCursorPosition) * m_RotationSpeed;
 

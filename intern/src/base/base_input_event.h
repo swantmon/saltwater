@@ -139,7 +139,7 @@ namespace IO
         
         inline CInputEvent(unsigned int _Type);
         inline CInputEvent(unsigned int _Type, unsigned int _Action, unsigned int _Key, unsigned int _KeyModifier);
-        inline CInputEvent(unsigned int _Type, unsigned int _Action, unsigned int _Key, const glm::vec2& _rPointerPosition);
+        inline CInputEvent(unsigned int _Type, unsigned int _Action, unsigned int _Key, const glm::vec2& _rPointerPosition, const glm::vec2& _rLocalPointerPosition);
         inline CInputEvent(unsigned int _Type, unsigned int _Action, unsigned int _Key, const glm::vec2& _rPointerPosition, float _WheelDelta);
 
         inline CInputEvent(unsigned int _Type, unsigned int _Action, unsigned int _Key);
@@ -166,7 +166,8 @@ namespace IO
         inline bool HasControl() const;
         inline bool HasModifier() const;
         
-        inline const glm::vec2& GetCursorPosition() const;
+        inline const glm::vec2& GetGlobalCursorPosition() const;
+        inline const glm::vec2& GetLocalCursorPosition() const;
         
         inline float GetDelta() const;
 
@@ -187,6 +188,7 @@ namespace IO
         
         SBits     m_Bits;
         glm::vec2 m_PointerPosition;
+        glm::vec2 m_LocalPointerPosition;
         float     m_WheelDelta;
     };
 } // namespace IO
@@ -218,8 +220,9 @@ namespace IO
     
     // -----------------------------------------------------------------------------
     
-    inline CInputEvent::CInputEvent(unsigned int _Type, unsigned int _Action, unsigned int _Key, const glm::vec2& _rPointerPosition)
+    inline CInputEvent::CInputEvent(unsigned int _Type, unsigned int _Action, unsigned int _Key, const glm::vec2& _rPointerPosition, const glm::vec2& _rLocalPointerPosition)
         : m_PointerPosition(_rPointerPosition)
+        , m_LocalPointerPosition(_rLocalPointerPosition)
         , m_WheelDelta    (0)
     {
         m_Bits.m_Type        = _Type;
@@ -358,9 +361,16 @@ namespace IO
     
     // -----------------------------------------------------------------------------
     
-    inline const glm::vec2& CInputEvent::GetCursorPosition() const
+    inline const glm::vec2& CInputEvent::GetGlobalCursorPosition() const
     {
         return m_PointerPosition;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    inline const glm::vec2& CInputEvent::GetLocalCursorPosition() const
+    {
+        return m_LocalPointerPosition;
     }
     
     // -----------------------------------------------------------------------------
