@@ -138,9 +138,12 @@ namespace
         // -----------------------------------------------------------------------------
         m_AnalogStickDeadZone = Core::CProgramParameters::GetInstance().Get("input:gamepad:deadzone", 3200);
 
-        if (SDL_Init(SDL_INIT_JOYSTICK) < 0)
+        if (Core::CProgramParameters::GetInstance().Get("input:gamepad:enable", true))
         {
-            BASE_THROWM("Could not initialise SDL");
+            if (SDL_Init(SDL_INIT_JOYSTICK) < 0)
+            {
+                BASE_THROWM("Could not initialise SDL");
+            }
         }
 
         if (SDL_NumJoysticks() < 1)
