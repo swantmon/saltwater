@@ -741,18 +741,11 @@ namespace
             glm::vec3 Position = m_SelectionAnchor0;
             glm::mat4 Scaling;
             glm::mat4 Translation;
-            glm::mat4 Rotation;
-
-            glm::vec3 SquareDiagonal = m_SelectionAnchor1 - m_SelectionAnchor0;
-            //float Angle = glm::acos(glm::dot(glm::normalize(SquareDiagonal), glm::normalize(glm::vec3(1.0f, 0.0f, 1.0f))));
-            float Angle = 0.0f;
 
             Scaling = glm::scale(glm::vec3(0.1f));
             Translation = glm::translate(Position);
-            Rotation = glm::eulerAngleY(Angle);
 
-            BufferData.m_WorldMatrix = Translation * Scaling * Rotation;
-            BufferData.m_WorldMatrix = glm::eulerAngleX(glm::radians(90.0f)) * BufferData.m_WorldMatrix;
+            BufferData.m_WorldMatrix = Translation * Scaling;
             BufferData.m_Color = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
 
             BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
@@ -764,18 +757,11 @@ namespace
             glm::vec3 Position = m_SelectionAnchor1;
             glm::mat4 Scaling;
             glm::mat4 Translation;
-            glm::mat4 Rotation;
-
-            glm::vec3 SquareDiagonal = m_SelectionAnchor1 - m_SelectionAnchor0;
-            //float Angle = glm::acos(glm::dot(glm::normalize(SquareDiagonal), glm::normalize(glm::vec3(1.0f, 0.0f, 1.0f))));
-            float Angle = 0.0f;
-
+            
             Scaling = glm::scale(glm::vec3(0.1f));
             Translation = glm::translate(Position);
-            Rotation = glm::eulerAngleY(Angle);
 
-            BufferData.m_WorldMatrix = Translation * Scaling * Rotation;
-            BufferData.m_WorldMatrix = BufferData.m_WorldMatrix;
+            BufferData.m_WorldMatrix = Translation * Scaling;
             BufferData.m_Color = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
 
             BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
@@ -1194,7 +1180,7 @@ namespace
 
         ContextManager::ResetShaderCS();
 
-        return glm::vec3(PickingData.m_WorldHitPosition);
+        return glm::vec3(ReconstructionToSaltwater * PickingData.m_WorldHitPosition);
     }
 
     // -----------------------------------------------------------------------------

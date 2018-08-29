@@ -287,7 +287,7 @@ namespace Scpt
             glm::vec4 WSCursorPosition = InvViewProjectionMatrix * CSCursorPosition;
             WSCursorPosition /= WSCursorPosition.w;
 
-            glm::vec3 RayDirection = -glm::normalize(glm::vec3(WSCursorPosition) - CameraPosition);
+            glm::vec3 RayDirection = glm::vec3(WSCursorPosition) - CameraPosition;
 
             float d = (m_SelectionBoxAnchor0.z - CameraPosition.z) / RayDirection.z;
 
