@@ -287,10 +287,9 @@ namespace Scpt
             glm::vec4 WSCursorPosition = InvViewProjectionMatrix * CSCursorPosition;
             WSCursorPosition /= WSCursorPosition.w;
 
-            glm::vec3 RayDirection = glm::normalize(glm::vec3(WSCursorPosition) - CameraPosition);
-            glm::vec3 Normal = glm::vec3(0.0f, 0.0f, 1.0f);
+            glm::vec3 RayDirection = -glm::normalize(glm::vec3(WSCursorPosition) - CameraPosition);
 
-            float d = glm::dot((glm::normalize(m_SelectionBoxAnchor0 - glm::vec3(WSCursorPosition))), Normal) / glm::dot(RayDirection, Normal);
+            float d = (m_SelectionBoxAnchor0.z - CameraPosition.z) / RayDirection.z;
 
             return d * RayDirection + CameraPosition;
         }
@@ -355,6 +354,11 @@ namespace Scpt
                 }
                 else if (MessageID == 1)
                 {
+                    if (m_IsReconstructorInitialized)
+                    {
+                        return;
+                    }
+
                     ENGINE_CONSOLE_INFO("Initializing reconstructor");
 
                     glm::vec2 FocalLength = *reinterpret_cast<glm::vec2*>(Decompressed.data() + sizeof(int32_t) * 2);
@@ -426,6 +430,8 @@ namespace Scpt
                 Gfx::ContextManager::SetImageTexture(2, m_ShiftLUTPtr);
 
                 Gfx::ContextManager::Dispatch(DivUp(m_DepthSize.x, m_TileSize2D), DivUp(m_DepthSize.y, m_TileSize2D), 1);
+
+                m_UseTrackingCamera = true;
 
                 //OnNewFrame(m_DepthTexture, nullptr, &m_PoseMatrix);
 
