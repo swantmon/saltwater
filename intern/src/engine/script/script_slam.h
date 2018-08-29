@@ -20,6 +20,7 @@
 #include "engine/graphic/gfx_shader_manager.h"
 #include "engine/graphic/gfx_texture.h"
 #include "engine/graphic/gfx_texture_manager.h"
+#include "engine/graphic/gfx_view_manager.h"
 
 #include "engine/script/script_script.h"
 
@@ -82,11 +83,22 @@ namespace Scpt
         // -----------------------------------------------------------------------------
         // Stuff for selection box
         // -----------------------------------------------------------------------------
+        enum class ESelection
+        {
+            NOSELECTION,
+            FIRSTPRESS,
+            FIRSTRELEASE,
+            SECONDPRESS,
+            SECONDRELEASE
+        };
+
         glm::vec3 m_SelectionBoxAnchor0;
         glm::vec3 m_SelectionBoxAnchor1;
         float m_SelectionBoxHeight;
 
-        int m_SelectionState;
+        ESelection m_SelectionState;
+
+        bool m_MousePressed;
 
         // -----------------------------------------------------------------------------
         // Stuff for network data source
@@ -114,7 +126,8 @@ namespace Scpt
             m_SelectionBoxAnchor0 = glm::vec3(0.0f);
             m_SelectionBoxAnchor1 = glm::vec3(0.0f);
             m_SelectionBoxHeight = 0.0f;
-            m_SelectionState = 0;
+            m_SelectionState = ESelection::NOSELECTION;
+            m_MousePressed = false;
 
             // -----------------------------------------------------------------------------
             // Load SLAM plugin
@@ -256,25 +269,63 @@ namespace Scpt
 
         // -----------------------------------------------------------------------------
 
+        glm::vec3 ComputeAnchor1(const Base::CInputEvent& _rEvent)
+        {
+            glm::ivec2 RawCursor = _rEvent.GetLocalCursorPosition();
+
+            const glm::ivec2 WindowSize = Gfx::Main::GetActiveWindowSize();
+            const glm::vec3 CameraPosition = Gfx::ViewManager::GetMainCamera()->GetView()->GetPosition();
+            const glm::mat4 ViewProjectionMatrix = Gfx::ViewManager::GetMainCamera()->GetViewProjectionMatrix();
+
+            glm::ivec2 Cursor;
+            Cursor.x = RawCursor.y;
+            Cursor.y = WindowSize.y - RawCursor.x;
+
+            glm::vec4 CSCursorPosition = glm::vec4(glm::vec2(Cursor) / glm::vec2(WindowSize) * 2.0f - 1.0f, 0.0f, 1.0f);
+            glm::mat4 InvViewProjectionMatrix = glm::inverse(ViewProjectionMatrix);
+
+            glm::vec4 WSCursorPosition = InvViewProjectionMatrix * CSCursorPosition;
+            WSCursorPosition /= WSCursorPosition.w;
+
+            glm::vec3 RayDirection = glm::normalize(glm::vec3(WSCursorPosition) - CameraPosition);
+            glm::vec3 Normal = glm::vec3(0.0f, 0.0f, 1.0f);
+
+            float d = glm::dot((glm::normalize(m_SelectionBoxAnchor0 - glm::vec3(WSCursorPosition))), Normal) / glm::dot(RayDirection, Normal);
+
+            return d * RayDirection + CameraPosition;
+        }
+
+        // -----------------------------------------------------------------------------
+
         void OnInput(const Base::CInputEvent& _rEvent) override
         {
             if (_rEvent.GetAction() == Base::CInputEvent::MouseLeftPressed)
             {
-                glm::vec3 Hit;
-                Pick(_rEvent.GetLocalCursorPosition(), Hit);
+                m_MousePressed = true;
+
+                if (m_SelectionState == ESelection::NOSELECTION)
+                {
+                    Pick(_rEvent.GetLocalCursorPosition(), m_SelectionBoxAnchor0);
+                    m_SelectionState = ESelection::FIRSTPRESS;
+                }
             }
             else if (_rEvent.GetAction() == Base::CInputEvent::MouseLeftReleased)
             {
-                glm::vec3 Hit;
-                Pick(_rEvent.GetLocalCursorPosition(), Hit);
+                m_MousePressed = false;
+
+                m_SelectionState = ESelection::NOSELECTION;
             }
             else if (_rEvent.GetAction() == Base::CInputEvent::MouseMove)
             {
-                glm::vec3 Hit;
-                Pick(_rEvent.GetLocalCursorPosition(), Hit);
-            }
+                if (m_MousePressed && m_SelectionState == ESelection::FIRSTPRESS)
+                {
+                    m_SelectionBoxAnchor1 = ComputeAnchor1(_rEvent);
 
-            UpdateSelectionBox(m_SelectionBoxAnchor0, m_SelectionBoxAnchor1, m_SelectionBoxHeight, m_SelectionState);
+                    std::cout << m_SelectionBoxAnchor0.x << '\n' << m_SelectionBoxAnchor0.y << '\n' << m_SelectionBoxAnchor0.z << "\n\n";
+                    std::cout << m_SelectionBoxAnchor1.x << '\n' << m_SelectionBoxAnchor1.y << '\n' << m_SelectionBoxAnchor1.z << "\n\n";
+                }
+            }
+            UpdateSelectionBox(m_SelectionBoxAnchor0, m_SelectionBoxAnchor1, m_SelectionBoxHeight, static_cast<int>(m_SelectionState));
         }
 
     private:
