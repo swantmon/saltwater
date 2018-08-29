@@ -716,6 +716,11 @@ namespace
 
     void CGfxReconstructionRenderer::RenderSelectionBox()
     {
+        if (m_SelectionState == 0)
+        {
+            return;
+        }
+
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
 
         ContextManager::SetRenderContext(m_OutlineRenderContextPtr);
@@ -732,20 +737,51 @@ namespace
 
         ContextManager::SetTopology(STopology::LineList);
 
-        glm::vec3 Position = m_SelectionAnchor0;
-        glm::mat4 Scaling;
-        glm::mat4 Translation;
-                
-        Scaling = glm::scale(glm::vec3(1));
-        Translation = glm::translate(Position);
+        {
+            glm::vec3 Position = m_SelectionAnchor0;
+            glm::mat4 Scaling;
+            glm::mat4 Translation;
+            glm::mat4 Rotation;
 
-        BufferData.m_WorldMatrix = Translation * Scaling;
-        BufferData.m_WorldMatrix = glm::eulerAngleX(glm::radians(90.0f)) * BufferData.m_WorldMatrix;
-        BufferData.m_Color = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+            glm::vec3 SquareDiagonal = m_SelectionAnchor1 - m_SelectionAnchor0;
+            //float Angle = glm::acos(glm::dot(glm::normalize(SquareDiagonal), glm::normalize(glm::vec3(1.0f, 0.0f, 1.0f))));
+            float Angle = 0.0f;
 
-        BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
+            Scaling = glm::scale(glm::vec3(0.1f));
+            Translation = glm::translate(Position);
+            Rotation = glm::eulerAngleY(Angle);
 
-        ContextManager::Draw(m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface()->GetNumberOfVertices(), 0);
+            BufferData.m_WorldMatrix = Translation * Scaling * Rotation;
+            BufferData.m_WorldMatrix = glm::eulerAngleX(glm::radians(90.0f)) * BufferData.m_WorldMatrix;
+            BufferData.m_Color = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+
+            BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
+
+            ContextManager::Draw(m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface()->GetNumberOfVertices(), 0);
+        }
+
+        {
+            glm::vec3 Position = m_SelectionAnchor1;
+            glm::mat4 Scaling;
+            glm::mat4 Translation;
+            glm::mat4 Rotation;
+
+            glm::vec3 SquareDiagonal = m_SelectionAnchor1 - m_SelectionAnchor0;
+            //float Angle = glm::acos(glm::dot(glm::normalize(SquareDiagonal), glm::normalize(glm::vec3(1.0f, 0.0f, 1.0f))));
+            float Angle = 0.0f;
+
+            Scaling = glm::scale(glm::vec3(0.1f));
+            Translation = glm::translate(Position);
+            Rotation = glm::eulerAngleY(Angle);
+
+            BufferData.m_WorldMatrix = Translation * Scaling * Rotation;
+            BufferData.m_WorldMatrix = BufferData.m_WorldMatrix;
+            BufferData.m_Color = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+
+            BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
+
+            ContextManager::Draw(m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface()->GetNumberOfVertices(), 0);
+        }
     }
 
     // -----------------------------------------------------------------------------
