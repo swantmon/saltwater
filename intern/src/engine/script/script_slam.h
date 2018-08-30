@@ -319,9 +319,6 @@ namespace Scpt
                 if (m_MousePressed && m_SelectionState == ESelection::FIRSTPRESS)
                 {
                     m_SelectionBoxAnchor1 = ComputeAnchor1(_rEvent);
-
-                    std::cout << m_SelectionBoxAnchor0.x << '\n' << m_SelectionBoxAnchor0.y << '\n' << m_SelectionBoxAnchor0.z << "\n\n";
-                    std::cout << m_SelectionBoxAnchor1.x << '\n' << m_SelectionBoxAnchor1.y << '\n' << m_SelectionBoxAnchor1.z << "\n\n";
                 }
             }
             UpdateSelectionBox(m_SelectionBoxAnchor0, m_SelectionBoxAnchor1, m_SelectionBoxHeight, static_cast<int>(m_SelectionState));
