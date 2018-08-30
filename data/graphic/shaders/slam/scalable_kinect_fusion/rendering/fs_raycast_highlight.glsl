@@ -8,7 +8,7 @@
  
 layout(std140, binding = 1) uniform PerDrawCallData
 {
-    vec4 g_Color;
+    mat4 g_WSToSelectionTransform;
 };
  
 // -----------------------------------------------------------------------------
