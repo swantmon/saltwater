@@ -859,6 +859,13 @@ namespace
 
     void CGfxReconstructionRenderer::RaycastScalableVolumeWithHighlight()
     {
+        glm::mat4 ReconstructionToSaltwater = glm::mat4(
+            1.0f, 0.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 1.0f, 0.0f,
+            0.0f, -1.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, 1.0f
+        );
+
         Performance::BeginEvent("Raycasting with hightlighting for rendering");
 
         ContextManager::SetTargetSet(TargetSetManager::GetDeferredTargetSet());
@@ -912,7 +919,7 @@ namespace
             glm::vec3(glm::eulerAngleX(glm::half_pi<float>()) * glm::vec4(Min[0], Max[1], Max[2], 1.0f))
         };
 
-        glm::mat4 InvOBBMatrix = glm::inverse(m_SelectionTransform);
+        glm::mat4 InvOBBMatrix = glm::inverse(m_SelectionTransform) * ReconstructionToSaltwater;
         
         BufferManager::UploadBufferData(m_RaycastHighLightConstantBufferPtr, &InvOBBMatrix);
 

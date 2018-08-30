@@ -10,7 +10,80 @@ layout(std140, binding = 1) uniform PerDrawCallData
 {
     mat4 g_WSToSelectionTransform;
 };
- 
+
+bool IsInBox(vec3 Position)
+{
+    Position = (g_WSToSelectionTransform * vec4(Position, 1.0f)).xyz;
+    bool IsInX = Position.x > 0.0f && Position.x < 1.0f;
+    bool IsInY = Position.y > 0.0f && Position.y < 1.0f;
+    bool IsInZ = Position.z > 0.0f && Position.z < 1.0f;
+    return IsInX && IsInY && IsInZ;
+}
+
+vec3 GetPositionHightlight(vec3 CameraPosition, vec3 RayDirection)
+{
+    const float StartLength = max(RAYCAST_NEAR, GetStartLength(CameraPosition, RayDirection, g_AABBMin, g_AABBMax));
+    const float EndLength = min(RAYCAST_FAR,GetEndLength(CameraPosition, RayDirection, g_AABBMin, g_AABBMax));
+
+    float RayLength = StartLength;
+    float Step = TRUNCATED_DISTANCE;
+
+    float CurrentTSDF = GetVoxel(CameraPosition + RayLength * RayDirection).x;
+    float PreviousTSDF;
+    RayLength += Step;
+
+    vec3 Vertex = vec3(0.0f);
+
+    float NewStep;
+    
+    vec3 PreviousPosition;
+    vec3 CurrentPosition;
+
+    while (RayLength < EndLength)
+    {
+        PreviousPosition = CameraPosition + RayLength * RayDirection;
+        RayLength += Step;
+        CurrentPosition = CameraPosition + RayLength * RayDirection;
+
+        PreviousTSDF = CurrentTSDF;
+        
+        CurrentTSDF = GetVoxelWithStep(CurrentPosition, RayDirection, NewStep).x;
+
+        if (NewStep > 0.0f)
+        {
+            RayLength += NewStep;
+        }
+#ifdef RAYCAST_BACKSIDES
+        else if (CurrentTSDF * PreviousTSDF < 0.0f && !IsInBox(PreviousPosition))
+#else
+        else if (CurrentTSDF < 0.0f && PreviousTSDF > 0.0f && !IsInBox(PreviousPosition))
+#endif
+        {
+            break;
+        }
+        
+        //Step = CurrentTSDF < 1.0f ? VOXEL_SIZE : TRUNCATED_DISTANCE;
+        Step = VOXEL_SIZE;
+    }
+
+    if (RayLength < EndLength)
+    {
+        float Ft = GetInterpolatedTSDF(PreviousPosition);
+        float Ftdt = GetInterpolatedTSDF(CurrentPosition);
+        float Ts = RayLength - Step * Ft / (Ftdt - Ft);
+
+        Vertex = CameraPosition + RayDirection * Ts;
+    }
+
+    return Vertex;
+}
+
+void GetPositionAndColorHighlight(vec3 CameraPosition, vec3 RayDirection, out vec3 Vertex, out vec3 Color)
+{
+    Vertex = GetPositionHightlight(CameraPosition, RayDirection);
+    Color = GetColor(Vertex); 
+}
+
 // -----------------------------------------------------------------------------
 // Input from previous shader stage
 // -----------------------------------------------------------------------------
@@ -50,11 +123,11 @@ void main()
  
 #ifdef CAPTURE_COLOR
  
-    GetPositionAndColor(Cameraposition, RayDirection, WSPosition, Color);
+    GetPositionAndColorHighlight(Cameraposition, RayDirection, WSPosition, Color);
  
 #else
 
-    WSPosition = GetPosition(Cameraposition, RayDirection);
+    WSPosition = GetPositionHighlight(Cameraposition, RayDirection);
     Color = vec3(1.0f, 1.0f, 1.0f); //g_Color.rgb; TODO: use color from buffer
  
 #endif
