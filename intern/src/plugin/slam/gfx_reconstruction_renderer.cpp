@@ -185,8 +185,6 @@ namespace
         bool m_RenderRootQueue;
         bool m_RenderLevel1Queue;
         bool m_RenderLevel2Queue;
-        bool m_RenderHistogram;
-        bool m_RenderPlanes;
         bool m_RenderBackSides;
 
         glm::vec3 m_SelectionAnchor0;
@@ -208,8 +206,6 @@ namespace
         , m_RenderRootQueue      (false)
         , m_RenderLevel1Queue    (false)
         , m_RenderLevel2Queue    (false)
-        , m_RenderHistogram      (false)
-        , m_RenderPlanes         (false)
     {
         
     }
@@ -256,8 +252,6 @@ namespace
         m_RenderRootQueue       = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:root"        , false);
         m_RenderLevel1Queue     = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:level1"      , false);
         m_RenderLevel2Queue     = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:level2"      , false);
-        m_RenderHistogram       = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:histogram"          , false);
-        m_RenderPlanes          = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:planes"             , false);
         m_RenderBackSides       = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:backsides"          , true);
 
         m_SelectionAnchor0 = glm::vec3(0.0f);
