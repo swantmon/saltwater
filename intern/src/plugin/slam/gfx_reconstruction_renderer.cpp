@@ -731,37 +731,27 @@ namespace
 
         ContextManager::SetTopology(STopology::LineList);
 
-        {
-            glm::vec3 Position = m_SelectionAnchor0;
-            glm::mat4 Scaling;
-            glm::mat4 Translation;
+        glm::vec3 Diagonal = m_SelectionAnchor1 - m_SelectionAnchor0;
+        glm::vec3 NDiagonal = glm::normalize(Diagonal);
 
-            Scaling = glm::scale(glm::vec3(0.1f));
-            Translation = glm::translate(Position);
+        glm::vec3 Position = m_SelectionAnchor0;
+        glm::mat4 Scaling;
+        glm::mat4 Translation;
+        glm::mat4 Rotation;
 
-            BufferData.m_WorldMatrix = Translation * Scaling;
-            BufferData.m_Color = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+        Scaling = glm::scale(glm::vec3(glm::length(Diagonal) / glm::sqrt(2.0f)));
+        Translation = glm::translate(Position);
 
-            BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
+        glm::vec3 Direction = glm::mat3(glm::eulerAngleZ(-glm::pi<float>() / 4.0f)) * NDiagonal;
+        float Angle = std::atan2(Direction.y, Direction.x); // TODO: find out why glm::atan2 does lead to a compiler error
+        Rotation = glm::eulerAngleZ(Angle);
 
-            ContextManager::Draw(m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface()->GetNumberOfVertices(), 0);
-        }
+        BufferData.m_WorldMatrix = Translation * Scaling * Rotation;
+        BufferData.m_Color = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
 
-        {
-            glm::vec3 Position = m_SelectionAnchor1;
-            glm::mat4 Scaling;
-            glm::mat4 Translation;
-            
-            Scaling = glm::scale(glm::vec3(0.1f));
-            Translation = glm::translate(Position);
+        BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
 
-            BufferData.m_WorldMatrix = Translation * Scaling;
-            BufferData.m_Color = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
-
-            BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
-
-            ContextManager::Draw(m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface()->GetNumberOfVertices(), 0);
-        }
+        ContextManager::Draw(m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface()->GetNumberOfVertices(), 0);
     }
 
     // -----------------------------------------------------------------------------
