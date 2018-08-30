@@ -115,6 +115,7 @@ namespace
         void RenderVolumeVertexMap();
 
 		void RaycastScalableVolume();
+        void RaycastScalableVolumeWithHighlight();
         
         void RenderQueuedRootVolumes();
         void RenderQueuedLevel1Grids();
@@ -143,11 +144,13 @@ namespace
         
         CShaderPtr m_RaycastVSPtr;
         CShaderPtr m_RaycastFSPtr;
+        CShaderPtr m_RaycastHighlightFSPtr;
 
         CShaderPtr m_CopyRaycastVSPtr;
         CShaderPtr m_CopyRaycastFSPtr;
 
         CBufferPtr m_RaycastConstantBufferPtr;
+        CBufferPtr m_RaycastHighLightConstantBufferPtr;
         CBufferPtr m_DrawCallConstantBufferPtr;
                 
         CMeshPtr m_CameraMeshPtr;
@@ -187,9 +190,8 @@ namespace
         bool m_RenderLevel2Queue;
         bool m_RenderBackSides;
 
-        glm::vec3 m_SelectionAnchor0;
-        glm::vec3 m_SelectionAnchor1;
-        float m_SelectionHeight;
+        glm::mat4 m_SelectionTransform;
+
         int m_SelectionState;
     };
 } // namespace
@@ -253,11 +255,6 @@ namespace
         m_RenderLevel1Queue     = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:level1"      , false);
         m_RenderLevel2Queue     = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:level2"      , false);
         m_RenderBackSides       = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:backsides"          , true);
-
-        m_SelectionAnchor0 = glm::vec3(0.0f);
-        m_SelectionAnchor1 = glm::vec3(0.0f);
-        m_SelectionHeight = 0.0f;
-        m_SelectionState = 0;
     }
 
     // -----------------------------------------------------------------------------
@@ -272,6 +269,7 @@ namespace
         m_OutlineLevel2FSPtr = 0;
         m_RaycastVSPtr = 0;
         m_RaycastFSPtr = 0;
+        m_RaycastHighlightFSPtr = 0;
         m_CopyRaycastVSPtr = 0;
         m_CopyRaycastFSPtr = 0;
         m_PickingCSPtr = 0;
@@ -282,6 +280,7 @@ namespace
         m_PickingBuffer = 0;
 
         m_RaycastConstantBufferPtr = 0;
+        m_RaycastHighLightConstantBufferPtr = 0;
         m_DrawCallConstantBufferPtr = 0;
         
         m_CameraMeshPtr = 0;
@@ -362,6 +361,7 @@ namespace
 
         m_RaycastVSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_raycast.glsl", "main", DefineString.c_str());
         m_RaycastFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_raycast.glsl", "main", DefineString.c_str());
+        m_RaycastHighlightFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_raycast_highlight.glsl", "main", DefineString.c_str());
 
         m_CopyRaycastVSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_copy_raycast.glsl", "main", DefineString.c_str());
         m_CopyRaycastFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_copy_raycast.glsl", "main", DefineString.c_str());
@@ -454,6 +454,10 @@ namespace
         ConstantBufferDesc.m_pClassKey = 0;
 
         m_RaycastConstantBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(glm::mat4) + 2 * sizeof(glm::vec4);
+
+        m_RaycastHighLightConstantBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
         
         ConstantBufferDesc.m_NumberOfBytes = sizeof(SDrawCallConstantBuffer);
         m_DrawCallConstantBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
@@ -731,22 +735,7 @@ namespace
 
         ContextManager::SetTopology(STopology::LineList);
 
-        glm::vec3 Diagonal = m_SelectionAnchor1 - m_SelectionAnchor0;
-        glm::vec3 NDiagonal = glm::normalize(Diagonal);
-
-        glm::vec3 Position = m_SelectionAnchor0;
-        glm::mat4 Scaling;
-        glm::mat4 Translation;
-        glm::mat4 Rotation;
-
-        Scaling = glm::scale(glm::vec3(glm::length(Diagonal) / glm::sqrt(2.0f)));
-        Translation = glm::translate(Position);
-
-        glm::vec3 Direction = glm::mat3(glm::eulerAngleZ(-glm::pi<float>() / 4.0f)) * NDiagonal;
-        float Angle = std::atan2(Direction.y, Direction.x); // TODO: find out why glm::atan2 does lead to a compiler error
-        Rotation = glm::eulerAngleZ(Angle);
-
-        BufferData.m_WorldMatrix = Translation * Scaling * Rotation;
+        BufferData.m_WorldMatrix = m_SelectionTransform;
         BufferData.m_Color = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
 
         BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
@@ -865,7 +854,82 @@ namespace
 
         Performance::EndEvent();
 	}
-    
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxReconstructionRenderer::RaycastScalableVolumeWithHighlight()
+    {
+        Performance::BeginEvent("Raycasting with hightlighting for rendering");
+
+        ContextManager::SetTargetSet(TargetSetManager::GetDeferredTargetSet());
+
+        MR::CScalableSLAMReconstructor::SScalableVolume& rVolume = m_pScalableReconstructor->GetVolume();
+
+        MR::SReconstructionSettings Settings;
+        m_pScalableReconstructor->GetReconstructionSettings(&Settings);
+
+        glm::mat4 PoseMatrix = m_pScalableReconstructor->GetPoseMatrix();
+
+        ContextManager::SetShaderVS(m_RaycastVSPtr);
+        ContextManager::SetShaderPS(m_RaycastHighlightFSPtr);
+
+        ContextManager::SetResourceBuffer(0, rVolume.m_RootVolumePoolPtr);
+        ContextManager::SetResourceBuffer(1, rVolume.m_RootGridPoolPtr);
+        ContextManager::SetResourceBuffer(2, rVolume.m_Level1PoolPtr);
+        ContextManager::SetResourceBuffer(3, rVolume.m_TSDFPoolPtr);
+        ContextManager::SetResourceBuffer(6, rVolume.m_RootVolumePositionBufferPtr);
+
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+        ContextManager::SetConstantBuffer(1, m_RaycastHighLightConstantBufferPtr);
+        ContextManager::SetConstantBuffer(2, rVolume.m_AABBBufferPtr);
+
+        ContextManager::Barrier();
+
+        ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::Default));
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
+
+        const glm::vec3 Min = glm::vec3(
+            rVolume.m_MinOffset[0] * Settings.m_VolumeSize,
+            rVolume.m_MinOffset[1] * Settings.m_VolumeSize,
+            rVolume.m_MinOffset[2] * Settings.m_VolumeSize
+        );
+
+        const glm::vec3 Max = glm::vec3(
+            (rVolume.m_MaxOffset[0] + 1.0f) * Settings.m_VolumeSize, // Add 1.0f because MaxOffset stores the max volume offset
+            (rVolume.m_MaxOffset[1] + 1.0f) * Settings.m_VolumeSize, // and we have to consider the volume size
+            (rVolume.m_MaxOffset[2] + 1.0f) * Settings.m_VolumeSize
+        );
+
+        glm::vec3 Vertices[8] =
+        {
+            glm::vec3(glm::eulerAngleX(glm::half_pi<float>()) * glm::vec4(Min[0], Min[1], Min[2], 1.0f)),
+            glm::vec3(glm::eulerAngleX(glm::half_pi<float>()) * glm::vec4(Max[0], Min[1], Min[2], 1.0f)),
+            glm::vec3(glm::eulerAngleX(glm::half_pi<float>()) * glm::vec4(Max[0], Max[1], Min[2], 1.0f)),
+            glm::vec3(glm::eulerAngleX(glm::half_pi<float>()) * glm::vec4(Min[0], Max[1], Min[2], 1.0f)),
+            glm::vec3(glm::eulerAngleX(glm::half_pi<float>()) * glm::vec4(Min[0], Min[1], Max[2], 1.0f)),
+            glm::vec3(glm::eulerAngleX(glm::half_pi<float>()) * glm::vec4(Max[0], Min[1], Max[2], 1.0f)),
+            glm::vec3(glm::eulerAngleX(glm::half_pi<float>()) * glm::vec4(Max[0], Max[1], Max[2], 1.0f)),
+            glm::vec3(glm::eulerAngleX(glm::half_pi<float>()) * glm::vec4(Min[0], Max[1], Max[2], 1.0f))
+        };
+
+
+        
+        //BufferManager::UploadBufferData(m_RaycastConstantBufferPtr, &Color);
+
+        BufferManager::UploadBufferData(m_VolumeMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer(), &Vertices);
+
+        const unsigned int Offset = 0;
+        ContextManager::SetVertexBuffer(m_VolumeMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
+        ContextManager::SetIndexBuffer(m_VolumeMeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
+        ContextManager::SetInputLayout(m_VolumeInputLayoutPtr);
+
+        ContextManager::SetTopology(STopology::TriangleList);
+
+        ContextManager::DrawIndexed(36, 0, 0);
+
+        Performance::EndEvent();
+    }
+
 	// -----------------------------------------------------------------------------
 
 	void CGfxReconstructionRenderer::RenderQueuedRootVolumes()
@@ -1169,9 +1233,22 @@ namespace
 
     void CGfxReconstructionRenderer::SetSelectionBox(const glm::vec3& _rAnchor0, const glm::vec3& _rAnchor1, float _Height, int _State)
     {
-        m_SelectionAnchor0 = _rAnchor0;
-        m_SelectionAnchor1 = _rAnchor1;
-        m_SelectionHeight = _Height;
+        glm::vec3 Diagonal = _rAnchor1 - _rAnchor0;
+        glm::vec3 NDiagonal = glm::normalize(Diagonal);
+
+        glm::vec3 Position = _rAnchor0;
+        glm::mat4 Scaling;
+        glm::mat4 Translation;
+        glm::mat4 Rotation;
+
+        Scaling = glm::scale(glm::vec3(glm::length(Diagonal) / glm::sqrt(2.0f)));
+        Translation = glm::translate(Position);
+
+        glm::vec3 Direction = glm::mat3(glm::eulerAngleZ(-glm::pi<float>() / 4.0f)) * NDiagonal;
+        float Angle = std::atan2(Direction.y, Direction.x); // TODO: find out why glm::atan2 does lead to a compiler error
+        Rotation = glm::eulerAngleZ(Angle);
+
+        m_SelectionTransform = Translation * Scaling * Rotation;
         m_SelectionState = _State;
     }
 
