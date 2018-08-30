@@ -455,7 +455,7 @@ namespace
 
         m_RaycastConstantBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
 
-        ConstantBufferDesc.m_NumberOfBytes = sizeof(glm::mat4) + 2 * sizeof(glm::vec4);
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(glm::mat4);
 
         m_RaycastHighLightConstantBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
         
@@ -912,9 +912,9 @@ namespace
             glm::vec3(glm::eulerAngleX(glm::half_pi<float>()) * glm::vec4(Min[0], Max[1], Max[2], 1.0f))
         };
 
-
+        glm::mat4 InvOBBMatrix = glm::inverse(m_SelectionTransform);
         
-        //BufferManager::UploadBufferData(m_RaycastConstantBufferPtr, &Color);
+        BufferManager::UploadBufferData(m_RaycastHighLightConstantBufferPtr, &InvOBBMatrix);
 
         BufferManager::UploadBufferData(m_VolumeMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer(), &Vertices);
 
@@ -1278,7 +1278,14 @@ namespace
 
             if (m_RenderVolume)
             {
-                RaycastScalableVolume();
+                if (m_SelectionState == 0)
+                {
+                    RaycastScalableVolume();
+                }
+                else
+                {
+                    RaycastScalableVolumeWithHighlight();
+                }
             }
 
             if (m_RenderVertexMap)
