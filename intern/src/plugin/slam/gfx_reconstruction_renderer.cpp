@@ -146,7 +146,7 @@ namespace
 
         CShaderPtr m_CopyRaycastVSPtr;
         CShaderPtr m_CopyRaycastFSPtr;
-        
+
         CBufferPtr m_RaycastConstantBufferPtr;
         CBufferPtr m_DrawCallConstantBufferPtr;
                 
@@ -841,18 +841,16 @@ namespace
             glm::vec3(glm::eulerAngleX(glm::half_pi<float>()) * glm::vec4(Min[0], Max[1], Max[2], 1.0f))
         };
 
-        glm::vec4 RaycastData[2];
-        PoseMatrix = glm::translate(glm::vec3(RaycastData[0][0], RaycastData[0][1], RaycastData[0][2]));
-        RaycastData[0][3] = 1.0f;
+        glm::vec4 Color;
         if (Settings.m_CaptureColor)
         {
-            RaycastData[1] = m_pScalableReconstructor->IsTrackingLost() ? glm::vec4(1.0f, 0.0f, 0.0f, 1.0f) : glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+            Color = m_pScalableReconstructor->IsTrackingLost() ? glm::vec4(1.0f, 0.0f, 0.0f, 1.0f) : glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
         }
         else
         {
-            RaycastData[1] = m_pScalableReconstructor->IsTrackingLost() ? glm::vec4(1.0f, 0.0f, 0.0f, 1.0f) : glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+            Color = m_pScalableReconstructor->IsTrackingLost() ? glm::vec4(1.0f, 0.0f, 0.0f, 1.0f) : glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
         }
-        BufferManager::UploadBufferData(m_RaycastConstantBufferPtr, RaycastData);
+        BufferManager::UploadBufferData(m_RaycastConstantBufferPtr, &Color);
 
         BufferManager::UploadBufferData(m_VolumeMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer(), &Vertices);
 

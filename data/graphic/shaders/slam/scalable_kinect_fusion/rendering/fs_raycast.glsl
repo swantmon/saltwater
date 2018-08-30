@@ -8,7 +8,6 @@
  
 layout(std140, binding = 1) uniform PerDrawCallData
 {
-    vec4 g_LightPosition;
     vec4 g_Color;
 };
  
