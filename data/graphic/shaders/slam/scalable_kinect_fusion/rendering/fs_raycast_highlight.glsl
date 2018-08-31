@@ -20,72 +20,15 @@ bool IsInBox(vec3 Position)
     return IsInX && IsInY && IsInZ;
 }
 
-vec3 GetPositionHightlight(vec3 CameraPosition, vec3 RayDirection)
-{
-    const float StartLength = max(RAYCAST_NEAR, GetStartLength(CameraPosition, RayDirection, g_AABBMin, g_AABBMax));
-    const float EndLength = min(RAYCAST_FAR,GetEndLength(CameraPosition, RayDirection, g_AABBMin, g_AABBMax));
-
-    float RayLength = StartLength;
-    float Step = TRUNCATED_DISTANCE;
-
-    float CurrentTSDF = GetVoxel(CameraPosition + RayLength * RayDirection).x;
-    float PreviousTSDF;
-    RayLength += Step;
-
-    vec3 Vertex = vec3(0.0f);
-
-    float NewStep;
-    
-    vec3 PreviousPosition;
-    vec3 CurrentPosition;
-
-    while (RayLength < EndLength)
-    {
-        PreviousPosition = CameraPosition + RayLength * RayDirection;
-        RayLength += Step;
-        CurrentPosition = CameraPosition + RayLength * RayDirection;
-
-        PreviousTSDF = CurrentTSDF;
-        
-        CurrentTSDF = GetVoxelWithStep(CurrentPosition, RayDirection, NewStep).x;
-
-        if (NewStep > 0.0f)
-        {
-            RayLength += NewStep;
-        }
-#ifdef RAYCAST_BACKSIDES
-        else if (CurrentTSDF * PreviousTSDF < 0.0f && !IsInBox(PreviousPosition))
-#else
-        else if (CurrentTSDF < 0.0f && PreviousTSDF > 0.0f && !IsInBox(PreviousPosition))
-#endif
-        {
-            break;
-        }
-        
-        //Step = CurrentTSDF < 1.0f ? VOXEL_SIZE : TRUNCATED_DISTANCE;
-        Step = VOXEL_SIZE;
-    }
-
-    if (RayLength < EndLength)
-    {
-        float Ft = GetInterpolatedTSDF(PreviousPosition);
-        float Ftdt = GetInterpolatedTSDF(CurrentPosition);
-        float Ts = RayLength - Step * Ft / (Ftdt - Ft);
-
-        Vertex = CameraPosition + RayDirection * Ts;
-    }
-
-    return Vertex;
-}
-
 void GetPositionAndColorHighlight(vec3 CameraPosition, vec3 RayDirection, out vec3 Vertex, out vec3 Color)
 {
-    Vertex = GetPositionHightlight(CameraPosition, RayDirection);
+    Vertex = GetPosition(CameraPosition, RayDirection);
 #ifdef CAPTURE_COLOR
     Color = GetColor(Vertex);
 #else
     Color = vec3(1.0f);
 #endif
+    Color = IsInBox(Vertex) ? (Color + vec3(0.0f, 0.0f, 1.0f)) / 2.0f : Color;
 }
 
 // -----------------------------------------------------------------------------
