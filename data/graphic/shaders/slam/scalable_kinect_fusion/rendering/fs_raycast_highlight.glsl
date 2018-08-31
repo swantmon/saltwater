@@ -81,7 +81,11 @@ vec3 GetPositionHightlight(vec3 CameraPosition, vec3 RayDirection)
 void GetPositionAndColorHighlight(vec3 CameraPosition, vec3 RayDirection, out vec3 Vertex, out vec3 Color)
 {
     Vertex = GetPositionHightlight(CameraPosition, RayDirection);
-    Color = GetColor(Vertex); 
+#ifdef CAPTURE_COLOR
+    Color = GetColor(Vertex);
+#else
+    Color = vec3(1.0f);
+#endif
 }
 
 // -----------------------------------------------------------------------------
@@ -120,18 +124,9 @@ void main()
     RayDirection.z = RayDirection.z == 0.0f ? 1e-15f : RayDirection.z;
  
     vec3 WSPosition, Color;
- 
-#ifdef CAPTURE_COLOR
- 
-    GetPositionAndColorHighlight(Cameraposition, RayDirection, WSPosition, Color);
- 
-#else
 
-    WSPosition = GetPositionHighlight(Cameraposition, RayDirection);
-    Color = vec3(1.0f, 1.0f, 1.0f); //g_Color.rgb; TODO: use color from buffer
- 
-#endif
- 
+    GetPositionAndColorHighlight(Cameraposition, RayDirection, WSPosition, Color);
+
     if (WSPosition.x != 0.0f && (Color.r != 0.0f || Color.g != 0.0f || Color.b != 0.0f))
     {
         vec3 WSNormal = mat3(ReconstructionToSaltwater) * GetNormal(WSPosition);

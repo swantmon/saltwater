@@ -324,14 +324,15 @@ vec3 GetPosition(vec3 CameraPosition, vec3 RayDirection)
     return Vertex;
 }
 
-#ifdef CAPTURE_COLOR
-
 void GetPositionAndColor(vec3 CameraPosition, vec3 RayDirection, out vec3 Vertex, out vec3 Color)
 {
     Vertex = GetPosition(CameraPosition, RayDirection);
-    Color = GetColor(Vertex); 
-}
 
-#endif
+#ifdef CAPTURE_COLOR
+    Color = GetColor(Vertex);
+#else
+    Color = vec3(1.0f, 1.0f, 1.0f);
+#endif 
+}
 
 #endif // __INCLUDE_COMMON_RAYCAST_GLSL__

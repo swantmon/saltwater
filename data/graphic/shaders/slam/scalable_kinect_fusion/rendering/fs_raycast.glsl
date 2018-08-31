@@ -47,17 +47,8 @@ void main()
     RayDirection.z = RayDirection.z == 0.0f ? 1e-15f : RayDirection.z;
  
     vec3 WSPosition, Color;
- 
-#ifdef CAPTURE_COLOR
- 
-    GetPositionAndColor(Cameraposition, RayDirection, WSPosition, Color);
- 
-#else
 
-    WSPosition = GetPosition(Cameraposition, RayDirection);
-    Color = vec3(1.0f, 1.0f, 1.0f); //g_Color.rgb; TODO: use color from buffer
- 
-#endif
+    GetPositionAndColor(Cameraposition, RayDirection, WSPosition, Color);
  
     if (WSPosition.x != 0.0f && (Color.r != 0.0f || Color.g != 0.0f || Color.b != 0.0f))
     {
