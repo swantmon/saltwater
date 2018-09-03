@@ -747,11 +747,6 @@ namespace
 
     void CGfxReconstructionRenderer::RenderVolumeVertexMap()
     {
-        //GLint OldViewPort[4];
-        //glGetIntegerv(GL_VIEWPORT, OldViewPort);
-        //
-        //glViewport(0, 0, 512, 424);
-
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
 
         ContextManager::SetRenderContext(m_OutlineRenderContextPtr);
@@ -769,8 +764,6 @@ namespace
         ContextManager::SetTopology(STopology::TriangleStrip);
 
         ContextManager::Draw(4, 0);
-
-        //glViewport(OldViewPort[0], OldViewPort[1], OldViewPort[2], OldViewPort[3]);
     }
     
 	// -----------------------------------------------------------------------------
@@ -1536,6 +1529,6 @@ namespace ReconstructionRenderer
         CGfxReconstructionRenderer::GetInstance().SetSelectionBox(_rAnchor0, _rAnchor1, _Height, _State);
     }
 
-} // namespace Voxel
+} // namespace ReconstructionRenderer
 } // namespace Gfx
 
