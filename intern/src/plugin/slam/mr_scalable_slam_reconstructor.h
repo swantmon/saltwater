@@ -159,6 +159,7 @@ namespace MR
 
         Gfx::CTexturePtr GetVertexMap();
         Gfx::CTexturePtr GetNormalMap();
+        Gfx::CTexturePtr GetColorMap();
 
         glm::ivec2 GetDepthImageSize();
 

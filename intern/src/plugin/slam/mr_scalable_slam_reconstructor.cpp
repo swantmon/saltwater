@@ -1915,6 +1915,13 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
+    Gfx::CTexturePtr CScalableSLAMReconstructor::GetColorMap()
+    {
+        return m_RawCameraFramePtr;
+    }
+
+    // -----------------------------------------------------------------------------
+
     glm::ivec2 CScalableSLAMReconstructor::GetDepthImageSize()
     {
         return m_DepthFrameSize;

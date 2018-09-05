@@ -1151,6 +1151,7 @@ namespace
         ContextManager::SetConstantBuffer(1, m_DrawCallConstantBufferPtr);
 
         ContextManager::SetImageTexture(0, m_pScalableReconstructor->GetVertexMap());
+        ContextManager::SetImageTexture(1, m_pScalableReconstructor->GetColorMap());
 
         const unsigned int Offset = 0;
         ContextManager::SetVertexBuffer(m_CameraMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
