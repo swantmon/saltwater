@@ -302,6 +302,8 @@ namespace MR
         bool m_IsIntegrationPaused;
         bool m_IsTrackingPaused;
 
+        bool m_IsTrackingNeeded;
+
         int m_MinWeight;
 
 		std::vector<float> m_VolumeSizes;

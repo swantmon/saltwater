@@ -1364,6 +1364,8 @@ namespace MR
 
     void CScalableSLAMReconstructor::OnNewFrame(Gfx::CTexturePtr DepthBuffer, Gfx::CTexturePtr ColorBuffer, const glm::mat4* pTransform)
     {
+        m_IsTrackingNeeded = pTransform == nullptr;
+
         const bool CaptureColor = m_ReconstructionSettings.m_CaptureColor;
         
         if (m_IsTrackingPaused)
@@ -1394,7 +1396,7 @@ namespace MR
         // Tracking
         //////////////////////////////////////////////////////////////////////////////////////
 
-        if (pTransform == nullptr)
+        if (m_IsTrackingNeeded)
         {
             if (m_IntegratedFrameCount > m_MinWeight)
             {
@@ -1508,14 +1510,14 @@ namespace MR
 
         BufferManager::UploadBufferData(m_VolumeBuffers.m_AABBBufferPtr, &Data);
 
-        if (pTransform == nullptr)
+        if (m_IsTrackingNeeded)
         {
             Raycast();
         }
 
         Performance::EndEvent();
 
-        if (pTransform == nullptr)
+        if (m_IsTrackingNeeded)
         {
             CreateRaycastPyramid();
         }
@@ -1546,6 +1548,25 @@ namespace MR
     {
         const int WorkGroupsX = DivUp(m_DepthFrameSize.x, g_TileSize2D);
         const int WorkGroupsY = DivUp(m_DepthFrameSize.y, g_TileSize2D);
+
+        ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
+        ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
+
+        /////////////////////////////////////////////////////////////////////////////////////
+        // Generate raw vertex map
+        /////////////////////////////////////////////////////////////////////////////////////
+
+        ContextManager::SetShaderCS(m_VertexMapCSPtr);
+
+        ContextManager::SetImageTexture(0, m_RawDepthBufferPtr);
+        ContextManager::SetImageTexture(1, m_RawVertexMapPtr);
+        ContextManager::Barrier();
+        ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+
+        if (!m_IsTrackingNeeded)
+        {
+            return;
+        }
 
         //////////////////////////////////////////////////////////////////////////////////////
         // Bilateral Filter
@@ -1581,9 +1602,6 @@ namespace MR
         // Generate vertex map pyramid
         /////////////////////////////////////////////////////////////////////////////////////
 
-        ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
-        ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
-
         ContextManager::SetShaderCS(m_VertexMapCSPtr);
         for (int PyramidLevel = 0; PyramidLevel < m_ReconstructionSettings.m_PyramidLevelCount; ++ PyramidLevel)
         {
@@ -1595,17 +1613,6 @@ namespace MR
             ContextManager::Barrier();
             ContextManager::Dispatch(PyramidWorkGroupsX, PyramidWorkGroupsY, 1);
         }
-
-        /////////////////////////////////////////////////////////////////////////////////////
-        // Generate raw vertex map
-        /////////////////////////////////////////////////////////////////////////////////////
-        
-        ContextManager::SetShaderCS(m_VertexMapCSPtr);
-
-        ContextManager::SetImageTexture(0, m_RawDepthBufferPtr);
-        ContextManager::SetImageTexture(1, m_RawVertexMapPtr);
-        ContextManager::Barrier();
-        ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
 
         /////////////////////////////////////////////////////////////////////////////////////
         // Generate normal map pyramid
