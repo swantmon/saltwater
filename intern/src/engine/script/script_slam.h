@@ -12,6 +12,8 @@
 
 #include "engine/core/core_plugin_manager.h"
 
+#include "engine/engine.h"
+
 #include "engine/data/data_component_facet.h"
 #include "engine/data/data_sky_component.h"
 #include "engine/data/data_transformation_facet.h"
@@ -132,6 +134,8 @@ namespace Scpt
             // -----------------------------------------------------------------------------
             // Load SLAM plugin
             // -----------------------------------------------------------------------------
+            Engine::LoadPlugin("plugin_slam");
+
             if (!Core::PluginManager::HasPlugin("SLAM"))
             {
                 throw Base::CException(__FILE__, __LINE__, "SLAM plugin was not loaded");
@@ -175,6 +179,9 @@ namespace Scpt
                 // -----------------------------------------------------------------------------
                 // Load Kinect plugin
                 // -----------------------------------------------------------------------------
+                
+                Engine::LoadPlugin("plugin_kinect");
+
                 if (!Core::PluginManager::HasPlugin("Kinect"))
                 {
                     throw Base::CException(__FILE__, __LINE__, "Kinect plugin was not loaded");
