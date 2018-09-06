@@ -53,6 +53,8 @@ namespace
 
         void RaiseEvent(int _EventID);
 
+        void LoadPlugin(const std::string& _Plugin);
+
     private:
 
         typedef std::vector<Core::IPlugin*> CPlugins;
@@ -207,6 +209,17 @@ namespace
             rEvent();
         }
     }
+
+    // -----------------------------------------------------------------------------
+
+    void CEngine::LoadPlugin(const std::string& _Plugin)
+    {
+        auto Plugin = Core::PluginManager::LoadPlugin(_Plugin);
+
+        m_AvailablePlugins.push_back(&Plugin->GetInstance());
+
+        Plugin->GetInstance().OnStart();
+    }
 } // namespace 
 
 namespace Engine
@@ -257,4 +270,12 @@ namespace Engine
     {
         CEngine::GetInstance().RaiseEvent(_EventID);
     }
+
+    // -----------------------------------------------------------------------------
+
+    void LoadPlugin(const std::string& _PluginName)
+    {
+        CEngine::GetInstance().LoadPlugin(_PluginName);
+    }
+
 } // namespace Pipeline
