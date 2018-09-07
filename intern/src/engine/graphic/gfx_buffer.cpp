@@ -32,7 +32,7 @@ namespace Gfx
     
     // -----------------------------------------------------------------------------
     
-    unsigned int CBuffer::GetNumberOfBytes() const
+    unsigned long long CBuffer::GetNumberOfBytes() const
     {
         return m_NumberOfBytes;
     }

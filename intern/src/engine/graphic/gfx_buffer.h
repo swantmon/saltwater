@@ -69,7 +69,7 @@ namespace Gfx
             unsigned int GetAccess() const;
             unsigned int GetStride() const;
             
-            unsigned int GetNumberOfBytes() const;
+            unsigned long long GetNumberOfBytes() const;
             
             void* GetBytes();
             const void* GetBytes() const;
@@ -78,10 +78,10 @@ namespace Gfx
         
         protected:
         
-            SInfo             m_Info;             ///< Stores information about the buffer.
-            unsigned int      m_NumberOfBytes;    ///< The number of bytes stored in the buffer.
-            void*             m_pBytes;           ///< The bytes stored in the buffer.
-            void*             m_pStorage;         ///< Pointer to GPU memory.
+            SInfo              m_Info;             ///< Stores information about the buffer.
+            unsigned long long m_NumberOfBytes;    ///< The number of bytes stored in the buffer.
+            void*              m_pBytes;           ///< The bytes stored in the buffer.
+            void*              m_pStorage;         ///< Pointer to GPU memory.
         
         protected:
             
