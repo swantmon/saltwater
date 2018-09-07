@@ -20,7 +20,7 @@ namespace Gfx
         CBuffer::EUsage       m_Usage;
         CBuffer::EBinding     m_Binding;
         CBuffer::EAccess      m_Access;
-        unsigned int          m_NumberOfBytes;
+        unsigned long long    m_NumberOfBytes;
         void*                 m_pBytes;
         const std::type_info* m_pClassKey;
     };
