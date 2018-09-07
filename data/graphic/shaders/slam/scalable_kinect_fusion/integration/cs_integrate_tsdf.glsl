@@ -84,7 +84,7 @@ void main()
                     vec2 Voxel = UnpackVoxel(TSDFPoolValue, OldColor);
                 #else
                     vec2 Voxel = UnpackVoxel(TSDFPoolValue);
-                #endif
+                #endif // CAPTURE_COLOR
 
                     Voxel.x = (Voxel.x * Voxel.y + TSDF) / (Voxel.y + 1.0f);
                     Voxel.y = min(MAX_INTEGRATION_WEIGHT, Voxel.y + 1.0f);
