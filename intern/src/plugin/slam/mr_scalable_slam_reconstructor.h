@@ -288,7 +288,7 @@ namespace MR
 
         unsigned int m_RootGridPoolSize;
         unsigned int m_Level1GridPoolSize;
-        unsigned int m_TSDFPoolSize;
+        unsigned long long m_TSDFPoolSize;
 
         bool m_PoolFull;
         

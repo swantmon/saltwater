@@ -62,7 +62,7 @@ namespace
     const unsigned int g_MaxRootVolumePoolSize =              g_MegabyteSize;
     const unsigned int g_MaxRootGridPoolSize   =       128u * g_MegabyteSize;
     const unsigned int g_MaxLevel1GridPoolSize =       128u * g_MegabyteSize;
-    const unsigned int g_MaxTSDFPoolSize       = 16u * 128u * g_MegabyteSize;
+    const unsigned long long g_MaxTSDFPoolSize       = 16ul * 128ul * g_MegabyteSize;
     //*/
     
     const int g_TileSize1D = 64;
@@ -333,7 +333,7 @@ namespace MR
         // Volumes that touch the pyramid top but are not between near and far are still valid hits for some reason
         // and they are even pass the rasterization step even though they cannot contain valid samples
 
-        const float Near = 2.0f; // m_pRGBDCameraControl->GetMinDepth();
+        const float Near = 0.5f; // m_pRGBDCameraControl->GetMinDepth();
 		const float Far = m_DepthBounds.y;
 
 		// near
@@ -399,7 +399,8 @@ namespace MR
         std::stringstream Stream[3];
         Stream[0] << "Rootgrid pool size: " << m_RootVolumePoolItemCount * m_ReconstructionSettings.m_VoxelsPerGrid[0] * sizeof(SGridPoolItem) / Megabyte << " MB";
         Stream[1] << "Level1 pool size  : " << pPoolSizes[1] * m_ReconstructionSettings.m_VoxelsPerGrid[1] * sizeof(SGridPoolItem) / Megabyte << " MB";
-        Stream[2] << "TSDF pool size    : " << pPoolSizes[2] * m_ReconstructionSettings.m_VoxelsPerGrid[2] * TSDFItemSize / Megabyte << " MB";
+        Stream[2] << "TSDF pool size    : " << static_cast<unsigned long long>(pPoolSizes[2]) * m_ReconstructionSettings.m_VoxelsPerGrid[2] *
+                                               TSDFItemSize / Megabyte << " MB";
 
         BufferManager::UnmapBuffer(m_VolumeBuffers.m_PoolItemCountBufferPtr);
 
@@ -1466,7 +1467,7 @@ namespace MR
                 m_IsIntegrationPaused = true;
                 ENGINE_CONSOLE_ERROR("Level1 pool is full!");
             }
-            if (m_VolumeBuffers.m_TSDFPoolSize * m_ReconstructionSettings.m_VoxelsPerGrid[2] * TSDFItemSize > m_TSDFPoolSize)
+            if (static_cast<unsigned long long>(m_VolumeBuffers.m_TSDFPoolSize) * m_ReconstructionSettings.m_VoxelsPerGrid[2] * TSDFItemSize > m_TSDFPoolSize)
             {
                 m_PoolFull = true;
                 m_IsIntegrationPaused = true;
