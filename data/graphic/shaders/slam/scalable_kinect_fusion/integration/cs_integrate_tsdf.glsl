@@ -82,14 +82,10 @@ void main()
                 #ifdef CAPTURE_COLOR
                     vec3 OldColor;
                     vec2 Voxel = UnpackVoxel(TSDFPoolValue, OldColor);
-                #else
-                    vec2 Voxel = UnpackVoxel(TSDFPoolValue);
-                #endif // CAPTURE_COLOR
 
                     Voxel.x = (Voxel.x * Voxel.y + TSDF) / (Voxel.y + 1.0f);
                     Voxel.y = min(MAX_INTEGRATION_WEIGHT, Voxel.y + 1.0f);
 
-                #ifdef CAPTURE_COLOR
                     ivec2 ColorCoords = DepthCoords;
                     ColorCoords.x = 640 - ColorCoords.x - 1;
                     ColorCoords.y -= 60;
@@ -97,6 +93,11 @@ void main()
                     Color = Color.x == 0.0f ? OldColor : (OldColor * Voxel.y + Color) / (Voxel.y + 1.0f);
                     TSDFPoolValue = PackVoxel(Voxel.x, Voxel.y, Color);
                 #else
+                    vec2 Voxel = UnpackVoxel(TSDFPoolValue);
+
+                    Voxel.x = (Voxel.x * Voxel.y + TSDF) / (Voxel.y + 1.0f);
+                    Voxel.y = min(MAX_INTEGRATION_WEIGHT, Voxel.y + 1.0f);
+
                     TSDFPoolValue = PackVoxel(Voxel.x, Voxel.y);
                 #endif // CAPTURE_COLOR
                     
