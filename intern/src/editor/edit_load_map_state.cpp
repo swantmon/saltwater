@@ -611,12 +611,12 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Setup entities
         // -----------------------------------------------------------------------------
-        Dt::SEntityDescriptor EntityDesc;
+        Dt::SEntityDescriptor RootEntityDesc;
 
-        EntityDesc.m_EntityCategory = Dt::SEntityCategory::Static;
-        EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
+        RootEntityDesc.m_EntityCategory = Dt::SEntityCategory::Static;
+        RootEntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
-        Dt::CEntity& rRootEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+        Dt::CEntity& rRootEntity = Dt::EntityManager::CreateEntity(RootEntityDesc);
 
         rRootEntity.SetName("Root");
 
@@ -629,20 +629,20 @@ namespace Edit
         // -----------------------------------------------------------------------------
 
         {
-            Dt::SEntityDescriptor EntityDesc;
+            Dt::SEntityDescriptor SphereDesc;
 
-            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Static;
-            EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
+            SphereDesc.m_EntityCategory = Dt::SEntityCategory::Static;
+            SphereDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
-            Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+            Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(SphereDesc);
 
             rEntity.SetName("Sphere");
 
-            Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
+            Dt::CTransformationFacet* pSphereTransformationFacet = rEntity.GetTransformationFacet();
 
-            pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 1.0f));
-            pTransformationFacet->SetScale(glm::vec3(0.50f));
-            pTransformationFacet->SetRotation(glm::vec3(0.0f));
+            pSphereTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 1.0f));
+            pSphereTransformationFacet->SetScale(glm::vec3(0.50f));
+            pSphereTransformationFacet->SetRotation(glm::vec3(0.0f));
 
             // -----------------------------------------------------------------------------
 
@@ -672,21 +672,21 @@ namespace Edit
         }
 
         {
-            Dt::SEntityDescriptor EntityDesc;
+            Dt::SEntityDescriptor PlaneEntityDesc;
 
-            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Static;
-            EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
+            PlaneEntityDesc.m_EntityCategory = Dt::SEntityCategory::Static;
+            PlaneEntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
-            Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+            Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(PlaneEntityDesc);
 
             rEntity.SetName("Plane");
             rEntity.SetLayer(Dt::SEntityLayer::AR);
 
-            Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
+            Dt::CTransformationFacet* pPlaneTransformationFacet = rEntity.GetTransformationFacet();
 
-            pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
-            pTransformationFacet->SetScale(glm::vec3(1.0f, 1.0f, 0.001f));
-            pTransformationFacet->SetRotation(glm::vec3(0.0f));
+            pPlaneTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+            pPlaneTransformationFacet->SetScale(glm::vec3(1.0f, 1.0f, 0.001f));
+            pPlaneTransformationFacet->SetRotation(glm::vec3(0.0f));
 
             // -----------------------------------------------------------------------------
 

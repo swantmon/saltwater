@@ -155,7 +155,6 @@ namespace Edit
     {
         bool HasTexture = false;
         std::string TextureName;
-        unsigned int TextureHash = 0;
 
         // -----------------------------------------------------------------------------
         // Read values

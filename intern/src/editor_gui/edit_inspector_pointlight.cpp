@@ -137,7 +137,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Read values
         // -----------------------------------------------------------------------------
-        int EntityID  = _rMessage.Get<Base::ID>();
+        Base::ID EntityID  = _rMessage.Get<Base::ID>();
         int ColorMode = _rMessage.Get<int>();
 
         BASE_UNUSED(EntityID);
