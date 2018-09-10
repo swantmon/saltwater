@@ -468,9 +468,9 @@ namespace
 
         auto PointLightComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CPointLightComponent>();
 
-        for (auto Component : PointLightComponents)
+        for (auto PointLightComponent : PointLightComponents)
         {
-            Dt::CPointLightComponent* pPointLightComponent = static_cast<Dt::CPointLightComponent*>(Component);
+            Dt::CPointLightComponent* pPointLightComponent = static_cast<Dt::CPointLightComponent*>(PointLightComponent);
 
             if (pPointLightComponent->IsActiveAndUsable() == false) continue;
 
@@ -480,9 +480,9 @@ namespace
 
              SLightPropertiesBuffer LightProperties; 
  
-            float InvSqrAttenuationRadius = pPointLightComponent->GetReciprocalSquaredAttenuationRadius(); 
-            float AngleScale              = pPointLightComponent->GetAngleScale(); 
-            float AngleOffset             = pPointLightComponent->GetAngleOffset(); 
+            //float InvSqrAttenuationRadius = pPointLightComponent->GetReciprocalSquaredAttenuationRadius(); 
+            //float AngleScale              = pPointLightComponent->GetAngleScale(); 
+            //float AngleOffset             = pPointLightComponent->GetAngleOffset(); 
  
             LightProperties.m_LightProjectionMatrix = pPointLight->GetCamera()->GetProjectionMatrix();
             LightProperties.m_LightViewMatrix       = pPointLight->GetCamera()->GetView()->GetViewMatrix();
@@ -526,9 +526,9 @@ namespace
 
             auto DataMeshComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CMeshComponent>();
 
-            for (auto Component : DataMeshComponents)
+            for (auto DataMeshComponent : DataMeshComponents)
             {
-                Dt::CMeshComponent* pDtComponent = static_cast<Dt::CMeshComponent*>(Component);
+                Dt::CMeshComponent* pDtComponent = static_cast<Dt::CMeshComponent*>(DataMeshComponent);
 
                 if (pDtComponent->IsActiveAndUsable() == false) continue;
 
@@ -551,7 +551,7 @@ namespace
 
                 if (!pMaterial->HasRefraction()) continue;
 
-                for (int Index = 0; Index < pMaterial->GetTextureSetPS()->GetNumberOfTextures(); ++Index)
+                for (unsigned int Index = 0; Index < pMaterial->GetTextureSetPS()->GetNumberOfTextures(); ++Index)
                 {
                     ContextManager::SetSampler(Index, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
@@ -616,9 +616,9 @@ namespace
 
             ContextManager::SetShaderPS(m_NormalPSPtr);
 
-            for (auto Component : DataMeshComponents)
+            for (auto DataMeshComponent : DataMeshComponents)
             {
-                Dt::CMeshComponent* pDtComponent = static_cast<Dt::CMeshComponent*>(Component);
+                Dt::CMeshComponent* pDtComponent = static_cast<Dt::CMeshComponent*>(DataMeshComponent);
 
                 if (pDtComponent->IsActiveAndUsable() == false) continue;
 
@@ -702,9 +702,9 @@ namespace
 
             ContextManager::SetTopology(STopology::TriangleList);
 
-            for (auto Component : DataMeshComponents)
+            for (auto DataMeshComponent : DataMeshComponents)
             {
-                Dt::CMeshComponent* pDtComponent = static_cast<Dt::CMeshComponent*>(Component);
+                Dt::CMeshComponent* pDtComponent = static_cast<Dt::CMeshComponent*>(DataMeshComponent);
 
                 if (pDtComponent->IsActiveAndUsable() == false) continue;
 

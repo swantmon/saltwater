@@ -108,6 +108,7 @@ namespace Cam
 
     void CGameControl::UpdateTransformation(Dt::CEntity* _pEntity)
     {
+        BASE_UNUSED(_pEntity);
         assert(_pEntity != nullptr);
 
         Dt::CTransformationFacet* pTransformationFacet = m_pRelatedEntity->GetTransformationFacet();
