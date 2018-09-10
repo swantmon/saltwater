@@ -174,6 +174,8 @@ namespace MR
         void Start();
         void Exit();
 
+        bool IsInitialized();
+
     private:
 
 		glm::vec4 GetHessianNormalForm(const glm::vec3& rA, const glm::vec3& rB, const glm::vec3& rC);
@@ -321,5 +323,7 @@ namespace MR
 
         bool m_CreateNormalsFromTSDF;
         bool m_RaycastBackSides;
+
+        bool m_IsInizialized;
     };
 } // namespace MR

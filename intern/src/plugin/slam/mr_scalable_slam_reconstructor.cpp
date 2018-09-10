@@ -230,6 +230,8 @@ namespace MR
         ClearPool();
         
         m_pTracker.reset(new CICPTracker(m_DepthFrameSize.x, m_DepthFrameSize.y, m_ReconstructionSettings));
+
+        m_IsInizialized = true;
     }
 
     // -----------------------------------------------------------------------------
@@ -391,6 +393,8 @@ namespace MR
     
     void CScalableSLAMReconstructor::Exit()
     {
+        m_IsInizialized = false;
+
         const int TSDFItemSize = m_ReconstructionSettings.m_CaptureColor ? sizeof(STSDFColorPoolItem) : sizeof(STSDFPoolItem);
 
         int* pPoolSizes = static_cast<int*>(BufferManager::MapBuffer(m_VolumeBuffers.m_PoolItemCountBufferPtr, CBuffer::EMap::ReadWrite));
@@ -460,6 +464,13 @@ namespace MR
         m_VolumeBuffers.m_TSDFPoolPtr = 0;
         m_VolumeBuffers.m_PoolItemCountBufferPtr = 0;
         m_VolumeIndexBufferPtr = 0;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    bool CScalableSLAMReconstructor::IsInitialized()
+    {
+        return m_IsInizialized;
     }
     
     // -----------------------------------------------------------------------------
@@ -1835,6 +1846,8 @@ namespace MR
         {
             SReconstructionSettings::SetDefaultSettings(m_ReconstructionSettings);
         }
+
+        m_IsInizialized = false;
     }
 
     // -----------------------------------------------------------------------------
