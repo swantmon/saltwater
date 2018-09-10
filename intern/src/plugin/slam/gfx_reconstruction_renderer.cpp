@@ -1267,6 +1267,8 @@ namespace
 
     void CGfxReconstructionRenderer::SetSelectionBox(const glm::vec3& _rAnchor0, const glm::vec3& _rAnchor1, float _Height, int _State)
     {
+        BASE_UNUSED(_Height);
+
         glm::vec3 Diagonal = _rAnchor1 - _rAnchor0;
         glm::vec3 NDiagonal = glm::normalize(Diagonal);
 
