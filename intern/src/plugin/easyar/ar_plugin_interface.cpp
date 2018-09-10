@@ -125,7 +125,7 @@ namespace AR
 
         if (m_IsActive == false)
         {
-            ENGINE_CONSOLE_ERRORV("Failed initializing EasyAR engine. Maybe the key '%s' is not valid.", Key);
+            ENGINE_CONSOLE_ERRORV("Failed initializing EasyAR engine. Maybe the key '%s' is not valid.", Key.c_str());
 
             return;
         }

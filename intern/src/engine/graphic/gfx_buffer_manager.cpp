@@ -442,7 +442,7 @@ namespace
             CInternBuffer& rTargetBuffer = *static_cast<CInternBuffer*>(&(*_TargetBufferPtr));
             CInternBuffer& rSourceBuffer = *static_cast<CInternBuffer*>(&(*_SourceBufferPtr));
             
-            unsigned int NumberOfBytes = glm::min(rTargetBuffer.m_NumberOfBytes, rSourceBuffer.m_NumberOfBytes);
+            GLsizeiptr NumberOfBytes = glm::min(rTargetBuffer.m_NumberOfBytes, rSourceBuffer.m_NumberOfBytes);
 
             glCopyBufferSubData(rTargetBuffer.m_NativeBuffer, rSourceBuffer.m_NativeBuffer, 0, 0, NumberOfBytes);
         }
