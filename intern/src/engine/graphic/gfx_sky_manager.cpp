@@ -1176,7 +1176,9 @@ namespace
 
         ContextManager::Draw(3, 0);
 
+#ifdef PLATFORM_ANDROID
         ContextManager::Flush();
+#endif // PLATFORM_ANDROID
 
         Performance::EndEvent();
 
@@ -1197,7 +1199,9 @@ namespace
 
         ContextManager::Draw(3, 0);
 
+#ifdef PLATFORM_ANDROID
         ContextManager::Flush();
+#endif // PLATFORM_ANDROID
 
         Performance::EndEvent();
 
@@ -1240,7 +1244,9 @@ namespace
 
             ContextManager::Draw(3, 0);
 
+#ifdef PLATFORM_ANDROID
             ContextManager::Flush();
+#endif // PLATFORM_ANDROID
         }
 
         ContextManager::ResetShaderGS();
@@ -1272,7 +1278,9 @@ namespace
 
         ContextManager::Draw(3, 0);
 
+#ifdef PLATFORM_ANDROID
         ContextManager::Flush();
+#endif // PLATFORM_ANDROID
 
         Performance::EndEvent();
 
@@ -1309,7 +1317,9 @@ namespace
 
             ContextManager::Draw(3, 0);
 
+#ifdef PLATFORM_ANDROID
             ContextManager::Flush();
+#endif // PLATFORM_ANDROID
         }
 
         ContextManager::ResetShaderGS();
@@ -1373,7 +1383,9 @@ namespace
 
                 ContextManager::Draw(3, 0);
 
+#ifdef PLATFORM_ANDROID
                 ContextManager::Flush();
+#endif // PLATFORM_ANDROID
             }
 
             ContextManager::ResetShaderGS();
@@ -1393,7 +1405,9 @@ namespace
 
             ContextManager::Draw(3, 0);
 
+#ifdef PLATFORM_ANDROID
             ContextManager::Flush();
+#endif // PLATFORM_ANDROID
 
             Performance::EndEvent();
 
@@ -1435,7 +1449,9 @@ namespace
 
                 ContextManager::Draw(3, 0);
 
+#ifdef PLATFORM_ANDROID
                 ContextManager::Flush();
+#endif // PLATFORM_ANDROID
             }
 
             ContextManager::ResetShaderGS();
@@ -1464,7 +1480,9 @@ namespace
 
             ContextManager::Draw(3, 0);
 
+#ifdef PLATFORM_ANDROID
             ContextManager::Flush();
+#endif // PLATFORM_ANDROID
 
             Performance::EndEvent();
 
@@ -1500,7 +1518,9 @@ namespace
 
                 ContextManager::Draw(3, 0);
 
+#ifdef PLATFORM_ANDROID
                 ContextManager::Flush();
+#endif // PLATFORM_ANDROID
             }
 
             ContextManager::ResetShaderGS();
