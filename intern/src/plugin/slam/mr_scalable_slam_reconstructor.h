@@ -162,6 +162,7 @@ namespace MR
         Gfx::CTexturePtr GetColorMap();
 
         glm::ivec2 GetDepthImageSize();
+        glm::vec4 GetDepthIntrinsics();
 
         float GetReconstructionSize();
 

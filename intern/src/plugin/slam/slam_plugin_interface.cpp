@@ -78,15 +78,6 @@ namespace SLAM
     void CPluginInterface::OnStart()
     {
         Gfx::ReconstructionRenderer::OnStart();
-        Gfx::ReconstructionRenderer::OnSetupShader();
-        Gfx::ReconstructionRenderer::OnSetupKernels();
-        Gfx::ReconstructionRenderer::OnSetupRenderTargets();
-        Gfx::ReconstructionRenderer::OnSetupStates();
-        Gfx::ReconstructionRenderer::OnSetupTextures();
-        Gfx::ReconstructionRenderer::OnSetupBuffers();
-        Gfx::ReconstructionRenderer::OnSetupResources();
-        Gfx::ReconstructionRenderer::OnSetupModels();
-        Gfx::ReconstructionRenderer::OnSetupEnd();
 
         Engine::RegisterEventHandler(Engine::Gfx_OnUpdate, Gfx::ReconstructionRenderer::Update);
         Engine::RegisterEventHandler(Engine::Gfx_OnRenderGBuffer, Gfx::ReconstructionRenderer::Render);

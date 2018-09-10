@@ -112,6 +112,8 @@ namespace
 
     private:
 
+        void Initialize();
+
         void RenderVolumeVertexMap();
 
 		void RaycastScalableVolume();
@@ -193,6 +195,8 @@ namespace
         glm::mat4 m_SelectionTransform;
 
         int m_SelectionState;
+
+        bool m_IsInitialized;
     };
 } // namespace
 
@@ -208,6 +212,7 @@ namespace
         , m_RenderRootQueue      (false)
         , m_RenderLevel1Queue    (false)
         , m_RenderLevel2Queue    (false)
+        , m_IsInitialized        (false)
     {
         
     }
@@ -255,6 +260,25 @@ namespace
         m_RenderLevel1Queue     = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:level1"      , false);
         m_RenderLevel2Queue     = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:level2"      , false);
         m_RenderBackSides       = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:backsides"          , true);
+
+        m_IsInitialized = false;
+    }
+
+    // -----------------------------------------------------------------------------
+    
+    void CGfxReconstructionRenderer::Initialize()
+    {
+        OnSetupShader();
+        OnSetupKernels();
+        OnSetupRenderTargets();
+        OnSetupStates();
+        OnSetupTextures();
+        OnSetupBuffers();
+        OnSetupResources();
+        OnSetupModels();
+        OnSetupEnd();
+
+        m_IsInitialized = true;
     }
 
     // -----------------------------------------------------------------------------
@@ -303,6 +327,8 @@ namespace
         m_IntermediateTargetPtr0 = nullptr;
         m_IntermediateTargetPtr1 = nullptr;
         m_IntermediateTargetSetPtr = nullptr;
+
+        m_IsInitialized = false;
     }
     
     // -----------------------------------------------------------------------------
@@ -324,9 +350,8 @@ namespace
             << "#define VOLUME_SIZE " << Settings.m_VolumeSize << " \n"
             << "#define VOXEL_SIZE " << Settings.m_VoxelSize << " \n"
             << "#define MAX_INTEGRATION_WEIGHT " << Settings.m_MaxIntegrationWeight << '\n'
-#pragma message ("Remove magic numbers")
-            << "#define DEPTH_IMAGE_WIDTH " << 640 << '\n'
-            << "#define DEPTH_IMAGE_HEIGHT " << 480 << '\n'
+            << "#define DEPTH_IMAGE_WIDTH " << DepthImageSize.x << '\n'
+            << "#define DEPTH_IMAGE_HEIGHT " << DepthImageSize.y << '\n'
             << "#define ROOT_RESOLUTION " << Settings.m_GridResolutions[0] << '\n'
             << "#define LEVEL1_RESOLUTION " << Settings.m_GridResolutions[1] << '\n'
             << "#define LEVEL2_RESOLUTION " << Settings.m_GridResolutions[2] << '\n'
@@ -488,22 +513,29 @@ namespace
         // Create camera frustum mesh
         ////////////////////////////////////////////////////////////////////////////////
 
-        //Todo: remove magic numbers (focal length/point, max/min depth)
-
-        float Focalx = (-317.644318f / 640.0f) / (570.013184f / 640.0f);
-        float Focaly = (-233.153610f / 480.0f) / (568.727722f / 480.0f);
+        glm::ivec2 DepthSize = m_pScalableReconstructor->GetDepthImageSize();
+        glm::vec4 Intrinsics = m_pScalableReconstructor->GetDepthIntrinsics();
         
+        float Focalx = (-Intrinsics.z / DepthSize.x) / (Intrinsics.x / DepthSize.x);
+        float Focaly = (-Intrinsics.w / DepthSize.y) / (Intrinsics.y / DepthSize.y);
+        
+        MR::SReconstructionSettings Settings;
+        MR::SReconstructionSettings::SetDefaultSettings(Settings);
+
+        float Min = Settings.m_DepthThreshold.x / 1000.f;
+        float Max = Settings.m_DepthThreshold.y / 1000.f;
+
         glm::vec3 CameraVertices[] =
         {
-            glm::vec3(-Focalx * 8.0f, -Focaly * 8.0f, 8.0f),
-            glm::vec3( Focalx * 8.0f, -Focaly * 8.0f, 8.0f),
-            glm::vec3( Focalx * 8.0f,  Focaly * 8.0f, 8.0f),
-            glm::vec3(-Focalx * 8.0f,  Focaly * 8.0f, 8.0f),
-            glm::vec3(          0.0f,           0.0f, 0.0f),
-            glm::vec3(-Focalx * 0.5f, -Focaly * 0.5f, 0.5f),
-            glm::vec3( Focalx * 0.5f, -Focaly * 0.5f, 0.5f),
-            glm::vec3( Focalx * 0.5f,  Focaly * 0.5f, 0.5f),
-            glm::vec3(-Focalx * 0.5f,  Focaly * 0.5f, 0.5f),
+            glm::vec3(-Focalx * Max, -Focaly * Max, Max),
+            glm::vec3( Focalx * Max, -Focaly * Max, Max),
+            glm::vec3( Focalx * Max,  Focaly * Max, Max),
+            glm::vec3(-Focalx * Max,  Focaly * Max, Max),
+            glm::vec3(         0.0f,          0.0f, 0.0f),
+            glm::vec3(-Focalx * Min, -Focaly * Min, Min),
+            glm::vec3( Focalx * Min, -Focaly * Min, Min),
+            glm::vec3( Focalx * Min,  Focaly * Min, Min),
+            glm::vec3(-Focalx * Min,  Focaly * Min, Min),
         };
 
         glm::vec3 CameraLines[24] =
@@ -1160,8 +1192,9 @@ namespace
         ContextManager::SetInputLayout(m_CameraInputLayoutPtr);
         ContextManager::SetTopology(STopology::PointList);
 
-#pragma message("Remove magic numbers")
-        ContextManager::Draw(640 * 480, 0);
+        glm::ivec2 DepthSize = m_pScalableReconstructor->GetDepthImageSize();
+
+        ContextManager::Draw(DepthSize.x * DepthSize.y, 0);
     }
 
     // -----------------------------------------------------------------------------
@@ -1257,6 +1290,16 @@ namespace
 
     void CGfxReconstructionRenderer::Render(int _Pass)
     {
+        if (!m_IsInitialized && !m_pScalableReconstructor->IsInitialized())
+        {
+            return;
+        }
+
+        if (!m_IsInitialized && m_pScalableReconstructor->IsInitialized())
+        {
+            Initialize();
+        }
+
         glEnable(GL_PROGRAM_POINT_SIZE);
 		if (_Pass == 0)
 		{

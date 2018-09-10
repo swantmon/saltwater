@@ -1947,7 +1947,14 @@ namespace MR
     {
         return m_DepthFrameSize;
     }
-    
+
+    // -----------------------------------------------------------------------------
+
+    glm::vec4 CScalableSLAMReconstructor::GetDepthIntrinsics()
+    {
+        return glm::vec4(m_FocalLength, m_FocalPoint);
+    }
+
     // -----------------------------------------------------------------------------
 
     float CScalableSLAMReconstructor::GetReconstructionSize()
