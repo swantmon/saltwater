@@ -39,7 +39,8 @@ namespace Scpt
             COMMAND,
             TRANSFORM,
             DEPTHFRAME,
-            COLORFRAME
+            COLORFRAME,
+            LIGHTESTIMATE
         };
 
         typedef void(*InitializeCallback)(void);
@@ -466,6 +467,11 @@ namespace Scpt
                 Gfx::ContextManager::Dispatch(DivUp(m_ColorSize.x, m_TileSize2D), DivUp(m_ColorSize.y, m_TileSize2D), 1);
 
                 OnNewFrame(m_DepthTexture, m_RGBTexture, &m_PoseMatrix);
+            }
+            else if (MessageType == LIGHTESTIMATE)
+            {
+                const float Intensity = *reinterpret_cast<float*>(Decompressed.data() + sizeof(int32_t));
+                const float Temperature = *reinterpret_cast<float*>(Decompressed.data() + sizeof(int32_t) + sizeof(float));
             }
         }
 
