@@ -1610,6 +1610,9 @@ namespace MR
             ContextManager::Dispatch(PyramidWorkGroupsX, PyramidWorkGroupsY, 1);
         }
 
+        ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
+        ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
+
         /////////////////////////////////////////////////////////////////////////////////////
         // Generate vertex map pyramid
         /////////////////////////////////////////////////////////////////////////////////////
