@@ -26,11 +26,11 @@ namespace MR
         s_DefaultSettings.m_TruncatedDistance = 30.0f;
         s_DefaultSettings.m_MaxIntegrationWeight = Core::CProgramParameters::GetInstance().Get("mr:slam:max_weight", 200);
         s_DefaultSettings.m_PyramidLevelCount = 3;
-        s_DefaultSettings.m_DepthThreshold = Core::CProgramParameters::GetInstance().Get("mr:slam:depth_threshold", glm::ivec2(500, 8000));
+        s_DefaultSettings.m_DepthThreshold = Core::CProgramParameters::GetInstance().Get("mr:slam:depth_threshold", glm::ivec2(500, 3000));
 
         s_DefaultSettings.m_IsScalable = Core::CProgramParameters::GetInstance().Get("mr:slam:scalable", true);
 
-        s_DefaultSettings.m_VoxelSize = Core::CProgramParameters::GetInstance().Get("mr:slam:metrics:voxel_size", 0.004f);
+        s_DefaultSettings.m_VoxelSize = Core::CProgramParameters::GetInstance().Get("mr:slam:metrics:voxel_size", 0.002f);
         s_DefaultSettings.m_VolumeSize = Core::CProgramParameters::GetInstance().Get("mr:slam:metrics:volume_size", 4.0f);
         s_DefaultSettings.m_VolumeResolution = Core::CProgramParameters::GetInstance().Get("mr:slam:metrics:volume_resolution", 512);
 
@@ -56,7 +56,7 @@ namespace MR
             }
         }
 
-        s_DefaultSettings.m_CaptureColor = Core::CProgramParameters::GetInstance().Get("mr:slam:capture_color", false);
+        s_DefaultSettings.m_CaptureColor = Core::CProgramParameters::GetInstance().Get("mr:slam:capture_color", true);
 
         s_IsInitialized = true;
     }
