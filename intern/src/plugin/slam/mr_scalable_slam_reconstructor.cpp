@@ -491,6 +491,8 @@ namespace MR
             << "#define VOLUME_SIZE "            << m_VolumeSizes[0]                                      << " \n"
             << "#define DEPTH_IMAGE_WIDTH "      << m_DepthFrameSize.x                                    << " \n"
             << "#define DEPTH_IMAGE_HEIGHT "     << m_DepthFrameSize.y                                    << " \n"
+            << "#define COLOR_IMAGE_WIDTH "      << m_ColorFrameSize.x                                    << " \n"
+            << "#define COLOR_IMAGE_HEIGHT "     << m_ColorFrameSize.y                                    << " \n"
             << "#define TILE_SIZE1D "            << g_TileSize1D                                          << " \n"
             << "#define TILE_SIZE2D "            << g_TileSize2D                                          << " \n"
             << "#define TILE_SIZE3D "            << g_TileSize3D                                          << " \n"
