@@ -473,13 +473,12 @@ namespace Scpt
 
                 m_UseTrackingCamera = true;
 
-                //OnNewFrame(m_DepthTexture, nullptr, &m_PoseMatrix);
-
-                /*std::vector<char> Compressed;
-                Base::Compress(Message, Compressed, 1);
-                Net::CNetworkManager::GetInstance().SendMessage(0, Compressed);*/
+                if (!m_CaptureColor)
+                {
+                    OnNewFrame(m_DepthTexture, nullptr, &m_PoseMatrix);
+                }
             }
-            else if (MessageType == COLORFRAME)
+            else if (MessageType == COLORFRAME && m_CaptureColor)
             {
                 const int32_t Width = *reinterpret_cast<int32_t*>(Decompressed.data() + sizeof(int32_t));
                 const int32_t Height = *reinterpret_cast<int32_t*>(Decompressed.data() + 2 * sizeof(int32_t));
