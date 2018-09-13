@@ -219,11 +219,11 @@ namespace MR
 
                 if (x >= 0 && x < CameraWidth && y >= 0 && y < CameraHeight)
                 {
-                    pBuffer[j * DepthWidth + i] = m_CameraFrameBuffer[y * CameraWidth + x];
+                    pBuffer[j * DepthWidth + (DepthWidth - i - 1)] = m_CameraFrameBuffer[y * CameraWidth + x];
                 }
                 else
                 {
-                    pBuffer[j * DepthWidth + i] = { 0, 0, 0, 255 };
+                    pBuffer[j * DepthWidth + (DepthWidth - i - 1)] = { 0, 0, 0, 255 };
                 }
             }
         }
