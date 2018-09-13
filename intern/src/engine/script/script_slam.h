@@ -393,12 +393,23 @@ namespace Scpt
                     m_DepthSize = *reinterpret_cast<glm::ivec2*>(Decompressed.data() + sizeof(int32_t) * 2 + sizeof(glm::vec2) * 2);
                     m_ColorSize = *reinterpret_cast<glm::ivec2*>(Decompressed.data() + sizeof(int32_t) * 2 + sizeof(glm::vec2) * 2 + sizeof(glm::ivec2));
 
-                    OnSetImageSizesAndIntrinsics(glm::vec4(m_DepthSize, m_ColorSize), glm::vec4(FocalLength, FocalPoint));
-
-                    OnInitializeReconstructor();
-
                     typedef bool(*GetColorCaptureFunc)(void);
                     m_CaptureColor = ((GetColorCaptureFunc)(Core::PluginManager::GetPluginFunction("SLAM", "IsCapturingColor")))();
+
+                    if (m_CaptureColor)
+                    {
+                        FocalLength.x = (FocalLength.x / m_DepthSize.x) * m_ColorSize.x;
+                        FocalLength.y = (FocalLength.y / m_DepthSize.y) * m_ColorSize.y;
+                        FocalPoint.x = (FocalPoint.x / m_DepthSize.x) * m_ColorSize.x;
+                        FocalPoint.y = (FocalPoint.y / m_DepthSize.y) * m_ColorSize.y;
+                        OnSetImageSizesAndIntrinsics(glm::vec4(m_ColorSize, m_ColorSize), glm::vec4(FocalLength, FocalPoint));
+                    }
+                    else
+                    {
+                        OnSetImageSizesAndIntrinsics(glm::vec4(m_DepthSize, m_DepthSize), glm::vec4(FocalLength, FocalPoint));
+                    }
+
+                    OnInitializeReconstructor();
 
                     m_IsReconstructorInitialized = true;
 
@@ -418,15 +429,24 @@ namespace Scpt
                     TextureDescriptor.m_pFileName = nullptr;
                     TextureDescriptor.m_pPixels = 0;
                     TextureDescriptor.m_Format = Gfx::CTexture::R16_UINT;
-                    m_DepthTexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
                     m_ShiftTexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
 
+                    TextureDescriptor.m_NumberOfPixelsU = m_CaptureColor ? m_ColorSize.x : m_DepthSize.x;
+                    TextureDescriptor.m_NumberOfPixelsV = m_CaptureColor ? m_ColorSize.y : m_DepthSize.y;
+                    m_DepthTexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
+
                     std::stringstream DefineStream;
-                    DefineStream << "#define TILE_SIZE_2D " << m_TileSize2D << " \n";
+                    DefineStream
+                        << "#define TILE_SIZE_2D " << m_TileSize2D << " \n"
+                        << "#define DEPTH_WIDTH "  << m_DepthSize.x << " \n"
+                        << "#define DEPTH_HEIGHT " << m_DepthSize.y << " \n";
 
                     if (m_CaptureColor)
                     {
-                        DefineStream << "#define CAPTURE_COLOR " << " \n";
+                        DefineStream
+                            << "#define COLOR_WIDTH " << m_ColorSize.x << " \n"
+                            << "#define COLOR_HEIGHT " << m_ColorSize.y << " \n"
+                            << "#define CAPTURE_COLOR " << " \n";
 
                         TextureDescriptor.m_NumberOfPixelsU = m_ColorSize.x;
                         TextureDescriptor.m_NumberOfPixelsV = m_ColorSize.y;
@@ -464,7 +484,7 @@ namespace Scpt
                 const uint16_t* RawBuffer = reinterpret_cast<uint16_t*>(Decompressed.data() + 3 * sizeof(int32_t));
 
                 Base::AABB2UInt TargetRect;
-                TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(Width, Height));
+                TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_DepthSize));
                 Gfx::TextureManager::CopyToTexture2D(m_ShiftTexture, TargetRect, Width, const_cast<uint16_t*>(RawBuffer));
 
                 Gfx::ContextManager::SetShaderCS(m_ShiftDepthCSPtr);
@@ -472,7 +492,9 @@ namespace Scpt
                 Gfx::ContextManager::SetImageTexture(1, m_DepthTexture);
                 Gfx::ContextManager::SetImageTexture(2, m_ShiftLUTPtr);
 
-                Gfx::ContextManager::Dispatch(DivUp(m_DepthSize.x, m_TileSize2D), DivUp(m_DepthSize.y, m_TileSize2D), 1);
+                int WorkgroupsX = DivUp(m_CaptureColor ? m_ColorSize.x : m_DepthSize.x, m_TileSize2D);
+                int WorkgroupsY = DivUp(m_CaptureColor ? m_ColorSize.y : m_DepthSize.y, m_TileSize2D);
+                Gfx::ContextManager::Dispatch(WorkgroupsX, WorkgroupsY, 1);
 
                 m_UseTrackingCamera = true;
 
