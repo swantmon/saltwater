@@ -104,6 +104,8 @@ namespace Scpt
 
         bool m_MousePressed;
 
+        bool m_CaptureColor;
+
         // -----------------------------------------------------------------------------
         // Stuff for network data source
         // -----------------------------------------------------------------------------
@@ -121,7 +123,9 @@ namespace Scpt
         // Stuff for Kinect data source
         // -----------------------------------------------------------------------------
         typedef bool(*GetDepthBufferFunc)(uint16_t*);
+        typedef bool(*GetColorBufferFunc)(char*);
         GetDepthBufferFunc GetDepthBuffer;
+        GetColorBufferFunc GetColorBuffer;
 
     public:
 
@@ -226,8 +230,13 @@ namespace Scpt
                 TextureDescriptor.m_Format = Gfx::CTexture::R16_UINT;
 
                 m_DepthTexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
+                
+                TextureDescriptor.m_Format = Gfx::CTexture::R8G8B8A8_UBYTE;
+
+                m_RGBTexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
 
                 GetDepthBuffer = (GetDepthBufferFunc)(Core::PluginManager::GetPluginFunction("Kinect", "GetDepthBuffer"));
+                GetColorBuffer = (GetColorBufferFunc)(Core::PluginManager::GetPluginFunction("Kinect", "GetColorBuffer"));
             }
             else
             {
@@ -252,13 +261,15 @@ namespace Scpt
 
         void Update() override
         {
-            if (m_DataSource == KINECT && GetDepthBuffer(m_DepthBuffer))
+            if (m_DataSource == KINECT && GetDepthBuffer(m_DepthBuffer) && GetColorBuffer(m_ColorBuffer))
             {
                 Base::AABB2UInt TargetRect;
                 TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_DepthSize.x, m_DepthSize.y));
-                Gfx::TextureManager::CopyToTexture2D(m_DepthTexture, TargetRect, m_DepthSize.x, const_cast<uint16_t*>(m_DepthBuffer));
 
-                OnNewFrame(m_DepthTexture, nullptr, nullptr);
+                Gfx::TextureManager::CopyToTexture2D(m_DepthTexture, TargetRect, m_DepthSize.x, m_DepthBuffer);                
+                Gfx::TextureManager::CopyToTexture2D(m_RGBTexture, TargetRect, m_DepthSize.x, m_ColorBuffer);
+
+                OnNewFrame(m_DepthTexture, m_RGBTexture, nullptr);
             }
 
             if (m_UseTrackingCamera)
