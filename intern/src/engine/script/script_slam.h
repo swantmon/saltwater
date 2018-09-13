@@ -171,13 +171,6 @@ namespace Scpt
 
                 m_DataSource = NETWORK;
 
-                std::stringstream DefineStream;
-                DefineStream
-                    << "#define TILE_SIZE_2D " << m_TileSize2D << " \n";
-                std::string DefineString = DefineStream.str();
-                m_YUVtoRGBCSPtr = Gfx::ShaderManager::CompileCS("slam\\cs_yuv_to_rgb.glsl", "main", DefineString.c_str());
-                m_ShiftDepthCSPtr = Gfx::ShaderManager::CompileCS("slam\\cs_shift_depth.glsl", "main", DefineString.c_str());
-
                 CreateShiftLUTTexture();
             }
             else if (DataSource == "kinect")
@@ -428,8 +421,13 @@ namespace Scpt
                     m_DepthTexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
                     m_ShiftTexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
 
+                    std::stringstream DefineStream;
+                    DefineStream << "#define TILE_SIZE_2D " << m_TileSize2D << " \n";
+
                     if (m_CaptureColor)
                     {
+                        DefineStream << "#define CAPTURE_COLOR " << " \n";
+
                         TextureDescriptor.m_NumberOfPixelsU = m_ColorSize.x;
                         TextureDescriptor.m_NumberOfPixelsV = m_ColorSize.y;
                         TextureDescriptor.m_Format = Gfx::CTexture::R8G8B8A8_UBYTE;
@@ -442,7 +440,12 @@ namespace Scpt
                         TextureDescriptor.m_NumberOfPixelsV = m_ColorSize.y / 2;
                         TextureDescriptor.m_Format = Gfx::CTexture::R8G8_UBYTE;
                         m_UVTexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
+
+                        std::string DefineString = DefineStream.str();
+                        m_YUVtoRGBCSPtr = Gfx::ShaderManager::CompileCS("slam\\cs_yuv_to_rgb.glsl", "main", DefineString.c_str());
                     }
+                    std::string DefineString = DefineStream.str();
+                    m_ShiftDepthCSPtr = Gfx::ShaderManager::CompileCS("slam\\cs_shift_depth.glsl", "main", DefineString.c_str());
 
                     m_UseTrackingCamera = true;
 
