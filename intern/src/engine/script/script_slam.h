@@ -72,6 +72,7 @@ namespace Scpt
         Gfx::CTexturePtr m_DepthTexture;
         Gfx::CTexturePtr m_RGBTexture;
         uint16_t* m_DepthBuffer;
+        char* m_ColorBuffer;
         glm::mat4 m_PoseMatrix;
 
         glm::ivec2 m_DepthSize;
@@ -207,6 +208,7 @@ namespace Scpt
                 m_IsReconstructorInitialized = true;
 
                 m_DepthBuffer = new uint16_t[m_DepthSize.x * m_DepthSize.y];
+                m_ColorBuffer = new char[m_DepthSize.x * m_DepthSize.y * 4];
 
                 Gfx::STextureDescriptor TextureDescriptor = {};
 
@@ -237,6 +239,9 @@ namespace Scpt
 
         void Exit() override
         {
+            delete[] m_DepthBuffer;
+            delete[] m_ColorBuffer;
+
             if (m_IsReconstructorInitialized)
             {
                 OnTerminateReconstructor();
