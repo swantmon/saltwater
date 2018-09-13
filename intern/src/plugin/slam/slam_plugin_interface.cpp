@@ -68,9 +68,20 @@ namespace SLAM
         return Gfx::ReconstructionRenderer::Pick(_rCursor);
     }
 
+    // -----------------------------------------------------------------------------
+
     void CPluginInterface::SetSelectionBox(const glm::vec3& _rAnchor0, const glm::vec3& _rAnchor1, float _Height, int _State)
     {
         Gfx::ReconstructionRenderer::SetSelectionBox(_rAnchor0, _rAnchor1, _Height, _State);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    bool CPluginInterface::IsCapturingColor()
+    {
+        MR::SReconstructionSettings Settings;
+        Gfx::ReconstructionRenderer::GetReconstructor().GetReconstructionSettings(&Settings);
+        return Settings.m_CaptureColor;
     }
 
     // -----------------------------------------------------------------------------
@@ -149,4 +160,9 @@ extern "C" CORE_PLUGIN_API_EXPORT void Pick(const glm::ivec2& _rCursor, glm::vec
 extern "C" CORE_PLUGIN_API_EXPORT void UpdateSelectionBox(const glm::vec3& _rAnchor0, const glm::vec3& _rAnchor1, float _Height, int _State)
 {
     static_cast<SLAM::CPluginInterface&>(GetInstance()).SetSelectionBox(_rAnchor0, _rAnchor1, _Height, _State);
+}
+
+extern "C" CORE_PLUGIN_API_EXPORT bool IsCapturingColor(void)
+{
+    return static_cast<SLAM::CPluginInterface&>(GetInstance()).IsCapturingColor();
 }
