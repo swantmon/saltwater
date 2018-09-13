@@ -87,8 +87,8 @@ void main()
                     Voxel.y = min(MAX_INTEGRATION_WEIGHT, Voxel.y + 1.0f);
 
                     ivec2 ColorCoords = DepthCoords;
-                    ColorCoords.x = 640 - ColorCoords.x - 1;
-                    ColorCoords.y -= 60;
+                    ColorCoords.x = DEPTH_IMAGE_WIDTH - ColorCoords.x - 1;
+                    ColorCoords.y -= (DEPTH_IMAGE_HEIGHT - COLOR_IMAGE_HEIGHT) / 2;
                     vec3 Color = imageLoad(cs_Color, ColorCoords).rgb;
                     Color = Color.x == 0.0f ? OldColor : (OldColor * Voxel.y + Color) / (Voxel.y + 1.0f);
                     TSDFPoolValue = PackVoxel(Voxel.x, Voxel.y, Color);
