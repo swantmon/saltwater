@@ -237,6 +237,9 @@ namespace Scpt
 
                 GetDepthBuffer = (GetDepthBufferFunc)(Core::PluginManager::GetPluginFunction("Kinect", "GetDepthBuffer"));
                 GetColorBuffer = (GetColorBufferFunc)(Core::PluginManager::GetPluginFunction("Kinect", "GetColorBuffer"));
+
+                typedef bool(*GetColorCaptureFunc)(void);
+                m_CaptureColor = ((GetColorCaptureFunc)(Core::PluginManager::GetPluginFunction("SLAM", "IsCapturingColor")))();
             }
             else
             {
@@ -261,15 +264,25 @@ namespace Scpt
 
         void Update() override
         {
-            if (m_DataSource == KINECT && GetDepthBuffer(m_DepthBuffer) && GetColorBuffer(m_ColorBuffer))
+            if (m_DataSource == KINECT)
             {
-                Base::AABB2UInt TargetRect;
-                TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_DepthSize.x, m_DepthSize.y));
+                if (m_CaptureColor && GetDepthBuffer(m_DepthBuffer) && GetColorBuffer(m_ColorBuffer))
+                {
+                    Base::AABB2UInt TargetRect;
+                    TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_DepthSize.x, m_DepthSize.y));
 
-                Gfx::TextureManager::CopyToTexture2D(m_DepthTexture, TargetRect, m_DepthSize.x, m_DepthBuffer);                
-                Gfx::TextureManager::CopyToTexture2D(m_RGBTexture, TargetRect, m_DepthSize.x, m_ColorBuffer);
+                    Gfx::TextureManager::CopyToTexture2D(m_DepthTexture, TargetRect, m_DepthSize.x, m_DepthBuffer);
+                    Gfx::TextureManager::CopyToTexture2D(m_RGBTexture, TargetRect, m_DepthSize.x, m_ColorBuffer);
 
-                OnNewFrame(m_DepthTexture, m_RGBTexture, nullptr);
+                    OnNewFrame(m_DepthTexture, m_RGBTexture, nullptr);
+                }
+                else if (GetDepthBuffer(m_DepthBuffer))
+                {
+                    Base::AABB2UInt TargetRect;
+                    TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_DepthSize.x, m_DepthSize.y));
+                    Gfx::TextureManager::CopyToTexture2D(m_DepthTexture, TargetRect, m_DepthSize.x, m_DepthBuffer);
+                    OnNewFrame(m_DepthTexture, nullptr, nullptr);
+                }
             }
 
             if (m_UseTrackingCamera)
@@ -391,6 +404,9 @@ namespace Scpt
 
                     OnInitializeReconstructor();
 
+                    typedef bool(*GetColorCaptureFunc)(void);
+                    m_CaptureColor = ((GetColorCaptureFunc)(Core::PluginManager::GetPluginFunction("SLAM", "IsCapturingColor")))();
+
                     m_IsReconstructorInitialized = true;
 
                     m_DepthBuffer = new uint16_t[m_DepthSize.x * m_DepthSize.y];
@@ -412,18 +428,21 @@ namespace Scpt
                     m_DepthTexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
                     m_ShiftTexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
 
-                    TextureDescriptor.m_NumberOfPixelsU = m_ColorSize.x;
-                    TextureDescriptor.m_NumberOfPixelsV = m_ColorSize.y;
-                    TextureDescriptor.m_Format = Gfx::CTexture::R8G8B8A8_UBYTE;
-                    m_RGBTexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
+                    if (m_CaptureColor)
+                    {
+                        TextureDescriptor.m_NumberOfPixelsU = m_ColorSize.x;
+                        TextureDescriptor.m_NumberOfPixelsV = m_ColorSize.y;
+                        TextureDescriptor.m_Format = Gfx::CTexture::R8G8B8A8_UBYTE;
+                        m_RGBTexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
 
-                    TextureDescriptor.m_Format = Gfx::CTexture::R8_UBYTE;
-                    m_YTexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
+                        TextureDescriptor.m_Format = Gfx::CTexture::R8_UBYTE;
+                        m_YTexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
 
-                    TextureDescriptor.m_NumberOfPixelsU = m_ColorSize.x / 2;
-                    TextureDescriptor.m_NumberOfPixelsV = m_ColorSize.y / 2;
-                    TextureDescriptor.m_Format = Gfx::CTexture::R8G8_UBYTE;
-                    m_UVTexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
+                        TextureDescriptor.m_NumberOfPixelsU = m_ColorSize.x / 2;
+                        TextureDescriptor.m_NumberOfPixelsV = m_ColorSize.y / 2;
+                        TextureDescriptor.m_Format = Gfx::CTexture::R8G8_UBYTE;
+                        m_UVTexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
+                    }
 
                     m_UseTrackingCamera = true;
 
