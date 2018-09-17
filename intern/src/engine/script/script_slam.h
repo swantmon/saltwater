@@ -14,10 +14,6 @@
 
 #include "engine/engine.h"
 
-#include "engine/data/data_component_facet.h"
-#include "engine/data/data_sky_component.h"
-#include "engine/data/data_transformation_facet.h"
-
 #include "engine/graphic/gfx_context_manager.h"
 #include "engine/graphic/gfx_shader_manager.h"
 #include "engine/graphic/gfx_texture.h"
