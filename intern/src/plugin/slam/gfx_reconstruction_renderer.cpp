@@ -1175,7 +1175,7 @@ namespace
         glm::mat4 PoseMatrix = m_pScalableReconstructor->GetPoseMatrix();
         
         BufferData.m_WorldMatrix = glm::eulerAngleX(glm::half_pi<float>()) * PoseMatrix;
-        BufferData.m_Color = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
+        BufferData.m_Color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
 
         BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
 
