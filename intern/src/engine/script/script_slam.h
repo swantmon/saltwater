@@ -476,14 +476,14 @@ namespace Scpt
             }
             else if (MessageType == DEPTHFRAME)
             {
-                int32_t Width = *reinterpret_cast<int32_t*>(Decompressed.data() + sizeof(int32_t));
-                int32_t Height = *reinterpret_cast<int32_t*>(Decompressed.data() + 2 * sizeof(int32_t));
+                //int32_t Width = *reinterpret_cast<int32_t*>(Decompressed.data() + sizeof(int32_t));
+                //int32_t Height = *reinterpret_cast<int32_t*>(Decompressed.data() + 2 * sizeof(int32_t));
 
                 const uint16_t* RawBuffer = reinterpret_cast<uint16_t*>(Decompressed.data() + 3 * sizeof(int32_t));
 
                 Base::AABB2UInt TargetRect;
                 TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_DepthSize));
-                Gfx::TextureManager::CopyToTexture2D(m_ShiftTexture, TargetRect, Width, const_cast<uint16_t*>(RawBuffer));
+                Gfx::TextureManager::CopyToTexture2D(m_ShiftTexture, TargetRect, m_DepthSize.x, const_cast<uint16_t*>(RawBuffer));
 
                 Gfx::ContextManager::SetShaderCS(m_ShiftDepthCSPtr);
                 Gfx::ContextManager::SetImageTexture(0, m_ShiftTexture);
