@@ -398,8 +398,8 @@ namespace Scpt
 
                     if (m_CaptureColor)
                     {
-                        FocalLength.x = (FocalLength.x / m_DepthSize.x) * m_ColorSize.x;
-                        FocalLength.y = (FocalLength.y / m_DepthSize.y) * m_ColorSize.y;
+                        //FocalLength.x = (FocalLength.x / m_DepthSize.x) * m_ColorSize.x;
+                        //FocalLength.y = (FocalLength.y / m_DepthSize.y) * m_ColorSize.y;
                         FocalPoint.x = (FocalPoint.x / m_DepthSize.x) * m_ColorSize.x;
                         FocalPoint.y = (FocalPoint.y / m_DepthSize.y) * m_ColorSize.y;
                         OnSetImageSizesAndIntrinsics(glm::vec4(m_ColorSize, m_ColorSize), glm::vec4(FocalLength, FocalPoint));
