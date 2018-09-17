@@ -35,7 +35,6 @@ void main()
     WSPosition = g_WorldMatrix * vec4(WSPosition.xyz, 1.0f);
     gl_Position = g_WorldToScreen * WSPosition;
     gl_PointSize = 1.0f;
-    UV.y -= 60;
     out_Color = imageLoad(cs_ColorMap, UV).rgb;
 }
 
