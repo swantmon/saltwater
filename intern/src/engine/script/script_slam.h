@@ -328,6 +328,11 @@ namespace Scpt
 
         void OnInput(const Base::CInputEvent& _rEvent) override
         {
+            if (!m_IsReconstructorInitialized)
+            {
+                return;
+            }
+
             if (_rEvent.GetAction() == Base::CInputEvent::MouseLeftPressed)
             {
                 m_MousePressed = true;
