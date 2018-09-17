@@ -112,6 +112,20 @@ namespace
 
     private:
 
+        // -----------------------------------------------------------------------------
+        // Stuff for selection box
+        // -----------------------------------------------------------------------------
+        enum class ESelection
+        {
+            NOSELECTION,
+            FIRSTPRESS,
+            FIRSTRELEASE,
+            SECONDPRESS,
+            SECONDRELEASE
+        };
+
+    private:
+
         void Initialize();
 
         void RenderVolumeVertexMap();
@@ -194,7 +208,7 @@ namespace
 
         glm::mat4 m_SelectionTransform;
 
-        int m_SelectionState;
+        ESelection m_SelectionState;
 
         bool m_IsInitialized;
     };
@@ -746,7 +760,7 @@ namespace
 
     void CGfxReconstructionRenderer::RenderSelectionBox()
     {
-        if (m_SelectionState == 0)
+        if (m_SelectionState == ESelection::NOSELECTION)
         {
             return;
         }
@@ -1285,7 +1299,7 @@ namespace
         Rotation = glm::eulerAngleZ(Angle);
 
         m_SelectionTransform = Translation * Scaling * Rotation;
-        m_SelectionState = _State;
+        m_SelectionState = static_cast<ESelection>(_State);
     }
 
     // -----------------------------------------------------------------------------
@@ -1324,7 +1338,7 @@ namespace
 
             if (m_RenderVolume)
             {
-                if (m_SelectionState == 0)
+                if (m_SelectionState == ESelection::NOSELECTION)
                 {
                     RaycastScalableVolume();
                 }

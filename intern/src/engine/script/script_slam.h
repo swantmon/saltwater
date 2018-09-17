@@ -343,7 +343,7 @@ namespace Scpt
             {
                 m_MousePressed = false;
 
-                m_SelectionState = ESelection::NOSELECTION;
+                m_SelectionState = m_SelectionState == ESelection::FIRSTPRESS ? ESelection::FIRSTRELEASE : ESelection::NOSELECTION;
             }
             else if (_rEvent.GetAction() == Base::CInputEvent::MouseMove)
             {
