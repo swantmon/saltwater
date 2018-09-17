@@ -11,7 +11,10 @@ layout(std140, binding = 1) uniform PerDrawCallData
 };
 
 layout (binding = 0, MAP_TEXTURE_FORMAT) uniform image2D cs_VertexMap;
+
+#ifdef CAPTURE_COLOR
 layout (binding = 1, rgba8) readonly uniform image2D cs_ColorMap;
+#endif
 
 out gl_PerVertex
 {
@@ -35,7 +38,12 @@ void main()
     WSPosition = g_WorldMatrix * vec4(WSPosition.xyz, 1.0f);
     gl_Position = g_WorldToScreen * WSPosition;
     gl_PointSize = 1.0f;
+
+#ifdef CAPTURE_COLOR
     out_Color = imageLoad(cs_ColorMap, UV).rgb;
+#else
+    out_Color = g_Color.rgb;
+#endif
 }
 
 #endif // __INCLUDE_VS_POINT_CLOUD_GLSL__
