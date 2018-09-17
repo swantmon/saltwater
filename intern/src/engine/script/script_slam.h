@@ -375,7 +375,7 @@ namespace Scpt
             {
                 const int MessageID = *reinterpret_cast<int32_t*>(Decompressed.data() + sizeof(int32_t));
 
-                if (MessageID == 0)
+                if (MessageID == 0 && m_IsReconstructorInitialized)
                 {
                     OnResetReconstruction();
                 }
