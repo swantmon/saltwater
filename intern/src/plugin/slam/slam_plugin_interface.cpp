@@ -44,6 +44,13 @@ namespace SLAM
 
     // -----------------------------------------------------------------------------
 
+    void CPluginInterface::OnInput(const Base::CInputEvent& _rEvent)
+    {
+        m_SLAMControl.OnInput(_rEvent);
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CPluginInterface::OnPause()
     {
         ENGINE_CONSOLE_INFOV("SLAM plugin paused!");
@@ -70,4 +77,9 @@ extern "C" CORE_PLUGIN_API_EXPORT void Resume()
 extern "C" CORE_PLUGIN_API_EXPORT void Update()
 {
     static_cast<SLAM::CPluginInterface&>(GetInstance()).Update();
+}
+
+extern "C" CORE_PLUGIN_API_EXPORT void OnInput(const Base::CInputEvent& _rEvent)
+{
+    static_cast<SLAM::CPluginInterface&>(GetInstance()).OnInput(_rEvent);
 }

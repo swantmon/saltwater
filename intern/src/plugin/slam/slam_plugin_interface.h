@@ -19,6 +19,8 @@ namespace SLAM
         void OnResume() override;
         void Update() override;
 
+        void OnInput(const Base::CInputEvent& _rEvent);
+
     private:
 
         MR::CSLAMControl m_SLAMControl;

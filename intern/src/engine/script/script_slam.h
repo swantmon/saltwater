@@ -38,6 +38,8 @@ namespace Scpt
             {
                 throw Base::CException(__FILE__, __LINE__, "SLAM plugin could not be loaded");
             }
+
+            InputCallback = (FInputCallback)(Core::PluginManager::GetPluginFunction("SLAM", "OnInput"));
         }
 
         // -----------------------------------------------------------------------------
@@ -58,8 +60,12 @@ namespace Scpt
 
         void OnInput(const Base::CInputEvent& _rEvent) override
         {
-            
+            InputCallback(_rEvent);
         }
 
+    private:
+
+        typedef void(*FInputCallback)(const Base::CInputEvent& _rEvent);
+        FInputCallback InputCallback;
     };
 } // namespace Scpt
