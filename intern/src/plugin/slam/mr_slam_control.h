@@ -197,8 +197,9 @@ namespace MR
                 GetDepthBuffer = (GetDepthBufferFunc)(Core::PluginManager::GetPluginFunction("Kinect", "GetDepthBuffer"));
                 GetColorBuffer = (GetColorBufferFunc)(Core::PluginManager::GetPluginFunction("Kinect", "GetColorBuffer"));
 
-                typedef bool(*GetColorCaptureFunc)(void);
-                m_CaptureColor = ((GetColorCaptureFunc)(Core::PluginManager::GetPluginFunction("SLAM", "IsCapturingColor")))();
+                MR::SReconstructionSettings Settings;
+                Gfx::ReconstructionRenderer::GetReconstructor().GetReconstructionSettings(&Settings);
+                m_CaptureColor = Settings.m_CaptureColor;
             }
             else
             {
