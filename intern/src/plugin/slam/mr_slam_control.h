@@ -89,7 +89,7 @@ namespace MR
 
         bool m_CaptureColor;
 
-        MR::CScalableSLAMReconstructor* m_pReconstructor;
+        std::unique_ptr<MR::CScalableSLAMReconstructor> m_pReconstructor;
 
         // -----------------------------------------------------------------------------
         // Stuff for network data source
@@ -122,7 +122,7 @@ namespace MR
             m_SelectionState = ESelection::NOSELECTION;
             m_MousePressed = false;
 
-            m_pReconstructor = new MR::CScalableSLAMReconstructor;
+            m_pReconstructor.reset(new MR::CScalableSLAMReconstructor);
             Gfx::ReconstructionRenderer::SetReconstructor(*m_pReconstructor);
 
             // -----------------------------------------------------------------------------
@@ -236,6 +236,8 @@ namespace MR
             m_ShiftTexture = nullptr;
             m_ShiftDepthCSPtr = nullptr;
             m_ShiftLUTPtr = nullptr;
+
+            m_pReconstructor.release();
         }
 
         // -----------------------------------------------------------------------------
