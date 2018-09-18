@@ -323,11 +323,6 @@ namespace MR
 
 	void CScalableSLAMReconstructor::UpdateFrustum()
 	{
-		//Todo: remove magic numbers (focal length/point)
-
-		//float x = (-0.50602675f) / 0.72113f;
-		//float y = (-0.499133f) / 0.870799f;
-        
         float x = (-m_FocalPoint.x / m_DepthFrameSize.x) / (m_FocalLength.x / m_DepthFrameSize.x);
         float y = (-m_FocalPoint.y / m_DepthFrameSize.y) / (m_FocalLength.y / m_DepthFrameSize.y);
                 
