@@ -189,6 +189,8 @@ namespace MR
 
     void CScalableSLAMReconstructor::Start()
     {
+        m_DepthBounds = glm::vec2(m_ReconstructionSettings.m_DepthThreshold) / 1000.0f;
+
         assert(m_DepthFrameSize.x != 0 && m_DepthFrameSize.y != 0);
         assert(m_ColorFrameSize.x != 0 && m_ColorFrameSize.y != 0);
         assert(m_FocalLength.x != 0 && m_FocalLength.y != 0);
