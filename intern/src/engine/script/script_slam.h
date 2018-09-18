@@ -38,24 +38,20 @@ namespace Scpt
             {
                 throw Base::CException(__FILE__, __LINE__, "SLAM plugin could not be loaded");
             }
-
-            OnPluginExit = (PluginCallback)Core::PluginManager::GetPluginFunction("SLAM", "Exit");
-            OnPluginUpdate = (PluginCallback)Core::PluginManager::GetPluginFunction("SLAM", "Update");
-
         }
 
         // -----------------------------------------------------------------------------
 
         void Exit() override
         {
-            OnPluginExit();
+            
         }
 
         // -----------------------------------------------------------------------------
 
         void Update() override
         {
-            OnPluginUpdate();
+            
         }
 
         // -----------------------------------------------------------------------------
@@ -65,11 +61,5 @@ namespace Scpt
             
         }
 
-    private:
-
-        typedef void(*PluginCallback)(void);
-
-        PluginCallback OnPluginExit;
-        PluginCallback OnPluginUpdate;
     };
 } // namespace Scpt

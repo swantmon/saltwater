@@ -217,6 +217,19 @@ namespace MR
             {
                 Gfx::ReconstructionRenderer::GetReconstructor().Exit();
             }
+
+            m_DepthTexture = nullptr;
+            m_RGBTexture = nullptr;
+
+            m_NetworkDelegate = nullptr;
+            
+            m_YUVtoRGBCSPtr = nullptr;
+            m_YTexture = nullptr;
+            m_UVTexture = nullptr;
+
+            m_ShiftTexture = nullptr;
+            m_ShiftDepthCSPtr = nullptr;
+            m_ShiftLUTPtr = nullptr;
         }
 
         // -----------------------------------------------------------------------------

@@ -31,6 +31,8 @@ namespace SLAM
     void CPluginInterface::OnExit()
     {
         m_SLAMControl.Exit();
+
+        Gfx::ReconstructionRenderer::OnExit();
     }
 
     // -----------------------------------------------------------------------------
@@ -54,16 +56,6 @@ namespace SLAM
         ENGINE_CONSOLE_INFOV("SLAM plugin resumed!");
     }
 } // namespace HW
-
-extern "C" CORE_PLUGIN_API_EXPORT void Start()
-{
-    static_cast<SLAM::CPluginInterface&>(GetInstance()).OnStart();
-}
-
-extern "C" CORE_PLUGIN_API_EXPORT void Exit()
-{
-    static_cast<SLAM::CPluginInterface&>(GetInstance()).OnExit();
-}
 
 extern "C" CORE_PLUGIN_API_EXPORT void Pause()
 {
