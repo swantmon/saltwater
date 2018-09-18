@@ -122,7 +122,8 @@ namespace MR
             m_SelectionState = ESelection::NOSELECTION;
             m_MousePressed = false;
 
-            m_pReconstructor = &Gfx::ReconstructionRenderer::GetReconstructor();
+            m_pReconstructor = new MR::CScalableSLAMReconstructor;
+            Gfx::ReconstructionRenderer::SetReconstructor(*m_pReconstructor);
 
             // -----------------------------------------------------------------------------
             // Determine where we get our data from

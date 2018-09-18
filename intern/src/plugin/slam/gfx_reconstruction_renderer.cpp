@@ -97,14 +97,9 @@ namespace
         
         void Update();
         void Render(int _Pass);
-        void PauseIntegration(bool _Paused);
-        void PauseTracking(bool _Paused);
         void ChangeCamera(bool _IsTrackingCamera);
-        float GetReconstructionSize();
 
-        MR::CScalableSLAMReconstructor& GetReconstructor();
-
-        void OnReconstructionUpdate(const MR::SReconstructionSettings& _Settings);
+        void SetReconstructor(MR::CScalableSLAMReconstructor& _rReconstructor);
 
         glm::vec3 Pick(const glm::ivec2& _rCursorPosition);
 
@@ -145,7 +140,7 @@ namespace
 
     private:
 
-		std::unique_ptr<MR::CScalableSLAMReconstructor> m_pScalableReconstructor;
+		MR::CScalableSLAMReconstructor* m_pScalableReconstructor;
         
         CShaderPtr m_OutlineVSPtr;
         CShaderPtr m_OutlineFSPtr;
@@ -245,12 +240,7 @@ namespace
         assert(Main::GetGraphicsAPI().m_GraphicsAPI == CGraphicsInfo::OpenGL);
 
         Main::RegisterResizeHandler(GFX_BIND_RESIZE_METHOD(&CGfxReconstructionRenderer::OnResize));
-        
-		MR::SReconstructionSettings DefaultSettings;
-        MR::SReconstructionSettings::SetDefaultSettings(DefaultSettings);
-
-        m_pScalableReconstructor.reset(new MR::CScalableSLAMReconstructor);
-                
+                                
         m_UseTrackingCamera     = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:use_tracking_camera", true);
         m_RenderVolume          = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:volume"             , true);
         m_RenderVolumeVertexMap = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:volume_vertex_map"  , false);
@@ -687,16 +677,6 @@ namespace
         OnSetupShader();
     }
 
-    // -----------------------------------------------------------------------------
-
-    void CGfxReconstructionRenderer::OnReconstructionUpdate(const MR::SReconstructionSettings& _Settings)
-    {
-        m_pScalableReconstructor->ResetReconstruction(&_Settings);
-
-        BufferManager::UploadBufferData(m_VolumeMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer(), &g_CubeVertices);
-        OnSetupShader();
-    }
-    
     // -----------------------------------------------------------------------------
     
     void CGfxReconstructionRenderer::OnNewMap()
@@ -1371,35 +1351,16 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxReconstructionRenderer::PauseIntegration(bool _Paused)
-    {
-        m_pScalableReconstructor->PauseIntegration(_Paused);
-    }
-    
-    // -----------------------------------------------------------------------------
-
-    void CGfxReconstructionRenderer::PauseTracking(bool _Paused)
-    {
-		m_pScalableReconstructor->PauseTracking(_Paused);
-    }
-
-    // -----------------------------------------------------------------------------
-
     void CGfxReconstructionRenderer::ChangeCamera(bool _IsTrackingCamera)
     {
         m_UseTrackingCamera = _IsTrackingCamera;
     }
 
-    float CGfxReconstructionRenderer::GetReconstructionSize()
-    {
-        return m_pScalableReconstructor->GetReconstructionSize();
-    }
-
     // -----------------------------------------------------------------------------
 
-    MR::CScalableSLAMReconstructor& CGfxReconstructionRenderer::GetReconstructor()
+    void CGfxReconstructionRenderer::SetReconstructor(MR::CScalableSLAMReconstructor& _rReconstructor)
     {
-        return *m_pScalableReconstructor;
+        m_pScalableReconstructor = &_rReconstructor;
     }
 
 } // namespace
@@ -1491,13 +1452,6 @@ namespace ReconstructionRenderer
     }
     
     // -----------------------------------------------------------------------------
-
-    void OnReconstructionUpdate(const MR::SReconstructionSettings& _Settings)
-    {
-        CGfxReconstructionRenderer::GetInstance().OnReconstructionUpdate(_Settings);
-    }
-
-    // -----------------------------------------------------------------------------
     
     void OnNewMap()
     {
@@ -1527,37 +1481,16 @@ namespace ReconstructionRenderer
     
     // -----------------------------------------------------------------------------
 
-    void PauseIntegration(bool _Paused)
-    {
-        CGfxReconstructionRenderer::GetInstance().PauseIntegration(_Paused);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void PauseTracking(bool _Paused)
-    {
-        CGfxReconstructionRenderer::GetInstance().PauseTracking(_Paused);
-    }
-
-    // -----------------------------------------------------------------------------
-
     void ChangeCamera(bool _IsTrackingCamera)
     {
         CGfxReconstructionRenderer::GetInstance().ChangeCamera(_IsTrackingCamera);
     }
-
+    
     // -----------------------------------------------------------------------------
 
-    float GetReconstructionSize()
+    void SetReconstructor(MR::CScalableSLAMReconstructor& _rReconstructor)
     {
-        return CGfxReconstructionRenderer::GetInstance().GetReconstructionSize();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    MR::CScalableSLAMReconstructor& GetReconstructor()
-    {
-        return CGfxReconstructionRenderer::GetInstance().GetReconstructor();
+        CGfxReconstructionRenderer::GetInstance().SetReconstructor(_rReconstructor);
     }
 
     // -----------------------------------------------------------------------------
