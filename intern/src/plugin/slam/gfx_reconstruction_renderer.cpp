@@ -250,22 +250,7 @@ namespace
         MR::SReconstructionSettings::SetDefaultSettings(DefaultSettings);
 
         m_pScalableReconstructor.reset(new MR::CScalableSLAMReconstructor);
-
-#pragma message ("Just for testing. Remove later")
-        //             m_pScalableReconstructor->SetImageSizes(glm::ivec2(640, 480), glm::ivec2(640, 480));
-        //             m_pScalableReconstructor->SetIntrinsics(glm::vec2(570.013184f, 568.727722f), glm::vec2(317.644318f, 233.153610f));
-        //             m_pScalableReconstructor->SetDepthBounds(0.5f, 8.0f);
-
-        //             m_pScalableReconstructor->SetImageSizes(glm::ivec2(640, 480), glm::ivec2(640, 480));
-        //             m_pScalableReconstructor->SetIntrinsics(glm::vec2(573.191345f, 573.191345f), glm::vec2(320.107849f, 240.107849f));
-        m_pScalableReconstructor->SetDepthBounds(0.5f, 3.0f);
-
-        //             m_pScalableReconstructor->SetImageSizes(glm::ivec2(512, 424), glm::ivec2(512, 424));
-        //             m_pScalableReconstructor->SetIntrinsics(glm::vec2(0.72113f * 512, 0.870799f * 424), glm::vec2(0.50602675f * 512, 0.499133f * 424));
-        //             m_pScalableReconstructor->SetDepthBounds(0.5f, 8.0f);
-
-        //m_pScalableReconstructor->Start();
-        
+                
         m_UseTrackingCamera     = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:use_tracking_camera", true);
         m_RenderVolume          = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:volume"             , true);
         m_RenderVolumeVertexMap = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:volume_vertex_map"  , false);
