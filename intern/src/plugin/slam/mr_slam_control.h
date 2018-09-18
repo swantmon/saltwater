@@ -89,6 +89,8 @@ namespace MR
 
         bool m_CaptureColor;
 
+        MR::CScalableSLAMReconstructor* m_pReconstructor;
+
         // -----------------------------------------------------------------------------
         // Stuff for network data source
         // -----------------------------------------------------------------------------
@@ -119,6 +121,8 @@ namespace MR
             m_SelectionBoxHeight = 0.0f;
             m_SelectionState = ESelection::NOSELECTION;
             m_MousePressed = false;
+
+            m_pReconstructor = &Gfx::ReconstructionRenderer::GetReconstructor();
 
             // -----------------------------------------------------------------------------
             // Determine where we get our data from
@@ -163,10 +167,10 @@ namespace MR
                 GetIntrinsics(FocalLength, FocalPoint, m_DepthSize);
                 m_ColorSize = m_DepthSize;
 
-                Gfx::ReconstructionRenderer::GetReconstructor().SetImageSizes(glm::vec2(m_DepthSize), glm::vec2(m_ColorSize));
-                Gfx::ReconstructionRenderer::GetReconstructor().SetIntrinsics(glm::vec2(FocalLength), glm::vec2(FocalPoint));
+                m_pReconstructor->SetImageSizes(glm::vec2(m_DepthSize), glm::vec2(m_ColorSize));
+                m_pReconstructor->SetIntrinsics(glm::vec2(FocalLength), glm::vec2(FocalPoint));
                 
-                Gfx::ReconstructionRenderer::GetReconstructor().Start();
+                m_pReconstructor->Start();
 
                 m_IsReconstructorInitialized = true;
 
@@ -198,7 +202,7 @@ namespace MR
                 GetColorBuffer = (GetColorBufferFunc)(Core::PluginManager::GetPluginFunction("Kinect", "GetColorBuffer"));
 
                 MR::SReconstructionSettings Settings;
-                Gfx::ReconstructionRenderer::GetReconstructor().GetReconstructionSettings(&Settings);
+                m_pReconstructor->GetReconstructionSettings(&Settings);
                 m_CaptureColor = Settings.m_CaptureColor;
             }
             else
@@ -216,7 +220,7 @@ namespace MR
 
             if (m_IsReconstructorInitialized)
             {
-                Gfx::ReconstructionRenderer::GetReconstructor().Exit();
+                m_pReconstructor->Exit();
             }
 
             m_DepthTexture = nullptr;
@@ -247,14 +251,14 @@ namespace MR
                     Gfx::TextureManager::CopyToTexture2D(m_DepthTexture, TargetRect, m_DepthSize.x, m_DepthBuffer);
                     Gfx::TextureManager::CopyToTexture2D(m_RGBTexture, TargetRect, m_DepthSize.x, m_ColorBuffer);
 
-                    Gfx::ReconstructionRenderer::GetReconstructor().OnNewFrame(m_DepthTexture, m_RGBTexture, nullptr);
+                    m_pReconstructor->OnNewFrame(m_DepthTexture, m_RGBTexture, nullptr);
                 }
                 else if (GetDepthBuffer(m_DepthBuffer))
                 {
                     Base::AABB2UInt TargetRect;
                     TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_DepthSize.x, m_DepthSize.y));
                     Gfx::TextureManager::CopyToTexture2D(m_DepthTexture, TargetRect, m_DepthSize.x, m_DepthBuffer);
-                    Gfx::ReconstructionRenderer::GetReconstructor().OnNewFrame(m_DepthTexture, nullptr, nullptr);
+                    m_pReconstructor->OnNewFrame(m_DepthTexture, nullptr, nullptr);
                 }
             }
 
@@ -362,7 +366,7 @@ namespace MR
 
                 if (MessageID == 0 && m_IsReconstructorInitialized)
                 {
-                    Gfx::ReconstructionRenderer::GetReconstructor().ResetReconstruction();
+                    m_pReconstructor->ResetReconstruction();
                 }
                 else if (MessageID == 1)
                 {
@@ -379,7 +383,7 @@ namespace MR
                     m_ColorSize = *reinterpret_cast<glm::ivec2*>(Decompressed.data() + sizeof(int32_t) * 2 + sizeof(glm::vec2) * 2 + sizeof(glm::ivec2));
 
                     MR::SReconstructionSettings Settings;
-                    Gfx::ReconstructionRenderer::GetReconstructor().GetReconstructionSettings(&Settings);
+                    m_pReconstructor->GetReconstructionSettings(&Settings);
 
                     m_CaptureColor = Settings.m_CaptureColor;
 
@@ -388,16 +392,16 @@ namespace MR
                         FocalPoint.x = (FocalPoint.x / m_DepthSize.x) * m_ColorSize.x;
                         FocalPoint.y = (FocalPoint.y / m_DepthSize.y) * m_ColorSize.y;
 
-                        Gfx::ReconstructionRenderer::GetReconstructor().SetImageSizes(glm::vec2(m_ColorSize), glm::vec2(m_ColorSize));
-                        Gfx::ReconstructionRenderer::GetReconstructor().SetIntrinsics(glm::vec2(FocalLength), glm::vec2(FocalPoint));
+                        m_pReconstructor->SetImageSizes(glm::vec2(m_ColorSize), glm::vec2(m_ColorSize));
+                        m_pReconstructor->SetIntrinsics(glm::vec2(FocalLength), glm::vec2(FocalPoint));
                     }
                     else
                     {
-                        Gfx::ReconstructionRenderer::GetReconstructor().SetImageSizes(glm::vec2(m_DepthSize), glm::vec2(m_DepthSize));
-                        Gfx::ReconstructionRenderer::GetReconstructor().SetIntrinsics(glm::vec2(FocalLength), glm::vec2(FocalPoint));
+                        m_pReconstructor->SetImageSizes(glm::vec2(m_DepthSize), glm::vec2(m_DepthSize));
+                        m_pReconstructor->SetIntrinsics(glm::vec2(FocalLength), glm::vec2(FocalPoint));
                     }
 
-                    Gfx::ReconstructionRenderer::GetReconstructor().Start();
+                    m_pReconstructor->Start();
 
                     m_IsReconstructorInitialized = true;
 
@@ -488,7 +492,7 @@ namespace MR
 
                 if (!m_CaptureColor)
                 {
-                    Gfx::ReconstructionRenderer::GetReconstructor().OnNewFrame(m_DepthTexture, nullptr, &m_PoseMatrix);
+                    m_pReconstructor->OnNewFrame(m_DepthTexture, nullptr, &m_PoseMatrix);
                 }
             }
             else if (MessageType == COLORFRAME && m_CaptureColor)
@@ -513,7 +517,7 @@ namespace MR
 
                 Gfx::ContextManager::Dispatch(DivUp(m_ColorSize.x, m_TileSize2D), DivUp(m_ColorSize.y, m_TileSize2D), 1);
 
-                Gfx::ReconstructionRenderer::GetReconstructor().OnNewFrame(m_DepthTexture, m_RGBTexture, &m_PoseMatrix);
+                m_pReconstructor->OnNewFrame(m_DepthTexture, m_RGBTexture, &m_PoseMatrix);
             }
             else if (MessageType == LIGHTESTIMATE)
             {
