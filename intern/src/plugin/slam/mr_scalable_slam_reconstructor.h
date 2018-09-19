@@ -166,6 +166,8 @@ namespace MR
 
         float GetReconstructionSize();
 
+        void CreatePool();
+
         void SetImageSizes(glm::ivec2 _DepthFrameSize, glm::ivec2 _ColorFrameSize);
         void SetIntrinsics(glm::vec2 _FocalLength, glm::vec2 _FocalPoint);
         void SetDepthBounds(float _Min, float _Max);
