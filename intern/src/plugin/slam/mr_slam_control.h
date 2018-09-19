@@ -54,8 +54,8 @@ namespace MR
         
         Gfx::CTexturePtr m_DepthTexture;
         Gfx::CTexturePtr m_RGBTexture;
-        uint16_t* m_DepthBuffer;
-        char* m_ColorBuffer;
+        std::vector<uint16_t> m_DepthBuffer;
+        std::vector<char> m_ColorBuffer;
         glm::mat4 m_PoseMatrix;
 
         glm::ivec2 m_DepthSize;
@@ -175,8 +175,8 @@ namespace MR
 
                 m_IsReconstructorInitialized = true;
 
-                m_DepthBuffer = new uint16_t[m_DepthSize.x * m_DepthSize.y];
-                m_ColorBuffer = new char[m_DepthSize.x * m_DepthSize.y * 4];
+                m_DepthBuffer.resize(m_DepthSize.x * m_DepthSize.y);
+                m_ColorBuffer.resize(m_DepthSize.x * m_DepthSize.y * 4);
 
                 Gfx::STextureDescriptor TextureDescriptor = {};
 
@@ -216,8 +216,8 @@ namespace MR
 
         void Exit()
         {
-            delete[] m_DepthBuffer;
-            delete[] m_ColorBuffer;
+            m_DepthBuffer.clear();
+            m_ColorBuffer.clear();
 
             if (m_IsReconstructorInitialized)
             {
@@ -246,21 +246,21 @@ namespace MR
         {
             if (m_DataSource == KINECT)
             {
-                if (m_CaptureColor && GetDepthBuffer(m_DepthBuffer) && GetColorBuffer(m_ColorBuffer))
+                if (m_CaptureColor && GetDepthBuffer(m_DepthBuffer.data()) && GetColorBuffer(m_ColorBuffer.data()))
                 {
                     Base::AABB2UInt TargetRect;
                     TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_DepthSize.x, m_DepthSize.y));
 
-                    Gfx::TextureManager::CopyToTexture2D(m_DepthTexture, TargetRect, m_DepthSize.x, m_DepthBuffer);
-                    Gfx::TextureManager::CopyToTexture2D(m_RGBTexture, TargetRect, m_DepthSize.x, m_ColorBuffer);
+                    Gfx::TextureManager::CopyToTexture2D(m_DepthTexture, TargetRect, m_DepthSize.x, m_DepthBuffer.data());
+                    Gfx::TextureManager::CopyToTexture2D(m_RGBTexture, TargetRect, m_DepthSize.x, m_ColorBuffer.data());
 
                     m_pReconstructor->OnNewFrame(m_DepthTexture, m_RGBTexture, nullptr);
                 }
-                else if (GetDepthBuffer(m_DepthBuffer))
+                else if (GetDepthBuffer(m_DepthBuffer.data()))
                 {
                     Base::AABB2UInt TargetRect;
                     TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_DepthSize.x, m_DepthSize.y));
-                    Gfx::TextureManager::CopyToTexture2D(m_DepthTexture, TargetRect, m_DepthSize.x, m_DepthBuffer);
+                    Gfx::TextureManager::CopyToTexture2D(m_DepthTexture, TargetRect, m_DepthSize.x, m_DepthBuffer.data());
                     m_pReconstructor->OnNewFrame(m_DepthTexture, nullptr, nullptr);
                 }
             }
@@ -403,7 +403,7 @@ namespace MR
 
                     m_IsReconstructorInitialized = true;
 
-                    m_DepthBuffer = new uint16_t[m_DepthSize.x * m_DepthSize.y];
+                    m_DepthBuffer.resize(m_DepthSize.x * m_DepthSize.y);
 
                     Gfx::STextureDescriptor TextureDescriptor = {};
 
