@@ -373,11 +373,6 @@ namespace MR
                 }
                 else if (MessageID == 1)
                 {
-                    if (m_IsReconstructorInitialized)
-                    {
-                        return;
-                    }
-
                     ENGINE_CONSOLE_INFO("Initializing reconstructor");
 
                     glm::vec2 FocalLength = *reinterpret_cast<glm::vec2*>(Decompressed.data() + sizeof(int32_t) * 2);
