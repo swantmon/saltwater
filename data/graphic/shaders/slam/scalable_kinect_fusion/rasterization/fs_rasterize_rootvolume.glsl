@@ -54,13 +54,20 @@ bool InBox()
     vec3 AABBMax = AABBPosition + TRUNCATED_DISTANCE + VOLUME_SIZE;
 
     vec3 Vertex = imageLoad(cs_Vertex, ivec2(gl_FragCoord)).xyz;
-    Vertex = (g_PoseMatrix * vec4(Vertex, 1.0f)).xyz; 
+    
+    if (Vertex.x == 0.0f)
+    {
+        return false;
+    }
+    else
+    {
+        Vertex = (g_PoseMatrix * vec4(Vertex, 1.0f)).xyz; 
 
-    return 
-        Vertex.x != 0.0f &&
-        Vertex.x > AABBMin.x && Vertex.x < AABBMax.x &&
-        Vertex.y > AABBMin.y && Vertex.y < AABBMax.y &&
-        Vertex.z > AABBMin.z && Vertex.z < AABBMax.z;
+        return
+            Vertex.x > AABBMin.x && Vertex.x < AABBMax.x &&
+            Vertex.y > AABBMin.y && Vertex.y < AABBMax.y &&
+            Vertex.z > AABBMin.z && Vertex.z < AABBMax.z;
+    }
 }
 
 // -----------------------------------------------------------------------------
