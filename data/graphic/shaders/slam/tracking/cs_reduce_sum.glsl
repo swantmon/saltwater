@@ -24,7 +24,7 @@ layout(std140, binding = 2) uniform UBOSummationData
 
 #ifdef USE_SHUFFLE_INTRINSICS
 
-shared float g_SharedData[REDUCTION_SHADER_COUNT / 32];
+shared float g_SharedData[max(REDUCTION_SHADER_COUNT / 32, 32)];
 
 layout (local_size_x = REDUCTION_SHADER_COUNT, local_size_y = 1, local_size_z = 1) in;
 void main()
