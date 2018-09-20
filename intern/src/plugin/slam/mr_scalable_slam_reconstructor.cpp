@@ -69,7 +69,7 @@ namespace
     const int g_TileSize2D = 16;
     const int g_TileSize3D = 8;
 
-    glm::vec3 CubeVertices[] =
+    glm::vec3 g_CubeVertices[] =
     {
         glm::vec3(0.0f, 0.0f, 0.0f),
         glm::vec3(1.0f, 0.0f, 0.0f),
@@ -81,7 +81,7 @@ namespace
         glm::vec3(0.0f, 1.0f, 1.0f),
     };
 
-    unsigned int CubeIndices[] =
+    unsigned int g_CubeIndices[] =
     {
         0, 1, 2,
         0, 2, 3,
@@ -264,7 +264,12 @@ namespace MR
 
     void CScalableSLAMReconstructor::SetupMeshes()
     {
-        m_CubeMeshPtr = Gfx::MeshManager::CreateBox(1.0f, 1.0f, 1.0f);
+        //m_CubeMeshPtr = Gfx::MeshManager::CreateBox(1.0f, 1.0f, 1.0f);
+
+        const int VertexCount = sizeof(g_CubeVertices) / sizeof(g_CubeVertices[0]);
+        const int IndexCount = sizeof(g_CubeIndices) / sizeof(g_CubeIndices[0]);
+
+        m_CubeMeshPtr = Gfx::MeshManager::CreateMesh(g_CubeVertices, VertexCount, g_CubeIndices, IndexCount);
     }
     
 	// -----------------------------------------------------------------------------
