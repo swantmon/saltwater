@@ -198,32 +198,12 @@ namespace MR
         assert(m_DepthBounds.x != 0.0f && m_DepthBounds.y != 0.0f);
 
         ////////////////////////////////////////////////////////////////////////////////
-        // Check if conservative rasterization is available
-        ////////////////////////////////////////////////////////////////////////////////
-
-        const bool EnableConservativeRaster = Core::CProgramParameters::GetInstance().Get("mr:slam:conservative_raster_enable", true);
-
-        m_UseConservativeRasterization = false;
-
-        if (EnableConservativeRaster)
-        {
-            m_UseConservativeRasterization = Main::IsExtensionAvailable("GL_NV_conservative_raster");
-
-            if (!m_UseConservativeRasterization)
-            {
-                ENGINE_CONSOLE_INFO("Conservative rasterization is not available. Will use fallback method");
-            }
-        }
-
-        ////////////////////////////////////////////////////////////////////////////////
         // Setup data, buffer etc.
         ////////////////////////////////////////////////////////////////////////////////
         
         m_DepthPixels = std::vector<unsigned short>(m_DepthFrameSize.x * m_DepthFrameSize.y);
         m_CameraPixels = std::vector<char>(m_DepthFrameSize.x * m_DepthFrameSize.y * 4);
 
-        SetupData();
-        SetupMeshes();
         SetupRenderStates();
 		SetupShaders();
 		SetupTextures();
@@ -264,8 +244,6 @@ namespace MR
 
     void CScalableSLAMReconstructor::SetupMeshes()
     {
-        //m_CubeMeshPtr = Gfx::MeshManager::CreateBox(1.0f, 1.0f, 1.0f);
-
         const int VertexCount = sizeof(g_CubeVertices) / sizeof(g_CubeVertices[0]);
         const int IndexCount = sizeof(g_CubeIndices) / sizeof(g_CubeIndices[0]);
 
@@ -279,12 +257,8 @@ namespace MR
         m_IsIntegrationPaused = false;
         m_IsTrackingPaused = false;
 
-        m_PoolFull = false;
-
         m_CreateNormalsFromTSDF = Core::CProgramParameters::GetInstance().Get("mr:slam:normals_from_tsdf", false);
         m_RaycastBackSides = Core::CProgramParameters::GetInstance().Get("mr:slam:raycast_backsides", true);
-
-        m_ReconstructionSize = 0.0f;
 
         m_MinWeight = Core::CProgramParameters::GetInstance().Get("mr:slam:min_weight", 15);
 
@@ -298,25 +272,7 @@ namespace MR
         {
             m_VolumeSizes[i] = m_VolumeSizes[i + 1] * m_ReconstructionSettings.m_GridResolutions[i];
         }
-
-		const float VolumeSize = m_VolumeSizes[0];
-		glm::mat4 PoseRotation, PoseTranslation;
 		
-		PoseRotation = glm::eulerAngleXYZ(g_InitialCameraRotation[0], g_InitialCameraRotation[1], g_InitialCameraRotation[2]);
-        PoseTranslation = glm::translate(g_InitialCameraPosition * VolumeSize);
-		
-		m_PoseMatrix = PoseTranslation * PoseRotation;
-        
-        m_RootVolumePoolItemCount = 0;
-		m_IntegratedFrameCount = 0;
-		m_FrameCount = 0;
-		m_TrackingLost = true;
-
-        m_VolumeBuffers.m_RootGridPoolSize = 0;
-        m_VolumeBuffers.m_Level1PoolSize= 0;
-        m_VolumeBuffers.m_TSDFPoolSize = 0;
-        m_VolumeBuffers.m_RootVolumeTotalWidth = g_AABB;
-
 		UpdateFrustum();
 	}
 
@@ -1847,6 +1803,24 @@ namespace MR
 
     CScalableSLAMReconstructor::CScalableSLAMReconstructor(const SReconstructionSettings* pReconstructionSettings)
     {
+        ////////////////////////////////////////////////////////////////////////////////
+        // Check if conservative rasterization is available
+        ////////////////////////////////////////////////////////////////////////////////
+
+        const bool EnableConservativeRaster = Core::CProgramParameters::GetInstance().Get("mr:slam:conservative_raster_enable", true);
+
+        m_UseConservativeRasterization = false;
+
+        if (EnableConservativeRaster)
+        {
+            m_UseConservativeRasterization = Main::IsExtensionAvailable("GL_NV_conservative_raster");
+
+            if (!m_UseConservativeRasterization)
+            {
+                ENGINE_CONSOLE_INFO("Conservative rasterization is not available. Will use fallback method");
+            }
+        }
+
         m_DepthFrameSize = glm::ivec2(0);
         m_ColorFrameSize = glm::ivec2(0);
         m_FocalLength = glm::vec2(0.0f);
@@ -1863,8 +1837,33 @@ namespace MR
             SReconstructionSettings::SetDefaultSettings(m_ReconstructionSettings);
         }
 
+        SetupData();
+        SetupMeshes();
         CreatePool();
         ClearPool();
+
+        glm::mat4 PoseRotation, PoseTranslation;
+
+        m_PoolFull = false;
+
+        m_ReconstructionSize = 0.0f;
+
+        const float VolumeSize = m_VolumeSizes[0];
+
+        PoseRotation = glm::eulerAngleXYZ(g_InitialCameraRotation[0], g_InitialCameraRotation[1], g_InitialCameraRotation[2]);
+        PoseTranslation = glm::translate(g_InitialCameraPosition * VolumeSize);
+
+        m_PoseMatrix = PoseTranslation * PoseRotation;
+
+        m_RootVolumePoolItemCount = 0;
+        m_IntegratedFrameCount = 0;
+        m_FrameCount = 0;
+        m_TrackingLost = true;
+
+        m_VolumeBuffers.m_RootGridPoolSize = 0;
+        m_VolumeBuffers.m_Level1PoolSize = 0;
+        m_VolumeBuffers.m_TSDFPoolSize = 0;
+        m_VolumeBuffers.m_RootVolumeTotalWidth = g_AABB;
 
         m_IsInizialized = false;
     }
