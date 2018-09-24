@@ -185,7 +185,7 @@ namespace MR
 		float GetPointPlaneDistance(const glm::vec3& rPoint, const glm::vec4& rPlane);
 		bool RootGridInFrustum(const glm::ivec3& rKey);
 
-		void UpdateRootrids();
+		void UpdateRootgrids();
         void CreateIntegrationQueues(std::vector<uint32_t>& rVolumeQueue);
         void IntegrateHierarchies(std::vector<uint32_t>& rVolumeQueue);
         

@@ -897,7 +897,7 @@ namespace MR
     
     // -----------------------------------------------------------------------------
 
-	void CScalableSLAMReconstructor::UpdateRootrids()
+	void CScalableSLAMReconstructor::UpdateRootgrids()
 	{
         ////////////////////////////////////////////////////////////////////////////////
         // Create all root grid volumes that are in the view frustum 
@@ -1472,7 +1472,7 @@ namespace MR
             Performance::BeginEvent("Updating root grid");
 
             UpdateFrustum();
-            UpdateRootrids();
+            UpdateRootgrids();
 
             Performance::EndEvent();
         }
