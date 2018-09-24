@@ -390,14 +390,11 @@ namespace MR
         m_EmptyTargetSetPtr = 0;
         m_DepthViewPortSetPtr = 0;
 
-        for (int i = 0; i < m_ReconstructionSettings.m_PyramidLevelCount; ++ i)
-        {
-            m_SmoothDepthBufferPtr[i] = 0;
-            m_ReferenceVertexMapPtr[i] = 0;
-            m_ReferenceNormalMapPtr[i] = 0;
-            m_RaycastVertexMapPtr[i] = 0;
-            m_RaycastNormalMapPtr[i] = 0;
-        }
+        m_SmoothDepthBufferPtr.clear();
+        m_ReferenceVertexMapPtr.clear();
+        m_ReferenceNormalMapPtr.clear();
+        m_RaycastVertexMapPtr.clear();
+        m_RaycastNormalMapPtr.clear();
 
         m_RootVolumeMap.clear();
         
