@@ -219,10 +219,7 @@ namespace MR
             m_DepthBuffer.clear();
             m_ColorBuffer.clear();
 
-            if (m_IsReconstructorInitialized)
-            {
-                m_pReconstructor->Exit();
-            }
+            m_pReconstructor->Exit();
 
             m_DepthTexture = nullptr;
             m_RGBTexture = nullptr;
