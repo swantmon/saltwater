@@ -74,6 +74,8 @@ namespace
         SDL_Joystick* m_pGamePad;
         int m_AnalogStickDeadZone;
         
+        bool m_EnableGamepad;
+
     private:
         
         void OnTranslation(Edit::CState::EStateType _NewState);
@@ -136,10 +138,12 @@ namespace
         // -----------------------------------------------------------------------------
         // Init SDL for gamepad input
         // -----------------------------------------------------------------------------
-        m_AnalogStickDeadZone = Core::CProgramParameters::GetInstance().Get("input:gamepad:deadzone", 3200);
+        m_EnableGamepad = Core::CProgramParameters::GetInstance().Get("input:gamepad:enable", true);
 
-        if (Core::CProgramParameters::GetInstance().Get("input:gamepad:enable", true))
+        if (m_EnableGamepad)
         {
+            m_AnalogStickDeadZone = Core::CProgramParameters::GetInstance().Get("input:gamepad:deadzone", 3200);
+
             if (SDL_Init(SDL_INIT_JOYSTICK) < 0)
             {
                 BASE_THROWM("Could not initialise SDL");
@@ -233,8 +237,11 @@ namespace
     
     void CApplication::OnExit()
     {
-        SDL_JoystickClose(m_pGamePad);
-        SDL_Quit();
+        if (m_EnableGamepad)
+        {
+            SDL_JoystickClose(m_pGamePad);
+            SDL_Quit();
+        }
 
         // -----------------------------------------------------------------------------
         // Helper
@@ -272,7 +279,11 @@ namespace
             // Events
             // -----------------------------------------------------------------------------
             Edit::GUI::ProcessEvents();
-            ProcessSDLEvents();
+
+            if (m_EnableGamepad)
+            {
+                ProcessSDLEvents();
+            }
 
             // -----------------------------------------------------------------------------
             // Send FPS to editor
