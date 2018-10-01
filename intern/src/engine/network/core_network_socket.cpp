@@ -212,13 +212,20 @@ namespace Net
     {
         auto& IOService = CNetworkManager::GetInstance().GetIOService();
 
-        m_pEndpoint.reset(new asio::ip::tcp::endpoint(asio::ip::tcp::v4(), static_cast<unsigned short>(_Port)));
-        m_pAcceptor.reset(new asio::ip::tcp::acceptor(IOService, *m_pEndpoint));
-        m_pSocket.reset(new asio::ip::tcp::socket(IOService));
+        try
+        {
+            m_pEndpoint.reset(new asio::ip::tcp::endpoint(asio::ip::tcp::v4(), static_cast<unsigned short>(_Port)));
+            m_pAcceptor.reset(new asio::ip::tcp::acceptor(IOService, *m_pEndpoint));
+            m_pSocket.reset(new asio::ip::tcp::socket(IOService));
 
-        m_Header.resize(s_HeaderSize);
+            m_Header.resize(s_HeaderSize);
 
-        m_pAcceptor->async_accept(*m_pSocket, *m_pEndpoint, std::bind(&CServerSocket::OnAccept, this, std::placeholders::_1));
+            m_pAcceptor->async_accept(*m_pSocket, *m_pEndpoint, std::bind(&CServerSocket::OnAccept, this, std::placeholders::_1));
+        }
+        catch (const std::exception& e)
+        {
+            throw Base::CException(__FILE__, __LINE__, e.what());
+        }
     }
 
     // -----------------------------------------------------------------------------
