@@ -41,8 +41,8 @@ void main()
 {
     vec2 UV;
 
-    UV.x = gl_VertexID % int(CAUSTIC_MAP_RESOLUTION);
-    UV.y = gl_VertexID / int(CAUSTIC_MAP_RESOLUTION);
+    UV.x = float(gl_VertexID % int(CAUSTIC_MAP_RESOLUTION));
+    UV.y = float(gl_VertexID / int(CAUSTIC_MAP_RESOLUTION));
 
     UV /= vec2(CAUSTIC_MAP_RESOLUTION);
 

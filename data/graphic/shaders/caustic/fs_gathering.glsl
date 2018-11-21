@@ -42,8 +42,8 @@ void main(void)
     // We could do this using point sprites, but the final framerate is 10x 
     // faster this way.
     // -----------------------------------------------------------------------------
-    vec2 FragmentLocation = gl_FragCoord.xy;
-    vec2 PointLocation    = (in_NormalizedCoords.xy * 0.5f + 0.5f) * vec2(CAUSTIC_MAP_RESOLUTION);
+    vec2 FragmentLocation = vec2(gl_FragCoord.xy);
+    vec2 PointLocation    = (vec2(in_NormalizedCoords.xy) * 0.5f + 0.5f) * vec2(CAUSTIC_MAP_RESOLUTION);
     
     // -----------------------------------------------------------------------------
     // Gaussian from Graphics Gems I, "Convenient anti-aliasing filters that 
