@@ -223,6 +223,18 @@ namespace
     
     void CGfxCausticRenderer::OnSetupTextures()
     {
+#ifdef PLATFORM_ANDROID
+        const CTexture::EFormat FLOAT1 = CTexture::R16_FLOAT;
+        const CTexture::EFormat FLOAT2 = CTexture::R16G16_FLOAT;
+        const CTexture::EFormat FLOAT3 = CTexture::R16G16B16_FLOAT;
+        const CTexture::EFormat FLOAT4 = CTexture::R16G16B16A16_FLOAT;
+#else
+        const CTexture::EFormat FLOAT1 = CTexture::R32_FLOAT;
+        const CTexture::EFormat FLOAT2 = CTexture::R32G32_FLOAT;
+        const CTexture::EFormat FLOAT3 = CTexture::R32G32B32_FLOAT;
+        const CTexture::EFormat FLOAT4 = CTexture::R32G32B32A32_FLOAT;
+#endif
+
         STextureDescriptor TextureDescriptor;
 
         TextureDescriptor.m_NumberOfPixelsU  = s_CausticMapSize;
@@ -232,7 +244,7 @@ namespace
         TextureDescriptor.m_NumberOfTextures = 1;
         TextureDescriptor.m_Binding          = CTexture::ShaderResource | CTexture::RenderTarget;
         TextureDescriptor.m_Access           = CTexture::CPUWrite;
-        TextureDescriptor.m_Format           = CTexture::R32G32B32_FLOAT;
+        TextureDescriptor.m_Format           = FLOAT3;
         TextureDescriptor.m_Usage            = CTexture::GPUReadWrite;
         TextureDescriptor.m_Semantic         = CTexture::Diffuse;
         TextureDescriptor.m_pFileName        = 0;
@@ -251,7 +263,7 @@ namespace
         TextureDescriptor.m_NumberOfTextures = 1;
         TextureDescriptor.m_Binding          = CTexture::ShaderResource | CTexture::DepthStencilTarget;
         TextureDescriptor.m_Access           = CTexture::CPUWrite;
-        TextureDescriptor.m_Format           = CTexture::R32_FLOAT;
+        TextureDescriptor.m_Format           = FLOAT1;
         TextureDescriptor.m_Usage            = CTexture::GPUReadWrite;
         TextureDescriptor.m_Semantic         = CTexture::Diffuse;
         TextureDescriptor.m_pFileName        = 0;
@@ -270,7 +282,7 @@ namespace
         TextureDescriptor.m_NumberOfTextures = 1;
         TextureDescriptor.m_Binding          = CTexture::ShaderResource | CTexture::DepthStencilTarget;
         TextureDescriptor.m_Access           = CTexture::CPUWrite;
-        TextureDescriptor.m_Format           = CTexture::R32_FLOAT;
+        TextureDescriptor.m_Format           = FLOAT1;
         TextureDescriptor.m_Usage            = CTexture::GPUReadWrite;
         TextureDescriptor.m_Semantic         = CTexture::Diffuse;
         TextureDescriptor.m_pFileName        = 0;
@@ -289,7 +301,7 @@ namespace
         TextureDescriptor.m_NumberOfTextures = 1;
         TextureDescriptor.m_Binding          = CTexture::ShaderResource | CTexture::DepthStencilTarget;
         TextureDescriptor.m_Access           = CTexture::CPUWrite;
-        TextureDescriptor.m_Format           = CTexture::R32_FLOAT;
+        TextureDescriptor.m_Format           = FLOAT1;
         TextureDescriptor.m_Usage            = CTexture::GPUReadWrite;
         TextureDescriptor.m_Semantic         = CTexture::Diffuse;
         TextureDescriptor.m_pFileName        = 0;
@@ -308,7 +320,7 @@ namespace
         TextureDescriptor.m_NumberOfTextures = 1;
         TextureDescriptor.m_Binding          = CTexture::ShaderResource | CTexture::RenderTarget;
         TextureDescriptor.m_Access           = CTexture::CPUWrite;
-        TextureDescriptor.m_Format           = CTexture::R32G32B32A32_FLOAT;
+        TextureDescriptor.m_Format           = FLOAT4;
         TextureDescriptor.m_Usage            = CTexture::GPUReadWrite;
         TextureDescriptor.m_Semantic         = CTexture::Diffuse;
         TextureDescriptor.m_pFileName        = 0;
@@ -327,7 +339,7 @@ namespace
         TextureDescriptor.m_NumberOfTextures = 1;
         TextureDescriptor.m_Binding          = CTexture::ShaderResource | CTexture::RenderTarget;
         TextureDescriptor.m_Access           = CTexture::CPUWrite;
-        TextureDescriptor.m_Format           = CTexture::R32G32B32A32_FLOAT;
+        TextureDescriptor.m_Format           = FLOAT4;
         TextureDescriptor.m_Usage            = CTexture::GPUReadWrite;
         TextureDescriptor.m_Semantic         = CTexture::Diffuse;
         TextureDescriptor.m_pFileName        = 0;
