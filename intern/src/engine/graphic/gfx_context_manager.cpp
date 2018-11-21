@@ -348,7 +348,12 @@ namespace
         // -----------------------------------------------------------------------------
         // Enable various OpenGL capabilities
         // -----------------------------------------------------------------------------
+
+#ifdef PLATFORM_ANDROID
+        ENGINE_CONSOLE_WARNING("GL_PROGRAM_POINT_SIZE not supported on Android");
+#else
         glEnable(GL_PROGRAM_POINT_SIZE);
+#endif
     }
 
     // -----------------------------------------------------------------------------

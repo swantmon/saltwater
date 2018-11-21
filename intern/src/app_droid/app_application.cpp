@@ -330,7 +330,7 @@ namespace
                             float PointerX = AMotionEvent_getRawX(_pEvent, IndexOfPointer);
                             float PointerY = AMotionEvent_getRawY(_pEvent, IndexOfPointer);
 
-                            Base::CInputEvent Input(Base::CInputEvent::Input, InputAction, Base::CInputEvent::Pointer + IndexOfPointer, glm::vec2(PointerX, PointerY));
+                            Base::CInputEvent Input(Base::CInputEvent::Input, InputAction, Base::CInputEvent::Pointer + IndexOfPointer, glm::vec2(PointerX, PointerY), glm::vec2(PointerX, PointerY));
 
                             Gui::EventHandler::OnUserEvent(Input);
                         }
