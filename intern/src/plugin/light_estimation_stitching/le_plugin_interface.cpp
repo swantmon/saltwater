@@ -20,6 +20,8 @@
 #include "engine/graphic/gfx_texture_manager.h"
 #include "engine/graphic/gfx_view_manager.h"
 
+#include "engine/network/core_network_manager.h"
+
 #include "plugin/light_estimation_stitching/le_plugin_interface.h"
 
 #include <array>
@@ -144,6 +146,18 @@ namespace LE
         // Settings
         // -----------------------------------------------------------------------------
         m_IsActive = true;
+
+        m_NetworkDelegate = std::shared_ptr<Net::CMessageDelegate>(new Net::CMessageDelegate(std::bind(&CPluginInterface::OnNewMessage, this, std::placeholders::_1, std::placeholders::_2)));
+        Net::CNetworkManager::GetInstance().RegisterMessageHandler(0, m_NetworkDelegate);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CPluginInterface::OnNewMessage(const Net::CMessage& _rMessage, int _Port)
+    {
+        BASE_UNUSED(_Port);
+
+        float x = 0;
     }
 
     // -----------------------------------------------------------------------------
