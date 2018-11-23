@@ -57,7 +57,7 @@ namespace Net
             _Port = m_DefaultPort;
         }
 
-        if (m_Sockets.count(_Port) == 0)
+        if (m_Sockets.count(_Port) != 0)
         {
             if (m_Sockets.at(_Port)->IsOpen())
             {
