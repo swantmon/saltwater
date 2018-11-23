@@ -91,7 +91,7 @@ namespace Net
             std::memcpy(pData->data() + sizeof(int32_t), &MessageLength, sizeof(MessageLength));
             std::memcpy(pData->data() + 2 * sizeof(int32_t), _rData.data(), _MessageLength);
 
-            m_pSocket->async_send(asio::buffer(*pData, DataLength), std::bind(&CServerSocket::OnSendComplete, this, pData));
+            asio::async_write(*m_pSocket, asio::buffer(*pData, DataLength), std::bind(&CServerSocket::OnSendComplete, this, pData));
 
             return true;
         }
