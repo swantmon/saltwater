@@ -42,6 +42,11 @@ namespace Net
         }
 
         m_Mutex.unlock();
+
+        if (!m_IsSending && !m_OutgoingMessages.empty())
+        {
+            InternalSendMessage();
+        }
     }
 
     // -----------------------------------------------------------------------------
@@ -65,6 +70,8 @@ namespace Net
         m_MessageQueue.push(std::move(Message));
 
         m_Mutex.unlock();
+
+        m_IsSending = false;
     }
 
     // -----------------------------------------------------------------------------
@@ -73,25 +80,7 @@ namespace Net
     {
         if (IsOpen())
         {
-            if (_MessageLength == 0)
-            {
-                _MessageLength = static_cast<int>(_rData.size());
-            }
-
-            int DataLength = _MessageLength + 2 * sizeof(int32_t);
-
-            std::shared_ptr<std::vector<char>> pData = std::make_shared<std::vector<char>>();
-
-            pData->resize(DataLength);
-
-            int32_t MessageID = static_cast<int32_t>(_MessageCategory);
-            int32_t MessageLength = static_cast<int32_t>(_MessageLength);
-
-            std::memcpy(pData->data(), &MessageID, sizeof(MessageID));
-            std::memcpy(pData->data() + sizeof(int32_t), &MessageLength, sizeof(MessageLength));
-            std::memcpy(pData->data() + 2 * sizeof(int32_t), _rData.data(), _MessageLength);
-
-            asio::async_write(*m_pSocket, asio::buffer(*pData, DataLength), std::bind(&CServerSocket::OnSendComplete, this, pData));
+            m_OutgoingMessages.emplace_back(_MessageCategory, _rData, _MessageLength);
 
             return true;
         }
@@ -100,6 +89,44 @@ namespace Net
             return false;
         }
     }
+
+    // -----------------------------------------------------------------------------
+
+    void CServerSocket::InternalSendMessage()
+    {
+        if (!m_IsSending)
+        {
+            m_IsSending = true;
+
+            const OutgoingMessage& Message = m_OutgoingMessages.front();
+
+            int MessageLength = Message.m_MessageLength;
+            const auto& Data = Message.m_PayLoad;
+            const int MessageCategory = Message.m_MessageCategory;
+
+            if (MessageLength == 0)
+            {
+                MessageLength = static_cast<int>(Data.size());
+            }
+
+            int DataLength = MessageLength + 2 * sizeof(int32_t);
+
+            std::shared_ptr<std::vector<char>> pData = std::make_shared<std::vector<char>>();
+
+            pData->resize(DataLength);
+
+            int32_t MessageID32 = static_cast<int32_t>(MessageCategory);
+            int32_t MessageLength32 = static_cast<int32_t>(MessageLength);
+
+            std::memcpy(pData->data(), &MessageID32, sizeof(MessageID32));
+            std::memcpy(pData->data() + sizeof(int32_t), &MessageLength32, sizeof(MessageLength32));
+            std::memcpy(pData->data() + 2 * sizeof(int32_t), Data.data(), MessageLength32);
+
+            asio::async_write(*m_pSocket, asio::buffer(*pData, DataLength), std::bind(&CServerSocket::OnSendComplete, this, pData));
+
+            m_OutgoingMessages.pop_front();
+        }
+    };
 
     // -----------------------------------------------------------------------------
 
@@ -209,6 +236,7 @@ namespace Net
     CServerSocket::CServerSocket(int _Port)
         : m_Port(_Port)
         , m_IsOpen(false)
+        , m_IsSending(false)
     {
         auto& IOService = CNetworkManager::GetInstance().GetIOService();
 
