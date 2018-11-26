@@ -1,4 +1,4 @@
-﻿
+
 #include "engine/engine_precompiled.h"
 
 #include "app_droid/app_application.h"
@@ -812,8 +812,8 @@ namespace
         // -----------------------------------------------------------------------------
         // Allocate memory
         // -----------------------------------------------------------------------------
-        int NumberOfPixels = pInternTexture->GetNumberOfPixelsU() * pInternTexture->GetNumberOfPixelsV();
-        int NumberOfBytes = NumberOfPixels * s_NumberOfChannels * sizeof(char);
+        const int NumberOfPixels = pInternTexture->GetNumberOfPixelsU() * pInternTexture->GetNumberOfPixelsV();
+        const int NumberOfBytes = NumberOfPixels * s_NumberOfChannels * sizeof(char);
 
         // -----------------------------------------------------------------------------
         // Get data from GPU
