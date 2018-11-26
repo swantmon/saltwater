@@ -1,4 +1,4 @@
-
+﻿
 #include "engine/engine_precompiled.h"
 
 #include "app_droid/app_application.h"
@@ -830,7 +830,7 @@ namespace
             glBindFramebuffer(GL_FRAMEBUFFER, Framebuffer);
 #endif
 
-            for (int i = 0; i < 6; i++)
+            for (int i = 0; i < 6; ++ i)
             {
 #if PLATFORM_ANDROID
                 glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, pInternTexture->m_NativeTexture, 0);
