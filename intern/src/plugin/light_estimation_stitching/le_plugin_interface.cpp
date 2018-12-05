@@ -57,7 +57,11 @@ namespace LE
         m_GSPtr = Gfx::ShaderManager::CompileGS("../../plugins/light_estimation_stitching/gs.glsl", "main");
         m_PSPtr = Gfx::ShaderManager::CompilePS("../../plugins/light_estimation_stitching/fs.glsl", "main");
         
-        m_C2PShaderPtr = Gfx::ShaderManager::CompileCS("../../plugins/light_estimation_stitching/cs_cube2pano.glsl", "main", "#define TILE_SIZE 1 \n #define IMAGE_TYPE rgba32f \n ");
+        m_C2PShaderPtr = Gfx::ShaderManager::CompileCS("../../plugins/light_estimation_stitching/cs_cube2pano.glsl", "main", "\
+            #define TILE_SIZE 1\n \
+            #define CUBE_TYPE rgba8\n \
+            #define OUTPUT_TYPE rgba32f\n \
+            #define CUBE_SIZE 512\n");
 
         // -----------------------------------------------------------------------------
         // Input layout
@@ -184,6 +188,9 @@ namespace LE
         m_OutputCubemapPtr = 0;
         m_TargetSetPtr = 0;
         m_ViewPortSetPtr = 0;
+
+        m_C2PShaderPtr = 0;
+        m_PanoramaTexturePtr = 0;
     }
 
     // -----------------------------------------------------------------------------
@@ -264,7 +271,7 @@ namespace LE
 
         Gfx::ContextManager::SetImageTexture(1, static_cast<Gfx::CTexturePtr>(m_PanoramaTexturePtr));
 
-        Gfx::ContextManager::Dispatch(512, 512, 1);
+        Gfx::ContextManager::Dispatch(128, 64, 1);
 
         Gfx::ContextManager::ResetImageTexture(0);
 
@@ -393,7 +400,9 @@ namespace LE
         // -----------------------------------------------------------------------------
         Gfx::TextureManager::UpdateMipmap(m_OutputCubemapPtr);
 
-        Gfx::Performance::EndEvent();
+
+
+
 
 
 
@@ -405,6 +414,21 @@ namespace LE
 
 
         CubemapToPano();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        Gfx::Performance::EndEvent();       
     }
 } // namespace LE
 
