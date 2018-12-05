@@ -48,7 +48,6 @@ namespace LE
         Gfx::CShaderPtr m_VSPtr;
         Gfx::CShaderPtr m_GSPtr;
         Gfx::CShaderPtr m_PSPtr;
-        Gfx::CShaderPtr m_C2PShaderPtr;
 
         Gfx::CBufferPtr m_CubemapBufferPtr;
 
@@ -56,17 +55,12 @@ namespace LE
 
         Gfx::CTexturePtr m_InputTexturePtr;
         Gfx::CTexturePtr m_OutputCubemapPtr;
-        Gfx::CTexturePtr m_PanoramaTexturePtr;
 
         Gfx::CTargetSetPtr m_TargetSetPtr;
 
         Gfx::CViewPortSetPtr m_ViewPortSetPtr;
 
         bool m_IsActive;
-
-    private:
-
-        void CubemapToPano();
 
     private:
 

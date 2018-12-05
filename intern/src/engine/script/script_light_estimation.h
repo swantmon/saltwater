@@ -11,6 +11,9 @@
 #include "engine/data/data_transformation_facet.h"
 
 #include "engine/graphic/gfx_main.h"
+#include "engine/graphic/gfx_context_manager.h"
+#include "engine/graphic/gfx_shader.h"
+#include "engine/graphic/gfx_shader_manager.h"
 #include "engine/graphic/gfx_texture.h"
 #include "engine/graphic/gfx_texture_manager.h"
 
@@ -44,9 +47,11 @@ namespace Scpt
         LESetInputTextureFunc SetInputTexture;
         LESetOutputCubemapFunc SetOutputCubemap;
         LEGetOutputCubemapFunc GetOutputCubemap;
-        ARGetBackgroundTextureFunc GetBackgroundTexture;
+
+        Gfx::CShaderPtr m_C2PShaderPtr;
 
         Gfx::CTexturePtr m_OutputCubemapPtr;
+        Gfx::CTexturePtr m_PanoramaTexturePtr;
 
         std::string m_PluginNames[NumberOfEstimationTypes] = { "Light Estimation Stitching", "Light Estimation LUT" };
 
@@ -71,36 +76,13 @@ namespace Scpt
             if (m_pSkyComponent == nullptr) return;
 
             // -----------------------------------------------------------------------------
-            // Input
+            // Shader
             // -----------------------------------------------------------------------------
-            if (Core::PluginManager::HasPlugin("ArCore"))
-            {
-                GetBackgroundTexture = (ARGetBackgroundTextureFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetBackgroundTexture"));
-            }
-            else if (Core::PluginManager::HasPlugin("EasyAR"))
-            {
-                GetBackgroundTexture = (ARGetBackgroundTextureFunc)(Core::PluginManager::GetPluginFunction("EasyAR", "GetBackgroundTexture"));
-            }
-            else
-            {
-//                 Gfx::STextureDescriptor TextureDescriptor;
-// 
-//                 TextureDescriptor.m_Format           = Gfx::CTexture::R8G8B8A8_UBYTE;
-//                 TextureDescriptor.m_NumberOfPixelsU  = Gfx::STextureDescriptor::s_FormatFromSource;
-//                 TextureDescriptor.m_NumberOfPixelsV  = Gfx::STextureDescriptor::s_FormatFromSource;
-//                 TextureDescriptor.m_NumberOfPixelsW  = 1;
-//                 TextureDescriptor.m_NumberOfTextures = 1;
-//                 TextureDescriptor.m_NumberOfMipMaps  = Gfx::STextureDescriptor::s_GenerateAllMipMaps;
-//                 TextureDescriptor.m_Usage            = Gfx::CTexture::GPURead;
-//                 TextureDescriptor.m_Access           = Gfx::CTexture::CPUWrite;
-//                 TextureDescriptor.m_Semantic         = Gfx::CTexture::Diffuse;
-//                 TextureDescriptor.m_pFileName        = "environments/Lobby-Center_2k.hdr";
-//                 TextureDescriptor.m_pPixels          = 0;
-// 
-//                 SetInputTexture(Gfx::TextureManager::CreateTexture2D(TextureDescriptor));
-
-                return;
-            }
+            m_C2PShaderPtr = Gfx::ShaderManager::CompileCS("helper/cs_cube2pano.glsl", "main", "\
+                #define TILE_SIZE 1\n \
+                #define CUBE_TYPE rgba8\n \
+                #define OUTPUT_TYPE rgba8\n \
+                #define CUBE_SIZE 512\n");
 
             // -----------------------------------------------------------------------------
             // Output cube map texture
@@ -126,6 +108,25 @@ namespace Scpt
             Gfx::TextureManager::SetTextureLabel(m_OutputCubemapPtr, "Sky cubemap from image");
 
             // -----------------------------------------------------------------------------
+        
+            TextureDescriptor.m_NumberOfPixelsU  = 128;
+            TextureDescriptor.m_NumberOfPixelsV  = 64;
+            TextureDescriptor.m_NumberOfPixelsW  = 1;
+            TextureDescriptor.m_NumberOfMipMaps  = 1;
+            TextureDescriptor.m_NumberOfTextures = 1;
+            TextureDescriptor.m_Binding          = Gfx::CTexture::ShaderResource;
+            TextureDescriptor.m_Access           = Gfx::CTexture::CPUWrite;
+            TextureDescriptor.m_Format           = Gfx::CTexture::R8G8B8A8_BYTE;
+            TextureDescriptor.m_Usage            = Gfx::CTexture::GPUReadWrite;
+            TextureDescriptor.m_Semantic         = Gfx::CTexture::Diffuse;
+            TextureDescriptor.m_pFileName        = 0;
+            TextureDescriptor.m_pPixels          = 0;
+        
+            m_PanoramaTexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
+
+            Gfx::TextureManager::SetTextureLabel(m_PanoramaTexturePtr, "Sky panorama from image");
+
+            // -----------------------------------------------------------------------------
             // Setup sky
             // -----------------------------------------------------------------------------
             m_pSkyComponent->SetType(Dt::CSkyComponent::Cubemap);
@@ -147,6 +148,8 @@ namespace Scpt
         void Exit() override
         {
             m_OutputCubemapPtr = 0;
+            m_C2PShaderPtr = 0;
+            m_PanoramaTexturePtr = 0;
         }
 
         // -----------------------------------------------------------------------------
@@ -234,15 +237,63 @@ namespace Scpt
 
             m_pCurrentPluginPtr->OnResume();
 
-            SetInputTexture(GetBackgroundTexture());
-
             SetOutputCubemap(m_OutputCubemapPtr);
+
+            if (Core::PluginManager::HasPlugin("ArCore") || Core::PluginManager::HasPlugin("EasyAR"))
+            {
+                ARGetBackgroundTextureFunc GetBackgroundTexture;
+
+                if (Core::PluginManager::HasPlugin("ArCore"))
+                {
+                    GetBackgroundTexture = (ARGetBackgroundTextureFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetBackgroundTexture"));
+                }
+                else
+                {
+                    GetBackgroundTexture = (ARGetBackgroundTextureFunc)(Core::PluginManager::GetPluginFunction("EasyAR", "GetBackgroundTexture"));
+                }
+
+                SetInputTexture(GetBackgroundTexture());
+            }
+            else
+            {
+                Gfx::STextureDescriptor TextureDescriptor;
+
+                TextureDescriptor.m_Format           = Gfx::CTexture::R8G8B8A8_UBYTE;
+                TextureDescriptor.m_NumberOfPixelsU  = Gfx::STextureDescriptor::s_FormatFromSource;
+                TextureDescriptor.m_NumberOfPixelsV  = Gfx::STextureDescriptor::s_FormatFromSource;
+                TextureDescriptor.m_NumberOfPixelsW  = 1;
+                TextureDescriptor.m_NumberOfTextures = 1;
+                TextureDescriptor.m_NumberOfMipMaps  = Gfx::STextureDescriptor::s_GenerateAllMipMaps;
+                TextureDescriptor.m_Usage            = Gfx::CTexture::GPURead;
+                TextureDescriptor.m_Access           = Gfx::CTexture::CPUWrite;
+                TextureDescriptor.m_Semantic         = Gfx::CTexture::Diffuse;
+                TextureDescriptor.m_pFileName        = "environments/Lobby-Center_2k.hdr";
+                TextureDescriptor.m_pPixels          = 0;
+
+                SetInputTexture(Gfx::TextureManager::CreateTexture2D(TextureDescriptor));
+            }
         }
 
         // -----------------------------------------------------------------------------
 
         void SaveCubemap()
         {
+            Gfx::ContextManager::SetShaderCS(m_C2PShaderPtr);
+
+            Gfx::ContextManager::SetImageTexture(0, static_cast<Gfx::CTexturePtr>(m_OutputCubemapPtr));
+
+            Gfx::ContextManager::SetImageTexture(1, static_cast<Gfx::CTexturePtr>(m_PanoramaTexturePtr));
+
+            Gfx::ContextManager::Dispatch(128, 64, 1);
+
+            Gfx::ContextManager::ResetImageTexture(0);
+
+            Gfx::ContextManager::ResetShaderCS();
+
+            // -----------------------------------------------------------------------------
+
+            Gfx::TextureManager::SaveTexture(m_PanoramaTexturePtr, Core::AssetManager::GetPathToFiles() + "/env_panorama.ppm");
+
             Gfx::TextureManager::SaveTexture(m_OutputCubemapPtr, Core::AssetManager::GetPathToFiles() + "/env_cubemap.ppm");
         }
     };
