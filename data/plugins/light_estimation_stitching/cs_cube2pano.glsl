@@ -31,11 +31,11 @@ void main()
     // -----------------------------------------------------------------------------
     vec3 UnitDirection = vec3(0.0f, 0.0f, 0.0f);
 
-    float Theta = float(Y) / float(gl_NumWorkGroups.y) * 3.141592653589793f;
-    float Phi   = float(X) / float(gl_NumWorkGroups.x) * 2.0f * 3.141592653589793f;
+    float Theta = float(Y) / 64.0f * 3.141592653589793f;
+    float Phi   = float(X) / 128.0f * 2.0f * 3.141592653589793f;
 
     UnitDirection.x = sin(Phi) * sin(Theta) * - 1.0f;
-    UnitDirection.y = cos(Theta);
+    UnitDirection.y = -cos(Theta);
     UnitDirection.z = cos(Phi) * sin(Theta) * - 1.0f;
 
     // -----------------------------------------------------------------------------
@@ -53,39 +53,39 @@ void main()
 
     if (UnitUV.x >= BIAS) //Right
     {
-        UV.x = int((((UnitUV.z + 1.0f) / 2.0f) - 1.0f) * CUBE_SIZE);
-        UV.y = int((((UnitUV.y + 1.0f) / 2.0f)) * CUBE_SIZE);
+        UV.x = CUBE_SIZE - int((((UnitUV.y + 1.0f) / 2.0f)) * CUBE_SIZE);
+        UV.y = int((((UnitUV.z + 1.0f) / 2.0f) - 1.0f) * CUBE_SIZE);
         UV.z = 0;
     }
     else if (UnitUV.x <= -BIAS) // Left
     {
-        UV.x = int((((UnitUV.z + 1.0f) / 2.0f)) * CUBE_SIZE);
-        UV.y = int((((UnitUV.y + 1.0f) / 2.0f)) * CUBE_SIZE);
+        UV.y = CUBE_SIZE - int((((UnitUV.z + 1.0f) / 2.0f)) * CUBE_SIZE);
+        UV.x = int((((UnitUV.y + 1.0f) / 2.0f)) * CUBE_SIZE);
         UV.z = 1;
     }
     else if (UnitUV.y >= BIAS) // Up
     {
         UV.x = int((((UnitUV.x + 1.0f) / 2.0f)) * CUBE_SIZE);
         UV.y = int((((UnitUV.z + 1.0f) / 2.0f) - 1.0f) * CUBE_SIZE);
-        UV.z = 2;
+        UV.z = 4;
     }
     else if (UnitUV.y <= -BIAS) // Down
     {
         UV.x = int((((UnitUV.x + 1.0f) / 2.0f)) * CUBE_SIZE);
-        UV.y = int((((UnitUV.z + 1.0f) / 2.0f)) * CUBE_SIZE);
-        UV.z = 3;
+        UV.y = CUBE_SIZE - int((((UnitUV.z + 1.0f) / 2.0f)) * CUBE_SIZE);
+        UV.z = 5;
     }
     else if (UnitUV.z >= BIAS) // Front
     {
         UV.x = int((((UnitUV.x + 1.0f) / 2.0f)) * CUBE_SIZE);
         UV.y = int((((UnitUV.y + 1.0f) / 2.0f)) * CUBE_SIZE);
-        UV.z = 4;
+        UV.z = 2;
     }
     else if (UnitUV.z <= -BIAS) // Back
     {
         UV.x = int((((UnitUV.x + 1.0f) / 2.0f) - 1.0f) * CUBE_SIZE);
-        UV.y = int((((UnitUV.y + 1.0f) / 2.0f)) * CUBE_SIZE);
-        UV.z = 5;
+        UV.y = CUBE_SIZE - int((((UnitUV.y + 1.0f) / 2.0f)) * CUBE_SIZE);
+        UV.z = 3;
     }
 
     // -----------------------------------------------------------------------------
