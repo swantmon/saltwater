@@ -5,6 +5,7 @@
 #include "plugin/light_estimation_stitching/le_precompiled.h"
 
 #include "engine/core/core_console.h"
+#include "engine/core/core_asset_manager.h"
 
 #include "engine/engine.h"
 
@@ -55,6 +56,8 @@ namespace LE
         m_VSPtr = Gfx::ShaderManager::CompileVS("../../plugins/light_estimation_stitching/vs.glsl", "main");
         m_GSPtr = Gfx::ShaderManager::CompileGS("../../plugins/light_estimation_stitching/gs.glsl", "main");
         m_PSPtr = Gfx::ShaderManager::CompilePS("../../plugins/light_estimation_stitching/fs.glsl", "main");
+        
+        m_C2PShaderPtr = Gfx::ShaderManager::CompileCS("../../plugins/light_estimation_stitching/cs_cube2pano.glsl", "main", "#define TILE_SIZE 1 \n #define IMAGE_TYPE rgba32f \n ");
 
         // -----------------------------------------------------------------------------
         // Input layout
@@ -66,6 +69,28 @@ namespace LE
         };
 
         Gfx::ShaderManager::CreateInputLayout(P3T2InputLayout, 2, m_VSPtr);
+
+        // -----------------------------------------------------------------------------
+        // Texture
+        // -----------------------------------------------------------------------------
+        Gfx::STextureDescriptor TextureDescriptor;
+        
+        TextureDescriptor.m_NumberOfPixelsU  = 128;
+        TextureDescriptor.m_NumberOfPixelsV  = 64;
+        TextureDescriptor.m_NumberOfPixelsW  = 1;
+        TextureDescriptor.m_NumberOfMipMaps  = 1;
+        TextureDescriptor.m_NumberOfTextures = 1;
+        TextureDescriptor.m_Binding          = Gfx::CTexture::ShaderResource;
+        TextureDescriptor.m_Access           = Gfx::CTexture::CPUWrite;
+        TextureDescriptor.m_Format           = Gfx::CTexture::R32G32B32A32_FLOAT;
+        TextureDescriptor.m_Usage            = Gfx::CTexture::GPUReadWrite;
+        TextureDescriptor.m_Semantic         = Gfx::CTexture::Diffuse;
+        TextureDescriptor.m_pFileName        = 0;
+        TextureDescriptor.m_pPixels          = 0;
+        
+        m_PanoramaTexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
+
+        Gfx::TextureManager::SetTextureLabel(m_PanoramaTexturePtr, "Panorama Texture");
 
         // -----------------------------------------------------------------------------
         // Buffer
@@ -231,6 +256,27 @@ namespace LE
 
     // -----------------------------------------------------------------------------
 
+    void CPluginInterface::CubemapToPano()
+    {
+        Gfx::ContextManager::SetShaderCS(m_C2PShaderPtr);
+
+        Gfx::ContextManager::SetImageTexture(0, static_cast<Gfx::CTexturePtr>(m_OutputCubemapPtr));
+
+        Gfx::ContextManager::SetImageTexture(1, static_cast<Gfx::CTexturePtr>(m_PanoramaTexturePtr));
+
+        Gfx::ContextManager::Dispatch(512, 512, 1);
+
+        Gfx::ContextManager::ResetImageTexture(0);
+
+        Gfx::ContextManager::ResetShaderCS();
+
+        // -----------------------------------------------------------------------------
+
+        Gfx::TextureManager::SaveTexture(m_PanoramaTexturePtr, Core::AssetManager::GetPathToFiles() + "/env_panorama.ppm");
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CPluginInterface::Gfx_OnUpdate()
     {
         if (m_IsActive == false || m_InputTexturePtr == 0 || m_OutputCubemapPtr == 0) return;
@@ -348,6 +394,17 @@ namespace LE
         Gfx::TextureManager::UpdateMipmap(m_OutputCubemapPtr);
 
         Gfx::Performance::EndEvent();
+
+
+
+
+
+
+
+
+
+
+        CubemapToPano();
     }
 } // namespace LE
 
