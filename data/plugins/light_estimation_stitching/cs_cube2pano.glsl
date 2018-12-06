@@ -53,38 +53,38 @@ void main()
 
     if (UnitUV.x >= BIAS) //Right
     {
-        UV.x = CUBE_SIZE - int((((UnitUV.y + 1.0f) / 2.0f)) * CUBE_SIZE);
-        UV.y = int((((UnitUV.z + 1.0f) / 2.0f) - 1.0f) * CUBE_SIZE);
+        UV.x = float(CUBE_SIZE) - int((((UnitUV.y + 1.0f) / 2.0f)) * float(CUBE_SIZE));
+        UV.y = int((((UnitUV.z + 1.0f) / 2.0f) - 1.0f) * float(CUBE_SIZE));
         UV.z = 0;
     }
     else if (UnitUV.x <= -BIAS) // Left
     {
-        UV.y = CUBE_SIZE - int((((UnitUV.z + 1.0f) / 2.0f)) * CUBE_SIZE);
-        UV.x = int((((UnitUV.y + 1.0f) / 2.0f)) * CUBE_SIZE);
+        UV.y = float(CUBE_SIZE) - int((((UnitUV.z + 1.0f) / 2.0f)) * float(CUBE_SIZE));
+        UV.x = int((((UnitUV.y + 1.0f) / 2.0f)) * float(CUBE_SIZE));
         UV.z = 1;
     }
     else if (UnitUV.y >= BIAS) // Up
     {
-        UV.x = int((((UnitUV.x + 1.0f) / 2.0f)) * CUBE_SIZE);
-        UV.y = int((((UnitUV.z + 1.0f) / 2.0f) - 1.0f) * CUBE_SIZE);
+        UV.x = int((((UnitUV.x + 1.0f) / 2.0f)) * float(CUBE_SIZE));
+        UV.y = int((((UnitUV.z + 1.0f) / 2.0f) - 1.0f) * float(CUBE_SIZE));
         UV.z = 4;
     }
     else if (UnitUV.y <= -BIAS) // Down
     {
-        UV.x = int((((UnitUV.x + 1.0f) / 2.0f)) * CUBE_SIZE);
-        UV.y = CUBE_SIZE - int((((UnitUV.z + 1.0f) / 2.0f)) * CUBE_SIZE);
+        UV.x = int((((UnitUV.x + 1.0f) / 2.0f)) * float(CUBE_SIZE));
+        UV.y = float(CUBE_SIZE) - int((((UnitUV.z + 1.0f) / 2.0f)) * float(CUBE_SIZE));
         UV.z = 5;
     }
     else if (UnitUV.z >= BIAS) // Front
     {
-        UV.x = int((((UnitUV.x + 1.0f) / 2.0f)) * CUBE_SIZE);
-        UV.y = int((((UnitUV.y + 1.0f) / 2.0f)) * CUBE_SIZE);
+        UV.x = int((((UnitUV.x + 1.0f) / 2.0f)) * float(CUBE_SIZE));
+        UV.y = int((((UnitUV.y + 1.0f) / 2.0f)) * float(CUBE_SIZE));
         UV.z = 2;
     }
     else if (UnitUV.z <= -BIAS) // Back
     {
-        UV.x = int((((UnitUV.x + 1.0f) / 2.0f) - 1.0f) * CUBE_SIZE);
-        UV.y = CUBE_SIZE - int((((UnitUV.y + 1.0f) / 2.0f)) * CUBE_SIZE);
+        UV.x = int((((UnitUV.x + 1.0f) / 2.0f) - 1.0f) * float(CUBE_SIZE));
+        UV.y = float(CUBE_SIZE) - int((((UnitUV.y + 1.0f) / 2.0f)) * float(CUBE_SIZE));
         UV.z = 3;
     }
 
