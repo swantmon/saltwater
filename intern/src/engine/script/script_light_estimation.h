@@ -17,6 +17,8 @@
 #include "engine/graphic/gfx_texture.h"
 #include "engine/graphic/gfx_texture_manager.h"
 
+#include "engine/network/core_network_manager.h"
+
 #include "engine/script/script_script.h"
 
 namespace Scpt
@@ -58,6 +60,8 @@ namespace Scpt
         Core::IPlugin* m_pCurrentPluginPtr = nullptr;
 
         int m_Mode;
+
+        std::shared_ptr<Net::CMessageDelegate> m_NetworkDelegate;
 
     public:
 
@@ -141,6 +145,9 @@ namespace Scpt
             // Prepare light estimation
             // -----------------------------------------------------------------------------
             SwitchLightEstimation(Stitching);
+
+            m_NetworkDelegate = std::shared_ptr<Net::CMessageDelegate>(new Net::CMessageDelegate(std::bind(&CLightEstimationScript::OnNewMessage, this, std::placeholders::_1, std::placeholders::_2)));
+            Net::CNetworkManager::GetInstance().RegisterMessageHandler(0, m_NetworkDelegate);
         }
 
         // -----------------------------------------------------------------------------
@@ -156,6 +163,19 @@ namespace Scpt
 
         void Update() override
         {
+            if (m_OutputCubemapPtr != nullptr && Net::CNetworkManager::GetInstance().IsConnected())
+            {
+                SendPanoramaTexture();
+            }
+        }
+
+        // -----------------------------------------------------------------------------
+
+        void OnNewMessage(const Net::CMessage& _rMessage, int _Port)
+        {
+            BASE_UNUSED(_Port);
+
+            float x = 0;
         }
 
         // -----------------------------------------------------------------------------
@@ -295,6 +315,29 @@ namespace Scpt
             Gfx::TextureManager::SaveTexture(m_PanoramaTexturePtr, Core::AssetManager::GetPathToFiles() + "/env_panorama.ppm");
 
             Gfx::TextureManager::SaveTexture(m_OutputCubemapPtr, Core::AssetManager::GetPathToFiles() + "/env_cubemap.ppm");
+        }
+
+        // -----------------------------------------------------------------------------
+
+        void SendPanoramaTexture()
+        {
+            Gfx::ContextManager::SetShaderCS(m_C2PShaderPtr);
+
+            Gfx::ContextManager::SetImageTexture(0, static_cast<Gfx::CTexturePtr>(m_OutputCubemapPtr));
+
+            Gfx::ContextManager::SetImageTexture(1, static_cast<Gfx::CTexturePtr>(m_PanoramaTexturePtr));
+
+            Gfx::ContextManager::Dispatch(128, 64, 1);
+
+            Gfx::ContextManager::ResetImageTexture(0);
+
+            Gfx::ContextManager::ResetShaderCS();
+
+            std::vector<char> Data(128 * 64 * 4);
+
+            Gfx::TextureManager::CopyTextureToCPU(m_PanoramaTexturePtr, Data.data());
+
+            Net::CNetworkManager::GetInstance().SendMessage(0, Data);
         }
     };
 } // namespace Scpt
