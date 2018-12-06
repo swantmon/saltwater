@@ -380,7 +380,7 @@ namespace LE
         // -----------------------------------------------------------------------------
         Gfx::TextureManager::UpdateMipmap(m_OutputCubemapPtr);
 
-        Gfx::Performance::EndEvent();
+        Gfx::Performance::EndEvent();       
     }
 } // namespace LE
 
