@@ -21,8 +21,6 @@
 #include "engine/graphic/gfx_texture_manager.h"
 #include "engine/graphic/gfx_view_manager.h"
 
-#include "engine/network/core_network_manager.h"
-
 #include "plugin/light_estimation_stitching/le_plugin_interface.h"
 
 #include <array>
@@ -147,18 +145,6 @@ namespace LE
         // Settings
         // -----------------------------------------------------------------------------
         m_IsActive = true;
-
-        m_NetworkDelegate = std::shared_ptr<Net::CMessageDelegate>(new Net::CMessageDelegate(std::bind(&CPluginInterface::OnNewMessage, this, std::placeholders::_1, std::placeholders::_2)));
-        Net::CNetworkManager::GetInstance().RegisterMessageHandler(0, m_NetworkDelegate);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CPluginInterface::OnNewMessage(const Net::CMessage& _rMessage, int _Port)
-    {
-        BASE_UNUSED(_Port);
-
-        float x = 0;
     }
 
     // -----------------------------------------------------------------------------
@@ -180,19 +166,7 @@ namespace LE
 
     void CPluginInterface::Update()
     {
-        if (m_OutputCubemapPtr != nullptr && Net::CNetworkManager::GetInstance().IsConnected())
-        {
-            Gfx::CTexturePtr FirstMipmapCubeTexture = Gfx::TextureManager::GetMipmapFromTexture2D(m_OutputCubemapPtr, 0);
 
-            const int Width = FirstMipmapCubeTexture->GetNumberOfPixelsU();
-            const int Height = FirstMipmapCubeTexture->GetNumberOfPixelsV();
-
-            std::vector<char> Data(Width * Height * 6 * 4);
-
-            Gfx::TextureManager::CopyTextureToCPU(m_OutputCubemapPtr, Data.data());
-
-            Net::CNetworkManager::GetInstance().SendMessage(0, Data);
-        }
     }
 
     // -----------------------------------------------------------------------------

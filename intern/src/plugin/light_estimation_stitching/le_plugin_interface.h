@@ -13,8 +13,6 @@
 #include "engine/graphic/gfx_target_set.h"
 #include "engine/graphic/gfx_texture.h"
 
-#include "engine/network/core_network_manager.h"
-
 namespace LE
 {
     class CPluginInterface : private Base::CUncopyable, public Core::IPlugin
@@ -31,9 +29,6 @@ namespace LE
 
         void SetOutputCubemap(Gfx::CTexturePtr _OutputCubemapPtr);
         Gfx::CTexturePtr GetOutputCubemap();
-
-        void OnNewMessage(const Net::CMessage& _rMessage, int _Port);
-
     private:
 
         struct SCubemapBuffer
@@ -65,8 +60,6 @@ namespace LE
         Gfx::CViewPortSetPtr m_ViewPortSetPtr;
 
         bool m_IsActive;
-
-        std::shared_ptr<Net::CMessageDelegate> m_NetworkDelegate;
 
     private:
 
