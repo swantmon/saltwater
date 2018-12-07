@@ -806,7 +806,7 @@ namespace
 #if PLATFORM_ANDROID
         static const int s_NumberOfChannels = 4;
 #else
-        static const int s_NumberOfChannels = 3;
+        static const int s_NumberOfChannels = 4;
 #endif
 
         // -----------------------------------------------------------------------------
@@ -839,7 +839,7 @@ namespace
 
                 glReadPixels(0, 0, pInternTexture->GetNumberOfPixelsU(), pInternTexture->GetNumberOfPixelsV(), GL_RGBA, GL_UNSIGNED_BYTE, _pBuffer + i * NumberOfBytes);
 #else
-                glGetTexImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, GL_BYTE, _pBuffer + i * NumberOfBytes);
+                glGetTexImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, GL_BYTE, _pBuffer + i * NumberOfBytes);
 #endif
             }
 
@@ -862,7 +862,7 @@ namespace
 
             glDeleteFramebuffers(1, &Framebuffer);
 #else
-            glGetTexImage(pInternTexture->m_NativeBinding, 0, GL_RGB, GL_BYTE, _pBuffer);
+            glGetTexImage(pInternTexture->m_NativeBinding, 0, GL_RGBA, GL_BYTE, _pBuffer);
 #endif
         }
     }
