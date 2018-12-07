@@ -173,9 +173,8 @@ namespace Scpt
 
         void OnNewMessage(const Net::CMessage& _rMessage, int _Port)
         {
+            BASE_UNUSED(_rMessage);
             BASE_UNUSED(_Port);
-
-            float x = 0;
         }
 
         // -----------------------------------------------------------------------------
@@ -279,8 +278,8 @@ namespace Scpt
                 Gfx::STextureDescriptor TextureDescriptor;
 
                 TextureDescriptor.m_Format           = Gfx::CTexture::R8G8B8A8_UBYTE;
-                TextureDescriptor.m_NumberOfPixelsU  = Gfx::STextureDescriptor::s_FormatFromSource;
-                TextureDescriptor.m_NumberOfPixelsV  = Gfx::STextureDescriptor::s_FormatFromSource;
+                TextureDescriptor.m_NumberOfPixelsU  = Gfx::STextureDescriptor::s_NumberOfPixelsFromSource;
+                TextureDescriptor.m_NumberOfPixelsV  = Gfx::STextureDescriptor::s_NumberOfPixelsFromSource;
                 TextureDescriptor.m_NumberOfPixelsW  = 1;
                 TextureDescriptor.m_NumberOfTextures = 1;
                 TextureDescriptor.m_NumberOfMipMaps  = Gfx::STextureDescriptor::s_GenerateAllMipMaps;

@@ -182,7 +182,7 @@
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\..\extern\sdl2\include;..\..\..\src;..\..\..\..\extern\glm\include;..\..\..\..\extern\json\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\asio\include;..\..\..\..\extern\glew\include;..\..\..\..\extern\sdl2\include;..\..\..\..\extern\glm\include;..\..\..\..\extern\json\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeaderFile>editor/edit_precompiled.h</PrecompiledHeaderFile>
       <DisableSpecificWarnings>
@@ -235,7 +235,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\..\extern\sdl2\include;..\..\..\src;..\..\..\..\extern\glm\include;..\..\..\..\extern\json\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\asio\include;..\..\..\..\extern\glew\include;..\..\..\..\extern\sdl2\include;..\..\..\..\extern\glm\include;..\..\..\..\extern\json\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeaderFile>editor/edit_precompiled.h</PrecompiledHeaderFile>
       <DisableSpecificWarnings>
