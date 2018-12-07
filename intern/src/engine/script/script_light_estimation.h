@@ -63,6 +63,11 @@ namespace Scpt
 
         std::shared_ptr<Net::CMessageDelegate> m_NetworkDelegate;
 
+
+
+        bool m_AwaitingEstimation = false;
+
+
     public:
 
         void Start() override
@@ -166,6 +171,8 @@ namespace Scpt
             if (m_OutputCubemapPtr != nullptr && Net::CNetworkManager::GetInstance().IsConnected())
             {
                 SendPanoramaTexture();
+
+                m_AwaitingEstimation = true;
             }
         }
 
@@ -173,8 +180,38 @@ namespace Scpt
 
         void OnNewMessage(const Net::CMessage& _rMessage, int _Port)
         {
-            BASE_UNUSED(_rMessage);
             BASE_UNUSED(_Port);
+
+            if (m_AwaitingEstimation == false || _rMessage.m_DecompressedSize != 24576) return;
+
+            m_AwaitingEstimation = false;
+
+            Gfx::STextureDescriptor TextureDescriptor;
+
+            TextureDescriptor.m_NumberOfPixelsU  = 128;
+            TextureDescriptor.m_NumberOfPixelsV  = 64;
+            TextureDescriptor.m_NumberOfPixelsW  = 1;
+            TextureDescriptor.m_NumberOfMipMaps  = 1;
+            TextureDescriptor.m_NumberOfTextures = 1;
+            TextureDescriptor.m_Binding          = Gfx::CTexture::ShaderResource;
+            TextureDescriptor.m_Access           = Gfx::CTexture::CPUWrite;
+            TextureDescriptor.m_Format           = Gfx::CTexture::R8G8B8_BYTE;
+            TextureDescriptor.m_Usage            = Gfx::CTexture::GPUReadWrite;
+            TextureDescriptor.m_Semantic         = Gfx::CTexture::Diffuse;
+            TextureDescriptor.m_pFileName        = 0;
+            TextureDescriptor.m_pPixels          = const_cast<char*>(&_rMessage.m_Payload[0]);
+        
+            m_PanoramaTexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
+
+            Gfx::TextureManager::SetTextureLabel(m_PanoramaTexturePtr, "Sky panorama from image");
+
+            m_pSkyComponent->SetType(Dt::CSkyComponent::Panorama);
+            m_pSkyComponent->SetTexture(m_PanoramaTexturePtr);
+            m_pSkyComponent->SetRefreshMode(Dt::CSkyComponent::Dynamic);
+            m_pSkyComponent->SetQuality(Dt::CSkyComponent::PX128);
+            m_pSkyComponent->SetIntensity(12000);
+
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*m_pSkyComponent, Dt::CSkyComponent::DirtyInfo);
         }
 
         // -----------------------------------------------------------------------------
