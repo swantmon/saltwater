@@ -63,11 +63,6 @@ namespace Scpt
 
         std::shared_ptr<Net::CMessageDelegate> m_NetworkDelegate;
 
-
-
-        bool m_AwaitingEstimation = false;
-
-
     public:
 
         void Start() override
@@ -171,8 +166,6 @@ namespace Scpt
             if (m_OutputCubemapPtr != nullptr && Net::CNetworkManager::GetInstance().IsConnected())
             {
                 SendPanoramaTexture();
-
-                m_AwaitingEstimation = true;
             }
         }
 
@@ -182,9 +175,7 @@ namespace Scpt
         {
             BASE_UNUSED(_Port);
 
-            if (m_AwaitingEstimation == false || _rMessage.m_DecompressedSize != 24576) return;
-
-            m_AwaitingEstimation = false;
+            if (_rMessage.m_DecompressedSize != 24576) return;
 
             Gfx::STextureDescriptor TextureDescriptor;
 
