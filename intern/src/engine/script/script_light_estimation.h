@@ -277,7 +277,7 @@ namespace Scpt
             {
                 Gfx::STextureDescriptor TextureDescriptor;
 
-                TextureDescriptor.m_Format           = Gfx::CTexture::R8G8B8A8_UBYTE;
+                TextureDescriptor.m_Format           = Gfx::STextureDescriptor::s_FormatFromSource;
                 TextureDescriptor.m_NumberOfPixelsU  = Gfx::STextureDescriptor::s_NumberOfPixelsFromSource;
                 TextureDescriptor.m_NumberOfPixelsV  = Gfx::STextureDescriptor::s_NumberOfPixelsFromSource;
                 TextureDescriptor.m_NumberOfPixelsW  = 1;
@@ -286,6 +286,7 @@ namespace Scpt
                 TextureDescriptor.m_Usage            = Gfx::CTexture::GPURead;
                 TextureDescriptor.m_Access           = Gfx::CTexture::CPUWrite;
                 TextureDescriptor.m_Semantic         = Gfx::CTexture::Diffuse;
+                TextureDescriptor.m_Binding          = Gfx::CTexture::ShaderResource;
                 TextureDescriptor.m_pFileName        = "environments/Lobby-Center_2k.hdr";
                 TextureDescriptor.m_pPixels          = 0;
 
