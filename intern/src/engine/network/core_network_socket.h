@@ -83,6 +83,8 @@ namespace Net
         std::deque<OutgoingMessage> m_OutgoingMessages;
         std::atomic<bool> m_IsSending;
 
+        std::atomic<bool> m_IsConnectionLost;
+
         // shared_ptr cannot access the destructor so we use a custom deleter
         friend void SocketDeleter(Net::CServerSocket* _pSocket)
         {

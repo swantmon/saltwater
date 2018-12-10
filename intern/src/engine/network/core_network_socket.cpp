@@ -4,6 +4,8 @@
 #include "base/base_exception.h"
 
 #include "engine/core/core_console.h"
+
+#include "engine/core/core_console.h"
 #include "engine/network/core_network_manager.h"
 #include "engine/network/core_network_socket.h"
 
@@ -15,6 +17,12 @@ namespace Net
 {
     void CServerSocket::Update()
     {
+        if (m_IsConnectionLost)
+        {
+            AsyncReconnect();
+            m_IsConnectionLost = false;
+        }
+
         m_Mutex.lock();
 
         while (!m_MessageQueue.empty())
@@ -134,6 +142,8 @@ namespace Net
     {
         BASE_UNUSED(_TransferredBytes);
 
+        ENGINE_CONSOLE_INFOV("ReceiveHeader  %i", _TransferredBytes);
+
         if (!_rError)
         {
             assert(_TransferredBytes == m_Header.size());
@@ -154,7 +164,7 @@ namespace Net
         }
         else
         {
-            AsyncReconnect();
+            m_IsConnectionLost = true;
         }
     }
 
@@ -163,6 +173,8 @@ namespace Net
     void CServerSocket::ReceivePayload(const std::error_code& _rError, size_t _TransferredBytes)
     {
         BASE_UNUSED(_TransferredBytes);
+
+        ENGINE_CONSOLE_INFOV("ReceivePayload  %i", _TransferredBytes);
 
         m_PendingMessage.m_Payload = std::move(m_Payload);
 
@@ -178,7 +190,7 @@ namespace Net
         }
         else
         {
-            AsyncReconnect();
+            m_IsConnectionLost = true;
         }
     }
 
@@ -198,12 +210,16 @@ namespace Net
     {
         auto Callback = std::bind(&CServerSocket::ReceiveHeader, this, std::placeholders::_1, std::placeholders::_2);
         asio::async_read(*m_pSocket, asio::buffer(m_Header), asio::transfer_exactly(s_HeaderSize), Callback);
+
+        ENGINE_CONSOLE_INFO("StartListening");
     }
 
     // -----------------------------------------------------------------------------
 
     void CServerSocket::AsyncReconnect()
     {
+        m_OutgoingMessages.clear();
+
         // Notify listener that the connection was lost
         CMessage Message;
         Message.m_Category = 0;
@@ -219,6 +235,7 @@ namespace Net
 
         // Try to reconnect
         m_IsOpen = false;
+        m_IsSending = false;
         m_pSocket->close();
         ENGINE_CONSOLE_INFOV("Connection lost on port %i", m_Port);
         m_pAcceptor->async_accept(*m_pSocket, *m_pEndpoint, std::bind(&CServerSocket::OnAccept, this, std::placeholders::_1));
@@ -237,6 +254,7 @@ namespace Net
         : m_Port(_Port)
         , m_IsOpen(false)
         , m_IsSending(false)
+        , m_IsConnectionLost(false)
     {
         auto& IOService = CNetworkManager::GetInstance().GetIOService();
 
