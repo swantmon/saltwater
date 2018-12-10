@@ -322,6 +322,27 @@ namespace Scpt
 
         void SendPanoramaTexture()
         {
+            Gfx::STextureDescriptor TextureDescriptor;
+
+            TextureDescriptor.m_NumberOfPixelsU  = 128;
+            TextureDescriptor.m_NumberOfPixelsV  = 64;
+            TextureDescriptor.m_NumberOfPixelsW  = 1;
+            TextureDescriptor.m_NumberOfMipMaps  = 1;
+            TextureDescriptor.m_NumberOfTextures = 1;
+            TextureDescriptor.m_Binding          = Gfx::CTexture::ShaderResource;
+            TextureDescriptor.m_Access           = Gfx::CTexture::CPUWrite;
+            TextureDescriptor.m_Format           = Gfx::CTexture::R8G8B8A8_BYTE;
+            TextureDescriptor.m_Usage            = Gfx::CTexture::GPUReadWrite;
+            TextureDescriptor.m_Semantic         = Gfx::CTexture::Diffuse;
+            TextureDescriptor.m_pFileName        = 0;
+            TextureDescriptor.m_pPixels          = 0;
+        
+            m_PanoramaTexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
+
+            Gfx::TextureManager::SetTextureLabel(m_PanoramaTexturePtr, "Sky panorama from image");
+
+            // -----------------------------------------------------------------------------
+
             Gfx::ContextManager::SetShaderCS(m_C2PShaderPtr);
 
             Gfx::ContextManager::SetImageTexture(0, static_cast<Gfx::CTexturePtr>(m_OutputCubemapPtr));
