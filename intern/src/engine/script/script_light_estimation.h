@@ -91,55 +91,7 @@ namespace Scpt
             // -----------------------------------------------------------------------------
             // Output cube map texture
             // -----------------------------------------------------------------------------
-            Gfx::STextureDescriptor TextureDescriptor;
-
-            TextureDescriptor.m_NumberOfPixelsU  = 512;
-            TextureDescriptor.m_NumberOfPixelsV  = 512;
-            TextureDescriptor.m_NumberOfPixelsW  = 1;
-            TextureDescriptor.m_NumberOfMipMaps  = Gfx::STextureDescriptor::s_GenerateAllMipMaps;
-            TextureDescriptor.m_NumberOfTextures = 6;
-            TextureDescriptor.m_Binding          = Gfx::CTexture::ShaderResource | Gfx::CTexture::RenderTarget;
-            TextureDescriptor.m_Access           = Gfx::CTexture::CPUWrite;
-            TextureDescriptor.m_Format           = Gfx::CTexture::Unknown;
-            TextureDescriptor.m_Usage            = Gfx::CTexture::GPURead;
-            TextureDescriptor.m_Semantic         = Gfx::CTexture::Diffuse;
-            TextureDescriptor.m_pFileName        = 0;
-            TextureDescriptor.m_pPixels          = 0;
-            TextureDescriptor.m_Format           = Gfx::CTexture::R8G8B8A8_BYTE;
-
-            m_OutputCubemapPtr = Gfx::TextureManager::CreateCubeTexture(TextureDescriptor);
-
-            Gfx::TextureManager::SetTextureLabel(m_OutputCubemapPtr, "Sky cubemap from image");
-
-            // -----------------------------------------------------------------------------
-        
-            TextureDescriptor.m_NumberOfPixelsU  = 128;
-            TextureDescriptor.m_NumberOfPixelsV  = 64;
-            TextureDescriptor.m_NumberOfPixelsW  = 1;
-            TextureDescriptor.m_NumberOfMipMaps  = 1;
-            TextureDescriptor.m_NumberOfTextures = 1;
-            TextureDescriptor.m_Binding          = Gfx::CTexture::ShaderResource;
-            TextureDescriptor.m_Access           = Gfx::CTexture::CPUWrite;
-            TextureDescriptor.m_Format           = Gfx::CTexture::R8G8B8A8_BYTE;
-            TextureDescriptor.m_Usage            = Gfx::CTexture::GPUReadWrite;
-            TextureDescriptor.m_Semantic         = Gfx::CTexture::Diffuse;
-            TextureDescriptor.m_pFileName        = 0;
-            TextureDescriptor.m_pPixels          = 0;
-        
-            m_PanoramaTexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
-
-            Gfx::TextureManager::SetTextureLabel(m_PanoramaTexturePtr, "Sky panorama from image");
-
-            // -----------------------------------------------------------------------------
-            // Setup sky
-            // -----------------------------------------------------------------------------
-            m_pSkyComponent->SetType(Dt::CSkyComponent::Cubemap);
-            m_pSkyComponent->SetTexture(m_OutputCubemapPtr);
-            m_pSkyComponent->SetRefreshMode(Dt::CSkyComponent::Dynamic);
-            m_pSkyComponent->SetQuality(Dt::CSkyComponent::PX128);
-            m_pSkyComponent->SetIntensity(12000);
-
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*m_pSkyComponent, Dt::CSkyComponent::DirtyInfo);
+            ResetTextures();
 
             // -----------------------------------------------------------------------------
             // Prepare light estimation
@@ -163,10 +115,6 @@ namespace Scpt
 
         void Update() override
         {
-            if (m_OutputCubemapPtr != nullptr && Net::CNetworkManager::GetInstance().IsConnected())
-            {
-                SendPanoramaTexture();
-            }
         }
 
         // -----------------------------------------------------------------------------
@@ -209,46 +157,71 @@ namespace Scpt
 
         void OnInput(const Base::CInputEvent& _rEvent) override
         {
-            // -----------------------------------------------------------------------------
-            // Switch mode
-            // -----------------------------------------------------------------------------
             if (_rEvent.GetAction() == Base::CInputEvent::TouchReleased)
             {
+                ENGINE_CONSOLE_INFO("Touched (NE = switch estimation; SE = save cubemap; NW = send panorama; SW = reset");
+
                 float x = _rEvent.GetGlobalCursorPosition()[0];
                 float y = _rEvent.GetGlobalCursorPosition()[1];
 
                 if (x < 200.0f && y < 200.0f)
                 {
+                    ENGINE_CONSOLE_INFO("Switch light estimation");
+
                     m_Mode = (m_Mode + 1) % NumberOfEstimationTypes;
 
                     SwitchLightEstimation((EEstimationType)m_Mode);
                 }
-            }
 
-            if (_rEvent.GetAction() == Base::CInputEvent::KeyReleased && _rEvent.GetKey() == Base::CInputEvent::Key0)
-            {
-                m_Mode = (m_Mode + 1) % NumberOfEstimationTypes;
+                if (x < 200.0f && y > Gfx::Main::GetActiveNativeWindowSize()[1] - 200.0f)
+                {
+                    ENGINE_CONSOLE_INFO("Save cubemap");
 
-                SwitchLightEstimation((EEstimationType)m_Mode);
-            }
+                    SaveCubemap();
+                }
 
-            // -----------------------------------------------------------------------------
-            // Save textures
-            // -----------------------------------------------------------------------------
-            if (_rEvent.GetAction() == Base::CInputEvent::TouchReleased)
-            {
-                float x = _rEvent.GetGlobalCursorPosition()[0];
-                float y = _rEvent.GetGlobalCursorPosition()[1];
+                if (x > Gfx::Main::GetActiveNativeWindowSize()[0] - 200.0f && y < 200.0f)
+                {
+                    if (m_OutputCubemapPtr != nullptr && Net::CNetworkManager::GetInstance().IsConnected())
+                    {
+                        ENGINE_CONSOLE_INFO("Send panorama via network");
+
+                        SendPanoramaTexture();
+                    }
+                }
 
                 if (x > Gfx::Main::GetActiveNativeWindowSize()[0] - 200.0f && y > Gfx::Main::GetActiveNativeWindowSize()[1] - 200.0f)
                 {
-                    SaveCubemap();
+                    ENGINE_CONSOLE_INFO("Reset panorama texture");
+
+                    ResetTextures();
                 }
             }
 
-            if (_rEvent.GetAction() == Base::CInputEvent::KeyReleased && _rEvent.GetKey() == Base::CInputEvent::Key1)
+            // -----------------------------------------------------------------------------
+
+            if (_rEvent.GetAction() == Base::CInputEvent::KeyReleased)
             {
-                SaveCubemap();
+                switch (_rEvent.GetKey())
+                {
+                case Base::CInputEvent::Key0:
+                    m_Mode = (m_Mode + 1) % NumberOfEstimationTypes;
+
+                    SwitchLightEstimation((EEstimationType)m_Mode);
+                    break;
+                case Base::CInputEvent::Key1:
+                    SaveCubemap();
+                    break;
+                case Base::CInputEvent::Key2:
+                    if (m_OutputCubemapPtr != nullptr && Net::CNetworkManager::GetInstance().IsConnected())
+                    {
+                        SendPanoramaTexture();
+                    }
+                    break;
+                case Base::CInputEvent::Key3:
+                    ResetTextures();
+                    break;
+                };
             }
         }
 
@@ -366,6 +339,65 @@ namespace Scpt
             Gfx::TextureManager::CopyTextureToCPU(m_PanoramaTexturePtr, Data.data());
 
             Net::CNetworkManager::GetInstance().SendMessage(0, Data);
+        }
+
+        // -----------------------------------------------------------------------------
+
+        void ResetTextures()
+        {
+            Gfx::STextureDescriptor TextureDescriptor;
+
+            TextureDescriptor.m_NumberOfPixelsU  = 128;
+            TextureDescriptor.m_NumberOfPixelsV  = 64;
+            TextureDescriptor.m_NumberOfPixelsW  = 1;
+            TextureDescriptor.m_NumberOfMipMaps  = 1;
+            TextureDescriptor.m_NumberOfTextures = 1;
+            TextureDescriptor.m_Binding          = Gfx::CTexture::ShaderResource;
+            TextureDescriptor.m_Access           = Gfx::CTexture::CPUWrite;
+            TextureDescriptor.m_Format           = Gfx::CTexture::R8G8B8A8_BYTE;
+            TextureDescriptor.m_Usage            = Gfx::CTexture::GPUReadWrite;
+            TextureDescriptor.m_Semantic         = Gfx::CTexture::Diffuse;
+            TextureDescriptor.m_pFileName        = 0;
+            TextureDescriptor.m_pPixels          = 0;
+        
+            m_PanoramaTexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
+
+            Gfx::TextureManager::SetTextureLabel(m_PanoramaTexturePtr, "Sky panorama from image");
+
+            // -----------------------------------------------------------------------------
+
+            TextureDescriptor.m_NumberOfPixelsU  = 512;
+            TextureDescriptor.m_NumberOfPixelsV  = 512;
+            TextureDescriptor.m_NumberOfPixelsW  = 1;
+            TextureDescriptor.m_NumberOfMipMaps  = Gfx::STextureDescriptor::s_GenerateAllMipMaps;
+            TextureDescriptor.m_NumberOfTextures = 6;
+            TextureDescriptor.m_Binding          = Gfx::CTexture::ShaderResource | Gfx::CTexture::RenderTarget;
+            TextureDescriptor.m_Access           = Gfx::CTexture::CPUWrite;
+            TextureDescriptor.m_Format           = Gfx::CTexture::Unknown;
+            TextureDescriptor.m_Usage            = Gfx::CTexture::GPURead;
+            TextureDescriptor.m_Semantic         = Gfx::CTexture::Diffuse;
+            TextureDescriptor.m_pFileName        = 0;
+            TextureDescriptor.m_pPixels          = 0;
+            TextureDescriptor.m_Format           = Gfx::CTexture::R8G8B8A8_BYTE;
+
+            m_OutputCubemapPtr = Gfx::TextureManager::CreateCubeTexture(TextureDescriptor);
+
+            Gfx::TextureManager::SetTextureLabel(m_OutputCubemapPtr, "Sky cubemap from image");
+
+            // -----------------------------------------------------------------------------
+            // Setup sky
+            // -----------------------------------------------------------------------------
+            m_pSkyComponent->SetType(Dt::CSkyComponent::Cubemap);
+            m_pSkyComponent->SetTexture(m_OutputCubemapPtr);
+            m_pSkyComponent->SetRefreshMode(Dt::CSkyComponent::Dynamic);
+            m_pSkyComponent->SetQuality(Dt::CSkyComponent::PX128);
+            m_pSkyComponent->SetIntensity(12000);
+
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*m_pSkyComponent, Dt::CSkyComponent::DirtyInfo);
+
+            // -----------------------------------------------------------------------------
+
+            SwitchLightEstimation((EEstimationType)m_Mode);
         }
     };
 } // namespace Scpt
