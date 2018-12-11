@@ -37,7 +37,9 @@ namespace Net
 
         friend class CNetworkManager;
 
-        void OnAccept(const std::system_error& _rError);
+        void Connect();
+
+        void OnConnect(const std::system_error& _rError);
         void OnSendComplete(std::shared_ptr<std::vector<char>> _Data);
 
         int m_Port;
@@ -82,6 +84,8 @@ namespace Net
 
         std::deque<OutgoingMessage> m_OutgoingMessages;
         std::atomic<bool> m_IsSending;
+
+        std::atomic<bool> m_IsConnectionLost;
 
         // shared_ptr cannot access the destructor so we use a custom deleter
         friend void SocketDeleter(Net::CServerSocket* _pSocket)

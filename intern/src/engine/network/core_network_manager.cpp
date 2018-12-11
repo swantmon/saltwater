@@ -11,7 +11,9 @@ namespace Net
 {
     void CNetworkManager::OnStart()
     {
+        m_IsServer = Core::CProgramParameters::GetInstance().Get("network:is_server", true);
         m_DefaultPort = Core::CProgramParameters::GetInstance().Get("network:default_port", 12345);
+        m_ServerIP = Core::CProgramParameters::GetInstance().Get("network:server_ip", "127.0.0.1");
         m_IsRunning = true;
         m_WorkerThread = std::thread(std::bind(&CNetworkManager::Run, this));
     }
@@ -57,7 +59,7 @@ namespace Net
             _Port = m_DefaultPort;
         }
 
-        if (m_Sockets.count(_Port) == 0)
+        if (m_Sockets.count(_Port) != 0)
         {
             if (m_Sockets.at(_Port)->IsOpen())
             {
@@ -111,10 +113,16 @@ namespace Net
 
     // -----------------------------------------------------------------------------
 
-    CNetworkManager& CNetworkManager::GetInstance()
+    bool CNetworkManager::IsServer() const
     {
-        static CNetworkManager s_Instance;
-        return s_Instance;
+        return m_IsServer;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const std::string& CNetworkManager::GetServerIP() const
+    {
+        return m_ServerIP;
     }
 
     // -----------------------------------------------------------------------------
@@ -129,5 +137,13 @@ namespace Net
     CNetworkManager::~CNetworkManager()
     {
 
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CNetworkManager& CNetworkManager::GetInstance()
+    {
+        static CNetworkManager s_Instance;
+        return s_Instance;
     }
 } // namespace Net

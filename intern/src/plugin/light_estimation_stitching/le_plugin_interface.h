@@ -29,7 +29,6 @@ namespace LE
 
         void SetOutputCubemap(Gfx::CTexturePtr _OutputCubemapPtr);
         Gfx::CTexturePtr GetOutputCubemap();
-
     private:
 
         struct SCubemapBuffer
