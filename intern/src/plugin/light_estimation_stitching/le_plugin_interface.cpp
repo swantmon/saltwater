@@ -5,6 +5,7 @@
 #include "plugin/light_estimation_stitching/le_precompiled.h"
 
 #include "engine/core/core_console.h"
+#include "engine/core/core_time.h"
 
 #include "engine/engine.h"
 
@@ -165,7 +166,7 @@ namespace LE
 
     void CPluginInterface::Update()
     {
-        
+
     }
 
     // -----------------------------------------------------------------------------
@@ -193,7 +194,10 @@ namespace LE
 
     void CPluginInterface::SetOutputCubemap(Gfx::CTexturePtr _OutputCubemapPtr)
     {
-        if (_OutputCubemapPtr == nullptr) return;
+        if (_OutputCubemapPtr == nullptr)
+        {
+            return;
+        }
 
         m_OutputCubemapPtr = _OutputCubemapPtr;
 
@@ -233,7 +237,10 @@ namespace LE
 
     void CPluginInterface::Gfx_OnUpdate()
     {
-        if (m_IsActive == false || m_InputTexturePtr == 0 || m_OutputCubemapPtr == 0) return;
+        if (m_IsActive == false || m_InputTexturePtr == 0 || m_OutputCubemapPtr == 0)
+        {
+            return;
+        }
 
         Gfx::Performance::BeginEvent("Light estimation from far plane");
 
@@ -347,7 +354,7 @@ namespace LE
         // -----------------------------------------------------------------------------
         Gfx::TextureManager::UpdateMipmap(m_OutputCubemapPtr);
 
-        Gfx::Performance::EndEvent();
+        Gfx::Performance::EndEvent();       
     }
 } // namespace LE
 

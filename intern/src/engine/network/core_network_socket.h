@@ -8,6 +8,7 @@
 #include "engine/network/core_network_common.h"
 #include "engine/network/core_network_manager.h"
 
+#include <atomic>
 #include <map>
 #include <memory>
 #include <mutex>
@@ -36,7 +37,9 @@ namespace Net
 
         friend class CNetworkManager;
 
-        void OnAccept(const std::system_error& _rError);
+        void Connect();
+
+        void OnConnect(const std::system_error& _rError);
         void OnSendComplete(std::shared_ptr<std::vector<char>> _Data);
 
         int m_Port;
@@ -61,6 +64,28 @@ namespace Net
     private:
 
         int s_HeaderSize = 12;
+
+        struct OutgoingMessage
+        {
+            OutgoingMessage(int _MessageCategory, std::vector<char> _Payload, int _MessageLength)
+                : m_MessageCategory(_MessageCategory)
+                , m_PayLoad(_Payload)
+                , m_MessageLength(_MessageLength)
+            {
+
+            }
+
+            int m_MessageCategory;
+            std::vector<char> m_PayLoad;
+            int m_MessageLength;
+        };
+
+        void InternalSendMessage();
+
+        std::deque<OutgoingMessage> m_OutgoingMessages;
+        std::atomic<bool> m_IsSending;
+
+        std::atomic<bool> m_IsConnectionLost;
 
         // shared_ptr cannot access the destructor so we use a custom deleter
         friend void SocketDeleter(Net::CServerSocket* _pSocket)

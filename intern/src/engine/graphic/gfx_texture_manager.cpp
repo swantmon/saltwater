@@ -72,6 +72,7 @@ namespace
         void UpdateMipmap(CTexturePtr _TexturePtr);
 
         void SaveTexture(CTexturePtr _TexturePtr, const std::string& _rPathToFile);
+        void CopyTextureToCPU(CTexturePtr _TexturePtr, char* _pBuffer);
 
         void SetTextureLabel(CTexturePtr _TexturePtr, const char* _pLabel);
 
@@ -777,6 +778,93 @@ namespace
         // Release memory
         // -----------------------------------------------------------------------------
         Base::CMemory::Free(pBytes);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxTextureManager::CopyTextureToCPU(CTexturePtr _TexturePtr, char* _pBuffer)
+    {
+        // -----------------------------------------------------------------------------
+        // Get data
+        // -----------------------------------------------------------------------------
+        assert(_TexturePtr != 0);
+
+        CInternTexture* pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
+
+        assert(pInternTexture);
+
+        // -----------------------------------------------------------------------------
+        // Handle error cases
+        // -----------------------------------------------------------------------------
+        if (pInternTexture->GetNumberOfPixelsW() > 1)
+        {
+            ENGINE_CONSOLE_WARNING("Saving 3D textures is not suported. Saving aborted!");
+
+            return;
+        }
+
+#if PLATFORM_ANDROID
+        static const int s_NumberOfChannels = 4;
+#else
+        static const int s_NumberOfChannels = 4;
+#endif
+
+        // -----------------------------------------------------------------------------
+        // Allocate memory
+        // -----------------------------------------------------------------------------
+        const int NumberOfPixels = pInternTexture->GetNumberOfPixelsU() * pInternTexture->GetNumberOfPixelsV();
+        const int NumberOfBytes = NumberOfPixels * s_NumberOfChannels * sizeof(char);
+
+        // -----------------------------------------------------------------------------
+        // Get data from GPU
+        // -----------------------------------------------------------------------------
+        glBindTexture(pInternTexture->m_NativeBinding, pInternTexture->m_NativeTexture);
+
+        if (pInternTexture->IsCube())
+        {
+#if PLATFORM_ANDROID
+            GLuint Framebuffer;
+
+            glGenFramebuffers(1, &Framebuffer);
+
+            glBindFramebuffer(GL_FRAMEBUFFER, Framebuffer);
+#endif
+
+            for (int i = 0; i < 6; ++ i)
+            {
+#if PLATFORM_ANDROID
+                glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, pInternTexture->m_NativeTexture, 0);
+
+                GLenum Status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+
+                glReadPixels(0, 0, pInternTexture->GetNumberOfPixelsU(), pInternTexture->GetNumberOfPixelsV(), GL_RGBA, GL_UNSIGNED_BYTE, _pBuffer + i * NumberOfBytes);
+#else
+                glGetTexImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, GL_BYTE, _pBuffer + i * NumberOfBytes);
+#endif
+            }
+
+#if PLATFORM_ANDROID
+            glDeleteFramebuffers(1, &Framebuffer);
+#endif
+        }
+        else
+        {
+#if PLATFORM_ANDROID
+            GLuint Framebuffer;
+
+            glGenFramebuffers(1, &Framebuffer);
+
+            glBindFramebuffer(GL_FRAMEBUFFER, Framebuffer);
+
+            glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, pInternTexture->m_NativeTexture, 0);
+
+            glReadPixels(0, 0, pInternTexture->GetNumberOfPixelsU(), pInternTexture->GetNumberOfPixelsV(), GL_RGBA, GL_UNSIGNED_BYTE, _pBuffer);
+
+            glDeleteFramebuffers(1, &Framebuffer);
+#else
+            glGetTexImage(pInternTexture->m_NativeBinding, 0, GL_RGBA, GL_BYTE, _pBuffer);
+#endif
+        }
     }
 
     // -----------------------------------------------------------------------------
@@ -2495,6 +2583,13 @@ namespace TextureManager
     void SaveTexture(CTexturePtr _TexturePtr, const std::string& _rPathToFile)
     {
         CGfxTextureManager::GetInstance().SaveTexture(_TexturePtr, _rPathToFile);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CopyTextureToCPU(CTexturePtr _TexturePtr, char* _pBuffer)
+    {
+        CGfxTextureManager::GetInstance().CopyTextureToCPU(_TexturePtr, _pBuffer);
     }
 
     // -----------------------------------------------------------------------------

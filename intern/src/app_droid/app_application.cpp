@@ -249,7 +249,7 @@ namespace
                     Engine::Update();
                 }
 
-                ENGINE_CONSOLE_INFOV("FPS: %f", 1.0f / Core::Time::GetDeltaTimeLastFrame());
+                //ENGINE_CONSOLE_INFOV("FPS: %f", 1.0f / Core::Time::GetDeltaTimeLastFrame());
 
                 // -----------------------------------------------------------------------------
                 // Check state

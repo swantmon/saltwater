@@ -88,6 +88,7 @@ target_link_libraries( plugin_arcore base engine )
 # Plugin Light Estimation LUT
 # ---------------------------------------
 include_directories( ${IncludeDir} )
+include_directories( ${ExternDir}/asio/include )
 
 link_directories ( ${ExternDir}/assimp/lib/${ANDROID_ABI} )
 link_directories ( ${ExternDir}/devil/lib/${ANDROID_ABI} )

@@ -34,6 +34,9 @@ namespace Net
         void RegisterMessageHandler(int _MessageCategory, const std::shared_ptr<CMessageDelegate>& _rDelegate, int _Port = 0);
         bool SendMessage(int _MessageCategory, const std::vector<char>& _rData, int _Length = 0, int _Port = 0);
 
+        bool IsServer() const;
+        const std::string& GetServerIP() const;
+
     private:
 
         void Run();
@@ -69,5 +72,7 @@ namespace Net
         asio::io_service m_IOService;
 
         int m_DefaultPort;
+        std::string m_ServerIP;
+        bool m_IsServer;
     };
 } // namespace Net
