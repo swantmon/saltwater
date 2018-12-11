@@ -3,7 +3,7 @@
 
 #include "base/base_exception.h"
 
-//#include "engine/core/core_console.h"
+#include "engine/core/core_console.h"
 
 #include "engine/network/core_network_manager.h"
 #include "engine/network/core_network_socket.h"
@@ -140,9 +140,7 @@ namespace Net
     void CServerSocket::ReceiveHeader(const std::error_code& _rError, size_t _TransferredBytes)
     {
         BASE_UNUSED(_TransferredBytes);
-
-        ENGINE_CONSOLE_INFOV("ReceiveHeader  %i", _TransferredBytes);
-
+        
         if (!_rError)
         {
             assert(_TransferredBytes == m_Header.size());
@@ -214,8 +212,6 @@ namespace Net
     {
         auto Callback = std::bind(&CServerSocket::ReceiveHeader, this, std::placeholders::_1, std::placeholders::_2);
         asio::async_read(*m_pSocket, asio::buffer(m_Header), asio::transfer_exactly(s_HeaderSize), Callback);
-
-        ENGINE_CONSOLE_INFO("StartListening");
     }
 
     // -----------------------------------------------------------------------------
