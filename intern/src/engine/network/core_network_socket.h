@@ -37,7 +37,9 @@ namespace Net
 
         friend class CNetworkManager;
 
-        void OnAccept(const std::system_error& _rError);
+        void Connect();
+
+        void OnConnect(const std::system_error& _rError);
         void OnSendComplete(std::shared_ptr<std::vector<char>> _Data);
 
         int m_Port;

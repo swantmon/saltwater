@@ -196,14 +196,14 @@ namespace Net
 
     // -----------------------------------------------------------------------------
 
-    void CServerSocket::OnAccept(const std::system_error& _rError)
+    void CServerSocket::OnConnect(const std::system_error& _rError)
     {
         m_IsOpen = true;
         BASE_UNUSED(_rError);                
         ENGINE_CONSOLE_INFOV("Connected on port %i", m_Port);
         StartListening();
     }
-
+    
     // -----------------------------------------------------------------------------
 
     void CServerSocket::StartListening()
@@ -212,6 +212,45 @@ namespace Net
         asio::async_read(*m_pSocket, asio::buffer(m_Header), asio::transfer_exactly(s_HeaderSize), Callback);
 
         ENGINE_CONSOLE_INFO("StartListening");
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CServerSocket::Connect()
+    {
+        auto& IOService = CNetworkManager::GetInstance().GetIOService();
+        bool IsServer = CNetworkManager::GetInstance().IsServer();
+
+        try
+        {
+            if (IsServer)
+            {
+                m_pEndpoint.reset(new asio::ip::tcp::endpoint(asio::ip::tcp::v4(), static_cast<unsigned short>(m_Port)));
+                m_pAcceptor.reset(new asio::ip::tcp::acceptor(IOService, *m_pEndpoint));
+                m_pSocket.reset(new asio::ip::tcp::socket(IOService));
+
+                m_Header.resize(s_HeaderSize);
+
+                m_pAcceptor->async_accept(*m_pSocket, *m_pEndpoint, std::bind(&CServerSocket::OnConnect, this, std::placeholders::_1));
+            }
+            else
+            {
+                std::string IP = CNetworkManager::GetInstance().GetServerIP();
+
+                asio::ip::address address = asio::ip::address::from_string(IP);
+
+                m_pEndpoint.reset(new asio::ip::tcp::endpoint(address, static_cast<unsigned short>(m_Port)));
+                m_pSocket.reset(new asio::ip::tcp::socket(IOService));
+
+                m_Header.resize(s_HeaderSize);
+
+                m_pSocket->async_connect(*m_pEndpoint, std::bind(&CServerSocket::OnConnect, this, std::placeholders::_1));
+            }
+        }
+        catch (const std::exception& e)
+        {
+            throw Base::CException(__FILE__, __LINE__, e.what());
+        }
     }
 
     // -----------------------------------------------------------------------------
@@ -238,7 +277,8 @@ namespace Net
         m_IsSending = false;
         m_pSocket->close();
         ENGINE_CONSOLE_INFOV("Connection lost on port %i", m_Port);
-        m_pAcceptor->async_accept(*m_pSocket, *m_pEndpoint, std::bind(&CServerSocket::OnAccept, this, std::placeholders::_1));
+
+        Connect();
     }
 
     // -----------------------------------------------------------------------------
@@ -256,22 +296,7 @@ namespace Net
         , m_IsSending(false)
         , m_IsConnectionLost(false)
     {
-        auto& IOService = CNetworkManager::GetInstance().GetIOService();
-
-        try
-        {
-            m_pEndpoint.reset(new asio::ip::tcp::endpoint(asio::ip::tcp::v4(), static_cast<unsigned short>(_Port)));
-            m_pAcceptor.reset(new asio::ip::tcp::acceptor(IOService, *m_pEndpoint));
-            m_pSocket.reset(new asio::ip::tcp::socket(IOService));
-
-            m_Header.resize(s_HeaderSize);
-
-            m_pAcceptor->async_accept(*m_pSocket, *m_pEndpoint, std::bind(&CServerSocket::OnAccept, this, std::placeholders::_1));
-        }
-        catch (const std::exception& e)
-        {
-            throw Base::CException(__FILE__, __LINE__, e.what());
-        }
+        Connect();
     }
 
     // -----------------------------------------------------------------------------
