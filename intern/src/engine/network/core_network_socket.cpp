@@ -198,10 +198,17 @@ namespace Net
 
     void CServerSocket::OnConnect(const std::system_error& _rError)
     {
-        m_IsOpen = true;
-        BASE_UNUSED(_rError);                
-        ENGINE_CONSOLE_INFOV("Connected on port %i", m_Port);
-        StartListening();
+        if (!_rError.code())
+        {
+            m_IsOpen = true;
+            ENGINE_CONSOLE_INFOV("Connected on port %i", m_Port);
+            StartListening();
+        }
+        else
+        {
+            ENGINE_CONSOLE_INFO(_rError.what());
+            Connect();
+        }
     }
     
     // -----------------------------------------------------------------------------
