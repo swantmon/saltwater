@@ -3,9 +3,8 @@
 
 #include "base/base_exception.h"
 
-#include "engine/core/core_console.h"
+//#include "engine/core/core_console.h"
 
-#include "engine/core/core_console.h"
 #include "engine/network/core_network_manager.h"
 #include "engine/network/core_network_socket.h"
 
@@ -173,9 +172,7 @@ namespace Net
     void CServerSocket::ReceivePayload(const std::error_code& _rError, size_t _TransferredBytes)
     {
         BASE_UNUSED(_TransferredBytes);
-
-        ENGINE_CONSOLE_INFOV("ReceivePayload  %i", _TransferredBytes);
-
+        
         m_PendingMessage.m_Payload = std::move(m_Payload);
 
         m_Mutex.lock();
