@@ -41,6 +41,12 @@ namespace Scpt
 
     private:
 
+        static const unsigned int s_PanoramaWidth  = 256;
+        static const unsigned int s_PanoramaHeight = 128;
+        static const unsigned int s_CubemapSize    = 512;
+
+    private:
+
         typedef void(*LESetInputTextureFunc)(Gfx::CTexturePtr);
         typedef void(*LESetOutputCubemapFunc)(Gfx::CTexturePtr);
         typedef Gfx::CTexturePtr(*LEGetOutputCubemapFunc)();
@@ -51,6 +57,7 @@ namespace Scpt
         LEGetOutputCubemapFunc GetOutputCubemap;
 
         Gfx::CShaderPtr m_C2PShaderPtr;
+        Gfx::CShaderPtr m_FusePanoramaShaderPtr;
 
         Gfx::CTexturePtr m_OutputCubemapPtr;
         Gfx::CTexturePtr m_PanoramaTexturePtr;
@@ -82,11 +89,20 @@ namespace Scpt
             // -----------------------------------------------------------------------------
             // Shader
             // -----------------------------------------------------------------------------
-            m_C2PShaderPtr = Gfx::ShaderManager::CompileCS("helper/cs_cube2pano.glsl", "main", "\
-                #define TILE_SIZE 1\n \
-                #define CUBE_TYPE rgba8\n \
-                #define OUTPUT_TYPE rgba8\n \
-                #define CUBE_SIZE 512\n");
+            std::string Define = "";
+            Define += "#define TILE_SIZE 1\n";
+            Define += "#define CUBE_TYPE rgba8\n";
+            Define += "#define OUTPUT_TYPE rgba8\n";
+            Define += "#define CUBE_SIZE " + std::to_string(s_CubemapSize) + "\n";
+
+            m_C2PShaderPtr = Gfx::ShaderManager::CompileCS("helper/cs_cube2pano.glsl", "main", Define.c_str());
+
+            Define = "";
+            Define += "#define TILE_SIZE 1\n";
+            Define += "#define ESTIMATION_TYPE rgba8\n";
+            Define += "#define ORIGINAL_TYPE rgba8\n";
+
+            m_FusePanoramaShaderPtr = Gfx::ShaderManager::CompileCS("helper/cs_fusepano.glsl", "main", Define.c_str());
 
             // -----------------------------------------------------------------------------
             // Output cube map texture
@@ -123,12 +139,15 @@ namespace Scpt
         {
             BASE_UNUSED(_Port);
 
-            if (_rMessage.m_DecompressedSize != 24576) return;
+            if (_rMessage.m_DecompressedSize != s_PanoramaWidth * s_PanoramaHeight * 3) return;
 
+            // -----------------------------------------------------------------------------
+            // Read new texture from network
+            // -----------------------------------------------------------------------------
             Gfx::STextureDescriptor TextureDescriptor;
 
-            TextureDescriptor.m_NumberOfPixelsU  = 128;
-            TextureDescriptor.m_NumberOfPixelsV  = 64;
+            TextureDescriptor.m_NumberOfPixelsU  = s_PanoramaWidth;
+            TextureDescriptor.m_NumberOfPixelsV  = s_PanoramaHeight;
             TextureDescriptor.m_NumberOfPixelsW  = 1;
             TextureDescriptor.m_NumberOfMipMaps  = 1;
             TextureDescriptor.m_NumberOfTextures = 1;
@@ -140,8 +159,30 @@ namespace Scpt
             TextureDescriptor.m_pFileName        = 0;
             TextureDescriptor.m_pPixels          = const_cast<char*>(&_rMessage.m_Payload[0]);
         
-            m_PanoramaTexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
+            Gfx::CTexturePtr NewTexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
 
+            // -----------------------------------------------------------------------------
+            // Create combination of new texture and existing data
+            // -----------------------------------------------------------------------------
+            Gfx::ContextManager::SetShaderCS(m_FusePanoramaShaderPtr);
+
+            Gfx::ContextManager::SetImageTexture(0, static_cast<Gfx::CTexturePtr>(NewTexturePtr));
+
+            Gfx::ContextManager::SetImageTexture(1, static_cast<Gfx::CTexturePtr>(m_PanoramaTexturePtr));
+
+            Gfx::ContextManager::Dispatch(s_PanoramaWidth, s_PanoramaHeight, 1);
+
+            Gfx::ContextManager::ResetImageTexture(0);
+
+            Gfx::ContextManager::ResetImageTexture(1);
+
+            Gfx::ContextManager::ResetShaderCS();
+
+            NewTexturePtr = 0;
+
+            // -----------------------------------------------------------------------------
+            // Set new texture to sky
+            // -----------------------------------------------------------------------------
             Gfx::TextureManager::SetTextureLabel(m_PanoramaTexturePtr, "Sky panorama from image");
 
             m_pSkyComponent->SetType(Dt::CSkyComponent::Panorama);
@@ -159,7 +200,7 @@ namespace Scpt
         {
             if (_rEvent.GetAction() == Base::CInputEvent::TouchReleased)
             {
-                ENGINE_CONSOLE_INFO("Touched (NE = switch estimation; SE = save cubemap; NW = send panorama; SW = reset");
+                ENGINE_CONSOLE_INFO("Touched (NE = switch estimation; SE = save cube map; NW = send panorama; SW = reset");
 
                 float x = _rEvent.GetGlobalCursorPosition()[0];
                 float y = _rEvent.GetGlobalCursorPosition()[1];
@@ -305,9 +346,11 @@ namespace Scpt
 
             Gfx::ContextManager::SetImageTexture(1, static_cast<Gfx::CTexturePtr>(m_PanoramaTexturePtr));
 
-            Gfx::ContextManager::Dispatch(128, 64, 1);
+            Gfx::ContextManager::Dispatch(s_PanoramaWidth, s_PanoramaHeight, 1);
 
             Gfx::ContextManager::ResetImageTexture(0);
+
+            Gfx::ContextManager::ResetImageTexture(1);
 
             Gfx::ContextManager::ResetShaderCS();
 
@@ -324,8 +367,8 @@ namespace Scpt
         {
             Gfx::STextureDescriptor TextureDescriptor;
 
-            TextureDescriptor.m_NumberOfPixelsU  = 128;
-            TextureDescriptor.m_NumberOfPixelsV  = 64;
+            TextureDescriptor.m_NumberOfPixelsU  = s_PanoramaWidth;
+            TextureDescriptor.m_NumberOfPixelsV  = s_PanoramaHeight;
             TextureDescriptor.m_NumberOfPixelsW  = 1;
             TextureDescriptor.m_NumberOfMipMaps  = 1;
             TextureDescriptor.m_NumberOfTextures = 1;
@@ -349,13 +392,15 @@ namespace Scpt
 
             Gfx::ContextManager::SetImageTexture(1, static_cast<Gfx::CTexturePtr>(m_PanoramaTexturePtr));
 
-            Gfx::ContextManager::Dispatch(128, 64, 1);
+            Gfx::ContextManager::Dispatch(s_PanoramaWidth, s_PanoramaHeight, 1);
 
             Gfx::ContextManager::ResetImageTexture(0);
 
+            Gfx::ContextManager::ResetImageTexture(1);
+
             Gfx::ContextManager::ResetShaderCS();
 
-            std::vector<char> Data(128 * 64 * 4);
+            std::vector<char> Data(s_PanoramaWidth * s_PanoramaHeight * 4);
 
             Gfx::TextureManager::CopyTextureToCPU(m_PanoramaTexturePtr, Data.data());
 
@@ -368,8 +413,8 @@ namespace Scpt
         {
             Gfx::STextureDescriptor TextureDescriptor;
 
-            TextureDescriptor.m_NumberOfPixelsU  = 128;
-            TextureDescriptor.m_NumberOfPixelsV  = 64;
+            TextureDescriptor.m_NumberOfPixelsU  = s_PanoramaWidth;
+            TextureDescriptor.m_NumberOfPixelsV  = s_PanoramaHeight;
             TextureDescriptor.m_NumberOfPixelsW  = 1;
             TextureDescriptor.m_NumberOfMipMaps  = 1;
             TextureDescriptor.m_NumberOfTextures = 1;
@@ -387,8 +432,8 @@ namespace Scpt
 
             // -----------------------------------------------------------------------------
 
-            TextureDescriptor.m_NumberOfPixelsU  = 512;
-            TextureDescriptor.m_NumberOfPixelsV  = 512;
+            TextureDescriptor.m_NumberOfPixelsU  = s_CubemapSize;
+            TextureDescriptor.m_NumberOfPixelsV  = s_CubemapSize;
             TextureDescriptor.m_NumberOfPixelsW  = 1;
             TextureDescriptor.m_NumberOfMipMaps  = Gfx::STextureDescriptor::s_GenerateAllMipMaps;
             TextureDescriptor.m_NumberOfTextures = 6;
@@ -403,7 +448,7 @@ namespace Scpt
 
             m_OutputCubemapPtr = Gfx::TextureManager::CreateCubeTexture(TextureDescriptor);
 
-            Gfx::TextureManager::SetTextureLabel(m_OutputCubemapPtr, "Sky cubemap from image");
+            Gfx::TextureManager::SetTextureLabel(m_OutputCubemapPtr, "Sky cube map from image");
 
             // -----------------------------------------------------------------------------
             // Setup sky
