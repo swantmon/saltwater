@@ -31,8 +31,8 @@ void main()
     // -----------------------------------------------------------------------------
     vec3 UnitDirection = vec3(0.0f, 0.0f, 0.0f);
 
-    float Theta = float(Y) / 64.0f * 3.141592653589793f;
-    float Phi   = float(X) / 128.0f * 2.0f * 3.141592653589793f;
+    float Theta = float(Y) / 128.0f * 3.141592653589793f;
+    float Phi   = float(X) / 256.0f * 2.0f * 3.141592653589793f;
 
     UnitDirection.x = sin(Phi) * sin(Theta) * - 1.0f;
     UnitDirection.y = cos(Theta);
