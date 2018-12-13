@@ -99,8 +99,7 @@ namespace Scpt
 
             Define = "";
             Define += "#define TILE_SIZE 1\n";
-            Define += "#define ESTIMATION_TYPE rgba8\n";
-            Define += "#define ORIGINAL_TYPE rgba8\n";
+            Define += "#define PANORAMA_TYPE rgba8\n";
 
             m_FusePanoramaShaderPtr = Gfx::ShaderManager::CompileCS("helper/cs_fusepano.glsl", "main", Define.c_str());
 
@@ -139,7 +138,7 @@ namespace Scpt
         {
             BASE_UNUSED(_Port);
 
-            if (_rMessage.m_DecompressedSize != s_PanoramaWidth * s_PanoramaHeight * 3) return;
+            if (_rMessage.m_DecompressedSize != s_PanoramaWidth * s_PanoramaHeight * 4) return;
 
             // -----------------------------------------------------------------------------
             // Read new texture from network
@@ -153,7 +152,7 @@ namespace Scpt
             TextureDescriptor.m_NumberOfTextures = 1;
             TextureDescriptor.m_Binding          = Gfx::CTexture::ShaderResource;
             TextureDescriptor.m_Access           = Gfx::CTexture::CPUWrite;
-            TextureDescriptor.m_Format           = Gfx::CTexture::R8G8B8_UBYTE;
+            TextureDescriptor.m_Format           = Gfx::CTexture::R8G8B8A8_UBYTE;
             TextureDescriptor.m_Usage            = Gfx::CTexture::GPUReadWrite;
             TextureDescriptor.m_Semantic         = Gfx::CTexture::Diffuse;
             TextureDescriptor.m_pFileName        = 0;
