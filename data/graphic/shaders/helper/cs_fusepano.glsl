@@ -8,7 +8,8 @@
 // Output
 // -----------------------------------------------------------------------------
 layout (binding = 0, PANORAMA_TYPE) readonly uniform image2D in_PanoramaEstimation;
-layout (binding = 1, PANORAMA_TYPE) uniform image2D inout_PanoramaOrginal;
+layout (binding = 1, PANORAMA_TYPE) readonly uniform image2D in_PanoramaOrginal;
+layout (binding = 2, PANORAMA_TYPE) writeonly uniform image2D out_Panorama;
 
 // -------------------------------------------------------------------------------------
 
@@ -19,13 +20,13 @@ void main()
 
     vec4 TexelEstimation = imageLoad(in_PanoramaEstimation, UV);
 
-    vec4 TexelOriginal = imageLoad(inout_PanoramaOrginal, UV);
+    vec4 TexelOriginal = imageLoad(in_PanoramaOrginal, UV);
 
     float Alpha = TexelOriginal.a;
 
     vec3 NewTexel = TexelEstimation.rgb * (1.0f - Alpha) + TexelOriginal.rgb * Alpha;
 
-    imageStore(inout_PanoramaOrginal, UV, vec4(NewTexel.rgb, 1.0f));
+    imageStore(out_Panorama, UV, vec4(NewTexel.rgb, 1.0f));
 }
 
 #endif // __INCLUDE_CS_FUSEPANO_GLSL__

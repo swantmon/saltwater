@@ -169,11 +169,15 @@ namespace Scpt
 
             Gfx::ContextManager::SetImageTexture(1, static_cast<Gfx::CTexturePtr>(m_PanoramaTexturePtr));
 
+            Gfx::ContextManager::SetImageTexture(2, static_cast<Gfx::CTexturePtr>(m_PanoramaTexturePtr));
+
             Gfx::ContextManager::Dispatch(s_PanoramaWidth, s_PanoramaHeight, 1);
 
             Gfx::ContextManager::ResetImageTexture(0);
 
             Gfx::ContextManager::ResetImageTexture(1);
+
+            Gfx::ContextManager::ResetImageTexture(2);
 
             Gfx::ContextManager::ResetShaderCS();
 
