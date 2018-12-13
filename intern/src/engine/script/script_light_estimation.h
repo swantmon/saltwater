@@ -234,6 +234,10 @@ namespace Scpt
 
                         SendPanoramaTexture();
                     }
+                    else
+                    {
+                        ENGINE_CONSOLE_INFO("No connection between script and endpoint. Please check connection.");
+                    }
                 }
 
                 if (x > Gfx::Main::GetActiveNativeWindowSize()[0] - 200.0f && y > Gfx::Main::GetActiveNativeWindowSize()[1] - 200.0f)
