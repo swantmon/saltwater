@@ -4,6 +4,7 @@
 #include "base/base_coordinate_system.h"
 #include "base/base_include_glm.h"
 
+#include "engine/core/core_console.h"
 #include "engine/core/core_plugin_manager.h"
 
 #include "engine/data/data_camera_component.h"
@@ -62,6 +63,13 @@ namespace Scpt
             }
 
             m_ArCoreAvailable = Core::PluginManager::HasPlugin(PluginName);
+
+            if (!m_ArCoreAvailable)
+            {
+                ENGINE_CONSOLE_WARNING("No plugin is loaded to enable AR.")
+
+                return;
+            }
 
             ArCoreGetCamera = (ArCoreGetCameraFunc)(Core::PluginManager::GetPluginFunction(PluginName, "GetCamera"));
             ArCoreGetCameraTrackingState = (ArCoreGetCameraTrackingStateFunc)(Core::PluginManager::GetPluginFunction(PluginName, "GetCameraTrackingState"));
