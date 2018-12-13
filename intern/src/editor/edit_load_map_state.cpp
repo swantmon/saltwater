@@ -9,6 +9,8 @@
 
 #include "engine/camera/cam_control_manager.h"
 
+#include "engine/core/core_program_parameters.h"
+
 #include "engine/data/data_camera_component.h"
 #include "engine/data/data_component.h"
 #include "engine/data/data_component_facet.h"
@@ -55,6 +57,7 @@ namespace Edit
     void CreateDefaultScene();
     void CreateDefaultARScene();
     void CreateCornellBoxScene();
+    void CreateSLAMScene();
 } // namespace Edit
 
 namespace Edit
@@ -90,8 +93,31 @@ namespace Edit
     
     CState::EStateType CLoadMapState::InternOnEnter()
     {
-        CreateDefaultScene();
-        
+        auto Scene = Core::CProgramParameters::GetInstance().Get("graphics:load_scene", "default");
+
+        ENGINE_CONSOLE_INFOV("Loading scene '%s'", Scene.c_str());
+
+        if (Scene == "empty")
+        {
+            CreateEmptyScene();
+        }
+        else if (Scene == "default")
+        {
+            CreateDefaultScene();
+        }
+        else if (Scene == "default_ar")
+        {
+            CreateDefaultARScene();
+        }
+        else if (Scene == "cornell_box")
+        {
+            CreateCornellBoxScene();
+        }
+        else if (Scene == "slam")
+        {
+            CreateSLAMScene();
+        }
+                
         return Edit::CState::LoadMap;
     }
     
@@ -337,7 +363,7 @@ namespace Edit
         Dt::EntityManager::MarkEntityAsDirty(rRootEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
 
         {
-            /*EntityDesc.m_EntityCategory = Dt::SEntityCategory::Static;
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Static;
             EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
             Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
@@ -377,11 +403,11 @@ namespace Edit
 
             Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
 
-            rRootEntity.Attach(rEntity);*/
+            rRootEntity.Attach(rEntity);
         }
 
         {
-            /*EntityDesc.m_EntityCategory = Dt::SEntityCategory::Static;
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Static;
             EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
             Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
@@ -421,9 +447,198 @@ namespace Edit
 
             Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
 
-            rRootEntity.Attach(rEntity);*/
+            rRootEntity.Attach(rEntity);
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CreateSLAMScene()
+    {
+        // -----------------------------------------------------------------------------
+        // Allocate a map
+        // -----------------------------------------------------------------------------
+        Dt::Map::AllocateMap(1, 1);
+
+        // -----------------------------------------------------------------------------
+        // Setup cameras
+        // -----------------------------------------------------------------------------
+        {
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
+            EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
+
+            Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+
+            rEntity.SetName("Main Camera");
+
+            Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
+
+            pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 10.0f));
+            pTransformationFacet->SetScale(glm::vec3(1.0f));
+            pTransformationFacet->SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
+
+            auto Component = Dt::CComponentManager::GetInstance().Allocate<Dt::CCameraComponent>();
+
+            Component->SetProjectionType(Dt::CCameraComponent::Perspective);
+            Component->SetClearFlag(Dt::CCameraComponent::Skybox);
+
+            rEntity.AttachComponent(Component);
+
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*Component, Dt::CCameraComponent::DirtyCreate);
+
+            // -----------------------------------------------------------------------------
+
+            auto ScriptComponent = Dt::CComponentManager::GetInstance().Allocate<Scpt::CCameraControlScript>();
+
+            rEntity.AttachComponent(ScriptComponent);
+
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*ScriptComponent, Dt::CScriptComponent::DirtyCreate);
+
+            // -----------------------------------------------------------------------------
+
+            Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
 
+        // -----------------------------------------------------------------------------
+        // Effects
+        // -----------------------------------------------------------------------------
+        {
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
+            EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
+
+            Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+
+            rEntity.SetName("AA");
+
+            {
+                auto Component = Dt::CComponentManager::GetInstance().Allocate<Dt::CPostAAComponent>();
+
+                Component->SetType(Dt::CPostAAComponent::SMAA);
+
+                rEntity.AttachComponent(Component);
+
+                Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*Component, Dt::CLightProbeComponent::DirtyCreate);
+            }
+
+            Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
+
+        // -----------------------------------------------------------------------------
+        // Setup light
+        // -----------------------------------------------------------------------------
+        {
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
+            EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
+
+            Dt::CEntity& rLightingEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+
+            rLightingEntity.SetName("Local light probe");
+
+            Dt::CTransformationFacet* pTransformationFacet = rLightingEntity.GetTransformationFacet();
+
+            pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+            pTransformationFacet->SetScale(glm::vec3(1.0f));
+            pTransformationFacet->SetRotation(glm::vec3(0.0f));
+
+            {
+                auto LightProbeComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CLightProbeComponent>();
+
+                LightProbeComponent->SetType(Dt::CLightProbeComponent::Sky);
+                LightProbeComponent->SetQuality(Dt::CLightProbeComponent::PX256);
+                LightProbeComponent->SetIntensity(1.0f);
+                LightProbeComponent->SetRefreshMode(Dt::CLightProbeComponent::Dynamic);
+                LightProbeComponent->SetNear(0.01f);
+                LightProbeComponent->SetFar(1024.0f);
+                LightProbeComponent->SetParallaxCorrection(false);
+                LightProbeComponent->SetBoxSize(glm::vec3(1024.0f));
+
+                rLightingEntity.AttachComponent(LightProbeComponent);
+
+                Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*LightProbeComponent, Dt::CLightProbeComponent::DirtyCreate);
+            }
+
+            Dt::EntityManager::MarkEntityAsDirty(rLightingEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
+
+        {
+            Dt::SEntityDescriptor EntityDesc;
+
+            EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
+            EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
+
+            Dt::CEntity& rEnvironmentEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+
+            rEnvironmentEntity.SetName("Environment");
+
+            // -----------------------------------------------------------------------------
+            // Transformation
+            // -----------------------------------------------------------------------------
+            Dt::CTransformationFacet* pTransformationFacet = rEnvironmentEntity.GetTransformationFacet();
+
+            pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 20.0f));
+            pTransformationFacet->SetScale(glm::vec3(1.0f));
+            pTransformationFacet->SetRotation(glm::vec3(0.0f));
+
+            {
+                auto SunComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CSunComponent>();
+
+                SunComponent->EnableTemperature(false);
+                SunComponent->SetColor(glm::vec3(1.0f, 1.0f, 1.0f));
+                SunComponent->SetDirection(glm::vec3(0.0f, 0.01f, -1.0f));
+                SunComponent->SetIntensity(90600.0f);
+                SunComponent->SetTemperature(0);
+                SunComponent->SetRefreshMode(Dt::CSunComponent::Dynamic);
+
+                SunComponent->UpdateLightness();
+
+                rEnvironmentEntity.AttachComponent(SunComponent);
+
+                Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*SunComponent, Dt::CSunComponent::DirtyCreate);
+            }
+
+            {
+                auto Component = Dt::CComponentManager::GetInstance().Allocate<Dt::CSkyComponent>();
+
+                Component->SetRefreshMode(Dt::CSkyComponent::Static);
+                Component->SetType(Dt::CSkyComponent::Procedural);
+                Component->SetIntensity(100000.0f);
+
+                rEnvironmentEntity.AttachComponent(Component);
+
+                Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*Component, Dt::CSkyComponent::DirtyCreate);
+            }
+
+            Dt::EntityManager::MarkEntityAsDirty(rEnvironmentEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
+
+        // -----------------------------------------------------------------------------
+        // Setup entities
+        // -----------------------------------------------------------------------------
+        Dt::SEntityDescriptor EntityDesc;
+
+        EntityDesc.m_EntityCategory = Dt::SEntityCategory::Static;
+        EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
+
+        Dt::CEntity& rRootEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+
+        rRootEntity.SetName("Root");
+
+        Dt::CTransformationFacet* pTransformationFacet = rRootEntity.GetTransformationFacet();
+
+        pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+        pTransformationFacet->SetScale(glm::vec3(1.0f));
+        pTransformationFacet->SetRotation(glm::vec3(0.0f));
+
+        // -----------------------------------------------------------------------------
+
+        Dt::EntityManager::MarkEntityAsDirty(rRootEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        
         // -----------------------------------------------------------------------------
         // Setup slam
         // -----------------------------------------------------------------------------
