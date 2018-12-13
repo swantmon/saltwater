@@ -322,6 +322,8 @@ namespace Scpt
             }
             else
             {
+                ENGINE_CONSOLE_WARNING("No plugin is loaded to enable light stitching in AR.")
+
                 Gfx::STextureDescriptor TextureDescriptor;
 
                 TextureDescriptor.m_Format           = Gfx::STextureDescriptor::s_FormatFromSource;

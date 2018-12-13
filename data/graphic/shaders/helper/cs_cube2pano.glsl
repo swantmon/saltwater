@@ -1,6 +1,8 @@
 #ifndef __INCLUDE_CS_CUBE2PANO_GLSL__
 #define __INCLUDE_CS_CUBE2PANO_GLSL__
 
+// Code based on: https://stackoverflow.com/questions/34250742/converting-a-cubemap-into-equirectangular-panorama
+
 // #define TILE_SIZE 8
 // #define CUBE_TYPE rgba8
 // #define OUTPUT_TYPE rgba8
@@ -34,11 +36,11 @@ void main()
     vec3 UnitDirection = vec3(0.0f, 0.0f, 0.0f);
 
     float Theta = float(Y) / float(PANORAMA_SIZE_H) * 3.141592653589793f;
-    float Phi   = float(X) / float(PANORAMA_SIZE_W) * 2.0f * 3.141592653589793f;
+    float Phi   = float(X) / float(PANORAMA_SIZE_W) * 2.0f * 3.141592653589793f - 3.141592653589793f * 0.5;
 
-    UnitDirection.x = sin(Phi) * sin(Theta) * - 1.0f;
-    UnitDirection.y = cos(Theta);
-    UnitDirection.z = cos(Phi) * sin(Theta) * - 1.0f;
+    UnitDirection.x = sin(Phi) * sin(Theta) * 1.0f;
+    UnitDirection.y = cos(Theta) * -1.0f;
+    UnitDirection.z = cos(Phi) * sin(Theta) * 1.0f;
 
     // -----------------------------------------------------------------------------
     // Cube map coordinates
@@ -53,37 +55,37 @@ void main()
 
     ivec3 UV = ivec3(0, 0, -1);
 
-    if (UnitUV.x >= BIAS) //Right
+    if (UnitUV.x >= BIAS)
     {
         UV.x = int((((UnitUV.z + 1.0f) / 2.0f) - 1.0f) * float(CUBE_SIZE));
         UV.y = int((((UnitUV.y + 1.0f) / 2.0f)) * float(CUBE_SIZE));
         UV.z = 0;
     }
-    else if (UnitUV.x <= -BIAS) // Left
+    else if (UnitUV.x <= -BIAS)
     {
         UV.x = int((((UnitUV.z + 1.0f) / 2.0f)) * float(CUBE_SIZE));
         UV.y = int((((UnitUV.y + 1.0f) / 2.0f)) * float(CUBE_SIZE));
         UV.z = 1;
     }
-    else if (UnitUV.y >= BIAS) // Up
+    else if (UnitUV.y >= BIAS)
     {
         UV.x = int((((UnitUV.x + 1.0f) / 2.0f)) * float(CUBE_SIZE));
         UV.y = int((((UnitUV.z + 1.0f) / 2.0f) - 1.0f) * float(CUBE_SIZE));
-        UV.z = 2;
+        UV.z = 3;
     }
-    else if (UnitUV.y <= -BIAS) // Down
+    else if (UnitUV.y <= -BIAS)
     {
         UV.x = int((((UnitUV.x + 1.0f) / 2.0f)) * float(CUBE_SIZE));
         UV.y = int((((UnitUV.z + 1.0f) / 2.0f)) * float(CUBE_SIZE));
-        UV.z = 3;
+        UV.z = 2;
     }
-    else if (UnitUV.z >= BIAS) // Front
+    else if (UnitUV.z >= BIAS)
     {
         UV.x = int((((UnitUV.x + 1.0f) / 2.0f)) * float(CUBE_SIZE));
         UV.y = int((((UnitUV.y + 1.0f) / 2.0f)) * float(CUBE_SIZE));
         UV.z = 4;
     }
-    else if (UnitUV.z <= -BIAS) // Back
+    else if (UnitUV.z <= -BIAS)
     {
         UV.x = int((((UnitUV.x + 1.0f) / 2.0f) - 1.0f) * float(CUBE_SIZE));
         UV.y = int((((UnitUV.y + 1.0f) / 2.0f)) * float(CUBE_SIZE));
