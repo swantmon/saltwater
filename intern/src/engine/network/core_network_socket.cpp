@@ -87,7 +87,9 @@ namespace Net
     {
         if (IsOpen())
         {
-            m_OutgoingMessages.emplace_back(_MessageCategory, _rData, _MessageLength);
+            int Length = _MessageLength == 0 ? static_cast<int>(_rData.size()) : _MessageLength;
+
+            m_OutgoingMessages.emplace_back(_MessageCategory, _rData, Length);
 
             return true;
         }
@@ -116,7 +118,7 @@ namespace Net
                 MessageLength = static_cast<int>(Data.size());
             }
 
-            int DataLength = MessageLength + 2 * sizeof(int32_t);
+            int DataLength = MessageLength + 3 * sizeof(int32_t);
 
             std::shared_ptr<std::vector<char>> pData = std::make_shared<std::vector<char>>();
 
@@ -127,7 +129,8 @@ namespace Net
 
             std::memcpy(pData->data(), &MessageID32, sizeof(MessageID32));
             std::memcpy(pData->data() + sizeof(int32_t), &MessageLength32, sizeof(MessageLength32));
-            std::memcpy(pData->data() + 2 * sizeof(int32_t), Data.data(), MessageLength32);
+            std::memcpy(pData->data() + 2 * sizeof(int32_t), &MessageLength32, sizeof(MessageLength32)); // TODO: Add compression
+            std::memcpy(pData->data() + 3 * sizeof(int32_t), Data.data(), MessageLength32);
 
             asio::async_write(*m_pSocket, asio::buffer(*pData, DataLength), std::bind(&CServerSocket::OnSendComplete, this, pData));
 
