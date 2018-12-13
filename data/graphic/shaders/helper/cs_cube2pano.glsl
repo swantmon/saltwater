@@ -5,6 +5,8 @@
 // #define CUBE_TYPE rgba8
 // #define OUTPUT_TYPE rgba8
 // #define CUBE_SIZE 512
+// #define PANORAMA_SIZE_W 128
+// #define PANORAMA_SIZE_H 64
 #define BIAS 0.99
 
 // -----------------------------------------------------------------------------
@@ -31,8 +33,8 @@ void main()
     // -----------------------------------------------------------------------------
     vec3 UnitDirection = vec3(0.0f, 0.0f, 0.0f);
 
-    float Theta = float(Y) / 128.0f * 3.141592653589793f;
-    float Phi   = float(X) / 256.0f * 2.0f * 3.141592653589793f;
+    float Theta = float(Y) / float(PANORAMA_SIZE_H) * 3.141592653589793f;
+    float Phi   = float(X) / float(PANORAMA_SIZE_W) * 2.0f * 3.141592653589793f;
 
     UnitDirection.x = sin(Phi) * sin(Theta) * - 1.0f;
     UnitDirection.y = cos(Theta);

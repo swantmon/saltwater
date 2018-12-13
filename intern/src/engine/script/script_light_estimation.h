@@ -94,6 +94,8 @@ namespace Scpt
             Define += "#define CUBE_TYPE rgba8\n";
             Define += "#define OUTPUT_TYPE rgba8\n";
             Define += "#define CUBE_SIZE " + std::to_string(s_CubemapSize) + "\n";
+            Define += "#define PANORAMA_SIZE_W " + std::to_string(s_PanoramaWidth) + "\n";
+            Define += "#define PANORAMA_SIZE_H " + std::to_string(s_PanoramaHeight) + "\n";
 
             m_C2PShaderPtr = Gfx::ShaderManager::CompileCS("helper/cs_cube2pano.glsl", "main", Define.c_str());
 
@@ -191,7 +193,7 @@ namespace Scpt
             m_pSkyComponent->SetType(Dt::CSkyComponent::Panorama);
             m_pSkyComponent->SetTexture(m_PanoramaTexturePtr);
             m_pSkyComponent->SetRefreshMode(Dt::CSkyComponent::Dynamic);
-            m_pSkyComponent->SetQuality(Dt::CSkyComponent::PX128);
+            m_pSkyComponent->SetQuality(Dt::CSkyComponent::PX256);
             m_pSkyComponent->SetIntensity(12000);
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*m_pSkyComponent, Dt::CSkyComponent::DirtyInfo);
