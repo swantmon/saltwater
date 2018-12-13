@@ -6,7 +6,6 @@
 #include "common_global.glsl"
 #include "common_light.glsl"
 #include "common_gbuffer.glsl"
-#include "common_raycast.glsl"
 
 // -----------------------------------------------------------------------------
 // Input from engine
@@ -14,6 +13,16 @@
 const float LUT_SIZE  = 32.0f;
 const float LUT_SCALE = (LUT_SIZE - 1.0f) / LUT_SIZE;
 const float LUT_BIAS  = 0.5f / LUT_SIZE;
+
+struct SRectangle 
+{ 
+    vec3 m_Center     ; 
+    vec3 m_DirectionX ; 
+    vec3 m_DirectionY ; 
+    float m_HalfWidth ; 
+    float m_HalfHeight; 
+    vec4 m_Plane      ; 
+}; 
 
 layout(std140, binding = 1) uniform UB1
 {
@@ -40,10 +49,10 @@ layout(binding = 2) uniform sampler2D ps_GBuffer2;
 layout(binding = 3) uniform sampler2D ps_DepthTexture;
 layout(binding = 4) uniform sampler2D ps_LTCMaterial;
 layout(binding = 5) uniform sampler2D ps_LTCMag;
-layout(binding = 6) uniform sampler2D ps_FilteredMap;
 
-// -----------------------------------------------------------------------------
+layout(binding = 6) uniform sampler2D ps_FilteredMap;
 // Input
+// -----------------------------------------------------------------------------
 // -----------------------------------------------------------------------------
 layout(location = 2) in vec2 in_UV;
 

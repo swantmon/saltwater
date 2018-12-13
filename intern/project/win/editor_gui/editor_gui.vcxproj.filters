@@ -187,114 +187,146 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\src\editor_gui\edit_gui.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\src\editor_gui\edit_gui.h" />
+  </ItemGroup>
+  <ItemGroup>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_mainwindow.ui">
       <Filter>Form Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_mainwindow.h" />
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_tone_mapping.h">
+      <Filter>Generated Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_texture_value.h">
+      <Filter>Generated Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_asset_file_list.h">
+      <Filter>Generated Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_texture.h">
+      <Filter>Generated Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_arealight.h">
+      <Filter>Generated Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_clickable_label.h">
+      <Filter>Generated Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_asset_browser.h">
+      <Filter>Generated Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_newscenedialog.h">
+      <Filter>Generated Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_scenegraph.h">
+      <Filter>Generated Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector.h">
+      <Filter>Generated Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_transformation.h">
+      <Filter>Generated Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_pointlight.h">
+      <Filter>Generated Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_environment.h">
+      <Filter>Generated Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_light_probe.h">
+      <Filter>Generated Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_bloom.h">
+      <Filter>Generated Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_dof.h">
+      <Filter>Generated Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_post_aa.h">
+      <Filter>Generated Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_ssr.h">
+      <Filter>Generated Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_volumefog.h">
+      <Filter>Generated Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_sun.h">
+      <Filter>Generated Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_entity.h">
+      <Filter>Generated Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_material.h">
+      <Filter>Generated Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_camera.h">
+      <Filter>Generated Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_arcontroller.h">
+      <Filter>Generated Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_arcontroller_marker.h">
+      <Filter>Generated Files</Filter>
+    </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_render_context.h">
-      <Filter>Widgets</Filter>
+      <Filter>Generated Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_mainwindow.h">
+      <Filter>Generated Files</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_newscenedialog.ui">
       <Filter>Form Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_scenegraph.h">
-      <Filter>Widgets</Filter>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_transformation.ui">
+      <Filter>Form Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector.h">
-      <Filter>Widgets</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_newscenedialog.h">
-      <Filter>Dialogs</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_transformation.h">
-      <Filter>Widgets\Inspector</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_pointlight.h">
-      <Filter>Widgets\Inspector</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_environment.h">
-      <Filter>Widgets\Inspector</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_bloom.h">
-      <Filter>Widgets\Inspector</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_dof.h">
-      <Filter>Widgets\Inspector</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_ssr.h">
-      <Filter>Widgets\Inspector</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_volumefog.h">
-      <Filter>Widgets\Inspector</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_clickable_label.h">
-      <Filter>Widgets</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_bloom.ui">
-      <Filter>Form Files\Inspector</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_dof.ui">
-      <Filter>Form Files\Inspector</Filter>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_point_light.ui">
+      <Filter>Form Files</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_environment.ui">
-      <Filter>Form Files\Inspector</Filter>
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_light_probe.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_bloom.ui">
+      <Filter>Form Files</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_ssr.ui">
-      <Filter>Form Files\Inspector</Filter>
+      <Filter>Form Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_sun.ui">
-      <Filter>Form Files\Inspector</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_transformation.ui">
-      <Filter>Form Files\Inspector</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_volumefog.ui">
-      <Filter>Form Files\Inspector</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_sun.h">
-      <Filter>Widgets\Inspector</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_entity.ui">
-      <Filter>Form Files\Inspector</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_entity.h">
-      <Filter>Widgets\Inspector</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_material.ui">
-      <Filter>Form Files\Inspector</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_material.h">
-      <Filter>Widgets\Inspector</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_camera.ui">
-      <Filter>Form Files\Inspector</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_arcontroller.ui">
-      <Filter>Form Files\Inspector</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_arcontroller_marker.ui">
-      <Filter>Form Files\Inspector</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_artrackedobject.ui">
-      <Filter>Form Files\Inspector</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_camera.h">
-      <Filter>Widgets\Inspector</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_arcontroller.h">
-      <Filter>Widgets\Inspector</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_arcontroller_marker.h">
-      <Filter>Widgets\Inspector</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_post_aa.h">
-      <Filter>Widgets\Inspector</Filter>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_dof.ui">
+      <Filter>Form Files</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_post_aa.ui">
-      <Filter>Form Files\Inspector</Filter>
+      <Filter>Form Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_asset_browser.h">
-      <Filter>Widgets</Filter>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_volumefog.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_sun.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_entity.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_material.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_camera.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_arcontroller.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_arcontroller_marker.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_artrackedobject.ui">
+      <Filter>Form Files</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_asset_browser.ui">
       <Filter>Form Files</Filter>
@@ -305,41 +337,14 @@
     <CustomBuild Include="..\..\..\src\editor_gui\edit_texture_value.ui">
       <Filter>Form Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_texture_value.h">
-      <Filter>Widgets</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_asset_file_list.h">
-      <Filter>Widgets</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_texture.ui">
-      <Filter>Form Files\Inspector</Filter>
+      <Filter>Form Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_texture.h">
-      <Filter>Widgets\Inspector</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_arealight.h">
-      <Filter>Widgets\Inspector</Filter>
+    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_area_light.ui">
+      <Filter>Form Files</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\editor_gui\edit_tone_mapping.ui">
       <Filter>Form Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_tone_mapping.h">
-      <Filter>Widgets</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_area_light.ui">
-      <Filter>Form Files\Inspector</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_point_light.ui">
-      <Filter>Form Files\Inspector</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_light_probe.ui">
-      <Filter>Form Files\Inspector</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\..\src\editor_gui\edit_inspector_light_probe.h">
-      <Filter>Widgets\Inspector</Filter>
-    </CustomBuild>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\..\src\editor_gui\edit_gui.h" />
   </ItemGroup>
 </Project>

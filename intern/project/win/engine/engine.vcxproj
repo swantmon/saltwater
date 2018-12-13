@@ -268,6 +268,7 @@
     <ClInclude Include="..\..\..\src\engine\script\script_light_estimation.h" />
     <ClInclude Include="..\..\..\src\engine\script\script_script.h" />
     <ClInclude Include="..\..\..\src\engine\script\script_script_manager.h" />
+    <ClInclude Include="..\..\..\src\engine\script\script_slam.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\base\base.vcxproj">

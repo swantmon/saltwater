@@ -57,7 +57,7 @@ namespace Edit
         CInspectorLightProbe*     m_pLightProbeWidget;
         CInspectorBloom*          m_pBloomWidget;
         CInspectorDOF*            m_pDOFWidget;
-        CInspectorPostAA*         m_pFXAAWidget;
+        CInspectorPostAA*         m_pPostAAWidget;
         CInspectorSSR*            m_pSSRWidget;
         CInspectorVolumeFog*      m_pVolumeFogWidget;
         CInspectorMaterial*       m_pMaterialWidget;

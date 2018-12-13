@@ -533,6 +533,9 @@
    </property>
   </action>
   <action name="m_pActionCamera">
+   <property name="checkable">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>&amp;Camera</string>
    </property>
