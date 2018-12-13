@@ -22,11 +22,11 @@ void main()
 
     vec4 TexelOriginal = imageLoad(in_PanoramaOrginal, UV);
 
-    float Alpha = TexelOriginal.a;
+    float Alpha = clamp(TexelOriginal.a * 4.0f, 0.0f, 1.0f);
 
     vec3 NewTexel = TexelEstimation.rgb * (1.0f - Alpha) + TexelOriginal.rgb * Alpha;
 
-    imageStore(out_Panorama, UV, vec4(NewTexel.rgb, 1.0f));
+    imageStore(out_Panorama, UV, vec4(NewTexel, 1.0f));
 }
 
 #endif // __INCLUDE_CS_FUSEPANO_GLSL__

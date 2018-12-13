@@ -165,11 +165,11 @@ namespace Scpt
             // -----------------------------------------------------------------------------
             Gfx::ContextManager::SetShaderCS(m_FusePanoramaShaderPtr);
 
-            Gfx::ContextManager::SetImageTexture(0, static_cast<Gfx::CTexturePtr>(NewTexturePtr));
+            Gfx::ContextManager::SetImageTexture(0, NewTexturePtr);
 
-            Gfx::ContextManager::SetImageTexture(1, static_cast<Gfx::CTexturePtr>(m_PanoramaTexturePtr));
+            Gfx::ContextManager::SetImageTexture(1, m_PanoramaTexturePtr);
 
-            Gfx::ContextManager::SetImageTexture(2, static_cast<Gfx::CTexturePtr>(m_PanoramaTexturePtr));
+            Gfx::ContextManager::SetImageTexture(2, m_PanoramaTexturePtr);
 
             Gfx::ContextManager::Dispatch(s_PanoramaWidth, s_PanoramaHeight, 1);
 
@@ -345,9 +345,9 @@ namespace Scpt
         {
             Gfx::ContextManager::SetShaderCS(m_C2PShaderPtr);
 
-            Gfx::ContextManager::SetImageTexture(0, static_cast<Gfx::CTexturePtr>(m_OutputCubemapPtr));
+            Gfx::ContextManager::SetImageTexture(0, m_OutputCubemapPtr);
 
-            Gfx::ContextManager::SetImageTexture(1, static_cast<Gfx::CTexturePtr>(m_PanoramaTexturePtr));
+            Gfx::ContextManager::SetImageTexture(1, m_PanoramaTexturePtr);
 
             Gfx::ContextManager::Dispatch(s_PanoramaWidth, s_PanoramaHeight, 1);
 
@@ -391,9 +391,9 @@ namespace Scpt
 
             Gfx::ContextManager::SetShaderCS(m_C2PShaderPtr);
 
-            Gfx::ContextManager::SetImageTexture(0, static_cast<Gfx::CTexturePtr>(m_OutputCubemapPtr));
+            Gfx::ContextManager::SetImageTexture(0, m_OutputCubemapPtr);
 
-            Gfx::ContextManager::SetImageTexture(1, static_cast<Gfx::CTexturePtr>(m_PanoramaTexturePtr));
+            Gfx::ContextManager::SetImageTexture(1, m_PanoramaTexturePtr);
 
             Gfx::ContextManager::Dispatch(s_PanoramaWidth, s_PanoramaHeight, 1);
 
