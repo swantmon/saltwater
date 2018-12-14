@@ -43,7 +43,7 @@ parser.add_argument('--mask_ground_and_sky', type=float, default=0.3, help='Perc
 parser.add_argument('--number_of_masks', type=int, default=2, help='number of random mask')
 parser.add_argument('--mask_size', type=int, default=64, help='size of random mask')
 parser.add_argument('--sample_interval', type=int, default=1000, help='interval between image sampling')
-parser.add_argument('--output', type=str, default='./output/20181115_SUN360_FLAT_256x128/', help='output folder of the results')
+parser.add_argument('--output', type=str, default='./output/', help='output folder of the results')
 parser.add_argument('--path_to_savepoint', type=str, default='./savepoint/', help='path to load and store savepoint')
 parser.add_argument('--port', type=int, default=12345, help='Port address to an endpoint')
 opt = parser.parse_args()
@@ -371,13 +371,19 @@ def OnNewClient(_Socket, _Address):
     print ("Accepted connection from client", _Address)
 
     # -----------------------------------------------------------------------------
+    # Prepare for output
+    # -----------------------------------------------------------------------------
+    os.makedirs('{}{}'.format(opt.output, _Address[0]), exist_ok=True)
+    os.makedirs('./tmp/{}'.format(_Address[0]), exist_ok=True)
+
+    # -----------------------------------------------------------------------------
     # Wait for data
     # -----------------------------------------------------------------------------
     IsRunning = True
     Interval = 0
     
     while (IsRunning):
-        print("Wait for data...")
+        print(_Address, "Wait for data...")
 
         try:
             header = _Socket.recv(12)
@@ -386,7 +392,7 @@ def OnNewClient(_Socket, _Address):
             bytesLeft = integers[1]
             panorama = np.array([])
 
-            print("Receiving ", bytesLeft, " byte of data")
+            print(_Address, "Receiving ", bytesLeft, " byte of data")
 
             while bytesLeft > 0:
                 buffer = _Socket.recv(bytesLeft)
@@ -395,11 +401,11 @@ def OnNewClient(_Socket, _Address):
                 nparray = np.frombuffer(buffer, dtype=np.uint8)
                 panorama = np.concatenate([panorama, nparray])
         except:
-            print ("An error occured during waiting for header payload data")
+            print(_Address, "An error occured during waiting for header payload data")
             IsRunning = False
             continue
 
-        print("Data received")
+        print(_Address, "Data received")
 
         # -----------------------------------------------------------------------------
         # Use generator to create estimation
@@ -432,9 +438,9 @@ def OnNewClient(_Socket, _Address):
         # Now: Save image to see quality
         # TODO: Do not save image! Use data directly.
         # -----------------------------------------------------------------------------
-        save_image(gen_mask.data, './tmp_output_generator.png', nrow=1, normalize=True)  
+        save_image(gen_mask.data, './tmp/{}/tmp_output_generator.png'.format(_Address[0]), nrow=1, normalize=True)  
 
-        im = Image.open("./tmp_output_generator.png").convert('RGBA')
+        im = Image.open('./tmp/{}/tmp_output_generator.png'.format(_Address[0])).convert('RGBA')
 
         resultData =  np.asarray(list(im.getdata()))
 
@@ -450,7 +456,9 @@ def OnNewClient(_Socket, _Address):
         # -----------------------------------------------------------------------------
         sample = torch.cat((masked_samples.data, gen_mask.data), -2)
 
-        save_image(sample, './output/result_panorama_%d.png' % Interval, nrow=1, normalize=True)
+        
+
+        save_image(sample, '{}{}/result_panorama_{}.png'.format(opt.output, _Address[0], Interval), nrow=1, normalize=True)
 
         Interval = Interval + 1
     
