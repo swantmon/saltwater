@@ -41,7 +41,7 @@
     <ProjectGuid>{42C07B21-2392-4E0A-9DEB-E5E4B8A7864E}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>camera</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
     <ProjectName>plugin_light_estimation_stitching</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

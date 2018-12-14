@@ -38,7 +38,7 @@
     <ProjectGuid>{53CCEF0F-9EFC-4780-9B1D-B3771960936D}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>camera</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
     <ProjectName>editor_port</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

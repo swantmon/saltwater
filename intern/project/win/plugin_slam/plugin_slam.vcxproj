@@ -52,7 +52,7 @@
     <ProjectGuid>{E0842B40-2749-4D03-B627-55761E06452B}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>camera</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
     <ProjectName>plugin_slam</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
