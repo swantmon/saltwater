@@ -33,14 +33,15 @@ del tmp_dependencies_x64_arm64.zip
 @echo off
 if not exist "bin" mkdir bin
 
-copy extern\artoolkit\bin\%BuildMode%\*.dll bin\
-copy extern\assimp\bin\%BuildMode%\*.dll bin\
-copy extern\devil\bin\%BuildMode%\*.dll bin\
-copy extern\glew\bin\%BuildMode%\*.dll bin\
-copy extern\opencv\bin\%BuildMode%\*.dll bin\
-copy extern\qt\bin\%BuildMode%\*.dll bin\
-copy extern\sdl2\bin\%BuildMode%\*.dll bin\
-copy extern\tinyxml2\bin\%BuildMode%\*.dll bin\
+copy extern\assimp\lib\%BuildMode%\*.dll bin\
+copy extern\devil\lib\%BuildMode%\*.dll bin\
+copy extern\easyar\lib\%BuildMode%\*.dll bin\
+copy extern\glew\lib\%BuildMode%\*.dll bin\
+copy extern\opencv\lib\%BuildMode%\*.dll bin\
+copy extern\qt\lib\%BuildMode%\*.dll bin\
+copy extern\sdl2\lib\%BuildMode%\*.dll bin\
+copy extern\tinyxml2\lib\%BuildMode%\*.dll bin\
+copy extern\zlib\lib\%BuildMode%\*.dll bin\
 @echo on
 
 @echo "Copying finished"
