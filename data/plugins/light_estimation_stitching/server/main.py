@@ -369,32 +369,6 @@ def Training():
 
 def SocketUsage():
     # -----------------------------------------------------------------------------
-    # Open socket and connect or listen
-    # -----------------------------------------------------------------------------
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-    if opt.endpoint == '':
-        print ("Start server on port %d" % opt.port)
-
-        s.bind(('', opt.port))
-        s.listen()
-
-        s, addr = s.accept()
-
-        print ("Accepted connection from client", addr)
-    else:
-        print ("Start connecting to ip %s on port %d" % (opt.endpoint, opt.port))
-
-        try:
-            s.connect((opt.endpoint, opt.port))
-
-            print("Connected")
-        except:
-            print ("Can not connect to other side")
-            
-            return
-
-    # -----------------------------------------------------------------------------
     # Load best model from path
     # -----------------------------------------------------------------------------
     (Epoch, BestPrecision, GeneratorDict, OptimizerDict) = LoadCheckpoint(opt.path_to_savepoint + '/model_best_generator.pth.tar')
