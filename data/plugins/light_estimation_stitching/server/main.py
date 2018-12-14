@@ -456,11 +456,13 @@ def OnNewClient(_Socket, _Address):
         # -----------------------------------------------------------------------------
         sample = torch.cat((masked_samples.data, gen_mask.data), -2)
 
-        
-
         save_image(sample, '{}{}/result_panorama_{}.png'.format(opt.output, _Address[0], Interval), nrow=1, normalize=True)
 
         Interval = Interval + 1
+
+    print ("Disconnected from client", _Address)
+
+    os.remove('./tmp/{}/tmp_output_generator.png'.format(_Address[0]))
     
     _Socket.close()
 
@@ -492,6 +494,8 @@ def StartServer():
         Client, Address = Socket.accept()
 
         _thread.start_new_thread(OnNewClient, (Client, Address))
+    
+    Socket.close()
 
 # -----------------------------------------------------------------------------
 # Main function
