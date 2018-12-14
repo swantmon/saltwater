@@ -440,9 +440,9 @@ def SocketUsage():
             print("Wait for data...")
 
             try:
-                header = s.recv(8)
+                header = s.recv(12)
 
-                integers = struct.unpack('I' * 2, header)
+                integers = struct.unpack('I' * 3, header)
                 bytesLeft = integers[1]
                 panorama = np.array([])
 
