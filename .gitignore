@@ -255,7 +255,6 @@ CMakeLists.txt.user*
 /assets/
 /bin/
 /extern/
-!/data/**
 
 ### Engine specific files ###
-*.bat
+/*.bat
