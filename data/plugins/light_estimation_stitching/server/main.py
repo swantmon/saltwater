@@ -6,6 +6,7 @@ import math
 import socket
 import struct
 import cv2
+import _thread 
 
 import torchvision.transforms as transforms
 from torchvision.utils import save_image
@@ -44,7 +45,6 @@ parser.add_argument('--mask_size', type=int, default=64, help='size of random ma
 parser.add_argument('--sample_interval', type=int, default=1000, help='interval between image sampling')
 parser.add_argument('--output', type=str, default='./output/20181115_SUN360_FLAT_256x128/', help='output folder of the results')
 parser.add_argument('--path_to_savepoint', type=str, default='./savepoint/', help='path to load and store savepoint')
-parser.add_argument('--endpoint', type=str, default='', help='IP address to an endpoint')
 parser.add_argument('--port', type=int, default=12345, help='Port address to an endpoint')
 opt = parser.parse_args()
 
@@ -367,7 +367,98 @@ def Training():
 
 # -----------------------------------------------------------------------------
 
-def SocketUsage():
+def OnNewClient(_Socket, _Address):
+    print ("Accepted connection from client", _Address)
+
+    # -----------------------------------------------------------------------------
+    # Wait for data
+    # -----------------------------------------------------------------------------
+    IsRunning = True
+    Interval = 0
+    
+    while (IsRunning):
+        print("Wait for data...")
+
+        try:
+            header = _Socket.recv(12)
+
+            integers = struct.unpack('I' * 3, header)
+            bytesLeft = integers[1]
+            panorama = np.array([])
+
+            print("Receiving ", bytesLeft, " byte of data")
+
+            while bytesLeft > 0:
+                buffer = _Socket.recv(bytesLeft)
+                bytesLeft -= len(buffer)
+
+                nparray = np.frombuffer(buffer, dtype=np.uint8)
+                panorama = np.concatenate([panorama, nparray])
+        except:
+            print ("An error occured during waiting for header payload data")
+            IsRunning = False
+            continue
+
+        print("Data received")
+
+        # -----------------------------------------------------------------------------
+        # Use generator to create estimation
+        # -----------------------------------------------------------------------------
+        panorama.shape = (opt.img_size_h, opt.img_size_w, 4)
+        panorama = panorama / 255.0
+        
+        masked_sample = Image.new("RGB", (opt.img_size_w, opt.img_size_h), "white")
+        masked_sample_pixels = masked_sample.load()
+
+        for y in range(opt.img_size_h):
+            for x in range(opt.img_size_w):
+                if panorama[y][x][3] != 0.0:
+                    masked_sample_pixels[x, y] = (int(panorama[y][x][0] * 255), int(panorama[y][x][1] * 255), int(panorama[y][x][2] * 255))
+
+        transform = transforms.Compose(transforms_)
+
+        masked_sample = transform(masked_sample)
+
+        masked_samples = torch.zeros([1, 3, opt.img_size_h, opt.img_size_w])
+
+        masked_samples[0] = masked_sample
+
+        masked_samples = Variable(masked_samples.type(Tensor))
+
+        gen_mask = generator(masked_samples)
+
+        # -----------------------------------------------------------------------------
+        # Send generated image back
+        # Now: Save image to see quality
+        # TODO: Do not save image! Use data directly.
+        # -----------------------------------------------------------------------------
+        save_image(gen_mask.data, './tmp_output_generator.png', nrow=1, normalize=True)  
+
+        im = Image.open("./tmp_output_generator.png").convert('RGBA')
+
+        resultData =  np.asarray(list(im.getdata()))
+
+        resultData = resultData.astype(np.uint8)
+
+        pixels = resultData.tobytes()
+
+        _Socket.sendall(struct.pack('iii', 0, opt.img_size_w * opt.img_size_h * 4, opt.img_size_w * opt.img_size_h * 4))
+        _Socket.sendall(pixels)
+
+        # -----------------------------------------------------------------------------
+        # Save output and input to file system
+        # -----------------------------------------------------------------------------
+        sample = torch.cat((masked_samples.data, gen_mask.data), -2)
+
+        save_image(sample, './output/result_panorama_%d.png' % Interval, nrow=1, normalize=True)
+
+        Interval = Interval + 1
+    
+    _Socket.close()
+
+# -----------------------------------------------------------------------------
+
+def StartServer():
     # -----------------------------------------------------------------------------
     # Load best model from path
     # -----------------------------------------------------------------------------
@@ -379,120 +470,23 @@ def SocketUsage():
 
     # -----------------------------------------------------------------------------
     # Open socket and connect or listen
-    # -----------------------------------------------------------------------------
-    while(1):
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    # -----------------------------------------------------------------------------          
+    Socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-        if opt.endpoint == '':
-            print ("Start server on port %d" % opt.port)
+    print ("Start server on port %d" % opt.port)
 
-            s.bind(('', opt.port))
-            s.listen()
+    Socket.bind(('', opt.port))
+    Socket.listen()
 
-            s, addr = s.accept()
+    while True:
+        print ("Wait for client...")
 
-            print ("Accepted connection from client", addr)
-        else:
-            print ("Start connecting to ip %s on port %d" % (opt.endpoint, opt.port))
+        Client, Address = Socket.accept()
 
-            try:
-                s.connect((opt.endpoint, opt.port))
-
-                print("Connected")
-            except:
-                print ("Can not connect to other side")
-                
-                return
-
-        # -----------------------------------------------------------------------------
-        # Wait for data
-        # -----------------------------------------------------------------------------
-        IsRunning = True
-        Interval = 0
-        
-        while (IsRunning):
-            print("Wait for data...")
-
-            try:
-                header = s.recv(12)
-
-                integers = struct.unpack('I' * 3, header)
-                bytesLeft = integers[1]
-                panorama = np.array([])
-
-                print("Receiving ", bytesLeft, " byte of data")
-
-                while bytesLeft > 0:
-                    buffer = s.recv(bytesLeft)
-                    bytesLeft -= len(buffer)
-
-                    nparray = np.frombuffer(buffer, dtype=np.uint8)
-                    panorama = np.concatenate([panorama, nparray])
-            except:
-                print ("An error occured during waiting for header payload data")
-                IsRunning = False
-                continue
-
-            print("Data received")
-
-            # -----------------------------------------------------------------------------
-            # Use generator to create estimation
-            # -----------------------------------------------------------------------------
-            panorama.shape = (opt.img_size_h, opt.img_size_w, 4)
-            panorama = panorama / 255.0
-            
-            masked_sample = Image.new("RGB", (opt.img_size_w, opt.img_size_h), "white")
-            masked_sample_pixels = masked_sample.load()
-
-            for y in range(opt.img_size_h):
-                for x in range(opt.img_size_w):
-                    if panorama[y][x][3] != 0.0:
-                        masked_sample_pixels[x, y] = (int(panorama[y][x][0] * 255), int(panorama[y][x][1] * 255), int(panorama[y][x][2] * 255))
-
-            transform = transforms.Compose(transforms_)
-
-            masked_sample = transform(masked_sample)
-
-            masked_samples = torch.zeros([1, 3, opt.img_size_h, opt.img_size_w])
-
-            masked_samples[0] = masked_sample
-
-            masked_samples = Variable(masked_samples.type(Tensor))
-
-            gen_mask = generator(masked_samples)
-
-            # -----------------------------------------------------------------------------
-            # Send generated image back
-            # Now: Save image to see quality
-            # TODO: Do not save image! Use data directly.
-            # -----------------------------------------------------------------------------
-            save_image(gen_mask.data, './tmp_output_generator.png', nrow=1, normalize=True)  
-
-            im = Image.open("./tmp_output_generator.png").convert('RGBA')
-
-            resultData =  np.asarray(list(im.getdata()))
-
-            resultData = resultData.astype(np.uint8)
-
-            pixels = resultData.tobytes()
-
-            s.sendall(struct.pack('iii', 0, opt.img_size_w * opt.img_size_h * 4, opt.img_size_w * opt.img_size_h * 4))
-            s.sendall(pixels)
-
-            # -----------------------------------------------------------------------------
-            # Save output and input to file system
-            # -----------------------------------------------------------------------------
-            sample = torch.cat((masked_samples.data, gen_mask.data), -2)
-
-            save_image(sample, './output/result_panorama_%d.png' % Interval, nrow=1, normalize=True)
-
-            Interval = Interval + 1
-    
-        s.close()
-    
+        _thread.start_new_thread(OnNewClient, (Client, Address))
 
 # -----------------------------------------------------------------------------
 # Main function
 # -----------------------------------------------------------------------------
 if __name__ == '__main__':
-    SocketUsage()
+    StartServer()
