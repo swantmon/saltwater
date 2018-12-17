@@ -84,6 +84,4 @@ def SaveCheckpoint(_Epoch, _ModelDict, _BestPrecision, _OptimizerDict, _Filename
         }, _Filename)
 
 def LoadCheckpoint(_Filename='checkpoint.pth.tar'):
-    Checkpoint = torch.load(_Filename, map_location='cpu')
-
-    return (Checkpoint['epoch'], Checkpoint['best_prec1'], Checkpoint['state_dict'], Checkpoint['optimizer'])
+    return torch.load(_Filename)

@@ -7,6 +7,7 @@ import socket
 import struct
 import cv2
 import _thread 
+import sys
 
 import torchvision.transforms as transforms
 from torchvision.utils import save_image
@@ -47,13 +48,15 @@ os.makedirs(opt.output, exist_ok=True)
 cuda = True if torch.cuda.is_available() else False
 
 # -----------------------------------------------------------------------------
-# Settings
+# GAN & Settings
 # -----------------------------------------------------------------------------
 transforms_ = [ transforms.Resize((opt.img_size_h, opt.img_size_w), Image.BICUBIC),
                 transforms.ToTensor(),
                 transforms.Normalize((0.5,0.5,0.5), (0.5,0.5,0.5)) ]
 
 Tensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
+
+generator = Generator()
 
 # -----------------------------------------------------------------------------
 # Functionality
@@ -161,32 +164,44 @@ def OnNewClient(_Socket, _Address):
 # Main function
 # -----------------------------------------------------------------------------
 if __name__ == '__main__':
-    # -----------------------------------------------------------------------------
-    # Load best model from path
-    # -----------------------------------------------------------------------------
-    generator = Generator()
+    try:
 
-    (Epoch, BestPrecision, GeneratorDict, OptimizerDict) = LoadCheckpoint(opt.path_to_generator)
+        # -----------------------------------------------------------------------------
+        # Load best model from path
+        # -----------------------------------------------------------------------------
+        if os.path.isfile(opt.path_to_generator) == False:
+            print ('No existing checkpoint available (Path:', opt.path_to_generator, ')')
+            os._exit(1)
 
-    generator.load_state_dict(GeneratorDict)
+        Checkpoint = LoadCheckpoint(opt.path_to_generator)
 
-    print ("Loaded extisting checkpoint")
+        generator.load_state_dict(Checkpoint['state_dict'])
 
-    # -----------------------------------------------------------------------------
-    # Open socket and connect or listen
-    # -----------------------------------------------------------------------------          
-    Socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        print ("Loaded extisting checkpoint")
 
-    print ("Start server on port %d" % opt.port)
+        # -----------------------------------------------------------------------------
+        # Open socket and connect or listen
+        # -----------------------------------------------------------------------------          
+        Socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    Socket.bind(('', opt.port))
-    Socket.listen()
+        print ("Start server on port %d" % opt.port)
 
-    while True:
-        print ("Wait for client...")
+        Socket.bind(('', opt.port))
+        Socket.listen()
 
-        Client, Address = Socket.accept()
+        while True:
+            print ("Wait for client...")
 
-        _thread.start_new_thread(OnNewClient, (Client, Address))
-    
-    Socket.close()
+            Client, Address = Socket.accept()
+
+            _thread.start_new_thread(OnNewClient, (Client, Address))
+        
+        Socket.close()
+
+    except OSError as err:
+        print("OS error: {0}".format(err))
+    except ValueError:
+        print("Could not convert data to an integer.")
+    except:
+        print("Unexpected error:", sys.exc_info()[0])
+        raise

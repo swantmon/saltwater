@@ -4,6 +4,7 @@ import os
 import numpy as np
 import math
 import cv2
+import sys
 
 import torchvision.transforms as transforms
 from torchvision.utils import save_image
@@ -270,77 +271,107 @@ def save_sample(batches_done, _Path):
 # Main function
 # -----------------------------------------------------------------------------
 if __name__ == '__main__':
-    MinimalLoss = 1000
 
-    for epoch in range(opt.n_epochs):
-        for i, (imgs, masked_imgs, masked_parts) in enumerate(train_dataloader):
+    try:
 
-            # -----------------------------------------------------------------------------
-            # Adversarial ground truths
-            # -----------------------------------------------------------------------------
-            valid = Variable(Tensor(imgs.shape[0], *patch).fill_(1.0), requires_grad=False)
-            fake = Variable(Tensor(imgs.shape[0], *patch).fill_(0.0), requires_grad=False)
+        if os.path.isfile(opt.path_to_savepoint + '/model_best_generator.pth.tar'):
+            Checkpoint = LoadCheckpoint(opt.path_to_savepoint + '/model_best_discriminator.pth.tar')
+
+            discriminator.load_state_dict(Checkpoint['state_dict'])
+            optimizer_D.load_state_dict(Checkpoint['optimizer'])
 
             # -----------------------------------------------------------------------------
-            # Configure input
-            # -----------------------------------------------------------------------------
-            imgs = Variable(imgs.type(Tensor))
-            masked_imgs = Variable(masked_imgs.type(Tensor))
-            masked_parts = Variable(masked_parts.type(Tensor))
 
-            # -----------------------------------------------------------------------------
-            #  Train Generator
-            # -----------------------------------------------------------------------------
-            optimizer_G.zero_grad()
+            Checkpoint = LoadCheckpoint(opt.path_to_savepoint + '/model_best_generator.pth.tar')
 
-            # -----------------------------------------------------------------------------
-            # Generate a batch of images
-            # -----------------------------------------------------------------------------
-            gen_parts = generator(masked_imgs)
+            LastEpoch            = Checkpoint['epoch']
+            GeneratorMinimalLoss = Checkpoint['best_prec1']
 
-            # -----------------------------------------------------------------------------
-            # Adversarial and pixelwise loss
-            # -----------------------------------------------------------------------------
-            g_adv = adversarial_loss(discriminator(gen_parts), valid)
-            g_pixel = pixelwise_loss(gen_parts, masked_parts)
+            generator.load_state_dict(Checkpoint['state_dict'])
+            optimizer_G.load_state_dict(Checkpoint['optimizer'])
+        else:
+            LastEpoch = 0
+            GeneratorMinimalLoss = 1000
 
-            g_loss = 0.001 * g_adv + 0.999 * g_pixel
+        # -----------------------------------------------------------------------------
 
-            g_loss.backward()
-            optimizer_G.step()
+        for epoch in range(LastEpoch, opt.n_epochs):
+            for i, (imgs, masked_imgs, masked_parts) in enumerate(train_dataloader):
 
-            # -----------------------------------------------------------------------------
-            #  Train Discriminator
-            # -----------------------------------------------------------------------------
-            optimizer_D.zero_grad()
+                # -----------------------------------------------------------------------------
+                # Adversarial ground truths
+                # -----------------------------------------------------------------------------
+                valid = Variable(Tensor(imgs.shape[0], *patch).fill_(1.0), requires_grad=False)
+                fake = Variable(Tensor(imgs.shape[0], *patch).fill_(0.0), requires_grad=False)
 
-            # -----------------------------------------------------------------------------
-            # Measure discriminator's ability to classify real from generated samples
-            # -----------------------------------------------------------------------------
-            real_loss = adversarial_loss(discriminator(masked_parts), valid)
-            fake_loss = adversarial_loss(discriminator(gen_parts.detach()), fake)
-            d_loss = 0.5 * (real_loss + fake_loss)
+                # -----------------------------------------------------------------------------
+                # Configure input
+                # -----------------------------------------------------------------------------
+                imgs = Variable(imgs.type(Tensor))
+                masked_imgs = Variable(masked_imgs.type(Tensor))
+                masked_parts = Variable(masked_parts.type(Tensor))
 
-            d_loss.backward()
-            optimizer_D.step()
+                # -----------------------------------------------------------------------------
+                #  Train Generator
+                # -----------------------------------------------------------------------------
+                optimizer_G.zero_grad()
 
-            # -----------------------------------------------------------------------------
-            # Generate sample at sample interval w/ test dataset
-            # -----------------------------------------------------------------------------
-            batches_done = epoch * len(train_dataloader) + i
-            if batches_done % opt.sample_interval == 0:
-                save_sample(batches_done, opt.output + '/%d.png' % batches_done)
+                # -----------------------------------------------------------------------------
+                # Generate a batch of images
+                # -----------------------------------------------------------------------------
+                gen_parts = generator(masked_imgs)
 
-            # -----------------------------------------------------------------------------
-            # Save network if it is the best up to now
-            # -----------------------------------------------------------------------------
-            if g_loss < MinimalLoss and epoch > 0:
-                MinimalLoss = g_loss
-                SaveCheckpoint(epoch, generator.state_dict(), g_loss, optimizer_G.state_dict(), opt.path_to_savepoint + '/model_best_generator.pth.tar')
-                SaveCheckpoint(epoch, discriminator.state_dict(), d_loss, optimizer_D.state_dict(), opt.path_to_savepoint + '/model_best_discriminator.pth.tar')
-                save_sample(batches_done, opt.path_to_savepoint + '/model_best_epoch_batch.png')
-            
-            # -----------------------------------------------------------------------------
-            # Round end
-            # -----------------------------------------------------------------------------
-            print ('[Epoch %d/%d] [Batch %d/%d] [D loss: %f] [G adv: %f, pixel: %f, total: %f]' % (epoch, opt.n_epochs, i, len(train_dataloader), d_loss.item(), g_adv.item(), g_pixel.item(), g_loss.item()))
+                # -----------------------------------------------------------------------------
+                # Adversarial and pixelwise loss
+                # -----------------------------------------------------------------------------
+                g_adv = adversarial_loss(discriminator(gen_parts), valid)
+                g_pixel = pixelwise_loss(gen_parts, masked_parts)
+
+                g_loss = 0.001 * g_adv + 0.999 * g_pixel
+
+                g_loss.backward()
+                optimizer_G.step()
+
+                # -----------------------------------------------------------------------------
+                #  Train Discriminator
+                # -----------------------------------------------------------------------------
+                optimizer_D.zero_grad()
+
+                # -----------------------------------------------------------------------------
+                # Measure discriminator's ability to classify real from generated samples
+                # -----------------------------------------------------------------------------
+                real_loss = adversarial_loss(discriminator(masked_parts), valid)
+                fake_loss = adversarial_loss(discriminator(gen_parts.detach()), fake)
+                d_loss = 0.5 * (real_loss + fake_loss)
+
+                d_loss.backward()
+                optimizer_D.step()
+
+                # -----------------------------------------------------------------------------
+                # Generate sample at sample interval w/ test dataset
+                # -----------------------------------------------------------------------------
+                batches_done = epoch * len(train_dataloader) + i
+                if batches_done % opt.sample_interval == 0:
+                    save_sample(batches_done, opt.output + '/%d.png' % batches_done)
+
+                # -----------------------------------------------------------------------------
+                # Save network if it is the best up to now
+                # -----------------------------------------------------------------------------
+                if g_loss < GeneratorMinimalLoss and epoch > 0:
+                    GeneratorMinimalLoss = g_loss
+                    SaveCheckpoint(epoch, generator.state_dict(), g_loss, optimizer_G.state_dict(), opt.path_to_savepoint + '/model_best_generator.pth.tar')
+                    SaveCheckpoint(epoch, discriminator.state_dict(), d_loss, optimizer_D.state_dict(), opt.path_to_savepoint + '/model_best_discriminator.pth.tar')
+                    save_sample(batches_done, opt.path_to_savepoint + '/model_best_epoch_batch.png')
+                
+                # -----------------------------------------------------------------------------
+                # Round end
+                # -----------------------------------------------------------------------------
+                print ('[Epoch %d/%d] [Batch %d/%d] [D loss: %f] [G adv: %f, pixel: %f, total: %f]' % (epoch, opt.n_epochs, i, len(train_dataloader), d_loss.item(), g_adv.item(), g_pixel.item(), g_loss.item()))
+
+    except OSError as err:
+        print("OS error: {0}".format(err))
+    except ValueError:
+        print("Could not convert data to an integer.")
+    except:
+        print("Unexpected error:", sys.exc_info()[0])
+        raise
