@@ -198,10 +198,10 @@ if __name__ == '__main__':
         
         Socket.close()
 
-    except OSError as err:
-        print("OS error: {0}".format(err))
+    except OSError as _Error:
+        print("OS error: {0}".format(_Error))
     except ValueError:
-        print("Could not convert data to an integer.")
+        print("Could not convert data to an value.")
     except:
         print("Unexpected error:", sys.exc_info()[0])
         raise

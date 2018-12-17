@@ -289,6 +289,8 @@ if __name__ == '__main__':
 
             generator.load_state_dict(Checkpoint['state_dict'])
             optimizer_G.load_state_dict(Checkpoint['optimizer'])
+
+            print ("Loaded extisting checkpoint to resume in epoch", LastEpoch)
         else:
             LastEpoch = 0
             GeneratorMinimalLoss = 1000
@@ -361,17 +363,17 @@ if __name__ == '__main__':
                     GeneratorMinimalLoss = g_loss
                     SaveCheckpoint(epoch, generator.state_dict(), g_loss, optimizer_G.state_dict(), opt.path_to_savepoint + '/model_best_generator.pth.tar')
                     SaveCheckpoint(epoch, discriminator.state_dict(), d_loss, optimizer_D.state_dict(), opt.path_to_savepoint + '/model_best_discriminator.pth.tar')
-                    save_sample(batches_done, opt.path_to_savepoint + '/model_best_epoch_batch.png')
+                    save_sample(batches_done, opt.path_to_savepoint + '/model_best_batch.png')
                 
                 # -----------------------------------------------------------------------------
                 # Round end
                 # -----------------------------------------------------------------------------
                 print ('[Epoch %d/%d] [Batch %d/%d] [D loss: %f] [G adv: %f, pixel: %f, total: %f]' % (epoch, opt.n_epochs, i, len(train_dataloader), d_loss.item(), g_adv.item(), g_pixel.item(), g_loss.item()))
 
-    except OSError as err:
-        print("OS error: {0}".format(err))
+    except OSError as _Error:
+        print("OS error: {0}".format(_Error))
     except ValueError:
-        print("Could not convert data to an integer.")
+        print("Could not convert data to an value.")
     except:
         print("Unexpected error:", sys.exc_info()[0])
         raise
