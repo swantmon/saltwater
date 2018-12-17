@@ -3,7 +3,6 @@ import glob
 import os
 import numpy as np
 import math
-import cv2
 import sys
 
 import torchvision.transforms as transforms

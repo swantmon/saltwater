@@ -5,7 +5,6 @@ import numpy as np
 import math
 import socket
 import struct
-import cv2
 import _thread 
 import sys
 
