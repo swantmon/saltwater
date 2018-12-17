@@ -5,4 +5,3 @@ scipy
 pillow
 urllib3
 scikit-image
-opencv-python

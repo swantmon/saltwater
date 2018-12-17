@@ -3,10 +3,7 @@ import glob
 import os
 import numpy as np
 import math
-import socket
-import struct
-import cv2
-import _thread 
+import sys
 
 import torchvision.transforms as transforms
 from torchvision.utils import save_image
@@ -45,7 +42,6 @@ parser.add_argument('--mask_size', type=int, default=64, help='size of random ma
 parser.add_argument('--sample_interval', type=int, default=1000, help='interval between image sampling')
 parser.add_argument('--output', type=str, default='./output/', help='output folder of the results')
 parser.add_argument('--path_to_savepoint', type=str, default='./savepoint/', help='path to load and store savepoint')
-parser.add_argument('--port', type=int, default=12345, help='Port address to an endpoint')
 opt = parser.parse_args()
 
 # -----------------------------------------------------------------------------
@@ -271,234 +267,112 @@ def save_sample(batches_done, _Path):
     save_image(sample, _Path, nrow=6, normalize=True)
 
 # -----------------------------------------------------------------------------
-# Logging
-# -----------------------------------------------------------------------------
-def SaveCheckpoint(_Epoch, _ModelDict, _BestPrecision, _OptimizerDict, _Filename='checkpoint.pth.tar'):
-    torch.save({
-            'epoch': _Epoch + 1,
-            'state_dict': _ModelDict,
-            'best_prec1': _BestPrecision,
-            'optimizer' : _OptimizerDict,
-        }, _Filename)
-
-def LoadCheckpoint(_Filename='checkpoint.pth.tar'):
-    Checkpoint = torch.load(_Filename)
-
-    return (Checkpoint['epoch'], Checkpoint['best_prec1'], Checkpoint['state_dict'], Checkpoint['optimizer'])
-
-# -----------------------------------------------------------------------------
-# Functionality
-# -----------------------------------------------------------------------------
-def Training():
-    MinimalLoss = 1000
-
-    for epoch in range(opt.n_epochs):
-        for i, (imgs, masked_imgs, masked_parts) in enumerate(train_dataloader):
-
-            # -----------------------------------------------------------------------------
-            # Adversarial ground truths
-            # -----------------------------------------------------------------------------
-            valid = Variable(Tensor(imgs.shape[0], *patch).fill_(1.0), requires_grad=False)
-            fake = Variable(Tensor(imgs.shape[0], *patch).fill_(0.0), requires_grad=False)
-
-            # -----------------------------------------------------------------------------
-            # Configure input
-            # -----------------------------------------------------------------------------
-            imgs = Variable(imgs.type(Tensor))
-            masked_imgs = Variable(masked_imgs.type(Tensor))
-            masked_parts = Variable(masked_parts.type(Tensor))
-
-            # -----------------------------------------------------------------------------
-            #  Train Generator
-            # -----------------------------------------------------------------------------
-            optimizer_G.zero_grad()
-
-            # -----------------------------------------------------------------------------
-            # Generate a batch of images
-            # -----------------------------------------------------------------------------
-            gen_parts = generator(masked_imgs)
-
-            # -----------------------------------------------------------------------------
-            # Adversarial and pixelwise loss
-            # -----------------------------------------------------------------------------
-            g_adv = adversarial_loss(discriminator(gen_parts), valid)
-            g_pixel = pixelwise_loss(gen_parts, masked_parts)
-
-            g_loss = 0.001 * g_adv + 0.999 * g_pixel
-
-            g_loss.backward()
-            optimizer_G.step()
-
-            # -----------------------------------------------------------------------------
-            #  Train Discriminator
-            # -----------------------------------------------------------------------------
-            optimizer_D.zero_grad()
-
-            # -----------------------------------------------------------------------------
-            # Measure discriminator's ability to classify real from generated samples
-            # -----------------------------------------------------------------------------
-            real_loss = adversarial_loss(discriminator(masked_parts), valid)
-            fake_loss = adversarial_loss(discriminator(gen_parts.detach()), fake)
-            d_loss = 0.5 * (real_loss + fake_loss)
-
-            d_loss.backward()
-            optimizer_D.step()
-
-            # -----------------------------------------------------------------------------
-            # Generate sample at sample interval w/ test dataset
-            # -----------------------------------------------------------------------------
-            batches_done = epoch * len(train_dataloader) + i
-            if batches_done % opt.sample_interval == 0:
-                save_sample(batches_done, opt.output + '/%d.png' % batches_done)
-
-            # -----------------------------------------------------------------------------
-            # Save network if it is the best up to now
-            # -----------------------------------------------------------------------------
-            if g_loss < MinimalLoss and epoch > 0:
-                MinimalLoss = g_loss
-                SaveCheckpoint(epoch, generator.state_dict(), g_loss, optimizer_G.state_dict(), opt.path_to_savepoint + '/model_best_generator.pth.tar')
-                SaveCheckpoint(epoch, discriminator.state_dict(), d_loss, optimizer_D.state_dict(), opt.path_to_savepoint + '/model_best_discriminator.pth.tar')
-                save_sample(batches_done, opt.path_to_savepoint + '/model_best_epoch_batch.png')
-            
-            # -----------------------------------------------------------------------------
-            # Round end
-            # -----------------------------------------------------------------------------
-            print ('[Epoch %d/%d] [Batch %d/%d] [D loss: %f] [G adv: %f, pixel: %f, total: %f]' % (epoch, opt.n_epochs, i, len(train_dataloader), d_loss.item(), g_adv.item(), g_pixel.item(), g_loss.item()))
-
-# -----------------------------------------------------------------------------
-
-def OnNewClient(_Socket, _Address):
-    print ("Accepted connection from client", _Address)
-
-    # -----------------------------------------------------------------------------
-    # Prepare for output
-    # -----------------------------------------------------------------------------
-    os.makedirs('{}{}'.format(opt.output, _Address[0]), exist_ok=True)
-    os.makedirs('./tmp/{}'.format(_Address[0]), exist_ok=True)
-
-    # -----------------------------------------------------------------------------
-    # Wait for data
-    # -----------------------------------------------------------------------------
-    IsRunning = True
-    Interval = 0
-    
-    while (IsRunning):
-        print(_Address, "Wait for data...")
-
-        try:
-            header = _Socket.recv(12)
-
-            integers = struct.unpack('I' * 3, header)
-            bytesLeft = integers[1]
-            panorama = np.array([])
-
-            print(_Address, "Receiving ", bytesLeft, " byte of data")
-
-            while bytesLeft > 0:
-                buffer = _Socket.recv(bytesLeft)
-                bytesLeft -= len(buffer)
-
-                nparray = np.frombuffer(buffer, dtype=np.uint8)
-                panorama = np.concatenate([panorama, nparray])
-        except:
-            print(_Address, "An error occured during waiting for header payload data")
-            IsRunning = False
-            continue
-
-        print(_Address, "Data received")
-
-        # -----------------------------------------------------------------------------
-        # Use generator to create estimation
-        # -----------------------------------------------------------------------------
-        panorama.shape = (opt.img_size_h, opt.img_size_w, 4)
-        panorama = panorama / 255.0
-        
-        masked_sample = Image.new("RGB", (opt.img_size_w, opt.img_size_h), "white")
-        masked_sample_pixels = masked_sample.load()
-
-        for y in range(opt.img_size_h):
-            for x in range(opt.img_size_w):
-                if panorama[y][x][3] != 0.0:
-                    masked_sample_pixels[x, y] = (int(panorama[y][x][0] * 255), int(panorama[y][x][1] * 255), int(panorama[y][x][2] * 255))
-
-        transform = transforms.Compose(transforms_)
-
-        masked_sample = transform(masked_sample)
-
-        masked_samples = torch.zeros([1, 3, opt.img_size_h, opt.img_size_w])
-
-        masked_samples[0] = masked_sample
-
-        masked_samples = Variable(masked_samples.type(Tensor))
-
-        gen_mask = generator(masked_samples)
-
-        # -----------------------------------------------------------------------------
-        # Send generated image back
-        # Now: Save image to see quality
-        # TODO: Do not save image! Use data directly.
-        # -----------------------------------------------------------------------------
-        save_image(gen_mask.data, './tmp/{}/tmp_output_generator.png'.format(_Address[0]), nrow=1, normalize=True)  
-
-        im = Image.open('./tmp/{}/tmp_output_generator.png'.format(_Address[0])).convert('RGBA')
-
-        resultData =  np.asarray(list(im.getdata()))
-
-        resultData = resultData.astype(np.uint8)
-
-        pixels = resultData.tobytes()
-
-        _Socket.sendall(struct.pack('iii', 0, opt.img_size_w * opt.img_size_h * 4, opt.img_size_w * opt.img_size_h * 4))
-        _Socket.sendall(pixels)
-
-        # -----------------------------------------------------------------------------
-        # Save output and input to file system
-        # -----------------------------------------------------------------------------
-        sample = torch.cat((masked_samples.data, gen_mask.data), -2)
-
-        save_image(sample, '{}{}/result_panorama_{}.png'.format(opt.output, _Address[0], Interval), nrow=1, normalize=True)
-
-        Interval = Interval + 1
-
-    print ("Disconnected from client", _Address)
-
-    os.remove('./tmp/{}/tmp_output_generator.png'.format(_Address[0]))
-    
-    _Socket.close()
-
-# -----------------------------------------------------------------------------
-
-def StartServer():
-    # -----------------------------------------------------------------------------
-    # Load best model from path
-    # -----------------------------------------------------------------------------
-    (Epoch, BestPrecision, GeneratorDict, OptimizerDict) = LoadCheckpoint(opt.path_to_savepoint + '/model_best_generator.pth.tar')
-
-    generator.load_state_dict(GeneratorDict)
-
-    print ("Loaded extisting checkpoint")
-
-    # -----------------------------------------------------------------------------
-    # Open socket and connect or listen
-    # -----------------------------------------------------------------------------          
-    Socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-    print ("Start server on port %d" % opt.port)
-
-    Socket.bind(('', opt.port))
-    Socket.listen()
-
-    while True:
-        print ("Wait for client...")
-
-        Client, Address = Socket.accept()
-
-        _thread.start_new_thread(OnNewClient, (Client, Address))
-    
-    Socket.close()
-
-# -----------------------------------------------------------------------------
 # Main function
 # -----------------------------------------------------------------------------
 if __name__ == '__main__':
-    StartServer()
+
+    try:
+
+        if os.path.isfile(opt.path_to_savepoint + '/model_best_generator.pth.tar'):
+            Checkpoint = LoadCheckpoint(opt.path_to_savepoint + '/model_best_discriminator.pth.tar')
+
+            discriminator.load_state_dict(Checkpoint['state_dict'])
+            optimizer_D.load_state_dict(Checkpoint['optimizer'])
+
+            # -----------------------------------------------------------------------------
+
+            Checkpoint = LoadCheckpoint(opt.path_to_savepoint + '/model_best_generator.pth.tar')
+
+            LastEpoch            = Checkpoint['epoch']
+            GeneratorMinimalLoss = Checkpoint['best_prec1']
+
+            generator.load_state_dict(Checkpoint['state_dict'])
+            optimizer_G.load_state_dict(Checkpoint['optimizer'])
+
+            print ("Loaded extisting checkpoint to resume in epoch", LastEpoch)
+        else:
+            LastEpoch = 0
+            GeneratorMinimalLoss = 1000
+
+        # -----------------------------------------------------------------------------
+
+        for epoch in range(LastEpoch, opt.n_epochs):
+            for i, (imgs, masked_imgs, masked_parts) in enumerate(train_dataloader):
+
+                # -----------------------------------------------------------------------------
+                # Adversarial ground truths
+                # -----------------------------------------------------------------------------
+                valid = Variable(Tensor(imgs.shape[0], *patch).fill_(1.0), requires_grad=False)
+                fake = Variable(Tensor(imgs.shape[0], *patch).fill_(0.0), requires_grad=False)
+
+                # -----------------------------------------------------------------------------
+                # Configure input
+                # -----------------------------------------------------------------------------
+                imgs = Variable(imgs.type(Tensor))
+                masked_imgs = Variable(masked_imgs.type(Tensor))
+                masked_parts = Variable(masked_parts.type(Tensor))
+
+                # -----------------------------------------------------------------------------
+                #  Train Generator
+                # -----------------------------------------------------------------------------
+                optimizer_G.zero_grad()
+
+                # -----------------------------------------------------------------------------
+                # Generate a batch of images
+                # -----------------------------------------------------------------------------
+                gen_parts = generator(masked_imgs)
+
+                # -----------------------------------------------------------------------------
+                # Adversarial and pixelwise loss
+                # -----------------------------------------------------------------------------
+                g_adv = adversarial_loss(discriminator(gen_parts), valid)
+                g_pixel = pixelwise_loss(gen_parts, masked_parts)
+
+                g_loss = 0.001 * g_adv + 0.999 * g_pixel
+
+                g_loss.backward()
+                optimizer_G.step()
+
+                # -----------------------------------------------------------------------------
+                #  Train Discriminator
+                # -----------------------------------------------------------------------------
+                optimizer_D.zero_grad()
+
+                # -----------------------------------------------------------------------------
+                # Measure discriminator's ability to classify real from generated samples
+                # -----------------------------------------------------------------------------
+                real_loss = adversarial_loss(discriminator(masked_parts), valid)
+                fake_loss = adversarial_loss(discriminator(gen_parts.detach()), fake)
+                d_loss = 0.5 * (real_loss + fake_loss)
+
+                d_loss.backward()
+                optimizer_D.step()
+
+                # -----------------------------------------------------------------------------
+                # Generate sample at sample interval w/ test dataset
+                # -----------------------------------------------------------------------------
+                batches_done = epoch * len(train_dataloader) + i
+                if batches_done % opt.sample_interval == 0:
+                    save_sample(batches_done, opt.output + '/%d.png' % batches_done)
+
+                # -----------------------------------------------------------------------------
+                # Save network if it is the best up to now
+                # -----------------------------------------------------------------------------
+                if g_loss < GeneratorMinimalLoss and epoch > 0:
+                    GeneratorMinimalLoss = g_loss
+                    SaveCheckpoint(epoch, generator.state_dict(), g_loss, optimizer_G.state_dict(), opt.path_to_savepoint + '/model_best_generator.pth.tar')
+                    SaveCheckpoint(epoch, discriminator.state_dict(), d_loss, optimizer_D.state_dict(), opt.path_to_savepoint + '/model_best_discriminator.pth.tar')
+                    save_sample(batches_done, opt.path_to_savepoint + '/model_best_batch.png')
+                
+                # -----------------------------------------------------------------------------
+                # Round end
+                # -----------------------------------------------------------------------------
+                print ('[Epoch %d/%d] [Batch %d/%d] [D loss: %f] [G adv: %f, pixel: %f, total: %f]' % (epoch, opt.n_epochs, i, len(train_dataloader), d_loss.item(), g_adv.item(), g_pixel.item(), g_loss.item()))
+
+    except OSError as _Error:
+        print("OS error: {0}".format(_Error))
+    except ValueError:
+        print("Could not convert data to an value.")
+    except:
+        print("Unexpected error:", sys.exc_info()[0])
+        raise

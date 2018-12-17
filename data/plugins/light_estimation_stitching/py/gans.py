@@ -2,7 +2,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch
 
-
+# -----------------------------------------------------------------------------
+# Models
+# -----------------------------------------------------------------------------
 class Generator(nn.Module):
     def __init__(self, channels=3):
         super(Generator, self).__init__()
@@ -69,3 +71,17 @@ class Discriminator(nn.Module):
 
     def forward(self, img):
         return self.model(img)
+
+# -----------------------------------------------------------------------------
+# Saving / Loading
+# -----------------------------------------------------------------------------
+def SaveCheckpoint(_Epoch, _ModelDict, _BestPrecision, _OptimizerDict, _Filename='checkpoint.pth.tar'):
+    torch.save({
+            'epoch': _Epoch + 1,
+            'state_dict': _ModelDict,
+            'best_prec1': _BestPrecision,
+            'optimizer' : _OptimizerDict,
+        }, _Filename)
+
+def LoadCheckpoint(_Filename='checkpoint.pth.tar'):
+    return torch.load(_Filename)
