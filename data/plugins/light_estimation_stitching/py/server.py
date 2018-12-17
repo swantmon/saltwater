@@ -57,6 +57,9 @@ Tensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
 
 generator = Generator()
 
+if cuda:
+    generator.cuda()
+
 # -----------------------------------------------------------------------------
 # Functionality
 # -----------------------------------------------------------------------------
