@@ -175,10 +175,6 @@ if __name__ == '__main__':
         # -----------------------------------------------------------------------------
         # Load best model from path
         # -----------------------------------------------------------------------------
-        if os.path.isfile(opt.path_to_generator) == False:
-            print ('No existing checkpoint available (Path:', opt.path_to_generator, ')')
-            os._exit(1)
-
         Checkpoint = LoadCheckpoint(opt.path_to_generator)
 
         generator.load_state_dict(Checkpoint['state_dict'])
