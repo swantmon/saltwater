@@ -63,7 +63,7 @@ if cuda:
 # -----------------------------------------------------------------------------
 # Functionality
 # -----------------------------------------------------------------------------
-def OnNewClient(_Socket, _Address):
+def OnNewClient(_Socket, _Address, _ID):
     print ("Accepted connection from client", _Address)
 
     # -----------------------------------------------------------------------------
@@ -134,9 +134,11 @@ def OnNewClient(_Socket, _Address):
         # Now: Save image to see quality
         # TODO: Do not save image! Use data directly.
         # -----------------------------------------------------------------------------
-        save_image(gen_mask.data, './tmp/{}/tmp_output_generator.png'.format(_Address[0]), nrow=1, normalize=True)  
+        os.makedirs('./tmp/{}/{}'.format(_Address[0], _ID), exist_ok=True)
 
-        im = Image.open('./tmp/{}/tmp_output_generator.png'.format(_Address[0])).convert('RGBA')
+        save_image(gen_mask.data, './tmp/{}/{}/tmp_output_generator.png'.format(_Address[0], _ID), nrow=1, normalize=True)  
+
+        im = Image.open('./tmp/{}/{}/tmp_output_generator.png'.format(_Address[0], _ID)).convert('RGBA')
 
         resultData =  np.asarray(list(im.getdata()))
 
@@ -152,13 +154,15 @@ def OnNewClient(_Socket, _Address):
         # -----------------------------------------------------------------------------
         sample = torch.cat((masked_samples.data, gen_mask.data), -2)
 
-        save_image(sample, '{}{}/result_panorama_{}.png'.format(opt.output, _Address[0], Interval), nrow=1, normalize=True)
+        os.makedirs('{}{}/{}'.format(opt.output, _Address[0], _ID), exist_ok=True)
+        save_image(sample, '{}{}/{}/result_panorama_{}.png'.format(opt.output, _Address[0], _ID, Interval), nrow=1, normalize=True)
 
         Interval = Interval + 1
 
     print ("Disconnected from client", _Address)
 
-    os.remove('./tmp/{}/tmp_output_generator.png'.format(_Address[0]))
+    if os.path.isfile('./tmp/{}/{}/tmp_output_generator.png'.format(_Address[0], _ID)) == True:
+        os.remove('./tmp/{}/{}/tmp_output_generator.png'.format(_Address[0], _ID))
     
     _Socket.close()
 
@@ -171,10 +175,6 @@ if __name__ == '__main__':
         # -----------------------------------------------------------------------------
         # Load best model from path
         # -----------------------------------------------------------------------------
-        if os.path.isfile(opt.path_to_generator) == False:
-            print ('No existing checkpoint available (Path:', opt.path_to_generator, ')')
-            os._exit(1)
-
         Checkpoint = LoadCheckpoint(opt.path_to_generator)
 
         generator.load_state_dict(Checkpoint['state_dict'])
@@ -191,12 +191,16 @@ if __name__ == '__main__':
         Socket.bind(('', opt.port))
         Socket.listen()
 
+        SocketID = 0
+
         while True:
             print ("Wait for client...")
 
             Client, Address = Socket.accept()
 
-            _thread.start_new_thread(OnNewClient, (Client, Address))
+            _thread.start_new_thread(OnNewClient, (Client, Address, SocketID))
+
+            SocketID = SocketID + 1
         
         Socket.close()
 
