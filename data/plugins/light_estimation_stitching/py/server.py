@@ -161,7 +161,8 @@ def OnNewClient(_Socket, _Address, _ID):
 
     print ("Disconnected from client", _Address)
 
-    os.remove('./tmp/{}/{}/tmp_output_generator.png'.format(_Address[0], _ID))
+    if os.path.isfile('./tmp/{}/{}/tmp_output_generator.png'.format(_Address[0], _ID)) == True:
+        os.remove('./tmp/{}/{}/tmp_output_generator.png'.format(_Address[0], _ID))
     
     _Socket.close()
 
