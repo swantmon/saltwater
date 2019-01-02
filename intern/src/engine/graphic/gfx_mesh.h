@@ -6,6 +6,8 @@
 
 #include "engine/graphic/gfx_lod.h"
 
+#include <array>
+
 namespace Gfx
 {
     class ENGINE_API CMesh : public Base::CManagedPoolItemBase
@@ -13,7 +15,7 @@ namespace Gfx
     public:
         
         static const unsigned int s_NumberOfLODs = 4;
-        
+
     public:
         
         unsigned int GetNumberOfLODs() const;
@@ -25,12 +27,13 @@ namespace Gfx
     public:
 
         CMesh();
+        ~CMesh();
         
     protected:
         
-        unsigned int      m_NumberOfLODs;
-        CLODPtr           m_LODs[s_NumberOfLODs];
-        Base::AABB3Float  m_AABB;
+        unsigned int                        m_NumberOfLODs;
+        std::array<CLODPtr, s_NumberOfLODs> m_LODs;
+        Base::AABB3Float                    m_AABB;
     };
 } // namespace Gfx
 

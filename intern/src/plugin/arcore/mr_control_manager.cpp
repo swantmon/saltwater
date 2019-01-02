@@ -490,6 +490,25 @@ namespace
         m_TrackedObjects.clear();
 
         // -----------------------------------------------------------------------------
+        // Release ressources
+        // -----------------------------------------------------------------------------
+        m_BackgroundTexturePtr   = 0;
+        m_ExternalTexturePtr     = 0;
+        m_BackgroundTargetSetPtr = 0;
+        m_WebcamVSPtr            = 0;
+        m_WebcamPSPtr            = 0;
+        m_PlaneVS                = 0;
+        m_PlanePS                = 0;
+        m_PointVS                = 0;
+        m_PointPS                = 0;
+        m_WebcamUVBufferPtr      = 0;
+        m_PlaneVerticesBufferPtr = 0;
+        m_PlaneIndicesBufferPtr  = 0;
+        m_PointVerticesBufferPtr = 0;
+        m_MatrixBufferPtr        = 0;
+        m_ColorBufferPtr         = 0;
+
+        // -----------------------------------------------------------------------------
         // AR session and frame
         // -----------------------------------------------------------------------------
         ArSession_destroy(m_pARSession);

@@ -27,11 +27,7 @@ namespace Gfx
 
         m_MaterialKey.m_Key = 0;
 
-        m_ShaderPtrs[CShader::Vertex] = 0;
-        m_ShaderPtrs[CShader::Hull] = 0;
-        m_ShaderPtrs[CShader::Domain] = 0;
-        m_ShaderPtrs[CShader::Geometry] = 0;
-        m_ShaderPtrs[CShader::Pixel] = 0;
+        for (auto& rShader : m_ShaderPtrs) rShader = 0;
 
         m_ForwardShaderPSPtr = 0;
 

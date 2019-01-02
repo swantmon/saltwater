@@ -42,6 +42,7 @@
 #include "engine/graphic/gfx_view_manager.h"
 
 #include <algorithm>
+#include <array>
 #include <vector>
 
 using namespace Gfx;
@@ -129,7 +130,7 @@ namespace
 
         struct SLightJob
         {
-            CTexturePtr m_ShadowTexturePtrs[s_MaxNumberOfLights];
+            std::array<CTexturePtr, s_MaxNumberOfLights> m_ShadowTexturePtrs;
             CTexturePtr m_SpecularTexturePtr;
             CTexturePtr m_DiffuseTexturePtr;
         };
@@ -137,7 +138,6 @@ namespace
     private:
 
         typedef std::vector<SRenderJob> CRenderJobs;
-        typedef std::vector<SLightJob> CLightJobs;
 
     private:
 
@@ -214,27 +214,36 @@ namespace
         // -----------------------------------------------------------------------------
         // Iterate throw render jobs to release managed pointer
         // -----------------------------------------------------------------------------
-        for (auto CurrentRenderJob : m_DeferredRenderJobs)
+        for (auto& rCurrentRenderJob : m_DeferredRenderJobs)
         {
-            CurrentRenderJob.m_SurfacePtr = nullptr;
+            rCurrentRenderJob.m_SurfacePtr = nullptr;
         }
 
         m_DeferredRenderJobs.clear();
 
         // -----------------------------------------------------------------------------
 
-        for (auto CurrentRenderJob : m_ForwardRenderJobs)
+        for (auto& rCurrentRenderJob : m_ForwardRenderJobs)
         {
-            CurrentRenderJob.m_SurfacePtr = nullptr;
+            rCurrentRenderJob.m_SurfacePtr = nullptr;
         }
 
         m_ForwardRenderJobs.clear();
 
         // -----------------------------------------------------------------------------
 
-        for (unsigned int IndexOfTexture = 0; IndexOfTexture < s_MaxNumberOfLights; ++IndexOfTexture)
+        for (auto& rCurrentRenderJob : m_HitproxyRenderJobs)
         {
-            m_ForwardLightTextures.m_ShadowTexturePtrs[IndexOfTexture] = nullptr;
+            rCurrentRenderJob.m_SurfacePtr = nullptr;
+        }
+
+        m_HitproxyRenderJobs.clear();
+
+        // -----------------------------------------------------------------------------
+
+        for (auto& rTexture : m_ForwardLightTextures.m_ShadowTexturePtrs)
+        {
+            rTexture = nullptr;
         }
 
         m_ForwardLightTextures.m_DiffuseTexturePtr  = nullptr;
