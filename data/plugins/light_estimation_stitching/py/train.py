@@ -4,6 +4,7 @@ import os
 import numpy as np
 import math
 import sys
+import random
 
 import torchvision.transforms as transforms
 from torchvision.utils import save_image
@@ -26,7 +27,7 @@ import torch
 # Config
 # -----------------------------------------------------------------------------
 parser = argparse.ArgumentParser()
-parser.add_argument('--n_epochs', type=int, default=1000, help='number of epochs of training')
+parser.add_argument('--n_epochs', type=int, default=2000, help='number of epochs of training')
 parser.add_argument('--batch_size', type=int, default=16, help='size of the batches')
 parser.add_argument('--path_to_dataset', type=str, default='./data/20181115_SUN360_FLAT_256x128/', help='path to the dataset (no recursive search)')
 parser.add_argument('--lr', type=float, default=0.0002, help='adam: learning rate')
@@ -37,10 +38,10 @@ parser.add_argument('--img_size_w', type=int, default=256, help='size of each im
 parser.add_argument('--img_size_h', type=int, default=128, help='size of each image dimension')
 parser.add_argument('--img_channels', type=int, default=3, help='number of image channels')
 parser.add_argument('--mask_ground_and_sky', type=float, default=0.3, help='Percentage of a mask for lower and upper part')
-parser.add_argument('--number_of_masks', type=int, default=2, help='number of random mask')
+parser.add_argument('--number_of_masks', type=int, default=4, help='number of random mask')
 parser.add_argument('--mask_size', type=int, default=64, help='size of random mask')
-parser.add_argument('--sample_interval', type=int, default=1000, help='interval between image sampling')
-parser.add_argument('--output', type=str, default='./output/', help='output folder of the results')
+parser.add_argument('--sample_interval', type=int, default=5000, help='interval between image sampling')
+parser.add_argument('--output', type=str, default='./output/20181115_SUN360_FLAT_256x128/', help='output folder of the results')
 parser.add_argument('--path_to_savepoint', type=str, default='./savepoint/', help='path to load and store savepoint')
 opt = parser.parse_args()
 
@@ -63,18 +64,6 @@ class ImageDataset(Dataset):
     # -----------------------------------------------------------------------------
 
     def apply_random_mask(self, img):
-        #x1 = np.random.randint(0, opt.img_size_w - opt.mask_size)
-        #y1 = np.random.randint(0, opt.img_size_h - opt.mask_size)
-
-        #y2, x2 = y1 + opt.mask_size, x1 + opt.mask_size
-
-        #masked_part = img.clone()
-        #masked_img = img.clone()
-
-        #masked_img[:, y1:y2, x1:x2] = 1
-
-        #return masked_img, masked_part
-
         masked_part = img.clone()
         masked_img = img.clone()
 
@@ -85,14 +74,14 @@ class ImageDataset(Dataset):
 
         masked_img[:, y1:y2, x1:x2] = 1
 
-        y1 = int(opt.img_size_h * (0.8 - opt.mask_ground_and_sky * 0.4))
-        y2 = int(opt.img_size_h * 0.8)
+        y1 = int(opt.img_size_h * (1.0 - opt.mask_ground_and_sky * 0.4))
+        y2 = int(opt.img_size_h * 1.0)
         x1 = int(0)
         x2 = int(opt.img_size_w)
 
         masked_img[:, y1:y2, x1:x2] = 1
         
-        for _ in range(opt.number_of_masks):
+        for _ in range(random.randrange(1, opt.number_of_masks + 1)):
             y1 = np.random.randint(0, opt.img_size_h - opt.mask_size)
             x1 = np.random.randint(0, opt.img_size_w - int(opt.mask_size * 1.5))
 
@@ -126,15 +115,15 @@ class ImageDataset(Dataset):
         masked_part[:, y1:y2, x1:x2] = 1
         masked_img[:, y1:y2, x1:x2] = 1
 
-        y1 = int(opt.img_size_h * (0.8 - opt.mask_ground_and_sky * 0.4))
-        y2 = int(opt.img_size_h * 0.8)
+        y1 = int(opt.img_size_h * (1.0 - opt.mask_ground_and_sky * 0.4))
+        y2 = int(opt.img_size_h * 1.0)
         x1 = int(0)
         x2 = int(opt.img_size_w)
 
         masked_part[:, y1:y2, x1:x2] = 1
         masked_img[:, y1:y2, x1:x2] = 1
         
-        for _ in range(opt.number_of_masks):
+        for _ in range(random.randrange(1, opt.number_of_masks + 1)):
             y1 = np.random.randint(0, opt.img_size_h - opt.mask_size)
             x1 = np.random.randint(0, opt.img_size_w - int(opt.mask_size * 1.5))
 
