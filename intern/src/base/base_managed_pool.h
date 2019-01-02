@@ -843,7 +843,7 @@ namespace CON
             }
             
             // -----------------------------------------------------------------------------
-            // Setup page with header informations
+            // Setup page with header information
             // -----------------------------------------------------------------------------
             pPage->m_Head.m_pOwner = this;
             pPage->m_Head.m_BaseID = static_cast<BID>(m_NumberOfSetNodes);
