@@ -50,6 +50,5 @@ namespace App
 
     void CPlayState::InternOnRun()
     {
-        App::Application::ChangeState(CState::Play);
     }
 } // namespace App

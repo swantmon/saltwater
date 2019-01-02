@@ -65,7 +65,6 @@ namespace
 
             unsigned int m_WindowID;
             std::string m_ParameterFile;
-            bool m_WindowTerminateRequested;
             int m_Running;
         };
         
@@ -224,36 +223,18 @@ namespace
             }
 
             // -----------------------------------------------------------------------------
-            // Events
-            // -----------------------------------------------------------------------------
-            if (m_AppSetup.m_WindowTerminateRequested)
-            {
-                m_RequestState = App::CState::Exit;
-
-                m_AppSetup.m_Running = 0;
-            }
-
-            // -----------------------------------------------------------------------------
             // Process
             // -----------------------------------------------------------------------------
-            if (m_AppSetup.m_Running)
+            s_pStates[m_CurrentState]->OnRun();
+
+            if (m_AppSetup.m_Running) Engine::Update();
+
+            // -----------------------------------------------------------------------------
+            // Check state
+            // -----------------------------------------------------------------------------
+            if (m_RequestState != m_CurrentState)
             {
-                // -----------------------------------------------------------------------------
-                // States
-                // -----------------------------------------------------------------------------
-                s_pStates[m_CurrentState]->OnRun();
-
-                Engine::Update();
-
-                //ENGINE_CONSOLE_INFOV("FPS: %f", 1.0f / Core::Time::GetDeltaTimeLastFrame());
-
-                // -----------------------------------------------------------------------------
-                // Check state
-                // -----------------------------------------------------------------------------
-                if (m_RequestState != m_CurrentState)
-                {
-                    OnTranslation(m_RequestState);
-                }
+                OnTranslation(m_RequestState);
             }
 
             if (m_RequestState == App::CState::Exit)
@@ -397,12 +378,18 @@ namespace
 
             case APP_CMD_TERM_WINDOW:
                 {
-                    AppSetup->m_WindowTerminateRequested = true;
+                    App::Application::ChangeState(App::CState::Exit);
+
+                    AppSetup->m_Running = 0;
                 }
                 break;
 
             case APP_CMD_DESTROY:
-                {  }
+                {
+                    App::Application::ChangeState(App::CState::Exit);
+
+                    AppSetup->m_Running = 0;
+                }
                 break;
 
             case APP_CMD_START:
