@@ -9,6 +9,8 @@
 #include "engine/graphic/gfx_shader.h"
 #include "engine/graphic/gfx_texture_set.h"
 
+#include <array>
+
 namespace Gfx
 {
     class ENGINE_API CMaterial : public Base::CManagedPoolItemBase
@@ -96,7 +98,7 @@ namespace Gfx
 
     protected:
 
-        CShaderPtr m_ShaderPtrs[CShader::NumberOfTypes];
+        std::array<CShaderPtr, CShader::NumberOfTypes> m_ShaderPtrs;
 
         CShaderPtr m_ForwardShaderPSPtr;
 

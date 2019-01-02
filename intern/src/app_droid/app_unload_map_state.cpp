@@ -2,6 +2,9 @@
 #include "app_droid/app_application.h"
 #include "app_droid/app_unload_map_state.h"
 
+#include "engine/data/data_entity_manager.h"
+#include "engine/data/data_map.h"
+
 namespace App
 {
     CUnloadMapState& CUnloadMapState::GetInstance()
@@ -30,6 +33,8 @@ namespace App
 
     void CUnloadMapState::InternOnEnter()
     {
+        Dt::Map          ::FreeMap();
+        Dt::EntityManager::Clear();
     }
 
     // -----------------------------------------------------------------------------

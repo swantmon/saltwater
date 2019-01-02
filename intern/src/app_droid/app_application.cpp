@@ -64,8 +64,8 @@ namespace
             ASensorEventQueue* m_SensorEventQueue;
 
             unsigned int m_WindowID;
-            bool m_TerminateRequested;
-            int m_Animating;
+            std::string m_ParameterFile;
+            int m_Running;
         };
         
     private:
@@ -73,7 +73,6 @@ namespace
         App::CState::EStateType m_CurrentState;
         App::CState::EStateType m_RequestState;
         SApplicationSetup       m_AppSetup;
-        std::string             m_ParameterFile;
         
     private:
         
@@ -104,7 +103,6 @@ namespace
     CApplication::CApplication()
         : m_CurrentState (App::CState::Init)
         , m_RequestState (App::CState::Init)
-        , m_ParameterFile("/android.config")
     {
         Base::CMemory::Zero(&m_AppSetup, sizeof(m_AppSetup));
     }
@@ -128,8 +126,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Set engine
         // -----------------------------------------------------------------------------
-        m_AppSetup.m_pAndroidApp = _pAndroidApp;
-        m_AppSetup.m_Animating   = 1;
+        m_AppSetup.m_pAndroidApp   = _pAndroidApp;
+        m_AppSetup.m_Running       = 0;
+        m_AppSetup.m_ParameterFile = std::string(m_AppSetup.m_pAndroidApp->activity->externalDataPath) +  "/android.config";
 
         // -----------------------------------------------------------------------------
         // Prepare to monitor accelerometer
@@ -145,7 +144,7 @@ namespace
 
         int VerbosityLevel = 0;
 
-        Core::CProgramParameters::GetInstance().ParseFile(m_AppSetup.m_pAndroidApp->activity->externalDataPath + m_ParameterFile);
+        Core::CProgramParameters::GetInstance().ParseFile(m_AppSetup.m_ParameterFile);
 
         VerbosityLevel = Core::CProgramParameters::GetInstance().Get<int>(VerbosityNameString, 3);
 
@@ -158,8 +157,11 @@ namespace
 
         // -----------------------------------------------------------------------------
         // From now on we can start the state engine and enter the first state
-        // -----------------------------------------------------------------------------        
-        s_pStates[m_CurrentState]->OnEnter();
+        // -----------------------------------------------------------------------------
+        m_CurrentState = App::CState::Init;
+        m_RequestState = App::CState::Init;
+
+        App::CInitState::GetInstance().OnEnter();
     }
     
     // -----------------------------------------------------------------------------
@@ -167,29 +169,21 @@ namespace
     void CApplication::OnExit()
     {
         // -----------------------------------------------------------------------------
-        // Make last transition to exit
+        // Save configuration
         // -----------------------------------------------------------------------------
-        OnTranslation(App::CState::UnloadMap);
-
-        s_pStates[m_CurrentState]->OnRun();
-
-        s_pStates[m_CurrentState]->OnLeave();
-
-        OnTranslation(App::CState::Exit);
-
-        s_pStates[m_CurrentState]->OnRun();
-
-        s_pStates[m_CurrentState]->OnLeave();
+        Core::CProgramParameters::GetInstance().WriteFile(m_AppSetup.m_ParameterFile);
 
         // -----------------------------------------------------------------------------
-        // Start engine
+        // Shutdown engine
         // -----------------------------------------------------------------------------
         Engine::Shutdown();
 
         // -----------------------------------------------------------------------------
-        // Save configuration
+        // Exit app
         // -----------------------------------------------------------------------------
-        Core::CProgramParameters::GetInstance().WriteFile(m_AppSetup.m_pAndroidApp->activity->externalDataPath + m_ParameterFile);
+        ANativeActivity_finish(m_AppSetup.m_pAndroidApp->activity);
+
+        exit(0);
     }
     
     // -----------------------------------------------------------------------------
@@ -200,18 +194,16 @@ namespace
         // With an window and context we initialize our application and run our game.
         // Furthermore we handle different events by the window.
         // -----------------------------------------------------------------------------
-        int ApplicationMessage = 0;
-
-        for (; ApplicationMessage == 0 ; )
+        for (;;)
         {
             // -----------------------------------------------------------------------------
-            // Events and inputs
+            // Inputs
             // -----------------------------------------------------------------------------
             int Identifcation;
             int Events;
             struct android_poll_source* AndroidPollSource;
 
-            while ((Identifcation = ALooper_pollAll(m_AppSetup.m_Animating ? 0 : -1, NULL, &Events, (void**)&AndroidPollSource)) >= 0) 
+            while ((Identifcation = ALooper_pollAll(m_AppSetup.m_Running ? 0 : -1, NULL, &Events, (void**)&AndroidPollSource)) >= 0)
             {
                 if (AndroidPollSource != NULL) 
                 {
@@ -230,34 +222,30 @@ namespace
                         }
                     }
                 }
-
-                if (m_AppSetup.m_pAndroidApp->destroyRequested != 0 || m_AppSetup.m_TerminateRequested != 0) 
-                {
-                    ApplicationMessage = 1;
-                }
             }
 
-            if (m_AppSetup.m_Animating)
+            // -----------------------------------------------------------------------------
+            // Process
+            // -----------------------------------------------------------------------------
+            s_pStates[m_CurrentState]->OnRun();
+
+            if (m_AppSetup.m_Running) Engine::Update();
+
+            // -----------------------------------------------------------------------------
+            // Check state
+            // -----------------------------------------------------------------------------
+            if (m_RequestState != m_CurrentState)
             {
-                // -----------------------------------------------------------------------------
-                // States
-                // -----------------------------------------------------------------------------
-                s_pStates[m_CurrentState]->OnRun();
+                OnTranslation(m_RequestState);
+            }
 
-                if (m_CurrentState != App::CState::Init)
-                {
-                    Engine::Update();
-                }
+            if (m_RequestState == App::CState::Exit)
+            {
+                App::CExitState::GetInstance().OnRun();
 
-                //ENGINE_CONSOLE_INFOV("FPS: %f", 1.0f / Core::Time::GetDeltaTimeLastFrame());
+                App::CExitState::GetInstance().OnLeave();
 
-                // -----------------------------------------------------------------------------
-                // Check state
-                // -----------------------------------------------------------------------------
-                if (m_RequestState != m_CurrentState)
-                {
-                    OnTranslation(m_RequestState);
-                }
+                break;
             }
         }
     }
@@ -353,6 +341,12 @@ namespace
         switch (_Command) 
         {
             case APP_CMD_SAVE_STATE:
+                {
+                    // -----------------------------------------------------------------------------
+                    // Save configuration
+                    // -----------------------------------------------------------------------------
+                    Core::CProgramParameters::GetInstance().WriteFile(AppSetup->m_ParameterFile);
+                }
                 break;
 
             case APP_CMD_INIT_WINDOW:
@@ -379,14 +373,40 @@ namespace
                     // Change state
                     // -----------------------------------------------------------------------------
                     App::Application::ChangeState(App::CState::Start);
+
+                    AppSetup->m_Running = 1;
                 }
                 break;
 
             case APP_CMD_TERM_WINDOW:
-                // -----------------------------------------------------------------------------
-                // The window is being hidden or closed, clean it up.
-                // -----------------------------------------------------------------------------
-                AppSetup->m_TerminateRequested = true;
+                {
+                    App::CExitState::GetInstance().OnRun();
+
+                    App::CExitState::GetInstance().OnLeave();
+
+                    Engine::Shutdown();
+                }
+                break;
+
+            case APP_CMD_DESTROY:
+                {
+                }
+                break;
+
+            case APP_CMD_START:
+                {  }
+                break;
+
+            case APP_CMD_STOP:
+                {  }
+                break;
+
+            case APP_CMD_PAUSE:
+                {  }
+                break;
+
+            case APP_CMD_RESUME:
+                {  }
                 break;
 
             case APP_CMD_CONTENT_RECT_CHANGED:
@@ -412,6 +432,8 @@ namespace
                 // -----------------------------------------------------------------------------
                 Engine::Resume();
 
+                AppSetup->m_Running = 1;
+
                 if (AppSetup->m_AccelerometerSensor != NULL)
                 {
                     ASensorEventQueue_enableSensor(AppSetup->m_SensorEventQueue, AppSetup->m_AccelerometerSensor);
@@ -421,8 +443,6 @@ namespace
                     // -----------------------------------------------------------------------------
                     ASensorEventQueue_setEventRate(AppSetup->m_SensorEventQueue, AppSetup->m_AccelerometerSensor, (1000L / 60) * 1000);
                 }
-
-                AppSetup->m_Animating = 1;
                 break;
 
             case APP_CMD_LOST_FOCUS:
@@ -432,12 +452,13 @@ namespace
                 // -----------------------------------------------------------------------------
                 Engine::Pause();
 
+                AppSetup->m_Running = 0;
+
                 if (AppSetup->m_AccelerometerSensor != NULL)
                 {
                     ASensorEventQueue_disableSensor(AppSetup->m_SensorEventQueue, AppSetup->m_AccelerometerSensor);
                 }
 
-                AppSetup->m_Animating = 0;
                 break;
         }
     }

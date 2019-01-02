@@ -166,13 +166,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Iterate throw render jobs to release managed pointer
         // -----------------------------------------------------------------------------
-        CRenderJobs::const_iterator EndOfRenderJobs;
-
-        EndOfRenderJobs = m_RenderJobs.end();
-
         for (auto& rCurrentRenderJob : m_RenderJobs)
         {
-            rCurrentRenderJob.m_SurfacePtr = nullptr;
+            rCurrentRenderJob.m_SurfacePtr = 0;
         }
 
         m_RenderJobs.clear();

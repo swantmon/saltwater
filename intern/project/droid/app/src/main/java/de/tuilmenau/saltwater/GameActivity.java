@@ -118,6 +118,8 @@ public class GameActivity extends NativeActivity
     @Override
     public void onDestroy()
     {
+        finish();
+
         super.onDestroy();
     }
 

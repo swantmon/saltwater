@@ -37,13 +37,11 @@ namespace App
 
     void CExitState::InternOnLeave()
     {
-
     }
 
     // -----------------------------------------------------------------------------
 
     void CExitState::InternOnRun()
     {
-
     }
 } // namespace App
