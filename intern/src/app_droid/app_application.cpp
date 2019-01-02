@@ -178,6 +178,11 @@ namespace
         // Shutdown engine
         // -----------------------------------------------------------------------------
         Engine::Shutdown();
+
+        // -----------------------------------------------------------------------------
+        // Exit app
+        // -----------------------------------------------------------------------------
+        ANativeActivity_finish(m_AppSetup.m_pAndroidApp->activity);
     }
     
     // -----------------------------------------------------------------------------
@@ -224,6 +229,8 @@ namespace
             if (m_AppSetup.m_WindowTerminateRequested)
             {
                 m_RequestState = App::CState::Exit;
+
+                m_AppSetup.m_Running = 0;
             }
 
             // -----------------------------------------------------------------------------
@@ -353,10 +360,8 @@ namespace
             case APP_CMD_SAVE_STATE:
                 {
                     // -----------------------------------------------------------------------------
-                    // Save configuration w/ info
+                    // Save configuration
                     // -----------------------------------------------------------------------------
-                    ENGINE_CONSOLE_INFOV("Save configuration state: %s", AppSetup->m_ParameterFile.c_str())
-
                     Core::CProgramParameters::GetInstance().WriteFile(AppSetup->m_ParameterFile);
                 }
                 break;
