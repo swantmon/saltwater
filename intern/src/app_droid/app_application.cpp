@@ -182,6 +182,8 @@ namespace
         // Exit app
         // -----------------------------------------------------------------------------
         ANativeActivity_finish(m_AppSetup.m_pAndroidApp->activity);
+
+        exit(0);
     }
     
     // -----------------------------------------------------------------------------
@@ -378,17 +380,16 @@ namespace
 
             case APP_CMD_TERM_WINDOW:
                 {
-                    App::Application::ChangeState(App::CState::Exit);
+                    App::CExitState::GetInstance().OnRun();
 
-                    AppSetup->m_Running = 0;
+                    App::CExitState::GetInstance().OnLeave();
+
+                    Engine::Shutdown();
                 }
                 break;
 
             case APP_CMD_DESTROY:
                 {
-                    App::Application::ChangeState(App::CState::Exit);
-
-                    AppSetup->m_Running = 0;
                 }
                 break;
 
@@ -457,6 +458,7 @@ namespace
                 {
                     ASensorEventQueue_disableSensor(AppSetup->m_SensorEventQueue, AppSetup->m_AccelerometerSensor);
                 }
+
                 break;
         }
     }
