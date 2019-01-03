@@ -65,6 +65,7 @@ namespace
 
             unsigned int m_WindowID;
             std::string m_ParameterFile;
+            bool m_IsStarted;
             int m_Running;
         };
         
@@ -182,8 +183,6 @@ namespace
         // Exit app
         // -----------------------------------------------------------------------------
         ANativeActivity_finish(m_AppSetup.m_pAndroidApp->activity);
-
-        exit(0);
     }
     
     // -----------------------------------------------------------------------------
@@ -338,7 +337,7 @@ namespace
     {
         CApplication::SApplicationSetup* AppSetup = static_cast<CApplication::SApplicationSetup*>(_pAndroidApp->userData);
 
-        switch (_Command) 
+        switch (_Command)
         {
             case APP_CMD_SAVE_STATE:
                 {
@@ -350,46 +349,74 @@ namespace
                 break;
 
             case APP_CMD_INIT_WINDOW:
-                // -----------------------------------------------------------------------------
-                // The window is being shown, get it ready.
-                // -----------------------------------------------------------------------------
-                if (AppSetup->m_pAndroidApp->window != NULL)
                 {
                     // -----------------------------------------------------------------------------
-                    // Register window
+                    // The window is being shown, get it ready.
                     // -----------------------------------------------------------------------------
-                    unsigned int WindowID = Gfx::Pipeline::RegisterWindow(AppSetup->m_pAndroidApp->window);
+                    if (AppSetup->m_pAndroidApp->window != NULL)
+                    {
+                        if (AppSetup->m_IsStarted == false)
+                        {
+                            // -----------------------------------------------------------------------------
+                            // Register new native window in engine as a new window
+                            // -----------------------------------------------------------------------------
+                            unsigned int WindowID = Gfx::Pipeline::RegisterWindow(AppSetup->m_pAndroidApp->window, 0, true);
 
-                    Gfx::Pipeline::ActivateWindow(WindowID);
+                            Gfx::Pipeline::ActivateWindow(WindowID);
 
-                    AppSetup->m_WindowID = WindowID;
+                            AppSetup->m_WindowID = WindowID;
 
-                    // -----------------------------------------------------------------------------
-                    // Start engine
-                    // -----------------------------------------------------------------------------
-                    Engine::Startup();
+                            // -----------------------------------------------------------------------------
+                            // Start engine because this is the first start
+                            // -----------------------------------------------------------------------------
+                            Engine::Startup();
 
-                    // -----------------------------------------------------------------------------
-                    // Change state
-                    // -----------------------------------------------------------------------------
-                    App::Application::ChangeState(App::CState::Start);
+                            // -----------------------------------------------------------------------------
+                            // Change state
+                            // -----------------------------------------------------------------------------
+                            App::Application::ChangeState(App::CState::Start);
 
-                    AppSetup->m_Running = 1;
+                            AppSetup->m_IsStarted = true;
+                        }
+                        else
+                        {
+                            // -----------------------------------------------------------------------------
+                            // Reinitialize window because a new native window has been created
+                            // -----------------------------------------------------------------------------
+                            Gfx::Pipeline::ReinitializeWindow(AppSetup->m_WindowID, AppSetup->m_pAndroidApp->window);
+                        }
+
+                        AppSetup->m_Running = 1;
+                    }
                 }
                 break;
 
             case APP_CMD_TERM_WINDOW:
                 {
-                    App::CExitState::GetInstance().OnRun();
-
-                    App::CExitState::GetInstance().OnLeave();
-
-                    Engine::Shutdown();
+                    AppSetup->m_Running = 0;
                 }
                 break;
 
             case APP_CMD_DESTROY:
                 {
+                    // -----------------------------------------------------------------------------
+                    // There is no time to exit the app via loop because the thread will be
+                    // stopped. So, we shutdown the engine and finish the native activity
+                    // by ourself.
+                    // -----------------------------------------------------------------------------
+                    Core::CProgramParameters::GetInstance().WriteFile(AppSetup->m_ParameterFile);
+
+                    // -----------------------------------------------------------------------------
+                    // Shutdown engine
+                    // -----------------------------------------------------------------------------
+                    Engine::Shutdown();
+
+                    // -----------------------------------------------------------------------------
+                    // Exit app
+                    // -----------------------------------------------------------------------------
+                    ANativeActivity_finish(AppSetup->m_pAndroidApp->activity);
+
+                    exit(0);
                 }
                 break;
 
@@ -427,38 +454,41 @@ namespace
                 break;
 
             case APP_CMD_GAINED_FOCUS:
-                // -----------------------------------------------------------------------------
-                // When our app gains focus, we start monitoring the accelerometer.
-                // -----------------------------------------------------------------------------
-                Engine::Resume();
-
-                AppSetup->m_Running = 1;
-
-                if (AppSetup->m_AccelerometerSensor != NULL)
                 {
-                    ASensorEventQueue_enableSensor(AppSetup->m_SensorEventQueue, AppSetup->m_AccelerometerSensor);
+                    // -----------------------------------------------------------------------------
+                    // When our app gains focus, we start monitoring the accelerometer.
+                    // -----------------------------------------------------------------------------
+                    Engine::Resume();
 
-                    // -----------------------------------------------------------------------------
-                    // We'd like to get 60 events per second (in us).
-                    // -----------------------------------------------------------------------------
-                    ASensorEventQueue_setEventRate(AppSetup->m_SensorEventQueue, AppSetup->m_AccelerometerSensor, (1000L / 60) * 1000);
+                    AppSetup->m_Running = 1;
+
+                    if (AppSetup->m_AccelerometerSensor != NULL)
+                    {
+                        ASensorEventQueue_enableSensor(AppSetup->m_SensorEventQueue, AppSetup->m_AccelerometerSensor);
+
+                        // -----------------------------------------------------------------------------
+                        // We'd like to get 60 events per second (in us).
+                        // -----------------------------------------------------------------------------
+                        ASensorEventQueue_setEventRate(AppSetup->m_SensorEventQueue, AppSetup->m_AccelerometerSensor, (1000L / 60) * 1000);
+                    }
                 }
                 break;
 
             case APP_CMD_LOST_FOCUS:
-                // -----------------------------------------------------------------------------
-                // When our app loses focus, we stop monitoring the accelerometer.
-                // This is to avoid consuming battery while not being used.
-                // -----------------------------------------------------------------------------
-                Engine::Pause();
-
-                AppSetup->m_Running = 0;
-
-                if (AppSetup->m_AccelerometerSensor != NULL)
                 {
-                    ASensorEventQueue_disableSensor(AppSetup->m_SensorEventQueue, AppSetup->m_AccelerometerSensor);
-                }
+                    // -----------------------------------------------------------------------------
+                    // When our app loses focus, we stop monitoring the accelerometer.
+                    // This is to avoid consuming battery while not being used.
+                    // -----------------------------------------------------------------------------
+                    Engine::Pause();
 
+                    AppSetup->m_Running = 0;
+
+                    if (AppSetup->m_AccelerometerSensor != NULL)
+                    {
+                        ASensorEventQueue_disableSensor(AppSetup->m_SensorEventQueue, AppSetup->m_AccelerometerSensor);
+                    }
+                }
                 break;
         }
     }
