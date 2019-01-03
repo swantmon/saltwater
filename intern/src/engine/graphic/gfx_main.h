@@ -36,6 +36,7 @@ namespace Main
     ENGINE_API void ActivateWindow(unsigned int _WindowID);
 
     ENGINE_API void InitializeWindow(unsigned int _WindowID, void* _pWindow, int _VSync = 1);
+    ENGINE_API void UninitializeWindow(unsigned int _WindowID);
 
     ENGINE_API const glm::ivec2& GetActiveWindowSize();
     ENGINE_API const glm::ivec2& GetWindowSize(unsigned int _WindowID);

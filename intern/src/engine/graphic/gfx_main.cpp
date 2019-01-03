@@ -53,6 +53,7 @@ namespace
         void ActivateWindow(unsigned int _WindowID);
 
         void InitializeWindow(unsigned int _WindowID, void* _pWindow, int _VSync);
+        void UninitializeWindow(unsigned int _WindowID);
 
         const glm::ivec2& GetActiveWindowSize();
         const glm::ivec2& GetWindowSize(unsigned int _WindowID);
@@ -117,6 +118,7 @@ namespace
             glm::ivec2 m_InternalWindowSize;
             glm::ivec2 m_NativeWindowSize;
             int        m_VSync;
+            bool	   m_IsInitialized;
         };
         
         struct SPerFrameConstantBuffer
@@ -168,6 +170,7 @@ namespace
         void SetWindowSize(SWindowInfo& _rWindowInfo, int _Width, int _Height);
 
         void InternInitializeWindow(SWindowInfo& _rWindowInfo);
+        void InternUninitializeWindow(SWindowInfo& _rWindowInfo);
     };
 } // namespace
 
@@ -248,14 +251,10 @@ namespace
     
     void CGfxMain::OnExit()
     {
-#ifdef PLATFORM_ANDROID
         for (SWindowInfo& rWindowInfo : m_WindowInfos)
         {
-            eglMakeCurrent(rWindowInfo.m_pNativeWindowHandle, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
-
-            eglTerminate(rWindowInfo.m_pNativeWindowHandle);
+            InternUninitializeWindow(rWindowInfo);
         }
-#endif // PLATFORM_ANDROID
     }
     
     // -----------------------------------------------------------------------------
@@ -312,6 +311,17 @@ namespace
         rDirtyWindow.m_VSync               = _VSync;
 
         InternInitializeWindow(rDirtyWindow);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxMain::UninitializeWindow(unsigned int _WindowID)
+    {
+        if (_WindowID >= m_NumberOfWindows) return;
+
+        SWindowInfo& rDirtyWindow = m_WindowInfos[_WindowID];
+
+        InternUninitializeWindow(rDirtyWindow);
     }
 
     // -----------------------------------------------------------------------------
@@ -433,6 +443,8 @@ namespace
 
         SWindowInfo& rWindowInfo = *m_pActiveWindowInfo;
 
+        if (rWindowInfo.m_IsInitialized == false) return;
+
 #ifdef PLATFORM_ANDROID
         eglMakeCurrent(rWindowInfo.m_EglDisplay, rWindowInfo.m_EglSurface, rWindowInfo.m_EglSurface, rWindowInfo.m_EglContext);
 #else
@@ -452,6 +464,8 @@ namespace
         assert(m_pActiveWindowInfo != 0);
 
         SWindowInfo& rWindowInfo = *m_pActiveWindowInfo;
+
+        if (rWindowInfo.m_IsInitialized == false) return;
 
 #ifdef PLATFORM_ANDROID
         eglSwapBuffers(rWindowInfo.m_EglDisplay, rWindowInfo.m_EglSurface);
@@ -915,7 +929,7 @@ namespace
 			_rWindowInfo.m_pNativeDeviceContextHandle = pNativeDeviceContextHandle;
 			_rWindowInfo.m_pNativeOpenGLContextHandle = pNativeOpenGLContextHandle;
 #endif
-
+            
         // -----------------------------------------------------------------------------
         // Check specific OpenGL(ES) versions and availability
         // -----------------------------------------------------------------------------
@@ -926,10 +940,32 @@ namespace
 
         assert(pInfoGLVersion && pInfoGLGLSLVersion && pInfoGLVendor && pInfoGLRenderer);
 
-        ENGINE_CONSOLE_INFOV("GL:        %s", pInfoGLVersion);
-        ENGINE_CONSOLE_INFOV("GLSL:      %s", pInfoGLGLSLVersion);
-        ENGINE_CONSOLE_INFOV("Vendor:    %s", pInfoGLVendor);
-        ENGINE_CONSOLE_INFOV("Renderer:  %s", pInfoGLRenderer);
+        ENGINE_CONSOLE_INFOV("GL:         %s", pInfoGLVersion);
+        ENGINE_CONSOLE_INFOV("GLSL:       %s", pInfoGLGLSLVersion);
+        ENGINE_CONSOLE_INFOV("Vendor:     %s", pInfoGLVendor);
+        ENGINE_CONSOLE_INFOV("Renderer:   %s", pInfoGLRenderer);
+
+        // -----------------------------------------------------------------------------
+        // Set window as initialized
+        // -----------------------------------------------------------------------------
+        _rWindowInfo.m_IsInitialized = true;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxMain::InternUninitializeWindow(SWindowInfo& _rWindowInfo)
+    {
+        if (_rWindowInfo.m_IsInitialized == false) return;
+
+#ifdef PLATFORM_ANDROID
+        eglMakeCurrent(_rWindowInfo.m_EglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+
+        eglDestroySurface(_rWindowInfo.m_EglDisplay, _rWindowInfo.m_EglSurface);
+
+        eglTerminate(_rWindowInfo.m_pNativeWindowHandle);
+#endif
+
+        _rWindowInfo.m_IsInitialized = false;
     }
 } // namespace
 
@@ -982,6 +1018,13 @@ namespace Main
     void InitializeWindow(unsigned int _WindowID, void* _pWindow, int _VSync)
     {
         CGfxMain::GetInstance().InitializeWindow(_WindowID, _pWindow, _VSync);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void UninitializeWindow(unsigned int _WindowID)
+    {
+        CGfxMain::GetInstance().UninitializeWindow(_WindowID);
     }
 
     // -----------------------------------------------------------------------------

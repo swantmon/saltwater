@@ -606,6 +606,13 @@ namespace Pipeline
 
     // -----------------------------------------------------------------------------
 
+    void UninitializeWindow(unsigned int _WindowID)
+    {
+        Main::UninitializeWindow(_WindowID);
+    }
+
+    // -----------------------------------------------------------------------------
+
     void OnResize(unsigned int _WindowID, unsigned int _Width, unsigned int _Height)
     {
         Main::OnResize(_WindowID, _Width, _Height);

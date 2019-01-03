@@ -399,6 +399,8 @@ namespace
                     // Window is closed. The next time a new window will be created. For now we
                     // only have to prevent the engine from running.
                     // -----------------------------------------------------------------------------
+                    Gfx::Pipeline::UninitializeWindow(AppSetup->m_WindowID);
+
                     AppSetup->m_Running = 0;
                 }
                 break;
