@@ -52,6 +52,8 @@ namespace
 
         void ActivateWindow(unsigned int _WindowID);
 
+        void InitializeWindow(unsigned int _WindowID, void* _pWindow, int _VSync);
+
         const glm::ivec2& GetActiveWindowSize();
         const glm::ivec2& GetWindowSize(unsigned int _WindowID);
 
@@ -125,19 +127,19 @@ namespace
             glm::mat4 m_ViewToScreen;
             glm::mat4 m_ScreenToView;
             glm::mat4 m_ViewToWorld;
-            glm::vec4   m_ViewPosition;
-            glm::vec4   m_ViewDirection;
+            glm::vec4 m_ViewPosition;
+            glm::vec4 m_ViewDirection;
             glm::mat4 m_PreviousWorldToView;
             glm::mat4 m_PreviousViewToScreen;
             glm::mat4 m_PreviousScreenToView;
             glm::mat4 m_PreviousViewToWorld;
-            glm::vec4   m_PreviousViewPosition;
-            glm::vec4   m_PreviousViewDirection;
-            glm::vec4   m_InvertedScreensizeAndScreensize;
-            glm::vec4   m_ScreenPositionScaleBias;
-            glm::vec4   m_CameraParameters0;
-            glm::vec4   m_WorldParameters0;
-            glm::vec4   m_FrameParameters0;
+            glm::vec4 m_PreviousViewPosition;
+            glm::vec4 m_PreviousViewDirection;
+            glm::vec4 m_InvertedScreensizeAndScreensize;
+            glm::vec4 m_ScreenPositionScaleBias;
+            glm::vec4 m_CameraParameters0;
+            glm::vec4 m_WorldParameters0;
+            glm::vec4 m_FrameParameters0;
         };
         
     private:
@@ -163,7 +165,9 @@ namespace
 
     private:
 
-        void SetWindowSize(SWindowInfo* _pWindowInfo, int _Width, int _Height);
+        void SetWindowSize(SWindowInfo& _rWindowInfo, int _Width, int _Height);
+
+        void InternInitializeWindow(SWindowInfo& _rWindowInfo);
     };
 } // namespace
 
@@ -220,289 +224,10 @@ namespace
         {
             SWindowInfo& rWindowInfo = m_WindowInfos[IndexOfWindow];
 
-#ifdef PLATFORM_ANDROID
-            EGLNativeWindowType  pNativeWindowHandle;
-            EGLBoolean           Status;
-            EGLint               Error;
-
             // -----------------------------------------------------------------------------
-            // Check OpenGLES
+            // Initialize
             // -----------------------------------------------------------------------------
-            if (m_GraphicsInfo.m_GraphicsAPI != CGraphicsInfo::OpenGLES)
-            {
-                BASE_THROWM("Only OpenGLES is supported on Android devices. Please change graphics API in the config file.")
-            }
-
-            if (!(m_GraphicsInfo.m_MajorVersion >= 3 && m_GraphicsInfo.m_MinorVersion >= 2))
-            {
-                BASE_THROWM("Lower versions as OpenGLES 3.2 is not supported.")
-            }
-
-            // -----------------------------------------------------------------------------
-            // Cast data
-            // -----------------------------------------------------------------------------
-            pNativeWindowHandle = static_cast<EGLNativeWindowType>(rWindowInfo.m_pNativeWindowHandle);
-
-            // -----------------------------------------------------------------------------
-            // Create OpenGLES
-            // -----------------------------------------------------------------------------
-            rWindowInfo.m_EglDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-
-            if (rWindowInfo.m_EglDisplay == EGL_NO_DISPLAY)
-            {
-                BASE_THROWM("Failed to get an EGLDisplay.");
-            }
-
-            Status = eglInitialize(rWindowInfo.m_EglDisplay, 0, 0);
-
-            if (Status == EGL_FALSE)
-            {
-                BASE_THROWM("Failed to initialize the EGLDisplay.");
-            }
-
-            // -----------------------------------------------------------------------------
-            // Configuration
-            // -----------------------------------------------------------------------------
-            const EGLint ConfigAttributes[] =
-            {
-                EGL_SURFACE_TYPE,    EGL_WINDOW_BIT | EGL_PBUFFER_BIT,
-                EGL_RENDERABLE_TYPE, EGL_OPENGL_ES3_BIT_KHR,
-                EGL_BLUE_SIZE,       8,
-                EGL_GREEN_SIZE,      8,
-                EGL_RED_SIZE,        8,
-                EGL_DEPTH_SIZE,      24,
-                EGL_NONE
-            };
-
-            EGLint NumConfigs;
-
-            eglChooseConfig(rWindowInfo.m_EglDisplay, ConfigAttributes, &rWindowInfo.m_EglConfig, 1, &NumConfigs);
-
-            if (NumConfigs != 1)
-            {
-                BASE_THROWM("Failed to choose config.");
-            }
-
-            // -----------------------------------------------------------------------------
-            // Format
-            // -----------------------------------------------------------------------------
-            EGLint Format;
-
-            Status = eglGetConfigAttrib(rWindowInfo.m_EglDisplay, rWindowInfo.m_EglConfig, EGL_NATIVE_VISUAL_ID, &Format);
-
-            if (Status == EGL_FALSE)
-            {
-                BASE_THROWM("Failed to get native visual ID.");
-            }
-
-            ANativeWindow_setBuffersGeometry(pNativeWindowHandle, 0, 0, Format);
-
-            // -----------------------------------------------------------------------------
-            // Surface
-            // -----------------------------------------------------------------------------
-            rWindowInfo.m_EglSurface = eglCreateWindowSurface(rWindowInfo.m_EglDisplay, rWindowInfo.m_EglConfig, pNativeWindowHandle, NULL);
-
-            Error = eglGetError();
-
-            if (rWindowInfo.m_EglSurface == EGL_NO_SURFACE || Error != EGL_SUCCESS)
-            {
-                BASE_THROWV("Unable to create surface because of %i.", Error);
-            }
-
-            // -----------------------------------------------------------------------------
-            // Context
-            // -----------------------------------------------------------------------------
-            EGLint ContextAttributes[] =
-            {
-                EGL_CONTEXT_CLIENT_VERSION, m_GraphicsInfo.m_MajorVersion,
-                EGL_NONE
-            };
-
-            rWindowInfo.m_EglContext = eglCreateContext(rWindowInfo.m_EglDisplay, rWindowInfo.m_EglConfig, EGL_NO_CONTEXT, ContextAttributes);
-
-            Error = eglGetError();
-
-            if (rWindowInfo.m_EglContext == EGL_NO_CONTEXT || Error != EGL_SUCCESS)
-            {
-                BASE_THROWV("Unable to create context because of %i.", Error);
-            }
-
-            // -----------------------------------------------------------------------------
-            // Make current
-            // -----------------------------------------------------------------------------
-            Status = eglMakeCurrent(rWindowInfo.m_EglDisplay, rWindowInfo.m_EglSurface, rWindowInfo.m_EglSurface, rWindowInfo.m_EglContext);
-
-            Error = eglGetError();
-
-            if (Status == EGL_FALSE || Error != EGL_SUCCESS)
-            {
-                BASE_THROWV("Unable to set current EGL stuff because of %i.", Error);
-            }
-
-            // -----------------------------------------------------------------------------
-            // Get native resolution
-            // -----------------------------------------------------------------------------
-            int Width, Height;
-
-            eglQuerySurface(rWindowInfo.m_EglDisplay, rWindowInfo.m_EglSurface, EGL_WIDTH, &Width);
-            eglQuerySurface(rWindowInfo.m_EglDisplay, rWindowInfo.m_EglSurface, EGL_HEIGHT, &Height);
-
-            SetWindowSize(m_pActiveWindowInfo, Width, Height);
-#else
-            HWND  pNativeWindowHandle;
-            HDC   pNativeDeviceContextHandle;
-            HGLRC pNativeOpenGLContextHandle;
-            HGLRC pDummyNativeOpenGLContextHandle;
-            int   Format;
-
-            const PIXELFORMATDESCRIPTOR PixelFormatDesc =
-            {
-                sizeof(PIXELFORMATDESCRIPTOR),
-                1,
-                PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER,    //< Flags
-                PFD_TYPE_RGBA,                                                 //< RGBA or palette.
-                32,                                                            //< Depth of color frame buffer.
-                0, 0, 0, 0, 0, 0,
-                0,
-                0,
-                0,
-                0, 0, 0, 0,
-                32,                                                            //< Number of bits for the depth buffer
-                8,                                                             //< Number of bits for the stencil buffer
-                0,                                                             //< Number of Aux buffers in the frame buffer.
-                PFD_MAIN_PLANE,
-                0,
-                0, 0, 0
-            };
-
-            // -----------------------------------------------------------------------------
-            // Create OpenGL specific stuff with dummy context
-            // -----------------------------------------------------------------------------
-            pNativeWindowHandle = static_cast<HWND>(rWindowInfo.m_pNativeWindowHandle);
-
-            pNativeDeviceContextHandle = ::GetDC(pNativeWindowHandle);
-
-            Format = ChoosePixelFormat(pNativeDeviceContextHandle, &PixelFormatDesc);
-
-            SetPixelFormat(pNativeDeviceContextHandle, Format, &PixelFormatDesc);
-
-            pDummyNativeOpenGLContextHandle = ::wglCreateContext(pNativeDeviceContextHandle);
-
-            if (pDummyNativeOpenGLContextHandle == 0)
-            {
-                BASE_THROWM("OpenGL dummy context creation failed.");
-            }
-
-            wglMakeCurrent(pNativeDeviceContextHandle, pDummyNativeOpenGLContextHandle);
-
-            // -----------------------------------------------------------------------------
-            // Check if OpenGLES is available on desktop graphics card
-            // -----------------------------------------------------------------------------
-            if (m_GraphicsInfo.m_GraphicsAPI == CGraphicsInfo::OpenGLES)
-            {
-                typedef const char* (WINAPI * PFNWGLGETEXTENSIONSSTRINGARBPROC)(HDC hdc);
-                PROC Function = wglGetProcAddress("wglGetExtensionsStringARB");
-                PFNWGLGETEXTENSIONSSTRINGARBPROC wglGetExtensionsStringARB = reinterpret_cast<PFNWGLGETEXTENSIONSSTRINGARBPROC>(Function);
-
-                std::string wglExtensions = wglGetExtensionsStringARB(pNativeDeviceContextHandle);
-
-                std::size_t found = wglExtensions.find("WGL_EXT_create_context_es2_profile");
-                bool GLESAvailable = found != std::string::npos;
-
-                if (!GLESAvailable)
-                {
-                    BASE_THROWM("OpenGL ES 3.2 extension on desktop is not available! Please change graphics API back to \"gl\" inside config.");
-                }
-            }
-
-            // -----------------------------------------------------------------------------
-            // Activate GLEW. GLEW is an extension manager which handles all different
-            // OpenGL extensions.
-            //
-            // glewExperimental defines a possible option for extensions in experimental
-            // state. It is needed to start this on while a dummy context is created.
-            // Depending on this dummy context GLEW initialize possible functionality.
-            // -----------------------------------------------------------------------------
-            glewExperimental = GL_TRUE;
-
-            GLenum res = glewInit();
-
-            if (res != GLEW_OK)
-            {
-                BASE_THROWV("GLEW can't be initialized on this system because '%s'", glewGetErrorString(res));
-            }
-
-            // -----------------------------------------------------------------------------
-            // Create final OpenGL context with attributes
-            // -----------------------------------------------------------------------------
-            const int Attributes[] =
-            {
-                WGL_CONTEXT_MAJOR_VERSION_ARB, m_GraphicsInfo.m_MajorVersion,
-                WGL_CONTEXT_MINOR_VERSION_ARB, m_GraphicsInfo.m_MinorVersion,
-                WGL_CONTEXT_PROFILE_MASK_ARB , m_GraphicsInfo.m_GraphicsAPI == CGraphicsInfo::OpenGLES ? WGL_CONTEXT_ES2_PROFILE_BIT_EXT : WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
-#ifdef ENGINE_DEBUG_MODE
-                WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_DEBUG_BIT_ARB,
-#else
-                WGL_CONTEXT_FLAGS_ARB, 0,
-#endif // APP_DEBUG_MODE
-                0,
-            };
-
-            pNativeOpenGLContextHandle = ::wglCreateContextAttribsARB(pNativeDeviceContextHandle, 0, Attributes);
-
-            if (pNativeDeviceContextHandle == 0)
-            {
-                BASE_THROWM("OpenGL context creation failed.");
-            }
-
-            wglMakeCurrent(pNativeDeviceContextHandle, pNativeOpenGLContextHandle);
-
-            // -----------------------------------------------------------------------------
-            // VSync
-            // -----------------------------------------------------------------------------
-            wglSwapIntervalEXT(rWindowInfo.m_VSync);
-
-            // -----------------------------------------------------------------------------
-            // Clip Control
-            // -----------------------------------------------------------------------------
-#ifdef GLM_FORCE_DEPTH_ZERO_TO_ONE
-            glClipControl(GL_LOWER_LEFT, GL_ZERO_TO_ONE);
-#endif
-
-            // -----------------------------------------------------------------------------
-            // Get native resolution
-            // -----------------------------------------------------------------------------
-            RECT WindowRect;
-
-            GetWindowRect(pNativeWindowHandle, &WindowRect);
-
-            int Width  = glm::abs(WindowRect.right - WindowRect.left);
-            int Height = glm::abs(WindowRect.bottom - WindowRect.top);
-
-            SetWindowSize(m_pActiveWindowInfo, Width, Height);
-
-            // -----------------------------------------------------------------------------
-            // Save created data
-            // -----------------------------------------------------------------------------
-            rWindowInfo.m_pNativeDeviceContextHandle = pNativeDeviceContextHandle;
-            rWindowInfo.m_pNativeOpenGLContextHandle = pNativeOpenGLContextHandle;
-#endif
-
-            // -----------------------------------------------------------------------------
-            // Check specific OpenGL(ES) versions and availability
-            // -----------------------------------------------------------------------------
-            const unsigned char* pInfoGLVersion     = glGetString(GL_VERSION);                  //< Returns a version or release number.
-            const unsigned char* pInfoGLVendor      = glGetString(GL_VENDOR);                   //< Returns the company responsible for this GL implementation. This name does not change from release to release.
-            const unsigned char* pInfoGLRenderer    = glGetString(GL_RENDERER);                 //< Returns the name of the renderer. This name is typically specific to a particular configuration of a hardware platform. It does not change from release to release.
-            const unsigned char* pInfoGLGLSLVersion = glGetString(GL_SHADING_LANGUAGE_VERSION); //< Returns a version or release number for the shading language.
-
-            assert(pInfoGLVersion && pInfoGLGLSLVersion && pInfoGLVendor && pInfoGLRenderer);
-
-            ENGINE_CONSOLE_INFOV("Window ID: %i", IndexOfWindow);
-            ENGINE_CONSOLE_INFOV("GL:        %s", pInfoGLVersion);
-            ENGINE_CONSOLE_INFOV("GLSL:      %s", pInfoGLGLSLVersion);
-            ENGINE_CONSOLE_INFOV("Vendor:    %s", pInfoGLVendor);
-            ENGINE_CONSOLE_INFOV("Renderer:  %s", pInfoGLRenderer);
+            InternInitializeWindow(rWindowInfo);
 
             // -----------------------------------------------------------------------------
             // Extensions
@@ -577,6 +302,20 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    void CGfxMain::InitializeWindow(unsigned int _WindowID, void* _pWindow, int _VSync)
+    {
+        if (_WindowID >= m_NumberOfWindows) return;
+
+        SWindowInfo& rDirtyWindow = m_WindowInfos[_WindowID];
+
+        rDirtyWindow.m_pNativeWindowHandle = _pWindow;
+        rDirtyWindow.m_VSync               = _VSync;
+
+        InternInitializeWindow(rDirtyWindow);
+    }
+
+    // -----------------------------------------------------------------------------
+
     const glm::ivec2& CGfxMain::GetActiveWindowSize()
     {
         assert(m_pActiveWindowInfo != 0);
@@ -622,7 +361,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Setup window info
         // -----------------------------------------------------------------------------
-        SetWindowSize(&m_WindowInfos[_WindowID], _Width, _Height);
+        SetWindowSize(m_WindowInfos[_WindowID], _Width, _Height);
 
         // -----------------------------------------------------------------------------
         // Send to every delegate that resize has changed
@@ -872,19 +611,19 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxMain::SetWindowSize(SWindowInfo* _pWindowInfo, int _Width, int _Height)
+    void CGfxMain::SetWindowSize(SWindowInfo& _rWindowInfo, int _Width, int _Height)
     {
         // -----------------------------------------------------------------------------
         // Set native resolution
         // -----------------------------------------------------------------------------
-        _pWindowInfo->m_NativeWindowSize[0] = _Width;
-        _pWindowInfo->m_NativeWindowSize[1] = _Height;
+        _rWindowInfo.m_NativeWindowSize[0] = _Width;
+        _rWindowInfo.m_NativeWindowSize[1] = _Height;
 
         // -----------------------------------------------------------------------------
         // Calculate internal resolution
         // -----------------------------------------------------------------------------
-        _pWindowInfo->m_InternalWindowSize[0] = _pWindowInfo->m_NativeWindowSize[0];
-        _pWindowInfo->m_InternalWindowSize[1] = _pWindowInfo->m_NativeWindowSize[1];
+        _rWindowInfo.m_InternalWindowSize[0] = _rWindowInfo.m_NativeWindowSize[0];
+        _rWindowInfo.m_InternalWindowSize[1] = _rWindowInfo.m_NativeWindowSize[1];
 
         switch (m_GraphicsInfo.m_PixelMatching)
         {
@@ -892,17 +631,305 @@ namespace
         {
             float Scale = Core::CProgramParameters::GetInstance().Get<float>("graphics:pixel_matching:scale", 1.0f);
 
-            _pWindowInfo->m_InternalWindowSize[0] = static_cast<int>(static_cast<float>(_pWindowInfo->m_NativeWindowSize[0]) * Scale);
-            _pWindowInfo->m_InternalWindowSize[1] = static_cast<int>(static_cast<float>(_pWindowInfo->m_NativeWindowSize[1]) * Scale);
+            _rWindowInfo.m_InternalWindowSize[0] = static_cast<int>(static_cast<float>(_rWindowInfo.m_NativeWindowSize[0]) * Scale);
+            _rWindowInfo.m_InternalWindowSize[1] = static_cast<int>(static_cast<float>(_rWindowInfo.m_NativeWindowSize[1]) * Scale);
         }
         break;
         case CInternGraphicsInfo::Fix:
         {
-            _pWindowInfo->m_InternalWindowSize[0] = Core::CProgramParameters::GetInstance().Get<unsigned int>("graphics:pixel_matching:fixed:w", _Width);
-            _pWindowInfo->m_InternalWindowSize[1] = Core::CProgramParameters::GetInstance().Get<unsigned int>("graphics:pixel_matching:fixed:h", _Height);
+            _rWindowInfo.m_InternalWindowSize[0] = Core::CProgramParameters::GetInstance().Get<unsigned int>("graphics:pixel_matching:fixed:w", _Width);
+            _rWindowInfo.m_InternalWindowSize[1] = Core::CProgramParameters::GetInstance().Get<unsigned int>("graphics:pixel_matching:fixed:h", _Height);
         }
         break;
         };
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxMain::InternInitializeWindow(SWindowInfo& _rWindowInfo)
+    {
+#ifdef PLATFORM_ANDROID
+        EGLNativeWindowType  pNativeWindowHandle;
+        EGLBoolean           Status;
+        EGLint               Error;
+
+        // -----------------------------------------------------------------------------
+        // Check OpenGLES
+        // -----------------------------------------------------------------------------
+        if (m_GraphicsInfo.m_GraphicsAPI != CGraphicsInfo::OpenGLES)
+        {
+            BASE_THROWM("Only OpenGLES is supported on Android devices. Please change graphics API in the config file.")
+        }
+
+        if (!(m_GraphicsInfo.m_MajorVersion >= 3 && m_GraphicsInfo.m_MinorVersion >= 2))
+        {
+            BASE_THROWM("Lower versions as OpenGLES 3.2 is not supported.")
+        }
+
+        // -----------------------------------------------------------------------------
+        // Cast data
+        // -----------------------------------------------------------------------------
+        pNativeWindowHandle = static_cast<EGLNativeWindowType>(_rWindowInfo.m_pNativeWindowHandle);
+
+        // -----------------------------------------------------------------------------
+        // Create OpenGLES
+        // -----------------------------------------------------------------------------
+        _rWindowInfo.m_EglDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+
+        if (_rWindowInfo.m_EglDisplay == EGL_NO_DISPLAY)
+        {
+            BASE_THROWM("Failed to get an EGLDisplay.");
+        }
+
+        Status = eglInitialize(_rWindowInfo.m_EglDisplay, 0, 0);
+
+        if (Status == EGL_FALSE)
+        {
+            BASE_THROWM("Failed to initialize the EGLDisplay.");
+        }
+
+        // -----------------------------------------------------------------------------
+        // Configuration
+        // -----------------------------------------------------------------------------
+        const EGLint ConfigAttributes[] =
+                {
+                        EGL_SURFACE_TYPE,    EGL_WINDOW_BIT | EGL_PBUFFER_BIT,
+                        EGL_RENDERABLE_TYPE, EGL_OPENGL_ES3_BIT_KHR,
+                        EGL_BLUE_SIZE,       8,
+                        EGL_GREEN_SIZE,      8,
+                        EGL_RED_SIZE,        8,
+                        EGL_DEPTH_SIZE,      24,
+                        EGL_NONE
+                };
+
+        EGLint NumConfigs;
+
+        eglChooseConfig(_rWindowInfo.m_EglDisplay, ConfigAttributes, &_rWindowInfo.m_EglConfig, 1, &NumConfigs);
+
+        if (NumConfigs != 1)
+        {
+            BASE_THROWM("Failed to choose config.");
+        }
+
+        // -----------------------------------------------------------------------------
+        // Format
+        // -----------------------------------------------------------------------------
+        EGLint Format;
+
+        Status = eglGetConfigAttrib(_rWindowInfo.m_EglDisplay, _rWindowInfo.m_EglConfig, EGL_NATIVE_VISUAL_ID, &Format);
+
+        if (Status == EGL_FALSE)
+        {
+            BASE_THROWM("Failed to get native visual ID.");
+        }
+
+        ANativeWindow_setBuffersGeometry(pNativeWindowHandle, 0, 0, Format);
+
+        // -----------------------------------------------------------------------------
+        // Surface
+        // -----------------------------------------------------------------------------
+        _rWindowInfo.m_EglSurface = eglCreateWindowSurface(_rWindowInfo.m_EglDisplay, _rWindowInfo.m_EglConfig, pNativeWindowHandle, NULL);
+
+        Error = eglGetError();
+
+        if (_rWindowInfo.m_EglSurface == EGL_NO_SURFACE || Error != EGL_SUCCESS)
+        {
+            BASE_THROWV("Unable to create surface because of %i.", Error);
+        }
+
+        // -----------------------------------------------------------------------------
+        // Context
+        // -----------------------------------------------------------------------------
+        EGLint ContextAttributes[] =
+                {
+                        EGL_CONTEXT_CLIENT_VERSION, m_GraphicsInfo.m_MajorVersion,
+                        EGL_NONE
+                };
+
+        _rWindowInfo.m_EglContext = eglCreateContext(_rWindowInfo.m_EglDisplay, _rWindowInfo.m_EglConfig, EGL_NO_CONTEXT, ContextAttributes);
+
+        Error = eglGetError();
+
+        if (_rWindowInfo.m_EglContext == EGL_NO_CONTEXT || Error != EGL_SUCCESS)
+        {
+            BASE_THROWV("Unable to create context because of %i.", Error);
+        }
+
+        // -----------------------------------------------------------------------------
+        // Make current
+        // -----------------------------------------------------------------------------
+        Status = eglMakeCurrent(_rWindowInfo.m_EglDisplay, _rWindowInfo.m_EglSurface, _rWindowInfo.m_EglSurface, _rWindowInfo.m_EglContext);
+
+        Error = eglGetError();
+
+        if (Status == EGL_FALSE || Error != EGL_SUCCESS)
+        {
+            BASE_THROWV("Unable to set current EGL stuff because of %i.", Error);
+        }
+
+        // -----------------------------------------------------------------------------
+        // Get native resolution
+        // -----------------------------------------------------------------------------
+        int Width, Height;
+
+        eglQuerySurface(_rWindowInfo.m_EglDisplay, _rWindowInfo.m_EglSurface, EGL_WIDTH, &Width);
+        eglQuerySurface(_rWindowInfo.m_EglDisplay, _rWindowInfo.m_EglSurface, EGL_HEIGHT, &Height);
+
+        SetWindowSize(_rWindowInfo, Width, Height);
+#else
+        HWND  pNativeWindowHandle;
+            HDC   pNativeDeviceContextHandle;
+            HGLRC pNativeOpenGLContextHandle;
+            HGLRC pDummyNativeOpenGLContextHandle;
+            int   Format;
+
+            const PIXELFORMATDESCRIPTOR PixelFormatDesc =
+            {
+                sizeof(PIXELFORMATDESCRIPTOR),
+                1,
+                PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER,    //< Flags
+                PFD_TYPE_RGBA,                                                 //< RGBA or palette.
+                32,                                                            //< Depth of color frame buffer.
+                0, 0, 0, 0, 0, 0,
+                0,
+                0,
+                0,
+                0, 0, 0, 0,
+                32,                                                            //< Number of bits for the depth buffer
+                8,                                                             //< Number of bits for the stencil buffer
+                0,                                                             //< Number of Aux buffers in the frame buffer.
+                PFD_MAIN_PLANE,
+                0,
+                0, 0, 0
+            };
+
+            // -----------------------------------------------------------------------------
+            // Create OpenGL specific stuff with dummy context
+            // -----------------------------------------------------------------------------
+            pNativeWindowHandle = static_cast<HWND>(_rWindowInfo.m_pNativeWindowHandle);
+
+            pNativeDeviceContextHandle = ::GetDC(pNativeWindowHandle);
+
+            Format = ChoosePixelFormat(pNativeDeviceContextHandle, &PixelFormatDesc);
+
+            SetPixelFormat(pNativeDeviceContextHandle, Format, &PixelFormatDesc);
+
+            pDummyNativeOpenGLContextHandle = ::wglCreateContext(pNativeDeviceContextHandle);
+
+            if (pDummyNativeOpenGLContextHandle == 0)
+            {
+                BASE_THROWM("OpenGL dummy context creation failed.");
+            }
+
+            wglMakeCurrent(pNativeDeviceContextHandle, pDummyNativeOpenGLContextHandle);
+
+            // -----------------------------------------------------------------------------
+            // Check if OpenGLES is available on desktop graphics card
+            // -----------------------------------------------------------------------------
+            if (m_GraphicsInfo.m_GraphicsAPI == CGraphicsInfo::OpenGLES)
+            {
+                typedef const char* (WINAPI * PFNWGLGETEXTENSIONSSTRINGARBPROC)(HDC hdc);
+                PROC Function = wglGetProcAddress("wglGetExtensionsStringARB");
+                PFNWGLGETEXTENSIONSSTRINGARBPROC wglGetExtensionsStringARB = reinterpret_cast<PFNWGLGETEXTENSIONSSTRINGARBPROC>(Function);
+
+                std::string wglExtensions = wglGetExtensionsStringARB(pNativeDeviceContextHandle);
+
+                std::size_t found = wglExtensions.find("WGL_EXT_create_context_es2_profile");
+                bool GLESAvailable = found != std::string::npos;
+
+                if (!GLESAvailable)
+                {
+                    BASE_THROWM("OpenGL ES 3.2 extension on desktop is not available! Please change graphics API back to \"gl\" inside config.");
+                }
+            }
+
+            // -----------------------------------------------------------------------------
+            // Activate GLEW. GLEW is an extension manager which handles all different
+            // OpenGL extensions.
+            //
+            // glewExperimental defines a possible option for extensions in experimental
+            // state. It is needed to start this on while a dummy context is created.
+            // Depending on this dummy context GLEW initialize possible functionality.
+            // -----------------------------------------------------------------------------
+            glewExperimental = GL_TRUE;
+
+            GLenum res = glewInit();
+
+            if (res != GLEW_OK)
+            {
+                BASE_THROWV("GLEW can't be initialized on this system because '%s'", glewGetErrorString(res));
+            }
+
+            // -----------------------------------------------------------------------------
+            // Create final OpenGL context with attributes
+            // -----------------------------------------------------------------------------
+            const int Attributes[] =
+            {
+                WGL_CONTEXT_MAJOR_VERSION_ARB, m_GraphicsInfo.m_MajorVersion,
+                WGL_CONTEXT_MINOR_VERSION_ARB, m_GraphicsInfo.m_MinorVersion,
+                WGL_CONTEXT_PROFILE_MASK_ARB , m_GraphicsInfo.m_GraphicsAPI == CGraphicsInfo::OpenGLES ? WGL_CONTEXT_ES2_PROFILE_BIT_EXT : WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
+#ifdef ENGINE_DEBUG_MODE
+                WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_DEBUG_BIT_ARB,
+#else
+                WGL_CONTEXT_FLAGS_ARB, 0,
+#endif // APP_DEBUG_MODE
+                0,
+            };
+
+            pNativeOpenGLContextHandle = ::wglCreateContextAttribsARB(pNativeDeviceContextHandle, 0, Attributes);
+
+            if (pNativeDeviceContextHandle == 0)
+            {
+                BASE_THROWM("OpenGL context creation failed.");
+            }
+
+            wglMakeCurrent(pNativeDeviceContextHandle, pNativeOpenGLContextHandle);
+
+            // -----------------------------------------------------------------------------
+            // VSync
+            // -----------------------------------------------------------------------------
+            wglSwapIntervalEXT(_rWindowInfo.m_VSync);
+
+            // -----------------------------------------------------------------------------
+            // Clip Control
+            // -----------------------------------------------------------------------------
+#ifdef GLM_FORCE_DEPTH_ZERO_TO_ONE
+            glClipControl(GL_LOWER_LEFT, GL_ZERO_TO_ONE);
+#endif
+
+            // -----------------------------------------------------------------------------
+            // Get native resolution
+            // -----------------------------------------------------------------------------
+            RECT WindowRect;
+
+            GetWindowRect(pNativeWindowHandle, &WindowRect);
+
+            int Width  = glm::abs(WindowRect.right - WindowRect.left);
+            int Height = glm::abs(WindowRect.bottom - WindowRect.top);
+
+            SetWindowSize(_rWindowInfo, Width, Height);
+
+            // -----------------------------------------------------------------------------
+            // Save created data
+            // -----------------------------------------------------------------------------
+			_rWindowInfo.m_pNativeDeviceContextHandle = pNativeDeviceContextHandle;
+			_rWindowInfo.m_pNativeOpenGLContextHandle = pNativeOpenGLContextHandle;
+#endif
+
+        // -----------------------------------------------------------------------------
+        // Check specific OpenGL(ES) versions and availability
+        // -----------------------------------------------------------------------------
+        const unsigned char* pInfoGLVersion     = glGetString(GL_VERSION);                  //< Returns a version or release number.
+        const unsigned char* pInfoGLVendor      = glGetString(GL_VENDOR);                   //< Returns the company responsible for this GL implementation. This name does not change from release to release.
+        const unsigned char* pInfoGLRenderer    = glGetString(GL_RENDERER);                 //< Returns the name of the renderer. This name is typically specific to a particular configuration of a hardware platform. It does not change from release to release.
+        const unsigned char* pInfoGLGLSLVersion = glGetString(GL_SHADING_LANGUAGE_VERSION); //< Returns a version or release number for the shading language.
+
+        assert(pInfoGLVersion && pInfoGLGLSLVersion && pInfoGLVendor && pInfoGLRenderer);
+
+        ENGINE_CONSOLE_INFOV("GL:        %s", pInfoGLVersion);
+        ENGINE_CONSOLE_INFOV("GLSL:      %s", pInfoGLGLSLVersion);
+        ENGINE_CONSOLE_INFOV("Vendor:    %s", pInfoGLVendor);
+        ENGINE_CONSOLE_INFOV("Renderer:  %s", pInfoGLRenderer);
     }
 } // namespace
 
@@ -948,6 +975,13 @@ namespace Main
     void ActivateWindow(unsigned int _WindowID)
     {
         return CGfxMain::GetInstance().ActivateWindow(_WindowID);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void InitializeWindow(unsigned int _WindowID, void* _pWindow, int _VSync)
+    {
+        CGfxMain::GetInstance().InitializeWindow(_WindowID, _pWindow, _VSync);
     }
 
     // -----------------------------------------------------------------------------
