@@ -820,7 +820,7 @@ namespace
 
         SetWindowSize(_rWindowInfo, Width, Height);
 #else
-        HWND  pNativeWindowHandle;
+            HWND  pNativeWindowHandle;
             HDC   pNativeDeviceContextHandle;
             HGLRC pNativeOpenGLContextHandle;
             HGLRC pDummyNativeOpenGLContextHandle;
