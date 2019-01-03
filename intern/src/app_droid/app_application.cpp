@@ -360,7 +360,7 @@ namespace
                             // -----------------------------------------------------------------------------
                             // Register new native window in engine as a new window
                             // -----------------------------------------------------------------------------
-                            unsigned int WindowID = Gfx::Pipeline::RegisterWindow(AppSetup->m_pAndroidApp->window);
+                            unsigned int WindowID = Gfx::Pipeline::RegisterWindow(AppSetup->m_pAndroidApp->window, 0, true);
 
                             Gfx::Pipeline::ActivateWindow(WindowID);
 
@@ -383,9 +383,7 @@ namespace
                             // -----------------------------------------------------------------------------
                             // Reinitialize window because a new native window has been created
                             // -----------------------------------------------------------------------------
-                            Gfx::Pipeline::InitializeWindow(AppSetup->m_WindowID, AppSetup->m_pAndroidApp->window);
-
-                            Gfx::Pipeline::ActivateWindow(AppSetup->m_WindowID);
+                            Gfx::Pipeline::ReinitializeWindow(AppSetup->m_WindowID, AppSetup->m_pAndroidApp->window);
                         }
 
                         AppSetup->m_Running = 1;
@@ -395,12 +393,6 @@ namespace
 
             case APP_CMD_TERM_WINDOW:
                 {
-                    // -----------------------------------------------------------------------------
-                    // Window is closed. The next time a new window will be created. For now we
-                    // only have to prevent the engine from running.
-                    // -----------------------------------------------------------------------------
-                    Gfx::Pipeline::UninitializeWindow(AppSetup->m_WindowID);
-
                     AppSetup->m_Running = 0;
                 }
                 break;

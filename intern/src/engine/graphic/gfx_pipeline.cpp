@@ -583,11 +583,11 @@ namespace Pipeline
 
     // -----------------------------------------------------------------------------
 
-    unsigned int RegisterWindow(void* _pWindow, int _VSync)
+    unsigned int RegisterWindow(void* _pWindow, int _VSync, bool _PreserveContext)
     {
         assert(_pWindow != 0);
 
-        return Main::RegisterWindow(_pWindow, _VSync);
+        return Main::RegisterWindow(_pWindow, _VSync, _PreserveContext);
     }
 
     // -----------------------------------------------------------------------------
@@ -599,16 +599,9 @@ namespace Pipeline
 
     // -----------------------------------------------------------------------------
 
-    void InitializeWindow(unsigned int _WindowID, void* _pWindow, int _VSync)
+    void ReinitializeWindow(unsigned int _WindowID, void* _pWindow, int _VSync)
     {
-        Main::InitializeWindow(_WindowID, _pWindow, _VSync);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void UninitializeWindow(unsigned int _WindowID)
-    {
-        Main::UninitializeWindow(_WindowID);
+        Main::ReinitializeWindow(_WindowID, _pWindow, _VSync);
     }
 
     // -----------------------------------------------------------------------------

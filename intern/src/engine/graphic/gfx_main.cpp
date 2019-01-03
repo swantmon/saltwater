@@ -46,14 +46,13 @@ namespace
         
     public:
 
-        unsigned int RegisterWindow(void* _pWindow, int _VSync);
+        unsigned int RegisterWindow(void* _pWindow, int _VSync, bool _PreserveContext);
 
         unsigned int GetNumberOfWindows();
 
         void ActivateWindow(unsigned int _WindowID);
 
-        void InitializeWindow(unsigned int _WindowID, void* _pWindow, int _VSync);
-        void UninitializeWindow(unsigned int _WindowID);
+        void ReinitializeWindow(unsigned int _WindowID, void* _pWindow, int _VSync);
 
         const glm::ivec2& GetActiveWindowSize();
         const glm::ivec2& GetWindowSize(unsigned int _WindowID);
@@ -118,7 +117,7 @@ namespace
             glm::ivec2 m_InternalWindowSize;
             glm::ivec2 m_NativeWindowSize;
             int        m_VSync;
-            bool	   m_IsInitialized;
+            bool       m_PreserveContext;
         };
         
         struct SPerFrameConstantBuffer
@@ -170,7 +169,7 @@ namespace
         void SetWindowSize(SWindowInfo& _rWindowInfo, int _Width, int _Height);
 
         void InternInitializeWindow(SWindowInfo& _rWindowInfo);
-        void InternUninitializeWindow(SWindowInfo& _rWindowInfo);
+        void InternDestroyWindow(SWindowInfo& _rWindowInfo);
     };
 } // namespace
 
@@ -193,7 +192,7 @@ namespace
     
     CGfxMain::~CGfxMain()
     {
-        
+
     }
     
     // -----------------------------------------------------------------------------
@@ -233,6 +232,22 @@ namespace
             InternInitializeWindow(rWindowInfo);
 
             // -----------------------------------------------------------------------------
+            // Check specific OpenGL(ES) versions and availability
+            // -----------------------------------------------------------------------------
+            const unsigned char* pInfoGLVersion     = glGetString(GL_VERSION);                  //< Returns a version or release number.
+            const unsigned char* pInfoGLVendor      = glGetString(GL_VENDOR);                   //< Returns the company responsible for this GL implementation. This name does not change from release to release.
+            const unsigned char* pInfoGLRenderer    = glGetString(GL_RENDERER);                 //< Returns the name of the renderer. This name is typically specific to a particular configuration of a hardware platform. It does not change from release to release.
+            const unsigned char* pInfoGLGLSLVersion = glGetString(GL_SHADING_LANGUAGE_VERSION); //< Returns a version or release number for the shading language.
+
+            assert(pInfoGLVersion && pInfoGLGLSLVersion && pInfoGLVendor && pInfoGLRenderer);
+
+            ENGINE_CONSOLE_INFOV("Initialize Window: %i", IndexOfWindow);
+            ENGINE_CONSOLE_INFOV("GL:       %s", pInfoGLVersion);
+            ENGINE_CONSOLE_INFOV("GLSL:     %s", pInfoGLGLSLVersion);
+            ENGINE_CONSOLE_INFOV("Vendor:   %s", pInfoGLVendor);
+            ENGINE_CONSOLE_INFOV("Renderer: %s", pInfoGLRenderer);
+
+            // -----------------------------------------------------------------------------
             // Extensions
             // -----------------------------------------------------------------------------
             GLint ExtensionCount;
@@ -253,7 +268,7 @@ namespace
     {
         for (SWindowInfo& rWindowInfo : m_WindowInfos)
         {
-            InternUninitializeWindow(rWindowInfo);
+            InternDestroyWindow(rWindowInfo);
         }
     }
     
@@ -266,7 +281,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    unsigned int CGfxMain::RegisterWindow(void* _pWindow, int _VSync)
+    unsigned int CGfxMain::RegisterWindow(void* _pWindow, int _VSync, bool _PreserveContext)
     {
         if (_pWindow == 0 || m_NumberOfWindows == s_MaxNumberOfWindows) return 0;
 
@@ -277,6 +292,7 @@ namespace
 
         rNewWindow.m_pNativeWindowHandle        = _pWindow;
         rNewWindow.m_VSync                      = _VSync;
+        rNewWindow.m_PreserveContext            = _PreserveContext;
 
         ++ m_NumberOfWindows;
 
@@ -301,27 +317,40 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxMain::InitializeWindow(unsigned int _WindowID, void* _pWindow, int _VSync)
+    void CGfxMain::ReinitializeWindow(unsigned int _WindowID, void* _pWindow, int _VSync)
     {
         if (_WindowID >= m_NumberOfWindows) return;
 
         SWindowInfo& rDirtyWindow = m_WindowInfos[_WindowID];
 
+        // -----------------------------------------------------------------------------
+        // Destroy old window info
+        // -----------------------------------------------------------------------------
+        InternDestroyWindow(rDirtyWindow);
+
+        // -----------------------------------------------------------------------------
+        // Put new window info and re-initialize
+        // -----------------------------------------------------------------------------
         rDirtyWindow.m_pNativeWindowHandle = _pWindow;
         rDirtyWindow.m_VSync               = _VSync;
 
         InternInitializeWindow(rDirtyWindow);
-    }
 
-    // -----------------------------------------------------------------------------
+        // -----------------------------------------------------------------------------
+        // Check specific OpenGL(ES) versions and availability
+        // -----------------------------------------------------------------------------
+        const unsigned char* pInfoGLVersion     = glGetString(GL_VERSION);                  //< Returns a version or release number.
+        const unsigned char* pInfoGLVendor      = glGetString(GL_VENDOR);                   //< Returns the company responsible for this GL implementation. This name does not change from release to release.
+        const unsigned char* pInfoGLRenderer    = glGetString(GL_RENDERER);                 //< Returns the name of the renderer. This name is typically specific to a particular configuration of a hardware platform. It does not change from release to release.
+        const unsigned char* pInfoGLGLSLVersion = glGetString(GL_SHADING_LANGUAGE_VERSION); //< Returns a version or release number for the shading language.
 
-    void CGfxMain::UninitializeWindow(unsigned int _WindowID)
-    {
-        if (_WindowID >= m_NumberOfWindows) return;
+        assert(pInfoGLVersion && pInfoGLGLSLVersion && pInfoGLVendor && pInfoGLRenderer);
 
-        SWindowInfo& rDirtyWindow = m_WindowInfos[_WindowID];
-
-        InternUninitializeWindow(rDirtyWindow);
+        ENGINE_CONSOLE_INFOV("Reinitialize Window: %i", _WindowID);
+        ENGINE_CONSOLE_INFOV("GL:       %s", pInfoGLVersion);
+        ENGINE_CONSOLE_INFOV("GLSL:     %s", pInfoGLGLSLVersion);
+        ENGINE_CONSOLE_INFOV("Vendor:   %s", pInfoGLVendor);
+        ENGINE_CONSOLE_INFOV("Renderer: %s", pInfoGLRenderer);
     }
 
     // -----------------------------------------------------------------------------
@@ -443,8 +472,6 @@ namespace
 
         SWindowInfo& rWindowInfo = *m_pActiveWindowInfo;
 
-        if (rWindowInfo.m_IsInitialized == false) return;
-
 #ifdef PLATFORM_ANDROID
         eglMakeCurrent(rWindowInfo.m_EglDisplay, rWindowInfo.m_EglSurface, rWindowInfo.m_EglSurface, rWindowInfo.m_EglContext);
 #else
@@ -464,8 +491,6 @@ namespace
         assert(m_pActiveWindowInfo != 0);
 
         SWindowInfo& rWindowInfo = *m_pActiveWindowInfo;
-
-        if (rWindowInfo.m_IsInitialized == false) return;
 
 #ifdef PLATFORM_ANDROID
         eglSwapBuffers(rWindowInfo.m_EglDisplay, rWindowInfo.m_EglSurface);
@@ -752,21 +777,25 @@ namespace
         }
 
         // -----------------------------------------------------------------------------
-        // Context
+        // Create a context only if no one is available or context should not be
+        // preserved.
         // -----------------------------------------------------------------------------
-        EGLint ContextAttributes[] =
-                {
-                        EGL_CONTEXT_CLIENT_VERSION, m_GraphicsInfo.m_MajorVersion,
-                        EGL_NONE
-                };
-
-        _rWindowInfo.m_EglContext = eglCreateContext(_rWindowInfo.m_EglDisplay, _rWindowInfo.m_EglConfig, EGL_NO_CONTEXT, ContextAttributes);
-
-        Error = eglGetError();
-
-        if (_rWindowInfo.m_EglContext == EGL_NO_CONTEXT || Error != EGL_SUCCESS)
+        if (_rWindowInfo.m_PreserveContext == false || _rWindowInfo.m_EglContext == 0)
         {
-            BASE_THROWV("Unable to create context because of %i.", Error);
+            EGLint ContextAttributes[] =
+            {
+                    EGL_CONTEXT_CLIENT_VERSION, m_GraphicsInfo.m_MajorVersion,
+                    EGL_NONE
+            };
+
+            _rWindowInfo.m_EglContext = eglCreateContext(_rWindowInfo.m_EglDisplay, _rWindowInfo.m_EglConfig, EGL_NO_CONTEXT, ContextAttributes);
+
+            Error = eglGetError();
+
+            if (_rWindowInfo.m_EglContext == EGL_NO_CONTEXT || Error != EGL_SUCCESS)
+            {
+                BASE_THROWV("Unable to create context because of %i.", Error);
+            }
         }
 
         // -----------------------------------------------------------------------------
@@ -929,43 +958,21 @@ namespace
 			_rWindowInfo.m_pNativeDeviceContextHandle = pNativeDeviceContextHandle;
 			_rWindowInfo.m_pNativeOpenGLContextHandle = pNativeOpenGLContextHandle;
 #endif
-            
-        // -----------------------------------------------------------------------------
-        // Check specific OpenGL(ES) versions and availability
-        // -----------------------------------------------------------------------------
-        const unsigned char* pInfoGLVersion     = glGetString(GL_VERSION);                  //< Returns a version or release number.
-        const unsigned char* pInfoGLVendor      = glGetString(GL_VENDOR);                   //< Returns the company responsible for this GL implementation. This name does not change from release to release.
-        const unsigned char* pInfoGLRenderer    = glGetString(GL_RENDERER);                 //< Returns the name of the renderer. This name is typically specific to a particular configuration of a hardware platform. It does not change from release to release.
-        const unsigned char* pInfoGLGLSLVersion = glGetString(GL_SHADING_LANGUAGE_VERSION); //< Returns a version or release number for the shading language.
-
-        assert(pInfoGLVersion && pInfoGLGLSLVersion && pInfoGLVendor && pInfoGLRenderer);
-
-        ENGINE_CONSOLE_INFOV("GL:         %s", pInfoGLVersion);
-        ENGINE_CONSOLE_INFOV("GLSL:       %s", pInfoGLGLSLVersion);
-        ENGINE_CONSOLE_INFOV("Vendor:     %s", pInfoGLVendor);
-        ENGINE_CONSOLE_INFOV("Renderer:   %s", pInfoGLRenderer);
-
-        // -----------------------------------------------------------------------------
-        // Set window as initialized
-        // -----------------------------------------------------------------------------
-        _rWindowInfo.m_IsInitialized = true;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CGfxMain::InternUninitializeWindow(SWindowInfo& _rWindowInfo)
+    void CGfxMain::InternDestroyWindow(SWindowInfo& _rWindowInfo)
     {
-        if (_rWindowInfo.m_IsInitialized == false) return;
-
 #ifdef PLATFORM_ANDROID
         eglMakeCurrent(_rWindowInfo.m_EglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
 
         eglDestroySurface(_rWindowInfo.m_EglDisplay, _rWindowInfo.m_EglSurface);
 
         eglTerminate(_rWindowInfo.m_pNativeWindowHandle);
+#else
+        BASE_UNUSED(_rWindowInfo);
 #endif
-
-        _rWindowInfo.m_IsInitialized = false;
     }
 } // namespace
 
@@ -994,9 +1001,9 @@ namespace Main
 
     // -----------------------------------------------------------------------------
 
-    unsigned int RegisterWindow(void* _pWindow, int _VSync)
+    unsigned int RegisterWindow(void* _pWindow, int _VSync, bool _PreserveContext)
     {
-        return CGfxMain::GetInstance().RegisterWindow(_pWindow, _VSync);
+        return CGfxMain::GetInstance().RegisterWindow(_pWindow, _VSync, _PreserveContext);
     }
 
     // -----------------------------------------------------------------------------
@@ -1015,16 +1022,9 @@ namespace Main
 
     // -----------------------------------------------------------------------------
 
-    void InitializeWindow(unsigned int _WindowID, void* _pWindow, int _VSync)
+    void ReinitializeWindow(unsigned int _WindowID, void* _pWindow, int _VSync)
     {
-        CGfxMain::GetInstance().InitializeWindow(_WindowID, _pWindow, _VSync);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void UninitializeWindow(unsigned int _WindowID)
-    {
-        CGfxMain::GetInstance().UninitializeWindow(_WindowID);
+        CGfxMain::GetInstance().ReinitializeWindow(_WindowID, _pWindow, _VSync);
     }
 
     // -----------------------------------------------------------------------------
