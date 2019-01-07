@@ -20,7 +20,7 @@ namespace Core
 
     public:
 
-        void Dump(void* _pBytes, size_t _NumberOfBytes);
+        void Dump(const void* _pBytes, size_t _NumberOfBytes);
         void* Read(size_t _NumberOfBytes);
 
     public:
@@ -46,7 +46,6 @@ namespace Core
         {
         public:
             int StepSize;
-            void* NextPtr;
         };
 
     private:
@@ -66,7 +65,15 @@ namespace Core
 {
     CRecorder::CRecorder()
     {
-        
+        // -----------------------------------------------------------------------------
+        // Header
+        // -----------------------------------------------------------------------------
+        m_Header.NumberOfFrames = 0;
+
+        // -----------------------------------------------------------------------------
+        // Frame
+        // -----------------------------------------------------------------------------
+        m_CurrentFrameHeader.StepSize = 0;
     }
 
     // -----------------------------------------------------------------------------
@@ -80,14 +87,16 @@ namespace Core
 
     void CRecorder::Step()
     {
-
+        ++m_Header.NumberOfFrames;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CRecorder::Dump(void* _pBytes, size_t _NumberOfBytes)
+    void CRecorder::Dump(const void* _pBytes, size_t _NumberOfBytes)
     {
+        m_CurrentFrameData.write(static_cast<const char*>(_pBytes), _NumberOfBytes);
 
+        m_CurrentFrameHeader.StepSize += _NumberOfBytes;
     }
 
     // -----------------------------------------------------------------------------
