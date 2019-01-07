@@ -39,7 +39,8 @@ namespace MR
             TRANSFORM,
             DEPTHFRAME,
             COLORFRAME,
-            LIGHTESTIMATE
+            LIGHTESTIMATE,
+            PLANE
         };
 
     private:
@@ -518,6 +519,13 @@ namespace MR
             {
                 const float Intensity = *reinterpret_cast<float*>(Decompressed.data() + sizeof(int32_t));
                 const float Temperature = *reinterpret_cast<float*>(Decompressed.data() + sizeof(int32_t) + sizeof(float));
+            }
+            else if (MessageType == PLANE)
+            {
+                int PlaneAction = *reinterpret_cast<int*>(Decompressed.data() + sizeof(int32_t));
+
+                glm::mat4 PlaneTransform = *reinterpret_cast<glm::mat4*>(Decompressed.data() + 2 * sizeof(int32_t)) * glm::eulerAngleX(glm::pi<float>());
+                glm::vec4 PlaneExtent = *reinterpret_cast<glm::vec4*>(Decompressed.data() + 2 * sizeof(int32_t) + sizeof(glm::mat4));
             }
         }
 
