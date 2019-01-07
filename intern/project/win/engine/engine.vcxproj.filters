@@ -166,6 +166,9 @@
     <Filter Include="network">
       <UniqueIdentifier>{e9e54e8a-9d7c-43f0-b6c0-50bb3034ffdb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="core\recorder">
+      <UniqueIdentifier>{27a2300e-e3e9-41d7-8847-946294e4975c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\engine\core\core_asset_importer.cpp">
@@ -478,6 +481,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\engine\graphic\gfx_refraction_renderer.cpp">
       <Filter>graphic\engine\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\engine\core\core_recorder.cpp">
+      <Filter>core\recorder</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -888,6 +894,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_refraction_renderer.h">
       <Filter>graphic\engine\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\engine\core\core_recorder.h">
+      <Filter>core\recorder</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
