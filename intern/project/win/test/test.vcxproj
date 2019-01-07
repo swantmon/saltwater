@@ -32,6 +32,7 @@
     <ClCompile Include="..\..\..\test\base\test_base_sphere.cpp" />
     <ClCompile Include="..\..\..\test\base\test_base_tokenizer.cpp" />
     <ClCompile Include="..\..\..\test\core\test_core_function_call.cpp" />
+    <ClCompile Include="..\..\..\test\core\test_core_recorder.cpp" />
     <ClCompile Include="..\..\..\test\test_main.cpp" />
     <ClCompile Include="..\..\..\test\test_precompiled.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

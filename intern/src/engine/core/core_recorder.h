@@ -11,12 +11,7 @@ namespace Core
     {
     public:
 
-        static const int s_InfiniteRecordingTime = -1;
-
-    public:
-
-        CRecorder(const std::string& _rPathToRecording);
-        CRecorder(int _FrameRate, int _RecordTime = s_InfiniteRecordingTime);
+        CRecorder();
         ~CRecorder();
 
     public:
@@ -58,9 +53,54 @@ namespace Core
 
         CHeader m_Header;
         CStream m_Stream;
+        
         CFrameHeader m_CurrentFrameHeader;
+        CStream m_CurrentFrameData;
 
         std::string m_PathToArchive;
         bool m_FrameIsFinished;
     };
+} // namespace Core
+
+namespace Core
+{
+    CRecorder::CRecorder()
+    {
+        
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CRecorder::~CRecorder()
+    {
+
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CRecorder::Step()
+    {
+
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CRecorder::Dump(void* _pBytes, size_t _NumberOfBytes)
+    {
+
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void* CRecorder::Read(size_t _NumberOfBytes)
+    {
+        return 0;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CRecorder::SaveRecordingToFile(const std::string& _rPathToFile)
+    {
+
+    }
 } // namespace Core
