@@ -96,7 +96,8 @@ namespace
         void OnResize(unsigned int _Width, unsigned int _Height);
         
         void Update();
-        void Render(int _Pass);
+        void Render();
+        void RenderForward();
         void ChangeCamera(bool _IsTrackingCamera);
 
         void SetReconstructor(MR::CScalableSLAMReconstructor& _rReconstructor);
@@ -1180,7 +1181,7 @@ namespace
         for (const auto& Plane : m_pScalableReconstructor->GetPlanes())
         {
             BufferData.m_WorldMatrix = Plane.m_Transform * glm::scale(glm::vec3(Plane.m_Extent));
-            BufferData.m_Color = glm::vec4(1.0f, 1.0f, 0.0f, 0.1f);
+            BufferData.m_Color = glm::vec4(1.0f, 1.0f, 0.0f, 0.3f);
 
             BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
 
@@ -1320,7 +1321,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxReconstructionRenderer::Render(int _Pass)
+    void CGfxReconstructionRenderer::Render()
     {
         if (!m_IsInitialized && !m_pScalableReconstructor->IsInitialized())
         {
@@ -1333,75 +1334,82 @@ namespace
         }
 
         glEnable(GL_PROGRAM_POINT_SIZE);
-		if (_Pass == 0)
-		{
-            Performance::BeginEvent("SLAM Reconstruction Rendering");
+        Performance::BeginEvent("SLAM Reconstruction Rendering");
 
-            ContextManager::SetViewPortSet(ViewManager::GetViewPortSet());
-            ContextManager::SetTargetSet(TargetSetManager::GetDeferredTargetSet());
-            //glm::vec4 ClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-            //TargetSetManager::ClearTargetSet(TargetSetManager::GetDeferredTargetSet(), ClearColor);
+        ContextManager::SetViewPortSet(ViewManager::GetViewPortSet());
+        ContextManager::SetTargetSet(TargetSetManager::GetDeferredTargetSet());
+        //glm::vec4 ClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+        //TargetSetManager::ClearTargetSet(TargetSetManager::GetDeferredTargetSet(), ClearColor);
 
-            if (!m_UseTrackingCamera)
-            {
-                RenderCamera();
-            }
-
-            if (m_RenderVolumeVertexMap)
-            {
-                RenderVolumeVertexMap();
-            }
-
-            if (m_RenderPlanes)
-            {
-                RenderPlanes();
-            }
-
-            if (m_RenderVolume)
-            {
-                if (m_SelectionState == ESelection::NOSELECTION)
-                {
-                    RaycastScalableVolume();
-                }
-                else
-                {
-                    RaycastScalableVolumeWithHighlight();
-                }
-            }
-
-            if (m_RenderVertexMap)
-            {
-                RenderVertexMap();
-            }
-
-            if (m_RenderRootQueue)
-            {
-                RenderQueuedRootVolumes();
-            }
-
-            if (m_RenderLevel1Queue)
-            {
-                RenderQueuedLevel1Grids();
-            }
-
-            if (m_RenderLevel2Queue)
-            {
-                RenderQueuedLevel2Grids();
-            }
-
-            RenderSelectionBox();
-
-            Performance::EndEvent();
-		}
-        else
+        if (!m_UseTrackingCamera)
         {
-            if (m_pScalableReconstructor != nullptr)
+            RenderCamera();
+        }
+
+        if (m_RenderVolumeVertexMap)
+        {
+            RenderVolumeVertexMap();
+        }
+
+        if (m_RenderVolume)
+        {
+            if (m_SelectionState == ESelection::NOSELECTION)
             {
-                if (m_RenderVolumeVertexMap)
-                {
-                    RenderVolumeVertexMap();
-                }
+                RaycastScalableVolume();
             }
+            else
+            {
+                RaycastScalableVolumeWithHighlight();
+            }
+        }
+
+        if (m_RenderVertexMap)
+        {
+            RenderVertexMap();
+        }
+
+        if (m_RenderRootQueue)
+        {
+            RenderQueuedRootVolumes();
+        }
+
+        if (m_RenderLevel1Queue)
+        {
+            RenderQueuedLevel1Grids();
+        }
+
+        if (m_RenderLevel2Queue)
+        {
+            RenderQueuedLevel2Grids();
+        }
+
+        Performance::EndEvent();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxReconstructionRenderer::RenderForward()
+    {
+        if (!m_IsInitialized && !m_pScalableReconstructor->IsInitialized())
+        {
+            return;
+        }
+
+        if (!m_IsInitialized && m_pScalableReconstructor->IsInitialized())
+        {
+            Initialize();
+        }
+
+        if (m_RenderVolumeVertexMap)
+        {
+            RenderVolumeVertexMap();
+        }
+
+        RenderSelectionBox();
+
+        if (m_RenderPlanes)
+        {
+            RenderPlanes();
         }
     }
 
@@ -1532,7 +1540,14 @@ namespace ReconstructionRenderer
     
     void Render()
     {
-        CGfxReconstructionRenderer::GetInstance().Render(0);
+        CGfxReconstructionRenderer::GetInstance().Render();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void RenderForward()
+    {
+        CGfxReconstructionRenderer::GetInstance().RenderForward();
     }
     
     // -----------------------------------------------------------------------------

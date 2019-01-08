@@ -25,6 +25,7 @@ namespace ReconstructionRenderer
     
     void Update();
     void Render();
+    void RenderForward();
     void ChangeCamera(bool _IsTrackingCamera);
 
     void SetReconstructor(MR::CScalableSLAMReconstructor& _rReconstructor);
