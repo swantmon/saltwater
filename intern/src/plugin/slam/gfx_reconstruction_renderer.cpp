@@ -1180,7 +1180,7 @@ namespace
         
         for (const auto& Plane : m_pScalableReconstructor->GetPlanes())
         {
-            BufferData.m_WorldMatrix = Plane.m_Transform * glm::scale(glm::vec3(Plane.m_Extent));
+            BufferData.m_WorldMatrix = Plane.second.m_Transform * glm::scale(glm::vec3(Plane.second.m_Extent));
             BufferData.m_Color = glm::vec4(1.0f, 1.0f, 0.0f, 0.3f);
 
             BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);

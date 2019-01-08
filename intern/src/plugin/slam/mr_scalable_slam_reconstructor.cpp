@@ -1800,16 +1800,32 @@ namespace MR
     
     // -----------------------------------------------------------------------------
 
-    void CScalableSLAMReconstructor::AddPlane(glm::mat4 _Transform, glm::vec4 _Extent)
+    void CScalableSLAMReconstructor::AddPlane(glm::mat4 _Transform, glm::vec4 _Extent, int _ID)
     {
         SPlane Plane = { _Transform, _Extent };
 
-        m_Planes.push_back(Plane);
+        m_Planes[_ID] = Plane;
     }
 
     // -----------------------------------------------------------------------------
 
-    const std::vector<CScalableSLAMReconstructor::SPlane>& CScalableSLAMReconstructor::GetPlanes() const
+    void CScalableSLAMReconstructor::UpdatePlane(glm::mat4 _Transform, glm::vec4 _Extent, int _ID)
+    {
+        SPlane Plane = { _Transform, _Extent };
+
+        m_Planes[_ID] = Plane;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CScalableSLAMReconstructor::RemovePlane(int _ID)
+    {
+        m_Planes.erase(m_Planes.find(_ID));
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const std::map<int, CScalableSLAMReconstructor::SPlane>& CScalableSLAMReconstructor::GetPlanes() const
     {
         return m_Planes;
     }

@@ -522,16 +522,25 @@ namespace MR
             }
             else if (MessageType == PLANE)
             {
-                int PlaneAction = *reinterpret_cast<int*>(Decompressed.data() + sizeof(int32_t));
+                int PlaneID = *reinterpret_cast<int*>(Decompressed.data() + sizeof(int32_t));
+                int PlaneAction = *reinterpret_cast<int*>(Decompressed.data() + 2 * sizeof(int32_t));
 
-                if (PlaneAction == 0)
+                glm::mat4 PlaneTransform = *reinterpret_cast<glm::mat4*>(Decompressed.data() + 3 * sizeof(int32_t));
+                glm::vec4 PlaneExtent = *reinterpret_cast<glm::vec4*>(Decompressed.data() + 3 * sizeof(int32_t) + sizeof(glm::mat4));
+
+                PlaneTransform = glm::eulerAngleX(glm::half_pi<float>()) * PlaneTransform;
+
+                switch (PlaneAction)
                 {
-                    glm::mat4 PlaneTransform = *reinterpret_cast<glm::mat4*>(Decompressed.data() + 2 * sizeof(int32_t));
-                    glm::vec4 PlaneExtent = *reinterpret_cast<glm::vec4*>(Decompressed.data() + 2 * sizeof(int32_t) + sizeof(glm::mat4));
-
-                    PlaneTransform = glm::eulerAngleX(glm::half_pi<float>()) * PlaneTransform;
-
-                    m_pReconstructor->AddPlane(PlaneTransform, PlaneExtent);
+                case 0:
+                    m_pReconstructor->AddPlane(PlaneTransform, PlaneExtent, PlaneID);
+                    break;
+                case 1:
+                    m_pReconstructor->UpdatePlane(PlaneTransform, PlaneExtent, PlaneID);
+                    break;
+                case 2:
+                    m_pReconstructor->RemovePlane(PlaneID);
+                    break;
                 }
             }
         }

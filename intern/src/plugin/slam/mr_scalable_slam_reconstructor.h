@@ -149,8 +149,10 @@ namespace MR
 
         void ResetReconstruction(const SReconstructionSettings* pReconstructionSettings = nullptr);
 
-        void AddPlane(glm::mat4 _Transform, glm::vec4 _Extent);
-        const std::vector<SPlane>& GetPlanes() const;
+        void AddPlane(glm::mat4 _Transform, glm::vec4 _Extent, int _ID);
+        void UpdatePlane(glm::mat4 _Transform, glm::vec4 _Extent, int _ID);
+        void RemovePlane(int _ID);
+        const std::map<int, SPlane>& GetPlanes() const;
 
         void PauseIntegration(bool _Paused);
         void PauseTracking(bool _Paused);
@@ -338,6 +340,6 @@ namespace MR
 
         bool m_IsInizialized;
 
-        std::vector<SPlane> m_Planes;
+        std::map<int, SPlane> m_Planes;
     };
 } // namespace MR
