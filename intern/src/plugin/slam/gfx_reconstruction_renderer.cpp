@@ -134,6 +134,8 @@ namespace
 
         void RenderCamera();
 
+        void RenderPlanes();
+
         void RenderVertexMap();
 
         void RenderSelectionBox();
@@ -620,22 +622,22 @@ namespace
 
         const int PlaneSize = 3;
 
-        for (int x = -PlaneSize; x <= PlaneSize; ++x)
+        for (int x = -PlaneSize; x <= PlaneSize; ++ x)
         {
-            for (int y = -PlaneSize; y <= PlaneSize; ++y)
+            for (int y = -PlaneSize; y <= PlaneSize; ++ y)
             {
                 glm::vec3 NewVertices[4] =
                 {
-                    QuadLines[0],
-                    QuadLines[1],
-                    QuadLines[2],
-                    QuadLines[3],
+                    glm::vec3(QuadLines[0].x, QuadLines[0].z, QuadLines[0].y),  // convert from x-y to x-z planes
+                    glm::vec3(QuadLines[1].x, QuadLines[1].z, QuadLines[1].y),
+                    glm::vec3(QuadLines[2].x, QuadLines[2].z, QuadLines[2].y),
+                    glm::vec3(QuadLines[3].x, QuadLines[3].z, QuadLines[3].y),
                 };
 
-                for (int i = 0; i < 4; ++i)
+                for (int i = 0; i < 4; ++ i)
                 {
                     NewVertices[i][0] += x;
-                    NewVertices[i][1] += y;
+                    NewVertices[i][2] += y;
 
                     PlaneVertices.push_back(NewVertices[i]);
                 }
@@ -1141,6 +1143,43 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    void CGfxReconstructionRenderer::RenderPlanes()
+    {
+        Performance::BeginEvent("Plane Rendering");
+
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Wireframe));
+
+        ContextManager::SetRenderContext(m_OutlineRenderContextPtr);
+        ContextManager::SetShaderVS(m_OutlineVSPtr);
+        ContextManager::SetShaderPS(m_OutlineFSPtr);
+
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+        ContextManager::SetConstantBuffer(1, m_DrawCallConstantBufferPtr);
+
+        const unsigned int Offset = 0;
+        ContextManager::SetVertexBuffer(m_PlaneMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
+        ContextManager::SetIndexBuffer(m_PlaneMeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
+
+        ContextManager::SetInputLayout(m_CameraInputLayoutPtr);
+        ContextManager::SetTopology(STopology::TriangleList);
+
+        SDrawCallConstantBuffer BufferData;
+        
+        for (const auto& Plane : m_pScalableReconstructor->GetPlanes())
+        {
+            BufferData.m_WorldMatrix = Plane.m_Transform;
+            BufferData.m_Color = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
+
+            BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
+
+            ContextManager::DrawIndexed(m_PlaneMeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
+        }
+
+        Performance::EndEvent();
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CGfxReconstructionRenderer::RenderVertexMap()
     {
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
@@ -1300,6 +1339,8 @@ namespace
             {
                 RenderVolumeVertexMap();
             }
+
+            RenderPlanes();
 
             if (m_RenderVolume)
             {

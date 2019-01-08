@@ -1779,6 +1779,8 @@ namespace MR
         m_RootVolumeMap.clear();
         m_RootVolumeVector.clear();
 
+        m_Planes.clear();
+
         if (pReconstructionSettings != nullptr)
         {
 			assert(pReconstructionSettings->m_IsScalable);
@@ -1794,6 +1796,22 @@ namespace MR
         ClearPool();
 
         ClearMarkerStatistics();
+    }
+    
+    // -----------------------------------------------------------------------------
+
+    void CScalableSLAMReconstructor::AddPlane(glm::mat4 _Transform, glm::vec4 _Extent)
+    {
+        SPlane Plane = { _Transform, _Extent };
+
+        m_Planes.push_back(Plane);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const std::vector<CScalableSLAMReconstructor::SPlane>& CScalableSLAMReconstructor::GetPlanes() const
+    {
+        return m_Planes;
     }
 
     // -----------------------------------------------------------------------------
