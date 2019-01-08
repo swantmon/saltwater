@@ -6,11 +6,10 @@
 #include "base/base_serialize_std_vector.h"
 #include "base/base_serialize_text_reader.h"
 #include "base/base_serialize_text_writer.h"
+#include "base/base_serialize_binary_reader.h"
+#include "base/base_serialize_binary_writer.h"
 
 #include <vector>
-
-static const char* s_pTmpSerializeFilename = "test.txt";
-
 
 BASE_TEST(SerializeDataWithText)
 {
@@ -26,23 +25,22 @@ BASE_TEST(SerializeDataWithText)
     std::vector<int> IntegerListValue = { 0, 1, 2, 3 };
 
     // -----------------------------------------------------------------------------
+    // Stream (this could be also a file)
+    // -----------------------------------------------------------------------------
+    std::stringstream Stream;
+
+    // -----------------------------------------------------------------------------
     // Writing
     // -----------------------------------------------------------------------------
-    std::ofstream outFile;
+    Base::CTextWriter Writer(Stream, 1);
 
-    outFile.open(s_pTmpSerializeFilename);
+    Writer << IntegerValue;
+    Writer << FloatingValue;
+    Writer << DoubleValue;
+    Writer << pCharValue;
 
-    Base::CTextWriter TextWriter(outFile, 1);
-
-    TextWriter << IntegerValue;
-    TextWriter << FloatingValue;
-    TextWriter << DoubleValue;
-    TextWriter << pCharValue;
-
-    Base::Serialize(TextWriter, StringValue);
-    Base::Serialize(TextWriter, IntegerListValue);
-
-    outFile.close();
+    Base::Serialize(Writer, StringValue);
+    Base::Serialize(Writer, IntegerListValue);
 
     // -----------------------------------------------------------------------------
     // Test data
@@ -58,21 +56,80 @@ BASE_TEST(SerializeDataWithText)
     // -----------------------------------------------------------------------------
     // Reading
     // -----------------------------------------------------------------------------
-    std::ifstream inFile;
+    Base::CTextReader Reader(Stream, 1);
 
-    inFile.open(s_pTmpSerializeFilename);
+    Reader >> IntegerValueTest;
+    Reader >> FloatingValueTest;
+    Reader >> DoubleValueTest;
+    Reader >> pCharValueTest;
 
-    Base::CTextReader TextReader(inFile, 1);
+    Base::Serialize(Reader, StringValueTest);
+    Base::Serialize(Reader, IntegerListValueTest);
 
-    TextReader >> IntegerValueTest;
-    TextReader >> FloatingValueTest;
-    TextReader >> DoubleValueTest;
-    TextReader >> pCharValueTest;
+    // -----------------------------------------------------------------------------
+    // Check
+    // -----------------------------------------------------------------------------
+    BASE_CHECK(IntegerValue == IntegerValueTest);
+    BASE_CHECK(FloatingValue == FloatingValueTest);
+    BASE_CHECK(DoubleValue == DoubleValueTest);
+    BASE_CHECK(strcmp(pCharValue, pCharValueTest) == 0);
+    BASE_CHECK(StringValue == StringValueTest);
+}
 
-    Base::Serialize(TextReader, StringValueTest);
-    Base::Serialize(TextReader, IntegerListValueTest);
+BASE_TEST(SerializeDataWithBinary)
+{
+    // -----------------------------------------------------------------------------
+    // Data
+    // -----------------------------------------------------------------------------
+    int IntegerValue = 4;
+    float FloatingValue = 13.37f;
+    double DoubleValue = 12.34;
+    char* pCharValue = "This is a test";
+    std::string StringValue = "This is just another test!";
 
-    outFile.close();
+    std::vector<int> IntegerListValue = { 0, 1, 2, 3 };
+
+    // -----------------------------------------------------------------------------
+    // Stream (this could be also a file)
+    // -----------------------------------------------------------------------------
+    std::stringstream Stream;
+
+    // -----------------------------------------------------------------------------
+    // Writing
+    // -----------------------------------------------------------------------------
+    Base::CBinaryWriter Writer(Stream, 1);
+
+    Writer << IntegerValue;
+    Writer << FloatingValue;
+    Writer << DoubleValue;
+    Writer << pCharValue;
+
+    Base::Serialize(Writer, StringValue);
+    Base::Serialize(Writer, IntegerListValue);
+
+    // -----------------------------------------------------------------------------
+    // Test data
+    // -----------------------------------------------------------------------------
+    int IntegerValueTest;
+    float FloatingValueTest;
+    double DoubleValueTest;
+    char* pCharValueTest;
+    std::string StringValueTest;
+
+    std::vector<int> IntegerListValueTest;
+
+    // -----------------------------------------------------------------------------
+    // Reading
+    // -----------------------------------------------------------------------------
+    Base::CBinaryReader Reader(Stream, 1);
+
+    Reader >> IntegerValueTest;
+    Reader >> FloatingValueTest;
+    Reader >> DoubleValueTest;
+    Reader >> pCharValueTest;
+
+    Base::Serialize(Reader, StringValueTest);
+    Base::Serialize(Reader, IntegerListValueTest);
 
     // -----------------------------------------------------------------------------
     // Check
