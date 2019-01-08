@@ -76,6 +76,8 @@ BASE_TEST(SerializeDataWithText)
     BASE_CHECK(StringValue == StringValueTest);
 }
 
+// -----------------------------------------------------------------------------
+
 BASE_TEST(SerializeDataWithBinary)
 {
     // -----------------------------------------------------------------------------

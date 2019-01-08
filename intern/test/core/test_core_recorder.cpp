@@ -24,23 +24,55 @@ BASE_TEST(RecordDataWithRecorder)
 
     SComplex ComplexStructValue = { 0, 1.0 };
 
-
     // -----------------------------------------------------------------------------
     // Recording
     // -----------------------------------------------------------------------------
-    Core::CRecorder NewRecorder;
+    Core::CRecorder NewRecorder("test_recording/", true, 3);
 
-    NewRecorder.Dump(&IntegerValue, sizeof(IntegerValue));
-    NewRecorder.Dump(&FloatingValue, sizeof(FloatingValue));
-    NewRecorder.Dump(&pCharValue, strlen(pCharValue));
-
-    NewRecorder.Step();
-
-    NewRecorder.Dump(&DoubleValue, sizeof(DoubleValue));
-    NewRecorder.Dump(&StringValue, sizeof(StringValue));
-    NewRecorder.Dump(&ComplexStructValue, sizeof(SComplex));
+    NewRecorder.Write(&IntegerValue, sizeof(IntegerValue), 0);
+    NewRecorder.Write(&FloatingValue, sizeof(FloatingValue), 1);
+    NewRecorder.Write(&pCharValue, strlen(pCharValue), 2);
 
     NewRecorder.Step();
 
-    NewRecorder.SaveRecordingToFile("test_recording.7z");
+    NewRecorder.Write(&DoubleValue, sizeof(DoubleValue), 0);
+    NewRecorder.Write(&StringValue, sizeof(StringValue), 1);
+    NewRecorder.Write(&ComplexStructValue, sizeof(SComplex), 2);
+
+    NewRecorder.Stop();
+
+    // -----------------------------------------------------------------------------
+    // Test data
+    // -----------------------------------------------------------------------------
+    int IntegerValueTest;
+    float FloatingValueTest;
+    double DoubleValueTest;
+    char pCharValueTest[14];
+    std::string StringValueTest;
+
+    SComplex ComplexStructValueTest = { 0, 0 };
+
+    // -----------------------------------------------------------------------------
+    // Playing
+    // -----------------------------------------------------------------------------
+    Core::CRecorder NewRecordPlayer("test_recording/", false);
+
+    NewRecordPlayer.Read(&IntegerValueTest, sizeof(IntegerValueTest), 0);
+    NewRecordPlayer.Read(&FloatingValueTest, sizeof(FloatingValueTest), 1);
+    NewRecordPlayer.Read(&pCharValueTest, 14, 2);
+
+    NewRecordPlayer.Step();
+
+    NewRecordPlayer.Read(&DoubleValueTest, sizeof(DoubleValueTest), 0);
+    NewRecordPlayer.Read(&StringValueTest, sizeof(StringValueTest), 1);
+    NewRecordPlayer.Read(&ComplexStructValueTest, sizeof(SComplex), 2);
+
+    // -----------------------------------------------------------------------------
+    // Check
+    // -----------------------------------------------------------------------------
+    BASE_CHECK(IntegerValue == IntegerValueTest);
+    BASE_CHECK(FloatingValue == FloatingValueTest);
+    BASE_CHECK(DoubleValue == DoubleValueTest);
+    BASE_CHECK(strcmp(pCharValue, pCharValueTest) == 0);
+    BASE_CHECK(StringValue == StringValueTest);
 }
