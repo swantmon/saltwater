@@ -1341,16 +1341,6 @@ namespace
         //glm::vec4 ClearColor(0.2f, 0.2f, 0.2f, 1.0f);
         //TargetSetManager::ClearTargetSet(TargetSetManager::GetDeferredTargetSet(), ClearColor);
 
-        if (!m_UseTrackingCamera)
-        {
-            RenderCamera();
-        }
-
-        if (m_RenderVolumeVertexMap)
-        {
-            RenderVolumeVertexMap();
-        }
-
         if (m_RenderVolume)
         {
             if (m_SelectionState == ESelection::NOSELECTION)
@@ -1362,27 +1352,6 @@ namespace
                 RaycastScalableVolumeWithHighlight();
             }
         }
-
-        if (m_RenderVertexMap)
-        {
-            RenderVertexMap();
-        }
-
-        if (m_RenderRootQueue)
-        {
-            RenderQueuedRootVolumes();
-        }
-
-        if (m_RenderLevel1Queue)
-        {
-            RenderQueuedLevel1Grids();
-        }
-
-        if (m_RenderLevel2Queue)
-        {
-            RenderQueuedLevel2Grids();
-        }
-
         Performance::EndEvent();
     }
 
@@ -1403,6 +1372,36 @@ namespace
         if (m_RenderVolumeVertexMap)
         {
             RenderVolumeVertexMap();
+        }
+
+        if (!m_UseTrackingCamera)
+        {
+            RenderCamera();
+        }
+
+        if (m_RenderVolumeVertexMap)
+        {
+            RenderVolumeVertexMap();
+        }
+
+        if (m_RenderVertexMap)
+        {
+            RenderVertexMap();
+        }
+
+        if (m_RenderRootQueue)
+        {
+            RenderQueuedRootVolumes();
+        }
+
+        if (m_RenderLevel1Queue)
+        {
+            RenderQueuedLevel1Grids();
+        }
+
+        if (m_RenderLevel2Queue)
+        {
+            RenderQueuedLevel2Grids();
         }
 
         RenderSelectionBox();
