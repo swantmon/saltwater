@@ -45,6 +45,9 @@
     <ClCompile Include="..\..\..\test\core\test_core_recorder.cpp">
       <Filter>core</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\test\base\test_base_serialization.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="core">
