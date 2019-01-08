@@ -202,6 +202,7 @@ namespace
         bool m_RenderLevel1Queue;
         bool m_RenderLevel2Queue;
         bool m_RenderBackSides;
+        bool m_RenderPlanes;
 
         glm::mat4 m_SelectionTransform;
 
@@ -251,6 +252,7 @@ namespace
         m_RenderLevel1Queue     = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:level1"      , false);
         m_RenderLevel2Queue     = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:level2"      , false);
         m_RenderBackSides       = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:backsides"          , true);
+        m_RenderPlanes          = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:planes"             , false);
 
         m_IsInitialized = false;
     }
@@ -1145,6 +1147,11 @@ namespace
 
     void CGfxReconstructionRenderer::RenderPlanes()
     {
+        if (m_pScalableReconstructor->GetPlanes().empty())
+        {
+            return;
+        }
+
         Performance::BeginEvent("Plane Rendering");
 
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Wireframe));
@@ -1340,7 +1347,10 @@ namespace
                 RenderVolumeVertexMap();
             }
 
-            RenderPlanes();
+            if (m_RenderPlanes)
+            {
+                RenderPlanes();
+            }
 
             if (m_RenderVolume)
             {
