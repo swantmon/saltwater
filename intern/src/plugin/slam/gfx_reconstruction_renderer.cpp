@@ -179,6 +179,7 @@ namespace
         CInputLayoutPtr m_QuadInputLayoutPtr;
 
         CRenderContextPtr m_OutlineRenderContextPtr;
+        CRenderContextPtr m_PlaneRenderContextPtr;
 
         CMeshPtr m_PlaneMeshPtr;
         
@@ -311,6 +312,7 @@ namespace
 		m_CubeOutlineInputLayoutPtr = 0;
 
         m_OutlineRenderContextPtr = 0;
+        m_PlaneRenderContextPtr = 0;
 
 		m_pScalableReconstructor = nullptr;
 
@@ -425,11 +427,16 @@ namespace
     void CGfxReconstructionRenderer::OnSetupStates()
     {
         m_OutlineRenderContextPtr = ContextManager::CreateRenderContext();
-
         m_OutlineRenderContextPtr->SetCamera(ViewManager::GetMainCamera());
         m_OutlineRenderContextPtr->SetViewPortSet(ViewManager::GetViewPortSet());
         m_OutlineRenderContextPtr->SetTargetSet(TargetSetManager::GetDeferredTargetSet());
         m_OutlineRenderContextPtr->SetRenderState(StateManager::GetRenderState(CRenderState::NoCull | CRenderState::Wireframe));
+
+        m_PlaneRenderContextPtr = ContextManager::CreateRenderContext();
+        m_PlaneRenderContextPtr->SetCamera(ViewManager::GetMainCamera());
+        m_PlaneRenderContextPtr->SetViewPortSet(ViewManager::GetViewPortSet());
+        m_PlaneRenderContextPtr->SetTargetSet(TargetSetManager::GetDeferredTargetSet());
+        m_PlaneRenderContextPtr->SetRenderState(StateManager::GetRenderState(CRenderState::NoCull | CRenderState::AlphaBlend));
     }
     
     // -----------------------------------------------------------------------------
@@ -641,7 +648,7 @@ namespace
                     NewVertices[i][0] += x;
                     NewVertices[i][2] += y;
 
-                    PlaneVertices.push_back(NewVertices[i]);
+                    PlaneVertices.push_back(NewVertices[i] / PlaneSize);
                 }
             }
         }
@@ -1152,11 +1159,9 @@ namespace
             return;
         }
 
-        Performance::BeginEvent("Plane Rendering");
-
-        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Wireframe));
-
-        ContextManager::SetRenderContext(m_OutlineRenderContextPtr);
+        Performance::BeginEvent("Plane rendering");
+        
+        ContextManager::SetRenderContext(m_PlaneRenderContextPtr);
         ContextManager::SetShaderVS(m_OutlineVSPtr);
         ContextManager::SetShaderPS(m_OutlineFSPtr);
 
@@ -1174,8 +1179,8 @@ namespace
         
         for (const auto& Plane : m_pScalableReconstructor->GetPlanes())
         {
-            BufferData.m_WorldMatrix = Plane.m_Transform;
-            BufferData.m_Color = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
+            BufferData.m_WorldMatrix = Plane.m_Transform * glm::scale(glm::vec3(Plane.m_Extent));
+            BufferData.m_Color = glm::vec4(1.0f, 1.0f, 0.0f, 0.1f);
 
             BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
 
