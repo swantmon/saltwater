@@ -142,6 +142,7 @@
     <ClInclude Include="..\..\..\src\engine\core\core_plugin.h" />
     <ClInclude Include="..\..\..\src\engine\core\core_plugin_manager.h" />
     <ClInclude Include="..\..\..\src\engine\core\core_program_parameters.h" />
+    <ClInclude Include="..\..\..\src\engine\core\core_recorder.h" />
     <ClInclude Include="..\..\..\src\engine\core\core_time.h" />
     <ClInclude Include="..\..\..\src\engine\data\data_area_light_component.h" />
     <ClInclude Include="..\..\..\src\engine\data\data_ar_controller_component.h" />

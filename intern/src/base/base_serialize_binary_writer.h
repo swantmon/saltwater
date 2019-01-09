@@ -177,7 +177,7 @@ namespace SER
 
     // -----------------------------------------------------------------------------
 
-    inline void CBinaryWriter::WriteBinary(const void* _pBytes, const unsigned int _NumberOfBytes)
+    void CBinaryWriter::WriteBinary(const void* _pBytes, const unsigned int _NumberOfBytes)
     {
         m_pStream->write(static_cast<const char*>(_pBytes), _NumberOfBytes);
     }
@@ -187,6 +187,6 @@ namespace SER
     template<typename TElement>
     inline void CBinaryWriter::WriteClass(const TElement& _rElement)
     {
-        Serialize(*this, const_cast<TElement&>(_rElement));
+        SER::Private::CAccess::Write(*this, const_cast<TElement&>(_rElement));
     }
 } // namespace SER
