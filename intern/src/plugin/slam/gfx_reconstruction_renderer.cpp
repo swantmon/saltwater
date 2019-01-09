@@ -430,13 +430,13 @@ namespace
         m_OutlineRenderContextPtr = ContextManager::CreateRenderContext();
         m_OutlineRenderContextPtr->SetCamera(ViewManager::GetMainCamera());
         m_OutlineRenderContextPtr->SetViewPortSet(ViewManager::GetViewPortSet());
-        m_OutlineRenderContextPtr->SetTargetSet(TargetSetManager::GetDeferredTargetSet());
+        m_OutlineRenderContextPtr->SetTargetSet(TargetSetManager::GetLightAccumulationTargetSet());
         m_OutlineRenderContextPtr->SetRenderState(StateManager::GetRenderState(CRenderState::NoCull | CRenderState::Wireframe));
 
         m_PlaneRenderContextPtr = ContextManager::CreateRenderContext();
         m_PlaneRenderContextPtr->SetCamera(ViewManager::GetMainCamera());
         m_PlaneRenderContextPtr->SetViewPortSet(ViewManager::GetViewPortSet());
-        m_PlaneRenderContextPtr->SetTargetSet(TargetSetManager::GetDeferredTargetSet());
+        m_PlaneRenderContextPtr->SetTargetSet(TargetSetManager::GetLightAccumulationTargetSet());
         m_PlaneRenderContextPtr->SetRenderState(StateManager::GetRenderState(CRenderState::NoCull | CRenderState::AlphaBlend));
     }
     
@@ -1352,7 +1352,11 @@ namespace
                 RaycastScalableVolumeWithHighlight();
             }
         }
+
         Performance::EndEvent();
+
+        ContextManager::ResetShaderVS();
+        ContextManager::ResetShaderPS();
     }
 
     // -----------------------------------------------------------------------------
@@ -1363,12 +1367,7 @@ namespace
         {
             return;
         }
-
-        if (!m_IsInitialized && m_pScalableReconstructor->IsInitialized())
-        {
-            Initialize();
-        }
-
+        
         if (m_RenderVolumeVertexMap)
         {
             RenderVolumeVertexMap();
@@ -1410,6 +1409,9 @@ namespace
         {
             RenderPlanes();
         }
+
+        ContextManager::ResetShaderVS();
+        ContextManager::ResetShaderPS();
     }
 
     // -----------------------------------------------------------------------------
