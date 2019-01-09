@@ -1,5 +1,6 @@
 #pragma once
 
+#include "base/base_clock.h"
 #include "base/base_memory.h"
 #include "base/base_serialize_archive.h"
 #include "base/base_serialize_std_vector.h"
@@ -27,6 +28,10 @@ namespace Core
         inline void Restart();
 
         inline void Step();
+
+        inline bool IsEnd();
+
+        inline void SetFPS(int _FramesPerSeconds);
                 
     public:
 
@@ -79,6 +84,10 @@ namespace Core
         CFrames m_Frames;
 
         int m_FrameIndex;
+        int m_FramesPerSeconds;
+        double m_Frequenz;
+        double m_TimeSinceLastStep;
+        Base::CPerformanceClock m_Clock;
 
     private:
 
@@ -174,7 +183,11 @@ namespace Core
 namespace Core
 {
     CRecorder::CRecorder()
-        : m_FrameIndex(0)
+        : m_FrameIndex       (0)
+        , m_FramesPerSeconds (-1)
+        , m_Frequenz         (0.0)
+        , m_TimeSinceLastStep(0.0)
+        , m_Clock            ( )
     {
         if (m_Frames.size() == 0) AddFrame();
     }
@@ -233,7 +246,38 @@ namespace Core
 
     inline void CRecorder::Step()
     {
-        ++m_FrameIndex;
+        if (m_FramesPerSeconds == -1)
+        {
+            ++m_FrameIndex;
+        }
+        else
+        {
+            m_TimeSinceLastStep += m_Clock.GetDurationOfFrame();
+
+            if (m_TimeSinceLastStep > m_Frequenz)
+            {
+                ++ m_FrameIndex;
+
+                m_TimeSinceLastStep = 0.0f;
+            }   
+
+            m_Clock.OnFrame();
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    inline bool CRecorder::IsEnd()
+    {
+        return m_FrameIndex == m_Frames.size();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    inline void CRecorder::SetFPS(int _FramesPerSeconds)
+    {
+        m_FramesPerSeconds = _FramesPerSeconds;
+        m_Frequenz         = 1.0 / (double)_FramesPerSeconds;
     }
 
     // -----------------------------------------------------------------------------

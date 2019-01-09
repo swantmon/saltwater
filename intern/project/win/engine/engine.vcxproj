@@ -28,7 +28,6 @@
     <ClCompile Include="..\..\..\src\engine\core\core_console.cpp" />
     <ClCompile Include="..\..\..\src\engine\core\core_plugin_manager.cpp" />
     <ClCompile Include="..\..\..\src\engine\core\core_program_parameters.cpp" />
-    <ClCompile Include="..\..\..\src\engine\core\core_recorder.cpp" />
     <ClCompile Include="..\..\..\src\engine\core\core_time.cpp" />
     <ClCompile Include="..\..\..\src\engine\data\data_area_light_component.cpp" />
     <ClCompile Include="..\..\..\src\engine\data\data_ar_controller_component.cpp" />

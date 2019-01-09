@@ -482,9 +482,6 @@
     <ClCompile Include="..\..\..\src\engine\graphic\gfx_refraction_renderer.cpp">
       <Filter>graphic\engine\renderer</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\engine\core\core_recorder.cpp">
-      <Filter>core\recorder</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\engine\core\core_asset_generator.h">
