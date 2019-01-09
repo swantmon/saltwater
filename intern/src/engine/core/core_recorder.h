@@ -1,8 +1,7 @@
 #pragma once
 
 #include "base/base_memory.h"
-#include "base/base_serialize_text_reader.h"
-#include "base/base_serialize_text_writer.h"
+#include "base/base_serialize_archive.h"
 #include "base/base_serialize_std_vector.h"
 
 #include <fstream>

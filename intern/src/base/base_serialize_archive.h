@@ -70,15 +70,11 @@ namespace SER
         template<typename TElement>
         inline void WritePrimitive(const TElement& _rElement) = 0;
 
-        virtual inline void WriteBinary(const void* _pBytes, const unsigned int _NumberOfBytes) = 0;
-
         template<typename TElement>
         inline void WriteClass(const TElement& _rElement) = 0;
 
         template<typename TElement>
         inline void ReadPrimitive(TElement& _rElement) = 0;
-
-        virtual inline void ReadBinary(void* _pBytes, unsigned int _NumberOfBytes) = 0;
 
         template<typename TElement>
         inline void ReadClass(TElement& _rElement) = 0;
