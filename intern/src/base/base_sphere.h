@@ -222,7 +222,7 @@ namespace MATH
     template<typename T>
     bool CSphere<T>::Contains(const CVector& _rPoint) const
     {
-        auto Distance = (m_Center - _rPoint).length();
+        auto Distance = glm::distance(m_Center, _rPoint);
         
         return Distance <= m_Radius;
     }
@@ -232,7 +232,7 @@ namespace MATH
     template<typename T>
     bool CSphere<T>::Contains(const CThis& _rSphere) const
     {
-        auto Distance        = (m_Center - _rSphere.m_Center).length();
+        auto Distance        = glm::distance(m_Center, _rSphere.m_Center);
         auto MinimalDistance = m_Radius - _rSphere.m_Radius;
         
         return Distance <= MinimalDistance;
@@ -243,7 +243,7 @@ namespace MATH
     template<typename T>
     bool CSphere<T>::Intersects(const CThis& _rSphere) const
     {
-        auto Distance        = (m_Center - _rSphere.m_Center).length();
+        auto Distance        = glm::distance(m_Center, _rSphere.m_Center);
         auto MinimalDistance = m_Radius + _rSphere.m_Radius;
         
         return Distance <= MinimalDistance;
