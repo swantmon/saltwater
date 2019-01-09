@@ -96,7 +96,8 @@ namespace
         void OnResize(unsigned int _Width, unsigned int _Height);
         
         void Update();
-        void Render(int _Pass);
+        void Render();
+        void RenderForward();
         void ChangeCamera(bool _IsTrackingCamera);
 
         void SetReconstructor(MR::CScalableSLAMReconstructor& _rReconstructor);
@@ -133,6 +134,8 @@ namespace
         void RenderQueuedLevel2Grids();
 
         void RenderCamera();
+
+        void RenderPlanes();
 
         void RenderVertexMap();
 
@@ -177,6 +180,7 @@ namespace
         CInputLayoutPtr m_QuadInputLayoutPtr;
 
         CRenderContextPtr m_OutlineRenderContextPtr;
+        CRenderContextPtr m_PlaneRenderContextPtr;
 
         CMeshPtr m_PlaneMeshPtr;
         
@@ -200,6 +204,7 @@ namespace
         bool m_RenderLevel1Queue;
         bool m_RenderLevel2Queue;
         bool m_RenderBackSides;
+        bool m_RenderPlanes;
 
         glm::mat4 m_SelectionTransform;
 
@@ -249,6 +254,7 @@ namespace
         m_RenderLevel1Queue     = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:level1"      , false);
         m_RenderLevel2Queue     = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:level2"      , false);
         m_RenderBackSides       = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:backsides"          , true);
+        m_RenderPlanes          = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:planes"             , false);
 
         m_IsInitialized = false;
     }
@@ -307,6 +313,7 @@ namespace
 		m_CubeOutlineInputLayoutPtr = 0;
 
         m_OutlineRenderContextPtr = 0;
+        m_PlaneRenderContextPtr = 0;
 
 		m_pScalableReconstructor = nullptr;
 
@@ -421,11 +428,16 @@ namespace
     void CGfxReconstructionRenderer::OnSetupStates()
     {
         m_OutlineRenderContextPtr = ContextManager::CreateRenderContext();
-
         m_OutlineRenderContextPtr->SetCamera(ViewManager::GetMainCamera());
         m_OutlineRenderContextPtr->SetViewPortSet(ViewManager::GetViewPortSet());
-        m_OutlineRenderContextPtr->SetTargetSet(TargetSetManager::GetDeferredTargetSet());
+        m_OutlineRenderContextPtr->SetTargetSet(TargetSetManager::GetLightAccumulationTargetSet());
         m_OutlineRenderContextPtr->SetRenderState(StateManager::GetRenderState(CRenderState::NoCull | CRenderState::Wireframe));
+
+        m_PlaneRenderContextPtr = ContextManager::CreateRenderContext();
+        m_PlaneRenderContextPtr->SetCamera(ViewManager::GetMainCamera());
+        m_PlaneRenderContextPtr->SetViewPortSet(ViewManager::GetViewPortSet());
+        m_PlaneRenderContextPtr->SetTargetSet(TargetSetManager::GetLightAccumulationTargetSet());
+        m_PlaneRenderContextPtr->SetRenderState(StateManager::GetRenderState(CRenderState::NoCull | CRenderState::AlphaBlend));
     }
     
     // -----------------------------------------------------------------------------
@@ -620,24 +632,24 @@ namespace
 
         const int PlaneSize = 3;
 
-        for (int x = -PlaneSize; x <= PlaneSize; ++x)
+        for (int x = -PlaneSize; x <= PlaneSize; ++ x)
         {
-            for (int y = -PlaneSize; y <= PlaneSize; ++y)
+            for (int y = -PlaneSize; y <= PlaneSize; ++ y)
             {
                 glm::vec3 NewVertices[4] =
                 {
-                    QuadLines[0],
-                    QuadLines[1],
-                    QuadLines[2],
-                    QuadLines[3],
+                    glm::vec3(QuadLines[0].x, QuadLines[0].z, QuadLines[0].y),  // convert from x-y to x-z planes
+                    glm::vec3(QuadLines[1].x, QuadLines[1].z, QuadLines[1].y),
+                    glm::vec3(QuadLines[2].x, QuadLines[2].z, QuadLines[2].y),
+                    glm::vec3(QuadLines[3].x, QuadLines[3].z, QuadLines[3].y),
                 };
 
-                for (int i = 0; i < 4; ++i)
+                for (int i = 0; i < 4; ++ i)
                 {
                     NewVertices[i][0] += x;
-                    NewVertices[i][1] += y;
+                    NewVertices[i][2] += y;
 
-                    PlaneVertices.push_back(NewVertices[i]);
+                    PlaneVertices.push_back(NewVertices[i] / PlaneSize);
                 }
             }
         }
@@ -1141,6 +1153,46 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    void CGfxReconstructionRenderer::RenderPlanes()
+    {
+        if (m_pScalableReconstructor->GetPlanes().empty())
+        {
+            return;
+        }
+
+        Performance::BeginEvent("Plane rendering");
+        
+        ContextManager::SetRenderContext(m_PlaneRenderContextPtr);
+        ContextManager::SetShaderVS(m_OutlineVSPtr);
+        ContextManager::SetShaderPS(m_OutlineFSPtr);
+
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+        ContextManager::SetConstantBuffer(1, m_DrawCallConstantBufferPtr);
+
+        const unsigned int Offset = 0;
+        ContextManager::SetVertexBuffer(m_PlaneMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
+        ContextManager::SetIndexBuffer(m_PlaneMeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
+
+        ContextManager::SetInputLayout(m_CameraInputLayoutPtr);
+        ContextManager::SetTopology(STopology::TriangleList);
+
+        SDrawCallConstantBuffer BufferData;
+        
+        for (const auto& Plane : m_pScalableReconstructor->GetPlanes())
+        {
+            BufferData.m_WorldMatrix = Plane.second.m_Transform * glm::scale(glm::vec3(Plane.second.m_Extent));
+            BufferData.m_Color = glm::vec4(1.0f, 1.0f, 0.0f, 0.3f);
+
+            BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
+
+            ContextManager::DrawIndexed(m_PlaneMeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
+        }
+
+        Performance::EndEvent();
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CGfxReconstructionRenderer::RenderVertexMap()
     {
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
@@ -1269,7 +1321,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxReconstructionRenderer::Render(int _Pass)
+    void CGfxReconstructionRenderer::Render()
     {
         if (!m_IsInitialized && !m_pScalableReconstructor->IsInitialized())
         {
@@ -1282,71 +1334,84 @@ namespace
         }
 
         glEnable(GL_PROGRAM_POINT_SIZE);
-		if (_Pass == 0)
-		{
-            Performance::BeginEvent("SLAM Reconstruction Rendering");
+        Performance::BeginEvent("SLAM Reconstruction Rendering");
 
-            ContextManager::SetViewPortSet(ViewManager::GetViewPortSet());
-            ContextManager::SetTargetSet(TargetSetManager::GetDeferredTargetSet());
-            //glm::vec4 ClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-            //TargetSetManager::ClearTargetSet(TargetSetManager::GetDeferredTargetSet(), ClearColor);
+        ContextManager::SetViewPortSet(ViewManager::GetViewPortSet());
+        ContextManager::SetTargetSet(TargetSetManager::GetDeferredTargetSet());
+        //glm::vec4 ClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+        //TargetSetManager::ClearTargetSet(TargetSetManager::GetDeferredTargetSet(), ClearColor);
 
-            if (!m_UseTrackingCamera)
-            {
-                RenderCamera();
-            }
-
-            if (m_RenderVolumeVertexMap)
-            {
-                RenderVolumeVertexMap();
-            }
-
-            if (m_RenderVolume)
-            {
-                if (m_SelectionState == ESelection::NOSELECTION)
-                {
-                    RaycastScalableVolume();
-                }
-                else
-                {
-                    RaycastScalableVolumeWithHighlight();
-                }
-            }
-
-            if (m_RenderVertexMap)
-            {
-                RenderVertexMap();
-            }
-
-            if (m_RenderRootQueue)
-            {
-                RenderQueuedRootVolumes();
-            }
-
-            if (m_RenderLevel1Queue)
-            {
-                RenderQueuedLevel1Grids();
-            }
-
-            if (m_RenderLevel2Queue)
-            {
-                RenderQueuedLevel2Grids();
-            }
-
-            RenderSelectionBox();
-
-            Performance::EndEvent();
-		}
-        else
+        if (m_RenderVolume)
         {
-            if (m_pScalableReconstructor != nullptr)
+            if (m_SelectionState == ESelection::NOSELECTION)
             {
-                if (m_RenderVolumeVertexMap)
-                {
-                    RenderVolumeVertexMap();
-                }
+                RaycastScalableVolume();
+            }
+            else
+            {
+                RaycastScalableVolumeWithHighlight();
             }
         }
+
+        Performance::EndEvent();
+
+        ContextManager::ResetShaderVS();
+        ContextManager::ResetShaderPS();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxReconstructionRenderer::RenderForward()
+    {
+        if (!m_IsInitialized && !m_pScalableReconstructor->IsInitialized())
+        {
+            return;
+        }
+        
+        if (m_RenderVolumeVertexMap)
+        {
+            RenderVolumeVertexMap();
+        }
+
+        if (!m_UseTrackingCamera)
+        {
+            RenderCamera();
+        }
+
+        if (m_RenderVolumeVertexMap)
+        {
+            RenderVolumeVertexMap();
+        }
+
+        if (m_RenderVertexMap)
+        {
+            RenderVertexMap();
+        }
+
+        if (m_RenderRootQueue)
+        {
+            RenderQueuedRootVolumes();
+        }
+
+        if (m_RenderLevel1Queue)
+        {
+            RenderQueuedLevel1Grids();
+        }
+
+        if (m_RenderLevel2Queue)
+        {
+            RenderQueuedLevel2Grids();
+        }
+
+        RenderSelectionBox();
+
+        if (m_RenderPlanes)
+        {
+            RenderPlanes();
+        }
+
+        ContextManager::ResetShaderVS();
+        ContextManager::ResetShaderPS();
     }
 
     // -----------------------------------------------------------------------------
@@ -1476,7 +1541,14 @@ namespace ReconstructionRenderer
     
     void Render()
     {
-        CGfxReconstructionRenderer::GetInstance().Render(0);
+        CGfxReconstructionRenderer::GetInstance().Render();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void RenderForward()
+    {
+        CGfxReconstructionRenderer::GetInstance().RenderForward();
     }
     
     // -----------------------------------------------------------------------------

@@ -58,6 +58,12 @@ namespace MR
     {
 	public:
 
+        struct SPlane
+        {
+            glm::mat4 m_Transform;
+            glm::vec4 m_Extent;
+        };
+
         struct SIndirectParameters
         {
             uint32_t m_Count;
@@ -142,6 +148,11 @@ namespace MR
     public:
 
         void ResetReconstruction(const SReconstructionSettings* pReconstructionSettings = nullptr);
+
+        void AddPlane(glm::mat4 _Transform, glm::vec4 _Extent, int _ID);
+        void UpdatePlane(glm::mat4 _Transform, glm::vec4 _Extent, int _ID);
+        void RemovePlane(int _ID);
+        const std::map<int, SPlane>& GetPlanes() const;
 
         void PauseIntegration(bool _Paused);
         void PauseTracking(bool _Paused);
@@ -328,5 +339,7 @@ namespace MR
         bool m_RaycastBackSides;
 
         bool m_IsInizialized;
+
+        std::map<int, SPlane> m_Planes;
     };
 } // namespace MR
