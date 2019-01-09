@@ -80,7 +80,7 @@ BASE_TEST(RecordDataWithRecorder)
         SFrame FrameCheck;
 
         Recorder.GetData(Frame);
-        Recorder.GetData(FrameCheck);
+        RecorderCheck.GetData(FrameCheck);
 
         RecorderCheck.Step();
         Recorder.Step();
@@ -160,7 +160,7 @@ BASE_TEST(RecordDataWithRecorderBinary)
         SFrame FrameCheck;
 
         Recorder.GetData(Frame);
-        Recorder.GetData(FrameCheck);
+        RecorderCheck.GetData(FrameCheck);
 
         RecorderCheck.Step();
         Recorder.Step();
@@ -169,4 +169,67 @@ BASE_TEST(RecordDataWithRecorderBinary)
         BASE_CHECK(Frame.m_2 == FrameCheck.m_2);
         BASE_CHECK(Frame.m_3 == FrameCheck.m_3);
     }
+}
+
+// -----------------------------------------------------------------------------
+
+BASE_TEST(RecordDataWithRecorderWithFixedTime)
+{
+    // -----------------------------------------------------------------------------
+    // Data
+    // -----------------------------------------------------------------------------
+    struct SFrame
+    {
+        int m_1;
+    };
+
+    std::array<SFrame, 120> Frames;
+
+    int Index = 0;
+
+    for (auto& Frame : Frames)
+    {
+        Frame.m_1 = Index;
+
+        ++Index;
+    }
+
+    // -----------------------------------------------------------------------------
+    // Recording
+    // -----------------------------------------------------------------------------
+    Core::CRecorder Recorder;
+
+    for (auto& Frame : Frames)
+    {
+        Recorder.SetData(&Frame, sizeof(SFrame));
+
+        Recorder.Step();
+    }
+
+    // -----------------------------------------------------------------------------
+    // Write record
+    // -----------------------------------------------------------------------------
+    std::stringstream Stream;
+
+    Base::CTextWriter Writer(Stream, 1);
+
+    Writer << Recorder;
+
+    // -----------------------------------------------------------------------------
+    // Check record w/ prev. record
+    // -----------------------------------------------------------------------------
+    Recorder.Restart();
+
+    Recorder.SetFPS(60);
+
+    bool IsRecordEnd = false;
+
+    BASE_TIME_RESET();
+
+    while (!Recorder.IsEnd())
+    {
+        Recorder.Step();
+    }
+
+    BASE_TIME_LOG(TimeOfRecordIs2Sec);
 }
