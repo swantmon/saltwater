@@ -244,7 +244,7 @@ namespace SER
 
         ++ m_NumberOfIdents;
 
-        SER::Private::CAccess::Serialize(*this, const_cast<TElement&>(_rElement));
+        SER::Private::CAccess::Write(*this, const_cast<TElement&>(_rElement));
 
         -- m_NumberOfIdents;
 

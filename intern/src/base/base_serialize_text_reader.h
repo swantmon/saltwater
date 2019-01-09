@@ -252,7 +252,7 @@ namespace SER
 
         ++ m_NumberOfIdents;
 
-        Serialize(*this, const_cast<TElement&>(_rElement));
+        SER::Private::CAccess::Read(*this, const_cast<TElement&>(_rElement));
 
         -- m_NumberOfIdents;
 

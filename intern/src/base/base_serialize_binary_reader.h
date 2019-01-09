@@ -190,6 +190,6 @@ namespace SER
     template<typename TElement>
     inline void CBinaryReader::ReadClass(TElement& _rElement)
     {
-        Serialize(*this, const_cast<TElement&>(_rElement));
+        SER::Private::CAccess::Read(*this, const_cast<TElement&>(_rElement));
     }
 } // namespace SER
