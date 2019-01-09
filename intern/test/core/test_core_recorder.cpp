@@ -39,7 +39,7 @@ BASE_TEST(RecordDataWithRecorder)
 
     for (auto& Frame : Frames)
     {
-        Recorder.SetFrameData(&Frame, sizeof(SFrame));
+        Recorder.SetData(&Frame, sizeof(SFrame));
 
         Recorder.Step();
     }
@@ -85,8 +85,8 @@ BASE_TEST(RecordDataWithRecorder)
         SFrame Frame;
         SFrame FrameCheck;
 
-        Recorder.GetFrameData(Frame);
-        Recorder.GetFrameData(FrameCheck);
+        Recorder.GetData(Frame);
+        Recorder.GetData(FrameCheck);
 
         RecorderCheck.Step();
         Recorder.Step();

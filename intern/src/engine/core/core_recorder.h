@@ -19,9 +19,9 @@ namespace Core
     public:
 
         template<class TType>
-        inline void GetFrameData(TType& _rBytes);
+        inline void GetData(TType& _rBytes);
 
-        inline void SetFrameData(void* _pBytes, size_t _NumberOfBytes);
+        inline void SetData(void* _pBytes, size_t _NumberOfBytes);
 
         inline int GetNumberOfFrames();
 
@@ -193,7 +193,7 @@ namespace Core
     // -----------------------------------------------------------------------------
 
     template<class TType>
-    inline void CRecorder::GetFrameData(TType& _rBytes)
+    inline void CRecorder::GetData(TType& _rBytes)
     {
         CFrame& rCurrentFrame = m_Frames[m_FrameIndex];
 
@@ -207,7 +207,7 @@ namespace Core
 
     // -----------------------------------------------------------------------------
 
-    inline void CRecorder::SetFrameData(void* _pBytes, size_t _NumberOfBytes)
+    inline void CRecorder::SetData(void* _pBytes, size_t _NumberOfBytes)
     {
         if (m_FrameIndex == GetNumberOfFrames()) AddFrame();
 
