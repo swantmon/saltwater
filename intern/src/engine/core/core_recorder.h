@@ -1,251 +1,268 @@
 #pragma once
 
+#include "base/base_memory.h"
 #include "base/base_serialize_text_reader.h"
 #include "base/base_serialize_text_writer.h"
+#include "base/base_serialize_std_vector.h"
 
 #include <fstream>
 
 namespace Core
 {
     class CRecorder
-    {
-    public:
-           
-        typedef CRecorder CThis;
-        
+    {        
     public:
 
-        CRecorder(const std::string& _rPathToRecord, bool _Record, int _NumberOfCategories = 1);
+        CRecorder();
         ~CRecorder();
 
     public:
 
-        inline void Step();
+        template<class TType>
+        inline void GetFrameData(TType& _rBytes);
 
-        inline void Stop();
-        
+        inline void SetFrameData(void* _pBytes, size_t _NumberOfBytes);
+
+        inline int GetNumberOfFrames();
+
+        inline void Restart();
+
+        inline void Step();
+                
     public:
 
-        inline void Write(const void* _pBytes, const unsigned int _NumberOfBytes, int _Category = 0);
+        template <class TArchive>
+        inline void Read(TArchive& _rCodec);
 
-        inline void Read(void* _pBytes, const unsigned int _NumberOfBytes, int _Category = 0);
+        template <class TArchive>
+        inline void Write(TArchive& _rCodec);
 
     private:
 
-        typedef std::stringstream            CStream;
+        class CFrame
+        {
 
-        typedef Base::CTextWriter            CWriter;
-        typedef Base::CTextReader            CReader;
-        typedef std::vector<Base::CArchive*> CCategories;
-        typedef std::vector<CCategories>     CFrames;
+        public:
+
+            CFrame();
+            ~CFrame();
+
+            void SetTimecode(size_t _Timecode);
+            size_t GetTimecode() const;
+
+            void Get(void*& _prBytes, size_t& _rNumberOfBytes);
+
+            void Set(void* _pBytes, size_t _NumberOfBytes);
+
+            void Clear();
+
+        public:
+
+            template <class TArchive>
+            inline void Read(TArchive& _rCodec);
+
+            template <class TArchive>
+            inline void Write(TArchive& _rCodec);
+
+        private:
+
+            size_t m_Timecode;
+            void* m_pBytes;
+            size_t m_NumberOfBytes;
+        };
+
+    private:
+
+        typedef std::vector<CFrame> CFrames;
 
     private:
 
         CFrames m_Frames;
-        std::string m_PathToRecord;
-        bool m_IsRecording;
 
-        std::vector<std::ifstream*> m_InputStreams;
-        std::vector<std::ofstream*> m_OutputStreams;
+        int m_FrameIndex;
 
     private:
 
-        int m_CurrentNumberOfFrame;
-        int m_NumberOfCategories;
+        void AddFrame();
     };
 } // namespace Core
 
 namespace Core
 {
-    CRecorder::CRecorder(const std::string& _rPathToRecord, bool _Record, int _NumberOfCategories)
-        : m_CurrentNumberOfFrame(0)
-        , m_NumberOfCategories  (_NumberOfCategories)
-        , m_PathToRecord        (_rPathToRecord)
-        , m_IsRecording         (_Record)
+    CRecorder::CFrame::CFrame()
+        : m_Timecode     (-1)
+        , m_pBytes       (0)
+        , m_NumberOfBytes(0)
+    { }
 
+    // -----------------------------------------------------------------------------
+
+    CRecorder::CFrame::~CFrame()
     {
-        if (m_IsRecording)
-        {
-            CCategories NewCategories;
+    }
 
-            for (int Category = 0; Category < m_NumberOfCategories; ++Category)
-            {
-                std::ofstream* OutputCategory = new std::ofstream();
+    // -----------------------------------------------------------------------------
 
-                OutputCategory->open(m_PathToRecord + std::to_string(m_CurrentNumberOfFrame) + "_" + std::to_string(Category) + ".txt");
+    void CRecorder::CFrame::SetTimecode(size_t _Timecode)
+    {
+        m_Timecode = _Timecode;
+    }
 
-                CWriter* CategoryReader = new CWriter(*OutputCategory, 1);
+    // -----------------------------------------------------------------------------
 
-                NewCategories.push_back(CategoryReader);
-                m_OutputStreams.push_back(OutputCategory);
-            }
+    size_t CRecorder::CFrame::GetTimecode() const
+    {
+        return m_Timecode;
+    }
 
-            m_Frames.push_back(NewCategories);
-        }
-        else
-        {
-            // -----------------------------------------------------------------------------
-            // Header
-            // -----------------------------------------------------------------------------
-            std::ifstream InputHeader;
+    // -----------------------------------------------------------------------------
 
-            InputHeader.open(m_PathToRecord + ".info");
+    void CRecorder::CFrame::Get(void*& _prBytes, size_t& _rNumberOfBytes)
+    {
+        _prBytes = m_pBytes;
 
-            CReader Header(InputHeader, 1);
+        _rNumberOfBytes = m_NumberOfBytes;
+    }
 
-            Header >> m_NumberOfCategories;
+    // -----------------------------------------------------------------------------
 
-            InputHeader.close();
+    void CRecorder::CFrame::Set(void* _pBytes, size_t _NumberOfBytes)
+    {
+        Clear();
 
-            // -----------------------------------------------------------------------------
-            // Frames
-            // -----------------------------------------------------------------------------
-            CCategories Categories;
+        m_NumberOfBytes = _NumberOfBytes;
 
-            for (int Category = 0; Category < m_NumberOfCategories; ++Category)
-            {
-                std::ifstream* InputCategory = new std::ifstream();
+        m_pBytes = Base::CMemory::Allocate(_NumberOfBytes);
 
-                InputCategory->open(m_PathToRecord + std::to_string(m_CurrentNumberOfFrame) + "_" + std::to_string(Category) + ".txt");
+        Base::CMemory::Copy(m_pBytes, _pBytes, _NumberOfBytes);
+    }
 
-                CReader* CategoryReader = new CReader(*InputCategory, 1);
+    // -----------------------------------------------------------------------------
 
-                Categories.push_back(CategoryReader);
-                m_InputStreams.push_back(InputCategory);
-            }
+    inline void CRecorder::CFrame::Clear()
+    {
+        if (m_pBytes != 0) Base::CMemory::Free(m_pBytes);
 
-            m_Frames.push_back(Categories);
-        }
+        m_pBytes        = 0;
+        m_NumberOfBytes = 0;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    template <class TArchive>
+    inline void CRecorder::CFrame::Read(TArchive& _rCodec)
+    {
+        _rCodec >> m_Timecode;
+        _rCodec >> m_NumberOfBytes;
+
+        m_pBytes = Base::CMemory::Allocate(m_NumberOfBytes);
+
+        _rCodec.ReadBinary(m_pBytes, m_NumberOfBytes);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    template <class TArchive>
+    inline void CRecorder::CFrame::Write(TArchive& _rCodec)
+    {
+        _rCodec << m_Timecode;
+        _rCodec << m_NumberOfBytes;
+
+        _rCodec.WriteBinary(m_pBytes, m_NumberOfBytes);
+    }
+} // namespace Core
+
+namespace Core
+{
+    CRecorder::CRecorder()
+        : m_FrameIndex(0)
+    {
+        if (m_Frames.size() == 0) AddFrame();
     }
 
     // -----------------------------------------------------------------------------
 
     CRecorder::~CRecorder()
     {
-        Stop();
+        for (auto& rFrame : m_Frames)
+        {
+            rFrame.Clear();
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    template<class TType>
+    inline void CRecorder::GetFrameData(TType& _rBytes)
+    {
+        CFrame& rCurrentFrame = m_Frames[m_FrameIndex];
+
+        void* pBytes = 0;
+        size_t NumberOfBytes = 0;
+
+        rCurrentFrame.Get(pBytes, NumberOfBytes);
+
+        _rBytes = *static_cast<TType*>(pBytes);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    inline void CRecorder::SetFrameData(void* _pBytes, size_t _NumberOfBytes)
+    {
+        if (m_FrameIndex == GetNumberOfFrames()) AddFrame();
+
+        CFrame& rCurrentFrame = m_Frames[m_FrameIndex];
+
+        rCurrentFrame.Set(_pBytes, _NumberOfBytes);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    inline int CRecorder::GetNumberOfFrames()
+    {
+        return m_Frames.size();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    inline void CRecorder::Restart()
+    {
+        m_FrameIndex = 0;
     }
 
     // -----------------------------------------------------------------------------
 
     inline void CRecorder::Step()
     {
-        ++ m_CurrentNumberOfFrame;
-
-        // -----------------------------------------------------------------------------
-        // Close current streams
-        // -----------------------------------------------------------------------------
-        for (auto& rStream : m_OutputStreams)
-        {
-            rStream->close();
-
-            delete rStream;
-        }
-
-        for (auto& rStream : m_InputStreams)
-        {
-            rStream->close();
-
-            delete rStream;
-        }
-
-        m_OutputStreams.clear();
-
-        m_InputStreams.clear();
-
-        if (m_IsRecording)
-        {
-            // -----------------------------------------------------------------------------
-            // Open new streams
-            // -----------------------------------------------------------------------------
-            CCategories NewCategories;
-
-            for (int Category = 0; Category < m_NumberOfCategories; ++Category)
-            {
-                std::ofstream* OutputCategory = new std::ofstream();
-
-                OutputCategory->open(m_PathToRecord + std::to_string(m_CurrentNumberOfFrame) + "_" + std::to_string(Category) + ".txt");
-
-                CWriter* CategoryReader = new CWriter(*OutputCategory, 1);
-
-                NewCategories.push_back(CategoryReader);
-                m_OutputStreams.push_back(OutputCategory);
-            }
-
-            m_Frames.push_back(NewCategories);
-        }
-        else
-        {
-            // -----------------------------------------------------------------------------
-            // Open new streams
-            // -----------------------------------------------------------------------------
-            CCategories NewCategories;
-
-            for (int Category = 0; Category < m_NumberOfCategories; ++Category)
-            {
-                std::ifstream* OutputCategory = new std::ifstream();
-
-                OutputCategory->open(m_PathToRecord + std::to_string(m_CurrentNumberOfFrame) + "_" + std::to_string(Category) + ".txt");
-
-                CReader* CategoryReader = new CReader(*OutputCategory, 1);
-
-                NewCategories.push_back(CategoryReader);
-                m_InputStreams.push_back(OutputCategory);
-            }
-
-            m_Frames.push_back(NewCategories);
-        }
+        ++m_FrameIndex;
     }
 
     // -----------------------------------------------------------------------------
 
-    inline void CRecorder::Stop()
+    template <class TArchive>
+    inline void CRecorder::Read(TArchive& _rCodec)
     {
-        // -----------------------------------------------------------------------------
-        // Header
-        // -----------------------------------------------------------------------------
-        std::ofstream OutputHeader;
+        m_Frames.clear();
 
-        OutputHeader.open(m_PathToRecord + ".info");
-
-        CWriter HeaderWriter(OutputHeader, 1);
-
-        HeaderWriter << m_NumberOfCategories;
-
-        OutputHeader.close();
-
-        // -----------------------------------------------------------------------------
-        // Close current streams
-        // -----------------------------------------------------------------------------
-        for (auto& rStream : m_OutputStreams)
-        {
-            rStream->close();
-
-            delete rStream;
-        }
-
-        for (auto& rStream : m_InputStreams)
-        {
-            rStream->close();
-
-            delete rStream;
-        }
-
-        m_OutputStreams.clear();
-
-        m_InputStreams.clear();
+        Base::Read(_rCodec, m_Frames);
     }
 
     // -----------------------------------------------------------------------------
 
-    inline void CRecorder::Write(const void* _pBytes, const unsigned int _NumberOfBytes, int _Category)
+    template <class TArchive>
+    inline void CRecorder::Write(TArchive& _rCodec)
     {
-        static_cast<Base::CTextWriter*>(m_Frames[m_CurrentNumberOfFrame][_Category])->WriteBinary(static_cast<const char*>(_pBytes), _NumberOfBytes);
+        Base::Write(_rCodec, m_Frames);
     }
 
     // -----------------------------------------------------------------------------
 
-    inline void CRecorder::Read(void* _pBytes, const unsigned int _NumberOfBytes, int _Category)
+    void CRecorder::AddFrame()
     {
-        static_cast<Base::CTextReader*>(m_Frames[m_CurrentNumberOfFrame][_Category])->ReadBinary(static_cast<char*>(_pBytes), _NumberOfBytes);
+        CFrame NewFrame;
+
+        NewFrame.SetTimecode(m_FrameIndex);
+
+        m_Frames.push_back(NewFrame);
     }
 } // namespace Core

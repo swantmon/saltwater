@@ -5,74 +5,94 @@
 
 #include "engine/core/core_recorder.h"
 
+#include <array>
+
 BASE_TEST(RecordDataWithRecorder)
 {
     // -----------------------------------------------------------------------------
     // Data
     // -----------------------------------------------------------------------------
-    int IntegerValue = 4;
-    float FloatingValue = 13.37f;
-    double DoubleValue = 12.34;
-    char* pCharValue = "This is a test";
-    std::string StringValue = "This is just another test!";
-
-    struct SComplex
+    struct SFrame
     {
-        int m_Header;
-        float m_Value;
+        int         m_1;
+        float       m_2;
+        std::string m_3;
     };
 
-    SComplex ComplexStructValue = { 0, 1.0 };
+    std::array<SFrame, 120> Frames;
+
+    int Index = 0;
+
+    for (auto& Frame : Frames)
+    {
+        Frame.m_1 = Index;
+        Frame.m_2 = 1337.0f - float(Index);
+        Frame.m_3 = "The current frame number is " + std::to_string(Index);
+
+        ++Index;
+    }
 
     // -----------------------------------------------------------------------------
     // Recording
     // -----------------------------------------------------------------------------
-    Core::CRecorder NewRecorder("test_recording/", true, 3);
+    Core::CRecorder Recorder;
 
-    NewRecorder.Write(&IntegerValue, sizeof(IntegerValue), 0);
-    NewRecorder.Write(&FloatingValue, sizeof(FloatingValue), 1);
-    NewRecorder.Write(&pCharValue, strlen(pCharValue), 2);
+    for (auto& Frame : Frames)
+    {
+        Recorder.SetFrameData(&Frame, sizeof(SFrame));
 
-    NewRecorder.Step();
-
-    NewRecorder.Write(&DoubleValue, sizeof(DoubleValue), 0);
-    NewRecorder.Write(&StringValue, sizeof(StringValue), 1);
-    NewRecorder.Write(&ComplexStructValue, sizeof(SComplex), 2);
-
-    NewRecorder.Stop();
+        Recorder.Step();
+    }
 
     // -----------------------------------------------------------------------------
-    // Test data
+    // Write record
     // -----------------------------------------------------------------------------
-    int IntegerValueTest;
-    float FloatingValueTest;
-    double DoubleValueTest;
-    char pCharValueTest[14];
-    std::string StringValueTest;
+    std::ofstream RecordFileOutput;
 
-    SComplex ComplexStructValueTest = { 0, 0 };
+    RecordFileOutput.open("test_recording/test_record.txt");
 
-    // -----------------------------------------------------------------------------
-    // Playing
-    // -----------------------------------------------------------------------------
-    Core::CRecorder NewRecordPlayer("test_recording/", false);
+    Base::CTextWriter Writer(RecordFileOutput, 1);
 
-    NewRecordPlayer.Read(&IntegerValueTest, sizeof(IntegerValueTest), 0);
-    NewRecordPlayer.Read(&FloatingValueTest, sizeof(FloatingValueTest), 1);
-    NewRecordPlayer.Read(&pCharValueTest, 14, 2);
+    Writer << Recorder;
 
-    NewRecordPlayer.Step();
-
-    NewRecordPlayer.Read(&DoubleValueTest, sizeof(DoubleValueTest), 0);
-    NewRecordPlayer.Read(&StringValueTest, sizeof(StringValueTest), 1);
-    NewRecordPlayer.Read(&ComplexStructValueTest, sizeof(SComplex), 2);
+    RecordFileOutput.close();
 
     // -----------------------------------------------------------------------------
-    // Check
+    // Read record
     // -----------------------------------------------------------------------------
-    BASE_CHECK(IntegerValue == IntegerValueTest);
-    BASE_CHECK(FloatingValue == FloatingValueTest);
-    BASE_CHECK(DoubleValue == DoubleValueTest);
-    BASE_CHECK(strcmp(pCharValue, pCharValueTest) == 0);
-    BASE_CHECK(StringValue == StringValueTest);
+    Core::CRecorder RecorderCheck;
+
+    std::ifstream RecordFileInput;
+
+    RecordFileInput.open("test_recording/test_record.txt");
+
+    Base::CTextReader Reader(RecordFileInput, 1);
+
+    Reader >> RecorderCheck;
+
+    RecordFileInput.close();
+
+    // -----------------------------------------------------------------------------
+    // Check record w/ prev. record
+    // -----------------------------------------------------------------------------
+    BASE_CHECK(Recorder.GetNumberOfFrames() == RecorderCheck.GetNumberOfFrames());
+
+    Recorder.Restart();
+    RecorderCheck.Restart();
+
+    for (int FrameIndex = 0; FrameIndex < RecorderCheck.GetNumberOfFrames(); ++FrameIndex)
+    {
+        SFrame Frame;
+        SFrame FrameCheck;
+
+        Recorder.GetFrameData(Frame);
+        Recorder.GetFrameData(FrameCheck);
+
+        RecorderCheck.Step();
+        Recorder.Step();
+
+        BASE_CHECK(Frame.m_1 == FrameCheck.m_1);
+        BASE_CHECK(Frame.m_2 == FrameCheck.m_2);
+        BASE_CHECK(Frame.m_3 == FrameCheck.m_3);
+    }
 }
