@@ -49,6 +49,12 @@ namespace SER
         inline CThis& operator << (const TElement& _rElement);
 
         template<typename TElement>
+        inline CThis& Read(TElement& _rElement) { return *this; };
+
+        template<typename TElement>
+        inline CThis& operator >> (TElement& _rElement) { return *this; };
+
+        template<typename TElement>
         inline CThis& operator & (const TElement& _rElement);
 
     public:
@@ -64,10 +70,18 @@ namespace SER
         template<typename TElement>
         inline void WritePrimitive(const TElement& _rElement);
         
-        inline void WriteBinary(const void* _pBytes, const unsigned int _NumberOfBytes);
+        virtual void WriteBinary(const void* _pBytes, const unsigned int _NumberOfBytes) override;
 
         template<typename TElement>
         inline void WriteClass(const TElement& _rElement);
+
+        template<typename TElement>
+        inline void ReadPrimitive(TElement& _rElement) {};
+
+        inline void ReadBinary(void* _pBytes, unsigned int _NumberOfBytes) {};
+
+        template<typename TElement>
+        inline void ReadClass(TElement& _rElement) {};
 
     private:
         CStream*     m_pStream;
@@ -177,7 +191,7 @@ namespace SER
 
     // -----------------------------------------------------------------------------
 
-    inline void CBinaryWriter::WriteBinary(const void* _pBytes, const unsigned int _NumberOfBytes)
+    void CBinaryWriter::WriteBinary(const void* _pBytes, const unsigned int _NumberOfBytes)
     {
         m_pStream->write(static_cast<const char*>(_pBytes), _NumberOfBytes);
     }
@@ -187,6 +201,6 @@ namespace SER
     template<typename TElement>
     inline void CBinaryWriter::WriteClass(const TElement& _rElement)
     {
-        Serialize(*this, const_cast<TElement&>(_rElement));
+        SER::Private::CAccess::Write(*this, const_cast<TElement&>(_rElement));
     }
 } // namespace SER

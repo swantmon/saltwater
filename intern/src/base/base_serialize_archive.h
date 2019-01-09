@@ -35,7 +35,53 @@ namespace SER
 	class CArchive
     {
     public:
+
+        typedef CArchive CThis;
+
+    public:
         inline CArchive(unsigned int _Version);
+
+    public:
+        template<typename TElement>
+        inline CThis& Write(const TElement& _rElement) = 0;
+
+        template<typename TElement>
+        inline CThis& operator << (const TElement& _rElement) = 0;
+
+        template<typename TElement>
+        inline CThis& Read(TElement& _rElement) = 0;
+
+        template<typename TElement>
+        inline CThis& operator >> (TElement& _rElement) = 0;
+
+        template<typename TElement>
+        inline CThis& operator & (const TElement& _rElement) = 0;
+
+    public:
+        template<typename TElement>
+        inline void BeginCollection(unsigned int _NumberOfElements) = 0;
+
+        template<typename TElement>
+        inline void WriteCollection(const TElement* _pElements) = 0;
+
+        template<typename TElement>
+        inline void EndCollection() = 0;
+
+        template<typename TElement>
+        inline void WritePrimitive(const TElement& _rElement) = 0;
+
+        virtual inline void WriteBinary(const void* _pBytes, const unsigned int _NumberOfBytes) = 0;
+
+        template<typename TElement>
+        inline void WriteClass(const TElement& _rElement) = 0;
+
+        template<typename TElement>
+        inline void ReadPrimitive(TElement& _rElement) = 0;
+
+        virtual inline void ReadBinary(void* _pBytes, unsigned int _NumberOfBytes) = 0;
+
+        template<typename TElement>
+        inline void ReadClass(TElement& _rElement) = 0;
 
     protected:
         unsigned int m_ArchiveVersion;

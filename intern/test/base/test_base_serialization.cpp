@@ -142,3 +142,135 @@ BASE_TEST(SerializeDataWithBinary)
     BASE_CHECK(strcmp(pCharValue, pCharValueTest) == 0);
     BASE_CHECK(StringValue == StringValueTest);
 }
+
+// -----------------------------------------------------------------------------
+
+class CComplexClass
+{
+public:
+    int a;
+
+public:
+
+    template <class TArchive>
+    inline void Read(TArchive& _rCodec)
+    {
+        _rCodec >> a;
+    }
+
+    template <class TArchive>
+    inline void Write(TArchive& _rCodec)
+    {
+        _rCodec << a;
+    }
+};
+
+BASE_TEST(SerializeComplexWithText)
+{
+    // -----------------------------------------------------------------------------
+    // Data
+    // -----------------------------------------------------------------------------
+    CComplexClass CompexClass = { 1337 };
+
+    std::vector<CComplexClass> ComplexClassListValue = { {0}, {1}, {2}, {3} };
+
+    // -----------------------------------------------------------------------------
+    // Stream (this could be also a file)
+    // -----------------------------------------------------------------------------
+    std::stringstream Stream;
+
+    // -----------------------------------------------------------------------------
+    // Writing
+    // -----------------------------------------------------------------------------
+    Base::CTextWriter Writer(Stream, 1);
+
+    Writer << CompexClass;
+
+    Base::Serialize(Writer, ComplexClassListValue);
+
+    // -----------------------------------------------------------------------------
+    // Test data
+    // -----------------------------------------------------------------------------
+    CComplexClass CompexClassTest;
+
+    std::vector<CComplexClass> ComplexClassListValueTest;
+
+    // -----------------------------------------------------------------------------
+    // Reading
+    // -----------------------------------------------------------------------------
+    Base::CTextReader Reader(Stream, 1);
+
+    Reader >> CompexClassTest;
+
+    Base::Serialize(Reader, ComplexClassListValueTest);
+
+    // -----------------------------------------------------------------------------
+    // Check
+    // -----------------------------------------------------------------------------
+    BASE_CHECK(CompexClass.a == CompexClassTest.a);
+
+    int Index = 0;
+
+    for (auto& Class : ComplexClassListValue)
+    {
+        BASE_CHECK(Class.a == ComplexClassListValueTest[Index].a);
+
+        ++Index;
+    }
+}
+
+// -----------------------------------------------------------------------------
+
+BASE_TEST(SerializeComplexWithBinary)
+{
+    // -----------------------------------------------------------------------------
+    // Data
+    // -----------------------------------------------------------------------------
+    CComplexClass CompexClass = { 1337 };
+
+    std::vector<CComplexClass> ComplexClassListValue = { {0}, {1}, {2}, {3} };
+
+    // -----------------------------------------------------------------------------
+    // Stream (this could be also a file)
+    // -----------------------------------------------------------------------------
+    std::stringstream Stream;
+
+    // -----------------------------------------------------------------------------
+    // Writing
+    // -----------------------------------------------------------------------------
+    Base::CBinaryWriter Writer(Stream, 1);
+
+    Writer << CompexClass;
+
+    Base::Serialize(Writer, ComplexClassListValue);
+
+    // -----------------------------------------------------------------------------
+    // Test data
+    // -----------------------------------------------------------------------------
+    CComplexClass CompexClassTest;
+
+    std::vector<CComplexClass> ComplexClassListValueTest;
+
+    // -----------------------------------------------------------------------------
+    // Reading
+    // -----------------------------------------------------------------------------
+    Base::CBinaryReader Reader(Stream, 1);
+
+    Reader >> CompexClassTest;
+
+    Base::Serialize(Reader, ComplexClassListValueTest);
+
+    // -----------------------------------------------------------------------------
+    // Check
+    // -----------------------------------------------------------------------------
+    BASE_CHECK(CompexClass.a == CompexClassTest.a);
+
+    int Index = 0;
+
+    for (auto& Class : ComplexClassListValue)
+    {
+        BASE_CHECK(Class.a == ComplexClassListValueTest[Index].a);
+
+        ++Index;
+    }
+}

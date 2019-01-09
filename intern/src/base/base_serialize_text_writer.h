@@ -51,6 +51,12 @@ namespace SER
         inline CThis& operator << (const TElement& _rElement);
 
         template<typename TElement>
+        inline CThis& Read(TElement& _rElement) { return *this; };
+
+        template<typename TElement>
+        inline CThis& operator >> (TElement& _rElement) { return *this; };
+
+        template<typename TElement>
         inline CThis& operator & (const TElement& _rElement);
 
     public:
@@ -70,6 +76,14 @@ namespace SER
 
         template<typename TElement>
         inline void WriteClass(const TElement& _rElement);
+
+        template<typename TElement>
+        inline void ReadPrimitive(TElement& _rElement) {};
+
+        inline void ReadBinary(void* _pBytes, unsigned int _NumberOfBytes) {};
+
+        template<typename TElement>
+        inline void ReadClass(TElement& _rElement) {};
 
     private:
         enum EStatus
@@ -244,7 +258,7 @@ namespace SER
 
         ++ m_NumberOfIdents;
 
-        SER::Private::CAccess::Serialize(*this, const_cast<TElement&>(_rElement));
+        SER::Private::CAccess::Write(*this, const_cast<TElement&>(_rElement));
 
         -- m_NumberOfIdents;
 
