@@ -190,6 +190,8 @@ namespace MR
 
         bool IsInitialized();
 
+        Gfx::CTexturePtr CreatePlaneTexture(const glm::vec3& _rAnchor0, const glm::vec3& _rAnchor1);
+
     private:
 
 		glm::vec4 GetHessianNormalForm(const glm::vec3& rA, const glm::vec3& rB, const glm::vec3& rC);
@@ -239,6 +241,8 @@ namespace MR
 
         Gfx::CBufferPtr m_PointRasterizationBufferPtr;
 
+        Gfx::CBufferPtr m_PlaneExtractionBufferPtr;
+
         SScalableVolume m_VolumeBuffers;
 
         Gfx::CBufferPtr m_VolumeIndexBufferPtr;
@@ -256,6 +260,8 @@ namespace MR
         Gfx::CShaderPtr m_RasterizeRootVolumeVSPtr;
         Gfx::CShaderPtr m_RasterizeRootVolumeFSPtr;
         
+        Gfx::CShaderPtr m_PlaneCSPtr;
+
         Gfx::CShaderPtr m_PointCloudVSPtr;
         Gfx::CShaderPtr m_PointCloudGSPtr;
         Gfx::CShaderPtr m_PointCloudFSPtr;

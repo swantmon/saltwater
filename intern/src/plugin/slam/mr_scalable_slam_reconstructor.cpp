@@ -174,6 +174,14 @@ namespace
         uint32_t m_Color;
     };
 
+    struct SPlaneExtraction
+    {
+        glm::vec4 m_PlanePosition;
+        glm::vec2 m_Extent;
+        glm::ivec2 m_PlaneResolution;
+        glm::vec2 m_PixelSize;
+    };
+
     int DivUp(int TotalShaderCount, int WorkGroupSize)
     {
         return (TotalShaderCount + WorkGroupSize - 1) / WorkGroupSize;
@@ -373,6 +381,8 @@ namespace MR
         m_RaycastPyramidCSPtr = 0;
         m_VolumeCountersCSPtr = 0;
         
+        m_PlaneCSPtr = 0;
+
         m_RasterizeRootVolumeVSPtr = 0;
         m_RasterizeRootVolumeFSPtr = 0;
         
@@ -498,6 +508,8 @@ namespace MR
         m_IntegrateLevel1GridCSPtr = ShaderManager::CompileCS("slam\\scalable_kinect_fusion\\integration\\cs_integrate_level1grid.glsl"   , "main", DefineString.c_str());
         m_IntegrateTSDFCSPtr       = ShaderManager::CompileCS("slam\\scalable_kinect_fusion\\integration\\cs_integrate_tsdf.glsl"         , "main", DefineString.c_str());
         m_FillIndirectBufferCSPtr  = ShaderManager::CompileCS("slam\\scalable_kinect_fusion\\cs_fill_indirect.glsl"                       , "main", DefineString.c_str());
+
+        m_PlaneCSPtr = ShaderManager::CompileCS("slam\\scalable_kinect_fusion\\cs_create_plane.glsl", "main", DefineString.c_str());
 
         SInputElementDescriptor InputLayoutDesc = {};
 
@@ -1281,6 +1293,12 @@ namespace MR
         ConstantBufferDesc.m_Binding = CBuffer::ConstantBuffer;
         ConstantBufferDesc.m_NumberOfBytes = sizeof(SScalableRaycastConstantBuffer);
         m_VolumeBuffers.m_AABBBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+
+        ConstantBufferDesc.m_pBytes = nullptr;
+        ConstantBufferDesc.m_Binding = CBuffer::ConstantBuffer;
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(SPlaneExtraction);
+
+        m_PlaneExtractionBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
     }
 
     void CScalableSLAMReconstructor::CreatePool()
@@ -1828,6 +1846,66 @@ namespace MR
     const std::map<int, CScalableSLAMReconstructor::SPlane>& CScalableSLAMReconstructor::GetPlanes() const
     {
         return m_Planes;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    Gfx::CTexturePtr CScalableSLAMReconstructor::CreatePlaneTexture(const glm::vec3& _rAnchor0, const glm::vec3& _rAnchor1)
+    {
+        Performance::BeginEvent("Create plane texture");
+
+        const int PlaneResolution = 256;
+
+        SPlaneExtraction ConstantBuffer;
+        ConstantBuffer.m_PlanePosition = glm::vec4((_rAnchor0 + _rAnchor1) / 2.0f, 1.0f);
+        ConstantBuffer.m_PlaneResolution = glm::ivec2(PlaneResolution);
+        ConstantBuffer.m_Extent = glm::vec2(glm::distance(_rAnchor0, _rAnchor1) * 2.0f);
+        ConstantBuffer.m_PixelSize = ConstantBuffer.m_Extent / glm::vec2(ConstantBuffer.m_PlaneResolution);
+
+        BufferManager::UploadBufferData(m_PlaneExtractionBufferPtr, &ConstantBuffer);
+
+        STextureDescriptor TextureDescriptor = {};
+
+        TextureDescriptor.m_NumberOfPixelsU = PlaneResolution;
+        TextureDescriptor.m_NumberOfPixelsV = PlaneResolution;
+        TextureDescriptor.m_NumberOfPixelsW = 1;
+        TextureDescriptor.m_NumberOfMipMaps = 1;
+        TextureDescriptor.m_NumberOfTextures = 1;
+        TextureDescriptor.m_Binding = CTexture::ShaderResource;
+        TextureDescriptor.m_Access = CTexture::CPUWrite;
+        TextureDescriptor.m_Usage = CTexture::GPUReadWrite;
+        TextureDescriptor.m_Semantic = CTexture::UndefinedSemantic;
+        TextureDescriptor.m_pFileName = 0;
+        TextureDescriptor.m_pPixels = 0;
+        TextureDescriptor.m_Format = CTexture::R8G8B8A8_UBYTE;
+
+        Gfx::CTexturePtr PlaneTexture = TextureManager::CreateTexture2D(TextureDescriptor);
+
+        const int WorkGroupsX = DivUp(PlaneResolution, g_TileSize2D);
+        const int WorkGroupsY = DivUp(PlaneResolution, g_TileSize2D);
+
+        ContextManager::SetShaderCS(m_PlaneCSPtr);
+
+        ContextManager::SetImageTexture(0, PlaneTexture);
+
+        ContextManager::SetResourceBuffer(0, m_VolumeBuffers.m_RootVolumePoolPtr);
+        ContextManager::SetResourceBuffer(1, m_VolumeBuffers.m_RootGridPoolPtr);
+        ContextManager::SetResourceBuffer(2, m_VolumeBuffers.m_Level1PoolPtr);
+        ContextManager::SetResourceBuffer(3, m_VolumeBuffers.m_TSDFPoolPtr);
+        ContextManager::SetResourceBuffer(6, m_VolumeBuffers.m_RootVolumePositionBufferPtr);
+
+        ContextManager::SetConstantBuffer(0, m_PlaneExtractionBufferPtr);
+        ContextManager::SetConstantBuffer(2, m_VolumeBuffers.m_AABBBufferPtr);
+
+        ContextManager::Barrier();
+
+        ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+
+        Performance::EndEvent();
+
+        ContextManager::ResetShaderCS();
+
+        return PlaneTexture;
     }
 
     // -----------------------------------------------------------------------------

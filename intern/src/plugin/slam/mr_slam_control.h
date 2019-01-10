@@ -263,6 +263,11 @@ namespace MR
                 }
             }
 
+            if (m_SelectionState == ESelection::FIRSTRELEASE)
+            {
+                Gfx::CTexturePtr PlaneTexture = m_pReconstructor->CreatePlaneTexture(m_SelectionBoxAnchor0, m_SelectionBoxAnchor1);
+            }
+
             if (m_UseTrackingCamera)
             {
                 Cam::CControl& rControl = static_cast<Cam::CEditorControl&>(Cam::ControlManager::GetActiveControl());
@@ -333,6 +338,8 @@ namespace MR
                 m_MousePressed = false;
 
                 m_SelectionState = m_SelectionState == ESelection::FIRSTPRESS ? ESelection::FIRSTRELEASE : ESelection::NOSELECTION;
+
+                //Gfx::CTexturePtr PlaneTexture = m_pReconstructor->CreatePlaneTexture(m_SelectionBoxAnchor0, m_SelectionBoxAnchor1);
             }
             else if (_rEvent.GetAction() == Base::CInputEvent::MouseMove)
             {
