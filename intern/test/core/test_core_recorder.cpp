@@ -180,7 +180,7 @@ BASE_TEST(RecordDataWithRecorderBinary)
 
 // -----------------------------------------------------------------------------
 
-BASE_TEST(RecordDataWithRecorderWithFPS)
+BASE_TEST(PlayRecorderWithFPS)
 {
     // -----------------------------------------------------------------------------
     // Data
@@ -238,7 +238,7 @@ BASE_TEST(RecordDataWithRecorderWithFPS)
 
 // -----------------------------------------------------------------------------
 
-BASE_TEST(RecordDataWithRecorderWithTimecode)
+BASE_TEST(PlayRecorderWithTimecode)
 {
     // -----------------------------------------------------------------------------
     // Data
