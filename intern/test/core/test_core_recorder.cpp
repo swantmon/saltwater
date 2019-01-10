@@ -11,7 +11,6 @@
 #include "engine/core/core_recorder.h"
 
 #include <array>
-#include <iostream>
 
 BASE_TEST(RecordDataWithRecorder)
 {
