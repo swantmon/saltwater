@@ -5,8 +5,6 @@
 #include "base/base_serialize_archive.h"
 #include "base/base_serialize_std_vector.h"
 
-#include <fstream>
-
 namespace Core
 {
     class CRecorder
