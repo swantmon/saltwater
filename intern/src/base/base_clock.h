@@ -329,6 +329,7 @@ namespace CORE
 
         m_StartTimestamp           = std::chrono::high_resolution_clock::now();
         m_PredictedDurationOfFrame = m_DefaultDurationOfFrame;
+        m_LastTick                 = 0.0;
         m_CurrentTime              = 0.0;
         m_NumberOfFrames           = 0;
         m_IndexOfHistory           = 0;
