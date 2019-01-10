@@ -268,6 +268,8 @@ BASE_TEST(PlayRecorderWithTimecode)
 
     Recorder.Record();
 
+    Recorder.SetFPS(2);
+
     for (auto CurrentFrame = Frames.begin(); CurrentFrame != Frames.end(); )
     {
         auto& Frame = *CurrentFrame;
