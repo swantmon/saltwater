@@ -60,16 +60,6 @@ namespace Core
 
     private:
 
-        enum EMode
-        {
-            IDLE,
-            PLAY,
-            PAUSE,
-            RECORD,
-        };
-
-    private:
-
         class CFrame
         {
 
@@ -120,7 +110,8 @@ namespace Core
         double m_Frequenz;
         double m_TimeSinceLastStep;
         Base::CPerformanceClock m_Clock;
-        EMode m_Mode;
+        Base::CTimer m_Timer;
+        bool m_IsRecording;
         EPlaybackMode m_PlaybackMode;
         CFrames::iterator m_CurrentFrameIter;
 
@@ -249,10 +240,13 @@ namespace Core
         , m_Frequenz         (0.0)
         , m_TimeSinceLastStep(0.0)
         , m_Clock            ( )
-        , m_Mode             (IDLE)
+        , m_Timer            (m_Clock)
+        , m_IsRecording      (false)
         , m_PlaybackMode     (_PlaybackMode)
         , m_CurrentFrameIter (m_Frames.begin())
-    { }
+    { 
+        m_Timer.Pause();
+    }
 
     // -----------------------------------------------------------------------------
 
@@ -266,8 +260,6 @@ namespace Core
     template<class TType>
     inline double CRecorder::GetData(TType& _rBytes)
     {
-        if (m_Mode == IDLE) return 0.0;
-
         void* pBytes = 0;
         size_t NumberOfBytes = 0;
 
@@ -282,7 +274,7 @@ namespace Core
 
     inline void CRecorder::SetData(void* _pBytes, size_t _NumberOfBytes)
     {
-        if (m_Mode != RECORD) return;
+        if (!m_IsRecording) return;
 
         if (m_CurrentFrameIter == m_Frames.end())
         {
@@ -300,47 +292,32 @@ namespace Core
 
     inline void CRecorder::Play()
     {
-        switch (m_Mode)
-        {
-        case IDLE:
-            Restart();
-            break;
-        }
+        m_IsRecording = false;
 
-        m_Mode = PLAY;
+        m_Timer.Resume();
     }
 
     // -----------------------------------------------------------------------------
 
     inline void CRecorder::Record()
     {
-        switch (m_Mode)
-        {
-        case IDLE:
-            Restart();
-            break;
-        }
+        m_IsRecording = true;
 
-        m_Mode = RECORD;
-
-        if (IsEnd()) UpdateReel();
+        m_Timer.Resume();
     }
 
     // -----------------------------------------------------------------------------
 
     inline void CRecorder::Pause()
     {
-        if (m_Mode == IDLE) return;
-
-        m_Mode = PAUSE;
+        if (!m_Timer.IsPaused()) m_Timer.Pause();
+        else m_Timer.Resume();
     }
 
     // -----------------------------------------------------------------------------
 
     inline void CRecorder::Eject()
     {
-        m_Mode = IDLE;
-
         Restart();
         Clear();
     }
@@ -352,9 +329,9 @@ namespace Core
         CheckEOL();
 
         m_TimeSinceLastStep = 0.0;
-        m_CurrentFrameIter = m_Frames.begin();
+        m_CurrentFrameIter  = m_Frames.begin();
 
-        m_Clock.Reset();
+        m_Timer.Reset();
     }
 
     // -----------------------------------------------------------------------------
@@ -363,18 +340,20 @@ namespace Core
     {
         m_Clock.OnFrame();
 
-        switch (m_Mode)
+        if (m_Timer.IsPaused()) return;
+
+        // -----------------------------------------------------------------------------
+        // Recording
+        // -----------------------------------------------------------------------------
+        if (m_IsRecording)
         {
-        default:
-        case Core::CRecorder::IDLE:
-        case Core::CRecorder::PAUSE:
+            UpdateReel();
             return;
-            break;
-        case Core::CRecorder::PLAY:
-        case Core::CRecorder::RECORD:
-            break;
         }
 
+        // -----------------------------------------------------------------------------
+        // Playing
+        // -----------------------------------------------------------------------------
         switch (m_PlaybackMode)
         {
         default:
@@ -382,7 +361,7 @@ namespace Core
             UpdateReel();
             break;
         case Core::CRecorder::FPS:
-            m_TimeSinceLastStep += m_Clock.GetDurationOfFrame();
+            m_TimeSinceLastStep += m_Timer.GetDurationOfFrame();
 
             if (m_TimeSinceLastStep > m_Frequenz)
             {
@@ -394,16 +373,13 @@ namespace Core
         case Core::CRecorder::TIMECODE:
             CFrames::iterator NextFrameIter = std::next(m_CurrentFrameIter);
 
-            if (NextFrameIter == m_Frames.end())
-            {
-                UpdateReel();
-            }
-            else if (NextFrameIter->GetTimecode() < m_Clock.GetTime())
+            if (NextFrameIter == m_Frames.end() || NextFrameIter->GetTimecode() < m_Timer.GetTime())
             {
                 UpdateReel();
             }
             break;
         }
+       
     }
 
     // -----------------------------------------------------------------------------
@@ -432,7 +408,7 @@ namespace Core
 
     inline double CRecorder::GetTime()
     {
-        return m_Clock.GetTime();
+        return m_Timer.GetTime();
     }
 
     // -----------------------------------------------------------------------------
@@ -441,6 +417,8 @@ namespace Core
     inline void CRecorder::Read(TArchive& _rCodec)
     {
         Clear();
+
+        _rCodec >> m_FramesPerSeconds;
 
         Base::Read(_rCodec, m_Frames);
     }
@@ -451,6 +429,8 @@ namespace Core
     inline void CRecorder::Write(TArchive& _rCodec)
     {
         CheckEOL();
+
+        _rCodec << m_FramesPerSeconds;
 
         Base::Write(_rCodec, m_Frames);
     }

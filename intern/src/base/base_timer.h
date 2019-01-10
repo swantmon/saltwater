@@ -29,13 +29,15 @@ namespace CORE
             inline double GetTime() const;
             inline double GetDurationOfFrame() const;
 
-            inline void SetTimeScale(float _TimeScale);
-            inline float GetTimeScale() const;
+            inline void SetTimeScale(double _TimeScale);
+            inline double GetTimeScale() const;
 
             inline void Pause();
             inline void Resume();
 
             inline bool IsPaused() const;
+
+            inline void Reset();
 
         private:
 
@@ -44,7 +46,7 @@ namespace CORE
             CTimer*     m_pPrevious;
             double      m_CurrentTime;
             double      m_PredictedDurationOfFrame;
-            float       m_TimeScale;
+            double      m_TimeScale;
             bool        m_IsPaused;
 
         private:
@@ -63,7 +65,7 @@ namespace CORE
         , m_pPrevious               (0)
         , m_CurrentTime             (0.0)
         , m_PredictedDurationOfFrame(0.0)
-        , m_TimeScale               (1.0f)
+        , m_TimeScale               (1.0)
         , m_IsPaused                (false)
     {
     }
@@ -76,7 +78,7 @@ namespace CORE
         , m_pPrevious               (0)
         , m_CurrentTime             (0.0)
         , m_PredictedDurationOfFrame(0.0)
-        , m_TimeScale               (1.0f)
+        , m_TimeScale               (1.0)
         , m_IsPaused                (false)
     {
         m_pClock->AddTimer(*this);
@@ -131,14 +133,14 @@ namespace CORE
 
     // -----------------------------------------------------------------------------
 
-    inline void CTimer::SetTimeScale(float _TimeScale)
+    inline void CTimer::SetTimeScale(double _TimeScale)
     {
         m_TimeScale = _TimeScale;
     }
 
     // -----------------------------------------------------------------------------
 
-    inline float CTimer::GetTimeScale() const
+    inline double CTimer::GetTimeScale() const
     {
         return m_TimeScale;
     }
@@ -147,14 +149,14 @@ namespace CORE
 
     inline void CTimer::Pause()
     {
-        m_IsPaused = false;
+        m_IsPaused = true;
     }
 
     // -----------------------------------------------------------------------------
 
     inline void CTimer::Resume()
     {
-        m_IsPaused = true;
+        m_IsPaused = false;
     }
 
     // -----------------------------------------------------------------------------
@@ -162,6 +164,15 @@ namespace CORE
     inline bool CTimer::IsPaused() const
     {
         return m_IsPaused;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    inline void CTimer::Reset()
+    {
+        m_CurrentTime              = 0.0;
+        m_PredictedDurationOfFrame = 0.0;
+        m_TimeScale                = 1.0;
     }
 
     // -----------------------------------------------------------------------------
