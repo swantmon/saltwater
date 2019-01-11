@@ -892,7 +892,13 @@
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_refraction_renderer.h">
       <Filter>graphic\engine\renderer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\engine\core\core_recorder.h">
+    <ClInclude Include="..\..\..\src\engine\core\core_record_reader.h">
+      <Filter>core\recorder</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\engine\core\core_record_writer.h">
+      <Filter>core\recorder</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\engine\core\core_base_recorder.h">
       <Filter>core\recorder</Filter>
     </ClInclude>
   </ItemGroup>
