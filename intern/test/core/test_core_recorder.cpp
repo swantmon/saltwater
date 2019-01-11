@@ -3,6 +3,7 @@
 
 #include "base/base_clock.h"
 #include "base/base_test_defines.h"
+#include "base/base_include_glm.h"
 
 #include "engine/core/core_record_reader.h"
 #include "engine/core/core_record_writer.h"
@@ -18,6 +19,7 @@ BASE_TEST(RecordDataWithRecorder)
     {
         int   m_1;
         float m_2;
+        std::vector<char> m_3;
     };
 
     std::array<SFrame, 120> Frames;
@@ -28,6 +30,8 @@ BASE_TEST(RecordDataWithRecorder)
     {
         Frame.m_1 = Index;
         Frame.m_2 = 1337.0f - float(Index);
+
+        Frame.m_3.resize(glm::linearRand(1, 4000000));
 
         ++Index;
     }
@@ -41,7 +45,10 @@ BASE_TEST(RecordDataWithRecorder)
 
     for (auto& Frame : Frames)
     {
-        RecordWriter.WriteBinary(&Frame, sizeof(SFrame));
+        RecordWriter << Frame.m_1;
+        RecordWriter << Frame.m_2;
+
+        Base::Write(RecordWriter, Frame.m_3);
     }
 
     // -----------------------------------------------------------------------------
@@ -58,9 +65,13 @@ BASE_TEST(RecordDataWithRecorder)
 
         SFrame FrameCheck;
 
-        RecordReader.ReadBinary(&FrameCheck, sizeof(SFrame));
+        RecordReader >> FrameCheck.m_1;
+        RecordReader >> FrameCheck.m_2;
+
+        Base::Read(RecordReader, FrameCheck.m_3);
 
         BASE_CHECK(Frame.m_1 == FrameCheck.m_1);
         BASE_CHECK(Frame.m_2 == FrameCheck.m_2);
+        BASE_CHECK(Frame.m_3.size() == FrameCheck.m_3.size());
     }
 }
