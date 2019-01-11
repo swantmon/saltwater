@@ -1,11 +1,12 @@
 
 #include "test_precompiled.h"
 
-#include "base/base_test_defines.h"
+#include "base/base_clock.h"
 #include "base/base_serialize_binary_reader.h"
 #include "base/base_serialize_binary_writer.h"
 #include "base/base_serialize_text_reader.h"
 #include "base/base_serialize_text_writer.h"
+#include "base/base_test_defines.h"
 
 #include "engine/core/core_recorder.h"
 
@@ -41,6 +42,8 @@ BASE_TEST(RecordDataWithRecorder)
     // -----------------------------------------------------------------------------
     Core::CRecorder Recorder;
 
+    Recorder.Record();
+
     for (auto& Frame : Frames)
     {
         Recorder.SetData(&Frame, sizeof(SFrame));
@@ -69,12 +72,13 @@ BASE_TEST(RecordDataWithRecorder)
     // -----------------------------------------------------------------------------
     // Check record w/ prev. record
     // -----------------------------------------------------------------------------
-    BASE_CHECK(Recorder.GetNumberOfFrames() == RecorderCheck.GetNumberOfFrames());
-
     Recorder.Restart();
     RecorderCheck.Restart();
 
-    for (int FrameIndex = 0; FrameIndex < RecorderCheck.GetNumberOfFrames(); ++FrameIndex)
+    Recorder.Play();
+    RecorderCheck.Play();
+
+    while (!RecorderCheck.IsEnd())
     {
         SFrame Frame;
         SFrame FrameCheck;
@@ -90,6 +94,8 @@ BASE_TEST(RecordDataWithRecorder)
         BASE_CHECK(Frame.m_3 == FrameCheck.m_3);
     }
 }
+
+// -----------------------------------------------------------------------------
 
 BASE_TEST(RecordDataWithRecorderBinary)
 {
@@ -149,12 +155,13 @@ BASE_TEST(RecordDataWithRecorderBinary)
     // -----------------------------------------------------------------------------
     // Check record w/ prev. record
     // -----------------------------------------------------------------------------
-    BASE_CHECK(Recorder.GetNumberOfFrames() == RecorderCheck.GetNumberOfFrames());
-
     Recorder.Restart();
     RecorderCheck.Restart();
 
-    for (int FrameIndex = 0; FrameIndex < RecorderCheck.GetNumberOfFrames(); ++FrameIndex)
+    Recorder.Play();
+    RecorderCheck.Play();
+
+    while (!RecorderCheck.IsEnd())
     {
         SFrame Frame;
         SFrame FrameCheck;
@@ -173,7 +180,7 @@ BASE_TEST(RecordDataWithRecorderBinary)
 
 // -----------------------------------------------------------------------------
 
-BASE_TEST(RecordDataWithRecorderWithFixedTime)
+BASE_TEST(PlayRecorderWithFPS)
 {
     // -----------------------------------------------------------------------------
     // Data
@@ -199,6 +206,8 @@ BASE_TEST(RecordDataWithRecorderWithFixedTime)
     // -----------------------------------------------------------------------------
     Core::CRecorder Recorder;
 
+    Recorder.Record();
+
     for (auto& Frame : Frames)
     {
         Recorder.SetData(&Frame, sizeof(SFrame));
@@ -207,22 +216,15 @@ BASE_TEST(RecordDataWithRecorderWithFixedTime)
     }
 
     // -----------------------------------------------------------------------------
-    // Write record
+    // Check record
     // -----------------------------------------------------------------------------
-    std::stringstream Stream;
+    Recorder.Play();
 
-    Base::CTextWriter Writer(Stream, 1);
-
-    Writer << Recorder;
-
-    // -----------------------------------------------------------------------------
-    // Check record w/ prev. record
-    // -----------------------------------------------------------------------------
     Recorder.Restart();
 
-    Recorder.SetFPS(60);
+    Recorder.SetPlaybackMode(Core::CRecorder::FPS);
 
-    bool IsRecordEnd = false;
+    Recorder.SetFPS(60);
 
     BASE_TIME_RESET();
 
@@ -232,4 +234,83 @@ BASE_TEST(RecordDataWithRecorderWithFixedTime)
     }
 
     BASE_TIME_LOG(TimeOfRecordIs2Sec);
+}
+
+// -----------------------------------------------------------------------------
+
+BASE_TEST(PlayRecorderWithTimecode)
+{
+    // -----------------------------------------------------------------------------
+    // Data
+    // -----------------------------------------------------------------------------
+    struct SFrame
+    {
+        int m_1;
+    };
+
+    std::array<SFrame, 4> Frames;
+
+    int Index = 0;
+
+    for (auto& Frame : Frames)
+    {
+        Frame.m_1 = Index;
+
+        ++Index;
+    }
+
+    // -----------------------------------------------------------------------------
+    // Recording
+    // -----------------------------------------------------------------------------
+    Base::CPerformanceClock Clock;
+
+    Core::CRecorder Recorder;
+
+    Recorder.Record();
+
+    Recorder.SetFPS(2);
+
+    for (auto CurrentFrame = Frames.begin(); CurrentFrame != Frames.end(); )
+    {
+        auto& Frame = *CurrentFrame;
+
+        static double TimeSinceLastCall = 0.0;
+
+        TimeSinceLastCall += Clock.GetDurationOfFrame();
+
+        if (TimeSinceLastCall > 0.5)
+        {
+            Recorder.SetData(&Frame, sizeof(SFrame));
+
+            TimeSinceLastCall = 0.0;
+
+            ++CurrentFrame;
+        }
+
+        Recorder.Step();
+
+        Clock.OnFrame();
+    }
+
+    // -----------------------------------------------------------------------------
+    // Check record
+    // -----------------------------------------------------------------------------
+    Recorder.Play();
+
+    Recorder.Restart();
+
+    Recorder.SetPlaybackMode(Core::CRecorder::TIMECODE);
+
+    BASE_TIME_RESET();
+
+    while (!Recorder.IsEnd())
+    {
+        SFrame Frame;
+
+        double Timecode = Recorder.GetData(Frame);
+
+        Recorder.Step();
+    }
+
+    BASE_TIME_LOG(TimecodeRecordIs2Sec);
 }

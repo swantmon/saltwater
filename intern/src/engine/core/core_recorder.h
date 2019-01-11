@@ -5,25 +5,38 @@
 #include "base/base_serialize_archive.h"
 #include "base/base_serialize_std_vector.h"
 
-#include <fstream>
-
 namespace Core
 {
     class CRecorder
-    {        
+    {
     public:
 
-        CRecorder();
+        enum EPlaybackMode
+        {
+            SINGLE,
+            FPS,
+            TIMECODE
+        };
+
+    public:
+
+        CRecorder(EPlaybackMode _PlaybackMode = SINGLE);
         ~CRecorder();
 
     public:
 
         template<class TType>
-        inline void GetData(TType& _rBytes);
+        inline double GetData(TType& _rBytes);
 
         inline void SetData(void* _pBytes, size_t _NumberOfBytes);
 
-        inline int GetNumberOfFrames();
+        inline void Play();
+
+        inline void Record();
+
+        inline void Eject();
+
+        inline void Pause();
 
         inline void Restart();
 
@@ -32,7 +45,11 @@ namespace Core
         inline bool IsEnd();
 
         inline void SetFPS(int _FramesPerSeconds);
-                
+
+        inline void SetPlaybackMode(EPlaybackMode _Mode);
+
+        inline double GetTime();
+
     public:
 
         template <class TArchive>
@@ -51,14 +68,19 @@ namespace Core
             CFrame();
             ~CFrame();
 
-            void SetTimecode(size_t _Timecode);
-            size_t GetTimecode() const;
+            void SetIndex(size_t _Timecode);
+            size_t GetIndex() const;
+
+            void SetTimecode(double _Timecode);
+            double GetTimecode() const;
 
             void Get(void*& _prBytes, size_t& _rNumberOfBytes);
 
             void Set(void* _pBytes, size_t _NumberOfBytes);
 
             void Clear();
+
+            bool HasData();
 
         public:
 
@@ -70,7 +92,8 @@ namespace Core
 
         private:
 
-            size_t m_Timecode;
+            size_t m_Index;
+            double m_Timecode;
             void* m_pBytes;
             size_t m_NumberOfBytes;
         };
@@ -83,22 +106,29 @@ namespace Core
 
         CFrames m_Frames;
 
-        int m_FrameIndex;
         int m_FramesPerSeconds;
         double m_Frequenz;
         double m_TimeSinceLastStep;
         Base::CPerformanceClock m_Clock;
+        Base::CTimer m_Timer;
+        bool m_IsRecording;
+        EPlaybackMode m_PlaybackMode;
+        CFrames::iterator m_CurrentFrameIter;
 
     private:
 
-        void AddFrame();
+        void AcquireNewFrame();
+        void UpdateReel();
+        void Clear();
+        void CheckEOL();
     };
 } // namespace Core
 
 namespace Core
 {
     CRecorder::CFrame::CFrame()
-        : m_Timecode     (-1)
+        : m_Index        (-1)
+        , m_Timecode     (-1)
         , m_pBytes       (0)
         , m_NumberOfBytes(0)
     { }
@@ -111,14 +141,28 @@ namespace Core
 
     // -----------------------------------------------------------------------------
 
-    void CRecorder::CFrame::SetTimecode(size_t _Timecode)
+    void CRecorder::CFrame::SetIndex(size_t _Index)
+    {
+        m_Index = _Index;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    size_t CRecorder::CFrame::GetIndex() const
+    {
+        return m_Index;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CRecorder::CFrame::SetTimecode(double _Timecode)
     {
         m_Timecode = _Timecode;
     }
 
     // -----------------------------------------------------------------------------
 
-    size_t CRecorder::CFrame::GetTimecode() const
+    double CRecorder::CFrame::GetTimecode() const
     {
         return m_Timecode;
     }
@@ -147,7 +191,7 @@ namespace Core
 
     // -----------------------------------------------------------------------------
 
-    inline void CRecorder::CFrame::Clear()
+    void CRecorder::CFrame::Clear()
     {
         if (m_pBytes != 0) Base::CMemory::Free(m_pBytes);
 
@@ -157,9 +201,17 @@ namespace Core
 
     // -----------------------------------------------------------------------------
 
+    bool CRecorder::CFrame::HasData()
+    {
+        return m_pBytes != nullptr && m_NumberOfBytes > 0;
+    }
+
+    // -----------------------------------------------------------------------------
+
     template <class TArchive>
     inline void CRecorder::CFrame::Read(TArchive& _rCodec)
     {
+        _rCodec >> m_Index;
         _rCodec >> m_Timecode;
         _rCodec >> m_NumberOfBytes;
 
@@ -173,6 +225,7 @@ namespace Core
     template <class TArchive>
     inline void CRecorder::CFrame::Write(TArchive& _rCodec)
     {
+        _rCodec << m_Index;
         _rCodec << m_Timecode;
         _rCodec << m_NumberOfBytes;
 
@@ -182,94 +235,158 @@ namespace Core
 
 namespace Core
 {
-    CRecorder::CRecorder()
-        : m_FrameIndex       (0)
-        , m_FramesPerSeconds (-1)
+    CRecorder::CRecorder(EPlaybackMode _PlaybackMode)
+        : m_FramesPerSeconds (-1)
         , m_Frequenz         (0.0)
         , m_TimeSinceLastStep(0.0)
         , m_Clock            ( )
-    {
-        if (m_Frames.size() == 0) AddFrame();
+        , m_Timer            (m_Clock)
+        , m_IsRecording      (false)
+        , m_PlaybackMode     (_PlaybackMode)
+        , m_CurrentFrameIter (m_Frames.begin())
+    { 
+        m_Timer.Pause();
     }
 
     // -----------------------------------------------------------------------------
 
     CRecorder::~CRecorder()
     {
-        for (auto& rFrame : m_Frames)
-        {
-            rFrame.Clear();
-        }
+        Clear();
     }
 
     // -----------------------------------------------------------------------------
 
     template<class TType>
-    inline void CRecorder::GetData(TType& _rBytes)
+    inline double CRecorder::GetData(TType& _rBytes)
     {
-        CFrame& rCurrentFrame = m_Frames[m_FrameIndex];
-
         void* pBytes = 0;
         size_t NumberOfBytes = 0;
 
-        rCurrentFrame.Get(pBytes, NumberOfBytes);
+        m_CurrentFrameIter->Get(pBytes, NumberOfBytes);
 
         _rBytes = *static_cast<TType*>(pBytes);
+
+        return m_CurrentFrameIter->GetTimecode();
     }
 
     // -----------------------------------------------------------------------------
 
     inline void CRecorder::SetData(void* _pBytes, size_t _NumberOfBytes)
     {
-        if (m_FrameIndex == GetNumberOfFrames()) AddFrame();
+        if (!m_IsRecording) return;
 
-        CFrame& rCurrentFrame = m_Frames[m_FrameIndex];
+        if (m_CurrentFrameIter == m_Frames.end())
+        {
+            AcquireNewFrame();
 
-        rCurrentFrame.Set(_pBytes, _NumberOfBytes);
+            m_CurrentFrameIter = std::prev(m_Frames.end());
+        }
+
+        m_CurrentFrameIter->SetTimecode(m_Clock.GetTime());
+
+        m_CurrentFrameIter->Set(_pBytes, _NumberOfBytes);
     }
 
     // -----------------------------------------------------------------------------
 
-    inline int CRecorder::GetNumberOfFrames()
+    inline void CRecorder::Play()
     {
-        return m_Frames.size();
+        m_IsRecording = false;
+
+        m_Timer.Resume();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    inline void CRecorder::Record()
+    {
+        m_IsRecording = true;
+
+        m_Timer.Resume();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    inline void CRecorder::Pause()
+    {
+        if (!m_Timer.IsPaused()) m_Timer.Pause();
+        else m_Timer.Resume();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    inline void CRecorder::Eject()
+    {
+        Restart();
+        Clear();
     }
 
     // -----------------------------------------------------------------------------
 
     inline void CRecorder::Restart()
     {
-        m_FrameIndex = 0;
+        CheckEOL();
+
+        m_TimeSinceLastStep = 0.0;
+        m_CurrentFrameIter  = m_Frames.begin();
+
+        m_Timer.Reset();
     }
 
     // -----------------------------------------------------------------------------
 
     inline void CRecorder::Step()
     {
-        if (m_FramesPerSeconds == -1)
+        m_Clock.OnFrame();
+
+        if (m_Timer.IsPaused()) return;
+
+        // -----------------------------------------------------------------------------
+        // Recording
+        // -----------------------------------------------------------------------------
+        if (m_IsRecording)
         {
-            ++m_FrameIndex;
+            UpdateReel();
+            return;
         }
-        else
+
+        // -----------------------------------------------------------------------------
+        // Playing
+        // -----------------------------------------------------------------------------
+        switch (m_PlaybackMode)
         {
-            m_TimeSinceLastStep += m_Clock.GetDurationOfFrame();
+        default:
+        case Core::CRecorder::SINGLE:
+            UpdateReel();
+            break;
+        case Core::CRecorder::FPS:
+            m_TimeSinceLastStep += m_Timer.GetDurationOfFrame();
 
             if (m_TimeSinceLastStep > m_Frequenz)
             {
-                ++ m_FrameIndex;
+                UpdateReel();
 
                 m_TimeSinceLastStep = 0.0f;
-            }   
+            }
+            break;
+        case Core::CRecorder::TIMECODE:
+            CFrames::iterator NextFrameIter = std::next(m_CurrentFrameIter);
 
-            m_Clock.OnFrame();
+            if (NextFrameIter == m_Frames.end() || NextFrameIter->GetTimecode() < m_Timer.GetTime())
+            {
+                UpdateReel();
+            }
+            break;
         }
+       
     }
 
     // -----------------------------------------------------------------------------
 
     inline bool CRecorder::IsEnd()
     {
-        return m_FrameIndex == m_Frames.size();
+        return m_CurrentFrameIter == m_Frames.end();
     }
 
     // -----------------------------------------------------------------------------
@@ -282,10 +399,26 @@ namespace Core
 
     // -----------------------------------------------------------------------------
 
+    inline void CRecorder::SetPlaybackMode(EPlaybackMode _Mode)
+    {
+        m_PlaybackMode = _Mode;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    inline double CRecorder::GetTime()
+    {
+        return m_Timer.GetTime();
+    }
+
+    // -----------------------------------------------------------------------------
+
     template <class TArchive>
     inline void CRecorder::Read(TArchive& _rCodec)
     {
-        m_Frames.clear();
+        Clear();
+
+        _rCodec >> m_FramesPerSeconds;
 
         Base::Read(_rCodec, m_Frames);
     }
@@ -295,17 +428,53 @@ namespace Core
     template <class TArchive>
     inline void CRecorder::Write(TArchive& _rCodec)
     {
+        CheckEOL();
+
+        _rCodec << m_FramesPerSeconds;
+
         Base::Write(_rCodec, m_Frames);
     }
 
     // -----------------------------------------------------------------------------
 
-    void CRecorder::AddFrame()
+    void CRecorder::AcquireNewFrame()
     {
         CFrame NewFrame;
 
-        NewFrame.SetTimecode(m_FrameIndex);
+        NewFrame.SetIndex(m_Frames.size());
 
         m_Frames.push_back(NewFrame);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CRecorder::UpdateReel()
+    {
+        if (!IsEnd())
+        {
+            ++ m_CurrentFrameIter;
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CRecorder::Clear()
+    {
+        for (auto& rFrame : m_Frames)
+        {
+            rFrame.Clear();
+        }
+
+        m_Frames.clear();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CRecorder::CheckEOL()
+    {
+        if (m_Frames.size() > 0 && !m_Frames.back().HasData())
+        {
+            m_Frames.pop_back();
+        }
     }
 } // namespace Core
