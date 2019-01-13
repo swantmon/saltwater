@@ -103,7 +103,7 @@ BASE_TEST(RecordDataWithRecorderFStream)
 
         for (auto& rChar : OriginalFrame.m_3)
         {
-            //rChar = glm::linearRand(0, 255);
+            rChar = glm::linearRand(0, 255);
         }
 
         ++Index;
