@@ -55,9 +55,14 @@ namespace Core
         template<typename TElement>
         inline void WriteClass(const TElement& _rElement);
 
+    public:
+
+        inline CStream* GetStream();
+
     private:
         CStream*     m_pStream;
         unsigned int m_NumberOfElements;
+        bool         m_IsCollection;
 
     public:
 
@@ -68,9 +73,10 @@ namespace Core
 namespace Core
 {
     inline CRecordWriter::CRecordWriter(CStream& _rStream, unsigned int _Version)
-        : CArchive(_Version)
-        , m_pStream(&_rStream)
+        : CArchive          (_Version)
+        , m_pStream         (&_rStream)
         , m_NumberOfElements(0)
+        , m_IsCollection    (false)
     {
         // -----------------------------------------------------------------------------
         // Write header informations (internal format, version)
@@ -119,7 +125,9 @@ namespace Core
     {
         m_NumberOfElements = _NumberOfElements;
 
-        InternWriteBinary(&m_NumberOfElements, sizeof(m_NumberOfElements));
+        WriteBinary(&m_NumberOfElements, sizeof(m_NumberOfElements));
+
+        m_IsCollection = true;
     }
 
     // -----------------------------------------------------------------------------
@@ -132,7 +140,7 @@ namespace Core
 
         if (IsPrimitive)
         {
-            WriteBinary(_pElements, m_NumberOfElements * sizeof(*_pElements));
+            InternWriteBinary(_pElements, m_NumberOfElements * sizeof(*_pElements));
         }
         else
         {
@@ -153,7 +161,7 @@ namespace Core
     template<typename TElement>
     inline void CRecordWriter::EndCollection()
     {
-
+        m_IsCollection = false;
     }
 
     // -----------------------------------------------------------------------------
@@ -168,17 +176,21 @@ namespace Core
 
     void CRecordWriter::WriteBinary(const void* _pBytes, const unsigned int _NumberOfBytes)
     {
-        // -----------------------------------------------------------------------------
-        // Update time
-        // -----------------------------------------------------------------------------
-        Update();
+        if (!m_IsCollection)
+        {
+            // -----------------------------------------------------------------------------
+            // Update time
+            // -----------------------------------------------------------------------------
+            Update();
 
-        double Time = GetTime();
+            double Timecode = GetTime();
 
-        // -----------------------------------------------------------------------------
-        // Write time and data to stream
-        // -----------------------------------------------------------------------------
-        InternWriteBinary(&Time, sizeof(Time));
+            // -----------------------------------------------------------------------------
+            // Write time and data to stream
+            // -----------------------------------------------------------------------------
+            InternWriteBinary(&Timecode, sizeof(Timecode));
+        }
+
         InternWriteBinary(_pBytes, _NumberOfBytes);
     }
 
@@ -188,6 +200,13 @@ namespace Core
     inline void CRecordWriter::WriteClass(const TElement& _rElement)
     {
         Core::Private::CAccess::Write(*this, const_cast<TElement&>(_rElement));
+    }
+
+    // -----------------------------------------------------------------------------
+
+    inline CRecordWriter::CStream* CRecordWriter::GetStream()
+    {
+        return m_pStream;
     }
 
     // -----------------------------------------------------------------------------

@@ -22,6 +22,10 @@ namespace Core
 
     public:
 
+        inline void RestartTimer();
+
+    public:
+
         inline void Update();
 
     private:
@@ -49,6 +53,13 @@ namespace Core
     inline double CBaseRecorder::GetTime()
     {
         return m_Timer.GetTime();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    inline void CBaseRecorder::RestartTimer()
+    {
+        m_Timer.Reset();
     }
 
     // -----------------------------------------------------------------------------
