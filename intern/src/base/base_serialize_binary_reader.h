@@ -69,17 +69,15 @@ namespace SER
         inline void ReadClass(TElement& _rElement);
 
     private:
-        CStream*     m_pStream;
-        unsigned int m_NumberOfElements;
+        CStream* m_pStream;
     };
 } // namespace SER
 
 namespace SER
 {
 	inline CBinaryReader::CBinaryReader(CStream& _rStream, unsigned int _Version)
-        : CArchive          (_Version)
-        , m_pStream         (&_rStream)
-        , m_NumberOfElements(0)
+        : CArchive (_Version)
+        , m_pStream(&_rStream)
     {
         // -----------------------------------------------------------------------------
         // Read header informations (internal format, version)
@@ -132,9 +130,11 @@ namespace SER
     template<typename TElement>
     inline unsigned int CBinaryReader::BeginCollection()
     {
-        ReadBinary(&m_NumberOfElements, sizeof(m_NumberOfElements));
+        int NumberOfElements;
 
-        return m_NumberOfElements;
+        ReadBinary(&NumberOfElements, sizeof(NumberOfElements));
+
+        return NumberOfElements;
     }
 
     // -----------------------------------------------------------------------------
@@ -146,16 +146,11 @@ namespace SER
 
         if (IsPrimitive)
         {
-            ReadBinary(_pElements, m_NumberOfElements * sizeof(*_pElements));
+            ReadBinary(_pElements, _NumberOfElements * sizeof(*_pElements));
         }
         else
         {
-            unsigned int IndexOfElement;
-            unsigned int NumberOfElements;
-
-            NumberOfElements = m_NumberOfElements;
-
-            for (IndexOfElement = 0; IndexOfElement < NumberOfElements; ++IndexOfElement)
+            for (unsigned int IndexOfElement = 0; IndexOfElement < _NumberOfElements; ++IndexOfElement)
             {
                 Read(_pElements[IndexOfElement]);
             }

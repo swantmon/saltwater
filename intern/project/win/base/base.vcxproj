@@ -55,6 +55,7 @@
     <ClInclude Include="..\..\..\src\base\base_plane.h" />
     <ClInclude Include="..\..\..\src\base\base_pool.h" />
     <ClInclude Include="..\..\..\src\base\base_precompiled.h" />
+    <ClInclude Include="..\..\..\src\base\base_serialize_recorder.h" />
     <ClInclude Include="..\..\..\src\base\base_serialize_record_reader.h" />
     <ClInclude Include="..\..\..\src\base\base_serialize_record_writer.h" />
     <ClInclude Include="..\..\..\src\base\base_remove_const.h" />

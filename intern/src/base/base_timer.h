@@ -29,8 +29,8 @@ namespace CORE
             inline double GetTime() const;
             inline double GetDurationOfFrame() const;
 
-            inline void SetTimeScale(double _TimeScale);
-            inline double GetTimeScale() const;
+            inline void SetSpeed(double _TimeScale);
+            inline double GetSpeed() const;
 
             inline void Pause();
             inline void Resume();
@@ -46,7 +46,7 @@ namespace CORE
             CTimer*     m_pPrevious;
             double      m_CurrentTime;
             double      m_PredictedDurationOfFrame;
-            double      m_TimeScale;
+            double      m_Speed;
             bool        m_IsPaused;
 
         private:
@@ -65,7 +65,7 @@ namespace CORE
         , m_pPrevious               (0)
         , m_CurrentTime             (0.0)
         , m_PredictedDurationOfFrame(0.0)
-        , m_TimeScale               (1.0)
+        , m_Speed                   (1.0)
         , m_IsPaused                (false)
     {
     }
@@ -78,7 +78,7 @@ namespace CORE
         , m_pPrevious               (0)
         , m_CurrentTime             (0.0)
         , m_PredictedDurationOfFrame(0.0)
-        , m_TimeScale               (1.0)
+        , m_Speed                   (1.0)
         , m_IsPaused                (false)
     {
         m_pClock->AddTimer(*this);
@@ -133,16 +133,16 @@ namespace CORE
 
     // -----------------------------------------------------------------------------
 
-    inline void CTimer::SetTimeScale(double _TimeScale)
+    inline void CTimer::SetSpeed(double _TimeScale)
     {
-        m_TimeScale = _TimeScale;
+        m_Speed = _TimeScale;
     }
 
     // -----------------------------------------------------------------------------
 
-    inline double CTimer::GetTimeScale() const
+    inline double CTimer::GetSpeed() const
     {
-        return m_TimeScale;
+        return m_Speed;
     }
 
     // -----------------------------------------------------------------------------
@@ -172,7 +172,7 @@ namespace CORE
     {
         m_CurrentTime              = 0.0;
         m_PredictedDurationOfFrame = 0.0;
-        m_TimeScale                = 1.0;
+        m_Speed                    = 1.0;
     }
 
     // -----------------------------------------------------------------------------
@@ -181,7 +181,7 @@ namespace CORE
     {
         if (!m_IsPaused)
         {
-            m_PredictedDurationOfFrame = _DurationOfFrame * m_TimeScale;
+            m_PredictedDurationOfFrame = _DurationOfFrame * m_Speed;
 
             m_CurrentTime += m_PredictedDurationOfFrame;
         }
