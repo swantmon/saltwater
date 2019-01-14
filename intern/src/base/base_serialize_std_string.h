@@ -24,7 +24,7 @@ namespace SER
     inline void Write(TArchive& _rArchive, const std::basic_string<TObject, TTraits, TAllocator>& _rString)
     {
         _rArchive.template BeginCollection<TObject>(_rString.size());
-        _rArchive.WriteCollection(_rString.data());
+        _rArchive.WriteCollection(_rString.data(), _rString.size());
         _rArchive.template EndCollection<TObject>();
     }
 

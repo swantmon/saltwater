@@ -69,9 +69,8 @@ namespace SER
         Base::CPerformanceClock m_Clock;
         Base::CTimer m_Timer;
 
-        CStream*     m_pStream;
-        double       m_Timecode;
-        unsigned int m_NumberOfElements;
+        CStream* m_pStream;
+        double   m_Timecode;
 
     private:
 
@@ -86,7 +85,6 @@ namespace SER
         , m_Clock           ()
         , m_Timer           (m_Clock)
         , m_pStream         (&_rStream)
-        , m_NumberOfElements(0)
     {
         // -----------------------------------------------------------------------------
         // Read header informations (internal format, version)
@@ -139,9 +137,11 @@ namespace SER
     template<typename TElement>
     inline unsigned int CRecordReader::BeginCollection()
     {
-        ReadBinary(&m_NumberOfElements, sizeof(m_NumberOfElements));
+        unsigned int NumberOfElements;
 
-        return m_NumberOfElements;
+        ReadBinary(&NumberOfElements, sizeof(NumberOfElements));
+
+        return NumberOfElements;
     }
 
     // -----------------------------------------------------------------------------
@@ -153,16 +153,11 @@ namespace SER
 
         if (IsPrimitive)
         {
-            ReadBinary(_pElements, m_NumberOfElements * sizeof(*_pElements));
+            ReadBinary(_pElements, _NumberOfElements * sizeof(*_pElements));
         }
         else
         {
-            unsigned int IndexOfElement;
-            unsigned int NumberOfElements;
-
-            NumberOfElements = m_NumberOfElements;
-
-            for (IndexOfElement = 0; IndexOfElement < NumberOfElements; ++IndexOfElement)
+            for (unsigned int IndexOfElement = 0; IndexOfElement < _NumberOfElements; ++IndexOfElement)
             {
                 Read(_pElements[IndexOfElement]);
             }

@@ -82,7 +82,6 @@ namespace SER
 
     private:
         CStream*     m_pStream;
-        unsigned int m_NumberOfElements;
         unsigned int m_NumberOfIdents;
         EStatus      m_State;
 
@@ -126,11 +125,10 @@ namespace SER
 namespace SER
 {
 	inline CTextReader::CTextReader(CStream& _rStream, unsigned int _Version)
-        : CArchive          (_Version)
-        , m_pStream         (&_rStream)
-        , m_NumberOfElements(0)
-        , m_NumberOfIdents  (0)
-        , m_State           (Root)
+        : CArchive        (_Version)
+        , m_pStream       (&_rStream)
+        , m_NumberOfIdents(0)
+        , m_State         (Root)
     {
         // -----------------------------------------------------------------------------
         // Read header informations (internal format, version)
@@ -139,7 +137,7 @@ namespace SER
 
         InternReadChar(Private::Code::s_Space);
 
-        InternReadPrimitive(m_ArchiveVersion);        
+        InternReadPrimitive(m_ArchiveVersion);
 
         if (m_ArchiveVersion != _Version)
         {
@@ -197,9 +195,7 @@ namespace SER
     template<typename TElement>
     inline void CTextReader::ReadCollection(TElement* _pElements, unsigned int _NumberOfElements)
     {
-        m_NumberOfElements = _NumberOfElements;
-
-        InternReadCollection(_pElements, m_NumberOfElements);
+        InternReadCollection(_pElements, _NumberOfElements);
     }
 
     // -----------------------------------------------------------------------------
@@ -268,12 +264,14 @@ namespace SER
     template<typename TElement>
     inline unsigned int CTextReader::InternBeginCollection(TElement* _pElements)
     {
+        int NumberOfElements;
+
         InternReadIndent();
         InternReadChar(Private::Code::s_BracketOpen);
         InternReadName(Private::Code::s_Collection);
 
         InternReadChar(Private::Code::s_Space);
-        InternReadValue(m_NumberOfElements);
+        InternReadValue(NumberOfElements);
         InternReadChar(Private::Code::s_Space);
 
         InternReadEOL();
@@ -281,7 +279,7 @@ namespace SER
         m_State = List;
         ++ m_NumberOfIdents;
 
-        return m_NumberOfElements;
+        return NumberOfElements;
     }
 
     // -----------------------------------------------------------------------------
@@ -290,15 +288,17 @@ namespace SER
     {
         BASE_UNUSED(_pElements);
 
+        int NumberOfElements;
+
         InternReadIndent();
         InternReadChar(Private::Code::s_BracketOpen);
         InternReadName(Private::Code::s_Text);
 
         InternReadChar(Private::Code::s_Space);
-        InternReadValue(m_NumberOfElements);
+        InternReadValue(NumberOfElements);
         InternReadChar(Private::Code::s_Space);
 
-        return m_NumberOfElements;
+        return NumberOfElements;
     }
 
     // -----------------------------------------------------------------------------
@@ -307,15 +307,17 @@ namespace SER
     {
         BASE_UNUSED(_pElements);
 
+        int NumberOfElements;
+
         InternReadIndent();
         InternReadChar(Private::Code::s_BracketOpen);
         InternReadName(Private::Code::s_Text);
 
         InternReadChar(Private::Code::s_Space);
-        InternReadValue(m_NumberOfElements);
+        InternReadValue(NumberOfElements);
         InternReadChar(Private::Code::s_Space);
 
-        return m_NumberOfElements;
+        return NumberOfElements;
     }
 
     // -----------------------------------------------------------------------------
@@ -323,15 +325,13 @@ namespace SER
     template<typename TElement>
     inline void CTextReader::InternReadCollection(TElement* _pElements, unsigned int _NumberOfElements)
     {
-        unsigned int IndexOfElement;
-
         InternReadIndent();
         InternReadChar(Private::Code::s_BracketOpen);
         InternReadEOL();
 
         ++ m_NumberOfIdents;
 
-        for (IndexOfElement = 0; IndexOfElement < _NumberOfElements; ++IndexOfElement)
+        for (unsigned int IndexOfElement = 0; IndexOfElement < _NumberOfElements; ++IndexOfElement)
         {
             Read(_pElements[IndexOfElement]);
         }
@@ -347,14 +347,9 @@ namespace SER
 
     inline void CTextReader::InternReadCollection(char* _pElements, unsigned int _NumberOfElements)
     {
-        unsigned int IndexOfElement;
-        unsigned int NumberOfElements;
-
-        NumberOfElements = m_NumberOfElements;
-
         InternReadChar(Private::Code::s_TextSeperator);
 
-        for (IndexOfElement = 0; IndexOfElement < _NumberOfElements; ++IndexOfElement)
+        for (unsigned int IndexOfElement = 0; IndexOfElement < _NumberOfElements; ++IndexOfElement)
         {
             Read(_pElements[IndexOfElement]);
         }
@@ -366,14 +361,9 @@ namespace SER
 
     inline void CTextReader::InternReadCollection(wchar_t* _pElements, unsigned int _NumberOfElements)
     {
-        unsigned int IndexOfElement;
-        unsigned int NumberOfElements;
-
-        NumberOfElements = m_NumberOfElements;
-
         InternReadChar(Private::Code::s_TextSeperator);
 
-        for (IndexOfElement = 0; IndexOfElement < _NumberOfElements; ++IndexOfElement)
+        for (unsigned int IndexOfElement = 0; IndexOfElement < _NumberOfElements; ++IndexOfElement)
         {
             Read(_pElements[IndexOfElement]);
         }

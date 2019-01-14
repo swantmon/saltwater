@@ -59,10 +59,10 @@ namespace SER
 
     public:
         template<typename TElement>
-        inline void BeginCollection(unsigned int _NumberOfElements) = 0;
+        inline void BeginCollection() = 0;
 
         template<typename TElement>
-        inline void WriteCollection(const TElement* _pElements) = 0;
+        inline void WriteCollection(const TElement* _pElements, unsigned int _NumberOfElements) = 0;
 
         template<typename TElement>
         inline void EndCollection() = 0;
@@ -261,7 +261,7 @@ namespace SER
             unsigned int NumberOfCharacters = static_cast<unsigned int>(strlen(_pElement));
             
             _rArchive.template BeginCollection<char>(NumberOfCharacters);
-            _rArchive.WriteCollection(_pElement);
+            _rArchive.WriteCollection(_pElement, NumberOfCharacters);
             _rArchive.template EndCollection<char>();
         }
         
