@@ -5,14 +5,14 @@
 #include "base/base_memory.h"
 #include "base/base_serialize_access.h"
 #include "base/base_serialize_archive.h"
+#include "base/base_serialize_recorder.h"
 #include "base/base_timer.h"
-
 
 using namespace Base;
 
 namespace SER
 {
-    class CRecordReader : public CArchive
+    class CRecordReader : public CArchive, public CRecorder
     {
     public:
         enum
@@ -65,26 +65,12 @@ namespace SER
 
         inline bool IsEnd() const;
 
-    public:
-
-        inline double GetTime();
-
-        inline double GetDurationOfFrame();
-
-        inline void RestartTimer();
-
-    public:
-
-        inline void Update();
-
     private:
         Base::CPerformanceClock m_Clock;
         Base::CTimer m_Timer;
 
-        CStream*     m_pStream;
-        double       m_Timecode;
-        unsigned int m_NumberOfElements;
-        bool         m_IsCollection;
+        CStream* m_pStream;
+        double   m_Timecode;
 
     private:
 
@@ -99,14 +85,7 @@ namespace SER
         , m_Clock           ()
         , m_Timer           (m_Clock)
         , m_pStream         (&_rStream)
-        , m_NumberOfElements(0)
-        , m_IsCollection    (false)
     {
-        // -----------------------------------------------------------------------------
-        // Reset stream position to beginning
-        // -----------------------------------------------------------------------------
-        m_pStream->seekg(m_pStream->beg);
-
         // -----------------------------------------------------------------------------
         // Read header informations (internal format, version)
         // -----------------------------------------------------------------------------        
@@ -158,11 +137,11 @@ namespace SER
     template<typename TElement>
     inline unsigned int CRecordReader::BeginCollection()
     {
-        ReadBinary(&m_NumberOfElements, sizeof(m_NumberOfElements));
+        unsigned int NumberOfElements;
 
-        m_IsCollection = true;
+        ReadBinary(&NumberOfElements, sizeof(NumberOfElements));
 
-        return m_NumberOfElements;
+        return NumberOfElements;
     }
 
     // -----------------------------------------------------------------------------
@@ -174,16 +153,11 @@ namespace SER
 
         if (IsPrimitive)
         {
-            ReadBinary(_pElements, m_NumberOfElements * sizeof(*_pElements));
+            ReadBinary(_pElements, _NumberOfElements * sizeof(*_pElements));
         }
         else
         {
-            unsigned int IndexOfElement;
-            unsigned int NumberOfElements;
-
-            NumberOfElements = m_NumberOfElements;
-
-            for (IndexOfElement = 0; IndexOfElement < NumberOfElements; ++IndexOfElement)
+            for (unsigned int IndexOfElement = 0; IndexOfElement < _NumberOfElements; ++IndexOfElement)
             {
                 Read(_pElements[IndexOfElement]);
             }
@@ -195,7 +169,6 @@ namespace SER
     template<typename TElement>
     inline void CRecordReader::EndCollection()
     {
-        m_IsCollection = false;
     }
 
     // -----------------------------------------------------------------------------
@@ -210,14 +183,14 @@ namespace SER
 
     inline void CRecordReader::ReadBinary(void* _pBytes, unsigned int _NumberOfBytes)
     {
-        if (!m_IsCollection)
-        {
-            // -----------------------------------------------------------------------------
-            // Read current time
-            // -----------------------------------------------------------------------------
-            InternReadBinary(&m_Timecode, sizeof(m_Timecode));
-        }
+        // -----------------------------------------------------------------------------
+        // Read current time
+        // -----------------------------------------------------------------------------
+        InternReadBinary(&m_Timecode, sizeof(m_Timecode));
         
+        // -----------------------------------------------------------------------------
+        // Read data
+        // -----------------------------------------------------------------------------
         InternReadBinary(_pBytes, _NumberOfBytes);
     }
 
@@ -254,34 +227,6 @@ namespace SER
     inline bool CRecordReader::IsEnd() const
     {
         return m_pStream->peek() == EOF;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    inline double CRecordReader::GetTime()
-    {
-        return m_Timer.GetTime();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    inline double CRecordReader::GetDurationOfFrame()
-    {
-        return m_Timer.GetDurationOfFrame();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    inline void CRecordReader::RestartTimer()
-    {
-        m_Timer.Reset();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    inline void CRecordReader::Update()
-    {
-        m_Clock.OnFrame();
     }
 
     // -----------------------------------------------------------------------------

@@ -29,7 +29,7 @@ namespace SER
         
         if (NumberOfElements > 0)
         {
-            _rArchive.WriteCollection(&_rVector.front());
+            _rArchive.WriteCollection(&_rVector.front(), NumberOfElements);
         }
 
         _rArchive.template EndCollection<TObject>();

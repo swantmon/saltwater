@@ -56,7 +56,7 @@ namespace SER
         inline void BeginCollection(unsigned int _NumberOfElements);
 
         template<typename TElement>
-        inline void WriteCollection(const TElement* _pElements);
+        inline void WriteCollection(const TElement* _pElements, unsigned int _NumberOfElements);
 
         template<typename TElement>
         inline void EndCollection();
@@ -70,17 +70,15 @@ namespace SER
         inline void WriteClass(const TElement& _rElement);
 
     private:
-        CStream*     m_pStream;
-        unsigned int m_NumberOfElements;
+        CStream* m_pStream;
     };
 } // namespace SER
 
 namespace SER
 {
 	inline CBinaryWriter::CBinaryWriter(CStream& _rStream, unsigned int _Version)
-        : CArchive          (_Version)
-        , m_pStream         (&_rStream)
-        , m_NumberOfElements(0)
+        : CArchive (_Version)
+        , m_pStream(&_rStream)
     {
         // -----------------------------------------------------------------------------
         // Write header informations (internal format, version)
@@ -128,31 +126,24 @@ namespace SER
     template<typename TElement>
     inline void CBinaryWriter::BeginCollection(unsigned int _NumberOfElements)
     {
-        m_NumberOfElements = _NumberOfElements;
-
-        WriteBinary(&m_NumberOfElements, sizeof(m_NumberOfElements));
+        WriteBinary(&_NumberOfElements, sizeof(_NumberOfElements));
     }
 
     // -----------------------------------------------------------------------------
 
     template<typename TElement>
-    inline void CBinaryWriter::WriteCollection(const TElement* _pElements)
+    inline void CBinaryWriter::WriteCollection(const TElement* _pElements, unsigned int _NumberOfElements)
     {
         typedef typename SRemovePointer<TElement>::X XUnqualified;
         bool IsPrimitive = SIsPrimitive<TElement>::Value;
 
         if (IsPrimitive)
         {
-            WriteBinary(_pElements, m_NumberOfElements * sizeof(*_pElements));
+            WriteBinary(_pElements, _NumberOfElements * sizeof(*_pElements));
         }
         else
         {
-            unsigned int IndexOfElement;
-            unsigned int NumberOfElements;
-
-            NumberOfElements = m_NumberOfElements;
-
-            for (IndexOfElement = 0; IndexOfElement < NumberOfElements; ++IndexOfElement)
+            for (unsigned int IndexOfElement = 0; IndexOfElement < _NumberOfElements; ++IndexOfElement)
             {
                 Write(_pElements[IndexOfElement]);
             }

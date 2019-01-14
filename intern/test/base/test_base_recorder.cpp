@@ -207,19 +207,17 @@ BASE_TEST(RecordDataWithRecorderTimecode)
 
     Base::CRecordWriter RecordWriter(Stream, 1);
 
-    Base::CPerformanceClock Clock;
-
     BASE_TIME_RESET();
 
     double CurrentFrameTime = 0.0;
 
     for (int Index = 0; Index < Frames.size();)
     {
-        Clock.OnFrame();
+        RecordWriter.Update();
 
         auto& OriginalFrame = Frames[Index];
 
-        CurrentFrameTime += Clock.GetDurationOfFrame();
+        CurrentFrameTime += RecordWriter.GetDurationOfFrame();
 
         if (CurrentFrameTime > 1.0 / 30.0)
         {
@@ -247,8 +245,6 @@ BASE_TEST(RecordDataWithRecorderTimecode)
     Index = 0;
 
     CurrentFrameTime = 0.0;
-
-    RecordReaderFPS.RestartTimer();
 
     BASE_TIME_RESET();
 
@@ -281,6 +277,8 @@ BASE_TEST(RecordDataWithRecorderTimecode)
 
     BASE_TIME_LOG(ReadRecorderIn1SecViaFPS);
 
+    Stream.seekg(Stream.beg);
+
     // -----------------------------------------------------------------------------
     // Read record
     // -----------------------------------------------------------------------------
@@ -290,6 +288,8 @@ BASE_TEST(RecordDataWithRecorderTimecode)
     // Check record w/ prev. record
     // -----------------------------------------------------------------------------
     Index = 0;
+
+    RecordReaderTimecode.SetSpeed(2.0);
 
     BASE_TIME_RESET();
 
@@ -316,5 +316,85 @@ BASE_TEST(RecordDataWithRecorderTimecode)
         }
     }
 
-    BASE_TIME_LOG(ReadRecorderIn1SecViaTimecode);
+    BASE_TIME_LOG(ReadRecorderIn500msViaTimecode);
+}
+
+// -----------------------------------------------------------------------------
+
+struct SFrame
+{
+    int   m_1;
+    float m_2;
+    std::vector<char> m_3;
+
+    template<class TArchive>
+    void Read(TArchive& _rArchive)
+    {
+        _rArchive >> m_1;
+        _rArchive >> m_2;
+
+        Base::Read(_rArchive, m_3);
+    }
+
+    template<class TArchive>
+    void Write(TArchive& _rArchive)
+    {
+        _rArchive << m_1;
+        _rArchive << m_2;
+
+        Base::Write(_rArchive, m_3);
+    }
+};
+
+BASE_TEST(RecordClassWithRecorderSStream)
+{
+    // -----------------------------------------------------------------------------
+    // Data
+    // -----------------------------------------------------------------------------
+    std::array<SFrame, 120> Frames;
+
+    int Index = 0;
+
+    for (auto& OriginalFrame : Frames)
+    {
+        OriginalFrame.m_1 = Index;
+        OriginalFrame.m_2 = 1337.0f - float(Index);
+
+        OriginalFrame.m_3.resize(glm::linearRand(1, 4000000));
+
+        ++Index;
+    }
+
+    // -----------------------------------------------------------------------------
+    // Recording
+    // -----------------------------------------------------------------------------
+    std::stringstream Stream;
+
+    Base::CRecordWriter RecordWriter(Stream, 1);
+
+    for (auto& OriginalFrame : Frames)
+    {
+        RecordWriter << OriginalFrame;
+    }
+
+    Stream.seekg(Stream.beg);
+
+    // -----------------------------------------------------------------------------
+    // Read record
+    // -----------------------------------------------------------------------------
+    Base::CRecordReader RecordReaderFPS(Stream, 1);
+
+    // -----------------------------------------------------------------------------
+    // Check record w/ prev. record
+    // -----------------------------------------------------------------------------
+    for (auto& OriginalFrame : Frames)
+    {
+        SFrame ReadFrame;
+
+        RecordReaderFPS >> ReadFrame;
+
+        BASE_CHECK(OriginalFrame.m_1 == ReadFrame.m_1);
+        BASE_CHECK(OriginalFrame.m_2 == ReadFrame.m_2);
+        BASE_CHECK(OriginalFrame.m_3.size() == ReadFrame.m_3.size());
+    }
 }
