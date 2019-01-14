@@ -256,12 +256,15 @@ namespace MR
 
             std::string RecordParam = Core::CProgramParameters::GetInstance().Get("mr:slam:recording:mode", "none");
             m_RecordFileName = Core::CProgramParameters::GetInstance().Get("mr:slam:recording:file", "");
+            double SpeedOfPlayback = Core::CProgramParameters::GetInstance().Get("mr:slam:recording:speed", 1.0);
 
             if (RecordParam == "play")
             {
                 m_RecordMode = PLAY;
                 m_RecordFile.open(m_RecordFileName, std::fstream::in | std::fstream::binary);
                 m_pRecordReader.reset(new Base::CRecordReader(m_RecordFile, 1));
+
+                m_pRecordReader->SetSpeed(SpeedOfPlayback);
             }
             else if (RecordParam == "record")
             {
@@ -310,28 +313,25 @@ namespace MR
         {
             if (m_RecordMode == PLAY)
             {
+                m_pRecordReader->Update();
+
                 if (m_pRecordReader->IsEnd())
                 {
                     m_RecordMode = NONE;
                     m_UseTrackingCamera = false;
                 }
-                else
+
+                while (!m_pRecordReader->IsEnd() && m_pRecordReader->PeekTimecode() < m_pRecordReader->GetTime())
                 {
-                    for (int i = 0; i < 30; ++i)
-                    {
-                        if (!m_pRecordReader->IsEnd())
-                        {
-                            Net::CMessage Message;
+                    Net::CMessage Message;
 
-                            *m_pRecordReader >> Message.m_Category;
-                            *m_pRecordReader >> Message.m_MessageType;
-                            *m_pRecordReader >> Message.m_CompressedSize;
-                            *m_pRecordReader >> Message.m_DecompressedSize;
-                            Base::Read(*m_pRecordReader, Message.m_Payload);
+                    *m_pRecordReader >> Message.m_Category;
+                    *m_pRecordReader >> Message.m_MessageType;
+                    *m_pRecordReader >> Message.m_CompressedSize;
+                    *m_pRecordReader >> Message.m_DecompressedSize;
+                    Base::Read(*m_pRecordReader, Message.m_Payload);
 
-                            HandleMessage(Message);
-                        }
-                    }
+                    HandleMessage(Message);
                 }
             }
 
