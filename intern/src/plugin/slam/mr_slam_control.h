@@ -4,6 +4,8 @@
 #include "base/base_compression.h"
 #include "base/base_exception.h"
 #include "base/base_include_glm.h"
+#include "base/base_serialize_record_reader.h"
+#include "base/base_serialize_record_writer.h"
 
 #include "engine/camera/cam_control_manager.h"
 #include "engine/camera/cam_editor_control.h"
@@ -88,6 +90,10 @@ namespace MR
 
         bool m_MousePressed;
 
+        // -----------------------------------------------------------------------------
+        // Reconstructor
+        // -----------------------------------------------------------------------------
+
         bool m_CaptureColor;
 
         std::unique_ptr<MR::CScalableSLAMReconstructor> m_pReconstructor;
@@ -112,6 +118,24 @@ namespace MR
         typedef bool(*GetColorBufferFunc)(char*);
         GetDepthBufferFunc GetDepthBuffer;
         GetColorBufferFunc GetColorBuffer;
+
+        // -----------------------------------------------------------------------------
+        // Recording
+        // -----------------------------------------------------------------------------
+
+        enum ERecordMode
+        {
+            NONE,
+            PLAY,
+            RECORD,
+        };
+        
+        ERecordMode m_RecordMode;
+        std::string m_RecordFileName;
+
+        std::fstream m_RecordFile;
+        std::unique_ptr<Base::CRecordWriter> m_pRecordWriter;
+        std::unique_ptr<Base::CRecordReader> m_pRecordReader;
 
     public:
 
@@ -211,12 +235,34 @@ namespace MR
             {
                 throw Base::CException(__FILE__, __LINE__, "Unknown data source for SLAM plugin");
             }
+
+            std::string RecordParam = Core::CProgramParameters::GetInstance().Get("mr:slam:recording:mode", "none");
+            m_RecordFileName = Core::CProgramParameters::GetInstance().Get("mr:slam:recording:file", "");
+
+            if (RecordParam == "play")
+            {
+                m_RecordMode = PLAY;
+                m_RecordFile.open(m_RecordFileName, std::fstream::in | std::fstream::binary);
+                m_pRecordReader.reset(new Base::CRecordReader(m_RecordFile, 1));
+            }
+            else if (RecordParam == "record")
+            {
+                m_RecordMode = RECORD;
+                m_RecordFile.open(m_RecordFileName, std::fstream::out | std::fstream::binary);
+                m_pRecordWriter.reset(new Base::CRecordWriter(m_RecordFile, 1));
+            }
+            else
+            {
+                m_RecordMode = NONE;
+            }
         }
 
         // -----------------------------------------------------------------------------
 
         void Exit()
         {
+            m_RecordFile.close();
+
             m_DepthBuffer.clear();
             m_ColorBuffer.clear();
 
@@ -242,6 +288,33 @@ namespace MR
 
         void Update()
         {
+            if (m_RecordMode == PLAY)
+            {
+                if (m_pRecordReader->IsEnd())
+                {
+                    m_RecordMode = NONE;
+                    m_UseTrackingCamera = false;
+                }
+                else
+                {
+                    for (int i = 0; i < 30; ++i)
+                    {
+                        if (!m_pRecordReader->IsEnd())
+                        {
+                            Net::CMessage Message;
+
+                            *m_pRecordReader >> Message.m_Category;
+                            *m_pRecordReader >> Message.m_MessageType;
+                            *m_pRecordReader >> Message.m_CompressedSize;
+                            *m_pRecordReader >> Message.m_DecompressedSize;
+                            Base::Read(*m_pRecordReader, Message.m_Payload);
+
+                            HandleMessage(Message);
+                        }
+                    }
+                }
+            }
+
             if (m_DataSource == KINECT)
             {
                 if (m_CaptureColor && GetDepthBuffer(m_DepthBuffer.data()) && GetColorBuffer(m_ColorBuffer.data()))
@@ -558,6 +631,15 @@ namespace MR
 
             if (_rMessage.m_MessageType == 0)
             {
+                if (m_RecordMode == RECORD)
+                {
+                    *m_pRecordWriter << _rMessage.m_Category;
+                    *m_pRecordWriter << _rMessage.m_MessageType;
+                    *m_pRecordWriter << _rMessage.m_CompressedSize;
+                    *m_pRecordWriter << _rMessage.m_DecompressedSize;
+                    Base::Write(*m_pRecordWriter, _rMessage.m_Payload);
+                }
+
                 HandleMessage(_rMessage);
             }
             else if (_rMessage.m_MessageType == 2)
