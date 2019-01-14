@@ -1,19 +1,18 @@
 #pragma once
 
+#include "base/base_clock.h"
 #include "base/base_defines.h"
+#include "base/base_memory.h"
 #include "base/base_serialize_access.h"
 #include "base/base_serialize_archive.h"
+#include "base/base_timer.h"
 
-#include "base/base_clock.h"
-#include "base/base_memory.h"
-
-#include "engine/core/core_base_recorder.h"
 
 using namespace Base;
 
-namespace Core
+namespace SER
 {
-    class CRecordReader : public CArchive, public CBaseRecorder
+    class CRecordReader : public CArchive
     {
     public:
         enum
@@ -60,14 +59,32 @@ namespace Core
 
     public:
 
-        inline void Reset();
+        CStream* GetStream();
 
-        inline bool IsEndOfStream();
-        
+        inline double PeekTimecode();
+
+        inline bool IsEnd() const;
+
+    public:
+
+        inline double GetTime();
+
+        inline double GetDurationOfFrame();
+
+        inline void RestartTimer();
+
+    public:
+
+        inline void Update();
+
     private:
+        Base::CPerformanceClock m_Clock;
+        Base::CTimer m_Timer;
+
         CStream*     m_pStream;
-        double       m_CurrentBlobTime;
+        double       m_Timecode;
         unsigned int m_NumberOfElements;
+        bool         m_IsCollection;
 
     private:
 
@@ -75,15 +92,18 @@ namespace Core
     };
 } // namespace SER
 
-namespace Core
+namespace SER
 {
     inline CRecordReader::CRecordReader(CStream& _rStream, unsigned int _Version)
-        : CArchive(_Version)
-        , m_pStream(&_rStream)
+        : CArchive          (_Version)
+        , m_Clock           ()
+        , m_Timer           (m_Clock)
+        , m_pStream         (&_rStream)
         , m_NumberOfElements(0)
+        , m_IsCollection    (false)
     {
         // -----------------------------------------------------------------------------
-        // Reset position
+        // Reset stream position to beginning
         // -----------------------------------------------------------------------------
         m_pStream->seekg(m_pStream->beg);
 
@@ -138,7 +158,9 @@ namespace Core
     template<typename TElement>
     inline unsigned int CRecordReader::BeginCollection()
     {
-        InternReadBinary(&m_NumberOfElements, sizeof(m_NumberOfElements));
+        ReadBinary(&m_NumberOfElements, sizeof(m_NumberOfElements));
+
+        m_IsCollection = true;
 
         return m_NumberOfElements;
     }
@@ -173,7 +195,7 @@ namespace Core
     template<typename TElement>
     inline void CRecordReader::EndCollection()
     {
-
+        m_IsCollection = false;
     }
 
     // -----------------------------------------------------------------------------
@@ -188,7 +210,13 @@ namespace Core
 
     inline void CRecordReader::ReadBinary(void* _pBytes, unsigned int _NumberOfBytes)
     {
-        InternReadBinary(&m_CurrentBlobTime, sizeof(m_CurrentBlobTime));
+        if (!m_IsCollection)
+        {
+            // -----------------------------------------------------------------------------
+            // Read current time
+            // -----------------------------------------------------------------------------
+            InternReadBinary(&m_Timecode, sizeof(m_Timecode));
+        }
         
         InternReadBinary(_pBytes, _NumberOfBytes);
     }
@@ -198,21 +226,62 @@ namespace Core
     template<typename TElement>
     inline void CRecordReader::ReadClass(TElement& _rElement)
     {
-        Core::Private::CAccess::Read(*this, const_cast<TElement&>(_rElement));
+        SER::Private::CAccess::Read(*this, const_cast<TElement&>(_rElement));
     }
 
     // -----------------------------------------------------------------------------
  
-    inline void CRecordReader::Reset()
+    inline CRecordReader::CStream* CRecordReader::GetStream()
     {
-        m_pStream->seekg(m_pStream->beg);
+        return m_pStream;
     }
 
     // -----------------------------------------------------------------------------
 
-    inline bool CRecordReader::IsEndOfStream()
+    inline double CRecordReader::PeekTimecode()
     {
-        return m_pStream->eof();
+        double Timecode;
+
+        InternReadBinary(&Timecode, sizeof(Timecode));
+
+        m_pStream->seekg(-sizeof(Timecode), m_pStream->cur);
+
+        return Timecode;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    inline bool CRecordReader::IsEnd() const
+    {
+        return m_pStream->peek() == EOF;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    inline double CRecordReader::GetTime()
+    {
+        return m_Timer.GetTime();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    inline double CRecordReader::GetDurationOfFrame()
+    {
+        return m_Timer.GetDurationOfFrame();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    inline void CRecordReader::RestartTimer()
+    {
+        m_Timer.Reset();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    inline void CRecordReader::Update()
+    {
+        m_Clock.OnFrame();
     }
 
     // -----------------------------------------------------------------------------
