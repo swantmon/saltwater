@@ -42,10 +42,10 @@
     <ClCompile Include="..\..\..\test\base\test_base_coordinate_system.cpp">
       <Filter>base</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\test\core\test_core_recorder.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\test\base\test_base_serialization.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\test\base\test_base_recorder.cpp">
       <Filter>base</Filter>
     </ClCompile>
   </ItemGroup>

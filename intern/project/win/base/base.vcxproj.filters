@@ -225,5 +225,11 @@
     <ClInclude Include="..\..\..\src\base\base_compression.h">
       <Filter>compression</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_serialize_record_writer.h">
+      <Filter>serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_serialize_record_reader.h">
+      <Filter>serialization</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

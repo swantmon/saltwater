@@ -138,13 +138,10 @@
     <ClInclude Include="..\..\..\src\engine\core\core_asset_generator.h" />
     <ClInclude Include="..\..\..\src\engine\core\core_asset_importer.h" />
     <ClInclude Include="..\..\..\src\engine\core\core_asset_manager.h" />
-    <ClInclude Include="..\..\..\src\engine\core\core_base_recorder.h" />
     <ClInclude Include="..\..\..\src\engine\core\core_console.h" />
     <ClInclude Include="..\..\..\src\engine\core\core_plugin.h" />
     <ClInclude Include="..\..\..\src\engine\core\core_plugin_manager.h" />
     <ClInclude Include="..\..\..\src\engine\core\core_program_parameters.h" />
-    <ClInclude Include="..\..\..\src\engine\core\core_record_writer.h" />
-    <ClInclude Include="..\..\..\src\engine\core\core_record_reader.h" />
     <ClInclude Include="..\..\..\src\engine\core\core_time.h" />
     <ClInclude Include="..\..\..\src\engine\data\data_area_light_component.h" />
     <ClInclude Include="..\..\..\src\engine\data\data_ar_controller_component.h" />

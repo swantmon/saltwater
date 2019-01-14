@@ -4,14 +4,13 @@
 #include "base/base_clock.h"
 #include "base/base_test_defines.h"
 #include "base/base_include_glm.h"
-
-#include "engine/core/core_record_reader.h"
-#include "engine/core/core_record_writer.h"
+#include "base/base_serialize_record_reader.h"
+#include "base/base_serialize_record_writer.h"
 
 #include <array>
+#include <vector>
 #include <fstream>
 #include <sstream>
-#include <iostream>
 
 BASE_TEST(RecordDataWithRecorderSStream)
 {
@@ -44,7 +43,7 @@ BASE_TEST(RecordDataWithRecorderSStream)
     // -----------------------------------------------------------------------------
     std::stringstream Stream;
 
-    Core::CRecordWriter RecordWriter(Stream, 1);
+    Base::CRecordWriter RecordWriter(Stream, 1);
 
     for (auto& OriginalFrame : Frames)
     {
@@ -59,7 +58,7 @@ BASE_TEST(RecordDataWithRecorderSStream)
     // -----------------------------------------------------------------------------
     // Read record
     // -----------------------------------------------------------------------------
-    Core::CRecordReader RecordReaderFPS(Stream, 1);
+    Base::CRecordReader RecordReaderFPS(Stream, 1);
 
     // -----------------------------------------------------------------------------
     // Check record w/ prev. record
@@ -121,7 +120,7 @@ BASE_TEST(RecordDataWithRecorderFStream)
 
     BASE_CHECK(OutFileStream.is_open());
 
-    Core::CRecordWriter RecordWriter(OutFileStream, 1);
+    Base::CRecordWriter RecordWriter(OutFileStream, 1);
 
     for (auto& OriginalFrame : Frames)
     {
@@ -142,7 +141,7 @@ BASE_TEST(RecordDataWithRecorderFStream)
 
     BASE_CHECK(InFileStream.is_open());
 
-    Core::CRecordReader RecordReader(InFileStream, 1);
+    Base::CRecordReader RecordReader(InFileStream, 1);
 
     // -----------------------------------------------------------------------------
     // Check record w/ prev. record
@@ -206,7 +205,7 @@ BASE_TEST(RecordDataWithRecorderTimecode)
     // -----------------------------------------------------------------------------
     std::stringstream Stream;
 
-    Core::CRecordWriter RecordWriter(Stream, 1);
+    Base::CRecordWriter RecordWriter(Stream, 1);
 
     Base::CPerformanceClock Clock;
 
@@ -240,7 +239,7 @@ BASE_TEST(RecordDataWithRecorderTimecode)
     // -----------------------------------------------------------------------------
     // Read record
     // -----------------------------------------------------------------------------
-    Core::CRecordReader RecordReaderFPS(Stream, 1);
+    Base::CRecordReader RecordReaderFPS(Stream, 1);
 
     // -----------------------------------------------------------------------------
     // Check record w/ prev. record
@@ -249,15 +248,15 @@ BASE_TEST(RecordDataWithRecorderTimecode)
 
     CurrentFrameTime = 0.0;
 
-    Clock.Reset();
+    RecordReaderFPS.RestartTimer();
 
     BASE_TIME_RESET();
 
     while (!RecordReaderFPS.IsEnd())
     {
-        Clock.OnFrame();
+        RecordReaderFPS.Update();
 
-        CurrentFrameTime += Clock.GetDurationOfFrame();
+        CurrentFrameTime += RecordReaderFPS.GetDurationOfFrame();
 
         if (CurrentFrameTime > 1.0 / 30.0)
         {
@@ -285,7 +284,7 @@ BASE_TEST(RecordDataWithRecorderTimecode)
     // -----------------------------------------------------------------------------
     // Read record
     // -----------------------------------------------------------------------------
-    Core::CRecordReader RecordReaderTimecode(Stream, 1);
+    Base::CRecordReader RecordReaderTimecode(Stream, 1);
 
     // -----------------------------------------------------------------------------
     // Check record w/ prev. record

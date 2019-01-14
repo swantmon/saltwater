@@ -1,16 +1,14 @@
 #pragma once
 
+#include "base/base_clock.h"
 #include "base/base_defines.h"
 #include "base/base_serialize_access.h"
 #include "base/base_serialize_archive.h"
+#include "base/base_timer.h"
 
-#include "engine/core/core_base_recorder.h"
-
-using namespace Base;
-
-namespace Core
+namespace SER
 {
-    class CRecordWriter : public CArchive, public CBaseRecorder
+    class CRecordWriter : public CArchive
     {
     public:
         enum
@@ -59,7 +57,13 @@ namespace Core
 
         inline CStream* GetStream();
 
+        inline void Reset();
+
     private:
+
+        Base::CPerformanceClock m_Clock;
+        Base::CTimer m_Timer;
+
         CStream*     m_pStream;
         unsigned int m_NumberOfElements;
         bool         m_IsCollection;
@@ -70,18 +74,17 @@ namespace Core
     };
 } // namespace Core
 
-namespace Core
+namespace SER
 {
     inline CRecordWriter::CRecordWriter(CStream& _rStream, unsigned int _Version)
         : CArchive          (_Version)
+        , m_Clock           ()
+        , m_Timer           (m_Clock)
         , m_pStream         (&_rStream)
         , m_NumberOfElements(0)
         , m_IsCollection    (false)
     {
-        // -----------------------------------------------------------------------------
-        // Write header informations (internal format, version)
-        // -----------------------------------------------------------------------------
-        InternWriteBinary(&m_ArchiveVersion, sizeof(m_ArchiveVersion));
+        Reset();
     }
 
     // -----------------------------------------------------------------------------
@@ -181,9 +184,9 @@ namespace Core
             // -----------------------------------------------------------------------------
             // Update time
             // -----------------------------------------------------------------------------
-            Update();
+            m_Clock.OnFrame();
 
-            double Timecode = GetTime();
+            double Timecode = m_Timer.GetTime();
 
             // -----------------------------------------------------------------------------
             // Write time and data to stream
@@ -199,7 +202,7 @@ namespace Core
     template<typename TElement>
     inline void CRecordWriter::WriteClass(const TElement& _rElement)
     {
-        Core::Private::CAccess::Write(*this, const_cast<TElement&>(_rElement));
+        SER::Private::CAccess::Write(*this, const_cast<TElement&>(_rElement));
     }
 
     // -----------------------------------------------------------------------------
@@ -207,6 +210,20 @@ namespace Core
     inline CRecordWriter::CStream* CRecordWriter::GetStream()
     {
         return m_pStream;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    inline void CRecordWriter::Reset()
+    {
+        m_Timer.Reset();
+
+        m_pStream->clear();
+
+        // -----------------------------------------------------------------------------
+        // Write header informations (internal format, version)
+        // -----------------------------------------------------------------------------
+        InternWriteBinary(&m_ArchiveVersion, sizeof(m_ArchiveVersion));
     }
 
     // -----------------------------------------------------------------------------
