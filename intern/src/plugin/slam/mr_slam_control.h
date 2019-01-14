@@ -16,6 +16,7 @@
 
 #include "engine/engine.h"
 
+#include "engine/graphic/gfx_buffer_manager.h"
 #include "engine/graphic/gfx_context_manager.h"
 #include "engine/graphic/gfx_main.h"
 #include "engine/graphic/gfx_shader_manager.h"
@@ -111,6 +112,14 @@ namespace MR
         Gfx::CShaderPtr m_ShiftDepthCSPtr;
         Gfx::CTexturePtr m_ShiftLUTPtr;
 
+        Gfx::CBufferPtr m_RGBConversionBuffer;
+
+        struct SRGBConversion
+        {
+            glm::vec4 m_Ambient;
+            glm::vec4 m_Temperature;
+        };
+
         // -----------------------------------------------------------------------------
         // Stuff for Kinect data source
         // -----------------------------------------------------------------------------
@@ -167,6 +176,15 @@ namespace MR
                 m_DataSource = NETWORK;
 
                 CreateShiftLUTTexture();
+
+                Gfx::SBufferDescriptor ConstantBufferDesc = {};
+
+                ConstantBufferDesc.m_Usage = Gfx::CBuffer::EUsage::GPURead;
+                ConstantBufferDesc.m_Binding = Gfx::CBuffer::ConstantBuffer;
+                ConstantBufferDesc.m_Access = Gfx::CBuffer::CPUWrite;
+                ConstantBufferDesc.m_NumberOfBytes = sizeof(SRGBConversion);
+
+                m_RGBConversionBuffer = Gfx::BufferManager::CreateBuffer(ConstantBufferDesc);
             }
             else if (DataSource == "kinect")
             {
@@ -267,6 +285,8 @@ namespace MR
             m_ColorBuffer.clear();
 
             m_pReconstructor->Exit();
+
+            m_RGBConversionBuffer = nullptr;
 
             m_DepthTexture = nullptr;
             m_RGBTexture = nullptr;
@@ -586,6 +606,8 @@ namespace MR
                 TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_ColorSize.x / 2, m_ColorSize.y / 2));
                 Gfx::TextureManager::CopyToTexture2D(m_UVTexture, TargetRect, m_ColorSize.x / 2, const_cast<char*>(UVData));
 
+                Gfx::ContextManager::SetConstantBuffer(0, m_RGBConversionBuffer);
+
                 Gfx::ContextManager::SetShaderCS(m_YUVtoRGBCSPtr);
                 Gfx::ContextManager::SetImageTexture(0, m_YTexture);
                 Gfx::ContextManager::SetImageTexture(1, m_UVTexture);
@@ -597,8 +619,15 @@ namespace MR
             }
             else if (MessageType == LIGHTESTIMATE)
             {
-                const float Intensity = *reinterpret_cast<float*>(Decompressed.data() + sizeof(int32_t));
-                const float Temperature = *reinterpret_cast<float*>(Decompressed.data() + sizeof(int32_t) + sizeof(float));
+                const float AmbientIntensity = *reinterpret_cast<float*>(Decompressed.data() + sizeof(int32_t));
+                const float LightTemperature = *reinterpret_cast<float*>(Decompressed.data() + sizeof(int32_t) + sizeof(float));
+
+                glm::vec3 LightColor = KelvinToRGB(LightTemperature);
+
+                SRGBConversion Data;
+                Data.m_Ambient = glm::vec4(AmbientIntensity);
+                Data.m_Temperature = glm::vec4(LightColor, LightTemperature);
+                Gfx::BufferManager::UploadBufferData(m_RGBConversionBuffer, &Data);
             }
             else if (MessageType == PLANE)
             {
@@ -740,6 +769,42 @@ namespace MR
             Base::AABB2UInt TargetRect;
             TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(Count, 1));
             Gfx::TextureManager::CopyToTexture2D(m_ShiftLUTPtr, TargetRect, Count, const_cast<uint16_t*>(LUT));
+        }
+
+        glm::vec3 KelvinToRGB(float _Kelvin)
+        {
+            _Kelvin = _Kelvin / 100.f;
+            glm::vec3 RGB;
+
+            if (_Kelvin <= 66)
+            {
+                RGB.r = 255;
+
+                RGB.g = _Kelvin;
+                RGB.g = 99.4708025861f * std::log(RGB.g) - 161.1195681661f;
+
+                if (_Kelvin <= 19)
+                {
+                    RGB.b = 0;
+                }
+                else
+                {
+                    RGB.b = _Kelvin - 10;
+                    RGB.b = 138.5177312231f * std::log(RGB.b) - 305.0447927307f;
+                }
+            }
+            else
+            {
+                RGB.r = _Kelvin - 60;
+                RGB.r = 329.698727446f * std::pow(RGB.r, -0.1332047592f);
+
+                RGB.g = _Kelvin - 60;
+                RGB.g = 288.1221695283f * std::pow(RGB.g, -0.0755148492f);
+
+                RGB.b = 255;
+            }
+
+            return glm::clamp(RGB, 0.0f, 255.0f) / 255.0f;
         }
 
         int DivUp(int TotalShaderCount, int WorkGroupSize)

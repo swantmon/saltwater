@@ -1,6 +1,12 @@
 #ifndef __INCLUDE_CS_YUV_TO_RGB_GLSL__
 #define __INCLUDE_CS_YUV_TO_RGB_GLSL__
 
+layout(std140, binding = 0) uniform RGBConversion
+{
+    vec4 g_AmbientIntensity;
+    vec4 g_Temperature;
+};
+
 layout (binding = 0, r8) readonly uniform image2D cs_Y;
 layout (binding = 1, rg8) readonly uniform image2D cs_UV;
 layout (binding = 2, rgba8) writeonly uniform image2D cs_RGB;
@@ -25,7 +31,9 @@ void main()
 
         vec4 RGBColor = YCbCrToRGBTransform * vec4(YColor, UVColor, 1.0f);
 
-        imageStore(cs_RGB, Coords, vec4(RGBColor));
+        //RGBColor.rgb = RGBColor.rgb * (1000.0f / g_AmbientIntensity.r) * (1.0f / g_Temperature.rgb);
+
+        imageStore(cs_RGB, Coords, RGBColor);
     }
 }
 
