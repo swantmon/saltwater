@@ -4,11 +4,12 @@
 #include "base/base_defines.h"
 #include "base/base_serialize_access.h"
 #include "base/base_serialize_archive.h"
+#include "base/base_serialize_recorder.h"
 #include "base/base_timer.h"
 
 namespace SER
 {
-    class CRecordWriter : public CArchive
+    class CRecordWriter : public CArchive, public CRecorder
     {
     public:
         enum
@@ -57,16 +58,10 @@ namespace SER
 
         inline CStream* GetStream();
 
-        inline void Reset();
-
     private:
-
-        Base::CPerformanceClock m_Clock;
-        Base::CTimer m_Timer;
 
         CStream*     m_pStream;
         unsigned int m_NumberOfElements;
-        bool         m_IsCollection;
 
     public:
 
@@ -78,13 +73,13 @@ namespace SER
 {
     inline CRecordWriter::CRecordWriter(CStream& _rStream, unsigned int _Version)
         : CArchive          (_Version)
-        , m_Clock           ()
-        , m_Timer           (m_Clock)
         , m_pStream         (&_rStream)
         , m_NumberOfElements(0)
-        , m_IsCollection    (false)
     {
-        Reset();
+        // -----------------------------------------------------------------------------
+        // Write header informations (internal format, version)
+        // -----------------------------------------------------------------------------
+        InternWriteBinary(&m_ArchiveVersion, sizeof(m_ArchiveVersion));
     }
 
     // -----------------------------------------------------------------------------
@@ -129,8 +124,6 @@ namespace SER
         m_NumberOfElements = _NumberOfElements;
 
         WriteBinary(&m_NumberOfElements, sizeof(m_NumberOfElements));
-
-        m_IsCollection = true;
     }
 
     // -----------------------------------------------------------------------------
@@ -143,7 +136,7 @@ namespace SER
 
         if (IsPrimitive)
         {
-            InternWriteBinary(_pElements, m_NumberOfElements * sizeof(*_pElements));
+            WriteBinary(_pElements, m_NumberOfElements * sizeof(*_pElements));
         }
         else
         {
@@ -164,7 +157,6 @@ namespace SER
     template<typename TElement>
     inline void CRecordWriter::EndCollection()
     {
-        m_IsCollection = false;
     }
 
     // -----------------------------------------------------------------------------
@@ -179,21 +171,21 @@ namespace SER
 
     void CRecordWriter::WriteBinary(const void* _pBytes, const unsigned int _NumberOfBytes)
     {
-        if (!m_IsCollection)
-        {
-            // -----------------------------------------------------------------------------
-            // Update time
-            // -----------------------------------------------------------------------------
-            m_Clock.OnFrame();
+        // -----------------------------------------------------------------------------
+        // Update time
+        // -----------------------------------------------------------------------------
+        Update();
 
-            double Timecode = m_Timer.GetTime();
+        double Timecode = GetTime();
 
-            // -----------------------------------------------------------------------------
-            // Write time and data to stream
-            // -----------------------------------------------------------------------------
-            InternWriteBinary(&Timecode, sizeof(Timecode));
-        }
+        // -----------------------------------------------------------------------------
+        // Write time and data to stream
+        // -----------------------------------------------------------------------------
+        InternWriteBinary(&Timecode, sizeof(Timecode));
 
+        // -----------------------------------------------------------------------------
+        // Write data
+        // -----------------------------------------------------------------------------
         InternWriteBinary(_pBytes, _NumberOfBytes);
     }
 
@@ -210,20 +202,6 @@ namespace SER
     inline CRecordWriter::CStream* CRecordWriter::GetStream()
     {
         return m_pStream;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    inline void CRecordWriter::Reset()
-    {
-        m_Timer.Reset();
-
-        m_pStream->clear();
-
-        // -----------------------------------------------------------------------------
-        // Write header informations (internal format, version)
-        // -----------------------------------------------------------------------------
-        InternWriteBinary(&m_ArchiveVersion, sizeof(m_ArchiveVersion));
     }
 
     // -----------------------------------------------------------------------------
