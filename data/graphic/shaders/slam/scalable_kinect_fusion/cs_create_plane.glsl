@@ -14,10 +14,12 @@
 
 layout(std140, binding = 0) uniform PlaneData
 {
-    vec4 g_PlanePosition;
-    vec2 g_Extent;
+    vec3  g_PlaneCenterPosition;
+    float g_Height;
+    vec2  g_PlaneSize;
     ivec2 g_PlaneResolution;
-    vec2 g_PixelSize;
+    vec2  g_PixelSize;
+    ivec2 g_PixelBounds;
 };
 
 layout (binding = 0, rgba8) uniform image2D cs_Plane;
@@ -42,7 +44,15 @@ void main()
     );
 
     ivec2 PixelOffset = ivec2(gl_GlobalInvocationID.xy) - (g_PlaneResolution / 2);
-    vec2 CameraOffset = g_PlanePosition.xy + PixelOffset * g_PixelSize;
+
+    if (PixelOffset.x < g_PixelBounds.y && PixelOffset.x > -g_PixelBounds.y &&
+        PixelOffset.y < g_PixelBounds.y && PixelOffset.y > -g_PixelBounds.y)
+    {
+        imageStore(cs_Plane, ivec2(gl_GlobalInvocationID.xy), vec4(0.0f));
+        return;
+    }
+
+    vec2 CameraOffset = g_PlaneCenterPosition.xy + PixelOffset * g_PixelSize;
 
     vec3 RayDirection = vec3(0.0f, 0.0f, -1.0f);
  
@@ -50,7 +60,7 @@ void main()
     RayDirection.y = RayDirection.y == 0.0f ? 1e-15f : RayDirection.y;
     RayDirection.z = RayDirection.z == 0.0f ? 1e-15f : RayDirection.z;
 
-    vec3 CameraPosition = vec3(CameraOffset, g_PlanePosition.z + 1.5f);
+    vec3 CameraPosition = vec3(CameraOffset, g_PlaneCenterPosition.z + 1.5f);
 
     vec3 WSPosition, Color;
 
