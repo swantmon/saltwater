@@ -118,31 +118,12 @@ namespace
         glm::mat4 m_InvPoseMatrix;
     };
 
-    struct SIncBuffer
-    {
-        glm::mat4 m_PoseMatrix;
-        glm::mat4 m_InvPoseMatrix;
-        int m_PyramidLevel;
-        float Padding[3];
-    };
-
-	struct SPositionBuffer
-	{
-		glm::vec3 m_Position;
-		int m_Index;
-	};
-
-    struct SDrawCallBufferData
-    {
-        glm::mat4 m_WorldMatrix;
-    };
-
     struct SInstanceData
     {
         glm::ivec3 m_Offset;
         int m_Index;
     };
-    
+
     struct SPointRasterization
     {
         glm::ivec3 m_Offset;
