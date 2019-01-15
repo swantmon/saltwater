@@ -321,7 +321,7 @@ namespace MR
                     m_UseTrackingCamera = false;
                 }
 
-                while (!m_pRecordReader->IsEnd() && m_pRecordReader->PeekTimecode() < m_pRecordReader->GetTime())
+                while (!m_pRecordReader->IsEnd())
                 {
                     Net::CMessage Message;
 
@@ -657,7 +657,7 @@ namespace MR
         void OnNewMessage(const Net::CMessage& _rMessage, int _Port)
         {
             BASE_UNUSED(_Port);
-
+            
             if (_rMessage.m_MessageType == 0)
             {
                 if (m_RecordMode == RECORD)
