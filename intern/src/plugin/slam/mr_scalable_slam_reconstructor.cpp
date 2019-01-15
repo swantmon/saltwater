@@ -1358,6 +1358,22 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
+    void CScalableSLAMReconstructor::GetImageSizes(glm::ivec2& _rDepthFrameSize, glm::ivec2& _rColorFrameSize)
+    {
+        _rDepthFrameSize = m_DepthFrameSize;
+        _rColorFrameSize = m_ColorFrameSize;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CScalableSLAMReconstructor::GetIntrinsics(glm::vec2& _rFocalLength, glm::vec2& _rFocalPoint)
+    {
+        _rFocalLength = m_FocalLength;
+        _rFocalPoint = m_FocalPoint;
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CScalableSLAMReconstructor::OnNewFrame(Gfx::CTexturePtr DepthBuffer, Gfx::CTexturePtr ColorBuffer, const glm::mat4* pTransform)
     {
         m_IsTrackingNeeded = pTransform == nullptr;

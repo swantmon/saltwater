@@ -65,6 +65,16 @@ namespace
         glm::vec4 m_WorldHitPosition;
     };
 
+    struct SIntrinsics
+    {
+        glm::mat4 m_KMatrix;
+        glm::mat4 m_InvKMatrix;
+        glm::vec2 m_FocalPoint;
+        glm::vec2 m_FocalLength;
+        glm::vec2 m_InvFocalLength;
+        glm::vec2 Padding;
+    };
+
     class CGfxReconstructionRenderer : private Base::CUncopyable
     {
         BASE_SINGLETON_FUNC(CGfxReconstructionRenderer)
@@ -142,9 +152,13 @@ namespace
 
         void RenderSelectionBox();
 
+        void SetIntrinsics(const glm::vec2& _FocalLength, const glm::vec2& _FocalPoint);
+
     private:
 
 		MR::CScalableSLAMReconstructor* m_pScalableReconstructor;
+
+        SIntrinsics m_Intrinsics;
         
         CShaderPtr m_OutlineVSPtr;
         CShaderPtr m_OutlineFSPtr;
@@ -158,6 +172,7 @@ namespace
         CShaderPtr m_OutlineLevel2FSPtr;
         
         CShaderPtr m_RaycastVSPtr;
+        CShaderPtr m_RaycastDiminishedVSPtr;
         CShaderPtr m_RaycastFSPtr;
         CShaderPtr m_RaycastHighlightFSPtr;
         CShaderPtr m_RaycastDiminishedFSPtr;
@@ -168,6 +183,7 @@ namespace
         CBufferPtr m_RaycastConstantBufferPtr;
         CBufferPtr m_RaycastHighLightConstantBufferPtr;
         CBufferPtr m_DrawCallConstantBufferPtr;
+        CBufferPtr m_IntrinsicsConstantBufferPtr;
                 
         CMeshPtr m_CameraMeshPtr;
 		CInputLayoutPtr m_CameraInputLayoutPtr;
@@ -207,6 +223,8 @@ namespace
         bool m_RenderBackSides;
         bool m_RenderPlanes;
 
+        glm::vec3 m_SelectionBoxMin;
+        glm::vec3 m_SelectionBoxMax;
         glm::mat4 m_SelectionTransform;
 
         ESelection m_SelectionState;
@@ -264,6 +282,27 @@ namespace
     
     void CGfxReconstructionRenderer::Initialize()
     {
+        // -----------------------------------------------------------------------------
+        // Intrinsics data
+        // -----------------------------------------------------------------------------
+        glm::ivec2 DepthImageSize;
+        glm::ivec2 ColorImageSize;
+        glm::vec2 FocalLength;
+        glm::vec2 FocalPoint;
+
+        m_pScalableReconstructor->GetImageSizes(DepthImageSize, ColorImageSize);
+        m_pScalableReconstructor->GetIntrinsics(FocalLength, FocalPoint);
+
+        FocalLength[0] = FocalLength[0] / DepthImageSize[0] * 1280;
+        FocalLength[1] = FocalLength[1] / DepthImageSize[1] * 720;
+        FocalPoint[0] = FocalPoint[0] / DepthImageSize[0] * 1280;
+        FocalPoint[1] = FocalPoint[1] / DepthImageSize[1] * 720;
+
+        SetIntrinsics(FocalLength, FocalPoint);
+
+        // -----------------------------------------------------------------------------
+        // Rest
+        // -----------------------------------------------------------------------------
         OnSetupShader();
         OnSetupKernels();
         OnSetupRenderTargets();
@@ -288,6 +327,7 @@ namespace
         m_OutlineLevel2VSPtr = 0;
         m_OutlineLevel2FSPtr = 0;
         m_RaycastVSPtr = 0;
+        m_RaycastDiminishedVSPtr = 0;
         m_RaycastFSPtr = 0;
         m_RaycastHighlightFSPtr = 0;
         m_RaycastDiminishedFSPtr = 0;
@@ -303,6 +343,7 @@ namespace
         m_RaycastConstantBufferPtr = 0;
         m_RaycastHighLightConstantBufferPtr = 0;
         m_DrawCallConstantBufferPtr = 0;
+        m_IntrinsicsConstantBufferPtr = 0;
         
         m_CameraMeshPtr = 0;
         m_VolumeMeshPtr = 0;
@@ -382,6 +423,7 @@ namespace
         m_PointCloudFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_point_cloud.glsl", "main", DefineString.c_str());
 
         m_RaycastVSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_raycast.glsl", "main", DefineString.c_str());
+        m_RaycastDiminishedVSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_raycast_diminished.glsl", "main", DefineString.c_str());
         m_RaycastFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_raycast.glsl", "main", DefineString.c_str());
         m_RaycastHighlightFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_raycast_highlight.glsl", "main", DefineString.c_str());
         m_RaycastDiminishedFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_raycast_diminished.glsl", "main", DefineString.c_str());
@@ -500,6 +542,18 @@ namespace
         ConstantBufferDesc.m_pClassKey = 0;
 
         m_PickingBuffer = BufferManager::CreateBuffer(ConstantBufferDesc);
+
+        ConstantBufferDesc.m_Stride        = 0;
+        ConstantBufferDesc.m_Usage         = CBuffer::GPURead;
+        ConstantBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
+        ConstantBufferDesc.m_Access        = CBuffer::CPUWrite;
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(SIntrinsics);
+        ConstantBufferDesc.m_pBytes        = &m_Intrinsics;
+        ConstantBufferDesc.m_pClassKey     = 0;
+
+        m_IntrinsicsConstantBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+
+        BufferManager::SetBufferLabel(m_IntrinsicsConstantBufferPtr, "Camera Intrinsics");
     }
     
     // -----------------------------------------------------------------------------
@@ -944,6 +998,8 @@ namespace
 
     void CGfxReconstructionRenderer::RaycastScalableVolumeDiminished()
     {
+        if (m_SelectionState == ESelection::NOSELECTION) return;
+
         glm::mat4 ReconstructionToSaltwater = glm::mat4(
             1.0f, 0.0f, 0.0f, 0.0f,
             0.0f, 0.0f, 1.0f, 0.0f,
@@ -956,13 +1012,8 @@ namespace
         ContextManager::SetTargetSet(m_DiminishedTargetSetPtr);
 
         MR::CScalableSLAMReconstructor::SScalableVolume& rVolume = m_pScalableReconstructor->GetVolume();
-
-        MR::SReconstructionSettings Settings;
-        m_pScalableReconstructor->GetReconstructionSettings(&Settings);
-
-        glm::mat4 PoseMatrix = m_pScalableReconstructor->GetPoseMatrix();
-
-        ContextManager::SetShaderVS(m_RaycastVSPtr);
+        
+        ContextManager::SetShaderVS(m_RaycastDiminishedVSPtr);
         ContextManager::SetShaderPS(m_RaycastDiminishedFSPtr);
 
         ContextManager::SetResourceBuffer(0, rVolume.m_RootVolumePoolPtr);
@@ -973,6 +1024,11 @@ namespace
 
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
         ContextManager::SetConstantBuffer(1, m_RaycastHighLightConstantBufferPtr);
+#if 1
+        MR::SReconstructionSettings Settings;
+
+        m_pScalableReconstructor->GetReconstructionSettings(&Settings);
+
         ContextManager::SetConstantBuffer(2, rVolume.m_AABBBufferPtr);
 
         ContextManager::Barrier();
@@ -1003,6 +1059,30 @@ namespace
             glm::vec3(glm::eulerAngleX(glm::half_pi<float>()) * glm::vec4(Max[0], Max[1], Max[2], 1.0f)),
             glm::vec3(glm::eulerAngleX(glm::half_pi<float>()) * glm::vec4(Min[0], Max[1], Max[2], 1.0f))
         };
+#else
+        ContextManager::SetConstantBuffer(2, rVolume.m_AABBBufferPtr);
+        ContextManager::SetConstantBuffer(3, m_IntrinsicsConstantBufferPtr);
+
+        ContextManager::Barrier();
+
+        ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::Default));
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
+
+        const glm::vec3 Min = m_SelectionBoxMin;
+        const glm::vec3 Max = m_SelectionBoxMax;
+
+        glm::vec3 Vertices[8] =
+        {
+            glm::vec3(glm::vec4(Min[0], Min[1], Min[2], 1.0f)),
+            glm::vec3(glm::vec4(Max[0], Min[1], Min[2], 1.0f)),
+            glm::vec3(glm::vec4(Max[0], Max[1], Min[2], 1.0f)),
+            glm::vec3(glm::vec4(Min[0], Max[1], Min[2], 1.0f)),
+            glm::vec3(glm::vec4(Min[0], Min[1], Max[2], 1.0f)),
+            glm::vec3(glm::vec4(Max[0], Min[1], Max[2], 1.0f)),
+            glm::vec3(glm::vec4(Max[0], Max[1], Max[2], 1.0f)),
+            glm::vec3(glm::vec4(Min[0], Max[1], Max[2], 1.0f))
+        };
+#endif
 
         glm::mat4 InvOBBMatrix = glm::inverse(m_SelectionTransform) * ReconstructionToSaltwater;
 
@@ -1384,6 +1464,10 @@ namespace
         float Angle = std::atan2(Direction.y, Direction.x); // TODO: find out why glm::atan2 does lead to a compiler error
         Rotation = glm::eulerAngleZ(Angle);
 
+        m_SelectionBoxMin = _rAnchor0;
+        m_SelectionBoxMax = _rAnchor1;
+        m_SelectionBoxMax.z += glm::length(Diagonal);
+
         m_SelectionTransform = Translation * Scaling * Rotation;
         m_SelectionState = static_cast<ESelection>(_State);
     }
@@ -1497,6 +1581,29 @@ namespace
     void CGfxReconstructionRenderer::SetReconstructor(MR::CScalableSLAMReconstructor& _rReconstructor)
     {
         m_pScalableReconstructor = &_rReconstructor;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxReconstructionRenderer::SetIntrinsics(const glm::vec2& _FocalLength, const glm::vec2& _FocalPoint)
+    {
+        const float FocalLengthX = _FocalLength.x;
+        const float FocalLengthY = _FocalLength.y;
+        const float FocalPointX  = _FocalPoint.x;
+        const float FocalPointY  = _FocalPoint.y;
+
+        glm::mat4 KMatrix(
+            FocalLengthX, 0.0f        , 0.0f, 0.0f,
+            0.0f        , FocalLengthY, 0.0f, 0.0f,
+            FocalPointX , FocalPointY , 1.0f, 0.0f,
+            0.0f        , 0.0f        , 0.0f, 1.0f
+        );
+
+        m_Intrinsics.m_FocalPoint     = glm::vec2(FocalPointX, FocalPointY);
+        m_Intrinsics.m_FocalLength    = glm::vec2(FocalLengthX, FocalLengthY);
+        m_Intrinsics.m_InvFocalLength = glm::vec2(1.0f / FocalLengthX, 1.0f / FocalLengthY);
+        m_Intrinsics.m_KMatrix        = KMatrix;
+        m_Intrinsics.m_InvKMatrix     = glm::inverse(KMatrix);
     }
 
 } // namespace
@@ -1649,7 +1756,6 @@ namespace ReconstructionRenderer
     {
         CGfxReconstructionRenderer::GetInstance().SetSelectionBox(_rAnchor0, _rAnchor1, _Height, _State);
     }
-
 } // namespace ReconstructionRenderer
 } // namespace Gfx
 

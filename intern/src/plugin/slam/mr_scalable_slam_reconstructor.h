@@ -183,6 +183,9 @@ namespace MR
         void SetIntrinsics(glm::vec2 _FocalLength, glm::vec2 _FocalPoint);
         void SetDepthBounds(float _Min, float _Max);
 
+        void GetImageSizes(glm::ivec2& _rDepthFrameSize, glm::ivec2& _rColorFrameSize);
+        void GetIntrinsics(glm::vec2& _rFocalLength, glm::vec2& _rFocalPoint);
+
         void OnNewFrame(Gfx::CTexturePtr DepthBuffer, Gfx::CTexturePtr ColorBuffer, const glm::mat4* pTransform);
         
         void Start();
