@@ -1024,42 +1024,7 @@ namespace
 
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
         ContextManager::SetConstantBuffer(1, m_RaycastHighLightConstantBufferPtr);
-#if 1
-        MR::SReconstructionSettings Settings;
 
-        m_pScalableReconstructor->GetReconstructionSettings(&Settings);
-
-        ContextManager::SetConstantBuffer(2, rVolume.m_AABBBufferPtr);
-
-        ContextManager::Barrier();
-
-        ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::Default));
-        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
-
-        const glm::vec3 Min = glm::vec3(
-            rVolume.m_MinOffset[0] * Settings.m_VolumeSize,
-            rVolume.m_MinOffset[1] * Settings.m_VolumeSize,
-            rVolume.m_MinOffset[2] * Settings.m_VolumeSize
-        );
-
-        const glm::vec3 Max = glm::vec3(
-            (rVolume.m_MaxOffset[0] + 1.0f) * Settings.m_VolumeSize, // Add 1.0f because MaxOffset stores the max volume offset
-            (rVolume.m_MaxOffset[1] + 1.0f) * Settings.m_VolumeSize, // and we have to consider the volume size
-            (rVolume.m_MaxOffset[2] + 1.0f) * Settings.m_VolumeSize
-        );
-
-        glm::vec3 Vertices[8] =
-        {
-            glm::vec3(glm::eulerAngleX(glm::half_pi<float>()) * glm::vec4(Min[0], Min[1], Min[2], 1.0f)),
-            glm::vec3(glm::eulerAngleX(glm::half_pi<float>()) * glm::vec4(Max[0], Min[1], Min[2], 1.0f)),
-            glm::vec3(glm::eulerAngleX(glm::half_pi<float>()) * glm::vec4(Max[0], Max[1], Min[2], 1.0f)),
-            glm::vec3(glm::eulerAngleX(glm::half_pi<float>()) * glm::vec4(Min[0], Max[1], Min[2], 1.0f)),
-            glm::vec3(glm::eulerAngleX(glm::half_pi<float>()) * glm::vec4(Min[0], Min[1], Max[2], 1.0f)),
-            glm::vec3(glm::eulerAngleX(glm::half_pi<float>()) * glm::vec4(Max[0], Min[1], Max[2], 1.0f)),
-            glm::vec3(glm::eulerAngleX(glm::half_pi<float>()) * glm::vec4(Max[0], Max[1], Max[2], 1.0f)),
-            glm::vec3(glm::eulerAngleX(glm::half_pi<float>()) * glm::vec4(Min[0], Max[1], Max[2], 1.0f))
-        };
-#else
         ContextManager::SetConstantBuffer(2, rVolume.m_AABBBufferPtr);
         ContextManager::SetConstantBuffer(3, m_IntrinsicsConstantBufferPtr);
 
@@ -1068,8 +1033,8 @@ namespace
         ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::Default));
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
 
-        const glm::vec3 Min = m_SelectionBoxMin;
-        const glm::vec3 Max = m_SelectionBoxMax;
+        const glm::vec3 Min = glm::translate(glm::vec3(-0.05f)) * glm::vec4(m_SelectionBoxMin, 1.0f);
+        const glm::vec3 Max = glm::translate(glm::vec3(+0.05f)) * glm::vec4(m_SelectionBoxMax, 1.0f);
 
         glm::vec3 Vertices[8] =
         {
@@ -1082,7 +1047,6 @@ namespace
             glm::vec3(glm::vec4(Max[0], Max[1], Max[2], 1.0f)),
             glm::vec3(glm::vec4(Min[0], Max[1], Max[2], 1.0f))
         };
-#endif
 
         glm::mat4 InvOBBMatrix = glm::inverse(m_SelectionTransform) * ReconstructionToSaltwater;
 
@@ -1466,7 +1430,7 @@ namespace
 
         m_SelectionBoxMin = _rAnchor0;
         m_SelectionBoxMax = _rAnchor1;
-        m_SelectionBoxMax.z += glm::length(Diagonal);
+        m_SelectionBoxMax.z += glm::length(Diagonal) / glm::sqrt(2.0f);
 
         m_SelectionTransform = Translation * Scaling * Rotation;
         m_SelectionState = static_cast<ESelection>(_State);
