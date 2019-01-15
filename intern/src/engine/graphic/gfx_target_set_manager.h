@@ -31,6 +31,6 @@ namespace TargetSetManager
     ENGINE_API void ClearTargetSet(CTargetSetPtr _TargetPtr, float _Depth);
     ENGINE_API void ClearTargetSet(CTargetSetPtr _TargetPtr);
 
-    void SetTargetSetLabel(CTargetSetPtr _TargetSetPtr, const char* _pLabel);
+    ENGINE_API void SetTargetSetLabel(CTargetSetPtr _TargetSetPtr, const char* _pLabel);
 } // namespace TargetSetManager
 } // namespace Gfx
