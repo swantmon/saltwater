@@ -29,6 +29,18 @@ layout (binding = 0, rgba8) uniform image2D cs_Plane;
 layout (local_size_x = TILE_SIZE2D, local_size_y = TILE_SIZE2D, local_size_z = 1) in;
 void main()
 {
+    mat3 SaltwaterToReconstruction = mat3(
+        1.0f, 0.0f,  0.0f,
+        0.0f, 0.0f, -1.0f,
+        0.0f, 1.0f,  0.0f
+    );
+ 
+    mat3 ReconstructionToSaltwater = mat3(
+        1.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 1.0f,
+        0.0f, -1.0f, 0.0f
+    );
+
     ivec2 PixelOffset = ivec2(gl_GlobalInvocationID.xy) - (g_PlaneResolution / 2);
     vec2 CameraOffset = g_PlanePosition.xy + PixelOffset * g_PixelSize;
 
@@ -38,9 +50,12 @@ void main()
     RayDirection.y = RayDirection.y == 0.0f ? 1e-15f : RayDirection.y;
     RayDirection.z = RayDirection.z == 0.0f ? 1e-15f : RayDirection.z;
 
-    vec3 CameraPosition = vec3(CameraOffset, g_PlanePosition.z + 0.3f);
+    vec3 CameraPosition = vec3(CameraOffset, g_PlanePosition.z + 1.5f);
 
     vec3 WSPosition, Color;
+
+    CameraPosition = SaltwaterToReconstruction * CameraPosition;
+    RayDirection = SaltwaterToReconstruction * RayDirection;
 
     GetPositionAndColor(CameraPosition, RayDirection, WSPosition, Color);
  
