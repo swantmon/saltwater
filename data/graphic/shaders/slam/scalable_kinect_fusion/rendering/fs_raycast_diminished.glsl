@@ -135,8 +135,8 @@ void main()
     VertexPixelPosition.z = 1.0f;
  
     vec3 CameraPosition = SaltwaterToReconstruction * g_ViewPosition.xyz;
-    vec3 RayDirection = normalize(VertexPixelPosition);
-    //vec3 RayDirection = SaltwaterToReconstruction * normalize(in_WSRayDirection);
+    //vec3 RayDirection = normalize(VertexPixelPosition);
+    vec3 RayDirection = SaltwaterToReconstruction * normalize(in_WSRayDirection);
  
     RayDirection.x = RayDirection.x == 0.0f ? 1e-15f : RayDirection.x;
     RayDirection.y = RayDirection.y == 0.0f ? 1e-15f : RayDirection.y;
