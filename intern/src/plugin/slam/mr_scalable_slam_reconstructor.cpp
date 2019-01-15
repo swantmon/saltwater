@@ -180,6 +180,7 @@ namespace
         glm::vec2 m_Extent;
         glm::ivec2 m_PlaneResolution;
         glm::vec2 m_PixelSize;
+        glm::vec2 Padding;
     };
 
     int DivUp(int TotalShaderCount, int WorkGroupSize)
