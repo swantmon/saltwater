@@ -1884,9 +1884,11 @@ namespace MR
         float SelectionWidth = glm::sqrt(DiagonalLength * DiagonalLength / 2.0f);
 
         int MaxPixel = int((PlaneResolution / 2) * (1.0f / PlaneScale));
-
+        
+        float CameraRotation = glm::acos(glm::dot(glm::normalize(Diagonal), glm::vec3(0.0f, 1.0f, 0.0f)));
+        
         SPlaneExtraction ConstantBuffer;
-        ConstantBuffer.m_Rotation = glm::eulerAngleZ(glm::acos(glm::dot(glm::normalize(Diagonal), glm::vec3(0.0f, 1.0f, 0.0f))) + glm::pi<float>() / 4.0f);
+        ConstantBuffer.m_Rotation = glm::eulerAngleZ(CameraRotation + glm::pi<float>() / 4.0f);
         ConstantBuffer.m_PlaneCenterPosition = glm::vec3((_rAnchor0 + _rAnchor1) / 2.0f);
         ConstantBuffer.m_PlaneSize = glm::vec2(SelectionWidth * PlaneScale);
         ConstantBuffer.m_Height = 0.0f; // TODO
