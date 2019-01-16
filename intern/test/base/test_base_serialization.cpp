@@ -273,6 +273,8 @@ BASE_TEST(SerializeDataWithTextFile)
             ++Index2;
         }
 
+        Index2 = 0;
+
         ++Index;
     }
 }
