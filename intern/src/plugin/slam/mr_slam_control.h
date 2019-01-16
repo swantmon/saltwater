@@ -4,6 +4,8 @@
 #include "base/base_compression.h"
 #include "base/base_exception.h"
 #include "base/base_include_glm.h"
+#include "base/base_serialize_record_reader.h"
+#include "base/base_serialize_record_writer.h"
 
 #include "engine/camera/cam_control_manager.h"
 #include "engine/camera/cam_editor_control.h"
@@ -14,6 +16,7 @@
 
 #include "engine/engine.h"
 
+#include "engine/graphic/gfx_buffer_manager.h"
 #include "engine/graphic/gfx_context_manager.h"
 #include "engine/graphic/gfx_main.h"
 #include "engine/graphic/gfx_shader_manager.h"
@@ -62,6 +65,9 @@ namespace MR
         glm::ivec2 m_DepthSize;
         glm::ivec2 m_ColorSize;
 
+        glm::ivec2 m_DeviceResolution;
+        glm::mat4  m_DeviceProjectionMatrix;
+
         bool m_UseTrackingCamera = false;
 
         bool m_IsReconstructorInitialized = false;
@@ -88,6 +94,10 @@ namespace MR
 
         bool m_MousePressed;
 
+        // -----------------------------------------------------------------------------
+        // Reconstructor
+        // -----------------------------------------------------------------------------
+
         bool m_CaptureColor;
 
         std::unique_ptr<MR::CScalableSLAMReconstructor> m_pReconstructor;
@@ -105,6 +115,14 @@ namespace MR
         Gfx::CShaderPtr m_ShiftDepthCSPtr;
         Gfx::CTexturePtr m_ShiftLUTPtr;
 
+        Gfx::CBufferPtr m_RGBConversionBuffer;
+
+        struct SRGBConversion
+        {
+            glm::vec4 m_Ambient;
+            glm::vec4 m_Temperature;
+        };
+
         // -----------------------------------------------------------------------------
         // Stuff for Kinect data source
         // -----------------------------------------------------------------------------
@@ -112,6 +130,24 @@ namespace MR
         typedef bool(*GetColorBufferFunc)(char*);
         GetDepthBufferFunc GetDepthBuffer;
         GetColorBufferFunc GetColorBuffer;
+
+        // -----------------------------------------------------------------------------
+        // Recording
+        // -----------------------------------------------------------------------------
+
+        enum ERecordMode
+        {
+            NONE,
+            PLAY,
+            RECORD,
+        };
+        
+        ERecordMode m_RecordMode;
+        std::string m_RecordFileName;
+
+        std::fstream m_RecordFile;
+        std::unique_ptr<Base::CRecordWriter> m_pRecordWriter;
+        std::unique_ptr<Base::CRecordReader> m_pRecordReader;
 
     public:
 
@@ -143,6 +179,15 @@ namespace MR
                 m_DataSource = NETWORK;
 
                 CreateShiftLUTTexture();
+
+                Gfx::SBufferDescriptor ConstantBufferDesc = {};
+
+                ConstantBufferDesc.m_Usage = Gfx::CBuffer::EUsage::GPURead;
+                ConstantBufferDesc.m_Binding = Gfx::CBuffer::ConstantBuffer;
+                ConstantBufferDesc.m_Access = Gfx::CBuffer::CPUWrite;
+                ConstantBufferDesc.m_NumberOfBytes = sizeof(SRGBConversion);
+
+                m_RGBConversionBuffer = Gfx::BufferManager::CreateBuffer(ConstantBufferDesc);
             }
             else if (DataSource == "kinect")
             {
@@ -211,16 +256,45 @@ namespace MR
             {
                 throw Base::CException(__FILE__, __LINE__, "Unknown data source for SLAM plugin");
             }
+
+            std::string RecordParam = Core::CProgramParameters::GetInstance().Get("mr:slam:recording:mode", "none");
+            m_RecordFileName = Core::CProgramParameters::GetInstance().Get("mr:slam:recording:file", "");
+            double SpeedOfPlayback = Core::CProgramParameters::GetInstance().Get("mr:slam:recording:speed", 1.0);
+
+            if (RecordParam == "play")
+            {
+                m_RecordMode = PLAY;
+                m_RecordFile.open(m_RecordFileName, std::fstream::in | std::fstream::binary);
+                m_pRecordReader.reset(new Base::CRecordReader(m_RecordFile, 1));
+
+                m_pRecordReader->SkipTime();
+
+                m_pRecordReader->SetSpeed(SpeedOfPlayback);
+            }
+            else if (RecordParam == "record")
+            {
+                m_RecordMode = RECORD;
+                m_RecordFile.open(m_RecordFileName, std::fstream::out | std::fstream::binary);
+                m_pRecordWriter.reset(new Base::CRecordWriter(m_RecordFile, 1));
+            }
+            else
+            {
+                m_RecordMode = NONE;
+            }
         }
 
         // -----------------------------------------------------------------------------
 
         void Exit()
         {
+            m_RecordFile.close();
+
             m_DepthBuffer.clear();
             m_ColorBuffer.clear();
 
             m_pReconstructor->Exit();
+
+            m_RGBConversionBuffer = nullptr;
 
             m_DepthTexture = nullptr;
             m_RGBTexture = nullptr;
@@ -242,6 +316,30 @@ namespace MR
 
         void Update()
         {
+            if (m_RecordMode == PLAY)
+            {
+                m_pRecordReader->Update();
+
+                if (m_pRecordReader->IsEnd())
+                {
+                    m_RecordMode = NONE;
+                    m_UseTrackingCamera = false;
+                }
+
+                while (!m_pRecordReader->IsEnd() && m_pRecordReader->PeekTimecode() < m_pRecordReader->GetTime())
+                {
+                    Net::CMessage Message;
+
+                    *m_pRecordReader >> Message.m_Category;
+                    *m_pRecordReader >> Message.m_MessageType;
+                    *m_pRecordReader >> Message.m_CompressedSize;
+                    *m_pRecordReader >> Message.m_DecompressedSize;
+                    Base::Read(*m_pRecordReader, Message.m_Payload);
+
+                    HandleMessage(Message);
+                }
+            }
+
             if (m_DataSource == KINECT)
             {
                 if (m_CaptureColor && GetDepthBuffer(m_DepthBuffer.data()) && GetColorBuffer(m_ColorBuffer.data()))
@@ -263,10 +361,23 @@ namespace MR
                 }
             }
 
+//             if (m_SelectionState == ESelection::FIRSTRELEASE)
+//             {
+//                 Gfx::CTexturePtr PlaneTexture = m_pReconstructor->CreatePlaneTexture(m_SelectionBoxAnchor0, m_SelectionBoxAnchor1);
+//             }
+
             if (m_UseTrackingCamera)
             {
-                Cam::CControl& rControl = static_cast<Cam::CEditorControl&>(Cam::ControlManager::GetActiveControl());
+                Cam::CEditorControl& rControl = static_cast<Cam::CEditorControl&>(Cam::ControlManager::GetActiveControl());
 
+                // -----------------------------------------------------------------------------
+                // Projection
+                // -----------------------------------------------------------------------------
+                rControl.SetProjectionMatrix(glm::transpose(m_DeviceProjectionMatrix));
+
+                // -----------------------------------------------------------------------------
+                // View
+                // -----------------------------------------------------------------------------
                 glm::mat4 PoseMatrix = m_PoseMatrix;
                 PoseMatrix = glm::eulerAngleX(glm::radians(90.0f)) * PoseMatrix;
 
@@ -333,6 +444,8 @@ namespace MR
                 m_MousePressed = false;
 
                 m_SelectionState = m_SelectionState == ESelection::FIRSTPRESS ? ESelection::FIRSTRELEASE : ESelection::NOSELECTION;
+
+                //Gfx::CTexturePtr PlaneTexture = m_pReconstructor->CreatePlaneTexture(m_SelectionBoxAnchor0, m_SelectionBoxAnchor1);
             }
             else if (_rEvent.GetAction() == Base::CInputEvent::MouseMove)
             {
@@ -373,15 +486,19 @@ namespace MR
                 {
                     ENGINE_CONSOLE_INFO("Initializing reconstructor");
 
-                    glm::vec2 FocalLength = *reinterpret_cast<glm::vec2*>(Decompressed.data() + sizeof(int32_t) * 2);
-                    glm::vec2 FocalPoint = *reinterpret_cast<glm::vec2*>(Decompressed.data() + sizeof(int32_t) * 2 + sizeof(glm::vec2));
-                    m_DepthSize = *reinterpret_cast<glm::ivec2*>(Decompressed.data() + sizeof(int32_t) * 2 + sizeof(glm::vec2) * 2);
-                    m_ColorSize = *reinterpret_cast<glm::ivec2*>(Decompressed.data() + sizeof(int32_t) * 2 + sizeof(glm::vec2) * 2 + sizeof(glm::ivec2));
+                    glm::vec2 FocalLength =    *reinterpret_cast<glm::vec2* >(Decompressed.data() + sizeof(int32_t) * 2);
+                    glm::vec2 FocalPoint =     *reinterpret_cast<glm::vec2* >(Decompressed.data() + sizeof(int32_t) * 2 + sizeof(glm::vec2));
+                    m_DepthSize =              *reinterpret_cast<glm::ivec2*>(Decompressed.data() + sizeof(int32_t) * 2 + sizeof(glm::vec2) * 2);
+                    m_ColorSize =              *reinterpret_cast<glm::ivec2*>(Decompressed.data() + sizeof(int32_t) * 2 + sizeof(glm::vec2) * 2 + sizeof(glm::ivec2));
+                    m_DeviceResolution =       *reinterpret_cast<glm::ivec2*>(Decompressed.data() + sizeof(int32_t) * 2 + sizeof(glm::vec2) * 3 + sizeof(glm::ivec2));
+                    m_DeviceProjectionMatrix = *reinterpret_cast<glm::mat4* >(Decompressed.data() + sizeof(int32_t) * 2 + sizeof(glm::vec2) * 4 + sizeof(glm::ivec2));
 
                     MR::SReconstructionSettings Settings;
                     m_pReconstructor->GetReconstructionSettings(&Settings);
 
                     m_CaptureColor = Settings.m_CaptureColor;
+
+                    m_pReconstructor->SetDeviceResolution(m_DeviceResolution);
 
                     if (m_CaptureColor)
                     {
@@ -506,6 +623,8 @@ namespace MR
                 TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_ColorSize.x / 2, m_ColorSize.y / 2));
                 Gfx::TextureManager::CopyToTexture2D(m_UVTexture, TargetRect, m_ColorSize.x / 2, const_cast<char*>(UVData));
 
+                Gfx::ContextManager::SetConstantBuffer(0, m_RGBConversionBuffer);
+
                 Gfx::ContextManager::SetShaderCS(m_YUVtoRGBCSPtr);
                 Gfx::ContextManager::SetImageTexture(0, m_YTexture);
                 Gfx::ContextManager::SetImageTexture(1, m_UVTexture);
@@ -517,8 +636,15 @@ namespace MR
             }
             else if (MessageType == LIGHTESTIMATE)
             {
-                const float Intensity = *reinterpret_cast<float*>(Decompressed.data() + sizeof(int32_t));
-                const float Temperature = *reinterpret_cast<float*>(Decompressed.data() + sizeof(int32_t) + sizeof(float));
+                const float AmbientIntensity = *reinterpret_cast<float*>(Decompressed.data() + sizeof(int32_t));
+                const float LightTemperature = *reinterpret_cast<float*>(Decompressed.data() + sizeof(int32_t) + sizeof(float));
+
+                glm::vec3 LightColor = KelvinToRGB(LightTemperature);
+
+                SRGBConversion Data;
+                Data.m_Ambient = glm::vec4(AmbientIntensity);
+                Data.m_Temperature = glm::vec4(LightColor, LightTemperature);
+                Gfx::BufferManager::UploadBufferData(m_RGBConversionBuffer, &Data);
             }
             else if (MessageType == PLANE)
             {
@@ -548,9 +674,18 @@ namespace MR
         void OnNewMessage(const Net::CMessage& _rMessage, int _Port)
         {
             BASE_UNUSED(_Port);
-
+            
             if (_rMessage.m_MessageType == 0)
             {
+                if (m_RecordMode == RECORD)
+                {
+                    *m_pRecordWriter << _rMessage.m_Category;
+                    *m_pRecordWriter << _rMessage.m_MessageType;
+                    *m_pRecordWriter << _rMessage.m_CompressedSize;
+                    *m_pRecordWriter << _rMessage.m_DecompressedSize;
+                    Base::Write(*m_pRecordWriter, _rMessage.m_Payload);
+                }
+
                 HandleMessage(_rMessage);
             }
             else if (_rMessage.m_MessageType == 2)
@@ -651,6 +786,42 @@ namespace MR
             Base::AABB2UInt TargetRect;
             TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(Count, 1));
             Gfx::TextureManager::CopyToTexture2D(m_ShiftLUTPtr, TargetRect, Count, const_cast<uint16_t*>(LUT));
+        }
+
+        glm::vec3 KelvinToRGB(float _Kelvin)
+        {
+            _Kelvin = _Kelvin / 100.f;
+            glm::vec3 RGB;
+
+            if (_Kelvin <= 66)
+            {
+                RGB.r = 255;
+
+                RGB.g = _Kelvin;
+                RGB.g = 99.4708025861f * std::log(RGB.g) - 161.1195681661f;
+
+                if (_Kelvin <= 19)
+                {
+                    RGB.b = 0;
+                }
+                else
+                {
+                    RGB.b = _Kelvin - 10;
+                    RGB.b = 138.5177312231f * std::log(RGB.b) - 305.0447927307f;
+                }
+            }
+            else
+            {
+                RGB.r = _Kelvin - 60;
+                RGB.r = 329.698727446f * std::pow(RGB.r, -0.1332047592f);
+
+                RGB.g = _Kelvin - 60;
+                RGB.g = 288.1221695283f * std::pow(RGB.g, -0.0755148492f);
+
+                RGB.b = 255;
+            }
+
+            return glm::clamp(RGB, 0.0f, 255.0f) / 255.0f;
         }
 
         int DivUp(int TotalShaderCount, int WorkGroupSize)

@@ -182,6 +182,12 @@ namespace MR
         void SetImageSizes(glm::ivec2 _DepthFrameSize, glm::ivec2 _ColorFrameSize);
         void SetIntrinsics(glm::vec2 _FocalLength, glm::vec2 _FocalPoint);
         void SetDepthBounds(float _Min, float _Max);
+        void SetDeviceResolution(const glm::ivec2& _rResolution);
+
+        void GetImageSizes(glm::ivec2& _rDepthFrameSize, glm::ivec2& _rColorFrameSize);
+        void GetIntrinsics(glm::vec2& _rFocalLength, glm::vec2& _rFocalPoint);
+        void GetDepthBounds(float& _rMin, float& _rMax);
+        void GetDeviceResolution(glm::ivec2& _rResolution);
 
         void OnNewFrame(Gfx::CTexturePtr DepthBuffer, Gfx::CTexturePtr ColorBuffer, const glm::mat4* pTransform);
         
@@ -189,6 +195,8 @@ namespace MR
         void Exit();
 
         bool IsInitialized();
+
+        Gfx::CTexturePtr CreatePlaneTexture(const glm::vec3& _rAnchor0, const glm::vec3& _rAnchor1);
 
     private:
 
@@ -239,6 +247,8 @@ namespace MR
 
         Gfx::CBufferPtr m_PointRasterizationBufferPtr;
 
+        Gfx::CBufferPtr m_PlaneExtractionBufferPtr;
+
         SScalableVolume m_VolumeBuffers;
 
         Gfx::CBufferPtr m_VolumeIndexBufferPtr;
@@ -256,6 +266,8 @@ namespace MR
         Gfx::CShaderPtr m_RasterizeRootVolumeVSPtr;
         Gfx::CShaderPtr m_RasterizeRootVolumeFSPtr;
         
+        Gfx::CShaderPtr m_PlaneCSPtr;
+
         Gfx::CShaderPtr m_PointCloudVSPtr;
         Gfx::CShaderPtr m_PointCloudGSPtr;
         Gfx::CShaderPtr m_PointCloudFSPtr;
@@ -294,6 +306,7 @@ namespace MR
         glm::vec2 m_FocalLength;
         glm::vec2 m_FocalPoint;
         glm::vec2 m_DepthBounds;
+        glm::ivec2 m_DeviceResolution;
 
         glm::mat4 m_PoseMatrix;
         
