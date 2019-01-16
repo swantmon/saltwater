@@ -324,7 +324,7 @@ namespace MR
                     m_UseTrackingCamera = false;
                 }
 
-                while (!m_pRecordReader->IsEnd())
+                while (!m_pRecordReader->IsEnd() && m_pRecordReader->PeekTimecode() < m_pRecordReader->GetTime());
                 {
                     Net::CMessage Message;
 
@@ -488,7 +488,7 @@ namespace MR
 
                     m_CaptureColor = Settings.m_CaptureColor;
 
-                    m_pReconstructor->SetDeviceResolution(glm::ivec2(1280, 720));
+                    m_pReconstructor->SetDeviceResolution(m_DeviceResolution);
 
                     if (m_CaptureColor)
                     {
