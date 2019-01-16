@@ -14,6 +14,7 @@
 
 layout(std140, binding = 0) uniform PlaneData
 {
+    mat4  g_Rotation;
     vec3  g_PlaneCenterPosition;
     float g_Height;
     vec2  g_PlaneSize;
@@ -61,6 +62,7 @@ void main()
     RayDirection.z = RayDirection.z == 0.0f ? 1e-15f : RayDirection.z;
 
     vec3 CameraPosition = vec3(CameraOffset, g_PlaneCenterPosition.z + 1.5f);
+    CameraPosition = (g_Rotation * vec4(CameraPosition - g_PlaneCenterPosition, 1.0f)).xyz + g_PlaneCenterPosition;
 
     vec3 WSPosition, Color;
 
