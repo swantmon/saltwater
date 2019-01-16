@@ -65,16 +65,6 @@ namespace
         glm::vec4 m_WorldHitPosition;
     };
 
-    struct SIntrinsics
-    {
-        glm::mat4 m_KMatrix;
-        glm::mat4 m_InvKMatrix;
-        glm::vec2 m_FocalPoint;
-        glm::vec2 m_FocalLength;
-        glm::vec2 m_InvFocalLength;
-        glm::vec2 Padding;
-    };
-
     class CGfxReconstructionRenderer : private Base::CUncopyable
     {
         BASE_SINGLETON_FUNC(CGfxReconstructionRenderer)
@@ -152,13 +142,9 @@ namespace
 
         void RenderSelectionBox();
 
-        void SetIntrinsics(const glm::vec2& _FocalLength, const glm::vec2& _FocalPoint);
-
     private:
 
 		MR::CScalableSLAMReconstructor* m_pScalableReconstructor;
-
-        SIntrinsics m_Intrinsics;
         
         CShaderPtr m_OutlineVSPtr;
         CShaderPtr m_OutlineFSPtr;
@@ -183,7 +169,6 @@ namespace
         CBufferPtr m_RaycastConstantBufferPtr;
         CBufferPtr m_RaycastHighLightConstantBufferPtr;
         CBufferPtr m_DrawCallConstantBufferPtr;
-        CBufferPtr m_IntrinsicsConstantBufferPtr;
                 
         CMeshPtr m_CameraMeshPtr;
 		CInputLayoutPtr m_CameraInputLayoutPtr;
@@ -282,29 +267,6 @@ namespace
     
     void CGfxReconstructionRenderer::Initialize()
     {
-        // -----------------------------------------------------------------------------
-        // Intrinsics data
-        // -----------------------------------------------------------------------------
-        glm::ivec2 DepthImageSize;
-        glm::ivec2 ColorImageSize;
-        glm::vec2 FocalLength;
-        glm::vec2 FocalPoint;
-        glm::ivec2 DeviceResolution;
-
-        m_pScalableReconstructor->GetDeviceResolution(DeviceResolution);
-        m_pScalableReconstructor->GetImageSizes(DepthImageSize, ColorImageSize);
-        m_pScalableReconstructor->GetIntrinsics(FocalLength, FocalPoint);
-
-        FocalLength[0] = FocalLength[0] / DepthImageSize[0] * DeviceResolution[0];
-        FocalLength[1] = FocalLength[1] / DepthImageSize[1] * DeviceResolution[1];
-        FocalPoint[0] = FocalPoint[0] / DepthImageSize[0] * DeviceResolution[0];
-        FocalPoint[1] = FocalPoint[1] / DepthImageSize[1] * DeviceResolution[1];
-
-        SetIntrinsics(FocalLength, FocalPoint);
-
-        // -----------------------------------------------------------------------------
-        // Rest
-        // -----------------------------------------------------------------------------
         OnSetupShader();
         OnSetupKernels();
         OnSetupRenderTargets();
@@ -345,7 +307,6 @@ namespace
         m_RaycastConstantBufferPtr = 0;
         m_RaycastHighLightConstantBufferPtr = 0;
         m_DrawCallConstantBufferPtr = 0;
-        m_IntrinsicsConstantBufferPtr = 0;
         
         m_CameraMeshPtr = 0;
         m_VolumeMeshPtr = 0;
@@ -544,18 +505,6 @@ namespace
         ConstantBufferDesc.m_pClassKey = 0;
 
         m_PickingBuffer = BufferManager::CreateBuffer(ConstantBufferDesc);
-
-        ConstantBufferDesc.m_Stride        = 0;
-        ConstantBufferDesc.m_Usage         = CBuffer::GPURead;
-        ConstantBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
-        ConstantBufferDesc.m_Access        = CBuffer::CPUWrite;
-        ConstantBufferDesc.m_NumberOfBytes = sizeof(SIntrinsics);
-        ConstantBufferDesc.m_pBytes        = &m_Intrinsics;
-        ConstantBufferDesc.m_pClassKey     = 0;
-
-        m_IntrinsicsConstantBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
-
-        BufferManager::SetBufferLabel(m_IntrinsicsConstantBufferPtr, "Camera Intrinsics");
     }
     
     // -----------------------------------------------------------------------------
@@ -1028,7 +977,6 @@ namespace
         ContextManager::SetConstantBuffer(1, m_RaycastHighLightConstantBufferPtr);
 
         ContextManager::SetConstantBuffer(2, rVolume.m_AABBBufferPtr);
-        ContextManager::SetConstantBuffer(3, m_IntrinsicsConstantBufferPtr);
 
         ContextManager::Barrier();
 
@@ -1548,30 +1496,6 @@ namespace
     {
         m_pScalableReconstructor = &_rReconstructor;
     }
-
-    // -----------------------------------------------------------------------------
-
-    void CGfxReconstructionRenderer::SetIntrinsics(const glm::vec2& _FocalLength, const glm::vec2& _FocalPoint)
-    {
-        const float FocalLengthX = _FocalLength.x;
-        const float FocalLengthY = _FocalLength.y;
-        const float FocalPointX  = _FocalPoint.x;
-        const float FocalPointY  = _FocalPoint.y;
-
-        glm::mat4 KMatrix(
-            FocalLengthX, 0.0f        , 0.0f, 0.0f,
-            0.0f        , FocalLengthY, 0.0f, 0.0f,
-            FocalPointX , FocalPointY , 1.0f, 0.0f,
-            0.0f        , 0.0f        , 0.0f, 1.0f
-        );
-
-        m_Intrinsics.m_FocalPoint     = glm::vec2(FocalPointX, FocalPointY);
-        m_Intrinsics.m_FocalLength    = glm::vec2(FocalLengthX, FocalLengthY);
-        m_Intrinsics.m_InvFocalLength = glm::vec2(1.0f / FocalLengthX, 1.0f / FocalLengthY);
-        m_Intrinsics.m_KMatrix        = KMatrix;
-        m_Intrinsics.m_InvKMatrix     = glm::inverse(KMatrix);
-    }
-
 } // namespace
 
 namespace Gfx

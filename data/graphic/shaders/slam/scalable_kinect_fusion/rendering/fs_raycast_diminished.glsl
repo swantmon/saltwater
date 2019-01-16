@@ -13,15 +13,6 @@ layout(std140, binding = 1) uniform PerDrawCallData
     mat4 g_WSToSelectionTransform;
 };
 
-layout(std140, binding = 3) uniform UBOIntrinsics
-{
-    mat4 m_KMatrix;
-    mat4 m_InvKMatrix;
-    vec2 m_FocalPoint;
-    vec2 m_FocalLength;
-    vec2 m_InvFocalLength;
-};
-
 // -----------------------------------------------------------------------------
 // functions
 // -----------------------------------------------------------------------------
@@ -118,18 +109,9 @@ void main()
         0.0f, 0.0f, 1.0f,
         0.0f, -1.0f, 0.0f
     );
-
-    vec2 FragCoord = vec2(gl_FragCoord.x, gl_FragCoord.y);
-
-    vec3 VertexPixelPosition;
-    VertexPixelPosition.xz = vec2(FragCoord - m_FocalPoint) * m_InvFocalLength;
-    VertexPixelPosition.y = 1.0f;
-
-    vec3 WSRayDirection = SaltwaterToReconstruction * mat3(g_ViewToWorld) * normalize(VertexPixelPosition);
  
     vec3 CameraPosition = SaltwaterToReconstruction * g_ViewPosition.xyz;
-    vec3 RayDirection = SaltwaterToReconstruction * WSRayDirection;
-    //vec3 RayDirection = SaltwaterToReconstruction * normalize(in_WSRayDirection);
+    vec3 RayDirection = SaltwaterToReconstruction * normalize(in_WSRayDirection);
  
     RayDirection.x = RayDirection.x == 0.0f ? 1e-15f : RayDirection.x;
     RayDirection.y = RayDirection.y == 0.0f ? 1e-15f : RayDirection.y;
