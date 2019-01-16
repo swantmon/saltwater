@@ -26,6 +26,8 @@ namespace CORE
 
         public:
 
+            inline void SetTime(double _Time);
+
             inline double GetTime() const;
             inline double GetDurationOfFrame() const;
 
@@ -115,6 +117,13 @@ namespace CORE
         // Add the timer to the clock.
         // -----------------------------------------------------------------------------
         m_pClock->AddTimer(*this);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    inline void CTimer::SetTime(double _Time)
+    {
+        m_CurrentTime = _Time;
     }
 
     // -----------------------------------------------------------------------------

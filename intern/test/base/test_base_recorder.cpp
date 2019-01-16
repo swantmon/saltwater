@@ -398,3 +398,117 @@ BASE_TEST(RecordClassWithRecorderSStream)
         BASE_CHECK(OriginalFrame.m_3.size() == ReadFrame.m_3.size());
     }
 }
+
+// -----------------------------------------------------------------------------
+
+BASE_TEST(RecordDataWithRecorderTimecodeAndStarttime)
+{
+    // -----------------------------------------------------------------------------
+    // Data
+    // -----------------------------------------------------------------------------
+    struct SFrame
+    {
+        int   m_1;
+        float m_2;
+        std::vector<char> m_3;
+    };
+
+    std::array<SFrame, 30> Frames;
+
+    int Index = 0;
+
+    for (auto& OriginalFrame : Frames)
+    {
+        OriginalFrame.m_1 = Index;
+        OriginalFrame.m_2 = 1337.0f - float(Index);
+
+        OriginalFrame.m_3.resize(glm::linearRand(1, 400));
+
+        ++Index;
+    }
+
+    // -----------------------------------------------------------------------------
+    // Record data with 60 FPS and 0.5s delay
+    // In total it will be 1s. Without delay: 0.5s
+    // -----------------------------------------------------------------------------
+    std::stringstream Stream;
+
+    Base::CRecordWriter RecordWriter(Stream, 1);
+
+    BASE_TIME_RESET();
+
+    double CurrentFrameTime = 0.0;
+
+    Base::CPerformanceClock DelayClock;
+
+    for (int Index = 0; Index < Frames.size();)
+    {
+        DelayClock.OnFrame();
+
+        if (DelayClock.GetTime() < 0.5) continue;
+
+        RecordWriter.Update();
+
+        auto& OriginalFrame = Frames[Index];
+
+        CurrentFrameTime += RecordWriter.GetDurationOfFrame();
+
+        if (CurrentFrameTime > 1.0 / 60.0)
+        {
+            RecordWriter << OriginalFrame.m_1;
+            RecordWriter << OriginalFrame.m_2;
+
+            Base::Write(RecordWriter, OriginalFrame.m_3);
+
+            ++ Index;
+
+            CurrentFrameTime = 0.0;
+        }
+    }
+
+    BASE_TIME_LOG(FillRecorderIn1Sec);
+
+    // -----------------------------------------------------------------------------
+    // Reset stream
+    // -----------------------------------------------------------------------------
+    Stream.seekg(Stream.beg);
+
+    // -----------------------------------------------------------------------------
+    // Read record
+    // -----------------------------------------------------------------------------
+    Base::CRecordReader RecordReaderTimecode(Stream, 1);
+
+    // -----------------------------------------------------------------------------
+    // Check record w/ prev. record
+    // -----------------------------------------------------------------------------
+    Index = 0;
+
+    RecordReaderTimecode.SkipTime();
+
+    BASE_TIME_RESET();
+
+    while (!RecordReaderTimecode.IsEnd())
+    {
+        RecordReaderTimecode.Update();
+
+        if (RecordReaderTimecode.PeekTimecode() < RecordReaderTimecode.GetTime())
+        {
+            SFrame ReadFrame;
+
+            RecordReaderTimecode >> ReadFrame.m_1;
+            RecordReaderTimecode >> ReadFrame.m_2;
+
+            Base::Read(RecordReaderTimecode, ReadFrame.m_3);
+
+            auto& OriginalFrame = Frames[Index];
+
+            BASE_CHECK(OriginalFrame.m_1 == ReadFrame.m_1);
+            BASE_CHECK(OriginalFrame.m_2 == ReadFrame.m_2);
+            BASE_CHECK(OriginalFrame.m_3.size() == ReadFrame.m_3.size());
+
+            ++Index;
+        }
+    }
+
+    BASE_TIME_LOG(ReadRecorderWStarttimeIn500ms);
+}

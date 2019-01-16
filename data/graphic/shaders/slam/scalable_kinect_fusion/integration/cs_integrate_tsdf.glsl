@@ -90,7 +90,7 @@ void main()
                     ColorCoords.x = DEPTH_IMAGE_WIDTH - ColorCoords.x - 1;
                     ColorCoords.y -= (DEPTH_IMAGE_HEIGHT - COLOR_IMAGE_HEIGHT) / 2;
                     vec3 Color = imageLoad(cs_Color, ColorCoords).rgb;
-                    Color = Color.x == 0.0f ? OldColor : (OldColor * Voxel.y + Color) / (Voxel.y + 1.0f);
+                    Color = Color.x == 0.0f ? OldColor : (OldColor * Voxel.y + 10.0f * Color) / (Voxel.y + 10.0f);
                     TSDFPoolValue = PackVoxel(Voxel.x, Voxel.y, Color);
                 #else
                     vec2 Voxel = UnpackVoxel(TSDFPoolValue);

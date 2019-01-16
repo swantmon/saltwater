@@ -63,11 +63,11 @@ namespace SER
 
         inline double PeekTimecode();
 
+        inline void SkipTime();
+
         inline bool IsEnd() const;
 
     private:
-        Base::CPerformanceClock m_Clock;
-        Base::CTimer m_Timer;
 
         CStream* m_pStream;
         double   m_Timecode;
@@ -81,10 +81,9 @@ namespace SER
 namespace SER
 {
     inline CRecordReader::CRecordReader(CStream& _rStream, unsigned int _Version)
-        : CArchive          (_Version)
-        , m_Clock           ()
-        , m_Timer           (m_Clock)
-        , m_pStream         (&_rStream)
+        : CArchive (_Version)
+        , CRecorder( )
+        , m_pStream(&_rStream)
     {
         // -----------------------------------------------------------------------------
         // Read header informations (internal format, version)
@@ -220,6 +219,13 @@ namespace SER
         m_pStream->seekg(-sizeof(Timecode), m_pStream->cur);
 
         return Timecode;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    inline void CRecordReader::SkipTime()
+    {
+        m_Timer.SetTime(PeekTimecode());
     }
 
     // -----------------------------------------------------------------------------

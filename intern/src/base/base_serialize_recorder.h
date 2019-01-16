@@ -43,7 +43,7 @@ namespace SER
 
         inline void Update();
 
-    private:
+    protected:
 
         Base::CPerformanceClock m_Clock;
         Base::CTimer m_Timer;
