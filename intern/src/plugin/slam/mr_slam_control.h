@@ -65,6 +65,9 @@ namespace MR
         glm::ivec2 m_DepthSize;
         glm::ivec2 m_ColorSize;
 
+        glm::ivec2 m_DeviceResolution;
+        glm::mat4  m_DeviceProjectionMatrix;
+
         bool m_UseTrackingCamera = false;
 
         bool m_IsReconstructorInitialized = false;
@@ -321,7 +324,7 @@ namespace MR
                     m_UseTrackingCamera = false;
                 }
 
-                while (!m_pRecordReader->IsEnd() && m_pRecordReader->PeekTimecode() < m_pRecordReader->GetTime())
+                while (!m_pRecordReader->IsEnd())
                 {
                     Net::CMessage Message;
 
@@ -356,10 +359,10 @@ namespace MR
                 }
             }
 
-            if (m_SelectionState == ESelection::FIRSTRELEASE)
-            {
-                Gfx::CTexturePtr PlaneTexture = m_pReconstructor->CreatePlaneTexture(m_SelectionBoxAnchor0, m_SelectionBoxAnchor1);
-            }
+//             if (m_SelectionState == ESelection::FIRSTRELEASE)
+//             {
+//                 Gfx::CTexturePtr PlaneTexture = m_pReconstructor->CreatePlaneTexture(m_SelectionBoxAnchor0, m_SelectionBoxAnchor1);
+//             }
 
             if (m_UseTrackingCamera)
             {
@@ -473,10 +476,12 @@ namespace MR
                 {
                     ENGINE_CONSOLE_INFO("Initializing reconstructor");
 
-                    glm::vec2 FocalLength = *reinterpret_cast<glm::vec2*>(Decompressed.data() + sizeof(int32_t) * 2);
-                    glm::vec2 FocalPoint = *reinterpret_cast<glm::vec2*>(Decompressed.data() + sizeof(int32_t) * 2 + sizeof(glm::vec2));
-                    m_DepthSize = *reinterpret_cast<glm::ivec2*>(Decompressed.data() + sizeof(int32_t) * 2 + sizeof(glm::vec2) * 2);
-                    m_ColorSize = *reinterpret_cast<glm::ivec2*>(Decompressed.data() + sizeof(int32_t) * 2 + sizeof(glm::vec2) * 2 + sizeof(glm::ivec2));
+                    glm::vec2 FocalLength =    *reinterpret_cast<glm::vec2* >(Decompressed.data() + sizeof(int32_t) * 2);
+                    glm::vec2 FocalPoint =     *reinterpret_cast<glm::vec2* >(Decompressed.data() + sizeof(int32_t) * 2 + sizeof(glm::vec2));
+                    m_DepthSize =              *reinterpret_cast<glm::ivec2*>(Decompressed.data() + sizeof(int32_t) * 2 + sizeof(glm::vec2) * 2);
+                    m_ColorSize =              *reinterpret_cast<glm::ivec2*>(Decompressed.data() + sizeof(int32_t) * 2 + sizeof(glm::vec2) * 2 + sizeof(glm::ivec2));
+                    m_DeviceResolution =       *reinterpret_cast<glm::ivec2*>(Decompressed.data() + sizeof(int32_t) * 2 + sizeof(glm::vec2) * 3 + sizeof(glm::ivec2));
+                    m_DeviceProjectionMatrix = *reinterpret_cast<glm::mat4* >(Decompressed.data() + sizeof(int32_t) * 2 + sizeof(glm::vec2) * 4 + sizeof(glm::ivec2));
 
                     MR::SReconstructionSettings Settings;
                     m_pReconstructor->GetReconstructionSettings(&Settings);
@@ -659,7 +664,7 @@ namespace MR
         void OnNewMessage(const Net::CMessage& _rMessage, int _Port)
         {
             BASE_UNUSED(_Port);
-
+            
             if (_rMessage.m_MessageType == 0)
             {
                 if (m_RecordMode == RECORD)

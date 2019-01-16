@@ -118,31 +118,12 @@ namespace
         glm::mat4 m_InvPoseMatrix;
     };
 
-    struct SIncBuffer
-    {
-        glm::mat4 m_PoseMatrix;
-        glm::mat4 m_InvPoseMatrix;
-        int m_PyramidLevel;
-        float Padding[3];
-    };
-
-	struct SPositionBuffer
-	{
-		glm::vec3 m_Position;
-		int m_Index;
-	};
-
-    struct SDrawCallBufferData
-    {
-        glm::mat4 m_WorldMatrix;
-    };
-
     struct SInstanceData
     {
         glm::ivec3 m_Offset;
         int m_Index;
     };
-    
+
     struct SPointRasterization
     {
         glm::ivec3 m_Offset;
@@ -176,10 +157,12 @@ namespace
 
     struct SPlaneExtraction
     {
-        glm::vec4 m_PlanePosition;
-        glm::vec2 m_Extent;
+        glm::vec3  m_PlaneCenterPosition;
+        float      m_Height;
+        glm::vec2  m_PlaneSize;
         glm::ivec2 m_PlaneResolution;
-        glm::vec2 m_PixelSize;
+        glm::vec2  m_PixelSize;
+        glm::ivec2 m_PixelBounds;
     };
 
     int DivUp(int TotalShaderCount, int WorkGroupSize)
@@ -1893,12 +1876,21 @@ namespace MR
         Performance::BeginEvent("Create plane texture");
 
         const int PlaneResolution = 256;
+        const float PlaneScale = 3.0f;
+
+        glm::vec3 Diagonal = _rAnchor1 - _rAnchor0;    
+        float DiagonalLength = glm::length(Diagonal);
+        float SelectionWidth = glm::sqrt(DiagonalLength * DiagonalLength / 2.0f);
+
+        int MaxPixel = int((PlaneResolution / 2) * (1.0f / PlaneScale));
 
         SPlaneExtraction ConstantBuffer;
-        ConstantBuffer.m_PlanePosition = glm::vec4((_rAnchor0 + _rAnchor1) / 2.0f, 1.0f);
+        ConstantBuffer.m_PlaneCenterPosition = glm::vec3((_rAnchor0 + _rAnchor1) / 2.0f);
+        ConstantBuffer.m_PlaneSize = glm::vec2(SelectionWidth * PlaneScale);
+        ConstantBuffer.m_Height = 0.0f; // TODO
         ConstantBuffer.m_PlaneResolution = glm::ivec2(PlaneResolution);
-        ConstantBuffer.m_Extent = glm::vec2(glm::distance(_rAnchor0, _rAnchor1) * 2.0f);
-        ConstantBuffer.m_PixelSize = ConstantBuffer.m_Extent / glm::vec2(ConstantBuffer.m_PlaneResolution);
+        ConstantBuffer.m_PixelSize = ConstantBuffer.m_PlaneSize / glm::vec2(ConstantBuffer.m_PlaneResolution);
+        ConstantBuffer.m_PixelBounds = glm::ivec2(-MaxPixel, MaxPixel);
 
         BufferManager::UploadBufferData(m_PlaneExtractionBufferPtr, &ConstantBuffer);
 

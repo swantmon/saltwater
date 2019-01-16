@@ -14,10 +14,12 @@
 
 layout(std140, binding = 0) uniform PlaneData
 {
-    vec4 g_PlanePosition;
-    vec2 g_Extent;
+    vec3  g_PlaneCenterPosition;
+    float g_Height;
+    vec2  g_PlaneSize;
     ivec2 g_PlaneResolution;
-    vec2 g_PixelSize;
+    vec2  g_PixelSize;
+    ivec2 g_PixelBounds;
 };
 
 layout (binding = 0, rgba8) uniform image2D cs_Plane;
@@ -29,8 +31,28 @@ layout (binding = 0, rgba8) uniform image2D cs_Plane;
 layout (local_size_x = TILE_SIZE2D, local_size_y = TILE_SIZE2D, local_size_z = 1) in;
 void main()
 {
+    mat3 SaltwaterToReconstruction = mat3(
+        1.0f, 0.0f,  0.0f,
+        0.0f, 0.0f, -1.0f,
+        0.0f, 1.0f,  0.0f
+    );
+ 
+    mat3 ReconstructionToSaltwater = mat3(
+        1.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 1.0f,
+        0.0f, -1.0f, 0.0f
+    );
+
     ivec2 PixelOffset = ivec2(gl_GlobalInvocationID.xy) - (g_PlaneResolution / 2);
-    vec2 CameraOffset = g_PlanePosition.xy + PixelOffset * g_PixelSize;
+
+    if (PixelOffset.x < g_PixelBounds.y && PixelOffset.x > -g_PixelBounds.y &&
+        PixelOffset.y < g_PixelBounds.y && PixelOffset.y > -g_PixelBounds.y)
+    {
+        imageStore(cs_Plane, ivec2(gl_GlobalInvocationID.xy), vec4(0.0f));
+        return;
+    }
+
+    vec2 CameraOffset = g_PlaneCenterPosition.xy + PixelOffset * g_PixelSize;
 
     vec3 RayDirection = vec3(0.0f, 0.0f, -1.0f);
  
@@ -38,9 +60,12 @@ void main()
     RayDirection.y = RayDirection.y == 0.0f ? 1e-15f : RayDirection.y;
     RayDirection.z = RayDirection.z == 0.0f ? 1e-15f : RayDirection.z;
 
-    vec3 CameraPosition = vec3(CameraOffset, g_PlanePosition.z + 0.3f);
+    vec3 CameraPosition = vec3(CameraOffset, g_PlaneCenterPosition.z + 1.5f);
 
     vec3 WSPosition, Color;
+
+    CameraPosition = SaltwaterToReconstruction * CameraPosition;
+    RayDirection = SaltwaterToReconstruction * RayDirection;
 
     GetPositionAndColor(CameraPosition, RayDirection, WSPosition, Color);
  
