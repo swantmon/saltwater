@@ -267,6 +267,8 @@ namespace MR
                 m_RecordFile.open(m_RecordFileName, std::fstream::in | std::fstream::binary);
                 m_pRecordReader.reset(new Base::CRecordReader(m_RecordFile, 1));
 
+                m_pRecordReader->SkipTime();
+
                 m_pRecordReader->SetSpeed(SpeedOfPlayback);
             }
             else if (RecordParam == "record")
@@ -324,7 +326,7 @@ namespace MR
                     m_UseTrackingCamera = false;
                 }
 
-                while (!m_pRecordReader->IsEnd())
+                while (!m_pRecordReader->IsEnd() && m_pRecordReader->PeekTimecode() < m_pRecordReader->GetTime())
                 {
                     Net::CMessage Message;
 
