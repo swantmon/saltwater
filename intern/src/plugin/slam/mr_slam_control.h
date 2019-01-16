@@ -368,8 +368,16 @@ namespace MR
 
             if (m_UseTrackingCamera)
             {
-                Cam::CControl& rControl = static_cast<Cam::CEditorControl&>(Cam::ControlManager::GetActiveControl());
+                Cam::CEditorControl& rControl = static_cast<Cam::CEditorControl&>(Cam::ControlManager::GetActiveControl());
 
+                // -----------------------------------------------------------------------------
+                // Projection
+                // -----------------------------------------------------------------------------
+                rControl.SetProjectionMatrix(glm::transpose(m_DeviceProjectionMatrix));
+
+                // -----------------------------------------------------------------------------
+                // View
+                // -----------------------------------------------------------------------------
                 glm::mat4 PoseMatrix = m_PoseMatrix;
                 PoseMatrix = glm::eulerAngleX(glm::radians(90.0f)) * PoseMatrix;
 
@@ -489,6 +497,8 @@ namespace MR
                     m_pReconstructor->GetReconstructionSettings(&Settings);
 
                     m_CaptureColor = Settings.m_CaptureColor;
+
+                    m_pReconstructor->SetDeviceResolution(m_DeviceResolution);
 
                     if (m_CaptureColor)
                     {

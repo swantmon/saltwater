@@ -1341,6 +1341,44 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
+    void CScalableSLAMReconstructor::SetDeviceResolution(const glm::ivec2& _rResolution)
+    {
+        m_DeviceResolution = _rResolution;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CScalableSLAMReconstructor::GetImageSizes(glm::ivec2& _rDepthFrameSize, glm::ivec2& _rColorFrameSize)
+    {
+        _rDepthFrameSize = m_DepthFrameSize;
+        _rColorFrameSize = m_ColorFrameSize;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CScalableSLAMReconstructor::GetIntrinsics(glm::vec2& _rFocalLength, glm::vec2& _rFocalPoint)
+    {
+        _rFocalLength = m_FocalLength;
+        _rFocalPoint = m_FocalPoint;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CScalableSLAMReconstructor::GetDepthBounds(float& _rMin, float& _rMax)
+    {
+        _rMin = m_DepthBounds[0];
+        _rMax = m_DepthBounds[1];
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CScalableSLAMReconstructor::GetDeviceResolution(glm::ivec2& _rResolution)
+    {
+        _rResolution = m_DeviceResolution;
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CScalableSLAMReconstructor::OnNewFrame(Gfx::CTexturePtr DepthBuffer, Gfx::CTexturePtr ColorBuffer, const glm::mat4* pTransform)
     {
         m_IsTrackingNeeded = pTransform == nullptr;
@@ -1927,6 +1965,7 @@ namespace MR
         m_FocalLength = glm::vec2(0.0f);
         m_FocalPoint = glm::vec2(0.0f);
         m_DepthBounds = glm::vec2(0.0f);
+        m_DeviceResolution = glm::vec2(0, 0);
 
         if (pReconstructionSettings != nullptr)
         {

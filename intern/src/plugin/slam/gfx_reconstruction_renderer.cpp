@@ -128,6 +128,7 @@ namespace
 
 		void RaycastScalableVolume();
         void RaycastScalableVolumeWithHighlight();
+        void RaycastScalableVolumeDiminished();
         
         void RenderQueuedRootVolumes();
         void RenderQueuedLevel1Grids();
@@ -157,8 +158,10 @@ namespace
         CShaderPtr m_OutlineLevel2FSPtr;
         
         CShaderPtr m_RaycastVSPtr;
+        CShaderPtr m_RaycastDiminishedVSPtr;
         CShaderPtr m_RaycastFSPtr;
         CShaderPtr m_RaycastHighlightFSPtr;
+        CShaderPtr m_RaycastDiminishedFSPtr;
 
         CShaderPtr m_CopyRaycastVSPtr;
         CShaderPtr m_CopyRaycastFSPtr;
@@ -189,9 +192,8 @@ namespace
 
         CShaderPtr m_PickingCSPtr;
 
-        CTexturePtr m_IntermediateTargetPtr0;
-        CTexturePtr m_IntermediateTargetPtr1;
-        CTargetSetPtr m_IntermediateTargetSetPtr;
+        CTexturePtr m_DiminishedTargetPtr;
+        CTargetSetPtr m_DiminishedTargetSetPtr;
 
         CBufferPtr m_PickingBuffer;
 
@@ -206,6 +208,8 @@ namespace
         bool m_RenderBackSides;
         bool m_RenderPlanes;
 
+        glm::vec3 m_SelectionBoxMin;
+        glm::vec3 m_SelectionBoxMax;
         glm::mat4 m_SelectionTransform;
 
         ESelection m_SelectionState;
@@ -287,8 +291,10 @@ namespace
         m_OutlineLevel2VSPtr = 0;
         m_OutlineLevel2FSPtr = 0;
         m_RaycastVSPtr = 0;
+        m_RaycastDiminishedVSPtr = 0;
         m_RaycastFSPtr = 0;
         m_RaycastHighlightFSPtr = 0;
+        m_RaycastDiminishedFSPtr = 0;
         m_CopyRaycastVSPtr = 0;
         m_CopyRaycastFSPtr = 0;
         m_PickingCSPtr = 0;
@@ -320,9 +326,8 @@ namespace
         m_PointCloudVSPtr = 0;
         m_PointCloudFSPtr = 0;
 
-        m_IntermediateTargetPtr0 = nullptr;
-        m_IntermediateTargetPtr1 = nullptr;
-        m_IntermediateTargetSetPtr = nullptr;
+        m_DiminishedTargetPtr = nullptr;
+        m_DiminishedTargetSetPtr = nullptr;
 
         m_IsInitialized = false;
     }
@@ -381,8 +386,10 @@ namespace
         m_PointCloudFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_point_cloud.glsl", "main", DefineString.c_str());
 
         m_RaycastVSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_raycast.glsl", "main", DefineString.c_str());
+        m_RaycastDiminishedVSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_raycast_diminished.glsl", "main", DefineString.c_str());
         m_RaycastFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_raycast.glsl", "main", DefineString.c_str());
         m_RaycastHighlightFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_raycast_highlight.glsl", "main", DefineString.c_str());
+        m_RaycastDiminishedFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_raycast_diminished.glsl", "main", DefineString.c_str());
 
         m_CopyRaycastVSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_copy_raycast.glsl", "main", DefineString.c_str());
         m_CopyRaycastFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_copy_raycast.glsl", "main", DefineString.c_str());
@@ -420,7 +427,26 @@ namespace
     
     void CGfxReconstructionRenderer::OnSetupRenderTargets()
     {
+        STextureDescriptor TextureDescriptor = {};
 
+        TextureDescriptor.m_NumberOfPixelsU  = 1280;
+        TextureDescriptor.m_NumberOfPixelsV  = 720;
+        TextureDescriptor.m_NumberOfPixelsW  = 1;
+        TextureDescriptor.m_NumberOfMipMaps  = 1;
+        TextureDescriptor.m_NumberOfTextures = 1;
+        TextureDescriptor.m_Binding          = CTexture::ShaderResource | CTexture::RenderTarget;
+        TextureDescriptor.m_Access           = CTexture::CPUWrite;
+        TextureDescriptor.m_Usage            = CTexture::GPUReadWrite;
+        TextureDescriptor.m_Semantic         = CTexture::UndefinedSemantic;
+        TextureDescriptor.m_Format           = CTexture::R16G16B16A16_FLOAT;
+
+        m_DiminishedTargetPtr = TextureManager::CreateTexture2D(TextureDescriptor);
+
+        TextureManager::SetTextureLabel(m_DiminishedTargetPtr, "Diminished Texture");
+
+        m_DiminishedTargetSetPtr = TargetSetManager::CreateTargetSet(m_DiminishedTargetPtr);
+
+        TargetSetManager::SetTargetSetLabel(m_DiminishedTargetSetPtr, "Diminished Target Set");
     }
     
     // -----------------------------------------------------------------------------
@@ -444,25 +470,7 @@ namespace
     
     void CGfxReconstructionRenderer::OnSetupTextures()
     {
-        glm::ivec2 Size = Main::GetActiveWindowSize();
 
-        STextureDescriptor TextureDescriptor = {};
-
-        TextureDescriptor.m_NumberOfPixelsU = Size.x;
-        TextureDescriptor.m_NumberOfPixelsV = Size.y;
-        TextureDescriptor.m_NumberOfPixelsW = 1;
-        TextureDescriptor.m_NumberOfMipMaps = 1;
-        TextureDescriptor.m_NumberOfTextures = 1;
-        TextureDescriptor.m_Binding = CTexture::ShaderResource | CTexture::RenderTarget;
-        TextureDescriptor.m_Access = CTexture::CPUWrite;
-        TextureDescriptor.m_Usage = CTexture::GPUReadWrite;
-        TextureDescriptor.m_Semantic = CTexture::UndefinedSemantic;
-        TextureDescriptor.m_Format = CTexture::R16G16B16A16_FLOAT;
-
-        m_IntermediateTargetPtr0 = TextureManager::CreateTexture2D(TextureDescriptor);
-        m_IntermediateTargetPtr1 = TextureManager::CreateTexture2D(TextureDescriptor);
-
-        m_IntermediateTargetSetPtr = TargetSetManager::CreateTargetSet(m_IntermediateTargetPtr0, m_IntermediateTargetPtr1);
     }
     
     // -----------------------------------------------------------------------------
@@ -707,23 +715,7 @@ namespace
 
     void CGfxReconstructionRenderer::OnResize(unsigned int _Width, unsigned int _Height)
     {
-        STextureDescriptor TextureDescriptor = {};
 
-        TextureDescriptor.m_NumberOfPixelsU = _Width;
-        TextureDescriptor.m_NumberOfPixelsV = _Height;
-        TextureDescriptor.m_NumberOfPixelsW = 1;
-        TextureDescriptor.m_NumberOfMipMaps = 1;
-        TextureDescriptor.m_NumberOfTextures = 1;
-        TextureDescriptor.m_Binding = CTexture::ShaderResource | CTexture::RenderTarget;
-        TextureDescriptor.m_Access = CTexture::CPUWrite;
-        TextureDescriptor.m_Usage = CTexture::GPUReadWrite;
-        TextureDescriptor.m_Semantic = CTexture::UndefinedSemantic;
-        TextureDescriptor.m_Format = CTexture::R16G16B16A16_FLOAT;
-
-        m_IntermediateTargetPtr0 = TextureManager::CreateTexture2D(TextureDescriptor);
-        m_IntermediateTargetPtr1 = TextureManager::CreateTexture2D(TextureDescriptor);
-
-        m_IntermediateTargetSetPtr = TargetSetManager::CreateTargetSet(m_IntermediateTargetPtr0, m_IntermediateTargetPtr1);
     }
 
     // -----------------------------------------------------------------------------
@@ -937,6 +929,77 @@ namespace
 
         glm::mat4 InvOBBMatrix = glm::inverse(m_SelectionTransform) * ReconstructionToSaltwater;
         
+        BufferManager::UploadBufferData(m_RaycastHighLightConstantBufferPtr, &InvOBBMatrix);
+
+        BufferManager::UploadBufferData(m_VolumeMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer(), &Vertices);
+
+        const unsigned int Offset = 0;
+        ContextManager::SetVertexBuffer(m_VolumeMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
+        ContextManager::SetIndexBuffer(m_VolumeMeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
+        ContextManager::SetInputLayout(m_VolumeInputLayoutPtr);
+
+        ContextManager::SetTopology(STopology::TriangleList);
+
+        ContextManager::DrawIndexed(36, 0, 0);
+
+        Performance::EndEvent();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxReconstructionRenderer::RaycastScalableVolumeDiminished()
+    {
+        if (m_SelectionState == ESelection::NOSELECTION) return;
+
+        glm::mat4 ReconstructionToSaltwater = glm::mat4(
+            1.0f, 0.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 1.0f, 0.0f,
+            0.0f, -1.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, 1.0f
+        );
+
+        Performance::BeginEvent("Raycasting for diminishing");
+
+        ContextManager::SetTargetSet(m_DiminishedTargetSetPtr);
+
+        MR::CScalableSLAMReconstructor::SScalableVolume& rVolume = m_pScalableReconstructor->GetVolume();
+        
+        ContextManager::SetShaderVS(m_RaycastDiminishedVSPtr);
+        ContextManager::SetShaderPS(m_RaycastDiminishedFSPtr);
+
+        ContextManager::SetResourceBuffer(0, rVolume.m_RootVolumePoolPtr);
+        ContextManager::SetResourceBuffer(1, rVolume.m_RootGridPoolPtr);
+        ContextManager::SetResourceBuffer(2, rVolume.m_Level1PoolPtr);
+        ContextManager::SetResourceBuffer(3, rVolume.m_TSDFPoolPtr);
+        ContextManager::SetResourceBuffer(6, rVolume.m_RootVolumePositionBufferPtr);
+
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+        ContextManager::SetConstantBuffer(1, m_RaycastHighLightConstantBufferPtr);
+
+        ContextManager::SetConstantBuffer(2, rVolume.m_AABBBufferPtr);
+
+        ContextManager::Barrier();
+
+        ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::Default));
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
+
+        const glm::vec3 Min = glm::translate(glm::vec3(-0.7f)) * glm::vec4(m_SelectionBoxMin, 1.0f);
+        const glm::vec3 Max = glm::translate(glm::vec3(+0.7f)) * glm::vec4(m_SelectionBoxMax, 1.0f);
+
+        glm::vec3 Vertices[8] =
+        {
+            glm::vec3(glm::vec4(Min[0], Min[1], Min[2], 1.0f)),
+            glm::vec3(glm::vec4(Max[0], Min[1], Min[2], 1.0f)),
+            glm::vec3(glm::vec4(Max[0], Max[1], Min[2], 1.0f)),
+            glm::vec3(glm::vec4(Min[0], Max[1], Min[2], 1.0f)),
+            glm::vec3(glm::vec4(Min[0], Min[1], Max[2], 1.0f)),
+            glm::vec3(glm::vec4(Max[0], Min[1], Max[2], 1.0f)),
+            glm::vec3(glm::vec4(Max[0], Max[1], Max[2], 1.0f)),
+            glm::vec3(glm::vec4(Min[0], Max[1], Max[2], 1.0f))
+        };
+
+        glm::mat4 InvOBBMatrix = glm::inverse(m_SelectionTransform) * ReconstructionToSaltwater;
+
         BufferManager::UploadBufferData(m_RaycastHighLightConstantBufferPtr, &InvOBBMatrix);
 
         BufferManager::UploadBufferData(m_VolumeMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer(), &Vertices);
@@ -1315,6 +1378,10 @@ namespace
         float Angle = std::atan2(Direction.y, Direction.x); // TODO: find out why glm::atan2 does lead to a compiler error
         Rotation = glm::eulerAngleZ(Angle);
 
+        m_SelectionBoxMin = _rAnchor0;
+        m_SelectionBoxMax = _rAnchor1;
+        m_SelectionBoxMax.z += glm::length(Diagonal) / glm::sqrt(2.0f);
+
         m_SelectionTransform = Translation * Scaling * Rotation;
         m_SelectionState = static_cast<ESelection>(_State);
     }
@@ -1351,6 +1418,8 @@ namespace
             {
                 RaycastScalableVolumeWithHighlight();
             }
+
+            RaycastScalableVolumeDiminished();
         }
 
         Performance::EndEvent();
@@ -1427,7 +1496,6 @@ namespace
     {
         m_pScalableReconstructor = &_rReconstructor;
     }
-
 } // namespace
 
 namespace Gfx
@@ -1578,7 +1646,6 @@ namespace ReconstructionRenderer
     {
         CGfxReconstructionRenderer::GetInstance().SetSelectionBox(_rAnchor0, _rAnchor1, _Height, _State);
     }
-
 } // namespace ReconstructionRenderer
 } // namespace Gfx
 
