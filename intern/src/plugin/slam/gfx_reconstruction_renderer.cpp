@@ -1033,8 +1033,8 @@ namespace
         ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::Default));
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
 
-        const glm::vec3 Min = glm::translate(glm::vec3(-0.05f)) * glm::vec4(m_SelectionBoxMin, 1.0f);
-        const glm::vec3 Max = glm::translate(glm::vec3(+0.05f)) * glm::vec4(m_SelectionBoxMax, 1.0f);
+        const glm::vec3 Min = glm::translate(glm::vec3(-0.7f)) * glm::vec4(m_SelectionBoxMin, 1.0f);
+        const glm::vec3 Max = glm::translate(glm::vec3(+0.7f)) * glm::vec4(m_SelectionBoxMax, 1.0f);
 
         glm::vec3 Vertices[8] =
         {
