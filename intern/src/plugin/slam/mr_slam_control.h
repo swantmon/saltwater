@@ -326,7 +326,7 @@ namespace MR
                     m_UseTrackingCamera = false;
                 }
 
-                while (!m_pRecordReader->IsEnd() && m_pRecordReader->PeekTimecode() < m_pRecordReader->GetTime());
+                while (!m_pRecordReader->IsEnd() && m_pRecordReader->PeekTimecode() < m_pRecordReader->GetTime())
                 {
                     Net::CMessage Message;
 
