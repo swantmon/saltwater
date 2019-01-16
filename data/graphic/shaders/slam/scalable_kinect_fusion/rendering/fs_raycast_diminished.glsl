@@ -30,17 +30,6 @@ bool IsInBox(vec3 Position)
     Position = (g_WSToSelectionTransform * vec4(Position, 1.0f)).xyz;
     bool IsInX = Position.x > 0.0f && Position.x < 1.0f;
     bool IsInY = Position.y > 0.0f && Position.y < 1.0f;
-    bool IsInZ = Position.z > 0.0f && Position.z < 1.0f;
-    return IsInX && IsInY && IsInZ;
-}
-
-// -----------------------------------------------------------------------------
-
-bool IsInBox2(vec3 Position)
-{
-    Position = (g_WSToSelectionTransform * vec4(Position, 1.0f)).xyz;
-    bool IsInX = Position.x > 0.0f && Position.x < 1.0f;
-    bool IsInY = Position.y > 0.0f && Position.y < 1.0f;
     bool IsInZ = Position.z > 0.1f && Position.z < 1.0f;
     return IsInX && IsInY && IsInZ;
 }
@@ -81,9 +70,9 @@ vec3 GetDiminishedPosition(vec3 CameraPosition, vec3 RayDirection)
             RayLength += NewStep;
         }
 #ifdef RAYCAST_BACKSIDES
-        else if (CurrentTSDF * PreviousTSDF < 0.0f && !IsInBox2(CurrentPosition))
+        else if (CurrentTSDF * PreviousTSDF < 0.0f && !IsInBox(CurrentPosition))
 #else
-        else if (CurrentTSDF < 0.0f && PreviousTSDF > 0.0f && !IsInBox2(CurrentPosition))
+        else if (CurrentTSDF < 0.0f && PreviousTSDF > 0.0f && !IsInBox(CurrentPosition))
 #endif
         {
             break;
@@ -130,13 +119,17 @@ void main()
         0.0f, -1.0f, 0.0f
     );
 
+    vec2 FragCoord = vec2(gl_FragCoord.x, gl_FragCoord.y);
+
     vec3 VertexPixelPosition;
-    VertexPixelPosition.xy = vec2(gl_FragCoord.xy - m_FocalPoint) * m_InvFocalLength;
-    VertexPixelPosition.z = 1.0f;
+    VertexPixelPosition.xz = vec2(FragCoord - m_FocalPoint) * m_InvFocalLength;
+    VertexPixelPosition.y = 1.0f;
+
+    vec3 WSRayDirection = SaltwaterToReconstruction * mat3(g_ViewToWorld)* normalize(VertexPixelPosition);
  
     vec3 CameraPosition = SaltwaterToReconstruction * g_ViewPosition.xyz;
-    //vec3 RayDirection = normalize(VertexPixelPosition);
-    vec3 RayDirection = SaltwaterToReconstruction * normalize(in_WSRayDirection);
+    vec3 RayDirection = SaltwaterToReconstruction * WSRayDirection;
+    //vec3 RayDirection = SaltwaterToReconstruction * normalize(in_WSRayDirection);
  
     RayDirection.x = RayDirection.x == 0.0f ? 1e-15f : RayDirection.x;
     RayDirection.y = RayDirection.y == 0.0f ? 1e-15f : RayDirection.y;
@@ -152,7 +145,6 @@ void main()
     Color = vec3(1.0f);
 #endif
     
-    //vec4 FinalColor = IsInBox(Vertex) ? vec4(Color, 1.0f) : vec4(0.0f);
     vec4 FinalColor = vec4(Color, 1.0f);
 
     out_DiminishedColor = FinalColor;
