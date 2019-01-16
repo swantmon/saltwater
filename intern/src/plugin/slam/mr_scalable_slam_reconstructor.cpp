@@ -157,6 +157,7 @@ namespace
 
     struct SPlaneExtraction
     {
+        glm::mat4  m_Rotation;
         glm::vec3  m_PlaneCenterPosition;
         float      m_Height;
         glm::vec2  m_PlaneSize;
@@ -1885,6 +1886,7 @@ namespace MR
         int MaxPixel = int((PlaneResolution / 2) * (1.0f / PlaneScale));
 
         SPlaneExtraction ConstantBuffer;
+        ConstantBuffer.m_Rotation = glm::eulerAngleZ(glm::acos(glm::dot(glm::normalize(Diagonal), glm::vec3(0.0f, 1.0f, 0.0f))) + glm::pi<float>() / 4.0f);
         ConstantBuffer.m_PlaneCenterPosition = glm::vec3((_rAnchor0 + _rAnchor1) / 2.0f);
         ConstantBuffer.m_PlaneSize = glm::vec2(SelectionWidth * PlaneScale);
         ConstantBuffer.m_Height = 0.0f; // TODO
