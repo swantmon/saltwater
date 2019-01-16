@@ -155,7 +155,7 @@ namespace
         uint32_t m_Color;
     };
 
-    struct SPlaneExtraction
+    struct SPlaneInpainting
     {
         glm::mat4  m_Rotation;
         glm::vec3  m_PlaneCenterPosition;
@@ -1280,7 +1280,7 @@ namespace MR
 
         ConstantBufferDesc.m_pBytes = nullptr;
         ConstantBufferDesc.m_Binding = CBuffer::ConstantBuffer;
-        ConstantBufferDesc.m_NumberOfBytes = sizeof(SPlaneExtraction);
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(SPlaneInpainting);
 
         m_PlaneExtractionBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
     }
@@ -1887,7 +1887,7 @@ namespace MR
         
         float CameraRotation = glm::acos(glm::dot(glm::normalize(Diagonal), glm::vec3(0.0f, 1.0f, 0.0f)));
         
-        SPlaneExtraction ConstantBuffer;
+        SPlaneInpainting ConstantBuffer;
         ConstantBuffer.m_Rotation = glm::eulerAngleZ(CameraRotation + glm::pi<float>() / 4.0f);
         ConstantBuffer.m_PlaneCenterPosition = glm::vec3((_rAnchor0 + _rAnchor1) / 2.0f);
         ConstantBuffer.m_PlaneSize = glm::vec2(SelectionWidth * PlaneScale);
