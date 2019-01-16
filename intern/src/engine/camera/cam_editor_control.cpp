@@ -45,6 +45,23 @@ namespace Cam
 
     // -----------------------------------------------------------------------------
 
+    void CEditorControl::SetProjectionMatrix(const glm::mat4& _rProjectionMatrix)
+    {
+        Gfx::CCamera& rCamera = *Gfx::ViewManager::GetMainCamera();
+
+        float Near = glm::abs(_rProjectionMatrix[2][3] / (_rProjectionMatrix[2][2] - 1.0f));
+        float Far  = glm::abs(_rProjectionMatrix[2][3] / (_rProjectionMatrix[2][2] + 1.0f));
+
+        float Bottom = Near * (_rProjectionMatrix[2][1] - 1.0f) / _rProjectionMatrix[1][1];
+        float Top    = Near * (_rProjectionMatrix[2][1] + 1.0f) / _rProjectionMatrix[1][1];
+        float Left   = Near * (_rProjectionMatrix[2][0] - 1.0f) / _rProjectionMatrix[0][0];
+        float Right  = Near * (_rProjectionMatrix[2][0] + 1.0f) / _rProjectionMatrix[0][0];
+
+        rCamera.SetPerspective(Left, Right, Bottom, Top, Near, Far);
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CEditorControl::InternOnEvent(const Base::CInputEvent& _rEvent)
     {
         if (_rEvent.GetAction() == Base::CInputEvent::MouseMiddlePressed && !m_IsFlying)
