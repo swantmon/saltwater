@@ -1358,6 +1358,13 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
+    void CScalableSLAMReconstructor::SetDeviceResolution(const glm::ivec2& _rResolution)
+    {
+        m_DeviceResolution = _rResolution;
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CScalableSLAMReconstructor::GetImageSizes(glm::ivec2& _rDepthFrameSize, glm::ivec2& _rColorFrameSize)
     {
         _rDepthFrameSize = m_DepthFrameSize;
@@ -1370,6 +1377,21 @@ namespace MR
     {
         _rFocalLength = m_FocalLength;
         _rFocalPoint = m_FocalPoint;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CScalableSLAMReconstructor::GetDepthBounds(float& _rMin, float& _rMax)
+    {
+        _rMin = m_DepthBounds[0];
+        _rMax = m_DepthBounds[1];
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CScalableSLAMReconstructor::GetDeviceResolution(glm::ivec2& _rResolution)
+    {
+        _rResolution = m_DeviceResolution;
     }
 
     // -----------------------------------------------------------------------------
@@ -1951,6 +1973,7 @@ namespace MR
         m_FocalLength = glm::vec2(0.0f);
         m_FocalPoint = glm::vec2(0.0f);
         m_DepthBounds = glm::vec2(0.0f);
+        m_DeviceResolution = glm::vec2(0, 0);
 
         if (pReconstructionSettings != nullptr)
         {

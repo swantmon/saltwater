@@ -483,6 +483,8 @@ namespace MR
 
                     m_CaptureColor = Settings.m_CaptureColor;
 
+                    m_pReconstructor->SetDeviceResolution(glm::ivec2(1280, 720));
+
                     if (m_CaptureColor)
                     {
                         FocalPoint.x = (FocalPoint.x / m_DepthSize.x) * m_ColorSize.x;

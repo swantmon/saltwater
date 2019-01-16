@@ -125,7 +125,7 @@ void main()
     VertexPixelPosition.xz = vec2(FragCoord - m_FocalPoint) * m_InvFocalLength;
     VertexPixelPosition.y = 1.0f;
 
-    vec3 WSRayDirection = SaltwaterToReconstruction * mat3(g_ViewToWorld)* normalize(VertexPixelPosition);
+    vec3 WSRayDirection = SaltwaterToReconstruction * mat3(g_ViewToWorld) * normalize(VertexPixelPosition);
  
     vec3 CameraPosition = SaltwaterToReconstruction * g_ViewPosition.xyz;
     vec3 RayDirection = SaltwaterToReconstruction * WSRayDirection;

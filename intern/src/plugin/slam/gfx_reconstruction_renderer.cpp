@@ -289,14 +289,16 @@ namespace
         glm::ivec2 ColorImageSize;
         glm::vec2 FocalLength;
         glm::vec2 FocalPoint;
+        glm::ivec2 DeviceResolution;
 
+        m_pScalableReconstructor->GetDeviceResolution(DeviceResolution);
         m_pScalableReconstructor->GetImageSizes(DepthImageSize, ColorImageSize);
         m_pScalableReconstructor->GetIntrinsics(FocalLength, FocalPoint);
 
-        FocalLength[0] = FocalLength[0] / DepthImageSize[0] * 1280;
-        FocalLength[1] = FocalLength[1] / DepthImageSize[1] * 720;
-        FocalPoint[0] = FocalPoint[0] / DepthImageSize[0] * 1280;
-        FocalPoint[1] = FocalPoint[1] / DepthImageSize[1] * 720;
+        FocalLength[0] = FocalLength[0] / DepthImageSize[0] * DeviceResolution[0];
+        FocalLength[1] = FocalLength[1] / DepthImageSize[1] * DeviceResolution[1];
+        FocalPoint[0] = FocalPoint[0] / DepthImageSize[0] * DeviceResolution[0];
+        FocalPoint[1] = FocalPoint[1] / DepthImageSize[1] * DeviceResolution[1];
 
         SetIntrinsics(FocalLength, FocalPoint);
 
