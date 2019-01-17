@@ -171,10 +171,7 @@ namespace
         CShaderPtr m_RaycastFSPtr;
         CShaderPtr m_RaycastHighlightFSPtr;
         CShaderPtr m_RaycastDiminishedFSPtr;
-
-        CShaderPtr m_CopyRaycastVSPtr;
-        CShaderPtr m_CopyRaycastFSPtr;
-
+        
         CBufferPtr m_RaycastConstantBufferPtr;
         CBufferPtr m_RaycastHighLightConstantBufferPtr;
         CBufferPtr m_DrawCallConstantBufferPtr;
@@ -304,8 +301,6 @@ namespace
         m_RaycastFSPtr = 0;
         m_RaycastHighlightFSPtr = 0;
         m_RaycastDiminishedFSPtr = 0;
-        m_CopyRaycastVSPtr = 0;
-        m_CopyRaycastFSPtr = 0;
         m_PickingCSPtr = 0;
 
         m_VolumeVertexMapVSPtr = 0;
@@ -401,9 +396,6 @@ namespace
         m_RaycastFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_raycast.glsl", "main", DefineString.c_str());
         m_RaycastHighlightFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_raycast_highlight.glsl", "main", DefineString.c_str());
         m_RaycastDiminishedFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_raycast_diminished.glsl", "main", DefineString.c_str());
-
-        m_CopyRaycastVSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_copy_raycast.glsl", "main", DefineString.c_str());
-        m_CopyRaycastFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_copy_raycast.glsl", "main", DefineString.c_str());
 
         m_VolumeVertexMapVSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_volume_vertex_map.glsl", "main", DefineString.c_str());
         m_VolumeVertexMapFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_volume_vertex_map.glsl", "main", DefineString.c_str());
