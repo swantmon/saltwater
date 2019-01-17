@@ -137,6 +137,7 @@ namespace
 		void RaycastScalableVolume();
         void RaycastScalableVolumeWithHighlight();
         void RaycastScalableVolumeDiminished();
+        void RenderInpaintedPlane();
         
         void RenderQueuedRootVolumes();
         void RenderQueuedLevel1Grids();
@@ -336,6 +337,8 @@ namespace
 
         m_DiminishedTargetPtr = nullptr;
         m_DiminishedTargetSetPtr = nullptr;
+
+        m_InpaintedPlaneTexture = nullptr;
 
         m_IsInitialized = false;
     }
@@ -957,8 +960,6 @@ namespace
 
     void CGfxReconstructionRenderer::RaycastScalableVolumeDiminished()
     {
-        if (m_SelectionState == ESelection::NOSELECTION) return;
-
         glm::mat4 ReconstructionToSaltwater = glm::mat4(
             1.0f, 0.0f, 0.0f, 0.0f,
             0.0f, 0.0f, 1.0f, 0.0f,
@@ -1022,6 +1023,13 @@ namespace
         ContextManager::DrawIndexed(36, 0, 0);
 
         Performance::EndEvent();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxReconstructionRenderer::RenderInpaintedPlane()
+    {
+
     }
 
 	// -----------------------------------------------------------------------------
@@ -1435,8 +1443,11 @@ namespace
             {
                 RaycastScalableVolumeWithHighlight();
             }
-
-            RaycastScalableVolumeDiminished();
+            if (m_SelectionState == ESelection::FIRSTRELEASE)
+            {
+                RenderInpaintedPlane();
+                RaycastScalableVolumeDiminished();
+            }
         }
 
         Performance::EndEvent();
