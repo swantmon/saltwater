@@ -131,9 +131,7 @@ namespace
     private:
 
         void Initialize();
-
-        void RenderVolumeVertexMap();
-
+        
 		void RaycastScalableVolume();
         void RaycastScalableVolumeWithHighlight();
         void RaycastScalableVolumeDiminished();
@@ -205,7 +203,6 @@ namespace
 
         bool m_UseTrackingCamera;
 
-        bool m_RenderVolumeVertexMap;
         bool m_RenderVolume;
         bool m_RenderVertexMap;
         bool m_RenderRootQueue;
@@ -231,7 +228,6 @@ namespace
     CGfxReconstructionRenderer::CGfxReconstructionRenderer()
         : m_UseTrackingCamera    (true)
         , m_RenderVolume         (true)
-        , m_RenderVolumeVertexMap(false)
         , m_RenderVertexMap      (false)
         , m_RenderRootQueue      (false)
         , m_RenderLevel1Queue    (false)
@@ -258,7 +254,6 @@ namespace
                                 
         m_UseTrackingCamera     = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:use_tracking_camera", true);
         m_RenderVolume          = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:volume"             , true);
-        m_RenderVolumeVertexMap = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:volume_vertex_map"  , false);
         m_RenderVertexMap       = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:vertex_map"         , false);
         m_RenderRootQueue       = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:root"        , false);
         m_RenderLevel1Queue     = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:level1"      , false);
@@ -760,30 +755,7 @@ namespace
 
         ContextManager::Draw(m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface()->GetNumberOfVertices(), 0);
     }
-
-    // -----------------------------------------------------------------------------
-
-    void CGfxReconstructionRenderer::RenderVolumeVertexMap()
-    {
-        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
-
-        ContextManager::SetRenderContext(m_OutlineRenderContextPtr);
-        ContextManager::SetShaderVS(m_VolumeVertexMapVSPtr);
-        ContextManager::SetShaderPS(m_VolumeVertexMapFSPtr);
-
-        ContextManager::SetImageTexture(0, m_pScalableReconstructor->GetVertexMap());
-        ContextManager::SetImageTexture(1, m_pScalableReconstructor->GetNormalMap());
-
-        const unsigned int Offset = 0;
-        ContextManager::SetVertexBuffer(m_QuadMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
-        ContextManager::SetIndexBuffer(m_QuadMeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
-
-        ContextManager::SetInputLayout(m_QuadInputLayoutPtr);
-        ContextManager::SetTopology(STopology::TriangleStrip);
-
-        ContextManager::Draw(4, 0);
-    }
-    
+        
 	// -----------------------------------------------------------------------------
 
 	void CGfxReconstructionRenderer::RaycastScalableVolume()
@@ -1021,7 +993,30 @@ namespace
 
     void CGfxReconstructionRenderer::RenderInpaintedPlane()
     {
-
+//         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
+// 
+//         ContextManager::SetRenderContext(m_PlaneRenderContextPtr);
+//         ContextManager::SetShaderVS(m_InpaintedPlaneVSPtr);
+//         ContextManager::SetShaderPS(m_InpaintedPlaneFSPtr);
+// 
+//         SDrawCallConstantBuffer BufferData;
+//         
+//         BufferData.m_WorldMatrix = glm::eulerAngleX(glm::half_pi<float>()) * PoseMatrix;
+//         BufferData.m_Color = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
+// 
+//         BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
+// 
+//         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+//         ContextManager::SetConstantBuffer(1, m_DrawCallConstantBufferPtr);
+// 
+//         const unsigned int Offset = 0;
+//         ContextManager::SetVertexBuffer(->GetLOD(0)->GetSurface()->GetVertexBuffer());
+//         ContextManager::SetIndexBuffer(->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
+// 
+//         ContextManager::SetInputLayout(m_CameraInputLayoutPtr);
+//         ContextManager::SetTopology(STopology::TriangleList);
+// 
+//         ContextManager::Draw(->GetLOD(0)->GetSurface()->GetNumberOfVertices(), 0);
     }
 
 	// -----------------------------------------------------------------------------
@@ -1266,6 +1261,8 @@ namespace
 
     void CGfxReconstructionRenderer::RenderVertexMap()
     {
+        Performance::BeginEvent("RenderVertexMap");
+
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
         ContextManager::SetRenderContext(m_OutlineRenderContextPtr);
 
@@ -1288,15 +1285,17 @@ namespace
         ContextManager::SetImageTexture(1, m_pScalableReconstructor->GetColorMap());
 
         const unsigned int Offset = 0;
-        ContextManager::SetVertexBuffer(m_CameraMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
-        ContextManager::SetIndexBuffer(m_CameraMeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
+        ContextManager::SetVertexBuffer(m_QuadMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
+        ContextManager::SetIndexBuffer(m_QuadMeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
 
-        ContextManager::SetInputLayout(m_CameraInputLayoutPtr);
+        ContextManager::SetInputLayout(m_QuadInputLayoutPtr);
         ContextManager::SetTopology(STopology::PointList);
 
         glm::ivec2 DepthSize = m_pScalableReconstructor->GetDepthImageSize();
 
         ContextManager::Draw(DepthSize.x * DepthSize.y, 0);
+
+        Performance::EndEvent();
     }
 
     // -----------------------------------------------------------------------------
@@ -1457,24 +1456,14 @@ namespace
             return;
         }
         
-        if (m_RenderVolumeVertexMap)
+        if (m_RenderVertexMap)
         {
-            RenderVolumeVertexMap();
+            RenderVertexMap();
         }
 
         if (!m_UseTrackingCamera)
         {
             RenderCamera();
-        }
-
-        if (m_RenderVolumeVertexMap)
-        {
-            RenderVolumeVertexMap();
-        }
-
-        if (m_RenderVertexMap)
-        {
-            RenderVertexMap();
         }
 
         if (m_RenderRootQueue)
