@@ -105,6 +105,7 @@ namespace
         glm::vec3 Pick(const glm::ivec2& _rCursorPosition);
 
         void SetSelectionBox(const glm::vec3& _rAnchor0, const glm::vec3& _rAnchor1, float _Height, int _State);
+        void SetInpaintedPlane(const glm::vec3& _rAnchor0, const glm::vec3& _rAnchor1, Gfx::CTexturePtr _Texture);
 
     private:
 
@@ -119,6 +120,13 @@ namespace
             SECONDPRESS,
             SECONDRELEASE
         };
+
+        // -----------------------------------------------------------------------------
+        // Stuff for inpainted plane
+        // -----------------------------------------------------------------------------
+        Gfx::CTexturePtr m_InpaintedPlaneTexture;
+        glm::vec3 m_InpaintedPlaneAnchor0;
+        glm::vec3 m_InpaintedPlaneAnchor1;
 
     private:
 
@@ -1387,6 +1395,15 @@ namespace
     }
 
     // -----------------------------------------------------------------------------
+    
+    void CGfxReconstructionRenderer::SetInpaintedPlane(const glm::vec3& _rAnchor0, const glm::vec3& _rAnchor1, Gfx::CTexturePtr _Texture)
+    {
+        m_InpaintedPlaneTexture = _Texture;
+        m_InpaintedPlaneAnchor0 = _rAnchor0;
+        m_InpaintedPlaneAnchor1 = _rAnchor1;
+    }
+
+    // -----------------------------------------------------------------------------
 
     void CGfxReconstructionRenderer::Render()
     {
@@ -1646,6 +1663,14 @@ namespace ReconstructionRenderer
     {
         CGfxReconstructionRenderer::GetInstance().SetSelectionBox(_rAnchor0, _rAnchor1, _Height, _State);
     }
+
+    // -----------------------------------------------------------------------------
+
+    void SetInpaintedPlane(const glm::vec3& _rAnchor0, const glm::vec3& _rAnchor1, Gfx::CTexturePtr _Texture)
+    {
+        CGfxReconstructionRenderer::GetInstance().SetInpaintedPlane(_rAnchor0, _rAnchor1, _Texture);
+    }
+
 } // namespace ReconstructionRenderer
 } // namespace Gfx
 

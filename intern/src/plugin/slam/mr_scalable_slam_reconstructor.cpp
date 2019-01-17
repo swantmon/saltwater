@@ -1879,7 +1879,7 @@ namespace MR
         const int PlaneResolution = 256;
         const float PlaneScale = 3.0f;
 
-        glm::vec3 Diagonal = _rAnchor1 - _rAnchor0;    
+        glm::vec3 Diagonal = _rAnchor1 - _rAnchor0;
         float DiagonalLength = glm::length(Diagonal);
         float SelectionWidth = glm::sqrt(DiagonalLength * DiagonalLength / 2.0f);
 
