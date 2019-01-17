@@ -148,8 +148,7 @@ namespace
         void OnExit();
         
         CMeshPtr CreateMeshFromFile(const std::string& _rPathToFile, int _GenFlag, int _MeshIndex);
-        CMeshPtr CreateMesh(const std::vector<glm::vec3> _rVertices, const std::vector<uint32_t> _rIndices);
-        CMeshPtr CreateMesh(const glm::vec3* _rVertices, int _NumberOfVertices, const uint32_t* _rIndices, int _NumberOfIndices);
+        CMeshPtr CreateMesh(const void* _rVertices, int _NumberOfVertices, int _SizeOfVertex, const uint32_t* _rIndices, int _NumberOfIndices);
         CMeshPtr CreateBox(float _Width, float _Height, float _Depth);
         CMeshPtr CreateSphere(float _Radius, unsigned int _Stacks, unsigned int _Slices);
         CMeshPtr CreateSphereIsometric(float _Radius, unsigned int _Refinement);
@@ -282,14 +281,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    CMeshPtr CGfxMeshManager::CreateMesh(const std::vector<glm::vec3> _rVertices, const std::vector<uint32_t> _rIndices)
-    {
-        return CreateMesh(_rVertices.data(), static_cast<int>(_rVertices.size()), _rIndices.data(), static_cast<int>(_rIndices.size()));
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CMeshPtr CGfxMeshManager::CreateMesh(const glm::vec3* _rVertices, int _NumberOfVertices, const uint32_t* _rIndices, int _NumberOfIndices)
+    CMeshPtr CGfxMeshManager::CreateMesh(const void* _rVertices, int _NumberOfVertices, int _SizeOfVertex, const uint32_t* _rIndices, int _NumberOfIndices)
     {
         // -----------------------------------------------------------------------------
         // Create model with LOD, surface and materials
@@ -332,8 +324,8 @@ namespace
         BufferDesc.m_Usage = CBuffer::GPURead;
         BufferDesc.m_Binding = CBuffer::VertexBuffer;
         BufferDesc.m_Access = CBuffer::CPUWrite;
-        BufferDesc.m_NumberOfBytes = _NumberOfVertices * sizeof(_rVertices[0]);
-        BufferDesc.m_pBytes = const_cast<glm::vec3*>(_rVertices);
+        BufferDesc.m_NumberOfBytes = _NumberOfVertices * _SizeOfVertex;
+        BufferDesc.m_pBytes = const_cast<void*>(_rVertices);
         BufferDesc.m_pClassKey = 0;
 
         rSurface.m_VertexBufferPtr = BufferManager::CreateBuffer(BufferDesc);
@@ -1535,16 +1527,9 @@ namespace MeshManager
 
     // -----------------------------------------------------------------------------
 
-    CMeshPtr CreateMesh(const std::vector<glm::vec3> _rVertices, const std::vector<uint32_t> _rIndices)
+    CMeshPtr CreateMesh(const void* _rVertices, int _NumberOfVertices, int _SizeOfVertex, const uint32_t* _rIndices, int _NumberOfIndices)
     {
-        return CGfxMeshManager::GetInstance().CreateMesh(_rVertices, _rIndices);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CMeshPtr CreateMesh(const glm::vec3* _rVertices, int _NumberOfVertices, const uint32_t* _rIndices, int _NumberOfIndices)
-    {
-        return CGfxMeshManager::GetInstance().CreateMesh(_rVertices, _NumberOfVertices, _rIndices, _NumberOfIndices);
+        return CGfxMeshManager::GetInstance().CreateMesh(_rVertices, _NumberOfVertices, _SizeOfVertex, _rIndices, _NumberOfIndices);
     }
 
     // -----------------------------------------------------------------------------
