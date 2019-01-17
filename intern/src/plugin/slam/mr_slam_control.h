@@ -144,7 +144,6 @@ namespace MR
         // -----------------------------------------------------------------------------
         // Recording
         // -----------------------------------------------------------------------------
-
         enum ERecordMode
         {
             NONE,
@@ -158,6 +157,13 @@ namespace MR
         std::fstream m_RecordFile;
         std::unique_ptr<Base::CRecordWriter> m_pRecordWriter;
         std::unique_ptr<Base::CRecordReader> m_pRecordReader;
+
+        // -----------------------------------------------------------------------------
+        // Stuff for inpainting
+        // -----------------------------------------------------------------------------
+        Gfx::CTexturePtr m_PlaneTexture;
+        glm::vec3 m_PlaneAnchor0;
+        glm::vec3 m_PlaneAnchor1;
 
     public:
 
@@ -319,6 +325,8 @@ namespace MR
             m_ShiftDepthCSPtr = nullptr;
             m_ShiftLUTPtr = nullptr;
 
+            m_PlaneTexture = nullptr;
+
             m_pReconstructor.release();
         }
 
@@ -370,11 +378,6 @@ namespace MR
                     m_pReconstructor->OnNewFrame(m_DepthTexture, nullptr, nullptr);
                 }
             }
-
-//             if (m_SelectionState == ESelection::FIRSTRELEASE)
-//             {
-//                 Gfx::CTexturePtr PlaneTexture = m_pReconstructor->CreatePlaneTexture(m_SelectionBoxAnchor0, m_SelectionBoxAnchor1);
-//             }
 
             if (m_UseTrackingCamera)
             {
@@ -455,7 +458,9 @@ namespace MR
 
                 m_SelectionState = m_SelectionState == ESelection::FIRSTPRESS ? ESelection::FIRSTRELEASE : ESelection::NOSELECTION;
 
-                //Gfx::CTexturePtr PlaneTexture = m_pReconstructor->CreatePlaneTexture(m_SelectionBoxAnchor0, m_SelectionBoxAnchor1);
+                m_PlaneTexture = m_pReconstructor->CreatePlaneTexture(m_SelectionBoxAnchor0, m_SelectionBoxAnchor1);
+                m_PlaneAnchor0 = m_SelectionBoxAnchor0;
+                m_PlaneAnchor1 = m_SelectionBoxAnchor1;
             }
             else if (_rEvent.GetAction() == Base::CInputEvent::MouseMove)
             {
