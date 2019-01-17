@@ -563,7 +563,7 @@ namespace
             CameraVertices[8], CameraVertices[5],
         };
 
-        m_CameraMeshPtr = MeshManager::CreateMesh(CameraLines, sizeof(CameraLines) / sizeof(CameraLines[0]), nullptr, 0);
+        m_CameraMeshPtr = MeshManager::CreateMesh(CameraLines, sizeof(CameraLines) / sizeof(CameraLines[0]), sizeof(CameraVertices[0]), nullptr, 0);
 
         ////////////////////////////////////////////////////////////////////////////////
         // Create cube mesh
@@ -608,13 +608,13 @@ namespace
             4, 6, 5,
         };
         
-        m_VolumeMeshPtr = MeshManager::CreateMesh(g_CubeVertices, sizeof(g_CubeVertices) / sizeof(g_CubeVertices[0]), CubeIndices, sizeof(CubeIndices) / sizeof(CubeIndices[0]));
+        m_VolumeMeshPtr = MeshManager::CreateMesh(g_CubeVertices, sizeof(g_CubeVertices) / sizeof(g_CubeVertices[0]), sizeof(g_CubeVertices), CubeIndices, sizeof(CubeIndices) / sizeof(CubeIndices[0]));
 
         ////////////////////////////////////////////////////////////////////////////////
         // Create cube outline mesh
         ////////////////////////////////////////////////////////////////////////////////
 
-        m_CubeOutlineMeshPtr = MeshManager::CreateMesh(CubeLines, sizeof(CubeLines) / sizeof(CubeLines[0]), nullptr, 0);
+        m_CubeOutlineMeshPtr = MeshManager::CreateMesh(CubeLines, sizeof(CubeLines) / sizeof(CubeLines[0]), sizeof(CubeLines[0]), nullptr, 0);
 
         ////////////////////////////////////////////////////////////////////////////////
         // Create quad mesh
@@ -628,7 +628,7 @@ namespace
             glm::vec3(1.0f, 0.0f, 0.0f),
         };
 
-        m_QuadMeshPtr = MeshManager::CreateMesh(QuadLines, sizeof(QuadLines) / sizeof(QuadLines[0]), nullptr, 0);
+        m_QuadMeshPtr = MeshManager::CreateMesh(QuadLines, sizeof(QuadLines) / sizeof(QuadLines[0]), sizeof(QuadLines), nullptr, 0);
 
         ////////////////////////////////////////////////////////////////////////////////
         // Create plane mesh
@@ -676,7 +676,7 @@ namespace
             }
         }
 
-        m_PlaneMeshPtr = MeshManager::CreateMesh(PlaneVertices, Indices);
+        m_PlaneMeshPtr = MeshManager::CreateMesh(PlaneVertices.data(), PlaneVertices.size(), sizeof(PlaneVertices[0]), Indices.data(), PlaneVertices.size());
     }
 
     // -----------------------------------------------------------------------------

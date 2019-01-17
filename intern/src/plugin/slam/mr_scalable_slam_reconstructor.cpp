@@ -239,7 +239,7 @@ namespace MR
         const int VertexCount = sizeof(g_CubeVertices) / sizeof(g_CubeVertices[0]);
         const int IndexCount = sizeof(g_CubeIndices) / sizeof(g_CubeIndices[0]);
 
-        m_CubeMeshPtr = Gfx::MeshManager::CreateMesh(g_CubeVertices, VertexCount, g_CubeIndices, IndexCount);
+        m_CubeMeshPtr = Gfx::MeshManager::CreateMesh(g_CubeVertices, VertexCount, sizeof(g_CubeVertices[0]), g_CubeIndices, IndexCount);
     }
     
 	// -----------------------------------------------------------------------------
