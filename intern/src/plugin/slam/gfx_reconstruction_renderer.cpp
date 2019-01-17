@@ -1392,7 +1392,7 @@ namespace
         }
         else
         {
-            m_SelectionBox.Extend(_rWSPosition);
+            m_SelectionBox.StickyExtend(_rWSPosition, 0.004f);
         }
 
         m_SelectionState = ESelection::SELECTED;
