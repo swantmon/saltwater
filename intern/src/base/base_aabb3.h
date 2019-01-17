@@ -75,6 +75,7 @@ namespace MATH
         inline const CVector& GetMax() const;
         
         inline void Extend(const CVector& _rVector);
+        inline void StickyExtend(const CVector& _rVector, float _Factor);
 
     public:
 
@@ -323,6 +324,29 @@ namespace MATH
         m_MaxPoint[2] = m_MaxPoint[2] > _rVector[2] ? m_MaxPoint[2] : _rVector[2];
         
         assert(IsValid());
+    }
+
+    // -----------------------------------------------------------------------------
+
+    template<typename T>
+    inline void CAABB3<T>::StickyExtend(const CVector& _rVector, float _Factor)
+    {
+        if (ContainsPoint(_rVector)) return;
+
+        glm::vec3 PointOnBox;
+        float Lambda;
+        
+        IntersectsRay(_rVector, glm::normalize(GetCenter() - _rVector), PointOnBox, Lambda);
+
+        glm::vec3 NDirection = glm::normalize(_rVector - PointOnBox);
+
+        float Length = glm::distance(PointOnBox, _rVector);
+
+        Length = glm::clamp(_Factor / Length, 0.0f, 1.0f) * Length;
+
+        glm::vec3 SloppyVector = PointOnBox + Length * NDirection;
+
+        Extend(SloppyVector);
     }
 
     // -----------------------------------------------------------------------------

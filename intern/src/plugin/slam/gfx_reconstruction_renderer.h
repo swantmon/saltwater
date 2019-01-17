@@ -29,8 +29,13 @@ namespace ReconstructionRenderer
     void ChangeCamera(bool _IsTrackingCamera);
 
     void SetReconstructor(MR::CScalableSLAMReconstructor& _rReconstructor);
+
     glm::vec3 Pick(const glm::ivec2& _rCursor);
-    void SetSelectionBox(const glm::vec3& _rAnchor0, const glm::vec3& _rAnchor1, float _Height, int _State);
+
+    void UpdateSelectionBox();
+
+    void AddPositionToSelection(const glm::vec3& _rWSPosition);
+    void ResetSelection();
     void SetInpaintedPlane(const glm::vec3& _rAnchor0, const glm::vec3& _rAnchor1, Gfx::CTexturePtr _Texture);
 } // namespace ReconstructionRenderer
 } // namespace Gfx
