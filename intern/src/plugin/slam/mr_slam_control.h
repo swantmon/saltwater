@@ -446,11 +446,7 @@ namespace MR
             else if (_rEvent.GetAction() == Base::CInputEvent::MouseRightReleased && m_SelectionState == ESelection::FIRSTPRESS)
             {
                 Gfx::ReconstructionRenderer::ResetSelection();
-
-                m_SelectionState = ESelection::NOSELECTION;
             }
-
-            Gfx::ReconstructionRenderer::SetSelectionBox(m_SelectionBoxAnchor0, m_SelectionBoxAnchor1, m_SelectionBoxHeight, static_cast<int>(m_SelectionState));
         }
 
     private:

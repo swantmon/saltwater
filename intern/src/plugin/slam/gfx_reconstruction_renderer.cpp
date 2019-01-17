@@ -104,8 +104,7 @@ namespace
 
         glm::vec3 Pick(const glm::ivec2& _rCursorPosition);
 
-        void SetSelectionBox(const glm::vec3& _rAnchor0, const glm::vec3& _rAnchor1, float _Height, int _State);
-
+        void UpdateSelectionBox();
         void AddPositionToSelection(const glm::vec3& _rWSPosition);
         void ResetSelection();
 
@@ -117,10 +116,7 @@ namespace
         enum class ESelection
         {
             NOSELECTION,
-            FIRSTPRESS,
-            FIRSTRELEASE,
-            SECONDPRESS,
-            SECONDRELEASE
+            SELECTED,
         };
 
     private:
@@ -211,10 +207,7 @@ namespace
         bool m_RenderBackSides;
         bool m_RenderPlanes;
 
-        glm::vec3 m_SelectionBoxMin;
-        glm::vec3 m_SelectionBoxMax;
         glm::mat4 m_SelectionTransform;
-
         ESelection m_SelectionState;
 
         Base::AABB3Float m_SelectionBox;
@@ -728,7 +721,7 @@ namespace
 
     void CGfxReconstructionRenderer::Update()
     {
-
+        UpdateSelectionBox();
     }
     
     // -----------------------------------------------------------------------------
@@ -993,8 +986,8 @@ namespace
         ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::Default));
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
 
-        const glm::vec3 Min = glm::translate(glm::vec3(-0.7f)) * glm::vec4(m_SelectionBoxMin, 1.0f);
-        const glm::vec3 Max = glm::translate(glm::vec3(+0.7f)) * glm::vec4(m_SelectionBoxMax, 1.0f);
+        const glm::vec3 Min = m_SelectionBox.GetMin();
+        const glm::vec3 Max = m_SelectionBox.GetMax();
 
         glm::vec3 Vertices[8] =
         {
@@ -1369,14 +1362,9 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxReconstructionRenderer::SetSelectionBox(const glm::vec3& _rAnchor0, const glm::vec3& _rAnchor1, float _Height, int _State)
+    void CGfxReconstructionRenderer::UpdateSelectionBox()
     {
-        BASE_UNUSED(_Height);
-
-        // -----------------------------------------------------------------------------
-        // Break
-        // -----------------------------------------------------------------------------
-        if (_State == 0) return;
+        if (m_SelectionState == ESelection::NOSELECTION) return;
 
         // -----------------------------------------------------------------------------
         // Get minimum and maximum
@@ -1391,17 +1379,6 @@ namespace
         glm::mat4 Translation = glm::translate(Min);
 
         m_SelectionTransform = Translation * Scaling;
-
-        // -----------------------------------------------------------------------------
-        // Apply height
-        // -----------------------------------------------------------------------------
-        m_SelectionBoxMin = Min;
-        m_SelectionBoxMax = Max;
-
-        // -----------------------------------------------------------------------------
-        // Set state
-        // -----------------------------------------------------------------------------
-        m_SelectionState = static_cast<ESelection>(_State);
     }
 
     // -----------------------------------------------------------------------------
@@ -1417,6 +1394,8 @@ namespace
         {
             m_SelectionBox.Extend(_rWSPosition);
         }
+
+        m_SelectionState = ESelection::SELECTED;
     }
 
     // -----------------------------------------------------------------------------
@@ -1424,6 +1403,8 @@ namespace
     void CGfxReconstructionRenderer::ResetSelection()
     {
         m_SelectionBox.Set(glm::vec3(0.0f), glm::vec3(0.0f));
+
+        m_SelectionState = ESelection::NOSELECTION;
     }
 
     // -----------------------------------------------------------------------------
@@ -1682,9 +1663,9 @@ namespace ReconstructionRenderer
 
     // -----------------------------------------------------------------------------
 
-    void SetSelectionBox(const glm::vec3& _rAnchor0, const glm::vec3& _rAnchor1, float _Height, int _State)
+    void UpdateSelectionBox()
     {
-        CGfxReconstructionRenderer::GetInstance().SetSelectionBox(_rAnchor0, _rAnchor1, _Height, _State);
+        CGfxReconstructionRenderer::GetInstance().UpdateSelectionBox();
     }
 
     // -----------------------------------------------------------------------------
