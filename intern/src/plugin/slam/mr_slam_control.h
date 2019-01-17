@@ -461,6 +461,8 @@ namespace MR
                 m_PlaneTexture = m_pReconstructor->CreatePlaneTexture(m_SelectionBoxAnchor0, m_SelectionBoxAnchor1);
                 m_PlaneAnchor0 = m_SelectionBoxAnchor0;
                 m_PlaneAnchor1 = m_SelectionBoxAnchor1;
+
+                Gfx::ReconstructionRenderer::SetInpaintedPlane(m_PlaneAnchor0, m_PlaneAnchor1, m_PlaneTexture);
             }
             else if (_rEvent.GetAction() == Base::CInputEvent::MouseMove)
             {
