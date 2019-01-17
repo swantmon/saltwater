@@ -1261,8 +1261,6 @@ namespace
 
     void CGfxReconstructionRenderer::RenderVertexMap()
     {
-        Performance::BeginEvent("RenderVertexMap");
-
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
         ContextManager::SetRenderContext(m_OutlineRenderContextPtr);
 
@@ -1294,8 +1292,6 @@ namespace
         glm::ivec2 DepthSize = m_pScalableReconstructor->GetDepthImageSize();
 
         ContextManager::Draw(DepthSize.x * DepthSize.y, 0);
-
-        Performance::EndEvent();
     }
 
     // -----------------------------------------------------------------------------
