@@ -4,7 +4,16 @@
 
 #include "common_global.glsl"
 
-layout(location = 0) in vec3 in_VertexPosition;
+layout(std140, binding = 1) uniform PerDrawCallData
+{
+    mat4 g_WorldMatrix;
+    vec4 g_Color;
+};
+
+layout(location = 0) in vec2 in_VertexPosition;
+layout(location = 1) in vec2 in_TexCoord;
+
+layout(location = 0) out vec2 out_TexCoord;
 
 out gl_PerVertex
 {
@@ -17,7 +26,8 @@ out gl_PerVertex
 
 void main()
 {
-    gl_Position = vec4(in_VertexPosition * 2.0f - 1.0f, 1.0f);
+    out_TexCoord = in_TexCoord;
+    gl_Position = g_WorldToScreen * g_WorldMatrix * vec4(in_VertexPosition, 0.0f, 1.0f);
 }
 
 #endif // __INCLUDE_VS_OUTLINE_GLSL__

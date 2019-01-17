@@ -186,8 +186,8 @@ namespace
         CMeshPtr m_VolumeMeshPtr;        
         CInputLayoutPtr m_VolumeInputLayoutPtr;
 
-        CMeshPtr m_QuadMeshPtr;
-        CInputLayoutPtr m_QuadInputLayoutPtr;
+        CMeshPtr m_InpaintedPlaneMeshPtr;
+        CInputLayoutPtr m_InpaintedPlaneLayoutPtr;
 
         CRenderContextPtr m_OutlineRenderContextPtr;
         CRenderContextPtr m_PlaneRenderContextPtr;
@@ -313,12 +313,12 @@ namespace
         
         m_CameraMeshPtr = 0;
         m_VolumeMeshPtr = 0;
-        m_QuadMeshPtr = 0;
+        m_InpaintedPlaneMeshPtr = 0;
 		m_CubeOutlineMeshPtr = 0;
         m_PlaneMeshPtr = 0;
         m_CameraInputLayoutPtr = 0;
         m_VolumeInputLayoutPtr = 0;
-        m_QuadInputLayoutPtr = 0;
+        m_InpaintedPlaneLayoutPtr = 0;
 		m_CubeOutlineInputLayoutPtr = 0;
 
         m_OutlineRenderContextPtr = 0;
@@ -422,7 +422,14 @@ namespace
         m_CameraInputLayoutPtr = ShaderManager::CreateInputLayout(&InputLayoutDesc, 1, m_OutlineVSPtr);
         m_VolumeInputLayoutPtr = ShaderManager::CreateInputLayout(&InputLayoutDesc, 1, m_RaycastVSPtr);
         m_CubeOutlineInputLayoutPtr = ShaderManager::CreateInputLayout(&InputLayoutDesc, 1, m_OutlineVSPtr);
-        m_QuadInputLayoutPtr = ShaderManager::CreateInputLayout(&InputLayoutDesc, 1, m_OutlineVSPtr);
+
+        SInputElementDescriptor QuadLayout[] =
+        {
+            { "POSITION", 0, CInputLayout::Float2Format, 0, 0, 16, CInputLayout::PerVertex, 0 },
+            { "TEXCOORD", 1, CInputLayout::Float2Format, 0, 8, 16, CInputLayout::PerVertex, 0 },
+        };
+
+        m_InpaintedPlaneLayoutPtr = ShaderManager::CreateInputLayout(QuadLayout, sizeof(QuadLayout) / sizeof(QuadLayout[0]), m_InpaintedPlaneVSPtr);
     }
     
     // -----------------------------------------------------------------------------
@@ -698,7 +705,6 @@ namespace
         ////////////////////////////////////////////////////////////////////////////////
         // Create quad mesh
         ////////////////////////////////////////////////////////////////////////////////
-
         struct SQuadVertex
         {
             glm::vec2 m_Pos;
@@ -707,13 +713,13 @@ namespace
 
         SQuadVertex Quad[4] =
         {
-            { glm::vec2(0.0f, 1.0f), glm::vec2(0.0f, 1.0f) },
-            { glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 1.0f) },
-            { glm::vec2(1.0f, 1.0f), glm::vec2(0.0f, 1.0f) },
-            { glm::vec2(1.0f, 0.0f), glm::vec2(0.0f, 1.0f) },
+            { glm::vec2(-1.0f, -1.0f), glm::vec2(0.0f, 1.0f) },
+            { glm::vec2( 1.0f, -1.0f), glm::vec2(0.0f, 0.0f) },
+            { glm::vec2(-1.0f,  1.0f), glm::vec2(1.0f, 1.0f) },
+            { glm::vec2( 1.0f,  1.0f), glm::vec2(1.0f, 0.0f) },
         };
 
-        m_QuadMeshPtr = MeshManager::CreateMesh(QuadLines, sizeof(QuadLines) / sizeof(QuadLines[0]), sizeof(QuadLines), nullptr, 0);
+        m_InpaintedPlaneMeshPtr = MeshManager::CreateMesh(Quad, sizeof(Quad) / sizeof(Quad[0]), sizeof(Quad[0]), nullptr, 0);
     }
 
     // -----------------------------------------------------------------------------
@@ -1033,33 +1039,41 @@ namespace
 
     void CGfxReconstructionRenderer::RenderInpaintedPlane()
     {
-//         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
-// 
-//         ContextManager::SetViewPortSet(m_DiminishedViewPortSetPtr);
-//         ContextManager::SetTargetSet(m_DiminishedTargetSetPtr);
-// 
-//         ContextManager::SetRenderContext(m_PlaneRenderContextPtr);
-//         ContextManager::SetShaderVS(m_InpaintedPlaneVSPtr);
-//         ContextManager::SetShaderPS(m_InpaintedPlaneFSPtr);
-// 
-//         SDrawCallConstantBuffer BufferData;
-//         
-//         BufferData.m_WorldMatrix = glm::eulerAngleX(glm::half_pi<float>()) * PoseMatrix;
-//         BufferData.m_Color = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
-// 
-//         BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
-// 
-//         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
-//         ContextManager::SetConstantBuffer(1, m_DrawCallConstantBufferPtr);
-// 
-//         const unsigned int Offset = 0;
-//         ContextManager::SetVertexBuffer(->GetLOD(0)->GetSurface()->GetVertexBuffer());
-//         ContextManager::SetIndexBuffer(->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
-// 
-//         ContextManager::SetInputLayout(m_CameraInputLayoutPtr);
-//         ContextManager::SetTopology(STopology::TriangleList);
-// 
-//         ContextManager::Draw(->GetLOD(0)->GetSurface()->GetNumberOfVertices(), 0);
+        Performance::BeginEvent("Render inpainted plane");
+
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
+
+        ContextManager::SetViewPortSet(m_DiminishedViewPortSetPtr);
+        ContextManager::SetTargetSet(m_DiminishedTargetSetPtr);
+
+        ContextManager::SetRenderContext(m_PlaneRenderContextPtr);
+        ContextManager::SetShaderVS(m_InpaintedPlaneVSPtr);
+        ContextManager::SetShaderPS(m_InpaintedPlaneFSPtr);
+
+        ContextManager::SetTexture(0, m_InpaintedPlaneTexture);
+
+        glm::vec3 MiddlePoint = (m_InpaintedPlaneAnchor0 + m_InpaintedPlaneAnchor1) / 2.0f;
+
+        SDrawCallConstantBuffer BufferData;
+        
+        BufferData.m_WorldMatrix = glm::translate(MiddlePoint);
+        BufferData.m_Color = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
+
+        BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
+
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+        ContextManager::SetConstantBuffer(1, m_DrawCallConstantBufferPtr);
+
+        const unsigned int Offset = 0;
+        ContextManager::SetVertexBuffer(m_InpaintedPlaneMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
+        ContextManager::SetIndexBuffer(m_InpaintedPlaneMeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
+
+        ContextManager::SetInputLayout(m_InpaintedPlaneLayoutPtr);
+        ContextManager::SetTopology(STopology::TriangleStrip);
+
+        ContextManager::Draw(m_InpaintedPlaneMeshPtr->GetLOD(0)->GetSurface()->GetNumberOfVertices(), 0);
+
+        Performance::EndEvent();
     }
 
 	// -----------------------------------------------------------------------------
@@ -1326,10 +1340,10 @@ namespace
         ContextManager::SetImageTexture(1, m_pScalableReconstructor->GetColorMap());
 
         const unsigned int Offset = 0;
-        ContextManager::SetVertexBuffer(m_QuadMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
-        ContextManager::SetIndexBuffer(m_QuadMeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
+        ContextManager::SetVertexBuffer(m_CameraMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
+        ContextManager::SetIndexBuffer(m_CameraMeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
 
-        ContextManager::SetInputLayout(m_QuadInputLayoutPtr);
+        ContextManager::SetInputLayout(m_CameraInputLayoutPtr);
         ContextManager::SetTopology(STopology::PointList);
 
         glm::ivec2 DepthSize = m_pScalableReconstructor->GetDepthImageSize();
