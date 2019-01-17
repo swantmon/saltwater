@@ -104,7 +104,9 @@ namespace
 
         glm::vec3 Pick(const glm::ivec2& _rCursorPosition);
 
-        void SetSelectionBox(const glm::vec3& _rAnchor0, const glm::vec3& _rAnchor1, float _Height, int _State);
+        void UpdateSelectionBox();
+        void AddPositionToSelection(const glm::vec3& _rWSPosition);
+        void ResetSelection();
 
     private:
 
@@ -114,10 +116,7 @@ namespace
         enum class ESelection
         {
             NOSELECTION,
-            FIRSTPRESS,
-            FIRSTRELEASE,
-            SECONDPRESS,
-            SECONDRELEASE
+            SELECTED,
         };
 
     private:
@@ -208,11 +207,10 @@ namespace
         bool m_RenderBackSides;
         bool m_RenderPlanes;
 
-        glm::vec3 m_SelectionBoxMin;
-        glm::vec3 m_SelectionBoxMax;
         glm::mat4 m_SelectionTransform;
-
         ESelection m_SelectionState;
+
+        Base::AABB3Float m_SelectionBox;
 
         bool m_IsInitialized;
     };
@@ -230,6 +228,7 @@ namespace
         , m_RenderRootQueue      (false)
         , m_RenderLevel1Queue    (false)
         , m_RenderLevel2Queue    (false)
+        , m_SelectionBox         ()
         , m_IsInitialized        (false)
     {
         
@@ -722,7 +721,7 @@ namespace
 
     void CGfxReconstructionRenderer::Update()
     {
-
+        UpdateSelectionBox();
     }
     
     // -----------------------------------------------------------------------------
@@ -733,6 +732,8 @@ namespace
         {
             return;
         }
+
+        Performance::BeginEvent("Render selection box");
 
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
 
@@ -756,6 +757,8 @@ namespace
         BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
 
         ContextManager::Draw(m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface()->GetNumberOfVertices(), 0);
+
+        Performance::EndEvent();
     }
 
     // -----------------------------------------------------------------------------
@@ -983,8 +986,8 @@ namespace
         ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::Default));
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
 
-        const glm::vec3 Min = glm::translate(glm::vec3(-0.7f)) * glm::vec4(m_SelectionBoxMin, 1.0f);
-        const glm::vec3 Max = glm::translate(glm::vec3(+0.7f)) * glm::vec4(m_SelectionBoxMax, 1.0f);
+        const glm::vec3 Min = m_SelectionBox.GetMin();
+        const glm::vec3 Max = m_SelectionBox.GetMax();
 
         glm::vec3 Vertices[8] =
         {
@@ -1359,31 +1362,49 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxReconstructionRenderer::SetSelectionBox(const glm::vec3& _rAnchor0, const glm::vec3& _rAnchor1, float _Height, int _State)
+    void CGfxReconstructionRenderer::UpdateSelectionBox()
     {
-        BASE_UNUSED(_Height);
+        if (m_SelectionState == ESelection::NOSELECTION) return;
 
-        glm::vec3 Diagonal = _rAnchor1 - _rAnchor0;
-        glm::vec3 NDiagonal = glm::normalize(Diagonal);
+        // -----------------------------------------------------------------------------
+        // Get minimum and maximum
+        // -----------------------------------------------------------------------------
+        glm::vec3 Min = m_SelectionBox.GetMin();
+        glm::vec3 Max = m_SelectionBox.GetMax();
 
-        glm::vec3 Position = _rAnchor0;
-        glm::mat4 Scaling;
-        glm::mat4 Translation;
-        glm::mat4 Rotation;
+        // -----------------------------------------------------------------------------
+        // Calculate box w/ transform in WS
+        // -----------------------------------------------------------------------------
+        glm::mat4 Scaling     = glm::scale(glm::vec3(m_SelectionBox.GetSize()));
+        glm::mat4 Translation = glm::translate(Min);
 
-        Scaling = glm::scale(glm::vec3(glm::length(Diagonal) / glm::sqrt(2.0f)));
-        Translation = glm::translate(Position);
+        m_SelectionTransform = Translation * Scaling;
+    }
 
-        glm::vec3 Direction = glm::mat3(glm::eulerAngleZ(-glm::pi<float>() / 4.0f)) * NDiagonal;
-        float Angle = std::atan2(Direction.y, Direction.x); // TODO: find out why glm::atan2 does lead to a compiler error
-        Rotation = glm::eulerAngleZ(Angle);
+    // -----------------------------------------------------------------------------
 
-        m_SelectionBoxMin = _rAnchor0;
-        m_SelectionBoxMax = _rAnchor1;
-        m_SelectionBoxMax.z += glm::length(Diagonal) / glm::sqrt(2.0f);
+    void CGfxReconstructionRenderer::AddPositionToSelection(const glm::vec3& _rWSPosition)
+    {
+        if (m_SelectionBox.GetMin() == glm::vec3(0.0f) && m_SelectionBox.GetMax() == glm::vec3(0.0f))
+        {
+            m_SelectionBox.SetMin(_rWSPosition);
+            m_SelectionBox.SetMax(_rWSPosition);
+        }
+        else
+        {
+            m_SelectionBox.StickyExtend(_rWSPosition, 0.004f);
+        }
 
-        m_SelectionTransform = Translation * Scaling * Rotation;
-        m_SelectionState = static_cast<ESelection>(_State);
+        m_SelectionState = ESelection::SELECTED;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxReconstructionRenderer::ResetSelection()
+    {
+        m_SelectionBox.Set(glm::vec3(0.0f), glm::vec3(0.0f));
+
+        m_SelectionState = ESelection::NOSELECTION;
     }
 
     // -----------------------------------------------------------------------------
@@ -1642,9 +1663,23 @@ namespace ReconstructionRenderer
 
     // -----------------------------------------------------------------------------
 
-    void SetSelectionBox(const glm::vec3& _rAnchor0, const glm::vec3& _rAnchor1, float _Height, int _State)
+    void UpdateSelectionBox()
     {
-        CGfxReconstructionRenderer::GetInstance().SetSelectionBox(_rAnchor0, _rAnchor1, _Height, _State);
+        CGfxReconstructionRenderer::GetInstance().UpdateSelectionBox();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void AddPositionToSelection(const glm::vec3& _rWSPosition)
+    {
+        CGfxReconstructionRenderer::GetInstance().AddPositionToSelection(_rWSPosition);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void ResetSelection()
+    {
+        CGfxReconstructionRenderer::GetInstance().ResetSelection();
     }
 } // namespace ReconstructionRenderer
 } // namespace Gfx

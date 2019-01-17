@@ -92,7 +92,7 @@ namespace MR
 
         ESelection m_SelectionState;
 
-        bool m_MousePressed;
+        bool m_LeftAnchorSelected;
 
         // -----------------------------------------------------------------------------
         // Reconstructor
@@ -157,7 +157,7 @@ namespace MR
             m_SelectionBoxAnchor1 = glm::vec3(0.0f);
             m_SelectionBoxHeight = 0.0f;
             m_SelectionState = ESelection::NOSELECTION;
-            m_MousePressed = false;
+            m_LeftAnchorSelected = false;
 
             m_pReconstructor.reset(new MR::CScalableSLAMReconstructor);
             Gfx::ReconstructionRenderer::SetReconstructor(*m_pReconstructor);
@@ -431,30 +431,22 @@ namespace MR
 
             if (_rEvent.GetAction() == Base::CInputEvent::MouseLeftPressed)
             {
-                m_MousePressed = true;
+                m_SelectionState = ESelection::FIRSTPRESS;
 
-                if (m_SelectionState == ESelection::NOSELECTION)
-                {
-                    m_SelectionBoxAnchor0 = Gfx::ReconstructionRenderer::Pick(_rEvent.GetLocalCursorPosition());
-                    m_SelectionState = ESelection::FIRSTPRESS;
-                }
+                Gfx::ReconstructionRenderer::AddPositionToSelection(Gfx::ReconstructionRenderer::Pick(_rEvent.GetLocalCursorPosition()));
             }
             else if (_rEvent.GetAction() == Base::CInputEvent::MouseLeftReleased)
             {
-                m_MousePressed = false;
-
-                m_SelectionState = m_SelectionState == ESelection::FIRSTPRESS ? ESelection::FIRSTRELEASE : ESelection::NOSELECTION;
-
-                //Gfx::CTexturePtr PlaneTexture = m_pReconstructor->CreatePlaneTexture(m_SelectionBoxAnchor0, m_SelectionBoxAnchor1);
+                m_SelectionState = ESelection::FIRSTRELEASE;
             }
-            else if (_rEvent.GetAction() == Base::CInputEvent::MouseMove)
+            else if (_rEvent.GetAction() == Base::CInputEvent::MouseMove && m_SelectionState == ESelection::FIRSTPRESS)
             {
-                if (m_MousePressed && m_SelectionState == ESelection::FIRSTPRESS)
-                {
-                    m_SelectionBoxAnchor1 = ComputeAnchor1(_rEvent);
-                }
+                Gfx::ReconstructionRenderer::AddPositionToSelection(Gfx::ReconstructionRenderer::Pick(_rEvent.GetLocalCursorPosition()));
             }
-            Gfx::ReconstructionRenderer::SetSelectionBox(m_SelectionBoxAnchor0, m_SelectionBoxAnchor1, m_SelectionBoxHeight, static_cast<int>(m_SelectionState));
+            else if (_rEvent.GetAction() == Base::CInputEvent::MouseRightReleased && m_SelectionState == ESelection::FIRSTPRESS)
+            {
+                Gfx::ReconstructionRenderer::ResetSelection();
+            }
         }
 
     private:
