@@ -98,6 +98,7 @@ namespace
         void Update();
         void Render();
         void RenderForward();
+        void RenderHitProxy();
         void ChangeCamera(bool _IsTrackingCamera);
 
         void SetReconstructor(MR::CScalableSLAMReconstructor& _rReconstructor);
@@ -161,11 +162,13 @@ namespace
         CShaderPtr m_RaycastFSPtr;
         CShaderPtr m_RaycastHighlightFSPtr;
         CShaderPtr m_RaycastDiminishedFSPtr;
+        CShaderPtr m_RaycastHitProxyFSPtr;
 
         CShaderPtr m_CopyRaycastVSPtr;
         CShaderPtr m_CopyRaycastFSPtr;
 
         CBufferPtr m_RaycastConstantBufferPtr;
+        CBufferPtr m_RaycastHitProxyBufferPtr;
         CBufferPtr m_RaycastHighLightConstantBufferPtr;
         CBufferPtr m_DrawCallConstantBufferPtr;
                 
@@ -294,6 +297,7 @@ namespace
         m_RaycastFSPtr = 0;
         m_RaycastHighlightFSPtr = 0;
         m_RaycastDiminishedFSPtr = 0;
+        m_RaycastHitProxyFSPtr = 0;
         m_CopyRaycastVSPtr = 0;
         m_CopyRaycastFSPtr = 0;
         m_PickingCSPtr = 0;
@@ -304,6 +308,7 @@ namespace
         m_PickingBuffer = 0;
 
         m_RaycastConstantBufferPtr = 0;
+        m_RaycastHitProxyBufferPtr = 0;
         m_RaycastHighLightConstantBufferPtr = 0;
         m_DrawCallConstantBufferPtr = 0;
         
@@ -389,6 +394,8 @@ namespace
         m_RaycastFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_raycast.glsl", "main", DefineString.c_str());
         m_RaycastHighlightFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_raycast_highlight.glsl", "main", DefineString.c_str());
         m_RaycastDiminishedFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_raycast_diminished.glsl", "main", DefineString.c_str());
+
+        m_RaycastHitProxyFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_raycast_hitproxy.glsl", "main", DefineString.c_str());
 
         m_CopyRaycastVSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_copy_raycast.glsl", "main", DefineString.c_str());
         m_CopyRaycastFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_copy_raycast.glsl", "main", DefineString.c_str());
@@ -487,6 +494,10 @@ namespace
         ConstantBufferDesc.m_pClassKey = 0;
 
         m_RaycastConstantBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(int);
+
+        m_RaycastHitProxyBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
 
         ConstantBufferDesc.m_NumberOfBytes = sizeof(glm::mat4);
 
@@ -1506,6 +1517,82 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    void CGfxReconstructionRenderer::RenderHitProxy()
+    {
+        Performance::BeginEvent("Voxel Hit Proxy");
+
+        if (m_RenderVolume)
+        {
+            MR::CScalableSLAMReconstructor::SScalableVolume& rVolume = m_pScalableReconstructor->GetVolume();
+
+            MR::SReconstructionSettings Settings;
+            m_pScalableReconstructor->GetReconstructionSettings(&Settings);
+
+            glm::mat4 PoseMatrix = m_pScalableReconstructor->GetPoseMatrix();
+
+            ContextManager::SetShaderVS(m_RaycastVSPtr);
+            ContextManager::SetShaderPS(m_RaycastHitProxyFSPtr);
+
+            ContextManager::SetResourceBuffer(0, rVolume.m_RootVolumePoolPtr);
+            ContextManager::SetResourceBuffer(1, rVolume.m_RootGridPoolPtr);
+            ContextManager::SetResourceBuffer(2, rVolume.m_Level1PoolPtr);
+            ContextManager::SetResourceBuffer(3, rVolume.m_TSDFPoolPtr);
+            ContextManager::SetResourceBuffer(6, rVolume.m_RootVolumePositionBufferPtr);
+
+            ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+            ContextManager::SetConstantBuffer(1, m_RaycastHitProxyBufferPtr);
+            ContextManager::SetConstantBuffer(2, rVolume.m_AABBBufferPtr);
+
+            ContextManager::Barrier();
+
+            const glm::vec3 Min = glm::vec3(
+                rVolume.m_MinOffset[0] * Settings.m_VolumeSize,
+                rVolume.m_MinOffset[1] * Settings.m_VolumeSize,
+                rVolume.m_MinOffset[2] * Settings.m_VolumeSize
+            );
+
+            const glm::vec3 Max = glm::vec3(
+                (rVolume.m_MaxOffset[0] + 1.0f) * Settings.m_VolumeSize, // Add 1.0f because MaxOffset stores the max volume offset
+                (rVolume.m_MaxOffset[1] + 1.0f) * Settings.m_VolumeSize, // and we have to consider the volume size
+                (rVolume.m_MaxOffset[2] + 1.0f) * Settings.m_VolumeSize
+            );
+
+            glm::vec3 Vertices[8] =
+            {
+                glm::vec3(glm::eulerAngleX(glm::half_pi<float>()) * glm::vec4(Min[0], Min[1], Min[2], 1.0f)),
+                glm::vec3(glm::eulerAngleX(glm::half_pi<float>()) * glm::vec4(Max[0], Min[1], Min[2], 1.0f)),
+                glm::vec3(glm::eulerAngleX(glm::half_pi<float>()) * glm::vec4(Max[0], Max[1], Min[2], 1.0f)),
+                glm::vec3(glm::eulerAngleX(glm::half_pi<float>()) * glm::vec4(Min[0], Max[1], Min[2], 1.0f)),
+                glm::vec3(glm::eulerAngleX(glm::half_pi<float>()) * glm::vec4(Min[0], Min[1], Max[2], 1.0f)),
+                glm::vec3(glm::eulerAngleX(glm::half_pi<float>()) * glm::vec4(Max[0], Min[1], Max[2], 1.0f)),
+                glm::vec3(glm::eulerAngleX(glm::half_pi<float>()) * glm::vec4(Max[0], Max[1], Max[2], 1.0f)),
+                glm::vec3(glm::eulerAngleX(glm::half_pi<float>()) * glm::vec4(Min[0], Max[1], Max[2], 1.0f))
+            };
+
+            int ID = 1000;
+
+            BufferManager::UploadBufferData(m_RaycastHitProxyBufferPtr, &ID);
+
+            BufferManager::UploadBufferData(m_VolumeMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer(), &Vertices);
+
+            const unsigned int Offset = 0;
+            ContextManager::SetVertexBuffer(m_VolumeMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
+            ContextManager::SetIndexBuffer(m_VolumeMeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
+            ContextManager::SetInputLayout(m_VolumeInputLayoutPtr);
+
+            ContextManager::SetTopology(STopology::TriangleList);
+
+            ContextManager::DrawIndexed(36, 0, 0);
+
+            ContextManager::ResetShaderVS();
+            ContextManager::ResetShaderPS();
+        }
+
+        Performance::EndEvent();
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CGfxReconstructionRenderer::ChangeCamera(bool _IsTrackingCamera)
     {
         m_UseTrackingCamera = _IsTrackingCamera;
@@ -1638,6 +1725,13 @@ namespace ReconstructionRenderer
     void RenderForward()
     {
         CGfxReconstructionRenderer::GetInstance().RenderForward();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void RenderHitProxy()
+    {
+        CGfxReconstructionRenderer::GetInstance().RenderHitProxy();
     }
     
     // -----------------------------------------------------------------------------

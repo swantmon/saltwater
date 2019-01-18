@@ -148,7 +148,6 @@ namespace
         CBufferPtr        m_LightPropertiesBufferPtr;
         CShaderPtr        m_HitProxyShaderPtr;
         CRenderContextPtr m_DeferredContextPtr;
-        CRenderContextPtr m_HitProxyContextPtr;
         CRenderJobs       m_DeferredRenderJobs;
         CRenderJobs       m_ForwardRenderJobs;
         CRenderJobs       m_HitproxyRenderJobs;
@@ -171,7 +170,6 @@ namespace
         , m_LightPropertiesBufferPtr()
         , m_HitProxyShaderPtr       ()
         , m_DeferredContextPtr      ()
-        , m_HitProxyContextPtr      ()
         , m_DeferredRenderJobs      ()
         , m_ForwardRenderJobs       ()
         , m_ForwardLightTextures    ()
@@ -209,7 +207,6 @@ namespace
         m_LightPropertiesBufferPtr = 0;
         m_HitProxyShaderPtr        = 0;
         m_DeferredContextPtr       = 0;
-        m_HitProxyContextPtr       = 0;
 
         // -----------------------------------------------------------------------------
         // Iterate throw render jobs to release managed pointer
@@ -277,9 +274,7 @@ namespace
         CCameraPtr      CameraPtr              = ViewManager     ::GetMainCamera ();
         CViewPortSetPtr ViewPortSetPtr         = ViewManager     ::GetViewPortSet();
         CRenderStatePtr DeferredRenderStatePtr = StateManager    ::GetRenderState(0);
-        CRenderStatePtr HitProxyRenderStatePtr = StateManager    ::GetRenderState(CRenderState::EqualDepth);
         CTargetSetPtr   DeferredTargetSetPtr   = TargetSetManager::GetDeferredTargetSet();
-        CTargetSetPtr   HitProxyTargetSetPtr   = TargetSetManager::GetHitProxyTargetSet();
 
         CRenderContextPtr RenderContextPtr = ContextManager::CreateRenderContext();
 
@@ -289,17 +284,6 @@ namespace
         RenderContextPtr->SetRenderState(DeferredRenderStatePtr);
 
         m_DeferredContextPtr = RenderContextPtr;
-
-        // -----------------------------------------------------------------------------
-
-        RenderContextPtr = ContextManager::CreateRenderContext();
-
-        RenderContextPtr->SetCamera(CameraPtr);
-        RenderContextPtr->SetViewPortSet(ViewPortSetPtr);
-        RenderContextPtr->SetTargetSet(HitProxyTargetSetPtr);
-        RenderContextPtr->SetRenderState(HitProxyRenderStatePtr);
-
-        m_HitProxyContextPtr = RenderContextPtr;
     }
 
     // -----------------------------------------------------------------------------
@@ -730,8 +714,6 @@ namespace
 
         Performance::BeginEvent("Mesh Hit Proxy");
 
-        ContextManager::SetRenderContext(m_HitProxyContextPtr);
-
         ContextManager::SetTopology(STopology::TriangleList);
 
         auto RenderJobs = [&](const auto _ListOfJobs)->void
@@ -782,23 +764,9 @@ namespace
 
         RenderJobs(m_HitproxyRenderJobs);
 
-        ContextManager::ResetInputLayout();
-
-        ContextManager::ResetIndexBuffer();
-
-        ContextManager::ResetVertexBuffer();
-
-        ContextManager::ResetConstantBuffer(0);
-        ContextManager::ResetConstantBuffer(1);
-        ContextManager::ResetConstantBuffer(2);
-
         ContextManager::ResetShaderPS();
 
         ContextManager::ResetShaderVS();
-
-        ContextManager::ResetTopology();
-
-        ContextManager::ResetRenderContext();
 
         Performance::EndEvent();
     }

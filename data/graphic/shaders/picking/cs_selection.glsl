@@ -1,5 +1,5 @@
-#ifndef __INCLUDE_CS_PICKING_BLUR_GLSL__
-#define __INCLUDE_CS_PICKING_BLUR_GLSL__
+#ifndef __INCLUDE_CS_SELECTION_GLSL__
+#define __INCLUDE_CS_SELECTION_GLSL__
 
 #include "common_gbuffer.glsl"
 #include "common_global.glsl"
@@ -98,4 +98,4 @@ void main()
     out_EntityID   = ID;
 }
 
-#endif // __INCLUDE_CS_PICKING_BLUR_GLSL__
+#endif // __INCLUDE_CS_SELECTION_GLSL__

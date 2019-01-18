@@ -61,7 +61,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         assert(m_pSelectionTicket == 0);
 
-        m_pSelectionTicket = &Gfx::SelectionRenderer::AcquireTicket(-1, -1, 1, 1, Gfx::SPickFlag::Actor);
+        m_pSelectionTicket = &Gfx::SelectionRenderer::AcquireTicket(-1, -1, 1, 1, Gfx::SPickFlag::Mesh);
         
         return Edit::CState::Edit;
     }

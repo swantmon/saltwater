@@ -30,6 +30,7 @@
 #include "engine/graphic/gfx_mesh_manager.h"
 #include "engine/graphic/gfx_mesh_renderer.h"
 #include "engine/graphic/gfx_performance.h"
+#include "engine/graphic/gfx_reconstruction_renderer.h"
 #include "engine/graphic/gfx_selection_renderer.h"
 #include "engine/graphic/gfx_shader_manager.h"
 #include "engine/graphic/gfx_state_manager.h"
@@ -922,12 +923,6 @@ namespace
                 SRequest& rRequest = rTicket.m_Requests[IndexOfLastRequest];
 
                 // -----------------------------------------------------------------------------
-                // Render hit proxies depending on flag
-                // -----------------------------------------------------------------------------
-                if (rTicket.m_Flags & SPickFlag::Actor) MeshRenderer::RenderHitProxy();
-                if (rTicket.m_Flags & SPickFlag::AR)    ARRenderer   ::RenderHitProxy();
-
-                // -----------------------------------------------------------------------------
                 // Setup buffer
                 // -----------------------------------------------------------------------------
                 glm::ivec2 ActiveWindowSize = Gfx::Main::GetActiveNativeWindowSize();
@@ -952,8 +947,31 @@ namespace
                 BufferManager::UploadBufferData(m_SelectionBufferSetPtrs[IndexOfBuffer]->GetBuffer(0), &Settings);
 
                 // -----------------------------------------------------------------------------
+                // Render hit proxies depending on flag
+                // -----------------------------------------------------------------------------
+                Performance::BeginEvent("Renderer");
+
+                ContextManager::SetViewPortSet(ViewManager::GetViewPortSet());
+                ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::EqualDepth));
+                ContextManager::SetTargetSet(TargetSetManager::GetHitProxyTargetSet());
+                ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
+
+                if (rTicket.m_Flags & SPickFlag::Mesh)  MeshRenderer          ::RenderHitProxy();
+                if (rTicket.m_Flags & SPickFlag::AR)    ARRenderer            ::RenderHitProxy();
+                if (rTicket.m_Flags & SPickFlag::Voxel) ReconstructionRenderer::RenderHitProxy();
+
+                ContextManager::ResetRenderContext();
+
+                ContextManager::ResetShaderVS();
+                ContextManager::ResetShaderPS();
+
+                Performance::EndEvent();
+
+                // -----------------------------------------------------------------------------
                 // Execute
                 // -----------------------------------------------------------------------------
+                Performance::BeginEvent("Result");
+
                 ContextManager::SetShaderCS(m_SelectionCSPtr);
 
                 ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
@@ -988,6 +1006,8 @@ namespace
                 // Clear hit proxy target set
                 // -----------------------------------------------------------------------------
                 TargetSetManager::ClearTargetSet(TargetSetManager::GetHitProxyTargetSet(), glm::vec4(0.0f));
+
+                Performance::EndEvent();
 
                 // -----------------------------------------------------------------------------
                 // Set request
@@ -1125,7 +1145,6 @@ namespace
 
             AddEntityToJobs(m_pSelectedEntity);
         }
-        
     }
 } // namespace
 

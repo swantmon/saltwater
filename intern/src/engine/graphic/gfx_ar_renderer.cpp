@@ -107,7 +107,6 @@ namespace
         CBufferPtr m_HitProxyPassPSBufferPtr;
 
         CRenderContextPtr m_DeferredRenderContextPtr;
-        CRenderContextPtr m_HitProxyContextPtr;
 
         CShaderPtr m_DifferentialGBufferShaderPSPtr;
         CShaderPtr m_HitProxyShaderPtr;
@@ -123,14 +122,13 @@ namespace
 namespace
 {
     CGfxARRenderer::CGfxARRenderer()
-        : m_ModelBufferPtr                  ()
-        , m_MaterialPSBufferPtr             ()
-        , m_HitProxyPassPSBufferPtr         ()
-        , m_DeferredRenderContextPtr        ()
-        , m_HitProxyContextPtr              ()
-        , m_DifferentialGBufferShaderPSPtr  ()
-        , m_HitProxyShaderPtr               ()
-        , m_RenderJobs                      ()
+        : m_ModelBufferPtr                ()
+        , m_MaterialPSBufferPtr           ()
+        , m_HitProxyPassPSBufferPtr       ()
+        , m_DeferredRenderContextPtr      ()
+        , m_DifferentialGBufferShaderPSPtr()
+        , m_HitProxyShaderPtr             ()
+        , m_RenderJobs                    ()
     {
         // -----------------------------------------------------------------------------
         // Reserve some jobs
@@ -159,7 +157,6 @@ namespace
         m_MaterialPSBufferPtr              = 0;
         m_HitProxyPassPSBufferPtr          = 0;
         m_DeferredRenderContextPtr         = 0;
-        m_HitProxyContextPtr               = 0;
         m_DifferentialGBufferShaderPSPtr   = 0;
         m_HitProxyShaderPtr                = 0;
 
@@ -203,9 +200,7 @@ namespace
         CCameraPtr      CameraPtr              = ViewManager     ::GetMainCamera ();
         CViewPortSetPtr ViewPortSetPtr         = ViewManager     ::GetViewPortSet();
         CRenderStatePtr DeferredRenderStatePtr = StateManager    ::GetRenderState(0);
-        CRenderStatePtr HitProxyRenderStatePtr = StateManager    ::GetRenderState(CRenderState::EqualDepth);
         CTargetSetPtr   DeferredTargetSetPtr   = TargetSetManager::GetDeferredTargetSet();
-        CTargetSetPtr   HitProxyTargetSetPtr   = TargetSetManager::GetHitProxyTargetSet();
 
         // -----------------------------------------------------------------------------
 
@@ -215,15 +210,6 @@ namespace
         m_DeferredRenderContextPtr->SetViewPortSet(ViewPortSetPtr);
         m_DeferredRenderContextPtr->SetTargetSet(DeferredTargetSetPtr);
         m_DeferredRenderContextPtr->SetRenderState(DeferredRenderStatePtr);
-
-        // -----------------------------------------------------------------------------
-
-        m_HitProxyContextPtr = ContextManager::CreateRenderContext();
-
-        m_HitProxyContextPtr->SetCamera(CameraPtr);
-        m_HitProxyContextPtr->SetViewPortSet(ViewPortSetPtr);
-        m_HitProxyContextPtr->SetTargetSet(HitProxyTargetSetPtr);
-        m_HitProxyContextPtr->SetRenderState(HitProxyRenderStatePtr);
     }
 
     // -----------------------------------------------------------------------------
@@ -421,8 +407,6 @@ namespace
         // -----------------------------------------------------------------------------
         // Prepare renderer
         // -----------------------------------------------------------------------------
-        ContextManager::SetRenderContext(m_HitProxyContextPtr);
-
         ContextManager::SetTopology(STopology::TriangleList);
 
         ContextManager::SetShaderPS(m_HitProxyShaderPtr);
@@ -463,23 +447,9 @@ namespace
             ContextManager::DrawIndexed(SurfacePtr->GetNumberOfIndices(), 0, 0);
         }
 
-        ContextManager::ResetInputLayout();
-
-        ContextManager::ResetIndexBuffer();
-
-        ContextManager::ResetVertexBuffer();
-
-        ContextManager::ResetConstantBuffer(0);
-        ContextManager::ResetConstantBuffer(1);
-        ContextManager::ResetConstantBuffer(2);
-
         ContextManager::ResetShaderPS();
 
         ContextManager::ResetShaderVS();
-
-        ContextManager::ResetTopology();
-
-        ContextManager::ResetRenderContext();
 
         Performance::EndEvent();
     }
