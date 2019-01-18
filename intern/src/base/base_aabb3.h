@@ -336,7 +336,7 @@ namespace MATH
         glm::vec3 PointOnBox;
         float Lambda;
         
-        IntersectsRay(_rVector, glm::normalize(GetCenter() - _rVector), PointOnBox, Lambda);
+        if(!IntersectsRay(_rVector, glm::normalize(GetCenter() - _rVector), PointOnBox, Lambda)) return;
 
         glm::vec3 NDirection = glm::normalize(_rVector - PointOnBox);
 
