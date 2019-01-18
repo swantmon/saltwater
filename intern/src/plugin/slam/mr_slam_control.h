@@ -343,6 +343,13 @@ namespace MR
                 Gfx::ReconstructionRenderer::AddPositionToSelection(Gfx::ReconstructionRenderer::Pick(m_LatestCursorPosition));
             }
 
+            if (m_SelectionState != ESelection::NOSELECTION)
+            {
+                const auto& AABB = Gfx::ReconstructionRenderer::GetSelectionBox();
+                m_PlaneTexture = m_pReconstructor->CreatePlaneTexture(AABB);
+                Gfx::ReconstructionRenderer::SetInpaintedPlane(m_PlaneTexture, AABB);
+            }
+
             // -----------------------------------------------------------------------------
             // Playing
             // -----------------------------------------------------------------------------
