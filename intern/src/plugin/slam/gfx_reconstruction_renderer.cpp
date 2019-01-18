@@ -1520,6 +1520,8 @@ namespace
             }
             else
             {
+                Gfx::TargetSetManager::ClearTargetSet(m_DiminishedTargetSetPtr);
+
                 RaycastScalableVolumeWithHighlight();
                 RenderInpaintedPlane();
                 RaycastScalableVolumeDiminished();
