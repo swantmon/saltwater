@@ -19,6 +19,8 @@ namespace Cam
 
         void SetProjectionMatrix(const glm::mat4& _rProjectionMatrix);
 
+        void SetRotation(const glm::mat3& _rRotationMatrix);
+
     private:
 
         static const float s_MoveVelocityBorder[];
