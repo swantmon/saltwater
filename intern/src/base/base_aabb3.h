@@ -342,9 +342,9 @@ namespace MATH
 
         Distance = glm::clamp(_Factor / Distance, 0.0f, 1.0f) * Distance;
 
-        glm::vec3 SloppyVector = PointOnBox + Distance * NDirection;
+        glm::vec3 StickyVector = PointOnBox + Distance * NDirection;
 
-        Extend(SloppyVector);
+        Extend(StickyVector);
     }
 
     // -----------------------------------------------------------------------------
