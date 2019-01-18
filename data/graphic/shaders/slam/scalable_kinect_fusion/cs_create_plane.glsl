@@ -43,15 +43,16 @@ void main()
         0.0f, -1.0f, 0.0f
     );
 
-    ivec2 PixelOffset = ivec2(gl_GlobalInvocationID.xy);
+    ivec2 Coords = ivec2(gl_GlobalInvocationID.xy);
 
-    if (PixelOffset.x > g_MinPixels.x && PixelOffset.y > g_MinPixels.y &&
-        PixelOffset.x < g_MaxPixels.x && PixelOffset.y < g_MaxPixels.y)
+    if (Coords.x > g_MinPixels.x && Coords.y > g_MinPixels.y &&
+        Coords.x < g_MaxPixels.x && Coords.y < g_MaxPixels.y)
     {
         imageStore(cs_Plane, ivec2(gl_GlobalInvocationID.xy), vec4(0.0f));
         return;
     }
 
+    ivec2 PixelOffset = Coords - ivec2(g_PlaneResolution / 2);
     vec2 CameraOffset = g_PlaneCenterPosition.xy + PixelOffset * g_PixelSize;
 
     vec3 RayDirection = vec3(0.0f, 0.0f, -1.0f);
