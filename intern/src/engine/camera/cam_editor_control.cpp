@@ -62,6 +62,22 @@ namespace Cam
 
     // -----------------------------------------------------------------------------
 
+    void CEditorControl::SetRotation(const glm::mat3& _rRotationMatrix)
+    {
+        CControl::SetRotation(_rRotationMatrix);
+
+        // -----------------------------------------------------------------------------
+
+        float X, Y, Z;
+
+        glm::extractEulerAngleXYZ(glm::mat4(m_RotationMatrix), X, Y, Z);
+
+        m_CurrentRotation[0] = glm::degrees(Z);
+        m_CurrentRotation[1] = glm::degrees(Y);
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CEditorControl::InternOnEvent(const Base::CInputEvent& _rEvent)
     {
         if (_rEvent.GetAction() == Base::CInputEvent::MouseMiddlePressed && !m_IsFlying)
