@@ -86,6 +86,7 @@ namespace MR
             SECONDRELEASE
         };
 
+        glm::vec2 m_LatestCursorPosition;
         glm::vec3 m_SelectionBoxAnchor0;
         glm::vec3 m_SelectionBoxAnchor1;
         float m_SelectionBoxHeight;
@@ -316,6 +317,17 @@ namespace MR
 
         void Update()
         {
+            // -----------------------------------------------------------------------------
+            // Selection
+            // -----------------------------------------------------------------------------
+            if (m_SelectionState == ESelection::FIRSTPRESS)
+            {
+                Gfx::ReconstructionRenderer::AddPositionToSelection(Gfx::ReconstructionRenderer::Pick(m_LatestCursorPosition));
+            }
+
+            // -----------------------------------------------------------------------------
+            // Playing
+            // -----------------------------------------------------------------------------
             if (m_RecordMode == PLAY)
             {
                 m_pRecordReader->Update();
@@ -340,6 +352,9 @@ namespace MR
                 }
             }
 
+            // -----------------------------------------------------------------------------
+            // Devices
+            // -----------------------------------------------------------------------------
             if (m_DataSource == KINECT)
             {
                 if (m_CaptureColor && GetDepthBuffer(m_DepthBuffer.data()) && GetColorBuffer(m_ColorBuffer.data()))
@@ -433,15 +448,15 @@ namespace MR
             {
                 m_SelectionState = ESelection::FIRSTPRESS;
 
-                Gfx::ReconstructionRenderer::AddPositionToSelection(Gfx::ReconstructionRenderer::Pick(_rEvent.GetLocalCursorPosition()));
+                m_LatestCursorPosition = _rEvent.GetLocalCursorPosition();
             }
             else if (_rEvent.GetAction() == Base::CInputEvent::MouseLeftReleased)
             {
                 m_SelectionState = ESelection::FIRSTRELEASE;
             }
-            else if (_rEvent.GetAction() == Base::CInputEvent::MouseMove && m_SelectionState == ESelection::FIRSTPRESS)
+            else if (_rEvent.GetAction() == Base::CInputEvent::MouseMove)
             {
-                Gfx::ReconstructionRenderer::AddPositionToSelection(Gfx::ReconstructionRenderer::Pick(_rEvent.GetLocalCursorPosition()));
+                m_LatestCursorPosition = _rEvent.GetLocalCursorPosition();
             }
             else if (_rEvent.GetAction() == Base::CInputEvent::MouseRightReleased && m_SelectionState == ESelection::FIRSTPRESS)
             {
