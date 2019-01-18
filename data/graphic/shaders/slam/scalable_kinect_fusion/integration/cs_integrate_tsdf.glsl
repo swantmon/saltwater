@@ -10,6 +10,8 @@
 // Constants
 // -----------------------------------------------------------------------------
 
+const float g_ColorWeight = 20.0f;
+
 layout(std430, binding = 6) buffer Level2Queue
 {
     uint g_VolumeID[];
@@ -90,7 +92,7 @@ void main()
                     ColorCoords.x = DEPTH_IMAGE_WIDTH - ColorCoords.x - 1;
                     ColorCoords.y -= (DEPTH_IMAGE_HEIGHT - COLOR_IMAGE_HEIGHT) / 2;
                     vec3 Color = imageLoad(cs_Color, ColorCoords).rgb;
-                    Color = Color.x == 0.0f ? OldColor : (OldColor * Voxel.y + 10.0f * Color) / (Voxel.y + 10.0f);
+                    Color = Color.x == 0.0f ? OldColor : (OldColor * Voxel.y + g_ColorWeight * Color) / (Voxel.y + g_ColorWeight);
                     TSDFPoolValue = PackVoxel(Voxel.x, Voxel.y, Color);
                 #else
                     vec2 Voxel = UnpackVoxel(TSDFPoolValue);

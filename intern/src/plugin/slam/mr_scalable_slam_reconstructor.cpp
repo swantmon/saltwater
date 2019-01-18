@@ -155,14 +155,15 @@ namespace
         uint32_t m_Color;
     };
 
-    struct SPlaneExtraction
+    struct SPlaneInpainting
     {
         glm::vec3  m_PlaneCenterPosition;
-        float      m_Height;
-        glm::vec2  m_PlaneSize;
-        glm::ivec2 m_PlaneResolution;
-        glm::vec2  m_PixelSize;
-        glm::ivec2 m_PixelBounds;
+        float      m_PlaneSize;
+        glm::ivec2 m_MinPixels;
+        glm::ivec2 m_MaxPixels;
+        int        m_PlaneResolution;
+        float      m_PixelSize;
+        glm::vec2  Padding;
     };
 
     int DivUp(int TotalShaderCount, int WorkGroupSize)
@@ -1279,7 +1280,7 @@ namespace MR
 
         ConstantBufferDesc.m_pBytes = nullptr;
         ConstantBufferDesc.m_Binding = CBuffer::ConstantBuffer;
-        ConstantBufferDesc.m_NumberOfBytes = sizeof(SPlaneExtraction);
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(SPlaneInpainting);
 
         m_PlaneExtractionBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
     }
@@ -1871,26 +1872,33 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    Gfx::CTexturePtr CScalableSLAMReconstructor::CreatePlaneTexture(const glm::vec3& _rAnchor0, const glm::vec3& _rAnchor1)
+    Gfx::CTexturePtr CScalableSLAMReconstructor::CreatePlaneTexture(const Base::AABB3Float& _rAABB)
     {
         Performance::BeginEvent("Create plane texture");
 
-        const int PlaneResolution = 256;
-        const float PlaneScale = 3.0f;
+        const int PlaneResolution = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:inpainted_plane:resolution", 256);
+        const float PlaneScale = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:inpainted_plane:scale", 2.0f);
 
-        glm::vec3 Diagonal = _rAnchor1 - _rAnchor0;    
-        float DiagonalLength = glm::length(Diagonal);
-        float SelectionWidth = glm::sqrt(DiagonalLength * DiagonalLength / 2.0f);
+        glm::vec3 Min = _rAABB.GetMin();
+        glm::vec3 Max = _rAABB.GetMax();
 
-        int MaxPixel = int((PlaneResolution / 2) * (1.0f / PlaneScale));
+        glm::vec3 AnchorMin = Min;
+        glm::vec3 AnchorMax = Max;
+        AnchorMax.z = AnchorMin.z;
 
-        SPlaneExtraction ConstantBuffer;
-        ConstantBuffer.m_PlaneCenterPosition = glm::vec3((_rAnchor0 + _rAnchor1) / 2.0f);
-        ConstantBuffer.m_PlaneSize = glm::vec2(SelectionWidth * PlaneScale);
-        ConstantBuffer.m_Height = 0.0f; // TODO
-        ConstantBuffer.m_PlaneResolution = glm::ivec2(PlaneResolution);
-        ConstantBuffer.m_PixelSize = ConstantBuffer.m_PlaneSize / glm::vec2(ConstantBuffer.m_PlaneResolution);
-        ConstantBuffer.m_PixelBounds = glm::ivec2(-MaxPixel, MaxPixel);
+        glm::vec2 SelectionSize = glm::vec2(AnchorMax.x - AnchorMin.x, AnchorMax.y - AnchorMin.y);
+        
+        float PlaneSize = glm::max(SelectionSize.x, SelectionSize.y) * PlaneScale;
+
+        glm::ivec2 PixelOffset = (glm::vec2(PlaneResolution) / PlaneSize * SelectionSize) / 2.0f;
+
+        SPlaneInpainting ConstantBuffer;
+        ConstantBuffer.m_PlaneCenterPosition = (AnchorMin + AnchorMax) / 2.0f;
+        ConstantBuffer.m_PlaneSize = PlaneSize;
+        ConstantBuffer.m_MinPixels = glm::ivec2(PlaneResolution / 2) - PixelOffset;
+        ConstantBuffer.m_MaxPixels = glm::ivec2(PlaneResolution / 2) + PixelOffset;
+        ConstantBuffer.m_PlaneResolution = PlaneResolution;
+        ConstantBuffer.m_PixelSize = PlaneSize / PlaneResolution;
 
         BufferManager::UploadBufferData(m_PlaneExtractionBufferPtr, &ConstantBuffer);
 

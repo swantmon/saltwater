@@ -36,5 +36,8 @@ namespace ReconstructionRenderer
 
     void AddPositionToSelection(const glm::vec3& _rWSPosition);
     void ResetSelection();
+    void SetInpaintedPlane(Gfx::CTexturePtr _Texture, const Base::AABB3Float& _rAABB);
+
+    const Base::AABB3Float& GetSelectionBox();
 } // namespace ReconstructionRenderer
 } // namespace Gfx

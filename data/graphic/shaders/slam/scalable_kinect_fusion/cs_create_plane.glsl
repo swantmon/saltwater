@@ -15,11 +15,11 @@
 layout(std140, binding = 0) uniform PlaneData
 {
     vec3  g_PlaneCenterPosition;
-    float g_Height;
-    vec2  g_PlaneSize;
-    ivec2 g_PlaneResolution;
-    vec2  g_PixelSize;
-    ivec2 g_PixelBounds;
+    float g_PlaneSize;
+    ivec2 g_MinPixels;
+    ivec2 g_MaxPixels;
+    int   g_PlaneResolution;
+    float g_PixelSize;
 };
 
 layout (binding = 0, rgba8) uniform image2D cs_Plane;
@@ -43,15 +43,16 @@ void main()
         0.0f, -1.0f, 0.0f
     );
 
-    ivec2 PixelOffset = ivec2(gl_GlobalInvocationID.xy) - (g_PlaneResolution / 2);
+    ivec2 Coords = ivec2(gl_GlobalInvocationID.xy);
 
-    if (PixelOffset.x < g_PixelBounds.y && PixelOffset.x > -g_PixelBounds.y &&
-        PixelOffset.y < g_PixelBounds.y && PixelOffset.y > -g_PixelBounds.y)
+    if (Coords.x > g_MinPixels.x && Coords.y > g_MinPixels.y &&
+        Coords.x < g_MaxPixels.x && Coords.y < g_MaxPixels.y)
     {
-        imageStore(cs_Plane, ivec2(gl_GlobalInvocationID.xy), vec4(0.0f));
+        imageStore(cs_Plane, ivec2(gl_GlobalInvocationID.xy), vec4(1.0f, 0.0f, 0.0f, 1.0f));
         return;
     }
 
+    ivec2 PixelOffset = Coords - ivec2(g_PlaneResolution / 2);
     vec2 CameraOffset = g_PlaneCenterPosition.xy + PixelOffset * g_PixelSize;
 
     vec3 RayDirection = vec3(0.0f, 0.0f, -1.0f);
