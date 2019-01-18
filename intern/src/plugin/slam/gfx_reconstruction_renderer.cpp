@@ -127,6 +127,7 @@ namespace
         // -----------------------------------------------------------------------------
         Gfx::CTexturePtr m_InpaintedPlaneTexture;
         Base::AABB3Float m_InpaintedPlaneAABB;
+        float m_InpaintedPlaneScale;
 
     private:
 
@@ -256,14 +257,15 @@ namespace
 
         Main::RegisterResizeHandler(GFX_BIND_RESIZE_METHOD(&CGfxReconstructionRenderer::OnResize));
                                 
-        m_UseTrackingCamera     = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:use_tracking_camera", true);
-        m_RenderVolume          = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:volume"             , true);
-        m_RenderVertexMap       = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:vertex_map"         , false);
-        m_RenderRootQueue       = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:root"        , false);
-        m_RenderLevel1Queue     = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:level1"      , false);
-        m_RenderLevel2Queue     = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:level2"      , false);
-        m_RenderBackSides       = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:backsides"          , true);
-        m_RenderPlanes          = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:planes"             , false);
+        m_UseTrackingCamera   = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:use_tracking_camera", true);
+        m_RenderVolume        = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:volume"             , true);
+        m_RenderVertexMap     = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:vertex_map"         , false);
+        m_RenderRootQueue     = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:root"        , false);
+        m_RenderLevel1Queue   = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:level1"      , false);
+        m_RenderLevel2Queue   = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:level2"      , false);
+        m_RenderBackSides     = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:backsides"          , true);
+        m_RenderPlanes        = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:planes"             , false);
+        m_InpaintedPlaneScale = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:inpainted_plane:scale", 2.0f);
 
         m_IsInitialized = false;
     }
@@ -713,10 +715,10 @@ namespace
 
         SQuadVertex Quad[4] =
         {
-            { glm::vec2(-1.0f, -1.0f), glm::vec2(0.0f, 1.0f) },
-            { glm::vec2( 1.0f, -1.0f), glm::vec2(0.0f, 0.0f) },
-            { glm::vec2(-1.0f,  1.0f), glm::vec2(1.0f, 1.0f) },
-            { glm::vec2( 1.0f,  1.0f), glm::vec2(1.0f, 0.0f) },
+            { glm::vec2(-1.0f, -1.0f), glm::vec2(0.0f, 0.0f) },
+            { glm::vec2( 1.0f, -1.0f), glm::vec2(1.0f, 0.0f) },
+            { glm::vec2(-1.0f,  1.0f), glm::vec2(0.0f, 1.0f) },
+            { glm::vec2( 1.0f,  1.0f), glm::vec2(1.0f, 1.0f) },
         };
 
         m_InpaintedPlaneMeshPtr = MeshManager::CreateMesh(Quad, sizeof(Quad) / sizeof(Quad[0]), sizeof(Quad[0]), nullptr, 0);
@@ -1063,11 +1065,14 @@ namespace
         glm::vec3 MaxAnchor = Max;
         Max.z = Min.z;
 
-        glm::vec3 MiddlePoint = (Min + Max) / 2.0f;
+        float SelectionWidth = glm::max(MaxAnchor.x - MinAnchor.x, MaxAnchor.y - MinAnchor.y);
+        float Scale = m_InpaintedPlaneScale * SelectionWidth * 0.5f;
 
+        glm::vec3 MiddlePoint = (Min + Max) / 2.0f;
+        
         SDrawCallConstantBuffer BufferData;
         
-        BufferData.m_WorldMatrix = glm::translate(MiddlePoint);
+        BufferData.m_WorldMatrix = glm::translate(MiddlePoint) * glm::scale(glm::vec3(Scale));
         BufferData.m_Color = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
 
         BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
