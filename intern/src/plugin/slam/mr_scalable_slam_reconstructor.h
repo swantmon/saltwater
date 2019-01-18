@@ -196,7 +196,7 @@ namespace MR
 
         bool IsInitialized();
 
-        Gfx::CTexturePtr CreatePlaneTexture(const glm::vec3& _rAnchor0, const glm::vec3& _rAnchor1);
+        Gfx::CTexturePtr CreatePlaneTexture(const Base::AABB3Float& _rAABB);
 
     private:
 
