@@ -334,17 +334,15 @@ namespace MATH
         if (ContainsPoint(_rVector)) return;
 
         glm::vec3 PointOnBox;
-        float Lambda;
+        float Distance;
         
-        if(!IntersectsRay(_rVector, glm::normalize(GetCenter() - _rVector), PointOnBox, Lambda)) return;
+        if(!IntersectsRay(_rVector, glm::normalize(GetCenter() - _rVector), PointOnBox, Distance)) return;
 
         glm::vec3 NDirection = glm::normalize(_rVector - PointOnBox);
 
-        float Length = glm::distance(PointOnBox, _rVector);
+        Distance = glm::clamp(_Factor / Distance, 0.0f, 1.0f) * Distance;
 
-        Length = glm::clamp(_Factor / Length, 0.0f, 1.0f) * Length;
-
-        glm::vec3 SloppyVector = PointOnBox + Length * NDirection;
+        glm::vec3 SloppyVector = PointOnBox + Distance * NDirection;
 
         Extend(SloppyVector);
     }
