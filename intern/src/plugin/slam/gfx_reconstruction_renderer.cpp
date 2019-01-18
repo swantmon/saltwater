@@ -107,7 +107,7 @@ namespace
         void UpdateSelectionBox();
         void AddPositionToSelection(const glm::vec3& _rWSPosition);
         void ResetSelection();
-        void SetInpaintedPlane(const glm::vec3& _rAnchor0, const glm::vec3& _rAnchor1, Gfx::CTexturePtr _Texture);
+        void SetInpaintedPlane(Gfx::CTexturePtr _Texture, const Base::AABB3Float& _rAABB);
 
         const Base::AABB3Float& GetSelectionBox();
 
@@ -126,8 +126,7 @@ namespace
         // Stuff for inpainted plane
         // -----------------------------------------------------------------------------
         Gfx::CTexturePtr m_InpaintedPlaneTexture;
-        glm::vec3 m_InpaintedPlaneAnchor0;
-        glm::vec3 m_InpaintedPlaneAnchor1;
+        Base::AABB3Float m_InpaintedPlaneAABB;
 
     private:
 
@@ -1057,7 +1056,14 @@ namespace
 
         ContextManager::SetTexture(0, m_InpaintedPlaneTexture);
 
-        glm::vec3 MiddlePoint = (m_InpaintedPlaneAnchor0 + m_InpaintedPlaneAnchor1) / 2.0f;
+        glm::vec3 Min = m_InpaintedPlaneAABB.GetMin();
+        glm::vec3 Max = m_InpaintedPlaneAABB.GetMax();
+
+        glm::vec3 MinAnchor = Min;
+        glm::vec3 MaxAnchor = Max;
+        Max.z = Min.z;
+
+        glm::vec3 MiddlePoint = (Min + Max) / 2.0f;
 
         SDrawCallConstantBuffer BufferData;
         
@@ -1462,11 +1468,10 @@ namespace
 
     // -----------------------------------------------------------------------------
     
-    void CGfxReconstructionRenderer::SetInpaintedPlane(const glm::vec3& _rAnchor0, const glm::vec3& _rAnchor1, Gfx::CTexturePtr _Texture)
+    void CGfxReconstructionRenderer::SetInpaintedPlane(Gfx::CTexturePtr _Texture, const Base::AABB3Float& _rAABB)
     {
         m_InpaintedPlaneTexture = _Texture;
-        m_InpaintedPlaneAnchor0 = _rAnchor0;
-        m_InpaintedPlaneAnchor1 = _rAnchor1;
+        m_InpaintedPlaneAABB = _rAABB;
     }
 
     // -----------------------------------------------------------------------------
@@ -1752,9 +1757,9 @@ namespace ReconstructionRenderer
 
     // -----------------------------------------------------------------------------
 
-    void SetInpaintedPlane(const glm::vec3& _rAnchor0, const glm::vec3& _rAnchor1, Gfx::CTexturePtr _Texture)
+    void SetInpaintedPlane(Gfx::CTexturePtr _Texture, const Base::AABB3Float& _rAABB)
     {
-        CGfxReconstructionRenderer::GetInstance().SetInpaintedPlane(_rAnchor0, _rAnchor1, _Texture);
+        CGfxReconstructionRenderer::GetInstance().SetInpaintedPlane(_Texture, _rAABB);
     }
 
     // -----------------------------------------------------------------------------
