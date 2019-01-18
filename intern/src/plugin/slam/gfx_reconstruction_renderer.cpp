@@ -109,6 +109,8 @@ namespace
         void ResetSelection();
         void SetInpaintedPlane(const glm::vec3& _rAnchor0, const glm::vec3& _rAnchor1, Gfx::CTexturePtr _Texture);
 
+        const Base::AABB3Float& GetSelectionBox();
+
     private:
 
         // -----------------------------------------------------------------------------
@@ -1467,11 +1469,20 @@ namespace
         m_InpaintedPlaneAnchor1 = _rAnchor1;
     }
 
+    // -----------------------------------------------------------------------------
+
     void CGfxReconstructionRenderer::ResetSelection()
     {
         m_SelectionBox.Set(glm::vec3(0.0f), glm::vec3(0.0f));
 
         m_SelectionState = ESelection::NOSELECTION;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const Base::AABB3Float& CGfxReconstructionRenderer::GetSelectionBox()
+    {
+        return m_SelectionBox;
     }
 
     // -----------------------------------------------------------------------------
@@ -1744,6 +1755,13 @@ namespace ReconstructionRenderer
     void SetInpaintedPlane(const glm::vec3& _rAnchor0, const glm::vec3& _rAnchor1, Gfx::CTexturePtr _Texture)
     {
         CGfxReconstructionRenderer::GetInstance().SetInpaintedPlane(_rAnchor0, _rAnchor1, _Texture);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const Base::AABB3Float& GetSelectionBox()
+    {
+        return CGfxReconstructionRenderer::GetInstance().GetSelectionBox();
     }
 
 } // namespace ReconstructionRenderer
