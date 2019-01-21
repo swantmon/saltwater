@@ -1,0 +1,7 @@
+torchvision
+matplotlib
+numpy
+scipy
+pillow
+urllib3
+scikit-image
