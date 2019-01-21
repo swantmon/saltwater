@@ -12,6 +12,7 @@
 #include "engine/graphic/gfx_render_context.h"
 #include "engine/graphic/gfx_render_state.h"
 #include "engine/graphic/gfx_sampler_set.h"
+#include "engine/graphic/gfx_scissor_rect.h"
 #include "engine/graphic/gfx_shader.h"
 #include "engine/graphic/gfx_target_set.h"
 #include "engine/graphic/gfx_texture.h"
@@ -57,6 +58,10 @@ namespace ContextManager
     ENGINE_API void ResetViewPortSet();
     ENGINE_API void SetViewPortSet(CViewPortSetPtr _ViewPortSetPtr);
     ENGINE_API CViewPortSetPtr GetViewPortSet();
+
+    ENGINE_API void ResetScissorRect();
+    ENGINE_API void SetScissorRect(const CScissorRect& _rScissorRect);
+    ENGINE_API const CScissorRect& GetScissorRect();
 
     ENGINE_API void ResetInputLayout();
     ENGINE_API void SetInputLayout(CInputLayoutPtr _InputLayoutPtr);
