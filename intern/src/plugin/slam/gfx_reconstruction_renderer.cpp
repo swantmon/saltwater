@@ -305,6 +305,7 @@ namespace
         m_RaycastFSPtr = 0;
         m_RaycastHighlightFSPtr = 0;
         m_RaycastDiminishedFSPtr = 0;
+        m_RaycastHitProxyFSPtr = 0;
         m_PickingCSPtr = 0;
 
         m_VertexMapVSPtr = 0;
@@ -405,6 +406,7 @@ namespace
         m_RaycastFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_raycast.glsl", "main", DefineString.c_str());
         m_RaycastHighlightFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_raycast_highlight.glsl", "main", DefineString.c_str());
         m_RaycastDiminishedFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_raycast_diminished.glsl", "main", DefineString.c_str());
+        m_RaycastHitProxyFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_raycast_hitproxy.glsl", "main", DefineString.c_str());
 
         m_VertexMapVSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_vertex_map.glsl", "main", DefineString.c_str());
         m_VertexMapFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_vertex_map.glsl", "main", DefineString.c_str());
