@@ -23,6 +23,8 @@
 #include "engine/graphic/gfx_texture.h"
 #include "engine/graphic/gfx_texture_manager.h"
 #include "engine/graphic/gfx_view_manager.h"
+#include "engine/graphic/gfx_selection.h"
+#include "engine/graphic/gfx_selection_renderer.h"
 
 #include "engine/script/script_script.h"
 
@@ -94,6 +96,8 @@ namespace MR
         ESelection m_SelectionState;
 
         bool m_LeftAnchorSelected;
+
+        Gfx::CSelectionTicket* m_pSelectionTicket;
 
         // -----------------------------------------------------------------------------
         // Reconstructor
@@ -175,6 +179,8 @@ namespace MR
             m_SelectionBoxHeight = 0.0f;
             m_SelectionState = ESelection::NOSELECTION;
             m_LeftAnchorSelected = false;
+
+            m_pSelectionTicket = &Gfx::SelectionRenderer::AcquireTicket(-1, -1, 1, 1, Gfx::SPickFlag::Voxel);
 
             m_pReconstructor.reset(new MR::CScalableSLAMReconstructor);
             Gfx::ReconstructionRenderer::SetReconstructor(*m_pReconstructor);
@@ -329,6 +335,8 @@ namespace MR
             m_PlaneTexture = nullptr;
 
             m_pReconstructor.release();
+
+            Gfx::SelectionRenderer::Clear(*m_pSelectionTicket);
         }
 
         // -----------------------------------------------------------------------------
@@ -338,9 +346,19 @@ namespace MR
             // -----------------------------------------------------------------------------
             // Selection
             // -----------------------------------------------------------------------------
+            Gfx::CSelectionTicket& rSelectionTicket = *m_pSelectionTicket;
+
             if (m_SelectionState == ESelection::FIRSTPRESS)
             {
-                Gfx::ReconstructionRenderer::AddPositionToSelection(Gfx::ReconstructionRenderer::Pick(m_LatestCursorPosition));
+                Gfx::SelectionRenderer::PushPick(rSelectionTicket, glm::ivec2(m_LatestCursorPosition));
+            }
+
+            if (Gfx::SelectionRenderer::PopPick(rSelectionTicket))
+            {
+                if (rSelectionTicket.m_HitFlag == Gfx::SHitFlag::Entity)
+                {
+                    Gfx::ReconstructionRenderer::AddPositionToSelection(rSelectionTicket.m_WSPosition);
+                }
             }
 
             if (m_SelectionState != ESelection::NOSELECTION)
@@ -474,7 +492,7 @@ namespace MR
             {
                 m_SelectionState = ESelection::FIRSTRELEASE;
             }
-            else if (_rEvent.GetAction() == Base::CInputEvent::MouseMove)
+            else if (_rEvent.GetAction() == Base::CInputEvent::MouseMove && m_SelectionState == ESelection::FIRSTPRESS)
             {
                 m_LatestCursorPosition = _rEvent.GetLocalCursorPosition();
             }

@@ -1,7 +1,5 @@
 #pragma once
 
-#include "mr_scalable_slam_reconstructor.h"
-
 namespace Gfx
 {
 namespace ReconstructionRenderer
@@ -27,18 +25,5 @@ namespace ReconstructionRenderer
     void Render();
     void RenderForward();
     void RenderHitProxy();
-    void ChangeCamera(bool _IsTrackingCamera);
-
-    void SetReconstructor(MR::CScalableSLAMReconstructor& _rReconstructor);
-
-    glm::vec3 Pick(const glm::ivec2& _rCursor);
-
-    void UpdateSelectionBox();
-
-    void AddPositionToSelection(const glm::vec3& _rWSPosition);
-    void ResetSelection();
-    void SetInpaintedPlane(Gfx::CTexturePtr _Texture, const Base::AABB3Float& _rAABB);
-
-    const Base::AABB3Float& GetSelectionBox();
 } // namespace ReconstructionRenderer
 } // namespace Gfx

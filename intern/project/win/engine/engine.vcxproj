@@ -97,6 +97,7 @@
     <ClCompile Include="..\..\..\src\engine\graphic\gfx_postfx_hdr_renderer.cpp" />
     <ClCompile Include="..\..\..\src\engine\graphic\gfx_postfx_renderer.cpp" />
     <ClCompile Include="..\..\..\src\engine\graphic\gfx_rasterizer_state.cpp" />
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_reconstruction_renderer.cpp" />
     <ClCompile Include="..\..\..\src\engine\graphic\gfx_reflection_renderer.cpp" />
     <ClCompile Include="..\..\..\src\engine\graphic\gfx_refraction_renderer.cpp" />
     <ClCompile Include="..\..\..\src\engine\graphic\gfx_render_context.cpp" />
@@ -104,6 +105,7 @@
     <ClCompile Include="..\..\..\src\engine\graphic\gfx_sampler.cpp" />
     <ClCompile Include="..\..\..\src\engine\graphic\gfx_sampler_manager.cpp" />
     <ClCompile Include="..\..\..\src\engine\graphic\gfx_sampler_set.cpp" />
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_scissor_rect.cpp" />
     <ClCompile Include="..\..\..\src\engine\graphic\gfx_selection_renderer.cpp" />
     <ClCompile Include="..\..\..\src\engine\graphic\gfx_shader.cpp" />
     <ClCompile Include="..\..\..\src\engine\graphic\gfx_shader_manager.cpp" />
@@ -225,6 +227,7 @@
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_postfx_renderer.h" />
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_rasterizer_description.h" />
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_rasterizer_state.h" />
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_reconstruction_renderer.h" />
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_reflection_renderer.h" />
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_refraction_renderer.h" />
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_render_context.h" />
@@ -232,6 +235,7 @@
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_sampler.h" />
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_sampler_manager.h" />
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_sampler_set.h" />
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_scissor_rect.h" />
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_selection.h" />
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_selection_renderer.h" />
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_shader.h" />

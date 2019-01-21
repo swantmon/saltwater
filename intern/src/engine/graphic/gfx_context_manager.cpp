@@ -78,6 +78,10 @@ namespace
         void SetViewPortSet(CViewPortSetPtr _ViewPortSetPtr);
         CViewPortSetPtr GetViewPortSet();
 
+        void ResetScissorRect();
+        void SetScissorRect(const CScissorRect& _rScissorRect);
+        const CScissorRect& GetScissorRect();
+
         void ResetInputLayout();
         void SetInputLayout(CInputLayoutPtr _InputLayoutPtr);
         CInputLayoutPtr GetInputLayout();
@@ -199,12 +203,13 @@ namespace
         CInputLayoutPtr       m_InputLayoutPtr;
         CTargetSetPtr         m_TargetSetPtr;;
         CViewPortSetPtr       m_ViewPortSetPtr;
+        CScissorRect          m_ScissorRect;
         CRenderContexts       m_RenderContexts;
         GLuint                m_NativeShaderPipeline;
         CShaderPtr            m_ShaderSlots[CShader::NumberOfTypes];
-        CTexturePtr       m_TextureUnits[s_NumberOfTextureUnits];
+        CTexturePtr           m_TextureUnits[s_NumberOfTextureUnits];
         CSamplerPtr           m_SamplerUnits[s_NumberOfTextureUnits];
-        CTexturePtr       m_ImageUnits[s_NumberOfImageUnits];
+        CTexturePtr           m_ImageUnits[s_NumberOfImageUnits];
         CBufferPtr            m_BufferUnits[s_NumberOfBufferUnits];
         CBufferPtr            m_ResourceUnits[s_NumberOfResourceUnits];
         CBufferPtr            m_AtomicUnits[s_NumberOfAtomicUnits];
@@ -272,6 +277,7 @@ namespace
         , m_InputLayoutPtr        ()
         , m_TargetSetPtr          ()
         , m_ViewPortSetPtr        ()
+        , m_ScissorRect           ()
         , m_RenderContexts        ()
         , m_NativeShaderPipeline  (0)
     {
@@ -404,6 +410,7 @@ namespace
         ResetShaderCS();
         ResetTargetSet();
         ResetViewPortSet();
+        ResetScissorRect();
 
         for (IndexOfTextureUnit = 0; IndexOfTextureUnit < s_NumberOfTextureUnits; ++IndexOfTextureUnit)
         {
@@ -448,6 +455,7 @@ namespace
     {
         ResetTargetSet();
         ResetViewPortSet();
+        ResetScissorRect();
         ResetBlendState();
         ResetDepthStencilState();
         ResetRasterizerState();
@@ -823,6 +831,31 @@ namespace
     CViewPortSetPtr CGfxContextManager::GetViewPortSet()
     {
         return m_ViewPortSetPtr;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxContextManager::ResetScissorRect()
+    {
+        glDisable(GL_SCISSOR_TEST);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxContextManager::SetScissorRect(const CScissorRect& _rScissorRect)
+    {
+        glEnable(GL_SCISSOR_TEST);
+
+        glScissor(_rScissorRect.GetTopLeftX(), _rScissorRect.GetTopLeftY(), _rScissorRect.GetWidth(), _rScissorRect.GetHeight());
+
+        m_ScissorRect = _rScissorRect;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const CScissorRect& CGfxContextManager::GetScissorRect()
+    {
+        return m_ScissorRect;
     }
 
     // -----------------------------------------------------------------------------
@@ -1947,6 +1980,27 @@ namespace ContextManager
     CViewPortSetPtr GetViewPortSet()
     {
         return CGfxContextManager::GetInstance().GetViewPortSet();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void ResetScissorRect()
+    {
+        CGfxContextManager::GetInstance().ResetScissorRect();
+    }
+    
+    // -----------------------------------------------------------------------------
+
+    void SetScissorRect(const CScissorRect& _rScissorRect)
+    {
+        CGfxContextManager::GetInstance().SetScissorRect(_rScissorRect);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const CScissorRect& GetScissorRect()
+    {
+        return CGfxContextManager::GetInstance().GetScissorRect();
     }
 
     // -----------------------------------------------------------------------------

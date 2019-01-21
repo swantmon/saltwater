@@ -30,6 +30,7 @@
 #include "engine/graphic/gfx_mesh_manager.h"
 #include "engine/graphic/gfx_mesh_renderer.h"
 #include "engine/graphic/gfx_performance.h"
+#include "engine/graphic/gfx_reconstruction_renderer.h"
 #include "engine/graphic/gfx_selection_renderer.h"
 #include "engine/graphic/gfx_shader_manager.h"
 #include "engine/graphic/gfx_state_manager.h"
@@ -107,8 +108,9 @@ namespace
 
         struct SRequest
         {
-            glm::ivec2 m_Cursor;
-            Base::U64  m_TimeStamp;
+            glm::ivec2   m_Cursor;
+            Base::U64    m_TimeStamp;
+            CScissorRect m_ScissorRect;
         };
         
         class CInternSelectionTicket : CSelectionTicket
@@ -159,7 +161,7 @@ namespace
 
         struct SSelectionSettingsBuffer
         {
-            glm::vec4 m_MinMaxUV;
+            glm::ivec4 m_PositionSize;
         };
         
         struct SHighlightSettingsBuffer
@@ -169,14 +171,14 @@ namespace
 
         struct SSurfaceRenderJob
         {
-            CSurfacePtr    m_SurfacePtr;
-            glm::mat4 m_ModelMatrix;
+            CSurfacePtr m_SurfacePtr;
+            glm::mat4  m_ModelMatrix;
         };
 
         struct SProbeRenderJob
         {
-            glm::mat4        m_ModelMatrix;
-            Gfx::CTexturePtr  m_TextureCubePtr;
+            glm::mat4                 m_ModelMatrix;
+            Gfx::CTexturePtr          m_TextureCubePtr;
             Dt::CLightProbeComponent* m_pDtProbeFacet;
         };
 
@@ -189,7 +191,8 @@ namespace
         
         CBufferPtr             m_ModelBufferPtr;
         CBufferPtr             m_HighlightPSBufferPtr;
-        CBufferSetPtr          m_SelectionBufferSetPtrs[s_MaxNumberOfBuffer];
+        CBufferPtr             m_SelectionSettingsBufferPtrs[s_MaxNumberOfBuffer];
+        CBufferPtr             m_SelectionOutputBufferPtrs[s_MaxNumberOfBuffer];
         CShaderPtr             m_HighlightPSPtr;
         CShaderPtr             m_TextureCubePSPtr;
         CShaderPtr             m_SelectionCSPtr;
@@ -245,18 +248,19 @@ namespace
 namespace
 {
     CGfxSelectionRenderer::CGfxSelectionRenderer()
-        : m_ModelBufferPtr        ()
-        , m_HighlightPSBufferPtr  ()
-        , m_SelectionBufferSetPtrs()
-        , m_HighlightPSPtr        ()
-        , m_TextureCubePSPtr      ()
-        , m_GBufferTextureSetPtr  ()
-        , m_SphereMeshPtr         ()
-        , m_BoxMeshPtr            ()
-        , m_SurfaceRenderJobs     ()
-        , m_ProbeRenderJobs       ()
-        , m_SelectionTickets      ()
-        , m_pSelectedEntity       (0)
+        : m_ModelBufferPtr             ()
+        , m_HighlightPSBufferPtr       ()
+        , m_SelectionSettingsBufferPtrs()
+        , m_SelectionOutputBufferPtrs  ()
+        , m_HighlightPSPtr             ()
+        , m_TextureCubePSPtr           ()
+        , m_GBufferTextureSetPtr       ()
+        , m_SphereMeshPtr              ()
+        , m_BoxMeshPtr                 ()
+        , m_SurfaceRenderJobs          ()
+        , m_ProbeRenderJobs            ()
+        , m_SelectionTickets           ()
+        , m_pSelectedEntity            (0)
     {
         ResetTickets();
     }
@@ -296,7 +300,8 @@ namespace
         // -----------------------------------------------------------------------------
         for (unsigned int IndexOfBuffer = 0; IndexOfBuffer < s_MaxNumberOfBuffer; ++IndexOfBuffer)
         {
-            m_SelectionBufferSetPtrs[IndexOfBuffer] = 0;
+            m_SelectionSettingsBufferPtrs[IndexOfBuffer] = 0;
+            m_SelectionOutputBufferPtrs[IndexOfBuffer]   = 0;
         }
 
         // -----------------------------------------------------------------------------
@@ -392,7 +397,7 @@ namespace
             ConstanteBufferDesc.m_pBytes        = 0;
             ConstanteBufferDesc.m_pClassKey     = 0;
 
-            CBufferPtr SelectionRequestBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
+            m_SelectionSettingsBufferPtrs[IndexOfBuffer] = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
             // -----------------------------------------------------------------------------
 
@@ -404,9 +409,7 @@ namespace
             ConstanteBufferDesc.m_pBytes        = 0;
             ConstanteBufferDesc.m_pClassKey     = 0;
 
-            CBufferPtr SelectionOuputBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
-
-            m_SelectionBufferSetPtrs[IndexOfBuffer] = BufferManager::CreateBufferSet(SelectionRequestBufferPtr, SelectionOuputBufferPtr);;
+            m_SelectionOutputBufferPtrs[IndexOfBuffer] = BufferManager::CreateBuffer(ConstanteBufferDesc);
         }
     }
     
@@ -545,7 +548,7 @@ namespace
         // -----------------------------------------------------------------------------
         glm::ivec2 ActiveWindowSize = Gfx::Main::GetActiveNativeWindowSize();
 
-        if ((_rCursor[0] < 0) || (_rCursor[1] < 0) || (_rCursor[0] >= static_cast<short>(ActiveWindowSize[0])) || (_rCursor[1] >= static_cast<short>(ActiveWindowSize[1])))
+        if ((_rCursor[0] < 0) || (_rCursor[1] < 0) || (_rCursor[0] >= ActiveWindowSize[0]) || (_rCursor[1] >= ActiveWindowSize[1]))
         {
             return;
         }
@@ -555,8 +558,13 @@ namespace
         // -----------------------------------------------------------------------------
         SRequest& rRequest = rTicket.m_Requests[rTicket.m_IndexOfPushRequest];
 
-        rRequest.m_Cursor    = _rCursor;
-        rRequest.m_TimeStamp = Base::SLimits<Base::U64>::s_Max;
+        rRequest.m_Cursor      = _rCursor;
+        rRequest.m_TimeStamp   = Base::SLimits<Base::U64>::s_Max;
+
+        rRequest.m_ScissorRect.SetTopLeftX(_rCursor.x + rTicket.m_OffsetX);
+        rRequest.m_ScissorRect.SetTopLeftY(ActiveWindowSize.y - _rCursor.y + rTicket.m_OffsetY);
+        rRequest.m_ScissorRect.SetWidth(rTicket.m_SizeX);
+        rRequest.m_ScissorRect.SetHeight(rTicket.m_SizeY);
 
         // -----------------------------------------------------------------------------
         // Set push index
@@ -603,7 +611,7 @@ namespace
         IndexOfLastRequest = (rTicket.m_IndexOfPopRequest > 0) ? rTicket.m_IndexOfPopRequest - 1 : CInternSelectionTicket::s_MaxNumberOfRequests - 1;
         IndexOfBuffer      = rTicket.m_IndexOfTicket * s_MaxNumberOfTickets + IndexOfLastRequest;
 
-        SSelectionOutput* pOutput = static_cast<SSelectionOutput*>(BufferManager::MapBuffer(m_SelectionBufferSetPtrs[IndexOfBuffer]->GetBuffer(1), CBuffer::Read));
+        SSelectionOutput* pOutput = static_cast<SSelectionOutput*>(BufferManager::MapBuffer(m_SelectionOutputBufferPtrs[IndexOfBuffer], CBuffer::Read));
 
         rTicket.m_WSPosition = glm::vec3(pOutput->m_WSPosition[0], pOutput->m_WSPosition[1], pOutput->m_WSPosition[2]);
         rTicket.m_WSNormal   = glm::vec3(pOutput->m_WSNormal[0], pOutput->m_WSNormal[1], pOutput->m_WSNormal[2]);
@@ -618,7 +626,7 @@ namespace
             rTicket.m_pObject = Dt::EntityManager::GetEntityByID(pOutput->m_EntityID);
         }
 
-        BufferManager::UnmapBuffer(m_SelectionBufferSetPtrs[IndexOfBuffer]->GetBuffer(1));
+        BufferManager::UnmapBuffer(m_SelectionOutputBufferPtrs[IndexOfBuffer]);
 
         return true;
     }
@@ -900,66 +908,63 @@ namespace
 
     void CGfxSelectionRenderer::RenderSelection()
     {
-        unsigned int IndexOfLastRequest;
-        unsigned int IndexOfTicket;
-        unsigned int IndexOfBuffer;
-        unsigned int MinX;
-        unsigned int MinY;
-        unsigned int MaxX;
-        unsigned int MaxY;
-
         Performance::BeginEvent("Picking");
 
-        for (IndexOfTicket = 0; IndexOfTicket < s_MaxNumberOfTickets; ++IndexOfTicket)
+        for (int IndexOfTicket = 0; IndexOfTicket < s_MaxNumberOfTickets; ++IndexOfTicket)
         {
             CInternSelectionTicket& rTicket = m_SelectionTickets[IndexOfTicket];
 
             if (rTicket.m_IsValid && (rTicket.m_NumberOfRequests > 0) && (rTicket.m_Frame <= Core::Time::GetNumberOfFrame()))
             {
-                IndexOfLastRequest = (rTicket.m_IndexOfPushRequest > 0) ? rTicket.m_IndexOfPushRequest - 1 : CInternSelectionTicket::s_MaxNumberOfRequests - 1;
-                IndexOfBuffer      = IndexOfTicket * s_MaxNumberOfTickets + IndexOfLastRequest;
+                int IndexOfLastRequest = (rTicket.m_IndexOfPushRequest > 0) ? rTicket.m_IndexOfPushRequest - 1 : CInternSelectionTicket::s_MaxNumberOfRequests - 1;
+                int IndexOfBuffer      = IndexOfTicket * s_MaxNumberOfTickets + IndexOfLastRequest;
 
                 SRequest& rRequest = rTicket.m_Requests[IndexOfLastRequest];
 
                 // -----------------------------------------------------------------------------
                 // Render hit proxies depending on flag
                 // -----------------------------------------------------------------------------
-                if (rTicket.m_Flags & SPickFlag::Actor) MeshRenderer::RenderHitProxy();
-                if (rTicket.m_Flags & SPickFlag::AR)    ARRenderer   ::RenderHitProxy();
+                Performance::BeginEvent("Renderer");
+
+                ContextManager::SetViewPortSet(ViewManager::GetViewPortSet());
+                ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::EqualDepth));
+                ContextManager::SetTargetSet(TargetSetManager::GetHitProxyTargetSet());
+                ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
+                ContextManager::SetScissorRect(rRequest.m_ScissorRect);
+
+                if (rTicket.m_Flags & SPickFlag::Mesh)  MeshRenderer          ::RenderHitProxy();
+                if (rTicket.m_Flags & SPickFlag::AR)    ARRenderer            ::RenderHitProxy();
+                if (rTicket.m_Flags & SPickFlag::Voxel) ReconstructionRenderer::RenderHitProxy();
+
+                ContextManager::ResetRenderContext();
+
+                ContextManager::ResetShaderVS();
+                ContextManager::ResetShaderPS();
+
+                Performance::EndEvent();
 
                 // -----------------------------------------------------------------------------
-                // Setup buffer
+                // Result
                 // -----------------------------------------------------------------------------
+                Performance::BeginEvent("Result");
+
                 glm::ivec2 ActiveWindowSize = Gfx::Main::GetActiveNativeWindowSize();
 
                 SSelectionSettingsBuffer Settings;
 
-                MinX = rRequest.m_Cursor[0] + rTicket.m_OffsetX;
-                MinY = rRequest.m_Cursor[1] + rTicket.m_OffsetY;
-                MaxX = MinX + rTicket.m_SizeX;
-                MaxY = MinY + rTicket.m_SizeY;
+                Settings.m_PositionSize.x = rRequest.m_Cursor.x + rTicket.m_OffsetX;
+                Settings.m_PositionSize.y = ActiveWindowSize.y - rRequest.m_Cursor.y + rTicket.m_OffsetY;
+                Settings.m_PositionSize.z = rTicket.m_SizeX;
+                Settings.m_PositionSize.w = rTicket.m_SizeY;
 
-                if (MaxX > static_cast<unsigned int>(ActiveWindowSize[0])) MaxX = ActiveWindowSize[0];
-                if (MaxY > static_cast<unsigned int>(ActiveWindowSize[1])) MaxY = ActiveWindowSize[1];
-                if (MinX > MaxX) MinX = 0;
-                if (MinY > MaxY) MinY = 0;
+                BufferManager::UploadBufferData(m_SelectionSettingsBufferPtrs[IndexOfBuffer], &Settings);
 
-                Settings.m_MinMaxUV.x = static_cast<float>(MinX) / static_cast<float>(ActiveWindowSize[0]);
-                Settings.m_MinMaxUV.y = static_cast<float>(MinY) / static_cast<float>(ActiveWindowSize[1]);
-                Settings.m_MinMaxUV.z = static_cast<float>(MaxX) / static_cast<float>(ActiveWindowSize[0]);
-                Settings.m_MinMaxUV.w = static_cast<float>(MaxY) / static_cast<float>(ActiveWindowSize[1]);
-
-                BufferManager::UploadBufferData(m_SelectionBufferSetPtrs[IndexOfBuffer]->GetBuffer(0), &Settings);
-
-                // -----------------------------------------------------------------------------
-                // Execute
-                // -----------------------------------------------------------------------------
                 ContextManager::SetShaderCS(m_SelectionCSPtr);
 
                 ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
 
-                ContextManager::SetResourceBuffer(0, m_SelectionBufferSetPtrs[IndexOfBuffer]->GetBuffer(0));
-                ContextManager::SetResourceBuffer(1, m_SelectionBufferSetPtrs[IndexOfBuffer]->GetBuffer(1));
+                ContextManager::SetResourceBuffer(0, m_SelectionSettingsBufferPtrs[IndexOfBuffer]);
+                ContextManager::SetResourceBuffer(1, m_SelectionOutputBufferPtrs[IndexOfBuffer]);
 
                 ContextManager::SetTexture(0, TargetSetManager::GetDeferredTargetSet()->GetDepthStencilTarget());
 
@@ -988,6 +993,8 @@ namespace
                 // Clear hit proxy target set
                 // -----------------------------------------------------------------------------
                 TargetSetManager::ClearTargetSet(TargetSetManager::GetHitProxyTargetSet(), glm::vec4(0.0f));
+
+                Performance::EndEvent();
 
                 // -----------------------------------------------------------------------------
                 // Set request
@@ -1125,7 +1132,6 @@ namespace
 
             AddEntityToJobs(m_pSelectedEntity);
         }
-        
     }
 } // namespace
 
