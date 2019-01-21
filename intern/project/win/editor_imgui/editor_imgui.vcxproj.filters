@@ -1,0 +1,65 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="states">
+      <UniqueIdentifier>{7807dec5-a560-497a-89fa-d6fa102e7bc5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gui">
+      <UniqueIdentifier>{9614303a-16dd-45bb-9d4e-e6f6a8eb1fff}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\editor_imgui\edit_edit_state.cpp">
+      <Filter>states</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_imgui\edit_exit_state.cpp">
+      <Filter>states</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_imgui\edit_intro_state.cpp">
+      <Filter>states</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_imgui\edit_load_map_state.cpp">
+      <Filter>states</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_imgui\edit_play_state.cpp">
+      <Filter>states</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_imgui\edit_start_state.cpp">
+      <Filter>states</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_imgui\edit_unload_map_state.cpp">
+      <Filter>states</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_imgui\edit_main.cpp" />
+    <ClCompile Include="..\..\..\src\editor_imgui\edit_application.cpp" />
+    <ClCompile Include="..\..\..\src\editor_imgui\edit_precompiled.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\src\editor_imgui\edit_edit_state.h">
+      <Filter>states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor_imgui\edit_exit_state.h">
+      <Filter>states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor_imgui\edit_intro_state.h">
+      <Filter>states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor_imgui\edit_load_map_state.h">
+      <Filter>states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor_imgui\edit_play_state.h">
+      <Filter>states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor_imgui\edit_start_state.h">
+      <Filter>states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor_imgui\edit_state.h">
+      <Filter>states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor_imgui\edit_unload_map_state.h">
+      <Filter>states</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor_imgui\edit_application.h" />
+    <ClInclude Include="..\..\..\src\editor_imgui\edit_precompiled.h" />
+  </ItemGroup>
+</Project>

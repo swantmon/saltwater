@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27004.2009
+VisualStudioVersion = 15.0.27004.2005
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test", "test\test.vcxproj", "{470B0BE6-8875-4485-9B04-C6CC9914834D}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -16,6 +16,7 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "editor", "editor\editor.vcxproj", "{399D716C-0FEC-4D19-AA74-0C434B6C3047}"
 	ProjectSection(ProjectDependencies) = postProject
 		{53CCEF0F-9EFC-4780-9B1D-B3771960936D} = {53CCEF0F-9EFC-4780-9B1D-B3771960936D}
+		{E0842B40-2749-4D03-B627-55761E06452B} = {E0842B40-2749-4D03-B627-55761E06452B}
 		{B12702AD-ABFB-343A-A199-8E24837244A3} = {B12702AD-ABFB-343A-A199-8E24837244A3}
 	EndProjectSection
 EndProject
@@ -41,6 +42,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "plugin_kinect", "plugin_kinect\plugin_kinect.vcxproj", "{B75EB043-6466-4506-8075-E56E89813AFD}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "plugin_slam", "plugin_slam\plugin_slam.vcxproj", "{E0842B40-2749-4D03-B627-55761E06452B}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "editor_imgui", "editor_imgui\editor_imgui.vcxproj", "{1D1429E2-E429-4EA6-87CB-908A858C5710}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -152,6 +155,14 @@ Global
 		{E0842B40-2749-4D03-B627-55761E06452B}.Release|x64.Build.0 = Release|x64
 		{E0842B40-2749-4D03-B627-55761E06452B}.Release|x86.ActiveCfg = Release|Win32
 		{E0842B40-2749-4D03-B627-55761E06452B}.Release|x86.Build.0 = Release|Win32
+		{1D1429E2-E429-4EA6-87CB-908A858C5710}.Debug|x64.ActiveCfg = Debug|x64
+		{1D1429E2-E429-4EA6-87CB-908A858C5710}.Debug|x64.Build.0 = Debug|x64
+		{1D1429E2-E429-4EA6-87CB-908A858C5710}.Debug|x86.ActiveCfg = Debug|Win32
+		{1D1429E2-E429-4EA6-87CB-908A858C5710}.Debug|x86.Build.0 = Debug|Win32
+		{1D1429E2-E429-4EA6-87CB-908A858C5710}.Release|x64.ActiveCfg = Release|x64
+		{1D1429E2-E429-4EA6-87CB-908A858C5710}.Release|x64.Build.0 = Release|x64
+		{1D1429E2-E429-4EA6-87CB-908A858C5710}.Release|x86.ActiveCfg = Release|Win32
+		{1D1429E2-E429-4EA6-87CB-908A858C5710}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

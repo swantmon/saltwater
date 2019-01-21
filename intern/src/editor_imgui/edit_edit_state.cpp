@@ -1,0 +1,130 @@
+
+#include "editor_imgui/edit_precompiled.h"
+
+#include "editor_imgui/edit_edit_state.h"
+#include "editor_imgui/edit_unload_map_state.h"
+
+#include "editor_port/edit_message.h"
+#include "editor_port/edit_message_manager.h"
+
+#include "engine/camera/cam_control_manager.h"
+
+#include "engine/data/data_entity.h"
+#include "engine/data/data_entity_manager.h"
+
+#include "engine/graphic/gfx_selection_renderer.h"
+
+#include "engine/gui/gui_input_manager.h"
+
+#include "engine/script/script_script_manager.h"
+
+namespace Edit
+{
+    CEditState& CEditState::GetInstance()
+    {
+        static CEditState s_Singleton;
+        
+        return s_Singleton;
+    }
+} // namespace Edit
+
+namespace Edit
+{
+    CEditState::CEditState()
+        : m_Action(CState::Edit)
+    {
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    CEditState::~CEditState()
+    {
+        
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    CState::EStateType CEditState::InternOnEnter()
+    {
+        // -----------------------------------------------------------------------------
+        // Acquire an selection ticket at selection renderer
+        // -----------------------------------------------------------------------------
+        assert(m_pSelectionTicket == 0);
+
+        m_pSelectionTicket = &Gfx::SelectionRenderer::AcquireTicket(-1, -1, 1, 1, Gfx::SPickFlag::Mesh);
+        
+        return Edit::CState::Edit;
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    CState::EStateType CEditState::InternOnLeave()
+    {
+        // -----------------------------------------------------------------------------
+        // Clear ticket
+        // -----------------------------------------------------------------------------
+        Gfx::SelectionRenderer::Clear(*m_pSelectionTicket);
+
+        m_pSelectionTicket = 0;
+
+        // -----------------------------------------------------------------------------
+        // Unselect entity
+        // -----------------------------------------------------------------------------
+        Gfx::SelectionRenderer::UnselectEntity();
+
+        // -----------------------------------------------------------------------------
+        // Reset action
+        // -----------------------------------------------------------------------------
+        m_Action = CState::Edit;
+        
+        return Edit::CState::Edit;
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    CState::EStateType CEditState::InternOnRun()
+    {
+        CState::EStateType NextState = CState::Edit;
+
+        switch (m_Action)
+        {
+        case Edit::CState::Exit:
+            CUnloadMapState::GetInstance().SetNextState(CState::Exit);
+            NextState = Edit::CState::UnloadMap;
+            break;
+        case Edit::CState::Play:
+            NextState = Edit::CState::Play;
+            break;
+        }
+
+        // -----------------------------------------------------------------------------
+        // Selection
+        // -----------------------------------------------------------------------------
+        assert(m_pSelectionTicket != 0);
+
+        Gfx::CSelectionTicket& rSelectionTicket = *m_pSelectionTicket;
+
+        if (Gfx::SelectionRenderer::PopPick(rSelectionTicket))
+        {
+            if (rSelectionTicket.m_HitFlag == Gfx::SHitFlag::Entity && rSelectionTicket.m_pObject != nullptr)
+            {
+                Dt::CEntity* pEntity = (Dt::CEntity*)rSelectionTicket.m_pObject;
+
+                Gfx::SelectionRenderer::SelectEntity(pEntity->GetID());
+
+                // -----------------------------------------------------------------------------
+                // Send entity to editor
+                // -----------------------------------------------------------------------------
+                Edit::CMessage NewMessage;
+
+                NewMessage.Put(pEntity->GetID());
+
+                NewMessage.Reset();
+
+                Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::Entity_Selected, NewMessage);
+            }
+        }
+
+        return NextState;
+    }
+} // namespace Edit
