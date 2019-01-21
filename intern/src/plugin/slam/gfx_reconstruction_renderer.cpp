@@ -108,6 +108,9 @@ namespace
         void UpdateSelectionBox();
         void AddPositionToSelection(const glm::vec3& _rWSPosition);
         void ResetSelection();
+        void SetInpaintedPlane(Gfx::CTexturePtr _Texture, const Base::AABB3Float& _rAABB);
+
+        const Base::AABB3Float& GetSelectionBox();
 
     private:
 
@@ -120,15 +123,21 @@ namespace
             SELECTED,
         };
 
+        // -----------------------------------------------------------------------------
+        // Stuff for inpainted plane
+        // -----------------------------------------------------------------------------
+        Gfx::CTexturePtr m_InpaintedPlaneTexture;
+        Base::AABB3Float m_InpaintedPlaneAABB;
+        float m_InpaintedPlaneScale;
+
     private:
 
         void Initialize();
-
-        void RenderVolumeVertexMap();
-
+        
 		void RaycastScalableVolume();
         void RaycastScalableVolumeWithHighlight();
         void RaycastScalableVolumeDiminished();
+        void RenderInpaintedPlane();
         
         void RenderQueuedRootVolumes();
         void RenderQueuedLevel1Grids();
@@ -149,8 +158,8 @@ namespace
         CShaderPtr m_OutlineVSPtr;
         CShaderPtr m_OutlineFSPtr;
 
-        CShaderPtr m_VolumeVertexMapVSPtr;
-        CShaderPtr m_VolumeVertexMapFSPtr;
+        CShaderPtr m_VertexMapVSPtr;
+        CShaderPtr m_VertexMapFSPtr;
 
         CShaderPtr m_OutlineLevel1VSPtr;
         CShaderPtr m_OutlineLevel1FSPtr;
@@ -164,9 +173,9 @@ namespace
         CShaderPtr m_RaycastDiminishedFSPtr;
         CShaderPtr m_RaycastHitProxyFSPtr;
 
-        CShaderPtr m_CopyRaycastVSPtr;
-        CShaderPtr m_CopyRaycastFSPtr;
-
+        CShaderPtr m_InpaintedPlaneVSPtr;
+        CShaderPtr m_InpaintedPlaneFSPtr;
+        
         CBufferPtr m_RaycastConstantBufferPtr;
         CBufferPtr m_RaycastHitProxyBufferPtr;
         CBufferPtr m_RaycastHighLightConstantBufferPtr;
@@ -181,8 +190,8 @@ namespace
         CMeshPtr m_VolumeMeshPtr;        
         CInputLayoutPtr m_VolumeInputLayoutPtr;
 
-        CMeshPtr m_QuadMeshPtr;
-        CInputLayoutPtr m_QuadInputLayoutPtr;
+        CMeshPtr m_InpaintedPlaneMeshPtr;
+        CInputLayoutPtr m_InpaintedPlaneLayoutPtr;
 
         CRenderContextPtr m_OutlineRenderContextPtr;
         CRenderContextPtr m_PlaneRenderContextPtr;
@@ -196,12 +205,12 @@ namespace
 
         CTexturePtr m_DiminishedTargetPtr;
         CTargetSetPtr m_DiminishedTargetSetPtr;
+        CViewPortSetPtr m_DiminishedViewPortSetPtr;
 
         CBufferPtr m_PickingBuffer;
 
         bool m_UseTrackingCamera;
 
-        bool m_RenderVolumeVertexMap;
         bool m_RenderVolume;
         bool m_RenderVertexMap;
         bool m_RenderRootQueue;
@@ -226,7 +235,6 @@ namespace
     CGfxReconstructionRenderer::CGfxReconstructionRenderer()
         : m_UseTrackingCamera    (true)
         , m_RenderVolume         (true)
-        , m_RenderVolumeVertexMap(false)
         , m_RenderVertexMap      (false)
         , m_RenderRootQueue      (false)
         , m_RenderLevel1Queue    (false)
@@ -252,15 +260,15 @@ namespace
 
         Main::RegisterResizeHandler(GFX_BIND_RESIZE_METHOD(&CGfxReconstructionRenderer::OnResize));
                                 
-        m_UseTrackingCamera     = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:use_tracking_camera", true);
-        m_RenderVolume          = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:volume"             , true);
-        m_RenderVolumeVertexMap = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:volume_vertex_map"  , false);
-        m_RenderVertexMap       = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:vertex_map"         , false);
-        m_RenderRootQueue       = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:root"        , false);
-        m_RenderLevel1Queue     = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:level1"      , false);
-        m_RenderLevel2Queue     = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:level2"      , false);
-        m_RenderBackSides       = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:backsides"          , true);
-        m_RenderPlanes          = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:planes"             , false);
+        m_UseTrackingCamera   = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:use_tracking_camera", true);
+        m_RenderVolume        = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:volume"             , true);
+        m_RenderVertexMap     = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:vertex_map"         , false);
+        m_RenderRootQueue     = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:root"        , false);
+        m_RenderLevel1Queue   = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:level1"      , false);
+        m_RenderLevel2Queue   = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:level2"      , false);
+        m_RenderBackSides     = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:backsides"          , true);
+        m_RenderPlanes        = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:planes"             , false);
+        m_InpaintedPlaneScale = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:inpainted_plane:scale", 2.0f);
 
         m_IsInitialized = false;
     }
@@ -297,13 +305,10 @@ namespace
         m_RaycastFSPtr = 0;
         m_RaycastHighlightFSPtr = 0;
         m_RaycastDiminishedFSPtr = 0;
-        m_RaycastHitProxyFSPtr = 0;
-        m_CopyRaycastVSPtr = 0;
-        m_CopyRaycastFSPtr = 0;
         m_PickingCSPtr = 0;
 
-        m_VolumeVertexMapVSPtr = 0;
-        m_VolumeVertexMapFSPtr = 0;
+        m_VertexMapVSPtr = 0;
+        m_VertexMapFSPtr = 0;
         
         m_PickingBuffer = 0;
 
@@ -314,12 +319,12 @@ namespace
         
         m_CameraMeshPtr = 0;
         m_VolumeMeshPtr = 0;
-        m_QuadMeshPtr = 0;
+        m_InpaintedPlaneMeshPtr = 0;
 		m_CubeOutlineMeshPtr = 0;
         m_PlaneMeshPtr = 0;
         m_CameraInputLayoutPtr = 0;
         m_VolumeInputLayoutPtr = 0;
-        m_QuadInputLayoutPtr = 0;
+        m_InpaintedPlaneLayoutPtr = 0;
 		m_CubeOutlineInputLayoutPtr = 0;
 
         m_OutlineRenderContextPtr = 0;
@@ -330,8 +335,14 @@ namespace
         m_PointCloudVSPtr = 0;
         m_PointCloudFSPtr = 0;
 
+        m_InpaintedPlaneVSPtr = 0;
+        m_InpaintedPlaneFSPtr = 0;
+
+        m_DiminishedViewPortSetPtr = nullptr;
         m_DiminishedTargetPtr = nullptr;
         m_DiminishedTargetSetPtr = nullptr;
+
+        m_InpaintedPlaneTexture = nullptr;
 
         m_IsInitialized = false;
     }
@@ -395,15 +406,13 @@ namespace
         m_RaycastHighlightFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_raycast_highlight.glsl", "main", DefineString.c_str());
         m_RaycastDiminishedFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_raycast_diminished.glsl", "main", DefineString.c_str());
 
-        m_RaycastHitProxyFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_raycast_hitproxy.glsl", "main", DefineString.c_str());
-
-        m_CopyRaycastVSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_copy_raycast.glsl", "main", DefineString.c_str());
-        m_CopyRaycastFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_copy_raycast.glsl", "main", DefineString.c_str());
-
-        m_VolumeVertexMapVSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_volume_vertex_map.glsl", "main", DefineString.c_str());
-        m_VolumeVertexMapFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_volume_vertex_map.glsl", "main", DefineString.c_str());
+        m_VertexMapVSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_vertex_map.glsl", "main", DefineString.c_str());
+        m_VertexMapFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_vertex_map.glsl", "main", DefineString.c_str());
         
         m_PickingCSPtr = ShaderManager::CompileCS("slam\\scalable_kinect_fusion\\cs_picking.glsl", "main", DefineString.c_str());
+
+        m_InpaintedPlaneVSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_inpainted_plane.glsl", "main", DefineString.c_str());;
+        m_InpaintedPlaneFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_inpainted_plane.glsl", "main", DefineString.c_str());;
 
         SInputElementDescriptor InputLayoutDesc = {};
 
@@ -419,7 +428,14 @@ namespace
         m_CameraInputLayoutPtr = ShaderManager::CreateInputLayout(&InputLayoutDesc, 1, m_OutlineVSPtr);
         m_VolumeInputLayoutPtr = ShaderManager::CreateInputLayout(&InputLayoutDesc, 1, m_RaycastVSPtr);
         m_CubeOutlineInputLayoutPtr = ShaderManager::CreateInputLayout(&InputLayoutDesc, 1, m_OutlineVSPtr);
-        m_QuadInputLayoutPtr = ShaderManager::CreateInputLayout(&InputLayoutDesc, 1, m_OutlineVSPtr);
+
+        SInputElementDescriptor QuadLayout[] =
+        {
+            { "POSITION", 0, CInputLayout::Float2Format, 0, 0, 16, CInputLayout::PerVertex, 0 },
+            { "TEXCOORD", 1, CInputLayout::Float2Format, 0, 8, 16, CInputLayout::PerVertex, 0 },
+        };
+
+        m_InpaintedPlaneLayoutPtr = ShaderManager::CreateInputLayout(QuadLayout, sizeof(QuadLayout) / sizeof(QuadLayout[0]), m_InpaintedPlaneVSPtr);
     }
     
     // -----------------------------------------------------------------------------
@@ -459,6 +475,16 @@ namespace
     
     void CGfxReconstructionRenderer::OnSetupStates()
     {
+        Gfx::SViewPortDescriptor Desc;
+        Desc.m_Width = 1280;
+        Desc.m_Height = 720;
+        Desc.m_TopLeftX = 0;
+        Desc.m_TopLeftY = 0;
+        Desc.m_MinDepth = 0.0f;
+        Desc.m_MaxDepth = 0.0f;
+        CViewPortPtr ViewPort = ViewManager::CreateViewPort(Desc);
+        m_DiminishedViewPortSetPtr = ViewManager::CreateViewPortSet(ViewPort);
+
         m_OutlineRenderContextPtr = ContextManager::CreateRenderContext();
         m_OutlineRenderContextPtr->SetCamera(ViewManager::GetMainCamera());
         m_OutlineRenderContextPtr->SetViewPortSet(ViewManager::GetViewPortSet());
@@ -467,9 +493,9 @@ namespace
 
         m_PlaneRenderContextPtr = ContextManager::CreateRenderContext();
         m_PlaneRenderContextPtr->SetCamera(ViewManager::GetMainCamera());
-        m_PlaneRenderContextPtr->SetViewPortSet(ViewManager::GetViewPortSet());
-        m_PlaneRenderContextPtr->SetTargetSet(TargetSetManager::GetLightAccumulationTargetSet());
-        m_PlaneRenderContextPtr->SetRenderState(StateManager::GetRenderState(CRenderState::NoCull | CRenderState::AlphaBlend));
+        m_PlaneRenderContextPtr->SetViewPortSet(m_DiminishedViewPortSetPtr);
+        m_PlaneRenderContextPtr->SetTargetSet(m_DiminishedTargetSetPtr);
+        m_PlaneRenderContextPtr->SetRenderState(StateManager::GetRenderState(CRenderState::NoCull));
     }
     
     // -----------------------------------------------------------------------------
@@ -629,7 +655,7 @@ namespace
         m_CubeOutlineMeshPtr = MeshManager::CreateMesh(CubeLines, sizeof(CubeLines) / sizeof(CubeLines[0]), sizeof(CubeLines[0]), nullptr, 0);
 
         ////////////////////////////////////////////////////////////////////////////////
-        // Create quad mesh
+        // Create plane mesh
         ////////////////////////////////////////////////////////////////////////////////
 
         glm::vec3 QuadLines[4] =
@@ -639,12 +665,6 @@ namespace
             glm::vec3(1.0f, 1.0f, 0.0f),
             glm::vec3(1.0f, 0.0f, 0.0f),
         };
-
-        m_QuadMeshPtr = MeshManager::CreateMesh(QuadLines, sizeof(QuadLines) / sizeof(QuadLines[0]), sizeof(QuadLines), nullptr, 0);
-
-        ////////////////////////////////////////////////////////////////////////////////
-        // Create plane mesh
-        ////////////////////////////////////////////////////////////////////////////////
 
         std::vector<glm::vec3> PlaneVertices;
 
@@ -688,7 +708,28 @@ namespace
             }
         }
 
-        m_PlaneMeshPtr = MeshManager::CreateMesh(PlaneVertices.data(), PlaneVertices.size(), sizeof(PlaneVertices[0]), Indices.data(), PlaneVertices.size());
+        int PlaneVertexCount = static_cast<int>(PlaneVertices.size());
+        int PlaneIndexCount = static_cast<int>(PlaneVertices.size());
+        m_PlaneMeshPtr = MeshManager::CreateMesh(PlaneVertices.data(), PlaneVertexCount, sizeof(PlaneVertices[0]), Indices.data(), PlaneIndexCount);
+
+        ////////////////////////////////////////////////////////////////////////////////
+        // Create quad mesh
+        ////////////////////////////////////////////////////////////////////////////////
+        struct SQuadVertex
+        {
+            glm::vec2 m_Pos;
+            glm::vec2 m_Tex;
+        };
+
+        SQuadVertex Quad[4] =
+        {
+            { glm::vec2(-1.0f, -1.0f), glm::vec2(0.0f, 0.0f) },
+            { glm::vec2( 1.0f, -1.0f), glm::vec2(1.0f, 0.0f) },
+            { glm::vec2(-1.0f,  1.0f), glm::vec2(0.0f, 1.0f) },
+            { glm::vec2( 1.0f,  1.0f), glm::vec2(1.0f, 1.0f) },
+        };
+
+        m_InpaintedPlaneMeshPtr = MeshManager::CreateMesh(Quad, sizeof(Quad) / sizeof(Quad[0]), sizeof(Quad[0]), nullptr, 0);
     }
 
     // -----------------------------------------------------------------------------
@@ -725,7 +766,8 @@ namespace
 
     void CGfxReconstructionRenderer::OnResize(unsigned int _Width, unsigned int _Height)
     {
-
+        BASE_UNUSED(_Width);
+        BASE_UNUSED(_Height);
     }
 
     // -----------------------------------------------------------------------------
@@ -771,30 +813,7 @@ namespace
 
         Performance::EndEvent();
     }
-
-    // -----------------------------------------------------------------------------
-
-    void CGfxReconstructionRenderer::RenderVolumeVertexMap()
-    {
-        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
-
-        ContextManager::SetRenderContext(m_OutlineRenderContextPtr);
-        ContextManager::SetShaderVS(m_VolumeVertexMapVSPtr);
-        ContextManager::SetShaderPS(m_VolumeVertexMapFSPtr);
-
-        ContextManager::SetImageTexture(0, m_pScalableReconstructor->GetVertexMap());
-        ContextManager::SetImageTexture(1, m_pScalableReconstructor->GetNormalMap());
-
-        const unsigned int Offset = 0;
-        ContextManager::SetVertexBuffer(m_QuadMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
-        ContextManager::SetIndexBuffer(m_QuadMeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
-
-        ContextManager::SetInputLayout(m_QuadInputLayoutPtr);
-        ContextManager::SetTopology(STopology::TriangleStrip);
-
-        ContextManager::Draw(4, 0);
-    }
-    
+        
 	// -----------------------------------------------------------------------------
 
 	void CGfxReconstructionRenderer::RaycastScalableVolume()
@@ -963,8 +982,6 @@ namespace
 
     void CGfxReconstructionRenderer::RaycastScalableVolumeDiminished()
     {
-        if (m_SelectionState == ESelection::NOSELECTION) return;
-
         glm::mat4 ReconstructionToSaltwater = glm::mat4(
             1.0f, 0.0f, 0.0f, 0.0f,
             0.0f, 0.0f, 1.0f, 0.0f,
@@ -975,6 +992,8 @@ namespace
         Performance::BeginEvent("Raycasting for diminishing");
 
         ContextManager::SetTargetSet(m_DiminishedTargetSetPtr);
+
+        ContextManager::SetViewPortSet(m_DiminishedViewPortSetPtr);
 
         MR::CScalableSLAMReconstructor::SScalableVolume& rVolume = m_pScalableReconstructor->GetVolume();
         
@@ -1026,6 +1045,57 @@ namespace
         ContextManager::SetTopology(STopology::TriangleList);
 
         ContextManager::DrawIndexed(36, 0, 0);
+
+        Performance::EndEvent();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxReconstructionRenderer::RenderInpaintedPlane()
+    {
+        Performance::BeginEvent("Render inpainted plane");
+
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
+
+        ContextManager::SetViewPortSet(m_DiminishedViewPortSetPtr);
+        ContextManager::SetTargetSet(m_DiminishedTargetSetPtr);
+
+        ContextManager::SetRenderContext(m_PlaneRenderContextPtr);
+        ContextManager::SetShaderVS(m_InpaintedPlaneVSPtr);
+        ContextManager::SetShaderPS(m_InpaintedPlaneFSPtr);
+
+        ContextManager::SetTexture(0, m_InpaintedPlaneTexture);
+
+        glm::vec3 Min = m_InpaintedPlaneAABB.GetMin();
+        glm::vec3 Max = m_InpaintedPlaneAABB.GetMax();
+
+        glm::vec3 MinAnchor = Min;
+        glm::vec3 MaxAnchor = Max;
+        Max.z = Min.z;
+
+        float SelectionWidth = glm::max(MaxAnchor.x - MinAnchor.x, MaxAnchor.y - MinAnchor.y);
+        float Scale = m_InpaintedPlaneScale * SelectionWidth * 0.5f;
+
+        glm::vec3 MiddlePoint = (Min + Max) / 2.0f;
+        
+        SDrawCallConstantBuffer BufferData;
+        
+        BufferData.m_WorldMatrix = glm::translate(MiddlePoint) * glm::scale(glm::vec3(Scale));
+        BufferData.m_Color = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
+
+        BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
+
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+        ContextManager::SetConstantBuffer(1, m_DrawCallConstantBufferPtr);
+
+        const unsigned int Offset = 0;
+        ContextManager::SetVertexBuffer(m_InpaintedPlaneMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
+        ContextManager::SetIndexBuffer(m_InpaintedPlaneMeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
+
+        ContextManager::SetInputLayout(m_InpaintedPlaneLayoutPtr);
+        ContextManager::SetTopology(STopology::TriangleStrip);
+
+        ContextManager::Draw(m_InpaintedPlaneMeshPtr->GetLOD(0)->GetSurface()->GetNumberOfVertices(), 0);
 
         Performance::EndEvent();
     }
@@ -1410,12 +1480,27 @@ namespace
     }
 
     // -----------------------------------------------------------------------------
+    
+    void CGfxReconstructionRenderer::SetInpaintedPlane(Gfx::CTexturePtr _Texture, const Base::AABB3Float& _rAABB)
+    {
+        m_InpaintedPlaneTexture = _Texture;
+        m_InpaintedPlaneAABB = _rAABB;
+    }
+
+    // -----------------------------------------------------------------------------
 
     void CGfxReconstructionRenderer::ResetSelection()
     {
         m_SelectionBox.Set(glm::vec3(0.0f), glm::vec3(0.0f));
 
         m_SelectionState = ESelection::NOSELECTION;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const Base::AABB3Float& CGfxReconstructionRenderer::GetSelectionBox()
+    {
+        return m_SelectionBox;
     }
 
     // -----------------------------------------------------------------------------
@@ -1448,10 +1533,12 @@ namespace
             }
             else
             {
-                RaycastScalableVolumeWithHighlight();
-            }
+                Gfx::TargetSetManager::ClearTargetSet(m_DiminishedTargetSetPtr);
 
-            RaycastScalableVolumeDiminished();
+                RaycastScalableVolumeWithHighlight();
+                RenderInpaintedPlane();
+                RaycastScalableVolumeDiminished();
+            }
         }
 
         Performance::EndEvent();
@@ -1469,24 +1556,14 @@ namespace
             return;
         }
         
-        if (m_RenderVolumeVertexMap)
+        if (m_RenderVertexMap)
         {
-            RenderVolumeVertexMap();
+            RenderVertexMap();
         }
 
         if (!m_UseTrackingCamera)
         {
             RenderCamera();
-        }
-
-        if (m_RenderVolumeVertexMap)
-        {
-            RenderVolumeVertexMap();
-        }
-
-        if (m_RenderVertexMap)
-        {
-            RenderVertexMap();
         }
 
         if (m_RenderRootQueue)
@@ -1775,6 +1852,21 @@ namespace ReconstructionRenderer
     {
         CGfxReconstructionRenderer::GetInstance().ResetSelection();
     }
+
+    // -----------------------------------------------------------------------------
+
+    void SetInpaintedPlane(Gfx::CTexturePtr _Texture, const Base::AABB3Float& _rAABB)
+    {
+        CGfxReconstructionRenderer::GetInstance().SetInpaintedPlane(_Texture, _rAABB);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const Base::AABB3Float& GetSelectionBox()
+    {
+        return CGfxReconstructionRenderer::GetInstance().GetSelectionBox();
+    }
+
 } // namespace ReconstructionRenderer
 } // namespace Gfx
 
