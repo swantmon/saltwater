@@ -10,6 +10,9 @@
     <Filter Include="imgui helper">
       <UniqueIdentifier>{60e1bd7e-ebb4-4c30-8908-7962fdfe5826}</UniqueIdentifier>
     </Filter>
+    <Filter Include="gui\panels">
+      <UniqueIdentifier>{7f59819c-41d3-449b-b8c2-d20d553dab5b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\editor_imgui\edit_edit_state.cpp">
@@ -41,6 +44,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\editor_imgui\imgui_impl_sdl.cpp">
       <Filter>imgui helper</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_imgui\edit_gui.cpp">
+      <Filter>gui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -75,6 +81,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\editor_imgui\imgui_impl_sdl.h">
       <Filter>imgui helper</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor_imgui\edit_gui.h">
+      <Filter>gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor_imgui\edit_debug_panel.h">
+      <Filter>gui\panels</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
