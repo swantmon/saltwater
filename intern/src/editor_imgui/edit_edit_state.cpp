@@ -15,6 +15,7 @@
 #include "engine/graphic/gfx_selection_renderer.h"
 
 #include "engine/gui/gui_input_manager.h"
+#include "engine/gui/gui_event_handler.h"
 
 #include "engine/script/script_script_manager.h"
 
@@ -46,6 +47,11 @@ namespace Edit
     
     CState::EStateType CEditState::InternOnEnter()
     {
+        // -----------------------------------------------------------------------------
+        // Input
+        // -----------------------------------------------------------------------------
+        Gui::EventHandler::RegisterDirectUserListener(GUI_BIND_INPUT_METHOD(&CEditState::OnInputEvent));
+
         // -----------------------------------------------------------------------------
         // Acquire an selection ticket at selection renderer
         // -----------------------------------------------------------------------------
@@ -126,5 +132,15 @@ namespace Edit
         }
 
         return NextState;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CEditState::OnInputEvent(const Base::CInputEvent& _rInputEvent)
+    {
+        if (_rInputEvent.GetType() == Base::CInputEvent::Exit)
+        {
+            m_Action = CState::Exit;
+        }
     }
 } // namespace Edit

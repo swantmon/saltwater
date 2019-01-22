@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "base/base_input_event.h"
+
 #include "editor_imgui/edit_state.h"
 
 namespace Gfx
@@ -33,5 +35,9 @@ namespace Edit
         virtual CState::EStateType InternOnEnter();
         virtual CState::EStateType InternOnLeave();
         virtual CState::EStateType InternOnRun();
+
+    private:
+
+        void OnInputEvent(const Base::CInputEvent& _rInputEvent);
     };
 } // namespace Edit

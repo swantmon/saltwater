@@ -130,7 +130,7 @@ namespace
         // -----------------------------------------------------------------------------
         SDL_Init(SDL_INIT_VIDEO);
 
-        m_pWindow = SDL_CreateWindow("Editor", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 1280, 720, SDL_WINDOW_OPENGL);
+        m_pWindow = SDL_CreateWindow("Editor", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 1280, 720, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 
         if (m_pWindow == NULL) 
         {
@@ -295,10 +295,16 @@ namespace
 
     void CApplication::ProcessWindowEvents(const SDL_Event& _rSDLEvent)
     {
-        switch (_rSDLEvent.type)
+        using Base::CInputEvent;
+
+        CInputEvent Event(CInputEvent::Input);
+
+        switch (_rSDLEvent.window.event)
         {
         case SDL_WINDOWEVENT_CLOSE:
-            
+            Event = Base::CInputEvent(Base::CInputEvent::Exit);
+
+            Gui::EventHandler::OnUserEvent(Event);
             break;
         case SDL_WINDOWEVENT_RESIZED:
             int WindowWidth;
