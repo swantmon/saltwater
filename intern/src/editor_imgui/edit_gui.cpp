@@ -64,6 +64,7 @@ namespace
         int m_AnalogStickDeadZone;
 
         bool m_EnableGamepad;
+        bool m_CloseWindow;
 
         GUI::CInspectorPanel m_Inspector;
 
@@ -86,6 +87,7 @@ namespace
         : m_EditWindowID(0)
         , m_LatestMousePosition(glm::vec2(0, 0))
         , m_pGamePad(nullptr)
+        , m_CloseWindow(false)
     {
 
     }
@@ -234,6 +236,20 @@ namespace
         ImGui::NewFrame();
 
         // -----------------------------------------------------------------------------
+        // Menu
+        // -----------------------------------------------------------------------------
+        if (ImGui::BeginMainMenuBar())
+        {
+            if (ImGui::BeginMenu("File"))
+            {
+                ImGui::MenuItem("Exit", "ALT+F4", &m_CloseWindow);
+
+                ImGui::EndMenu();
+            }
+            ImGui::EndMainMenuBar();
+        }
+
+        // -----------------------------------------------------------------------------
         // Panels
         // -----------------------------------------------------------------------------
         m_Inspector.Render();
@@ -276,6 +292,16 @@ namespace
             ProcessKeyboardEvents(SDLEvent);
             ProcessMouseEvents(SDLEvent);
             ProcessGamepadEvents(SDLEvent);
+
+            // -----------------------------------------------------------------------------
+            // Special
+            // -----------------------------------------------------------------------------
+            if (SDLEvent.type == SDL_QUIT || m_CloseWindow)
+            {
+                Base::CInputEvent Event = Base::CInputEvent(Base::CInputEvent::Exit);
+
+                Gui::EventHandler::OnUserEvent(Event);
+            }
         }
     }
 
