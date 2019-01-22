@@ -117,17 +117,6 @@ namespace Edit
                 Dt::CEntity* pEntity = (Dt::CEntity*)rSelectionTicket.m_pObject;
 
                 Gfx::SelectionRenderer::SelectEntity(pEntity->GetID());
-
-                // -----------------------------------------------------------------------------
-                // Send entity to editor
-                // -----------------------------------------------------------------------------
-                Edit::CMessage NewMessage;
-
-                NewMessage.Put(pEntity->GetID());
-
-                NewMessage.Reset();
-
-                Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::Entity_Selected, NewMessage);
             }
         }
 
@@ -141,6 +130,13 @@ namespace Edit
         if (_rInputEvent.GetType() == Base::CInputEvent::Exit)
         {
             m_Action = CState::Exit;
+        }
+        else if (_rInputEvent.GetType() == Base::CInputEvent::Input)
+        {
+            if (_rInputEvent.GetAction() == Base::CInputEvent::MouseLeftReleased && m_pSelectionTicket != 0)
+            {
+                Gfx::SelectionRenderer::PushPick(*m_pSelectionTicket, _rInputEvent.GetLocalCursorPosition());
+            }
         }
     }
 } // namespace Edit

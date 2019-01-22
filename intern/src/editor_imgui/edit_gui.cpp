@@ -57,7 +57,6 @@ namespace
     private:
 
         unsigned int m_EditWindowID;
-        glm::vec2 m_LatestMousePosition;
 
         SDL_Joystick* m_pGamePad;
         SDL_Window* m_pWindow;
@@ -85,7 +84,6 @@ namespace
 {
     CEditorGui::CEditorGui()
         : m_EditWindowID(0)
-        , m_LatestMousePosition(glm::vec2(0, 0))
         , m_pGamePad(nullptr)
         , m_CloseWindow(false)
     {
@@ -208,6 +206,8 @@ namespace
         m_EditWindowID = _WindowID;
 
         SDL_SetWindowSize(m_pWindow, _Width, _Height);
+
+        Gfx::Pipeline::OnResize(m_EditWindowID, _Width, _Height);
     }
 
     // -----------------------------------------------------------------------------
@@ -372,19 +372,17 @@ namespace
 
         Base::CInputEvent::EAction MouseAction = Base::CInputEvent::UndefinedAction;
         int WheelData;
+        glm::ivec2 LocalMousePosition, GlobalMousePosition;
+
+        SDL_GetMouseState(&LocalMousePosition.x, &LocalMousePosition.y);
+        SDL_GetGlobalMouseState(&GlobalMousePosition.x, &GlobalMousePosition.y);
+
+        WheelData = _rSDLEvent.wheel.y;
 
         switch (_rSDLEvent.type)
         {
         case SDL_MOUSEMOTION:
-            int MousePositionX;
-            int MousePositionY;
-
-            SDL_GetMouseState(&MousePositionX, &MousePositionY);
-
-            m_LatestMousePosition[0] = MousePositionX;
-            m_LatestMousePosition[1] = MousePositionY;
-
-            Event = CInputEvent(CInputEvent::Input, CInputEvent::MouseMove, CInputEvent::Mouse, m_LatestMousePosition, m_LatestMousePosition);
+            Event = CInputEvent(CInputEvent::Input, CInputEvent::MouseMove, CInputEvent::Mouse, GlobalMousePosition, LocalMousePosition);
 
             Gui::EventHandler::OnUserEvent(Event);
             break;
@@ -404,7 +402,7 @@ namespace
 
             if (MouseAction != CInputEvent::UndefinedAction)
             {
-                Event = CInputEvent(CInputEvent::Input, MouseAction, CInputEvent::Mouse, m_LatestMousePosition, m_LatestMousePosition);
+                Event = CInputEvent(CInputEvent::Input, MouseAction, CInputEvent::Mouse, GlobalMousePosition, LocalMousePosition);
 
                 Gui::EventHandler::OnUserEvent(Event);
             }
@@ -425,7 +423,7 @@ namespace
 
             if (MouseAction != Base::CInputEvent::UndefinedAction)
             {
-                Event = CInputEvent(CInputEvent::Input, MouseAction, CInputEvent::Mouse, m_LatestMousePosition, m_LatestMousePosition);
+                Event = CInputEvent(CInputEvent::Input, MouseAction, CInputEvent::Mouse, GlobalMousePosition, LocalMousePosition);
 
                 Gui::EventHandler::OnUserEvent(Event);
             }
@@ -433,7 +431,7 @@ namespace
         case SDL_MOUSEWHEEL:
             WheelData = _rSDLEvent.wheel.y;
 
-            Event = CInputEvent(CInputEvent::Input, CInputEvent::MouseWheel, CInputEvent::Mouse, m_LatestMousePosition, WheelData);
+            Event = CInputEvent(CInputEvent::Input, CInputEvent::MouseWheel, CInputEvent::Mouse, GlobalMousePosition, LocalMousePosition, static_cast<float>(WheelData));
 
             Gui::EventHandler::OnUserEvent(Event);
             break;
