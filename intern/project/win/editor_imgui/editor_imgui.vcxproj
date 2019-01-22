@@ -34,6 +34,8 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\editor_imgui\edit_start_state.cpp" />
     <ClCompile Include="..\..\..\src\editor_imgui\edit_unload_map_state.cpp" />
+    <ClCompile Include="..\..\..\src\editor_imgui\imgui_impl_opengl.cpp" />
+    <ClCompile Include="..\..\..\src\editor_imgui\imgui_impl_sdl.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\editor_imgui\edit_application.h" />
@@ -46,6 +48,8 @@
     <ClInclude Include="..\..\..\src\editor_imgui\edit_start_state.h" />
     <ClInclude Include="..\..\..\src\editor_imgui\edit_state.h" />
     <ClInclude Include="..\..\..\src\editor_imgui\edit_unload_map_state.h" />
+    <ClInclude Include="..\..\..\src\editor_imgui\imgui_impl_opengl.h" />
+    <ClInclude Include="..\..\..\src\editor_imgui\imgui_impl_sdl.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\base\base.vcxproj">

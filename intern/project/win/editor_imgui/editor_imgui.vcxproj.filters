@@ -7,6 +7,9 @@
     <Filter Include="gui">
       <UniqueIdentifier>{9614303a-16dd-45bb-9d4e-e6f6a8eb1fff}</UniqueIdentifier>
     </Filter>
+    <Filter Include="imgui helper">
+      <UniqueIdentifier>{60e1bd7e-ebb4-4c30-8908-7962fdfe5826}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\editor_imgui\edit_edit_state.cpp">
@@ -33,6 +36,12 @@
     <ClCompile Include="..\..\..\src\editor_imgui\edit_main.cpp" />
     <ClCompile Include="..\..\..\src\editor_imgui\edit_application.cpp" />
     <ClCompile Include="..\..\..\src\editor_imgui\edit_precompiled.cpp" />
+    <ClCompile Include="..\..\..\src\editor_imgui\imgui_impl_opengl.cpp">
+      <Filter>imgui helper</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_imgui\imgui_impl_sdl.cpp">
+      <Filter>imgui helper</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\editor_imgui\edit_edit_state.h">
@@ -61,5 +70,11 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\editor_imgui\edit_application.h" />
     <ClInclude Include="..\..\..\src\editor_imgui\edit_precompiled.h" />
+    <ClInclude Include="..\..\..\src\editor_imgui\imgui_impl_opengl.h">
+      <Filter>imgui helper</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor_imgui\imgui_impl_sdl.h">
+      <Filter>imgui helper</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

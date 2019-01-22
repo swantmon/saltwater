@@ -14,6 +14,8 @@
 #include "editor_imgui/edit_play_state.h"
 #include "editor_imgui/edit_start_state.h"
 #include "editor_imgui/edit_unload_map_state.h"
+#include "editor_imgui/imgui_impl_opengl.h"
+#include "editor_imgui/imgui_impl_sdl.h"
 
 #include "engine/core/core_asset_manager.h"
 #include "engine/core/core_console.h"
@@ -23,6 +25,7 @@
 #include "engine/engine.h"
 
 #include "engine/graphic/gfx_pipeline.h"
+#include "engine/graphic/gfx_performance.h"
 
 #include "engine/gui/gui_event_handler.h"
 
@@ -156,6 +159,35 @@ namespace
         Gfx::Pipeline::ActivateWindow(m_EditWindowID);
 
         // -----------------------------------------------------------------------------
+        // IMGUI
+        // -----------------------------------------------------------------------------
+        IMGUI_CHECKVERSION();
+        ImGui::CreateContext();
+        ImGuiIO& io = ImGui::GetIO(); (void)io;
+        //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
+
+        // Setup Dear ImGui style
+        ImGui::StyleColorsDark();
+        //ImGui::StyleColorsClassic();
+
+        ImGui_ImplSDL2_InitForOpenGL(m_pWindow, 0);
+
+        ImGui_ImplOpenGL3_Init();
+
+        auto RenderUI = [&]()
+        {
+            Gfx::Performance::BeginEvent("IMGUI");
+
+            ImGui::Render();
+
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+            Gfx::Performance::EndEvent();
+        };
+
+        Engine::RegisterEventHandler(Engine::Gfx_OnRenderUI, RenderUI);
+
+        // -----------------------------------------------------------------------------
         // From now on we can start the state engine and enter the first state
         // -----------------------------------------------------------------------------
         s_pStates[m_CurrentState]->OnEnter();
@@ -200,6 +232,12 @@ namespace
     
     void CApplication::OnExit()
     {
+        ImGui_ImplSDL2_Shutdown();
+
+        ImGui_ImplOpenGL3_Shutdown();
+
+        ImGui::DestroyContext();
+
         SDL_DestroyWindow(m_pWindow);
 
         SDL_JoystickClose(m_pGamePad);
@@ -226,6 +264,19 @@ namespace
             // Events
             // -----------------------------------------------------------------------------
             ProcessSDLEvents();
+
+            // -----------------------------------------------------------------------------
+            // Update GUI
+            // -----------------------------------------------------------------------------
+            ImGui_ImplOpenGL3_NewFrame();
+
+            ImGui_ImplSDL2_NewFrame(m_pWindow);
+
+            ImGui::NewFrame();
+
+            bool open = true;
+
+            ImGui::ShowDemoWindow(&open);
 
             // -----------------------------------------------------------------------------
             // State engine
@@ -284,6 +335,14 @@ namespace
 
         while (SDL_PollEvent(&SDLEvent))
         {
+            // -----------------------------------------------------------------------------
+            // IMGUI
+            // -----------------------------------------------------------------------------
+            ImGui_ImplSDL2_ProcessEvent(&SDLEvent);
+
+            // -----------------------------------------------------------------------------
+            // Engine
+            // -----------------------------------------------------------------------------
             ProcessWindowEvents(SDLEvent);
             ProcessKeyboardEvents(SDLEvent);
             ProcessMouseEvents(SDLEvent);
