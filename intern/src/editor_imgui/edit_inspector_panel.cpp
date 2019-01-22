@@ -5,6 +5,8 @@
 
 #include "editor_imgui/edit_inspector_panel.h"
 
+#include "engine/data/data_entity_manager.h"
+
 #include "imgui.h"
 
 namespace Edit
@@ -22,14 +24,24 @@ namespace GUI
     {
 
     }
-        
+
+    // -----------------------------------------------------------------------------
+
+    void CInspectorPanel::InspectEntity(int _ID)
+    {
+        m_pEntity = Dt::EntityManager::GetEntityByID(_ID);
+    }
+
     // -----------------------------------------------------------------------------
 
     void CInspectorPanel::Render()
     {
         ImGui::Begin("Inspector");
 
-
+        if (m_pEntity)
+        {
+            m_pEntity->OnGUI();
+        }
 
         ImGui::End();
     }

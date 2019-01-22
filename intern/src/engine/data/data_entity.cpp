@@ -448,4 +448,11 @@ namespace Dt
 
         m_pComponentsFacet->RemoveComponent(_pComponent);
     }
+
+    // -----------------------------------------------------------------------------
+
+    void CEntity::OnGUI()
+    {
+        int a = 4;
+    }
 } // namespace Dt

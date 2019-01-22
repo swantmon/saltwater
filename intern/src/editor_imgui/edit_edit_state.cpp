@@ -3,6 +3,7 @@
 
 #include "editor_imgui/edit_edit_state.h"
 #include "editor_imgui/edit_unload_map_state.h"
+#include "editor_imgui/edit_inspector_panel.h"
 
 #include "editor_port/edit_message.h"
 #include "editor_port/edit_message_manager.h"
@@ -78,6 +79,8 @@ namespace Edit
         // -----------------------------------------------------------------------------
         Gfx::SelectionRenderer::UnselectEntity();
 
+        Edit::GUI::CInspectorPanel::GetInstance().InspectEntity(-1);
+
         // -----------------------------------------------------------------------------
         // Reset action
         // -----------------------------------------------------------------------------
@@ -117,6 +120,8 @@ namespace Edit
                 Dt::CEntity* pEntity = (Dt::CEntity*)rSelectionTicket.m_pObject;
 
                 Gfx::SelectionRenderer::SelectEntity(pEntity->GetID());
+
+                Edit::GUI::CInspectorPanel::GetInstance().InspectEntity(pEntity->GetID());
             }
         }
 
