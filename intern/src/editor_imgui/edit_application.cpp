@@ -73,6 +73,9 @@ namespace
         void OnTranslation(Edit::CState::EStateType _NewState);
 
         void ProcessSDLEvents();
+        void ProcessWindowEvents(const SDL_Event& _rSDLEvent);
+        void ProcessKeyboardEvents(const SDL_Event& _rSDLEvent);
+        void ProcessMouseEvents(const SDL_Event& _rSDLEvent);
         void ProcessGamepadEvents(const SDL_Event& _rSDLEvent);
 
         Base::CInputEvent::EKey ConvertSDLKey(const SDL_Event& _rSDLEvent);
@@ -281,27 +284,63 @@ namespace
 
         while (SDL_PollEvent(&SDLEvent))
         {
-            switch (SDLEvent.type)
-            {
-            case SDL_JOYDEVICEADDED:
+            ProcessWindowEvents(SDLEvent);
+            ProcessKeyboardEvents(SDLEvent);
+            ProcessMouseEvents(SDLEvent);
+            ProcessGamepadEvents(SDLEvent);
+        }
+    }
 
-                SDL_JoystickEventState(SDL_ENABLE);
-                m_pGamePad = SDL_JoystickOpen(0);
-                if (m_pGamePad == nullptr)
-                {
-                    BASE_THROWM("Could not initialise controller");
-                }
-                ENGINE_CONSOLE_INFOV(SDL_JoystickName(m_pGamePad));
-                break;
+    // -----------------------------------------------------------------------------
 
-            case SDL_JOYDEVICEREMOVED:
+    void CApplication::ProcessWindowEvents(const SDL_Event& _rSDLEvent)
+    {
+        switch (_rSDLEvent.type)
+        {
+        case SDL_WINDOWEVENT_CLOSE:
+            
+            break;
+        case SDL_WINDOWEVENT_RESIZED:
+            SDL_Log("Window %d resized to %dx%d", _rSDLEvent.window.windowID, _rSDLEvent.window.data1, _rSDLEvent.window.data2);
+            break;
+        }
+    }
 
-                ENGINE_CONSOLE_INFO("Gamepad disconnected");
-                break;
+    // -----------------------------------------------------------------------------
 
-            default:
-                ProcessGamepadEvents(SDLEvent);
-            }
+    void CApplication::ProcessKeyboardEvents(const SDL_Event& _rSDLEvent)
+    {
+        using Base::CInputEvent;
+
+        CInputEvent Event(CInputEvent::Input);
+
+        switch (_rSDLEvent.type)
+        {
+        case SDL_KEYDOWN:
+            break;
+        case SDL_KEYUP:
+            break;
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CApplication::ProcessMouseEvents(const SDL_Event& _rSDLEvent)
+    {
+        using Base::CInputEvent;
+
+        CInputEvent Event(CInputEvent::Input);
+
+        switch (_rSDLEvent.type)
+        {
+        case SDL_MOUSEMOTION:
+            break;
+        case SDL_MOUSEBUTTONDOWN:
+            break;
+        case SDL_MOUSEBUTTONUP:
+            break;
+        case SDL_MOUSEWHEEL:
+            break;
         }
     }
 
@@ -315,6 +354,20 @@ namespace
 
         switch (_rSDLEvent.type)
         {
+        case SDL_JOYDEVICEADDED:
+            SDL_JoystickEventState(SDL_ENABLE);
+            m_pGamePad = SDL_JoystickOpen(0);
+            if (m_pGamePad == nullptr)
+            {
+                BASE_THROWM("Could not initialise controller");
+            }
+            ENGINE_CONSOLE_INFOV(SDL_JoystickName(m_pGamePad));
+            break;
+
+        case SDL_JOYDEVICEREMOVED:
+            ENGINE_CONSOLE_INFO("Gamepad disconnected");
+            break;
+
         case SDL_JOYAXISMOTION:
 
             if (_rSDLEvent.jaxis.value > m_AnalogStickDeadZone || _rSDLEvent.jaxis.value < -m_AnalogStickDeadZone)
