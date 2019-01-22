@@ -301,7 +301,12 @@ namespace
             
             break;
         case SDL_WINDOWEVENT_RESIZED:
-            SDL_Log("Window %d resized to %dx%d", _rSDLEvent.window.windowID, _rSDLEvent.window.data1, _rSDLEvent.window.data2);
+            int WindowWidth;
+            int WindowHeight;
+
+            SDL_GetWindowSize(m_pWindow, &WindowWidth, &WindowHeight);
+
+            Gfx::Pipeline::OnResize(m_EditWindowID, WindowWidth, WindowHeight);
             break;
         }
     }
@@ -313,12 +318,26 @@ namespace
         using Base::CInputEvent;
 
         CInputEvent Event(CInputEvent::Input);
+        unsigned int Key;
+        unsigned int Mod;
 
         switch (_rSDLEvent.type)
         {
         case SDL_KEYDOWN:
+            Key = _rSDLEvent.key.keysym.sym;
+            Mod = _rSDLEvent.key.keysym.mod;
+
+            Event = CInputEvent(Base::CInputEvent::Input, Base::CInputEvent::KeyPressed, Key, Mod);
+
+            Gui::EventHandler::OnUserEvent(Event);
             break;
         case SDL_KEYUP:
+            Key = _rSDLEvent.key.keysym.sym;
+            Mod = _rSDLEvent.key.keysym.mod;
+
+            Event = CInputEvent(Base::CInputEvent::Input, Base::CInputEvent::KeyReleased, Key, Mod);
+
+            Gui::EventHandler::OnUserEvent(Event);
             break;
         }
     }
@@ -331,15 +350,72 @@ namespace
 
         CInputEvent Event(CInputEvent::Input);
 
+        Base::CInputEvent::EAction MouseAction = Base::CInputEvent::UndefinedAction;
+        int WheelData;
+
         switch (_rSDLEvent.type)
         {
         case SDL_MOUSEMOTION:
+            int MousePositionX;
+            int MousePositionY;
+
+            SDL_GetMouseState(&MousePositionX, &MousePositionY);
+
+            m_LatestMousePosition[0] = MousePositionX;
+            m_LatestMousePosition[1] = MousePositionY;
+
+            Event = CInputEvent(CInputEvent::Input, CInputEvent::MouseMove, CInputEvent::Mouse, m_LatestMousePosition, m_LatestMousePosition);
+
+            Gui::EventHandler::OnUserEvent(Event);
             break;
         case SDL_MOUSEBUTTONDOWN:
+            if (_rSDLEvent.button.button == SDL_BUTTON_LEFT)
+            {
+                MouseAction = Base::CInputEvent::MouseLeftPressed;
+            }
+            else if (_rSDLEvent.button.button == SDL_BUTTON_MIDDLE)
+            {
+                MouseAction = Base::CInputEvent::MouseMiddlePressed;
+            }
+            else if (_rSDLEvent.button.button == SDL_BUTTON_RIGHT)
+            {
+                MouseAction = CInputEvent::MouseRightPressed;
+            }
+
+            if (MouseAction != CInputEvent::UndefinedAction)
+            {
+                Event = CInputEvent(CInputEvent::Input, MouseAction, CInputEvent::Mouse, m_LatestMousePosition, m_LatestMousePosition);
+
+                Gui::EventHandler::OnUserEvent(Event);
+            }
             break;
         case SDL_MOUSEBUTTONUP:
+            if (_rSDLEvent.button.button == SDL_BUTTON_LEFT)
+            {
+                MouseAction = CInputEvent::MouseLeftReleased;
+            }
+            else if (_rSDLEvent.button.button == SDL_BUTTON_MIDDLE)
+            {
+                MouseAction = CInputEvent::MouseMiddleReleased;
+            }
+            else if (_rSDLEvent.button.button == SDL_BUTTON_RIGHT)
+            {
+                MouseAction = CInputEvent::MouseRightReleased;
+            }
+
+            if (MouseAction != Base::CInputEvent::UndefinedAction)
+            {
+                Event = CInputEvent(CInputEvent::Input, MouseAction, CInputEvent::Mouse, m_LatestMousePosition, m_LatestMousePosition);
+
+                Gui::EventHandler::OnUserEvent(Event);
+            }
             break;
         case SDL_MOUSEWHEEL:
+            WheelData = _rSDLEvent.wheel.y;
+
+            Event = CInputEvent(CInputEvent::Input, CInputEvent::MouseWheel, CInputEvent::Mouse, m_LatestMousePosition, WheelData);
+
+            Gui::EventHandler::OnUserEvent(Event);
             break;
         }
     }
