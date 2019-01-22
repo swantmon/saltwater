@@ -66,7 +66,7 @@ namespace
         bool m_EnableGamepad;
         bool m_CloseWindow;
 
-        GUI::CInspectorPanel m_Inspector;
+        GUI::CInspectorPanel& m_rInspector = GUI::CInspectorPanel::GetInstance();
 
     private:
 
@@ -252,7 +252,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Panels
         // -----------------------------------------------------------------------------
-        m_Inspector.Render();
+        m_rInspector.Render();
     }
 
     // -----------------------------------------------------------------------------
