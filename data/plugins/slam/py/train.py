@@ -61,25 +61,24 @@ class ImageDataset(Dataset):
 
     # -----------------------------------------------------------------------------
 
-    def apply_random_mask(self, img):
+    def apply_train_mask(self, img):
         masked_img = img.clone()
-        masked_part = img.clone()
         
-        #y1 = np.random.randint(0, opt.img_size_h - opt.mask_size)
-        #x1 = np.random.randint(0, opt.img_size_w - opt.mask_size)
-        y1 = int((opt.img_size_h - opt.mask_size) / 2)
-        x1 = int((opt.img_size_w - opt.mask_size) / 2)
+        y1 = np.random.randint(0, opt.img_size_h - opt.mask_size)
+        x1 = np.random.randint(0, opt.img_size_w - opt.mask_size)
+        #y1 = int((opt.img_size_h - opt.mask_size) / 2)
+        #x1 = int((opt.img_size_w - opt.mask_size) / 2)
 
         y2, x2 = y1 + opt.mask_size, x1 + opt.mask_size
 
         masked_img[:, y1:y2, x1:x2] = 1
+        masked_part = img[:, y1:y2, x1:x2]
 
-        return masked_img, masked_part
+        return masked_img, masked_part, 0
 
     # -----------------------------------------------------------------------------
 
-    def apply_center_mask(self, img):
-        masked_part = torch.zeros(img.shape)
+    def apply_test_mask(self, img):
         masked_img = img.clone()
         
         y1 = int((opt.img_size_h - opt.mask_size) / 2)
@@ -88,9 +87,8 @@ class ImageDataset(Dataset):
         y2, x2 = y1 + opt.mask_size, x1 + opt.mask_size
 
         masked_img[:, y1:y2, x1:x2] = 1
-        masked_part[:, y1:y2, x1:x2] = 1
 
-        return masked_img, masked_part
+        return masked_img, 0, ([x1, y1, x2, y2])
 
     # -----------------------------------------------------------------------------
 
@@ -100,12 +98,12 @@ class ImageDataset(Dataset):
 
         if self.mode == 'train':
             # For training data perform random mask
-            masked_img, masked_part = self.apply_random_mask(img)
+            masked_img, masked_part, pos = self.apply_train_mask(img)
         else:
             # For test data mask the center of the image
-            masked_img, masked_part = self.apply_center_mask(img)
+            masked_img, masked_part, pos = self.apply_test_mask(img)
 
-        return img, masked_img, masked_part
+        return img, masked_img, masked_part, pos
 
     # -----------------------------------------------------------------------------
 
@@ -120,7 +118,7 @@ cuda = True if torch.cuda.is_available() else False
 # -----------------------------------------------------------------------------
 # Calculate output of image discriminator (PatchGAN)
 # -----------------------------------------------------------------------------
-patch_h, patch_w = int(opt.img_size_h / 2**3), int(opt.img_size_w / 2**3)
+patch_h, patch_w = int(opt.mask_size / 2**3), int(opt.mask_size / 2**3)
 patch = (1, patch_h, patch_w)
 
 # -----------------------------------------------------------------------------
@@ -187,25 +185,27 @@ Tensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
 # Functions
 # -----------------------------------------------------------------------------
 def save_sample(batches_done, _Path):
-    samples, masked_samples, masked_part = next(iter(test_dataloader))
+    samples, masked_samples, masked_part, position = next(iter(test_dataloader))
     samples = Variable(samples.type(Tensor))
     masked_samples = Variable(masked_samples.type(Tensor))
-    masked_part = Variable(masked_part.type(Tensor))
+
+    x1 = position[0][0].item()
+    y1 = position[1][0].item()
+    x2 = position[2][0].item()
+    y2 = position[3][0].item()
 
     # -----------------------------------------------------------------------------
     # Generate inpainted image
     # -----------------------------------------------------------------------------
     gen_mask = generator(masked_samples)
 
-    # -----------------------------------------------------------------------------
-    # Mixture
-    # -----------------------------------------------------------------------------
-    filled_example = gen_mask * masked_part + masked_samples * (1 - masked_part)
+    filled_sample = masked_samples.clone()
+    filled_sample[:, :, y1:y2, x1:x2] = gen_mask
 
     # -----------------------------------------------------------------------------
     # Save sample
     # -----------------------------------------------------------------------------
-    sample = torch.cat((masked_samples.data, gen_mask.data, filled_example.data, samples.data), -2)
+    sample = torch.cat((masked_samples.data, filled_sample.data, samples.data), -2)
     save_image(sample, _Path, nrow=6, normalize=True)
 
 # -----------------------------------------------------------------------------
@@ -239,7 +239,7 @@ if __name__ == '__main__':
         # -----------------------------------------------------------------------------
 
         for epoch in range(LastEpoch, opt.n_epochs):
-            for i, (imgs, masked_imgs, masked_parts) in enumerate(train_dataloader):
+            for i, (imgs, masked_imgs, masked_parts, position) in enumerate(train_dataloader):
 
                 # -----------------------------------------------------------------------------
                 # Adversarial ground truths
