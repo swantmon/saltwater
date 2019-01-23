@@ -6,7 +6,11 @@
 #include "editor_imgui/edit_inspector_panel.h"
 #include "editor_imgui/edit_gui_factory.h"
 
+#include "engine/data/data_entity.h"
 #include "engine/data/data_entity_manager.h"
+#include "engine/data/data_transformation_facet.h"
+#include "engine/data/data_component_facet.h"
+#include "engine/data/data_component_manager.h"
 
 #include "imgui.h"
 
@@ -49,11 +53,41 @@ namespace GUI
 
         if (m_pEntity)
         {
-            if (rFactory.HasClass<Dt::CEntity>())
+            auto Hash = rFactory.CalculateHash(m_pEntity);
+
+            if (rFactory.HasClass(Hash))
             {
-                auto Panel = rFactory.GetClass<Dt::CEntity>(m_pEntity);
+                auto Panel = rFactory.GetClass(Hash, m_pEntity);
 
                 Panel->OnGUI();
+            }
+
+            auto pTransformationFacet = m_pEntity->GetTransformationFacet();
+
+            Hash = rFactory.CalculateHash(pTransformationFacet);
+
+            if (pTransformationFacet && rFactory.HasClass(Hash))
+            {
+                auto Panel = rFactory.GetClass(Hash, pTransformationFacet);
+
+                Panel->OnGUI();
+            }
+
+            auto pComponentFacet = m_pEntity->GetComponentFacet();
+
+            if (pComponentFacet)
+            {
+                for (auto& rComponent : pComponentFacet->GetComponents())
+                {
+                    size_t Hash = rFactory.CalculateHash(rComponent);
+
+                    if (rFactory.HasClass(Hash))
+                    {
+                        auto Panel = rFactory.GetClass(Hash, &rComponent);
+
+                        Panel->OnGUI();
+                    }
+                }
             }
         }
 

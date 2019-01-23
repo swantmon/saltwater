@@ -57,6 +57,12 @@
     <ClCompile Include="..\..\..\src\editor_imgui\edit_data_entity.cpp">
       <Filter>gui\panels</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_imgui\edit_data_transformation_facet.cpp">
+      <Filter>gui\panels</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_imgui\edit_data_material_component.cpp">
+      <Filter>gui\panels</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\editor_imgui\edit_edit_state.h">
@@ -104,6 +110,12 @@
       <Filter>gui\factory</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\editor_imgui\edit_data_entity.h">
+      <Filter>gui\panels</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor_imgui\edit_data_transformation_facet.h">
+      <Filter>gui\panels</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor_imgui\edit_data_material_component.h">
       <Filter>gui\panels</Filter>
     </ClInclude>
   </ItemGroup>

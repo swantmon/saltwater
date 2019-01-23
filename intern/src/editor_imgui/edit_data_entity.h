@@ -13,11 +13,9 @@ namespace Dt
         
         void OnGUI()
         {
-            int ID = static_cast<int>(m_ID);
+            ImGui::Text("Name:");
 
-            ImGui::InputInt("ID", &ID);
-
-            CEntity::m_ID = ID;
+            ImGui::Text(m_Name.c_str());
         }
     };
 } // namespace Dt

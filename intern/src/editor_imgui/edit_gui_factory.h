@@ -22,21 +22,22 @@ namespace Edit
         
         template<class T>
         void RegisterClass(CBaseFactory* _pClassObject);
-        
+
+        inline void RegisterClass(size_t _Hash, CBaseFactory* _pClassObject);
+
+        inline CBaseFactory* GetClass(size_t _Hash, void* _pBaseClass);
+
+        inline bool HasClass(size_t _Hash);
+
         template<class T>
-        CBaseFactory* GetClass(void* _pBaseClass);
-        
+        size_t CalculateHash();
+
         template<class T>
-        bool HasClass();
+        size_t CalculateHash(T _Class);
         
     private:
         
         std::map<size_t, CBaseFactory*> m_Factory;
-        
-    private:
-        
-        template<class T>
-        size_t CalculateHash();
     };
 } // namespace Edit
 
@@ -45,28 +46,26 @@ namespace Edit
     template<class T>
     void CGUIFactory::RegisterClass(CBaseFactory* _pClassObject)
     {
-        if (!HasClass<T>())
+        RegisterClass(CalculateHash<T>(), _pClassObject);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    inline void CGUIFactory::RegisterClass(size_t _Hash, CBaseFactory* _pClassObject)
+    {
+        if (!HasClass(_Hash))
         {
-            m_Factory.insert(std::make_pair(CalculateHash<T>(), _pClassObject));
+            m_Factory.insert(std::make_pair(_Hash, _pClassObject));
         }
     }
 
     // -----------------------------------------------------------------------------
 
-    template<class T>
-    bool CGUIFactory::HasClass()
+    inline CBaseFactory* CGUIFactory::GetClass(size_t _Hash, void* _pBaseClass)
     {
-        return m_Factory.find(CalculateHash<T>()) != m_Factory.end();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    template<class T>
-    CBaseFactory* CGUIFactory::GetClass(void* _pBaseClass)
-    {
-        if (HasClass<T>())
+        if (HasClass(_Hash))
         {
-            return static_cast<CBaseFactory*>(m_Factory.find(CalculateHash<T>())->second->Create(_pBaseClass));
+            return static_cast<CBaseFactory*>(m_Factory.find(_Hash)->second->Create(_pBaseClass));
         }
 
         return nullptr;
@@ -74,9 +73,26 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
+    inline bool CGUIFactory::HasClass(size_t _Hash)
+    {
+        return m_Factory.find(_Hash) != m_Factory.end();
+    }
+
+    // -----------------------------------------------------------------------------
+
     template<class T>
     size_t CGUIFactory::CalculateHash()
     {
-        return typeid(T).hash_code();
+        T* pSample = 0;
+
+        return CalculateHash(pSample);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    template<class T>
+    size_t CGUIFactory::CalculateHash(T _Class)
+    {
+        return typeid(_Class).hash_code();
     }
 } // namespace Edit
