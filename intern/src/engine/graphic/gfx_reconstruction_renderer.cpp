@@ -144,7 +144,7 @@ namespace
     
     void CGfxEngineReconstructionRenderer::OnSetupEnd()
     {
-        SLAMRenderHitProxy = (FSLAMRenderHitProxy)(Core::PluginManager::GetPluginFunction("SLAM", "OnRenderHitProxy"));
+        
     }
     
     // -----------------------------------------------------------------------------
@@ -200,7 +200,9 @@ namespace
 
     void CGfxEngineReconstructionRenderer::RenderHitProxy()
     {
-        if (SLAMRenderHitProxy == 0)
+        SLAMRenderHitProxy = (FSLAMRenderHitProxy)(Core::PluginManager::GetPluginFunction("SLAM", "OnRenderHitProxy"));
+
+        if (SLAMRenderHitProxy != 0)
         {
             SLAMRenderHitProxy = (FSLAMRenderHitProxy)(Core::PluginManager::GetPluginFunction("SLAM", "OnRenderHitProxy"));
         }
