@@ -904,6 +904,5 @@
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_scissor_rect.h">
       <Filter>graphic\engine\scissor rects</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\engine\engine_behaviour.h" />
   </ItemGroup>
 </Project>

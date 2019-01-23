@@ -2,7 +2,6 @@
 #pragma once
 
 #include "engine/engine_config.h"
-#include "engine/engine_behaviour.h"
 
 #include "base/base_aabb3.h"
 #include "base/base_typedef.h"
@@ -50,7 +49,7 @@ namespace Dt
 
 namespace Dt
 {
-    class ENGINE_API CEntity : public Engine::CBehaviour
+    class ENGINE_API CEntity
     {
     public:
 

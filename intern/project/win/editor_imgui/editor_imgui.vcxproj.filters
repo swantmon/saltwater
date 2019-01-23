@@ -13,6 +13,9 @@
     <Filter Include="gui\wrapper">
       <UniqueIdentifier>{60e1bd7e-ebb4-4c30-8908-7962fdfe5826}</UniqueIdentifier>
     </Filter>
+    <Filter Include="gui\factory">
+      <UniqueIdentifier>{08250363-5a86-4bc0-9537-a41aae3d5ca8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\editor_imgui\edit_edit_state.cpp">
@@ -49,6 +52,9 @@
       <Filter>gui</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\editor_imgui\edit_inspector_panel.cpp">
+      <Filter>gui\panels</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_imgui\edit_data_entity.cpp">
       <Filter>gui\panels</Filter>
     </ClCompile>
   </ItemGroup>
@@ -89,6 +95,15 @@
       <Filter>gui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\editor_imgui\edit_inspector_panel.h">
+      <Filter>gui\panels</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor_imgui\edit_gui_factory.h">
+      <Filter>gui\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor_imgui\edit_base_factory.h">
+      <Filter>gui\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor_imgui\edit_data_entity.h">
       <Filter>gui\panels</Filter>
     </ClInclude>
   </ItemGroup>

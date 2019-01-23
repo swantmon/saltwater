@@ -4,6 +4,7 @@
 #include "base/base_include_glm.h"
 
 #include "editor_imgui/edit_inspector_panel.h"
+#include "editor_imgui/edit_gui_factory.h"
 
 #include "engine/data/data_entity_manager.h"
 
@@ -36,11 +37,18 @@ namespace GUI
 
     void CInspectorPanel::Render()
     {
+        Edit::CGUIFactory& rFactory = Edit::CGUIFactory::GetInstance();
+
         ImGui::Begin("Inspector");
 
         if (m_pEntity)
         {
-            m_pEntity->OnGUI();
+            if (rFactory.HasClass<Dt::CEntity>())
+            {
+                auto Panel = rFactory.GetClass<Dt::CEntity>(m_pEntity);
+
+                Panel->OnGUI();
+            }
         }
 
         ImGui::End();
