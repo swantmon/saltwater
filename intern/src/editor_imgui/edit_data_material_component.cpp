@@ -22,7 +22,7 @@ namespace Dt
         SRegFactoryCMaterialComponentGUIFactory()
         {
             static CMaterialComponentGUIFactory s_CMaterialComponentGUIFactory;
-            Edit::CGUIFactory::GetInstance().RegisterClass<CMaterialComponent>(&s_CMaterialComponentGUIFactory);
+            Edit::CGUIFactory::GetInstance().Register<CMaterialComponent>(&s_CMaterialComponentGUIFactory);
         }
     } const g_SRegFactoryCMaterialComponentGUIFactory;
 } // namespace Dt

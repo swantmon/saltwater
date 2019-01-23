@@ -11,6 +11,7 @@
 #include "engine/data/data_transformation_facet.h"
 #include "engine/data/data_component_facet.h"
 #include "engine/data/data_component_manager.h"
+#include "engine/data/data_script_component.h"
 
 #include "imgui.h"
 
@@ -55,9 +56,9 @@ namespace GUI
         {
             auto Hash = rFactory.CalculateHash(m_pEntity);
 
-            if (rFactory.HasClass<Dt::CEntity>())
+            if (rFactory.Has<Dt::CEntity>())
             {
-                auto Panel = rFactory.GetClass<Dt::CEntity>(m_pEntity);
+                auto Panel = rFactory.Get<Dt::CEntity>(m_pEntity);
 
                 Panel->OnGUI();
             }
@@ -66,9 +67,9 @@ namespace GUI
 
             Hash = rFactory.CalculateHash(pTransformationFacet);
 
-            if (pTransformationFacet && rFactory.HasClass<Dt::CTransformationFacet>())
+            if (pTransformationFacet && rFactory.Has<Dt::CTransformationFacet>())
             {
-                auto Panel = rFactory.GetClass<Dt::CTransformationFacet>(pTransformationFacet);
+                auto Panel = rFactory.Get<Dt::CTransformationFacet>(pTransformationFacet);
 
                 Panel->OnGUI();
             }
@@ -81,9 +82,16 @@ namespace GUI
                 {
                     size_t Hash = rComponent->GetTypeID();
 
-                    if (rFactory.HasClass(Hash))
+                    if (rComponent->GetTypeID() == Base::CTypeInfo::GetTypeID<Dt::CScriptComponent>())
                     {
-                        auto Panel = rFactory.GetClass(Hash, &rComponent);
+                        auto pScriptComponent = static_cast<Dt::CScriptComponent*>(rComponent);
+
+                        Hash = pScriptComponent->GetScriptTypeID();
+                    }
+
+                    if (rFactory.Has(Hash))
+                    {
+                        auto Panel = rFactory.Get(Hash, &rComponent);
 
                         Panel->OnGUI();
                     }

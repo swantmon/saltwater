@@ -22,7 +22,7 @@ namespace Dt
         SRegFactoryCEntityGUIFactory()
         {
             static CEntityGUIFactory s_CEntityGUIFactory;
-            Edit::CGUIFactory::GetInstance().RegisterClass<CEntity>(&s_CEntityGUIFactory);
+            Edit::CGUIFactory::GetInstance().Register<CEntity>(&s_CEntityGUIFactory);
         }
     } const g_SRegFactoryCEntityGUIFactory;        
 } // namespace Dt

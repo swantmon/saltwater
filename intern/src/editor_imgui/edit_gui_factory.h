@@ -23,17 +23,17 @@ namespace Edit
     public:
         
         template<class T>
-        void RegisterClass(CBaseFactory* _pClassObject);
+        void Register(CBaseFactory* _pClassObject);
 
         template<class T>
-        CBaseFactory* GetClass(void* _pBaseClass);
+        CBaseFactory* Get(void* _pBaseClass);
 
-        inline CBaseFactory* GetClass(size_t _Hash, void* _pBaseClass);
+        inline CBaseFactory* Get(size_t _Hash, void* _pBaseClass);
 
         template<class T>
-        bool HasClass();
+        bool Has();
 
-        inline bool HasClass(size_t _Hash);
+        inline bool Has(size_t _Hash);
 
         template<class T>
         size_t CalculateHash();
@@ -50,9 +50,9 @@ namespace Edit
 namespace Edit
 {
     template<class T>
-    void CGUIFactory::RegisterClass(CBaseFactory* _pClassObject)
+    void CGUIFactory::Register(CBaseFactory* _pClassObject)
     {
-        if (!HasClass<T>())
+        if (!Has<T>())
         {
             m_Factory.insert(std::make_pair(CalculateHash<T>(), _pClassObject));
         }
@@ -61,9 +61,9 @@ namespace Edit
     // -----------------------------------------------------------------------------
 
     template<class T>
-    CBaseFactory* CGUIFactory::GetClass(void* _pBaseClass)
+    CBaseFactory* CGUIFactory::Get(void* _pBaseClass)
     {
-        if (HasClass<T>())
+        if (Has<T>())
         {
             return static_cast<CBaseFactory*>(m_Factory.find(CalculateHash<T>())->second->Create(_pBaseClass));
         }
@@ -73,9 +73,9 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    inline CBaseFactory* CGUIFactory::GetClass(size_t _Hash, void* _pBaseClass)
+    inline CBaseFactory* CGUIFactory::Get(size_t _Hash, void* _pBaseClass)
     {
-        if (HasClass(_Hash))
+        if (Has(_Hash))
         {
             return static_cast<CBaseFactory*>(m_Factory.find(_Hash)->second->Create(_pBaseClass));
         }
@@ -86,14 +86,14 @@ namespace Edit
     // -----------------------------------------------------------------------------
 
     template<class T>
-    bool CGUIFactory::HasClass()
+    bool CGUIFactory::Has()
     {
         return m_Factory.find(CalculateHash<T>()) != m_Factory.end();
     }
 
     // -----------------------------------------------------------------------------
 
-    inline bool CGUIFactory::HasClass(size_t _Hash)
+    inline bool CGUIFactory::Has(size_t _Hash)
     {
         return m_Factory.find(_Hash) != m_Factory.end();
     }

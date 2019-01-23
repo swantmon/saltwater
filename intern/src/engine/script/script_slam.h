@@ -26,7 +26,7 @@
 
 namespace Scpt
 {
-    class CSLAMScript : public CScript<CSLAMScript>
+    class ENGINE_API CSLAMScript : public CScript<CSLAMScript>
     {
     public:
 

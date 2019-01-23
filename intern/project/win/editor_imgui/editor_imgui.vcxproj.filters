@@ -63,6 +63,9 @@
     <ClCompile Include="..\..\..\src\editor_imgui\edit_data_material_component.cpp">
       <Filter>gui\panels</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_imgui\edit_script_slam.cpp">
+      <Filter>gui\panels</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\editor_imgui\edit_edit_state.h">
@@ -116,6 +119,9 @@
       <Filter>gui\panels</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\editor_imgui\edit_data_material_component.h">
+      <Filter>gui\panels</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor_imgui\edit_script_slam.h">
       <Filter>gui\panels</Filter>
     </ClInclude>
   </ItemGroup>
