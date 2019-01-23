@@ -14,6 +14,8 @@ namespace Dt
         void OnGUI()
         {
             ImGui::Text("Transformation Facet");
+
+            ImGui::DragFloat3("Position", &m_Position.x);
         }
     };
 } // namespace Dt

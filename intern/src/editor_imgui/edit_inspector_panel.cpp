@@ -55,9 +55,9 @@ namespace GUI
         {
             auto Hash = rFactory.CalculateHash(m_pEntity);
 
-            if (rFactory.HasClass(Hash))
+            if (rFactory.HasClass<Dt::CEntity>())
             {
-                auto Panel = rFactory.GetClass(Hash, m_pEntity);
+                auto Panel = rFactory.GetClass<Dt::CEntity>(m_pEntity);
 
                 Panel->OnGUI();
             }
@@ -66,9 +66,9 @@ namespace GUI
 
             Hash = rFactory.CalculateHash(pTransformationFacet);
 
-            if (pTransformationFacet && rFactory.HasClass(Hash))
+            if (pTransformationFacet && rFactory.HasClass<Dt::CTransformationFacet>())
             {
-                auto Panel = rFactory.GetClass(Hash, pTransformationFacet);
+                auto Panel = rFactory.GetClass<Dt::CTransformationFacet>(pTransformationFacet);
 
                 Panel->OnGUI();
             }
@@ -79,7 +79,7 @@ namespace GUI
             {
                 for (auto& rComponent : pComponentFacet->GetComponents())
                 {
-                    size_t Hash = rFactory.CalculateHash(rComponent);
+                    size_t Hash = rComponent->GetTypeID();
 
                     if (rFactory.HasClass(Hash))
                     {
@@ -89,6 +89,8 @@ namespace GUI
                     }
                 }
             }
+
+            Dt::EntityManager::MarkEntityAsDirty(*m_pEntity, Dt::CEntity::DirtyMove);
         }
 
         ImGui::End();
