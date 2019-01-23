@@ -21,7 +21,7 @@ namespace GUI
 
     public:
 
-        void InspectEntity(int _ID);
+        void InspectEntity(Dt::CEntity::BID _ID);
 
     public:
 

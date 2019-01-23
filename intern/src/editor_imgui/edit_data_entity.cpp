@@ -11,7 +11,7 @@ namespace Dt
     {
     public:
         CEntityGUIFactory() { }
-        CEntityGUIFactory(void* _pEntity) { m_GUI = ::new (_pEntity) (CEntityGUI); };
+        CEntityGUIFactory(void* _pEntity) { m_GUI = (CEntityGUI*)(_pEntity);};
         void* Create(void* _pChild) { return new CEntityGUIFactory(_pChild); };
         void OnGUI() { m_GUI->OnGUI(); }
     private:

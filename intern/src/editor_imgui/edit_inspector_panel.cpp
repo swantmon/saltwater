@@ -28,8 +28,14 @@ namespace GUI
 
     // -----------------------------------------------------------------------------
 
-    void CInspectorPanel::InspectEntity(int _ID)
+    void CInspectorPanel::InspectEntity(Dt::CEntity::BID _ID)
     {
+        if (_ID == Dt::CEntity::s_InvalidID)
+        {
+            m_pEntity = 0;
+            return;
+        }
+
         m_pEntity = Dt::EntityManager::GetEntityByID(_ID);
     }
 

@@ -79,7 +79,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         Gfx::SelectionRenderer::UnselectEntity();
 
-        Edit::GUI::CInspectorPanel::GetInstance().InspectEntity(-1);
+        Edit::GUI::CInspectorPanel::GetInstance().InspectEntity(Dt::CEntity::s_InvalidID);
 
         // -----------------------------------------------------------------------------
         // Reset action
@@ -122,6 +122,12 @@ namespace Edit
                 Gfx::SelectionRenderer::SelectEntity(pEntity->GetID());
 
                 Edit::GUI::CInspectorPanel::GetInstance().InspectEntity(pEntity->GetID());
+            }
+            else
+            {
+                Gfx::SelectionRenderer::UnselectEntity();
+
+                Edit::GUI::CInspectorPanel::GetInstance().InspectEntity(Dt::CEntity::s_InvalidID);
             }
         }
 
