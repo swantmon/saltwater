@@ -10,7 +10,7 @@ namespace Dt
     {
     public:
         CMaterialComponentGUIFactory() { }
-        CMaterialComponentGUIFactory(void* _pEntity) { m_GUI = (CMaterialComponentGUI*)(_pEntity); };
+        CMaterialComponentGUIFactory(void* _pChild) { m_GUI = (CMaterialComponentGUI*)(_pChild); };
         void* Create(void* _pChild) { return new CMaterialComponentGUIFactory(_pChild); };
         void OnGUI() { m_GUI->OnGUI(); }
     private:

@@ -14,6 +14,9 @@ namespace Dt
         void OnGUI()
         {
             ImGui::Text("Material Component");
+
+            ImGui::ColorEdit4("Albedo", &m_Color.x);
+            ImGui::DragFloat("Roughness", &m_Roughness);
         }
     };
 } // namespace Dt
