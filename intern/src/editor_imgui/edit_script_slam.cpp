@@ -6,7 +6,7 @@
 
 namespace Edit
 {
-    class CSLAMScriptGUIFactory : public Edit::CBaseFactory
+    class CSLAMScriptGUIFactory : public Edit::IGUIFactory
     {
     public:
         CSLAMScriptGUIFactory() { }

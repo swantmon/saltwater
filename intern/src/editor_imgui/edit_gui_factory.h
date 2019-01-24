@@ -7,7 +7,7 @@
 
 namespace Edit
 {
-    class CBaseFactory
+    class IGUIFactory
     {
     public:
         virtual void* Create(void* _pChild) = 0;
@@ -21,22 +21,17 @@ namespace Edit
     {
     public:
         
-        static CGUIFactory& GetInstance()
-        {
-            static CGUIFactory s_Instance;
-
-            return s_Instance;
-        }
+        inline static CGUIFactory& GetInstance();
         
     public:
         
         template<class T>
-        void Register(CBaseFactory* _pClassObject);
+        void Register(IGUIFactory* _pObject);
 
         template<class T>
-        CBaseFactory* Get(void* _pBaseClass);
+        IGUIFactory* Get(void* _pObject);
 
-        inline CBaseFactory* Get(size_t _Hash, void* _pBaseClass);
+        inline IGUIFactory* Get(size_t _Hash, void* _pObject);
 
         template<class T>
         bool Has();
@@ -47,18 +42,27 @@ namespace Edit
         size_t CalculateHash();
 
         template<class T>
-        size_t CalculateHash(T _Class);
+        size_t CalculateHash(T _Object);
         
     private:
         
-        std::map<size_t, CBaseFactory*> m_Factory;
+        std::map<size_t, IGUIFactory*> m_Factory;
     };
 } // namespace Edit
 
 namespace Edit
 {
+    inline CGUIFactory& CGUIFactory::GetInstance()
+    {
+        static CGUIFactory s_Instance;
+
+        return s_Instance;
+    }
+
+    // -----------------------------------------------------------------------------
+
     template<class T>
-    void CGUIFactory::Register(CBaseFactory* _pClassObject)
+    void CGUIFactory::Register(IGUIFactory* _pClassObject)
     {
         if (!Has<T>())
         {
@@ -69,11 +73,11 @@ namespace Edit
     // -----------------------------------------------------------------------------
 
     template<class T>
-    CBaseFactory* CGUIFactory::Get(void* _pBaseClass)
+    IGUIFactory* CGUIFactory::Get(void* _pBaseClass)
     {
         if (Has<T>())
         {
-            return static_cast<CBaseFactory*>(m_Factory.find(CalculateHash<T>())->second->Create(_pBaseClass));
+            return static_cast<IGUIFactory*>(m_Factory.find(CalculateHash<T>())->second->Create(_pBaseClass));
         }
 
         return nullptr;
@@ -81,11 +85,11 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    inline CBaseFactory* CGUIFactory::Get(size_t _Hash, void* _pBaseClass)
+    inline IGUIFactory* CGUIFactory::Get(size_t _Hash, void* _pBaseClass)
     {
         if (Has(_Hash))
         {
-            return static_cast<CBaseFactory*>(m_Factory.find(_Hash)->second->Create(_pBaseClass));
+            return static_cast<IGUIFactory*>(m_Factory.find(_Hash)->second->Create(_pBaseClass));
         }
 
         return nullptr;

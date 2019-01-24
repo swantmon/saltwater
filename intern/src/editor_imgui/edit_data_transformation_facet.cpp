@@ -6,7 +6,7 @@
 
 namespace Dt
 {
-    class CTransformationFacetGUIFactory : public Edit::CBaseFactory
+    class CTransformationFacetGUIFactory : public Edit::IGUIFactory
     {
     public:
         CTransformationFacetGUIFactory() { }
