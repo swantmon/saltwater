@@ -1,3 +1,6 @@
+
+#include "editor_imgui/edit_precompiled.h"
+
 // dear imgui: Renderer for OpenGL3 / OpenGL ES2 / OpenGL ES3 (modern OpenGL with shaders / programmatic pipeline)
 // This needs to be used along with a Platform Binding (e.g. GLFW, SDL, Win32, custom..)
 // (Note: We are using GL3W as a helper library to access OpenGL functions since there is no standard header to access modern OpenGL functions easily. Alternatives are GLEW, Glad, etc..)
@@ -48,8 +51,6 @@
 //  ES 2.0    100       "#version 100"
 //  ES 3.0    300       "#version 300 es"
 //----------------------------------------
-
-#include "editor_imgui/edit_precompiled.h"
 
 #if defined(_MSC_VER) && !defined(_CRT_SECURE_NO_WARNINGS)
 #define _CRT_SECURE_NO_WARNINGS

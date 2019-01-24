@@ -6,7 +6,7 @@
 
 #include "engine/data/data_entity.h"
 
-#include <map>
+#include <vector>
 
 namespace Edit
 {
@@ -27,7 +27,16 @@ namespace GUI
 
     private:
 
-        std::map<Dt::CEntity::BID, bool> m_SelectionState;
+        struct SItemState
+        {
+            int Depth;
+            bool IsSelected;
+            Dt::CEntity* pEntity;
+        };
+
+    private:
+
+        std::vector<SItemState> m_SelectionState;
     };
 } // namespace GUI
 } // namespace Edit

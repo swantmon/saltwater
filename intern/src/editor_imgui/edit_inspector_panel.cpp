@@ -6,14 +6,14 @@
 #include "editor_imgui/edit_inspector_panel.h"
 #include "editor_imgui/edit_gui_factory.h"
 
+#include "editor_imgui/imgui/imgui.h"
+
 #include "engine/data/data_entity.h"
 #include "engine/data/data_entity_manager.h"
 #include "engine/data/data_transformation_facet.h"
 #include "engine/data/data_component_facet.h"
 #include "engine/data/data_component_manager.h"
 #include "engine/data/data_script_component.h"
-
-#include "imgui.h"
 
 namespace Edit
 {

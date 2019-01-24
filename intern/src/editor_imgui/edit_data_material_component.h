@@ -3,7 +3,7 @@
 
 #include "engine/data/data_material_component.h"
 
-#include "imgui.h"
+#include "editor_imgui/imgui/imgui.h"
 
 namespace Dt
 {

@@ -9,8 +9,10 @@
 #include "editor_imgui/edit_gui.h"
 #include "editor_imgui/edit_inspector_panel.h"
 #include "editor_imgui/edit_scene_graph_panel.h"
-#include "editor_imgui/imgui_impl_opengl.h"
-#include "editor_imgui/imgui_impl_sdl.h"
+
+#include "editor_imgui/imgui/imgui_impl_opengl.h"
+#include "editor_imgui/imgui/imgui_impl_sdl.h"
+#include "editor_imgui/imgui/imgui.h"
 
 #include "engine/core/core_asset_manager.h"
 #include "engine/core/core_console.h"
@@ -26,8 +28,6 @@
 
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_syswm.h"
-
-#include "imgui.h"
 
 using namespace Edit;
 

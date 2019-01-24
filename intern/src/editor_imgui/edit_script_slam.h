@@ -3,7 +3,7 @@
 
 #include "engine/script/script_slam.h"
 
-#include "imgui.h"
+#include "editor_imgui/imgui/imgui.h"
 
 namespace Scpt
 {

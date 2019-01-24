@@ -1,6 +1,6 @@
 
 #pragma once
 
-#include "imgui.h"
+#include "imgui/imgui.h"
 
 #define IMGUI_IMPL_OPENGL_LOADER_GLEW

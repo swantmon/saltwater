@@ -41,8 +41,12 @@
     <ClCompile Include="..\..\..\src\editor_imgui\edit_script_slam.cpp" />
     <ClCompile Include="..\..\..\src\editor_imgui\edit_start_state.cpp" />
     <ClCompile Include="..\..\..\src\editor_imgui\edit_unload_map_state.cpp" />
-    <ClCompile Include="..\..\..\src\editor_imgui\imgui_impl_opengl.cpp" />
-    <ClCompile Include="..\..\..\src\editor_imgui\imgui_impl_sdl.cpp" />
+    <ClCompile Include="..\..\..\src\editor_imgui\imgui\imgui.cpp" />
+    <ClCompile Include="..\..\..\src\editor_imgui\imgui\imgui_demo.cpp" />
+    <ClCompile Include="..\..\..\src\editor_imgui\imgui\imgui_draw.cpp" />
+    <ClCompile Include="..\..\..\src\editor_imgui\imgui\imgui_impl_opengl.cpp" />
+    <ClCompile Include="..\..\..\src\editor_imgui\imgui\imgui_impl_sdl.cpp" />
+    <ClCompile Include="..\..\..\src\editor_imgui\imgui\imgui_widgets.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\editor_imgui\edit_application.h" />
@@ -63,8 +67,14 @@
     <ClInclude Include="..\..\..\src\editor_imgui\edit_start_state.h" />
     <ClInclude Include="..\..\..\src\editor_imgui\edit_state.h" />
     <ClInclude Include="..\..\..\src\editor_imgui\edit_unload_map_state.h" />
-    <ClInclude Include="..\..\..\src\editor_imgui\imgui_impl_opengl.h" />
-    <ClInclude Include="..\..\..\src\editor_imgui\imgui_impl_sdl.h" />
+    <ClInclude Include="..\..\..\src\editor_imgui\imgui\imconfig.h" />
+    <ClInclude Include="..\..\..\src\editor_imgui\imgui\imgui.h" />
+    <ClInclude Include="..\..\..\src\editor_imgui\imgui\imgui_impl_opengl.h" />
+    <ClInclude Include="..\..\..\src\editor_imgui\imgui\imgui_impl_sdl.h" />
+    <ClInclude Include="..\..\..\src\editor_imgui\imgui\imgui_internal.h" />
+    <ClInclude Include="..\..\..\src\editor_imgui\imgui\imstb_rectpack.h" />
+    <ClInclude Include="..\..\..\src\editor_imgui\imgui\imstb_textedit.h" />
+    <ClInclude Include="..\..\..\src\editor_imgui\imgui\imstb_truetype.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\base\base.vcxproj">
@@ -181,7 +191,7 @@
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\asio\include;..\..\..\..\extern\glew\include;..\..\..\..\extern\sdl2\include;..\..\..\..\extern\glm\include;..\..\..\..\extern\imgui\include;..\..\..\..\extern\json\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\asio\include;..\..\..\..\extern\glew\include;..\..\..\..\extern\sdl2\include;..\..\..\..\extern\glm\include;..\..\..\..\extern\json\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeaderFile>editor_imgui/edit_precompiled.h</PrecompiledHeaderFile>
       <DisableSpecificWarnings>
@@ -191,8 +201,8 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <OutputFile>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\\$(TargetFileName)</OutputFile>
-      <AdditionalLibraryDirectories>..\..\..\..\extern\sdl2\lib\x64;..\..\..\build\x64;..\..\..\..\extern\assimp\lib\x64;..\..\..\..\extern\devil\lib\x64;..\..\..\..\extern\glew\lib\x64;..\..\..\..\extern\imgui\lib\x64;..\..\..\..\extern\qt\lib\x64;..\..\..\..\extern\zlib\lib\x64;..\..\..\..\extern\tinyxml2\lib\x64</AdditionalLibraryDirectories>
-      <AdditionalDependencies>assimp.lib;DevIL.lib;ILU.lib;ILUT.lib;glew32.lib;SDL2.lib;SDL2main.lib;SDL2test.lib;zlibstatic.lib;imgui.lib;tinyxml2d.lib;opengl32.lib;glu32.lib;Qt5Core.lib;Qt5Gui.lib;Qt5Widgets.lib;qtmain.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\..\..\extern\sdl2\lib\x64;..\..\..\build\x64;..\..\..\..\extern\assimp\lib\x64;..\..\..\..\extern\devil\lib\x64;..\..\..\..\extern\glew\lib\x64;..\..\..\..\extern\qt\lib\x64;..\..\..\..\extern\zlib\lib\x64;..\..\..\..\extern\tinyxml2\lib\x64</AdditionalLibraryDirectories>
+      <AdditionalDependencies>assimp.lib;DevIL.lib;ILU.lib;ILUT.lib;glew32.lib;SDL2.lib;SDL2main.lib;SDL2test.lib;zlibstatic.lib;tinyxml2d.lib;opengl32.lib;glu32.lib;Qt5Core.lib;Qt5Gui.lib;Qt5Widgets.lib;qtmain.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <EntryPointSymbol>
       </EntryPointSymbol>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
@@ -234,7 +244,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\asio\include;..\..\..\..\extern\glew\include;..\..\..\..\extern\sdl2\include;..\..\..\..\extern\glm\include;..\..\..\..\extern\imgui\include;..\..\..\..\extern\json\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\asio\include;..\..\..\..\extern\glew\include;..\..\..\..\extern\sdl2\include;..\..\..\..\extern\glm\include;..\..\..\..\extern\json\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeaderFile>editor_imgui/edit_precompiled.h</PrecompiledHeaderFile>
       <DisableSpecificWarnings>
@@ -246,8 +256,8 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <OutputFile>$(SolutionDir)..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\\$(TargetFileName)</OutputFile>
-      <AdditionalLibraryDirectories>..\..\..\..\extern\sdl2\lib\x64;..\..\..\build\x64;..\..\..\..\extern\assimp\lib\x64;..\..\..\..\extern\devil\lib\x64;..\..\..\..\extern\glew\lib\x64;..\..\..\..\extern\imgui\lib\x64;..\..\..\..\extern\qt\lib\x64;..\..\..\..\extern\zlib\lib\x64;..\..\..\..\extern\tinyxml2\lib\x64</AdditionalLibraryDirectories>
-      <AdditionalDependencies>assimp.lib;DevIL.lib;ILU.lib;ILUT.lib;glew32.lib;SDL2.lib;SDL2main.lib;SDL2test.lib;zlibstatic.lib;imgui.lib;tinyxml2.lib;opengl32.lib;glu32.lib;Qt5Core.lib;Qt5Gui.lib;Qt5Widgets.lib;qtmain.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\..\..\extern\sdl2\lib\x64;..\..\..\build\x64;..\..\..\..\extern\assimp\lib\x64;..\..\..\..\extern\devil\lib\x64;..\..\..\..\extern\glew\lib\x64;..\..\..\..\extern\qt\lib\x64;..\..\..\..\extern\zlib\lib\x64;..\..\..\..\extern\tinyxml2\lib\x64</AdditionalLibraryDirectories>
+      <AdditionalDependencies>assimp.lib;DevIL.lib;ILU.lib;ILUT.lib;glew32.lib;SDL2.lib;SDL2main.lib;SDL2test.lib;zlibstatic.lib;tinyxml2.lib;opengl32.lib;glu32.lib;Qt5Core.lib;Qt5Gui.lib;Qt5Widgets.lib;qtmain.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>copy ..\..\..\build\$(Platform)\$(ProjectName)\$(Configuration)\*.exe ..\..\..\..\bin\</Command>

@@ -1,3 +1,6 @@
+
+#include "editor_imgui/edit_precompiled.h"
+
 // dear imgui: Platform Binding for SDL2
 // This needs to be used along with a Renderer (e.g. DirectX11, OpenGL3, Vulkan..)
 // (Info: SDL2 is a cross-platform general purpose library for handling windows, inputs, graphics context creation, etc.)
@@ -37,10 +40,8 @@
 //  2017-08-25: Inputs: MousePos set to -FLT_MAX,-FLT_MAX when mouse is unavailable/missing (instead of -1,-1).
 //  2016-10-15: Misc: Added a void* user_data parameter to Clipboard function handlers.
 
-#include "editor_imgui/edit_precompiled.h"
-
-#include "imgui.h"
-#include "imgui_impl_sdl.h"
+#include "editor_imgui/imgui/imgui.h"
+#include "editor_imgui/imgui/imgui_impl_sdl.h"
 
 // SDL
 // (the multi-viewports feature requires SDL features supported from SDL 2.0.5+)

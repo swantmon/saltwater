@@ -14,7 +14,7 @@
 
 #include "engine/graphic/gfx_selection_renderer.h"
 
-#include "imgui.h"
+#include "imgui/imgui.h"
 
 namespace Edit
 {
@@ -36,112 +36,46 @@ namespace GUI
 
     void CSceneGraphPanel::Render()
     {
-        std::function<void(Dt::CEntity*)> RecursiveTree = [&](Dt::CEntity* _pEntity)->void
+        // -----------------------------------------------------------------------------
+        // Build graph
+        // -----------------------------------------------------------------------------
+        m_SelectionState.clear();
+
+        std::function<void(Dt::CEntity*, int&)> RecursiveTree = [&](Dt::CEntity* _pEntity, int& _rDepth)->void
         {
             Dt::CEntity* pSibling = _pEntity;
 
+            auto pHierarchyFacet = _pEntity->GetHierarchyFacet();
+
             while (pSibling != nullptr)
             {
+                SItemState ItemState;
+
+                ItemState.Depth      = _rDepth;
+                ItemState.IsSelected = false;
+                ItemState.pEntity    = pSibling;
+
+                m_SelectionState.push_back(ItemState);
+
                 auto pHierarchyFacet = pSibling->GetHierarchyFacet();
-
-                Dt::CEntity::BID CurrentEntityID = pSibling->GetID();
-
-                ImGui::PushID(CurrentEntityID);
-
-                ImGui::Indent();
-
-                // -----------------------------------------------------------------------------
-                // Identifier
-                // -----------------------------------------------------------------------------
-                if (pHierarchyFacet->GetFirstChild() == 0)
-                {
-                    m_SelectionState[CurrentEntityID] = false;
-                }
 
                 if (pHierarchyFacet->GetFirstChild() != 0)
                 {
-                    char* Identifier = m_SelectionState[CurrentEntityID] ? "-" : "+";
+                    ++ _rDepth;
 
-                    if (ImGui::Button(Identifier))
-                    {
-                        m_SelectionState[CurrentEntityID] = !m_SelectionState[CurrentEntityID];
-                    }
+                    RecursiveTree(pHierarchyFacet->GetFirstChild(), _rDepth);
 
-                    ImGui::SameLine();
+                    -- _rDepth;
                 }
-
-                // -----------------------------------------------------------------------------
-                // Entity
-                // -----------------------------------------------------------------------------
-                if (ImGui::Button(pSibling->GetName().c_str()))
-                {
-                    CInspectorPanel::GetInstance().InspectEntity(CurrentEntityID);
-
-                    Gfx::SelectionRenderer::SelectEntity(CurrentEntityID);
-                }
-
-                // -----------------------------------------------------------------------------
-                // Children
-                // -----------------------------------------------------------------------------
-                if (m_SelectionState[CurrentEntityID])
-                {
-                    if (pHierarchyFacet->GetFirstChild() != 0)
-                    {
-                        RecursiveTree(pHierarchyFacet->GetFirstChild());
-                    }
-                }
-
-                // -----------------------------------------------------------------------------
-                // Drag & Drop
-                // -----------------------------------------------------------------------------
-                if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
-                {
-                    ImGui::SetDragDropPayload("SCENE_GRAPH_DRAGDROP", &CurrentEntityID, sizeof(Dt::CEntity::BID));
-
-                    ImGui::Text("%s", pSibling->GetName().c_str());
-
-                    ImGui::EndDragDropSource();
-                }
-                if (ImGui::BeginDragDropTarget())
-                {
-                    if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("SCENE_GRAPH_DRAGDROP"))
-                    {
-                        assert(payload->DataSize == sizeof(Dt::CEntity::BID*));
-
-                        const Dt::CEntity::BID EntityIDDestination = *(const Dt::CEntity::BID*)payload->Data;
-
-                        ENGINE_CONSOLE_INFOV("Move %i to %i", EntityIDDestination, CurrentEntityID);
-
-                        Dt::CEntity* pSourceEntity = Dt::EntityManager::GetEntityByID(EntityIDDestination);
-
-                        if (pSourceEntity == nullptr) return;
-
-                        pSourceEntity->Detach();
-
-                        Dt::CEntity* pDestinationEntity = Dt::EntityManager::GetEntityByID(CurrentEntityID);
-
-                        pDestinationEntity->Attach(*pSourceEntity);
-
-                        Dt::EntityManager::MarkEntityAsDirty(*pSourceEntity, Dt::CEntity::DirtyMove);
-                    }
-                    ImGui::EndDragDropTarget();
-                }
-
-                ImGui::Unindent();
-
-                ImGui::PopID();
 
                 pSibling = pHierarchyFacet->GetSibling();
             }
         };
 
-
-        Edit::CGUIFactory& rFactory = Edit::CGUIFactory::GetInstance();
-
-        ImGui::Begin("Scene Graph");
-
         auto CurrentEntity = Dt::Map::EntitiesBegin();
         auto EndOfEntities = Dt::Map::EntitiesEnd();
+
+        int CurrentDepth = 0;
 
         while (CurrentEntity != EndOfEntities)
         {
@@ -151,10 +85,91 @@ namespace GUI
 
             if (pHierarchyFacet->GetParent() == 0)
             {
-                RecursiveTree(pEntity);
+                RecursiveTree(pEntity, CurrentDepth);
             }
 
             CurrentEntity = CurrentEntity.Next();
+        }
+
+        // -----------------------------------------------------------------------------
+        // GUI
+        // -----------------------------------------------------------------------------
+        Edit::CGUIFactory& rFactory = Edit::CGUIFactory::GetInstance();
+
+        ImGui::Begin("Scene Graph");
+
+        for (auto& rItemState : m_SelectionState)
+        {
+            Dt::CEntity::BID CurrentID = rItemState.pEntity->GetID();
+
+            ImGui::PushID(CurrentID);
+
+            for (int i = 0; i < rItemState.Depth; ++ i)
+            {
+                ImGui::Indent();
+            }
+
+            auto pHierarchyFacet = rItemState.pEntity->GetHierarchyFacet();
+
+            if (pHierarchyFacet->GetFirstChild() != 0)
+            {
+                char* Identifier = rItemState.IsSelected ? "-" : "+";
+
+                if (ImGui::Button(Identifier))
+                {
+                    rItemState.IsSelected = !rItemState.IsSelected;
+                }
+
+                ImGui::SameLine();
+            }
+
+            if (ImGui::Selectable(rItemState.pEntity->GetName().c_str()))
+            {
+                CInspectorPanel::GetInstance().InspectEntity(CurrentID);
+
+                Gfx::SelectionRenderer::SelectEntity(CurrentID);
+            }
+
+            if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
+            {
+                ImGui::SetDragDropPayload("SCENE_GRAPH_DRAGDROP", &CurrentID, sizeof(Dt::CEntity::BID));
+
+                ImGui::Text("%s", rItemState.pEntity->GetName().c_str());
+
+                ImGui::EndDragDropSource();
+            }
+
+            if (ImGui::BeginDragDropTarget())
+            {
+                if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("SCENE_GRAPH_DRAGDROP"))
+                {
+                    assert(payload->DataSize == sizeof(Dt::CEntity::BID*));
+
+                    const Dt::CEntity::BID EntityIDDestination = *(const Dt::CEntity::BID*)payload->Data;
+
+                    ENGINE_CONSOLE_INFOV("Move %i to %i", EntityIDDestination, CurrentID);
+
+                    Dt::CEntity* pSourceEntity = Dt::EntityManager::GetEntityByID(EntityIDDestination);
+
+                    if (pSourceEntity == nullptr) return;
+
+                    pSourceEntity->Detach();
+
+                    Dt::CEntity* pDestinationEntity = Dt::EntityManager::GetEntityByID(CurrentID);
+
+                    pDestinationEntity->Attach(*pSourceEntity);
+
+                    Dt::EntityManager::MarkEntityAsDirty(*pSourceEntity, Dt::CEntity::DirtyMove);
+                }
+                ImGui::EndDragDropTarget();
+            }
+
+            for (int i = 0; i < rItemState.Depth; ++i)
+            {
+                ImGui::Unindent();
+            }
+
+            ImGui::PopID();
         }
 
         ImGui::End();
