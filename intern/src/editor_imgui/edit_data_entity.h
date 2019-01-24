@@ -13,13 +13,9 @@ namespace Dt
         
         void OnGUI()
         {
-            ImGui::BeginGroup();
+            ImGui::Text("Name: %s", m_Name.c_str());
 
-            ImGui::Text("Name:");
-
-            ImGui::Text(m_Name.c_str());
-
-            ImGui::EndGroup();
+            ImGui::Text("ID: %i", m_ID);
         }
 
         // -----------------------------------------------------------------------------
