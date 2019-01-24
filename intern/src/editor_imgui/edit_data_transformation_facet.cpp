@@ -10,8 +10,8 @@ namespace Dt
     {
     public:
         CTransformationFacetGUIFactory() { }
-        CTransformationFacetGUIFactory(void* _pEntity) { m_GUI = (CTransformationFacetGUI*)(_pEntity); };
-        void* Create(void* _pChild) { return new CTransformationFacetGUIFactory(_pChild); };
+        IGUIFactory* Create() { return new CTransformationFacetGUIFactory(); };
+        void SetChild(void* _pChild) { m_GUI = (CTransformationFacetGUI*)(_pChild); }
         void OnGUI() { m_GUI->OnGUI(); }
         const char* GetHeader() { return m_GUI->GetHeader(); };
     private:

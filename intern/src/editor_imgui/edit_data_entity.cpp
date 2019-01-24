@@ -10,8 +10,8 @@ namespace Dt
     {
     public:
         CEntityGUIFactory() { }
-        CEntityGUIFactory(void* _pEntity) { m_GUI = (CEntityGUI*)(_pEntity);};
-        void* Create(void* _pChild) { return new CEntityGUIFactory(_pChild); };
+        IGUIFactory* Create() { return new CEntityGUIFactory(); };
+        void SetChild(void* _pChild) { m_GUI = (CEntityGUI*)(_pChild); }
         void OnGUI() { m_GUI->OnGUI(); }
         const char* GetHeader() { return m_GUI->GetHeader(); };
     private:

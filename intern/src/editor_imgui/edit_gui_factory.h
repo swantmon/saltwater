@@ -4,6 +4,7 @@
 #include "base/base_type_info.h"
 #include "base/base_uncopyable.h"
 
+#include <array>
 #include <map>
 
 namespace Edit
@@ -11,7 +12,9 @@ namespace Edit
     class IGUIFactory
     {
     public:
-        virtual void* Create(void* _pChild) = 0;
+        virtual IGUIFactory* Create() = 0;
+
+        virtual void SetChild(void* _pChild) = 0;
 
         virtual void OnGUI() = 0;
 
@@ -49,12 +52,25 @@ namespace Edit
 
     private:
 
-        typedef std::map<size_t, IGUIFactory*> CFactory;
-        typedef std::pair<size_t, IGUIFactory*> CFactoryPair;
+        static const int s_MaxNumberOfInstances = 12;
+
+    private:
+
+        struct SFactoryElement
+        {
+            IGUIFactory* m_pFactory;
+            int m_Index;
+            std::array<IGUIFactory*, s_MaxNumberOfInstances> m_Instances;
+        };
+
+    private:
+
+        typedef std::map<size_t, SFactoryElement> CFactoryMap;
+        typedef std::pair<size_t, SFactoryElement> CFactoryMapPair;
         
     private:
         
-        CFactory m_Factory;
+        CFactoryMap m_Factory;
     };
 } // namespace Edit
 
@@ -74,7 +90,17 @@ namespace Edit
     {
         if (!Has<T>())
         {
-            m_Factory.insert(CFactoryPair(CalculateHash<T>(), _pClassObject));
+            SFactoryElement NewElement;
+
+            NewElement.m_pFactory = _pClassObject;
+            NewElement.m_Index = 0;
+
+            for (auto& rInstance : NewElement.m_Instances)
+            {
+                rInstance = _pClassObject->Create();
+            }
+
+            m_Factory.insert(CFactoryMapPair(CalculateHash<T>(), NewElement));
         }
     }
 
@@ -85,7 +111,15 @@ namespace Edit
     {
         if (Has<T>())
         {
-            return static_cast<IGUIFactory*>(m_Factory.find(CalculateHash<T>())->second->Create(_pBaseClass));
+            SFactoryElement& rElement = m_Factory.find(CalculateHash<T>())->second;
+
+            auto CurrentInstance = rElement.m_Instances[rElement.m_Index];
+
+            rElement.m_Index = ++rElement.m_Index % s_MaxNumberOfInstances;
+
+            CurrentInstance->SetChild(_pBaseClass);
+
+            return CurrentInstance;
         }
 
         return nullptr;
@@ -97,7 +131,15 @@ namespace Edit
     {
         if (Has(_Hash))
         {
-            return static_cast<IGUIFactory*>(m_Factory.find(_Hash)->second->Create(_pBaseClass));
+            SFactoryElement& rElement = m_Factory.find(_Hash)->second;
+
+            auto CurrentInstance = rElement.m_Instances[rElement.m_Index];
+
+            rElement.m_Index = ++rElement.m_Index % s_MaxNumberOfInstances;
+
+            CurrentInstance->SetChild(_pBaseClass);
+
+            return CurrentInstance;
         }
 
         return nullptr;

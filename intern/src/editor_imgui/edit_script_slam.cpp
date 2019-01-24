@@ -10,8 +10,8 @@ namespace Edit
     {
     public:
         CSLAMScriptGUIFactory() { }
-        CSLAMScriptGUIFactory(void* _pChild) { m_GUI = (CSLAMScriptGUI*)(_pChild); };
-        void* Create(void* _pChild) { return new CSLAMScriptGUIFactory(_pChild); };
+        IGUIFactory* Create() { return new CSLAMScriptGUIFactory(); };
+        void SetChild(void* _pChild) { m_GUI = (CSLAMScriptGUI*)(_pChild); }
         void OnGUI() { m_GUI->OnGUI(); }
         const char* GetHeader() { return m_GUI->GetHeader(); };
     private:
