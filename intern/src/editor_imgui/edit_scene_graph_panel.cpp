@@ -46,32 +46,49 @@ namespace GUI
 
                 ImGui::PushID(CurrentEntityID);
 
-                if (pHierarchyFacet->GetFirstChild() == 0)
+                ImGui::Indent();
+
+                // -----------------------------------------------------------------------------
+                // Identfier
+                // -----------------------------------------------------------------------------
+                if (pHierarchyFacet->GetFirstChild() != 0)
                 {
-                    ImGui::Indent();
+                    char* Identifier = m_SelectionState[CurrentEntityID] ? "-" : "+";
 
-                    if (ImGui::Selectable(pSibling->GetName().c_str()))
+                    if (ImGui::Button(Identifier))
                     {
-                        CInspectorPanel::GetInstance().InspectEntity(CurrentEntityID);
-
-                        Gfx::SelectionRenderer::SelectEntity(CurrentEntityID);
+                        m_SelectionState[CurrentEntityID] = !m_SelectionState[CurrentEntityID];
                     }
 
-                    ImGui::Unindent();
+                    ImGui::SameLine();
                 }
-                else
-                {
-                    if (ImGui::TreeNode("Test", "%s", pSibling->GetName().c_str()))
-                    {
-                        if (pHierarchyFacet->GetFirstChild() != 0)
-                        {
-                            RecursiveTree(pHierarchyFacet->GetFirstChild());
-                        }
 
-                        ImGui::TreePop();
+                // -----------------------------------------------------------------------------
+                // Entity
+                // -----------------------------------------------------------------------------
+                if (ImGui::Selectable(pSibling->GetName().c_str(), m_SelectionState[CurrentEntityID]))
+                {
+                    CInspectorPanel::GetInstance().InspectEntity(CurrentEntityID);
+
+                    Gfx::SelectionRenderer::SelectEntity(CurrentEntityID);
+                }
+
+                // -----------------------------------------------------------------------------
+                // Children
+                // -----------------------------------------------------------------------------
+                if (m_SelectionState[CurrentEntityID])
+                {
+                    if (pHierarchyFacet->GetFirstChild() != 0)
+                    {
+                        RecursiveTree(pHierarchyFacet->GetFirstChild());
                     }
                 }
 
+                ImGui::Unindent();
+
+                // -----------------------------------------------------------------------------
+                // Drag & Drop
+                // -----------------------------------------------------------------------------
                 if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
                 {
                     ImGui::SetDragDropPayload("DND_DEMO_CELL", &CurrentEntityID, sizeof(Dt::CEntity::BID));
@@ -85,18 +102,15 @@ namespace GUI
 
                         const Dt::CEntity::BID EntityIDDestination = *(const Dt::CEntity::BID*)payload->Data;
 
-                        Dt::CEntity* pSourceEntity = Dt::EntityManager::GetEntityByID(CurrentEntityID);
+                        Dt::CEntity* pSourceEntity = Dt::EntityManager::GetEntityByID(EntityIDDestination);
 
                         if (pSourceEntity == nullptr) return;
 
                         pSourceEntity->Detach();
 
-                        if (EntityIDDestination != -1)
-                        {
-                            Dt::CEntity* pDestinationEntity = Dt::EntityManager::GetEntityByID(EntityIDDestination);
+                        Dt::CEntity* pDestinationEntity = Dt::EntityManager::GetEntityByID(CurrentEntityID);
 
-                            pDestinationEntity->Attach(*pSourceEntity);
-                        }
+                        pDestinationEntity->Attach(*pSourceEntity);
 
                         Dt::EntityManager::MarkEntityAsDirty(*pSourceEntity, Dt::CEntity::DirtyMove);
                     }

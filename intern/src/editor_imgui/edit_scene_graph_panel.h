@@ -6,6 +6,8 @@
 
 #include "engine/data/data_entity.h"
 
+#include <map>
+
 namespace Edit
 {
 namespace GUI
@@ -22,6 +24,10 @@ namespace GUI
     public:
 
         void Render();
+
+    private:
+
+        std::map<Dt::CEntity::BID, bool> m_SelectionState;
     };
 } // namespace GUI
 } // namespace Edit
