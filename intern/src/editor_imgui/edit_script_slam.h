@@ -13,9 +13,18 @@ namespace Edit
 
         void OnGUI()
         {
-            ImGui::Text("SLAM script Component");
+            ImGui::CollapsingHeader("SLAM (Script)");
 
             ImGui::Checkbox("Active", &m_IsSelectionEnabled);
+
+            ImGui::Separator();
+        }
+
+        // -----------------------------------------------------------------------------
+
+        const char* GetHeader()
+        {
+            return "SLAM (Script)";
         }
     };
 } // namespace Edit

@@ -13,9 +13,20 @@ namespace Dt
         
         void OnGUI()
         {
+            ImGui::BeginGroup();
+
             ImGui::Text("Name:");
 
             ImGui::Text(m_Name.c_str());
+
+            ImGui::EndGroup();
+        }
+
+        // -----------------------------------------------------------------------------
+
+        const char* GetHeader()
+        {
+            return "Entity";
         }
     };
 } // namespace Dt

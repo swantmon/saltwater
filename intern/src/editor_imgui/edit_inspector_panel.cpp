@@ -71,7 +71,10 @@ namespace GUI
             {
                 auto Panel = rFactory.Get<Dt::CTransformationFacet>(pTransformationFacet);
 
-                Panel->OnGUI();
+                if (ImGui::CollapsingHeader(Panel->GetHeader(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed))
+                {
+                    Panel->OnGUI();
+                }
             }
 
             auto pComponentFacet = m_pEntity->GetComponentFacet();
@@ -93,7 +96,10 @@ namespace GUI
                     {
                         auto Panel = rFactory.Get(Hash, pComponent);
 
-                        Panel->OnGUI();
+                        if (ImGui::CollapsingHeader(Panel->GetHeader()))
+                        {
+                            Panel->OnGUI();
+                        }
                     }
 
                     Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Dt::IComponent::DirtyInfo);

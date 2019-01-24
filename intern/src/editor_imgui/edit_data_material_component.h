@@ -13,10 +13,15 @@ namespace Dt
 
         void OnGUI()
         {
-            ImGui::Text("Material Component");
-
             ImGui::ColorEdit4("Albedo", &m_Color.x);
             ImGui::SliderFloat("Roughness", &m_Roughness, 0.0f, 1.0f);
+        }
+
+        // -----------------------------------------------------------------------------
+
+        const char* GetHeader()
+        {
+            return "Material";
         }
     };
 } // namespace Dt

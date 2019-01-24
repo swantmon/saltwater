@@ -13,6 +13,7 @@ namespace Dt
         CEntityGUIFactory(void* _pEntity) { m_GUI = (CEntityGUI*)(_pEntity);};
         void* Create(void* _pChild) { return new CEntityGUIFactory(_pChild); };
         void OnGUI() { m_GUI->OnGUI(); }
+        const char* GetHeader() { return m_GUI->GetHeader(); };
     private:
         CEntityGUI* m_GUI;
     };
@@ -23,5 +24,5 @@ namespace Dt
             static CEntityGUIFactory s_CEntityGUIFactory;
             Edit::CGUIFactory::GetInstance().Register<CEntity>(&s_CEntityGUIFactory);
         }
-    } const g_SRegFactoryCEntityGUIFactory;        
+    } const g_SRegFactoryCEntityGUIFactory;
 } // namespace Dt

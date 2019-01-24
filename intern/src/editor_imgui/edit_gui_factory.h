@@ -14,6 +14,8 @@ namespace Edit
         virtual void* Create(void* _pChild) = 0;
 
         virtual void OnGUI() = 0;
+
+        virtual const char* GetHeader() = 0;
     };
 
     // -----------------------------------------------------------------------------

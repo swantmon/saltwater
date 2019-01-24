@@ -13,6 +13,7 @@ namespace Dt
         CMaterialComponentGUIFactory(void* _pChild) { m_GUI = (CMaterialComponentGUI*)(_pChild); };
         void* Create(void* _pChild) { return new CMaterialComponentGUIFactory(_pChild); };
         void OnGUI() { m_GUI->OnGUI(); }
+        const char* GetHeader() { return m_GUI->GetHeader(); };
     private:
         CMaterialComponentGUI* m_GUI;
     };

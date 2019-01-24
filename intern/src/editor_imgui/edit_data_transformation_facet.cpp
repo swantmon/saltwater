@@ -13,6 +13,7 @@ namespace Dt
         CTransformationFacetGUIFactory(void* _pEntity) { m_GUI = (CTransformationFacetGUI*)(_pEntity); };
         void* Create(void* _pChild) { return new CTransformationFacetGUIFactory(_pChild); };
         void OnGUI() { m_GUI->OnGUI(); }
+        const char* GetHeader() { return m_GUI->GetHeader(); };
     private:
         CTransformationFacetGUI* m_GUI;
     };
