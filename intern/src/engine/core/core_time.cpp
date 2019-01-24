@@ -32,9 +32,9 @@ namespace
                 
     private:
         
-        Base::CPerformanceClock m_Clock;
-        Base::Size              m_NumberOfFrame;
-        double                  m_ActiveTime;
+        Base::CDefaultClock m_Clock;
+        Base::Size          m_NumberOfFrame;
+        double              m_ActiveTime;
     };
 } // namespace
 

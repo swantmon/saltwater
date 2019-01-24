@@ -7,9 +7,10 @@
 #include "base/base_include_glm.h"
 
 #include "editor_imgui/edit_gui.h"
+#include "editor_imgui/edit_inspector_panel.h"
+#include "editor_imgui/edit_scene_graph_panel.h"
 #include "editor_imgui/imgui_impl_opengl.h"
 #include "editor_imgui/imgui_impl_sdl.h"
-#include "editor_imgui/edit_inspector_panel.h"
 
 #include "engine/core/core_asset_manager.h"
 #include "engine/core/core_console.h"
@@ -66,6 +67,9 @@ namespace
         bool m_CloseWindow;
 
         GUI::CInspectorPanel& m_rInspector = GUI::CInspectorPanel::GetInstance();
+        GUI::CSceneGraphPanel& m_rSceneGraph = GUI::CSceneGraphPanel::GetInstance();
+
+        std::vector<float> m_FrameTimings;
 
     private:
 
@@ -86,6 +90,7 @@ namespace
         : m_EditWindowID(0)
         , m_pGamePad(nullptr)
         , m_CloseWindow(false)
+        , m_FrameTimings()
     {
 
     }
@@ -253,6 +258,27 @@ namespace
         // Panels
         // -----------------------------------------------------------------------------
         m_rInspector.Render();
+        m_rSceneGraph.Render();
+
+        // -----------------------------------------------------------------------------
+        // Info
+        // -----------------------------------------------------------------------------
+        float DeltaTimeLastFrame = static_cast<float>(Core::Time::GetDeltaTimeLastFrame());
+
+        m_FrameTimings.push_back(1.0f / DeltaTimeLastFrame);
+
+        if (m_FrameTimings.size() > 120)
+        {
+            m_FrameTimings.erase(m_FrameTimings.begin());
+        }
+
+        ImGui::Begin("Infos");
+
+        ImGui::PlotLines("FPS", m_FrameTimings.data(), m_FrameTimings.size(), 0, 0, 1, 300);
+
+        ImGui::Text("Frequency is %.2f ms (%.0f FPS).", DeltaTimeLastFrame * 1000, 1.0f / max(DeltaTimeLastFrame, 0.0001f));
+
+        ImGui::End();
     }
 
     // -----------------------------------------------------------------------------

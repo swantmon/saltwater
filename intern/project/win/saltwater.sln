@@ -44,6 +44,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "plugin_slam", "plugin_slam\plugin_slam.vcxproj", "{E0842B40-2749-4D03-B627-55761E06452B}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "editor_imgui", "editor_imgui\editor_imgui.vcxproj", "{1D1429E2-E429-4EA6-87CB-908A858C5710}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E0842B40-2749-4D03-B627-55761E06452B} = {E0842B40-2749-4D03-B627-55761E06452B}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
