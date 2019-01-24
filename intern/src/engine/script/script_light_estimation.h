@@ -207,8 +207,8 @@ namespace Scpt
             {
                 ENGINE_CONSOLE_INFO("Touched (NE = switch estimation; SE = save cube map; NW = send panorama; SW = reset");
 
-                float x = _rEvent.GetGlobalCursorPosition()[0];
-                float y = _rEvent.GetGlobalCursorPosition()[1];
+                float x = static_cast<float>(_rEvent.GetGlobalCursorPosition()[0]);
+                float y = static_cast<float>(_rEvent.GetGlobalCursorPosition()[1]);
 
                 if (x < 200.0f && y < 200.0f)
                 {
