@@ -13,11 +13,7 @@ namespace Edit
 
         void OnGUI()
         {
-            ImGui::CollapsingHeader("SLAM (Script)");
-
-            ImGui::Checkbox("Active", &m_IsSelectionEnabled);
-
-            ImGui::Separator();
+             ImGui::Checkbox("Active", &m_IsSelectionEnabled);
         }
 
         // -----------------------------------------------------------------------------

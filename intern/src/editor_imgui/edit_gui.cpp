@@ -335,6 +335,8 @@ namespace
 
     void CEditorGui::ProcessKeyboardEvents(const SDL_Event& _rSDLEvent)
     {
+        if (ImGui::GetIO().WantCaptureKeyboard) return;
+
         using Base::CInputEvent;
 
         CInputEvent Event(CInputEvent::Input);
@@ -366,6 +368,8 @@ namespace
 
     void CEditorGui::ProcessMouseEvents(const SDL_Event& _rSDLEvent)
     {
+        if (ImGui::GetIO().WantCaptureMouse) return;
+
         using Base::CInputEvent;
 
         CInputEvent Event(CInputEvent::Input);
