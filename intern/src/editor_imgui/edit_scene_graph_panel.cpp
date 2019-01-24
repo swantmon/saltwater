@@ -101,7 +101,7 @@ namespace GUI
 
         for (auto& rItemState : m_ItemState)
         {
-            if (rItemState.Depth >= MaximumDepth) continue;
+            if (rItemState.Depth > MaximumDepth) continue;
 
             MaximumDepth = 1000;
 
@@ -118,7 +118,7 @@ namespace GUI
 
             if (pHierarchyFacet->GetFirstChild() != 0)
             {
-                char* Identifier = m_SelectionState[CurrentID] ? "-" : "+";
+                char* Identifier = m_SelectionState[CurrentID] ? "+" : "-";
 
                 if (ImGui::Button(Identifier))
                 {
@@ -128,7 +128,7 @@ namespace GUI
                 ImGui::SameLine();
             }
 
-            if (m_SelectionState[CurrentID]) MaximumDepth = rItemState.Depth + 1;
+            if (m_SelectionState[CurrentID]) MaximumDepth = rItemState.Depth;
 
             if (ImGui::Selectable(rItemState.pEntity->GetName().c_str()))
             {
