@@ -2,6 +2,7 @@
 #pragma once
 
 #include "base/base_type_info.h"
+#include "base/base_uncopyable.h"
 
 #include <map>
 
@@ -17,7 +18,7 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    class CGUIFactory
+    class CGUIFactory : Base::CUncopyable
     {
     public:
         
@@ -43,10 +44,15 @@ namespace Edit
 
         template<class T>
         size_t CalculateHash(T _Object);
+
+    private:
+
+        typedef std::map<size_t, IGUIFactory*> CFactory;
+        typedef std::pair<size_t, IGUIFactory*> CFactoryPair;
         
     private:
         
-        std::map<size_t, IGUIFactory*> m_Factory;
+        CFactory m_Factory;
     };
 } // namespace Edit
 
@@ -66,7 +72,7 @@ namespace Edit
     {
         if (!Has<T>())
         {
-            m_Factory.insert(std::make_pair(CalculateHash<T>(), _pClassObject));
+            m_Factory.insert(CFactoryPair(CalculateHash<T>(), _pClassObject));
         }
     }
 
@@ -123,6 +129,8 @@ namespace Edit
     template<class T>
     size_t CGUIFactory::CalculateHash(T _Class)
     {
+        BASE_UNUSED(_Class);
+
         return Base::CTypeInfo::GetTypeID<T>();
     }
 } // namespace Edit
