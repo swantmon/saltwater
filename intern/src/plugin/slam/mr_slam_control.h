@@ -348,6 +348,15 @@ namespace MR
             // -----------------------------------------------------------------------------
             // Selection
             // -----------------------------------------------------------------------------
+            if (m_SelectionFlag)
+            {
+                ENGINE_CONSOLE_INFO("ON");
+            }
+            else
+            {
+                ENGINE_CONSOLE_INFO("OFF");
+            }
+
             if (!m_SelectionFlag) m_SelectionState = ESelection::NOSELECTION;
 
             Gfx::CSelectionTicket& rSelectionTicket = *m_pSelectionTicket;

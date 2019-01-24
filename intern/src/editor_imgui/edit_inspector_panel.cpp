@@ -78,7 +78,7 @@ namespace GUI
 
             if (pComponentFacet)
             {
-                for (auto& rComponent : pComponentFacet->GetComponents())
+                for (auto rComponent : pComponentFacet->GetComponents())
                 {
                     Hash = rComponent->GetTypeID();
 

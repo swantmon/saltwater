@@ -14,6 +14,8 @@ namespace Edit
         void OnGUI()
         {
             ImGui::Text("SLAM script Component");
+
+            ImGui::Checkbox("Active", &m_IsSelectionEnabled);
         }
     };
 } // namespace Edit
