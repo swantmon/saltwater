@@ -39,7 +39,7 @@ namespace GUI
         // -----------------------------------------------------------------------------
         // Build graph
         // -----------------------------------------------------------------------------
-        m_SelectionState.clear();
+        m_ItemState.clear();
 
         std::function<void(Dt::CEntity*, int&)> RecursiveTree = [&](Dt::CEntity* _pEntity, int& _rDepth)->void
         {
@@ -52,10 +52,9 @@ namespace GUI
                 SItemState ItemState;
 
                 ItemState.Depth      = _rDepth;
-                ItemState.IsSelected = false;
                 ItemState.pEntity    = pSibling;
 
-                m_SelectionState.push_back(ItemState);
+                m_ItemState.push_back(ItemState);
 
                 auto pHierarchyFacet = pSibling->GetHierarchyFacet();
 
@@ -98,8 +97,14 @@ namespace GUI
 
         ImGui::Begin("Scene Graph");
 
-        for (auto& rItemState : m_SelectionState)
+        int MaximumDepth = 1000;
+
+        for (auto& rItemState : m_ItemState)
         {
+            if (rItemState.Depth >= MaximumDepth) continue;
+
+            MaximumDepth = 1000;
+
             Dt::CEntity::BID CurrentID = rItemState.pEntity->GetID();
 
             ImGui::PushID(CurrentID);
@@ -113,15 +118,17 @@ namespace GUI
 
             if (pHierarchyFacet->GetFirstChild() != 0)
             {
-                char* Identifier = rItemState.IsSelected ? "-" : "+";
+                char* Identifier = m_SelectionState[CurrentID] ? "-" : "+";
 
                 if (ImGui::Button(Identifier))
                 {
-                    rItemState.IsSelected = !rItemState.IsSelected;
+                    m_SelectionState[CurrentID] = !m_SelectionState[CurrentID];
                 }
 
                 ImGui::SameLine();
             }
+
+            if (m_SelectionState[CurrentID]) MaximumDepth = rItemState.Depth + 1;
 
             if (ImGui::Selectable(rItemState.pEntity->GetName().c_str()))
             {
@@ -146,8 +153,6 @@ namespace GUI
                     assert(payload->DataSize == sizeof(Dt::CEntity::BID*));
 
                     const Dt::CEntity::BID EntityIDDestination = *(const Dt::CEntity::BID*)payload->Data;
-
-                    ENGINE_CONSOLE_INFOV("Move %i to %i", EntityIDDestination, CurrentID);
 
                     Dt::CEntity* pSourceEntity = Dt::EntityManager::GetEntityByID(EntityIDDestination);
 
