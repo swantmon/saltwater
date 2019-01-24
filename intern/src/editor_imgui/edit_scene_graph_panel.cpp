@@ -3,11 +3,14 @@
 
 #include "editor_imgui/edit_gui_factory.h"
 #include "editor_imgui/edit_scene_graph_panel.h"
+#include "editor_imgui/edit_inspector_panel.h"
 
 #include "engine/data/data_map.h"
 #include "engine/data/data_entity.h"
 #include "engine/data/data_entity_manager.h"
 #include "engine/data/data_hierarchy_facet.h"
+
+#include "engine/graphic/gfx_selection_renderer.h"
 
 #include "imgui.h"
 
@@ -39,11 +42,20 @@ namespace GUI
             {
                 auto pHierarchyFacet = pSibling->GetHierarchyFacet();
 
+                Dt::CEntity::BID CurrentEntityID = pSibling->GetID();
+
+                ImGui::PushID(CurrentEntityID);
+
                 if (pHierarchyFacet->GetFirstChild() == 0)
                 {
                     ImGui::Indent();
 
-                    ImGui::Selectable(pSibling->GetName().c_str());
+                    if (ImGui::Selectable(pSibling->GetName().c_str()))
+                    {
+                        CInspectorPanel::GetInstance().InspectEntity(CurrentEntityID);
+
+                        Gfx::SelectionRenderer::SelectEntity(CurrentEntityID);
+                    }
 
                     ImGui::Unindent();
                 }
@@ -59,6 +71,39 @@ namespace GUI
                         ImGui::TreePop();
                     }
                 }
+
+                if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
+                {
+                    ImGui::SetDragDropPayload("DND_DEMO_CELL", &CurrentEntityID, sizeof(Dt::CEntity::BID));
+                    ImGui::EndDragDropSource();
+                }
+                if (ImGui::BeginDragDropTarget())
+                {
+                    if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("DND_DEMO_CELL"))
+                    {
+                        assert(payload->DataSize == sizeof(Dt::CEntity::BID*));
+
+                        const Dt::CEntity::BID EntityIDDestination = *(const Dt::CEntity::BID*)payload->Data;
+
+                        Dt::CEntity* pSourceEntity = Dt::EntityManager::GetEntityByID(CurrentEntityID);
+
+                        if (pSourceEntity == nullptr) return;
+
+                        pSourceEntity->Detach();
+
+                        if (EntityIDDestination != -1)
+                        {
+                            Dt::CEntity* pDestinationEntity = Dt::EntityManager::GetEntityByID(EntityIDDestination);
+
+                            pDestinationEntity->Attach(*pSourceEntity);
+                        }
+
+                        Dt::EntityManager::MarkEntityAsDirty(*pSourceEntity, Dt::CEntity::DirtyMove);
+                    }
+                    ImGui::EndDragDropTarget();
+                }
+
+                ImGui::PopID();
 
                 pSibling = pHierarchyFacet->GetSibling();
             }
