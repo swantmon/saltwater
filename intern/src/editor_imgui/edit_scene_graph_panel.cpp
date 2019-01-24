@@ -1,6 +1,8 @@
 
 #include "editor_imgui/edit_precompiled.h"
 
+#include "engine/core/core_console.h"
+
 #include "editor_imgui/edit_gui_factory.h"
 #include "editor_imgui/edit_scene_graph_panel.h"
 #include "editor_imgui/edit_inspector_panel.h"
@@ -49,8 +51,13 @@ namespace GUI
                 ImGui::Indent();
 
                 // -----------------------------------------------------------------------------
-                // Identfier
+                // Identifier
                 // -----------------------------------------------------------------------------
+                if (pHierarchyFacet->GetFirstChild() == 0)
+                {
+                    m_SelectionState[CurrentEntityID] = false;
+                }
+
                 if (pHierarchyFacet->GetFirstChild() != 0)
                 {
                     char* Identifier = m_SelectionState[CurrentEntityID] ? "-" : "+";
@@ -66,7 +73,7 @@ namespace GUI
                 // -----------------------------------------------------------------------------
                 // Entity
                 // -----------------------------------------------------------------------------
-                if (ImGui::Selectable(pSibling->GetName().c_str(), m_SelectionState[CurrentEntityID]))
+                if (ImGui::Button(pSibling->GetName().c_str()))
                 {
                     CInspectorPanel::GetInstance().InspectEntity(CurrentEntityID);
 
@@ -84,23 +91,26 @@ namespace GUI
                     }
                 }
 
-                ImGui::Unindent();
-
                 // -----------------------------------------------------------------------------
                 // Drag & Drop
                 // -----------------------------------------------------------------------------
                 if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
                 {
-                    ImGui::SetDragDropPayload("DND_DEMO_CELL", &CurrentEntityID, sizeof(Dt::CEntity::BID));
+                    ImGui::SetDragDropPayload("SCENE_GRAPH_DRAGDROP", &CurrentEntityID, sizeof(Dt::CEntity::BID));
+
+                    ImGui::Text("%s", pSibling->GetName().c_str());
+
                     ImGui::EndDragDropSource();
                 }
                 if (ImGui::BeginDragDropTarget())
                 {
-                    if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("DND_DEMO_CELL"))
+                    if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("SCENE_GRAPH_DRAGDROP"))
                     {
                         assert(payload->DataSize == sizeof(Dt::CEntity::BID*));
 
                         const Dt::CEntity::BID EntityIDDestination = *(const Dt::CEntity::BID*)payload->Data;
+
+                        ENGINE_CONSOLE_INFOV("Move %i to %i", EntityIDDestination, CurrentEntityID);
 
                         Dt::CEntity* pSourceEntity = Dt::EntityManager::GetEntityByID(EntityIDDestination);
 
@@ -116,6 +126,8 @@ namespace GUI
                     }
                     ImGui::EndDragDropTarget();
                 }
+
+                ImGui::Unindent();
 
                 ImGui::PopID();
 
