@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include "base/base_memory.h"
 #include "base/base_type_info.h"
 #include "base/base_uncopyable.h"
 
@@ -71,6 +72,10 @@ namespace Edit
     private:
         
         CFactoryMap m_Factory;
+
+    private:
+
+        inline ~CGUIFactory();
     };
 } // namespace Edit
 
@@ -81,6 +86,23 @@ namespace Edit
         static CGUIFactory s_Instance;
 
         return s_Instance;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    inline CGUIFactory::~CGUIFactory()
+    {
+        for (auto& rFactory : m_Factory)
+        {
+            for (auto& rInstance : rFactory.second.m_Instances)
+            {
+                Base::CMemory::DeleteObject(rInstance);
+
+                rInstance = 0;
+            }
+        }
+
+        m_Factory.clear();
     }
 
     // -----------------------------------------------------------------------------
