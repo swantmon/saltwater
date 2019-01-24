@@ -92,6 +92,7 @@ namespace MR
         glm::vec3 m_SelectionBoxAnchor0;
         glm::vec3 m_SelectionBoxAnchor1;
         float m_SelectionBoxHeight;
+        bool m_SelectionFlag;
 
         ESelection m_SelectionState;
 
@@ -179,6 +180,7 @@ namespace MR
             m_SelectionBoxHeight = 0.0f;
             m_SelectionState = ESelection::NOSELECTION;
             m_LeftAnchorSelected = false;
+            m_SelectionFlag = false;
 
             m_pSelectionTicket = &Gfx::SelectionRenderer::AcquireTicket(-1, -1, 1, 1, Gfx::SPickFlag::Voxel);
 
@@ -346,6 +348,8 @@ namespace MR
             // -----------------------------------------------------------------------------
             // Selection
             // -----------------------------------------------------------------------------
+            if (!m_SelectionFlag) m_SelectionState = ESelection::NOSELECTION;
+
             Gfx::CSelectionTicket& rSelectionTicket = *m_pSelectionTicket;
 
             if (m_SelectionState == ESelection::FIRSTPRESS)
@@ -500,6 +504,13 @@ namespace MR
             {
                 Gfx::ReconstructionRenderer::ResetSelection();
             }
+        }
+
+        // -----------------------------------------------------------------------------
+
+        void SetActivateSelection(bool _Flag)
+        {
+            m_SelectionFlag = _Flag;
         }
 
     private:
