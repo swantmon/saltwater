@@ -29,22 +29,20 @@ namespace Net
         void Update();
         void OnExit();
 
-        bool IsConnected(int _Port = 0) const;
+        bool IsConnected(int _Port) const;
 
-        void RegisterMessageHandler(int _MessageCategory, const std::shared_ptr<CMessageDelegate>& _rDelegate, int _Port = 0);
-        bool SendMessage(int _MessageCategory, const std::vector<char>& _rData, int _Length = 0, int _Port = 0);
+        int CreateServerSocket(int _Port);
+        int CreateClientSocket(const std::string& _IP, int _Port);
 
-        bool IsServer() const;
-        const std::string& GetServerIP() const;
-
+        void RegisterMessageHandler(int _Port, const std::shared_ptr<CMessageDelegate>& _rDelegate);
+        bool SendMessage(int _Port, const CMessage& _rMessage);
+        
     private:
 
         void Run();
 
-        friend class CServerSocket;
+        friend class CServer;
         
-        CServerSocket& GetSocket(int _Port);
-
         asio::io_service& GetIOService();
 
     private:
@@ -56,23 +54,18 @@ namespace Net
 
         struct SocketDeleter
         {
-            void operator()(CServerSocket* _pSocket)
+            void operator()(CServer* _pSocket)
             {
                 delete _pSocket;
             }
         };
         
-        std::map<int, std::unique_ptr<CServerSocket, SocketDeleter>> m_Sockets;
+        std::map<int, std::unique_ptr<CServer, SocketDeleter>> m_Sockets;  // the key value refers to port numbers
         
-        std::vector<CMessageDelegate> m_MessageDelegates;
         std::thread m_WorkerThread;
 
         std::atomic_bool m_IsRunning;
 
         asio::io_service m_IOService;
-
-        int m_DefaultPort;
-        std::string m_ServerIP;
-        bool m_IsServer;
     };
 } // namespace Net

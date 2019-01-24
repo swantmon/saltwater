@@ -228,16 +228,16 @@ namespace Scpt
 
                 if (x > Gfx::Main::GetActiveNativeWindowSize()[0] - 200.0f && y < 200.0f)
                 {
-                    if (m_OutputCubemapPtr != nullptr && Net::CNetworkManager::GetInstance().IsConnected())
-                    {
-                        ENGINE_CONSOLE_INFO("Send panorama via network");
-
-                        SendPanoramaTexture();
-                    }
-                    else
-                    {
-                        ENGINE_CONSOLE_INFO("No connection between script and endpoint. Please check connection.");
-                    }
+//                     if (m_OutputCubemapPtr != nullptr && Net::CNetworkManager::GetInstance().IsConnected())
+//                     {
+//                         ENGINE_CONSOLE_INFO("Send panorama via network");
+// 
+//                         SendPanoramaTexture();
+//                     }
+//                     else
+//                     {
+//                         ENGINE_CONSOLE_INFO("No connection between script and endpoint. Please check connection.");
+//                     }
                 }
 
                 if (x > Gfx::Main::GetActiveNativeWindowSize()[0] - 200.0f && y > Gfx::Main::GetActiveNativeWindowSize()[1] - 200.0f)
@@ -263,10 +263,10 @@ namespace Scpt
                     SaveCubemap();
                     break;
                 case Base::CInputEvent::Key2:
-                    if (m_OutputCubemapPtr != nullptr && Net::CNetworkManager::GetInstance().IsConnected())
-                    {
-                        SendPanoramaTexture();
-                    }
+//                     if (m_OutputCubemapPtr != nullptr && Net::CNetworkManager::GetInstance().IsConnected())
+//                     {
+//                         SendPanoramaTexture();
+//                     }
                     break;
                 case Base::CInputEvent::Key3:
                     ResetTextures();
@@ -415,7 +415,7 @@ namespace Scpt
 
             Gfx::TextureManager::CopyTextureToCPU(m_PanoramaTexturePtr, Data.data());
 
-            Net::CNetworkManager::GetInstance().SendMessage(0, Data);
+            //Net::CNetworkManager::GetInstance().SendMessage(0, Data);
         }
 
         // -----------------------------------------------------------------------------
