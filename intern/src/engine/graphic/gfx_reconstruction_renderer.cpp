@@ -172,7 +172,8 @@ namespace
 
     void CGfxEngineReconstructionRenderer::OnResize(unsigned int _Width, unsigned int _Height)
     {
-
+        BASE_UNUSED(_Width);
+        BASE_UNUSED(_Height);
     }
 
     // -----------------------------------------------------------------------------
@@ -200,8 +201,6 @@ namespace
 
     void CGfxEngineReconstructionRenderer::RenderHitProxy()
     {
-        SLAMRenderHitProxy = (FSLAMRenderHitProxy)(Core::PluginManager::GetPluginFunction("SLAM", "OnRenderHitProxy"));
-
         if (SLAMRenderHitProxy != 0)
         {
             SLAMRenderHitProxy = (FSLAMRenderHitProxy)(Core::PluginManager::GetPluginFunction("SLAM", "OnRenderHitProxy"));
