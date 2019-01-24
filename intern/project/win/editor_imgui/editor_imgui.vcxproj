@@ -55,7 +55,6 @@
     <ClInclude Include="..\..\..\src\editor_imgui\edit_gui.h" />
     <ClInclude Include="..\..\..\src\editor_imgui\edit_intro_state.h" />
     <ClInclude Include="..\..\..\src\editor_imgui\edit_load_map_state.h" />
-    <ClInclude Include="..\..\..\src\editor_imgui\edit_base_factory.h" />
     <ClInclude Include="..\..\..\src\editor_imgui\edit_play_state.h" />
     <ClInclude Include="..\..\..\src\editor_imgui\edit_precompiled.h" />
     <ClInclude Include="..\..\..\src\editor_imgui\edit_script_slam.h" />

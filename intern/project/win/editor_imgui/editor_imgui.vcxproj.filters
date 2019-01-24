@@ -16,6 +16,15 @@
     <Filter Include="gui\factory">
       <UniqueIdentifier>{08250363-5a86-4bc0-9537-a41aae3d5ca8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="gui\objects">
+      <UniqueIdentifier>{d7c4b4c4-40a1-48ce-9d4c-8bcc4a07853d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gui\objects\data">
+      <UniqueIdentifier>{e2a91126-efe8-4c03-8fea-aa55d11e5f6f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gui\objects\scripts">
+      <UniqueIdentifier>{548c3b3f-4325-4419-b204-0c560681ba61}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\editor_imgui\edit_edit_state.cpp">
@@ -55,16 +64,16 @@
       <Filter>gui\panels</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\editor_imgui\edit_data_entity.cpp">
-      <Filter>gui\panels</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\editor_imgui\edit_data_transformation_facet.cpp">
-      <Filter>gui\panels</Filter>
+      <Filter>gui\objects\data</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\editor_imgui\edit_data_material_component.cpp">
-      <Filter>gui\panels</Filter>
+      <Filter>gui\objects\data</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_imgui\edit_data_transformation_facet.cpp">
+      <Filter>gui\objects\data</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\editor_imgui\edit_script_slam.cpp">
-      <Filter>gui\panels</Filter>
+      <Filter>gui\objects\scripts</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -109,20 +118,17 @@
     <ClInclude Include="..\..\..\src\editor_imgui\edit_gui_factory.h">
       <Filter>gui\factory</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\editor_imgui\edit_base_factory.h">
-      <Filter>gui\factory</Filter>
+    <ClInclude Include="..\..\..\src\editor_imgui\edit_data_transformation_facet.h">
+      <Filter>gui\objects\data</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\editor_imgui\edit_data_entity.h">
-      <Filter>gui\panels</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\editor_imgui\edit_data_transformation_facet.h">
-      <Filter>gui\panels</Filter>
+      <Filter>gui\objects\data</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\editor_imgui\edit_data_material_component.h">
-      <Filter>gui\panels</Filter>
+      <Filter>gui\objects\data</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\editor_imgui\edit_script_slam.h">
-      <Filter>gui\panels</Filter>
+      <Filter>gui\objects\scripts</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

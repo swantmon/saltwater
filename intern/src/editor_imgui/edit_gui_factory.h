@@ -3,12 +3,20 @@
 
 #include "base/base_type_info.h"
 
-#include "editor_imgui/edit_base_factory.h"
-
 #include <map>
 
 namespace Edit
 {
+    class CBaseFactory
+    {
+    public:
+        virtual void* Create(void* _pChild) = 0;
+
+        virtual void OnGUI() = 0;
+    };
+
+    // -----------------------------------------------------------------------------
+
     class CGUIFactory
     {
     public:
