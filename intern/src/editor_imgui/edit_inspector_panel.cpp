@@ -87,10 +87,6 @@ namespace GUI
                         auto pScriptComponent = static_cast<Dt::CScriptComponent*>(rComponent);
 
                         Hash = pScriptComponent->GetScriptTypeID();
-
-                        auto Panel = rFactory.Get(Hash, &rComponent);
-
-                        Panel->OnGUI();
                     }
 
                     if (rFactory.Has(Hash))
