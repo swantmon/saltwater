@@ -8,6 +8,27 @@
 #include <array>
 #include <map>
 
+#define REGISTER_FACTORY(Name, Child)                                                                           \
+class BASE_CONCAT(Name, Factory) : public Edit::IGUIFactory                                                     \
+{                                                                                                               \
+public:                                                                                                         \
+    BASE_CONCAT(Name, Factory)() { }                                                                            \
+    IGUIFactory* Create() { return new BASE_CONCAT(Name, Factory)(); };                                         \
+    void SetChild(void* _pChild) { m_pChild = (Name*)(_pChild); }                                               \
+    void OnGUI() { m_pChild->OnGUI(); }                                                                         \
+    const char* GetHeader() { return m_pChild->GetHeader(); };                                                  \
+private:                                                                                                        \
+    Name* m_pChild;                                                                                             \
+};                                                                                                              \
+struct BASE_CONCAT(SRegFactory, Name)                                                                           \
+{                                                                                                               \
+    BASE_CONCAT(SRegFactory, Name)()                                                                            \
+    {                                                                                                           \
+        static BASE_CONCAT(Name, Factory) BASE_CONCAT(s_Factory, Name);                                         \
+        Edit::CGUIFactory::GetInstance().Register<Child>(&BASE_CONCAT(s_Factory, Name));                        \
+    }                                                                                                           \
+} const BASE_CONCAT(g_SRegFactory, Name);
+
 namespace Edit
 {
     class IGUIFactory

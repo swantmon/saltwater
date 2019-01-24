@@ -5,7 +5,7 @@
 
 #include "imgui.h"
 
-namespace Edit
+namespace Scpt
 {
     class CSLAMScriptGUI : public Scpt::CSLAMScript
     {
@@ -23,4 +23,4 @@ namespace Edit
             return "SLAM (Script)";
         }
     };
-} // namespace Edit
+} // namespace Scpt
