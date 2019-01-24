@@ -78,23 +78,25 @@ namespace GUI
 
             if (pComponentFacet)
             {
-                for (auto rComponent : pComponentFacet->GetComponents())
+                for (auto pComponent : pComponentFacet->GetComponents())
                 {
-                    Hash = rComponent->GetTypeID();
+                    Hash = pComponent->GetTypeID();
 
-                    if (rComponent->GetTypeID() == Base::CTypeInfo::GetTypeID<Dt::CScriptComponent>())
+                    if (pComponent->GetTypeID() == Base::CTypeInfo::GetTypeID<Dt::CScriptComponent>())
                     {
-                        auto pScriptComponent = static_cast<Dt::CScriptComponent*>(rComponent);
+                        auto pScriptComponent = static_cast<Dt::CScriptComponent*>(pComponent);
 
                         Hash = pScriptComponent->GetScriptTypeID();
                     }
 
                     if (rFactory.Has(Hash))
                     {
-                        auto Panel = rFactory.Get(Hash, &rComponent);
+                        auto Panel = rFactory.Get(Hash, pComponent);
 
                         Panel->OnGUI();
                     }
+
+                    Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Dt::IComponent::DirtyInfo);
                 }
             }
 
