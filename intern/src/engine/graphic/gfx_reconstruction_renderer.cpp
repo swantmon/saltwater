@@ -201,7 +201,7 @@ namespace
 
     void CGfxEngineReconstructionRenderer::RenderHitProxy()
     {
-        if (SLAMRenderHitProxy != 0)
+        if (SLAMRenderHitProxy == 0)
         {
             SLAMRenderHitProxy = (FSLAMRenderHitProxy)(Core::PluginManager::GetPluginFunction("SLAM", "OnRenderHitProxy"));
         }
