@@ -11,6 +11,9 @@ namespace Net
 {
     void CNetworkManager::OnStart()
     {
+        m_IsServer = Core::CProgramParameters::GetInstance().Get("network:is_server", true);
+        m_DefaultPort = Core::CProgramParameters::GetInstance().Get("network:default_port", 12345);
+        m_ServerIP = Core::CProgramParameters::GetInstance().Get("network:server_ip", "127.0.0.1");
         m_IsRunning = true;
         m_WorkerThread = std::thread(std::bind(&CNetworkManager::Run, this));
     }
@@ -49,8 +52,13 @@ namespace Net
 
     // -----------------------------------------------------------------------------
 
-    bool CNetworkManager::IsConnected(int _Port) const
+    bool CNetworkManager::IsConnected(int _Port /* = 0 */) const
     {
+        if (_Port == 0)
+        {
+            _Port = m_DefaultPort;
+        }
+
         if (m_Sockets.count(_Port) != 0)
         {
             if (m_Sockets.at(_Port)->IsOpen())
@@ -64,50 +72,36 @@ namespace Net
 
     // -----------------------------------------------------------------------------
 
-    int CNetworkManager::CreateServerSocket(int _Port)
+    CServerSocket& CNetworkManager::GetSocket(int _Port)
     {
         if (m_Sockets.count(_Port) == 0)
         {
-            m_Sockets[_Port].reset(new CServer(_Port));
+            m_Sockets[_Port].reset(new CServerSocket(_Port));
         }
 
-        return _Port;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    int CNetworkManager::CreateClientSocket(const std::string& _IP, int _Port)
-    {
-        if (m_Sockets.count(_Port) == 0)
-        {
-            m_Sockets[_Port].reset(new CServer(_IP, _Port));
-        }
-
-        return _Port;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CNetworkManager::RegisterMessageHandler(int _Port, const std::shared_ptr<CMessageDelegate>& _rDelegate)
-    {
-        if (m_Sockets.count(_Port) == 0)
-        {
-            throw Base::CException(__FILE__, __LINE__, "Failed to register message handler. No appropriate socket found.");
-        }
-
-        m_Sockets[_Port]->RegisterMessageHandler(_rDelegate);
+        return *m_Sockets[_Port];
     }
     
     // -----------------------------------------------------------------------------
 
-    bool CNetworkManager::SendMessage(int _Port, const CMessage& _rMessage)
+    void CNetworkManager::RegisterMessageHandler(int _MessageCategory, const std::shared_ptr<CMessageDelegate>& _rDelegate, int _Port)
     {
-        if (m_Sockets.count(_Port) == 0)
+        int Port = _Port == 0 ? m_DefaultPort : _Port;
+
+        CServerSocket& rSocket = GetSocket(Port);
+        rSocket.RegisterMessageHandler(_MessageCategory, _rDelegate);
+    }
+    
+    // -----------------------------------------------------------------------------
+
+    bool CNetworkManager::SendMessage(int _MessageCategory, const std::vector<char>& _rData, int _Length, int _Port)
+    {
+        if (_Port == 0)
         {
-            throw Base::CException(__FILE__, __LINE__, "Failed to register message handler. No appropriate socket found.");
+            _Port = m_DefaultPort;
         }
 
-        return m_Sockets[_Port]->SendMessage(_rMessage);
+        return m_Sockets[_Port]->SendMessage(_MessageCategory, _rData, _Length);
     }
 
     // -----------------------------------------------------------------------------
@@ -115,6 +109,20 @@ namespace Net
     asio::io_service& CNetworkManager::GetIOService()
     {
         return m_IOService;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    bool CNetworkManager::IsServer() const
+    {
+        return m_IsServer;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const std::string& CNetworkManager::GetServerIP() const
+    {
+        return m_ServerIP;
     }
 
     // -----------------------------------------------------------------------------
