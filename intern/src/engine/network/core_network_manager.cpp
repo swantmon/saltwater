@@ -88,14 +88,14 @@ namespace Net
 
     // -----------------------------------------------------------------------------
 
-    void CNetworkManager::RegisterMessageHandler(int _Port, const std::shared_ptr<CMessageDelegate>& _rDelegate)
+    void CNetworkManager::RegisterMessageHandler(int _SocketHandle, const std::shared_ptr<CMessageDelegate>& _rDelegate)
     {
-        if (m_Sockets.count(_Port) == 0)
+        if (m_Sockets.count(_SocketHandle) == 0)
         {
             throw Base::CException(__FILE__, __LINE__, "Failed to register message handler. No appropriate socket found.");
         }
 
-        m_Sockets[_Port]->RegisterMessageHandler(_rDelegate);
+        m_Sockets[_SocketHandle]->RegisterMessageHandler(_rDelegate);
     }
     
     // -----------------------------------------------------------------------------

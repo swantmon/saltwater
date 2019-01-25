@@ -34,7 +34,7 @@ namespace Net
         int CreateServerSocket(int _Port);
         int CreateClientSocket(const std::string& _IP, int _Port);
 
-        void RegisterMessageHandler(int _Port, const std::shared_ptr<CMessageDelegate>& _rDelegate);
+        void RegisterMessageHandler(int _SocketHandle, const std::shared_ptr<CMessageDelegate>& _rDelegate);
         bool SendMessage(int _Port, const CMessage& _rMessage);
         
     private:
