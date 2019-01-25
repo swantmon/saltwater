@@ -620,29 +620,9 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Setup entities
         // -----------------------------------------------------------------------------
-        Dt::SEntityDescriptor EntityDesc;
-
-        EntityDesc.m_EntityCategory = Dt::SEntityCategory::Static;
-        EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
-
-        Dt::CEntity& rRootEntity = Dt::EntityManager::CreateEntity(EntityDesc);
-
-        rRootEntity.SetName("Root");
-
-        Dt::CTransformationFacet* pTransformationFacet = rRootEntity.GetTransformationFacet();
-
-        pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
-        pTransformationFacet->SetScale(glm::vec3(1.0f));
-        pTransformationFacet->SetRotation(glm::vec3(0.0f));
-
-        // -----------------------------------------------------------------------------
-
-        Dt::EntityManager::MarkEntityAsDirty(rRootEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
-        
-        // -----------------------------------------------------------------------------
-        // Setup slam
-        // -----------------------------------------------------------------------------
         {
+            Dt::SEntityDescriptor EntityDesc;
+
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
             EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
