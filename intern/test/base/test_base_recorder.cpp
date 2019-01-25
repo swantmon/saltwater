@@ -105,7 +105,7 @@ BASE_TEST(RecordDataWithRecorderFStream)
 
         for (auto& rChar : OriginalFrame.m_3)
         {
-            rChar = glm::linearRand(0, 255);
+            rChar = static_cast<char>(glm::linearRand(0, 255));
         }
 
         ++Index;
@@ -159,13 +159,13 @@ BASE_TEST(RecordDataWithRecorderFStream)
         BASE_CHECK(OriginalFrame.m_2 == ReadFrame.m_2);
         BASE_CHECK(OriginalFrame.m_3.size() == ReadFrame.m_3.size());
 
-        int Index = 0;
+        int i = 0;
 
         for (auto& rChar : OriginalFrame.m_3)
         {
-            BASE_CHECK(rChar == ReadFrame.m_3[Index]);
+            BASE_CHECK(rChar == ReadFrame.m_3[i]);
 
-            ++Index;
+            ++i;
         }
     }
 
@@ -211,11 +211,11 @@ BASE_TEST(RecordDataWithRecorderTimecode)
 
     double CurrentFrameTime = 0.0;
 
-    for (int Index = 0; Index < Frames.size();)
+    for (int i = 0; i < Frames.size();)
     {
         RecordWriter.Update();
 
-        auto& OriginalFrame = Frames[Index];
+        auto& OriginalFrame = Frames[i];
 
         CurrentFrameTime += RecordWriter.GetDurationOfFrame();
 
@@ -226,7 +226,7 @@ BASE_TEST(RecordDataWithRecorderTimecode)
 
             Base::Write(RecordWriter, OriginalFrame.m_3);
 
-            ++ Index;
+            ++ i;
 
             CurrentFrameTime = 0.0;
         }
@@ -441,7 +441,7 @@ BASE_TEST(RecordDataWithRecorderTimecodeAndStarttime)
 
     Base::CPerformanceClock DelayClock;
 
-    for (int Index = 0; Index < Frames.size();)
+    for (int i = 0; i < Frames.size();)
     {
         DelayClock.OnFrame();
 
@@ -449,7 +449,7 @@ BASE_TEST(RecordDataWithRecorderTimecodeAndStarttime)
 
         RecordWriter.Update();
 
-        auto& OriginalFrame = Frames[Index];
+        auto& OriginalFrame = Frames[i];
 
         CurrentFrameTime += RecordWriter.GetDurationOfFrame();
 
@@ -460,7 +460,7 @@ BASE_TEST(RecordDataWithRecorderTimecodeAndStarttime)
 
             Base::Write(RecordWriter, OriginalFrame.m_3);
 
-            ++ Index;
+            ++ i;
 
             CurrentFrameTime = 0.0;
         }

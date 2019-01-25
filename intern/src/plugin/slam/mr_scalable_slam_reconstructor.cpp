@@ -1890,7 +1890,7 @@ namespace MR
         
         float PlaneSize = glm::max(SelectionSize.x, SelectionSize.y) * PlaneScale;
 
-        glm::ivec2 PixelOffset = (glm::vec2(PlaneResolution) / PlaneSize * SelectionSize) / 2.0f;
+        glm::ivec2 PixelOffset = (glm::vec2(PlaneResolution, PlaneResolution) / PlaneSize * SelectionSize) / 2.0f;
 
         SPlaneInpainting ConstantBuffer;
         ConstantBuffer.m_PlaneCenterPosition = (AnchorMin + AnchorMax) / 2.0f;

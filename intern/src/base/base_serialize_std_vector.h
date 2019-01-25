@@ -23,7 +23,7 @@ namespace SER
 	template<class TArchive, typename TObject>
     inline void Write(TArchive& _rArchive, const std::vector<TObject>& _rVector)
     {
-        unsigned int NumberOfElements = _rVector.size();
+        unsigned int NumberOfElements = static_cast<unsigned int>(_rVector.size());
 
         _rArchive.template BeginCollection<TObject>(NumberOfElements);
         
