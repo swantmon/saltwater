@@ -620,10 +620,10 @@ namespace MR
                         m_UVTexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
 
                         std::string DefineString = DefineStream.str();
-                        m_YUVtoRGBCSPtr = Gfx::ShaderManager::CompileCS("slam\\cs_yuv_to_rgb.glsl", "main", DefineString.c_str());
+                        m_YUVtoRGBCSPtr = Gfx::ShaderManager::CompileCS("../../plugins/slam/cs_yuv_to_rgb.glsl", "main", DefineString.c_str());
                     }
                     std::string DefineString = DefineStream.str();
-                    m_ShiftDepthCSPtr = Gfx::ShaderManager::CompileCS("slam\\cs_shift_depth.glsl", "main", DefineString.c_str());
+                    m_ShiftDepthCSPtr = Gfx::ShaderManager::CompileCS("../../plugins/slam/cs_shift_depth.glsl", "main", DefineString.c_str());
 
                     m_UseTrackingCamera = true;
 

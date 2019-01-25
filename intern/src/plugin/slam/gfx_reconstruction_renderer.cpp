@@ -391,30 +391,30 @@ namespace
 
         std::string DefineString = DefineStream.str();
 
-        m_OutlineVSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_outline.glsl", "main", DefineString.c_str());
-        m_OutlineFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_outline.glsl", "main", DefineString.c_str());
-        m_OutlineLevel1VSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_outline_level1.glsl", "main", DefineString.c_str());
-        m_OutlineLevel1FSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_outline_level1.glsl", "main", DefineString.c_str());
-        m_OutlineLevel2VSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_outline_level2.glsl", "main", DefineString.c_str());
-        m_OutlineLevel2FSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_outline_level2.glsl", "main", DefineString.c_str());
+        m_OutlineVSPtr = ShaderManager::CompileVS("../../plugins/slam/scalable/rendering/vs_outline.glsl", "main", DefineString.c_str());
+        m_OutlineFSPtr = ShaderManager::CompilePS("../../plugins/slam/scalable/rendering/fs_outline.glsl", "main", DefineString.c_str());
+        m_OutlineLevel1VSPtr = ShaderManager::CompileVS("../../plugins/slam/scalable/rendering/vs_outline_level1.glsl", "main", DefineString.c_str());
+        m_OutlineLevel1FSPtr = ShaderManager::CompilePS("../../plugins/slam/scalable/rendering/fs_outline_level1.glsl", "main", DefineString.c_str());
+        m_OutlineLevel2VSPtr = ShaderManager::CompileVS("../../plugins/slam/scalable/rendering/vs_outline_level2.glsl", "main", DefineString.c_str());
+        m_OutlineLevel2FSPtr = ShaderManager::CompilePS("../../plugins/slam/scalable/rendering/fs_outline_level2.glsl", "main", DefineString.c_str());
 
-        m_PointCloudVSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_point_cloud.glsl", "main", DefineString.c_str());
-        m_PointCloudFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_point_cloud.glsl", "main", DefineString.c_str());
+        m_PointCloudVSPtr = ShaderManager::CompileVS("../../plugins/slam/scalable/rendering/vs_point_cloud.glsl", "main", DefineString.c_str());
+        m_PointCloudFSPtr = ShaderManager::CompilePS("../../plugins/slam/scalable/rendering/fs_point_cloud.glsl", "main", DefineString.c_str());
 
-        m_RaycastVSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_raycast.glsl", "main", DefineString.c_str());
-        m_RaycastDiminishedVSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_raycast_diminished.glsl", "main", DefineString.c_str());
-        m_RaycastFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_raycast.glsl", "main", DefineString.c_str());
-        m_RaycastHighlightFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_raycast_highlight.glsl", "main", DefineString.c_str());
-        m_RaycastDiminishedFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_raycast_diminished.glsl", "main", DefineString.c_str());
-        m_RaycastHitProxyFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_raycast_hitproxy.glsl", "main", DefineString.c_str());
+        m_RaycastVSPtr = ShaderManager::CompileVS("../../plugins/slam/scalable/rendering/vs_raycast.glsl", "main", DefineString.c_str());
+        m_RaycastDiminishedVSPtr = ShaderManager::CompileVS("../../plugins/slam/scalable/rendering/vs_raycast_diminished.glsl", "main", DefineString.c_str());
+        m_RaycastFSPtr = ShaderManager::CompilePS("../../plugins/slam/scalable/rendering/fs_raycast.glsl", "main", DefineString.c_str());
+        m_RaycastHighlightFSPtr = ShaderManager::CompilePS("../../plugins/slam/scalable/rendering/fs_raycast_highlight.glsl", "main", DefineString.c_str());
+        m_RaycastDiminishedFSPtr = ShaderManager::CompilePS("../../plugins/slam/scalable/rendering/fs_raycast_diminished.glsl", "main", DefineString.c_str());
+        m_RaycastHitProxyFSPtr = ShaderManager::CompilePS("../../plugins/slam/scalable/rendering/fs_raycast_hitproxy.glsl", "main", DefineString.c_str());
 
-        m_VertexMapVSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_vertex_map.glsl", "main", DefineString.c_str());
-        m_VertexMapFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_vertex_map.glsl", "main", DefineString.c_str());
+        m_VertexMapVSPtr = ShaderManager::CompileVS("../../plugins/slam/scalable/rendering/vs_vertex_map.glsl", "main", DefineString.c_str());
+        m_VertexMapFSPtr = ShaderManager::CompilePS("../../plugins/slam/scalable/rendering/fs_vertex_map.glsl", "main", DefineString.c_str());
         
-        m_PickingCSPtr = ShaderManager::CompileCS("slam\\scalable_kinect_fusion\\cs_picking.glsl", "main", DefineString.c_str());
+        m_PickingCSPtr = ShaderManager::CompileCS("../../plugins/slam/scalable/cs_picking.glsl", "main", DefineString.c_str());
 
-        m_InpaintedPlaneVSPtr = ShaderManager::CompileVS("slam\\scalable_kinect_fusion\\rendering\\vs_inpainted_plane.glsl", "main", DefineString.c_str());;
-        m_InpaintedPlaneFSPtr = ShaderManager::CompilePS("slam\\scalable_kinect_fusion\\rendering\\fs_inpainted_plane.glsl", "main", DefineString.c_str());;
+        m_InpaintedPlaneVSPtr = ShaderManager::CompileVS("../../plugins/slam/scalable/rendering/vs_inpainted_plane.glsl", "main", DefineString.c_str());;
+        m_InpaintedPlaneFSPtr = ShaderManager::CompilePS("../../plugins/slam/scalable/rendering/fs_inpainted_plane.glsl", "main", DefineString.c_str());;
 
         SInputElementDescriptor InputLayoutDesc = {};
 
