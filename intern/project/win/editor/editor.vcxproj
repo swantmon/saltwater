@@ -19,57 +19,96 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\src\editor\edit_actor_helper.cpp" />
     <ClCompile Include="..\..\..\src\editor\edit_application.cpp" />
+    <ClCompile Include="..\..\..\src\editor\edit_data_area_light_component.cpp" />
+    <ClCompile Include="..\..\..\src\editor\edit_data_bloom_component.cpp" />
+    <ClCompile Include="..\..\..\src\editor\edit_data_camera_component.cpp" />
+    <ClCompile Include="..\..\..\src\editor\edit_data_dof_component.cpp" />
+    <ClCompile Include="..\..\..\src\editor\edit_data_entity.cpp" />
+    <ClCompile Include="..\..\..\src\editor\edit_data_light_probe_component.cpp" />
+    <ClCompile Include="..\..\..\src\editor\edit_data_material_component.cpp" />
+    <ClCompile Include="..\..\..\src\editor\edit_data_mesh_component.cpp" />
+    <ClCompile Include="..\..\..\src\editor\edit_data_point_light_component.cpp" />
+    <ClCompile Include="..\..\..\src\editor\edit_data_post_aa_component.cpp" />
+    <ClCompile Include="..\..\..\src\editor\edit_data_sky_component.cpp" />
+    <ClCompile Include="..\..\..\src\editor\edit_data_ssao_component.cpp" />
+    <ClCompile Include="..\..\..\src\editor\edit_data_ssr_component.cpp" />
+    <ClCompile Include="..\..\..\src\editor\edit_data_sun_component.cpp" />
+    <ClCompile Include="..\..\..\src\editor\edit_data_transformation_facet.cpp" />
+    <ClCompile Include="..\..\..\src\editor\edit_data_volume_fog_component.cpp" />
     <ClCompile Include="..\..\..\src\editor\edit_edit_state.cpp" />
-    <ClCompile Include="..\..\..\src\editor\edit_effect_helper.cpp" />
-    <ClCompile Include="..\..\..\src\editor\edit_entity_helper.cpp" />
     <ClCompile Include="..\..\..\src\editor\edit_exit_state.cpp" />
-    <ClCompile Include="..\..\..\src\editor\edit_graphic_helper.cpp" />
+    <ClCompile Include="..\..\..\src\editor\edit_gui.cpp" />
+    <ClCompile Include="..\..\..\src\editor\edit_infos_panel.cpp" />
+    <ClCompile Include="..\..\..\src\editor\edit_inspector_panel.cpp" />
     <ClCompile Include="..\..\..\src\editor\edit_intro_state.cpp" />
-    <ClCompile Include="..\..\..\src\editor\edit_light_helper.cpp" />
     <ClCompile Include="..\..\..\src\editor\edit_load_map_state.cpp" />
     <ClCompile Include="..\..\..\src\editor\edit_main.cpp" />
-    <ClCompile Include="..\..\..\src\editor\edit_material_helper.cpp" />
     <ClCompile Include="..\..\..\src\editor\edit_play_state.cpp" />
-    <ClCompile Include="..\..\..\src\editor\edit_plugin_helper.cpp" />
     <ClCompile Include="..\..\..\src\editor\edit_precompiled.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\editor\edit_scene_graph_panel.cpp" />
+    <ClCompile Include="..\..\..\src\editor\edit_script_slam.cpp" />
     <ClCompile Include="..\..\..\src\editor\edit_start_state.cpp" />
     <ClCompile Include="..\..\..\src\editor\edit_unload_map_state.cpp" />
+    <ClCompile Include="..\..\..\src\editor\imgui\imgui.cpp" />
+    <ClCompile Include="..\..\..\src\editor\imgui\imgui_demo.cpp" />
+    <ClCompile Include="..\..\..\src\editor\imgui\imgui_draw.cpp" />
+    <ClCompile Include="..\..\..\src\editor\imgui\imgui_impl_opengl.cpp" />
+    <ClCompile Include="..\..\..\src\editor\imgui\imgui_impl_sdl.cpp" />
+    <ClCompile Include="..\..\..\src\editor\imgui\imgui_widgets.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\src\editor\edit_actor_helper.h" />
     <ClInclude Include="..\..\..\src\editor\edit_application.h" />
+    <ClInclude Include="..\..\..\src\editor\edit_component_factory.h" />
+    <ClInclude Include="..\..\..\src\editor\edit_data_area_light_component.h" />
+    <ClInclude Include="..\..\..\src\editor\edit_data_bloom_component.h" />
+    <ClInclude Include="..\..\..\src\editor\edit_data_camera_component.h" />
+    <ClInclude Include="..\..\..\src\editor\edit_data_dof_component.h" />
+    <ClInclude Include="..\..\..\src\editor\edit_data_light_probe_component.h" />
+    <ClInclude Include="..\..\..\src\editor\edit_data_material_component.h" />
+    <ClInclude Include="..\..\..\src\editor\edit_data_mesh_component.h" />
+    <ClInclude Include="..\..\..\src\editor\edit_data_point_light_component.h" />
+    <ClInclude Include="..\..\..\src\editor\edit_data_post_aa_component.h" />
+    <ClInclude Include="..\..\..\src\editor\edit_data_sky_component.h" />
+    <ClInclude Include="..\..\..\src\editor\edit_data_ssao_component.h" />
+    <ClInclude Include="..\..\..\src\editor\edit_data_ssr_component.h" />
+    <ClInclude Include="..\..\..\src\editor\edit_data_sun_component.h" />
+    <ClInclude Include="..\..\..\src\editor\edit_data_transformation_facet.h" />
+    <ClInclude Include="..\..\..\src\editor\edit_data_entity.h" />
+    <ClInclude Include="..\..\..\src\editor\edit_data_volume_fog_component.h" />
+    <ClInclude Include="..\..\..\src\editor\edit_gui_factory.h" />
+    <ClInclude Include="..\..\..\src\editor\edit_infos_panel.h" />
+    <ClInclude Include="..\..\..\src\editor\edit_inspector_panel.h" />
     <ClInclude Include="..\..\..\src\editor\edit_edit_state.h" />
-    <ClInclude Include="..\..\..\src\editor\edit_effect_helper.h" />
-    <ClInclude Include="..\..\..\src\editor\edit_entity_helper.h" />
     <ClInclude Include="..\..\..\src\editor\edit_exit_state.h" />
-    <ClInclude Include="..\..\..\src\editor\edit_graphic_helper.h" />
+    <ClInclude Include="..\..\..\src\editor\edit_gui.h" />
     <ClInclude Include="..\..\..\src\editor\edit_intro_state.h" />
-    <ClInclude Include="..\..\..\src\editor\edit_light_helper.h" />
     <ClInclude Include="..\..\..\src\editor\edit_load_map_state.h" />
-    <ClInclude Include="..\..\..\src\editor\edit_material_helper.h" />
+    <ClInclude Include="..\..\..\src\editor\edit_panel_interface.h" />
     <ClInclude Include="..\..\..\src\editor\edit_play_state.h" />
-    <ClInclude Include="..\..\..\src\editor\edit_plugin_helper.h" />
     <ClInclude Include="..\..\..\src\editor\edit_precompiled.h" />
+    <ClInclude Include="..\..\..\src\editor\edit_scene_graph_panel.h" />
+    <ClInclude Include="..\..\..\src\editor\edit_script_slam.h" />
     <ClInclude Include="..\..\..\src\editor\edit_start_state.h" />
     <ClInclude Include="..\..\..\src\editor\edit_state.h" />
     <ClInclude Include="..\..\..\src\editor\edit_unload_map_state.h" />
+    <ClInclude Include="..\..\..\src\editor\imgui\imconfig.h" />
+    <ClInclude Include="..\..\..\src\editor\imgui\imgui.h" />
+    <ClInclude Include="..\..\..\src\editor\imgui\imgui_impl_opengl.h" />
+    <ClInclude Include="..\..\..\src\editor\imgui\imgui_impl_sdl.h" />
+    <ClInclude Include="..\..\..\src\editor\imgui\imgui_internal.h" />
+    <ClInclude Include="..\..\..\src\editor\imgui\imstb_rectpack.h" />
+    <ClInclude Include="..\..\..\src\editor\imgui\imstb_textedit.h" />
+    <ClInclude Include="..\..\..\src\editor\imgui\imstb_truetype.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\base\base.vcxproj">
       <Project>{3a61e67a-052f-4a68-b8db-771c8cd0d2ee}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\editor_gui\editor_gui.vcxproj">
-      <Project>{b12702ad-abfb-343a-a199-8e24837244a3}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\editor_port\editor_port.vcxproj">
-      <Project>{53ccef0f-9efc-4780-9b1d-b3771960936d}</Project>
     </ProjectReference>
     <ProjectReference Include="..\engine\engine.vcxproj">
       <Project>{e481e898-c074-4491-bc6e-93844bfaff74}</Project>

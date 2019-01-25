@@ -132,7 +132,7 @@ namespace Edit
     
     CState::EStateType CLoadMapState::InternOnRun()
     {
-        return CState::Edit;
+        return CState::CState::Edit;
     }
 } // namespace Edit
 
