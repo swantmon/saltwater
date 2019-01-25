@@ -17,12 +17,21 @@ namespace Dt
         {
             ImGui::Columns(2, nullptr, false);
 
-            ImGui::SetColumnWidth(0, 50);
+            ImGui::SetColumnWidth(0, 80);
 
             // -----------------------------------------------------------------------------
             // ID
             // -----------------------------------------------------------------------------
             ImGui::Text("ID: %i", m_ID);
+
+            // -----------------------------------------------------------------------------
+            // Active
+            // -----------------------------------------------------------------------------
+            bool IsActive = m_Flags.m_IsActive;
+
+            ImGui::Checkbox("Active", &IsActive);
+
+            SetActive(IsActive);
 
             ImGui::NextColumn();
 
