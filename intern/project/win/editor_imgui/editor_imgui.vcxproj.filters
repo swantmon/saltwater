@@ -96,6 +96,12 @@
     <ClCompile Include="..\..\..\src\editor_imgui\edit_infos_panel.cpp">
       <Filter>gui\panels</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_imgui\edit_data_light_probe_component.cpp">
+      <Filter>gui\objects\data</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor_imgui\edit_data_sky_component.cpp">
+      <Filter>gui\objects\data</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\editor_imgui\edit_edit_state.h">
@@ -180,6 +186,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\editor_imgui\edit_panel_interface.h">
       <Filter>gui\panels</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor_imgui\edit_data_light_probe_component.h">
+      <Filter>gui\objects\data</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor_imgui\edit_data_sky_component.h">
+      <Filter>gui\objects\data</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

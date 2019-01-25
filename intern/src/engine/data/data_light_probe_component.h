@@ -92,11 +92,15 @@ namespace Dt
         EType        m_Type;               //< Type of the probe (@see EType)
         EQuality     m_Quality;            //< Quality of the probe (@see EQuality)
         EClearFlag   m_ClearFlag;          //< Clear flag of the reflection probe (@see EClearFlag)
-        std::string  m_Cubemap;            //< Pointer to cube map for custom probe
+        std::string  m_Cubemap;            //< Name of the cube map for custom probe
         float        m_Intensity;          //< Intensity of the light probe
         float        m_Near;               //< Near clipping plane
         float        m_Far;                //< Far clipping plane
         bool         m_ParallaxCorrection; //< Use a parallax correction of the reflection
         glm::vec3    m_BoxSize;            //< Size of the box around the probe that affects the objects
+
+    private:
+
+        friend class CLightProbeComponentGUI;
     };
 } // namespace Dt
