@@ -22,6 +22,7 @@
     <ClCompile Include="..\..\..\src\editor_imgui\edit_application.cpp" />
     <ClCompile Include="..\..\..\src\editor_imgui\edit_data_entity.cpp" />
     <ClCompile Include="..\..\..\src\editor_imgui\edit_data_material_component.cpp" />
+    <ClCompile Include="..\..\..\src\editor_imgui\edit_data_sun_component.cpp" />
     <ClCompile Include="..\..\..\src\editor_imgui\edit_data_transformation_facet.cpp" />
     <ClCompile Include="..\..\..\src\editor_imgui\edit_edit_state.cpp" />
     <ClCompile Include="..\..\..\src\editor_imgui\edit_exit_state.cpp" />
@@ -51,6 +52,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\src\editor_imgui\edit_application.h" />
     <ClInclude Include="..\..\..\src\editor_imgui\edit_data_material_component.h" />
+    <ClInclude Include="..\..\..\src\editor_imgui\edit_data_sun_component.h" />
     <ClInclude Include="..\..\..\src\editor_imgui\edit_data_transformation_facet.h" />
     <ClInclude Include="..\..\..\src\editor_imgui\edit_data_entity.h" />
     <ClInclude Include="..\..\..\src\editor_imgui\edit_gui_factory.h" />

@@ -65,5 +65,9 @@ namespace Dt
         float        m_Temperature;
         float        m_Intensity;
         bool         m_HasTemperature;
+
+    private:
+
+        friend class CSunComponentGUI;
     };
 } // namespace Dt
