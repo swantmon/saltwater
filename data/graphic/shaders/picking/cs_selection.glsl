@@ -59,7 +59,7 @@ void main()
     // That implementation is for a first test and will be replaced as soon
     // as needed.
     // -----------------------------------------------------------------------------
-    vec2 UV = m_PositionSize.xy * g_InvertedScreensizeAndScreensize.xy;
+    vec2 UV = vec2(m_PositionSize.xy) * g_InvertedScreensizeAndScreensize.xy;
 
     // -----------------------------------------------------------------------------
     // Get data
