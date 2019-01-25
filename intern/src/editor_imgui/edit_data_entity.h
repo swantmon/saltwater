@@ -42,9 +42,10 @@ namespace Dt
 
             strcpy_s(EntityName, m_Name.c_str());
 
-            ImGui::InputText("Name", EntityName, 255);
-
-            m_Name = EntityName;
+            if (ImGui::InputText("Name", EntityName, 255))
+            {
+                m_Name = EntityName;
+            }
 
             // -----------------------------------------------------------------------------
             // Category

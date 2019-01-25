@@ -106,5 +106,9 @@ namespace Dt
         float          m_AngleScale;
         float          m_AngleOffset;
         bool           m_HasTemperature;
+
+    private:
+
+        friend class CPointLightComponentGUI;
     };
 } // namespace Dt

@@ -1,0 +1,77 @@
+
+#pragma once
+
+#include "engine/data/data_point_light_component.h"
+
+#include "editor_imgui/imgui/imgui.h"
+
+namespace Dt
+{
+    class CPointLightComponentGUI : public CPointLightComponent
+    {
+    public:
+
+        void OnGUI()
+        {
+            ImGui::ColorEdit3("Color", &m_Color.r);
+
+            ImGui::DragFloat("Intensity", &m_Intensity);
+
+            ImGui::DragFloat3("Direction", &m_Direction.x);
+
+            ImGui::DragFloat("Attenuation Radius", &m_AttentuationRadius);
+
+            ImGui::DragFloat("Inner Cone", &m_InnerConeAngle, 1.0f, 0.0f, 0.0f, "%.0f angle");
+
+            ImGui::DragFloat("Outer Cone", &m_OuterConeAngle, 1.0f, 0.0f, 0.0f, "%.0f angle");
+
+            // -----------------------------------------------------------------------------
+            // Shadow Type
+            // -----------------------------------------------------------------------------
+            {
+                const char* Text[] = { "No Shadows", "Hard Shadows", "Global Illumination" };
+
+                int Index = static_cast<int>(GetShadowType());
+
+                ImGui::Combo("Shadow Type", &Index, Text, 3);
+
+                SetShadowType(static_cast<EShadowType>(Index));
+            }
+
+            // -----------------------------------------------------------------------------
+            // Shadow Quality
+            // -----------------------------------------------------------------------------
+            {
+                const char* Text[] = { "Low", "Medium", "High", "Very High" };
+
+                int Index = static_cast<int>(GetShadowQuality());
+
+                ImGui::Combo("Shadow Quality", &Index, Text, 4);
+
+                SetShadowQuality(static_cast<EShadowQuality>(Index));
+            }
+
+            // -----------------------------------------------------------------------------
+            // Shadow Refresh
+            // -----------------------------------------------------------------------------
+            {
+                const char* Text[] = { "Static", "Dynamic" };
+
+                int Index = static_cast<int>(GetRefreshMode());
+
+                ImGui::Combo("Shadow Refresh", &Index, Text, 2);
+
+                SetRefreshMode(static_cast<ERefreshMode>(Index));
+            }
+
+            UpdateLightness();
+        }
+
+        // -----------------------------------------------------------------------------
+
+        const char* GetHeader()
+        {
+            return "Point Light";
+        }
+    };
+} // namespace Dt

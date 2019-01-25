@@ -52,5 +52,9 @@ namespace Dt
         glm::vec4 m_LerpScale;
         glm::vec4 m_LerpBias;
         glm::vec3 m_EqFar;            //< Distance since everything should be blured (x = 1 / 1 - Start_Distance; y = 1 - x)
+
+    private:
+
+        friend class CDOFComponentGUI;
     };
 } // namespace Dt

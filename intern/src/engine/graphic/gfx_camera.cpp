@@ -224,21 +224,21 @@ namespace Gfx
 
     // -----------------------------------------------------------------------------
 
-    void CCamera::SetViewportRect(Base::AABB2Float& _rViewportRect)
+    void CCamera::SetViewportRect(glm::vec4& _rViewportRect)
     {
         m_ViewportRect = _rViewportRect;
     }
 
     // -----------------------------------------------------------------------------
 
-    Base::AABB2Float& CCamera::GetViewportRect()
+    glm::vec4& CCamera::GetViewportRect()
     {
         return m_ViewportRect;
     }
 
     // -----------------------------------------------------------------------------
 
-    const Base::AABB2Float& CCamera::GetViewportRect() const
+    const glm::vec4& CCamera::GetViewportRect() const
     {
         return m_ViewportRect;
     }
