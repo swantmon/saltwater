@@ -14,7 +14,7 @@
 
 namespace Net
 {
-    void CServerSocket::Update()
+    void CSocket::Update()
     {
         if (m_IsConnectionLost)
         {
@@ -27,22 +27,11 @@ namespace Net
         while (!m_MessageQueue.empty())
         {
             auto& rMessage = m_MessageQueue.front();
-
-            int MessageCategory = rMessage.m_Category;
-
-            auto Range = m_Delegates.equal_range(MessageCategory);
-            for (auto Iterator = Range.first; Iterator != Range.second; )
+            
+            for (auto& rDelegate : m_Delegates)
             {
-                auto Delegate = Iterator->second.lock();
-                if (Delegate == nullptr)
-                {
-                    Iterator = m_Delegates.erase(Iterator);
-                }
-                else
-                {
-                    (*Delegate)(rMessage, m_Port);
-                    ++ Iterator;
-                }
+                assert(!rDelegate.expired());
+                (*rDelegate.lock())(rMessage, m_Port);
             }
 
             m_MessageQueue.pop();
@@ -58,14 +47,14 @@ namespace Net
 
     // -----------------------------------------------------------------------------
 
-    void CServerSocket::RegisterMessageHandler(int _MessageCategory, const std::shared_ptr<CMessageDelegate>& _rDelegate)
+    void CSocket::RegisterMessageHandler(const std::shared_ptr<CMessageDelegate>& _rDelegate)
     {
-        m_Delegates.insert(std::make_pair(_MessageCategory, _rDelegate));
+        m_Delegates.push_back(_rDelegate);
     }
 
     // -----------------------------------------------------------------------------
 
-    void CServerSocket::OnSendComplete(std::shared_ptr<std::vector<char>> _Data)
+    void CSocket::OnSendComplete(std::shared_ptr<std::vector<char>> _Data)
     {
         BASE_UNUSED(_Data);
 
@@ -83,13 +72,11 @@ namespace Net
 
     // -----------------------------------------------------------------------------
     
-    bool CServerSocket::SendMessage(int _MessageCategory, const std::vector<char>& _rData, int _MessageLength)
+    bool CSocket::SendMessage(const CMessage& _rMessage)
     {
         if (IsOpen())
         {
-            int Length = _MessageLength == 0 ? static_cast<int>(_rData.size()) : _MessageLength;
-
-            m_OutgoingMessages.emplace_back(_MessageCategory, _rData, Length);
+            m_OutgoingMessages.emplace_back(_rMessage);
 
             return true;
         }
@@ -101,17 +88,17 @@ namespace Net
 
     // -----------------------------------------------------------------------------
 
-    void CServerSocket::InternalSendMessage()
+    void CSocket::InternalSendMessage()
     {
         if (!m_IsSending)
         {
             m_IsSending = true;
 
-            const OutgoingMessage& Message = m_OutgoingMessages.front();
+            const CMessage& Message = m_OutgoingMessages.front();
 
-            int MessageLength = Message.m_MessageLength;
-            const auto& Data = Message.m_PayLoad;
-            const int MessageCategory = Message.m_MessageCategory;
+            int MessageLength = Message.m_CompressedSize;
+            const auto& Data = Message.m_Payload;
+            const int MessageCategory = Message.m_Category;
 
             if (MessageLength == 0)
             {
@@ -132,7 +119,7 @@ namespace Net
             std::memcpy(pData->data() + 2 * sizeof(int32_t), &MessageLength32, sizeof(MessageLength32)); // TODO: Add compression
             std::memcpy(pData->data() + 3 * sizeof(int32_t), Data.data(), MessageLength32);
 
-            asio::async_write(*m_pSocket, asio::buffer(*pData, DataLength), std::bind(&CServerSocket::OnSendComplete, this, pData));
+            asio::async_write(*m_pSocket, asio::buffer(*pData, DataLength), std::bind(&CSocket::OnSendComplete, this, pData));
 
             m_OutgoingMessages.pop_front();
         }
@@ -140,7 +127,7 @@ namespace Net
 
     // -----------------------------------------------------------------------------
 
-    void CServerSocket::ReceiveHeader(const std::error_code& _rError, size_t _TransferredBytes)
+    void CSocket::ReceiveHeader(const std::error_code& _rError, size_t _TransferredBytes)
     {
         BASE_UNUSED(_TransferredBytes);
         
@@ -154,7 +141,7 @@ namespace Net
             int32_t DecompressedMessageLength = *reinterpret_cast<int32_t*>(m_Header.data() + 2 * sizeof(int32_t));
             m_Payload.resize(CompressedMessageLength);
 
-            auto Callback = std::bind(&CServerSocket::ReceivePayload, this, std::placeholders::_1, std::placeholders::_2);
+            auto Callback = std::bind(&CSocket::ReceivePayload, this, std::placeholders::_1, std::placeholders::_2);
             asio::async_read(*m_pSocket, asio::buffer(m_Payload), asio::transfer_exactly(CompressedMessageLength), Callback);
 
             m_PendingMessage.m_Category = MessageID;
@@ -170,7 +157,7 @@ namespace Net
 
     // -----------------------------------------------------------------------------
 
-    void CServerSocket::ReceivePayload(const std::error_code& _rError, size_t _TransferredBytes)
+    void CSocket::ReceivePayload(const std::error_code& _rError, size_t _TransferredBytes)
     {
         BASE_UNUSED(_TransferredBytes);
         
@@ -194,7 +181,7 @@ namespace Net
 
     // -----------------------------------------------------------------------------
 
-    void CServerSocket::OnConnect(const std::system_error& _rError)
+    void CSocket::OnConnect(const std::system_error& _rError)
     {
         if (!_rError.code())
         {
@@ -211,22 +198,21 @@ namespace Net
     
     // -----------------------------------------------------------------------------
 
-    void CServerSocket::StartListening()
+    void CSocket::StartListening()
     {
-        auto Callback = std::bind(&CServerSocket::ReceiveHeader, this, std::placeholders::_1, std::placeholders::_2);
+        auto Callback = std::bind(&CSocket::ReceiveHeader, this, std::placeholders::_1, std::placeholders::_2);
         asio::async_read(*m_pSocket, asio::buffer(m_Header), asio::transfer_exactly(s_HeaderSize), Callback);
     }
 
     // -----------------------------------------------------------------------------
 
-    void CServerSocket::Connect()
+    void CSocket::Connect()
     {
         auto& IOService = CNetworkManager::GetInstance().GetIOService();
-        bool IsServer = CNetworkManager::GetInstance().IsServer();
 
         try
         {
-            if (IsServer)
+            if (m_IsServer)
             {
                 m_pEndpoint.reset(new asio::ip::tcp::endpoint(asio::ip::tcp::v4(), static_cast<unsigned short>(m_Port)));
                 m_pAcceptor.reset(new asio::ip::tcp::acceptor(IOService, *m_pEndpoint));
@@ -234,20 +220,18 @@ namespace Net
 
                 m_Header.resize(s_HeaderSize);
 
-                m_pAcceptor->async_accept(*m_pSocket, *m_pEndpoint, std::bind(&CServerSocket::OnConnect, this, std::placeholders::_1));
+                m_pAcceptor->async_accept(*m_pSocket, *m_pEndpoint, std::bind(&CSocket::OnConnect, this, std::placeholders::_1));
             }
             else
             {
-                std::string IP = CNetworkManager::GetInstance().GetServerIP();
-
-                asio::ip::address address = asio::ip::address::from_string(IP);
+                asio::ip::address address = asio::ip::address::from_string(m_IP);
 
                 m_pEndpoint.reset(new asio::ip::tcp::endpoint(address, static_cast<unsigned short>(m_Port)));
                 m_pSocket.reset(new asio::ip::tcp::socket(IOService));
 
                 m_Header.resize(s_HeaderSize);
 
-                m_pSocket->async_connect(*m_pEndpoint, std::bind(&CServerSocket::OnConnect, this, std::placeholders::_1));
+                m_pSocket->async_connect(*m_pEndpoint, std::bind(&CSocket::OnConnect, this, std::placeholders::_1));
             }
         }
         catch (const std::exception& e)
@@ -258,7 +242,7 @@ namespace Net
 
     // -----------------------------------------------------------------------------
 
-    void CServerSocket::AsyncReconnect()
+    void CSocket::AsyncReconnect()
     {
         m_OutgoingMessages.clear();
 
@@ -286,25 +270,58 @@ namespace Net
 
     // -----------------------------------------------------------------------------
 
-    bool CServerSocket::IsOpen() const
+    bool CSocket::IsOpen() const
     {
         return m_IsOpen;
     }
 
     // -----------------------------------------------------------------------------
 
-    CServerSocket::CServerSocket(int _Port)
+    bool CSocket::IsServer() const
+    {
+        return m_IsServer;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    int CSocket::GetPort() const
+    {
+        return m_Port;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const std::string& CSocket::GetIP() const
+    {
+        return m_IP;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CSocket::CSocket(int _Port)
         : m_Port(_Port)
         , m_IsOpen(false)
         , m_IsSending(false)
         , m_IsConnectionLost(false)
+        , m_IsServer(true)
+    {
+        Connect();
+    }
+
+    CSocket::CSocket(const std::string& _IP, int _Port)
+        : m_Port(_Port)
+        , m_IP(_IP)
+        , m_IsOpen(false)
+        , m_IsSending(false)
+        , m_IsConnectionLost(false)
+        , m_IsServer(false)
     {
         Connect();
     }
 
     // -----------------------------------------------------------------------------
 
-    CServerSocket::~CServerSocket()
+    CSocket::~CSocket()
     {
         m_pSocket->close();
     }
