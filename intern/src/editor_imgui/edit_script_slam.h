@@ -22,5 +22,12 @@ namespace Scpt
         {
             return "SLAM (Script)";
         }
+
+        // -----------------------------------------------------------------------------
+
+        void OnNewComponent(Dt::CEntity::BID _ID)
+        {
+
+        }
     };
 } // namespace Scpt

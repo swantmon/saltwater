@@ -8,7 +8,7 @@
 #include <array>
 #include <map>
 
-#define REGISTER_FACTORY(Name, Child)                                                                           \
+#define REGISTER_GUI(Name, Child)                                                                               \
 class BASE_CONCAT(Name, Factory) : public Edit::IGUIFactory                                                     \
 {                                                                                                               \
 public:                                                                                                         \

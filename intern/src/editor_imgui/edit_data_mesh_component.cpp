@@ -6,5 +6,5 @@
 
 namespace Dt
 {
-    REGISTER_FACTORY(CMeshComponentGUI, CMeshComponent)
+    REGISTER_GUI(CMeshComponentGUI, CMeshComponent);
 } // namespace Dt

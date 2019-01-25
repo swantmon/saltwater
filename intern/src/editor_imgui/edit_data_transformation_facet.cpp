@@ -6,5 +6,5 @@
 
 namespace Dt
 {
-    REGISTER_FACTORY(CTransformationFacetGUI, CTransformationFacet)
+    REGISTER_GUI(CTransformationFacetGUI, CTransformationFacet)
 } // namespace Dt

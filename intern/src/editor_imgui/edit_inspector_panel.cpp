@@ -3,8 +3,9 @@
 
 #include "base/base_include_glm.h"
 
-#include "editor_imgui/edit_inspector_panel.h"
+#include "editor_imgui/edit_component_factory.h"
 #include "editor_imgui/edit_gui_factory.h"
+#include "editor_imgui/edit_inspector_panel.h"
 
 #include "editor_imgui/imgui/imgui.h"
 
@@ -49,6 +50,7 @@ namespace GUI
     void CInspectorPanel::Render()
     {
         Edit::CGUIFactory& rFactory = Edit::CGUIFactory::GetInstance();
+        Edit::CComponentFactory& rComponentFactory = Edit::CComponentFactory::GetInstance();
 
         ImGui::Begin("Inspector", &m_IsVisible);
 
@@ -109,6 +111,25 @@ namespace GUI
             }
 
             Dt::EntityManager::MarkEntityAsDirty(*m_pEntity, Dt::CEntity::DirtyMove);
+
+            ImGui::Separator();
+
+            ImGui::PushItemWidth(-1);
+
+            if (ImGui::BeginCombo("##hidelabel", "Add Component"))
+            {
+                for (auto pComponent : rComponentFactory.GetComponents())
+                {
+                    if (ImGui::Selectable(pComponent->GetHeader()))
+                    {
+                        pComponent->OnNewComponent(m_pEntity->GetID());
+                    }
+                }
+
+                ImGui::EndCombo();
+            }
+
+            ImGui::PopItemWidth();
         }
 
         ImGui::End();

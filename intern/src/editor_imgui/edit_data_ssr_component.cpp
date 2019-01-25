@@ -1,10 +1,13 @@
 
 #include "editor_imgui/edit_precompiled.h"
 
+#include "editor_imgui/edit_component_factory.h"
 #include "editor_imgui/edit_gui_factory.h"
 #include "editor_imgui/edit_data_ssr_component.h"
 
 namespace Dt
 {
-    REGISTER_FACTORY(CSSRComponentGUI, CSSRComponent)
+    REGISTER_GUI(CSSRComponentGUI, CSSRComponent);
+
+    REGISTER_COMPONENT(CSSRComponentGUI);
 } // namespace Dt

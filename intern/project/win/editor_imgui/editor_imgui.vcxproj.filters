@@ -271,5 +271,8 @@
     <ClInclude Include="..\..\..\src\editor_imgui\edit_data_volume_fog_component.h">
       <Filter>gui\objects\data\components\fx</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\editor_imgui\edit_component_factory.h">
+      <Filter>gui\factory</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

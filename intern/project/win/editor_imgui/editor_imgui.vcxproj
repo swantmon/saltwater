@@ -64,6 +64,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\editor_imgui\edit_application.h" />
+    <ClInclude Include="..\..\..\src\editor_imgui\edit_component_factory.h" />
     <ClInclude Include="..\..\..\src\editor_imgui\edit_data_area_light_component.h" />
     <ClInclude Include="..\..\..\src\editor_imgui\edit_data_bloom_component.h" />
     <ClInclude Include="..\..\..\src\editor_imgui\edit_data_camera_component.h" />
