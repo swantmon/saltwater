@@ -19,9 +19,6 @@
     <Filter Include="gui\objects\data">
       <UniqueIdentifier>{e2a91126-efe8-4c03-8fea-aa55d11e5f6f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="gui\objects\scripts">
-      <UniqueIdentifier>{548c3b3f-4325-4419-b204-0c560681ba61}</UniqueIdentifier>
-    </Filter>
     <Filter Include="gui\native">
       <UniqueIdentifier>{904bb3ad-33d3-4144-8fde-4694febcbb0c}</UniqueIdentifier>
     </Filter>
@@ -42,6 +39,9 @@
     </Filter>
     <Filter Include="gui\objects\data\components\model">
       <UniqueIdentifier>{ec06401f-5c0c-4c7d-9ddb-7b2385561cbd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gui\objects\data\scripts">
+      <UniqueIdentifier>{548c3b3f-4325-4419-b204-0c560681ba61}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -79,7 +79,7 @@
       <Filter>gui\objects\data</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\editor_imgui\edit_script_slam.cpp">
-      <Filter>gui\objects\scripts</Filter>
+      <Filter>gui\objects\data\scripts</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\editor_imgui\edit_scene_graph_panel.cpp">
       <Filter>gui\panels</Filter>
@@ -191,7 +191,7 @@
       <Filter>gui\objects\data</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\editor_imgui\edit_script_slam.h">
-      <Filter>gui\objects\scripts</Filter>
+      <Filter>gui\objects\data\scripts</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\editor_imgui\edit_scene_graph_panel.h">
       <Filter>gui\panels</Filter>
