@@ -493,7 +493,7 @@ namespace MR
         m_IntegrateTSDFCSPtr       = ShaderManager::CompileCS("../../plugins/slam/scalable/integration\\cs_integrate_tsdf.glsl"         , "main", DefineString.c_str());
         m_FillIndirectBufferCSPtr  = ShaderManager::CompileCS("../../plugins/slam/scalable/cs_fill_indirect.glsl"                       , "main", DefineString.c_str());
 
-        m_PlaneCSPtr = ShaderManager::CompileCS("slam\\scalable_kinect_fusion\\cs_create_plane.glsl", "main", DefineString.c_str());
+        m_PlaneCSPtr = ShaderManager::CompileCS("../../plugins/slam/scalable/cs_create_plane.glsl", "main", DefineString.c_str());
 
         SInputElementDescriptor InputLayoutDesc = {};
 
