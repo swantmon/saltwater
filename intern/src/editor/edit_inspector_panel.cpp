@@ -49,6 +49,7 @@ namespace GUI
 
     void CInspectorPanel::Render()
     {
+        int IndexID = 0;
         Edit::CGUIFactory& rFactory = Edit::CGUIFactory::GetInstance();
         Edit::CComponentFactory& rComponentFactory = Edit::CComponentFactory::GetInstance();
 
@@ -60,9 +61,15 @@ namespace GUI
 
             if (rFactory.Has<Dt::CEntity>())
             {
+                ImGui::PushID(IndexID);
+
                 auto Panel = rFactory.Get<Dt::CEntity>(m_pEntity);
 
                 Panel->OnGUI();
+
+                ImGui::PopID();
+
+                ++IndexID;
             }
 
             ImGui::Separator();
@@ -75,10 +82,16 @@ namespace GUI
             {
                 auto Panel = rFactory.Get<Dt::CTransformationFacet>(pTransformationFacet);
 
+                ImGui::PushID(IndexID);
+
                 if (ImGui::CollapsingHeader(Panel->GetHeader(), ImGuiTreeNodeFlags_DefaultOpen))
                 {
                     Panel->OnGUI();
                 }
+
+                ImGui::PopID();
+
+                ++IndexID;
             }
 
             auto pComponentFacet = m_pEntity->GetComponentFacet();
@@ -100,10 +113,16 @@ namespace GUI
                     {
                         auto Panel = rFactory.Get(Hash, pComponent);
 
+                        ImGui::PushID(IndexID);
+
                         if (ImGui::CollapsingHeader(Panel->GetHeader()))
                         {
                             Panel->OnGUI();
                         }
+
+                        ImGui::PopID();
+
+                        ++IndexID;
                     }
 
                     Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Dt::IComponent::DirtyInfo);
@@ -116,7 +135,7 @@ namespace GUI
 
             ImGui::PushItemWidth(-1);
 
-            if (ImGui::BeginCombo("##hidelabel", "Add Component"))
+            if (ImGui::BeginCombo("##ADD_COMPONENT", "Add Component"))
             {
                 for (auto pComponent : rComponentFactory.GetComponents())
                 {
