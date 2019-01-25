@@ -16,7 +16,7 @@
 
 namespace Net
 {
-    class ENGINE_API CServer
+    class ENGINE_API CSocket
     {
     private:
 
@@ -28,6 +28,9 @@ namespace Net
 
         bool IsOpen() const;
         bool IsServer() const;
+
+        int GetPort() const;
+        const std::string& GetIP() const;
 
         void Update();
 
@@ -77,13 +80,13 @@ namespace Net
         std::atomic<bool> m_IsConnectionLost;
 
         // shared_ptr cannot access the destructor so we use a custom deleter
-        friend void SocketDeleter(Net::CServer* _pSocket)
+        friend void SocketDeleter(Net::CSocket* _pSocket)
         {
             delete _pSocket;
         }
 
-        CServer(int _Port);
-        CServer(const std::string& _IP, int _Port);
-        ~CServer();
+        CSocket(int _Port);
+        CSocket(const std::string& _IP, int _Port);
+        ~CSocket();
     };
 } // namespace Net

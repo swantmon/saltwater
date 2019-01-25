@@ -29,19 +29,22 @@ namespace Net
         void Update();
         void OnExit();
 
-        bool IsConnected(int _Port) const;
+        bool IsConnected(SocketHandle _SocketHandle) const;
 
-        int CreateServerSocket(int _Port);
-        int CreateClientSocket(const std::string& _IP, int _Port);
+        int GetPort(SocketHandle _SocketHandle) const;
+        const std::string& GetIP(SocketHandle _SocketHandle) const;
 
-        void RegisterMessageHandler(int _SocketHandle, const std::shared_ptr<CMessageDelegate>& _rDelegate);
-        bool SendMessage(int _Port, const CMessage& _rMessage);
+        SocketHandle CreateServerSocket(int _Port);
+        SocketHandle CreateClientSocket(const std::string& _IP, int _Port);
+
+        void RegisterMessageHandler(SocketHandle _SocketHandle, const std::shared_ptr<CMessageDelegate>& _rDelegate);
+        bool SendMessage(SocketHandle _SocketHandle, const CMessage& _rMessage);
         
     private:
 
         void Run();
 
-        friend class CServer;
+        friend class CSocket;
         
         asio::io_service& GetIOService();
 
@@ -54,13 +57,13 @@ namespace Net
 
         struct SocketDeleter
         {
-            void operator()(CServer* _pSocket)
+            void operator()(CSocket* _pSocket)
             {
                 delete _pSocket;
             }
         };
         
-        std::map<int, std::unique_ptr<CServer, SocketDeleter>> m_Sockets;  // the key value refers to port numbers
+        std::map<SocketHandle, std::unique_ptr<CSocket, SocketDeleter>> m_Sockets;
         
         std::thread m_WorkerThread;
 
