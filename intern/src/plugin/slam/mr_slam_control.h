@@ -295,12 +295,16 @@ namespace MR
                 m_pRecordReader->SkipTime();
 
                 m_pRecordReader->SetSpeed(SpeedOfPlayback);
+
+                ENGINE_CONSOLE_INFOV("Playing recording from file \"%s\"", m_RecordFileName.c_str());
             }
             else if (RecordParam == "record")
             {
                 m_RecordMode = RECORD;
                 m_RecordFile.open(m_RecordFileName, std::fstream::out | std::fstream::binary);
                 m_pRecordWriter.reset(new Base::CRecordWriter(m_RecordFile, 1));
+
+                ENGINE_CONSOLE_INFOV("Recoding into file file \"%s\"", m_RecordFileName.c_str());
             }
             else
             {
