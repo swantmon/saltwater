@@ -216,7 +216,7 @@ namespace SER
 
         InternReadBinary(&Timecode, sizeof(Timecode));
 
-        m_pStream->seekg(-sizeof(Timecode), m_pStream->cur);
+        m_pStream->seekg(-int(sizeof(Timecode)), m_pStream->cur);
 
         return Timecode;
     }

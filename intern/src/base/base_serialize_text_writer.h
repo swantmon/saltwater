@@ -226,15 +226,13 @@ namespace SER
 
         static const unsigned int s_MaxLengthOfClassName = 2048;
 
-        char ClassName[s_MaxLengthOfClassName];
-
-        strcpy(ClassName, typeid( XUnqualified ).name());
+        std::string ClassName = typeid(XUnqualified).name();
 
         InternWriteIndent();
 
         InternWriteChar(Private::Code::s_BracketOpen);
 
-        InternWriteName(ClassName);
+        InternWriteName(ClassName.c_str());
 
         InternWriteEOL();
 
@@ -256,6 +254,8 @@ namespace SER
     template<typename TElement>
     inline void CTextWriter::InternBeginCollection(const TElement* _pElements, unsigned int _NumberOfElements)
     {
+        BASE_UNUSED(_pElements);
+
         InternWriteIndent();
         InternWriteChar(Private::Code::s_BracketOpen);
         InternWriteName(Private::Code::s_Collection);
@@ -356,6 +356,8 @@ namespace SER
     template<typename TElement>
     inline void CTextWriter::InternEndCollection(const TElement* _pElements)
     {
+        BASE_UNUSED(_pElements);
+
         m_State = Default;
 
         -- m_NumberOfIdents;

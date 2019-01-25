@@ -420,7 +420,7 @@ namespace Scpt
             Net::CMessage Message;
 
             Message.m_Payload = std::vector<char>(s_PanoramaWidth * s_PanoramaHeight * 4);
-            Message.m_CompressedSize = Message.m_DecompressedSize = Message.m_Payload.size();
+            Message.m_CompressedSize = Message.m_DecompressedSize = static_cast<int>(Message.m_Payload.size());
             Message.m_MessageType = 0;
 
             Gfx::TextureManager::CopyTextureToCPU(m_PanoramaTexturePtr, Message.m_Payload.data());
