@@ -11,6 +11,9 @@
 #include "engine/core/core_program_parameters.h"
 #include "engine/core/core_time.h"
 
+#include "engine/data/data_component_manager.h"
+#include "engine/data/data_script_component.h"
+
 #include "engine/graphic/gfx_buffer_manager.h"
 #include "engine/graphic/gfx_context_manager.h"
 #include "engine/graphic/gfx_main.h"
@@ -24,6 +27,8 @@
 #include "engine/graphic/gfx_texture.h"
 #include "engine/graphic/gfx_texture_manager.h"
 #include "engine/graphic/gfx_view_manager.h"
+
+#include "engine/script/script_slam.h"
 
 #include "plugin/slam/gfx_reconstruction_renderer.h"
 #include "plugin/slam/mr_scalable_slam_reconstructor.h"
@@ -1598,9 +1603,32 @@ namespace
 
     void CGfxReconstructionRenderer::RenderHitProxy()
     {
+        // -----------------------------------------------------------------------------
+        // Get ID
+        // -----------------------------------------------------------------------------
+        Dt::CEntity::BID ID = Dt::CEntity::s_InvalidID;
+
+        auto& rComponentManager = Dt::CComponentManager::GetInstance();
+
+        auto& rComponents = rComponentManager.GetComponents<Dt::CScriptComponent>();
+
+        for (auto Component : rComponents)
+        {
+            auto ScriptComponent = static_cast<Dt::CScriptComponent*>(Component);
+
+            if (ScriptComponent->IsActiveAndUsable() == false) continue;
+
+            if (ScriptComponent->GetScriptTypeID() == Base::CTypeInfo::GetTypeID<Scpt::CSLAMScript>())
+            {
+                ID = ScriptComponent->GetHostEntity()->GetID();
+
+                break;
+            }
+        }
+
         Performance::BeginEvent("Voxel Hit Proxy");
 
-        if (m_RenderVolume)
+        if (m_RenderVolume && ID != Dt::CEntity::s_InvalidID)
         {
             MR::CScalableSLAMReconstructor::SScalableVolume& rVolume = m_pScalableReconstructor->GetVolume();
 
@@ -1647,8 +1675,6 @@ namespace
                 glm::vec3(glm::eulerAngleX(glm::half_pi<float>()) * glm::vec4(Max[0], Max[1], Max[2], 1.0f)),
                 glm::vec3(glm::eulerAngleX(glm::half_pi<float>()) * glm::vec4(Min[0], Max[1], Max[2], 1.0f))
             };
-
-            int ID = 1000;
 
             BufferManager::UploadBufferData(m_RaycastHitProxyBufferPtr, &ID);
 

@@ -470,7 +470,7 @@ namespace
 
             const Dt::CEntity& rCurrentEntity = *pDtComponent->GetHostEntity();
 
-            if (rCurrentEntity.GetLayer() == Dt::SEntityLayer::AR)
+            if (rCurrentEntity.GetLayer() & Dt::SEntityLayer::AR)
             {
                 Gfx::CMesh* pMeshObject = static_cast<Gfx::CMesh*>(pDtComponent->GetFacet(Dt::CMeshComponent::Graphic));
 

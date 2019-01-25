@@ -1,9 +1,9 @@
 
 #pragma once
 
-#include "editor/edit_state.h"
+#include "base/base_input_event.h"
 
-#include "editor_port/edit_message.h"
+#include "editor/edit_state.h"
 
 namespace Gfx
 {
@@ -35,15 +35,9 @@ namespace Edit
         virtual CState::EStateType InternOnEnter();
         virtual CState::EStateType InternOnLeave();
         virtual CState::EStateType InternOnRun();
-        
+
     private:
 
-        void OnExit(Edit::CMessage& _rMessage);
-        void OnPlay(Edit::CMessage& _rMessage);
-        void OnNewMap(Edit::CMessage& _rMessage);
-
-        void OnHighlightEntity(Edit::CMessage& _rMessage);
-
-        void OnMouseLeftReleased(Edit::CMessage& _rMessage);
+        void OnInputEvent(const Base::CInputEvent& _rInputEvent);
     };
 } // namespace Edit

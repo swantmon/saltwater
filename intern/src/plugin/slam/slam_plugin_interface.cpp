@@ -52,6 +52,13 @@ namespace SLAM
 
     // -----------------------------------------------------------------------------
 
+    void CPluginInterface::SetActivateSelection(bool _Flag)
+    {
+        m_SLAMControl.SetActivateSelection(_Flag);
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CPluginInterface::OnPause()
     {
         ENGINE_CONSOLE_INFOV("SLAM plugin paused!");
@@ -88,4 +95,9 @@ extern "C" CORE_PLUGIN_API_EXPORT void OnInput(const Base::CInputEvent& _rEvent)
 extern "C" CORE_PLUGIN_API_EXPORT void OnRenderHitProxy()
 {
     Gfx::ReconstructionRenderer::RenderHitProxy();
+}
+
+extern "C" CORE_PLUGIN_API_EXPORT void SetActivateSelection(bool _Flag)
+{
+    static_cast<SLAM::CPluginInterface&>(GetInstance()).SetActivateSelection(_Flag);
 }

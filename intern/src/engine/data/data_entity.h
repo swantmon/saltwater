@@ -22,7 +22,7 @@ namespace Dt
 {
     struct SEntityCategory
     {
-        enum
+        enum Enum
         {
             Static,
             Dynamic,
@@ -33,15 +33,13 @@ namespace Dt
 
     struct SEntityLayer
     {
-        enum
+        enum Enum
         {
-            Default         = 0x00,
-            AR              = 0x01,
-            TransparentFX   = 0x02,
+            Default         = 0x01,
+            AR              = 0x02,
             IgnoreRaycast   = 0x04,
-            Water           = 0x08,
-            UI              = 0x10,
-            NumberOfLayers  = 6,
+            UI              = 0x08,
+            NumberOfLayers  = 4,
             UndefinedLayer  = -1
         };
     };
@@ -189,5 +187,9 @@ namespace Dt
 
         CEntity();
         ~CEntity();
+
+    private:
+
+        friend class CEntityGUI;
     };
 } // namespace Dt

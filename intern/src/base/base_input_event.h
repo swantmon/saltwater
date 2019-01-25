@@ -139,8 +139,8 @@ namespace IO
         
         inline CInputEvent(unsigned int _Type);
         inline CInputEvent(unsigned int _Type, unsigned int _Action, unsigned int _Key, unsigned int _KeyModifier);
-        inline CInputEvent(unsigned int _Type, unsigned int _Action, unsigned int _Key, const glm::vec2& _rPointerPosition, const glm::vec2& _rLocalPointerPosition);
-        inline CInputEvent(unsigned int _Type, unsigned int _Action, unsigned int _Key, const glm::vec2& _rPointerPosition, float _WheelDelta);
+        inline CInputEvent(unsigned int _Type, unsigned int _Action, unsigned int _Key, const glm::ivec2& _rPointerPosition, const glm::ivec2& _rLocalPointerPosition);
+        inline CInputEvent(unsigned int _Type, unsigned int _Action, unsigned int _Key, const glm::ivec2& _rPointerPosition, const glm::ivec2& _rLocalPointerPosition, float _WheelDelta);
 
         inline CInputEvent(unsigned int _Type, unsigned int _Action, unsigned int _Key);
         inline CInputEvent(unsigned int _Type, unsigned int _Action, unsigned int _Key, float _Delta);
@@ -166,8 +166,8 @@ namespace IO
         inline bool HasControl() const;
         inline bool HasModifier() const;
         
-        inline const glm::vec2& GetGlobalCursorPosition() const;
-        inline const glm::vec2& GetLocalCursorPosition() const;
+        inline const glm::ivec2& GetGlobalCursorPosition() const;
+        inline const glm::ivec2& GetLocalCursorPosition() const;
         
         inline float GetDelta() const;
 
@@ -186,18 +186,19 @@ namespace IO
         
     private:
         
-        SBits     m_Bits;
-        glm::vec2 m_PointerPosition;
-        glm::vec2 m_LocalPointerPosition;
-        float     m_WheelDelta;
+        SBits      m_Bits;
+        glm::ivec2 m_GlobalPointerPosition;
+        glm::ivec2 m_LocalPointerPosition;
+        float      m_WheelDelta;
     };
 } // namespace IO
 
 namespace IO
 {
     inline CInputEvent::CInputEvent(unsigned int _Type)
-        : m_PointerPosition(-1, -1)
-        , m_WheelDelta    (0)
+        : m_GlobalPointerPosition(-1, -1)
+        , m_LocalPointerPosition(-1, -1)
+        , m_WheelDelta(0)
     {
         m_Bits.m_Action      = 0;
         m_Bits.m_Key         = 0;
@@ -209,8 +210,9 @@ namespace IO
     // -----------------------------------------------------------------------------
     
     inline CInputEvent::CInputEvent(unsigned int _Type, unsigned int _Action, unsigned int _Key, unsigned int _KeyCombo)
-        : m_PointerPosition(-1, -1)
-        , m_WheelDelta    (0)
+        : m_GlobalPointerPosition(-1, -1)
+        , m_LocalPointerPosition(-1, -1)
+        , m_WheelDelta(0)
     {
         m_Bits.m_Action      = _Action;
         m_Bits.m_Key         = _Key;
@@ -220,10 +222,10 @@ namespace IO
     
     // -----------------------------------------------------------------------------
     
-    inline CInputEvent::CInputEvent(unsigned int _Type, unsigned int _Action, unsigned int _Key, const glm::vec2& _rPointerPosition, const glm::vec2& _rLocalPointerPosition)
-        : m_PointerPosition(_rPointerPosition)
+    inline CInputEvent::CInputEvent(unsigned int _Type, unsigned int _Action, unsigned int _Key, const glm::ivec2& _rPointerPosition, const glm::ivec2& _rLocalPointerPosition)
+        : m_GlobalPointerPosition(_rPointerPosition)
         , m_LocalPointerPosition(_rLocalPointerPosition)
-        , m_WheelDelta    (0)
+        , m_WheelDelta(0)
     {
         m_Bits.m_Type        = _Type;
         m_Bits.m_Action      = _Action;
@@ -233,9 +235,10 @@ namespace IO
     
     // -----------------------------------------------------------------------------
     
-    inline CInputEvent::CInputEvent(unsigned int _Type, unsigned int _Action, unsigned int _Key, const glm::vec2& _rPointerPosition, float _WheelDelta)
-        : m_PointerPosition(_rPointerPosition)
-        , m_WheelDelta    (_WheelDelta)
+    inline CInputEvent::CInputEvent(unsigned int _Type, unsigned int _Action, unsigned int _Key, const glm::ivec2& _rPointerPosition, const glm::ivec2& _rLocalPointerPosition, float _WheelDelta)
+        : m_GlobalPointerPosition(_rPointerPosition)
+        , m_LocalPointerPosition(_rLocalPointerPosition)
+        , m_WheelDelta(_WheelDelta)
     {
         m_Bits.m_Type        = _Type;
         m_Bits.m_Action      = _Action;
@@ -246,6 +249,9 @@ namespace IO
     // -----------------------------------------------------------------------------
 
     inline CInputEvent::CInputEvent(unsigned int _Type, unsigned int _Action, unsigned int _Key)
+        : m_GlobalPointerPosition(-1, -1)
+        , m_LocalPointerPosition(-1, -1)
+        , m_WheelDelta(0)
     {
         m_Bits.m_Type        = _Type;
         m_Bits.m_Action      = _Action;
@@ -256,6 +262,8 @@ namespace IO
     // -----------------------------------------------------------------------------
 
     inline CInputEvent::CInputEvent(unsigned int _Type, unsigned int _Action, unsigned int _Key, float _Delta)
+        : m_GlobalPointerPosition(-1, -1)
+        , m_LocalPointerPosition(-1, -1)
     {
         m_Bits.m_Type        = _Type;
         m_Bits.m_Action      = _Action;
@@ -267,6 +275,8 @@ namespace IO
     // -----------------------------------------------------------------------------
 
     inline CInputEvent::CInputEvent(unsigned int _Type, unsigned int _Action, unsigned int _Key, unsigned int _Axis, float _Delta)
+        : m_GlobalPointerPosition(-1, -1)
+        , m_LocalPointerPosition(-1, -1)
     {
         m_Bits.m_Type        = _Type;
         m_Bits.m_Action      = _Action;
@@ -279,8 +289,9 @@ namespace IO
     // -----------------------------------------------------------------------------
     
     inline CInputEvent::CInputEvent(const CInputEvent& _rEvent)
-        : m_PointerPosition(_rEvent.m_PointerPosition)
-        , m_WheelDelta    (_rEvent.m_WheelDelta)
+        : m_GlobalPointerPosition(_rEvent.m_GlobalPointerPosition)
+        , m_LocalPointerPosition(_rEvent.m_LocalPointerPosition)
+        , m_WheelDelta(_rEvent.m_WheelDelta)
     {
         m_Bits.m_Type        = _rEvent.m_Bits.m_Type;
         m_Bits.m_Action      = _rEvent.m_Bits.m_Action;
@@ -299,13 +310,14 @@ namespace IO
     
     inline CInputEvent& CInputEvent::operator = (const CInputEvent& _rEvent)
     {
-        m_Bits.m_Type        = _rEvent.m_Bits.m_Type;
-        m_Bits.m_Action      = _rEvent.m_Bits.m_Action;
-        m_Bits.m_Key         = _rEvent.m_Bits.m_Key;
-        m_Bits.m_KeyModifier = _rEvent.m_Bits.m_KeyModifier;
-        m_Bits.m_Axis        = _rEvent.m_Bits.m_Axis;
-        m_PointerPosition    = _rEvent.m_PointerPosition;
-        m_WheelDelta         = _rEvent.m_WheelDelta;
+        m_Bits.m_Type           = _rEvent.m_Bits.m_Type;
+        m_Bits.m_Action         = _rEvent.m_Bits.m_Action;
+        m_Bits.m_Key            = _rEvent.m_Bits.m_Key;
+        m_Bits.m_KeyModifier    = _rEvent.m_Bits.m_KeyModifier;
+        m_Bits.m_Axis           = _rEvent.m_Bits.m_Axis;
+        m_GlobalPointerPosition = _rEvent.m_GlobalPointerPosition;
+        m_LocalPointerPosition  = _rEvent.m_LocalPointerPosition;
+        m_WheelDelta            = _rEvent.m_WheelDelta;
         
         return *this;
     }
@@ -361,14 +373,14 @@ namespace IO
     
     // -----------------------------------------------------------------------------
     
-    inline const glm::vec2& CInputEvent::GetGlobalCursorPosition() const
+    inline const glm::ivec2& CInputEvent::GetGlobalCursorPosition() const
     {
-        return m_PointerPosition;
+        return m_GlobalPointerPosition;
     }
 
     // -----------------------------------------------------------------------------
 
-    inline const glm::vec2& CInputEvent::GetLocalCursorPosition() const
+    inline const glm::ivec2& CInputEvent::GetLocalCursorPosition() const
     {
         return m_LocalPointerPosition;
     }

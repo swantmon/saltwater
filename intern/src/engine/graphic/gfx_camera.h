@@ -61,9 +61,9 @@ namespace Gfx
         void SetCullingMask(unsigned int _CullingMask);
         unsigned int GetCullingMask() const;
 
-        void SetViewportRect(Base::AABB2Float& _rViewportRect);
-        Base::AABB2Float& GetViewportRect();
-        const Base::AABB2Float& GetViewportRect() const;
+        void SetViewportRect(glm::vec4& _rViewportRect);
+        glm::vec4& GetViewportRect();
+        const glm::vec4& GetViewportRect() const;
 
         void SetDepth(float _Depth);
         float GetDepth() const;
@@ -151,7 +151,7 @@ namespace Gfx
         glm::vec3 m_WorldSpaceFrustum [8];
 
         Base::AABB3Float m_WorldAABB;
-        Base::AABB2Float m_ViewportRect;
+        glm::vec4 m_ViewportRect;
 
         CCamera* m_pSibling;
 

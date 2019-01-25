@@ -1,0 +1,13 @@
+
+#include "editor/edit_precompiled.h"
+
+#include "editor/edit_component_factory.h" 
+#include "editor/edit_gui_factory.h"
+#include "editor/edit_data_area_light_component.h"
+
+namespace Dt
+{
+    REGISTER_GUI(CAreaLightComponentGUI, CAreaLightComponent);
+
+    REGISTER_COMPONENT(CAreaLightComponentGUI);
+} // namespace Dt

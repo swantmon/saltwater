@@ -28,6 +28,8 @@ namespace Dt
         template<class T>
         bool HasComponent() const;
 
+        CComponentVector& GetComponents();
+
         const CComponentVector& GetComponents() const;
 
     public:

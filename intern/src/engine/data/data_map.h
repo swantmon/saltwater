@@ -9,15 +9,6 @@
 
 #include "engine/data/data_region.h"
 
-namespace Base
-{
-namespace Ser
-{
-    class CTextReader;
-    class CTextWriter;
-} // namespace Ser
-} // namespace Base
-
 namespace Dt
 {
     class CEntity;
@@ -27,7 +18,7 @@ namespace Dt
 {
 namespace Map
 {
-    class CEntityIterator
+    class ENGINE_API CEntityIterator
     {
     public:
 
@@ -84,29 +75,29 @@ namespace Map
     ENGINE_API void FreeMap();
     ENGINE_API bool HasMap();
 
-    CRegion* GetRegions();                                                                                                                                          ///< Returns a pointer to the region array.
-    CRegion& GetRegionByID(unsigned int _RegionID);                                                                                                                 ///< Returns the regions with the passed ID.
-    CRegion& GetRegionByPosition(float _AxisX, float _AxisY);                                                                                                               ///< Returns the region that covers the given world coordinate.
-    CRegion& GetRegionByPosition(const glm::vec3& _rPosition);                                                                                                   ///< Returns the region that covers the given world coordinate.
+    ENGINE_API CRegion* GetRegions();                                                                                                                                          ///< Returns a pointer to the region array.
+    ENGINE_API CRegion& GetRegionByID(unsigned int _RegionID);                                                                                                                 ///< Returns the regions with the passed ID.
+    ENGINE_API CRegion& GetRegionByPosition(float _AxisX, float _AxisY);                                                                                                       ///< Returns the region that covers the given world coordinate.
+    ENGINE_API CRegion& GetRegionByPosition(const glm::vec3& _rPosition);                                                                                                      ///< Returns the region that covers the given world coordinate.
     
-    Base::Size GetNumberOfRegions();                                                                                                                                ///< Returns the number of regions in the map.
-    Base::Size GetNumberOfRegionsX();                                                                                                                               ///< Returns the number of regions in one row of the map.
-    Base::Size GetNumberOfRegionsY();                                                                                                                               ///< Returns the number of regions in one column of the map.
+    ENGINE_API Base::Size GetNumberOfRegions();                                                                                                                                ///< Returns the number of regions in the map.
+    ENGINE_API Base::Size GetNumberOfRegionsX();                                                                                                                               ///< Returns the number of regions in one row of the map.
+    ENGINE_API Base::Size GetNumberOfRegionsY();                                                                                                                               ///< Returns the number of regions in one column of the map.
     
-    Base::Size GetNumberOfSquareMeters();                                                                                                                           ///< Returns the number of tiles in the map.
-    Base::Size GetNumberOfMetersX();                                                                                                                                ///< Returns the number of tiles in one row of the map.
-    Base::Size GetNumberOfMetersY();                                                                                                                                ///< Returns the number of tiles in one column of the map.
+    ENGINE_API Base::Size GetNumberOfSquareMeters();                                                                                                                           ///< Returns the number of tiles in the map.
+    ENGINE_API Base::Size GetNumberOfMetersX();                                                                                                                                ///< Returns the number of tiles in one row of the map.
+    ENGINE_API Base::Size GetNumberOfMetersY();                                                                                                                                ///< Returns the number of tiles in one column of the map.
 
-    CEntityIterator EntitiesBegin();                                                                                                                                ///< Returns an iterator to the first entity in the map.
-    CEntityIterator EntitiesBegin(unsigned int _Category);                                                                                              ///< Returns an iterator to the first entity of the given category.
-    CEntityIterator EntitiesBegin(const Base::AABB3Float& _rAABB);                                                                                                  ///< Returns an iterator to the first entity within the AABB.
-    CEntityIterator EntitiesBegin(unsigned int _Category, const Base::AABB3Float& _rAABB);                                                              ///< Returns an iterator to the first entity of the given category within the AABB.
-    CEntityIterator EntitiesBegin(const Base::AABB3Float& _rAABB, const glm::vec3& _rPosition, float _SquareRadius);                                             ///< Returns an iterator to the first entity within the given radius.
-    CEntityIterator EntitiesBegin(unsigned int _Category, const Base::AABB3Float& _rAABB, const glm::vec3& _rPosition, float _SquareRadius);         ///< Returns an iterator to the first entity of the given category within the given radius.
-    CEntityIterator EntitiesEnd();                                                                                                                                  ///< Returns an iterator with a null pointer.
+    ENGINE_API CEntityIterator EntitiesBegin();                                                                                                                                ///< Returns an iterator to the first entity in the map.
+    ENGINE_API CEntityIterator EntitiesBegin(unsigned int _Category);                                                                                                          ///< Returns an iterator to the first entity of the given category.
+    ENGINE_API CEntityIterator EntitiesBegin(const Base::AABB3Float& _rAABB);                                                                                                  ///< Returns an iterator to the first entity within the AABB.
+    ENGINE_API CEntityIterator EntitiesBegin(unsigned int _Category, const Base::AABB3Float& _rAABB);                                                                          ///< Returns an iterator to the first entity of the given category within the AABB.
+    ENGINE_API CEntityIterator EntitiesBegin(const Base::AABB3Float& _rAABB, const glm::vec3& _rPosition, float _SquareRadius);                                                ///< Returns an iterator to the first entity within the given radius.
+    ENGINE_API CEntityIterator EntitiesBegin(unsigned int _Category, const Base::AABB3Float& _rAABB, const glm::vec3& _rPosition, float _SquareRadius);                        ///< Returns an iterator to the first entity of the given category within the given radius.
+    ENGINE_API CEntityIterator EntitiesEnd();                                                                                                                                  ///< Returns an iterator with a null pointer.
     
-    void AddEntity(CEntity& _rEntity);
-    void RemoveEntity(CEntity& _rEntity);
-    void MoveEntity(CEntity& _rEntity);
+    ENGINE_API void AddEntity(CEntity& _rEntity);
+    ENGINE_API void RemoveEntity(CEntity& _rEntity);
+    ENGINE_API void MoveEntity(CEntity& _rEntity);
 } // namespace Map
 } // namespace Dt

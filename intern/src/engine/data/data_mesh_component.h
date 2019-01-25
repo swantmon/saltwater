@@ -48,5 +48,9 @@ namespace Dt
         int         m_GeneratorFlag;
         int         m_MeshIndex;
         EMeshType   m_MeshType;
+
+    private:
+
+        friend class CMeshComponentGUI;
     };
 } // namespace Dt

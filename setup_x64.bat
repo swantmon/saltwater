@@ -38,7 +38,6 @@ copy extern\devil\lib\%BuildMode%\*.dll bin\
 copy extern\easyar\lib\%BuildMode%\*.dll bin\
 copy extern\glew\lib\%BuildMode%\*.dll bin\
 copy extern\opencv\lib\%BuildMode%\*.dll bin\
-copy extern\qt\lib\%BuildMode%\*.dll bin\
 copy extern\sdl2\lib\%BuildMode%\*.dll bin\
 copy extern\tinyxml2\lib\%BuildMode%\*.dll bin\
 copy extern\zlib\lib\%BuildMode%\*.dll bin\

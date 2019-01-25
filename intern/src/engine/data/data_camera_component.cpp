@@ -190,21 +190,21 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CCameraComponent::SetViewportRect(const Base::AABB2Float& _rViewportRect)
+    void CCameraComponent::SetViewportRect(const glm::vec4& _rViewportRect)
     {
         m_ViewportRect = _rViewportRect;
     }
 
     // -----------------------------------------------------------------------------
 
-    Base::AABB2Float& CCameraComponent::GetViewportRect()
+    glm::vec4& CCameraComponent::GetViewportRect()
     {
         return m_ViewportRect;
     }
 
     // -----------------------------------------------------------------------------
 
-    const Base::AABB2Float& CCameraComponent::GetViewportRect() const
+    const glm::vec4& CCameraComponent::GetViewportRect() const
     {
         return m_ViewportRect;
     }

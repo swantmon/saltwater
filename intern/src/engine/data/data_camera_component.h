@@ -3,7 +3,6 @@
 
 #include "engine/engine_config.h"
 
-#include "base/base_aabb2.h"
 #include "base/base_include_glm.h"
 
 #include "engine/data/data_component.h"
@@ -77,9 +76,9 @@ namespace Dt
         void SetFar(float _Far);
         float GetFar() const;
 
-        void SetViewportRect(const Base::AABB2Float& _rViewportRect);
-        Base::AABB2Float& GetViewportRect();
-        const Base::AABB2Float& GetViewportRect() const;
+        void SetViewportRect(const glm::vec4& _rViewportRect);
+        glm::vec4& GetViewportRect();
+        const glm::vec4& GetViewportRect() const;
 
         void SetDepth(float _Depth);
         float GetDepth() const;
@@ -119,9 +118,13 @@ namespace Dt
         Gfx::CTexturePtr m_pBackgroundTexture;              //< Background texture
         glm::vec3        m_BackgroundColor;                 //< Default background color of the camera (depending on clear flag)
         glm::mat4        m_ProjectionMatrix;                //< RAW projection matrix even RAW is active
-        Base::AABB2Float m_ViewportRect;                    //< View port this camera should render
+        glm::vec4        m_ViewportRect;                    //< View port this camera should render
         EClearFlag       m_ClearFlag;                       //< Clear flag of the render target (@see EClearFlag)
         EProjectionType  m_ProjectionType;                  //< Camera can be orthographic or projection
         ECameraMode      m_CameraMode;                      //< Setup the camera as automatic or manual behavior for light sensitivity (default is auto with sunny16 setup)
+
+    private:
+
+        friend class CCameraComponentGUI;
     };
 } // namespace Dt

@@ -3,9 +3,7 @@
 
 #include "editor/edit_edit_state.h"
 #include "editor/edit_unload_map_state.h"
-
-#include "editor_port/edit_message.h"
-#include "editor_port/edit_message_manager.h"
+#include "editor/edit_inspector_panel.h"
 
 #include "engine/camera/cam_control_manager.h"
 
@@ -15,6 +13,7 @@
 #include "engine/graphic/gfx_selection_renderer.h"
 
 #include "engine/gui/gui_input_manager.h"
+#include "engine/gui/gui_event_handler.h"
 
 #include "engine/script/script_script_manager.h"
 
@@ -33,16 +32,6 @@ namespace Edit
     CEditState::CEditState()
         : m_Action(CState::Edit)
     {
-        // -----------------------------------------------------------------------------
-        // Register messages
-        // -----------------------------------------------------------------------------
-        Edit::MessageManager::Register(Edit::SGUIMessageType::App_Exit  , EDIT_RECEIVE_MESSAGE(&CEditState::OnExit));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::App_Play  , EDIT_RECEIVE_MESSAGE(&CEditState::OnPlay));
-        Edit::MessageManager::Register(Edit::SGUIMessageType::App_NewMap, EDIT_RECEIVE_MESSAGE(&CEditState::OnNewMap));
-
-        Edit::MessageManager::Register(Edit::SGUIMessageType::Graphic_HighlightEntity, EDIT_RECEIVE_MESSAGE(&CEditState::OnHighlightEntity));
-
-        Edit::MessageManager::Register(Edit::SGUIMessageType::Input_MouseLeftReleased, EDIT_RECEIVE_MESSAGE(&CEditState::OnMouseLeftReleased));
     }
     
     // -----------------------------------------------------------------------------
@@ -57,11 +46,16 @@ namespace Edit
     CState::EStateType CEditState::InternOnEnter()
     {
         // -----------------------------------------------------------------------------
+        // Input
+        // -----------------------------------------------------------------------------
+        Gui::EventHandler::RegisterDirectUserListener(GUI_BIND_INPUT_METHOD(&CEditState::OnInputEvent));
+
+        // -----------------------------------------------------------------------------
         // Acquire an selection ticket at selection renderer
         // -----------------------------------------------------------------------------
         assert(m_pSelectionTicket == 0);
 
-        m_pSelectionTicket = &Gfx::SelectionRenderer::AcquireTicket(-1, -1, 1, 1, Gfx::SPickFlag::Mesh);
+        m_pSelectionTicket = &Gfx::SelectionRenderer::AcquireTicket(-1, -1, 1, 1, Gfx::SPickFlag::Everything);
         
         return Edit::CState::Edit;
     }
@@ -81,6 +75,8 @@ namespace Edit
         // Unselect entity
         // -----------------------------------------------------------------------------
         Gfx::SelectionRenderer::UnselectEntity();
+
+        Edit::GUI::CInspectorPanel::GetInstance().InspectEntity(Dt::CEntity::s_InvalidID);
 
         // -----------------------------------------------------------------------------
         // Reset action
@@ -122,16 +118,13 @@ namespace Edit
 
                 Gfx::SelectionRenderer::SelectEntity(pEntity->GetID());
 
-                // -----------------------------------------------------------------------------
-                // Send entity to editor
-                // -----------------------------------------------------------------------------
-                Edit::CMessage NewMessage;
+                Edit::GUI::CInspectorPanel::GetInstance().InspectEntity(pEntity->GetID());
+            }
+            else
+            {
+                Gfx::SelectionRenderer::UnselectEntity();
 
-                NewMessage.Put(pEntity->GetID());
-
-                NewMessage.Reset();
-
-                Edit::MessageManager::SendMessage(Edit::SApplicationMessageType::Entity_Selected, NewMessage);
+                Edit::GUI::CInspectorPanel::GetInstance().InspectEntity(Dt::CEntity::s_InvalidID);
             }
         }
 
@@ -140,62 +133,18 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void CEditState::OnExit(Edit::CMessage& _rMessage)
+    void CEditState::OnInputEvent(const Base::CInputEvent& _rInputEvent)
     {
-        BASE_UNUSED(_rMessage);
-
-        m_Action = CState::Exit;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CEditState::OnPlay(Edit::CMessage& _rMessage)
-    {
-        BASE_UNUSED(_rMessage);
-
-        m_Action = CState::Play;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CEditState::OnNewMap(Edit::CMessage& _rMessage)
-    {
-        BASE_UNUSED(_rMessage);
-
-        m_Action = CState::Intro;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CEditState::OnHighlightEntity(Edit::CMessage& _rMessage)
-    {
-        Base::ID EntityID = _rMessage.Get<Base::ID>();
-
-        if (EntityID != static_cast<Base::ID>(-1))
+        if (_rInputEvent.GetType() == Base::CInputEvent::Exit)
         {
-            Gfx::SelectionRenderer::SelectEntity(EntityID);
+            m_Action = CState::Exit;
         }
-        else
+        else if (_rInputEvent.GetType() == Base::CInputEvent::Input)
         {
-            Gfx::SelectionRenderer::UnselectEntity();
-        }
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CEditState::OnMouseLeftReleased(Edit::CMessage& _rMessage)
-    {
-        int GlobalMousePositionX = _rMessage.Get<int>();
-        int GlobalMousePositionY = _rMessage.Get<int>();
-        int LocalMousePositionX  = _rMessage.Get<int>();
-        int LocalMousePositionY  = _rMessage.Get<int>();
-
-        BASE_UNUSED(GlobalMousePositionX);
-        BASE_UNUSED(GlobalMousePositionY);
-
-        if (m_pSelectionTicket != 0)
-        {
-            Gfx::SelectionRenderer::PushPick(*m_pSelectionTicket, glm::ivec2(LocalMousePositionX, LocalMousePositionY));
+            if (_rInputEvent.GetAction() == Base::CInputEvent::MouseLeftReleased && m_pSelectionTicket != 0)
+            {
+                Gfx::SelectionRenderer::PushPick(*m_pSelectionTicket, _rInputEvent.GetLocalCursorPosition());
+            }
         }
     }
 } // namespace Edit
