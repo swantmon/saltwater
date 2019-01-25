@@ -197,7 +197,9 @@ namespace MR
                 // -----------------------------------------------------------------------------
                 m_NetworkDelegate = std::shared_ptr<Net::CMessageDelegate>(new Net::CMessageDelegate(std::bind(&CSLAMControl::OnNewMessage, this, std::placeholders::_1, std::placeholders::_2)));
 
-                Net::CNetworkManager::GetInstance().RegisterMessageHandler(0, m_NetworkDelegate);
+                int Port = Core::CProgramParameters::GetInstance().Get("mr:slam:network_port", 12345);
+                auto SocketHandle = Net::CNetworkManager::GetInstance().CreateServerSocket(Port);
+                Net::CNetworkManager::GetInstance().RegisterMessageHandler(SocketHandle, m_NetworkDelegate);
 
                 m_DataSource = NETWORK;
 
