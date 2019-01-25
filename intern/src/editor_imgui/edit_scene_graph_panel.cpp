@@ -140,6 +140,16 @@ namespace GUI
                 Gfx::SelectionRenderer::SelectEntity(CurrentID);
             }
 
+            if (ImGui::BeginPopupContextItem())
+            {
+                if (ImGui::Button("Delete"))
+                {
+                    Dt::EntityManager::MarkEntityAsDirty(*rItemState.pEntity, Dt::CEntity::DirtyRemove | Dt::CEntity::DirtyDestroy);
+                }
+
+                ImGui::EndPopup();
+            }
+
             if (pHierarchyFacet->GetFirstChild() == 0)
             {
                 ImGui::Unindent();

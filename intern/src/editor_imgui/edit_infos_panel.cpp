@@ -37,7 +37,10 @@ namespace GUI
             ImGuiWindowFlags_NoResize |
             ImGuiWindowFlags_NoCollapse |
             ImGuiWindowFlags_NoSavedSettings |
-            ImGuiWindowFlags_AlwaysAutoResize;
+            ImGuiWindowFlags_AlwaysAutoResize |
+            ImGuiWindowFlags_NoTitleBar |
+            ImGuiWindowFlags_NoFocusOnAppearing | 
+            ImGuiWindowFlags_NoNav;
 
         float DeltaTimeLastFrame = static_cast<float>(Core::Time::GetDeltaTimeLastFrame());
 
@@ -48,11 +51,7 @@ namespace GUI
             m_FrameTimings.erase(m_FrameTimings.begin());
         }
 
-        glm::ivec2 WindowSize = Gfx::Main::GetActiveNativeWindowSize();
-
-        float StoredWindowAlpha = ImGui::GetStyle().Alpha;
-
-        ImGui::GetStyle().Alpha = 0.8f;
+        ImGui::SetNextWindowBgAlpha(0.4f);
 
         ImGui::Begin("Infos", &m_IsVisible, Style);
 
@@ -60,11 +59,9 @@ namespace GUI
 
         ImGui::Text("Frequency is %.2f ms/frame (%.0f FPS).", DeltaTimeLastFrame * 1000, 1.0f / glm::max(DeltaTimeLastFrame, 0.0001f));
 
-        ImGui::SetWindowPos(ImVec2(WindowSize.x - ImGui::GetWindowWidth() - 20, 40), true);
+        ImGui::SetWindowPos(ImVec2(ImGui::GetIO().DisplaySize.x - ImGui::GetWindowWidth() - 20, 40), true);
 
         ImGui::End();
-
-        ImGui::GetStyle().Alpha = StoredWindowAlpha;
     }
 
     // -----------------------------------------------------------------------------

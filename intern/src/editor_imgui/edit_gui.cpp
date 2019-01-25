@@ -22,6 +22,9 @@
 #include "engine/core/core_program_parameters.h"
 #include "engine/core/core_time.h"
 
+#include "engine/data/data_entity_manager.h"
+#include "engine/data/data_map.h"
+
 #include "engine/engine.h"
 
 #include "engine/graphic/gfx_pipeline.h"
@@ -323,6 +326,26 @@ namespace
 
                 ImGui::EndMenu();
             }
+
+            if (ImGui::BeginMenu("Entity"))
+            {
+                if (ImGui::MenuItem("Add empty entity"))
+                {
+                    Dt::SEntityDescriptor EntityDesc;
+
+                    EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
+                    EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
+
+                    Dt::CEntity& rNewEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+
+                    rNewEntity.SetName("New entity");
+
+                    Dt::EntityManager::MarkEntityAsDirty(rNewEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+                }
+
+                ImGui::EndMenu();
+            }
+
             if (ImGui::BeginMenu("Windows"))
             {
                 for (auto pPanel : m_Panels)
