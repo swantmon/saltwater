@@ -720,9 +720,9 @@ namespace MR
             }
         }
 
-        void OnNewMessage(const Net::CMessage& _rMessage, int _Port)
+        void OnNewMessage(const Net::CMessage& _rMessage, Net::SocketHandle _SocketHandle)
         {
-            BASE_UNUSED(_Port);
+            BASE_UNUSED(_SocketHandle);
             
             if (_rMessage.m_MessageType == 0)
             {
