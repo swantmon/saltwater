@@ -50,7 +50,7 @@ namespace GUI
     {
         Edit::CGUIFactory& rFactory = Edit::CGUIFactory::GetInstance();
 
-        ImGui::Begin("Inspector");
+        ImGui::Begin("Inspector", &m_IsVisible);
 
         if (m_pEntity)
         {
@@ -110,6 +110,13 @@ namespace GUI
         }
 
         ImGui::End();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const char* CInspectorPanel::GetName()
+    {
+        return "Inspector";
     }
 } // namespace GUI
 } // namespace Edit

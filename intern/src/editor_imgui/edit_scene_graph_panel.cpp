@@ -95,7 +95,7 @@ namespace GUI
         // -----------------------------------------------------------------------------
         Edit::CGUIFactory& rFactory = Edit::CGUIFactory::GetInstance();
 
-        ImGui::Begin("Scene Graph");
+        ImGui::Begin("Scene Graph", &m_IsVisible);
 
         int MaximumDepth = 1000;
 
@@ -128,6 +128,11 @@ namespace GUI
                 ImGui::SameLine();
             }
 
+            if (pHierarchyFacet->GetFirstChild() == 0)
+            {
+                ImGui::Indent();
+            }
+
             if (m_SelectionState[CurrentID]) MaximumDepth = rItemState.Depth;
 
             if (ImGui::Selectable(rItemState.pEntity->GetName().c_str()))
@@ -135,6 +140,16 @@ namespace GUI
                 CInspectorPanel::GetInstance().InspectEntity(CurrentID);
 
                 Gfx::SelectionRenderer::SelectEntity(CurrentID);
+            }
+
+            if (pHierarchyFacet->GetFirstChild() == 0)
+            {
+                ImGui::Unindent();
+            }
+
+            for (int i = 0; i < rItemState.Depth; ++i)
+            {
+                ImGui::Unindent();
             }
 
             if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
@@ -169,15 +184,17 @@ namespace GUI
                 ImGui::EndDragDropTarget();
             }
 
-            for (int i = 0; i < rItemState.Depth; ++i)
-            {
-                ImGui::Unindent();
-            }
-
             ImGui::PopID();
         }
 
         ImGui::End();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const char* CSceneGraphPanel::GetName()
+    {
+        return "Scene Graph";
     }
 } // namespace GUI
 } // namespace Edit

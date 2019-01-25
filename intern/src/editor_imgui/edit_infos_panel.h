@@ -5,24 +5,20 @@
 
 #include "editor_imgui/edit_panel_interface.h"
 
-#include "engine/data/data_entity.h"
+#include <vector>
 
 namespace Edit
 {
 namespace GUI
 {
-    class CInspectorPanel : public IPanel
+    class CInfosPanel : public IPanel
     {
-        BASE_SINGLETON_FUNC(CInspectorPanel)
+        BASE_SINGLETON_FUNC(CInfosPanel)
 
     public:
 
-        CInspectorPanel();
-       ~CInspectorPanel();
-
-    public:
-
-        void InspectEntity(Dt::CEntity::BID _ID);
+        CInfosPanel();
+       ~CInfosPanel();
 
     public:
 
@@ -32,7 +28,7 @@ namespace GUI
 
     private:
 
-        Dt::CEntity* m_pEntity;
+        std::vector<float> m_FrameTimings;
     };
 } // namespace GUI
 } // namespace Edit

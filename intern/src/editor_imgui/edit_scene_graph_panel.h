@@ -2,7 +2,8 @@
 #pragma once
 
 #include "base/base_singleton.h"
-#include "base/base_uncopyable.h"
+
+#include "editor_imgui/edit_panel_interface.h"
 
 #include "engine/data/data_entity.h"
 
@@ -13,7 +14,7 @@ namespace Edit
 {
 namespace GUI
 {
-    class CSceneGraphPanel : public Base::CUncopyable
+    class CSceneGraphPanel : public IPanel
     {
         BASE_SINGLETON_FUNC(CSceneGraphPanel)
 
@@ -25,6 +26,8 @@ namespace GUI
     public:
 
         void Render();
+
+        const char* GetName();
 
     private:
 

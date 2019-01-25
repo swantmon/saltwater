@@ -1,12 +1,14 @@
 
 #include "editor_imgui/edit_precompiled.h"
 
-#include "base/base_uncopyable.h"
-#include "base/base_input_event.h"
-#include "base/base_singleton.h"
 #include "base/base_include_glm.h"
+#include "base/base_input_event.h"
+#include "base/base_memory.h"
+#include "base/base_singleton.h"
+#include "base/base_uncopyable.h"
 
 #include "editor_imgui/edit_gui.h"
+#include "editor_imgui/edit_infos_panel.h"
 #include "editor_imgui/edit_inspector_panel.h"
 #include "editor_imgui/edit_scene_graph_panel.h"
 
@@ -28,6 +30,8 @@
 
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_syswm.h"
+
+#include <array>
 
 using namespace Edit;
 
@@ -57,6 +61,23 @@ namespace
 
     private:
 
+        enum EPanels
+        {
+            Inspector,
+            SceneGraph,
+            Infos,
+            NumberOfPanels,
+        };
+
+        const std::array<Edit::GUI::IPanel*, NumberOfPanels> m_Panels = 
+        {
+            &GUI::CInspectorPanel::GetInstance(),
+            &GUI::CSceneGraphPanel::GetInstance(),
+            &GUI::CInfosPanel::GetInstance()
+        };
+
+    private:
+
         unsigned int m_EditWindowID;
 
         SDL_Joystick* m_pGamePad;
@@ -65,11 +86,6 @@ namespace
 
         bool m_EnableGamepad;
         bool m_CloseWindow;
-
-        GUI::CInspectorPanel& m_rInspector = GUI::CInspectorPanel::GetInstance();
-        GUI::CSceneGraphPanel& m_rSceneGraph = GUI::CSceneGraphPanel::GetInstance();
-
-        std::vector<float> m_FrameTimings;
 
     private:
 
@@ -90,16 +106,13 @@ namespace
         : m_EditWindowID(0)
         , m_pGamePad(nullptr)
         , m_CloseWindow(false)
-        , m_FrameTimings()
     {
-
     }
     
     // -----------------------------------------------------------------------------
 
     CEditorGui::~CEditorGui()
     {
-
     }
 
     // -----------------------------------------------------------------------------
@@ -251,34 +264,28 @@ namespace
 
                 ImGui::EndMenu();
             }
+            if (ImGui::BeginMenu("Windows"))
+            {
+                for (auto pPanel : m_Panels)
+                {
+                    if (ImGui::MenuItem(pPanel->GetName()))
+                    {
+                        pPanel->Show(!pPanel->IsVisible());
+                    }
+                }
+
+                ImGui::EndMenu();
+            }
             ImGui::EndMainMenuBar();
         }
 
         // -----------------------------------------------------------------------------
         // Panels
         // -----------------------------------------------------------------------------
-        m_rInspector.Render();
-        m_rSceneGraph.Render();
-
-        // -----------------------------------------------------------------------------
-        // Info
-        // -----------------------------------------------------------------------------
-        float DeltaTimeLastFrame = static_cast<float>(Core::Time::GetDeltaTimeLastFrame());
-
-        m_FrameTimings.push_back(1.0f / DeltaTimeLastFrame);
-
-        if (m_FrameTimings.size() > 120)
+        for (auto pPanel : m_Panels)
         {
-            m_FrameTimings.erase(m_FrameTimings.begin());
+            if (pPanel->IsVisible()) pPanel->Render();
         }
-
-        ImGui::Begin("Infos");
-
-        ImGui::PlotLines("FPS", m_FrameTimings.data(), m_FrameTimings.size(), 0, 0, 1, 300);
-
-        ImGui::Text("Frequency is %.2f ms (%.0f FPS).", DeltaTimeLastFrame * 1000, 1.0f / max(DeltaTimeLastFrame, 0.0001f));
-
-        ImGui::End();
     }
 
     // -----------------------------------------------------------------------------
