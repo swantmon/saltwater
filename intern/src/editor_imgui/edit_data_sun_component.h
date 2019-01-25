@@ -13,8 +13,6 @@ namespace Dt
 
         void OnGUI()
         {
-            ERefreshMode m_RefreshMode;
-
             const char* RefreshModeText[] = { "Static", "Dynamic" };
 
             int RefreshModeIndex = static_cast<int>(GetRefreshMode());

@@ -45,8 +45,6 @@ namespace GUI
         {
             Dt::CEntity* pSibling = _pEntity;
 
-            auto pHierarchyFacet = _pEntity->GetHierarchyFacet();
-
             while (pSibling != nullptr)
             {
                 SItemState ItemState;

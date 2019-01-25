@@ -58,7 +58,7 @@ namespace GUI
 
         ImGui::PlotLines("FPS", m_FrameTimings.data(), m_FrameTimings.size(), 0, 0, 1, 300);
 
-        ImGui::Text("Frequency is %.2f ms (%.0f FPS).", DeltaTimeLastFrame * 1000, 1.0f / glm::max(DeltaTimeLastFrame, 0.0001f));
+        ImGui::Text("Frequency is %.2f ms/frame (%.0f FPS).", DeltaTimeLastFrame * 1000, 1.0f / glm::max(DeltaTimeLastFrame, 0.0001f));
 
         ImGui::SetWindowPos(ImVec2(WindowSize.x - ImGui::GetWindowWidth() - 20, 40), true);
 

@@ -63,6 +63,8 @@ namespace GUI
                 Panel->OnGUI();
             }
 
+            ImGui::Separator();
+
             auto pTransformationFacet = m_pEntity->GetTransformationFacet();
 
             Hash = rFactory.CalculateHash(pTransformationFacet);
@@ -71,7 +73,7 @@ namespace GUI
             {
                 auto Panel = rFactory.Get<Dt::CTransformationFacet>(pTransformationFacet);
 
-                if (ImGui::CollapsingHeader(Panel->GetHeader(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed))
+                if (ImGui::CollapsingHeader(Panel->GetHeader(), ImGuiTreeNodeFlags_DefaultOpen))
                 {
                     Panel->OnGUI();
                 }

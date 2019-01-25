@@ -23,7 +23,8 @@ namespace Dt
         , m_WorldPosition       ()
         , m_Flags               ()
     {
-        m_Flags.m_Key = 0;
+        m_Flags.m_Key   = 0;
+        m_Flags.m_Layer = SEntityLayer::Default;
 
         m_Flags.m_IsDynamic    = true;
         m_Flags.m_IsSelectable = true;
