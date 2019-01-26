@@ -132,6 +132,23 @@ namespace
     
     void CApplication::OnExit()
     {
+        if (m_CurrentState != Edit::CState::Exit)
+        {
+            s_pStates[m_CurrentState]->OnLeave();
+
+            Edit::CUnloadMapState::GetInstance().OnEnter();
+
+            Edit::CUnloadMapState::GetInstance().OnRun();
+
+            Edit::CUnloadMapState::GetInstance().OnLeave();
+
+            Edit::CExitState::GetInstance().OnEnter();
+
+            Edit::CExitState::GetInstance().OnRun();
+
+            Edit::CExitState::GetInstance().OnLeave();
+        }
+
         // -----------------------------------------------------------------------------
         // GUI
         // -----------------------------------------------------------------------------
