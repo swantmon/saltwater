@@ -74,15 +74,10 @@ namespace Edit
 
     private:
 
-        static const int s_MaxNumberOfInstances = 12;
-
-    private:
-
         struct SFactoryElement
         {
             IGUIFactory* m_pFactory;
-            int m_Index;
-            std::array<IGUIFactory*, s_MaxNumberOfInstances> m_Instances;
+            std::map<size_t, IGUIFactory*> m_Instances;
         };
 
     private:
@@ -117,10 +112,10 @@ namespace Edit
         {
             for (auto& rInstance : rFactory.second.m_Instances)
             {
-                Base::CMemory::DeleteObject(rInstance);
-
-                rInstance = 0;
+                Base::CMemory::DeleteObject(rInstance.second);
             }
+
+            rFactory.second.m_Instances.clear();
         }
 
         m_Factory.clear();
@@ -136,12 +131,6 @@ namespace Edit
             SFactoryElement NewElement;
 
             NewElement.m_pFactory = _pClassObject;
-            NewElement.m_Index = 0;
-
-            for (auto& rInstance : NewElement.m_Instances)
-            {
-                rInstance = _pClassObject->Create();
-            }
 
             m_Factory.insert(CFactoryMapPair(CalculateHash<T>(), NewElement));
         }
@@ -156,11 +145,14 @@ namespace Edit
         {
             SFactoryElement& rElement = m_Factory.find(CalculateHash<T>())->second;
 
-            auto CurrentInstance = rElement.m_Instances[rElement.m_Index];
+            if (rElement.m_Instances.find((size_t)_pBaseClass) == rElement.m_Instances.end())
+            {
+                rElement.m_Instances[(size_t)_pBaseClass] = rElement.m_pFactory->Create();
 
-            rElement.m_Index = ++rElement.m_Index % s_MaxNumberOfInstances;
+                rElement.m_Instances[(size_t)_pBaseClass]->SetChild(_pBaseClass);
+            }
 
-            CurrentInstance->SetChild(_pBaseClass);
+            auto CurrentInstance = rElement.m_Instances[(size_t)_pBaseClass];
 
             return CurrentInstance;
         }
@@ -176,11 +168,14 @@ namespace Edit
         {
             SFactoryElement& rElement = m_Factory.find(_Hash)->second;
 
-            auto CurrentInstance = rElement.m_Instances[rElement.m_Index];
+            if (rElement.m_Instances.find((size_t)_pBaseClass) == rElement.m_Instances.end())
+            {
+                rElement.m_Instances[(size_t)_pBaseClass] = rElement.m_pFactory->Create();
 
-            rElement.m_Index = ++rElement.m_Index % s_MaxNumberOfInstances;
+                rElement.m_Instances[(size_t)_pBaseClass]->SetChild(_pBaseClass);
+            }
 
-            CurrentInstance->SetChild(_pBaseClass);
+            auto CurrentInstance = rElement.m_Instances[(size_t)_pBaseClass];
 
             return CurrentInstance;
         }

@@ -91,8 +91,6 @@ namespace GUI
         // -----------------------------------------------------------------------------
         // GUI
         // -----------------------------------------------------------------------------
-        Edit::CGUIFactory& rFactory = Edit::CGUIFactory::GetInstance();
-
         ImGui::Begin("Scene Graph", &m_IsVisible);
 
         int MaximumDepth = 1000;
