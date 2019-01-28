@@ -128,7 +128,10 @@ namespace
 
     CDtLvlMap::~CDtLvlMap()
     {
-        assert(m_pRegions == nullptr);
+        if (m_pRegions == nullptr)
+        {
+            FreeMap();
+        }
     }
    
     // -----------------------------------------------------------------------------
