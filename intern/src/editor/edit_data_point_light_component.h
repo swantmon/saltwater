@@ -21,11 +21,11 @@ namespace Dt
 
             ImGui::DragFloat3("Direction", &m_Direction.x);
 
-            ImGui::DragFloat("Attenuation Radius", &m_AttentuationRadius);
+            ImGui::DragFloat("Attenuation Radius", &m_AttentuationRadius, 0.01f, 0.0f, 100.0f, "%.2f");
 
-            ImGui::DragFloat("Inner Cone", &m_InnerConeAngle, 1.0f, 0.0f, 0.0f, "%.0f angle");
+            ImGui::SliderAngle("Inner Cone", &m_InnerConeAngle, 0.0f, 180.0f, "%.0f angle");
 
-            ImGui::DragFloat("Outer Cone", &m_OuterConeAngle, 1.0f, 0.0f, 0.0f, "%.0f angle");
+            ImGui::SliderAngle("Outer Cone", &m_OuterConeAngle, 0.0f, 180.0f, "%.0f angle");
 
             // -----------------------------------------------------------------------------
             // Shadow Type

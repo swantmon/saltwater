@@ -132,6 +132,17 @@ namespace
     
     void CApplication::OnExit()
     {
+        if (m_CurrentState == Edit::CState::Edit || m_CurrentState == Edit::CState::Play)
+        {
+            s_pStates[m_CurrentState]->OnLeave();
+
+            Edit::CUnloadMapState::GetInstance().OnEnter();
+
+            Edit::CUnloadMapState::GetInstance().OnRun();
+
+            Edit::CUnloadMapState::GetInstance().OnLeave();
+        }
+
         if (m_CurrentState != Edit::CState::Exit)
         {
             s_pStates[m_CurrentState]->OnLeave();
