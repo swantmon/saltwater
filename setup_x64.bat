@@ -9,7 +9,7 @@ set BuildMode=x64
 @echo "Start downloading dependencies..."
 
 @echo off
-if not exist "tmp_dependencies_x64_arm64.zip" curl http://data.tobias-schwandt.de/dependencies_x64_arm64.zip --output tmp_dependencies_x64_arm64.zip
+if not exist "tmp_dependencies_x64_arm64.zip" curl https://www4.tu-ilmenau.de/vwds/research/projects/saltwater/dependencies_x64_arm64.7z --output tmp_dependencies_x64_arm64.zip
 @echo on
 
 @echo "Downloading dependencies finished"
