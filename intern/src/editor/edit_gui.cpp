@@ -395,6 +395,12 @@ namespace
 
         while (SDL_PollEvent(&SDLEvent))
         {
+            if (SDLEvent.type == SDL_KEYDOWN && SDLEvent.key.keysym.sym == 13)
+            {
+                ENGINE_CONSOLE_INFOV("Key, %i", );
+            }
+
+
             // -----------------------------------------------------------------------------
             // IMGUI
             // -----------------------------------------------------------------------------
