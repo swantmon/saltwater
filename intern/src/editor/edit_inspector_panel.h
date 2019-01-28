@@ -33,6 +33,7 @@ namespace GUI
     private:
 
         Dt::CEntity* m_pEntity;
+        std::string m_SearchString;
     };
 } // namespace GUI
 } // namespace Edit
