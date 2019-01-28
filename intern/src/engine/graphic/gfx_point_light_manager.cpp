@@ -402,6 +402,14 @@ namespace
                 }
             }
         }
+        else if ((DirtyFlags & Dt::CPointLightComponent::DirtyDestroy) != 0)
+        {
+            pGfxPointLightFacet = static_cast<CInternObject*>(pPointLightComponent->GetFacet(Dt::CPointLightComponent::Graphic));
+
+            pGfxPointLightFacet = 0;
+
+            return;
+        }
         else
         {
             pGfxPointLightFacet = static_cast<CInternObject*>(pPointLightComponent->GetFacet(Dt::CPointLightComponent::Graphic));

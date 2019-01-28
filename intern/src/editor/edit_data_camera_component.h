@@ -58,7 +58,7 @@ namespace Dt
             // -----------------------------------------------------------------------------
             // Clipping planes
             // -----------------------------------------------------------------------------
-            ImGui::Text("Clipping Planes");
+            ImGui::TextDisabled("Clipping Planes");
 
             ImGui::DragFloat("Near", &m_Near);
 
@@ -96,7 +96,7 @@ namespace Dt
             // -----------------------------------------------------------------------------
             // Viewport Rect
             // -----------------------------------------------------------------------------
-            ImGui::Text("Viewport");
+            ImGui::TextDisabled("Viewport");
 
             ImGui::DragFloat2("XY", &m_ViewportRect.x);
 
