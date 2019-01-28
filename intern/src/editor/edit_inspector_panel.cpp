@@ -16,6 +16,8 @@
 #include "engine/data/data_component_manager.h"
 #include "engine/data/data_script_component.h"
 
+#include <regex>
+
 namespace Edit
 {
 namespace GUI
@@ -135,13 +137,29 @@ namespace GUI
 
             ImGui::PushItemWidth(-1);
 
+            char SearchCharBuffer[64] = {};
+
+            std::string SearchString;
+
             if (ImGui::BeginCombo("##ADD_COMPONENT", "Add Component"))
             {
+                ImGui::PushItemWidth(-1);
+
+                if (ImGui::InputText("##SEARCH_REGEX", SearchCharBuffer, 64))
+                {
+                    SearchString = SearchCharBuffer;
+                }
+
+                ImGui::PopItemWidth();
+
                 for (auto pComponent : rComponentFactory.GetComponents())
                 {
-                    if (ImGui::Selectable(pComponent->GetHeader()))
+                    if (SearchString.length() == 0 || std::regex_match(pComponent->GetHeader(), std::regex("(.*)(" + SearchString + ")(.*)")))
                     {
-                        pComponent->OnNewComponent(m_pEntity->GetID());
+                        if (ImGui::Selectable(pComponent->GetHeader()))
+                        {
+                            pComponent->OnNewComponent(m_pEntity->GetID());
+                        }
                     }
                 }
 
