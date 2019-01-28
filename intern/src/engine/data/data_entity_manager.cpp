@@ -140,6 +140,7 @@ namespace
     
     CDtLvlEntityManager::~CDtLvlEntityManager()
     {
+        Clear();
     }
 
     // -----------------------------------------------------------------------------

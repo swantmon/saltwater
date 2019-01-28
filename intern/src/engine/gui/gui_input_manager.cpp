@@ -35,27 +35,29 @@ namespace
         bool GetKeyDown(Base::CInputEvent::EKey _Key);
         bool GetKeyUp(Base::CInputEvent::EKey _Key);
 
-        bool GetMouseButton(Base::CInputEvent::EKey _Key);
-        bool GetMouseButtonDown(Base::CInputEvent::EKey _Key);
-        bool GetMouseButtonUp(Base::CInputEvent::EKey _Key);
-
-        glm::vec2& GetMousePosition();
+        const glm::vec2& GetGlobalMousePosition();
+        const glm::vec2& GetLocalMousePosition();
         float GetMouseScrollDelta();
 
     private:
 
+        enum EKeyState
+        {
+            Idle,
+            Pressed,
+            Released,
+        };
+
         struct SMouse
         {
-            int          m_ButtonLeft;
-            int          m_ButtonMiddle;
-            int          m_ButtonRight;
-            glm::vec2 m_LatestMousePosition;
-            float        m_ScrollDelta;
+            glm::vec2 m_LatestGlobalMousePosition;
+            glm::vec2 m_LatestLocalMousePosition;
+            float     m_ScrollDelta;
         };
 
     private:
 
-        typedef std::map<Base::CInputEvent::EKey, int> CKeyboardKeys;
+        typedef std::map<Base::CInputEvent::EKey, EKeyState> CKeyboardKeys;
 
     private:
 
@@ -74,9 +76,6 @@ namespace
         : m_Mouse       ()
         , m_KeyboardKeys()
     {
-        // -----------------------------------------------------------------------------
-        // register input event to gui
-        // -----------------------------------------------------------------------------
         Gui::EventHandler::RegisterDirectUserListener(GUI_BIND_INPUT_METHOD(&CGuiInputManager::OnEvent));
     }
 
@@ -105,34 +104,9 @@ namespace
 
     void CGuiInputManager::Update()
     {
-        // -----------------------------------------------------------------------------
-        // Keyboard
-        // -----------------------------------------------------------------------------
-        CKeyboardKeys::iterator CurrentKey = m_KeyboardKeys.begin();
-        CKeyboardKeys::iterator EndOfKeys  = m_KeyboardKeys.end();
-
-        for (; CurrentKey != EndOfKeys; ++CurrentKey)
+        for (auto CurrentKey : m_KeyboardKeys)
         {
-            if (CurrentKey->second >= 0)
-            {
-                ++ CurrentKey->second;
-            }
-            else if (CurrentKey->second == -1)
-            {
-                CurrentKey->second = -2;
-            }
-        }
-
-        // -----------------------------------------------------------------------------
-        // Mouse
-        // -----------------------------------------------------------------------------
-        if (m_Mouse.m_ButtonLeft >= 0)
-        {
-            ++m_Mouse.m_ButtonLeft;
-        }
-        else if (m_Mouse.m_ButtonLeft == -1)
-        {
-            m_Mouse.m_ButtonLeft = -2;
+            if (CurrentKey.second == EKeyState::Released) CurrentKey.second = EKeyState::Idle;
         }
     }
 
@@ -140,18 +114,9 @@ namespace
 
     bool CGuiInputManager::IsAnyKey()
     {
-        // -----------------------------------------------------------------------------
-        // Keyboard
-        // -----------------------------------------------------------------------------
-        CKeyboardKeys::iterator CurrentKey = m_KeyboardKeys.begin();
-        CKeyboardKeys::iterator EndOfKeys = m_KeyboardKeys.end();
-
-        for (; CurrentKey != EndOfKeys; ++CurrentKey)
+        for (auto CurrentKey : m_KeyboardKeys)
         {
-            if (CurrentKey->second != -2)
-            {
-                return true;
-            }
+            if (CurrentKey.second != EKeyState::Idle) return true;
         }
 
         return false;
@@ -161,18 +126,9 @@ namespace
 
     bool CGuiInputManager::IsAnyKeyDown()
     {
-        // -----------------------------------------------------------------------------
-        // Keyboard
-        // -----------------------------------------------------------------------------
-        CKeyboardKeys::iterator CurrentKey = m_KeyboardKeys.begin();
-        CKeyboardKeys::iterator EndOfKeys = m_KeyboardKeys.end();
-
-        for (; CurrentKey != EndOfKeys; ++CurrentKey)
+        for (auto CurrentKey : m_KeyboardKeys)
         {
-            if (CurrentKey->second == 0)
-            {
-                return true;
-            }
+            if (CurrentKey.second == EKeyState::Pressed) return true;
         }
 
         return false;
@@ -182,18 +138,9 @@ namespace
 
     bool CGuiInputManager::IsAnyKeyUp()
     {
-        // -----------------------------------------------------------------------------
-        // Keyboard
-        // -----------------------------------------------------------------------------
-        CKeyboardKeys::iterator CurrentKey = m_KeyboardKeys.begin();
-        CKeyboardKeys::iterator EndOfKeys = m_KeyboardKeys.end();
-
-        for (; CurrentKey != EndOfKeys; ++CurrentKey)
+        for (auto CurrentKey : m_KeyboardKeys)
         {
-            if (CurrentKey->second == -1)
-            {
-                return true;
-            }
+            if (CurrentKey.second == EKeyState::Released) return true;
         }
 
         return false;
@@ -203,69 +150,35 @@ namespace
 
     bool CGuiInputManager::GetKey(Base::CInputEvent::EKey _Key)
     {
-        return m_KeyboardKeys.find(_Key) != m_KeyboardKeys.end() && m_KeyboardKeys.at(_Key) >= 0;
+        return m_KeyboardKeys.find(_Key) != m_KeyboardKeys.end() && m_KeyboardKeys.at(_Key) != EKeyState::Idle;
     }
 
     // -----------------------------------------------------------------------------
 
     bool CGuiInputManager::GetKeyDown(Base::CInputEvent::EKey _Key)
     {
-        return m_KeyboardKeys.find(_Key) != m_KeyboardKeys.end() && m_KeyboardKeys.at(_Key) == 0;
+        return m_KeyboardKeys.find(_Key) != m_KeyboardKeys.end() && m_KeyboardKeys.at(_Key) == EKeyState::Pressed;
     }
 
     // -----------------------------------------------------------------------------
 
     bool CGuiInputManager::GetKeyUp(Base::CInputEvent::EKey _Key)
     {
-        bool Return = m_KeyboardKeys.find(_Key) != m_KeyboardKeys.end() && m_KeyboardKeys.at(_Key) == -1;
-
-        if (Return)
-        {
-            m_KeyboardKeys.at(_Key) = -2;
-        }
-
-        return Return;
+        return m_KeyboardKeys.find(_Key) != m_KeyboardKeys.end() && m_KeyboardKeys.at(_Key) == EKeyState::Released;
     }
 
     // -----------------------------------------------------------------------------
 
-    bool CGuiInputManager::GetMouseButton(Base::CInputEvent::EKey _Key)
+    const glm::vec2& CGuiInputManager::GetGlobalMousePosition()
     {
-        BASE_UNUSED(_Key);
-
-        return m_Mouse.m_ButtonLeft >= 0;
+        return m_Mouse.m_LatestGlobalMousePosition;
     }
 
     // -----------------------------------------------------------------------------
 
-    bool CGuiInputManager::GetMouseButtonDown(Base::CInputEvent::EKey _Key)
+    const glm::vec2& CGuiInputManager::GetLocalMousePosition()
     {
-        BASE_UNUSED(_Key);
-
-        return m_Mouse.m_ButtonLeft == 0;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    bool CGuiInputManager::GetMouseButtonUp(Base::CInputEvent::EKey _Key)
-    {
-        BASE_UNUSED(_Key);
-
-        bool Return = m_Mouse.m_ButtonLeft == -1;
-
-        if (Return)
-        {
-            m_Mouse.m_ButtonLeft = -2;
-        }
-
-        return Return;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    glm::vec2& CGuiInputManager::GetMousePosition()
-    {
-        return m_Mouse.m_LatestMousePosition;
+        return m_Mouse.m_LatestLocalMousePosition;
     }
 
     // -----------------------------------------------------------------------------
@@ -283,30 +196,13 @@ namespace
         {
             Base::CInputEvent::EKey Key = static_cast<Base::CInputEvent::EKey>(_rEvent.GetKey());
 
-            CKeyboardKeys::iterator LowerBound = m_KeyboardKeys.lower_bound(Key);
-
-            if (LowerBound != m_KeyboardKeys.end() && !(m_KeyboardKeys.key_comp()(Key, LowerBound->first)))
-            {
-                LowerBound->second = 0;
-            }
-            else
-            {
-                m_KeyboardKeys.insert(LowerBound, CKeyboardKeys::value_type(Key, 0));
-            }
+            m_KeyboardKeys[Key] = EKeyState::Pressed;
         }
         else if (_rEvent.GetAction() == Base::CInputEvent::KeyReleased)
         {
             Base::CInputEvent::EKey Key = static_cast<Base::CInputEvent::EKey>(_rEvent.GetKey());
 
-            m_KeyboardKeys.at(Key) = -1;
-        }
-        else if (_rEvent.GetAction() == Base::CInputEvent::MouseLeftPressed)
-        {
-            m_Mouse.m_ButtonLeft = 0;
-        }
-        else if (_rEvent.GetAction() == Base::CInputEvent::MouseLeftReleased)
-        {
-            m_Mouse.m_ButtonLeft = -1;
+            m_KeyboardKeys[Key] = EKeyState::Released;
         }
         else if (_rEvent.GetAction() == Base::CInputEvent::MouseWheel)
         {
@@ -314,7 +210,8 @@ namespace
         }
         else if (_rEvent.GetAction() == Base::CInputEvent::MouseMove)
         {
-            m_Mouse.m_LatestMousePosition = _rEvent.GetGlobalCursorPosition();
+            m_Mouse.m_LatestGlobalMousePosition = _rEvent.GetGlobalCursorPosition();
+            m_Mouse.m_LatestLocalMousePosition = _rEvent.GetLocalCursorPosition();
         }
     }
 } // namespace 
@@ -386,30 +283,16 @@ namespace InputManager
 
     // -----------------------------------------------------------------------------
 
-    bool GetMouseButton(Base::CInputEvent::EKey _Key)
+    const glm::vec2& GetGlobalMousePosition()
     {
-        return CGuiInputManager::GetInstance().GetMouseButton(_Key);
+        return CGuiInputManager::GetInstance().GetGlobalMousePosition();
     }
 
     // -----------------------------------------------------------------------------
 
-    bool GetMouseButtonDown(Base::CInputEvent::EKey _Key)
+    const glm::vec2& GetLocalMousePosition()
     {
-        return CGuiInputManager::GetInstance().GetMouseButtonDown(_Key);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    bool GetMouseButtonUp(Base::CInputEvent::EKey _Key)
-    {
-        return CGuiInputManager::GetInstance().GetMouseButtonUp(_Key);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    glm::vec2& GetMousePosition()
-    {
-        return CGuiInputManager::GetInstance().GetMousePosition();
+        return CGuiInputManager::GetInstance().GetLocalMousePosition();
     }
 
     // -----------------------------------------------------------------------------
