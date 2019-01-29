@@ -84,8 +84,6 @@ namespace MR
             NOSELECTION,
             FIRSTPRESS,
             FIRSTRELEASE,
-            SECONDPRESS,
-            SECONDRELEASE
         };
 
         glm::vec2 m_LatestCursorPosition;
