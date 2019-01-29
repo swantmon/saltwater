@@ -22,9 +22,9 @@
 #include "engine/graphic/gfx_shader_manager.h"
 #include "engine/graphic/gfx_texture.h"
 #include "engine/graphic/gfx_texture_manager.h"
-#include "engine/graphic/gfx_view_manager.h"
 #include "engine/graphic/gfx_selection.h"
 #include "engine/graphic/gfx_selection_renderer.h"
+#include "engine/graphic/gfx_view_manager.h"
 
 #include "engine/script/script_script.h"
 
@@ -779,7 +779,14 @@ namespace MR
         void OnNewNeuralNetMessage(const Net::CMessage& _rMessage, Net::SocketHandle _SocketHandle)
         {
             BASE_UNUSED(_SocketHandle);
-            BASE_UNUSED(_rMessage);            
+            BASE_UNUSED(_rMessage);   
+
+            if (_rMessage.m_MessageType == 0)
+            {
+                ENGINE_CONSOLE_INFO("Received inpainted plane");
+                auto TargetRect = Base::AABB2UInt(glm::uvec2(32, 32), glm::uvec2(96, 96));
+                Gfx::TextureManager::CopyToTexture2D(m_PlaneTexture, TargetRect, 64 * 4, const_cast<char*>(_rMessage.m_Payload.data()), true);
+            }
         }
 
         void SendPlane()
