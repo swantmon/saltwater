@@ -1876,7 +1876,7 @@ namespace MR
     {
         Performance::BeginEvent("Create plane texture");
 
-        const int PlaneResolution = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:inpainted_plane:resolution", 256);
+        const int PlaneResolution = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:inpainted_plane:resolution", 128);
         const float PlaneScale = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:inpainted_plane:scale", 2.0f);
 
         glm::vec3 Min = _rAABB.GetMin();
