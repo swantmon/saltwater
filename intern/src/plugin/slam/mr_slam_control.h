@@ -384,13 +384,6 @@ namespace MR
                 }
             }
 
-            if (m_SelectionState != ESelection::NOSELECTION)
-            {
-                const auto& AABB = Gfx::ReconstructionRenderer::GetSelectionBox();
-                m_PlaneTexture = m_pReconstructor->CreatePlaneTexture(AABB);
-                Gfx::ReconstructionRenderer::SetInpaintedPlane(m_PlaneTexture, AABB);
-            }
-
             // -----------------------------------------------------------------------------
             // Playing
             // -----------------------------------------------------------------------------
@@ -786,6 +779,9 @@ namespace MR
                 ENGINE_CONSOLE_INFO("Received inpainted plane");
                 auto TargetRect = Base::AABB2UInt(glm::uvec2(32, 32), glm::uvec2(96, 96));
                 Gfx::TextureManager::CopyToTexture2D(m_PlaneTexture, TargetRect, 64 * 4, const_cast<char*>(_rMessage.m_Payload.data()), true);
+
+                const auto& AABB = Gfx::ReconstructionRenderer::GetSelectionBox();
+                Gfx::ReconstructionRenderer::SetInpaintedPlane(m_PlaneTexture, AABB);
             }
         }
 
