@@ -39,7 +39,8 @@ class Generator(nn.Module):
         self.norm5 = nn.BatchNorm2d(512, 0.8)
         self.conv6 = nn.Conv2d(512, 1000, 4)
 
-        self.linear1 = nn.Linear(1, 1, 4)
+        self.linear1 = nn.Linear(1024, 1024)
+        self.linear2 = nn.Linear(64, 64)
 
         self.tconv1 = nn.ConvTranspose2d(1000, 512, 4, stride=1, padding=0)
         self.norm6 = nn.BatchNorm2d(512, 0.8)
@@ -76,6 +77,30 @@ class Generator(nn.Module):
     def forward(self, x):
         x = self.pool(self.conv1(x))                # 128 x 128 > 64 x 64
 
+        x = self.linear2(x)
+
+        x = self.test1(x)
+        x = F.relu(self.test2(x))
+        x = self.test3(x)
+        x = F.relu(self.test4(x))
+        x = self.test5(x)
+        x = F.relu(self.test6(x))
+        x = self.test7(x)
+        x = F.relu(self.test8(x))
+
+        x = self.linear1(x)        
+
+        x = self.pool(self.test9(x))
+        x = F.leaky_relu(self.test10(x), 0.2)
+        x = self.pool(self.test11(x))
+        x = F.leaky_relu(self.test12(x), 0.2)
+        x = self.pool(self.test13(x))
+        x = F.leaky_relu(self.test14(x), 0.2)
+        x = self.pool(self.test15(x))
+        x = F.leaky_relu(self.test16(x), 0.2)
+
+        x = self.linear2(x)
+
         x = self.pool(self.conv2(x))                # 64 x 64 > 32 x 32
         x = F.leaky_relu(self.norm2(x), 0.2)
         x = self.pool(self.conv3(x))                # 32 x 32 > 16 x 16
@@ -85,8 +110,6 @@ class Generator(nn.Module):
         x = self.pool(self.conv5(x))                # 8 x 8 > 4 x 4
         x = F.leaky_relu(self.norm5(x), 0.2)
         x = self.conv6(x)                           # 4 x 4 > 1 x 1
-
-        x = self.linear1(x)
 
         x = self.tconv1(x)                          # 1 x 1 > 4 x 4
         x = F.relu(self.norm6(x))
@@ -99,23 +122,7 @@ class Generator(nn.Module):
         x = self.tconv5(x)
         x = F.relu(self.norm10(x))
 
-        x = self.test1(x)
-        x = F.relu(self.test2(x))
-        x = self.test3(x)
-        x = F.relu(self.test4(x))
-        x = self.test5(x)
-        x = F.relu(self.test6(x))
-        x = self.test7(x)
-        x = F.relu(self.test8(x))
-
-        x = self.pool(self.test9(x))
-        x = F.leaky_relu(self.test10(x), 0.2)
-        x = self.pool(self.test11(x))
-        x = F.leaky_relu(self.test12(x), 0.2)
-        x = self.pool(self.test13(x))
-        x = F.leaky_relu(self.test14(x), 0.2)
-        x = self.pool(self.test15(x))
-        x = F.leaky_relu(self.test16(x), 0.2)
+        x = self.linear2(x)
 
         x = F.tanh(self.conv7(x))
 
