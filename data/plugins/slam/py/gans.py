@@ -29,16 +29,6 @@ class Generator(nn.Module):
         self.pool = nn.MaxPool2d(2, 2)
 
         self.conv1 = nn.Conv2d(channels, 64, 4, stride=1, padding=2)
-
-#        self.test1 = nn.ConvTranspose2d(64, 128, 4, stride=2, padding=1)
-#        self.test2 = nn.BatchNorm2d(128, 0.8)
-#        self.test3 = nn.ConvTranspose2d(128, 256, 4, stride=2, padding=1)
-#        self.test4 = nn.BatchNorm2d(256, 0.8)
-#        self.test5 = nn.Conv2d(256, 128, 4, stride=1, padding=2)
-#        self.test6 = nn.BatchNorm2d(128, 0.8)
-#        self.test7 = nn.Conv2d(128, 64, 4, stride=1, padding=2)
-#        self.test8 = nn.BatchNorm2d(64, 0.8)
-
         self.conv2 = nn.Conv2d(64, 64, 4, stride=1, padding=2)
         self.norm2 = nn.BatchNorm2d(64, 0.8)
         self.conv3 = nn.Conv2d(64, 128, 4, stride=1, padding=2)
@@ -61,20 +51,31 @@ class Generator(nn.Module):
         self.tconv5 = nn.ConvTranspose2d(64, 64, 4, stride=2, padding=1)
         self.norm10 = nn.BatchNorm2d(64, 0.8)
 
+        
+
+        self.test1 = nn.ConvTranspose2d(64, 32, 4, stride=2, padding=1)
+        self.test2 = nn.BatchNorm2d(32, 0.8)
+        self.test3 = nn.ConvTranspose2d(32, 16, 4, stride=2, padding=1)
+        self.test4 = nn.BatchNorm2d(16, 0.8)
+        self.test5 = nn.Conv2d(16, 32, 4, stride=1, padding=2)
+        self.test6 = nn.BatchNorm2d(32, 0.8)
+        self.test7 = nn.Conv2d(32, 64, 4, stride=1, padding=2)
+        self.test8 = nn.BatchNorm2d(64, 0.8)
+
         self.conv7 = nn.Conv2d(64, channels, 3, 1, 1)
 
 
     def forward(self, x):
         x = self.pool(self.conv1(x))                # 128 x 128 > 64 x 64
 
-#        x = self.test1(x)
-#        x = F.relu(self.test2(x))
-#        x = self.test3(x)
-#        x = F.relu(self.test4(x))
-#        x = self.pool(self.test5(x))
-#        x = F.leaky_relu(self.test6(x), 0.2)
-#        x = self.pool(self.test7(x))
-#        x = F.leaky_relu(self.test8(x), 0.2)
+        x = self.test1(x)
+        x = F.relu(self.test2(x))
+        x = self.test3(x)
+        x = F.relu(self.test4(x))
+        x = self.pool(self.test5(x))
+        x = F.leaky_relu(self.test6(x), 0.2)
+        x = self.pool(self.test7(x))
+        x = F.leaky_relu(self.test8(x), 0.2)
 
         x = self.pool(self.conv2(x))                # 64 x 64 > 32 x 32
         x = F.leaky_relu(self.norm2(x), 0.2)
@@ -95,6 +96,16 @@ class Generator(nn.Module):
         x = F.relu(self.norm9(x))
         x = self.tconv5(x)
         x = F.relu(self.norm10(x))
+
+        x = self.test1(x)
+        x = F.relu(self.test2(x))
+        x = self.test3(x)
+        x = F.relu(self.test4(x))
+        x = self.pool(self.test5(x))
+        x = F.leaky_relu(self.test6(x), 0.2)
+        x = self.pool(self.test7(x))
+        x = F.leaky_relu(self.test8(x), 0.2)
+
         x = F.tanh(self.conv7(x))
 
         return x
