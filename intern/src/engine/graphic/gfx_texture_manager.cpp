@@ -460,8 +460,8 @@ namespace
         glm::uvec2 Offset     = _rTargetRect[0];
         glm::uvec2 UpdateSize = _rTargetRect[1] - _rTargetRect[0];
         
-        assert(_TexturePtr->GetNumberOfPixelsU() <= UpdateSize[0] + Offset[0]);
-        assert(_TexturePtr->GetNumberOfPixelsV() <= UpdateSize[1] + Offset[1]);
+        assert(_TexturePtr->GetNumberOfPixelsU() >= UpdateSize[0] + Offset[0]);
+        assert(_TexturePtr->GetNumberOfPixelsV() >= UpdateSize[1] + Offset[1]);
         
         CInternTexture* pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
         
@@ -502,8 +502,8 @@ namespace
         glm::uvec2 Offset     = glm::uvec2(0);
         glm::uvec2 UpdateSize = glm::uvec2(_TextureArrayPtr->GetNumberOfPixelsU(), _TextureArrayPtr->GetNumberOfPixelsV());
         
-        assert(Size[0] <= UpdateSize[0] + Offset[0]);
-        assert(Size[1] <= UpdateSize[1] + Offset[1]);
+        assert(Size[0] >= UpdateSize[0] + Offset[0]);
+        assert(Size[1] >= UpdateSize[1] + Offset[1]);
         
         CInternTexture* pInternTextureArray = static_cast<CInternTexture*>(_TextureArrayPtr.GetPtr());
         
@@ -544,8 +544,8 @@ namespace
         glm::uvec2 Offset     = glm::uvec2(0);
         glm::uvec2 UpdateSize = glm::uvec2(_TextureArrayPtr->GetNumberOfPixelsU(), _TextureArrayPtr->GetNumberOfPixelsV());
         
-        assert(_TexturePtr->GetNumberOfPixelsU() <= UpdateSize[0] + Offset[0]);
-        assert(_TexturePtr->GetNumberOfPixelsV() <= UpdateSize[1] + Offset[1]);
+        assert(_TexturePtr->GetNumberOfPixelsU() >= UpdateSize[0] + Offset[0]);
+        assert(_TexturePtr->GetNumberOfPixelsV() >= UpdateSize[1] + Offset[1]);
 
         int Format = ConvertGLImageFormat(_TextureArrayPtr->GetFormat());
         int Type   = ConvertGLImageType(_TextureArrayPtr->GetFormat());
