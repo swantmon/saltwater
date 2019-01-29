@@ -111,7 +111,7 @@ namespace MR
         // -----------------------------------------------------------------------------
         // Stuff for network data source
         // -----------------------------------------------------------------------------
-        std::shared_ptr<Net::CMessageDelegate> m_NetworkDelegate;
+        std::shared_ptr<Net::CMessageDelegate> m_SLAMNetworkDelegate;
 
         Gfx::CShaderPtr m_YUVtoRGBCSPtr;
         Gfx::CTexturePtr m_YTexture;
@@ -138,6 +138,8 @@ namespace MR
             glm::ivec2 m_DeviceResolution;
             glm::mat4  m_DeviceProjectionMatrix;
         };
+
+        Net::SocketHandle m_DataSourceSocket;
 
         // -----------------------------------------------------------------------------
         // Stuff for Kinect data source
@@ -171,6 +173,9 @@ namespace MR
         glm::vec3 m_PlaneAnchor0;
         glm::vec3 m_PlaneAnchor1;
 
+        Net::SocketHandle m_NeuralNetworkSocket;
+        std::shared_ptr<Net::CMessageDelegate> m_NeualNetworkDelegate;
+
     public:
 
         void Start()
@@ -195,14 +200,24 @@ namespace MR
             if (DataSource == "network")
             {
                 // -----------------------------------------------------------------------------
-                // Create network connection
+                // Create network connection for SLAM client
                 // -----------------------------------------------------------------------------
-                m_NetworkDelegate = std::shared_ptr<Net::CMessageDelegate>(new Net::CMessageDelegate(std::bind(&CSLAMControl::OnNewMessage, this, std::placeholders::_1, std::placeholders::_2)));
-
+                auto Delegate = new Net::CMessageDelegate(std::bind(&CSLAMControl::OnNewSLAMMessage, this, std::placeholders::_1, std::placeholders::_2));
+                m_SLAMNetworkDelegate = std::shared_ptr<Net::CMessageDelegate>(Delegate);
                 int Port = Core::CProgramParameters::GetInstance().Get("mr:slam:network_port", 12345);
-                auto SocketHandle = Net::CNetworkManager::GetInstance().CreateServerSocket(Port);
-                Net::CNetworkManager::GetInstance().RegisterMessageHandler(SocketHandle, m_NetworkDelegate);
+                m_DataSourceSocket = Net::CNetworkManager::GetInstance().CreateServerSocket(Port);
+                Net::CNetworkManager::GetInstance().RegisterMessageHandler(m_DataSourceSocket, m_SLAMNetworkDelegate);
 
+                // -----------------------------------------------------------------------------
+                // Create network connection for Neural Network Server
+                // -----------------------------------------------------------------------------
+                Delegate = new Net::CMessageDelegate(std::bind(&CSLAMControl::OnNewNeuralNetMessage, this, std::placeholders::_1, std::placeholders::_2));
+                m_NeualNetworkDelegate = std::shared_ptr<Net::CMessageDelegate>(Delegate);
+                Port = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:net:port", 12346);
+                std::string IP = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:net:ip", "127.0.0.1");
+                m_NeuralNetworkSocket = Net::CNetworkManager::GetInstance().CreateClientSocket(IP, Port);
+                Net::CNetworkManager::GetInstance().RegisterMessageHandler(m_NeuralNetworkSocket, m_NeualNetworkDelegate);
+                
                 m_DataSource = NETWORK;
 
                 CreateShiftLUTTexture();
@@ -330,7 +345,7 @@ namespace MR
             m_DepthTexture = nullptr;
             m_RGBTexture = nullptr;
 
-            m_NetworkDelegate = nullptr;
+            m_SLAMNetworkDelegate = nullptr;
             
             m_YUVtoRGBCSPtr = nullptr;
             m_YTexture = nullptr;
@@ -735,7 +750,7 @@ namespace MR
             }
         }
 
-        void OnNewMessage(const Net::CMessage& _rMessage, Net::SocketHandle _SocketHandle)
+        void OnNewSLAMMessage(const Net::CMessage& _rMessage, Net::SocketHandle _SocketHandle)
         {
             BASE_UNUSED(_SocketHandle);
             
@@ -757,6 +772,12 @@ namespace MR
                 // Enable mouse control after disconnect
                 m_UseTrackingCamera = false;
             }
+        }
+
+        void OnNewNeuralNetMessage(const Net::CMessage& _rMessage, Net::SocketHandle _SocketHandle)
+        {
+            BASE_UNUSED(_SocketHandle);
+            BASE_UNUSED(_rMessage);            
         }
 
         void CreateShiftLUTTexture()
