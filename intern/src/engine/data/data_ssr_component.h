@@ -36,5 +36,9 @@ namespace Dt
         float m_RoughnessMask;          //> Identifier of the roughness depending surfaces. (Default: -6.66f)
         float m_Distance;               //> Distance in units between objects to detect reflection (equal to ray length)
         bool  m_UseLastFrame;           //> Either use double reflections of not (Default: true)
+
+    private:
+
+        friend class CSSRComponentGUI;
     };
 } // namespace Dt

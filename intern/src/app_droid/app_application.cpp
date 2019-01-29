@@ -129,7 +129,7 @@ namespace
         // -----------------------------------------------------------------------------
         m_AppSetup.m_pAndroidApp   = _pAndroidApp;
         m_AppSetup.m_Running       = 0;
-        m_AppSetup.m_ParameterFile = std::string(m_AppSetup.m_pAndroidApp->activity->externalDataPath) +  "/android.config";
+        m_AppSetup.m_ParameterFile = std::string(m_AppSetup.m_pAndroidApp->activity->externalDataPath) +  "/data/android.config";
 
         // -----------------------------------------------------------------------------
         // Prepare to monitor accelerometer

@@ -6,6 +6,7 @@
 
 #include "engine/core/core_plugin_manager.h"
 
+#include "engine/core/core_program_parameters.h"
 #include "engine/data/data_component_facet.h"
 #include "engine/data/data_sky_component.h"
 #include "engine/data/data_transformation_facet.h"
@@ -69,6 +70,7 @@ namespace Scpt
         int m_Mode;
 
         std::shared_ptr<Net::CMessageDelegate> m_NetworkDelegate;
+        Net::SocketHandle m_SocketHandle;
 
     public:
 
@@ -115,8 +117,12 @@ namespace Scpt
             // -----------------------------------------------------------------------------
             SwitchLightEstimation(Stitching);
 
+            std::string IP = Core::CProgramParameters::GetInstance().Get("mr:stitching:server_ip", "127.0.0.1");
+            int Port = Core::CProgramParameters::GetInstance().Get("mr:stitching:network_port", 12345);
+
+            m_SocketHandle = Net::CNetworkManager::GetInstance().CreateClientSocket(IP, Port);
             m_NetworkDelegate = std::shared_ptr<Net::CMessageDelegate>(new Net::CMessageDelegate(std::bind(&CLightEstimationScript::OnNewMessage, this, std::placeholders::_1, std::placeholders::_2)));
-            Net::CNetworkManager::GetInstance().RegisterMessageHandler(0, m_NetworkDelegate);
+            Net::CNetworkManager::GetInstance().RegisterMessageHandler(m_SocketHandle, m_NetworkDelegate);
         }
 
         // -----------------------------------------------------------------------------
@@ -136,9 +142,9 @@ namespace Scpt
 
         // -----------------------------------------------------------------------------
 
-        void OnNewMessage(const Net::CMessage& _rMessage, int _Port)
+        void OnNewMessage(const Net::CMessage& _rMessage, Net::SocketHandle _SocketHandle)
         {
-            BASE_UNUSED(_Port);
+            BASE_UNUSED(_SocketHandle);
 
             if (_rMessage.m_DecompressedSize != s_PanoramaWidth * s_PanoramaHeight * 4) return;
 
@@ -207,8 +213,8 @@ namespace Scpt
             {
                 ENGINE_CONSOLE_INFO("Touched (NE = switch estimation; SE = save cube map; NW = send panorama; SW = reset");
 
-                float x = _rEvent.GetGlobalCursorPosition()[0];
-                float y = _rEvent.GetGlobalCursorPosition()[1];
+                float x = static_cast<float>(_rEvent.GetGlobalCursorPosition()[0]);
+                float y = static_cast<float>(_rEvent.GetGlobalCursorPosition()[1]);
 
                 if (x < 200.0f && y < 200.0f)
                 {
@@ -228,7 +234,7 @@ namespace Scpt
 
                 if (x > Gfx::Main::GetActiveNativeWindowSize()[0] - 200.0f && y < 200.0f)
                 {
-                    if (m_OutputCubemapPtr != nullptr && Net::CNetworkManager::GetInstance().IsConnected())
+                    if (m_OutputCubemapPtr != nullptr && Net::CNetworkManager::GetInstance().IsConnected(m_SocketHandle))
                     {
                         ENGINE_CONSOLE_INFO("Send panorama via network");
 
@@ -263,7 +269,7 @@ namespace Scpt
                     SaveCubemap();
                     break;
                 case Base::CInputEvent::Key2:
-                    if (m_OutputCubemapPtr != nullptr && Net::CNetworkManager::GetInstance().IsConnected())
+                    if (m_OutputCubemapPtr != nullptr && Net::CNetworkManager::GetInstance().IsConnected(m_SocketHandle))
                     {
                         SendPanoramaTexture();
                     }
@@ -411,11 +417,15 @@ namespace Scpt
 
             Gfx::ContextManager::ResetShaderCS();
 
-            std::vector<char> Data(s_PanoramaWidth * s_PanoramaHeight * 4);
+            Net::CMessage Message;
 
-            Gfx::TextureManager::CopyTextureToCPU(m_PanoramaTexturePtr, Data.data());
+            Message.m_Payload = std::vector<char>(s_PanoramaWidth * s_PanoramaHeight * 4);
+            Message.m_CompressedSize = Message.m_DecompressedSize = static_cast<int>(Message.m_Payload.size());
+            Message.m_MessageType = 0;
 
-            Net::CNetworkManager::GetInstance().SendMessage(0, Data);
+            Gfx::TextureManager::CopyTextureToCPU(m_PanoramaTexturePtr, Message.m_Payload.data());
+
+            Net::CNetworkManager::GetInstance().SendMessage(m_SocketHandle, Message);
         }
 
         // -----------------------------------------------------------------------------

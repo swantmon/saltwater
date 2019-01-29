@@ -30,6 +30,8 @@ namespace Scpt
     {
     public:
 
+        bool m_IsSelectionEnabled = false;
+
         void Start() override
         {
             Engine::LoadPlugin("plugin_slam");
@@ -40,6 +42,8 @@ namespace Scpt
             }
 
             InputCallback = (FInputCallback)(Core::PluginManager::GetPluginFunction("SLAM", "OnInput"));
+
+            SetActivateSelection = (FSetActivateSelection)(Core::PluginManager::GetPluginFunction("SLAM", "SetActivateSelection"));
         }
 
         // -----------------------------------------------------------------------------
@@ -53,7 +57,7 @@ namespace Scpt
 
         void Update() override
         {
-            
+            SetActivateSelection(m_IsSelectionEnabled);
         }
 
         // -----------------------------------------------------------------------------
@@ -67,5 +71,8 @@ namespace Scpt
 
         typedef void(*FInputCallback)(const Base::CInputEvent& _rEvent);
         FInputCallback InputCallback;
+
+        typedef void(*FSetActivateSelection)(bool _Flag);
+        FSetActivateSelection SetActivateSelection;
     };
 } // namespace Scpt

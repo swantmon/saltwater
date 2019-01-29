@@ -92,6 +92,7 @@ namespace MR
         glm::vec3 m_SelectionBoxAnchor0;
         glm::vec3 m_SelectionBoxAnchor1;
         float m_SelectionBoxHeight;
+        bool m_SelectionFlag;
 
         ESelection m_SelectionState;
 
@@ -179,6 +180,7 @@ namespace MR
             m_SelectionBoxHeight = 0.0f;
             m_SelectionState = ESelection::NOSELECTION;
             m_LeftAnchorSelected = false;
+            m_SelectionFlag = false;
 
             m_pSelectionTicket = &Gfx::SelectionRenderer::AcquireTicket(-1, -1, 1, 1, Gfx::SPickFlag::Voxel);
 
@@ -197,7 +199,9 @@ namespace MR
                 // -----------------------------------------------------------------------------
                 m_NetworkDelegate = std::shared_ptr<Net::CMessageDelegate>(new Net::CMessageDelegate(std::bind(&CSLAMControl::OnNewMessage, this, std::placeholders::_1, std::placeholders::_2)));
 
-                Net::CNetworkManager::GetInstance().RegisterMessageHandler(0, m_NetworkDelegate);
+                int Port = Core::CProgramParameters::GetInstance().Get("mr:slam:network_port", 12345);
+                auto SocketHandle = Net::CNetworkManager::GetInstance().CreateServerSocket(Port);
+                Net::CNetworkManager::GetInstance().RegisterMessageHandler(SocketHandle, m_NetworkDelegate);
 
                 m_DataSource = NETWORK;
 
@@ -293,12 +297,16 @@ namespace MR
                 m_pRecordReader->SkipTime();
 
                 m_pRecordReader->SetSpeed(SpeedOfPlayback);
+
+                ENGINE_CONSOLE_INFOV("Playing recording from file \"%s\"", m_RecordFileName.c_str());
             }
             else if (RecordParam == "record")
             {
                 m_RecordMode = RECORD;
                 m_RecordFile.open(m_RecordFileName, std::fstream::out | std::fstream::binary);
                 m_pRecordWriter.reset(new Base::CRecordWriter(m_RecordFile, 1));
+
+                ENGINE_CONSOLE_INFOV("Recoding into file file \"%s\"", m_RecordFileName.c_str());
             }
             else
             {
@@ -346,6 +354,8 @@ namespace MR
             // -----------------------------------------------------------------------------
             // Selection
             // -----------------------------------------------------------------------------
+            if (!m_SelectionFlag) m_SelectionState = ESelection::NOSELECTION;
+
             Gfx::CSelectionTicket& rSelectionTicket = *m_pSelectionTicket;
 
             if (m_SelectionState == ESelection::FIRSTPRESS)
@@ -502,6 +512,13 @@ namespace MR
             }
         }
 
+        // -----------------------------------------------------------------------------
+
+        void SetActivateSelection(bool _Flag)
+        {
+            m_SelectionFlag = _Flag;
+        }
+
     private:
 
         void HandleMessage(const Net::CMessage& _rMessage)
@@ -614,10 +631,10 @@ namespace MR
                         m_UVTexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
 
                         std::string DefineString = DefineStream.str();
-                        m_YUVtoRGBCSPtr = Gfx::ShaderManager::CompileCS("slam\\cs_yuv_to_rgb.glsl", "main", DefineString.c_str());
+                        m_YUVtoRGBCSPtr = Gfx::ShaderManager::CompileCS("../../plugins/slam/cs_yuv_to_rgb.glsl", "main", DefineString.c_str());
                     }
                     std::string DefineString = DefineStream.str();
-                    m_ShiftDepthCSPtr = Gfx::ShaderManager::CompileCS("slam\\cs_shift_depth.glsl", "main", DefineString.c_str());
+                    m_ShiftDepthCSPtr = Gfx::ShaderManager::CompileCS("../../plugins/slam/cs_shift_depth.glsl", "main", DefineString.c_str());
 
                     m_UseTrackingCamera = true;
 
@@ -718,9 +735,9 @@ namespace MR
             }
         }
 
-        void OnNewMessage(const Net::CMessage& _rMessage, int _Port)
+        void OnNewMessage(const Net::CMessage& _rMessage, Net::SocketHandle _SocketHandle)
         {
-            BASE_UNUSED(_Port);
+            BASE_UNUSED(_SocketHandle);
             
             if (_rMessage.m_MessageType == 0)
             {

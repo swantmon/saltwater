@@ -52,5 +52,9 @@ namespace Dt
         float     m_AbsorptionCoefficient;              //< Absorption amount of light by the fog
         float     m_DensityLevel;                       //< Amount of density at the ground level / sea level
         float     m_DensityAttenuation;                 //< Attenuation factor for the density at higher level
+
+    private:
+
+        friend class CVolumeFogComponentGUI;
     };
 } // namespace Dt

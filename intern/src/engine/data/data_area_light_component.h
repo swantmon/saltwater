@@ -73,5 +73,9 @@ namespace Dt
         bool        m_IsTwoSided;
         bool        m_HasTemperature;
         std::string m_Texture;
+
+    private:
+
+        friend class CAreaLightComponentGUI;
     };
 } // namespace Dt

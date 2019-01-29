@@ -38,6 +38,10 @@ namespace Dt
         glm::vec3 m_Position;              //< Position of the entity to its parent
         glm::quat m_Rotation;              //< Rotation of the entity to its parent
         glm::vec3 m_Scale;                 //< Scale of the entity to its parent
+
+    private:
+
+        friend class CTransformationFacetGUI;
     };
 } // namespace Dt
 

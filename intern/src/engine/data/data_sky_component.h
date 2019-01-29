@@ -76,5 +76,9 @@ namespace Dt
         bool             m_HasHDR;             //< Declares either the image consists of HDR values
         Gfx::CTexturePtr m_TexturePtr;         //< Texture
         float            m_Intensity;          //< Intensity of sky that is freely adjustable by artist (multiplier on the image)
+
+    private:
+
+        friend class CSkyComponentGUI;
     };
 } // namespace Dt

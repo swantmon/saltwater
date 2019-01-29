@@ -24,9 +24,9 @@ namespace Edit
         
         CUnloadMapState();
         ~CUnloadMapState();
-        
+
     private:
-        
+
         virtual CState::EStateType InternOnEnter();
         virtual CState::EStateType InternOnLeave();
         virtual CState::EStateType InternOnRun();

@@ -107,5 +107,9 @@ namespace Dt
         float       m_MetalMask;
         float       m_Displacement;
         float       m_RefractionIndex;
+
+    private:
+
+        friend class CMaterialComponentGUI;
     };
 } // namespace Dt

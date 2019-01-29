@@ -232,17 +232,13 @@ namespace SER
     {
         typedef typename SRemoveQualifier<TElement>::X XUnqualified;
 
-        static const unsigned int s_MaxLengthOfClassName = 2048;
-
-        char ClassName[s_MaxLengthOfClassName];
-
-        strcpy(ClassName, typeid( XUnqualified ).name());
+        std::string ClassName = typeid(XUnqualified).name();
 
         InternReadIndent();
 
         InternReadChar(Private::Code::s_BracketOpen);
 
-        InternReadName(ClassName);
+        InternReadName(ClassName.c_str());
 
         InternReadEOL();
 
@@ -264,6 +260,8 @@ namespace SER
     template<typename TElement>
     inline unsigned int CTextReader::InternBeginCollection(TElement* _pElements)
     {
+        BASE_UNUSED(_pElements);
+
         int NumberOfElements;
 
         InternReadIndent();
@@ -376,6 +374,8 @@ namespace SER
     template<typename TElement>
     inline void CTextReader::InternEndCollection(TElement* _pElements)
     {
+        BASE_UNUSED(_pElements);
+
         m_State = Root;
 
         -- m_NumberOfIdents;
