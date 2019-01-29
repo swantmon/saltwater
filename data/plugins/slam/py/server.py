@@ -146,16 +146,16 @@ def OnNewClient(_Socket, _Address, _ID):
 
         pixels = resultData.tobytes()
 
-        _Socket.sendall(struct.pack('iii', 0, opt.img_size_w * opt.img_size_h * 4, opt.img_size_w * opt.img_size_h * 4))
+        _Socket.sendall(struct.pack('iii', 0, opt.img_size_w * opt.img_size_h, opt.img_size_w * opt.img_size_h)) #TODO Choose size programmatically
         _Socket.sendall(pixels)
 
         # -----------------------------------------------------------------------------
         # Save output and input to file system
         # -----------------------------------------------------------------------------
-        sample = torch.cat((masked_samples.data, gen_mask.data), -2)
+        #sample = torch.cat((masked_samples.data, gen_mask.data), -2)
 
-        os.makedirs('{}{}/{}'.format(opt.output, _Address[0], _ID), exist_ok=True)
-        save_image(sample, '{}{}/{}/result_panorama_{}.png'.format(opt.output, _Address[0], _ID, Interval), nrow=1, normalize=True)
+        #os.makedirs('{}{}/{}'.format(opt.output, _Address[0], _ID), exist_ok=True)
+        #save_image(sample, '{}{}/{}/result_panorama_{}.png'.format(opt.output, _Address[0], _ID, Interval), nrow=1, normalize=True)
 
         Interval = Interval + 1
 
