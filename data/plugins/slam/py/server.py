@@ -30,7 +30,7 @@ import torch
 # -----------------------------------------------------------------------------
 parser = argparse.ArgumentParser()
 parser.add_argument('--output', type=str, default='./output/', help='output folder of the results')
-parser.add_argument('--img_size_w', type=int, default=256, help='width of image dimension')
+parser.add_argument('--img_size_w', type=int, default=128, help='width of image dimension')
 parser.add_argument('--img_size_h', type=int, default=128, help='height of each image dimension')
 parser.add_argument('--path_to_generator', type=str, default='./savepoint/model_best_generator.pth.tar', help='path to saved generator')
 parser.add_argument('--port', type=int, default=12346, help='Port address to an endpoint')
