@@ -523,6 +523,10 @@ namespace MR
             {
                 Gfx::ReconstructionRenderer::ResetSelection();
             }
+            else if (_rEvent.GetAction() == Base::CInputEvent::MouseWheel)
+            {
+                SendPlane();
+            }
         }
 
         // -----------------------------------------------------------------------------
@@ -776,6 +780,30 @@ namespace MR
         {
             BASE_UNUSED(_SocketHandle);
             BASE_UNUSED(_rMessage);            
+        }
+
+        void SendPlane()
+        {
+            if (!Net::CNetworkManager::GetInstance().IsConnected(m_NeuralNetworkSocket))
+            {
+                ENGINE_CONSOLE_INFO("Cannot send plane to neural net because the socket has no connection");
+                return;
+            }
+
+            const int PlaneResolution = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:inpainted_plane:resolution", 128);
+            
+            const auto& AABB = Gfx::ReconstructionRenderer::GetSelectionBox();
+            m_PlaneTexture = m_pReconstructor->CreatePlaneTexture(AABB);
+
+            Net::CMessage Message;
+
+            Message.m_Payload = std::vector<char>(PlaneResolution * PlaneResolution * 4);
+            Message.m_CompressedSize = Message.m_DecompressedSize = static_cast<int>(Message.m_Payload.size());
+            Message.m_MessageType = 0;
+
+            Gfx::TextureManager::CopyTextureToCPU(m_PlaneTexture, Message.m_Payload.data());
+
+            Net::CNetworkManager::GetInstance().SendMessage(m_NeuralNetworkSocket, Message);
         }
 
         void CreateShiftLUTTexture()
