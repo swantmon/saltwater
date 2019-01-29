@@ -270,7 +270,7 @@ if __name__ == '__main__':
                 g_adv = adversarial_loss(discriminator(gen_parts), valid)
                 g_pixel = pixelwise_loss(gen_parts, masked_parts)
 
-                g_loss = 0.001 * g_adv + 0.999 * g_pixel
+                g_loss = 0.1 * g_adv + 0.9 * g_pixel
 
                 g_loss.backward()
                 optimizer_G.step()
