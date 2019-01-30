@@ -28,8 +28,8 @@ import torch
 # -----------------------------------------------------------------------------
 parser = argparse.ArgumentParser()
 parser.add_argument('--n_epochs', type=int, default=40000, help='number of epochs of training')
-parser.add_argument('--batch_size', type=int, default=8, help='size of the batches')
-parser.add_argument('--path_to_dataset', type=str, default='./data/DTD_FLAT/', help='path to the dataset (no recursive search)')
+parser.add_argument('--batch_size', type=int, default=32, help='size of the batches')
+parser.add_argument('--path_to_dataset', type=str, default='./data/ILSVRC2012_img_train/', help='path to the dataset (no recursive search)')
 parser.add_argument('--lr', type=float, default=0.0002, help='adam: learning rate')
 parser.add_argument('--b1', type=float, default=0.5, help='adam: decay of first order momentum of gradient')
 parser.add_argument('--b2', type=float, default=0.999, help='adam: decay of first order momentum of gradient')
@@ -39,7 +39,7 @@ parser.add_argument('--img_size_h', type=int, default=128, help='size of each im
 parser.add_argument('--img_channels', type=int, default=3, help='number of image channels')
 parser.add_argument('--mask_size', type=int, default=64, help='size of random mask')
 parser.add_argument('--sample_interval', type=int, default=100, help='interval between image sampling')
-parser.add_argument('--output', type=str, default='./output/DTD_FLAT/', help='output folder of the results')
+parser.add_argument('--output', type=str, default='./output/ILSVRC2012_img_train/', help='output folder of the results')
 parser.add_argument('--path_to_savepoint', type=str, default='./savepoint/', help='path to load and store savepoint')
 opt = parser.parse_args()
 
@@ -64,10 +64,10 @@ class ImageDataset(Dataset):
     def apply_train_mask(self, img):
         masked_img = img.clone()
         
-        y1 = np.random.randint(0, opt.img_size_h - opt.mask_size)
-        x1 = np.random.randint(0, opt.img_size_w - opt.mask_size)
-        #y1 = int((opt.img_size_h - opt.mask_size) / 2)
-        #x1 = int((opt.img_size_w - opt.mask_size) / 2)
+        #y1 = np.random.randint(0, opt.img_size_h - opt.mask_size)
+        #x1 = np.random.randint(0, opt.img_size_w - opt.mask_size)
+        y1 = int((opt.img_size_h - opt.mask_size) / 2)
+        x1 = int((opt.img_size_w - opt.mask_size) / 2)
 
         y2, x2 = y1 + opt.mask_size, x1 + opt.mask_size
 
@@ -302,9 +302,9 @@ if __name__ == '__main__':
                 # -----------------------------------------------------------------------------
                 if g_loss < GeneratorMinimalLoss and epoch > 0:
                     GeneratorMinimalLoss = g_loss
-                    #SaveCheckpoint(epoch, generator.state_dict(), g_loss, optimizer_G.state_dict(), opt.path_to_savepoint + '/model_best_generator.pth.tar')
-                    #SaveCheckpoint(epoch, discriminator.state_dict(), d_loss, optimizer_D.state_dict(), opt.path_to_savepoint + '/model_best_discriminator.pth.tar')
-                    #save_sample(batches_done, opt.path_to_savepoint + '/model_best_batch.png')
+                    SaveCheckpoint(epoch, generator.state_dict(), g_loss, optimizer_G.state_dict(), opt.path_to_savepoint + '/model_best_generator.pth.tar')
+                    SaveCheckpoint(epoch, discriminator.state_dict(), d_loss, optimizer_D.state_dict(), opt.path_to_savepoint + '/model_best_discriminator.pth.tar')
+                    save_sample(batches_done, opt.path_to_savepoint + '/model_best_batch.png')
                 
                 # -----------------------------------------------------------------------------
                 # Round end
