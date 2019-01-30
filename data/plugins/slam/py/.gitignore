@@ -5,3 +5,6 @@
 *.h5
 *.tar
 log/
+data/
+output/
+savepoint/

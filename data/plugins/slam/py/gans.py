@@ -30,24 +30,24 @@ class Generator(nn.Module):
 
         self.pool = nn.MaxPool2d(2, 2)
 
-        self.conv1_1 = nn.Conv2d(channels, 64, 4, stride=1, padding=2)
+        self.conv1_1 = nn.Conv2d(channels, 64, 3, stride=1, padding=1)
 
-        self.conv2_1 = nn.Conv2d(64, 64, 4, stride=1, padding=2)
+        self.conv2_1 = nn.Conv2d(64, 64, 3, stride=1, padding=1)
         self.norm2_1 = nn.BatchNorm2d(64, 0.8)
 
-        self.conv3_1 = nn.Conv2d(64, 128, 4, stride=1, padding=2)
+        self.conv3_1 = nn.Conv2d(64, 128, 3, stride=1, padding=1)
         self.norm3_1 = nn.BatchNorm2d(128, 0.8)
 
-        self.conv4_1 = nn.Conv2d(128, 256, 4, stride=1, padding=2)
+        self.conv4_1 = nn.Conv2d(128, 256, 3, stride=1, padding=1)
         self.norm4_1 = nn.BatchNorm2d(256, 0.8)
 
-        self.conv5_1 = nn.Conv2d(256, 512, 4, stride=1, padding=2)
+        self.conv5_1 = nn.Conv2d(256, 512, 3, stride=1, padding=1)
         self.norm5_1 = nn.BatchNorm2d(512, 0.8)
 
         self.conv6_1 = nn.Conv2d(512, 1000, 4)
-        self.linear6_2 = nn.Linear(1, 1000)
+        self.linear6_2 = nn.Linear(1000, 2048)
         self.drop6_3 = nn.Dropout(0.5)
-        self.linear6_4 = nn.Linear(1000, 1)
+        self.linear6_4 = nn.Linear(2048, 1000)
         self.drop6_5 = nn.Dropout(0.5)
 
         self.tconv6_1 = nn.ConvTranspose2d(1000, 512, 4, stride=1, padding=0)
@@ -95,10 +95,15 @@ class Generator(nn.Module):
 
         x = self.conv6_1(x) 
 
+        (_, C, H, W) = x.data.size()
+        x = x.view(-1 , C * H * W)
+
         x = self.linear6_2(x)
         x = self.drop6_3(x)  
         x = self.linear6_4(x)
-        x = self.drop6_5(x)    
+        x = self.drop6_5(x)   
+
+        x = x.view(-1 , C, H, W)
 
         x = self.tconv6_1(x)
         x = self.norm6_1(x)
