@@ -139,9 +139,9 @@ namespace
 
         void Initialize();
         
-		void RaycastScalableVolume();
-        void RaycastScalableVolumeWithHighlight();
-        void RaycastScalableVolumeDiminished();
+		void RaycastVolume();
+        void RaycastVolumeWithHighlight();
+        void RaycastVolumeDiminished();
         void RenderInpaintedPlane();
         
         void RenderQueuedRootVolumes();
@@ -158,7 +158,7 @@ namespace
 
     private:
 
-		MR::CSLAMReconstructor* m_pScalableReconstructor;
+		MR::CSLAMReconstructor* m_pReconstructor;
         
         CShaderPtr m_OutlineVSPtr;
         CShaderPtr m_OutlineFSPtr;
@@ -336,7 +336,7 @@ namespace
         m_OutlineRenderContextPtr = 0;
         m_PlaneRenderContextPtr = 0;
 
-		m_pScalableReconstructor = nullptr;
+		m_pReconstructor = nullptr;
 
         m_PointCloudVSPtr = 0;
         m_PointCloudFSPtr = 0;
@@ -361,9 +361,9 @@ namespace
 
         const std::string InternalFormatString = Core::CProgramParameters::GetInstance().Get("mr:slam:map_format", "rgba16f");
 
-        m_pScalableReconstructor->GetReconstructionSettings(&Settings);
+        m_pReconstructor->GetReconstructionSettings(&Settings);
 
-        glm::ivec2 DepthImageSize = m_pScalableReconstructor->GetDepthImageSize();
+        glm::ivec2 DepthImageSize = m_pReconstructor->GetDepthImageSize();
 
         std::stringstream DefineStream;
 
@@ -565,8 +565,8 @@ namespace
         // Create camera frustum mesh
         ////////////////////////////////////////////////////////////////////////////////
 
-        glm::ivec2 DepthSize = m_pScalableReconstructor->GetDepthImageSize();
-        glm::vec4 Intrinsics = m_pScalableReconstructor->GetDepthIntrinsics();
+        glm::ivec2 DepthSize = m_pReconstructor->GetDepthImageSize();
+        glm::vec4 Intrinsics = m_pReconstructor->GetDepthIntrinsics();
         
         float Focalx = (-Intrinsics.z / DepthSize.x) / (Intrinsics.x / DepthSize.x);
         float Focaly = (-Intrinsics.w / DepthSize.y) / (Intrinsics.y / DepthSize.y);
@@ -750,7 +750,7 @@ namespace
     
     void CGfxReconstructionRenderer::OnReload()
     {
-        m_pScalableReconstructor->ResetReconstruction();
+        m_pReconstructor->ResetReconstruction();
 
         OnSetupShader();
     }
@@ -823,18 +823,18 @@ namespace
         
 	// -----------------------------------------------------------------------------
 
-	void CGfxReconstructionRenderer::RaycastScalableVolume()
+	void CGfxReconstructionRenderer::RaycastVolume()
 	{
         Performance::BeginEvent("Raycasting for rendering");
 
         ContextManager::SetTargetSet(TargetSetManager::GetDeferredTargetSet());
 
-        MR::CSLAMReconstructor::SSLAMVolume& rVolume = m_pScalableReconstructor->GetVolume();
+        MR::CSLAMReconstructor::SSLAMVolume& rVolume = m_pReconstructor->GetVolume();
 
         MR::SReconstructionSettings Settings;
-        m_pScalableReconstructor->GetReconstructionSettings(&Settings);
+        m_pReconstructor->GetReconstructionSettings(&Settings);
 
-        glm::mat4 PoseMatrix = m_pScalableReconstructor->GetPoseMatrix();
+        glm::mat4 PoseMatrix = m_pReconstructor->GetPoseMatrix();
 
         ContextManager::SetShaderVS(m_RaycastVSPtr);
         ContextManager::SetShaderPS(m_RaycastFSPtr);
@@ -881,11 +881,11 @@ namespace
         glm::vec4 Color;
         if (Settings.m_CaptureColor)
         {
-            Color = m_pScalableReconstructor->IsTrackingLost() ? glm::vec4(1.0f, 0.0f, 0.0f, 1.0f) : glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+            Color = m_pReconstructor->IsTrackingLost() ? glm::vec4(1.0f, 0.0f, 0.0f, 1.0f) : glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
         }
         else
         {
-            Color = m_pScalableReconstructor->IsTrackingLost() ? glm::vec4(1.0f, 0.0f, 0.0f, 1.0f) : glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+            Color = m_pReconstructor->IsTrackingLost() ? glm::vec4(1.0f, 0.0f, 0.0f, 1.0f) : glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
         }
         BufferManager::UploadBufferData(m_RaycastConstantBufferPtr, &Color);
 
@@ -905,7 +905,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxReconstructionRenderer::RaycastScalableVolumeWithHighlight()
+    void CGfxReconstructionRenderer::RaycastVolumeWithHighlight()
     {
         glm::mat4 ReconstructionToSaltwater = glm::mat4(
             1.0f, 0.0f, 0.0f, 0.0f,
@@ -918,12 +918,12 @@ namespace
 
         ContextManager::SetTargetSet(TargetSetManager::GetDeferredTargetSet());
 
-        MR::CSLAMReconstructor::SSLAMVolume& rVolume = m_pScalableReconstructor->GetVolume();
+        MR::CSLAMReconstructor::SSLAMVolume& rVolume = m_pReconstructor->GetVolume();
 
         MR::SReconstructionSettings Settings;
-        m_pScalableReconstructor->GetReconstructionSettings(&Settings);
+        m_pReconstructor->GetReconstructionSettings(&Settings);
 
-        glm::mat4 PoseMatrix = m_pScalableReconstructor->GetPoseMatrix();
+        glm::mat4 PoseMatrix = m_pReconstructor->GetPoseMatrix();
 
         ContextManager::SetShaderVS(m_RaycastVSPtr);
         ContextManager::SetShaderPS(m_RaycastHighlightFSPtr);
@@ -987,7 +987,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxReconstructionRenderer::RaycastScalableVolumeDiminished()
+    void CGfxReconstructionRenderer::RaycastVolumeDiminished()
     {
         glm::mat4 ReconstructionToSaltwater = glm::mat4(
             1.0f, 0.0f, 0.0f, 0.0f,
@@ -1002,7 +1002,7 @@ namespace
 
         ContextManager::SetViewPortSet(m_DiminishedViewPortSetPtr);
 
-        MR::CSLAMReconstructor::SSLAMVolume& rVolume = m_pScalableReconstructor->GetVolume();
+        MR::CSLAMReconstructor::SSLAMVolume& rVolume = m_pReconstructor->GetVolume();
         
         ContextManager::SetShaderVS(m_RaycastDiminishedVSPtr);
         ContextManager::SetShaderPS(m_RaycastDiminishedFSPtr);
@@ -1131,9 +1131,9 @@ namespace
 		glm::mat4 Scaling;
 		glm::mat4 Translation;
 
-        const auto& GridSizes = m_pScalableReconstructor->GetVolumeSizes();
+        const auto& GridSizes = m_pReconstructor->GetVolumeSizes();
 
-		for (auto& rPair : m_pScalableReconstructor->GetRootVolumeMap())
+		for (auto& rPair : m_pReconstructor->GetRootVolumeMap())
 		{
 			auto& rRootGrid = rPair.second;
 
@@ -1183,9 +1183,9 @@ namespace
         glm::mat4 Scaling;
         glm::mat4 Translation;
 
-        const auto& VolumeSizes = m_pScalableReconstructor->GetVolumeSizes();
+        const auto& VolumeSizes = m_pReconstructor->GetVolumeSizes();
 
-        for (auto& rPair : m_pScalableReconstructor->GetRootVolumeMap())
+        for (auto& rPair : m_pReconstructor->GetRootVolumeMap())
         {
             auto& rRootGrid = rPair.second;
 
@@ -1240,9 +1240,9 @@ namespace
         glm::vec3 Position;
         glm::mat4 Translation;
 
-        const auto& VolumeSizes = m_pScalableReconstructor->GetVolumeSizes();
+        const auto& VolumeSizes = m_pReconstructor->GetVolumeSizes();
 
-        for (auto& rPair : m_pScalableReconstructor->GetRootVolumeMap())
+        for (auto& rPair : m_pReconstructor->GetRootVolumeMap())
         {
             auto& rRootGrid = rPair.second;
 
@@ -1285,7 +1285,7 @@ namespace
 
 		SDrawCallConstantBuffer BufferData;
 
-        glm::mat4 PoseMatrix = m_pScalableReconstructor->GetPoseMatrix();
+        glm::mat4 PoseMatrix = m_pReconstructor->GetPoseMatrix();
         
         BufferData.m_WorldMatrix = glm::eulerAngleX(glm::half_pi<float>()) * PoseMatrix;
 		BufferData.m_Color = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
@@ -1309,7 +1309,7 @@ namespace
 
     void CGfxReconstructionRenderer::RenderPlanes()
     {
-        if (m_pScalableReconstructor->GetPlanes().empty())
+        if (m_pReconstructor->GetPlanes().empty())
         {
             return;
         }
@@ -1332,7 +1332,7 @@ namespace
 
         SDrawCallConstantBuffer BufferData;
         
-        for (const auto& Plane : m_pScalableReconstructor->GetPlanes())
+        for (const auto& Plane : m_pReconstructor->GetPlanes())
         {
             BufferData.m_WorldMatrix = Plane.second.m_Transform * glm::scale(glm::vec3(Plane.second.m_Extent));
             BufferData.m_Color = glm::vec4(1.0f, 1.0f, 0.0f, 0.3f);
@@ -1357,7 +1357,7 @@ namespace
 
         SDrawCallConstantBuffer BufferData;
 
-        glm::mat4 PoseMatrix = m_pScalableReconstructor->GetPoseMatrix();
+        glm::mat4 PoseMatrix = m_pReconstructor->GetPoseMatrix();
         
         BufferData.m_WorldMatrix = glm::eulerAngleX(glm::half_pi<float>()) * PoseMatrix;
         BufferData.m_Color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
@@ -1367,8 +1367,8 @@ namespace
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
         ContextManager::SetConstantBuffer(1, m_DrawCallConstantBufferPtr);
 
-        ContextManager::SetImageTexture(0, m_pScalableReconstructor->GetVertexMap());
-        ContextManager::SetImageTexture(1, m_pScalableReconstructor->GetColorMap());
+        ContextManager::SetImageTexture(0, m_pReconstructor->GetVertexMap());
+        ContextManager::SetImageTexture(1, m_pReconstructor->GetColorMap());
 
         const unsigned int Offset = 0;
         ContextManager::SetVertexBuffer(m_CameraMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
@@ -1377,7 +1377,7 @@ namespace
         ContextManager::SetInputLayout(m_CameraInputLayoutPtr);
         ContextManager::SetTopology(STopology::PointList);
 
-        glm::ivec2 DepthSize = m_pScalableReconstructor->GetDepthImageSize();
+        glm::ivec2 DepthSize = m_pReconstructor->GetDepthImageSize();
 
         ContextManager::Draw(DepthSize.x * DepthSize.y, 0);
     }
@@ -1400,7 +1400,7 @@ namespace
             0.0f, -1.0f, 0.0f
         );
 
-        MR::CSLAMReconstructor::SSLAMVolume& rVolume = m_pScalableReconstructor->GetVolume();
+        MR::CSLAMReconstructor::SSLAMVolume& rVolume = m_pReconstructor->GetVolume();
 
         const glm::ivec2 WindowSize = Gfx::Main::GetActiveWindowSize();
         const glm::vec3 CameraPosition = Gfx::ViewManager::GetMainCamera()->GetView()->GetPosition();
@@ -1514,12 +1514,12 @@ namespace
 
     void CGfxReconstructionRenderer::Render()
     {
-        if (!m_IsInitialized && !m_pScalableReconstructor->IsInitialized())
+        if (!m_IsInitialized && !m_pReconstructor->IsInitialized())
         {
             return;
         }
 
-        if (!m_IsInitialized && m_pScalableReconstructor->IsInitialized())
+        if (!m_IsInitialized && m_pReconstructor->IsInitialized())
         {
             Initialize();
         }
@@ -1536,15 +1536,15 @@ namespace
         {
             if (m_SelectionState == ESelection::NOSELECTION)
             {
-                RaycastScalableVolume();
+                RaycastVolume();
             }
             else
             {
                 Gfx::TargetSetManager::ClearTargetSet(m_DiminishedTargetSetPtr);
 
-                RaycastScalableVolumeWithHighlight();
+                RaycastVolumeWithHighlight();
                 RenderInpaintedPlane();
-                RaycastScalableVolumeDiminished();
+                RaycastVolumeDiminished();
             }
         }
 
@@ -1558,7 +1558,7 @@ namespace
 
     void CGfxReconstructionRenderer::RenderForward()
     {
-        if (!m_IsInitialized && !m_pScalableReconstructor->IsInitialized())
+        if (!m_IsInitialized && !m_pReconstructor->IsInitialized())
         {
             return;
         }
@@ -1630,12 +1630,12 @@ namespace
 
         if (m_RenderVolume && ID != Dt::CEntity::s_InvalidID)
         {
-            MR::CSLAMReconstructor::SSLAMVolume& rVolume = m_pScalableReconstructor->GetVolume();
+            MR::CSLAMReconstructor::SSLAMVolume& rVolume = m_pReconstructor->GetVolume();
 
             MR::SReconstructionSettings Settings;
-            m_pScalableReconstructor->GetReconstructionSettings(&Settings);
+            m_pReconstructor->GetReconstructionSettings(&Settings);
 
-            glm::mat4 PoseMatrix = m_pScalableReconstructor->GetPoseMatrix();
+            glm::mat4 PoseMatrix = m_pReconstructor->GetPoseMatrix();
 
             ContextManager::SetShaderVS(m_RaycastVSPtr);
             ContextManager::SetShaderPS(m_RaycastHitProxyFSPtr);
@@ -1707,7 +1707,7 @@ namespace
 
     void CGfxReconstructionRenderer::SetReconstructor(MR::CSLAMReconstructor& _rReconstructor)
     {
-        m_pScalableReconstructor = &_rReconstructor;
+        m_pReconstructor = &_rReconstructor;
     }
 } // namespace
 
