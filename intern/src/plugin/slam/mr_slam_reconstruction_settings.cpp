@@ -27,21 +27,17 @@ namespace MR
         s_DefaultSettings.m_MaxIntegrationWeight = Core::CProgramParameters::GetInstance().Get("mr:slam:max_weight", 200);
         s_DefaultSettings.m_PyramidLevelCount = 3;
         s_DefaultSettings.m_DepthThreshold = Core::CProgramParameters::GetInstance().Get("mr:slam:depth_threshold", glm::ivec2(500, 3000));
-
-        s_DefaultSettings.m_IsScalable = Core::CProgramParameters::GetInstance().Get("mr:slam:scalable", true);
-
-        s_DefaultSettings.m_VoxelSize = Core::CProgramParameters::GetInstance().Get("mr:slam:metrics:voxel_size", 0.002f);
-        s_DefaultSettings.m_VolumeSize = Core::CProgramParameters::GetInstance().Get("mr:slam:metrics:volume_size", 4.0f);
-        s_DefaultSettings.m_VolumeResolution = Core::CProgramParameters::GetInstance().Get("mr:slam:metrics:volume_resolution", 512);
+        
+        s_DefaultSettings.m_VoxelSize = Core::CProgramParameters::GetInstance().Get("mr:slam:voxel_size", 0.002f);
 
         s_DefaultSettings.m_PyramidLevelIterations = Core::CProgramParameters::GetInstance().Get("mr:slam:tracking_iterations", glm::ivec3(5, 5, 4));
         
-        s_DefaultSettings.m_GridResolutions = glm::ivec3(16, 8, 8);
+        auto Resolutions = glm::ivec3(16, 8, 8);
+        int TotalResolution = Resolutions[0] * Resolutions[1] * Resolutions[2];
+        s_DefaultSettings.m_GridResolutions = Resolutions;
 
-        if (s_DefaultSettings.m_IsScalable)
-        {
-            s_DefaultSettings.m_VolumeSize = s_DefaultSettings.m_VoxelSize;
-        }
+        s_DefaultSettings.m_VolumeResolution = TotalResolution;
+        s_DefaultSettings.m_VolumeSize = TotalResolution * s_DefaultSettings.m_VoxelSize;
 
         for (int i = 0; i < GRID_LEVELS; ++i)
         {
@@ -49,11 +45,6 @@ namespace MR
                 s_DefaultSettings.m_GridResolutions[i] *
                 s_DefaultSettings.m_GridResolutions[i] *
                 s_DefaultSettings.m_GridResolutions[i];
-
-            if (s_DefaultSettings.m_IsScalable)
-            {
-                s_DefaultSettings.m_VolumeSize *= s_DefaultSettings.m_GridResolutions[i];
-            }
         }
 
         s_DefaultSettings.m_CaptureColor = Core::CProgramParameters::GetInstance().Get("mr:slam:capture_color", true);
