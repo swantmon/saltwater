@@ -189,7 +189,7 @@ namespace MR
 
             m_pSelectionTicket = &Gfx::SelectionRenderer::AcquireTicket(-1, -1, 1, 1, Gfx::SPickFlag::Voxel);
 
-            m_pReconstructor.reset(new MR::CSLAMReconstructor);
+            m_pReconstructor = std::make_unique<MR::CSLAMReconstructor>();
             Gfx::ReconstructionRenderer::SetReconstructor(*m_pReconstructor);
 
             // -----------------------------------------------------------------------------
@@ -202,24 +202,29 @@ namespace MR
                 // -----------------------------------------------------------------------------
                 // Create network connection for SLAM client
                 // -----------------------------------------------------------------------------
-                auto Delegate = new Net::CMessageDelegate(std::bind(&CSLAMControl::OnNewSLAMMessage, this, std::placeholders::_1, std::placeholders::_2));
-                m_SLAMNetworkDelegate = std::shared_ptr<Net::CMessageDelegate>(Delegate);
                 int Port = Core::CProgramParameters::GetInstance().Get("mr:slam:network_port", 12345);
                 m_DataSourceSocket = Net::CNetworkManager::GetInstance().CreateServerSocket(Port);
+
+                m_SLAMNetworkDelegate = std::make_shared<Net::CMessageDelegate>(
+                    std::bind(&CSLAMControl::OnNewSLAMMessage, this, std::placeholders::_1, std::placeholders::_2)
+                );
                 Net::CNetworkManager::GetInstance().RegisterMessageHandler(m_DataSourceSocket, m_SLAMNetworkDelegate);
 
-                // -----------------------------------------------------------------------------
-                // Create network connection for Neural Network Server
-                // -----------------------------------------------------------------------------
+                
                 m_EnableInpainting = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:net:enable", true);
                 
                 if (m_EnableInpainting)
                 {
-                    Delegate = new Net::CMessageDelegate(std::bind(&CSLAMControl::OnNewNeuralNetMessage, this, std::placeholders::_1, std::placeholders::_2));
-                    m_NeualNetworkDelegate = std::shared_ptr<Net::CMessageDelegate>(Delegate);
+                    // -----------------------------------------------------------------------------
+                    // Create network connection for Neural Network Server
+                    // -----------------------------------------------------------------------------
                     Port = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:net:port", 12346);
                     std::string IP = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:net:ip", "127.0.0.1");
                     m_NeuralNetworkSocket = Net::CNetworkManager::GetInstance().CreateClientSocket(IP, Port);
+
+                    m_NeualNetworkDelegate = m_SLAMNetworkDelegate = std::make_shared<Net::CMessageDelegate>(
+                        std::bind(&CSLAMControl::OnNewNeuralNetMessage, this, std::placeholders::_1, std::placeholders::_2)
+                    );
                     Net::CNetworkManager::GetInstance().RegisterMessageHandler(m_NeuralNetworkSocket, m_NeualNetworkDelegate);
                 }
                 else
@@ -316,7 +321,7 @@ namespace MR
             {
                 m_RecordMode = PLAY;
                 m_RecordFile.open(m_RecordFileName, std::fstream::in | std::fstream::binary);
-                m_pRecordReader.reset(new Base::CRecordReader(m_RecordFile, 1));
+                m_pRecordReader = std::make_unique<Base::CRecordReader>(m_RecordFile, 1);
 
                 m_pRecordReader->SkipTime();
 
@@ -328,7 +333,7 @@ namespace MR
             {
                 m_RecordMode = RECORD;
                 m_RecordFile.open(m_RecordFileName, std::fstream::out | std::fstream::binary);
-                m_pRecordWriter.reset(new Base::CRecordWriter(m_RecordFile, 1));
+                m_pRecordWriter = std::make_unique<Base::CRecordWriter>(m_RecordFile, 1);
 
                 ENGINE_CONSOLE_INFOV("Recoding into file file \"%s\"", m_RecordFileName.c_str());
             }

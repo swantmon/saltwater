@@ -201,7 +201,7 @@ namespace MR
 		SetupTextures();
 		SetupBuffers(false);
                 
-        m_pTracker.reset(new CICPTracker(m_DepthFrameSize.x, m_DepthFrameSize.y, m_ReconstructionSettings));
+        m_pTracker = std::make_unique<MR::CICPTracker>(m_DepthFrameSize.x, m_DepthFrameSize.y, m_ReconstructionSettings);
 
         m_IsInizialized = true;
     }
