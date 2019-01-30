@@ -1271,9 +1271,9 @@ namespace MR
         ConstantBufferDesc.m_NumberOfBytes = sizeof(int32_t) * 4;// 16 bytes = minimum
         m_VolumeIndexBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
 
-        SRaycastConstantBuffer ScalableRaycastZero = {};
+        SRaycastConstantBuffer RaycastZero = {};
 
-        ConstantBufferDesc.m_pBytes = &ScalableRaycastZero;
+        ConstantBufferDesc.m_pBytes = &RaycastZero;
         ConstantBufferDesc.m_Binding = CBuffer::ConstantBuffer;
         ConstantBufferDesc.m_NumberOfBytes = sizeof(SRaycastConstantBuffer);
         m_VolumeBuffers.m_AABBBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
