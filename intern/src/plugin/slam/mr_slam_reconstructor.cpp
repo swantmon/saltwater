@@ -179,7 +179,7 @@ namespace MR
     
     // -----------------------------------------------------------------------------
 
-    void CScalableSLAMReconstructor::Start()
+    void CSLAMReconstructor::Start()
     {
         m_DepthBounds = glm::vec2(m_ReconstructionSettings.m_DepthThreshold) / 1000.0f;
 
@@ -208,7 +208,7 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CScalableSLAMReconstructor::SetupRenderStates()
+    void CSLAMReconstructor::SetupRenderStates()
     {
         SViewPortDescriptor ViewPortDescriptor = {};
 
@@ -234,7 +234,7 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CScalableSLAMReconstructor::SetupMeshes()
+    void CSLAMReconstructor::SetupMeshes()
     {
         const int VertexCount = sizeof(g_CubeVertices) / sizeof(g_CubeVertices[0]);
         const int IndexCount = sizeof(g_CubeIndices) / sizeof(g_CubeIndices[0]);
@@ -244,7 +244,7 @@ namespace MR
     
 	// -----------------------------------------------------------------------------
 
-	void CScalableSLAMReconstructor::SetupData()
+	void CSLAMReconstructor::SetupData()
 	{
         m_IsIntegrationPaused = false;
         m_IsTrackingPaused = false;
@@ -270,7 +270,7 @@ namespace MR
 
 	// -----------------------------------------------------------------------------
 
-	void CScalableSLAMReconstructor::UpdateFrustum()
+	void CSLAMReconstructor::UpdateFrustum()
 	{
         float x = (-m_FocalPoint.x / m_DepthFrameSize.x) / (m_FocalLength.x / m_DepthFrameSize.x);
         float y = (-m_FocalPoint.y / m_DepthFrameSize.y) / (m_FocalLength.y / m_DepthFrameSize.y);
@@ -313,7 +313,7 @@ namespace MR
 
 	// -----------------------------------------------------------------------------
 
-	glm::vec4 CScalableSLAMReconstructor::GetHessianNormalForm(const glm::vec3& rA, const glm::vec3& rB, const glm::vec3& rC)
+	glm::vec4 CSLAMReconstructor::GetHessianNormalForm(const glm::vec3& rA, const glm::vec3& rB, const glm::vec3& rC)
 	{
 		glm::vec3 V1 = rB - rA;
         glm::vec3 V2 = rC - rA;
@@ -327,7 +327,7 @@ namespace MR
 
 	// -----------------------------------------------------------------------------
 
-	float CScalableSLAMReconstructor::GetPointPlaneDistance(const glm::vec3& rPoint, const glm::vec4& rPlane)
+	float CSLAMReconstructor::GetPointPlaneDistance(const glm::vec3& rPoint, const glm::vec4& rPlane)
 	{
         const float Dot = glm::dot(rPoint, glm::vec3(rPlane));
 		return Dot - rPlane[3];
@@ -335,7 +335,7 @@ namespace MR
 
     // -----------------------------------------------------------------------------
     
-    void CScalableSLAMReconstructor::Exit()
+    void CSLAMReconstructor::Exit()
     {
         m_IsInizialized = false;
 
@@ -411,14 +411,14 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    bool CScalableSLAMReconstructor::IsInitialized()
+    bool CSLAMReconstructor::IsInitialized()
     {
         return m_IsInizialized;
     }
     
     // -----------------------------------------------------------------------------
     
-    void CScalableSLAMReconstructor::SetupShaders()
+    void CSLAMReconstructor::SetupShaders()
     {
         const float VoxelSize = m_ReconstructionSettings.m_VoxelSize;
 
@@ -511,7 +511,7 @@ namespace MR
     
     // -----------------------------------------------------------------------------
     
-	bool CScalableSLAMReconstructor::RootGridInFrustum(const glm::ivec3& rKey)
+	bool CSLAMReconstructor::RootGridInFrustum(const glm::ivec3& rKey)
 	{
 		float AABB[6];
 
@@ -554,7 +554,7 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CScalableSLAMReconstructor::RasterizeRootVolumes()
+    void CSLAMReconstructor::RasterizeRootVolumes()
     {
         const unsigned int Offset = 0;
         ContextManager::SetVertexBuffer(m_CubeMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
@@ -587,7 +587,7 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CScalableSLAMReconstructor::GatherVolumeCounters(unsigned int Count, CBufferPtr CounterBuffer, CBufferPtr QueueBuffer, CBufferPtr IndirectBuffer)
+    void CSLAMReconstructor::GatherVolumeCounters(unsigned int Count, CBufferPtr CounterBuffer, CBufferPtr QueueBuffer, CBufferPtr IndirectBuffer)
     {
         ContextManager::Barrier();
 
@@ -606,7 +606,7 @@ namespace MR
 
 	// -----------------------------------------------------------------------------
     
-    void CScalableSLAMReconstructor::CreateIntegrationQueues(std::vector<uint32_t>& rVolumeQueue)
+    void CSLAMReconstructor::CreateIntegrationQueues(std::vector<uint32_t>& rVolumeQueue)
     {
         ////////////////////////////////////////////////////////////////////////////////
         // Create buffers for new volumes
@@ -752,7 +752,7 @@ namespace MR
     
     // -----------------------------------------------------------------------------
 
-    void CScalableSLAMReconstructor::IntegrateHierarchies(std::vector<uint32_t>& rVolumeQueue)
+    void CSLAMReconstructor::IntegrateHierarchies(std::vector<uint32_t>& rVolumeQueue)
     {
         for (uint32_t VolumeIndex : rVolumeQueue)
         {
@@ -890,7 +890,7 @@ namespace MR
     
     // -----------------------------------------------------------------------------
 
-	void CScalableSLAMReconstructor::UpdateRootgrids()
+	void CSLAMReconstructor::UpdateRootgrids()
 	{
         ////////////////////////////////////////////////////////////////////////////////
         // Create all root grid volumes that are in the view frustum 
@@ -1076,7 +1076,7 @@ namespace MR
 
 	// -----------------------------------------------------------------------------
 
-    void CScalableSLAMReconstructor::SetupTextures()
+    void CSLAMReconstructor::SetupTextures()
     {
         m_SmoothDepthBufferPtr.resize(m_ReconstructionSettings.m_PyramidLevelCount);
         m_ReferenceVertexMapPtr.resize(m_ReconstructionSettings.m_PyramidLevelCount);
@@ -1165,7 +1165,7 @@ namespace MR
     
     // -----------------------------------------------------------------------------
     
-    void CScalableSLAMReconstructor::SetupBuffers(bool _CreatePool)
+    void CSLAMReconstructor::SetupBuffers(bool _CreatePool)
     {
         const float FocalLengthX0 = m_FocalLength.x;
         const float FocalLengthY0 = m_FocalLength.y;
@@ -1285,7 +1285,7 @@ namespace MR
         m_PlaneExtractionBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
     }
 
-    void CScalableSLAMReconstructor::CreatePool()
+    void CSLAMReconstructor::CreatePool()
     {
         m_RootGridPoolSize = Core::CProgramParameters::GetInstance().Get("mr:slam:pool_sizes:level0", g_MaxRootGridPoolSize / g_MegabyteSize) * g_MegabyteSize;
         m_Level1GridPoolSize = Core::CProgramParameters::GetInstance().Get("mr:slam:pool_sizes:level1", g_MaxLevel1GridPoolSize / g_MegabyteSize) * g_MegabyteSize;
@@ -1319,7 +1319,7 @@ namespace MR
     
     // -----------------------------------------------------------------------------
 
-    void CScalableSLAMReconstructor::SetImageSizes(glm::ivec2 _DepthFrameSize, glm::ivec2 _ColorFrameSize)
+    void CSLAMReconstructor::SetImageSizes(glm::ivec2 _DepthFrameSize, glm::ivec2 _ColorFrameSize)
     {
         m_DepthFrameSize = _DepthFrameSize;
         m_ColorFrameSize = _ColorFrameSize;
@@ -1327,7 +1327,7 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CScalableSLAMReconstructor::SetIntrinsics(glm::vec2 _FocalLength, glm::vec2 _FocalPoint)
+    void CSLAMReconstructor::SetIntrinsics(glm::vec2 _FocalLength, glm::vec2 _FocalPoint)
     {
         m_FocalLength = _FocalLength;
         m_FocalPoint = _FocalPoint;
@@ -1335,21 +1335,21 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CScalableSLAMReconstructor::SetDepthBounds(float _Min, float _Max)
+    void CSLAMReconstructor::SetDepthBounds(float _Min, float _Max)
     {
         m_DepthBounds = glm::vec2(_Min, _Max);
     }
 
     // -----------------------------------------------------------------------------
 
-    void CScalableSLAMReconstructor::SetDeviceResolution(const glm::ivec2& _rResolution)
+    void CSLAMReconstructor::SetDeviceResolution(const glm::ivec2& _rResolution)
     {
         m_DeviceResolution = _rResolution;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CScalableSLAMReconstructor::GetImageSizes(glm::ivec2& _rDepthFrameSize, glm::ivec2& _rColorFrameSize)
+    void CSLAMReconstructor::GetImageSizes(glm::ivec2& _rDepthFrameSize, glm::ivec2& _rColorFrameSize)
     {
         _rDepthFrameSize = m_DepthFrameSize;
         _rColorFrameSize = m_ColorFrameSize;
@@ -1357,7 +1357,7 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CScalableSLAMReconstructor::GetIntrinsics(glm::vec2& _rFocalLength, glm::vec2& _rFocalPoint)
+    void CSLAMReconstructor::GetIntrinsics(glm::vec2& _rFocalLength, glm::vec2& _rFocalPoint)
     {
         _rFocalLength = m_FocalLength;
         _rFocalPoint = m_FocalPoint;
@@ -1365,7 +1365,7 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CScalableSLAMReconstructor::GetDepthBounds(float& _rMin, float& _rMax)
+    void CSLAMReconstructor::GetDepthBounds(float& _rMin, float& _rMax)
     {
         _rMin = m_DepthBounds[0];
         _rMax = m_DepthBounds[1];
@@ -1373,14 +1373,14 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CScalableSLAMReconstructor::GetDeviceResolution(glm::ivec2& _rResolution)
+    void CSLAMReconstructor::GetDeviceResolution(glm::ivec2& _rResolution)
     {
         _rResolution = m_DeviceResolution;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CScalableSLAMReconstructor::OnNewFrame(Gfx::CTexturePtr DepthBuffer, Gfx::CTexturePtr ColorBuffer, const glm::mat4* pTransform)
+    void CSLAMReconstructor::OnNewFrame(Gfx::CTexturePtr DepthBuffer, Gfx::CTexturePtr ColorBuffer, const glm::mat4* pTransform)
     {
         m_IsTrackingNeeded = pTransform == nullptr;
 
@@ -1562,7 +1562,7 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CScalableSLAMReconstructor::CreateReferencePyramid()
+    void CSLAMReconstructor::CreateReferencePyramid()
     {
         const int WorkGroupsX = DivUp(m_DepthFrameSize.x, g_TileSize2D);
         const int WorkGroupsY = DivUp(m_DepthFrameSize.y, g_TileSize2D);
@@ -1654,7 +1654,7 @@ namespace MR
       
     // -----------------------------------------------------------------------------
 
-    void CScalableSLAMReconstructor::CreateRaycastPyramid()
+    void CSLAMReconstructor::CreateRaycastPyramid()
     {
         ////////////////////////////////////////////////////////////////////////////////////
         // If the normal map is not generated from the TSDF
@@ -1706,7 +1706,7 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CScalableSLAMReconstructor::Raycast()
+    void CSLAMReconstructor::Raycast()
     {
         const int WorkGroupsX = DivUp(m_DepthFrameSize.x, g_TileSize2D);
         const int WorkGroupsY = DivUp(m_DepthFrameSize.y, g_TileSize2D);
@@ -1733,7 +1733,7 @@ namespace MR
     
     // -----------------------------------------------------------------------------
 
-    void CScalableSLAMReconstructor::ClearBuffer(CBufferPtr BufferPtr)
+    void CSLAMReconstructor::ClearBuffer(CBufferPtr BufferPtr)
     {
         assert(BufferPtr.IsValid());
 
@@ -1742,7 +1742,7 @@ namespace MR
     
     // -----------------------------------------------------------------------------
 
-    void CScalableSLAMReconstructor::ClearBuffer(CBufferPtr BufferPtr, size_t Size)
+    void CSLAMReconstructor::ClearBuffer(CBufferPtr BufferPtr, size_t Size)
     {
         if (Size > m_ClearVector.size())
         {
@@ -1757,7 +1757,7 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CScalableSLAMReconstructor::ClearPool()
+    void CSLAMReconstructor::ClearPool()
     {
         const uint32_t DataSize = g_MegabyteSize / 4;
 
@@ -1791,7 +1791,7 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CScalableSLAMReconstructor::ClearMarkerStatistics()
+    void CSLAMReconstructor::ClearMarkerStatistics()
     {
         Performance::ResetEventStatistics("Rasterize point cloud");
         Performance::ResetEventStatistics("Render single point cloud");
@@ -1814,7 +1814,7 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CScalableSLAMReconstructor::ResetReconstruction(const SReconstructionSettings* pReconstructionSettings)
+    void CSLAMReconstructor::ResetReconstruction(const SReconstructionSettings* pReconstructionSettings)
     {
         m_RootVolumeMap.clear();
         m_RootVolumeVector.clear();
@@ -1840,7 +1840,7 @@ namespace MR
     
     // -----------------------------------------------------------------------------
 
-    void CScalableSLAMReconstructor::AddPlane(glm::mat4 _Transform, glm::vec4 _Extent, int _ID)
+    void CSLAMReconstructor::AddPlane(glm::mat4 _Transform, glm::vec4 _Extent, int _ID)
     {
         SPlane Plane = { _Transform, _Extent };
 
@@ -1849,7 +1849,7 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CScalableSLAMReconstructor::UpdatePlane(glm::mat4 _Transform, glm::vec4 _Extent, int _ID)
+    void CSLAMReconstructor::UpdatePlane(glm::mat4 _Transform, glm::vec4 _Extent, int _ID)
     {
         SPlane Plane = { _Transform, _Extent };
 
@@ -1858,21 +1858,21 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    void CScalableSLAMReconstructor::RemovePlane(int _ID)
+    void CSLAMReconstructor::RemovePlane(int _ID)
     {
         m_Planes.erase(m_Planes.find(_ID));
     }
 
     // -----------------------------------------------------------------------------
 
-    const std::map<int, CScalableSLAMReconstructor::SPlane>& CScalableSLAMReconstructor::GetPlanes() const
+    const std::map<int, CSLAMReconstructor::SPlane>& CSLAMReconstructor::GetPlanes() const
     {
         return m_Planes;
     }
 
     // -----------------------------------------------------------------------------
 
-    Gfx::CTexturePtr CScalableSLAMReconstructor::CreatePlaneTexture(const Base::AABB3Float& _rAABB)
+    Gfx::CTexturePtr CSLAMReconstructor::CreatePlaneTexture(const Base::AABB3Float& _rAABB)
     {
         Performance::BeginEvent("Create plane texture");
 
@@ -1948,7 +1948,7 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    CScalableSLAMReconstructor::CScalableSLAMReconstructor(const SReconstructionSettings* pReconstructionSettings)
+    CSLAMReconstructor::CSLAMReconstructor(const SReconstructionSettings* pReconstructionSettings)
     {
         ////////////////////////////////////////////////////////////////////////////////
         // Check if conservative rasterization is available
@@ -2018,69 +2018,69 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    CScalableSLAMReconstructor::~CScalableSLAMReconstructor()
+    CSLAMReconstructor::~CSLAMReconstructor()
     {
     }
 
     // -----------------------------------------------------------------------------
 
-    bool CScalableSLAMReconstructor::IsTrackingLost() const
+    bool CSLAMReconstructor::IsTrackingLost() const
     {
         return !m_IsTrackingPaused && m_TrackingLost;
     }
 
     // -----------------------------------------------------------------------------
 
-    glm::mat4 CScalableSLAMReconstructor::GetPoseMatrix() const
+    glm::mat4 CSLAMReconstructor::GetPoseMatrix() const
     {
         return m_PoseMatrix;
     }
 
     // -----------------------------------------------------------------------------
 
-    CScalableSLAMReconstructor::CRootVolumeMap& CScalableSLAMReconstructor::GetRootVolumeMap()
+    CSLAMReconstructor::CRootVolumeMap& CSLAMReconstructor::GetRootVolumeMap()
     {
         return m_RootVolumeMap;
     }
 
     // -----------------------------------------------------------------------------
 
-    CScalableSLAMReconstructor::CRootVolumeVector& CScalableSLAMReconstructor::GetRootVolumeVector()
+    CSLAMReconstructor::CRootVolumeVector& CSLAMReconstructor::GetRootVolumeVector()
     {
         return m_RootVolumeVector;
     }
 
     // -----------------------------------------------------------------------------
 
-    CScalableSLAMReconstructor::SScalableVolume& CScalableSLAMReconstructor::GetVolume()
+    CSLAMReconstructor::SScalableVolume& CSLAMReconstructor::GetVolume()
     {
         return m_VolumeBuffers;
     }
 
     // -----------------------------------------------------------------------------
 
-    const std::vector<float>& CScalableSLAMReconstructor::GetVolumeSizes() const
+    const std::vector<float>& CSLAMReconstructor::GetVolumeSizes() const
     {
         return m_VolumeSizes;
     }
 
     // -----------------------------------------------------------------------------
     
-    void CScalableSLAMReconstructor::PauseIntegration(bool _Paused)
+    void CSLAMReconstructor::PauseIntegration(bool _Paused)
     {
         m_IsIntegrationPaused = _Paused;
     }
     
     // -----------------------------------------------------------------------------
 
-    void CScalableSLAMReconstructor::PauseTracking(bool _Paused)
+    void CSLAMReconstructor::PauseTracking(bool _Paused)
     {
         m_IsTrackingPaused = _Paused;
     }
         
     // -----------------------------------------------------------------------------
 
-    void CScalableSLAMReconstructor::GetReconstructionSettings(SReconstructionSettings* pReconstructionSettings)
+    void CSLAMReconstructor::GetReconstructionSettings(SReconstructionSettings* pReconstructionSettings)
     {
         assert(pReconstructionSettings != nullptr);
         *pReconstructionSettings = m_ReconstructionSettings;
@@ -2088,42 +2088,42 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    Gfx::CTexturePtr CScalableSLAMReconstructor::GetVertexMap()
+    Gfx::CTexturePtr CSLAMReconstructor::GetVertexMap()
     {
         return m_RawVertexMapPtr;
     }
 
     // -----------------------------------------------------------------------------
 
-    Gfx::CTexturePtr CScalableSLAMReconstructor::GetNormalMap()
+    Gfx::CTexturePtr CSLAMReconstructor::GetNormalMap()
     {
         return m_RaycastNormalMapPtr[0];
     }
 
     // -----------------------------------------------------------------------------
 
-    Gfx::CTexturePtr CScalableSLAMReconstructor::GetColorMap()
+    Gfx::CTexturePtr CSLAMReconstructor::GetColorMap()
     {
         return m_RawCameraFramePtr;
     }
 
     // -----------------------------------------------------------------------------
 
-    glm::ivec2 CScalableSLAMReconstructor::GetDepthImageSize()
+    glm::ivec2 CSLAMReconstructor::GetDepthImageSize()
     {
         return m_DepthFrameSize;
     }
 
     // -----------------------------------------------------------------------------
 
-    glm::vec4 CScalableSLAMReconstructor::GetDepthIntrinsics()
+    glm::vec4 CSLAMReconstructor::GetDepthIntrinsics()
     {
         return glm::vec4(m_FocalLength, m_FocalPoint);
     }
 
     // -----------------------------------------------------------------------------
 
-    float CScalableSLAMReconstructor::GetReconstructionSize()
+    float CSLAMReconstructor::GetReconstructionSize()
     {
         return m_ReconstructionSize;
     }

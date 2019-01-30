@@ -106,7 +106,7 @@ namespace MR
 
         bool m_CaptureColor;
 
-        std::unique_ptr<MR::CScalableSLAMReconstructor> m_pReconstructor;
+        std::unique_ptr<MR::CSLAMReconstructor> m_pReconstructor;
 
         // -----------------------------------------------------------------------------
         // Stuff for network data source
@@ -184,7 +184,7 @@ namespace MR
 
             m_pSelectionTicket = &Gfx::SelectionRenderer::AcquireTicket(-1, -1, 1, 1, Gfx::SPickFlag::Voxel);
 
-            m_pReconstructor.reset(new MR::CScalableSLAMReconstructor);
+            m_pReconstructor.reset(new MR::CSLAMReconstructor);
             Gfx::ReconstructionRenderer::SetReconstructor(*m_pReconstructor);
 
             // -----------------------------------------------------------------------------

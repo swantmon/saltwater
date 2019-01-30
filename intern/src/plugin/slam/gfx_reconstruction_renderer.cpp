@@ -106,7 +106,7 @@ namespace
         void RenderHitProxy();
         void ChangeCamera(bool _IsTrackingCamera);
 
-        void SetReconstructor(MR::CScalableSLAMReconstructor& _rReconstructor);
+        void SetReconstructor(MR::CSLAMReconstructor& _rReconstructor);
 
         glm::vec3 Pick(const glm::ivec2& _rCursorPosition);
 
@@ -158,7 +158,7 @@ namespace
 
     private:
 
-		MR::CScalableSLAMReconstructor* m_pScalableReconstructor;
+		MR::CSLAMReconstructor* m_pScalableReconstructor;
         
         CShaderPtr m_OutlineVSPtr;
         CShaderPtr m_OutlineFSPtr;
@@ -829,7 +829,7 @@ namespace
 
         ContextManager::SetTargetSet(TargetSetManager::GetDeferredTargetSet());
 
-        MR::CScalableSLAMReconstructor::SScalableVolume& rVolume = m_pScalableReconstructor->GetVolume();
+        MR::CSLAMReconstructor::SScalableVolume& rVolume = m_pScalableReconstructor->GetVolume();
 
         MR::SReconstructionSettings Settings;
         m_pScalableReconstructor->GetReconstructionSettings(&Settings);
@@ -918,7 +918,7 @@ namespace
 
         ContextManager::SetTargetSet(TargetSetManager::GetDeferredTargetSet());
 
-        MR::CScalableSLAMReconstructor::SScalableVolume& rVolume = m_pScalableReconstructor->GetVolume();
+        MR::CSLAMReconstructor::SScalableVolume& rVolume = m_pScalableReconstructor->GetVolume();
 
         MR::SReconstructionSettings Settings;
         m_pScalableReconstructor->GetReconstructionSettings(&Settings);
@@ -1002,7 +1002,7 @@ namespace
 
         ContextManager::SetViewPortSet(m_DiminishedViewPortSetPtr);
 
-        MR::CScalableSLAMReconstructor::SScalableVolume& rVolume = m_pScalableReconstructor->GetVolume();
+        MR::CSLAMReconstructor::SScalableVolume& rVolume = m_pScalableReconstructor->GetVolume();
         
         ContextManager::SetShaderVS(m_RaycastDiminishedVSPtr);
         ContextManager::SetShaderPS(m_RaycastDiminishedFSPtr);
@@ -1212,7 +1212,7 @@ namespace
                 int VertexCount = m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface()->GetNumberOfVertices();
                 BufferManager::UploadBufferData(rRootGrid.m_IndirectLevel1Buffer, &VertexCount, 0, sizeof(uint32_t));
 
-                ContextManager::DrawIndirect(rRootGrid.m_IndirectLevel1Buffer, MR::CScalableSLAMReconstructor::SIndirectBuffers::s_DrawOffset);
+                ContextManager::DrawIndirect(rRootGrid.m_IndirectLevel1Buffer, MR::CSLAMReconstructor::SIndirectBuffers::s_DrawOffset);
             }
         }
     }
@@ -1268,7 +1268,7 @@ namespace
                 int VertexCount = m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface()->GetNumberOfVertices();
                 BufferManager::UploadBufferData(rRootGrid.m_IndirectLevel2Buffer, &VertexCount, 0, sizeof(uint32_t));
 
-                ContextManager::DrawIndirect(rRootGrid.m_IndirectLevel2Buffer, MR::CScalableSLAMReconstructor::SIndirectBuffers::s_DrawOffset);
+                ContextManager::DrawIndirect(rRootGrid.m_IndirectLevel2Buffer, MR::CSLAMReconstructor::SIndirectBuffers::s_DrawOffset);
             }
         }
     }
@@ -1400,7 +1400,7 @@ namespace
             0.0f, -1.0f, 0.0f
         );
 
-        MR::CScalableSLAMReconstructor::SScalableVolume& rVolume = m_pScalableReconstructor->GetVolume();
+        MR::CSLAMReconstructor::SScalableVolume& rVolume = m_pScalableReconstructor->GetVolume();
 
         const glm::ivec2 WindowSize = Gfx::Main::GetActiveWindowSize();
         const glm::vec3 CameraPosition = Gfx::ViewManager::GetMainCamera()->GetView()->GetPosition();
@@ -1630,7 +1630,7 @@ namespace
 
         if (m_RenderVolume && ID != Dt::CEntity::s_InvalidID)
         {
-            MR::CScalableSLAMReconstructor::SScalableVolume& rVolume = m_pScalableReconstructor->GetVolume();
+            MR::CSLAMReconstructor::SScalableVolume& rVolume = m_pScalableReconstructor->GetVolume();
 
             MR::SReconstructionSettings Settings;
             m_pScalableReconstructor->GetReconstructionSettings(&Settings);
@@ -1705,7 +1705,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxReconstructionRenderer::SetReconstructor(MR::CScalableSLAMReconstructor& _rReconstructor)
+    void CGfxReconstructionRenderer::SetReconstructor(MR::CSLAMReconstructor& _rReconstructor)
     {
         m_pScalableReconstructor = &_rReconstructor;
     }
@@ -1848,7 +1848,7 @@ namespace ReconstructionRenderer
     
     // -----------------------------------------------------------------------------
 
-    void SetReconstructor(MR::CScalableSLAMReconstructor& _rReconstructor)
+    void SetReconstructor(MR::CSLAMReconstructor& _rReconstructor)
     {
         CGfxReconstructionRenderer::GetInstance().SetReconstructor(_rReconstructor);
     }

@@ -54,7 +54,7 @@ namespace MR
 		}
 	};
 
-    class CScalableSLAMReconstructor : private Base::CUncopyable
+    class CSLAMReconstructor : private Base::CUncopyable
     {
 	public:
 
@@ -142,8 +142,8 @@ namespace MR
 
     public:
 
-        CScalableSLAMReconstructor(const SReconstructionSettings* pReconstructionSettings = nullptr);
-        ~CScalableSLAMReconstructor();
+        CSLAMReconstructor(const SReconstructionSettings* pReconstructionSettings = nullptr);
+        ~CSLAMReconstructor();
 
     public:
 

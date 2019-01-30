@@ -29,7 +29,7 @@ namespace ReconstructionRenderer
     void RenderHitProxy();
     void ChangeCamera(bool _IsTrackingCamera);
 
-    void SetReconstructor(MR::CScalableSLAMReconstructor& _rReconstructor);
+    void SetReconstructor(MR::CSLAMReconstructor& _rReconstructor);
 
     glm::vec3 Pick(const glm::ivec2& _rCursor);
 
