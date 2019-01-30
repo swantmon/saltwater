@@ -28,10 +28,20 @@ namespace Net
         {
             auto& rMessage = m_MessageQueue.front();
             
-            for (auto& rDelegate : m_Delegates)
+            auto It = m_Delegates.begin();
+
+            while (It != m_Delegates.end())
             {
-                assert(!rDelegate.expired());
-                (*rDelegate.lock())(rMessage, m_Port);
+                if (It->expired())
+                {
+                    It = m_Delegates.erase(It);
+                }
+                else
+                {
+                    auto Delegate = *(It->lock());
+                    Delegate(rMessage, m_Port);
+                    ++ It;
+                }
             }
 
             m_MessageQueue.pop();
