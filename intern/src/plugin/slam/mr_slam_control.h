@@ -174,6 +174,8 @@ namespace MR
         Net::SocketHandle m_NeuralNetworkSocket;
         std::shared_ptr<Net::CMessageDelegate> m_NeualNetworkDelegate;
 
+        bool m_EnableInpainting;
+
     public:
 
         void Start()
@@ -209,12 +211,21 @@ namespace MR
                 // -----------------------------------------------------------------------------
                 // Create network connection for Neural Network Server
                 // -----------------------------------------------------------------------------
-                Delegate = new Net::CMessageDelegate(std::bind(&CSLAMControl::OnNewNeuralNetMessage, this, std::placeholders::_1, std::placeholders::_2));
-                m_NeualNetworkDelegate = std::shared_ptr<Net::CMessageDelegate>(Delegate);
-                Port = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:net:port", 12346);
-                std::string IP = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:net:ip", "127.0.0.1");
-                m_NeuralNetworkSocket = Net::CNetworkManager::GetInstance().CreateClientSocket(IP, Port);
-                Net::CNetworkManager::GetInstance().RegisterMessageHandler(m_NeuralNetworkSocket, m_NeualNetworkDelegate);
+                m_EnableInpainting = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:net:enable", true);
+                
+                if (m_EnableInpainting)
+                {
+                    Delegate = new Net::CMessageDelegate(std::bind(&CSLAMControl::OnNewNeuralNetMessage, this, std::placeholders::_1, std::placeholders::_2));
+                    m_NeualNetworkDelegate = std::shared_ptr<Net::CMessageDelegate>(Delegate);
+                    Port = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:net:port", 12346);
+                    std::string IP = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:net:ip", "127.0.0.1");
+                    m_NeuralNetworkSocket = Net::CNetworkManager::GetInstance().CreateClientSocket(IP, Port);
+                    Net::CNetworkManager::GetInstance().RegisterMessageHandler(m_NeuralNetworkSocket, m_NeualNetworkDelegate);
+                }
+                else
+                {
+                    ENGINE_CONSOLE_INFO("Inpainting by neural networks is disabled");
+                }
                 
                 m_DataSource = NETWORK;
 
@@ -516,7 +527,7 @@ namespace MR
             {
                 Gfx::ReconstructionRenderer::ResetSelection();
             }
-            else if (_rEvent.GetAction() == Base::CInputEvent::MouseWheel)
+            else if (_rEvent.GetAction() == Base::CInputEvent::MouseWheel && m_EnableInpainting)
             {
                 SendPlane();
             }
