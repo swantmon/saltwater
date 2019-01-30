@@ -578,13 +578,13 @@ namespace MR
                     m_DeviceResolution = Message.m_DeviceResolution;
                     m_DeviceProjectionMatrix = Message.m_DeviceProjectionMatrix;
 
+                    Gfx::ReconstructionRenderer::SetDeviceResolution(m_DeviceResolution);
+
                     MR::SReconstructionSettings Settings;
                     m_pReconstructor->GetReconstructionSettings(&Settings);
 
                     m_CaptureColor = Settings.m_CaptureColor;
-
-                    m_pReconstructor->SetDeviceResolution(m_DeviceResolution);
-
+                    
                     if (m_CaptureColor)
                     {
                         FocalPoint.x = (FocalPoint.x / m_DepthSize.x) * m_ColorSize.x;
