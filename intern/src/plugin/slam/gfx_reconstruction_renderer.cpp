@@ -31,7 +31,7 @@
 #include "engine/script/script_slam.h"
 
 #include "plugin/slam/gfx_reconstruction_renderer.h"
-#include "plugin/slam/mr_scalable_slam_reconstructor.h"
+#include "plugin/slam/mr_slam_reconstructor.h"
 
 #include "GL/glew.h"
 

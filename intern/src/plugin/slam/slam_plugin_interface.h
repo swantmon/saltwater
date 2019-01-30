@@ -3,8 +3,6 @@
 
 #include "engine/core/core_plugin_manager.h"
 
-#include "plugin/slam/mr_scalable_slam_reconstructor.h"
-
 #include "plugin/slam/mr_slam_control.h"
 
 namespace SLAM
