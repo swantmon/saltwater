@@ -1823,7 +1823,6 @@ namespace MR
 
         if (pReconstructionSettings != nullptr)
         {
-			assert(pReconstructionSettings->m_IsScalable);
             m_ReconstructionSettings = *pReconstructionSettings;
         }
 
@@ -1977,7 +1976,6 @@ namespace MR
 
         if (pReconstructionSettings != nullptr)
         {
-            assert(pReconstructionSettings->m_IsScalable);
             m_ReconstructionSettings = *pReconstructionSettings;
         }
         else
