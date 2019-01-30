@@ -59,10 +59,10 @@ namespace
     const unsigned int g_MaxLevel1GridPoolSize =  64u * g_MegabyteSize;
     const unsigned int g_MaxTSDFPoolSize       = 128u * g_MegabyteSize;
     /*/
-    const unsigned int g_MaxRootVolumePoolSize =              g_MegabyteSize;
-    const unsigned int g_MaxRootGridPoolSize   =       128u * g_MegabyteSize;
-    const unsigned int g_MaxLevel1GridPoolSize =       128u * g_MegabyteSize;
-    const unsigned long long g_MaxTSDFPoolSize       = 16ul * 128ul * g_MegabyteSize;
+    const unsigned int g_MaxRootVolumePoolSize =                g_MegabyteSize;
+    const unsigned int g_MaxRootGridPoolSize   =          16u * g_MegabyteSize;
+    const unsigned int g_MaxLevel1GridPoolSize =          16u * g_MegabyteSize;
+    const unsigned long long g_MaxTSDFPoolSize = 16ul * 128ul * g_MegabyteSize;
     //*/
     
     const int g_TileSize1D = 64;
