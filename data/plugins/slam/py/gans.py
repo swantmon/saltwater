@@ -26,107 +26,106 @@ class Generator(nn.Module):
             layers.append(nn.ReLU())
             return layers
 
+        # -----------------------------------------------------------------------------
+
         self.pool = nn.MaxPool2d(2, 2)
 
-        self.conv1 = nn.Conv2d(channels, 64, 4, stride=1, padding=2)
-        self.conv2 = nn.Conv2d(64, 64, 4, stride=1, padding=2)
-        self.norm2 = nn.BatchNorm2d(64, 0.8)
-        self.conv3 = nn.Conv2d(64, 128, 4, stride=1, padding=2)
-        self.norm3 = nn.BatchNorm2d(128, 0.8)
-        self.conv4 = nn.Conv2d(128, 256, 4, stride=1, padding=2)
-        self.norm4 = nn.BatchNorm2d(256, 0.8)
-        self.conv5 = nn.Conv2d(256, 512, 4, stride=1, padding=2)
-        self.norm5 = nn.BatchNorm2d(512, 0.8)
-        self.conv6 = nn.Conv2d(512, 1000, 4)
+        self.conv1_1 = nn.Conv2d(channels, 64, 4, stride=1, padding=2)
 
-        self.linear1 = nn.Linear(1024, 1024)
-        self.linear2 = nn.Linear(64, 64)
+        self.conv2_1 = nn.Conv2d(64, 64, 4, stride=1, padding=2)
+        self.norm2_1 = nn.BatchNorm2d(64, 0.8)
 
-        self.tconv1 = nn.ConvTranspose2d(1000, 512, 4, stride=1, padding=0)
-        self.norm6 = nn.BatchNorm2d(512, 0.8)
-        self.tconv2 = nn.ConvTranspose2d(512, 256, 4, stride=2, padding=1)
-        self.norm7 = nn.BatchNorm2d(256, 0.8)
-        self.tconv3 = nn.ConvTranspose2d(256, 128, 4, stride=2, padding=1)
-        self.norm8 = nn.BatchNorm2d(128, 0.8)
-        self.tconv4 = nn.ConvTranspose2d(128, 64, 4, stride=2, padding=1)
-        self.norm9 = nn.BatchNorm2d(64, 0.8)
-        self.tconv5 = nn.ConvTranspose2d(64, 64, 4, stride=2, padding=1)
-        self.norm10 = nn.BatchNorm2d(64, 0.8)
+        self.conv3_1 = nn.Conv2d(64, 128, 4, stride=1, padding=2)
+        self.norm3_1 = nn.BatchNorm2d(128, 0.8)
 
-        self.test1 = nn.ConvTranspose2d(64, 32, 4, stride=2, padding=1)
-        self.test2 = nn.BatchNorm2d(32, 0.8)
-        self.test3 = nn.ConvTranspose2d(32, 16, 4, stride=2, padding=1)
-        self.test4 = nn.BatchNorm2d(16, 0.8)
-        self.test5 = nn.ConvTranspose2d(16, 8, 4, stride=2, padding=1)
-        self.test6 = nn.BatchNorm2d(8, 0.8)
-        self.test7 = nn.ConvTranspose2d(8, 4, 4, stride=2, padding=1)
-        self.test8 = nn.BatchNorm2d(4, 0.8)
+        self.conv4_1 = nn.Conv2d(128, 256, 4, stride=1, padding=2)
+        self.norm4_1 = nn.BatchNorm2d(256, 0.8)
 
-        self.test9 = nn.Conv2d(4, 8, 4, stride=1, padding=2)
-        self.test10 = nn.BatchNorm2d(8, 0.8)
-        self.test11 = nn.Conv2d(8, 16, 4, stride=1, padding=2)
-        self.test12 = nn.BatchNorm2d(16, 0.8)
-        self.test13 = nn.Conv2d(16, 32, 4, stride=1, padding=2)
-        self.test14 = nn.BatchNorm2d(32, 0.8)
-        self.test15 = nn.Conv2d(32, 64, 4, stride=1, padding=2)
-        self.test16 = nn.BatchNorm2d(64, 0.8)
+        self.conv5_1 = nn.Conv2d(256, 512, 4, stride=1, padding=2)
+        self.norm5_1 = nn.BatchNorm2d(512, 0.8)
 
-        self.conv7 = nn.Conv2d(64, channels, 3, 1, 1)
+        self.conv6_1 = nn.Conv2d(512, 1000, 4)
+        self.linear6_2 = nn.Linear(1, 1000)
+        self.drop6_3 = nn.Dropout(0.5)
+        self.linear6_4 = nn.Linear(1000, 1)
+        self.drop6_5 = nn.Dropout(0.5)
 
+        self.tconv6_1 = nn.ConvTranspose2d(1000, 512, 4, stride=1, padding=0)
+        self.norm6_1 = nn.BatchNorm2d(512, 0.8)
+
+        self.tconv7_1 = nn.ConvTranspose2d(512, 256, 4, stride=2, padding=1)
+        self.norm7_1 = nn.BatchNorm2d(256, 0.8)
+
+        self.tconv8_1 = nn.ConvTranspose2d(256, 128, 4, stride=2, padding=1)
+        self.norm8_1 = nn.BatchNorm2d(128, 0.8)
+
+        self.tconv9_1 = nn.ConvTranspose2d(128, 64, 4, stride=2, padding=1)
+        self.norm9_1 = nn.BatchNorm2d(64, 0.8)
+
+        self.tconv10_1 = nn.ConvTranspose2d(64, 64, 4, stride=2, padding=1)
+        self.norm10_1 = nn.BatchNorm2d(64, 0.8)
+
+        self.conv11 = nn.Conv2d(64, channels, 3, 1, 1)
+
+    # -----------------------------------------------------------------------------
 
     def forward(self, x):
-        x = self.pool(self.conv1(x))                # 128 x 128 > 64 x 64
+        x = self.conv1_1(x)
+        x = self.pool(x)
 
-        x = self.linear2(x)
+        x = self.conv2_1(x)
+        x = self.norm2_1(x)
+        x = self.pool(x)
+        x = F.elu(x)
 
-        x = self.test1(x)
-        x = F.relu(self.test2(x))
-        x = self.test3(x)
-        x = F.relu(self.test4(x))
-        x = self.test5(x)
-        x = F.relu(self.test6(x))
-        x = self.test7(x)
-        x = F.relu(self.test8(x))
+        x = self.conv3_1(x)
+        x = self.norm3_1(x)
+        x = self.pool(x)
+        x = F.elu(x)
 
-        x = self.linear1(x)        
+        x = self.conv4_1(x)
+        x = self.norm4_1(x)
+        x = self.pool(x)
+        x = F.elu(x)
 
-        x = self.pool(self.test9(x))
-        x = F.leaky_relu(self.test10(x), 0.2)
-        x = self.pool(self.test11(x))
-        x = F.leaky_relu(self.test12(x), 0.2)
-        x = self.pool(self.test13(x))
-        x = F.leaky_relu(self.test14(x), 0.2)
-        x = self.pool(self.test15(x))
-        x = F.leaky_relu(self.test16(x), 0.2)
+        x = self.conv5_1(x)
+        x = self.norm5_1(x)
+        x = self.pool(x)
+        x = F.elu(x)
 
-        x = self.linear2(x)
+        x = self.conv6_1(x) 
 
-        x = self.pool(self.conv2(x))                # 64 x 64 > 32 x 32
-        x = F.leaky_relu(self.norm2(x), 0.2)
-        x = self.pool(self.conv3(x))                # 32 x 32 > 16 x 16
-        x = F.leaky_relu(self.norm3(x), 0.2)
-        x = self.pool(self.conv4(x))                # 16 x 16 > 8 x 8
-        x = F.leaky_relu(self.norm4(x), 0.2)
-        x = self.pool(self.conv5(x))                # 8 x 8 > 4 x 4
-        x = F.leaky_relu(self.norm5(x), 0.2)
-        x = self.conv6(x)                           # 4 x 4 > 1 x 1
+        x = self.linear6_2(x)
+        x = self.drop6_3(x)  
+        x = self.linear6_4(x)
+        x = self.drop6_5(x)    
 
-        x = self.tconv1(x)                          # 1 x 1 > 4 x 4
-        x = F.relu(self.norm6(x))
-        x = self.tconv2(x)
-        x = F.relu(self.norm7(x))
-        x = self.tconv3(x)
-        x = F.relu(self.norm8(x))
-        x = self.tconv4(x)
-        x = F.relu(self.norm9(x))
-        x = self.tconv5(x)
-        x = F.relu(self.norm10(x))
+        x = self.tconv6_1(x)
+        x = self.norm6_1(x)
+        x = F.elu(x)
 
-        x = self.linear2(x)
+        x = self.tconv7_1(x)
+        x = self.norm7_1(x)
+        x = F.elu(x)
 
-        x = F.tanh(self.conv7(x))
+        x = self.tconv8_1(x)
+        x = self.norm8_1(x)
+        x = F.elu(x)
+
+        x = self.tconv9_1(x)
+        x = self.norm9_1(x)
+        x = F.elu(x)
+
+        x = self.tconv10_1(x)
+        x = self.norm10_1(x)
+        x = F.elu(x)
+
+        x = self.conv11(x)
+        x = F.tanh(x)
 
         return x
+
+# -----------------------------------------------------------------------------
 
 class Discriminator(nn.Module):
     def __init__(self, channels=3):
