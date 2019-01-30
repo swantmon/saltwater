@@ -24,38 +24,83 @@
 #include "engine/graphic/gfx_view_manager.h"
 
 #include "plugin/slam/mr_slam_reconstructor.h"
-#include "plugin/slam/mr_kinect_control.h"
-
-#include <gl/glew.h>
 
 #include <iostream>
 #include <limits>
 #include <memory>
 #include <sstream>
 
+#include <gl/glew.h>
+
+#include "engine/graphic/gfx_native_buffer.h"
+
 using namespace MR;
 using namespace Gfx;
 
 namespace
 {
-    //*
-    const glm::vec3 g_InitialCameraPosition = glm::vec3(0.5f, 0.5f, 1.5f);
-    const glm::vec3 g_InitialCameraRotation = glm::vec3(3.14f, 0.0f, 0.0f);
+	//*
+	const glm::vec3 g_InitialCameraPosition = glm::vec3(0.0f, 0.0f, 0.0f);
+	const glm::vec3 g_InitialCameraRotation = glm::vec3(3.14f, 0.0f, 0.0f);
+	/*/
+	const glm::vec3 g_InitialCameraPosition = glm::vec3(0.5f, 0.5f, -0.5f);
+	const glm::vec3 g_InitialCameraRotation = glm::vec3(0.0f, 0.0f, 0.0f);
+	//*/
+    
+    const unsigned int g_MegabyteSize = 1024u * 1024u;
+
+    const int g_AABB = 16;
+
+    const int g_MaxVolumeInstanceCount = 512;
+
+    /*
+    const unsigned int g_MaxRootVolumePoolSize =        g_MegabyteSize;
+    const unsigned int g_MaxRootGridPoolSize   =  16u * g_MegabyteSize;
+    const unsigned int g_MaxLevel1GridPoolSize =  64u * g_MegabyteSize;
+    const unsigned int g_MaxTSDFPoolSize       = 128u * g_MegabyteSize;
     /*/
-    const glm::vec3 g_InitialCameraPosition = glm::vec3(0.5f, 0.5f, -0.5f);
-    const glm::vec3 g_InitialCameraRotation = glm::vec3(0.0f, 0.0f, 0.0f);
+    const unsigned int g_MaxRootVolumePoolSize =                g_MegabyteSize;
+    const unsigned int g_MaxRootGridPoolSize   =          16u * g_MegabyteSize;
+    const unsigned int g_MaxLevel1GridPoolSize =          16u * g_MegabyteSize;
+    const unsigned long long g_MaxTSDFPoolSize = 16ul * 128ul * g_MegabyteSize;
     //*/
     
-    const float g_EpsilonDistance = 0.1f;
-    const float g_EpsilonAngle = 0.75f;
-    
-    const int g_ICPValueCount = 27;
+    const int g_TileSize1D = 64;
+    const int g_TileSize2D = 16;
+    const int g_TileSize3D = 8;
 
-    const unsigned int g_TileSize1D = 512;
-    const unsigned int g_TileSize2D = 16;
-    const unsigned int g_TileSize3D = 8;
+    glm::vec3 g_CubeVertices[] =
+    {
+        glm::vec3(0.0f, 0.0f, 0.0f),
+        glm::vec3(1.0f, 0.0f, 0.0f),
+        glm::vec3(1.0f, 1.0f, 0.0f),
+        glm::vec3(0.0f, 1.0f, 0.0f),
+        glm::vec3(0.0f, 0.0f, 1.0f),
+        glm::vec3(1.0f, 0.0f, 1.0f),
+        glm::vec3(1.0f, 1.0f, 1.0f),
+        glm::vec3(0.0f, 1.0f, 1.0f),
+    };
 
-    const bool g_UseHighPrecisionMaps = false;
+    unsigned int g_CubeIndices[] =
+    {
+        0, 1, 2,
+        0, 2, 3,
+
+        5, 2, 1,
+        5, 6, 2,
+
+        4, 5, 1,
+        4, 1, 0,
+
+        4, 0, 7,
+        0, 3, 7,
+
+        7, 2, 6,
+        7, 3, 2,
+
+        4, 7, 6,
+        4, 6, 5,
+    };
 
     struct SIntrinsics
     {
@@ -73,19 +118,59 @@ namespace
         glm::mat4 m_InvPoseMatrix;
     };
 
-    struct SIncBuffer
+    struct SInstanceData
     {
-        glm::mat4 m_PoseMatrix;
-        glm::mat4 m_InvPoseMatrix;
-        int m_PyramidLevel;
-        float Padding[3];
+        glm::ivec3 m_Offset;
+        int m_Index;
     };
 
-    struct SDrawCallBufferData
+    struct SPointRasterization
     {
-        glm::mat4 m_WorldMatrix;
+        glm::ivec3 m_Offset;
+        int32_t m_BufferOffset;
     };
-    
+
+    struct SVolumePoolItem
+    {
+        glm::ivec3 m_Offset;
+        bool m_NearSurface;
+    };
+
+    struct SGridPoolItem
+    {
+        int m_PoolIndex;
+        bool m_NearSurface;
+    };
+
+    struct STSDFPoolItem
+    {
+        uint16_t m_TSDF;
+        uint16_t m_Weight;
+    };
+
+    struct STSDFColorPoolItem
+    {
+        uint16_t m_TSDF;
+        uint16_t m_Weight;
+        uint32_t m_Color;
+    };
+
+    struct SPlaneInpainting
+    {
+        glm::vec3  m_PlaneCenterPosition;
+        float      m_PlaneSize;
+        glm::ivec2 m_MinPixels;
+        glm::ivec2 m_MaxPixels;
+        int        m_PlaneResolution;
+        float      m_PixelSize;
+        glm::vec2  Padding;
+    };
+
+    int DivUp(int TotalShaderCount, int WorkGroupSize)
+    {
+        return (TotalShaderCount + WorkGroupSize - 1) / WorkGroupSize;
+    }
+
 } // namespace
 
 namespace MR
@@ -94,178 +179,903 @@ namespace MR
     
     // -----------------------------------------------------------------------------
 
-    CSLAMReconstructor::CSLAMReconstructor(const SReconstructionSettings* pReconstructionSettings)
-    {
-        if (pReconstructionSettings != nullptr)
-        {
-			assert(!pReconstructionSettings->m_IsScalable);
-            m_ReconstructionSettings = *pReconstructionSettings;
-        }
-        else
-        {
-            SReconstructionSettings::SetDefaultSettings(m_ReconstructionSettings);
-        }
-        Start();
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    CSLAMReconstructor::~CSLAMReconstructor()
-    {
-        Exit();
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    bool CSLAMReconstructor::IsTrackingLost() const
-    {
-        return !m_IsTrackingPaused && m_TrackingLost;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    glm::mat4 CSLAMReconstructor::GetPoseMatrix() const
-    {
-        return m_PoseMatrix;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    Gfx::CTexturePtr CSLAMReconstructor::GetTSDFVolume()
-    {
-        return m_TSDFVolumePtr;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    Gfx::CTexturePtr CSLAMReconstructor::GetColorVolume()
-    {
-        return m_ColorVolumePtr;
-    }
-
-    // -----------------------------------------------------------------------------
-
     void CSLAMReconstructor::Start()
     {
-        m_pKinectControl.reset(new MR::CKinectControl);
-        ENGINE_CONSOLE_INFO("Using Kinect for SLAM");
+        m_DepthBounds = glm::vec2(m_ReconstructionSettings.m_DepthThreshold) / 1000.0f;
 
-        m_DepthPixels = std::vector<unsigned short>(m_pKinectControl->GetDepthPixelCount());
-        m_CameraPixels = std::vector<char>(m_pKinectControl->GetDepthPixelCount() * 4);
+        assert(m_DepthFrameSize.x != 0 && m_DepthFrameSize.y != 0);
+        assert(m_ColorFrameSize.x != 0 && m_ColorFrameSize.y != 0);
+        assert(m_FocalLength.x != 0 && m_FocalLength.y != 0);
+        assert(m_FocalPoint.x != 0.0f && m_FocalPoint.y != 0.0f);
+        assert(m_DepthBounds.x != 0.0f && m_DepthBounds.y != 0.0f);
 
-        const float VolumeSize = m_ReconstructionSettings.m_VolumeSize;
-        glm::mat4 PoseRotation, PoseTranslation;
+        ////////////////////////////////////////////////////////////////////////////////
+        // Setup data, buffer etc.
+        ////////////////////////////////////////////////////////////////////////////////
+        
+        m_DepthPixels = std::vector<unsigned short>(m_DepthFrameSize.x * m_DepthFrameSize.y);
+        m_CameraPixels = std::vector<char>(m_DepthFrameSize.x * m_DepthFrameSize.y * 4);
 
-        PoseRotation = glm::eulerAngleXYZ(g_InitialCameraRotation.x, g_InitialCameraRotation.y, g_InitialCameraRotation.z);
-        PoseTranslation = glm::translate(g_InitialCameraPosition * VolumeSize);
-        m_PoseMatrix = PoseTranslation * PoseRotation;
+        SetupRenderStates();
+		SetupShaders();
+		SetupTextures();
+		SetupBuffers(false);
+                
+        m_pTracker.reset(new CICPTracker(m_DepthFrameSize.x, m_DepthFrameSize.y, m_ReconstructionSettings));
 
-        m_IntegratedFrameCount = 0;
-        m_FrameCount = 0;
-        m_TrackingLost = true;
+        m_IsInizialized = true;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CSLAMReconstructor::SetupRenderStates()
+    {
+        SViewPortDescriptor ViewPortDescriptor = {};
+
+        ViewPortDescriptor.m_MinDepth = 0.0f;
+        ViewPortDescriptor.m_MaxDepth = 1.0f;
+        ViewPortDescriptor.m_TopLeftX = 0.0f;
+        ViewPortDescriptor.m_TopLeftY = 0.0f;
+        ViewPortDescriptor.m_Width = static_cast<float>(m_DepthFrameSize.x);
+        ViewPortDescriptor.m_Height = static_cast<float>(m_DepthFrameSize.y);
+
+        Gfx::CViewPortPtr DepthViewPort = ViewManager::CreateViewPort(ViewPortDescriptor);
+
+        m_DepthViewPortSetPtr = ViewManager::CreateViewPortSet(DepthViewPort);
+
+        const int Width = m_ReconstructionSettings.m_GridResolutions[0] * m_ReconstructionSettings.m_GridResolutions[1];
+        ViewPortDescriptor.m_Width = static_cast<float>(Width);
+        ViewPortDescriptor.m_Height = static_cast<float>(Width);
+
+        Gfx::CViewPortPtr FullVolumeViewPort = ViewManager::CreateViewPort(ViewPortDescriptor);
+
+        m_FullVolumeViewPort = ViewManager::CreateViewPortSet(FullVolumeViewPort);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CSLAMReconstructor::SetupMeshes()
+    {
+        const int VertexCount = sizeof(g_CubeVertices) / sizeof(g_CubeVertices[0]);
+        const int IndexCount = sizeof(g_CubeIndices) / sizeof(g_CubeIndices[0]);
+
+        m_CubeMeshPtr = Gfx::MeshManager::CreateMesh(g_CubeVertices, VertexCount, sizeof(g_CubeVertices[0]), g_CubeIndices, IndexCount);
+    }
+    
+	// -----------------------------------------------------------------------------
+
+	void CSLAMReconstructor::SetupData()
+	{
         m_IsIntegrationPaused = false;
         m_IsTrackingPaused = false;
 
-        SetupShaders();
-        SetupTextures();
-        SetupBuffers();
+        m_CreateNormalsFromTSDF = Core::CProgramParameters::GetInstance().Get("mr:slam:normals_from_tsdf", false);
+        m_RaycastBackSides = Core::CProgramParameters::GetInstance().Get("mr:slam:raycast_backsides", true);
 
-        const int Width = m_pKinectControl->GetDepthWidth();
-        const int Height = m_pKinectControl->GetDepthHeight();
-        m_pTracker.reset(new CICPTracker(Width, Height, m_ReconstructionSettings));
-    }
+        m_MinWeight = Core::CProgramParameters::GetInstance().Get("mr:slam:min_weight", 15);
+
+        m_VolumeDepthThreshold = Core::CProgramParameters::GetInstance().Get("mr:slam:volume_min_depth_count", 2000);
+
+        const int GridLevelCount = MR::SReconstructionSettings::GRID_LEVELS;
+
+        m_VolumeSizes.resize(GridLevelCount);
+        m_VolumeSizes[GridLevelCount - 1] = m_ReconstructionSettings.m_VoxelSize * m_ReconstructionSettings.m_GridResolutions[GridLevelCount - 1];
+        for (int i = GridLevelCount - 2; i >= 0; --i)
+        {
+            m_VolumeSizes[i] = m_VolumeSizes[i + 1] * m_ReconstructionSettings.m_GridResolutions[i];
+        }
+		
+		UpdateFrustum();
+	}
+
+	// -----------------------------------------------------------------------------
+
+	void CSLAMReconstructor::UpdateFrustum()
+	{
+        float x = (-m_FocalPoint.x / m_DepthFrameSize.x) / (m_FocalLength.x / m_DepthFrameSize.x);
+        float y = (-m_FocalPoint.y / m_DepthFrameSize.y) / (m_FocalLength.y / m_DepthFrameSize.y);
+                
+        // TODO: use camera near parameter and find out why frustum culling does not work correctly
+        // Volumes that touch the pyramid top but are not between near and far are still valid hits for some reason
+        // and they are even pass the rasterization step even though they cannot contain valid samples
+
+        const float Near = 0.5f; // m_pRGBDCameraControl->GetMinDepth();
+		const float Far = m_DepthBounds.y;
+
+		// near
+
+		m_FrustumPoints[0] = glm::vec3( x * Near,  y * Near, Near);
+		m_FrustumPoints[1] = glm::vec3(-x * Near,  y * Near, Near);
+		m_FrustumPoints[2] = glm::vec3(-x * Near, -y * Near, Near);
+		m_FrustumPoints[3] = glm::vec3( x * Near, -y * Near, Near);
+
+		// far
+
+		m_FrustumPoints[4] = glm::vec3( x * Far,  y * Far, Far);
+		m_FrustumPoints[5] = glm::vec3(-x * Far,  y * Far, Far);
+		m_FrustumPoints[6] = glm::vec3(-x * Far, -y * Far, Far);
+		m_FrustumPoints[7] = glm::vec3( x * Far, -y * Far, Far);
+
+		for (int i = 0; i < m_FrustumPoints.size(); ++i)
+		{
+			glm::vec4 Corner = glm::vec4(m_FrustumPoints[i], 1.0f);
+			Corner = m_PoseMatrix * Corner;
+			m_FrustumPoints[i] = glm::vec3(Corner[0], Corner[1], Corner[2]);
+		}
+
+		m_FrustumPlanes[0] = GetHessianNormalForm(m_FrustumPoints[0], m_FrustumPoints[2], m_FrustumPoints[1]); // near
+		m_FrustumPlanes[1] = GetHessianNormalForm(m_FrustumPoints[6], m_FrustumPoints[7], m_FrustumPoints[4]); // far
+		m_FrustumPlanes[2] = GetHessianNormalForm(m_FrustumPoints[4], m_FrustumPoints[3], m_FrustumPoints[0]); // right
+		m_FrustumPlanes[3] = GetHessianNormalForm(m_FrustumPoints[1], m_FrustumPoints[6], m_FrustumPoints[5]); // left
+		m_FrustumPlanes[4] = GetHessianNormalForm(m_FrustumPoints[4], m_FrustumPoints[1], m_FrustumPoints[5]); // top
+		m_FrustumPlanes[5] = GetHessianNormalForm(m_FrustumPoints[7], m_FrustumPoints[6], m_FrustumPoints[2]); // bottom
+	}
+
+	// -----------------------------------------------------------------------------
+
+	glm::vec4 CSLAMReconstructor::GetHessianNormalForm(const glm::vec3& rA, const glm::vec3& rB, const glm::vec3& rC)
+	{
+		glm::vec3 V1 = rB - rA;
+        glm::vec3 V2 = rC - rA;
+
+        glm::vec3 Normal = glm::normalize(glm::cross(V1, V2));
+
+        float D = glm::dot(rA, Normal);
+
+		return glm::vec4(Normal, D);
+	}
+
+	// -----------------------------------------------------------------------------
+
+	float CSLAMReconstructor::GetPointPlaneDistance(const glm::vec3& rPoint, const glm::vec4& rPlane)
+	{
+        const float Dot = glm::dot(rPoint, glm::vec3(rPlane));
+		return Dot - rPlane[3];
+	}
 
     // -----------------------------------------------------------------------------
     
     void CSLAMReconstructor::Exit()
     {
+        m_IsInizialized = false;
+
+        const int TSDFItemSize = m_ReconstructionSettings.m_CaptureColor ? sizeof(STSDFColorPoolItem) : sizeof(STSDFPoolItem);
+
+        int* pPoolSizes = static_cast<int*>(BufferManager::MapBuffer(m_VolumeBuffers.m_PoolItemCountBufferPtr, CBuffer::EMap::ReadWrite));
+        
+        const float Megabyte = 1024.0f * 1024.0f;
+        std::stringstream Stream[3];
+        Stream[0] << "Rootgrid pool size: " << m_RootVolumePoolItemCount * m_ReconstructionSettings.m_VoxelsPerGrid[0] * sizeof(SGridPoolItem) / Megabyte << " MB";
+        Stream[1] << "Level1 pool size  : " << pPoolSizes[1] * m_ReconstructionSettings.m_VoxelsPerGrid[1] * sizeof(SGridPoolItem) / Megabyte << " MB";
+        Stream[2] << "TSDF pool size    : " << static_cast<unsigned long long>(pPoolSizes[2]) * m_ReconstructionSettings.m_VoxelsPerGrid[2] *
+                                               TSDFItemSize / Megabyte << " MB";
+
+        BufferManager::UnmapBuffer(m_VolumeBuffers.m_PoolItemCountBufferPtr);
+
+        ENGINE_CONSOLE_INFO(Stream[0].str().c_str());
+        ENGINE_CONSOLE_INFO(Stream[1].str().c_str());
+        ENGINE_CONSOLE_INFO(Stream[2].str().c_str());
+
         m_BilateralFilterCSPtr = 0;
         m_VertexMapCSPtr = 0;
         m_NormalMapCSPtr = 0;
         m_DownSampleDepthCSPtr = 0;
-        m_IntegrationCSPtr = 0;
+        m_IntegrateTSDFCSPtr = 0;
         m_RaycastCSPtr = 0;
         m_RaycastPyramidCSPtr = 0;
-        m_ClearVolumeCSPtr = 0;
+        m_VolumeCountersCSPtr = 0;
+        
+        m_PlaneCSPtr = 0;
 
+        m_RasterizeRootVolumeVSPtr = 0;
+        m_RasterizeRootVolumeFSPtr = 0;
+        
+        m_ClearAtomicCountersCSPtr = 0;
+
+        m_IntegrateRootGridCSPtr = 0;
+        m_IntegrateLevel1GridCSPtr = 0;
+
+        m_CubeMeshPtr = 0;
+        m_CubeInputLayoutPtr = 0;
+
+        m_RawVertexMapPtr = 0;
         m_RawDepthBufferPtr = 0;
         m_RawCameraFramePtr = 0;
+        m_EmptyTargetSetPtr = 0;
+        m_DepthViewPortSetPtr = 0;
 
-        for (int i = 0; i < m_ReconstructionSettings.m_PyramidLevelCount; ++ i)
-        {
-            m_SmoothDepthBufferPtr[i] = 0;
-            m_ReferenceVertexMapPtr[i] = 0;
-            m_ReferenceNormalMapPtr[i] = 0;
-            m_RaycastVertexMapPtr[i] = 0;
-            m_RaycastNormalMapPtr[i] = 0;
-        }
+        m_SmoothDepthBufferPtr.clear();
+        m_ReferenceVertexMapPtr.clear();
+        m_ReferenceNormalMapPtr.clear();
+        m_RaycastVertexMapPtr.clear();
+        m_RaycastNormalMapPtr.clear();
 
-        m_TSDFVolumePtr = 0;
-        m_ColorVolumePtr = 0;
-
+        m_RootVolumeMap.clear();
+        
         m_IntrinsicsConstantBufferPtr = 0;
         m_TrackingDataConstantBufferPtr = 0;
         m_RaycastPyramidConstantBufferPtr = 0;
         m_BilateralFilterConstantBufferPtr = 0;
+        m_AtomicCounterBufferPtr = 0;
+        m_IndexedIndirectBufferPtr = 0;
+
+        m_VolumeQueueBufferPtr = 0;
+        m_RootVolumeInstanceBufferPtr = 0;
+        m_VolumeBuffers.m_RootVolumePoolPtr = 0;
+        m_VolumeBuffers.m_RootGridPoolPtr = 0;
+        m_VolumeBuffers.m_Level1PoolPtr = 0;
+        m_VolumeBuffers.m_TSDFPoolPtr = 0;
+        m_VolumeBuffers.m_PoolItemCountBufferPtr = 0;
+        m_VolumeIndexBufferPtr = 0;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    bool CSLAMReconstructor::IsInitialized()
+    {
+        return m_IsInizialized;
     }
     
     // -----------------------------------------------------------------------------
     
     void CSLAMReconstructor::SetupShaders()
     {
-        const int SummandsX = GetWorkGroupCount(m_pKinectControl->GetDepthWidth(), g_TileSize2D);
-        const int SummandsY = GetWorkGroupCount(m_pKinectControl->GetDepthHeight(), g_TileSize2D);
+        const float VoxelSize = m_ReconstructionSettings.m_VoxelSize;
 
-        const int Summands = SummandsX * SummandsY;
-        const float SummandsLog2 = glm::log2(static_cast<float>(Summands));
-        const int SummandsPOT = 1 << (static_cast<int>(SummandsLog2) + 1);
-        
-        const float VoxelSize = m_ReconstructionSettings.m_VolumeSize / m_ReconstructionSettings.m_VolumeResolution;
-
-        const std::string InternalFormatString = g_UseHighPrecisionMaps ? "rgba32f" : "rgba16f";
-
-        const float TruncatedDistance = m_ReconstructionSettings.m_TruncatedDistance / 1000.0f;
+        const std::string InternalFormatString = Core::CProgramParameters::GetInstance().Get("mr:slam:map_format", "rgba16f");
 
         std::stringstream DefineStream;
 
-        DefineStream
-            << "#define PYRAMID_LEVELS "         << m_ReconstructionSettings.m_PyramidLevelCount    << " \n"
-            << "#define VOLUME_RESOLUTION "      << m_ReconstructionSettings.m_VolumeResolution     << " \n"
-            << "#define VOXEL_SIZE "             << VoxelSize                                       << " \n"
-            << "#define VOLUME_SIZE "            << m_ReconstructionSettings.m_VolumeSize           << " \n"
-            << "#define DEPTH_IMAGE_WIDTH "      << m_pKinectControl->GetDepthWidth()           << " \n"
-            << "#define DEPTH_IMAGE_HEIGHT "     << m_pKinectControl->GetDepthHeight()          << " \n"
-            << "#define TILE_SIZE1D "            << g_TileSize1D                                    << " \n"
-            << "#define TILE_SIZE2D "            << g_TileSize2D                                    << " \n"
-            << "#define TILE_SIZE3D "            << g_TileSize3D                                    << " \n"
-            << "#define TRUNCATED_DISTANCE "     << TruncatedDistance                               << " \n"
-            << "#define MAX_INTEGRATION_WEIGHT " << m_ReconstructionSettings.m_MaxIntegrationWeight << " \n"
-            << "#define EPSILON_DISTANCE "       << g_EpsilonDistance                               << " \n"
-            << "#define EPSILON_ANGLE "          << g_EpsilonAngle                                  << " \n"
-            << "#define ICP_VALUE_COUNT "        << g_ICPValueCount                                 << " \n"
-            << "#define REDUCTION_SHADER_COUNT " << SummandsPOT / 2                                 << " \n"
-            << "#define ICP_SUMMAND_COUNT "      << Summands                                        << " \n"
-            << "#define MAP_TEXTURE_FORMAT "     << InternalFormatString                            << " \n";
+        const float TruncatedDistance = m_ReconstructionSettings.m_TruncatedDistance / 1000.0f;
 
+        DefineStream
+            << "#define PYRAMID_LEVELS "         << m_ReconstructionSettings.m_PyramidLevelCount          << " \n"
+            << "#define VOXEL_SIZE "             << VoxelSize                                             << " \n"
+            << "#define VOLUME_SIZE "            << m_VolumeSizes[0]                                      << " \n"
+            << "#define DEPTH_IMAGE_WIDTH "      << m_DepthFrameSize.x                                    << " \n"
+            << "#define DEPTH_IMAGE_HEIGHT "     << m_DepthFrameSize.y                                    << " \n"
+            << "#define COLOR_IMAGE_WIDTH "      << m_ColorFrameSize.x                                    << " \n"
+            << "#define COLOR_IMAGE_HEIGHT "     << m_ColorFrameSize.y                                    << " \n"
+            << "#define TILE_SIZE1D "            << g_TileSize1D                                          << " \n"
+            << "#define TILE_SIZE2D "            << g_TileSize2D                                          << " \n"
+            << "#define TILE_SIZE3D "            << g_TileSize3D                                          << " \n"
+            << "#define TRUNCATED_DISTANCE "     << TruncatedDistance                                     << " \n"
+            << "#define MAX_INTEGRATION_WEIGHT " << m_ReconstructionSettings.m_MaxIntegrationWeight       << " \n"
+            << "#define MAP_TEXTURE_FORMAT "     << InternalFormatString                                  << " \n"
+            << "#define ROOT_RESOLUTION "        << m_ReconstructionSettings.m_GridResolutions[0]         << " \n"
+            << "#define LEVEL1_RESOLUTION "      << m_ReconstructionSettings.m_GridResolutions[1]         << " \n"
+            << "#define LEVEL2_RESOLUTION "      << m_ReconstructionSettings.m_GridResolutions[2]         << " \n"
+            << "#define VOXELS_PER_ROOTGRID "    << m_ReconstructionSettings.m_VoxelsPerGrid[0]           << " \n"
+            << "#define VOXELS_PER_LEVEL1GRID "  << m_ReconstructionSettings.m_VoxelsPerGrid[1]           << " \n"
+            << "#define VOXELS_PER_LEVEL2GRID "  << m_ReconstructionSettings.m_VoxelsPerGrid[2]           << " \n"
+            << "#define RAYCAST_NEAR "           << m_DepthBounds.x                                       << " \n"
+            << "#define RAYCAST_FAR "            << m_DepthBounds.y                                       << " \n"
+            << "#define VOLUME_DEPTH_THRESHOLD " << m_VolumeDepthThreshold                                << " \n"
+            << "#define MIN_TREE_WEIGHT "        << m_MinWeight                                           << " \n"
+            << "#define MIN_DEPTH "              << m_ReconstructionSettings.m_DepthThreshold.x / 1000.0f << " \n"
+            << "#define MAX_DEPTH "              << m_ReconstructionSettings.m_DepthThreshold.y / 1000.0f << " \n";
+        
         if (m_ReconstructionSettings.m_CaptureColor)
         {
             DefineStream << "#define CAPTURE_COLOR\n";
         }
-        
+        if (m_UseConservativeRasterization)
+        {
+            DefineStream << "#define CONSERVATIVE_RASTERIZATION_AVAILABLE\n";
+        }
+        if (m_CreateNormalsFromTSDF)
+        {
+            DefineStream << "#define NORMAL_MAP_FROM_TSDF\n";
+        }
+        if (m_RaycastBackSides)
+        {
+            DefineStream << "#define RAYCAST_BACKSIDES\n";
+        }
+
         std::string DefineString = DefineStream.str();
         
-        m_BilateralFilterCSPtr   = ShaderManager::CompileCS("slam\\kinect_fusion\\cs_bilateral_filter.glsl"  , "main", DefineString.c_str());
-        m_VertexMapCSPtr         = ShaderManager::CompileCS("slam\\kinect_fusion\\cs_vertex_map.glsl"        , "main", DefineString.c_str());
-        m_NormalMapCSPtr         = ShaderManager::CompileCS("slam\\kinect_fusion\\cs_normal_map.glsl"        , "main", DefineString.c_str());
-        m_DownSampleDepthCSPtr   = ShaderManager::CompileCS("slam\\kinect_fusion\\cs_downsample_depth.glsl"  , "main", DefineString.c_str());
-        m_IntegrationCSPtr       = ShaderManager::CompileCS("slam\\kinect_fusion\\cs_integrate.glsl"         , "main", DefineString.c_str());        
-        m_RaycastCSPtr           = ShaderManager::CompileCS("slam\\kinect_fusion\\cs_raycast.glsl"           , "main", DefineString.c_str());
-        m_RaycastPyramidCSPtr    = ShaderManager::CompileCS("slam\\kinect_fusion\\cs_raycast_pyramid.glsl"   , "main", DefineString.c_str());
-        m_ClearVolumeCSPtr       = ShaderManager::CompileCS("slam\\kinect_fusion\\cs_clear_volume.glsl"      , "main", DefineString.c_str());
+        m_BilateralFilterCSPtr     = ShaderManager::CompileCS("../../plugins/slam/scalable/pyramid_creation\\cs_bilateral_filter.glsl"  , "main", DefineString.c_str());
+        m_VertexMapCSPtr           = ShaderManager::CompileCS("../../plugins/slam/scalable/pyramid_creation\\cs_vertex_map.glsl"        , "main", DefineString.c_str());
+        m_NormalMapCSPtr           = ShaderManager::CompileCS("../../plugins/slam/scalable/pyramid_creation\\cs_normal_map.glsl"        , "main", DefineString.c_str());
+        m_DownSampleDepthCSPtr     = ShaderManager::CompileCS("../../plugins/slam/scalable/pyramid_creation\\cs_downsample_depth.glsl"  , "main", DefineString.c_str());
+        m_RaycastPyramidCSPtr      = ShaderManager::CompileCS("../../plugins/slam/scalable/pyramid_creation\\cs_raycast_pyramid.glsl"   , "main", DefineString.c_str());
+        m_RaycastCSPtr             = ShaderManager::CompileCS("../../plugins/slam/scalable/cs_raycast.glsl"                             , "main", DefineString.c_str());
+        m_ClearAtomicCountersCSPtr = ShaderManager::CompileCS("../../plugins/slam/scalable/cs_clear_atomic_buffer.glsl"                 , "main", DefineString.c_str());
+        m_VolumeCountersCSPtr      = ShaderManager::CompileCS("../../plugins/slam/scalable/cs_volume_counters.glsl"                     , "main", DefineString.c_str());
+        m_RasterizeRootVolumeVSPtr = ShaderManager::CompileVS("../../plugins/slam/scalable/rasterization\\vs_rasterize_rootvolume.glsl" , "main", DefineString.c_str());
+        m_RasterizeRootVolumeFSPtr = ShaderManager::CompilePS("../../plugins/slam/scalable/rasterization\\fs_rasterize_rootvolume.glsl" , "main", DefineString.c_str());
+        m_PointCloudVSPtr          = ShaderManager::CompileVS("../../plugins/slam/scalable/rasterization\\vs_rootgrid.glsl"             , "main", DefineString.c_str());
+        m_PointCloudGSPtr          = ShaderManager::CompileGS("../../plugins/slam/scalable/rasterization\\gs_rootgrid.glsl"             , "main", DefineString.c_str());
+        m_PointCloudFSPtr          = ShaderManager::CompilePS("../../plugins/slam/scalable/rasterization\\fs_rootgrid.glsl"             , "main", DefineString.c_str());
+        m_PointsFullCSPtr          = ShaderManager::CompileCS("../../plugins/slam/scalable/rasterization\\cs_gather_full.glsl"          , "main", DefineString.c_str());
+        m_IntegrateRootGridCSPtr   = ShaderManager::CompileCS("../../plugins/slam/scalable/integration\\cs_integrate_rootgrid.glsl"     , "main", DefineString.c_str());
+        m_IntegrateLevel1GridCSPtr = ShaderManager::CompileCS("../../plugins/slam/scalable/integration\\cs_integrate_level1grid.glsl"   , "main", DefineString.c_str());
+        m_IntegrateTSDFCSPtr       = ShaderManager::CompileCS("../../plugins/slam/scalable/integration\\cs_integrate_tsdf.glsl"         , "main", DefineString.c_str());
+        m_FillIndirectBufferCSPtr  = ShaderManager::CompileCS("../../plugins/slam/scalable/cs_fill_indirect.glsl"                       , "main", DefineString.c_str());
+
+        m_PlaneCSPtr = ShaderManager::CompileCS("../../plugins/slam/scalable/cs_create_plane.glsl", "main", DefineString.c_str());
+
+        SInputElementDescriptor InputLayoutDesc = {};
+
+        InputLayoutDesc.m_pSemanticName = "POSITION";
+        InputLayoutDesc.m_SemanticIndex = 0;
+        InputLayoutDesc.m_Format = CInputLayout::Float3Format;
+        InputLayoutDesc.m_InputSlot = 0;
+        InputLayoutDesc.m_AlignedByteOffset = 0;
+        InputLayoutDesc.m_Stride = 12;
+        InputLayoutDesc.m_InputSlotClass = CInputLayout::PerVertex;
+        InputLayoutDesc.m_InstanceDataStepRate = 0;
+
+        m_CubeInputLayoutPtr = ShaderManager::CreateInputLayout(&InputLayoutDesc, 1, m_RasterizeRootVolumeVSPtr);
     }
     
     // -----------------------------------------------------------------------------
     
+	bool CSLAMReconstructor::RootGridInFrustum(const glm::ivec3& rKey)
+	{
+		float AABB[6];
+
+		for (int PlaneIndex = 0; PlaneIndex < 3; ++PlaneIndex)
+		{
+			AABB[PlaneIndex * 2] = rKey[PlaneIndex] * m_VolumeSizes[0];
+			AABB[PlaneIndex * 2 + 1] = AABB[PlaneIndex * 2] + m_VolumeSizes[0];
+		}
+
+		glm::vec3 Cube[8] =
+		{
+			glm::vec3(AABB[0], AABB[2], AABB[4]),
+			glm::vec3(AABB[0], AABB[3], AABB[4]),
+			glm::vec3(AABB[0], AABB[2], AABB[5]),
+			glm::vec3(AABB[0], AABB[3], AABB[5]),
+			glm::vec3(AABB[1], AABB[2], AABB[4]),
+			glm::vec3(AABB[1], AABB[3], AABB[4]),
+			glm::vec3(AABB[1], AABB[2], AABB[5]),
+			glm::vec3(AABB[1], AABB[3], AABB[5]),
+		};
+
+		for (int PlaneIndex = 0; PlaneIndex < 6; ++ PlaneIndex)
+		{
+			int Outside = 0;
+			for (int CubeIndex = 0; CubeIndex < 8; ++ CubeIndex)
+			{
+				if (GetPointPlaneDistance(Cube[CubeIndex], m_FrustumPlanes[PlaneIndex]) > 0)
+				{
+					++ Outside;
+				}
+			}
+			if (Outside == 8)
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+    // -----------------------------------------------------------------------------
+
+    void CSLAMReconstructor::RasterizeRootVolumes()
+    {
+        const unsigned int Offset = 0;
+        ContextManager::SetVertexBuffer(m_CubeMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
+        ContextManager::SetIndexBuffer(m_CubeMeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
+        ContextManager::SetInputLayout(m_CubeInputLayoutPtr);
+        ContextManager::SetTopology(STopology::TriangleList);
+
+        ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
+        ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
+
+        ContextManager::SetShaderVS(m_RasterizeRootVolumeVSPtr);
+        ContextManager::SetShaderPS(m_RasterizeRootVolumeFSPtr);
+
+        ContextManager::SetImageTexture(0, m_RawVertexMapPtr);
+
+        ContextManager::SetResourceBuffer(0, m_AtomicCounterBufferPtr);
+        ContextManager::SetResourceBuffer(1, m_RootVolumeInstanceBufferPtr);
+
+        ContextManager::Barrier();
+        
+        const unsigned int IndexCount = m_CubeMeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices();
+        const unsigned int InstanceCount = static_cast<unsigned int>(m_RootVolumeVector.size());
+        assert(InstanceCount < g_MaxVolumeInstanceCount);
+        ClearBuffer(m_AtomicCounterBufferPtr, InstanceCount * sizeof(int32_t));
+        ContextManager::DrawIndexedInstanced(IndexCount, InstanceCount, 0, 0, 0);
+
+        ContextManager::ResetShaderVS();
+        ContextManager::ResetShaderPS();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CSLAMReconstructor::GatherVolumeCounters(unsigned int Count, CBufferPtr CounterBuffer, CBufferPtr QueueBuffer, CBufferPtr IndirectBuffer)
+    {
+        ContextManager::Barrier();
+
+        ContextManager::SetShaderCS(m_VolumeCountersCSPtr);
+
+        SIndirectBuffers IndirectBufferData = {};
+        IndirectBufferData.m_Indexed.m_IndexCount = 36;
+        BufferManager::UploadBufferData(IndirectBuffer, &IndirectBufferData);
+
+        ContextManager::SetResourceBuffer(0, CounterBuffer);
+        ContextManager::SetResourceBuffer(1, IndirectBuffer);
+        ContextManager::SetResourceBuffer(2, QueueBuffer);
+        
+        ContextManager::Dispatch(Count, 1, 1);
+    }
+
+	// -----------------------------------------------------------------------------
+    
+    void CSLAMReconstructor::CreateIntegrationQueues(std::vector<uint32_t>& rVolumeQueue)
+    {
+        ////////////////////////////////////////////////////////////////////////////////
+        // Create buffers for new volumes
+        ////////////////////////////////////////////////////////////////////////////////
+
+        ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
+        ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
+
+        ContextManager::SetImageTexture(0, m_RawVertexMapPtr);
+
+        const unsigned int Offset = 0;
+
+        for (uint32_t VolumeIndex : rVolumeQueue)
+        {
+            assert(m_RootVolumeVector[VolumeIndex] != nullptr);
+
+            auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
+
+            rRootVolume.m_IsVisible = true;
+
+            if (rRootVolume.m_Level1QueuePtr == nullptr)
+            {
+                SBufferDescriptor ConstantBufferDesc = {};
+                ConstantBufferDesc.m_Binding = CBuffer::ResourceBuffer;
+                ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
+                ConstantBufferDesc.m_NumberOfBytes = sizeof(uint32_t) * m_ReconstructionSettings.m_VoxelsPerGrid[0];
+                ConstantBufferDesc.m_pBytes = nullptr;
+                ConstantBufferDesc.m_Usage = CBuffer::GPURead;
+                rRootVolume.m_Level1QueuePtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+                ConstantBufferDesc.m_NumberOfBytes *= m_ReconstructionSettings.m_VoxelsPerGrid[1];
+                rRootVolume.m_Level2QueuePtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+
+                SIndirectBuffers InitialData = {};
+                ConstantBufferDesc.m_NumberOfBytes = sizeof(SIndirectBuffers);
+                ConstantBufferDesc.m_pBytes = &InitialData;
+                rRootVolume.m_IndirectLevel1Buffer = BufferManager::CreateBuffer(ConstantBufferDesc);
+                rRootVolume.m_IndirectLevel2Buffer = BufferManager::CreateBuffer(ConstantBufferDesc);
+            }
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////
+        // Render point cloud to full volume
+        ////////////////////////////////////////////////////////////////////////////////////////////////
+
+        Performance::BeginEvent("Rasterize point cloud");
+
+        ContextManager::SetImageTexture(1, m_FullVolumePtr);
+        ContextManager::SetViewPortSet(m_FullVolumeViewPort);
+
+        ContextManager::SetShaderVS(m_PointCloudVSPtr);
+        ContextManager::SetShaderPS(m_PointCloudGSPtr);
+        ContextManager::SetShaderPS(m_PointCloudFSPtr);
+        ContextManager::Barrier();
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_FRONT);
+        glDisable(GL_DEPTH_TEST);
+        glDisable(GL_MULTISAMPLE);
+        // Just set a dummy mesh
+        ContextManager::SetVertexBuffer(m_CubeMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
+        ContextManager::SetIndexBuffer(m_CubeMeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
+        ContextManager::SetInputLayout(m_CubeInputLayoutPtr);
+        ContextManager::SetTopology(STopology::PointList);
+        
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
+
+        ContextManager::SetConstantBuffer(3, m_PointRasterizationBufferPtr);
+        ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
+
+        ContextManager::SetShaderVS(m_PointCloudVSPtr);
+        ContextManager::SetShaderGS(m_PointCloudGSPtr);
+        ContextManager::SetShaderPS(m_PointCloudFSPtr);
+
+        ContextManager::SetShaderCS(m_PointsFullCSPtr);
+
+        if (m_UseConservativeRasterization)
+        {
+            glEnable(GL_CONSERVATIVE_RASTERIZATION_NV);
+        }
+        for (uint32_t VolumeIndex : rVolumeQueue)
+        {
+            auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
+
+            SIndirectBuffers IndirectBufferData = {};
+            IndirectBufferData.m_Indexed.m_IndexCount = m_CubeMeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices();
+            BufferManager::UploadBufferData(rRootVolume.m_IndirectLevel1Buffer, &IndirectBufferData);
+            BufferManager::UploadBufferData(rRootVolume.m_IndirectLevel2Buffer, &IndirectBufferData);
+            
+            Performance::BeginEvent("Render single point cloud");
+
+            SPointRasterization BufferData;
+            BufferData.m_Offset = rRootVolume.m_Offset;
+            BufferData.m_BufferOffset = 0;
+            BufferManager::UploadBufferData(m_PointRasterizationBufferPtr, &BufferData);
+
+            ContextManager::Draw(m_DepthFrameSize.x * m_DepthFrameSize.y, 0);
+
+            Performance::EndEvent();
+
+            Performance::BeginEvent("Gather point cloud data");
+                        
+            ContextManager::SetResourceBuffer(0, rRootVolume.m_IndirectLevel1Buffer);
+            ContextManager::SetResourceBuffer(1, rRootVolume.m_IndirectLevel2Buffer);
+            ContextManager::SetResourceBuffer(2, rRootVolume.m_Level1QueuePtr);
+            ContextManager::SetResourceBuffer(3, rRootVolume.m_Level2QueuePtr);
+
+            const int WorkGroups = m_ReconstructionSettings.m_GridResolutions[0];
+            ContextManager::Dispatch(WorkGroups, WorkGroups, WorkGroups);
+
+            ContextManager::Barrier();
+            Performance::EndEvent();
+        }
+        if (m_UseConservativeRasterization)
+        {
+            glDisable(GL_CONSERVATIVE_RASTERIZATION_NV);
+        }
+
+        Performance::EndEvent();
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////
+        // Fill the indirect buffers
+        ////////////////////////////////////////////////////////////////////////////////////////////////
+
+        ContextManager::SetShaderCS(m_FillIndirectBufferCSPtr);
+
+        Performance::BeginEvent("Fill indirect buffers");
+
+        for (uint32_t VolumeIndex : rVolumeQueue)
+        {
+            auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
+
+            ContextManager::SetResourceBuffer(0, rRootVolume.m_IndirectLevel1Buffer);
+            ContextManager::SetResourceBuffer(1, rRootVolume.m_IndirectLevel2Buffer);
+
+            ContextManager::Dispatch(1, 1, 1);
+        }
+
+        Performance::EndEvent();
+
+        ContextManager::ResetShaderVS();
+        ContextManager::ResetShaderGS();
+        ContextManager::ResetShaderPS();
+    }
+    
+    // -----------------------------------------------------------------------------
+
+    void CSLAMReconstructor::IntegrateHierarchies(std::vector<uint32_t>& rVolumeQueue)
+    {
+        for (uint32_t VolumeIndex : rVolumeQueue)
+        {
+            assert(m_RootVolumeVector[VolumeIndex] != nullptr);
+
+            auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////
+            // Assign GPU memory to volume when necessary
+            ////////////////////////////////////////////////////////////////////////////////////////////////
+
+            if (rRootVolume.m_PoolIndex == -1) // Allocate pool memory for volume
+            {
+                rRootVolume.m_PoolIndex = m_RootVolumePoolItemCount++;
+
+                int Range = sizeof(SVolumePoolItem);
+                int Offset = rRootVolume.m_PoolIndex * sizeof(SVolumePoolItem);
+
+                SVolumePoolItem Item;
+                Item.m_NearSurface = false;
+                Item.m_Offset = rRootVolume.m_Offset;
+
+                BufferManager::UploadBufferData(m_VolumeBuffers.m_RootVolumePoolPtr, &Item, Offset, Range);
+            }
+        }
+
+        ContextManager::SetResourceBuffer(0, m_VolumeBuffers.m_RootVolumePoolPtr);
+        ContextManager::SetResourceBuffer(1, m_VolumeBuffers.m_RootGridPoolPtr);
+        ContextManager::SetResourceBuffer(2, m_VolumeBuffers.m_Level1PoolPtr);
+        ContextManager::SetResourceBuffer(3, m_VolumeBuffers.m_TSDFPoolPtr);
+        ContextManager::SetResourceBuffer(4, m_VolumeBuffers.m_PoolItemCountBufferPtr);
+        ContextManager::SetResourceBuffer(5, m_VolumeIndexBufferPtr);
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////
+        // Fill root grids
+        ////////////////////////////////////////////////////////////////////////////////////////////////
+
+        Performance::BeginEvent("Fill root grids");
+
+        ContextManager::SetShaderCS(m_IntegrateRootGridCSPtr);
+
+        for (uint32_t VolumeIndex : rVolumeQueue)
+        {
+            auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////
+            // Set current volume
+            ////////////////////////////////////////////////////////////////////////////////////////////////
+            
+            BufferManager::UploadBufferData(m_VolumeIndexBufferPtr, &rRootVolume.m_PoolIndex);
+            
+            ////////////////////////////////////////////////////////////////////////////////////////////////
+            // Integrate into root grid
+            ////////////////////////////////////////////////////////////////////////////////////////////////
+
+            ContextManager::SetResourceBuffer(6, rRootVolume.m_Level1QueuePtr);
+            ContextManager::SetResourceBuffer(7, rRootVolume.m_IndirectLevel1Buffer);
+
+            ContextManager::Barrier();
+
+            ContextManager::DispatchIndirect(rRootVolume.m_IndirectLevel1Buffer, SIndirectBuffers::s_ComputeDivOffset);
+        }
+
+        Performance::EndEvent();
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////
+        // Fill intenal grids
+        ////////////////////////////////////////////////////////////////////////////////////////////////
+
+        Performance::BeginEvent("Fill internal grids");
+
+        ContextManager::SetShaderCS(m_IntegrateLevel1GridCSPtr);
+
+        for (uint32_t VolumeIndex : rVolumeQueue)
+        {
+            auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////
+            // Set current volume
+            ////////////////////////////////////////////////////////////////////////////////////////////////
+
+            BufferManager::UploadBufferData(m_VolumeIndexBufferPtr, &rRootVolume.m_PoolIndex);
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////
+            // Integrate into root grid
+            ////////////////////////////////////////////////////////////////////////////////////////////////
+
+            ContextManager::SetResourceBuffer(6, rRootVolume.m_Level2QueuePtr);
+            ContextManager::SetResourceBuffer(7, rRootVolume.m_IndirectLevel2Buffer);
+
+            ContextManager::Barrier();
+
+            ContextManager::DispatchIndirect(rRootVolume.m_IndirectLevel2Buffer, SIndirectBuffers::s_ComputeDivOffset);
+        }
+
+        Performance::EndEvent();
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////
+        // Compute new TSDF values
+        ////////////////////////////////////////////////////////////////////////////////////////////////
+
+        Performance::BeginEvent("Compute new TSDF");
+
+        ContextManager::SetImageTexture(0, m_RawDepthBufferPtr);
+        if (m_ReconstructionSettings.m_CaptureColor)
+        {
+            ContextManager::SetImageTexture(1, m_RawCameraFramePtr);
+        }
+        ContextManager::SetShaderCS(m_IntegrateTSDFCSPtr);
+
+        for (uint32_t VolumeIndex : rVolumeQueue)
+        {
+            auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////
+            // Set current volume
+            ////////////////////////////////////////////////////////////////////////////////////////////////
+
+            BufferManager::UploadBufferData(m_VolumeIndexBufferPtr, &rRootVolume.m_PoolIndex);
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////
+            // Integrate into TSDF grids
+            ////////////////////////////////////////////////////////////////////////////////////////////////
+
+            ContextManager::SetResourceBuffer(6, rRootVolume.m_Level2QueuePtr);
+            ContextManager::SetResourceBuffer(7, rRootVolume.m_IndirectLevel2Buffer);
+
+            ContextManager::Barrier();
+
+            ContextManager::DispatchIndirect(rRootVolume.m_IndirectLevel2Buffer, SIndirectBuffers::s_ComputeOffset);
+        }
+
+        Performance::EndEvent();
+    }
+    
+    // -----------------------------------------------------------------------------
+
+	void CSLAMReconstructor::UpdateRootgrids()
+	{
+        ////////////////////////////////////////////////////////////////////////////////
+        // Create all root grid volumes that are in the view frustum 
+        ////////////////////////////////////////////////////////////////////////////////
+
+		glm::vec3 BBMax = m_FrustumPoints[0];
+        glm::vec3 BBMin = m_FrustumPoints[0];
+
+		for (int i = 1; i < m_FrustumPoints.size(); ++ i)
+		{
+			for (int j = 0; j < 3; ++ j)
+			{
+				BBMax[j] = glm::max(m_FrustumPoints[i][j], BBMax[j]);
+				BBMin[j] = glm::min(m_FrustumPoints[i][j], BBMin[j]);
+			}
+		}
+		
+        glm::ivec3 MaxIndex;
+        glm::ivec3 MinIndex;
+
+		for (int i = 0; i < 3; ++ i)
+		{
+			MaxIndex[i] = static_cast<int>(BBMax[i] / m_VolumeSizes[0]);
+			MinIndex[i] = static_cast<int>(BBMin[i] / m_VolumeSizes[0]);
+		}
+
+		SRootVolume RootVolume;
+        RootVolume.m_PoolIndex = -1;
+
+		for (int x = MinIndex[0] - 1; x <= MaxIndex[0]; ++ x)
+		{
+			for (int y = MinIndex[1] - 1; y <= MaxIndex[1]; ++ y)
+			{
+				for (int z = MinIndex[2] - 1; z <= MaxIndex[2]; ++ z)
+				{
+                    glm::ivec3 Key = glm::ivec3(x, y, z);
+					
+					if (m_RootVolumeMap.count(Key) == 0 && RootGridInFrustum(Key))
+					{
+						RootVolume.m_Offset = Key;
+						RootVolume.m_IsVisible = true;
+
+						m_RootVolumeMap[Key] = RootVolume;
+					}
+				}
+			}
+		}
+
+        ////////////////////////////////////////////////////////////////////////////////
+        // Prepare instance buffers
+        ////////////////////////////////////////////////////////////////////////////////
+
+        ClearBuffer(m_AtomicCounterBufferPtr, m_RootVolumeMap.size() * sizeof(int32_t));
+        
+        ////////////////////////////////////////////////////////////////////////////////
+        // Create vector and instance buffer for root grid volumes
+        ////////////////////////////////////////////////////////////////////////////////
+
+        m_RootVolumeVector.clear();
+        
+        SInstanceData* pInstanceData = static_cast<SInstanceData*>(BufferManager::MapBuffer(m_RootVolumeInstanceBufferPtr, CBuffer::Write));
+
+		for (auto& rPair : m_RootVolumeMap)
+		{
+			auto& rRootGrid = rPair.second;
+
+			rRootGrid.m_IsVisible = RootGridInFrustum(rRootGrid.m_Offset);
+            
+            if (rRootGrid.m_IsVisible)
+            {
+                m_RootVolumeVector.push_back(&rRootGrid);
+
+                SInstanceData InstanceData;
+                InstanceData.m_Offset = rRootGrid.m_Offset;
+                InstanceData.m_Index = 0; // todo: remove
+
+                *pInstanceData = InstanceData;
+                ++pInstanceData;
+            }
+        }
+
+        BufferManager::UnmapBuffer(m_RootVolumeInstanceBufferPtr);
+
+        ////////////////////////////////////////////////////////////////////////////////
+        // Check all possible root grid volumes for depth data
+        ////////////////////////////////////////////////////////////////////////////////
+
+        ContextManager::SetTargetSet(m_EmptyTargetSetPtr);
+        ContextManager::SetViewPortSet(m_DepthViewPortSetPtr);
+
+        Performance::BeginEvent("Check Root Volumes");
+
+        ContextManager::ResetShaderCS();
+
+        RasterizeRootVolumes();
+        GatherVolumeCounters(static_cast<unsigned int>(m_RootVolumeVector.size()), m_AtomicCounterBufferPtr, m_VolumeQueueBufferPtr, m_IndexedIndirectBufferPtr);
+
+        Performance::EndEvent();
+
+        // todo: try to get rid of mapping
+        SIndirectBuffers* pIndirectData = static_cast<SIndirectBuffers*>(BufferManager::MapBuffer(m_IndexedIndirectBufferPtr, CBuffer::ReadWrite));
+        int VolumeCount = pIndirectData->m_Indexed.m_InstanceCount;
+        BufferManager::UnmapBuffer(m_IndexedIndirectBufferPtr);
+
+        ////////////////////////////////////////////////////////////////////////////////
+        // Integrate depth into individual root volume grids
+        ////////////////////////////////////////////////////////////////////////////////
+
+        for (auto& rRootVolume : m_RootVolumeVector)
+        {
+            rRootVolume->m_IsVisible = false;
+        }
+
+        if (VolumeCount > 0)
+        {
+            Performance::BeginEvent("Update volume");
+
+            std::vector<uint32_t> VolumeQueue(VolumeCount);
+            uint32_t* pVoxelQueue = static_cast<uint32_t*>(BufferManager::MapBufferRange(m_VolumeQueueBufferPtr, CBuffer::Read, 0, VolumeCount * sizeof(uint32_t)));
+            memcpy(VolumeQueue.data(), pVoxelQueue, sizeof(uint32_t) * VolumeCount);
+            BufferManager::UnmapBuffer(m_VolumeQueueBufferPtr);
+
+            Performance::BeginEvent("Create integration queues");
+            CreateIntegrationQueues(VolumeQueue);
+            Performance::EndEvent();
+            
+            Performance::BeginEvent("Integrate hierarchy");
+            IntegrateHierarchies(VolumeQueue);
+            Performance::EndEvent();
+
+            // Compute the AABB for the whole reconstruction
+
+            glm::ivec3 TotalMinOffset = m_RootVolumeVector[VolumeQueue[0]]->m_Offset;
+            glm::ivec3 TotalMaxOffset = TotalMinOffset;
+
+            for (int i = 1; i < VolumeQueue.size(); ++i)
+            {
+                glm::ivec3 MinOffset = m_RootVolumeVector[VolumeQueue[i]]->m_Offset;
+                glm::ivec3 MaxOffset = MinOffset;
+
+                TotalMinOffset[0] = glm::min(TotalMinOffset[0], MinOffset[0]);
+                TotalMinOffset[1] = glm::min(TotalMinOffset[1], MinOffset[1]);
+                TotalMinOffset[2] = glm::min(TotalMinOffset[2], MinOffset[2]);
+
+                TotalMaxOffset[0] = glm::max(TotalMaxOffset[0], MaxOffset[0]);
+                TotalMaxOffset[1] = glm::max(TotalMaxOffset[1], MaxOffset[1]);
+                TotalMaxOffset[2] = glm::max(TotalMaxOffset[2], MaxOffset[2]);
+            }
+
+            const int CurrentWidth = m_VolumeBuffers.m_RootVolumeTotalWidth / 2;
+
+            if (TotalMinOffset[0] <= -CurrentWidth || TotalMinOffset[1] <= -CurrentWidth || TotalMinOffset[2] <= -CurrentWidth ||
+                TotalMaxOffset[0] >   CurrentWidth || TotalMaxOffset[1] >   CurrentWidth || TotalMaxOffset[2] >   CurrentWidth)
+            {
+                // TODO: resize buffer
+                assert(false);
+            }
+
+            m_VolumeBuffers.m_MinOffset[0] = glm::min(TotalMinOffset[0], m_VolumeBuffers.m_MinOffset[0]);
+            m_VolumeBuffers.m_MinOffset[1] = glm::min(TotalMinOffset[1], m_VolumeBuffers.m_MinOffset[1]);
+            m_VolumeBuffers.m_MinOffset[2] = glm::min(TotalMinOffset[2], m_VolumeBuffers.m_MinOffset[2]);
+
+            m_VolumeBuffers.m_MaxOffset[0] = glm::max(TotalMaxOffset[0], m_VolumeBuffers.m_MaxOffset[0]);
+            m_VolumeBuffers.m_MaxOffset[1] = glm::max(TotalMaxOffset[1], m_VolumeBuffers.m_MaxOffset[1]);
+            m_VolumeBuffers.m_MaxOffset[2] = glm::max(TotalMaxOffset[2], m_VolumeBuffers.m_MaxOffset[2]);
+
+            for (uint32_t VolumeIndex : VolumeQueue)
+            {
+                auto& rRootVolume = *m_RootVolumeVector[VolumeIndex];
+                
+                // Store pool indices in root volume position buffer
+
+                const int Width = m_VolumeBuffers.m_RootVolumeTotalWidth;
+                const glm::ivec3 Offset = rRootVolume.m_Offset + Width / 2; // Offset value by half of width so it is positive
+                const int Index = Offset[0] + (Offset[1] * Width) + (Offset[2] * Width * Width);
+
+                BufferManager::UploadBufferData(m_VolumeBuffers.m_RootVolumePositionBufferPtr, &rRootVolume.m_PoolIndex, Index * sizeof(int32_t), sizeof(int32_t));
+            }
+
+            Performance::EndEvent();
+        }
+	}
+
+	// -----------------------------------------------------------------------------
+
     void CSLAMReconstructor::SetupTextures()
     {
         m_SmoothDepthBufferPtr.resize(m_ReconstructionSettings.m_PyramidLevelCount);
@@ -274,12 +1084,16 @@ namespace MR
         m_RaycastVertexMapPtr.resize(m_ReconstructionSettings.m_PyramidLevelCount);
         m_RaycastNormalMapPtr.resize(m_ReconstructionSettings.m_PyramidLevelCount);
 
+        std::string MapFormatString = Core::CProgramParameters::GetInstance().Get("mr:slam:map_format", "rgba16f");
+        assert(MapFormatString == "rgba16f" || MapFormatString == "rgba32f");
+        CTexture::EFormat MapFormat = MapFormatString == "rgba16f" ? CTexture::R16G16B16A16_FLOAT : CTexture::R32G32B32A32_FLOAT;
+
         STextureDescriptor TextureDescriptor = {};
         
         for (int i = 0; i < m_ReconstructionSettings.m_PyramidLevelCount; ++i)
         {
-            TextureDescriptor.m_NumberOfPixelsU = m_pKinectControl->GetDepthWidth() >> i;
-            TextureDescriptor.m_NumberOfPixelsV = m_pKinectControl->GetDepthHeight() >> i;
+            TextureDescriptor.m_NumberOfPixelsU = m_DepthFrameSize.x >> i;
+            TextureDescriptor.m_NumberOfPixelsV = m_DepthFrameSize.y >> i;
             TextureDescriptor.m_NumberOfPixelsW = 1;
             TextureDescriptor.m_NumberOfMipMaps = 1;
             TextureDescriptor.m_NumberOfTextures = 1;
@@ -293,31 +1107,16 @@ namespace MR
 
             m_SmoothDepthBufferPtr[i] = TextureManager::CreateTexture2D(TextureDescriptor);
 
-            TextureDescriptor.m_Format = g_UseHighPrecisionMaps ? CTexture::R32G32B32A32_FLOAT : CTexture::R16G16B16A16_FLOAT;
+            TextureDescriptor.m_Format = MapFormat;
 
             m_ReferenceVertexMapPtr[i] = TextureManager::CreateTexture2D(TextureDescriptor);
             m_ReferenceNormalMapPtr[i] = TextureManager::CreateTexture2D(TextureDescriptor);
             m_RaycastVertexMapPtr[i] = TextureManager::CreateTexture2D(TextureDescriptor);
             m_RaycastNormalMapPtr[i] = TextureManager::CreateTexture2D(TextureDescriptor);
         }
-        
-        TextureDescriptor.m_NumberOfPixelsU = m_ReconstructionSettings.m_VolumeResolution;
-        TextureDescriptor.m_NumberOfPixelsV = m_ReconstructionSettings.m_VolumeResolution;
-        TextureDescriptor.m_NumberOfPixelsW = m_ReconstructionSettings.m_VolumeResolution;
-        TextureDescriptor.m_NumberOfMipMaps = 1;
-        TextureDescriptor.m_NumberOfTextures = 1;
-        TextureDescriptor.m_Binding = CTexture::ShaderResource;
-        TextureDescriptor.m_Access = CTexture::CPUWrite;
-        TextureDescriptor.m_Usage = CTexture::GPUReadWrite;
-        TextureDescriptor.m_Semantic = CTexture::UndefinedSemantic;
-        TextureDescriptor.m_pFileName = 0;
-        TextureDescriptor.m_pPixels = 0;
-        TextureDescriptor.m_Format = CTexture::R16G16_FLOAT;
 
-        m_TSDFVolumePtr = TextureManager::CreateTexture3D(TextureDescriptor);
-
-        TextureDescriptor.m_NumberOfPixelsU = m_pKinectControl->GetDepthWidth();
-        TextureDescriptor.m_NumberOfPixelsV = m_pKinectControl->GetDepthHeight();
+        TextureDescriptor.m_NumberOfPixelsU = m_DepthFrameSize.x;
+        TextureDescriptor.m_NumberOfPixelsV = m_DepthFrameSize.y;
         TextureDescriptor.m_NumberOfPixelsW = 1;
         TextureDescriptor.m_NumberOfMipMaps = 1;
         TextureDescriptor.m_NumberOfTextures = 1;
@@ -331,36 +1130,47 @@ namespace MR
 
         m_RawDepthBufferPtr = TextureManager::CreateTexture2D(TextureDescriptor);
 
-        if (m_ReconstructionSettings.m_CaptureColor)
-        {
-            TextureDescriptor.m_NumberOfPixelsU = m_pKinectControl->GetDepthWidth();
-            TextureDescriptor.m_NumberOfPixelsV = m_pKinectControl->GetDepthHeight();
-            TextureDescriptor.m_Format = CTexture::R8G8B8A8_UBYTE;
+        TextureDescriptor.m_Format = MapFormat;
 
-            m_RawCameraFramePtr = TextureManager::CreateTexture2D(TextureDescriptor);
+        m_RawVertexMapPtr = TextureManager::CreateTexture2D(TextureDescriptor);
 
-            TextureDescriptor.m_NumberOfPixelsU = m_ReconstructionSettings.m_VolumeResolution;
-            TextureDescriptor.m_NumberOfPixelsV = m_ReconstructionSettings.m_VolumeResolution;
-            TextureDescriptor.m_NumberOfPixelsW = m_ReconstructionSettings.m_VolumeResolution;
-            TextureDescriptor.m_Format = CTexture::R8G8B8A8_UBYTE;
+		if (m_ReconstructionSettings.m_CaptureColor)
+		{
+			TextureDescriptor.m_NumberOfPixelsU = m_ColorFrameSize.x;
+			TextureDescriptor.m_NumberOfPixelsV = m_ColorFrameSize.y;
+			TextureDescriptor.m_Format = CTexture::R8G8B8A8_UBYTE;
 
-            m_ColorVolumePtr = TextureManager::CreateTexture3D(TextureDescriptor);
-        }
-        else
-        {
-            m_RawCameraFramePtr = 0;
-            m_ColorVolumePtr = 0;
-        }
+			m_RawCameraFramePtr = TextureManager::CreateTexture2D(TextureDescriptor);
+		}
+
+        const int VolumeWidth = m_ReconstructionSettings.m_GridResolutions[0] * m_ReconstructionSettings.m_GridResolutions[1];
+
+        TextureDescriptor.m_NumberOfPixelsU = VolumeWidth;
+        TextureDescriptor.m_NumberOfPixelsV = VolumeWidth;
+        TextureDescriptor.m_NumberOfPixelsW = VolumeWidth;
+        TextureDescriptor.m_Binding = CTexture::ShaderResource;
+        TextureDescriptor.m_Access = CTexture::CPUWrite;
+        TextureDescriptor.m_Usage = CTexture::GPUReadWrite;
+        TextureDescriptor.m_Semantic = CTexture::UndefinedSemantic;
+        TextureDescriptor.m_Format = CTexture::R8_UINT;
+
+        m_FullVolumePtr = TextureManager::CreateTexture3D(TextureDescriptor);
+
+        m_EmptyFullVolumePtr = TargetSetManager::CreateEmptyTargetSet(VolumeWidth, VolumeWidth);
+
+        m_EmptyTargetSetPtr = TargetSetManager::CreateEmptyTargetSet(m_DepthFrameSize.x, m_DepthFrameSize.y);
+
+        Gfx::TextureManager::ClearTexture(m_FullVolumePtr);
     }
     
     // -----------------------------------------------------------------------------
     
-    void CSLAMReconstructor::SetupBuffers()
+    void CSLAMReconstructor::SetupBuffers(bool _CreatePool)
     {
-        const float FocalLengthX0 = m_pKinectControl->GetDepthFocalLengthX();
-        const float FocalLengthY0 = m_pKinectControl->GetDepthFocalLengthY();
-        const float FocalPointX0 = m_pKinectControl->GetDepthFocalPointX();
-        const float FocalPointY0 = m_pKinectControl->GetDepthFocalPointY();
+        const float FocalLengthX0 = m_FocalLength.x;
+        const float FocalLengthY0 = m_FocalLength.y;
+        const float FocalPointX0 = m_FocalPoint.x;
+        const float FocalPointY0 = m_FocalPoint.y;
         
         std::vector<SIntrinsics> Intrinsics(m_ReconstructionSettings.m_PyramidLevelCount);
 
@@ -382,7 +1192,7 @@ namespace MR
 
             Intrinsics[i].m_FocalPoint = glm::vec2(FocalPointX, FocalPointY);
             Intrinsics[i].m_FocalLength = glm::vec2(FocalLengthX, FocalLengthY);
-            Intrinsics[i].m_InvFocalLength = 1.0f / glm::vec2(FocalLengthX, FocalLengthY);
+            Intrinsics[i].m_InvFocalLength = glm::vec2(1.0f / FocalLengthX, 1.0f / FocalLengthY);
             Intrinsics[i].m_KMatrix = KMatrix;
             Intrinsics[i].m_InvKMatrix = glm::inverse(KMatrix);
         }
@@ -412,48 +1222,184 @@ namespace MR
         ConstantBufferDesc.m_Usage = CBuffer::GPUReadWrite;
         m_RaycastPyramidConstantBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
         
-        ConstantBufferDesc.m_Usage = CBuffer::GPURead;        
+        ConstantBufferDesc.m_Usage = CBuffer::GPURead;
+
         ConstantBufferDesc.m_NumberOfBytes = 16;
         ConstantBufferDesc.m_pBytes = &m_ReconstructionSettings.m_DepthThreshold;
         m_BilateralFilterConstantBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+        
+        SIndirectBuffers ZeroIndirectData = {};
+        ConstantBufferDesc.m_Usage = CBuffer::GPURead;
+        ConstantBufferDesc.m_Binding = CBuffer::ResourceBuffer;
+        ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(SIndirectBuffers);
+        ConstantBufferDesc.m_pBytes = &ZeroIndirectData;
+        m_IndexedIndirectBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+
+        SPointRasterization ZeroPointRasterization = {};
+        ConstantBufferDesc.m_Binding = CBuffer::ConstantBuffer;
+        ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
+        ConstantBufferDesc.m_pBytes = &ZeroPointRasterization;
+        ConstantBufferDesc.m_Usage = CBuffer::GPURead;
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(SPointRasterization);
+        m_PointRasterizationBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+
+        ConstantBufferDesc.m_Binding = CBuffer::ResourceBuffer;
+        ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(SInstanceData) * g_MaxVolumeInstanceCount;
+        ConstantBufferDesc.m_pBytes = nullptr;
+        ConstantBufferDesc.m_Usage = CBuffer::GPURead;
+        m_RootVolumeInstanceBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+
+        ConstantBufferDesc.m_Binding = CBuffer::ResourceBuffer;
+        ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
+        ConstantBufferDesc.m_NumberOfBytes = m_ReconstructionSettings.m_GridResolutions[0] * m_ReconstructionSettings.m_GridResolutions[1];
+        ConstantBufferDesc.m_NumberOfBytes = ConstantBufferDesc.m_NumberOfBytes *
+                                             ConstantBufferDesc.m_NumberOfBytes *
+                                             ConstantBufferDesc.m_NumberOfBytes * sizeof(uint32_t);
+        ConstantBufferDesc.m_pBytes = nullptr;
+        ConstantBufferDesc.m_Usage = CBuffer::GPURead;
+        m_VolumeQueueBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(uint32_t) * g_MaxVolumeInstanceCount;
+        m_AtomicCounterBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+
+        if (_CreatePool)
+        {
+            CreatePool();
+        }
+
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(int32_t) * 4;// 16 bytes = minimum
+        m_VolumeIndexBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+
+        SRaycastConstantBuffer RaycastZero = {};
+
+        ConstantBufferDesc.m_pBytes = &RaycastZero;
+        ConstantBufferDesc.m_Binding = CBuffer::ConstantBuffer;
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(SRaycastConstantBuffer);
+        m_VolumeBuffers.m_AABBBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+
+        ConstantBufferDesc.m_pBytes = nullptr;
+        ConstantBufferDesc.m_Binding = CBuffer::ConstantBuffer;
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(SPlaneInpainting);
+
+        m_PlaneExtractionBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+    }
+
+    void CSLAMReconstructor::CreatePool()
+    {
+        m_RootGridPoolSize = Core::CProgramParameters::GetInstance().Get("mr:slam:pool_sizes:level0", g_MaxRootGridPoolSize / g_MegabyteSize) * g_MegabyteSize;
+        m_Level1GridPoolSize = Core::CProgramParameters::GetInstance().Get("mr:slam:pool_sizes:level1", g_MaxLevel1GridPoolSize / g_MegabyteSize) * g_MegabyteSize;
+        m_TSDFPoolSize = Core::CProgramParameters::GetInstance().Get("mr:slam:pool_sizes:level2", g_MaxTSDFPoolSize / g_MegabyteSize) * g_MegabyteSize;
+
+        SBufferDescriptor ConstantBufferDesc = {};
+
+        ConstantBufferDesc.m_Binding = CBuffer::ResourceBuffer;
+        ConstantBufferDesc.m_Access = CBuffer::CPUWrite;        
+        ConstantBufferDesc.m_Usage = CBuffer::GPURead;
+
+        const unsigned int RootVolumePositionBufferSize = g_AABB * g_AABB * g_AABB * sizeof(uint32_t);
+
+        ConstantBufferDesc.m_NumberOfBytes = RootVolumePositionBufferSize;
+        m_VolumeBuffers.m_RootVolumePositionBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+        ConstantBufferDesc.m_NumberOfBytes = g_MaxRootVolumePoolSize;
+        m_VolumeBuffers.m_RootVolumePoolPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+        ConstantBufferDesc.m_NumberOfBytes = m_RootGridPoolSize;
+        m_VolumeBuffers.m_RootGridPoolPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+        ConstantBufferDesc.m_NumberOfBytes = m_Level1GridPoolSize;
+        m_VolumeBuffers.m_Level1PoolPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+        ConstantBufferDesc.m_NumberOfBytes = m_TSDFPoolSize;
+        m_VolumeBuffers.m_TSDFPoolPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+
+        uint32_t Zero[] = { 0, 0, 0, 0 };
+
+        ConstantBufferDesc.m_pBytes = Zero;
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(uint32_t) * 4;// m_ReconstructionSettings.GRID_LEVELS;
+        m_VolumeBuffers.m_PoolItemCountBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+    }
+    
+    // -----------------------------------------------------------------------------
+
+    void CSLAMReconstructor::SetImageSizes(glm::ivec2 _DepthFrameSize, glm::ivec2 _ColorFrameSize)
+    {
+        m_DepthFrameSize = _DepthFrameSize;
+        m_ColorFrameSize = _ColorFrameSize;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CSLAMReconstructor::Update()
+    void CSLAMReconstructor::SetIntrinsics(glm::vec2 _FocalLength, glm::vec2 _FocalPoint)
     {
+        m_FocalLength = _FocalLength;
+        m_FocalPoint = _FocalPoint;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CSLAMReconstructor::SetDepthBounds(float _Min, float _Max)
+    {
+        m_DepthBounds = glm::vec2(_Min, _Max);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CSLAMReconstructor::SetDeviceResolution(const glm::ivec2& _rResolution)
+    {
+        m_DeviceResolution = _rResolution;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CSLAMReconstructor::GetImageSizes(glm::ivec2& _rDepthFrameSize, glm::ivec2& _rColorFrameSize)
+    {
+        _rDepthFrameSize = m_DepthFrameSize;
+        _rColorFrameSize = m_ColorFrameSize;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CSLAMReconstructor::GetIntrinsics(glm::vec2& _rFocalLength, glm::vec2& _rFocalPoint)
+    {
+        _rFocalLength = m_FocalLength;
+        _rFocalPoint = m_FocalPoint;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CSLAMReconstructor::GetDepthBounds(float& _rMin, float& _rMax)
+    {
+        _rMin = m_DepthBounds[0];
+        _rMax = m_DepthBounds[1];
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CSLAMReconstructor::GetDeviceResolution(glm::ivec2& _rResolution)
+    {
+        _rResolution = m_DeviceResolution;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CSLAMReconstructor::OnNewFrame(Gfx::CTexturePtr DepthBuffer, Gfx::CTexturePtr ColorBuffer, const glm::mat4* pTransform)
+    {
+        m_IsTrackingNeeded = pTransform == nullptr;
+
         const bool CaptureColor = m_ReconstructionSettings.m_CaptureColor;
-
-        unsigned short* pDepth = m_DepthPixels.data();
-        char* pColor = m_CameraPixels.data();
-
+        
         if (m_IsTrackingPaused)
         {
             return;
         }
-
-        if (!m_pKinectControl->GetDepthBuffer(pDepth))
-        {
-            return;
-        }
-
-        if (CaptureColor && !m_pKinectControl->GetCameraFrame(pColor))
-        {
-            return;
-        }
-
-        Performance::BeginEvent("Kinect Fusion");
+                
+        Performance::BeginEvent("Scalable Kinect Fusion");
 
         Performance::BeginEvent("Data Input");
 
-        Base::AABB2UInt TargetRect;
-        TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_pKinectControl->GetDepthWidth(), m_pKinectControl->GetDepthHeight()));
-        TextureManager::CopyToTexture2D(m_RawDepthBufferPtr, TargetRect, m_pKinectControl->GetDepthWidth(), pDepth);
+        m_RawDepthBufferPtr = DepthBuffer;
 
         if (CaptureColor)
         {
-            TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_pKinectControl->GetDepthWidth(), m_pKinectControl->GetDepthHeight()));
-            TextureManager::CopyToTexture2D(m_RawCameraFramePtr, TargetRect, m_pKinectControl->GetDepthWidth(), pColor);
+            m_RawCameraFramePtr = ColorBuffer;
         }
 
         //////////////////////////////////////////////////////////////////////////////////////
@@ -468,33 +1414,89 @@ namespace MR
         // Tracking
         //////////////////////////////////////////////////////////////////////////////////////
 
-        if (m_IntegratedFrameCount > 0)
+        if (m_IsTrackingNeeded)
         {
-            Performance::BeginEvent("Tracking");
-
-            glm::mat4 NewPoseMatrix = m_pTracker->Track(m_PoseMatrix,
-                m_ReferenceVertexMapPtr,
-                m_ReferenceNormalMapPtr,
-                m_RaycastVertexMapPtr,
-                m_RaycastNormalMapPtr,
-                m_IntrinsicsConstantBufferPtr
-            );
-
-            m_TrackingLost = m_pTracker->IsTrackingLost();
-
-            if (!m_TrackingLost)
+            if (m_IntegratedFrameCount > m_MinWeight)
             {
-                m_PoseMatrix = NewPoseMatrix;
-                
-                STrackingData TrackingData;
-                TrackingData.m_PoseMatrix = NewPoseMatrix;
-                TrackingData.m_InvPoseMatrix = glm::inverse(NewPoseMatrix);
+                Performance::BeginEvent("Tracking");
 
-                BufferManager::UploadBufferData(m_TrackingDataConstantBufferPtr, &TrackingData);
+                glm::mat4 NewPoseMatrix = m_pTracker->Track(m_PoseMatrix,
+                    m_ReferenceVertexMapPtr,
+                    m_ReferenceNormalMapPtr,
+                    m_RaycastVertexMapPtr,
+                    m_RaycastNormalMapPtr,
+                    m_IntrinsicsConstantBufferPtr
+                );
+
+                m_TrackingLost = m_pTracker->IsTrackingLost();
+
+                if (!m_TrackingLost)
+                {
+                    m_PoseMatrix = NewPoseMatrix;
+
+                    STrackingData TrackingData;
+                    TrackingData.m_PoseMatrix = NewPoseMatrix;
+                    TrackingData.m_InvPoseMatrix = glm::inverse(NewPoseMatrix);
+
+                    BufferManager::UploadBufferData(m_TrackingDataConstantBufferPtr, &TrackingData);
+                }
+
+                Performance::EndEvent();
             }
-
-            Performance::EndEvent();
         }
+        else
+        {
+            m_TrackingLost = false;
+
+            m_PoseMatrix = *pTransform;
+
+            STrackingData TrackingData;
+            TrackingData.m_PoseMatrix = *pTransform;
+            TrackingData.m_InvPoseMatrix = glm::inverse(*pTransform);
+
+            BufferManager::UploadBufferData(m_TrackingDataConstantBufferPtr, &TrackingData);
+        }
+
+        //////////////////////////////////////////////////////////////////////////////////////
+        // Store root grid count on gpu and read other pool sizes form gpu
+        //////////////////////////////////////////////////////////////////////////////////////
+
+        int* pPoolSizes = static_cast<int*>(BufferManager::MapBuffer(m_VolumeBuffers.m_PoolItemCountBufferPtr, CBuffer::EMap::ReadWrite));
+        pPoolSizes[0] = m_RootVolumePoolItemCount;
+        m_VolumeBuffers.m_RootGridPoolSize = m_RootVolumePoolItemCount;
+        m_VolumeBuffers.m_Level1PoolSize = pPoolSizes[1];
+        m_VolumeBuffers.m_TSDFPoolSize = pPoolSizes[2];
+        BufferManager::UnmapBuffer(m_VolumeBuffers.m_PoolItemCountBufferPtr);
+        
+        const unsigned int TSDFItemSize = m_ReconstructionSettings.m_CaptureColor ? sizeof(STSDFColorPoolItem) : sizeof(STSDFPoolItem);
+
+        if (!m_PoolFull)
+        {
+            if (m_VolumeBuffers.m_RootGridPoolSize * m_ReconstructionSettings.m_VoxelsPerGrid[0] * sizeof(SGridPoolItem) > m_RootGridPoolSize)
+            {
+                m_PoolFull = true;
+                m_IsIntegrationPaused = true;
+                ENGINE_CONSOLE_ERROR("Rootgrid pool is full!");
+            }
+            if (m_VolumeBuffers.m_Level1PoolSize * m_ReconstructionSettings.m_VoxelsPerGrid[1] * sizeof(SGridPoolItem) > m_Level1GridPoolSize)
+            {
+                m_PoolFull = true;
+                m_IsIntegrationPaused = true;
+                ENGINE_CONSOLE_ERROR("Level1 pool is full!");
+            }
+            if (static_cast<unsigned long long>(m_VolumeBuffers.m_TSDFPoolSize) * m_ReconstructionSettings.m_VoxelsPerGrid[2] * TSDFItemSize > m_TSDFPoolSize)
+            {
+                m_PoolFull = true;
+                m_IsIntegrationPaused = true;
+                ENGINE_CONSOLE_ERROR("TSDF pool buffer is full!");
+            }
+        }
+         
+        unsigned int ReconstructionSizeBytes = m_VolumeBuffers.m_RootGridPoolSize * m_ReconstructionSettings.m_VoxelsPerGrid[0] * sizeof(SGridPoolItem);
+        ReconstructionSizeBytes += m_VolumeBuffers.m_Level1PoolSize * m_ReconstructionSettings.m_VoxelsPerGrid[1] * sizeof(SGridPoolItem);
+        ReconstructionSizeBytes += m_VolumeBuffers.m_TSDFPoolSize * m_ReconstructionSettings.m_VoxelsPerGrid[2] * TSDFItemSize;
+
+        m_ReconstructionSize = static_cast<float>(ReconstructionSizeBytes) / g_MegabyteSize;
 
         //////////////////////////////////////////////////////////////////////////////////////
         // Integrate and raycast pyramid
@@ -504,11 +1506,39 @@ namespace MR
 
         if (!m_IsIntegrationPaused)
         {
-            Integrate();            
+            Performance::BeginEvent("Updating root grid");
+
+            UpdateFrustum();
+            UpdateRootgrids();
+
+            Performance::EndEvent();
+        }
+        Performance::BeginEvent("Raycasting for tracking");
+
+        SRaycastConstantBuffer Data;
+
+        for (int i = 0; i < 3; ++i)
+        {
+            Data.m_AABBMin[i] = m_VolumeBuffers.m_MinOffset[i] * m_ReconstructionSettings.m_VolumeSize;
+            Data.m_AABBMax[i] = (m_VolumeBuffers.m_MaxOffset[i] + 1.0f) * m_ReconstructionSettings.m_VolumeSize;
         }
 
-        Raycast();
-        CreateRaycastPyramid();
+        Data.m_MinWeight = m_MinWeight;
+        Data.m_VolumeTextureWidth = m_VolumeBuffers.m_RootVolumeTotalWidth;
+
+        BufferManager::UploadBufferData(m_VolumeBuffers.m_AABBBufferPtr, &Data);
+
+        if (m_IsTrackingNeeded)
+        {
+            Raycast();
+        }
+
+        Performance::EndEvent();
+
+        if (m_IsTrackingNeeded)
+        {
+            CreateRaycastPyramid();
+        }
 
         Performance::EndEvent();
 
@@ -523,14 +1553,38 @@ namespace MR
         ContextManager::ResetTexture(0);
 
         Performance::EndEvent();
+
+        if (m_IntegratedFrameCount == m_MinWeight)
+        {
+            ClearMarkerStatistics();
+        }
     }
 
     // -----------------------------------------------------------------------------
 
     void CSLAMReconstructor::CreateReferencePyramid()
     {
-        const int WorkGroupsX = GetWorkGroupCount(m_pKinectControl->GetDepthWidth(), g_TileSize2D);
-        const int WorkGroupsY = GetWorkGroupCount(m_pKinectControl->GetDepthHeight(), g_TileSize2D);
+        const int WorkGroupsX = DivUp(m_DepthFrameSize.x, g_TileSize2D);
+        const int WorkGroupsY = DivUp(m_DepthFrameSize.y, g_TileSize2D);
+
+        ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
+        ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
+
+        /////////////////////////////////////////////////////////////////////////////////////
+        // Generate raw vertex map
+        /////////////////////////////////////////////////////////////////////////////////////
+
+        ContextManager::SetShaderCS(m_VertexMapCSPtr);
+
+        ContextManager::SetImageTexture(0, m_RawDepthBufferPtr);
+        ContextManager::SetImageTexture(1, m_RawVertexMapPtr);
+        ContextManager::Barrier();
+        ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+
+        if (!m_IsTrackingNeeded)
+        {
+            return;
+        }
 
         //////////////////////////////////////////////////////////////////////////////////////
         // Bilateral Filter
@@ -540,8 +1594,8 @@ namespace MR
 
         ContextManager::SetShaderCS(m_BilateralFilterCSPtr);
         ContextManager::SetConstantBuffer(0, m_BilateralFilterConstantBufferPtr);
-        ContextManager::SetImageTexture(0, static_cast<CTexturePtr>(m_RawDepthBufferPtr));
-        ContextManager::SetImageTexture(1, static_cast<CTexturePtr>(m_SmoothDepthBufferPtr[0]));
+        ContextManager::SetImageTexture(0, m_RawDepthBufferPtr);
+        ContextManager::SetImageTexture(1, m_SmoothDepthBufferPtr[0]);
         ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
 
         //////////////////////////////////////////////////////////////////////////////////////
@@ -550,107 +1604,102 @@ namespace MR
 
         for (int PyramidLevel = 1; PyramidLevel < m_ReconstructionSettings.m_PyramidLevelCount; ++ PyramidLevel)
         {
-            const int PyramidWorkGroupsX = GetWorkGroupCount(m_pKinectControl->GetDepthWidth() >> PyramidLevel, g_TileSize2D);
-            const int PyramidWorkGroupsY = GetWorkGroupCount(m_pKinectControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
+            const int PyramidWorkGroupsX = DivUp(m_DepthFrameSize.x >> PyramidLevel, g_TileSize2D);
+            const int PyramidWorkGroupsY = DivUp(m_DepthFrameSize.y >> PyramidLevel, g_TileSize2D);
             
             ContextManager::SetShaderCS(m_DownSampleDepthCSPtr);
 
-            ContextManager::SetImageTexture(0, static_cast<CTexturePtr>(m_SmoothDepthBufferPtr[PyramidLevel - 1]));
-            ContextManager::SetImageTexture(1, static_cast<CTexturePtr>(m_SmoothDepthBufferPtr[PyramidLevel]));
+            ContextManager::SetImageTexture(0, m_SmoothDepthBufferPtr[PyramidLevel - 1]);
+            ContextManager::SetImageTexture(1, m_SmoothDepthBufferPtr[PyramidLevel]);
             ContextManager::Barrier();
 
             ContextManager::Dispatch(PyramidWorkGroupsX, PyramidWorkGroupsY, 1);
         }
-
-        /////////////////////////////////////////////////////////////////////////////////////
-        // Generate vertex and normal map
-        /////////////////////////////////////////////////////////////////////////////////////
 
         ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
         ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
 
+        /////////////////////////////////////////////////////////////////////////////////////
+        // Generate vertex map pyramid
+        /////////////////////////////////////////////////////////////////////////////////////
+
+        ContextManager::SetShaderCS(m_VertexMapCSPtr);
         for (int PyramidLevel = 0; PyramidLevel < m_ReconstructionSettings.m_PyramidLevelCount; ++ PyramidLevel)
         {
-            const int PyramidWorkGroupsX = GetWorkGroupCount(m_pKinectControl->GetDepthWidth() >> PyramidLevel, g_TileSize2D);
-            const int PyramidWorkGroupsY = GetWorkGroupCount(m_pKinectControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
+            const int PyramidWorkGroupsX = DivUp(m_DepthFrameSize.x >> PyramidLevel, g_TileSize2D);
+            const int PyramidWorkGroupsY = DivUp(m_DepthFrameSize.y >> PyramidLevel, g_TileSize2D);
 
-            ContextManager::SetShaderCS(m_VertexMapCSPtr);
-            ContextManager::SetImageTexture(0, static_cast<CTexturePtr>(m_SmoothDepthBufferPtr[PyramidLevel]));
-            ContextManager::SetImageTexture(1, static_cast<CTexturePtr>(m_ReferenceVertexMapPtr[PyramidLevel]));
+            ContextManager::SetImageTexture(0, m_SmoothDepthBufferPtr[PyramidLevel]);
+            ContextManager::SetImageTexture(1, m_ReferenceVertexMapPtr[PyramidLevel]);
             ContextManager::Barrier();
             ContextManager::Dispatch(PyramidWorkGroupsX, PyramidWorkGroupsY, 1);
         }
 
+        /////////////////////////////////////////////////////////////////////////////////////
+        // Generate normal map pyramid
+        /////////////////////////////////////////////////////////////////////////////////////
+
+        ContextManager::SetShaderCS(m_NormalMapCSPtr);
         for (int PyramidLevel = 0; PyramidLevel < m_ReconstructionSettings.m_PyramidLevelCount; ++ PyramidLevel)
         {
-            const int PyramidWorkGroupsX = GetWorkGroupCount(m_pKinectControl->GetDepthWidth() >> PyramidLevel, g_TileSize2D);
-            const int PyramidWorkGroupsY = GetWorkGroupCount(m_pKinectControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
-
-            ContextManager::SetShaderCS(m_NormalMapCSPtr);
-            ContextManager::SetImageTexture(0, static_cast<CTexturePtr>(m_ReferenceVertexMapPtr[PyramidLevel]));
-            ContextManager::SetImageTexture(1, static_cast<CTexturePtr>(m_ReferenceNormalMapPtr[PyramidLevel]));
+            const int PyramidWorkGroupsX = DivUp(m_DepthFrameSize.x >> PyramidLevel, g_TileSize2D);
+            const int PyramidWorkGroupsY = DivUp(m_DepthFrameSize.y >> PyramidLevel, g_TileSize2D);
+                        
+            ContextManager::SetImageTexture(0, m_ReferenceVertexMapPtr[PyramidLevel]);
+            ContextManager::SetImageTexture(1, m_ReferenceNormalMapPtr[PyramidLevel]);
             ContextManager::Barrier();
             ContextManager::Dispatch(PyramidWorkGroupsX, PyramidWorkGroupsY, 1);
         }
     }
-    
-    // -----------------------------------------------------------------------------
-
-    void CSLAMReconstructor::Integrate()
-    {
-        const int WorkGroups = GetWorkGroupCount(m_ReconstructionSettings.m_VolumeResolution, g_TileSize2D);
-
-        ContextManager::SetShaderCS(m_IntegrationCSPtr);
-
-        ContextManager::SetImageTexture(0, static_cast<CTexturePtr>(m_TSDFVolumePtr));
-        ContextManager::SetImageTexture(1, static_cast<CTexturePtr>(m_RawDepthBufferPtr));
-        
-        if (m_ReconstructionSettings.m_CaptureColor)
-        {
-            ContextManager::SetImageTexture(2, static_cast<CTexturePtr>(m_ColorVolumePtr));
-            ContextManager::SetImageTexture(3, static_cast<CTexturePtr>(m_RawCameraFramePtr));
-        }
-        else
-        {
-            ContextManager::ResetImageTexture(2);
-            ContextManager::ResetImageTexture(3);
-        }
-        
-        ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
-        ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);        
-        
-        ContextManager::Barrier();
-
-        ContextManager::Dispatch(WorkGroups, WorkGroups, 1);
-    }
-    
+      
     // -----------------------------------------------------------------------------
 
     void CSLAMReconstructor::CreateRaycastPyramid()
     {
+        ////////////////////////////////////////////////////////////////////////////////////
+        // If the normal map is not generated from the TSDF
+        // generate it here from the vertex map
+        /////////////////////////////////////////////////////////////////////////////////////
+
+        if (!m_CreateNormalsFromTSDF)
+        {
+            ContextManager::SetShaderCS(m_NormalMapCSPtr);
+            const int WorkGroupsX = DivUp(m_DepthFrameSize.x, g_TileSize2D);
+            const int WorkGroupsY = DivUp(m_DepthFrameSize.y, g_TileSize2D);
+
+            ContextManager::SetImageTexture(0, m_RaycastVertexMapPtr[0]);
+            ContextManager::SetImageTexture(1, m_RaycastNormalMapPtr[0]);
+            ContextManager::Barrier();
+            ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+        }
+
+        /////////////////////////////////////////////////////////////////////////////////////
+        // Downsample vertex and normals maps to create the pyramid
+        /////////////////////////////////////////////////////////////////////////////////////
+
         ContextManager::SetShaderCS(m_RaycastPyramidCSPtr);
 
         ContextManager::SetConstantBuffer(0, m_RaycastPyramidConstantBufferPtr);
         
         for (int PyramidLevel = 1; PyramidLevel < m_ReconstructionSettings.m_PyramidLevelCount; ++PyramidLevel)
         {
-            const int WorkGroupsX = GetWorkGroupCount(m_pKinectControl->GetDepthWidth() >> PyramidLevel, g_TileSize2D);
-            const int WorkGroupsY = GetWorkGroupCount(m_pKinectControl->GetDepthHeight() >> PyramidLevel, g_TileSize2D);
+            const int WorkGroupsX = DivUp(m_DepthFrameSize.x >> PyramidLevel, g_TileSize2D);
+            const int WorkGroupsY = DivUp(m_DepthFrameSize.y >> PyramidLevel, g_TileSize2D);
 
             float Normalized = 0.0f;
             BufferManager::UploadBufferData(m_RaycastPyramidConstantBufferPtr, &Normalized);
             
             ContextManager::Barrier();
-            ContextManager::SetImageTexture(0, static_cast<CTexturePtr>(m_RaycastVertexMapPtr[PyramidLevel - 1]));
-            ContextManager::SetImageTexture(1, static_cast<CTexturePtr>(m_RaycastVertexMapPtr[PyramidLevel]));
+            ContextManager::SetImageTexture(0, m_RaycastVertexMapPtr[PyramidLevel - 1]);
+            ContextManager::SetImageTexture(1, m_RaycastVertexMapPtr[PyramidLevel]);
             ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
 
             Normalized = 1.0f;
             BufferManager::UploadBufferData(m_RaycastPyramidConstantBufferPtr, &Normalized);
 
             ContextManager::Barrier();
-            ContextManager::SetImageTexture(0, static_cast<CTexturePtr>(m_RaycastNormalMapPtr[PyramidLevel - 1]));
-            ContextManager::SetImageTexture(1, static_cast<CTexturePtr>(m_RaycastNormalMapPtr[PyramidLevel]));
+            ContextManager::SetImageTexture(0, m_RaycastNormalMapPtr[PyramidLevel - 1]);
+            ContextManager::SetImageTexture(1, m_RaycastNormalMapPtr[PyramidLevel]);
             ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
         }
     }
@@ -659,56 +1708,358 @@ namespace MR
 
     void CSLAMReconstructor::Raycast()
     {
-        const int WorkGroupsX = GetWorkGroupCount(m_pKinectControl->GetDepthWidth(), g_TileSize2D);
-        const int WorkGroupsY = GetWorkGroupCount(m_pKinectControl->GetDepthHeight(), g_TileSize2D);
+        const int WorkGroupsX = DivUp(m_DepthFrameSize.x, g_TileSize2D);
+        const int WorkGroupsY = DivUp(m_DepthFrameSize.y, g_TileSize2D);
 
         ContextManager::SetShaderCS(m_RaycastCSPtr);
+        
+        ContextManager::SetImageTexture(1, m_RaycastVertexMapPtr[0]);
+        ContextManager::SetImageTexture(2, m_RaycastNormalMapPtr[0]);
 
-        ContextManager::SetTexture(0, static_cast<CTexturePtr>(m_TSDFVolumePtr));
-        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::ESampler::MinMagMipLinearClamp));
-
-        ContextManager::SetImageTexture(1, static_cast<CTexturePtr>(m_RaycastVertexMapPtr[0]));
-        ContextManager::SetImageTexture(2, static_cast<CTexturePtr>(m_RaycastNormalMapPtr[0]));
+        ContextManager::SetResourceBuffer(0, m_VolumeBuffers.m_RootVolumePoolPtr);
+        ContextManager::SetResourceBuffer(1, m_VolumeBuffers.m_RootGridPoolPtr);
+        ContextManager::SetResourceBuffer(2, m_VolumeBuffers.m_Level1PoolPtr);
+        ContextManager::SetResourceBuffer(3, m_VolumeBuffers.m_TSDFPoolPtr);
+        ContextManager::SetResourceBuffer(6, m_VolumeBuffers.m_RootVolumePositionBufferPtr);
 
         ContextManager::SetConstantBuffer(0, m_IntrinsicsConstantBufferPtr);
         ContextManager::SetConstantBuffer(1, m_TrackingDataConstantBufferPtr);
-        
+        ContextManager::SetConstantBuffer(2, m_VolumeBuffers.m_AABBBufferPtr);
+
         ContextManager::Barrier();
 
         ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+    }
+    
+    // -----------------------------------------------------------------------------
+
+    void CSLAMReconstructor::ClearBuffer(CBufferPtr BufferPtr)
+    {
+        assert(BufferPtr.IsValid());
+
+        ClearBuffer(BufferPtr, BufferPtr->GetNumberOfBytes());
+    }
+    
+    // -----------------------------------------------------------------------------
+
+    void CSLAMReconstructor::ClearBuffer(CBufferPtr BufferPtr, size_t Size)
+    {
+        if (Size > m_ClearVector.size())
+        {
+            m_ClearVector.resize(Size, 0);
+        }
+        
+        assert(Size > 0);
+        assert(BufferPtr.IsValid());
+
+        BufferManager::UploadBufferData(BufferPtr, m_ClearVector.data());
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CSLAMReconstructor::ClearPool()
+    {
+        const uint32_t DataSize = g_MegabyteSize / 4;
+
+        std::vector<int> Data(g_MegabyteSize / sizeof(int));
+        std::memset(Data.data(), -1, DataSize);
+
+        for (unsigned int i = 0; i < g_MaxRootVolumePoolSize / g_MegabyteSize; ++ i)
+        {
+            BufferManager::UploadBufferData(m_VolumeBuffers.m_RootVolumePoolPtr, Data.data(), i * DataSize, DataSize);
+        }
+        for (unsigned int i = 0; i < m_RootGridPoolSize / g_MegabyteSize; ++ i)
+        {
+            BufferManager::UploadBufferData(m_VolumeBuffers.m_RootGridPoolPtr, Data.data(), i * DataSize, DataSize);
+        }
+        for (unsigned int i = 0; i < m_Level1GridPoolSize / g_MegabyteSize; ++ i)
+        {
+            BufferManager::UploadBufferData(m_VolumeBuffers.m_Level1PoolPtr, Data.data(), i * DataSize, DataSize);
+        }
+
+        BufferManager::UploadBufferData(m_VolumeBuffers.m_RootVolumePositionBufferPtr, Data.data());
+
+        uint32_t Zero[] = { 0, 0, 0, 0 };
+        BufferManager::UploadBufferData(m_VolumeBuffers.m_PoolItemCountBufferPtr, &Zero);
+
+        std::memset(Data.data(), 0, DataSize);
+        for (unsigned int i = 0; i < m_TSDFPoolSize / g_MegabyteSize; ++ i)
+        {
+            BufferManager::UploadBufferData(m_VolumeBuffers.m_TSDFPoolPtr, Data.data(), i * DataSize, DataSize);
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CSLAMReconstructor::ClearMarkerStatistics()
+    {
+        Performance::ResetEventStatistics("Rasterize point cloud");
+        Performance::ResetEventStatistics("Render single point cloud");
+        Performance::ResetEventStatistics("Gather point cloud data");
+        Performance::ResetEventStatistics("Fill indirect buffers");
+        Performance::ResetEventStatistics("Fill root grids");
+        Performance::ResetEventStatistics("Fill internal grids");
+        Performance::ResetEventStatistics("Compute new TSDF");
+        Performance::ResetEventStatistics("Check Root Volumes");
+        Performance::ResetEventStatistics("Update volume");
+        Performance::ResetEventStatistics("Create integration queues");
+        Performance::ResetEventStatistics("Integrate hierarchy");
+        Performance::ResetEventStatistics("Scalable Kinect Fusion");
+        Performance::ResetEventStatistics("Data Input");
+        Performance::ResetEventStatistics("Tracking");
+        Performance::ResetEventStatistics("TSDF Integration and Raycasting");
+        Performance::ResetEventStatistics("Updating root grid");
+        Performance::ResetEventStatistics("Raycasting for tracking");
     }
 
     // -----------------------------------------------------------------------------
 
     void CSLAMReconstructor::ResetReconstruction(const SReconstructionSettings* pReconstructionSettings)
     {
+        m_RootVolumeMap.clear();
+        m_RootVolumeVector.clear();
+
+        m_Planes.clear();
+
         if (pReconstructionSettings != nullptr)
         {
-			assert(!pReconstructionSettings->m_IsScalable);
             m_ReconstructionSettings = *pReconstructionSettings;
-            
-            SetupTextures();
-            SetupBuffers();
-            SetupShaders();
         }
+
+		SetupData();
+
+		SetupTextures();
+		SetupBuffers(false);
+		SetupShaders();
+
+        ClearPool();
+
+        ClearMarkerStatistics();
+    }
+    
+    // -----------------------------------------------------------------------------
+
+    void CSLAMReconstructor::AddPlane(glm::mat4 _Transform, glm::vec4 _Extent, int _ID)
+    {
+        SPlane Plane = { _Transform, _Extent };
+
+        m_Planes[_ID] = Plane;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CSLAMReconstructor::UpdatePlane(glm::mat4 _Transform, glm::vec4 _Extent, int _ID)
+    {
+        SPlane Plane = { _Transform, _Extent };
+
+        m_Planes[_ID] = Plane;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CSLAMReconstructor::RemovePlane(int _ID)
+    {
+        m_Planes.erase(m_Planes.find(_ID));
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const std::map<int, CSLAMReconstructor::SPlane>& CSLAMReconstructor::GetPlanes() const
+    {
+        return m_Planes;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    Gfx::CTexturePtr CSLAMReconstructor::CreatePlaneTexture(const Base::AABB3Float& _rAABB)
+    {
+        Performance::BeginEvent("Create plane texture");
+
+        const int PlaneResolution = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:inpainted_plane:resolution", 256);
+        const float PlaneScale = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:inpainted_plane:scale", 2.0f);
+
+        glm::vec3 Min = _rAABB.GetMin();
+        glm::vec3 Max = _rAABB.GetMax();
+
+        glm::vec3 AnchorMin = Min;
+        glm::vec3 AnchorMax = Max;
+        AnchorMax.z = AnchorMin.z;
+
+        glm::vec2 SelectionSize = glm::vec2(AnchorMax.x - AnchorMin.x, AnchorMax.y - AnchorMin.y);
+        
+        float PlaneSize = glm::max(SelectionSize.x, SelectionSize.y) * PlaneScale;
+
+        glm::ivec2 PixelOffset = (glm::vec2(PlaneResolution, PlaneResolution) / PlaneSize * SelectionSize) / 2.0f;
+
+        SPlaneInpainting ConstantBuffer;
+        ConstantBuffer.m_PlaneCenterPosition = (AnchorMin + AnchorMax) / 2.0f;
+        ConstantBuffer.m_PlaneSize = PlaneSize;
+        ConstantBuffer.m_MinPixels = glm::ivec2(PlaneResolution / 2) - PixelOffset;
+        ConstantBuffer.m_MaxPixels = glm::ivec2(PlaneResolution / 2) + PixelOffset;
+        ConstantBuffer.m_PlaneResolution = PlaneResolution;
+        ConstantBuffer.m_PixelSize = PlaneSize / PlaneResolution;
+
+        BufferManager::UploadBufferData(m_PlaneExtractionBufferPtr, &ConstantBuffer);
+
+        STextureDescriptor TextureDescriptor = {};
+
+        TextureDescriptor.m_NumberOfPixelsU = PlaneResolution;
+        TextureDescriptor.m_NumberOfPixelsV = PlaneResolution;
+        TextureDescriptor.m_NumberOfPixelsW = 1;
+        TextureDescriptor.m_NumberOfMipMaps = 1;
+        TextureDescriptor.m_NumberOfTextures = 1;
+        TextureDescriptor.m_Binding = CTexture::ShaderResource;
+        TextureDescriptor.m_Access = CTexture::CPUWrite;
+        TextureDescriptor.m_Usage = CTexture::GPUReadWrite;
+        TextureDescriptor.m_Semantic = CTexture::UndefinedSemantic;
+        TextureDescriptor.m_pFileName = 0;
+        TextureDescriptor.m_pPixels = 0;
+        TextureDescriptor.m_Format = CTexture::R8G8B8A8_UBYTE;
+
+        Gfx::CTexturePtr PlaneTexture = TextureManager::CreateTexture2D(TextureDescriptor);
+
+        const int WorkGroupsX = DivUp(PlaneResolution, g_TileSize2D);
+        const int WorkGroupsY = DivUp(PlaneResolution, g_TileSize2D);
+
+        ContextManager::SetShaderCS(m_PlaneCSPtr);
+
+        ContextManager::SetImageTexture(0, PlaneTexture);
+
+        ContextManager::SetResourceBuffer(0, m_VolumeBuffers.m_RootVolumePoolPtr);
+        ContextManager::SetResourceBuffer(1, m_VolumeBuffers.m_RootGridPoolPtr);
+        ContextManager::SetResourceBuffer(2, m_VolumeBuffers.m_Level1PoolPtr);
+        ContextManager::SetResourceBuffer(3, m_VolumeBuffers.m_TSDFPoolPtr);
+        ContextManager::SetResourceBuffer(6, m_VolumeBuffers.m_RootVolumePositionBufferPtr);
+
+        ContextManager::SetConstantBuffer(0, m_PlaneExtractionBufferPtr);
+        ContextManager::SetConstantBuffer(2, m_VolumeBuffers.m_AABBBufferPtr);
+
+        ContextManager::Barrier();
+
+        ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+
+        Performance::EndEvent();
+
+        ContextManager::ResetShaderCS();
+
+        return PlaneTexture;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CSLAMReconstructor::CSLAMReconstructor(const SReconstructionSettings* pReconstructionSettings)
+    {
+        ////////////////////////////////////////////////////////////////////////////////
+        // Check if conservative rasterization is available
+        ////////////////////////////////////////////////////////////////////////////////
+
+        const bool EnableConservativeRaster = Core::CProgramParameters::GetInstance().Get("mr:slam:conservative_raster_enable", true);
+
+        m_UseConservativeRasterization = false;
+
+        if (EnableConservativeRaster)
+        {
+            m_UseConservativeRasterization = Main::IsExtensionAvailable("GL_NV_conservative_raster");
+
+            if (!m_UseConservativeRasterization)
+            {
+                ENGINE_CONSOLE_INFO("Conservative rasterization is not available. Will use fallback method");
+            }
+        }
+
+        m_DepthFrameSize = glm::ivec2(0);
+        m_ColorFrameSize = glm::ivec2(0);
+        m_FocalLength = glm::vec2(0.0f);
+        m_FocalPoint = glm::vec2(0.0f);
+        m_DepthBounds = glm::vec2(0.0f);
+        m_DeviceResolution = glm::vec2(0, 0);
+
+        if (pReconstructionSettings != nullptr)
+        {
+            m_ReconstructionSettings = *pReconstructionSettings;
+        }
+        else
+        {
+            SReconstructionSettings::SetDefaultSettings(m_ReconstructionSettings);
+        }
+
+        SetupData();
+        SetupMeshes();
+        CreatePool();
+        ClearPool();
 
         glm::mat4 PoseRotation, PoseTranslation;
 
-        PoseRotation = glm::eulerAngleXYZ(g_InitialCameraRotation.x, g_InitialCameraRotation.y, g_InitialCameraRotation.z);
-        PoseTranslation = glm::translate(g_InitialCameraPosition * m_ReconstructionSettings.m_VolumeSize);
+        m_PoolFull = false;
+
+        m_ReconstructionSize = 0.0f;
+
+        const float VolumeSize = m_VolumeSizes[0];
+
+        PoseRotation = glm::eulerAngleXYZ(g_InitialCameraRotation[0], g_InitialCameraRotation[1], g_InitialCameraRotation[2]);
+        PoseTranslation = glm::translate(g_InitialCameraPosition * VolumeSize);
+
         m_PoseMatrix = PoseTranslation * PoseRotation;
 
+        m_RootVolumePoolItemCount = 0;
         m_IntegratedFrameCount = 0;
         m_FrameCount = 0;
         m_TrackingLost = true;
 
-        STrackingData TrackingData;
-        TrackingData.m_PoseMatrix = m_PoseMatrix;
-        TrackingData.m_InvPoseMatrix = glm::inverse(m_PoseMatrix);
-        
-        BufferManager::UploadBufferData(m_TrackingDataConstantBufferPtr, &TrackingData);
-                
-        ClearVolume();
+        m_VolumeBuffers.m_RootGridPoolSize = 0;
+        m_VolumeBuffers.m_Level1PoolSize = 0;
+        m_VolumeBuffers.m_TSDFPoolSize = 0;
+        m_VolumeBuffers.m_RootVolumeTotalWidth = g_AABB;
+
+        m_IsInizialized = false;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CSLAMReconstructor::~CSLAMReconstructor()
+    {
+    }
+
+    // -----------------------------------------------------------------------------
+
+    bool CSLAMReconstructor::IsTrackingLost() const
+    {
+        return !m_IsTrackingPaused && m_TrackingLost;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    glm::mat4 CSLAMReconstructor::GetPoseMatrix() const
+    {
+        return m_PoseMatrix;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CSLAMReconstructor::CRootVolumeMap& CSLAMReconstructor::GetRootVolumeMap()
+    {
+        return m_RootVolumeMap;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CSLAMReconstructor::CRootVolumeVector& CSLAMReconstructor::GetRootVolumeVector()
+    {
+        return m_RootVolumeVector;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CSLAMReconstructor::SSLAMVolume& CSLAMReconstructor::GetVolume()
+    {
+        return m_VolumeBuffers;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const std::vector<float>& CSLAMReconstructor::GetVolumeSizes() const
+    {
+        return m_VolumeSizes;
     }
 
     // -----------------------------------------------------------------------------
@@ -724,30 +2075,6 @@ namespace MR
     {
         m_IsTrackingPaused = _Paused;
     }
-
-    // -----------------------------------------------------------------------------
-
-    void CSLAMReconstructor::ClearVolume()
-    {
-        ContextManager::SetShaderCS(m_ClearVolumeCSPtr);
-
-        ContextManager::SetImageTexture(0, static_cast<CTexturePtr>(m_TSDFVolumePtr));
-
-        if (m_ReconstructionSettings.m_CaptureColor)
-        {
-            ContextManager::SetImageTexture(1, static_cast<CTexturePtr>(m_ColorVolumePtr));
-        }
-        else
-        {
-            ContextManager::ResetImageTexture(1);
-        }
-
-        ContextManager::Barrier();
-
-        const int WorkGroupSize = GetWorkGroupCount(m_ReconstructionSettings.m_VolumeResolution, g_TileSize3D);
-
-        ContextManager::Dispatch(WorkGroupSize, WorkGroupSize, WorkGroupSize);
-    }
         
     // -----------------------------------------------------------------------------
 
@@ -759,8 +2086,43 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    int CSLAMReconstructor::GetWorkGroupCount(int TotalShaderCount, int WorkGroupSize)
+    Gfx::CTexturePtr CSLAMReconstructor::GetVertexMap()
     {
-        return (TotalShaderCount + WorkGroupSize - 1) / WorkGroupSize;
+        return m_RawVertexMapPtr;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    Gfx::CTexturePtr CSLAMReconstructor::GetNormalMap()
+    {
+        return m_RaycastNormalMapPtr[0];
+    }
+
+    // -----------------------------------------------------------------------------
+
+    Gfx::CTexturePtr CSLAMReconstructor::GetColorMap()
+    {
+        return m_RawCameraFramePtr;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    glm::ivec2 CSLAMReconstructor::GetDepthImageSize()
+    {
+        return m_DepthFrameSize;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    glm::vec4 CSLAMReconstructor::GetDepthIntrinsics()
+    {
+        return glm::vec4(m_FocalLength, m_FocalPoint);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    float CSLAMReconstructor::GetReconstructionSize()
+    {
+        return m_ReconstructionSize;
     }
 } // namespace MR

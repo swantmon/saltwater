@@ -19,9 +19,7 @@ namespace MR
         glm::ivec3 m_PyramidLevelIterations;
 		glm::ivec2 m_DepthThreshold;
 		bool m_CaptureColor;
-
-		bool m_IsScalable;
-
+        
 		glm::ivec3  m_GridResolutions;
         glm::ivec3  m_VoxelsPerGrid;
                 
