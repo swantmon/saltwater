@@ -829,7 +829,7 @@ namespace
 
         ContextManager::SetTargetSet(TargetSetManager::GetDeferredTargetSet());
 
-        MR::CSLAMReconstructor::SScalableVolume& rVolume = m_pScalableReconstructor->GetVolume();
+        MR::CSLAMReconstructor::SSLAMVolume& rVolume = m_pScalableReconstructor->GetVolume();
 
         MR::SReconstructionSettings Settings;
         m_pScalableReconstructor->GetReconstructionSettings(&Settings);
@@ -918,7 +918,7 @@ namespace
 
         ContextManager::SetTargetSet(TargetSetManager::GetDeferredTargetSet());
 
-        MR::CSLAMReconstructor::SScalableVolume& rVolume = m_pScalableReconstructor->GetVolume();
+        MR::CSLAMReconstructor::SSLAMVolume& rVolume = m_pScalableReconstructor->GetVolume();
 
         MR::SReconstructionSettings Settings;
         m_pScalableReconstructor->GetReconstructionSettings(&Settings);
@@ -1002,7 +1002,7 @@ namespace
 
         ContextManager::SetViewPortSet(m_DiminishedViewPortSetPtr);
 
-        MR::CSLAMReconstructor::SScalableVolume& rVolume = m_pScalableReconstructor->GetVolume();
+        MR::CSLAMReconstructor::SSLAMVolume& rVolume = m_pScalableReconstructor->GetVolume();
         
         ContextManager::SetShaderVS(m_RaycastDiminishedVSPtr);
         ContextManager::SetShaderPS(m_RaycastDiminishedFSPtr);
@@ -1400,7 +1400,7 @@ namespace
             0.0f, -1.0f, 0.0f
         );
 
-        MR::CSLAMReconstructor::SScalableVolume& rVolume = m_pScalableReconstructor->GetVolume();
+        MR::CSLAMReconstructor::SSLAMVolume& rVolume = m_pScalableReconstructor->GetVolume();
 
         const glm::ivec2 WindowSize = Gfx::Main::GetActiveWindowSize();
         const glm::vec3 CameraPosition = Gfx::ViewManager::GetMainCamera()->GetView()->GetPosition();
@@ -1630,7 +1630,7 @@ namespace
 
         if (m_RenderVolume && ID != Dt::CEntity::s_InvalidID)
         {
-            MR::CSLAMReconstructor::SScalableVolume& rVolume = m_pScalableReconstructor->GetVolume();
+            MR::CSLAMReconstructor::SSLAMVolume& rVolume = m_pScalableReconstructor->GetVolume();
 
             MR::SReconstructionSettings Settings;
             m_pScalableReconstructor->GetReconstructionSettings(&Settings);

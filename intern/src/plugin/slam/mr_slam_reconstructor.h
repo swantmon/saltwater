@@ -112,7 +112,7 @@ namespace MR
             Gfx::CBufferPtr m_IndirectLevel2Buffer;
 		};
 
-        struct SScalableRaycastConstantBuffer
+        struct SRaycastConstantBuffer
         {
             glm::vec3 m_AABBMin;
             int m_MinWeight;
@@ -120,7 +120,7 @@ namespace MR
             int m_VolumeTextureWidth;
         };
 
-        struct SScalableVolume
+        struct SSLAMVolume
         {
             Gfx::CBufferPtr m_RootVolumePositionBufferPtr;// 3D Buffer with indices to m_RootVolumePoolPtr
             Gfx::CBufferPtr m_RootVolumePoolPtr;          // Individual Volumes
@@ -162,7 +162,7 @@ namespace MR
 		CRootVolumeMap& GetRootVolumeMap();
         CRootVolumeVector& GetRootVolumeVector();
 
-        SScalableVolume& GetVolume();
+        SSLAMVolume& GetVolume();
 
         const std::vector<float>& GetVolumeSizes() const;
 
@@ -249,7 +249,7 @@ namespace MR
 
         Gfx::CBufferPtr m_PlaneExtractionBufferPtr;
 
-        SScalableVolume m_VolumeBuffers;
+        SSLAMVolume m_VolumeBuffers;
 
         Gfx::CBufferPtr m_VolumeIndexBufferPtr;
         

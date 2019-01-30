@@ -1271,11 +1271,11 @@ namespace MR
         ConstantBufferDesc.m_NumberOfBytes = sizeof(int32_t) * 4;// 16 bytes = minimum
         m_VolumeIndexBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
 
-        SScalableRaycastConstantBuffer ScalableRaycastZero = {};
+        SRaycastConstantBuffer ScalableRaycastZero = {};
 
         ConstantBufferDesc.m_pBytes = &ScalableRaycastZero;
         ConstantBufferDesc.m_Binding = CBuffer::ConstantBuffer;
-        ConstantBufferDesc.m_NumberOfBytes = sizeof(SScalableRaycastConstantBuffer);
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(SRaycastConstantBuffer);
         m_VolumeBuffers.m_AABBBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
 
         ConstantBufferDesc.m_pBytes = nullptr;
@@ -1515,7 +1515,7 @@ namespace MR
         }
         Performance::BeginEvent("Raycasting for tracking");
 
-        SScalableRaycastConstantBuffer Data;
+        SRaycastConstantBuffer Data;
 
         for (int i = 0; i < 3; ++i)
         {
@@ -2052,7 +2052,7 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    CSLAMReconstructor::SScalableVolume& CSLAMReconstructor::GetVolume()
+    CSLAMReconstructor::SSLAMVolume& CSLAMReconstructor::GetVolume()
     {
         return m_VolumeBuffers;
     }
