@@ -1067,6 +1067,8 @@ namespace
 
     void CGfxReconstructionRenderer::RenderInpaintedPlane()
     {
+        assert(m_InpaintedPlaneTexture != nullptr);
+
         Performance::BeginEvent("Render inpainted plane");
 
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
