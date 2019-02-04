@@ -222,7 +222,7 @@ namespace MR
                     std::string IP = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:net:ip", "127.0.0.1");
                     m_NeuralNetworkSocket = Net::CNetworkManager::GetInstance().CreateClientSocket(IP, Port);
 
-                    m_NeualNetworkDelegate = m_SLAMNetworkDelegate = std::make_shared<Net::CMessageDelegate>(
+                    m_NeualNetworkDelegate = std::make_shared<Net::CMessageDelegate>(
                         std::bind(&CSLAMControl::OnNewNeuralNetMessage, this, std::placeholders::_1, std::placeholders::_2)
                     );
                     Net::CNetworkManager::GetInstance().RegisterMessageHandler(m_NeuralNetworkSocket, m_NeualNetworkDelegate);
