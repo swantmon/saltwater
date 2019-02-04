@@ -28,7 +28,7 @@ import torch
 # -----------------------------------------------------------------------------
 parser = argparse.ArgumentParser()
 parser.add_argument('--n_epochs', type=int, default=40000, help='number of epochs of training')
-parser.add_argument('--batch_size', type=int, default=32, help='size of the batches')
+parser.add_argument('--batch_size', type=int, default=64, help='size of the batches')
 parser.add_argument('--path_to_dataset', type=str, default='./data/ILSVRC2012_img_train/', help='path to the dataset (no recursive search)')
 parser.add_argument('--lr', type=float, default=0.0002, help='adam: learning rate')
 parser.add_argument('--b1', type=float, default=0.5, help='adam: decay of first order momentum of gradient')
@@ -94,6 +94,7 @@ class ImageDataset(Dataset):
 
     def __getitem__(self, index):
         img = Image.open(self.files[index % len(self.files)])
+        img = img.convert('RGB')
         img = self.transform(img)
 
         if self.mode == 'train':
@@ -270,7 +271,7 @@ if __name__ == '__main__':
                 g_adv = adversarial_loss(discriminator(gen_parts), valid)
                 g_pixel = pixelwise_loss(gen_parts, masked_parts)
 
-                g_loss = 0.1 * g_adv + 0.9 * g_pixel
+                g_loss = 0.001 * g_adv + 0.999 * g_pixel
 
                 g_loss.backward()
                 optimizer_G.step()

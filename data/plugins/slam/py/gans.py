@@ -95,15 +95,15 @@ class Generator(nn.Module):
 
         x = self.conv6_1(x) 
 
-        (_, C, H, W) = x.data.size()
-        x = x.view(-1 , C * H * W)
+        #(_, C, H, W) = x.data.size()
+        #x = x.view(-1 , C * H * W)
 
-        x = self.linear6_2(x)
-        x = self.drop6_3(x)  
-        x = self.linear6_4(x)
-        x = self.drop6_5(x)   
+        #x = self.linear6_2(x)
+        #x = self.drop6_3(x)  
+        #x = self.linear6_4(x)
+        #x = self.drop6_5(x)   
 
-        x = x.view(-1 , C, H, W)
+        #x = x.view(-1 , C, H, W)
 
         x = self.tconv6_1(x)
         x = self.norm6_1(x)
