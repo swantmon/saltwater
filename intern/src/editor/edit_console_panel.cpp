@@ -171,9 +171,11 @@ namespace GUI
         // -----------------------------------------------------------------------------
         // Input
         // -----------------------------------------------------------------------------
-        ImGuiInputTextCallback TextEditCallback = [](ImGuiInputTextCallbackData* data)->int
+        ImGuiInputTextCallback TextEditCallback = [](ImGuiInputTextCallbackData* _pData)->int
         {
-            // CConsolePanel* pConsole = (CConsolePanel*)data->UserData;
+            BASE_UNUSED(_pData);
+
+            // CConsolePanel* pConsole = (CConsolePanel*)_pData->UserData;
 
             return 0;
         };
