@@ -2,6 +2,7 @@
 #include "editor/edit_precompiled.h"
 
 #include "base/base_include_glm.h"
+#include "base/base_input_event.h"
 
 #include "editor/edit_console_panel.h"
 
@@ -11,6 +12,7 @@
 #include "engine/core/core_time.h"
 
 #include "engine/graphic/gfx_main.h"
+#include "engine/gui/gui_event_handler.h"
 
 #include <algorithm> 
 #include <cctype>
@@ -192,7 +194,7 @@ namespace GUI
 
             Helper::Trim(Input);
 
-            if (Input.length() > 0) ExecCommand(Input);
+            if (Input.length() > 0) ExecuteCommand(Input);
 
             ReclaimFocus = true;
 
@@ -227,11 +229,18 @@ namespace GUI
 
     // -----------------------------------------------------------------------------
 
-    void CConsolePanel::ExecCommand(const std::string& _rCommand)
+    void CConsolePanel::ExecuteCommand(const std::string& _rCommand)
     {
         m_Items.push_back("# " + _rCommand);
 
         m_ScrollToBottom = true;
+
+        // -----------------------------------------------------------------------------
+        // Send command via input event
+        // -----------------------------------------------------------------------------
+        Base::CInputEvent Event(Base::CInputEvent::Command, _rCommand);
+
+        Gui::EventHandler::OnUserEvent(Event);
     }
 } // namespace GUI
 } // namespace Edit
