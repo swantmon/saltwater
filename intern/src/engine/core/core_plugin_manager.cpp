@@ -12,7 +12,9 @@
 #include "engine/core/core_console.h"
 #include "engine/core/core_plugin_manager.h"
 
-#include <map>
+#include <filesystem>
+#include <unordered_map>
+#include <regex>
 #include <string>
 
 #ifdef PLATFORM_WINDOWS
@@ -30,6 +32,16 @@ namespace
         BASE_SINGLETON_FUNC(CPluginManager)
 
     public:
+
+		void Start();
+
+		void Update();
+
+		void Pause();
+
+		void Resume();
+
+		void Exit();
 
         SPluginInfo* LoadPlugin(const std::string& _rLibrary);
 
@@ -54,12 +66,20 @@ namespace
             SPluginInfo* m_pInfo;
         };
 
+	private:
+
+		CInternPlugin::CInstance InternLoadLibrary(const std::string& _rFileName);
+		bool InternGetPluginName(CPluginManager::CInternPlugin::CInstance _Instance, std::string& _rName);
+		void InternCloseLibrary(CPluginManager::CInternPlugin::CInstance _Instance);
+
     private:
 
-        typedef std::map<Base::BHash, CInternPlugin> CPlugins;
+		using CPluginFiles = std::unordered_map<std::string, std::string>;
+        using CPlugins = std::unordered_map<std::string, CInternPlugin>;
 
     private:
 
+		CPluginFiles m_PluginFiles;
         CPlugins m_Plugins;
 
     private:
@@ -67,15 +87,132 @@ namespace
         CPluginManager();
         ~CPluginManager();
 
-        Base::BHash GenerateHash(const char* _pValue);
+		std::regex m_PluginRegex;
     };
 } // namespace
 
 namespace
 {
+#ifdef PLATFORM_WINDOWS
+
+	CPluginManager::CInternPlugin::CInstance CPluginManager::InternLoadLibrary(const std::string& _rFileName)
+	{
+		WCHAR FileName[32768];
+
+		MultiByteToWideChar(CP_UTF8, 0, _rFileName.c_str(), -1, FileName, 32768);
+
+		std::wstring PluginFile = std::wstring(FileName);
+
+		return LoadLibraryExW(PluginFile.c_str(), NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
+	}
+
+	bool CPluginManager::InternGetPluginName(CPluginManager::CInternPlugin::CInstance _Instance, std::string& _rName)
+	{
+		if (_Instance == nullptr)
+		{
+			return false;
+		}
+
+		_rName = ((SPluginInfo*)GetProcAddress(_Instance, "InfoExport"))->m_pPluginName;
+	}
+
+	void CPluginManager::InternCloseLibrary(CPluginManager::CInternPlugin::CInstance _Instance)
+	{
+		FreeLibrary(_Instance);
+	}
+
+#elif PLATFORM_ANDROID
+
+	CPluginManager::CInternPlugin::CInstance CPluginManager::InternLoadLibrary(const std::string& _rFileName)
+	{
+		return dlopen(_rFileName.c_str(), RTLD_NOW);
+	}
+
+	bool CPluginManager::InternGetPluginName(CPluginManager::CInternPlugin::CInstance _Instance, std::string& _rName)
+	{
+		if (_Instance == nullptr)
+		{
+			return false;
+		}
+
+		_rName = ((SPluginInfo*)dlsym(Instance, "InfoExport"))->m_pPluginName;
+	}
+
+	void CPluginManager::InternCloseLibrary(CPluginManager::CInternPlugin::CInstance _Instance)
+	{
+		dlclose(_Instance);
+	}
+
+#endif //PLATFORM_WINDOWS
+
+	void CPluginManager::Start()
+	{
+		// Find all files in the current path
+
+		auto Path = "";
+		for (const auto & rEntry : std::filesystem::directory_iterator(Path))
+		{
+			// Find the ones that look like Saltwater plugins
+
+			auto PluginFileName = rEntry.path().string();
+			if (std::regex_match(PluginFileName, m_PluginRegex))
+			{
+				// Found one! Now load it and get the plugin plugin's name
+
+				CInternPlugin::CInstance Instance = InternLoadLibrary(PluginFileName);
+
+				std::string PluginName;
+				if (InternGetPluginName(Instance, PluginName))
+				{
+					m_PluginFiles[PluginName] = PluginFileName;
+				}
+
+				InternCloseLibrary(Instance);
+			}
+		}
+	}
+
+	// -----------------------------------------------------------------------------
+
+	void CPluginManager::Update()
+	{
+
+	}
+
+	// -----------------------------------------------------------------------------
+
+	void CPluginManager::Pause()
+	{
+
+	}
+
+	// -----------------------------------------------------------------------------
+
+	void CPluginManager::Resume()
+	{
+
+	}
+
+	// -----------------------------------------------------------------------------
+
+	void CPluginManager::Exit()
+	{
+
+	}
+
+	// -----------------------------------------------------------------------------
+
     CPluginManager::CPluginManager()
     {
-
+#ifdef PLATFORM_WINDOWS
+	#ifdef ENGINE_DEBUG_MODE
+		m_PluginRegex = std::regex("^plugin_.*d.dll$");
+	#else
+		m_PluginRegex = std::regex("^plugin_.*r.dll$");
+	#endif // ENGINE_DEBUG_MODE
+#elif PLATFORM_ANDROID
+		m_PluginRegex = std::regex("^libplugin_.*.so$");
+#endif
     }
 
     // -----------------------------------------------------------------------------
@@ -162,9 +299,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Check if plugin is already loaded.
         // -----------------------------------------------------------------------------
-        Base::BHash Hash = GenerateHash(pPluginInfo->m_pPluginName);
-
-        auto PluginIter = m_Plugins.find(Hash);
+        auto PluginIter = m_Plugins.find(_rLibrary);
 
         if (PluginIter != m_Plugins.end())
         {
@@ -188,53 +323,57 @@ namespace
         // -----------------------------------------------------------------------------
         // Save plugin
         // -----------------------------------------------------------------------------
-        m_Plugins[Hash].m_pInfo    = pPluginInfo;
-        m_Plugins[Hash].m_Instance = Instance;
+        m_Plugins[_rLibrary].m_pInfo    = pPluginInfo;
+        m_Plugins[_rLibrary].m_Instance = Instance;
 
-        return m_Plugins[Hash].m_pInfo;
+        return m_Plugins[_rLibrary].m_pInfo;
     }
 
     // -----------------------------------------------------------------------------
 
     bool CPluginManager::HasPlugin(const std::string& _rName)
     {
-        Base::BHash Hash = GenerateHash(_rName.c_str());
-
-        return m_Plugins.find(Hash) != m_Plugins.end();
+        return m_Plugins.find(_rName) != m_Plugins.end();
     }
 
     // -----------------------------------------------------------------------------
 
     IPlugin* CPluginManager::GetPlugin(const std::string& _rName)
     {
-        Base::BHash Hash = GenerateHash(_rName.c_str());
-
-        auto PluginIter = m_Plugins.find(Hash);
+        auto PluginIter = m_Plugins.find(_rName);
 
         if (PluginIter == m_Plugins.end())
         {
-            ENGINE_CONSOLE_ERRORV("Plugin '%s' is not registered.", _rName.c_str());
+			auto Plugin = LoadPlugin(_rName);
+			if (Plugin == nullptr)
+			{
+				ENGINE_CONSOLE_ERRORV("Plugin '%s' is not registered.", _rName.c_str());
 
-            return nullptr;
+				return nullptr;
+			}
+			else
+			{
+				return &Plugin->GetInstance();
+			}
         }
-
-        return &PluginIter->second.m_pInfo->GetInstance();
+		else
+		{
+			return &PluginIter->second.m_pInfo->GetInstance();
+		}
     }
 
     // -----------------------------------------------------------------------------
 
     void* CPluginManager::GetPluginFunction(const std::string& _rName, const std::string& _rFunction)
     {
-        Base::BHash Hash = GenerateHash(_rName.c_str());
-
-        auto PluginIter = m_Plugins.find(Hash);
+        auto PluginIter = m_Plugins.find(_rName);
 
         if (PluginIter == m_Plugins.end()) return nullptr;
 
         void* pMethod = nullptr;
 
 #ifdef PLATFORM_WINDOWS
-        pMethod = (void*)GetProcAddress(m_Plugins[Hash].m_Instance, _rFunction.c_str());
+        pMethod = (void*)GetProcAddress(m_Plugins[_rName].m_Instance, _rFunction.c_str());
 #elif PLATFORM_ANDROID
         pMethod = (void*)dlsym(m_Plugins[Hash].m_Instance, _rFunction.c_str());
 #endif // PLATFORM_WINDOWS
@@ -242,18 +381,47 @@ namespace
         return pMethod;
     }
 
-    // -----------------------------------------------------------------------------
-
-    Base::BHash CPluginManager::GenerateHash(const char* _pValue)
-    {
-        return Base::CRC32(_pValue, sizeof(char) * static_cast<unsigned int>(strlen(_pValue)));
-    }
 } // namespace
 
 namespace Core
 {
 namespace PluginManager
 {
+	void Start()
+	{
+		CPluginManager::GetInstance().Start();
+	}
+
+	// -----------------------------------------------------------------------------
+
+	void Update()
+	{
+		CPluginManager::GetInstance().Update();
+	}
+
+	// -----------------------------------------------------------------------------
+
+	void Pause()
+	{
+		CPluginManager::GetInstance().Pause();
+	}
+
+	// -----------------------------------------------------------------------------
+
+	void Resume()
+	{
+		CPluginManager::GetInstance().Resume();
+	}
+
+	// -----------------------------------------------------------------------------
+
+	void Exit()
+	{
+		CPluginManager::GetInstance().Exit();
+	}
+
+	// -----------------------------------------------------------------------------
+
     SPluginInfo* LoadPlugin(const std::string& _rLibrary)
     {
         return CPluginManager::GetInstance().LoadPlugin(_rLibrary);

@@ -10,7 +10,15 @@ namespace Core
 {
 namespace PluginManager
 {
-    ENGINE_API SPluginInfo* LoadPlugin(const std::string& _rLibrary);
+	ENGINE_API void Start();
+
+	ENGINE_API void Update();
+
+	ENGINE_API void Pause();
+
+	ENGINE_API void Resume();
+
+	ENGINE_API void Exit();
 
     ENGINE_API bool HasPlugin(const std::string& _rName);
 
