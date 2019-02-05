@@ -34,7 +34,7 @@ namespace Core
 
             std::string Command = _rEvent.GetCommand();
 
-            if (Command.length() < 3 || !Command.compare(0, 2, "pp ")) return;
+            if (Command.length() < 3 || Command.compare(0, 2, "pp") != 0) return;
 
             Command = Command.substr(3);
 
