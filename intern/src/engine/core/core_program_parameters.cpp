@@ -39,6 +39,8 @@ namespace Core
 
             Command = Command.substr(3);
 
+            Base::Trim(Command);
+
             if (Command.length() == 0) return;
 
             size_t EqualPosition = Command.find('=');
@@ -199,6 +201,8 @@ namespace Core
     json::json_pointer CProgramParameters::ConvertOptionToJSONPointer(const std::string& _rOption)
     {
         std::string Copy = _rOption;
+
+        Base::Trim(Copy);
 
         std::replace(Copy.begin(), Copy.end(), ':', '/');
 
