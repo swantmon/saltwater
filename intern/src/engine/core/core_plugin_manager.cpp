@@ -12,11 +12,13 @@
 #include "engine/core/core_console.h"
 #include "engine/core/core_plugin_manager.h"
 
-//#include <filesystem>
-#include <experimental/filesystem>
-#include <unordered_map>
+#include <dirent.h>
+#include <stdio.h>
+
+#include <filesystem>
 #include <regex>
 #include <string>
+#include <unordered_map>
 
 #ifdef PLATFORM_WINDOWS
 #include "windows.h"
@@ -166,16 +168,17 @@ namespace
 	{
 		// Find all files in the current path
 
-		auto Path = "";
+#ifdef PLATFORM_WINDOWS
+        auto Path = "";
 		for (const auto & rEntry : std::filesystem::directory_iterator(Path))
 		{
 			// Find the ones that look like Saltwater plugins
 
-			auto PluginFileName = rEntry.path().string();
+			const auto PluginFileName = rEntry.path().string();
 			if (std::regex_match(PluginFileName, m_PluginRegex))
 			{
 				// Found one! Now load it and get the plugin plugin's name
-				
+
 				std::string PluginName;
 				if (InternGetPluginName(PluginFileName, PluginName))
 				{
@@ -183,6 +186,29 @@ namespace
 				}
 			}
 		}
+#elif PLATFORM_ANDROID
+        DIR *d;
+        struct dirent *dir;
+        char* path = "/data/app/de.tuilmenau.saltwater-VbOH7XlLTkFPWdRzEPKJeQ==/lib/arm64";
+        d = opendir(path);LD_LIB
+        auto i = errno;
+        if (d) {
+            while ((dir = readdir(d)) != NULL) {
+                const auto PluginFileName = std::string(dir->d_name);
+                if (std::regex_match(PluginFileName, m_PluginRegex))
+                {
+                    // Found one! Now load it and get the plugin plugin's name
+
+                    std::string PluginName;
+                    if (InternGetPluginName(PluginFileName, PluginName))
+                    {
+                        m_PluginFiles[PluginName] = PluginFileName;
+                    }
+                }
+            }
+            closedir(d);
+        }
+#endif
 	}
 
 	// -----------------------------------------------------------------------------
