@@ -25,6 +25,18 @@ namespace GUI
         void Render();
 
         const char* GetName();
+
+    private:
+
+        std::string m_Input;
+        std::vector<std::string> m_Items;
+        bool m_ScrollToBottom;
+
+    private:
+
+        void ClearLog();
+        void AddLog(const char* _pText, ...);
+        void ExecCommand(const std::string& _rCommand);
     };
 } // namespace GUI
 } // namespace Edit
