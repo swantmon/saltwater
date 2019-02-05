@@ -35,7 +35,6 @@ namespace GUI
     private:
 
         void ClearLog();
-        void AddLog(const char* _pText, ...);
         void ExecCommand(const std::string& _rCommand);
     };
 } // namespace GUI

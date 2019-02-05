@@ -7,6 +7,7 @@
 
 #include "editor/imgui/imgui.h"
 
+#include "engine/core/core_console.h"
 #include "engine/core/core_time.h"
 
 #include "engine/graphic/gfx_main.h"
@@ -48,7 +49,16 @@ namespace GUI
     {
         ClearLog();
 
-        AddLog("Welcome to Dear ImGui!");
+        auto NewEntryDelegate = [&](Core::CConsole::EConsoleLevel _Level, const std::string _Entry)
+        {
+            std::string LogLevelString = Core::CConsole::GetInstance().GetLogLevelString(_Level);
+
+            m_Items.push_back("[" + LogLevelString + "] " + _Entry);
+
+            m_ScrollToBottom = true;
+        };
+
+        Core::CConsole::GetInstance().RegisterHandler(NewEntryDelegate);
     }
 
     // -----------------------------------------------------------------------------
@@ -121,13 +131,25 @@ namespace GUI
             // -----------------------------------------------------------------------------
             ImVec4 TextColor = DefaultTextColor;
 
-            if (strstr(pItem, "[error]"))
+            if (strstr(pItem, "[Error]"))
             {
-                TextColor = ImColor(1.0f, 0.4f, 0.4f, 1.0f);
+                TextColor = ImColor(255, 40, 40);
+            }
+            else if (strstr(pItem, "[Warning]"))
+            {
+                TextColor = ImColor(255, 235, 40);
+            }
+            else if (strstr(pItem, "[Info]"))
+            {
+                TextColor = DefaultTextColor;
+            }
+            else if (strstr(pItem, "[Debug]"))
+            {
+                TextColor = ImColor(100, 180, 255);
             }
             else if (strncmp(pItem, "# ", 2) == 0)
             {
-                TextColor = ImColor(1.0f, 0.78f, 0.58f, 1.0f);
+                TextColor = ImColor(255, 200, 0);
             }
 
             ImGui::PushStyleColor(ImGuiCol_Text, TextColor);
@@ -151,7 +173,7 @@ namespace GUI
         // -----------------------------------------------------------------------------
         ImGuiInputTextCallback TextEditCallback = [](ImGuiInputTextCallbackData* data)->int
         {
-            CConsolePanel* pConsole = (CConsolePanel*)data->UserData;
+            // CConsolePanel* pConsole = (CConsolePanel*)data->UserData;
 
             return 0;
         };
@@ -162,7 +184,7 @@ namespace GUI
 
         strcpy_s(InputBuffer, m_Input.c_str());
 
-        if (ImGui::InputText("Input", InputBuffer, 255, ImGuiInputTextFlags_EnterReturnsTrue, TextEditCallback, (void*)this))
+        if (ImGui::InputText("##Input", InputBuffer, 255, ImGuiInputTextFlags_EnterReturnsTrue, TextEditCallback, (void*)this))
         {
             std::string Input = InputBuffer;
 
@@ -203,26 +225,11 @@ namespace GUI
 
     // -----------------------------------------------------------------------------
 
-    void CConsolePanel::AddLog(const char* _pText, ...)
-    {
-        char Buffer[1024];
-
-        va_list Args;
-        va_start(Args, _pText);
-        vsnprintf(Buffer, IM_ARRAYSIZE(Buffer), _pText, Args);
-        Buffer[IM_ARRAYSIZE(Buffer) - 1] = 0;
-        va_end(Args);
-
-        m_Items.push_back(Buffer);
-
-        m_ScrollToBottom = true;
-    }
-
-    // -----------------------------------------------------------------------------
-
     void CConsolePanel::ExecCommand(const std::string& _rCommand)
     {
-        AddLog("# %s\n", _rCommand.c_str());
+        m_Items.push_back("# " + _rCommand);
+
+        m_ScrollToBottom = true;
     }
 } // namespace GUI
 } // namespace Edit
