@@ -142,11 +142,11 @@ namespace GUI
             }
             else if (strstr(pItem, "[Debug]"))
             {
-                TextColor = ImColor(100, 180, 255);
+                TextColor = ImColor(40, 180, 80);
             }
             else if (strncmp(pItem, "# ", 2) == 0)
             {
-                TextColor = ImColor(40, 180, 80);
+                TextColor = ImColor(100, 180, 255);
             }
 
             ImGui::PushStyleColor(ImGuiCol_Text, TextColor);
