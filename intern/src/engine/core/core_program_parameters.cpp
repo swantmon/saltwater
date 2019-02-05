@@ -26,9 +26,6 @@ namespace Core
 {
     CProgramParameters::CProgramParameters()
     {
-        // -----------------------------------------------------------------------------
-        // Handle input commands
-        // -----------------------------------------------------------------------------
         auto InputCommandDelegate = [&](const Base::CInputEvent& _rEvent)
         {
             if (_rEvent.GetType() != Base::CInputEvent::Command) return;

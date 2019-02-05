@@ -65,11 +65,8 @@ namespace GUI
         // -----------------------------------------------------------------------------
         // Header
         // -----------------------------------------------------------------------------
-        if (ImGui::Button("Scroll to bottom")) m_ScrollToBottom = true;
-        ImGui::SameLine();
-
         static ImGuiTextFilter TextFilter;
-        TextFilter.Draw("Filter", 120);
+        TextFilter.Draw("Filter");
 
         ImGui::Separator();
 
@@ -87,6 +84,8 @@ namespace GUI
             if (ImGui::Selectable("Clear")) ClearLog();
 
             CopyToClipboard = ImGui::Selectable("Copy to clipboard");
+
+            m_ScrollToBottom = ImGui::Selectable("Scroll to bottom");
 
             ImGui::EndPopup();
         }
@@ -163,7 +162,7 @@ namespace GUI
 
                     if (_pData->EventKey == ImGuiKey_UpArrow)
                     {
-                        if (rPositonInHistory == -1)    rPositonInHistory = rHistory.size() - 1;
+                        if (rPositonInHistory == -1)    rPositonInHistory = static_cast<int>(rHistory.size() - 1);
                         else if (rPositonInHistory > 0) rPositonInHistory--;
                     }
                     else if (_pData->EventKey == ImGuiKey_DownArrow)
@@ -191,7 +190,7 @@ namespace GUI
 
         strcpy_s(InputBuffer, m_Input.c_str());
 
-        if (ImGui::InputText("##Input", InputBuffer, 255, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_CallbackHistory, TextEditCallback, (void*)this))
+        if (ImGui::InputText("Input", InputBuffer, 255, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_CallbackHistory, TextEditCallback, (void*)this))
         {
             std::string Input = InputBuffer;
 
@@ -254,9 +253,9 @@ namespace GUI
         }
         else if (_rCommand.compare("HISTORY") == 0)
         {
-            int First = m_History.size() - 10;
+            int First = glm::max(static_cast<int>(m_History.size()) - 10, 0);
 
-            for (int Index = First > 0 ? First : 0; Index < m_History.size(); Index++)
+            for (int Index = First; Index < m_History.size(); Index ++)
             {
                 m_Items.push_back(std::to_string(Index) + ": " + m_History[Index]);
             }
