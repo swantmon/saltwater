@@ -7,14 +7,15 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
+#include "editor/edit_console_panel.h"
 #include "editor/edit_gui.h"
 #include "editor/edit_infos_panel.h"
 #include "editor/edit_inspector_panel.h"
 #include "editor/edit_scene_graph_panel.h"
 
+#include "editor/imgui/imgui.h"
 #include "editor/imgui/imgui_impl_opengl.h"
 #include "editor/imgui/imgui_impl_sdl.h"
-#include "editor/imgui/imgui.h"
 #include "editor/imgui/imgui_internal.h"
 
 #include "engine/core/core_asset_manager.h"
@@ -70,6 +71,7 @@ namespace
             Inspector,
             SceneGraph,
             Infos,
+            Console,
             NumberOfPanels,
         };
 
@@ -77,7 +79,8 @@ namespace
         {
             &GUI::CInspectorPanel::GetInstance(),
             &GUI::CSceneGraphPanel::GetInstance(),
-            &GUI::CInfosPanel::GetInstance()
+            &GUI::CInfosPanel::GetInstance(),
+            &GUI::CConsolePanel::GetInstance()
         };
 
     private:
