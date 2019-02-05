@@ -147,6 +147,9 @@
     <ClCompile Include="..\..\..\src\editor\edit_data_entity.cpp">
       <Filter>gui\objects</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\editor\edit_console_panel.cpp">
+      <Filter>gui\panels</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\editor\edit_edit_state.h">
@@ -270,6 +273,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\editor\edit_data_entity.h">
       <Filter>gui\objects</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor\edit_console_panel.h">
+      <Filter>gui\panels</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

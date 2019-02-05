@@ -1,7 +1,11 @@
 
 #include "engine/engine_precompiled.h"
 
+#include "base/base_input_event.h"
+
 #include "engine/core/core_program_parameters.h"
+
+#include "engine/gui/gui_event_handler.h"
 
 #include <sstream>
 
@@ -21,6 +25,83 @@ namespace Core
 {
     CProgramParameters::CProgramParameters()
     {
+        // -----------------------------------------------------------------------------
+        // Handle input commands
+        // -----------------------------------------------------------------------------
+        auto InputCommandDelegate = [&](const Base::CInputEvent& _rEvent)
+        {
+            if (_rEvent.GetType() != Base::CInputEvent::Command) return;
+
+            std::string Command = _rEvent.GetCommand();
+
+            if (Command.length() < 3 || Command.compare(0, 2, "pp") != 0) return;
+
+            Command = Command.substr(3);
+
+            if (Command.length() == 0) return;
+
+            size_t EqualPosition = Command.find('=');
+
+            if (EqualPosition == std::string::npos)
+            {
+                if (IsNull(Command))
+                {
+                    ENGINE_CONSOLE_WARNINGV("Option %s does not exists", Command.c_str());
+                }
+                else
+                {
+                    auto Value = m_Container[ConvertOptionToJSONPointer(Command)];
+
+                    ENGINE_CONSOLE_INFOV("%s is %s", Command.c_str(), Value.dump().c_str());
+                }
+            }
+            else
+            {
+                std::string Option = Command.substr(0, EqualPosition);
+                std::string Value  = Command.substr(EqualPosition + 1);
+
+                if (Value.length() == 0 || Option.length() == 0) return;
+
+                if (IsNull(Option))
+                {
+                    auto NewValue = nlohmann::json::parse(Value);
+
+                    m_Container[ConvertOptionToJSONPointer(Option)] = NewValue;
+
+                    auto Value = m_Container[ConvertOptionToJSONPointer(Option)];
+
+                    ENGINE_CONSOLE_INFOV("New option %s with value %s", Option.c_str(), Value.dump().c_str());
+                }
+                else
+                {
+                    auto CurrentValue = m_Container[ConvertOptionToJSONPointer(Option)];
+
+                    try
+                    {
+                        auto NewValue = nlohmann::json::parse(Value);
+
+                        if (NewValue.type() == CurrentValue.type())
+                        {
+                            m_Container[ConvertOptionToJSONPointer(Option)] = NewValue;
+
+                            auto Value = m_Container[ConvertOptionToJSONPointer(Option)];
+
+                            ENGINE_CONSOLE_INFOV("%s is set to %s", Option.c_str(), Value.dump().c_str());
+                        }
+                        else
+                        {
+                            ENGINE_CONSOLE_ERRORV("Type mismatch for option %s", Option.c_str());
+                        }
+                    }
+                    catch (json::exception& rException)
+                    {
+                        ENGINE_CONSOLE_ERRORV("%s", rException.what());
+                    }
+                }
+            }
+        };
+
+        Gui::EventHandler::RegisterDirectUserListener(InputCommandDelegate);
     }
 
     // -----------------------------------------------------------------------------
