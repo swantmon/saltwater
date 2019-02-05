@@ -275,11 +275,30 @@ namespace GUI
         m_History.push_back(_rCommand);
 
         // -----------------------------------------------------------------------------
-        // Send command via input event
+        // Commands
         // -----------------------------------------------------------------------------
-        Base::CInputEvent Event(Base::CInputEvent::Command, _rCommand);
+        if (_rCommand.compare("CLS") == 0)
+        {
+            ClearLog();
+        }
+        else if (_rCommand.compare("HISTORY") == 0)
+        {
+            int First = m_History.size() - 10;
 
-        Gui::EventHandler::OnUserEvent(Event);
+            for (int Index = First > 0 ? First : 0; Index < m_History.size(); Index++)
+            {
+                m_Items.push_back(std::to_string(Index) + ": " + m_History[Index]);
+            }
+        }
+        else
+        {
+            // -----------------------------------------------------------------------------
+            // Send command via input event
+            // -----------------------------------------------------------------------------
+            Base::CInputEvent Event(Base::CInputEvent::Command, _rCommand);
+
+            Gui::EventHandler::OnUserEvent(Event);
+        }
     }
 } // namespace GUI
 } // namespace Edit
