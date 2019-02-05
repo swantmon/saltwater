@@ -12,7 +12,8 @@
 #include "engine/core/core_console.h"
 #include "engine/core/core_plugin_manager.h"
 
-#include <filesystem>
+//#include <filesystem>
+#include <experimental/filesystem>
 #include <unordered_map>
 #include <regex>
 #include <string>
@@ -279,7 +280,7 @@ namespace
 #ifdef PLATFORM_WINDOWS
             ENGINE_CONSOLE_ERRORV("Plugin '%s' not found.", FileName.c_str());
 #elif PLATFORM_ANDROID
-            ENGINE_CONSOLE_ERRORV("Plugin '%s' not found (Error: '%s').", _rLibrary.c_str(), dlerror());
+            ENGINE_CONSOLE_ERRORV("Plugin '%s' not found (Error: '%s').", FileName.c_str(), dlerror());
 #endif // PLATFORM_WINDOWS
 
             return nullptr;
@@ -360,19 +361,12 @@ namespace
 
     void* CPluginManager::GetPluginFunction(const std::string& _rName, const std::string& _rFunction)
     {
-        auto PluginIter = m_Plugins.find(_rName);
+	    auto NameIter = m_PluginFiles.find(_rName);
+        auto PluginIter = m_Plugins.find(NameIter->second);
 
         if (PluginIter == m_Plugins.end()) return nullptr;
 
-        void* pMethod = nullptr;
-
-#ifdef PLATFORM_WINDOWS
-        pMethod = (void*)GetProcAddress(m_Plugins[_rName].m_Instance, _rFunction.c_str());
-#elif PLATFORM_ANDROID
-        pMethod = (void*)dlsym(m_Plugins[Hash].m_Instance, _rFunction.c_str());
-#endif // PLATFORM_WINDOWS
-
-        return pMethod;
+        return InternGetProc(PluginIter->second.m_Instance, _rFunction);
     }
 
 } // namespace
