@@ -2,6 +2,7 @@
 #include "engine/engine_precompiled.h"
 
 #include "base/base_input_event.h"
+#include "base/base_string_helper.h"
 
 #include "engine/core/core_program_parameters.h"
 
@@ -25,9 +26,6 @@ namespace Core
 {
     CProgramParameters::CProgramParameters()
     {
-        // -----------------------------------------------------------------------------
-        // Handle input commands
-        // -----------------------------------------------------------------------------
         auto InputCommandDelegate = [&](const Base::CInputEvent& _rEvent)
         {
             if (_rEvent.GetType() != Base::CInputEvent::Command) return;
@@ -37,6 +35,8 @@ namespace Core
             if (Command.length() < 3 || Command.compare(0, 2, "pp") != 0) return;
 
             Command = Command.substr(3);
+
+            Base::Trim(Command);
 
             if (Command.length() == 0) return;
 
@@ -50,9 +50,11 @@ namespace Core
                 }
                 else
                 {
-                    auto Value = m_Container[ConvertOptionToJSONPointer(Command)];
+                    auto JSONOption = ConvertOptionToJSONPointer(Command);
 
-                    ENGINE_CONSOLE_INFOV("%s is %s", Command.c_str(), Value.dump().c_str());
+                    auto JSONValue = m_Container[JSONOption];
+
+                    ENGINE_CONSOLE_INFOV("%s is %s", Command.c_str(), JSONValue.dump().c_str());
                 }
             }
             else
@@ -60,43 +62,45 @@ namespace Core
                 std::string Option = Command.substr(0, EqualPosition);
                 std::string Value  = Command.substr(EqualPosition + 1);
 
+                Base::Trim(Option);
+                Base::Trim(Value);
+
                 if (Value.length() == 0 || Option.length() == 0) return;
 
-                if (IsNull(Option))
+                auto JSONOption = ConvertOptionToJSONPointer(Option);
+
+                try
                 {
-                    auto NewValue = nlohmann::json::parse(Value);
-
-                    m_Container[ConvertOptionToJSONPointer(Option)] = NewValue;
-
-                    auto Value = m_Container[ConvertOptionToJSONPointer(Option)];
-
-                    ENGINE_CONSOLE_INFOV("New option %s with value %s", Option.c_str(), Value.dump().c_str());
-                }
-                else
-                {
-                    auto CurrentValue = m_Container[ConvertOptionToJSONPointer(Option)];
-
-                    try
+                    if (m_Container[JSONOption].is_null())
                     {
-                        auto NewValue = nlohmann::json::parse(Value);
+                        auto NewJSONValue = nlohmann::json::parse(Value);
 
-                        if (NewValue.type() == CurrentValue.type())
+                        m_Container[JSONOption] = NewJSONValue;
+
+                        ENGINE_CONSOLE_INFOV("New option %s with value %s", Option.c_str(), NewJSONValue.dump().c_str());
+                    }
+                    else
+                    {
+
+                        auto NewJSONValue = nlohmann::json::parse(Value);
+
+                        auto CurrentJSONValue = m_Container[JSONOption];
+
+                        if (NewJSONValue.type() == CurrentJSONValue.type())
                         {
-                            m_Container[ConvertOptionToJSONPointer(Option)] = NewValue;
+                            m_Container[JSONOption] = NewJSONValue;
 
-                            auto Value = m_Container[ConvertOptionToJSONPointer(Option)];
-
-                            ENGINE_CONSOLE_INFOV("%s is set to %s", Option.c_str(), Value.dump().c_str());
+                            ENGINE_CONSOLE_INFOV("%s is set to %s", Option.c_str(), NewJSONValue.dump().c_str());
                         }
                         else
                         {
                             ENGINE_CONSOLE_ERRORV("Type mismatch for option %s", Option.c_str());
                         }
                     }
-                    catch (json::exception& rException)
-                    {
-                        ENGINE_CONSOLE_ERRORV("%s", rException.what());
-                    }
+                }
+                catch (const json::exception& _rException)
+                {
+                    ENGINE_CONSOLE_ERRORV("Failed parsing JSON with reason > %s", _rException.what());
                 }
             }
         };
@@ -194,6 +198,8 @@ namespace Core
     json::json_pointer CProgramParameters::ConvertOptionToJSONPointer(const std::string& _rOption)
     {
         std::string Copy = _rOption;
+
+        Base::Trim(Copy);
 
         std::replace(Copy.begin(), Copy.end(), ':', '/');
 

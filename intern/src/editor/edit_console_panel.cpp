@@ -3,6 +3,7 @@
 
 #include "base/base_include_glm.h"
 #include "base/base_input_event.h"
+#include "base/base_string_helper.h"
 
 #include "editor/edit_console_panel.h"
 
@@ -13,35 +14,6 @@
 
 #include "engine/graphic/gfx_main.h"
 #include "engine/gui/gui_event_handler.h"
-
-#include <algorithm> 
-#include <cctype>
-#include <locale>
-
-namespace Helper
-{
-    static inline void TrimLeft(std::string &_rString) 
-    {
-        _rString.erase(_rString.begin(), std::find_if(_rString.begin(), _rString.end(), [](int ch) 
-        {
-            return !std::isspace(ch);
-        }));
-    }
-
-    static inline void TrimRight(std::string &_rString) 
-    {
-        _rString.erase(std::find_if(_rString.rbegin(), _rString.rend(), [](int ch) 
-        {
-            return !std::isspace(ch);
-        }).base(), _rString.end());
-    }
-
-    static inline void Trim(std::string &_rString) 
-    {
-        TrimLeft(_rString);
-        TrimRight(_rString);
-    }
-} // namespace Helper
 
 namespace Edit
 {
@@ -82,7 +54,8 @@ namespace GUI
 
     void CConsolePanel::Render()
     {
-        ImGui::SetNextWindowSize(ImVec2(520, 600), ImGuiCond_FirstUseEver);
+        ImGui::SetNextWindowPos(ImVec2(30, 510), ImGuiCond_FirstUseEver);
+        ImGui::SetNextWindowSize(ImVec2(600, 200), ImGuiCond_FirstUseEver);
 
         if (!ImGui::Begin("Console", &m_IsVisible))
         {
@@ -93,11 +66,8 @@ namespace GUI
         // -----------------------------------------------------------------------------
         // Header
         // -----------------------------------------------------------------------------
-        if (ImGui::Button("Scroll to bottom")) m_ScrollToBottom = true;
-        ImGui::SameLine();
-
         static ImGuiTextFilter TextFilter;
-        TextFilter.Draw("Filter", 120);
+        TextFilter.Draw("Filter");
 
         ImGui::Separator();
 
@@ -115,6 +85,8 @@ namespace GUI
             if (ImGui::Selectable("Clear")) ClearLog();
 
             CopyToClipboard = ImGui::Selectable("Copy to clipboard");
+
+            m_ScrollToBottom = ImGui::Selectable("Scroll to bottom");
 
             ImGui::EndPopup();
         }
@@ -191,7 +163,7 @@ namespace GUI
 
                     if (_pData->EventKey == ImGuiKey_UpArrow)
                     {
-                        if (rPositonInHistory == -1)    rPositonInHistory = rHistory.size() - 1;
+                        if (rPositonInHistory == -1)    rPositonInHistory = static_cast<int>(rHistory.size() - 1);
                         else if (rPositonInHistory > 0) rPositonInHistory--;
                     }
                     else if (_pData->EventKey == ImGuiKey_DownArrow)
@@ -219,11 +191,11 @@ namespace GUI
 
         strcpy_s(InputBuffer, m_Input.c_str());
 
-        if (ImGui::InputText("##Input", InputBuffer, 255, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_CallbackHistory, TextEditCallback, (void*)this))
+        if (ImGui::InputText("Input", InputBuffer, 255, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_CallbackHistory, TextEditCallback, (void*)this))
         {
             std::string Input = InputBuffer;
 
-            Helper::Trim(Input);
+            Base::Trim(Input);
 
             if (Input.length() > 0) ExecuteCommand(Input);
 
@@ -282,9 +254,9 @@ namespace GUI
         }
         else if (_rCommand.compare("HISTORY") == 0)
         {
-            int First = m_History.size() - 10;
+            int First = glm::max(static_cast<int>(m_History.size()) - 10, 0);
 
-            for (int Index = First > 0 ? First : 0; Index < m_History.size(); Index++)
+            for (int Index = First; Index < m_History.size(); Index ++)
             {
                 m_Items.push_back(std::to_string(Index) + ": " + m_History[Index]);
             }
