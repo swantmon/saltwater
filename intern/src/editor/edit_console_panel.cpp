@@ -85,20 +85,11 @@ namespace GUI
         // -----------------------------------------------------------------------------
         // Header
         // -----------------------------------------------------------------------------
-        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
+        if (ImGui::Button("Scroll to bottom")) m_ScrollToBottom = true;
+        ImGui::SameLine();
+
         static ImGuiTextFilter TextFilter;
-        TextFilter.Draw("", 180);
-        ImGui::PopStyleVar();
-
-        ImGui::SameLine();
-
-        if (ImGui::SmallButton("Clear")) ClearLog();
-        ImGui::SameLine();
-
-        bool CopyToClipboard = ImGui::SmallButton("Copy"); 
-        ImGui::SameLine();
-
-        if (ImGui::SmallButton("Scroll to bottom")) m_ScrollToBottom = true;
+        TextFilter.Draw("Filter", 120);
 
         ImGui::Separator();
 
@@ -109,9 +100,13 @@ namespace GUI
 
         ImGui::BeginChild("ScrollingRegion", ImVec2(0, -FooterHeightToReserve), false, ImGuiWindowFlags_HorizontalScrollbar);
 
+        bool CopyToClipboard = false;
+
         if (ImGui::BeginPopupContextWindow())
         {
             if (ImGui::Selectable("Clear")) ClearLog();
+
+            CopyToClipboard = ImGui::Selectable("Copy to clipboard");
 
             ImGui::EndPopup();
         }
@@ -199,6 +194,12 @@ namespace GUI
             ReclaimFocus = true;
 
             m_Input.clear();
+        }
+
+        ImGui::SameLine();
+
+        if (ImGui::Button("Send"))
+        {
         }
 
         // -----------------------------------------------------------------------------
