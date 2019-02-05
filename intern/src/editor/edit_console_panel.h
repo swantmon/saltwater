@@ -30,6 +30,8 @@ namespace GUI
 
         std::string m_Input;
         std::vector<std::string> m_Items;
+        std::vector<std::string> m_History;
+        int m_PositonInHistory;
         bool m_ScrollToBottom;
 
     private:

@@ -48,6 +48,11 @@ namespace Edit
 namespace GUI
 {
     CConsolePanel::CConsolePanel()
+        : m_Input           ()
+        , m_Items           ()
+        , m_History         ()
+        , m_PositonInHistory(-1)
+        , m_ScrollToBottom  (true)
     {
         ClearLog();
 
@@ -68,6 +73,9 @@ namespace GUI
     CConsolePanel::~CConsolePanel()
     {
         ClearLog();
+
+        m_Items.clear();
+        m_History.clear();
     }
 
     // -----------------------------------------------------------------------------
@@ -170,10 +178,39 @@ namespace GUI
         // -----------------------------------------------------------------------------
         ImGuiInputTextCallback TextEditCallback = [](ImGuiInputTextCallbackData* _pData)->int
         {
-            BASE_UNUSED(_pData);
+            CConsolePanel* pConsole = (CConsolePanel*)_pData->UserData;
 
-            // CConsolePanel* pConsole = (CConsolePanel*)_pData->UserData;
+            const auto& rHistory = pConsole->m_History;
+            auto& rPositonInHistory = pConsole->m_PositonInHistory;
 
+            switch (_pData->EventFlag)
+            {
+                case ImGuiInputTextFlags_CallbackHistory:
+                {
+                    // Example of HISTORY
+                    const int prev_history_pos = rPositonInHistory;
+
+                    if (_pData->EventKey == ImGuiKey_UpArrow)
+                    {
+                        if (rPositonInHistory == -1)    rPositonInHistory = rHistory.size() - 1;
+                        else if (rPositonInHistory > 0) rPositonInHistory--;
+                    }
+                    else if (_pData->EventKey == ImGuiKey_DownArrow)
+                    {
+                        if (rPositonInHistory != -1)
+                            if (++rPositonInHistory >= rHistory.size())
+                                rPositonInHistory = -1;
+                    }
+
+                    if (prev_history_pos != rPositonInHistory)
+                    {
+                        const char* history_str = (rPositonInHistory >= 0) ? rHistory[rPositonInHistory].c_str() : "";
+
+                        _pData->DeleteChars(0, _pData->BufTextLen);
+                        _pData->InsertChars(0, history_str);
+                    }
+                }
+            }
             return 0;
         };
 
@@ -183,7 +220,7 @@ namespace GUI
 
         strcpy_s(InputBuffer, m_Input.c_str());
 
-        if (ImGui::InputText("##Input", InputBuffer, 255, ImGuiInputTextFlags_EnterReturnsTrue, TextEditCallback, (void*)this))
+        if (ImGui::InputText("##Input", InputBuffer, 255, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_CallbackHistory, TextEditCallback, (void*)this))
         {
             std::string Input = InputBuffer;
 
@@ -229,6 +266,13 @@ namespace GUI
         m_Items.push_back("# " + _rCommand);
 
         m_ScrollToBottom = true;
+
+        // -----------------------------------------------------------------------------
+        // Add to history
+        // -----------------------------------------------------------------------------
+        m_PositonInHistory = -1;
+
+        m_History.push_back(_rCommand);
 
         // -----------------------------------------------------------------------------
         // Send command via input event
