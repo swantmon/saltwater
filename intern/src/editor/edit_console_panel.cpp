@@ -187,8 +187,7 @@ namespace GUI
             {
                 case ImGuiInputTextFlags_CallbackHistory:
                 {
-                    // Example of HISTORY
-                    const int prev_history_pos = rPositonInHistory;
+                    const int PreviousHistoryPosition = rPositonInHistory;
 
                     if (_pData->EventKey == ImGuiKey_UpArrow)
                     {
@@ -202,12 +201,12 @@ namespace GUI
                                 rPositonInHistory = -1;
                     }
 
-                    if (prev_history_pos != rPositonInHistory)
+                    if (PreviousHistoryPosition != rPositonInHistory)
                     {
-                        const char* history_str = (rPositonInHistory >= 0) ? rHistory[rPositonInHistory].c_str() : "";
+                        const char* pHistoryText = (rPositonInHistory >= 0) ? rHistory[rPositonInHistory].c_str() : "";
 
                         _pData->DeleteChars(0, _pData->BufTextLen);
-                        _pData->InsertChars(0, history_str);
+                        _pData->InsertChars(0, pHistoryText);
                     }
                 }
             }
