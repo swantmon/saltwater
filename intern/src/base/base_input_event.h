@@ -159,7 +159,7 @@ namespace IO
         
     public:
         
-        inline unsigned int GetType() const;
+        inline EType GetType() const;
         
         inline unsigned int GetAction() const;
         
@@ -348,7 +348,7 @@ namespace IO
     
     // -----------------------------------------------------------------------------
     
-    inline unsigned int CInputEvent::GetType() const
+    inline CInputEvent::EType CInputEvent::GetType() const
     {
         return static_cast<CInputEvent::EType>(m_Bits.m_Type);
     }
