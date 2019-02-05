@@ -91,6 +91,9 @@ namespace GUI
         // -----------------------------------------------------------------------------
         // GUI
         // -----------------------------------------------------------------------------
+        ImGui::SetNextWindowPos(ImVec2(30, 100), ImGuiCond_FirstUseEver);
+        ImGui::SetNextWindowSize(ImVec2(300, 400), ImGuiCond_FirstUseEver);
+
         ImGui::Begin("Scene Graph", &m_IsVisible);
 
         int MaximumDepth = 1000;

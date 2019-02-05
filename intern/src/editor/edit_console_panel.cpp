@@ -54,7 +54,8 @@ namespace GUI
 
     void CConsolePanel::Render()
     {
-        ImGui::SetNextWindowSize(ImVec2(520, 600), ImGuiCond_FirstUseEver);
+        ImGui::SetNextWindowPos(ImVec2(30, 510), ImGuiCond_FirstUseEver);
+        ImGui::SetNextWindowSize(ImVec2(600, 200), ImGuiCond_FirstUseEver);
 
         if (!ImGui::Begin("Console", &m_IsVisible))
         {

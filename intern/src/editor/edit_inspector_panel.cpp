@@ -51,6 +51,9 @@ namespace GUI
 
     void CInspectorPanel::Render()
     {
+        ImGui::SetNextWindowPos(ImVec2(950, 100), ImGuiCond_FirstUseEver);
+        ImGui::SetNextWindowSize(ImVec2(300, 400), ImGuiCond_FirstUseEver);
+
         int IndexID = 0;
         Edit::CGUIFactory& rFactory = Edit::CGUIFactory::GetInstance();
         Edit::CComponentFactory& rComponentFactory = Edit::CComponentFactory::GetInstance();
