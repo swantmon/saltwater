@@ -146,7 +146,7 @@ namespace GUI
             }
             else if (strncmp(pItem, "# ", 2) == 0)
             {
-                TextColor = ImColor(255, 200, 0);
+                TextColor = ImColor(40, 180, 80);
             }
 
             ImGui::PushStyleColor(ImGuiCol_Text, TextColor);
@@ -194,12 +194,6 @@ namespace GUI
             ReclaimFocus = true;
 
             m_Input.clear();
-        }
-
-        ImGui::SameLine();
-
-        if (ImGui::Button("Send"))
-        {
         }
 
         // -----------------------------------------------------------------------------
