@@ -63,7 +63,6 @@ namespace
     private:
 
         CEventDelegates m_EventDelegates;
-        CPlugins m_AvailablePlugins;
     };
 } // namespace 
 
@@ -100,6 +99,8 @@ namespace
 
         Gfx::Pipeline::OnStart();
 
+		Core::PluginManager::Start();
+
         // -----------------------------------------------------------------------------
         // Plugins
         // -----------------------------------------------------------------------------
@@ -107,13 +108,7 @@ namespace
 
         for (auto SelectedPlugin : SelectedPlugins)
         {
-            auto Plugin = Core::PluginManager::LoadPlugin(SelectedPlugin);
-
-            if (Plugin == nullptr) continue;
-
-            m_AvailablePlugins.push_back(&Plugin->GetInstance());
-
-            Plugin->GetInstance().OnStart();
+			LoadPlugin(SelectedPlugin);
         }
     }
 
@@ -122,14 +117,11 @@ namespace
     void CEngine::Shutdown()
     {
         // -----------------------------------------------------------------------------
-        // Plugins
-        // -----------------------------------------------------------------------------
-        for (auto Plugin : m_AvailablePlugins) Plugin->OnExit();
-
-        // -----------------------------------------------------------------------------
         // Engine
         // -----------------------------------------------------------------------------
-        Scpt::ScriptManager::OnExit();
+		Core::PluginManager::Exit();
+		
+		Scpt::ScriptManager::OnExit();
 
         Dt::EntityManager::OnExit();
 
@@ -147,13 +139,10 @@ namespace
     void CEngine::Update()
     {
         // -----------------------------------------------------------------------------
-        // Plugins
-        // -----------------------------------------------------------------------------
-        for (auto Plugin : m_AvailablePlugins) Plugin->Update();
-
-        // -----------------------------------------------------------------------------
         // Engine
         // -----------------------------------------------------------------------------
+		Core::PluginManager::Update();
+
         Core::Time::Update();
 
         Cam::ControlManager::Update();
@@ -178,7 +167,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Plugins
         // -----------------------------------------------------------------------------
-        for (auto Plugin : m_AvailablePlugins) Plugin->OnResume();
+		Core::PluginManager::Resume();
     }
 
     // -----------------------------------------------------------------------------
@@ -188,7 +177,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Plugins
         // -----------------------------------------------------------------------------
-        for (auto Plugin : m_AvailablePlugins) Plugin->OnPause();
+		Core::PluginManager::Pause();
     }
 
     // -----------------------------------------------------------------------------
@@ -214,11 +203,9 @@ namespace
 
     void CEngine::LoadPlugin(const std::string& _Plugin)
     {
-        auto Plugin = Core::PluginManager::LoadPlugin(_Plugin);
-
-        m_AvailablePlugins.push_back(&Plugin->GetInstance());
-
-        Plugin->GetInstance().OnStart();
+        auto Plugin = Core::PluginManager::GetPlugin(_Plugin);
+		
+        Plugin->OnStart();
     }
 } // namespace 
 
