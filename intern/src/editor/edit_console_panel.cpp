@@ -3,6 +3,7 @@
 
 #include "base/base_include_glm.h"
 #include "base/base_input_event.h"
+#include "base/base_string_helper.h"
 
 #include "editor/edit_console_panel.h"
 
@@ -13,35 +14,6 @@
 
 #include "engine/graphic/gfx_main.h"
 #include "engine/gui/gui_event_handler.h"
-
-#include <algorithm> 
-#include <cctype>
-#include <locale>
-
-namespace Helper
-{
-    static inline void TrimLeft(std::string &_rString) 
-    {
-        _rString.erase(_rString.begin(), std::find_if(_rString.begin(), _rString.end(), [](int ch) 
-        {
-            return !std::isspace(ch);
-        }));
-    }
-
-    static inline void TrimRight(std::string &_rString) 
-    {
-        _rString.erase(std::find_if(_rString.rbegin(), _rString.rend(), [](int ch) 
-        {
-            return !std::isspace(ch);
-        }).base(), _rString.end());
-    }
-
-    static inline void Trim(std::string &_rString) 
-    {
-        TrimLeft(_rString);
-        TrimRight(_rString);
-    }
-} // namespace Helper
 
 namespace Edit
 {
@@ -223,7 +195,7 @@ namespace GUI
         {
             std::string Input = InputBuffer;
 
-            Helper::Trim(Input);
+            Base::Trim(Input);
 
             if (Input.length() > 0) ExecuteCommand(Input);
 

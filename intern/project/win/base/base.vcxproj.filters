@@ -234,5 +234,8 @@
     <ClInclude Include="..\..\..\src\base\base_serialize_recorder.h">
       <Filter>serialization</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\base\base_string_helper.h">
+      <Filter>core</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
