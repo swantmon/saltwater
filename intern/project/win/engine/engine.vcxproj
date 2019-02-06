@@ -386,6 +386,7 @@
       <PrecompiledHeaderFile>engine/engine_precompiled.h</PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <DisableSpecificWarnings>4251;4275</DisableSpecificWarnings>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -439,6 +440,7 @@
       <PrecompiledHeaderFile>engine/engine_precompiled.h</PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <DisableSpecificWarnings>4251;4275</DisableSpecificWarnings>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

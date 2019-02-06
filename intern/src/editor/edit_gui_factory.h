@@ -108,14 +108,14 @@ namespace Edit
 
     inline CGUIFactory::~CGUIFactory()
     {
-        for (auto& rFactory : m_Factory)
+        for (auto& [rFactoryKey, rFactory] : m_Factory)
         {
-            for (auto& rInstance : rFactory.second.m_Instances)
+            for (auto& [rInstanceKey, rInstance] : rFactory.m_Instances)
             {
-                Base::CMemory::DeleteObject(rInstance.second);
+                Base::CMemory::DeleteObject(rInstance);
             }
 
-            rFactory.second.m_Instances.clear();
+            rFactory.m_Instances.clear();
         }
 
         m_Factory.clear();

@@ -32,6 +32,27 @@ namespace Dt
 
     public:
 
+#pragma warning(push)
+#pragma warning(disable : 4201)
+
+        struct SFlags
+        {
+            union
+            {
+                struct
+                {
+                    unsigned int m_IsActive : 1;        //< Either the component is active or not
+                    unsigned int m_Padding : 31;
+                };
+
+                unsigned int m_Key;
+            };
+        };
+
+#pragma warning(pop) 
+
+    public:
+
         IComponent()
             : m_ID(0)
             , m_pHostEntity(0)
@@ -53,6 +74,21 @@ namespace Dt
             return m_DirtyFlags;
         }
 
+        void SetActive(bool _Flag)
+        {
+            m_Flags.m_IsActive = _Flag;
+        }
+
+        bool IsActive() const
+        {
+            return m_Flags.m_IsActive == true;
+        }
+
+        bool IsActiveAndUsable() const
+        {
+            return m_Flags.m_IsActive == true && m_pHostEntity != nullptr && m_pHostEntity->IsActive() == true;
+        }
+
     public:
 
         virtual const Base::ID GetTypeID() const = 0;
@@ -63,6 +99,7 @@ namespace Dt
 
         Base::ID m_ID;
         Dt::CEntity* m_pHostEntity;
+        SFlags m_Flags;
         unsigned int m_DirtyFlags;
 
     private:
@@ -91,35 +128,10 @@ namespace Dt
 
     public:
 
-#pragma warning(push)
-#pragma warning(disable : 4201)
-
-        struct SFlags
-        {
-            union
-            {
-                struct
-                {
-                    unsigned int m_IsActive   : 1;        //< Either the component is active or not
-                    unsigned int m_Padding    : 31;
-                };
-
-                unsigned int m_Key;
-            };
-        };
-
-#pragma warning(pop) 
-
-    public:
-
         CComponent();
         ~CComponent();
 
         const Base::ID GetTypeID() const override;
-
-        void SetActive(bool _Flag);
-        bool IsActive() const;
-        bool IsActiveAndUsable() const;
 
         void SetFacet(unsigned int _Category, void* _pFacet);
         void* GetFacet(unsigned int _Category);
@@ -131,7 +143,6 @@ namespace Dt
 
     private:
 
-        SFlags  m_Flags;
         CFacets m_Facets;
     };
 } // namespace Dt
@@ -168,30 +179,6 @@ namespace Dt
     const Base::ID CComponent<T>::GetTypeID() const
     {
         return STATIC_TYPE_ID;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    template<class T>
-    void CComponent<T>::SetActive(bool _Flag)
-    {
-        m_Flags.m_IsActive = _Flag;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    template<class T>
-    bool CComponent<T>::IsActive() const
-    {
-        return m_Flags.m_IsActive == true;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    template<class T>
-    bool CComponent<T>::IsActiveAndUsable() const
-    {
-        return m_Flags.m_IsActive == true && m_pHostEntity != nullptr && m_pHostEntity->IsActive() == true;
     }
 
     // -----------------------------------------------------------------------------
