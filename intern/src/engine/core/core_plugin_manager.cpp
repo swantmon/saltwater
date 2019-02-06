@@ -37,15 +37,15 @@ namespace
 
     public:
 
-		void Start();
+		void OnStart();
 
 		void Update();
 
-		void Pause();
+		void OnPause();
 
-		void Resume();
+		void OnResume();
 
-		void Exit();
+		void OnExit();
 
         void SetLibraryPath(const std::string& _rPath);
 
@@ -147,7 +147,7 @@ namespace
 
 	// -----------------------------------------------------------------------------
 
-	void CPluginManager::Start()
+	void CPluginManager::OnStart()
 	{
 		// Find all files in the current path
 
@@ -228,7 +228,7 @@ namespace
 
 	// -----------------------------------------------------------------------------
 
-	void CPluginManager::Pause()
+	void CPluginManager::OnPause()
 	{
 		for (auto&[Key, Plugin] : m_Plugins)
 		{
@@ -241,7 +241,7 @@ namespace
 
 	// -----------------------------------------------------------------------------
 
-	void CPluginManager::Resume()
+	void CPluginManager::OnResume()
 	{
 		for (auto&[Key, Plugin] : m_Plugins)
 		{
@@ -254,13 +254,14 @@ namespace
 
 	// -----------------------------------------------------------------------------
 
-	void CPluginManager::Exit()
+	void CPluginManager::OnExit()
 	{
 		for (auto&[Key, Plugin] : m_Plugins)
 		{
 			if (Plugin.m_IsInitialized)
 			{
 				Plugin.m_pInfo->GetInstance().OnExit();
+                InternFreeLibrary(Plugin.m_Instance);
 			}
 		}
 	}
@@ -396,9 +397,9 @@ namespace Core
 {
 namespace PluginManager
 {
-	void Start()
+	void OnStart()
 	{
-		CPluginManager::GetInstance().Start();
+		CPluginManager::GetInstance().OnStart();
 	}
 
 	// -----------------------------------------------------------------------------
@@ -410,23 +411,23 @@ namespace PluginManager
 
 	// -----------------------------------------------------------------------------
 
-	void Pause()
+	void OnPause()
 	{
-		CPluginManager::GetInstance().Pause();
+		CPluginManager::GetInstance().OnPause();
 	}
 
 	// -----------------------------------------------------------------------------
 
-	void Resume()
+	void OnResume()
 	{
-		CPluginManager::GetInstance().Resume();
+		CPluginManager::GetInstance().OnResume();
 	}
 
 	// -----------------------------------------------------------------------------
 
-	void Exit()
+	void OnExit()
 	{
-		CPluginManager::GetInstance().Exit();
+		CPluginManager::GetInstance().OnExit();
 	}
 
     // -----------------------------------------------------------------------------
