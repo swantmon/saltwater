@@ -121,7 +121,7 @@ namespace AR
         // -----------------------------------------------------------------------------
         m_Engine = std::make_shared<easyar::Engine>();
 
-        m_IsActive = m_Engine->initialize(Key);
+        m_IsActive = Key.compare("<INSERT YOUR EASYAR KEY HERE>") != 0 ? m_Engine->initialize(Key) : false;
 
         if (m_IsActive == false)
         {
@@ -417,6 +417,8 @@ namespace AR
 
     void CPluginInterface::Gfx_OnUpdate()
     {
+        if (m_IsActive == false) return;
+
         // -----------------------------------------------------------------------------
         // Frame
         // -----------------------------------------------------------------------------
