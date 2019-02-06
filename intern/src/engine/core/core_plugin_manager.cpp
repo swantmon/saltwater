@@ -208,7 +208,7 @@ namespace
 		{
 			if (m_Plugins.find(SelectedPlugin) == m_Plugins.end())
 			{
-				throw Base::CException(__FILE__, __LINE__, ("Required plugin "s + " is not available"s).c_str());
+				BASE_THROWM(("Required plugin "s + " is not available"s).c_str());
 			}
 		}
 	}
@@ -311,7 +311,7 @@ namespace
 		if (Iter == m_Plugins.end())
 		{
 			std::string Error = "Could not find plugin with name " + _rPluginName;
-			throw Base::CException(__FILE__, __LINE__, Error.c_str());
+			BASE_THROWM(Error.c_str());
 		}
 		
 		// -----------------------------------------------------------------------------
@@ -376,7 +376,7 @@ namespace
 		if (PluginIter == m_Plugins.end())
 		{
             auto Error = "Plugin "s + _rName + " not available"s;
-            throw Base::CException(__FILE__, __LINE__, Error.c_str());
+            BASE_THROWM(Error.c_str());
 		}
 
         auto Proc = InternGetProc(PluginIter->second.m_Instance, _rFunction);
@@ -384,7 +384,7 @@ namespace
         if (Proc == nullptr)
         {
             auto Error = "Function "s + _rFunction + " not available in plugin "s + _rName;
-            throw Base::CException(__FILE__, __LINE__, Error.c_str());
+			BASE_THROWM(Error.c_str());
         }
 
         return Proc;
