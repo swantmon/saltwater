@@ -46,6 +46,8 @@ namespace
 
 		void Exit();
 
+        void SetLibraryPath(const std::string& _rPath);
+
         SPluginInfo* LoadPlugin(const std::string& _rLibrary);
 
         bool HasPlugin(const std::string& _rName);
@@ -85,6 +87,7 @@ namespace
 
 		CPluginFiles m_PluginFiles;
         CPlugins m_Plugins;
+        std::string m_LibraryPath;
 
     private:
 
@@ -189,9 +192,7 @@ namespace
 #elif PLATFORM_ANDROID
         DIR *d;
         struct dirent *dir;
-        char* path = "/data/app/de.tuilmenau.saltwater-VbOH7XlLTkFPWdRzEPKJeQ==/lib/arm64";
-        d = opendir(path);LD_LIB
-        auto i = errno;
+        d = opendir(m_LibraryPath.c_str());
         if (d) {
             while ((dir = readdir(d)) != NULL) {
                 const auto PluginFileName = std::string(dir->d_name);
@@ -264,6 +265,13 @@ namespace
         }
 
         m_Plugins.clear();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CPluginManager::SetLibraryPath(const std::string& _rPath)
+    {
+	    m_LibraryPath = _rPath;
     }
 
     // -----------------------------------------------------------------------------
@@ -446,6 +454,13 @@ namespace PluginManager
     bool HasPlugin(const std::string& _rName)
     {
         return CPluginManager::GetInstance().HasPlugin(_rName);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void SetLibraryPath(const std::string& _rPath)
+    {
+        CPluginManager::GetInstance().SetLibraryPath(_rPath);
     }
 
     // -----------------------------------------------------------------------------
