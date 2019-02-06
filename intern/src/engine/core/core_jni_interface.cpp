@@ -46,6 +46,8 @@ namespace
 
         const glm::ivec2& GetDeviceDimension();
 
+        std::string GetLibraryPath();
+
         bool CheckPermission(const std::string& _rPermission);
 
         void AcquirePermissions(const std::string* _pPermissions, unsigned int _NumberOfPermissions);
@@ -268,6 +270,19 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    std::string CJNIInterface::GetLibraryPath()
+    {
+        auto Env = GetJavaEnvironment();
+        auto JNIMethod = Env->GetMethodID(m_GameActivityID, "GetLibraryPath", "()Ljava/lang/String;");
+        auto JNIString = static_cast<jstring>(Env->CallObjectMethod(m_GameActivityThiz, JNIMethod));
+        const char* pTempPath = Env->GetStringUTFChars(JNIString, 0);
+        std::string Path = pTempPath;
+        Env->ReleaseStringUTFChars(JNIString, pTempPath);
+        return Path;
+    }
+
+    // -----------------------------------------------------------------------------
+
     bool CJNIInterface::CheckPermission(const std::string& _rPermission)
     {
         JNIEnv* pEnvironment = GetJavaEnvironment();
@@ -356,6 +371,13 @@ namespace JNI
     const glm::ivec2& GetDeviceDimension()
     {
         return CJNIInterface::GetInstance().GetDeviceDimension();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    std::string GetLibraryPath()
+    {
+        return CJNIInterface::GetInstance().GetLibraryPath();
     }
 
     // -----------------------------------------------------------------------------

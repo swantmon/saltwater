@@ -31,10 +31,13 @@ namespace JNI
 
     const glm::ivec2& GetDeviceDimension();
 
+    std::string GetLibraryPath();
+
     bool CheckPermission(const std::string& _rPermission);
 
     void AcquirePermissions(const std::string* _pPermissions, unsigned int _NumberOfPermissions);
 
     void RegisterOnAcquirePermission(COnAcquirePermissionDelegate _NewDelegate);
+
 } // namespace JNI
 } // namespace Core
