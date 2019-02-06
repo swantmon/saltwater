@@ -11,6 +11,7 @@
 
 #include "engine/core/core_console.h"
 #include "engine/core/core_plugin_manager.h"
+#include "engine/core/core_program_parameters.h"
 
 #include <filesystem>
 #include <regex>
@@ -47,19 +48,16 @@ namespace
 
         void SetLibraryPath(const std::string& _rPath);
 
-        SPluginInfo* LoadPlugin(const std::string& _rLibrary);
-
-        bool HasPlugin(const std::string& _rName);
-
-        IPlugin* GetPlugin(const std::string& _rName);
+        SPluginInfo* InternLoadPlugin(const std::string& _rLibrary);
+		
+        bool LoadPlugin(const std::string& _rName);
 
         void* GetPluginFunction(const std::string& _rName, const std::string& _rMethod);
 
     private:
 
-        class CInternPlugin
+        struct SInternPlugin
         {
-        public:
 #ifdef PLATFORM_WINDOWS
             typedef HINSTANCE CInstance;
 #elif PLATFORM_ANDROID
@@ -68,23 +66,21 @@ namespace
 
             CInstance m_Instance;
             SPluginInfo* m_pInfo;
+			bool m_IsInitialized;
         };
 
 	private:
 
-		bool InternGetPluginName(const std::string& _rFileName, std::string& _rPluginName);
-		CInternPlugin::CInstance InternLoadLibrary(const std::string& _rFileName);
-		void InternFreeLibrary(CInternPlugin::CInstance _Library);
-		void* InternGetProc(CInternPlugin::CInstance _Library, const std::string& _rProcName);
+		SInternPlugin::CInstance InternLoadLibrary(const std::string& _rFileName);
+		void InternFreeLibrary(SInternPlugin::CInstance _Library);
+		void* InternGetProc(SInternPlugin::CInstance _Library, const std::string& _rProcName);
 
     private:
 
-		using CPluginFiles = std::unordered_map<std::string, std::string>;
-        using CPlugins = std::unordered_map<std::string, CInternPlugin>;
+        using CPlugins = std::unordered_map<std::string, SInternPlugin>;
 
     private:
 
-		CPluginFiles m_PluginFiles;
         CPlugins m_Plugins;
         std::string m_LibraryPath;
 
@@ -101,7 +97,7 @@ namespace
 {
 #ifdef PLATFORM_WINDOWS
 
-	CPluginManager::CInternPlugin::CInstance CPluginManager::InternLoadLibrary(const std::string& _rFileName)
+	CPluginManager::SInternPlugin::CInstance CPluginManager::InternLoadLibrary(const std::string& _rFileName)
 	{
 		WCHAR FileName[32768];
 		MultiByteToWideChar(CP_UTF8, 0, _rFileName.c_str(), -1, FileName, 32768);
@@ -111,14 +107,14 @@ namespace
 
 	// -----------------------------------------------------------------------------
 
-	void CPluginManager::InternFreeLibrary(CPluginManager::CInternPlugin::CInstance _Library)
+	void CPluginManager::InternFreeLibrary(CPluginManager::SInternPlugin::CInstance _Library)
 	{
 		FreeLibrary(_Library);
 	}
 
 	// -----------------------------------------------------------------------------
 
-	void* CPluginManager::InternGetProc(CPluginManager::CInternPlugin::CInstance _Library, const std::string& _rProcName)
+	void* CPluginManager::InternGetProc(CPluginManager::SInternPlugin::CInstance _Library, const std::string& _rProcName)
 	{
 		return GetProcAddress(_Library, _rProcName.c_str());
 	}
@@ -127,42 +123,26 @@ namespace
 
 #elif PLATFORM_ANDROID
 
-	CPluginManager::CInternPlugin::CInstance CPluginManager::InternLoadLibrary(const std::string& _rFileName)
+	CPluginManager::SInternPlugin::CInstance CPluginManager::InternLoadLibrary(const std::string& _rFileName)
 	{
 		return dlopen(_rFileName.c_str(), RTLD_NOW);
 	}
 
 	// -----------------------------------------------------------------------------
 
-	void CPluginManager::InternFreeLibrary(CPluginManager::CInternPlugin::CInstance _Library)
+	void CPluginManager::InternFreeLibrary(CPluginManager::SInternPlugin::CInstance _Library)
 	{
 		dlclose(_Library);
 	}
 
 	// -----------------------------------------------------------------------------
 
-	void* CPluginManager::InternGetProc(CPluginManager::CInternPlugin::CInstance _Library, const std::string& _rProcName)
+	void* CPluginManager::InternGetProc(CPluginManager::SInternPlugin::CInstance _Library, const std::string& _rProcName)
 	{
 		return dlsym(_Library, _rProcName.c_str());
 	}
 
 #endif //PLATFORM_WINDOWS
-
-	bool CPluginManager::InternGetPluginName(const std::string& _rFileName, std::string& _rPluginName)
-	{
-		auto Instance = InternLoadLibrary(_rFileName);
-
-		if (Instance == nullptr)
-		{
-			return false;
-		}
-
-		_rPluginName = ((SPluginInfo*)InternGetProc(Instance, "InfoExport"))->m_pPluginName;
-
-		InternFreeLibrary(Instance);
-
-		return true;
-	}
 
 	// -----------------------------------------------------------------------------
 
@@ -173,21 +153,31 @@ namespace
 #ifdef PLATFORM_WINDOWS
 		for (const auto & rEntry : std::filesystem::directory_iterator(m_LibraryPath))
 		{
-			// Find the ones that look like Saltwater plugins
+			// Find the ones that have a name like Saltwater plugins
 
 			const auto PluginFileName = rEntry.path().string();
 			if (std::regex_match(PluginFileName, m_PluginRegex))
 			{
 				// Found one! Now load it and get the plugin plugin's name
+				// If we can't get the name it's not a valid SW plugin and we release it
 
-				std::string PluginName;
-				if (InternGetPluginName(PluginFileName, PluginName))
+				auto pLib = InternLoadLibrary(PluginFileName);
+				if (pLib != nullptr)
 				{
-					m_PluginFiles[PluginName] = PluginFileName;
+					auto pInfo = static_cast<SPluginInfo*>(InternGetProc(pLib, "InfoExport"));
+
+					if (pInfo != nullptr)
+					{
+						m_Plugins[pInfo->m_pPluginName] = { pLib, pInfo, false };
+					}
+					else
+					{
+						InternFreeLibrary(pLib);
+					}
 				}
 			}
 		}
-#elif PLATFORM_ANDROID // TODO: Check if Android supports and std::filesystem and delete this branch
+#elif PLATFORM_ANDROID // TODO: Check if Android supports std::filesystem and delete this branch
         DIR *d;
         struct dirent *dir;
         d = opendir(m_LibraryPath.c_str());
@@ -208,34 +198,70 @@ namespace
             closedir(d);
         }
 #endif
+
+		auto SelectedPlugins = Core::CProgramParameters::GetInstance().Get("plugins:selection", std::vector<std::string>());
+
+		for (auto SelectedPlugin : SelectedPlugins)
+		{
+			if (m_Plugins.find(SelectedPlugin) == m_Plugins.end())
+			{
+				using namespace std::string_literals;
+
+				throw Base::CException(__FILE__, __LINE__, ("Required plugin "s + " is not available"s).c_str());
+			}
+		}
 	}
 
 	// -----------------------------------------------------------------------------
 
 	void CPluginManager::Update()
 	{
-
+		for (auto& [Key, Plugin] : m_Plugins)
+		{
+			if (Plugin.m_IsInitialized)
+			{
+				Plugin.m_pInfo->GetInstance().Update();
+			}
+		}
 	}
 
 	// -----------------------------------------------------------------------------
 
 	void CPluginManager::Pause()
 	{
-
+		for (auto&[Key, Plugin] : m_Plugins)
+		{
+			if (Plugin.m_IsInitialized)
+			{
+				Plugin.m_pInfo->GetInstance().OnPause();
+			}
+		}
 	}
 
 	// -----------------------------------------------------------------------------
 
 	void CPluginManager::Resume()
 	{
-
+		for (auto&[Key, Plugin] : m_Plugins)
+		{
+			if (Plugin.m_IsInitialized)
+			{
+				Plugin.m_pInfo->GetInstance().OnResume();
+			}
+		}
 	}
 
 	// -----------------------------------------------------------------------------
 
 	void CPluginManager::Exit()
 	{
-
+		for (auto&[Key, Plugin] : m_Plugins)
+		{
+			if (Plugin.m_IsInitialized)
+			{
+				Plugin.m_pInfo->GetInstance().OnExit();
+			}
+		}
 	}
 
 	// -----------------------------------------------------------------------------
@@ -257,9 +283,9 @@ namespace
 
     CPluginManager::~CPluginManager()
     {
-        for (auto Plugin : m_Plugins)
+        for (auto& rPlugin : m_Plugins)
         {
-			InternFreeLibrary(Plugin.second.m_Instance);
+			InternFreeLibrary(rPlugin.second.m_Instance);
         }
 
         m_Plugins.clear();
@@ -274,67 +300,31 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    SPluginInfo* CPluginManager::LoadPlugin(const std::string& _rPluginName)
+    SPluginInfo* CPluginManager::InternLoadPlugin(const std::string& _rPluginName)
     {
 		// -----------------------------------------------------------------------------
 		// Find file name of plugin
 		// -----------------------------------------------------------------------------
-		const auto Iter = m_PluginFiles.find(_rPluginName);
+		const auto Iter = m_Plugins.find(_rPluginName);
 
-		if (Iter == m_PluginFiles.end())
+		if (Iter == m_Plugins.end())
 		{
 			std::string Error = "Could not find plugin with name " + _rPluginName;
 			throw Base::CException(__FILE__, __LINE__, Error.c_str());
 		}
 		
-		const std::string& FileName = Iter->second;
-
 		// -----------------------------------------------------------------------------
-		// Check if plugin is already loaded.
-		// -----------------------------------------------------------------------------
-		auto PluginIter = m_Plugins.find(FileName);
-
-		if (PluginIter != m_Plugins.end())
-		{
-			ENGINE_CONSOLE_ERRORV("Plugin '%s' is already loaded (V=%s).", PluginIter->second.m_pInfo->m_pPluginName, PluginIter->second.m_pInfo->m_pPluginVersion);
-
-			return PluginIter->second.m_pInfo;
-		}
-
-		// -----------------------------------------------------------------------------
-		// Load library and info
+		// Get library info
 		// -----------------------------------------------------------------------------
 
-		auto Instance = InternLoadLibrary(FileName);
+		auto Instance = Iter->second.m_Instance;
+		auto pPluginInfo = Iter->second.m_pInfo;
 
-        if (Instance == nullptr)
-        {
-#ifdef PLATFORM_WINDOWS
-            ENGINE_CONSOLE_ERRORV("Plugin '%s' not found.", FileName.c_str());
-#elif PLATFORM_ANDROID
-            ENGINE_CONSOLE_ERRORV("Plugin '%s' not found (Error: '%s').", FileName.c_str(), dlerror());
-#endif // PLATFORM_WINDOWS
+		assert(Instance != nullptr);
+		assert(pPluginInfo != nullptr);
+		assert(!Iter->second.m_IsInitialized);
 
-            return nullptr;
-        }
-
-        ENGINE_CONSOLE_INFOV("Loading plugin '%s' successful.", FileName.c_str());
-		
-        auto pPluginInfo = (SPluginInfo*)InternGetProc(Instance, "InfoExport");
-
-        if (pPluginInfo == nullptr)
-        {
-#ifdef PLATFORM_WINDOWS
-            ENGINE_CONSOLE_ERRORV("Loading plugin information failed (Error: %i).", GetLastError());
-#elif PLATFORM_ANDROID
-            ENGINE_CONSOLE_ERRORV("Loading plugin information failed (Error: '%s').", dlerror());
-#endif // PLATFORM_WINDOWS
-
-			InternFreeLibrary(Instance);
-
-            return nullptr;
-        }
-
+		ENGINE_CONSOLE_INFOV("Loading plugin '%s' successful.", _rPluginName.c_str());
         ENGINE_CONSOLE_INFOV("Plugin name:        %s"   , pPluginInfo->m_pPluginName);
         ENGINE_CONSOLE_INFOV("Plugin version:     %s"   , pPluginInfo->m_pPluginVersion);
         ENGINE_CONSOLE_INFOV("Plugin description: %s"   , pPluginInfo->m_pPluginDescription);
@@ -342,50 +332,37 @@ namespace
 
         if (pPluginInfo->m_APIMajorVersion < ENGINE_MAJOR_VERSION || (pPluginInfo->m_APIMajorVersion == ENGINE_MAJOR_VERSION && pPluginInfo->m_APIMinorVersion < ENGINE_MINOR_VERSION))
         {
-            ENGINE_CONSOLE_ERRORV("Plugin '%s' is out-dated (Current API version is %i.%i).", PluginIter->second.m_pInfo->m_pPluginName, ENGINE_MAJOR_VERSION, ENGINE_MINOR_VERSION);
+            ENGINE_CONSOLE_ERRORV("Plugin '%s' is out-dated (Current API version is %i.%i).", _rPluginName.c_str(), ENGINE_MAJOR_VERSION, ENGINE_MINOR_VERSION);
 
             return nullptr;
         }
 
-        // -----------------------------------------------------------------------------
-        // Save plugin
-        // -----------------------------------------------------------------------------
-        m_Plugins[_rPluginName].m_pInfo    = pPluginInfo;
-        m_Plugins[_rPluginName].m_Instance = Instance;
+		Iter->second.m_IsInitialized = true;
+
+		pPluginInfo->GetInstance().OnStart();
 
         return m_Plugins[_rPluginName].m_pInfo;
     }
 
     // -----------------------------------------------------------------------------
 
-    bool CPluginManager::HasPlugin(const std::string& _rName)
-    {
-        return m_Plugins.find(_rName) != m_Plugins.end();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    IPlugin* CPluginManager::GetPlugin(const std::string& _rName)
+    bool CPluginManager::LoadPlugin(const std::string& _rName)
     {
         auto PluginIter = m_Plugins.find(_rName);
 
         if (PluginIter == m_Plugins.end())
-        {
-			auto Plugin = LoadPlugin(_rName);
-			if (Plugin == nullptr)
-			{
-				ENGINE_CONSOLE_ERRORV("Plugin '%s' is not registered.", _rName.c_str());
-
-				return nullptr;
-			}
-			else
-			{
-				return &Plugin->GetInstance();
-			}
+        {			
+			std::string Info = "Plugin " + _rName + " is not available";
+			ENGINE_CONSOLE_INFO(Info.c_str());
+			return false;
         }
 		else
 		{
-			return &PluginIter->second.m_pInfo->GetInstance();
+			if (!PluginIter->second.m_IsInitialized)
+			{
+				InternLoadPlugin(_rName);
+			}
+			return true;
 		}
     }
 
@@ -393,10 +370,12 @@ namespace
 
     void* CPluginManager::GetPluginFunction(const std::string& _rName, const std::string& _rFunction)
     {
-	    auto NameIter = m_PluginFiles.find(_rName);
-        auto PluginIter = m_Plugins.find(NameIter->second);
+        auto PluginIter = m_Plugins.find(_rName);
 
-        if (PluginIter == m_Plugins.end()) return nullptr;
+		if (PluginIter == m_Plugins.end())
+		{
+			return nullptr;
+		}
 
         return InternGetProc(PluginIter->second.m_Instance, _rFunction);
     }
@@ -440,20 +419,6 @@ namespace PluginManager
 		CPluginManager::GetInstance().Exit();
 	}
 
-	// -----------------------------------------------------------------------------
-
-    SPluginInfo* LoadPlugin(const std::string& _rLibrary)
-    {
-        return CPluginManager::GetInstance().LoadPlugin(_rLibrary);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    bool HasPlugin(const std::string& _rName)
-    {
-        return CPluginManager::GetInstance().HasPlugin(_rName);
-    }
-
     // -----------------------------------------------------------------------------
 
     void SetLibraryPath(const std::string& _rPath)
@@ -463,9 +428,9 @@ namespace PluginManager
 
     // -----------------------------------------------------------------------------
 
-    IPlugin* GetPlugin(const std::string& _rName)
+    bool LoadPlugin(const std::string& _rName)
     {
-        return CPluginManager::GetInstance().GetPlugin(_rName);
+        return CPluginManager::GetInstance().LoadPlugin(_rName);
     }
 
     // -----------------------------------------------------------------------------

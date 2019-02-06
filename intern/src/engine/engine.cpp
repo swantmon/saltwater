@@ -53,11 +53,8 @@ namespace
 
         void RaiseEvent(int _EventID);
 
-        void LoadPlugin(const std::string& _Plugin);
-
     private:
 
-        typedef std::vector<Core::IPlugin*> CPlugins;
         typedef std::map<int, std::vector<CEventDelegate>> CEventDelegates;
 
     private:
@@ -100,16 +97,6 @@ namespace
         Gfx::Pipeline::OnStart();
 
 		Core::PluginManager::Start();
-
-        // -----------------------------------------------------------------------------
-        // Plugins
-        // -----------------------------------------------------------------------------
-        auto SelectedPlugins = Core::CProgramParameters::GetInstance().Get("plugins:selection", std::vector<std::string>());
-
-        for (auto SelectedPlugin : SelectedPlugins)
-        {
-			LoadPlugin(SelectedPlugin);
-        }
     }
 
     // -----------------------------------------------------------------------------
@@ -199,14 +186,6 @@ namespace
         }
     }
 
-    // -----------------------------------------------------------------------------
-
-    void CEngine::LoadPlugin(const std::string& _Plugin)
-    {
-        auto Plugin = Core::PluginManager::GetPlugin(_Plugin);
-		
-        Plugin->OnStart();
-    }
 } // namespace 
 
 namespace Engine
@@ -256,13 +235,6 @@ namespace Engine
     void RaiseEvent(int _EventID)
     {
         CEngine::GetInstance().RaiseEvent(_EventID);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void LoadPlugin(const std::string& _PluginName)
-    {
-        CEngine::GetInstance().LoadPlugin(_PluginName);
     }
 
 } // namespace Pipeline

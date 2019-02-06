@@ -36,6 +36,4 @@ namespace Engine
     ENGINE_API void RegisterEventHandler(int _EventID, CEventDelegate _Delegate);
 
     ENGINE_API void RaiseEvent(int _EventID);
-
-    ENGINE_API void LoadPlugin(const std::string& _PluginName);
 } // namespace Engine

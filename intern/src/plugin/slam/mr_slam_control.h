@@ -222,9 +222,7 @@ namespace MR
                 // Load Kinect plugin
                 // -----------------------------------------------------------------------------
                 
-                Engine::LoadPlugin("plugin_kinect");
-
-                if (!Core::PluginManager::HasPlugin("Kinect"))
+                if (!Core::PluginManager::LoadPlugin("Kinect"))
                 {
                     throw Base::CException(__FILE__, __LINE__, "Kinect plugin was not loaded");
                 }

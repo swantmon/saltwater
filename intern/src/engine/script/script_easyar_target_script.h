@@ -45,7 +45,7 @@ namespace Scpt
 
             m_MRToEngineMatrix = Base::CCoordinateSystem::GetBaseMatrix(glm::vec3(1, 0, 0), glm::vec3(0, 1, 0), glm::vec3(0, 0, -1));
 
-            m_IsPluginAvailable = Core::PluginManager::HasPlugin("EasyAR");
+            m_IsPluginAvailable = Core::PluginManager::LoadPlugin("EasyAR");
 
             AcquireNewTarget = (AcquireNewTargetFunc)(Core::PluginManager::GetPluginFunction("EasyAR", "AcquireNewTarget"));
             ReleaseTarget = (ReleaseTargetFunc)(Core::PluginManager::GetPluginFunction("EasyAR", "ReleaseTarget"));
