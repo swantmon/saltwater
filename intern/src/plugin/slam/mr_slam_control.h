@@ -315,8 +315,6 @@ namespace MR
 
         void Exit()
         {
-            m_NetworkDelegate = 0;
-
             m_RecordFile.close();
 
             m_DepthBuffer.clear();
