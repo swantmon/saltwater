@@ -30,8 +30,6 @@ namespace GUI
 
         auto NewEntryDelegate = [&](Core::CConsole::EConsoleLevel _Level, const std::string _Entry)
         {
-            std::string LogLevelString = Core::CConsole::GetInstance().GetLogLevelString(_Level);
-
             m_Items.push_back({ _Level, _Entry });
 
             m_ScrollToBottom = true;

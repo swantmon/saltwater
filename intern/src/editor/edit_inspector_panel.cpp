@@ -140,37 +140,27 @@ namespace GUI
 
             ImGui::PushItemWidth(-1);
 
-            char SearchCharBuffer[64];
-
-            strcpy_s<64>(SearchCharBuffer, m_SearchString.c_str());
-
             if (ImGui::BeginCombo("##ADD_COMPONENT", "Add Component"))
             {
                 ImGui::PushItemWidth(-1);
 
-                if (ImGui::InputText("##SEARCH_REGEX", SearchCharBuffer, 64))
-                {
-                    m_SearchString = SearchCharBuffer;
-                }
+                static ImGuiTextFilter TextFilter;
+
+                TextFilter.Draw("##SEARCH_REGEX");
 
                 ImGui::PopItemWidth();
 
                 for (auto pComponent : rComponentFactory.GetComponents())
                 {
-                    if (m_SearchString.length() == 0 || std::regex_match(pComponent->GetHeader(), std::regex("(.*)(" + m_SearchString + ")(.*)")))
+                    if (!TextFilter.PassFilter(pComponent->GetHeader())) continue;
+
+                    if (ImGui::Selectable(pComponent->GetHeader()))
                     {
-                        if (ImGui::Selectable(pComponent->GetHeader()))
-                        {
-                            pComponent->OnNewComponent(m_pEntity->GetID());
-                        }
+                        pComponent->OnNewComponent(m_pEntity->GetID());
                     }
                 }
 
                 ImGui::EndCombo();
-            }
-            else
-            {
-                m_SearchString = "";
             }
 
             ImGui::PopItemWidth();
