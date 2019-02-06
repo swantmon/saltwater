@@ -106,7 +106,7 @@ namespace GUI
 
             Dt::CEntity::BID CurrentID = rItemState.pEntity->GetID();
 
-            ImGui::PushID(CurrentID);
+            ImGui::PushID(static_cast<int>(CurrentID));
 
             for (int i = 0; i < rItemState.Depth; ++ i)
             {

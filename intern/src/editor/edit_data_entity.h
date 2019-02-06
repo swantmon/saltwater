@@ -80,7 +80,7 @@ namespace Dt
             
             for (int i = 0; i < SEntityLayer::NumberOfLayers; ++i)
             {
-                if ((1 << i) == LayerFlags)
+                if ((1 << i) == static_cast<int>(LayerFlags))
                 {
                     item_current = EntityLayerText[i];
                     break;
