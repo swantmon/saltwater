@@ -122,6 +122,12 @@ namespace GUI
 
                         if (ImGui::CollapsingHeader(Panel->GetHeader()))
                         {
+                            bool IsActive = pComponent->IsActive();
+
+                            ImGui::Checkbox("Active", &IsActive);
+
+                            pComponent->SetActive(IsActive);
+
                             Panel->OnGUI();
                         }
 
