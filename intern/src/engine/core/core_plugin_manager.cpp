@@ -27,6 +27,7 @@
 #endif
 
 using namespace Core;
+using namespace std::string_literals;
 
 namespace
 {
@@ -168,6 +169,8 @@ namespace
 
 					if (pInfo != nullptr)
 					{
+                        auto Message = "Found plugin \'"s + pInfo->m_pPluginName + "\' in file \'"s + PluginFileName + "\'"s;
+                        ENGINE_CONSOLE_INFO(Message.c_str());
 						m_Plugins[pInfo->m_pPluginName] = { pLib, pInfo, false };
 					}
 					else
@@ -205,8 +208,6 @@ namespace
 		{
 			if (m_Plugins.find(SelectedPlugin) == m_Plugins.end())
 			{
-				using namespace std::string_literals;
-
 				throw Base::CException(__FILE__, __LINE__, ("Required plugin "s + " is not available"s).c_str());
 			}
 		}
