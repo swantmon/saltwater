@@ -152,9 +152,10 @@ namespace
         Core::CConsole::GetInstance().SetVerbosityLevel(VerbosityLevel);
 
         // -----------------------------------------------------------------------------
-        // Setup asset manager
+        // Setup paths
         // -----------------------------------------------------------------------------
         Core::AssetManager::SetFilePath(_pAndroidApp->activity->externalDataPath);
+        Core::PluginManager::SetLibraryPath(Core::JNI::GetLibraryPath());
 
         // -----------------------------------------------------------------------------
         // From now on we can start the state engine and enter the first state
