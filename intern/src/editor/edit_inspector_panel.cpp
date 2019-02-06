@@ -16,8 +16,6 @@
 #include "engine/data/data_component_manager.h"
 #include "engine/data/data_script_component.h"
 
-#include <regex>
-
 namespace Edit
 {
 namespace GUI
