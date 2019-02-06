@@ -191,6 +191,13 @@ public class GameActivity extends NativeActivity
 
     // -----------------------------------------------------------------------------
 
+    public String GetLibraryPath()
+    {
+        return getApplicationContext().getApplicationInfo().nativeLibraryDir;
+    }
+
+    // -----------------------------------------------------------------------------
+
     public void RestoreTransparentBars()
     {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
