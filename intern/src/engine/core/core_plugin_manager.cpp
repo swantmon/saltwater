@@ -260,10 +260,14 @@ namespace
 		{
 			if (Plugin.m_IsInitialized)
 			{
-				Plugin.m_pInfo->GetInstance().OnExit();
-                InternFreeLibrary(Plugin.m_Instance);
+				Plugin.m_pInfo->GetInstance().OnExit();                
 			}
 		}
+
+        for (auto&[Key, Plugin] : m_Plugins)
+        {
+            InternFreeLibrary(Plugin.m_Instance);
+        }
 	}
 
 	// -----------------------------------------------------------------------------
@@ -285,12 +289,7 @@ namespace
 
     CPluginManager::~CPluginManager()
     {
-        for (auto& rPlugin : m_Plugins)
-        {
-			InternFreeLibrary(rPlugin.second.m_Instance);
-        }
-
-        m_Plugins.clear();
+        
     }
 
     // -----------------------------------------------------------------------------
