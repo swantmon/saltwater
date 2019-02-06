@@ -32,7 +32,7 @@ namespace GUI
         {
             std::string LogLevelString = Core::CConsole::GetInstance().GetLogLevelString(_Level);
 
-            m_Items.push_back("[" + LogLevelString + "] " + _Entry);
+            m_Items.push_back({ _Level, _Entry });
 
             m_ScrollToBottom = true;
         };
@@ -97,40 +97,44 @@ namespace GUI
 
         ImVec4 DefaultTextColor = ImGui::GetStyleColorVec4(ImGuiCol_Text);
 
-        for (auto& rItem : m_Items)
+        for (auto[Index, Message]  : m_Items)
         {
-            const char* pItem = rItem.c_str();
+            if (!TextFilter.PassFilter(Message.c_str())) continue;
 
-            if (!TextFilter.PassFilter(pItem)) continue;
-
-            // -----------------------------------------------------------------------------
-            // Style
-            // -----------------------------------------------------------------------------
             ImVec4 TextColor = DefaultTextColor;
 
-            if (strstr(pItem, "[Error]"))
+            switch (Index)
             {
+            case Core::CConsole::EConsoleLevel::Error:
                 TextColor = ImColor(255, 40, 40);
-            }
-            else if (strstr(pItem, "[Warning]"))
-            {
+                Message = "[Error] " + Message;
+                break;
+            case Core::CConsole::EConsoleLevel::Warning:
                 TextColor = ImColor(255, 235, 40);
-            }
-            else if (strstr(pItem, "[Info]"))
-            {
+                Message = "[Warning] " + Message;
+                break;
+            case Core::CConsole::EConsoleLevel::Info:
                 TextColor = DefaultTextColor;
-            }
-            else if (strstr(pItem, "[Debug]"))
-            {
+                Message = "[Info] " + Message;
+                break;
+            case Core::CConsole::EConsoleLevel::Debug:
                 TextColor = ImColor(40, 180, 80);
-            }
-            else if (strncmp(pItem, "# ", 2) == 0)
-            {
+                Message = "[Debug] " + Message;
+                break;
+            case -1:
                 TextColor = ImColor(100, 180, 255);
+                Message = "[#] " + Message;
+                break;
+            case -2:
+                TextColor = DefaultTextColor;
+                break;
+            case Core::CConsole::EConsoleLevel::Default:
+            default:
+                TextColor = DefaultTextColor;
             }
 
             ImGui::PushStyleColor(ImGuiCol_Text, TextColor);
-            ImGui::TextUnformatted(pItem);
+            ImGui::TextUnformatted(Message.c_str());
             ImGui::PopStyleColor();
         }
 
@@ -234,7 +238,7 @@ namespace GUI
 
     void CConsolePanel::ExecuteCommand(const std::string& _rCommand)
     {
-        m_Items.push_back("# " + _rCommand);
+        m_Items.push_back({ -1, _rCommand });
 
         m_ScrollToBottom = true;
 
@@ -258,7 +262,7 @@ namespace GUI
 
             for (int Index = First; Index < m_History.size(); Index ++)
             {
-                m_Items.push_back(std::to_string(Index) + ": " + m_History[Index]);
+                m_Items.push_back({ -2, std::to_string(Index) + ": " + m_History[Index] });
             }
         }
         else

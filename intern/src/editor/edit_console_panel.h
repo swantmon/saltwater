@@ -28,8 +28,16 @@ namespace GUI
 
     private:
 
+        struct SItem
+        {
+            int Level;
+            std::string m_Message;
+        };
+
+    private:
+
         std::string m_Input;
-        std::vector<std::string> m_Items;
+        std::vector<SItem> m_Items;
         std::vector<std::string> m_History;
         int m_PositonInHistory;
         bool m_ScrollToBottom;
