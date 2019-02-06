@@ -12,9 +12,6 @@
 #include "engine/core/core_console.h"
 #include "engine/core/core_plugin_manager.h"
 
-#include <dirent.h>
-#include <stdio.h>
-
 #include <filesystem>
 #include <regex>
 #include <string>
@@ -23,7 +20,9 @@
 #ifdef PLATFORM_WINDOWS
 #include "windows.h"
 #elif PLATFORM_ANDROID
+#include <dirent.h>
 #include <dlfcn.h>
+#include <stdio.h>
 #endif
 
 using namespace Core;
