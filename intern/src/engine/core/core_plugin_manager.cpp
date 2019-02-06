@@ -375,10 +375,19 @@ namespace
 
 		if (PluginIter == m_Plugins.end())
 		{
-			return nullptr;
+            auto Error = "Plugin "s + _rName + " not available"s;
+            throw Base::CException(__FILE__, __LINE__, Error.c_str());
 		}
 
-        return InternGetProc(PluginIter->second.m_Instance, _rFunction);
+        auto Proc = InternGetProc(PluginIter->second.m_Instance, _rFunction);
+
+        if (Proc == nullptr)
+        {
+            auto Error = "Function "s + _rFunction + " not available in plugin "s + _rName;
+            throw Base::CException(__FILE__, __LINE__, Error.c_str());
+        }
+
+        return Proc;
     }
 
 } // namespace
