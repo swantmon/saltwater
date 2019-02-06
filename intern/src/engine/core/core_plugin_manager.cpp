@@ -172,8 +172,7 @@ namespace
 		// Find all files in the current path
 
 #ifdef PLATFORM_WINDOWS
-        auto Path = "";
-		for (const auto & rEntry : std::filesystem::directory_iterator(Path))
+		for (const auto & rEntry : std::filesystem::directory_iterator(m_LibraryPath))
 		{
 			// Find the ones that look like Saltwater plugins
 
@@ -189,7 +188,7 @@ namespace
 				}
 			}
 		}
-#elif PLATFORM_ANDROID
+#elif PLATFORM_ANDROID // TODO: Check if Android supports and std::filesystem and delete this branch
         DIR *d;
         struct dirent *dir;
         d = opendir(m_LibraryPath.c_str());
