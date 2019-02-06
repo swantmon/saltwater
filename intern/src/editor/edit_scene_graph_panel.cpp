@@ -98,22 +98,22 @@ namespace GUI
 
         int MaximumDepth = 1000;
 
-        for (auto& rItemState : m_ItemState)
+        for (auto[Depth, pEntity] : m_ItemState)
         {
-            if (rItemState.Depth > MaximumDepth) continue;
+            if (Depth > MaximumDepth) continue;
 
             MaximumDepth = 1000;
 
-            Dt::CEntity::BID CurrentID = rItemState.pEntity->GetID();
+            Dt::CEntity::BID CurrentID = pEntity->GetID();
 
             ImGui::PushID(static_cast<int>(CurrentID));
 
-            for (int i = 0; i < rItemState.Depth; ++ i)
+            for (int i = 0; i < Depth; ++ i)
             {
                 ImGui::Indent();
             }
 
-            auto pHierarchyFacet = rItemState.pEntity->GetHierarchyFacet();
+            auto pHierarchyFacet = pEntity->GetHierarchyFacet();
 
             if (pHierarchyFacet->GetFirstChild() != 0)
             {
@@ -132,9 +132,9 @@ namespace GUI
                 ImGui::Indent();
             }
 
-            if (m_SelectionState[CurrentID]) MaximumDepth = rItemState.Depth;
+            if (m_SelectionState[CurrentID]) MaximumDepth = Depth;
 
-            if (ImGui::Selectable(rItemState.pEntity->GetName().c_str()))
+            if (ImGui::Selectable(pEntity->GetName().c_str()))
             {
                 CInspectorPanel::GetInstance().InspectEntity(CurrentID);
 
@@ -145,7 +145,7 @@ namespace GUI
             {
                 if (ImGui::Button("Delete"))
                 {
-                    Dt::EntityManager::MarkEntityAsDirty(*rItemState.pEntity, Dt::CEntity::DirtyRemove | Dt::CEntity::DirtyDestroy);
+                    Dt::EntityManager::MarkEntityAsDirty(*pEntity, Dt::CEntity::DirtyRemove | Dt::CEntity::DirtyDestroy);
                 }
 
                 ImGui::EndPopup();
@@ -156,7 +156,7 @@ namespace GUI
                 ImGui::Unindent();
             }
 
-            for (int i = 0; i < rItemState.Depth; ++i)
+            for (int i = 0; i < Depth; ++i)
             {
                 ImGui::Unindent();
             }
@@ -165,7 +165,7 @@ namespace GUI
             {
                 ImGui::SetDragDropPayload("SCENE_GRAPH_DRAGDROP", &CurrentID, sizeof(Dt::CEntity::BID));
 
-                ImGui::Text("%s", rItemState.pEntity->GetName().c_str());
+                ImGui::Text("%s", pEntity->GetName().c_str());
 
                 ImGui::EndDragDropSource();
             }

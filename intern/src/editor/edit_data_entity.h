@@ -62,7 +62,7 @@ namespace Dt
             // Layer
             // -----------------------------------------------------------------------------
             unsigned int LayerFlags = m_Flags.m_Layer;
-            const char* item_current = "<Multiple Values>";
+            const char* pCurrentText = LayerFlags > 0 ? "<Multiple Values>" : "<Nothing>";
 
             const char* EntityLayerText[SEntityLayer::NumberOfLayers] = { 
                 "Default", 
@@ -82,12 +82,12 @@ namespace Dt
             {
                 if ((1 << i) == static_cast<int>(LayerFlags))
                 {
-                    item_current = EntityLayerText[i];
+                    pCurrentText = EntityLayerText[i];
                     break;
                 }
             }
 
-            if (ImGui::BeginCombo("Layer", item_current, 0))
+            if (ImGui::BeginCombo("Layer", pCurrentText, 0))
             {
                 for (int n = 0; n < SEntityLayer::NumberOfLayers; n++)
                 {
