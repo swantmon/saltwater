@@ -121,7 +121,7 @@ namespace AR
         // -----------------------------------------------------------------------------
         m_Engine = std::make_shared<easyar::Engine>();
 
-        m_IsActive = Key.compare("<INSERT YOUR EASYAR KEY HERE>") != 0 ? m_Engine->initialize(Key) : false;
+        m_IsActive = m_Engine->initialize(Key);
 
         if (m_IsActive == false)
         {
