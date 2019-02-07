@@ -16,7 +16,6 @@ namespace PAT
 
         using FunctionType = std::function<void(Args...)>;
         using HandleType = std::shared_ptr<FunctionType>;
-        using ContainerType = std::vector<std::weak_ptr<FunctionType>>;
 
         static void Notify(Args... _Args)
         {
@@ -43,7 +42,9 @@ namespace PAT
         }
 
     private:
-        
+
+        using ContainerType = std::vector<std::weak_ptr<FunctionType>>;
+
         static ContainerType s_Container;
     };
 
