@@ -25,6 +25,10 @@ namespace Net
 
     public:
 
+        using CMessageDelegate = CSocket::CMessageDelegate;
+
+    public:
+
         void OnStart();
         void Update();
         void OnExit();
@@ -37,7 +41,7 @@ namespace Net
         SocketHandle CreateServerSocket(int _Port);
         SocketHandle CreateClientSocket(const std::string& _IP, int _Port);
 
-        void RegisterMessageHandler(SocketHandle _SocketHandle, const std::shared_ptr<CMessageDelegate>& _rDelegate);
+        CMessageDelegate::HandleType RegisterMessageHandler(SocketHandle _SocketHandle, CMessageDelegate::FunctionType _Function);
         bool SendMessage(SocketHandle _SocketHandle, const CMessage& _rMessage);
         
     private:

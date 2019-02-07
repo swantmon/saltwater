@@ -74,7 +74,7 @@ namespace Scpt
 
         int m_Mode;
 
-        std::shared_ptr<Net::CMessageDelegate> m_NetworkDelegate;
+        Net::CNetworkManager::CMessageDelegate::HandleType m_NetworkDelegate;
         Net::SocketHandle m_SocketHandle;
 
     public:
@@ -128,8 +128,7 @@ namespace Scpt
             int Port = Core::CProgramParameters::GetInstance().Get("mr:stitching:network_port", 12345);
 
             m_SocketHandle = Net::CNetworkManager::GetInstance().CreateClientSocket(IP, Port);
-            m_NetworkDelegate = std::shared_ptr<Net::CMessageDelegate>(new Net::CMessageDelegate(std::bind(&CLightEstimationScript::OnNewMessage, this, std::placeholders::_1, std::placeholders::_2)));
-            Net::CNetworkManager::GetInstance().RegisterMessageHandler(m_SocketHandle, m_NetworkDelegate);
+            m_NetworkDelegate = Net::CNetworkManager::GetInstance().RegisterMessageHandler(m_SocketHandle, std::bind(&CLightEstimationScript::OnNewMessage, this, std::placeholders::_1, std::placeholders::_2));
         }
 
         // -----------------------------------------------------------------------------

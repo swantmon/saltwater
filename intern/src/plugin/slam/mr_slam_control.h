@@ -111,7 +111,7 @@ namespace MR
         // -----------------------------------------------------------------------------
         // Stuff for network data source
         // -----------------------------------------------------------------------------
-        std::shared_ptr<Net::CMessageDelegate> m_NetworkDelegate;
+        Net::CNetworkManager::CMessageDelegate::HandleType m_NetworkDelegate;
 
         Gfx::CShaderPtr m_YUVtoRGBCSPtr;
         Gfx::CTexturePtr m_YTexture;
@@ -196,11 +196,11 @@ namespace MR
                 // -----------------------------------------------------------------------------
                 // Create network connection
                 // -----------------------------------------------------------------------------
-                m_NetworkDelegate = std::shared_ptr<Net::CMessageDelegate>(new Net::CMessageDelegate(std::bind(&CSLAMControl::OnNewMessage, this, std::placeholders::_1, std::placeholders::_2)));
+                auto Delegate = std::bind(&CSLAMControl::OnNewMessage, this, std::placeholders::_1, std::placeholders::_2);
 
                 int Port = Core::CProgramParameters::GetInstance().Get("mr:slam:network_port", 12345);
                 auto SocketHandle = Net::CNetworkManager::GetInstance().CreateServerSocket(Port);
-                Net::CNetworkManager::GetInstance().RegisterMessageHandler(SocketHandle, m_NetworkDelegate);
+                m_NetworkDelegate = Net::CNetworkManager::GetInstance().RegisterMessageHandler(SocketHandle, Delegate);
 
                 m_DataSource = NETWORK;
 
