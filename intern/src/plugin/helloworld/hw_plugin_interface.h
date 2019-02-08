@@ -21,6 +21,6 @@ namespace HW
 
     private:
 
-        Engine::CEventDelegate::HandleType m_GfxOnRenderGBufferDelegate;
+        Engine::CEventDelegates::HandleType m_GfxOnRenderGBufferDelegate;
     };
 } // namespace HW

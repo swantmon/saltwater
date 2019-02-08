@@ -87,7 +87,7 @@ namespace AR
 
         bool m_FlipVertical; 
 
-        Engine::CEventDelegate::HandleType m_GfxOnUpdateDelegate;
+        Engine::CEventDelegates::HandleType m_GfxOnUpdateDelegate;
 
     private:
 

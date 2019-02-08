@@ -91,7 +91,7 @@ namespace
         bool m_EnableGamepad;
         bool m_CloseWindow;
 
-        Engine::CEventDelegate::HandleType m_GfxOnRenderGUIDelegate;
+        Engine::CEventDelegates::HandleType m_GfxOnRenderGUIDelegate;
 
     private:
 

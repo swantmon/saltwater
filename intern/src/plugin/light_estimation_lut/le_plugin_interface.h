@@ -66,7 +66,7 @@ namespace LE
 
         bool m_IsActive;
 
-        Engine::CEventDelegate::HandleType m_GfxOnUpdateDelegate;
+        Engine::CEventDelegates::HandleType m_GfxOnUpdateDelegate;
 
     private:
 
