@@ -91,6 +91,8 @@ namespace
         bool m_EnableGamepad;
         bool m_CloseWindow;
 
+        Engine::CEventDelegate::HandleType m_GfxOnRenderGUIDelegate;
+
     private:
 
         void ProcessSDLEvents();
@@ -220,7 +222,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Rendering
         // -----------------------------------------------------------------------------
-        auto RenderUI = [&]()
+        auto RenderUI = []()
         {
             Gfx::Performance::BeginEvent("IMGUI");
 
@@ -231,7 +233,7 @@ namespace
             Gfx::Performance::EndEvent();
         };
 
-        Engine::RegisterEventHandler(Engine::Gfx_OnRenderUI, RenderUI);
+        m_GfxOnRenderGUIDelegate = Engine::RegisterEventHandler(Engine::EEvent::Gfx_OnRenderUI, RenderUI);
 
         // -----------------------------------------------------------------------------
         // Init SDL for gamepad input

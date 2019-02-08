@@ -23,7 +23,7 @@
 
 #include "engine/script/script_script_manager.h"
 
-#include <map>
+#include <array>
 
 using namespace Engine;
 
@@ -49,13 +49,9 @@ namespace
 
         void Pause();
 
-        void RegisterEventHandler(int _EventID, CEventDelegate _Delegate);
+        CEventDelegates::HandleType RegisterEventHandler(EEvent _Event, CEventDelegates::FunctionType _Function);
 
-        void RaiseEvent(int _EventID);
-
-    private:
-
-        typedef std::map<int, std::vector<CEventDelegate>> CEventDelegates;
+        void RaiseEvent(EEvent _Event);
 
     private:
 
@@ -74,16 +70,12 @@ namespace
 
     CEngine::~CEngine()
     {
-        m_EventDelegates.clear();
     }
 
     // -----------------------------------------------------------------------------
 
     void CEngine::Startup()
     {
-        // -----------------------------------------------------------------------------
-        // Engine
-        // -----------------------------------------------------------------------------
         Core::Time::OnStart();
 
         Scpt::ScriptManager::OnStart();
@@ -96,19 +88,20 @@ namespace
 
         Gfx::Pipeline::OnStart();
 
-		Core::PluginManager::OnStart();
+        Core::PluginManager::OnStart();
+
+        RaiseEvent(EEvent::Engine_OnStartup);
     }
 
     // -----------------------------------------------------------------------------
 
     void CEngine::Shutdown()
     {
-        // -----------------------------------------------------------------------------
-        // Engine
-        // -----------------------------------------------------------------------------
-		Core::PluginManager::OnExit();
-		
-		Scpt::ScriptManager::OnExit();
+        RaiseEvent(EEvent::Engine_OnShutdown);
+
+        Core::PluginManager::OnExit();
+
+        Scpt::ScriptManager::OnExit();
 
         Dt::EntityManager::OnExit();
 
@@ -125,9 +118,6 @@ namespace
 
     void CEngine::Update()
     {
-        // -----------------------------------------------------------------------------
-        // Engine
-        // -----------------------------------------------------------------------------
 		Core::PluginManager::Update();
 
         Core::Time::Update();
@@ -145,45 +135,40 @@ namespace
         Net::CNetworkManager::GetInstance().Update();
 
         Gfx::Pipeline::Render();
+
+        RaiseEvent(EEvent::Engine_OnUpdate);
     }
 
     // -----------------------------------------------------------------------------
 
     void CEngine::Resume()
     {
-        // -----------------------------------------------------------------------------
-        // Plugins
-        // -----------------------------------------------------------------------------
 		Core::PluginManager::OnResume();
+
+        RaiseEvent(EEvent::Engine_OnResume);
     }
 
     // -----------------------------------------------------------------------------
 
     void CEngine::Pause()
     {
-        // -----------------------------------------------------------------------------
-        // Plugins
-        // -----------------------------------------------------------------------------
 		Core::PluginManager::OnPause();
+
+        RaiseEvent(EEvent::Engine_OnPause);
     }
 
     // -----------------------------------------------------------------------------
 
-    void CEngine::RegisterEventHandler(int _EventID, CEventDelegate _Delegate)
+    CEventDelegates::HandleType CEngine::RegisterEventHandler(EEvent _Event, CEventDelegates::FunctionType _Function)
     {
-        m_EventDelegates[_EventID].push_back(_Delegate);
+        return m_EventDelegates.Register(static_cast<int>(_Event), _Function);
     }
 
     // -----------------------------------------------------------------------------
 
-    void CEngine::RaiseEvent(int _EventID)
+    void CEngine::RaiseEvent(EEvent _Event)
     {
-        auto& rListOfDelegates = m_EventDelegates[_EventID];
-
-        for (auto& rEvent : rListOfDelegates)
-        {
-            rEvent();
-        }
+        m_EventDelegates.Notify(static_cast<int>(_Event));
     }
 
 } // namespace 
@@ -225,16 +210,16 @@ namespace Engine
 
     // -----------------------------------------------------------------------------
 
-    void RegisterEventHandler(int _EventID, CEventDelegate _Delegate)
+    CEventDelegates::HandleType RegisterEventHandler(EEvent _Event, CEventDelegates::FunctionType _Function)
     {
-        CEngine::GetInstance().RegisterEventHandler(_EventID, _Delegate);
+        return CEngine::GetInstance().RegisterEventHandler(_Event, _Function);
     }
 
     // -----------------------------------------------------------------------------
 
-    void RaiseEvent(int _EventID)
+    void RaiseEvent(EEvent _Event)
     {
-        CEngine::GetInstance().RaiseEvent(_EventID);
+        CEngine::GetInstance().RaiseEvent(_Event);
     }
 
 } // namespace Pipeline

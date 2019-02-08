@@ -85,7 +85,9 @@ namespace AR
         void* m_pCameraImageData;
         void* m_pCameraTempImageLineData;
 
-        bool m_FlipVertical;
+        bool m_FlipVertical; 
+
+        Engine::CEventDelegate::HandleType m_GfxOnUpdateDelegate;
 
     private:
 

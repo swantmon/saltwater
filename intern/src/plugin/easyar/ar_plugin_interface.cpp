@@ -89,7 +89,7 @@ namespace AR
         // -----------------------------------------------------------------------------
         // Hooks
         // -----------------------------------------------------------------------------
-        Engine::RegisterEventHandler(Engine::Gfx_OnUpdate, ENGINE_BIND_EVENT_METHOD(&CPluginInterface::Gfx_OnUpdate));
+        m_GfxOnUpdateDelegate = Engine::RegisterEventHandler(Engine::EEvent::Gfx_OnUpdate, std::bind(&CPluginInterface::Gfx_OnUpdate, this));
 
         // -----------------------------------------------------------------------------
         // Parameters
