@@ -26,7 +26,7 @@ namespace Engine
         NumberOfEvents
     };
 
-    using CEventDelegates = Base::CDelegateArray<static_cast<int>(EEvent::NumberOfEvents)>;
+    using CEventDelegates = Base::CDelegates<static_cast<int>(EEvent::NumberOfEvents)>;
 } // namespace Engine
 
 namespace Engine

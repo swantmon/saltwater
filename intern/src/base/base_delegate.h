@@ -54,8 +54,8 @@ namespace PAT
 
     // -----------------------------------------------------------------------------
 
-    template<int _NumberOfContainer = 1, class ... Args>
-    class CDelegateArray
+    template<int _TAmount, class ... Args>
+    class CDelegates
     {
     public:
 
@@ -88,11 +88,11 @@ namespace PAT
 
     private:
 
-        using ContainerType = std::array<std::vector<std::weak_ptr<FunctionType>>, _NumberOfContainer>;
+        using ContainerType = std::array<std::vector<std::weak_ptr<FunctionType>>, _TAmount>;
 
         static ContainerType s_Container;
     };
 
-    template<int _NumberOfContainer, class ... Args>
-    typename CDelegateArray<_NumberOfContainer, Args...>::ContainerType CDelegateArray<_NumberOfContainer, Args...>::s_Container;
+    template<int _TAmount, class ... Args>
+    typename CDelegates<_TAmount, Args...>::ContainerType CDelegates<_TAmount, Args...>::s_Container;
 } // namespace PAT
