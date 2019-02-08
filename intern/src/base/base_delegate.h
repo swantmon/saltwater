@@ -79,10 +79,10 @@ namespace PAT
             s_Container[_Container].erase(std::remove_if(s_Container[_Container].begin(), s_Container[_Container].end(), [](const auto& _Handle) { return _Handle.expired(); }), s_Container[_Container].end());
         }
 
-        static auto Register(int _Number, FunctionType _Function)
+        static auto Register(int _Container, FunctionType _Function)
         {
             auto Ptr = std::make_shared<FunctionType>(_Function);
-            s_Container[_Number].push_back(Ptr);
+            s_Container[_Container].push_back(Ptr);
             return Ptr;
         }
 
