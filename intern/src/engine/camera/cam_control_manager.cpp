@@ -40,7 +40,7 @@ namespace
 
     public:
 
-        void OnEvent(const Base::CInputEvent& _rEvent);
+        void OnInputEvent(const Base::CInputEvent& _rEvent);
         void OnDirtyEntity(Dt::CEntity* _pEntity);
         void OnDirtyComponent(Dt::IComponent* _pComponent);
 
@@ -56,6 +56,8 @@ namespace
 		Dt::CComponentManager::CComponentDelegate::HandleType m_DirtyComponentDelegate;
 
 		Dt::EntityManager::CEntityDelegate::HandleType m_DirtyEntityDelegate;
+
+		Gui::EventHandler::CInputEventDelegate::HandleType m_EventDelegate;
     };
 } // namespace
 
@@ -76,7 +78,7 @@ namespace
         // -----------------------------------------------------------------------------
         // register input event to gui
         // -----------------------------------------------------------------------------
-        Gui::EventHandler::RegisterDirectUserListener(GUI_BIND_INPUT_METHOD(&CCamControlManager::OnEvent));
+		m_EventDelegate = Gui::EventHandler::RegisterDirectUserListener(std::bind(&CCamControlManager::OnInputEvent, this, std::placeholders::_1));
     }
 
     // -----------------------------------------------------------------------------
@@ -148,7 +150,7 @@ namespace
     
     // -----------------------------------------------------------------------------
 
-    void CCamControlManager::OnEvent(const Base::CInputEvent& _rEvent)
+    void CCamControlManager::OnInputEvent(const Base::CInputEvent& _rEvent)
     {
         if (m_pActiveControl != nullptr)
         {

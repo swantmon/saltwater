@@ -5,6 +5,8 @@
 
 #include "editor/edit_state.h"
 
+#include "engine/gui/gui_event_handler.h"
+
 namespace Gfx
 {
     class CSelectionTicket;
@@ -24,6 +26,8 @@ namespace Edit
         CState::EStateType m_Action;
 
         Gfx::CSelectionTicket* m_pSelectionTicket;
+
+		Gui::EventHandler::CInputEventDelegate::HandleType m_EventDelegate;
 
     private:
         
