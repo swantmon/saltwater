@@ -3,31 +3,22 @@
 
 #include "engine/engine_config.h"
 
+#include "base/base_delegate.h"
 #include "base/base_include_glm.h"
 
 #include "engine/graphic/gfx_buffer.h"
 #include "engine/graphic/gfx_graphics_info.h"
 
-#include <functional>
-
 namespace Gfx
 {
 namespace Main
 {
-    typedef std::function<void(int, int)> CResizeDelegate;
-} // namespace Main
-} // namespace Gfx
+	using CResizeDelegate = Base::CDelegate<int, int>;
 
-#define GFX_BIND_RESIZE_METHOD(_Method) std::bind(_Method, this, std::placeholders::_1, std::placeholders::_2)
-
-namespace Gfx
-{
-namespace Main
-{
     ENGINE_API void OnStart();
     ENGINE_API void OnExit();
 
-    ENGINE_API void RegisterResizeHandler(CResizeDelegate _NewDelgate);
+    ENGINE_API CResizeDelegate::HandleType RegisterResizeHandler(CResizeDelegate::FunctionType _Function);
 
     ENGINE_API unsigned int RegisterWindow(void* _pWindow, int _VSync = 1, bool _PreserveContext = false);
 

@@ -79,6 +79,8 @@ namespace
         CTargetSetPtr m_DeferredTargetSet;
         CTargetSetPtr m_LightAccumulationTargetSet;
         CTargetSetPtr m_HitProxyTargetSet;
+
+		Gfx::Main::CResizeDelegate::HandleType m_ResizeDelegate;
         
     private:
         
@@ -98,10 +100,7 @@ namespace
         , m_LightAccumulationTargetSet()
         , m_HitProxyTargetSet         ()
     {
-        // -----------------------------------------------------------------------------
-        // Register for resizing events
-        // -----------------------------------------------------------------------------
-        Main::RegisterResizeHandler(GFX_BIND_RESIZE_METHOD(&CGfxTargetSetManager::OnResize));
+		m_ResizeDelegate = Gfx::Main::RegisterResizeHandler(std::bind(&CGfxTargetSetManager::OnResize, this, std::placeholders::_1, std::placeholders::_2));
     }
     
     // -----------------------------------------------------------------------------

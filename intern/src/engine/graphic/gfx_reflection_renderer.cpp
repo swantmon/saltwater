@@ -169,6 +169,8 @@ namespace
 
         CLightProbeRenderJobs m_LightProbeRenderJobs;
         CSSRRenderJobs        m_SSRRenderJobs;
+
+		Gfx::Main::CResizeDelegate::HandleType m_ResizeDelegate;
         
     private:
         
@@ -201,10 +203,7 @@ namespace
         m_LightProbeRenderJobs.reserve(1);
         m_SSRRenderJobs       .reserve(1);
 
-        // -----------------------------------------------------------------------------
-        // Register for resizing events
-        // -----------------------------------------------------------------------------
-        Main::RegisterResizeHandler(GFX_BIND_RESIZE_METHOD(&CGfxReflectionRenderer::OnResize));
+		m_ResizeDelegate = Gfx::Main::RegisterResizeHandler(std::bind(&CGfxReflectionRenderer::OnResize, this, std::placeholders::_1, std::placeholders::_2));
     }
     
     // -----------------------------------------------------------------------------
