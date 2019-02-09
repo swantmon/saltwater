@@ -102,17 +102,10 @@ namespace Core
     }
 
     // -----------------------------------------------------------------------------
-    
-    const char* CConsole::GetText() const
+
+    void CConsole::RegisterHandler(CEntryDelegate _NewDelegate)
     {
-        return m_OutputStream.str().c_str();
-    }
-    
-    // -----------------------------------------------------------------------------
-    
-    void CConsole::Clear()
-    {
-        m_OutputStream.clear();
+        m_Delegates.push_back(_NewDelegate);
     }
 
     // -----------------------------------------------------------------------------
@@ -147,9 +140,10 @@ namespace Core
 
         __android_log_print(s_LogLevel[_ConsoleLevel], "Base.Console", "%s\n", _pText);
 #else
-
-        fprintf(stdout, "%s: %s\n", GetLogLevelString(_ConsoleLevel).c_str(), _pText);
+        fprintf(stdout, "[%s] %s\n", GetLogLevelString(_ConsoleLevel).c_str(), _pText);
         fflush(stdout);
 #endif // PLATFORM_ANDROID
+
+        for (auto& rDelegate : m_Delegates) rDelegate(_ConsoleLevel, _pText);
     }
 } // namespace Core
