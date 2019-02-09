@@ -19,6 +19,5 @@ namespace Net
         std::vector<char> m_Payload;
     };
 
-    typedef int SocketHandle;
-    typedef std::function<void(const CMessage& _rMessage, SocketHandle)> CMessageDelegate;
+    using SocketHandle = int;
 } // namespace Net

@@ -31,6 +31,7 @@
     <ClInclude Include="..\..\..\src\base\base_coordinate_system.h" />
     <ClInclude Include="..\..\..\src\base\base_crc.h" />
     <ClInclude Include="..\..\..\src\base\base_defines.h" />
+    <ClInclude Include="..\..\..\src\base\base_delegate.h" />
     <ClInclude Include="..\..\..\src\base\base_event_queue.h" />
     <ClInclude Include="..\..\..\src\base\base_exception.h" />
     <ClInclude Include="..\..\..\src\base\base_frustum.h" />

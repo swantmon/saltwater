@@ -24,5 +24,9 @@ namespace SLAM
     private:
 
         MR::CSLAMControl m_SLAMControl;
+
+        Engine::CEventDelegates::HandleType m_UpdateDelegate;
+        Engine::CEventDelegates::HandleType m_RenderGBufferDelegate;
+        Engine::CEventDelegates::HandleType m_RenderForwardDelegate;
     };
 } // namespace HW

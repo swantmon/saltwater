@@ -18,5 +18,9 @@ namespace HW
     public:
 
         void EventHook();
+
+    private:
+
+        Engine::CEventDelegates::HandleType m_GfxOnRenderGBufferDelegate;
     };
 } // namespace HW

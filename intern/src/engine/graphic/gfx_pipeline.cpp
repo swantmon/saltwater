@@ -496,7 +496,7 @@ namespace Pipeline
         CausticRenderer      ::Update();
         RefractionRenderer   ::Update();
 
-        Engine::RaiseEvent(Engine::Gfx_OnUpdate);
+        Engine::RaiseEvent(Engine::EEvent::Gfx_OnUpdate);
 
         Performance::EndEvent();
 
@@ -508,7 +508,7 @@ namespace Pipeline
         ARRenderer  ::Render();
         MeshRenderer::Render();
 
-        Engine::RaiseEvent(Engine::Gfx_OnRenderGBuffer);
+        Engine::RaiseEvent(Engine::EEvent::Gfx_OnRenderGBuffer);
 
         Performance::EndEvent();
         
@@ -526,7 +526,7 @@ namespace Pipeline
         BackgroundRenderer   ::Render();
         CausticRenderer      ::Render();
 
-        Engine::RaiseEvent(Engine::Gfx_OnRenderLighting);
+        Engine::RaiseEvent(Engine::EEvent::Gfx_OnRenderLighting);
 
         Performance::EndEvent();
 
@@ -541,7 +541,7 @@ namespace Pipeline
 
         RefractionRenderer::RenderForward();
 
-        Engine::RaiseEvent(Engine::Gfx_OnRenderForward);
+        Engine::RaiseEvent(Engine::EEvent::Gfx_OnRenderForward);
 
         Performance::EndEvent();
 
@@ -583,7 +583,7 @@ namespace Pipeline
         // -----------------------------------------------------------------------------
         Performance::BeginEvent("UI Pass");
 
-        Engine::RaiseEvent(Engine::Gfx_OnRenderUI);
+        Engine::RaiseEvent(Engine::EEvent::Gfx_OnRenderUI);
 
         Performance::EndEvent();
 

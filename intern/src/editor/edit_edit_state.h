@@ -5,6 +5,8 @@
 
 #include "editor/edit_state.h"
 
+#include "engine/gui/gui_event_handler.h"
+
 namespace Gfx
 {
     class CSelectionTicket;
@@ -25,6 +27,8 @@ namespace Edit
 
         Gfx::CSelectionTicket* m_pSelectionTicket;
 
+		Gui::EventHandler::CEventDelegate::HandleType m_OnEventDelegate;
+
     private:
         
         CEditState();
@@ -38,6 +42,6 @@ namespace Edit
 
     private:
 
-        void OnInputEvent(const Base::CInputEvent& _rInputEvent);
+        void OnEvent(const Base::CInputEvent& _rInputEvent);
     };
 } // namespace Edit

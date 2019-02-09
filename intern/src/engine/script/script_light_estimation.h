@@ -22,6 +22,9 @@
 
 #include "engine/script/script_script.h"
 
+#include <array>
+#include <string>
+
 namespace Scpt
 {
     class CLightEstimationScript : public CScript<CLightEstimationScript>
@@ -51,11 +54,13 @@ namespace Scpt
         typedef void(*LESetInputTextureFunc)(Gfx::CTexturePtr);
         typedef void(*LESetOutputCubemapFunc)(Gfx::CTexturePtr);
         typedef Gfx::CTexturePtr(*LEGetOutputCubemapFunc)();
+        typedef void(*LESetActiveFunc)(bool);
         typedef Gfx::CTexturePtr(*ARGetBackgroundTextureFunc)();
 
-        LESetInputTextureFunc SetInputTexture;
-        LESetOutputCubemapFunc SetOutputCubemap;
-        LEGetOutputCubemapFunc GetOutputCubemap;
+        LESetInputTextureFunc SetInputTexture = nullptr;
+        LESetOutputCubemapFunc SetOutputCubemap = nullptr;
+        LEGetOutputCubemapFunc GetOutputCubemap = nullptr;
+        LESetActiveFunc SetActive = nullptr;
 
         Gfx::CShaderPtr m_C2PShaderPtr;
         Gfx::CShaderPtr m_FusePanoramaShaderPtr;
@@ -63,13 +68,13 @@ namespace Scpt
         Gfx::CTexturePtr m_OutputCubemapPtr;
         Gfx::CTexturePtr m_PanoramaTexturePtr;
 
-        std::string m_PluginNames[NumberOfEstimationTypes] = { "Light Estimation Stitching", "Light Estimation LUT" };
+        std::array<std::string, NumberOfEstimationTypes> m_PluginNames = { "Light Estimation Stitching", "Light Estimation LUT" };
 
         Core::IPlugin* m_pCurrentPluginPtr = nullptr;
 
         int m_Mode;
 
-        std::shared_ptr<Net::CMessageDelegate> m_NetworkDelegate;
+        Net::CNetworkManager::CMessageDelegate::HandleType m_NetworkDelegate;
         Net::SocketHandle m_SocketHandle;
 
     public:
@@ -115,14 +120,15 @@ namespace Scpt
             // -----------------------------------------------------------------------------
             // Prepare light estimation
             // -----------------------------------------------------------------------------
+            for (auto& rPluginName : m_PluginNames) Core::PluginManager::LoadPlugin(rPluginName);
+            
             SwitchLightEstimation(Stitching);
 
             std::string IP = Core::CProgramParameters::GetInstance().Get("mr:stitching:server_ip", "127.0.0.1");
             int Port = Core::CProgramParameters::GetInstance().Get("mr:stitching:network_port", 12345);
 
             m_SocketHandle = Net::CNetworkManager::GetInstance().CreateClientSocket(IP, Port);
-            m_NetworkDelegate = std::shared_ptr<Net::CMessageDelegate>(new Net::CMessageDelegate(std::bind(&CLightEstimationScript::OnNewMessage, this, std::placeholders::_1, std::placeholders::_2)));
-            Net::CNetworkManager::GetInstance().RegisterMessageHandler(m_SocketHandle, m_NetworkDelegate);
+            m_NetworkDelegate = Net::CNetworkManager::GetInstance().RegisterMessageHandler(m_SocketHandle, std::bind(&CLightEstimationScript::OnNewMessage, this, std::placeholders::_1, std::placeholders::_2));
         }
 
         // -----------------------------------------------------------------------------
@@ -292,15 +298,12 @@ namespace Scpt
             // -----------------------------------------------------------------------------
             std::string CurrentPluginName = m_PluginNames[_EstimationType];
 
-            if (!Core::PluginManager::HasPlugin(CurrentPluginName))
-            {
-                return;
-            }
+            if (!Core::PluginManager::LoadPlugin(CurrentPluginName)) return;
 
             // -----------------------------------------------------------------------------
             // Pause old plugin
             // -----------------------------------------------------------------------------
-            if (m_pCurrentPluginPtr) m_pCurrentPluginPtr->OnPause();
+            if (SetActive != nullptr) SetActive(false);
 
             // -----------------------------------------------------------------------------
             // Prepare new plugin
@@ -308,48 +311,29 @@ namespace Scpt
             SetInputTexture  = (LESetInputTextureFunc)(Core::PluginManager::GetPluginFunction(CurrentPluginName, "SetInputTexture"));
             SetOutputCubemap = (LESetOutputCubemapFunc)(Core::PluginManager::GetPluginFunction(CurrentPluginName, "SetOutputCubemap"));
             GetOutputCubemap = (LEGetOutputCubemapFunc)(Core::PluginManager::GetPluginFunction(CurrentPluginName, "GetOutputCubemap"));
+            SetActive        = (LESetActiveFunc)(Core::PluginManager::GetPluginFunction(CurrentPluginName, "SetActive"));
 
-            m_pCurrentPluginPtr = Core::PluginManager::GetPlugin(CurrentPluginName);
-
-            m_pCurrentPluginPtr->OnResume();
+            SetActive(true);
 
             SetOutputCubemap(m_OutputCubemapPtr);
 
-            if (Core::PluginManager::HasPlugin("ArCore") || Core::PluginManager::HasPlugin("EasyAR"))
+#ifdef PLATFORM_ANDROID
+            std::string ARPluginName = "ArCore";
+#else
+            std::string ARPluginName = "EasyAR";
+#endif
+
+            if (Core::PluginManager::LoadPlugin(ARPluginName))
             {
                 ARGetBackgroundTextureFunc GetBackgroundTexture;
 
-                if (Core::PluginManager::HasPlugin("ArCore"))
-                {
-                    GetBackgroundTexture = (ARGetBackgroundTextureFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetBackgroundTexture"));
-                }
-                else
-                {
-                    GetBackgroundTexture = (ARGetBackgroundTextureFunc)(Core::PluginManager::GetPluginFunction("EasyAR", "GetBackgroundTexture"));
-                }
+                GetBackgroundTexture = (ARGetBackgroundTextureFunc)(Core::PluginManager::GetPluginFunction(ARPluginName, "GetBackgroundTexture"));
 
                 SetInputTexture(GetBackgroundTexture());
             }
             else
             {
                 ENGINE_CONSOLE_WARNING("No plugin is loaded to enable light stitching in AR.")
-
-//                 Gfx::STextureDescriptor TextureDescriptor;
-// 
-//                 TextureDescriptor.m_Format           = Gfx::STextureDescriptor::s_FormatFromSource;
-//                 TextureDescriptor.m_NumberOfPixelsU  = Gfx::STextureDescriptor::s_NumberOfPixelsFromSource;
-//                 TextureDescriptor.m_NumberOfPixelsV  = Gfx::STextureDescriptor::s_NumberOfPixelsFromSource;
-//                 TextureDescriptor.m_NumberOfPixelsW  = 1;
-//                 TextureDescriptor.m_NumberOfTextures = 1;
-//                 TextureDescriptor.m_NumberOfMipMaps  = Gfx::STextureDescriptor::s_GenerateAllMipMaps;
-//                 TextureDescriptor.m_Usage            = Gfx::CTexture::GPURead;
-//                 TextureDescriptor.m_Access           = Gfx::CTexture::CPUWrite;
-//                 TextureDescriptor.m_Semantic         = Gfx::CTexture::Diffuse;
-//                 TextureDescriptor.m_Binding          = Gfx::CTexture::ShaderResource;
-//                 TextureDescriptor.m_pFileName        = "environments/Lobby-Center_2k.hdr";
-//                 TextureDescriptor.m_pPixels          = 0;
-// 
-//                 SetInputTexture(Gfx::TextureManager::CreateTexture2D(TextureDescriptor));
             }
         }
 

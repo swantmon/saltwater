@@ -94,6 +94,8 @@ namespace
         bool m_EnableGamepad;
         bool m_CloseWindow;
 
+        Engine::CEventDelegates::HandleType m_GfxOnRenderGUIDelegate;
+
     private:
 
         void ProcessSDLEvents();
@@ -223,7 +225,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Rendering
         // -----------------------------------------------------------------------------
-        auto RenderUI = [&]()
+        auto RenderUI = []()
         {
             Gfx::Performance::BeginEvent("IMGUI");
 
@@ -234,7 +236,7 @@ namespace
             Gfx::Performance::EndEvent();
         };
 
-        Engine::RegisterEventHandler(Engine::Gfx_OnRenderUI, RenderUI);
+        m_GfxOnRenderGUIDelegate = Engine::RegisterEventHandler(Engine::EEvent::Gfx_OnRenderUI, RenderUI);
 
         // -----------------------------------------------------------------------------
         // Init SDL for gamepad input
@@ -420,7 +422,7 @@ namespace
             {
                 Base::CInputEvent Event = Base::CInputEvent(Base::CInputEvent::Exit);
 
-                Gui::EventHandler::OnUserEvent(Event);
+                Gui::EventHandler::OnEvent(Event);
             }
         }
     }
@@ -438,7 +440,7 @@ namespace
         case SDL_WINDOWEVENT_CLOSE:
             Event = Base::CInputEvent(Base::CInputEvent::Exit);
 
-            Gui::EventHandler::OnUserEvent(Event);
+            Gui::EventHandler::OnEvent(Event);
             break;
         case SDL_WINDOWEVENT_RESIZED:
             int WindowWidth;
@@ -471,7 +473,7 @@ namespace
 
             Event = CInputEvent(Base::CInputEvent::Input, Base::CInputEvent::KeyPressed, Key, Mod);
 
-            Gui::EventHandler::OnUserEvent(Event);
+            Gui::EventHandler::OnEvent(Event);
             break;
         case SDL_KEYUP:
             Key = _rSDLEvent.key.keysym.sym;
@@ -479,7 +481,7 @@ namespace
 
             Event = CInputEvent(Base::CInputEvent::Input, Base::CInputEvent::KeyReleased, Key, Mod);
 
-            Gui::EventHandler::OnUserEvent(Event);
+            Gui::EventHandler::OnEvent(Event);
             break;
         }
     }
@@ -508,7 +510,7 @@ namespace
         case SDL_MOUSEMOTION:
             Event = CInputEvent(CInputEvent::Input, CInputEvent::MouseMove, CInputEvent::Mouse, GlobalMousePosition, LocalMousePosition);
 
-            Gui::EventHandler::OnUserEvent(Event);
+            Gui::EventHandler::OnEvent(Event);
             break;
         case SDL_MOUSEBUTTONDOWN:
             if (_rSDLEvent.button.button == SDL_BUTTON_LEFT)
@@ -528,7 +530,7 @@ namespace
             {
                 Event = CInputEvent(CInputEvent::Input, MouseAction, CInputEvent::Mouse, GlobalMousePosition, LocalMousePosition);
 
-                Gui::EventHandler::OnUserEvent(Event);
+                Gui::EventHandler::OnEvent(Event);
             }
             break;
         case SDL_MOUSEBUTTONUP:
@@ -549,7 +551,7 @@ namespace
             {
                 Event = CInputEvent(CInputEvent::Input, MouseAction, CInputEvent::Mouse, GlobalMousePosition, LocalMousePosition);
 
-                Gui::EventHandler::OnUserEvent(Event);
+                Gui::EventHandler::OnEvent(Event);
             }
             break;
         case SDL_MOUSEWHEEL:
@@ -557,7 +559,7 @@ namespace
 
             Event = CInputEvent(CInputEvent::Input, CInputEvent::MouseWheel, CInputEvent::Mouse, GlobalMousePosition, LocalMousePosition, static_cast<float>(WheelData));
 
-            Gui::EventHandler::OnUserEvent(Event);
+            Gui::EventHandler::OnEvent(Event);
             break;
         }
     }
@@ -603,20 +605,20 @@ namespace
                     Event = CInputEvent(CInputEvent::Input, CInputEvent::GamepadAxisMotion, Key, Axis, Strength);
                 }
 
-                Gui::EventHandler::OnUserEvent(Event);
+                Gui::EventHandler::OnEvent(Event);
             }
             break;
 
         case SDL_JOYBUTTONDOWN:
 
             Event = CInputEvent(CInputEvent::Input, CInputEvent::GamepadKeyPressed, ConvertSDLKey(_rSDLEvent));
-            Gui::EventHandler::OnUserEvent(Event);
+            Gui::EventHandler::OnEvent(Event);
             break;
 
         case SDL_JOYBUTTONUP:
 
             Event = CInputEvent(CInputEvent::Input, CInputEvent::GamepadKeyReleased, ConvertSDLKey(_rSDLEvent));
-            Gui::EventHandler::OnUserEvent(Event);
+            Gui::EventHandler::OnEvent(Event);
             break;
         }
     }

@@ -106,12 +106,12 @@ namespace MR
 
         bool m_CaptureColor;
 
-        std::unique_ptr<MR::CSLAMReconstructor> m_pReconstructor;
+        MR::CSLAMReconstructor m_Reconstructor;
 
         // -----------------------------------------------------------------------------
         // Stuff for network data source
         // -----------------------------------------------------------------------------
-        std::shared_ptr<Net::CMessageDelegate> m_NetworkDelegate;
+        Net::CNetworkManager::CMessageDelegate::HandleType m_NetworkDelegate;
 
         Gfx::CShaderPtr m_YUVtoRGBCSPtr;
         Gfx::CTexturePtr m_YTexture;
@@ -184,8 +184,7 @@ namespace MR
 
             m_pSelectionTicket = &Gfx::SelectionRenderer::AcquireTicket(-1, -1, 1, 1, Gfx::SPickFlag::Voxel);
 
-            m_pReconstructor.reset(new MR::CSLAMReconstructor);
-            Gfx::ReconstructionRenderer::SetReconstructor(*m_pReconstructor);
+            Gfx::ReconstructionRenderer::SetReconstructor(m_Reconstructor);
 
             // -----------------------------------------------------------------------------
             // Determine where we get our data from
@@ -197,11 +196,11 @@ namespace MR
                 // -----------------------------------------------------------------------------
                 // Create network connection
                 // -----------------------------------------------------------------------------
-                m_NetworkDelegate = std::shared_ptr<Net::CMessageDelegate>(new Net::CMessageDelegate(std::bind(&CSLAMControl::OnNewMessage, this, std::placeholders::_1, std::placeholders::_2)));
+                auto Delegate = std::bind(&CSLAMControl::OnNewMessage, this, std::placeholders::_1, std::placeholders::_2);
 
                 int Port = Core::CProgramParameters::GetInstance().Get("mr:slam:network_port", 12345);
                 auto SocketHandle = Net::CNetworkManager::GetInstance().CreateServerSocket(Port);
-                Net::CNetworkManager::GetInstance().RegisterMessageHandler(SocketHandle, m_NetworkDelegate);
+                m_NetworkDelegate = Net::CNetworkManager::GetInstance().RegisterMessageHandler(SocketHandle, Delegate);
 
                 m_DataSource = NETWORK;
 
@@ -222,9 +221,7 @@ namespace MR
                 // Load Kinect plugin
                 // -----------------------------------------------------------------------------
                 
-                Engine::LoadPlugin("plugin_kinect");
-
-                if (!Core::PluginManager::HasPlugin("Kinect"))
+                if (!Core::PluginManager::LoadPlugin("Kinect"))
                 {
                     throw Base::CException(__FILE__, __LINE__, "Kinect plugin was not loaded");
                 }
@@ -241,10 +238,10 @@ namespace MR
                 GetIntrinsics(FocalLength, FocalPoint, m_DepthSize);
                 m_ColorSize = m_DepthSize;
 
-                m_pReconstructor->SetImageSizes(glm::vec2(m_DepthSize), glm::vec2(m_ColorSize));
-                m_pReconstructor->SetIntrinsics(glm::vec2(FocalLength), glm::vec2(FocalPoint));
+                m_Reconstructor.SetImageSizes(glm::vec2(m_DepthSize), glm::vec2(m_ColorSize));
+                m_Reconstructor.SetIntrinsics(glm::vec2(FocalLength), glm::vec2(FocalPoint));
                 
-                m_pReconstructor->Start();
+                m_Reconstructor.Start();
 
                 m_IsReconstructorInitialized = true;
 
@@ -276,7 +273,7 @@ namespace MR
                 GetColorBuffer = (GetColorBufferFunc)(Core::PluginManager::GetPluginFunction("Kinect", "GetColorBuffer"));
 
                 MR::SReconstructionSettings Settings;
-                m_pReconstructor->GetReconstructionSettings(&Settings);
+                m_Reconstructor.GetReconstructionSettings(&Settings);
                 m_CaptureColor = Settings.m_CaptureColor;
             }
             else
@@ -323,7 +320,7 @@ namespace MR
             m_DepthBuffer.clear();
             m_ColorBuffer.clear();
 
-            m_pReconstructor->Exit();
+            m_Reconstructor.Exit();
 
             m_RGBConversionBuffer = nullptr;
 
@@ -341,9 +338,7 @@ namespace MR
             m_ShiftLUTPtr = nullptr;
 
             m_PlaneTexture = nullptr;
-
-            m_pReconstructor.release();
-
+            
             Gfx::SelectionRenderer::Clear(*m_pSelectionTicket);
         }
 
@@ -374,7 +369,7 @@ namespace MR
             if (m_SelectionState != ESelection::NOSELECTION)
             {
                 const auto& AABB = Gfx::ReconstructionRenderer::GetSelectionBox();
-                m_PlaneTexture = m_pReconstructor->CreatePlaneTexture(AABB);
+                m_PlaneTexture = m_Reconstructor.CreatePlaneTexture(AABB);
                 Gfx::ReconstructionRenderer::SetInpaintedPlane(m_PlaneTexture, AABB);
             }
 
@@ -418,14 +413,14 @@ namespace MR
                     Gfx::TextureManager::CopyToTexture2D(m_DepthTexture, TargetRect, m_DepthSize.x, m_DepthBuffer.data());
                     Gfx::TextureManager::CopyToTexture2D(m_RGBTexture, TargetRect, m_DepthSize.x, m_ColorBuffer.data());
 
-                    m_pReconstructor->OnNewFrame(m_DepthTexture, m_RGBTexture, nullptr);
+                    m_Reconstructor.OnNewFrame(m_DepthTexture, m_RGBTexture, nullptr);
                 }
                 else if (GetDepthBuffer(m_DepthBuffer.data()))
                 {
                     Base::AABB2UInt TargetRect;
                     TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_DepthSize.x, m_DepthSize.y));
                     Gfx::TextureManager::CopyToTexture2D(m_DepthTexture, TargetRect, m_DepthSize.x, m_DepthBuffer.data());
-                    m_pReconstructor->OnNewFrame(m_DepthTexture, nullptr, nullptr);
+                    m_Reconstructor.OnNewFrame(m_DepthTexture, nullptr, nullptr);
                 }
             }
 
@@ -542,7 +537,7 @@ namespace MR
 
                 if (MessageID == 0 && m_IsReconstructorInitialized)
                 {
-                    m_pReconstructor->ResetReconstruction();
+                    m_Reconstructor.ResetReconstruction();
                 }
                 else if (MessageID == 1)
                 {
@@ -558,27 +553,27 @@ namespace MR
                     m_DeviceProjectionMatrix = Message.m_DeviceProjectionMatrix;
 
                     MR::SReconstructionSettings Settings;
-                    m_pReconstructor->GetReconstructionSettings(&Settings);
+                    m_Reconstructor.GetReconstructionSettings(&Settings);
 
                     m_CaptureColor = Settings.m_CaptureColor;
 
-                    m_pReconstructor->SetDeviceResolution(m_DeviceResolution);
+                    m_Reconstructor.SetDeviceResolution(m_DeviceResolution);
 
                     if (m_CaptureColor)
                     {
                         FocalPoint.x = (FocalPoint.x / m_DepthSize.x) * m_ColorSize.x;
                         FocalPoint.y = (FocalPoint.y / m_DepthSize.y) * m_ColorSize.y;
 
-                        m_pReconstructor->SetImageSizes(glm::vec2(m_ColorSize), glm::vec2(m_ColorSize));
-                        m_pReconstructor->SetIntrinsics(glm::vec2(FocalLength), glm::vec2(FocalPoint));
+                        m_Reconstructor.SetImageSizes(glm::vec2(m_ColorSize), glm::vec2(m_ColorSize));
+                        m_Reconstructor.SetIntrinsics(glm::vec2(FocalLength), glm::vec2(FocalPoint));
                     }
                     else
                     {
-                        m_pReconstructor->SetImageSizes(glm::vec2(m_DepthSize), glm::vec2(m_DepthSize));
-                        m_pReconstructor->SetIntrinsics(glm::vec2(FocalLength), glm::vec2(FocalPoint));
+                        m_Reconstructor.SetImageSizes(glm::vec2(m_DepthSize), glm::vec2(m_DepthSize));
+                        m_Reconstructor.SetIntrinsics(glm::vec2(FocalLength), glm::vec2(FocalPoint));
                     }
 
-                    m_pReconstructor->Start();
+                    m_Reconstructor.Start();
 
                     m_IsReconstructorInitialized = true;
 
@@ -669,7 +664,7 @@ namespace MR
 
                 if (!m_CaptureColor)
                 {
-                    m_pReconstructor->OnNewFrame(m_DepthTexture, nullptr, &m_PoseMatrix);
+                    m_Reconstructor.OnNewFrame(m_DepthTexture, nullptr, &m_PoseMatrix);
                 }
             }
             else if (MessageType == COLORFRAME && m_CaptureColor)
@@ -696,7 +691,7 @@ namespace MR
 
                 Gfx::ContextManager::Dispatch(DivUp(m_ColorSize.x, m_TileSize2D), DivUp(m_ColorSize.y, m_TileSize2D), 1);
 
-                m_pReconstructor->OnNewFrame(m_DepthTexture, m_RGBTexture, &m_PoseMatrix);
+                m_Reconstructor.OnNewFrame(m_DepthTexture, m_RGBTexture, &m_PoseMatrix);
             }
             else if (MessageType == LIGHTESTIMATE)
             {
@@ -723,13 +718,13 @@ namespace MR
                 switch (PlaneAction)
                 {
                 case 0:
-                    m_pReconstructor->AddPlane(PlaneTransform, PlaneExtent, PlaneID);
+                    m_Reconstructor.AddPlane(PlaneTransform, PlaneExtent, PlaneID);
                     break;
                 case 1:
-                    m_pReconstructor->UpdatePlane(PlaneTransform, PlaneExtent, PlaneID);
+                    m_Reconstructor.UpdatePlane(PlaneTransform, PlaneExtent, PlaneID);
                     break;
                 case 2:
-                    m_pReconstructor->RemovePlane(PlaneID);
+                    m_Reconstructor.RemovePlane(PlaneID);
                     break;
                 }
             }

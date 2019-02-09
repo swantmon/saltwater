@@ -29,6 +29,9 @@ namespace LE
 
         void SetOutputCubemap(Gfx::CTexturePtr _OutputCubemapPtr);
         Gfx::CTexturePtr GetOutputCubemap();
+
+        void SetActive(bool _Flag);
+
     private:
 
         struct SCubemapBuffer
@@ -60,6 +63,8 @@ namespace LE
         Gfx::CViewPortSetPtr m_ViewPortSetPtr;
 
         bool m_IsActive;
+
+        Engine::CEventDelegates::HandleType m_GfxOnUpdateDelegate;
 
     private:
 

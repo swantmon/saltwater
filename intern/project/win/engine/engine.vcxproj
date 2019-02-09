@@ -259,7 +259,6 @@
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_view_manager.h" />
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_view_port.h" />
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_view_port_set.h" />
-    <ClInclude Include="..\..\..\src\engine\gui\gui_event_delegate.h" />
     <ClInclude Include="..\..\..\src\engine\gui\gui_event_handler.h" />
     <ClInclude Include="..\..\..\src\engine\gui\gui_input_manager.h" />
     <ClInclude Include="..\..\..\src\engine\network\core_network_common.h" />

@@ -23,6 +23,7 @@
 #include <vector>
 
 using namespace Gfx;
+using namespace Gfx::Main;
 
 namespace
 {
@@ -42,7 +43,7 @@ namespace
         
     public:
         
-        void RegisterResizeHandler(Gfx::Main::CResizeDelegate _NewDelgate);
+		CResizeDelegate::HandleType RegisterResizeHandler(CResizeDelegate::FunctionType _Function);
         
     public:
 
@@ -144,19 +145,12 @@ namespace
         };
         
     private:
-        
-        typedef std::vector<Gfx::Main::CResizeDelegate> CResizeDelegates;
-        typedef CResizeDelegates::iterator              CResizeDelegateIterator;
-        
-    private:
 
         CInternGraphicsInfo m_GraphicsInfo;
 
         SWindowInfo  m_WindowInfos[s_MaxNumberOfWindows];
         SWindowInfo* m_pActiveWindowInfo;
         unsigned int m_NumberOfWindows;
-
-        CResizeDelegates m_ResizeDelegates;
 
         SPerFrameConstantBuffer m_PerFrameConstantBuffer;
 
@@ -178,7 +172,6 @@ namespace
     CGfxMain::CGfxMain()
         : m_pActiveWindowInfo              (0)
         , m_NumberOfWindows                (0)
-        , m_ResizeDelegates                ()
         , m_PerFrameConstantBuffer         ()
         , m_PerFrameConstantBufferBufferPtr()
     {
@@ -274,9 +267,9 @@ namespace
     
     // -----------------------------------------------------------------------------
     
-    void CGfxMain::RegisterResizeHandler(Gfx::Main::CResizeDelegate _NewDelgate)
+	CResizeDelegate::HandleType CGfxMain::RegisterResizeHandler(CResizeDelegate::FunctionType _Function)
     {
-        m_ResizeDelegates.push_back(_NewDelgate);
+		return CResizeDelegate::Register(_Function);
     }
 
     // -----------------------------------------------------------------------------
@@ -290,9 +283,9 @@ namespace
         // -----------------------------------------------------------------------------
         SWindowInfo& rNewWindow = m_WindowInfos[m_NumberOfWindows];
 
-        rNewWindow.m_pNativeWindowHandle        = _pWindow;
-        rNewWindow.m_VSync                      = _VSync;
-        rNewWindow.m_PreserveContext            = _PreserveContext;
+        rNewWindow.m_pNativeWindowHandle = _pWindow;
+        rNewWindow.m_VSync               = _VSync;
+        rNewWindow.m_PreserveContext     = _PreserveContext;
 
         ++ m_NumberOfWindows;
 
@@ -405,12 +398,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Send to every delegate that resize has changed
         // -----------------------------------------------------------------------------
-        CResizeDelegateIterator EndOfDelegates = m_ResizeDelegates.end();
+		auto Size = m_WindowInfos[_WindowID].m_InternalWindowSize;
 
-        for (CResizeDelegateIterator CurrentDelegate = m_ResizeDelegates.begin(); CurrentDelegate != EndOfDelegates; ++CurrentDelegate)
-        {
-            (*CurrentDelegate)(m_WindowInfos[_WindowID].m_InternalWindowSize[0], m_WindowInfos[_WindowID].m_InternalWindowSize[1]);
-        }
+		CResizeDelegate::Notify(Size[0], Size[1]);
     }
 
     // -----------------------------------------------------------------------------
@@ -994,9 +984,9 @@ namespace Main
     
     // -----------------------------------------------------------------------------
     
-    void RegisterResizeHandler(CResizeDelegate _NewDelgate)
+	CResizeDelegate::HandleType RegisterResizeHandler(CResizeDelegate::FunctionType _Function)
     {
-        CGfxMain::GetInstance().RegisterResizeHandler(_NewDelgate);
+        return CGfxMain::GetInstance().RegisterResizeHandler(_Function);
     }
 
     // -----------------------------------------------------------------------------

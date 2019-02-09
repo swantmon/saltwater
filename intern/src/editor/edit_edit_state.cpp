@@ -48,7 +48,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Input
         // -----------------------------------------------------------------------------
-        Gui::EventHandler::RegisterDirectUserListener(GUI_BIND_INPUT_METHOD(&CEditState::OnInputEvent));
+        m_OnEventDelegate = Gui::EventHandler::RegisterEventHandler(std::bind(&CEditState::OnEvent, this, std::placeholders::_1));
 
         // -----------------------------------------------------------------------------
         // Acquire an selection ticket at selection renderer
@@ -64,6 +64,11 @@ namespace Edit
     
     CState::EStateType CEditState::InternOnLeave()
     {
+		// -----------------------------------------------------------------------------
+		// Unregister event
+		// -----------------------------------------------------------------------------
+		m_OnEventDelegate = 0;
+
         // -----------------------------------------------------------------------------
         // Clear ticket
         // -----------------------------------------------------------------------------
@@ -133,7 +138,7 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void CEditState::OnInputEvent(const Base::CInputEvent& _rInputEvent)
+    void CEditState::OnEvent(const Base::CInputEvent& _rInputEvent)
     {
         if (_rInputEvent.GetType() == Base::CInputEvent::Exit)
         {

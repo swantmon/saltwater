@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "base/base_delegate.h"
+
 #include "engine/engine_precompiled.h"
 
 #include "engine/engine_config.h"
@@ -20,6 +22,8 @@ namespace Net
     {
     private:
 
+        using CMessageDelegate = Base::CDelegate<const CMessage&, SocketHandle>;
+
         void StartListening();
         void ReceiveHeader(const std::error_code& _rError, size_t _TransferredBytes);
         void ReceivePayload(const std::error_code& _rError, size_t _TransferredBytes);
@@ -34,7 +38,7 @@ namespace Net
 
         void Update();
 
-        void RegisterMessageHandler(const std::shared_ptr<CMessageDelegate>& _rDelegate);
+        CMessageDelegate::HandleType RegisterMessageHandler(CMessageDelegate::FunctionType _Function);
         bool SendMessage(const CMessage& _rMessage);
 
     private:

@@ -52,6 +52,12 @@ namespace
 
         CControl* m_pActiveControl;
         CControl* m_pControls[CControl::NumberOfControls];
+
+		Dt::CComponentManager::CComponentDelegate::HandleType m_OnDirtyComponentDelegate;
+
+		Dt::EntityManager::CEntityDelegate::HandleType m_OnDirtyEntityDelegate;
+
+		Gui::EventHandler::CEventDelegate::HandleType m_OnEventDelegate;
     };
 } // namespace
 
@@ -62,17 +68,17 @@ namespace
         // -----------------------------------------------------------------------------
         // register changing components
         // -----------------------------------------------------------------------------
-        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(DATA_DIRTY_COMPONENT_METHOD(&CCamControlManager::OnDirtyComponent));
+		m_OnDirtyComponentDelegate = Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(std::bind(&CCamControlManager::OnDirtyComponent, this, std::placeholders::_1));
 
         // -----------------------------------------------------------------------------
         // register changing entities
         // -----------------------------------------------------------------------------
-        Dt::EntityManager::RegisterDirtyEntityHandler(DATA_DIRTY_ENTITY_METHOD(&CCamControlManager::OnDirtyEntity));
+        m_OnDirtyEntityDelegate = Dt::EntityManager::RegisterDirtyEntityHandler(std::bind(&CCamControlManager::OnDirtyEntity, this, std::placeholders::_1));
 
         // -----------------------------------------------------------------------------
         // register input event to gui
         // -----------------------------------------------------------------------------
-        Gui::EventHandler::RegisterDirectUserListener(GUI_BIND_INPUT_METHOD(&CCamControlManager::OnEvent));
+		m_OnEventDelegate = Gui::EventHandler::RegisterEventHandler(std::bind(&CCamControlManager::OnEvent, this, std::placeholders::_1));
     }
 
     // -----------------------------------------------------------------------------

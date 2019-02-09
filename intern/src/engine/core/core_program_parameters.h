@@ -8,6 +8,8 @@
 
 #include "engine/core/core_console.h"
 
+#include "engine/gui/gui_event_handler.h"
+
 #include <string>
 
 namespace Core
@@ -43,6 +45,8 @@ namespace Core
     private:
 
         nlohmann::json m_Container;
+
+		Gui::EventHandler::CEventDelegate::HandleType m_OnEventDelegate;
 
     private:
 

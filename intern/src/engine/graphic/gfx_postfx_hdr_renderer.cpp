@@ -141,6 +141,8 @@ namespace
         CBloomRenderJobs m_BloomRenderJobs;
         
         unsigned int m_SwapCounter;
+
+		Gfx::Main::CResizeDelegate::HandleType m_OnResizeDelegate;
         
     private:
         
@@ -176,10 +178,7 @@ namespace
     {
         m_BloomRenderJobs.reserve(2);
 
-        // -----------------------------------------------------------------------------
-        // Register for resizing events
-        // -----------------------------------------------------------------------------
-        Main::RegisterResizeHandler(GFX_BIND_RESIZE_METHOD(&CGfxPostFXHDRRenderer::OnResize));
+		m_OnResizeDelegate = Gfx::Main::RegisterResizeHandler(std::bind(&CGfxPostFXHDRRenderer::OnResize, this, std::placeholders::_1, std::placeholders::_2));
     }
     
     // -----------------------------------------------------------------------------

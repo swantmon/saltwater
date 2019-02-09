@@ -26,7 +26,7 @@ namespace Core
 {
     CProgramParameters::CProgramParameters()
     {
-        auto InputCommandDelegate = [&](const Base::CInputEvent& _rEvent)
+        auto OnEvent = [&](const Base::CInputEvent& _rEvent)
         {
             if (_rEvent.GetType() != Base::CInputEvent::Command) return;
 
@@ -105,7 +105,7 @@ namespace Core
             }
         };
 
-        Gui::EventHandler::RegisterDirectUserListener(InputCommandDelegate);
+        m_OnEventDelegate = Gui::EventHandler::RegisterEventHandler(OnEvent);
     }
 
     // -----------------------------------------------------------------------------

@@ -185,7 +185,9 @@ namespace
         CBufferPtr m_GeometryVPBufferPtr;
         CBufferPtr m_GeometryMBufferPtr;
 
-        SLightJob m_LightJob;
+		SLightJob m_LightJob;
+
+		Dt::CComponentManager::CComponentDelegate::HandleType m_OnDirtyComponentDelegate;
 
     private:
 
@@ -389,7 +391,7 @@ namespace
         // Register dirty handler for automatic light probe / reflection
         // creation
         // -----------------------------------------------------------------------------
-        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(DATA_DIRTY_COMPONENT_METHOD(&CGfxLightProbeManager::OnDirtyComponent));
+		m_OnDirtyComponentDelegate = Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(std::bind(&CGfxLightProbeManager::OnDirtyComponent, this, std::placeholders::_1));
     }
 
     // -----------------------------------------------------------------------------
