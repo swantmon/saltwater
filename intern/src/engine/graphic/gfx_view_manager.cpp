@@ -156,6 +156,11 @@ namespace
         CCameraPtr      m_FullQuadCameraPtr;
         CViewPortPtr    m_ViewPortPtr;
         CViewPortSetPtr m_ViewPortSetPtr;
+
+		// -----------------------------------------------------------------------------
+		// Others
+		// -----------------------------------------------------------------------------
+		Dt::CComponentManager::CComponentDelegate::HandleType m_DirtyComponentDelegate;
     };
 } // namespace
 
@@ -226,7 +231,7 @@ namespace
             
             Gfx::Main::RegisterResizeHandler(GFX_BIND_RESIZE_METHOD(&CGfxViewManager::OnResize));
 
-            Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(DATA_DIRTY_COMPONENT_METHOD(&CGfxViewManager::OnDirtyComponent));
+			m_DirtyComponentDelegate = Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(std::bind(&CGfxViewManager::OnDirtyComponent, this, std::placeholders::_1));
         }
         catch (...)
         {

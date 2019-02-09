@@ -192,7 +192,9 @@ namespace
         CLODs      m_LODs;
         CSurfaces  m_Surfaces;
         
-        CMeshByHash m_ModelByHash;
+		CMeshByHash m_ModelByHash;
+
+		Dt::CComponentManager::CComponentDelegate::HandleType m_DirtyComponentDelegate;
 
     private:
 
@@ -228,7 +230,7 @@ namespace
     
     void CGfxMeshManager::OnStart()
     {
-        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(DATA_DIRTY_COMPONENT_METHOD(&CGfxMeshManager::OnDirtyComponent));
+		m_DirtyComponentDelegate = Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(std::bind(&CGfxMeshManager::OnDirtyComponent, this, std::placeholders::_1));
     }
     
     // -----------------------------------------------------------------------------

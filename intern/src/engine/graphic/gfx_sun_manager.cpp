@@ -97,6 +97,8 @@ namespace
         CShaderPtr m_ShadowSMShaderPSPtr;
         
         CBufferSetPtr m_LightCameraVSBufferPtr;
+
+		Dt::CComponentManager::CComponentDelegate::HandleType m_DirtyComponentDelegate;
         
     private:
 
@@ -183,7 +185,7 @@ namespace
         // -----------------------------------------------------------------------------
         // On dirty stuff
         // -----------------------------------------------------------------------------
-        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(DATA_DIRTY_COMPONENT_METHOD(&CGfxSunManager::OnDirtyComponent));
+		m_DirtyComponentDelegate = Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(std::bind(&CGfxSunManager::OnDirtyComponent, this, std::placeholders::_1));
 
         Dt::EntityManager::RegisterDirtyEntityHandler(DATA_DIRTY_ENTITY_METHOD(&CGfxSunManager::OnDirtyEntity));
     }

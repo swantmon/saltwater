@@ -187,7 +187,9 @@ namespace
 
         CMaterials       m_Materials;
         CMaterialsByHash m_MaterialsByHash;
-        CMaterialPtr     m_DefaultMaterialPtr;
+		CMaterialPtr     m_DefaultMaterialPtr;
+
+		Dt::CComponentManager::CComponentDelegate::HandleType m_DirtyComponentDelegate;
 
     private:
 
@@ -241,7 +243,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Set dirty handler of data textures
         // -----------------------------------------------------------------------------
-        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(DATA_DIRTY_COMPONENT_METHOD(&CGfxMaterialManager::OnDirtyComponent));
+		m_DirtyComponentDelegate = Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(std::bind(&CGfxMaterialManager::OnDirtyComponent, this, std::placeholders::_1));
     }
 
     // -----------------------------------------------------------------------------

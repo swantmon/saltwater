@@ -41,6 +41,8 @@ namespace
 
         CScripts m_Scripts;
 
+		Dt::CComponentManager::CComponentDelegate::HandleType m_DirtyComponentDelegate;
+
     private:
 
         void OnDirtyComponent(Dt::IComponent* _pComponent);
@@ -53,7 +55,7 @@ namespace
 {
     CScptScriptManager::CScptScriptManager()
     {
-        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(DATA_DIRTY_COMPONENT_METHOD(&CScptScriptManager::OnDirtyComponent));
+        m_DirtyComponentDelegate = Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(std::bind(&CScptScriptManager::OnDirtyComponent, this, std::placeholders::_1));
     }
 
     // -----------------------------------------------------------------------------

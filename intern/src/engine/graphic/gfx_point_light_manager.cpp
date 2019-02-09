@@ -104,7 +104,9 @@ namespace
         CShaderPtr m_ShadowRSMShaderPSPtr;
         CShaderPtr m_ShadowRSMTexShaderPSPtr;
         CBufferSetPtr m_LightCameraVSBufferPtr;
-        CBufferSetPtr m_RSMPSBuffer;
+		CBufferSetPtr m_RSMPSBuffer;
+
+		Dt::CComponentManager::CComponentDelegate::HandleType m_DirtyComponentDelegate;
 
     private:
 
@@ -229,7 +231,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Register dirty entity handler for automatic sky creation
         // -----------------------------------------------------------------------------
-        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(DATA_DIRTY_COMPONENT_METHOD(&CGfxPointLightManager::OnDirtyComponent));
+		m_DirtyComponentDelegate = Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(std::bind(&CGfxPointLightManager::OnDirtyComponent, this, std::placeholders::_1));
 
         Dt::EntityManager::RegisterDirtyEntityHandler(DATA_DIRTY_ENTITY_METHOD(&CGfxPointLightManager::OnDirtyEntity));
     }

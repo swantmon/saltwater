@@ -52,6 +52,8 @@ namespace
 
         CControl* m_pActiveControl;
         CControl* m_pControls[CControl::NumberOfControls];
+
+		Dt::CComponentManager::CComponentDelegate::HandleType m_DirtyComponentDelegate;
     };
 } // namespace
 
@@ -62,7 +64,7 @@ namespace
         // -----------------------------------------------------------------------------
         // register changing components
         // -----------------------------------------------------------------------------
-        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(DATA_DIRTY_COMPONENT_METHOD(&CCamControlManager::OnDirtyComponent));
+		m_DirtyComponentDelegate = Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(std::bind(&CCamControlManager::OnDirtyComponent, this, std::placeholders::_1));
 
         // -----------------------------------------------------------------------------
         // register changing entities
