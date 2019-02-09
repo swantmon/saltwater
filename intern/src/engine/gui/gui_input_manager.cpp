@@ -78,7 +78,7 @@ namespace
         : m_Mouse       ()
         , m_KeyboardKeys()
     {
-		m_EventDelegate = Gui::EventHandler::RegisterDirectUserListener(std::bind(&CGuiInputManager::OnInputEvent, this, std::placeholders::_1));
+		m_EventDelegate = Gui::EventHandler::RegisterInputHandler(std::bind(&CGuiInputManager::OnInputEvent, this, std::placeholders::_1));
     }
 
     // -----------------------------------------------------------------------------

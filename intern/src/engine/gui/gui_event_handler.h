@@ -24,6 +24,6 @@ namespace EventHandler
 {
     ENGINE_API void OnUserEvent(const Base::CInputEvent& _rEvent);
 
-    ENGINE_API CInputEventDelegate::HandleType RegisterDirectUserListener(CInputEventDelegate::FunctionType _Function);
+    ENGINE_API CInputEventDelegate::HandleType RegisterInputHandler(CInputEventDelegate::FunctionType _Function);
 } // namespace EventHandler
 } // namespace Gui

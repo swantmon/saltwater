@@ -57,7 +57,7 @@ namespace
 {
     CScptScriptManager::CScptScriptManager()
     {
-		m_EventDelegate = Gui::EventHandler::RegisterDirectUserListener(std::bind(&CScptScriptManager::OnInputEvent, this, std::placeholders::_1));
+		m_EventDelegate = Gui::EventHandler::RegisterInputHandler(std::bind(&CScptScriptManager::OnInputEvent, this, std::placeholders::_1));
 
         m_DirtyComponentDelegate = Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(std::bind(&CScptScriptManager::OnDirtyComponent, this, std::placeholders::_1));
     }

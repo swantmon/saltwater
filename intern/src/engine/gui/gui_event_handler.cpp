@@ -30,7 +30,7 @@ namespace
 
     public:
 
-		CInputEventDelegate::HandleType RegisterDirectUserListener(CInputEventDelegate::FunctionType _Function);
+		CInputEventDelegate::HandleType RegisterInputHandler(CInputEventDelegate::FunctionType _Function);
     };
 } // namespace
 
@@ -55,7 +55,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-	CInputEventDelegate::HandleType CGUIEventHandler::RegisterDirectUserListener(CInputEventDelegate::FunctionType _Function)
+	CInputEventDelegate::HandleType CGUIEventHandler::RegisterInputHandler(CInputEventDelegate::FunctionType _Function)
     {
 		return CInputEventDelegate::Register(_Function);
     }
@@ -72,9 +72,9 @@ namespace EventHandler
 
     // -----------------------------------------------------------------------------
 
-	CInputEventDelegate::HandleType RegisterDirectUserListener(CInputEventDelegate::FunctionType _Function)
+	CInputEventDelegate::HandleType RegisterInputHandler(CInputEventDelegate::FunctionType _Function)
     {
-        return CGUIEventHandler::GetInstance().RegisterDirectUserListener(_Function);
+        return CGUIEventHandler::GetInstance().RegisterInputHandler(_Function);
     }
 } // namespace EventHandler
 } // namespace Gui

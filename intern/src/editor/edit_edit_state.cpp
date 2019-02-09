@@ -48,7 +48,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Input
         // -----------------------------------------------------------------------------
-        m_EventDelegate = Gui::EventHandler::RegisterDirectUserListener(std::bind(&CEditState::OnInputEvent, this, std::placeholders::_1));
+        m_EventDelegate = Gui::EventHandler::RegisterInputHandler(std::bind(&CEditState::OnInputEvent, this, std::placeholders::_1));
 
         // -----------------------------------------------------------------------------
         // Acquire an selection ticket at selection renderer

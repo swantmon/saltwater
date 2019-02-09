@@ -78,7 +78,7 @@ namespace
         // -----------------------------------------------------------------------------
         // register input event to gui
         // -----------------------------------------------------------------------------
-		m_EventDelegate = Gui::EventHandler::RegisterDirectUserListener(std::bind(&CCamControlManager::OnInputEvent, this, std::placeholders::_1));
+		m_EventDelegate = Gui::EventHandler::RegisterInputHandler(std::bind(&CCamControlManager::OnInputEvent, this, std::placeholders::_1));
     }
 
     // -----------------------------------------------------------------------------
