@@ -194,7 +194,7 @@ namespace
         
 		CMeshByHash m_ModelByHash;
 
-		Dt::CComponentManager::CComponentDelegate::HandleType m_DirtyComponentDelegate;
+		Dt::CComponentManager::CComponentDelegate::HandleType m_OnDirtyComponentDelegate;
 
     private:
 
@@ -230,7 +230,7 @@ namespace
     
     void CGfxMeshManager::OnStart()
     {
-		m_DirtyComponentDelegate = Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(std::bind(&CGfxMeshManager::OnDirtyComponent, this, std::placeholders::_1));
+		m_OnDirtyComponentDelegate = Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(std::bind(&CGfxMeshManager::OnDirtyComponent, this, std::placeholders::_1));
     }
     
     // -----------------------------------------------------------------------------

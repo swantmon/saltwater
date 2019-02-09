@@ -187,7 +187,7 @@ namespace
         CTexturePtr m_IrradianceTable;
 		CTexturePtr m_InscatterTable;
 
-		Dt::CComponentManager::CComponentDelegate::HandleType m_DirtyComponentDelegate;
+		Dt::CComponentManager::CComponentDelegate::HandleType m_OnDirtyComponentDelegate;
 
     private:
 
@@ -384,7 +384,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Register dirty entity handler for automatic sky creation
         // -----------------------------------------------------------------------------
-		m_DirtyComponentDelegate = Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(std::bind(&CGfxSkyManager::OnDirtyComponent, this, std::placeholders::_1));
+		m_OnDirtyComponentDelegate = Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(std::bind(&CGfxSkyManager::OnDirtyComponent, this, std::placeholders::_1));
 
         // -----------------------------------------------------------------------------
         // Precompute Scattering

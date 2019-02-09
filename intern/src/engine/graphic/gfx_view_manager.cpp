@@ -160,9 +160,9 @@ namespace
 		// -----------------------------------------------------------------------------
 		// Others
 		// -----------------------------------------------------------------------------
-		Gfx::Main::CResizeDelegate::HandleType m_ResizeDelegate;
+		Gfx::Main::CResizeDelegate::HandleType m_OnResizeDelegate;
 
-		Dt::CComponentManager::CComponentDelegate::HandleType m_DirtyComponentDelegate;
+		Dt::CComponentManager::CComponentDelegate::HandleType m_OnDirtyComponentDelegate;
     };
 } // namespace
 
@@ -231,9 +231,9 @@ namespace
 
             ResizeCameras(Width, Height);
             
-            m_ResizeDelegate = Gfx::Main::RegisterResizeHandler(std::bind(&CGfxViewManager::OnResize, this, std::placeholders::_1, std::placeholders::_2));
+            m_OnResizeDelegate = Gfx::Main::RegisterResizeHandler(std::bind(&CGfxViewManager::OnResize, this, std::placeholders::_1, std::placeholders::_2));
 
-			m_DirtyComponentDelegate = Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(std::bind(&CGfxViewManager::OnDirtyComponent, this, std::placeholders::_1));
+			m_OnDirtyComponentDelegate = Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(std::bind(&CGfxViewManager::OnDirtyComponent, this, std::placeholders::_1));
         }
         catch (...)
         {

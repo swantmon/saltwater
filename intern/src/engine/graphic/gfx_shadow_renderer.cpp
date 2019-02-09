@@ -134,7 +134,7 @@ namespace
 
         CSSAORenderJobs m_SSAORenderJobs;
 
-		Gfx::Main::CResizeDelegate::HandleType m_ResizeDelegate;
+		Gfx::Main::CResizeDelegate::HandleType m_OnResizeDelegate;
 
     private:
 
@@ -159,7 +159,7 @@ namespace
     {
         m_SSAORenderJobs.reserve(1);
 
-		m_ResizeDelegate = Gfx::Main::RegisterResizeHandler(std::bind(&CGfxShadowRenderer::OnResize, this, std::placeholders::_1, std::placeholders::_2));
+		m_OnResizeDelegate = Gfx::Main::RegisterResizeHandler(std::bind(&CGfxShadowRenderer::OnResize, this, std::placeholders::_1, std::placeholders::_2));
     }
     
     // -----------------------------------------------------------------------------

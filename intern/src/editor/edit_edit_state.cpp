@@ -48,7 +48,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Input
         // -----------------------------------------------------------------------------
-        m_EventDelegate = Gui::EventHandler::RegisterInputHandler(std::bind(&CEditState::OnInputEvent, this, std::placeholders::_1));
+        m_OnEventDelegate = Gui::EventHandler::RegisterEventHandler(std::bind(&CEditState::OnEvent, this, std::placeholders::_1));
 
         // -----------------------------------------------------------------------------
         // Acquire an selection ticket at selection renderer
@@ -67,7 +67,7 @@ namespace Edit
 		// -----------------------------------------------------------------------------
 		// Unregister event
 		// -----------------------------------------------------------------------------
-		m_EventDelegate = 0;
+		m_OnEventDelegate = 0;
 
         // -----------------------------------------------------------------------------
         // Clear ticket
@@ -138,7 +138,7 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void CEditState::OnInputEvent(const Base::CInputEvent& _rInputEvent)
+    void CEditState::OnEvent(const Base::CInputEvent& _rInputEvent)
     {
         if (_rInputEvent.GetType() == Base::CInputEvent::Exit)
         {

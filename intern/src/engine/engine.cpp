@@ -55,7 +55,7 @@ namespace
 
     private:
 
-        CEventDelegates m_EventDelegates;
+        CEventDelegates m_OnEventDelegates;
     };
 } // namespace 
 
@@ -161,14 +161,14 @@ namespace
 
     CEventDelegates::HandleType CEngine::RegisterEventHandler(EEvent _Event, CEventDelegates::FunctionType _Function)
     {
-        return m_EventDelegates.Register(static_cast<int>(_Event), _Function);
+        return m_OnEventDelegates.Register(static_cast<int>(_Event), _Function);
     }
 
     // -----------------------------------------------------------------------------
 
     void CEngine::RaiseEvent(EEvent _Event)
     {
-        m_EventDelegates.Notify(static_cast<int>(_Event));
+        m_OnEventDelegates.Notify(static_cast<int>(_Event));
     }
 
 } // namespace 

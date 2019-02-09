@@ -14,7 +14,7 @@ namespace Gui
 {
 namespace EventHandler
 {
-	using CInputEventDelegate = Base::CDelegate<const Base::CInputEvent&>;
+	using CEventDelegate = Base::CDelegate<const Base::CInputEvent&>;
 } // namespace EventHandler
 } // namespace Gui
 
@@ -22,8 +22,8 @@ namespace Gui
 {
 namespace EventHandler
 {
-    ENGINE_API void OnUserEvent(const Base::CInputEvent& _rEvent);
+    ENGINE_API void OnEvent(const Base::CInputEvent& _rEvent);
 
-    ENGINE_API CInputEventDelegate::HandleType RegisterInputHandler(CInputEventDelegate::FunctionType _Function);
+    ENGINE_API CEventDelegate::HandleType RegisterEventHandler(CEventDelegate::FunctionType _Function);
 } // namespace EventHandler
 } // namespace Gui

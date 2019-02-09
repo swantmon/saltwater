@@ -64,7 +64,7 @@ namespace
         SMouse        m_Mouse;
 		CKeyboardKeys m_KeyboardKeys;
 
-		Gui::EventHandler::CInputEventDelegate::HandleType m_EventDelegate;
+		Gui::EventHandler::CEventDelegate::HandleType m_OnEventDelegate;
 
     private:
 
@@ -78,7 +78,7 @@ namespace
         : m_Mouse       ()
         , m_KeyboardKeys()
     {
-		m_EventDelegate = Gui::EventHandler::RegisterInputHandler(std::bind(&CGuiInputManager::OnInputEvent, this, std::placeholders::_1));
+		m_OnEventDelegate = Gui::EventHandler::RegisterEventHandler(std::bind(&CGuiInputManager::OnInputEvent, this, std::placeholders::_1));
     }
 
     // -----------------------------------------------------------------------------

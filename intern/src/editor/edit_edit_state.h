@@ -27,7 +27,7 @@ namespace Edit
 
         Gfx::CSelectionTicket* m_pSelectionTicket;
 
-		Gui::EventHandler::CInputEventDelegate::HandleType m_EventDelegate;
+		Gui::EventHandler::CEventDelegate::HandleType m_OnEventDelegate;
 
     private:
         
@@ -42,6 +42,6 @@ namespace Edit
 
     private:
 
-        void OnInputEvent(const Base::CInputEvent& _rInputEvent);
+        void OnEvent(const Base::CInputEvent& _rInputEvent);
     };
 } // namespace Edit

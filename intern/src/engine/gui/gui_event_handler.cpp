@@ -26,11 +26,11 @@ namespace
     
     public:
 
-        void OnUserEvent(const Base::CInputEvent& _rEvent);
+        void OnEvent(const Base::CInputEvent& _rEvent);
 
     public:
 
-		CInputEventDelegate::HandleType RegisterInputHandler(CInputEventDelegate::FunctionType _Function);
+		CEventDelegate::HandleType RegisterEventHandler(CEventDelegate::FunctionType _Function);
     };
 } // namespace
 
@@ -48,16 +48,16 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGUIEventHandler::OnUserEvent(const Base::CInputEvent& _rEvent)
+    void CGUIEventHandler::OnEvent(const Base::CInputEvent& _rEvent)
     {
-		CInputEventDelegate::Notify(_rEvent);
+		CEventDelegate::Notify(_rEvent);
     }
 
     // -----------------------------------------------------------------------------
 
-	CInputEventDelegate::HandleType CGUIEventHandler::RegisterInputHandler(CInputEventDelegate::FunctionType _Function)
+	CEventDelegate::HandleType CGUIEventHandler::RegisterEventHandler(CEventDelegate::FunctionType _Function)
     {
-		return CInputEventDelegate::Register(_Function);
+		return CEventDelegate::Register(_Function);
     }
 } // namespace
 
@@ -65,16 +65,16 @@ namespace Gui
 {
 namespace EventHandler
 {
-    void OnUserEvent(const Base::CInputEvent& _rEvent)
+    void OnEvent(const Base::CInputEvent& _rEvent)
     {
-        CGUIEventHandler::GetInstance().OnUserEvent(_rEvent);
+        CGUIEventHandler::GetInstance().OnEvent(_rEvent);
     }
 
     // -----------------------------------------------------------------------------
 
-	CInputEventDelegate::HandleType RegisterInputHandler(CInputEventDelegate::FunctionType _Function)
+	CEventDelegate::HandleType RegisterEventHandler(CEventDelegate::FunctionType _Function)
     {
-        return CGUIEventHandler::GetInstance().RegisterInputHandler(_Function);
+        return CGUIEventHandler::GetInstance().RegisterEventHandler(_Function);
     }
 } // namespace EventHandler
 } // namespace Gui

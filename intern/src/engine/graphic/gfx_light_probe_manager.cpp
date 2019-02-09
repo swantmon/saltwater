@@ -187,7 +187,7 @@ namespace
 
 		SLightJob m_LightJob;
 
-		Dt::CComponentManager::CComponentDelegate::HandleType m_DirtyComponentDelegate;
+		Dt::CComponentManager::CComponentDelegate::HandleType m_OnDirtyComponentDelegate;
 
     private:
 
@@ -391,7 +391,7 @@ namespace
         // Register dirty handler for automatic light probe / reflection
         // creation
         // -----------------------------------------------------------------------------
-		m_DirtyComponentDelegate = Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(std::bind(&CGfxLightProbeManager::OnDirtyComponent, this, std::placeholders::_1));
+		m_OnDirtyComponentDelegate = Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(std::bind(&CGfxLightProbeManager::OnDirtyComponent, this, std::placeholders::_1));
     }
 
     // -----------------------------------------------------------------------------

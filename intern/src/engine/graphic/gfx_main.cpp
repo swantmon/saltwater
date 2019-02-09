@@ -145,19 +145,12 @@ namespace
         };
         
     private:
-        
-        typedef std::vector<Gfx::Main::CResizeDelegate> CResizeDelegates;
-        typedef CResizeDelegates::iterator              CResizeDelegateIterator;
-        
-    private:
 
         CInternGraphicsInfo m_GraphicsInfo;
 
         SWindowInfo  m_WindowInfos[s_MaxNumberOfWindows];
         SWindowInfo* m_pActiveWindowInfo;
         unsigned int m_NumberOfWindows;
-
-        CResizeDelegates m_ResizeDelegates;
 
         SPerFrameConstantBuffer m_PerFrameConstantBuffer;
 
@@ -179,7 +172,6 @@ namespace
     CGfxMain::CGfxMain()
         : m_pActiveWindowInfo              (0)
         , m_NumberOfWindows                (0)
-        , m_ResizeDelegates                ()
         , m_PerFrameConstantBuffer         ()
         , m_PerFrameConstantBufferBufferPtr()
     {
