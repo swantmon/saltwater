@@ -54,6 +54,8 @@ namespace
         CControl* m_pControls[CControl::NumberOfControls];
 
 		Dt::CComponentManager::CComponentDelegate::HandleType m_DirtyComponentDelegate;
+
+		Dt::EntityManager::CEntityDelegate::HandleType m_DirtyEntityDelegate;
     };
 } // namespace
 
@@ -69,7 +71,7 @@ namespace
         // -----------------------------------------------------------------------------
         // register changing entities
         // -----------------------------------------------------------------------------
-        Dt::EntityManager::RegisterDirtyEntityHandler(DATA_DIRTY_ENTITY_METHOD(&CCamControlManager::OnDirtyEntity));
+        m_DirtyEntityDelegate = Dt::EntityManager::RegisterDirtyEntityHandler(std::bind(&CCamControlManager::OnDirtyEntity, this, std::placeholders::_1));
 
         // -----------------------------------------------------------------------------
         // register input event to gui

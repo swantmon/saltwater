@@ -87,6 +87,8 @@ namespace
 
 		Dt::CComponentManager::CComponentDelegate::HandleType m_DirtyComponentDelegate;
 
+		Dt::EntityManager::CEntityDelegate::HandleType m_DirtyEntityDelegate;
+
     private:
 
         void OnDirtyEntity(Dt::CEntity* _pEntity);
@@ -197,7 +199,7 @@ namespace
         // -----------------------------------------------------------------------------
 		m_DirtyComponentDelegate = Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(std::bind(&CGfxAreaLightManager::OnDirtyComponent, this, std::placeholders::_1));
 
-        Dt::EntityManager::RegisterDirtyEntityHandler(DATA_DIRTY_ENTITY_METHOD(&CGfxAreaLightManager::OnDirtyEntity));
+		m_DirtyEntityDelegate = Dt::EntityManager::RegisterDirtyEntityHandler(std::bind(&CGfxAreaLightManager::OnDirtyEntity, this, std::placeholders::_1));
     }
 
     // -----------------------------------------------------------------------------

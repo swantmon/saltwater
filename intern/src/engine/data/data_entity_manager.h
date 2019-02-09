@@ -1,13 +1,7 @@
-//
-//  data_entity_manager.h
-//  data
-//
-//  Created by Tobias Schwandt on 06/11/14.
-//  Copyright (c) 2014 TU Ilmenau. All rights reserved.
-//
-
 
 #pragma once
+
+#include "base/base_delegate.h"
 
 #include "engine/engine_config.h"
 
@@ -24,16 +18,6 @@ namespace Dt
 
 namespace Dt
 {
-namespace EntityManager
-{
-    typedef std::function<void(Dt::CEntity* _pEntity)> CEntityDelegate;
-} // namespace EntityManager
-} // namespace Dt
-
-#define DATA_DIRTY_ENTITY_METHOD(_Method) std::bind(_Method, this, std::placeholders::_1)
-
-namespace Dt
-{
     struct SEntityDescriptor
     {
         unsigned int m_EntityCategory;
@@ -45,6 +29,8 @@ namespace Dt
 {
 namespace EntityManager
 {
+	using CEntityDelegate = Base::CDelegate<Dt::CEntity*>;
+
     ENGINE_API void OnStart();
     ENGINE_API void OnExit();
 
@@ -62,6 +48,6 @@ namespace EntityManager
 
     ENGINE_API void MarkEntityAsDirty(CEntity& _rEntity, unsigned int _DirtyFlags);
 
-    ENGINE_API void RegisterDirtyEntityHandler(CEntityDelegate _NewDelegate);
+    ENGINE_API CEntityDelegate::HandleType RegisterDirtyEntityHandler(CEntityDelegate::FunctionType _Function);
 } // namespace EntityManager
 } // namespace Dt

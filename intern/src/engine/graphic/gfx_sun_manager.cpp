@@ -99,6 +99,8 @@ namespace
         CBufferSetPtr m_LightCameraVSBufferPtr;
 
 		Dt::CComponentManager::CComponentDelegate::HandleType m_DirtyComponentDelegate;
+
+		Dt::EntityManager::CEntityDelegate::HandleType m_DirtyEntityDelegate;
         
     private:
 
@@ -187,7 +189,7 @@ namespace
         // -----------------------------------------------------------------------------
 		m_DirtyComponentDelegate = Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(std::bind(&CGfxSunManager::OnDirtyComponent, this, std::placeholders::_1));
 
-        Dt::EntityManager::RegisterDirtyEntityHandler(DATA_DIRTY_ENTITY_METHOD(&CGfxSunManager::OnDirtyEntity));
+		m_DirtyEntityDelegate = Dt::EntityManager::RegisterDirtyEntityHandler(std::bind(&CGfxSunManager::OnDirtyEntity, this, std::placeholders::_1));
     }
     
     // -----------------------------------------------------------------------------

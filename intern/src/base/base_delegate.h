@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "base/base_defines.h"
+
 #include <array>
 #include <algorithm>
 #include <cassert>
