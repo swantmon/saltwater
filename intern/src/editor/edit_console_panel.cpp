@@ -270,7 +270,7 @@ namespace GUI
             // -----------------------------------------------------------------------------
             Base::CInputEvent Event(Base::CInputEvent::Command, _rCommand);
 
-            Gui::EventHandler::OnUserEvent(Event);
+            Gui::EventHandler::OnEvent(Event);
         }
     }
 } // namespace GUI
