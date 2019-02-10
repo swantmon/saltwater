@@ -292,6 +292,12 @@ namespace
 
         Gfx::CBufferPtr m_ColorBufferPtr;
 
+        Gfx::Main::CResizeDelegate::HandleType m_ResizeHandle;
+
+        Dt::EntityManager::CEntityDelegate::HandleType m_EntityDelegate;
+
+        Dt::CComponentManager::CComponentDelegate::HandleType m_ComponentDelegate;
+
     private:
 
         void Render();
@@ -322,7 +328,7 @@ namespace
         m_Settings.m_ShowPlanes = false;
         m_Settings.m_ShowPoints = false;
 
-        Gfx::Main::RegisterResizeHandler(GFX_BIND_RESIZE_METHOD(&CMRControlManager::OnResize));
+        m_ResizeHandle = Gfx::Main::RegisterResizeHandler(std::bind(&CMRControlManager::OnResize, this, std::placeholders::_1, std::placeholders::_2));
     }
 
     // -----------------------------------------------------------------------------
@@ -473,9 +479,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Handler
         // -----------------------------------------------------------------------------
-        Dt::EntityManager::RegisterDirtyEntityHandler(DATA_DIRTY_ENTITY_METHOD(&CMRControlManager::OnDirtyEntity));
+        m_EntityDelegate = Dt::EntityManager::RegisterDirtyEntityHandler(std::bind(&CMRControlManager::OnDirtyEntity, this, std::placeholders::_1));
 
-        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(DATA_DIRTY_COMPONENT_METHOD(&CMRControlManager::OnDirtyComponent));
+        m_ComponentDelegate = Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(std::bind(&CMRControlManager::OnDirtyComponent, this, std::placeholders::_1));
 
         // -----------------------------------------------------------------------------
         // Settings

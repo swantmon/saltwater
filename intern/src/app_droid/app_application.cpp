@@ -320,7 +320,7 @@ namespace
 
                             Base::CInputEvent Input(Base::CInputEvent::Input, InputAction, Base::CInputEvent::Pointer + IndexOfPointer, glm::vec2(PointerX, PointerY), glm::vec2(PointerX, PointerY));
 
-                            Gui::EventHandler::OnUserEvent(Input);
+                            Gui::EventHandler::OnEvent(Input);
                         }
                     }
                     break;
