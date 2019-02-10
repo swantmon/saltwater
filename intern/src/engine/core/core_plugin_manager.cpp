@@ -191,11 +191,22 @@ namespace
                 {
                     // Found one! Now load it and get the plugin plugin's name
 
-                    std::string PluginName;
-                    if (InternGetPluginName(PluginFileName, PluginName))
-                    {
-                        m_PluginFiles[PluginName] = PluginFileName;
-                    }
+					auto pLib = InternLoadLibrary(PluginFileName);
+					if (pLib != nullptr)
+					{
+						auto pInfo = static_cast<SPluginInfo*>(InternGetProc(pLib, "InfoExport"));
+
+						if (pInfo != nullptr)
+						{
+							auto Message = "Found plugin \'"s + pInfo->m_pPluginName + "\' in file \'"s + PluginFileName + "\'"s;
+							ENGINE_CONSOLE_INFO(Message.c_str());
+							m_Plugins[pInfo->m_pPluginName] = { pLib, pInfo, false };
+						}
+						else
+						{
+							InternFreeLibrary(pLib);
+						}
+					}
                 }
             }
             closedir(d);
