@@ -135,8 +135,8 @@ namespace
         // Prepare to monitor accelerometer
         // -----------------------------------------------------------------------------
         m_AppSetup.m_SensorManager       = ASensorManager_getInstance();
-        m_AppSetup.m_AccelerometerSensor = ASensorManager_getDefaultSensor(m_AppSetup.m_SensorManager, ASENSOR_TYPE_ACCELEROMETER);
-        m_AppSetup.m_SensorEventQueue    = ASensorManager_createEventQueue(m_AppSetup.m_SensorManager, _pAndroidApp->looper, LOOPER_ID_USER, NULL, NULL);
+        //m_AppSetup.m_AccelerometerSensor = ASensorManager_getDefaultSensor(m_AppSetup.m_SensorManager, ASENSOR_TYPE_ACCELEROMETER);
+        //m_AppSetup.m_SensorEventQueue    = ASensorManager_createEventQueue(m_AppSetup.m_SensorManager, _pAndroidApp->looper, LOOPER_ID_USER, NULL, NULL);
 
         // -----------------------------------------------------------------------------
         // Load configuration file
@@ -210,6 +210,7 @@ namespace
                     AndroidPollSource->process(m_AppSetup.m_pAndroidApp, AndroidPollSource);
                 }
 
+                /*
                 if (Identifcation == LOOPER_ID_USER) 
                 {
                     if (m_AppSetup.m_AccelerometerSensor != NULL)
@@ -218,10 +219,11 @@ namespace
 
                         while (ASensorEventQueue_getEvents(m_AppSetup.m_SensorEventQueue, &SensorEvent, 1) > 0)
                         {
-                            // BASE_CONSOLE_INFOV("Accelerometer: x=%f y=%f z=%f", SensorEvent.acceleration.x, SensorEvent.acceleration.y, SensorEvent.acceleration.z);
+                            BASE_CONSOLE_INFOV("Accelerometer: x=%f y=%f z=%f", SensorEvent.acceleration.x, SensorEvent.acceleration.y, SensorEvent.acceleration.z);
                         }
                     }
                 }
+                 */
             }
 
             // -----------------------------------------------------------------------------
@@ -430,11 +432,15 @@ namespace
                 break;
 
             case APP_CMD_PAUSE:
-                {  }
+                {
+                    Engine::Pause();
+                }
                 break;
 
             case APP_CMD_RESUME:
-                {  }
+                {
+                    Engine::Resume();
+                }
                 break;
 
             case APP_CMD_CONTENT_RECT_CHANGED:

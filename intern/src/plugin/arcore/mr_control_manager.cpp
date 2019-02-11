@@ -526,7 +526,7 @@ namespace
 
     void CMRControlManager::Update()
     {
-        if (m_pARSession == nullptr) return;
+        if (m_pARSession == nullptr) OnResume();
 
         ArStatus Result;
 
@@ -649,6 +649,8 @@ namespace
 
         if(!Core::JNI::CheckPermission(s_Permissions[0]))
         {
+            ENGINE_CONSOLE_DEBUGV("Acquire permission %s", s_Permissions[0].c_str());
+
             Core::JNI::AcquirePermissions(s_Permissions, 1);
         }
 
@@ -669,16 +671,19 @@ namespace
 
             switch (InstallStatus)
             {
-                case AR_INSTALL_STATUS_INSTALLED:
-                    break;
                 case AR_INSTALL_STATUS_INSTALL_REQUESTED:
-                {
-                    ENGINE_CONSOLE_INFO("ArCore is not installed on this device.");
+                    {
+                        ENGINE_CONSOLE_INFO("ArCore is not installed on this device.");
 
-                    m_InstallRequested = true;
+                        m_InstallRequested = true;
 
-                    return;
-                } break;
+                        return;
+                    }
+                    break;
+                default:
+                case AR_INSTALL_STATUS_INSTALLED:
+                    ENGINE_CONSOLE_DEBUG("ArCore is installed");
+                    break;
             }
 
             // -----------------------------------------------------------------------------
