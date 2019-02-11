@@ -344,9 +344,6 @@ namespace
         {
             case APP_CMD_SAVE_STATE:
                 {
-                    // -----------------------------------------------------------------------------
-                    // Save configuration
-                    // -----------------------------------------------------------------------------
                     Core::CProgramParameters::GetInstance().WriteFile(AppSetup->m_ParameterFile);
                 }
                 break;
@@ -402,21 +399,10 @@ namespace
 
             case APP_CMD_DESTROY:
                 {
-                    // -----------------------------------------------------------------------------
-                    // There is no time to exit the app via loop because the thread will be
-                    // stopped. So, we shutdown the engine and finish the native activity
-                    // by ourself.
-                    // -----------------------------------------------------------------------------
                     Core::CProgramParameters::GetInstance().WriteFile(AppSetup->m_ParameterFile);
 
-                    // -----------------------------------------------------------------------------
-                    // Shutdown engine
-                    // -----------------------------------------------------------------------------
                     Engine::Shutdown();
 
-                    // -----------------------------------------------------------------------------
-                    // Exit app
-                    // -----------------------------------------------------------------------------
                     ANativeActivity_finish(AppSetup->m_pAndroidApp->activity);
 
                     exit(0);
@@ -424,11 +410,18 @@ namespace
                 break;
 
             case APP_CMD_START:
-                {  }
+                {
+                    if (AppSetup->m_IsStarted)
+                    {
+                        AppSetup->m_Running = 1;
+                    }
+                }
                 break;
 
             case APP_CMD_STOP:
-                {  }
+                {
+                     AppSetup->m_Running = 0;
+                }
                 break;
 
             case APP_CMD_PAUSE:
