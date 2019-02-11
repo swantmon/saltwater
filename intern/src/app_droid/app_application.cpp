@@ -433,13 +433,22 @@ namespace
 
             case APP_CMD_PAUSE:
                 {
-                    Engine::Pause();
+                    if (AppSetup->m_IsStarted)
+                    {
+                        Engine::Pause();
+
+                        AppSetup->m_Running = 0;
+                    }
                 }
                 break;
-
             case APP_CMD_RESUME:
                 {
-                    Engine::Resume();
+                    if (AppSetup->m_IsStarted)
+                    {
+                        Engine::Resume();
+
+                        AppSetup->m_Running = 1;
+                    }
                 }
                 break;
 
@@ -462,13 +471,7 @@ namespace
 
             case APP_CMD_GAINED_FOCUS:
                 {
-                    // -----------------------------------------------------------------------------
-                    // When our app gains focus, we start monitoring the accelerometer.
-                    // -----------------------------------------------------------------------------
-                    Engine::Resume();
-
-                    AppSetup->m_Running = 1;
-
+                    /*
                     if (AppSetup->m_AccelerometerSensor != NULL)
                     {
                         ASensorEventQueue_enableSensor(AppSetup->m_SensorEventQueue, AppSetup->m_AccelerometerSensor);
@@ -478,23 +481,18 @@ namespace
                         // -----------------------------------------------------------------------------
                         ASensorEventQueue_setEventRate(AppSetup->m_SensorEventQueue, AppSetup->m_AccelerometerSensor, (1000L / 60) * 1000);
                     }
+                    */
                 }
                 break;
 
             case APP_CMD_LOST_FOCUS:
                 {
-                    // -----------------------------------------------------------------------------
-                    // When our app loses focus, we stop monitoring the accelerometer.
-                    // This is to avoid consuming battery while not being used.
-                    // -----------------------------------------------------------------------------
-                    Engine::Pause();
-
-                    AppSetup->m_Running = 0;
-
+                    /*
                     if (AppSetup->m_AccelerometerSensor != NULL)
                     {
                         ASensorEventQueue_disableSensor(AppSetup->m_SensorEventQueue, AppSetup->m_AccelerometerSensor);
                     }
+                    */
                 }
                 break;
         }
