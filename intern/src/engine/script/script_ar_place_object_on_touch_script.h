@@ -46,7 +46,7 @@ namespace Scpt
 
             m_MRToEngineMatrix = Base::CCoordinateSystem::GetBaseMatrix(glm::vec3(1, 0, 0), glm::vec3(0, 1, 0), glm::vec3(0, 0, -1));
 
-            m_ArCoreAvailable = Core::PluginManager::HasPlugin("ArCore");
+            m_ArCoreAvailable = Core::PluginManager::LoadPlugin("ArCore");
 
             AcquireNewMarker = (ArCoreAcquireNewMarkerFunc)(Core::PluginManager::GetPluginFunction("ArCore", "AcquireNewMarker"));
             ReleaseMarker = (ArCoreReleaseMarkerFunc)(Core::PluginManager::GetPluginFunction("ArCore", "ReleaseMarker"));

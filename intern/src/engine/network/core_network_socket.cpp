@@ -187,7 +187,7 @@ namespace Net
         }
         else
         {
-            ENGINE_CONSOLE_INFO(_rError.what());
+            ENGINE_CONSOLE_DEBUG(_rError.what());
             Connect();
         }
     }
