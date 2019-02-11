@@ -31,7 +31,6 @@
 
 #include <assert.h>
 #include <unordered_map>
-#include <vector>
 
 using namespace Dt;
 using namespace Dt::EntityManager;
@@ -66,7 +65,7 @@ namespace
 
         void Update();
 
-        void RegisterDirtyEntityHandler(CEntityDelegate _NewDelegate);
+		CEntityDelegate::HandleType RegisterDirtyEntityHandler(CEntityDelegate::FunctionType _Function);
         
     private:
         
@@ -100,7 +99,6 @@ namespace
         typedef Base::CPool<CInternHierarchyFacet, 2048>      CHierarchyFacetPool;
         typedef Base::CPool<CInternTransformationFacet, 2048> CTransformationFacetPool;
         typedef Base::CPool<CInternComponentsFacet, 2048>     CComponentsFacetPool;
-        typedef std::vector<CEntityDelegate>                  CEntityDelegates;
 
         typedef std::unordered_map<Base::ID, CInternEntity*> CEntityByIDs;
         typedef CEntityByIDs::iterator                       CEntityByIDPair;
@@ -111,7 +109,6 @@ namespace
         CHierarchyFacetPool      m_HierarchyFacets;
         CTransformationFacetPool m_TransformationFacets;
         CComponentsFacetPool     m_ComponentsFacets;
-        CEntityDelegates         m_EntityDelegates;
         CEntityByIDs             m_EntityByID;
         Base::ID                 m_EntityID;
 
@@ -130,7 +127,6 @@ namespace
         : m_Entities            ()
         , m_HierarchyFacets     ()
         , m_TransformationFacets()
-        , m_EntityDelegates     ()
         , m_EntityByID          ()
         , m_EntityID            (0)
     {
@@ -375,10 +371,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Send new dirty entity to all handler
         // -----------------------------------------------------------------------------
-        for (auto& rEntityDelegate : m_EntityDelegates)
-        {
-            (rEntityDelegate)(&_rEntity);
-        }
+		CEntityDelegate::Notify(&_rEntity);
 
         _rEntity.SetDirtyFlags(0);
     }
@@ -391,9 +384,9 @@ namespace
 
     // -----------------------------------------------------------------------------
     
-    void CDtLvlEntityManager::RegisterDirtyEntityHandler(CEntityDelegate _NewDelegate)
+    CEntityDelegate::HandleType CDtLvlEntityManager::RegisterDirtyEntityHandler(CEntityDelegate::FunctionType _Function)
     {
-        m_EntityDelegates.push_back(_NewDelegate);
+		return CEntityDelegate::Register(_Function);
     }
 
     // -----------------------------------------------------------------------------
@@ -595,9 +588,9 @@ namespace EntityManager
 
     // -----------------------------------------------------------------------------
     
-    void RegisterDirtyEntityHandler(CEntityDelegate _NewDelegate)
+	CEntityDelegate::HandleType RegisterDirtyEntityHandler(CEntityDelegate::FunctionType _Function)
     {
-        CDtLvlEntityManager::GetInstance().RegisterDirtyEntityHandler(_NewDelegate);
+        return CDtLvlEntityManager::GetInstance().RegisterDirtyEntityHandler(_Function);
     }
 } // namespace EntityManager
 } // namespace Dt

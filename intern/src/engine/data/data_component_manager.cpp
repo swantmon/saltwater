@@ -6,11 +6,10 @@
 namespace Dt
 {
     CComponentManager::CComponentManager()
-        : m_Components        ( )
-        , m_ComponentByID     ( )
-        , m_ComponentsByType  ( )
-        , m_ComponentDelegates( )
-        , m_CurrentID         (0)
+        : m_Components      ( )
+        , m_ComponentByID   ( )
+        , m_ComponentsByType( )
+        , m_CurrentID       (0)
     {
 
     }
@@ -74,8 +73,17 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    void CComponentManager::RegisterDirtyComponentHandler(CComponentDelegate _NewDelegate)
+	CComponentManager::CComponentDelegate::HandleType CComponentManager::RegisterDirtyComponentHandler(CComponentDelegate::FunctionType _NewDelegate)
     {
-        m_ComponentDelegates.push_back(_NewDelegate);
-    }
+		return CComponentDelegate::Register(_NewDelegate);
+	}
+
+	// -----------------------------------------------------------------------------
+
+	void CComponentManager::MarkComponentAsDirty(IComponent& _rComponent, unsigned int _DirtyFlags)
+	{
+		_rComponent.m_DirtyFlags = _DirtyFlags;
+
+		CComponentDelegate::Notify(&_rComponent);
+	}
 } // namespace Dt

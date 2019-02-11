@@ -16,8 +16,6 @@
 #include "engine/data/data_component_manager.h"
 #include "engine/data/data_script_component.h"
 
-#include <regex>
-
 namespace Edit
 {
 namespace GUI
@@ -51,6 +49,9 @@ namespace GUI
 
     void CInspectorPanel::Render()
     {
+        ImGui::SetNextWindowPos(ImVec2(950, 100), ImGuiCond_FirstUseEver);
+        ImGui::SetNextWindowSize(ImVec2(300, 400), ImGuiCond_FirstUseEver);
+
         int IndexID = 0;
         Edit::CGUIFactory& rFactory = Edit::CGUIFactory::GetInstance();
         Edit::CComponentFactory& rComponentFactory = Edit::CComponentFactory::GetInstance();
@@ -119,6 +120,12 @@ namespace GUI
 
                         if (ImGui::CollapsingHeader(Panel->GetHeader()))
                         {
+                            bool IsActive = pComponent->IsActive();
+
+                            ImGui::Checkbox("Active", &IsActive);
+
+                            pComponent->SetActive(IsActive);
+
                             Panel->OnGUI();
                         }
 
@@ -137,37 +144,27 @@ namespace GUI
 
             ImGui::PushItemWidth(-1);
 
-            char SearchCharBuffer[64];
-
-            strcpy_s<64>(SearchCharBuffer, m_SearchString.c_str());
-
             if (ImGui::BeginCombo("##ADD_COMPONENT", "Add Component"))
             {
                 ImGui::PushItemWidth(-1);
 
-                if (ImGui::InputText("##SEARCH_REGEX", SearchCharBuffer, 64))
-                {
-                    m_SearchString = SearchCharBuffer;
-                }
+                static ImGuiTextFilter TextFilter;
+
+                TextFilter.Draw("##SEARCH_REGEX");
 
                 ImGui::PopItemWidth();
 
                 for (auto pComponent : rComponentFactory.GetComponents())
                 {
-                    if (m_SearchString.length() == 0 || std::regex_match(pComponent->GetHeader(), std::regex("(.*)(" + m_SearchString + ")(.*)")))
+                    if (!TextFilter.PassFilter(pComponent->GetHeader())) continue;
+
+                    if (ImGui::Selectable(pComponent->GetHeader()))
                     {
-                        if (ImGui::Selectable(pComponent->GetHeader()))
-                        {
-                            pComponent->OnNewComponent(m_pEntity->GetID());
-                        }
+                        pComponent->OnNewComponent(m_pEntity->GetID());
                     }
                 }
 
                 ImGui::EndCombo();
-            }
-            else
-            {
-                m_SearchString = "";
             }
 
             ImGui::PopItemWidth();

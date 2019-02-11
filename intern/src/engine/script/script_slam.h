@@ -34,9 +34,7 @@ namespace Scpt
 
         void Start() override
         {
-            Engine::LoadPlugin("plugin_slam");
-
-            if (!Core::PluginManager::HasPlugin("SLAM"))
+            if (!Core::PluginManager::LoadPlugin("SLAM"))
             {
                 throw Base::CException(__FILE__, __LINE__, "SLAM plugin could not be loaded");
             }

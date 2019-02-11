@@ -232,7 +232,9 @@ namespace
 
         Base::AABB3Float m_SelectionBox;
 
-        bool m_IsInitialized;
+		bool m_IsInitialized;
+
+		Gfx::Main::CResizeDelegate::HandleType m_ResizeDelegate;
     };
 } // namespace
 
@@ -266,7 +268,7 @@ namespace
     {
         assert(Main::GetGraphicsAPI().m_GraphicsAPI == CGraphicsInfo::OpenGL);
 
-        Main::RegisterResizeHandler(GFX_BIND_RESIZE_METHOD(&CGfxReconstructionRenderer::OnResize));
+		m_ResizeDelegate = Gfx::Main::RegisterResizeHandler(std::bind(&CGfxReconstructionRenderer::OnResize, this, std::placeholders::_1, std::placeholders::_2));
                                 
         m_UseTrackingCamera   = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:use_tracking_camera", true);
         m_RenderVolume        = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:volume"             , true);

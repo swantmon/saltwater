@@ -28,21 +28,7 @@ namespace Net
         {
             auto& rMessage = m_MessageQueue.front();
             
-            auto It = m_Delegates.begin();
-
-            while (It != m_Delegates.end())
-            {
-                if (It->expired())
-                {
-                    It = m_Delegates.erase(It);
-                }
-                else
-                {
-                    auto Delegate = *(It->lock());
-                    Delegate(rMessage, m_Port);
-                    ++ It;
-                }
-            }
+            CMessageDelegate::Notify(rMessage, m_Port);
 
             m_MessageQueue.pop();
         }
@@ -57,9 +43,9 @@ namespace Net
 
     // -----------------------------------------------------------------------------
 
-    void CSocket::RegisterMessageHandler(const std::shared_ptr<CMessageDelegate>& _rDelegate)
+    CSocket::CMessageDelegate::HandleType CSocket::RegisterMessageHandler(CMessageDelegate::FunctionType _Function)
     {
-        m_Delegates.push_back(_rDelegate);
+        return CMessageDelegate::Register(_Function);
     }
 
     // -----------------------------------------------------------------------------
@@ -201,7 +187,7 @@ namespace Net
         }
         else
         {
-            ENGINE_CONSOLE_INFO(_rError.what());
+            ENGINE_CONSOLE_DEBUG(_rError.what());
             Connect();
         }
     }

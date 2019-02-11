@@ -407,6 +407,19 @@ namespace MR
         m_VolumeBuffers.m_TSDFPoolPtr = 0;
         m_VolumeBuffers.m_PoolItemCountBufferPtr = 0;
         m_VolumeIndexBufferPtr = 0;
+
+        m_PointRasterizationBufferPtr = 0;
+        m_PlaneExtractionBufferPtr = 0;
+        m_PointCloudVSPtr = 0;
+        m_PointCloudGSPtr = 0;
+        m_PointCloudFSPtr = 0;
+        m_PointsFullCSPtr = 0;
+        m_FillIndirectBufferCSPtr = 0;
+
+        m_FullVolumePtr = 0;
+        m_EmptyTargetSetPtr = 0;
+        m_EmptyFullVolumePtr = 0;
+        m_FullVolumeViewPort = 0;
     }
 
     // -----------------------------------------------------------------------------

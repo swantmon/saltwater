@@ -41,6 +41,10 @@ namespace
 
         CScripts m_Scripts;
 
+		Gui::EventHandler::CEventDelegate::HandleType m_OnEventDelegate;
+
+		Dt::CComponentManager::CComponentDelegate::HandleType m_OnDirtyComponentDelegate;
+
     private:
 
         void OnDirtyComponent(Dt::IComponent* _pComponent);
@@ -53,7 +57,9 @@ namespace
 {
     CScptScriptManager::CScptScriptManager()
     {
-        Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(DATA_DIRTY_COMPONENT_METHOD(&CScptScriptManager::OnDirtyComponent));
+		m_OnEventDelegate = Gui::EventHandler::RegisterEventHandler(std::bind(&CScptScriptManager::OnInputEvent, this, std::placeholders::_1));
+
+        m_OnDirtyComponentDelegate = Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(std::bind(&CScptScriptManager::OnDirtyComponent, this, std::placeholders::_1));
     }
 
     // -----------------------------------------------------------------------------
@@ -66,7 +72,6 @@ namespace
 
     void CScptScriptManager::OnStart()
     {
-        Gui::EventHandler::RegisterDirectUserListener(GUI_BIND_INPUT_METHOD(&CScptScriptManager::OnInputEvent));
     }
 
     // -----------------------------------------------------------------------------
@@ -77,8 +82,6 @@ namespace
         {
             rScript->Exit();
         }
-
-        Gui::EventHandler::UnregisterDirectUserListener(GUI_BIND_INPUT_METHOD(&CScptScriptManager::OnInputEvent));
     }
 
     // -----------------------------------------------------------------------------
@@ -168,10 +171,7 @@ namespace
 
     void CScptScriptManager::OnInputEvent(const Base::CInputEvent& _rInputEvent)
     {
-        for (auto& rScript : m_Scripts)
-        {
-            rScript->OnInput(_rInputEvent);
-        }
+        for (auto& rScript : m_Scripts) rScript->OnInput(_rInputEvent);
     }
 } // namespace
 

@@ -3,10 +3,11 @@
 
 #include "engine/engine_config.h"
 
-#include "base/base_uncopyable.h"
 #include "base/base_defines.h"
+#include "base/base_delegate.h"
 #include "base/base_singleton.h"
 #include "base/base_typedef.h"
+#include "base/base_uncopyable.h"
 
 #include "engine/data/data_component.h"
 
@@ -25,7 +26,7 @@ namespace Dt
 
     public:
 
-        typedef std::function<void(Dt::IComponent* _pComponent)> CComponentDelegate;
+		using CComponentDelegate = Base::CDelegate<Dt::IComponent*>;
 
     public:
 
@@ -42,24 +43,21 @@ namespace Dt
         template<class T>
         const std::vector<Dt::IComponent*>& GetComponents();
 
-        template<class T>
-        void MarkComponentAsDirty(T& _rComponent, unsigned int _DirtyFlags);
+        void MarkComponentAsDirty(IComponent& _rComponent, unsigned int _DirtyFlags);
 
-        void RegisterDirtyComponentHandler(CComponentDelegate _NewDelegate);
+		CComponentDelegate::HandleType RegisterDirtyComponentHandler(CComponentDelegate::FunctionType _NewDelegate);
 
     private:
 
         typedef std::vector<std::unique_ptr<Dt::IComponent>>     CComponents;
         typedef std::map<Base::ID, Dt::IComponent*>              CComponentsByID;
         typedef std::map<Base::ID, std::vector<Dt::IComponent*>> CComponentsByType;
-        typedef std::vector<CComponentDelegate>                  CComponentDelegates;
 
     private:
 
         CComponents         m_Components; 
         CComponentsByID     m_ComponentByID;
         CComponentsByType   m_ComponentsByType;
-        CComponentDelegates m_ComponentDelegates;
         Base::ID            m_CurrentID;
 
     private:
@@ -68,8 +66,6 @@ namespace Dt
         ~CComponentManager();
     };
 } // namespace Dt
-
-#define DATA_DIRTY_COMPONENT_METHOD(_Method) std::bind(_Method, this, std::placeholders::_1)
 
 namespace Dt
 {
@@ -111,18 +107,5 @@ namespace Dt
     const std::vector<Dt::IComponent*>& CComponentManager::GetComponents()
     {
         return m_ComponentsByType[Base::CTypeInfo::GetTypeID<T>()];
-    }
-
-    // -----------------------------------------------------------------------------
-
-    template<class T>
-    void CComponentManager::MarkComponentAsDirty(T& _rComponent, unsigned int _DirtyFlags)
-    {
-        _rComponent.m_DirtyFlags = _DirtyFlags;
-
-        for (auto Delegate : m_ComponentDelegates)
-        {
-            Delegate(&_rComponent);
-        }
     }
 } // namespace Dt

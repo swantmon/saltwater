@@ -11,6 +11,7 @@
 #include <vector>
 
 using namespace Gui;
+using namespace Gui::EventHandler;
 
 namespace
 {
@@ -25,38 +26,18 @@ namespace
     
     public:
 
-        void OnUserEvent(const Base::CInputEvent& _rEvent);
-        void OnUpdateEvent();
+        void OnEvent(const Base::CInputEvent& _rEvent);
 
     public:
 
-        void RegisterDirectUserListener(const CInputEventDelegate& _rListener);
-        void UnregisterDirectUserListener(const CInputEventDelegate& _rListener);
-        void UnregisterAllDirectUserListeners();
-        bool ContainsDirectUserListener(const CInputEventDelegate& _rListener) const;
-
-    private:
-
-        typedef std::vector<CInputEventDelegate> CDelegates;
-        typedef CDelegates::iterator             CDelegateIterator;
-        typedef CDelegates::const_iterator       CDelegateConstIterator;
-
-    private:
-
-        CDelegates  m_DirectUserListeners;
-        
-    private:
-
-        CDelegateConstIterator GetDirectUserListener(const CInputEventDelegate& _rListener) const;
+		CEventDelegate::HandleType RegisterEventHandler(CEventDelegate::FunctionType _Function);
     };
 } // namespace
 
 namespace
 {
     CGUIEventHandler::CGUIEventHandler()
-        : m_DirectUserListeners()
     {
-        m_DirectUserListeners.reserve(256);
     }
 
 	// -----------------------------------------------------------------------------
@@ -67,68 +48,16 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGUIEventHandler::OnUserEvent(const Base::CInputEvent& _rEvent)
+    void CGUIEventHandler::OnEvent(const Base::CInputEvent& _rEvent)
     {
-        // -----------------------------------------------------------------------------
-        // Inform all direct user listeners about the event.
-        // -----------------------------------------------------------------------------
-        const CDelegateConstIterator EndOfDirectUserListeners = m_DirectUserListeners.end();
-
-        for (CDelegateConstIterator CurrentDirectUserListener = m_DirectUserListeners.begin(); CurrentDirectUserListener < EndOfDirectUserListeners; ++ CurrentDirectUserListener)
-        {
-            (*CurrentDirectUserListener)(_rEvent);
-        }
+		CEventDelegate::Notify(_rEvent);
     }
 
     // -----------------------------------------------------------------------------
 
-    void CGUIEventHandler::RegisterDirectUserListener(const CInputEventDelegate& _rListener)
+	CEventDelegate::HandleType CGUIEventHandler::RegisterEventHandler(CEventDelegate::FunctionType _Function)
     {
-        assert(!ContainsDirectUserListener(_rListener));
-
-        m_DirectUserListeners.push_back(_rListener);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CGUIEventHandler::UnregisterDirectUserListener(const CInputEventDelegate& _rListener)
-    {
-        CDelegateConstIterator DirectUserListener = GetDirectUserListener(_rListener);
-
-        assert(DirectUserListener != m_DirectUserListeners.end());
-
-        m_DirectUserListeners.erase(DirectUserListener);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CGUIEventHandler::UnregisterAllDirectUserListeners()
-    {
-        m_DirectUserListeners.clear();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    CGUIEventHandler::CDelegateConstIterator CGUIEventHandler::GetDirectUserListener(const CInputEventDelegate& _rListener) const
-    {
-        CDelegateConstIterator EndOfDirectUserListeners = m_DirectUserListeners.end();
-
-        for (CDelegateConstIterator CurrentDirectUserListener = m_DirectUserListeners.begin(); CurrentDirectUserListener < EndOfDirectUserListeners; ++ CurrentDirectUserListener)
-        {
-            if ((*CurrentDirectUserListener).target_type() == _rListener.target_type())
-            {
-                return CurrentDirectUserListener;
-            }
-        }
-
-        return EndOfDirectUserListeners;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    bool CGUIEventHandler::ContainsDirectUserListener(const CInputEventDelegate& _rListener) const
-    {
-        return GetDirectUserListener(_rListener) != m_DirectUserListeners.end();
+		return CEventDelegate::Register(_Function);
     }
 } // namespace
 
@@ -136,37 +65,16 @@ namespace Gui
 {
 namespace EventHandler
 {
-    void OnUserEvent(const Base::CInputEvent& _rEvent)
+    void OnEvent(const Base::CInputEvent& _rEvent)
     {
-        CGUIEventHandler::GetInstance().OnUserEvent(_rEvent);
+        CGUIEventHandler::GetInstance().OnEvent(_rEvent);
     }
 
     // -----------------------------------------------------------------------------
 
-    void RegisterDirectUserListener(const CInputEventDelegate& _rListener)
+	CEventDelegate::HandleType RegisterEventHandler(CEventDelegate::FunctionType _Function)
     {
-        CGUIEventHandler::GetInstance().RegisterDirectUserListener(_rListener);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void UnregisterDirectUserListener(const CInputEventDelegate& _rListener)
-    {
-        CGUIEventHandler::GetInstance().UnregisterDirectUserListener(_rListener);
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void UnregisterAllDirectUserListeners()
-    {
-        CGUIEventHandler::GetInstance().UnregisterAllDirectUserListeners();
-    }
-
-    // -----------------------------------------------------------------------------
-
-    bool ContainsDirectUserListener(const CInputEventDelegate& _rListener)
-    {
-        return CGUIEventHandler::GetInstance().ContainsDirectUserListener(_rListener);
+        return CGUIEventHandler::GetInstance().RegisterEventHandler(_Function);
     }
 } // namespace EventHandler
 } // namespace Gui

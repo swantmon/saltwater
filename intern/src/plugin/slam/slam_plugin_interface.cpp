@@ -20,9 +20,9 @@ namespace SLAM
     {
         Gfx::ReconstructionRenderer::OnStart();
 
-        Engine::RegisterEventHandler(Engine::Gfx_OnUpdate, Gfx::ReconstructionRenderer::Update);
-        Engine::RegisterEventHandler(Engine::Gfx_OnRenderGBuffer, Gfx::ReconstructionRenderer::Render);
-        Engine::RegisterEventHandler(Engine::Gfx_OnRenderForward, Gfx::ReconstructionRenderer::RenderForward);
+        m_UpdateDelegate        = Engine::RegisterEventHandler(Engine::EEvent::Gfx_OnUpdate, Gfx::ReconstructionRenderer::Update);
+        m_RenderGBufferDelegate = Engine::RegisterEventHandler(Engine::EEvent::Gfx_OnRenderGBuffer, Gfx::ReconstructionRenderer::Render);
+        m_RenderForwardDelegate = Engine::RegisterEventHandler(Engine::EEvent::Gfx_OnRenderForward, Gfx::ReconstructionRenderer::RenderForward);
 
         m_SLAMControl.Start();
     }

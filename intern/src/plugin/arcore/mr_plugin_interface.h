@@ -3,6 +3,8 @@
 
 #include "engine/core/core_plugin_manager.h"
 
+#include "engine/engine.h"
+
 namespace MR
 {
     class CPluginInterface : public Core::IPlugin
@@ -18,5 +20,6 @@ namespace MR
     private:
 
         void Gfx_OnUpdate();
+        Engine::CEventDelegates::HandleType m_EventDelegateHandle;
     };
 } // namespace MR

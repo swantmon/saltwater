@@ -55,7 +55,7 @@ namespace LE
         // -----------------------------------------------------------------------------
         // Hooks
         // -----------------------------------------------------------------------------
-        Engine::RegisterEventHandler(Engine::Gfx_OnUpdate, ENGINE_BIND_EVENT_METHOD(&CPluginInterface::Gfx_OnUpdate));
+        m_GfxOnUpdateDelegate = Engine::RegisterEventHandler(Engine::EEvent::Gfx_OnUpdate, std::bind(&CPluginInterface::Gfx_OnUpdate, this));
 
         // -----------------------------------------------------------------------------
         // Shader
@@ -246,6 +246,13 @@ namespace LE
 
     // -----------------------------------------------------------------------------
 
+    void CPluginInterface::SetActive(bool _Flag)
+    {
+        m_IsActive = _Flag;
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CPluginInterface::Gfx_OnUpdate()
     {
         if (m_IsActive == false || m_InputTexturePtr == 0 || m_OutputCubemapPtr == 0) return;
@@ -353,6 +360,11 @@ extern "C" CORE_PLUGIN_API_EXPORT void SetOutputCubemap(Gfx::CTexturePtr _Output
 extern "C" CORE_PLUGIN_API_EXPORT Gfx::CTexturePtr GetOutputCubemap()
 {
     return static_cast<LE::CPluginInterface&>(GetInstance()).GetOutputCubemap();
+}
+
+extern "C" CORE_PLUGIN_API_EXPORT void SetActive(bool _Flag)
+{
+    static_cast<LE::CPluginInterface&>(GetInstance()).SetActive(_Flag);
 }
 
 #if HAS_OPENCV_SUPPORT == 1

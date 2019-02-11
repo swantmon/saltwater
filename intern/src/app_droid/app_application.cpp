@@ -135,8 +135,8 @@ namespace
         // Prepare to monitor accelerometer
         // -----------------------------------------------------------------------------
         m_AppSetup.m_SensorManager       = ASensorManager_getInstance();
-        m_AppSetup.m_AccelerometerSensor = ASensorManager_getDefaultSensor(m_AppSetup.m_SensorManager, ASENSOR_TYPE_ACCELEROMETER);
-        m_AppSetup.m_SensorEventQueue    = ASensorManager_createEventQueue(m_AppSetup.m_SensorManager, _pAndroidApp->looper, LOOPER_ID_USER, NULL, NULL);
+        //m_AppSetup.m_AccelerometerSensor = ASensorManager_getDefaultSensor(m_AppSetup.m_SensorManager, ASENSOR_TYPE_ACCELEROMETER);
+        //m_AppSetup.m_SensorEventQueue    = ASensorManager_createEventQueue(m_AppSetup.m_SensorManager, _pAndroidApp->looper, LOOPER_ID_USER, NULL, NULL);
 
         // -----------------------------------------------------------------------------
         // Load configuration file
@@ -152,9 +152,10 @@ namespace
         Core::CConsole::GetInstance().SetVerbosityLevel(VerbosityLevel);
 
         // -----------------------------------------------------------------------------
-        // Setup asset manager
+        // Setup paths
         // -----------------------------------------------------------------------------
         Core::AssetManager::SetFilePath(_pAndroidApp->activity->externalDataPath);
+        Core::PluginManager::SetLibraryPath(Core::JNI::GetLibraryPath());
 
         // -----------------------------------------------------------------------------
         // From now on we can start the state engine and enter the first state
@@ -209,6 +210,7 @@ namespace
                     AndroidPollSource->process(m_AppSetup.m_pAndroidApp, AndroidPollSource);
                 }
 
+                /*
                 if (Identifcation == LOOPER_ID_USER) 
                 {
                     if (m_AppSetup.m_AccelerometerSensor != NULL)
@@ -217,10 +219,11 @@ namespace
 
                         while (ASensorEventQueue_getEvents(m_AppSetup.m_SensorEventQueue, &SensorEvent, 1) > 0)
                         {
-                            // BASE_CONSOLE_INFOV("Accelerometer: x=%f y=%f z=%f", SensorEvent.acceleration.x, SensorEvent.acceleration.y, SensorEvent.acceleration.z);
+                            BASE_CONSOLE_INFOV("Accelerometer: x=%f y=%f z=%f", SensorEvent.acceleration.x, SensorEvent.acceleration.y, SensorEvent.acceleration.z);
                         }
                     }
                 }
+                 */
             }
 
             // -----------------------------------------------------------------------------
@@ -319,7 +322,7 @@ namespace
 
                             Base::CInputEvent Input(Base::CInputEvent::Input, InputAction, Base::CInputEvent::Pointer + IndexOfPointer, glm::vec2(PointerX, PointerY), glm::vec2(PointerX, PointerY));
 
-                            Gui::EventHandler::OnUserEvent(Input);
+                            Gui::EventHandler::OnEvent(Input);
                         }
                     }
                     break;
@@ -341,9 +344,6 @@ namespace
         {
             case APP_CMD_SAVE_STATE:
                 {
-                    // -----------------------------------------------------------------------------
-                    // Save configuration
-                    // -----------------------------------------------------------------------------
                     Core::CProgramParameters::GetInstance().WriteFile(AppSetup->m_ParameterFile);
                 }
                 break;
@@ -399,21 +399,10 @@ namespace
 
             case APP_CMD_DESTROY:
                 {
-                    // -----------------------------------------------------------------------------
-                    // There is no time to exit the app via loop because the thread will be
-                    // stopped. So, we shutdown the engine and finish the native activity
-                    // by ourself.
-                    // -----------------------------------------------------------------------------
                     Core::CProgramParameters::GetInstance().WriteFile(AppSetup->m_ParameterFile);
 
-                    // -----------------------------------------------------------------------------
-                    // Shutdown engine
-                    // -----------------------------------------------------------------------------
                     Engine::Shutdown();
 
-                    // -----------------------------------------------------------------------------
-                    // Exit app
-                    // -----------------------------------------------------------------------------
                     ANativeActivity_finish(AppSetup->m_pAndroidApp->activity);
 
                     exit(0);
@@ -421,19 +410,39 @@ namespace
                 break;
 
             case APP_CMD_START:
-                {  }
+                {
+                    if (AppSetup->m_IsStarted)
+                    {
+                        AppSetup->m_Running = 1;
+                    }
+                }
                 break;
 
             case APP_CMD_STOP:
-                {  }
+                {
+                     AppSetup->m_Running = 0;
+                }
                 break;
 
             case APP_CMD_PAUSE:
-                {  }
-                break;
+                {
+                    if (AppSetup->m_IsStarted)
+                    {
+                        Engine::Pause();
 
+                        AppSetup->m_Running = 0;
+                    }
+                }
+                break;
             case APP_CMD_RESUME:
-                {  }
+                {
+                    if (AppSetup->m_IsStarted)
+                    {
+                        Engine::Resume();
+
+                        AppSetup->m_Running = 1;
+                    }
+                }
                 break;
 
             case APP_CMD_CONTENT_RECT_CHANGED:
@@ -455,13 +464,7 @@ namespace
 
             case APP_CMD_GAINED_FOCUS:
                 {
-                    // -----------------------------------------------------------------------------
-                    // When our app gains focus, we start monitoring the accelerometer.
-                    // -----------------------------------------------------------------------------
-                    Engine::Resume();
-
-                    AppSetup->m_Running = 1;
-
+                    /*
                     if (AppSetup->m_AccelerometerSensor != NULL)
                     {
                         ASensorEventQueue_enableSensor(AppSetup->m_SensorEventQueue, AppSetup->m_AccelerometerSensor);
@@ -471,23 +474,18 @@ namespace
                         // -----------------------------------------------------------------------------
                         ASensorEventQueue_setEventRate(AppSetup->m_SensorEventQueue, AppSetup->m_AccelerometerSensor, (1000L / 60) * 1000);
                     }
+                    */
                 }
                 break;
 
             case APP_CMD_LOST_FOCUS:
                 {
-                    // -----------------------------------------------------------------------------
-                    // When our app loses focus, we stop monitoring the accelerometer.
-                    // This is to avoid consuming battery while not being used.
-                    // -----------------------------------------------------------------------------
-                    Engine::Pause();
-
-                    AppSetup->m_Running = 0;
-
+                    /*
                     if (AppSetup->m_AccelerometerSensor != NULL)
                     {
                         ASensorEventQueue_disableSensor(AppSetup->m_SensorEventQueue, AppSetup->m_AccelerometerSensor);
                     }
+                    */
                 }
                 break;
         }

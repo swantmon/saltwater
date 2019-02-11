@@ -169,6 +169,9 @@
     <Filter Include="graphic\engine\scissor rects">
       <UniqueIdentifier>{7dd9f403-efca-4a0a-b434-70c2577c32cb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="core\input">
+      <UniqueIdentifier>{3f2888bf-eba3-46a6-8f9c-960eccb08285}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\engine\core\core_asset_importer.cpp">
@@ -825,9 +828,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\engine\gui\gui_input_manager.h">
       <Filter>gui\input</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\engine\gui\gui_event_delegate.h">
-      <Filter>gui\events</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\engine\gui\gui_event_handler.h">
       <Filter>gui\events</Filter>

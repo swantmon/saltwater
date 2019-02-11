@@ -7,7 +7,9 @@
 #include "base/base_defines.h"
 #include "base/base_uncopyable.h"
 
+#include <functional>
 #include <sstream>
+#include <vector>
 
 #define ENGINE_CONSOLE_DEFAULT(_Message) ::Core::CConsole::GetInstance().Entry(::Core::CConsole::Default, _Message);
 #define ENGINE_CONSOLE_ERROR(  _Message) ::Core::CConsole::GetInstance().Entry(::Core::CConsole::Error  , _Message);
@@ -45,6 +47,10 @@ namespace Core
 
     public:
 
+        typedef std::function<void(EConsoleLevel _Level, const std::string _Entry)> CEntryDelegate;
+
+    public:
+
         static CConsole& GetInstance();
 
     public:
@@ -54,14 +60,10 @@ namespace Core
         std::ostringstream& StreamEntry(EConsoleLevel _ConsoleLevel);
 
         void SetVerbosityLevel(int _Level);
-        
-    public:
-        
-        const char* GetText() const;
-        
-    public:
-        
-        void Clear();
+
+        void RegisterHandler(CEntryDelegate _NewDelegate);
+
+        const std::string& GetLogLevelString(EConsoleLevel _ConsoleLevel) const;
         
     private:
         
@@ -79,9 +81,9 @@ namespace Core
         
         int m_VerbosityLevel;
 
-    private:
+        std::vector<CEntryDelegate> m_Delegates;
 
-        const std::string& GetLogLevelString(EConsoleLevel _ConsoleLevel) const;
+    private:
 
         void Out(EConsoleLevel _ConsoleLevel, const char* _pText) const;
     };

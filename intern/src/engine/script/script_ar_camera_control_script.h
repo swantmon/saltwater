@@ -62,7 +62,7 @@ namespace Scpt
                 m_pCameraComponent = m_pCameraEntity->GetComponentFacet()->GetComponent<Dt::CCameraComponent>();
             }
 
-            m_ArCoreAvailable = Core::PluginManager::HasPlugin(PluginName);
+            m_ArCoreAvailable = Core::PluginManager::LoadPlugin(PluginName);
 
             if (!m_ArCoreAvailable)
             {
