@@ -22,9 +22,9 @@
 #include "engine/graphic/gfx_shader_manager.h"
 #include "engine/graphic/gfx_texture.h"
 #include "engine/graphic/gfx_texture_manager.h"
-#include "engine/graphic/gfx_view_manager.h"
 #include "engine/graphic/gfx_selection.h"
 #include "engine/graphic/gfx_selection_renderer.h"
+#include "engine/graphic/gfx_view_manager.h"
 
 #include "engine/script/script_script.h"
 
@@ -84,8 +84,6 @@ namespace MR
             NOSELECTION,
             FIRSTPRESS,
             FIRSTRELEASE,
-            SECONDPRESS,
-            SECONDRELEASE
         };
 
         glm::vec2 m_LatestCursorPosition;
@@ -111,7 +109,7 @@ namespace MR
         // -----------------------------------------------------------------------------
         // Stuff for network data source
         // -----------------------------------------------------------------------------
-        Net::CNetworkManager::CMessageDelegate::HandleType m_NetworkDelegate;
+        Net::CNetworkManager::CMessageDelegate::HandleType m_SLAMNetHandle;
 
         Gfx::CShaderPtr m_YUVtoRGBCSPtr;
         Gfx::CTexturePtr m_YTexture;
@@ -138,6 +136,8 @@ namespace MR
             glm::ivec2 m_DeviceResolution;
             glm::mat4  m_DeviceProjectionMatrix;
         };
+
+        Net::SocketHandle m_DataSourceSocket;
 
         // -----------------------------------------------------------------------------
         // Stuff for Kinect data source
@@ -171,6 +171,11 @@ namespace MR
         glm::vec3 m_PlaneAnchor0;
         glm::vec3 m_PlaneAnchor1;
 
+        Net::SocketHandle m_NeuralNetworkSocket;
+        Net::CNetworkManager::CMessageDelegate::HandleType m_NeualNetworkDelegate;
+
+        bool m_EnableInpainting;
+
     public:
 
         void Start()
@@ -194,14 +199,33 @@ namespace MR
             if (DataSource == "network")
             {
                 // -----------------------------------------------------------------------------
-                // Create network connection
+                // Create network connection for SLAM client
                 // -----------------------------------------------------------------------------
-                auto Delegate = std::bind(&CSLAMControl::OnNewMessage, this, std::placeholders::_1, std::placeholders::_2);
+                auto SLAMDelegate = std::bind(&CSLAMControl::OnNewSLAMMessage, this, std::placeholders::_1, std::placeholders::_2);
 
                 int Port = Core::CProgramParameters::GetInstance().Get("mr:slam:network_port", 12345);
                 auto SocketHandle = Net::CNetworkManager::GetInstance().CreateServerSocket(Port);
-                m_NetworkDelegate = Net::CNetworkManager::GetInstance().RegisterMessageHandler(SocketHandle, Delegate);
+                m_SLAMNetHandle = Net::CNetworkManager::GetInstance().RegisterMessageHandler(SocketHandle, SLAMDelegate);
+                
+                m_EnableInpainting = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:net:enable", true);
+                
+                if (m_EnableInpainting)
+                {
+                    // -----------------------------------------------------------------------------
+                    // Create network connection for Neural Network Server
+                    // -----------------------------------------------------------------------------
+                    Port = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:net:port", 12346);
+                    std::string IP = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:net:ip", "127.0.0.1");
+                    m_NeuralNetworkSocket = Net::CNetworkManager::GetInstance().CreateClientSocket(IP, Port);
 
+                    auto NNDelegate = std::bind(&CSLAMControl::OnNewNeuralNetMessage, this, std::placeholders::_1, std::placeholders::_2);
+                    m_NeualNetworkDelegate = Net::CNetworkManager::GetInstance().RegisterMessageHandler(m_NeuralNetworkSocket, NNDelegate);
+                }
+                else
+                {
+                    ENGINE_CONSOLE_INFO("Inpainting by neural networks is disabled");
+                }
+                
                 m_DataSource = NETWORK;
 
                 CreateShiftLUTTexture();
@@ -289,7 +313,7 @@ namespace MR
             {
                 m_RecordMode = PLAY;
                 m_RecordFile.open(m_RecordFileName, std::fstream::in | std::fstream::binary);
-                m_pRecordReader.reset(new Base::CRecordReader(m_RecordFile, 1));
+                m_pRecordReader = std::make_unique<Base::CRecordReader>(m_RecordFile, 1);
 
                 m_pRecordReader->SkipTime();
 
@@ -301,7 +325,7 @@ namespace MR
             {
                 m_RecordMode = RECORD;
                 m_RecordFile.open(m_RecordFileName, std::fstream::out | std::fstream::binary);
-                m_pRecordWriter.reset(new Base::CRecordWriter(m_RecordFile, 1));
+                m_pRecordWriter = std::make_unique<Base::CRecordWriter>(m_RecordFile, 1);
 
                 ENGINE_CONSOLE_INFOV("Recoding into file file \"%s\"", m_RecordFileName.c_str());
             }
@@ -327,7 +351,7 @@ namespace MR
             m_DepthTexture = nullptr;
             m_RGBTexture = nullptr;
 
-            m_NetworkDelegate = nullptr;
+            m_SLAMNetHandle = nullptr;
             
             m_YUVtoRGBCSPtr = nullptr;
             m_YTexture = nullptr;
@@ -363,6 +387,11 @@ namespace MR
                 if (rSelectionTicket.m_HitFlag == Gfx::SHitFlag::Entity)
                 {
                     Gfx::ReconstructionRenderer::AddPositionToSelection(rSelectionTicket.m_WSPosition);
+
+                    const auto& AABB = Gfx::ReconstructionRenderer::GetSelectionBox();
+                    m_PlaneTexture = m_Reconstructor.CreatePlaneTexture(AABB);
+
+                    Gfx::ReconstructionRenderer::SetInpaintedPlane(m_PlaneTexture, AABB);
                 }
             }
 
@@ -505,6 +534,10 @@ namespace MR
             {
                 Gfx::ReconstructionRenderer::ResetSelection();
             }
+            else if (_rEvent.GetAction() == Base::CInputEvent::MouseWheel && m_EnableInpainting)
+            {
+                SendPlane();
+            }
         }
 
         // -----------------------------------------------------------------------------
@@ -552,13 +585,13 @@ namespace MR
                     m_DeviceResolution = Message.m_DeviceResolution;
                     m_DeviceProjectionMatrix = Message.m_DeviceProjectionMatrix;
 
+                    Gfx::ReconstructionRenderer::SetDeviceResolution(m_DeviceResolution);
+
                     MR::SReconstructionSettings Settings;
                     m_Reconstructor.GetReconstructionSettings(&Settings);
 
                     m_CaptureColor = Settings.m_CaptureColor;
-
-                    m_Reconstructor.SetDeviceResolution(m_DeviceResolution);
-
+                    
                     if (m_CaptureColor)
                     {
                         FocalPoint.x = (FocalPoint.x / m_DepthSize.x) * m_ColorSize.x;
@@ -730,7 +763,7 @@ namespace MR
             }
         }
 
-        void OnNewMessage(const Net::CMessage& _rMessage, Net::SocketHandle _SocketHandle)
+        void OnNewSLAMMessage(const Net::CMessage& _rMessage, Net::SocketHandle _SocketHandle)
         {
             BASE_UNUSED(_SocketHandle);
             
@@ -752,6 +785,46 @@ namespace MR
                 // Enable mouse control after disconnect
                 m_UseTrackingCamera = false;
             }
+        }
+
+        void OnNewNeuralNetMessage(const Net::CMessage& _rMessage, Net::SocketHandle _SocketHandle)
+        {
+            BASE_UNUSED(_SocketHandle);
+            BASE_UNUSED(_rMessage);   
+
+            if (_rMessage.m_MessageType == 0)
+            {
+                ENGINE_CONSOLE_INFO("Received inpainted plane");
+                auto TargetRect = Base::AABB2UInt(glm::uvec2(32, 32), glm::uvec2(96, 96));
+                Gfx::TextureManager::CopyToTexture2D(m_PlaneTexture, TargetRect, 64 * 4, const_cast<char*>(_rMessage.m_Payload.data()), true);
+
+                const auto& AABB = Gfx::ReconstructionRenderer::GetSelectionBox();
+                Gfx::ReconstructionRenderer::SetInpaintedPlane(m_PlaneTexture, AABB);
+            }
+        }
+
+        void SendPlane()
+        {
+            if (!Net::CNetworkManager::GetInstance().IsConnected(m_NeuralNetworkSocket))
+            {
+                ENGINE_CONSOLE_INFO("Cannot send plane to neural net because the socket has no connection");
+                return;
+            }
+
+            const int PlaneResolution = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:inpainted_plane:resolution", 128);
+            
+            const auto& AABB = Gfx::ReconstructionRenderer::GetSelectionBox();
+            m_PlaneTexture = m_Reconstructor.CreatePlaneTexture(AABB);
+
+            Net::CMessage Message;
+
+            Message.m_Payload = std::vector<char>(PlaneResolution * PlaneResolution * 4);
+            Message.m_CompressedSize = Message.m_DecompressedSize = static_cast<int>(Message.m_Payload.size());
+            Message.m_MessageType = 0;
+
+            Gfx::TextureManager::CopyTextureToCPU(m_PlaneTexture, Message.m_Payload.data());
+
+            Net::CNetworkManager::GetInstance().SendMessage(m_NeuralNetworkSocket, Message);
         }
 
         void CreateShiftLUTTexture()

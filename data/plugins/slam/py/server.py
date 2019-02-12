@@ -29,12 +29,12 @@ import torch
 # Config
 # -----------------------------------------------------------------------------
 parser = argparse.ArgumentParser()
-parser.add_argument('--output', type=str, default='D:/NN/plugin_stitching/output/', help='output folder of the results')
-parser.add_argument('--img_size_w', type=int, default=256, help='width of image dimension')
+parser.add_argument('--output', type=str, default='D:/NN/plugin_slam/output/', help='output folder of the results')
+parser.add_argument('--img_size_w', type=int, default=128, help='width of image dimension')
 parser.add_argument('--img_size_h', type=int, default=128, help='height of each image dimension')
-parser.add_argument('--path_to_generator', type=str, default='D:/NN/plugin_stitching/savepoint/model_best_generator.pth.tar', help='path to saved generator')
-parser.add_argument('--port', type=int, default=12345, help='Port address to an endpoint')
-parser.add_argument('--temp', type=str, default='D:/NN/plugin_stitching/.tmp/', help='temporary folder')
+parser.add_argument('--path_to_generator', type=str, default='D:/NN/plugin_slam/savepoint/model_best_generator.pth.tar', help='path to saved generator')
+parser.add_argument('--port', type=int, default=12346, help='Port address to an endpoint')
+parser.add_argument('--temp', type=str, default='D:/NN/plugin_slam/.tmp/', help='temporary folder')
 opt = parser.parse_args()
 
 # -----------------------------------------------------------------------------
@@ -147,16 +147,16 @@ def OnNewClient(_Socket, _Address, _ID):
 
         pixels = resultData.tobytes()
 
-        _Socket.sendall(struct.pack('iii', 0, opt.img_size_w * opt.img_size_h * 4, opt.img_size_w * opt.img_size_h * 4))
+        _Socket.sendall(struct.pack('iii', 0, opt.img_size_w * opt.img_size_h, opt.img_size_w * opt.img_size_h)) #TODO Choose size programmatically
         _Socket.sendall(pixels)
 
         # -----------------------------------------------------------------------------
         # Save output and input to file system
         # -----------------------------------------------------------------------------
-        sample = torch.cat((masked_samples.data, gen_mask.data), -2)
+        #sample = torch.cat((masked_samples.data, gen_mask.data), -2)
 
-        os.makedirs('{}{}/{}'.format(opt.output, _Address[0], _ID), exist_ok=True)
-        save_image(sample, '{}{}/{}/result_panorama_{}.png'.format(opt.output, _Address[0], _ID, Interval), nrow=1, normalize=True)
+        #os.makedirs('{}{}/{}'.format(opt.output, _Address[0], _ID), exist_ok=True)
+        #save_image(sample, '{}{}/{}/result_panorama_{}.png'.format(opt.output, _Address[0], _ID, Interval), nrow=1, normalize=True)
 
         Interval = Interval + 1
 

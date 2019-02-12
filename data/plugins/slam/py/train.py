@@ -27,22 +27,20 @@ import torch
 # Config
 # -----------------------------------------------------------------------------
 parser = argparse.ArgumentParser()
-parser.add_argument('--n_epochs', type=int, default=2000, help='number of epochs of training')
-parser.add_argument('--batch_size', type=int, default=16, help='size of the batches')
-parser.add_argument('--path_to_dataset', type=str, default='D:/NN/dataset/SUN360_FLAT_256x128/', help='path to the dataset (no recursive search)')
+parser.add_argument('--n_epochs', type=int, default=40000, help='number of epochs of training')
+parser.add_argument('--batch_size', type=int, default=64, help='size of the batches')
+parser.add_argument('--path_to_dataset', type=str, default='D:/NN/dataset/ILSVRC2012_img_train/', help='path to the dataset (no recursive search)')
 parser.add_argument('--lr', type=float, default=0.0002, help='adam: learning rate')
 parser.add_argument('--b1', type=float, default=0.5, help='adam: decay of first order momentum of gradient')
 parser.add_argument('--b2', type=float, default=0.999, help='adam: decay of first order momentum of gradient')
 parser.add_argument('--n_cpu', type=int, default=0, help='number of cpu threads to use during batch generation')
-parser.add_argument('--img_size_w', type=int, default=256, help='size of each image dimension')
+parser.add_argument('--img_size_w', type=int, default=128, help='size of each image dimension')
 parser.add_argument('--img_size_h', type=int, default=128, help='size of each image dimension')
 parser.add_argument('--img_channels', type=int, default=3, help='number of image channels')
-parser.add_argument('--mask_ground_and_sky', type=float, default=0.3, help='Percentage of a mask for lower and upper part')
-parser.add_argument('--number_of_masks', type=int, default=4, help='number of random mask')
 parser.add_argument('--mask_size', type=int, default=64, help='size of random mask')
-parser.add_argument('--sample_interval', type=int, default=5000, help='interval between image sampling')
-parser.add_argument('--output', type=str, default='D:/NN/plugin_stitching/output/SUN360_FLAT_256x128/', help='output folder of the results')
-parser.add_argument('--path_to_savepoint', type=str, default='D:/NN/plugin_stitching/savepoint/', help='path to load and store savepoint')
+parser.add_argument('--sample_interval', type=int, default=100, help='interval between image sampling')
+parser.add_argument('--output', type=str, default='D:/NN/plugin_slam/output/ILSVRC2012_img_train/', help='output folder of the results')
+parser.add_argument('--path_to_savepoint', type=str, default='D:/NN/plugin_slam/savepoint/', help='path to load and store savepoint')
 opt = parser.parse_args()
 
 # -----------------------------------------------------------------------------
@@ -63,91 +61,50 @@ class ImageDataset(Dataset):
 
     # -----------------------------------------------------------------------------
 
-    def apply_random_mask(self, img):
-        masked_part = img.clone()
+    def apply_train_mask(self, img):
         masked_img = img.clone()
-
-        y1 = int(opt.img_size_h * 0.0)
-        y2 = int(opt.img_size_h * opt.mask_ground_and_sky)
-        x1 = int(0)
-        x2 = int(opt.img_size_w)
-
-        masked_img[:, y1:y2, x1:x2] = 1
-
-        y1 = int(opt.img_size_h * (1.0 - opt.mask_ground_and_sky * 0.4))
-        y2 = int(opt.img_size_h * 1.0)
-        x1 = int(0)
-        x2 = int(opt.img_size_w)
-
-        masked_img[:, y1:y2, x1:x2] = 1
         
-        for _ in range(random.randrange(1, opt.number_of_masks + 1)):
-            y1 = np.random.randint(0, opt.img_size_h - opt.mask_size)
-            x1 = np.random.randint(0, opt.img_size_w - int(opt.mask_size * 1.5))
+        #y1 = np.random.randint(0, opt.img_size_h - opt.mask_size)
+        #x1 = np.random.randint(0, opt.img_size_w - opt.mask_size)
+        y1 = int((opt.img_size_h - opt.mask_size) / 2)
+        x1 = int((opt.img_size_w - opt.mask_size) / 2)
 
-            y2, x2 = y1 + opt.mask_size, x1 + int(opt.mask_size * 1.5)
+        y2, x2 = y1 + opt.mask_size, x1 + opt.mask_size
 
-            masked_img[:, y1:y2, x1:x2] = 1
+        masked_img[:, y1:y2, x1:x2] = 1
+        masked_part = img[:, y1:y2, x1:x2]
 
-        return masked_img, masked_part
+        return masked_img, masked_part, 0
 
     # -----------------------------------------------------------------------------
 
-    def apply_center_mask(self, img):
-        # Get upper-left pixel coordinate
-        i = (opt.img_size - opt.mask_size) // 2
+    def apply_test_mask(self, img):
         masked_img = img.clone()
-        masked_img[:, i:i+opt.mask_size, i:i+opt.mask_size] = 1
-
-        return masked_img, masked_img
-
-    # -----------------------------------------------------------------------------
-
-    def apply_panorama_mask(self, img):
-        masked_part = torch.zeros(img.shape)
-        masked_img = img.clone()
-
-        y1 = int(opt.img_size_h * 0.0)
-        y2 = int(opt.img_size_h * opt.mask_ground_and_sky)
-        x1 = int(0)
-        x2 = int(opt.img_size_w)
-
-        masked_part[:, y1:y2, x1:x2] = 1
-        masked_img[:, y1:y2, x1:x2] = 1
-
-        y1 = int(opt.img_size_h * (1.0 - opt.mask_ground_and_sky * 0.4))
-        y2 = int(opt.img_size_h * 1.0)
-        x1 = int(0)
-        x2 = int(opt.img_size_w)
-
-        masked_part[:, y1:y2, x1:x2] = 1
-        masked_img[:, y1:y2, x1:x2] = 1
         
-        for _ in range(random.randrange(1, opt.number_of_masks + 1)):
-            y1 = np.random.randint(0, opt.img_size_h - opt.mask_size)
-            x1 = np.random.randint(0, opt.img_size_w - int(opt.mask_size * 1.5))
+        y1 = int((opt.img_size_h - opt.mask_size) / 2)
+        x1 = int((opt.img_size_w - opt.mask_size) / 2)
 
-            y2, x2 = y1 + opt.mask_size, x1 + int(opt.mask_size * 1.5)
+        y2, x2 = y1 + opt.mask_size, x1 + opt.mask_size
 
-            masked_part[:, y1:y2, x1:x2] = 1
-            masked_img[:, y1:y2, x1:x2] = 1
+        masked_img[:, y1:y2, x1:x2] = 1
 
-        return masked_img, masked_part
+        return masked_img, 0, ([x1, y1, x2, y2])
 
     # -----------------------------------------------------------------------------
 
     def __getitem__(self, index):
         img = Image.open(self.files[index % len(self.files)])
+        img = img.convert('RGB')
         img = self.transform(img)
 
         if self.mode == 'train':
             # For training data perform random mask
-            masked_img, aux = self.apply_random_mask(img)
+            masked_img, masked_part, pos = self.apply_train_mask(img)
         else:
             # For test data mask the center of the image
-            masked_img, aux = self.apply_panorama_mask(img)
+            masked_img, masked_part, pos = self.apply_test_mask(img)
 
-        return img, masked_img, aux
+        return img, masked_img, masked_part, pos
 
     # -----------------------------------------------------------------------------
 
@@ -162,7 +119,7 @@ cuda = True if torch.cuda.is_available() else False
 # -----------------------------------------------------------------------------
 # Calculate output of image discriminator (PatchGAN)
 # -----------------------------------------------------------------------------
-patch_h, patch_w = int(opt.img_size_h / 2**3), int(opt.img_size_w / 2**3)
+patch_h, patch_w = int(opt.mask_size / 2**3), int(opt.mask_size / 2**3)
 patch = (1, patch_h, patch_w)
 
 # -----------------------------------------------------------------------------
@@ -224,35 +181,32 @@ optimizer_D = torch.optim.Adam(discriminator.parameters(), lr=opt.lr, betas=(opt
 
 Tensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
 
-# -----------------------------------------------------------------------------
-# Adversarial ground truths
-# -----------------------------------------------------------------------------
-valid = Variable(Tensor(np.ones(patch)), requires_grad=False)
-fake = Variable(Tensor(np.zeros(patch)), requires_grad=False)
 
 # -----------------------------------------------------------------------------
 # Functions
 # -----------------------------------------------------------------------------
 def save_sample(batches_done, _Path):
-    samples, masked_samples, masked_part = next(iter(test_dataloader))
+    samples, masked_samples, masked_part, position = next(iter(test_dataloader))
     samples = Variable(samples.type(Tensor))
     masked_samples = Variable(masked_samples.type(Tensor))
-    masked_part = Variable(masked_part.type(Tensor))
+
+    x1 = position[0][0].item()
+    y1 = position[1][0].item()
+    x2 = position[2][0].item()
+    y2 = position[3][0].item()
 
     # -----------------------------------------------------------------------------
     # Generate inpainted image
     # -----------------------------------------------------------------------------
     gen_mask = generator(masked_samples)
 
-    # -----------------------------------------------------------------------------
-    # Mixture
-    # -----------------------------------------------------------------------------
-    filled_example = gen_mask * masked_part + masked_samples * (1 - masked_part)
+    filled_sample = masked_samples.clone()
+    filled_sample[:, :, y1:y2, x1:x2] = gen_mask
 
     # -----------------------------------------------------------------------------
     # Save sample
     # -----------------------------------------------------------------------------
-    sample = torch.cat((masked_samples.data, gen_mask.data, filled_example.data, samples.data), -2)
+    sample = torch.cat((masked_samples.data, filled_sample.data, samples.data), -2)
     save_image(sample, _Path, nrow=6, normalize=True)
 
 # -----------------------------------------------------------------------------
@@ -286,7 +240,7 @@ if __name__ == '__main__':
         # -----------------------------------------------------------------------------
 
         for epoch in range(LastEpoch, opt.n_epochs):
-            for i, (imgs, masked_imgs, masked_parts) in enumerate(train_dataloader):
+            for i, (imgs, masked_imgs, masked_parts, position) in enumerate(train_dataloader):
 
                 # -----------------------------------------------------------------------------
                 # Adversarial ground truths

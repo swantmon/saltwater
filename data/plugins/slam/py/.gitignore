@@ -1,0 +1,10 @@
+*.png
+*.jpg
+*.pyc
+*.vscode/*
+*.h5
+*.tar
+log/
+data/
+output/
+savepoint/

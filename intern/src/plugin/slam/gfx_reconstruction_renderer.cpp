@@ -107,6 +107,7 @@ namespace
         void ChangeCamera(bool _IsTrackingCamera);
 
         void SetReconstructor(MR::CSLAMReconstructor& _rReconstructor);
+        void SetDeviceResolution(const glm::ivec2& _Resolution);
 
         glm::vec3 Pick(const glm::ivec2& _rCursorPosition);
 
@@ -118,6 +119,8 @@ namespace
         const Base::AABB3Float& GetSelectionBox();
 
     private:
+
+        glm::ivec2 m_DeviceResolution;
 
         // -----------------------------------------------------------------------------
         // Stuff for selection box
@@ -458,10 +461,12 @@ namespace
     
     void CGfxReconstructionRenderer::OnSetupRenderTargets()
     {
+        assert(m_DeviceResolution.x != 0 && m_DeviceResolution.y != 0);
+
         STextureDescriptor TextureDescriptor = {};
 
-        TextureDescriptor.m_NumberOfPixelsU  = 1280;
-        TextureDescriptor.m_NumberOfPixelsV  = 720;
+        TextureDescriptor.m_NumberOfPixelsU  = m_DeviceResolution.x;
+        TextureDescriptor.m_NumberOfPixelsV  = m_DeviceResolution.y;
         TextureDescriptor.m_NumberOfPixelsW  = 1;
         TextureDescriptor.m_NumberOfMipMaps  = 1;
         TextureDescriptor.m_NumberOfTextures = 1;
@@ -484,9 +489,11 @@ namespace
     
     void CGfxReconstructionRenderer::OnSetupStates()
     {
+        assert(m_DeviceResolution.x != 0 && m_DeviceResolution.y != 0);
+
         Gfx::SViewPortDescriptor Desc;
-        Desc.m_Width = 1280;
-        Desc.m_Height = 720;
+        Desc.m_Width = static_cast<float>(m_DeviceResolution.x);
+        Desc.m_Height = static_cast<float>(m_DeviceResolution.y);
         Desc.m_TopLeftX = 0;
         Desc.m_TopLeftY = 0;
         Desc.m_MinDepth = 0.0f;
@@ -1062,6 +1069,8 @@ namespace
 
     void CGfxReconstructionRenderer::RenderInpaintedPlane()
     {
+        assert(m_InpaintedPlaneTexture != nullptr);
+
         Performance::BeginEvent("Render inpainted plane");
 
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
@@ -1711,6 +1720,13 @@ namespace
     {
         m_pReconstructor = &_rReconstructor;
     }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxReconstructionRenderer::SetDeviceResolution(const glm::ivec2& _Resolution)
+    {
+        m_DeviceResolution = _Resolution;
+    }
 } // namespace
 
 namespace Gfx
@@ -1853,6 +1869,13 @@ namespace ReconstructionRenderer
     void SetReconstructor(MR::CSLAMReconstructor& _rReconstructor)
     {
         CGfxReconstructionRenderer::GetInstance().SetReconstructor(_rReconstructor);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void SetDeviceResolution(const glm::ivec2& _Resolution)
+    {
+        CGfxReconstructionRenderer::GetInstance().SetDeviceResolution(_Resolution);
     }
 
     // -----------------------------------------------------------------------------

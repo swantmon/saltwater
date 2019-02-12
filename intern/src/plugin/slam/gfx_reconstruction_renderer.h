@@ -30,6 +30,7 @@ namespace ReconstructionRenderer
     void ChangeCamera(bool _IsTrackingCamera);
 
     void SetReconstructor(MR::CSLAMReconstructor& _rReconstructor);
+    void SetDeviceResolution(const glm::ivec2& _Resolution);
 
     glm::vec3 Pick(const glm::ivec2& _rCursor);
 

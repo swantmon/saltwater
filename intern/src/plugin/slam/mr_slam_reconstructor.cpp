@@ -201,7 +201,7 @@ namespace MR
 		SetupTextures();
 		SetupBuffers(false);
                 
-        m_pTracker.reset(new CICPTracker(m_DepthFrameSize.x, m_DepthFrameSize.y, m_ReconstructionSettings));
+        m_pTracker = std::make_unique<MR::CICPTracker>(m_DepthFrameSize.x, m_DepthFrameSize.y, m_ReconstructionSettings);
 
         m_IsInizialized = true;
     }
@@ -1352,14 +1352,7 @@ namespace MR
     {
         m_DepthBounds = glm::vec2(_Min, _Max);
     }
-
-    // -----------------------------------------------------------------------------
-
-    void CSLAMReconstructor::SetDeviceResolution(const glm::ivec2& _rResolution)
-    {
-        m_DeviceResolution = _rResolution;
-    }
-
+    
     // -----------------------------------------------------------------------------
 
     void CSLAMReconstructor::GetImageSizes(glm::ivec2& _rDepthFrameSize, glm::ivec2& _rColorFrameSize)
@@ -1382,13 +1375,6 @@ namespace MR
     {
         _rMin = m_DepthBounds[0];
         _rMax = m_DepthBounds[1];
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CSLAMReconstructor::GetDeviceResolution(glm::ivec2& _rResolution)
-    {
-        _rResolution = m_DeviceResolution;
     }
 
     // -----------------------------------------------------------------------------
@@ -1985,7 +1971,6 @@ namespace MR
         m_FocalLength = glm::vec2(0.0f);
         m_FocalPoint = glm::vec2(0.0f);
         m_DepthBounds = glm::vec2(0.0f);
-        m_DeviceResolution = glm::vec2(0, 0);
 
         if (pReconstructionSettings != nullptr)
         {
