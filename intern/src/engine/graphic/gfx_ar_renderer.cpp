@@ -472,26 +472,28 @@ namespace
 
             if (rCurrentEntity.GetLayer() & Dt::SEntityLayer::AR)
             {
-                Gfx::CMesh* pMeshObject = static_cast<Gfx::CMesh*>(pDtComponent->GetFacet(Dt::CMeshComponent::Graphic));
+                Gfx::CMesh* pGfxComponent = static_cast<Gfx::CMesh*>(pDtComponent->GetFacet(Dt::CMeshComponent::Graphic));
 
                 // -----------------------------------------------------------------------------
                 // Surface
                 // -----------------------------------------------------------------------------
-                CSurfacePtr SurfacePtr = pMeshObject->GetLOD(0)->GetSurface();
+                CSurfacePtr SurfacePtr = pGfxComponent->GetLOD(0)->GetSurface();
 
-                if (SurfacePtr == nullptr)
-                {
-                    break;
-                }
+                if (SurfacePtr == nullptr) continue;
 
                 const CMaterial* pMaterial = SurfacePtr->GetMaterial();
                 
-                if (pDtComponent->GetHostEntity()->GetComponentFacet()->HasComponent<Dt::CMaterialComponent>())
+                if (rCurrentEntity.GetComponentFacet()->HasComponent<Dt::CMaterialComponent>())
                 {
-                    auto pDtMaterialComponent = pDtComponent->GetHostEntity()->GetComponentFacet()->GetComponent<Dt::CMaterialComponent>();
+                    auto pMaterialComponent = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CMaterialComponent>();
 
-                    pMaterial = static_cast<const Gfx::CMaterial*>(pDtMaterialComponent->GetFacet(Dt::CMaterialComponent::Graphic));
+                    if (pMaterialComponent->IsActiveAndUsable())
+                    {
+                        pMaterial = static_cast<const Gfx::CMaterial*>(pMaterialComponent->GetFacet(Dt::CMaterialComponent::Graphic));
+                    }
                 }
+
+                assert(pMaterial != 0);
 
                 // -----------------------------------------------------------------------------
                 // Set information to render job

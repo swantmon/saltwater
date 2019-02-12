@@ -834,11 +834,14 @@ namespace
 
                 const Gfx::CMaterial* pMaterial = SurfacePtr->GetMaterial();
 
-                if (pDtComponent->GetHostEntity()->GetComponentFacet()->HasComponent<Dt::CMaterialComponent>())
+                if (rCurrentEntity.GetComponentFacet()->HasComponent<Dt::CMaterialComponent>())
                 {
-                    auto pMaterialComponent = pDtComponent->GetHostEntity()->GetComponentFacet()->GetComponent<Dt::CMaterialComponent>();
+                    auto pMaterialComponent = rCurrentEntity.GetComponentFacet()->GetComponent<Dt::CMaterialComponent>();
 
-                    pMaterial = static_cast<const Gfx::CMaterial*>(pMaterialComponent->GetFacet(Dt::CMaterialComponent::Graphic));
+                    if (pMaterialComponent->IsActiveAndUsable())
+                    {
+                        pMaterial = static_cast<const Gfx::CMaterial*>(pMaterialComponent->GetFacet(Dt::CMaterialComponent::Graphic));
+                    }
                 }
 
                 assert(pMaterial != 0);
@@ -859,7 +862,6 @@ namespace
                     if (pMaterial->HasAlpha()) m_ForwardRenderJobs.push_back(NewRenderJob);
                     else                       m_DeferredRenderJobs.push_back(NewRenderJob);
                 }
-                
 
                 m_HitproxyRenderJobs.push_back(NewRenderJob);
             }
