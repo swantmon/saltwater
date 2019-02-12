@@ -29,7 +29,7 @@ import torch
 parser = argparse.ArgumentParser()
 parser.add_argument('--n_epochs', type=int, default=2000, help='number of epochs of training')
 parser.add_argument('--batch_size', type=int, default=16, help='size of the batches')
-parser.add_argument('--path_to_dataset', type=str, default='./data/20181115_SUN360_FLAT_256x128/', help='path to the dataset (no recursive search)')
+parser.add_argument('--path_to_dataset', type=str, default='D:/NN/dataset/SUN360_FLAT_256x128/', help='path to the dataset (no recursive search)')
 parser.add_argument('--lr', type=float, default=0.0002, help='adam: learning rate')
 parser.add_argument('--b1', type=float, default=0.5, help='adam: decay of first order momentum of gradient')
 parser.add_argument('--b2', type=float, default=0.999, help='adam: decay of first order momentum of gradient')
@@ -41,8 +41,8 @@ parser.add_argument('--mask_ground_and_sky', type=float, default=0.3, help='Perc
 parser.add_argument('--number_of_masks', type=int, default=4, help='number of random mask')
 parser.add_argument('--mask_size', type=int, default=64, help='size of random mask')
 parser.add_argument('--sample_interval', type=int, default=5000, help='interval between image sampling')
-parser.add_argument('--output', type=str, default='./output/20181115_SUN360_FLAT_256x128/', help='output folder of the results')
-parser.add_argument('--path_to_savepoint', type=str, default='./savepoint/', help='path to load and store savepoint')
+parser.add_argument('--output', type=str, default='D:/NN/plugin_stitching/output/SUN360_FLAT_256x128/', help='output folder of the results')
+parser.add_argument('--path_to_savepoint', type=str, default='D:/NN/plugin_stitching/savepoint/', help='path to load and store savepoint')
 opt = parser.parse_args()
 
 # -----------------------------------------------------------------------------

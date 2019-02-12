@@ -29,11 +29,12 @@ import torch
 # Config
 # -----------------------------------------------------------------------------
 parser = argparse.ArgumentParser()
-parser.add_argument('--output', type=str, default='./output/', help='output folder of the results')
+parser.add_argument('--output', type=str, default='D:/NN/plugin_slam/output/', help='output folder of the results')
 parser.add_argument('--img_size_w', type=int, default=128, help='width of image dimension')
 parser.add_argument('--img_size_h', type=int, default=128, help='height of each image dimension')
-parser.add_argument('--path_to_generator', type=str, default='./savepoint/model_best_generator.pth.tar', help='path to saved generator')
+parser.add_argument('--path_to_generator', type=str, default='D:/NN/plugin_slam/savepoint/model_best_generator.pth.tar', help='path to saved generator')
 parser.add_argument('--port', type=int, default=12346, help='Port address to an endpoint')
+parser.add_argument('--temp', type=str, default='D:/NN/plugin_slam/.tmp/', help='temporary folder')
 opt = parser.parse_args()
 
 # -----------------------------------------------------------------------------
@@ -134,11 +135,11 @@ def OnNewClient(_Socket, _Address, _ID):
         # Now: Save image to see quality
         # TODO: Do not save image! Use data directly.
         # -----------------------------------------------------------------------------
-        os.makedirs('./tmp/{}/{}'.format(_Address[0], _ID), exist_ok=True)
+        os.makedirs('{}{}/{}'.format(opt.temp, _Address[0], _ID), exist_ok=True)
 
-        save_image(gen_mask.data, './tmp/{}/{}/tmp_output_generator.png'.format(_Address[0], _ID), nrow=1, normalize=True)  
+        save_image(gen_mask.data, '{}{}/{}/tmp_output_generator.png'.format(opt.temp, _Address[0], _ID), nrow=1, normalize=True)  
 
-        im = Image.open('./tmp/{}/{}/tmp_output_generator.png'.format(_Address[0], _ID)).convert('RGBA')
+        im = Image.open('{}{}/{}/tmp_output_generator.png'.format(opt.temp, _Address[0], _ID)).convert('RGBA')
 
         resultData =  np.asarray(list(im.getdata()))
 
@@ -161,8 +162,8 @@ def OnNewClient(_Socket, _Address, _ID):
 
     print ("Disconnected from client", _Address)
 
-    if os.path.isfile('./tmp/{}/{}/tmp_output_generator.png'.format(_Address[0], _ID)) == True:
-        os.remove('./tmp/{}/{}/tmp_output_generator.png'.format(_Address[0], _ID))
+    if os.path.isfile('{}{}/{}/tmp_output_generator.png'.format(opt.temp, _Address[0], _ID)) == True:
+        os.remove('{}}{}/{}/tmp_output_generator.png'.format(opt.temp, _Address[0], _ID))
     
     _Socket.close()
 
