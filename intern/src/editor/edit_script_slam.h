@@ -16,7 +16,7 @@ namespace Scpt
 
         void OnGUI()
         {
-             ImGui::Checkbox("Active", &m_IsSelectionEnabled);
+             ImGui::Checkbox("Enable Selection", &m_IsSelectionEnabled);
         }
 
         // -----------------------------------------------------------------------------

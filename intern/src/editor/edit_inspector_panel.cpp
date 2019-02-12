@@ -122,7 +122,7 @@ namespace GUI
                         {
                             bool IsActive = pComponent->IsActive();
 
-                            ImGui::Checkbox("Active", &IsActive);
+                            ImGui::Checkbox("Active##ComponentActive", &IsActive);
 
                             pComponent->SetActive(IsActive);
 
