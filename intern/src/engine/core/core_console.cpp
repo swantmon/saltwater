@@ -12,7 +12,7 @@
 namespace Core
 {
 
-	CConsole& CConsole::GetInstance()
+    CConsole& CConsole::GetInstance()
     {
         static CConsole s_Singleton;
 

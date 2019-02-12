@@ -10,7 +10,7 @@ namespace MATH
 {
 
     template<typename T>
-	class CAABB3
+    class CAABB3
     {
 
         //
@@ -146,7 +146,7 @@ namespace MATH
 {
 
     typedef CAABB3<int>    AABB3int;
-	typedef CAABB3<float>  AABB3Float;
+    typedef CAABB3<float>  AABB3Float;
     typedef CAABB3<double> AABB3Double;
 
 } // namespace MATH

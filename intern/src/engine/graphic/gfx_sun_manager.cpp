@@ -98,9 +98,9 @@ namespace
         
         CBufferSetPtr m_LightCameraVSBufferPtr;
 
-		Dt::CComponentManager::CComponentDelegate::HandleType m_OnDirtyComponentDelegate;
+        Dt::CComponentManager::CComponentDelegate::HandleType m_OnDirtyComponentDelegate;
 
-		Dt::EntityManager::CEntityDelegate::HandleType m_OnDirtyEntityDelegate;
+        Dt::EntityManager::CEntityDelegate::HandleType m_OnDirtyEntityDelegate;
         
     private:
 
@@ -187,9 +187,9 @@ namespace
         // -----------------------------------------------------------------------------
         // On dirty stuff
         // -----------------------------------------------------------------------------
-		m_OnDirtyComponentDelegate = Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(std::bind(&CGfxSunManager::OnDirtyComponent, this, std::placeholders::_1));
+        m_OnDirtyComponentDelegate = Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(std::bind(&CGfxSunManager::OnDirtyComponent, this, std::placeholders::_1));
 
-		m_OnDirtyEntityDelegate = Dt::EntityManager::RegisterDirtyEntityHandler(std::bind(&CGfxSunManager::OnDirtyEntity, this, std::placeholders::_1));
+        m_OnDirtyEntityDelegate = Dt::EntityManager::RegisterDirtyEntityHandler(std::bind(&CGfxSunManager::OnDirtyEntity, this, std::placeholders::_1));
     }
     
     // -----------------------------------------------------------------------------
@@ -349,14 +349,14 @@ namespace
         
         _pInternLight->m_TextureSMPtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // Depth only
 
-		TextureManager::SetTextureLabel(_pInternLight->m_TextureSMPtr, "Sun: Shadowmap");
+        TextureManager::SetTextureLabel(_pInternLight->m_TextureSMPtr, "Sun: Shadowmap");
         
         // -----------------------------------------------------------------------------
         // Create target set for shadow mapping
         // -----------------------------------------------------------------------------
         CTargetSetPtr ShadowTargetSetPtr = TargetSetManager::CreateTargetSet(_pInternLight->m_TextureSMPtr);
 
-		TargetSetManager::SetTargetSetLabel(ShadowTargetSetPtr, "Sun: Shadowmap");
+        TargetSetManager::SetTargetSetLabel(ShadowTargetSetPtr, "Sun: Shadowmap");
         
         // -----------------------------------------------------------------------------
         // Create view and camera

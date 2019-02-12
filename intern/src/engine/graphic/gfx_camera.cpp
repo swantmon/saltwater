@@ -80,8 +80,8 @@ namespace Gfx
         // Save the dimensions.
         // --------------------------------------------------------------------------------
         m_Left   = _Left;
-		m_Right  = _Right;
-		m_Bottom = _Bottom;
+        m_Right  = _Right;
+        m_Bottom = _Bottom;
         m_Top    = _Top;
         m_Near   = _Near;
         m_Far    = _Far;
@@ -145,9 +145,9 @@ namespace Gfx
         // --------------------------------------------------------------------------------
         // Save the dimensions.
         // --------------------------------------------------------------------------------
-        m_Left   = _Left;		
-		m_Right  = _Right;
-		m_Bottom = _Bottom;
+        m_Left   = _Left;        
+        m_Right  = _Right;
+        m_Bottom = _Bottom;
         m_Top    = _Top;
         m_Near   = _Near;
         m_Far    = _Far;
@@ -450,7 +450,7 @@ namespace Gfx
         m_WorldSpaceFrustum[SFace::Far  | SFace::Right | SFace::Top   ] = m_ViewPtr->m_Position + m_ViewPtr->m_RotationMatrix * m_ObjectSpaceFrustum[SFace::Far  | SFace::Right | SFace::Top   ];
     }
 
-	// --------------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------
 
     void CCamera::Update()
     {
@@ -464,21 +464,21 @@ namespace Gfx
         // --------------------------------------------------------------------------------
         m_ViewProjectionMatrix = m_ProjectionMatrix * m_ViewPtr->m_ViewMatrix;
 
-		// --------------------------------------------------------------------------------
-		// Determine the lower and higher extrema of camera's world position
-		// --------------------------------------------------------------------------------
-		glm::vec3& rMin = m_WorldAABB.GetMin();
+        // --------------------------------------------------------------------------------
+        // Determine the lower and higher extrema of camera's world position
+        // --------------------------------------------------------------------------------
+        glm::vec3& rMin = m_WorldAABB.GetMin();
         glm::vec3& rMax = m_WorldAABB.GetMax();
 
         rMin = m_WorldSpaceFrustum[0];
         rMax = m_WorldSpaceFrustum[0];
 
-		for (int IndexOfVertex = 1; IndexOfVertex < 8; ++ IndexOfVertex)
-		{
-			if (m_WorldSpaceFrustum[IndexOfVertex][0] < rMin[0])
-			{
+        for (int IndexOfVertex = 1; IndexOfVertex < 8; ++ IndexOfVertex)
+        {
+            if (m_WorldSpaceFrustum[IndexOfVertex][0] < rMin[0])
+            {
                 rMin[0] = m_WorldSpaceFrustum[IndexOfVertex][0];
-			}
+            }
             else if (m_WorldSpaceFrustum[IndexOfVertex][0] > rMax[0])
             {
                 rMax[0] = m_WorldSpaceFrustum[IndexOfVertex][0];
@@ -501,7 +501,7 @@ namespace Gfx
             {
                 rMax[2] = m_WorldSpaceFrustum[IndexOfVertex][2];
             }
-		}
+        }
     }
 
     // -----------------------------------------------------------------------------

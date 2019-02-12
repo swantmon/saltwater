@@ -21,7 +21,7 @@ namespace SER
 {
 namespace Private
 {
-	class CAccess
+    class CAccess
     {
     public:
         template <class TArchive, class TObject>
@@ -56,7 +56,7 @@ namespace Private
 
     // -----------------------------------------------------------------------------
 
-	template <class TArchive, class TObject>
+    template <class TArchive, class TObject>
     inline void CAccess::Serialize(TArchive& _rCodec, TObject& _rObject)
     {
         _rObject.Serialize(_rCodec);

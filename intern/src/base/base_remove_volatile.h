@@ -5,7 +5,7 @@
 
 namespace CORE
 {
-	template<typename T>
+    template<typename T>
     struct SRemoveVolatile
     {
         typedef T X;

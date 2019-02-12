@@ -7,7 +7,7 @@
 
 namespace CORE
 {
-	template<typename T>
+    template<typename T>
     struct SRemoveQualifier
     {
     private:

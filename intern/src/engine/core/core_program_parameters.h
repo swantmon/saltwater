@@ -46,7 +46,7 @@ namespace Core
 
         nlohmann::json m_Container;
 
-		Gui::EventHandler::CEventDelegate::HandleType m_OnEventDelegate;
+        Gui::EventHandler::CEventDelegate::HandleType m_OnEventDelegate;
 
     private:
 

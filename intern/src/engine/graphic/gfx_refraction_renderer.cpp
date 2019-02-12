@@ -160,7 +160,7 @@ namespace
         CRenderJobs       m_RefractionRenderJobs;
         SLightJob         m_ForwardLightTextures;
 
-		Gfx::Main::CResizeDelegate::HandleType m_OnResizeDelegate;
+        Gfx::Main::CResizeDelegate::HandleType m_OnResizeDelegate;
 
     private:
 
@@ -184,7 +184,7 @@ namespace
     {
         m_RefractionRenderJobs.reserve(4);
 
-		m_OnResizeDelegate = Gfx::Main::RegisterResizeHandler(std::bind(&CGfxRefractionRenderer::OnResize, this, std::placeholders::_1, std::placeholders::_2));
+        m_OnResizeDelegate = Gfx::Main::RegisterResizeHandler(std::bind(&CGfxRefractionRenderer::OnResize, this, std::placeholders::_1, std::placeholders::_2));
     }
 
     // -----------------------------------------------------------------------------

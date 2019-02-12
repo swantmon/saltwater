@@ -187,7 +187,7 @@ namespace
     
     CGfxFogRenderer::~CGfxFogRenderer()
     {
-    	
+        
     }
     
     // -----------------------------------------------------------------------------
@@ -278,7 +278,7 @@ namespace
         
         m_ESMTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor);
 
-		TextureManager::SetTextureLabel(m_ESMTexturePtr, "Fog ESM");
+        TextureManager::SetTextureLabel(m_ESMTexturePtr, "Fog ESM");
 
         CTexturePtr ESMSwapTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor);
 
@@ -395,7 +395,7 @@ namespace
 
         m_GradientPermutationTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor);
 
-		TextureManager::SetTextureLabel(m_GradientPermutationTexturePtr, "Fog Gradient Permutation");
+        TextureManager::SetTextureLabel(m_GradientPermutationTexturePtr, "Fog Gradient Permutation");
 
         Base::CMemory::Free(pPermutationGradientData);
 
@@ -416,11 +416,11 @@ namespace
 
         m_VolumeTexturePtr = TextureManager::CreateTexture3D(RendertargetDescriptor);
 
-		TextureManager::SetTextureLabel(m_VolumeTexturePtr, "Fog Volume Texture");
+        TextureManager::SetTextureLabel(m_VolumeTexturePtr, "Fog Volume Texture");
 
         m_ScatteringTexturePtr = TextureManager::CreateTexture3D(RendertargetDescriptor);
 
-		TextureManager::SetTextureLabel(m_VolumeTexturePtr, "Fog Scattering Texture");
+        TextureManager::SetTextureLabel(m_VolumeTexturePtr, "Fog Scattering Texture");
 
         // -----------------------------------------------------------------------------
 

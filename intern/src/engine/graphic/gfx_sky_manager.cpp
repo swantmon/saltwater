@@ -185,9 +185,9 @@ namespace
 
         CTexturePtr m_TransmittanceTable;
         CTexturePtr m_IrradianceTable;
-		CTexturePtr m_InscatterTable;
+        CTexturePtr m_InscatterTable;
 
-		Dt::CComponentManager::CComponentDelegate::HandleType m_OnDirtyComponentDelegate;
+        Dt::CComponentManager::CComponentDelegate::HandleType m_OnDirtyComponentDelegate;
 
     private:
 
@@ -384,7 +384,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Register dirty entity handler for automatic sky creation
         // -----------------------------------------------------------------------------
-		m_OnDirtyComponentDelegate = Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(std::bind(&CGfxSkyManager::OnDirtyComponent, this, std::placeholders::_1));
+        m_OnDirtyComponentDelegate = Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(std::bind(&CGfxSkyManager::OnDirtyComponent, this, std::placeholders::_1));
 
         // -----------------------------------------------------------------------------
         // Precompute Scattering
@@ -987,12 +987,12 @@ namespace
         CTexturePtr m_DeltaSM        = TextureManager::CreateTexture3D(TextureDesc);
         CTexturePtr m_DeltaJ         = TextureManager::CreateTexture3D(TextureDesc);
 
-		// -----------------------------------------------------------------------------
-		// Labels
-		// -----------------------------------------------------------------------------
-		TextureManager::SetTextureLabel(m_TransmittanceTable, "PAS: Transmittance Table");
-		TextureManager::SetTextureLabel(m_IrradianceTable, "PAS: Irradiance Table");
-		TextureManager::SetTextureLabel(m_InscatterTable, "PAS: Inscatter Table");
+        // -----------------------------------------------------------------------------
+        // Labels
+        // -----------------------------------------------------------------------------
+        TextureManager::SetTextureLabel(m_TransmittanceTable, "PAS: Transmittance Table");
+        TextureManager::SetTextureLabel(m_IrradianceTable, "PAS: Irradiance Table");
+        TextureManager::SetTextureLabel(m_InscatterTable, "PAS: Inscatter Table");
 
         // -----------------------------------------------------------------------------
         // Target sets & view ports

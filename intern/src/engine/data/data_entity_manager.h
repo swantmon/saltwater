@@ -29,7 +29,7 @@ namespace Dt
 {
 namespace EntityManager
 {
-	using CEntityDelegate = Base::CDelegate<Dt::CEntity*>;
+    using CEntityDelegate = Base::CDelegate<Dt::CEntity*>;
 
     ENGINE_API void OnStart();
     ENGINE_API void OnExit();

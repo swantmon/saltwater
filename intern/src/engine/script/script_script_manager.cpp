@@ -41,9 +41,9 @@ namespace
 
         CScripts m_Scripts;
 
-		Gui::EventHandler::CEventDelegate::HandleType m_OnEventDelegate;
+        Gui::EventHandler::CEventDelegate::HandleType m_OnEventDelegate;
 
-		Dt::CComponentManager::CComponentDelegate::HandleType m_OnDirtyComponentDelegate;
+        Dt::CComponentManager::CComponentDelegate::HandleType m_OnDirtyComponentDelegate;
 
     private:
 
@@ -57,7 +57,7 @@ namespace
 {
     CScptScriptManager::CScptScriptManager()
     {
-		m_OnEventDelegate = Gui::EventHandler::RegisterEventHandler(std::bind(&CScptScriptManager::OnInputEvent, this, std::placeholders::_1));
+        m_OnEventDelegate = Gui::EventHandler::RegisterEventHandler(std::bind(&CScptScriptManager::OnInputEvent, this, std::placeholders::_1));
 
         m_OnDirtyComponentDelegate = Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(std::bind(&CScptScriptManager::OnDirtyComponent, this, std::placeholders::_1));
     }

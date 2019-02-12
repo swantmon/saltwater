@@ -136,10 +136,10 @@ namespace
         void SetResourceBufferRange(unsigned int _Unit, CBufferPtr _BufferPtr, unsigned int _Offset, unsigned int _Range);
         CBufferPtr GetResourceBuffer(unsigned int _Unit);
 
-		void ResetAtomicCounterBuffer(unsigned int _Unit);
-		void SetAtomicCounterBuffer(unsigned int _Unit, CBufferPtr _BufferPtr);
+        void ResetAtomicCounterBuffer(unsigned int _Unit);
+        void SetAtomicCounterBuffer(unsigned int _Unit, CBufferPtr _BufferPtr);
         void SetAtomicCounterBufferRange(unsigned int _Unit, CBufferPtr _BufferPtr, unsigned int _Offset, unsigned int _Range);
-		CBufferPtr GetAtomicCounterBuffer(unsigned int _Unit);
+        CBufferPtr GetAtomicCounterBuffer(unsigned int _Unit);
 
         void Flush();
 
@@ -164,8 +164,8 @@ namespace
         static const unsigned int s_NumberOfTextureUnits  = 16;
         static const unsigned int s_NumberOfImageUnits    = 8;
         static const unsigned int s_NumberOfBufferUnits   = 16;
-		static const unsigned int s_NumberOfResourceUnits = 16;
-		static const unsigned int s_NumberOfAtomicUnits = 16;
+        static const unsigned int s_NumberOfResourceUnits = 16;
+        static const unsigned int s_NumberOfAtomicUnits = 16;
 
         static const GLenum s_NativeTopologies[];
         
@@ -910,26 +910,26 @@ namespace
             // glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 24,  0);
             // glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 24, 12);
             // 
-            // Byte	Content
-            // 0	Position
-            // 12	Normal
-            // 24	Position
-            // 36	Normal
-            // 48	Position
-            // 60	Normal
+            // Byte    Content
+            // 0    Position
+            // 12    Normal
+            // 24    Position
+            // 36    Normal
+            // 48    Position
+            // 60    Normal
             // 
             // 
             // Non-Interleaved:
             // glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 12,  0);  // alternativ auch stride=0
             // glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 12, 36);  // alternativ auch stride=0
             // 
-            // Byte	Content
-            // 0	Position
-            // 12	Position
-            // 24	Position
-            // 36	Normal
-            // 48	Normal
-            // 60	Normal
+            // Byte    Content
+            // 0    Position
+            // 12    Position
+            // 24    Position
+            // 36    Normal
+            // 48    Normal
+            // 60    Normal
             //
             // From: http://wiki.delphigl.com/index.php/glVertexAttribPointer
             //
@@ -1467,7 +1467,7 @@ namespace
         assert(pNativeBuffer->GetBinding() == CBuffer::ResourceBuffer);
 
         glBindBufferRange(GL_SHADER_STORAGE_BUFFER, _Unit, pNativeBuffer->m_NativeBuffer, 0, pNativeBuffer->GetNumberOfBytes());
-		
+        
         m_ResourceUnits[_Unit] = _BufferPtr;
     }
 
@@ -1501,37 +1501,37 @@ namespace
         return m_ResourceUnits[_Unit];
     }
 
-	// -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
 
-	void CGfxContextManager::ResetAtomicCounterBuffer(unsigned int _Unit)
-	{
-		assert(_Unit < s_NumberOfAtomicUnits);
+    void CGfxContextManager::ResetAtomicCounterBuffer(unsigned int _Unit)
+    {
+        assert(_Unit < s_NumberOfAtomicUnits);
 
-		glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, 0);
+        glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, 0);
 
-		m_AtomicUnits[_Unit] = 0;
-	}
+        m_AtomicUnits[_Unit] = 0;
+    }
 
-	// -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
 
-	void CGfxContextManager::SetAtomicCounterBuffer(unsigned int _Unit, CBufferPtr _BufferPtr)
-	{
-		if (_BufferPtr == nullptr) return;
+    void CGfxContextManager::SetAtomicCounterBuffer(unsigned int _Unit, CBufferPtr _BufferPtr)
+    {
+        if (_BufferPtr == nullptr) return;
 
-		CNativeBuffer* pNativeBuffer = 0;
+        CNativeBuffer* pNativeBuffer = 0;
 
-		assert(_Unit < s_NumberOfAtomicUnits);
+        assert(_Unit < s_NumberOfAtomicUnits);
 
-		if (m_AtomicUnits[_Unit] == _BufferPtr) return;
+        if (m_AtomicUnits[_Unit] == _BufferPtr) return;
 
-		pNativeBuffer = static_cast<CNativeBuffer*>(_BufferPtr.GetPtr());
+        pNativeBuffer = static_cast<CNativeBuffer*>(_BufferPtr.GetPtr());
 
-		assert(pNativeBuffer->GetBinding() == CBuffer::AtomicCounterBuffer);
+        assert(pNativeBuffer->GetBinding() == CBuffer::AtomicCounterBuffer);
 
-		glBindBufferRange(GL_ATOMIC_COUNTER_BUFFER, _Unit, pNativeBuffer->m_NativeBuffer, 0, pNativeBuffer->GetNumberOfBytes());
+        glBindBufferRange(GL_ATOMIC_COUNTER_BUFFER, _Unit, pNativeBuffer->m_NativeBuffer, 0, pNativeBuffer->GetNumberOfBytes());
 
-		m_AtomicUnits[_Unit] = _BufferPtr;
-	}
+        m_AtomicUnits[_Unit] = _BufferPtr;
+    }
 
     // -----------------------------------------------------------------------------
 
@@ -1554,14 +1554,14 @@ namespace
         m_AtomicUnits[_Unit] = 0; // TODO: store range binding
     }
 
-	// -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
 
-	CBufferPtr CGfxContextManager::GetAtomicCounterBuffer(unsigned int _Unit)
-	{
-		assert(_Unit < s_NumberOfAtomicUnits);
+    CBufferPtr CGfxContextManager::GetAtomicCounterBuffer(unsigned int _Unit)
+    {
+        assert(_Unit < s_NumberOfAtomicUnits);
 
-		return m_AtomicUnits[_Unit];
-	}
+        return m_AtomicUnits[_Unit];
+    }
 
     // -----------------------------------------------------------------------------
 
@@ -2319,19 +2319,19 @@ namespace ContextManager
         return CGfxContextManager::GetInstance().GetResourceBuffer(_Unit);
     }
 
-	// -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
 
-	void ResetAtomicCounterBuffer(unsigned int _Unit)
-	{
-		CGfxContextManager::GetInstance().ResetAtomicCounterBuffer(_Unit);
-	}
+    void ResetAtomicCounterBuffer(unsigned int _Unit)
+    {
+        CGfxContextManager::GetInstance().ResetAtomicCounterBuffer(_Unit);
+    }
 
-	// -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
 
-	void SetAtomicCounterBuffer(unsigned int _Unit, CBufferPtr _BufferPtr)
-	{
-		CGfxContextManager::GetInstance().SetAtomicCounterBuffer(_Unit, _BufferPtr);
-	}
+    void SetAtomicCounterBuffer(unsigned int _Unit, CBufferPtr _BufferPtr)
+    {
+        CGfxContextManager::GetInstance().SetAtomicCounterBuffer(_Unit, _BufferPtr);
+    }
 
     // -----------------------------------------------------------------------------
 
@@ -2340,12 +2340,12 @@ namespace ContextManager
         CGfxContextManager::GetInstance().SetAtomicCounterBufferRange(_Unit, _BufferPtr, _Offset, _Range);
     }
 
-	// -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
 
-	CBufferPtr GetAtomicCounterBuffer(unsigned int _Unit)
-	{
-		return CGfxContextManager::GetInstance().GetAtomicCounterBuffer(_Unit);
-	}
+    CBufferPtr GetAtomicCounterBuffer(unsigned int _Unit)
+    {
+        return CGfxContextManager::GetInstance().GetAtomicCounterBuffer(_Unit);
+    }
 
     // -----------------------------------------------------------------------------
 

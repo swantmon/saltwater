@@ -65,7 +65,7 @@ namespace
 
         void Update();
 
-		CEntityDelegate::HandleType RegisterDirtyEntityHandler(CEntityDelegate::FunctionType _Function);
+        CEntityDelegate::HandleType RegisterDirtyEntityHandler(CEntityDelegate::FunctionType _Function);
         
     private:
         
@@ -371,7 +371,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Send new dirty entity to all handler
         // -----------------------------------------------------------------------------
-		CEntityDelegate::Notify(&_rEntity);
+        CEntityDelegate::Notify(&_rEntity);
 
         _rEntity.SetDirtyFlags(0);
     }
@@ -386,7 +386,7 @@ namespace
     
     CEntityDelegate::HandleType CDtLvlEntityManager::RegisterDirtyEntityHandler(CEntityDelegate::FunctionType _Function)
     {
-		return CEntityDelegate::Register(_Function);
+        return CEntityDelegate::Register(_Function);
     }
 
     // -----------------------------------------------------------------------------
@@ -588,7 +588,7 @@ namespace EntityManager
 
     // -----------------------------------------------------------------------------
     
-	CEntityDelegate::HandleType RegisterDirtyEntityHandler(CEntityDelegate::FunctionType _Function)
+    CEntityDelegate::HandleType RegisterDirtyEntityHandler(CEntityDelegate::FunctionType _Function)
     {
         return CDtLvlEntityManager::GetInstance().RegisterDirtyEntityHandler(_Function);
     }

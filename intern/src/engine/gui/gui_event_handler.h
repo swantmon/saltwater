@@ -14,7 +14,7 @@ namespace Gui
 {
 namespace EventHandler
 {
-	using CEventDelegate = Base::CDelegate<const Base::CInputEvent&>;
+    using CEventDelegate = Base::CDelegate<const Base::CInputEvent&>;
 } // namespace EventHandler
 } // namespace Gui
 

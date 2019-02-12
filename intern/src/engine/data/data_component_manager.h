@@ -26,7 +26,7 @@ namespace Dt
 
     public:
 
-		using CComponentDelegate = Base::CDelegate<Dt::IComponent*>;
+        using CComponentDelegate = Base::CDelegate<Dt::IComponent*>;
 
     public:
 
@@ -45,7 +45,7 @@ namespace Dt
 
         void MarkComponentAsDirty(IComponent& _rComponent, unsigned int _DirtyFlags);
 
-		CComponentDelegate::HandleType RegisterDirtyComponentHandler(CComponentDelegate::FunctionType _NewDelegate);
+        CComponentDelegate::HandleType RegisterDirtyComponentHandler(CComponentDelegate::FunctionType _NewDelegate);
 
     private:
 

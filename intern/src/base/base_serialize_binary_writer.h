@@ -24,7 +24,7 @@
 
 namespace SER
 {
-	class CBinaryWriter : public CArchive
+    class CBinaryWriter : public CArchive
     {
     public:
         enum
@@ -76,7 +76,7 @@ namespace SER
 
 namespace SER
 {
-	inline CBinaryWriter::CBinaryWriter(CStream& _rStream, unsigned int _Version)
+    inline CBinaryWriter::CBinaryWriter(CStream& _rStream, unsigned int _Version)
         : CArchive (_Version)
         , m_pStream(&_rStream)
     {

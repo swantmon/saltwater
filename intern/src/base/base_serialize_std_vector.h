@@ -8,7 +8,7 @@
 
 namespace SER
 {
-	template<class TArchive, typename TObject>
+    template<class TArchive, typename TObject>
     inline void Write(TArchive& _rArchive, const std::vector<TObject>& _rVector);
 
     template<class TArchive, typename TObject>
@@ -20,7 +20,7 @@ namespace SER
 
 namespace SER
 {
-	template<class TArchive, typename TObject>
+    template<class TArchive, typename TObject>
     inline void Write(TArchive& _rArchive, const std::vector<TObject>& _rVector)
     {
         unsigned int NumberOfElements = static_cast<unsigned int>(_rVector.size());

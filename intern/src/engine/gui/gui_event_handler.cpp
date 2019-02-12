@@ -30,7 +30,7 @@ namespace
 
     public:
 
-		CEventDelegate::HandleType RegisterEventHandler(CEventDelegate::FunctionType _Function);
+        CEventDelegate::HandleType RegisterEventHandler(CEventDelegate::FunctionType _Function);
     };
 } // namespace
 
@@ -40,7 +40,7 @@ namespace
     {
     }
 
-	// -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
 
     CGUIEventHandler::~CGUIEventHandler()
     {
@@ -50,14 +50,14 @@ namespace
 
     void CGUIEventHandler::OnEvent(const Base::CInputEvent& _rEvent)
     {
-		CEventDelegate::Notify(_rEvent);
+        CEventDelegate::Notify(_rEvent);
     }
 
     // -----------------------------------------------------------------------------
 
-	CEventDelegate::HandleType CGUIEventHandler::RegisterEventHandler(CEventDelegate::FunctionType _Function)
+    CEventDelegate::HandleType CGUIEventHandler::RegisterEventHandler(CEventDelegate::FunctionType _Function)
     {
-		return CEventDelegate::Register(_Function);
+        return CEventDelegate::Register(_Function);
     }
 } // namespace
 
@@ -72,7 +72,7 @@ namespace EventHandler
 
     // -----------------------------------------------------------------------------
 
-	CEventDelegate::HandleType RegisterEventHandler(CEventDelegate::FunctionType _Function)
+    CEventDelegate::HandleType RegisterEventHandler(CEventDelegate::FunctionType _Function)
     {
         return CGUIEventHandler::GetInstance().RegisterEventHandler(_Function);
     }
