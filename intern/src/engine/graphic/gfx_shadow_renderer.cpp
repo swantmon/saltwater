@@ -134,7 +134,7 @@ namespace
 
         CSSAORenderJobs m_SSAORenderJobs;
 
-		Gfx::Main::CResizeDelegate::HandleType m_OnResizeDelegate;
+        Gfx::Main::CResizeDelegate::HandleType m_OnResizeDelegate;
 
     private:
 
@@ -159,7 +159,7 @@ namespace
     {
         m_SSAORenderJobs.reserve(1);
 
-		m_OnResizeDelegate = Gfx::Main::RegisterResizeHandler(std::bind(&CGfxShadowRenderer::OnResize, this, std::placeholders::_1, std::placeholders::_2));
+        m_OnResizeDelegate = Gfx::Main::RegisterResizeHandler(std::bind(&CGfxShadowRenderer::OnResize, this, std::placeholders::_1, std::placeholders::_2));
     }
     
     // -----------------------------------------------------------------------------
@@ -263,7 +263,7 @@ namespace
 
         CTexturePtr HalfTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor);
 
-		TextureManager::SetTextureLabel(HalfTexturePtr, "SSAO");
+        TextureManager::SetTextureLabel(HalfTexturePtr, "SSAO");
         
         // -----------------------------------------------------------------------------
         // Create render target
@@ -274,7 +274,7 @@ namespace
 
         m_HalfRenderbufferPtr = TargetSetManager::CreateTargetSet(HalfRenderbuffer, 1);
 
-		TargetSetManager::SetTargetSetLabel(m_HalfRenderbufferPtr, "SSAO");
+        TargetSetManager::SetTargetSetLabel(m_HalfRenderbufferPtr, "SSAO");
     }
     
     // -----------------------------------------------------------------------------

@@ -32,7 +32,7 @@
 
 namespace SER
 {
-	class CArchive
+    class CArchive
     {
     public:
 

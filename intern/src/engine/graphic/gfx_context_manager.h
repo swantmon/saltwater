@@ -117,10 +117,10 @@ namespace ContextManager
     ENGINE_API void SetResourceBufferRange(unsigned int _Unit, CBufferPtr _BufferPtr, unsigned int _Offset, unsigned int _Range);
     ENGINE_API CBufferPtr GetResourceBuffer(unsigned int _Unit);
 
-	ENGINE_API void ResetAtomicCounterBuffer(unsigned int _Unit);
-	ENGINE_API void SetAtomicCounterBuffer(unsigned int _Unit, CBufferPtr _BufferPtr);
+    ENGINE_API void ResetAtomicCounterBuffer(unsigned int _Unit);
+    ENGINE_API void SetAtomicCounterBuffer(unsigned int _Unit, CBufferPtr _BufferPtr);
     ENGINE_API void SetAtomicCounterBufferRange(unsigned int _Unit, CBufferPtr _BufferPtr, unsigned int _Offset, unsigned int _Range);
-	ENGINE_API CBufferPtr GetAtomicCounterBuffer(unsigned int _Unit);
+    ENGINE_API CBufferPtr GetAtomicCounterBuffer(unsigned int _Unit);
 
     ENGINE_API void Flush();
 

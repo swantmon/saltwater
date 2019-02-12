@@ -73,17 +73,17 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-	CComponentManager::CComponentDelegate::HandleType CComponentManager::RegisterDirtyComponentHandler(CComponentDelegate::FunctionType _NewDelegate)
+    CComponentManager::CComponentDelegate::HandleType CComponentManager::RegisterDirtyComponentHandler(CComponentDelegate::FunctionType _NewDelegate)
     {
-		return CComponentDelegate::Register(_NewDelegate);
-	}
+        return CComponentDelegate::Register(_NewDelegate);
+    }
 
-	// -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
 
-	void CComponentManager::MarkComponentAsDirty(IComponent& _rComponent, unsigned int _DirtyFlags)
-	{
-		_rComponent.m_DirtyFlags = _DirtyFlags;
+    void CComponentManager::MarkComponentAsDirty(IComponent& _rComponent, unsigned int _DirtyFlags)
+    {
+        _rComponent.m_DirtyFlags = _DirtyFlags;
 
-		CComponentDelegate::Notify(&_rComponent);
-	}
+        CComponentDelegate::Notify(&_rComponent);
+    }
 } // namespace Dt

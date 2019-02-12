@@ -31,7 +31,7 @@ namespace Gfx
         public:
 
             void Update();
-		
+        
         protected:
 
             glm::mat4 m_ViewMatrix;

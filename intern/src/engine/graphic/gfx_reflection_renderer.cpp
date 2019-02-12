@@ -170,7 +170,7 @@ namespace
         CLightProbeRenderJobs m_LightProbeRenderJobs;
         CSSRRenderJobs        m_SSRRenderJobs;
 
-		Gfx::Main::CResizeDelegate::HandleType m_OnResizeDelegate;
+        Gfx::Main::CResizeDelegate::HandleType m_OnResizeDelegate;
         
     private:
         
@@ -203,7 +203,7 @@ namespace
         m_LightProbeRenderJobs.reserve(1);
         m_SSRRenderJobs       .reserve(1);
 
-		m_OnResizeDelegate = Gfx::Main::RegisterResizeHandler(std::bind(&CGfxReflectionRenderer::OnResize, this, std::placeholders::_1, std::placeholders::_2));
+        m_OnResizeDelegate = Gfx::Main::RegisterResizeHandler(std::bind(&CGfxReflectionRenderer::OnResize, this, std::placeholders::_1, std::placeholders::_2));
     }
     
     // -----------------------------------------------------------------------------
@@ -301,7 +301,7 @@ namespace
         
         CTexturePtr SSRTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // SSR
 
-		TextureManager::SetTextureLabel(SSRTexturePtr, "Screen Space Reflection Target");
+        TextureManager::SetTextureLabel(SSRTexturePtr, "Screen Space Reflection Target");
 
         // -----------------------------------------------------------------------------
 
@@ -321,7 +321,7 @@ namespace
         
         m_HCBTexture2DPtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // HCB
 
-		TextureManager::SetTextureLabel(m_HCBTexture2DPtr, "Hierarchical Color Buffer Target");
+        TextureManager::SetTextureLabel(m_HCBTexture2DPtr, "Hierarchical Color Buffer Target");
 
         TextureManager::UpdateMipmap(m_HCBTexture2DPtr);
 
@@ -393,7 +393,7 @@ namespace
         
         m_BRDFTexture2DPtr = TextureManager::CreateTexture2D(TextureDescriptor);
 
-		TextureManager::SetTextureLabel(m_BRDFTexture2DPtr, "BRDF");
+        TextureManager::SetTextureLabel(m_BRDFTexture2DPtr, "BRDF");
         
         // -----------------------------------------------------------------------------
 
@@ -554,7 +554,7 @@ namespace
         
         CTexturePtr SSRTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // SSR
 
-		TextureManager::SetTextureLabel(SSRTexturePtr, "Screen Space Reflection Target");
+        TextureManager::SetTextureLabel(SSRTexturePtr, "Screen Space Reflection Target");
 
         // -----------------------------------------------------------------------------
 
@@ -574,7 +574,7 @@ namespace
         
         m_HCBTexture2DPtr = TextureManager::CreateTexture2D(RendertargetDescriptor); // HCB
 
-		TextureManager::SetTextureLabel(m_HCBTexture2DPtr, "Hierarchical Color Buffer Target");
+        TextureManager::SetTextureLabel(m_HCBTexture2DPtr, "Hierarchical Color Buffer Target");
 
         TextureManager::UpdateMipmap(m_HCBTexture2DPtr);
 

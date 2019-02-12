@@ -33,8 +33,8 @@ namespace MR
         float GetDepthFocalLengthY() const;
         float GetDepthFocalPointX() const;
         float GetDepthFocalPointY() const;
-		float GetMinDepth() const;
-		float GetMaxDepth() const;
+        float GetMinDepth() const;
+        float GetMaxDepth() const;
         bool GetDepthBuffer(unsigned short* pBuffer);
 
     public:
@@ -42,7 +42,7 @@ namespace MR
         CKinectControl();
        ~CKinectControl();
 
-	private:
+    private:
 
         struct Byte4
         {

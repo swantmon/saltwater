@@ -13,7 +13,7 @@ namespace Gfx
 {
 namespace Main
 {
-	using CResizeDelegate = Base::CDelegate<int, int>;
+    using CResizeDelegate = Base::CDelegate<int, int>;
 
     ENGINE_API void OnStart();
     ENGINE_API void OnExit();

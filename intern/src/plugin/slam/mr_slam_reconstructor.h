@@ -22,41 +22,41 @@ namespace MR
 {
     class IRGBDCameraControl;
 
-	struct IndexCompare
-	{
-		bool operator()(const glm::ivec3& rLeft, const glm::ivec3& rRight) const
-		{
-			if (rLeft[0] < rRight[0])
-			{
-				return true;
-			}
-			if (rLeft[0] > rRight[0])
-			{
-				return false;
-			}
-			if (rLeft[1] < rRight[1])
-			{
-				return true;
-			}
-			if (rLeft[1] > rRight[1])
-			{
-				return false;
-			}
-			if (rLeft[2] < rRight[2])
-			{
-				return true;
-			}
-			if (rLeft[2] > rRight[2])
-			{
-				return false;
-			}
-			return false;
-		}
-	};
+    struct IndexCompare
+    {
+        bool operator()(const glm::ivec3& rLeft, const glm::ivec3& rRight) const
+        {
+            if (rLeft[0] < rRight[0])
+            {
+                return true;
+            }
+            if (rLeft[0] > rRight[0])
+            {
+                return false;
+            }
+            if (rLeft[1] < rRight[1])
+            {
+                return true;
+            }
+            if (rLeft[1] > rRight[1])
+            {
+                return false;
+            }
+            if (rLeft[2] < rRight[2])
+            {
+                return true;
+            }
+            if (rLeft[2] > rRight[2])
+            {
+                return false;
+            }
+            return false;
+        }
+    };
 
     class CSLAMReconstructor : private Base::CUncopyable
     {
-	public:
+    public:
 
         struct SPlane
         {
@@ -101,8 +101,8 @@ namespace MR
             static const int s_ComputeOffset = s_ComputeDivOffset + sizeof(SComputeParameters);
         };
 
-		struct SRootVolume
-		{
+        struct SRootVolume
+        {
             glm::ivec3 m_Offset;
             bool m_IsVisible;
             int m_PoolIndex;
@@ -110,7 +110,7 @@ namespace MR
             Gfx::CBufferPtr m_Level2QueuePtr;
             Gfx::CBufferPtr m_IndirectLevel1Buffer;
             Gfx::CBufferPtr m_IndirectLevel2Buffer;
-		};
+        };
 
         struct SRaycastConstantBuffer
         {
@@ -159,7 +159,7 @@ namespace MR
         bool IsTrackingLost() const;
         glm::mat4 GetPoseMatrix() const;
 
-		CRootVolumeMap& GetRootVolumeMap();
+        CRootVolumeMap& GetRootVolumeMap();
         CRootVolumeVector& GetRootVolumeVector();
 
         SSLAMVolume& GetVolume();
@@ -198,11 +198,11 @@ namespace MR
 
     private:
 
-		glm::vec4 GetHessianNormalForm(const glm::vec3& rA, const glm::vec3& rB, const glm::vec3& rC);
-		float GetPointPlaneDistance(const glm::vec3& rPoint, const glm::vec4& rPlane);
-		bool RootGridInFrustum(const glm::ivec3& rKey);
+        glm::vec4 GetHessianNormalForm(const glm::vec3& rA, const glm::vec3& rB, const glm::vec3& rC);
+        float GetPointPlaneDistance(const glm::vec3& rPoint, const glm::vec4& rPlane);
+        bool RootGridInFrustum(const glm::ivec3& rKey);
 
-		void UpdateRootgrids();
+        void UpdateRootgrids();
         void CreateIntegrationQueues(std::vector<uint32_t>& rVolumeQueue);
         void IntegrateHierarchies(std::vector<uint32_t>& rVolumeQueue);
         
@@ -212,7 +212,7 @@ namespace MR
 
         void ClearMarkerStatistics();
 
-		void SetupData();
+        void SetupData();
         void SetupMeshes();
         void SetupRenderStates();
 
@@ -227,7 +227,7 @@ namespace MR
         void Raycast();
         void CreateRaycastPyramid();
         
-		void UpdateFrustum();
+        void UpdateFrustum();
                         
     private:
 
@@ -296,7 +296,7 @@ namespace MR
         
         Gfx::CBufferPtr m_AtomicCounterBufferPtr;
 
-		CRootVolumeMap m_RootVolumeMap;
+        CRootVolumeMap m_RootVolumeMap;
         CRootVolumeVector m_RootVolumeVector;
 
         glm::ivec2 m_DepthFrameSize;
@@ -332,10 +332,10 @@ namespace MR
 
         int m_MinWeight;
 
-		std::vector<float> m_VolumeSizes;
+        std::vector<float> m_VolumeSizes;
         
-		std::array<glm::vec3, 8> m_FrustumPoints;
-		std::array<glm::vec4, 6> m_FrustumPlanes;
+        std::array<glm::vec3, 8> m_FrustumPoints;
+        std::array<glm::vec4, 6> m_FrustumPlanes;
         
         bool m_UseConservativeRasterization;
 

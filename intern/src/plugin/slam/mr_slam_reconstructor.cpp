@@ -39,13 +39,13 @@ using namespace Gfx;
 
 namespace
 {
-	//*
-	const glm::vec3 g_InitialCameraPosition = glm::vec3(0.0f, 0.0f, 0.0f);
-	const glm::vec3 g_InitialCameraRotation = glm::vec3(3.14f, 0.0f, 0.0f);
-	/*/
-	const glm::vec3 g_InitialCameraPosition = glm::vec3(0.5f, 0.5f, -0.5f);
-	const glm::vec3 g_InitialCameraRotation = glm::vec3(0.0f, 0.0f, 0.0f);
-	//*/
+    //*
+    const glm::vec3 g_InitialCameraPosition = glm::vec3(0.0f, 0.0f, 0.0f);
+    const glm::vec3 g_InitialCameraRotation = glm::vec3(3.14f, 0.0f, 0.0f);
+    /*/
+    const glm::vec3 g_InitialCameraPosition = glm::vec3(0.5f, 0.5f, -0.5f);
+    const glm::vec3 g_InitialCameraRotation = glm::vec3(0.0f, 0.0f, 0.0f);
+    //*/
     
     const unsigned int g_MegabyteSize = 1024u * 1024u;
 
@@ -197,9 +197,9 @@ namespace MR
         m_CameraPixels = std::vector<char>(m_DepthFrameSize.x * m_DepthFrameSize.y * 4);
 
         SetupRenderStates();
-		SetupShaders();
-		SetupTextures();
-		SetupBuffers(false);
+        SetupShaders();
+        SetupTextures();
+        SetupBuffers(false);
                 
         m_pTracker = std::make_unique<MR::CICPTracker>(m_DepthFrameSize.x, m_DepthFrameSize.y, m_ReconstructionSettings);
 
@@ -242,10 +242,10 @@ namespace MR
         m_CubeMeshPtr = Gfx::MeshManager::CreateMesh(g_CubeVertices, VertexCount, sizeof(g_CubeVertices[0]), g_CubeIndices, IndexCount);
     }
     
-	// -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
 
-	void CSLAMReconstructor::SetupData()
-	{
+    void CSLAMReconstructor::SetupData()
+    {
         m_IsIntegrationPaused = false;
         m_IsTrackingPaused = false;
 
@@ -264,14 +264,14 @@ namespace MR
         {
             m_VolumeSizes[i] = m_VolumeSizes[i + 1] * m_ReconstructionSettings.m_GridResolutions[i];
         }
-		
-		UpdateFrustum();
-	}
+        
+        UpdateFrustum();
+    }
 
-	// -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
 
-	void CSLAMReconstructor::UpdateFrustum()
-	{
+    void CSLAMReconstructor::UpdateFrustum()
+    {
         float x = (-m_FocalPoint.x / m_DepthFrameSize.x) / (m_FocalLength.x / m_DepthFrameSize.x);
         float y = (-m_FocalPoint.y / m_DepthFrameSize.y) / (m_FocalLength.y / m_DepthFrameSize.y);
                 
@@ -280,58 +280,58 @@ namespace MR
         // and they are even pass the rasterization step even though they cannot contain valid samples
 
         const float Near = 0.5f; // m_pRGBDCameraControl->GetMinDepth();
-		const float Far = m_DepthBounds.y;
+        const float Far = m_DepthBounds.y;
 
-		// near
+        // near
 
-		m_FrustumPoints[0] = glm::vec3( x * Near,  y * Near, Near);
-		m_FrustumPoints[1] = glm::vec3(-x * Near,  y * Near, Near);
-		m_FrustumPoints[2] = glm::vec3(-x * Near, -y * Near, Near);
-		m_FrustumPoints[3] = glm::vec3( x * Near, -y * Near, Near);
+        m_FrustumPoints[0] = glm::vec3( x * Near,  y * Near, Near);
+        m_FrustumPoints[1] = glm::vec3(-x * Near,  y * Near, Near);
+        m_FrustumPoints[2] = glm::vec3(-x * Near, -y * Near, Near);
+        m_FrustumPoints[3] = glm::vec3( x * Near, -y * Near, Near);
 
-		// far
+        // far
 
-		m_FrustumPoints[4] = glm::vec3( x * Far,  y * Far, Far);
-		m_FrustumPoints[5] = glm::vec3(-x * Far,  y * Far, Far);
-		m_FrustumPoints[6] = glm::vec3(-x * Far, -y * Far, Far);
-		m_FrustumPoints[7] = glm::vec3( x * Far, -y * Far, Far);
+        m_FrustumPoints[4] = glm::vec3( x * Far,  y * Far, Far);
+        m_FrustumPoints[5] = glm::vec3(-x * Far,  y * Far, Far);
+        m_FrustumPoints[6] = glm::vec3(-x * Far, -y * Far, Far);
+        m_FrustumPoints[7] = glm::vec3( x * Far, -y * Far, Far);
 
-		for (int i = 0; i < m_FrustumPoints.size(); ++i)
-		{
-			glm::vec4 Corner = glm::vec4(m_FrustumPoints[i], 1.0f);
-			Corner = m_PoseMatrix * Corner;
-			m_FrustumPoints[i] = glm::vec3(Corner[0], Corner[1], Corner[2]);
-		}
+        for (int i = 0; i < m_FrustumPoints.size(); ++i)
+        {
+            glm::vec4 Corner = glm::vec4(m_FrustumPoints[i], 1.0f);
+            Corner = m_PoseMatrix * Corner;
+            m_FrustumPoints[i] = glm::vec3(Corner[0], Corner[1], Corner[2]);
+        }
 
-		m_FrustumPlanes[0] = GetHessianNormalForm(m_FrustumPoints[0], m_FrustumPoints[2], m_FrustumPoints[1]); // near
-		m_FrustumPlanes[1] = GetHessianNormalForm(m_FrustumPoints[6], m_FrustumPoints[7], m_FrustumPoints[4]); // far
-		m_FrustumPlanes[2] = GetHessianNormalForm(m_FrustumPoints[4], m_FrustumPoints[3], m_FrustumPoints[0]); // right
-		m_FrustumPlanes[3] = GetHessianNormalForm(m_FrustumPoints[1], m_FrustumPoints[6], m_FrustumPoints[5]); // left
-		m_FrustumPlanes[4] = GetHessianNormalForm(m_FrustumPoints[4], m_FrustumPoints[1], m_FrustumPoints[5]); // top
-		m_FrustumPlanes[5] = GetHessianNormalForm(m_FrustumPoints[7], m_FrustumPoints[6], m_FrustumPoints[2]); // bottom
-	}
+        m_FrustumPlanes[0] = GetHessianNormalForm(m_FrustumPoints[0], m_FrustumPoints[2], m_FrustumPoints[1]); // near
+        m_FrustumPlanes[1] = GetHessianNormalForm(m_FrustumPoints[6], m_FrustumPoints[7], m_FrustumPoints[4]); // far
+        m_FrustumPlanes[2] = GetHessianNormalForm(m_FrustumPoints[4], m_FrustumPoints[3], m_FrustumPoints[0]); // right
+        m_FrustumPlanes[3] = GetHessianNormalForm(m_FrustumPoints[1], m_FrustumPoints[6], m_FrustumPoints[5]); // left
+        m_FrustumPlanes[4] = GetHessianNormalForm(m_FrustumPoints[4], m_FrustumPoints[1], m_FrustumPoints[5]); // top
+        m_FrustumPlanes[5] = GetHessianNormalForm(m_FrustumPoints[7], m_FrustumPoints[6], m_FrustumPoints[2]); // bottom
+    }
 
-	// -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
 
-	glm::vec4 CSLAMReconstructor::GetHessianNormalForm(const glm::vec3& rA, const glm::vec3& rB, const glm::vec3& rC)
-	{
-		glm::vec3 V1 = rB - rA;
+    glm::vec4 CSLAMReconstructor::GetHessianNormalForm(const glm::vec3& rA, const glm::vec3& rB, const glm::vec3& rC)
+    {
+        glm::vec3 V1 = rB - rA;
         glm::vec3 V2 = rC - rA;
 
         glm::vec3 Normal = glm::normalize(glm::cross(V1, V2));
 
         float D = glm::dot(rA, Normal);
 
-		return glm::vec4(Normal, D);
-	}
+        return glm::vec4(Normal, D);
+    }
 
-	// -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
 
-	float CSLAMReconstructor::GetPointPlaneDistance(const glm::vec3& rPoint, const glm::vec4& rPlane)
-	{
+    float CSLAMReconstructor::GetPointPlaneDistance(const glm::vec3& rPoint, const glm::vec4& rPlane)
+    {
         const float Dot = glm::dot(rPoint, glm::vec3(rPlane));
-		return Dot - rPlane[3];
-	}
+        return Dot - rPlane[3];
+    }
 
     // -----------------------------------------------------------------------------
     
@@ -524,46 +524,46 @@ namespace MR
     
     // -----------------------------------------------------------------------------
     
-	bool CSLAMReconstructor::RootGridInFrustum(const glm::ivec3& rKey)
-	{
-		float AABB[6];
+    bool CSLAMReconstructor::RootGridInFrustum(const glm::ivec3& rKey)
+    {
+        float AABB[6];
 
-		for (int PlaneIndex = 0; PlaneIndex < 3; ++PlaneIndex)
-		{
-			AABB[PlaneIndex * 2] = rKey[PlaneIndex] * m_VolumeSizes[0];
-			AABB[PlaneIndex * 2 + 1] = AABB[PlaneIndex * 2] + m_VolumeSizes[0];
-		}
+        for (int PlaneIndex = 0; PlaneIndex < 3; ++PlaneIndex)
+        {
+            AABB[PlaneIndex * 2] = rKey[PlaneIndex] * m_VolumeSizes[0];
+            AABB[PlaneIndex * 2 + 1] = AABB[PlaneIndex * 2] + m_VolumeSizes[0];
+        }
 
-		glm::vec3 Cube[8] =
-		{
-			glm::vec3(AABB[0], AABB[2], AABB[4]),
-			glm::vec3(AABB[0], AABB[3], AABB[4]),
-			glm::vec3(AABB[0], AABB[2], AABB[5]),
-			glm::vec3(AABB[0], AABB[3], AABB[5]),
-			glm::vec3(AABB[1], AABB[2], AABB[4]),
-			glm::vec3(AABB[1], AABB[3], AABB[4]),
-			glm::vec3(AABB[1], AABB[2], AABB[5]),
-			glm::vec3(AABB[1], AABB[3], AABB[5]),
-		};
+        glm::vec3 Cube[8] =
+        {
+            glm::vec3(AABB[0], AABB[2], AABB[4]),
+            glm::vec3(AABB[0], AABB[3], AABB[4]),
+            glm::vec3(AABB[0], AABB[2], AABB[5]),
+            glm::vec3(AABB[0], AABB[3], AABB[5]),
+            glm::vec3(AABB[1], AABB[2], AABB[4]),
+            glm::vec3(AABB[1], AABB[3], AABB[4]),
+            glm::vec3(AABB[1], AABB[2], AABB[5]),
+            glm::vec3(AABB[1], AABB[3], AABB[5]),
+        };
 
-		for (int PlaneIndex = 0; PlaneIndex < 6; ++ PlaneIndex)
-		{
-			int Outside = 0;
-			for (int CubeIndex = 0; CubeIndex < 8; ++ CubeIndex)
-			{
-				if (GetPointPlaneDistance(Cube[CubeIndex], m_FrustumPlanes[PlaneIndex]) > 0)
-				{
-					++ Outside;
-				}
-			}
-			if (Outside == 8)
-			{
-				return false;
-			}
-		}
+        for (int PlaneIndex = 0; PlaneIndex < 6; ++ PlaneIndex)
+        {
+            int Outside = 0;
+            for (int CubeIndex = 0; CubeIndex < 8; ++ CubeIndex)
+            {
+                if (GetPointPlaneDistance(Cube[CubeIndex], m_FrustumPlanes[PlaneIndex]) > 0)
+                {
+                    ++ Outside;
+                }
+            }
+            if (Outside == 8)
+            {
+                return false;
+            }
+        }
 
-		return true;
-	}
+        return true;
+    }
 
     // -----------------------------------------------------------------------------
 
@@ -617,7 +617,7 @@ namespace MR
         ContextManager::Dispatch(Count, 1, 1);
     }
 
-	// -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
     
     void CSLAMReconstructor::CreateIntegrationQueues(std::vector<uint32_t>& rVolumeQueue)
     {
@@ -903,54 +903,54 @@ namespace MR
     
     // -----------------------------------------------------------------------------
 
-	void CSLAMReconstructor::UpdateRootgrids()
-	{
+    void CSLAMReconstructor::UpdateRootgrids()
+    {
         ////////////////////////////////////////////////////////////////////////////////
         // Create all root grid volumes that are in the view frustum 
         ////////////////////////////////////////////////////////////////////////////////
 
-		glm::vec3 BBMax = m_FrustumPoints[0];
+        glm::vec3 BBMax = m_FrustumPoints[0];
         glm::vec3 BBMin = m_FrustumPoints[0];
 
-		for (int i = 1; i < m_FrustumPoints.size(); ++ i)
-		{
-			for (int j = 0; j < 3; ++ j)
-			{
-				BBMax[j] = glm::max(m_FrustumPoints[i][j], BBMax[j]);
-				BBMin[j] = glm::min(m_FrustumPoints[i][j], BBMin[j]);
-			}
-		}
-		
+        for (int i = 1; i < m_FrustumPoints.size(); ++ i)
+        {
+            for (int j = 0; j < 3; ++ j)
+            {
+                BBMax[j] = glm::max(m_FrustumPoints[i][j], BBMax[j]);
+                BBMin[j] = glm::min(m_FrustumPoints[i][j], BBMin[j]);
+            }
+        }
+        
         glm::ivec3 MaxIndex;
         glm::ivec3 MinIndex;
 
-		for (int i = 0; i < 3; ++ i)
-		{
-			MaxIndex[i] = static_cast<int>(BBMax[i] / m_VolumeSizes[0]);
-			MinIndex[i] = static_cast<int>(BBMin[i] / m_VolumeSizes[0]);
-		}
+        for (int i = 0; i < 3; ++ i)
+        {
+            MaxIndex[i] = static_cast<int>(BBMax[i] / m_VolumeSizes[0]);
+            MinIndex[i] = static_cast<int>(BBMin[i] / m_VolumeSizes[0]);
+        }
 
-		SRootVolume RootVolume;
+        SRootVolume RootVolume;
         RootVolume.m_PoolIndex = -1;
 
-		for (int x = MinIndex[0] - 1; x <= MaxIndex[0]; ++ x)
-		{
-			for (int y = MinIndex[1] - 1; y <= MaxIndex[1]; ++ y)
-			{
-				for (int z = MinIndex[2] - 1; z <= MaxIndex[2]; ++ z)
-				{
+        for (int x = MinIndex[0] - 1; x <= MaxIndex[0]; ++ x)
+        {
+            for (int y = MinIndex[1] - 1; y <= MaxIndex[1]; ++ y)
+            {
+                for (int z = MinIndex[2] - 1; z <= MaxIndex[2]; ++ z)
+                {
                     glm::ivec3 Key = glm::ivec3(x, y, z);
-					
-					if (m_RootVolumeMap.count(Key) == 0 && RootGridInFrustum(Key))
-					{
-						RootVolume.m_Offset = Key;
-						RootVolume.m_IsVisible = true;
+                    
+                    if (m_RootVolumeMap.count(Key) == 0 && RootGridInFrustum(Key))
+                    {
+                        RootVolume.m_Offset = Key;
+                        RootVolume.m_IsVisible = true;
 
-						m_RootVolumeMap[Key] = RootVolume;
-					}
-				}
-			}
-		}
+                        m_RootVolumeMap[Key] = RootVolume;
+                    }
+                }
+            }
+        }
 
         ////////////////////////////////////////////////////////////////////////////////
         // Prepare instance buffers
@@ -966,11 +966,11 @@ namespace MR
         
         SInstanceData* pInstanceData = static_cast<SInstanceData*>(BufferManager::MapBuffer(m_RootVolumeInstanceBufferPtr, CBuffer::Write));
 
-		for (auto& rPair : m_RootVolumeMap)
-		{
-			auto& rRootGrid = rPair.second;
+        for (auto& rPair : m_RootVolumeMap)
+        {
+            auto& rRootGrid = rPair.second;
 
-			rRootGrid.m_IsVisible = RootGridInFrustum(rRootGrid.m_Offset);
+            rRootGrid.m_IsVisible = RootGridInFrustum(rRootGrid.m_Offset);
             
             if (rRootGrid.m_IsVisible)
             {
@@ -1085,9 +1085,9 @@ namespace MR
 
             Performance::EndEvent();
         }
-	}
+    }
 
-	// -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
 
     void CSLAMReconstructor::SetupTextures()
     {
@@ -1147,14 +1147,14 @@ namespace MR
 
         m_RawVertexMapPtr = TextureManager::CreateTexture2D(TextureDescriptor);
 
-		if (m_ReconstructionSettings.m_CaptureColor)
-		{
-			TextureDescriptor.m_NumberOfPixelsU = m_ColorFrameSize.x;
-			TextureDescriptor.m_NumberOfPixelsV = m_ColorFrameSize.y;
-			TextureDescriptor.m_Format = CTexture::R8G8B8A8_UBYTE;
+        if (m_ReconstructionSettings.m_CaptureColor)
+        {
+            TextureDescriptor.m_NumberOfPixelsU = m_ColorFrameSize.x;
+            TextureDescriptor.m_NumberOfPixelsV = m_ColorFrameSize.y;
+            TextureDescriptor.m_Format = CTexture::R8G8B8A8_UBYTE;
 
-			m_RawCameraFramePtr = TextureManager::CreateTexture2D(TextureDescriptor);
-		}
+            m_RawCameraFramePtr = TextureManager::CreateTexture2D(TextureDescriptor);
+        }
 
         const int VolumeWidth = m_ReconstructionSettings.m_GridResolutions[0] * m_ReconstructionSettings.m_GridResolutions[1];
 
@@ -1825,11 +1825,11 @@ namespace MR
             m_ReconstructionSettings = *pReconstructionSettings;
         }
 
-		SetupData();
+        SetupData();
 
-		SetupTextures();
-		SetupBuffers(false);
-		SetupShaders();
+        SetupTextures();
+        SetupBuffers(false);
+        SetupShaders();
 
         ClearPool();
 

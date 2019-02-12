@@ -11,7 +11,7 @@
 namespace MATH
 {
 
-	class CFrustum
+    class CFrustum
     {
 
         //
@@ -86,7 +86,7 @@ namespace MATH
 namespace MATH
 {
 
-	glm::vec4& CFrustum::operator[] (const int _Index)
+    glm::vec4& CFrustum::operator[] (const int _Index)
     {
         assert(_Index >= 0 && _Index < NumberOfPlanes);
 

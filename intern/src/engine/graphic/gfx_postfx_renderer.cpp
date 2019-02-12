@@ -165,7 +165,7 @@ namespace
 
         bool m_DebugAlbedo;
 
-		Gfx::Main::CResizeDelegate::HandleType m_OnResizeDelegate;
+        Gfx::Main::CResizeDelegate::HandleType m_OnResizeDelegate;
         
     private:
         
@@ -200,7 +200,7 @@ namespace
         m_PostAARenderJobs.reserve(2);
         m_DOFRenderJobs   .reserve(2);
 
-		m_OnResizeDelegate = Gfx::Main::RegisterResizeHandler(std::bind(&CGfxPostFXRenderer::OnResize, this, std::placeholders::_1, std::placeholders::_2));
+        m_OnResizeDelegate = Gfx::Main::RegisterResizeHandler(std::bind(&CGfxPostFXRenderer::OnResize, this, std::placeholders::_1, std::placeholders::_2));
     }
     
     // -----------------------------------------------------------------------------

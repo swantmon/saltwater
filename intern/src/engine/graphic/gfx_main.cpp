@@ -43,7 +43,7 @@ namespace
         
     public:
         
-		CResizeDelegate::HandleType RegisterResizeHandler(CResizeDelegate::FunctionType _Function);
+        CResizeDelegate::HandleType RegisterResizeHandler(CResizeDelegate::FunctionType _Function);
         
     public:
 
@@ -267,9 +267,9 @@ namespace
     
     // -----------------------------------------------------------------------------
     
-	CResizeDelegate::HandleType CGfxMain::RegisterResizeHandler(CResizeDelegate::FunctionType _Function)
+    CResizeDelegate::HandleType CGfxMain::RegisterResizeHandler(CResizeDelegate::FunctionType _Function)
     {
-		return CResizeDelegate::Register(_Function);
+        return CResizeDelegate::Register(_Function);
     }
 
     // -----------------------------------------------------------------------------
@@ -398,9 +398,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Send to every delegate that resize has changed
         // -----------------------------------------------------------------------------
-		auto Size = m_WindowInfos[_WindowID].m_InternalWindowSize;
+        auto Size = m_WindowInfos[_WindowID].m_InternalWindowSize;
 
-		CResizeDelegate::Notify(Size[0], Size[1]);
+        CResizeDelegate::Notify(Size[0], Size[1]);
     }
 
     // -----------------------------------------------------------------------------
@@ -945,8 +945,8 @@ namespace
             // -----------------------------------------------------------------------------
             // Save created data
             // -----------------------------------------------------------------------------
-			_rWindowInfo.m_pNativeDeviceContextHandle = pNativeDeviceContextHandle;
-			_rWindowInfo.m_pNativeOpenGLContextHandle = pNativeOpenGLContextHandle;
+            _rWindowInfo.m_pNativeDeviceContextHandle = pNativeDeviceContextHandle;
+            _rWindowInfo.m_pNativeOpenGLContextHandle = pNativeOpenGLContextHandle;
 #endif
     }
 
@@ -984,7 +984,7 @@ namespace Main
     
     // -----------------------------------------------------------------------------
     
-	CResizeDelegate::HandleType RegisterResizeHandler(CResizeDelegate::FunctionType _Function)
+    CResizeDelegate::HandleType RegisterResizeHandler(CResizeDelegate::FunctionType _Function)
     {
         return CGfxMain::GetInstance().RegisterResizeHandler(_Function);
     }

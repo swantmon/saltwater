@@ -83,11 +83,11 @@ namespace
         CShaderPtr  m_ForegroundBlurShaderPtr;
         CTexturePtr m_BackgroundTexturePtr;
         CBufferPtr  m_GaussianPropertiesPtr;
-		CBufferPtr  m_FilterPropertiesPtr;
+        CBufferPtr  m_FilterPropertiesPtr;
 
-		Dt::CComponentManager::CComponentDelegate::HandleType m_OnDirtyComponentDelegate;
+        Dt::CComponentManager::CComponentDelegate::HandleType m_OnDirtyComponentDelegate;
 
-		Dt::EntityManager::CEntityDelegate::HandleType m_OnDirtyEntityDelegate;
+        Dt::EntityManager::CEntityDelegate::HandleType m_OnDirtyEntityDelegate;
 
     private:
 
@@ -197,9 +197,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Register dirty entity handler for automatic sky creation
         // -----------------------------------------------------------------------------
-		m_OnDirtyComponentDelegate = Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(std::bind(&CGfxAreaLightManager::OnDirtyComponent, this, std::placeholders::_1));
+        m_OnDirtyComponentDelegate = Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(std::bind(&CGfxAreaLightManager::OnDirtyComponent, this, std::placeholders::_1));
 
-		m_OnDirtyEntityDelegate = Dt::EntityManager::RegisterDirtyEntityHandler(std::bind(&CGfxAreaLightManager::OnDirtyEntity, this, std::placeholders::_1));
+        m_OnDirtyEntityDelegate = Dt::EntityManager::RegisterDirtyEntityHandler(std::bind(&CGfxAreaLightManager::OnDirtyEntity, this, std::placeholders::_1));
     }
 
     // -----------------------------------------------------------------------------

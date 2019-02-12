@@ -26,7 +26,7 @@
 
 namespace SER
 {
-	class CTextWriter : public CArchive
+    class CTextWriter : public CArchive
     {
     public:
         enum
@@ -121,7 +121,7 @@ namespace SER
 
 namespace SER
 {
-	inline CTextWriter::CTextWriter(CStream& _rStream, unsigned int _Version)
+    inline CTextWriter::CTextWriter(CStream& _rStream, unsigned int _Version)
         : CArchive        (_Version)
         , m_pStream       (&_rStream)
         , m_NumberOfIdents(0)

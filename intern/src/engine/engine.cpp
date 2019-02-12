@@ -118,7 +118,7 @@ namespace
 
     void CEngine::Update()
     {
-		Core::PluginManager::Update();
+        Core::PluginManager::Update();
 
         Core::Time::Update();
 
@@ -143,7 +143,7 @@ namespace
 
     void CEngine::Resume()
     {
-		Core::PluginManager::OnResume();
+        Core::PluginManager::OnResume();
 
         RaiseEvent(EEvent::Engine_OnResume);
     }
@@ -152,7 +152,7 @@ namespace
 
     void CEngine::Pause()
     {
-		Core::PluginManager::OnPause();
+        Core::PluginManager::OnPause();
 
         RaiseEvent(EEvent::Engine_OnPause);
     }

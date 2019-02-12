@@ -38,7 +38,7 @@ namespace MR
         CICPTracker(int _Width, int _Height, const MR::SReconstructionSettings& _Settings);
        ~CICPTracker();
 
-	private:
+    private:
 
         void CICPTracker::DetermineSummands(int PyramidLevel, const glm::mat4& rIncPoseMatrix,
             const CICPTracker::CTextureVector& _rReferenceVertexMap,

@@ -24,7 +24,7 @@
 
 namespace SER
 {
-	class CTextReader : public CArchive
+    class CTextReader : public CArchive
     {
     public:
         enum
@@ -124,7 +124,7 @@ namespace SER
 
 namespace SER
 {
-	inline CTextReader::CTextReader(CStream& _rStream, unsigned int _Version)
+    inline CTextReader::CTextReader(CStream& _rStream, unsigned int _Version)
         : CArchive        (_Version)
         , m_pStream       (&_rStream)
         , m_NumberOfIdents(0)

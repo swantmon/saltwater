@@ -57,11 +57,11 @@ namespace
         glm::vec3(0.0f, 1.0f, 1.0f),
     };
 
-	struct SDrawCallConstantBuffer
-	{
-		glm::mat4 m_WorldMatrix;
-		glm::vec4 m_Color;
-	};
+    struct SDrawCallConstantBuffer
+    {
+        glm::mat4 m_WorldMatrix;
+        glm::vec4 m_Color;
+    };
 
     struct SPickingBuffer
     {
@@ -142,7 +142,7 @@ namespace
 
         void Initialize();
         
-		void RaycastVolume();
+        void RaycastVolume();
         void RaycastVolumeWithHighlight();
         void RaycastVolumeDiminished();
         void RenderInpaintedPlane();
@@ -161,7 +161,7 @@ namespace
 
     private:
 
-		MR::CSLAMReconstructor* m_pReconstructor;
+        MR::CSLAMReconstructor* m_pReconstructor;
         
         CShaderPtr m_OutlineVSPtr;
         CShaderPtr m_OutlineFSPtr;
@@ -190,10 +190,10 @@ namespace
         CBufferPtr m_DrawCallConstantBufferPtr;
                 
         CMeshPtr m_CameraMeshPtr;
-		CInputLayoutPtr m_CameraInputLayoutPtr;
+        CInputLayoutPtr m_CameraInputLayoutPtr;
 
-		CMeshPtr m_CubeOutlineMeshPtr;
-		CInputLayoutPtr m_CubeOutlineInputLayoutPtr;
+        CMeshPtr m_CubeOutlineMeshPtr;
+        CInputLayoutPtr m_CubeOutlineInputLayoutPtr;
 
         CMeshPtr m_VolumeMeshPtr;        
         CInputLayoutPtr m_VolumeInputLayoutPtr;
@@ -232,9 +232,9 @@ namespace
 
         Base::AABB3Float m_SelectionBox;
 
-		bool m_IsInitialized;
+        bool m_IsInitialized;
 
-		Gfx::Main::CResizeDelegate::HandleType m_ResizeDelegate;
+        Gfx::Main::CResizeDelegate::HandleType m_ResizeDelegate;
     };
 } // namespace
 
@@ -268,7 +268,7 @@ namespace
     {
         assert(Main::GetGraphicsAPI().m_GraphicsAPI == CGraphicsInfo::OpenGL);
 
-		m_ResizeDelegate = Gfx::Main::RegisterResizeHandler(std::bind(&CGfxReconstructionRenderer::OnResize, this, std::placeholders::_1, std::placeholders::_2));
+        m_ResizeDelegate = Gfx::Main::RegisterResizeHandler(std::bind(&CGfxReconstructionRenderer::OnResize, this, std::placeholders::_1, std::placeholders::_2));
                                 
         m_UseTrackingCamera   = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:use_tracking_camera", true);
         m_RenderVolume        = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:volume"             , true);
@@ -331,17 +331,17 @@ namespace
         m_CameraMeshPtr = 0;
         m_VolumeMeshPtr = 0;
         m_InpaintedPlaneMeshPtr = 0;
-		m_CubeOutlineMeshPtr = 0;
+        m_CubeOutlineMeshPtr = 0;
         m_PlaneMeshPtr = 0;
         m_CameraInputLayoutPtr = 0;
         m_VolumeInputLayoutPtr = 0;
         m_InpaintedPlaneLayoutPtr = 0;
-		m_CubeOutlineInputLayoutPtr = 0;
+        m_CubeOutlineInputLayoutPtr = 0;
 
         m_OutlineRenderContextPtr = 0;
         m_PlaneRenderContextPtr = 0;
 
-		m_pReconstructor = nullptr;
+        m_pReconstructor = nullptr;
 
         m_PointCloudVSPtr = 0;
         m_PointCloudFSPtr = 0;
@@ -362,7 +362,7 @@ namespace
     
     void CGfxReconstructionRenderer::OnSetupShader()
     {
-		MR::SReconstructionSettings Settings;
+        MR::SReconstructionSettings Settings;
 
         const std::string InternalFormatString = Core::CProgramParameters::GetInstance().Get("mr:slam:map_format", "rgba16f");
 
@@ -830,10 +830,10 @@ namespace
         Performance::EndEvent();
     }
         
-	// -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
 
-	void CGfxReconstructionRenderer::RaycastVolume()
-	{
+    void CGfxReconstructionRenderer::RaycastVolume()
+    {
         Performance::BeginEvent("Raycasting for rendering");
 
         ContextManager::SetTargetSet(TargetSetManager::GetDeferredTargetSet());
@@ -910,7 +910,7 @@ namespace
         ContextManager::DrawIndexed(36, 0, 0);
 
         Performance::EndEvent();
-	}
+    }
 
     // -----------------------------------------------------------------------------
 
@@ -1118,38 +1118,38 @@ namespace
         Performance::EndEvent();
     }
 
-	// -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
 
-	void CGfxReconstructionRenderer::RenderQueuedRootVolumes()
-	{
-		ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
+    void CGfxReconstructionRenderer::RenderQueuedRootVolumes()
+    {
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
 
-		ContextManager::SetRenderContext(m_OutlineRenderContextPtr);
-		ContextManager::SetShaderVS(m_OutlineVSPtr);
-		ContextManager::SetShaderPS(m_OutlineFSPtr);
+        ContextManager::SetRenderContext(m_OutlineRenderContextPtr);
+        ContextManager::SetShaderVS(m_OutlineVSPtr);
+        ContextManager::SetShaderPS(m_OutlineFSPtr);
 
-		ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
-		ContextManager::SetConstantBuffer(1, m_DrawCallConstantBufferPtr);
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+        ContextManager::SetConstantBuffer(1, m_DrawCallConstantBufferPtr);
 
-		SDrawCallConstantBuffer BufferData;
+        SDrawCallConstantBuffer BufferData;
 
-		ContextManager::SetVertexBuffer(m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
-		ContextManager::SetInputLayout(m_CubeOutlineInputLayoutPtr);
+        ContextManager::SetVertexBuffer(m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
+        ContextManager::SetInputLayout(m_CubeOutlineInputLayoutPtr);
 
-		ContextManager::SetTopology(STopology::LineList);
+        ContextManager::SetTopology(STopology::LineList);
 
         glm::vec3 Position;
-		glm::mat4 Scaling;
-		glm::mat4 Translation;
+        glm::mat4 Scaling;
+        glm::mat4 Translation;
 
         const auto& GridSizes = m_pReconstructor->GetVolumeSizes();
 
-		for (auto& rPair : m_pReconstructor->GetRootVolumeMap())
-		{
-			auto& rRootGrid = rPair.second;
+        for (auto& rPair : m_pReconstructor->GetRootVolumeMap())
+        {
+            auto& rRootGrid = rPair.second;
 
-			if (rRootGrid.m_IsVisible)
-			{
+            if (rRootGrid.m_IsVisible)
+            {
                 Position[0] = static_cast<float>(rRootGrid.m_Offset[0]);
                 Position[1] = static_cast<float>(rRootGrid.m_Offset[1]);
                 Position[2] = static_cast<float>(rRootGrid.m_Offset[2]);
@@ -1166,9 +1166,9 @@ namespace
                 BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
 
                 ContextManager::Draw(m_CubeOutlineMeshPtr->GetLOD(0)->GetSurface()->GetNumberOfVertices(), 0);
-			}
-		}
-	}
+            }
+        }
+    }
 
     // -----------------------------------------------------------------------------
 
@@ -1294,14 +1294,14 @@ namespace
         ContextManager::SetShaderVS(m_OutlineVSPtr);
         ContextManager::SetShaderPS(m_OutlineFSPtr);
 
-		SDrawCallConstantBuffer BufferData;
+        SDrawCallConstantBuffer BufferData;
 
         glm::mat4 PoseMatrix = m_pReconstructor->GetPoseMatrix();
         
         BufferData.m_WorldMatrix = glm::eulerAngleX(glm::half_pi<float>()) * PoseMatrix;
-		BufferData.m_Color = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
+        BufferData.m_Color = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
 
-		BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
+        BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
 
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
         ContextManager::SetConstantBuffer(1, m_DrawCallConstantBufferPtr);

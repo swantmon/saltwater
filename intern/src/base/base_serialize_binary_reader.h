@@ -23,7 +23,7 @@
 
 namespace SER
 {
-	class CBinaryReader : public CArchive
+    class CBinaryReader : public CArchive
     {
     public:
         enum
@@ -75,7 +75,7 @@ namespace SER
 
 namespace SER
 {
-	inline CBinaryReader::CBinaryReader(CStream& _rStream, unsigned int _Version)
+    inline CBinaryReader::CBinaryReader(CStream& _rStream, unsigned int _Version)
         : CArchive (_Version)
         , m_pStream(&_rStream)
     {

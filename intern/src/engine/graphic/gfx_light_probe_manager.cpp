@@ -185,9 +185,9 @@ namespace
         CBufferPtr m_GeometryVPBufferPtr;
         CBufferPtr m_GeometryMBufferPtr;
 
-		SLightJob m_LightJob;
+        SLightJob m_LightJob;
 
-		Dt::CComponentManager::CComponentDelegate::HandleType m_OnDirtyComponentDelegate;
+        Dt::CComponentManager::CComponentDelegate::HandleType m_OnDirtyComponentDelegate;
 
     private:
 
@@ -391,7 +391,7 @@ namespace
         // Register dirty handler for automatic light probe / reflection
         // creation
         // -----------------------------------------------------------------------------
-		m_OnDirtyComponentDelegate = Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(std::bind(&CGfxLightProbeManager::OnDirtyComponent, this, std::placeholders::_1));
+        m_OnDirtyComponentDelegate = Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(std::bind(&CGfxLightProbeManager::OnDirtyComponent, this, std::placeholders::_1));
     }
 
     // -----------------------------------------------------------------------------
@@ -521,7 +521,7 @@ namespace
 
         _rInterLightProbeFacet.m_ReflectionCubemapPtr = TextureManager::CreateCubeTexture(TextureDescriptor);
 
-		TextureManager::SetTextureLabel(_rInterLightProbeFacet.m_ReflectionCubemapPtr, "Light Probe Reflection Texture");
+        TextureManager::SetTextureLabel(_rInterLightProbeFacet.m_ReflectionCubemapPtr, "Light Probe Reflection Texture");
 
         // -----------------------------------------------------------------------------
 
@@ -580,7 +580,7 @@ namespace
         
         _rInterLightProbeFacet.m_SpecularPtr = TextureManager::CreateCubeTexture(TextureDescriptor);
 
-		TextureManager::SetTextureLabel(_rInterLightProbeFacet.m_SpecularPtr, "Light Probe Specular Texture");
+        TextureManager::SetTextureLabel(_rInterLightProbeFacet.m_SpecularPtr, "Light Probe Specular Texture");
         
         // -----------------------------------------------------------------------------
         
@@ -592,7 +592,7 @@ namespace
         
         _rInterLightProbeFacet.m_DiffusePtr = TextureManager::CreateCubeTexture(TextureDescriptor);
 
-		TextureManager::SetTextureLabel(_rInterLightProbeFacet.m_DiffusePtr, "Light Probe Diffuse Texture");
+        TextureManager::SetTextureLabel(_rInterLightProbeFacet.m_DiffusePtr, "Light Probe Diffuse Texture");
         
         // -----------------------------------------------------------------------------
         // For all cube maps create a render target for every mip map

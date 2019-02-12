@@ -10,7 +10,7 @@
 
 namespace 
 {
-	class CTestSuite
+    class CTestSuite
     {
         
     public:
