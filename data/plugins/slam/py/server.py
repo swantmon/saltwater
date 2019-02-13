@@ -71,7 +71,7 @@ def OnNewClient(_Socket, _Address, _ID):
     # Prepare for output
     # -----------------------------------------------------------------------------
     os.makedirs('{}{}'.format(opt.output, _Address[0]), exist_ok=True)
-    os.makedirs('./tmp/{}'.format(_Address[0]), exist_ok=True)
+    os.makedirs('{}{}'.format(opt.temp, _Address[0]), exist_ok=True)
 
     # -----------------------------------------------------------------------------
     # Wait for data
