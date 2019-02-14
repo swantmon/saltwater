@@ -5,64 +5,20 @@ import torch.nn as nn
 import torch.optim as optim
 import torchvision.transforms as transforms
 
+from torchvision.utils import save_image
+
 from PIL import Image
-from CaffeLoader import loadCaffemodel
-
-import argparse
-parser = argparse.ArgumentParser()
-# Basic options
-parser.add_argument("-style_image", help="Style target image", default='D:/NN/plugin_slam/examples/inputs/simp1.jpg')
-parser.add_argument("-style_blend_weights", default=None) 
-parser.add_argument("-content_image", help="Content target image", default='D:/NN/plugin_slam/examples/inputs/brad_pitt.jpg')
-parser.add_argument("-image_size", help="Maximum height / width of generated image", type=int, default=512)
-parser.add_argument("-gpu", help="Zero-indexed ID of the GPU to use; for CPU mode set -gpu = -1", type=int, default=0)
-
-# Optimization options
-parser.add_argument("-content_weight", type=float, default=5e0) 
-parser.add_argument("-style_weight", type=float, default=1e2)
-parser.add_argument("-tv_weight", type=float, default=1e-3)
-parser.add_argument("-num_iterations", type=int, default=1000)
-parser.add_argument("-init", choices=['random', 'image'], default='random')
-parser.add_argument("-init_image", default=None)
-parser.add_argument("-optimizer", choices=['lbfgs', 'adam'], default='lbfgs')
-parser.add_argument("-learning_rate", type=float, default=1e0)
-parser.add_argument("-lbfgs_num_correction", type=int, default=0)
-
-# Output options      
-parser.add_argument("-print_iter", type=int, default=50)
-parser.add_argument("-save_iter", type=int, default=100)
-parser.add_argument("-output_image", default='out.png')
-
-# Other options
-parser.add_argument("-style_scale", type=float, default=1.0)
-parser.add_argument("-original_colors", type=int, choices=[0, 1], default=0)
-parser.add_argument("-pooling", choices=['avg', 'max'], default='max')
-parser.add_argument("-model_file", type=str, default='D:/NN/plugin_slam/models/vgg19-d01eb7cb.pth')
-parser.add_argument("-backend", choices=['nn', 'cudnn', 'mkl'], default='nn')
-parser.add_argument("-cudnn_autotune", action='store_true')
-parser.add_argument("-seed", type=int, default=-1)
-
-parser.add_argument("-content_layers", help="layers for content", default='relu4_2')
-parser.add_argument("-style_layers", help="layers for style", default='relu1_1,relu2_1,relu3_1,relu4_1,relu5_1')
-
-parser.add_argument('--output', type=str, default='D:/NN/plugin_slam/output/', help='output folder of the results')
-
-params = parser.parse_args()
-
-
-os.makedirs(params.output, exist_ok=True)
-
+from extern.CaffeLoader import loadCaffemodel
 
 Image.MAX_IMAGE_PIXELS = 1000000000 # Support gigapixel images
 
-
-def main():       
-    dtype = setup_gpu()
+def NeuralStyle(params, _Content, _Style):       
+    dtype = setup_gpu(params)
 
     cnn, layerList = loadCaffemodel(params.model_file, params.pooling, params.gpu)  
 
-    content_image = preprocess(params.content_image, params.image_size).type(dtype)
-    style_image_list = params.style_image.split(',')
+    content_image = preprocess(_Content, params.image_size).type(dtype)
+    style_image_list = _Style.split(',')
     style_images_caffe = []
     for image in style_image_list:
         style_size = int(params.image_size * params.style_scale)
@@ -209,13 +165,10 @@ def main():
                 filename = params.output + output_filename + str(file_extension)
             else:
                 filename = params.output + str(output_filename) + "_" + str(t) + str(file_extension)
+
             disp = deprocess(img.clone())
-            
-            # Maybe perform postprocessing for color-independent style transfer
-            if params.original_colors == 1:
-                disp = original_colors(deprocess(content_image.clone()), disp)
-                
-            disp.save(str(filename))
+
+            save_image(disp, str(filename), nrow=1, normalize=True)
 
     # Function to evaluate loss and gradient. We run the net forward and
     # backward to get the gradient, and sum up losses from the loss modules.
@@ -244,13 +197,15 @@ def main():
             
         return loss
 
-    optimizer, loopVal = setup_optimizer(img)
+    optimizer, loopVal = setup_optimizer(img, params)
     while num_calls[0] <= loopVal:
          optimizer.step(feval)
 
+    return deprocess(img.clone())
+
 
 # Configure the optimizer
-def setup_optimizer(img):
+def setup_optimizer(img, params):
     if params.optimizer == 'lbfgs':
         print("Running optimization with L-BFGS")
         optim_state = {
@@ -269,7 +224,7 @@ def setup_optimizer(img):
     return optimizer, loopVal
 
 
-def setup_gpu():
+def setup_gpu(params):
     if params.gpu > -1:
         if params.backend == 'cudnn': 
             torch.backends.cudnn.enabled = True
@@ -304,11 +259,9 @@ def preprocess(image_name, image_size):
 def deprocess(output_tensor):
     Normalize = transforms.Compose([transforms.Normalize(mean=[-103.939, -116.779, -123.68], std=[1,1,1])]) 
     bgr2rgb = transforms.Compose([transforms.Lambda(lambda x: x[torch.LongTensor([2,1,0])])]) 
-    output_tensor = bgr2rgb(Normalize(output_tensor.squeeze(0).cpu())) / 256
-    output_tensor.clamp_(0, 1)
-    Image2PIL = transforms.ToPILImage()
-    image = Image2PIL(output_tensor.cpu())
-    return image
+    output_tensor = bgr2rgb(Normalize(output_tensor.squeeze(0).cpu())) / 128 - 1.0
+    output_tensor.clamp_(-1, 1)
+    return output_tensor
 
 
 # Combine the Y channel of the generated image and the UV/CbCr channels of the
@@ -409,7 +362,3 @@ class TVLoss(nn.Module):
         self.y_diff = input[:,:,:,1:] - input[:,:,:,:-1]
         self.loss = self.strength * (torch.sum(torch.abs(self.x_diff)) + torch.sum(torch.abs(self.y_diff)))
         return input
-
-
-if __name__ == "__main__":
-    main()
