@@ -12,7 +12,7 @@ from extern.CaffeLoader import loadCaffemodel
 
 Image.MAX_IMAGE_PIXELS = 1000000000 # Support gigapixel images
 
-def NeuralStyle(params, _Content, _Style):       
+def NeuralStyle(params, _Content, _Style, _InitImage = None):       
     dtype = setup_gpu(params)
 
     cnn, layerList = loadCaffemodel(params.model_file, params.pooling, params.gpu)  
@@ -25,9 +25,9 @@ def NeuralStyle(params, _Content, _Style):
         img_caffe = preprocess(image, style_size).type(dtype)
         style_images_caffe.append(img_caffe)
 
-    if params.init_image != None:
+    if _InitImage != None:
         image_size = (content_image.size(2), content_image.size(3))
-        init_image = preprocess(params.init_image, image_size).type(dtype)
+        init_image = preprocess(_InitImage, image_size).type(dtype)
 
     # Handle style blending weights for multiple style inputs
     style_blend_weights = []
@@ -141,7 +141,7 @@ def NeuralStyle(params, _Content, _Style):
         B, C, H, W = content_image.size()
         img = torch.randn(C, H, W).mul(0.001).unsqueeze(0).type(dtype)
     elif params.init == 'image':
-        if params.init_image != None:
+        if _InitImage != None:
             img = init_image.clone()
         else:
             img = content_image.clone()
