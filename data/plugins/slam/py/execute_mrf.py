@@ -41,14 +41,17 @@ parser.add_argument('--path_to_generator', type=str, default='D:/NN/plugin_slam/
 
 # Basic options
 parser.add_argument("-style_blend_weights", default=None) 
-parser.add_argument("-image_size", help="Maximum height / width of generated image", type=int, default=128)
+parser.add_argument("-image_size", help="Maximum height / width of generated image", type=int, default=64)
 parser.add_argument("-gpu", help="Zero-indexed ID of the GPU to use; for CPU mode set -gpu = -1", type=int, default=0)
 
 # Optimization options
-parser.add_argument("-content_weight", type=float, default=5e0) 
-parser.add_argument("-style_weight", type=float, default=1e2)
-parser.add_argument("-tv_weight", type=float, default=1e-3)
-parser.add_argument("-num_iterations", type=int, default=1000)
+#parser.add_argument("-content_weight", type=float, default=5e0) 
+parser.add_argument("-content_weight", type=float, default=5e1) 
+#parser.add_argument("-style_weight", type=float, default=1e2)
+parser.add_argument("-style_weight", type=float, default=4e1)
+#parser.add_argument("-tv_weight", type=float, default=1e-3)
+parser.add_argument("-tv_weight", type=float, default=0)
+parser.add_argument("-num_iterations", type=int, default=800)
 parser.add_argument("-init", choices=['random', 'image'], default='random')
 parser.add_argument("-init_image", default=None)
 parser.add_argument("-optimizer", choices=['lbfgs', 'adam'], default='lbfgs')
@@ -70,7 +73,8 @@ parser.add_argument("-cudnn_autotune", action='store_true')
 parser.add_argument("-seed", type=int, default=-1)
 
 parser.add_argument("-content_layers", help="layers for content", default='relu4_2')
-parser.add_argument("-style_layers", help="layers for style", default='relu1_1,relu2_1,relu3_1,relu4_1,relu5_1')
+#parser.add_argument("-style_layers", help="layers for style", default='relu1_1,relu2_1,relu3_1,relu4_1,relu5_1')
+parser.add_argument("-style_layers", help="layers for style", default='relu3_1,relu4_1')
 
 opt = parser.parse_args()
 
@@ -186,25 +190,27 @@ if __name__ == '__main__':
 
             os.makedirs('{}/{}'.format(opt.output, i), exist_ok=True)
 
-            save_image(gen_mask, '{}/{}/input.png'.format(opt.output, i), nrow=1, normalize=True)
+            save_image(imgs, '{}/{}/0_original.png'.format(opt.output, i), nrow=1, normalize=True)
 
-            # save_image(masked_imgs, '{}/{}/style.png'.format(opt.output, i), nrow=1, normalize=True)
+            save_image(masked_imgs, '{}/{}/1_masked.png'.format(opt.output, i), nrow=1, normalize=True)
 
-            save_image(filled_sample, '{}/{}/style.png'.format(opt.output, i), nrow=1, normalize=True)
+            save_image(filled_sample, '{}/{}/2_prediction_1.png'.format(opt.output, i), nrow=1, normalize=True)
+
+            save_image(gen_mask, '{}/{}/3_cutout_1.png'.format(opt.output, i), nrow=1, normalize=True)            
 
             # -----------------------------------------------------------------------------
             # MRF
             # -----------------------------------------------------------------------------
-            Result = NeuralStyle(opt, '{}/{}/input.png'.format(opt.output, i), '{}/{}/style.png'.format(opt.output, i))
+            Result = NeuralStyle(opt, '{}/{}/3_cutout_1.png'.format(opt.output, i), '{}/{}/2_prediction_1.png'.format(opt.output, i), _InitImage = '{}/{}/1_masked.png'.format(opt.output, i))
 
-            filled_sample[:, :, y1:y2, x1:x2] = Result[:, y1:y2, x1:x2]
+            filled_sample[:, :, y1:y2, x1:x2] = Result
 
             # -----------------------------------------------------------------------------
             # Save output and input to file system
             # -----------------------------------------------------------------------------
-            save_image(Result, '{}/{}/result_0.png'.format(opt.output, i), nrow=1, normalize=True)
+            save_image(filled_sample, '{}/{}/2_prediction_2.png'.format(opt.output, i), nrow=1, normalize=True)
 
-            save_image(filled_sample, '{}/{}/result_1.png'.format(opt.output, i), nrow=1, normalize=True)
+            save_image(Result, '{}/{}/3_cutout_2.png'.format(opt.output, i), nrow=1, normalize=True)
         
         print ("Finished")
 
