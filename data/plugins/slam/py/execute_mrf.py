@@ -158,7 +158,12 @@ if __name__ == '__main__':
                 # -----------------------------------------------------------------------------
                 sample = torch.cat((imgs.data, filled_sample.data), -2)
 
-                save_image(sample, '{}/result.png'.format(opt.output, ), nrow=1, normalize=True)
+                save_image(gen_mask, '{}/input.png'.format(opt.output, ), nrow=1, normalize=True)
+
+
+                save_image(masked_imgs, '{}/style.png'.format(opt.output, ), nrow=1, normalize=True)
+
+                save_image(filled_sample, '{}/complete.png'.format(opt.output, ), nrow=1, normalize=True)
         
         print ("Finished")
 
