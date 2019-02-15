@@ -41,18 +41,19 @@ parser.add_argument('--path_to_generator', type=str, default='D:/NN/plugin_slam/
 
 # Basic options
 parser.add_argument("-style_blend_weights", default=None) 
-parser.add_argument("-image_size", help="Maximum height / width of generated image", type=int, default=64)
+parser.add_argument("-image_size", help="Maximum height / width of generated image", type=int, default=256)
 parser.add_argument("-gpu", help="Zero-indexed ID of the GPU to use; for CPU mode set -gpu = -1", type=int, default=0)
 
 # Optimization options
 #parser.add_argument("-content_weight", type=float, default=5e0) 
-parser.add_argument("-content_weight", type=float, default=5e1) 
+parser.add_argument("-content_weight", type=float, default=8e1) 
 #parser.add_argument("-style_weight", type=float, default=1e2)
-parser.add_argument("-style_weight", type=float, default=4e1)
+parser.add_argument("-style_weight", type=float, default=6e2)
 #parser.add_argument("-tv_weight", type=float, default=1e-3)
 parser.add_argument("-tv_weight", type=float, default=0)
-parser.add_argument("-num_iterations", type=int, default=800)
-parser.add_argument("-init", choices=['random', 'image'], default='random')
+parser.add_argument("-num_iterations", type=int, default=1000)
+#parser.add_argument("-init", choices=['random', 'image'], default='random')
+parser.add_argument("-init", choices=['random', 'image'], default='image')
 parser.add_argument("-init_image", default=None)
 parser.add_argument("-optimizer", choices=['lbfgs', 'adam'], default='lbfgs')
 parser.add_argument("-learning_rate", type=float, default=1e0)
@@ -201,16 +202,24 @@ if __name__ == '__main__':
             # -----------------------------------------------------------------------------
             # MRF
             # -----------------------------------------------------------------------------
-            Result = NeuralStyle(opt, '{}/{}/3_cutout_1.png'.format(opt.output, i), '{}/{}/2_prediction_1.png'.format(opt.output, i), _InitImage = '{}/{}/1_masked.png'.format(opt.output, i))
+            Result = NeuralStyle(opt, '{}/{}/3_cutout_1.png'.format(opt.output, i), '{}/{}/2_prediction_1.png'.format(opt.output, i), _InitImage = '{}/{}/3_cutout_1.png'.format(opt.output, i))
 
-            filled_sample[:, :, y1:y2, x1:x2] = Result
+            ResizeResult = transforms.Compose([
+                transforms.ToPILImage(),
+                transforms.Resize((opt.mask_size, opt.mask_size), Image.BICUBIC),
+                transforms.ToTensor(),
+            ])
+
+            check = ResizeResult(Result * 0.5 + 0.5)
+
+            filled_sample[:, :, y1:y2, x1:x2] = check * 2.0 - 1.0
 
             # -----------------------------------------------------------------------------
             # Save output and input to file system
             # -----------------------------------------------------------------------------
             save_image(filled_sample, '{}/{}/2_prediction_2.png'.format(opt.output, i), nrow=1, normalize=True)
 
-            save_image(Result, '{}/{}/3_cutout_2.png'.format(opt.output, i), nrow=1, normalize=True)
+            save_image(check, '{}/{}/3_cutout_2.png'.format(opt.output, i), nrow=1, normalize=True)
         
         print ("Finished")
 
