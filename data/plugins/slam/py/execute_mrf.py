@@ -41,14 +41,14 @@ parser.add_argument('--path_to_generator', type=str, default='D:/NN/plugin_slam/
 
 # Basic options
 parser.add_argument("-style_blend_weights", default=None) 
-parser.add_argument("-image_size", help="Maximum height / width of generated image", type=int, default=256)
+parser.add_argument("-image_size", help="Maximum height / width of generated image", type=int, default=384)
 parser.add_argument("-gpu", help="Zero-indexed ID of the GPU to use; for CPU mode set -gpu = -1", type=int, default=0)
 
 # Optimization options
 #parser.add_argument("-content_weight", type=float, default=5e0) 
-parser.add_argument("-content_weight", type=float, default=8e1) 
+parser.add_argument("-content_weight", type=float, default=5e1) 
 #parser.add_argument("-style_weight", type=float, default=1e2)
-parser.add_argument("-style_weight", type=float, default=6e2)
+parser.add_argument("-style_weight", type=float, default=1e2)
 #parser.add_argument("-tv_weight", type=float, default=1e-3)
 parser.add_argument("-tv_weight", type=float, default=0)
 parser.add_argument("-num_iterations", type=int, default=1000)
@@ -136,7 +136,7 @@ transforms_ = [ transforms.Resize((opt.img_size_h, opt.img_size_w), Image.BICUBI
                 transforms.Normalize((0.5,0.5,0.5), (0.5,0.5,0.5)) ]
 
 test_dataloader = DataLoader(ImageDataset(opt.path_to_dataset, transforms_=transforms_),
-                        batch_size=1, shuffle=True, num_workers=0)
+                        batch_size=1, shuffle=False, num_workers=0)
 
 Tensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
 
@@ -197,12 +197,24 @@ if __name__ == '__main__':
 
             save_image(filled_sample, '{}/{}/2_prediction_1.png'.format(opt.output, i), nrow=1, normalize=True)
 
-            save_image(gen_mask, '{}/{}/3_cutout_1.png'.format(opt.output, i), nrow=1, normalize=True)            
+            save_image(gen_mask, '{}/{}/3_cutout_1.png'.format(opt.output, i), nrow=1, normalize=True)      
+
+            style_image = masked_imgs.clone()
+
+            style_image[:, :, 32:62 , 32:96] = masked_imgs[:, :, 1 :31 , 32:96]
+            style_image[:, :, 63:77 , 32:96] = masked_imgs[:, :, 17:31 , 32:96]
+            style_image[:, :, 78:109, 32:96] = masked_imgs[:, :, 97:128, 32:96]     
+
+            #style_image[:, :, 117:232, 117:396] = style_image[:, :, 1  :116, 117:396]
+            #style_image[:, :, 233:280, 117:396] = style_image[:, :, 69 :116, 117:396]
+            #style_image[:, :, 281:396, 117:396] = style_image[:, :, 397:512, 117:396]      
+
+            save_image(style_image, '{}/{}/4_style.png'.format(opt.output, i), nrow=1, normalize=True)      
 
             # -----------------------------------------------------------------------------
             # MRF
             # -----------------------------------------------------------------------------
-            Result = NeuralStyle(opt, '{}/{}/3_cutout_1.png'.format(opt.output, i), '{}/{}/2_prediction_1.png'.format(opt.output, i), _InitImage = '{}/{}/3_cutout_1.png'.format(opt.output, i))
+            Result = NeuralStyle(opt, '{}/{}/3_cutout_1.png'.format(opt.output, i), '{}/{}/4_style.png'.format(opt.output, i), _InitImage = '{}/{}/3_cutout_1.png'.format(opt.output, i))
 
             ResizeResult = transforms.Compose([
                 transforms.ToPILImage(),
@@ -210,16 +222,16 @@ if __name__ == '__main__':
                 transforms.ToTensor(),
             ])
 
-            check = ResizeResult(Result * 0.5 + 0.5)
+            resized_result = ResizeResult(Result * 0.5 + 0.5) * 2.0 - 1.0
 
-            filled_sample[:, :, y1:y2, x1:x2] = check * 2.0 - 1.0
+            filled_sample[:, :, y1:y2, x1:x2] = resized_result
 
             # -----------------------------------------------------------------------------
             # Save output and input to file system
             # -----------------------------------------------------------------------------
             save_image(filled_sample, '{}/{}/2_prediction_2.png'.format(opt.output, i), nrow=1, normalize=True)
 
-            save_image(check, '{}/{}/3_cutout_2.png'.format(opt.output, i), nrow=1, normalize=True)
+            save_image(resized_result, '{}/{}/3_cutout_2.png'.format(opt.output, i), nrow=1, normalize=True)
         
         print ("Finished")
 
