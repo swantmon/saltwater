@@ -31,6 +31,10 @@ namespace
     public:
 
         CEventDelegate::HandleType RegisterEventHandler(CEventDelegate::FunctionType _Function);
+
+    private:
+
+        CEventDelegate m_EventDelegate;
     };
 } // namespace
 
@@ -50,14 +54,14 @@ namespace
 
     void CGUIEventHandler::OnEvent(const Base::CInputEvent& _rEvent)
     {
-        CEventDelegate::Notify(_rEvent);
+        m_EventDelegate.Notify(_rEvent);
     }
 
     // -----------------------------------------------------------------------------
 
     CEventDelegate::HandleType CGUIEventHandler::RegisterEventHandler(CEventDelegate::FunctionType _Function)
     {
-        return CEventDelegate::Register(_Function);
+        return m_EventDelegate.Register(_Function);
     }
 } // namespace
 

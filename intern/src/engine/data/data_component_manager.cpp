@@ -75,7 +75,7 @@ namespace Dt
 
     CComponentManager::CComponentDelegate::HandleType CComponentManager::RegisterDirtyComponentHandler(CComponentDelegate::FunctionType _NewDelegate)
     {
-        return CComponentDelegate::Register(_NewDelegate);
+        return m_ComponentDelegate.Register(_NewDelegate);
     }
 
     // -----------------------------------------------------------------------------
@@ -84,6 +84,6 @@ namespace Dt
     {
         _rComponent.m_DirtyFlags = _DirtyFlags;
 
-        CComponentDelegate::Notify(&_rComponent);
+        m_ComponentDelegate.Notify(&_rComponent);
     }
 } // namespace Dt
