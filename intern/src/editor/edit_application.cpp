@@ -123,7 +123,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Show GUI
         // -----------------------------------------------------------------------------
-        Edit::GUI::Setup(m_EditWindowID, 1280, 720);
+
+        auto WindowSize = Core::CProgramParameters::GetInstance().Get("application:window_size", glm::ivec2(1280, 720));
+        Edit::GUI::Setup(m_EditWindowID, WindowSize.x, WindowSize.y);
 
         Edit::GUI::Show();
     }

@@ -93,7 +93,7 @@ namespace Edit
     
     CState::EStateType CLoadMapState::InternOnEnter()
     {
-        auto Scene = Core::CProgramParameters::GetInstance().Get("graphics:load_scene", "default");
+        auto Scene = Core::CProgramParameters::GetInstance().Get("application:load_scene", "default");
 
         ENGINE_CONSOLE_INFOV("Loading scene '%s'", Scene.c_str());
 
