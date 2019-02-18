@@ -28,7 +28,7 @@ namespace Net
         {
             auto& rMessage = m_MessageQueue.front();
             
-            CMessageDelegate::Notify(rMessage, m_Port);
+            m_MessageDelegate.Notify(rMessage, m_Port);
 
             m_MessageQueue.pop();
         }
@@ -45,7 +45,7 @@ namespace Net
 
     CSocket::CMessageDelegate::HandleType CSocket::RegisterMessageHandler(CMessageDelegate::FunctionType _Function)
     {
-        return CMessageDelegate::Register(_Function);
+        return m_MessageDelegate.Register(_Function);
     }
 
     // -----------------------------------------------------------------------------

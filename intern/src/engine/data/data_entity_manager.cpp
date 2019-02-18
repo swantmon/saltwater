@@ -114,6 +114,8 @@ namespace
 
     private:
 
+        CEntityDelegate m_EntityDelegate;
+
         void UpdateEntity(CEntity& _rEntity);
 
         template<typename THasHierarchy>
@@ -371,7 +373,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Send new dirty entity to all handler
         // -----------------------------------------------------------------------------
-        CEntityDelegate::Notify(&_rEntity);
+        m_EntityDelegate.Notify(&_rEntity);
 
         _rEntity.SetDirtyFlags(0);
     }
@@ -386,7 +388,7 @@ namespace
     
     CEntityDelegate::HandleType CDtLvlEntityManager::RegisterDirtyEntityHandler(CEntityDelegate::FunctionType _Function)
     {
-        return CEntityDelegate::Register(_Function);
+        return m_EntityDelegate.Register(_Function);
     }
 
     // -----------------------------------------------------------------------------

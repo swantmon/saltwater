@@ -60,6 +60,8 @@ namespace Dt
         CComponentsByType   m_ComponentsByType;
         Base::ID            m_CurrentID;
 
+        CComponentDelegate m_ComponentDelegate;
+
     private:
 
         CComponentManager();

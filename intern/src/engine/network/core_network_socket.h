@@ -72,6 +72,8 @@ namespace Net
         std::string m_IP;
         const bool m_IsServer;
 
+        CMessageDelegate m_MessageDelegate;
+
     private:
 
         int s_HeaderSize = 12;
