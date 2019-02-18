@@ -1320,14 +1320,16 @@ namespace
 
     void CGfxReconstructionRenderer::RenderPlanes()
     {
-        if (m_pReconstructor->GetPlanes().empty())
+        const auto& rPlanes = m_pReconstructor->GetPlanes();
+
+        if (rPlanes.empty())
         {
             return;
         }
 
         Performance::BeginEvent("Plane rendering");
         
-        ContextManager::SetRenderContext(m_PlaneRenderContextPtr);
+        ContextManager::SetRenderContext(m_OutlineRenderContextPtr);
         ContextManager::SetShaderVS(m_OutlineVSPtr);
         ContextManager::SetShaderPS(m_OutlineFSPtr);
 
@@ -1343,7 +1345,7 @@ namespace
 
         SDrawCallConstantBuffer BufferData;
         
-        for (const auto& Plane : m_pReconstructor->GetPlanes())
+        for (const auto& Plane : rPlanes)
         {
             BufferData.m_WorldMatrix = Plane.second.m_Transform * glm::scale(glm::vec3(Plane.second.m_Extent));
             BufferData.m_Color = glm::vec4(1.0f, 1.0f, 0.0f, 0.3f);
@@ -1614,6 +1616,11 @@ namespace
 
     void CGfxReconstructionRenderer::RenderHitProxy()
     {
+        if (!m_IsInitialized)
+        {
+            return;
+        }
+
         // -----------------------------------------------------------------------------
         // Get ID
         // -----------------------------------------------------------------------------
