@@ -667,6 +667,10 @@ namespace MR
 
                     ENGINE_CONSOLE_INFO("Initialization complete");
                 }
+                else if (MessageID == 2)
+                {
+                    SendPlane();
+                }
             }
             else if (MessageType == TRANSFORM)
             {
@@ -809,6 +813,12 @@ namespace MR
 
         void SendPlane()
         {
+            if (!m_IsReconstructorInitialized)
+            {
+                ENGINE_CONSOLE_INFO("Reconstruction is not initialized");
+                return;
+            }
+
             if (!Net::CNetworkManager::GetInstance().IsConnected(m_NeuralNetworkSocket))
             {
                 ENGINE_CONSOLE_INFO("Cannot send plane to neural net because the socket has no connection");
