@@ -121,6 +121,11 @@ void main()
 
     Vertex = GetDiminishedPosition(CameraPosition, RayDirection);
 
+    if (Vertex.x == 0.0f)
+    {
+        discard;
+    }
+    
 #ifdef CAPTURE_COLOR
     Color = GetColor(Vertex);
 #else
