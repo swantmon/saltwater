@@ -176,6 +176,9 @@ namespace MR
 
         bool m_EnableInpainting;
 
+        int m_PlaneResolution;
+        float m_PlaneScale;
+
     public:
 
         void Start()
@@ -220,6 +223,9 @@ namespace MR
 
                     auto NNDelegate = std::bind(&CSLAMControl::OnNewNeuralNetMessage, this, std::placeholders::_1, std::placeholders::_2);
                     m_NeualNetworkDelegate = Net::CNetworkManager::GetInstance().RegisterMessageHandler(m_NeuralNetworkSocket, NNDelegate);
+
+                    m_PlaneResolution = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:inpainted_plane:resolution", 128);
+                    m_PlaneScale = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:inpainted_plane:scale", 2.0f);
                 }
                 else
                 {
@@ -393,13 +399,6 @@ namespace MR
 
                     Gfx::ReconstructionRenderer::SetInpaintedPlane(m_PlaneTexture, AABB);
                 }
-            }
-
-            if (m_SelectionState != ESelection::NOSELECTION)
-            {
-                const auto& AABB = Gfx::ReconstructionRenderer::GetSelectionBox();
-                m_PlaneTexture = m_Reconstructor.CreatePlaneTexture(AABB);
-                Gfx::ReconstructionRenderer::SetInpaintedPlane(m_PlaneTexture, AABB);
             }
 
             // -----------------------------------------------------------------------------
@@ -794,9 +793,14 @@ namespace MR
 
             if (_rMessage.m_MessageType == 0)
             {
+                int ScaledResolution = static_cast<int>(m_PlaneResolution / m_PlaneScale);
+                int BorderSize = (m_PlaneResolution - ScaledResolution) / 2;
+                int Min = BorderSize;
+                int Max = m_PlaneResolution - BorderSize;
+
                 ENGINE_CONSOLE_INFO("Received inpainted plane");
-                auto TargetRect = Base::AABB2UInt(glm::uvec2(32, 32), glm::uvec2(96, 96));
-                Gfx::TextureManager::CopyToTexture2D(m_PlaneTexture, TargetRect, 64 * 4, const_cast<char*>(_rMessage.m_Payload.data()), true);
+                auto TargetRect = Base::AABB2UInt(glm::uvec2(Min, Min), glm::uvec2(Max, Max));
+                Gfx::TextureManager::CopyToTexture2D(m_PlaneTexture, TargetRect, ScaledResolution * 4, const_cast<char*>(_rMessage.m_Payload.data()), true);
 
                 const auto& AABB = Gfx::ReconstructionRenderer::GetSelectionBox();
                 Gfx::ReconstructionRenderer::SetInpaintedPlane(m_PlaneTexture, AABB);
@@ -810,15 +814,14 @@ namespace MR
                 ENGINE_CONSOLE_INFO("Cannot send plane to neural net because the socket has no connection");
                 return;
             }
-
-            const int PlaneResolution = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:inpainted_plane:resolution", 128);
             
             const auto& AABB = Gfx::ReconstructionRenderer::GetSelectionBox();
             m_PlaneTexture = m_Reconstructor.CreatePlaneTexture(AABB);
 
             Net::CMessage Message;
 
-            Message.m_Payload = std::vector<char>(PlaneResolution * PlaneResolution * 4);
+            Message.m_Category = 0;
+            Message.m_Payload = std::vector<char>(m_PlaneResolution * m_PlaneResolution * 4);
             Message.m_CompressedSize = Message.m_DecompressedSize = static_cast<int>(Message.m_Payload.size());
             Message.m_MessageType = 0;
 
