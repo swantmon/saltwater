@@ -30,7 +30,7 @@ namespace Scpt
     {
     public:
 
-        bool m_IsSelectionEnabled = false;
+        bool m_IsSelectionEnabled = true;
 
         void Start() override
         {
