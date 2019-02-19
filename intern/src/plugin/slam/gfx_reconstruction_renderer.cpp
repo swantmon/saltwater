@@ -1556,8 +1556,11 @@ namespace
                 Gfx::TargetSetManager::ClearTargetSet(m_DiminishedTargetSetPtr);
 
                 RaycastVolumeWithHighlight();
-                RenderInpaintedPlane();
-                RaycastVolumeDiminished();
+                if (m_InpaintedPlaneTexture != nullptr)
+                {
+                    RenderInpaintedPlane();
+                    RaycastVolumeDiminished();
+                }
             }
         }
 
