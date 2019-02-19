@@ -393,11 +393,6 @@ namespace MR
                 if (rSelectionTicket.m_HitFlag == Gfx::SHitFlag::Entity)
                 {
                     Gfx::ReconstructionRenderer::AddPositionToSelection(rSelectionTicket.m_WSPosition);
-
-                    const auto& AABB = Gfx::ReconstructionRenderer::GetSelectionBox();
-                    m_PlaneTexture = m_Reconstructor.CreatePlaneTexture(AABB);
-
-                    Gfx::ReconstructionRenderer::SetInpaintedPlane(m_PlaneTexture, AABB);
                 }
             }
 
