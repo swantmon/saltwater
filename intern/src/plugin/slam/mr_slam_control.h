@@ -528,9 +528,9 @@ namespace MR
             {
                 Gfx::ReconstructionRenderer::ResetSelection();
             }
-            else if (_rEvent.GetAction() == Base::CInputEvent::MouseWheel && m_EnableInpainting)
+            else if (_rEvent.GetAction() == Base::CInputEvent::MouseWheel)
             {
-                SendPlane();
+                CreatePlane();
             }
         }
 
@@ -664,7 +664,7 @@ namespace MR
                 }
                 else if (MessageID == 2)
                 {
-                    SendPlane();
+                    CreatePlane();
                 }
             }
             else if (MessageType == TRANSFORM)
@@ -806,7 +806,7 @@ namespace MR
             }
         }
 
-        void SendPlane()
+        void CreatePlane()
         {
             if (!m_IsReconstructorInitialized)
             {
@@ -814,25 +814,33 @@ namespace MR
                 return;
             }
 
-            if (!Net::CNetworkManager::GetInstance().IsConnected(m_NeuralNetworkSocket))
-            {
-                ENGINE_CONSOLE_INFO("Cannot send plane to neural net because the socket has no connection");
-                return;
-            }
-            
             const auto& AABB = Gfx::ReconstructionRenderer::GetSelectionBox();
             m_PlaneTexture = m_Reconstructor.CreatePlaneTexture(AABB);
 
-            Net::CMessage Message;
+            if (m_EnableInpainting)
+            {
+                if (!Net::CNetworkManager::GetInstance().IsConnected(m_NeuralNetworkSocket))
+                {
+                    ENGINE_CONSOLE_INFO("Cannot send plane to neural net because the socket has no connection");
+                    Gfx::ReconstructionRenderer::SetInpaintedPlane(m_PlaneTexture, AABB);
+                    return;
+                }
 
-            Message.m_Category = 0;
-            Message.m_Payload = std::vector<char>(m_PlaneResolution * m_PlaneResolution * 4);
-            Message.m_CompressedSize = Message.m_DecompressedSize = static_cast<int>(Message.m_Payload.size());
-            Message.m_MessageType = 0;
+                Net::CMessage Message;
 
-            Gfx::TextureManager::CopyTextureToCPU(m_PlaneTexture, Message.m_Payload.data());
+                Message.m_Category = 0;
+                Message.m_Payload = std::vector<char>(m_PlaneResolution * m_PlaneResolution * 4);
+                Message.m_CompressedSize = Message.m_DecompressedSize = static_cast<int>(Message.m_Payload.size());
+                Message.m_MessageType = 0;
 
-            Net::CNetworkManager::GetInstance().SendMessage(m_NeuralNetworkSocket, Message);
+                Gfx::TextureManager::CopyTextureToCPU(m_PlaneTexture, Message.m_Payload.data());
+
+                Net::CNetworkManager::GetInstance().SendMessage(m_NeuralNetworkSocket, Message);
+            }
+            else
+            {
+                Gfx::ReconstructionRenderer::SetInpaintedPlane(m_PlaneTexture, AABB);
+            }
         }
 
         void CreateShiftLUTTexture()
