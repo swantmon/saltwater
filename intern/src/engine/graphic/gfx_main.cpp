@@ -85,6 +85,8 @@ namespace
 
         static const unsigned int s_MaxNumberOfWindows = 4;
         
+        CResizeDelegate m_ResizeDelegate;
+
     private:
 
         class CInternGraphicsInfo : public CGraphicsInfo
@@ -269,7 +271,7 @@ namespace
     
     CResizeDelegate::HandleType CGfxMain::RegisterResizeHandler(CResizeDelegate::FunctionType _Function)
     {
-        return CResizeDelegate::Register(_Function);
+        return m_ResizeDelegate.Register(_Function);
     }
 
     // -----------------------------------------------------------------------------
@@ -400,7 +402,7 @@ namespace
         // -----------------------------------------------------------------------------
         auto Size = m_WindowInfos[_WindowID].m_InternalWindowSize;
 
-        CResizeDelegate::Notify(Size[0], Size[1]);
+        m_ResizeDelegate.Notify(Size[0], Size[1]);
     }
 
     // -----------------------------------------------------------------------------
