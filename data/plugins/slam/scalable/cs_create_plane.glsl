@@ -45,7 +45,7 @@ void main()
 
     ivec2 Coords = ivec2(gl_GlobalInvocationID.xy);
 
-    if (Coords.x > g_MinPixels.x && Coords.y > g_MinPixels.y &&
+    if (Coords.x >= g_MinPixels.x && Coords.y >= g_MinPixels.y &&
         Coords.x < g_MaxPixels.x && Coords.y < g_MaxPixels.y)
     {
         imageStore(cs_Plane, ivec2(gl_GlobalInvocationID.xy), vec4(1.0f));
