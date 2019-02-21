@@ -3,7 +3,11 @@
 
 #include "engine/core/core_plugin_manager.h"
 
-namespace HW
+#include "base/base_include_glm.h"
+
+#include <vector>
+
+namespace Stereo
 {
     class CPluginInterface : public Core::IPlugin
     {
@@ -18,5 +22,17 @@ namespace HW
     public:
 
         void EventHook();
+
+    public:
+
+        // CPU
+
+        std::vector<char> GetLatestDepthImageCPU() const;
+        void OnFrameCPU(const std::vector<char>& _rRGBImage, const glm::mat4& _Transform);
+
+        // GPU
+
+        Gfx::CTexturePtr GetLatestDepthImageGPU() const;
+        void OnFrameGPU(Gfx::CTexturePtr _RGBImage, const glm::mat4& _Transform);
     };
 } // namespace HW
