@@ -176,6 +176,24 @@ namespace MR
 
         bool m_EnableInpainting;
 
+        // -----------------------------------------------------------------------------
+        // Stuff for stereo matching
+        // -----------------------------------------------------------------------------
+        bool m_UseStereoMatching;
+        bool m_UseGPUForStereo;
+
+        typedef void(*StereoOnFrameCPUFunc)(const std::vector<char>&, const glm::mat4&);
+        typedef void(*StereoGetFrameCPUFunc)(std::vector<char>&);
+        
+        StereoOnFrameCPUFunc StereoOnFrameCPU;
+        StereoGetFrameCPUFunc StereoGetFrameCPU;
+
+        typedef void(*StereoOnFrameGPUFunc)(Gfx::CTexturePtr _RGBImage, const glm::mat4& _Transform);
+        typedef void(*StereoGetFrameGPUFunc)(Gfx::CTexturePtr& _rDepthImage);
+
+        StereoOnFrameGPUFunc StereoOnFrameGPU;
+        StereoGetFrameGPUFunc StereoGetFrameGPU;
+
     public:
 
         void Start()
@@ -332,6 +350,28 @@ namespace MR
             else
             {
                 m_RecordMode = NONE;
+            }
+
+            m_UseStereoMatching = Core::CProgramParameters::GetInstance().Get("mr:stereo:enable", true);
+            m_UseGPUForStereo = Core::CProgramParameters::GetInstance().Get("mr:stereo:use_gpu", false);
+
+            if (m_UseStereoMatching)
+            {
+                if (!Core::PluginManager::LoadPlugin("Stereo Matching"))
+                {
+                    throw Base::CException(__FILE__, __LINE__, "Stereo Matching plugin was not loaded");
+                }
+
+                if (m_UseGPUForStereo)
+                {
+                    StereoOnFrameGPU = (StereoOnFrameGPUFunc)(Core::PluginManager::GetPluginFunction("Stereo Matching", "OnFrameGPU"));
+                    StereoGetFrameGPU = (StereoGetFrameGPUFunc)(Core::PluginManager::GetPluginFunction("Stereo Matching", "GetLatestDepthImageGPU"));
+                }
+                else
+                {
+                    StereoOnFrameCPU = (StereoOnFrameCPUFunc)(Core::PluginManager::GetPluginFunction("Stereo Matching", "OnFrameCPU"));
+                    StereoGetFrameCPU = (StereoGetFrameCPUFunc)(Core::PluginManager::GetPluginFunction("Stereo Matching", "GetLatestDepthImageCPU"));
+                }
             }
         }
 
@@ -606,6 +646,15 @@ namespace MR
                         m_Reconstructor.SetIntrinsics(glm::vec2(FocalLength), glm::vec2(FocalPoint));
                     }
 
+                    if (m_UseStereoMatching)
+                    {
+                        typedef void(*SetIntrinsicsFunc)(const glm::vec2&, const glm::vec2&, const glm::ivec2&);
+
+                        auto SetIntrinsics = (SetIntrinsicsFunc)(Core::PluginManager::GetPluginFunction("Stereo Matching", "SetIntrinsics"));
+                        
+                        SetIntrinsics(FocalLength, FocalPoint, m_ColorSize);
+                    }
+
                     m_Reconstructor.Start();
 
                     m_IsReconstructorInitialized = true;
@@ -723,6 +772,22 @@ namespace MR
                 Gfx::ContextManager::SetImageTexture(2, m_RGBTexture);
 
                 Gfx::ContextManager::Dispatch(DivUp(m_ColorSize.x, m_TileSize2D), DivUp(m_ColorSize.y, m_TileSize2D), 1);
+
+                if (m_UseStereoMatching)
+                {
+                    if (m_UseGPUForStereo)
+                    {
+                        StereoOnFrameGPU(m_RGBTexture, m_PoseMatrix);
+                    }
+                    else
+                    {
+                        std::vector<char> PixelData(m_RGBTexture->GetNumberOfPixelsU() * m_RGBTexture->GetNumberOfPixelsV() * 4);
+
+                        Gfx::TextureManager::CopyTextureToCPU(m_RGBTexture, PixelData.data());
+
+                        StereoOnFrameCPU(PixelData, m_PoseMatrix);
+                    }
+                }
 
                 m_Reconstructor.OnNewFrame(m_DepthTexture, m_RGBTexture, &m_PoseMatrix);
             }

@@ -1,17 +1,26 @@
 
-#include "plugin/stereo_matching/stereo_precompiled.h"
+#include "plugin/stereo/stereo_precompiled.h"
 
 #include "engine/core/core_console.h"
 
 #include "engine/engine.h"
 #include "engine/graphic/gfx_texture.h"
 
-#include "plugin/stereo_matching/stereo_plugin_interface.h"
+#include "plugin/stereo/stereo_plugin_interface.h"
 
 CORE_PLUGIN_INFO(Stereo::CPluginInterface, "Stereo Matching", "1.0", "This plugin takes RGB and transformation data and provides 2.5D depth maps")
 
 namespace Stereo
 {
+    void CPluginInterface::SetIntrinsics(const glm::vec2& _rFocalLength, const glm::vec2& _rFocalPoint, const glm::ivec2& _rImageSize)
+    {
+        m_FocalLength = _rFocalLength;
+        m_FocalPoint = _rFocalPoint;
+        m_ImageSize = _rImageSize;
+    }
+
+    // -----------------------------------------------------------------------------
+
     std::vector<char> CPluginInterface::GetLatestDepthImageCPU() const
     {
         return std::vector<char>();
@@ -85,9 +94,9 @@ namespace Stereo
 
 // -----------------------------------------------------------------------------
 
-extern "C" CORE_PLUGIN_API_EXPORT void GetLatestDepthImageGPU(Gfx::CTexturePtr& _rDepthImage)
+extern "C" CORE_PLUGIN_API_EXPORT void OnFrameCPU(const std::vector<char>& _rRGBImage, const glm::mat4& _Transform)
 {
-    _rDepthImage = static_cast<Stereo::CPluginInterface&>(GetInstance()).GetLatestDepthImageGPU();
+    static_cast<Stereo::CPluginInterface&>(GetInstance()).OnFrameCPU(_rRGBImage, _Transform);
 }
 
 // -----------------------------------------------------------------------------
@@ -99,14 +108,21 @@ extern "C" CORE_PLUGIN_API_EXPORT void GetLatestDepthImageCPU(std::vector<char>&
 
 // -----------------------------------------------------------------------------
 
-extern "C" CORE_PLUGIN_API_EXPORT void OnFrameCPU(const std::vector<char>& _rRGBImage, const glm::mat4& _Transform)
+extern "C" CORE_PLUGIN_API_EXPORT void OnFrameGPU(Gfx::CTexturePtr _RGBImage, const glm::mat4& _Transform)
 {
-    static_cast<Stereo::CPluginInterface&>(GetInstance()).OnFrameCPU(_rRGBImage, _Transform);
+    static_cast<Stereo::CPluginInterface&>(GetInstance()).OnFrameGPU(_RGBImage, _Transform);
 }
 
 // -----------------------------------------------------------------------------
 
-extern "C" CORE_PLUGIN_API_EXPORT void OnFrameGPU(Gfx::CTexturePtr _RGBImage, const glm::mat4& _Transform)
+extern "C" CORE_PLUGIN_API_EXPORT void GetLatestDepthImageGPU(Gfx::CTexturePtr& _rDepthImage)
 {
-    static_cast<Stereo::CPluginInterface&>(GetInstance()).OnFrameGPU(_RGBImage, _Transform);
+    _rDepthImage = static_cast<Stereo::CPluginInterface&>(GetInstance()).GetLatestDepthImageGPU();
+}
+
+// -----------------------------------------------------------------------------
+
+extern "C" CORE_PLUGIN_API_EXPORT void SetIntrinsics(const glm::vec2& _rFocalLength, const glm::vec2& _rFocalPoint, const glm::ivec2& _rImageSize)
+{
+    static_cast<Stereo::CPluginInterface&>(GetInstance()).SetIntrinsics(_rFocalLength, _rFocalPoint, _rImageSize);
 }

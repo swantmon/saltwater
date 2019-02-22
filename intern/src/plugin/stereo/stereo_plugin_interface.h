@@ -25,6 +25,8 @@ namespace Stereo
 
     public:
 
+        void SetIntrinsics(const glm::vec2& _rFocalLength, const glm::vec2& _rFocalPoint, const glm::ivec2& _rImageSize);
+
         // CPU
 
         std::vector<char> GetLatestDepthImageCPU() const;
@@ -34,5 +36,11 @@ namespace Stereo
 
         Gfx::CTexturePtr GetLatestDepthImageGPU() const;
         void OnFrameGPU(Gfx::CTexturePtr _RGBImage, const glm::mat4& _Transform);
+
+    private:
+
+        glm::vec2 m_FocalLength;
+        glm::vec2 m_FocalPoint;
+        glm::ivec2 m_ImageSize;
     };
 } // namespace HW
