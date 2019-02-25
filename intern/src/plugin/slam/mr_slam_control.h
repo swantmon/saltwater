@@ -179,6 +179,8 @@ namespace MR
         int m_PlaneResolution;
         float m_PlaneScale;
 
+		bool m_SendInpaintedResult;
+
     public:
 
         void Start()
