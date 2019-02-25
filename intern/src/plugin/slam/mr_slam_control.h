@@ -341,6 +341,8 @@ namespace MR
             {
                 m_RecordMode = NONE;
             }
+
+			m_SendInpaintedResult = Core::CProgramParameters::GetInstance().Get("mr:slam:diminished_reality:send_result", true);
         }
 
         // -----------------------------------------------------------------------------
