@@ -472,7 +472,28 @@ namespace MR
                 rControl.SetRotation(glm::mat4(glm::inverse(glm::mat3(View))));
                 rControl.Update();
             }
+
+			if (m_SendInpaintedResult)
+			{
+				SendInpaintedResult();
+			}
         }
+
+		// -----------------------------------------------------------------------------
+
+		void SendInpaintedResult()
+		{
+			Gfx::CTexturePtr FrameBuffer = Gfx::ReconstructionRenderer::GetInpaintedRendering();
+			if (FrameBuffer != nullptr)
+			{
+				std::vector<char> RawData(FrameBuffer->GetNumberOfPixelsU() * FrameBuffer->GetNumberOfPixelsV() * 4);
+				Gfx::TextureManager::CopyTextureToCPU(FrameBuffer, RawData.data());
+
+				std::vector<char> Compressed;
+
+				Base::Compress(RawData, Compressed, 0);
+			}
+		}
 
         // -----------------------------------------------------------------------------
 
