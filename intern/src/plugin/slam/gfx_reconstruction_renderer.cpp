@@ -115,6 +115,7 @@ namespace
         void AddPositionToSelection(const glm::vec3& _rWSPosition);
         void ResetSelection();
         void SetInpaintedPlane(Gfx::CTexturePtr _Texture, const Base::AABB3Float& _rAABB);
+		CTexturePtr GetInpaintedRendering();
 
         const Base::AABB3Float& GetSelectionBox();
 
@@ -1507,6 +1508,13 @@ namespace
         m_InpaintedPlaneAABB = _rAABB;
     }
 
+	// -----------------------------------------------------------------------------
+
+	CTexturePtr CGfxReconstructionRenderer::GetInpaintedRendering()
+	{
+		return m_DiminishedTargetPtr;
+	}
+
     // -----------------------------------------------------------------------------
 
     void CGfxReconstructionRenderer::ResetSelection()
@@ -1922,6 +1930,13 @@ namespace ReconstructionRenderer
     {
         CGfxReconstructionRenderer::GetInstance().SetInpaintedPlane(_Texture, _rAABB);
     }
+
+	// -----------------------------------------------------------------------------
+
+	CTexturePtr GetInpaintedRendering()
+	{
+		return CGfxReconstructionRenderer::GetInstance().GetInpaintedRendering();
+	}
 
     // -----------------------------------------------------------------------------
 
