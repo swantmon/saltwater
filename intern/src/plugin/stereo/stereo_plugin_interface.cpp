@@ -34,15 +34,12 @@ namespace Stereo
     void CPluginInterface::OnFrameCPU(const std::vector<char>& _rRGBImage, const glm::mat4& _Transform)
     {
         
-		BASE_UNUSED(_rRGBImage);
+        BASE_UNUSED(_rRGBImage);
         BASE_UNUSED(_Transform);
-
-
-
-		// Optional for internal check
-		CPluginInterface::ShowImg(_rRGBImage); // Showing image for visual checking -> Modify to control in editor.config
-		
-
+        
+        // Optional for internal check
+        CPluginInterface::ShowImg(_rRGBImage); // Showing image for visual checking -> Modify to control in editor.config
+        
     }
 
     // -----------------------------------------------------------------------------
@@ -61,16 +58,16 @@ namespace Stereo
     }
 
     // -----------------------------------------------------------------------------
-	void CPluginInterface::ShowImg(const std::vector<char>& Img_RGBA) const
-	{
-		cv::Mat CV_Img(cv::Size(m_ImageSize.x, m_ImageSize.y), CV_8UC4); // 2D Matrix(x*y) with (8-bit unsigned character) + (4 bands)
-			// cv::Mat is built in BGR/BGRA in default.
-
-		memcpy(CV_Img.data, Img_RGBA.data(), Img_RGBA.size());
-
-		cv::cvtColor(CV_Img, CV_Img, cv::COLOR_BGRA2RGBA); // Transform to RGB before imshow & imwrite
-		
-		cv::imshow("Hello", CV_Img);
+    void CPluginInterface::ShowImg(const std::vector<char>& Img_RGBA) const
+    {
+        cv::Mat CV_Img(cv::Size(m_ImageSize.x, m_ImageSize.y), CV_8UC4); // 2D Matrix(x*y) with (8-bit unsigned character) + (4 bands)
+            // cv::Mat is built in BGR/BGRA in default.
+        
+        memcpy(CV_Img.data, Img_RGBA.data(), Img_RGBA.size());
+        
+        cv::cvtColor(CV_Img, CV_Img, cv::COLOR_BGRA2RGBA); // Transform to RGB before imshow & imwrite
+        
+        cv::imshow("Hello", CV_Img);
 	}
 
 	// -----------------------------------------------------------------------------
@@ -78,7 +75,7 @@ namespace Stereo
     void CPluginInterface::OnStart()
     {
         ENGINE_CONSOLE_INFOV("Stereo matching plugin started!");
-		Img_RGB.resize(2);
+        Img_RGB.resize(2);
     }
 
     // -----------------------------------------------------------------------------
