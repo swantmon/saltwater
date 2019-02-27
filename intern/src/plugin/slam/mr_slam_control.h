@@ -474,7 +474,7 @@ namespace MR
                 rControl.Update();
             }
 
-            if (m_SendInpaintedResult)
+            if (m_SendInpaintedResult && Net::CNetworkManager::GetInstance().IsConnected(m_SLAMSocket))
             {
                 SendInpaintedResult();
             }
@@ -499,7 +499,6 @@ namespace MR
 
             Gfx::CTexturePtr Texture = Gfx::ReconstructionRenderer::GetInpaintedRendering(m_PoseMatrix, AABB);
 
-
             if (Texture != nullptr)
             {
                 std::vector<char> RawData(Texture->GetNumberOfPixelsU() * Texture->GetNumberOfPixelsV() * 4);
@@ -516,7 +515,7 @@ namespace MR
                 Message.m_MessageType = 0;
                 Message.m_Payload = std::move(Compressed);
 
-                Net::CNetworkManager::GetInstance().SendMessage(m_SLAMSocket, Message);
+                //Net::CNetworkManager::GetInstance().SendMessage(m_SLAMSocket, Message);
             }
         }
 

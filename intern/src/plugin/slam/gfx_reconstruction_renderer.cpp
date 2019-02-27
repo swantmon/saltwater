@@ -145,8 +145,9 @@ namespace
         
         void RaycastVolume();
         void RaycastVolumeWithHighlight();
-        void RaycastVolumeDiminished();
-        void RenderInpaintedPlane();
+
+        void RaycastVolumeDiminished(const glm::mat4& _rPoseMatrix, const Base::AABB3Float& _rAABB);
+        void RenderInpaintedPlane(const glm::mat4& _rPoseMatrix, const Base::AABB3Float& _rAABB);
         
         void RenderQueuedRootVolumes();
         void RenderQueuedLevel1Grids();
@@ -997,7 +998,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxReconstructionRenderer::RaycastVolumeDiminished()
+    void CGfxReconstructionRenderer::RaycastVolumeDiminished(const glm::mat4& _rPoseMatrix, const Base::AABB3Float& _rAABB)
     {
         glm::mat4 ReconstructionToSaltwater = glm::mat4(
             1.0f, 0.0f, 0.0f, 0.0f,
@@ -1033,8 +1034,8 @@ namespace
         ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::Default));
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
 
-        const glm::vec3 Min = m_SelectionBox.GetMin();
-        const glm::vec3 Max = m_SelectionBox.GetMax();
+        const glm::vec3 Min = _rAABB.GetMin();
+        const glm::vec3 Max = _rAABB.GetMax();
 
         glm::vec3 Vertices[8] =
         {
@@ -1068,7 +1069,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxReconstructionRenderer::RenderInpaintedPlane()
+    void CGfxReconstructionRenderer::RenderInpaintedPlane(const glm::mat4& _rPoseMatrix, const Base::AABB3Float& _rAABB)
     {
         assert(m_InpaintedPlaneTexture != nullptr);
 
@@ -1085,8 +1086,8 @@ namespace
 
         ContextManager::SetTexture(0, m_InpaintedPlaneTexture);
 
-        glm::vec3 Min = m_InpaintedPlaneAABB.GetMin();
-        glm::vec3 Max = m_InpaintedPlaneAABB.GetMax();
+        glm::vec3 Min = _rAABB.GetMin();
+        glm::vec3 Max = _rAABB.GetMax();
 
         glm::vec3 MinAnchor = Min;
         glm::vec3 MaxAnchor = Max;
@@ -1512,6 +1513,12 @@ namespace
 
     CTexturePtr CGfxReconstructionRenderer::GetInpaintedRendering(const glm::mat4& _rPoseMatrix, const Base::AABB3Float& _rAABB)
     {
+        if (m_InpaintedPlaneTexture != nullptr)
+        {
+            RenderInpaintedPlane(_rPoseMatrix, _rAABB);
+            RaycastVolumeDiminished(_rPoseMatrix, _rAABB);
+        }
+
         return m_DiminishedTargetPtr;
     }
 
@@ -1564,11 +1571,6 @@ namespace
                 Gfx::TargetSetManager::ClearTargetSet(m_DiminishedTargetSetPtr);
 
                 RaycastVolumeWithHighlight();
-                if (m_InpaintedPlaneTexture != nullptr)
-                {
-                    RenderInpaintedPlane();
-                    RaycastVolumeDiminished();
-                }
             }
         }
 
