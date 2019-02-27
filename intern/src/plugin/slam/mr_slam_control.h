@@ -137,7 +137,7 @@ namespace MR
             glm::mat4  m_DeviceProjectionMatrix;
         };
 
-        Net::SocketHandle m_DataSourceSocket;
+        Net::SocketHandle m_SLAMSocket;
 
         // -----------------------------------------------------------------------------
         // Stuff for Kinect data source
@@ -209,8 +209,8 @@ namespace MR
                 auto SLAMDelegate = std::bind(&CSLAMControl::OnNewSLAMMessage, this, std::placeholders::_1, std::placeholders::_2);
 
                 int Port = Core::CProgramParameters::GetInstance().Get("mr:slam:network_port", 12345);
-                auto SocketHandle = Net::CNetworkManager::GetInstance().CreateServerSocket(Port);
-                m_SLAMNetHandle = Net::CNetworkManager::GetInstance().RegisterMessageHandler(SocketHandle, SLAMDelegate);
+                m_SLAMSocket = Net::CNetworkManager::GetInstance().CreateServerSocket(Port);
+                m_SLAMNetHandle = Net::CNetworkManager::GetInstance().RegisterMessageHandler(m_SLAMSocket, SLAMDelegate);
                 
                 m_EnableInpainting = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:net:enable", true);
                 
