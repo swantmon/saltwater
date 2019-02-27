@@ -7,7 +7,7 @@
 
 #include <vector>
 
-#include "PhotoGrammmetry.h"
+#include "plugin\stereo\stereo_photogrammmetry.h"
 
 namespace Stereo
 {
@@ -45,10 +45,10 @@ namespace Stereo
         glm::vec2 m_FocalPoint;
         glm::ivec2 m_ImageSize;
 
-		std::vector<PhotoGrammmetry> Img_RGB;
-
-	private:
-
-		void ShowImg(const std::vector<char>& Img_RGBA) const;
+        std::vector<Photogrammmetry> Img_RGB;
+        
+    private:
+        
+        void ShowImg(const std::vector<char>& Img_RGBA) const;
     };
 } // namespace HW
