@@ -179,7 +179,7 @@ namespace MR
         int m_PlaneResolution;
         float m_PlaneScale;
 
-		bool m_SendInpaintedResult;
+        bool m_SendInpaintedResult;
 
     public:
 
@@ -342,7 +342,7 @@ namespace MR
                 m_RecordMode = NONE;
             }
 
-			m_SendInpaintedResult = Core::CProgramParameters::GetInstance().Get("mr:slam:diminished_reality:send_result", true);
+            m_SendInpaintedResult = Core::CProgramParameters::GetInstance().Get("mr:slam:diminished_reality:send_result", true);
         }
 
         // -----------------------------------------------------------------------------
@@ -463,41 +463,62 @@ namespace MR
                 // -----------------------------------------------------------------------------
                 // View
                 // -----------------------------------------------------------------------------
-                glm::mat4 PoseMatrix = m_PoseMatrix;
-                PoseMatrix = glm::eulerAngleX(glm::radians(90.0f)) * PoseMatrix;
+                glm::mat4 PoseMatrix = glm::eulerAngleX(glm::radians(90.0f)) * m_PoseMatrix;
 
-                glm::vec3 Eye = PoseMatrix * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-                glm::vec3 At = PoseMatrix * glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
-                glm::vec3 Up = PoseMatrix * glm::vec4(0.0f, -1.0f, 0.0f, 0.0f);
+                glm::mat4 View = PoseToView(PoseMatrix);
 
-                glm::mat4 View = glm::lookAtRH(Eye, At, Up);
+                auto Test = -glm::vec3(PoseMatrix[3].x, PoseMatrix[3].y, PoseMatrix[3].z);
 
-                rControl.SetPosition(glm::vec4(Eye, 1.0f));
+                rControl.SetPosition(glm::vec4(PoseMatrix[3].x, PoseMatrix[3].y, PoseMatrix[3].z, 1.0f));
                 rControl.SetRotation(glm::mat4(glm::inverse(glm::mat3(View))));
                 rControl.Update();
             }
 
-			if (m_SendInpaintedResult)
-			{
-				SendInpaintedResult();
-			}
+            if (m_SendInpaintedResult)
+            {
+                SendInpaintedResult();
+            }
         }
 
-		// -----------------------------------------------------------------------------
+        // -----------------------------------------------------------------------------
 
-		void SendInpaintedResult()
-		{
-			Gfx::CTexturePtr FrameBuffer = Gfx::ReconstructionRenderer::GetInpaintedRendering();
-			if (FrameBuffer != nullptr)
-			{
-				std::vector<char> RawData(FrameBuffer->GetNumberOfPixelsU() * FrameBuffer->GetNumberOfPixelsV() * 4);
-				Gfx::TextureManager::CopyTextureToCPU(FrameBuffer, RawData.data());
+        glm::mat4 PoseToView(const glm::mat4& _rPoseMatrix)
+        {
+            glm::vec3 Eye = _rPoseMatrix * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+            glm::vec3 At = _rPoseMatrix * glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+            glm::vec3 Up = _rPoseMatrix * glm::vec4(0.0f, -1.0f, 0.0f, 0.0f);
 
-				std::vector<char> Compressed;
+            return glm::lookAtRH(Eye, At, Up);
+        }
 
-				Base::Compress(RawData, Compressed, 0);
-			}
-		}
+        // -----------------------------------------------------------------------------
+
+        void SendInpaintedResult()
+        {
+            const auto& AABB = Gfx::ReconstructionRenderer::GetSelectionBox();
+
+            Gfx::CTexturePtr Texture = Gfx::ReconstructionRenderer::GetInpaintedRendering(m_PoseMatrix, AABB);
+
+
+            if (Texture != nullptr)
+            {
+                std::vector<char> RawData(Texture->GetNumberOfPixelsU() * Texture->GetNumberOfPixelsV() * 4);
+                Gfx::TextureManager::CopyTextureToCPU(Texture, RawData.data());
+
+                std::vector<char> Compressed;
+
+                Base::Compress(RawData, Compressed, 1);
+
+                Net::CMessage Message;
+                Message.m_Category = 0;
+                Message.m_CompressedSize = Compressed.size();
+                Message.m_DecompressedSize = RawData.size();
+                Message.m_MessageType = 0;
+                Message.m_Payload = std::move(Compressed);
+
+                Net::CNetworkManager::GetInstance().SendMessage(m_SLAMSocket, Message);
+            }
+        }
 
         // -----------------------------------------------------------------------------
 

@@ -115,7 +115,7 @@ namespace
         void AddPositionToSelection(const glm::vec3& _rWSPosition);
         void ResetSelection();
         void SetInpaintedPlane(Gfx::CTexturePtr _Texture, const Base::AABB3Float& _rAABB);
-		CTexturePtr GetInpaintedRendering(const glm::mat4& _rPoseMatrix, const Base::AABB3Float& _rAABB);
+        CTexturePtr GetInpaintedRendering(const glm::mat4& _rPoseMatrix, const Base::AABB3Float& _rAABB);
 
         const Base::AABB3Float& GetSelectionBox();
 
@@ -1508,12 +1508,12 @@ namespace
         m_InpaintedPlaneAABB = _rAABB;
     }
 
-	// -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
 
-	CTexturePtr CGfxReconstructionRenderer::GetInpaintedRendering(const glm::mat4& _rPoseMatrix, const Base::AABB3Float& _rAABB)
-	{
-		return m_DiminishedTargetPtr;
-	}
+    CTexturePtr CGfxReconstructionRenderer::GetInpaintedRendering(const glm::mat4& _rPoseMatrix, const Base::AABB3Float& _rAABB)
+    {
+        return m_DiminishedTargetPtr;
+    }
 
     // -----------------------------------------------------------------------------
 
@@ -1931,12 +1931,12 @@ namespace ReconstructionRenderer
         CGfxReconstructionRenderer::GetInstance().SetInpaintedPlane(_Texture, _rAABB);
     }
 
-	// -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
 
-	CTexturePtr GetInpaintedRendering(const glm::mat4& _rPoseMatrix, const Base::AABB3Float& _rAABB)
-	{
-		return CGfxReconstructionRenderer::GetInstance().GetInpaintedRendering(_rPoseMatrix, _rAABB);
-	}
+    CTexturePtr GetInpaintedRendering(const glm::mat4& _rPoseMatrix, const Base::AABB3Float& _rAABB)
+    {
+        return CGfxReconstructionRenderer::GetInstance().GetInpaintedRendering(_rPoseMatrix, _rAABB);
+    }
 
     // -----------------------------------------------------------------------------
 
