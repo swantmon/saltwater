@@ -7,6 +7,8 @@
 
 #include <vector>
 
+#include "PhotoGrammmetry.h"
+
 namespace Stereo
 {
     class CPluginInterface : public Core::IPlugin
@@ -42,5 +44,11 @@ namespace Stereo
         glm::vec2 m_FocalLength;
         glm::vec2 m_FocalPoint;
         glm::ivec2 m_ImageSize;
+
+		std::vector<PhotoGrammmetry> Img_RGB;
+
+	private:
+
+		void ShowImg(const std::vector<char>& Img_RGBA) const;
     };
 } // namespace HW
