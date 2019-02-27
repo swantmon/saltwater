@@ -472,11 +472,11 @@ namespace
         TextureDescriptor.m_NumberOfPixelsW  = 1;
         TextureDescriptor.m_NumberOfMipMaps  = 1;
         TextureDescriptor.m_NumberOfTextures = 1;
-        TextureDescriptor.m_Binding          = CTexture::ShaderResource | CTexture::RenderTarget;
-        TextureDescriptor.m_Access           = CTexture::CPUWrite;
-        TextureDescriptor.m_Usage            = CTexture::GPUReadWrite;
+        TextureDescriptor.m_Binding          = CTexture::RenderTarget;
+        TextureDescriptor.m_Access           = CTexture::EAccess::CPURead;
+        TextureDescriptor.m_Usage            = CTexture::EUsage::GPUToCPU;
         TextureDescriptor.m_Semantic         = CTexture::UndefinedSemantic;
-        TextureDescriptor.m_Format           = CTexture::R16G16B16A16_FLOAT;
+        TextureDescriptor.m_Format           = CTexture::R8G8B8A8_BYTE;
 
         m_DiminishedTargetPtr = TextureManager::CreateTexture2D(TextureDescriptor);
 
@@ -1517,9 +1517,11 @@ namespace
         {
             RenderInpaintedPlane(_rPoseMatrix, _rAABB);
             RaycastVolumeDiminished(_rPoseMatrix, _rAABB);
+
+            return m_DiminishedTargetPtr;
         }
 
-        return m_DiminishedTargetPtr;
+        return nullptr;
     }
 
     // -----------------------------------------------------------------------------
