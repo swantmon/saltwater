@@ -27,7 +27,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\src\plugin\stereo\stereo_photogrammmetry.cpp" />
+    <ClCompile Include="..\..\..\src\plugin\stereo\stereo_fu_fotogmtcv.cpp" />
     <ClCompile Include="..\..\..\src\plugin\stereo\stereo_plugin_interface.cpp" />
     <ClCompile Include="..\..\..\src\plugin\stereo\stereo_precompiled.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -37,7 +37,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\src\plugin\stereo\stereo_photogrammmetry.h" />
+    <ClInclude Include="..\..\..\src\plugin\stereo\stereo_fu_fotogmtcv.h" />
     <ClInclude Include="..\..\..\src\plugin\stereo\stereo_plugin_interface.h" />
     <ClInclude Include="..\..\..\src\plugin\stereo\stereo_precompiled.h" />
   </ItemGroup>

@@ -4,12 +4,12 @@
 
 namespace Stereo
 {
-    Photogrammmetry::Photogrammmetry()
+    Fu_FotoGmtCV::Fu_FotoGmtCV()
     {
     }
 
 
-    Photogrammmetry::~Photogrammmetry()
+    Fu_FotoGmtCV::~Fu_FotoGmtCV()
     {
     }
 } // Stereo

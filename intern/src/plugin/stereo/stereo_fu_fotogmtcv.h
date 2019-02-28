@@ -1,19 +1,19 @@
 #pragma once
 
-#ifndef Photogrammmetry_H
-#define Photogrammmetry_H
+#ifndef Fu_FotoGmtCV_H
+#define Fu_FotoGmtCV_H
 
 #include <vector>
 
-#include "base/base_include_glm.h"
+#include "base/base_include_glm.h" // Some warnings appears when directly #include glm 
 
 namespace Stereo
 {
-    class Photogrammmetry
+    class Fu_FotoGmtCV
     {
     public:
-        Photogrammmetry();
-        ~Photogrammmetry();
+        Fu_FotoGmtCV();
+        ~Fu_FotoGmtCV();
         
     public:
         
