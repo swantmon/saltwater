@@ -7,7 +7,7 @@
 
 #include <vector>
 
-#include "plugin\stereo\stereo_photogrammmetry.h"
+#include "plugin\stereo\stereo_fu_fotogmtcv.h"
 
 namespace Stereo
 {
@@ -45,7 +45,8 @@ namespace Stereo
         glm::vec2 m_FocalPoint;
         glm::ivec2 m_ImageSize;
 
-        std::vector<Photogrammmetry> Img_RGB;
+        std::vector<Fu_FotoGmtCV> SeqImg_RGB;
+        int ImgMaxCal = 2; // Maximal images for calculation once
         
     private:
         

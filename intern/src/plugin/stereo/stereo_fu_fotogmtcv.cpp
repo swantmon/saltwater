@@ -1,5 +1,5 @@
 #include "plugin\stereo\stereo_precompiled.h"
-#include "plugin\stereo\stereo_photogrammmetry.h"
+#include "plugin\stereo\stereo_fu_fotogmtcv.h"
 
 
 namespace Stereo
