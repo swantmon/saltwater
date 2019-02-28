@@ -19,6 +19,7 @@
 #include "engine/graphic/gfx_buffer_manager.h"
 #include "engine/graphic/gfx_context_manager.h"
 #include "engine/graphic/gfx_main.h"
+#include "engine/graphic/gfx_performance.h"
 #include "engine/graphic/gfx_shader_manager.h"
 #include "engine/graphic/gfx_texture.h"
 #include "engine/graphic/gfx_texture_manager.h"
@@ -482,72 +483,6 @@ namespace MR
 
         // -----------------------------------------------------------------------------
 
-        glm::mat4 PoseToView(const glm::mat4& _rPoseMatrix)
-        {
-            glm::vec3 Eye = _rPoseMatrix * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-            glm::vec3 At = _rPoseMatrix * glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
-            glm::vec3 Up = _rPoseMatrix * glm::vec4(0.0f, -1.0f, 0.0f, 0.0f);
-
-            return glm::lookAtRH(Eye, At, Up);
-        }
-
-        // -----------------------------------------------------------------------------
-
-        void SendInpaintedResult()
-        {
-            const auto& AABB = Gfx::ReconstructionRenderer::GetSelectionBox();
-
-            Gfx::CTexturePtr Texture = Gfx::ReconstructionRenderer::GetInpaintedRendering(m_PoseMatrix, AABB);
-
-            if (Texture != nullptr)
-            {
-                std::vector<char> RawData(Texture->GetNumberOfPixelsU() * Texture->GetNumberOfPixelsV() * 4);
-                Gfx::TextureManager::CopyTextureToCPU(Texture, RawData.data());
-
-                std::vector<char> Compressed;
-
-                Base::Compress(RawData, Compressed, 1);
-
-                Net::CMessage Message;
-                Message.m_Category = 0;
-                Message.m_CompressedSize = Compressed.size();
-                Message.m_DecompressedSize = RawData.size();
-                Message.m_MessageType = 0;
-                Message.m_Payload = std::move(Compressed);
-
-                //Net::CNetworkManager::GetInstance().SendMessage(m_SLAMSocket, Message);
-            }
-        }
-
-        // -----------------------------------------------------------------------------
-
-        glm::vec3 ComputeAnchor1(const Base::CInputEvent& _rEvent)
-        {
-            glm::ivec2 RawCursor = _rEvent.GetLocalCursorPosition();
-
-            const glm::ivec2 WindowSize = Gfx::Main::GetActiveWindowSize();
-            const glm::vec3 CameraPosition = Gfx::ViewManager::GetMainCamera()->GetView()->GetPosition();
-            const glm::mat4 ViewProjectionMatrix = Gfx::ViewManager::GetMainCamera()->GetViewProjectionMatrix();
-
-            glm::ivec2 Cursor;
-            Cursor.x = RawCursor.y;
-            Cursor.y = WindowSize.y - RawCursor.x;
-
-            glm::vec4 CSCursorPosition = glm::vec4(glm::vec2(Cursor) / glm::vec2(WindowSize) * 2.0f - 1.0f, 0.0f, 1.0f);
-            glm::mat4 InvViewProjectionMatrix = glm::inverse(ViewProjectionMatrix);
-
-            glm::vec4 WSCursorPosition = InvViewProjectionMatrix * CSCursorPosition;
-            WSCursorPosition /= WSCursorPosition.w;
-
-            glm::vec3 RayDirection = glm::vec3(WSCursorPosition) - CameraPosition;
-
-            float d = (m_SelectionBoxAnchor0.z - CameraPosition.z) / RayDirection.z;
-
-            return d * RayDirection + CameraPosition;
-        }
-
-        // -----------------------------------------------------------------------------
-
         void OnInput(const Base::CInputEvent& _rEvent)
         {
             if (!m_IsReconstructorInitialized)
@@ -587,6 +522,45 @@ namespace MR
         }
 
     private:
+
+        glm::mat4 PoseToView(const glm::mat4& _rPoseMatrix)
+        {
+            glm::vec3 Eye = _rPoseMatrix * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+            glm::vec3 At = _rPoseMatrix * glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+            glm::vec3 Up = _rPoseMatrix * glm::vec4(0.0f, -1.0f, 0.0f, 0.0f);
+
+            return glm::lookAtRH(Eye, At, Up);
+        }
+
+        // -----------------------------------------------------------------------------
+
+        void SendInpaintedResult()
+        {
+            const auto& AABB = Gfx::ReconstructionRenderer::GetSelectionBox();
+
+            Gfx::CTexturePtr Texture = Gfx::ReconstructionRenderer::GetInpaintedRendering(m_PoseMatrix, AABB);
+
+            if (Texture != nullptr)
+            {
+                std::vector<char> RawData(Texture->GetNumberOfPixelsU() * Texture->GetNumberOfPixelsV() * 4);
+                Gfx::TextureManager::CopyTextureToCPU(Texture, RawData.data());
+
+                std::vector<char> Compressed;
+
+                Base::Compress(RawData, Compressed, 1);
+
+                Net::CMessage Message;
+                Message.m_Category = 0;
+                Message.m_CompressedSize = Compressed.size();
+                Message.m_DecompressedSize = RawData.size();
+                Message.m_MessageType = 0;
+                Message.m_Payload = std::move(Compressed);
+
+                //Net::CNetworkManager::GetInstance().SendMessage(m_SLAMSocket, Message);
+            }
+        }
+
+        // -----------------------------------------------------------------------------
 
         void HandleMessage(const Net::CMessage& _rMessage)
         {
