@@ -13,12 +13,13 @@ namespace Stereo
     {
     public:
         Fu_FotoGmtCV();
+        Fu_FotoGmtCV(const std::vector<char>&);
         ~Fu_FotoGmtCV();
         
     public:
         
     private:
-        std::vector<char> Img;
+        std::vector<char> FuImg;
         glm::mat3 K_mtx;
         glm::mat3x4 P_mtx;
     };
