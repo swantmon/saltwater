@@ -17,7 +17,8 @@ namespace Stereo
         ~Fu_FotoGmtCV();
         
     public:
-        
+        void setPmtx(glm::mat3x4 P);
+
     private:
         std::vector<char> FuImg;
         glm::mat3 K_mtx;
