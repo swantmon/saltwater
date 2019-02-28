@@ -37,8 +37,28 @@ namespace Stereo
         BASE_UNUSED(_rRGBImage);
         BASE_UNUSED(_Transform);
         
+        if (SeqImg_RGB.empty())
+        {
+            SeqImg_RGB.resize(1);
+            SeqImg_RGB[0] = Fu_FotoGmtCV(_rRGBImage);
+        }
+        else if (SeqImg_RGB.size() < ImgMaxCal)
+        {
+            SeqImg_RGB.resize(SeqImg_RGB.size() + 1);
+            SeqImg_RGB[SeqImg_RGB.size() - 1] = Fu_FotoGmtCV(_rRGBImage);
+        }
+        else
+        {
+            // Start Calculation; SfM + SGM
+            
+        }
+        
+        
         // Optional for internal check
+        /*
         CPluginInterface::ShowImg(_rRGBImage); // Showing image for visual checking -> Modify to control in editor.config
+        */
+        
         
     }
 
@@ -75,7 +95,6 @@ namespace Stereo
     void CPluginInterface::OnStart()
     {
         ENGINE_CONSOLE_INFOV("Stereo matching plugin started!");
-        Img_RGB.resize(2);
     }
 
     // -----------------------------------------------------------------------------
