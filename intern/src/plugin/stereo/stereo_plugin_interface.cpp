@@ -41,6 +41,7 @@ namespace Stereo
         {
             SeqImg_RGB.resize(1);
             SeqImg_RGB[0] = Fu_FotoGmtCV(_rRGBImage);
+            SeqImg_RGB[0].setPmtx(_Transform);
         }
         else if (SeqImg_RGB.size() < ImgMaxCal)
         {

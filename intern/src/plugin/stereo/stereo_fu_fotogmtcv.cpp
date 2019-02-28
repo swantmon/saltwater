@@ -15,4 +15,10 @@ namespace Stereo
     Fu_FotoGmtCV::~Fu_FotoGmtCV()
     {
     }
+
+    void Fu_FotoGmtCV::setPmtx(glm::mat3x4 P) // P is the transform from Mapping frame to Image frame
+    {
+        P_mtx = P;
+    }
+
 } // Stereo
