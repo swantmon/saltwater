@@ -8,6 +8,8 @@ import struct
 import _thread 
 import sys
 
+import cv2
+
 import torchvision.transforms as transforms
 from torchvision.utils import save_image
 from PIL import Image
@@ -199,17 +201,33 @@ if __name__ == '__main__':
 
             save_image(gen_mask, '{}/{}/3_cutout_1.png'.format(opt.output, i), nrow=1, normalize=True)      
 
-            style_image = masked_imgs.clone()
+            mask = torch.zeros([128, 128])
 
-            style_image[:, :, 32:62 , 32:96] = masked_imgs[:, :, 1 :31 , 32:96]
-            style_image[:, :, 63:77 , 32:96] = masked_imgs[:, :, 17:31 , 32:96]
-            style_image[:, :, 78:109, 32:96] = masked_imgs[:, :, 97:128, 32:96]     
+            mask[y1:y2, x1:x2] = torch.ones([64, 64])
+
+            save_image(mask, '{}/{}/X_mask.png'.format(opt.output, i), nrow=1, normalize=True)      
+
+            style_image = filled_sample.clone()
+
+            #style_image[:, :, 32:63 , 32:96] = masked_imgs[:, :, 1 :32 , 32:96]
+            #style_image[:, :, 63:77 , 32:96] = masked_imgs[:, :, 17:31 , 32:96]
+            #style_image[:, :, 78:109, 32:96] = masked_imgs[:, :, 97:128, 32:96]
 
             #style_image[:, :, 117:232, 117:396] = style_image[:, :, 1  :116, 117:396]
             #style_image[:, :, 233:280, 117:396] = style_image[:, :, 69 :116, 117:396]
             #style_image[:, :, 281:396, 117:396] = style_image[:, :, 397:512, 117:396]      
 
             save_image(style_image, '{}/{}/4_style.png'.format(opt.output, i), nrow=1, normalize=True)      
+
+            # -----------------------------------------------------------------------------
+            # OpenCV Inpainting
+            # -----------------------------------------------------------------------------
+            img  = cv2.imread('{}/{}/1_masked.png'.format(opt.output, i))
+            mask = cv2.imread('{}/{}/X_mask.png'.format(opt.output, i),0)
+
+            dst = cv2.inpaint(img, mask, 3, cv2.INPAINT_TELEA)
+
+            cv2.imwrite('{}/{}/2_prediction_2.png'.format(opt.output, i), dst)
 
             # -----------------------------------------------------------------------------
             # MRF
@@ -229,9 +247,9 @@ if __name__ == '__main__':
             # -----------------------------------------------------------------------------
             # Save output and input to file system
             # -----------------------------------------------------------------------------
-            save_image(filled_sample, '{}/{}/2_prediction_2.png'.format(opt.output, i), nrow=1, normalize=True)
+            save_image(filled_sample, '{}/{}/2_prediction_3.png'.format(opt.output, i), nrow=1, normalize=True)
 
-            save_image(resized_result, '{}/{}/3_cutout_2.png'.format(opt.output, i), nrow=1, normalize=True)
+            save_image(resized_result, '{}/{}/3_cutout_3.png'.format(opt.output, i), nrow=1, normalize=True)
         
         print ("Finished")
 
