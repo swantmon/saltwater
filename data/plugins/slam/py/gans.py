@@ -44,6 +44,9 @@ class Generator(nn.Module):
         self.conv5_1 = nn.Conv2d(256, 512, 3, stride=1, padding=1)
         self.norm5_1 = nn.BatchNorm2d(512, 0.8)
 
+        self.conv5_2 = nn.Conv2d(512, 512, 3, stride=1, padding=1)
+        self.norm5_2 = nn.BatchNorm2d(512, 0.8)
+
         self.conv6_1 = nn.Conv2d(512, 1000, 4)
         self.linear6_2 = nn.Linear(1000, 2048)
         self.drop6_3 = nn.Dropout(0.5)
@@ -90,6 +93,11 @@ class Generator(nn.Module):
 
         x = self.conv5_1(x)
         x = self.norm5_1(x)
+        x = self.pool(x)
+        x = F.elu(x)        
+
+        x = self.conv5_2(x)
+        x = self.norm5_2(x)
         x = self.pool(x)
         x = F.elu(x)
 
