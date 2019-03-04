@@ -40,13 +40,17 @@ namespace Stereo
         if (SeqImg_RGB.empty())
         {
             SeqImg_RGB.resize(1);
-            SeqImg_RGB[0] = Fu_FotoGmtCV(_rRGBImage);
+            SeqImg_RGB[0] = Fu_FotoGmtCV(_rRGBImage, m_ImageSize.x, m_ImageSize.y);
+            SeqImg_RGB[0].ShowImg();
             SeqImg_RGB[0].setPmtx(_Transform);
         }
         else if (SeqImg_RGB.size() < ImgMaxCal)
         {
             SeqImg_RGB.resize(SeqImg_RGB.size() + 1);
-            SeqImg_RGB[SeqImg_RGB.size() - 1] = Fu_FotoGmtCV(_rRGBImage);
+            int SeqImg_Idx = SeqImg_RGB.size() - 1;
+            SeqImg_RGB[SeqImg_Idx] = Fu_FotoGmtCV(_rRGBImage, m_ImageSize.x, m_ImageSize.y);
+            SeqImg_RGB[SeqImg_Idx].ShowImg();
+            SeqImg_RGB[SeqImg_Idx].setPmtx(_Transform);
         }
         else
         {
@@ -56,9 +60,9 @@ namespace Stereo
         
         
         // Optional for internal check
-        /*
+        
         CPluginInterface::ShowImg(_rRGBImage); // Showing image for visual checking -> Modify to control in editor.config
-        */
+        
         
         
     }

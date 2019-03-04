@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #ifndef Fu_FotoGmtCV_H
 #define Fu_FotoGmtCV_H
@@ -7,20 +7,26 @@
 
 #include "base/base_include_glm.h" // Some warnings appears when directly #include glm 
 
+#include "opencv2/opencv.hpp"
+
 namespace Stereo
 {
     class Fu_FotoGmtCV
     {
     public:
         Fu_FotoGmtCV();
-        Fu_FotoGmtCV(const std::vector<char>&);
+        Fu_FotoGmtCV(const std::vector<char>&, int, int);
         ~Fu_FotoGmtCV();
-        
+    
+    public:
+        cv::Mat PolarRect();
+
     public:
         void setPmtx(glm::mat4x3 P);
+        void ShowImg(); 
 
     private:
-        std::vector<char> FuImg;
+        cv::Mat FuImg; // RGB or RGBA
         glm::mat3 K_mtx;
         glm::mat4x3 P_mtx;
     };
