@@ -862,7 +862,7 @@ namespace
 
             glDeleteFramebuffers(1, &Framebuffer);
 #else
-            glGetTexImage(pInternTexture->m_NativeBinding, 0, GL_RGBA, GL_BYTE, _pBuffer);
+            glGetTexImage(pInternTexture->m_NativeBinding, 0, GL_RGBA, GL_UNSIGNED_BYTE, _pBuffer);
 #endif
         }
     }
