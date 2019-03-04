@@ -47,10 +47,10 @@ namespace Stereo
         else if (SeqImg_RGB.size() < ImgMaxCal)
         {
             SeqImg_RGB.resize(SeqImg_RGB.size() + 1);
-            int SeqImg_Idx = SeqImg_RGB.size() - 1;
-            SeqImg_RGB[SeqImg_Idx] = Fu_FotoGmtCV(_rRGBImage, m_ImageSize.x, m_ImageSize.y);
-            SeqImg_RGB[SeqImg_Idx].ShowImg();
-            SeqImg_RGB[SeqImg_Idx].setPmtx(_Transform);
+            int SeqImg_CurIdx = SeqImg_RGB.size() - 1;
+            SeqImg_RGB[SeqImg_CurIdx] = Fu_FotoGmtCV(_rRGBImage, m_ImageSize.x, m_ImageSize.y);
+            SeqImg_RGB[SeqImg_CurIdx].ShowImg();
+            SeqImg_RGB[SeqImg_CurIdx].setPmtx(_Transform);
         }
         else
         {
