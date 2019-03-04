@@ -26,7 +26,8 @@ namespace Stereo
         void ShowImg(); 
 
     private:
-        cv::Mat FuImg; // RGB or RGBA
+        cv::Mat FuImg; // Original Image in RGB or RGBA
+        cv::Mat FuImg_Rect; // Rectified Image
         glm::mat3 K_mtx;
         glm::mat4x3 P_mtx;
     };
