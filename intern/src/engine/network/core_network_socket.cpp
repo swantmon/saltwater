@@ -59,7 +59,7 @@ namespace Net
         
         m_Mutex.lock();
 
-        m_MessageQueue.push(std::move(Message));
+        m_MessageQueue.push(Message);
 
         m_Mutex.unlock();
 
@@ -135,10 +135,10 @@ namespace Net
             int32_t MessageID = *reinterpret_cast<int32_t*>(m_Header.data());
             int32_t CompressedMessageLength = *reinterpret_cast<int32_t*>(m_Header.data() + sizeof(int32_t));
             int32_t DecompressedMessageLength = *reinterpret_cast<int32_t*>(m_Header.data() + 2 * sizeof(int32_t));
-            m_Payload.resize(CompressedMessageLength);
+            m_PendingMessage.m_Payload.resize(CompressedMessageLength);
 
             auto Callback = std::bind(&CSocket::ReceivePayload, this, std::placeholders::_1, std::placeholders::_2);
-            asio::async_read(*m_pSocket, asio::buffer(m_Payload), asio::transfer_exactly(CompressedMessageLength), Callback);
+            asio::async_read(*m_pSocket, asio::buffer(m_PendingMessage.m_Payload), asio::transfer_exactly(CompressedMessageLength), Callback);
 
             m_PendingMessage.m_Category = MessageID;
             m_PendingMessage.m_MessageType = 0;
@@ -157,11 +157,9 @@ namespace Net
     {
         BASE_UNUSED(_TransferredBytes);
         
-        m_PendingMessage.m_Payload = std::move(m_Payload);
-
         m_Mutex.lock();
 
-        m_MessageQueue.push(std::move(m_PendingMessage));
+        m_MessageQueue.push(m_PendingMessage);
 
         m_Mutex.unlock();
 
@@ -251,7 +249,7 @@ namespace Net
 
         m_Mutex.lock();
 
-        m_MessageQueue.push(std::move(Message));
+        m_MessageQueue.push(Message);
 
         m_Mutex.unlock();
 
