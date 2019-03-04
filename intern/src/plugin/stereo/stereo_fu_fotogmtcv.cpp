@@ -20,9 +20,10 @@ namespace Stereo
     {
     }
 
-    Fu_FotoGmtCV::cv::Mat PolarRect()
+    cv::Mat Fu_FotoGmtCV:: PolarRect()
     {
-        
+        // Apply Polar Rectification proposed by Polleys et al. (1999)
+
         return FuImg_Rect;
     }
 
