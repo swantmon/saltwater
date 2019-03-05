@@ -41,18 +41,18 @@ namespace Stereo
         {
             SeqImg_RGB.resize(1);
             SeqImg_RGB[0] = Fu_FotoGmtCV(_rRGBImage, m_ImageSize.x, m_ImageSize.y);
-            SeqImg_RGB[0].ShowImg();
             SeqImg_RGB[0].set_Rot(glm::mat3(_Transform));
-            SeqImg_RGB[0].set_Trans(_Transform[3]);
+            SeqImg_RGB[0].set_Trans(-1 * glm::transpose(glm::mat3(_Transform)) * glm::vec3(_Transform[3]));
+            SeqImg_RGB[0].set_P(glm::mat4x3(_Transform));
         }
         else if (SeqImg_RGB.size() < ImgMaxCal)
         {
             SeqImg_RGB.resize(SeqImg_RGB.size() + 1);
             int SeqImg_CurIdx = SeqImg_RGB.size() - 1;
             SeqImg_RGB[SeqImg_CurIdx] = Fu_FotoGmtCV(_rRGBImage, m_ImageSize.x, m_ImageSize.y);
-            SeqImg_RGB[SeqImg_CurIdx].ShowImg();
             SeqImg_RGB[SeqImg_CurIdx].set_Rot(glm::mat3(_Transform));
-            SeqImg_RGB[SeqImg_CurIdx].set_Trans(_Transform[3]);
+            SeqImg_RGB[SeqImg_CurIdx].set_Trans(-1 * glm::transpose(glm::mat3(_Transform)) * glm::vec3(_Transform[3]));
+            SeqImg_RGB[SeqImg_CurIdx].set_P(glm::mat4x3(_Transform));
         }
         else
         {
