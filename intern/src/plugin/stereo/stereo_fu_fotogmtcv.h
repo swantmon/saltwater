@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #ifndef Fu_FotoGmtCV_H
 #define Fu_FotoGmtCV_H
@@ -13,13 +13,15 @@ namespace Stereo
 {
     class Fu_FotoGmtCV
     {
+    //---Constructor & Destructor---
     public:
         Fu_FotoGmtCV();
         Fu_FotoGmtCV(const std::vector<char>&, int ImgW, int ImgH);
         ~Fu_FotoGmtCV();
-    
+    //---Epipolarization: Polar Rectification-----
     public:
-        cv::Mat PolarRect();
+        cv::Mat PolarRect(Fu_FotoGmtCV Img_Match);
+        void DetermCoRegion();
 
     public:
         void set_Rot(glm::mat3 R);
@@ -27,8 +29,8 @@ namespace Stereo
         void ShowImg(); 
 
     private:
-        cv::Mat FuImg; // Original Image in RGB or RGBA
-        cv::Mat FuImg_Rect; // Rectified Image
+        cv::Mat Img; // Original Image in RGB or RGBA
+        cv::Mat Img_Rect; // Rectified Image
         glm::mat3 K_mtx;
         glm::mat4x3 P_mtx;
         glm::mat3 Rot_mtx; // Rotations from Mapping frame to Image frame
