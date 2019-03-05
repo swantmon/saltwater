@@ -23,16 +23,24 @@ namespace Stereo
     cv::Mat Fu_FotoGmtCV::PolarRect(Fu_FotoGmtCV Img_Match)
     {
         // Apply Polar Rectification proposed by Pollefeys et al. (1999)
-
+        /*
         // Derive F-mtx by known P-mtx
             // E = B * R_1to2 = R_2to1 * B
             // F = inv(K2)' * E * inv(K)
             // F = [P2*PC1]_skewSym * P2 * inv(P1) = [epipole2]_skewSym * P2 * inv(P1)
-        //glm::mat3 F_mtx = Img_Match.P_mtx * (-1 * glm::mat3(P_mtx[0], P_mtx[1], P_mtx[2]) * P_mtx[3]);
+        
+        glm::mat3x4 P_ImgBase = glm::mat3x4(Rot_mtx, glm::vec3(Trans_vec));
+        glm::mat3x4 P_ImgM = glm::mat3x4(Img_Match.Rot_mtx, glm::vec3(Img_Match.Trans_vec));
+        glm::mat4x3 P_ImgBase_PsudoInv = glm::transpose(P_ImgBase) * glm::inverse(P_ImgBase * glm::transpose(P_ImgBase));
+        
+        glm::vec3 Epipole_ImgM = P_ImgM * Trans_vec; // Epipole of Image_Match
+        glm::mat3 Epipole_ImgM_SkewSym = 
+            glm::mat3(glm::vec3(0, Epipole_ImgM[2], -Epipole_ImgM[1]), glm::vec3(-Epipole_ImgM[2], 0, Epipole_ImgM[0]), glm::vec3(Epipole_ImgM[1], -Epipole_ImgM[0], 0));
+        glm::mat3 F_mtx = Epipole_ImgM_SkewSym * P_ImgM * P_ImgBase_PsudoInv;
         // Derive H-mtx by known P-mtx
 
         DetermCoRegion();
-
+        */
         return Img_Rect;
     }
 
@@ -49,6 +57,11 @@ namespace Stereo
     void Fu_FotoGmtCV::set_Trans(glm::vec3 T)
     {
         Trans_vec = T;
+    }
+
+    void Fu_FotoGmtCV::set_P(glm::mat4x3 P)
+    {
+        P_mtx = P;
     }
 
     void Fu_FotoGmtCV::ShowImg()
