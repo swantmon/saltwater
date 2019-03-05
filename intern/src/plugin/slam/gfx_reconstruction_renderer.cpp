@@ -1515,6 +1515,8 @@ namespace
     {
         if (m_InpaintedPlaneTexture != nullptr)
         {
+            Gfx::TargetSetManager::ClearTargetSet(m_DiminishedTargetSetPtr);
+
             RenderInpaintedPlane(_rPoseMatrix, _rAABB);
             RaycastVolumeDiminished(_rPoseMatrix, _rAABB);
 
@@ -1570,8 +1572,6 @@ namespace
             }
             else
             {
-                Gfx::TargetSetManager::ClearTargetSet(m_DiminishedTargetSetPtr);
-
                 RaycastVolumeWithHighlight();
             }
         }
