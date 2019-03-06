@@ -48,15 +48,20 @@ namespace Stereo
         else if (SeqImg_RGB.size() < ImgMaxCal)
         {
             SeqImg_RGB.resize(SeqImg_RGB.size() + 1);
-            int SeqImg_CurIdx = SeqImg_RGB.size() - 1;
-            SeqImg_RGB[SeqImg_CurIdx] = Fu_FotoGmtCV(_rRGBImage, m_ImageSize.x, m_ImageSize.y);
-            SeqImg_RGB[SeqImg_CurIdx].set_Rot(glm::mat3(_Transform));
-            SeqImg_RGB[SeqImg_CurIdx].set_Trans(-1 * glm::transpose(glm::mat3(_Transform)) * glm::vec3(_Transform[3]));
-            SeqImg_RGB[SeqImg_CurIdx].set_P(glm::mat4x3(_Transform));
+            int Seq_Idx = SeqImg_RGB.size() - 1; // Maybe can replace by iterator
+            SeqImg_RGB[Seq_Idx] = Fu_FotoGmtCV(_rRGBImage, m_ImageSize.x, m_ImageSize.y);
+            SeqImg_RGB[Seq_Idx].set_Rot(glm::mat3(_Transform));
+            SeqImg_RGB[Seq_Idx].set_Trans(-1 * glm::transpose(glm::mat3(_Transform)) * glm::vec3(_Transform[3]));
+            SeqImg_RGB[Seq_Idx].set_P(glm::mat4x3(_Transform));
         }
         else
         {
-            // Start Calculation; SfM + SGM
+            // Start Stereo Matching
+            for (std::vector<Fu_FotoGmtCV>::iterator iter = SeqImg_RGB.begin(); iter < SeqImg_RGB.end(); iter++)
+            {
+                std::vector<Fu_FotoGmtCV>::iterator iterNext = iter + 1;
+                iter->PolarRect(*iterNext);
+            }
             
         }
         
