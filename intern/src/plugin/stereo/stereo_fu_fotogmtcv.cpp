@@ -49,6 +49,11 @@ namespace Stereo
     }
 
     //---Set Functions---
+    void Fu_FotoGmtCV::set_K(glm::mat3 K)
+    {
+        K_mtx = K;
+    }
+
     void Fu_FotoGmtCV::set_Rot(glm::mat3 R)
     {
         Rot_mtx = R;

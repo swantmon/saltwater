@@ -41,8 +41,7 @@ namespace Stereo
 
     private:
 
-        glm::vec2 m_FocalLength;
-        glm::vec2 m_FocalPoint;
+        glm::mat3 m_Camera_mtx;
         glm::ivec2 m_ImageSize;
 
         std::vector<Fu_FotoGmtCV> SeqImg_RGB;

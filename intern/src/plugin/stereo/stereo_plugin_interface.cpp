@@ -17,8 +17,7 @@ namespace Stereo
 {
     void CPluginInterface::SetIntrinsics(const glm::vec2& _rFocalLength, const glm::vec2& _rFocalPoint, const glm::ivec2& _rImageSize)
     {
-        m_FocalLength = _rFocalLength;
-        m_FocalPoint = _rFocalPoint;
+        m_Camera_mtx = glm::mat3(glm::vec3(_rFocalLength.x, 0, 0), glm::vec3(0, _rFocalLength.y, 0), glm::vec3(_rFocalPoint.x, _rFocalPoint.y, 1));
         m_ImageSize = _rImageSize;
     }
 
@@ -34,25 +33,27 @@ namespace Stereo
     void CPluginInterface::OnFrameCPU(const std::vector<char>& _rRGBImage, const glm::mat4& _Transform)
     {
         
-        BASE_UNUSED(_rRGBImage);
-        BASE_UNUSED(_Transform);
+        // BASE_UNUSED(_rRGBImage); // For variables which has not been used yet.
+        // BASE_UNUSED(_Transform); // For variables which has not been used yet.
         
         if (SeqImg_RGB.empty())
         {
             SeqImg_RGB.resize(1);
             SeqImg_RGB[0] = Fu_FotoGmtCV(_rRGBImage, m_ImageSize.x, m_ImageSize.y);
+            SeqImg_RGB[0].set_K(m_Camera_mtx);
             SeqImg_RGB[0].set_Rot(glm::mat3(_Transform));
             SeqImg_RGB[0].set_Trans(-1 * glm::transpose(glm::mat3(_Transform)) * glm::vec3(_Transform[3]));
-            SeqImg_RGB[0].set_P(glm::mat4x3(_Transform));
+            SeqImg_RGB[0].set_P(m_Camera_mtx * glm::mat4x3(_Transform));
         }
         else if (SeqImg_RGB.size() < ImgMaxCal)
         {
             SeqImg_RGB.resize(SeqImg_RGB.size() + 1);
             int Seq_Idx = SeqImg_RGB.size() - 1; // Maybe can replace by iterator
             SeqImg_RGB[Seq_Idx] = Fu_FotoGmtCV(_rRGBImage, m_ImageSize.x, m_ImageSize.y);
+            SeqImg_RGB[Seq_Idx].set_K(m_Camera_mtx);
             SeqImg_RGB[Seq_Idx].set_Rot(glm::mat3(_Transform));
             SeqImg_RGB[Seq_Idx].set_Trans(-1 * glm::transpose(glm::mat3(_Transform)) * glm::vec3(_Transform[3]));
-            SeqImg_RGB[Seq_Idx].set_P(glm::mat4x3(_Transform));
+            SeqImg_RGB[Seq_Idx].set_P(m_Camera_mtx * glm::mat4x3(_Transform));
         }
         else
         {
