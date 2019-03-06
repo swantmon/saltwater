@@ -1031,9 +1031,7 @@ namespace
         );
 
         Performance::BeginEvent("Raycasting for diminishing");
-
-        ContextManager::SetTargetSet(m_DiminishedTargetSetPtr);
-
+        
         ContextManager::SetViewPortSet(m_DiminishedViewPortSetPtr);
 
         MR::CSLAMReconstructor::SSLAMVolume& rVolume = m_pReconstructor->GetVolume();
@@ -1103,7 +1101,6 @@ namespace
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
 
         ContextManager::SetViewPortSet(m_DiminishedViewPortSetPtr);
-        ContextManager::SetTargetSet(m_DiminishedTargetSetPtr);
 
         ContextManager::SetRenderContext(m_PlaneRenderContextPtr);
         ContextManager::SetShaderVS(m_BackgroundVSPtr);
@@ -1134,7 +1131,6 @@ namespace
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
 
         ContextManager::SetViewPortSet(m_DiminishedViewPortSetPtr);
-        ContextManager::SetTargetSet(m_DiminishedTargetSetPtr);
 
         ContextManager::SetRenderContext(m_PlaneRenderContextPtr);
         ContextManager::SetShaderVS(m_InpaintedPlaneVSPtr);
@@ -1571,7 +1567,11 @@ namespace
     {
         if (m_InpaintedPlaneTexture != nullptr)
         {
+            Performance::BeginEvent("Render diminished reality");
+
             Gfx::TargetSetManager::ClearTargetSet(m_DiminishedTargetSetPtr);
+
+            ContextManager::SetTargetSet(m_DiminishedTargetSetPtr);
 
             if (_BackgroundTexturePtr != nullptr)
             {
@@ -1579,6 +1579,8 @@ namespace
             }
             RenderInpaintedPlane(_rPoseMatrix, _rAABB);
             RaycastVolumeDiminished(_rPoseMatrix, _rAABB);
+
+            Performance::EndEvent();
 
             return m_DiminishedTargetPtr;
         }
