@@ -71,7 +71,7 @@ namespace MR
         glm::ivec2 m_DeviceResolution;
         glm::mat4  m_DeviceProjectionMatrix;
 
-        bool m_UseTrackingCamera = false;
+        bool m_UseTrackingCamera = true;
 
         bool m_IsReconstructorInitialized = false;
 
@@ -699,9 +699,7 @@ namespace MR
                     }
                     std::string DefineString = DefineStream.str();
                     m_ShiftDepthCSPtr = Gfx::ShaderManager::CompileCS("../../plugins/slam/cs_shift_depth.glsl", "main", DefineString.c_str());
-
-                    m_UseTrackingCamera = true;
-
+                    
                     if (m_SendInpaintedResult)
                     {
                         m_PixelBufferSize = m_DeviceResolution.x * m_DeviceResolution.y * 4;
@@ -743,9 +741,7 @@ namespace MR
                 int WorkgroupsX = DivUp(m_CaptureColor ? m_ColorSize.x : m_DepthSize.x, m_TileSize2D);
                 int WorkgroupsY = DivUp(m_CaptureColor ? m_ColorSize.y : m_DepthSize.y, m_TileSize2D);
                 Gfx::ContextManager::Dispatch(WorkgroupsX, WorkgroupsY, 1);
-
-                m_UseTrackingCamera = true;
-
+                
                 if (!m_CaptureColor)
                 {
                     m_Reconstructor.OnNewFrame(m_DepthTexture, nullptr, &m_PoseMatrix);
