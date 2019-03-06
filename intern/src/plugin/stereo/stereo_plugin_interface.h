@@ -48,7 +48,8 @@ namespace Stereo
         int ImgMaxCal = 2; // Maximal images for calculation once
         
     private:
-        
+        void glm2cv(cv::Mat* cvmat, const glm::mat3& glmmat);
+        void glm2cv(cv::Mat* cvmat, const glm::vec3& glmmat);
         void ShowImg(const std::vector<char>& Img_RGBA) const;
     };
 } // namespace HW

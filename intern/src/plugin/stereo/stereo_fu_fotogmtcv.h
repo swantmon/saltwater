@@ -22,26 +22,36 @@ namespace Stereo
     //---Epipolarization: Polar Rectification-----
     public:
         cv::Mat PolarRect(Fu_FotoGmtCV Img_Match);
-        void DetermCoRegion();
+
+    private:
+        void determ_CoRegion();
+
 
     //---Set Functions---
     public:
+        void set_Cam(glm::mat3& K);
         void set_Rot(glm::mat3 R);
         void set_Trans(glm::vec3 T);
-        void set_P(glm::mat4x3 P);
+        void set_P(glm::mat3x4 P);
     
-    //---Get Functions---
+    //---Show Functions---
     public:
-        void ShowImg(); 
+        void show_Img(); 
+
+    //---Type Transform---
+    private:
+        void glm2cv(cv::Mat* cvmat, const glm::mat3& glmmat);
+        void glm2cv(cv::Mat* cvmat, const glm::vec3& glmmat);
+        void glm2cv(cv::Mat* cvmat, const glm::mat3x4& glmmat);
 
     //---Members---
     private:
         cv::Mat Img; // Original Image in RGB or RGBA
         cv::Mat Img_Rect; // Rectified Image
-        glm::mat3 K_mtx;
-        glm::mat3 Rot_mtx; // Rotations from Mapping frame to Image frame
-        glm::vec3 Trans_vec; // Translations in Mapping frame
-        glm::mat4x3 P_mtx; // P-matrix = [Rot_mtx | -Rot_mtx*Trans_vec]
+        cv::Mat K_mtx;
+        cv::Mat Rot_mtx; // Rotations from Mapping frame to Image frame
+        cv::Mat Trans_vec; // Translations in Mapping frame
+        cv::Mat P_mtx; // P-matrix = [Rot_mtx | -Rot_mtx*Trans_vec]
             /*
             glm is column-major, which makes glm::mat4*3 represents real 3*4 matrix
             Verification: glm::mat3x2 * glm::mat2x3 = glm::mat2

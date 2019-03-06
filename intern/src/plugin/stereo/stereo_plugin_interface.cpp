@@ -39,18 +39,19 @@ namespace Stereo
         if (SeqImg_RGB.empty())
         {
             SeqImg_RGB.resize(1);
+
             SeqImg_RGB[0] = Fu_FotoGmtCV(_rRGBImage, m_ImageSize.x, m_ImageSize.y);
-            SeqImg_RGB[0].set_K(m_Camera_mtx);
+            SeqImg_RGB[0].set_Cam(m_Camera_mtx);
             SeqImg_RGB[0].set_Rot(glm::mat3(_Transform));
             SeqImg_RGB[0].set_Trans(-1 * glm::transpose(glm::mat3(_Transform)) * glm::vec3(_Transform[3]));
-            SeqImg_RGB[0].set_P(m_Camera_mtx * glm::mat4x3(_Transform));
+            SeqImg_RGB[0].set_P(glm::transpose(m_Camera_mtx * glm::mat4x3(_Transform)));
         }
         else if (SeqImg_RGB.size() < ImgMaxCal)
         {
             SeqImg_RGB.resize(SeqImg_RGB.size() + 1);
             int Seq_Idx = SeqImg_RGB.size() - 1; // Maybe can replace by iterator
             SeqImg_RGB[Seq_Idx] = Fu_FotoGmtCV(_rRGBImage, m_ImageSize.x, m_ImageSize.y);
-            SeqImg_RGB[Seq_Idx].set_K(m_Camera_mtx);
+            SeqImg_RGB[Seq_Idx].set_Cam(m_Camera_mtx);
             SeqImg_RGB[Seq_Idx].set_Rot(glm::mat3(_Transform));
             SeqImg_RGB[Seq_Idx].set_Trans(-1 * glm::transpose(glm::mat3(_Transform)) * glm::vec3(_Transform[3]));
             SeqImg_RGB[Seq_Idx].set_P(m_Camera_mtx * glm::mat4x3(_Transform));
@@ -91,10 +92,24 @@ namespace Stereo
     }
 
     // -----------------------------------------------------------------------------
+
+    void CPluginInterface::glm2cv(cv::Mat* cvmat, const glm::mat3& glmmat)
+    {
+        memcpy(cvmat->data, glm::value_ptr(glmmat), 9 * sizeof(float));
+    }
+
+    void CPluginInterface::glm2cv(cv::Mat* cvmat, const glm::vec3& glmmat)
+    {
+        memcpy(cvmat->data, glm::value_ptr(glmmat), 3 * sizeof(float));
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CPluginInterface::ShowImg(const std::vector<char>& Img_RGBA) const
     {
         cv::Mat CV_Img(cv::Size(m_ImageSize.x, m_ImageSize.y), CV_8UC4); // 2D Matrix(x*y) with (8-bit unsigned character) + (4 bands)
             // cv::Mat is built in BGR/BGRA in default.
+            // cv::Mat is ImgH(Num of Row), ImgW(Num of Col)
         
         memcpy(CV_Img.data, Img_RGBA.data(), Img_RGBA.size());
         
