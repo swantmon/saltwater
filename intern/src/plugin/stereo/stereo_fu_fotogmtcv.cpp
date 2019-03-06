@@ -30,11 +30,19 @@ namespace Stereo
         
         cv::Mat P_ImgB_PsudoInv;
         cv::invert(P_mtx, P_ImgB_PsudoInv, cv::DECOMP_SVD);
-        glm::vec3 Epipole_ImgM = Img_Match.P_mtx * glm::vec4(Trans_vec, 1); // Epipole of Image_Match
-        glm::mat3 Epipole_ImgM_SkewSym = 
-            glm::mat3(glm::vec3(0, Epipole_ImgM[2], -Epipole_ImgM[1]), glm::vec3(-Epipole_ImgM[2], 0, Epipole_ImgM[0]), glm::vec3(Epipole_ImgM[1], -Epipole_ImgM[0], 0));
+        cv::Mat PC;
+        cv::resize(Trans_vec, PC, cv::Size(4,1));
+        PC.at<float>(4, 0) = 1;
+        cv::Mat Epipole_ImgM = Img_Match.P_mtx * PC; // Epipole of Image_Match
+        cv::Mat Epipole_ImgM_SkewSym = cv::Mat::zeros(cv::Size(3, 3), CV_16F);
+        Epipole_ImgM_SkewSym.at<float>(0, 1) = -Epipole_ImgM.at<float>(2, 0);
+        Epipole_ImgM_SkewSym.at<float>(0, 2) = Epipole_ImgM.at<float>(1, 0);
+        Epipole_ImgM_SkewSym.at<float>(1, 0) = Epipole_ImgM.at<float>(2, 0);
+        Epipole_ImgM_SkewSym.at<float>(1, 2) = -Epipole_ImgM.at<float>(0, 0);
+        Epipole_ImgM_SkewSym.at<float>(2, 0) = -Epipole_ImgM.at<float>(1, 0);
+        Epipole_ImgM_SkewSym.at<float>(2, 1) = Epipole_ImgM.at<float>(0, 0);
         
-        glm::mat3 F_mtx = Epipole_ImgM_SkewSym * Img_Match.P_mtx * P_ImgB_PsudoInv;
+        cv::Mat F_mtx = Epipole_ImgM_SkewSym * Img_Match.P_mtx * P_ImgB_PsudoInv;
         
 
         
