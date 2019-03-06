@@ -182,6 +182,11 @@ namespace MR
 
         bool m_SendInpaintedResult;
 
+        GLuint m_PixelDataBuffer; // Opengl pixel buffer object has 3 times the size of the image (triple buffering)
+        int m_PixelBufferSize;
+
+        void* m_pGPUPixelData; // Pointer to raw gpu memory of peristent mapped buffer
+
     public:
 
         void Start()
@@ -542,17 +547,24 @@ namespace MR
 
             if (Texture != nullptr)
             {
-                std::vector<char> RawData(Texture->GetNumberOfPixelsU() * Texture->GetNumberOfPixelsV() * 4);
-                Gfx::TextureManager::CopyTextureToCPU(Texture, RawData.data());
+                glBindBuffer(GL_PIXEL_PACK_BUFFER, m_PixelDataBuffer);
 
+                Gfx::TextureManager::CopyTextureToCPU(Texture, nullptr);
+
+                glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+                
+                GLsync Fence = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+
+                auto Status = glClientWaitSync(Fence, GL_SYNC_FLUSH_COMMANDS_BIT, INT_MAX);
+                                
                 std::vector<char> Compressed;
 
-                Base::Compress(RawData, Compressed, 1);
+                Base::Compress(static_cast<char*>(m_pGPUPixelData), m_PixelBufferSize, Compressed, 1);
 
                 Net::CMessage Message;
                 Message.m_Category = 0;
                 Message.m_CompressedSize = Compressed.size();
-                Message.m_DecompressedSize = RawData.size();
+                Message.m_DecompressedSize = m_PixelBufferSize;
                 Message.m_MessageType = 0;
                 Message.m_Payload = std::move(Compressed);
 
@@ -678,6 +690,17 @@ namespace MR
                     m_ShiftDepthCSPtr = Gfx::ShaderManager::CompileCS("../../plugins/slam/cs_shift_depth.glsl", "main", DefineString.c_str());
 
                     m_UseTrackingCamera = true;
+
+                    if (m_SendInpaintedResult)
+                    {
+                        m_PixelBufferSize = m_DeviceResolution.x * m_DeviceResolution.y * 4;
+                        glCreateBuffers(1, &m_PixelDataBuffer);
+
+                        // The GPU buffer has three times the size of the image so we can use triple buffering and avoid stalls
+
+                        glNamedBufferStorage(m_PixelDataBuffer, m_PixelBufferSize * 3, nullptr, GL_MAP_READ_BIT | GL_MAP_PERSISTENT_BIT);
+                        m_pGPUPixelData = glMapNamedBufferRange(m_PixelDataBuffer, 0, m_PixelBufferSize * 3, GL_MAP_READ_BIT | GL_MAP_PERSISTENT_BIT);
+                    }
 
                     ENGINE_CONSOLE_INFO("Initialization complete");
                 }
