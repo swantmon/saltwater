@@ -60,7 +60,7 @@ namespace MR
         EDATASOURCE m_DataSource;
         
         Gfx::CTexturePtr m_DepthTexture;
-        Gfx::CTexturePtr m_RGBTexture;
+        Gfx::CTexturePtr m_RGBATexture;
         std::vector<uint16_t> m_DepthBuffer;
         std::vector<char> m_ColorBuffer;
         glm::mat4 m_PoseMatrix;
@@ -305,7 +305,7 @@ namespace MR
                 
                 TextureDescriptor.m_Format = Gfx::CTexture::R8G8B8A8_UBYTE;
 
-                m_RGBTexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
+                m_RGBATexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
 
                 GetDepthBuffer = (GetDepthBufferFunc)(Core::PluginManager::GetPluginFunction("Kinect", "GetDepthBuffer"));
                 GetColorBuffer = (GetColorBufferFunc)(Core::PluginManager::GetPluginFunction("Kinect", "GetColorBuffer"));
@@ -365,7 +365,7 @@ namespace MR
             m_RGBConversionBuffer = nullptr;
 
             m_DepthTexture = nullptr;
-            m_RGBTexture = nullptr;
+            m_RGBATexture = nullptr;
 
             m_SLAMNetHandle = nullptr;
             
@@ -444,9 +444,9 @@ namespace MR
                     TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_DepthSize.x, m_DepthSize.y));
 
                     Gfx::TextureManager::CopyToTexture2D(m_DepthTexture, TargetRect, m_DepthSize.x, m_DepthBuffer.data());
-                    Gfx::TextureManager::CopyToTexture2D(m_RGBTexture, TargetRect, m_DepthSize.x, m_ColorBuffer.data());
+                    Gfx::TextureManager::CopyToTexture2D(m_RGBATexture, TargetRect, m_DepthSize.x, m_ColorBuffer.data());
 
-                    m_Reconstructor.OnNewFrame(m_DepthTexture, m_RGBTexture, nullptr);
+                    m_Reconstructor.OnNewFrame(m_DepthTexture, m_RGBATexture, nullptr);
                 }
                 else if (GetDepthBuffer(m_DepthBuffer.data()))
                 {
@@ -673,7 +673,7 @@ namespace MR
                         TextureDescriptor.m_NumberOfPixelsU = m_ColorSize.x;
                         TextureDescriptor.m_NumberOfPixelsV = m_ColorSize.y;
                         TextureDescriptor.m_Format = Gfx::CTexture::R8G8B8A8_UBYTE;
-                        m_RGBTexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
+                        m_RGBATexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
 
                         TextureDescriptor.m_Format = Gfx::CTexture::R8_UBYTE;
                         m_YTexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
@@ -760,11 +760,11 @@ namespace MR
                 Gfx::ContextManager::SetShaderCS(m_YUVtoRGBCSPtr);
                 Gfx::ContextManager::SetImageTexture(0, m_YTexture);
                 Gfx::ContextManager::SetImageTexture(1, m_UVTexture);
-                Gfx::ContextManager::SetImageTexture(2, m_RGBTexture);
+                Gfx::ContextManager::SetImageTexture(2, m_RGBATexture);
 
                 Gfx::ContextManager::Dispatch(DivUp(m_ColorSize.x, m_TileSize2D), DivUp(m_ColorSize.y, m_TileSize2D), 1);
 
-                m_Reconstructor.OnNewFrame(m_DepthTexture, m_RGBTexture, &m_PoseMatrix);
+                m_Reconstructor.OnNewFrame(m_DepthTexture, m_RGBATexture, &m_PoseMatrix);
             }
             else if (MessageType == LIGHTESTIMATE)
             {
