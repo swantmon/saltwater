@@ -484,6 +484,10 @@ namespace MR
             {
                 SendInpaintedResult();
             }
+
+            const auto& AABB = Gfx::ReconstructionRenderer::GetSelectionBox();
+
+            Gfx::CTexturePtr Texture = Gfx::ReconstructionRenderer::GetInpaintedRendering(m_PoseMatrix, AABB, m_RGBATexture);
         }
 
         // -----------------------------------------------------------------------------
