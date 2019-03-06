@@ -530,6 +530,13 @@ namespace MR
             m_SelectionFlag = _Flag;
         }
 
+        // -----------------------------------------------------------------------------
+
+        void EnableMouseControl(bool _Flag)
+        {
+            m_UseTrackingCamera = !_Flag;
+        }
+
     private:
 
         glm::mat4 PoseToView(const glm::mat4& _rPoseMatrix)

@@ -31,6 +31,7 @@ namespace Scpt
     public:
 
         bool m_IsSelectionEnabled = true;
+        bool m_IsMouseControlEnabled = true;
 
         void Start() override
         {
@@ -41,7 +42,8 @@ namespace Scpt
 
             InputCallback = (FInputCallback)(Core::PluginManager::GetPluginFunction("SLAM", "OnInput"));
 
-            SetActivateSelection = (FSetActivateSelection)(Core::PluginManager::GetPluginFunction("SLAM", "SetActivateSelection"));
+            SetActivateSelection = (FSetFlag)(Core::PluginManager::GetPluginFunction("SLAM", "SetActivateSelection"));
+            EnableMouseControl = (FSetFlag)(Core::PluginManager::GetPluginFunction("SLAM", "EnableMouseControl"));
         }
 
         // -----------------------------------------------------------------------------
@@ -56,6 +58,7 @@ namespace Scpt
         void Update() override
         {
             SetActivateSelection(m_IsSelectionEnabled);
+            EnableMouseControl(m_IsMouseControlEnabled);
         }
 
         // -----------------------------------------------------------------------------
@@ -70,7 +73,8 @@ namespace Scpt
         typedef void(*FInputCallback)(const Base::CInputEvent& _rEvent);
         FInputCallback InputCallback;
 
-        typedef void(*FSetActivateSelection)(bool _Flag);
-        FSetActivateSelection SetActivateSelection;
+        typedef void(*FSetFlag)(bool _Flag);
+        FSetFlag SetActivateSelection;
+        FSetFlag EnableMouseControl;
     };
 } // namespace Scpt
