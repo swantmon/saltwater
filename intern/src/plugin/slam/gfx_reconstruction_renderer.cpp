@@ -115,7 +115,7 @@ namespace
         void AddPositionToSelection(const glm::vec3& _rWSPosition);
         void ResetSelection();
         void SetInpaintedPlane(Gfx::CTexturePtr _Texture, const Base::AABB3Float& _rAABB);
-        CTexturePtr GetInpaintedRendering(const glm::mat4& _rPoseMatrix, const Base::AABB3Float& _rAABB);
+        CTexturePtr GetInpaintedRendering(const glm::mat4& _rPoseMatrix, const Base::AABB3Float& _rAABB, CTexturePtr _BackgroundTexturePtr);
 
         const Base::AABB3Float& GetSelectionBox();
 
@@ -146,7 +146,8 @@ namespace
         void RaycastVolume();
         void RaycastVolumeWithHighlight();
 
-        void RaycastVolumeDiminished(const glm::mat4& _rPoseMatrix, const Base::AABB3Float& _rAABB);
+        void RenderBackgroundImage(CTexturePtr _Background);
+        void RaycastVolumeDiminished(const glm::mat4& _rPoseMatrix, const Base::AABB3Float& _rAABB, CTexturePtr _BackgroundTexture = nullptr);
         void RenderInpaintedPlane(const glm::mat4& _rPoseMatrix, const Base::AABB3Float& _rAABB);
         
         void RenderQueuedRootVolumes();
@@ -185,6 +186,9 @@ namespace
 
         CShaderPtr m_InpaintedPlaneVSPtr;
         CShaderPtr m_InpaintedPlaneFSPtr;
+
+        CShaderPtr m_BackgroundVSPtr;
+        CShaderPtr m_BackgroundFSPtr;
         
         CBufferPtr m_RaycastConstantBufferPtr;
         CBufferPtr m_RaycastHitProxyBufferPtr;
@@ -202,6 +206,9 @@ namespace
 
         CMeshPtr m_InpaintedPlaneMeshPtr;
         CInputLayoutPtr m_InpaintedPlaneLayoutPtr;
+
+        CMeshPtr m_FullscreenQuadMeshPtr;
+        CInputLayoutPtr m_FullscreenQuadLayoutPtr;
 
         CRenderContextPtr m_OutlineRenderContextPtr;
         CRenderContextPtr m_PlaneRenderContextPtr;
@@ -319,9 +326,12 @@ namespace
         m_RaycastDiminishedFSPtr = 0;
         m_RaycastHitProxyFSPtr = 0;
         m_PickingCSPtr = 0;
-
+        
         m_VertexMapVSPtr = 0;
         m_VertexMapFSPtr = 0;
+
+        m_BackgroundVSPtr = 0;
+        m_BackgroundFSPtr = 0;
         
         m_PickingBuffer = 0;
 
@@ -333,6 +343,7 @@ namespace
         m_CameraMeshPtr = 0;
         m_VolumeMeshPtr = 0;
         m_InpaintedPlaneMeshPtr = 0;
+        m_FullscreenQuadMeshPtr = 0;
         m_CubeOutlineMeshPtr = 0;
         m_PlaneMeshPtr = 0;
         m_CameraInputLayoutPtr = 0;
@@ -425,8 +436,11 @@ namespace
         
         m_PickingCSPtr = ShaderManager::CompileCS("../../plugins/slam/scalable/cs_picking.glsl", "main", DefineString.c_str());
 
-        m_InpaintedPlaneVSPtr = ShaderManager::CompileVS("../../plugins/slam/scalable/rendering/vs_inpainted_plane.glsl", "main", DefineString.c_str());;
-        m_InpaintedPlaneFSPtr = ShaderManager::CompilePS("../../plugins/slam/scalable/rendering/fs_inpainted_plane.glsl", "main", DefineString.c_str());;
+        m_InpaintedPlaneVSPtr = ShaderManager::CompileVS("../../plugins/slam/scalable/rendering/vs_inpainted_plane.glsl", "main", DefineString.c_str());
+        m_InpaintedPlaneFSPtr = ShaderManager::CompilePS("../../plugins/slam/scalable/rendering/fs_inpainted_plane.glsl", "main", DefineString.c_str());
+
+        m_BackgroundVSPtr = ShaderManager::CompileVS("../../plugins/slam/scalable/rendering/vs_background.glsl", "main", DefineString.c_str());
+        m_BackgroundFSPtr = ShaderManager::CompilePS("../../plugins/slam/scalable/rendering/fs_background.glsl", "main", DefineString.c_str());
 
         SInputElementDescriptor InputLayoutDesc = {};
 
@@ -450,6 +464,13 @@ namespace
         };
 
         m_InpaintedPlaneLayoutPtr = ShaderManager::CreateInputLayout(QuadLayout, sizeof(QuadLayout) / sizeof(QuadLayout[0]), m_InpaintedPlaneVSPtr);
+
+        SInputElementDescriptor FullscreenQuadLayout[] =
+        {
+            { "POSITION", 0, CInputLayout::Float2Format, 0, 0, 8, CInputLayout::PerVertex, 0 },
+        };
+
+        m_FullscreenQuadLayoutPtr = ShaderManager::CreateInputLayout(FullscreenQuadLayout, sizeof(FullscreenQuadLayout) / sizeof(FullscreenQuadLayout[0]), m_BackgroundVSPtr);
     }
     
     // -----------------------------------------------------------------------------
@@ -748,6 +769,8 @@ namespace
         };
 
         m_InpaintedPlaneMeshPtr = MeshManager::CreateMesh(Quad, sizeof(Quad) / sizeof(Quad[0]), sizeof(Quad[0]), nullptr, 0);
+
+        m_FullscreenQuadMeshPtr = MeshManager::CreateRectangle(-1.0f, -1.0f, 2.0f, 2.0f);
     }
 
     // -----------------------------------------------------------------------------
@@ -995,10 +1018,10 @@ namespace
 
         Performance::EndEvent();
     }
-
+    
     // -----------------------------------------------------------------------------
 
-    void CGfxReconstructionRenderer::RaycastVolumeDiminished(const glm::mat4& _rPoseMatrix, const Base::AABB3Float& _rAABB)
+    void CGfxReconstructionRenderer::RaycastVolumeDiminished(const glm::mat4& _rPoseMatrix, const Base::AABB3Float& _rAABB, CTexturePtr _BackgroundTexturePtr)
     {
         glm::mat4 ReconstructionToSaltwater = glm::mat4(
             1.0f, 0.0f, 0.0f, 0.0f,
@@ -1017,6 +1040,8 @@ namespace
         
         ContextManager::SetShaderVS(m_RaycastDiminishedVSPtr);
         ContextManager::SetShaderPS(m_RaycastDiminishedFSPtr);
+
+        ContextManager::SetTexture(0, _BackgroundTexturePtr);
 
         ContextManager::SetResourceBuffer(0, rVolume.m_RootVolumePoolPtr);
         ContextManager::SetResourceBuffer(1, rVolume.m_RootGridPoolPtr);
@@ -1069,6 +1094,37 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    void CGfxReconstructionRenderer::RenderBackgroundImage(CTexturePtr _Background)
+    {
+        assert(_Background != nullptr);
+
+        Performance::BeginEvent("Render background");
+
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
+
+        ContextManager::SetViewPortSet(m_DiminishedViewPortSetPtr);
+        ContextManager::SetTargetSet(m_DiminishedTargetSetPtr);
+
+        ContextManager::SetRenderContext(m_PlaneRenderContextPtr);
+        ContextManager::SetShaderVS(m_BackgroundVSPtr);
+        ContextManager::SetShaderPS(m_BackgroundFSPtr);
+
+        ContextManager::SetTexture(0, _Background);
+
+        const unsigned int Offset = 0;
+        ContextManager::SetVertexBuffer(m_FullscreenQuadMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
+        ContextManager::SetIndexBuffer(m_FullscreenQuadMeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
+
+        ContextManager::SetInputLayout(m_FullscreenQuadLayoutPtr);
+        ContextManager::SetTopology(STopology::TriangleStrip);
+
+        ContextManager::DrawIndexed(m_FullscreenQuadMeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
+
+        Performance::EndEvent();
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CGfxReconstructionRenderer::RenderInpaintedPlane(const glm::mat4& _rPoseMatrix, const Base::AABB3Float& _rAABB)
     {
         assert(m_InpaintedPlaneTexture != nullptr);
@@ -1101,7 +1157,7 @@ namespace
         SDrawCallConstantBuffer BufferData;
         
         BufferData.m_WorldMatrix = glm::translate(MiddlePoint) * glm::scale(glm::vec3(Scale));
-        BufferData.m_Color = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
+        BufferData.m_Color = glm::vec4(Scale);
 
         BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
 
@@ -1511,12 +1567,16 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    CTexturePtr CGfxReconstructionRenderer::GetInpaintedRendering(const glm::mat4& _rPoseMatrix, const Base::AABB3Float& _rAABB)
+    CTexturePtr CGfxReconstructionRenderer::GetInpaintedRendering(const glm::mat4& _rPoseMatrix, const Base::AABB3Float& _rAABB, CTexturePtr _BackgroundTexturePtr)
     {
         if (m_InpaintedPlaneTexture != nullptr)
         {
             Gfx::TargetSetManager::ClearTargetSet(m_DiminishedTargetSetPtr);
 
+            if (_BackgroundTexturePtr != nullptr)
+            {
+                RenderBackgroundImage(_BackgroundTexturePtr);
+            }
             RenderInpaintedPlane(_rPoseMatrix, _rAABB);
             RaycastVolumeDiminished(_rPoseMatrix, _rAABB);
 
@@ -1937,9 +1997,9 @@ namespace ReconstructionRenderer
 
     // -----------------------------------------------------------------------------
 
-    CTexturePtr GetInpaintedRendering(const glm::mat4& _rPoseMatrix, const Base::AABB3Float& _rAABB)
+    CTexturePtr GetInpaintedRendering(const glm::mat4& _rPoseMatrix, const Base::AABB3Float& _rAABB, CTexturePtr _BackgroundTexturePtr)
     {
-        return CGfxReconstructionRenderer::GetInstance().GetInpaintedRendering(_rPoseMatrix, _rAABB);
+        return CGfxReconstructionRenderer::GetInstance().GetInpaintedRendering(_rPoseMatrix, _rAABB, _BackgroundTexturePtr);
     }
 
     // -----------------------------------------------------------------------------
