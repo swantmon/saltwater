@@ -7,7 +7,7 @@
 layout(std140, binding = 1) uniform PerDrawCallData
 {
     mat4 g_WorldMatrix;
-    vec4 g_Color;
+    vec4 g_Scale;
 };
 
 layout(location = 0) in vec2 in_VertexPosition;
