@@ -101,16 +101,14 @@ namespace Stereo
         if (epipole.y < 0) { // Cases 1, 2 and 3
             if (epipole.x < 0) { // Case 1
                 minRho = sqrt(epipole.x * epipole.x + epipole.y * epipole.y);         // Point A
-                maxRho = sqrt(((imgDimensions.width - 1) - epipole.x) * ((imgDimensions.width - 1) - epipole.x) +
-                    ((imgDimensions.height - 1) - epipole.y) * ((imgDimensions.height - 1) - epipole.y));        // Point D
+                maxRho = sqrt(((imgDimensions.width - 1) - epipole.x) * ((imgDimensions.width - 1) - epipole.x) + ((imgDimensions.height - 1) - epipole.y) * ((imgDimensions.height - 1) - epipole.y));        // Point D
             }
             else if (epipole.x <= imgDimensions.width - 1) { // Case 2
                 minRho = -epipole.y;
-                maxRho = max(sqrt(epipole.x * epipole.x +
-                    ((imgDimensions.height - 1) - epipole.y) * ((imgDimensions.height - 1) - epipole.y)),        // Point C
-                    sqrt(((imgDimensions.width - 1) - epipole.x) * ((imgDimensions.width - 1) - epipole.x) +
-                    ((imgDimensions.height - 1) - epipole.y) * ((imgDimensions.height - 1) - epipole.y))        // Point D
-                );
+                maxRho = std::max(
+                                sqrt(epipole.x * epipole.x + ((imgDimensions.height - 1) - epipole.y) * ((imgDimensions.height - 1) - epipole.y)),        // Point C
+                                sqrt(((imgDimensions.width - 1) - epipole.x) * ((imgDimensions.width - 1) - epipole.x) + ((imgDimensions.height - 1) - epipole.y) * ((imgDimensions.height - 1) - epipole.y))        // Point D
+                                 );
             }
             else { // Case 3
                 minRho = sqrt(((imgDimensions.width - 1) - epipole.x) * ((imgDimensions.width - 1) - epipole.x) +
