@@ -30,26 +30,41 @@ namespace Stereo
         
         cv::Mat P_ImgB_PsudoInv;
         cv::invert(P_mtx, P_ImgB_PsudoInv, cv::DECOMP_SVD);
-        cv::Mat PC;
-        cv::resize(Trans_vec, PC, cv::Size(4,1));
-        PC.at<float>(4, 0) = 1;
-        cv::Mat Epipole_ImgM = Img_Match.P_mtx * PC; // Epipole of Image_Match
-        cv::Mat Epipole_ImgM_SkewSym = cv::Mat::zeros(cv::Size(3, 3), CV_16F);
-        Epipole_ImgM_SkewSym.at<float>(0, 1) = -Epipole_ImgM.at<float>(2, 0);
-        Epipole_ImgM_SkewSym.at<float>(0, 2) = Epipole_ImgM.at<float>(1, 0);
-        Epipole_ImgM_SkewSym.at<float>(1, 0) = Epipole_ImgM.at<float>(2, 0);
-        Epipole_ImgM_SkewSym.at<float>(1, 2) = -Epipole_ImgM.at<float>(0, 0);
-        Epipole_ImgM_SkewSym.at<float>(2, 0) = -Epipole_ImgM.at<float>(1, 0);
-        Epipole_ImgM_SkewSym.at<float>(2, 1) = Epipole_ImgM.at<float>(0, 0);
+        cv::Mat PC = cv::Mat(4, 1, CV_32F);
+        PC.at<float>(0, 0) = Trans_vec.at<float>(0, 0);
+        PC.at<float>(1, 0) = Trans_vec.at<float>(1, 0);
+        PC.at<float>(2, 0) = Trans_vec.at<float>(2, 0);
+        PC.at<float>(3, 0) = 1;
+        cv::Mat EpiPole_ImgM = Img_Match.P_mtx * PC; // Epipole of Image_Match
+        float eMx = (EpiPole_ImgM.at<float>(0, 0) / EpiPole_ImgM.at<float>(2, 0));
+        float eMy = (EpiPole_ImgM.at<float>(1, 0) / EpiPole_ImgM.at<float>(2, 0));
+        cv::Mat Epipole_ImgM_SkewSym = cv::Mat::zeros(cv::Size(3, 3), CV_32F);
+        Epipole_ImgM_SkewSym.at<float>(0, 1) = -EpiPole_ImgM.at<float>(2, 0);
+        Epipole_ImgM_SkewSym.at<float>(0, 2) = EpiPole_ImgM.at<float>(1, 0);
+        Epipole_ImgM_SkewSym.at<float>(1, 0) = EpiPole_ImgM.at<float>(2, 0);
+        Epipole_ImgM_SkewSym.at<float>(1, 2) = -EpiPole_ImgM.at<float>(0, 0);
+        Epipole_ImgM_SkewSym.at<float>(2, 0) = -EpiPole_ImgM.at<float>(1, 0);
+        Epipole_ImgM_SkewSym.at<float>(2, 1) = EpiPole_ImgM.at<float>(0, 0);
         
         cv::Mat F_mtx = Epipole_ImgM_SkewSym * Img_Match.P_mtx * P_ImgB_PsudoInv;
         
+        cv::SVD F_svd(F_mtx);
+        cv::Mat EpiPole_ImgB = F_svd.vt.row(2);
+        std::vector<cv::Point2f> EpiPole;
+        EpiPole[0] = cv::Point2d(EpiPole_ImgB.at<float>(0, 0) / EpiPole_ImgB.at<float>(0, 2), EpiPole_ImgB.at<float>(0, 1) / EpiPole_ImgB.at<float>(0, 2));
+        // cv::Mat e2 = F_svd.u.col(2);
+        // cv::Point2f EpiPole_M = cv::Point2d(e2.at<float>(0, 0) / e2.at<float>(2, 0), e2.at<float>(1, 0) / e2.at<float>(2, 0));
+        EpiPole[1] = cv::Point2d(EpiPole_ImgM.at<float>(0, 0) / EpiPole_ImgM.at<float>(2, 0), EpiPole_ImgM.at<float>(1, 0) / EpiPole_ImgM.at<float>(2, 0));
+        if ((EpiPole[0].x * EpiPole[1].x < 0) && (EpiPole[0].y * EpiPole[1].y < 0))
+        {
 
+            EpiPole[1] *= -1;
+        }
         
         return Img_Rect;
     }
 
-    void Fu_FotoGmtCV::determ_CoRegion()
+    void Fu_FotoGmtCV::determ_CoRegion(const std::vector<cv::Point2f>& EpiPoles, const cv::Size ImgSize, const cv::Mat& F)
     {
         
     }
