@@ -45,7 +45,7 @@ namespace Stereo
         glm::ivec2 m_ImageSize;
 
         std::vector<Fu_FotoGmtCV> SeqImg_RGB;
-        int ImgMaxCal = 2; // Maximal images for calculation once
+        std::size_t ImgMaxCal = 2; // Maximal images for calculation once
         
     private:
         void glm2cv(cv::Mat* cvmat, const glm::mat3& glmmat);

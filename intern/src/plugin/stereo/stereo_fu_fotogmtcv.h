@@ -24,8 +24,9 @@ namespace Stereo
         cv::Mat PolarRect(Fu_FotoGmtCV Img_Match);
 
     private:
-        void determ_CoRegion();
-
+        void determ_CoRegion(const std::vector<cv::Point2f>& EpiPoles, const cv::Size ImgSize, const cv::Mat& F);
+        void get_ImgCorner(const cv::Point2f & EpiPole, const cv::Size ImgSize, std::vector<cv::Point2f> & ImgCorner);
+        void determ_RhoRange(const cv::Point2f & EpiPole, const cv::Size ImgSize, std::vector<cv::Point2f> & ImgCorner, float & minRho, float & maxRho);
 
     //---Set Functions---
     public:
