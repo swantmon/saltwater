@@ -7,7 +7,7 @@
 
 #include <vector>
 
-#include "plugin\stereo\stereo_fu_fotogmtcv.h"
+#include "plugin\stereo\stereo_futogmtcv.h"
 
 namespace Stereo
 {
@@ -44,7 +44,7 @@ namespace Stereo
         glm::mat3 m_Camera_mtx;
         glm::ivec2 m_ImageSize;
 
-        std::vector<Fu_FotoGmtCV> SeqImg_RGB;
+        std::vector<FutoGmtCV> SeqImg_RGB;
         std::size_t ImgMaxCal = 2; // Maximal images for calculation once
         
     private:
