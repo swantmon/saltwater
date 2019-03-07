@@ -25,8 +25,17 @@ namespace Stereo
 
     private:
         void determ_CoRegion(const std::vector<cv::Point2f>& EpiPoles, const cv::Size ImgSize, const cv::Mat& F);
-        void get_ImgCorner(const cv::Point2f & EpiPole, const cv::Size ImgSize, std::vector<cv::Point2f> & ImgCorner);
+        void get_ExternPt(const cv::Point2f & EpiPole, const cv::Size ImgSize, std::vector<cv::Point2f> & ExternPt);
         void determ_RhoRange(const cv::Point2f & EpiPole, const cv::Size ImgSize, std::vector<cv::Point2f> & ImgCorner, float & minRho, float & maxRho);
+        void get_ImgLn_from_ImgPt(const cv::Point2f & ImgPt1, const cv::Point2f & ImgPt2, cv::Vec3f ImgLn);
+        void cal_EpiLn(const std::vector<cv::Point2f>& ImgPts, const uint whichImg, const cv::Mat F_mtx, const std::vector<cv::Vec3f>& ImgLn_old, std::vector<cv::Vec3f>& ImgLn_new);
+        bool LnIntersectRect(const cv::Vec3d & ImgLn, const cv::Size & ImgSize, cv::Point2d * intersection);
+        bool LnIntersectsSegment(const cv::Vec3d & ImgLn, const cv::Point2d & ImgPtB, const cv::Point2d & ImgPtM, cv::Point2d * intersection);
+        cv::Point2d get_BorderIntersect(const cv::Point2f& Epipole, const cv::Vec3f& ImgLn, const cv::Size& ImgSize, const cv::Point2f* ImgPt_Last);
+
+    //---Is Function---
+    public:
+        bool is_InsideImg(cv::Point2f ImgPt, cv::Size ImgSize);
 
     //---Set Functions---
     public:
@@ -53,13 +62,6 @@ namespace Stereo
         cv::Mat Rot_mtx; // Rotations from Mapping frame to Image frame
         cv::Mat Trans_vec; // Translations in Mapping frame
         cv::Mat P_mtx; // P-matrix = [Rot_mtx | -Rot_mtx*Trans_vec]
-            /*
-            glm is column-major, which makes glm::mat4*3 represents real 3*4 matrix
-            Verification: glm::mat3x2 * glm::mat2x3 = glm::mat2
-                glm::mat3x2 A = glm::mat3x2(glm::vec2(1, 2), glm::vec2(2, 3), glm::vec2(1, 2));
-                glm::mat2x3 B = glm::mat2x3(glm::vec3(0, 1, 2), glm::vec3(2, 1, 0));
-                glm::mat2 Ans = A * B;
-            */
     };
 } // Stereo
 
