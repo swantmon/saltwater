@@ -20,6 +20,8 @@ namespace Stereo
     
     //---Main Function---
     private:
+        void compute(const cv::Mat& Img1, const cv::Mat& Img2, const cv::Mat& F, cv::Mat& RectImg1, cv::Mat& RectImg2);
+        
         void determ_CoRegion(const std::vector<cv::Point2f>& EpiPoles, const cv::Size ImgSize, const cv::Mat& F);
             // Determine the Common Region = Determine the size of Epipolar Image
         void getTransformationPoints(const cv::Size& imgDimensions, const cv::Point2d epipole1, const cv::Point2d epipole2, const cv::Mat& F);
@@ -32,6 +34,7 @@ namespace Stereo
         void getExternalPoints(const cv::Point2d& EpiPole, const cv::Size ImgSize, std::vector<cv::Point2f>& ImgPt_Extern);
         void determ_RhoRange(const cv::Point2d& EpiPole, const cv::Size ImgSize, const std::vector<cv::Point2f>& ImgPt_Extern, double& minRho, double& maxRho);
 
+        void getEpipoles(const cv::Mat& F, cv::Point2f& epipole1, cv::Point2f& epipole2);
         cv::Vec3f get_ImgLn_from_ImgPt(const cv::Point2d& ImgPt1, const cv::Point2d& ImgPt2);
         void computeEpilines(const std::vector<cv::Point2f> & points, const uint32_t &whichImage, const cv::Mat & F, const std::vector <cv::Vec3f> & oldlines, std::vector <cv::Vec3f> & newLines);
             // Derive Epipolar Line on Image according to Image Point on the other Image.
@@ -50,8 +53,6 @@ namespace Stereo
         void getBorderIntersections(const cv::Point2d& epipole, const cv::Vec3d& line, const cv::Size& imgDimensions, std::vector<cv::Point2d>& intersections);
         cv::Point2d getNearestIntersection(const cv::Point2d & oldEpipole, const cv::Point2d & newEpipole, const cv::Vec3d & line, const cv::Point2d & oldPoint, const cv::Size & imgDimensions);
 
-    //---Basic Operation Function
-    private:
         bool Is_InsideImg(cv::Point2d ImgPt, cv::Size ImgSize);
         bool Is_TheRightPoint(const cv::Point2d & epipole, const cv::Point2d & intersection, const cv::Vec3d & line, const cv::Point2d * lastPoint);
 

@@ -14,6 +14,19 @@ namespace Stereo
     }
 
     //---Main Function---
+    void PolarRect::compute(const cv::Mat& Img1, const cv::Mat& Img2, const cv::Mat& F, cv::Mat& RectImg1, cv::Mat& RectImg2)
+    {
+        std::vector<cv::Point2f> EpiPoles(2);
+        getEpipoles(F, EpiPoles[0], EpiPoles[1]);
+
+        determ_CoRegion(EpiPoles, cv::Size(Img1.cols, Img1.rows), F);
+
+        getTransformationPoints(Img1.size(), EpiPoles[0], EpiPoles[1], F);
+
+        doTransformation(Img1, Img2, EpiPoles[0], EpiPoles[1], F);
+
+    }
+
     inline void PolarRect::determ_CoRegion(const std::vector<cv::Point2f>& EpiPoles, const cv::Size ImgSize, const cv::Mat& F)
     {
         std::vector<cv::Point2f> externalPoints1, externalPoints2;
@@ -420,6 +433,17 @@ namespace Stereo
         }
     }
 
+    inline void PolarRect::getEpipoles(const cv::Mat& F, cv::Point2f& EpiPole1, cv::Point2f& EpiPole2)
+    {
+        cv::SVD svd(F);
+
+        cv::Mat e1 = svd.vt.row(2);
+        cv::Mat e2 = svd.u.col(2);
+
+        EpiPole1 = cv::Point2f(e1.at<double>(0, 0) / e1.at<double>(0, 2), e1.at<double>(0, 1) / e1.at<double>(0, 2));
+        EpiPole2 = cv::Point2f(e2.at<double>(0, 0) / e2.at<double>(2, 0), e2.at<double>(1, 0) / e2.at<double>(2, 0));
+    }
+
     cv::Vec3f PolarRect::get_ImgLn_from_ImgPt(const cv::Point2d& ImgPt1, const cv::Point2d& ImgPt2)
     {
         // Image Line: a*x + b*y + c = 0
@@ -737,7 +761,6 @@ namespace Stereo
         return point;
     }
 
-    //---Basic Operation Function---
     inline bool PolarRect::Is_InsideImg(cv::Point2d ImgPt, cv::Size ImgSize)
     {
         return ((ImgPt.x >= 0) && (ImgPt.y >= 0) && (ImgPt.x < (ImgSize.width - 1.0)) && (ImgPt.y <= (ImgSize.height - 1.0)));
