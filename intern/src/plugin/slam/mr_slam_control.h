@@ -859,7 +859,8 @@ namespace MR
         {
             CreatePlane();
             m_StreamState = STREAM_DIMINSIHED;
-            m_ColorSize = m_ColorSize * 2;
+
+            m_ColorSize = *reinterpret_cast<const glm::ivec2*>(_rData.data() + 2 * sizeof(int32_t));
 
             Gfx::STextureDescriptor TextureDescriptor = {};
 
