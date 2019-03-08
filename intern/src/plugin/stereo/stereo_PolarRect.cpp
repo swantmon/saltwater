@@ -548,16 +548,15 @@ namespace Stereo
         cv::Vec2f v(p2.x - epipole.x, p2.y - epipole.y);
         double maxDist = cv::norm(v);
         v /= maxDist;
-
+            
         {
             uint32_t rhoIdx = 0;
-            for (double rho = minRho; rho <= min(maxDist, maxRho); rho += 1.0, rhoIdx++) 
+            for (double rho = minRho; rho <= std::min(maxDist, maxRho); rho += 1.0, rhoIdx++) 
             {
                 cv::Point2d target(v[0] * rho + epipole.x, v[1] * rho + epipole.y);
                 if ((target.x >= 0) && (target.x < inputImage.cols) &&
                     (target.y >= 0) && (target.y < inputImage.rows)) 
                 {
-
                     mapX.at<float>(thetaIdx, rhoIdx) = target.x;
                     mapY.at<float>(thetaIdx, rhoIdx) = target.y;
 
