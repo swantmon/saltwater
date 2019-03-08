@@ -146,7 +146,7 @@ namespace
         void RaycastVolume();
         void RaycastVolumeWithHighlight();
 
-        void RenderBackgroundImage(CTexturePtr _Background);
+        void RenderBackgroundImage(CTexturePtr _Background, bool _IsFlipped = false);
         void RaycastVolumeDiminished(const glm::mat4& _rPoseMatrix, const Base::AABB3Float& _rAABB, CTexturePtr _BackgroundTexture = nullptr);
         void RenderInpaintedPlane(const glm::mat4& _rPoseMatrix, const Base::AABB3Float& _rAABB);
         
@@ -211,7 +211,6 @@ namespace
         CInputLayoutPtr m_FullscreenQuadLayoutPtr;
 
         CRenderContextPtr m_OutlineRenderContextPtr;
-        CRenderContextPtr m_PlaneRenderContextPtr;
 
         CMeshPtr m_PlaneMeshPtr;
         
@@ -352,7 +351,6 @@ namespace
         m_CubeOutlineInputLayoutPtr = 0;
 
         m_OutlineRenderContextPtr = 0;
-        m_PlaneRenderContextPtr = 0;
 
         m_pReconstructor = nullptr;
 
@@ -493,7 +491,7 @@ namespace
         TextureDescriptor.m_NumberOfPixelsW  = 1;
         TextureDescriptor.m_NumberOfMipMaps  = 1;
         TextureDescriptor.m_NumberOfTextures = 1;
-        TextureDescriptor.m_Binding          = CTexture::RenderTarget;
+        TextureDescriptor.m_Binding          = CTexture::RenderTarget | CTexture::ShaderResource;
         TextureDescriptor.m_Access           = CTexture::EAccess::CPURead;
         TextureDescriptor.m_Usage            = CTexture::EUsage::GPUToCPU;
         TextureDescriptor.m_Semantic         = CTexture::UndefinedSemantic;
@@ -529,12 +527,6 @@ namespace
         m_OutlineRenderContextPtr->SetViewPortSet(ViewManager::GetViewPortSet());
         m_OutlineRenderContextPtr->SetTargetSet(TargetSetManager::GetLightAccumulationTargetSet());
         m_OutlineRenderContextPtr->SetRenderState(StateManager::GetRenderState(CRenderState::NoCull | CRenderState::Wireframe));
-
-        m_PlaneRenderContextPtr = ContextManager::CreateRenderContext();
-        m_PlaneRenderContextPtr->SetCamera(ViewManager::GetMainCamera());
-        m_PlaneRenderContextPtr->SetViewPortSet(m_DiminishedViewPortSetPtr);
-        m_PlaneRenderContextPtr->SetTargetSet(m_DiminishedTargetSetPtr);
-        m_PlaneRenderContextPtr->SetRenderState(StateManager::GetRenderState(CRenderState::NoCull));
     }
     
     // -----------------------------------------------------------------------------
@@ -1032,8 +1024,6 @@ namespace
 
         Performance::BeginEvent("Raycasting for diminishing");
         
-        ContextManager::SetViewPortSet(m_DiminishedViewPortSetPtr);
-
         MR::CSLAMReconstructor::SSLAMVolume& rVolume = m_pReconstructor->GetVolume();
         
         ContextManager::SetShaderVS(m_RaycastDiminishedVSPtr);
@@ -1092,7 +1082,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxReconstructionRenderer::RenderBackgroundImage(CTexturePtr _Background)
+    void CGfxReconstructionRenderer::RenderBackgroundImage(CTexturePtr _Background, bool _IsFlipped)
     {
         assert(_Background != nullptr);
 
@@ -1100,13 +1090,18 @@ namespace
 
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
 
-        ContextManager::SetViewPortSet(m_DiminishedViewPortSetPtr);
-
-        ContextManager::SetRenderContext(m_PlaneRenderContextPtr);
         ContextManager::SetShaderVS(m_BackgroundVSPtr);
         ContextManager::SetShaderPS(m_BackgroundFSPtr);
 
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
         ContextManager::SetTexture(0, _Background);
+
+        SDrawCallConstantBuffer BufferData = {};
+        BufferData.m_Color = glm::vec4(_IsFlipped ? 1.0f : 0.0f);
+
+        BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
+
+        ContextManager::SetConstantBuffer(0, m_DrawCallConstantBufferPtr);
 
         const unsigned int Offset = 0;
         ContextManager::SetVertexBuffer(m_FullscreenQuadMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
@@ -1116,6 +1111,8 @@ namespace
         ContextManager::SetTopology(STopology::TriangleStrip);
 
         ContextManager::DrawIndexed(m_FullscreenQuadMeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
+
+        ContextManager::ResetTexture(0);
 
         Performance::EndEvent();
     }
@@ -1129,10 +1126,7 @@ namespace
         Performance::BeginEvent("Render inpainted plane");
 
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
-
-        ContextManager::SetViewPortSet(m_DiminishedViewPortSetPtr);
-
-        ContextManager::SetRenderContext(m_PlaneRenderContextPtr);
+        
         ContextManager::SetShaderVS(m_InpaintedPlaneVSPtr);
         ContextManager::SetShaderPS(m_InpaintedPlaneFSPtr);
 
@@ -1562,9 +1556,11 @@ namespace
     }
 
     // -----------------------------------------------------------------------------
-
+    bool m_IsInpainting = false;
     CTexturePtr CGfxReconstructionRenderer::GetInpaintedRendering(const glm::mat4& _rPoseMatrix, const Base::AABB3Float& _rAABB, CTexturePtr _BackgroundTexturePtr)
     {
+        m_IsInpainting = true;
+
         if (m_InpaintedPlaneTexture != nullptr)
         {
             Performance::BeginEvent("Render diminished reality");
@@ -1572,6 +1568,7 @@ namespace
             Gfx::TargetSetManager::ClearTargetSet(m_DiminishedTargetSetPtr);
 
             ContextManager::SetTargetSet(m_DiminishedTargetSetPtr);
+            ContextManager::SetViewPortSet(m_DiminishedViewPortSetPtr);
 
             if (_BackgroundTexturePtr != nullptr)
             {
@@ -1579,6 +1576,8 @@ namespace
             }
             RenderInpaintedPlane(_rPoseMatrix, _rAABB);
             RaycastVolumeDiminished(_rPoseMatrix, _rAABB);
+
+            ContextManager::ResetTargetSet();
 
             Performance::EndEvent();
 
@@ -1634,7 +1633,10 @@ namespace
             }
             else
             {
-                RaycastVolumeWithHighlight();
+                if (!m_IsInpainting)
+                {
+                    RaycastVolumeWithHighlight();
+                }
             }
         }
 
@@ -1683,6 +1685,12 @@ namespace
         if (m_RenderPlanes)
         {
             RenderPlanes();
+        }
+
+        if (m_IsInpainting)
+        {
+            ContextManager::SetTargetSet(TargetSetManager::GetLightAccumulationTargetSet());
+            RenderBackgroundImage(m_DiminishedTargetPtr, true);
         }
 
         ContextManager::ResetShaderVS();
