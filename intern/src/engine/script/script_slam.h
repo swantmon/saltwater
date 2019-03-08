@@ -31,7 +31,7 @@ namespace Scpt
     public:
 
         bool m_IsSelectionEnabled = true;
-        bool m_IsMouseControlEnabled = true;
+        bool m_IsMouseControlEnabled = false;
 
         void Start() override
         {
