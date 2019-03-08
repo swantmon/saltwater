@@ -22,6 +22,7 @@ namespace Stereo
     private:
         void determ_CoRegion(const std::vector<cv::Point2f>& epipoles, const cv::Size imgDimensions, const cv::Mat & F);
         void getTransformationPoints(const cv::Size& imgDimensions, const cv::Point2d epipole1, const cv::Point2d epipole2, const cv::Mat& F);
+        void doTransformation(const cv::Mat& img1, const cv::Mat& img2, const cv::Point2d epipole1, const cv::Point2d epipole2, const cv::Mat& F);
 
     //---Assist Function---
     private:
@@ -30,6 +31,10 @@ namespace Stereo
 
         cv::Vec3f get_ImgLn_from_ImgPt(const cv::Point2d& ImgPt1, const cv::Point2d& ImgPt2);
         void computeEpilines(const std::vector<cv::Point2f> & points, const uint32_t &whichImage, const cv::Mat & F, const std::vector <cv::Vec3f> & oldlines, std::vector <cv::Vec3f> & newLines);
+        void getNewPointAndLineSingleImage(const cv::Point2d epipole1, const cv::Point2d epipole2, const cv::Size & imgDimensions, const cv::Mat & F, const uint32_t & whichImage, const cv::Point2d & pOld1, const cv::Point2d & pOld2, 
+                                           cv::Vec3f & prevLine, cv::Point2d & pNew1, cv::Vec3f & newLine1, cv::Point2d & pNew2, cv::Vec3f & newLine2);
+        void getNewEpiline(const cv::Point2d epipole1, const cv::Point2d epipole2, const cv::Size & imgDimensions, const cv::Mat & F, const cv::Point2d pOld1, const cv::Point2d pOld2,
+                           cv::Vec3f prevLine1, cv::Vec3f prevLine2, cv::Point2d & pNew1, cv::Point2d & pNew2, cv::Vec3f & newLine1, cv::Vec3f & newLine2);
 
         bool lineIntersectsRect(const cv::Vec3d & line, const cv::Size & imgDimensions, cv::Point2d * intersection = NULL);
         bool lineIntersectsSegment(const cv::Vec3d & line, const cv::Point2d & p1, const cv::Point2d & p2, cv::Point2d * intersection = NULL);
@@ -48,7 +53,8 @@ namespace Stereo
         cv::Point2d m_b1, m_b2, m_e1, m_e2; // ??? Border of Epipolar Image ???
         double m_minRho1, m_maxRho1, m_minRho2, m_maxRho2; // Min & Max distance from EpiPole to Image Plane.
 
-        vector<cv::Point2d> m_thetaPoints1, m_thetaPoints2;
+        double m_stepSize; // ???
+        std::vector<cv::Point2d> m_thetaPoints1, m_thetaPoints2; // ???
     };
 
 }

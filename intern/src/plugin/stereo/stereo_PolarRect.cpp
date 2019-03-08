@@ -230,7 +230,7 @@ namespace Stereo
             double crossProd = v1.cross(v2)[2];
 
             if (thetaIdx != 0) {
-                if ((SIGN(lastCrossProd) != SIGN(crossProd)) || (fabs(acos(v1.dot(-v3))) < 0.01) || (p1 == cv::Point2d(-1, -1)))
+                if ( ((lastCrossProd * crossProd) < 0) || (fabs(acos(v1.dot(-v3))) < 0.01) || (p1 == cv::Point2d(-1, -1)) )
                     crossesLeft--;
 
                 if ((crossesLeft < 0)) {
@@ -239,45 +239,15 @@ namespace Stereo
             }
             lastCrossProd = crossProd;
             thetaIdx++;
-
-            if (m_showIterations) {
-                int keycode = cv::waitKey(0);
-
-                // q: exit
-                if (keycode == 113) {
-                    exit(0);
-                }
-                // 1: stepSize = 1
-                if (keycode == 49) {
-                    m_stepSize = 1;
-                }
-                // 2: stepSize = 50
-                if (keycode == 50) {
-                    m_stepSize = 10;
-                }
-                // 3: stepSize = 50
-                if (keycode == 51) {
-                    m_stepSize = 50;
-                }
-                // 4: stepSize = 100
-                if (keycode == 51) {
-                    m_stepSize = 100;
-                }
-                // n: next image
-                if (keycode == 110) {
-                    break;
-                }
-                // r: reset current image
-                if (keycode == 114) {
-                    p1 = m_b1;
-                    p2 = m_b2;
-                    line1 = m_line1B;
-                    line2 = m_line2B;
-                }
-            }
+            
         }
         m_thetaPoints1.pop_back();
         m_thetaPoints2.pop_back();
+    }
+
+    void PolarRect::doTransformation(const cv::Mat& img1, const cv::Mat& img2, const cv::Point2d epipole1, const cv::Point2d epipole2, const cv::Mat& F)
+    {
+
     }
 
     //---Assist Function---
@@ -448,6 +418,108 @@ namespace Stereo
                 newLines[i] *= -1;
             }
         }
+    }
+
+    inline void PolarRect::getNewPointAndLineSingleImage(const cv::Point2d epipole1, const cv::Point2d epipole2, const cv::Size & imgDimensions, const cv::Mat & F, const uint32_t & whichImage, const cv::Point2d & pOld1, const cv::Point2d & pOld2,
+        cv::Vec3f & prevLine, cv::Point2d & pNew1, cv::Vec3f & newLine1, cv::Point2d & pNew2, cv::Vec3f & newLine2)
+    {
+        // We obtain vector v
+        cv::Vec2f v;
+
+        cv::Vec3f vBegin(m_b1.x - epipole1.x, m_b1.y - epipole1.y, 0.0);
+        cv::Vec3f vCurr(pOld1.x - epipole1.x, pOld1.y - epipole1.y, 0.0);
+        cv::Vec3f vEnd(m_e1.x - epipole1.x, m_e1.y - epipole1.y, 0.0);
+
+        vBegin /= cv::norm(vBegin);
+        vCurr /= cv::norm(vCurr);
+        vEnd /= cv::norm(vEnd);
+
+        if (Is_InsideImg(epipole1, imgDimensions)) 
+        {
+            if (Is_InsideImg(epipole2, imgDimensions)) 
+            {
+                v = cv::Vec2f(vCurr[1], -vCurr[0]);
+            }
+            else 
+            {
+                vBegin = cv::Vec3f(m_b2.x - epipole2.x, m_b2.y - epipole2.y, 0.0);
+                vCurr = cv::Vec3f(pOld2.x - epipole2.x, pOld2.y - epipole2.y, 0.0);
+                vEnd = cv::Vec3f(m_e2.x - epipole2.x, m_e2.y - epipole2.y, 0.0);
+
+                vBegin /= cv::norm(vBegin);
+                vCurr /= cv::norm(vCurr);
+                vEnd /= cv::norm(vEnd);
+
+                const cv::Vec3f vCross = vBegin.cross(vEnd);
+
+                v = cv::Vec2f(vCurr[1], -vCurr[0]);
+                if (vCross[2] > 0.0) {
+                    v = -v;
+                }
+            }
+        }
+        else 
+        {
+            const cv::Vec3f vCross = vBegin.cross(vEnd);
+
+            v = cv::Vec2f(vCurr[1], -vCurr[0]);
+            if (vCross[2] > 0.0) 
+            {
+                v = -v;
+            }
+        }
+
+        pNew1 = cv::Point2d(pOld1.x + v[0] * m_stepSize, pOld1.y + v[1] * m_stepSize);
+        newLine1 = get_ImgLn_from_ImgPt(epipole1, pNew1);
+
+        if (!Is_InsideImg(epipole1, imgDimensions)) 
+        {
+            pNew1 = getBorderIntersection(epipole1, newLine1, imgDimensions, &pOld1);
+        }
+        else 
+        {
+            pNew1 = getNearestIntersection(epipole1, epipole1, newLine1, pOld1, imgDimensions);
+        }
+
+        std::vector<cv::Point2f> points(1);
+        points[0] = pNew1;
+        std::vector<cv::Vec3f> inLines(1);
+        inLines[0] = newLine1;
+        std::vector<cv::Vec3f> outLines(1);
+        computeEpilines(points, whichImage, F, inLines, outLines);
+        newLine2 = outLines[0];
+
+        if (!Is_InsideImg(epipole2, imgDimensions)) 
+        {
+            cv::Point2d tmpPoint = getBorderIntersection(epipole2, newLine2, imgDimensions, &pOld2);
+            pNew2 = tmpPoint;
+        }
+        else {
+            std::vector <cv::Point2d> intersections;
+            getBorderIntersections(epipole2, newLine2, imgDimensions, intersections);
+            pNew2 = intersections[0];
+
+            double minDist = std::numeric_limits<double>::max();
+            for (uint32_t i = 0; i < intersections.size(); i++) {
+                const double dist = (pOld2.x - intersections[i].x) * (pOld2.x - intersections[i].x) +
+                    (pOld2.y - intersections[i].y) * (pOld2.y - intersections[i].y);
+                if (minDist > dist) {
+                    minDist = dist;
+                    pNew2 = intersections[i];
+                }
+            }
+        }
+    }
+
+    inline void PolarRect::getNewEpiline(const cv::Point2d epipole1, const cv::Point2d epipole2, const cv::Size & imgDimensions, const cv::Mat & F, const cv::Point2d pOld1, const cv::Point2d pOld2,
+                                         cv::Vec3f prevLine1, cv::Vec3f prevLine2, cv::Point2d & pNew1, cv::Point2d & pNew2, cv::Vec3f & newLine1, cv::Vec3f & newLine2)
+    {
+        getNewPointAndLineSingleImage(epipole1, epipole2, imgDimensions, F, 1, pOld1, pOld2, prevLine1, pNew1, newLine1, pNew2, newLine2);
+
+        //TODO If the distance is too big in image 2, we do it in the opposite sense
+    //     double distImg2 = (pOld2.x - pNew2.x) * (pOld2.x - pNew2.x) + (pOld2.y - pNew2.y) * (pOld2.y - pNew2.y);
+    //     if (distImg2 > m_stepSize * m_stepSize)
+    //         getNewPointAndLineSingleImage(epipole2, epipole1, imgDimensions, F, 2, pOld2, pOld1, prevLine2, pNew2, newLine2, pNew1, newLine1);
     }
 
     inline bool PolarRect::lineIntersectsRect(const cv::Vec3d& line, const cv::Size& imgDimensions, cv::Point2d* intersection = NULL)
