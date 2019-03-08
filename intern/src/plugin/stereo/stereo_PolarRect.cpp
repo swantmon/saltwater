@@ -247,7 +247,26 @@ namespace Stereo
 
     void PolarRect::doTransformation(const cv::Mat& img1, const cv::Mat& img2, const cv::Point2d epipole1, const cv::Point2d epipole2, const cv::Mat& F)
     {
+        const double rhoRange1 = m_maxRho1 - m_minRho1 + 1;
+        const double rhoRange2 = m_maxRho2 - m_minRho2 + 1;
 
+        const double rhoRange = std::max(rhoRange1, rhoRange2);
+
+        m_mapX1 = cv::Mat::ones(m_thetaPoints1.size(), rhoRange, CV_32FC1) * -1;
+        m_mapY1 = cv::Mat::ones(m_thetaPoints1.size(), rhoRange, CV_32FC1) * -1;
+        m_mapX2 = cv::Mat::ones(m_thetaPoints2.size(), rhoRange, CV_32FC1) * -1;
+        m_mapY2 = cv::Mat::ones(m_thetaPoints2.size(), rhoRange, CV_32FC1) * -1;
+
+        m_inverseMapX1 = cv::Mat::ones(img1.rows, img1.cols, CV_32FC1) * -1;
+        m_inverseMapY1 = cv::Mat::ones(img1.rows, img1.cols, CV_32FC1) * -1;
+        m_inverseMapX2 = cv::Mat::ones(img1.rows, img1.cols, CV_32FC1) * -1;
+        m_inverseMapY2 = cv::Mat::ones(img1.rows, img1.cols, CV_32FC1) * -1;
+
+        for (uint32_t thetaIdx = 0; thetaIdx < m_thetaPoints1.size(); thetaIdx++) 
+        {
+            transformLine(epipole1, m_thetaPoints1[thetaIdx], img1, thetaIdx, m_minRho1, m_maxRho1, m_mapX1, m_mapY1, m_inverseMapX1, m_inverseMapY1);
+            transformLine(epipole2, m_thetaPoints2[thetaIdx], img2, thetaIdx, m_minRho2, m_maxRho2, m_mapX2, m_mapY2, m_inverseMapX2, m_inverseMapY2);
+        }
     }
 
     //---Assist Function---
@@ -520,6 +539,31 @@ namespace Stereo
     //     double distImg2 = (pOld2.x - pNew2.x) * (pOld2.x - pNew2.x) + (pOld2.y - pNew2.y) * (pOld2.y - pNew2.y);
     //     if (distImg2 > m_stepSize * m_stepSize)
     //         getNewPointAndLineSingleImage(epipole2, epipole1, imgDimensions, F, 2, pOld2, pOld1, prevLine2, pNew2, newLine2, pNew1, newLine1);
+    }
+
+    void transformLine(const cv::Point2d& epipole, const cv::Point2d& p2, const cv::Mat& inputImage, const uint32_t & thetaIdx, const double &minRho, const double & maxRho, cv::Mat& mapX, cv::Mat& mapY, cv::Mat& inverseMapX, cv::Mat& inverseMapY)
+    {
+        cv::Vec2f v(p2.x - epipole.x, p2.y - epipole.y);
+        double maxDist = cv::norm(v);
+        v /= maxDist;
+
+        {
+            uint32_t rhoIdx = 0;
+            for (double rho = minRho; rho <= min(maxDist, maxRho); rho += 1.0, rhoIdx++) 
+            {
+                cv::Point2d target(v[0] * rho + epipole.x, v[1] * rho + epipole.y);
+                if ((target.x >= 0) && (target.x < inputImage.cols) &&
+                    (target.y >= 0) && (target.y < inputImage.rows)) 
+                {
+
+                    mapX.at<float>(thetaIdx, rhoIdx) = target.x;
+                    mapY.at<float>(thetaIdx, rhoIdx) = target.y;
+
+                    inverseMapX.at<float>(target.y, target.x) = rhoIdx;
+                    inverseMapY.at<float>(target.y, target.x) = thetaIdx;
+                }
+            }
+        }
     }
 
     inline bool PolarRect::lineIntersectsRect(const cv::Vec3d& line, const cv::Size& imgDimensions, cv::Point2d* intersection = NULL)

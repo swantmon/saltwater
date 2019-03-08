@@ -35,6 +35,7 @@ namespace Stereo
                                            cv::Vec3f & prevLine, cv::Point2d & pNew1, cv::Vec3f & newLine1, cv::Point2d & pNew2, cv::Vec3f & newLine2);
         void getNewEpiline(const cv::Point2d epipole1, const cv::Point2d epipole2, const cv::Size & imgDimensions, const cv::Mat & F, const cv::Point2d pOld1, const cv::Point2d pOld2,
                            cv::Vec3f prevLine1, cv::Vec3f prevLine2, cv::Point2d & pNew1, cv::Point2d & pNew2, cv::Vec3f & newLine1, cv::Vec3f & newLine2);
+        void transformLine(const cv::Point2d& epipole, const cv::Point2d& p2, const cv::Mat& inputImage, const uint32_t & thetaIdx, const double &minRho, const double & maxRho, cv::Mat& mapX, cv::Mat& mapY, cv::Mat& inverseMapX, cv::Mat& inverseMapY);
 
         bool lineIntersectsRect(const cv::Vec3d & line, const cv::Size & imgDimensions, cv::Point2d * intersection = NULL);
         bool lineIntersectsSegment(const cv::Vec3d & line, const cv::Point2d & p1, const cv::Point2d & p2, cv::Point2d * intersection = NULL);
@@ -52,6 +53,9 @@ namespace Stereo
         cv::Vec3f m_line1B, m_line1E, m_line2B, m_line2E; // Beginning & Ending of Image Line
         cv::Point2d m_b1, m_b2, m_e1, m_e2; // ??? Border of Epipolar Image ???
         double m_minRho1, m_maxRho1, m_minRho2, m_maxRho2; // Min & Max distance from EpiPole to Image Plane.
+
+        cv::Mat m_mapX1, m_mapY1, m_mapX2, m_mapY2;
+        cv::Mat m_inverseMapX1, m_inverseMapY1, m_inverseMapX2, m_inverseMapY2;
 
         double m_stepSize; // ???
         std::vector<cv::Point2d> m_thetaPoints1, m_thetaPoints2; // ???
