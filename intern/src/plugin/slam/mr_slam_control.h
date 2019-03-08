@@ -495,9 +495,12 @@ namespace MR
                 SendInpaintedResult();
             }
 
-            const auto& AABB = Gfx::ReconstructionRenderer::GetSelectionBox();
+            if (m_StreamState == STREAM_DIMINSIHED)
+            {
+                const auto& AABB = Gfx::ReconstructionRenderer::GetSelectionBox();
 
-            Gfx::CTexturePtr Texture = Gfx::ReconstructionRenderer::GetInpaintedRendering(m_PoseMatrix, AABB, m_RGBATexture);
+                Gfx::CTexturePtr Texture = Gfx::ReconstructionRenderer::GetInpaintedRendering(m_PoseMatrix, AABB, m_RGBATexture);
+            }
         }
 
         // -----------------------------------------------------------------------------
