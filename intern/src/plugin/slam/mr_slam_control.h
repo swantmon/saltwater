@@ -195,6 +195,8 @@ namespace MR
 
         EStreamState m_StreamState;
 
+        glm::mat4 m_PreliminaryPoseMatrix;
+
     public:
 
         void Start()
@@ -632,7 +634,14 @@ namespace MR
             }
             else if (MessageType == TRANSFORM)
             {
-                m_PoseMatrix = *reinterpret_cast<glm::mat4*>(Decompressed.data() + sizeof(int32_t)) * glm::eulerAngleX(glm::pi<float>());
+                if (m_StreamState == STREAM_SLAM)
+                {
+                    m_PoseMatrix = *reinterpret_cast<glm::mat4*>(Decompressed.data() + sizeof(int32_t)) * glm::eulerAngleX(glm::pi<float>());
+                }
+                else if (m_StreamState == STREAM_DIMINSIHED)
+                {
+                    m_PreliminaryPoseMatrix = *reinterpret_cast<glm::mat4*>(Decompressed.data() + sizeof(int32_t)) * glm::eulerAngleX(glm::pi<float>());
+                }                
             }
             else if (MessageType == DEPTHFRAME)
             {
@@ -666,6 +675,10 @@ namespace MR
                 if (m_StreamState == STREAM_SLAM)
                 {
                     m_Reconstructor.OnNewFrame(m_DepthTexture, m_RGBATexture, &m_PoseMatrix);
+                }
+                else
+                {
+                    m_PoseMatrix = m_PreliminaryPoseMatrix;
                 }
             }
             else if (MessageType == LIGHTESTIMATE)
