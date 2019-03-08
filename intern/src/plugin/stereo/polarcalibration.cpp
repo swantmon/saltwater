@@ -21,7 +21,7 @@
 #include <fstream>
 #include <omp.h>
 
-#include "plugin\stereo\stereo_polarcalibration.h"
+#include "plugin\stereo\polarcalibration.h"
 
 
 PolarCalibration::PolarCalibration() {
