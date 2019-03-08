@@ -59,6 +59,7 @@ namespace Stereo
         else
         {
             // Start Stereo Matching
+
             for (std::vector<FutoGmtCV>::iterator iter = SeqImg_RGB.begin(); iter < SeqImg_RGB.end(); iter++)
             {
                 std::vector<FutoGmtCV>::iterator iterNext = iter + 1;
