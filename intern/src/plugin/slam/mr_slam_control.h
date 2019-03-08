@@ -182,15 +182,25 @@ namespace MR
 
         bool m_SendInpaintedResult;
 
-        GLuint m_PixelDataBuffer; // Opengl pixel buffer object has 3 times the size of the image (triple buffering)
+        GLuint m_PixelDataBuffer; // OpenGL pixel buffer object has 3 times the size of the image (triple buffering)
         int m_PixelBufferSize;
 
-        void* m_pGPUPixelData; // Pointer to raw gpu memory of peristent mapped buffer
+        void* m_pGPUPixelData; // Pointer to raw gpu memory of persistent mapped buffer
+
+        enum EStreamState
+        {
+            STREAM_SLAM,
+            STREAM_DIMINSIHED
+        };
+
+        EStreamState m_StreamState;
 
     public:
 
         void Start()
         {
+            m_StreamState = STREAM_SLAM;
+
             m_SelectionBoxAnchor0 = glm::vec3(0.0f);
             m_SelectionBoxAnchor1 = glm::vec3(0.0f);
             m_SelectionBoxHeight = 0.0f;
@@ -610,112 +620,11 @@ namespace MR
                 }
                 else if (MessageID == 1)
                 {
-                    ENGINE_CONSOLE_INFO("Initializing reconstructor");
-
-                    SIntrinsicsMessage Message = *reinterpret_cast<SIntrinsicsMessage*>(Decompressed.data() + sizeof(int32_t) * 2);
-                    
-                    glm::vec2 FocalLength = Message.m_FocalLength;
-                    glm::vec2 FocalPoint = Message.m_FocalPoint;
-                    m_DepthSize = Message.m_DepthSize;
-                    m_ColorSize = Message.m_ColorSize;
-                    m_DeviceResolution = Message.m_DeviceResolution;
-                    m_DeviceProjectionMatrix = Message.m_DeviceProjectionMatrix;
-
-                    Gfx::ReconstructionRenderer::SetDeviceResolution(m_DeviceResolution);
-
-                    MR::SReconstructionSettings Settings;
-                    m_Reconstructor.GetReconstructionSettings(&Settings);
-
-                    m_CaptureColor = Settings.m_CaptureColor;
-                    
-                    if (m_CaptureColor)
-                    {
-                        FocalPoint.x = (FocalPoint.x / m_DepthSize.x) * m_ColorSize.x;
-                        FocalPoint.y = (FocalPoint.y / m_DepthSize.y) * m_ColorSize.y;
-
-                        m_Reconstructor.SetImageSizes(glm::vec2(m_ColorSize), glm::vec2(m_ColorSize));
-                        m_Reconstructor.SetIntrinsics(glm::vec2(FocalLength), glm::vec2(FocalPoint));
-                    }
-                    else
-                    {
-                        m_Reconstructor.SetImageSizes(glm::vec2(m_DepthSize), glm::vec2(m_DepthSize));
-                        m_Reconstructor.SetIntrinsics(glm::vec2(FocalLength), glm::vec2(FocalPoint));
-                    }
-
-                    m_Reconstructor.Start();
-
-                    m_IsReconstructorInitialized = true;
-
-                    m_DepthBuffer.resize(m_DepthSize.x * m_DepthSize.y);
-
-                    Gfx::STextureDescriptor TextureDescriptor = {};
-
-                    TextureDescriptor.m_NumberOfPixelsU = m_DepthSize.x;
-                    TextureDescriptor.m_NumberOfPixelsV = m_DepthSize.y;
-                    TextureDescriptor.m_NumberOfPixelsW = 1;
-                    TextureDescriptor.m_NumberOfMipMaps = 1;
-                    TextureDescriptor.m_NumberOfTextures = 1;
-                    TextureDescriptor.m_Binding = Gfx::CTexture::ShaderResource;
-                    TextureDescriptor.m_Access = Gfx::CTexture::CPUWrite;
-                    TextureDescriptor.m_Usage = Gfx::CTexture::GPUReadWrite;
-                    TextureDescriptor.m_Semantic = Gfx::CTexture::UndefinedSemantic;
-                    TextureDescriptor.m_pFileName = nullptr;
-                    TextureDescriptor.m_pPixels = 0;
-                    TextureDescriptor.m_Format = Gfx::CTexture::R16_UINT;
-                    m_ShiftTexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
-
-                    TextureDescriptor.m_NumberOfPixelsU = m_CaptureColor ? m_ColorSize.x : m_DepthSize.x;
-                    TextureDescriptor.m_NumberOfPixelsV = m_CaptureColor ? m_ColorSize.y : m_DepthSize.y;
-                    m_DepthTexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
-
-                    std::stringstream DefineStream;
-                    DefineStream
-                        << "#define TILE_SIZE_2D " << m_TileSize2D << " \n"
-                        << "#define DEPTH_WIDTH "  << m_DepthSize.x << " \n"
-                        << "#define DEPTH_HEIGHT " << m_DepthSize.y << " \n";
-
-                    if (m_CaptureColor)
-                    {
-                        DefineStream
-                            << "#define COLOR_WIDTH " << m_ColorSize.x << " \n"
-                            << "#define COLOR_HEIGHT " << m_ColorSize.y << " \n"
-                            << "#define CAPTURE_COLOR " << " \n";
-
-                        TextureDescriptor.m_NumberOfPixelsU = m_ColorSize.x;
-                        TextureDescriptor.m_NumberOfPixelsV = m_ColorSize.y;
-                        TextureDescriptor.m_Format = Gfx::CTexture::R8G8B8A8_UBYTE;
-                        m_RGBATexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
-
-                        TextureDescriptor.m_Format = Gfx::CTexture::R8_UBYTE;
-                        m_YTexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
-
-                        TextureDescriptor.m_NumberOfPixelsU = m_ColorSize.x / 2;
-                        TextureDescriptor.m_NumberOfPixelsV = m_ColorSize.y / 2;
-                        TextureDescriptor.m_Format = Gfx::CTexture::R8G8_UBYTE;
-                        m_UVTexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
-
-                        std::string DefineString = DefineStream.str();
-                        m_YUVtoRGBCSPtr = Gfx::ShaderManager::CompileCS("../../plugins/slam/cs_yuv_to_rgb.glsl", "main", DefineString.c_str());
-                    }
-                    std::string DefineString = DefineStream.str();
-                    m_ShiftDepthCSPtr = Gfx::ShaderManager::CompileCS("../../plugins/slam/cs_shift_depth.glsl", "main", DefineString.c_str());
-                    
-                    if (m_SendInpaintedResult)
-                    {
-                        m_PixelBufferSize = m_DeviceResolution.x * m_DeviceResolution.y * 4;
-                        glCreateBuffers(1, &m_PixelDataBuffer);
-
-                        // The GPU buffer has three times the size of the image so we can use triple buffering and avoid stalls
-
-                        glNamedBufferStorage(m_PixelDataBuffer, m_PixelBufferSize * 3, nullptr, GL_MAP_READ_BIT | GL_MAP_PERSISTENT_BIT);
-                        m_pGPUPixelData = glMapNamedBufferRange(m_PixelDataBuffer, 0, m_PixelBufferSize * 3, GL_MAP_READ_BIT | GL_MAP_PERSISTENT_BIT);
-                    }
-
-                    ENGINE_CONSOLE_INFO("Initialization complete");
+                    InitializeSLAM(Decompressed);
                 }
                 else if (MessageID == 2)
                 {
-                    CreatePlane();
+                    EnableDiminishedReality(Decompressed);
                 }
             }
             else if (MessageType == TRANSFORM)
@@ -742,36 +651,19 @@ namespace MR
                 int WorkgroupsY = DivUp(m_CaptureColor ? m_ColorSize.y : m_DepthSize.y, m_TileSize2D);
                 Gfx::ContextManager::Dispatch(WorkgroupsX, WorkgroupsY, 1);
                 
-                if (!m_CaptureColor)
+                if (!m_CaptureColor && m_StreamState == STREAM_SLAM)
                 {
                     m_Reconstructor.OnNewFrame(m_DepthTexture, nullptr, &m_PoseMatrix);
                 }
             }
             else if (MessageType == COLORFRAME && m_CaptureColor)
             {
-                const int32_t Width = *reinterpret_cast<int32_t*>(Decompressed.data() + sizeof(int32_t));
-                const int32_t Height = *reinterpret_cast<int32_t*>(Decompressed.data() + 2 * sizeof(int32_t));
+                ExtractRGBAFrame(Decompressed);
 
-                const char* YData = Decompressed.data() + 3 * sizeof(int32_t);
-                const char* UVData = YData + Width * Height;
-
-                Base::AABB2UInt TargetRect;
-                TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_ColorSize.x, m_ColorSize.y));
-                Gfx::TextureManager::CopyToTexture2D(m_YTexture, TargetRect, m_ColorSize.x, const_cast<char*>(YData));
-
-                TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_ColorSize.x / 2, m_ColorSize.y / 2));
-                Gfx::TextureManager::CopyToTexture2D(m_UVTexture, TargetRect, m_ColorSize.x / 2, const_cast<char*>(UVData));
-
-                Gfx::ContextManager::SetConstantBuffer(0, m_RGBConversionBuffer);
-
-                Gfx::ContextManager::SetShaderCS(m_YUVtoRGBCSPtr);
-                Gfx::ContextManager::SetImageTexture(0, m_YTexture);
-                Gfx::ContextManager::SetImageTexture(1, m_UVTexture);
-                Gfx::ContextManager::SetImageTexture(2, m_RGBATexture);
-
-                Gfx::ContextManager::Dispatch(DivUp(m_ColorSize.x, m_TileSize2D), DivUp(m_ColorSize.y, m_TileSize2D), 1);
-
-                m_Reconstructor.OnNewFrame(m_DepthTexture, m_RGBATexture, &m_PoseMatrix);
+                if (m_StreamState == STREAM_SLAM)
+                {
+                    m_Reconstructor.OnNewFrame(m_DepthTexture, m_RGBATexture, &m_PoseMatrix);
+                }
             }
             else if (MessageType == LIGHTESTIMATE)
             {
@@ -809,6 +701,188 @@ namespace MR
                 }
             }
         }
+
+        // -----------------------------------------------------------------------------
+
+        void ExtractRGBAFrame(const std::vector<char>& _rData)
+        {
+            const int32_t Width = *reinterpret_cast<const int32_t*>(_rData.data() + sizeof(int32_t));
+            const int32_t Height = *reinterpret_cast<const int32_t*>(_rData.data() + 2 * sizeof(int32_t));
+
+            const char* YData = _rData.data() + 3 * sizeof(int32_t);
+            const char* UVData = YData + Width * Height;
+
+            Base::AABB2UInt TargetRect;
+            TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_ColorSize.x, m_ColorSize.y));
+            Gfx::TextureManager::CopyToTexture2D(m_YTexture, TargetRect, m_ColorSize.x, const_cast<char*>(YData));
+
+            TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_ColorSize.x / 2, m_ColorSize.y / 2));
+            Gfx::TextureManager::CopyToTexture2D(m_UVTexture, TargetRect, m_ColorSize.x / 2, const_cast<char*>(UVData));
+
+            Gfx::ContextManager::SetConstantBuffer(0, m_RGBConversionBuffer);
+
+            Gfx::ContextManager::SetShaderCS(m_YUVtoRGBCSPtr);
+            Gfx::ContextManager::SetImageTexture(0, m_YTexture);
+            Gfx::ContextManager::SetImageTexture(1, m_UVTexture);
+            Gfx::ContextManager::SetImageTexture(2, m_RGBATexture);
+
+            Gfx::ContextManager::Dispatch(DivUp(m_ColorSize.x, m_TileSize2D), DivUp(m_ColorSize.y, m_TileSize2D), 1);
+        }
+
+        // -----------------------------------------------------------------------------
+
+        void InitializeSLAM(const std::vector<char>& _rData)
+        {
+            ENGINE_CONSOLE_INFO("Initializing reconstructor");
+
+            SIntrinsicsMessage Message = *reinterpret_cast<const SIntrinsicsMessage*>(_rData.data() + sizeof(int32_t) * 2);
+
+            glm::vec2 FocalLength = Message.m_FocalLength;
+            glm::vec2 FocalPoint = Message.m_FocalPoint;
+            m_DepthSize = Message.m_DepthSize;
+            m_ColorSize = Message.m_ColorSize;
+            m_DeviceResolution = Message.m_DeviceResolution;
+            m_DeviceProjectionMatrix = Message.m_DeviceProjectionMatrix;
+
+            Gfx::ReconstructionRenderer::SetDeviceResolution(m_DeviceResolution);
+
+            MR::SReconstructionSettings Settings;
+            m_Reconstructor.GetReconstructionSettings(&Settings);
+
+            m_CaptureColor = Settings.m_CaptureColor;
+
+            if (m_CaptureColor)
+            {
+                FocalPoint.x = (FocalPoint.x / m_DepthSize.x) * m_ColorSize.x;
+                FocalPoint.y = (FocalPoint.y / m_DepthSize.y) * m_ColorSize.y;
+
+                m_Reconstructor.SetImageSizes(glm::vec2(m_ColorSize), glm::vec2(m_ColorSize));
+                m_Reconstructor.SetIntrinsics(glm::vec2(FocalLength), glm::vec2(FocalPoint));
+            }
+            else
+            {
+                m_Reconstructor.SetImageSizes(glm::vec2(m_DepthSize), glm::vec2(m_DepthSize));
+                m_Reconstructor.SetIntrinsics(glm::vec2(FocalLength), glm::vec2(FocalPoint));
+            }
+
+            m_Reconstructor.Start();
+
+            m_IsReconstructorInitialized = true;
+
+            m_DepthBuffer.resize(m_DepthSize.x * m_DepthSize.y);
+
+            Gfx::STextureDescriptor TextureDescriptor = {};
+
+            TextureDescriptor.m_NumberOfPixelsU = m_DepthSize.x;
+            TextureDescriptor.m_NumberOfPixelsV = m_DepthSize.y;
+            TextureDescriptor.m_NumberOfPixelsW = 1;
+            TextureDescriptor.m_NumberOfMipMaps = 1;
+            TextureDescriptor.m_NumberOfTextures = 1;
+            TextureDescriptor.m_Binding = Gfx::CTexture::ShaderResource;
+            TextureDescriptor.m_Access = Gfx::CTexture::CPUWrite;
+            TextureDescriptor.m_Usage = Gfx::CTexture::GPUReadWrite;
+            TextureDescriptor.m_Semantic = Gfx::CTexture::UndefinedSemantic;
+            TextureDescriptor.m_pFileName = nullptr;
+            TextureDescriptor.m_pPixels = 0;
+            TextureDescriptor.m_Format = Gfx::CTexture::R16_UINT;
+            m_ShiftTexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
+
+            TextureDescriptor.m_NumberOfPixelsU = m_CaptureColor ? m_ColorSize.x : m_DepthSize.x;
+            TextureDescriptor.m_NumberOfPixelsV = m_CaptureColor ? m_ColorSize.y : m_DepthSize.y;
+            m_DepthTexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
+
+            std::stringstream DefineStream;
+            DefineStream
+                << "#define TILE_SIZE_2D " << m_TileSize2D << " \n"
+                << "#define DEPTH_WIDTH " << m_DepthSize.x << " \n"
+                << "#define DEPTH_HEIGHT " << m_DepthSize.y << " \n";
+
+            if (m_CaptureColor)
+            {
+                DefineStream
+                    << "#define COLOR_WIDTH " << m_ColorSize.x << " \n"
+                    << "#define COLOR_HEIGHT " << m_ColorSize.y << " \n"
+                    << "#define CAPTURE_COLOR " << " \n";
+
+                TextureDescriptor.m_NumberOfPixelsU = m_ColorSize.x;
+                TextureDescriptor.m_NumberOfPixelsV = m_ColorSize.y;
+                TextureDescriptor.m_Format = Gfx::CTexture::R8G8B8A8_UBYTE;
+                m_RGBATexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
+
+                TextureDescriptor.m_Format = Gfx::CTexture::R8_UBYTE;
+                m_YTexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
+
+                TextureDescriptor.m_NumberOfPixelsU = m_ColorSize.x / 2;
+                TextureDescriptor.m_NumberOfPixelsV = m_ColorSize.y / 2;
+                TextureDescriptor.m_Format = Gfx::CTexture::R8G8_UBYTE;
+                m_UVTexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
+
+                std::string DefineString = DefineStream.str();
+                m_YUVtoRGBCSPtr = Gfx::ShaderManager::CompileCS("../../plugins/slam/cs_yuv_to_rgb.glsl", "main", DefineString.c_str());
+            }
+            std::string DefineString = DefineStream.str();
+            m_ShiftDepthCSPtr = Gfx::ShaderManager::CompileCS("../../plugins/slam/cs_shift_depth.glsl", "main", DefineString.c_str());
+
+            if (m_SendInpaintedResult)
+            {
+                m_PixelBufferSize = m_DeviceResolution.x * m_DeviceResolution.y * 4;
+                glCreateBuffers(1, &m_PixelDataBuffer);
+
+                // The GPU buffer has three times the size of the image so we can use triple buffering and avoid stalls
+
+                glNamedBufferStorage(m_PixelDataBuffer, m_PixelBufferSize * 3, nullptr, GL_MAP_READ_BIT | GL_MAP_PERSISTENT_BIT);
+                m_pGPUPixelData = glMapNamedBufferRange(m_PixelDataBuffer, 0, m_PixelBufferSize * 3, GL_MAP_READ_BIT | GL_MAP_PERSISTENT_BIT);
+            }
+
+            ENGINE_CONSOLE_INFO("Initialization complete");
+        }
+
+        // -----------------------------------------------------------------------------
+
+        void EnableDiminishedReality(const std::vector<char>& _rData)
+        {
+            CreatePlane();
+            m_StreamState = STREAM_DIMINSIHED;
+            m_ColorSize = m_ColorSize * 2;
+
+            Gfx::STextureDescriptor TextureDescriptor = {};
+
+            TextureDescriptor.m_NumberOfPixelsU = m_ColorSize.x;
+            TextureDescriptor.m_NumberOfPixelsV = m_ColorSize.y;
+            TextureDescriptor.m_NumberOfPixelsW = 1;
+            TextureDescriptor.m_NumberOfMipMaps = 1;
+            TextureDescriptor.m_NumberOfTextures = 1;
+            TextureDescriptor.m_Binding = Gfx::CTexture::ShaderResource;
+            TextureDescriptor.m_Access = Gfx::CTexture::CPUWrite;
+            TextureDescriptor.m_Usage = Gfx::CTexture::GPUReadWrite;
+            TextureDescriptor.m_Semantic = Gfx::CTexture::UndefinedSemantic;
+            TextureDescriptor.m_pFileName = nullptr;
+            TextureDescriptor.m_pPixels = 0;
+            TextureDescriptor.m_Format = Gfx::CTexture::R8G8B8A8_UBYTE;
+            m_RGBATexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
+
+            TextureDescriptor.m_Format = Gfx::CTexture::R8_UBYTE;
+            m_YTexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
+
+            TextureDescriptor.m_NumberOfPixelsU = m_ColorSize.x / 2;
+            TextureDescriptor.m_NumberOfPixelsV = m_ColorSize.y / 2;
+            TextureDescriptor.m_Format = Gfx::CTexture::R8G8_UBYTE;
+            m_UVTexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
+
+            std::stringstream DefineStream;
+            DefineStream
+                << "#define TILE_SIZE_2D " << m_TileSize2D << " \n"
+                << "#define DEPTH_WIDTH " << m_DepthSize.x << " \n"
+                << "#define DEPTH_HEIGHT " << m_DepthSize.y << " \n"
+                << "#define COLOR_WIDTH " << m_ColorSize.x << " \n"
+                << "#define COLOR_HEIGHT " << m_ColorSize.y << " \n"
+                << "#define CAPTURE_COLOR " << " \n";
+
+            std::string DefineString = DefineStream.str();
+            m_YUVtoRGBCSPtr = Gfx::ShaderManager::CompileCS("../../plugins/slam/cs_yuv_to_rgb.glsl", "main", DefineString.c_str());
+        }
+
+        // -----------------------------------------------------------------------------
 
         void OnNewSLAMMessage(const Net::CMessage& _rMessage, Net::SocketHandle _SocketHandle)
         {
