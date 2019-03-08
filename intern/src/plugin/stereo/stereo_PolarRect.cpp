@@ -23,7 +23,261 @@ namespace Stereo
         determ_RhoRange(epipoles[0], imgDimensions, externalPoints1, m_minRho1, m_maxRho1);
         determ_RhoRange(epipoles[1], imgDimensions, externalPoints2, m_minRho2, m_maxRho2);
 
+        if (!Is_InsideImg(epipoles[0], imgDimensions) && !Is_InsideImg(epipoles[1], imgDimensions))
+        {
+            // CASE 1: Both outside
+            const cv::Vec3f line11 = get_ImgLn_from_ImgPt(epipoles[0], externalPoints1[0]);
+            const cv::Vec3f line12 = get_ImgLn_from_ImgPt((epipoles[0], externalPoints1[1]);
 
+            const cv::Vec3f line23 = get_ImgLn_from_ImgPt((epipoles[1], externalPoints2[0]);
+            const cv::Vec3f line24 = get_ImgLn_from_ImgPt((epipoles[1], externalPoints2[1]);
+
+            std::vector <cv::Vec3f> inputLines(2), outputLines(2);
+            inputLines[0] = line23;
+            inputLines[1] = line24;
+            computeEpilines(externalPoints2, 2, F, inputLines, outputLines);
+            const cv::Vec3f line13 = outputLines[0];
+            const cv::Vec3f line14 = outputLines[1];
+
+            inputLines[0] = line11;
+            inputLines[1] = line12;
+            computeEpilines(externalPoints1, 1, F, inputLines, outputLines);
+            const cv::Vec3f line21 = outputLines[0];
+            const cv::Vec3f line22 = outputLines[1];
+
+            // Beginning and ending lines
+            m_line1B = lineIntersectsRect(line13, imgDimensions) ? line13 : line11;
+            m_line1E = lineIntersectsRect(line14, imgDimensions) ? line14 : line12;
+            m_line2B = lineIntersectsRect(line21, imgDimensions) ? line21 : line23;
+            m_line2E = lineIntersectsRect(line22, imgDimensions) ? line22 : line24;
+
+            // Beginning and ending lines intersection with the borders
+            {
+                std::vector<cv::Point2d> intersections;
+                getBorderIntersections(epipoles[0], m_line1B, imgDimensions, intersections);
+                double maxDist = std::numeric_limits<double>::min();
+                for (uint32_t i = 0; i < intersections.size(); i++)
+                {
+                    const cv::Point2f intersect = intersections[i];
+                    const double dist = cv::norm(epipoles[0] - intersect);
+                    if (dist > maxDist)
+                    {
+                        maxDist = dist;
+                        m_b1 = intersections[i];
+                    }
+                }
+            }
+            {
+                std::vector<cv::Point2d> intersections;
+                getBorderIntersections(epipoles[1], m_line2B, imgDimensions, intersections);
+                double maxDist = std::numeric_limits<double>::min();
+                for (uint32_t i = 0; i < intersections.size(); i++)
+                {
+                    const cv::Point2f intersect = intersections[i];
+                    const double dist = cv::norm(epipoles[1] - intersect);
+                    if (dist > maxDist)
+                    {
+                        maxDist = dist;
+                        m_b2 = intersections[i];
+                    }
+                }
+            }
+            {
+                std::vector<cv::Point2d> intersections;
+                getBorderIntersections(epipoles[0], m_line1E, imgDimensions, intersections);
+                double maxDist = std::numeric_limits<double>::min();
+                for (uint32_t i = 0; i < intersections.size(); i++)
+                {
+                    const cv::Point2f intersect = intersections[i];
+                    const double dist = cv::norm(epipoles[0] - intersect);
+                    if (dist > maxDist)
+                    {
+                        maxDist = dist;
+                        m_e1 = intersections[i];
+                    }
+                }
+            }
+            {
+                std::vector<cv::Point2d> intersections;
+                getBorderIntersections(epipoles[1], m_line2E, imgDimensions, intersections);
+                double maxDist = std::numeric_limits<double>::min();
+                for (uint32_t i = 0; i < intersections.size(); i++)
+                {
+                    const cv::Point2f intersect = intersections[i];
+                    const double dist = cv::norm(epipoles[1] - intersect);
+                    if (dist > maxDist)
+                    {
+                        maxDist = dist;
+                        m_e1 = intersections[i];
+                    }
+                }
+            }
+        }
+        else if (Is_InsideImg(epipoles[0], imgDimensions) && Is_InsideImg(epipoles[1], imgDimensions)) 
+        {
+            // CASE 2: Both inside
+            m_line1B = get_ImgLn_from_ImgPt(epipoles[0], externalPoints1[0]);
+            m_line1E = m_line1B;
+
+            std::vector <cv::Vec3f> inputLines(1), outputLines(1);
+            inputLines[0] = m_line1B;
+            computeEpilines(externalPoints1, 1, F, inputLines, outputLines);
+
+            m_line2B = outputLines[0];
+            m_line2E = outputLines[0];
+
+            m_b1 = getBorderIntersection(epipoles[0], m_line1B, imgDimensions);
+            m_e1 = getBorderIntersection(epipoles[0], m_line1E, imgDimensions);
+
+            m_b2 = m_e2 = getNearestIntersection(epipoles[0], epipoles[1], m_line2B, m_b1, imgDimensions);
+
+        }
+        else 
+        {
+            // CASE 3: One inside and one outside
+            if (Is_InsideImg(epipoles[0], imgDimensions)) 
+            {
+                // CASE 3.1: Only the first epipole is inside
+
+                const cv::Vec3f line23 = get_ImgLn_from_ImgPt(epipoles[1], externalPoints2[0]);
+                const cv::Vec3f line24 = get_ImgLn_from_ImgPt(epipoles[1], externalPoints2[1]);
+
+                std::vector <cv::Vec3f> inputLines(2), outputLines(2);
+                inputLines[0] = line23;
+                inputLines[1] = line24;
+                computeEpilines(externalPoints2, 2, F, inputLines, outputLines);
+                const cv::Vec3f & line13 = outputLines[0];
+                const cv::Vec3f & line14 = outputLines[1];
+
+                m_line1B = line13;
+                m_line1E = line14;
+                m_line2B = line23;
+                m_line2E = line24;
+
+                m_b2 = getBorderIntersection(epipoles[1], m_line2B, imgDimensions);
+                m_e2 = getBorderIntersection(epipoles[1], m_line2E, imgDimensions);
+
+                m_b1 = getNearestIntersection(epipoles[1], epipoles[0], m_line1B, m_b2, imgDimensions);
+                m_e1 = getNearestIntersection(epipoles[1], epipoles[0], m_line1E, m_e2, imgDimensions);
+            }
+            else 
+            {
+                // CASE 3.2: Only the second epipole is inside
+                const cv::Vec3f line11 = get_ImgLn_from_ImgPt(epipoles[0], externalPoints1[0]);
+                const cv::Vec3f line12 = get_ImgLn_from_ImgPt(epipoles[0], externalPoints1[1]);
+
+                std::vector <cv::Vec3f> inputLines(2), outputLines(2);
+                inputLines[0] = line11;
+                inputLines[1] = line12;
+                computeEpilines(externalPoints1, 1, F, inputLines, outputLines);
+                const cv::Vec3f& line21 = outputLines[0];
+                const cv::Vec3f& line22 = outputLines[1];
+
+                m_line1B = line11;
+                m_line1E = line12;
+                m_line2B = line21;
+                m_line2E = line22;
+
+                m_b1 = getBorderIntersection(epipoles[0], m_line1B, imgDimensions);
+                m_e1 = getBorderIntersection(epipoles[0], m_line1E, imgDimensions);
+
+                m_b2 = getNearestIntersection(epipoles[0], epipoles[1], m_line2B, m_b1, imgDimensions);
+                m_e2 = getNearestIntersection(epipoles[0], epipoles[1], m_line2E, m_e1, imgDimensions);
+
+            }
+        }
+
+    }
+
+    void PolarRect::getTransformationPoints(const cv::Size& imgDimensions, const cv::Point2d epipole1, const cv::Point2d epipole2, const cv::Mat& F)
+    {
+        cv::Point2d p1 = m_b1, p2 = m_b2;
+        cv::Vec3f line1 = m_line1B, line2 = m_line2B;
+
+        m_thetaPoints1.clear();
+        m_thetaPoints2.clear();
+        m_thetaPoints1.reserve(2 * (imgDimensions.width + imgDimensions.height));
+        m_thetaPoints2.reserve(2 * (imgDimensions.width + imgDimensions.height));
+
+        int32_t crossesLeft = 0;
+        if (Is_InsideImg(epipole1, imgDimensions) && Is_InsideImg(epipole2, imgDimensions))
+            crossesLeft++;
+
+        uint32_t thetaIdx = 0;
+        double lastCrossProd = 0;
+
+        while (true) 
+        {
+            m_thetaPoints1.push_back(p1);
+            m_thetaPoints2.push_back(p2);
+            //         transformLine(epipole1, p1, img1, thetaIdx, m_minRho1, m_maxRho1, m_mapX1, m_mapY1, m_inverseMapX1, m_inverseMapY1);
+            //         transformLine(epipole2, p2, img2, thetaIdx, m_minRho2, m_maxRho2, m_mapX2, m_mapY2, m_inverseMapX2, m_inverseMapY2);
+
+            cv::Vec3f v0(p1.x - epipole1.x, p1.y - epipole1.y, 1.0);
+            v0 /= cv::norm(v0);
+            cv::Point2d oldP1 = p1;
+
+            getNewEpiline(epipole1, epipole2, imgDimensions, F, p1, p2, line1, line2, p1, p2, line1, line2);
+
+            // Check if we reached the end
+            cv::Vec3f v1(p1.x - epipole1.x, p1.y - epipole1.y, 0.0);
+            v1 /= cv::norm(v1);
+            cv::Vec3f v2(m_e1.x - epipole1.x, m_e1.y - epipole1.y, 0.0);
+            v2 /= cv::norm(v2);
+            cv::Vec3f v3(oldP1.x - epipole1.x, oldP1.y - epipole1.y, 0.0);
+            v3 /= cv::norm(v3);
+
+            double crossProd = v1.cross(v2)[2];
+
+            if (thetaIdx != 0) {
+                if ((SIGN(lastCrossProd) != SIGN(crossProd)) || (fabs(acos(v1.dot(-v3))) < 0.01) || (p1 == cv::Point2d(-1, -1)))
+                    crossesLeft--;
+
+                if ((crossesLeft < 0)) {
+                    break;
+                }
+            }
+            lastCrossProd = crossProd;
+            thetaIdx++;
+
+            if (m_showIterations) {
+                int keycode = cv::waitKey(0);
+
+                // q: exit
+                if (keycode == 113) {
+                    exit(0);
+                }
+                // 1: stepSize = 1
+                if (keycode == 49) {
+                    m_stepSize = 1;
+                }
+                // 2: stepSize = 50
+                if (keycode == 50) {
+                    m_stepSize = 10;
+                }
+                // 3: stepSize = 50
+                if (keycode == 51) {
+                    m_stepSize = 50;
+                }
+                // 4: stepSize = 100
+                if (keycode == 51) {
+                    m_stepSize = 100;
+                }
+                // n: next image
+                if (keycode == 110) {
+                    break;
+                }
+                // r: reset current image
+                if (keycode == 114) {
+                    p1 = m_b1;
+                    p2 = m_b2;
+                    line1 = m_line1B;
+                    line2 = m_line2B;
+                }
+            }
+        }
+        m_thetaPoints1.pop_back();
+        m_thetaPoints2.pop_back();
     }
 
     //---Assist Function---
@@ -173,6 +427,229 @@ namespace Stereo
                 maxRho = sqrt(EpiPole.x * EpiPole.x + EpiPole.y * EpiPole.y);        // Point A
             }
         }
+    }
+
+    cv::Vec3f PolarRect::get_ImgLn_from_ImgPt(const cv::Point2d& ImgPt1, const cv::Point2d& ImgPt2)
+    {
+        // Image Line: a*x + b*y + c = 0
+        // Using Vec3f to store a, b, c
+        cv::Vec3f ImgLn = (ImgPt1.y - ImgPt2.y, ImgPt2.x - ImgPt1.x, ImgPt1.x * ImgPt2.y - ImgPt2.x * ImgPt1.y);
+        return ImgLn;
+    }
+
+    inline void PolarRect::computeEpilines(const std::vector<cv::Point2f>& points, const uint32_t &whichImage, const cv::Mat & F, const std::vector<cv::Vec3f>& oldlines, std::vector<cv::Vec3f>& newLines)
+    {
+        cv::computeCorrespondEpilines(points, whichImage, F, newLines);
+
+        for (uint32_t i = 0; i < oldlines.size(); i++) 
+        {
+            if (((oldlines[i][0] * newLines[i][0]) < 0) && ((oldlines[i][1] * newLines[i][1]) < 0)) 
+            {
+                newLines[i] *= -1;
+            }
+        }
+    }
+
+    inline bool PolarRect::lineIntersectsRect(const cv::Vec3d& line, const cv::Size& imgDimensions, cv::Point2d* intersection = NULL)
+    {
+        return 
+            lineIntersectsSegment(line, cv::Point2d(0, 0), cv::Point2d(imgDimensions.width - 1, 0), intersection) ||
+            lineIntersectsSegment(line, cv::Point2d(imgDimensions.width - 1, 0), cv::Point2d(imgDimensions.width - 1, imgDimensions.height - 1), intersection) ||
+            lineIntersectsSegment(line, cv::Point2d(imgDimensions.width - 1, imgDimensions.height - 1), cv::Point2d(0, imgDimensions.height - 1), intersection) ||
+            lineIntersectsSegment(line, cv::Point2d(0, imgDimensions.height - 1), cv::Point2d(0, 0), intersection);
+    }
+
+    inline bool PolarRect::lineIntersectsSegment(const cv::Vec3d & line, const cv::Point2d & p1, const cv::Point2d & p2, cv::Point2d * intersection = NULL)
+    {
+        const cv::Vec3d segment = get_ImgLn_from_ImgPt(p1, p2);
+
+        if (intersection != NULL)
+            *intersection = cv::Point2d(std::numeric_limits<double>::max(), std::numeric_limits<double>::max());
+
+        // Lines are represented as ax + by + c = 0, so
+        // y = -(ax+c)/b. If y1=y2, then we have to obtain x, which is
+        // x = (b1 * c2 - b2 * c1) / (b2 * a1 - b1 * a2)
+        if ((segment[1] * line[0] - line[1] * segment[0]) == 0)
+            { return false; }
+        double x = (line[1] * segment[2] - segment[1] * line[2]) / (segment[1] * line[0] - line[1] * segment[0]);
+        double y = -(line[0] * x + line[2]) / line[1];
+
+        if (((int32_t)round(x) >= (int32_t)std::min(p1.x, p2.x)) && ((int32_t)round(x) <= (int32_t)std::max(p1.x, p2.x))) 
+        {
+            if (((int32_t)round(y) >= (int32_t)std::min(p1.y, p2.y)) && ((int32_t)round(y) <= (int32_t)std::max(p1.y, p2.y))) 
+            {
+                if (intersection != NULL)
+                    *intersection = cv::Point2d(x, y);
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    inline cv::Point2d PolarRect::getBorderIntersection(const cv::Point2d& epipole, const cv::Vec3d& line, const cv::Size& imgDimensions, const cv::Point2d* lastPoint = NULL)
+    {
+        cv::Point2d intersection(-1, -1);
+
+        if (Is_InsideImg(epipole, imgDimensions)) 
+        {
+            if (lineIntersectsSegment(line, cv::Point2d(0, 0), cv::Point2d(imgDimensions.width - 1, 0), &intersection)) 
+            {
+                if (Is_TheRightPoint(epipole, intersection, line, lastPoint)) {
+
+                    return intersection;
+                }
+            }
+            if (lineIntersectsSegment(line, cv::Point2d(imgDimensions.width - 1, 0), cv::Point2d(imgDimensions.width - 1, imgDimensions.height - 1), &intersection)) 
+            {
+                if (Is_TheRightPoint(epipole, intersection, line, lastPoint)) 
+                {
+                    return intersection;
+                }
+            }
+            if (lineIntersectsSegment(line, cv::Point2d(imgDimensions.width - 1, imgDimensions.height - 1), cv::Point2d(0, imgDimensions.height - 1), &intersection)) 
+            {
+                if (Is_TheRightPoint(epipole, intersection, line, lastPoint)) 
+                {
+                    return intersection;
+                }
+            }
+            if (lineIntersectsSegment(line, cv::Point2d(0, imgDimensions.height - 1), cv::Point2d(0, 0), &intersection)) 
+            {
+                if (Is_TheRightPoint(epipole, intersection, line, lastPoint)) 
+                {
+                    return intersection;
+                }
+            }
+        }
+        else {
+            double maxDist = std::numeric_limits<double>::min();
+            cv::Point2d tmpIntersection(-1, -1);
+            if (lineIntersectsSegment(line, cv::Point2d(0, 0), cv::Point2d(imgDimensions.width - 1, 0), &tmpIntersection)) 
+            {
+                const double dist2 = (tmpIntersection.x - epipole.x) * (tmpIntersection.x - epipole.x) + (tmpIntersection.x - epipole.x) * (tmpIntersection.x - epipole.x);
+
+                if (dist2 > maxDist) {
+                    maxDist = dist2;
+                    intersection = tmpIntersection;
+                }
+            }
+            if (lineIntersectsSegment(line, cv::Point2d(imgDimensions.width - 1, 0), cv::Point2d(imgDimensions.width - 1, imgDimensions.height - 1), &tmpIntersection)) 
+            {
+                const double dist2 = (tmpIntersection.x - epipole.x) * (tmpIntersection.x - epipole.x) + (tmpIntersection.x - epipole.x) * (tmpIntersection.x - epipole.x);
+
+                if (dist2 > maxDist) 
+                {
+                    maxDist = dist2;
+                    intersection = tmpIntersection;
+                }
+            }
+            if (lineIntersectsSegment(line, cv::Point2d(imgDimensions.width - 1, imgDimensions.height - 1), cv::Point2d(0, imgDimensions.height - 1), &tmpIntersection)) 
+            {
+                const double dist2 = (tmpIntersection.x - epipole.x) * (tmpIntersection.x - epipole.x) + (tmpIntersection.x - epipole.x) * (tmpIntersection.x - epipole.x);
+
+                if (dist2 > maxDist) 
+                {
+                    maxDist = dist2;
+                    intersection = tmpIntersection;
+                }
+            }
+            if (lineIntersectsSegment(line, cv::Point2d(0, imgDimensions.height - 1), cv::Point2d(0, 0), &tmpIntersection)) 
+            {
+                const double dist2 = (tmpIntersection.x - epipole.x) * (tmpIntersection.x - epipole.x) + (tmpIntersection.x - epipole.x) * (tmpIntersection.x - epipole.x);
+
+                if (dist2 > maxDist) 
+                {
+                    maxDist = dist2;
+                    intersection = tmpIntersection;
+                }
+            }
+            return intersection;
+        }
+    }
+
+    inline void PolarRect::getBorderIntersections(const cv::Point2d& epipole, const cv::Vec3d& line, const cv::Size& imgDimensions, std::vector<cv::Point2d>& intersections)
+    {
+        cv::Point2d intersection(-1, -1);
+        intersections.reserve(2);
+
+        if (lineIntersectsSegment(line, cv::Point2d(0, 0), cv::Point2d(imgDimensions.width - 1, 0), &intersection)) 
+        {
+            intersections.push_back(intersection);
+        }
+        if (lineIntersectsSegment(line, cv::Point2d(imgDimensions.width - 1, 0), cv::Point2d(imgDimensions.width - 1, imgDimensions.height - 1), &intersection)) 
+        {
+            intersections.push_back(intersection);
+        }
+        if (lineIntersectsSegment(line, cv::Point2d(imgDimensions.width - 1, imgDimensions.height - 1), cv::Point2d(0, imgDimensions.height - 1), &intersection)) 
+        {
+            intersections.push_back(intersection);
+        }
+        if (lineIntersectsSegment(line, cv::Point2d(0, imgDimensions.height - 1), cv::Point2d(0, 0), &intersection)) 
+        {
+            intersections.push_back(intersection);
+        }
+    }
+
+    inline cv::Point2d PolarRect::getNearestIntersection(const cv::Point2d& oldEpipole, const cv::Point2d& newEpipole, const cv::Vec3d& line, const cv::Point2d& oldPoint, const cv::Size& imgDimensions)
+    {
+        std::vector<cv::Point2d> intersections;
+        getBorderIntersections(newEpipole, line, imgDimensions, intersections);
+
+        double minAngle = std::numeric_limits<double>::max();
+        cv::Point2d point(-1, -1);
+
+        cv::Vec3d v1(oldPoint.x - oldEpipole.x, oldPoint.y - oldEpipole.y, 0.0);
+        v1 /= cv::norm(v1);
+
+        for (uint32_t i = 0; i < intersections.size(); i++) 
+        {
+            cv::Vec3d v(intersections[i].x - newEpipole.x, intersections[i].y - newEpipole.y, 0.0);
+            v /= cv::norm(v);
+
+            const double & angle = fabs(acos(v.dot(v1)));
+
+            if (angle < minAngle) 
+            {
+                minAngle = angle;
+                point = intersections[i];
+            }
+        }
+
+        return point;
+    }
+
+    //---Basic Operation Function---
+    inline bool PolarRect::Is_InsideImg(cv::Point2d ImgPt, cv::Size ImgSize)
+    {
+        return ((ImgPt.x >= 0) && (ImgPt.y >= 0) && (ImgPt.x < (ImgSize.width - 1.0)) && (ImgPt.y <= (ImgSize.height - 1.0)));
+    }
+
+    inline bool PolarRect::Is_TheRightPoint(const cv::Point2d & epipole, const cv::Point2d & intersection, const cv::Vec3d & line, const cv::Point2d * lastPoint)
+    {
+        if (lastPoint != NULL) 
+        {
+            cv::Vec3f v1(lastPoint->x - epipole.x, lastPoint->y - epipole.y, 0.0);
+            v1 /= cv::norm(v1);
+            cv::Vec3f v2(intersection.x - epipole.x, intersection.y - epipole.y, 0.0);
+            v2 /= cv::norm(v2);
+
+            if (fabs(acos(v1.dot(v2))) > CV_PI / 2.0)
+                return false;
+            else
+                return true;
+        }
+        else 
+        {
+            if ((line[0] > 0) && (epipole.y < intersection.y)) return false;
+            if ((line[0] < 0) && (epipole.y > intersection.y)) return false;
+            if ((line[1] > 0) && (epipole.x > intersection.x)) return false;
+            if ((line[1] < 0) && (epipole.x < intersection.x)) return false;
+
+            return true;
+        }
+        return false;
     }
 
 }
