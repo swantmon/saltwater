@@ -62,8 +62,11 @@ namespace Stereo
 
             for (std::vector<FutoGmtCV>::iterator iter = SeqImg_RGB.begin(); iter < SeqImg_RGB.end(); iter++)
             {
-                std::vector<FutoGmtCV>::iterator iterNext = iter + 1;
-                iter->PolarRect(*iterNext);
+                std::vector<FutoGmtCV>::iterator iterNext = iter + 1; // Next frame
+
+                FutoGmtCV RectImg_Curt, RectImg_Next;
+
+                iter->oper_PolarRect;
             }
             
         }

@@ -6,8 +6,9 @@
 #include <vector>
 
 #include "base/base_include_glm.h" // Some warnings appears when directly #include glm 
-
 #include "opencv2/opencv.hpp"
+
+#include "plugin\stereo\stereo_PolarRect.h"
 
 namespace Stereo
 {
@@ -18,10 +19,6 @@ namespace Stereo
         FutoGmtCV();
         FutoGmtCV(const std::vector<char>&, int ImgW, int ImgH);
         ~FutoGmtCV();
-    
-    //---Epipolarization: Polar Rectification-----
-    public:
-        cv::Mat PolarRect(FutoGmtCV Img_Match);
 
     //---Is Function---
     public:
@@ -44,13 +41,16 @@ namespace Stereo
         void glm2cv(cv::Mat* cvmat, const glm::vec3& glmmat);
         void glm2cv(cv::Mat* cvmat, const glm::mat3x4& glmmat);
 
+    //---Operator---
+    public:
+        PolarRect oper_PolarRect;
+
     //---Members---
     private:
-        cv::Mat Img; // Original Image in RGB or RGBA
-        cv::Mat Img_Rect; // Rectified Image
-        cv::Mat K_mtx;
+        cv::Mat Img; // Image data in RGB or RGBA
+        cv::Mat K_mtx; // Camera Matrix in pixel. Origin is upper-left. x-axis is row-direction and y-axis is column-direction
         cv::Mat Rot_mtx; // Rotations from Mapping frame to Image frame
-        cv::Mat Trans_vec; // Translations in Mapping frame
+        cv::Mat Trans_vec; // Projection Center in Mapping frame
         cv::Mat P_mtx; // P-matrix = [Rot_mtx | -Rot_mtx*Trans_vec]
     };
 } // Stereo

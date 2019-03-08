@@ -20,6 +20,7 @@ namespace Stereo
     {
     }
 
+    /*
     //---Polar Rectification---
     cv::Mat FutoGmtCV::PolarRect(FutoGmtCV Img_Match) // Apply Polar Rectification proposed by Pollefeys et al. (1999)
     {
@@ -60,6 +61,8 @@ namespace Stereo
 
         return Img_Rect;
     }
+
+    */
 
     //---Orientation & Transformation---
 
