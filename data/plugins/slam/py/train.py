@@ -151,6 +151,7 @@ if cuda:
     discriminator.cuda()
     adversarial_loss.cuda()
     pixelwise_loss.cuda()
+    print ("CUDA support is used.")
 
 # -----------------------------------------------------------------------------
 # Initialize weights

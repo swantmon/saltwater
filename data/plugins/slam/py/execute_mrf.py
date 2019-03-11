@@ -34,10 +34,10 @@ from extern.neural_style import *
 # -----------------------------------------------------------------------------
 parser = argparse.ArgumentParser()
 
-parser.add_argument('--output', type=str, default='D:/NN/plugin_slam/output_mrf/', help='output folder of the results')
-parser.add_argument('--path_to_dataset', type=str, default='D:/NN/dataset/ILSVRC2012_img_test/', help='path to the dataset (no recursive search)')
-parser.add_argument('--img_size_w', type=int, default=128, help='width of image dimension')
-parser.add_argument('--img_size_h', type=int, default=128, help='height of each image dimension')
+parser.add_argument('--output', type=str, default='D:/NN/dataset/test/', help='output folder of the results')
+parser.add_argument('--path_to_dataset', type=str, default='D:/NN/dataset/test/', help='path to the dataset (no recursive search)')
+parser.add_argument('--img_size_w', type=int, default=256, help='width of image dimension')
+parser.add_argument('--img_size_h', type=int, default=256, help='height of each image dimension')
 parser.add_argument('--mask_size', type=int, default=64, help='size of random mask')
 parser.add_argument('--path_to_generator', type=str, default='D:/NN/plugin_slam/savepoint/model_best_generator.pth.tar', help='path to saved generator')
 
@@ -146,6 +146,7 @@ generator = Generator()
 
 if cuda:
     generator.cuda()
+    print ("CUDA support is used.")
 
 # -----------------------------------------------------------------------------
 # Main function
@@ -201,7 +202,7 @@ if __name__ == '__main__':
 
             save_image(gen_mask, '{}/{}/3_cutout_1.png'.format(opt.output, i), nrow=1, normalize=True)      
 
-            mask = torch.zeros([128, 128])
+            mask = torch.zeros([256, 256])
 
             mask[y1:y2, x1:x2] = torch.ones([64, 64])
 
