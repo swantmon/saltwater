@@ -16,12 +16,14 @@ namespace Stereo
     //---Constructor & Destructor---
     public:
         PolarRect();
+        PolarRect(const cv::Mat& Img_B, const cv::Mat& Img_M);
         ~PolarRect();
     
     //---Main Function---
+    public:
+        void compute(const cv::Mat& F, cv::Mat& RectImg1, cv::Mat& RectImg2);
+        void get_RectImg(cv::Mat & rectified1, cv::Mat & rectified2, int interpolation = cv::INTER_CUBIC);
     private:
-        void compute(const cv::Mat& Img1, const cv::Mat& Img2, const cv::Mat& F, cv::Mat& RectImg1, cv::Mat& RectImg2);
-        
         void determ_CoRegion(const std::vector<cv::Point2f>& EpiPoles, const cv::Size ImgSize, const cv::Mat& F);
             // Determine the Common Region = Determine the size of Epipolar Image
         void getTransformationPoints(const cv::Size& imgDimensions, const cv::Point2d epipole1, const cv::Point2d epipole2, const cv::Mat& F);
@@ -58,6 +60,8 @@ namespace Stereo
 
     //---Member---
     private:
+        cv::Mat Img_B_Orig, Img_M_Orig;
+
         cv::Point2d m_b1, m_b2, m_e1, m_e2; // The Beginning & Ending Point of Common Region in Image_Base & Image_Match.
         cv::Vec3f m_line1B, m_line1E, m_line2B, m_line2E; // Beginning & Ending of Epipolar Line in Image_Base & Image_Match
         double m_minRho1, m_maxRho1, m_minRho2, m_maxRho2; // Min & Max distance from EpiPole to Image Plane.

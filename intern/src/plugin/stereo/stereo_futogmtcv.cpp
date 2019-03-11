@@ -4,6 +4,7 @@
 
 namespace Stereo
 {
+    //---Constructors & Destructor---
     FutoGmtCV::FutoGmtCV()
     {
     }
@@ -20,9 +21,18 @@ namespace Stereo
     {
     }
 
-    /*
-    //---Polar Rectification---
-    cv::Mat FutoGmtCV::PolarRect(FutoGmtCV Img_Match) // Apply Polar Rectification proposed by Pollefeys et al. (1999)
+    //---Photogrammetric Computer Vision---
+    void FutoGmtCV::cal_PolarRect(const cv::Mat& Img_Match, const cv::Mat F_mtx, const cv::Point2f EpiPole_B, const cv::Point2f EpiPole_M) // Epipolarization based on Polar Rectification
+    {
+        oper_PolarRect = PolarRect(Img, Img_Match);
+
+        oper_PolarRect.compute();
+
+        oper_PolarRect.get_RectImg();
+    }
+
+    //---Orientation & Transformation---
+    void FutoGmtCV::cal_F_mtx(const cv::Mat& P_ImgM, cv::Mat& F_mtx) // Compute F-mtx from known P-mtx
     {
         //---Derive F-mtx by known P-mtx---
             // E = B * R_1to2 = R_2to1 * B
@@ -36,40 +46,27 @@ namespace Stereo
         PC.at<float>(1, 0) = Trans_vec.at<float>(1, 0);
         PC.at<float>(2, 0) = Trans_vec.at<float>(2, 0);
         PC.at<float>(3, 0) = 1;
-        cv::Mat EpiPole_ImgM = Img_Match.P_mtx * PC; // Epipole of Image_Match
-        cv::Mat Epipole_ImgM_SkewSym = cv::Mat::zeros(cv::Size(3, 3), CV_16F);
-        Epipole_ImgM_SkewSym.at<float>(0, 1) = -EpiPole_ImgM.at<float>(2, 0);
-        Epipole_ImgM_SkewSym.at<float>(0, 2) = EpiPole_ImgM.at<float>(1, 0);
-        Epipole_ImgM_SkewSym.at<float>(1, 0) = EpiPole_ImgM.at<float>(2, 0);
-        Epipole_ImgM_SkewSym.at<float>(1, 2) = -EpiPole_ImgM.at<float>(0, 0);
-        Epipole_ImgM_SkewSym.at<float>(2, 0) = -EpiPole_ImgM.at<float>(1, 0);
-        Epipole_ImgM_SkewSym.at<float>(2, 1) = EpiPole_ImgM.at<float>(0, 0);
+        cv::Mat EpiPole_ImgM = P_ImgM * PC; // Epipole of Image_Match
+        cv::Mat Epipole_ImgM_SkewSymMtx = cv::Mat::zeros(cv::Size(3, 3), CV_16F);
+        Epipole_ImgM_SkewSymMtx.at<float>(0, 1) = -EpiPole_ImgM.at<float>(2, 0);
+        Epipole_ImgM_SkewSymMtx.at<float>(0, 2) = EpiPole_ImgM.at<float>(1, 0);
+        Epipole_ImgM_SkewSymMtx.at<float>(1, 0) = EpiPole_ImgM.at<float>(2, 0);
+        Epipole_ImgM_SkewSymMtx.at<float>(1, 2) = -EpiPole_ImgM.at<float>(0, 0);
+        Epipole_ImgM_SkewSymMtx.at<float>(2, 0) = -EpiPole_ImgM.at<float>(1, 0);
+        Epipole_ImgM_SkewSymMtx.at<float>(2, 1) = EpiPole_ImgM.at<float>(0, 0);
 
-        cv::Mat F_mtx = Epipole_ImgM_SkewSym * Img_Match.P_mtx * P_ImgB_PsudoInv;
-
-        cv::SVD F_svd(F_mtx);
-        cv::Mat EpiPole_ImgB = F_svd.vt.row(2);
-        std::vector<cv::Point2f> EpiPoles(2);
-        EpiPoles[0] = cv::Point2d(EpiPole_ImgB.at<float>(0, 0) / EpiPole_ImgB.at<float>(0, 2), EpiPole_ImgB.at<float>(0, 1) / EpiPole_ImgB.at<float>(0, 2));
-        //cv::Mat e2 = F_svd.u.col(2);
-        //cv::Point2f EpiPole_M = cv::Point2d(e2.at<float>(0, 0) / e2.at<float>(2, 0), e2.at<float>(1, 0) / e2.at<float>(2, 0));
-        EpiPoles[1] = cv::Point2d(EpiPole_ImgM.at<float>(0, 0) / EpiPole_ImgM.at<float>(2, 0), EpiPole_ImgM.at<float>(1, 0) / EpiPole_ImgM.at<float>(2, 0));
-        if ((EpiPoles[0].x * EpiPoles[1].x < 0) && (EpiPoles[0].y * EpiPoles[1].y < 0))
-        {
-            EpiPoles[1] *= -1;
-        }
-
-        return Img_Rect;
+        F_mtx = Epipole_ImgM_SkewSymMtx * P_ImgM  * P_ImgB_PsudoInv;
     }
 
-    */
-
-    //---Orientation & Transformation---
-
-    //---Is Function---
-    bool FutoGmtCV::is_InsideImg(cv::Point2f ImgPt, cv::Size ImgSize)
+    void FutoGmtCV::cal_EpiPoles(const cv::Mat& F_mtx, cv::Point2f& EpiPole_B, cv::Point2f& EpiPole_M)
     {
-        return ( (ImgPt.x >= 0) && (ImgPt.y >= 0) && (ImgPt.x < ImgSize.width) && (ImgPt.y < ImgSize.height) );
+        cv::SVD F_svd(F_mtx);
+        cv::Mat e_B = F_svd.vt.row(2);
+        EpiPole_B = cv::Point2f(e_B.at<float>(0, 0) / e_B.at<float>(0, 2), e_B.at<float>(0, 1) / e_B.at<float>(0, 2));
+        cv::Mat e_M = F_svd.u.col(2);
+        EpiPole_M = cv::Point2f(e_M.at<float>(0, 0) / e_M.at<float>(2, 0), e_M.at<float>(1, 0) / e_M.at<float>(2, 0));
+        if ((EpiPole_B.x * EpiPole_M.x < 0) && (EpiPole_B.y * EpiPole_M.y < 0))
+            EpiPole_M *= -1;
     }
 
     //---Set Functions---
@@ -77,8 +74,25 @@ namespace Stereo
     {
         cv::Mat cvK = cv::Mat(3, 3, CV_32F);
         glm2cv(&cvK, glm::transpose(glmK));
-        
+
         K_mtx = cvK;
+    }
+
+    //---Get Function---
+    cv::Mat FutoGmtCV::get_Img()
+    {
+        return Img;
+    }
+
+    cv::Mat FutoGmtCV::get_P_mtx()
+    {
+        return P_mtx;
+    }
+
+    //---Is Function---
+    bool FutoGmtCV::is_InsideImg(cv::Point2f ImgPt, cv::Size ImgSize)
+    {
+        return ( (ImgPt.x >= 0) && (ImgPt.y >= 0) && (ImgPt.x < ImgSize.width) && (ImgPt.y < ImgSize.height) );
     }
 
     void FutoGmtCV::set_Rot(glm::mat3 glmR)
@@ -97,10 +111,10 @@ namespace Stereo
         Trans_vec = cvT;
     }
 
-    void FutoGmtCV::set_P(glm::mat3x4 glmP)
+    void FutoGmtCV::set_P_mtx(glm::mat4x3 glmP)
     {
         cv::Mat cvP = cv::Mat(3, 4, CV_32F);
-        glm2cv(&cvP, glmP);
+        glm2cv(&cvP, glm::transpose(glmP));
 
         P_mtx = cvP;
     }

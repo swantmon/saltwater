@@ -8,7 +8,7 @@
 
 #include "plugin/stereo/stereo_plugin_interface.h"
 
-#include "opencv2/opencv.hpp"
+#include "opencv2/opencv.hpp" // After completing, remove #include openCV. => Do not apply OpenCV in Engine part.
 
 
 CORE_PLUGIN_INFO(Stereo::CPluginInterface, "Stereo Matching", "1.0", "This plugin takes RGB and transformation data and provides 2.5D depth maps")
@@ -40,11 +40,11 @@ namespace Stereo
         {
             SeqImg_RGB.resize(1);
 
-            SeqImg_RGB[0] = FutoGmtCV(_rRGBImage, m_ImageSize.x, m_ImageSize.y);
+            SeqImg_RGB[0] = FutoGmtCV(_rRGBImage, m_ImageSize.x, m_ImageSize.y); // Image Data, Image Width (# of col), Image Height (# of row)
             SeqImg_RGB[0].set_Cam(m_Camera_mtx);
             SeqImg_RGB[0].set_Rot(glm::mat3(_Transform));
             SeqImg_RGB[0].set_Trans(-1 * glm::transpose(glm::mat3(_Transform)) * glm::vec3(_Transform[3]));
-            SeqImg_RGB[0].set_P(glm::transpose(m_Camera_mtx * glm::mat4x3(_Transform)));
+            SeqImg_RGB[0].set_P_mtx(m_Camera_mtx * glm::mat4x3(_Transform));
         }
         else if (SeqImg_RGB.size() < ImgMaxCal)
         {
@@ -54,7 +54,7 @@ namespace Stereo
             SeqImg_RGB[Seq_Idx].set_Cam(m_Camera_mtx);
             SeqImg_RGB[Seq_Idx].set_Rot(glm::mat3(_Transform));
             SeqImg_RGB[Seq_Idx].set_Trans(-1 * glm::transpose(glm::mat3(_Transform)) * glm::vec3(_Transform[3]));
-            SeqImg_RGB[Seq_Idx].set_P(m_Camera_mtx * glm::mat4x3(_Transform));
+            SeqImg_RGB[Seq_Idx].set_P_mtx(m_Camera_mtx * glm::mat4x3(_Transform));
         }
         else
         {
@@ -66,7 +66,14 @@ namespace Stereo
 
                 FutoGmtCV RectImg_Curt, RectImg_Next;
 
-                iter->oper_PolarRect;
+                cv::Mat F_mtx(3, 3, CV_16F);
+                iter->cal_F_mtx(iterNext->get_P_mtx(), F_mtx);
+
+                std::vector<cv::Point2f> EpiPoles(2);
+                iter->cal_EpiPoles(F_mtx, EpiPoles[0], EpiPoles[1]);
+
+                iter->cal_PolarRect(iterNext->get_Img());
+
             }
             
         }

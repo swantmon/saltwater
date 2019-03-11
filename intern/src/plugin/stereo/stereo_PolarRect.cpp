@@ -8,23 +8,34 @@ namespace Stereo
     {
     }
 
+    PolarRect::PolarRect(const cv::Mat& Img_B, const cv::Mat& Img_M)
+    {
+        Img_B_Orig = Img_B;
+        Img_M_Orig = Img_M;
+    }
 
     PolarRect::~PolarRect()
     {
     }
 
     //---Main Function---
-    void PolarRect::compute(const cv::Mat& Img1, const cv::Mat& Img2, const cv::Mat& F, cv::Mat& RectImg1, cv::Mat& RectImg2)
+    void PolarRect::compute(const cv::Mat& F, cv::Mat& RectImg1, cv::Mat& RectImg2)
     {
         std::vector<cv::Point2f> EpiPoles(2);
         getEpipoles(F, EpiPoles[0], EpiPoles[1]);
 
-        determ_CoRegion(EpiPoles, cv::Size(Img1.cols, Img1.rows), F);
+        determ_CoRegion(EpiPoles, cv::Size(Img_B_Orig.cols, Img_B_Orig.rows), F);
 
-        getTransformationPoints(Img1.size(), EpiPoles[0], EpiPoles[1], F);
+        getTransformationPoints(Img_B_Orig.size(), EpiPoles[0], EpiPoles[1], F);
 
-        doTransformation(Img1, Img2, EpiPoles[0], EpiPoles[1], F);
+        doTransformation(Img_B_Orig, Img_M_Orig, EpiPoles[0], EpiPoles[1], F);
 
+    }
+
+    void PolarRect::get_RectImg(cv::Mat& Img_B_Rect, cv::Mat& Img_M_Rect, int interpolation)
+    {
+        cv::remap(Img_B_Orig, Img_B_Rect, m_mapX1, m_mapY1, interpolation, cv::BORDER_TRANSPARENT);
+        cv::remap(Img_M_Orig, Img_M_Rect, m_mapX2, m_mapY2, interpolation, cv::BORDER_TRANSPARENT);
     }
 
     inline void PolarRect::determ_CoRegion(const std::vector<cv::Point2f>& EpiPoles, const cv::Size ImgSize, const cv::Mat& F)

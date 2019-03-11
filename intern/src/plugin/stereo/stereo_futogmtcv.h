@@ -20,16 +20,30 @@ namespace Stereo
         FutoGmtCV(const std::vector<char>&, int ImgW, int ImgH);
         ~FutoGmtCV();
 
-    //---Is Function---
+    //---Photogrammetric Computer Vision---
     public:
-        bool is_InsideImg(cv::Point2f ImgPt, cv::Size ImgSize);
+        void cal_PolarRect(const cv::Mat& Img_Match, const cv::Mat F_mtx, const cv::Point2f EpiPole_B, const cv::Point2f EpiPole_M);
+
+    //---Orientation & Transformation---
+    public:
+        void cal_F_mtx(const cv::Mat& P_ImgM, cv::Mat& F_mtx);
+        void cal_EpiPoles(const cv::Mat& F_mtx, cv::Point2f& EpiPole_B, cv::Point2f& EpiPole_M);
 
     //---Set Functions---
     public:
         void set_Cam(glm::mat3& K);
         void set_Rot(glm::mat3 R);
         void set_Trans(glm::vec3 T);
-        void set_P(glm::mat3x4 P);
+        void set_P_mtx(glm::mat4x3 P);
+
+    //---Get Function---
+    public:
+        cv::Mat get_Img();
+        cv::Mat get_P_mtx();
+
+    //---Is Function---
+    public:
+        bool is_InsideImg(cv::Point2f ImgPt, cv::Size ImgSize);
     
     //---Show Functions---
     public:
@@ -40,9 +54,9 @@ namespace Stereo
         void glm2cv(cv::Mat* cvmat, const glm::mat3& glmmat);
         void glm2cv(cv::Mat* cvmat, const glm::vec3& glmmat);
         void glm2cv(cv::Mat* cvmat, const glm::mat3x4& glmmat);
-
-    //---Operator---
-    public:
+    
+    //---Operator Object---
+    private:
         PolarRect oper_PolarRect;
 
     //---Members---
