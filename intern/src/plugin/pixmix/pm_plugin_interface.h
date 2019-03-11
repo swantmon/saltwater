@@ -18,7 +18,6 @@ namespace PM
     public:
 
         void EventHook();
-
-    private:
+        void Inpaint(const glm::ivec2& _Resolution, const std::vector<char>& _SourceImage, std::vector<char>& _DestinationImage);
     };
 } // namespace PM

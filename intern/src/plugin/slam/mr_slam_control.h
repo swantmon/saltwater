@@ -204,6 +204,9 @@ namespace MR
 
         glm::mat4 m_PreliminaryPoseMatrix;
 
+        typedef void(*InpaintWithPixMixFunc)(const glm::ivec2&, const std::vector<char>&, std::vector<char>&);
+        InpaintWithPixMixFunc InpaintWithPixMix;
+
     public:
 
         void Start()
@@ -237,10 +240,11 @@ namespace MR
                 m_SLAMSocket = Net::CNetworkManager::GetInstance().CreateServerSocket(Port);
                 m_SLAMNetHandle = Net::CNetworkManager::GetInstance().RegisterMessageHandler(m_SLAMSocket, SLAMDelegate);
                 
+                m_PlaneResolution = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:inpainted_plane:resolution", 128);
+                m_PlaneScale = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:inpainted_plane:scale", 2.0f);
+
                 auto ModeParameter = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:mode", "pixmix");
                 
-
-
                 if (ModeParameter == "nn")
                 {
                     ENGINE_CONSOLE_INFO("Inpainting with neural networks");
@@ -256,13 +260,17 @@ namespace MR
 
                     auto NNDelegate = std::bind(&CSLAMControl::OnNewNeuralNetMessage, this, std::placeholders::_1, std::placeholders::_2);
                     m_NeualNetworkDelegate = Net::CNetworkManager::GetInstance().RegisterMessageHandler(m_NeuralNetworkSocket, NNDelegate);
-
-                    m_PlaneResolution = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:inpainted_plane:resolution", 128);
-                    m_PlaneScale = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:inpainted_plane:scale", 2.0f);
                 }
                 else if (ModeParameter == "pixmix")
                 {
                     ENGINE_CONSOLE_INFO("Inpainting with PixMix");
+
+                    if (!Core::PluginManager::LoadPlugin("PixMix"))
+                    {
+                        throw Base::CException(__FILE__, __LINE__, "Kinect plugin was not loaded");
+                    }
+
+                    InpaintWithPixMix = (InpaintWithPixMixFunc)(Core::PluginManager::GetPluginFunction("PixMix", "Inpaint"));
 
                     m_InpaintingMode = INTPAINTING_PIXMIX;
                 }
@@ -1002,7 +1010,18 @@ namespace MR
             }
             else if (m_InpaintingMode == INTPAINTING_PIXMIX)
             {
+                auto RawData = std::vector<char>(m_PlaneResolution * m_PlaneResolution * 4);
 
+                Gfx::TextureManager::CopyTextureToCPU(m_PlaneTexture, RawData.data());
+
+                auto InpaintedImage = std::vector<char>(m_PlaneResolution * m_PlaneResolution * 4);
+
+                InpaintWithPixMix(glm::ivec2(m_PlaneResolution, m_PlaneResolution), RawData, InpaintedImage);
+
+                auto TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_PlaneResolution, m_PlaneResolution));
+                Gfx::TextureManager::CopyToTexture2D(m_PlaneTexture, TargetRect, m_PlaneResolution, const_cast<char*>(InpaintedImage.data()), true);
+
+                Gfx::ReconstructionRenderer::SetInpaintedPlane(m_PlaneTexture, AABB);
             }
             else
             {
