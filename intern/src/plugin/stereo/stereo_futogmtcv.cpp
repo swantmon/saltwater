@@ -22,13 +22,15 @@ namespace Stereo
     }
 
     //---Photogrammetric Computer Vision---
-    void FutoGmtCV::cal_PolarRect(const cv::Mat& Img_Match, const cv::Mat F_mtx, const cv::Point2f EpiPole_B, const cv::Point2f EpiPole_M) // Epipolarization based on Polar Rectification
+    void FutoGmtCV::cal_PolarRect(const cv::Mat& Img_Match, const cv::Mat F_mtx, cv::Mat& RectImg_Base, cv::Mat& RectImg_Match) // Epipolarization based on Polar Rectification
     {
         oper_PolarRect = PolarRect(Img, Img_Match);
 
-        oper_PolarRect.compute();
+        oper_PolarRect.compute(F_mtx);
 
-        oper_PolarRect.get_RectImg();
+        oper_PolarRect.gen_RectImg();
+
+        oper_PolarRect.get_RectImg(RectImg_Base, RectImg_Match);
     }
 
     //---Orientation & Transformation---
@@ -47,7 +49,7 @@ namespace Stereo
         PC.at<float>(2, 0) = Trans_vec.at<float>(2, 0);
         PC.at<float>(3, 0) = 1;
         cv::Mat EpiPole_ImgM = P_ImgM * PC; // Epipole of Image_Match
-        cv::Mat Epipole_ImgM_SkewSymMtx = cv::Mat::zeros(cv::Size(3, 3), CV_16F);
+        cv::Mat Epipole_ImgM_SkewSymMtx = cv::Mat::zeros(cv::Size(3, 3), CV_32F);
         Epipole_ImgM_SkewSymMtx.at<float>(0, 1) = -EpiPole_ImgM.at<float>(2, 0);
         Epipole_ImgM_SkewSymMtx.at<float>(0, 2) = EpiPole_ImgM.at<float>(1, 0);
         Epipole_ImgM_SkewSymMtx.at<float>(1, 0) = EpiPole_ImgM.at<float>(2, 0);

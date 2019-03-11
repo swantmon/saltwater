@@ -21,8 +21,9 @@ namespace Stereo
     
     //---Main Function---
     public:
-        void compute(const cv::Mat& F, cv::Mat& RectImg1, cv::Mat& RectImg2);
-        void get_RectImg(cv::Mat & rectified1, cv::Mat & rectified2, int interpolation = cv::INTER_CUBIC);
+        void compute(const cv::Mat& F);
+        void gen_RectImg(int interpolation = cv::INTER_CUBIC);
+        void get_RectImg(cv::Mat& RectImg_B, cv::Mat& RectImg_M);
     private:
         void determ_CoRegion(const std::vector<cv::Point2f>& EpiPoles, const cv::Size ImgSize, const cv::Mat& F);
             // Determine the Common Region = Determine the size of Epipolar Image
@@ -34,7 +35,7 @@ namespace Stereo
     //---Assist Function---
     private:
         void getExternalPoints(const cv::Point2d& EpiPole, const cv::Size ImgSize, std::vector<cv::Point2f>& ImgPt_Extern);
-        void determ_RhoRange(const cv::Point2d& EpiPole, const cv::Size ImgSize, const std::vector<cv::Point2f>& ImgPt_Extern, double& minRho, double& maxRho);
+        void cal_RhoRange(const cv::Point2d& EpiPole, const cv::Size ImgSize, const std::vector<cv::Point2f>& ImgPt_Extern, double& minRho, double& maxRho);
 
         void getEpipoles(const cv::Mat& F, cv::Point2f& epipole1, cv::Point2f& epipole2);
         cv::Vec3f get_ImgLn_from_ImgPt(const cv::Point2d& ImgPt1, const cv::Point2d& ImgPt2);
@@ -60,7 +61,7 @@ namespace Stereo
 
     //---Member---
     private:
-        cv::Mat Img_B_Orig, Img_M_Orig;
+        cv::Mat Img_B_Orig, Img_M_Orig, Img_B_Rect, Img_M_Rect;
 
         cv::Point2d m_b1, m_b2, m_e1, m_e2; // The Beginning & Ending Point of Common Region in Image_Base & Image_Match.
         cv::Vec3f m_line1B, m_line1E, m_line2B, m_line2E; // Beginning & Ending of Epipolar Line in Image_Base & Image_Match

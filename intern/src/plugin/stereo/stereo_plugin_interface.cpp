@@ -66,13 +66,13 @@ namespace Stereo
 
                 FutoGmtCV RectImg_Curt, RectImg_Next;
 
-                cv::Mat F_mtx(3, 3, CV_16F);
+                cv::Mat F_mtx(3, 3, CV_32F);
                 iter->cal_F_mtx(iterNext->get_P_mtx(), F_mtx);
 
                 std::vector<cv::Point2f> EpiPoles(2);
                 iter->cal_EpiPoles(F_mtx, EpiPoles[0], EpiPoles[1]);
 
-                iter->cal_PolarRect(iterNext->get_Img());
+                iter->cal_PolarRect(iterNext->get_Img(), F_mtx, RectImg_Curt.get_Img(), RectImg_Next.get_Img());
 
             }
             

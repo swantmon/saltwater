@@ -19,7 +19,7 @@ namespace Stereo
     }
 
     //---Main Function---
-    void PolarRect::compute(const cv::Mat& F, cv::Mat& RectImg1, cv::Mat& RectImg2)
+    void PolarRect::compute(const cv::Mat& F)
     {
         std::vector<cv::Point2f> EpiPoles(2);
         getEpipoles(F, EpiPoles[0], EpiPoles[1]);
@@ -32,10 +32,16 @@ namespace Stereo
 
     }
 
-    void PolarRect::get_RectImg(cv::Mat& Img_B_Rect, cv::Mat& Img_M_Rect, int interpolation)
+    void PolarRect::gen_RectImg(int interpolation)
     {
         cv::remap(Img_B_Orig, Img_B_Rect, m_mapX1, m_mapY1, interpolation, cv::BORDER_TRANSPARENT);
         cv::remap(Img_M_Orig, Img_M_Rect, m_mapX2, m_mapY2, interpolation, cv::BORDER_TRANSPARENT);
+    }
+
+    void PolarRect::get_RectImg(cv::Mat& RectImg_B, cv::Mat& RectImg_M)
+    {
+        RectImg_B = Img_B_Rect;
+        RectImg_M = Img_M_Rect;
     }
 
     inline void PolarRect::determ_CoRegion(const std::vector<cv::Point2f>& EpiPoles, const cv::Size ImgSize, const cv::Mat& F)
@@ -44,8 +50,8 @@ namespace Stereo
         getExternalPoints(EpiPoles[0], ImgSize, externalPoints1);
         getExternalPoints(EpiPoles[1], ImgSize, externalPoints2);
 
-        determ_RhoRange(EpiPoles[0], ImgSize, externalPoints1, m_minRho1, m_maxRho1);
-        determ_RhoRange(EpiPoles[1], ImgSize, externalPoints2, m_minRho2, m_maxRho2);
+        cal_RhoRange(EpiPoles[0], ImgSize, externalPoints1, m_minRho1, m_maxRho1);
+        cal_RhoRange(EpiPoles[1], ImgSize, externalPoints2, m_minRho2, m_maxRho2);
 
         if (!Is_InsideImg(EpiPoles[0], ImgSize) && !Is_InsideImg(EpiPoles[1], ImgSize))
         {
@@ -365,7 +371,7 @@ namespace Stereo
         }
     }
 
-    inline void PolarRect::determ_RhoRange(const cv::Point2d& EpiPole, const cv::Size ImgSize, const std::vector<cv::Point2f>& ImgPt_Extern, double& minRho, double& maxRho)
+    inline void PolarRect::cal_RhoRange(const cv::Point2d& EpiPole, const cv::Size ImgSize, const std::vector<cv::Point2f>& ImgPt_Extern, double& minRho, double& maxRho)
     {
         if (EpiPole.y < 0) 
         { 
@@ -602,7 +608,7 @@ namespace Stereo
         }
     }
 
-    inline bool PolarRect::lineIntersectsRect(const cv::Vec3d& line, const cv::Size& imgDimensions, cv::Point2d* intersection = NULL)
+    inline bool PolarRect::lineIntersectsRect(const cv::Vec3d& line, const cv::Size& imgDimensions, cv::Point2d* intersection)
     {
         return 
             lineIntersectsSegment(line, cv::Point2d(0, 0), cv::Point2d(imgDimensions.width - 1, 0), intersection) ||
@@ -611,7 +617,7 @@ namespace Stereo
             lineIntersectsSegment(line, cv::Point2d(0, imgDimensions.height - 1), cv::Point2d(0, 0), intersection);
     }
 
-    inline bool PolarRect::lineIntersectsSegment(const cv::Vec3d & line, const cv::Point2d & p1, const cv::Point2d & p2, cv::Point2d * intersection = NULL)
+    inline bool PolarRect::lineIntersectsSegment(const cv::Vec3d & line, const cv::Point2d & p1, const cv::Point2d & p2, cv::Point2d * intersection)
     {
         const cv::Vec3d segment = get_ImgLn_from_ImgPt(p1, p2);
 
@@ -640,7 +646,7 @@ namespace Stereo
         return false;
     }
 
-    inline cv::Point2d PolarRect::getBorderIntersection(const cv::Point2d& epipole, const cv::Vec3d& line, const cv::Size& imgDimensions, const cv::Point2d* lastPoint = NULL)
+    inline cv::Point2d PolarRect::getBorderIntersection(const cv::Point2d& epipole, const cv::Vec3d& line, const cv::Size& imgDimensions, const cv::Point2d* lastPoint)
     {
         cv::Point2d intersection(-1, -1);
 
@@ -803,4 +809,4 @@ namespace Stereo
         return false;
     }
 
-}
+} // Stereo

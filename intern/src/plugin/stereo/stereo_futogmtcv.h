@@ -22,7 +22,7 @@ namespace Stereo
 
     //---Photogrammetric Computer Vision---
     public:
-        void cal_PolarRect(const cv::Mat& Img_Match, const cv::Mat F_mtx, const cv::Point2f EpiPole_B, const cv::Point2f EpiPole_M);
+        void cal_PolarRect(const cv::Mat& Img_Match, const cv::Mat F_mtx, cv::Mat& RectImg_Base, cv::Mat& RectImg_Match);
 
     //---Orientation & Transformation---
     public:
