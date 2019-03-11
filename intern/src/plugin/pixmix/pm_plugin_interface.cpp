@@ -70,12 +70,26 @@ namespace PM
         cv::Mat_<cv::Vec3b> Source3(_Resolution.x, _Resolution.y);
         cv::Mat_<cv::Vec3b> Dest3(_Resolution.x, _Resolution.y);
 
-        cv::cvtColor(Source4, Source3, CV_RGBA2RGB);
-        cv::cvtColor(Dest4, Dest3, CV_RGBA2RGB);
+        cv::cvtColor(Source4, Source3, CV_BGRA2RGB);
 
-        cv::Mat_<uchar> Mask;
+        cv::Mat_<uchar> Mask(Source3.size());
 
-        Util::createMask(Source3, cv::Scalar(255, 255, 255), Mask);
+        for (int r = 0; r < Source3.rows; ++r)
+        {
+            for (int c = 0; c < Source3.cols; ++c)
+            {
+                cv::Vec3b color = Source3(r, c);
+
+                if (color[0] == 255 && color[1] == 255 && color[2] == 255)
+                {
+                    Mask(r, c) = 0;
+                }
+                else
+                {
+                    Mask(r, c) = 255;
+                }
+            }
+        }
 
         cv::imshow("Input color image", Source3);
         cv::imshow("Input mask image", Mask);
@@ -88,6 +102,10 @@ namespace PM
 
         cv::imshow("Output color image", Dest3);
         cv::waitKey();
+
+        cv::cvtColor(Dest3, Dest4, CV_RGB2BGRA);
+
+        std::memcpy(_DestinationImage.data(), Dest4.data, _DestinationImage.size());
     }
 } // namespace HW
 
