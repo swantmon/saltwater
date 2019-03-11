@@ -29,12 +29,12 @@ import torch
 # Config
 # -----------------------------------------------------------------------------
 parser = argparse.ArgumentParser()
-parser.add_argument('--output', type=str, default='D:/NN/plugin_slam/output/', help='output folder of the results')
-parser.add_argument('--img_size_w', type=int, default=128, help='width of image dimension')
-parser.add_argument('--img_size_h', type=int, default=128, help='height of each image dimension')
-parser.add_argument('--path_to_generator', type=str, default='D:/NN/plugin_slam/savepoint/model_best_generator.pth.tar', help='path to saved generator')
+parser.add_argument('--output', type=str, default='C:/Users/chku9845adm/Desktop/saltwater/output/', help='output folder of the results')
+parser.add_argument('--img_size_w', type=int, default=256, help='width of image dimension')
+parser.add_argument('--img_size_h', type=int, default=256, help='height of each image dimension')
+parser.add_argument('--path_to_generator', type=str, default='C:/Users/chku9845adm/Documents/Nextcloud/GAN_evaluation_data/savepoint_20190311_VOXEL/model_best_generator.pth.tar', help='path to saved generator')
 parser.add_argument('--port', type=int, default=12346, help='Port address to an endpoint')
-parser.add_argument('--temp', type=str, default='D:/NN/plugin_slam/.tmp/', help='temporary folder')
+parser.add_argument('--temp', type=str, default='C:/Users/chku9845adm/Desktop/saltwater/.tmp/', help='temporary folder')
 opt = parser.parse_args()
 
 # -----------------------------------------------------------------------------
@@ -146,7 +146,7 @@ def OnNewClient(_Socket, _Address, _ID):
 
         pixels = resultData.tobytes()
 
-        _Socket.sendall(struct.pack('iii', 0, opt.img_size_w * opt.img_size_h, opt.img_size_w * opt.img_size_h)) #TODO Choose size programmatically
+        _Socket.sendall(struct.pack('iii', 0, 64 * 64 * 4, 64 * 64 * 4)) #TODO Choose size programmatically
         _Socket.sendall(pixels)
 
         # -----------------------------------------------------------------------------
@@ -160,7 +160,7 @@ def OnNewClient(_Socket, _Address, _ID):
         masked_image = np.asarray(list(Image.open('{}{}/{}/masked_{}.png'.format(opt.output, _Address[0], _ID, Interval)).convert('RGBA').getdata()))
         gen_image = np.asarray(list(Image.open('{}{}/{}/generated_{}.png'.format(opt.output, _Address[0], _ID, Interval)).convert('RGBA').getdata()))
 
-        masked_image.shape = (128, 128, 4)
+        masked_image.shape = (256, 256, 4)
         gen_image.shape = (64, 64, 4)
 
         masked_image = masked_image.astype(np.uint8)

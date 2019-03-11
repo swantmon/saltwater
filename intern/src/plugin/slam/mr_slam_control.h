@@ -1000,6 +1000,10 @@ namespace MR
 
                 Net::CNetworkManager::GetInstance().SendMessage(m_NeuralNetworkSocket, Message);
             }
+            else if (m_InpaintingMode == INTPAINTING_PIXMIX)
+            {
+
+            }
             else
             {
                 Gfx::ReconstructionRenderer::SetInpaintedPlane(m_PlaneTexture, AABB);
