@@ -175,7 +175,14 @@ namespace MR
         Net::SocketHandle m_NeuralNetworkSocket;
         Net::CNetworkManager::CMessageDelegate::HandleType m_NeualNetworkDelegate;
 
-        bool m_EnableInpainting;
+        enum EInpaintintingMode
+        {
+            INPAINTING_DISABLED,
+            INPAINTING_NN,
+            INTPAINTING_PIXMIX
+        };
+
+        EInpaintintingMode m_InpaintingMode;
 
         int m_PlaneResolution;
         float m_PlaneScale;
@@ -230,10 +237,16 @@ namespace MR
                 m_SLAMSocket = Net::CNetworkManager::GetInstance().CreateServerSocket(Port);
                 m_SLAMNetHandle = Net::CNetworkManager::GetInstance().RegisterMessageHandler(m_SLAMSocket, SLAMDelegate);
                 
-                m_EnableInpainting = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:net:enable", true);
+                auto ModeParameter = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:mode", "pixmix");
                 
-                if (m_EnableInpainting)
+
+
+                if (ModeParameter == "nn")
                 {
+                    ENGINE_CONSOLE_INFO("Inpainting with neural networks");
+
+                    m_InpaintingMode = INPAINTING_NN;
+
                     // -----------------------------------------------------------------------------
                     // Create network connection for Neural Network Server
                     // -----------------------------------------------------------------------------
@@ -247,9 +260,17 @@ namespace MR
                     m_PlaneResolution = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:inpainted_plane:resolution", 128);
                     m_PlaneScale = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:inpainted_plane:scale", 2.0f);
                 }
+                else if (ModeParameter == "pixmix")
+                {
+                    ENGINE_CONSOLE_INFO("Inpainting with PixMix");
+
+                    m_InpaintingMode = INTPAINTING_PIXMIX;
+                }
                 else
                 {
-                    ENGINE_CONSOLE_INFO("Inpainting by neural networks is disabled");
+                    m_InpaintingMode = INPAINTING_DISABLED;
+
+                    ENGINE_CONSOLE_INFO("Inpainting is disabled");
                 }
                 
                 m_DataSource = NETWORK;
@@ -534,7 +555,7 @@ namespace MR
             }
             else if (_rEvent.GetAction() == Base::CInputEvent::MouseWheel)
             {
-                CreatePlane();
+                EnableDiminishedReality(m_ColorSize);
             }
         }
 
@@ -629,7 +650,9 @@ namespace MR
                 }
                 else if (MessageID == 2)
                 {
-                    EnableDiminishedReality(Decompressed);
+                    auto ColorSize = *reinterpret_cast<const glm::ivec2*>(Decompressed.data() + 2 * sizeof(int32_t));
+
+                    EnableDiminishedReality(ColorSize);
                 }
             }
             else if (MessageType == TRANSFORM)
@@ -855,12 +878,12 @@ namespace MR
 
         // -----------------------------------------------------------------------------
 
-        void EnableDiminishedReality(const std::vector<char>& _rData)
+        void EnableDiminishedReality(const glm::ivec2& _ColorSize)
         {
             CreatePlane();
             m_StreamState = STREAM_DIMINSIHED;
 
-            m_ColorSize = *reinterpret_cast<const glm::ivec2*>(_rData.data() + 2 * sizeof(int32_t));
+            m_ColorSize = _ColorSize;
 
             Gfx::STextureDescriptor TextureDescriptor = {};
 
@@ -957,7 +980,7 @@ namespace MR
             const auto& AABB = Gfx::ReconstructionRenderer::GetSelectionBox();
             m_PlaneTexture = m_Reconstructor.CreatePlaneTexture(AABB);
 
-            if (m_EnableInpainting)
+            if (m_InpaintingMode == INPAINTING_NN)
             {
                 if (!Net::CNetworkManager::GetInstance().IsConnected(m_NeuralNetworkSocket))
                 {
