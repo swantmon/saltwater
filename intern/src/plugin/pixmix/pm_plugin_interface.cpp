@@ -91,17 +91,17 @@ namespace PM
             }
         }
 
-        cv::imshow("Input color image", Source3);
-        cv::imshow("Input mask image", Mask);
-        cv::waitKey(1);
+        //cv::imshow("Input color image", Source3);
+        //cv::imshow("Input mask image", Mask);
+        //cv::waitKey(1);
 
         PixMix pm;
         pm.init(Source3, Mask);
 
         pm.execute(Dest3, 0.05f);
 
-        cv::imshow("Output color image", Dest3);
-        cv::waitKey();
+        //cv::imshow("Output color image", Dest3);
+        //cv::waitKey();
 
         cv::cvtColor(Dest3, Dest4, CV_RGB2BGRA);
 
