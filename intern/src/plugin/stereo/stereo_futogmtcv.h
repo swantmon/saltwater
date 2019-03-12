@@ -27,7 +27,6 @@ namespace Stereo
     //---Orientation & Transformation---
     public:
         void cal_F_mtx(const cv::Mat& P_ImgM, cv::Mat& F_mtx);
-        void cal_EpiPoles(const cv::Mat& F_mtx, cv::Point2f& EpiPole_B, cv::Point2f& EpiPole_M);
 
     //---Set Functions---
     public:

@@ -17,7 +17,7 @@ namespace Stereo
 {
     void CPluginInterface::SetIntrinsics(const glm::vec2& _rFocalLength, const glm::vec2& _rFocalPoint, const glm::ivec2& _rImageSize)
     {
-        m_Camera_mtx = glm::mat3(glm::vec3(_rFocalLength.x, 0, 0), glm::vec3(0, _rFocalLength.y, 0), glm::vec3(_rFocalPoint.x, _rFocalPoint.y, 1));
+        m_Camera_mtx = glm::mat3(glm::vec3(_rFocalLength.x, 0, 0), glm::vec3(0, _rFocalLength.y, 0), glm::vec3(_rFocalPoint.x, _rFocalPoint.y, 1)); // Unit is pixel
         m_ImageSize = _rImageSize;
     }
 
@@ -60,17 +60,14 @@ namespace Stereo
         {
             // Start Stereo Matching
 
-            for (std::vector<FutoGmtCV>::iterator iter = SeqImg_RGB.begin(); iter < SeqImg_RGB.end(); iter++)
+            for (std::vector<FutoGmtCV>::iterator iter = SeqImg_RGB.begin(); iter != SeqImg_RGB.end(); iter++)
             {
                 std::vector<FutoGmtCV>::iterator iterNext = iter + 1; // Next frame
 
                 FutoGmtCV RectImg_Curt, RectImg_Next;
 
-                cv::Mat F_mtx(3, 3, CV_32F);
+                cv::Mat F_mtx(3, 3, CV_16F);
                 iter->cal_F_mtx(iterNext->get_P_mtx(), F_mtx);
-
-                std::vector<cv::Point2f> EpiPoles(2);
-                iter->cal_EpiPoles(F_mtx, EpiPoles[0], EpiPoles[1]);
 
                 iter->cal_PolarRect(iterNext->get_Img(), F_mtx, RectImg_Curt.get_Img(), RectImg_Next.get_Img());
 

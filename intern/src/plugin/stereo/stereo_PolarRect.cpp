@@ -10,8 +10,8 @@ namespace Stereo
 
     PolarRect::PolarRect(const cv::Mat& Img_B, const cv::Mat& Img_M)
     {
-        Img_B_Orig = Img_B;
-        Img_M_Orig = Img_M;
+        ImgB_Orig = Img_B;
+        ImgM_Orig = Img_M;
     }
 
     PolarRect::~PolarRect()
@@ -22,56 +22,56 @@ namespace Stereo
     void PolarRect::compute(const cv::Mat& F)
     {
         std::vector<cv::Point2f> EpiPoles(2);
-        getEpipoles(F, EpiPoles[0], EpiPoles[1]);
+        get_Epipoles(F, EpiPoles[0], EpiPoles[1]);
 
-        determ_CoRegion(EpiPoles, cv::Size(Img_B_Orig.cols, Img_B_Orig.rows), F);
+        cal_CoRegion(EpiPoles, cv::Size(ImgB_Orig.cols, ImgB_Orig.rows), F);
 
-        getTransformationPoints(Img_B_Orig.size(), EpiPoles[0], EpiPoles[1], F);
+        get_TransformImgPts(ImgB_Orig.size(), EpiPoles[0], EpiPoles[1], F);
 
-        doTransformation(Img_B_Orig, Img_M_Orig, EpiPoles[0], EpiPoles[1], F);
+        do_Transform(ImgB_Orig, ImgM_Orig, EpiPoles[0], EpiPoles[1], F);
 
     }
 
-    void PolarRect::gen_RectImg(int interpolation)
+    void PolarRect::genrt_RectImg(int interpolation)
     {
-        cv::remap(Img_B_Orig, Img_B_Rect, m_mapX1, m_mapY1, interpolation, cv::BORDER_TRANSPARENT);
-        cv::remap(Img_M_Orig, Img_M_Rect, m_mapX2, m_mapY2, interpolation, cv::BORDER_TRANSPARENT);
+        cv::remap(ImgB_Orig, ImgB_Rect, m_mapX1, m_mapY1, interpolation, cv::BORDER_TRANSPARENT);
+        cv::remap(ImgM_Orig, ImgM_Rect, m_mapX2, m_mapY2, interpolation, cv::BORDER_TRANSPARENT);
     }
 
     void PolarRect::get_RectImg(cv::Mat& RectImg_B, cv::Mat& RectImg_M)
     {
-        RectImg_B = Img_B_Rect;
-        RectImg_M = Img_M_Rect;
+        RectImg_B = ImgB_Rect;
+        RectImg_M = ImgM_Rect;
     }
 
-    inline void PolarRect::determ_CoRegion(const std::vector<cv::Point2f>& EpiPoles, const cv::Size ImgSize, const cv::Mat& F)
+    inline void PolarRect::cal_CoRegion(const std::vector<cv::Point2f>& EpiPoles, const cv::Size ImgSize, const cv::Mat& F)
     {
-        std::vector<cv::Point2f> externalPoints1, externalPoints2;
-        getExternalPoints(EpiPoles[0], ImgSize, externalPoints1);
-        getExternalPoints(EpiPoles[1], ImgSize, externalPoints2);
+        std::vector<cv::Point2f> ExternPts_ImgB, ExternPts_ImgM;
+        get_ExternPts(EpiPoles[0], ImgSize, ExternPts_ImgB);
+        get_ExternPts(EpiPoles[1], ImgSize, ExternPts_ImgM);
 
-        cal_RhoRange(EpiPoles[0], ImgSize, externalPoints1, m_minRho1, m_maxRho1);
-        cal_RhoRange(EpiPoles[1], ImgSize, externalPoints2, m_minRho2, m_maxRho2);
+        cal_RhoRange(EpiPoles[0], ImgSize, ExternPts_ImgB, m_Rho_ImgB_min, m_Rho_ImgB_max);
+        cal_RhoRange(EpiPoles[1], ImgSize, ExternPts_ImgM, m_Rho_ImgM_min, m_Rho_ImgM_max);
 
         if (!Is_InsideImg(EpiPoles[0], ImgSize) && !Is_InsideImg(EpiPoles[1], ImgSize))
         {
             // CASE 1: Both outside
-            const cv::Vec3f line11 = get_ImgLn_from_ImgPt(EpiPoles[0], externalPoints1[0]);
-            const cv::Vec3f line12 = get_ImgLn_from_ImgPt(EpiPoles[0], externalPoints1[1]);
+            const cv::Vec3f line11 = get_ImgLn_from_ImgPt(EpiPoles[0], ExternPts_ImgB[0]);
+            const cv::Vec3f line12 = get_ImgLn_from_ImgPt(EpiPoles[0], ExternPts_ImgB[1]);
 
-            const cv::Vec3f line23 = get_ImgLn_from_ImgPt(EpiPoles[1], externalPoints2[0]);
-            const cv::Vec3f line24 = get_ImgLn_from_ImgPt(EpiPoles[1], externalPoints2[1]);
+            const cv::Vec3f line23 = get_ImgLn_from_ImgPt(EpiPoles[1], ExternPts_ImgM[0]);
+            const cv::Vec3f line24 = get_ImgLn_from_ImgPt(EpiPoles[1], ExternPts_ImgM[1]);
 
             std::vector <cv::Vec3f> inputLines(2), outputLines(2);
             inputLines[0] = line23;
             inputLines[1] = line24;
-            computeEpilines(externalPoints2, 2, F, inputLines, outputLines);
+            computeEpilines(ExternPts_ImgM, 2, F, inputLines, outputLines);
             const cv::Vec3f line13 = outputLines[0];
             const cv::Vec3f line14 = outputLines[1];
 
             inputLines[0] = line11;
             inputLines[1] = line12;
-            computeEpilines(externalPoints1, 1, F, inputLines, outputLines);
+            computeEpilines(ExternPts_ImgB, 1, F, inputLines, outputLines);
             const cv::Vec3f line21 = outputLines[0];
             const cv::Vec3f line22 = outputLines[1];
 
@@ -146,12 +146,12 @@ namespace Stereo
         else if (Is_InsideImg(EpiPoles[0], ImgSize) && Is_InsideImg(EpiPoles[1], ImgSize)) 
         {
             // CASE 2: Both inside
-            m_line1B = get_ImgLn_from_ImgPt(EpiPoles[0], externalPoints1[0]);
+            m_line1B = get_ImgLn_from_ImgPt(EpiPoles[0], ExternPts_ImgB[0]);
             m_line1E = m_line1B;
 
             std::vector <cv::Vec3f> inputLines(1), outputLines(1);
             inputLines[0] = m_line1B;
-            computeEpilines(externalPoints1, 1, F, inputLines, outputLines);
+            computeEpilines(ExternPts_ImgB, 1, F, inputLines, outputLines);
 
             m_line2B = outputLines[0];
             m_line2E = outputLines[0];
@@ -169,13 +169,13 @@ namespace Stereo
             {
                 // CASE 3.1: Only the first epipole is inside
 
-                const cv::Vec3f line23 = get_ImgLn_from_ImgPt(EpiPoles[1], externalPoints2[0]);
-                const cv::Vec3f line24 = get_ImgLn_from_ImgPt(EpiPoles[1], externalPoints2[1]);
+                const cv::Vec3f line23 = get_ImgLn_from_ImgPt(EpiPoles[1], ExternPts_ImgM[0]);
+                const cv::Vec3f line24 = get_ImgLn_from_ImgPt(EpiPoles[1], ExternPts_ImgM[1]);
 
                 std::vector <cv::Vec3f> inputLines(2), outputLines(2);
                 inputLines[0] = line23;
                 inputLines[1] = line24;
-                computeEpilines(externalPoints2, 2, F, inputLines, outputLines);
+                computeEpilines(ExternPts_ImgM, 2, F, inputLines, outputLines);
                 const cv::Vec3f & line13 = outputLines[0];
                 const cv::Vec3f & line14 = outputLines[1];
 
@@ -193,13 +193,13 @@ namespace Stereo
             else 
             {
                 // CASE 3.2: Only the second epipole is inside
-                const cv::Vec3f line11 = get_ImgLn_from_ImgPt(EpiPoles[0], externalPoints1[0]);
-                const cv::Vec3f line12 = get_ImgLn_from_ImgPt(EpiPoles[0], externalPoints1[1]);
+                const cv::Vec3f line11 = get_ImgLn_from_ImgPt(EpiPoles[0], ExternPts_ImgB[0]);
+                const cv::Vec3f line12 = get_ImgLn_from_ImgPt(EpiPoles[0], ExternPts_ImgB[1]);
 
                 std::vector <cv::Vec3f> inputLines(2), outputLines(2);
                 inputLines[0] = line11;
                 inputLines[1] = line12;
-                computeEpilines(externalPoints1, 1, F, inputLines, outputLines);
+                computeEpilines(ExternPts_ImgB, 1, F, inputLines, outputLines);
                 const cv::Vec3f& line21 = outputLines[0];
                 const cv::Vec3f& line22 = outputLines[1];
 
@@ -219,15 +219,15 @@ namespace Stereo
 
     }
 
-    void PolarRect::getTransformationPoints(const cv::Size& ImgSize, const cv::Point2d EpiPole1, const cv::Point2d EpiPole2, const cv::Mat& F)
+    void PolarRect::get_TransformImgPts(const cv::Size& ImgSize, const cv::Point2d EpiPole1, const cv::Point2d EpiPole2, const cv::Mat& F)
     {
         cv::Point2d p1 = m_b1, p2 = m_b2;
         cv::Vec3f line1 = m_line1B, line2 = m_line2B;
 
-        m_thetaPoints1.clear();
-        m_thetaPoints2.clear();
-        m_thetaPoints1.reserve(2 * (ImgSize.width + ImgSize.height));
-        m_thetaPoints2.reserve(2 * (ImgSize.width + ImgSize.height));
+        m_ThetaPts_ImgB.clear();
+        m_ThetaPts_ImgM.clear();
+        m_ThetaPts_ImgB.reserve(2 * (ImgSize.width + ImgSize.height));
+        m_ThetaPts_ImgM.reserve(2 * (ImgSize.width + ImgSize.height));
 
         int32_t crossesLeft = 0;
         if (Is_InsideImg(EpiPole1, ImgSize) && Is_InsideImg(EpiPole2, ImgSize))
@@ -238,8 +238,8 @@ namespace Stereo
 
         while (true) 
         {
-            m_thetaPoints1.push_back(p1);
-            m_thetaPoints2.push_back(p2);
+            m_ThetaPts_ImgB.push_back(p1);
+            m_ThetaPts_ImgM.push_back(p2);
             //         transformLine(epipole1, p1, img1, thetaIdx, m_minRho1, m_maxRho1, m_mapX1, m_mapY1, m_inverseMapX1, m_inverseMapY1);
             //         transformLine(epipole2, p2, img2, thetaIdx, m_minRho2, m_maxRho2, m_mapX2, m_mapY2, m_inverseMapX2, m_inverseMapY2);
 
@@ -273,36 +273,36 @@ namespace Stereo
             thetaIdx++;
             
         }
-        m_thetaPoints1.pop_back();
-        m_thetaPoints2.pop_back();
+        m_ThetaPts_ImgB.pop_back();
+        m_ThetaPts_ImgM.pop_back();
     }
 
-    void PolarRect::doTransformation(const cv::Mat& img1, const cv::Mat& img2, const cv::Point2d epipole1, const cv::Point2d epipole2, const cv::Mat& F)
+    void PolarRect::do_Transform(const cv::Mat& img1, const cv::Mat& img2, const cv::Point2d epipole1, const cv::Point2d epipole2, const cv::Mat& F)
     {
-        const double rhoRange1 = m_maxRho1 - m_minRho1 + 1;
-        const double rhoRange2 = m_maxRho2 - m_minRho2 + 1;
+        const double rhoRange1 = m_Rho_ImgB_max - m_Rho_ImgB_min + 1;
+        const double rhoRange2 = m_Rho_ImgM_max - m_Rho_ImgM_min + 1;
 
         const double rhoRange = std::max(rhoRange1, rhoRange2);
 
-        m_mapX1 = cv::Mat::ones(m_thetaPoints1.size(), rhoRange, CV_32FC1) * -1;
-        m_mapY1 = cv::Mat::ones(m_thetaPoints1.size(), rhoRange, CV_32FC1) * -1;
-        m_mapX2 = cv::Mat::ones(m_thetaPoints2.size(), rhoRange, CV_32FC1) * -1;
-        m_mapY2 = cv::Mat::ones(m_thetaPoints2.size(), rhoRange, CV_32FC1) * -1;
+        m_mapX1 = cv::Mat::ones(m_ThetaPts_ImgB.size(), rhoRange, CV_32FC1) * -1;
+        m_mapY1 = cv::Mat::ones(m_ThetaPts_ImgB.size(), rhoRange, CV_32FC1) * -1;
+        m_mapX2 = cv::Mat::ones(m_ThetaPts_ImgM.size(), rhoRange, CV_32FC1) * -1;
+        m_mapY2 = cv::Mat::ones(m_ThetaPts_ImgM.size(), rhoRange, CV_32FC1) * -1;
 
         m_inverseMapX1 = cv::Mat::ones(img1.rows, img1.cols, CV_32FC1) * -1;
         m_inverseMapY1 = cv::Mat::ones(img1.rows, img1.cols, CV_32FC1) * -1;
         m_inverseMapX2 = cv::Mat::ones(img1.rows, img1.cols, CV_32FC1) * -1;
         m_inverseMapY2 = cv::Mat::ones(img1.rows, img1.cols, CV_32FC1) * -1;
 
-        for (uint32_t thetaIdx = 0; thetaIdx < m_thetaPoints1.size(); thetaIdx++) 
+        for (uint32_t thetaIdx = 0; thetaIdx < m_ThetaPts_ImgB.size(); thetaIdx++) 
         {
-            transformLine(epipole1, m_thetaPoints1[thetaIdx], img1, thetaIdx, m_minRho1, m_maxRho1, m_mapX1, m_mapY1, m_inverseMapX1, m_inverseMapY1);
-            transformLine(epipole2, m_thetaPoints2[thetaIdx], img2, thetaIdx, m_minRho2, m_maxRho2, m_mapX2, m_mapY2, m_inverseMapX2, m_inverseMapY2);
+            transformLine(epipole1, m_ThetaPts_ImgB[thetaIdx], img1, thetaIdx, m_Rho_ImgB_min, m_Rho_ImgB_max, m_mapX1, m_mapY1, m_inverseMapX1, m_inverseMapY1);
+            transformLine(epipole2, m_ThetaPts_ImgM[thetaIdx], img2, thetaIdx, m_Rho_ImgM_min, m_Rho_ImgM_max, m_mapX2, m_mapY2, m_inverseMapX2, m_inverseMapY2);
         }
     }
 
     //---Assist Function---
-    void PolarRect::getExternalPoints(const cv::Point2d& EpiPole, const cv::Size ImgSize, std::vector<cv::Point2f>& ImgPt_Extern)
+    void PolarRect::get_ExternPts(const cv::Point2d& EpiPole, const cv::Size ImgSize, std::vector<cv::Point2f>& ImgPt_Extern)
     {
         if (EpiPole.y < 0) 
         {
@@ -371,43 +371,43 @@ namespace Stereo
         }
     }
 
-    inline void PolarRect::cal_RhoRange(const cv::Point2d& EpiPole, const cv::Size ImgSize, const std::vector<cv::Point2f>& ImgPt_Extern, double& minRho, double& maxRho)
+    inline void PolarRect::cal_RhoRange(const cv::Point2d& EpiPole, const cv::Size ImgSize, const std::vector<cv::Point2f>& ImgPt_Extern, float& Rho_min, float& Rho_max)
     {
         if (EpiPole.y < 0) 
         { 
             if (EpiPole.x < 0) // Region 
             { 
-                minRho = sqrt(EpiPole.x * EpiPole.x + EpiPole.y * EpiPole.y);         // Point A
-                maxRho = sqrt(((ImgSize.width - 1) - EpiPole.x) * ((ImgSize.width - 1) - EpiPole.x) + ((ImgSize.height - 1) - EpiPole.y) * ((ImgSize.height - 1) - EpiPole.y));        // Point D
+                Rho_min = sqrt(EpiPole.x * EpiPole.x + EpiPole.y * EpiPole.y);         // Point A
+                Rho_max = sqrt(((ImgSize.width - 1) - EpiPole.x) * ((ImgSize.width - 1) - EpiPole.x) + ((ImgSize.height - 1) - EpiPole.y) * ((ImgSize.height - 1) - EpiPole.y));        // Point D
             }
             else if (EpiPole.x <= ImgSize.width - 1) // Region 2
             { 
-                minRho = -EpiPole.y;
-                maxRho = std::max(
+                Rho_min = -EpiPole.y;
+                Rho_max = std::max(
                                 sqrt(EpiPole.x * EpiPole.x + ((ImgSize.height - 1) - EpiPole.y) * ((ImgSize.height - 1) - EpiPole.y)),        // Point C
                                 sqrt(((ImgSize.width - 1) - EpiPole.x) * ((ImgSize.width - 1) - EpiPole.x) + ((ImgSize.height - 1) - EpiPole.y) * ((ImgSize.height - 1) - EpiPole.y))        // Point D
                                  );
             }
             else // Region 3
             { 
-                minRho = sqrt(((ImgSize.width - 1) - EpiPole.x) * ((ImgSize.width - 1) - EpiPole.x) + EpiPole.y * EpiPole.y);        // Point B
-                maxRho = sqrt(EpiPole.x * EpiPole.x + ((ImgSize.height - 1) - EpiPole.y) * ((ImgSize.height - 1) - EpiPole.y));        // Point C
+                Rho_min = sqrt(((ImgSize.width - 1) - EpiPole.x) * ((ImgSize.width - 1) - EpiPole.x) + EpiPole.y * EpiPole.y);        // Point B
+                Rho_max = sqrt(EpiPole.x * EpiPole.x + ((ImgSize.height - 1) - EpiPole.y) * ((ImgSize.height - 1) - EpiPole.y));        // Point C
             }
         }
         else if (EpiPole.y <= ImgSize.height - 1) 
         { 
             if (EpiPole.x < 0) // Region 4
             { 
-                minRho = -EpiPole.x;
-                maxRho = std::max(
+                Rho_min = -EpiPole.x;
+                Rho_max = std::max(
                                 sqrt(((ImgSize.width - 1) - EpiPole.x) * ((ImgSize.width - 1) - EpiPole.x) + ((ImgSize.height - 1) - EpiPole.y) * ((ImgSize.height - 1) - EpiPole.y)),        // Point D
                                 sqrt(((ImgSize.width - 1) - EpiPole.x) * ((ImgSize.width - 1) - EpiPole.x) + EpiPole.y * EpiPole.y)        // Point B
                                  );
             }
             else if (EpiPole.x <= ImgSize.width - 1) // Region 5
             { 
-                minRho = 0;
-                maxRho = std::max(
+                Rho_min = 0;
+                Rho_max = std::max(
                             std::max(
                                     sqrt(EpiPole.x * EpiPole.x + EpiPole.y * EpiPole.y),        // Point A
                                     sqrt(((ImgSize.width - 1) - EpiPole.x) * ((ImgSize.width - 1) - EpiPole.x) + EpiPole.y * EpiPole.y)        // Point B
@@ -420,8 +420,8 @@ namespace Stereo
             }
             else // Region 6
             { 
-                minRho = EpiPole.x - (ImgSize.width - 1);
-                maxRho = std::max(
+                Rho_min = EpiPole.x - (ImgSize.width - 1);
+                Rho_max = std::max(
                                 sqrt(EpiPole.x * EpiPole.x + EpiPole.y * EpiPole.y),        // Point A
                                 sqrt(EpiPole.x * EpiPole.x + ((ImgSize.height - 1) - EpiPole.y) * ((ImgSize.height - 1) - EpiPole.y))        // Point C
                                  );
@@ -431,34 +431,23 @@ namespace Stereo
         { 
             if (EpiPole.x < 0) // Region 7
             { 
-                minRho = sqrt(EpiPole.x * EpiPole.x + ((ImgSize.height - 1) - EpiPole.y) * ((ImgSize.height - 1) - EpiPole.y));        // Point C
-                maxRho = sqrt(((ImgSize.width - 1) - EpiPole.x) * ((ImgSize.width - 1) - EpiPole.x) + EpiPole.y * EpiPole.y);        // Point B
+                Rho_min = sqrt(EpiPole.x * EpiPole.x + ((ImgSize.height - 1) - EpiPole.y) * ((ImgSize.height - 1) - EpiPole.y));        // Point C
+                Rho_max = sqrt(((ImgSize.width - 1) - EpiPole.x) * ((ImgSize.width - 1) - EpiPole.x) + EpiPole.y * EpiPole.y);        // Point B
             }
             else if (EpiPole.x <= ImgSize.width - 1) // Region 8
             { 
-                minRho = EpiPole.y - (ImgSize.height - 1);
-                maxRho = std::max(
+                Rho_min = EpiPole.y - (ImgSize.height - 1);
+                Rho_max = std::max(
                                 sqrt(EpiPole.x * EpiPole.x + EpiPole.y * EpiPole.y),        // Point A
                                 sqrt(((ImgSize.width - 1) - EpiPole.x) * ((ImgSize.width - 1) - EpiPole.x) + EpiPole.y * EpiPole.y)        // Point B
                                  );
             }
             else // Region 9
             { 
-                minRho = sqrt(((ImgSize.width - 1) - EpiPole.x) * ((ImgSize.width - 1) - EpiPole.x) + ((ImgSize.height - 1) - EpiPole.y) * ((ImgSize.height - 1) - EpiPole.y));        // Point D
-                maxRho = sqrt(EpiPole.x * EpiPole.x + EpiPole.y * EpiPole.y);        // Point A
+                Rho_min = sqrt(((ImgSize.width - 1) - EpiPole.x) * ((ImgSize.width - 1) - EpiPole.x) + ((ImgSize.height - 1) - EpiPole.y) * ((ImgSize.height - 1) - EpiPole.y));        // Point D
+                Rho_max = sqrt(EpiPole.x * EpiPole.x + EpiPole.y * EpiPole.y);        // Point A
             }
         }
-    }
-
-    inline void PolarRect::getEpipoles(const cv::Mat& F, cv::Point2f& EpiPole1, cv::Point2f& EpiPole2)
-    {
-        cv::SVD svd(F);
-
-        cv::Mat e1 = svd.vt.row(2);
-        cv::Mat e2 = svd.u.col(2);
-
-        EpiPole1 = cv::Point2f(e1.at<double>(0, 0) / e1.at<double>(0, 2), e1.at<double>(0, 1) / e1.at<double>(0, 2));
-        EpiPole2 = cv::Point2f(e2.at<double>(0, 0) / e2.at<double>(2, 0), e2.at<double>(1, 0) / e2.at<double>(2, 0));
     }
 
     cv::Vec3f PolarRect::get_ImgLn_from_ImgPt(const cv::Point2d& ImgPt1, const cv::Point2d& ImgPt2)
@@ -573,10 +562,10 @@ namespace Stereo
         }
     }
 
-    inline void PolarRect::getNewEpiline(const cv::Point2d epipole1, const cv::Point2d epipole2, const cv::Size & imgDimensions, const cv::Mat & F, const cv::Point2d pOld1, const cv::Point2d pOld2,
+    inline void PolarRect::getNewEpiline(const cv::Point2d epipole1, const cv::Point2d epipole2, const cv::Size & ImgSize, const cv::Mat & F, const cv::Point2d pOld1, const cv::Point2d pOld2,
                                          cv::Vec3f prevLine1, cv::Vec3f prevLine2, cv::Point2d & pNew1, cv::Point2d & pNew2, cv::Vec3f & newLine1, cv::Vec3f & newLine2)
     {
-        getNewPointAndLineSingleImage(epipole1, epipole2, imgDimensions, F, 1, pOld1, pOld2, prevLine1, pNew1, newLine1, pNew2, newLine2);
+        getNewPointAndLineSingleImage(epipole1, epipole2, ImgSize, F, 1, pOld1, pOld2, prevLine1, pNew1, newLine1, pNew2, newLine2);
 
         //TODO If the distance is too big in image 2, we do it in the opposite sense
     //     double distImg2 = (pOld2.x - pNew2.x) * (pOld2.x - pNew2.x) + (pOld2.y - pNew2.y) * (pOld2.y - pNew2.y);
@@ -776,6 +765,17 @@ namespace Stereo
         }
 
         return point;
+    }
+
+    inline void PolarRect::get_Epipoles(const cv::Mat& F, cv::Point2f& EpiPole1, cv::Point2f& EpiPole2)
+    {
+        cv::SVD svd(F);
+
+        cv::Mat e1 = svd.vt.row(2);
+        cv::Mat e2 = svd.u.col(2);
+
+        EpiPole1 = cv::Point2f(e1.at<float>(0, 0) / e1.at<float>(0, 2), e1.at<float>(0, 1) / e1.at<float>(0, 2));
+        EpiPole2 = cv::Point2f(e2.at<float>(0, 0) / e2.at<float>(2, 0), e2.at<float>(1, 0) / e2.at<float>(2, 0));
     }
 
     inline bool PolarRect::Is_InsideImg(cv::Point2d ImgPt, cv::Size ImgSize)

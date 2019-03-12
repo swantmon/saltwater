@@ -28,7 +28,7 @@ namespace Stereo
 
         oper_PolarRect.compute(F_mtx);
 
-        oper_PolarRect.gen_RectImg();
+        oper_PolarRect.genrt_RectImg();
 
         oper_PolarRect.get_RectImg(RectImg_Base, RectImg_Match);
     }
@@ -58,17 +58,6 @@ namespace Stereo
         Epipole_ImgM_SkewSymMtx.at<float>(2, 1) = EpiPole_ImgM.at<float>(0, 0);
 
         F_mtx = Epipole_ImgM_SkewSymMtx * P_ImgM  * P_ImgB_PsudoInv;
-    }
-
-    void FutoGmtCV::cal_EpiPoles(const cv::Mat& F_mtx, cv::Point2f& EpiPole_B, cv::Point2f& EpiPole_M)
-    {
-        cv::SVD F_svd(F_mtx);
-        cv::Mat e_B = F_svd.vt.row(2);
-        EpiPole_B = cv::Point2f(e_B.at<float>(0, 0) / e_B.at<float>(0, 2), e_B.at<float>(0, 1) / e_B.at<float>(0, 2));
-        cv::Mat e_M = F_svd.u.col(2);
-        EpiPole_M = cv::Point2f(e_M.at<float>(0, 0) / e_M.at<float>(2, 0), e_M.at<float>(1, 0) / e_M.at<float>(2, 0));
-        if ((EpiPole_B.x * EpiPole_M.x < 0) && (EpiPole_B.y * EpiPole_M.y < 0))
-            EpiPole_M *= -1;
     }
 
     //---Set Functions---
