@@ -29,6 +29,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "plugin_slam", "plugin_slam\plugin_slam.vcxproj", "{E0842B40-2749-4D03-B627-55761E06452B}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "plugin_stereo", "plugin_stereo\plugin_stereo.vcxproj", "{3E5E354E-2967-4AA5-B6CE-F57BA9D0B4AE}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E0842B40-2749-4D03-B627-55761E06452B} = {E0842B40-2749-4D03-B627-55761E06452B}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
