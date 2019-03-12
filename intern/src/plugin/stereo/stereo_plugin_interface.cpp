@@ -60,17 +60,42 @@ namespace Stereo
         {
             // Start Stereo Matching
 
-            for (std::vector<FutoGmtCV>::iterator iter = SeqImg_RGB.begin(); iter != SeqImg_RGB.end(); iter++)
+            for (std::vector<FutoGmtCV>::iterator iter = SeqImg_RGB.begin(); iter < SeqImg_RGB.end()-1; iter++) // end() returns the next position of the last element.
             {
+
                 std::vector<FutoGmtCV>::iterator iterNext = iter + 1; // Next frame
 
-                FutoGmtCV RectImg_Curt, RectImg_Next;
+                //---Check the Orientation of 2 Images---
+                float r11_B = iter->get_P_mtx().at<float>(0, 0);
+                float r22_B = iter->get_P_mtx().at<float>(1, 1);
+                float r33_B = iter->get_P_mtx().at<float>(2, 2);
+                float T1_B = iter->get_P_mtx().at<float>(0, 3);
+                float T2_B = iter->get_P_mtx().at<float>(1, 3);
+                float T3_B = iter->get_P_mtx().at<float>(2, 3);
+
+                float r11_M = iterNext->get_P_mtx().at<float>(0, 0);
+                float r22_M = iterNext->get_P_mtx().at<float>(1, 1);
+                float r33_M = iterNext->get_P_mtx().at<float>(2, 2);
+                float T1_M = iterNext->get_P_mtx().at<float>(0, 3);
+                float T2_M = iterNext->get_P_mtx().at<float>(1, 3);
+                float T3_M = iterNext->get_P_mtx().at<float>(2, 3);
+
+                //---show Original Img for check---
+                cv::imshow("Img_Base_Orig", iter->get_Img());
+                cv::imshow("Img_Match_Orig", iterNext->get_Img());
+                //---
+
+                cv::Mat RectImg_Curt, RectImg_Next;
 
                 cv::Mat F_mtx(3, 3, CV_16F);
                 iter->cal_F_mtx(iterNext->get_P_mtx(), F_mtx);
 
-                iter->cal_PolarRect(iterNext->get_Img(), F_mtx, RectImg_Curt.get_Img(), RectImg_Next.get_Img());
+                iter->cal_PolarRect(iterNext->get_Img(), F_mtx, RectImg_Curt, RectImg_Next);
 
+                //---Show Rectified Img for check---
+                cv::imshow("Img_Base_Rect", RectImg_Curt);
+                cv::imshow("Img_Match_Rect", RectImg_Next);
+                //---
             }
             
         }

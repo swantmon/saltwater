@@ -69,10 +69,10 @@ namespace Stereo
         cv::Vec3f m_line1B, m_line1E, m_line2B, m_line2E; // Beginning & Ending of Epipolar Line in Image_Base & Image_Match
         float m_Rho_ImgB_min, m_Rho_ImgB_max, m_Rho_ImgM_min, m_Rho_ImgM_max; // Min & Max distance from EpiPole to Image Plane.
 
-        std::vector<cv::Point2d> m_ThetaPts_ImgB, m_ThetaPts_ImgM; // Rows in Epipolar Images.
+        std::vector<cv::Point2d> m_ThetaPts_ImgB, m_ThetaPts_ImgM; // Height of rectified Image = # of epipolar line
 
-        cv::Mat m_mapX1, m_mapY1, m_mapX2, m_mapY2; // Look-up Table from Rectified to Original (To get pixel value from Original).
-        cv::Mat m_inverseMapX1, m_inverseMapY1, m_inverseMapX2, m_inverseMapY2; // Look-up Table from Original to Rectified.
+        cv::Mat m_mapX1, m_mapY1, m_mapX2, m_mapY2; // Look-up Table (Size of Rectified Img) & storing x,y -> from Rectified to Original (to get pixel value).
+        cv::Mat m_inverseMapX1, m_inverseMapY1, m_inverseMapX2, m_inverseMapY2; // Look-up Table (Size of Original Img) & storing rho,theta -> from Original to Rectified.
 
         double m_stepSize; // ???
     };
