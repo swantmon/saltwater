@@ -147,6 +147,7 @@ namespace
         void RaycastVolumeWithHighlight();
 
         void RenderBackgroundImage(CTexturePtr _Background, bool _IsFlipped = false);
+        void CombineDiminishedImage(CTexturePtr _Background, CTexturePtr _Diminished, bool _IsFlipped = false);
         void RaycastVolumeDiminished(const glm::mat4& _rPoseMatrix, const Base::AABB3Float& _rAABB, CTexturePtr _BackgroundTexture = nullptr);
         void RenderInpaintedPlane(const glm::mat4& _rPoseMatrix, const Base::AABB3Float& _rAABB);
         
@@ -189,6 +190,7 @@ namespace
 
         CShaderPtr m_BackgroundVSPtr;
         CShaderPtr m_BackgroundFSPtr;
+        CShaderPtr m_CombineDiminishedFSPtr;
         
         CBufferPtr m_RaycastConstantBufferPtr;
         CBufferPtr m_RaycastHitProxyBufferPtr;
@@ -220,7 +222,9 @@ namespace
         CShaderPtr m_PickingCSPtr;
 
         CTexturePtr m_DiminishedTargetPtr;
+        CTexturePtr m_DiminishedFinalTargetPtr;
         CTargetSetPtr m_DiminishedTargetSetPtr;
+        CTargetSetPtr m_DiminishedFinalTargetSetPtr;
         CViewPortSetPtr m_DiminishedViewPortSetPtr;
 
         CBufferPtr m_PickingBuffer;
@@ -331,6 +335,7 @@ namespace
 
         m_BackgroundVSPtr = 0;
         m_BackgroundFSPtr = 0;
+        m_CombineDiminishedFSPtr = 0;
         
         m_PickingBuffer = 0;
 
@@ -361,8 +366,10 @@ namespace
         m_InpaintedPlaneFSPtr = 0;
 
         m_DiminishedViewPortSetPtr = nullptr;
+        m_DiminishedFinalTargetPtr = nullptr;
         m_DiminishedTargetPtr = nullptr;
         m_DiminishedTargetSetPtr = nullptr;
+        m_DiminishedFinalTargetSetPtr = nullptr;
 
         m_InpaintedPlaneTexture = nullptr;
 
@@ -440,6 +447,8 @@ namespace
         m_BackgroundVSPtr = ShaderManager::CompileVS("../../plugins/slam/scalable/rendering/vs_background.glsl", "main", DefineString.c_str());
         m_BackgroundFSPtr = ShaderManager::CompilePS("../../plugins/slam/scalable/rendering/fs_background.glsl", "main", DefineString.c_str());
 
+        m_CombineDiminishedFSPtr = ShaderManager::CompilePS("../../plugins/slam/scalable/rendering/fs_combine_diminished.glsl", "main", DefineString.c_str());
+
         SInputElementDescriptor InputLayoutDesc = {};
 
         InputLayoutDesc.m_pSemanticName        = "POSITION";
@@ -498,12 +507,16 @@ namespace
         TextureDescriptor.m_Format           = CTexture::R8G8B8A8_BYTE;
 
         m_DiminishedTargetPtr = TextureManager::CreateTexture2D(TextureDescriptor);
+        m_DiminishedFinalTargetPtr = TextureManager::CreateTexture2D(TextureDescriptor);
 
         TextureManager::SetTextureLabel(m_DiminishedTargetPtr, "Diminished Texture");
+        TextureManager::SetTextureLabel(m_DiminishedFinalTargetPtr, "Diminished Final Texture");
 
         m_DiminishedTargetSetPtr = TargetSetManager::CreateTargetSet(m_DiminishedTargetPtr);
+        m_DiminishedFinalTargetSetPtr = TargetSetManager::CreateTargetSet(m_DiminishedFinalTargetPtr);
 
         TargetSetManager::SetTargetSetLabel(m_DiminishedTargetSetPtr, "Diminished Target Set");
+        TargetSetManager::SetTargetSetLabel(m_DiminishedFinalTargetSetPtr, "Diminished Final Target Set");
     }
     
     // -----------------------------------------------------------------------------
@@ -1119,6 +1132,46 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    void CGfxReconstructionRenderer::CombineDiminishedImage(CTexturePtr _Background, CTexturePtr _Diminished, bool _IsFlipped)
+    {
+        assert(_Background != nullptr);
+        assert(_Diminished != nullptr);
+
+        Performance::BeginEvent("Render background");
+
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
+
+        ContextManager::SetShaderVS(m_BackgroundVSPtr);
+        ContextManager::SetShaderPS(m_CombineDiminishedFSPtr);
+
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+        ContextManager::SetTexture(0, _Background);
+        ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+        ContextManager::SetTexture(1, _Diminished);
+
+        SDrawCallConstantBuffer BufferData = {};
+        BufferData.m_Color = glm::vec4(_IsFlipped ? 1.0f : 0.0f);
+
+        BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
+
+        ContextManager::SetConstantBuffer(0, m_DrawCallConstantBufferPtr);
+
+        const unsigned int Offset = 0;
+        ContextManager::SetVertexBuffer(m_FullscreenQuadMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
+        ContextManager::SetIndexBuffer(m_FullscreenQuadMeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
+
+        ContextManager::SetInputLayout(m_FullscreenQuadLayoutPtr);
+        ContextManager::SetTopology(STopology::TriangleStrip);
+
+        ContextManager::DrawIndexed(m_FullscreenQuadMeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
+
+        ContextManager::ResetTexture(0);
+
+        Performance::EndEvent();
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CGfxReconstructionRenderer::RenderInpaintedPlane(const glm::mat4& _rPoseMatrix, const Base::AABB3Float& _rAABB)
     {
         assert(m_InpaintedPlaneTexture != nullptr);
@@ -1566,27 +1619,28 @@ namespace
             Performance::BeginEvent("Render diminished reality");
 
             Gfx::TargetSetManager::ClearTargetSet(m_DiminishedTargetSetPtr);
+            Gfx::TargetSetManager::ClearTargetSet(m_DiminishedFinalTargetSetPtr);
 
             ContextManager::SetTargetSet(m_DiminishedTargetSetPtr);
             ContextManager::SetViewPortSet(m_DiminishedViewPortSetPtr);
 
-            glEnable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            //glEnable(GL_BLEND);
+            //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-            if (_BackgroundTexturePtr != nullptr)
-            {
-                RenderBackgroundImage(_BackgroundTexturePtr);
-            }
             RenderInpaintedPlane(_rPoseMatrix, _rAABB);
             RaycastVolumeDiminished(_rPoseMatrix, _rAABB);
 
-            glDisable(GL_BLEND);
+            //glDisable(GL_BLEND);
 
-            ContextManager::ResetTargetSet();
+            if (_BackgroundTexturePtr != nullptr)
+            {
+                ContextManager::SetTargetSet(m_DiminishedFinalTargetSetPtr);
+                CombineDiminishedImage(_BackgroundTexturePtr, m_DiminishedTargetPtr);
+            }
 
             Performance::EndEvent();
 
-            return m_DiminishedTargetPtr;
+            return m_DiminishedFinalTargetPtr;
         }
 
         return nullptr;
@@ -1695,7 +1749,7 @@ namespace
         if (m_IsInpainting)
         {
             ContextManager::SetTargetSet(TargetSetManager::GetLightAccumulationTargetSet());
-            RenderBackgroundImage(m_DiminishedTargetPtr, true);
+            RenderBackgroundImage(m_DiminishedFinalTargetPtr, true);
         }
 
         ContextManager::ResetShaderVS();
