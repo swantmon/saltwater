@@ -239,7 +239,8 @@ namespace
         CTargetSetPtr m_DiminishedFinalTargetSetPtr;
         CViewPortSetPtr m_DiminishedViewPortSetPtr;
 
-        CTexturePtr m_MembraneTexturePtr;
+        CTexturePtr m_MembranePatchesTexturePtr; 
+        CTexturePtr m_MembraneBordersTexturePtr;
 
         CBufferPtr m_PickingBuffer;
 
@@ -356,7 +357,8 @@ namespace
         
         m_PickingBuffer = 0;
 
-        m_MembraneTexturePtr = 0;
+        m_MembranePatchesTexturePtr = 0;
+        m_MembraneBordersTexturePtr = 0;
 
         m_RaycastConstantBufferPtr = 0;
         m_RaycastHitProxyBufferPtr = 0;
@@ -582,8 +584,11 @@ namespace
         TextureDescriptor.m_Semantic = CTexture::UndefinedSemantic;
         TextureDescriptor.m_Format = CTexture::R8G8B8A8_BYTE;
 
-        m_MembraneTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
-        TextureManager::SetTextureLabel(m_MembraneTexturePtr, "Membrane Texture");
+        m_MembranePatchesTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
+        m_MembraneBordersTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
+        TextureManager::SetTextureLabel(m_MembranePatchesTexturePtr, "Membrane Patches Texture");
+        TextureManager::SetTextureLabel(m_MembraneBordersTexturePtr, "Membrane Borders Texture");
+
     }
     
     // -----------------------------------------------------------------------------
@@ -1214,19 +1219,20 @@ namespace
         const int WorkGroupsX = DivUp(256, g_TileSize2D);
         const int WorkGroupsY = DivUp(256, g_TileSize2D);
 
-        TextureManager::ClearTexture(m_MembraneTexturePtr);
+        TextureManager::ClearTexture(m_MembranePatchesTexturePtr);
+        TextureManager::ClearTexture(m_MembraneBordersTexturePtr);
 
         ContextManager::SetShaderCS(m_MembranePatchesCSPtr);
 
         ContextManager::SetImageTexture(0, _Diminished);
-        ContextManager::SetImageTexture(1, m_MembraneTexturePtr);
+        ContextManager::SetImageTexture(1, m_MembranePatchesTexturePtr);
         ContextManager::Barrier();
         ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
 
-        ContextManager::SetShaderCS(m_MembranePatchesCSPtr);
+        ContextManager::SetShaderCS(m_MembraneBorderCSPtr);
 
-        ContextManager::SetImageTexture(0, _Diminished);
-        ContextManager::SetImageTexture(1, m_MembraneTexturePtr);
+        ContextManager::SetImageTexture(0, m_MembranePatchesTexturePtr);
+        ContextManager::SetImageTexture(1, m_MembraneBordersTexturePtr);
         ContextManager::Barrier();
         ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
 
