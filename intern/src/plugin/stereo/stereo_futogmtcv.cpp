@@ -9,6 +9,11 @@ namespace Stereo
     {
     }
 
+    FutoGmtCV::FutoGmtCV(cv::Mat& Img_Input)
+    {
+        Img = Img_Input;
+    }
+
     FutoGmtCV::FutoGmtCV(const std::vector<char>& Img_Input, int ImgW, int ImgH)
     {
         // Latter apply switch for different types of images
@@ -22,7 +27,7 @@ namespace Stereo
     }
 
     //---Photogrammetric Computer Vision---
-    void FutoGmtCV::cal_PolarRect(const cv::Mat& Img_Match, const cv::Mat F_mtx, cv::Mat& RectImg_Base, cv::Mat& RectImg_Match) // Epipolarization based on Polar Rectification
+    void FutoGmtCV::cal_PolarRect(cv::Mat& RectImg_Base, cv::Mat& RectImg_Match, const cv::Mat& Img_Match, const cv::Mat F_mtx) // Epipolarization based on Polar Rectification
     {
         oper_PolarRect = PolarRect(Img, Img_Match);
 
@@ -43,31 +48,47 @@ namespace Stereo
 
         cv::Mat P_ImgB_PsudoInv;
         cv::invert(P_mtx, P_ImgB_PsudoInv, cv::DECOMP_SVD);
-        cv::Mat PC = cv::Mat(4, 1, CV_32F);
-        PC.at<float>(0, 0) = Trans_vec.at<float>(0, 0);
-        PC.at<float>(1, 0) = Trans_vec.at<float>(1, 0);
-        PC.at<float>(2, 0) = Trans_vec.at<float>(2, 0);
-        PC.at<float>(3, 0) = 1;
-        cv::Mat EpiPole_ImgM = P_ImgM * PC; // Epipole of Image_Match
+
+        cv::Mat PC_ImgB = cv::Mat(4, 1, CV_32F);
+        PC_ImgB.at<float>(0, 0) = P_mtx.at<float>(0, 3);
+        PC_ImgB.at<float>(1, 0) = P_mtx.at<float>(1, 3);
+        PC_ImgB.at<float>(2, 0) = P_mtx.at<float>(2, 3);
+        PC_ImgB.at<float>(3, 0) = 1;
+
+        cv::Mat EpiPole_ImgM = P_ImgM * PC_ImgB; // Epipole of Image_Match
         cv::Mat Epipole_ImgM_SkewSymMtx = cv::Mat::zeros(cv::Size(3, 3), CV_32F);
         Epipole_ImgM_SkewSymMtx.at<float>(0, 1) = -EpiPole_ImgM.at<float>(2, 0);
-        Epipole_ImgM_SkewSymMtx.at<float>(0, 2) = EpiPole_ImgM.at<float>(1, 0);
-        Epipole_ImgM_SkewSymMtx.at<float>(1, 0) = EpiPole_ImgM.at<float>(2, 0);
+        Epipole_ImgM_SkewSymMtx.at<float>(0, 2) =  EpiPole_ImgM.at<float>(1, 0);
+        Epipole_ImgM_SkewSymMtx.at<float>(1, 0) =  EpiPole_ImgM.at<float>(2, 0);
         Epipole_ImgM_SkewSymMtx.at<float>(1, 2) = -EpiPole_ImgM.at<float>(0, 0);
         Epipole_ImgM_SkewSymMtx.at<float>(2, 0) = -EpiPole_ImgM.at<float>(1, 0);
-        Epipole_ImgM_SkewSymMtx.at<float>(2, 1) = EpiPole_ImgM.at<float>(0, 0);
+        Epipole_ImgM_SkewSymMtx.at<float>(2, 1) =  EpiPole_ImgM.at<float>(0, 0);
 
         F_mtx = Epipole_ImgM_SkewSymMtx * P_ImgM  * P_ImgB_PsudoInv;
     }
 
     //---Set Functions---
-    void FutoGmtCV::set_Cam(glm::mat3& glmK)
+    void FutoGmtCV::set_Cam(cv::Mat& K_Input)
     {
-        cv::Mat cvK = cv::Mat(3, 3, CV_32F);
-        glm2cv(&cvK, glm::transpose(glmK));
-
-        K_mtx = cvK;
+        K_mtx = K_Input;
     }
+
+    void FutoGmtCV::set_Rot(cv::Mat& R_Input)
+    {
+        Rot_mtx = R_Input;
+    }
+
+    void FutoGmtCV::set_Trans(cv::Mat& T_Input)
+    {
+        Trans_vec = T_Input;
+    }
+
+
+    void FutoGmtCV::set_P_mtx(cv::Mat P_Input)
+    {
+        P_mtx = P_Input; // P_mtx = K_mtx * [Rot_mtx | Trans_vec]
+    }
+
 
     //---Get Function---
     cv::Mat FutoGmtCV::get_Img()
@@ -86,50 +107,10 @@ namespace Stereo
         return ( (ImgPt.x >= 0) && (ImgPt.y >= 0) && (ImgPt.x < ImgSize.width) && (ImgPt.y < ImgSize.height) );
     }
 
-    void FutoGmtCV::set_Rot(glm::mat3 glmR)
-    {
-        cv::Mat cvR = cv::Mat(3, 3, CV_32F);
-        glm2cv(&cvR, glm::transpose(glmR));
-        
-        Rot_mtx = cvR;
-    }
-
-    void FutoGmtCV::set_Trans(glm::vec3 glmT)
-    {
-        cv::Mat cvT = cv::Mat(3, 1, CV_32F);
-        glm2cv(&cvT, glmT);
-        
-        Trans_vec = cvT;
-    }
-
-    void FutoGmtCV::set_P_mtx(glm::mat4x3 glmP)
-    {
-        cv::Mat cvP = cv::Mat(3, 4, CV_32F);
-        glm2cv(&cvP, glm::transpose(glmP));
-
-        P_mtx = cvP;
-    }
-
-    //---Show Function---
+    //---Export Function---
     void FutoGmtCV::show_Img()
     {
         cv::imshow("Image", Img);
-    }
-
-    //---Type Transform---
-    void FutoGmtCV::glm2cv(cv::Mat* cvmat, const glm::mat3& glmmat)
-    {
-        memcpy(cvmat->data, glm::value_ptr(glmmat), 9 * sizeof(float));
-    }
-
-    void FutoGmtCV::glm2cv(cv::Mat* cvmat, const glm::vec3& glmmat)
-    {
-        memcpy(cvmat->data, glm::value_ptr(glmmat), 3 * sizeof(float));
-    }
-
-    void FutoGmtCV::glm2cv(cv::Mat* cvmat, const glm::mat3x4& glmmat)
-    {
-        memcpy(cvmat->data, glm::value_ptr(glmmat), 12 * sizeof(float));
     }
 
 } // Stereo

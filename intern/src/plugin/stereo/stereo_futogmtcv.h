@@ -5,10 +5,9 @@
 
 #include <vector>
 
-#include "base/base_include_glm.h" // Some warnings appears when directly #include glm 
-#include "opencv2/opencv.hpp"
-
 #include "plugin\stereo\stereo_PolarRect.h"
+
+#include "opencv2/opencv.hpp"
 
 namespace Stereo
 {
@@ -17,12 +16,13 @@ namespace Stereo
     //---Constructor & Destructor---
     public:
         FutoGmtCV();
-        FutoGmtCV(const std::vector<char>&, int ImgW, int ImgH);
+        FutoGmtCV(cv::Mat& Img_Input);
+        FutoGmtCV(const std::vector<char>& Img_Input, int ImgW, int ImgH);
         ~FutoGmtCV();
 
     //---Photogrammetric Computer Vision---
     public:
-        void cal_PolarRect(const cv::Mat& Img_Match, const cv::Mat F_mtx, cv::Mat& RectImg_Base, cv::Mat& RectImg_Match);
+        void cal_PolarRect(cv::Mat& RectImg_Base, cv::Mat& RectImg_Match, const cv::Mat& Img_Match, const cv::Mat F_mtx);
 
     //---Orientation & Transformation---
     public:
@@ -30,10 +30,10 @@ namespace Stereo
 
     //---Set Functions---
     public:
-        void set_Cam(glm::mat3& K);
-        void set_Rot(glm::mat3 R);
-        void set_Trans(glm::vec3 T);
-        void set_P_mtx(glm::mat4x3 P);
+        void set_Cam(cv::Mat& K);
+        void set_Rot(cv::Mat& R);
+        void set_Trans(cv::Mat& T);
+        void set_P_mtx(cv::Mat P_Input);
 
     //---Get Function---
     public:
@@ -44,15 +44,9 @@ namespace Stereo
     public:
         bool is_InsideImg(cv::Point2f ImgPt, cv::Size ImgSize);
     
-    //---Show Functions---
+    //---Export Functions---
     public:
         void show_Img(); 
-
-    //---Type Transform---
-    private:
-        void glm2cv(cv::Mat* cvmat, const glm::mat3& glmmat);
-        void glm2cv(cv::Mat* cvmat, const glm::vec3& glmmat);
-        void glm2cv(cv::Mat* cvmat, const glm::mat3x4& glmmat);
     
     //---Operator Object---
     private:

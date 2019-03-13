@@ -2,13 +2,13 @@
 #include "plugin/stereo/stereo_precompiled.h"
 
 #include "engine/core/core_console.h"
-
 #include "engine/engine.h"
 #include "engine/graphic/gfx_texture.h"
 
 #include "plugin/stereo/stereo_plugin_interface.h"
 
-#include "opencv2/opencv.hpp" // After completing, remove #include openCV. => Do not apply OpenCV in Engine part.
+#include "base/base_include_glm.h" // Some warnings appears when directly #include glm 
+#include "opencv2/opencv.hpp" 
 
 
 CORE_PLUGIN_INFO(Stereo::CPluginInterface, "Stereo Matching", "1.0", "This plugin takes RGB and transformation data and provides 2.5D depth maps")
@@ -35,50 +35,38 @@ namespace Stereo
         
         // BASE_UNUSED(_rRGBImage); // For variables which has not been used yet.
         // BASE_UNUSED(_Transform); // For variables which has not been used yet.
-        
-        if (SeqImg_RGB.empty())
-        {
-            SeqImg_RGB.resize(1);
 
-            SeqImg_RGB[0] = FutoGmtCV(_rRGBImage, m_ImageSize.x, m_ImageSize.y); // Image Data, Image Width (# of col), Image Height (# of row)
-            SeqImg_RGB[0].set_Cam(m_Camera_mtx);
-            SeqImg_RGB[0].set_Rot(glm::mat3(_Transform));
-            SeqImg_RGB[0].set_Trans(-1 * glm::transpose(glm::mat3(_Transform)) * glm::vec3(_Transform[3]));
-            SeqImg_RGB[0].set_P_mtx(m_Camera_mtx * glm::mat4x3(_Transform));
-        }
-        else if (SeqImg_RGB.size() < ImgMaxCal)
+        
+        if (SeqImg.empty())
         {
-            SeqImg_RGB.resize(SeqImg_RGB.size() + 1);
-            int Seq_Idx = SeqImg_RGB.size() - 1; // Maybe can replace by iterator
-            SeqImg_RGB[Seq_Idx] = FutoGmtCV(_rRGBImage, m_ImageSize.x, m_ImageSize.y);
-            SeqImg_RGB[Seq_Idx].set_Cam(m_Camera_mtx);
-            SeqImg_RGB[Seq_Idx].set_Rot(glm::mat3(_Transform));
-            SeqImg_RGB[Seq_Idx].set_Trans(-1 * glm::transpose(glm::mat3(_Transform)) * glm::vec3(_Transform[3]));
-            SeqImg_RGB[Seq_Idx].set_P_mtx(m_Camera_mtx * glm::mat4x3(_Transform));
+            SeqImg.resize(1);
+
+            SeqImg[0] = FutoGmtCV(_rRGBImage, m_ImageSize.x, m_ImageSize.y); // Image Data, Image Width (# of col), Image Height (# of row)
+
+            glm::mat4x3 P_mtx_glm = m_Camera_mtx * glm::mat4x3(_Transform);
+            cv::Mat P_mtx_cv = cv::Mat(3, 4, CV_32F);
+            glm2cv(&P_mtx_cv, glm::transpose(P_mtx_glm));
+            SeqImg[0].set_P_mtx(P_mtx_cv);
+        }
+        else if (SeqImg.size() < ImgMaxCal)
+        {
+            SeqImg.resize(SeqImg.size() + 1);
+            int Seq_Idx = SeqImg.size() - 1; // Maybe can replace by iterator
+            SeqImg[Seq_Idx] = FutoGmtCV(_rRGBImage, m_ImageSize.x, m_ImageSize.y);
+
+            glm::mat4x3 P_mtx_glm = m_Camera_mtx * glm::mat4x3(_Transform);
+            cv::Mat P_mtx_cv = cv::Mat(3, 4, CV_32F);
+            glm2cv(&P_mtx_cv, glm::transpose(P_mtx_glm));
+            SeqImg[Seq_Idx].set_P_mtx(P_mtx_cv);
         }
         else
         {
-            // Start Stereo Matching
-
-            for (std::vector<FutoGmtCV>::iterator iter = SeqImg_RGB.begin(); iter < SeqImg_RGB.end()-1; iter++) // end() returns the next position of the last element.
+            //---Epipolarization---
+            
+            for (std::vector<FutoGmtCV>::iterator iter = SeqImg.begin(); iter < SeqImg.end()-1; iter++) // end() returns the next position of the last element.
             {
 
                 std::vector<FutoGmtCV>::iterator iterNext = iter + 1; // Next frame
-
-                //---Check the Orientation of 2 Images---
-                float r11_B = iter->get_P_mtx().at<float>(0, 0);
-                float r22_B = iter->get_P_mtx().at<float>(1, 1);
-                float r33_B = iter->get_P_mtx().at<float>(2, 2);
-                float T1_B = iter->get_P_mtx().at<float>(0, 3);
-                float T2_B = iter->get_P_mtx().at<float>(1, 3);
-                float T3_B = iter->get_P_mtx().at<float>(2, 3);
-
-                float r11_M = iterNext->get_P_mtx().at<float>(0, 0);
-                float r22_M = iterNext->get_P_mtx().at<float>(1, 1);
-                float r33_M = iterNext->get_P_mtx().at<float>(2, 2);
-                float T1_M = iterNext->get_P_mtx().at<float>(0, 3);
-                float T2_M = iterNext->get_P_mtx().at<float>(1, 3);
-                float T3_M = iterNext->get_P_mtx().at<float>(2, 3);
 
                 //---show Original Img for check---
                 cv::imshow("Img_Base_Orig", iter->get_Img());
@@ -87,10 +75,10 @@ namespace Stereo
 
                 cv::Mat RectImg_Curt, RectImg_Next;
 
-                cv::Mat F_mtx(3, 3, CV_16F);
+                cv::Mat F_mtx(3, 3, CV_32F);
                 iter->cal_F_mtx(iterNext->get_P_mtx(), F_mtx);
 
-                iter->cal_PolarRect(iterNext->get_Img(), F_mtx, RectImg_Curt, RectImg_Next);
+                iter->cal_PolarRect(RectImg_Curt, RectImg_Next, iterNext->get_Img(), F_mtx);
 
                 //---Show Rectified Img for check---
                 cv::imshow("Img_Base_Rect", RectImg_Curt);
@@ -98,6 +86,9 @@ namespace Stereo
                 //---
             }
             
+            //---Stereo Matching---
+
+            //---Reform SeqImg---
         }
         
         
@@ -134,6 +125,11 @@ namespace Stereo
     void CPluginInterface::glm2cv(cv::Mat* cvmat, const glm::vec3& glmmat)
     {
         memcpy(cvmat->data, glm::value_ptr(glmmat), 3 * sizeof(float));
+    }
+
+    void CPluginInterface::glm2cv(cv::Mat* cvmat, const glm::mat3x4& glmmat)
+    {
+        memcpy(cvmat->data, glm::value_ptr(glmmat), 12 * sizeof(float));
     }
 
     // -----------------------------------------------------------------------------

@@ -44,12 +44,13 @@ namespace Stereo
         glm::mat3 m_Camera_mtx;
         glm::ivec2 m_ImageSize;
 
-        std::vector<FutoGmtCV> SeqImg_RGB;
+        std::vector<FutoGmtCV> SeqImg;
         std::size_t ImgMaxCal = 2; // Maximal images for calculation once
         
     private:
         void glm2cv(cv::Mat* cvmat, const glm::mat3& glmmat);
         void glm2cv(cv::Mat* cvmat, const glm::vec3& glmmat);
+        void glm2cv(cv::Mat* cvmat, const glm::mat3x4& glmmat);
         void ShowImg(const std::vector<char>& Img_RGBA) const;
     };
 } // namespace HW
