@@ -307,6 +307,13 @@ namespace
         m_RenderPlanes        = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:planes"             , false);
         m_InpaintedPlaneScale = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:inpainted_plane:scale", 2.0f);
 
+        if (Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:aabb:load", false))
+        {
+            m_SelectionState = ESelection::SELECTED;
+            m_SelectionBox.SetMin(Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:aabb:min", glm::vec3(0.0f)));
+            m_SelectionBox.SetMax(Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:aabb:max", glm::vec3(0.0f)));
+        }
+
         m_IsInitialized = false;
     }
 
@@ -331,6 +338,12 @@ namespace
     
     void CGfxReconstructionRenderer::OnExit()
     {
+        if (Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:aabb:store", false))
+        {
+            Core::CProgramParameters::GetInstance().Add("mr:diminished_reality:aabb:min", m_SelectionBox.GetMin());
+            Core::CProgramParameters::GetInstance().Add("mr:diminished_reality:aabb:max", m_SelectionBox.GetMax());
+        }
+
         m_OutlineVSPtr = 0;
         m_OutlineFSPtr = 0;
         m_OutlineLevel1VSPtr = 0;
