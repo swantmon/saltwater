@@ -45,6 +45,13 @@ using namespace Gfx;
 
 namespace
 {
+    const int g_TileSize2D = 16;
+
+    int DivUp(int TotalShaderCount, int WorkGroupSize)
+    {
+        return (TotalShaderCount + WorkGroupSize - 1) / WorkGroupSize;
+    }
+
     glm::vec3 g_CubeVertices[] =
     {
         glm::vec3(0.0f, 0.0f, 0.0f),
@@ -151,6 +158,8 @@ namespace
         void RaycastVolumeDiminished(const glm::mat4& _rPoseMatrix, const Base::AABB3Float& _rAABB, CTexturePtr _BackgroundTexture = nullptr);
         void RenderInpaintedPlane(const glm::mat4& _rPoseMatrix, const Base::AABB3Float& _rAABB);
         
+        void CreateMembrane(CTexturePtr _Diminished);
+
         void RenderQueuedRootVolumes();
         void RenderQueuedLevel1Grids();
         void RenderQueuedLevel2Grids();
@@ -192,6 +201,9 @@ namespace
         CShaderPtr m_BackgroundFSPtr;
         CShaderPtr m_CombineDiminishedFSPtr;
         
+        CShaderPtr m_MembranePatchesCSPtr;
+        CShaderPtr m_MembraneBorderCSPtr;
+
         CBufferPtr m_RaycastConstantBufferPtr;
         CBufferPtr m_RaycastHitProxyBufferPtr;
         CBufferPtr m_RaycastHighLightConstantBufferPtr;
@@ -226,6 +238,8 @@ namespace
         CTargetSetPtr m_DiminishedTargetSetPtr;
         CTargetSetPtr m_DiminishedFinalTargetSetPtr;
         CViewPortSetPtr m_DiminishedViewPortSetPtr;
+
+        CTexturePtr m_MembraneTexturePtr;
 
         CBufferPtr m_PickingBuffer;
 
@@ -336,8 +350,13 @@ namespace
         m_BackgroundVSPtr = 0;
         m_BackgroundFSPtr = 0;
         m_CombineDiminishedFSPtr = 0;
+
+        m_MembranePatchesCSPtr = 0;
+        m_MembraneBorderCSPtr = 0;
         
         m_PickingBuffer = 0;
+
+        m_MembraneTexturePtr = 0;
 
         m_RaycastConstantBufferPtr = 0;
         m_RaycastHitProxyBufferPtr = 0;
@@ -391,6 +410,7 @@ namespace
         std::stringstream DefineStream;
 
         DefineStream
+            << "#define TILE_SIZE_2D " << g_TileSize2D << " \n"
             << "#define TRUNCATED_DISTANCE " << Settings.m_TruncatedDistance / 1000.0f << " \n"
             << "#define VOLUME_SIZE " << Settings.m_VolumeSize << " \n"
             << "#define VOXEL_SIZE " << Settings.m_VoxelSize << " \n"
@@ -448,6 +468,9 @@ namespace
         m_BackgroundFSPtr = ShaderManager::CompilePS("../../plugins/slam/scalable/rendering/fs_background.glsl", "main", DefineString.c_str());
 
         m_CombineDiminishedFSPtr = ShaderManager::CompilePS("../../plugins/slam/scalable/rendering/fs_combine_diminished.glsl", "main", DefineString.c_str());
+
+        m_MembranePatchesCSPtr = ShaderManager::CompileCS("../../plugins/slam/scalable/rendering/cs_membrane_patches.glsl", "main", DefineString.c_str());
+        m_MembraneBorderCSPtr = ShaderManager::CompileCS("../../plugins/slam/scalable/rendering/cs_membrane_border.glsl", "main", DefineString.c_str());
 
         SInputElementDescriptor InputLayoutDesc = {};
 
@@ -546,7 +569,21 @@ namespace
     
     void CGfxReconstructionRenderer::OnSetupTextures()
     {
+        STextureDescriptor TextureDescriptor = {};
 
+        TextureDescriptor.m_NumberOfPixelsU = 256;
+        TextureDescriptor.m_NumberOfPixelsV = 256;
+        TextureDescriptor.m_NumberOfPixelsW = 1;
+        TextureDescriptor.m_NumberOfMipMaps = 1;
+        TextureDescriptor.m_NumberOfTextures = 1;
+        TextureDescriptor.m_Binding = CTexture::RenderTarget | CTexture::ShaderResource;
+        TextureDescriptor.m_Access = CTexture::EAccess::CPURead;
+        TextureDescriptor.m_Usage = CTexture::EUsage::GPUToCPU;
+        TextureDescriptor.m_Semantic = CTexture::UndefinedSemantic;
+        TextureDescriptor.m_Format = CTexture::R8G8B8A8_BYTE;
+
+        m_MembraneTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
+        TextureManager::SetTextureLabel(m_MembraneTexturePtr, "Membrane Texture");
     }
     
     // -----------------------------------------------------------------------------
@@ -1172,6 +1209,32 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    void CGfxReconstructionRenderer::CreateMembrane(CTexturePtr _Diminished)
+    {
+        const int WorkGroupsX = DivUp(256, g_TileSize2D);
+        const int WorkGroupsY = DivUp(256, g_TileSize2D);
+
+        TextureManager::ClearTexture(m_MembraneTexturePtr);
+
+        ContextManager::SetShaderCS(m_MembranePatchesCSPtr);
+
+        ContextManager::SetImageTexture(0, _Diminished);
+        ContextManager::SetImageTexture(1, m_MembraneTexturePtr);
+        ContextManager::Barrier();
+        ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+
+        ContextManager::SetShaderCS(m_MembranePatchesCSPtr);
+
+        ContextManager::SetImageTexture(0, _Diminished);
+        ContextManager::SetImageTexture(1, m_MembraneTexturePtr);
+        ContextManager::Barrier();
+        ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+
+        ContextManager::ResetShaderCS();
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CGfxReconstructionRenderer::RenderInpaintedPlane(const glm::mat4& _rPoseMatrix, const Base::AABB3Float& _rAABB)
     {
         assert(m_InpaintedPlaneTexture != nullptr);
@@ -1631,6 +1694,8 @@ namespace
             RaycastVolumeDiminished(_rPoseMatrix, _rAABB);
 
             //glDisable(GL_BLEND);
+
+            CreateMembrane(m_DiminishedTargetPtr);
 
             if (_BackgroundTexturePtr != nullptr)
             {
