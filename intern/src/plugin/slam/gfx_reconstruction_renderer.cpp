@@ -1570,12 +1570,17 @@ namespace
             ContextManager::SetTargetSet(m_DiminishedTargetSetPtr);
             ContextManager::SetViewPortSet(m_DiminishedViewPortSetPtr);
 
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
             if (_BackgroundTexturePtr != nullptr)
             {
                 RenderBackgroundImage(_BackgroundTexturePtr);
             }
             RenderInpaintedPlane(_rPoseMatrix, _rAABB);
             RaycastVolumeDiminished(_rPoseMatrix, _rAABB);
+
+            glDisable(GL_BLEND);
 
             ContextManager::ResetTargetSet();
 

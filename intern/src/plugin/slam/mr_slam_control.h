@@ -528,7 +528,9 @@ namespace MR
 
             if (m_StreamState == STREAM_DIMINSIHED)
             {
-                const auto& AABB = Gfx::ReconstructionRenderer::GetSelectionBox();
+                auto AABB = Gfx::ReconstructionRenderer::GetSelectionBox();
+
+                AABB.SetMax(AABB.GetMax() + glm::vec3(0.0f, 0.0f, 5.0f));
 
                 Gfx::CTexturePtr Texture = Gfx::ReconstructionRenderer::GetInpaintedRendering(m_PoseMatrix, AABB, m_RGBATexture);
             }

@@ -21,7 +21,7 @@ bool IsInBox(vec3 Position)
     Position = (g_WSToSelectionTransform * vec4(Position, 1.0f)).xyz;
     bool IsInX = Position.x > 0.0f && Position.x < 1.0f;
     bool IsInY = Position.y > 0.0f && Position.y < 1.0f;
-    bool IsInZ = Position.z > 0.1f && Position.z < 1.0f;
+    bool IsInZ = Position.z > 0.0f && Position.z < 2.0f;
     return IsInX && IsInY && IsInZ;
 }
 
@@ -46,6 +46,8 @@ vec3 GetDiminishedPosition(vec3 CameraPosition, vec3 RayDirection)
     vec3 PreviousPosition;
     vec3 CurrentPosition;
 
+    bool hit = false;
+
     while (RayLength < EndLength)
     {
         PreviousPosition = CameraPosition + RayLength * RayDirection;
@@ -60,13 +62,13 @@ vec3 GetDiminishedPosition(vec3 CameraPosition, vec3 RayDirection)
         {
             RayLength += NewStep;
         }
-#ifdef RAYCAST_BACKSIDES
-        else if (CurrentTSDF * PreviousTSDF < 0.0f && !IsInBox(CurrentPosition))
-#else
         else if (CurrentTSDF < 0.0f && PreviousTSDF > 0.0f && !IsInBox(CurrentPosition))
-#endif
         {
             break;
+        }
+        else if (CurrentTSDF < 0.0f && PreviousTSDF > 0.0f)
+        {
+            hit = true;
         }
         
         //Step = CurrentTSDF < 1.0f ? VOXEL_SIZE : TRUNCATED_DISTANCE;
@@ -82,7 +84,7 @@ vec3 GetDiminishedPosition(vec3 CameraPosition, vec3 RayDirection)
         Vertex = CameraPosition + RayDirection * Ts;
     }
 
-    return Vertex;
+    return hit ? Vertex : vec3(0.0f);
 }
 
 // -----------------------------------------------------------------------------
