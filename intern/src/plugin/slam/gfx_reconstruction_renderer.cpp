@@ -1313,15 +1313,6 @@ namespace
         ContextManager::Dispatch(BorderPatchCount, 1, 1);
 
         // -----------------------------------------------------------------------------
-        // Evaluate color differences at the membrane border
-        // -----------------------------------------------------------------------------
-
-        ContextManager::SetShaderCS(m_MembraneBorderCSPtr);
-
-        ContextManager::Barrier();
-        ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
-
-        // -----------------------------------------------------------------------------
         // Propagate differences
         // -----------------------------------------------------------------------------
 
