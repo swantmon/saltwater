@@ -1214,9 +1214,12 @@ namespace
         ContextManager::SetShaderPS(m_CombineDiminishedFSPtr);
 
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
-        ContextManager::SetTexture(0, _Background);
         ContextManager::SetSampler(1, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+        ContextManager::SetSampler(2, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
+
+        ContextManager::SetTexture(0, _Background);        
         ContextManager::SetTexture(1, _Diminished);
+        ContextManager::SetTexture(2, m_MembraneBordersTexturePtr);
 
         SDrawCallConstantBuffer BufferData = {};
         BufferData.m_Color = glm::vec4(_IsFlipped ? 1.0f : 0.0f);

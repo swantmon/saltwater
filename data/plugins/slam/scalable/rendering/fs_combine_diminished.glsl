@@ -4,6 +4,8 @@
 
 layout(binding = 0) uniform sampler2D g_BackgroundImage;
 layout(binding = 1) uniform sampler2D g_DiminishedImage;
+layout(binding = 2) uniform sampler2D g_Membrane;
+
 
 layout(std140, binding = 0) uniform RGBConversion
 {
@@ -19,7 +21,18 @@ layout(location = 0) out vec4 out_Color;
 
 void main()
 {
-    out_Color = texture(g_BackgroundImage, in_TexCoordsFlipped) + texture(g_DiminishedImage, in_TexCoords);
+	vec4 Background = texture(g_BackgroundImage, in_TexCoords);
+	vec4 Diminished = texture(g_DiminishedImage, in_TexCoordsFlipped);
+	vec4 Membrane = texture(g_Membrane, in_TexCoordsFlipped);
+
+	if (Diminished.a < 0.5f)
+	{
+		Diminished.rgb = Diminished.rgb / 2.0f;
+	}
+
+	vec3 Color = Background.rgb + Diminished.rgb + Membrane.rgb;
+
+    out_Color = vec4(Color, 1.0f);
 }
 
 #endif // __INCLUDE_FS_OUTLINE_GLSL__

@@ -19,9 +19,7 @@ void main()
 
     const ivec2 MembraneCoords = ivec2(gl_GlobalInvocationID.xy);
     const ivec2 ImageCoords = ivec2(vec2(MembraneCoords) / imageSize(cs_MembranePatches) * imageSize(cs_Diminished));
-
-    imageStore(cs_MembraneBorders, MembraneCoords, vec4(0.0f));
-
+    
     vec4 Color = imageLoad(cs_Diminished, ImageCoords);
 
     if (Color.a > 0.5f)
