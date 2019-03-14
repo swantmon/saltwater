@@ -2,7 +2,8 @@
 #define __INCLUDE_CS_YUV_TO_RGB_GLSL__
 
 layout (binding = 0, rgba8) uniform image2D cs_Diminished;
-layout (binding = 1, rgba8) uniform image2D cs_Membrane;
+layout (binding = 1, rgba8) uniform image2D cs_MembranePatches;
+layout (binding = 2, rgba8) uniform image2D cs_MembraneBorders;
 
 shared int IsOverlapping;
 
@@ -17,8 +18,10 @@ void main()
     barrier();
 
     const ivec2 MembraneCoords = ivec2(gl_GlobalInvocationID.xy);
-    const ivec2 ImageCoords = ivec2(vec2(MembraneCoords) / imageSize(cs_Membrane) * imageSize(cs_Diminished));
-    
+    const ivec2 ImageCoords = ivec2(vec2(MembraneCoords) / imageSize(cs_MembranePatches) * imageSize(cs_Diminished));
+
+    imageStore(cs_MembraneBorders, MembraneCoords, vec4(0.0f));
+
     vec3 Color = imageLoad(cs_Diminished, ImageCoords).rgb;
 
     if (dot(Color, vec3(1.0)) != 0.0)
@@ -30,7 +33,7 @@ void main()
     
     if (IsOverlapping > 0)
     {
-        imageStore(cs_Membrane, MembraneCoords, vec4(1.0f));
+        imageStore(cs_MembranePatches, MembraneCoords, vec4(1.0f));
     }
 }
 

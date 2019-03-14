@@ -208,6 +208,8 @@ namespace
         CBufferPtr m_RaycastHitProxyBufferPtr;
         CBufferPtr m_RaycastHighLightConstantBufferPtr;
         CBufferPtr m_DrawCallConstantBufferPtr;
+
+        CBufferPtr m_MembranePatchBufferPtr;
                 
         CMeshPtr m_CameraMeshPtr;
         CInputLayoutPtr m_CameraInputLayoutPtr;
@@ -377,6 +379,8 @@ namespace
         m_RaycastHitProxyBufferPtr = 0;
         m_RaycastHighLightConstantBufferPtr = 0;
         m_DrawCallConstantBufferPtr = 0;
+
+        m_MembranePatchBufferPtr = 0;
         
         m_CameraMeshPtr = 0;
         m_VolumeMeshPtr = 0;
@@ -640,6 +644,16 @@ namespace
         ConstantBufferDesc.m_pClassKey = 0;
 
         m_PickingBuffer = BufferManager::CreateBuffer(ConstantBufferDesc);
+
+        ConstantBufferDesc.m_Stride = 0;
+        ConstantBufferDesc.m_Usage = CBuffer::GPURead;
+        ConstantBufferDesc.m_Binding = CBuffer::ResourceBuffer;
+        ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(int) + 128 * sizeof(glm::vec4);
+        ConstantBufferDesc.m_pBytes = nullptr;
+        ConstantBufferDesc.m_pClassKey = 0;
+
+        m_MembranePatchBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
     }
     
     // -----------------------------------------------------------------------------
@@ -1235,17 +1249,21 @@ namespace
         TextureManager::ClearTexture(m_MembranePatchesTexturePtr);
         TextureManager::ClearTexture(m_MembraneBordersTexturePtr);
 
-        ContextManager::SetShaderCS(m_MembranePatchesCSPtr);
+        int32_t Zero = 0;
+        BufferManager::UploadBufferData(m_MembranePatchBufferPtr, &Zero);
 
         ContextManager::SetImageTexture(0, _Diminished);
         ContextManager::SetImageTexture(1, m_MembranePatchesTexturePtr);
+        ContextManager::SetImageTexture(2, m_MembraneBordersTexturePtr);
+        ContextManager::SetResourceBuffer(0, m_MembranePatchBufferPtr);
+
+        ContextManager::SetShaderCS(m_MembranePatchesCSPtr);
+
         ContextManager::Barrier();
         ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
 
         ContextManager::SetShaderCS(m_MembraneBorderCSPtr);
 
-        ContextManager::SetImageTexture(0, m_MembranePatchesTexturePtr);
-        ContextManager::SetImageTexture(1, m_MembraneBordersTexturePtr);
         ContextManager::Barrier();
         ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
 

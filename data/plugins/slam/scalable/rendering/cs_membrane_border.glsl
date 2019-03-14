@@ -1,8 +1,15 @@
 #ifndef __INCLUDE_CS_YUV_TO_RGB_GLSL__
 #define __INCLUDE_CS_YUV_TO_RGB_GLSL__
 
-layout (binding = 0, rgba8) uniform image2D cs_MembranePatches;
-layout (binding = 1, rgba8) uniform image2D cs_MembraneBorders;
+layout (binding = 0, rgba8) uniform image2D cs_Diminished;
+layout (binding = 1, rgba8) uniform image2D cs_MembranePatches;
+layout (binding = 2, rgba8) uniform image2D cs_MembraneBorders;
+
+layout(std430, binding = 0) buffer BorderPatches
+{
+    int g_Count;
+    vec4 g_Patches[128];
+};
 
 layout (local_size_x = TILE_SIZE_2D, local_size_y = TILE_SIZE_2D, local_size_z = 1) in;
 void main()
@@ -20,6 +27,12 @@ void main()
     if (any(IsNeighbour) && !IsMarked)
     {
         imageStore(cs_MembraneBorders, Coords, vec4(1.0f, 0.0f, 0.0f, 0.0f));
+
+        if (gl_LocalInvocationID == 0)
+        {
+            int Index = atomicAdd(g_Count, 1);
+            g_Patches[Index] = vec4(Coords / TILE_SIZE_2D, 0.0f, 0.0f);
+        }
     }
 }
 
