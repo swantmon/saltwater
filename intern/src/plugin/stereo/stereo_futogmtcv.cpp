@@ -29,13 +29,18 @@ namespace Stereo
     //---Photogrammetric Computer Vision---
     void FutoGmtCV::cal_PolarRect(cv::Mat& RectImg_Base, cv::Mat& RectImg_Match, const cv::Mat& Img_Match, const cv::Mat F_mtx) // Epipolarization based on Polar Rectification
     {
-        oper_PolarRect = PolarRect(Img, Img_Match);
+        oper_PolarRect = Rect_Polar(Img, Img_Match);
 
         oper_PolarRect.compute(F_mtx);
 
         oper_PolarRect.genrt_RectImg();
 
         oper_PolarRect.get_RectImg(RectImg_Base, RectImg_Match);
+    }
+
+    void FutoGmtCV::cal_PlanarRect(FutoGmtCV& RectImg_Base, FutoGmtCV& RectImg_Match, const FutoGmtCV& OrigImg_Match)
+    {
+
     }
 
     //---Orientation & Transformation---

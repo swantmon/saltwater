@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#ifndef PolarRect_H
-#define PolarRect_H
+#ifndef Rect_Polar_H
+#define Rect_Polar_H
 
 #include <vector>
 
@@ -11,13 +11,13 @@
 
 namespace Stereo
 {
-    class PolarRect
+    class Rect_Polar
     {
     //---Constructor & Destructor---
     public:
-        PolarRect();
-        PolarRect(const cv::Mat& Img_B, const cv::Mat& Img_M);
-        ~PolarRect();
+        Rect_Polar();
+        Rect_Polar(const cv::Mat& Img_B, const cv::Mat& Img_M);
+        ~Rect_Polar();
     
     //---Main Function---
     public:

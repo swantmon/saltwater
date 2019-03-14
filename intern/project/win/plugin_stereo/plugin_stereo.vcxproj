@@ -29,19 +29,21 @@
   <ItemGroup>
     <ClCompile Include="..\..\..\src\plugin\stereo\stereo_futogmtcv.cpp" />
     <ClCompile Include="..\..\..\src\plugin\stereo\stereo_plugin_interface.cpp" />
-    <ClCompile Include="..\..\..\src\plugin\stereo\stereo_PolarRect.cpp" />
     <ClCompile Include="..\..\..\src\plugin\stereo\stereo_precompiled.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\plugin\stereo\stereo_Rect_Planar.cpp" />
+    <ClCompile Include="..\..\..\src\plugin\stereo\stereo_Rect_Polar.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\plugin\stereo\stereo_futogmtcv.h" />
     <ClInclude Include="..\..\..\src\plugin\stereo\stereo_plugin_interface.h" />
-    <ClInclude Include="..\..\..\src\plugin\stereo\stereo_PolarRect.h" />
     <ClInclude Include="..\..\..\src\plugin\stereo\stereo_precompiled.h" />
+    <ClInclude Include="..\..\..\src\plugin\stereo\stereo_Rect_Planar.h" />
+    <ClInclude Include="..\..\..\src\plugin\stereo\stereo_Rect_Polar.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{3E5E354E-2967-4AA5-B6CE-F57BA9D0B4AE}</ProjectGuid>

@@ -71,14 +71,18 @@ namespace Stereo
                 //---show Original Img for check---
                 cv::imshow("Img_Base_Orig", iter->get_Img());
                 cv::imshow("Img_Match_Orig", iterNext->get_Img());
-                //---
+                //------
 
-                cv::Mat RectImg_Curt, RectImg_Next;
-
+                //---Compute Fundamental Matrix---
                 cv::Mat F_mtx(3, 3, CV_32F);
                 iter->cal_F_mtx(iterNext->get_P_mtx(), F_mtx);
+                //------
 
-                iter->cal_PolarRect(RectImg_Curt, RectImg_Next, iterNext->get_Img(), F_mtx);
+                //---Generate Rectified Images---
+                cv::Mat RectImg_Curt, RectImg_Next;
+                // iter->cal_PolarRect(RectImg_Curt, RectImg_Next, iterNext->get_Img(), F_mtx); //Applied Polar Rectification
+
+                //------
 
                 //---Show Rectified Img for check---
                 cv::imshow("Img_Base_Rect", RectImg_Curt);

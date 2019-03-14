@@ -1,25 +1,25 @@
 #include "plugin\stereo\stereo_precompiled.h"
-#include "plugin\stereo\stereo_PolarRect.h"
+#include "plugin\stereo\stereo_Rect_Polar.h"
 
 namespace Stereo
 {
     //---Constructor & Destructor---
-    PolarRect::PolarRect()
+    Rect_Polar::Rect_Polar()
     {
     }
 
-    PolarRect::PolarRect(const cv::Mat& Img_B, const cv::Mat& Img_M)
+    Rect_Polar::Rect_Polar(const cv::Mat& Img_B, const cv::Mat& Img_M)
     {
         ImgB_Orig = Img_B;
         ImgM_Orig = Img_M;
     }
 
-    PolarRect::~PolarRect()
+    Rect_Polar::~Rect_Polar()
     {
     }
 
     //---Main Function---
-    void PolarRect::compute(const cv::Mat& F)
+    void Rect_Polar::compute(const cv::Mat& F)
     {
         std::vector<cv::Point2f> EpiPoles(2);
         get_Epipoles(F, EpiPoles[0], EpiPoles[1]);
@@ -32,19 +32,19 @@ namespace Stereo
 
     }
 
-    void PolarRect::genrt_RectImg(int interpolation)
+    void Rect_Polar::genrt_RectImg(int interpolation)
     {
         cv::remap(ImgB_Orig, ImgB_Rect, m_mapX1, m_mapY1, interpolation, cv::BORDER_TRANSPARENT);
         cv::remap(ImgM_Orig, ImgM_Rect, m_mapX2, m_mapY2, interpolation, cv::BORDER_TRANSPARENT);
     }
 
-    void PolarRect::get_RectImg(cv::Mat& RectImg_B, cv::Mat& RectImg_M)
+    void Rect_Polar::get_RectImg(cv::Mat& RectImg_B, cv::Mat& RectImg_M)
     {
         RectImg_B = ImgB_Rect;
         RectImg_M = ImgM_Rect;
     }
 
-    inline void PolarRect::cal_CoRegion(const std::vector<cv::Point2f>& EpiPoles, const cv::Size ImgSize, const cv::Mat& F)
+    inline void Rect_Polar::cal_CoRegion(const std::vector<cv::Point2f>& EpiPoles, const cv::Size ImgSize, const cv::Mat& F)
     {
         std::vector<cv::Point2f> ExternPts_ImgB, ExternPts_ImgM;
         get_ExternPts(EpiPoles[0], ImgSize, ExternPts_ImgB);
@@ -219,7 +219,7 @@ namespace Stereo
 
     }
 
-    void PolarRect::get_TransformImgPts(const cv::Size& ImgSize, const cv::Point2d EpiPole1, const cv::Point2d EpiPole2, const cv::Mat& F)
+    void Rect_Polar::get_TransformImgPts(const cv::Size& ImgSize, const cv::Point2d EpiPole1, const cv::Point2d EpiPole2, const cv::Mat& F)
     {
         cv::Point2d p1 = m_b1, p2 = m_b2;
         cv::Vec3f line1 = m_line1B, line2 = m_line2B;
@@ -277,7 +277,7 @@ namespace Stereo
         m_ThetaPts_ImgM.pop_back();
     }
 
-    void PolarRect::do_Transform(const cv::Mat& img1, const cv::Mat& img2, const cv::Point2d epipole1, const cv::Point2d epipole2, const cv::Mat& F)
+    void Rect_Polar::do_Transform(const cv::Mat& img1, const cv::Mat& img2, const cv::Point2d epipole1, const cv::Point2d epipole2, const cv::Mat& F)
     {
         const double rhoRange1 = m_Rho_ImgB_max - m_Rho_ImgB_min + 1;
         const double rhoRange2 = m_Rho_ImgM_max - m_Rho_ImgM_min + 1;
@@ -302,7 +302,7 @@ namespace Stereo
     }
 
     //---Assist Function---
-    void PolarRect::get_ExternPts(const cv::Point2d& EpiPole, const cv::Size ImgSize, std::vector<cv::Point2f>& ImgPt_Extern)
+    void Rect_Polar::get_ExternPts(const cv::Point2d& EpiPole, const cv::Size ImgSize, std::vector<cv::Point2f>& ImgPt_Extern)
     {
         if (EpiPole.y < 0) 
         {
@@ -371,7 +371,7 @@ namespace Stereo
         }
     }
 
-    inline void PolarRect::cal_RhoRange(const cv::Point2d& EpiPole, const cv::Size ImgSize, const std::vector<cv::Point2f>& ImgPt_Extern, float& Rho_min, float& Rho_max)
+    inline void Rect_Polar::cal_RhoRange(const cv::Point2d& EpiPole, const cv::Size ImgSize, const std::vector<cv::Point2f>& ImgPt_Extern, float& Rho_min, float& Rho_max)
     {
         if (EpiPole.y < 0) 
         { 
@@ -450,7 +450,7 @@ namespace Stereo
         }
     }
 
-    cv::Vec3f PolarRect::get_ImgLn_from_ImgPt(const cv::Point2d& ImgPt1, const cv::Point2d& ImgPt2)
+    cv::Vec3f Rect_Polar::get_ImgLn_from_ImgPt(const cv::Point2d& ImgPt1, const cv::Point2d& ImgPt2)
     {
         // Image Line: a*x + b*y + c = 0
         // Using Vec3f to store a, b, c
@@ -458,7 +458,7 @@ namespace Stereo
         return ImgLn;
     }
 
-    inline void PolarRect::computeEpilines(const std::vector<cv::Point2f>& points, const uint32_t &whichImage, const cv::Mat & F, const std::vector<cv::Vec3f>& oldlines, std::vector<cv::Vec3f>& newLines)
+    inline void Rect_Polar::computeEpilines(const std::vector<cv::Point2f>& points, const uint32_t &whichImage, const cv::Mat & F, const std::vector<cv::Vec3f>& oldlines, std::vector<cv::Vec3f>& newLines)
     {
         cv::computeCorrespondEpilines(points, whichImage, F, newLines);
 
@@ -471,7 +471,7 @@ namespace Stereo
         }
     }
 
-    inline void PolarRect::getNewPointAndLineSingleImage(const cv::Point2d epipole1, const cv::Point2d epipole2, const cv::Size & imgDimensions, const cv::Mat & F, const uint32_t & whichImage, const cv::Point2d & pOld1, const cv::Point2d & pOld2,
+    inline void Rect_Polar::getNewPointAndLineSingleImage(const cv::Point2d epipole1, const cv::Point2d epipole2, const cv::Size & imgDimensions, const cv::Mat & F, const uint32_t & whichImage, const cv::Point2d & pOld1, const cv::Point2d & pOld2,
         cv::Vec3f & prevLine, cv::Point2d & pNew1, cv::Vec3f & newLine1, cv::Point2d & pNew2, cv::Vec3f & newLine2)
     {
         // We obtain vector v
@@ -562,7 +562,7 @@ namespace Stereo
         }
     }
 
-    inline void PolarRect::getNewEpiline(const cv::Point2d epipole1, const cv::Point2d epipole2, const cv::Size & ImgSize, const cv::Mat & F, const cv::Point2d pOld1, const cv::Point2d pOld2,
+    inline void Rect_Polar::getNewEpiline(const cv::Point2d epipole1, const cv::Point2d epipole2, const cv::Size & ImgSize, const cv::Mat & F, const cv::Point2d pOld1, const cv::Point2d pOld2,
                                          cv::Vec3f prevLine1, cv::Vec3f prevLine2, cv::Point2d & pNew1, cv::Point2d & pNew2, cv::Vec3f & newLine1, cv::Vec3f & newLine2)
     {
         getNewPointAndLineSingleImage(epipole1, epipole2, ImgSize, F, 1, pOld1, pOld2, prevLine1, pNew1, newLine1, pNew2, newLine2);
@@ -573,7 +573,7 @@ namespace Stereo
     //         getNewPointAndLineSingleImage(epipole2, epipole1, imgDimensions, F, 2, pOld2, pOld1, prevLine2, pNew2, newLine2, pNew1, newLine1);
     }
 
-    void PolarRect::transformLine(const cv::Point2d& epipole, const cv::Point2d& p2, const cv::Mat& inputImage, const uint32_t & thetaIdx, const double &minRho, const double & maxRho, cv::Mat& mapX, cv::Mat& mapY, cv::Mat& inverseMapX, cv::Mat& inverseMapY)
+    void Rect_Polar::transformLine(const cv::Point2d& epipole, const cv::Point2d& p2, const cv::Mat& inputImage, const uint32_t & thetaIdx, const double &minRho, const double & maxRho, cv::Mat& mapX, cv::Mat& mapY, cv::Mat& inverseMapX, cv::Mat& inverseMapY)
     {
         cv::Vec2f v(p2.x - epipole.x, p2.y - epipole.y);
         double maxDist = cv::norm(v);
@@ -597,7 +597,7 @@ namespace Stereo
         }
     }
 
-    inline bool PolarRect::lineIntersectsRect(const cv::Vec3d& line, const cv::Size& imgDimensions, cv::Point2d* intersection)
+    inline bool Rect_Polar::lineIntersectsRect(const cv::Vec3d& line, const cv::Size& imgDimensions, cv::Point2d* intersection)
     {
         return 
             lineIntersectsSegment(line, cv::Point2d(0, 0), cv::Point2d(imgDimensions.width - 1, 0), intersection) ||
@@ -606,7 +606,7 @@ namespace Stereo
             lineIntersectsSegment(line, cv::Point2d(0, imgDimensions.height - 1), cv::Point2d(0, 0), intersection);
     }
 
-    inline bool PolarRect::lineIntersectsSegment(const cv::Vec3d & line, const cv::Point2d & p1, const cv::Point2d & p2, cv::Point2d * intersection)
+    inline bool Rect_Polar::lineIntersectsSegment(const cv::Vec3d & line, const cv::Point2d & p1, const cv::Point2d & p2, cv::Point2d * intersection)
     {
         const cv::Vec3d segment = get_ImgLn_from_ImgPt(p1, p2);
 
@@ -635,7 +635,7 @@ namespace Stereo
         return false;
     }
 
-    inline cv::Point2d PolarRect::getBorderIntersection(const cv::Point2d& epipole, const cv::Vec3d& line, const cv::Size& imgDimensions, const cv::Point2d* lastPoint)
+    inline cv::Point2d Rect_Polar::getBorderIntersection(const cv::Point2d& epipole, const cv::Vec3d& line, const cv::Size& imgDimensions, const cv::Point2d* lastPoint)
     {
         cv::Point2d intersection(-1, -1);
 
@@ -716,7 +716,7 @@ namespace Stereo
         }
     }
 
-    inline void PolarRect::getBorderIntersections(const cv::Point2d& epipole, const cv::Vec3d& line, const cv::Size& imgDimensions, std::vector<cv::Point2d>& intersections)
+    inline void Rect_Polar::getBorderIntersections(const cv::Point2d& epipole, const cv::Vec3d& line, const cv::Size& imgDimensions, std::vector<cv::Point2d>& intersections)
     {
         cv::Point2d intersection(-1, -1);
         intersections.reserve(2);
@@ -739,7 +739,7 @@ namespace Stereo
         }
     }
 
-    inline cv::Point2d PolarRect::getNearestIntersection(const cv::Point2d& oldEpipole, const cv::Point2d& newEpipole, const cv::Vec3d& line, const cv::Point2d& oldPoint, const cv::Size& imgDimensions)
+    inline cv::Point2d Rect_Polar::getNearestIntersection(const cv::Point2d& oldEpipole, const cv::Point2d& newEpipole, const cv::Vec3d& line, const cv::Point2d& oldPoint, const cv::Size& imgDimensions)
     {
         std::vector<cv::Point2d> intersections;
         getBorderIntersections(newEpipole, line, imgDimensions, intersections);
@@ -767,7 +767,7 @@ namespace Stereo
         return point;
     }
 
-    inline void PolarRect::get_Epipoles(const cv::Mat& F, cv::Point2f& EpiPole1, cv::Point2f& EpiPole2)
+    inline void Rect_Polar::get_Epipoles(const cv::Mat& F, cv::Point2f& EpiPole1, cv::Point2f& EpiPole2)
     {
         cv::SVD svd(F);
 
@@ -778,12 +778,12 @@ namespace Stereo
         EpiPole2 = cv::Point2f(e2.at<float>(0, 0) / e2.at<float>(2, 0), e2.at<float>(1, 0) / e2.at<float>(2, 0));
     }
 
-    inline bool PolarRect::Is_InsideImg(cv::Point2d ImgPt, cv::Size ImgSize)
+    inline bool Rect_Polar::Is_InsideImg(cv::Point2d ImgPt, cv::Size ImgSize)
     {
         return ((ImgPt.x >= 0) && (ImgPt.y >= 0) && (ImgPt.x < (ImgSize.width - 1.0)) && (ImgPt.y <= (ImgSize.height - 1.0)));
     }
 
-    inline bool PolarRect::Is_TheRightPoint(const cv::Point2d & epipole, const cv::Point2d & intersection, const cv::Vec3d & line, const cv::Point2d * lastPoint)
+    inline bool Rect_Polar::Is_TheRightPoint(const cv::Point2d & epipole, const cv::Point2d & intersection, const cv::Vec3d & line, const cv::Point2d * lastPoint)
     {
         if (lastPoint != NULL) 
         {

@@ -5,7 +5,8 @@
 
 #include <vector>
 
-#include "plugin\stereo\stereo_PolarRect.h"
+#include "plugin\stereo\stereo_Rect_Polar.h"
+#include "plugin\stereo\stereo_Rect_Planar.h"
 
 #include "opencv2/opencv.hpp"
 
@@ -23,6 +24,7 @@ namespace Stereo
     //---Photogrammetric Computer Vision---
     public:
         void cal_PolarRect(cv::Mat& RectImg_Base, cv::Mat& RectImg_Match, const cv::Mat& Img_Match, const cv::Mat F_mtx);
+        void cal_PlanarRect(FutoGmtCV& RectImg_Base, FutoGmtCV& RectImg_Match, const FutoGmtCV& OrigImg_Match);
 
     //---Orientation & Transformation---
     public:
@@ -50,7 +52,8 @@ namespace Stereo
     
     //---Operator Object---
     private:
-        PolarRect oper_PolarRect;
+        Rect_Polar oper_PolarRect; // Operate Polar Rectification for Epipolarization
+        Rect_Planar oper_PlanarRect; // Operate Planar Rectification for Epipolarization
 
     //---Members---
     private:
