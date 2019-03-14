@@ -10,7 +10,7 @@ shared int IsOverlapping;
 layout (local_size_x = TILE_SIZE_2D, local_size_y = TILE_SIZE_2D, local_size_z = 1) in;
 void main()
 {
-    if (gl_LocalInvocationID == 0)
+    if (gl_LocalInvocationIndex == 0)
     {
         IsOverlapping = 0;
     }

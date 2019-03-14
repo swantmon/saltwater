@@ -28,10 +28,10 @@ void main()
     {
         imageStore(cs_MembraneBorders, Coords, vec4(1.0f, 0.0f, 0.0f, 0.0f));
 
-        if (gl_LocalInvocationID == 0)
+        if (gl_LocalInvocationIndex == 0)
         {
             int Index = atomicAdd(g_Count, 1);
-            g_Patches[Index] = vec4(Coords / TILE_SIZE_2D, 0.0f, 0.0f);
+            g_Patches[Index] = vec4(gl_WorkGroupID.xy, 0.0f, 0.0f);
         }
     }
 }
