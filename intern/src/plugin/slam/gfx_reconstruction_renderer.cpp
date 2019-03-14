@@ -1274,7 +1274,7 @@ namespace
         TextureManager::ClearTexture(m_MembraneBordersTexturePtr);
 
         int32_t Zero = 0;
-        BufferManager::UploadBufferData(m_MembranePatchBufferPtr, &Zero);
+        BufferManager::UploadBufferData(m_MembranePatchBufferPtr, &Zero, 0, sizeof(Zero));
 
         ContextManager::SetImageTexture(0, _Diminished);
         ContextManager::SetImageTexture(1, _BackgroundTexturePtr);
