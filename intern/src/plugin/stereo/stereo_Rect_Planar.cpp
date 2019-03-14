@@ -89,20 +89,45 @@ namespace Stereo
 
     void Rect_Planar::determ_RectiedImgSize(const cv::Size& ImgSize_OrigB, const cv::Size& ImgSize_OrigM)
     {
-        cv::Mat ImgCorner_OrigB_UL(3, 1, CV_32F), ImgCorner_OrigB_UR(3, 1, CV_32F), ImgCorner_OrigB_DL(3, 1, CV_32F), ImgCorner_OrigB_DR(3, 1, CV_32F);
-        ImgCorner_OrigB_UL.col(0) = (0, 0, 1);
-        ImgCorner_OrigB_UR.col(0) = (ImgSize_OrigB.width, 0, 1);
-        ImgCorner_OrigB_DL.col(0) = (0, ImgSize_OrigB.height, 1);
-        ImgCorner_OrigB_DR.col(0) = (ImgSize_OrigB.width, ImgSize_OrigB.height, 1);
+        cv::Mat ImgCorner_OrigB_UL = cv::Mat::ones(3, 1, CV_32F);
+        ImgCorner_OrigB_UL.at<float>(0, 0) = 0;
+        ImgCorner_OrigB_UL.at<float>(1, 0) = 0;
+        float OrigB_UL00 = ImgCorner_OrigB_UL.at<float>(0, 0);
+        float OrigB_UL10 = ImgCorner_OrigB_UL.at<float>(1, 0);
+        float OrigB_UL20 = ImgCorner_OrigB_UL.at<float>(2, 0);
+        cv::Mat ImgCorner_OrigB_UR = cv::Mat::ones(3, 1, CV_32F);
+        ImgCorner_OrigB_UR.at<float>(0, 0) = ImgSize_OrigB.width;
+        ImgCorner_OrigB_UR.at<float>(1, 0) = 0;
+        cv::Mat ImgCorner_OrigB_DL = cv::Mat::ones(3, 1, CV_32F);
+        ImgCorner_OrigB_DL.at<float>(0, 0) = 0;
+        ImgCorner_OrigB_DL.at<float>(1, 0) = ImgSize_OrigB.height;
+        cv::Mat ImgCorner_OrigB_DR = cv::Mat::ones(3, 1, CV_32F);
+        ImgCorner_OrigB_DR.at<float>(0, 0) = ImgSize_OrigB.width;
+        ImgCorner_OrigB_DR.at<float>(1, 0) = ImgSize_OrigB.height;
+        float OrigB_DR00 = ImgCorner_OrigB_DR.at<float>(0, 0);
+        float OrigB_DR10 = ImgCorner_OrigB_DR.at<float>(1, 0);
+        float OrigB_DR20 = ImgCorner_OrigB_DR.at<float>(2, 0);
 
         cv::Mat ImgCorner_OrigB2RectB_UL = H_B * ImgCorner_OrigB_UL;
         ImgCorner_OrigB2RectB_UL = ImgCorner_OrigB2RectB_UL / ImgCorner_OrigB2RectB_UL.at<float>(2, 0);
+        float OrigB2RectB_UL00 = ImgCorner_OrigB2RectB_UL.at<float>(0, 0);
+        float OrigB2RectB_UL10 = ImgCorner_OrigB2RectB_UL.at<float>(1, 0);
+        float OrigB2RectB_UL20 = ImgCorner_OrigB2RectB_UL.at<float>(2, 0);
         cv::Mat ImgCorner_OrigB2RectB_UR = H_B * ImgCorner_OrigB_UR;
         ImgCorner_OrigB2RectB_UR = ImgCorner_OrigB2RectB_UR / ImgCorner_OrigB2RectB_UR.at<float>(2, 0);
+        float OrigB2RectB_UR00 = ImgCorner_OrigB2RectB_UL.at<float>(0, 0);
+        float OrigB2RectB_UR10 = ImgCorner_OrigB2RectB_UL.at<float>(1, 0);
+        float OrigB2RectB_UR20 = ImgCorner_OrigB2RectB_UL.at<float>(2, 0);
         cv::Mat ImgCorner_OrigB2RectB_DL = H_B * ImgCorner_OrigB_DL;
         ImgCorner_OrigB2RectB_DL = ImgCorner_OrigB2RectB_DL / ImgCorner_OrigB2RectB_DL.at<float>(2, 0);
+        float OrigB2RectB_DL00 = ImgCorner_OrigB2RectB_UL.at<float>(0, 0);
+        float OrigB2RectB_DL10 = ImgCorner_OrigB2RectB_UL.at<float>(1, 0);
+        float OrigB2RectB_DL20 = ImgCorner_OrigB2RectB_UL.at<float>(2, 0);
         cv::Mat ImgCorner_OrigB2RectB_DR = H_B * ImgCorner_OrigB_DR;
         ImgCorner_OrigB2RectB_DR = ImgCorner_OrigB2RectB_DR / ImgCorner_OrigB2RectB_DR.at<float>(2, 0);
+        float OrigB2RectB_DR00 = ImgCorner_OrigB2RectB_UL.at<float>(0, 0);
+        float OrigB2RectB_DR10 = ImgCorner_OrigB2RectB_UL.at<float>(1, 0);
+        float OrigB2RectB_DR20 = ImgCorner_OrigB2RectB_UL.at<float>(2, 0);
 
         float ImgBound_RectB_x_min, ImgBound_RectB_x_max, ImgBound_RectB_y_min, ImgBound_RectB_y_max;
         ImgBound_RectB_x_min = ImgCorner_OrigB2RectB_UL.at<float>(0, 0) <= ImgCorner_OrigB2RectB_DL.at<float>(0, 0) ? ImgCorner_OrigB2RectB_UL.at<float>(0, 0) : ImgCorner_OrigB2RectB_DL.at<float>(0, 0);
@@ -144,10 +169,12 @@ namespace Stereo
 
     void Rect_Planar::cal_R_Rect(const cv::Mat& R_Orig_B, const cv::Mat& t_Orig_B, const cv::Mat& t_Orig_M)
     {
-        R_Rect.row(0) = (t_Orig_B - t_Orig_M) / cv::norm((t_Orig_B - t_Orig_M), cv::NORM_L1);
+        R_Rect = cv::Mat(3, 3, CV_32F);
 
+        cv::Mat BaseLine = t_Orig_B - t_Orig_M;
+
+        R_Rect.row(0) = BaseLine / cv::norm(BaseLine, cv::NORM_L2);
         R_Rect.row(1) = R_Orig_B.row(2).cross(R_Rect.row(0));
-
         R_Rect.row(2) = R_Rect.row(0).cross(R_Rect.row(1));
     }
 
@@ -167,6 +194,15 @@ namespace Stereo
     void Rect_Planar::cal_H(const cv::Mat& P_Orig_B, cv::Mat& P_Orig_M)
     {
         H_B = P_Rect_B * P_Orig_B.inv(cv::DECOMP_SVD);
+        float H_B_00 = H_B.at<float>(0, 0);
+        float H_B_01 = H_B.at<float>(0, 1);
+        float H_B_02 = H_B.at<float>(0, 2);
+        float H_B_10 = H_B.at<float>(1, 0);
+        float H_B_11 = H_B.at<float>(1, 1);
+        float H_B_12 = H_B.at<float>(1, 2);
+        float H_B_20 = H_B.at<float>(2, 0);
+        float H_B_21 = H_B.at<float>(2, 1);
+        float H_B_22 = H_B.at<float>(2, 2);
         H_M = P_Rect_M * P_Orig_M.inv(cv::DECOMP_SVD);
     }
 

@@ -10,18 +10,30 @@ namespace Stereo
     }
 
     FutoGmtCV::FutoGmtCV(cv::Mat& Img_Input)
+        : Img(Img_Input)
     {
-        Img = Img_Input;
     }
 
-    FutoGmtCV::FutoGmtCV(const std::vector<char>& Img_Input, int ImgW, int ImgH)
+    FutoGmtCV::FutoGmtCV(cv::Mat& Img_Input, cv::Mat P)
+        : Img(Img_Input),
+          P_mtx(P)
     {
-        // Latter apply switch for different types of images
-        cv::Mat Img_Input_cv(cv::Size(ImgW, ImgH), CV_8UC4); // 2D Matrix(x*y) with (8-bit unsigned character) + (4 bands)
-        memcpy(Img_Input_cv.data, Img_Input.data(), Img_Input.size());
-        cv::cvtColor(Img_Input_cv, Img_Input_cv, cv::COLOR_BGRA2RGBA); // Transform image from BGRA (default of OpenCV) to RGB
-        Img = Img_Input_cv; // 1D vector stores 2D image in row-oriented
+        // Derive K, R, T from P
+
     }
+    FutoGmtCV::FutoGmtCV(cv::Mat& Img_Input, cv::Mat K, cv::Mat R, cv::Mat T)
+        : Img(Img_Input),
+          K_mtx(K),
+          Rot_mtx(R), 
+          Trans_vec(T)
+    {
+        cv::Mat Transform_mtx(3, 4, CV_32F);
+        Transform_mtx.colRange(0, 2) = Rot_mtx.colRange(0, 2);
+        Transform_mtx.col(3) = Trans_vec.col(0);
+
+        P_mtx = K_mtx * Transform_mtx;
+    }
+
     FutoGmtCV::~FutoGmtCV()
     {
     }
@@ -38,8 +50,16 @@ namespace Stereo
         oper_PolarRect.get_RectImg(RectImg_Base, RectImg_Match);
     }
 
-    void FutoGmtCV::cal_PlanarRect(FutoGmtCV& RectImg_Base, FutoGmtCV& RectImg_Match, const FutoGmtCV& OrigImg_Match)
+    void FutoGmtCV::cal_PlanarRect(cv::Mat& RectImg_Base, cv::Mat& RectImg_Match, const FutoGmtCV& OrigImg_Match)
     {
+        oper_PlanarRect.cal_K_Rect(K_mtx, OrigImg_Match.get_Cam());
+        oper_PlanarRect.cal_R_Rect(Rot_mtx, Trans_vec, OrigImg_Match.get_Trans());
+        oper_PlanarRect.cal_P_Rect(Trans_vec, OrigImg_Match.get_Trans());
+        oper_PlanarRect.cal_H(P_mtx, OrigImg_Match.get_P_mtx());
+
+        oper_PlanarRect.determ_RectiedImgSize(Img.size(), OrigImg_Match.get_Img().size());
+        oper_PlanarRect.genrt_RectifiedImg(Img, OrigImg_Match.get_Img());
+        oper_PlanarRect.get_RectImg(RectImg_Base, RectImg_Match);
 
     }
 
@@ -96,12 +116,22 @@ namespace Stereo
 
 
     //---Get Function---
-    cv::Mat FutoGmtCV::get_Img()
+    cv::Mat FutoGmtCV::get_Img() const
     {
         return Img;
     }
 
-    cv::Mat FutoGmtCV::get_P_mtx()
+    cv::Mat FutoGmtCV::get_Cam() const
+    {
+        return K_mtx;
+    }
+
+    cv::Mat FutoGmtCV::get_Trans() const
+    {
+        return Trans_vec;
+    }
+
+    cv::Mat FutoGmtCV::get_P_mtx() const
     {
         return P_mtx;
     }

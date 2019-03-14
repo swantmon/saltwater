@@ -18,13 +18,14 @@ namespace Stereo
     public:
         FutoGmtCV();
         FutoGmtCV(cv::Mat& Img_Input);
-        FutoGmtCV(const std::vector<char>& Img_Input, int ImgW, int ImgH);
+        FutoGmtCV(cv::Mat& Img_Input, cv::Mat P);
+        FutoGmtCV(cv::Mat& Img_Input, cv::Mat K, cv::Mat R, cv::Mat T);
         ~FutoGmtCV();
 
     //---Photogrammetric Computer Vision---
     public:
         void cal_PolarRect(cv::Mat& RectImg_Base, cv::Mat& RectImg_Match, const cv::Mat& Img_Match, const cv::Mat F_mtx);
-        void cal_PlanarRect(FutoGmtCV& RectImg_Base, FutoGmtCV& RectImg_Match, const FutoGmtCV& OrigImg_Match);
+        void cal_PlanarRect(cv::Mat& RectImg_Base, cv::Mat& RectImg_Match, const FutoGmtCV& OrigImg_Match);
 
     //---Orientation & Transformation---
     public:
@@ -39,8 +40,10 @@ namespace Stereo
 
     //---Get Function---
     public:
-        cv::Mat get_Img();
-        cv::Mat get_P_mtx();
+        cv::Mat get_Img() const;
+        cv::Mat get_Cam() const;
+        cv::Mat get_Trans() const;
+        cv::Mat get_P_mtx() const;
 
     //---Is Function---
     public:

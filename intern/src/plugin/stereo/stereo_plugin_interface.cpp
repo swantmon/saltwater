@@ -36,28 +36,38 @@ namespace Stereo
         // BASE_UNUSED(_rRGBImage); // For variables which has not been used yet.
         // BASE_UNUSED(_Transform); // For variables which has not been used yet.
 
+        //---Transform Image & Orientations to OpenCV format---
+        cv::Mat Img_cv(cv::Size(m_ImageSize.x, m_ImageSize.y), CV_8UC4); // 2D Matrix(x*y) with (8-bit unsigned character) + (4 bands)
+        memcpy(Img_cv.data, _rRGBImage.data(), _rRGBImage.size());
+        cv::cvtColor(Img_cv, Img_cv, cv::COLOR_BGRA2RGBA); // Transform image from BGRA (default color mode in OpenCV) to RGBA
+
+        glm::mat4x3 P_glm = m_Camera_mtx * glm::mat4x3(_Transform);
+        cv::Mat P_cv(3, 4, CV_32F);
+        glm2cv(&P_cv, glm::transpose(P_glm));
+
+        cv::Mat K_cv(3, 3, CV_32F);
+        glm2cv(&K_cv, glm::transpose(m_Camera_mtx));
+
+        glm::mat3 R_glm = glm::mat3(_Transform);
+        cv::Mat R_cv(3, 3, CV_32F);
+        glm2cv(&R_cv, glm::transpose(R_glm));
+
+        glm::vec3 T_glm = glm::vec3(_Transform[3]);
+        cv::Mat T_cv(3, 1, CV_32F);
+        glm2cv(&T_cv, T_glm);
+
+        //------
         
         if (SeqImg.empty())
         {
             SeqImg.resize(1);
-
-            SeqImg[0] = FutoGmtCV(_rRGBImage, m_ImageSize.x, m_ImageSize.y); // Image Data, Image Width (# of col), Image Height (# of row)
-
-            glm::mat4x3 P_mtx_glm = m_Camera_mtx * glm::mat4x3(_Transform);
-            cv::Mat P_mtx_cv = cv::Mat(3, 4, CV_32F);
-            glm2cv(&P_mtx_cv, glm::transpose(P_mtx_glm));
-            SeqImg[0].set_P_mtx(P_mtx_cv);
+            SeqImg[0] = FutoGmtCV(Img_cv, K_cv, R_cv, T_cv); 
         }
         else if (SeqImg.size() < ImgMaxCal)
         {
             SeqImg.resize(SeqImg.size() + 1);
             int Seq_Idx = SeqImg.size() - 1; // Maybe can replace by iterator
-            SeqImg[Seq_Idx] = FutoGmtCV(_rRGBImage, m_ImageSize.x, m_ImageSize.y);
-
-            glm::mat4x3 P_mtx_glm = m_Camera_mtx * glm::mat4x3(_Transform);
-            cv::Mat P_mtx_cv = cv::Mat(3, 4, CV_32F);
-            glm2cv(&P_mtx_cv, glm::transpose(P_mtx_glm));
-            SeqImg[Seq_Idx].set_P_mtx(P_mtx_cv);
+            SeqImg[Seq_Idx] = FutoGmtCV(Img_cv, K_cv, R_cv, T_cv);
         }
         else
         {
@@ -81,6 +91,7 @@ namespace Stereo
                 //---Generate Rectified Images---
                 cv::Mat RectImg_Curt, RectImg_Next;
                 // iter->cal_PolarRect(RectImg_Curt, RectImg_Next, iterNext->get_Img(), F_mtx); //Applied Polar Rectification
+                iter->cal_PlanarRect(RectImg_Curt, RectImg_Next, *iterNext); //Applied Polar Rectification
 
                 //------
 
