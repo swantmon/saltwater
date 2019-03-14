@@ -158,7 +158,7 @@ namespace
         void RaycastVolumeDiminished(const glm::mat4& _rPoseMatrix, const Base::AABB3Float& _rAABB, CTexturePtr _BackgroundTexture = nullptr);
         void RenderInpaintedPlane(const glm::mat4& _rPoseMatrix, const Base::AABB3Float& _rAABB);
         
-        void CreateMembrane(CTexturePtr _Diminished);
+        void CreateMembrane(CTexturePtr _BackgroundTexturePtr, CTexturePtr _Diminished);
 
         void RenderQueuedRootVolumes();
         void RenderQueuedLevel1Grids();
@@ -203,6 +203,7 @@ namespace
         
         CShaderPtr m_MembranePatchesCSPtr;
         CShaderPtr m_MembraneBorderCSPtr;
+        CShaderPtr m_MembraneEvalBorderCSPtr;
 
         CBufferPtr m_RaycastConstantBufferPtr;
         CBufferPtr m_RaycastHitProxyBufferPtr;
@@ -264,6 +265,10 @@ namespace
         bool m_IsInitialized;
 
         Gfx::Main::CResizeDelegate::HandleType m_ResizeDelegate;
+
+        int m_PatchCount;
+        int m_PatchSize;
+        int m_MaxBorderPatchCount;
     };
 } // namespace
 
@@ -317,6 +322,10 @@ namespace
         }
 
         m_IsInitialized = false;
+
+        m_MaxBorderPatchCount = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:rendering:max_border_patch_count", 128);
+        m_PatchCount = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:rendering:patch_count", 16);
+        m_PatchSize = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:rendering:patch_size", 16);
     }
 
     // -----------------------------------------------------------------------------
@@ -369,6 +378,7 @@ namespace
 
         m_MembranePatchesCSPtr = 0;
         m_MembraneBorderCSPtr = 0;
+        m_MembraneEvalBorderCSPtr = 0;
         
         m_PickingBuffer = 0;
 
@@ -445,7 +455,10 @@ namespace
             << "#define MAP_TEXTURE_FORMAT " << InternalFormatString << " \n"
             << "#define RAYCAST_NEAR " << 0.0f << " \n"
             << "#define RAYCAST_FAR " << 1000.0f << " \n"
-            << "#define MIN_TREE_WEIGHT " << Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:min_weight", 30) << " \n";
+            << "#define MIN_TREE_WEIGHT " << Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:min_weight", 30) << " \n"
+            << "#define MAX_BORDER_PATCH_COUNT " << m_MaxBorderPatchCount << " \n"
+            << "#define PATCH_COUNT " << m_PatchCount << " \n"
+            << "#define PATCH_SIZE " << m_PatchSize << " \n";
 
         if (Settings.m_CaptureColor)
         {
@@ -490,6 +503,7 @@ namespace
 
         m_MembranePatchesCSPtr = ShaderManager::CompileCS("../../plugins/slam/scalable/rendering/cs_membrane_patches.glsl", "main", DefineString.c_str());
         m_MembraneBorderCSPtr = ShaderManager::CompileCS("../../plugins/slam/scalable/rendering/cs_membrane_border.glsl", "main", DefineString.c_str());
+        m_MembraneEvalBorderCSPtr = ShaderManager::CompileCS("../../plugins/slam/scalable/rendering/cs_membrane_eval_border.glsl", "main", DefineString.c_str());
 
         SInputElementDescriptor InputLayoutDesc = {};
 
@@ -649,7 +663,7 @@ namespace
         ConstantBufferDesc.m_Usage = CBuffer::GPURead;
         ConstantBufferDesc.m_Binding = CBuffer::ResourceBuffer;
         ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
-        ConstantBufferDesc.m_NumberOfBytes = sizeof(int) + 128 * sizeof(glm::vec4);
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(int) + m_MaxBorderPatchCount * 2 * sizeof(glm::vec4);
         ConstantBufferDesc.m_pBytes = nullptr;
         ConstantBufferDesc.m_pClassKey = 0;
 
@@ -1244,8 +1258,12 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxReconstructionRenderer::CreateMembrane(CTexturePtr _Diminished)
+    void CGfxReconstructionRenderer::CreateMembrane(CTexturePtr _BackgroundTexturePtr, CTexturePtr _Diminished)
     {
+        // -----------------------------------------------------------------------------
+        // Prepare membrane data
+        // -----------------------------------------------------------------------------
+
         const int WorkGroupsX = DivUp(256, g_TileSize2D);
         const int WorkGroupsY = DivUp(256, g_TileSize2D);
 
@@ -1256,19 +1274,42 @@ namespace
         BufferManager::UploadBufferData(m_MembranePatchBufferPtr, &Zero);
 
         ContextManager::SetImageTexture(0, _Diminished);
-        ContextManager::SetImageTexture(1, m_MembranePatchesTexturePtr);
-        ContextManager::SetImageTexture(2, m_MembraneBordersTexturePtr);
+        ContextManager::SetImageTexture(1, _BackgroundTexturePtr);
+        ContextManager::SetImageTexture(2, m_MembranePatchesTexturePtr);
+        ContextManager::SetImageTexture(3, m_MembraneBordersTexturePtr);
         ContextManager::SetResourceBuffer(0, m_MembranePatchBufferPtr);
+
+        // -----------------------------------------------------------------------------
+        // Find inner membrane patches
+        // -----------------------------------------------------------------------------
 
         ContextManager::SetShaderCS(m_MembranePatchesCSPtr);
 
         ContextManager::Barrier();
         ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
 
+        // -----------------------------------------------------------------------------
+        // Find outer membrane patches / the membrane border
+        // -----------------------------------------------------------------------------
+
         ContextManager::SetShaderCS(m_MembraneBorderCSPtr);
 
         ContextManager::Barrier();
         ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+
+        ContextManager::ResetShaderCS();
+
+        // -----------------------------------------------------------------------------
+        // Evaluate color differences at the membrane border
+        // -----------------------------------------------------------------------------
+
+        int32_t BorderPatchCount = *reinterpret_cast<int32_t*>(BufferManager::MapBufferRange(m_MembranePatchBufferPtr, Gfx::CBuffer::Read, 0, sizeof(int32_t)));
+        BufferManager::UnmapBuffer(m_MembranePatchBufferPtr);
+
+        ContextManager::SetShaderCS(m_MembraneEvalBorderCSPtr);
+
+        ContextManager::Barrier();
+        ContextManager::Dispatch(BorderPatchCount, 1, 1);
 
         ContextManager::ResetShaderCS();
     }
@@ -1735,7 +1776,7 @@ namespace
 
             //glDisable(GL_BLEND);
 
-            CreateMembrane(m_DiminishedTargetPtr);
+            CreateMembrane(_BackgroundTexturePtr, m_DiminishedTargetPtr);
 
             if (_BackgroundTexturePtr != nullptr)
             {
