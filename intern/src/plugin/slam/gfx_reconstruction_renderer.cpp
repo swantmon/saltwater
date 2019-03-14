@@ -204,6 +204,7 @@ namespace
         CShaderPtr m_MembranePatchesCSPtr;
         CShaderPtr m_MembraneBorderCSPtr;
         CShaderPtr m_MembraneEvalBorderCSPtr;
+        CShaderPtr m_MembranePropagateCSPtr;
 
         CBufferPtr m_RaycastConstantBufferPtr;
         CBufferPtr m_RaycastHitProxyBufferPtr;
@@ -379,6 +380,7 @@ namespace
         m_MembranePatchesCSPtr = 0;
         m_MembraneBorderCSPtr = 0;
         m_MembraneEvalBorderCSPtr = 0;
+        m_MembranePropagateCSPtr = 0;
         
         m_PickingBuffer = 0;
 
@@ -504,6 +506,7 @@ namespace
         m_MembranePatchesCSPtr = ShaderManager::CompileCS("../../plugins/slam/scalable/rendering/cs_membrane_patches.glsl", "main", DefineString.c_str());
         m_MembraneBorderCSPtr = ShaderManager::CompileCS("../../plugins/slam/scalable/rendering/cs_membrane_border.glsl", "main", DefineString.c_str());
         m_MembraneEvalBorderCSPtr = ShaderManager::CompileCS("../../plugins/slam/scalable/rendering/cs_membrane_eval_border.glsl", "main", DefineString.c_str());
+        m_MembranePropagateCSPtr = ShaderManager::CompileCS("../../plugins/slam/scalable/rendering/cs_membrane_propagate.glsl", "main", DefineString.c_str());
 
         SInputElementDescriptor InputLayoutDesc = {};
 
@@ -613,7 +616,7 @@ namespace
         TextureDescriptor.m_Access = CTexture::EAccess::CPURead;
         TextureDescriptor.m_Usage = CTexture::EUsage::GPUToCPU;
         TextureDescriptor.m_Semantic = CTexture::UndefinedSemantic;
-        TextureDescriptor.m_Format = CTexture::R8G8B8A8_BYTE;
+        TextureDescriptor.m_Format = CTexture::R16G16B16A16_FLOAT;
 
         m_MembranePatchesTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
         m_MembraneBordersTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
@@ -1297,8 +1300,6 @@ namespace
         ContextManager::Barrier();
         ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
 
-        ContextManager::ResetShaderCS();
-
         // -----------------------------------------------------------------------------
         // Evaluate color differences at the membrane border
         // -----------------------------------------------------------------------------
@@ -1311,7 +1312,35 @@ namespace
         ContextManager::Barrier();
         ContextManager::Dispatch(BorderPatchCount, 1, 1);
 
+        // -----------------------------------------------------------------------------
+        // Evaluate color differences at the membrane border
+        // -----------------------------------------------------------------------------
+
+        ContextManager::SetShaderCS(m_MembraneBorderCSPtr);
+
+        ContextManager::Barrier();
+        ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+
+        // -----------------------------------------------------------------------------
+        // Propagate differences
+        // -----------------------------------------------------------------------------
+
+        ContextManager::SetShaderCS(m_MembranePropagateCSPtr);
+
+        ContextManager::Barrier();
+        ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+
+        // -----------------------------------------------------------------------------
+        // Reset
+        // -----------------------------------------------------------------------------
+
         ContextManager::ResetShaderCS();
+
+        ContextManager::ResetImageTexture(0);
+        ContextManager::ResetImageTexture(1);
+        ContextManager::ResetImageTexture(2);
+        ContextManager::ResetImageTexture(3);
+        ContextManager::ResetResourceBuffer(0);
     }
 
     // -----------------------------------------------------------------------------

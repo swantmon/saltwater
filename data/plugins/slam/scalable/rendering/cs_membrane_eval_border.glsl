@@ -13,6 +13,9 @@ layout(std430, binding = 0) buffer BorderPatches
     vec4 g_PatchColors[MAX_BORDER_PATCH_COUNT];
 };
 
+shared int g_SampleCount[TILE_SIZE_2D * TILE_SIZE_2D];
+shared vec3 g_ColorSum[TILE_SIZE_2D * TILE_SIZE_2D];
+
 layout (local_size_x = TILE_SIZE_2D, local_size_y = TILE_SIZE_2D, local_size_z = 1) in;
 void main()
 {
@@ -23,7 +26,7 @@ void main()
     vec2 PatchPosition = g_PatchPositions[gl_WorkGroupID.x].xy * PATCH_SIZE;
     const ivec2 MembraneCoords = ivec2(PatchPosition + gl_LocalInvocationID.xy);
 
-    imageStore(cs_MembranePatches, MembraneCoords, vec4(1.0f, 0.0f, 0.0f, 1.0f));
+    imageStore(cs_MembraneBorders, MembraneCoords, vec4(0.0f, 0.0f, 0.0f, 1.0f));
 
     const vec2 NormalizedCoords = MembraneCoords / vec2(MembraneSize);
 
@@ -35,9 +38,34 @@ void main()
 
     if(Diminished.x > 0.0f)
     {
-        vec3 ColorDiff = Diminished - Background;
+        vec3 ColorDiff = Background - Diminished;
+
+        g_SampleCount[gl_LocalInvocationIndex] = 1;
+        g_ColorSum[gl_LocalInvocationIndex] = ColorDiff;
         imageStore(cs_MembraneBorders, MembraneCoords, vec4(ColorDiff, 1.0f));
     }
+    else
+    {
+        g_SampleCount[gl_LocalInvocationIndex] = 0;
+        g_ColorSum[gl_LocalInvocationIndex] = vec3(0.0f);
+    }
+    
+    for (int i = TILE_SIZE_2D * TILE_SIZE_2D / 2; i > 0; i /= 2)
+    {
+        barrier();
+
+        if (gl_LocalInvocationIndex < i)
+        {
+            g_SampleCount[gl_LocalInvocationIndex] += g_SampleCount[gl_LocalInvocationIndex + i];
+            g_ColorSum[gl_LocalInvocationIndex] += g_ColorSum[gl_LocalInvocationIndex + i];
+        }
+    }
+
+    barrier();
+
+    g_PatchColors[gl_WorkGroupID.x] = vec4(g_ColorSum[0] / g_SampleCount[0], 1.0f);
+
+    imageStore(cs_MembraneBorders, MembraneCoords, vec4(g_ColorSum[0] / g_SampleCount[0], 1.0f));
 }
 
 #endif //__INCLUDE_CS_YUV_TO_RGB_GLSL__
