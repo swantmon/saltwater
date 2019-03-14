@@ -27,7 +27,7 @@ bool IsInBox(vec3 Position)
 
 // -----------------------------------------------------------------------------
 
-vec3 GetDiminishedPosition(vec3 CameraPosition, vec3 RayDirection)
+vec4 GetDiminishedPosition(vec3 CameraPosition, vec3 RayDirection)
 {
     const float StartLength = max(RAYCAST_NEAR, GetStartLength(CameraPosition, RayDirection, g_AABBMin, g_AABBMax));
     const float EndLength = min(RAYCAST_FAR,GetEndLength(CameraPosition, RayDirection, g_AABBMin, g_AABBMax));
@@ -84,7 +84,7 @@ vec3 GetDiminishedPosition(vec3 CameraPosition, vec3 RayDirection)
         Vertex = CameraPosition + RayDirection * Ts;
     }
 
-    return hit ? Vertex : vec3(0.0f);
+    return hit ? vec4(Vertex, 1.0f) : vec4(Vertex, 0.0f);
 }
 
 // -----------------------------------------------------------------------------
@@ -118,25 +118,17 @@ void main()
     RayDirection.x = RayDirection.x == 0.0f ? 1e-15f : RayDirection.x;
     RayDirection.y = RayDirection.y == 0.0f ? 1e-15f : RayDirection.y;
     RayDirection.z = RayDirection.z == 0.0f ? 1e-15f : RayDirection.z;
- 
-    vec3 WSPosition, Color, Vertex;
 
-    Vertex = GetDiminishedPosition(CameraPosition, RayDirection);
+    vec4 Vertex = GetDiminishedPosition(CameraPosition, RayDirection);
 
     if (Vertex.x == 0.0f)
     {
         discard;
     }
     
-#ifdef CAPTURE_COLOR
-    Color = GetColor(Vertex);
-#else
-    Color = vec3(1.0f);
-#endif
+    vec3 Color = GetColor(Vertex.xyz);
     
-    vec4 FinalColor = vec4(Color, 1.0f);
-
-    out_DiminishedColor = FinalColor;
+    out_DiminishedColor = vec4(Color, Vertex.w);
 }
 
 #endif // __INCLUDE_FS_RAYCAST_DIMINISHED_GLSL__

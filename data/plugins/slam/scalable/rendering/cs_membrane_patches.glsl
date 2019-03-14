@@ -22,9 +22,9 @@ void main()
 
     imageStore(cs_MembraneBorders, MembraneCoords, vec4(0.0f));
 
-    vec3 Color = imageLoad(cs_Diminished, ImageCoords).rgb;
+    vec4 Color = imageLoad(cs_Diminished, ImageCoords);
 
-    if (dot(Color, vec3(1.0)) != 0.0)
+    if (Color.a > 0.5f)
     {
         atomicAdd(IsOverlapping, 1);
     }

@@ -21,7 +21,16 @@ void main()
     {
         discard;
     }
-    out_Color = texture(PlaneTexture, in_TexCoords);
+
+    if (Tex.x > 0.33f || Tex.y > 0.33f)
+    {
+    	out_Color = vec4(texture(PlaneTexture, in_TexCoords).rgb, 0.0f);
+    }
+    else
+    {
+    	out_Color = vec4(texture(PlaneTexture, in_TexCoords).rgb, 1.0f);
+    }
+
     //out_Color = vec4(1.0f, 0.0f, 0.0f, 1.0f);
 }
 
