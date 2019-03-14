@@ -2,8 +2,9 @@
 #define __INCLUDE_CS_YUV_TO_RGB_GLSL__
 
 layout (binding = 0, rgba8) uniform image2D cs_Diminished;
-layout (binding = 1, rgba8) uniform image2D cs_MembranePatches;
-layout (binding = 2, rgba8) uniform image2D cs_MembraneBorders;
+layout (binding = 1, rgba8) uniform image2D cs_Background;
+layout (binding = 2, rgba8) uniform image2D cs_MembranePatches;
+layout (binding = 3, rgba8) uniform image2D cs_MembraneBorders;
 
 shared int IsOverlapping;
 
