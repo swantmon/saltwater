@@ -238,10 +238,14 @@ namespace
 
         CShaderPtr m_PickingCSPtr;
 
-        CTexturePtr m_DiminishedTargetPtr;
+        CTexturePtr m_DiminishedRaycastTargetPtr;
+        CTexturePtr m_DiminishedPlaneTargetPtr;
         CTexturePtr m_DiminishedFinalTargetPtr;
-        CTargetSetPtr m_DiminishedTargetSetPtr;
+
+        CTargetSetPtr m_DiminishedRaycastTargetSetPtr;
+        CTargetSetPtr m_DiminishedPlaneTargetSetPtr;
         CTargetSetPtr m_DiminishedFinalTargetSetPtr;
+
         CViewPortSetPtr m_DiminishedViewPortSetPtr;
 
         CTexturePtr m_MembranePatchesTexturePtr; 
@@ -420,9 +424,13 @@ namespace
         m_InpaintedPlaneFSPtr = 0;
 
         m_DiminishedViewPortSetPtr = nullptr;
+
+        m_DiminishedRaycastTargetPtr = nullptr;
         m_DiminishedFinalTargetPtr = nullptr;
-        m_DiminishedTargetPtr = nullptr;
-        m_DiminishedTargetSetPtr = nullptr;
+        m_DiminishedPlaneTargetPtr = nullptr;
+
+        m_DiminishedRaycastTargetSetPtr = nullptr;
+        m_DiminishedPlaneTargetSetPtr = nullptr;
         m_DiminishedFinalTargetSetPtr = nullptr;
 
         m_InpaintedPlaneTexture = nullptr;
@@ -570,16 +578,20 @@ namespace
         TextureDescriptor.m_Semantic         = CTexture::UndefinedSemantic;
         TextureDescriptor.m_Format           = CTexture::R8G8B8A8_BYTE;
 
-        m_DiminishedTargetPtr = TextureManager::CreateTexture2D(TextureDescriptor);
+        m_DiminishedRaycastTargetPtr = TextureManager::CreateTexture2D(TextureDescriptor);
+        m_DiminishedPlaneTargetPtr = TextureManager::CreateTexture2D(TextureDescriptor);
         m_DiminishedFinalTargetPtr = TextureManager::CreateTexture2D(TextureDescriptor);
 
-        TextureManager::SetTextureLabel(m_DiminishedTargetPtr, "Diminished Texture");
+        TextureManager::SetTextureLabel(m_DiminishedRaycastTargetPtr, "Diminished Raycast Texture");
+        TextureManager::SetTextureLabel(m_DiminishedPlaneTargetPtr, "Diminished Plane Texture");
         TextureManager::SetTextureLabel(m_DiminishedFinalTargetPtr, "Diminished Final Texture");
 
-        m_DiminishedTargetSetPtr = TargetSetManager::CreateTargetSet(m_DiminishedTargetPtr);
+        m_DiminishedRaycastTargetSetPtr = TargetSetManager::CreateTargetSet(m_DiminishedRaycastTargetPtr);
+        m_DiminishedPlaneTargetSetPtr = TargetSetManager::CreateTargetSet(m_DiminishedPlaneTargetPtr);
         m_DiminishedFinalTargetSetPtr = TargetSetManager::CreateTargetSet(m_DiminishedFinalTargetPtr);
 
-        TargetSetManager::SetTargetSetLabel(m_DiminishedTargetSetPtr, "Diminished Target Set");
+        TargetSetManager::SetTargetSetLabel(m_DiminishedRaycastTargetSetPtr, "Diminished Raycast Target Set");
+        TargetSetManager::SetTargetSetLabel(m_DiminishedPlaneTargetSetPtr, "Diminished Plane Target Set");
         TargetSetManager::SetTargetSetLabel(m_DiminishedFinalTargetSetPtr, "Diminished Final Target Set");
     }
     
@@ -1141,6 +1153,8 @@ namespace
         ContextManager::SetShaderPS(m_RaycastDiminishedFSPtr);
 
         ContextManager::SetTexture(0, _BackgroundTexturePtr);
+
+        ContextManager::SetImageTexture(0, m_DiminishedPlaneTargetPtr);
 
         ContextManager::SetResourceBuffer(0, rVolume.m_RootVolumePoolPtr);
         ContextManager::SetResourceBuffer(1, rVolume.m_RootGridPoolPtr);
@@ -1810,26 +1824,30 @@ namespace
         {
             Performance::BeginEvent("Render diminished reality");
 
-            Gfx::TargetSetManager::ClearTargetSet(m_DiminishedTargetSetPtr);
+            Gfx::TargetSetManager::ClearTargetSet(m_DiminishedRaycastTargetSetPtr);
+            Gfx::TargetSetManager::ClearTargetSet(m_DiminishedPlaneTargetSetPtr);
             Gfx::TargetSetManager::ClearTargetSet(m_DiminishedFinalTargetSetPtr);
 
-            ContextManager::SetTargetSet(m_DiminishedTargetSetPtr);
+            ContextManager::SetTargetSet(m_DiminishedPlaneTargetSetPtr);
             ContextManager::SetViewPortSet(m_DiminishedViewPortSetPtr);
 
             //glEnable(GL_BLEND);
             //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
             RenderInpaintedPlane(_rPoseMatrix, _rAABB);
+
+            ContextManager::SetTargetSet(m_DiminishedRaycastTargetSetPtr);
+
             RaycastVolumeDiminished(_rPoseMatrix, _rAABB);
 
             //glDisable(GL_BLEND);
 
-            CreateMembrane(_BackgroundTexturePtr, m_DiminishedTargetPtr);
+            CreateMembrane(_BackgroundTexturePtr, m_DiminishedRaycastTargetPtr);
 
             if (_BackgroundTexturePtr != nullptr)
             {
                 ContextManager::SetTargetSet(m_DiminishedFinalTargetSetPtr);
-                CombineDiminishedImage(_BackgroundTexturePtr, m_DiminishedTargetPtr);
+                CombineDiminishedImage(_BackgroundTexturePtr, m_DiminishedRaycastTargetPtr);
             }
 
             Performance::EndEvent();

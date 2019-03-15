@@ -13,6 +13,8 @@ layout(std140, binding = 1) uniform PerDrawCallData
     mat4 g_WSToSelectionTransform;
 };
 
+layout (binding = 0, rgba8) uniform image2D cs_PlaneRendering;
+
 // -----------------------------------------------------------------------------
 // functions
 // -----------------------------------------------------------------------------
@@ -100,6 +102,8 @@ layout(location = 0) out vec4 out_DiminishedColor;
 // -----------------------------------------------------------------------------
 void main()
 {
+    vec3 PlaneColor = imageLoad(cs_PlaneRendering, ivec2(gl_FragCoord)).rgb;
+
     mat3 SaltwaterToReconstruction = mat3(
         1.0f, 0.0f,  0.0f,
         0.0f, 0.0f, -1.0f,
@@ -121,13 +125,13 @@ void main()
 
     vec4 Vertex = GetDiminishedPosition(CameraPosition, RayDirection);
 
-    if (Vertex.x == 0.0f)
+    vec3 Color = PlaneColor;
+
+    if (Color.x == 0.0f)
     {
-        discard;
+        Color = GetColor(Vertex.xyz);
     }
-    
-    vec3 Color = GetColor(Vertex.xyz);
-    
+
     out_DiminishedColor = vec4(Color, Vertex.w);
 }
 
