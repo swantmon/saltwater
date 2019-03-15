@@ -1149,8 +1149,8 @@ namespace
         ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::Default));
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
 
-        const glm::vec3 Min = _rAABB.GetMin();
-        const glm::vec3 Max = _rAABB.GetMax();
+        const glm::vec3 Min = _rAABB.GetMin() - 20.0f;
+        const glm::vec3 Max = _rAABB.GetMax() + 20.0f;
 
         glm::vec3 Vertices[8] =
         {
