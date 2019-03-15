@@ -246,6 +246,7 @@ namespace
 
         CTexturePtr m_MembranePatchesTexturePtr; 
         CTexturePtr m_MembraneBordersTexturePtr;
+        CTexturePtr m_MembraneTexturePtr;
 
         CBufferPtr m_PickingBuffer;
 
@@ -388,6 +389,7 @@ namespace
 
         m_MembranePatchesTexturePtr = 0;
         m_MembraneBordersTexturePtr = 0;
+        m_MembraneTexturePtr = 0;
 
         m_RaycastConstantBufferPtr = 0;
         m_RaycastHitProxyBufferPtr = 0;
@@ -610,8 +612,8 @@ namespace
     {
         STextureDescriptor TextureDescriptor = {};
 
-        TextureDescriptor.m_NumberOfPixelsU = 256;
-        TextureDescriptor.m_NumberOfPixelsV = 256;
+        TextureDescriptor.m_NumberOfPixelsU = m_PatchSize * m_PatchCount;
+        TextureDescriptor.m_NumberOfPixelsV = m_PatchSize * m_PatchCount;
         TextureDescriptor.m_NumberOfPixelsW = 1;
         TextureDescriptor.m_NumberOfMipMaps = 1;
         TextureDescriptor.m_NumberOfTextures = 1;
@@ -623,8 +625,15 @@ namespace
 
         m_MembranePatchesTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
         m_MembraneBordersTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
+
         TextureManager::SetTextureLabel(m_MembranePatchesTexturePtr, "Membrane Patches Texture");
         TextureManager::SetTextureLabel(m_MembraneBordersTexturePtr, "Membrane Borders Texture");
+
+        TextureDescriptor.m_NumberOfPixelsU = m_PatchCount;
+        TextureDescriptor.m_NumberOfPixelsV = m_PatchCount;
+
+        m_MembraneTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
+        TextureManager::SetTextureLabel(m_MembraneTexturePtr, "Membrane Final Texture");
 
     }
     
@@ -1239,7 +1248,7 @@ namespace
 
         ContextManager::SetTexture(0, _Background);        
         ContextManager::SetTexture(1, _Diminished);
-        ContextManager::SetTexture(2, m_MembraneBordersTexturePtr);
+        ContextManager::SetTexture(2, m_MembraneTexturePtr);
 
         SDrawCallConstantBuffer BufferData = {};
         BufferData.m_Color = glm::vec4(_IsFlipped ? 1.0f : 0.0f);
@@ -1275,6 +1284,7 @@ namespace
 
         TextureManager::ClearTexture(m_MembranePatchesTexturePtr);
         TextureManager::ClearTexture(m_MembraneBordersTexturePtr);
+        TextureManager::ClearTexture(m_MembraneTexturePtr);
 
         int32_t Zero = 0;
         BufferManager::UploadBufferData(m_MembranePatchBufferPtr, &Zero, 0, sizeof(Zero));
@@ -1283,6 +1293,7 @@ namespace
         ContextManager::SetImageTexture(1, _BackgroundTexturePtr);
         ContextManager::SetImageTexture(2, m_MembranePatchesTexturePtr);
         ContextManager::SetImageTexture(3, m_MembraneBordersTexturePtr);
+        ContextManager::SetImageTexture(4, m_MembraneTexturePtr);
         ContextManager::SetResourceBuffer(0, m_MembranePatchBufferPtr);
 
         // -----------------------------------------------------------------------------
