@@ -565,7 +565,9 @@ namespace MR
             }
             else if (_rEvent.GetAction() == Base::CInputEvent::MouseWheel)
             {
-                EnableDiminishedReality(m_ColorSize);
+                auto AABB = Gfx::ReconstructionRenderer::GetSelectionBox();
+
+                Gfx::ReconstructionRenderer::AddPositionToSelection(AABB.GetMax() + glm::vec3(0.0f, 0.0f, 0.1f));
             }
         }
 
