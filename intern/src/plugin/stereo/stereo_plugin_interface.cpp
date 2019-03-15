@@ -66,7 +66,7 @@ namespace Stereo
         else if (SeqImg.size() < ImgMaxCal)
         {
             SeqImg.resize(SeqImg.size() + 1);
-            int Seq_Idx = SeqImg.size() - 1; // Maybe can replace by iterator
+            int Seq_Idx = SeqImg.size() - 1; 
             SeqImg[Seq_Idx] = FutoGmtCV(Img_cv, K_cv, R_cv, T_cv);
         }
         else
@@ -90,6 +90,7 @@ namespace Stereo
 
                 //---Generate Rectified Images---
                 cv::Mat RectImg_Curt, RectImg_Next;
+
                 // iter->cal_PolarRect(RectImg_Curt, RectImg_Next, iterNext->get_Img(), F_mtx); //Applied Polar Rectification
                 iter->cal_PlanarRect(RectImg_Curt, RectImg_Next, *iterNext); //Applied Polar Rectification
 

@@ -28,8 +28,8 @@ namespace Stereo
           Trans_vec(T)
     {
         cv::Mat Transform_mtx(3, 4, CV_32F);
-        Transform_mtx.colRange(0, 2) = Rot_mtx.colRange(0, 2);
-        Transform_mtx.col(3) = Trans_vec.col(0);
+        Rot_mtx.colRange(0, 3).copyTo(Transform_mtx.colRange(0, 3));
+        Trans_vec.col(0).copyTo(Transform_mtx.col(3));
 
         P_mtx = K_mtx * Transform_mtx;
     }

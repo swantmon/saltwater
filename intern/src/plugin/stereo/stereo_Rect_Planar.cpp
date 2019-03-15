@@ -89,76 +89,78 @@ namespace Stereo
 
     void Rect_Planar::determ_RectiedImgSize(const cv::Size& ImgSize_OrigB, const cv::Size& ImgSize_OrigM)
     {
-        cv::Mat ImgCorner_OrigB_UL = cv::Mat::ones(3, 1, CV_32F);
-        ImgCorner_OrigB_UL.at<float>(0, 0) = 0;
-        ImgCorner_OrigB_UL.at<float>(1, 0) = 0;
-        float OrigB_UL00 = ImgCorner_OrigB_UL.at<float>(0, 0);
-        float OrigB_UL10 = ImgCorner_OrigB_UL.at<float>(1, 0);
-        float OrigB_UL20 = ImgCorner_OrigB_UL.at<float>(2, 0);
-        cv::Mat ImgCorner_OrigB_UR = cv::Mat::ones(3, 1, CV_32F);
-        ImgCorner_OrigB_UR.at<float>(0, 0) = ImgSize_OrigB.width;
-        ImgCorner_OrigB_UR.at<float>(1, 0) = 0;
-        cv::Mat ImgCorner_OrigB_DL = cv::Mat::ones(3, 1, CV_32F);
-        ImgCorner_OrigB_DL.at<float>(0, 0) = 0;
-        ImgCorner_OrigB_DL.at<float>(1, 0) = ImgSize_OrigB.height;
-        cv::Mat ImgCorner_OrigB_DR = cv::Mat::ones(3, 1, CV_32F);
-        ImgCorner_OrigB_DR.at<float>(0, 0) = ImgSize_OrigB.width;
-        ImgCorner_OrigB_DR.at<float>(1, 0) = ImgSize_OrigB.height;
-        float OrigB_DR00 = ImgCorner_OrigB_DR.at<float>(0, 0);
-        float OrigB_DR10 = ImgCorner_OrigB_DR.at<float>(1, 0);
-        float OrigB_DR20 = ImgCorner_OrigB_DR.at<float>(2, 0);
+        cv::Mat ImgCnrUL_OrigB = cv::Mat::ones(3, 1, CV_32F);
+        ImgCnrUL_OrigB.at<float>(0, 0) = 0;
+        ImgCnrUL_OrigB.at<float>(1, 0) = 0;
+        cv::Mat ImgCnrUR_OrigB = cv::Mat::ones(3, 1, CV_32F);
+        ImgCnrUR_OrigB.at<float>(0, 0) = ImgSize_OrigB.width;
+        ImgCnrUR_OrigB.at<float>(1, 0) = 0;
+        cv::Mat ImgCnrDL_OrigB = cv::Mat::ones(3, 1, CV_32F);
+        ImgCnrDL_OrigB.at<float>(0, 0) = 0;
+        ImgCnrDL_OrigB.at<float>(1, 0) = ImgSize_OrigB.height;
+        cv::Mat ImgCnrDR_OrigB = cv::Mat::ones(3, 1, CV_32F);
+        ImgCnrDR_OrigB.at<float>(0, 0) = ImgSize_OrigB.width;
+        ImgCnrDR_OrigB.at<float>(1, 0) = ImgSize_OrigB.height;
 
-        cv::Mat ImgCorner_OrigB2RectB_UL = H_B * ImgCorner_OrigB_UL;
-        ImgCorner_OrigB2RectB_UL = ImgCorner_OrigB2RectB_UL / ImgCorner_OrigB2RectB_UL.at<float>(2, 0);
-        float OrigB2RectB_UL00 = ImgCorner_OrigB2RectB_UL.at<float>(0, 0);
-        float OrigB2RectB_UL10 = ImgCorner_OrigB2RectB_UL.at<float>(1, 0);
-        float OrigB2RectB_UL20 = ImgCorner_OrigB2RectB_UL.at<float>(2, 0);
-        cv::Mat ImgCorner_OrigB2RectB_UR = H_B * ImgCorner_OrigB_UR;
-        ImgCorner_OrigB2RectB_UR = ImgCorner_OrigB2RectB_UR / ImgCorner_OrigB2RectB_UR.at<float>(2, 0);
-        float OrigB2RectB_UR00 = ImgCorner_OrigB2RectB_UL.at<float>(0, 0);
-        float OrigB2RectB_UR10 = ImgCorner_OrigB2RectB_UL.at<float>(1, 0);
-        float OrigB2RectB_UR20 = ImgCorner_OrigB2RectB_UL.at<float>(2, 0);
-        cv::Mat ImgCorner_OrigB2RectB_DL = H_B * ImgCorner_OrigB_DL;
-        ImgCorner_OrigB2RectB_DL = ImgCorner_OrigB2RectB_DL / ImgCorner_OrigB2RectB_DL.at<float>(2, 0);
-        float OrigB2RectB_DL00 = ImgCorner_OrigB2RectB_UL.at<float>(0, 0);
-        float OrigB2RectB_DL10 = ImgCorner_OrigB2RectB_UL.at<float>(1, 0);
-        float OrigB2RectB_DL20 = ImgCorner_OrigB2RectB_UL.at<float>(2, 0);
-        cv::Mat ImgCorner_OrigB2RectB_DR = H_B * ImgCorner_OrigB_DR;
-        ImgCorner_OrigB2RectB_DR = ImgCorner_OrigB2RectB_DR / ImgCorner_OrigB2RectB_DR.at<float>(2, 0);
-        float OrigB2RectB_DR00 = ImgCorner_OrigB2RectB_UL.at<float>(0, 0);
-        float OrigB2RectB_DR10 = ImgCorner_OrigB2RectB_UL.at<float>(1, 0);
-        float OrigB2RectB_DR20 = ImgCorner_OrigB2RectB_UL.at<float>(2, 0);
+        cv::Mat ImgCnrUL_Orig2Rect_B = H_B * ImgCnrUL_OrigB;
+        ImgCnrUL_Orig2Rect_B = ImgCnrUL_Orig2Rect_B / ImgCnrUL_Orig2Rect_B.at<float>(2, 0);
+        float OrigB2RectB_UL00 = ImgCnrUL_Orig2Rect_B.at<float>(0, 0);
+        float OrigB2RectB_UL10 = ImgCnrUL_Orig2Rect_B.at<float>(1, 0);
+        float OrigB2RectB_UL20 = ImgCnrUL_Orig2Rect_B.at<float>(2, 0);
+        cv::Mat ImgCnrUR_Orig2Rect_B = H_B * ImgCnrUR_OrigB;
+        ImgCnrUR_Orig2Rect_B = ImgCnrUR_Orig2Rect_B / ImgCnrUR_Orig2Rect_B.at<float>(2, 0);
+        float OrigB2RectB_UR00 = ImgCnrUR_Orig2Rect_B.at<float>(0, 0);
+        float OrigB2RectB_UR10 = ImgCnrUR_Orig2Rect_B.at<float>(1, 0);
+        float OrigB2RectB_UR20 = ImgCnrUR_Orig2Rect_B.at<float>(2, 0);
+        cv::Mat ImgCnrDL_Orig2Rect_B = H_B * ImgCnrDL_OrigB;
+        ImgCnrDL_Orig2Rect_B = ImgCnrDL_Orig2Rect_B / ImgCnrDL_Orig2Rect_B.at<float>(2, 0);
+        float OrigB2RectB_DL00 = ImgCnrDL_Orig2Rect_B.at<float>(0, 0);
+        float OrigB2RectB_DL10 = ImgCnrDL_Orig2Rect_B.at<float>(1, 0);
+        float OrigB2RectB_DL20 = ImgCnrDL_Orig2Rect_B.at<float>(2, 0);
+        cv::Mat ImgCnrDR_Orig2Rect_B = H_B * ImgCnrDR_OrigB;
+        ImgCnrDR_Orig2Rect_B = ImgCnrDR_Orig2Rect_B / ImgCnrDR_Orig2Rect_B.at<float>(2, 0);
+        float OrigB2RectB_DR00 = ImgCnrDR_Orig2Rect_B.at<float>(0, 0);
+        float OrigB2RectB_DR10 = ImgCnrDR_Orig2Rect_B.at<float>(1, 0);
+        float OrigB2RectB_DR20 = ImgCnrDR_Orig2Rect_B.at<float>(2, 0);
 
-        float ImgBound_RectB_x_min, ImgBound_RectB_x_max, ImgBound_RectB_y_min, ImgBound_RectB_y_max;
-        ImgBound_RectB_x_min = ImgCorner_OrigB2RectB_UL.at<float>(0, 0) <= ImgCorner_OrigB2RectB_DL.at<float>(0, 0) ? ImgCorner_OrigB2RectB_UL.at<float>(0, 0) : ImgCorner_OrigB2RectB_DL.at<float>(0, 0);
-        ImgBound_RectB_x_max = ImgCorner_OrigB2RectB_UR.at<float>(0, 0) >= ImgCorner_OrigB2RectB_DR.at<float>(0, 0) ? ImgCorner_OrigB2RectB_UR.at<float>(0, 0) : ImgCorner_OrigB2RectB_DR.at<float>(0, 0);
-        ImgBound_RectB_y_min = ImgCorner_OrigB2RectB_UL.at<float>(1, 0) <= ImgCorner_OrigB2RectB_UR.at<float>(1, 0) ? ImgCorner_OrigB2RectB_UL.at<float>(1, 0) : ImgCorner_OrigB2RectB_UR.at<float>(1, 0);
-        ImgBound_RectB_y_max = ImgCorner_OrigB2RectB_DL.at<float>(1, 0) >= ImgCorner_OrigB2RectB_DR.at<float>(1, 0) ? ImgCorner_OrigB2RectB_DL.at<float>(1, 0) : ImgCorner_OrigB2RectB_DR.at<float>(1, 0);
+        float ImgBound_RectB_x_min = std::min(ImgCnrUL_Orig2Rect_B.at<float>(0, 0), ImgCnrDL_Orig2Rect_B.at<float>(0, 0));
+        float ImgBound_RectB_y_min = std::min(ImgCnrUL_Orig2Rect_B.at<float>(1, 0), ImgCnrUR_Orig2Rect_B.at<float>(1, 0));
+        float ImgBound_RectB_x_max = std::max(ImgCnrUR_Orig2Rect_B.at<float>(0, 0), ImgCnrDR_Orig2Rect_B.at<float>(0, 0));
+        float ImgBound_RectB_y_max = std::max(ImgCnrDL_Orig2Rect_B.at<float>(1, 0), ImgCnrDR_Orig2Rect_B.at<float>(1, 0));
 
-        ImgSize_Rect_B = cv::Size(ImgBound_RectB_x_max - ImgBound_RectB_x_min, ImgBound_RectB_y_max - ImgBound_RectB_y_min);
+        //ImgSize_Rect_B = cv::Size(ImgBound_RectB_x_max, ImgBound_RectB_y_max);
 
-        cv::Mat ImgCorner_OrigM_UL(3, 1, CV_32F), ImgCorner_OrigM_UR(3, 1, CV_32F), ImgCorner_OrigM_DL(3, 1, CV_32F), ImgCorner_OrigM_DR(3, 1, CV_32F);
-        ImgCorner_OrigM_UL.col(0) = (0, 0, 1);
-        ImgCorner_OrigM_UR.col(0) = (ImgSize_OrigM.width, 0, 1);
-        ImgCorner_OrigM_DL.col(0) = (0, ImgSize_OrigM.height, 1);
-        ImgCorner_OrigM_DR.col(0) = (ImgSize_OrigM.width, ImgSize_OrigM.height, 1);
+        cv::Mat ImgCnrUL_OrigM = cv::Mat::ones(3, 1, CV_32F);
+        ImgCnrUL_OrigM.at<float>(0, 0) = 0;
+        ImgCnrUL_OrigM.at<float>(1, 0) = 0;
+        cv::Mat ImgCnrUR_OrigM = cv::Mat::ones(3, 1, CV_32F);
+        ImgCnrUR_OrigM.at<float>(0, 0) = ImgSize_OrigM.width;
+        ImgCnrUR_OrigM.at<float>(1, 0) = 0;
+        cv::Mat ImgCnrDL_OrigM = cv::Mat::ones(3, 1, CV_32F);
+        ImgCnrDL_OrigM.at<float>(0, 0) = 0;
+        ImgCnrDL_OrigM.at<float>(1, 0) = ImgSize_OrigM.height;
+        cv::Mat ImgCnrDR_OrigM = cv::Mat::ones(3, 1, CV_32F);
+        ImgCnrDR_OrigM.at<float>(0, 0) = ImgSize_OrigM.width;
+        ImgCnrDR_OrigM.at<float>(1, 0) = ImgSize_OrigM.height;
 
-        cv::Mat ImgCorner_OrigM2RectM_UL = H_M * ImgCorner_OrigM_UL;
-        ImgCorner_OrigM2RectM_UL = ImgCorner_OrigM2RectM_UL / ImgCorner_OrigM2RectM_UL.at<float>(2, 0);
-        cv::Mat ImgCorner_OrigM2RectM_UR = H_M * ImgCorner_OrigM_UR;
-        ImgCorner_OrigM2RectM_UR = ImgCorner_OrigM2RectM_UR / ImgCorner_OrigM2RectM_UR.at<float>(2, 0);
-        cv::Mat ImgCorner_OrigM2RectM_DL = H_M * ImgCorner_OrigM_DL;
-        ImgCorner_OrigM2RectM_DL = ImgCorner_OrigM2RectM_DL / ImgCorner_OrigM2RectM_DL.at<float>(2, 0);
-        cv::Mat ImgCorner_OrigM2RectM_DR = H_M * ImgCorner_OrigM_DR;
-        ImgCorner_OrigM2RectM_DR = ImgCorner_OrigM2RectM_DR / ImgCorner_OrigM2RectM_DR.at<float>(2, 0);
+        cv::Mat ImgCnrUL_Orig2Rect_M = H_M * ImgCnrUL_OrigM;
+        ImgCnrUL_Orig2Rect_M = ImgCnrUL_Orig2Rect_M / ImgCnrUL_Orig2Rect_M.at<float>(2, 0);
+        
+        cv::Mat ImgCnrUR_Orig2Rect_M = H_M * ImgCnrUR_OrigM;
+        ImgCnrUR_Orig2Rect_M = ImgCnrUR_Orig2Rect_M / ImgCnrUR_Orig2Rect_M.at<float>(2, 0);
+        
+        cv::Mat ImgCnrDL_Orig2Rect_M = H_M * ImgCnrDL_OrigM;
+        ImgCnrDL_Orig2Rect_M = ImgCnrDL_Orig2Rect_M / ImgCnrDL_Orig2Rect_M.at<float>(2, 0);
+        
+        cv::Mat ImgCnrDR_Orig2Rect_M = H_M * ImgCnrDR_OrigM;
+        ImgCnrDR_Orig2Rect_M = ImgCnrDR_Orig2Rect_M / ImgCnrDR_Orig2Rect_M.at<float>(2, 0);
 
-        float ImgBound_RectM_x_min, ImgBound_RectM_x_max, ImgBound_RectM_y_min, ImgBound_RectM_y_max;
-        ImgBound_RectM_x_min = ImgCorner_OrigM2RectM_UL.at<float>(0, 0) <= ImgCorner_OrigM2RectM_DL.at<float>(0, 0) ? ImgCorner_OrigM2RectM_UL.at<float>(0, 0) : ImgCorner_OrigM2RectM_DL.at<float>(0, 0);
-        ImgBound_RectM_x_max = ImgCorner_OrigM2RectM_UR.at<float>(0, 0) >= ImgCorner_OrigM2RectM_DR.at<float>(0, 0) ? ImgCorner_OrigM2RectM_UR.at<float>(0, 0) : ImgCorner_OrigM2RectM_DR.at<float>(0, 0);
-        ImgBound_RectM_y_min = ImgCorner_OrigM2RectM_UL.at<float>(1, 0) <= ImgCorner_OrigM2RectM_UR.at<float>(1, 0) ? ImgCorner_OrigM2RectM_UL.at<float>(1, 0) : ImgCorner_OrigM2RectM_UR.at<float>(1, 0);
-        ImgBound_RectM_y_max = ImgCorner_OrigM2RectM_DL.at<float>(1, 0) >= ImgCorner_OrigM2RectM_DR.at<float>(1, 0) ? ImgCorner_OrigM2RectM_DL.at<float>(1, 0) : ImgCorner_OrigM2RectM_DR.at<float>(1, 0);
+        float ImgBound_RectM_x_min = std::min(ImgCnrUL_Orig2Rect_M.at<float>(0, 0), ImgCnrDL_Orig2Rect_M.at<float>(0, 0));
+        float ImgBound_RectM_y_min = std::min(ImgCnrUL_Orig2Rect_M.at<float>(1, 0), ImgCnrUR_Orig2Rect_M.at<float>(1, 0));
+        float ImgBound_RectM_x_max = std::max(ImgCnrUR_Orig2Rect_M.at<float>(0, 0), ImgCnrDR_Orig2Rect_M.at<float>(0, 0));
+        float ImgBound_RectM_y_max = std::max(ImgCnrDL_Orig2Rect_M.at<float>(1, 0), ImgCnrDR_Orig2Rect_M.at<float>(1, 0));
 
-        ImgSize_Rect_M = cv::Size(ImgBound_RectM_x_max - ImgBound_RectM_x_min, ImgBound_RectM_y_max - ImgBound_RectM_y_min);
+        //ImgSize_Rect_M = cv::Size(ImgBound_RectM_x_max - ImgBound_RectM_x_min, ImgBound_RectM_y_max - ImgBound_RectM_y_min);
     }
 
     //---Compute Orientations---
@@ -171,21 +173,30 @@ namespace Stereo
     {
         R_Rect = cv::Mat(3, 3, CV_32F);
 
-        cv::Mat BaseLine = t_Orig_B - t_Orig_M;
+        cv::Mat R_Rect_row0 = t_Orig_B - t_Orig_M;
+        R_Rect_row0 = R_Rect_row0 / cv::norm(R_Rect_row0, cv::NORM_L2);
+        cv::transpose(R_Rect_row0, R_Rect_row0);
 
-        R_Rect.row(0) = BaseLine / cv::norm(BaseLine, cv::NORM_L2);
-        R_Rect.row(1) = R_Orig_B.row(2).cross(R_Rect.row(0));
-        R_Rect.row(2) = R_Rect.row(0).cross(R_Rect.row(1));
+        cv::Mat R_Rect_row1 = R_Orig_B.row(2).cross(R_Rect_row0);
+        R_Rect_row1 = R_Rect_row1 / cv::norm(R_Rect_row1, cv::NORM_L2);
+
+        cv::Mat R_Rect_row2 = R_Rect_row0.cross(R_Rect_row1);
+        R_Rect_row2 = R_Rect_row2 / cv::norm(R_Rect_row2, cv::NORM_L2);
+
+        R_Rect_row0.copyTo(R_Rect.row(0));
+        R_Rect_row1.copyTo(R_Rect.row(1));
+        R_Rect_row2.copyTo(R_Rect.row(2));
     }
 
     void Rect_Planar::cal_P_Rect(const cv::Mat& t_Orig_B, const cv::Mat& t_Orig_M)
     {
         cv::Mat Trans_Rect_B(3, 4, CV_32F);
-        Trans_Rect_B.colRange(0, 2) = R_Rect.colRange(0, 2);
-        Trans_Rect_B.col(3) = t_Orig_B.col(0);
+        R_Rect.colRange(0, 3).copyTo(Trans_Rect_B.colRange(0, 3)); // StartCol is inclusive while EndCol is exclusive
+        t_Orig_B.col(0).copyTo(Trans_Rect_B.col(3));
+
         cv::Mat Trans_Rect_M(3, 4, CV_32F);
-        Trans_Rect_M.colRange(0, 2) = R_Rect.colRange(0, 2);
-        Trans_Rect_M.col(3) = t_Orig_M.col(0);
+        R_Rect.colRange(0, 3).copyTo(Trans_Rect_M.colRange(0, 3)); // StartCol is inclusive while EndCol is exclusive
+        t_Orig_M.col(0).copyTo(Trans_Rect_M.col(3));
 
         P_Rect_B = K_Rect * Trans_Rect_B;
         P_Rect_M = K_Rect * Trans_Rect_M;
@@ -193,7 +204,7 @@ namespace Stereo
 
     void Rect_Planar::cal_H(const cv::Mat& P_Orig_B, cv::Mat& P_Orig_M)
     {
-        H_B = P_Rect_B * P_Orig_B.inv(cv::DECOMP_SVD);
+        H_B = P_Rect_B * P_Orig_B.inv(cv::DECOMP_SVD); 
         float H_B_00 = H_B.at<float>(0, 0);
         float H_B_01 = H_B.at<float>(0, 1);
         float H_B_02 = H_B.at<float>(0, 2);
