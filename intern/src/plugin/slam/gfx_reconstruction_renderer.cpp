@@ -1310,6 +1310,11 @@ namespace
         int32_t BorderPatchCount = *reinterpret_cast<int32_t*>(BufferManager::MapBufferRange(m_MembranePatchBufferPtr, Gfx::CBuffer::Read, 0, sizeof(int32_t)));
         BufferManager::UnmapBuffer(m_MembranePatchBufferPtr);
 
+        if (BorderPatchCount == 0)
+        {
+            return;
+        }
+
         ContextManager::SetShaderCS(m_MembraneEvalBorderCSPtr);
 
         ContextManager::Barrier();
