@@ -25,12 +25,16 @@ void main()
 	vec4 Diminished = texture(g_DiminishedImage, in_TexCoordsFlipped);
 	vec4 Membrane = texture(g_Membrane, in_TexCoordsFlipped);
 
+	vec3 Color;
+
 	if (Diminished.a < 0.5f)
 	{
-		Diminished.rgb = Diminished.rgb / 2.0f;
+		Color = Background.rgb;
 	}
-
-	vec3 Color = Background.rgb + Diminished.rgb + Membrane.rgb;
+	else
+	{
+		Color = Diminished.rgb + Membrane.rgb;
+	}
 
     out_Color = vec4(Color, 1.0f);
 }
