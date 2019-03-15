@@ -72,7 +72,8 @@ namespace PM
 
         cv::cvtColor(Source4, Source3, CV_BGRA2RGB);
 
-        cv::Mat_<uchar> Mask(Source3.size());
+        uchar NonMaskValue = 255;
+        cv::Mat_<uchar> Mask(Source3.rows, Source3.cols, NonMaskValue);
 
         for (int r = 0; r < Source3.rows; ++r)
         {
@@ -83,10 +84,10 @@ namespace PM
                 if (color[0] == 255 && color[1] == 255 && color[2] == 255)
                 {
                     Mask(r, c) = 0;
-                }
-                else
-                {
-                    Mask(r, c) = 255;
+                    Mask(r + 2, c    ) = 0;
+                    Mask(r - 2, c    ) = 0;
+                    Mask(r    , c + 2) = 0;
+                    Mask(r    , c - 2) = 0;
                 }
             }
         }
