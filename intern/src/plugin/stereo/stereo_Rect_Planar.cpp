@@ -161,6 +161,13 @@ namespace Stereo
         float ImgBound_RectM_y_max = std::max(ImgCnrDL_Orig2Rect_M.at<float>(1, 0), ImgCnrDR_Orig2Rect_M.at<float>(1, 0));
 
         //ImgSize_Rect_M = cv::Size(ImgBound_RectM_x_max - ImgBound_RectM_x_min, ImgBound_RectM_y_max - ImgBound_RectM_y_min);
+
+        // Test: Inverse Homography transform
+        cv::Mat ImgCnrUR_Rect2Orig_M = H_M.inv() * ImgCnrUR_Orig2Rect_M;
+        ImgCnrUR_Rect2Orig_M = ImgCnrUR_Rect2Orig_M / ImgCnrUR_Rect2Orig_M.at<float>(2, 0);
+        float Rect_Orig_M_UR00 = ImgCnrUR_Rect2Orig_M.at<float>(0, 0);
+        float Rect_Orig_M_UR10 = ImgCnrUR_Rect2Orig_M.at<float>(1, 0);
+        float Rect_Orig_M_UR20 = ImgCnrUR_Rect2Orig_M.at<float>(2, 0);
     }
 
     //---Compute Orientations---
