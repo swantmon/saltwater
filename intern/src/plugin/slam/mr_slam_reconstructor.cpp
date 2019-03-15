@@ -1758,7 +1758,7 @@ namespace MR
 
     void CSLAMReconstructor::ClearPool()
     {
-        const uint32_t DataSize = g_MegabyteSize / 4;
+        const uint32_t DataSize = g_MegabyteSize;
 
         std::vector<int> Data(g_MegabyteSize / sizeof(int));
         std::memset(Data.data(), -1, DataSize);
