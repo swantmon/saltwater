@@ -204,7 +204,8 @@ namespace
         CShaderPtr m_MembranePatchesCSPtr;
         CShaderPtr m_MembraneBorderCSPtr;
         CShaderPtr m_MembraneEvalBorderCSPtr;
-        CShaderPtr m_MembranePropagateCSPtr;
+        CShaderPtr m_MembranePropagateGridCSPtr;
+        CShaderPtr m_MembranePropagatePixelsCSPtr;
 
         CBufferPtr m_RaycastConstantBufferPtr;
         CBufferPtr m_RaycastHitProxyBufferPtr;
@@ -380,7 +381,8 @@ namespace
         m_MembranePatchesCSPtr = 0;
         m_MembraneBorderCSPtr = 0;
         m_MembraneEvalBorderCSPtr = 0;
-        m_MembranePropagateCSPtr = 0;
+        m_MembranePropagateGridCSPtr = 0;
+        m_MembranePropagatePixelsCSPtr = 0;
         
         m_PickingBuffer = 0;
 
@@ -506,7 +508,8 @@ namespace
         m_MembranePatchesCSPtr = ShaderManager::CompileCS("../../plugins/slam/scalable/rendering/cs_membrane_patches.glsl", "main", DefineString.c_str());
         m_MembraneBorderCSPtr = ShaderManager::CompileCS("../../plugins/slam/scalable/rendering/cs_membrane_border.glsl", "main", DefineString.c_str());
         m_MembraneEvalBorderCSPtr = ShaderManager::CompileCS("../../plugins/slam/scalable/rendering/cs_membrane_eval_border.glsl", "main", DefineString.c_str());
-        m_MembranePropagateCSPtr = ShaderManager::CompileCS("../../plugins/slam/scalable/rendering/cs_membrane_propagate.glsl", "main", DefineString.c_str());
+        m_MembranePropagateGridCSPtr = ShaderManager::CompileCS("../../plugins/slam/scalable/rendering/cs_membrane_propagate_grid.glsl", "main", DefineString.c_str());
+        m_MembranePropagatePixelsCSPtr = ShaderManager::CompileCS("../../plugins/slam/scalable/rendering/cs_membrane_propagate_pixels.glsl", "main", DefineString.c_str());
 
         SInputElementDescriptor InputLayoutDesc = {};
 
@@ -1223,7 +1226,7 @@ namespace
         assert(_Background != nullptr);
         assert(_Diminished != nullptr);
 
-        Performance::BeginEvent("Render background");
+        Performance::BeginEvent("Combine diminished image");
 
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
 
@@ -1313,10 +1316,19 @@ namespace
         ContextManager::Dispatch(BorderPatchCount, 1, 1);
 
         // -----------------------------------------------------------------------------
-        // Propagate differences
+        // Propagate differences to grid
         // -----------------------------------------------------------------------------
 
-        ContextManager::SetShaderCS(m_MembranePropagateCSPtr);
+        ContextManager::SetShaderCS(m_MembranePropagateGridCSPtr);
+
+        ContextManager::Barrier();
+        ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+
+        // -----------------------------------------------------------------------------
+        // Propagate differences to pixels
+        // -----------------------------------------------------------------------------
+
+        ContextManager::SetShaderCS(m_MembranePropagatePixelsCSPtr);
 
         ContextManager::Barrier();
         ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);

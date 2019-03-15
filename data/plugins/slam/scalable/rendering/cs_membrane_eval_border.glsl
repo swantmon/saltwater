@@ -63,7 +63,10 @@ void main()
 
     barrier();
 
-    g_PatchColors[gl_WorkGroupID.x] = vec4(g_ColorSum[0] / g_SampleCount[0], 1.0f);
+    if (gl_LocalInvocationIndex == 0)
+    {
+        g_PatchColors[gl_WorkGroupID.x] = vec4(g_ColorSum[0] / g_SampleCount[0], 1.0f);
+    }
 
     imageStore(cs_MembraneBorders, MembraneCoords, vec4(g_ColorSum[0] / g_SampleCount[0], 1.0f));
 }

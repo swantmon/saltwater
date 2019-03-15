@@ -15,7 +15,6 @@ layout(std430, binding = 0) buffer BorderPatches
 
 shared float g_WeightSum[MAX_BORDER_PATCH_COUNT];
 shared vec3 g_WeightedColorSum[MAX_BORDER_PATCH_COUNT];
-shared int g_Valid[MAX_BORDER_PATCH_COUNT];
 
 layout (local_size_x = MAX_BORDER_PATCH_COUNT, local_size_y = 1, local_size_z = 1) in;
 void main()
@@ -29,15 +28,15 @@ void main()
 
     bool IsBorder = gl_LocalInvocationIndex < g_Count;
 
-    vec2 PatchPosition = vec2(gl_WorkGroupID.xy + 0.5f) * PATCH_SIZE;
+    vec2 PatchPosition = vec2(gl_WorkGroupID.xy + 0.5f);
 
     vec2 BorderPosition = vec2(0.0f);
     vec3 BorderColor = vec3(0.0f);
 
     if (IsBorder)
     {
-        vec2 BorderPosition = g_PatchPositions[gl_LocalInvocationIndex].xy;
-        vec3 BorderColor = g_PatchColors[gl_LocalInvocationIndex].rgb;
+        BorderPosition = g_PatchPositions[gl_LocalInvocationIndex].xy;
+        BorderColor = g_PatchColors[gl_LocalInvocationIndex].rgb;
     }
 
     float d = distance(PatchPosition, BorderPosition);
@@ -46,7 +45,6 @@ void main()
 
     g_WeightSum[gl_LocalInvocationIndex] = Weight;
     g_WeightedColorSum[gl_LocalInvocationIndex] = Weight * BorderColor;
-    g_Valid[gl_LocalInvocationIndex] = IsBorder ? 1 : 0;
 
     for (int i = MAX_BORDER_PATCH_COUNT / 2; i > 0; i /= 2)
     {
@@ -56,7 +54,6 @@ void main()
         {
             g_WeightSum[gl_LocalInvocationIndex] += g_WeightSum[gl_LocalInvocationIndex + i];
             g_WeightedColorSum[gl_LocalInvocationIndex] += g_WeightedColorSum[gl_LocalInvocationIndex + i];
-            g_Valid[gl_LocalInvocationIndex] += g_Valid[gl_LocalInvocationIndex + i];
         }
     }
 
@@ -64,7 +61,7 @@ void main()
 
     if (gl_LocalInvocationIndex == 0)
     {
-        imageStore(cs_MembranePatches, ivec2(gl_WorkGroupID * PATCH_SIZE), vec4(g_Valid[0], 1.0f, 0.0f, 1.0f));
+        imageStore(cs_MembraneBorders, ivec2(gl_WorkGroupID * PATCH_SIZE), vec4(g_WeightedColorSum[0] / g_WeightSum[0], 1.0f));
     }
 }
 
