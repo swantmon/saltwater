@@ -20,7 +20,7 @@ layout(std430, binding = 1) buffer BorderPatches
     vec4 g_PatchColors[MAX_BORDER_PATCH_COUNT];
 };
 
-layout (local_size_x = TILE_SIZE_2D, local_size_y = TILE_SIZE_2D, local_size_z = 1) in;
+layout (local_size_x = PATCH_SIZE, local_size_y = PATCH_SIZE, local_size_z = 1) in;
 void main()
 {
     const ivec2 Coords = ivec2(gl_GlobalInvocationID.xy);
@@ -28,10 +28,10 @@ void main()
     bool IsMarked = imageLoad(cs_MembranePatches, Coords).r > 0.5f;
 
     bvec4 IsNeighbour;
-    IsNeighbour.x = imageLoad(cs_MembranePatches, Coords + ivec2(            0,  TILE_SIZE_2D)).r > 0.5f;
-    IsNeighbour.y = imageLoad(cs_MembranePatches, Coords + ivec2(            0, -TILE_SIZE_2D)).r > 0.5f;
-    IsNeighbour.z = imageLoad(cs_MembranePatches, Coords + ivec2( TILE_SIZE_2D,             0)).r > 0.5f;
-    IsNeighbour.w = imageLoad(cs_MembranePatches, Coords + ivec2(-TILE_SIZE_2D,             0)).r > 0.5f;
+    IsNeighbour.x = imageLoad(cs_MembranePatches, Coords + ivec2(            0,  PATCH_SIZE)).r > 0.5f;
+    IsNeighbour.y = imageLoad(cs_MembranePatches, Coords + ivec2(            0, -PATCH_SIZE)).r > 0.5f;
+    IsNeighbour.z = imageLoad(cs_MembranePatches, Coords + ivec2( PATCH_SIZE,             0)).r > 0.5f;
+    IsNeighbour.w = imageLoad(cs_MembranePatches, Coords + ivec2(-PATCH_SIZE,             0)).r > 0.5f;
 
     if (any(IsNeighbour) && !IsMarked)
     {

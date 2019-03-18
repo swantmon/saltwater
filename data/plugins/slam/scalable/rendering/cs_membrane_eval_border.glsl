@@ -20,10 +20,10 @@ layout(std430, binding = 1) buffer BorderPatches
     vec4 g_PatchColors[MAX_BORDER_PATCH_COUNT];
 };
 
-shared int g_SampleCount[TILE_SIZE_2D * TILE_SIZE_2D];
-shared vec3 g_ColorSum[TILE_SIZE_2D * TILE_SIZE_2D];
+shared int g_SampleCount[PATCH_SIZE * PATCH_SIZE];
+shared vec3 g_ColorSum[PATCH_SIZE * PATCH_SIZE];
 
-layout (local_size_x = TILE_SIZE_2D, local_size_y = TILE_SIZE_2D, local_size_z = 1) in;
+layout (local_size_x = PATCH_SIZE, local_size_y = PATCH_SIZE, local_size_z = 1) in;
 void main()
 {
     ivec2 BackgroundSize = imageSize(cs_Background);
@@ -57,7 +57,7 @@ void main()
         g_ColorSum[gl_LocalInvocationIndex] = vec3(0.0f);
     }
     
-    for (int i = TILE_SIZE_2D * TILE_SIZE_2D / 2; i > 0; i /= 2)
+    for (int i = PATCH_SIZE * PATCH_SIZE / 2; i > 0; i /= 2)
     {
         barrier();
 

@@ -1301,8 +1301,8 @@ namespace
         // Prepare membrane data
         // -----------------------------------------------------------------------------
 
-        const int WorkGroupsX = DivUp(256, g_TileSize2D);
-        const int WorkGroupsY = DivUp(256, g_TileSize2D);
+        const int WorkGroupsX = m_PatchCount;
+        const int WorkGroupsY = m_PatchCount;
 
         TextureManager::ClearTexture(m_MembranePatchesTexturePtr);
         TextureManager::ClearTexture(m_MembraneBordersTexturePtr);

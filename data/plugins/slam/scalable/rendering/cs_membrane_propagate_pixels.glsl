@@ -28,7 +28,7 @@ void main()
 
     vec3 GridColor = imageLoad(cs_MembraneBorders, Coords - (Coords % PATCH_SIZE)).rgb;
     
-    imageStore(cs_MembraneFinale, Coords / 16, vec4(GridColor, 1.0f));
+    imageStore(cs_MembraneFinale, Coords / PATCH_SIZE, vec4(GridColor, 1.0f));
 }
 
 #endif //__INCLUDE_CS_YUV_TO_RGB_GLSL__

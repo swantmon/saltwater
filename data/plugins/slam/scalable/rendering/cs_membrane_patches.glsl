@@ -8,7 +8,7 @@ layout (binding = 3, rgba16f) uniform image2D cs_MembraneBorders;
 
 shared int IsOverlapping;
 
-layout (local_size_x = TILE_SIZE_2D, local_size_y = TILE_SIZE_2D, local_size_z = 1) in;
+layout (local_size_x = PATCH_SIZE, local_size_y = PATCH_SIZE, local_size_z = 1) in;
 void main()
 {
     if (gl_LocalInvocationIndex == 0)
