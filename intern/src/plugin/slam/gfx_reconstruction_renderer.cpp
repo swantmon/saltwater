@@ -1341,18 +1341,10 @@ namespace
         // Evaluate color differences at the membrane border
         // -----------------------------------------------------------------------------
 
-        uint32_t BorderPatchCount = *reinterpret_cast<int32_t*>(BufferManager::MapBufferRange(m_MembraneIndirectBufferPtr, Gfx::CBuffer::Read, 0, sizeof(uint32_t)));
-        BufferManager::UnmapBuffer(m_MembranePatchBufferPtr);
-
-        if (BorderPatchCount == 0)
-        {
-            return;
-        }
-
         ContextManager::SetShaderCS(m_MembraneEvalBorderCSPtr);
 
         ContextManager::Barrier();
-        ContextManager::Dispatch(BorderPatchCount, 1, 1);
+        ContextManager::DispatchIndirect(m_MembraneIndirectBufferPtr, 0);
 
         // -----------------------------------------------------------------------------
         // Propagate differences to grid
@@ -1383,6 +1375,7 @@ namespace
         ContextManager::ResetImageTexture(2);
         ContextManager::ResetImageTexture(3);
         ContextManager::ResetResourceBuffer(0);
+        ContextManager::ResetResourceBuffer(1);
     }
 
     // -----------------------------------------------------------------------------
