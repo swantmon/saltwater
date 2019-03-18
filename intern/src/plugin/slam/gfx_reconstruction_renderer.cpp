@@ -212,6 +212,7 @@ namespace
         CBufferPtr m_RaycastHighLightConstantBufferPtr;
         CBufferPtr m_DrawCallConstantBufferPtr;
 
+        CBufferPtr m_MembraneIndirectBufferPtr;
         CBufferPtr m_MembranePatchBufferPtr;
                 
         CMeshPtr m_CameraMeshPtr;
@@ -403,7 +404,8 @@ namespace
         m_DrawCallConstantBufferPtr = 0;
 
         m_MembranePatchBufferPtr = 0;
-        
+        m_MembraneIndirectBufferPtr = 0;
+
         m_CameraMeshPtr = 0;
         m_VolumeMeshPtr = 0;
         m_InpaintedPlaneMeshPtr = 0;
@@ -692,11 +694,15 @@ namespace
         ConstantBufferDesc.m_Usage = CBuffer::GPURead;
         ConstantBufferDesc.m_Binding = CBuffer::ResourceBuffer;
         ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
-        ConstantBufferDesc.m_NumberOfBytes = sizeof(int) + m_MaxBorderPatchCount * 2 * sizeof(glm::vec4);
+        ConstantBufferDesc.m_NumberOfBytes = m_MaxBorderPatchCount * 2 * sizeof(glm::vec4);
         ConstantBufferDesc.m_pBytes = nullptr;
         ConstantBufferDesc.m_pClassKey = 0;
 
         m_MembranePatchBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
+
+        ConstantBufferDesc.m_NumberOfBytes = 4 * sizeof(int32_t);
+
+        m_MembraneIndirectBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
     }
     
     // -----------------------------------------------------------------------------
@@ -1302,15 +1308,16 @@ namespace
         TextureManager::ClearTexture(m_MembraneBordersTexturePtr);
         TextureManager::ClearTexture(m_MembraneTexturePtr);
 
-        int32_t Zero = 0;
-        BufferManager::UploadBufferData(m_MembranePatchBufferPtr, &Zero, 0, sizeof(Zero));
+        uint32_t Indirect[] = {0, 1, 1};
+        BufferManager::UploadBufferData(m_MembraneIndirectBufferPtr, &Indirect, 0, sizeof(Indirect));
 
         ContextManager::SetImageTexture(0, _Diminished);
         ContextManager::SetImageTexture(1, _BackgroundTexturePtr);
         ContextManager::SetImageTexture(2, m_MembranePatchesTexturePtr);
         ContextManager::SetImageTexture(3, m_MembraneBordersTexturePtr);
         ContextManager::SetImageTexture(4, m_MembraneTexturePtr);
-        ContextManager::SetResourceBuffer(0, m_MembranePatchBufferPtr);
+        ContextManager::SetResourceBuffer(0, m_MembraneIndirectBufferPtr);
+        ContextManager::SetResourceBuffer(1, m_MembranePatchBufferPtr);
 
         // -----------------------------------------------------------------------------
         // Find inner membrane patches
@@ -1334,7 +1341,7 @@ namespace
         // Evaluate color differences at the membrane border
         // -----------------------------------------------------------------------------
 
-        int32_t BorderPatchCount = *reinterpret_cast<int32_t*>(BufferManager::MapBufferRange(m_MembranePatchBufferPtr, Gfx::CBuffer::Read, 0, sizeof(int32_t)));
+        uint32_t BorderPatchCount = *reinterpret_cast<int32_t*>(BufferManager::MapBufferRange(m_MembraneIndirectBufferPtr, Gfx::CBuffer::Read, 0, sizeof(uint32_t)));
         BufferManager::UnmapBuffer(m_MembranePatchBufferPtr);
 
         if (BorderPatchCount == 0)

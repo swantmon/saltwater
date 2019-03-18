@@ -6,9 +6,16 @@ layout (binding = 1, rgba8) uniform image2D cs_Background;
 layout (binding = 2, rgba16f) uniform image2D cs_MembranePatches;
 layout (binding = 3, rgba16f) uniform image2D cs_MembraneBorders;
 
-layout(std430, binding = 0) buffer BorderPatches
+layout(std430, binding = 0) buffer Indirect
 {
-    int g_Count;
+    uint g_Count;
+    uint g_Y;
+    uint g_Z;
+    uint g_Unused;
+};
+
+layout(std430, binding = 1) buffer BorderPatches
+{
     vec4 g_PatchPositions[MAX_BORDER_PATCH_COUNT];
     vec4 g_PatchColors[MAX_BORDER_PATCH_COUNT];
 };
@@ -32,7 +39,7 @@ void main()
 
         if (gl_LocalInvocationIndex == 0)
         {
-            int Index = atomicAdd(g_Count, 1);
+            uint Index = atomicAdd(g_Count, 1);
             g_PatchPositions[Index] = vec4(gl_WorkGroupID.xy, 0.0f, 0.0f);
         }
     }

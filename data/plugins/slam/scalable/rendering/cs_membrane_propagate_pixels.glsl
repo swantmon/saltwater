@@ -7,9 +7,16 @@ layout (binding = 2, rgba16f) uniform image2D cs_MembranePatches;
 layout (binding = 3, rgba16f) uniform image2D cs_MembraneBorders;
 layout (binding = 4, rgba16f) uniform image2D cs_MembraneFinale;
 
-layout(std430, binding = 0) buffer BorderPatches
+layout(std430, binding = 0) buffer Indirect
 {
-    int g_Count;
+    uint g_Count;
+    uint g_Y;
+    uint g_Z;
+    uint g_Unused;
+};
+
+layout(std430, binding = 1) buffer BorderPatches
+{
     vec4 g_PatchPositions[MAX_BORDER_PATCH_COUNT];
     vec4 g_PatchColors[MAX_BORDER_PATCH_COUNT];
 };
