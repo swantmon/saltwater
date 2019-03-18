@@ -276,6 +276,8 @@ namespace
         int m_PatchCount;
         int m_PatchSize;
         int m_MaxBorderPatchCount;
+
+        bool m_IsInpainting = false;
     };
 } // namespace
 
@@ -1815,7 +1817,7 @@ namespace
     }
 
     // -----------------------------------------------------------------------------
-    bool m_IsInpainting = false;
+    
     CTexturePtr CGfxReconstructionRenderer::GetInpaintedRendering(const glm::mat4& _rPoseMatrix, const Base::AABB3Float& _rAABB, CTexturePtr _BackgroundTexturePtr)
     {
         m_IsInpainting = true;
