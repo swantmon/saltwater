@@ -16,79 +16,61 @@ namespace Stereo
     //---Generation of Rectified Img---
     void Rect_Planar::genrt_RectifiedImg(const cv::Mat& Img_Orig_B, const cv::Mat& Img_Orig_M)
     {
-        //---Create Look-Up Table for Transformation from Original to Rectified Images---
-        mapB_x_Orig2Rect = cv::Mat(ImgSize_Rect_B, CV_32FC1);
-        mapB_y_Orig2Rect = cv::Mat(ImgSize_Rect_B, CV_32FC1);
-        for (int x = 0; x < ImgSize_Rect_B.width; x++)
+        //---Create Rectified Images---
+        Img_Rect_B = cv::Mat(ImgSize_Rect, CV_8UC4);
+        Img_Rect_M = cv::Mat(ImgSize_Rect, CV_8UC4);
+        
+        //---Build Look-Up Table: from Rectified to Originals---
+        mapB_x_Rect2Orig = cv::Mat(ImgSize_Rect, CV_32FC1);
+        mapB_y_Rect2Orig = cv::Mat(ImgSize_Rect, CV_32FC1);
+        mapM_x_Rect2Orig = cv::Mat(ImgSize_Rect, CV_32FC1);
+        mapM_y_Rect2Orig = cv::Mat(ImgSize_Rect, CV_32FC1);
+
+        for (int idx_y = 0; idx_y < ImgSize_Rect.height; idx_y++)
         {
-            for (int y = 0; y < ImgSize_Rect_B.height; y++)
+            for (int idx_x = 0; idx_x < ImgSize_Rect.width; idx_x++)
             {
-                cv::Mat Pix_Rect(3, 1, CV_32F);
-                Pix_Rect .col(0) = (x, y, 1);
-                cv::Mat Pix_Rect2Orig = H_B.inv() * Pix_Rect;
-                Pix_Rect2Orig = Pix_Rect2Orig / Pix_Rect2Orig.at<float>(2, 0);
-                mapB_x_Orig2Rect.at<float>(x, y) = Pix_Rect2Orig.at<float>(0, 0);
-                mapB_y_Orig2Rect.at<float>(x, y) = Pix_Rect2Orig.at<float>(1, 0);
+                cv::Mat pixB_Rect = cv::Mat::ones(3, 1, CV_32F);
+                pixB_Rect.ptr<float>(0)[0] = idx_x + ImgSize_Rect_x_min;
+                pixB_Rect.ptr<float>(1)[0] = idx_y + ImgSize_Rect_y_min;
+
+                cv::Mat pixM_Rect = cv::Mat::ones(3, 1, CV_32F);
+                pixM_Rect.ptr<float>(0)[0] = idx_x + ImgSize_Rect_x_min;
+                pixM_Rect.ptr<float>(1)[0] = idx_y + ImgSize_Rect_y_min;
+                //---Test---
+                float pixB_Rect_x = pixB_Rect.at<float>(0, 0);
+                float pixB_Rect_y = pixB_Rect.at<float>(1, 0);
+                float pixB_Rect_1 = pixB_Rect.at<float>(2, 0);
+
+                cv::Mat pixB_Rect2Orig = H_B.inv() * pixB_Rect;
+                pixB_Rect2Orig /= pixB_Rect2Orig.ptr<float>(2)[0];
+
+                cv::Mat pixM_Rect2Orig = H_M.inv() * pixM_Rect;
+                pixM_Rect2Orig /= pixM_Rect2Orig.ptr<float>(2)[0];
+                //---Test---
+                float pixB_Orig_x = pixB_Rect2Orig.at<float>(0, 0);
+                float pixB_Orig_y = pixB_Rect2Orig.at<float>(1, 0);
+                float pixB_Orig_1 = pixB_Rect2Orig.at<float>(2, 0);
+
+                mapB_x_Rect2Orig.ptr<float>(idx_y)[idx_x] = pixB_Rect2Orig.ptr<float>(0)[0];
+                mapB_y_Rect2Orig.ptr<float>(idx_y)[idx_x] = pixB_Rect2Orig.ptr<float>(1)[0];
+
+                mapM_x_Rect2Orig.ptr<float>(idx_y)[idx_x] = pixM_Rect2Orig.ptr<float>(0)[0];
+                mapM_y_Rect2Orig.ptr<float>(idx_y)[idx_x] = pixM_Rect2Orig.ptr<float>(1)[0];
+                //---Test---
+                float pixB_Rect2Orig_x = mapB_x_Rect2Orig.at<float>(idx_y, idx_x);
+                float pixB_Rect2Orig_y = mapB_y_Rect2Orig.at<float>(idx_y, idx_x);
             }
         }
 
-        mapM_x_Orig2Rect = cv::Mat(ImgSize_Rect_M, CV_32FC1);
-        mapM_y_Orig2Rect = cv::Mat(ImgSize_Rect_M, CV_32FC1);
-        for (int x = 0; x < ImgSize_Rect_M.width; x++)
-        {
-            for (int y = 0; y < ImgSize_Rect_M.height; y++)
-            {
-                cv::Mat Pix_Rect(3, 1, CV_32F);
-                Pix_Rect.col(0) = (x, y, 1);
-                cv::Mat Pix_Rect2Orig = H_M.inv() * Pix_Rect;
-                Pix_Rect2Orig = Pix_Rect2Orig / Pix_Rect2Orig.at<float>(2, 0);
-                mapM_x_Orig2Rect.at<float>(x, y) = Pix_Rect2Orig.at<float>(0, 0);
-                mapM_y_Orig2Rect.at<float>(x, y) = Pix_Rect2Orig.at<float>(1, 0);
-            }
-        }
-
-        //---Generate Rectified Images---
-
-        Img_Rect_B = cv::Mat(ImgSize_Rect_B, CV_8UC4);
-        cv::remap(Img_Orig_B, Img_Rect_B, mapB_x_Orig2Rect, mapB_y_Orig2Rect, cv::INTER_LINEAR, cv::BORDER_TRANSPARENT);
-
-        Img_Rect_M = cv::Mat(ImgSize_Rect_M, CV_8UC4);
-        cv::remap(Img_Orig_M, Img_Rect_M, mapM_x_Orig2Rect, mapM_y_Orig2Rect, cv::INTER_LINEAR, cv::BORDER_TRANSPARENT);
-
-        //---Create Look-Up Table for Transformation from Rectified & Original Images---
-        mapB_x_Rect2Orig = cv::Mat(Img_Orig_B.size(), CV_32FC1);
-        mapB_y_Rect2Orig = cv::Mat(Img_Orig_B.size(), CV_32FC1);
-        for (int x = 0; x < Img_Orig_B.size().width; x++)
-        {
-            for (int y = 0; y < Img_Orig_B.size().height; y++)
-            {
-                cv::Mat Pix_Orig(3, 1, CV_32F);
-                Pix_Orig.col(0) = (x, y, 1);
-                cv::Mat Pix_Orig2Rect = H_B * Pix_Orig;
-                Pix_Orig2Rect = Pix_Orig2Rect / Pix_Orig2Rect.at<float>(2, 0);
-                mapB_x_Rect2Orig.at<float>(x, y) = Pix_Orig2Rect.at<float>(0, 0);
-                mapB_y_Rect2Orig.at<float>(x, y) = Pix_Orig2Rect.at<float>(1, 0);
-            }
-        }
-
-        mapM_x_Rect2Orig = cv::Mat(Img_Orig_M.size(), CV_32FC1);
-        mapM_y_Rect2Orig = cv::Mat(Img_Orig_M.size(), CV_32FC1);
-        for (int x = 0; x < Img_Orig_M.size().width; x++)
-        {
-            for (int y = 0; y < Img_Orig_M.size().height; y++)
-            {
-                cv::Mat Pix_Orig(3, 1, CV_32F);
-                Pix_Orig.col(0) = (x, y, 1);
-                cv::Mat Pix_Orig2Rect = H_M * Pix_Orig;
-                Pix_Orig2Rect = Pix_Orig2Rect / Pix_Orig2Rect.at<float>(2, 0);
-                mapM_x_Rect2Orig.at<float>(x, y) = Pix_Orig2Rect.at<float>(0, 0);
-                mapM_y_Rect2Orig.at<float>(x, y) = Pix_Orig2Rect.at<float>(1, 0);
-            }
-        }
+        //---Derive Pixel Value of Rectified Images: Transform Pixels from Rectied back to Origianls---
+        cv::remap(Img_Orig_B, Img_Rect_B, mapB_x_Rect2Orig, mapB_y_Rect2Orig, cv::INTER_LINEAR, cv::BORDER_TRANSPARENT);
+        cv::remap(Img_Orig_M, Img_Rect_M, mapM_x_Rect2Orig, mapM_y_Rect2Orig, cv::INTER_LINEAR, cv::BORDER_TRANSPARENT);
     }
 
     void Rect_Planar::determ_RectiedImgSize(const cv::Size& ImgSize_OrigB, const cv::Size& ImgSize_OrigM)
     {
+        //---Select Img Corner in Originals---
         cv::Mat ImgCnrUL_OrigB = cv::Mat::ones(3, 1, CV_32F);
         ImgCnrUL_OrigB.at<float>(0, 0) = 0;
         ImgCnrUL_OrigB.at<float>(1, 0) = 0;
@@ -102,6 +84,21 @@ namespace Stereo
         ImgCnrDR_OrigB.at<float>(0, 0) = ImgSize_OrigB.width;
         ImgCnrDR_OrigB.at<float>(1, 0) = ImgSize_OrigB.height;
 
+        cv::Mat ImgCnrUL_OrigM = cv::Mat::ones(3, 1, CV_32F);
+        ImgCnrUL_OrigM.at<float>(0, 0) = 0;
+        ImgCnrUL_OrigM.at<float>(1, 0) = 0;
+        cv::Mat ImgCnrUR_OrigM = cv::Mat::ones(3, 1, CV_32F);
+        ImgCnrUR_OrigM.at<float>(0, 0) = ImgSize_OrigM.width;
+        ImgCnrUR_OrigM.at<float>(1, 0) = 0;
+        cv::Mat ImgCnrDL_OrigM = cv::Mat::ones(3, 1, CV_32F);
+        ImgCnrDL_OrigM.at<float>(0, 0) = 0;
+        ImgCnrDL_OrigM.at<float>(1, 0) = ImgSize_OrigM.height;
+        cv::Mat ImgCnrDR_OrigM = cv::Mat::ones(3, 1, CV_32F);
+        ImgCnrDR_OrigM.at<float>(0, 0) = ImgSize_OrigM.width;
+        ImgCnrDR_OrigM.at<float>(1, 0) = ImgSize_OrigM.height;
+
+        
+        //---Transform Img Corner from Originals to Rectified---
         cv::Mat ImgCnrUL_Orig2Rect_B = H_B * ImgCnrUL_OrigB;
         ImgCnrUL_Orig2Rect_B = ImgCnrUL_Orig2Rect_B / ImgCnrUL_Orig2Rect_B.at<float>(2, 0);
         float OrigB2RectB_UL00 = ImgCnrUL_Orig2Rect_B.at<float>(0, 0);
@@ -123,44 +120,14 @@ namespace Stereo
         float OrigB2RectB_DR10 = ImgCnrDR_Orig2Rect_B.at<float>(1, 0);
         float OrigB2RectB_DR20 = ImgCnrDR_Orig2Rect_B.at<float>(2, 0);
 
-        float ImgBound_RectB_x_min = std::min(ImgCnrUL_Orig2Rect_B.at<float>(0, 0), ImgCnrDL_Orig2Rect_B.at<float>(0, 0));
-        float ImgBound_RectB_y_min = std::min(ImgCnrUL_Orig2Rect_B.at<float>(1, 0), ImgCnrUR_Orig2Rect_B.at<float>(1, 0));
-        float ImgBound_RectB_x_max = std::max(ImgCnrUR_Orig2Rect_B.at<float>(0, 0), ImgCnrDR_Orig2Rect_B.at<float>(0, 0));
-        float ImgBound_RectB_y_max = std::max(ImgCnrDL_Orig2Rect_B.at<float>(1, 0), ImgCnrDR_Orig2Rect_B.at<float>(1, 0));
-
-        //ImgSize_Rect_B = cv::Size(ImgBound_RectB_x_max, ImgBound_RectB_y_max);
-
-        cv::Mat ImgCnrUL_OrigM = cv::Mat::ones(3, 1, CV_32F);
-        ImgCnrUL_OrigM.at<float>(0, 0) = 0;
-        ImgCnrUL_OrigM.at<float>(1, 0) = 0;
-        cv::Mat ImgCnrUR_OrigM = cv::Mat::ones(3, 1, CV_32F);
-        ImgCnrUR_OrigM.at<float>(0, 0) = ImgSize_OrigM.width;
-        ImgCnrUR_OrigM.at<float>(1, 0) = 0;
-        cv::Mat ImgCnrDL_OrigM = cv::Mat::ones(3, 1, CV_32F);
-        ImgCnrDL_OrigM.at<float>(0, 0) = 0;
-        ImgCnrDL_OrigM.at<float>(1, 0) = ImgSize_OrigM.height;
-        cv::Mat ImgCnrDR_OrigM = cv::Mat::ones(3, 1, CV_32F);
-        ImgCnrDR_OrigM.at<float>(0, 0) = ImgSize_OrigM.width;
-        ImgCnrDR_OrigM.at<float>(1, 0) = ImgSize_OrigM.height;
-
         cv::Mat ImgCnrUL_Orig2Rect_M = H_M * ImgCnrUL_OrigM;
         ImgCnrUL_Orig2Rect_M = ImgCnrUL_Orig2Rect_M / ImgCnrUL_Orig2Rect_M.at<float>(2, 0);
-        
         cv::Mat ImgCnrUR_Orig2Rect_M = H_M * ImgCnrUR_OrigM;
         ImgCnrUR_Orig2Rect_M = ImgCnrUR_Orig2Rect_M / ImgCnrUR_Orig2Rect_M.at<float>(2, 0);
-        
         cv::Mat ImgCnrDL_Orig2Rect_M = H_M * ImgCnrDL_OrigM;
         ImgCnrDL_Orig2Rect_M = ImgCnrDL_Orig2Rect_M / ImgCnrDL_Orig2Rect_M.at<float>(2, 0);
-        
         cv::Mat ImgCnrDR_Orig2Rect_M = H_M * ImgCnrDR_OrigM;
         ImgCnrDR_Orig2Rect_M = ImgCnrDR_Orig2Rect_M / ImgCnrDR_Orig2Rect_M.at<float>(2, 0);
-
-        float ImgBound_RectM_x_min = std::min(ImgCnrUL_Orig2Rect_M.at<float>(0, 0), ImgCnrDL_Orig2Rect_M.at<float>(0, 0));
-        float ImgBound_RectM_y_min = std::min(ImgCnrUL_Orig2Rect_M.at<float>(1, 0), ImgCnrUR_Orig2Rect_M.at<float>(1, 0));
-        float ImgBound_RectM_x_max = std::max(ImgCnrUR_Orig2Rect_M.at<float>(0, 0), ImgCnrDR_Orig2Rect_M.at<float>(0, 0));
-        float ImgBound_RectM_y_max = std::max(ImgCnrDL_Orig2Rect_M.at<float>(1, 0), ImgCnrDR_Orig2Rect_M.at<float>(1, 0));
-
-        //ImgSize_Rect_M = cv::Size(ImgBound_RectM_x_max - ImgBound_RectM_x_min, ImgBound_RectM_y_max - ImgBound_RectM_y_min);
 
         // Test: Inverse Homography transform
         cv::Mat ImgCnrUR_Rect2Orig_M = H_M.inv() * ImgCnrUR_Orig2Rect_M;
@@ -168,6 +135,25 @@ namespace Stereo
         float Rect_Orig_M_UR00 = ImgCnrUR_Rect2Orig_M.at<float>(0, 0);
         float Rect_Orig_M_UR10 = ImgCnrUR_Rect2Orig_M.at<float>(1, 0);
         float Rect_Orig_M_UR20 = ImgCnrUR_Rect2Orig_M.at<float>(2, 0);
+
+        //---Determine the Boundary of Epipolar Image---
+        float ImgBound_RectB_x_min = std::min(ImgCnrUL_Orig2Rect_B.at<float>(0, 0), ImgCnrDL_Orig2Rect_B.at<float>(0, 0));
+        float ImgBound_RectB_y_min = std::min(ImgCnrUL_Orig2Rect_B.at<float>(1, 0), ImgCnrUR_Orig2Rect_B.at<float>(1, 0));
+        float ImgBound_RectB_x_max = std::max(ImgCnrUR_Orig2Rect_B.at<float>(0, 0), ImgCnrDR_Orig2Rect_B.at<float>(0, 0));
+        float ImgBound_RectB_y_max = std::max(ImgCnrDL_Orig2Rect_B.at<float>(1, 0), ImgCnrDR_Orig2Rect_B.at<float>(1, 0));
+
+        float ImgBound_RectM_x_min = std::min(ImgCnrUL_Orig2Rect_M.at<float>(0, 0), ImgCnrDL_Orig2Rect_M.at<float>(0, 0));
+        float ImgBound_RectM_y_min = std::min(ImgCnrUL_Orig2Rect_M.at<float>(1, 0), ImgCnrUR_Orig2Rect_M.at<float>(1, 0));
+        float ImgBound_RectM_x_max = std::max(ImgCnrUR_Orig2Rect_M.at<float>(0, 0), ImgCnrDR_Orig2Rect_M.at<float>(0, 0));
+        float ImgBound_RectM_y_max = std::max(ImgCnrDL_Orig2Rect_M.at<float>(1, 0), ImgCnrDR_Orig2Rect_M.at<float>(1, 0));
+
+        //---Determine the Size of Epipolar Imgs---
+        ImgSize_Rect_x_min = std::floor(std::min(ImgBound_RectB_x_min, ImgBound_RectM_x_min));
+        ImgSize_Rect_x_max = std::ceil(std::max(ImgBound_RectB_x_max, ImgBound_RectM_x_max));
+        ImgSize_Rect_y_min = std::floor(std::min(ImgBound_RectB_y_min, ImgBound_RectM_y_min));
+        ImgSize_Rect_y_max = std::ceil(std::max(ImgBound_RectB_y_max, ImgBound_RectM_y_max));
+
+        ImgSize_Rect = cv::Size(ImgSize_Rect_x_max - ImgSize_Rect_x_min, ImgSize_Rect_y_max - ImgSize_Rect_y_min);
     }
 
     //---Compute Orientations---

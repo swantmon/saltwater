@@ -71,38 +71,45 @@ namespace Stereo
         }
         else
         {
-            //---Epipolarization---
-            
-            for (std::vector<FutoGmtCV>::iterator iter = SeqImg.begin(); iter < SeqImg.end()-1; iter++) // end() returns the next position of the last element.
+            static bool T = true;
+            if (T) // During the testing, Only finishing one Image Pair and then close the program.
             {
+                for (std::vector<FutoGmtCV>::iterator iter = SeqImg.begin(); iter < SeqImg.end() - 1; iter++) // end() returns the next position of the last element.
+                {
+                    //---Epipolarization---
 
-                std::vector<FutoGmtCV>::iterator iterNext = iter + 1; // Next frame
+                    std::vector<FutoGmtCV>::iterator iterNext = iter + 1; // Next frame
 
-                //---show Original Img for check---
-                cv::imshow("Img_Base_Orig", iter->get_Img());
-                cv::imshow("Img_Match_Orig", iterNext->get_Img());
-                //------
+                    //---show Original Img for check---
+                    cv::imshow("Img_Base_Orig", iter->get_Img());
+                    cv::imshow("Img_Match_Orig", iterNext->get_Img());
+                    //------
 
-                //---Compute Fundamental Matrix---
-                cv::Mat F_mtx(3, 3, CV_32F);
-                iter->cal_F_mtx(iterNext->get_P_mtx(), F_mtx);
-                //------
+                    //---Compute Fundamental Matrix---
+                    cv::Mat F_mtx(3, 3, CV_32F);
+                    iter->cal_F_mtx(iterNext->get_P_mtx(), F_mtx);
+                    //------
 
-                //---Generate Rectified Images---
-                cv::Mat RectImg_Curt, RectImg_Next;
+                    //---Generate Rectified Images---
+                    cv::Mat RectImg_Curt, RectImg_Next;
 
-                // iter->cal_PolarRect(RectImg_Curt, RectImg_Next, iterNext->get_Img(), F_mtx); //Applied Polar Rectification
-                iter->cal_PlanarRect(RectImg_Curt, RectImg_Next, *iterNext); //Applied Polar Rectification
+                    // iter->cal_PolarRect(RectImg_Curt, RectImg_Next, iterNext->get_Img(), F_mtx); //Applied Polar Rectification
+                    iter->cal_PlanarRect(RectImg_Curt, RectImg_Next, *iterNext); //Applied Polar Rectification
 
-                //------
+                    //------
 
-                //---Show Rectified Img for check---
-                cv::imshow("Img_Base_Rect", RectImg_Curt);
-                cv::imshow("Img_Match_Rect", RectImg_Next);
-                //---
+                    //---Show Rectified Img for check---
+                    cv::imshow("Img_Base_Rect", RectImg_Curt);
+                    cv::imshow("Img_Match_Rect", RectImg_Next);
+                    //---
+
+                    //---Stereo Matching---
+
+                    //---
+                    T = false;
+                }
             }
             
-            //---Stereo Matching---
 
             //---Reform SeqImg---
         }

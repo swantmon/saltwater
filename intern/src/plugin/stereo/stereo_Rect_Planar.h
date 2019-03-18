@@ -32,9 +32,12 @@ namespace Stereo
 
     //---Members---
     private:
-        //---Epipolarization-----
+        //---Epipolar Images-----
         cv::Mat Img_Rect_B, Img_Rect_M;
-        cv::Size ImgSize_Rect_B, ImgSize_Rect_M;
+        cv::Size ImgSize_Rect;
+        int ImgSize_Rect_x_min, ImgSize_Rect_x_max, ImgSize_Rect_y_min, ImgSize_Rect_y_max;
+        
+        //---Transformation---
         cv::Mat mapB_x_Orig2Rect, mapB_y_Orig2Rect, mapM_x_Orig2Rect, mapM_y_Orig2Rect;
         cv::Mat mapB_x_Rect2Orig, mapB_y_Rect2Orig, mapM_x_Rect2Orig, mapM_y_Rect2Orig;
 
