@@ -16,8 +16,8 @@ namespace Stereo
 
     //---Generate Rectified Images-----
     public:
-        void genrt_RectifiedImg(const cv::Mat& Img_Orig_B, const cv::Mat& Img_Orig_M);
-        void determ_RectiedImgSize(const cv::Size& ImgSize_OrigB, const cv::Size& ImgSize_OrigM);
+        void genrt_RectImg(const cv::Mat& Img_Orig_B, const cv::Mat& Img_Orig_M);
+        void determ_RectImgSize(const cv::Size& ImgSize_OrigB, const cv::Size& ImgSize_OrigM);
         
     //---Compute Orientations---
     public:

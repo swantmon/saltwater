@@ -94,7 +94,7 @@ namespace Stereo
                     cv::Mat RectImg_Curt, RectImg_Next;
 
                     // iter->cal_PolarRect(RectImg_Curt, RectImg_Next, iterNext->get_Img(), F_mtx); //Applied Polar Rectification
-                    iter->cal_PlanarRect(RectImg_Curt, RectImg_Next, *iterNext); //Applied Polar Rectification
+                    iter->imp_PlanarRect(RectImg_Curt, RectImg_Next, *iterNext); //Applied Polar Rectification
 
                     //------
 
@@ -104,6 +104,10 @@ namespace Stereo
                     //---
 
                     //---Stereo Matching---
+                    cv::Mat DispImg_Curt;
+                    iter->imp_cvSGBM(DispImg_Curt, RectImg_Curt, RectImg_Next);
+
+                    cv::imshow("Img_Disp", DispImg_Curt);
 
                     //---
                     T = false;

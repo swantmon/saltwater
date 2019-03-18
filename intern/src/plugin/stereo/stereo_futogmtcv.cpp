@@ -39,28 +39,35 @@ namespace Stereo
     }
 
     //---Photogrammetric Computer Vision---
-    void FutoGmtCV::cal_PolarRect(cv::Mat& RectImg_Base, cv::Mat& RectImg_Match, const cv::Mat& Img_Match, const cv::Mat F_mtx) // Epipolarization based on Polar Rectification
+    void FutoGmtCV::imp_PolarRect(cv::Mat& RectImg_Base, cv::Mat& RectImg_Match, const cv::Mat& Img_Match, const cv::Mat F_mtx) // Epipolarization based on Polar Rectification
     {
-        oper_PolarRect = Rect_Polar(Img, Img_Match);
+        operObj_PolarRect = Rect_Polar(Img, Img_Match);
 
-        oper_PolarRect.compute(F_mtx);
+        operObj_PolarRect.compute(F_mtx);
 
-        oper_PolarRect.genrt_RectImg();
+        operObj_PolarRect.genrt_RectImg();
 
-        oper_PolarRect.get_RectImg(RectImg_Base, RectImg_Match);
+        operObj_PolarRect.get_RectImg(RectImg_Base, RectImg_Match);
     }
 
-    void FutoGmtCV::cal_PlanarRect(cv::Mat& RectImg_Base, cv::Mat& RectImg_Match, const FutoGmtCV& OrigImg_Match)
+    void FutoGmtCV::imp_PlanarRect(cv::Mat& RectImg_Base, cv::Mat& RectImg_Match, const FutoGmtCV& OrigImg_Match)
     {
-        oper_PlanarRect.cal_K_Rect(K_mtx, OrigImg_Match.get_Cam());
-        oper_PlanarRect.cal_R_Rect(Rot_mtx, Trans_vec, OrigImg_Match.get_Trans());
-        oper_PlanarRect.cal_P_Rect(Trans_vec, OrigImg_Match.get_Trans());
-        oper_PlanarRect.cal_H(P_mtx, OrigImg_Match.get_P_mtx());
+        operObj_PlanarRect.cal_K_Rect(K_mtx, OrigImg_Match.get_Cam());
+        operObj_PlanarRect.cal_R_Rect(Rot_mtx, Trans_vec, OrigImg_Match.get_Trans());
+        operObj_PlanarRect.cal_P_Rect(Trans_vec, OrigImg_Match.get_Trans());
+        operObj_PlanarRect.cal_H(P_mtx, OrigImg_Match.get_P_mtx());
 
-        oper_PlanarRect.determ_RectiedImgSize(Img.size(), OrigImg_Match.get_Img().size());
-        oper_PlanarRect.genrt_RectifiedImg(Img, OrigImg_Match.get_Img());
-        oper_PlanarRect.get_RectImg(RectImg_Base, RectImg_Match);
+        operObj_PlanarRect.determ_RectImgSize(Img.size(), OrigImg_Match.get_Img().size());
+        operObj_PlanarRect.genrt_RectImg(Img, OrigImg_Match.get_Img());
+        operObj_PlanarRect.get_RectImg(RectImg_Base, RectImg_Match);
 
+    }
+
+    void FutoGmtCV::imp_cvSGBM(cv::Mat& DispImg, const cv::Mat& RectImg_Base, const cv::Mat& RectImg_Match)
+    {
+        cv::Ptr<cv::StereoSGBM> operPtr_cvSGBM = cv::StereoSGBM::create();
+
+        operPtr_cvSGBM->compute(RectImg_Base, RectImg_Match, DispImg);
     }
 
     //---Orientation & Transformation---

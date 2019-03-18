@@ -14,7 +14,7 @@ namespace Stereo
     }
 
     //---Generation of Rectified Img---
-    void Rect_Planar::genrt_RectifiedImg(const cv::Mat& Img_Orig_B, const cv::Mat& Img_Orig_M)
+    void Rect_Planar::genrt_RectImg(const cv::Mat& Img_Orig_B, const cv::Mat& Img_Orig_M)
     {
         //---Create Rectified Images---
         Img_Rect_B = cv::Mat(ImgSize_Rect, CV_8UC4);
@@ -68,7 +68,7 @@ namespace Stereo
         cv::remap(Img_Orig_M, Img_Rect_M, mapM_x_Rect2Orig, mapM_y_Rect2Orig, cv::INTER_LINEAR, cv::BORDER_TRANSPARENT);
     }
 
-    void Rect_Planar::determ_RectiedImgSize(const cv::Size& ImgSize_OrigB, const cv::Size& ImgSize_OrigM)
+    void Rect_Planar::determ_RectImgSize(const cv::Size& ImgSize_OrigB, const cv::Size& ImgSize_OrigM)
     {
         //---Select Img Corner in Originals---
         cv::Mat ImgCnrUL_OrigB = cv::Mat::ones(3, 1, CV_32F);

@@ -24,8 +24,12 @@ namespace Stereo
 
     //---Photogrammetric Computer Vision---
     public:
-        void cal_PolarRect(cv::Mat& RectImg_Base, cv::Mat& RectImg_Match, const cv::Mat& Img_Match, const cv::Mat F_mtx);
-        void cal_PlanarRect(cv::Mat& RectImg_Base, cv::Mat& RectImg_Match, const FutoGmtCV& OrigImg_Match);
+        //---Epipolarization---
+        void imp_PolarRect(cv::Mat& RectImg_Base, cv::Mat& RectImg_Match, const cv::Mat& Img_Match, const cv::Mat F_mtx);
+        void imp_PlanarRect(cv::Mat& RectImg_Base, cv::Mat& RectImg_Match, const FutoGmtCV& OrigImg_Match);
+
+        //---Stereo Matching---
+        void imp_cvSGBM(cv::Mat& DispImg, const cv::Mat& RectImg_Base, const cv::Mat& RectImg_Match);
 
     //---Orientation & Transformation---
     public:
@@ -55,8 +59,12 @@ namespace Stereo
     
     //---Operator Object---
     private:
-        Rect_Polar oper_PolarRect; // Operate Polar Rectification for Epipolarization
-        Rect_Planar oper_PlanarRect; // Operate Planar Rectification for Epipolarization
+        //---Epipolarization---
+        Rect_Polar operObj_PolarRect; // Operate Polar Rectification for Epipolarization
+        Rect_Planar operObj_PlanarRect; // Operate Planar Rectification for Epipolarization
+
+        //---Stereo Matching---
+        
 
     //---Members---
     private:
