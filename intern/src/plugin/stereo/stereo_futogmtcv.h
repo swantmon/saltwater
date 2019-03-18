@@ -64,7 +64,7 @@ namespace Stereo
         Rect_Planar operObj_PlanarRect; // Operate Planar Rectification for Epipolarization
 
         //---Stereo Matching---
-        
+        cv::Ptr<cv::StereoSGBM> operPtr_cvSGBM;
 
     //---Members---
     private:

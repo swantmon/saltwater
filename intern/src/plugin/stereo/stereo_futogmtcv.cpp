@@ -65,7 +65,8 @@ namespace Stereo
 
     void FutoGmtCV::imp_cvSGBM(cv::Mat& DispImg, const cv::Mat& RectImg_Base, const cv::Mat& RectImg_Match)
     {
-        cv::Ptr<cv::StereoSGBM> operPtr_cvSGBM = cv::StereoSGBM::create();
+        operPtr_cvSGBM = cv::StereoSGBM::create();
+        //cv::StereoSGBM operPtr_cvSGBM = cv::StereoSGBM::create();
 
         operPtr_cvSGBM->compute(RectImg_Base, RectImg_Match, DispImg);
     }

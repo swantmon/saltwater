@@ -104,10 +104,11 @@ namespace Stereo
                     //---
 
                     //---Stereo Matching---
-                    cv::Mat DispImg_Curt;
-                    iter->imp_cvSGBM(DispImg_Curt, RectImg_Curt, RectImg_Next);
+                    cv::Mat DispImg_Curt_16bit, DispImg_Curt_8bit;
+                    iter->imp_cvSGBM(DispImg_Curt_16bit, RectImg_Curt, RectImg_Next);
 
-                    cv::imshow("Img_Disp", DispImg_Curt);
+                    DispImg_Curt_16bit.convertTo(DispImg_Curt_8bit, CV_8UC1);
+                    cv::imshow("Img_Disp", DispImg_Curt_8bit);
 
                     //---
                     T = false;
