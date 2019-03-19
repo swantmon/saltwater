@@ -17,21 +17,15 @@ layout(location = 0) out vec4 out_Color;
 void main()
 {
     vec2 Tex = abs(in_TexCoords * 2.0f - 1.0f);
-    if (Tex.x > 0.5f || Tex.y > 0.5f)
-    {
-        discard;
-    }
 
-    if (Tex.x > 0.33f || Tex.y > 0.33f)
+    if (Tex.x > (1.0f / g_Scale.y) || Tex.y > (1.0f / g_Scale.y))
     {
-    	out_Color = vec4(texture(PlaneTexture, in_TexCoords).rgb, 0.0f);
+        out_Color = vec4(texture(PlaneTexture, in_TexCoords).rgb, 0.0f);
     }
     else
     {
-    	out_Color = vec4(texture(PlaneTexture, in_TexCoords).rgb, 1.0f);
+        out_Color = vec4(texture(PlaneTexture, in_TexCoords).rgb, 1.0f);
     }
-
-    //out_Color = vec4(1.0f, 0.0f, 0.0f, 1.0f);
 }
 
 #endif // __INCLUDE_FS_OUTLINE_GLSL__
