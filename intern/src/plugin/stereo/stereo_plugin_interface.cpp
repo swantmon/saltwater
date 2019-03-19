@@ -96,9 +96,9 @@ namespace Stereo
                     cv::Mat RectImg_Curt, RectImg_Next;
 
                     //iter->cal_PolarRect(RectImg_Curt, RectImg_Next, iterNext->get_Img(), F_mtx); //Applied Polar Rectification
-                   // iter->imp_PlanarRect(RectImg_Curt, RectImg_Next, *iterNext); //Applied Polar Rectification
-                    RectImg_Curt = iter->get_Img();
-                    RectImg_Next = iterNext->get_Img();
+                    iter->imp_PlanarRect(RectImg_Curt, RectImg_Next, *iterNext); //Applied Polar Rectification
+                    //RectImg_Curt = iter->get_Img();
+                    //RectImg_Next = iterNext->get_Img();
                     //------
 
                     //---Show Rectified Img for check---
