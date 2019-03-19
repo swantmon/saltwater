@@ -1408,7 +1408,7 @@ namespace
         SDrawCallConstantBuffer BufferData;
         
         BufferData.m_WorldMatrix = glm::translate(MiddlePoint) * glm::scale(glm::vec3(Scale));
-        BufferData.m_Color = glm::vec4(Scale);
+        BufferData.m_Color = glm::vec4(Scale, m_InpaintedPlaneScale, 0.0f, 0.0f);
 
         BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
 
