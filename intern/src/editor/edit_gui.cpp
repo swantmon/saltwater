@@ -94,6 +94,8 @@ namespace
         bool m_EnableGamepad;
         bool m_CloseWindow;
 
+        bool m_ShowGUI;
+
         Engine::CEventDelegates::HandleType m_GfxOnRenderGUIDelegate;
 
     private:
@@ -269,6 +271,8 @@ namespace
                 ENGINE_CONSOLE_INFOV(SDL_JoystickName(m_pGamePad));
             }
         }
+
+        m_ShowGUI = Core::CProgramParameters::GetInstance().Get("application:show_gui", true);
     }
 
     // -----------------------------------------------------------------------------
@@ -323,6 +327,11 @@ namespace
         ImGui_ImplSDL2_NewFrame(m_pWindow);
 
         ImGui::NewFrame();
+
+        if (!m_ShowGUI)
+        {
+            return;
+        }
 
         // -----------------------------------------------------------------------------
         // Menu
