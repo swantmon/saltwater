@@ -66,8 +66,11 @@ namespace Stereo
     void FutoGmtCV::imp_cvSGBM(cv::Mat& DispImg, const cv::Mat& RectImg_Base, const cv::Mat& RectImg_Match)
     {
         operPtr_cvSGBM = cv::StereoSGBM::create();
-        operPtr_cvSGBM->setP1(8);
-        operPtr_cvSGBM->setP2(32);
+        int WinSize_SAD = 9;
+        operPtr_cvSGBM->setBlockSize(WinSize_SAD);
+        operPtr_cvSGBM->setP1(8 * WinSize_SAD * WinSize_SAD);
+        operPtr_cvSGBM->setP2(32 * WinSize_SAD * WinSize_SAD);
+        operPtr_cvSGBM->setPreFilterCap(8);
         operPtr_cvSGBM->setDisp12MaxDiff(1);
         operPtr_cvSGBM->setUniquenessRatio(10);
         operPtr_cvSGBM->setSpeckleWindowSize(100);

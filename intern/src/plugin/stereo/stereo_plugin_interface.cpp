@@ -97,25 +97,18 @@ namespace Stereo
 
                     //iter->cal_PolarRect(RectImg_Curt, RectImg_Next, iterNext->get_Img(), F_mtx); //Applied Polar Rectification
                     iter->imp_PlanarRect(RectImg_Curt, RectImg_Next, *iterNext); //Applied Polar Rectification
-                    //RectImg_Curt = iter->get_Img();
-                    //RectImg_Next = iterNext->get_Img();
-                    //------
-
-                    //---Show Rectified Img for check---
-                    
-                    cv::imwrite("C:\\saltwater\\intern\\src\\plugin\\stereo\\Img_Base_Rect.tif", RectImg_Curt);
-                    cv::imwrite("C:\\saltwater\\intern\\src\\plugin\\stereo\\Img_Match_Rect.tif", RectImg_Next);
-                    
-                    //---
 
                     //---Stereo Matching---
                     cv::Mat DispImg_Curt;
                     cv::Mat RectImg_Curt_Gray, RectImg_Next_Gray;
                     cv::cvtColor(RectImg_Curt, RectImg_Curt_Gray, cv::COLOR_RGBA2GRAY);
                     cv::cvtColor(RectImg_Next, RectImg_Next_Gray, cv::COLOR_RGBA2GRAY);
-                    cv::imshow("RectImg_Curt_Gray", RectImg_Curt_Gray);
-                    cv::imshow("RectImg_Next_Gray", RectImg_Next_Gray);
+                    //---Show Rectified Img for check---
+                    //char pixValue = RectImg_Curt_Gray.at<char>(113, 78);
+                    cv::imwrite("C:\\saltwater\\intern\\src\\plugin\\stereo\\RectImg_Curt_Gray.png", RectImg_Curt_Gray);
+                    cv::imwrite("C:\\saltwater\\intern\\src\\plugin\\stereo\\RectImg_Next_Gray.png", RectImg_Next_Gray);
                     iter->imp_cvSGBM(DispImg_Curt, RectImg_Curt_Gray, RectImg_Next_Gray);
+                    //---
                     //---test SGBM in OpenCV---
                     /*
                     cv::Mat TestImgL = cv::imread("C:\\saltwater\\intern\\src\\plugin\\stereo\\Test\\im2.png");
