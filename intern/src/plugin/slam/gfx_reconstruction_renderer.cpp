@@ -1153,8 +1153,6 @@ namespace
             0.0f, 0.0f, 0.0f, 1.0f
         );
 
-        Performance::BeginEvent("Raycasting for diminishing");
-        
         MR::CSLAMReconstructor::SSLAMVolume& rVolume = m_pReconstructor->GetVolume();
         
         ContextManager::SetShaderVS(m_RaycastDiminishedVSPtr);
@@ -1209,8 +1207,6 @@ namespace
         ContextManager::SetTopology(STopology::TriangleList);
 
         ContextManager::DrawIndexed(36, 0, 0);
-
-        Performance::EndEvent();
     }
 
     // -----------------------------------------------------------------------------
@@ -1297,8 +1293,6 @@ namespace
 
     void CGfxReconstructionRenderer::CreateMembrane(CTexturePtr _BackgroundTexturePtr, CTexturePtr _Diminished)
     {
-        Performance::BeginEvent("Create membrane");
-
         // -----------------------------------------------------------------------------
         // Prepare membrane data
         // -----------------------------------------------------------------------------
@@ -1378,8 +1372,6 @@ namespace
         ContextManager::ResetImageTexture(3);
         ContextManager::ResetResourceBuffer(0);
         ContextManager::ResetResourceBuffer(1);
-
-        Performance::EndEvent();
     }
 
     // -----------------------------------------------------------------------------
@@ -1844,16 +1836,28 @@ namespace
 
             ContextManager::SetTargetSet(m_DiminishedRaycastTargetSetPtr);
 
+            Performance::BeginEvent("Raycasting for diminishing");
+
             RaycastVolumeDiminished(_rPoseMatrix, _rAABB);
+
+            Performance::EndEvent();
 
             //glDisable(GL_BLEND);
 
+            Performance::BeginEvent("Create membrane");
+
             CreateMembrane(_BackgroundTexturePtr, m_DiminishedRaycastTargetPtr);
+
+            Performance::EndEvent();
 
             if (_BackgroundTexturePtr != nullptr)
             {
+                Performance::BeginEvent("Combine images");
+
                 ContextManager::SetTargetSet(m_DiminishedFinalTargetSetPtr);
                 CombineDiminishedImage(_BackgroundTexturePtr, m_DiminishedRaycastTargetPtr);
+
+                Performance::EndEvent();
             }
 
             Performance::EndEvent();
