@@ -1297,6 +1297,8 @@ namespace
 
     void CGfxReconstructionRenderer::CreateMembrane(CTexturePtr _BackgroundTexturePtr, CTexturePtr _Diminished)
     {
+        Performance::BeginEvent("Create membrane");
+
         // -----------------------------------------------------------------------------
         // Prepare membrane data
         // -----------------------------------------------------------------------------
@@ -1376,6 +1378,8 @@ namespace
         ContextManager::ResetImageTexture(3);
         ContextManager::ResetResourceBuffer(0);
         ContextManager::ResetResourceBuffer(1);
+
+        Performance::EndEvent();
     }
 
     // -----------------------------------------------------------------------------
