@@ -58,33 +58,41 @@ namespace Stereo
 
         //------
         
-        if (SeqImg.empty())
+        if (Keyframes.empty())
         {
-            SeqImg.resize(1);
-            SeqImg[0] = FutoGmtCV(Img_cv, K_cv, R_cv, T_cv); 
+            Keyframes.resize(1);
+            Keyframes[0] = FutoGmtCV(Img_cv, K_cv, R_cv, T_cv); 
         }
-        else if (SeqImg.size() < ImgMaxCal)
+        else if (Keyframes.size() < Max_Keyframe)
         {
-            SeqImg.resize(SeqImg.size() + 1);
-            int Seq_Idx = SeqImg.size() - 1; 
-            SeqImg[Seq_Idx] = FutoGmtCV(Img_cv, K_cv, R_cv, T_cv);
+            //---Select Keyframe-----
+            cv::Mat BaseLine = Keyframes.back().get_Trans() - T_cv;
+            float BaseLineLength = cv::norm(BaseLine, cv::NORM_L2);
+            if (BaseLineLength >= 0.15)
+            {
+                // Apply resize for memory allocation.
+                // Only use push_back & pull_back to add/remove element -> Apply push/pull with memory allocation has bad efficiency
+                Keyframes.resize(Keyframes.size() + 1);
+                int idx_frame = Keyframes.size() - 1;
+                Keyframes[idx_frame] = FutoGmtCV(Img_cv, K_cv, R_cv, T_cv);
+            }
         }
         else
         {
             static bool T = true;
             if (T) // During the testing, Only finishing one Image Pair and then close the program.
             {
-                for (std::vector<FutoGmtCV>::iterator iter = SeqImg.begin(); iter < SeqImg.end() - 1; iter++) // end() returns the next position of the last element.
+                for (std::vector<FutoGmtCV>::iterator iter = Keyframes.begin(); iter < Keyframes.end() - 1; iter++) // end() returns the next position of the last element.
                 {
                     //---Epipolarization---
 
                     std::vector<FutoGmtCV>::iterator iterNext = iter + 1; // Next frame
 
                     //---show Original Img for check---
-                    /*
+                    
                     cv::imshow("Img_Base_Orig", iter->get_Img());
                     cv::imshow("Img_Match_Orig", iterNext->get_Img());
-                    */
+                    
                     //------
 
                     //---Compute Fundamental Matrix---

@@ -44,8 +44,8 @@ namespace Stereo
         glm::mat3 m_Camera_mtx;
         glm::ivec2 m_ImageSize;
 
-        std::vector<FutoGmtCV> SeqImg;
-        std::size_t ImgMaxCal = 2; // Maximal images for calculation once
+        std::vector<FutoGmtCV> Keyframes;
+        std::size_t Max_Keyframe = 2; // Maximal images for calculation once
         
     private:
         void glm2cv(cv::Mat* cvmat, const glm::mat3& glmmat);
