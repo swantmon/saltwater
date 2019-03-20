@@ -143,17 +143,26 @@ namespace Stereo
         float Rect_Orig_M_UR10 = ImgCnrUR_Rect2Orig_M.at<float>(1, 0);
         float Rect_Orig_M_UR20 = ImgCnrUR_Rect2Orig_M.at<float>(2, 0);
         */
+        //---
 
         //---Determine the Boundary of Epipolar Image---
-        float ImgBound_RectB_x_min = std::min(ImgCnrUL_Orig2Rect_B.ptr<float>(0)[0], ImgCnrDL_Orig2Rect_B.ptr<float>(0)[0]);
-        float ImgBound_RectB_y_min = std::min(ImgCnrUL_Orig2Rect_B.ptr<float>(1)[0], ImgCnrUR_Orig2Rect_B.ptr<float>(1)[0]);
-        float ImgBound_RectB_x_max = std::max(ImgCnrUR_Orig2Rect_B.ptr<float>(0)[0], ImgCnrDR_Orig2Rect_B.ptr<float>(0)[0]);
-        float ImgBound_RectB_y_max = std::max(ImgCnrDL_Orig2Rect_B.ptr<float>(1)[0], ImgCnrDR_Orig2Rect_B.ptr<float>(1)[0]);
+        std::vector<float> ImgCnr_Orig2Rect_B_x = { ImgCnrUL_Orig2Rect_B.ptr<float>(0)[0], ImgCnrUR_Orig2Rect_B.ptr<float>(0)[0], ImgCnrDL_Orig2Rect_B.ptr<float>(0)[0], ImgCnrDR_Orig2Rect_B.ptr<float>(0)[0] };
 
-        float ImgBound_RectM_x_min = std::min(ImgCnrUL_Orig2Rect_M.ptr<float>(0)[0], ImgCnrDL_Orig2Rect_M.ptr<float>(0)[0]);
-        float ImgBound_RectM_y_min = std::min(ImgCnrUL_Orig2Rect_M.ptr<float>(1)[0], ImgCnrUR_Orig2Rect_M.ptr<float>(1)[0]);
-        float ImgBound_RectM_x_max = std::max(ImgCnrUR_Orig2Rect_M.ptr<float>(0)[0], ImgCnrDR_Orig2Rect_M.ptr<float>(0)[0]);
-        float ImgBound_RectM_y_max = std::max(ImgCnrDL_Orig2Rect_M.ptr<float>(1)[0], ImgCnrDR_Orig2Rect_M.ptr<float>(1)[0]);
+        std::vector<float> ImgCnr_Orig2Rect_B_y = { ImgCnrUL_Orig2Rect_B.ptr<float>(1)[0], ImgCnrUR_Orig2Rect_B.ptr<float>(1)[0], ImgCnrDL_Orig2Rect_B.ptr<float>(1)[0], ImgCnrDR_Orig2Rect_B.ptr<float>(1)[0] };
+
+        std::vector<float> ImgCnr_Orig2Rect_M_x = { ImgCnrUL_Orig2Rect_M.ptr<float>(0)[0], ImgCnrUR_Orig2Rect_M.ptr<float>(0)[0], ImgCnrDL_Orig2Rect_M.ptr<float>(0)[0], ImgCnrDR_Orig2Rect_M.ptr<float>(0)[0] };
+
+        std::vector<float> ImgCnr_Orig2Rect_M_y = { ImgCnrUL_Orig2Rect_M.ptr<float>(1)[0], ImgCnrUR_Orig2Rect_M.ptr<float>(1)[0], ImgCnrDL_Orig2Rect_M.ptr<float>(1)[0], ImgCnrDR_Orig2Rect_M.ptr<float>(1)[0] };
+
+        float ImgBound_RectB_x_min = *std::min_element(ImgCnr_Orig2Rect_B_x.begin(), ImgCnr_Orig2Rect_B_x.end());
+        float ImgBound_RectB_y_min = *std::min_element(ImgCnr_Orig2Rect_B_y.begin(), ImgCnr_Orig2Rect_B_y.end());
+        float ImgBound_RectB_x_max = *std::max_element(ImgCnr_Orig2Rect_B_x.begin(), ImgCnr_Orig2Rect_B_x.end());
+        float ImgBound_RectB_y_max = *std::max_element(ImgCnr_Orig2Rect_B_y.begin(), ImgCnr_Orig2Rect_B_y.end());
+
+        float ImgBound_RectM_x_min = *std::min_element(ImgCnr_Orig2Rect_M_x.begin(), ImgCnr_Orig2Rect_M_x.end());
+        float ImgBound_RectM_y_min = *std::min_element(ImgCnr_Orig2Rect_M_y.begin(), ImgCnr_Orig2Rect_M_y.end());
+        float ImgBound_RectM_x_max = *std::max_element(ImgCnr_Orig2Rect_M_x.begin(), ImgCnr_Orig2Rect_M_x.end());
+        float ImgBound_RectM_y_max = *std::max_element(ImgCnr_Orig2Rect_M_y.begin(), ImgCnr_Orig2Rect_M_y.end());
 
         //---Determine the Size of Epipolar Imgs---
         ImgSize_Rect_x_min = std::floor(std::min(ImgBound_RectB_x_min, ImgBound_RectM_x_min));
@@ -206,15 +215,7 @@ namespace Stereo
     void Rect_Planar::cal_H(const cv::Mat& P_Orig_B, cv::Mat& P_Orig_M)
     {
         H_B = P_Rect_B * P_Orig_B.inv(cv::DECOMP_SVD); 
-        float H_B_00 = H_B.at<float>(0, 0);
-        float H_B_01 = H_B.at<float>(0, 1);
-        float H_B_02 = H_B.at<float>(0, 2);
-        float H_B_10 = H_B.at<float>(1, 0);
-        float H_B_11 = H_B.at<float>(1, 1);
-        float H_B_12 = H_B.at<float>(1, 2);
-        float H_B_20 = H_B.at<float>(2, 0);
-        float H_B_21 = H_B.at<float>(2, 1);
-        float H_B_22 = H_B.at<float>(2, 2);
+
         H_M = P_Rect_M * P_Orig_M.inv(cv::DECOMP_SVD);
     }
 
