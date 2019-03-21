@@ -574,7 +574,7 @@ namespace
         TextureDescriptor.m_NumberOfPixelsU  = m_DeviceResolution.x;
         TextureDescriptor.m_NumberOfPixelsV  = m_DeviceResolution.y;
         TextureDescriptor.m_NumberOfPixelsW  = 1;
-        TextureDescriptor.m_NumberOfMipMaps  = 1;
+        TextureDescriptor.m_NumberOfMipMaps  = STextureDescriptor::s_GenerateAllMipMaps;;
         TextureDescriptor.m_NumberOfTextures = 1;
         TextureDescriptor.m_Binding          = CTexture::RenderTarget | CTexture::ShaderResource;
         TextureDescriptor.m_Access           = CTexture::EAccess::CPURead;
@@ -1855,6 +1855,9 @@ namespace
                 Performance::BeginEvent("Combine images");
 
                 ContextManager::SetTargetSet(m_DiminishedFinalTargetSetPtr);
+
+                Gfx::TextureManager::UpdateMipmap(m_DiminishedRaycastTargetPtr);
+
                 CombineDiminishedImage(_BackgroundTexturePtr, m_DiminishedRaycastTargetPtr);
 
                 Performance::EndEvent();
