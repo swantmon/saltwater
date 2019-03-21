@@ -76,7 +76,7 @@ void main()
     }
     else
     {
-        imageStore(cs_Plane, ivec2(gl_GlobalInvocationID.xy), vec4(0.0f));
+        imageStore(cs_Plane, ivec2(gl_GlobalInvocationID.xy), vec4(1.0f));
     }
 }
 
