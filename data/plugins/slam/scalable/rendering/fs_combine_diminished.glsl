@@ -21,20 +21,24 @@ layout(location = 0) out vec4 out_Color;
 
 void main()
 {
-	vec4 Background = texture(g_BackgroundImage, in_TexCoords);
-	vec4 Diminished = texture(g_DiminishedImage, in_TexCoordsFlipped);
-	vec4 Membrane = texture(g_Membrane, in_TexCoordsFlipped);
+    vec4 Background = texture(g_BackgroundImage, in_TexCoords);
+    vec4 Diminished = texture(g_DiminishedImage, in_TexCoordsFlipped);
+    vec4 Membrane = texture(g_Membrane, in_TexCoordsFlipped);
+    
+    float s1 = textureLod(g_DiminishedImage, in_TexCoordsFlipped + vec2(-0.01f, 0.0f), 1.0f).a;
+    float s2 = textureLod(g_DiminishedImage, in_TexCoordsFlipped + vec2(0.01f, 0.0f), 1.0f).a;
+    float s3 = textureLod(g_DiminishedImage, in_TexCoordsFlipped + vec2(0.0f, -0.01f), 1.0f).a;
+    float s4 = textureLod(g_DiminishedImage, in_TexCoordsFlipped + vec2(0.0f, 0.01f), 1.0f).a;
 
-	vec3 Color;
-
-	if (Diminished.a < 0.5f)
-	{
-		Color = Background.rgb;
-	}
-	else
-	{
-		Color = Diminished.rgb + Membrane.rgb;
-	}
+    vec3 Color;
+    if (Diminished.a < 0.5f && s1 + s2 + s3 + s4 == 0.0f)
+    {
+        Color = Background.rgb;
+    }
+    else
+    {
+        Color = Diminished.rgb + Membrane.rgb;
+    }
 
     out_Color = vec4(Color, 1.0f);
 }
