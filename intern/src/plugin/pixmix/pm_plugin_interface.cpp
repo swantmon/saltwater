@@ -84,16 +84,31 @@ namespace PM
                 if (color[0] == 255 && color[1] == 255 && color[2] == 255)
                 {
                     Mask(r, c) = 0;
-                    Mask(r + 2, c    ) = 0;
-                    Mask(r - 2, c    ) = 0;
-                    Mask(r    , c + 2) = 0;
-                    Mask(r    , c - 2) = 0;
+                    if (r + c < Source3.rows)
+                    {
+                        Mask(r + 2, c) = 0;
+                    }
+
+                    if (r - 2 >= 0)
+                    {
+                        Mask(r - 2, c) = 0;
+                    }
+
+                    if (c + 2 < Source3.cols)
+                    {
+                        Mask(r, c + 2) = 0;
+                    }
+
+                    if (c - 2 >= 0)
+                    {
+                        Mask(r, c - 2) = 0;
+                    }
                 }
             }
         }
 
-        //cv::imshow("Input color image", Source3);
-        //cv::imshow("Input mask image", Mask);
+        cv::imshow("Input color image", Source3);
+        cv::imshow("Input mask image", Mask);
         //cv::waitKey(1);
 
         PixMix pm;
@@ -101,7 +116,7 @@ namespace PM
 
         pm.execute(Dest3, 0.05f);
 
-        //cv::imshow("Output color image", Dest3);
+        cv::imshow("Output color image", Dest3);
         //cv::waitKey();
 
         cv::cvtColor(Dest3, Dest4, CV_RGB2BGRA);
