@@ -84,7 +84,7 @@ namespace PM
                 if (color[0] == 255 && color[1] == 255 && color[2] == 255)
                 {
                     Mask(r, c) = 0;
-                    if (r + c < Source3.rows)
+                    if (r + 2 < Source3.rows)
                     {
                         Mask(r + 2, c) = 0;
                     }
