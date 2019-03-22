@@ -69,9 +69,61 @@ namespace Stereo
             }
         }
 
-        //---Derive Pixel Value of Rectified Images: Transform Pixels from Rectied back to Origianls---
+        //---Derive Pixel Value of Rectified Images: Transform Pixels from Rectfied back to Origianls & Interpolation---
         cv::remap(Img_Orig_B, Img_Rect_B, mapB_x_Rect2Orig, mapB_y_Rect2Orig, cv::INTER_LINEAR, cv::BORDER_TRANSPARENT);
         cv::remap(Img_Orig_M, Img_Rect_M, mapM_x_Rect2Orig, mapM_y_Rect2Orig, cv::INTER_LINEAR, cv::BORDER_TRANSPARENT);
+
+
+        //---Build Look-Up Table: from Originals to Rectified---
+        mapB_x_Orig2Rect = cv::Mat(Img_Orig_B.size(), CV_32FC1);
+        mapB_y_Orig2Rect = cv::Mat(Img_Orig_B.size(), CV_32FC1);
+        mapM_x_Orig2Rect = cv::Mat(Img_Orig_M.size(), CV_32FC1);
+        mapM_y_Orig2Rect = cv::Mat(Img_Orig_M.size(), CV_32FC1);
+
+        for (int idx_y = 0; idx_y < Img_Orig_B.size().height; idx_y++)
+        {
+            for (int idx_x = 0; idx_x < Img_Orig_B.size().width; idx_x++)
+            {
+                cv::Mat pixB_Orig = cv::Mat::ones(3, 1, CV_32F);
+                pixB_Orig.ptr<float>(0)[0] = idx_x;
+                pixB_Orig.ptr<float>(1)[0] = idx_y;
+
+                cv::Mat pixM_Orig = cv::Mat::ones(3, 1, CV_32F);
+                pixM_Orig.ptr<float>(0)[0] = idx_x;
+                pixM_Orig.ptr<float>(1)[0] = idx_y;
+
+                cv::Mat pixB_Orig2Rect = H_B * pixB_Orig;
+                pixB_Orig2Rect /= pixB_Orig2Rect.ptr<float>(2)[0];
+                pixB_Orig2Rect.ptr<float>(0)[0] = pixB_Orig2Rect.ptr<float>(0)[0] - ImgSize_Rect_x_min;
+                pixB_Orig2Rect.ptr<float>(1)[0] = pixB_Orig2Rect.ptr<float>(1)[0] - ImgSize_Rect_y_min;
+                //---Test---
+                
+                float pixB_Rect_x = pixB_Orig2Rect.at<float>(0, 0);
+                float pixB_Rect_y = pixB_Orig2Rect.at<float>(1, 0);
+                float pixB_Rect_1 = pixB_Orig2Rect.at<float>(2, 0);
+                
+
+                cv::Mat pixM_Orig2Rect = H_M * pixM_Orig;
+                pixM_Orig2Rect /= pixM_Orig2Rect.ptr<float>(2)[0];
+                pixM_Orig2Rect.ptr<float>(0)[0] = pixM_Orig2Rect.ptr<float>(0)[0] - ImgSize_Rect_x_min;
+                pixM_Orig2Rect.ptr<float>(1)[0] = pixM_Orig2Rect.ptr<float>(1)[0] - ImgSize_Rect_y_min;
+
+                mapB_x_Orig2Rect.ptr<float>(idx_y)[idx_x] = pixB_Orig2Rect.ptr<float>(0)[0];
+                mapB_y_Orig2Rect.ptr<float>(idx_y)[idx_x] = pixB_Orig2Rect.ptr<float>(1)[0];
+
+                mapM_x_Orig2Rect.ptr<float>(idx_y)[idx_x] = pixM_Orig2Rect.ptr<float>(0)[0];
+                mapM_y_Orig2Rect.ptr<float>(idx_y)[idx_x] = pixM_Orig2Rect.ptr<float>(1)[0];
+            }
+        }
+
+        //---Test: Transform from orig2Rect---
+        /*
+        cv::Mat TestImg_Orig_B, TestImg_Orig_M;
+        cv::remap(Img_Rect_B, TestImg_Orig_B, mapB_x_Orig2Rect, mapB_y_Orig2Rect, cv::INTER_LINEAR, cv::BORDER_TRANSPARENT);
+        cv::remap(Img_Rect_M, TestImg_Orig_M, mapM_x_Orig2Rect, mapM_y_Orig2Rect, cv::INTER_LINEAR, cv::BORDER_TRANSPARENT);
+        cv::imshow("TestImg_Orig_B", TestImg_Orig_B);
+        cv::imshow("TestImg_Orig_M", TestImg_Orig_M);
+        */
     }
 
     void Rect_Planar::determ_RectImgSize(const cv::Size& ImgSize_OrigB, const cv::Size& ImgSize_OrigM)
@@ -224,6 +276,14 @@ namespace Stereo
     {
         Output_RectImgB = Img_Rect_B;
         Output_RectImgM = Img_Rect_M;
+    }
+
+    void Rect_Planar::get_Transform_Orig2Rect(cv::Mat& LookUpTx_B_Orig2Rect, cv::Mat& LookUpTy_B_Orig2Rect, cv::Mat& LookUpTx_M_Orig2Rect, cv::Mat& LookUpTy_M_Orig2Rect)
+    {
+        LookUpTx_B_Orig2Rect = mapB_x_Orig2Rect;
+        LookUpTy_B_Orig2Rect = mapB_y_Orig2Rect;
+        LookUpTx_M_Orig2Rect = mapM_x_Orig2Rect;
+        LookUpTy_M_Orig2Rect = mapM_y_Orig2Rect;
     }
 
 } // Stereo

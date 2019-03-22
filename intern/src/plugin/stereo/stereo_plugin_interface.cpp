@@ -85,15 +85,10 @@ namespace Stereo
             {
                 for (std::vector<FutoGmtCV>::iterator iter = Keyframes.begin(); iter < Keyframes.end() - 1; iter++) // end() returns the next position of the last element.
                 {
-                    //---Epipolarization---
-
                     std::vector<FutoGmtCV>::iterator iterNext = iter + 1; // Next frame
-
                     //---show Original Img for check---
-                    
                     cv::imshow("Img_Base_Orig", iter->get_Img());
                     cv::imshow("Img_Match_Orig", iterNext->get_Img());
-                    
                     //------
 
                     //---Compute Fundamental Matrix---
@@ -103,12 +98,13 @@ namespace Stereo
 
                     //---Generate Rectified Images---
                     cv::Mat RectImg_Curt, RectImg_Next;
+                    cv::Mat TableB_x_Orig2Rect, TableB_y_Orig2Rect, TableM_x_Orig2Rect, TableM_y_Orig2Rect;
 
                     //iter->cal_PolarRect(RectImg_Curt, RectImg_Next, iterNext->get_Img(), F_mtx); //Applied Polar Rectification
-                    iter->imp_PlanarRect(RectImg_Curt, RectImg_Next, *iterNext); //Applied Polar Rectification
+                    iter->imp_PlanarRect(RectImg_Curt, RectImg_Next, TableB_x_Orig2Rect, TableB_y_Orig2Rect, TableM_x_Orig2Rect, TableM_y_Orig2Rect, *iterNext); //Applied Polar Rectification
 
                     //---Stereo Matching---
-                    cv::Mat DispImg_Curt;
+                    cv::Mat DispImg_Curt_Rect, DispImg_Curt_Orig;
                     cv::Mat RectImg_Curt_Gray, RectImg_Next_Gray;
                     cv::cvtColor(RectImg_Curt, RectImg_Curt_Gray, cv::COLOR_RGBA2GRAY);
                     cv::cvtColor(RectImg_Next, RectImg_Next_Gray, cv::COLOR_RGBA2GRAY);
@@ -116,7 +112,8 @@ namespace Stereo
                     //char pixValue = RectImg_Curt_Gray.at<char>(113, 78);
                     cv::imwrite("C:\\saltwater\\intern\\src\\plugin\\stereo\\RectImg_Curt_Gray.png", RectImg_Curt_Gray);
                     cv::imwrite("C:\\saltwater\\intern\\src\\plugin\\stereo\\RectImg_Next_Gray.png", RectImg_Next_Gray);
-                    iter->imp_cvSGBM(DispImg_Curt, RectImg_Curt_Gray, RectImg_Next_Gray);
+                    iter->imp_cvSGBM(DispImg_Curt_Rect, RectImg_Curt_Gray, RectImg_Next_Gray);
+
                     //---
                     //---test SGBM in OpenCV---
                     /*
@@ -126,16 +123,19 @@ namespace Stereo
                     cv::imshow("TestImgR", TestImgR);
                     iter->imp_cvSGBM(DispImg_Curt, TestImgL, TestImgR);
                     */
-                    //---
-                    DispImg_Curt.convertTo(DispImg_Curt, CV_32F, 1.0 / 16); // Disparity Image is in 16-bit -> Divide by 16 to get real Disparity.
 
-                    //---for imshow---
-                    cv::Mat DispImg_Curt_8U(DispImg_Curt.size(), CV_8UC1);
-                    cv::normalize(DispImg_Curt, DispImg_Curt_8U, 0, 255, cv::NORM_MINMAX, CV_8UC1);
-                    cv::imwrite("C:\\saltwater\\intern\\src\\plugin\\stereo\\Disp.png", DispImg_Curt_8U);
+                    DispImg_Curt_Rect.convertTo(DispImg_Curt_Rect, CV_32F, 1.0 / 16); // Disparity Image is in 16-bit -> Divide by 16 to get real Disparity.
+                    DispImg_Curt_Orig = cv::Mat(iter->get_Img().size(), CV_32F);
+                    cv::remap(DispImg_Curt_Rect, DispImg_Curt_Orig, TableB_x_Orig2Rect, TableB_y_Orig2Rect, cv::INTER_LINEAR, cv::BORDER_TRANSPARENT);
 
-                    //---Transform Disparity back to Original Images---
+                    //---for imshow--- => Modify latter: Transform Disparity in Originals rather than in Rectified.
+                    cv::Mat DispImg_Curt_Rect_8U(DispImg_Curt_Rect.size(), CV_8UC1);
+                    cv::normalize(DispImg_Curt_Rect, DispImg_Curt_Rect_8U, 0, 255, cv::NORM_MINMAX, CV_8UC1);
+                    cv::imwrite("C:\\saltwater\\intern\\src\\plugin\\stereo\\Disp_Rect.png", DispImg_Curt_Rect_8U);
 
+                    cv::Mat DispImg_Curt_Orig_8U(DispImg_Curt_Orig.size(), CV_8UC1);
+                    cv::remap(DispImg_Curt_Rect_8U, DispImg_Curt_Orig_8U, TableB_x_Orig2Rect, TableB_y_Orig2Rect, cv::INTER_LINEAR, cv::BORDER_TRANSPARENT);
+                    cv::imwrite("C:\\saltwater\\intern\\src\\plugin\\stereo\\Disp_Orig.png", DispImg_Curt_Orig_8U);
 
                     //---
                     T = false;

@@ -50,7 +50,7 @@ namespace Stereo
         operObj_PolarRect.get_RectImg(RectImg_Base, RectImg_Match);
     }
 
-    void FutoGmtCV::imp_PlanarRect(cv::Mat& RectImg_Base, cv::Mat& RectImg_Match, const FutoGmtCV& OrigImg_Match)
+    void FutoGmtCV::imp_PlanarRect(cv::Mat& RectImg_Base, cv::Mat& RectImg_Match, cv::Mat& TableB_x_Orig2Rect, cv::Mat& TableB_y_Orig2Rect, cv::Mat& TableM_x_Orig2Rect, cv::Mat& TableM_y_Orig2Rect, const FutoGmtCV& OrigImg_Match)
     {
         operObj_PlanarRect.cal_K_Rect(K_mtx, OrigImg_Match.get_Cam());
         operObj_PlanarRect.cal_R_Rect(Rot_mtx, Trans_vec, OrigImg_Match.get_Trans());
@@ -60,7 +60,7 @@ namespace Stereo
         operObj_PlanarRect.determ_RectImgSize(Img.size(), OrigImg_Match.get_Img().size());
         operObj_PlanarRect.genrt_RectImg(Img, OrigImg_Match.get_Img());
         operObj_PlanarRect.get_RectImg(RectImg_Base, RectImg_Match);
-
+        operObj_PlanarRect.get_Transform_Orig2Rect(TableB_x_Orig2Rect, TableB_y_Orig2Rect, TableM_x_Orig2Rect, TableM_y_Orig2Rect);
     }
 
     void FutoGmtCV::imp_cvSGBM(cv::Mat& DispImg, const cv::Mat& RectImg_Base, const cv::Mat& RectImg_Match)
