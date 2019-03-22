@@ -77,9 +77,7 @@ namespace Stereo
         }
         else
         {
-            
 
-            //-----Old-----
             static bool T = true;
             if (T) // During the testing, Only finishing one Image Pair and then close the program.
             {
@@ -103,8 +101,6 @@ namespace Stereo
                     //iter->cal_PolarRect(RectImg_Curt, RectImg_Next, iterNext->get_Img(), F_mtx); //Applied Polar Rectification
                     iter->imp_PlanarRect(RectImg_Curt, RectImg_Next, TableB_x_Orig2Rect, TableB_y_Orig2Rect, TableM_x_Orig2Rect, TableM_y_Orig2Rect, *iterNext); //Applied Polar Rectification
 
-                    //---Stereo Matching---
-                    cv::Mat DispImg_Curt_Rect, DispImg_Curt_Orig;
                     cv::Mat RectImg_Curt_Gray, RectImg_Next_Gray;
                     cv::cvtColor(RectImg_Curt, RectImg_Curt_Gray, cv::COLOR_RGBA2GRAY);
                     cv::cvtColor(RectImg_Next, RectImg_Next_Gray, cv::COLOR_RGBA2GRAY);
@@ -112,8 +108,10 @@ namespace Stereo
                     //char pixValue = RectImg_Curt_Gray.at<char>(113, 78);
                     cv::imwrite("C:\\saltwater\\intern\\src\\plugin\\stereo\\RectImg_Curt_Gray.png", RectImg_Curt_Gray);
                     cv::imwrite("C:\\saltwater\\intern\\src\\plugin\\stereo\\RectImg_Next_Gray.png", RectImg_Next_Gray);
-                    iter->imp_cvSGBM(DispImg_Curt_Rect, RectImg_Curt_Gray, RectImg_Next_Gray);
 
+                    //---Stereo Matching---
+                    cv::Mat DispImg_Curt_Rect, DispImg_Curt_Orig;
+                    iter->imp_cvSGBM(DispImg_Curt_Rect, RectImg_Curt_Gray, RectImg_Next_Gray);
                     //---
                     //---test SGBM in OpenCV---
                     /*
@@ -137,13 +135,16 @@ namespace Stereo
                     cv::remap(DispImg_Curt_Rect_8U, DispImg_Curt_Orig_8U, TableB_x_Orig2Rect, TableB_y_Orig2Rect, cv::INTER_LINEAR, cv::BORDER_TRANSPARENT);
                     cv::imwrite("C:\\saltwater\\intern\\src\\plugin\\stereo\\Disp_Orig.png", DispImg_Curt_Orig_8U);
 
+                    //---Transform Disparity into Depth: Using Parallax Equation---
+
+
+                    //---Free the First frame, shift rest of frames, Add new frame---
+
+
                     //---
                     T = false;
                 }
             }
-            
-
-            //---Reform SeqImg---
         }
         
         
