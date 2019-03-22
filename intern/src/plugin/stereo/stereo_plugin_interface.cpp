@@ -56,8 +56,7 @@ namespace Stereo
         cv::Mat T_cv(3, 1, CV_32F);
         glm2cv(&T_cv, T_glm);
 
-        //------
-        
+        //---Select Keyframe for Computation---
         if (Keyframes.empty())
         {
             Keyframes.resize(1);
@@ -65,20 +64,22 @@ namespace Stereo
         }
         else if (Keyframes.size() < Max_Keyframe)
         {
-            //---Select Keyframe-----
+            //---Keyframe Selection: Baseline Condition---
             cv::Mat BaseLine = Keyframes.back().get_Trans() - T_cv;
             float BaseLineLength = cv::norm(BaseLine, cv::NORM_L2);
-            if (BaseLineLength >= 0.15)
+            if (BaseLineLength >= Keyf_BaseLine)
             {
                 // Apply resize for memory allocation.
-                // Only use push_back & pull_back to add/remove element -> Apply push/pull with memory allocation has bad efficiency
+                // Push_back & Pull_back are only applied to add/remove element -> Applying push/pull with memory allocation has bad efficiency
                 Keyframes.resize(Keyframes.size() + 1);
-                int idx_frame = Keyframes.size() - 1;
-                Keyframes[idx_frame] = FutoGmtCV(Img_cv, K_cv, R_cv, T_cv);
+                Keyframes.back() = FutoGmtCV(Img_cv, K_cv, R_cv, T_cv);
             }
         }
         else
         {
+            
+
+            //-----Old-----
             static bool T = true;
             if (T) // During the testing, Only finishing one Image Pair and then close the program.
             {
@@ -131,8 +132,10 @@ namespace Stereo
                     //---for imshow---
                     cv::Mat DispImg_Curt_8U(DispImg_Curt.size(), CV_8UC1);
                     cv::normalize(DispImg_Curt, DispImg_Curt_8U, 0, 255, cv::NORM_MINMAX, CV_8UC1);
-                    cv::imshow("Img_Disp", DispImg_Curt_8U);
                     cv::imwrite("C:\\saltwater\\intern\\src\\plugin\\stereo\\Disp.png", DispImg_Curt_8U);
+
+                    //---Transform Disparity back to Original Images---
+
 
                     //---
                     T = false;

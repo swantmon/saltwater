@@ -46,6 +46,7 @@ namespace Stereo
 
         std::vector<FutoGmtCV> Keyframes;
         std::size_t Max_Keyframe = 2; // Maximal images for calculation once
+        float Keyf_BaseLine = 0.07; // Keyframe Selection: BaseLine Condition. Unit is meter.
         
     private:
         void glm2cv(cv::Mat* cvmat, const glm::mat3& glmmat);
