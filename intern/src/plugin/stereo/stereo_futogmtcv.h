@@ -27,6 +27,7 @@ namespace Stereo
         //---Epipolarization---
         void imp_PolarRect(cv::Mat& RectImg_Base, cv::Mat& RectImg_Match, const cv::Mat& Img_Match, const cv::Mat F_mtx);
         void imp_PlanarRect(cv::Mat& RectImg_Base, cv::Mat& RectImg_Match, cv::Mat& Orig2Rect_B_x, cv::Mat& Orig2Rect_B_y, cv::Mat& Orig2Rect_M_x, cv::Mat& Orig2Rect_M_y, const FutoGmtCV& OrigImg_Match);
+        void imp_Rect_OpenCV(cv::Mat& RectImg_Base, cv::Mat& RectImg_Match, cv::Mat& Orig2Rect_B_x, cv::Mat& Orig2Rect_B_y, cv::Mat& Orig2Rect_M_x, cv::Mat& Orig2Rect_M_y, const FutoGmtCV& OrigImg_Match);
 
         //---Stereo Matching---
         void imp_cvSGBM(cv::Mat& DispImg, const cv::Mat& RectImg_Base, const cv::Mat& RectImg_Match);
@@ -46,6 +47,7 @@ namespace Stereo
     public:
         cv::Mat get_Img() const;
         cv::Mat get_Cam() const;
+        cv::Mat get_Rot() const;
         cv::Mat get_Trans() const;
         cv::Mat get_P_mtx() const;
 

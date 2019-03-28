@@ -43,14 +43,16 @@ namespace Stereo
 
         glm::mat3 m_Camera_mtx;
         glm::ivec2 m_ImageSize;
+        glm::vec4 m_DisCoeff;
 
         std::vector<FutoGmtCV> Keyframes;
-        std::size_t Max_Keyframe = 2; // Maximal images for calculation once
-        float Keyf_BaseLine = 0.07; // Keyframe Selection: BaseLine Condition. Unit is meter.
+        std::size_t Cdt_Keyf_MaxNum = 2; // Maximal images for calculation once
+        float Cnd_Keyf_BaseLine = 0.07; // Keyframe Selection: BaseLine Condition. Unit is meter.
         
     private:
         void glm2cv(cv::Mat* cvmat, const glm::mat3& glmmat);
         void glm2cv(cv::Mat* cvmat, const glm::vec3& glmmat);
+        void glm2cv(cv::Mat* cvmat, const glm::vec4& glmmat);
         void glm2cv(cv::Mat* cvmat, const glm::mat3x4& glmmat);
         void ShowImg(const std::vector<char>& Img_RGBA) const;
     };

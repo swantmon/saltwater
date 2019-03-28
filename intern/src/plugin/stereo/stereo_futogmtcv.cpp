@@ -59,8 +59,29 @@ namespace Stereo
 
         operObj_PlanarRect.determ_RectImgSize(Img.size(), OrigImg_Match.get_Img().size());
         operObj_PlanarRect.genrt_RectImg(Img, OrigImg_Match.get_Img());
+
         operObj_PlanarRect.get_RectImg(RectImg_Base, RectImg_Match);
         operObj_PlanarRect.get_Transform_Orig2Rect(Orig2Rect_B_x, Orig2Rect_B_y, Orig2Rect_M_x, Orig2Rect_M_y);
+    }
+
+    void FutoGmtCV::imp_Rect_OpenCV(cv::Mat& RectImg_Base, cv::Mat& RectImg_Match, cv::Mat& Orig2Rect_B_x, cv::Mat& Orig2Rect_B_y, cv::Mat& Orig2Rect_M_x, cv::Mat& Orig2Rect_M_y, const FutoGmtCV& OrigImg_Match)
+    {
+        cv::Mat DistCoeff = cv::Mat::zeros(4, 1, CV_32F);
+        cv::Mat R_RO = OrigImg_Match.get_Rot() * Rot_mtx.inv();
+        cv::Mat T_RO = R_RO.inv() * OrigImg_Match.get_Trans() - Trans_vec;
+
+        cv::Mat R_Rect_B(3, 3, CV_32F), R_Rect_M(3, 3, CV_32F), P_Rect_B(3, 4, CV_32F), P_Rect_M(3, 4, CV_32F), Q(4, 4, CV_32F);
+        cv::stereoRectify(K_mtx, DistCoeff, OrigImg_Match.get_Cam(), DistCoeff, Img.size(), R_RO, T_RO, R_Rect_B, R_Rect_M, P_Rect_B, P_Rect_M, Q);
+
+        cv::Mat K_Rect_B, K_Rect_M, R_rect_B, R_rect_M, T_Rect_B, T_Rect_M;
+        cv::decomposeProjectionMatrix(P_Rect_B, K_Rect_B, R_rect_B, T_Rect_B);
+        cv::decomposeProjectionMatrix(P_Rect_M, K_Rect_M, R_rect_M, T_Rect_M);
+
+        cv::initUndistortRectifyMap(K_mtx, DistCoeff, R_Rect_B, K_Rect_B, Img.size(), CV_32FC1, Orig2Rect_B_x, Orig2Rect_B_y);
+        cv::initUndistortRectifyMap(OrigImg_Match.get_Cam(), DistCoeff, R_Rect_M, K_Rect_M, OrigImg_Match.get_Img().size(), CV_32FC1, Orig2Rect_M_x, Orig2Rect_M_y);
+
+        cv::remap(Img, RectImg_Base, Orig2Rect_B_x, Orig2Rect_B_y, cv::INTER_LINEAR, cv::BORDER_TRANSPARENT);
+        cv::remap(OrigImg_Match.get_Img(), RectImg_Match, Orig2Rect_M_x, Orig2Rect_M_y, cv::INTER_LINEAR, cv::BORDER_TRANSPARENT);
     }
 
     void FutoGmtCV::imp_cvSGBM(cv::Mat& DispImg, const cv::Mat& RectImg_Base, const cv::Mat& RectImg_Match)
@@ -141,6 +162,11 @@ namespace Stereo
     cv::Mat FutoGmtCV::get_Cam() const
     {
         return K_mtx;
+    }
+
+    cv::Mat FutoGmtCV::get_Rot() const
+    {
+        return Rot_mtx;
     }
 
     cv::Mat FutoGmtCV::get_Trans() const

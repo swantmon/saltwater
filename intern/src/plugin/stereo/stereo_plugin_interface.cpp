@@ -19,6 +19,7 @@ namespace Stereo
     {
         m_Camera_mtx = glm::mat3(glm::vec3(_rFocalLength.x, 0, 0), glm::vec3(0, _rFocalLength.y, 0), glm::vec3(_rFocalPoint.x, _rFocalPoint.y, 1)); // Unit is pixel
         m_ImageSize = _rImageSize;
+        m_DisCoeff = glm::vec4(0.1325, -0.2666, -0.0030, 0.0020);
     }
 
     // -----------------------------------------------------------------------------
@@ -32,15 +33,13 @@ namespace Stereo
 
     void CPluginInterface::OnFrameCPU(const std::vector<char>& _rRGBImage, const glm::mat4& _Transform)
     {
-        
-        // BASE_UNUSED(_rRGBImage); // For variables which has not been used yet.
-        // BASE_UNUSED(_Transform); // For variables which has not been used yet.
+        /*
+        // If Valuables have not been used, use "BASE_UNUSED" to avoid warnings
+        BASE_UNUSED(_rRGBImage); // For variables which has not been used yet.
+        BASE_UNUSED(_Transform); // For variables which has not been used yet.
+        */
 
         //---Transform Image & Orientations to OpenCV format---
-        cv::Mat Img_cv(cv::Size(m_ImageSize.x, m_ImageSize.y), CV_8UC4); // 2D Matrix(x*y) with (8-bit unsigned character) + (4 bands)
-        memcpy(Img_cv.data, _rRGBImage.data(), _rRGBImage.size());
-        cv::cvtColor(Img_cv, Img_cv, cv::COLOR_BGRA2RGBA); // Transform image from BGRA (default color mode in OpenCV) to RGBA
-
         glm::mat4x3 P_glm = m_Camera_mtx * glm::mat4x3(_Transform);
         cv::Mat P_cv(3, 4, CV_32F);
         glm2cv(&P_cv, glm::transpose(P_glm));
@@ -56,23 +55,30 @@ namespace Stereo
         cv::Mat T_cv(3, 1, CV_32F);
         glm2cv(&T_cv, T_glm);
 
+        cv::Mat Img_dist_cv(cv::Size(m_ImageSize.x, m_ImageSize.y), CV_8UC4); // 2D Matrix(x*y) with (8-bit unsigned character) + (4 bands)
+        memcpy(Img_dist_cv.data, _rRGBImage.data(), _rRGBImage.size());
+        cv::cvtColor(Img_dist_cv, Img_dist_cv, cv::COLOR_BGRA2RGBA); // Transform image from BGRA (default color mode in OpenCV) to RGBA
+
+        cv::Mat Img_Undist_cv, DistCoeff_cv(4, 1, CV_32F);
+        glm2cv(&DistCoeff_cv, m_DisCoeff);
+
+        cv::undistort(Img_dist_cv, Img_Undist_cv, K_cv, DistCoeff_cv);
+
         //---Select Keyframe for Computation---
         if (Keyframes.empty())
         {
             Keyframes.resize(1);
-            Keyframes[0] = FutoGmtCV(Img_cv, K_cv, R_cv, T_cv); 
+            Keyframes[0] = FutoGmtCV(Img_Undist_cv, K_cv, R_cv, T_cv);
         }
-        else if (Keyframes.size() < Max_Keyframe)
+        else if (Keyframes.size() < Cdt_Keyf_MaxNum)
         {
             //---Keyframe Selection: Baseline Condition---
             cv::Mat BaseLine = Keyframes.back().get_Trans() - T_cv;
             float BaseLineLength = cv::norm(BaseLine, cv::NORM_L2);
-            if (BaseLineLength >= Keyf_BaseLine)
+            if (BaseLineLength >= Cnd_Keyf_BaseLine)
             {
-                // Apply resize for memory allocation.
-                // Push_back & Pull_back are only applied to add/remove element -> Applying push/pull with memory allocation has bad efficiency
-                Keyframes.resize(Keyframes.size() + 1);
-                Keyframes.back() = FutoGmtCV(Img_cv, K_cv, R_cv, T_cv);
+                Keyframes.resize(Keyframes.size() + 1); // Apply resize for memory allocation.
+                Keyframes.back() = FutoGmtCV(Img_Undist_cv, K_cv, R_cv, T_cv); // Push_back & Pull_back are only applied to add/remove element -> Applying push/pull with memory allocation has bad efficiency
             }
         }
         else
@@ -99,7 +105,8 @@ namespace Stereo
                     cv::Mat TableB_x_Orig2Rect, TableB_y_Orig2Rect, TableM_x_Orig2Rect, TableM_y_Orig2Rect;
 
                     //iter->cal_PolarRect(RectImg_Curt, RectImg_Next, iterNext->get_Img(), F_mtx); //Applied Polar Rectification
-                    iter->imp_PlanarRect(RectImg_Curt, RectImg_Next, TableB_x_Orig2Rect, TableB_y_Orig2Rect, TableM_x_Orig2Rect, TableM_y_Orig2Rect, *iterNext); //Applied Polar Rectification
+                    //iter->imp_PlanarRect(RectImg_Curt, RectImg_Next, TableB_x_Orig2Rect, TableB_y_Orig2Rect, TableM_x_Orig2Rect, TableM_y_Orig2Rect, *iterNext); //Applied Polar Rectification
+                    iter->imp_Rect_OpenCV(RectImg_Curt, RectImg_Next, TableB_x_Orig2Rect, TableB_y_Orig2Rect, TableM_x_Orig2Rect, TableM_y_Orig2Rect, *iterNext);
 
                     cv::Mat RectImg_Curt_Gray, RectImg_Next_Gray;
                     cv::cvtColor(RectImg_Curt, RectImg_Curt_Gray, cv::COLOR_RGBA2GRAY);
@@ -181,6 +188,11 @@ namespace Stereo
     void CPluginInterface::glm2cv(cv::Mat* cvmat, const glm::vec3& glmmat)
     {
         memcpy(cvmat->data, glm::value_ptr(glmmat), 3 * sizeof(float));
+    }
+
+    void CPluginInterface::glm2cv(cv::Mat* cvmat, const glm::vec4& glmmat)
+    {
+        memcpy(cvmat->data, glm::value_ptr(glmmat), 4 * sizeof(float));
     }
 
     void CPluginInterface::glm2cv(cv::Mat* cvmat, const glm::mat3x4& glmmat)
