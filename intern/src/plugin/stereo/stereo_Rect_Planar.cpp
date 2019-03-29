@@ -30,24 +30,20 @@ namespace Stereo
         {
             for (int idx_x = 0; idx_x < ImgSize_Rect.width; idx_x++)
             {
-                cv::Mat pixB_Rect = cv::Mat::ones(3, 1, CV_32F);
-                pixB_Rect.ptr<float>(0)[0] = idx_x + ImgSize_Rect_x_min;
-                pixB_Rect.ptr<float>(1)[0] = idx_y + ImgSize_Rect_y_min;
-
-                cv::Mat pixM_Rect = cv::Mat::ones(3, 1, CV_32F);
-                pixM_Rect.ptr<float>(0)[0] = idx_x + ImgSize_Rect_x_min;
-                pixM_Rect.ptr<float>(1)[0] = idx_y + ImgSize_Rect_y_min;
+                cv::Mat pix_Rect = cv::Mat::ones(3, 1, CV_32F);
+                pix_Rect.ptr<float>(0)[0] = idx_x + ImgSize_Rect_x_min;
+                pix_Rect.ptr<float>(1)[0] = idx_y + ImgSize_Rect_y_min;
                 //---Test---
                 /*
-                float pixB_Rect_x = pixB_Rect.at<float>(0, 0);
-                float pixB_Rect_y = pixB_Rect.at<float>(1, 0);
-                float pixB_Rect_1 = pixB_Rect.at<float>(2, 0);
+                float pix_Rect_x = pix_Rect.at<float>(0, 0);
+                float pix_Rect_y = pix_Rect.at<float>(1, 0);
+                float pix_Rect_1 = pix_Rect.at<float>(2, 0);
                 */
 
-                cv::Mat pixB_Rect2Orig = H_B.inv() * pixB_Rect;
+                cv::Mat pixB_Rect2Orig = H_B.inv() * pix_Rect;
                 pixB_Rect2Orig /= pixB_Rect2Orig.ptr<float>(2)[0];
 
-                cv::Mat pixM_Rect2Orig = H_M.inv() * pixM_Rect;
+                cv::Mat pixM_Rect2Orig = H_M.inv() * pix_Rect;
                 pixM_Rect2Orig /= pixM_Rect2Orig.ptr<float>(2)[0];
                 //---Test---
                 /*
@@ -61,7 +57,8 @@ namespace Stereo
 
                 mapM_x_Rect2Orig.ptr<float>(idx_y)[idx_x] = pixM_Rect2Orig.ptr<float>(0)[0];
                 mapM_y_Rect2Orig.ptr<float>(idx_y)[idx_x] = pixM_Rect2Orig.ptr<float>(1)[0];
-                //---Test---
+                
+                //---Test: Inverse Transformation---
                 /*
                 float pixB_Rect2Orig_x = mapB_x_Rect2Orig.at<float>(idx_y, idx_x);
                 float pixB_Rect2Orig_y = mapB_y_Rect2Orig.at<float>(idx_y, idx_x);
@@ -231,11 +228,11 @@ namespace Stereo
         K_Rect = 0.5 * (K_Orig_B + K_Orig_M);
     }
 
-    void Rect_Planar::cal_R_Rect(const cv::Mat& R_Orig_B, const cv::Mat& t_Orig_B, const cv::Mat& t_Orig_M)
+    void Rect_Planar::cal_R_Rect(const cv::Mat& R_Orig_B, const cv::Mat& PC_Orig_B, const cv::Mat& PC_Orig_M)
     {
         R_Rect = cv::Mat(3, 3, CV_32F);
 
-        cv::Mat R_Rect_row0 = t_Orig_B - t_Orig_M;
+        cv::Mat R_Rect_row0 = PC_Orig_M - PC_Orig_B;
         R_Rect_row0 = R_Rect_row0 / cv::norm(R_Rect_row0, cv::NORM_L2);
         cv::transpose(R_Rect_row0, R_Rect_row0);
 
@@ -250,14 +247,16 @@ namespace Stereo
         R_Rect_row2.copyTo(R_Rect.row(2));
     }
 
-    void Rect_Planar::cal_P_Rect(const cv::Mat& t_Orig_B, const cv::Mat& t_Orig_M)
+    void Rect_Planar::cal_P_Rect(const cv::Mat& PC_Orig_B, const cv::Mat& PC_Orig_M)
     {
         cv::Mat Trans_Rect_B(3, 4, CV_32F);
         R_Rect.colRange(0, 3).copyTo(Trans_Rect_B.colRange(0, 3)); // StartCol is inclusive while EndCol is exclusive
+        cv::Mat t_Orig_B = -R_Rect * PC_Orig_B;
         t_Orig_B.col(0).copyTo(Trans_Rect_B.col(3));
 
         cv::Mat Trans_Rect_M(3, 4, CV_32F);
         R_Rect.colRange(0, 3).copyTo(Trans_Rect_M.colRange(0, 3)); // StartCol is inclusive while EndCol is exclusive
+        cv::Mat t_Orig_M = -R_Rect * PC_Orig_M;
         t_Orig_M.col(0).copyTo(Trans_Rect_M.col(3));
 
         P_Rect_B = K_Rect * Trans_Rect_B;
@@ -267,8 +266,28 @@ namespace Stereo
     void Rect_Planar::cal_H(const cv::Mat& P_Orig_B, cv::Mat& P_Orig_M)
     {
         H_B = P_Rect_B * P_Orig_B.inv(cv::DECOMP_SVD); 
-
         H_M = P_Rect_M * P_Orig_M.inv(cv::DECOMP_SVD);
+
+        //H_B = P_Rect_B.colRange(0, 3) * P_Orig_B.colRange(0, 3).inv();
+        //H_M = P_Rect_M.colRange(0, 3) * P_Orig_M.colRange(0, 3).inv();
+
+        //---Test: y-Parax---
+        
+        cv::Mat pixB_Orig = cv::Mat::ones(3, 1, CV_32F);
+        pixB_Orig.at<float>(0, 0) = 285;
+        pixB_Orig.at<float>(1, 0) = 60;
+        cv::Mat pixM_Orig = cv::Mat::ones(3, 1, CV_32F);
+        pixM_Orig.at<float>(0, 0) = 229;
+        pixM_Orig.at<float>(1, 0) = 45;
+
+        cv::Mat pixB_Rect = H_B * pixB_Orig;
+        pixB_Rect /= pixB_Rect.at<float>(2, 0);
+        cv::Mat pixM_Rect = H_M * pixM_Orig;
+        pixM_Rect /= pixM_Rect.at<float>(2, 0);
+
+        float y_parax = pixM_Rect.at<float>(1, 0) - pixB_Rect.at<float>(1, 0);
+
+        //---
     }
 
     //---Get Function---

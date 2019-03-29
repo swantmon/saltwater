@@ -19,7 +19,7 @@ namespace Stereo
         FutoGmtCV();
         FutoGmtCV(cv::Mat& Img_Input);
         FutoGmtCV(cv::Mat& Img_Input, cv::Mat P);
-        FutoGmtCV(cv::Mat& Img_Input, cv::Mat K, cv::Mat R, cv::Mat T);
+        FutoGmtCV(cv::Mat& Img_Input, cv::Mat K, cv::Mat R, cv::Mat PC);
         ~FutoGmtCV();
 
     //---Photogrammetric Computer Vision---
@@ -48,7 +48,7 @@ namespace Stereo
         cv::Mat get_Img() const;
         cv::Mat get_Cam() const;
         cv::Mat get_Rot() const;
-        cv::Mat get_Trans() const;
+        cv::Mat get_PC() const;
         cv::Mat get_P_mtx() const;
 
     //---Is Function---
@@ -70,11 +70,11 @@ namespace Stereo
 
     //---Members---
     private:
-        cv::Mat Img; // Image data in RGB or RGBA
+        cv::Mat Img_RGB; // Image data in RGB or RGBA
         cv::Mat K_mtx; // Camera Matrix in pixel. Origin is upper-left. x-axis is row-direction and y-axis is column-direction
         cv::Mat Rot_mtx; // Rotations from Mapping frame to Image frame
-        cv::Mat Trans_vec; // Projection Center in Mapping frame
-        cv::Mat P_mtx; // P-matrix = [Rot_mtx | -Rot_mtx*Trans_vec]
+        cv::Mat PC_vec; // Projection Center in Mapping frame
+        cv::Mat P_mtx; // Perspective Projection Matrix = K_mtx * [Rot_mtx | -Rot_mtx*PC_vec]
     };
 } // Stereo
 

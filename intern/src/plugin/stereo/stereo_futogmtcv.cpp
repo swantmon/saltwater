@@ -10,25 +10,26 @@ namespace Stereo
     }
 
     FutoGmtCV::FutoGmtCV(cv::Mat& Img_Input)
-        : Img(Img_Input)
+        : Img_RGB(Img_Input)
     {
     }
 
     FutoGmtCV::FutoGmtCV(cv::Mat& Img_Input, cv::Mat P)
-        : Img(Img_Input),
+        : Img_RGB(Img_Input),
           P_mtx(P)
     {
         // Derive K, R, T from P
 
     }
-    FutoGmtCV::FutoGmtCV(cv::Mat& Img_Input, cv::Mat K, cv::Mat R, cv::Mat T)
-        : Img(Img_Input),
+    FutoGmtCV::FutoGmtCV(cv::Mat& Img_Input, cv::Mat K, cv::Mat R, cv::Mat PC)
+        : Img_RGB(Img_Input),
           K_mtx(K),
           Rot_mtx(R), 
-          Trans_vec(T)
+          PC_vec(PC)
     {
         cv::Mat Transform_mtx(3, 4, CV_32F);
         Rot_mtx.colRange(0, 3).copyTo(Transform_mtx.colRange(0, 3));
+        cv::Mat Trans_vec = -Rot_mtx * PC;
         Trans_vec.col(0).copyTo(Transform_mtx.col(3));
 
         P_mtx = K_mtx * Transform_mtx;
@@ -41,7 +42,7 @@ namespace Stereo
     //---Photogrammetric Computer Vision---
     void FutoGmtCV::imp_PolarRect(cv::Mat& RectImg_Base, cv::Mat& RectImg_Match, const cv::Mat& Img_Match, const cv::Mat F_mtx) // Epipolarization based on Polar Rectification
     {
-        operObj_PolarRect = Rect_Polar(Img, Img_Match);
+        operObj_PolarRect = Rect_Polar(Img_RGB, Img_Match);
 
         operObj_PolarRect.compute(F_mtx);
 
@@ -53,12 +54,12 @@ namespace Stereo
     void FutoGmtCV::imp_PlanarRect(cv::Mat& RectImg_Base, cv::Mat& RectImg_Match, cv::Mat& Orig2Rect_B_x, cv::Mat& Orig2Rect_B_y, cv::Mat& Orig2Rect_M_x, cv::Mat& Orig2Rect_M_y, const FutoGmtCV& OrigImg_Match)
     {
         operObj_PlanarRect.cal_K_Rect(K_mtx, OrigImg_Match.get_Cam());
-        operObj_PlanarRect.cal_R_Rect(Rot_mtx, Trans_vec, OrigImg_Match.get_Trans());
-        operObj_PlanarRect.cal_P_Rect(Trans_vec, OrigImg_Match.get_Trans());
+        operObj_PlanarRect.cal_R_Rect(Rot_mtx, PC_vec, OrigImg_Match.get_PC());
+        operObj_PlanarRect.cal_P_Rect(PC_vec, OrigImg_Match.get_PC());
         operObj_PlanarRect.cal_H(P_mtx, OrigImg_Match.get_P_mtx());
 
-        operObj_PlanarRect.determ_RectImgSize(Img.size(), OrigImg_Match.get_Img().size());
-        operObj_PlanarRect.genrt_RectImg(Img, OrigImg_Match.get_Img());
+        operObj_PlanarRect.determ_RectImgSize(Img_RGB.size(), OrigImg_Match.get_Img().size());
+        operObj_PlanarRect.genrt_RectImg(Img_RGB, OrigImg_Match.get_Img());
 
         operObj_PlanarRect.get_RectImg(RectImg_Base, RectImg_Match);
         operObj_PlanarRect.get_Transform_Orig2Rect(Orig2Rect_B_x, Orig2Rect_B_y, Orig2Rect_M_x, Orig2Rect_M_y);
@@ -68,19 +69,19 @@ namespace Stereo
     {
         cv::Mat DistCoeff = cv::Mat::zeros(4, 1, CV_32F);
         cv::Mat R_RO = OrigImg_Match.get_Rot() * Rot_mtx.inv();
-        cv::Mat T_RO = R_RO.inv() * OrigImg_Match.get_Trans() - Trans_vec;
+        cv::Mat T_RO = R_RO.inv() * OrigImg_Match.get_PC() - PC_vec;
 
         cv::Mat R_Rect_B(3, 3, CV_32F), R_Rect_M(3, 3, CV_32F), P_Rect_B(3, 4, CV_32F), P_Rect_M(3, 4, CV_32F), Q(4, 4, CV_32F);
-        cv::stereoRectify(K_mtx, DistCoeff, OrigImg_Match.get_Cam(), DistCoeff, Img.size(), R_RO, T_RO, R_Rect_B, R_Rect_M, P_Rect_B, P_Rect_M, Q);
+        cv::stereoRectify(K_mtx, DistCoeff, OrigImg_Match.get_Cam(), DistCoeff, Img_RGB.size(), R_RO, T_RO, R_Rect_B, R_Rect_M, P_Rect_B, P_Rect_M, Q);
 
         cv::Mat K_Rect_B, K_Rect_M, R_rect_B, R_rect_M, T_Rect_B, T_Rect_M;
         cv::decomposeProjectionMatrix(P_Rect_B, K_Rect_B, R_rect_B, T_Rect_B);
         cv::decomposeProjectionMatrix(P_Rect_M, K_Rect_M, R_rect_M, T_Rect_M);
 
-        cv::initUndistortRectifyMap(K_mtx, DistCoeff, R_Rect_B, K_Rect_B, Img.size(), CV_32FC1, Orig2Rect_B_x, Orig2Rect_B_y);
+        cv::initUndistortRectifyMap(K_mtx, DistCoeff, R_Rect_B, K_Rect_B, Img_RGB.size(), CV_32FC1, Orig2Rect_B_x, Orig2Rect_B_y);
         cv::initUndistortRectifyMap(OrigImg_Match.get_Cam(), DistCoeff, R_Rect_M, K_Rect_M, OrigImg_Match.get_Img().size(), CV_32FC1, Orig2Rect_M_x, Orig2Rect_M_y);
 
-        cv::remap(Img, RectImg_Base, Orig2Rect_B_x, Orig2Rect_B_y, cv::INTER_LINEAR, cv::BORDER_TRANSPARENT);
+        cv::remap(Img_RGB, RectImg_Base, Orig2Rect_B_x, Orig2Rect_B_y, cv::INTER_LINEAR, cv::BORDER_TRANSPARENT);
         cv::remap(OrigImg_Match.get_Img(), RectImg_Match, Orig2Rect_M_x, Orig2Rect_M_y, cv::INTER_LINEAR, cv::BORDER_TRANSPARENT);
     }
 
@@ -143,7 +144,7 @@ namespace Stereo
 
     void FutoGmtCV::set_Trans(cv::Mat& T_Input)
     {
-        Trans_vec = T_Input;
+        PC_vec = T_Input;
     }
 
 
@@ -156,7 +157,7 @@ namespace Stereo
     //---Get Function---
     cv::Mat FutoGmtCV::get_Img() const
     {
-        return Img;
+        return Img_RGB;
     }
 
     cv::Mat FutoGmtCV::get_Cam() const
@@ -169,9 +170,9 @@ namespace Stereo
         return Rot_mtx;
     }
 
-    cv::Mat FutoGmtCV::get_Trans() const
+    cv::Mat FutoGmtCV::get_PC() const
     {
-        return Trans_vec;
+        return PC_vec;
     }
 
     cv::Mat FutoGmtCV::get_P_mtx() const
@@ -188,7 +189,7 @@ namespace Stereo
     //---Export Function---
     void FutoGmtCV::show_Img()
     {
-        cv::imshow("Image", Img);
+        cv::imshow("Image", Img_RGB);
     }
 
 } // Stereo

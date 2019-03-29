@@ -54,6 +54,7 @@ namespace Stereo
         glm::vec3 T_glm = glm::vec3(_Transform[3]);
         cv::Mat T_cv(3, 1, CV_32F);
         glm2cv(&T_cv, T_glm);
+        cv::Mat PC_cv = -R_cv.inv() * T_cv;
 
         cv::Mat Img_dist_cv(cv::Size(m_ImageSize.x, m_ImageSize.y), CV_8UC4); // 2D Matrix(x*y) with (8-bit unsigned character) + (4 bands)
         memcpy(Img_dist_cv.data, _rRGBImage.data(), _rRGBImage.size());
@@ -68,17 +69,17 @@ namespace Stereo
         if (Keyframes.empty())
         {
             Keyframes.resize(1);
-            Keyframes[0] = FutoGmtCV(Img_Undist_cv, K_cv, R_cv, T_cv);
+            Keyframes[0] = FutoGmtCV(Img_Undist_cv, K_cv, R_cv, PC_cv);
         }
         else if (Keyframes.size() < Cdt_Keyf_MaxNum)
         {
             //---Keyframe Selection: Baseline Condition---
-            cv::Mat BaseLine = Keyframes.back().get_Trans() - T_cv;
+            cv::Mat BaseLine = Keyframes.back().get_PC() - PC_cv;
             float BaseLineLength = cv::norm(BaseLine, cv::NORM_L2);
             if (BaseLineLength >= Cnd_Keyf_BaseLine)
             {
                 Keyframes.resize(Keyframes.size() + 1); // Apply resize for memory allocation.
-                Keyframes.back() = FutoGmtCV(Img_Undist_cv, K_cv, R_cv, T_cv); // Push_back & Pull_back are only applied to add/remove element -> Applying push/pull with memory allocation has bad efficiency
+                Keyframes.back() = FutoGmtCV(Img_Undist_cv, K_cv, R_cv, PC_cv); // Push_back & Pull_back are only applied to add/remove element -> Applying push/pull with memory allocation has bad efficiency
             }
         }
         else
@@ -91,8 +92,8 @@ namespace Stereo
                 {
                     std::vector<FutoGmtCV>::iterator iterNext = iter + 1; // Next frame
                     //---show Original Img for check---
-                    cv::imshow("Img_Base_Orig", iter->get_Img());
-                    cv::imshow("Img_Match_Orig", iterNext->get_Img());
+                    cv::imwrite("C:\\saltwater\\intern\\src\\plugin\\stereo\\OrigImg_Curt.png", iter->get_Img());
+                    cv::imwrite("C:\\saltwater\\intern\\src\\plugin\\stereo\\OrigImg_Next.png", iterNext->get_Img());
                     //------
 
                     //---Compute Fundamental Matrix---
@@ -105,8 +106,48 @@ namespace Stereo
                     cv::Mat TableB_x_Orig2Rect, TableB_y_Orig2Rect, TableM_x_Orig2Rect, TableM_y_Orig2Rect;
 
                     //iter->cal_PolarRect(RectImg_Curt, RectImg_Next, iterNext->get_Img(), F_mtx); //Applied Polar Rectification
-                    //iter->imp_PlanarRect(RectImg_Curt, RectImg_Next, TableB_x_Orig2Rect, TableB_y_Orig2Rect, TableM_x_Orig2Rect, TableM_y_Orig2Rect, *iterNext); //Applied Polar Rectification
-                    iter->imp_Rect_OpenCV(RectImg_Curt, RectImg_Next, TableB_x_Orig2Rect, TableB_y_Orig2Rect, TableM_x_Orig2Rect, TableM_y_Orig2Rect, *iterNext);
+                    iter->imp_PlanarRect(RectImg_Curt, RectImg_Next, TableB_x_Orig2Rect, TableB_y_Orig2Rect, TableM_x_Orig2Rect, TableM_y_Orig2Rect, *iterNext); //Applied Planar Rectification
+                    //iter->imp_Rect_OpenCV(RectImg_Curt, RectImg_Next, TableB_x_Orig2Rect, TableB_y_Orig2Rect, TableM_x_Orig2Rect, TableM_y_Orig2Rect, *iterNext);
+                    //---Verify by Test---
+                    /*
+                    cv::Mat TestInputL = cv::imread("E:\\Project_ARCHITECT\\01 Epipolarization\\Fusiello\\Testing Data\\01-002570.jpg");
+                    cv::Mat TestInputR = cv::imread("E:\\Project_ARCHITECT\\01 Epipolarization\\Fusiello\\Testing Data\\02-002570.jpg");
+
+                    cv::Mat K_L = cv::Mat::zeros(3, 3, CV_32F);
+                    K_L.at<float>(0, 0) = 1280.465;
+                    K_L.at<float>(1, 1) = 1280.465;
+                    K_L.at<float>(0, 2) = 712.961;
+                    K_L.at<float>(1, 2) = 515.829;
+                    K_L.at<float>(2, 2) = 1;
+                    cv::Mat K_R = cv::Mat::zeros(3, 3, CV_32F);
+                    K_R.at<float>(0, 0) = 1281.566;
+                    K_R.at<float>(1, 1) = 1281.566;
+                    K_R.at<float>(0, 2) = 698.496;
+                    K_R.at<float>(1, 2) = 511.008;
+                    K_R.at<float>(2, 2) = 1;
+                    cv::Mat PC_L = cv::Mat::zeros(3, 1, CV_32F);
+                    cv::Mat PC_R = cv::Mat::zeros(3, 1, CV_32F);
+                    PC_R.at<float>(0, 0) = 1.630;
+                    PC_R.at<float>(1, 0) = 0.016;
+                    PC_R.at<float>(2, 0) = -0.192;
+                    cv::Mat R_L = cv::Mat::eye(3, 3, CV_32F);
+                    cv::Mat R_R = cv::Mat::eye(3, 3, CV_32F);
+                    R_R.at<float>(0, 0) = 0.9999;
+                    R_R.at<float>(0, 1) = 0.0085;
+                    R_R.at<float>(0, 2) = -0.0132;
+                    R_R.at<float>(1, 0) = -0.0084;
+                    R_R.at<float>(1, 1) = 0.9999;
+                    R_R.at<float>(1, 2) = 0.0123;
+                    R_R.at<float>(2, 0) = 0.0132;
+                    R_R.at<float>(2, 1) = -0.0122;
+                    R_R.at<float>(2, 2) = 0.9999;
+
+                    FutoGmtCV TestImgL = FutoGmtCV(TestInputL, K_L, R_L, T_L);
+                    FutoGmtCV TestImgR = FutoGmtCV(TestInputR, K_R, R_R, T_R);
+
+                    TestImgL.imp_PlanarRect(RectImg_Curt, RectImg_Next, TableB_x_Orig2Rect, TableB_y_Orig2Rect, TableM_x_Orig2Rect, TableM_y_Orig2Rect, TestImgR);
+                    */
+                    //---
 
                     cv::Mat RectImg_Curt_Gray, RectImg_Next_Gray;
                     cv::cvtColor(RectImg_Curt, RectImg_Curt_Gray, cv::COLOR_RGBA2GRAY);
