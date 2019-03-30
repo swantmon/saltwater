@@ -226,6 +226,7 @@ namespace Stereo
     void Rect_Planar::cal_K_Rect(const cv::Mat& K_Orig_B, const cv::Mat& K_Orig_M)
     {
         K_Rect = 0.5 * (K_Orig_B + K_Orig_M);
+        // Afterwards, add horizontal shift to keep RectImg centered = reduce the RectImg size
     }
 
     void Rect_Planar::cal_R_Rect(const cv::Mat& R_Orig_B, const cv::Mat& PC_Orig_B, const cv::Mat& PC_Orig_M)
@@ -233,14 +234,22 @@ namespace Stereo
         R_Rect = cv::Mat(3, 3, CV_32F);
 
         cv::Mat R_Rect_row0 = PC_Orig_M - PC_Orig_B;
-        R_Rect_row0 = R_Rect_row0 / cv::norm(R_Rect_row0, cv::NORM_L2);
+        /*
+        float R_Rect00 = R_Rect_row0.at<float>(0, 0);
+        float R_Rect01 = R_Rect_row0.at<float>(1, 0);
+        float R_Rect02 = R_Rect_row0.at<float>(2, 0);
+        */
+        R_Rect_row0 /= cv::norm(R_Rect_row0, cv::NORM_L2);
         cv::transpose(R_Rect_row0, R_Rect_row0);
+        if ()
+        {
+        }
 
         cv::Mat R_Rect_row1 = R_Orig_B.row(2).cross(R_Rect_row0);
-        R_Rect_row1 = R_Rect_row1 / cv::norm(R_Rect_row1, cv::NORM_L2);
+        R_Rect_row1 /= cv::norm(R_Rect_row1, cv::NORM_L2);
 
         cv::Mat R_Rect_row2 = R_Rect_row0.cross(R_Rect_row1);
-        R_Rect_row2 = R_Rect_row2 / cv::norm(R_Rect_row2, cv::NORM_L2);
+        R_Rect_row2 /= cv::norm(R_Rect_row2, cv::NORM_L2);
 
         R_Rect_row0.copyTo(R_Rect.row(0));
         R_Rect_row1.copyTo(R_Rect.row(1));

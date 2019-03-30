@@ -40,9 +40,9 @@ namespace Stereo
         */
 
         //---Transform Image & Orientations to OpenCV format---
-        glm::mat4x3 P_glm = m_Camera_mtx * glm::mat4x3(_Transform);
-        cv::Mat P_cv(3, 4, CV_32F);
-        glm2cv(&P_cv, glm::transpose(P_glm));
+        glm::mat4x3 Trans_glm = m_Camera_mtx * glm::mat4x3(_Transform);
+        cv::Mat Trans_cv(3, 4, CV_32F);
+        glm2cv(&Trans_cv, glm::transpose(Trans_glm));
 
         cv::Mat K_cv(3, 3, CV_32F);
         glm2cv(&K_cv, glm::transpose(m_Camera_mtx));
@@ -142,8 +142,8 @@ namespace Stereo
                     R_R.at<float>(2, 1) = -0.0122;
                     R_R.at<float>(2, 2) = 0.9999;
 
-                    FutoGmtCV TestImgL = FutoGmtCV(TestInputL, K_L, R_L, T_L);
-                    FutoGmtCV TestImgR = FutoGmtCV(TestInputR, K_R, R_R, T_R);
+                    FutoGmtCV TestImgL = FutoGmtCV(TestInputL, K_L, R_L, PC_L);
+                    FutoGmtCV TestImgR = FutoGmtCV(TestInputR, K_R, R_R, PC_R);
 
                     TestImgL.imp_PlanarRect(RectImg_Curt, RectImg_Next, TableB_x_Orig2Rect, TableB_y_Orig2Rect, TableM_x_Orig2Rect, TableM_y_Orig2Rect, TestImgR);
                     */
