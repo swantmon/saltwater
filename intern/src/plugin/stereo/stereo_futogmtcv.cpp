@@ -33,6 +33,16 @@ namespace Stereo
         Trans_vec.col(0).copyTo(Transform_mtx.col(3));
 
         P_mtx = K_mtx * Transform_mtx;
+        //---Test---
+        /*
+        float P00 = P_mtx.at<float>(0, 0);
+        float P01 = P_mtx.at<float>(0, 1);
+        float P02 = P_mtx.at<float>(0, 2);
+        float P03 = P_mtx.at<float>(0, 3);
+        float P12 = P_mtx.at<float>(1, 2);
+        float P23 = P_mtx.at<float>(2, 3);
+        */
+        //---
     }
 
     FutoGmtCV::~FutoGmtCV()

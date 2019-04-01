@@ -40,9 +40,9 @@ namespace Stereo
         */
 
         //---Transform Image & Orientations to OpenCV format---
-        glm::mat4x3 Trans_glm = m_Camera_mtx * glm::mat4x3(_Transform);
-        cv::Mat Trans_cv(3, 4, CV_32F);
-        glm2cv(&Trans_cv, glm::transpose(Trans_glm));
+        glm::mat4x3 P_glm = m_Camera_mtx * glm::mat4x3(_Transform);
+        cv::Mat P_cv(3, 4, CV_32F);
+        glm2cv(&P_cv, glm::transpose(P_glm));
 
         cv::Mat K_cv(3, 3, CV_32F);
         glm2cv(&K_cv, glm::transpose(m_Camera_mtx));
@@ -54,7 +54,7 @@ namespace Stereo
         glm::vec3 T_glm = glm::vec3(_Transform[3]);
         cv::Mat T_cv(3, 1, CV_32F);
         glm2cv(&T_cv, T_glm);
-        cv::Mat PC_cv = -R_cv.inv() * T_cv;
+        cv::Mat PC_cv = -R_cv.t() * T_cv;
 
         cv::Mat Img_dist_cv(cv::Size(m_ImageSize.x, m_ImageSize.y), CV_8UC4); // 2D Matrix(x*y) with (8-bit unsigned character) + (4 bands)
         memcpy(Img_dist_cv.data, _rRGBImage.data(), _rRGBImage.size());
@@ -92,8 +92,8 @@ namespace Stereo
                 {
                     std::vector<FutoGmtCV>::iterator iterNext = iter + 1; // Next frame
                     //---show Original Img for check---
-                    cv::imwrite("C:\\saltwater\\intern\\src\\plugin\\stereo\\OrigImg_Curt.png", iter->get_Img());
-                    cv::imwrite("C:\\saltwater\\intern\\src\\plugin\\stereo\\OrigImg_Next.png", iterNext->get_Img());
+                    cv::imwrite("E:\\Project_ARCHITECT\\OrigImg_Curt.png", iter->get_Img());
+                    cv::imwrite("E:\\Project_ARCHITECT\\OrigImg_Next.png", iterNext->get_Img());
                     //------
 
                     //---Compute Fundamental Matrix---
@@ -154,8 +154,8 @@ namespace Stereo
                     cv::cvtColor(RectImg_Next, RectImg_Next_Gray, cv::COLOR_RGBA2GRAY);
                     //---Show Rectified Img for check---
                     //char pixValue = RectImg_Curt_Gray.at<char>(113, 78);
-                    cv::imwrite("C:\\saltwater\\intern\\src\\plugin\\stereo\\RectImg_Curt_Gray.png", RectImg_Curt_Gray);
-                    cv::imwrite("C:\\saltwater\\intern\\src\\plugin\\stereo\\RectImg_Next_Gray.png", RectImg_Next_Gray);
+                    cv::imwrite("E:\\Project_ARCHITECT\\RectImg_Curt_Gray.png", RectImg_Curt_Gray);
+                    cv::imwrite("E:\\Project_ARCHITECT\\RectImg_Next_Gray.png", RectImg_Next_Gray);
 
                     //---Stereo Matching---
                     cv::Mat DispImg_Curt_Rect, DispImg_Curt_Orig;
@@ -177,16 +177,16 @@ namespace Stereo
                     //---for imshow--- => Modify latter: Transform Disparity in Originals rather than in Rectified.
                     cv::Mat DispImg_Curt_Rect_8U(DispImg_Curt_Rect.size(), CV_8UC1);
                     cv::normalize(DispImg_Curt_Rect, DispImg_Curt_Rect_8U, 0, 255, cv::NORM_MINMAX, CV_8UC1);
-                    cv::imwrite("C:\\saltwater\\intern\\src\\plugin\\stereo\\Disp_Rect.png", DispImg_Curt_Rect_8U);
+                    cv::imwrite("E:\\Project_ARCHITECT\\Disp_Rect.png", DispImg_Curt_Rect_8U);
 
                     cv::Mat DispImg_Curt_Orig_8U(DispImg_Curt_Orig.size(), CV_8UC1);
                     cv::remap(DispImg_Curt_Rect_8U, DispImg_Curt_Orig_8U, TableB_x_Orig2Rect, TableB_y_Orig2Rect, cv::INTER_LINEAR, cv::BORDER_TRANSPARENT);
-                    cv::imwrite("C:\\saltwater\\intern\\src\\plugin\\stereo\\Disp_Orig.png", DispImg_Curt_Orig_8U);
+                    cv::imwrite("E:\\Project_ARCHITECT\\Disp_Orig.png", DispImg_Curt_Orig_8U);
 
                     //---Transform Disparity into Depth: Using Parallax Equation---
 
 
-                    //---Free the First frame, shift rest of frames, Add new frame---
+                    //---Free the First frame, shift rest frames, Add new frame---
 
 
                     //---
