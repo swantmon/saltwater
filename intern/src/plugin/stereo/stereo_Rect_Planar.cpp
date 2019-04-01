@@ -239,11 +239,13 @@ namespace Stereo
         float R_Rect01 = R_Rect_row0.at<float>(1, 0);
         float R_Rect02 = R_Rect_row0.at<float>(2, 0);
         */
+        if (cv::sum(R_Rect_row0)[0] < 0)
+        {
+            R_Rect_row0 *= -1; // Make the rotation always left2right and up2down.
+        }
+
         R_Rect_row0 /= cv::norm(R_Rect_row0, cv::NORM_L2);
         cv::transpose(R_Rect_row0, R_Rect_row0);
-        if ()
-        {
-        }
 
         cv::Mat R_Rect_row1 = R_Orig_B.row(2).cross(R_Rect_row0);
         R_Rect_row1 /= cv::norm(R_Rect_row1, cv::NORM_L2);
