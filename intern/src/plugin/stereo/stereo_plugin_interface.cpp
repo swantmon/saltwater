@@ -48,13 +48,14 @@ namespace Stereo
         glm2cv(&K_cv, glm::transpose(m_Camera_mtx));
 
         glm::mat3 R_glm = glm::mat3(_Transform);
+        //glm::mat3 RRt = R_glm * glm::transpose(R_glm); //Rot_mtx is proved as Orthogonal mtx.
         cv::Mat R_cv(3, 3, CV_32F);
         glm2cv(&R_cv, glm::transpose(R_glm));
 
         glm::vec3 T_glm = glm::vec3(_Transform[3]);
-        cv::Mat T_cv(3, 1, CV_32F);
-        glm2cv(&T_cv, T_glm);
-        cv::Mat PC_cv = -R_cv.t() * T_cv;
+        glm::vec3 PC_glm = -glm::transpose(R_glm) * T_glm;
+        cv::Mat PC_cv(3, 1, CV_32F);
+        glm2cv(&PC_cv, PC_glm);
 
         cv::Mat Img_dist_cv(cv::Size(m_ImageSize.x, m_ImageSize.y), CV_8UC4); // 2D Matrix(x*y) with (8-bit unsigned character) + (4 bands)
         memcpy(Img_dist_cv.data, _rRGBImage.data(), _rRGBImage.size());
@@ -108,7 +109,7 @@ namespace Stereo
                     //iter->cal_PolarRect(RectImg_Curt, RectImg_Next, iterNext->get_Img(), F_mtx); //Applied Polar Rectification
                     iter->imp_PlanarRect(RectImg_Curt, RectImg_Next, TableB_x_Orig2Rect, TableB_y_Orig2Rect, TableM_x_Orig2Rect, TableM_y_Orig2Rect, *iterNext); //Applied Planar Rectification
                     //iter->imp_Rect_OpenCV(RectImg_Curt, RectImg_Next, TableB_x_Orig2Rect, TableB_y_Orig2Rect, TableM_x_Orig2Rect, TableM_y_Orig2Rect, *iterNext);
-                    //---Verify by Test---
+                    //---Verify by Test Data---
                     /*
                     cv::Mat TestInputL = cv::imread("E:\\Project_ARCHITECT\\01 Epipolarization\\Fusiello\\Testing Data\\01-002570.jpg");
                     cv::Mat TestInputR = cv::imread("E:\\Project_ARCHITECT\\01 Epipolarization\\Fusiello\\Testing Data\\02-002570.jpg");
