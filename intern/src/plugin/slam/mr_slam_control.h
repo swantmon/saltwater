@@ -658,7 +658,7 @@ namespace MR
                 }
                 else if (MessageID == 1)
                 {
-                    InitializeSLAM(Decompressed);
+                    InitializeSLAM(*reinterpret_cast<const SIntrinsicsMessage*>(Decompressed.data() + sizeof(int32_t) * 2));
                 }
                 else if (MessageID == 2)
                 {
@@ -782,18 +782,16 @@ namespace MR
 
         // -----------------------------------------------------------------------------
 
-        void InitializeSLAM(const std::vector<char>& _rData)
+        void InitializeSLAM(const SIntrinsicsMessage& _rMessage)
         {
             ENGINE_CONSOLE_INFO("Initializing reconstructor");
-
-            SIntrinsicsMessage Message = *reinterpret_cast<const SIntrinsicsMessage*>(_rData.data() + sizeof(int32_t) * 2);
-
-            glm::vec2 FocalLength = Message.m_FocalLength;
-            glm::vec2 FocalPoint = Message.m_FocalPoint;
-            m_DepthSize = Message.m_DepthSize;
-            m_ColorSize = Message.m_ColorSize;
-            m_DeviceResolution = Message.m_DeviceResolution;
-            m_DeviceProjectionMatrix = Message.m_DeviceProjectionMatrix;
+            
+            glm::vec2 FocalLength = _rMessage.m_FocalLength;
+            glm::vec2 FocalPoint = _rMessage.m_FocalPoint;
+            m_DepthSize = _rMessage.m_DepthSize;
+            m_ColorSize = _rMessage.m_ColorSize;
+            m_DeviceResolution = _rMessage.m_DeviceResolution;
+            m_DeviceProjectionMatrix = _rMessage.m_DeviceProjectionMatrix;
 
             Gfx::ReconstructionRenderer::SetDeviceResolution(m_DeviceResolution);
 
