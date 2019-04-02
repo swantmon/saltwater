@@ -33,16 +33,6 @@ namespace Stereo
         Trans_vec.col(0).copyTo(Transform_mtx.col(3));
 
         P_mtx = K_mtx * Transform_mtx;
-        //---Test---
-        /*
-        float P00 = P_mtx.at<float>(0, 0);
-        float P01 = P_mtx.at<float>(0, 1);
-        float P02 = P_mtx.at<float>(0, 2);
-        float P03 = P_mtx.at<float>(0, 3);
-        float P12 = P_mtx.at<float>(1, 2);
-        float P23 = P_mtx.at<float>(2, 3);
-        */
-        //---
     }
 
     FutoGmtCV::~FutoGmtCV()
@@ -73,26 +63,6 @@ namespace Stereo
 
         operObj_PlanarRect.get_RectImg(RectImg_Base, RectImg_Match);
         operObj_PlanarRect.get_Transform_Orig2Rect(Orig2Rect_B_x, Orig2Rect_B_y, Orig2Rect_M_x, Orig2Rect_M_y);
-    }
-
-    void FutoGmtCV::imp_Rect_OpenCV(cv::Mat& RectImg_Base, cv::Mat& RectImg_Match, cv::Mat& Orig2Rect_B_x, cv::Mat& Orig2Rect_B_y, cv::Mat& Orig2Rect_M_x, cv::Mat& Orig2Rect_M_y, const FutoGmtCV& OrigImg_Match)
-    {
-        cv::Mat DistCoeff = cv::Mat::zeros(4, 1, CV_32F);
-        cv::Mat R_RO = OrigImg_Match.get_Rot() * Rot_mtx.inv();
-        cv::Mat T_RO = R_RO.inv() * OrigImg_Match.get_PC() - PC_vec;
-
-        cv::Mat R_Rect_B(3, 3, CV_32F), R_Rect_M(3, 3, CV_32F), P_Rect_B(3, 4, CV_32F), P_Rect_M(3, 4, CV_32F), Q(4, 4, CV_32F);
-        cv::stereoRectify(K_mtx, DistCoeff, OrigImg_Match.get_Cam(), DistCoeff, Img_RGB.size(), R_RO, T_RO, R_Rect_B, R_Rect_M, P_Rect_B, P_Rect_M, Q);
-
-        cv::Mat K_Rect_B, K_Rect_M, R_rect_B, R_rect_M, T_Rect_B, T_Rect_M;
-        cv::decomposeProjectionMatrix(P_Rect_B, K_Rect_B, R_rect_B, T_Rect_B);
-        cv::decomposeProjectionMatrix(P_Rect_M, K_Rect_M, R_rect_M, T_Rect_M);
-
-        cv::initUndistortRectifyMap(K_mtx, DistCoeff, R_Rect_B, K_Rect_B, Img_RGB.size(), CV_32FC1, Orig2Rect_B_x, Orig2Rect_B_y);
-        cv::initUndistortRectifyMap(OrigImg_Match.get_Cam(), DistCoeff, R_Rect_M, K_Rect_M, OrigImg_Match.get_Img().size(), CV_32FC1, Orig2Rect_M_x, Orig2Rect_M_y);
-
-        cv::remap(Img_RGB, RectImg_Base, Orig2Rect_B_x, Orig2Rect_B_y, cv::INTER_LINEAR, cv::BORDER_TRANSPARENT);
-        cv::remap(OrigImg_Match.get_Img(), RectImg_Match, Orig2Rect_M_x, Orig2Rect_M_y, cv::INTER_LINEAR, cv::BORDER_TRANSPARENT);
     }
 
     void FutoGmtCV::imp_cvSGBM(cv::Mat& DispImg, const cv::Mat& RectImg_Base, const cv::Mat& RectImg_Match)
@@ -139,6 +109,24 @@ namespace Stereo
         Epipole_ImgM_SkewSymMtx.at<float>(2, 1) =  EpiPole_ImgM.at<float>(0, 0);
 
         F_mtx = Epipole_ImgM_SkewSymMtx * P_ImgM  * P_ImgB_PsudoInv;
+    }
+
+    void FutoGmtCV::cal_F_mtx(const cv::Mat& K_ImgM, const cv::Mat& R_ImgM, const cv::Mat& PC_ImgM, cv::Mat& F_mtx)
+    {
+        cv::Mat b = PC_ImgM - PC_vec;
+        cv::Mat B_SkewSym = cv::Mat::zeros(cv::Size(3, 3), CV_32F);
+        B_SkewSym.at<float>(0, 1) = -b.at<float>(2, 0);
+        B_SkewSym.at<float>(0, 2) = b.at<float>(1, 0);
+        B_SkewSym.at<float>(1, 0) = b.at<float>(2, 0);
+        B_SkewSym.at<float>(1, 2) = -b.at<float>(0, 0);
+        B_SkewSym.at<float>(2, 0) = -b.at<float>(1, 0);
+        B_SkewSym.at<float>(2, 1) = b.at<float>(0, 0);
+
+        cv::Mat R_B2M = R_ImgM * Rot_mtx.t();
+
+        cv::Mat E_mtx = B_SkewSym * R_B2M;
+
+        F_mtx = K_ImgM.inv().t() * E_mtx * K_mtx.inv();
     }
 
     //---Set Functions---
