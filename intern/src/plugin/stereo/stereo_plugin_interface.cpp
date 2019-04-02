@@ -40,20 +40,16 @@ namespace Stereo
         */
 
         //---Transform Image & Orientations to OpenCV format---
-        glm::mat4x3 P_glm = m_Camera_mtx * glm::mat4x3(_Transform);
-        cv::Mat P_cv(3, 4, CV_32F);
-        glm2cv(&P_cv, glm::transpose(P_glm));
-
         cv::Mat K_cv(3, 3, CV_32F);
         glm2cv(&K_cv, glm::transpose(m_Camera_mtx));
 
         glm::mat3 R_glm = glm::mat3(_Transform);
-        //glm::mat3 RRt = R_glm * glm::transpose(R_glm); //Rot_mtx is proved as Orthogonal mtx.
+        //glm::mat3 RRt = R_glm * glm::transpose(R_glm); //Rot_mtx is verified as Orthogonal mtx.
         cv::Mat R_cv(3, 3, CV_32F);
         glm2cv(&R_cv, glm::transpose(R_glm));
+        float R12 = R_cv.at<float>(1, 2);
 
-        glm::vec3 T_glm = glm::vec3(_Transform[3]);
-        glm::vec3 PC_glm = -glm::transpose(R_glm) * T_glm;
+        glm::vec3 PC_glm = glm::vec3(_Transform[3]);
         cv::Mat PC_cv(3, 1, CV_32F);
         glm2cv(&PC_cv, PC_glm);
 
@@ -97,9 +93,67 @@ namespace Stereo
                     cv::imwrite("E:\\Project_ARCHITECT\\OrigImg_Next.png", iterNext->get_Img());
                     //------
 
-                    //---Compute Fundamental Matrix---
-                    cv::Mat F_mtx(3, 3, CV_32F);
-                    iter->cal_F_mtx(iterNext->get_P_mtx(), F_mtx);
+                    //---Test: Compute Fundamental Matrix & Check Orientations given by iPad---
+
+                    cv::Mat F_mtx_byP(3, 3, CV_32F);
+                    iter->cal_F_mtx(iterNext->get_P_mtx(), F_mtx_byP);
+                    float F_byP00 = F_mtx_byP.at<float>(0, 0);
+                    float F_byP01 = F_mtx_byP.at<float>(0, 1);
+                    float F_byP02 = F_mtx_byP.at<float>(0, 2);
+                    float F_byP10 = F_mtx_byP.at<float>(1, 0);
+                    float F_byP11 = F_mtx_byP.at<float>(1, 1);
+                    float F_byP12 = F_mtx_byP.at<float>(1, 2);
+                    float F_byP20 = F_mtx_byP.at<float>(2, 0);
+                    float F_byP21 = F_mtx_byP.at<float>(2, 1);
+                    float F_byP22 = F_mtx_byP.at<float>(2, 2);
+
+                    cv::Mat F_mtx_byKBR(3, 3, CV_32F);
+                    iter->cal_F_mtx(iterNext->get_Cam(), iterNext->get_Rot(), iterNext->get_PC(), F_mtx_byKBR);
+                    float F_byKBR00 = F_mtx_byKBR.at<float>(0, 0);
+                    float F_byKBR01 = F_mtx_byKBR.at<float>(0, 1);
+                    float F_byKBR02 = F_mtx_byKBR.at<float>(0, 2);
+                    float F_byKBR10 = F_mtx_byKBR.at<float>(1, 0);
+                    float F_byKBR11 = F_mtx_byKBR.at<float>(1, 1);
+                    float F_byKBR12 = F_mtx_byKBR.at<float>(1, 2);
+                    float F_byKBR20 = F_mtx_byKBR.at<float>(2, 0);
+                    float F_byKBR21 = F_mtx_byKBR.at<float>(2, 1);
+                    float F_byKBR22 = F_mtx_byKBR.at<float>(2, 2);
+
+                    cv::Mat Pt_ImgB0 = cv::Mat::ones(3, 1, CV_32F);
+                    Pt_ImgB0.at<float>(0, 0) = 212;
+                    Pt_ImgB0.at<float>(1, 0) = 17;
+                    cv::Mat Pt_ImgB1 = cv::Mat::ones(3, 1, CV_32F);
+                    Pt_ImgB1.at<float>(0, 0) = 181;
+                    Pt_ImgB1.at<float>(1, 0) = 60;
+                    cv::Mat Pt_ImgB2 = cv::Mat::ones(3, 1, CV_32F);
+                    Pt_ImgB2.at<float>(0, 0) = 285;
+                    Pt_ImgB2.at<float>(1, 0) = 60;
+                    cv::Mat Pt_ImgB3 = cv::Mat::ones(3, 1, CV_32F);
+                    Pt_ImgB3.at<float>(0, 0) = 305;
+                    Pt_ImgB3.at<float>(1, 0) = 104;
+
+                    cv::Mat Pt_ImgM0 = cv::Mat::ones(3, 1, CV_32F);
+                    Pt_ImgM0.at<float>(0, 0) = 157;
+                    Pt_ImgM0.at<float>(1, 0) = 13;
+                    cv::Mat Pt_ImgM1 = cv::Mat::ones(3, 1, CV_32F);
+                    Pt_ImgM1.at<float>(0, 0) = 130;
+                    Pt_ImgM1.at<float>(1, 0) = 61;
+                    cv::Mat Pt_ImgM2 = cv::Mat::ones(3, 1, CV_32F);
+                    Pt_ImgM2.at<float>(0, 0) = 232;
+                    Pt_ImgM2.at<float>(1, 0) = 46;
+                    cv::Mat Pt_ImgM3 = cv::Mat::ones(3, 1, CV_32F);
+                    Pt_ImgM3.at<float>(0, 0) = 254;
+                    Pt_ImgM3.at<float>(1, 0) = 85;
+
+                    cv::Mat Pt0 = Pt_ImgM0.t() * F_byKBR22 * Pt_ImgB0;
+                    float P0 = Pt0.at<float>(0, 0);
+                    cv::Mat Pt1 = Pt_ImgM1.t() * F_byKBR22 * Pt_ImgB1;
+                    float P1 = Pt1.at<float>(0, 0);
+                    cv::Mat Pt2 = Pt_ImgM2.t() * F_byKBR22 * Pt_ImgB2;
+                    float P2 = Pt2.at<float>(0, 0);
+                    cv::Mat Pt3 = Pt_ImgM3.t() * F_byKBR22 * Pt_ImgB3;
+                    float P3 = Pt3.at<float>(0, 0);
+
                     //------
 
                     //---Generate Rectified Images---
@@ -108,7 +162,6 @@ namespace Stereo
 
                     //iter->cal_PolarRect(RectImg_Curt, RectImg_Next, iterNext->get_Img(), F_mtx); //Applied Polar Rectification
                     iter->imp_PlanarRect(RectImg_Curt, RectImg_Next, TableB_x_Orig2Rect, TableB_y_Orig2Rect, TableM_x_Orig2Rect, TableM_y_Orig2Rect, *iterNext); //Applied Planar Rectification
-                    //iter->imp_Rect_OpenCV(RectImg_Curt, RectImg_Next, TableB_x_Orig2Rect, TableB_y_Orig2Rect, TableM_x_Orig2Rect, TableM_y_Orig2Rect, *iterNext);
                     //---Verify by Test Data---
                     /*
                     cv::Mat TestInputL = cv::imread("E:\\Project_ARCHITECT\\01 Epipolarization\\Fusiello\\Testing Data\\01-002570.jpg");

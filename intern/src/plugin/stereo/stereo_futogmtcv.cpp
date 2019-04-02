@@ -114,6 +114,7 @@ namespace Stereo
     void FutoGmtCV::cal_F_mtx(const cv::Mat& K_ImgM, const cv::Mat& R_ImgM, const cv::Mat& PC_ImgM, cv::Mat& F_mtx)
     {
         cv::Mat b = PC_ImgM - PC_vec;
+        b = -Rot_mtx * b;
         cv::Mat B_SkewSym = cv::Mat::zeros(cv::Size(3, 3), CV_32F);
         B_SkewSym.at<float>(0, 1) = -b.at<float>(2, 0);
         B_SkewSym.at<float>(0, 2) = b.at<float>(1, 0);
