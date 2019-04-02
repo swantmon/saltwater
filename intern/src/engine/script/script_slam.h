@@ -44,6 +44,8 @@ namespace Scpt
 
             SetActivateSelection = (FSetFlag)(Core::PluginManager::GetPluginFunction("SLAM", "SetActivateSelection"));
             EnableMouseControl = (FSetFlag)(Core::PluginManager::GetPluginFunction("SLAM", "EnableMouseControl"));
+
+            m_IsMouseControlEnabled = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:use_tracking_camera", false);
         }
 
         // -----------------------------------------------------------------------------
