@@ -785,6 +785,15 @@ namespace MR
 
                         Gfx::TextureManager::CopyTextureToCPU(m_RGBTexture, PixelData.data());
 
+                        glm::vec3 Scale;
+                        glm::quat Rotation;
+                        glm::vec3 Translation;
+                        glm::vec3 Skew;
+                        glm::vec4 Perspective;
+                        glm::decompose(m_PoseMatrix, Scale, Rotation, Translation, Skew, Perspective);
+
+                        std::cout << Translation.x << '\t' << Translation.y << '\t' << Translation.z << '\n';
+
                         StereoOnFrameCPU(PixelData, m_PoseMatrix);
                     }
                 }
