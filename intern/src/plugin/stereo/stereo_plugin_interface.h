@@ -41,6 +41,9 @@ namespace Stereo
 
     private:
 
+        cv::Mat R_1st;
+        cv::Mat PC_1st;
+
         glm::mat3 m_Camera_mtx;
         glm::ivec2 m_ImageSize;
         glm::vec4 m_DisCoeff;
