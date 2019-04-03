@@ -44,10 +44,8 @@ namespace Stereo
         glm2cv(&K_cv, glm::transpose(m_Camera_mtx));
 
         glm::mat3 R_glm = glm::mat3(_Transform);
-        //glm::mat3 RRt = R_glm * glm::transpose(R_glm); //Rot_mtx is verified as Orthogonal mtx.
         cv::Mat R_cv(3, 3, CV_32F);
-        glm2cv(&R_cv, glm::transpose(R_glm));
-        float R12 = R_cv.at<float>(1, 2);
+        glm2cv(&R_cv, R_glm); // Rotation given by ARKit is Camera2World, but Photogrammetry needs Rotation is World2Camera.
 
         glm::vec3 PC_glm = glm::vec3(_Transform[3]);
         cv::Mat PC_cv(3, 1, CV_32F);
@@ -65,6 +63,14 @@ namespace Stereo
         //---Select Keyframe for Computation---
         if (Keyframes.empty())
         {
+            //---test: Using Relative orientations---
+            
+            R_cv.copyTo(R_1st);
+            R_cv = cv::Mat::eye(3, 3, CV_32F);
+            PC_cv.copyTo(PC_1st);
+            PC_cv = cv::Mat::zeros(3, 1, CV_32F);
+            
+            //------
             Keyframes.resize(1);
             Keyframes[0] = FutoGmtCV(Img_Undist_cv, K_cv, R_cv, PC_cv);
         }
@@ -75,6 +81,12 @@ namespace Stereo
             float BaseLineLength = cv::norm(BaseLine, cv::NORM_L2);
             if (BaseLineLength >= Cnd_Keyf_BaseLine)
             {
+                //---test: Using Relative Orientations---
+                
+                R_cv *= R_1st.t();
+                PC_cv = R_1st * (PC_cv - PC_1st);
+                
+                //---
                 Keyframes.resize(Keyframes.size() + 1); // Apply resize for memory allocation.
                 Keyframes.back() = FutoGmtCV(Img_Undist_cv, K_cv, R_cv, PC_cv); // Push_back & Pull_back are only applied to add/remove element -> Applying push/pull with memory allocation has bad efficiency
             }
@@ -93,8 +105,38 @@ namespace Stereo
                     cv::imwrite("E:\\Project_ARCHITECT\\OrigImg_Next.png", iterNext->get_Img());
                     //------
 
-                    //---Test: Compute Fundamental Matrix & Check Orientations given by iPad---
+                    //---Check Rotation of Current & Next---
 
+                    float R_Curt_00 = iter->get_Rot().at<float>(0, 0);
+                    float R_Curt_01 = iter->get_Rot().at<float>(0, 1);
+                    float R_Curt_02 = iter->get_Rot().at<float>(0, 2);
+                    float R_Curt_10 = iter->get_Rot().at<float>(1, 0);
+                    float R_Curt_11 = iter->get_Rot().at<float>(1, 1);
+                    float R_Curt_12 = iter->get_Rot().at<float>(1, 2);
+                    float R_Curt_20 = iter->get_Rot().at<float>(2, 0);
+                    float R_Curt_21 = iter->get_Rot().at<float>(2, 1);
+                    float R_Curt_22 = iter->get_Rot().at<float>(2, 2);
+                    float PC_Curt_00 = iter->get_PC().at<float>(0, 0);
+                    float PC_Curt_10 = iter->get_PC().at<float>(1, 0);
+                    float PC_Curt_20 = iter->get_PC().at<float>(2, 0);
+
+                    float R_Next_00 = iterNext->get_Rot().at<float>(0, 0);
+                    float R_Next_01 = iterNext->get_Rot().at<float>(0, 1);
+                    float R_Next_02 = iterNext->get_Rot().at<float>(0, 2);
+                    float R_Next_10 = iterNext->get_Rot().at<float>(1, 0);
+                    float R_Next_11 = iterNext->get_Rot().at<float>(1, 1);
+                    float R_Next_12 = iterNext->get_Rot().at<float>(1, 2);
+                    float R_Next_20 = iterNext->get_Rot().at<float>(2, 0);
+                    float R_Next_21 = iterNext->get_Rot().at<float>(2, 1);
+                    float R_Next_22 = iterNext->get_Rot().at<float>(2, 2);
+                    float PC_Next_00 = iterNext->get_PC().at<float>(0, 0);
+                    float PC_Next_10 = iterNext->get_PC().at<float>(1, 0);
+                    float PC_Next_20 = iterNext->get_PC().at<float>(2, 0);
+
+                    //---
+
+                    //---Test: Compute Fundamental Matrix & Check Orientations given by iPad---
+                    /*
                     cv::Mat F_mtx_byP(3, 3, CV_32F);
                     iter->cal_F_mtx(iterNext->get_P_mtx(), F_mtx_byP);
                     float F_byP00 = F_mtx_byP.at<float>(0, 0);
@@ -153,7 +195,7 @@ namespace Stereo
                     float P2 = Pt2.at<float>(0, 0);
                     cv::Mat Pt3 = Pt_ImgM3.t() * F_byKBR22 * Pt_ImgB3;
                     float P3 = Pt3.at<float>(0, 0);
-
+                    */
                     //------
 
                     //---Generate Rectified Images---
@@ -202,7 +244,7 @@ namespace Stereo
                     TestImgL.imp_PlanarRect(RectImg_Curt, RectImg_Next, TableB_x_Orig2Rect, TableB_y_Orig2Rect, TableM_x_Orig2Rect, TableM_y_Orig2Rect, TestImgR);
                     */
                     //---
-
+                    
                     cv::Mat RectImg_Curt_Gray, RectImg_Next_Gray;
                     cv::cvtColor(RectImg_Curt, RectImg_Curt_Gray, cv::COLOR_RGBA2GRAY);
                     cv::cvtColor(RectImg_Next, RectImg_Next_Gray, cv::COLOR_RGBA2GRAY);
@@ -242,7 +284,7 @@ namespace Stereo
 
                     //---Free the First frame, shift rest frames, Add new frame---
 
-
+                    
                     //---
                     T = false;
                 }
