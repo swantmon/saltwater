@@ -53,14 +53,21 @@ namespace Stereo
 
     void FutoGmtCV::imp_PlanarRect(cv::Mat& RectImg_Base, cv::Mat& RectImg_Match, cv::Mat& Orig2Rect_B_x, cv::Mat& Orig2Rect_B_y, cv::Mat& Orig2Rect_M_x, cv::Mat& Orig2Rect_M_y, const FutoGmtCV& OrigImg_Match)
     {
+        //---Calculate the Orientations of Rectified Images---
         operObj_PlanarRect.cal_K_Rect(K_mtx, OrigImg_Match.get_Cam());
         operObj_PlanarRect.cal_R_Rect(Rot_mtx, PC_vec, OrigImg_Match.get_PC());
         operObj_PlanarRect.cal_P_Rect(PC_vec, OrigImg_Match.get_PC());
         operObj_PlanarRect.cal_H(P_mtx, OrigImg_Match.get_P_mtx());
 
+        //---Center the Rectified Images---
+        operObj_PlanarRect.imp_CenterRectImg(Img_RGB.size(), OrigImg_Match.get_Img().size());
+        operObj_PlanarRect.cal_H(P_mtx, OrigImg_Match.get_P_mtx());
+
+        //---Generate Rectified Images---
         operObj_PlanarRect.determ_RectImgSize(Img_RGB.size(), OrigImg_Match.get_Img().size());
         operObj_PlanarRect.genrt_RectImg(Img_RGB, OrigImg_Match.get_Img());
 
+        //---Derive Rectified Images---
         operObj_PlanarRect.get_RectImg(RectImg_Base, RectImg_Match);
         operObj_PlanarRect.get_Transform_Orig2Rect(Orig2Rect_B_x, Orig2Rect_B_y, Orig2Rect_M_x, Orig2Rect_M_y);
     }

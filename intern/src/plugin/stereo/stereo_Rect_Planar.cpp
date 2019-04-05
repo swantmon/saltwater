@@ -222,11 +222,37 @@ namespace Stereo
         ImgSize_Rect = cv::Size(ImgSize_Rect_x_max - ImgSize_Rect_x_min, ImgSize_Rect_y_max - ImgSize_Rect_y_min);
     }
 
+    void Rect_Planar::imp_CenterRectImg(const cv::Size& ImgSize_OrigB, const cv::Size& ImgSize_OrigM)
+    {
+        cv::Mat CenterB_Orig = cv::Mat::ones(3, 1, CV_32F);
+        CenterB_Orig.ptr<float>(0)[0] = ImgSize_OrigB.width / 2;
+        CenterB_Orig.ptr<float>(1)[0] = ImgSize_OrigB.height / 2;
+        cv::Mat CenterM_Orig = cv::Mat::ones(3, 1, CV_32F);
+        CenterM_Orig.ptr<float>(0)[0] = ImgSize_OrigM.width / 2;
+        CenterM_Orig.ptr<float>(1)[0] = ImgSize_OrigM.height / 2;
+
+        cv::Mat CenterB_Orig2Rect = H_B * CenterB_Orig;
+        CenterB_Orig2Rect /= CenterB_Orig2Rect.ptr<float>(2)[0];
+        cv::Mat CenterM_Orig2Rect = H_B * CenterB_Orig;
+        CenterM_Orig2Rect /= CenterM_Orig2Rect.ptr<float>(2)[0];
+
+        cv::Mat Drift_B = CenterB_Orig - CenterB_Orig2Rect;
+        cv::Mat Drift_M = CenterM_Orig - CenterM_Orig2Rect;
+        float Drift_y = (Drift_B.ptr<float>(1)[0] + Drift_M.ptr<float>(1)[0]) / 2;
+        Drift_B.ptr<float>(1)[0] = Drift_y;
+        Drift_M.ptr<float>(1)[0] = Drift_y;
+
+        K_Rect_B.ptr<float>(0)[2] += Drift_B.ptr<float>(0)[0];
+        K_Rect_B.ptr<float>(1)[2] += Drift_B.ptr<float>(1)[0];
+        K_Rect_M.ptr<float>(0)[2] += Drift_M.ptr<float>(0)[0];
+        K_Rect_M.ptr<float>(1)[2] += Drift_M.ptr<float>(1)[0];
+    }
+
     //---Compute Orientations---
     void Rect_Planar::cal_K_Rect(const cv::Mat& K_Orig_B, const cv::Mat& K_Orig_M)
     {
-        K_Rect = 0.5 * (K_Orig_B + K_Orig_M);
-        // Afterwards, add horizontal shift to keep RectImg centered = reduce the RectImg size
+        K_Rect_B = 0.5 * (K_Orig_B + K_Orig_M);
+        K_Rect_M = 0.5 * (K_Orig_B + K_Orig_M);
     }
 
     void Rect_Planar::cal_R_Rect(const cv::Mat& R_Orig_B, const cv::Mat& PC_Orig_B, const cv::Mat& PC_Orig_M)
@@ -270,26 +296,30 @@ namespace Stereo
         cv::Mat t_Orig_M = -R_Rect * PC_Orig_M;
         t_Orig_M.col(0).copyTo(Trans_Rect_M.col(3));
 
-        P_Rect_B = K_Rect * Trans_Rect_B;
-        P_Rect_M = K_Rect * Trans_Rect_M;
+        P_Rect_B = K_Rect_B * Trans_Rect_B;
+        P_Rect_M = K_Rect_M * Trans_Rect_M;
     }
 
     void Rect_Planar::cal_H(const cv::Mat& P_Orig_B, cv::Mat& P_Orig_M)
     {
+        //---Calculate the Homography---
         H_B = P_Rect_B * P_Orig_B.inv(cv::DECOMP_SVD); 
         H_M = P_Rect_M * P_Orig_M.inv(cv::DECOMP_SVD);
-
+        //---Another Homography Transformation proposed by Fusiello. -> I do not like it because it is not reasonable
+        /*
         //H_B = P_Rect_B.colRange(0, 3) * P_Orig_B.colRange(0, 3).inv();
         //H_M = P_Rect_M.colRange(0, 3) * P_Orig_M.colRange(0, 3).inv();
+        */
+        //---
 
         //---Test: y-Parax---
         
         cv::Mat pixB_Orig = cv::Mat::ones(3, 1, CV_32F);
-        pixB_Orig.at<float>(0, 0) = 285;
-        pixB_Orig.at<float>(1, 0) = 60;
+        pixB_Orig.at<float>(0, 0) = 462;
+        pixB_Orig.at<float>(1, 0) = 698;
         cv::Mat pixM_Orig = cv::Mat::ones(3, 1, CV_32F);
-        pixM_Orig.at<float>(0, 0) = 229;
-        pixM_Orig.at<float>(1, 0) = 45;
+        pixM_Orig.at<float>(0, 0) = 296;
+        pixM_Orig.at<float>(1, 0) = 710;
 
         cv::Mat pixB_Rect = H_B * pixB_Orig;
         pixB_Rect /= pixB_Rect.at<float>(2, 0);

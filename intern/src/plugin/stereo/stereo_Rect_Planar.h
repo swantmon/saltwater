@@ -18,7 +18,8 @@ namespace Stereo
     public:
         void genrt_RectImg(const cv::Mat& Img_Orig_B, const cv::Mat& Img_Orig_M);
         void determ_RectImgSize(const cv::Size& ImgSize_OrigB, const cv::Size& ImgSize_OrigM);
-        
+        void imp_CenterRectImg(const cv::Size& ImgSize_OrigB, const cv::Size& ImgSize_OrigM);
+
     //---Compute Orientations---
     public:
         void cal_K_Rect(const cv::Mat& K_Orig_B, const cv::Mat& K_Orig_M);
@@ -43,10 +44,10 @@ namespace Stereo
         cv::Mat mapB_x_Rect2Orig, mapB_y_Rect2Orig, mapM_x_Rect2Orig, mapM_y_Rect2Orig;
 
         //---Orientations---
-        cv::Mat K_Rect; // Camera mtx for Rectified Images
-        cv::Mat R_Rect, R_Rect_M; // Rotation mtx for Rectified Images
-        cv::Mat P_Rect_B, P_Rect_M; // Perspective Projection mtx for Rectified Images
-        cv::Mat H_B, H_M; // Homography from Original to Rectified
+        cv::Mat K_Rect_B, K_Rect_M; // Camera mtx of Rectified Images
+        cv::Mat R_Rect; // Rotation mtx of Rectified Images (World -> Image)
+        cv::Mat P_Rect_B, P_Rect_M; // Perspective Projection mtx of Rectified Images (World -> Image)
+        cv::Mat H_B, H_M; // Homography (Original -> Rectified)
     };
 
 } // Stereo
