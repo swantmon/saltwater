@@ -17,7 +17,8 @@ namespace Stereo
 {
     void CPluginInterface::SetIntrinsics(const glm::vec2& _rFocalLength, const glm::vec2& _rFocalPoint, const glm::ivec2& _rImageSize)
     {
-        m_Camera_mtx = glm::mat3(glm::vec3(_rFocalLength.x, 0, 0), glm::vec3(0, _rFocalLength.y, 0), glm::vec3(_rFocalPoint.x, _rFocalPoint.y, 1)); // Unit is pixel
+        BASE_UNUSED(_rFocalLength); // For variables which has not been used yet. Use this statement to avoid warning.
+        BASE_UNUSED(_rFocalPoint); // For variables which has not been used yet. Use this statement to avoid warning.
         m_ImageSize = _rImageSize;
         m_DisCoeff = glm::vec4(0.1325, -0.2666, -0.0030, 0.0020);
     }
@@ -31,15 +32,13 @@ namespace Stereo
 
     // -----------------------------------------------------------------------------
 
-    void CPluginInterface::OnFrameCPU(const std::vector<char>& _rRGBImage, const glm::mat4& _Transform)
+    void CPluginInterface::OnFrameCPU(const std::vector<char>& _rRGBImage, const glm::mat4& _Transform, const glm::mat4& _Intrinsics)
     {
-        /*
-        // If Valuables have not been used, use "BASE_UNUSED" to avoid warnings
-        BASE_UNUSED(_rRGBImage); // For variables which has not been used yet.
-        BASE_UNUSED(_Transform); // For variables which has not been used yet.
-        */
-
         //---Transform Image & Orientations to OpenCV format---
+        //---Image is half resolution but Intrinsic is full resolution---
+        m_Camera_mtx = glm::mat3(_Intrinsics) / 2;
+        m_Camera_mtx[2].z = 1;
+        //------
         cv::Mat K_cv(3, 3, CV_32F);
         glm2cv(&K_cv, glm::transpose(m_Camera_mtx));
 
@@ -334,9 +333,9 @@ namespace Stereo
 
 // -----------------------------------------------------------------------------
 
-extern "C" CORE_PLUGIN_API_EXPORT void OnFrameCPU(const std::vector<char>& _rRGBImage, const glm::mat4& _Transform)
+extern "C" CORE_PLUGIN_API_EXPORT void OnFrameCPU(const std::vector<char>& _rRGBImage, const glm::mat4& _Transform, const glm::mat4& _Intrinsics)
 {
-    static_cast<Stereo::CPluginInterface&>(GetInstance()).OnFrameCPU(_rRGBImage, _Transform);
+    static_cast<Stereo::CPluginInterface&>(GetInstance()).OnFrameCPU(_rRGBImage, _Transform, _Intrinsics);
 }
 
 // -----------------------------------------------------------------------------

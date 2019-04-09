@@ -313,7 +313,7 @@ namespace Stereo
         //---
 
         //---Test: y-Parax---
-        
+        /*
         cv::Mat pixB_Orig = cv::Mat::ones(3, 1, CV_32F);
         pixB_Orig.at<float>(0, 0) = 462;
         pixB_Orig.at<float>(1, 0) = 698;
@@ -327,7 +327,7 @@ namespace Stereo
         pixM_Rect /= pixM_Rect.at<float>(2, 0);
 
         float y_parax = pixM_Rect.at<float>(1, 0) - pixB_Rect.at<float>(1, 0);
-
+        */
         //---
     }
 

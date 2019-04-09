@@ -45,7 +45,9 @@ namespace MR
             DEPTHFRAME,
             COLORFRAME,
             LIGHTESTIMATE,
-            PLANE
+            PLANE,
+            INFRARED,
+            COLORINTRINSICS
         };
 
     private:
@@ -63,6 +65,7 @@ namespace MR
         std::vector<uint16_t> m_DepthBuffer;
         std::vector<char> m_ColorBuffer;
         glm::mat4 m_PoseMatrix;
+        glm::mat4 m_ColorIntrinsics;
 
         glm::ivec2 m_DepthSize;
         glm::ivec2 m_ColorSize;
@@ -182,7 +185,7 @@ namespace MR
         bool m_UseStereoMatching;
         bool m_UseGPUForStereo;
 
-        typedef void(*StereoOnFrameCPUFunc)(const std::vector<char>&, const glm::mat4&);
+        typedef void(*StereoOnFrameCPUFunc)(const std::vector<char>&, const glm::mat4&, const glm::mat4&);
         typedef void(*StereoGetFrameCPUFunc)(std::vector<char>&);
         
         StereoOnFrameCPUFunc StereoOnFrameCPU;
@@ -785,16 +788,7 @@ namespace MR
 
                         Gfx::TextureManager::CopyTextureToCPU(m_RGBTexture, PixelData.data());
 
-                        glm::vec3 Scale;
-                        glm::quat Rotation;
-                        glm::vec3 Translation;
-                        glm::vec3 Skew;
-                        glm::vec4 Perspective;
-                        glm::decompose(m_PoseMatrix, Scale, Rotation, Translation, Skew, Perspective);
-
-                        std::cout << Translation.x << '\t' << Translation.y << '\t' << Translation.z << '\n';
-
-                        StereoOnFrameCPU(PixelData, m_PoseMatrix);
+                        StereoOnFrameCPU(PixelData, m_PoseMatrix, m_ColorIntrinsics);
                     }
                 }
 
@@ -834,6 +828,10 @@ namespace MR
                     m_Reconstructor.RemovePlane(PlaneID);
                     break;
                 }
+            }
+            else if (MessageType == COLORINTRINSICS)
+            {
+                m_ColorIntrinsics = *reinterpret_cast<glm::mat4*>(Decompressed.data() + sizeof(int32_t));
             }
         }
 
