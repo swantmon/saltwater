@@ -46,7 +46,9 @@ namespace MR
             DEPTHFRAME,
             COLORFRAME,
             LIGHTESTIMATE,
-            PLANE
+            PLANE,
+            INFRAREDFRAME,
+            COLORINTRINSICS
         };
 
     private:
@@ -64,6 +66,7 @@ namespace MR
         std::vector<uint16_t> m_DepthBuffer;
         std::vector<char> m_ColorBuffer;
         glm::mat4 m_PoseMatrix;
+        glm::mat4 m_ColorIntrinsics;
 
         glm::ivec2 m_DepthSize;
         glm::ivec2 m_ColorSize;
@@ -750,6 +753,10 @@ namespace MR
                     m_Reconstructor.RemovePlane(PlaneID);
                     break;
                 }
+            }
+            else if (MessageType == COLORINTRINSICS)
+            {
+                m_ColorIntrinsics = *reinterpret_cast<glm::mat4*>(Decompressed.data() + sizeof(int32_t));
             }
         }
 
