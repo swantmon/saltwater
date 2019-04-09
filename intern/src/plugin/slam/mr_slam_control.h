@@ -185,7 +185,7 @@ namespace MR
         bool m_UseStereoMatching;
         bool m_UseGPUForStereo;
 
-        typedef void(*StereoOnFrameCPUFunc)(const std::vector<char>&, const glm::mat4&, const glm::mat4&);
+        typedef void(*StereoOnFrameCPUFunc)(const std::vector<char>&, const glm::mat4&, const glm::mat4&, const std::vector<uint16_t>&);
         typedef void(*StereoGetFrameCPUFunc)(std::vector<char>&);
         
         StereoOnFrameCPUFunc StereoOnFrameCPU;
@@ -785,10 +785,12 @@ namespace MR
                     else
                     {
                         std::vector<char> PixelData(m_RGBTexture->GetNumberOfPixelsU() * m_RGBTexture->GetNumberOfPixelsV() * 4);
-
                         Gfx::TextureManager::CopyTextureToCPU(m_RGBTexture, PixelData.data());
 
-                        StereoOnFrameCPU(PixelData, m_PoseMatrix, m_ColorIntrinsics);
+                        std::vector<uint16_t> DepthData(m_RGBTexture->GetNumberOfPixelsU() * m_RGBTexture->GetNumberOfPixelsV());
+                        Gfx::TextureManager::CopyTextureToCPU(m_DepthTexture, reinterpret_cast<char*>(DepthData.data()));
+
+                        StereoOnFrameCPU(PixelData, m_PoseMatrix, m_ColorIntrinsics, DepthData);
                     }
                 }
 

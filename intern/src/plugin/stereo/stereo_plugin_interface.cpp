@@ -32,11 +32,12 @@ namespace Stereo
 
     // -----------------------------------------------------------------------------
 
-    void CPluginInterface::OnFrameCPU(const std::vector<char>& _rRGBImage, const glm::mat4& _Transform, const glm::mat4& _Intrinsics)
+    void CPluginInterface::OnFrameCPU(const std::vector<char>& _rRGBImage, const glm::mat4& _Transform, const glm::mat4& _Intrinsics, const std::vector<uint16_t>& _rDepthImage)
     {
+        std::cout << _rDepthImage.size();
+
         //---Transform Image & Orientations to OpenCV format---
-        //---Image is half resolution but Intrinsic is full resolution---
-        m_Camera_mtx = glm::mat3(_Intrinsics) / 2;
+        m_Camera_mtx = glm::mat3(_Intrinsics) / 2; // Image is half resolution but Intrinsic is full resolution
         m_Camera_mtx[2].z = 1;
         //------
         cv::Mat K_cv(3, 3, CV_32F);
@@ -333,9 +334,9 @@ namespace Stereo
 
 // -----------------------------------------------------------------------------
 
-extern "C" CORE_PLUGIN_API_EXPORT void OnFrameCPU(const std::vector<char>& _rRGBImage, const glm::mat4& _Transform, const glm::mat4& _Intrinsics)
+extern "C" CORE_PLUGIN_API_EXPORT void OnFrameCPU(const std::vector<char>& _rRGBImage, const glm::mat4& _Transform, const glm::mat4& _Intrinsics, const std::vector<uint16_t>& _rDepthImage)
 {
-    static_cast<Stereo::CPluginInterface&>(GetInstance()).OnFrameCPU(_rRGBImage, _Transform, _Intrinsics);
+    static_cast<Stereo::CPluginInterface&>(GetInstance()).OnFrameCPU(_rRGBImage, _Transform, _Intrinsics, _rDepthImage);
 }
 
 // -----------------------------------------------------------------------------

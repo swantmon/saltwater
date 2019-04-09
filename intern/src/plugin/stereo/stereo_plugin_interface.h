@@ -32,7 +32,7 @@ namespace Stereo
         // CPU
 
         std::vector<char> GetLatestDepthImageCPU() const;
-        void OnFrameCPU(const std::vector<char>& _rRGBImage, const glm::mat4& _Transform, const glm::mat4& _Intrinsics);
+        void OnFrameCPU(const std::vector<char>& _rRGBImage, const glm::mat4& _Transform, const glm::mat4& _Intrinsics, const std::vector<uint16_t>& _rDepthImage);
 
         // GPU
 
@@ -50,7 +50,7 @@ namespace Stereo
 
         std::vector<FutoGmtCV> Keyframes;
         std::size_t Cdt_Keyf_MaxNum = 2; // Maximal images for calculation once
-        float Cnd_Keyf_BaseLine = 0.05; // Keyframe Selection: BaseLine Condition. Unit is meter.
+        float Cnd_Keyf_BaseLine = 0.07; // Keyframe Selection: BaseLine Condition. Unit is meter.
         
     private:
         void glm2cv(cv::Mat* cvmat, const glm::mat3& glmmat);
