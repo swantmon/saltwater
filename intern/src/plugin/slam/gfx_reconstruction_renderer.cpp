@@ -122,7 +122,7 @@ namespace
         void AddPositionToSelection(const glm::vec3& _rWSPosition);
         void ResetSelection();
         void SetInpaintedPlane(Gfx::CTexturePtr _Texture, const Base::AABB3Float& _rAABB);
-        CTexturePtr GetInpaintedRendering(const glm::mat4& _rPoseMatrix, const Base::AABB3Float& _rAABB, CTexturePtr _BackgroundTexturePtr);
+        CTexturePtr GetInpaintedRendering(const Base::AABB3Float& _rAABB, CTexturePtr _BackgroundTexturePtr);
 
         const Base::AABB3Float& GetSelectionBox();
 
@@ -155,8 +155,8 @@ namespace
 
         void RenderBackgroundImage(CTexturePtr _Background, bool _IsFlipped = false);
         void CombineDiminishedImage(CTexturePtr _Background, CTexturePtr _Diminished, bool _IsFlipped = false);
-        void RaycastVolumeDiminished(const glm::mat4& _rPoseMatrix, const Base::AABB3Float& _rAABB, CTexturePtr _BackgroundTexture = nullptr);
-        void RenderInpaintedPlane(const glm::mat4& _rPoseMatrix, const Base::AABB3Float& _rAABB);
+        void RaycastVolumeDiminished(const Base::AABB3Float& _rAABB, CTexturePtr _BackgroundTexture = nullptr);
+        void RenderInpaintedPlane(const Base::AABB3Float& _rAABB);
         
         void CreateMembrane(CTexturePtr _BackgroundTexturePtr, CTexturePtr _Diminished);
 
@@ -1144,7 +1144,7 @@ namespace
     
     // -----------------------------------------------------------------------------
 
-    void CGfxReconstructionRenderer::RaycastVolumeDiminished(const glm::mat4& _rPoseMatrix, const Base::AABB3Float& _rAABB, CTexturePtr _BackgroundTexturePtr)
+    void CGfxReconstructionRenderer::RaycastVolumeDiminished(const Base::AABB3Float& _rAABB, CTexturePtr _BackgroundTexturePtr)
     {
         glm::mat4 ReconstructionToSaltwater = glm::mat4(
             1.0f, 0.0f, 0.0f, 0.0f,
@@ -1376,7 +1376,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxReconstructionRenderer::RenderInpaintedPlane(const glm::mat4& _rPoseMatrix, const Base::AABB3Float& _rAABB)
+    void CGfxReconstructionRenderer::RenderInpaintedPlane(const Base::AABB3Float& _rAABB)
     {
         assert(m_InpaintedPlaneTexture != nullptr);
 
@@ -1814,7 +1814,7 @@ namespace
 
     // -----------------------------------------------------------------------------
     
-    CTexturePtr CGfxReconstructionRenderer::GetInpaintedRendering(const glm::mat4& _rPoseMatrix, const Base::AABB3Float& _rAABB, CTexturePtr _BackgroundTexturePtr)
+    CTexturePtr CGfxReconstructionRenderer::GetInpaintedRendering(const Base::AABB3Float& _rAABB, CTexturePtr _BackgroundTexturePtr)
     {
         m_IsInpainting = true;
 
@@ -1832,13 +1832,13 @@ namespace
             //glEnable(GL_BLEND);
             //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-            RenderInpaintedPlane(_rPoseMatrix, _rAABB);
+            RenderInpaintedPlane(_rAABB);
 
             ContextManager::SetTargetSet(m_DiminishedRaycastTargetSetPtr);
 
             Performance::BeginEvent("Raycasting for diminishing");
 
-            RaycastVolumeDiminished(_rPoseMatrix, _rAABB);
+            RaycastVolumeDiminished(_rAABB);
 
             Performance::EndEvent();
 
@@ -2293,7 +2293,11 @@ namespace ReconstructionRenderer
 
     CTexturePtr GetInpaintedRendering(const glm::mat4& _rPoseMatrix, const Base::AABB3Float& _rAABB, CTexturePtr _BackgroundTexturePtr)
     {
-        return CGfxReconstructionRenderer::GetInstance().GetInpaintedRendering(_rPoseMatrix, _rAABB, _BackgroundTexturePtr);
+		// TODO: actually use pose matrix for rendering instead of the main camera
+
+		BASE_UNUSED(_rPoseMatrix);
+
+        return CGfxReconstructionRenderer::GetInstance().GetInpaintedRendering(_rAABB, _BackgroundTexturePtr);
     }
 
     // -----------------------------------------------------------------------------
