@@ -70,7 +70,7 @@ namespace PM
         cv::Mat_<cv::Vec3b> Source3(_Resolution.x, _Resolution.y);
         cv::Mat_<cv::Vec3b> Dest3(_Resolution.x, _Resolution.y);
 
-        cv::cvtColor(Source4, Source3, CV_BGRA2RGB);
+        cv::cvtColor(Source4, Source3, cv::COLOR_BGRA2RGB);
 
         uchar NonMaskValue = 255;
         cv::Mat_<uchar> Mask(Source3.rows, Source3.cols, NonMaskValue);
@@ -119,7 +119,7 @@ namespace PM
         cv::imshow("Output color image", Dest3);
         //cv::waitKey();
 
-        cv::cvtColor(Dest3, Dest4, CV_RGB2BGRA);
+        cv::cvtColor(Dest3, Dest4, cv::COLOR_RGB2BGRA);
 
         std::memcpy(_DestinationImage.data(), Dest4.data, _DestinationImage.size());
     }
