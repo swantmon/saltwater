@@ -13,8 +13,8 @@ void Util::createVizPosMap(
 	{
 		for (int c = 0; c < srcPosMap.cols; ++c)
 		{
-			dstColorMap(r, c)[0] = int((float)srcPosMap(r, c)[1] / (float)srcPosMap.cols * 255.0f);
-			dstColorMap(r, c)[1] = int((float)srcPosMap(r, c)[0] / (float)srcPosMap.rows * 255.0f);
+			dstColorMap(r, c)[0] = static_cast<char>(static_cast<float>(srcPosMap(r, c)[1]) / srcPosMap.cols * 255.0f);
+			dstColorMap(r, c)[1] = static_cast<char>(static_cast<float>(srcPosMap(r, c)[0]) / srcPosMap.rows * 255.0f);
 			dstColorMap(r, c)[2] = 255;
 		}
 	}
@@ -38,11 +38,11 @@ void Util::createMask(
 
 			if (color[0] == maskColor[0] && color[1] == maskColor[1] && color[2] == maskColor[2])
 			{
-				dstMask(r, c) = maskVal;
+				dstMask(r, c) = static_cast<char>(maskVal);
 			}
 			else
 			{
-				dstMask(r, c) = nonMaskVal;
+				dstMask(r, c) = static_cast<char>(nonMaskVal);
 			}
 		}
 	}
