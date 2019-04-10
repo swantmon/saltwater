@@ -1,0 +1,75 @@
+#ifndef __INCLUDE_CS_YUV_TO_RGB_GLSL__
+#define __INCLUDE_CS_YUV_TO_RGB_GLSL__
+
+layout (binding = 0, rgba8) uniform image2D cs_Diminished;
+layout (binding = 1, rgba8) uniform image2D cs_Background;
+layout (binding = 2, rgba16f) uniform image2D cs_MembranePatches;
+layout (binding = 3, rgba16f) uniform image2D cs_MembraneBorders;
+
+layout(std430, binding = 0) buffer Indirect
+{
+    uint g_Count;
+    uint g_Y;
+    uint g_Z;
+    uint g_Unused;
+};
+
+layout(std430, binding = 1) buffer BorderPatches
+{
+    vec4 g_PatchPositions[MAX_BORDER_PATCH_COUNT];
+    vec4 g_PatchColors[MAX_BORDER_PATCH_COUNT];
+};
+
+shared float g_WeightSum[MAX_BORDER_PATCH_COUNT];
+shared vec3 g_WeightedColorSum[MAX_BORDER_PATCH_COUNT];
+
+layout (local_size_x = MAX_BORDER_PATCH_COUNT, local_size_y = 1, local_size_z = 1) in;
+void main()
+{
+    bool IsPatch = imageLoad(cs_MembranePatches, ivec2(gl_WorkGroupID * PATCH_SIZE)).x > 0.5f;
+
+    if (!IsPatch)
+    {
+        return;
+    }
+
+    bool IsBorder = gl_LocalInvocationIndex < g_Count;
+
+    vec2 PatchPosition = vec2(gl_WorkGroupID.xy + 0.5f);
+
+    vec2 BorderPosition = vec2(0.0f);
+    vec3 BorderColor = vec3(0.0f);
+
+    if (IsBorder)
+    {
+        BorderPosition = g_PatchPositions[gl_LocalInvocationIndex].xy;
+        BorderColor = g_PatchColors[gl_LocalInvocationIndex].rgb;
+    }
+
+    float d = distance(PatchPosition, BorderPosition);
+
+    float Weight = 1.0f / (d * d * d);
+
+    g_WeightSum[gl_LocalInvocationIndex] = Weight;
+    g_WeightedColorSum[gl_LocalInvocationIndex] = Weight * BorderColor;
+
+    for (int i = MAX_BORDER_PATCH_COUNT / 2; i > 0; i /= 2)
+    {
+        barrier();
+
+        if (gl_LocalInvocationIndex < i)
+        {
+            g_WeightSum[gl_LocalInvocationIndex] += g_WeightSum[gl_LocalInvocationIndex + i];
+            g_WeightedColorSum[gl_LocalInvocationIndex] += g_WeightedColorSum[gl_LocalInvocationIndex + i];
+        }
+    }
+
+    barrier();
+
+    if (gl_LocalInvocationIndex == 0)
+    {
+        imageStore(cs_MembraneBorders, ivec2(gl_WorkGroupID * PATCH_SIZE), vec4(g_WeightedColorSum[0] / g_WeightSum[0], 1.0f));
+    }
+}
+
+#endif //__INCLUDE_CS_YUV_TO_RGB_GLSL__

@@ -1,7 +1,6 @@
-﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 19
-VisualStudioVersion = 19.0.27004.2005
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28803.156
 MinimumVisualStudioVersion = 15.0.27004.2005
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test", "test\test.vcxproj", "{470B0BE6-8875-4485-9B04-C6CC9914834D}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -27,6 +26,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "plugin_kinect", "plugin_kinect\plugin_kinect.vcxproj", "{B75EB043-6466-4506-8075-E56E89813AFD}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "plugin_slam", "plugin_slam\plugin_slam.vcxproj", "{E0842B40-2749-4D03-B627-55761E06452B}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "plugin_pixmix", "plugin_pixmix\plugin_pixmix.vcxproj", "{6DEB9929-9605-42B2-AB22-8740559FEA88}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -120,6 +121,14 @@ Global
 		{E0842B40-2749-4D03-B627-55761E06452B}.Release|x64.Build.0 = Release|x64
 		{E0842B40-2749-4D03-B627-55761E06452B}.Release|x86.ActiveCfg = Release|Win32
 		{E0842B40-2749-4D03-B627-55761E06452B}.Release|x86.Build.0 = Release|Win32
+		{6DEB9929-9605-42B2-AB22-8740559FEA88}.Debug|x64.ActiveCfg = Debug|x64
+		{6DEB9929-9605-42B2-AB22-8740559FEA88}.Debug|x64.Build.0 = Debug|x64
+		{6DEB9929-9605-42B2-AB22-8740559FEA88}.Debug|x86.ActiveCfg = Debug|Win32
+		{6DEB9929-9605-42B2-AB22-8740559FEA88}.Debug|x86.Build.0 = Debug|Win32
+		{6DEB9929-9605-42B2-AB22-8740559FEA88}.Release|x64.ActiveCfg = Release|x64
+		{6DEB9929-9605-42B2-AB22-8740559FEA88}.Release|x64.Build.0 = Release|x64
+		{6DEB9929-9605-42B2-AB22-8740559FEA88}.Release|x86.ActiveCfg = Release|Win32
+		{6DEB9929-9605-42B2-AB22-8740559FEA88}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -131,6 +140,7 @@ Global
 		{42C07B21-2392-4E0A-9DEB-E5E4B8A7864E} = {F0542C3D-B5F9-4381-A027-10B1804A46EF}
 		{B75EB043-6466-4506-8075-E56E89813AFD} = {F0542C3D-B5F9-4381-A027-10B1804A46EF}
 		{E0842B40-2749-4D03-B627-55761E06452B} = {F0542C3D-B5F9-4381-A027-10B1804A46EF}
+		{6DEB9929-9605-42B2-AB22-8740559FEA88} = {F0542C3D-B5F9-4381-A027-10B1804A46EF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {ABE024EA-EFBA-425A-9D54-106C60269005}

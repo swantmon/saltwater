@@ -59,6 +59,13 @@ namespace SLAM
 
     // -----------------------------------------------------------------------------
 
+    void CPluginInterface::EnableMouseControl(bool _Flag)
+    {
+        m_SLAMControl.EnableMouseControl(_Flag);
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CPluginInterface::OnPause()
     {
         ENGINE_CONSOLE_INFOV("SLAM plugin paused!");
@@ -100,4 +107,9 @@ extern "C" CORE_PLUGIN_API_EXPORT void OnRenderHitProxy()
 extern "C" CORE_PLUGIN_API_EXPORT void SetActivateSelection(bool _Flag)
 {
     static_cast<SLAM::CPluginInterface&>(GetInstance()).SetActivateSelection(_Flag);
+}
+
+extern "C" CORE_PLUGIN_API_EXPORT void EnableMouseControl(bool _Flag)
+{
+    static_cast<SLAM::CPluginInterface&>(GetInstance()).EnableMouseControl(_Flag);
 }
