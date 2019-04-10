@@ -33,24 +33,12 @@ namespace Stereo
                 cv::Mat pix_Rect = cv::Mat::ones(3, 1, CV_32F);
                 pix_Rect.ptr<float>(0)[0] = idx_x + ImgSize_Rect_x_min;
                 pix_Rect.ptr<float>(1)[0] = idx_y + ImgSize_Rect_y_min;
-                //---Test---
-                /*
-                float pix_Rect_x = pix_Rect.at<float>(0, 0);
-                float pix_Rect_y = pix_Rect.at<float>(1, 0);
-                float pix_Rect_1 = pix_Rect.at<float>(2, 0);
-                */
 
                 cv::Mat pixB_Rect2Orig = H_B.inv() * pix_Rect;
                 pixB_Rect2Orig /= pixB_Rect2Orig.ptr<float>(2)[0];
 
                 cv::Mat pixM_Rect2Orig = H_M.inv() * pix_Rect;
                 pixM_Rect2Orig /= pixM_Rect2Orig.ptr<float>(2)[0];
-                //---Test---
-                /*
-                float pixB_Orig_x = pixB_Rect2Orig.at<float>(0, 0);
-                float pixB_Orig_y = pixB_Rect2Orig.at<float>(1, 0);
-                float pixB_Orig_1 = pixB_Rect2Orig.at<float>(2, 0);
-                */
 
                 mapB_x_Rect2Orig.ptr<float>(idx_y)[idx_x] = pixB_Rect2Orig.ptr<float>(0)[0];
                 mapB_y_Rect2Orig.ptr<float>(idx_y)[idx_x] = pixB_Rect2Orig.ptr<float>(1)[0];
@@ -112,15 +100,6 @@ namespace Stereo
                 mapM_y_Orig2Rect.ptr<float>(idx_y)[idx_x] = pixM_Orig2Rect.ptr<float>(1)[0];
             }
         }
-
-        //---Test: Transform from orig2Rect---
-        /*
-        cv::Mat TestImg_Orig_B, TestImg_Orig_M;
-        cv::remap(Img_Rect_B, TestImg_Orig_B, mapB_x_Orig2Rect, mapB_y_Orig2Rect, cv::INTER_LINEAR, cv::BORDER_TRANSPARENT);
-        cv::remap(Img_Rect_M, TestImg_Orig_M, mapM_x_Orig2Rect, mapM_y_Orig2Rect, cv::INTER_LINEAR, cv::BORDER_TRANSPARENT);
-        cv::imshow("TestImg_Orig_B", TestImg_Orig_B);
-        cv::imshow("TestImg_Orig_M", TestImg_Orig_M);
-        */
     }
 
     void Rect_Planar::determ_RectImgSize(const cv::Size& ImgSize_OrigB, const cv::Size& ImgSize_OrigM)
@@ -156,24 +135,12 @@ namespace Stereo
         //---Transform Img Corner from Originals to Rectified---
         cv::Mat ImgCnrUL_Orig2Rect_B = H_B * ImgCnrUL_OrigB;
         ImgCnrUL_Orig2Rect_B = ImgCnrUL_Orig2Rect_B / ImgCnrUL_Orig2Rect_B.ptr<float>(2)[0];
-        //float OrigB2RectB_UL00 = ImgCnrUL_Orig2Rect_B.at<float>(0, 0);
-        //float OrigB2RectB_UL10 = ImgCnrUL_Orig2Rect_B.at<float>(1, 0);
-        //float OrigB2RectB_UL20 = ImgCnrUL_Orig2Rect_B.at<float>(2, 0);
         cv::Mat ImgCnrUR_Orig2Rect_B = H_B * ImgCnrUR_OrigB;
         ImgCnrUR_Orig2Rect_B = ImgCnrUR_Orig2Rect_B / ImgCnrUR_Orig2Rect_B.ptr<float>(2)[0];
-        //float OrigB2RectB_UR00 = ImgCnrUR_Orig2Rect_B.at<float>(0, 0);
-        //float OrigB2RectB_UR10 = ImgCnrUR_Orig2Rect_B.at<float>(1, 0);
-        //float OrigB2RectB_UR20 = ImgCnrUR_Orig2Rect_B.at<float>(2, 0);
         cv::Mat ImgCnrDL_Orig2Rect_B = H_B * ImgCnrDL_OrigB;
         ImgCnrDL_Orig2Rect_B = ImgCnrDL_Orig2Rect_B / ImgCnrDL_Orig2Rect_B.ptr<float>(2)[0];
-        //float OrigB2RectB_DL00 = ImgCnrDL_Orig2Rect_B.at<float>(0, 0);
-        //float OrigB2RectB_DL10 = ImgCnrDL_Orig2Rect_B.at<float>(1, 0);
-        //float OrigB2RectB_DL20 = ImgCnrDL_Orig2Rect_B.at<float>(2, 0);
         cv::Mat ImgCnrDR_Orig2Rect_B = H_B * ImgCnrDR_OrigB;
         ImgCnrDR_Orig2Rect_B = ImgCnrDR_Orig2Rect_B / ImgCnrDR_Orig2Rect_B.ptr<float>(2)[0];
-        //float OrigB2RectB_DR00 = ImgCnrDR_Orig2Rect_B.at<float>(0, 0);
-        //float OrigB2RectB_DR10 = ImgCnrDR_Orig2Rect_B.at<float>(1, 0);
-        //float OrigB2RectB_DR20 = ImgCnrDR_Orig2Rect_B.at<float>(2, 0);
 
         cv::Mat ImgCnrUL_Orig2Rect_M = H_M * ImgCnrUL_OrigM;
         ImgCnrUL_Orig2Rect_M = ImgCnrUL_Orig2Rect_M / ImgCnrUL_Orig2Rect_M.ptr<float>(2)[0];
@@ -183,16 +150,6 @@ namespace Stereo
         ImgCnrDL_Orig2Rect_M = ImgCnrDL_Orig2Rect_M / ImgCnrDL_Orig2Rect_M.ptr<float>(2)[0];
         cv::Mat ImgCnrDR_Orig2Rect_M = H_M * ImgCnrDR_OrigM;
         ImgCnrDR_Orig2Rect_M = ImgCnrDR_Orig2Rect_M / ImgCnrDR_Orig2Rect_M.ptr<float>(2)[0];
-
-        // Test: Inverse Homography transform
-        /*
-        cv::Mat ImgCnrUR_Rect2Orig_M = H_M.inv() * ImgCnrUR_Orig2Rect_M;
-        ImgCnrUR_Rect2Orig_M = ImgCnrUR_Rect2Orig_M / ImgCnrUR_Rect2Orig_M.at<float>(2, 0);
-        float Rect_Orig_M_UR00 = ImgCnrUR_Rect2Orig_M.at<float>(0, 0);
-        float Rect_Orig_M_UR10 = ImgCnrUR_Rect2Orig_M.at<float>(1, 0);
-        float Rect_Orig_M_UR20 = ImgCnrUR_Rect2Orig_M.at<float>(2, 0);
-        */
-        //---
 
         //---Determine the Boundary of Epipolar Image---
         std::vector<float> ImgCnr_Orig2Rect_B_x = { ImgCnrUL_Orig2Rect_B.ptr<float>(0)[0], ImgCnrUR_Orig2Rect_B.ptr<float>(0)[0], ImgCnrDL_Orig2Rect_B.ptr<float>(0)[0], ImgCnrDR_Orig2Rect_B.ptr<float>(0)[0] };
@@ -260,11 +217,6 @@ namespace Stereo
         R_Rect = cv::Mat(3, 3, CV_32F);
 
         cv::Mat R_Rect_row0 = PC_Orig_M - PC_Orig_B;
-        /*
-        float R_Rect00 = R_Rect_row0.at<float>(0, 0);
-        float R_Rect01 = R_Rect_row0.at<float>(1, 0);
-        float R_Rect02 = R_Rect_row0.at<float>(2, 0);
-        */
         if (cv::sum(R_Rect_row0)[0] < 0)
         {
             R_Rect_row0 *= -1; // Make the rotation always left2right and up2down.
@@ -312,23 +264,6 @@ namespace Stereo
         */
         //---
 
-        //---Test: y-Parax---
-        /*
-        cv::Mat pixB_Orig = cv::Mat::ones(3, 1, CV_32F);
-        pixB_Orig.at<float>(0, 0) = 462;
-        pixB_Orig.at<float>(1, 0) = 698;
-        cv::Mat pixM_Orig = cv::Mat::ones(3, 1, CV_32F);
-        pixM_Orig.at<float>(0, 0) = 296;
-        pixM_Orig.at<float>(1, 0) = 710;
-
-        cv::Mat pixB_Rect = H_B * pixB_Orig;
-        pixB_Rect /= pixB_Rect.at<float>(2, 0);
-        cv::Mat pixM_Rect = H_M * pixM_Orig;
-        pixM_Rect /= pixM_Rect.at<float>(2, 0);
-
-        float y_parax = pixM_Rect.at<float>(1, 0) - pixB_Rect.at<float>(1, 0);
-        */
-        //---
     }
 
     //---Get Function---
