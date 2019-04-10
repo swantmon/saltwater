@@ -151,7 +151,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>assimp.lib;DevIL.lib;ILU.lib;ILUT.lib;glew32.lib;opencv_world341d.lib;tinyxml2d.lib;opengl32.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>assimp.lib;DevIL.lib;ILU.lib;ILUT.lib;glew32.lib;opencv_world410d.lib;tinyxml2d.lib;opengl32.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>..\..\..\build\x64;..\..\..\..\extern\assimp\lib\x64;..\..\..\..\extern\devil\lib\x64;..\..\..\..\extern\glew\lib\x64;..\..\..\..\extern\opencv\lib\x64;..\..\..\..\extern\tinyxml2\lib\x64</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
@@ -207,7 +207,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>assimp.lib;DevIL.lib;ILU.lib;ILUT.lib;glew32.lib;opencv_world341.lib;tinyxml2.lib;opengl32.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>assimp.lib;DevIL.lib;ILU.lib;ILUT.lib;glew32.lib;opencv_world410.lib;tinyxml2.lib;opengl32.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>..\..\..\build\x64;..\..\..\..\extern\assimp\lib\x64;..\..\..\..\extern\devil\lib\x64;..\..\..\..\extern\glew\lib\x64;..\..\..\..\extern\opencv\lib\x64;..\..\..\..\extern\tinyxml2\lib\x64</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
