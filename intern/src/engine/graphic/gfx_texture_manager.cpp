@@ -814,6 +814,8 @@ namespace
         // -----------------------------------------------------------------------------
         const int NumberOfPixels = pInternTexture->GetNumberOfPixelsU() * pInternTexture->GetNumberOfPixelsV();
         const int NumberOfBytes = NumberOfPixels * s_NumberOfChannels * sizeof(char);
+        const GLuint Format = ConvertGLImageFormat(pInternTexture->GetFormat());
+        const GLuint ImageType = ConvertGLImageType(pInternTexture->GetFormat());
 
         // -----------------------------------------------------------------------------
         // Get data from GPU
@@ -837,9 +839,9 @@ namespace
 
                 GLenum Status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 
-                glReadPixels(0, 0, pInternTexture->GetNumberOfPixelsU(), pInternTexture->GetNumberOfPixelsV(), GL_RGBA, GL_UNSIGNED_BYTE, _pBuffer + i * NumberOfBytes);
+                glReadPixels(0, 0, pInternTexture->GetNumberOfPixelsU(), pInternTexture->GetNumberOfPixelsV(), Format, ImageType, _pBuffer + i * NumberOfBytes);
 #else
-                glGetTexImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, GL_BYTE, _pBuffer + i * NumberOfBytes);
+                glGetTexImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, Format, ImageType, _pBuffer + i * NumberOfBytes);
 #endif
             }
 
@@ -858,11 +860,11 @@ namespace
 
             glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, pInternTexture->m_NativeTexture, 0);
 
-            glReadPixels(0, 0, pInternTexture->GetNumberOfPixelsU(), pInternTexture->GetNumberOfPixelsV(), GL_RGBA, GL_UNSIGNED_BYTE, _pBuffer);
+            glReadPixels(0, 0, pInternTexture->GetNumberOfPixelsU(), pInternTexture->GetNumberOfPixelsV(), Format, ImageType, _pBuffer);
 
             glDeleteFramebuffers(1, &Framebuffer);
 #else
-            glGetTexImage(pInternTexture->m_NativeBinding, 0, GL_RGBA, GL_BYTE, _pBuffer);
+            glGetTexImage(pInternTexture->m_NativeBinding, 0, Format, ImageType, _pBuffer);
 #endif
         }
     }
