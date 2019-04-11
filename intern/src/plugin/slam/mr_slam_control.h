@@ -754,14 +754,14 @@ namespace MR
                 {
                     if (m_UseGPUForStereo)
                     {
-                        StereoOnFrameGPU(m_RGBTexture, m_PoseMatrix);
+                        StereoOnFrameGPU(m_RGBATexture, m_PoseMatrix);
                     }
                     else
                     {
-                        std::vector<char> PixelData(m_RGBTexture->GetNumberOfPixelsU() * m_RGBTexture->GetNumberOfPixelsV() * 4);
-                        Gfx::TextureManager::CopyTextureToCPU(m_RGBTexture, PixelData.data());
+                        std::vector<char> PixelData(m_RGBATexture->GetNumberOfPixelsU() * m_RGBATexture->GetNumberOfPixelsV() * 4);
+                        Gfx::TextureManager::CopyTextureToCPU(m_RGBATexture, PixelData.data());
 
-                        std::vector<uint16_t> DepthData(m_RGBTexture->GetNumberOfPixelsU() * m_RGBTexture->GetNumberOfPixelsV());
+                        std::vector<uint16_t> DepthData(m_RGBATexture->GetNumberOfPixelsU() * m_RGBATexture->GetNumberOfPixelsV());
                         Gfx::TextureManager::CopyTextureToCPU(m_DepthTexture, reinterpret_cast<char*>(DepthData.data()));
 
                         StereoOnFrameCPU(PixelData, m_PoseMatrix, m_ColorIntrinsics, DepthData);
