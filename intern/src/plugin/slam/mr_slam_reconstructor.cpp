@@ -487,24 +487,24 @@ namespace MR
 
         std::string DefineString = DefineStream.str();
         
-        m_BilateralFilterCSPtr     = ShaderManager::CompileCS("../../plugins/slam/scalable/pyramid_creation\\cs_bilateral_filter.glsl"  , "main", DefineString.c_str());
-        m_VertexMapCSPtr           = ShaderManager::CompileCS("../../plugins/slam/scalable/pyramid_creation\\cs_vertex_map.glsl"        , "main", DefineString.c_str());
-        m_NormalMapCSPtr           = ShaderManager::CompileCS("../../plugins/slam/scalable/pyramid_creation\\cs_normal_map.glsl"        , "main", DefineString.c_str());
-        m_DownSampleDepthCSPtr     = ShaderManager::CompileCS("../../plugins/slam/scalable/pyramid_creation\\cs_downsample_depth.glsl"  , "main", DefineString.c_str());
-        m_RaycastPyramidCSPtr      = ShaderManager::CompileCS("../../plugins/slam/scalable/pyramid_creation\\cs_raycast_pyramid.glsl"   , "main", DefineString.c_str());
-        m_RaycastCSPtr             = ShaderManager::CompileCS("../../plugins/slam/scalable/cs_raycast.glsl"                             , "main", DefineString.c_str());
-        m_ClearAtomicCountersCSPtr = ShaderManager::CompileCS("../../plugins/slam/scalable/cs_clear_atomic_buffer.glsl"                 , "main", DefineString.c_str());
-        m_VolumeCountersCSPtr      = ShaderManager::CompileCS("../../plugins/slam/scalable/cs_volume_counters.glsl"                     , "main", DefineString.c_str());
-        m_RasterizeRootVolumeVSPtr = ShaderManager::CompileVS("../../plugins/slam/scalable/rasterization\\vs_rasterize_rootvolume.glsl" , "main", DefineString.c_str());
-        m_RasterizeRootVolumeFSPtr = ShaderManager::CompilePS("../../plugins/slam/scalable/rasterization\\fs_rasterize_rootvolume.glsl" , "main", DefineString.c_str());
-        m_PointCloudVSPtr          = ShaderManager::CompileVS("../../plugins/slam/scalable/rasterization\\vs_rootgrid.glsl"             , "main", DefineString.c_str());
-        m_PointCloudGSPtr          = ShaderManager::CompileGS("../../plugins/slam/scalable/rasterization\\gs_rootgrid.glsl"             , "main", DefineString.c_str());
-        m_PointCloudFSPtr          = ShaderManager::CompilePS("../../plugins/slam/scalable/rasterization\\fs_rootgrid.glsl"             , "main", DefineString.c_str());
-        m_PointsFullCSPtr          = ShaderManager::CompileCS("../../plugins/slam/scalable/rasterization\\cs_gather_full.glsl"          , "main", DefineString.c_str());
-        m_IntegrateRootGridCSPtr   = ShaderManager::CompileCS("../../plugins/slam/scalable/integration\\cs_integrate_rootgrid.glsl"     , "main", DefineString.c_str());
-        m_IntegrateLevel1GridCSPtr = ShaderManager::CompileCS("../../plugins/slam/scalable/integration\\cs_integrate_level1grid.glsl"   , "main", DefineString.c_str());
-        m_IntegrateTSDFCSPtr       = ShaderManager::CompileCS("../../plugins/slam/scalable/integration\\cs_integrate_tsdf.glsl"         , "main", DefineString.c_str());
-        m_FillIndirectBufferCSPtr  = ShaderManager::CompileCS("../../plugins/slam/scalable/cs_fill_indirect.glsl"                       , "main", DefineString.c_str());
+        m_BilateralFilterCSPtr     = ShaderManager::CompileCS("../../plugins/slam/scalable/pyramid_creation/cs_bilateral_filter.glsl"  , "main", DefineString.c_str());
+        m_VertexMapCSPtr           = ShaderManager::CompileCS("../../plugins/slam/scalable/pyramid_creation/cs_vertex_map.glsl"        , "main", DefineString.c_str());
+        m_NormalMapCSPtr           = ShaderManager::CompileCS("../../plugins/slam/scalable/pyramid_creation/cs_normal_map.glsl"        , "main", DefineString.c_str());
+        m_DownSampleDepthCSPtr     = ShaderManager::CompileCS("../../plugins/slam/scalable/pyramid_creation/cs_downsample_depth.glsl"  , "main", DefineString.c_str());
+        m_RaycastPyramidCSPtr      = ShaderManager::CompileCS("../../plugins/slam/scalable/pyramid_creation/cs_raycast_pyramid.glsl"   , "main", DefineString.c_str());
+        m_RaycastCSPtr             = ShaderManager::CompileCS("../../plugins/slam/scalable/cs_raycast.glsl"                            , "main", DefineString.c_str());
+        m_ClearAtomicCountersCSPtr = ShaderManager::CompileCS("../../plugins/slam/scalable/cs_clear_atomic_buffer.glsl"                , "main", DefineString.c_str());
+        m_VolumeCountersCSPtr      = ShaderManager::CompileCS("../../plugins/slam/scalable/cs_volume_counters.glsl"                    , "main", DefineString.c_str());
+        m_RasterizeRootVolumeVSPtr = ShaderManager::CompileVS("../../plugins/slam/scalable/rasterization/vs_rasterize_rootvolume.glsl" , "main", DefineString.c_str());
+        m_RasterizeRootVolumeFSPtr = ShaderManager::CompilePS("../../plugins/slam/scalable/rasterization/fs_rasterize_rootvolume.glsl" , "main", DefineString.c_str());
+        m_PointCloudVSPtr          = ShaderManager::CompileVS("../../plugins/slam/scalable/rasterization/vs_rootgrid.glsl"             , "main", DefineString.c_str());
+        m_PointCloudGSPtr          = ShaderManager::CompileGS("../../plugins/slam/scalable/rasterization/gs_rootgrid.glsl"             , "main", DefineString.c_str());
+        m_PointCloudFSPtr          = ShaderManager::CompilePS("../../plugins/slam/scalable/rasterization/fs_rootgrid.glsl"             , "main", DefineString.c_str());
+        m_PointsFullCSPtr          = ShaderManager::CompileCS("../../plugins/slam/scalable/rasterization/cs_gather_full.glsl"          , "main", DefineString.c_str());
+        m_IntegrateRootGridCSPtr   = ShaderManager::CompileCS("../../plugins/slam/scalable/integration/cs_integrate_rootgrid.glsl"     , "main", DefineString.c_str());
+        m_IntegrateLevel1GridCSPtr = ShaderManager::CompileCS("../../plugins/slam/scalable/integration/cs_integrate_level1grid.glsl"   , "main", DefineString.c_str());
+        m_IntegrateTSDFCSPtr       = ShaderManager::CompileCS("../../plugins/slam/scalable/integration/cs_integrate_tsdf.glsl"         , "main", DefineString.c_str());
+        m_FillIndirectBufferCSPtr  = ShaderManager::CompileCS("../../plugins/slam/scalable/cs_fill_indirect.glsl"                      , "main", DefineString.c_str());
 
         m_PlaneCSPtr = ShaderManager::CompileCS("../../plugins/slam/scalable/cs_create_plane.glsl", "main", DefineString.c_str());
 
@@ -1758,7 +1758,7 @@ namespace MR
 
     void CSLAMReconstructor::ClearPool()
     {
-        const uint32_t DataSize = g_MegabyteSize / 4;
+        const uint32_t DataSize = g_MegabyteSize;
 
         std::vector<int> Data(g_MegabyteSize / sizeof(int));
         std::memset(Data.data(), -1, DataSize);

@@ -434,7 +434,10 @@ namespace
 
         const int Width = pInternTexture->GetNumberOfPixelsU();
         const int Height = pInternTexture->GetNumberOfPixelsV();
-        const int LayerCount = pInternTexture->GetNumberOfPixelsW();
+        const int LayerCount = std::max(pInternTexture->GetNumberOfPixelsW(), Gfx::CTexture::BPixels(1)); // make sure depth is at least 1
+
+        // https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glClearTexSubImage.xhtml
+        // "For texture types that do not have certain dimensions, this command treats those dimensions as having a size of 1. For example, to clear a portion of a two-dimensional texture, use zoffset equal to zero and depth equal to one."
 
         const int MipLevels = pInternTexture->GetNumberOfMipLevels();
 

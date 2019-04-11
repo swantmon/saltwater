@@ -59,7 +59,6 @@ namespace Net
         std::unique_ptr<asio::ip::tcp::socket> m_pSocket;
 
         std::vector<char> m_Header;
-        std::vector<char> m_Payload;
 
         CMessage m_PendingMessage;
 

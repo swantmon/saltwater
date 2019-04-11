@@ -1,8 +1,7 @@
-﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27004.2005
-MinimumVisualStudioVersion = 10.0.40219.1
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28803.156
+MinimumVisualStudioVersion = 15.0.27004.2005
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test", "test\test.vcxproj", "{470B0BE6-8875-4485-9B04-C6CC9914834D}"
 	ProjectSection(ProjectDependencies) = postProject
 		{3A61E67A-052F-4A68-B8DB-771C8CD0D2EE} = {3A61E67A-052F-4A68-B8DB-771C8CD0D2EE}
@@ -29,6 +28,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "plugin_slam", "plugin_slam\plugin_slam.vcxproj", "{E0842B40-2749-4D03-B627-55761E06452B}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "plugin_stereo", "plugin_stereo\plugin_stereo.vcxproj", "{3E5E354E-2967-4AA5-B6CE-F57BA9D0B4AE}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "plugin_pixmix", "plugin_pixmix\plugin_pixmix.vcxproj", "{6DEB9929-9605-42B2-AB22-8740559FEA88}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -130,6 +131,14 @@ Global
 		{3E5E354E-2967-4AA5-B6CE-F57BA9D0B4AE}.Release|x64.Build.0 = Release|x64
 		{3E5E354E-2967-4AA5-B6CE-F57BA9D0B4AE}.Release|x86.ActiveCfg = Release|Win32
 		{3E5E354E-2967-4AA5-B6CE-F57BA9D0B4AE}.Release|x86.Build.0 = Release|Win32
+		{6DEB9929-9605-42B2-AB22-8740559FEA88}.Debug|x64.ActiveCfg = Debug|x64
+		{6DEB9929-9605-42B2-AB22-8740559FEA88}.Debug|x64.Build.0 = Debug|x64
+		{6DEB9929-9605-42B2-AB22-8740559FEA88}.Debug|x86.ActiveCfg = Debug|Win32
+		{6DEB9929-9605-42B2-AB22-8740559FEA88}.Debug|x86.Build.0 = Debug|Win32
+		{6DEB9929-9605-42B2-AB22-8740559FEA88}.Release|x64.ActiveCfg = Release|x64
+		{6DEB9929-9605-42B2-AB22-8740559FEA88}.Release|x64.Build.0 = Release|x64
+		{6DEB9929-9605-42B2-AB22-8740559FEA88}.Release|x86.ActiveCfg = Release|Win32
+		{6DEB9929-9605-42B2-AB22-8740559FEA88}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -142,6 +151,7 @@ Global
 		{B75EB043-6466-4506-8075-E56E89813AFD} = {F0542C3D-B5F9-4381-A027-10B1804A46EF}
 		{E0842B40-2749-4D03-B627-55761E06452B} = {F0542C3D-B5F9-4381-A027-10B1804A46EF}
 		{3E5E354E-2967-4AA5-B6CE-F57BA9D0B4AE} = {F0542C3D-B5F9-4381-A027-10B1804A46EF}
+		{6DEB9929-9605-42B2-AB22-8740559FEA88} = {F0542C3D-B5F9-4381-A027-10B1804A46EF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {ABE024EA-EFBA-425A-9D54-106C60269005}

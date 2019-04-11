@@ -20,6 +20,7 @@ namespace SLAM
         void OnInput(const Base::CInputEvent& _rEvent);
 
         void SetActivateSelection(bool _Flag);
+        void EnableMouseControl(bool _Flag);
 
     private:
 
