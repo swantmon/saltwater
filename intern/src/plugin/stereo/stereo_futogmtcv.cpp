@@ -51,7 +51,7 @@ namespace Stereo
         operObj_PolarRect.get_RectImg(RectImg_Base, RectImg_Match);
     }
 
-    void FutoGmtCV::imp_PlanarRect(cv::Mat& RectImg_Base, cv::Mat& RectImg_Match, cv::Mat& Orig2Rect_B_x, cv::Mat& Orig2Rect_B_y, cv::Mat& Orig2Rect_M_x, cv::Mat& Orig2Rect_M_y, const FutoGmtCV& OrigImg_Match)
+    void FutoGmtCV::imp_PlanarRect(FutoGmtCV &RectImg_Base, FutoGmtCV &RectImg_Match, cv::Mat &Orig2Rect_B_x, cv::Mat &Orig2Rect_B_y, cv::Mat &Orig2Rect_M_x, cv::Mat &Orig2Rect_M_y, const FutoGmtCV &OrigImg_Match)
     {
         //---Calculate the Orientations of Rectified Images---
         operObj_PlanarRect.cal_K_Rect(K_mtx, OrigImg_Match.get_Cam());
@@ -68,7 +68,13 @@ namespace Stereo
         operObj_PlanarRect.genrt_RectImg(Img_RGB, OrigImg_Match.get_Img());
 
         //---Derive Rectified Images---
-        operObj_PlanarRect.get_RectImg(RectImg_Base, RectImg_Match);
+		cv::Mat RectImg_B, CamB_Rect, RectImg_M, CamM_Rect, Rot_Rect;
+        operObj_PlanarRect.get_RectImg(RectImg_B, RectImg_M);
+		operObj_PlanarRect.get_K_Rect(CamB_Rect, CamM_Rect);
+		operObj_PlanarRect.get_R_Rect(Rot_Rect);
+		RectImg_Base = FutoGmtCV(RectImg_B, CamB_Rect, Rot_Rect, PC_vec);
+		RectImg_Match = FutoGmtCV(RectImg_M, CamM_Rect, Rot_Rect, OrigImg_Match.get_PC());
+
         operObj_PlanarRect.get_Transform_Orig2Rect(Orig2Rect_B_x, Orig2Rect_B_y, Orig2Rect_M_x, Orig2Rect_M_y);
     }
 

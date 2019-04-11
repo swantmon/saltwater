@@ -27,30 +27,26 @@ namespace Stereo
 
     public:
 
-        void SetIntrinsics(const glm::vec2& _rFocalLength, const glm::vec2& _rFocalPoint, const glm::ivec2& _rImageSize);
+        void SetIntrinsics(const glm::vec2 &_rFocalLength, const glm::vec2 &_rFocalPoint, const glm::ivec2 &_rImageSize);
 
         // CPU
 
         std::vector<char> GetLatestDepthImageCPU() const;
-        void OnFrameCPU(const std::vector<char>& _rRGBImage, const glm::mat4& _Transform, const glm::mat4& _Intrinsics, const std::vector<uint16_t>& _rDepthImage);
+        void OnFrameCPU(const std::vector<char>& _rRGBImage, const glm::mat4 &_Transform, const glm::mat4 &_Intrinsics, const std::vector<uint16_t> &_rDepthImage);
 
         // GPU
 
         Gfx::CTexturePtr GetLatestDepthImageGPU() const;
-        void OnFrameGPU(Gfx::CTexturePtr _RGBImage, const glm::mat4& _Transform);
+        void OnFrameGPU(Gfx::CTexturePtr _RGBImage, const glm::mat4 &_Transform);
 
     private:
-
-        cv::Mat R_1st;
-        cv::Mat PC_1st;
-
-        glm::mat3 m_Camera_mtx;
         glm::ivec2 m_ImageSize;
-        glm::vec4 m_DisCoeff;
 
         std::vector<FutoGmtCV> Keyframes;
+
+		FutoGmtCV *Keyframe_Curt, *Keyframe_Last;
         std::size_t Cdt_Keyf_MaxNum = 2; // Maximal images for calculation once
-        float Cnd_Keyf_BaseLine = 0.07; // Keyframe Selection: BaseLine Condition. Unit is meter.
+        float Cnd_Keyf_BaseLineL = 0.07; // Keyframe Selection: BaseLine Condition. Unit is meter.
         
     private:
         void glm2cv(cv::Mat* cvmat, const glm::mat3& glmmat);

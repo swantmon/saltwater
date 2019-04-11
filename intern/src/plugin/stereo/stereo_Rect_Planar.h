@@ -29,6 +29,8 @@ namespace Stereo
 
     //---Get Function---
     public:
+		void get_K_Rect(cv::Mat CamB_Rect, cv::Mat CamM_Rect);
+		void get_R_Rect(cv::Mat Rot_Rect);
         void get_RectImg(cv::Mat& Output_RectImgB, cv::Mat& Output_RectImgM);
         void get_Transform_Orig2Rect(cv::Mat& LookUpTx_B_Orig2Rect, cv::Mat& LookUpTy_B_Orig2Rect, cv::Mat& LookUpTx_M_Orig2Rect, cv::Mat& LookUpTy_M_Orig2Rect);
 

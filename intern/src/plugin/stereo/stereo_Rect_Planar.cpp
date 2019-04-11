@@ -267,6 +267,16 @@ namespace Stereo
     }
 
     //---Get Function---
+	void Rect_Planar::get_K_Rect(cv::Mat CamB_Rect, cv::Mat CamM_Rect)
+	{
+		CamB_Rect = K_Rect_B;
+		CamM_Rect = K_Rect_M;
+	}
+	void Rect_Planar::get_R_Rect(cv::Mat Rot_Rect)
+	{
+		Rot_Rect = R_Rect;
+	}
+
     void Rect_Planar::get_RectImg(cv::Mat& Output_RectImgB, cv::Mat& Output_RectImgM)
     {
         Output_RectImgB = Img_Rect_B;
