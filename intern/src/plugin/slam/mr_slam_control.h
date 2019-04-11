@@ -879,6 +879,15 @@ namespace MR
                 m_Reconstructor.SetIntrinsics(glm::vec2(FocalLength), glm::vec2(FocalPoint));
             }
 
+			if (m_UseStereoMatching)
+			{
+				typedef void(*SetIntrinsicsFunc)(const glm::vec2&, const glm::vec2&, const glm::ivec2&);
+
+				auto SetIntrinsics = (SetIntrinsicsFunc)(Core::PluginManager::GetPluginFunction("Stereo Matching", "SetIntrinsics"));
+
+				SetIntrinsics(FocalLength, FocalPoint, m_ColorSize);
+			}
+
             m_Reconstructor.Start();
 
             m_IsReconstructorInitialized = true;
