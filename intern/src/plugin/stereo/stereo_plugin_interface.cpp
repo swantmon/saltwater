@@ -22,6 +22,8 @@ namespace Stereo
         BASE_UNUSED(_rFocalPoint); 
         //------
         m_ImageSize = _rImageSize;
+		Idx_Keyf_Curt = false;
+		Idx_Keyf_Last = false;
     }
 
     // -----------------------------------------------------------------------------
@@ -35,6 +37,7 @@ namespace Stereo
 
     void CPluginInterface::OnFrameCPU(const std::vector<char>& _rRGBImage, const glm::mat4& _Transform, const glm::mat4& _Intrinsics, const std::vector<uint16_t>& _rDepthImage)
     {
+
 
         //---Transform Image & Orientations to OpenCV format---
 		glm::mat3 K_glm = glm::mat3(_Intrinsics) / 2; // Image is half resolution but Intrinsic is full resolution
@@ -52,48 +55,43 @@ namespace Stereo
 
         cv::Mat Img_dist_cv(cv::Size(m_ImageSize.x, m_ImageSize.y), CV_8UC4); // 2D Matrix(x*y) with (8-bit unsigned character) + (4 bands)
         memcpy(Img_dist_cv.data, _rRGBImage.data(), _rRGBImage.size());
-        cv::cvtColor(Img_dist_cv, Img_dist_cv, cv::COLOR_BGRA2RGBA); // Transform image from BGRA (default color mode in OpenCV) to RGBA
+        cv::cvtColor(Img_dist_cv, Img_dist_cv, cv::COLOR_BGRA2GRAY); // Default Color Space in OpenCV is BGRA.
 
         cv::Mat Img_Undist_cv, DistCoeff_cv(5, 1, CV_32F); // DistCoeff = K1, K2, P1, P2, K3
-		DistCoeff_cv = cv::Mat::zeros(5, 1, CV_32F);
+		DistCoeff_cv = cv::Mat::zeros(5, 1, CV_32F); // We ignore the efficient from Lens Distortion. -> To see what does the result look like.
         cv::undistort(Img_dist_cv, Img_Undist_cv, K_cv, DistCoeff_cv);
 
-		FutoGmtCV frame = FutoGmtCV(Img_Undist_cv, K_cv, R_cv, PC_cv);
-
+		FutoGmtCV frame(Img_Undist_cv, K_cv, R_cv, PC_cv);
+		
         //---Select Keyframe for Computation---
-		bool T = true;
-		if (Keyframe_Curt == NULL)
+		if (!Idx_Keyf_Curt)
 		{
-			Keyframe_Curt = &frame;
+			Keyframe_Curt = frame;
+			Idx_Keyf_Curt = true;
 		}
-		else if (T)
+		else if (Idx_Keyf_Curt && !Idx_Keyf_Last)
 		{
-			//---Keyframe Condition: Baseline Length---
-			cv::Mat BaseLine = frame.get_PC() - Keyframe_Curt->get_PC();
+			cv::Mat BaseLine = frame.get_PC() - Keyframe_Curt.get_PC();
 			float BaseLineLength = cv::norm(BaseLine, cv::NORM_L2);
 
-			//---Selecting Keyframe---
-			if (BaseLineLength >= Cnd_Keyf_BaseLineL)
+			if (BaseLineLength > Cdt_Keyf_BaseLineL) // Select Keyframe: Baseline condition
 			{
 				Keyframe_Last = Keyframe_Curt;
-				Keyframe_Curt = &frame;
-			}
-			
-			//---show Original Img for check---
+				Keyframe_Curt = frame;
+				Idx_Keyf_Last = true;
 
-			cv::imwrite("E:\\Project_ARCHITECT\\OrigImg_Curt.png", Keyframe_Curt->get_Img());
-			cv::imwrite("E:\\Project_ARCHITECT\\OrigImg_Last.png", Keyframe_Last->get_Img());
+				//---show Original Img for check---
+				cv::imwrite("E:\\Project_ARCHITECT\\OrigImg_Curt.png", Keyframe_Curt.get_Img());
+				cv::imwrite("E:\\Project_ARCHITECT\\OrigImg_Last.png", Keyframe_Last.get_Img());
 
-			//---
+				//---Epipolarization---
+				FutoGmtCV RectImg_Curt, RectImg_Last;
+				cv::Mat Orig2Rect_Curt_x, Orig2Rect_Curt_y, Orig2Rect_Last_x, Orig2Rect_Last_y; // Look-Up Table of Orig2Rect (for getting value by interpolation)
 
-			//---Epipolarization---
-			FutoGmtCV RectImg_Curt, RectImg_Last;
-			cv::Mat Orig2Rect_Curt_x, Orig2Rect_Curt_y, Orig2Rect_Last_x, Orig2Rect_Last_y; // Look-Up Table of Orig2Rect (for getting value by interpolation)
+				Keyframe_Curt.imp_PlanarRect(RectImg_Curt, RectImg_Last, Orig2Rect_Curt_x, Orig2Rect_Curt_y, Orig2Rect_Last_x, Orig2Rect_Last_y, Keyframe_Last);
 
-			Keyframe_Curt->imp_PlanarRect(RectImg_Curt, RectImg_Last, Orig2Rect_Curt_x, Orig2Rect_Curt_y, Orig2Rect_Last_x, Orig2Rect_Last_y, *Keyframe_Last);
-
-			//---Verify by Test Data---
-				   /*
+				//---Verify by Test Data---
+				/*
 				   cv::Mat TestInputL = cv::imread("E:\\Project_ARCHITECT\\01 Epipolarization\\Fusiello\\Testing Data\\01-002570.jpg");
 				   cv::Mat TestInputR = cv::imread("E:\\Project_ARCHITECT\\01 Epipolarization\\Fusiello\\Testing Data\\02-002570.jpg");
 
@@ -131,75 +129,77 @@ namespace Stereo
 
 				   TestImgL.imp_PlanarRect(RectImg_Curt, RectImg_Next, TableB_x_Orig2Rect, TableB_y_Orig2Rect, TableM_x_Orig2Rect, TableM_y_Orig2Rect, TestImgR);
 				   */
-			//---
+			    //---
 
-			cv::Mat RectImg_Curt_Gray, RectImg_Last_Gray;
-			cv::cvtColor(RectImg_Curt.get_Img(), RectImg_Curt_Gray, cv::COLOR_RGBA2GRAY);
-			cv::cvtColor(RectImg_Last.get_Img(), RectImg_Last_Gray, cv::COLOR_RGBA2GRAY);
-			
-			//---Show Rectified Img for check---
+				cv::imwrite("E:\\Project_ARCHITECT\\RectImg_Curt.png", RectImg_Curt.get_Img());
+				cv::imwrite("E:\\Project_ARCHITECT\\RectImg_Last.png", RectImg_Last.get_Img());
 
-			cv::imwrite("E:\\Project_ARCHITECT\\RectImg_Curt.png", RectImg_Curt_Gray);
-			cv::imwrite("E:\\Project_ARCHITECT\\RectImg_Last.png", RectImg_Last_Gray);
+				//---Stereo Matching---
+				cv::Mat DispImg_Rect, DispImg_Orig;
+				Keyframe_Curt.imp_cvSGBM(DispImg_Rect, RectImg_Curt.get_Img(), RectImg_Last.get_Img());
 
-			//---
+				//---test SGBM in OpenCV---
+				/*
+						cv::Mat TestImgL = cv::imread("C:\\saltwater\\intern\\src\\plugin\\stereo\\Test\\im2.png");
+						cv::Mat TestImgR = cv::imread("C:\\saltwater\\intern\\src\\plugin\\stereo\\Test\\im6.png");
+						cv::imshow("TestImgL", TestImgL);
+						cv::imshow("TestImgR", TestImgR);
+						iter->imp_cvSGBM(DispImg_Curt, TestImgL, TestImgR);
+						*/
+				//---
 
-			//---Stereo Matching---
-			cv::Mat DispImg_Rect, DispImg_Orig;
-			Keyframe_Curt->imp_cvSGBM(DispImg_Rect, RectImg_Curt_Gray, RectImg_Last_Gray);
-			
-			//---test SGBM in OpenCV---
-					/*
-					cv::Mat TestImgL = cv::imread("C:\\saltwater\\intern\\src\\plugin\\stereo\\Test\\im2.png");
-					cv::Mat TestImgR = cv::imread("C:\\saltwater\\intern\\src\\plugin\\stereo\\Test\\im6.png");
-					cv::imshow("TestImgL", TestImgL);
-					cv::imshow("TestImgR", TestImgR);
-					iter->imp_cvSGBM(DispImg_Curt, TestImgL, TestImgR);
-					*/
+				DispImg_Rect.convertTo(DispImg_Rect, CV_32F, 1.0 / 16); // Disparity Image is in 16-bit -> Divide by 16 to get real Disparity.
+				DispImg_Orig = cv::Mat(Keyframe_Curt.get_Img().size(), CV_32F);
+				cv::remap(DispImg_Rect, DispImg_Orig, Orig2Rect_Curt_x, Orig2Rect_Curt_y, cv::INTER_LINEAR, cv::BORDER_TRANSPARENT); // !!! Warning: Using interpolation may cause additional errors !!!
 
-			DispImg_Rect.convertTo(DispImg_Rect, CV_32F, 1.0 / 16); // Disparity Image is in 16-bit -> Divide by 16 to get real Disparity.
-			DispImg_Orig = cv::Mat(Keyframe_Curt->get_Img().size(), CV_32F);
-			cv::remap(DispImg_Rect, DispImg_Orig, Orig2Rect_Curt_x, Orig2Rect_Curt_y, cv::INTER_LINEAR, cv::BORDER_TRANSPARENT); // !!! Warning: Using interpolation may cause additional errors !!!
+				//---Show Disparity Image generated from Stereo Matching---
+				cv::Mat DispImg_Rect_8U(DispImg_Rect.size(), CV_8UC1);
+				cv::normalize(DispImg_Rect, DispImg_Rect_8U, 0, 255, cv::NORM_MINMAX, CV_8UC1);
+				cv::imwrite("E:\\Project_ARCHITECT\\Disp_Rect.png", DispImg_Rect_8U);
 
-			//---Show Disparity Image generated from Stereo Matching---
-			cv::Mat DispImg_Rect_8U(DispImg_Rect.size(), CV_8UC1);
-			cv::normalize(DispImg_Rect, DispImg_Rect_8U, 0, 255, cv::NORM_MINMAX, CV_8UC1);
-			cv::imwrite("E:\\Project_ARCHITECT\\Disp_Rect.png", DispImg_Rect_8U);
+				cv::Mat DispImg_Orig_8U(DispImg_Orig.size(), CV_8UC1);
+				cv::normalize(DispImg_Orig, DispImg_Orig_8U, 0, 255, cv::NORM_MINMAX, CV_8UC1);
+				cv::imwrite("E:\\Project_ARCHITECT\\Disp_Orig.png", DispImg_Orig_8U);
 
-			cv::Mat DispImg_Orig_8U(DispImg_Orig.size(), CV_8UC1);
-			cv::normalize(DispImg_Orig, DispImg_Orig_8U, 0, 255, cv::NORM_MINMAX, CV_8UC1);
-			cv::imwrite("E:\\Project_ARCHITECT\\Disp_Orig.png", DispImg_Orig_8U);
+				//---Transform Disparity to Depth: Using Parallax Equation---
+				cv::Mat DepthImg_Rect = cv::Mat::zeros(DispImg_Rect.size(), CV_32F);
 
-			//---Transform Disparity to Depth: Using Parallax Equation---
-			cv::Mat DepthImg_Rect = cv::Mat::zeros(DispImg_Rect.size(), CV_32F);
-			for (int x_idx = 0; x_idx < DispImg_Rect.size().width; x_idx++)
-			{
-				for (int y_idx = 0; y_idx < DispImg_Rect.size().height; y_idx++)
+				for (int x_idx = 0; x_idx < DepthImg_Rect.size().width; x_idx++)
 				{
-					DepthImg_Rect.ptr<float>(y_idx)[x_idx] = RectImg_Curt.get_Cam().ptr<float>(0)[0] * BaseLineLength / DispImg_Rect.ptr<float>(y_idx)[x_idx];
+					for (int y_idx = 0; y_idx < DepthImg_Rect.size().height; y_idx++)
+					{
+						DepthImg_Rect.ptr<float>(y_idx)[x_idx] = RectImg_Curt.get_Cam().ptr<float>(0)[0] * BaseLineLength / DispImg_Rect.ptr<float>(y_idx)[x_idx];
+						float f = RectImg_Curt.get_Cam().ptr<float>(0)[0];
+						float Disparity = DispImg_Rect.ptr<float>(y_idx)[x_idx];
+						float Depth = DepthImg_Rect.ptr<float>(y_idx)[x_idx];
+						DepthImg_Rect.ptr<float>(y_idx)[x_idx] *= 1000; // Unit = mm
+					}
 				}
+
+				cv::Mat DepthImg_Orig = cv::Mat::zeros(DispImg_Orig.size(), CV_32F);
+				cv::remap(DepthImg_Rect, DepthImg_Orig, Orig2Rect_Curt_x, Orig2Rect_Curt_y, cv::INTER_LINEAR, cv::BORDER_TRANSPARENT); // !!! Warning: Using interpolation may cause additional errors !!!
+				//---Show Depth in pixel---
+
+				float Depth = DepthImg_Orig.ptr<float>(166)[192];
+
+				//---
+
+				//---Show Depth Image---
+				cv::Mat DepthImg_Rect_8U(DepthImg_Rect.size(), CV_8UC1);
+				cv::normalize(DepthImg_Rect, DepthImg_Rect_8U, 0, 255, cv::NORM_MINMAX, CV_8UC1);
+				cv::imwrite("E:\\Project_ARCHITECT\\Depth_Rect.png", DepthImg_Rect_8U);
+				cv::Mat DepthImg_Orig_8U(DepthImg_Orig.size(), CV_8UC1);
+				cv::normalize(DepthImg_Orig, DepthImg_Orig_8U, 0, 255, cv::NORM_MINMAX, CV_8UC1);
+				cv::imwrite("E:\\Project_ARCHITECT\\Depth_Orig.png", DepthImg_Orig_8U);
+
+				cv::Mat DepthImg_Orig_Sensor(cv::Size(m_ImageSize.x, m_ImageSize.y), CV_16UC1); // 2D Matrix(x*y) with (16-bit unsigned character & 1 Channel)
+				memcpy(DepthImg_Orig_Sensor.data, _rDepthImage.data(), _rDepthImage.size() * sizeof(_rDepthImage[0]));
+				cv::Mat DepthImg_Orig_Sensor_8U = cv::Mat(DepthImg_Orig_Sensor.size(), CV_8UC1);
+				cv::normalize(DepthImg_Orig_Sensor, DepthImg_Orig_Sensor_8U, 0, 255, cv::NORM_MINMAX, CV_8UC1);
+				cv::imwrite("E:\\Project_ARCHITECT\\Depth_Orig_Sensor.png", DepthImg_Orig_Sensor_8U);
 			}
-
-			cv::Mat DepthImg_Orig = cv::Mat::zeros(DispImg_Orig.size(), CV_32F);
-			cv::remap(DepthImg_Rect, DepthImg_Orig, Orig2Rect_Curt_x, Orig2Rect_Curt_y, cv::INTER_LINEAR, cv::BORDER_TRANSPARENT); // !!! Warning: Using interpolation may cause additional errors !!!
-
-			//---Show Depth Image---
-			cv::Mat DepthImg_Rect_8U(DepthImg_Rect.size(), CV_8UC1);
-			cv::normalize(DepthImg_Rect, DepthImg_Rect_8U, 0, 255, cv::NORM_MINMAX, CV_8UC1);
-			cv::imwrite("E:\\Project_ARCHITECT\\Depth_Rect.png", DepthImg_Rect_8U);
-			cv::Mat DepthImg_Orig_8U(DepthImg_Orig.size(), CV_8UC1);
-			cv::normalize(DepthImg_Orig, DepthImg_Orig_8U, 0, 255, cv::NORM_MINMAX, CV_8UC1);
-			cv::imwrite("E:\\Project_ARCHITECT\\Depth_Orig.png", DepthImg_Orig_8U);
-
-			cv::Mat DepthImg_Orig_Sensor(cv::Size(m_ImageSize.x, m_ImageSize.y), CV_16UC1); // 2D Matrix(x*y) with (8-bit unsigned character & 1 Channel)
-			memcpy(DepthImg_Orig_Sensor.data, _rDepthImage.data(), _rDepthImage.size() * sizeof(_rDepthImage[0]));
-			cv::Mat DepthImg_Orig_Sensor_8U = cv::Mat(DepthImg_Orig_Sensor.size(), CV_8UC1);
-			cv::normalize(DepthImg_Orig_Sensor, DepthImg_Orig_Sensor_8U, 0, 255, cv::NORM_MINMAX, CV_8UC1);
-			cv::imwrite("E:\\Project_ARCHITECT\\Depth_Orig_Sensor.png", DepthImg_Orig_Sensor_8U);
-
-			T = false;
-		}
-        
+			
+		}        
         
         // Optional for internal check
         CPluginInterface::ShowImg(_rRGBImage); // Showing image for visual checking -> Modify to control in editor.config
@@ -263,6 +263,7 @@ namespace Stereo
     void CPluginInterface::OnStart()
     {
         ENGINE_CONSOLE_INFOV("Stereo matching plugin started!");
+		sgm::StereoSGM ssgm(100, 100, 128, 8, 8, sgm::EXECUTE_INOUT_HOST2HOST);
     }
 
     // -----------------------------------------------------------------------------

@@ -6,8 +6,10 @@
 #include "base/base_include_glm.h"
 
 #include <vector>
+#include <memory>
 
 #include "plugin\stereo\stereo_futogmtcv.h"
+#include "libsgm.h"
 
 namespace Stereo
 {
@@ -42,11 +44,13 @@ namespace Stereo
     private:
         glm::ivec2 m_ImageSize;
 
-        std::vector<FutoGmtCV> Keyframes;
+		FutoGmtCV Keyframe_Curt, Keyframe_Last; // Only compute 2 frames first. -> In the future, I will modify if it needs to compute more images at once.
+		bool Idx_Keyf_Curt, Idx_Keyf_Last;
 
-		FutoGmtCV *Keyframe_Curt, *Keyframe_Last;
         std::size_t Cdt_Keyf_MaxNum = 2; // Maximal images for calculation once
-        float Cnd_Keyf_BaseLineL = 0.07; // Keyframe Selection: BaseLine Condition. Unit is meter.
+        float Cdt_Keyf_BaseLineL = 0.05; // Keyframe Selection: BaseLine Condition. Unit is meter.
+
+
         
     private:
         void glm2cv(cv::Mat* cvmat, const glm::mat3& glmmat);

@@ -45,12 +45,6 @@ namespace Stereo
 
                 mapM_x_Rect2Orig.ptr<float>(idx_y)[idx_x] = pixM_Rect2Orig.ptr<float>(0)[0];
                 mapM_y_Rect2Orig.ptr<float>(idx_y)[idx_x] = pixM_Rect2Orig.ptr<float>(1)[0];
-                
-                //---Test: Inverse Transformation---
-                /*
-                float pixB_Rect2Orig_x = mapB_x_Rect2Orig.at<float>(idx_y, idx_x);
-                float pixB_Rect2Orig_y = mapB_y_Rect2Orig.at<float>(idx_y, idx_x);
-                */
             }
         }
 
@@ -80,13 +74,7 @@ namespace Stereo
                 cv::Mat pixB_Orig2Rect = H_B * pixB_Orig;
                 pixB_Orig2Rect /= pixB_Orig2Rect.ptr<float>(2)[0];
                 pixB_Orig2Rect.ptr<float>(0)[0] = pixB_Orig2Rect.ptr<float>(0)[0] - ImgSize_Rect_x_min;
-                pixB_Orig2Rect.ptr<float>(1)[0] = pixB_Orig2Rect.ptr<float>(1)[0] - ImgSize_Rect_y_min;
-                //---Test---
-                
-                float pixB_Rect_x = pixB_Orig2Rect.at<float>(0, 0);
-                float pixB_Rect_y = pixB_Orig2Rect.at<float>(1, 0);
-                float pixB_Rect_1 = pixB_Orig2Rect.at<float>(2, 0);
-                
+                pixB_Orig2Rect.ptr<float>(1)[0] = pixB_Orig2Rect.ptr<float>(1)[0] - ImgSize_Rect_y_min;                
 
                 cv::Mat pixM_Orig2Rect = H_M * pixM_Orig;
                 pixM_Orig2Rect /= pixM_Orig2Rect.ptr<float>(2)[0];
@@ -190,7 +178,7 @@ namespace Stereo
 
         cv::Mat CenterB_Orig2Rect = H_B * CenterB_Orig;
         CenterB_Orig2Rect /= CenterB_Orig2Rect.ptr<float>(2)[0];
-        cv::Mat CenterM_Orig2Rect = H_B * CenterB_Orig;
+        cv::Mat CenterM_Orig2Rect = H_M * CenterM_Orig;
         CenterM_Orig2Rect /= CenterM_Orig2Rect.ptr<float>(2)[0];
 
         cv::Mat Drift_B = CenterB_Orig - CenterB_Orig2Rect;
@@ -214,7 +202,7 @@ namespace Stereo
 
     void Rect_Planar::cal_R_Rect(const cv::Mat& R_Orig_B, const cv::Mat& PC_Orig_B, const cv::Mat& PC_Orig_M)
     {
-        R_Rect = cv::Mat(3, 3, CV_32F);
+        R_Rect = cv::Mat::eye(3, 3, CV_32F);
 
         cv::Mat R_Rect_row0 = PC_Orig_M - PC_Orig_B;
         if (cv::sum(R_Rect_row0)[0] < 0)
@@ -257,7 +245,7 @@ namespace Stereo
         //---Calculate the Homography---
         H_B = P_Rect_B * P_Orig_B.inv(cv::DECOMP_SVD); 
         H_M = P_Rect_M * P_Orig_M.inv(cv::DECOMP_SVD);
-        //---Another Homography Transformation proposed by Fusiello. -> I do not like it because it is not reasonable
+        //---Another Homography Transformation used in Fusiello's Code. -> I do not like it because it is not reasonable
         /*
         //H_B = P_Rect_B.colRange(0, 3) * P_Orig_B.colRange(0, 3).inv();
         //H_M = P_Rect_M.colRange(0, 3) * P_Orig_M.colRange(0, 3).inv();
@@ -267,12 +255,12 @@ namespace Stereo
     }
 
     //---Get Function---
-	void Rect_Planar::get_K_Rect(cv::Mat CamB_Rect, cv::Mat CamM_Rect)
+	void Rect_Planar::get_K_Rect(cv::Mat &CamB_Rect, cv::Mat &CamM_Rect)
 	{
 		CamB_Rect = K_Rect_B;
 		CamM_Rect = K_Rect_M;
 	}
-	void Rect_Planar::get_R_Rect(cv::Mat Rot_Rect)
+	void Rect_Planar::get_R_Rect(cv::Mat &Rot_Rect)
 	{
 		Rot_Rect = R_Rect;
 	}
