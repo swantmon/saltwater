@@ -9,6 +9,7 @@
 #include "plugin\stereo\stereo_Rect_Planar.h"
 
 #include "opencv2/opencv.hpp"
+#include "libsgm.h"
 
 namespace Stereo
 {

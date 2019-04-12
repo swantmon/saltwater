@@ -9,7 +9,6 @@
 #include <memory>
 
 #include "plugin\stereo\stereo_futogmtcv.h"
-#include "libsgm.h"
 
 namespace Stereo
 {
@@ -48,8 +47,11 @@ namespace Stereo
 		bool Idx_Keyf_Curt, Idx_Keyf_Last;
 
         std::size_t Cdt_Keyf_MaxNum = 2; // Maximal images for calculation once
-        float Cdt_Keyf_BaseLineL = 0.05; // Keyframe Selection: BaseLine Condition. Unit is meter.
+        float Cdt_Keyf_BaseLineL = 0.03; // Keyframe Selection: BaseLine Condition. Unit is meter.
 
+		std::unique_ptr<sgm::StereoSGM> m_pStereoMatcherCUDA;
+		glm::ivec2 m_RectImageSize;
+		int m_DisparityCount;
 
         
     private:

@@ -2,6 +2,7 @@
 #include "plugin/stereo/stereo_precompiled.h"
 
 #include "engine/core/core_console.h"
+#include "engine/core/core_program_parameters.h"
 #include "engine/engine.h"
 #include "engine/graphic/gfx_texture.h"
 
@@ -56,6 +57,7 @@ namespace Stereo
         cv::Mat Img_dist_cv(cv::Size(m_ImageSize.x, m_ImageSize.y), CV_8UC4); // 2D Matrix(x*y) with (8-bit unsigned character) + (4 bands)
         memcpy(Img_dist_cv.data, _rRGBImage.data(), _rRGBImage.size());
         cv::cvtColor(Img_dist_cv, Img_dist_cv, cv::COLOR_BGRA2GRAY); // Default Color Space in OpenCV is BGRA.
+		int ch = Img_dist_cv.channels();
 
         cv::Mat Img_Undist_cv, DistCoeff_cv(5, 1, CV_32F); // DistCoeff = K1, K2, P1, P2, K3
 		DistCoeff_cv = cv::Mat::zeros(5, 1, CV_32F); // We ignore the efficient from Lens Distortion. -> To see what does the result look like.
@@ -88,12 +90,14 @@ namespace Stereo
 				FutoGmtCV RectImg_Curt, RectImg_Last;
 				cv::Mat Orig2Rect_Curt_x, Orig2Rect_Curt_y, Orig2Rect_Last_x, Orig2Rect_Last_y; // Look-Up Table of Orig2Rect (for getting value by interpolation)
 
-				Keyframe_Curt.imp_PlanarRect(RectImg_Curt, RectImg_Last, Orig2Rect_Curt_x, Orig2Rect_Curt_y, Orig2Rect_Last_x, Orig2Rect_Last_y, Keyframe_Last);
+				//Keyframe_Curt.imp_PlanarRect(RectImg_Curt, RectImg_Last, Orig2Rect_Curt_x, Orig2Rect_Curt_y, Orig2Rect_Last_x, Orig2Rect_Last_y, Keyframe_Last);
 
 				//---Verify by Test Data---
-				/*
-				   cv::Mat TestInputL = cv::imread("E:\\Project_ARCHITECT\\01 Epipolarization\\Fusiello\\Testing Data\\01-002570.jpg");
-				   cv::Mat TestInputR = cv::imread("E:\\Project_ARCHITECT\\01 Epipolarization\\Fusiello\\Testing Data\\02-002570.jpg");
+				
+				   cv::Mat TestInputL = cv::imread("E:\\Project_ARCHITECT\\cvSGBM_Test Data\\01-002570.jpg");
+				   cv::cvtColor(TestInputL, TestInputL, cv::COLOR_BGRA2GRAY);
+				   cv::Mat TestInputR = cv::imread("E:\\Project_ARCHITECT\\cvSGBM_Test Data\\02-002570.jpg");
+				   cv::cvtColor(TestInputR, TestInputR, cv::COLOR_BGRA2GRAY);
 
 				   cv::Mat K_L = cv::Mat::zeros(3, 3, CV_32F);
 				   K_L.at<float>(0, 0) = 1280.465;
@@ -127,16 +131,32 @@ namespace Stereo
 				   FutoGmtCV TestImgL = FutoGmtCV(TestInputL, K_L, R_L, PC_L);
 				   FutoGmtCV TestImgR = FutoGmtCV(TestInputR, K_R, R_R, PC_R);
 
-				   TestImgL.imp_PlanarRect(RectImg_Curt, RectImg_Next, TableB_x_Orig2Rect, TableB_y_Orig2Rect, TableM_x_Orig2Rect, TableM_y_Orig2Rect, TestImgR);
-				   */
+				   TestImgL.imp_PlanarRect(RectImg_Curt, RectImg_Last, Orig2Rect_Curt_x, Orig2Rect_Curt_y, Orig2Rect_Last_x, Orig2Rect_Last_y, TestImgR);
+				   
 			    //---
 
 				cv::imwrite("E:\\Project_ARCHITECT\\RectImg_Curt.png", RectImg_Curt.get_Img());
 				cv::imwrite("E:\\Project_ARCHITECT\\RectImg_Last.png", RectImg_Last.get_Img());
 
 				//---Stereo Matching---
-				cv::Mat DispImg_Rect, DispImg_Orig;
-				Keyframe_Curt.imp_cvSGBM(DispImg_Rect, RectImg_Curt.get_Img(), RectImg_Last.get_Img());
+				cv::Mat DispImg_Rect(m_RectImageSize.y, m_RectImageSize.x, CV_8UC1);
+				//Keyframe_Curt.imp_cvSGBM(DispImg_Rect, RectImg_Curt.get_Img(), RectImg_Last.get_Img());
+				assert(RectImg_Curt.get_Img().type() == CV_8U);
+				assert(RectImg_Last.get_Img().type() == CV_8U);
+				assert(DispImg_Rect.type() == CV_8U);
+
+				imshow("Left", RectImg_Curt.get_Img());
+				imshow("Right", RectImg_Last.get_Img());
+
+				cv::waitKey(0);
+
+				m_pStereoMatcherCUDA->execute(RectImg_Curt.get_Img().data, RectImg_Last.get_Img().data, DispImg_Rect.data);
+
+				imshow("Left", RectImg_Curt.get_Img());
+				imshow("Right", RectImg_Last.get_Img());
+				imshow("Disp", DispImg_Rect);
+
+				cv::waitKey(0);
 
 				//---test SGBM in OpenCV---
 				/*
@@ -148,8 +168,8 @@ namespace Stereo
 						*/
 				//---
 
-				DispImg_Rect.convertTo(DispImg_Rect, CV_32F, 1.0 / 16); // Disparity Image is in 16-bit -> Divide by 16 to get real Disparity.
-				DispImg_Orig = cv::Mat(Keyframe_Curt.get_Img().size(), CV_32F);
+				//DispImg_Rect.convertTo(DispImg_Rect, CV_32F, 1.0 / 16); // Disparity Image is in 16-bit -> Divide by 16 to get real Disparity.
+				cv::Mat DispImg_Orig(Keyframe_Curt.get_Img().size(), CV_32F);
 				cv::remap(DispImg_Rect, DispImg_Orig, Orig2Rect_Curt_x, Orig2Rect_Curt_y, cv::INTER_LINEAR, cv::BORDER_TRANSPARENT); // !!! Warning: Using interpolation may cause additional errors !!!
 
 				//---Show Disparity Image generated from Stereo Matching---
@@ -263,7 +283,9 @@ namespace Stereo
     void CPluginInterface::OnStart()
     {
         ENGINE_CONSOLE_INFOV("Stereo matching plugin started!");
-		sgm::StereoSGM ssgm(100, 100, 128, 8, 8, sgm::EXECUTE_INOUT_HOST2HOST);
+		m_RectImageSize = Core::CProgramParameters::GetInstance().Get("mr:stereo:cuda_image_size", glm::ivec2(855, 533));
+		m_DisparityCount = Core::CProgramParameters::GetInstance().Get("mr:stereo:disparity_count", 128);
+		m_pStereoMatcherCUDA = std::make_unique<sgm::StereoSGM>(m_RectImageSize.x, m_RectImageSize.y, m_DisparityCount, 8, 8, sgm::EXECUTE_INOUT_HOST2HOST);
     }
 
     // -----------------------------------------------------------------------------
