@@ -1,21 +1,94 @@
 #include "plugin\stereo\stereo_precompiled.h"
 #include "plugin\stereo\stereo_Rect_Planar.h"
 
+#include "engine/graphic/gfx_context_manager.h"
+#include "engine/graphic/gfx_performance.h"
+
+namespace
+{
+	int DivUp(int TotalShaderCount, int WorkGroupSize)
+	{
+		return (TotalShaderCount + WorkGroupSize - 1) / WorkGroupSize;
+	}
+}
+
 namespace Stereo
 {
     //---Constructors & Destructor---
     Rect_Planar::Rect_Planar()
     {
+		std::stringstream DefineStream;
+
+		DefineStream
+			<< "#define TILE_SIZE_2D " << 16 << " \n";
+
+		std::string DefineString = DefineStream.str();
+
+		m_RectificationCSPtr = Gfx::ShaderManager::CompileCS("../../plugins/stereo/cs_rectification.glsl", "main", DefineString.c_str());
+
+		Gfx::SBufferDescriptor BufferDesc = {};
+
+		BufferDesc.m_Stride = 0;
+		BufferDesc.m_Usage = Gfx::CBuffer::GPURead;
+		BufferDesc.m_Binding = Gfx::CBuffer::ConstantBuffer;
+		BufferDesc.m_Access = Gfx::CBuffer::CPUWrite;
+		BufferDesc.m_NumberOfBytes = sizeof(glm::mat4);
+		BufferDesc.m_pBytes = nullptr;
+		BufferDesc.m_pClassKey = 0;
+
+		m_HomographyBufferPtr = Gfx::BufferManager::CreateBuffer(BufferDesc);
     }
 
 
     Rect_Planar::~Rect_Planar()
     {
+		m_RectificationCSPtr = nullptr;
+		m_RectificationInputImagePtr = nullptr;
+		m_RectificationOutputImagePtr = nullptr;
     }
 
     //---Generation of Rectified Img---
     void Rect_Planar::genrt_RectImg(const cv::Mat& Img_Orig_B, const cv::Mat& Img_Orig_M)
     {
+// 		Gfx::Performance::BeginEvent("Rectification");
+// 
+// 		Gfx::STextureDescriptor TextureDescriptor = {};
+// 
+// 		TextureDescriptor.m_NumberOfPixelsU = Img_Orig_B.cols;
+// 		TextureDescriptor.m_NumberOfPixelsV = Img_Orig_B.rows;
+// 		TextureDescriptor.m_NumberOfPixelsW = 1;
+// 		TextureDescriptor.m_NumberOfMipMaps = 1;
+// 		TextureDescriptor.m_NumberOfTextures = 1;
+// 		TextureDescriptor.m_Binding = Gfx::CTexture::ShaderResource;
+// 		TextureDescriptor.m_Access = Gfx::CTexture::EAccess::CPURead;
+// 		TextureDescriptor.m_Usage = Gfx::CTexture::EUsage::GPUToCPU;
+// 		TextureDescriptor.m_Semantic = Gfx::CTexture::UndefinedSemantic;
+// 		TextureDescriptor.m_Format = Gfx::CTexture::R8_UBYTE;
+// 		TextureDescriptor.m_pPixels = Img_Orig_B.data;
+// 
+// 		m_RectificationInputImagePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
+// 
+// 		Gfx::ContextManager::SetShaderCS(m_RectificationCSPtr);
+// 		Gfx::ContextManager::SetImageTexture(0, m_RectificationInputImagePtr);
+// 		Gfx::ContextManager::SetImageTexture(1, m_RectificationOutputImagePtr);
+// 		Gfx::ContextManager::SetConstantBuffer(0, m_HomographyBufferPtr);
+// 
+// 		Gfx::BufferManager::UploadBufferData(m_HomographyBufferPtr, &H_B);
+// 
+// 		const int WorkGroupsX = DivUp(ImgSize_Rect.width, 16);
+// 		const int WorkGroupsY = DivUp(ImgSize_Rect.height, 16);
+// 
+// 		Gfx::ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+// 
+// 		Gfx::ContextManager::ResetShaderCS();
+// 
+// 		cv::Mat GPUResult(m_RectificationOutputImagePtr->GetNumberOfPixelsV(), m_RectificationOutputImagePtr->GetNumberOfPixelsU(), CV_8UC4);
+// 		Gfx::TextureManager::CopyTextureToCPU(m_RectificationOutputImagePtr, reinterpret_cast<char*>(GPUResult.data));
+// 
+// 		cv::imshow("GPU Result", GPUResult);
+// 
+// 		Gfx::Performance::EndEvent();
+
         //---Create Rectified Images---
         Img_Rect_B = cv::Mat(ImgSize_Rect, CV_8UC4);
         Img_Rect_M = cv::Mat(ImgSize_Rect, CV_8UC4);
@@ -165,6 +238,21 @@ namespace Stereo
         ImgSize_Rect_y_max = std::ceil(std::max(ImgBound_RectB_y_max, ImgBound_RectM_y_max));
 
         ImgSize_Rect = cv::Size(ImgSize_Rect_x_max - ImgSize_Rect_x_min, ImgSize_Rect_y_max - ImgSize_Rect_y_min);
+
+		Gfx::STextureDescriptor TextureDescriptor = {};
+
+		TextureDescriptor.m_NumberOfPixelsU = ImgSize_Rect.width;
+		TextureDescriptor.m_NumberOfPixelsV = ImgSize_Rect.height;
+		TextureDescriptor.m_NumberOfPixelsW = 1;
+		TextureDescriptor.m_NumberOfMipMaps = 1;
+		TextureDescriptor.m_NumberOfTextures = 1;
+		TextureDescriptor.m_Binding = Gfx::CTexture::ShaderResource;
+		TextureDescriptor.m_Access = Gfx::CTexture::EAccess::CPURead;
+		TextureDescriptor.m_Usage = Gfx::CTexture::EUsage::GPUToCPU;
+		TextureDescriptor.m_Semantic = Gfx::CTexture::UndefinedSemantic;
+		TextureDescriptor.m_Format = Gfx::CTexture::R8_UBYTE;
+
+		m_RectificationOutputImagePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
     }
 
     void Rect_Planar::imp_CenterRectImg(const cv::Size& ImgSize_OrigB, const cv::Size& ImgSize_OrigM)

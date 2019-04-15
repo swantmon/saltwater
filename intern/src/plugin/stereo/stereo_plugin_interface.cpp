@@ -90,10 +90,10 @@ namespace Stereo
 				FutoGmtCV RectImg_Curt, RectImg_Last;
 				cv::Mat Orig2Rect_Curt_x, Orig2Rect_Curt_y, Orig2Rect_Last_x, Orig2Rect_Last_y; // Look-Up Table of Orig2Rect (for getting value by interpolation)
 
-				//Keyframe_Curt.imp_PlanarRect(RectImg_Curt, RectImg_Last, Orig2Rect_Curt_x, Orig2Rect_Curt_y, Orig2Rect_Last_x, Orig2Rect_Last_y, Keyframe_Last);
+				Keyframe_Curt.imp_PlanarRect(RectImg_Curt, RectImg_Last, Orig2Rect_Curt_x, Orig2Rect_Curt_y, Orig2Rect_Last_x, Orig2Rect_Last_y, Keyframe_Last);
 
 				//---Verify by Test Data---
-				
+				/*
 				   cv::Mat TestInputL = cv::imread("E:\\Project_ARCHITECT\\cvSGBM_Test Data\\01-002570.jpg");
 				   cv::cvtColor(TestInputL, TestInputL, cv::COLOR_BGRA2GRAY);
 				   cv::Mat TestInputR = cv::imread("E:\\Project_ARCHITECT\\cvSGBM_Test Data\\02-002570.jpg");
@@ -132,7 +132,7 @@ namespace Stereo
 				   FutoGmtCV TestImgR = FutoGmtCV(TestInputR, K_R, R_R, PC_R);
 
 				   TestImgL.imp_PlanarRect(RectImg_Curt, RectImg_Last, Orig2Rect_Curt_x, Orig2Rect_Curt_y, Orig2Rect_Last_x, Orig2Rect_Last_y, TestImgR);
-				   
+				   */
 			    //---
 
 				cv::imwrite("E:\\Project_ARCHITECT\\RectImg_Curt.png", RectImg_Curt.get_Img());

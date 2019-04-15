@@ -3,6 +3,10 @@
 #ifndef Rect_Planar_H
 #define Rect_Planar_H
 
+#include "engine/graphic/gfx_texture_manager.h"
+#include "engine/graphic/gfx_buffer_manager.h"
+#include "engine/graphic/gfx_shader_manager.h"
+
 #include "opencv2/opencv.hpp"
 
 namespace Stereo
@@ -50,6 +54,11 @@ namespace Stereo
         cv::Mat R_Rect; // Rotation mtx of Rectified Images (World -> Image)
         cv::Mat P_Rect_B, P_Rect_M; // Perspective Projection mtx of Rectified Images (World -> Image)
         cv::Mat H_B, H_M; // Homography (Original -> Rectified)
+
+		Gfx::CShaderPtr m_RectificationCSPtr;
+		Gfx::CTexturePtr m_RectificationInputImagePtr;
+		Gfx::CTexturePtr m_RectificationOutputImagePtr;
+		Gfx::CBufferPtr m_HomographyBufferPtr;
     };
 
 } // Stereo
