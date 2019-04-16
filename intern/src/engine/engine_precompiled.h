@@ -12,7 +12,13 @@
 #define ASIO_HAS_VARIADIC_TEMPLATES
 #define ASIO_HAS_STD_FUNCTION
 #define ASIO_HAS_STD_CHRONO
+
+#pragma warning(push)
+#pragma warning(disable : 6031 6258 6001 6386 26495 6255 6387 26439 26444 4834) // Holy shit! These are all caused by asio :/
+
 #include "asio.hpp"
+
+#pragma warning(pop)
 
 // -----------------------------------------------------------------------------
 // STL includes

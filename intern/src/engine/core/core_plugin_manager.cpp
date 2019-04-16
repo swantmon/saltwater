@@ -329,10 +329,8 @@ namespace
         // Get library info
         // -----------------------------------------------------------------------------
 
-        auto Instance = Iter->second.m_Instance;
         auto pPluginInfo = Iter->second.m_pInfo;
 
-        assert(Instance != nullptr);
         assert(pPluginInfo != nullptr);
         assert(!Iter->second.m_IsInitialized);
 

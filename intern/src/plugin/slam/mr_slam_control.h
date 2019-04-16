@@ -657,15 +657,16 @@ namespace MR
                 
                 GLsync Fence = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
 
-                auto Status = glClientWaitSync(Fence, GL_SYNC_FLUSH_COMMANDS_BIT, INT_MAX);
-                                
+                //auto Status = glClientWaitSync(Fence, GL_SYNC_FLUSH_COMMANDS_BIT, INT_MAX);
+				glClientWaitSync(Fence, GL_SYNC_FLUSH_COMMANDS_BIT, INT_MAX);
+
                 std::vector<char> Compressed;
 
                 Base::Compress(static_cast<char*>(m_pGPUPixelData), m_PixelBufferSize, Compressed, 1);
 
                 Net::CMessage Message;
                 Message.m_Category = 0;
-                Message.m_CompressedSize = Compressed.size();
+                Message.m_CompressedSize = static_cast<int>(Compressed.size());
                 Message.m_DecompressedSize = m_PixelBufferSize;
                 Message.m_MessageType = 0;
                 Message.m_Payload = std::move(Compressed);
