@@ -42,24 +42,24 @@ namespace Stereo
 
     private:
         //---Inputs from plugin_slam---
-		glm::ivec2 m_ImageSize;
+        glm::ivec2 m_ImageSize;
 
-		glm::mat3 m_Cam; // Camera matrix of each frame.
-		glm::mat3 m_Rot; // Rotation matrix of each frame. (Image -> World for Computer Graphics)
-		glm::vec3 m_PC; // Camera position (Projection Center) vector.
-
-
+        glm::mat3 m_Cam; // Camera matrix of each frame.
+        glm::mat3 m_Rot; // Rotation matrix of each frame. (Image -> World for Computer Graphics)
+        glm::vec3 m_PC; // Camera position (Projection Center) vector.
 
 
-		FutoGmtCV Keyframe_Curt, Keyframe_Last; // Only compute 2 frames first. -> In the future, I will modify if it needs to compute more images at once.
-		bool Idx_Keyf_Curt, Idx_Keyf_Last;
+
+
+        FutoGmtCV Keyframe_Curt, Keyframe_Last; // Only compute 2 frames first. -> In the future, I will modify if it needs to compute more images at once.
+        bool Idx_Keyf_Curt, Idx_Keyf_Last;
 
         std::size_t Cdt_Keyf_MaxNum = 2; // Maximal images for calculation once
         float Cdt_Keyf_BaseLineL = 0.03; // Keyframe Selection: BaseLine Condition. Unit is meter.
 
-		std::unique_ptr<sgm::StereoSGM> m_pStereoMatcherCUDA;
-		glm::ivec2 m_RectImageSize;
-		int m_DisparityCount;
+        std::unique_ptr<sgm::StereoSGM> m_pStereoMatcherCUDA;
+        glm::ivec2 m_RectImageSize;
+        int m_DisparityCount;
 
         
     private:

@@ -6,10 +6,10 @@
 
 namespace // No specific namespace => Only allowed to use in this page.
 {
-	int DivUp(int TotalShaderCount, int WorkGroupSize)
-	{
-		return (TotalShaderCount + WorkGroupSize - 1) / WorkGroupSize;
-	}
+    int DivUp(int TotalShaderCount, int WorkGroupSize)
+    {
+        return (TotalShaderCount + WorkGroupSize - 1) / WorkGroupSize;
+    }
 }
 
 namespace FutoGmtCV
@@ -17,77 +17,77 @@ namespace FutoGmtCV
     //---Constructors & Destructor---
     PlanarRect::PlanarRect()
     {
-		std::stringstream DefineStream;
+        std::stringstream DefineStream;
 
-		DefineStream
-			<< "#define TILE_SIZE_2D " << 16 << " \n"; // It is suggested to use 16 for 2D image (based on experience).
+        DefineStream
+            << "#define TILE_SIZE_2D " << 16 << " \n"; // It is suggested to use 16 for 2D image (based on experience).
 
-		std::string DefineString = DefineStream.str();
+        std::string DefineString = DefineStream.str();
 
-		m_CSPtr_PlanarRecr = Gfx::ShaderManager::CompileCS("../../plugins/stereo/cs_Rect_Planar.glsl", "main", DefineString.c_str());
+        m_CSPtr_PlanarRecr = Gfx::ShaderManager::CompileCS("../../plugins/stereo/cs_Rect_Planar.glsl", "main", DefineString.c_str());
 
-		Gfx::SBufferDescriptor BufferDesc = {};
+        Gfx::SBufferDescriptor BufferDesc = {};
 
-		BufferDesc.m_Stride = 0;
-		BufferDesc.m_Usage = Gfx::CBuffer::GPURead;
-		BufferDesc.m_Binding = Gfx::CBuffer::ConstantBuffer;
-		BufferDesc.m_Access = Gfx::CBuffer::CPUWrite;
-		BufferDesc.m_NumberOfBytes = sizeof(glm::mat4);
-		BufferDesc.m_pBytes = nullptr;
-		BufferDesc.m_pClassKey = 0;
+        BufferDesc.m_Stride = 0;
+        BufferDesc.m_Usage = Gfx::CBuffer::GPURead;
+        BufferDesc.m_Binding = Gfx::CBuffer::ConstantBuffer;
+        BufferDesc.m_Access = Gfx::CBuffer::CPUWrite;
+        BufferDesc.m_NumberOfBytes = sizeof(glm::mat4);
+        BufferDesc.m_pBytes = nullptr;
+        BufferDesc.m_pClassKey = 0;
 
-		m_BufferPtr_Homography = Gfx::BufferManager::CreateBuffer(BufferDesc);
+        m_BufferPtr_Homography = Gfx::BufferManager::CreateBuffer(BufferDesc);
     }
 
 
     PlanarRect::~PlanarRect()
     {
-		m_CSPtr_PlanarRecr = nullptr;
-		m_TexturePtr_OrigImg = nullptr;
-		m_TexturePtr_RectImg = nullptr;
+        m_CSPtr_PlanarRecr = nullptr;
+        m_TexturePtr_OrigImg = nullptr;
+        m_TexturePtr_RectImg = nullptr;
     }
 
     //---Generation of Rectified Img---
     void PlanarRect::genrt_RectImg(const cv::Mat& Img_Orig_B, const cv::Mat& Img_Orig_M)
     {
-		Gfx::Performance::BeginEvent("Planar Rectification");
+        Gfx::Performance::BeginEvent("Planar Rectification");
 
-		Gfx::STextureDescriptor TextureDescriptor = {};
+        Gfx::STextureDescriptor TextureDescriptor = {};
 
-		TextureDescriptor.m_NumberOfPixelsU = Img_Orig_B.cols;
-		TextureDescriptor.m_NumberOfPixelsV = Img_Orig_B.rows;
-		TextureDescriptor.m_NumberOfPixelsW = 1;
-		TextureDescriptor.m_NumberOfMipMaps = 1;
-		TextureDescriptor.m_NumberOfTextures = 1;
-		TextureDescriptor.m_Binding = Gfx::CTexture::ShaderResource;
-		TextureDescriptor.m_Access = Gfx::CTexture::EAccess::CPURead;
-		TextureDescriptor.m_Usage = Gfx::CTexture::EUsage::GPUToCPU;
-		TextureDescriptor.m_Semantic = Gfx::CTexture::UndefinedSemantic;
-		TextureDescriptor.m_Format = Gfx::CTexture::R8_UBYTE;
-		TextureDescriptor.m_pPixels = Img_Orig_B.data;
+        TextureDescriptor.m_NumberOfPixelsU = Img_Orig_B.cols;
+        TextureDescriptor.m_NumberOfPixelsV = Img_Orig_B.rows;
+        TextureDescriptor.m_NumberOfPixelsW = 1;
+        TextureDescriptor.m_NumberOfMipMaps = 1;
+        TextureDescriptor.m_NumberOfTextures = 1;
+        TextureDescriptor.m_Binding = Gfx::CTexture::ShaderResource;
+        TextureDescriptor.m_Access = Gfx::CTexture::EAccess::CPURead;
+        TextureDescriptor.m_Usage = Gfx::CTexture::EUsage::GPUToCPU;
+        TextureDescriptor.m_Semantic = Gfx::CTexture::UndefinedSemantic;
+        TextureDescriptor.m_Format = Gfx::CTexture::R8_UBYTE;
+        TextureDescriptor.m_pPixels = Img_Orig_B.data;
 
-		m_TexturePtr_OrigImg = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
+        m_TexturePtr_OrigImg = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
 
-		Gfx::ContextManager::SetShaderCS(m_CSPtr_PlanarRecr);
-		Gfx::ContextManager::SetImageTexture(0, m_TexturePtr_OrigImg);
-		Gfx::ContextManager::SetImageTexture(1, m_TexturePtr_RectImg);
-		Gfx::ContextManager::SetConstantBuffer(0, m_BufferPtr_Homography);
+        Gfx::ContextManager::SetShaderCS(m_CSPtr_PlanarRecr);
+        Gfx::ContextManager::SetImageTexture(0, m_TexturePtr_OrigImg);
+        Gfx::ContextManager::SetImageTexture(1, m_TexturePtr_RectImg);
+        Gfx::ContextManager::SetConstantBuffer(0, m_BufferPtr_Homography);
 
-		Gfx::BufferManager::UploadBufferData(m_BufferPtr_Homography, &H_B, 0, sizeof(H_B));
+        Gfx::BufferManager::UploadBufferData(m_BufferPtr_Homography, &H_B, 0, sizeof(H_B));
 
-		const int WorkGroupsX = DivUp(ImgSize_Rect.width, 16);
-		const int WorkGroupsY = DivUp(ImgSize_Rect.height, 16);
+        const int WorkGroupsX = DivUp(ImgSize_Rect.width, 16);
+        const int WorkGroupsY = DivUp(ImgSize_Rect.height, 16);
 
-		Gfx::ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+        Gfx::ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
 
-		Gfx::ContextManager::ResetShaderCS();
+        Gfx::ContextManager::ResetShaderCS();
 
-		cv::Mat GPUResult(m_TexturePtr_RectImg->GetNumberOfPixelsV(), m_TexturePtr_RectImg->GetNumberOfPixelsU(), CV_8UC1);
-		Gfx::TextureManager::CopyTextureToCPU(m_TexturePtr_RectImg, reinterpret_cast<char*>(GPUResult.data));
+        cv::Mat GPUResult(m_TexturePtr_RectImg->GetNumberOfPixelsV(), m_TexturePtr_RectImg->GetNumberOfPixelsU(), CV_8UC1);
+        Gfx::TextureManager::CopyTextureToCPU(m_TexturePtr_RectImg, reinterpret_cast<char*>(GPUResult.data));
 
-		cv::imshow("GPU Result", GPUResult);
+        cv::imshow("GPU Result", GPUResult);
 
-		Gfx::Performance::EndEvent();
+        Gfx::Performance::EndEvent();
 
         //---Create Rectified Images---
         Img_Rect_B = cv::Mat(ImgSize_Rect, CV_8UC4);
@@ -239,20 +239,20 @@ namespace FutoGmtCV
 
         ImgSize_Rect = cv::Size(ImgSize_Rect_x_max - ImgSize_Rect_x_min, ImgSize_Rect_y_max - ImgSize_Rect_y_min);
 
-		Gfx::STextureDescriptor TextureDescriptor = {};
+        Gfx::STextureDescriptor TextureDescriptor = {};
 
-		TextureDescriptor.m_NumberOfPixelsU = ImgSize_Rect.width;
-		TextureDescriptor.m_NumberOfPixelsV = ImgSize_Rect.height;
-		TextureDescriptor.m_NumberOfPixelsW = 1;
-		TextureDescriptor.m_NumberOfMipMaps = 1;
-		TextureDescriptor.m_NumberOfTextures = 1;
-		TextureDescriptor.m_Binding = Gfx::CTexture::ShaderResource;
-		TextureDescriptor.m_Access = Gfx::CTexture::EAccess::CPUWrite;
-		TextureDescriptor.m_Usage = Gfx::CTexture::EUsage::GPUReadWrite;
-		TextureDescriptor.m_Semantic = Gfx::CTexture::UndefinedSemantic;
-		TextureDescriptor.m_Format = Gfx::CTexture::R8_UBYTE;
+        TextureDescriptor.m_NumberOfPixelsU = ImgSize_Rect.width;
+        TextureDescriptor.m_NumberOfPixelsV = ImgSize_Rect.height;
+        TextureDescriptor.m_NumberOfPixelsW = 1;
+        TextureDescriptor.m_NumberOfMipMaps = 1;
+        TextureDescriptor.m_NumberOfTextures = 1;
+        TextureDescriptor.m_Binding = Gfx::CTexture::ShaderResource;
+        TextureDescriptor.m_Access = Gfx::CTexture::EAccess::CPUWrite;
+        TextureDescriptor.m_Usage = Gfx::CTexture::EUsage::GPUReadWrite;
+        TextureDescriptor.m_Semantic = Gfx::CTexture::UndefinedSemantic;
+        TextureDescriptor.m_Format = Gfx::CTexture::R8_UBYTE;
 
-		m_TexturePtr_RectImg = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
+        m_TexturePtr_RectImg = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
     }
 
     void PlanarRect::imp_CenterRectImg(const cv::Size& ImgSize_OrigB, const cv::Size& ImgSize_OrigM)
@@ -343,15 +343,15 @@ namespace FutoGmtCV
     }
 
     //---Get Function---
-	void PlanarRect::get_K_Rect(cv::Mat &CamB_Rect, cv::Mat &CamM_Rect)
-	{
-		CamB_Rect = K_Rect_B;
-		CamM_Rect = K_Rect_M;
-	}
-	void PlanarRect::get_R_Rect(cv::Mat &Rot_Rect)
-	{
-		Rot_Rect = R_Rect;
-	}
+    void PlanarRect::get_K_Rect(cv::Mat &CamB_Rect, cv::Mat &CamM_Rect)
+    {
+        CamB_Rect = K_Rect_B;
+        CamM_Rect = K_Rect_M;
+    }
+    void PlanarRect::get_R_Rect(cv::Mat &Rot_Rect)
+    {
+        Rot_Rect = R_Rect;
+    }
 
     void PlanarRect::get_RectImg(cv::Mat& Output_RectImgB, cv::Mat& Output_RectImgM)
     {

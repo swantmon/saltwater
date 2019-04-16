@@ -17,27 +17,27 @@ namespace FutoGmtCV
     public:
         FutoImg();
         FutoImg(cv::Mat& Img_Input);
-		FutoImg(cv::Mat& Img_Input, cv::Mat P);
+        FutoImg(cv::Mat& Img_Input, cv::Mat P);
         FutoImg(cv::Mat& Img_Input, cv::Mat K, cv::Mat R, cv::Mat PC);
         ~FutoImg();
 
     //---Set Functions---
-	public:
-		void set_Cam(cv::Mat& K);
-		void set_Rot(cv::Mat& R);
-		void set_PC(cv::Mat& T);
-		void set_PPM(cv::Mat P_Input);
+    public:
+        void set_Cam(cv::Mat& K);
+        void set_Rot(cv::Mat& R);
+        void set_PC(cv::Mat& T);
+        void set_PPM(cv::Mat P_Input);
 
     //---Get Function---
-	public:
-		cv::Mat get_Img() const;
-		cv::Mat get_Cam() const;
-		cv::Mat get_Rot() const;
-		cv::Mat get_PC() const;
-		cv::Mat get_P_mtx() const;
+    public:
+        cv::Mat get_Img() const;
+        cv::Mat get_Cam() const;
+        cv::Mat get_Rot() const;
+        cv::Mat get_PC() const;
+        cv::Mat get_P_mtx() const;
 
 
-	//===OLD===
+    //===OLD===
 
     //---Photogrammetric Computer Vision---
     public:

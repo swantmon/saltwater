@@ -31,8 +31,8 @@ namespace FutoGmtCV
 
     //---Get Function---
     public:
-		void get_K_Rect(cv::Mat &CamB_Rect, cv::Mat &CamM_Rect);
-		void get_R_Rect(cv::Mat &Rot_Rect);
+        void get_K_Rect(cv::Mat &CamB_Rect, cv::Mat &CamM_Rect);
+        void get_R_Rect(cv::Mat &Rot_Rect);
         void get_RectImg(cv::Mat& Output_RectImgB, cv::Mat& Output_RectImgM);
         void get_Transform_Orig2Rect(cv::Mat& LookUpTx_B_Orig2Rect, cv::Mat& LookUpTy_B_Orig2Rect, cv::Mat& LookUpTx_M_Orig2Rect, cv::Mat& LookUpTy_M_Orig2Rect);
 
@@ -53,11 +53,11 @@ namespace FutoGmtCV
         cv::Mat P_Rect_B, P_Rect_M; // Perspective Projection mtx of Rectified Images (World -> Image)
         cv::Mat H_B, H_M; // Homography (Original -> Rectified)
 
-		//---GPU Managers---
-		Gfx::CShaderPtr m_CSPtr_PlanarRecr;
-		Gfx::CTexturePtr m_TexturePtr_OrigImg;
-		Gfx::CTexturePtr m_TexturePtr_RectImg;
-		Gfx::CBufferPtr m_BufferPtr_Homography;
+        //---GPU Managers---
+        Gfx::CShaderPtr m_CSPtr_PlanarRecr;
+        Gfx::CTexturePtr m_TexturePtr_OrigImg;
+        Gfx::CTexturePtr m_TexturePtr_RectImg;
+        Gfx::CBufferPtr m_BufferPtr_Homography;
     };
 
 } // FutoGmtCV
