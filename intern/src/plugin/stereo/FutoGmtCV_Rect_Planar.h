@@ -5,6 +5,8 @@
 #include "engine/graphic/gfx_texture_manager.h" // Managing GPU Texture (Data) by Pointer
 #include "engine/graphic/gfx_buffer_manager.h" // Managing GPU Buffer (Memory) by Pointer
 
+#include "plugin\stereo\FutoGmtCV_Img.h"
+
 #include "opencv2/opencv.hpp"
 
 namespace FutoGmtCV
@@ -16,18 +18,47 @@ namespace FutoGmtCV
         PlanarRect();
         ~PlanarRect();
 
-    //---Generate Rectified Images-----
+    //---Execution Functions---
     public:
-        void genrt_RectImg(const cv::Mat& Img_Orig_B, const cv::Mat& Img_Orig_M);
-        void determ_RectImgSize(const cv::Size& ImgSize_OrigB, const cv::Size& ImgSize_OrigM);
-        void imp_CenterRectImg(const cv::Size& ImgSize_OrigB, const cv::Size& ImgSize_OrigM);
+        void imp_PlanarRect();
 
-    //---Compute Orientations---
-    public:
-        void cal_K_Rect(const cv::Mat& K_Orig_B, const cv::Mat& K_Orig_M);
-        void cal_R_Rect(const cv::Mat& R_Orig_B, const cv::Mat& PC_Orig_B, const cv::Mat& PC_Orig_M);
-        void cal_P_Rect(const cv::Mat& t_Orig_B, const cv::Mat& t_Orig_M);
-        void cal_H(const cv::Mat& P_Orig_B, cv::Mat& P_Orig_M);
+
+    //---Assistant Functions---
+    private:
+        void cal_K_Rect();
+        void cal_R_Rect();
+        void cal_P_Rect();
+        void cal_H();
+
+        void imp_CenterRectImg();
+
+        void determ_RectImgSize();
+        void genrt_RectImg();
+
+
+    //---Members---
+    private:
+        //---Epipolar Image---
+        FutoImg m_Img_Orig_B, m_Img_Orig_M;
+        cv::Mat m_Img_Rect_B, m_Img_Rect_M;
+
+        cv::Mat m_K_Rect_B, m_K_Rect_M; // Camera mtx of Rectified Images
+        cv::Mat m_R_Rect; // Rotation mtx of Rectified Images (World -> Image)
+        cv::Mat m_P_Rect_B, m_P_Rect_M; // Perspective Projection mtx of Rectified Images (World -> Image)
+        cv::Mat m_Homo_B, m_Homo_M; // Homography (Original -> Rectified)
+
+        cv::Size m_ImgSize_Rect;
+        cv::Point m_ImgCnr_UL_Rect, m_ImgCnr_DR_Rect;
+
+        //---GPU Managers---
+        Gfx::CShaderPtr m_CSPtr_PlanarRecr;
+        Gfx::CTexturePtr m_TexturePtr_OrigImg;
+        Gfx::CTexturePtr m_TexturePtr_RectImg;
+        Gfx::CBufferPtr m_BufferPtr_Homography;
+
+    //=====OLD=====
+        
+        
 
     //---Get Function---
     public:
@@ -38,26 +69,12 @@ namespace FutoGmtCV
 
     //---Members---
     private:
-        //---Epipolar Images-----
-        cv::Mat Img_Rect_B, Img_Rect_M;
-        cv::Size ImgSize_Rect;
-        int ImgSize_Rect_x_min, ImgSize_Rect_x_max, ImgSize_Rect_y_min, ImgSize_Rect_y_max;
         
         //---Transformation---
         cv::Mat mapB_x_Orig2Rect, mapB_y_Orig2Rect, mapM_x_Orig2Rect, mapM_y_Orig2Rect;
         cv::Mat mapB_x_Rect2Orig, mapB_y_Rect2Orig, mapM_x_Rect2Orig, mapM_y_Rect2Orig;
 
-        //---Orientations---
-        cv::Mat K_Rect_B, K_Rect_M; // Camera mtx of Rectified Images
-        cv::Mat R_Rect; // Rotation mtx of Rectified Images (World -> Image)
-        cv::Mat P_Rect_B, P_Rect_M; // Perspective Projection mtx of Rectified Images (World -> Image)
-        cv::Mat H_B, H_M; // Homography (Original -> Rectified)
 
-        //---GPU Managers---
-        Gfx::CShaderPtr m_CSPtr_PlanarRecr;
-        Gfx::CTexturePtr m_TexturePtr_OrigImg;
-        Gfx::CTexturePtr m_TexturePtr_RectImg;
-        Gfx::CBufferPtr m_BufferPtr_Homography;
     };
 
 } // FutoGmtCV
