@@ -2,9 +2,9 @@
 #include "plugin/stereo/stereo_precompiled.h"
 
 #include "engine/core/core_console.h"
-#include "engine/core/core_program_parameters.h"
+#include "engine/core/core_program_parameters.h" // For controlling parameters in Config.
 #include "engine/engine.h"
-#include "engine/graphic/gfx_texture.h"
+#include "engine/graphic/gfx_texture.h" // For Transmit Texture between CPU & GPU
 
 #include "plugin/stereo/stereo_plugin_interface.h"
 
@@ -38,29 +38,27 @@ namespace Stereo
 
     void CPluginInterface::OnFrameCPU(const std::vector<char>& _rRGBImage, const glm::mat4& _Transform, const glm::mat4& _Intrinsics, const std::vector<uint16_t>& _rDepthImage)
     {
-
-
-        //---Transform Image & Orientations to OpenCV format---
-		glm::mat3 K_glm = glm::mat3(_Intrinsics) / 2; // Image is half resolution but Intrinsic is full resolution
-		K_glm[2].z = 1;
+        
+		//---Transform Image & Orientations to OpenCV format---
+		m_Cam = glm::mat3(_Intrinsics) / 2; // Image is half resolution but Intrinsic is full resolution
+		m_Cam[2].z = 1;
         cv::Mat K_cv(3, 3, CV_32F);
-        glm2cv(&K_cv, glm::transpose(K_glm));
+        glm2cv(&K_cv, glm::transpose(m_Cam));
 
-        glm::mat3 R_glm = glm::mat3(_Transform);
+		m_Rot = glm::mat3(_Transform);
         cv::Mat R_cv(3, 3, CV_32F);
-        glm2cv(&R_cv, R_glm); // No transpose -> Rotation given by ARKit is Camera2World, but Rotation in Photogrammetry is World2Camera.
+        glm2cv(&R_cv, m_Rot); // No transpose -> Rotation given by ARKit is Camera2World, but Rotation in Photogrammetry needs World2Camera.
 
-        glm::vec3 PC_glm = glm::vec3(_Transform[3]); // The last column of _Transform given by ARKit is the Position of Camera in World frame.
+		m_PC = glm::vec3(_Transform[3]); // The last column of _Transform given by ARKit is the Position of Camera in World frame.
         cv::Mat PC_cv(3, 1, CV_32F);
-        glm2cv(&PC_cv, PC_glm);
+        glm2cv(&PC_cv, m_PC);
 
         cv::Mat Img_dist_cv(cv::Size(m_ImageSize.x, m_ImageSize.y), CV_8UC4); // 2D Matrix(x*y) with (8-bit unsigned character) + (4 bands)
         memcpy(Img_dist_cv.data, _rRGBImage.data(), _rRGBImage.size());
         cv::cvtColor(Img_dist_cv, Img_dist_cv, cv::COLOR_BGRA2GRAY); // Default Color Space in OpenCV is BGRA.
-		int ch = Img_dist_cv.channels();
 
         cv::Mat Img_Undist_cv, DistCoeff_cv(5, 1, CV_32F); // DistCoeff = K1, K2, P1, P2, K3
-		DistCoeff_cv = cv::Mat::zeros(5, 1, CV_32F); // We ignore the efficient from Lens Distortion. -> To see what does the result look like.
+		DistCoeff_cv = cv::Mat::zeros(5, 1, CV_32F); // Ignore Lens Distortion in default, and See what does the result look like.
         cv::undistort(Img_dist_cv, Img_Undist_cv, K_cv, DistCoeff_cv);
 
 		FutoGmtCV frame(Img_Undist_cv, K_cv, R_cv, PC_cv);

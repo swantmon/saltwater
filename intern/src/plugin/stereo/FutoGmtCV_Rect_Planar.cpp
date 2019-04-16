@@ -1,10 +1,10 @@
 #include "plugin\stereo\stereo_precompiled.h"
-#include "plugin\stereo\stereo_Rect_Planar.h"
+#include "plugin\stereo\FutoGmtCV_Rect_Planar.h"
 
 #include "engine/graphic/gfx_context_manager.h"
 #include "engine/graphic/gfx_performance.h"
 
-namespace
+namespace // No specific namespace => Only allowed to use in this page.
 {
 	int DivUp(int TotalShaderCount, int WorkGroupSize)
 	{
@@ -12,19 +12,19 @@ namespace
 	}
 }
 
-namespace Stereo
+namespace FutoGmtCV
 {
     //---Constructors & Destructor---
-    Rect_Planar::Rect_Planar()
+    PlanarRect::PlanarRect()
     {
 		std::stringstream DefineStream;
 
 		DefineStream
-			<< "#define TILE_SIZE_2D " << 16 << " \n";
+			<< "#define TILE_SIZE_2D " << 16 << " \n"; // It is suggested to use 16 for 2D image (based on experience).
 
 		std::string DefineString = DefineStream.str();
 
-		m_RectificationCSPtr = Gfx::ShaderManager::CompileCS("../../plugins/stereo/cs_rectification.glsl", "main", DefineString.c_str());
+		m_CSPtr_PlanarRecr = Gfx::ShaderManager::CompileCS("../../plugins/stereo/cs_Rect_Planar.glsl", "main", DefineString.c_str());
 
 		Gfx::SBufferDescriptor BufferDesc = {};
 
@@ -36,21 +36,21 @@ namespace Stereo
 		BufferDesc.m_pBytes = nullptr;
 		BufferDesc.m_pClassKey = 0;
 
-		m_HomographyBufferPtr = Gfx::BufferManager::CreateBuffer(BufferDesc);
+		m_BufferPtr_Homography = Gfx::BufferManager::CreateBuffer(BufferDesc);
     }
 
 
-    Rect_Planar::~Rect_Planar()
+    PlanarRect::~PlanarRect()
     {
-		m_RectificationCSPtr = nullptr;
-		m_RectificationInputImagePtr = nullptr;
-		m_RectificationOutputImagePtr = nullptr;
+		m_CSPtr_PlanarRecr = nullptr;
+		m_TexturePtr_OrigImg = nullptr;
+		m_TexturePtr_RectImg = nullptr;
     }
 
     //---Generation of Rectified Img---
-    void Rect_Planar::genrt_RectImg(const cv::Mat& Img_Orig_B, const cv::Mat& Img_Orig_M)
+    void PlanarRect::genrt_RectImg(const cv::Mat& Img_Orig_B, const cv::Mat& Img_Orig_M)
     {
-		Gfx::Performance::BeginEvent("Rectification");
+		Gfx::Performance::BeginEvent("Planar Rectification");
 
 		Gfx::STextureDescriptor TextureDescriptor = {};
 
@@ -66,14 +66,14 @@ namespace Stereo
 		TextureDescriptor.m_Format = Gfx::CTexture::R8_UBYTE;
 		TextureDescriptor.m_pPixels = Img_Orig_B.data;
 
-		m_RectificationInputImagePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
+		m_TexturePtr_OrigImg = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
 
-		Gfx::ContextManager::SetShaderCS(m_RectificationCSPtr);
-		Gfx::ContextManager::SetImageTexture(0, m_RectificationInputImagePtr);
-		Gfx::ContextManager::SetImageTexture(1, m_RectificationOutputImagePtr);
-		Gfx::ContextManager::SetConstantBuffer(0, m_HomographyBufferPtr);
+		Gfx::ContextManager::SetShaderCS(m_CSPtr_PlanarRecr);
+		Gfx::ContextManager::SetImageTexture(0, m_TexturePtr_OrigImg);
+		Gfx::ContextManager::SetImageTexture(1, m_TexturePtr_RectImg);
+		Gfx::ContextManager::SetConstantBuffer(0, m_BufferPtr_Homography);
 
-		Gfx::BufferManager::UploadBufferData(m_HomographyBufferPtr, &H_B, 0, sizeof(H_B));
+		Gfx::BufferManager::UploadBufferData(m_BufferPtr_Homography, &H_B, 0, sizeof(H_B));
 
 		const int WorkGroupsX = DivUp(ImgSize_Rect.width, 16);
 		const int WorkGroupsY = DivUp(ImgSize_Rect.height, 16);
@@ -82,8 +82,8 @@ namespace Stereo
 
 		Gfx::ContextManager::ResetShaderCS();
 
-		cv::Mat GPUResult(m_RectificationOutputImagePtr->GetNumberOfPixelsV(), m_RectificationOutputImagePtr->GetNumberOfPixelsU(), CV_8UC1);
-		Gfx::TextureManager::CopyTextureToCPU(m_RectificationOutputImagePtr, reinterpret_cast<char*>(GPUResult.data));
+		cv::Mat GPUResult(m_TexturePtr_RectImg->GetNumberOfPixelsV(), m_TexturePtr_RectImg->GetNumberOfPixelsU(), CV_8UC1);
+		Gfx::TextureManager::CopyTextureToCPU(m_TexturePtr_RectImg, reinterpret_cast<char*>(GPUResult.data));
 
 		cv::imshow("GPU Result", GPUResult);
 
@@ -163,7 +163,7 @@ namespace Stereo
         }
     }
 
-    void Rect_Planar::determ_RectImgSize(const cv::Size& ImgSize_OrigB, const cv::Size& ImgSize_OrigM)
+    void PlanarRect::determ_RectImgSize(const cv::Size& ImgSize_OrigB, const cv::Size& ImgSize_OrigM)
     {
         //---Select Img Corner in Originals---
         cv::Mat ImgCnrUL_OrigB = cv::Mat::ones(3, 1, CV_32F);
@@ -252,10 +252,10 @@ namespace Stereo
 		TextureDescriptor.m_Semantic = Gfx::CTexture::UndefinedSemantic;
 		TextureDescriptor.m_Format = Gfx::CTexture::R8_UBYTE;
 
-		m_RectificationOutputImagePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
+		m_TexturePtr_RectImg = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
     }
 
-    void Rect_Planar::imp_CenterRectImg(const cv::Size& ImgSize_OrigB, const cv::Size& ImgSize_OrigM)
+    void PlanarRect::imp_CenterRectImg(const cv::Size& ImgSize_OrigB, const cv::Size& ImgSize_OrigM)
     {
         cv::Mat CenterB_Orig = cv::Mat::ones(3, 1, CV_32F);
         CenterB_Orig.ptr<float>(0)[0] = ImgSize_OrigB.width / 2;
@@ -282,13 +282,13 @@ namespace Stereo
     }
 
     //---Compute Orientations---
-    void Rect_Planar::cal_K_Rect(const cv::Mat& K_Orig_B, const cv::Mat& K_Orig_M)
+    void PlanarRect::cal_K_Rect(const cv::Mat& K_Orig_B, const cv::Mat& K_Orig_M)
     {
         K_Rect_B = 0.5 * (K_Orig_B + K_Orig_M);
         K_Rect_M = 0.5 * (K_Orig_B + K_Orig_M);
     }
 
-    void Rect_Planar::cal_R_Rect(const cv::Mat& R_Orig_B, const cv::Mat& PC_Orig_B, const cv::Mat& PC_Orig_M)
+    void PlanarRect::cal_R_Rect(const cv::Mat& R_Orig_B, const cv::Mat& PC_Orig_B, const cv::Mat& PC_Orig_M)
     {
         R_Rect = cv::Mat::eye(3, 3, CV_32F);
 
@@ -312,7 +312,7 @@ namespace Stereo
         R_Rect_row2.copyTo(R_Rect.row(2));
     }
 
-    void Rect_Planar::cal_P_Rect(const cv::Mat& PC_Orig_B, const cv::Mat& PC_Orig_M)
+    void PlanarRect::cal_P_Rect(const cv::Mat& PC_Orig_B, const cv::Mat& PC_Orig_M)
     {
         cv::Mat Trans_Rect_B(3, 4, CV_32F);
         R_Rect.colRange(0, 3).copyTo(Trans_Rect_B.colRange(0, 3)); // StartCol is inclusive while EndCol is exclusive
@@ -328,7 +328,7 @@ namespace Stereo
         P_Rect_M = K_Rect_M * Trans_Rect_M;
     }
 
-    void Rect_Planar::cal_H(const cv::Mat& P_Orig_B, cv::Mat& P_Orig_M)
+    void PlanarRect::cal_H(const cv::Mat& P_Orig_B, cv::Mat& P_Orig_M)
     {
         //---Calculate the Homography---
         H_B = P_Rect_B * P_Orig_B.inv(cv::DECOMP_SVD); 
@@ -343,23 +343,23 @@ namespace Stereo
     }
 
     //---Get Function---
-	void Rect_Planar::get_K_Rect(cv::Mat &CamB_Rect, cv::Mat &CamM_Rect)
+	void PlanarRect::get_K_Rect(cv::Mat &CamB_Rect, cv::Mat &CamM_Rect)
 	{
 		CamB_Rect = K_Rect_B;
 		CamM_Rect = K_Rect_M;
 	}
-	void Rect_Planar::get_R_Rect(cv::Mat &Rot_Rect)
+	void PlanarRect::get_R_Rect(cv::Mat &Rot_Rect)
 	{
 		Rot_Rect = R_Rect;
 	}
 
-    void Rect_Planar::get_RectImg(cv::Mat& Output_RectImgB, cv::Mat& Output_RectImgM)
+    void PlanarRect::get_RectImg(cv::Mat& Output_RectImgB, cv::Mat& Output_RectImgM)
     {
         Output_RectImgB = Img_Rect_B;
         Output_RectImgM = Img_Rect_M;
     }
 
-    void Rect_Planar::get_Transform_Orig2Rect(cv::Mat& LookUpTx_B_Orig2Rect, cv::Mat& LookUpTy_B_Orig2Rect, cv::Mat& LookUpTx_M_Orig2Rect, cv::Mat& LookUpTy_M_Orig2Rect)
+    void PlanarRect::get_Transform_Orig2Rect(cv::Mat& LookUpTx_B_Orig2Rect, cv::Mat& LookUpTy_B_Orig2Rect, cv::Mat& LookUpTx_M_Orig2Rect, cv::Mat& LookUpTy_M_Orig2Rect)
     {
         LookUpTx_B_Orig2Rect = mapB_x_Orig2Rect;
         LookUpTy_B_Orig2Rect = mapB_y_Orig2Rect;
@@ -367,4 +367,4 @@ namespace Stereo
         LookUpTy_M_Orig2Rect = mapM_y_Orig2Rect;
     }
 
-} // Stereo
+} // FutoGmtCV

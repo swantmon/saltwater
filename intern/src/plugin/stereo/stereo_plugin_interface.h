@@ -30,18 +30,26 @@ namespace Stereo
 
         void SetIntrinsics(const glm::vec2 &_rFocalLength, const glm::vec2 &_rFocalPoint, const glm::ivec2 &_rImageSize);
 
-        // CPU
+        //---CPU Computation---
 
         std::vector<char> GetLatestDepthImageCPU() const;
         void OnFrameCPU(const std::vector<char>& _rRGBImage, const glm::mat4 &_Transform, const glm::mat4 &_Intrinsics, const std::vector<uint16_t> &_rDepthImage);
 
-        // GPU
+        //---GPU Computation---
 
         Gfx::CTexturePtr GetLatestDepthImageGPU() const;
         void OnFrameGPU(Gfx::CTexturePtr _RGBImage, const glm::mat4 &_Transform);
 
     private:
-        glm::ivec2 m_ImageSize;
+        //---Inputs from plugin_slam---
+		glm::ivec2 m_ImageSize;
+
+		glm::mat3 m_Cam; // Camera matrix of each frame.
+		glm::mat3 m_Rot; // Rotation matrix of each frame. (Image -> World for Computer Graphics)
+		glm::vec3 m_PC; // Camera position (Projection Center) vector.
+
+
+
 
 		FutoGmtCV Keyframe_Curt, Keyframe_Last; // Only compute 2 frames first. -> In the future, I will modify if it needs to compute more images at once.
 		bool Idx_Keyf_Curt, Idx_Keyf_Last;

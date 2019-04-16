@@ -1,22 +1,20 @@
+
 #pragma once
 
-#ifndef Rect_Planar_H
-#define Rect_Planar_H
-
-#include "engine/graphic/gfx_texture_manager.h"
-#include "engine/graphic/gfx_buffer_manager.h"
-#include "engine/graphic/gfx_shader_manager.h"
+#include "engine/graphic/gfx_shader_manager.h" // Managing GPU Shader by Pointer
+#include "engine/graphic/gfx_texture_manager.h" // Managing GPU Texture (Data) by Pointer
+#include "engine/graphic/gfx_buffer_manager.h" // Managing GPU Buffer (Memory) by Pointer
 
 #include "opencv2/opencv.hpp"
 
-namespace Stereo
+namespace FutoGmtCV
 {
-    class Rect_Planar
+    class PlanarRect
     {
     //---Constructor & Destructor---
     public:
-        Rect_Planar();
-        ~Rect_Planar();
+        PlanarRect();
+        ~PlanarRect();
 
     //---Generate Rectified Images-----
     public:
@@ -55,12 +53,11 @@ namespace Stereo
         cv::Mat P_Rect_B, P_Rect_M; // Perspective Projection mtx of Rectified Images (World -> Image)
         cv::Mat H_B, H_M; // Homography (Original -> Rectified)
 
-		Gfx::CShaderPtr m_RectificationCSPtr;
-		Gfx::CTexturePtr m_RectificationInputImagePtr;
-		Gfx::CTexturePtr m_RectificationOutputImagePtr;
-		Gfx::CBufferPtr m_HomographyBufferPtr;
+		//---GPU Managers---
+		Gfx::CShaderPtr m_CSPtr_PlanarRecr;
+		Gfx::CTexturePtr m_TexturePtr_OrigImg;
+		Gfx::CTexturePtr m_TexturePtr_RectImg;
+		Gfx::CBufferPtr m_BufferPtr_Homography;
     };
 
-} // Stereo
-
-#endif
+} // FutoGmtCV
