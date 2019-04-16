@@ -77,7 +77,7 @@ namespace SLAM
     {
         ENGINE_CONSOLE_INFOV("SLAM plugin resumed!");
     }
-} // namespace HW
+} // namespace SLAM
 
 extern "C" CORE_PLUGIN_API_EXPORT void Pause()
 {
