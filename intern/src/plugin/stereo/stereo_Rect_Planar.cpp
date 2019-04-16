@@ -73,7 +73,7 @@ namespace Stereo
 		Gfx::ContextManager::SetImageTexture(1, m_RectificationOutputImagePtr);
 		Gfx::ContextManager::SetConstantBuffer(0, m_HomographyBufferPtr);
 
-		Gfx::BufferManager::UploadBufferData(m_HomographyBufferPtr, &H_B);
+		Gfx::BufferManager::UploadBufferData(m_HomographyBufferPtr, &H_B, 0, sizeof(H_B));
 
 		const int WorkGroupsX = DivUp(ImgSize_Rect.width, 16);
 		const int WorkGroupsY = DivUp(ImgSize_Rect.height, 16);
