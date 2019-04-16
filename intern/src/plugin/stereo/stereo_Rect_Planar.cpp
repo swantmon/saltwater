@@ -50,44 +50,44 @@ namespace Stereo
     //---Generation of Rectified Img---
     void Rect_Planar::genrt_RectImg(const cv::Mat& Img_Orig_B, const cv::Mat& Img_Orig_M)
     {
-// 		Gfx::Performance::BeginEvent("Rectification");
-// 
-// 		Gfx::STextureDescriptor TextureDescriptor = {};
-// 
-// 		TextureDescriptor.m_NumberOfPixelsU = Img_Orig_B.cols;
-// 		TextureDescriptor.m_NumberOfPixelsV = Img_Orig_B.rows;
-// 		TextureDescriptor.m_NumberOfPixelsW = 1;
-// 		TextureDescriptor.m_NumberOfMipMaps = 1;
-// 		TextureDescriptor.m_NumberOfTextures = 1;
-// 		TextureDescriptor.m_Binding = Gfx::CTexture::ShaderResource;
-// 		TextureDescriptor.m_Access = Gfx::CTexture::EAccess::CPURead;
-// 		TextureDescriptor.m_Usage = Gfx::CTexture::EUsage::GPUToCPU;
-// 		TextureDescriptor.m_Semantic = Gfx::CTexture::UndefinedSemantic;
-// 		TextureDescriptor.m_Format = Gfx::CTexture::R8_UBYTE;
-// 		TextureDescriptor.m_pPixels = Img_Orig_B.data;
-// 
-// 		m_RectificationInputImagePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
-// 
-// 		Gfx::ContextManager::SetShaderCS(m_RectificationCSPtr);
-// 		Gfx::ContextManager::SetImageTexture(0, m_RectificationInputImagePtr);
-// 		Gfx::ContextManager::SetImageTexture(1, m_RectificationOutputImagePtr);
-// 		Gfx::ContextManager::SetConstantBuffer(0, m_HomographyBufferPtr);
-// 
-// 		Gfx::BufferManager::UploadBufferData(m_HomographyBufferPtr, &H_B);
-// 
-// 		const int WorkGroupsX = DivUp(ImgSize_Rect.width, 16);
-// 		const int WorkGroupsY = DivUp(ImgSize_Rect.height, 16);
-// 
-// 		Gfx::ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
-// 
-// 		Gfx::ContextManager::ResetShaderCS();
-// 
-// 		cv::Mat GPUResult(m_RectificationOutputImagePtr->GetNumberOfPixelsV(), m_RectificationOutputImagePtr->GetNumberOfPixelsU(), CV_8UC4);
-// 		Gfx::TextureManager::CopyTextureToCPU(m_RectificationOutputImagePtr, reinterpret_cast<char*>(GPUResult.data));
-// 
-// 		cv::imshow("GPU Result", GPUResult);
-// 
-// 		Gfx::Performance::EndEvent();
+		Gfx::Performance::BeginEvent("Rectification");
+
+		Gfx::STextureDescriptor TextureDescriptor = {};
+
+		TextureDescriptor.m_NumberOfPixelsU = Img_Orig_B.cols;
+		TextureDescriptor.m_NumberOfPixelsV = Img_Orig_B.rows;
+		TextureDescriptor.m_NumberOfPixelsW = 1;
+		TextureDescriptor.m_NumberOfMipMaps = 1;
+		TextureDescriptor.m_NumberOfTextures = 1;
+		TextureDescriptor.m_Binding = Gfx::CTexture::ShaderResource;
+		TextureDescriptor.m_Access = Gfx::CTexture::EAccess::CPURead;
+		TextureDescriptor.m_Usage = Gfx::CTexture::EUsage::GPUToCPU;
+		TextureDescriptor.m_Semantic = Gfx::CTexture::UndefinedSemantic;
+		TextureDescriptor.m_Format = Gfx::CTexture::R8_UBYTE;
+		TextureDescriptor.m_pPixels = Img_Orig_B.data;
+
+		m_RectificationInputImagePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
+
+		Gfx::ContextManager::SetShaderCS(m_RectificationCSPtr);
+		Gfx::ContextManager::SetImageTexture(0, m_RectificationInputImagePtr);
+		Gfx::ContextManager::SetImageTexture(1, m_RectificationOutputImagePtr);
+		Gfx::ContextManager::SetConstantBuffer(0, m_HomographyBufferPtr);
+
+		Gfx::BufferManager::UploadBufferData(m_HomographyBufferPtr, &H_B);
+
+		const int WorkGroupsX = DivUp(ImgSize_Rect.width, 16);
+		const int WorkGroupsY = DivUp(ImgSize_Rect.height, 16);
+
+		Gfx::ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+
+		Gfx::ContextManager::ResetShaderCS();
+
+		cv::Mat GPUResult(m_RectificationOutputImagePtr->GetNumberOfPixelsV(), m_RectificationOutputImagePtr->GetNumberOfPixelsU(), CV_8UC1);
+		Gfx::TextureManager::CopyTextureToCPU(m_RectificationOutputImagePtr, reinterpret_cast<char*>(GPUResult.data));
+
+		cv::imshow("GPU Result", GPUResult);
+
+		Gfx::Performance::EndEvent();
 
         //---Create Rectified Images---
         Img_Rect_B = cv::Mat(ImgSize_Rect, CV_8UC4);
@@ -247,8 +247,8 @@ namespace Stereo
 		TextureDescriptor.m_NumberOfMipMaps = 1;
 		TextureDescriptor.m_NumberOfTextures = 1;
 		TextureDescriptor.m_Binding = Gfx::CTexture::ShaderResource;
-		TextureDescriptor.m_Access = Gfx::CTexture::EAccess::CPURead;
-		TextureDescriptor.m_Usage = Gfx::CTexture::EUsage::GPUToCPU;
+		TextureDescriptor.m_Access = Gfx::CTexture::EAccess::CPUWrite;
+		TextureDescriptor.m_Usage = Gfx::CTexture::EUsage::GPUReadWrite;
 		TextureDescriptor.m_Semantic = Gfx::CTexture::UndefinedSemantic;
 		TextureDescriptor.m_Format = Gfx::CTexture::R8_UBYTE;
 
