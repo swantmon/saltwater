@@ -214,6 +214,12 @@ namespace
 #ifdef PLATFORM_WINDOWS
         glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 #endif // PLATFORM_WINDOWS
+
+        // -----------------------------------------------------------------------------
+        // Do not add padding bytes when copying data between CPU and GPU
+        // -----------------------------------------------------------------------------
+        glPixelStorei(GL_PACK_ALIGNMENT, 1);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     }
 
     // -----------------------------------------------------------------------------
