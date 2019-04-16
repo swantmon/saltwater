@@ -51,8 +51,6 @@ namespace MR
             COLORINTRINSICS
         };
 
-    private:
-
         enum EDATASOURCE
         {
             NETWORK,
@@ -966,6 +964,8 @@ namespace MR
             }
         }
 
+        // -----------------------------------------------------------------------------
+
         void OnNewNeuralNetMessage(const Net::CMessage& _rMessage, Net::SocketHandle _SocketHandle)
         {
             BASE_UNUSED(_SocketHandle);
@@ -986,6 +986,8 @@ namespace MR
                 Gfx::ReconstructionRenderer::SetInpaintedPlane(m_PlaneTexture, AABB);
             }
         }
+
+        // -----------------------------------------------------------------------------
 
         void CreatePlane()
         {
@@ -1038,6 +1040,8 @@ namespace MR
                 Gfx::ReconstructionRenderer::SetInpaintedPlane(m_PlaneTexture, AABB);
             }
         }
+
+        // -----------------------------------------------------------------------------
 
         void CreateShiftLUTTexture()
         {
@@ -1132,6 +1136,8 @@ namespace MR
             Gfx::TextureManager::CopyToTexture2D(m_ShiftLUTPtr, TargetRect, Count, const_cast<uint16_t*>(LUT));
         }
 
+        // -----------------------------------------------------------------------------
+
         glm::vec3 KelvinToRGB(float _Kelvin)
         {
             _Kelvin = _Kelvin / 100.f;
@@ -1167,6 +1173,8 @@ namespace MR
 
             return glm::clamp(RGB, 0.0f, 255.0f) / 255.0f;
         }
+
+        // -----------------------------------------------------------------------------
 
         int DivUp(int TotalShaderCount, int WorkGroupSize)
         {
