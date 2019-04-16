@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "plugin\stereo\stereo_Rect_Polar.h"
-#include "plugin\stereo\stereo_Rect_Planar.h"
+#include "plugin\stereo\FutoGmtCV_Rect_Planar.h"
 
 #include "opencv2/opencv.hpp"
 #include "libsgm.h"
