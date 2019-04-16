@@ -658,7 +658,7 @@ namespace MR
                 GLsync Fence = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
 
                 //auto Status = glClientWaitSync(Fence, GL_SYNC_FLUSH_COMMANDS_BIT, INT_MAX);
-				glClientWaitSync(Fence, GL_SYNC_FLUSH_COMMANDS_BIT, INT_MAX);
+                glClientWaitSync(Fence, GL_SYNC_FLUSH_COMMANDS_BIT, INT_MAX);
 
                 std::vector<char> Compressed;
 

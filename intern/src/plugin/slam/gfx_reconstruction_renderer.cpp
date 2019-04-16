@@ -2293,9 +2293,9 @@ namespace ReconstructionRenderer
 
     CTexturePtr GetInpaintedRendering(const glm::mat4& _rPoseMatrix, const Base::AABB3Float& _rAABB, CTexturePtr _BackgroundTexturePtr)
     {
-		// TODO: actually use pose matrix for rendering instead of the main camera
+        // TODO: actually use pose matrix for rendering instead of the main camera
 
-		BASE_UNUSED(_rPoseMatrix);
+        BASE_UNUSED(_rPoseMatrix);
 
         return CGfxReconstructionRenderer::GetInstance().GetInpaintedRendering(_rAABB, _BackgroundTexturePtr);
     }
