@@ -83,8 +83,8 @@ namespace FutoGmtCV
         genrt_RectImg(Img_Orig_B.get_Img(), 0);
         genrt_RectImg(Img_Orig_M.get_Img(), 1);
 
-        get_RectImg(Img_Rect_B);
-        get_RectImg(Img_Rect_M);
+        get_RectImg(Img_Rect_B, 0);
+        get_RectImg(Img_Rect_M, 1);
     }
 
     //---Assistant Functions: Compute Orientations---
@@ -183,9 +183,9 @@ namespace FutoGmtCV
         cv::Mat H;
         switch (Which_Img)
         {
-        case 0: H = m_Homo_B;
+        case 0: m_Homo_B.copyTo(H);
             break;
-        case 1: H = m_Homo_M;
+        case 1: m_Homo_M.copyTo(H);
             break;
         }
 
@@ -259,15 +259,14 @@ namespace FutoGmtCV
         cv::Mat H;
         switch (Which_Img)
         {
-        case 0: 
-            H = m_Homo_B;
+        case 0: m_Homo_B.copyTo(H);
             break;
-        case 1: 
-            H = m_Homo_M;
+        case 1: m_Homo_M.copyTo(H);
             break;
         }
 
         //---Compute @ GPU---
+
         Gfx::Performance::BeginEvent("Planar Rectification");
 
         Gfx::STextureDescriptor TextureDescriptor = {};
@@ -291,7 +290,7 @@ namespace FutoGmtCV
         Gfx::ContextManager::SetImageTexture(1, m_TexturePtr_RectImg);
         Gfx::ContextManager::SetConstantBuffer(0, m_BufferPtr_Homography);
 
-        Gfx::BufferManager::UploadBufferData(m_BufferPtr_Homography, &H, 0, sizeof(H));
+        Gfx::BufferManager::UploadBufferData(m_BufferPtr_Homography, H.data, 0, sizeof(float) * H.rows * H.cols);
 
         const int WorkGroupsX = DivUp(m_ImgSize_Rect.width, 16);
         const int WorkGroupsY = DivUp(m_ImgSize_Rect.height, 16);
@@ -306,6 +305,7 @@ namespace FutoGmtCV
         cv::imshow("GPU Result", GPUResult);
 
         Gfx::Performance::EndEvent();
+
 
         //---Compute @ CPU (Remove after finishing "Compute @ GPU")---
 
@@ -333,15 +333,15 @@ namespace FutoGmtCV
         }
 
         //---Derive Pixel Value of Rectified Images: Transform Pixels from Rectfied back to Origianls & Interpolation---
-        cv::remap(Img_Orig, m_Img_Rect_B, map_Rect2Orig_x, map_Rect2Orig_y, cv::INTER_LINEAR, cv::BORDER_TRANSPARENT);
+        cv::remap(Img_Orig, Img_Rect, map_Rect2Orig_x, map_Rect2Orig_y, cv::INTER_LINEAR, cv::BORDER_TRANSPARENT);
 
         switch (Which_Img)
         {
         case 0:
-            m_Img_Rect_B = Img_Rect;
+            Img_Rect.copyTo(m_Img_Rect_B);
             break;
         case 1:
-            m_Img_Rect_M = Img_Rect;
+            Img_Rect.copyTo(m_Img_Rect_M);
             break;
         }
     }
@@ -351,9 +351,11 @@ namespace FutoGmtCV
     {
         switch (Which_Img)
         {
-        case 0: Img_Rect = FutoImg(m_Img_Rect_B, m_K_Rect_B, m_R_Rect, m_PC_Rect_B);
+        case 0: 
+            Img_Rect = FutoImg(m_Img_Rect_B, m_K_Rect_B, m_R_Rect, m_PC_Rect_B);
             break;
-        case 1: Img_Rect = FutoImg(m_Img_Rect_M, m_K_Rect_M, m_R_Rect, m_PC_Rect_M);
+        case 1: 
+            Img_Rect = FutoImg(m_Img_Rect_M, m_K_Rect_M, m_R_Rect, m_PC_Rect_M);
             break;
         }
     }
