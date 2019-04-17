@@ -1,12 +1,6 @@
 #ifndef __INCLUDE_CS_YUV_TO_RGB_GLSL__
 #define __INCLUDE_CS_YUV_TO_RGB_GLSL__
 
-layout(std140, binding = 0) uniform RGBConversion
-{
-    vec4 g_AmbientIntensity;
-    vec4 g_Temperature;
-};
-
 layout (binding = 0, r8) readonly uniform image2D cs_Y;
 layout (binding = 1, rg8) readonly uniform image2D cs_UV;
 layout (binding = 2, rgba8) writeonly uniform image2D cs_RGB;
