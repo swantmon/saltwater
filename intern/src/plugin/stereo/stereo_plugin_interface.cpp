@@ -225,6 +225,9 @@ namespace Stereo
 
             //---Finish Processing -> Free last keyframe---
             m_idx_Keyf_Last = false;
+
+            //---Temp Setting: Only calculate once, because it takes too much time calculating in CPU...
+            m_Cdt_Keyf_BaseLineL = 1000000000;
         }
         
         // Optional for internal check
