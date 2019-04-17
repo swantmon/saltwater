@@ -59,7 +59,6 @@ namespace Stereo
         bool m_idx_Keyf_Curt, m_idx_Keyf_Last; // To judge the current & last keyframes are exist or not.
 
 
-
         //===OLD===
 
 

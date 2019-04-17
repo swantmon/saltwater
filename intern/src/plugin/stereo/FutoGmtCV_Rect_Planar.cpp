@@ -6,6 +6,8 @@
 
 namespace // No specific namespace => Only allowed to use in this page.
 {
+    #define TileSize 16
+
     int DivUp(int TotalShaderCount, int WorkGroupSize)
     {
         return (TotalShaderCount + WorkGroupSize - 1) / WorkGroupSize;
@@ -20,7 +22,7 @@ namespace FutoGmtCV
         std::stringstream DefineStream;
 
         DefineStream
-            << "#define TILE_SIZE_2D " << 16 << " \n"; // It is suggested to use 16 for 2D image (based on experience).
+            << "#define TILE_SIZE_2D " << TileSize << " \n"; // It is suggested to use 16 for 2D image (based on experience).
 
         std::string DefineString = DefineStream.str();
 

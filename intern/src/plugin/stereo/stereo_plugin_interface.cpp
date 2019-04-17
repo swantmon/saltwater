@@ -86,7 +86,7 @@ namespace Stereo
         }
         else // Both current & last keyframes exist. -> Processing -> Free last keyframe.
         {
-            //---Epipolarization---
+            //---Rectification---
             FutoGmtCV::FutoImg RectImg_Curt, RectImg_Last;
             FutoGmtCV::PlanarRect PlanarRectifier = FutoGmtCV::PlanarRect();
 
@@ -306,7 +306,7 @@ namespace Stereo
 
 
 
-        //---OLD---
+        //---OLD: For LibSGM---
         m_RectImgSize = Core::CProgramParameters::GetInstance().Get("mr:stereo:cuda_image_size", glm::ivec2(855, 533));
         m_DisparityCount = Core::CProgramParameters::GetInstance().Get("mr:stereo:disparity_count", 128);
 
