@@ -26,7 +26,8 @@ namespace FutoGmtCV
     private:
         void cal_K_Rect(const cv::Mat& K_Orig_B, const cv::Mat& K_Orig_M);
         void cal_R_Rect(const cv::Mat& PC_Orig_B, const cv::Mat& PC_Orig_M, const cv::Mat& R_Orig_B);
-        void cal_P_Rect(const cv::Mat& PC_Orig_B, const cv::Mat& PC_Orig_M);
+        void cal_PC_Rect(const cv::Mat& PC_Orig_B, const cv::Mat& PC_Orig_M);
+        void cal_P_Rect();
         void cal_H(const cv::Mat& P_Orig_B, const cv::Mat& P_Orig_M);
 
         void cal_Drift(cv::Mat& CenterDrift, const cv::Size& ImgSize_Ori);
@@ -40,9 +41,10 @@ namespace FutoGmtCV
 
     //---Members---
     private:
-        cv::Mat m_Img_RectB, m_Img_RectM;
+        cv::Mat m_Img_Rect_B, m_Img_Rect_M; // Rectified Images
         cv::Mat m_K_Rect_B, m_K_Rect_M; // Camera mtx of Rectified Images
         cv::Mat m_R_Rect; // Rotation mtx of Rectified Images (World -> Image)
+        cv::Mat m_PC_Rect_B, m_PC_Rect_M; // Projection Center of Rectified Images
         cv::Mat m_P_Rect_B, m_P_Rect_M; // Perspective Projection mtx of Rectified Images (World -> Image)
         cv::Mat m_Homo_B, m_Homo_M; // Homography (Original -> Rectified)
 

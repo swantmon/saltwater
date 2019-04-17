@@ -3,12 +3,15 @@
 
 #include "engine/core/core_plugin_manager.h"
 
-#include "base/base_include_glm.h"
+#include "base/base_include_glm.h" // Some warnings appears when directly #include glm 
 
 #include <vector>
 #include <memory>
 
-#include "plugin\stereo\stereo_futogmtcv.h"
+#include "plugin\stereo\FutoGmtCV_Img.h"
+#include "plugin\stereo\FutoGmtCV_Rect_Planar.h"
+
+#include "opencv2/opencv.hpp" 
 
 namespace Stereo
 {
@@ -42,23 +45,26 @@ namespace Stereo
 
     private:
         //---Inputs from plugin_slam---
-        glm::ivec2 m_ImageSize;
+        float m_FrameResolution;
+        glm::ivec2 m_OrigImgSize; // Size of original image
 
-        glm::mat3 m_Cam; // Camera matrix of each frame.
-        glm::mat3 m_Rot; // Rotation matrix of each frame. (Image -> World for Computer Graphics)
-        glm::vec3 m_PC; // Camera position (Projection Center) vector.
+        //---Keyframe---
+        FutoGmtCV::FutoImg m_Keyframe_Curt, m_Keyframe_Last; // Only compute 2 frames first. -> In the future, I will modify if it needs to compute more images at once.
+
+        //---Keyframe Selection---
+        std::size_t m_Cdt_Keyf_MaxNum; // Maximal keyframes for calculation once
+        float m_Cdt_Keyf_BaseLineL; // Keyframe Selection: BaseLine Condition. Unit is meter.
+
+        //---Keyframe Status---
+        bool m_idx_Keyf_Curt, m_idx_Keyf_Last; // To judge the current & last keyframes are exist or not.
 
 
 
+        //===OLD===
 
-        FutoGmtCV Keyframe_Curt, Keyframe_Last; // Only compute 2 frames first. -> In the future, I will modify if it needs to compute more images at once.
-        bool Idx_Keyf_Curt, Idx_Keyf_Last; // Instead, using config to control.
-
-        std::size_t Cdt_Keyf_MaxNum = 2; // Maximal images for calculation once
-        float Cdt_Keyf_BaseLineL = 0.03; // Keyframe Selection: BaseLine Condition. Unit is meter.
 
         std::unique_ptr<sgm::StereoSGM> m_pStereoMatcherCUDA;
-        glm::ivec2 m_RectImageSize;
+        glm::ivec2 m_RectImgSize;
         int m_DisparityCount;
 
         
