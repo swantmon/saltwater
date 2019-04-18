@@ -269,7 +269,7 @@ namespace MR
         Gfx::CShaderPtr m_PointCloudVSPtr;
         Gfx::CShaderPtr m_PointCloudGSPtr;
         Gfx::CShaderPtr m_PointCloudFSPtr;
-        Gfx::CShaderPtr m_PointsFullCSPtr;
+        Gfx::CShaderPtr m_GatherVoxelsCSPtr;
 
         Gfx::CShaderPtr m_ClearAtomicCountersCSPtr;
 

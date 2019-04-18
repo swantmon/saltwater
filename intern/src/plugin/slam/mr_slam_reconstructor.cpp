@@ -413,7 +413,7 @@ namespace MR
         m_PointCloudVSPtr = 0;
         m_PointCloudGSPtr = 0;
         m_PointCloudFSPtr = 0;
-        m_PointsFullCSPtr = 0;
+        m_GatherVoxelsCSPtr = 0;
         m_FillIndirectBufferCSPtr = 0;
 
         m_FullVolumePtr = 0;
@@ -500,7 +500,7 @@ namespace MR
         m_PointCloudVSPtr          = ShaderManager::CompileVS("../../plugins/slam/scalable/rasterization/vs_rootgrid.glsl"             , "main", DefineString.c_str());
         m_PointCloudGSPtr          = ShaderManager::CompileGS("../../plugins/slam/scalable/rasterization/gs_rootgrid.glsl"             , "main", DefineString.c_str());
         m_PointCloudFSPtr          = ShaderManager::CompilePS("../../plugins/slam/scalable/rasterization/fs_rootgrid.glsl"             , "main", DefineString.c_str());
-        m_PointsFullCSPtr          = ShaderManager::CompileCS("../../plugins/slam/scalable/rasterization/cs_gather_full.glsl"          , "main", DefineString.c_str());
+        m_GatherVoxelsCSPtr        = ShaderManager::CompileCS("../../plugins/slam/scalable/rasterization/cs_gather_voxels.glsl"        , "main", DefineString.c_str());
         m_IntegrateRootGridCSPtr   = ShaderManager::CompileCS("../../plugins/slam/scalable/integration/cs_integrate_rootgrid.glsl"     , "main", DefineString.c_str());
         m_IntegrateLevel1GridCSPtr = ShaderManager::CompileCS("../../plugins/slam/scalable/integration/cs_integrate_level1grid.glsl"   , "main", DefineString.c_str());
         m_IntegrateTSDFCSPtr       = ShaderManager::CompileCS("../../plugins/slam/scalable/integration/cs_integrate_tsdf.glsl"         , "main", DefineString.c_str());
@@ -692,7 +692,7 @@ namespace MR
         ContextManager::SetShaderGS(m_PointCloudGSPtr);
         ContextManager::SetShaderPS(m_PointCloudFSPtr);
 
-        ContextManager::SetShaderCS(m_PointsFullCSPtr);
+        ContextManager::SetShaderCS(m_GatherVoxelsCSPtr);
 
         if (m_UseConservativeRasterization)
         {

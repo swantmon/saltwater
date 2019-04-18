@@ -1,6 +1,6 @@
 
-#ifndef __INCLUDE_CS_GATHER_GATHER_FULL_GLSL__
-#define __INCLUDE_CS_GATHER_GATHER_FULL_GLSL__
+#ifndef __INCLUDE_CS_GATHER_VOXELS_GLSL__
+#define __INCLUDE_CS_GATHER_VOXELS_GLSL__
 
 #include "../../plugins/slam/scalable/common_scalable.glsl"
 #include "../../plugins/slam/scalable/common_indirect.glsl"
@@ -65,4 +65,4 @@ void main()
     }
 }
 
-#endif // __INCLUDE_CS_GATHER_GATHER_FULL_GLSL__
+#endif // __INCLUDE_CS_GATHER_VOXELS_GLSL__
