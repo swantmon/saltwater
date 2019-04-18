@@ -10,29 +10,29 @@ namespace FutoGmtCV
     }
 
     FutoImg::FutoImg(cv::Mat& Img_Input)
-        : Img_RGB(Img_Input)
+        : m_Img(Img_Input)
     {
     }
 
     FutoImg::FutoImg(cv::Mat& Img_Input, cv::Mat P)
-        : Img_RGB(Img_Input),
-          P_mtx(P)
+        : m_Img(Img_Input),
+          m_P_mtx(P)
     {
         // Derive K, R, T from P
 
     }
     FutoImg::FutoImg(cv::Mat& Img_Input, cv::Mat K, cv::Mat R, cv::Mat PC)
-        : Img_RGB(Img_Input),
-          K_mtx(K),
-          Rot_mtx(R), 
-          PC_vec(PC)
+        : m_Img(Img_Input),
+          m_Cam_mtx(K),
+          m_Rot_mtx(R), 
+          m_PC_vec(PC)
     {
         cv::Mat Transform_mtx(3, 4, CV_32F);
-        Rot_mtx.colRange(0, 3).copyTo(Transform_mtx.colRange(0, 3));
-        cv::Mat Trans_vec = -Rot_mtx * PC;
+        m_Rot_mtx.colRange(0, 3).copyTo(Transform_mtx.colRange(0, 3));
+        cv::Mat Trans_vec = -m_Rot_mtx * PC;
         Trans_vec.col(0).copyTo(Transform_mtx.col(3));
 
-        P_mtx = K_mtx * Transform_mtx;
+        m_P_mtx = m_Cam_mtx * Transform_mtx;
     }
 
     FutoImg::~FutoImg()
@@ -42,50 +42,50 @@ namespace FutoGmtCV
     //---Set Functions---
     void FutoImg::set_Cam(cv::Mat& K_Input)
     {
-        K_mtx = K_Input;
+        m_Cam_mtx = K_Input;
     }
 
     void FutoImg::set_Rot(cv::Mat& R_Input)
     {
-        Rot_mtx = R_Input;
+        m_Rot_mtx = R_Input;
     }
 
     void FutoImg::set_PC(cv::Mat& PC_Input)
     {
-        PC_vec = PC_Input;
+        m_PC_vec = PC_Input;
     }
 
 
     void FutoImg::set_PPM(cv::Mat P_Input)
     {
-        P_mtx = P_Input; // P_mtx = K_mtx * [Rot_mtx | Trans_vec] = K_mtx * [Rot_mtx | -Rot_mtx * PC_vec]
+        m_P_mtx = P_Input; // P_mtx = K_mtx * [Rot_mtx | Trans_vec] = K_mtx * [Rot_mtx | -Rot_mtx * PC_vec]
     }
 
 
     //---Get Function---
     cv::Mat FutoImg::get_Img() const
     {
-        return Img_RGB;
+        return m_Img;
     }
 
     cv::Mat FutoImg::get_Cam() const
     {
-        return K_mtx;
+        return m_Cam_mtx;
     }
 
     cv::Mat FutoImg::get_Rot() const
     {
-        return Rot_mtx;
+        return m_Rot_mtx;
     }
 
     cv::Mat FutoImg::get_PC() const
     {
-        return PC_vec;
+        return m_PC_vec;
     }
 
     cv::Mat FutoImg::get_PPM() const
     {
-        return P_mtx;
+        return m_P_mtx;
     }
 
 

@@ -41,18 +41,20 @@ namespace FutoGmtCV
 
     //---Members---
     private:
+        //---Rectified Image---
         cv::Mat m_Img_Rect_B, m_Img_Rect_M; // Rectified Images
+        cv::Point m_ImgCnr_Rect_UL, m_ImgCnr_Rect_DR;
+        cv::Size m_ImgSize_Rect;
+
+        //---Orientations---
         cv::Mat m_K_Rect_B, m_K_Rect_M; // Camera mtx of Rectified Images
         cv::Mat m_R_Rect; // Rotation mtx of Rectified Images (World -> Image)
         cv::Mat m_PC_Rect_B, m_PC_Rect_M; // Projection Center of Rectified Images
         cv::Mat m_P_Rect_B, m_P_Rect_M; // Perspective Projection mtx of Rectified Images (World -> Image)
         cv::Mat m_Homo_B, m_Homo_M; // Homography (Original -> Rectified)
 
-        cv::Point m_ImgCnr_Rect_UL, m_ImgCnr_Rect_DR;
-        cv::Size m_ImgSize_Rect;
-
         //---GPU Managers---
-        Gfx::CShaderPtr m_CSPtr_PlanarRecr;
+        Gfx::CShaderPtr m_CSPtr_PlanarRect;
         Gfx::CTexturePtr m_TexturePtr_OrigImg;
         Gfx::CTexturePtr m_TexturePtr_RectImg;
         Gfx::CBufferPtr m_BufferPtr_Homography;

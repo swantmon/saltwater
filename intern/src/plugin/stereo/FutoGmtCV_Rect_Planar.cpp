@@ -6,7 +6,8 @@
 
 namespace // No specific namespace => Only allowed to use in this page.
 {
-    #define TileSize 16
+    //---Definition for GPU Parallel Processing---
+    #define TileSize_2D 16
 
     int DivUp(int TotalShaderCount, int WorkGroupSize)
     {
@@ -19,15 +20,17 @@ namespace FutoGmtCV
     //---Constructors & Destructor---
     PlanarRect::PlanarRect()
     {
+        //---Initialize Shader Manager---
         std::stringstream DefineStream;
 
         DefineStream
-            << "#define TILE_SIZE_2D " << TileSize << " \n"; // It is suggested to use 16 for 2D image (based on experience).
+            << "#define TILE_SIZE_2D " << TileSize_2D << " \n"; // 16 for work group size is suggested for 2D image (based on experience).
 
         std::string DefineString = DefineStream.str();
 
-        m_CSPtr_PlanarRecr = Gfx::ShaderManager::CompileCS("../../plugins/stereo/cs_Rect_Planar.glsl", "main", DefineString.c_str());
+        m_CSPtr_PlanarRect = Gfx::ShaderManager::CompileCS("../../plugins/stereo/cs_Rect_Planar.glsl", "main", DefineString.c_str());
 
+        //---Initialize Buffer Manager---
         Gfx::SBufferDescriptor BufferDesc = {};
 
         BufferDesc.m_Stride = 0;
@@ -44,7 +47,8 @@ namespace FutoGmtCV
 
     PlanarRect::~PlanarRect()
     {
-        m_CSPtr_PlanarRecr = nullptr;
+        //---Release Manager---
+        m_CSPtr_PlanarRect = nullptr;
         m_TexturePtr_OrigImg = nullptr;
         m_TexturePtr_RectImg = nullptr;
     }
@@ -52,16 +56,15 @@ namespace FutoGmtCV
     //---Execution Functions---
     void PlanarRect::execute(FutoImg& Img_Rect_B, FutoImg& Img_Rect_M, const FutoImg& Img_Orig_B, const FutoImg& Img_Orig_M)
     {
-        //---Step 1. Compute Orientations of Rectified Images---
+        //---Step 1. Compute Orientations (Rectified Images) & Homography (from Original to Rectified)---
         cal_K_Rect(Img_Orig_B.get_Cam(), Img_Orig_M.get_Cam());
         cal_R_Rect(Img_Orig_B.get_PC(), Img_Orig_M.get_PC(), Img_Orig_B.get_Rot());
         cal_PC_Rect(Img_Orig_B.get_PC(), Img_Orig_M.get_PC());
         cal_P_Rect();
 
-        //---Step 2. Compute the Homography from Original to Rectified---
         cal_H(Img_Orig_B.get_PPM(), Img_Orig_M.get_PPM());
 
-        //---Step 3. Center Rectified Images---
+        //---Step 2. Center Rectified Images---
         cv::Mat Drift_B = cv::Mat::zeros(3, 1, CV_32F);
         cv::Mat Drift_M = cv::Mat::zeros(3, 1, CV_32F);
 
@@ -74,11 +77,11 @@ namespace FutoGmtCV
         imp_Drift_K(Drift_B, Drift_M);
         cal_H(Img_Orig_B.get_PPM(), Img_Orig_M.get_PPM());
 
-        //---Step 4. Generate Rectified Images---
+        //---Step 3. Generate Rectified Images---
         cv::Point ImgCnr_RectB_UL, ImgCnr_RectB_DR, ImgCnr_RectM_UL, ImgCnr_RectM_DR;
 
         cal_RectImgBound(ImgCnr_RectB_UL, ImgCnr_RectB_DR, Img_Orig_B.get_Img().size(), 0);
-        cal_RectImgBound(ImgCnr_RectM_UL, ImgCnr_RectM_DR, Img_Orig_B.get_Img().size(), 1);
+        cal_RectImgBound(ImgCnr_RectM_UL, ImgCnr_RectM_DR, Img_Orig_M.get_Img().size(), 1);
 
         determ_RectImgSize(ImgCnr_RectB_UL, ImgCnr_RectB_DR, ImgCnr_RectM_UL, ImgCnr_RectM_DR);
 
@@ -149,7 +152,7 @@ namespace FutoGmtCV
         //---Calculate the Homography---
         m_Homo_B = m_P_Rect_B * P_Orig_B.inv(cv::DECOMP_SVD);
         m_Homo_M = m_P_Rect_M * P_Orig_M.inv(cv::DECOMP_SVD);
-        //---Another Homography Transformation used in Fusiello's Code. -> I do not like it because it is not reasonable but seems to be more efficient without much different.
+        //---Another Homography Transformation used in Fusiello's Code. -> Simplfying to enhance efficiency.
         /*
         //H_B = P_Rect_B.colRange(0, 3) * m_Img_Orig_B.get_P_mtx().colRange(0, 3).inv();
         //H_M = P_Rect_M.colRange(0, 3) * m_Img_Orig_M.get_P_mtx().colRange(0, 3).inv();
@@ -185,9 +188,9 @@ namespace FutoGmtCV
         cv::Mat H;
         switch (Which_Img)
         {
-        case 0: m_Homo_B.copyTo(H);
+        case 0: H = m_Homo_B;
             break;
-        case 1: m_Homo_M.copyTo(H);
+        case 1: H = m_Homo_M;
             break;
         }
 
@@ -251,7 +254,7 @@ namespace FutoGmtCV
         TextureDescriptor.m_Access = Gfx::CTexture::EAccess::CPUWrite;
         TextureDescriptor.m_Usage = Gfx::CTexture::EUsage::GPUReadWrite;
         TextureDescriptor.m_Semantic = Gfx::CTexture::UndefinedSemantic;
-        TextureDescriptor.m_Format = Gfx::CTexture::R8_UBYTE; // 1 channel with 8-bit 
+        TextureDescriptor.m_Format = Gfx::CTexture::R8_UBYTE; // 1 channel with 8-bit. -> R8G8B8 = 3 channels with 8-bit.
 
         m_TexturePtr_RectImg = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
     }
@@ -261,9 +264,9 @@ namespace FutoGmtCV
         cv::Mat H;
         switch (Which_Img)
         {
-        case 0: m_Homo_B.copyTo(H);
+        case 0: H = m_Homo_B;
             break;
-        case 1: m_Homo_M.copyTo(H);
+        case 1: H = m_Homo_M;
             break;
         }
 
@@ -287,24 +290,24 @@ namespace FutoGmtCV
 
         m_TexturePtr_OrigImg = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
 
-        Gfx::ContextManager::SetShaderCS(m_CSPtr_PlanarRecr);
+        Gfx::ContextManager::SetShaderCS(m_CSPtr_PlanarRect);
         Gfx::ContextManager::SetImageTexture(0, m_TexturePtr_OrigImg);
         Gfx::ContextManager::SetImageTexture(1, m_TexturePtr_RectImg);
         Gfx::ContextManager::SetConstantBuffer(0, m_BufferPtr_Homography);
 
         Gfx::BufferManager::UploadBufferData(m_BufferPtr_Homography, H.data, 0, sizeof(float) * H.rows * H.cols);
 
-        const int WorkGroupsX = DivUp(m_ImgSize_Rect.width, 16);
-        const int WorkGroupsY = DivUp(m_ImgSize_Rect.height, 16);
+        const int WorkGroupsX = DivUp(m_ImgSize_Rect.width, TileSize_2D);
+        const int WorkGroupsY = DivUp(m_ImgSize_Rect.height, TileSize_2D);
 
         Gfx::ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
 
         Gfx::ContextManager::ResetShaderCS();
 
-        cv::Mat GPUResult(m_TexturePtr_RectImg->GetNumberOfPixelsV(), m_TexturePtr_RectImg->GetNumberOfPixelsU(), CV_8UC1);
-        Gfx::TextureManager::CopyTextureToCPU(m_TexturePtr_RectImg, reinterpret_cast<char*>(GPUResult.data));
+        cv::Mat Img_Rect(m_TexturePtr_RectImg->GetNumberOfPixelsV(), m_TexturePtr_RectImg->GetNumberOfPixelsU(), CV_8UC1);
+        Gfx::TextureManager::CopyTextureToCPU(m_TexturePtr_RectImg, reinterpret_cast<char*>(Img_Rect.data));
 
-        cv::imshow("GPU Result", GPUResult);
+        cv::imshow("RectImg by GPU", Img_Rect);
 
         Gfx::Performance::EndEvent();
 
