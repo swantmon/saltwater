@@ -20,6 +20,12 @@ namespace FutoGmtCV
     //---Constructors & Destructor---
     PlanarRect::PlanarRect()
     {
+    }
+
+    PlanarRect::PlanarRect(const cv::Size& OrigImgSize, const cv::Size& RectImgSize)
+        : m_ImgSize_Orig(OrigImgSize),
+          m_ImgSize_Rect(RectImgSize)
+    {
         //---Initialize Shader Manager---
         std::stringstream DefineStream;
 
@@ -42,6 +48,52 @@ namespace FutoGmtCV
         BufferDesc.m_pClassKey = 0;
 
         m_BufferPtr_Homography = Gfx::BufferManager::CreateBuffer(BufferDesc);
+
+        //---Initialize Input Texture Manager---
+        Gfx::STextureDescriptor TextureDescriptor_In = {};
+
+        TextureDescriptor_In.m_NumberOfPixelsU = m_ImgSize_Orig.width;
+        TextureDescriptor_In.m_NumberOfPixelsV = m_ImgSize_Orig.height;
+        TextureDescriptor_In.m_NumberOfPixelsW = 1;
+        TextureDescriptor_In.m_NumberOfMipMaps = 1;
+        TextureDescriptor_In.m_NumberOfTextures = 1;
+        TextureDescriptor_In.m_Binding = Gfx::CTexture::ShaderResource;
+        TextureDescriptor_In.m_Access = Gfx::CTexture::EAccess::CPURead;
+        TextureDescriptor_In.m_Usage = Gfx::CTexture::EUsage::GPUToCPU;
+        TextureDescriptor_In.m_Semantic = Gfx::CTexture::UndefinedSemantic;
+        TextureDescriptor_In.m_Format = Gfx::CTexture::R8_UBYTE; // 1 channel with 8-bit. -> R8G8B8 = 3 channels with 8-bit.
+
+        m_TexturePtr_OrigImg = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_In);
+
+        //---Initialize Output Texture Manager---
+        Gfx::STextureDescriptor TextureDescriptor_Out = {};
+
+        TextureDescriptor_Out.m_NumberOfPixelsU = m_ImgSize_Rect.width;
+        TextureDescriptor_Out.m_NumberOfPixelsV = m_ImgSize_Rect.height;
+        TextureDescriptor_Out.m_NumberOfPixelsW = 1;
+        TextureDescriptor_Out.m_NumberOfMipMaps = 1;
+        TextureDescriptor_Out.m_NumberOfTextures = 1;
+        TextureDescriptor_Out.m_Binding = Gfx::CTexture::ShaderResource;
+        TextureDescriptor_Out.m_Access = Gfx::CTexture::EAccess::CPUWrite;
+        TextureDescriptor_Out.m_Usage = Gfx::CTexture::EUsage::GPUReadWrite;
+        TextureDescriptor_Out.m_Semantic = Gfx::CTexture::UndefinedSemantic;
+        TextureDescriptor_Out.m_Format = Gfx::CTexture::R8_UBYTE; // 1 channel with 8-bit. -> R8G8B8 = 3 channels with 8-bit.
+
+        m_TexturePtr_RectImg = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_Out);
+
+        //---Initialize Rectified Image @ CPU---
+        m_Img_Rect_B = cv::Mat::zeros(m_ImgSize_Rect, CV_8UC1);
+        m_Img_Rect_M = cv::Mat::zeros(m_ImgSize_Rect, CV_8UC1);
+
+        //---Initialize Look-Up Table @ CPU---
+        m_Table_Bx_Orig2Rect = cv::Mat::zeros(m_ImgSize_Orig, CV_8UC1);
+        m_Table_By_Orig2Rect = cv::Mat::zeros(m_ImgSize_Orig, CV_8UC1);
+        m_Table_Mx_Orig2Rect = cv::Mat::zeros(m_ImgSize_Orig, CV_8UC1);
+        m_Table_My_Orig2Rect = cv::Mat::zeros(m_ImgSize_Orig, CV_8UC1);
+        m_Table_Bx_Rect2Orig = cv::Mat::zeros(m_ImgSize_Rect, CV_8UC1);
+        m_Table_By_Rect2Orig = cv::Mat::zeros(m_ImgSize_Rect, CV_8UC1);
+        m_Table_Mx_Rect2Orig = cv::Mat::zeros(m_ImgSize_Rect, CV_8UC1);
+        m_Table_My_Rect2Orig = cv::Mat::zeros(m_ImgSize_Rect, CV_8UC1);
     }
 
 
@@ -56,7 +108,11 @@ namespace FutoGmtCV
     //---Execution Functions---
     void PlanarRect::execute(FutoImg& Img_Rect_B, FutoImg& Img_Rect_M, const FutoImg& Img_Orig_B, const FutoImg& Img_Orig_M)
     {
-        //---Step 1. Compute Orientations (Rectified Images) & Homography (from Original to Rectified)---
+        //---Step 0. Check the size of Original Image Size---
+        assert(Img_Orig_B.get_Img().size() == m_ImgSize_Orig); 
+        assert(Img_Orig_M.get_Img().size() == m_ImgSize_Orig); 
+
+        //---Step 1. Calculate Orientations of Rectified Images & Homography from Original to Rectified---
         cal_K_Rect(Img_Orig_B.get_Cam(), Img_Orig_M.get_Cam());
         cal_R_Rect(Img_Orig_B.get_PC(), Img_Orig_M.get_PC(), Img_Orig_B.get_Rot());
         cal_PC_Rect(Img_Orig_B.get_PC(), Img_Orig_M.get_PC());
@@ -75,16 +131,18 @@ namespace FutoGmtCV
         Drift_M.ptr<float>(1)[0] = Drift_y;
 
         imp_Drift_K(Drift_B, Drift_M);
-        cal_H(Img_Orig_B.get_PPM(), Img_Orig_M.get_PPM());
 
-        //---Step 3. Generate Rectified Images---
+        cal_H(Img_Orig_B.get_PPM(), Img_Orig_M.get_PPM()); // Update Homography because Rectified Camera mtx has changed.
+
+        //---Generate Rectified Images & Look-Up Table (Original <-> Rectified)---
         cv::Point ImgCnr_RectB_UL, ImgCnr_RectB_DR, ImgCnr_RectM_UL, ImgCnr_RectM_DR;
 
         cal_RectImgBound(ImgCnr_RectB_UL, ImgCnr_RectB_DR, Img_Orig_B.get_Img().size(), 0);
         cal_RectImgBound(ImgCnr_RectM_UL, ImgCnr_RectM_DR, Img_Orig_M.get_Img().size(), 1);
 
-        determ_RectImgSize(ImgCnr_RectB_UL, ImgCnr_RectB_DR, ImgCnr_RectM_UL, ImgCnr_RectM_DR);
+        determ_RectImgCnr(ImgCnr_RectB_UL, ImgCnr_RectB_DR, ImgCnr_RectM_UL, ImgCnr_RectM_DR);
 
+        //---Step 3. Build Look-Up Table for Pixel-Wise Transformation from Rectified to Original---
         genrt_RectImg(Img_Orig_B.get_Img(), 0);
         genrt_RectImg(Img_Orig_M.get_Img(), 1);
 
@@ -228,40 +286,18 @@ namespace FutoGmtCV
             std::ceil(std::max(std::max(ImgCnr_Orig2Rect_UL.ptr<float>(1)[0], ImgCnr_Orig2Rect_UR.ptr<float>(1)[0]), std::max(ImgCnr_Orig2Rect_DL.ptr<float>(1)[0], ImgCnr_Orig2Rect_DR.ptr<float>(1)[0])));
     }
 
-    void PlanarRect::determ_RectImgSize(const cv::Point& ImgCnr_RectB_UL, const cv::Point& ImgCnr_RectB_DR, const cv::Point& ImgCnr_RectM_UL, const cv::Point& ImgCnr_RectM_DR)
+    void PlanarRect::determ_RectImgCnr(const cv::Point& ImgCnr_RectB_UL, const cv::Point& ImgCnr_RectB_DR, const cv::Point& ImgCnr_RectM_UL, const cv::Point& ImgCnr_RectM_DR)
     {
         //---Calculate the common boundary of both rectified images---
         m_ImgCnr_Rect_UL.x = std::min(ImgCnr_RectB_UL.x, ImgCnr_RectM_UL.x);
         m_ImgCnr_Rect_UL.y = std::min(ImgCnr_RectB_UL.y, ImgCnr_RectM_UL.y);
         m_ImgCnr_Rect_DR.x = std::max(ImgCnr_RectB_DR.x, ImgCnr_RectM_DR.x);
         m_ImgCnr_Rect_DR.y = std::max(ImgCnr_RectB_DR.y, ImgCnr_RectM_DR.y);
-
-        //---Determine the size of both rectified images---
-        int RectW = m_ImgCnr_Rect_DR.x - m_ImgCnr_Rect_UL.x;
-        int RectH = m_ImgCnr_Rect_DR.y - m_ImgCnr_Rect_UL.y;
-
-        m_ImgSize_Rect = cv::Size(RectW, RectH);
-        
-        //---Determine TextureDescriptor for GPU Output---
-        Gfx::STextureDescriptor TextureDescriptor = {};
-
-        TextureDescriptor.m_NumberOfPixelsU = m_ImgSize_Rect.width;
-        TextureDescriptor.m_NumberOfPixelsV = m_ImgSize_Rect.height;
-        TextureDescriptor.m_NumberOfPixelsW = 1;
-        TextureDescriptor.m_NumberOfMipMaps = 1;
-        TextureDescriptor.m_NumberOfTextures = 1;
-        TextureDescriptor.m_Binding = Gfx::CTexture::ShaderResource;
-        TextureDescriptor.m_Access = Gfx::CTexture::EAccess::CPUWrite;
-        TextureDescriptor.m_Usage = Gfx::CTexture::EUsage::GPUReadWrite;
-        TextureDescriptor.m_Semantic = Gfx::CTexture::UndefinedSemantic;
-        TextureDescriptor.m_Format = Gfx::CTexture::R8_UBYTE; // 1 channel with 8-bit. -> R8G8B8 = 3 channels with 8-bit.
-
-        m_TexturePtr_RectImg = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
     }
 
     void PlanarRect::genrt_RectImg(const cv::Mat& Img_Orig, const int Which_Img)
     {
-        cv::Mat H;
+        cv::Mat H(3, 3, CV_32F);
         switch (Which_Img)
         {
         case 0: H = m_Homo_B;
@@ -273,7 +309,7 @@ namespace FutoGmtCV
         //---Compute @ GPU---
 
         Gfx::Performance::BeginEvent("Planar Rectification");
-
+        /*
         Gfx::STextureDescriptor TextureDescriptor = {};
 
         TextureDescriptor.m_NumberOfPixelsU = Img_Orig.cols;
@@ -286,16 +322,18 @@ namespace FutoGmtCV
         TextureDescriptor.m_Usage = Gfx::CTexture::EUsage::GPUToCPU;
         TextureDescriptor.m_Semantic = Gfx::CTexture::UndefinedSemantic;
         TextureDescriptor.m_Format = Gfx::CTexture::R8_UBYTE;
+        */
         TextureDescriptor.m_pPixels = Img_Orig.data;
 
-        m_TexturePtr_OrigImg = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
+        //m_TexturePtr_OrigImg = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
+
+        Gfx::BufferManager::UploadBufferData(m_BufferPtr_Homography, H.data, 0, sizeof(float) * H.rows * H.cols);
 
         Gfx::ContextManager::SetShaderCS(m_CSPtr_PlanarRect);
         Gfx::ContextManager::SetImageTexture(0, m_TexturePtr_OrigImg);
         Gfx::ContextManager::SetImageTexture(1, m_TexturePtr_RectImg);
         Gfx::ContextManager::SetConstantBuffer(0, m_BufferPtr_Homography);
 
-        Gfx::BufferManager::UploadBufferData(m_BufferPtr_Homography, H.data, 0, sizeof(float) * H.rows * H.cols);
 
         const int WorkGroupsX = DivUp(m_ImgSize_Rect.width, TileSize_2D);
         const int WorkGroupsY = DivUp(m_ImgSize_Rect.height, TileSize_2D);

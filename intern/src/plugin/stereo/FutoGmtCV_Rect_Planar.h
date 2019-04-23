@@ -16,6 +16,7 @@ namespace FutoGmtCV
     //---Constructor & Destructor---
     public:
         PlanarRect();
+        PlanarRect(const cv::Size& OrigImgSize, const cv::Size& RectImgSize);
         ~PlanarRect();
 
     //---Execution Functions---
@@ -34,7 +35,7 @@ namespace FutoGmtCV
         void imp_Drift_K(const cv::Mat& Drift_B, const cv::Mat& Drift_Mt);
 
         void cal_RectImgBound(cv::Point& ImgCnr_Rect_UL, cv::Point& ImgCnr_Rect_DR, const cv::Size& ImgSize_Orig, const int Which_Img = 0);
-        void determ_RectImgSize(const cv::Point& ImgCnr_RectB_UL, const cv::Point& ImgCnr_RectB_DR, const cv::Point& ImgCnr_RectM_UL, const cv::Point& ImgCnr_RectM_DR);
+        void determ_RectImgCnr(const cv::Point& ImgCnr_RectB_UL, const cv::Point& ImgCnr_RectB_DR, const cv::Point& ImgCnr_RectM_UL, const cv::Point& ImgCnr_RectM_DR);
         void genrt_RectImg(const cv::Mat& Img_Orig, const int Which_Img = 0);
 
         void get_RectImg(FutoImg& Img_Rect, const int Which_Img = 0);
@@ -43,8 +44,11 @@ namespace FutoGmtCV
     private:
         //---Rectified Image---
         cv::Mat m_Img_Rect_B, m_Img_Rect_M; // Rectified Images
+        cv::Size m_ImgSize_Orig, m_ImgSize_Rect;
+
         cv::Point m_ImgCnr_Rect_UL, m_ImgCnr_Rect_DR;
-        cv::Size m_ImgSize_Rect;
+        cv::Mat m_Table_Bx_Orig2Rect, m_Table_By_Orig2Rect, m_Table_Mx_Orig2Rect, m_Table_My_Orig2Rect; // Look-Up Table from Original to Rectified
+        cv::Mat m_Table_Bx_Rect2Orig, m_Table_By_Rect2Orig, m_Table_Mx_Rect2Orig, m_Table_My_Rect2Orig; // Look-Up Table from Rectified to Original
 
         //---Orientations---
         cv::Mat m_K_Rect_B, m_K_Rect_M; // Camera mtx of Rectified Images

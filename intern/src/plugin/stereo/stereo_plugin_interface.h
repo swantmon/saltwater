@@ -46,7 +46,7 @@ namespace Stereo
     private:
         //---Inputs from plugin_slam---
         float m_FrameResolution;
-        glm::ivec2 m_OrigImgSize; // Size of original image
+        glm::ivec2 m_OrigImgSize; // Size of original image -> x = width & y = height
 
         //---Keyframe---
         FutoGmtCV::FutoImg m_Keyframe_Curt, m_Keyframe_Last; // Only compute 2 frames first. -> In the future, I will modify if it needs to compute more images at once.
