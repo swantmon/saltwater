@@ -309,32 +309,22 @@ namespace FutoGmtCV
         //---Compute @ GPU---
 
         Gfx::Performance::BeginEvent("Planar Rectification");
-        /*
-        Gfx::STextureDescriptor TextureDescriptor = {};
 
-        TextureDescriptor.m_NumberOfPixelsU = Img_Orig.cols;
-        TextureDescriptor.m_NumberOfPixelsV = Img_Orig.rows;
-        TextureDescriptor.m_NumberOfPixelsW = 1;
-        TextureDescriptor.m_NumberOfMipMaps = 1;
-        TextureDescriptor.m_NumberOfTextures = 1;
-        TextureDescriptor.m_Binding = Gfx::CTexture::ShaderResource;
-        TextureDescriptor.m_Access = Gfx::CTexture::EAccess::CPURead;
-        TextureDescriptor.m_Usage = Gfx::CTexture::EUsage::GPUToCPU;
-        TextureDescriptor.m_Semantic = Gfx::CTexture::UndefinedSemantic;
-        TextureDescriptor.m_Format = Gfx::CTexture::R8_UBYTE;
-        */
-        TextureDescriptor.m_pPixels = Img_Orig.data;
+        //---Put OrigImg into Input Texture---
+        Base::AABB2UInt TargetRect;
+        TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_ImgSize_Orig.width, m_ImgSize_Orig.height));
+        Gfx::TextureManager::CopyToTexture2D(m_TexturePtr_OrigImg, TargetRect, m_ImgSize_Orig.width, Img_Orig.data);
 
-        //m_TexturePtr_OrigImg = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
-
+        //---Put Homography into Buffer---
         Gfx::BufferManager::UploadBufferData(m_BufferPtr_Homography, H.data, 0, sizeof(float) * H.rows * H.cols);
 
+        //---Connecting Managers (@CPU) & GLSL (@GPU)---
         Gfx::ContextManager::SetShaderCS(m_CSPtr_PlanarRect);
         Gfx::ContextManager::SetImageTexture(0, m_TexturePtr_OrigImg);
         Gfx::ContextManager::SetImageTexture(1, m_TexturePtr_RectImg);
         Gfx::ContextManager::SetConstantBuffer(0, m_BufferPtr_Homography);
 
-
+        //---Start GPU Parallel Processing---
         const int WorkGroupsX = DivUp(m_ImgSize_Rect.width, TileSize_2D);
         const int WorkGroupsY = DivUp(m_ImgSize_Rect.height, TileSize_2D);
 
