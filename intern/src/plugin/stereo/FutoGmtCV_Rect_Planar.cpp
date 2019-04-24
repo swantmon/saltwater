@@ -28,10 +28,8 @@ namespace FutoGmtCV
     {
         //---Initialize Shader Manager---
         std::stringstream DefineStream;
-
         DefineStream
             << "#define TILE_SIZE_2D " << TileSize_2D << " \n"; // 16 for work group size is suggested for 2D image (based on experience).
-
         std::string DefineString = DefineStream.str();
 
         m_CSPtr_PlanarRect = Gfx::ShaderManager::CompileCS("../../plugins/stereo/cs_Rect_Planar.glsl", "main", DefineString.c_str());
@@ -134,7 +132,7 @@ namespace FutoGmtCV
 
         cal_H(Img_Orig_B.get_PPM(), Img_Orig_M.get_PPM()); // Update Homography because Rectified Camera mtx has changed.
 
-        //---Generate Rectified Images & Look-Up Table (Original <-> Rectified)---
+        //---Step 3. Calculate the Corners of Rectified Images---
         cv::Point ImgCnr_RectB_UL, ImgCnr_RectB_DR, ImgCnr_RectM_UL, ImgCnr_RectM_DR;
 
         cal_RectImgBound(ImgCnr_RectB_UL, ImgCnr_RectB_DR, Img_Orig_B.get_Img().size(), 0);
@@ -142,7 +140,7 @@ namespace FutoGmtCV
 
         determ_RectImgCnr(ImgCnr_RectB_UL, ImgCnr_RectB_DR, ImgCnr_RectM_UL, ImgCnr_RectM_DR);
 
-        //---Step 3. Build Look-Up Table for Pixel-Wise Transformation from Rectified to Original---
+        //---Step 4. Generate Rectified Images---
         genrt_RectImg(Img_Orig_B.get_Img(), 0);
         genrt_RectImg(Img_Orig_M.get_Img(), 1);
 
