@@ -13,6 +13,14 @@ namespace // No specific namespace => Only allowed to use in this page.
     {
         return (TotalShaderCount + WorkGroupSize - 1) / WorkGroupSize;
     }
+
+    struct SHomographyTransform // Always make sure whole structure is the multiple of 4*float
+    {
+        glm::mat4 m_Homography; // Transmition unit of layout(std140) is 4*float. => mat3 is only 3*3*float, which may transmit wrong memory address.
+        glm::mat4 m_InvHomography;
+        glm::ivec2 m_RectImgConer_UL;
+        glm::ivec2 m_RectImgConer_DR;
+    };
 }
 
 namespace FutoGmtCV
@@ -32,7 +40,7 @@ namespace FutoGmtCV
             << "#define TILE_SIZE_2D " << TileSize_2D << " \n"; // 16 for work group size is suggested for 2D image (based on experience).
         std::string DefineString = DefineStream.str();
 
-        m_CSPtr_PlanarRect = Gfx::ShaderManager::CompileCS("../../plugins/stereo/cs_Rect_Planar.glsl", "main", DefineString.c_str());
+        m_PlanarRectCSPtr = Gfx::ShaderManager::CompileCS("../../plugins/stereo/cs_Rect_Planar.glsl", "main", DefineString.c_str());
 
         //---Initialize Buffer Manager---
         Gfx::SBufferDescriptor BufferDesc = {};
@@ -41,11 +49,11 @@ namespace FutoGmtCV
         BufferDesc.m_Usage = Gfx::CBuffer::GPURead;
         BufferDesc.m_Binding = Gfx::CBuffer::ConstantBuffer;
         BufferDesc.m_Access = Gfx::CBuffer::CPUWrite;
-        BufferDesc.m_NumberOfBytes = sizeof(glm::mat4);
+        BufferDesc.m_NumberOfBytes = sizeof(SHomographyTransform);
         BufferDesc.m_pBytes = nullptr;
         BufferDesc.m_pClassKey = 0;
 
-        m_BufferPtr_Homography = Gfx::BufferManager::CreateBuffer(BufferDesc);
+        m_HomographyBufferPtr = Gfx::BufferManager::CreateBuffer(BufferDesc);
 
         //---Initialize Input Texture Manager---
         Gfx::STextureDescriptor TextureDescriptor_In = {};
@@ -61,7 +69,7 @@ namespace FutoGmtCV
         TextureDescriptor_In.m_Semantic = Gfx::CTexture::UndefinedSemantic;
         TextureDescriptor_In.m_Format = Gfx::CTexture::R8_UBYTE; // 1 channel with 8-bit. -> R8G8B8 = 3 channels with 8-bit.
 
-        m_TexturePtr_OrigImg = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_In);
+        m_OrigImgTexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_In);
 
         //---Initialize Output Texture Manager---
         Gfx::STextureDescriptor TextureDescriptor_Out = {};
@@ -77,7 +85,7 @@ namespace FutoGmtCV
         TextureDescriptor_Out.m_Semantic = Gfx::CTexture::UndefinedSemantic;
         TextureDescriptor_Out.m_Format = Gfx::CTexture::R8_UBYTE; // 1 channel with 8-bit. -> R8G8B8 = 3 channels with 8-bit.
 
-        m_TexturePtr_RectImg = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_Out);
+        m_RectImgTexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_Out);
 
         //---Initialize Rectified Image @ CPU---
         m_Img_Rect_B = cv::Mat::zeros(m_ImgSize_Rect, CV_8UC1);
@@ -98,9 +106,9 @@ namespace FutoGmtCV
     PlanarRect::~PlanarRect()
     {
         //---Release Manager---
-        m_CSPtr_PlanarRect = nullptr;
-        m_TexturePtr_OrigImg = nullptr;
-        m_TexturePtr_RectImg = nullptr;
+        m_PlanarRectCSPtr = nullptr;
+        m_OrigImgTexturePtr = nullptr;
+        m_RectImgTexturePtr = nullptr;
     }
 
     //---Execution Functions---
@@ -311,16 +319,25 @@ namespace FutoGmtCV
         //---Put OrigImg into Input Texture---
         Base::AABB2UInt TargetRect;
         TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_ImgSize_Orig.width, m_ImgSize_Orig.height));
-        Gfx::TextureManager::CopyToTexture2D(m_TexturePtr_OrigImg, TargetRect, m_ImgSize_Orig.width, Img_Orig.data);
+        Gfx::TextureManager::CopyToTexture2D(m_OrigImgTexturePtr, TargetRect, m_ImgSize_Orig.width, Img_Orig.data);
 
         //---Put Homography into Buffer---
-        Gfx::BufferManager::UploadBufferData(m_BufferPtr_Homography, H.data, 0, sizeof(float) * H.rows * H.cols);
+        SHomographyTransform HomographyBuffer;
+
+        glm::mat3 Homography;
+        memcpy(&Homography, H.data, sizeof(Homography));
+        Homography = glm::transpose(Homography);
+
+        HomographyBuffer.m_Homography = glm::mat4(Homography);
+        HomographyBuffer.m_InvHomography = glm::mat4(glm::inverse(Homography));
+
+        Gfx::BufferManager::UploadBufferData(m_HomographyBufferPtr, &HomographyBuffer);
 
         //---Connecting Managers (@CPU) & GLSL (@GPU)---
-        Gfx::ContextManager::SetShaderCS(m_CSPtr_PlanarRect);
-        Gfx::ContextManager::SetImageTexture(0, m_TexturePtr_OrigImg);
-        Gfx::ContextManager::SetImageTexture(1, m_TexturePtr_RectImg);
-        Gfx::ContextManager::SetConstantBuffer(0, m_BufferPtr_Homography);
+        Gfx::ContextManager::SetShaderCS(m_PlanarRectCSPtr);
+        Gfx::ContextManager::SetImageTexture(0, m_OrigImgTexturePtr);
+        Gfx::ContextManager::SetImageTexture(1, m_RectImgTexturePtr);
+        Gfx::ContextManager::SetConstantBuffer(0, m_HomographyBufferPtr);
 
         //---Start GPU Parallel Processing---
         const int WorkGroupsX = DivUp(m_ImgSize_Rect.width, TileSize_2D);
@@ -330,8 +347,8 @@ namespace FutoGmtCV
 
         Gfx::ContextManager::ResetShaderCS();
 
-        cv::Mat Img_Rect(m_TexturePtr_RectImg->GetNumberOfPixelsV(), m_TexturePtr_RectImg->GetNumberOfPixelsU(), CV_8UC1);
-        Gfx::TextureManager::CopyTextureToCPU(m_TexturePtr_RectImg, reinterpret_cast<char*>(Img_Rect.data));
+        cv::Mat Img_Rect(m_RectImgTexturePtr->GetNumberOfPixelsV(), m_RectImgTexturePtr->GetNumberOfPixelsU(), CV_8UC1);
+        Gfx::TextureManager::CopyTextureToCPU(m_RectImgTexturePtr, reinterpret_cast<char*>(Img_Rect.data));
 
         cv::imshow("RectImg by GPU", Img_Rect);
 

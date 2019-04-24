@@ -58,10 +58,10 @@ namespace FutoGmtCV
         cv::Mat m_Homo_B, m_Homo_M; // Homography (Original -> Rectified)
 
         //---GPU Managers---
-        Gfx::CShaderPtr m_CSPtr_PlanarRect;
-        Gfx::CTexturePtr m_TexturePtr_OrigImg;
-        Gfx::CTexturePtr m_TexturePtr_RectImg;
-        Gfx::CBufferPtr m_BufferPtr_Homography;
+        Gfx::CShaderPtr m_PlanarRectCSPtr;
+        Gfx::CTexturePtr m_OrigImgTexturePtr;
+        Gfx::CTexturePtr m_RectImgTexturePtr;
+        Gfx::CBufferPtr m_HomographyBufferPtr;
     };
 
 } // FutoGmtCV
