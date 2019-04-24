@@ -330,6 +330,9 @@ namespace FutoGmtCV
 
         HomographyBuffer.m_Homography = glm::mat4(Homography);
         HomographyBuffer.m_InvHomography = glm::mat4(glm::inverse(Homography));
+        HomographyBuffer.m_RectImgConer_UL.x = m_ImgCnr_Rect_UL.x;
+        HomographyBuffer.m_RectImgConer_UL.y = m_ImgCnr_Rect_UL.y;
+
 
         Gfx::BufferManager::UploadBufferData(m_HomographyBufferPtr, &HomographyBuffer);
 
@@ -347,18 +350,21 @@ namespace FutoGmtCV
 
         Gfx::ContextManager::ResetShaderCS();
 
+        Gfx::Performance::EndEvent();
+
         cv::Mat Img_Rect(m_RectImgTexturePtr->GetNumberOfPixelsV(), m_RectImgTexturePtr->GetNumberOfPixelsU(), CV_8UC1);
         Gfx::TextureManager::CopyTextureToCPU(m_RectImgTexturePtr, reinterpret_cast<char*>(Img_Rect.data));
+        m_Img_Rect_B = Img_Rect;
 
         cv::imshow("RectImg by GPU", Img_Rect);
 
-        Gfx::Performance::EndEvent();
+        cv::waitKey(0);
 
 
         //---Compute @ CPU (Remove after finishing "Compute @ GPU")---
-
+        /*
         //---Create Rectified Images---
-        cv::Mat Img_Rect(m_ImgSize_Rect, CV_8UC1);
+        //cv::Mat Img_Rect(m_ImgSize_Rect, CV_8UC1);
 
         //---Build Look-Up Table: from Rectified to Originals---
         cv::Mat map_Rect2Orig_x(m_ImgSize_Rect, CV_32FC1);
@@ -392,6 +398,7 @@ namespace FutoGmtCV
             Img_Rect.copyTo(m_Img_Rect_M);
             break;
         }
+        */
     }
 
     //---Assistant Functions: Return Rectified Images---

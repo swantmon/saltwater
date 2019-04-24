@@ -88,7 +88,7 @@ namespace Stereo
         {
             //---Rectification---
             FutoGmtCV::FutoImg RectImg_Curt, RectImg_Last;
-            FutoGmtCV::PlanarRect PlanarRectifier = FutoGmtCV::PlanarRect();
+            FutoGmtCV::PlanarRect PlanarRectifier = FutoGmtCV::PlanarRect(m_Keyframe_Curt.get_Img().size(), cv::Size(1280, 1040));
 
             PlanarRectifier.execute(RectImg_Curt, RectImg_Last, m_Keyframe_Curt, m_Keyframe_Last);
 
