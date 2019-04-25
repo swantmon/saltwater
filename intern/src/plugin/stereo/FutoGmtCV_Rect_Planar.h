@@ -11,13 +11,13 @@
 
 namespace FutoGmtCV
 {
-    class PlanarRect
+    class Rectification_Planar
     {
     //---Constructor & Destructor---
     public:
-        PlanarRect();
-        PlanarRect(const cv::Size& OrigImgSize, const cv::Size& RectImgSize);
-        ~PlanarRect();
+        Rectification_Planar();
+        Rectification_Planar(const cv::Size& OrigImgSize, const cv::Size& RectImgSize);
+        ~Rectification_Planar();
 
     //---Execution Functions---
     public:
@@ -31,8 +31,8 @@ namespace FutoGmtCV
         void cal_P_Rect();
         void cal_H(const cv::Mat& P_Orig_B, const cv::Mat& P_Orig_M);
 
-        void cal_Drift(cv::Mat& CenterDrift, const cv::Size& ImgSize_Ori);
-        void imp_Drift_K(const cv::Mat& Drift_B, const cv::Mat& Drift_Mt);
+        void cal_CneterShift(cv::Mat& CenterDrift, const cv::Size& ImgSize_Ori);
+        void imp_CenterShift_K(const cv::Mat& Drift_B, const cv::Mat& Drift_Mt);
 
         void cal_RectImgBound(cv::Point& ImgCnr_Rect_UL, cv::Point& ImgCnr_Rect_DR, const cv::Size& ImgSize_Orig, const int Which_Img = 0);
         void determ_RectImgCnr(const cv::Point& ImgCnr_RectB_UL, const cv::Point& ImgCnr_RectB_DR, const cv::Point& ImgCnr_RectM_UL, const cv::Point& ImgCnr_RectM_DR);
@@ -45,10 +45,7 @@ namespace FutoGmtCV
         //---Rectified Image---
         cv::Mat m_Img_Rect_B, m_Img_Rect_M; // Rectified Images
         cv::Size m_ImgSize_Orig, m_ImgSize_Rect;
-
         cv::Point m_ImgCnr_Rect_UL, m_ImgCnr_Rect_DR;
-        cv::Mat m_Table_Bx_Orig2Rect, m_Table_By_Orig2Rect, m_Table_Mx_Orig2Rect, m_Table_My_Orig2Rect; // Look-Up Table from Original to Rectified
-        cv::Mat m_Table_Bx_Rect2Orig, m_Table_By_Rect2Orig, m_Table_Mx_Rect2Orig, m_Table_My_Rect2Orig; // Look-Up Table from Rectified to Original
 
         //---Orientations---
         cv::Mat m_K_Rect_B, m_K_Rect_M; // Camera mtx of Rectified Images
@@ -57,7 +54,7 @@ namespace FutoGmtCV
         cv::Mat m_P_Rect_B, m_P_Rect_M; // Perspective Projection mtx of Rectified Images (World -> Image)
         cv::Mat m_Homo_B, m_Homo_M; // Homography (Original -> Rectified)
 
-        //---GPU Managers---
+        //---GLSL Managers---
         Gfx::CShaderPtr m_PlanarRectCSPtr;
         Gfx::CTexturePtr m_OrigImgTexturePtr;
         Gfx::CTexturePtr m_RectImgTexturePtr;
