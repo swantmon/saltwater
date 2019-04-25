@@ -30,7 +30,7 @@ namespace FutoGmtCV
     {
     }
 
-    Rectification_Planar::Rectification_Planar(const cv::Size& OrigImgSize, const cv::Size& RectImgSize)
+    Rectification_Planar::Rectification_Planar(const glm::ivec2& OrigImgSize, const glm::ivec2& RectImgSize)
         : m_ImgSize_Orig(OrigImgSize),
           m_ImgSize_Rect(RectImgSize)
     {
@@ -58,8 +58,8 @@ namespace FutoGmtCV
         //---Initialize Input Texture Manager---
         Gfx::STextureDescriptor TextureDescriptor_In = {};
 
-        TextureDescriptor_In.m_NumberOfPixelsU = m_ImgSize_Orig.width;
-        TextureDescriptor_In.m_NumberOfPixelsV = m_ImgSize_Orig.height;
+        TextureDescriptor_In.m_NumberOfPixelsU = m_ImgSize_Orig.x;
+        TextureDescriptor_In.m_NumberOfPixelsV = m_ImgSize_Orig.y;
         TextureDescriptor_In.m_NumberOfPixelsW = 1;
         TextureDescriptor_In.m_NumberOfMipMaps = 1;
         TextureDescriptor_In.m_NumberOfTextures = 1;
@@ -67,15 +67,15 @@ namespace FutoGmtCV
         TextureDescriptor_In.m_Access = Gfx::CTexture::EAccess::CPURead;
         TextureDescriptor_In.m_Usage = Gfx::CTexture::EUsage::GPUToCPU;
         TextureDescriptor_In.m_Semantic = Gfx::CTexture::UndefinedSemantic;
-        TextureDescriptor_In.m_Format = Gfx::CTexture::R8_UBYTE; // 1 channel with 8-bit. -> R8G8B8 = 3 channels with 8-bit.
+        TextureDescriptor_In.m_Format = Gfx::CTexture::R8G8B8A8_BYTE; // 4 channels and each channel is 8-bit.
 
         m_OrigImgTexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_In);
 
         //---Initialize Output Texture Manager---
         Gfx::STextureDescriptor TextureDescriptor_Out = {};
 
-        TextureDescriptor_Out.m_NumberOfPixelsU = m_ImgSize_Rect.width;
-        TextureDescriptor_Out.m_NumberOfPixelsV = m_ImgSize_Rect.height;
+        TextureDescriptor_Out.m_NumberOfPixelsU = m_ImgSize_Rect.x;
+        TextureDescriptor_Out.m_NumberOfPixelsV = m_ImgSize_Rect.y;
         TextureDescriptor_Out.m_NumberOfPixelsW = 1;
         TextureDescriptor_Out.m_NumberOfMipMaps = 1;
         TextureDescriptor_Out.m_NumberOfTextures = 1;
@@ -83,7 +83,7 @@ namespace FutoGmtCV
         TextureDescriptor_Out.m_Access = Gfx::CTexture::EAccess::CPUWrite;
         TextureDescriptor_Out.m_Usage = Gfx::CTexture::EUsage::GPUReadWrite;
         TextureDescriptor_Out.m_Semantic = Gfx::CTexture::UndefinedSemantic;
-        TextureDescriptor_Out.m_Format = Gfx::CTexture::R8_UBYTE; // 1 channel with 8-bit. -> R8G8B8 = 3 channels with 8-bit.
+        TextureDescriptor_Out.m_Format = Gfx::CTexture::R8G8B8A8_BYTE; // 4 channels and each channel is 8-bit.
 
         m_RectImgTexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_Out);
 
@@ -105,8 +105,8 @@ namespace FutoGmtCV
     void Rectification_Planar::execute(FutoImg& Img_Rect_B, FutoImg& Img_Rect_M, const FutoImg& Img_Orig_B, const FutoImg& Img_Orig_M)
     {
         //---Step 0. Check the size of Original Image Size---
-        assert(Img_Orig_B.get_Img().size() == m_ImgSize_Orig); 
-        assert(Img_Orig_M.get_Img().size() == m_ImgSize_Orig); 
+        assert(Img_Orig_B.get_ImgSize().x == m_ImgSize_Orig.x && Img_Orig_B.get_ImgSize().y == m_ImgSize_Orig.y);
+        assert(Img_Orig_M.get_ImgSize().x == m_ImgSize_Orig.x && Img_Orig_M.get_ImgSize().y == m_ImgSize_Orig.y);
 
         //---Step 1. Calculate Orientations of Rectified Images & Homography from Original to Rectified---
         cal_K_Rect(Img_Orig_B.get_Cam(), Img_Orig_M.get_Cam());
@@ -117,21 +117,21 @@ namespace FutoGmtCV
         cal_H(Img_Orig_B.get_PPM(), Img_Orig_M.get_PPM());
 
         //---Step 2. Center Rectified Images---
-        cv::Mat CenterShift_B = cv::Mat::zeros(3, 1, CV_32F);
-        cv::Mat CenterShift_M = cv::Mat::zeros(3, 1, CV_32F);
+        glm::vec3 CenterShift_B(0.0f);
+        glm::vec3 CenterShift_M(0.0f);
 
-        cal_CneterShift(CenterShift_B, Img_Orig_B.get_Img().size());
-        cal_CneterShift(CenterShift_M, Img_Orig_M.get_Img().size());
-        float CenterShift_y = (CenterShift_B.ptr<float>(1)[0] + CenterShift_M.ptr<float>(1)[0]) / 2;
-        CenterShift_B.ptr<float>(1)[0] = CenterShift_y;
-        CenterShift_M.ptr<float>(1)[0] = CenterShift_y;
+        cal_CneterShift(CenterShift_B, Img_Orig_B.get_ImgSize());
+        cal_CneterShift(CenterShift_M, Img_Orig_M.get_ImgSize());
+        float CenterShift_y = (CenterShift_B.y + CenterShift_M.y) / 2;
+        CenterShift_B.y = CenterShift_y;
+        CenterShift_M.y = CenterShift_y;
 
         imp_CenterShift_K(CenterShift_B, CenterShift_M);
 
         cal_H(Img_Orig_B.get_PPM(), Img_Orig_M.get_PPM()); // Update Homography because Rectified Camera mtx has changed.
 
         //---Step 3. Calculate the Corners of Rectified Images---
-        cv::Point ImgCnr_RectB_UL, ImgCnr_RectB_DR, ImgCnr_RectM_UL, ImgCnr_RectM_DR;
+        glm::ivec2 ImgCnr_RectB_UL, ImgCnr_RectB_DR, ImgCnr_RectM_UL, ImgCnr_RectM_DR;
 
         cal_RectImgBound(ImgCnr_RectB_UL, ImgCnr_RectB_DR, Img_Orig_B.get_Img().size(), 0);
         cal_RectImgBound(ImgCnr_RectM_UL, ImgCnr_RectM_DR, Img_Orig_M.get_Img().size(), 1);
@@ -147,39 +147,36 @@ namespace FutoGmtCV
     }
 
     //---Assistant Functions: Compute Orientations---
-    void Rectification_Planar::cal_K_Rect(const cv::Mat& K_Orig_B, const cv::Mat& K_Orig_M)
+    void Rectification_Planar::cal_K_Rect(const glm::mat3& K_Orig_B, const glm::mat3& K_Orig_M)
     {
         m_K_Rect_B = 0.5 * (K_Orig_B + K_Orig_M);
-        m_K_Rect_B.ptr<float>(0)[1] = 0; // Let skew = 0
-        m_K_Rect_M = 0.5 * (K_Orig_B + K_Orig_M);
-        m_K_Rect_M.ptr<float>(0)[1] = 0; // Let skew = 0
+        m_K_Rect_B[1].x = 0; // Let skew = 0
+        m_K_Rect_M = m_K_Rect_B; // Camera mtx of both rectified images are the same.
     }
 
-    void Rectification_Planar::cal_R_Rect(const cv::Mat& PC_Orig_B, const cv::Mat& PC_Orig_M, const cv::Mat& R_Orig_B)
+    void Rectification_Planar::cal_R_Rect(const glm::vec3& PC_Orig_B, const glm::vec3& PC_Orig_M, const glm::mat3& R_Orig_B)
     {
-        m_R_Rect = cv::Mat::eye(3, 3, CV_32F);
+        glm::mat3 R_Orig_row = glm::transpose(R_Orig_B);
 
-        cv::Mat R_Rect_row0 = PC_Orig_M - PC_Orig_B;
-        if (cv::sum(R_Rect_row0)[0] < 0)
+        glm::vec3 R_Rect_row0 = PC_Orig_M - PC_Orig_B;
+        if ((R_Rect_row0.x + R_Rect_row0.y + R_Rect_row0.z) < 0)
         {
             R_Rect_row0 *= -1; // Make the rotation always left2right and up2down.
         }
 
-        R_Rect_row0 /= cv::norm(R_Rect_row0, cv::NORM_L2);
-        cv::transpose(R_Rect_row0, R_Rect_row0);
+        R_Rect_row0 /= glm::l2Norm(R_Rect_row0);
 
-        cv::Mat R_Rect_row1 = R_Orig_B.row(2).cross(R_Rect_row0);
-        R_Rect_row1 /= cv::norm(R_Rect_row1, cv::NORM_L2);
+        glm::vec3 R_Rect_row1 = glm::cross(R_Orig_row[1], R_Rect_row0);
+        R_Rect_row1 /= glm::l2Norm(R_Rect_row1);
 
-        cv::Mat R_Rect_row2 = R_Rect_row0.cross(R_Rect_row1);
-        R_Rect_row2 /= cv::norm(R_Rect_row2, cv::NORM_L2);
+        glm::vec3 R_Rect_row2 = glm::cross(R_Rect_row0, R_Rect_row1);
+        R_Rect_row2 /= glm::l2Norm(R_Rect_row2);
 
-        R_Rect_row0.copyTo(m_R_Rect.row(0));
-        R_Rect_row1.copyTo(m_R_Rect.row(1));
-        R_Rect_row2.copyTo(m_R_Rect.row(2));
+        m_R_Rect = glm::mat3(R_Rect_row0, R_Rect_row1, R_Rect_row2);
+        m_R_Rect = glm::transpose(m_R_Rect);
     }
 
-    void Rectification_Planar::cal_PC_Rect(const cv::Mat& PC_Orig_B, const cv::Mat& PC_Orig_M)
+    void Rectification_Planar::cal_PC_Rect(const glm::vec3& PC_Orig_B, const glm::vec3& PC_Orig_M)
     {
         m_PC_Rect_B = PC_Orig_B;
         m_PC_Rect_M = PC_Orig_M;
@@ -187,59 +184,44 @@ namespace FutoGmtCV
 
     void Rectification_Planar::cal_P_Rect()
     {
-        cv::Mat Trans_Rect_B(3, 4, CV_32F);
-        m_R_Rect.colRange(0, 3).copyTo(Trans_Rect_B.colRange(0, 3)); // StartCol is inclusive while EndCol is exclusive
-        cv::Mat t_Orig_B = -m_R_Rect * m_PC_Rect_B;
-        t_Orig_B.col(0).copyTo(Trans_Rect_B.col(3));
+        m_P_Rect_B = glm::mat4x3(m_R_Rect[0], m_R_Rect[1], m_R_Rect[2], -m_R_Rect * m_PC_Rect_B);
+        m_P_Rect_B *= m_K_Rect_B;
 
-        cv::Mat Trans_Rect_M(3, 4, CV_32F);
-        m_R_Rect.colRange(0, 3).copyTo(Trans_Rect_M.colRange(0, 3)); // StartCol is inclusive while EndCol is exclusive
-        cv::Mat t_Orig_M = -m_R_Rect * m_PC_Rect_M;
-        t_Orig_M.col(0).copyTo(Trans_Rect_M.col(3));
-
-        m_P_Rect_B = m_K_Rect_B * Trans_Rect_B;
-        m_P_Rect_M = m_K_Rect_M * Trans_Rect_M;
+        m_P_Rect_M = glm::mat4x3(m_R_Rect[0], m_R_Rect[1], m_R_Rect[2], -m_R_Rect * m_PC_Rect_M);
+        m_P_Rect_M *= m_K_Rect_M;
     }
 
-    void Rectification_Planar::cal_H(const cv::Mat& P_Orig_B, const cv::Mat& P_Orig_M)
+    void Rectification_Planar::cal_H(const glm::mat4x3& P_Orig_B, const glm::mat4x3& P_Orig_M)
     {
         //---Calculate the Homography---
-        m_Homo_B = m_P_Rect_B * P_Orig_B.inv(cv::DECOMP_SVD);
-        m_Homo_M = m_P_Rect_M * P_Orig_M.inv(cv::DECOMP_SVD);
-        //---Another Homography Transformation used in Fusiello's Code. -> Simplfying to enhance efficiency.
-        /*
-        //H_B = P_Rect_B.colRange(0, 3) * m_Img_Orig_B.get_P_mtx().colRange(0, 3).inv();
-        //H_M = P_Rect_M.colRange(0, 3) * m_Img_Orig_M.get_P_mtx().colRange(0, 3).inv();
-        */
-        //---
-
+        // A simple way to calculate Homography (Also proposed by Fusiello). <= glm::inverse cannot apply on glm::mat4*3
+        m_Homo_B = glm::mat3(m_P_Rect_B) * glm::inverse(glm::mat3(P_Orig_B));
+        m_Homo_M = glm::mat3(m_P_Rect_M) * glm::inverse(glm::mat3(P_Orig_M));
     }
 
     //---Assistant Functions: Center Rectified Images---
-    void Rectification_Planar::cal_CneterShift(cv::Mat& CenterDrift, const cv::Size& ImgSize_Orig)
+    void Rectification_Planar::cal_CneterShift(glm::vec3& CenterDrift, const glm::ivec2& ImgSize_Orig)
     {
-        cv::Mat Center_Orig = cv::Mat::ones(3, 1, CV_32F);
-        Center_Orig.ptr<float>(0)[0] = ImgSize_Orig.width / 2;
-        Center_Orig.ptr<float>(1)[0] = ImgSize_Orig.height / 2;
+        glm::vec3 Center_Orig(ImgSize_Orig.x/2, ImgSize_Orig.y/2, 1.0f);
 
-        cv::Mat Center_Orig2Rect = m_Homo_B * Center_Orig;
-        Center_Orig2Rect /= Center_Orig2Rect.ptr<float>(2)[0];
+        glm::vec3 Center_Orig2Rect = m_Homo_B * Center_Orig;
+        Center_Orig2Rect /= Center_Orig2Rect.z;
 
         CenterDrift = Center_Orig - Center_Orig2Rect;
     }
 
-    void Rectification_Planar::imp_CenterShift_K(const cv::Mat& Drift_B, const cv::Mat& Drift_M)
+    void Rectification_Planar::imp_CenterShift_K(const glm::vec3& Drift_B, const glm::vec3& Drift_M)
     {
-        m_K_Rect_B.ptr<float>(0)[2] += Drift_B.ptr<float>(0)[0];
-        m_K_Rect_B.ptr<float>(1)[2] += Drift_B.ptr<float>(1)[0];
-        m_K_Rect_M.ptr<float>(0)[2] += Drift_M.ptr<float>(0)[0];
-        m_K_Rect_M.ptr<float>(1)[2] += Drift_M.ptr<float>(1)[0];
+        m_K_Rect_B[2].x += Drift_B.x;
+        m_K_Rect_B[2].y += Drift_B.y;
+        m_K_Rect_M[2].x += Drift_M.x;
+        m_K_Rect_M[2].y += Drift_M.y;
     }
 
     //---Assistant Functions: Generate Rectified Images---
-    void Rectification_Planar::cal_RectImgBound(cv::Point& ImgCnr_Rect_UL, cv::Point& ImgCnr_Rect_DR, const cv::Size& ImgSize_Orig, const int Which_Img)
+    void Rectification_Planar::cal_RectImgBound(glm::ivec2& ImgCnr_Rect_UL, glm::ivec2& ImgCnr_Rect_DR, const glm::ivec2& ImgSize_Orig, const int Which_Img)
     {
-        cv::Mat H;
+        glm::mat3 H;
         switch (Which_Img)
         {
         case 0: H = m_Homo_B;
@@ -249,40 +231,33 @@ namespace FutoGmtCV
         }
 
         //---Select corners in original images---
-        cv::Mat ImgCnr_Orig_UL = cv::Mat::zeros(3, 1, CV_32F);
-        ImgCnr_Orig_UL.ptr<float>(2)[0] = 1;
-        cv::Mat ImgCnr_Orig_UR = cv::Mat::ones(3, 1, CV_32F);
-        ImgCnr_Orig_UR.ptr<float>(0)[0] = ImgSize_Orig.width;
-        ImgCnr_Orig_UR.ptr<float>(1)[0] = 0;
-        cv::Mat ImgCnr_Orig_DL = cv::Mat::ones(3, 1, CV_32F);
-        ImgCnr_Orig_DL.ptr<float>(0)[0] = 0;
-        ImgCnr_Orig_DL.ptr<float>(1)[0] = ImgSize_Orig.height;
-        cv::Mat ImgCnr_Orig_DR = cv::Mat::ones(3, 1, CV_32F);
-        ImgCnr_Orig_DR.ptr<float>(0)[0] = ImgSize_Orig.width;
-        ImgCnr_Orig_DR.ptr<float>(1)[0] = ImgSize_Orig.height;
+        glm::ivec3 ImgCnr_Orig_UL(0, 0, 1);
+        glm::ivec3 ImgCnr_Orig_UR(ImgSize_Orig.x, 0, 1);
+        glm::ivec3 ImgCnr_Orig_DL(0, ImgSize_Orig.y, 1);
+        glm::ivec3 ImgCnr_Orig_DR(ImgSize_Orig.x, ImgSize_Orig.y, 1);
 
         //---Transform corners from original to rectified---
-        cv::Mat ImgCnr_Orig2Rect_UL = H * ImgCnr_Orig_UL;
-        ImgCnr_Orig2Rect_UL /= ImgCnr_Orig2Rect_UL.ptr<float>(2)[0];
-        cv::Mat ImgCnr_Orig2Rect_UR = H * ImgCnr_Orig_UR;
-        ImgCnr_Orig2Rect_UR /= ImgCnr_Orig2Rect_UR.ptr<float>(2)[0];
-        cv::Mat ImgCnr_Orig2Rect_DL = H * ImgCnr_Orig_DL;
-        ImgCnr_Orig2Rect_DL /= ImgCnr_Orig2Rect_DL.ptr<float>(2)[0];
-        cv::Mat ImgCnr_Orig2Rect_DR = H * ImgCnr_Orig_DR;
-        ImgCnr_Orig2Rect_DR /= ImgCnr_Orig2Rect_DR.ptr<float>(2)[0];
+        glm::vec3 ImgCnr_Orig2Rect_UL = H * ImgCnr_Orig_UL;
+        ImgCnr_Orig2Rect_UL /= ImgCnr_Orig2Rect_UL.z;
+        glm::vec3 ImgCnr_Orig2Rect_UR = H * ImgCnr_Orig_UR;
+        ImgCnr_Orig2Rect_UR /= ImgCnr_Orig2Rect_UR.z;
+        glm::vec3 ImgCnr_Orig2Rect_DL = H * ImgCnr_Orig_DL;
+        ImgCnr_Orig2Rect_DL /= ImgCnr_Orig2Rect_DL.z;
+        glm::vec3 ImgCnr_Orig2Rect_DR = H * ImgCnr_Orig_DR;
+        ImgCnr_Orig2Rect_DR /= ImgCnr_Orig2Rect_DR.z;
 
         //---Determine the Boundary of Epipolar Image---
         ImgCnr_Rect_UL.x = 
-            std::floor(std::min(std::min(ImgCnr_Orig2Rect_UL.ptr<float>(0)[0], ImgCnr_Orig2Rect_UR.ptr<float>(0)[0]), std::min(ImgCnr_Orig2Rect_DL.ptr<float>(0)[0], ImgCnr_Orig2Rect_DR.ptr<float>(0)[0])));
+            std::floor(std::min(std::min(ImgCnr_Orig2Rect_UL.x, ImgCnr_Orig2Rect_UR.x), std::min(ImgCnr_Orig2Rect_DL.x, ImgCnr_Orig2Rect_DR.x)));
         ImgCnr_Rect_UL.y =
-            std::floor(std::min(std::min(ImgCnr_Orig2Rect_UL.ptr<float>(1)[0], ImgCnr_Orig2Rect_UR.ptr<float>(1)[0]), std::min(ImgCnr_Orig2Rect_DL.ptr<float>(1)[0], ImgCnr_Orig2Rect_DR.ptr<float>(1)[0])));
+            std::floor(std::min(std::min(ImgCnr_Orig2Rect_UL.y, ImgCnr_Orig2Rect_UR.y), std::min(ImgCnr_Orig2Rect_DL.y, ImgCnr_Orig2Rect_DR.y)));
         ImgCnr_Rect_DR.x =
-            std::ceil(std::max(std::max(ImgCnr_Orig2Rect_UL.ptr<float>(0)[0], ImgCnr_Orig2Rect_UR.ptr<float>(0)[0]), std::max(ImgCnr_Orig2Rect_DL.ptr<float>(0)[0], ImgCnr_Orig2Rect_DR.ptr<float>(0)[0])));
+            std::ceil(std::max(std::max(ImgCnr_Orig2Rect_UL.x, ImgCnr_Orig2Rect_UR.x), std::max(ImgCnr_Orig2Rect_DL.x, ImgCnr_Orig2Rect_DR.x)));
         ImgCnr_Rect_DR.y =
-            std::ceil(std::max(std::max(ImgCnr_Orig2Rect_UL.ptr<float>(1)[0], ImgCnr_Orig2Rect_UR.ptr<float>(1)[0]), std::max(ImgCnr_Orig2Rect_DL.ptr<float>(1)[0], ImgCnr_Orig2Rect_DR.ptr<float>(1)[0])));
+            std::ceil(std::max(std::max(ImgCnr_Orig2Rect_UL.y, ImgCnr_Orig2Rect_UR.y), std::max(ImgCnr_Orig2Rect_DL.y, ImgCnr_Orig2Rect_DR.y)));
     }
 
-    void Rectification_Planar::determ_RectImgCnr(const cv::Point& ImgCnr_RectB_UL, const cv::Point& ImgCnr_RectB_DR, const cv::Point& ImgCnr_RectM_UL, const cv::Point& ImgCnr_RectM_DR)
+    void Rectification_Planar::determ_RectImgCnr(const glm::ivec2& ImgCnr_RectB_UL, const glm::ivec2& ImgCnr_RectB_DR, const glm::ivec2& ImgCnr_RectM_UL, const glm::ivec2& ImgCnr_RectM_DR)
     {
         //---Calculate the common boundary of both rectified images---
         m_ImgCnr_Rect_UL.x = std::min(ImgCnr_RectB_UL.x, ImgCnr_RectM_UL.x);
@@ -293,7 +268,7 @@ namespace FutoGmtCV
 
     void Rectification_Planar::genrt_RectImg(const cv::Mat& Img_Orig, const int Which_Img)
     {
-        cv::Mat H(3, 3, CV_32F);
+        glm::mat3 H(0.0);
         switch (Which_Img)
         {
         case 0: H = m_Homo_B;
@@ -308,18 +283,14 @@ namespace FutoGmtCV
 
         //---Put OrigImg into Input Texture---
         Base::AABB2UInt TargetRect;
-        TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_ImgSize_Orig.width, m_ImgSize_Orig.height));
-        Gfx::TextureManager::CopyToTexture2D(m_OrigImgTexturePtr, TargetRect, m_ImgSize_Orig.width, Img_Orig.data);
+        TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_ImgSize_Orig.xh, m_ImgSize_Orig.y));
+        Gfx::TextureManager::CopyToTexture2D(m_OrigImgTexturePtr, TargetRect, m_ImgSize_Orig.x, Img_Orig.data);
 
         //---Put Homography into Buffer---
         SHomographyTransform HomographyBuffer;
 
-        glm::mat3 H_glm;
-        memcpy(&H_glm, H.data, sizeof(H_glm));
-        H_glm = glm::transpose(H_glm);
-
-        HomographyBuffer.m_Homography = glm::mat4(H_glm);
-        HomographyBuffer.m_InvHomography = glm::mat4(glm::inverse(H_glm));
+        HomographyBuffer.m_Homography = glm::mat4(H);
+        HomographyBuffer.m_InvHomography = glm::mat4(glm::inverse(H));
         HomographyBuffer.m_Shift_Orig2Rect.x = m_ImgCnr_Rect_UL.x;
         HomographyBuffer.m_Shift_Orig2Rect.y = m_ImgCnr_Rect_UL.y;
 
@@ -333,8 +304,8 @@ namespace FutoGmtCV
         Gfx::ContextManager::SetConstantBuffer(0, m_HomographyBufferPtr);
 
         //---Start GPU Parallel Processing---
-        const int WorkGroupsX = DivUp(m_ImgSize_Rect.width, TileSize_2D);
-        const int WorkGroupsY = DivUp(m_ImgSize_Rect.height, TileSize_2D);
+        const int WorkGroupsX = DivUp(m_ImgSize_Rect.x, TileSize_2D);
+        const int WorkGroupsY = DivUp(m_ImgSize_Rect.y, TileSize_2D);
 
         Gfx::ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
 

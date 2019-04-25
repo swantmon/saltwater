@@ -34,30 +34,21 @@ namespace Stereo
 
     void CPluginInterface::OnFrameCPU(const std::vector<char>& _rRGBImage, const glm::mat4& _Transform, const glm::mat4& _Intrinsics, const std::vector<uint16_t>& _rDepthImage)
     {
+        /*
+        Image given by ARKit is 4-channels (RGBA) => Size of _rRGBImage = ImageSize * 4
+        */
         
-        //---Transform Image & Orientations to OpenCV format---
-        glm::mat3 K_glm = glm::mat3(_Intrinsics) * m_FrameResolution; // Intrinsic should be modified according to frame resolution.
-        K_glm[2].z = 1;
-        cv::Mat K_cv(3, 3, CV_32F);
-        glm2cv(&K_cv, glm::transpose(K_glm));
+        glm::mat3 Cam_mtx = glm::mat3(_Intrinsics) * m_FrameResolution; // Intrinsic should be modified according to frame resolution.
+        Cam_mtx[2].z = 1;
 
-        glm::mat3 R_glm = glm::mat3(_Transform);
-        cv::Mat R_cv(3, 3, CV_32F);
-        glm2cv(&R_cv, R_glm); // No transpose -> Rotation given by ARKit is Camera2World, but Rotation in Photogrammetry needs World2Camera.
+        glm::mat3 Rot_mtx = glm::mat3(_Transform);
+        Rot_mtx = glm::transpose(Rot_mtx); // Rotation given by ARKit is Camera2World, but Rotation in Photogrammetry needs World2Camera.
 
-        glm::vec3 PC_glm = glm::vec3(_Transform[3]); // The last column of _Transform given by ARKit is the Position of Camera in World.
-        cv::Mat PC_cv(3, 1, CV_32F);
-        glm2cv(&PC_cv, PC_glm);
+        glm::vec3 PC_vec = glm::vec3(_Transform[3]); // The last column of _Transform given by ARKit is the Position of Camera in World.
 
-        cv::Mat Img_dist_cv(cv::Size(m_OrigImgSize.x, m_OrigImgSize.y), CV_8UC4); // 2D Matrix(x*y) with (8-bit unsigned character) + (4 bands)
-        memcpy(Img_dist_cv.data, _rRGBImage.data(), _rRGBImage.size());
-        cv::cvtColor(Img_dist_cv, Img_dist_cv, cv::COLOR_BGRA2GRAY); // Default Color Space in OpenCV is BGRA.
+        std::vector<char> Img_Input_RGBA = _rRGBImage;
 
-        cv::Mat Img_Undist_cv, DistCoeff_cv(5, 1, CV_32F); // DistCoeff = K1, K2, P1, P2, K3
-        DistCoeff_cv = cv::Mat::zeros(5, 1, CV_32F); // Ignore Lens Distortion in default, and See what does the result look like.
-        cv::undistort(Img_dist_cv, Img_Undist_cv, K_cv, DistCoeff_cv);
-
-        FutoGmtCV::FutoImg frame(Img_Undist_cv, K_cv, R_cv, PC_cv);
+        FutoGmtCV::FutoImg frame(Img_Input_RGBA, m_OrigImgSize, Cam_mtx, Rot_mtx, PC_vec);
         
         //---Select Keyframe for Computation---
         if (!m_idx_Keyf_Curt) // Current keyframe is empty -> Set current keyframe.
@@ -67,28 +58,21 @@ namespace Stereo
         }
         else if (m_idx_Keyf_Curt && !m_idx_Keyf_Last) // Current keyframe exists but Last keyframe is empty -> Set both current & last keyframes.
         {
-            cv::Mat BaseLine = frame.get_PC() - m_Keyframe_Curt.get_PC();
-            float BaseLineLength = cv::norm(BaseLine, cv::NORM_L2);
+            glm::vec3 BaseLine = frame.get_PC() - m_Keyframe_Curt.get_PC();
+            float BaseLineLength = glm::length2(BaseLine);
 
             if (BaseLineLength >= m_Cdt_Keyf_BaseLineL) // Select Keyframe: Baseline condition
             {
                 m_Keyframe_Last = m_Keyframe_Curt;
                 m_Keyframe_Curt = frame;
                 m_idx_Keyf_Last = true;
-
-                //===show Original Img for check===
-
-                cv::imwrite("E:\\Project_ARCHITECT\\OrigImg_Curt.png", m_Keyframe_Curt.get_Img());
-                cv::imwrite("E:\\Project_ARCHITECT\\OrigImg_Last.png", m_Keyframe_Last.get_Img());
-
-                //======
             }
         }
         else // Both current & last keyframes exist. -> Processing -> Free last keyframe.
         {
             //---Rectification---
             FutoGmtCV::FutoImg RectImg_Curt, RectImg_Last;
-            FutoGmtCV::Rectification_Planar PlanarRectifier = FutoGmtCV::Rectification_Planar(m_Keyframe_Curt.get_Img().size(), cv::Size(1280, 1040));
+            FutoGmtCV::Rectification_Planar PlanarRectifier = FutoGmtCV::Rectification_Planar(m_Keyframe_Curt.get_ImgSize(), m_RectImgSize);
 
             PlanarRectifier.execute(RectImg_Curt, RectImg_Last, m_Keyframe_Curt, m_Keyframe_Last);
 
@@ -252,28 +236,6 @@ namespace Stereo
 
     // -----------------------------------------------------------------------------
 
-    void CPluginInterface::glm2cv(cv::Mat* cvmat, const glm::mat3& glmmat)
-    {
-        memcpy(cvmat->data, glm::value_ptr(glmmat), 9 * sizeof(float));
-    }
-
-    void CPluginInterface::glm2cv(cv::Mat* cvmat, const glm::vec3& glmmat)
-    {
-        memcpy(cvmat->data, glm::value_ptr(glmmat), 3 * sizeof(float));
-    }
-
-    void CPluginInterface::glm2cv(cv::Mat* cvmat, const glm::vec4& glmmat)
-    {
-        memcpy(cvmat->data, glm::value_ptr(glmmat), 4 * sizeof(float));
-    }
-
-    void CPluginInterface::glm2cv(cv::Mat* cvmat, const glm::mat3x4& glmmat)
-    {
-        memcpy(cvmat->data, glm::value_ptr(glmmat), 12 * sizeof(float));
-    }
-
-    // -----------------------------------------------------------------------------
-
     void CPluginInterface::ShowImg(const std::vector<char>& Img_RGBA) const
     {
         cv::Mat CV_Img(cv::Size(m_OrigImgSize.x, m_OrigImgSize.y), CV_8UC4); // 2D Matrix(x*y) with (8-bit unsigned character) + (4 bands)
@@ -304,10 +266,10 @@ namespace Stereo
         m_idx_Keyf_Curt = false;
         m_idx_Keyf_Last = false;
 
-
+        //---Rectification-----
+        m_RectImgSize = Core::CProgramParameters::GetInstance().Get("mr:stereo:rectified_image_size", glm::ivec2(1280, 1040));
 
         //---OLD: For LibSGM---
-        m_RectImgSize = Core::CProgramParameters::GetInstance().Get("mr:stereo:cuda_image_size", glm::ivec2(855, 533));
         m_DisparityCount = Core::CProgramParameters::GetInstance().Get("mr:stereo:disparity_count", 128);
 
         m_pStereoMatcherCUDA = std::make_unique<sgm::StereoSGM>(m_RectImgSize.x, m_RectImgSize.y, m_DisparityCount, 8, 8, sgm::EXECUTE_INOUT_HOST2HOST);

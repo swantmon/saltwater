@@ -9,28 +9,28 @@ namespace FutoGmtCV
     {
     }
 
-    FutoImg::FutoImg(cv::Mat& Img_Input)
-        : m_Img(Img_Input)
+    FutoImg::FutoImg(std::vector<char>& Img_Input, glm::ivec2& ImgSize)
+        : m_Img(Img_Input),
+          m_ImgSize(ImgSize)
     {
     }
 
-    FutoImg::FutoImg(cv::Mat& Img_Input, cv::Mat P)
+    FutoImg::FutoImg(std::vector<char>& Img_Input, glm::ivec2& ImgSize, glm::mat4x3& P)
         : m_Img(Img_Input),
+          m_ImgSize(ImgSize),
           m_P_mtx(P)
     {
         // Derive K, R, T from P
 
     }
-    FutoImg::FutoImg(cv::Mat& Img_Input, cv::Mat K, cv::Mat R, cv::Mat PC)
+    FutoImg::FutoImg(std::vector<char>& Img_Input, glm::ivec2& ImgSize, glm::mat3& K, glm::mat3& R, glm::vec3& PC)
         : m_Img(Img_Input),
+          m_ImgSize(ImgSize),
           m_Cam_mtx(K),
           m_Rot_mtx(R), 
           m_PC_vec(PC)
     {
-        cv::Mat Transform_mtx(3, 4, CV_32F);
-        m_Rot_mtx.colRange(0, 3).copyTo(Transform_mtx.colRange(0, 3));
-        cv::Mat Trans_vec = -m_Rot_mtx * PC;
-        Trans_vec.col(0).copyTo(Transform_mtx.col(3));
+        glm::mat4x3 Transform_mtx = glm::mat4x3(m_Rot_mtx[0], m_Rot_mtx[1], m_Rot_mtx[2], -m_Rot_mtx * m_PC_vec);
 
         m_P_mtx = m_Cam_mtx * Transform_mtx;
     }
@@ -40,50 +40,55 @@ namespace FutoGmtCV
     }
 
     //---Set Functions---
-    void FutoImg::set_Cam(cv::Mat& K_Input)
+    void FutoImg::set_Cam(glm::mat3& K_Input)
     {
         m_Cam_mtx = K_Input;
     }
 
-    void FutoImg::set_Rot(cv::Mat& R_Input)
+    void FutoImg::set_Rot(glm::mat3& R_Input)
     {
         m_Rot_mtx = R_Input;
     }
 
-    void FutoImg::set_PC(cv::Mat& PC_Input)
+    void FutoImg::set_PC(glm::vec3& PC_Input)
     {
         m_PC_vec = PC_Input;
     }
 
 
-    void FutoImg::set_PPM(cv::Mat P_Input)
+    void FutoImg::set_PPM(glm::mat4x3& P_Input)
     {
         m_P_mtx = P_Input; // P_mtx = K_mtx * [Rot_mtx | Trans_vec] = K_mtx * [Rot_mtx | -Rot_mtx * PC_vec]
     }
 
 
     //---Get Function---
-    cv::Mat FutoImg::get_Img() const
+    std::vector<char> FutoImg::get_Img() const
     {
         return m_Img;
     }
 
-    cv::Mat FutoImg::get_Cam() const
+    glm::ivec2 FutoImg::get_ImgSize() const
+    {
+        return m_ImgSize;
+    }
+
+    glm::mat3 FutoImg::get_Cam() const
     {
         return m_Cam_mtx;
     }
 
-    cv::Mat FutoImg::get_Rot() const
+    glm::mat3 FutoImg::get_Rot() const
     {
         return m_Rot_mtx;
     }
 
-    cv::Mat FutoImg::get_PC() const
+    glm::vec3 FutoImg::get_PC() const
     {
         return m_PC_vec;
     }
 
-    cv::Mat FutoImg::get_PPM() const
+    glm::mat4x3 FutoImg::get_PPM() const
     {
         return m_P_mtx;
     }

@@ -58,20 +58,18 @@ namespace Stereo
         //---Keyframe Status---
         bool m_idx_Keyf_Curt, m_idx_Keyf_Last; // To judge the current & last keyframes are exist or not.
 
+        //---Rectification---
+        glm::ivec2 m_RectImgSize;
+
 
         //===OLD===
 
 
         std::unique_ptr<sgm::StereoSGM> m_pStereoMatcherCUDA;
-        glm::ivec2 m_RectImgSize;
         int m_DisparityCount;
 
         
     private:
-        void glm2cv(cv::Mat* cvmat, const glm::mat3& glmmat);
-        void glm2cv(cv::Mat* cvmat, const glm::vec3& glmmat);
-        void glm2cv(cv::Mat* cvmat, const glm::vec4& glmmat);
-        void glm2cv(cv::Mat* cvmat, const glm::mat3x4& glmmat);
         void ShowImg(const std::vector<char>& Img_RGBA) const;
     };
 } // namespace HW

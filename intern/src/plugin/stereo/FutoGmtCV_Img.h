@@ -1,6 +1,7 @@
 ﻿
 #pragma once
 
+#include "base/base_include_glm.h" // Some warnings appears when directly #include glm 
 #include "opencv2/opencv.hpp"
 #include "libsgm.h"
 
@@ -11,33 +12,35 @@ namespace FutoGmtCV
     //---Constructor & Destructor---
     public:
         FutoImg();
-        FutoImg(cv::Mat& Img_Input);
-        FutoImg(cv::Mat& Img_Input, cv::Mat P);
-        FutoImg(cv::Mat& Img_Input, cv::Mat K, cv::Mat R, cv::Mat PC);
+        FutoImg(std::vector<char>& Img_Input, glm::ivec2& ImgSize);
+        FutoImg(std::vector<char>& Img_Input, glm::ivec2& ImgSize, glm::mat4x3& P);
+        FutoImg(std::vector<char>& Img_Input, glm::ivec2& ImgSize, glm::mat3& K, glm::mat3& R, glm::vec3& PC);
         ~FutoImg();
 
     //---Set Functions---
     public:
-        void set_Cam(cv::Mat& K);
-        void set_Rot(cv::Mat& R);
-        void set_PC(cv::Mat& T);
-        void set_PPM(cv::Mat P_Input);
+        void set_Cam(glm::mat3& K);
+        void set_Rot(glm::mat3& R);
+        void set_PC(glm::vec3& T);
+        void set_PPM(glm::mat4x3& P_Input);
 
     //---Get Function---
     public:
-        cv::Mat get_Img() const;
-        cv::Mat get_Cam() const;
-        cv::Mat get_Rot() const;
-        cv::Mat get_PC() const;
-        cv::Mat get_PPM() const;
+        std::vector<char> get_Img() const;
+        glm::ivec2 get_ImgSize() const;
+        glm::mat3 get_Cam() const;
+        glm::mat3 get_Rot() const;
+        glm::vec3 get_PC() const;
+        glm::mat4x3 get_PPM() const;
         
     //---Members---
     private:
-        cv::Mat m_Img; // Image data in RGB or RGBA
-        cv::Mat m_Cam_mtx; // Camera Matrix in pixel. Origin is upper-left. x-axis is row-direction and y-axis is column-direction
-        cv::Mat m_Rot_mtx; // Rotations from Mapping frame to Image frame
-        cv::Mat m_PC_vec; // Projection Center in Mapping frame
-        cv::Mat m_P_mtx; // Perspective Projection Matrix = K_mtx * [Rot_mtx | -Rot_mtx*PC_vec]
+        std::vector<char> m_Img; // Image data in RGBA
+        glm::ivec2 m_ImgSize;
+        glm::mat3 m_Cam_mtx; // Camera Matrix in pixel. Origin is upper-left. x-axis is row-direction and y-axis is column-direction
+        glm::mat3 m_Rot_mtx; // Rotations from Mapping frame to Image frame
+        glm::vec3 m_PC_vec; // Projection Center in Mapping frame
+        glm::mat4x3 m_P_mtx; // Perspective Projection Matrix = K_mtx * [Rot_mtx | -Rot_mtx*PC_vec]
 
     //===OLD===
 
