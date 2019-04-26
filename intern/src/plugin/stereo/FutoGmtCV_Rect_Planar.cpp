@@ -122,6 +122,14 @@ namespace FutoGmtCV
         cal_RectImgBound(Img_Orig_B.get_ImgSize(), 0);
         cal_RectImgBound(Img_Orig_M.get_ImgSize(), 1);
 
+        m_Homo_B.m_RectImgConer_UL.x = m_Homo_B.m_RectImgConer_UL.x <= m_Homo_M.m_RectImgConer_UL.x ? m_Homo_B.m_RectImgConer_UL.x : m_Homo_M.m_RectImgConer_UL.x;
+        m_Homo_B.m_RectImgConer_UL.y = m_Homo_B.m_RectImgConer_UL.y <= m_Homo_M.m_RectImgConer_UL.y ? m_Homo_B.m_RectImgConer_UL.y : m_Homo_M.m_RectImgConer_UL.y;
+        m_Homo_B.m_RectImgConer_DR.x = m_Homo_B.m_RectImgConer_DR.x >= m_Homo_M.m_RectImgConer_DR.x ? m_Homo_B.m_RectImgConer_DR.x : m_Homo_M.m_RectImgConer_DR.x;
+        m_Homo_B.m_RectImgConer_DR.y = m_Homo_B.m_RectImgConer_DR.y >= m_Homo_M.m_RectImgConer_DR.y ? m_Homo_B.m_RectImgConer_DR.y : m_Homo_M.m_RectImgConer_DR.y;
+
+        m_Homo_M.m_RectImgConer_UL = m_Homo_B.m_RectImgConer_UL;
+        m_Homo_M.m_RectImgConer_DR = m_Homo_B.m_RectImgConer_DR;
+
         //---Step 4. Generate Rectified Images---
         genrt_RectImg(Img_Orig_B.get_Img(), 0);
         genrt_RectImg(Img_Orig_M.get_Img(), 1);
