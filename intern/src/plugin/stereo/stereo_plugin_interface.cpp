@@ -65,6 +65,17 @@ namespace Stereo
         }
         else // Both current & last keyframes exist. -> Processing -> Free last keyframe.
         {
+            //---Test: Show Rectified Images---
+            cv::Mat cvOrigImg_Curt(m_OrigImgSize.y, m_OrigImgSize.x, CV_8UC4);
+            memcpy(cvOrigImg_Curt.data, m_Keyframe_Curt.get_Img().data(), m_Keyframe_Curt.get_Img().size());
+            cv::cvtColor(cvOrigImg_Curt, cvOrigImg_Curt, cv::COLOR_BGRA2RGBA); // Transform to RGB before imshow & imwrite
+            cv::imwrite("E:\\Project_ARCHITECT\\OrigImg_Curt.png", cvOrigImg_Curt);
+
+            cv::Mat cvOrigImg_Last(m_OrigImgSize.y, m_OrigImgSize.x, CV_8UC4);
+            memcpy(cvOrigImg_Last.data, m_Keyframe_Last.get_Img().data(), m_Keyframe_Last.get_Img().size());
+            cv::cvtColor(cvOrigImg_Last, cvOrigImg_Last, cv::COLOR_BGRA2RGBA); // Transform to RGB before imshow & imwrite
+            cv::imwrite("E:\\Project_ARCHITECT\\OrigImg_Last.png", cvOrigImg_Last);
+
             //---Rectification---
             FutoGmtCV::FutoImg RectImg_Curt, RectImg_Last;
             FutoGmtCV::CRectification_Planar PlanarRectifier = FutoGmtCV::CRectification_Planar(m_Keyframe_Curt.get_ImgSize(), m_RectImgSize);

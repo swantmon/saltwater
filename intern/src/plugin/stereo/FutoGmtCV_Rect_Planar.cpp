@@ -59,7 +59,7 @@ namespace FutoGmtCV
         TextureDescriptor_In.m_Access = Gfx::CTexture::EAccess::CPURead;
         TextureDescriptor_In.m_Usage = Gfx::CTexture::EUsage::GPUToCPU;
         TextureDescriptor_In.m_Semantic = Gfx::CTexture::UndefinedSemantic;
-        TextureDescriptor_In.m_Format = Gfx::CTexture::R8G8B8A8_BYTE; // 4 channels and each channel is 8-bit.
+        TextureDescriptor_In.m_Format = Gfx::CTexture::R8G8B8A8_UBYTE; // 4 channels and each channel is 8-bit.
 
         m_OrigImgTexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_In);
 
@@ -75,7 +75,7 @@ namespace FutoGmtCV
         TextureDescriptor_Out.m_Access = Gfx::CTexture::EAccess::CPUWrite;
         TextureDescriptor_Out.m_Usage = Gfx::CTexture::EUsage::GPUReadWrite;
         TextureDescriptor_Out.m_Semantic = Gfx::CTexture::UndefinedSemantic;
-        TextureDescriptor_Out.m_Format = Gfx::CTexture::R8G8B8A8_BYTE; // 4 channels and each channel is 8-bit.
+        TextureDescriptor_Out.m_Format = Gfx::CTexture::R8G8B8A8_UBYTE; // 4 channels and each channel is 8-bit.
 
         m_RectImgTexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_Out);
     }
@@ -144,7 +144,7 @@ namespace FutoGmtCV
         R_Rect_row0 = (R_Rect_row0.x + R_Rect_row0.y + R_Rect_row0.z) >= 0 ? R_Rect_row0 : -R_Rect_row0; // Keep RectImg always along with positive baseline direction
         R_Rect_row0 /= glm::l2Norm(R_Rect_row0);
 
-        glm::vec3 R_Rect_row1 = glm::cross(glm::transpose(R_Orig_B)[1], R_Rect_row0);
+        glm::vec3 R_Rect_row1 = glm::cross(glm::transpose(R_Orig_B)[2], R_Rect_row0);
         R_Rect_row1 /= glm::l2Norm(R_Rect_row1);
 
         glm::vec3 R_Rect_row2 = glm::cross(R_Rect_row0, R_Rect_row1);
@@ -221,9 +221,9 @@ namespace FutoGmtCV
 
         //---Select corners in original images---
         glm::ivec3 ImgCnr_Orig_UL(0, 0, 1);
-        glm::ivec3 ImgCnr_Orig_UR(ImgSize_Orig.x, 0, 1);
-        glm::ivec3 ImgCnr_Orig_DL(0, ImgSize_Orig.y, 1);
-        glm::ivec3 ImgCnr_Orig_DR(ImgSize_Orig.x, ImgSize_Orig.y, 1);
+        glm::ivec3 ImgCnr_Orig_UR(ImgSize_Orig.x - 1, 0, 1);
+        glm::ivec3 ImgCnr_Orig_DL(0, ImgSize_Orig.y - 1, 1);
+        glm::ivec3 ImgCnr_Orig_DR(ImgSize_Orig.x - 1, ImgSize_Orig.y - 1, 1);
 
         //---Transform corners from original to rectified---
         glm::vec3 ImgCnr_Orig2Rect_UL = H * ImgCnr_Orig_UL;
@@ -301,7 +301,8 @@ namespace FutoGmtCV
         Gfx::Performance::EndEvent();
 
         std::vector<char> Img_Rect;
-        Img_Rect.resize(m_ImgSize_Rect.x * m_ImgSize_Rect.y * 4);
+        const int RectImgSize_1D = m_ImgSize_Rect.x * m_ImgSize_Rect.y * 4;
+        Img_Rect.resize(RectImgSize_1D);
         Gfx::TextureManager::CopyTextureToCPU(m_RectImgTexturePtr, reinterpret_cast<char*>(Img_Rect.data()));
 
         switch (Which_Img)
