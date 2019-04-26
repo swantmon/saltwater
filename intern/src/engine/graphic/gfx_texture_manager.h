@@ -65,8 +65,8 @@ namespace TextureManager
     ENGINE_API void ClearTextureLayer(CTexturePtr _TexturePtr, const void* _pData = nullptr, int _Layer = 0);
     ENGINE_API void ClearTexture(CTexturePtr _TexturePtr, const void* _pData = nullptr);
 
-    ENGINE_API void CopyToTexture2D(CTexturePtr _TexturePtr, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, void* _pBytes, bool _UpdateMipLevels = false);
-    ENGINE_API void CopyToTextureArray2D(CTexturePtr _TextureArrayPtr, unsigned int _IndexOfSlice, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, void* _pBytes, bool _UpdateMipLevels = false);
+    ENGINE_API void CopyToTexture2D(CTexturePtr _TexturePtr, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, const void* _pBytes, bool _UpdateMipLevels = false);
+    ENGINE_API void CopyToTextureArray2D(CTexturePtr _TextureArrayPtr, unsigned int _IndexOfSlice, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, const void* _pBytes, bool _UpdateMipLevels = false);
     ENGINE_API void CopyToTextureArray2D(CTexturePtr _TextureArrayPtr, unsigned int _IndexOfSlice, CTexturePtr _TexturePtr, bool _UpdateMipLevels = false);
 
     ENGINE_API CTexturePtr GetMipmapFromTexture2D(CTexturePtr _TexturePtr, unsigned int _Mipmap);
