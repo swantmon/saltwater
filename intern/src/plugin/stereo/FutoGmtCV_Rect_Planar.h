@@ -11,13 +11,21 @@
 
 namespace FutoGmtCV
 {
-    class Rectification_Planar
+    struct SHomographyTransform // Always make sure whole structure is the multiple of 4*float
+    {
+        glm::mat4 m_H_Orig2Rect; // Transmition unit of layout(std140) is 4*float. => mat3 is only 3*3*float, which may transmit wrong memory address.
+        glm::mat4 m_H_Rect2Orig;
+        glm::ivec2 m_RectImgConer_UL; // pix_Rect = pix_Orig2Rect + Shift; <= pix_Orig2Rect = H * pix_Orig;
+        glm::ivec2 m_Padding;
+    };
+
+    class CRectification_Planar
     {
     //---Constructor & Destructor---
     public:
-        Rectification_Planar();
-        Rectification_Planar(const glm::ivec2& OrigImgSize, const glm::ivec2& RectImgSize);
-        ~Rectification_Planar();
+        CRectification_Planar();
+        CRectification_Planar(const glm::ivec2& OrigImgSize, const glm::ivec2& RectImgSize);
+        ~CRectification_Planar();
 
     //---Execution Functions---
     public:
@@ -47,12 +55,14 @@ namespace FutoGmtCV
         glm::ivec2 m_ImgSize_Orig, m_ImgSize_Rect;
         glm::ivec2 m_ImgCnr_Rect_UL, m_ImgCnr_Rect_DR;
 
-        //---Orientations---
+        //---Homography---
+        SHomographyTransform m_Homo_B, m_Homo_M; // Homography (Original -> Rectified)
+
+        //---Orientations of Rectified Images---
         glm::mat3 m_K_Rect_B, m_K_Rect_M; // Camera mtx of Rectified Images
         glm::mat3 m_R_Rect; // Rotation mtx of Rectified Images (World -> Image)
         glm::vec3 m_PC_Rect_B, m_PC_Rect_M; // Projection Center of Rectified Images
         glm::mat4x3 m_P_Rect_B, m_P_Rect_M; // Perspective Projection mtx of Rectified Images (World -> Image)
-        glm::mat3 m_Homo_B, m_Homo_M; // Homography (Original -> Rectified)
 
         //---GLSL Managers---
         Gfx::CShaderPtr m_PlanarRectCSPtr;

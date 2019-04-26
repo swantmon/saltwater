@@ -34,21 +34,16 @@ namespace Stereo
 
     void CPluginInterface::OnFrameCPU(const std::vector<char>& _rRGBImage, const glm::mat4& _Transform, const glm::mat4& _Intrinsics, const std::vector<uint16_t>& _rDepthImage)
     {
-        /*
-        Image given by ARKit is 4-channels (RGBA) => Size of _rRGBImage = ImageSize * 4
-        */
-        
         glm::mat3 Cam_mtx = glm::mat3(_Intrinsics) * m_FrameResolution; // Intrinsic should be modified according to frame resolution.
         Cam_mtx[2].z = 1;
 
-        glm::mat3 Rot_mtx = glm::mat3(_Transform);
-        Rot_mtx = glm::transpose(Rot_mtx); // Rotation given by ARKit is Camera2World, but Rotation in Photogrammetry needs World2Camera.
+        glm::mat3 Rot_mtx = glm::transpose(glm::mat3(_Transform));// Rotation given by ARKit is Camera2World, but Rotation in Photogrammetry needs World2Camera.
 
         glm::vec3 PC_vec = glm::vec3(_Transform[3]); // The last column of _Transform given by ARKit is the Position of Camera in World.
 
-        std::vector<char> Img_Input_RGBA = _rRGBImage;
+        m_ARKImg_RGBA = _rRGBImage;
 
-        FutoGmtCV::FutoImg frame(Img_Input_RGBA, m_OrigImgSize, Cam_mtx, Rot_mtx, PC_vec);
+        FutoGmtCV::FutoImg frame(m_ARKImg_RGBA, m_OrigImgSize, Cam_mtx, Rot_mtx, PC_vec);
         
         //---Select Keyframe for Computation---
         if (!m_idx_Keyf_Curt) // Current keyframe is empty -> Set current keyframe.
@@ -59,7 +54,7 @@ namespace Stereo
         else if (m_idx_Keyf_Curt && !m_idx_Keyf_Last) // Current keyframe exists but Last keyframe is empty -> Set both current & last keyframes.
         {
             glm::vec3 BaseLine = frame.get_PC() - m_Keyframe_Curt.get_PC();
-            float BaseLineLength = glm::length2(BaseLine);
+            float BaseLineLength = glm::l2Norm(BaseLine);
 
             if (BaseLineLength >= m_Cdt_Keyf_BaseLineL) // Select Keyframe: Baseline condition
             {
@@ -72,7 +67,7 @@ namespace Stereo
         {
             //---Rectification---
             FutoGmtCV::FutoImg RectImg_Curt, RectImg_Last;
-            FutoGmtCV::Rectification_Planar PlanarRectifier = FutoGmtCV::Rectification_Planar(m_Keyframe_Curt.get_ImgSize(), m_RectImgSize);
+            FutoGmtCV::CRectification_Planar PlanarRectifier = FutoGmtCV::CRectification_Planar(m_Keyframe_Curt.get_ImgSize(), m_RectImgSize);
 
             PlanarRectifier.execute(RectImg_Curt, RectImg_Last, m_Keyframe_Curt, m_Keyframe_Last);
 
@@ -117,12 +112,6 @@ namespace Stereo
 
                PlanarRectifier.execute(RectImg_Curt, RectImg_Last, TestImgL, TestImgR);
                */
-            //=== ===
-
-            //===Show result===
-            cv::imwrite("E:\\Project_ARCHITECT\\RectImg_Curt.png", RectImg_Curt.get_Img());
-            cv::imwrite("E:\\Project_ARCHITECT\\RectImg_Last.png", RectImg_Last.get_Img());
-            //======
 
             //===== OLD =====
             /*
@@ -210,8 +199,7 @@ namespace Stereo
             //---Finish Processing -> Free last keyframe---
             m_idx_Keyf_Last = false;
 
-            //---Temp Setting: Only calculate once, because it takes too much time calculating in CPU...
-            m_Cdt_Keyf_BaseLineL = 1000000000;
+            m_Cdt_Keyf_BaseLineL = 1000000000; //---Temp Setting: Only calculate once, because it takes too much time calculating in CPU...
         }
         
         // Optional for internal check

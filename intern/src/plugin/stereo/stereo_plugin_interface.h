@@ -47,16 +47,15 @@ namespace Stereo
         //---Inputs from plugin_slam---
         float m_FrameResolution;
         glm::ivec2 m_OrigImgSize; // Size of original image -> x = width & y = height
+        std::vector<char> m_ARKImg_RGBA;
 
         //---Keyframe---
         FutoGmtCV::FutoImg m_Keyframe_Curt, m_Keyframe_Last; // Only compute 2 frames first. -> In the future, I will modify if it needs to compute more images at once.
+        bool m_idx_Keyf_Curt, m_idx_Keyf_Last; // To judge the current & last keyframes are exist or not.
 
         //---Keyframe Selection---
         std::size_t m_Cdt_Keyf_MaxNum; // Maximal keyframes for calculation once
         float m_Cdt_Keyf_BaseLineL; // Keyframe Selection: BaseLine Condition. Unit is meter.
-
-        //---Keyframe Status---
-        bool m_idx_Keyf_Curt, m_idx_Keyf_Last; // To judge the current & last keyframes are exist or not.
 
         //---Rectification---
         glm::ivec2 m_RectImgSize;
