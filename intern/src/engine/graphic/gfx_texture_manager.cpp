@@ -63,8 +63,8 @@ namespace
         void ClearTextureLayer(CTexturePtr _TexturePtr, const void* _pData, int _Layer);
         void ClearTexture(CTexturePtr _TexturePtr, const void* _pData);
 
-        void CopyToTexture2D(CTexturePtr _TexturePtr, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, void* _pBytes, bool _UpdateMipLevels);
-        void CopyToTextureArray2D(CTexturePtr _TextureArrayPtr, unsigned int _IndexOfSlice, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, void* _pBytes, bool _UpdateMipLevels);
+        void CopyToTexture2D(CTexturePtr _TexturePtr, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, const void* _pBytes, bool _UpdateMipLevels);
+        void CopyToTextureArray2D(CTexturePtr _TextureArrayPtr, unsigned int _IndexOfSlice, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, const void* _pBytes, bool _UpdateMipLevels);
         void CopyToTextureArray2D(CTexturePtr _TextureArrayPtr, unsigned int _IndexOfSlice, CTexturePtr _TexturePtr, bool _UpdateMipLevels);
 
         CTexturePtr GetMipmapFromTexture2D(CTexturePtr _TexturePtr, unsigned int _Mipmap);
@@ -456,7 +456,7 @@ namespace
 
     // -----------------------------------------------------------------------------
     
-    void CGfxTextureManager::CopyToTexture2D(CTexturePtr _TexturePtr, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, void* _pBytes, bool _UpdateMipLevels)
+    void CGfxTextureManager::CopyToTexture2D(CTexturePtr _TexturePtr, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, const void* _pBytes, bool _UpdateMipLevels)
     {
         BASE_UNUSED(_NumberOfBytesPerLine);
 
@@ -494,7 +494,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CGfxTextureManager::CopyToTextureArray2D(CTexturePtr _TextureArrayPtr, unsigned int _IndexOfSlice, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, void* _pBytes, bool _UpdateMipLevels)
+    void CGfxTextureManager::CopyToTextureArray2D(CTexturePtr _TextureArrayPtr, unsigned int _IndexOfSlice, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, const void* _pBytes, bool _UpdateMipLevels)
     {
         BASE_UNUSED(_UpdateMipLevels);
         BASE_UNUSED(_NumberOfBytesPerLine);
@@ -2556,14 +2556,14 @@ namespace TextureManager
     
     // -----------------------------------------------------------------------------
 
-    void CopyToTexture2D(CTexturePtr _TexturePtr, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, void* _pBytes, bool _UpdateMipLevels)
+    void CopyToTexture2D(CTexturePtr _TexturePtr, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, const void* _pBytes, bool _UpdateMipLevels)
     {
         CGfxTextureManager::GetInstance().CopyToTexture2D(_TexturePtr, _rTargetRect, _NumberOfBytesPerLine, _pBytes, _UpdateMipLevels);
     }
 
     // -----------------------------------------------------------------------------
 
-    void CopyToTextureArray2D(CTexturePtr _TextureArrayPtr, unsigned int _IndexOfSlice, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, void* _pBytes, bool _UpdateMipLevels)
+    void CopyToTextureArray2D(CTexturePtr _TextureArrayPtr, unsigned int _IndexOfSlice, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, const void* _pBytes, bool _UpdateMipLevels)
     {
         CGfxTextureManager::GetInstance().CopyToTextureArray2D(_TextureArrayPtr, _IndexOfSlice, _rTargetRect, _NumberOfBytesPerLine, _pBytes, _UpdateMipLevels);
     }
