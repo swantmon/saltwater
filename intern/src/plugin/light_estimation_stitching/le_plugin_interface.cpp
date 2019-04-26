@@ -110,7 +110,7 @@ namespace LE
         ConstanteBufferDesc.m_Access        = Gfx::CBuffer::CPUWrite;
         ConstanteBufferDesc.m_NumberOfBytes = sizeof(SCubemapBuffer);
         ConstanteBufferDesc.m_pBytes        = &DefaultGSValues;
-        ConstanteBufferDesc.m_pClassKey     = 0;
+        ConstanteBufferDesc.m_pClassKey     = nullptr;
         
         m_CubemapBufferPtr = Gfx::BufferManager::CreateBuffer(ConstanteBufferDesc);
 
@@ -132,14 +132,14 @@ namespace LE
         ConstanteBufferDesc.m_Access        = Gfx::CBuffer::CPUWrite;
         ConstanteBufferDesc.m_NumberOfBytes = sizeof(PlaneVertexBufferData);
         ConstanteBufferDesc.m_pBytes        = &PlaneVertexBufferData[0];
-        ConstanteBufferDesc.m_pClassKey     = 0;
+        ConstanteBufferDesc.m_pClassKey     = nullptr;
         
         m_VertexBufferPtr = Gfx::BufferManager::CreateBuffer(ConstanteBufferDesc);
 
         // -----------------------------------------------------------------------------
 
-        m_InputTexturePtr  = 0;
-        m_OutputCubemapPtr = 0;
+        m_InputTexturePtr  = nullptr;
+        m_OutputCubemapPtr = nullptr;
 
         // -----------------------------------------------------------------------------
         // Settings
@@ -151,15 +151,15 @@ namespace LE
 
     void CPluginInterface::OnExit()
     {
-        m_VSPtr = 0;
-        m_GSPtr = 0;
-        m_PSPtr = 0;
-        m_CubemapBufferPtr = 0;
-        m_VertexBufferPtr = 0;
-        m_InputTexturePtr = 0;
-        m_OutputCubemapPtr = 0;
-        m_TargetSetPtr = 0;
-        m_ViewPortSetPtr = 0;
+        m_VSPtr = nullptr;
+        m_GSPtr = nullptr;
+        m_PSPtr = nullptr;
+        m_CubemapBufferPtr = nullptr;
+        m_VertexBufferPtr = nullptr;
+        m_InputTexturePtr = nullptr;
+        m_OutputCubemapPtr = nullptr;
+        m_TargetSetPtr = nullptr;
+        m_ViewPortSetPtr = nullptr;
     }
 
     // -----------------------------------------------------------------------------
@@ -244,7 +244,7 @@ namespace LE
 
     void CPluginInterface::Gfx_OnUpdate()
     {
-        if (m_IsActive == false || m_InputTexturePtr == 0 || m_OutputCubemapPtr == 0)
+        if (m_IsActive == false || m_InputTexturePtr == nullptr || m_OutputCubemapPtr == nullptr)
         {
             return;
         }

@@ -172,7 +172,7 @@ namespace
 namespace
 {
     CGfxMain::CGfxMain()
-        : m_pActiveWindowInfo              (0)
+        : m_pActiveWindowInfo              (nullptr)
         , m_NumberOfWindows                (0)
         , m_PerFrameConstantBuffer         ()
         , m_PerFrameConstantBufferBufferPtr()
@@ -278,7 +278,7 @@ namespace
 
     unsigned int CGfxMain::RegisterWindow(void* _pWindow, int _VSync, bool _PreserveContext)
     {
-        if (_pWindow == 0 || m_NumberOfWindows == s_MaxNumberOfWindows) return 0;
+        if (_pWindow == nullptr || m_NumberOfWindows == s_MaxNumberOfWindows) return 0;
 
         // -----------------------------------------------------------------------------
         // Save data to new window
@@ -352,7 +352,7 @@ namespace
 
     const glm::ivec2& CGfxMain::GetActiveWindowSize()
     {
-        assert(m_pActiveWindowInfo != 0);
+        assert(m_pActiveWindowInfo != nullptr);
 
         return m_pActiveWindowInfo->m_InternalWindowSize;
     }
@@ -370,7 +370,7 @@ namespace
 
     const glm::ivec2& CGfxMain::GetActiveNativeWindowSize()
     {
-        assert(m_pActiveWindowInfo != 0);
+        assert(m_pActiveWindowInfo != nullptr);
 
         return m_pActiveWindowInfo->m_NativeWindowSize;
     }
@@ -460,7 +460,7 @@ namespace
     
     void CGfxMain::BeginFrame()
     {
-        assert(m_pActiveWindowInfo != 0);
+        assert(m_pActiveWindowInfo != nullptr);
 
         SWindowInfo& rWindowInfo = *m_pActiveWindowInfo;
 
@@ -480,7 +480,7 @@ namespace
     
     void CGfxMain::EndFrame()
     {
-        assert(m_pActiveWindowInfo != 0);
+        assert(m_pActiveWindowInfo != nullptr);
 
         SWindowInfo& rWindowInfo = *m_pActiveWindowInfo;
 
@@ -504,8 +504,8 @@ namespace
         BufferDescription.m_Usage         = Gfx::CBuffer::GPUReadWrite;
         BufferDescription.m_Binding       = Gfx::CBuffer::ConstantBuffer;
         BufferDescription.m_Access        = Gfx::CBuffer::CPUWrite;
-        BufferDescription.m_pBytes        = 0;
-        BufferDescription.m_pClassKey     = 0;
+        BufferDescription.m_pBytes        = nullptr;
+        BufferDescription.m_pClassKey     = nullptr;
         BufferDescription.m_NumberOfBytes = sizeof(SPerFrameConstantBuffer);
         
         m_PerFrameConstantBufferBufferPtr = BufferManager::CreateBuffer(BufferDescription);
@@ -541,7 +541,7 @@ namespace
     
     void CGfxMain::DestroyPerFrameConstantBuffers()
     {
-        m_PerFrameConstantBufferBufferPtr = 0;
+        m_PerFrameConstantBufferBufferPtr = nullptr;
     }
     
     // -----------------------------------------------------------------------------
@@ -660,7 +660,7 @@ namespace
         {
         case CInternGraphicsInfo::Scale:
         {
-            float Scale = Core::CProgramParameters::GetInstance().Get<float>("graphics:pixel_matching:scale", 1.0f);
+            auto Scale = Core::CProgramParameters::GetInstance().Get<float>("graphics:pixel_matching:scale", 1.0f);
 
             _rWindowInfo.m_InternalWindowSize[0] = static_cast<int>(static_cast<float>(_rWindowInfo.m_NativeWindowSize[0]) * Scale);
             _rWindowInfo.m_InternalWindowSize[1] = static_cast<int>(static_cast<float>(_rWindowInfo.m_NativeWindowSize[1]) * Scale);
@@ -851,7 +851,7 @@ namespace
 
             pDummyNativeOpenGLContextHandle = ::wglCreateContext(pNativeDeviceContextHandle);
 
-            if (pDummyNativeOpenGLContextHandle == 0)
+            if (pDummyNativeOpenGLContextHandle == nullptr)
             {
                 BASE_THROWM("OpenGL dummy context creation failed.");
             }
@@ -863,9 +863,9 @@ namespace
             // -----------------------------------------------------------------------------
             if (m_GraphicsInfo.m_GraphicsAPI == CGraphicsInfo::OpenGLES)
             {
-                typedef const char* (WINAPI * PFNWGLGETEXTENSIONSSTRINGARBPROC)(HDC hdc);
+                using PFNWGLGETEXTENSIONSSTRINGARBPROC = const char* (WINAPI *)(HDC hdc);
                 PROC Function = wglGetProcAddress("wglGetExtensionsStringARB");
-                PFNWGLGETEXTENSIONSSTRINGARBPROC wglGetExtensionsStringARB = reinterpret_cast<PFNWGLGETEXTENSIONSSTRINGARBPROC>(Function);
+                auto wglGetExtensionsStringARB = reinterpret_cast<PFNWGLGETEXTENSIONSSTRINGARBPROC>(Function);
 
                 std::string wglExtensions = wglGetExtensionsStringARB(pNativeDeviceContextHandle);
 
@@ -911,9 +911,9 @@ namespace
                 0,
             };
 
-            pNativeOpenGLContextHandle = ::wglCreateContextAttribsARB(pNativeDeviceContextHandle, 0, Attributes);
+            pNativeOpenGLContextHandle = ::wglCreateContextAttribsARB(pNativeDeviceContextHandle, nullptr, Attributes);
 
-            if (pNativeDeviceContextHandle == 0)
+            if (pNativeDeviceContextHandle == nullptr)
             {
                 BASE_THROWM("OpenGL context creation failed.");
             }

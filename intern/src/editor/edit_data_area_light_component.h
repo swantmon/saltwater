@@ -21,7 +21,7 @@ namespace Dt
 
             strcpy_s(PathToTexture, m_Texture.c_str());
 
-            if (ImGui::InputText("Name", PathToTexture, 255))
+            if (ImGui::InputText("Path to texture", PathToTexture, 255))
             {
                 m_Texture = PathToTexture;
             }
@@ -30,7 +30,11 @@ namespace Dt
 
             ImGui::DragFloat3("Direction", &m_Direction.x);
 
-            ImGui::DragFloat("Rotation", &m_Rotation);
+			float DegreeAngle = glm::degrees(m_Rotation);
+
+            ImGui::DragFloat("Rotation", &DegreeAngle, 0.1f, 0.0f, 0.0f, "%.2f");
+
+			m_Rotation = glm::radians(DegreeAngle);
 
             ImGui::DragFloat("Width", &m_Width);
 
