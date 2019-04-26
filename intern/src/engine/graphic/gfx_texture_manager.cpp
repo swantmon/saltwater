@@ -113,14 +113,14 @@ namespace
                 friend class CGfxTextureManager;
         };
 
-        typedef Base::CManagedPool<CInternTextureSet, 16> CTextureSets;
+        using CTextureSets = Base::CManagedPool<CInternTextureSet, 16>;
 
         // -----------------------------------------------------------------------------
         // There are way more 2D textures than 3D ones, so use bigger pages here.
         // -----------------------------------------------------------------------------
-        typedef Base::CManagedPool<CInternTexture, 256, 0> CTextures;
+        using CTextures = Base::CManagedPool<CInternTexture, 256, 0>;
         
-        typedef std::unordered_map<unsigned int, CTexturePtr> CTextureByHashs;
+        using CTextureByHashs = std::unordered_map<unsigned int, CTexturePtr>;
 
     private:
 
@@ -226,7 +226,7 @@ namespace
 
     void CGfxTextureManager::OnExit()
     {
-        m_Texture2DPtr = 0;
+        m_Texture2DPtr = nullptr;
 
         // -----------------------------------------------------------------------------
         // Clear all the pools with the textures.
@@ -281,7 +281,7 @@ namespace
         if (_rDescriptor.m_pFileName != nullptr && strlen(_rDescriptor.m_pFileName))
         {
             NumberOfBytes     = static_cast<unsigned int>(strlen(_rDescriptor.m_pFileName) * sizeof(char));
-            const void* pData = static_cast<const void*>(_rDescriptor.m_pFileName);
+            const auto* pData = static_cast<const void*>(_rDescriptor.m_pFileName);
             
             Hash = Base::CRC32(pData, NumberOfBytes);
             
@@ -296,7 +296,7 @@ namespace
         // -----------------------------------------------------------------------------
         CTexturePtr Texture2DPtr = InternCreateTexture2D(_rDescriptor, _IsDeleteable, _Behavior);
 
-        CInternTexture* pInternTexture2D = static_cast<CInternTexture*>(Texture2DPtr.GetPtr());
+        auto* pInternTexture2D = static_cast<CInternTexture*>(Texture2DPtr.GetPtr());
 
         if (pInternTexture2D == nullptr)
         {
@@ -386,14 +386,14 @@ namespace
         // Renderdoc crashes when _pData is nullptr but OpenGL allows NULL
         // Therefore we create a dummy value until Renderdoc is fixed
 
-        glm::ivec4 Dummy = glm::ivec4(0);
+        auto Dummy = glm::ivec4(0);
 
         if (_pData == nullptr)
         {
             _pData = &Dummy;
         }
 
-        CInternTexture* pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
+        auto* pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
         Gfx::CNativeTextureHandle TextureHandle = pInternTexture->m_NativeTexture;
         
         assert(_Layer <= static_cast<int>(pInternTexture->GetNumberOfTextures()));
@@ -425,14 +425,14 @@ namespace
         // Renderdoc crashes when _pData is nullptr but OpenGL allows NULL
         // Therefore we create a dummy value until Renderdoc is fixed
 
-        glm::ivec4 Dummy = glm::ivec4(0);
+        auto Dummy = glm::ivec4(0);
 
         if (_pData == nullptr)
         {
             _pData = &Dummy;
         }
 
-        CInternTexture* pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
+        auto* pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
         Gfx::CNativeTextureHandle TextureHandle = pInternTexture->m_NativeTexture;
 
         const int Format = ConvertGLImageFormat(_TexturePtr->GetFormat());
@@ -464,7 +464,7 @@ namespace
         // Get informations
         // -----------------------------------------------------------------------------
         assert(_TexturePtr.IsValid());
-        assert(_pBytes != 0);
+        assert(_pBytes != nullptr);
         
         glm::uvec2 Offset     = _rTargetRect[0];
         glm::uvec2 UpdateSize = _rTargetRect[1] - _rTargetRect[0];
@@ -472,7 +472,7 @@ namespace
         assert(_TexturePtr->GetNumberOfPixelsU() >= UpdateSize[0] + Offset[0]);
         assert(_TexturePtr->GetNumberOfPixelsV() >= UpdateSize[1] + Offset[1]);
         
-        CInternTexture* pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
+        auto* pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
         
         Gfx::CNativeTextureHandle TextureHandle = pInternTexture->m_NativeTexture;
         
@@ -504,17 +504,17 @@ namespace
         // -----------------------------------------------------------------------------
         glm::uvec2 Size = _rTargetRect.Size();
 
-        assert(_pBytes != 0);
+        assert(_pBytes != nullptr);
         assert(_TextureArrayPtr.IsValid());
         assert(_TextureArrayPtr->GetNumberOfPixelsU() == Size[0] && _TextureArrayPtr->GetNumberOfPixelsV() == Size[1]);
         
-        glm::uvec2 Offset     = glm::uvec2(0);
+        auto Offset     = glm::uvec2(0);
         glm::uvec2 UpdateSize = glm::uvec2(_TextureArrayPtr->GetNumberOfPixelsU(), _TextureArrayPtr->GetNumberOfPixelsV());
         
         assert(Size[0] >= UpdateSize[0] + Offset[0]);
         assert(Size[1] >= UpdateSize[1] + Offset[1]);
         
-        CInternTexture* pInternTextureArray = static_cast<CInternTexture*>(_TextureArrayPtr.GetPtr());
+        auto* pInternTextureArray = static_cast<CInternTexture*>(_TextureArrayPtr.GetPtr());
         
         int Format = ConvertGLImageFormat(pInternTextureArray->GetFormat());
         int Type   = ConvertGLImageType  (pInternTextureArray->GetFormat());
@@ -550,7 +550,7 @@ namespace
         assert(_TexturePtr     .IsValid());
         assert(_TextureArrayPtr->GetNumberOfPixelsU() == _TexturePtr->GetNumberOfPixelsU() && _TextureArrayPtr->GetNumberOfPixelsV() == _TexturePtr->GetNumberOfPixelsV());
         
-        glm::uvec2 Offset     = glm::uvec2(0);
+        auto Offset     = glm::uvec2(0);
         glm::uvec2 UpdateSize = glm::uvec2(_TextureArrayPtr->GetNumberOfPixelsU(), _TextureArrayPtr->GetNumberOfPixelsV());
         
         assert(_TexturePtr->GetNumberOfPixelsU() >= UpdateSize[0] + Offset[0]);
@@ -594,7 +594,7 @@ namespace
             
             CInternTexture& rTexture = *Texture2DPtr;
             
-            int MipmapPow = static_cast<int>(glm::pow(2, static_cast<int>(_Mipmap)));
+            auto MipmapPow = static_cast<int>(glm::pow(2, static_cast<int>(_Mipmap)));
 
             rTexture.m_FileName          = _TexturePtr->GetFileName();
             rTexture.m_pPixels           = _TexturePtr->GetPixels();
@@ -614,7 +614,7 @@ namespace
             rTexture.m_Info.m_Semantic          = _TexturePtr->GetSemantic();
             rTexture.m_Info.m_Usage             = _TexturePtr->GetUsage();
             
-            CInternTexture* pInternalTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
+            auto* pInternalTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
 
             rTexture.m_NativeTexture        = pInternalTexture->m_NativeTexture;
             rTexture.m_NativeBinding        = pInternalTexture->m_NativeBinding;
@@ -633,9 +633,9 @@ namespace
     
     void CGfxTextureManager::UpdateMipmap(CTexturePtr _TexturePtr)
     {
-        assert(_TexturePtr != 0);
+        assert(_TexturePtr != nullptr);
         
-        CInternTexture* pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
+        auto* pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
 
         assert(pInternTexture);
 
@@ -660,9 +660,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Get data
         // -----------------------------------------------------------------------------
-        assert(_TexturePtr != 0);
+        assert(_TexturePtr != nullptr);
 
-        CInternTexture* pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
+        auto* pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
 
         assert(pInternTexture);
 
@@ -796,9 +796,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Get data
         // -----------------------------------------------------------------------------
-        assert(_TexturePtr != 0);
+        assert(_TexturePtr != nullptr);
 
-        CInternTexture* pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
+        auto* pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
 
         assert(pInternTexture);
 
@@ -884,7 +884,7 @@ namespace
     {
         assert(_pLabel != nullptr);
 
-        CInternTexture* pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
+        auto* pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
 
         assert(pInternTexture != nullptr);
         
@@ -959,7 +959,7 @@ namespace
 
             pPathToTexture = PathToTexture.c_str();
 #else
-            const wchar_t* pPathToTexture = 0;
+            const wchar_t* pPathToTexture = nullptr;
 
             pPathToTexture = reinterpret_cast<const wchar_t*>(PathToTexture.c_str());
 #endif
@@ -1058,7 +1058,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Is data available, then upload it to graphic card
         // -----------------------------------------------------------------------------
-        if (pTextureData != 0)
+        if (pTextureData != nullptr)
         {
             glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, ImageWidth, ImageHeight, GLFormat, GLType, pTextureData);
 
@@ -1114,7 +1114,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Setup the new texture inside manager
             // -----------------------------------------------------------------------------
-            if (_rDescriptor.m_pFileName != 0) rTexture.m_FileName = _rDescriptor.m_pFileName;
+            if (_rDescriptor.m_pFileName != nullptr) rTexture.m_FileName = _rDescriptor.m_pFileName;
 
             rTexture.m_pPixels           = _rDescriptor.m_pPixels;
             rTexture.m_NumberOfPixels[0] = static_cast<Gfx::CTexture::BPixels>(ImageWidth);
@@ -1301,7 +1301,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Is data available, then upload it to graphic card
         // -----------------------------------------------------------------------------
-        if (pTextureData != 0)
+        if (pTextureData != nullptr)
         {
             glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, ImageWidth, ImageHeight, ImageDepth, GLFormat, GLType, pTextureData);
         }
@@ -1328,7 +1328,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Setup the new texture inside manager
             // -----------------------------------------------------------------------------
-            if (_rDescriptor.m_pFileName != 0) rTexture.m_FileName = _rDescriptor.m_pFileName;
+            if (_rDescriptor.m_pFileName != nullptr) rTexture.m_FileName = _rDescriptor.m_pFileName;
 
             rTexture.m_pPixels           = _rDescriptor.m_pPixels;
             rTexture.m_NumberOfPixels[0] = static_cast<Gfx::CTexture::BPixels>(ImageWidth);
@@ -1448,7 +1448,7 @@ namespace
         ILenum       NativeILType;
         ILinfo       NativeILImageInfo;
 
-        assert(_rDescriptor.m_NumberOfTextures == 6 && _rDescriptor.m_NumberOfPixelsW == 1 && _rDescriptor.m_pPixels == 0);
+        assert(_rDescriptor.m_NumberOfTextures == 6 && _rDescriptor.m_NumberOfPixelsW == 1 && _rDescriptor.m_pPixels == nullptr);
 
         ImageIsLoaded = false;
         NumberOfFaces = 1;
@@ -1499,7 +1499,7 @@ namespace
 
             pPathToTexture = PathToTexture.c_str();
 #else
-            const wchar_t* pPathToTexture = 0;
+            const wchar_t* pPathToTexture = nullptr;
 
             pPathToTexture = reinterpret_cast<const wchar_t*>(PathToTexture.c_str());
 #endif
@@ -1651,7 +1651,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Setup the new texture inside manager
             // -----------------------------------------------------------------------------
-            if (_rDescriptor.m_pFileName != 0) rTexture.m_FileName = _rDescriptor.m_pFileName;
+            if (_rDescriptor.m_pFileName != nullptr) rTexture.m_FileName = _rDescriptor.m_pFileName;
 
             rTexture.m_pPixels           = _rDescriptor.m_pPixels;
             rTexture.m_NumberOfPixels[0] = static_cast<Gfx::CTexture::BPixels>(ImageWidth);
@@ -1786,7 +1786,7 @@ namespace
         {
             CInternTexture& rTexture = *static_cast<CInternTexture*>(Texture2DPtr.GetPtr());
 
-            rTexture.m_pPixels           = 0;
+            rTexture.m_pPixels           = nullptr;
             rTexture.m_NumberOfPixels[0] = 0;
             rTexture.m_NumberOfPixels[1] = 0;
             rTexture.m_Hash              = 0;
@@ -2368,7 +2368,7 @@ namespace
 
         for (IndexOfTexture = 0; IndexOfTexture < m_NumberOfTextures; ++IndexOfTexture)
         {
-            m_TexturePtrs[IndexOfTexture] = 0;
+            m_TexturePtrs[IndexOfTexture] = nullptr;
         }
     }
 

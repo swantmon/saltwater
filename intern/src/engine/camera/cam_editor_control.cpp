@@ -135,7 +135,7 @@ namespace Cam
 
                 const glm::vec2& rCursorPosition = _rEvent.GetGlobalCursorPosition();
 
-                float DeltaTime = static_cast<float>(Core::Time::GetDeltaTimeLastFrame());
+                auto DeltaTime = static_cast<float>(Core::Time::GetDeltaTimeLastFrame());
 
                 glm::vec2 CurrentVelocity = (rCursorPosition - m_LastCursorPosition);
 
@@ -183,7 +183,7 @@ namespace Cam
         glm::vec3 Forward(0.0f, 0.0f, -1.0f);
         glm::vec3 Right  (1.0f, 0.0f,  0.0f);
 
-        float DeltaTime = static_cast<float>(Core::Time::GetDeltaTimeLastFrame());
+        auto DeltaTime = static_cast<float>(Core::Time::GetDeltaTimeLastFrame());
 
         Forward = m_RotationMatrix * Forward;
         Right   = m_RotationMatrix * Right;
