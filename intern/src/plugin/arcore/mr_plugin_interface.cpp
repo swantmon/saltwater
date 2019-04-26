@@ -7,7 +7,7 @@
 #include "plugin/arcore/mr_control_manager.h"
 #include "plugin/arcore/mr_plugin_interface.h"
 
-CORE_PLUGIN_INFO(MR::CPluginInterface, "ArCore", "1.6.0", "This plugin use ARCore 1.6.0 to enable augmented reality features.")
+CORE_PLUGIN_INFO(MR::CPluginInterface, "ArCore", "1.8.0", "This plugin use ARCore 1.8.0 to enable augmented reality features.")
 
 namespace MR
 {
