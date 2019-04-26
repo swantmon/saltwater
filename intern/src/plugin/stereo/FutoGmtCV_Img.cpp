@@ -9,13 +9,13 @@ namespace FutoGmtCV
     {
     }
 
-    FutoImg::FutoImg(std::vector<char>& Img_Input, glm::ivec2& ImgSize)
+    FutoImg::FutoImg(const std::vector<char>& Img_Input, const glm::ivec2& ImgSize)
         : m_Img(Img_Input),
           m_ImgSize(ImgSize)
     {
     }
 
-    FutoImg::FutoImg(std::vector<char>& Img_Input, glm::ivec2& ImgSize, glm::mat4x3& P)
+    FutoImg::FutoImg(const std::vector<char>& Img_Input, const glm::ivec2& ImgSize, const glm::mat4x3& P)
         : m_Img(Img_Input),
           m_ImgSize(ImgSize),
           m_P_mtx(P)
@@ -23,7 +23,7 @@ namespace FutoGmtCV
         // Derive K, R, T from P
 
     }
-    FutoImg::FutoImg(std::vector<char>& Img_Input, glm::ivec2& ImgSize, glm::mat3& K, glm::mat3& R, glm::vec3& PC)
+    FutoImg::FutoImg(const std::vector<char>& Img_Input, const glm::ivec2& ImgSize, const glm::mat3& K, const glm::mat3& R, const glm::vec3& PC)
         : m_Img(Img_Input),
           m_ImgSize(ImgSize),
           m_Cam_mtx(K),

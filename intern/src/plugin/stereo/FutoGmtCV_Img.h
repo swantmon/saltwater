@@ -12,9 +12,9 @@ namespace FutoGmtCV
     //---Constructor & Destructor---
     public:
         FutoImg();
-        FutoImg(std::vector<char>& Img_Input, glm::ivec2& ImgSize);
-        FutoImg(std::vector<char>& Img_Input, glm::ivec2& ImgSize, glm::mat4x3& P);
-        FutoImg(std::vector<char>& Img_Input, glm::ivec2& ImgSize, glm::mat3& K, glm::mat3& R, glm::vec3& PC);
+        FutoImg(const std::vector<char>& Img_Input, const glm::ivec2& ImgSize);
+        FutoImg(const std::vector<char>& Img_Input, const glm::ivec2& ImgSize, const glm::mat4x3& P);
+        FutoImg(const std::vector<char>& Img_Input, const glm::ivec2& ImgSize, const glm::mat3& K, const glm::mat3& R, const glm::vec3& PC);
         ~FutoImg();
 
     //---Set Functions---

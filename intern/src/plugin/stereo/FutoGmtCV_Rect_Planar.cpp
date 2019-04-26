@@ -361,10 +361,10 @@ namespace FutoGmtCV
         switch (Which_Img)
         {
         case 0: 
-            Img_Rect = FutoImg(m_Img_Rect_B, m_K_Rect_B, m_R_Rect, m_PC_Rect_B);
+            Img_Rect = FutoImg(m_Img_Rect_B, m_ImgSize_Rect, m_K_Rect_B, m_R_Rect, m_PC_Rect_B);
             break;
         case 1: 
-            Img_Rect = FutoImg(m_Img_Rect_M, m_K_Rect_M, m_R_Rect, m_PC_Rect_M);
+            Img_Rect = FutoImg(m_Img_Rect_M, m_ImgSize_Rect, m_K_Rect_M, m_R_Rect, m_PC_Rect_M);
             break;
         }
     }

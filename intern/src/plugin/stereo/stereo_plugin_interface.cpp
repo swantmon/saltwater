@@ -71,6 +71,19 @@ namespace Stereo
 
             PlanarRectifier.execute(RectImg_Curt, RectImg_Last, m_Keyframe_Curt, m_Keyframe_Last);
 
+            //---Test: Show Rectified Images---
+            cv::Mat cvRectImg_Curt(m_RectImgSize.y, m_RectImgSize.x, CV_8UC4);
+            memcpy(cvRectImg_Curt.data, RectImg_Curt.get_Img().data(), RectImg_Curt.get_Img().size());
+            cv::cvtColor(cvRectImg_Curt, cvRectImg_Curt, cv::COLOR_BGRA2RGBA); // Transform to RGB before imshow & imwrite
+            cv::imwrite("E:\\Project_ARCHITECT\\RectImg_Curt.png", cvRectImg_Curt);
+
+            cv::Mat cvRectImg_Last(m_RectImgSize.y, m_RectImgSize.x, CV_8UC4);
+            memcpy(cvRectImg_Last.data, RectImg_Last.get_Img().data(), RectImg_Last.get_Img().size());
+            cv::cvtColor(cvRectImg_Last, cvRectImg_Last, cv::COLOR_BGRA2RGBA); // Transform to RGB before imshow & imwrite
+            cv::imwrite("E:\\Project_ARCHITECT\\RectImg_Last.png", cvRectImg_Last);
+
+            
+
             //===Verify by Test Data===
             /*
                cv::Mat TestInputL = cv::imread("E:\\Project_ARCHITECT\\cvSGBM_Test Data\\01-002570.jpg");
