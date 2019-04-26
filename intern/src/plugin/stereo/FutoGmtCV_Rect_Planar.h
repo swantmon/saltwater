@@ -16,7 +16,7 @@ namespace FutoGmtCV
         glm::mat4 m_H_Orig2Rect; // Transmition unit of layout(std140) is 4*float. => mat3 is only 3*3*float, which may transmit wrong memory address.
         glm::mat4 m_H_Rect2Orig;
         glm::ivec2 m_RectImgConer_UL; // pix_Rect = pix_Orig2Rect + Shift; <= pix_Orig2Rect = H * pix_Orig;
-        glm::ivec2 m_Padding;
+        glm::ivec2 m_RectImgConer_DR;
     };
 
     class CRectification_Planar
@@ -39,19 +39,18 @@ namespace FutoGmtCV
         void cal_P_Rect();
         void cal_H(const glm::mat4x3& P_Orig_B, const glm::mat4x3& P_Orig_M);
 
-        void cal_CneterShift(glm::vec3& CenterDrift, const glm::ivec2& ImgSize_Orig);
-        void imp_CenterShift_K(const glm::vec3& Drift_B, const glm::vec3& Drift_Mt);
+        void cal_CenterShift(glm::vec2& CenterDrift, const glm::ivec2& ImgSize_Orig, const int Which_Img = 0);
+        void imp_CenterShift_K(const glm::vec2& Drift_B, const glm::vec2& Drift_Mt);
 
-        void cal_RectImgBound(glm::ivec2& ImgCnr_Rect_UL, glm::ivec2& ImgCnr_Rect_DR, const glm::ivec2& ImgSize_Orig, const int Which_Img = 0);
-        void determ_RectImgCnr(const glm::ivec2& ImgCnr_RectB_UL, const glm::ivec2& ImgCnr_RectB_DR, const glm::ivec2& ImgCnr_RectM_UL, const glm::ivec2& ImgCnr_RectM_DR);
-        void genrt_RectImg(const cv::Mat& Img_Orig, const int Which_Img = 0);
+        void cal_RectImgBound(const glm::ivec2& ImgSize_Orig, const int Which_Img = 0);
+        void genrt_RectImg(const std::vector<char>& Img_Orig, const int Which_Img = 0);
 
         void get_RectImg(FutoImg& Img_Rect, const int Which_Img = 0);
 
     //---Members---
     private:
         //---Rectified Image---
-        cv::Mat m_Img_Rect_B, m_Img_Rect_M; // Rectified Images
+        std::vector<char> m_Img_Rect_B, m_Img_Rect_M; // Rectified Images
         glm::ivec2 m_ImgSize_Orig, m_ImgSize_Rect;
         glm::ivec2 m_ImgCnr_Rect_UL, m_ImgCnr_Rect_DR;
 

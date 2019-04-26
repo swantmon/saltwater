@@ -41,7 +41,7 @@ namespace Stereo
 
         glm::vec3 PC_vec = glm::vec3(_Transform[3]); // The last column of _Transform given by ARKit is the Position of Camera in World.
 
-        m_ARKImg_RGBA = _rRGBImage;
+        m_ARKImg_RGBA = _rRGBImage; // vector size = m_OrigImgSize.x * m_OrigImgSize.y * 4
 
         FutoGmtCV::FutoImg frame(m_ARKImg_RGBA, m_OrigImgSize, Cam_mtx, Rot_mtx, PC_vec);
         
