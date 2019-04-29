@@ -51,8 +51,6 @@ namespace MR
             COLORINTRINSICS
         };
 
-    private:
-
         enum EDATASOURCE
         {
             NETWORK,
@@ -122,14 +120,6 @@ namespace MR
         Gfx::CTexturePtr m_ShiftTexture;
         Gfx::CShaderPtr m_ShiftDepthCSPtr;
         Gfx::CTexturePtr m_ShiftLUTPtr;
-
-        Gfx::CBufferPtr m_RGBConversionBuffer;
-
-        struct SRGBConversion
-        {
-            glm::vec4 m_Ambient;
-            glm::vec4 m_Temperature;
-        };
 
         struct SIntrinsicsMessage
         {
@@ -287,15 +277,6 @@ namespace MR
                 m_DataSource = NETWORK;
 
                 CreateShiftLUTTexture();
-
-                Gfx::SBufferDescriptor ConstantBufferDesc = {};
-
-                ConstantBufferDesc.m_Usage = Gfx::CBuffer::EUsage::GPURead;
-                ConstantBufferDesc.m_Binding = Gfx::CBuffer::ConstantBuffer;
-                ConstantBufferDesc.m_Access = Gfx::CBuffer::CPUWrite;
-                ConstantBufferDesc.m_NumberOfBytes = sizeof(SRGBConversion);
-
-                m_RGBConversionBuffer = Gfx::BufferManager::CreateBuffer(ConstantBufferDesc);
             }
             else if (DataSource == "kinect")
             {
@@ -405,8 +386,6 @@ namespace MR
             m_ColorBuffer.clear();
 
             m_Reconstructor.Exit();
-
-            m_RGBConversionBuffer = nullptr;
 
             m_DepthTexture = nullptr;
             m_RGBATexture = nullptr;
@@ -724,13 +703,6 @@ namespace MR
             {
                 const float AmbientIntensity = *reinterpret_cast<float*>(Decompressed.data() + sizeof(int32_t));
                 const float LightTemperature = *reinterpret_cast<float*>(Decompressed.data() + sizeof(int32_t) + sizeof(float));
-
-                glm::vec3 LightColor = KelvinToRGB(LightTemperature);
-
-                SRGBConversion Data;
-                Data.m_Ambient = glm::vec4(AmbientIntensity);
-                Data.m_Temperature = glm::vec4(LightColor, LightTemperature);
-                Gfx::BufferManager::UploadBufferData(m_RGBConversionBuffer, &Data);
             }
             else if (MessageType == PLANE)
             {
@@ -777,9 +749,7 @@ namespace MR
 
             TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_ColorSize.x / 2, m_ColorSize.y / 2));
             Gfx::TextureManager::CopyToTexture2D(m_UVTexture, TargetRect, m_ColorSize.x / 2, const_cast<char*>(UVData));
-
-            Gfx::ContextManager::SetConstantBuffer(0, m_RGBConversionBuffer);
-
+            
             Gfx::ContextManager::SetShaderCS(m_YUVtoRGBCSPtr);
             Gfx::ContextManager::SetImageTexture(0, m_YTexture);
             Gfx::ContextManager::SetImageTexture(1, m_UVTexture);
@@ -966,6 +936,8 @@ namespace MR
             }
         }
 
+        // -----------------------------------------------------------------------------
+
         void OnNewNeuralNetMessage(const Net::CMessage& _rMessage, Net::SocketHandle _SocketHandle)
         {
             BASE_UNUSED(_SocketHandle);
@@ -986,6 +958,8 @@ namespace MR
                 Gfx::ReconstructionRenderer::SetInpaintedPlane(m_PlaneTexture, AABB);
             }
         }
+
+        // -----------------------------------------------------------------------------
 
         void CreatePlane()
         {
@@ -1038,6 +1012,8 @@ namespace MR
                 Gfx::ReconstructionRenderer::SetInpaintedPlane(m_PlaneTexture, AABB);
             }
         }
+
+        // -----------------------------------------------------------------------------
 
         void CreateShiftLUTTexture()
         {
@@ -1132,6 +1108,8 @@ namespace MR
             Gfx::TextureManager::CopyToTexture2D(m_ShiftLUTPtr, TargetRect, Count, const_cast<uint16_t*>(LUT));
         }
 
+        // -----------------------------------------------------------------------------
+
         glm::vec3 KelvinToRGB(float _Kelvin)
         {
             _Kelvin = _Kelvin / 100.f;
@@ -1167,6 +1145,8 @@ namespace MR
 
             return glm::clamp(RGB, 0.0f, 255.0f) / 255.0f;
         }
+
+        // -----------------------------------------------------------------------------
 
         int DivUp(int TotalShaderCount, int WorkGroupSize)
         {
