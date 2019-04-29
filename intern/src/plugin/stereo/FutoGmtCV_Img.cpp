@@ -1,4 +1,5 @@
 #include "plugin\stereo\stereo_precompiled.h"
+
 #include "plugin\stereo\FutoGmtCV_Img.h"
 
 
@@ -93,25 +94,4 @@ namespace FutoGmtCV
         return m_P_mtx;
     }
 
-
-    //===== OLD =====
-
-    //---Photogrammetric Computer Vision---
-    void FutoImg::imp_cvSGBM(cv::Mat& DispImg, const cv::Mat& RectImg_Base, const cv::Mat& RectImg_Match)
-    {
-        operPtr_cvSGBM = cv::StereoSGBM::create();
-        int WinSize_SAD = 9;
-        operPtr_cvSGBM->setBlockSize(WinSize_SAD);
-        operPtr_cvSGBM->setP1(8 * WinSize_SAD * WinSize_SAD);
-        operPtr_cvSGBM->setP2(32 * WinSize_SAD * WinSize_SAD);
-        operPtr_cvSGBM->setPreFilterCap(8);
-        operPtr_cvSGBM->setDisp12MaxDiff(1);
-        operPtr_cvSGBM->setUniquenessRatio(10);
-        operPtr_cvSGBM->setSpeckleWindowSize(100);
-        operPtr_cvSGBM->setSpeckleRange(1);
-        //operPtr_cvSGBM->setMode(cv::StereoSGBM::MODE_SGBM);
-
-        operPtr_cvSGBM->compute(RectImg_Base, RectImg_Match, DispImg);
-    }
-
-} // FutoImg
+} // FutoGmtCV

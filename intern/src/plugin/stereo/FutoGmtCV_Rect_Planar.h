@@ -55,7 +55,7 @@ namespace FutoGmtCV
         glm::ivec2 m_ImgCnr_Rect_UL, m_ImgCnr_Rect_DR;
 
         //---Homography---
-        SHomographyTransform m_Homo_B, m_Homo_M; // Homography (Original -> Rectified)
+        SHomographyTransform m_Homography_B, m_Homography_M; // Homography (Original -> Rectified)
 
         //---Orientations of Rectified Images---
         glm::mat3 m_K_Rect_B, m_K_Rect_M; // Camera mtx of Rectified Images

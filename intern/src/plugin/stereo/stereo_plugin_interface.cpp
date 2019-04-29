@@ -92,8 +92,7 @@ namespace Stereo
             memcpy(cvRectImg_Last.data, RectImg_Last.get_Img().data(), RectImg_Last.get_Img().size());
             cv::cvtColor(cvRectImg_Last, cvRectImg_Last, cv::COLOR_BGRA2RGBA); // Transform to RGB before imshow & imwrite
             cv::imwrite("E:\\Project_ARCHITECT\\RectImg_Last.png", cvRectImg_Last);
-
-            
+            //---
 
             //===Verify by Test Data===
             /*
@@ -136,21 +135,13 @@ namespace Stereo
 
                PlanarRectifier.execute(RectImg_Curt, RectImg_Last, TestImgL, TestImgR);
                */
+            //======
+
+            //===Stereo Matching by LibSGM===
+
 
             //===== OLD =====
             /*
-            //---Stereo Matching---
-            cv::Mat DispImg_Rect(m_RectImgSize.y, m_RectImgSize.x, CV_8UC1);
-            //Keyframe_Curt.imp_cvSGBM(DispImg_Rect, RectImg_Curt.get_Img(), RectImg_Last.get_Img());
-            assert(RectImg_Curt.get_Img().type() == CV_8U); // If the condition is false, make alert. => Useful for debugging~~~!!!
-            assert(RectImg_Last.get_Img().type() == CV_8U);
-            assert(DispImg_Rect.type() == CV_8U);
-
-            imshow("Left", RectImg_Curt.get_Img());
-            imshow("Right", RectImg_Last.get_Img());
-
-            cv::waitKey(0);
-
             m_pStereoMatcherCUDA->execute(RectImg_Curt.get_Img().data, RectImg_Last.get_Img().data, DispImg_Rect.data);
 
             imshow("Left", RectImg_Curt.get_Img());
@@ -159,17 +150,7 @@ namespace Stereo
 
             cv::waitKey(0);
 
-            //---test SGBM in OpenCV---
-            
-                    cv::Mat TestImgL = cv::imread("C:\\saltwater\\intern\\src\\plugin\\stereo\\Test\\im2.png");
-                    cv::Mat TestImgR = cv::imread("C:\\saltwater\\intern\\src\\plugin\\stereo\\Test\\im6.png");
-                    cv::imshow("TestImgL", TestImgL);
-                    cv::imshow("TestImgR", TestImgR);
-                    iter->imp_cvSGBM(DispImg_Curt, TestImgL, TestImgR);
-            
-            //---
-
-                    //DispImg_Rect.convertTo(DispImg_Rect, CV_32F, 1.0 / 16); // Disparity Image is in 16-bit -> Divide by 16 to get real Disparity.
+            //DispImg_Rect.convertTo(DispImg_Rect, CV_32F, 1.0 / 16); // Disparity Image is in 16-bit -> Divide by 16 to get real Disparity.
             cv::Mat DispImg_Orig(m_Keyframe_Curt.get_Img().size(), CV_32F);
             cv::remap(DispImg_Rect, DispImg_Orig, Orig2Rect_Curt_x, Orig2Rect_Curt_y, cv::INTER_LINEAR, cv::BORDER_TRANSPARENT); // !!! Warning: Using interpolation may cause additional errors !!!
 

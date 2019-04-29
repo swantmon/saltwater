@@ -2,8 +2,8 @@
 #pragma once
 
 #include "base/base_include_glm.h" // Some warnings appears when directly #include glm 
-#include "opencv2/opencv.hpp"
-#include "libsgm.h"
+
+#include <vector>
 
 namespace FutoGmtCV
 {
@@ -41,21 +41,6 @@ namespace FutoGmtCV
         glm::mat3 m_Rot_mtx; // Rotations from Mapping frame to Image frame
         glm::vec3 m_PC_vec; // Projection Center in Mapping frame
         glm::mat4x3 m_P_mtx; // Perspective Projection Matrix = K_mtx * [Rot_mtx | -Rot_mtx*PC_vec]
-
-    //===OLD===
-
-    //---Photogrammetric Computer Vision---
-    public:
-
-        //---Stereo Matching---
-        void imp_cvSGBM(cv::Mat& DispImg, const cv::Mat& RectImg_Base, const cv::Mat& RectImg_Match);
-    
-    //---Operator Object---
-    private:
-        //---Stereo Matching---
-        cv::Ptr<cv::StereoSGBM> operPtr_cvSGBM;
-
-
     };
 } // FutoGmtCV
 

@@ -5,13 +5,17 @@
 
 #include "base/base_include_glm.h" // Some warnings appears when directly #include glm 
 
-#include <vector>
-#include <memory>
-
 #include "plugin\stereo\FutoGmtCV_Img.h"
 #include "plugin\stereo\FutoGmtCV_Rect_Planar.h"
 
+#include <vector>
+#include <memory>
+
 #include "opencv2/opencv.hpp" 
+
+#include "libsgm.h"
+
+
 
 namespace Stereo
 {

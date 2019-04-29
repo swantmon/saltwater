@@ -122,13 +122,13 @@ namespace FutoGmtCV
         cal_RectImgBound(Img_Orig_B.get_ImgSize(), 0);
         cal_RectImgBound(Img_Orig_M.get_ImgSize(), 1);
 
-        m_Homo_B.m_RectImgConer_UL.x = m_Homo_B.m_RectImgConer_UL.x <= m_Homo_M.m_RectImgConer_UL.x ? m_Homo_B.m_RectImgConer_UL.x : m_Homo_M.m_RectImgConer_UL.x;
-        m_Homo_B.m_RectImgConer_UL.y = m_Homo_B.m_RectImgConer_UL.y <= m_Homo_M.m_RectImgConer_UL.y ? m_Homo_B.m_RectImgConer_UL.y : m_Homo_M.m_RectImgConer_UL.y;
-        m_Homo_B.m_RectImgConer_DR.x = m_Homo_B.m_RectImgConer_DR.x >= m_Homo_M.m_RectImgConer_DR.x ? m_Homo_B.m_RectImgConer_DR.x : m_Homo_M.m_RectImgConer_DR.x;
-        m_Homo_B.m_RectImgConer_DR.y = m_Homo_B.m_RectImgConer_DR.y >= m_Homo_M.m_RectImgConer_DR.y ? m_Homo_B.m_RectImgConer_DR.y : m_Homo_M.m_RectImgConer_DR.y;
+        m_Homography_B.m_RectImgConer_UL.x = m_Homography_B.m_RectImgConer_UL.x <= m_Homography_M.m_RectImgConer_UL.x ? m_Homography_B.m_RectImgConer_UL.x : m_Homography_M.m_RectImgConer_UL.x;
+        m_Homography_B.m_RectImgConer_UL.y = m_Homography_B.m_RectImgConer_UL.y <= m_Homography_M.m_RectImgConer_UL.y ? m_Homography_B.m_RectImgConer_UL.y : m_Homography_M.m_RectImgConer_UL.y;
+        m_Homography_B.m_RectImgConer_DR.x = m_Homography_B.m_RectImgConer_DR.x >= m_Homography_M.m_RectImgConer_DR.x ? m_Homography_B.m_RectImgConer_DR.x : m_Homography_M.m_RectImgConer_DR.x;
+        m_Homography_B.m_RectImgConer_DR.y = m_Homography_B.m_RectImgConer_DR.y >= m_Homography_M.m_RectImgConer_DR.y ? m_Homography_B.m_RectImgConer_DR.y : m_Homography_M.m_RectImgConer_DR.y;
 
-        m_Homo_M.m_RectImgConer_UL = m_Homo_B.m_RectImgConer_UL;
-        m_Homo_M.m_RectImgConer_DR = m_Homo_B.m_RectImgConer_DR;
+        m_Homography_M.m_RectImgConer_UL = m_Homography_B.m_RectImgConer_UL;
+        m_Homography_M.m_RectImgConer_DR = m_Homography_B.m_RectImgConer_DR;
 
         //---Step 4. Generate Rectified Images---
         genrt_RectImg(Img_Orig_B.get_Img(), 0);
@@ -180,11 +180,11 @@ namespace FutoGmtCV
         glm::mat3 H_B = glm::mat3(m_P_Rect_B) * glm::inverse(glm::mat3(P_Orig_B));
         glm::mat3 H_M = glm::mat3(m_P_Rect_M) * glm::inverse(glm::mat3(P_Orig_M));
 
-        m_Homo_B.m_H_Orig2Rect = glm::mat4(H_B);
-        m_Homo_B.m_H_Rect2Orig = glm::mat4(glm::inverse(H_B));
+        m_Homography_B.m_H_Orig2Rect = glm::mat4(H_B);
+        m_Homography_B.m_H_Rect2Orig = glm::mat4(glm::inverse(H_B));
 
-        m_Homo_M.m_H_Orig2Rect = glm::mat4(H_M);
-        m_Homo_M.m_H_Rect2Orig = glm::mat4(glm::inverse(H_M));
+        m_Homography_M.m_H_Orig2Rect = glm::mat4(H_M);
+        m_Homography_M.m_H_Rect2Orig = glm::mat4(glm::inverse(H_M));
     }
 
     //---Assistant Functions: Center Rectified Images---
@@ -193,9 +193,9 @@ namespace FutoGmtCV
         glm::mat3 H;
         switch (Which_Img)
         {
-        case 0: H = glm::mat3(m_Homo_B.m_H_Orig2Rect);
+        case 0: H = glm::mat3(m_Homography_B.m_H_Orig2Rect);
             break;
-        case 1: H = glm::mat3(m_Homo_M.m_H_Orig2Rect);
+        case 1: H = glm::mat3(m_Homography_M.m_H_Orig2Rect);
             break;
         }
         
@@ -207,12 +207,12 @@ namespace FutoGmtCV
         CenterDrift = glm::vec2(Center_Orig - Center_Orig2Rect);
     }
 
-    void CRectification_Planar::imp_CenterShift_K(const glm::vec2& Drift_B, const glm::vec2& Drift_M)
+    void CRectification_Planar::imp_CenterShift_K(const glm::vec2& Shift_B, const glm::vec2& Shift_M)
     {
-        m_K_Rect_B[2].x += Drift_B.x;
-        m_K_Rect_B[2].y += Drift_B.y;
-        m_K_Rect_M[2].x += Drift_M.x;
-        m_K_Rect_M[2].y += Drift_M.y;
+        m_K_Rect_B[2].x += Shift_B.x;
+        m_K_Rect_B[2].y += Shift_B.y;
+        m_K_Rect_M[2].x += Shift_M.x;
+        m_K_Rect_M[2].y += Shift_M.y;
     }
 
     //---Assistant Functions: Generate Rectified Images---
@@ -221,9 +221,9 @@ namespace FutoGmtCV
         glm::mat3 H;
         switch (Which_Img)
         {
-        case 0: H = glm::mat3(m_Homo_B.m_H_Orig2Rect);
+        case 0: H = glm::mat3(m_Homography_B.m_H_Orig2Rect);
             break;
-        case 1: H = glm::mat3(m_Homo_M.m_H_Orig2Rect);
+        case 1: H = glm::mat3(m_Homography_M.m_H_Orig2Rect);
             break;
         }
 
@@ -258,39 +258,34 @@ namespace FutoGmtCV
         switch (Which_Img)
         {
         case 0: 
-            m_Homo_B.m_RectImgConer_UL.x = ImgCnr_Rect_UL.x;
-            m_Homo_B.m_RectImgConer_UL.y = ImgCnr_Rect_UL.y;
-            m_Homo_B.m_RectImgConer_DR.x = ImgCnr_Rect_DR.x;
-            m_Homo_B.m_RectImgConer_DR.y = ImgCnr_Rect_DR.y;
+            m_Homography_B.m_RectImgConer_UL = ImgCnr_Rect_UL;
+            m_Homography_B.m_RectImgConer_DR = ImgCnr_Rect_DR;
             break;
         case 1: 
-            m_Homo_M.m_RectImgConer_UL.x = ImgCnr_Rect_UL.x;
-            m_Homo_M.m_RectImgConer_UL.y = ImgCnr_Rect_UL.y;
-            m_Homo_M.m_RectImgConer_DR.x = ImgCnr_Rect_DR.x;
-            m_Homo_M.m_RectImgConer_DR.y = ImgCnr_Rect_DR.y;
+            m_Homography_M.m_RectImgConer_UL = ImgCnr_Rect_UL;
+            m_Homography_M.m_RectImgConer_DR = ImgCnr_Rect_DR;
             break;
         }
     }
 
     void CRectification_Planar::genrt_RectImg(const std::vector<char>& Img_Orig, const int Which_Img)
     {
-        //---Compute @ GPU---
-
+        //---GPU Computation Start---
         Gfx::Performance::BeginEvent("Planar Rectification");
+
+        //---Put Homography into Buffer---
+        switch (Which_Img)
+        {
+        case 0: Gfx::BufferManager::UploadBufferData(m_HomographyBufferPtr, &m_Homography_B);
+            break;
+        case 1: Gfx::BufferManager::UploadBufferData(m_HomographyBufferPtr, &m_Homography_M);
+            break;
+        }
 
         //---Put OrigImg into Input Texture---
         Base::AABB2UInt TargetRect;
         TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_ImgSize_Orig.x, m_ImgSize_Orig.y));
         Gfx::TextureManager::CopyToTexture2D(m_OrigImgTexturePtr, TargetRect, m_ImgSize_Orig.x, static_cast<const void*>(Img_Orig.data()));
-
-        //---Put Homography into Buffer---
-        switch (Which_Img)
-        {
-        case 0: Gfx::BufferManager::UploadBufferData(m_HomographyBufferPtr, &m_Homo_B);
-            break;
-        case 1: Gfx::BufferManager::UploadBufferData(m_HomographyBufferPtr, &m_Homo_M);
-            break;
-        }
 
         //---Connecting Managers (@CPU) & GLSL (@GPU)---
         Gfx::ContextManager::SetShaderCS(m_PlanarRectCSPtr);
