@@ -68,6 +68,7 @@ namespace Stereo
         int m_DisparityCount;
 
         std::unique_ptr<sgm::StereoSGM> m_pStereoMatcher_LibSGM;
+        cv::Ptr<cv::StereoSGBM> m_pStereoMatcher_cvSGBM;
 
         
     private:

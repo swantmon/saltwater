@@ -136,18 +136,29 @@ namespace Stereo
             //------
             
             //===Stereo Matching===
-            std::vector<char> DispImg_Rect(m_RectImgSize.x * m_RectImgSize.y, 0.0);
+            const int RectImgSize_1D = m_RectImgSize.x * m_RectImgSize.y;
+            std::vector<char> DispImg_Rect(RectImgSize_1D, 0.0);
 
             //---LibSGM---
             m_pStereoMatcher_LibSGM->execute(RectImg_Curt.get_Img().data(), RectImg_Last.get_Img().data(), DispImg_Rect.data());
 
             //---Test: Show Disparity Image---
-            cv::Mat cvDispImg_LibSGM(m_RectImgSize.y, m_RectImgSize.x, CV_8UC1);
+            cv::Mat cvDispImg_LibSGM(cvRectImg_Curt.size(), CV_8UC1);
             memcpy(cvDispImg_LibSGM.data, DispImg_Rect.data(), DispImg_Rect.size());
-            cv::imshow("Disp", cvDispImg_LibSGM);
-            cv::waitKey(0);
+            cv::normalize(cvDispImg_LibSGM, cvDispImg_LibSGM, 0, 500, cv::NORM_MINMAX, CV_8UC1);
+            cv::imwrite("E:\\Project_ARCHITECT\\DispImg_LibSGM.png", cvDispImg_LibSGM);
             //---
-            
+
+            //---SGBM by OpenCV---
+            cv::Mat cvDispImg_cvSGBM_16bit;
+            m_pStereoMatcher_cvSGBM = cv::StereoSGBM::create();
+            m_pStereoMatcher_cvSGBM->compute(cvRectImg_Curt, cvRectImg_Last, cvDispImg_cvSGBM_16bit);
+            cvDispImg_cvSGBM_16bit.convertTo(cvDispImg_cvSGBM_16bit, CV_32F, 1.0/16); // Disparity Image is in 16-bit -> Divide by 16 to get real Disparity.
+
+            //---Test: Show Disparity Image---
+            cv::Mat cvDispImg_cvSGBM_8bit(cvRectImg_Curt.size(), CV_8UC1);
+            cv::normalize(cvDispImg_cvSGBM_16bit, cvDispImg_cvSGBM_8bit, 0, 255, cv::NORM_MINMAX, CV_8UC1);
+            cv::imwrite("E:\\Project_ARCHITECT\\Disp_Rect.png", cvDispImg_cvSGBM_8bit);
 
             //===== OLD =====
             /*
