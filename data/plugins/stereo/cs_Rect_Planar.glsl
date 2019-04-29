@@ -10,7 +10,7 @@ layout(std140, binding = 0) uniform HomographyBuffer
 };
 
 layout (binding = 0, rgba8) readonly uniform image2D cs_OrigImg;
-layout (binding = 1, rgba8) writeonly uniform image2D cs_RectImg;
+layout (binding = 1, r8) writeonly uniform image2D cs_RectImg;
 
 vec4 BiLinearInterpolation(vec2 pixPosition)
 {
@@ -19,10 +19,15 @@ vec4 BiLinearInterpolation(vec2 pixPosition)
 	ivec2 pixPosition_DL = pixPosition_UL + ivec2(0, 1);
 	ivec2 pixPosition_DR = pixPosition_UL + ivec2(1, 1);
 
-	vec4 pixValue_UL = imageLoad(cs_OrigImg, pixPosition_UL);
-	vec4 pixValue_UR = imageLoad(cs_OrigImg, pixPosition_UR);
-	vec4 pixValue_DL = imageLoad(cs_OrigImg, pixPosition_DL);
-	vec4 pixValue_DR = imageLoad(cs_OrigImg, pixPosition_DR);
+	vec4 pixValue_RGBA_UL = imageLoad(cs_OrigImg, pixPosition_UL);
+	vec4 pixValue_RGBA_UR = imageLoad(cs_OrigImg, pixPosition_UR);
+	vec4 pixValue_RGBA_DL = imageLoad(cs_OrigImg, pixPosition_DL);
+	vec4 pixValue_RGBA_DR = imageLoad(cs_OrigImg, pixPosition_DR);
+
+	vec4 pixValue_UL = vec4(0.299 * pixValue_RGBA_UL.x + 0.587 * pixValue_RGBA_UL.y + 0.114 * pixValue_RGBA_UL.z);
+	vec4 pixValue_UR = vec4(0.299 * pixValue_RGBA_UR.x + 0.587 * pixValue_RGBA_UR.y + 0.114 * pixValue_RGBA_UR.z);
+	vec4 pixValue_DL = vec4(0.299 * pixValue_RGBA_DL.x + 0.587 * pixValue_RGBA_DL.y + 0.114 * pixValue_RGBA_DL.z);
+	vec4 pixValue_DR = vec4(0.299 * pixValue_RGBA_DR.x + 0.587 * pixValue_RGBA_DR.y + 0.114 * pixValue_RGBA_DR.z);
 
 	float a_x = (pixPosition.x - pixPosition_UL.x) / (pixPosition_UR.x - pixPosition_UL.x);
 	float a_y = (pixPosition.y - pixPosition_UL.y) / (pixPosition_DL.y - pixPosition_UL.y);

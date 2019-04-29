@@ -75,7 +75,7 @@ namespace FutoGmtCV
         TextureDescriptor_Out.m_Access = Gfx::CTexture::EAccess::CPUWrite;
         TextureDescriptor_Out.m_Usage = Gfx::CTexture::EUsage::GPUReadWrite;
         TextureDescriptor_Out.m_Semantic = Gfx::CTexture::UndefinedSemantic;
-        TextureDescriptor_Out.m_Format = Gfx::CTexture::R8G8B8A8_UBYTE; // 4 channels and each channel is 8-bit.
+        TextureDescriptor_Out.m_Format = Gfx::CTexture::R8_UBYTE; // 1 channels with 8-bit.
 
         m_RectImgTexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_Out);
     }
@@ -304,7 +304,7 @@ namespace FutoGmtCV
         Gfx::Performance::EndEvent();
 
         std::vector<char> Img_Rect;
-        const int RectImgSize_1D = m_ImgSize_Rect.x * m_ImgSize_Rect.y * 4;
+        const int RectImgSize_1D = m_ImgSize_Rect.x * m_ImgSize_Rect.y;
         Img_Rect.resize(RectImgSize_1D);
         Gfx::TextureManager::CopyTextureToCPU(m_RectImgTexturePtr, reinterpret_cast<char*>(Img_Rect.data()));
 

@@ -65,7 +65,7 @@ namespace Stereo
         }
         else // Both current & last keyframes exist. -> Processing -> Free last keyframe.
         {
-            //---Test: Show Rectified Images---
+            //---Test: Show Original Images---
             cv::Mat cvOrigImg_Curt(m_OrigImgSize.y, m_OrigImgSize.x, CV_8UC4);
             memcpy(cvOrigImg_Curt.data, m_Keyframe_Curt.get_Img().data(), m_Keyframe_Curt.get_Img().size());
             cv::cvtColor(cvOrigImg_Curt, cvOrigImg_Curt, cv::COLOR_BGRA2RGBA); // Transform to RGB before imshow & imwrite
@@ -76,25 +76,23 @@ namespace Stereo
             cv::cvtColor(cvOrigImg_Last, cvOrigImg_Last, cv::COLOR_BGRA2RGBA); // Transform to RGB before imshow & imwrite
             cv::imwrite("E:\\Project_ARCHITECT\\OrigImg_Last.png", cvOrigImg_Last);
 
-            //---Rectification---
+            //===Rectification===
             FutoGmtCV::FutoImg RectImg_Curt, RectImg_Last;
             FutoGmtCV::CRectification_Planar PlanarRectifier = FutoGmtCV::CRectification_Planar(m_Keyframe_Curt.get_ImgSize(), m_RectImgSize);
 
             PlanarRectifier.execute(RectImg_Curt, RectImg_Last, m_Keyframe_Curt, m_Keyframe_Last);
 
             //---Test: Show Rectified Images---
-            cv::Mat cvRectImg_Curt(m_RectImgSize.y, m_RectImgSize.x, CV_8UC4);
+            cv::Mat cvRectImg_Curt(m_RectImgSize.y, m_RectImgSize.x, CV_8UC1);
             memcpy(cvRectImg_Curt.data, RectImg_Curt.get_Img().data(), RectImg_Curt.get_Img().size());
-            cv::cvtColor(cvRectImg_Curt, cvRectImg_Curt, cv::COLOR_BGRA2RGBA); // Transform to RGB before imshow & imwrite
             cv::imwrite("E:\\Project_ARCHITECT\\RectImg_Curt.png", cvRectImg_Curt);
 
-            cv::Mat cvRectImg_Last(m_RectImgSize.y, m_RectImgSize.x, CV_8UC4);
+            cv::Mat cvRectImg_Last(m_RectImgSize.y, m_RectImgSize.x, CV_8UC1);
             memcpy(cvRectImg_Last.data, RectImg_Last.get_Img().data(), RectImg_Last.get_Img().size());
-            cv::cvtColor(cvRectImg_Last, cvRectImg_Last, cv::COLOR_BGRA2RGBA); // Transform to RGB before imshow & imwrite
             cv::imwrite("E:\\Project_ARCHITECT\\RectImg_Last.png", cvRectImg_Last);
             //---
 
-            //===Verify by Test Data===
+            //---Verify by Test Data---
             /*
                cv::Mat TestInputL = cv::imread("E:\\Project_ARCHITECT\\cvSGBM_Test Data\\01-002570.jpg");
                cv::cvtColor(TestInputL, TestInputL, cv::COLOR_BGRA2GRAY);
@@ -135,21 +133,24 @@ namespace Stereo
 
                PlanarRectifier.execute(RectImg_Curt, RectImg_Last, TestImgL, TestImgR);
                */
-            //======
+            //------
+            
+            //===Stereo Matching===
+            std::vector<char> DispImg_Rect(m_RectImgSize.x * m_RectImgSize.y, 0.0);
 
-            //===Stereo Matching by LibSGM===
+            //---LibSGM---
+            m_pStereoMatcher_LibSGM->execute(RectImg_Curt.get_Img().data, RectImg_Last.get_Img().data, DispImg_Rect.data);
 
+            //---Test: Show Disparity Image---
+            cv::Mat cvDispImg_LibSGM(m_RectImgSize.y, m_RectImgSize.x, CV_8UC1);
+            memcpy(cvDispImg_LibSGM.data, DispImg_Rect.data(), DispImg_Rect.size());
+            cv::imshow("Disp", DispImg_Rect);
+            cv::waitKey(0);
+            //---
+            
 
             //===== OLD =====
             /*
-            m_pStereoMatcherCUDA->execute(RectImg_Curt.get_Img().data, RectImg_Last.get_Img().data, DispImg_Rect.data);
-
-            imshow("Left", RectImg_Curt.get_Img());
-            imshow("Right", RectImg_Last.get_Img());
-            imshow("Disp", DispImg_Rect);
-
-            cv::waitKey(0);
-
             //DispImg_Rect.convertTo(DispImg_Rect, CV_32F, 1.0 / 16); // Disparity Image is in 16-bit -> Divide by 16 to get real Disparity.
             cv::Mat DispImg_Orig(m_Keyframe_Curt.get_Img().size(), CV_32F);
             cv::remap(DispImg_Rect, DispImg_Orig, Orig2Rect_Curt_x, Orig2Rect_Curt_y, cv::INTER_LINEAR, cv::BORDER_TRANSPARENT); // !!! Warning: Using interpolation may cause additional errors !!!
@@ -262,10 +263,9 @@ namespace Stereo
         //---Rectification-----
         m_RectImgSize = Core::CProgramParameters::GetInstance().Get("mr:stereo:rectified_image_size", glm::ivec2(1280, 1040));
 
-        //---OLD: For LibSGM---
+        //---LibSGM---
         m_DisparityCount = Core::CProgramParameters::GetInstance().Get("mr:stereo:disparity_count", 128);
-
-        m_pStereoMatcherCUDA = std::make_unique<sgm::StereoSGM>(m_RectImgSize.x, m_RectImgSize.y, m_DisparityCount, 8, 8, sgm::EXECUTE_INOUT_HOST2HOST);
+        m_pStereoMatcher_LibSGM = std::make_unique<sgm::StereoSGM>(m_RectImgSize.x, m_RectImgSize.y, m_DisparityCount, 8, 8, sgm::EXECUTE_INOUT_HOST2HOST);
     }
 
     // -----------------------------------------------------------------------------

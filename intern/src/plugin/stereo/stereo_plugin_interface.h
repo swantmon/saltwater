@@ -64,12 +64,10 @@ namespace Stereo
         //---Rectification---
         glm::ivec2 m_RectImgSize;
 
-
-        //===OLD===
-
-
-        std::unique_ptr<sgm::StereoSGM> m_pStereoMatcherCUDA;
+        //---Stereo Matching---
         int m_DisparityCount;
+
+        std::unique_ptr<sgm::StereoSGM> m_pStereoMatcher_LibSGM;
 
         
     private:
