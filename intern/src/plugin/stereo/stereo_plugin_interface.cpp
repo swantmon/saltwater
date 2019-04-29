@@ -139,12 +139,12 @@ namespace Stereo
             std::vector<char> DispImg_Rect(m_RectImgSize.x * m_RectImgSize.y, 0.0);
 
             //---LibSGM---
-            m_pStereoMatcher_LibSGM->execute(RectImg_Curt.get_Img().data, RectImg_Last.get_Img().data, DispImg_Rect.data);
+            m_pStereoMatcher_LibSGM->execute(RectImg_Curt.get_Img().data(), RectImg_Last.get_Img().data(), DispImg_Rect.data());
 
             //---Test: Show Disparity Image---
             cv::Mat cvDispImg_LibSGM(m_RectImgSize.y, m_RectImgSize.x, CV_8UC1);
             memcpy(cvDispImg_LibSGM.data, DispImg_Rect.data(), DispImg_Rect.size());
-            cv::imshow("Disp", DispImg_Rect);
+            cv::imshow("Disp", cvDispImg_LibSGM);
             cv::waitKey(0);
             //---
             
