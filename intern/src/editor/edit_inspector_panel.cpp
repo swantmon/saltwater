@@ -38,7 +38,7 @@ namespace GUI
     {
         if (_ID == Dt::CEntity::s_InvalidID)
         {
-            m_pEntity = 0;
+            m_pEntity = nullptr;
             return;
         }
 

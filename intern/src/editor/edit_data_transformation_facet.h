@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "base/base_include_glm.h"
+
 #include "engine/data/data_transformation_facet.h"
 
 #include "editor/imgui/imgui.h"
@@ -21,17 +23,22 @@ namespace Dt
             // -----------------------------------------------------------------------------
             // Rotation
             // -----------------------------------------------------------------------------
-            glm::vec3 RotationDegree;
+			glm::vec3 EulerAngles;
+            glm::vec3 DegreeAngles;
 
-            RotationDegree.x = glm::degrees(m_Rotation.x);
-            RotationDegree.y = glm::degrees(m_Rotation.y);
-            RotationDegree.z = glm::degrees(m_Rotation.z);
+			EulerAngles = glm::eulerAngles(m_Rotation);
 
-            ImGui::DragFloat3("Rotation", &RotationDegree.x, 0.1f, 0.0f, 0.0f, "%.2f");
+            DegreeAngles.x = glm::degrees(EulerAngles.x);
+            DegreeAngles.y = glm::degrees(EulerAngles.y);
+            DegreeAngles.z = glm::degrees(EulerAngles.z);
 
-            m_Rotation.x = glm::radians(RotationDegree.x);
-            m_Rotation.y = glm::radians(RotationDegree.y);
-            m_Rotation.z = glm::radians(RotationDegree.z);
+            ImGui::DragFloat3("Rotation", &DegreeAngles.x, 0.1f, 0.0f, 0.0f, "%.2f");
+
+			EulerAngles.x = glm::radians(DegreeAngles.x);
+			EulerAngles.y = glm::radians(DegreeAngles.y);
+			EulerAngles.z = glm::radians(DegreeAngles.z);
+
+			m_Rotation = glm::quat(EulerAngles);
 
             // -----------------------------------------------------------------------------
             // Scale
