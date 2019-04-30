@@ -30,7 +30,7 @@ namespace MR
         CPlaneExtractor(MR::CSLAMReconstructor* _pReconstructor);
         ~CPlaneExtractor();
 
-        void Update();
+        void UpdatePlane(int _PlaneID);
 
     private:
 

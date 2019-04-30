@@ -44,9 +44,13 @@ namespace MR
 {
     // -----------------------------------------------------------------------------
 
-    void CPlaneExtractor::Update()
+    void CPlaneExtractor::UpdatePlane(int _PlaneID)
     {
+        auto& rPlaneMap = m_pReconstructor->GetPlanes();
 
+        assert(rPlaneMap.find(_PlaneID) != rPlaneMap.end());
+
+        const auto& rPlane = rPlaneMap.at(_PlaneID);
     }
 
     // -----------------------------------------------------------------------------

@@ -737,7 +737,7 @@ namespace MR
                     break;
                 }
 
-                m_pPlaneExtractor->Update();
+                m_pPlaneExtractor->UpdatePlane(PlaneID);
             }
             else if (MessageType == COLORINTRINSICS)
             {
