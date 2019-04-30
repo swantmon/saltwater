@@ -71,6 +71,8 @@ namespace Stereo
         cv::Ptr<cv::StereoSGBM> m_pStereoMatcher_cvSGBM;
         cv::Ptr<cv::StereoBM> m_pStereoMatcher_cvBM;
         cv::Ptr<cv::cuda::StereoBM> m_pStereoMatcher_cvBM_cuda;
+        cv::Ptr<cv::StereoMatcher> m_pStereoMatcher_cvBP_cuda;
+        cv::Ptr<cv::StereoMatcher> m_pStereoMatcher_cvConstBP_cuda;
         
     private:
         void ShowImg(const std::vector<char>& Img_RGBA) const;

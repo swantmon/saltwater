@@ -149,22 +149,48 @@ namespace Stereo
             //---
 
             //---cvBM_cuda---
-            cv::cuda::GpuMat cvRectImg_Curt_gpu, cvRectImg_Last_gpu, cvDispImg_cvBM_cud_gpu;
+            cv::cuda::GpuMat cvRectImg_Curt_gpu, cvRectImg_Last_gpu;
+            cv::cuda::GpuMat cvDispImg_cvBM_cuda_gpu;
             cvRectImg_Curt_gpu.upload(cvRectImg_Curt);
             cvRectImg_Last_gpu.upload(cvRectImg_Last);
 
             
             m_pStereoMatcher_cvBM_cuda = cv::cuda::createStereoBM(m_DisparityCount, 7);
-            m_pStereoMatcher_cvBM_cuda->compute(cvRectImg_Curt_gpu, cvRectImg_Last_gpu, cvDispImg_cvBM_cud_gpu);
+            m_pStereoMatcher_cvBM_cuda->compute(cvRectImg_Curt_gpu, cvRectImg_Last_gpu, cvDispImg_cvBM_cuda_gpu);
 
             cv::Mat cvDispImg_cvBM_cuda_16bit;
-            cvDispImg_cvBM_cud_gpu.download(cvDispImg_cvBM_cuda_16bit);
-            
+            cvDispImg_cvBM_cuda_gpu.download(cvDispImg_cvBM_cuda_16bit);
             cvDispImg_cvBM_cuda_16bit.convertTo(cvDispImg_cvBM_cuda_16bit, CV_32F, 1.0 / 16); // Disparity Image is in 16-bit -> Divide by 16 to get real Disparity.
             //---Test: Show Disparity Image---
             cv::Mat cvDispImg_cvBM_cuda_8bit(cvRectImg_Curt.size(), CV_8UC1);
             cv::normalize(cvDispImg_cvBM_cuda_16bit, cvDispImg_cvBM_cuda_8bit, 0, 255, cv::NORM_MINMAX, CV_8UC1);
             cv::imwrite("E:\\Project_ARCHITECT\\Disp_Rect_cvBM_cuda.png", cvDispImg_cvBM_cuda_8bit);
+
+            //---cvBP_cuda---
+            cv::cuda::GpuMat cvDispImg_cvBP_cuda_gpu;
+            m_pStereoMatcher_cvBP_cuda = cv::cuda::createStereoBeliefPropagation();
+            m_pStereoMatcher_cvBP_cuda->compute(cvRectImg_Curt_gpu, cvRectImg_Last_gpu, cvDispImg_cvBP_cuda_gpu);
+
+            cv::Mat cvDispImg_cvBP_cuda_16bit;
+            cvDispImg_cvBP_cuda_gpu.download(cvDispImg_cvBP_cuda_16bit);
+            cvDispImg_cvBP_cuda_16bit.convertTo(cvDispImg_cvBP_cuda_16bit, CV_32F, 1.0 / 16); // Disparity Image is in 16-bit -> Divide by 16 to get real Disparity.
+            //---Test: Show Disparity Image---
+            cv::Mat cvDispImg_cvBP_cuda_8bit(cvRectImg_Curt.size(), CV_8UC1);
+            cv::normalize(cvDispImg_cvBP_cuda_16bit, cvDispImg_cvBP_cuda_8bit, 0, 255, cv::NORM_MINMAX, CV_8UC1);
+            cv::imwrite("E:\\Project_ARCHITECT\\Disp_Rect_cvBP_cuda.png", cvDispImg_cvBP_cuda_8bit);
+
+            //---cvConstantBP_cuda---
+            cv::cuda::GpuMat cvDispImg_cvConstBP_cuda_gpu;
+            m_pStereoMatcher_cvConstBP_cuda = cv::cuda::createStereoBeliefPropagation();
+            m_pStereoMatcher_cvConstBP_cuda->compute(cvRectImg_Curt_gpu, cvRectImg_Last_gpu, cvDispImg_cvConstBP_cuda_gpu);
+
+            cv::Mat cvDispImg_cvConstBP_cuda_16bit;
+            cvDispImg_cvConstBP_cuda_gpu.download(cvDispImg_cvConstBP_cuda_16bit);
+            cvDispImg_cvConstBP_cuda_16bit.convertTo(cvDispImg_cvConstBP_cuda_16bit, CV_32F, 1.0 / 16); // Disparity Image is in 16-bit -> Divide by 16 to get real Disparity.
+            //---Test: Show Disparity Image---
+            cv::Mat cvDispImg_cvConstBP_cuda_8bit(cvRectImg_Curt.size(), CV_8UC1);
+            cv::normalize(cvDispImg_cvConstBP_cuda_16bit, cvDispImg_cvConstBP_cuda_8bit, 0, 255, cv::NORM_MINMAX, CV_8UC1);
+            cv::imwrite("E:\\Project_ARCHITECT\\Disp_Rect_cvConstBP_cuda.png", cvDispImg_cvConstBP_cuda_8bit);
 
 
             //---cvSGBM---
