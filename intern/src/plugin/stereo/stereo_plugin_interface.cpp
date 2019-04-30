@@ -82,11 +82,11 @@ namespace Stereo
             PlanarRectifier.execute(RectImg_Curt, RectImg_Last, m_Keyframe_Curt, m_Keyframe_Last);
 
             //---Test: Show Rectified Images---
-            cv::Mat cvRectImg_Curt(m_RectImgSize.y, m_RectImgSize.x, CV_8UC1);
+            cv::Mat cvRectImg_Curt(RectImg_Curt.get_ImgSize().y, RectImg_Curt.get_ImgSize().x, CV_8UC1);
             memcpy(cvRectImg_Curt.data, RectImg_Curt.get_Img().data(), RectImg_Curt.get_Img().size());
             cv::imwrite("E:\\Project_ARCHITECT\\RectImg_Curt.png", cvRectImg_Curt);
 
-            cv::Mat cvRectImg_Last(m_RectImgSize.y, m_RectImgSize.x, CV_8UC1);
+            cv::Mat cvRectImg_Last(RectImg_Last.get_ImgSize().y, RectImg_Last.get_ImgSize().x, CV_8UC1);
             memcpy(cvRectImg_Last.data, RectImg_Last.get_Img().data(), RectImg_Last.get_Img().size());
             cv::imwrite("E:\\Project_ARCHITECT\\RectImg_Last.png", cvRectImg_Last);
             //---
@@ -138,13 +138,14 @@ namespace Stereo
             std::vector<char> DispImg_Rect(RectImg_Curt.get_Img().size(), 0.0);
             
             //---LibSGM---
-            
+            /*
             m_pStereoMatcher_LibSGM->execute(RectImg_Curt.get_Img().data(), RectImg_Last.get_Img().data(), DispImg_Rect.data());
             //---Test: Show Disparity Image---
             cv::Mat cvDispImg_LibSGM(cvRectImg_Curt.size(), CV_8UC1);
             memcpy(cvDispImg_LibSGM.data, DispImg_Rect.data(), DispImg_Rect.size());
             cv::normalize(cvDispImg_LibSGM, cvDispImg_LibSGM, 0, 500, cv::NORM_MINMAX, CV_8UC1);
             cv::imwrite("E:\\Project_ARCHITECT\\DispImg_LibSGM.png", cvDispImg_LibSGM);
+            */
             //---
 
             //---cvBM_cuda---
@@ -153,7 +154,7 @@ namespace Stereo
             cvRectImg_Last_gpu.upload(cvRectImg_Last);
 
             
-            m_pStereoMatcher_cvBM_cuda = cv::cuda::createStereoBM(64, 7);
+            m_pStereoMatcher_cvBM_cuda = cv::cuda::createStereoBM(m_DisparityCount, 7);
             m_pStereoMatcher_cvBM_cuda->compute(cvRectImg_Curt_gpu, cvRectImg_Last_gpu, cvDispImg_cvBM_cud_gpu);
 
             cv::Mat cvDispImg_cvBM_cuda_16bit;
@@ -167,6 +168,7 @@ namespace Stereo
 
 
             //---cvSGBM---
+            /*
             cv::Mat cvDispImg_cvSGBM_16bit;
             m_pStereoMatcher_cvSGBM = cv::StereoSGBM::create();
             m_pStereoMatcher_cvSGBM->compute(cvRectImg_Curt, cvRectImg_Last, cvDispImg_cvSGBM_16bit);
@@ -175,8 +177,10 @@ namespace Stereo
             cv::Mat cvDispImg_cvSGBM_8bit(cvRectImg_Curt.size(), CV_8UC1);
             cv::normalize(cvDispImg_cvSGBM_16bit, cvDispImg_cvSGBM_8bit, 0, 255, cv::NORM_MINMAX, CV_8UC1);
             cv::imwrite("E:\\Project_ARCHITECT\\Disp_Rect_cvSGBM.png", cvDispImg_cvSGBM_8bit);
+            */
             
             //---cvBM---
+            /*
             cv::Mat cvDispImg_cvBM_16bit;
             m_pStereoMatcher_cvBM = cv::StereoBM::create();
             m_pStereoMatcher_cvBM->compute(cvRectImg_Curt, cvRectImg_Last, cvDispImg_cvBM_16bit);
@@ -185,22 +189,7 @@ namespace Stereo
             cv::Mat cvDispImg_cvBM_8bit(cvRectImg_Curt.size(), CV_8UC1);
             cv::normalize(cvDispImg_cvBM_16bit, cvDispImg_cvBM_8bit, 0, 255, cv::NORM_MINMAX, CV_8UC1);
             cv::imwrite("E:\\Project_ARCHITECT\\Disp_Rect_cvBM.png", cvDispImg_cvBM_8bit);
-
-            //---cvBM: Test Data---
-            /*
-            cv::Mat TestInputL = cv::imread("E:\\Project_ARCHITECT\\cones-png-2\\cones\\im2.png", cv::IMREAD_GRAYSCALE);
-            cv::Mat TestInputR = cv::imread("E:\\Project_ARCHITECT\\cones-png-2\\cones\\im6.png", cv::IMREAD_GRAYSCALE);
-
-            cv::Mat cvDispImg_Test_cvBM_16bit;
-            m_pStereoMatcher_cvBM = cv::StereoBM::create();
-            m_pStereoMatcher_cvBM->compute(TestInputL, TestInputR, cvDispImg_Test_cvBM_16bit);
-            cvDispImg_Test_cvBM_16bit.convertTo(cvDispImg_Test_cvBM_16bit, CV_32F, 1.0 / 16); // Disparity Image is in 16-bit -> Divide by 16 to get real Disparity.
-            //---Test: Show Disparity Image---
-            cv::Mat cvDispImg_Test_cvBM_8bit(cvRectImg_Curt.size(), CV_8UC1);
-            cv::normalize(cvDispImg_Test_cvBM_16bit, cvDispImg_Test_cvBM_8bit, 0, 255, cv::NORM_MINMAX, CV_8UC1);
-            cv::imwrite("E:\\Project_ARCHITECT\\Disp_Rect_Test_cvBM.png", cvDispImg_Test_cvBM_8bit);
             */
-
 
             //===== OLD =====
             /*

@@ -43,6 +43,7 @@ namespace FutoGmtCV
         void imp_CenterShift_K(const glm::vec2& Drift_B, const glm::vec2& Drift_Mt);
 
         void cal_RectImgBound(const glm::ivec2& ImgSize_Orig, const int Which_Img = 0);
+        void determ_RectImgSize();
         void genrt_RectImg(const std::vector<char>& Img_Orig, const int Which_Img = 0);
 
         void get_RectImg(FutoImg& Img_Rect, const int Which_Img = 0);
@@ -52,7 +53,6 @@ namespace FutoGmtCV
         //---Rectified Image---
         std::vector<char> m_Img_Rect_B, m_Img_Rect_M; // Rectified Images
         glm::ivec2 m_ImgSize_Orig, m_ImgSize_Rect;
-        glm::ivec2 m_ImgCnr_Rect_UL, m_ImgCnr_Rect_DR;
 
         //---Homography---
         SHomographyTransform m_Homography_B, m_Homography_M; // Homography (Original -> Rectified)

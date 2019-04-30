@@ -62,22 +62,6 @@ namespace FutoGmtCV
         TextureDescriptor_In.m_Format = Gfx::CTexture::R8G8B8A8_UBYTE; // 4 channels and each channel is 8-bit.
 
         m_OrigImgTexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_In);
-
-        //---Initialize Output Texture Manager---
-        Gfx::STextureDescriptor TextureDescriptor_Out = {};
-
-        TextureDescriptor_Out.m_NumberOfPixelsU = m_ImgSize_Rect.x;
-        TextureDescriptor_Out.m_NumberOfPixelsV = m_ImgSize_Rect.y;
-        TextureDescriptor_Out.m_NumberOfPixelsW = 1;
-        TextureDescriptor_Out.m_NumberOfMipMaps = 1;
-        TextureDescriptor_Out.m_NumberOfTextures = 1;
-        TextureDescriptor_Out.m_Binding = Gfx::CTexture::ShaderResource;
-        TextureDescriptor_Out.m_Access = Gfx::CTexture::EAccess::CPUWrite;
-        TextureDescriptor_Out.m_Usage = Gfx::CTexture::EUsage::GPUReadWrite;
-        TextureDescriptor_Out.m_Semantic = Gfx::CTexture::UndefinedSemantic;
-        TextureDescriptor_Out.m_Format = Gfx::CTexture::R8_UBYTE; // 1 channels with 8-bit.
-
-        m_RectImgTexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_Out);
     }
 
 
@@ -122,13 +106,7 @@ namespace FutoGmtCV
         cal_RectImgBound(Img_Orig_B.get_ImgSize(), 0);
         cal_RectImgBound(Img_Orig_M.get_ImgSize(), 1);
 
-        m_Homography_B.m_RectImgConer_UL.x = m_Homography_B.m_RectImgConer_UL.x <= m_Homography_M.m_RectImgConer_UL.x ? m_Homography_B.m_RectImgConer_UL.x : m_Homography_M.m_RectImgConer_UL.x;
-        m_Homography_B.m_RectImgConer_UL.y = m_Homography_B.m_RectImgConer_UL.y <= m_Homography_M.m_RectImgConer_UL.y ? m_Homography_B.m_RectImgConer_UL.y : m_Homography_M.m_RectImgConer_UL.y;
-        m_Homography_B.m_RectImgConer_DR.x = m_Homography_B.m_RectImgConer_DR.x >= m_Homography_M.m_RectImgConer_DR.x ? m_Homography_B.m_RectImgConer_DR.x : m_Homography_M.m_RectImgConer_DR.x;
-        m_Homography_B.m_RectImgConer_DR.y = m_Homography_B.m_RectImgConer_DR.y >= m_Homography_M.m_RectImgConer_DR.y ? m_Homography_B.m_RectImgConer_DR.y : m_Homography_M.m_RectImgConer_DR.y;
-
-        m_Homography_M.m_RectImgConer_UL = m_Homography_B.m_RectImgConer_UL;
-        m_Homography_M.m_RectImgConer_DR = m_Homography_B.m_RectImgConer_DR;
+        determ_RectImgSize();
 
         //---Step 4. Generate Rectified Images---
         genrt_RectImg(Img_Orig_B.get_Img(), 0);
@@ -268,8 +246,39 @@ namespace FutoGmtCV
         }
     }
 
+    void CRectification_Planar::determ_RectImgSize()
+    {
+        glm::ivec2 RectImgConerUL, RectImgConerDR;
+
+        RectImgConerUL.x = m_Homography_B.m_RectImgConer_UL.x <= m_Homography_M.m_RectImgConer_UL.x ? m_Homography_B.m_RectImgConer_UL.x : m_Homography_M.m_RectImgConer_UL.x;
+        RectImgConerUL.y = m_Homography_B.m_RectImgConer_UL.y <= m_Homography_M.m_RectImgConer_UL.y ? m_Homography_B.m_RectImgConer_UL.y : m_Homography_M.m_RectImgConer_UL.y;
+        RectImgConerDR.x = m_Homography_B.m_RectImgConer_DR.x >= m_Homography_M.m_RectImgConer_DR.x ? m_Homography_B.m_RectImgConer_DR.x : m_Homography_M.m_RectImgConer_DR.x;
+        RectImgConerDR.y = m_Homography_B.m_RectImgConer_DR.y >= m_Homography_M.m_RectImgConer_DR.y ? m_Homography_B.m_RectImgConer_DR.y : m_Homography_M.m_RectImgConer_DR.y;
+
+        m_Homography_M.m_RectImgConer_UL = RectImgConerUL;
+        m_Homography_M.m_RectImgConer_DR = RectImgConerDR;
+
+        m_ImgSize_Rect = m_Homography_M.m_RectImgConer_DR - m_Homography_M.m_RectImgConer_UL;
+    }
+
     void CRectification_Planar::genrt_RectImg(const std::vector<char>& Img_Orig, const int Which_Img)
     {
+        //---Initialize Output Texture Manager---
+        Gfx::STextureDescriptor TextureDescriptor_Out = {};
+
+        TextureDescriptor_Out.m_NumberOfPixelsU = m_ImgSize_Rect.x;
+        TextureDescriptor_Out.m_NumberOfPixelsV = m_ImgSize_Rect.y;
+        TextureDescriptor_Out.m_NumberOfPixelsW = 1;
+        TextureDescriptor_Out.m_NumberOfMipMaps = 1;
+        TextureDescriptor_Out.m_NumberOfTextures = 1;
+        TextureDescriptor_Out.m_Binding = Gfx::CTexture::ShaderResource;
+        TextureDescriptor_Out.m_Access = Gfx::CTexture::EAccess::CPUWrite;
+        TextureDescriptor_Out.m_Usage = Gfx::CTexture::EUsage::GPUReadWrite;
+        TextureDescriptor_Out.m_Semantic = Gfx::CTexture::UndefinedSemantic;
+        TextureDescriptor_Out.m_Format = Gfx::CTexture::R8_UBYTE; // 1 channels with 8-bit.
+
+        m_RectImgTexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_Out);
+
         //---GPU Computation Start---
         Gfx::Performance::BeginEvent("Planar Rectification");
 
