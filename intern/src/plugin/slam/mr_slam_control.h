@@ -27,6 +27,8 @@
 #include "engine/graphic/gfx_selection_renderer.h"
 #include "engine/graphic/gfx_view_manager.h"
 
+#include "plugin/slam/mr_plane_extractor.h"
+
 #include "engine/script/script_script.h"
 
 #include "engine/network/core_network_manager.h"
@@ -199,6 +201,12 @@ namespace MR
 
         typedef void(*InpaintWithPixMixFunc)(const glm::ivec2&, const std::vector<char>&, std::vector<char>&);
         InpaintWithPixMixFunc InpaintWithPixMix;
+
+
+        // -----------------------------------------------------------------------------
+        // Plane extraction
+        // -----------------------------------------------------------------------------
+        std::unique_ptr<MR::CPlaneExtractor> m_pPlaneExtractor;
 
     public:
 
@@ -374,6 +382,8 @@ namespace MR
             }
 
             m_SendInpaintedResult = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:send_result", true);
+
+            m_pPlaneExtractor = std::make_unique<MR::CPlaneExtractor>(&m_Reconstructor);
         }
 
         // -----------------------------------------------------------------------------
@@ -726,6 +736,8 @@ namespace MR
                     m_Reconstructor.RemovePlane(PlaneID);
                     break;
                 }
+
+                m_pPlaneExtractor->Update();
             }
             else if (MessageType == COLORINTRINSICS)
             {

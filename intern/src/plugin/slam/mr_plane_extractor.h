@@ -19,14 +19,18 @@
 #include "engine/graphic/gfx_selection_renderer.h"
 #include "engine/graphic/gfx_view_manager.h"
 
+#include "plugin/slam/mr_slam_reconstructor.h"
+
 namespace MR
 {
     class CPlaneExtractor
     {
     public:
 
-        CPlaneExtractor();
+        CPlaneExtractor(MR::CSLAMReconstructor* _pReconstructor);
         ~CPlaneExtractor();
+
+        void Update();
 
     private:
 
@@ -36,5 +40,9 @@ namespace MR
             WALL,
             CEILING
         };
+
+    private:
+
+        MR::CSLAMReconstructor* m_pReconstructor;
     };
 } // namespace Scpt

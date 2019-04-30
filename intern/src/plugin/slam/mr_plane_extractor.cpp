@@ -41,12 +41,20 @@ namespace
 } // namespace
 
 namespace MR
-{    
+{
     // -----------------------------------------------------------------------------
 
-    CPlaneExtractor::CPlaneExtractor()
+    void CPlaneExtractor::Update()
     {
-        
+
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CPlaneExtractor::CPlaneExtractor(MR::CSLAMReconstructor* _pReconstructor)
+        : m_pReconstructor(_pReconstructor)
+    {
+        assert(_pReconstructor != nullptr);
     }
 
     // -----------------------------------------------------------------------------
@@ -55,4 +63,5 @@ namespace MR
     {
 
     }
+
 } // namespace MR
