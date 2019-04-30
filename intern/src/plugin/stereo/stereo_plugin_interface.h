@@ -12,6 +12,7 @@
 #include <memory>
 
 #include "opencv2/opencv.hpp" 
+#include "opencv2/cudastereo.hpp"
 
 #include "libsgm.h"
 
@@ -51,7 +52,6 @@ namespace Stereo
         //---Inputs from plugin_slam---
         float m_FrameResolution;
         glm::ivec2 m_OrigImgSize; // Size of original image -> x = width & y = height
-        std::vector<char> m_ARKImg_RGBA;
 
         //---Keyframe---
         FutoGmtCV::FutoImg m_Keyframe_Curt, m_Keyframe_Last; // Only compute 2 frames first. -> In the future, I will modify if it needs to compute more images at once.
@@ -69,7 +69,8 @@ namespace Stereo
 
         std::unique_ptr<sgm::StereoSGM> m_pStereoMatcher_LibSGM;
         cv::Ptr<cv::StereoSGBM> m_pStereoMatcher_cvSGBM;
-
+        cv::Ptr<cv::StereoBM> m_pStereoMatcher_cvBM;
+        cv::Ptr<cv::cuda::StereoBM> m_pStereoMatcher_cvBM_cuda;
         
     private:
         void ShowImg(const std::vector<char>& Img_RGBA) const;
