@@ -281,7 +281,7 @@ namespace FutoGmtCV
         //---GPU Computation Start---
         Gfx::Performance::BeginEvent("Planar Rectification");
 
-        //---Put Homography into Buffer---
+        //---Put Homography to Buffer & OrigImg to Texture---
         Base::AABB2UInt TargetRect;
 
         switch (Which_Img)
@@ -317,6 +317,7 @@ namespace FutoGmtCV
         Gfx::ContextManager::ResetShaderCS();
 
         Gfx::Performance::EndEvent();
+        //---GPU Computation End---
 
         std::vector<char> Img_Rect;
         const int RectImgSize_1D = m_ImgSize_Rect.x * m_ImgSize_Rect.y;

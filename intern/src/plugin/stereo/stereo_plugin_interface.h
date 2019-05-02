@@ -3,6 +3,10 @@
 
 #include "engine/core/core_plugin_manager.h"
 
+#include "engine/graphic/gfx_shader_manager.h" // To manage GPU Shader
+#include "engine/graphic/gfx_texture_manager.h" // To manage GPU Texture (Data in GPU processing) 
+#include "engine/graphic/gfx_buffer_manager.h" // To manage GPU Buffer (Memory in GPU) 
+
 #include "base/base_include_glm.h" // Some warnings appears when directly #include glm 
 
 #include "plugin\stereo\FutoGmtCV_Img.h"
@@ -82,5 +86,13 @@ namespace Stereo
         cv::Ptr<cv::cuda::StereoBM> m_pStereoMatcher_cvBM_cuda;
         cv::Ptr<cv::StereoMatcher> m_pStereoMatcher_cvBP_cuda;
         cv::Ptr<cv::StereoMatcher> m_pStereoMatcher_cvConstBP_cuda;
+
+        //---Disparity to Depth---
+        Gfx::CShaderPtr m_Disp2DepthCSPtr;
+        Gfx::CTexturePtr m_Disp_Rect_TexturePtr;
+        Gfx::CTexturePtr m_Depth_Orig_TexturePtr;
+        Gfx::CBufferPtr m_HomographyBufferPtr;
+        Gfx::CBufferPtr m_ParaxEqBufferPtr;
     };
+
 } // namespace HW

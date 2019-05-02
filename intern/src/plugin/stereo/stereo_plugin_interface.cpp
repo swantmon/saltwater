@@ -3,7 +3,11 @@
 
 #include "engine/core/core_console.h"
 #include "engine/core/core_program_parameters.h" // For controlling parameters in Config.
+
 #include "engine/engine.h"
+
+#include "engine/graphic/gfx_context_manager.h"
+#include "engine/graphic/gfx_performance.h"
 #include "engine/graphic/gfx_texture.h" // For Transmit Texture between CPU & GPU
 
 #include "plugin/stereo/stereo_plugin_interface.h"
@@ -11,6 +15,24 @@
 
 
 CORE_PLUGIN_INFO(Stereo::CPluginInterface, "Stereo Matching", "1.0", "This plugin takes RGB and transformation data and provides 2.5D depth maps")
+
+namespace
+{
+    //---Definition for GPU Parallel Processing---
+    #define TileSize_2D 16
+
+    int DivUp(int TotalShaderCount, int WorkGroupSize)
+    {
+        return (TotalShaderCount + WorkGroupSize - 1) / WorkGroupSize;
+    }
+
+    struct SParallaxEquation
+    {
+        float m_BaselineLength;
+        float m_FocalLength;
+        glm::ivec2 m_Padding;
+    };
+}
 
 namespace Stereo
 {
@@ -22,6 +44,22 @@ namespace Stereo
         //------
 
         m_OrigImgSize = _rImageSize;
+
+        // Initialize Texture Manager for Depth_Orig
+        Gfx::STextureDescriptor TextureDescriptor_Depth = {};
+
+        TextureDescriptor_Depth.m_NumberOfPixelsU = m_OrigImgSize.x;
+        TextureDescriptor_Depth.m_NumberOfPixelsV = m_OrigImgSize.y;
+        TextureDescriptor_Depth.m_NumberOfPixelsW = 1;
+        TextureDescriptor_Depth.m_NumberOfMipMaps = 1;
+        TextureDescriptor_Depth.m_NumberOfTextures = 1;
+        TextureDescriptor_Depth.m_Binding = Gfx::CTexture::ShaderResource;
+        TextureDescriptor_Depth.m_Access = Gfx::CTexture::EAccess::CPURead;
+        TextureDescriptor_Depth.m_Usage = Gfx::CTexture::EUsage::GPUToCPU;
+        TextureDescriptor_Depth.m_Semantic = Gfx::CTexture::UndefinedSemantic;
+        TextureDescriptor_Depth.m_Format = Gfx::CTexture::R16_UBYTE; // 1 channels and each channel is 16-Ubit.
+
+        m_Depth_Orig_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_Depth);
     }
 
     // -----------------------------------------------------------------------------
@@ -96,7 +134,9 @@ namespace Stereo
                 std::vector<char> DispImg_Rect(RectImg_Curt.get_Img().size(), 0.0);
 
                 cv::cuda::GpuMat cvRectImg_Curt_gpu, cvRectImg_Last_gpu;
-                cv::cuda::GpuMat cvDispImg_cvBM_cuda_gpu;
+                cvRectImg_Curt_gpu.upload(cvRectImg_Curt);
+                cvRectImg_Last_gpu.upload(cvRectImg_Last);
+                
 
                 if (m_Is_LibSGM)
                 {
@@ -111,10 +151,7 @@ namespace Stereo
 
                 if (m_Is_cvBM_cuda) //---BM by OpenCV + CUDA
                 {
-                    cvRectImg_Curt_gpu.upload(cvRectImg_Curt);
-                    cvRectImg_Last_gpu.upload(cvRectImg_Last);
-
-
+                    cv::cuda::GpuMat cvDispImg_cvBM_cuda_gpu;
                     m_pStereoMatcher_cvBM_cuda = cv::cuda::createStereoBM(m_DisparityCount, 7);
                     m_pStereoMatcher_cvBM_cuda->compute(cvRectImg_Curt_gpu, cvRectImg_Last_gpu, cvDispImg_cvBM_cuda_gpu);
 
@@ -168,6 +205,50 @@ namespace Stereo
                     cv::normalize(cvDispImg_cvSGBM_16bit, cvDispImg_cvSGBM_8bit, 0, 255, cv::NORM_MINMAX, CV_8UC1);
                     cv::imwrite("E:\\Project_ARCHITECT\\ARKit_DispImg_cvSGBM.png", cvDispImg_cvSGBM_8bit);
                 }
+
+                //---Transform Disparity in RectImg to Depth in OrigImg---
+                // Initialize Texture Manager for Disparity in RectImg
+                Gfx::STextureDescriptor TextureDescriptor_Disp = {};
+
+                TextureDescriptor_Disp.m_NumberOfPixelsU = RectImg_Curt.get_ImgSize().x;
+                TextureDescriptor_Disp.m_NumberOfPixelsV = RectImg_Curt.get_ImgSize().y;
+                TextureDescriptor_Disp.m_NumberOfPixelsW = 1;
+                TextureDescriptor_Disp.m_NumberOfMipMaps = 1;
+                TextureDescriptor_Disp.m_NumberOfTextures = 1;
+                TextureDescriptor_Disp.m_Binding = Gfx::CTexture::ShaderResource;
+                TextureDescriptor_Disp.m_Access = Gfx::CTexture::EAccess::CPUWrite;
+                TextureDescriptor_Disp.m_Usage = Gfx::CTexture::EUsage::GPUReadWrite;
+                TextureDescriptor_Disp.m_Semantic = Gfx::CTexture::UndefinedSemantic;
+                TextureDescriptor_Disp.m_Format = Gfx::CTexture::R16_UBYTE; // 1 channels with 16-Ubit.
+
+                m_Disp_Rect_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_Disp);
+
+                // GPU Start
+                Gfx::Performance::BeginEvent("Planar Rectification");
+
+                // Submit Data to Managers
+                Gfx::BufferManager::UploadBufferData(m_HomographyBufferPtr, &Homo_B);
+
+                Base::AABB2UInt TargetRect;
+                TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(RectImg_Curt.get_ImgSize().x, RectImg_Curt.get_ImgSize().y));
+                Gfx::TextureManager::CopyToTexture2D(m_Disp_Rect_TexturePtr, TargetRect, RectImg_Curt.get_ImgSize().x, static_cast<const void*>(DispImg_Rect.data()));
+
+                //---Connecting Managers (@CPU) & GLSL (@GPU)---
+                Gfx::ContextManager::SetShaderCS(m_Disp2DepthCSPtr);
+                Gfx::ContextManager::SetImageTexture(0, m_Disp_Rect_TexturePtr);
+                Gfx::ContextManager::SetImageTexture(1, m_Depth_Orig_TexturePtr);
+                Gfx::ContextManager::SetConstantBuffer(0, m_HomographyBufferPtr);
+                Gfx::ContextManager::SetConstantBuffer(1, m_ParaxEqBufferPtr);
+
+                //---Start GPU Parallel Processing---
+                const int WorkGroupsX = DivUp(m_OrigImgSize.x, TileSize_2D);
+                const int WorkGroupsY = DivUp(m_OrigImgSize.y, TileSize_2D);
+
+                Gfx::ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+
+                Gfx::ContextManager::ResetShaderCS();
+
+                Gfx::Performance::EndEvent();
             }
             
             if (m_Is_TestData_MyMMS)
@@ -217,7 +298,8 @@ namespace Stereo
                 std::vector<char> DispImg_Rect(RectImg_Curt.get_Img().size(), 0.0);
 
                 cv::cuda::GpuMat cvRectImg_Curt_gpu, cvRectImg_Last_gpu;
-                cv::cuda::GpuMat cvDispImg_cvBM_cuda_gpu;
+                cvRectImg_Curt_gpu.upload(cvRectImg_Curt);
+                cvRectImg_Last_gpu.upload(cvRectImg_Last);
 
                 if (m_Is_LibSGM)
                 {
@@ -232,9 +314,7 @@ namespace Stereo
 
                 if (m_Is_cvBM_cuda) //---BM by OpenCV + CUDA
                 {
-                    cvRectImg_Curt_gpu.upload(cvRectImg_Curt);
-                    cvRectImg_Last_gpu.upload(cvRectImg_Last);
-
+                    cv::cuda::GpuMat cvDispImg_cvBM_cuda_gpu;
 
                     m_pStereoMatcher_cvBM_cuda = cv::cuda::createStereoBM(m_DisparityCount, 7);
                     m_pStereoMatcher_cvBM_cuda->compute(cvRectImg_Curt_gpu, cvRectImg_Last_gpu, cvDispImg_cvBM_cuda_gpu);
@@ -290,6 +370,7 @@ namespace Stereo
                     cv::imwrite("E:\\Project_ARCHITECT\\MyMMS_DispImg_cvSGBM.png", cvDispImg_cvSGBM_8bit);
                 }
             }
+
 
             //===== OLD =====
             /*
@@ -423,12 +504,54 @@ namespace Stereo
         m_Is_cvBP_cuda = Core::CProgramParameters::GetInstance().Get("mr:stereo:cv_bp_cuda", true);
         m_Is_cvConstBP_cuda = Core::CProgramParameters::GetInstance().Get("mr:stereo:cv_const_bp_cuda", false);
         m_Is_cvSGBM = Core::CProgramParameters::GetInstance().Get("mr:stereo:cv_sgbm", true);
+
+        //---Disparity to Depth---
+        // Initialize Shader Manager
+        std::stringstream DefineStream;
+        DefineStream
+            << "#define TILE_SIZE_2D " << TileSize_2D << " \n"; // 16 for work group size is suggested for 2D image (based on experience).
+        std::string DefineString = DefineStream.str();
+
+        m_Disp2DepthCSPtr = Gfx::ShaderManager::CompileCS("../../plugins/stereo/cs_Disp_to_Depth.glsl", "main", DefineString.c_str());
+
+        // Initialize Buffer Manager
+        Gfx::SBufferDescriptor HomoBufferDesc = {};
+
+        HomoBufferDesc.m_Stride = 0;
+        HomoBufferDesc.m_Usage = Gfx::CBuffer::GPURead;
+        HomoBufferDesc.m_Binding = Gfx::CBuffer::ConstantBuffer;
+        HomoBufferDesc.m_Access = Gfx::CBuffer::CPUWrite;
+        HomoBufferDesc.m_NumberOfBytes = sizeof(FutoGmtCV::SHomographyTransform);
+        HomoBufferDesc.m_pBytes = nullptr;
+        HomoBufferDesc.m_pClassKey = 0;
+
+        m_HomographyBufferPtr = Gfx::BufferManager::CreateBuffer(HomoBufferDesc);
+
+        Gfx::SBufferDescriptor ParaxEqBufferDesc = {};
+
+        ParaxEqBufferDesc.m_Stride = 0;
+        ParaxEqBufferDesc.m_Usage = Gfx::CBuffer::GPURead;
+        ParaxEqBufferDesc.m_Binding = Gfx::CBuffer::ConstantBuffer;
+        ParaxEqBufferDesc.m_Access = Gfx::CBuffer::CPUWrite;
+        ParaxEqBufferDesc.m_NumberOfBytes = sizeof(SParallaxEquation);
+        ParaxEqBufferDesc.m_pBytes = nullptr;
+        ParaxEqBufferDesc.m_pClassKey = 0;
+
+        m_ParaxEqBufferPtr = Gfx::BufferManager::CreateBuffer(ParaxEqBufferDesc);
+
     }
 
     // -----------------------------------------------------------------------------
 
     void CPluginInterface::OnExit()
     {
+        //---Release Manager---
+        m_Disp2DepthCSPtr = nullptr;
+        m_Disp_Rect_TexturePtr = nullptr;
+        m_Depth_Orig_TexturePtr = nullptr;
+        m_HomographyBufferPtr = nullptr;
+        m_ParaxEqBufferPtr = nullptr;
+        
         ENGINE_CONSOLE_INFOV("Stereo matching plugin exited!");
     }
 
