@@ -64,158 +64,232 @@ namespace Stereo
         }
         else // Both current & last keyframes exist. -> Processing -> Free last keyframe.
         {
-            //---Test: Show Original Images---
-            cv::Mat cvOrigImg_Curt(m_OrigImgSize.y, m_OrigImgSize.x, CV_8UC4);
-            memcpy(cvOrigImg_Curt.data, m_Keyframe_Curt.get_Img().data(), m_Keyframe_Curt.get_Img().size());
-            cv::cvtColor(cvOrigImg_Curt, cvOrigImg_Curt, cv::COLOR_BGRA2RGBA); // Transform to RGB before imshow & imwrite
-            cv::imwrite("E:\\Project_ARCHITECT\\OrigImg_Curt.png", cvOrigImg_Curt);
+            if (m_Is_ARKitData)
+            {
+                //---Show Original Images---
+                cv::Mat cvOrigImg_Curt(m_OrigImgSize.y, m_OrigImgSize.x, CV_8UC4);
+                memcpy(cvOrigImg_Curt.data, m_Keyframe_Curt.get_Img().data(), m_Keyframe_Curt.get_Img().size());
+                cv::cvtColor(cvOrigImg_Curt, cvOrigImg_Curt, cv::COLOR_BGRA2RGBA); // Transform to RGB before imshow & imwrite
+                cv::imwrite("E:\\Project_ARCHITECT\\ARKit_OrigImg_Curt.png", cvOrigImg_Curt);
 
-            cv::Mat cvOrigImg_Last(m_OrigImgSize.y, m_OrigImgSize.x, CV_8UC4);
-            memcpy(cvOrigImg_Last.data, m_Keyframe_Last.get_Img().data(), m_Keyframe_Last.get_Img().size());
-            cv::cvtColor(cvOrigImg_Last, cvOrigImg_Last, cv::COLOR_BGRA2RGBA); // Transform to RGB before imshow & imwrite
-            cv::imwrite("E:\\Project_ARCHITECT\\OrigImg_Last.png", cvOrigImg_Last);
+                cv::Mat cvOrigImg_Last(m_OrigImgSize.y, m_OrigImgSize.x, CV_8UC4);
+                memcpy(cvOrigImg_Last.data, m_Keyframe_Last.get_Img().data(), m_Keyframe_Last.get_Img().size());
+                cv::cvtColor(cvOrigImg_Last, cvOrigImg_Last, cv::COLOR_BGRA2RGBA); // Transform to RGB before imshow & imwrite
+                cv::imwrite("E:\\Project_ARCHITECT\\ARKit_OrigImg_Last.png", cvOrigImg_Last);
 
-            //=====Rectification=====
-            FutoGmtCV::FutoImg RectImg_Curt, RectImg_Last;
-            FutoGmtCV::CRectification_Planar PlanarRectifier = FutoGmtCV::CRectification_Planar(m_Keyframe_Curt.get_ImgSize(), m_RectImgSize);
+                //---Rectification---
+                FutoGmtCV::FutoImg RectImg_Curt, RectImg_Last;
+                FutoGmtCV::SHomographyTransform Homo_B, Homo_M;
 
-            PlanarRectifier.execute(RectImg_Curt, RectImg_Last, m_Keyframe_Curt, m_Keyframe_Last);
+                FutoGmtCV::CRectification_Planar PlanarRectifier = FutoGmtCV::CRectification_Planar(m_Keyframe_Curt, m_Keyframe_Last);
+                PlanarRectifier.execute(RectImg_Curt, RectImg_Last, Homo_B, Homo_M);
 
-            //---Test: Show Rectified Images---
-            cv::Mat cvRectImg_Curt(RectImg_Curt.get_ImgSize().y, RectImg_Curt.get_ImgSize().x, CV_8UC1);
-            memcpy(cvRectImg_Curt.data, RectImg_Curt.get_Img().data(), RectImg_Curt.get_Img().size());
-            cv::imwrite("E:\\Project_ARCHITECT\\RectImg_Curt.png", cvRectImg_Curt);
+                cv::Mat cvRectImg_Curt(RectImg_Curt.get_ImgSize().y, RectImg_Curt.get_ImgSize().x, CV_8UC1);
+                memcpy(cvRectImg_Curt.data, RectImg_Curt.get_Img().data(), RectImg_Curt.get_Img().size());
+                cv::imwrite("E:\\Project_ARCHITECT\\ARKit_RectImg_Curt.png", cvRectImg_Curt);
 
-            cv::Mat cvRectImg_Last(RectImg_Last.get_ImgSize().y, RectImg_Last.get_ImgSize().x, CV_8UC1);
-            memcpy(cvRectImg_Last.data, RectImg_Last.get_Img().data(), RectImg_Last.get_Img().size());
-            cv::imwrite("E:\\Project_ARCHITECT\\RectImg_Last.png", cvRectImg_Last);
-            //---
+                cv::Mat cvRectImg_Last(RectImg_Last.get_ImgSize().y, RectImg_Last.get_ImgSize().x, CV_8UC1);
+                memcpy(cvRectImg_Last.data, RectImg_Last.get_Img().data(), RectImg_Last.get_Img().size());
+                cv::imwrite("E:\\Project_ARCHITECT\\ARKit_RectImg_Last.png", cvRectImg_Last);
 
-            //---Verify by Test Data---
-            /*
-               cv::Mat TestInputL = cv::imread("E:\\Project_ARCHITECT\\cvSGBM_Test Data\\01-002570.jpg");
-               cv::cvtColor(TestInputL, TestInputL, cv::COLOR_BGRA2GRAY);
-               cv::Mat TestInputR = cv::imread("E:\\Project_ARCHITECT\\cvSGBM_Test Data\\02-002570.jpg");
-               cv::cvtColor(TestInputR, TestInputR, cv::COLOR_BGRA2GRAY);
+                //---Stereo Matching---
+                std::vector<char> DispImg_Rect(RectImg_Curt.get_Img().size(), 0.0);
 
-               cv::Mat K_L = cv::Mat::zeros(3, 3, CV_32F);
-               K_L.at<float>(0, 0) = 1280.465;
-               K_L.at<float>(1, 1) = 1280.465;
-               K_L.at<float>(0, 2) = 712.961;
-               K_L.at<float>(1, 2) = 515.829;
-               K_L.at<float>(2, 2) = 1;
-               cv::Mat K_R = cv::Mat::zeros(3, 3, CV_32F);
-               K_R.at<float>(0, 0) = 1281.566;
-               K_R.at<float>(1, 1) = 1281.566;
-               K_R.at<float>(0, 2) = 698.496;
-               K_R.at<float>(1, 2) = 511.008;
-               K_R.at<float>(2, 2) = 1;
-               cv::Mat PC_L = cv::Mat::zeros(3, 1, CV_32F);
-               cv::Mat PC_R = cv::Mat::zeros(3, 1, CV_32F);
-               PC_R.at<float>(0, 0) = 1.630;
-               PC_R.at<float>(1, 0) = 0.016;
-               PC_R.at<float>(2, 0) = -0.192;
-               cv::Mat R_L = cv::Mat::eye(3, 3, CV_32F);
-               cv::Mat R_R = cv::Mat::eye(3, 3, CV_32F);
-               R_R.at<float>(0, 0) = 0.9999;
-               R_R.at<float>(0, 1) = 0.0085;
-               R_R.at<float>(0, 2) = -0.0132;
-               R_R.at<float>(1, 0) = -0.0084;
-               R_R.at<float>(1, 1) = 0.9999;
-               R_R.at<float>(1, 2) = 0.0123;
-               R_R.at<float>(2, 0) = 0.0132;
-               R_R.at<float>(2, 1) = -0.0122;
-               R_R.at<float>(2, 2) = 0.9999;
+                cv::cuda::GpuMat cvRectImg_Curt_gpu, cvRectImg_Last_gpu;
+                cv::cuda::GpuMat cvDispImg_cvBM_cuda_gpu;
 
-               FutoGmtCV::FutoImg TestImgL = FutoImg(TestInputL, K_L, R_L, PC_L);
-               FutoGmtCV::FutoImg TestImgR = FutoImg(TestInputR, K_R, R_R, PC_R);
+                if (m_Is_LibSGM)
+                {
+                    m_pStereoMatcher_LibSGM = std::make_unique<sgm::StereoSGM>(RectImg_Curt.get_ImgSize().x, RectImg_Curt.get_ImgSize().y, m_DisparityCount, 8, 8, sgm::EXECUTE_INOUT_HOST2HOST);
+                    m_pStereoMatcher_LibSGM->execute(RectImg_Curt.get_Img().data(), RectImg_Last.get_Img().data(), DispImg_Rect.data());
+                    //---Test: Show Disparity Image---
+                    cv::Mat cvDispImg_LibSGM(cvRectImg_Curt.size(), CV_8UC1);
+                    memcpy(cvDispImg_LibSGM.data, DispImg_Rect.data(), DispImg_Rect.size());
+                    cv::normalize(cvDispImg_LibSGM, cvDispImg_LibSGM, 0, 500, cv::NORM_MINMAX, CV_8UC1);
+                    cv::imwrite("E:\\Project_ARCHITECT\\ARKit_DispImg_LibSGM.png", cvDispImg_LibSGM);
+                }
 
-               PlanarRectifier.execute(RectImg_Curt, RectImg_Last, TestImgL, TestImgR);
-               */
-            //------
+                if (m_Is_cvBM_cuda) //---BM by OpenCV + CUDA
+                {
+                    cvRectImg_Curt_gpu.upload(cvRectImg_Curt);
+                    cvRectImg_Last_gpu.upload(cvRectImg_Last);
+
+
+                    m_pStereoMatcher_cvBM_cuda = cv::cuda::createStereoBM(m_DisparityCount, 7);
+                    m_pStereoMatcher_cvBM_cuda->compute(cvRectImg_Curt_gpu, cvRectImg_Last_gpu, cvDispImg_cvBM_cuda_gpu);
+
+                    cv::Mat cvDispImg_cvBM_cuda_16bit;
+                    cvDispImg_cvBM_cuda_gpu.download(cvDispImg_cvBM_cuda_16bit);
+                    cvDispImg_cvBM_cuda_16bit.convertTo(cvDispImg_cvBM_cuda_16bit, CV_32F, 1.0 / 16); // Disparity Image is in 16-bit -> Divide by 16 to get real Disparity.
+                    //---Test: Show Disparity Image---
+                    cv::Mat cvDispImg_cvBM_cuda_8bit(cvRectImg_Curt.size(), CV_8UC1);
+                    cv::normalize(cvDispImg_cvBM_cuda_16bit, cvDispImg_cvBM_cuda_8bit, 0, 255, cv::NORM_MINMAX, CV_8UC1);
+                    cv::imwrite("E:\\Project_ARCHITECT\\ARKit_DispImg_cvBM_cuda.png", cvDispImg_cvBM_cuda_8bit);
+                }
+
+                if (m_Is_cvBP_cuda) //---BP by OpenCV + CUDA
+                {
+                    cv::cuda::GpuMat cvDispImg_cvBP_cuda_gpu;
+                    m_pStereoMatcher_cvBP_cuda = cv::cuda::createStereoBeliefPropagation();
+                    m_pStereoMatcher_cvBP_cuda->compute(cvRectImg_Curt_gpu, cvRectImg_Last_gpu, cvDispImg_cvBP_cuda_gpu);
+
+                    cv::Mat cvDispImg_cvBP_cuda_16bit;
+                    cvDispImg_cvBP_cuda_gpu.download(cvDispImg_cvBP_cuda_16bit);
+                    cvDispImg_cvBP_cuda_16bit.convertTo(cvDispImg_cvBP_cuda_16bit, CV_32F, 1.0 / 16); // Disparity Image is in 16-bit -> Divide by 16 to get real Disparity.
+                    //---Test: Show Disparity Image---
+                    cv::Mat cvDispImg_cvBP_cuda_8bit(cvRectImg_Curt.size(), CV_8UC1);
+                    cv::normalize(cvDispImg_cvBP_cuda_16bit, cvDispImg_cvBP_cuda_8bit, 0, 255, cv::NORM_MINMAX, CV_8UC1);
+                    cv::imwrite("E:\\Project_ARCHITECT\\ARKit_DispImg_cvBP_cuda.png", cvDispImg_cvBP_cuda_8bit);
+                }
+
+                if (m_Is_cvConstBP_cuda)
+                {
+                    cv::cuda::GpuMat cvDispImg_cvConstBP_cuda_gpu;
+                    m_pStereoMatcher_cvConstBP_cuda = cv::cuda::createStereoBeliefPropagation();
+                    m_pStereoMatcher_cvConstBP_cuda->compute(cvRectImg_Curt_gpu, cvRectImg_Last_gpu, cvDispImg_cvConstBP_cuda_gpu);
+
+                    cv::Mat cvDispImg_cvConstBP_cuda_16bit;
+                    cvDispImg_cvConstBP_cuda_gpu.download(cvDispImg_cvConstBP_cuda_16bit);
+                    cvDispImg_cvConstBP_cuda_16bit.convertTo(cvDispImg_cvConstBP_cuda_16bit, CV_32F, 1.0 / 16); // Disparity Image is in 16-bit -> Divide by 16 to get real Disparity.
+                    //---Test: Show Disparity Image---
+                    cv::Mat cvDispImg_cvConstBP_cuda_8bit(cvRectImg_Curt.size(), CV_8UC1);
+                    cv::normalize(cvDispImg_cvConstBP_cuda_16bit, cvDispImg_cvConstBP_cuda_8bit, 0, 255, cv::NORM_MINMAX, CV_8UC1);
+                    cv::imwrite("E:\\Project_ARCHITECT\\ARKit_DispImg_cvConstBP_cuda.png", cvDispImg_cvConstBP_cuda_8bit);
+                }
+
+                if (m_Is_cvSGBM)
+                {
+                    cv::Mat cvDispImg_cvSGBM_16bit;
+                    m_pStereoMatcher_cvSGBM = cv::StereoSGBM::create();
+                    m_pStereoMatcher_cvSGBM->compute(cvRectImg_Curt, cvRectImg_Last, cvDispImg_cvSGBM_16bit);
+                    cvDispImg_cvSGBM_16bit.convertTo(cvDispImg_cvSGBM_16bit, CV_32F, 1.0 / 16); // Disparity Image is in 16-bit -> Divide by 16 to get real Disparity.
+                    //---Test: Show Disparity Image---
+                    cv::Mat cvDispImg_cvSGBM_8bit(cvRectImg_Curt.size(), CV_8UC1);
+                    cv::normalize(cvDispImg_cvSGBM_16bit, cvDispImg_cvSGBM_8bit, 0, 255, cv::NORM_MINMAX, CV_8UC1);
+                    cv::imwrite("E:\\Project_ARCHITECT\\ARKit_DispImg_cvSGBM.png", cvDispImg_cvSGBM_8bit);
+                }
+            }
             
-            //===Stereo Matching===
-            std::vector<char> DispImg_Rect(RectImg_Curt.get_Img().size(), 0.0);
-            
-            //---LibSGM---
-            /*
-            m_pStereoMatcher_LibSGM->execute(RectImg_Curt.get_Img().data(), RectImg_Last.get_Img().data(), DispImg_Rect.data());
-            //---Test: Show Disparity Image---
-            cv::Mat cvDispImg_LibSGM(cvRectImg_Curt.size(), CV_8UC1);
-            memcpy(cvDispImg_LibSGM.data, DispImg_Rect.data(), DispImg_Rect.size());
-            cv::normalize(cvDispImg_LibSGM, cvDispImg_LibSGM, 0, 500, cv::NORM_MINMAX, CV_8UC1);
-            cv::imwrite("E:\\Project_ARCHITECT\\DispImg_LibSGM.png", cvDispImg_LibSGM);
-            */
-            //---
+            if (m_Is_TestData_MyMMS)
+            {
+                //---Input Test Images---
+                cv::Mat cvInputImgL = cv::imread("E:\\Project_ARCHITECT\\01 Image Rectification\\My MMS\\Orig_01.jpg");
+                cv::cvtColor(cvInputImgL, cvInputImgL, cv::COLOR_BGRA2RGBA);
+                const int ImgSize_InputL_1D = cvInputImgL.rows * cvInputImgL.cols * 4;
+                std::vector<char> InputImgL(ImgSize_InputL_1D);
+                glm::ivec2 ImgSize_TestOrigL(cvInputImgL.cols, cvInputImgL.rows);
+                memcpy(InputImgL.data(), cvInputImgL.data, ImgSize_InputL_1D);
+                cv::Mat cvInputImgR = cv::imread("E:\\Project_ARCHITECT\\01 Image Rectification\\My MMS\\Orig_02.jpg");
+                cv::cvtColor(cvInputImgR, cvInputImgR, cv::COLOR_BGRA2RGBA);
+                const int ImgSize_InputR_1D = cvInputImgR.rows * cvInputImgR.cols * 4;
+                std::vector<char> InputImgR(ImgSize_InputR_1D);
+                glm::ivec2 ImgSize_TestOrigR(cvInputImgR.cols, cvInputImgR.rows);
+                memcpy(InputImgR.data(), cvInputImgR.data, ImgSize_InputR_1D);
 
-            //---cvBM_cuda---
-            cv::cuda::GpuMat cvRectImg_Curt_gpu, cvRectImg_Last_gpu;
-            cv::cuda::GpuMat cvDispImg_cvBM_cuda_gpu;
-            cvRectImg_Curt_gpu.upload(cvRectImg_Curt);
-            cvRectImg_Last_gpu.upload(cvRectImg_Last);
+                glm::mat3 K_L(glm::vec3(1280.465, 0, 0), glm::vec3(0, 1280.465, 0), glm::vec3(712.961, 515.829, 1));
+                glm::mat3 K_R(glm::vec3(1281.566, 0, 0), glm::vec3(0, 1281.566, 0), glm::vec3(698.496, 511.008, 1));
 
-            
-            m_pStereoMatcher_cvBM_cuda = cv::cuda::createStereoBM(m_DisparityCount, 7);
-            m_pStereoMatcher_cvBM_cuda->compute(cvRectImg_Curt_gpu, cvRectImg_Last_gpu, cvDispImg_cvBM_cuda_gpu);
+                glm::vec3 PC_L(0.0f);
+                glm::vec3 PC_R(1.630, 0.016, -0.192);
 
-            cv::Mat cvDispImg_cvBM_cuda_16bit;
-            cvDispImg_cvBM_cuda_gpu.download(cvDispImg_cvBM_cuda_16bit);
-            cvDispImg_cvBM_cuda_16bit.convertTo(cvDispImg_cvBM_cuda_16bit, CV_32F, 1.0 / 16); // Disparity Image is in 16-bit -> Divide by 16 to get real Disparity.
-            //---Test: Show Disparity Image---
-            cv::Mat cvDispImg_cvBM_cuda_8bit(cvRectImg_Curt.size(), CV_8UC1);
-            cv::normalize(cvDispImg_cvBM_cuda_16bit, cvDispImg_cvBM_cuda_8bit, 0, 255, cv::NORM_MINMAX, CV_8UC1);
-            cv::imwrite("E:\\Project_ARCHITECT\\Disp_Rect_cvBM_cuda.png", cvDispImg_cvBM_cuda_8bit);
+                glm::mat3 R_L(1.0f);
+                glm::mat3 R_R(glm::vec3(0.9999, -0.0084, 0.0132), glm::vec3(0.0085, 0.9999, -0.0122), glm::vec3(-0.0132, 0.0123, 0.9999));
 
-            //---cvBP_cuda---
-            cv::cuda::GpuMat cvDispImg_cvBP_cuda_gpu;
-            m_pStereoMatcher_cvBP_cuda = cv::cuda::createStereoBeliefPropagation();
-            m_pStereoMatcher_cvBP_cuda->compute(cvRectImg_Curt_gpu, cvRectImg_Last_gpu, cvDispImg_cvBP_cuda_gpu);
+                m_Keyframe_Curt = FutoGmtCV::FutoImg(InputImgL, ImgSize_TestOrigL, K_L, R_L, PC_L);
+                m_Keyframe_Last = FutoGmtCV::FutoImg(InputImgR, ImgSize_TestOrigR, K_R, R_R, PC_R);
 
-            cv::Mat cvDispImg_cvBP_cuda_16bit;
-            cvDispImg_cvBP_cuda_gpu.download(cvDispImg_cvBP_cuda_16bit);
-            cvDispImg_cvBP_cuda_16bit.convertTo(cvDispImg_cvBP_cuda_16bit, CV_32F, 1.0 / 16); // Disparity Image is in 16-bit -> Divide by 16 to get real Disparity.
-            //---Test: Show Disparity Image---
-            cv::Mat cvDispImg_cvBP_cuda_8bit(cvRectImg_Curt.size(), CV_8UC1);
-            cv::normalize(cvDispImg_cvBP_cuda_16bit, cvDispImg_cvBP_cuda_8bit, 0, 255, cv::NORM_MINMAX, CV_8UC1);
-            cv::imwrite("E:\\Project_ARCHITECT\\Disp_Rect_cvBP_cuda.png", cvDispImg_cvBP_cuda_8bit);
+                //---Rectification---
+                FutoGmtCV::FutoImg RectImg_Curt, RectImg_Last;
+                FutoGmtCV::SHomographyTransform Homo_B, Homo_M;
 
-            //---cvConstantBP_cuda---
-            cv::cuda::GpuMat cvDispImg_cvConstBP_cuda_gpu;
-            m_pStereoMatcher_cvConstBP_cuda = cv::cuda::createStereoBeliefPropagation();
-            m_pStereoMatcher_cvConstBP_cuda->compute(cvRectImg_Curt_gpu, cvRectImg_Last_gpu, cvDispImg_cvConstBP_cuda_gpu);
+                FutoGmtCV::CRectification_Planar PlanarRectifier = FutoGmtCV::CRectification_Planar(m_Keyframe_Curt, m_Keyframe_Last);
+                PlanarRectifier.execute(RectImg_Curt, RectImg_Last, Homo_B, Homo_M);
 
-            cv::Mat cvDispImg_cvConstBP_cuda_16bit;
-            cvDispImg_cvConstBP_cuda_gpu.download(cvDispImg_cvConstBP_cuda_16bit);
-            cvDispImg_cvConstBP_cuda_16bit.convertTo(cvDispImg_cvConstBP_cuda_16bit, CV_32F, 1.0 / 16); // Disparity Image is in 16-bit -> Divide by 16 to get real Disparity.
-            //---Test: Show Disparity Image---
-            cv::Mat cvDispImg_cvConstBP_cuda_8bit(cvRectImg_Curt.size(), CV_8UC1);
-            cv::normalize(cvDispImg_cvConstBP_cuda_16bit, cvDispImg_cvConstBP_cuda_8bit, 0, 255, cv::NORM_MINMAX, CV_8UC1);
-            cv::imwrite("E:\\Project_ARCHITECT\\Disp_Rect_cvConstBP_cuda.png", cvDispImg_cvConstBP_cuda_8bit);
+                cv::Mat cvRectImg_Curt(RectImg_Curt.get_ImgSize().y, RectImg_Curt.get_ImgSize().x, CV_8UC1);
+                memcpy(cvRectImg_Curt.data, RectImg_Curt.get_Img().data(), RectImg_Curt.get_Img().size());
+                cv::imwrite("E:\\Project_ARCHITECT\\MyMMS_RectImg_L.png", cvRectImg_Curt);
+
+                cv::Mat cvRectImg_Last(RectImg_Last.get_ImgSize().y, RectImg_Last.get_ImgSize().x, CV_8UC1);
+                memcpy(cvRectImg_Last.data, RectImg_Last.get_Img().data(), RectImg_Last.get_Img().size());
+                cv::imwrite("E:\\Project_ARCHITECT\\MyMMS_RectImg_R.png", cvRectImg_Last);
+
+                //---Stereo Matching---
+                std::vector<char> DispImg_Rect(RectImg_Curt.get_Img().size(), 0.0);
+
+                cv::cuda::GpuMat cvRectImg_Curt_gpu, cvRectImg_Last_gpu;
+                cv::cuda::GpuMat cvDispImg_cvBM_cuda_gpu;
+
+                if (m_Is_LibSGM)
+                {
+                    m_pStereoMatcher_LibSGM = std::make_unique<sgm::StereoSGM>(RectImg_Curt.get_ImgSize().x, RectImg_Curt.get_ImgSize().y, m_DisparityCount, 8, 8, sgm::EXECUTE_INOUT_HOST2HOST);
+                    m_pStereoMatcher_LibSGM->execute(RectImg_Curt.get_Img().data(), RectImg_Last.get_Img().data(), DispImg_Rect.data());
+                    //---Test: Show Disparity Image---
+                    cv::Mat cvDispImg_LibSGM(cvRectImg_Curt.size(), CV_8UC1);
+                    memcpy(cvDispImg_LibSGM.data, DispImg_Rect.data(), DispImg_Rect.size());
+                    cv::normalize(cvDispImg_LibSGM, cvDispImg_LibSGM, 0, 500, cv::NORM_MINMAX, CV_8UC1);
+                    cv::imwrite("E:\\Project_ARCHITECT\\MyMMS_DispImg_LibSGM.png", cvDispImg_LibSGM);
+                }
+
+                if (m_Is_cvBM_cuda) //---BM by OpenCV + CUDA
+                {
+                    cvRectImg_Curt_gpu.upload(cvRectImg_Curt);
+                    cvRectImg_Last_gpu.upload(cvRectImg_Last);
 
 
-            //---cvSGBM---
-            /*
-            cv::Mat cvDispImg_cvSGBM_16bit;
-            m_pStereoMatcher_cvSGBM = cv::StereoSGBM::create();
-            m_pStereoMatcher_cvSGBM->compute(cvRectImg_Curt, cvRectImg_Last, cvDispImg_cvSGBM_16bit);
-            cvDispImg_cvSGBM_16bit.convertTo(cvDispImg_cvSGBM_16bit, CV_32F, 1.0/16); // Disparity Image is in 16-bit -> Divide by 16 to get real Disparity.
-            //---Test: Show Disparity Image---
-            cv::Mat cvDispImg_cvSGBM_8bit(cvRectImg_Curt.size(), CV_8UC1);
-            cv::normalize(cvDispImg_cvSGBM_16bit, cvDispImg_cvSGBM_8bit, 0, 255, cv::NORM_MINMAX, CV_8UC1);
-            cv::imwrite("E:\\Project_ARCHITECT\\Disp_Rect_cvSGBM.png", cvDispImg_cvSGBM_8bit);
-            */
-            
-            //---cvBM---
-            /*
-            cv::Mat cvDispImg_cvBM_16bit;
-            m_pStereoMatcher_cvBM = cv::StereoBM::create();
-            m_pStereoMatcher_cvBM->compute(cvRectImg_Curt, cvRectImg_Last, cvDispImg_cvBM_16bit);
-            cvDispImg_cvBM_16bit.convertTo(cvDispImg_cvBM_16bit, CV_32F, 1.0 / 16); // Disparity Image is in 16-bit -> Divide by 16 to get real Disparity.
-            //---Test: Show Disparity Image---
-            cv::Mat cvDispImg_cvBM_8bit(cvRectImg_Curt.size(), CV_8UC1);
-            cv::normalize(cvDispImg_cvBM_16bit, cvDispImg_cvBM_8bit, 0, 255, cv::NORM_MINMAX, CV_8UC1);
-            cv::imwrite("E:\\Project_ARCHITECT\\Disp_Rect_cvBM.png", cvDispImg_cvBM_8bit);
-            */
+                    m_pStereoMatcher_cvBM_cuda = cv::cuda::createStereoBM(m_DisparityCount, 7);
+                    m_pStereoMatcher_cvBM_cuda->compute(cvRectImg_Curt_gpu, cvRectImg_Last_gpu, cvDispImg_cvBM_cuda_gpu);
+
+                    cv::Mat cvDispImg_cvBM_cuda_16bit;
+                    cvDispImg_cvBM_cuda_gpu.download(cvDispImg_cvBM_cuda_16bit);
+                    cvDispImg_cvBM_cuda_16bit.convertTo(cvDispImg_cvBM_cuda_16bit, CV_32F, 1.0 / 16); // Disparity Image is in 16-bit -> Divide by 16 to get real Disparity.
+                    //---Test: Show Disparity Image---
+                    cv::Mat cvDispImg_cvBM_cuda_8bit(cvRectImg_Curt.size(), CV_8UC1);
+                    cv::normalize(cvDispImg_cvBM_cuda_16bit, cvDispImg_cvBM_cuda_8bit, 0, 255, cv::NORM_MINMAX, CV_8UC1);
+                    cv::imwrite("E:\\Project_ARCHITECT\\MyMMS_DispImg_cvBM_cuda.png", cvDispImg_cvBM_cuda_8bit);
+                }
+
+                if (m_Is_cvBP_cuda) //---BP by OpenCV + CUDA
+                {
+                    cv::cuda::GpuMat cvDispImg_cvBP_cuda_gpu;
+                    m_pStereoMatcher_cvBP_cuda = cv::cuda::createStereoBeliefPropagation();
+                    m_pStereoMatcher_cvBP_cuda->compute(cvRectImg_Curt_gpu, cvRectImg_Last_gpu, cvDispImg_cvBP_cuda_gpu);
+
+                    cv::Mat cvDispImg_cvBP_cuda_16bit;
+                    cvDispImg_cvBP_cuda_gpu.download(cvDispImg_cvBP_cuda_16bit);
+                    cvDispImg_cvBP_cuda_16bit.convertTo(cvDispImg_cvBP_cuda_16bit, CV_32F, 1.0 / 16); // Disparity Image is in 16-bit -> Divide by 16 to get real Disparity.
+                    //---Test: Show Disparity Image---
+                    cv::Mat cvDispImg_cvBP_cuda_8bit(cvRectImg_Curt.size(), CV_8UC1);
+                    cv::normalize(cvDispImg_cvBP_cuda_16bit, cvDispImg_cvBP_cuda_8bit, 0, 255, cv::NORM_MINMAX, CV_8UC1);
+                    cv::imwrite("E:\\Project_ARCHITECT\\MyMMS_DispImg_cvBP_cuda.png", cvDispImg_cvBP_cuda_8bit);
+                }
+
+                if (m_Is_cvConstBP_cuda)
+                {
+                    cv::cuda::GpuMat cvDispImg_cvConstBP_cuda_gpu;
+                    m_pStereoMatcher_cvConstBP_cuda = cv::cuda::createStereoBeliefPropagation();
+                    m_pStereoMatcher_cvConstBP_cuda->compute(cvRectImg_Curt_gpu, cvRectImg_Last_gpu, cvDispImg_cvConstBP_cuda_gpu);
+
+                    cv::Mat cvDispImg_cvConstBP_cuda_16bit;
+                    cvDispImg_cvConstBP_cuda_gpu.download(cvDispImg_cvConstBP_cuda_16bit);
+                    cvDispImg_cvConstBP_cuda_16bit.convertTo(cvDispImg_cvConstBP_cuda_16bit, CV_32F, 1.0 / 16); // Disparity Image is in 16-bit -> Divide by 16 to get real Disparity.
+                    //---Test: Show Disparity Image---
+                    cv::Mat cvDispImg_cvConstBP_cuda_8bit(cvRectImg_Curt.size(), CV_8UC1);
+                    cv::normalize(cvDispImg_cvConstBP_cuda_16bit, cvDispImg_cvConstBP_cuda_8bit, 0, 255, cv::NORM_MINMAX, CV_8UC1);
+                    cv::imwrite("E:\\Project_ARCHITECT\\MyMMS_DispImg_cvConstBP_cuda.png", cvDispImg_cvConstBP_cuda_8bit);
+                }
+
+                if (m_Is_cvSGBM)
+                {
+                    cv::Mat cvDispImg_cvSGBM_16bit;
+                    m_pStereoMatcher_cvSGBM = cv::StereoSGBM::create();
+                    m_pStereoMatcher_cvSGBM->compute(cvRectImg_Curt, cvRectImg_Last, cvDispImg_cvSGBM_16bit);
+                    cvDispImg_cvSGBM_16bit.convertTo(cvDispImg_cvSGBM_16bit, CV_32F, 1.0 / 16); // Disparity Image is in 16-bit -> Divide by 16 to get real Disparity.
+                    //---Test: Show Disparity Image---
+                    cv::Mat cvDispImg_cvSGBM_8bit(cvRectImg_Curt.size(), CV_8UC1);
+                    cv::normalize(cvDispImg_cvSGBM_16bit, cvDispImg_cvSGBM_8bit, 0, 255, cv::NORM_MINMAX, CV_8UC1);
+                    cv::imwrite("E:\\Project_ARCHITECT\\MyMMS_DispImg_cvSGBM.png", cvDispImg_cvSGBM_8bit);
+                }
+            }
 
             //===== OLD =====
             /*
@@ -297,6 +371,12 @@ namespace Stereo
     }
 
     // -----------------------------------------------------------------------------
+    void CPluginInterface::imp_Rectification()
+    {
+        
+    }
+
+    // -----------------------------------------------------------------------------
 
     void CPluginInterface::ShowImg(const std::vector<char>& Img_RGBA) const
     {
@@ -317,6 +397,10 @@ namespace Stereo
     {
         ENGINE_CONSOLE_INFOV("Stereo matching plugin started!");
 
+        //---Program Setting---
+        m_Is_ARKitData = Core::CProgramParameters::GetInstance().Get("mr:stereo:arkit_data", true);
+        m_Is_TestData_MyMMS = Core::CProgramParameters::GetInstance().Get("mr:stereo:test_data_mms", true);
+
         //---Frame Resolution given by ARKit---
         m_FrameResolution = Core::CProgramParameters::GetInstance().Get("mr:stereo:frame_resolution", 0.5); // Full = 1; Half = 0.5;
 
@@ -331,9 +415,14 @@ namespace Stereo
         //---Rectification-----
         m_RectImgSize = Core::CProgramParameters::GetInstance().Get("mr:stereo:rectified_image_size", glm::ivec2(1280, 1040));
 
-        //---LibSGM---
+        //---Stereo Matching---
         m_DisparityCount = Core::CProgramParameters::GetInstance().Get("mr:stereo:disparity_count", 128);
-        m_pStereoMatcher_LibSGM = std::make_unique<sgm::StereoSGM>(m_RectImgSize.x, m_RectImgSize.y, m_DisparityCount, 8, 8, sgm::EXECUTE_INOUT_HOST2HOST);
+
+        m_Is_LibSGM = Core::CProgramParameters::GetInstance().Get("mr:stereo:libsgm", true);
+        m_Is_cvBM_cuda = Core::CProgramParameters::GetInstance().Get("mr:stereo:cv_bm_cuda", true);
+        m_Is_cvBP_cuda = Core::CProgramParameters::GetInstance().Get("mr:stereo:cv_bp_cuda", true);
+        m_Is_cvConstBP_cuda = Core::CProgramParameters::GetInstance().Get("mr:stereo:cv_const_bp_cuda", false);
+        m_Is_cvSGBM = Core::CProgramParameters::GetInstance().Get("mr:stereo:cv_sgbm", true);
     }
 
     // -----------------------------------------------------------------------------

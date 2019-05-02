@@ -49,6 +49,15 @@ namespace Stereo
         void OnFrameGPU(Gfx::CTexturePtr _RGBImage, const glm::mat4 &_Transform);
 
     private:
+        void imp_Rectification();
+        void ShowImg(const std::vector<char>& Img_RGBA) const;
+
+    private:
+        //---Program Setting---
+        bool m_Is_ARKitData, m_Is_TestData_MyMMS; // Select Data Set.
+        bool m_Is_LibSGM;
+        bool m_Is_cvBM_cuda, m_Is_cvBP_cuda, m_Is_cvConstBP_cuda, m_Is_cvSGBM; // Select Stereo Matching provided by OpenCV.
+
         //---Inputs from plugin_slam---
         float m_FrameResolution;
         glm::ivec2 m_OrigImgSize; // Size of original image -> x = width & y = height
@@ -73,8 +82,5 @@ namespace Stereo
         cv::Ptr<cv::cuda::StereoBM> m_pStereoMatcher_cvBM_cuda;
         cv::Ptr<cv::StereoMatcher> m_pStereoMatcher_cvBP_cuda;
         cv::Ptr<cv::StereoMatcher> m_pStereoMatcher_cvConstBP_cuda;
-        
-    private:
-        void ShowImg(const std::vector<char>& Img_RGBA) const;
     };
 } // namespace HW
