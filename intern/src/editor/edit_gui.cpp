@@ -272,6 +272,17 @@ namespace
             }
         }
 
+
+		// -----------------------------------------------------------------------------
+		// Check settings
+		// -----------------------------------------------------------------------------
+		bool IsFullscreen = Core::CProgramParameters::GetInstance().Get("application:fullscreen", false);
+
+		if (IsFullscreen)
+		{
+			SDL_SetWindowFullscreen(m_pWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
+		}
+
         m_ShowGUI = Core::CProgramParameters::GetInstance().Get("application:show_gui", true);
     }
 
