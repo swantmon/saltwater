@@ -165,7 +165,7 @@ namespace Stereo
                     
                 }
 
-                if (m_StereoMatching_Method == "cv_bm_cuda")
+                if (m_StereoMatching_Method == "cvBM_cuda")
                 {
                     m_pStereoMatcher_cvBM_cuda = cv::cuda::createStereoBM(m_DispRange, 7); // Disparity Range, Böock Size
                     m_pStereoMatcher_cvBM_cuda->compute(cvRectImg_Curt_gpu, cvRectImg_Last_gpu, cvDispImg_Rect_gpu);
@@ -184,7 +184,7 @@ namespace Stereo
                     }
                 }
 
-                if (m_StereoMatching_Method == "cv_bp_cuda")
+                if (m_StereoMatching_Method == "cvBP_cuda")
                 {
                     m_pStereoMatcher_cvBP_cuda = cv::cuda::createStereoBeliefPropagation();
                     m_pStereoMatcher_cvBP_cuda->compute(cvRectImg_Curt_gpu, cvRectImg_Last_gpu, cvDispImg_Rect_gpu);
@@ -204,7 +204,7 @@ namespace Stereo
                 }
 
 
-                if (m_StereoMatching_Method == "cv_const_bp_cuda")
+                if (m_StereoMatching_Method == "cvConstBP_cuda")
                 {
                     m_pStereoMatcher_cvConstBP_cuda = cv::cuda::createStereoConstantSpaceBP();
                     m_pStereoMatcher_cvConstBP_cuda->compute(cvRectImg_Curt_gpu, cvRectImg_Last_gpu, cvDispImg_Rect_gpu);
@@ -223,7 +223,7 @@ namespace Stereo
                     }
                 }
 
-                if (m_StereoMatching_Method == "cv_sgbm")
+                if (m_StereoMatching_Method == "cv_SGBM")
                 {
                     m_pStereoMatcher_cvSGBM = cv::StereoSGBM::create();
                     m_pStereoMatcher_cvSGBM->compute(cvRectImg_Curt, cvRectImg_Last, cvDispImg_Rect_cpu);
@@ -243,49 +243,49 @@ namespace Stereo
                 }
 
 
-                //---Transform Disparity in RectImg to Depth in OrigImg---
-                // Initialize Texture Manager for Disparity in RectImg
-                Gfx::STextureDescriptor TextureDescriptor_Disp = {};
+                ////---Transform Disparity in RectImg to Depth in OrigImg---
+                //// Initialize Texture Manager for Disparity in RectImg
+                //Gfx::STextureDescriptor TextureDescriptor_Disp = {};
 
-                TextureDescriptor_Disp.m_NumberOfPixelsU = RectImg_Curt.get_ImgSize().x;
-                TextureDescriptor_Disp.m_NumberOfPixelsV = RectImg_Curt.get_ImgSize().y;
-                TextureDescriptor_Disp.m_NumberOfPixelsW = 1;
-                TextureDescriptor_Disp.m_NumberOfMipMaps = 1;
-                TextureDescriptor_Disp.m_NumberOfTextures = 1;
-                TextureDescriptor_Disp.m_Binding = Gfx::CTexture::ShaderResource;
-                TextureDescriptor_Disp.m_Access = Gfx::CTexture::EAccess::CPUWrite;
-                TextureDescriptor_Disp.m_Usage = Gfx::CTexture::EUsage::GPUReadWrite;
-                TextureDescriptor_Disp.m_Semantic = Gfx::CTexture::UndefinedSemantic;
-                TextureDescriptor_Disp.m_Format = Gfx::CTexture::R16_UBYTE; // 1 channels with 16-Ubit.
+                //TextureDescriptor_Disp.m_NumberOfPixelsU = RectImg_Curt.get_ImgSize().x;
+                //TextureDescriptor_Disp.m_NumberOfPixelsV = RectImg_Curt.get_ImgSize().y;
+                //TextureDescriptor_Disp.m_NumberOfPixelsW = 1;
+                //TextureDescriptor_Disp.m_NumberOfMipMaps = 1;
+                //TextureDescriptor_Disp.m_NumberOfTextures = 1;
+                //TextureDescriptor_Disp.m_Binding = Gfx::CTexture::ShaderResource;
+                //TextureDescriptor_Disp.m_Access = Gfx::CTexture::EAccess::CPUWrite;
+                //TextureDescriptor_Disp.m_Usage = Gfx::CTexture::EUsage::GPUReadWrite;
+                //TextureDescriptor_Disp.m_Semantic = Gfx::CTexture::UndefinedSemantic;
+                //TextureDescriptor_Disp.m_Format = Gfx::CTexture::R16_UBYTE; // 1 channels with 16-Ubit.
 
-                m_Disp_Rect_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_Disp);
+                //m_Disp_Rect_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_Disp);
 
-                // GPU Start
-                Gfx::Performance::BeginEvent("Planar Rectification");
+                //// GPU Start
+                //Gfx::Performance::BeginEvent("Planar Rectification");
 
-                // Submit Data to Managers
-                Gfx::BufferManager::UploadBufferData(m_HomographyBufferPtr, &Homo_B);
+                //// Submit Data to Managers
+                //Gfx::BufferManager::UploadBufferData(m_HomographyBufferPtr, &Homo_B);
 
-                Base::AABB2UInt TargetRect;
-                TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(RectImg_Curt.get_ImgSize().x, RectImg_Curt.get_ImgSize().y));
-                Gfx::TextureManager::CopyToTexture2D(m_Disp_Rect_TexturePtr, TargetRect, RectImg_Curt.get_ImgSize().x, static_cast<const void*>(DispImg_Rect.data()));
+                //Base::AABB2UInt TargetRect;
+                //TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(RectImg_Curt.get_ImgSize().x, RectImg_Curt.get_ImgSize().y));
+                //Gfx::TextureManager::CopyToTexture2D(m_Disp_Rect_TexturePtr, TargetRect, RectImg_Curt.get_ImgSize().x, static_cast<const void*>(DispImg_Rect.data()));
 
-                //---Connecting Managers (@CPU) & GLSL (@GPU)---
-                Gfx::ContextManager::SetShaderCS(m_Disp2DepthCSPtr);
-                Gfx::ContextManager::SetImageTexture(0, m_Disp_Rect_TexturePtr);
-                Gfx::ContextManager::SetImageTexture(1, m_Depth_Orig_TexturePtr);
-                Gfx::ContextManager::SetConstantBuffer(0, m_HomographyBufferPtr);
-                Gfx::ContextManager::SetConstantBuffer(1, m_ParaxEqBufferPtr);
+                ////---Connecting Managers (@CPU) & GLSL (@GPU)---
+                //Gfx::ContextManager::SetShaderCS(m_Disp2DepthCSPtr);
+                //Gfx::ContextManager::SetImageTexture(0, m_Disp_Rect_TexturePtr);
+                //Gfx::ContextManager::SetImageTexture(1, m_Depth_Orig_TexturePtr);
+                //Gfx::ContextManager::SetConstantBuffer(0, m_HomographyBufferPtr);
+                //Gfx::ContextManager::SetConstantBuffer(1, m_ParaxEqBufferPtr);
 
-                //---Start GPU Parallel Processing---
-                const int WorkGroupsX = DivUp(m_OrigImgSize.x, TileSize_2D);
-                const int WorkGroupsY = DivUp(m_OrigImgSize.y, TileSize_2D);
+                ////---Start GPU Parallel Processing---
+                //const int WorkGroupsX = DivUp(m_OrigImgSize.x, TileSize_2D);
+                //const int WorkGroupsY = DivUp(m_OrigImgSize.y, TileSize_2D);
 
-                Gfx::ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+                //Gfx::ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
 
-                Gfx::ContextManager::ResetShaderCS();
+                //Gfx::ContextManager::ResetShaderCS();
 
-                Gfx::Performance::EndEvent();
+                //Gfx::Performance::EndEvent();
             }
             
             if (m_Is_TestData_MyMMS)
@@ -332,9 +332,9 @@ namespace Stereo
 
                 if (m_Is_imwrite)
                 {
-                    cv::imwrite("E:\\Project_ARCHITECT\\ARKit_RectImg_Curt.png", cvRectImg_Curt);
+                    cv::imwrite("E:\\Project_ARCHITECT\\MMS_RectImg_Curt.png", cvRectImg_Curt);
 
-                    cv::imwrite("E:\\Project_ARCHITECT\\ARKit_RectImg_Last.png", cvRectImg_Last);
+                    cv::imwrite("E:\\Project_ARCHITECT\\MMS_RectImg_Last.png", cvRectImg_Last);
                 }
 
                 //---Stereo Matching---
@@ -363,7 +363,7 @@ namespace Stereo
 
                 }
 
-                if (m_StereoMatching_Method == "cv_bm_cuda")
+                if (m_StereoMatching_Method == "cvBM_cuda")
                 {
                     m_pStereoMatcher_cvBM_cuda = cv::cuda::createStereoBM(m_DispRange, 7); // Disparity Range, Böock Size
                     m_pStereoMatcher_cvBM_cuda->compute(cvRectImg_Curt_gpu, cvRectImg_Last_gpu, cvDispImg_Rect_gpu);
@@ -382,7 +382,7 @@ namespace Stereo
                     }
                 }
 
-                if (m_StereoMatching_Method == "cv_bp_cuda")
+                if (m_StereoMatching_Method == "cvBP_cuda")
                 {
                     m_pStereoMatcher_cvBP_cuda = cv::cuda::createStereoBeliefPropagation();
                     m_pStereoMatcher_cvBP_cuda->compute(cvRectImg_Curt_gpu, cvRectImg_Last_gpu, cvDispImg_Rect_gpu);
@@ -402,7 +402,7 @@ namespace Stereo
                 }
 
 
-                if (m_StereoMatching_Method == "cv_const_bp_cuda")
+                if (m_StereoMatching_Method == "cvConstBP_cuda")
                 {
                     m_pStereoMatcher_cvConstBP_cuda = cv::cuda::createStereoConstantSpaceBP();
                     m_pStereoMatcher_cvConstBP_cuda->compute(cvRectImg_Curt_gpu, cvRectImg_Last_gpu, cvDispImg_Rect_gpu);
@@ -421,7 +421,7 @@ namespace Stereo
                     }
                 }
 
-                if (m_StereoMatching_Method == "cv_sgbm")
+                if (m_StereoMatching_Method == "cv_SGBM")
                 {
                     m_pStereoMatcher_cvSGBM = cv::StereoSGBM::create();
                     m_pStereoMatcher_cvSGBM->compute(cvRectImg_Curt, cvRectImg_Last, cvDispImg_Rect_cpu);
@@ -577,38 +577,38 @@ namespace Stereo
         m_StereoMatching_Method = Core::CProgramParameters::GetInstance().Get("mr:stereo:02_stereo_matching:Method", "cvBM_cuda");
 
         //---Disparity to Depth---
-        // Initialize Shader Manager
-        std::stringstream DefineStream;
-        DefineStream
-            << "#define TILE_SIZE_2D " << TileSize_2D << " \n"; // 16 for work group size is suggested for 2D image (based on experience).
-        std::string DefineString = DefineStream.str();
+        //// Initialize Shader Manager
+        //std::stringstream DefineStream;
+        //DefineStream
+        //    << "#define TILE_SIZE_2D " << TileSize_2D << " \n"; // 16 for work group size is suggested for 2D image (based on experience).
+        //std::string DefineString = DefineStream.str();
 
-        m_Disp2DepthCSPtr = Gfx::ShaderManager::CompileCS("../../plugins/stereo/cs_Disp_to_Depth.glsl", "main", DefineString.c_str());
+        //m_Disp2DepthCSPtr = Gfx::ShaderManager::CompileCS("../../plugins/stereo/cs_Disp_to_Depth.glsl", "main", DefineString.c_str());
 
-        // Initialize Buffer Manager
-        Gfx::SBufferDescriptor HomoBufferDesc = {};
+        //// Initialize Buffer Manager
+        //Gfx::SBufferDescriptor HomoBufferDesc = {};
 
-        HomoBufferDesc.m_Stride = 0;
-        HomoBufferDesc.m_Usage = Gfx::CBuffer::GPURead;
-        HomoBufferDesc.m_Binding = Gfx::CBuffer::ConstantBuffer;
-        HomoBufferDesc.m_Access = Gfx::CBuffer::CPUWrite;
-        HomoBufferDesc.m_NumberOfBytes = sizeof(FutoGmtCV::SHomographyTransform);
-        HomoBufferDesc.m_pBytes = nullptr;
-        HomoBufferDesc.m_pClassKey = 0;
+        //HomoBufferDesc.m_Stride = 0;
+        //HomoBufferDesc.m_Usage = Gfx::CBuffer::GPURead;
+        //HomoBufferDesc.m_Binding = Gfx::CBuffer::ConstantBuffer;
+        //HomoBufferDesc.m_Access = Gfx::CBuffer::CPUWrite;
+        //HomoBufferDesc.m_NumberOfBytes = sizeof(FutoGmtCV::SHomographyTransform);
+        //HomoBufferDesc.m_pBytes = nullptr;
+        //HomoBufferDesc.m_pClassKey = 0;
 
-        m_HomographyBufferPtr = Gfx::BufferManager::CreateBuffer(HomoBufferDesc);
+        //m_HomographyBufferPtr = Gfx::BufferManager::CreateBuffer(HomoBufferDesc);
 
-        Gfx::SBufferDescriptor ParaxEqBufferDesc = {};
+        //Gfx::SBufferDescriptor ParaxEqBufferDesc = {};
 
-        ParaxEqBufferDesc.m_Stride = 0;
-        ParaxEqBufferDesc.m_Usage = Gfx::CBuffer::GPURead;
-        ParaxEqBufferDesc.m_Binding = Gfx::CBuffer::ConstantBuffer;
-        ParaxEqBufferDesc.m_Access = Gfx::CBuffer::CPUWrite;
-        ParaxEqBufferDesc.m_NumberOfBytes = sizeof(SParallaxEquation);
-        ParaxEqBufferDesc.m_pBytes = nullptr;
-        ParaxEqBufferDesc.m_pClassKey = 0;
+        //ParaxEqBufferDesc.m_Stride = 0;
+        //ParaxEqBufferDesc.m_Usage = Gfx::CBuffer::GPURead;
+        //ParaxEqBufferDesc.m_Binding = Gfx::CBuffer::ConstantBuffer;
+        //ParaxEqBufferDesc.m_Access = Gfx::CBuffer::CPUWrite;
+        //ParaxEqBufferDesc.m_NumberOfBytes = sizeof(SParallaxEquation);
+        //ParaxEqBufferDesc.m_pBytes = nullptr;
+        //ParaxEqBufferDesc.m_pClassKey = 0;
 
-        m_ParaxEqBufferPtr = Gfx::BufferManager::CreateBuffer(ParaxEqBufferDesc);
+        //m_ParaxEqBufferPtr = Gfx::BufferManager::CreateBuffer(ParaxEqBufferDesc);
 
     }
 
