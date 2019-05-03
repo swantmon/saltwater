@@ -1,5 +1,5 @@
-#ifndef __INCLUDE_CS_Rect_Planar_GLSL__
-#define __INCLUDE_CS_Rect_Planar_GLSL__
+#ifndef __INCLUDE_CS_Disp_to_Depth_GLSL__
+#define __INCLUDE_CS_Disp_to_Depth_GLSL__
 
 layout(std140, binding = 0) uniform HomographyBuffer
 {
@@ -8,9 +8,15 @@ layout(std140, binding = 0) uniform HomographyBuffer
 	ivec2 g_RectImgConer_UL;
 	ivec2 g_RectImgConer_DR;
 };
+layout(std140, binding = 1) uniform ParaxEqBuffer
+{
+    float g_BaselineLength;
+	float g_FocalLength;
+	ivec2 g_Padding;
+};
 
-layout (binding = 0, rgba8) readonly uniform image2D cs_OrigImg;
-layout (binding = 1, r8) writeonly uniform image2D cs_RectImg;
+layout (binding = 0, r8) readonly uniform image2D cs_Disp_Rect;
+layout (binding = 1, r8) writeonly uniform image2D cs_Depth_Orig;
 
 vec4 BiLinearInterpolation(vec2 pixPosition)
 {
@@ -43,6 +49,14 @@ vec4 BiLinearInterpolation(vec2 pixPosition)
 layout (local_size_x = TILE_SIZE_2D, local_size_y = TILE_SIZE_2D, local_size_z = 1) in;
 void main()
 {
+	const ivec3 pixPosition_Orig = ivec3(gl_GlobalInvocationID.xy, 1);
+	vec3 pixPosition_Orig2Rect = mat3(g_Homography) * (pixPosition_Orig);
+	pixPosition_Orig2Rect /= pixPosition_Orig2Rect.z;
+	vec2 pixPosition_Rect = vec2(pixPosition_Orig2Rect) - g_RectImgConer_UL;
+    
+    
+
+	//*** OLD ***
 	const ivec3 pix_Rect = ivec3(gl_GlobalInvocationID.xy + g_RectImgConer_UL, 1);
 	vec3 pix_Rect2Orig = mat3(g_InvHomography) * (pix_Rect);
 	pix_Rect2Orig /= pix_Rect2Orig.z;
@@ -53,4 +67,4 @@ void main()
 	imageStore(cs_RectImg, ivec2(gl_GlobalInvocationID.xy), pixValue); 
 }
 
-#endif //__INCLUDE_CS_Rect_Planar_GLSL__
+#endif //__INCLUDE_CS_Disp_to_Depth_GLSL__
