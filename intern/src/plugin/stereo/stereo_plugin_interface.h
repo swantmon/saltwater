@@ -57,10 +57,10 @@ namespace Stereo
         void ShowImg(const std::vector<char>& Img_RGBA) const;
 
     private:
-        //---Program Setting---
+        //---Input Data---
         bool m_Is_ARKitData, m_Is_TestData_MyMMS; // Select Data Set.
-        bool m_Is_LibSGM;
-        bool m_Is_cvBM_cuda, m_Is_cvBP_cuda, m_Is_cvConstBP_cuda, m_Is_cvSGBM; // Select Stereo Matching provided by OpenCV.
+
+        bool m_Is_imwrite; // Export Image Result by OpenCV?
 
         //---Inputs from plugin_slam---
         float m_FrameResolution;
@@ -70,7 +70,6 @@ namespace Stereo
         FutoGmtCV::FutoImg m_Keyframe_Curt, m_Keyframe_Last; // Only compute 2 frames first. -> In the future, I will modify if it needs to compute more images at once.
         bool m_idx_Keyf_Curt, m_idx_Keyf_Last; // To judge the current & last keyframes are exist or not.
 
-        //---Keyframe Selection---
         std::size_t m_Cdt_Keyf_MaxNum; // Maximal keyframes for calculation once
         float m_Cdt_Keyf_BaseLineL; // Keyframe Selection: BaseLine Condition. Unit is meter.
 
@@ -78,7 +77,9 @@ namespace Stereo
         glm::ivec2 m_RectImgSize;
 
         //---Stereo Matching---
-        int m_DisparityCount;
+        int m_DispRange;
+
+        std::string m_StereoMatching_Method;
 
         std::unique_ptr<sgm::StereoSGM> m_pStereoMatcher_LibSGM;
         cv::Ptr<cv::StereoSGBM> m_pStereoMatcher_cvSGBM;
@@ -87,7 +88,7 @@ namespace Stereo
         cv::Ptr<cv::StereoMatcher> m_pStereoMatcher_cvBP_cuda;
         cv::Ptr<cv::StereoMatcher> m_pStereoMatcher_cvConstBP_cuda;
 
-        //---Disparity to Depth---
+        //---Depth Map---
         Gfx::CShaderPtr m_Disp2DepthCSPtr;
         Gfx::CTexturePtr m_Disp_Rect_TexturePtr;
         Gfx::CTexturePtr m_Depth_Orig_TexturePtr;
