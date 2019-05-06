@@ -734,7 +734,6 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-
     void CMRControlManager::OnResize(int _Width, int _Height)
     {
         int Rotation = Core::JNI::GetDeviceRotation();

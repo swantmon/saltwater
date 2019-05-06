@@ -90,7 +90,7 @@ public class PermissionFragment extends Fragment
 
     // -----------------------------------------------------------------------------
 
-    public void AcquirePermissions(String _Permissions[])
+    public void AcquirePermissions(String[] _Permissions)
     {
         requestPermissions(_Permissions, PERMISSION_REQUEST_CODE);
     }

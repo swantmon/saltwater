@@ -19,7 +19,7 @@ public class PermissionHelper
         {
             Class<?> Clazz = Class.forName("de.tuilmenau.saltwater.GameActivity");
 
-            Method GetInstanceMethod = Clazz.getMethod("GetInstance", new Class[] {});
+            Method GetInstanceMethod = Clazz.getMethod("GetInstance");
 
             return (Activity)GetInstanceMethod.invoke(null);
         }
@@ -55,7 +55,7 @@ public class PermissionHelper
 
     // -----------------------------------------------------------------------------
 
-    public static void AcquirePermissions(final String _Permissions[])
+    public static void AcquirePermissions(final String[] _Permissions)
     {
         Activity ForegroundActivity = GetForegroundActivity();
 
@@ -64,7 +64,7 @@ public class PermissionHelper
 
     // -----------------------------------------------------------------------------
 
-    public static void AcquirePermissions(final String _Permissions[], Activity _Activity)
+    public static void AcquirePermissions(final String[] _Permissions, Activity _Activity)
     {
         if (_Activity == null) return;
 
@@ -86,5 +86,5 @@ public class PermissionHelper
 
     // -----------------------------------------------------------------------------
 
-    public static native void nativeOnAcquirePermissions(String _Permissions[], int _GrantResults[]);
+    public static native void nativeOnAcquirePermissions(String[] _Permissions, int[] _GrantResults);
 }
