@@ -138,8 +138,8 @@ namespace MR
         // -----------------------------------------------------------------------------
         // Stuff for Kinect data source
         // -----------------------------------------------------------------------------
-        typedef bool(*GetDepthBufferFunc)(uint16_t*);
-        typedef bool(*GetColorBufferFunc)(char*);
+        using GetDepthBufferFunc = bool(*)(uint16_t*);
+        using GetColorBufferFunc = bool(*)(char*);
         GetDepthBufferFunc GetDepthBuffer;
         GetColorBufferFunc GetColorBuffer;
 
@@ -199,7 +199,7 @@ namespace MR
 
         glm::mat4 m_PreliminaryPoseMatrix;
 
-        typedef void(*InpaintWithPixMixFunc)(const glm::ivec2&, const std::vector<char>&, std::vector<char>&);
+        using InpaintWithPixMixFunc = void(*)(const glm::ivec2&, const std::vector<char>&, std::vector<char>&);
         InpaintWithPixMixFunc InpaintWithPixMix;
 
 
@@ -299,7 +299,7 @@ namespace MR
 
                 m_DataSource = KINECT;
 
-                typedef void(*GetIntrinsicsFunc)(glm::vec2&, glm::vec2&, glm::ivec2&);
+                using GetIntrinsicsFunc = void(*)(glm::vec2&, glm::vec2&, glm::ivec2&);
 
                 GetIntrinsicsFunc GetIntrinsics = (GetIntrinsicsFunc)(Core::PluginManager::GetPluginFunction("Kinect", "GetIntrinsics"));
 
@@ -331,7 +331,7 @@ namespace MR
                 TextureDescriptor.m_Usage = Gfx::CTexture::GPUReadWrite;
                 TextureDescriptor.m_Semantic = Gfx::CTexture::UndefinedSemantic;
                 TextureDescriptor.m_pFileName = nullptr;
-                TextureDescriptor.m_pPixels = 0;
+                TextureDescriptor.m_pPixels = nullptr;
                 TextureDescriptor.m_Format = Gfx::CTexture::R16_UINT;
 
                 m_DepthTexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
@@ -492,7 +492,7 @@ namespace MR
 
             if (m_UseTrackingCamera)
             {
-                Cam::CEditorControl& rControl = static_cast<Cam::CEditorControl&>(Cam::ControlManager::GetActiveControl());
+                auto& rControl = static_cast<Cam::CEditorControl&>(Cam::ControlManager::GetActiveControl());
 
                 // -----------------------------------------------------------------------------
                 // Projection
@@ -822,7 +822,7 @@ namespace MR
             TextureDescriptor.m_Usage = Gfx::CTexture::GPUReadWrite;
             TextureDescriptor.m_Semantic = Gfx::CTexture::UndefinedSemantic;
             TextureDescriptor.m_pFileName = nullptr;
-            TextureDescriptor.m_pPixels = 0;
+            TextureDescriptor.m_pPixels = nullptr;
             TextureDescriptor.m_Format = Gfx::CTexture::R16_UINT;
             m_ShiftTexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
 
@@ -897,7 +897,7 @@ namespace MR
             TextureDescriptor.m_Usage = Gfx::CTexture::GPUReadWrite;
             TextureDescriptor.m_Semantic = Gfx::CTexture::UndefinedSemantic;
             TextureDescriptor.m_pFileName = nullptr;
-            TextureDescriptor.m_pPixels = 0;
+            TextureDescriptor.m_pPixels = nullptr;
             TextureDescriptor.m_Format = Gfx::CTexture::R8G8B8A8_UBYTE;
             m_RGBATexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
 
@@ -957,7 +957,7 @@ namespace MR
 
             if (_rMessage.m_MessageType == 0)
             {
-                int ScaledResolution = static_cast<int>(m_PlaneResolution / m_PlaneScale);
+                auto ScaledResolution = static_cast<int>(m_PlaneResolution / m_PlaneScale);
                 int BorderSize = (m_PlaneResolution - ScaledResolution) / 2;
                 int Min = BorderSize;
                 int Max = m_PlaneResolution - BorderSize;
@@ -1111,7 +1111,7 @@ namespace MR
             TextureDescriptor.m_Usage = Gfx::CTexture::GPUReadWrite;
             TextureDescriptor.m_Semantic = Gfx::CTexture::UndefinedSemantic;
             TextureDescriptor.m_pFileName = nullptr;
-            TextureDescriptor.m_pPixels = 0;
+            TextureDescriptor.m_pPixels = nullptr;
             TextureDescriptor.m_Format = Gfx::CTexture::R16_UINT;
             m_ShiftLUTPtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
 
