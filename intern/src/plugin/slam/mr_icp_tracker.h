@@ -17,7 +17,7 @@ namespace MR
     {
     public:
 
-        typedef std::vector<Gfx::CTexturePtr> CTextureVector;
+        using CTextureVector = std::vector<Gfx::CTexturePtr>;
 
         glm::mat4 Track(
             const glm::mat4& _rPoseMatrix,
