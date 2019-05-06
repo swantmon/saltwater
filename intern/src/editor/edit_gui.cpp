@@ -154,7 +154,7 @@ namespace
 
         m_pWindow = SDL_CreateWindow("Editor", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WindowSize.x, WindowSize.y, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 
-        if (m_pWindow == NULL)
+        if (m_pWindow == nullptr)
         {
             BASE_THROWM("Could not initialize SDL window.");
         }
@@ -234,7 +234,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Init
         // -----------------------------------------------------------------------------
-        ImGui_ImplSDL2_InitForOpenGL(m_pWindow, 0);
+        ImGui_ImplSDL2_InitForOpenGL(m_pWindow, nullptr);
 
         ImGui_ImplOpenGL3_Init();
 

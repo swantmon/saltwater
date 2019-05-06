@@ -300,7 +300,7 @@ namespace
 
     private:
 
-        void Render();
+        void RenderBackground();
 
         void OnResize(int _Width, int _Height);
         void OnDirtyEntity(Dt::CEntity* _pEntity);
@@ -501,7 +501,7 @@ namespace
         m_TrackedObjects.clear();
 
         // -----------------------------------------------------------------------------
-        // Release ressources
+        // Release resources
         // -----------------------------------------------------------------------------
         m_BackgroundTexturePtr   = 0;
         m_ExternalTexturePtr     = 0;
@@ -632,7 +632,7 @@ namespace
             ArPose_destroy(pARPose);
         }
 
-        Render();
+        RenderBackground();
     }
 
     // -----------------------------------------------------------------------------
@@ -720,8 +720,8 @@ namespace
             // Default geometry
             // -----------------------------------------------------------------------------
             int Rotation = Core::JNI::GetDeviceRotation();
-            int Width    = Core::JNI::GetDeviceDimension()[0];
-            int Height   = Core::JNI::GetDeviceDimension()[1];
+            int Width    = Gfx::Main::GetActiveNativeWindowSize()[0];
+            int Height   = Gfx::Main::GetActiveNativeWindowSize()[1];
 
             ArSession_setDisplayGeometry(m_pARSession, Rotation, Width, Height);
         }
@@ -945,7 +945,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CMRControlManager::Render()
+    void CMRControlManager::RenderBackground()
     {
         // -----------------------------------------------------------------------------
         // Prepare
@@ -969,7 +969,7 @@ namespace
 
         if (HasGeometryChanged != 0 || g_IsUVsInitialized == false)
         {
-            ArFrame_transformDisplayUvCoords(m_pARSession, m_pARFrame, s_NumberOfVertices * 2, c_Uvs, g_TransformedUVs);
+            ArFrame_transformCoordinates2d(m_pARSession, m_pARFrame, AR_COORDINATES_2D_VIEW_NORMALIZED, s_NumberOfVertices, c_Uvs, AR_COORDINATES_2D_TEXTURE_NORMALIZED, g_TransformedUVs);
 
             Gfx::BufferManager::UploadBufferData(m_WebcamUVBufferPtr, &g_TransformedUVs);
 

@@ -67,7 +67,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Unregister event
         // -----------------------------------------------------------------------------
-        m_OnEventDelegate = 0;
+        m_OnEventDelegate = nullptr;
 
         // -----------------------------------------------------------------------------
         // Clear ticket
@@ -119,7 +119,7 @@ namespace Edit
         {
             if (rSelectionTicket.m_HitFlag == Gfx::SHitFlag::Entity && rSelectionTicket.m_pObject != nullptr)
             {
-                Dt::CEntity* pEntity = (Dt::CEntity*)rSelectionTicket.m_pObject;
+                auto pEntity = static_cast<Dt::CEntity*>(rSelectionTicket.m_pObject);
 
                 Gfx::SelectionRenderer::SelectEntity(pEntity->GetID());
 
