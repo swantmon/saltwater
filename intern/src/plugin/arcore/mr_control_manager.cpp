@@ -501,7 +501,7 @@ namespace
         m_TrackedObjects.clear();
 
         // -----------------------------------------------------------------------------
-        // Release ressources
+        // Release resources
         // -----------------------------------------------------------------------------
         m_BackgroundTexturePtr   = 0;
         m_ExternalTexturePtr     = 0;
@@ -720,8 +720,8 @@ namespace
             // Default geometry
             // -----------------------------------------------------------------------------
             int Rotation = Core::JNI::GetDeviceRotation();
-            int Width    = Core::JNI::GetDeviceDimension()[0];
-            int Height   = Core::JNI::GetDeviceDimension()[1];
+            int Width    = Gfx::Main::GetActiveNativeWindowSize()[0];
+            int Height   = Gfx::Main::GetActiveNativeWindowSize()[1];
 
             ArSession_setDisplayGeometry(m_pARSession, Rotation, Width, Height);
         }
