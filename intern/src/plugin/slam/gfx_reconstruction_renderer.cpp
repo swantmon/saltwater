@@ -365,67 +365,67 @@ namespace
             Core::CProgramParameters::GetInstance().Add("mr:diminished_reality:aabb:max", m_SelectionBox.GetMax());
         }
 
-        m_OutlineVSPtr = 0;
-        m_OutlineFSPtr = 0;
-        m_OutlineLevel1VSPtr = 0;
-        m_OutlineLevel1FSPtr = 0;
-        m_OutlineLevel2VSPtr = 0;
-        m_OutlineLevel2FSPtr = 0;
-        m_RaycastVSPtr = 0;
-        m_RaycastDiminishedVSPtr = 0;
-        m_RaycastFSPtr = 0;
-        m_RaycastHighlightFSPtr = 0;
-        m_RaycastDiminishedFSPtr = 0;
-        m_RaycastHitProxyFSPtr = 0;
-        m_PickingCSPtr = 0;
+        m_OutlineVSPtr = nullptr;
+        m_OutlineFSPtr = nullptr;
+        m_OutlineLevel1VSPtr = nullptr;
+        m_OutlineLevel1FSPtr = nullptr;
+        m_OutlineLevel2VSPtr = nullptr;
+        m_OutlineLevel2FSPtr = nullptr;
+        m_RaycastVSPtr = nullptr;
+        m_RaycastDiminishedVSPtr = nullptr;
+        m_RaycastFSPtr = nullptr;
+        m_RaycastHighlightFSPtr = nullptr;
+        m_RaycastDiminishedFSPtr = nullptr;
+        m_RaycastHitProxyFSPtr = nullptr;
+        m_PickingCSPtr = nullptr;
         
-        m_VertexMapVSPtr = 0;
-        m_VertexMapFSPtr = 0;
+        m_VertexMapVSPtr = nullptr;
+        m_VertexMapFSPtr = nullptr;
 
-        m_BackgroundVSPtr = 0;
-        m_BackgroundFSPtr = 0;
-        m_CombineDiminishedFSPtr = 0;
+        m_BackgroundVSPtr = nullptr;
+        m_BackgroundFSPtr = nullptr;
+        m_CombineDiminishedFSPtr = nullptr;
 
-        m_MembranePatchesCSPtr = 0;
-        m_MembraneBorderCSPtr = 0;
-        m_MembraneEvalBorderCSPtr = 0;
-        m_MembranePropagateGridCSPtr = 0;
-        m_MembranePropagatePixelsCSPtr = 0;
+        m_MembranePatchesCSPtr = nullptr;
+        m_MembraneBorderCSPtr = nullptr;
+        m_MembraneEvalBorderCSPtr = nullptr;
+        m_MembranePropagateGridCSPtr = nullptr;
+        m_MembranePropagatePixelsCSPtr = nullptr;
         
-        m_PickingBuffer = 0;
+        m_PickingBuffer = nullptr;
 
-        m_MembranePatchesTexturePtr = 0;
-        m_MembraneBordersTexturePtr = 0;
-        m_MembraneTexturePtr = 0;
+        m_MembranePatchesTexturePtr = nullptr;
+        m_MembraneBordersTexturePtr = nullptr;
+        m_MembraneTexturePtr = nullptr;
 
-        m_RaycastConstantBufferPtr = 0;
-        m_RaycastHitProxyBufferPtr = 0;
-        m_RaycastHighLightConstantBufferPtr = 0;
-        m_DrawCallConstantBufferPtr = 0;
+        m_RaycastConstantBufferPtr = nullptr;
+        m_RaycastHitProxyBufferPtr = nullptr;
+        m_RaycastHighLightConstantBufferPtr = nullptr;
+        m_DrawCallConstantBufferPtr = nullptr;
 
-        m_MembranePatchBufferPtr = 0;
-        m_MembraneIndirectBufferPtr = 0;
+        m_MembranePatchBufferPtr = nullptr;
+        m_MembraneIndirectBufferPtr = nullptr;
 
-        m_CameraMeshPtr = 0;
-        m_VolumeMeshPtr = 0;
-        m_InpaintedPlaneMeshPtr = 0;
-        m_FullscreenQuadMeshPtr = 0;
-        m_CubeOutlineMeshPtr = 0;
-        m_PlaneMeshPtr = 0;
-        m_CameraInputLayoutPtr = 0;
-        m_VolumeInputLayoutPtr = 0;
-        m_InpaintedPlaneLayoutPtr = 0;
-        m_CubeOutlineInputLayoutPtr = 0;
+        m_CameraMeshPtr = nullptr;
+        m_VolumeMeshPtr = nullptr;
+        m_InpaintedPlaneMeshPtr = nullptr;
+        m_FullscreenQuadMeshPtr = nullptr;
+        m_CubeOutlineMeshPtr = nullptr;
+        m_PlaneMeshPtr = nullptr;
+        m_CameraInputLayoutPtr = nullptr;
+        m_VolumeInputLayoutPtr = nullptr;
+        m_InpaintedPlaneLayoutPtr = nullptr;
+        m_CubeOutlineInputLayoutPtr = nullptr;
 
-        m_OutlineRenderContextPtr = 0;
+        m_OutlineRenderContextPtr = nullptr;
 
         m_pReconstructor = nullptr;
 
-        m_PointCloudVSPtr = 0;
-        m_PointCloudFSPtr = 0;
+        m_PointCloudVSPtr = nullptr;
+        m_PointCloudFSPtr = nullptr;
 
-        m_InpaintedPlaneVSPtr = 0;
-        m_InpaintedPlaneFSPtr = 0;
+        m_InpaintedPlaneVSPtr = nullptr;
+        m_InpaintedPlaneFSPtr = nullptr;
 
         m_DiminishedViewPortSetPtr = nullptr;
 
@@ -665,7 +665,7 @@ namespace
         ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
         ConstantBufferDesc.m_NumberOfBytes = sizeof(glm::vec4) * 2;
         ConstantBufferDesc.m_pBytes = nullptr;
-        ConstantBufferDesc.m_pClassKey = 0;
+        ConstantBufferDesc.m_pClassKey = nullptr;
 
         m_RaycastConstantBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
 
@@ -686,7 +686,7 @@ namespace
         ConstantBufferDesc.m_Access = CBuffer::CPUReadWrite;
         ConstantBufferDesc.m_NumberOfBytes = sizeof(SPickingBuffer);
         ConstantBufferDesc.m_pBytes = nullptr;
-        ConstantBufferDesc.m_pClassKey = 0;
+        ConstantBufferDesc.m_pClassKey = nullptr;
 
         m_PickingBuffer = BufferManager::CreateBuffer(ConstantBufferDesc);
 
@@ -696,7 +696,7 @@ namespace
         ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
         ConstantBufferDesc.m_NumberOfBytes = m_MaxBorderPatchCount * 2 * sizeof(glm::vec4);
         ConstantBufferDesc.m_pBytes = nullptr;
-        ConstantBufferDesc.m_pClassKey = 0;
+        ConstantBufferDesc.m_pClassKey = nullptr;
 
         m_MembranePatchBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
 
@@ -844,12 +844,12 @@ namespace
                     glm::vec3(QuadLines[3].x, QuadLines[3].z, QuadLines[3].y),
                 };
 
-                for (int i = 0; i < 4; ++ i)
+                for (auto & NewVertex : NewVertices)
                 {
-                    NewVertices[i][0] += x;
-                    NewVertices[i][2] += y;
+                    NewVertex[0] += x;
+                    NewVertex[2] += y;
 
-                    PlaneVertices.push_back(NewVertices[i] / PlaneSize);
+                    PlaneVertices.push_back(NewVertex / PlaneSize);
                 }
             }
         }
@@ -864,14 +864,14 @@ namespace
 
         for (int i = 0; i < static_cast<int>(PlaneVertices.size()) / 4; ++i)
         {
-            for (int j = 0; j < 6; ++j)
+            for (unsigned int BaseIndex : BaseIndices)
             {
-                Indices.push_back(BaseIndices[j] + i * 4);
+                Indices.push_back(BaseIndex + i * 4);
             }
         }
 
-        int PlaneVertexCount = static_cast<int>(PlaneVertices.size());
-        int PlaneIndexCount = static_cast<int>(PlaneVertices.size());
+        auto PlaneVertexCount = static_cast<int>(PlaneVertices.size());
+        auto PlaneIndexCount = static_cast<int>(PlaneVertices.size());
         m_PlaneMeshPtr = MeshManager::CreateMesh(PlaneVertices.data(), PlaneVertexCount, sizeof(PlaneVertices[0]), Indices.data(), PlaneIndexCount);
 
         ////////////////////////////////////////////////////////////////////////////////

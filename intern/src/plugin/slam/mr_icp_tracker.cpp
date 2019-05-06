@@ -167,7 +167,7 @@ namespace MR
 
     bool CICPTracker::CalculatePoseMatrix(glm::mat4& rIncPoseMatrix)
     {
-        typedef float Scalar;
+        using Scalar = float;
 
         Scalar A[36];
         Scalar b[6];
@@ -278,7 +278,7 @@ namespace MR
         BufferDesc.m_Usage = CBuffer::EUsage::GPURead;
         BufferDesc.m_Binding = CBuffer::ConstantBuffer;
         BufferDesc.m_Access = CBuffer::CPUWrite;
-        BufferDesc.m_pClassKey = 0;
+        BufferDesc.m_pClassKey = nullptr;
 
         BufferDesc.m_NumberOfBytes = 16;
         m_ICPSummationConstantBufferPtr = BufferManager::CreateBuffer(BufferDesc);
