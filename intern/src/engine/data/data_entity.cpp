@@ -323,10 +323,7 @@ namespace Dt
 
     void CEntity::Attach(CEntity& _rEntity)
     {
-        CEntity*         pFirstChild;
-        CHierarchyFacet* pChildHierarchyFacet;
-
-        pChildHierarchyFacet = _rEntity.GetHierarchyFacet();
+        auto pChildHierarchyFacet = _rEntity.GetHierarchyFacet();
 
         if (m_pHierarchyFacet == nullptr || pChildHierarchyFacet == nullptr)
         {
@@ -335,7 +332,7 @@ namespace Dt
 
         pChildHierarchyFacet->SetParent(this);
 
-        pFirstChild = m_pHierarchyFacet->GetFirstChild();
+        auto pFirstChild = m_pHierarchyFacet->GetFirstChild();
 
         if (pFirstChild != nullptr)
         {
@@ -377,17 +374,11 @@ namespace Dt
 
     void CEntity::Detach()
     {
-        CEntity*         pParent;
-        CHierarchyFacet* pParentHierarchyFacet;
+        auto pParent = m_pHierarchyFacet->GetParent();
 
-        pParent = m_pHierarchyFacet->GetParent();
+        if (pParent == nullptr) return;
 
-        if (pParent == nullptr)
-        {
-            return;
-        }
-
-        pParentHierarchyFacet = pParent->GetHierarchyFacet();
+        auto pParentHierarchyFacet = pParent->GetHierarchyFacet();
 
         pParentHierarchyFacet->SetFirstChild(m_pHierarchyFacet->GetSibling());
 
@@ -398,14 +389,9 @@ namespace Dt
         // -----------------------------------------------------------------------------
         // Transformation
         // -----------------------------------------------------------------------------
-        Dt::CTransformationFacet* pParentTransformationFacet;
+        auto pParentTransformationFacet = pParent->GetTransformationFacet();
 
-        pParentTransformationFacet = pParent->GetTransformationFacet();
-
-        if (m_pTransformationFacet == nullptr || pParentTransformationFacet == nullptr)
-        {
-            return;
-        }
+        if (m_pTransformationFacet == nullptr || pParentTransformationFacet == nullptr) return;
 
         glm::vec3 Translation;
         glm::quat Rotation;
@@ -445,7 +431,7 @@ namespace Dt
     {
         if (_pComponent == nullptr || _pComponent->GetHostEntity() != this) return;
 
-        _pComponent->m_pHostEntity = 0;
+        _pComponent->m_pHostEntity = nullptr;
 
         m_pComponentsFacet->RemoveComponent(_pComponent);
     }
