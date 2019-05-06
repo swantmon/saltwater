@@ -333,46 +333,6 @@ namespace FutoGmtCV
             m_Img_Rect_M = FutoImg(Img_Rect, m_ImgSize_Rect, m_K_Rect_M, m_R_Rect, m_PC_Rect_M);
             break;
         }
-
-
-        //---Compute @ CPU (Remove after finishing "Compute @ GPU")---
-        /*
-        //---Create Rectified Images---
-        //cv::Mat Img_Rect(m_ImgSize_Rect, CV_8UC1);
-
-        //---Build Look-Up Table: from Rectified to Originals---
-        cv::Mat map_Rect2Orig_x(m_ImgSize_Rect, CV_32FC1);
-        cv::Mat map_Rect2Orig_y(m_ImgSize_Rect, CV_32FC1);
-
-        for (int idx_y = 0; idx_y < m_ImgSize_Rect.height; idx_y++)
-        {
-            for (int idx_x = 0; idx_x < m_ImgSize_Rect.width; idx_x++)
-            {
-                cv::Mat pix_Rect = cv::Mat::ones(3, 1, CV_32F);
-                pix_Rect.ptr<float>(0)[0] = idx_x + m_ImgCnr_Rect_UL.x;
-                pix_Rect.ptr<float>(1)[0] = idx_y + m_ImgCnr_Rect_UL.y;
-
-                cv::Mat pix_Rect2Orig = H.inv() * pix_Rect;
-                pix_Rect2Orig /= pix_Rect2Orig.ptr<float>(2)[0];
-
-                map_Rect2Orig_x.ptr<float>(idx_y)[idx_x] = pix_Rect2Orig.ptr<float>(0)[0];
-                map_Rect2Orig_y.ptr<float>(idx_y)[idx_x] = pix_Rect2Orig.ptr<float>(1)[0];
-            }
-        }
-
-        //---Derive Pixel Value of Rectified Images: Transform Pixels from Rectfied back to Origianls & Interpolation---
-        cv::remap(Img_Orig, Img_Rect, map_Rect2Orig_x, map_Rect2Orig_y, cv::INTER_LINEAR, cv::BORDER_TRANSPARENT);
-
-        switch (Which_Img)
-        {
-        case 0:
-            Img_Rect.copyTo(m_Img_Rect_B);
-            break;
-        case 1:
-            Img_Rect.copyTo(m_Img_Rect_M);
-            break;
-        }
-        */
     }
 
     //---Assistant Functions: Return Rectified Images---

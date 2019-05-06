@@ -61,7 +61,7 @@ namespace Stereo
         void ShowImg(const std::vector<char>& Img_RGBA) const;
 
         //---ARKit Data---
-        float m_FrameResolution;
+        float m_FrameResolution; // Full=1, Half=0.5.
         glm::ivec2 m_OrigImgSize; // Size of original image -> x = width & y = height
 
         //---Keyframe---
@@ -99,7 +99,11 @@ namespace Stereo
         void imp_Disp2Depth(); // Transform Disparity to Depth in Rectified Image
 
         //---Depth from Rectified to Original---
+        Gfx::CShaderPtr m_Depth_Rect2Orig_CSPtr;
+        Gfx::CTexturePtr m_Depth_OrigImg_TexturePtr;
+        Gfx::CBufferPtr m_Homogrampy_BufferPtr;
 
+        void imp_Depth_Rect2Orig();
     };
 
 } // namespace HW

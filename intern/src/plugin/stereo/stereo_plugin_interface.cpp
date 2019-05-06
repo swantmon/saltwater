@@ -45,6 +45,21 @@ namespace Stereo
 
         m_OrigImgSize = _rImageSize;
 
+        //
+        Gfx::STextureDescriptor TextureDescriptor_Depth_OrigImg = {};
+
+        TextureDescriptor_Depth_OrigImg.m_NumberOfPixelsU = m_OrigImgSize.x;
+        TextureDescriptor_Depth_OrigImg.m_NumberOfPixelsV = m_OrigImgSize.y;
+        TextureDescriptor_Depth_OrigImg.m_NumberOfPixelsW = 1;
+        TextureDescriptor_Depth_OrigImg.m_NumberOfMipMaps = 1;
+        TextureDescriptor_Depth_OrigImg.m_NumberOfTextures = 1;
+        TextureDescriptor_Depth_OrigImg.m_Binding = Gfx::CTexture::ShaderResource;
+        TextureDescriptor_Depth_OrigImg.m_Access = Gfx::CTexture::EAccess::CPURead;
+        TextureDescriptor_Depth_OrigImg.m_Usage = Gfx::CTexture::EUsage::GPUToCPU;
+        TextureDescriptor_Depth_OrigImg.m_Semantic = Gfx::CTexture::UndefinedSemantic;
+        TextureDescriptor_Depth_OrigImg.m_Format = Gfx::CTexture::R32_FLOAT; // 1 channels with 32-bit float.
+
+        m_Depth_OrigImg_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_Depth_OrigImg);
     }
 
     // -----------------------------------------------------------------------------
@@ -85,7 +100,7 @@ namespace Stereo
                 m_idx_Keyf_Last = true;
             }
         }
-        else // Both current & last keyframes exist. -> Processing -> Free last keyframe.
+        else // Both current & last keyframes exist. -> Computing -> Free last keyframe.
         {
             if (m_Is_ARKitData)
             {
@@ -162,14 +177,13 @@ namespace Stereo
                     
                     if (m_Is_imwrite)
                     {
-                        cv::Mat cvDispImg_Rect_cpu_8bit(cvDispImg_Rect_cpu.size(), CV_8UC1);
-                        cv::normalize(cvDispImg_Rect_cpu, cvDispImg_Rect_cpu_8bit, 0, 255, cv::NORM_MINMAX, CV_8UC1);
-                        cv::imwrite("E:\\Project_ARCHITECT\\ARKit_DispImg_cvBM_cuda.png", cvDispImg_Rect_cpu_8bit);
+                        cv::Mat cvDisp_RectImg_cpu_8bit(cvDispImg_Rect_cpu.size(), CV_8UC1);
+                        cv::normalize(cvDispImg_Rect_cpu, cvDisp_RectImg_cpu_8bit, 0, 255, cv::NORM_MINMAX, CV_8UC1);
+                        cv::imwrite("E:\\Project_ARCHITECT\\ARKit_DispImg_cvBM_cuda.png", cvDisp_RectImg_cpu_8bit);
                     }
 
                     const int cvMemCpySize = cvDispImg_Rect_cpu.cols * cvDispImg_Rect_cpu.rows * cvDispImg_Rect_cpu.elemSize();
                     memcpy(m_Disparity_RectImg.data(), cvDispImg_Rect_cpu.data, cvMemCpySize);
-
                 }
 
                 if (m_StereoMatching_Method == "cvBP_cuda")
@@ -236,7 +250,18 @@ namespace Stereo
 
 
                 //---Transform Depth from Rectified to Original Image---
+                imp_Depth_Rect2Orig();
 
+                //---Return Depth in Original Image---
+                if (m_Is_imwrite)
+                {
+                    cv::Mat cvDepth_OrigImg(m_OrigImgSize.y, m_OrigImgSize.x, CV_32F);
+                    Gfx::TextureManager::CopyTextureToCPU(m_Depth_OrigImg_TexturePtr, reinterpret_cast<char*>(cvDepth_OrigImg.data));
+
+                    cv::Mat cvDepth_OrigImg_8bit(cvDepth_OrigImg.size(), CV_8UC1);
+                    cvDepth_OrigImg.convertTo(cvDepth_OrigImg_8bit, CV_8UC1);
+                    cv::imwrite("E:\\Project_ARCHITECT\\ARKit_Depth_OrigImg.png", cvDepth_OrigImg_8bit);
+                }
             }
             
             if (m_Is_TestData_MyMMS)
@@ -493,6 +518,32 @@ namespace Stereo
         // GPU End
     }
 
+    void CPluginInterface::imp_Depth_Rect2Orig()
+    {
+        //---GPU Start---
+        Gfx::Performance::BeginEvent("Depth from Rectified to Original");
+
+        // Submit Data to Managers
+        Gfx::BufferManager::UploadBufferData(m_Homogrampy_BufferPtr, &m_Homo_Curt);
+
+        // Connecting Managers (@CPU) & GLSL (@GPU)
+        Gfx::ContextManager::SetShaderCS(m_Depth_Rect2Orig_CSPtr);
+        Gfx::ContextManager::SetImageTexture(0, m_Depth_RectImg_TexturePtr);
+        Gfx::ContextManager::SetImageTexture(1, m_Depth_OrigImg_TexturePtr);
+        Gfx::ContextManager::SetConstantBuffer(0, m_Homogrampy_BufferPtr);
+
+        // Start GPU Parallel Processing
+        const int WorkGroupsX = DivUp(m_RectImg_Curt.get_ImgSize().x, TileSize_2D);
+        const int WorkGroupsY = DivUp(m_RectImg_Curt.get_ImgSize().y, TileSize_2D);
+
+        Gfx::ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+
+        Gfx::ContextManager::ResetShaderCS();
+
+        Gfx::Performance::EndEvent();
+        // GPU End
+    }
+
     // -----------------------------------------------------------------------------
 
     void CPluginInterface::ShowImg(const std::vector<char>& Img_RGBA) const
@@ -553,6 +604,19 @@ namespace Stereo
         ParaxEq_BufferDesc.m_pBytes = nullptr;
         ParaxEq_BufferDesc.m_pClassKey = 0;
         m_ParaxEq_BufferPtr = Gfx::BufferManager::CreateBuffer(ParaxEq_BufferDesc);
+
+        //---Depth from Rectified to Original---
+        m_Depth_Rect2Orig_CSPtr = Gfx::ShaderManager::CompileCS("../../plugins/stereo/cs_Depth_Rect2Orig.glsl", "main", DefineString.c_str());
+
+        Gfx::SBufferDescriptor Homography_BufferDesc = {};
+        Homography_BufferDesc.m_Stride = 0;
+        Homography_BufferDesc.m_Usage = Gfx::CBuffer::GPURead;
+        Homography_BufferDesc.m_Binding = Gfx::CBuffer::ConstantBuffer;
+        Homography_BufferDesc.m_Access = Gfx::CBuffer::CPUWrite;
+        Homography_BufferDesc.m_NumberOfBytes = sizeof(FutoGmtCV::SHomographyTransform);
+        Homography_BufferDesc.m_pBytes = nullptr;
+        Homography_BufferDesc.m_pClassKey = 0;
+        m_Homogrampy_BufferPtr = Gfx::BufferManager::CreateBuffer(Homography_BufferDesc);
     }
 
     // -----------------------------------------------------------------------------

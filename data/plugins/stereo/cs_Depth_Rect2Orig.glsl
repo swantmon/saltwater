@@ -9,8 +9,8 @@ layout(std140, binding = 0) uniform HomographyBuffer
 	ivec2 g_RectImgConer_DR;
 };
 
-layout (binding = 0, r16) readonly uniform image2D cs_Depth_RectImg;
-layout (binding = 1, r16) writeonly uniform image2D cs_Depth_OrigImg;
+layout (binding = 0, r32f) readonly uniform image2D cs_Depth_RectImg;
+layout (binding = 1, r32f) writeonly uniform image2D cs_Depth_OrigImg;
 
 vec4 BiLinearInterpolation(vec2 pixPosition)
 {
@@ -45,7 +45,6 @@ void main()
 
 	vec4 Depth = BiLinearInterpolation(pix_Rect);
 
-	//float pixValue = imageLoad(cs_OrigImg, ivec2(pix_Rect2Orig)).x; // pixValue is 0~1
 	imageStore(cs_Depth_OrigImg, ivec2(gl_GlobalInvocationID.xy), Depth); 
 }
 
