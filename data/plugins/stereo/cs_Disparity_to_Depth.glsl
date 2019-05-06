@@ -15,7 +15,7 @@ layout (local_size_x = TILE_SIZE_2D, local_size_y = TILE_SIZE_2D, local_size_z =
 void main()
 {
 	float Disparity = imageLoad(cs_Disp_RectImg, ivec2(gl_GlobalInvocationID.xy)).r;
-	float Depth = g_FocalLength * g_BaselineLength / Disparity; // Unit = meter (because Baseline is in meter)
+	float Depth = Disparity == 0.0f ? 0.0f : g_FocalLength * g_BaselineLength / Disparity; // Unit = meter (because Baseline is in meter)
 	imageStore(cs_Depth_RectImg, ivec2(gl_GlobalInvocationID.xy), vec4(Depth));
 }
 

@@ -170,7 +170,7 @@ namespace Stereo
 
                     cvDispImg_Rect_gpu.download(cvDispImg_Rect_cpu);
 
-                    if (cvDispImg_Rect_cpu.type() == CV_16S)
+                    if (cvDispImg_Rect_cpu.type() != CV_32F)
                     {
                         cvDispImg_Rect_cpu.convertTo(cvDispImg_Rect_cpu, CV_32F, 1.0 / 16); 
                     }
@@ -248,20 +248,11 @@ namespace Stereo
                 //---Transform Disparity to Depth in Rectified Image---
                 imp_Disp2Depth();
 
-
                 //---Transform Depth from Rectified to Original Image---
                 imp_Depth_Rect2Orig();
 
                 //---Return Depth in Original Image---
-                if (m_Is_imwrite)
-                {
-                    cv::Mat cvDepth_OrigImg(m_OrigImgSize.y, m_OrigImgSize.x, CV_32F);
-                    Gfx::TextureManager::CopyTextureToCPU(m_Depth_OrigImg_TexturePtr, reinterpret_cast<char*>(cvDepth_OrigImg.data));
 
-                    cv::Mat cvDepth_OrigImg_8bit(cvDepth_OrigImg.size(), CV_8UC1);
-                    cvDepth_OrigImg.convertTo(cvDepth_OrigImg_8bit, CV_8UC1);
-                    cv::imwrite("E:\\Project_ARCHITECT\\ARKit_Depth_OrigImg.png", cvDepth_OrigImg_8bit);
-                }
             }
             
             if (m_Is_TestData_MyMMS)
@@ -420,33 +411,10 @@ namespace Stereo
 
             }
 
-
-            //===== OLD =====
-            /*
-            
-            //---Show Depth Image---
-            cv::Mat DepthImg_Rect_8U(DepthImg_Rect.size(), CV_8UC1);
-            cv::normalize(DepthImg_Rect, DepthImg_Rect_8U, 0, 255, cv::NORM_MINMAX, CV_8UC1);
-            cv::imwrite("E:\\Project_ARCHITECT\\Depth_Rect.png", DepthImg_Rect_8U);
-            cv::Mat DepthImg_Orig_8U(DepthImg_Orig.size(), CV_8UC1);
-            cv::normalize(DepthImg_Orig, DepthImg_Orig_8U, 0, 255, cv::NORM_MINMAX, CV_8UC1);
-            cv::imwrite("E:\\Project_ARCHITECT\\Depth_Orig.png", DepthImg_Orig_8U);
-
-            cv::Mat DepthImg_Orig_Sensor(cv::Size(m_OrigImgSize.x, m_OrigImgSize.y), CV_16UC1); // 2D Matrix(x*y) with (16-bit unsigned character & 1 Channel)
-            memcpy(DepthImg_Orig_Sensor.data, _rDepthImage.data(), _rDepthImage.size() * sizeof(_rDepthImage[0]));
-            cv::Mat DepthImg_Orig_Sensor_8U = cv::Mat(DepthImg_Orig_Sensor.size(), CV_8UC1);
-            cv::normalize(DepthImg_Orig_Sensor, DepthImg_Orig_Sensor_8U, 0, 255, cv::NORM_MINMAX, CV_8UC1);
-            cv::imwrite("E:\\Project_ARCHITECT\\Depth_Orig_Sensor.png", DepthImg_Orig_Sensor_8U);
-            */
-
-            //---Finish Processing -> Free last keyframe---
-            m_idx_Keyf_Last = false;
-
-            m_Cdt_Keyf_BaseLineL = 1000000000; //---Temp Setting: Only calculate once, because it takes too much time calculating in CPU...
         }
         
         // Optional for internal check
-        CPluginInterface::ShowImg(_rRGBImage); // Showing image for visual checking -> Modify to control in editor.config
+        //CPluginInterface::ShowImg(_rRGBImage); // Showing image for visual checking -> Modify to control in editor.config
         
     }
 
@@ -469,22 +437,22 @@ namespace Stereo
     void CPluginInterface::imp_Disp2Depth()
     {
         //---Initialize Texture Manager for Disparity in Rectified Image---
-        Gfx::STextureDescriptor TextureDescriptor_Disp_RectImg = {};
+        Gfx::STextureDescriptor TextureDescriptor_RectImg = {};
 
-        TextureDescriptor_Disp_RectImg.m_NumberOfPixelsU = m_RectImg_Curt.get_ImgSize().x;
-        TextureDescriptor_Disp_RectImg.m_NumberOfPixelsV = m_RectImg_Last.get_ImgSize().y;
-        TextureDescriptor_Disp_RectImg.m_NumberOfPixelsW = 1;
-        TextureDescriptor_Disp_RectImg.m_NumberOfMipMaps = 1;
-        TextureDescriptor_Disp_RectImg.m_NumberOfTextures = 1;
-        TextureDescriptor_Disp_RectImg.m_Binding = Gfx::CTexture::ShaderResource;
-        TextureDescriptor_Disp_RectImg.m_Access = Gfx::CTexture::EAccess::CPUWrite;
-        TextureDescriptor_Disp_RectImg.m_Usage = Gfx::CTexture::EUsage::GPUReadWrite;
-        TextureDescriptor_Disp_RectImg.m_Semantic = Gfx::CTexture::UndefinedSemantic;
-        TextureDescriptor_Disp_RectImg.m_Format = Gfx::CTexture::R32_FLOAT; // 1 channels with 32-float.
+        TextureDescriptor_RectImg.m_NumberOfPixelsU = m_RectImg_Curt.get_ImgSize().x;
+        TextureDescriptor_RectImg.m_NumberOfPixelsV = m_RectImg_Last.get_ImgSize().y;
+        TextureDescriptor_RectImg.m_NumberOfPixelsW = 1;
+        TextureDescriptor_RectImg.m_NumberOfMipMaps = 1;
+        TextureDescriptor_RectImg.m_NumberOfTextures = 1;
+        TextureDescriptor_RectImg.m_Binding = Gfx::CTexture::ShaderResource;
+        TextureDescriptor_RectImg.m_Access = Gfx::CTexture::EAccess::CPUWrite;
+        TextureDescriptor_RectImg.m_Usage = Gfx::CTexture::EUsage::GPUReadWrite;
+        TextureDescriptor_RectImg.m_Semantic = Gfx::CTexture::UndefinedSemantic;
+        TextureDescriptor_RectImg.m_Format = Gfx::CTexture::R32_FLOAT; // 1 channels with 32-float.
 
-        m_Disp_RectImg_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_Disp_RectImg);
+        m_Disp_RectImg_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_RectImg);
 
-        m_Depth_RectImg_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_Disp_RectImg);
+        m_Depth_RectImg_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_RectImg);
 
         //---GPU Start---
         Gfx::Performance::BeginEvent("Disparity to Depth");
