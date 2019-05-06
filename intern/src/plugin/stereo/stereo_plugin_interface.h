@@ -53,34 +53,36 @@ namespace Stereo
         void OnFrameGPU(Gfx::CTexturePtr _RGBImage, const glm::mat4 &_Transform);
 
     private:
-        void imp_Rectification();
-        void ShowImg(const std::vector<char>& Img_RGBA) const;
-
-    private:
-        //---Input Data---
+        //---Program Design Setting---
         bool m_Is_ARKitData, m_Is_TestData_MyMMS; // Select Data Set.
 
         bool m_Is_imwrite; // Export Image Result by OpenCV?
 
-        //---Inputs from plugin_slam---
+        void ShowImg(const std::vector<char>& Img_RGBA) const;
+
+        //---ARKit Data---
         float m_FrameResolution;
         glm::ivec2 m_OrigImgSize; // Size of original image -> x = width & y = height
 
         //---Keyframe---
-        FutoGmtCV::FutoImg m_Keyframe_Curt, m_Keyframe_Last; // Only compute 2 frames first. -> In the future, I will modify if it needs to compute more images at once.
-        bool m_idx_Keyf_Curt, m_idx_Keyf_Last; // To judge the current & last keyframes are exist or not.
+        FutoGmtCV::FutoImg m_Keyframe_Curt, m_Keyframe_Last; // Only compute 2 frames first.
+        bool m_idx_Keyf_Curt, m_idx_Keyf_Last; // The status of current & last keyframes.
 
         std::size_t m_Cdt_Keyf_MaxNum; // Maximal keyframes for calculation once
         float m_Cdt_Keyf_BaseLineL; // Keyframe Selection: BaseLine Condition. Unit is meter.
 
         //---Rectification---
-        glm::ivec2 m_RectImgSize;
+        FutoGmtCV::FutoImg m_RectImg_Curt, m_RectImg_Last;
+        FutoGmtCV::SHomographyTransform m_Homo_Curt, m_Homo_Last;
+
+        FutoGmtCV::CRectification_Planar m_PlanarRectifier; // Implemant Rectification
 
         //---Stereo Matching---
+        std::vector<float> m_Disparity_RectImg;
+
         int m_DispRange;
 
         std::string m_StereoMatching_Method;
-
         std::unique_ptr<sgm::StereoSGM> m_pStereoMatcher_LibSGM;
         cv::Ptr<cv::StereoSGBM> m_pStereoMatcher_cvSGBM;
         cv::Ptr<cv::StereoBM> m_pStereoMatcher_cvBM;
@@ -88,12 +90,16 @@ namespace Stereo
         cv::Ptr<cv::StereoMatcher> m_pStereoMatcher_cvBP_cuda;
         cv::Ptr<cv::StereoMatcher> m_pStereoMatcher_cvConstBP_cuda;
 
-        //---Depth Map---
-        Gfx::CShaderPtr m_Disp2DepthCSPtr;
-        Gfx::CTexturePtr m_Disp_Rect_TexturePtr;
-        Gfx::CTexturePtr m_Depth_Orig_TexturePtr;
-        Gfx::CBufferPtr m_HomographyBufferPtr;
-        Gfx::CBufferPtr m_ParaxEqBufferPtr;
+        //---Disparity to Depth---
+        Gfx::CShaderPtr m_Disp2Depth_CSPtr;
+        Gfx::CTexturePtr m_Disp_RectImg_TexturePtr;
+        Gfx::CTexturePtr m_Depth_RectImg_TexturePtr;
+        Gfx::CBufferPtr m_ParaxEq_BufferPtr;
+
+        void imp_Disp2Depth(); // Transform Disparity to Depth in Rectified Image
+
+        //---Depth from Rectified to Original---
+
     };
 
 } // namespace HW

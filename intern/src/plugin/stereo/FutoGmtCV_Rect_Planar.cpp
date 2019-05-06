@@ -32,7 +32,7 @@ namespace FutoGmtCV
             << "#define TILE_SIZE_2D " << TileSize_2D << " \n"; // 16 for work group size is suggested for 2D image (based on experience).
         std::string DefineString = DefineStream.str();
 
-        m_PlanarRectCSPtr = Gfx::ShaderManager::CompileCS("../../plugins/stereo/cs_Rect_Planar.glsl", "main", DefineString.c_str());
+        m_PlanarRectCSPtr = Gfx::ShaderManager::CompileCS("../../plugins/stereo/cs_Rectification_Planar.glsl", "main", DefineString.c_str());
 
         //---Initialize Buffer Manager---
         Gfx::SBufferDescriptor BufferDesc = {};
