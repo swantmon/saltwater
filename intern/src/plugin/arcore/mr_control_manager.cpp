@@ -300,7 +300,7 @@ namespace
 
     private:
 
-        void Render();
+        void RenderBackground();
 
         void OnResize(int _Width, int _Height);
         void OnDirtyEntity(Dt::CEntity* _pEntity);
@@ -632,7 +632,7 @@ namespace
             ArPose_destroy(pARPose);
         }
 
-        Render();
+        RenderBackground();
     }
 
     // -----------------------------------------------------------------------------
@@ -945,7 +945,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CMRControlManager::Render()
+    void CMRControlManager::RenderBackground()
     {
         // -----------------------------------------------------------------------------
         // Prepare
@@ -969,7 +969,7 @@ namespace
 
         if (HasGeometryChanged != 0 || g_IsUVsInitialized == false)
         {
-            ArFrame_transformDisplayUvCoords(m_pARSession, m_pARFrame, s_NumberOfVertices * 2, c_Uvs, g_TransformedUVs);
+            ArFrame_transformCoordinates2d(m_pARSession, m_pARFrame, AR_COORDINATES_2D_VIEW_NORMALIZED, s_NumberOfVertices, c_Uvs, AR_COORDINATES_2D_TEXTURE_NORMALIZED, g_TransformedUVs);
 
             Gfx::BufferManager::UploadBufferData(m_WebcamUVBufferPtr, &g_TransformedUVs);
 
