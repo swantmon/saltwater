@@ -48,9 +48,11 @@ namespace MR
     {
         auto& rPlaneMap = m_pReconstructor->GetPlanes();
 
-        if (rPlaneMap.find(_PlaneID) != rPlaneMap.end())
+        auto Iter = rPlaneMap.find(_PlaneID);
+
+        if (Iter != rPlaneMap.end())
         {
-            const auto& rPlane = rPlaneMap.at(_PlaneID);
+            const auto& rPlane = *Iter;
         }
     }
 
