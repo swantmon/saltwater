@@ -59,6 +59,13 @@ namespace MR
             KINECT
         };
 
+        enum EPlaneAction
+        {
+            ADDPLANE,
+            UPDATEPLANE,
+            REMOVEPLANE
+        };
+
         EDATASOURCE m_DataSource;
         
         Gfx::CTexturePtr m_DepthTexture;
@@ -726,13 +733,13 @@ namespace MR
 
                 switch (PlaneAction)
                 {
-                case 0:
+                case ADDPLANE:
                     m_Reconstructor.AddPlane(PlaneTransform, PlaneExtent, PlaneID);
                     break;
-                case 1:
+                case UPDATEPLANE:
                     m_Reconstructor.UpdatePlane(PlaneTransform, PlaneExtent, PlaneID);
                     break;
-                case 2:
+                case REMOVEPLANE:
                     m_Reconstructor.RemovePlane(PlaneID);
                     break;
                 }
