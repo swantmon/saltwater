@@ -92,6 +92,8 @@ vec3 LinearToSRGB(in vec3 _LinearColor)
 
 void main(void)
 {
+#ifndef DISABLE_TONE_MAPPING
+
     vec3 LinearColor;
     vec3 ToneMappedLinearColor;
     vec3 Color;
@@ -111,6 +113,20 @@ void main(void)
     // Finalize
     // -----------------------------------------------------------------------------
     out_Final = vec4(Color, 1.0f);
+
+#else
+
+    // -----------------------------------------------------------------------------
+    // Read data from engine
+    // -----------------------------------------------------------------------------
+    vec3 LinearColor = texture(ps_LightAccumulation, in_TexCoord).rgb;
+
+    // -----------------------------------------------------------------------------
+    // Finalize
+    // -----------------------------------------------------------------------------
+    out_Final = vec4(LinearColor, 1.0f);
+
+#endif
 }
 
 #endif // __INCLUDE_FS_TONE_MAPPING_GLSL__

@@ -117,10 +117,10 @@ namespace
     
     void CGfxShadingRenderer::OnExit()
     {
-        m_TonemapBufferPtr       = 0;
-        m_FullquadShaderVSPtr    = 0;
-        m_ShadingPSPtr           = 0;
-        m_ShadingContextPtr      = 0;
+        m_TonemapBufferPtr       = nullptr;
+        m_FullquadShaderVSPtr    = nullptr;
+        m_ShadingPSPtr           = nullptr;
+        m_ShadingContextPtr      = nullptr;
     }
     
     // -----------------------------------------------------------------------------
@@ -129,7 +129,11 @@ namespace
     {
         m_FullquadShaderVSPtr   = ShaderManager::CompileVS("system/vs_fullscreen.glsl" , "main");
 
-        m_ShadingPSPtr          = ShaderManager::CompilePS("tone_mapping/fs_tone_mapping.glsl", "main");
+        bool IsToneMappingDisabled = Core::CProgramParameters::GetInstance().Get("graphics:tone_mapping:disable", false);
+
+        const char* pDefines = IsToneMappingDisabled ? "#define DISABLE_TONE_MAPPING" : " ";
+
+        m_ShadingPSPtr = ShaderManager::CompilePS("tone_mapping/fs_tone_mapping.glsl", "main", pDefines);
     }
     
     // -----------------------------------------------------------------------------
@@ -189,8 +193,8 @@ namespace
         ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
         ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
         ConstanteBufferDesc.m_NumberOfBytes = sizeof(SConstantBufferPS);
-        ConstanteBufferDesc.m_pBytes        = 0;
-        ConstanteBufferDesc.m_pClassKey     = 0;
+        ConstanteBufferDesc.m_pBytes        = nullptr;
+        ConstanteBufferDesc.m_pClassKey     = nullptr;
         
         m_TonemapBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
     }
