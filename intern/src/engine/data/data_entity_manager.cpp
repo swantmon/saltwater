@@ -95,13 +95,13 @@ namespace
         
     private:
         
-        typedef Base::CPool<CInternEntity, 2048>              CEntityPool;
-        typedef Base::CPool<CInternHierarchyFacet, 2048>      CHierarchyFacetPool;
-        typedef Base::CPool<CInternTransformationFacet, 2048> CTransformationFacetPool;
-        typedef Base::CPool<CInternComponentsFacet, 2048>     CComponentsFacetPool;
+        using CEntityPool              = Base::CPool<CInternEntity, 2048>;
+        using CHierarchyFacetPool      = Base::CPool<CInternHierarchyFacet, 2048>;
+        using CTransformationFacetPool = Base::CPool<CInternTransformationFacet, 2048>;
+        using CComponentsFacetPool     = Base::CPool<CInternComponentsFacet, 2048>;
 
-        typedef std::unordered_map<Base::ID, CInternEntity*> CEntityByIDs;
-        typedef CEntityByIDs::iterator                       CEntityByIDPair;
+        using CEntityByIDs    = std::unordered_map<Base::ID, CInternEntity*>;
+        using CEntityByIDPair = CEntityByIDs::iterator;
 
     private:
         
@@ -224,7 +224,7 @@ namespace
 
         auto Importer = Core::AssetImporter::AllocateAssimpImporter(_rFile, GeneratorFlag);
 
-        const Assimp::Importer* pImporter = static_cast<const Assimp::Importer*>(Core::AssetImporter::GetNativeAccessFromImporter(Importer));
+        const auto* pImporter = static_cast<const Assimp::Importer*>(Core::AssetImporter::GetNativeAccessFromImporter(Importer));
 
         const aiScene* pScene = pImporter->GetScene();
 
@@ -241,13 +241,13 @@ namespace
         EntityDescriptor.m_EntityCategory = Dt::SEntityCategory::Dynamic;
         EntityDescriptor.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
-        int NumberOfMeshes = static_cast<int>(pScene->mNumMeshes);
+        auto NumberOfMeshes = static_cast<int>(pScene->mNumMeshes);
 
         for (int IndexOfMesh = 0; IndexOfMesh < NumberOfMeshes; ++IndexOfMesh)
         {
             aiMesh* pMesh = pScene->mMeshes[IndexOfMesh];
 
-            CInternEntity& rChildEntity = static_cast<CInternEntity&>(CreateEntity(EntityDescriptor));
+            auto& rChildEntity = static_cast<CInternEntity&>(CreateEntity(EntityDescriptor));
 
             rChildEntity.SetName(pMesh->mName.C_Str());
 
@@ -291,7 +291,7 @@ namespace
 
     void CDtLvlEntityManager::FreeEntity(CEntity& _rEntity)
     {
-        CInternEntity& rInternEntity = static_cast<CInternEntity&>(_rEntity);
+        auto& rInternEntity = static_cast<CInternEntity&>(_rEntity);
 
         if (rInternEntity.m_pHierarchyFacet != nullptr)
         {

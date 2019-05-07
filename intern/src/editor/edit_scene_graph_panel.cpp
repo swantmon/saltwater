@@ -12,7 +12,7 @@
 #include "engine/data/data_entity_manager.h"
 #include "engine/data/data_hierarchy_facet.h"
 
-#include "engine/graphic/gfx_selection_renderer.h"
+#include "engine/graphic/gfx_highlight_renderer.h"
 
 #include "imgui/imgui.h"
 
@@ -138,7 +138,7 @@ namespace GUI
             {
                 CInspectorPanel::GetInstance().InspectEntity(CurrentID);
 
-                Gfx::SelectionRenderer::SelectEntity(CurrentID);
+                Gfx::HighlightRenderer::HighlightEntity(CurrentID);
             }
 
             if (ImGui::BeginPopupContextItem())

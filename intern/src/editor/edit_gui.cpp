@@ -95,6 +95,7 @@ namespace
         bool m_CloseWindow;
 
         bool m_ShowGUI;
+		bool m_IsFullscreen;
 
         Engine::CEventDelegates::HandleType m_GfxOnRenderGUIDelegate;
 
@@ -108,6 +109,8 @@ namespace
 
         Base::CInputEvent::EKey ConvertSDLKey(const SDL_Event& _rSDLEvent);
         Base::CInputEvent::EKey ConvertSDLAxis(const SDL_Event& _rSDLEvent);
+
+		void ToggleFullscreen();
     };
 } // namespace 
 
@@ -131,7 +134,16 @@ namespace
     void CEditorGui::Create(int& _rArgc, char** _ppArgv)
     {
         BASE_UNUSED(_rArgc);
-        BASE_UNUSED(_ppArgv);
+		BASE_UNUSED(_ppArgv);
+
+		// -----------------------------------------------------------------------------
+		// Check settings
+		// -----------------------------------------------------------------------------
+		m_IsFullscreen = Core::CProgramParameters::GetInstance().Get("application:fullscreen", false);
+
+		m_ShowGUI = Core::CProgramParameters::GetInstance().Get("application:show_gui", true);
+
+		auto WindowSize = Core::CProgramParameters::GetInstance().Get("application:window_size", glm::ivec2(1280, 720));
 
         // -----------------------------------------------------------------------------
         // SDL
@@ -140,14 +152,14 @@ namespace
 
         SDL_SetHintWithPriority(SDL_HINT_RENDER_VSYNC, "0", SDL_HINT_OVERRIDE);
 
-        auto WindowSize = Core::CProgramParameters::GetInstance().Get("application:window_size", glm::ivec2(1280, 720));
-
         m_pWindow = SDL_CreateWindow("Editor", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WindowSize.x, WindowSize.y, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 
-        if (m_pWindow == NULL)
+        if (m_pWindow == nullptr)
         {
             BASE_THROWM("Could not initialize SDL window.");
         }
+
+		if (m_IsFullscreen) SDL_SetWindowFullscreen(m_pWindow, SDL_WINDOW_FULLSCREEN);
 
         // -----------------------------------------------------------------------------
         // IMGUI
@@ -222,7 +234,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Init
         // -----------------------------------------------------------------------------
-        ImGui_ImplSDL2_InitForOpenGL(m_pWindow, 0);
+        ImGui_ImplSDL2_InitForOpenGL(m_pWindow, nullptr);
 
         ImGui_ImplOpenGL3_Init();
 
@@ -271,8 +283,6 @@ namespace
                 ENGINE_CONSOLE_INFOV(SDL_JoystickName(m_pGamePad));
             }
         }
-
-        m_ShowGUI = Core::CProgramParameters::GetInstance().Get("application:show_gui", true);
     }
 
     // -----------------------------------------------------------------------------
@@ -485,6 +495,8 @@ namespace
             Event = CInputEvent(Base::CInputEvent::Input, Base::CInputEvent::KeyPressed, Key, Mod);
 
             Gui::EventHandler::OnEvent(Event);
+
+			if ((Mod & KMOD_ALT) != 0 && Key == SDLK_RETURN) ToggleFullscreen();
             break;
         case SDL_KEYUP:
             Key = _rSDLEvent.key.keysym.sym;
@@ -679,6 +691,22 @@ namespace
         
         return Xbox360Axis[_rSDLEvent.jaxis.axis];
     }
+
+	// -----------------------------------------------------------------------------
+
+	void CEditorGui::ToggleFullscreen()
+	{
+		if (m_IsFullscreen)
+		{
+			SDL_SetWindowFullscreen(m_pWindow, 0);
+		}
+		else
+		{
+			SDL_SetWindowFullscreen(m_pWindow, SDL_WINDOW_FULLSCREEN);
+		}
+
+		m_IsFullscreen = !m_IsFullscreen;
+	}
 } // namespace 
 
 namespace Edit

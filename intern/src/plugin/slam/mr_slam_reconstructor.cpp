@@ -296,11 +296,11 @@ namespace MR
         m_FrustumPoints[6] = glm::vec3(-x * Far, -y * Far, Far);
         m_FrustumPoints[7] = glm::vec3( x * Far, -y * Far, Far);
 
-        for (int i = 0; i < m_FrustumPoints.size(); ++i)
+        for (auto & FrustumPoint : m_FrustumPoints)
         {
-            glm::vec4 Corner = glm::vec4(m_FrustumPoints[i], 1.0f);
+            glm::vec4 Corner = glm::vec4(FrustumPoint, 1.0f);
             Corner = m_PoseMatrix * Corner;
-            m_FrustumPoints[i] = glm::vec3(Corner[0], Corner[1], Corner[2]);
+            FrustumPoint = glm::vec3(Corner[0], Corner[1], Corner[2]);
         }
 
         m_FrustumPlanes[0] = GetHessianNormalForm(m_FrustumPoints[0], m_FrustumPoints[2], m_FrustumPoints[1]); // near
@@ -356,33 +356,33 @@ namespace MR
         ENGINE_CONSOLE_INFO(Stream[1].str().c_str());
         ENGINE_CONSOLE_INFO(Stream[2].str().c_str());
 
-        m_BilateralFilterCSPtr = 0;
-        m_VertexMapCSPtr = 0;
-        m_NormalMapCSPtr = 0;
-        m_DownSampleDepthCSPtr = 0;
-        m_IntegrateTSDFCSPtr = 0;
-        m_RaycastCSPtr = 0;
-        m_RaycastPyramidCSPtr = 0;
-        m_VolumeCountersCSPtr = 0;
+        m_BilateralFilterCSPtr = nullptr;
+        m_VertexMapCSPtr = nullptr;
+        m_NormalMapCSPtr = nullptr;
+        m_DownSampleDepthCSPtr = nullptr;
+        m_IntegrateTSDFCSPtr = nullptr;
+        m_RaycastCSPtr = nullptr;
+        m_RaycastPyramidCSPtr = nullptr;
+        m_VolumeCountersCSPtr = nullptr;
         
-        m_PlaneCSPtr = 0;
+        m_PlaneCSPtr = nullptr;
 
-        m_RasterizeRootVolumeVSPtr = 0;
-        m_RasterizeRootVolumeFSPtr = 0;
+        m_RasterizeRootVolumeVSPtr = nullptr;
+        m_RasterizeRootVolumeFSPtr = nullptr;
         
-        m_ClearAtomicCountersCSPtr = 0;
+        m_ClearAtomicCountersCSPtr = nullptr;
 
-        m_IntegrateRootGridCSPtr = 0;
-        m_IntegrateLevel1GridCSPtr = 0;
+        m_IntegrateRootGridCSPtr = nullptr;
+        m_IntegrateLevel1GridCSPtr = nullptr;
 
-        m_CubeMeshPtr = 0;
-        m_CubeInputLayoutPtr = 0;
+        m_CubeMeshPtr = nullptr;
+        m_CubeInputLayoutPtr = nullptr;
 
-        m_RawVertexMapPtr = 0;
-        m_RawDepthBufferPtr = 0;
-        m_RawCameraFramePtr = 0;
-        m_EmptyTargetSetPtr = 0;
-        m_DepthViewPortSetPtr = 0;
+        m_RawVertexMapPtr = nullptr;
+        m_RawDepthBufferPtr = nullptr;
+        m_RawCameraFramePtr = nullptr;
+        m_EmptyTargetSetPtr = nullptr;
+        m_DepthViewPortSetPtr = nullptr;
 
         m_SmoothDepthBufferPtr.clear();
         m_ReferenceVertexMapPtr.clear();
@@ -392,34 +392,34 @@ namespace MR
 
         m_RootVolumeMap.clear();
         
-        m_IntrinsicsConstantBufferPtr = 0;
-        m_TrackingDataConstantBufferPtr = 0;
-        m_RaycastPyramidConstantBufferPtr = 0;
-        m_BilateralFilterConstantBufferPtr = 0;
-        m_AtomicCounterBufferPtr = 0;
-        m_IndexedIndirectBufferPtr = 0;
+        m_IntrinsicsConstantBufferPtr = nullptr;
+        m_TrackingDataConstantBufferPtr = nullptr;
+        m_RaycastPyramidConstantBufferPtr = nullptr;
+        m_BilateralFilterConstantBufferPtr = nullptr;
+        m_AtomicCounterBufferPtr = nullptr;
+        m_IndexedIndirectBufferPtr = nullptr;
 
-        m_VolumeQueueBufferPtr = 0;
-        m_RootVolumeInstanceBufferPtr = 0;
-        m_VolumeBuffers.m_RootVolumePoolPtr = 0;
-        m_VolumeBuffers.m_RootGridPoolPtr = 0;
-        m_VolumeBuffers.m_Level1PoolPtr = 0;
-        m_VolumeBuffers.m_TSDFPoolPtr = 0;
-        m_VolumeBuffers.m_PoolItemCountBufferPtr = 0;
-        m_VolumeIndexBufferPtr = 0;
+        m_VolumeQueueBufferPtr = nullptr;
+        m_RootVolumeInstanceBufferPtr = nullptr;
+        m_VolumeBuffers.m_RootVolumePoolPtr = nullptr;
+        m_VolumeBuffers.m_RootGridPoolPtr = nullptr;
+        m_VolumeBuffers.m_Level1PoolPtr = nullptr;
+        m_VolumeBuffers.m_TSDFPoolPtr = nullptr;
+        m_VolumeBuffers.m_PoolItemCountBufferPtr = nullptr;
+        m_VolumeIndexBufferPtr = nullptr;
 
-        m_PointRasterizationBufferPtr = 0;
-        m_PlaneExtractionBufferPtr = 0;
-        m_PointCloudVSPtr = 0;
-        m_PointCloudGSPtr = 0;
-        m_PointCloudFSPtr = 0;
-        m_PointsFullCSPtr = 0;
-        m_FillIndirectBufferCSPtr = 0;
+        m_PointRasterizationBufferPtr = nullptr;
+        m_PlaneExtractionBufferPtr = nullptr;
+        m_PointCloudVSPtr = nullptr;
+        m_PointCloudGSPtr = nullptr;
+        m_PointCloudFSPtr = nullptr;
+        m_GatherVoxelsCSPtr = nullptr;
+        m_FillIndirectBufferCSPtr = nullptr;
 
-        m_FullVolumePtr = 0;
-        m_EmptyTargetSetPtr = 0;
-        m_EmptyFullVolumePtr = 0;
-        m_FullVolumeViewPort = 0;
+        m_FullVolumePtr = nullptr;
+        m_EmptyTargetSetPtr = nullptr;
+        m_EmptyFullVolumePtr = nullptr;
+        m_FullVolumeViewPort = nullptr;
     }
 
     // -----------------------------------------------------------------------------
@@ -500,7 +500,7 @@ namespace MR
         m_PointCloudVSPtr          = ShaderManager::CompileVS("../../plugins/slam/scalable/rasterization/vs_rootgrid.glsl"             , "main", DefineString.c_str());
         m_PointCloudGSPtr          = ShaderManager::CompileGS("../../plugins/slam/scalable/rasterization/gs_rootgrid.glsl"             , "main", DefineString.c_str());
         m_PointCloudFSPtr          = ShaderManager::CompilePS("../../plugins/slam/scalable/rasterization/fs_rootgrid.glsl"             , "main", DefineString.c_str());
-        m_PointsFullCSPtr          = ShaderManager::CompileCS("../../plugins/slam/scalable/rasterization/cs_gather_full.glsl"          , "main", DefineString.c_str());
+        m_GatherVoxelsCSPtr        = ShaderManager::CompileCS("../../plugins/slam/scalable/rasterization/cs_gather_voxels.glsl"        , "main", DefineString.c_str());
         m_IntegrateRootGridCSPtr   = ShaderManager::CompileCS("../../plugins/slam/scalable/integration/cs_integrate_rootgrid.glsl"     , "main", DefineString.c_str());
         m_IntegrateLevel1GridCSPtr = ShaderManager::CompileCS("../../plugins/slam/scalable/integration/cs_integrate_level1grid.glsl"   , "main", DefineString.c_str());
         m_IntegrateTSDFCSPtr       = ShaderManager::CompileCS("../../plugins/slam/scalable/integration/cs_integrate_tsdf.glsl"         , "main", DefineString.c_str());
@@ -549,9 +549,9 @@ namespace MR
         for (int PlaneIndex = 0; PlaneIndex < 6; ++ PlaneIndex)
         {
             int Outside = 0;
-            for (int CubeIndex = 0; CubeIndex < 8; ++ CubeIndex)
+            for (auto CubeIndex : Cube)
             {
-                if (GetPointPlaneDistance(Cube[CubeIndex], m_FrustumPlanes[PlaneIndex]) > 0)
+                if (GetPointPlaneDistance(CubeIndex, m_FrustumPlanes[PlaneIndex]) > 0)
                 {
                     ++ Outside;
                 }
@@ -588,8 +588,8 @@ namespace MR
 
         ContextManager::Barrier();
         
-        const unsigned int IndexCount = m_CubeMeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices();
-        const unsigned int InstanceCount = static_cast<unsigned int>(m_RootVolumeVector.size());
+        const auto IndexCount = m_CubeMeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices();
+        const auto InstanceCount = static_cast<unsigned int>(m_RootVolumeVector.size());
         assert(InstanceCount < g_MaxVolumeInstanceCount);
         ClearBuffer(m_AtomicCounterBufferPtr, InstanceCount * sizeof(int32_t));
         ContextManager::DrawIndexedInstanced(IndexCount, InstanceCount, 0, 0, 0);
@@ -692,7 +692,7 @@ namespace MR
         ContextManager::SetShaderGS(m_PointCloudGSPtr);
         ContextManager::SetShaderPS(m_PointCloudFSPtr);
 
-        ContextManager::SetShaderCS(m_PointsFullCSPtr);
+        ContextManager::SetShaderCS(m_GatherVoxelsCSPtr);
 
         if (m_UseConservativeRasterization)
         {
@@ -1114,8 +1114,8 @@ namespace MR
             TextureDescriptor.m_Access = CTexture::CPUWrite;
             TextureDescriptor.m_Usage = CTexture::GPUReadWrite;
             TextureDescriptor.m_Semantic = CTexture::UndefinedSemantic;
-            TextureDescriptor.m_pFileName = 0;
-            TextureDescriptor.m_pPixels = 0;
+            TextureDescriptor.m_pFileName = nullptr;
+            TextureDescriptor.m_pPixels = nullptr;
             TextureDescriptor.m_Format = CTexture::R16_UINT;
 
             m_SmoothDepthBufferPtr[i] = TextureManager::CreateTexture2D(TextureDescriptor);
@@ -1138,7 +1138,7 @@ namespace MR
         TextureDescriptor.m_Usage = CTexture::GPUReadWrite;
         TextureDescriptor.m_Semantic = CTexture::UndefinedSemantic;
         TextureDescriptor.m_pFileName = nullptr;
-        TextureDescriptor.m_pPixels = 0;
+        TextureDescriptor.m_pPixels = nullptr;
         TextureDescriptor.m_Format = CTexture::R16_UINT;
 
         m_RawDepthBufferPtr = TextureManager::CreateTexture2D(TextureDescriptor);
@@ -1218,7 +1218,7 @@ namespace MR
         ConstantBufferDesc.m_Access = CBuffer::CPUWrite;
         ConstantBufferDesc.m_NumberOfBytes = sizeof(SIntrinsics) * m_ReconstructionSettings.m_PyramidLevelCount;
         ConstantBufferDesc.m_pBytes = Intrinsics.data();
-        ConstantBufferDesc.m_pClassKey = 0;
+        ConstantBufferDesc.m_pClassKey = nullptr;
 
         m_IntrinsicsConstantBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
         
@@ -1230,7 +1230,7 @@ namespace MR
         ConstantBufferDesc.m_pBytes        = &TrackingData;
         m_TrackingDataConstantBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
 
-        ConstantBufferDesc.m_pBytes = 0;
+        ConstantBufferDesc.m_pBytes = nullptr;
         ConstantBufferDesc.m_NumberOfBytes = 16;
         ConstantBufferDesc.m_Usage = CBuffer::GPUReadWrite;
         m_RaycastPyramidConstantBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
@@ -1911,8 +1911,8 @@ namespace MR
         TextureDescriptor.m_Access = CTexture::CPUWrite;
         TextureDescriptor.m_Usage = CTexture::GPUReadWrite;
         TextureDescriptor.m_Semantic = CTexture::UndefinedSemantic;
-        TextureDescriptor.m_pFileName = 0;
-        TextureDescriptor.m_pPixels = 0;
+        TextureDescriptor.m_pFileName = nullptr;
+        TextureDescriptor.m_pPixels = nullptr;
         TextureDescriptor.m_Format = CTexture::R8G8B8A8_UBYTE;
 
         Gfx::CTexturePtr PlaneTexture = TextureManager::CreateTexture2D(TextureDescriptor);

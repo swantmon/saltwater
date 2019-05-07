@@ -77,37 +77,49 @@ namespace SLAM
     {
         ENGINE_CONSOLE_INFOV("SLAM plugin resumed!");
     }
-} // namespace HW
+} // namespace SLAM
 
 extern "C" CORE_PLUGIN_API_EXPORT void Pause()
 {
     static_cast<SLAM::CPluginInterface&>(GetInstance()).OnPause();
 }
 
+// -----------------------------------------------------------------------------
+
 extern "C" CORE_PLUGIN_API_EXPORT void Resume()
 {
     static_cast<SLAM::CPluginInterface&>(GetInstance()).OnResume();
 }
+
+// -----------------------------------------------------------------------------
 
 extern "C" CORE_PLUGIN_API_EXPORT void Update()
 {
     static_cast<SLAM::CPluginInterface&>(GetInstance()).Update();
 }
 
+// -----------------------------------------------------------------------------
+
 extern "C" CORE_PLUGIN_API_EXPORT void OnInput(const Base::CInputEvent& _rEvent)
 {
     static_cast<SLAM::CPluginInterface&>(GetInstance()).OnInput(_rEvent);
 }
+
+// -----------------------------------------------------------------------------
 
 extern "C" CORE_PLUGIN_API_EXPORT void OnRenderHitProxy()
 {
     Gfx::ReconstructionRenderer::RenderHitProxy();
 }
 
+// -----------------------------------------------------------------------------
+
 extern "C" CORE_PLUGIN_API_EXPORT void SetActivateSelection(bool _Flag)
 {
     static_cast<SLAM::CPluginInterface&>(GetInstance()).SetActivateSelection(_Flag);
 }
+
+// -----------------------------------------------------------------------------
 
 extern "C" CORE_PLUGIN_API_EXPORT void EnableMouseControl(bool _Flag)
 {

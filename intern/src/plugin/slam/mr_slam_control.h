@@ -51,8 +51,6 @@ namespace MR
             COLORINTRINSICS
         };
 
-    private:
-
         enum EDATASOURCE
         {
             NETWORK,
@@ -123,14 +121,6 @@ namespace MR
         Gfx::CShaderPtr m_ShiftDepthCSPtr;
         Gfx::CTexturePtr m_ShiftLUTPtr;
 
-        Gfx::CBufferPtr m_RGBConversionBuffer;
-
-        struct SRGBConversion
-        {
-            glm::vec4 m_Ambient;
-            glm::vec4 m_Temperature;
-        };
-
         struct SIntrinsicsMessage
         {
             glm::vec2  m_FocalLength;
@@ -146,8 +136,8 @@ namespace MR
         // -----------------------------------------------------------------------------
         // Stuff for Kinect data source
         // -----------------------------------------------------------------------------
-        typedef bool(*GetDepthBufferFunc)(uint16_t*);
-        typedef bool(*GetColorBufferFunc)(char*);
+        using GetDepthBufferFunc = bool(*)(uint16_t*);
+        using GetColorBufferFunc = bool(*)(char*);
         GetDepthBufferFunc GetDepthBuffer;
         GetColorBufferFunc GetColorBuffer;
 
@@ -207,7 +197,7 @@ namespace MR
 
         glm::mat4 m_PreliminaryPoseMatrix;
 
-        typedef void(*InpaintWithPixMixFunc)(const glm::ivec2&, const std::vector<char>&, std::vector<char>&);
+        using InpaintWithPixMixFunc = void(*)(const glm::ivec2&, const std::vector<char>&, std::vector<char>&);
         InpaintWithPixMixFunc InpaintWithPixMix;
 
         // -----------------------------------------------------------------------------
@@ -305,15 +295,6 @@ namespace MR
                 m_DataSource = NETWORK;
 
                 CreateShiftLUTTexture();
-
-                Gfx::SBufferDescriptor ConstantBufferDesc = {};
-
-                ConstantBufferDesc.m_Usage = Gfx::CBuffer::EUsage::GPURead;
-                ConstantBufferDesc.m_Binding = Gfx::CBuffer::ConstantBuffer;
-                ConstantBufferDesc.m_Access = Gfx::CBuffer::CPUWrite;
-                ConstantBufferDesc.m_NumberOfBytes = sizeof(SRGBConversion);
-
-                m_RGBConversionBuffer = Gfx::BufferManager::CreateBuffer(ConstantBufferDesc);
             }
             else if (DataSource == "kinect")
             {
@@ -328,7 +309,7 @@ namespace MR
 
                 m_DataSource = KINECT;
 
-                typedef void(*GetIntrinsicsFunc)(glm::vec2&, glm::vec2&, glm::ivec2&);
+                using GetIntrinsicsFunc = void(*)(glm::vec2&, glm::vec2&, glm::ivec2&);
 
                 GetIntrinsicsFunc GetIntrinsics = (GetIntrinsicsFunc)(Core::PluginManager::GetPluginFunction("Kinect", "GetIntrinsics"));
 
@@ -360,7 +341,7 @@ namespace MR
                 TextureDescriptor.m_Usage = Gfx::CTexture::GPUReadWrite;
                 TextureDescriptor.m_Semantic = Gfx::CTexture::UndefinedSemantic;
                 TextureDescriptor.m_pFileName = nullptr;
-                TextureDescriptor.m_pPixels = 0;
+                TextureDescriptor.m_pPixels = nullptr;
                 TextureDescriptor.m_Format = Gfx::CTexture::R16_UINT;
 
                 m_DepthTexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
@@ -445,8 +426,6 @@ namespace MR
             m_ColorBuffer.clear();
 
             m_Reconstructor.Exit();
-
-            m_RGBConversionBuffer = nullptr;
 
             m_DepthTexture = nullptr;
             m_RGBATexture = nullptr;
@@ -560,7 +539,7 @@ namespace MR
 
             if (m_UseTrackingCamera)
             {
-                Cam::CEditorControl& rControl = static_cast<Cam::CEditorControl&>(Cam::ControlManager::GetActiveControl());
+                auto& rControl = static_cast<Cam::CEditorControl&>(Cam::ControlManager::GetActiveControl());
 
                 // -----------------------------------------------------------------------------
                 // Projection
@@ -799,13 +778,6 @@ namespace MR
             {
                 const float AmbientIntensity = *reinterpret_cast<float*>(Decompressed.data() + sizeof(int32_t));
                 const float LightTemperature = *reinterpret_cast<float*>(Decompressed.data() + sizeof(int32_t) + sizeof(float));
-
-                glm::vec3 LightColor = KelvinToRGB(LightTemperature);
-
-                SRGBConversion Data;
-                Data.m_Ambient = glm::vec4(AmbientIntensity);
-                Data.m_Temperature = glm::vec4(LightColor, LightTemperature);
-                Gfx::BufferManager::UploadBufferData(m_RGBConversionBuffer, &Data);
             }
             else if (MessageType == PLANE)
             {
@@ -852,9 +824,7 @@ namespace MR
 
             TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_ColorSize.x / 2, m_ColorSize.y / 2));
             Gfx::TextureManager::CopyToTexture2D(m_UVTexture, TargetRect, m_ColorSize.x / 2, const_cast<char*>(UVData));
-
-            Gfx::ContextManager::SetConstantBuffer(0, m_RGBConversionBuffer);
-
+            
             Gfx::ContextManager::SetShaderCS(m_YUVtoRGBCSPtr);
             Gfx::ContextManager::SetImageTexture(0, m_YTexture);
             Gfx::ContextManager::SetImageTexture(1, m_UVTexture);
@@ -924,7 +894,7 @@ namespace MR
             TextureDescriptor.m_Usage = Gfx::CTexture::GPUReadWrite;
             TextureDescriptor.m_Semantic = Gfx::CTexture::UndefinedSemantic;
             TextureDescriptor.m_pFileName = nullptr;
-            TextureDescriptor.m_pPixels = 0;
+            TextureDescriptor.m_pPixels = nullptr;
             TextureDescriptor.m_Format = Gfx::CTexture::R16_UINT;
             m_ShiftTexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
 
@@ -999,7 +969,7 @@ namespace MR
             TextureDescriptor.m_Usage = Gfx::CTexture::GPUReadWrite;
             TextureDescriptor.m_Semantic = Gfx::CTexture::UndefinedSemantic;
             TextureDescriptor.m_pFileName = nullptr;
-            TextureDescriptor.m_pPixels = 0;
+            TextureDescriptor.m_pPixels = nullptr;
             TextureDescriptor.m_Format = Gfx::CTexture::R8G8B8A8_UBYTE;
             m_RGBATexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
 
@@ -1050,6 +1020,8 @@ namespace MR
             }
         }
 
+        // -----------------------------------------------------------------------------
+
         void OnNewNeuralNetMessage(const Net::CMessage& _rMessage, Net::SocketHandle _SocketHandle)
         {
             BASE_UNUSED(_SocketHandle);
@@ -1057,7 +1029,7 @@ namespace MR
 
             if (_rMessage.m_MessageType == 0)
             {
-                int ScaledResolution = static_cast<int>(m_PlaneResolution / m_PlaneScale);
+                auto ScaledResolution = static_cast<int>(m_PlaneResolution / m_PlaneScale);
                 int BorderSize = (m_PlaneResolution - ScaledResolution) / 2;
                 int Min = BorderSize;
                 int Max = m_PlaneResolution - BorderSize;
@@ -1070,6 +1042,8 @@ namespace MR
                 Gfx::ReconstructionRenderer::SetInpaintedPlane(m_PlaneTexture, AABB);
             }
         }
+
+        // -----------------------------------------------------------------------------
 
         void CreatePlane()
         {
@@ -1122,6 +1096,8 @@ namespace MR
                 Gfx::ReconstructionRenderer::SetInpaintedPlane(m_PlaneTexture, AABB);
             }
         }
+
+        // -----------------------------------------------------------------------------
 
         void CreateShiftLUTTexture()
         {
@@ -1207,7 +1183,7 @@ namespace MR
             TextureDescriptor.m_Usage = Gfx::CTexture::GPUReadWrite;
             TextureDescriptor.m_Semantic = Gfx::CTexture::UndefinedSemantic;
             TextureDescriptor.m_pFileName = nullptr;
-            TextureDescriptor.m_pPixels = 0;
+            TextureDescriptor.m_pPixels = nullptr;
             TextureDescriptor.m_Format = Gfx::CTexture::R16_UINT;
             m_ShiftLUTPtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
 
@@ -1215,6 +1191,8 @@ namespace MR
             TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(Count, 1));
             Gfx::TextureManager::CopyToTexture2D(m_ShiftLUTPtr, TargetRect, Count, const_cast<uint16_t*>(LUT));
         }
+
+        // -----------------------------------------------------------------------------
 
         glm::vec3 KelvinToRGB(float _Kelvin)
         {
@@ -1251,6 +1229,8 @@ namespace MR
 
             return glm::clamp(RGB, 0.0f, 255.0f) / 255.0f;
         }
+
+        // -----------------------------------------------------------------------------
 
         int DivUp(int TotalShaderCount, int WorkGroupSize)
         {
