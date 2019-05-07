@@ -11,6 +11,7 @@
 #include "engine/data/data_entity_manager.h"
 
 #include "engine/graphic/gfx_selection_renderer.h"
+#include "engine/graphic/gfx_highlight_renderer.h"
 
 #include "engine/gui/gui_input_manager.h"
 #include "engine/gui/gui_event_handler.h"
@@ -53,7 +54,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Acquire an selection ticket at selection renderer
         // -----------------------------------------------------------------------------
-        assert(m_pSelectionTicket == 0);
+        assert(m_pSelectionTicket == nullptr);
 
         m_pSelectionTicket = &Gfx::SelectionRenderer::AcquireTicket(-1, -1, 1, 1, Gfx::SPickFlag::Everything);
         
@@ -74,12 +75,12 @@ namespace Edit
         // -----------------------------------------------------------------------------
         Gfx::SelectionRenderer::Clear(*m_pSelectionTicket);
 
-        m_pSelectionTicket = 0;
+        m_pSelectionTicket = nullptr;
 
         // -----------------------------------------------------------------------------
         // Unselect entity
         // -----------------------------------------------------------------------------
-        Gfx::SelectionRenderer::UnselectEntity();
+        Gfx::HighlightRenderer::Reset();
 
         Edit::GUI::CInspectorPanel::GetInstance().InspectEntity(Dt::CEntity::s_InvalidID);
 
@@ -111,7 +112,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Selection
         // -----------------------------------------------------------------------------
-        assert(m_pSelectionTicket != 0);
+        assert(m_pSelectionTicket != nullptr);
 
         Gfx::CSelectionTicket& rSelectionTicket = *m_pSelectionTicket;
 
@@ -121,13 +122,13 @@ namespace Edit
             {
                 auto pEntity = static_cast<Dt::CEntity*>(rSelectionTicket.m_pObject);
 
-                Gfx::SelectionRenderer::SelectEntity(pEntity->GetID());
+                Gfx::HighlightRenderer::HighlightEntity(pEntity->GetID());
 
                 Edit::GUI::CInspectorPanel::GetInstance().InspectEntity(pEntity->GetID());
             }
             else
             {
-                Gfx::SelectionRenderer::UnselectEntity();
+                Gfx::HighlightRenderer::Reset();
 
                 Edit::GUI::CInspectorPanel::GetInstance().InspectEntity(Dt::CEntity::s_InvalidID);
             }
@@ -146,7 +147,7 @@ namespace Edit
         }
         else if (_rInputEvent.GetType() == Base::CInputEvent::Input)
         {
-            if (_rInputEvent.GetAction() == Base::CInputEvent::MouseLeftReleased && m_pSelectionTicket != 0)
+            if (_rInputEvent.GetAction() == Base::CInputEvent::MouseLeftReleased && m_pSelectionTicket != nullptr)
             {
                 Gfx::SelectionRenderer::PushPick(*m_pSelectionTicket, _rInputEvent.GetLocalCursorPosition());
             }
