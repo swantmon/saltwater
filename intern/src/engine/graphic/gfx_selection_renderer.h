@@ -9,16 +9,6 @@
 
 namespace Gfx
 {
-    struct SSelectionSettings
-    {
-        glm::vec4 m_HighlightColor;
-        bool      m_HighlightUseDepth;
-        bool      m_HighlightUseWireframe;
-    };
-} // namespace Gfx
-
-namespace Gfx
-{
 namespace SelectionRenderer
 {
     void OnStart();
@@ -39,9 +29,6 @@ namespace SelectionRenderer
     void Update();
     void Render();
 
-    ENGINE_API void SelectEntity(Base::ID _EntityID);
-    ENGINE_API void UnselectEntity();
-
     ENGINE_API CSelectionTicket& AcquireTicket(int _OffsetX, int _OffsetY, int _SizeX, int _SizeY, unsigned int _Flags = SPickFlag::Nothing);
     ENGINE_API void ReleaseTicket(CSelectionTicket& _rTicket);
 
@@ -53,9 +40,5 @@ namespace SelectionRenderer
     ENGINE_API bool IsEmpty(const CSelectionTicket& _rTicket);
 
     ENGINE_API bool IsValid(const CSelectionTicket& _rTicket);
-
-    ENGINE_API void ResetSettings();
-    ENGINE_API void SetSettings(const SSelectionSettings& _rSettings);
-    ENGINE_API const SSelectionSettings& GetSettings();
 } // namespace SelectionRenderer
 } // namespace Gfx

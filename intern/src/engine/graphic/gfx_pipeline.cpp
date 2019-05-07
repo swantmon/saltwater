@@ -17,6 +17,7 @@
 #include "engine/graphic/gfx_debug.h"
 #include "engine/graphic/gfx_debug_renderer.h"
 #include "engine/graphic/gfx_fog_renderer.h"
+#include "engine/graphic/gfx_highlight_renderer.h"
 #include "engine/graphic/gfx_histogram_renderer.h"
 #include "engine/graphic/gfx_light_area_renderer.h"
 #include "engine/graphic/gfx_light_indirect_renderer.h"
@@ -139,6 +140,7 @@ namespace Pipeline
         PostFX                ::OnStart();
         DebugRenderer         ::OnStart();
         SelectionRenderer     ::OnStart();
+        HighlightRenderer     ::OnStart();
         TonemappingRenderer   ::OnStart();
         CausticRenderer       ::OnStart();
         RefractionRenderer    ::OnStart();
@@ -163,6 +165,7 @@ namespace Pipeline
         PostFX                ::OnSetupShader();
         DebugRenderer         ::OnSetupShader();
         SelectionRenderer     ::OnSetupShader();
+        HighlightRenderer     ::OnSetupShader();
         TonemappingRenderer   ::OnSetupShader();
         CausticRenderer       ::OnSetupShader();
         RefractionRenderer    ::OnSetupShader();
@@ -187,6 +190,7 @@ namespace Pipeline
         PostFX                ::OnSetupKernels();
         DebugRenderer         ::OnSetupKernels();
         SelectionRenderer     ::OnSetupKernels();
+        HighlightRenderer     ::OnSetupKernels();
         TonemappingRenderer   ::OnSetupKernels();
         CausticRenderer       ::OnSetupKernels();
         RefractionRenderer    ::OnSetupKernels();
@@ -211,6 +215,7 @@ namespace Pipeline
         PostFX                ::OnSetupRenderTargets();
         DebugRenderer         ::OnSetupRenderTargets();
         SelectionRenderer     ::OnSetupRenderTargets();
+        HighlightRenderer     ::OnSetupRenderTargets();
         TonemappingRenderer   ::OnSetupRenderTargets();
         CausticRenderer       ::OnSetupRenderTargets();
         RefractionRenderer    ::OnSetupRenderTargets();
@@ -235,6 +240,7 @@ namespace Pipeline
         PostFX                ::OnSetupStates();
         DebugRenderer         ::OnSetupStates();
         SelectionRenderer     ::OnSetupStates();
+        HighlightRenderer     ::OnSetupStates();
         TonemappingRenderer   ::OnSetupStates();
         CausticRenderer       ::OnSetupStates();
         RefractionRenderer    ::OnSetupStates();
@@ -259,6 +265,7 @@ namespace Pipeline
         PostFX                ::OnSetupTextures();
         DebugRenderer         ::OnSetupTextures();
         SelectionRenderer     ::OnSetupTextures();
+        HighlightRenderer     ::OnSetupTextures();
         TonemappingRenderer   ::OnSetupTextures();
         CausticRenderer       ::OnSetupTextures();
         RefractionRenderer    ::OnSetupTextures();
@@ -283,6 +290,7 @@ namespace Pipeline
         PostFX                ::OnSetupBuffers();
         DebugRenderer         ::OnSetupBuffers();
         SelectionRenderer     ::OnSetupBuffers();
+        HighlightRenderer     ::OnSetupBuffers();
         TonemappingRenderer   ::OnSetupBuffers();
         CausticRenderer       ::OnSetupBuffers();
         RefractionRenderer    ::OnSetupBuffers();
@@ -307,6 +315,7 @@ namespace Pipeline
         PostFX                ::OnSetupResources();
         DebugRenderer         ::OnSetupResources();
         SelectionRenderer     ::OnSetupResources();
+        HighlightRenderer     ::OnSetupResources();
         TonemappingRenderer   ::OnSetupResources();
         CausticRenderer       ::OnSetupResources();
         RefractionRenderer    ::OnSetupResources();
@@ -331,6 +340,7 @@ namespace Pipeline
         PostFX                ::OnSetupModels();
         DebugRenderer         ::OnSetupModels();
         SelectionRenderer     ::OnSetupModels();
+        HighlightRenderer     ::OnSetupModels();
         TonemappingRenderer   ::OnSetupModels();
         CausticRenderer       ::OnSetupModels();
         RefractionRenderer    ::OnSetupModels();
@@ -355,6 +365,7 @@ namespace Pipeline
         PostFX                ::OnSetupEnd();
         DebugRenderer         ::OnSetupEnd();
         SelectionRenderer     ::OnSetupEnd();
+        HighlightRenderer     ::OnSetupEnd();
         TonemappingRenderer   ::OnSetupEnd();
         CausticRenderer       ::OnSetupEnd();
         RefractionRenderer    ::OnSetupEnd();
@@ -375,6 +386,7 @@ namespace Pipeline
         BackgroundRenderer    ::OnExit();
         DebugRenderer         ::OnExit();
         SelectionRenderer     ::OnExit();
+        HighlightRenderer     ::OnExit();
         LightAreaRenderer     ::OnExit();
         ReflectionRenderer    ::OnExit();
         LightPointRenderer    ::OnExit();
@@ -493,6 +505,7 @@ namespace Pipeline
         PostFXHDR            ::Update();
         PostFX               ::Update();
         SelectionRenderer    ::Update();
+        HighlightRenderer    ::Update();
         CausticRenderer      ::Update();
         RefractionRenderer   ::Update();
 
@@ -568,11 +581,20 @@ namespace Pipeline
         Performance::EndEvent();
 
         // -----------------------------------------------------------------------------
+        // Highlight Pass
+        // -----------------------------------------------------------------------------
+        Performance::BeginEvent("Highlight Pass");
+
+        SelectionRenderer::Render();
+
+        HighlightRenderer::Render();
+
+        Performance::EndEvent();
+
+        // -----------------------------------------------------------------------------
         // LDR Effect Pass
         // -----------------------------------------------------------------------------
         Performance::BeginEvent("LDR Effect Pass");
-
-        SelectionRenderer::Render();
 
         PostFX::Render();
 
@@ -597,7 +619,7 @@ namespace Pipeline
 
     unsigned int RegisterWindow(void* _pWindow, int _VSync, bool _PreserveContext)
     {
-        assert(_pWindow != 0);
+        assert(_pWindow != nullptr);
 
         return Main::RegisterWindow(_pWindow, _VSync, _PreserveContext);
     }

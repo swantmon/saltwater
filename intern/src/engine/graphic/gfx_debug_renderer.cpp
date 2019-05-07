@@ -118,37 +118,41 @@ namespace
 
     private:
 
-        typedef std::vector<SDebugCamera>  CDebugCameras;
-        typedef std::vector<SDebugTexture> CDebugTextures;
-        typedef std::vector<SDebugText>    CDebugTexts;
+        using CDebugCameras  = std::vector<SDebugCamera>;
+        using CDebugTextures = std::vector<SDebugTexture>;
+        using CDebugTexts    = std::vector<SDebugText>;
         
     private:
         
         CMeshPtr m_QuadModelPtr;
         CMeshPtr m_GizmoModelPtr;
 
-        CBufferSetPtr     m_ViewModelVSBuffer;
-        CBufferSetPtr     m_BaseModelVSBuffer;
-        CBufferSetPtr     m_ViewPSBuffer;
-        CBufferPtr        m_PlaneBuffer;
-        CBufferSetPtr     m_DeferredPassPSBuffer;
-        CBufferPtr        m_TextInstanceBufferPtr;
-        CBufferPtr        m_TextInstanceBufferSetPtr;
-        CBufferPtr        m_PlaneIndexBuffer;
-        CRenderContextPtr m_RenderContextPtr;
-        CShaderPtr        m_PositionShaderVSPtr;
-        CShaderPtr        m_PositionShaderPSPtr;
-        CShaderPtr        m_GizmoShaderVSPtr;
-        CShaderPtr        m_GizmoShaderPSPtr;
-        CShaderPtr        m_QuadTextureShaderVSPtr;
-        CShaderPtr        m_QuadTextureShaderPSPtr;
-        CShaderPtr        m_QuadTextShaderVSPtr;
-        CShaderPtr        m_QuadTextShaderPSPtr;
-        CTexturePtr   m_ConsolasTexturePtr;
+        CBufferSetPtr m_ViewModelVSBuffer;
+        CBufferSetPtr m_BaseModelVSBuffer;
+        CBufferSetPtr m_ViewPSBuffer;
+        CBufferSetPtr m_DeferredPassPSBuffer;
 
-        CDebugCameras  m_DebugCameras;
+        CBufferPtr m_PlaneBuffer;
+        CBufferPtr m_TextInstanceBufferPtr;
+        CBufferPtr m_TextInstanceBufferSetPtr;
+        CBufferPtr m_PlaneIndexBuffer;
+
+        CRenderContextPtr m_RenderContextPtr;
+
+        CShaderPtr m_PositionShaderVSPtr;
+        CShaderPtr m_PositionShaderPSPtr;
+        CShaderPtr m_GizmoShaderVSPtr;
+        CShaderPtr m_GizmoShaderPSPtr;
+        CShaderPtr m_QuadTextureShaderVSPtr;
+        CShaderPtr m_QuadTextureShaderPSPtr;
+        CShaderPtr m_QuadTextShaderVSPtr;
+        CShaderPtr m_QuadTextShaderPSPtr;
+
+        CTexturePtr m_ConsolasTexturePtr;
+
+        CDebugCameras m_DebugCameras;
         CDebugTextures m_DebugTextures;
-        CDebugTexts    m_DebugTexts;
+        CDebugTexts m_DebugTexts;
         
         bool m_IsGizmoVisible;
         
@@ -209,26 +213,26 @@ namespace
     
     void CGfxDebugRenderer::OnExit()
     {
-        m_QuadModelPtr             = 0;
-        m_GizmoModelPtr            = 0;
-        m_ViewModelVSBuffer        = 0;
-        m_BaseModelVSBuffer        = 0;
-        m_ViewPSBuffer             = 0;
-        m_PlaneBuffer              = 0;
-        m_DeferredPassPSBuffer     = 0;
-        m_TextInstanceBufferPtr    = 0;
-        m_TextInstanceBufferSetPtr = 0;
-        m_PlaneIndexBuffer         = 0;
-        m_RenderContextPtr         = 0;
-        m_PositionShaderVSPtr      = 0;
-        m_PositionShaderPSPtr      = 0;
-        m_GizmoShaderVSPtr         = 0;
-        m_GizmoShaderPSPtr         = 0;
-        m_QuadTextureShaderVSPtr   = 0;
-        m_QuadTextureShaderPSPtr   = 0;
-        m_QuadTextShaderVSPtr      = 0;
-        m_QuadTextShaderPSPtr      = 0;
-        m_ConsolasTexturePtr       = 0;
+        m_QuadModelPtr             = nullptr;
+        m_GizmoModelPtr            = nullptr;
+        m_ViewModelVSBuffer        = nullptr;
+        m_BaseModelVSBuffer        = nullptr;
+        m_ViewPSBuffer             = nullptr;
+        m_PlaneBuffer              = nullptr;
+        m_DeferredPassPSBuffer     = nullptr;
+        m_TextInstanceBufferPtr    = nullptr;
+        m_TextInstanceBufferSetPtr = nullptr;
+        m_PlaneIndexBuffer         = nullptr;
+        m_RenderContextPtr         = nullptr;
+        m_PositionShaderVSPtr      = nullptr;
+        m_PositionShaderPSPtr      = nullptr;
+        m_GizmoShaderVSPtr         = nullptr;
+        m_GizmoShaderPSPtr         = nullptr;
+        m_QuadTextureShaderVSPtr   = nullptr;
+        m_QuadTextureShaderPSPtr   = nullptr;
+        m_QuadTextShaderVSPtr      = nullptr;
+        m_QuadTextShaderPSPtr      = nullptr;
+        m_ConsolasTexturePtr       = nullptr;
 
         m_DebugCameras .clear();
         m_DebugTextures.clear();
@@ -364,7 +368,7 @@ namespace
         TextTextureDescriptor.m_Usage            = CTexture::GPURead;
         TextTextureDescriptor.m_Semantic         = CTexture::Diffuse;
         TextTextureDescriptor.m_pFileName        = "Consolas.tga";
-        TextTextureDescriptor.m_pPixels          = 0;
+        TextTextureDescriptor.m_pPixels          = nullptr;
         TextTextureDescriptor.m_Format           = CTexture::R8G8B8_UBYTE;
 
         m_ConsolasTexturePtr = static_cast<CTexturePtr>(TextureManager::CreateTexture2D(TextTextureDescriptor));
@@ -383,8 +387,8 @@ namespace
         ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
         ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
         ConstanteBufferDesc.m_NumberOfBytes = sizeof(SPerFrameConstantBuffer);
-        ConstanteBufferDesc.m_pBytes        = 0;
-        ConstanteBufferDesc.m_pClassKey     = 0;
+        ConstanteBufferDesc.m_pBytes        = nullptr;
+        ConstanteBufferDesc.m_pClassKey     = nullptr;
         
         CBufferPtr ViewBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
         
@@ -395,8 +399,8 @@ namespace
         ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
         ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
         ConstanteBufferDesc.m_NumberOfBytes = sizeof(SPerDrawCallConstantBuffer);
-        ConstanteBufferDesc.m_pBytes        = 0;
-        ConstanteBufferDesc.m_pClassKey     = 0;
+        ConstanteBufferDesc.m_pBytes        = nullptr;
+        ConstanteBufferDesc.m_pClassKey     = nullptr;
         
         CBufferPtr ModelBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
         
@@ -410,8 +414,8 @@ namespace
         ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
         ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
         ConstanteBufferDesc.m_NumberOfBytes = sizeof(CMaterial::SMaterialAttributes);
-        ConstanteBufferDesc.m_pBytes        = 0;
-        ConstanteBufferDesc.m_pClassKey     = 0;
+        ConstanteBufferDesc.m_pBytes        = nullptr;
+        ConstanteBufferDesc.m_pClassKey     = nullptr;
 
         CBufferPtr MaterialBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
@@ -424,8 +428,8 @@ namespace
         ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
         ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
         ConstanteBufferDesc.m_NumberOfBytes = sizeof(SProperties);
-        ConstanteBufferDesc.m_pBytes        = 0;
-        ConstanteBufferDesc.m_pClassKey     = 0;
+        ConstanteBufferDesc.m_pBytes        = nullptr;
+        ConstanteBufferDesc.m_pClassKey     = nullptr;
         
         CBufferPtr PropertiesBuffer = BufferManager::CreateBuffer(ConstanteBufferDesc);
         
@@ -479,7 +483,7 @@ namespace
         BufferDesc.m_Access        = CBuffer::CPUWrite;
         BufferDesc.m_NumberOfBytes = sizeof(PlaneVertexBufferData);
         BufferDesc.m_pBytes        = &PlaneVertexBufferData[0];
-        BufferDesc.m_pClassKey     = 0;
+        BufferDesc.m_pClassKey     = nullptr;
         
         m_PlaneBuffer = BufferManager::CreateBuffer(BufferDesc);
         
@@ -491,7 +495,7 @@ namespace
         BufferDesc.m_Access        = CBuffer::CPUWrite;
         BufferDesc.m_NumberOfBytes = sizeof(PlaneIndexBufferData);
         BufferDesc.m_pBytes        = &PlaneIndexBufferData[0];
-        BufferDesc.m_pClassKey     = 0;
+        BufferDesc.m_pClassKey     = nullptr;
         
         m_PlaneIndexBuffer = BufferManager::CreateBuffer(BufferDesc);
     }
@@ -737,14 +741,7 @@ namespace
 
     void CGfxDebugRenderer::RenderTextures()
     {
-        
-        CDebugTextures::iterator CurrentTexture = m_DebugTextures.begin();
-        CDebugTextures::iterator EndOfTextures  = m_DebugTextures.end();
-
-        if (CurrentTexture == EndOfTextures)
-        {
-            return;
-        }
+        if (m_DebugTextures.empty()) return;
 
         Performance::BeginEvent("Textures");
 
@@ -768,7 +765,7 @@ namespace
 
         ContextManager::SetConstantBuffer(1, m_BaseModelVSBuffer->GetBuffer(0));
 
-        for (; CurrentTexture != EndOfTextures; ++ CurrentTexture)
+        for (auto CurrentTexture : m_DebugTextures)
         {
             // -----------------------------------------------------------------------------
             // 
@@ -783,8 +780,8 @@ namespace
             //
             // -----------------------------------------------------------------------------
 
-            glm::vec2 MinPoint   = CurrentTexture->m_ScreenRegion.GetMin();
-            glm::vec2 MaxPoint   = CurrentTexture->m_ScreenRegion.GetMax();
+            glm::vec2 MinPoint   = CurrentTexture.m_ScreenRegion.GetMin();
+            glm::vec2 MaxPoint   = CurrentTexture.m_ScreenRegion.GetMax();
             glm::vec2 Difference = MaxPoint - MinPoint;
 
             SPerDrawCallConstantBuffer ModelBuffer;
@@ -798,7 +795,7 @@ namespace
 
             ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
 
-            ContextManager::SetTexture(0, CurrentTexture->m_TexturePtr->GetTexture(0));
+            ContextManager::SetTexture(0, CurrentTexture.m_TexturePtr->GetTexture(0));
 
             ContextManager::DrawIndexed(m_QuadModelPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
         }
