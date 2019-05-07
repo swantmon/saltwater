@@ -1381,6 +1381,8 @@ namespace MR
 
     void CSLAMReconstructor::OnNewFrame(Gfx::CTexturePtr DepthBuffer, Gfx::CTexturePtr ColorBuffer, const glm::mat4* pTransform)
     {
+        ENGINE_CONSOLE_INFO("New frame");
+
         m_IsTrackingNeeded = pTransform == nullptr;
 
         const bool CaptureColor = m_ReconstructionSettings.m_CaptureColor;

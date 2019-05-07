@@ -10,7 +10,7 @@ layout(std140, binding = 0) uniform HomographyBuffer
 };
 
 layout (binding = 0, r32f) readonly uniform image2D cs_Depth_RectImg;
-layout (binding = 1, r32f) writeonly uniform image2D cs_Depth_OrigImg;
+layout (binding = 1, r16ui) writeonly uniform uimage2D cs_Depth_OrigImg;
 
 vec4 BiLinearInterpolation(vec2 pixPosition)
 {
@@ -45,7 +45,7 @@ void main()
 
 	vec4 Depth = BiLinearInterpolation(pix_Rect);
 
-	imageStore(cs_Depth_OrigImg, ivec2(gl_GlobalInvocationID.xy), Depth); 
+	imageStore(cs_Depth_OrigImg, ivec2(gl_GlobalInvocationID.xy), uvec4(Depth)); 
 }
 
 #endif //__INCLUDE_CS_Rect_Planar_GLSL__

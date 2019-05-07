@@ -527,8 +527,7 @@ namespace MR
 
                 if (StereoGetFrameCPU(ColorFrame, DepthFrame, PoseMatrix))
                 {
-                    Base::AABB2UInt TargetRect;
-                    TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_ColorSize.x, m_ColorSize.y));
+                    auto TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_ColorSize.x, m_ColorSize.y));
 
                     Gfx::TextureManager::CopyToTexture2D(m_DepthTexture, TargetRect, m_ColorSize.x, DepthFrame.data());
                     Gfx::TextureManager::CopyToTexture2D(m_RGBATexture, TargetRect, m_ColorSize.x, ColorFrame.data());
@@ -764,14 +763,16 @@ namespace MR
                         StereoOnFrameCPU(PixelData, m_PoseMatrix, m_ColorIntrinsics, DepthData);
                     }
                 }
-
-                if (m_StreamState == STREAM_SLAM)
-                {
-                    m_Reconstructor.OnNewFrame(m_DepthTexture, m_RGBATexture, &m_PoseMatrix);
-                }
                 else
                 {
-                    m_PoseMatrix = m_PreliminaryPoseMatrix;
+                    if (m_StreamState == STREAM_SLAM)
+                    {
+                        m_Reconstructor.OnNewFrame(m_DepthTexture, m_RGBATexture, &m_PoseMatrix);
+                    }
+                    else
+                    {
+                        m_PoseMatrix = m_PreliminaryPoseMatrix;
+                    }
                 }
             }
             else if (MessageType == LIGHTESTIMATE)

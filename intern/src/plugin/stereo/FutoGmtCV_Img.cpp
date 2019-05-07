@@ -67,7 +67,7 @@ namespace FutoGmtCV
 
 
     //---Get Function---
-    std::vector<char> CFutoImg::get_Img() const
+    const std::vector<char>& CFutoImg::get_Img() const
     {
         return m_Image;
     }

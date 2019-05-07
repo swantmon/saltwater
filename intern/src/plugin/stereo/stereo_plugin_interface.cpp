@@ -57,7 +57,7 @@ namespace Stereo
         TextureDescriptor_Depth_OrigImg.m_Access = Gfx::CTexture::EAccess::CPURead;
         TextureDescriptor_Depth_OrigImg.m_Usage = Gfx::CTexture::EUsage::GPUToCPU;
         TextureDescriptor_Depth_OrigImg.m_Semantic = Gfx::CTexture::UndefinedSemantic;
-        TextureDescriptor_Depth_OrigImg.m_Format = Gfx::CTexture::R32_FLOAT; // 1 channels with 32-bit float.
+        TextureDescriptor_Depth_OrigImg.m_Format = Gfx::CTexture::R16_UINT; // 1 channels with 16-bit uint.
 
         m_Depth_OrigImg_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_Depth_OrigImg);
     }
@@ -68,6 +68,8 @@ namespace Stereo
     {
         if (m_HasNewFrame)
         {
+            assert(_ColorImage.size() == m_Keyframe_Curt.get_Img().size());
+
             std::memcpy(_ColorImage.data(), m_Keyframe_Curt.get_Img().data(), _ColorImage.size());
             Gfx::TextureManager::CopyTextureToCPU(m_Depth_OrigImg_TexturePtr, _rDepthImage.data());
             _rTransform = glm::mat4(glm::transpose(m_Keyframe_Curt.get_Rot()));
@@ -529,6 +531,7 @@ namespace Stereo
         Gfx::ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
 
         Gfx::ContextManager::ResetShaderCS();
+        Gfx::ContextManager::ResetImageTexture(1);
 
         Gfx::Performance::EndEvent();
         // GPU End

@@ -26,7 +26,7 @@ namespace FutoGmtCV
 
     //---Get Function---
     public:
-        std::vector<char> get_Img() const;
+        const std::vector<char>& get_Img() const;
         glm::ivec2 get_ImgSize() const;
         glm::mat3 get_Cam() const;
         glm::mat3 get_Rot() const;
