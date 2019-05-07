@@ -7,15 +7,15 @@
 
 namespace FutoGmtCV
 {
-    class FutoImg
+    class CFutoImg
     {
     //---Constructor & Destructor---
     public:
-        FutoImg();
-        FutoImg(const std::vector<char>& Img_Input, const glm::ivec2& ImgSize);
-        FutoImg(const std::vector<char>& Img_Input, const glm::ivec2& ImgSize, const glm::mat4x3& P);
-        FutoImg(const std::vector<char>& Img_Input, const glm::ivec2& ImgSize, const glm::mat3& K, const glm::mat3& R, const glm::vec3& PC);
-        ~FutoImg();
+        CFutoImg();
+        CFutoImg(const std::vector<char>& Img_Input, const glm::ivec2& ImgSize, const int& Channel);
+        CFutoImg(const std::vector<char>& Img_Input, const glm::ivec2& ImgSize, const int& Channel, const glm::mat4x3& P);
+        CFutoImg(const std::vector<char>& Img_Input, const glm::ivec2& ImgSize, const int& Channel, const glm::mat3& K, const glm::mat3& R, const glm::vec3& PC);
+        ~CFutoImg();
 
     //---Set Functions---
     public:
@@ -35,8 +35,9 @@ namespace FutoGmtCV
         
     //---Members---
     private:
-        std::vector<char> m_Img; // Image data in RGBA
-        glm::ivec2 m_ImgSize;
+        std::vector<char> m_Image; // Image data
+        glm::ivec2 m_ImgSize; // Image Width & Image Height
+        int m_Channel; // Number of Channel of Image
         glm::mat3 m_Cam_mtx; // Camera Matrix in pixel. Origin is upper-left. x-axis is row-direction and y-axis is column-direction
         glm::mat3 m_Rot_mtx; // Rotations from Mapping frame to Image frame
         glm::vec3 m_PC_vec; // Projection Center in Mapping frame

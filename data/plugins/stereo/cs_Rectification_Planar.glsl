@@ -1,5 +1,5 @@
-#ifndef __INCLUDE_CS_Rect_Planar_GLSL__
-#define __INCLUDE_CS_Rect_Planar_GLSL__
+#ifndef __INCLUDE_CS_Rectification_Planar_GLSL__
+#define __INCLUDE_CS_Rectification_Planar_GLSL__
 
 layout(std140, binding = 0) uniform HomographyBuffer
 {
@@ -53,4 +53,4 @@ void main()
 	imageStore(cs_RectImg, ivec2(gl_GlobalInvocationID.xy), pixValue); 
 }
 
-#endif //__INCLUDE_CS_Rect_Planar_GLSL__
+#endif //__INCLUDE_CS_Rectification_Planar_GLSL__

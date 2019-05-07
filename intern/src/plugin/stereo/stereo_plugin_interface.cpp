@@ -28,8 +28,8 @@ namespace
 
     struct SParallaxEquation
     {
-        float m_BaselineLength;
-        float m_FocalLength;
+        float m_BaselineLength; // Unit = meter
+        float m_FocalLength; // Unit = pixel
         glm::ivec2 m_Padding;
     };
 }
@@ -64,9 +64,23 @@ namespace Stereo
 
     // -----------------------------------------------------------------------------
 
-    std::vector<char> CPluginInterface::GetLatestDepthImageCPU() const
+    bool CPluginInterface::GetLatestFrameCPU(std::vector<char>& _ColorImage, std::vector<char>& _rDepthImage, glm::mat4& _rTransform)
     {
-        return std::vector<char>();
+        if (m_HasNewFrame)
+        {
+            std::memcpy(_ColorImage.data(), m_Keyframe_Curt.get_Img().data(), _ColorImage.size());
+            Gfx::TextureManager::CopyTextureToCPU(m_Depth_OrigImg_TexturePtr, _rDepthImage.data());
+            _rTransform = glm::mat4(glm::transpose(m_Keyframe_Curt.get_Rot()));
+            _rTransform[3] = glm::vec4(m_Keyframe_Curt.get_PC(), 1.0f);
+
+            return true;
+        }
+        else
+        {
+            m_HasNewFrame = false;
+
+            return false;
+        }
     }
 
     // -----------------------------------------------------------------------------
@@ -80,7 +94,7 @@ namespace Stereo
 
         glm::vec3 PC_vec = glm::vec3(_Transform[3]); // The last column of _Transform given by ARKit is the Position of Camera in World.
 
-        FutoGmtCV::FutoImg frame(_rRGBImage, m_OrigImgSize, Cam_mtx, Rot_mtx, PC_vec);
+        FutoGmtCV::CFutoImg frame(_rRGBImage, m_OrigImgSize, 4, Cam_mtx, Rot_mtx, PC_vec);
         
         //---Select Keyframe for Computation---
         if (!m_idx_Keyf_Curt) // Current keyframe is empty -> Set current keyframe.
@@ -170,9 +184,17 @@ namespace Stereo
 
                     cvDispImg_Rect_gpu.download(cvDispImg_Rect_cpu);
 
-                    if (cvDispImg_Rect_cpu.type() != CV_32F)
+                    switch (cvDispImg_Rect_cpu.depth())
                     {
-                        cvDispImg_Rect_cpu.convertTo(cvDispImg_Rect_cpu, CV_32F, 1.0 / 16); 
+                    case CV_16S:
+                        cvDispImg_Rect_cpu.convertTo(cvDispImg_Rect_cpu, CV_32F, 1.0 / 16);
+                        break;
+                    case CV_32F:
+                        cvDispImg_Rect_cpu.convertTo(cvDispImg_Rect_cpu, CV_32F);
+                        break;
+                    case CV_8U:
+                        cvDispImg_Rect_cpu.convertTo(cvDispImg_Rect_cpu, CV_32F);
+                        break;
                     }
                     
                     if (m_Is_imwrite)
@@ -280,11 +302,11 @@ namespace Stereo
                 glm::mat3 R_L(1.0f);
                 glm::mat3 R_R(glm::vec3(0.9999, -0.0084, 0.0132), glm::vec3(0.0085, 0.9999, -0.0122), glm::vec3(-0.0132, 0.0123, 0.9999));
 
-                m_Keyframe_Curt = FutoGmtCV::FutoImg(InputImgL, ImgSize_TestOrigL, K_L, R_L, PC_L);
-                m_Keyframe_Last = FutoGmtCV::FutoImg(InputImgR, ImgSize_TestOrigR, K_R, R_R, PC_R);
+                m_Keyframe_Curt = FutoGmtCV::CFutoImg(InputImgL, ImgSize_TestOrigL, 3, K_L, R_L, PC_L);
+                m_Keyframe_Last = FutoGmtCV::CFutoImg(InputImgR, ImgSize_TestOrigR, 3, K_R, R_R, PC_R);
 
                 //---Rectification---
-                FutoGmtCV::FutoImg RectImg_Curt, RectImg_Last;
+                FutoGmtCV::CFutoImg RectImg_Curt, RectImg_Last;
                 FutoGmtCV::SHomographyTransform Homo_B, Homo_M;
 
                 FutoGmtCV::CRectification_Planar PlanarRectifier = FutoGmtCV::CRectification_Planar(m_Keyframe_Curt, m_Keyframe_Last);
@@ -510,6 +532,8 @@ namespace Stereo
 
         Gfx::Performance::EndEvent();
         // GPU End
+
+        m_HasNewFrame = true;
     }
 
     // -----------------------------------------------------------------------------
@@ -638,9 +662,9 @@ extern "C" CORE_PLUGIN_API_EXPORT void OnFrameCPU(const std::vector<char>& _rRGB
 
 // -----------------------------------------------------------------------------
 
-extern "C" CORE_PLUGIN_API_EXPORT void GetLatestDepthImageCPU(std::vector<char>& _rDepthImage)
+extern "C" CORE_PLUGIN_API_EXPORT bool GetLatestFrameCPU(std::vector<char>& _ColorImage, std::vector<char>& _rDepthImage, glm::mat4& _rTransform)
 {
-    _rDepthImage = static_cast<Stereo::CPluginInterface&>(GetInstance()).GetLatestDepthImageCPU();
+    return static_cast<Stereo::CPluginInterface&>(GetInstance()).GetLatestFrameCPU(_ColorImage, _rDepthImage, _rTransform);
 }
 
 // -----------------------------------------------------------------------------

@@ -217,7 +217,7 @@ namespace MR
         bool m_UseGPUForStereo;
 
         typedef void(*StereoOnFrameCPUFunc)(const std::vector<char>&, const glm::mat4&, const glm::mat4&, const std::vector<uint16_t>&);
-        typedef void(*StereoGetFrameCPUFunc)(std::vector<char>&);
+        typedef bool(*StereoGetFrameCPUFunc)(std::vector<char>&, std::vector<char>&, glm::mat4&);
         
         StereoOnFrameCPUFunc StereoOnFrameCPU;
         StereoGetFrameCPUFunc StereoGetFrameCPU;
@@ -430,7 +430,7 @@ namespace MR
                 else
                 {
                     StereoOnFrameCPU = (StereoOnFrameCPUFunc)(Core::PluginManager::GetPluginFunction("Stereo Matching", "OnFrameCPU"));
-                    StereoGetFrameCPU = (StereoGetFrameCPUFunc)(Core::PluginManager::GetPluginFunction("Stereo Matching", "GetLatestDepthImageCPU"));
+                    StereoGetFrameCPU = (StereoGetFrameCPUFunc)(Core::PluginManager::GetPluginFunction("Stereo Matching", "GetLatestFrameCPU"));
                 }
             }
         }
@@ -538,6 +538,23 @@ namespace MR
                     TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_DepthSize.x, m_DepthSize.y));
                     Gfx::TextureManager::CopyToTexture2D(m_DepthTexture, TargetRect, m_DepthSize.x, m_DepthBuffer.data());
                     m_Reconstructor.OnNewFrame(m_DepthTexture, nullptr, nullptr);
+                }
+            }
+            else if (m_UseStereoMatching)
+            {
+                glm::mat4 PoseMatrix;
+                std::vector<char> DepthFrame(m_ColorSize.x * m_ColorSize.y * sizeof(uint16_t));
+                std::vector<char> ColorFrame(m_ColorSize.x * m_ColorSize.y * 4);
+
+                if (StereoGetFrameCPU(ColorFrame, DepthFrame, PoseMatrix))
+                {
+                    Base::AABB2UInt TargetRect;
+                    TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_ColorSize.x, m_ColorSize.y));
+
+                    Gfx::TextureManager::CopyToTexture2D(m_DepthTexture, TargetRect, m_ColorSize.x, DepthFrame.data());
+                    Gfx::TextureManager::CopyToTexture2D(m_RGBATexture, TargetRect, m_ColorSize.x, ColorFrame.data());
+
+                    m_Reconstructor.OnNewFrame(m_DepthTexture, m_RGBATexture, &PoseMatrix);
                 }
             }
 

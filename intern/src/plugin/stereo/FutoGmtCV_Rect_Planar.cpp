@@ -22,7 +22,7 @@ namespace FutoGmtCV
     {
     }
 
-    CRectification_Planar::CRectification_Planar(const FutoImg& OrigImg_B, const FutoImg& OrigImg_M)
+    CRectification_Planar::CRectification_Planar(const CFutoImg& OrigImg_B, const CFutoImg& OrigImg_M)
         : m_Img_Orig_B(OrigImg_B),
           m_Img_Orig_M(OrigImg_M)
     {
@@ -74,7 +74,7 @@ namespace FutoGmtCV
     }
 
     //---Execution Functions---
-    void CRectification_Planar::execute(FutoImg& Img_Rect_B, FutoImg& Img_Rect_M, SHomographyTransform& Homo_B, SHomographyTransform& Homo_M)
+    void CRectification_Planar::execute(CFutoImg& Img_Rect_B, CFutoImg& Img_Rect_M, SHomographyTransform& Homo_B, SHomographyTransform& Homo_M)
     {
         //---Step 1. Calculate Orientations of Rectified Images & Homography from Original to Rectified---
         cal_K_Rect(m_Img_Orig_B.get_Cam(), m_Img_Orig_M.get_Cam());
@@ -327,16 +327,16 @@ namespace FutoGmtCV
         switch (Which_Img)
         {
         case 0:
-            m_Img_Rect_B = FutoImg(Img_Rect, m_ImgSize_Rect, m_K_Rect_B, m_R_Rect, m_PC_Rect_B);
+            m_Img_Rect_B = CFutoImg(Img_Rect, m_ImgSize_Rect, 1, m_K_Rect_B, m_R_Rect, m_PC_Rect_B);
             break;
         case 1:
-            m_Img_Rect_M = FutoImg(Img_Rect, m_ImgSize_Rect, m_K_Rect_M, m_R_Rect, m_PC_Rect_M);
+            m_Img_Rect_M = CFutoImg(Img_Rect, m_ImgSize_Rect, 1, m_K_Rect_M, m_R_Rect, m_PC_Rect_M);
             break;
         }
     }
 
     //---Assistant Functions: Return Rectified Images---
-    void CRectification_Planar::get_Result(FutoImg& Img_Rect, SHomographyTransform& Homo, const int Which_Img)
+    void CRectification_Planar::get_Result(CFutoImg& Img_Rect, SHomographyTransform& Homo, const int Which_Img)
     {
         switch (Which_Img)
         {

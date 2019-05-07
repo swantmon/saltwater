@@ -26,6 +26,7 @@ namespace Stereo
 {
     class CPluginInterface : public Core::IPlugin
     {
+    //---Engine Function---
     public:
 
         void OnStart() override;
@@ -38,13 +39,14 @@ namespace Stereo
 
         void EventHook();
 
+    //---plugin_slam---
     public:
 
         void SetIntrinsics(const glm::vec2 &_rFocalLength, const glm::vec2 &_rFocalPoint, const glm::ivec2 &_rImageSize);
 
         //---CPU Computation---
 
-        std::vector<char> GetLatestDepthImageCPU() const;
+        bool GetLatestFrameCPU(std::vector<char>& _ColorImage, std::vector<char>& _rDepthImage, glm::mat4& _rTransform);
         void OnFrameCPU(const std::vector<char>& _rRGBImage, const glm::mat4 &_Transform, const glm::mat4 &_Intrinsics, const std::vector<uint16_t> &_rDepthImage);
 
         //---GPU Computation---
@@ -52,6 +54,7 @@ namespace Stereo
         Gfx::CTexturePtr GetLatestDepthImageGPU() const;
         void OnFrameGPU(Gfx::CTexturePtr _RGBImage, const glm::mat4 &_Transform);
 
+    //---plugin_stereo---
     private:
         //---Program Design Setting---
         bool m_Is_ARKitData, m_Is_TestData_MyMMS; // Select Data Set.
@@ -65,22 +68,22 @@ namespace Stereo
         glm::ivec2 m_OrigImgSize; // Size of original image -> x = width & y = height
 
         //---Keyframe---
-        FutoGmtCV::FutoImg m_Keyframe_Curt, m_Keyframe_Last; // Only compute 2 frames first.
+        FutoGmtCV::CFutoImg m_Keyframe_Curt, m_Keyframe_Last; // Only compute 2 frames first.
         bool m_idx_Keyf_Curt, m_idx_Keyf_Last; // The status of current & last keyframes.
 
         std::size_t m_Cdt_Keyf_MaxNum; // Maximal keyframes for calculation once
         float m_Cdt_Keyf_BaseLineL; // Keyframe Selection: BaseLine Condition. Unit is meter.
 
         //---Rectification---
-        FutoGmtCV::FutoImg m_RectImg_Curt, m_RectImg_Last;
+        FutoGmtCV::CFutoImg m_RectImg_Curt, m_RectImg_Last;
         FutoGmtCV::SHomographyTransform m_Homo_Curt, m_Homo_Last;
 
         FutoGmtCV::CRectification_Planar m_PlanarRectifier; // Implemant Rectification
 
         //---Stereo Matching---
-        std::vector<float> m_Disparity_RectImg;
+        std::vector<float> m_Disparity_RectImg; // Disparity in Rectified Image
 
-        int m_DispRange;
+        int m_DispRange; // Disparity Searching Range for Stereo Matching
 
         std::string m_StereoMatching_Method;
         std::unique_ptr<sgm::StereoSGM> m_pStereoMatcher_LibSGM;
@@ -104,6 +107,8 @@ namespace Stereo
         Gfx::CBufferPtr m_Homogrampy_BufferPtr;
 
         void imp_Depth_Rect2Orig();
+
+        bool m_HasNewFrame = false;
     };
 
 } // namespace HW

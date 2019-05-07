@@ -24,12 +24,12 @@ namespace FutoGmtCV
     //---Constructor & Destructor---
     public:
         CRectification_Planar();
-        CRectification_Planar(const FutoImg& OrigImg_B, const FutoImg& OrigImg_M);
+        CRectification_Planar(const CFutoImg& OrigImg_B, const CFutoImg& OrigImg_M);
         ~CRectification_Planar();
 
     //---Execution Functions---
     public:
-        void execute(FutoImg& Img_Rect_B, FutoImg& Img_Rect_M, SHomographyTransform& Homo_B, SHomographyTransform& Homo_M);
+        void execute(CFutoImg& Img_Rect_B, CFutoImg& Img_Rect_M, SHomographyTransform& Homo_B, SHomographyTransform& Homo_M);
 
     //---Assistant Functions---
     private:
@@ -46,13 +46,13 @@ namespace FutoGmtCV
         void determ_RectImgSize();
         void genrt_RectImg(const std::vector<char>& Img_Orig, const int Which_Img = 0);
 
-        void get_Result(FutoImg& Img_Rect, SHomographyTransform& Homo, const int Which_Img = 0);
+        void get_Result(CFutoImg& Img_Rect, SHomographyTransform& Homo, const int Which_Img = 0);
 
     //---Members---
     private:
         //---Image Data---
-        FutoImg m_Img_Orig_B, m_Img_Orig_M; // Original Images
-        FutoImg m_Img_Rect_B, m_Img_Rect_M; // Rectified Images
+        CFutoImg m_Img_Orig_B, m_Img_Orig_M; // Original Images
+        CFutoImg m_Img_Rect_B, m_Img_Rect_M; // Rectified Images
         glm::ivec2 m_ImgSize_Rect;
 
         //---Homography---
