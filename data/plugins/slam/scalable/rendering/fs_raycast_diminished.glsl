@@ -11,6 +11,8 @@
 layout(std140, binding = 1) uniform PerDrawCallData
 {
     mat4 g_WSToSelectionTransform;
+    vec3 g_SelectionAABBMin;
+    vec3 g_SelectionAABBMax;
 };
 
 layout (binding = 0, rgba8) uniform image2D cs_PlaneRendering;
@@ -68,7 +70,7 @@ vec4 GetDiminishedPosition(vec3 CameraPosition, vec3 RayDirection)
         {
             break;
         }
-        else if (CurrentTSDF < 0.0f && PreviousTSDF > 0.0f)
+        else if (IsInBox(CurrentPosition))
         {
             hit = true;
         }
@@ -132,7 +134,10 @@ void main()
         Color = GetColor(Vertex.xyz);
     }
 
-    out_DiminishedColor = vec4(Color, Vertex.w);
+    float Start = GetStartLength(g_ViewPosition.xyz, normalize(in_WSRayDirection), g_SelectionAABBMin, g_SelectionAABBMax);
+    float End = GetEndLength(g_ViewPosition.xyz, normalize(in_WSRayDirection), g_SelectionAABBMin, g_SelectionAABBMax);
+
+    out_DiminishedColor = vec4(Color, Start > End ? 0.0f : 1.0f);
 }
 
 #endif // __INCLUDE_FS_RAYCAST_DIMINISHED_GLSL__

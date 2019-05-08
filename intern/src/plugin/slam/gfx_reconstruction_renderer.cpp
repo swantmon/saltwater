@@ -77,6 +77,15 @@ namespace
         glm::vec4 m_WorldHitPosition;
     };
 
+    struct SSelectionTransform
+    {
+        glm::mat4 m_WSToSelectionTransform;
+        glm::vec3 m_AABBMin;
+        float Padding;
+        glm::vec3 m_AABBMax;
+        float Padding1;
+    };
+
     class CGfxReconstructionRenderer : private Base::CUncopyable
     {
         BASE_SINGLETON_FUNC(CGfxReconstructionRenderer)
@@ -673,7 +682,7 @@ namespace
 
         m_RaycastHitProxyBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
 
-        ConstantBufferDesc.m_NumberOfBytes = sizeof(glm::mat4);
+        ConstantBufferDesc.m_NumberOfBytes = sizeof(SSelectionTransform);
 
         m_RaycastHighLightConstantBufferPtr = BufferManager::CreateBuffer(ConstantBufferDesc);
         
@@ -1124,9 +1133,12 @@ namespace
             glm::vec3(glm::eulerAngleX(glm::half_pi<float>()) * glm::vec4(Min[0], Max[1], Max[2], 1.0f))
         };
 
-        glm::mat4 InvOBBMatrix = glm::inverse(m_SelectionTransform) * ReconstructionToSaltwater;
+        SSelectionTransform Buffer;
+        Buffer.m_WSToSelectionTransform = glm::inverse(m_SelectionTransform) * ReconstructionToSaltwater;
+        Buffer.m_AABBMin = m_SelectionBox.GetMin();
+        Buffer.m_AABBMax = m_SelectionBox.GetMax();
         
-        BufferManager::UploadBufferData(m_RaycastHighLightConstantBufferPtr, &InvOBBMatrix);
+        BufferManager::UploadBufferData(m_RaycastHighLightConstantBufferPtr, &Buffer);
 
         BufferManager::UploadBufferData(m_VolumeMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer(), &Vertices);
 
@@ -1193,9 +1205,12 @@ namespace
             glm::vec3(glm::vec4(Min[0], Max[1], Max[2], 1.0f))
         };
 
-        glm::mat4 InvOBBMatrix = glm::inverse(m_SelectionTransform) * ReconstructionToSaltwater;
+        SSelectionTransform Buffer;
+        Buffer.m_WSToSelectionTransform = glm::inverse(m_SelectionTransform) * ReconstructionToSaltwater;
+        Buffer.m_AABBMin = m_SelectionBox.GetMin();
+        Buffer.m_AABBMax = m_SelectionBox.GetMax();
 
-        BufferManager::UploadBufferData(m_RaycastHighLightConstantBufferPtr, &InvOBBMatrix);
+        BufferManager::UploadBufferData(m_RaycastHighLightConstantBufferPtr, &Buffer);
 
         BufferManager::UploadBufferData(m_VolumeMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer(), &Vertices);
 
