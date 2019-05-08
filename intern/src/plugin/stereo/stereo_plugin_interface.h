@@ -9,6 +9,8 @@
 
 #include "base/base_include_glm.h" // Some warnings appears when directly #include glm 
 
+#include "base/base_delegate.h"
+
 #include "plugin\stereo\FutoGmtCV_Img.h"
 #include "plugin\stereo\FutoGmtCV_Rect_Planar.h"
 
@@ -53,6 +55,11 @@ namespace Stereo
 
         Gfx::CTexturePtr GetLatestDepthImageGPU() const;
         void OnFrameGPU(Gfx::CTexturePtr _RGBImage, const glm::mat4 &_Transform);
+        
+    public:
+
+        using CStereoDelegate = Base::CDelegate<const std::vector<char>&, const std::vector<char>&, const glm::mat4&>;
+        CStereoDelegate::HandleType Register(Stereo::CPluginInterface::CStereoDelegate::FunctionType _Function);
 
     //---plugin_stereo---
     private:
@@ -106,7 +113,7 @@ namespace Stereo
 
         void imp_Depth_Rect2Orig();
 
-        bool m_HasNewFrame = false;
+        CStereoDelegate m_Delegate;
     };
 
 } // namespace HW

@@ -66,23 +66,7 @@ namespace Stereo
 
     bool CPluginInterface::GetLatestFrameCPU(std::vector<char>& _ColorImage, std::vector<char>& _rDepthImage, glm::mat4& _rTransform)
     {
-        if (m_HasNewFrame)
-        {
-            assert(_ColorImage.size() == m_Keyframe_Curt.get_Img().size());
-
-            std::memcpy(_ColorImage.data(), m_Keyframe_Curt.get_Img().data(), _ColorImage.size());
-            Gfx::TextureManager::CopyTextureToCPU(m_Depth_OrigImg_TexturePtr, _rDepthImage.data());
-            _rTransform = glm::mat4(glm::transpose(m_Keyframe_Curt.get_Rot()));
-            _rTransform[3] = glm::vec4(m_Keyframe_Curt.get_PC(), 1.0f);
-
-            return true;
-        }
-        else
-        {
-            m_HasNewFrame = false;
-
-            return false;
-        }
+        return false;
     }
 
     // -----------------------------------------------------------------------------
@@ -437,9 +421,6 @@ namespace Stereo
 
         }
         
-        // Optional for internal check
-        //CPluginInterface::ShowImg(_rRGBImage); // Showing image for visual checking -> Modify to control in editor.config
-        
     }
 
     // -----------------------------------------------------------------------------
@@ -536,7 +517,12 @@ namespace Stereo
         Gfx::Performance::EndEvent();
         // GPU End
 
-        m_HasNewFrame = true;
+        std::vector<char> DepthImage(m_Depth_OrigImg_TexturePtr->GetNumberOfPixelsU() * m_Depth_OrigImg_TexturePtr->GetNumberOfPixelsV() * sizeof(uint16_t));
+        Gfx::TextureManager::CopyTextureToCPU(m_Depth_OrigImg_TexturePtr, DepthImage.data());
+        glm::mat4 Transform = glm::mat4(glm::transpose(m_Keyframe_Curt.get_Rot()));
+        Transform[3] = glm::vec4(m_Keyframe_Curt.get_PC(), 1.0f);
+
+        m_Delegate.Notify(m_Keyframe_Curt.get_Img(), DepthImage, Transform);
     }
 
     // -----------------------------------------------------------------------------
@@ -639,6 +625,13 @@ namespace Stereo
         ENGINE_CONSOLE_INFOV("Oh hello. An event has been raised!");
     }
 
+    // -----------------------------------------------------------------------------
+
+    CPluginInterface::CStereoDelegate::HandleType CPluginInterface::Register(Stereo::CPluginInterface::CStereoDelegate::FunctionType _Function)
+    {
+        return m_Delegate.Register(_Function);
+    }
+
 } // namespace HW
 
 // -----------------------------------------------------------------------------
@@ -674,4 +667,11 @@ extern "C" CORE_PLUGIN_API_EXPORT void GetLatestDepthImageGPU(Gfx::CTexturePtr& 
 extern "C" CORE_PLUGIN_API_EXPORT void SetIntrinsics(const glm::vec2& _rFocalLength, const glm::vec2& _rFocalPoint, const glm::ivec2& _rImageSize)
 {
     static_cast<Stereo::CPluginInterface&>(GetInstance()).SetIntrinsics(_rFocalLength, _rFocalPoint, _rImageSize);
+}
+
+// -----------------------------------------------------------------------------
+
+extern "C" CORE_PLUGIN_API_EXPORT Stereo::CPluginInterface::CStereoDelegate::HandleType Register(Stereo::CPluginInterface::CStereoDelegate::FunctionType _Function)
+{
+    return static_cast<Stereo::CPluginInterface&>(GetInstance()).Register(_Function);
 }

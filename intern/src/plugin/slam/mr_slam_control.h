@@ -218,6 +218,11 @@ namespace MR
         StereoOnFrameGPUFunc StereoOnFrameGPU;
         StereoGetFrameGPUFunc StereoGetFrameGPU;
 
+        using StereoCallbackType = std::function<void(const std::vector<char>&, const std::vector<char>&, const glm::mat4&)>;
+        using StereoHandleType = std::shared_ptr<StereoCallbackType>;
+
+        StereoHandleType m_StereoHandle;
+
     public:
 
         void Start()
@@ -413,6 +418,14 @@ namespace MR
                     StereoOnFrameCPU = (StereoOnFrameCPUFunc)(Core::PluginManager::GetPluginFunction("Stereo Matching", "OnFrameCPU"));
                     StereoGetFrameCPU = (StereoGetFrameCPUFunc)(Core::PluginManager::GetPluginFunction("Stereo Matching", "GetLatestFrameCPU"));
                 }
+
+                typedef StereoHandleType(*RegisterFunc)(StereoCallbackType);
+
+                auto Register = (RegisterFunc)(Core::PluginManager::GetPluginFunction("Stereo Matching", "Register"));
+
+                auto Binder = std::bind(&CSLAMControl::OnNewStereoFrame, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+
+                m_StereoHandle = Register(Binder);
             }
         }
 
@@ -420,6 +433,8 @@ namespace MR
 
         void Exit()
         {
+            m_StereoHandle = nullptr;
+
             m_RecordFile.close();
 
             m_DepthBuffer.clear();
@@ -517,22 +532,6 @@ namespace MR
                     TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_DepthSize.x, m_DepthSize.y));
                     Gfx::TextureManager::CopyToTexture2D(m_DepthTexture, TargetRect, m_DepthSize.x, m_DepthBuffer.data());
                     m_Reconstructor.OnNewFrame(m_DepthTexture, nullptr, nullptr);
-                }
-            }
-            else if (m_UseStereoMatching)
-            {
-                glm::mat4 PoseMatrix;
-                std::vector<char> DepthFrame(m_ColorSize.x * m_ColorSize.y * sizeof(uint16_t));
-                std::vector<char> ColorFrame(m_ColorSize.x * m_ColorSize.y * 4);
-
-                if (StereoGetFrameCPU(ColorFrame, DepthFrame, PoseMatrix))
-                {
-                    auto TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_ColorSize.x, m_ColorSize.y));
-
-                    Gfx::TextureManager::CopyToTexture2D(m_DepthTexture, TargetRect, m_ColorSize.x, DepthFrame.data());
-                    Gfx::TextureManager::CopyToTexture2D(m_RGBATexture, TargetRect, m_ColorSize.x, ColorFrame.data());
-
-                    m_Reconstructor.OnNewFrame(m_DepthTexture, m_RGBATexture, &PoseMatrix);
                 }
             }
 
@@ -1042,6 +1041,18 @@ namespace MR
                 const auto& AABB = Gfx::ReconstructionRenderer::GetSelectionBox();
                 Gfx::ReconstructionRenderer::SetInpaintedPlane(m_PlaneTexture, AABB);
             }
+        }
+
+        // -----------------------------------------------------------------------------
+
+        void OnNewStereoFrame(const std::vector<char>& _rColor, const std::vector<char>& _rDepth, const glm::mat4& _rTransform)
+        {
+            auto TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_ColorSize.x, m_ColorSize.y));
+
+            Gfx::TextureManager::CopyToTexture2D(m_RGBATexture, TargetRect, m_ColorSize.x, _rColor.data());
+            Gfx::TextureManager::CopyToTexture2D(m_DepthTexture, TargetRect, m_ColorSize.x, _rDepth.data());
+
+            m_Reconstructor.OnNewFrame(m_DepthTexture, m_RGBATexture, &_rTransform);
         }
 
         // -----------------------------------------------------------------------------
