@@ -1,7 +1,7 @@
 ﻿
 #pragma once
 
-#include "base/base_include_glm.h" // Some warnings appears when directly #include glm 
+#include "C:/saltwater/intern/src/base/base_include_glm.h" // Some warnings appears when directly #include glm 
 
 #include <vector>
 
@@ -27,11 +27,11 @@ namespace FutoGmtCV
     //---Get Function---
     public:
         const std::vector<char>& get_Img() const;
-        glm::ivec2 get_ImgSize() const;
-        glm::mat3 get_Cam() const;
-        glm::mat3 get_Rot() const;
-        glm::vec3 get_PC() const;
-        glm::mat4x3 get_PPM() const;
+        const glm::ivec2& get_ImgSize() const;
+        const glm::mat3& get_Cam() const;
+        const glm::mat3& get_Rot() const;
+        const glm::vec3& get_PC() const;
+        const glm::mat4x3& get_PPM() const;
         
     //---Members---
     private:

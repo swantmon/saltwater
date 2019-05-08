@@ -72,27 +72,27 @@ namespace FutoGmtCV
         return m_Image;
     }
 
-    glm::ivec2 CFutoImg::get_ImgSize() const
+    const glm::ivec2& CFutoImg::get_ImgSize() const
     {
         return m_ImgSize;
     }
 
-    glm::mat3 CFutoImg::get_Cam() const
+    const glm::mat3& CFutoImg::get_Cam() const
     {
         return m_Cam_mtx;
     }
 
-    glm::mat3 CFutoImg::get_Rot() const
+    const glm::mat3& CFutoImg::get_Rot() const
     {
         return m_Rot_mtx;
     }
 
-    glm::vec3 CFutoImg::get_PC() const
+    const glm::vec3& CFutoImg::get_PC() const
     {
         return m_PC_vec;
     }
 
-    glm::mat4x3 CFutoImg::get_PPM() const
+    const glm::mat4x3& CFutoImg::get_PPM() const
     {
         return m_P_mtx;
     }

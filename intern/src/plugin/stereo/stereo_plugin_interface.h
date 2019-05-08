@@ -61,8 +61,6 @@ namespace Stereo
 
         bool m_Is_imwrite; // Export Image Result by OpenCV?
 
-        void ShowImg(const std::vector<char>& Img_RGBA) const;
-
         //---ARKit Data---
         float m_FrameResolution; // Full=1, Half=0.5.
         glm::ivec2 m_OrigImgSize; // Size of original image -> x = width & y = height

@@ -525,8 +525,8 @@ namespace Stereo
         Gfx::ContextManager::SetConstantBuffer(0, m_Homogrampy_BufferPtr);
 
         // Start GPU Parallel Processing
-        const int WorkGroupsX = DivUp(m_RectImg_Curt.get_ImgSize().x, TileSize_2D);
-        const int WorkGroupsY = DivUp(m_RectImg_Curt.get_ImgSize().y, TileSize_2D);
+        const int WorkGroupsX = DivUp(m_Keyframe_Curt.get_ImgSize().x, TileSize_2D);
+        const int WorkGroupsY = DivUp(m_Keyframe_Curt.get_ImgSize().y, TileSize_2D);
 
         Gfx::ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
 
@@ -537,21 +537,6 @@ namespace Stereo
         // GPU End
 
         m_HasNewFrame = true;
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CPluginInterface::ShowImg(const std::vector<char>& Img_RGBA) const
-    {
-        cv::Mat CV_Img(cv::Size(m_OrigImgSize.x, m_OrigImgSize.y), CV_8UC4); // 2D Matrix(x*y) with (8-bit unsigned character) + (4 bands)
-            // cv::Mat is built in BGR/BGRA in default.
-            // cv::Mat is ImgH(Num of Row), ImgW(Num of Col)
-        
-        memcpy(CV_Img.data, Img_RGBA.data(), Img_RGBA.size());
-        
-        cv::cvtColor(CV_Img, CV_Img, cv::COLOR_BGRA2RGBA); // Transform to RGB before imshow & imwrite
-        
-        cv::imshow("Hello", CV_Img);
     }
 
     // -----------------------------------------------------------------------------
