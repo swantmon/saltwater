@@ -364,13 +364,16 @@ namespace MR
             {
                 m_RecordMode = RECORD;
                 m_RecordFile.open(m_RecordFileName, std::fstream::out | std::fstream::binary);
-                m_pRecordWriter = std::make_unique<Base::CRecordWriter>(m_RecordFile, 1);
 
                 ENGINE_CONSOLE_INFOV("Recoding into file file \"%s\"", m_RecordFileName.c_str());
             }
-            else
+            else if (RecordParam == "none")
             {
                 m_RecordMode = NONE;
+            }
+            else
+            {
+                BASE_THROWM("Invalid recording mode!");
             }
 
             m_SendInpaintedResult = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:send_result", true);
@@ -920,6 +923,11 @@ namespace MR
             {
                 if (m_RecordMode == RECORD)
                 {
+                    if (m_pRecordWriter == nullptr)
+                    {
+                        m_pRecordWriter = std::make_unique<Base::CRecordWriter>(m_RecordFile, 1);
+                    }
+
                     *m_pRecordWriter << _rMessage.m_Category;
                     *m_pRecordWriter << _rMessage.m_MessageType;
                     *m_pRecordWriter << _rMessage.m_CompressedSize;
