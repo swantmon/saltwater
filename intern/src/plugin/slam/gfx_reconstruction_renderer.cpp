@@ -495,6 +495,10 @@ namespace
         {
             DefineStream << "#define RAYCAST_BACKSIDES\n";
         }
+        if (Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:diminish_complete_box", false))
+        {
+            DefineStream << "#define USE_WHOLE_SELECTION_BOX\n";
+        }
 
         std::string DefineString = DefineStream.str();
 

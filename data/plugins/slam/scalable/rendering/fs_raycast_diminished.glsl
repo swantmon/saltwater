@@ -70,7 +70,11 @@ vec4 GetDiminishedPosition(vec3 CameraPosition, vec3 RayDirection)
         {
             break;
         }
-        else if (IsInBox(CurrentPosition))
+#ifndef USE_WHOLE_SELECTION_BOX
+        else if (CurrentTSDF < 0.0f && PreviousTSDF > 0.0f)
+#else
+		else if (IsInBox(CurrentPosition))
+#endif
         {
             hit = true;
         }
@@ -134,10 +138,18 @@ void main()
         Color = GetColor(Vertex.xyz);
     }
 
-    float Start = GetStartLength(g_ViewPosition.xyz, normalize(in_WSRayDirection), g_SelectionAABBMin, g_SelectionAABBMax);
+#ifndef USE_WHOLE_SELECTION_BOX
+
+    out_DiminishedColor = vec4(Color, Vertex.w);
+
+#else 
+
+	float Start = GetStartLength(g_ViewPosition.xyz, normalize(in_WSRayDirection), g_SelectionAABBMin, g_SelectionAABBMax);
     float End = GetEndLength(g_ViewPosition.xyz, normalize(in_WSRayDirection), g_SelectionAABBMin, g_SelectionAABBMax);
 
     out_DiminishedColor = vec4(Color, Start > End ? 0.0f : 1.0f);
+
+#endif
 }
 
 #endif // __INCLUDE_FS_RAYCAST_DIMINISHED_GLSL__
