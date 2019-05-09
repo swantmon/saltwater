@@ -57,7 +57,7 @@ namespace FutoGmtCV
         TextureDescriptor_OrigImg.m_NumberOfTextures = 1;
         TextureDescriptor_OrigImg.m_Binding = Gfx::CTexture::ShaderResource;
         TextureDescriptor_OrigImg.m_Access = Gfx::CTexture::EAccess::CPURead;
-        TextureDescriptor_OrigImg.m_Usage = Gfx::CTexture::EUsage::GPUToCPU;
+        TextureDescriptor_OrigImg.m_Usage = Gfx::CTexture::EUsage::GPUReadWrite;
         TextureDescriptor_OrigImg.m_Semantic = Gfx::CTexture::UndefinedSemantic;
         TextureDescriptor_OrigImg.m_Format = Gfx::CTexture::R8G8B8A8_UBYTE; // 4 channels and each channel is 8-bit.
 

@@ -54,10 +54,12 @@ namespace Stereo
         TextureDescriptor_Depth_OrigImg.m_NumberOfMipMaps = 1;
         TextureDescriptor_Depth_OrigImg.m_NumberOfTextures = 1;
         TextureDescriptor_Depth_OrigImg.m_Binding = Gfx::CTexture::ShaderResource;
-        TextureDescriptor_Depth_OrigImg.m_Access = Gfx::CTexture::EAccess::CPURead;
-        TextureDescriptor_Depth_OrigImg.m_Usage = Gfx::CTexture::EUsage::GPUToCPU;
+        TextureDescriptor_Depth_OrigImg.m_Access = Gfx::CTexture::EAccess::CPUWrite;
+        TextureDescriptor_Depth_OrigImg.m_Usage = Gfx::CTexture::EUsage::GPUReadWrite;
         TextureDescriptor_Depth_OrigImg.m_Semantic = Gfx::CTexture::UndefinedSemantic;
         TextureDescriptor_Depth_OrigImg.m_Format = Gfx::CTexture::R16_UINT; // 1 channels with 16-bit uint.
+        TextureDescriptor_Depth_OrigImg.m_pFileName = nullptr;
+        TextureDescriptor_Depth_OrigImg.m_pPixels = nullptr;
 
         m_Depth_OrigImg_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_Depth_OrigImg);
     }
@@ -170,17 +172,13 @@ namespace Stereo
 
                     cvDispImg_Rect_gpu.download(cvDispImg_Rect_cpu);
 
-                    switch (cvDispImg_Rect_cpu.depth())
+                    if (cvDispImg_Rect_cpu.depth() == CV_16S)
                     {
-                    case CV_16S:
                         cvDispImg_Rect_cpu.convertTo(cvDispImg_Rect_cpu, CV_32F, 1.0 / 16);
-                        break;
-                    case CV_32F:
+                    } 
+                    else
+                    {
                         cvDispImg_Rect_cpu.convertTo(cvDispImg_Rect_cpu, CV_32F);
-                        break;
-                    case CV_8U:
-                        cvDispImg_Rect_cpu.convertTo(cvDispImg_Rect_cpu, CV_32F);
-                        break;
                     }
                     
                     if (m_Is_imwrite)
@@ -260,7 +258,12 @@ namespace Stereo
                 imp_Depth_Rect2Orig();
 
                 //---Return Depth in Original Image---
+                std::vector<char> DepthImage(m_Depth_OrigImg_TexturePtr->GetNumberOfPixelsU()* m_Depth_OrigImg_TexturePtr->GetNumberOfPixelsV() * sizeof(uint16_t));
+                Gfx::TextureManager::CopyTextureToCPU(m_Depth_OrigImg_TexturePtr, DepthImage.data());
+                glm::mat4 Transform = glm::mat4(glm::transpose(m_Keyframe_Curt.get_Rot()));
+                Transform[3] = glm::vec4(m_Keyframe_Curt.get_PC(), 1.0f);
 
+                m_Delegate.Notify(m_Keyframe_Curt.get_Img(), DepthImage, Transform);
             }
             
             if (m_Is_TestData_MyMMS)
@@ -340,7 +343,7 @@ namespace Stereo
 
                 if (m_StereoMatching_Method == "cvBM_cuda")
                 {
-                    m_pStereoMatcher_cvBM_cuda = cv::cuda::createStereoBM(m_DispRange, 7); // Disparity Range, Böock Size
+                    m_pStereoMatcher_cvBM_cuda = cv::cuda::createStereoBM(m_DispRange, 7); // Disparity Range, Bï¿½ock Size
                     m_pStereoMatcher_cvBM_cuda->compute(cvRectImg_Curt_gpu, cvRectImg_Last_gpu, cvDispImg_Rect_gpu);
 
                     cvDispImg_Rect_gpu.download(cvDispImg_Rect_cpu);
