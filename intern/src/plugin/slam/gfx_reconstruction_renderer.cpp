@@ -591,7 +591,7 @@ namespace
         TextureDescriptor.m_NumberOfTextures = 1;
         TextureDescriptor.m_Binding          = CTexture::RenderTarget | CTexture::ShaderResource;
         TextureDescriptor.m_Access           = CTexture::EAccess::CPURead;
-        TextureDescriptor.m_Usage            = CTexture::EUsage::GPUToCPU;
+        TextureDescriptor.m_Usage            = CTexture::EUsage::GPUReadWrite;
         TextureDescriptor.m_Semantic         = CTexture::UndefinedSemantic;
         TextureDescriptor.m_Format           = CTexture::R8G8B8A8_BYTE;
 
@@ -648,7 +648,7 @@ namespace
         TextureDescriptor.m_NumberOfTextures = 1;
         TextureDescriptor.m_Binding = CTexture::RenderTarget | CTexture::ShaderResource;
         TextureDescriptor.m_Access = CTexture::EAccess::CPURead;
-        TextureDescriptor.m_Usage = CTexture::EUsage::GPUToCPU;
+        TextureDescriptor.m_Usage = CTexture::EUsage::GPUReadWrite;
         TextureDescriptor.m_Semantic = CTexture::UndefinedSemantic;
         TextureDescriptor.m_Format = CTexture::R16G16B16A16_FLOAT;
 

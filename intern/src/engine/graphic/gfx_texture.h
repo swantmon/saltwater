@@ -110,10 +110,8 @@ namespace Gfx
 
             enum EUsage
             {
-                GPUReadWrite       =  0,
-                GPURead            =  1,
-                GPUReadCPUWrite    =  2,
-                GPUToCPU           =  3,
+                GPUReadWrite =  0,
+                GPURead      =  1,
             };
 
             enum EBinding
