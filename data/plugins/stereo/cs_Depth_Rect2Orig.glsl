@@ -45,7 +45,9 @@ void main()
 
 	vec4 Depth = BiLinearInterpolation(pix_Rect);
 
-	imageStore(cs_Depth_OrigImg, ivec2(gl_GlobalInvocationID.xy), uvec4(Depth)); 
+	ivec2 Coords = ivec2(gl_GlobalInvocationID.xy);
+	Coords.x = imageSize(cs_Depth_OrigImg).x - Coords.x;
+	imageStore(cs_Depth_OrigImg, Coords, uvec4(Depth)); 
 }
 
 #endif //__INCLUDE_CS_Rect_Planar_GLSL__
