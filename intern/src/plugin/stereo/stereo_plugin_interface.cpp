@@ -62,6 +62,10 @@ namespace Stereo
         TextureDescriptor_Depth_OrigImg.m_pPixels = nullptr;
 
         m_Depth_OrigImg_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_Depth_OrigImg);
+
+        m_Depth_Sensor_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_Depth_OrigImg);
+
+        m_Depth_Difference_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_Depth_OrigImg);
     }
 
     // -----------------------------------------------------------------------------
@@ -257,8 +261,16 @@ namespace Stereo
                 //---Transform Depth from Rectified to Original Image---
                 imp_Depth_Rect2Orig();
 
+                //---Compare Depth from Stereo Matching & Sensor---
+                Base::AABB2UInt TargetRect;
+                TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_OrigImgSize.x, m_OrigImgSize.y));
+                Gfx::TextureManager::CopyToTexture2D(m_Depth_Sensor_TexturePtr, TargetRect, m_OrigImgSize.x, static_cast<const void*>(_rDepthImage.data()));
+
+                chk_Depth();
+
                 //---Return Depth in Original Image---
-                std::vector<char> DepthImage(m_Depth_OrigImg_TexturePtr->GetNumberOfPixelsU()* m_Depth_OrigImg_TexturePtr->GetNumberOfPixelsV() * sizeof(uint16_t));
+                const int MemCpySize = m_Depth_OrigImg_TexturePtr->GetNumberOfPixelsU() * m_Depth_OrigImg_TexturePtr->GetNumberOfPixelsV() * sizeof(uint16_t);
+                std::vector<char> DepthImage(MemCpySize);
                 Gfx::TextureManager::CopyTextureToCPU(m_Depth_OrigImg_TexturePtr, DepthImage.data());
                 glm::mat4 Transform = glm::mat4(glm::transpose(m_Keyframe_Curt.get_Rot()));
                 Transform[3] = glm::vec4(m_Keyframe_Curt.get_PC(), 1.0f);
@@ -422,6 +434,7 @@ namespace Stereo
 
             }
 
+            m_idx_Keyf_Last = false;
         }
         
     }
@@ -509,8 +522,8 @@ namespace Stereo
         Gfx::ContextManager::SetConstantBuffer(0, m_Homogrampy_BufferPtr);
 
         // Start GPU Parallel Processing
-        const int WorkGroupsX = DivUp(m_Keyframe_Curt.get_ImgSize().x, TileSize_2D);
-        const int WorkGroupsY = DivUp(m_Keyframe_Curt.get_ImgSize().y, TileSize_2D);
+        const int WorkGroupsX = DivUp(m_OrigImgSize.x, TileSize_2D);
+        const int WorkGroupsY = DivUp(m_OrigImgSize.y, TileSize_2D);
 
         Gfx::ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
 
@@ -526,6 +539,30 @@ namespace Stereo
         Transform[3] = glm::vec4(m_Keyframe_Curt.get_PC(), 1.0f);
 
         m_Delegate.Notify(m_Keyframe_Curt.get_Img(), DepthImage, Transform);
+    }
+
+    void CPluginInterface::chk_Depth()
+    {
+        //---GPU Start---
+        Gfx::Performance::BeginEvent("Compare Depth");
+
+        // Connecting Managers (@CPU) & GLSL (@GPU)
+        Gfx::ContextManager::SetShaderCS(m_chk_Depth_CSPtr);
+        Gfx::ContextManager::SetImageTexture(0, m_Depth_OrigImg_TexturePtr);
+        Gfx::ContextManager::SetImageTexture(1, m_Depth_Sensor_TexturePtr);
+        Gfx::ContextManager::SetImageTexture(2, m_Depth_Difference_TexturePtr);
+
+        // Start GPU Parallel Processing
+        const int WorkGroupsX = DivUp(m_OrigImgSize.x, TileSize_2D);
+        const int WorkGroupsY = DivUp(m_OrigImgSize.y, TileSize_2D);
+
+        Gfx::ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+
+        Gfx::ContextManager::ResetShaderCS();
+        Gfx::ContextManager::ResetImageTexture(1);
+
+        Gfx::Performance::EndEvent();
+        // GPU End
     }
 
     // -----------------------------------------------------------------------------
@@ -586,6 +623,9 @@ namespace Stereo
         Homography_BufferDesc.m_pBytes = nullptr;
         Homography_BufferDesc.m_pClassKey = 0;
         m_Homogrampy_BufferPtr = Gfx::BufferManager::CreateBuffer(Homography_BufferDesc);
+
+        //---Compare Depth---
+        m_chk_Depth_CSPtr = Gfx::ShaderManager::CompileCS("../../plugins/stereo/cs_Compare_Depth.glsl", "main", DefineString.c_str());
     }
 
     // -----------------------------------------------------------------------------

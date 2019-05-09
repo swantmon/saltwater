@@ -113,6 +113,11 @@ namespace Stereo
 
         void imp_Depth_Rect2Orig();
 
+        void chk_Depth();
+        Gfx::CShaderPtr m_chk_Depth_CSPtr;
+        Gfx::CTexturePtr m_Depth_Sensor_TexturePtr;
+        Gfx::CTexturePtr m_Depth_Difference_TexturePtr;
+
         CStereoDelegate m_Delegate;
     };
 
