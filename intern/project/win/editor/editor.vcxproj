@@ -56,6 +56,7 @@
     <ClCompile Include="..\..\..\src\editor\edit_script_slam.cpp" />
     <ClCompile Include="..\..\..\src\editor\edit_start_state.cpp" />
     <ClCompile Include="..\..\..\src\editor\edit_unload_map_state.cpp" />
+    <ClCompile Include="..\..\..\src\editor\imgui\extensions\ImGuizmo.cpp" />
     <ClCompile Include="..\..\..\src\editor\imgui\imgui.cpp" />
     <ClCompile Include="..\..\..\src\editor\imgui\imgui_demo.cpp" />
     <ClCompile Include="..\..\..\src\editor\imgui\imgui_draw.cpp" />
@@ -99,6 +100,7 @@
     <ClInclude Include="..\..\..\src\editor\edit_start_state.h" />
     <ClInclude Include="..\..\..\src\editor\edit_state.h" />
     <ClInclude Include="..\..\..\src\editor\edit_unload_map_state.h" />
+    <ClInclude Include="..\..\..\src\editor\imgui\extensions\ImGuizmo.h" />
     <ClInclude Include="..\..\..\src\editor\imgui\imconfig.h" />
     <ClInclude Include="..\..\..\src\editor\imgui\imgui.h" />
     <ClInclude Include="..\..\..\src\editor\imgui\imgui_impl_opengl.h" />

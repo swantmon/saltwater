@@ -17,6 +17,7 @@
 #include "editor/imgui/imgui_impl_opengl.h"
 #include "editor/imgui/imgui_impl_sdl.h"
 #include "editor/imgui/imgui_internal.h"
+#include "editor/imgui/extensions/ImGuizmo.h"
 
 #include "engine/core/core_asset_manager.h"
 #include "engine/core/core_console.h"
@@ -337,6 +338,8 @@ namespace
         ImGui_ImplSDL2_NewFrame(m_pWindow);
 
         ImGui::NewFrame();
+
+        ImGuizmo::BeginFrame();
 
         if (!m_ShowGUI)
         {
