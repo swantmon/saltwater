@@ -34,6 +34,8 @@ namespace GUI
 
     void CToolbarPanel::Render()
     {
+        ImGui::SetNextWindowPos(ImVec2(20, 40), ImGuiCond_FirstUseEver);
+
         ImGui::Begin("Toolbar", &m_IsVisible);
 
         auto Operation = Edit::CEditState::GetInstance().GetOperation();
@@ -82,8 +84,6 @@ namespace GUI
         Edit::CEditState::GetInstance().SetOperation(Operation);
 
         Edit::CEditState::GetInstance().SetMode(Mode);
-
-        ImGui::SetWindowPos(ImVec2(20, 40), true);
 
         ImGui::End();
     }

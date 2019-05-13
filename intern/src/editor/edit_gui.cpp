@@ -32,6 +32,7 @@
 
 #include "engine/graphic/gfx_pipeline.h"
 #include "engine/graphic/gfx_performance.h"
+#include "engine/graphic/gfx_shader_manager.h"
 
 #include "engine/gui/gui_event_handler.h"
 
@@ -114,7 +115,8 @@ namespace
         Base::CInputEvent::EKey ConvertSDLKey(const SDL_Event& _rSDLEvent);
         Base::CInputEvent::EKey ConvertSDLAxis(const SDL_Event& _rSDLEvent);
 
-		void ToggleFullscreen(bool _Faked);
+		void ToggleFullscreen();
+        void ToggleGUI();
     };
 } // namespace 
 
@@ -122,8 +124,8 @@ namespace
 {
     CEditorGui::CEditorGui()
         : m_EditWindowID(0)
-        , m_pGamePad(nullptr)
-        , m_CloseWindow(false)
+        , m_pGamePad    (nullptr)
+        , m_CloseWindow (false)
     {
     }
     
@@ -380,6 +382,16 @@ namespace
                 ImGui::EndMenu();
             }
 
+            if (ImGui::BeginMenu("Rendering"))
+            {
+                if (ImGui::MenuItem("Reload All Shader"))
+                {
+                    Gfx::ShaderManager::ReloadAllShaders();
+                }
+
+                ImGui::EndMenu();
+            }
+
             if (ImGui::BeginMenu("Windows"))
             {
                 for (auto pPanel : m_Panels)
@@ -504,8 +516,8 @@ namespace
             Gui::EventHandler::OnEvent(Event);
 
             
-            if ((Mod & KMOD_ALT) != 0 && (Mod & KMOD_SHIFT) != 0 && Key == SDLK_RETURN) ToggleFullscreen(false);
-            else if ((Mod & KMOD_ALT) != 0 && Key == SDLK_RETURN) ToggleFullscreen(true);
+            if ((Mod & KMOD_ALT) != 0 && Key == SDLK_RETURN) ToggleFullscreen();
+            else if ((Mod & KMOD_ALT) != 0 && Key == SDLK_HASH) ToggleGUI();
             break;
         case SDL_KEYUP:
             Key = _rSDLEvent.key.keysym.sym;
@@ -703,7 +715,7 @@ namespace
 
 	// -----------------------------------------------------------------------------
 
-	void CEditorGui::ToggleFullscreen(bool _Faked)
+	void CEditorGui::ToggleFullscreen()
 	{
 		if (m_IsFullscreen)
 		{
@@ -711,12 +723,18 @@ namespace
 		}
 		else
 		{
-            if (_Faked) SDL_SetWindowFullscreen(m_pWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
-            else SDL_SetWindowFullscreen(m_pWindow, SDL_WINDOW_FULLSCREEN);
+            SDL_SetWindowFullscreen(m_pWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
 		}
 
 		m_IsFullscreen = !m_IsFullscreen;
 	}
+
+    // -----------------------------------------------------------------------------
+
+    void CEditorGui::ToggleGUI()
+    {
+        m_ShowGUI = !m_ShowGUI;
+    }
 } // namespace 
 
 namespace Edit
