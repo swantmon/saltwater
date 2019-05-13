@@ -30,7 +30,7 @@
 #ifdef _WIN32
 namespace Edit
 {
-    FileDialog::FileDialog(const std::string& _rTitle, const std::regex& _rFilter)
+    CImFileFialog::CImFileFialog(const std::string& _rTitle, const std::regex& _rFilter)
         : m_Title(_rTitle)
         , m_Regex(_rFilter)
     { 
@@ -39,7 +39,7 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void FileDialog::SetToCurrentPath() 
+    void CImFileFialog::SetToCurrentPath() 
     {
         m_CurrentPath = std::filesystem::current_path();
 
@@ -48,14 +48,14 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    const std::vector<std::string>& FileDialog::GetSelectedFiles() const 
+    const std::vector<std::string>& CImFileFialog::GetSelectedFiles() const 
     { 
         return m_SelectedFiles; 
     }
 
     // -----------------------------------------------------------------------------
 
-    void FileDialog::FillRoots()
+    void CImFileFialog::FillRoots()
     {
         DWORD Drives = GetLogicalDrives();
 
@@ -101,7 +101,7 @@ namespace Edit
         }
     }
 #else
-    void FileDialog::FillRoots()
+    void CImFileFialog::FillRoots()
     {
         m_Roots.push_back({ "/", "(root)" });
     }
@@ -109,7 +109,7 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void FileDialog::ClearCache() 
+    void CImFileFialog::ClearCache() 
     {
         m_IsCacheDirty = true;
 
@@ -120,7 +120,7 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void FileDialog::Open()
+    void CImFileFialog::Open()
     {
         m_ShouldOpen = true;
 
@@ -135,7 +135,7 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    bool FileDialog::Draw() 
+    bool CImFileFialog::Draw() 
     {
         bool IsDone = false;
 

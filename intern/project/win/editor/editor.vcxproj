@@ -53,6 +53,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\..\..\src\editor\edit_scene_graph_panel.cpp" />
+    <ClCompile Include="..\..\..\src\editor\edit_script_camera_control.cpp" />
     <ClCompile Include="..\..\..\src\editor\edit_script_slam.cpp" />
     <ClCompile Include="..\..\..\src\editor\edit_start_state.cpp" />
     <ClCompile Include="..\..\..\src\editor\edit_toolbar_panel.cpp" />
@@ -98,6 +99,7 @@
     <ClInclude Include="..\..\..\src\editor\edit_play_state.h" />
     <ClInclude Include="..\..\..\src\editor\edit_precompiled.h" />
     <ClInclude Include="..\..\..\src\editor\edit_scene_graph_panel.h" />
+    <ClInclude Include="..\..\..\src\editor\edit_script_camera_control.h" />
     <ClInclude Include="..\..\..\src\editor\edit_script_slam.h" />
     <ClInclude Include="..\..\..\src\editor\edit_start_state.h" />
     <ClInclude Include="..\..\..\src\editor\edit_state.h" />

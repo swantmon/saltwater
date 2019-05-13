@@ -30,6 +30,7 @@
 #include "engine/data/data_entity_manager.h"
 #include "engine/data/data_map.h"
 #include "engine/data/data_mesh_component.h"
+#include "engine/data/data_camera_component.h"
 #include "engine/data/data_component_manager.h"
 
 #include "engine/engine.h"
@@ -106,8 +107,7 @@ namespace
         bool m_ShowGUI;
 		bool m_IsFullscreen;
 
-        bool m_OpenImportDialog;
-        Edit::FileDialog m_ImportModelDialog;
+        Edit::CImFileFialog m_ImportModelDialog;
 
         Engine::CEventDelegates::HandleType m_GfxOnRenderGUIDelegate;
 
@@ -137,8 +137,7 @@ namespace
         , m_CloseWindow        (false)
         , m_ShowGUI            (true)
         , m_IsFullscreen       (false)
-        , m_OpenImportDialog   (false)
-        , m_ImportModelDialog  ("Import Model...", std::regex(".*.(obj|dae|fbx)"))
+        , m_ImportModelDialog  ("Import model...", std::regex(".*.(obj|dae|fbx)"))
     {                          
     }
     
@@ -378,7 +377,7 @@ namespace
 
             if (ImGui::BeginMenu("Entity"))
             {
-                if (ImGui::MenuItem("Add empty entity"))
+                if (ImGui::MenuItem("Create Empty"))
                 {
                     Dt::SEntityDescriptor EntityDesc;
 
@@ -392,7 +391,7 @@ namespace
                     Dt::EntityManager::MarkEntityAsDirty(rNewEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
                 }
 
-                if (ImGui::BeginMenu("Templates"))
+                if (ImGui::BeginMenu("3D Object"))
                 {
                     if (ImGui::MenuItem("Sphere"))
                     {
@@ -403,7 +402,7 @@ namespace
 
                         Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
 
-                        rEntity.SetName("New sphere");
+                        rEntity.SetName("New Sphere");
 
                         // -----------------------------------------------------------------------------
 
@@ -418,7 +417,7 @@ namespace
                         Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
                     }
 
-                    if (ImGui::MenuItem("Box"))
+                    if (ImGui::MenuItem("Cube"))
                     {
                         Dt::SEntityDescriptor EntityDesc;
 
@@ -427,7 +426,7 @@ namespace
 
                         Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
 
-                        rEntity.SetName("New box");
+                        rEntity.SetName("New Cube");
 
                         // -----------------------------------------------------------------------------
 
@@ -451,7 +450,7 @@ namespace
 
                         Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
 
-                        rEntity.SetName("New cone");
+                        rEntity.SetName("New Cone");
 
                         // -----------------------------------------------------------------------------
 
@@ -469,7 +468,34 @@ namespace
                     ImGui::EndMenu();
                 }
 
-                if (ImGui::MenuItem("Import Model"))
+                if (ImGui::MenuItem("Camera"))
+                {
+                    Dt::SEntityDescriptor EntityDesc;
+
+                    EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
+                    EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
+
+                    Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+
+                    rEntity.SetName("Camera");
+
+                    auto Component = Dt::CComponentManager::GetInstance().Allocate<Dt::CCameraComponent>();
+
+                    Component->SetProjectionType(Dt::CCameraComponent::Perspective);
+                    Component->SetClearFlag(Dt::CCameraComponent::Skybox);
+
+                    rEntity.AttachComponent(Component);
+
+                    Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*Component, Dt::CCameraComponent::DirtyCreate);
+
+                    // -----------------------------------------------------------------------------
+
+                    Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+                }
+
+                ImGui::Separator();
+
+                if (ImGui::MenuItem("Import"))
                 {
                     m_ImportModelDialog.Open();
                 }

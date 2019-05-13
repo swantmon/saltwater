@@ -6,12 +6,13 @@
 #include <string>
 #include <vector>
 
-namespace Edit {
-    class FileDialog 
+namespace Edit 
+{
+    class CImFileFialog 
     {
     public:
 
-        FileDialog(const std::string& _rTitle, const std::regex& _rFilter = std::regex(".*.[]?"));
+        CImFileFialog(const std::string& _rTitle, const std::regex& _rFilter = std::regex(".*.[]?"));
 
         void SetToCurrentPath();
 
