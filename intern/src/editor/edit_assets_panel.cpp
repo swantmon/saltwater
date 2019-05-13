@@ -81,163 +81,159 @@ namespace GUI
 
         ImGui::Text(m_CurrentPath.string().c_str());
 
-        ImGui::BeginChild("Directories", ImVec2(250, 350), true, ImGuiWindowFlags_HorizontalScrollbar);
+        ImGui::BeginChild("Directories", ImVec2(250, 0), true, ImGuiWindowFlags_HorizontalScrollbar);
 
-        if (ImGui::TreeNodeEx("Directories", ImGuiTreeNodeFlags_DefaultOpen))
+        if (ImGui::Selectable("..", false, 0, ImVec2(ImGui::GetWindowContentRegionWidth(), 0)))
         {
-            if (ImGui::Selectable("..", false, 0, ImVec2(ImGui::GetWindowContentRegionWidth(), 0)))
-            {
-                DoGoUp = true;
-            }
-
-            for (auto& p : m_Directories)
-            {
-                if (ImGui::Selectable(p.c_str(), false, 0, ImVec2(ImGui::GetWindowContentRegionWidth(), 0)))
-                {
-                    GoDownString = p;
-                }
-            }
-
-            ImGui::TreePop();
+            DoGoUp = true;
         }
+
+        for (auto& p : m_Directories)
+        {
+            if (ImGui::Selectable(p.c_str(), false, 0, ImVec2(ImGui::GetWindowContentRegionWidth(), 0)))
+            {
+                GoDownString = p;
+            }
+        }
+
         ImGui::EndChild();
 
         ImGui::SameLine();
+
+        std::string Header;
+
+        ImGui::BeginChild("Files", ImVec2(0, 0), true, ImGuiWindowFlags_HorizontalScrollbar);
+
+        ImGui::Columns(3);
+
+        switch (m_Sorter.m_SortModeName)
         {
-            std::string Header;
+        case UNSORTED:
+            Header = "  File";
+            break;
+        case SORT_DOWN:
+            Header = "v File";
+            break;
+        case SORT_UP:
+            Header = "^ File";
+            break;
+        }
 
-            ImGui::BeginChild("Files", ImVec2(500, 350), true, ImGuiWindowFlags_HorizontalScrollbar);
-            ImGui::Columns(3);
-
+        if (ImGui::Selectable(Header.c_str()))
+        {
             switch (m_Sorter.m_SortModeName)
             {
             case UNSORTED:
-                Header = "  File";
+                m_Sorter.m_SortModeName = SORT_DOWN;
                 break;
             case SORT_DOWN:
-                Header = "v File";
+                m_Sorter.m_SortModeName = SORT_UP;
                 break;
             case SORT_UP:
-                Header = "^ File";
+                m_Sorter.m_SortModeName = UNSORTED;
                 break;
             }
 
-            if (ImGui::Selectable(Header.c_str()))
-            {
-                switch (m_Sorter.m_SortModeName)
-                {
-                case UNSORTED:
-                    m_Sorter.m_SortModeName = SORT_DOWN;
-                    break;
-                case SORT_DOWN:
-                    m_Sorter.m_SortModeName = SORT_UP;
-                    break;
-                case SORT_UP:
-                    m_Sorter.m_SortModeName = UNSORTED;
-                    break;
-                }
+            m_Sorter.m_SortModeSize = UNSORTED;
+            m_Sorter.m_SortModeDate = UNSORTED;
 
-                m_Sorter.m_SortModeSize = UNSORTED;
-                m_Sorter.m_SortModeDate = UNSORTED;
+            ClearCache();
+        }
 
-                ClearCache();
-            }
+        ImGui::NextColumn();
 
-            ImGui::NextColumn();
+        switch (m_Sorter.m_SortModeSize)
+        {
+        case UNSORTED:
+            Header = "  Size";
+            break;
+        case SORT_DOWN:
+            Header = "v Size";
+            break;
+        case SORT_UP:
+            Header = "^ Size";
+            break;
+        }
 
+        if (ImGui::Selectable(Header.c_str()))
+        {
             switch (m_Sorter.m_SortModeSize)
             {
             case UNSORTED:
-                Header = "  Size";
+                m_Sorter.m_SortModeSize = SORT_DOWN;
                 break;
             case SORT_DOWN:
-                Header = "v Size";
+                m_Sorter.m_SortModeSize = SORT_UP;
                 break;
             case SORT_UP:
-                Header = "^ Size";
+                m_Sorter.m_SortModeSize = UNSORTED;
                 break;
             }
+            m_Sorter.m_SortModeName = UNSORTED;
+            m_Sorter.m_SortModeDate = UNSORTED;
+            ClearCache();
+        }
+        ImGui::NextColumn();
 
-            if (ImGui::Selectable(Header.c_str()))
-            {
-                switch (m_Sorter.m_SortModeSize)
-                {
-                case UNSORTED:
-                    m_Sorter.m_SortModeSize = SORT_DOWN;
-                    break;
-                case SORT_DOWN:
-                    m_Sorter.m_SortModeSize = SORT_UP;
-                    break;
-                case SORT_UP:
-                    m_Sorter.m_SortModeSize = UNSORTED;
-                    break;
-                }
-                m_Sorter.m_SortModeName = UNSORTED;
-                m_Sorter.m_SortModeDate = UNSORTED;
-                ClearCache();
-            }
-            ImGui::NextColumn();
+        switch (m_Sorter.m_SortModeDate)
+        {
+        case UNSORTED:
+            Header = "  Date & Time";
+            break;
+        case SORT_DOWN:
+            Header = "v Date & Time";
+            break;
+        case SORT_UP:
+            Header = "^ Date & Time";
+            break;
+        }
 
+        if (ImGui::Selectable(Header.c_str()))
+        {
             switch (m_Sorter.m_SortModeDate)
             {
             case UNSORTED:
-                Header = "  Date & Time";
+                m_Sorter.m_SortModeDate = SORT_DOWN;
                 break;
             case SORT_DOWN:
-                Header = "v Date & Time";
+                m_Sorter.m_SortModeDate = SORT_UP;
                 break;
             case SORT_UP:
-                Header = "^ Date & Time";
+                m_Sorter.m_SortModeDate = UNSORTED;
                 break;
             }
+            m_Sorter.m_SortModeName = UNSORTED;
+            m_Sorter.m_SortModeSize = UNSORTED;
 
-            if (ImGui::Selectable(Header.c_str()))
-            {
-                switch (m_Sorter.m_SortModeDate)
-                {
-                case UNSORTED:
-                    m_Sorter.m_SortModeDate = SORT_DOWN;
-                    break;
-                case SORT_DOWN:
-                    m_Sorter.m_SortModeDate = SORT_UP;
-                    break;
-                case SORT_UP:
-                    m_Sorter.m_SortModeDate = UNSORTED;
-                    break;
-                }
-                m_Sorter.m_SortModeName = UNSORTED;
-                m_Sorter.m_SortModeSize = UNSORTED;
-
-                ClearCache();
-            }
-
-            ImGui::NextColumn();
-            ImGui::Separator();
-
-            for (auto& rCurrentFile : m_Files)
-            {
-                std::string label = std::string("##") + rCurrentFile.m_Filename;
-
-                if (ImGui::Selectable(label.c_str(), rCurrentFile.m_Selected, ImGuiSelectableFlags_SpanAllColumns))
-                {
-                    for (auto& rFile : m_Files) rFile.m_Selected = false;
-
-                    rCurrentFile.m_Selected = true;
-                }
-
-                ImGui::SameLine();
-                ImGui::Text(rCurrentFile.m_Filename.c_str());
-                ImGui::NextColumn();
-                ImGui::Text(std::to_string(rCurrentFile.m_Size).c_str());
-                ImGui::NextColumn();
-                ImGui::Text(rCurrentFile.m_DateTime.c_str());
-                ImGui::NextColumn();
-
-                if (rCurrentFile.m_Selected) pSelectedFile = &rCurrentFile;
-            }
-
-            ImGui::EndChild();
+            ClearCache();
         }
+
+        ImGui::NextColumn();
+        ImGui::Separator();
+
+        for (auto& rCurrentFile : m_Files)
+        {
+            std::string label = std::string("##") + rCurrentFile.m_Filename;
+
+            if (ImGui::Selectable(label.c_str(), rCurrentFile.m_Selected, ImGuiSelectableFlags_SpanAllColumns))
+            {
+                for (auto& rFile : m_Files) rFile.m_Selected = false;
+
+                rCurrentFile.m_Selected = true;
+            }
+
+            ImGui::SameLine();
+            ImGui::Text(rCurrentFile.m_Filename.c_str());
+            ImGui::NextColumn();
+            ImGui::Text(std::to_string(rCurrentFile.m_Size).c_str());
+            ImGui::NextColumn();
+            ImGui::Text(rCurrentFile.m_DateTime.c_str());
+            ImGui::NextColumn();
+
+            if (rCurrentFile.m_Selected) pSelectedFile = &rCurrentFile;
+        }
+
+        ImGui::EndChild();
 
         std::string SelectedFileString;
         bool gotSelected = pSelectedFile;
