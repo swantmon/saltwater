@@ -114,7 +114,7 @@ namespace
         Base::CInputEvent::EKey ConvertSDLKey(const SDL_Event& _rSDLEvent);
         Base::CInputEvent::EKey ConvertSDLAxis(const SDL_Event& _rSDLEvent);
 
-		void ToggleFullscreen();
+		void ToggleFullscreen(bool _Faked);
     };
 } // namespace 
 
@@ -470,6 +470,7 @@ namespace
             Gui::EventHandler::OnEvent(Event);
             break;
         case SDL_WINDOWEVENT_RESIZED:
+        case SDL_WINDOWEVENT_SIZE_CHANGED:
             int WindowWidth;
             int WindowHeight;
 
@@ -502,7 +503,9 @@ namespace
 
             Gui::EventHandler::OnEvent(Event);
 
-			if ((Mod & KMOD_ALT) != 0 && Key == SDLK_RETURN) ToggleFullscreen();
+            
+            if ((Mod & KMOD_ALT) != 0 && (Mod & KMOD_SHIFT) != 0 && Key == SDLK_RETURN) ToggleFullscreen(false);
+            else if ((Mod & KMOD_ALT) != 0 && Key == SDLK_RETURN) ToggleFullscreen(true);
             break;
         case SDL_KEYUP:
             Key = _rSDLEvent.key.keysym.sym;
@@ -700,7 +703,7 @@ namespace
 
 	// -----------------------------------------------------------------------------
 
-	void CEditorGui::ToggleFullscreen()
+	void CEditorGui::ToggleFullscreen(bool _Faked)
 	{
 		if (m_IsFullscreen)
 		{
@@ -708,7 +711,8 @@ namespace
 		}
 		else
 		{
-			SDL_SetWindowFullscreen(m_pWindow, SDL_WINDOW_FULLSCREEN);
+            if (_Faked) SDL_SetWindowFullscreen(m_pWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
+            else SDL_SetWindowFullscreen(m_pWindow, SDL_WINDOW_FULLSCREEN);
 		}
 
 		m_IsFullscreen = !m_IsFullscreen;
