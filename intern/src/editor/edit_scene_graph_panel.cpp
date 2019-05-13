@@ -56,7 +56,7 @@ namespace GUI
 
                 auto pHierarchyFacet = pSibling->GetHierarchyFacet();
 
-                if (pHierarchyFacet->GetFirstChild() != 0)
+                if (pHierarchyFacet->GetFirstChild() != nullptr)
                 {
                     ++ _rDepth;
 
@@ -80,7 +80,7 @@ namespace GUI
 
             Dt::CEntity* pEntity = &*CurrentEntity;
 
-            if (pHierarchyFacet->GetParent() == 0)
+            if (pHierarchyFacet->GetParent() == nullptr)
             {
                 RecursiveTree(pEntity, CurrentDepth);
             }
@@ -115,7 +115,7 @@ namespace GUI
 
             auto pHierarchyFacet = pEntity->GetHierarchyFacet();
 
-            if (pHierarchyFacet->GetFirstChild() != 0)
+            if (pHierarchyFacet->GetFirstChild() != nullptr)
             {
                 char* Identifier = m_SelectionState[CurrentID] ? "+" : "-";
 
@@ -127,7 +127,7 @@ namespace GUI
                 ImGui::SameLine();
             }
 
-            if (pHierarchyFacet->GetFirstChild() == 0)
+            if (pHierarchyFacet->GetFirstChild() == nullptr)
             {
                 ImGui::Indent();
             }
@@ -151,7 +151,7 @@ namespace GUI
                 ImGui::EndPopup();
             }
 
-            if (pHierarchyFacet->GetFirstChild() == 0)
+            if (pHierarchyFacet->GetFirstChild() == nullptr)
             {
                 ImGui::Unindent();
             }

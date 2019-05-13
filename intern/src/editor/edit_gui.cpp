@@ -12,6 +12,7 @@
 #include "editor/edit_infos_panel.h"
 #include "editor/edit_inspector_panel.h"
 #include "editor/edit_scene_graph_panel.h"
+#include "editor/edit_toolbar_panel.h"
 
 #include "editor/imgui/imgui.h"
 #include "editor/imgui/imgui_impl_opengl.h"
@@ -73,6 +74,7 @@ namespace
             SceneGraph,
             Infos,
             Console,
+            Toolbar,
             NumberOfPanels,
         };
 
@@ -81,7 +83,8 @@ namespace
             &GUI::CInspectorPanel::GetInstance(),
             &GUI::CSceneGraphPanel::GetInstance(),
             &GUI::CInfosPanel::GetInstance(),
-            &GUI::CConsolePanel::GetInstance()
+            &GUI::CConsolePanel::GetInstance(),
+            &GUI::CToolbarPanel::GetInstance()
         };
 
     private:
@@ -516,7 +519,7 @@ namespace
 
     void CEditorGui::ProcessMouseEvents(const SDL_Event& _rSDLEvent)
     {
-        if (ImGui::GetIO().WantCaptureMouse) return;
+        if (!ImGuizmo::IsOver() && ImGui::GetIO().WantCaptureMouse) return;
 
         using Base::CInputEvent;
 

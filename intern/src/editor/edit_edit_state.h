@@ -21,7 +21,35 @@ namespace Edit
         
         static CEditState& GetInstance();
 
+    public:
+
+        enum EOperation
+        {
+            Hand,
+            Translate,
+            Rotate,
+            Scale
+        };
+
+        enum EMode
+        {
+            Local,
+            World
+        };
+
+    public:
+
+        void SetOperation(EOperation _Operation);
+        EOperation GetOperation() const;
+
+        void SetMode(EMode _Mode);
+        EMode GetMode() const;
+
     private:
+
+        EOperation m_CurrentOperation;
+
+        EMode m_CurrentMode;
 
         CState::EStateType m_Action;
 
@@ -36,9 +64,9 @@ namespace Edit
         
     private:
         
-        virtual CState::EStateType InternOnEnter();
-        virtual CState::EStateType InternOnLeave();
-        virtual CState::EStateType InternOnRun();
+        CState::EStateType InternOnEnter() override;
+        CState::EStateType InternOnLeave() override;
+        CState::EStateType InternOnRun() override;
 
     private:
 
