@@ -159,6 +159,12 @@
     <ClCompile Include="..\..\..\src\editor\edit_toolbar_panel.cpp">
       <Filter>gui\panels</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\editor\imgui\extensions\ImFiledialog.cpp">
+      <Filter>gui\native\extensions</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor\edit_script_camera_control.cpp">
+      <Filter>gui\objects\components\scripts</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\editor\edit_edit_state.h">
@@ -291,6 +297,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\editor\edit_toolbar_panel.h">
       <Filter>gui\panels</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor\imgui\extensions\ImFiledialog.h">
+      <Filter>gui\native\extensions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor\edit_script_camera_control.h">
+      <Filter>gui\objects\components\scripts</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
