@@ -18,7 +18,9 @@
 #include "editor/imgui/imgui_impl_opengl.h"
 #include "editor/imgui/imgui_impl_sdl.h"
 #include "editor/imgui/imgui_internal.h"
+
 #include "editor/imgui/extensions/ImGuizmo.h"
+#include "editor/imgui/extensions/ImFiledialog.h"
 
 #include "engine/core/core_asset_manager.h"
 #include "engine/core/core_console.h"
@@ -27,6 +29,8 @@
 
 #include "engine/data/data_entity_manager.h"
 #include "engine/data/data_map.h"
+#include "engine/data/data_mesh_component.h"
+#include "engine/data/data_component_manager.h"
 
 #include "engine/engine.h"
 
@@ -102,6 +106,9 @@ namespace
         bool m_ShowGUI;
 		bool m_IsFullscreen;
 
+        bool m_OpenImportDialog;
+        Edit::FileDialog m_ImportModelDialog;
+
         Engine::CEventDelegates::HandleType m_GfxOnRenderGUIDelegate;
 
     private:
@@ -123,10 +130,16 @@ namespace
 namespace
 {
     CEditorGui::CEditorGui()
-        : m_EditWindowID(0)
-        , m_pGamePad    (nullptr)
-        , m_CloseWindow (false)
-    {
+        : m_EditWindowID       (0)
+        , m_pGamePad           (nullptr)
+        , m_pWindow            (nullptr)
+        , m_AnalogStickDeadZone(0)
+        , m_CloseWindow        (false)
+        , m_ShowGUI            (true)
+        , m_IsFullscreen       (false)
+        , m_OpenImportDialog   (false)
+        , m_ImportModelDialog  ("Import Model...", std::regex(".*.(obj|dae|fbx)"))
+    {                          
     }
     
     // -----------------------------------------------------------------------------
@@ -379,6 +392,88 @@ namespace
                     Dt::EntityManager::MarkEntityAsDirty(rNewEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
                 }
 
+                if (ImGui::BeginMenu("Templates"))
+                {
+                    if (ImGui::MenuItem("Sphere"))
+                    {
+                        Dt::SEntityDescriptor EntityDesc;
+
+                        EntityDesc.m_EntityCategory = Dt::SEntityCategory::Static;
+                        EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
+
+                        Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+
+                        rEntity.SetName("New sphere");
+
+                        // -----------------------------------------------------------------------------
+
+                        auto pMeshComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CMeshComponent>();
+
+                        pMeshComponent->SetMeshType(Dt::CMeshComponent::Sphere);
+
+                        rEntity.AttachComponent(pMeshComponent);
+
+                        Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pMeshComponent, Dt::CMeshComponent::DirtyCreate);
+
+                        Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+                    }
+
+                    if (ImGui::MenuItem("Box"))
+                    {
+                        Dt::SEntityDescriptor EntityDesc;
+
+                        EntityDesc.m_EntityCategory = Dt::SEntityCategory::Static;
+                        EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
+
+                        Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+
+                        rEntity.SetName("New box");
+
+                        // -----------------------------------------------------------------------------
+
+                        auto pMeshComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CMeshComponent>();
+
+                        pMeshComponent->SetMeshType(Dt::CMeshComponent::Box);
+
+                        rEntity.AttachComponent(pMeshComponent);
+
+                        Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pMeshComponent, Dt::CMeshComponent::DirtyCreate);
+
+                        Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+                    }
+
+                    if (ImGui::MenuItem("Cone"))
+                    {
+                        Dt::SEntityDescriptor EntityDesc;
+
+                        EntityDesc.m_EntityCategory = Dt::SEntityCategory::Static;
+                        EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
+
+                        Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+
+                        rEntity.SetName("New cone");
+
+                        // -----------------------------------------------------------------------------
+
+                        auto pMeshComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CMeshComponent>();
+
+                        pMeshComponent->SetMeshType(Dt::CMeshComponent::Cone);
+
+                        rEntity.AttachComponent(pMeshComponent);
+
+                        Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pMeshComponent, Dt::CMeshComponent::DirtyCreate);
+
+                        Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+                    }
+
+                    ImGui::EndMenu();
+                }
+
+                if (ImGui::MenuItem("Import Model"))
+                {
+                    m_ImportModelDialog.Open();
+                }
+
                 ImGui::EndMenu();
             }
 
@@ -413,6 +508,32 @@ namespace
         for (auto pPanel : m_Panels)
         {
             if (pPanel->IsVisible()) pPanel->Render();
+        }
+
+        // -----------------------------------------------------------------------------
+        // Dialogs
+        // -----------------------------------------------------------------------------
+        if (m_ImportModelDialog.Draw())
+        {
+            const auto& rSelectedFiles = m_ImportModelDialog.GetSelectedFiles();
+
+            for (const auto& rSelectedFile : rSelectedFiles)
+            {
+                auto Entities = Dt::EntityManager::CreateEntitiesFromScene(rSelectedFile);
+
+                Dt::SEntityDescriptor EntityDesc;
+
+                EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
+                EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
+
+                Dt::CEntity& rNewModel = Dt::EntityManager::CreateEntity(EntityDesc);
+
+                for (auto& rEntity : Entities) rNewModel.Attach(*rEntity);
+
+                rNewModel.SetName("New model");
+
+                Dt::EntityManager::MarkEntityAsDirty(rNewModel, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+            }
         }
     }
 
