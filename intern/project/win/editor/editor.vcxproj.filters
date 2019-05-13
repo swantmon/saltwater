@@ -165,6 +165,9 @@
     <ClCompile Include="..\..\..\src\editor\edit_script_camera_control.cpp">
       <Filter>gui\objects\components\scripts</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\editor\edit_assets_panel.cpp">
+      <Filter>gui\panels</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\editor\edit_edit_state.h">
@@ -303,6 +306,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\editor\edit_script_camera_control.h">
       <Filter>gui\objects\components\scripts</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor\edit_assets_panel.h">
+      <Filter>gui\panels</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

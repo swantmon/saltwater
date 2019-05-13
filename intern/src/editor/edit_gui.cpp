@@ -7,6 +7,7 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
+#include "editor/edit_assets_panel.h"
 #include "editor/edit_console_panel.h"
 #include "editor/edit_gui.h"
 #include "editor/edit_infos_panel.h"
@@ -76,6 +77,7 @@ namespace
 
         enum EPanels
         {
+            Assets,
             Inspector,
             SceneGraph,
             Infos,
@@ -86,6 +88,7 @@ namespace
 
         const std::array<Edit::GUI::IPanel*, NumberOfPanels> m_Panels = 
         {
+            &GUI::CAssetsPanel::GetInstance(),
             &GUI::CInspectorPanel::GetInstance(),
             &GUI::CSceneGraphPanel::GetInstance(),
             &GUI::CInfosPanel::GetInstance(),
