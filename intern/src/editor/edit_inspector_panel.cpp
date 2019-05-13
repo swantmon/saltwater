@@ -53,8 +53,9 @@ namespace GUI
         ImGui::SetNextWindowSize(ImVec2(300, 400), ImGuiCond_FirstUseEver);
 
         int IndexID = 0;
-        Edit::CGUIFactory& rFactory = Edit::CGUIFactory::GetInstance();
-        Edit::CComponentFactory& rComponentFactory = Edit::CComponentFactory::GetInstance();
+
+        auto& rFactory = Edit::CGUIFactory::GetInstance();
+        auto& rComponentFactory = Edit::CComponentFactory::GetInstance();
 
         ImGui::Begin("Inspector", &m_IsVisible);
 

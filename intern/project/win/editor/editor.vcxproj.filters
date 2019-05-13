@@ -40,6 +40,9 @@
     <Filter Include="gui\objects\facets">
       <UniqueIdentifier>{84953982-0877-4423-b436-17d1739b086a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="gui\native\extensions">
+      <UniqueIdentifier>{1503ff86-efa6-4c04-9742-127169b967e8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\editor\edit_edit_state.cpp">
@@ -148,6 +151,12 @@
       <Filter>gui\objects</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\editor\edit_console_panel.cpp">
+      <Filter>gui\panels</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor\imgui\extensions\ImGuizmo.cpp">
+      <Filter>gui\native\extensions</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor\edit_toolbar_panel.cpp">
       <Filter>gui\panels</Filter>
     </ClCompile>
   </ItemGroup>
@@ -275,6 +284,12 @@
       <Filter>gui\objects</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\editor\edit_console_panel.h">
+      <Filter>gui\panels</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor\imgui\extensions\ImGuizmo.h">
+      <Filter>gui\native\extensions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor\edit_toolbar_panel.h">
       <Filter>gui\panels</Filter>
     </ClInclude>
   </ItemGroup>

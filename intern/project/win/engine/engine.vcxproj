@@ -73,6 +73,7 @@
     <ClCompile Include="..\..\..\src\engine\graphic\gfx_debug.cpp" />
     <ClCompile Include="..\..\..\src\engine\graphic\gfx_debug_renderer.cpp" />
     <ClCompile Include="..\..\..\src\engine\graphic\gfx_depth_stencil_state.cpp" />
+    <ClCompile Include="..\..\..\src\engine\graphic\gfx_highlight_renderer.cpp" />
     <ClCompile Include="..\..\..\src\engine\graphic\gfx_pipeline.cpp" />
     <ClCompile Include="..\..\..\src\engine\graphic\gfx_fog_renderer.cpp" />
     <ClCompile Include="..\..\..\src\engine\graphic\gfx_histogram_renderer.cpp" />
@@ -192,6 +193,7 @@
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_debug_renderer.h" />
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_depth_description.h" />
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_depth_stencil_state.h" />
+    <ClInclude Include="..\..\..\src\engine\graphic\gfx_highlight_renderer.h" />
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_pipeline.h" />
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_fog_renderer.h" />
     <ClInclude Include="..\..\..\src\engine\graphic\gfx_graphics_info.h" />

@@ -6,11 +6,13 @@
 #include "editor/edit_inspector_panel.h"
 
 #include "engine/camera/cam_control_manager.h"
+#include "engine/camera/cam_editor_control.h"
 
 #include "engine/data/data_entity.h"
 #include "engine/data/data_entity_manager.h"
 
 #include "engine/graphic/gfx_selection_renderer.h"
+#include "engine/graphic/gfx_highlight_renderer.h"
 
 #include "engine/gui/gui_input_manager.h"
 #include "engine/gui/gui_event_handler.h"
@@ -30,7 +32,10 @@ namespace Edit
 namespace Edit
 {
     CEditState::CEditState()
-        : m_Action(CState::Edit)
+        : m_CurrentOperation(Hand)
+        , m_CurrentMode     (World)
+        , m_Action          (CState::Edit)
+        , m_pSelectionTicket(nullptr)
     {
     }
     
@@ -39,6 +44,34 @@ namespace Edit
     CEditState::~CEditState()
     {
         
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CEditState::SetOperation(EOperation _Operation)
+    {
+        m_CurrentOperation = _Operation;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CEditState::EOperation CEditState::GetOperation() const
+    {
+        return m_CurrentOperation;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CEditState::SetMode(EMode _Mode)
+    {
+        m_CurrentMode = _Mode;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CEditState::EMode CEditState::GetMode() const
+    {
+        return m_CurrentMode;
     }
     
     // -----------------------------------------------------------------------------
@@ -53,7 +86,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Acquire an selection ticket at selection renderer
         // -----------------------------------------------------------------------------
-        assert(m_pSelectionTicket == 0);
+        assert(m_pSelectionTicket == nullptr);
 
         m_pSelectionTicket = &Gfx::SelectionRenderer::AcquireTicket(-1, -1, 1, 1, Gfx::SPickFlag::Everything);
         
@@ -74,12 +107,12 @@ namespace Edit
         // -----------------------------------------------------------------------------
         Gfx::SelectionRenderer::Clear(*m_pSelectionTicket);
 
-        m_pSelectionTicket = 0;
+        m_pSelectionTicket = nullptr;
 
         // -----------------------------------------------------------------------------
         // Unselect entity
         // -----------------------------------------------------------------------------
-        Gfx::SelectionRenderer::UnselectEntity();
+        Gfx::HighlightRenderer::Reset();
 
         Edit::GUI::CInspectorPanel::GetInstance().InspectEntity(Dt::CEntity::s_InvalidID);
 
@@ -111,7 +144,7 @@ namespace Edit
         // -----------------------------------------------------------------------------
         // Selection
         // -----------------------------------------------------------------------------
-        assert(m_pSelectionTicket != 0);
+        assert(m_pSelectionTicket != nullptr);
 
         Gfx::CSelectionTicket& rSelectionTicket = *m_pSelectionTicket;
 
@@ -121,13 +154,13 @@ namespace Edit
             {
                 auto pEntity = static_cast<Dt::CEntity*>(rSelectionTicket.m_pObject);
 
-                Gfx::SelectionRenderer::SelectEntity(pEntity->GetID());
+                Gfx::HighlightRenderer::HighlightEntity(pEntity->GetID());
 
                 Edit::GUI::CInspectorPanel::GetInstance().InspectEntity(pEntity->GetID());
             }
             else
             {
-                Gfx::SelectionRenderer::UnselectEntity();
+                Gfx::HighlightRenderer::Reset();
 
                 Edit::GUI::CInspectorPanel::GetInstance().InspectEntity(Dt::CEntity::s_InvalidID);
             }
@@ -146,9 +179,19 @@ namespace Edit
         }
         else if (_rInputEvent.GetType() == Base::CInputEvent::Input)
         {
-            if (_rInputEvent.GetAction() == Base::CInputEvent::MouseLeftReleased && m_pSelectionTicket != 0)
+            if (_rInputEvent.GetAction() == Base::CInputEvent::MouseLeftReleased && m_pSelectionTicket != nullptr)
             {
                 Gfx::SelectionRenderer::PushPick(*m_pSelectionTicket, _rInputEvent.GetLocalCursorPosition());
+            }
+
+            auto EditorControl = static_cast<Cam::CEditorControl&>(Cam::ControlManager::GetActiveControl());
+            
+            if (_rInputEvent.GetAction() == Base::CInputEvent::KeyReleased && !EditorControl.IsFlying())
+            {
+                if (_rInputEvent.GetKey() == 'q')      m_CurrentOperation = EOperation::Hand;
+                else if (_rInputEvent.GetKey() == 'w') m_CurrentOperation = EOperation::Translate;
+                else if (_rInputEvent.GetKey() == 'e') m_CurrentOperation = EOperation::Rotate;
+                else if (_rInputEvent.GetKey() == 'r') m_CurrentOperation = EOperation::Scale;
             }
         }
     }

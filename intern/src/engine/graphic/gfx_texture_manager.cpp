@@ -1908,8 +1908,6 @@ namespace
         {
             GL_READ_WRITE,
             GL_READ_ONLY,
-            GL_READ_ONLY,
-            GL_READ_ONLY,
         };
 
         return s_NativeUsage[_Usage];

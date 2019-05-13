@@ -12,7 +12,7 @@
 #include "engine/data/data_entity_manager.h"
 #include "engine/data/data_hierarchy_facet.h"
 
-#include "engine/graphic/gfx_selection_renderer.h"
+#include "engine/graphic/gfx_highlight_renderer.h"
 
 #include "imgui/imgui.h"
 
@@ -56,7 +56,7 @@ namespace GUI
 
                 auto pHierarchyFacet = pSibling->GetHierarchyFacet();
 
-                if (pHierarchyFacet->GetFirstChild() != 0)
+                if (pHierarchyFacet->GetFirstChild() != nullptr)
                 {
                     ++ _rDepth;
 
@@ -80,7 +80,7 @@ namespace GUI
 
             Dt::CEntity* pEntity = &*CurrentEntity;
 
-            if (pHierarchyFacet->GetParent() == 0)
+            if (pHierarchyFacet->GetParent() == nullptr)
             {
                 RecursiveTree(pEntity, CurrentDepth);
             }
@@ -115,7 +115,7 @@ namespace GUI
 
             auto pHierarchyFacet = pEntity->GetHierarchyFacet();
 
-            if (pHierarchyFacet->GetFirstChild() != 0)
+            if (pHierarchyFacet->GetFirstChild() != nullptr)
             {
                 char* Identifier = m_SelectionState[CurrentID] ? "+" : "-";
 
@@ -127,7 +127,7 @@ namespace GUI
                 ImGui::SameLine();
             }
 
-            if (pHierarchyFacet->GetFirstChild() == 0)
+            if (pHierarchyFacet->GetFirstChild() == nullptr)
             {
                 ImGui::Indent();
             }
@@ -138,7 +138,7 @@ namespace GUI
             {
                 CInspectorPanel::GetInstance().InspectEntity(CurrentID);
 
-                Gfx::SelectionRenderer::SelectEntity(CurrentID);
+                Gfx::HighlightRenderer::HighlightEntity(CurrentID);
             }
 
             if (ImGui::BeginPopupContextItem())
@@ -151,7 +151,7 @@ namespace GUI
                 ImGui::EndPopup();
             }
 
-            if (pHierarchyFacet->GetFirstChild() == 0)
+            if (pHierarchyFacet->GetFirstChild() == nullptr)
             {
                 ImGui::Unindent();
             }

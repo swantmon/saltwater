@@ -12,11 +12,13 @@
 #include "editor/edit_infos_panel.h"
 #include "editor/edit_inspector_panel.h"
 #include "editor/edit_scene_graph_panel.h"
+#include "editor/edit_toolbar_panel.h"
 
 #include "editor/imgui/imgui.h"
 #include "editor/imgui/imgui_impl_opengl.h"
 #include "editor/imgui/imgui_impl_sdl.h"
 #include "editor/imgui/imgui_internal.h"
+#include "editor/imgui/extensions/ImGuizmo.h"
 
 #include "engine/core/core_asset_manager.h"
 #include "engine/core/core_console.h"
@@ -30,6 +32,7 @@
 
 #include "engine/graphic/gfx_pipeline.h"
 #include "engine/graphic/gfx_performance.h"
+#include "engine/graphic/gfx_shader_manager.h"
 
 #include "engine/gui/gui_event_handler.h"
 
@@ -72,6 +75,7 @@ namespace
             SceneGraph,
             Infos,
             Console,
+            Toolbar,
             NumberOfPanels,
         };
 
@@ -80,7 +84,8 @@ namespace
             &GUI::CInspectorPanel::GetInstance(),
             &GUI::CSceneGraphPanel::GetInstance(),
             &GUI::CInfosPanel::GetInstance(),
-            &GUI::CConsolePanel::GetInstance()
+            &GUI::CConsolePanel::GetInstance(),
+            &GUI::CToolbarPanel::GetInstance()
         };
 
     private:
@@ -111,6 +116,7 @@ namespace
         Base::CInputEvent::EKey ConvertSDLAxis(const SDL_Event& _rSDLEvent);
 
 		void ToggleFullscreen();
+        void ToggleGUI();
     };
 } // namespace 
 
@@ -118,8 +124,8 @@ namespace
 {
     CEditorGui::CEditorGui()
         : m_EditWindowID(0)
-        , m_pGamePad(nullptr)
-        , m_CloseWindow(false)
+        , m_pGamePad    (nullptr)
+        , m_CloseWindow (false)
     {
     }
     
@@ -338,6 +344,8 @@ namespace
 
         ImGui::NewFrame();
 
+        ImGuizmo::BeginFrame();
+
         if (!m_ShowGUI)
         {
             return;
@@ -369,6 +377,16 @@ namespace
                     rNewEntity.SetName("New entity");
 
                     Dt::EntityManager::MarkEntityAsDirty(rNewEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+                }
+
+                ImGui::EndMenu();
+            }
+
+            if (ImGui::BeginMenu("Rendering"))
+            {
+                if (ImGui::MenuItem("Reload All Shader"))
+                {
+                    Gfx::ShaderManager::ReloadAllShaders();
                 }
 
                 ImGui::EndMenu();
@@ -464,6 +482,7 @@ namespace
             Gui::EventHandler::OnEvent(Event);
             break;
         case SDL_WINDOWEVENT_RESIZED:
+        case SDL_WINDOWEVENT_SIZE_CHANGED:
             int WindowWidth;
             int WindowHeight;
 
@@ -496,7 +515,9 @@ namespace
 
             Gui::EventHandler::OnEvent(Event);
 
-			if ((Mod & KMOD_ALT) != 0 && Key == SDLK_RETURN) ToggleFullscreen();
+            
+            if ((Mod & KMOD_ALT) != 0 && Key == SDLK_RETURN) ToggleFullscreen();
+            else if ((Mod & KMOD_ALT) != 0 && Key == SDLK_HASH) ToggleGUI();
             break;
         case SDL_KEYUP:
             Key = _rSDLEvent.key.keysym.sym;
@@ -513,7 +534,7 @@ namespace
 
     void CEditorGui::ProcessMouseEvents(const SDL_Event& _rSDLEvent)
     {
-        if (ImGui::GetIO().WantCaptureMouse) return;
+        if (!ImGuizmo::IsOver() && ImGui::GetIO().WantCaptureMouse) return;
 
         using Base::CInputEvent;
 
@@ -702,11 +723,18 @@ namespace
 		}
 		else
 		{
-			SDL_SetWindowFullscreen(m_pWindow, SDL_WINDOW_FULLSCREEN);
+            SDL_SetWindowFullscreen(m_pWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
 		}
 
 		m_IsFullscreen = !m_IsFullscreen;
 	}
+
+    // -----------------------------------------------------------------------------
+
+    void CEditorGui::ToggleGUI()
+    {
+        m_ShowGUI = !m_ShowGUI;
+    }
 } // namespace 
 
 namespace Edit
