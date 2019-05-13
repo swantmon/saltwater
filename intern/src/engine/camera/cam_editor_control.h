@@ -21,6 +21,10 @@ namespace Cam
 
         void SetRotation(const glm::mat3& _rRotationMatrix);
 
+        bool IsFlying();
+
+        bool IsDragging();
+
     private:
 
         static const float s_MoveVelocityBorder[];

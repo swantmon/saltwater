@@ -152,7 +152,7 @@ namespace GUI
         // -----------------------------------------------------------------------------
         ImGuiInputTextCallback TextEditCallback = [](ImGuiInputTextCallbackData* _pData)->int
         {
-            CConsolePanel* pConsole = (CConsolePanel*)_pData->UserData;
+            auto* pConsole = (CConsolePanel*)_pData->UserData;
 
             const auto& rHistory = pConsole->m_History;
             auto& rPositonInHistory = pConsole->m_PositonInHistory;

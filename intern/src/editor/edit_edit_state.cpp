@@ -6,6 +6,7 @@
 #include "editor/edit_inspector_panel.h"
 
 #include "engine/camera/cam_control_manager.h"
+#include "engine/camera/cam_editor_control.h"
 
 #include "engine/data/data_entity.h"
 #include "engine/data/data_entity_manager.h"
@@ -31,7 +32,10 @@ namespace Edit
 namespace Edit
 {
     CEditState::CEditState()
-        : m_Action(CState::Edit)
+        : m_CurrentOperation(Hand)
+        , m_CurrentMode     (World)
+        , m_Action          (CState::Edit)
+        , m_pSelectionTicket(nullptr)
     {
     }
     
@@ -40,6 +44,34 @@ namespace Edit
     CEditState::~CEditState()
     {
         
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CEditState::SetOperation(EOperation _Operation)
+    {
+        m_CurrentOperation = _Operation;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CEditState::EOperation CEditState::GetOperation() const
+    {
+        return m_CurrentOperation;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CEditState::SetMode(EMode _Mode)
+    {
+        m_CurrentMode = _Mode;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CEditState::EMode CEditState::GetMode() const
+    {
+        return m_CurrentMode;
     }
     
     // -----------------------------------------------------------------------------
@@ -150,6 +182,16 @@ namespace Edit
             if (_rInputEvent.GetAction() == Base::CInputEvent::MouseLeftReleased && m_pSelectionTicket != nullptr)
             {
                 Gfx::SelectionRenderer::PushPick(*m_pSelectionTicket, _rInputEvent.GetLocalCursorPosition());
+            }
+
+            auto EditorControl = static_cast<Cam::CEditorControl&>(Cam::ControlManager::GetActiveControl());
+            
+            if (_rInputEvent.GetAction() == Base::CInputEvent::KeyReleased && !EditorControl.IsFlying())
+            {
+                if (_rInputEvent.GetKey() == 'q')      m_CurrentOperation = EOperation::Hand;
+                else if (_rInputEvent.GetKey() == 'w') m_CurrentOperation = EOperation::Translate;
+                else if (_rInputEvent.GetKey() == 'e') m_CurrentOperation = EOperation::Rotate;
+                else if (_rInputEvent.GetKey() == 'r') m_CurrentOperation = EOperation::Scale;
             }
         }
     }

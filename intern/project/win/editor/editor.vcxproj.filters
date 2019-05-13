@@ -156,6 +156,9 @@
     <ClCompile Include="..\..\..\src\editor\imgui\extensions\ImGuizmo.cpp">
       <Filter>gui\native\extensions</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\editor\edit_toolbar_panel.cpp">
+      <Filter>gui\panels</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\editor\edit_edit_state.h">
@@ -285,6 +288,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\editor\imgui\extensions\ImGuizmo.h">
       <Filter>gui\native\extensions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor\edit_toolbar_panel.h">
+      <Filter>gui\panels</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

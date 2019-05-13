@@ -3,12 +3,13 @@
 
 #include "base/base_include_glm.h"
 
+#include "editor/edit_edit_state.h"
+#include "editor/imgui/imgui.h"
+#include "editor/imgui/extensions/ImGuizmo.h"
+
 #include "engine/core/core_console.h"
 
 #include "engine/data/data_transformation_facet.h"
-
-#include "editor/imgui/imgui.h"
-#include "editor/imgui/extensions/ImGuizmo.h"
 
 #include "engine/graphic/gfx_view_manager.h"
 
@@ -24,46 +25,6 @@ namespace Dt
 
             auto ViewMatrix = Camera->GetView()->GetViewMatrix();
             auto ProjMatrix = Camera->GetProjectionMatrix();
-
-            // -----------------------------------------------------------------------------
-            // GUIZMO
-            // -----------------------------------------------------------------------------
-            static ImGuizmo::OPERATION CurrentGizmoOperation(ImGuizmo::ROTATE);
-            static ImGuizmo::MODE CurrentGizmoMode(ImGuizmo::WORLD);
-
-            if (ImGui::RadioButton("Translate", CurrentGizmoOperation == ImGuizmo::TRANSLATE))
-            {
-                CurrentGizmoOperation = ImGuizmo::TRANSLATE;
-            }
-
-            ImGui::SameLine();
-
-            if (ImGui::RadioButton("Rotate", CurrentGizmoOperation == ImGuizmo::ROTATE))
-            {
-                CurrentGizmoOperation = ImGuizmo::ROTATE;
-            }
-
-            ImGui::SameLine();
-
-            if (ImGui::RadioButton("Scale", CurrentGizmoOperation == ImGuizmo::SCALE))
-            {
-                CurrentGizmoOperation = ImGuizmo::SCALE;
-            }
-
-            if (CurrentGizmoOperation != ImGuizmo::SCALE)
-            {
-                if (ImGui::RadioButton("Local", CurrentGizmoMode == ImGuizmo::LOCAL))
-                {
-                    CurrentGizmoMode = ImGuizmo::LOCAL;
-                }
-
-                ImGui::SameLine();
-
-                if (ImGui::RadioButton("World", CurrentGizmoMode == ImGuizmo::WORLD))
-                {
-                    CurrentGizmoMode = ImGuizmo::WORLD;
-                }
-            }
 
             // -----------------------------------------------------------------------------
             // Position
@@ -92,15 +53,50 @@ namespace Dt
             // -----------------------------------------------------------------------------
             // GUIZMO
             // -----------------------------------------------------------------------------
-            glm::mat4 WorldMatrix;
+            auto Operation = Edit::CEditState::GetInstance().GetOperation();
+            auto Mode      = Edit::CEditState::GetInstance().GetMode();
 
-            ImGuizmo::RecomposeMatrixFromComponents(&m_Position.x, &DegreeAngles.x, &m_Scale.x, &WorldMatrix[0][0]);
+            static ImGuizmo::OPERATION CurrentGizmoOperation(ImGuizmo::TRANSLATE);
+            static ImGuizmo::MODE CurrentGizmoMode(ImGuizmo::WORLD);
 
-            ImGuiIO& io = ImGui::GetIO();
-            ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
-            ImGuizmo::Manipulate(&ViewMatrix[0][0], &ProjMatrix[0][0], CurrentGizmoOperation, CurrentGizmoMode, &WorldMatrix[0][0], nullptr, nullptr);
+            switch (Operation)
+            {
+            case Edit::CEditState::Translate:
+                CurrentGizmoOperation = ImGuizmo::TRANSLATE;
+                break;
+            case Edit::CEditState::Rotate:
+                CurrentGizmoOperation = ImGuizmo::ROTATE;
+                break;
+            case Edit::CEditState::Scale:
+                CurrentGizmoOperation = ImGuizmo::SCALE;
+                break;
+            case Edit::CEditState::Hand:
+            default:
+                break;
+            }
 
-            ImGuizmo::DecomposeMatrixToComponents(&WorldMatrix[0][0], &m_Position.x, &DegreeAngles.x, &m_Scale.x);
+            switch (Mode)
+            {
+            case Edit::CEditState::Local:
+                CurrentGizmoMode = ImGuizmo::LOCAL;
+                break;
+            case Edit::CEditState::World:
+            default:
+                CurrentGizmoMode = ImGuizmo::WORLD;
+                break;
+            }
+            if (Operation != Edit::CEditState::Hand)
+            {
+                glm::mat4 WorldMatrix;
+
+                ImGuizmo::RecomposeMatrixFromComponents(&m_Position.x, &DegreeAngles.x, &m_Scale.x, &WorldMatrix[0][0]);
+
+                ImGuiIO& io = ImGui::GetIO();
+                ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
+                ImGuizmo::Manipulate(&ViewMatrix[0][0], &ProjMatrix[0][0], CurrentGizmoOperation, CurrentGizmoMode, &WorldMatrix[0][0], nullptr, nullptr);
+
+                ImGuizmo::DecomposeMatrixToComponents(&WorldMatrix[0][0], &m_Position.x, &DegreeAngles.x, &m_Scale.x);
+            }
 
             // -----------------------------------------------------------------------------
             // Apply rotation
