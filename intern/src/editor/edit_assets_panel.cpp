@@ -41,8 +41,9 @@ namespace Edit
 namespace GUI
 {
     CAssetsPanel::CAssetsPanel()
-        : m_Title("Assets")
-        , m_Regex(".*.[]?")
+        : m_Title    ("Assets")
+        , m_Regex    (".*.[]?")
+        , m_SpaceInfo()
     {
         m_CurrentPath = std::filesystem::current_path();
 
@@ -222,6 +223,15 @@ namespace GUI
                 rCurrentFile.m_Selected = true;
             }
 
+            if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+            {
+                int a = 4;
+
+                ImGui::SetDragDropPayload("ASSETS_DRAGDROP", &a, sizeof(int));
+
+                ImGui::EndDragDropSource();
+            }
+
             ImGui::SameLine();
             ImGui::Text(rCurrentFile.m_Filename.c_str());
             ImGui::NextColumn();
@@ -269,7 +279,6 @@ namespace GUI
 
     void CAssetsPanel::RefreshCache()
     {
-        m_Roots.clear();
         m_Directories.clear();
         m_Files.clear();
 

@@ -96,6 +96,8 @@ namespace GUI
 
         ImGui::Begin("Scene Graph", &m_IsVisible);
 
+        ImGui::BeginChild("SCENE_GRAPH_PANEL_CHILD");
+
         int MaximumDepth = 1000;
 
         for (auto[Depth, pEntity] : m_ItemState)
@@ -194,6 +196,23 @@ namespace GUI
             }
 
             ImGui::PopID();
+        }
+
+        ImGui::EndChild();
+
+        if (ImGui::BeginDragDropTarget())
+        {
+            ImGuiDragDropFlags ImGuiTargetFlags = 0;
+
+            // ImGuiTargetFlags |= ImGuiDragDropFlags_AcceptBeforeDelivery;    // Don't wait until the delivery (release mouse button on a target) to do something
+            // ImGuiTargetFlags |= ImGuiDragDropFlags_AcceptNoDrawDefaultRect; // Don't display the yellow rectangle
+
+            if (const ImGuiPayload* _pPayload = ImGui::AcceptDragDropPayload("ASSETS_DRAGDROP", ImGuiTargetFlags))
+            {
+                int a = 4;
+            }
+
+            ImGui::EndDragDropTarget();
         }
 
         ImGui::End();

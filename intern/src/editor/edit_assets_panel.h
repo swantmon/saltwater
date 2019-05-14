@@ -42,12 +42,6 @@ namespace GUI
 
     private:
 
-        struct SRoot
-        {
-            std::string m_Root;
-            std::string m_Label;
-        };
-
         struct SFile
         {
             std::string m_Filename;
@@ -91,7 +85,6 @@ namespace GUI
         std::string m_Title;
         std::regex m_Regex;
 
-        std::vector<SRoot> m_Roots;
         std::vector<std::string> m_Directories;
         std::vector<SFile> m_Files;
         std::vector<std::string> m_SelectedFiles;
