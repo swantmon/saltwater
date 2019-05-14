@@ -431,9 +431,6 @@ namespace Stereo
         ENGINE_CONSOLE_INFOV("Stereo matching plugin started!");
 
         //---Program Design Setting---
-        m_Is_ARKitData = Core::CProgramParameters::GetInstance().Get("mr:stereo:00_program_design_setting:input_data:arkit", true);
-        m_Is_TestData_MyMMS = Core::CProgramParameters::GetInstance().Get("mr:stereo:00_program_design_setting:input_data:test_mms", false);
-
         m_Is_imwrite = Core::CProgramParameters::GetInstance().Get("mr:stereo:00_program_design_setting:show_result", true);
 
         //---ARKit Data---

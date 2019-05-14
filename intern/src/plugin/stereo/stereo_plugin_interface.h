@@ -64,8 +64,6 @@ namespace Stereo
     //---plugin_stereo---
     private:
         //---Program Design Setting---
-        bool m_Is_ARKitData, m_Is_TestData_MyMMS; // Select Data Set.
-
         bool m_Is_imwrite; // Export Image Result by OpenCV?
 
         //---ARKit Data---
