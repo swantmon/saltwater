@@ -76,7 +76,7 @@ namespace GUI
 
         std::string GoDownString = "";
 
-        SFile* pSelectedFile = nullptr;
+        CFile* pSelectedFile = nullptr;
 
         ImGui::SameLine();
 
@@ -89,11 +89,11 @@ namespace GUI
             DoGoUp = true;
         }
 
-        for (auto& p : m_Directories)
+        for (auto& rCurrentDirectory : m_Directories)
         {
-            if (ImGui::Selectable(p.c_str(), false, 0, ImVec2(ImGui::GetWindowContentRegionWidth(), 0)))
+            if (ImGui::Selectable(rCurrentDirectory.c_str(), false, 0, ImVec2(ImGui::GetWindowContentRegionWidth(), 0)))
             {
-                GoDownString = p;
+                GoDownString = rCurrentDirectory;
             }
         }
 
@@ -225,9 +225,7 @@ namespace GUI
 
             if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
             {
-                int a = 4;
-
-                ImGui::SetDragDropPayload("ASSETS_DRAGDROP", &a, sizeof(int));
+                ImGui::SetDragDropPayload("ASSETS_DRAGDROP", &rCurrentFile, sizeof(CAsset));
 
                 ImGui::EndDragDropSource();
             }
@@ -244,13 +242,6 @@ namespace GUI
         }
 
         ImGui::EndChild();
-
-        std::string SelectedFileString;
-        bool gotSelected = pSelectedFile;
-
-        SelectedFileString = (m_CurrentPath / std::filesystem::path(pSelectedFile ? pSelectedFile->m_Filename : "...")).string();
-
-        std::replace(SelectedFileString.begin(), SelectedFileString.end(), '\\', '/');
       
         if (DoGoUp)
         {
@@ -309,9 +300,20 @@ namespace GUI
 
                     if (std::regex_match(rCurrentItemInPath.path().filename().string(), m_Regex))
                     {
-                        m_Files.push_back({ rCurrentItemInPath.path().filename().string(), std::filesystem::file_size(rCurrentItemInPath), formatted.str(), dateTime });
-                    }
+                        std::string CurrentFilePath = rCurrentItemInPath.path().string();
 
+                        std::replace(CurrentFilePath.begin(), CurrentFilePath.end(), '\\', '/');
+
+                        CFile NewAsset(CurrentFilePath);
+
+                        NewAsset.m_Filename      = rCurrentItemInPath.path().filename().string();
+                        NewAsset.m_Size          = std::filesystem::file_size(rCurrentItemInPath);
+                        NewAsset.m_DateTime      = formatted.str();
+                        NewAsset.m_DateTimeTimeT = dateTime;
+                        NewAsset.m_Selected      = false;
+
+                        m_Files.push_back(NewAsset);
+                    }
                 }
                 catch (...)
                 {

@@ -3,6 +3,7 @@
 
 #include "base/base_singleton.h"
 
+#include "editor/edit_asset_helper.h"
 #include "editor/edit_panel_interface.h"
 
 #include "engine/data/data_entity.h"
@@ -42,18 +43,32 @@ namespace GUI
 
     private:
 
-        struct SFile
+        class CFile : CAsset
         {
-            std::string m_Filename;
+        public:
+
+            CFile()
+                : CAsset("")
+            { }
+
+            CFile(const std::string& _rFileAndPath)
+                : CAsset(_rFileAndPath)
+            { }
+
+        public:
+
+            std::string    m_Filename;
             std::uintmax_t m_Size;
-            std::string m_DateTime;
-            std::time_t m_DateTimeTimeT;
-            bool m_Selected;
+            std::string    m_DateTime;
+            std::time_t    m_DateTimeTimeT;
+            bool           m_Selected;
+
+            friend class CAssetsPanel;
         };
 
         struct SSorter
         {
-            bool operator()(const SFile& a, const SFile& b) const
+            bool operator()(const CFile& a, const CFile& b) const
             {
                 switch (m_SortModeName)
                 {
@@ -86,7 +101,7 @@ namespace GUI
         std::regex m_Regex;
 
         std::vector<std::string> m_Directories;
-        std::vector<SFile> m_Files;
+        std::vector<CFile> m_Files;
         std::vector<std::string> m_SelectedFiles;
 
         SSorter m_Sorter;

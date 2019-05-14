@@ -1,11 +1,12 @@
 
 #include "editor/edit_precompiled.h"
 
-#include "engine/core/core_console.h"
-
+#include "editor/edit_asset_helper.h"
 #include "editor/edit_gui_factory.h"
 #include "editor/edit_scene_graph_panel.h"
 #include "editor/edit_inspector_panel.h"
+
+#include "engine/core/core_console.h"
 
 #include "engine/data/data_map.h"
 #include "engine/data/data_entity.h"
@@ -178,7 +179,7 @@ namespace GUI
                 {
                     assert(payload->DataSize == sizeof(Dt::CEntity::BID*));
 
-                    const Dt::CEntity::BID EntityIDDestination = *(const Dt::CEntity::BID*)payload->Data;
+                    auto EntityIDDestination = *static_cast<const Dt::CEntity::BID*>(payload->Data);
 
                     Dt::CEntity* pSourceEntity = Dt::EntityManager::GetEntityByID(EntityIDDestination);
 
@@ -209,7 +210,14 @@ namespace GUI
 
             if (const ImGuiPayload* _pPayload = ImGui::AcceptDragDropPayload("ASSETS_DRAGDROP", ImGuiTargetFlags))
             {
-                int a = 4;
+                auto& DraggedAsset = *static_cast<CAsset*>(_pPayload->Data);
+
+                auto pEntity = Edit::AssetHelper::LoadPrefabFromModel(DraggedAsset);
+
+                if (pEntity != nullptr)
+                {
+                    Dt::EntityManager::MarkEntityAsDirty(*pEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+                }
             }
 
             ImGui::EndDragDropTarget();

@@ -110,8 +110,6 @@ namespace
         bool m_ShowGUI;
 		bool m_IsFullscreen;
 
-        Edit::CImFileFialog m_ImportModelDialog;
-
         Engine::CEventDelegates::HandleType m_GfxOnRenderGUIDelegate;
 
     private:
@@ -140,7 +138,6 @@ namespace
         , m_CloseWindow        (false)
         , m_ShowGUI            (true)
         , m_IsFullscreen       (false)
-        , m_ImportModelDialog  ("Import model...", std::regex(".*.(obj|dae|fbx)"))
     {                          
     }
     
@@ -496,13 +493,6 @@ namespace
                     Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
                 }
 
-                ImGui::Separator();
-
-                if (ImGui::MenuItem("Import"))
-                {
-                    m_ImportModelDialog.Open();
-                }
-
                 ImGui::EndMenu();
             }
 
@@ -537,32 +527,6 @@ namespace
         for (auto pPanel : m_Panels)
         {
             if (pPanel->IsVisible()) pPanel->Render();
-        }
-
-        // -----------------------------------------------------------------------------
-        // Dialogs
-        // -----------------------------------------------------------------------------
-        if (m_ImportModelDialog.Draw())
-        {
-            const auto& rSelectedFiles = m_ImportModelDialog.GetSelectedFiles();
-
-            for (const auto& rSelectedFile : rSelectedFiles)
-            {
-                auto Entities = Dt::EntityManager::CreateEntitiesFromScene(rSelectedFile);
-
-                Dt::SEntityDescriptor EntityDesc;
-
-                EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
-                EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
-
-                Dt::CEntity& rNewModel = Dt::EntityManager::CreateEntity(EntityDesc);
-
-                for (auto& rEntity : Entities) rNewModel.Attach(*rEntity);
-
-                rNewModel.SetName("New model");
-
-                Dt::EntityManager::MarkEntityAsDirty(rNewModel, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
-            }
         }
     }
 

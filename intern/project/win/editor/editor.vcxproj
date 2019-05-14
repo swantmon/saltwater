@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\..\src\editor\edit_application.cpp" />
     <ClCompile Include="..\..\..\src\editor\edit_assets_panel.cpp" />
+    <ClCompile Include="..\..\..\src\editor\edit_asset_helper.cpp" />
     <ClCompile Include="..\..\..\src\editor\edit_console_panel.cpp" />
     <ClCompile Include="..\..\..\src\editor\edit_data_area_light_component.cpp" />
     <ClCompile Include="..\..\..\src\editor\edit_data_bloom_component.cpp" />
@@ -71,6 +72,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\src\editor\edit_application.h" />
     <ClInclude Include="..\..\..\src\editor\edit_assets_panel.h" />
+    <ClInclude Include="..\..\..\src\editor\edit_asset_helper.h" />
     <ClInclude Include="..\..\..\src\editor\edit_component_factory.h" />
     <ClInclude Include="..\..\..\src\editor\edit_console_panel.h" />
     <ClInclude Include="..\..\..\src\editor\edit_data_area_light_component.h" />
