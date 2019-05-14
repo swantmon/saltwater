@@ -91,50 +91,63 @@ namespace Stereo
         //---Select Keyframe for Computation---
         if (!m_idx_Keyf_Curt) // Current keyframe is empty -> Set current keyframe.
         {
+            //---Set Current Keyframe---
             m_Keyframe_Curt = frame;
             m_idx_Keyf_Curt = true;
         }
         else if (m_idx_Keyf_Curt && !m_idx_Keyf_Last) // Current keyframe exists but Last keyframe is empty -> Set both current & last keyframes.
         {
+            //---Calculate Baseline Length---
             glm::vec3 BaseLine = frame.get_PC() - m_Keyframe_Curt.get_PC();
             float BaseLineLength = glm::l2Norm(BaseLine);
 
             if (BaseLineLength >= m_Cdt_Keyf_BaseLineL) // Select Keyframe: Baseline condition
             {
+                //---Set Current & Last Keyframe---
                 m_Keyframe_Last = m_Keyframe_Curt;
                 m_Keyframe_Curt = frame;
                 m_idx_Keyf_Last = true;
-            }
-        }
-        else // Both current & last keyframes exist. -> Computing -> Free last keyframe.
-        {
-            if (m_Is_ARKitData)
-            {
-                
+
+                m_KeyfNum++;
+
+                //***Export Original Images***
+                std::stringstream ExportStream;
+                ExportStream.clear();
+                ExportStream.str("");
+
                 if (m_Is_imwrite)
                 {
                     cv::Mat cvOrigImg_Curt(m_OrigImgSize.y, m_OrigImgSize.x, CV_8UC4);
                     memcpy(cvOrigImg_Curt.data, m_Keyframe_Curt.get_Img().data(), m_Keyframe_Curt.get_Img().size());
                     cv::cvtColor(cvOrigImg_Curt, cvOrigImg_Curt, cv::COLOR_BGRA2RGBA); // Transform to RGB before imshow & imwrite
-                    cv::imwrite("E:\\Project_ARCHITECT\\ARKit_OrigImg_Curt.png", cvOrigImg_Curt);
+
+                    ExportStream << "E:\\Project_ARCHITECT\\ARKit_OrigImg_Curt_" << m_KeyfNum << ".png";
+                    cv::imwrite(ExportStream.str(), cvOrigImg_Curt);
+                    ExportStream.clear();
+                    ExportStream.str("");
 
                     cv::Mat cvOrigImg_Last(m_OrigImgSize.y, m_OrigImgSize.x, CV_8UC4);
                     memcpy(cvOrigImg_Last.data, m_Keyframe_Last.get_Img().data(), m_Keyframe_Last.get_Img().size());
                     cv::cvtColor(cvOrigImg_Last, cvOrigImg_Last, cv::COLOR_BGRA2RGBA); // Transform to RGB before imshow & imwrite
-                    cv::imwrite("E:\\Project_ARCHITECT\\ARKit_OrigImg_Last.png", cvOrigImg_Last);
+
+                    ExportStream << "E:\\Project_ARCHITECT\\ARKit_OrigImg_Last_" << m_KeyfNum << ".png";
+                    cv::imwrite(ExportStream.str(), cvOrigImg_Last);
+                    ExportStream.clear();
+                    ExportStream.str("");
                 }
 
-                //---Rectification---
+                //---Planar Rectification: Generate Rectified Keyframes---
                 m_PlanarRectifier = FutoGmtCV::CRectification_Planar(m_Keyframe_Curt, m_Keyframe_Last);
                 m_PlanarRectifier.execute(m_RectImg_Curt, m_RectImg_Last, m_Homo_Curt, m_Homo_Last);
 
-                // For OpenCV
+                //***For OpenCV***
                 cv::Mat cvRectImg_Curt(m_RectImg_Curt.get_ImgSize().y, m_RectImg_Curt.get_ImgSize().x, CV_8UC1);
                 memcpy(cvRectImg_Curt.data, m_RectImg_Curt.get_Img().data(), m_RectImg_Curt.get_Img().size());
 
                 cv::Mat cvRectImg_Last(m_RectImg_Last.get_ImgSize().y, m_RectImg_Last.get_ImgSize().x, CV_8UC1);
                 memcpy(cvRectImg_Last.data, m_RectImg_Last.get_Img().data(), m_RectImg_Last.get_Img().size());
 
+                //***Export Rectified Images***
                 if (m_Is_imwrite)
                 {
                     cv::imwrite("E:\\Project_ARCHITECT\\ARKit_RectImg_Curt.png", cvRectImg_Curt);
@@ -142,10 +155,10 @@ namespace Stereo
                     cv::imwrite("E:\\Project_ARCHITECT\\ARKit_RectImg_Last.png", cvRectImg_Last);
                 }
 
-                //---Stereo Matching---
+                //---Stereo Matching: Generate Disparity in Rectified Current Keyframe---
                 m_Disparity_RectImg.resize(m_RectImg_Curt.get_Img().size(), 0.0);
 
-                // For OpenCV
+                //***For OpenCV***
                 cv::cuda::GpuMat cvRectImg_Curt_gpu, cvRectImg_Last_gpu;
                 cvRectImg_Curt_gpu.upload(cvRectImg_Curt);
                 cvRectImg_Last_gpu.upload(cvRectImg_Last);
@@ -166,7 +179,7 @@ namespace Stereo
                         cv::normalize(cvDispImg_LibSGM, cvDispImg_LibSGM, 0, 500, cv::NORM_MINMAX, CV_8UC1);
                         cv::imwrite("E:\\Project_ARCHITECT\\ARKit_DispImg_LibSGM.png", cvDispImg_LibSGM);
                     }
-                    
+
                 }
 
                 if (m_StereoMatching_Method == "cvBM_cuda")
@@ -179,16 +192,18 @@ namespace Stereo
                     if (cvDispImg_Rect_cpu.depth() == CV_16S)
                     {
                         cvDispImg_Rect_cpu.convertTo(cvDispImg_Rect_cpu, CV_32F, 1.0 / 16);
-                    } 
+                    }
                     else
                     {
                         cvDispImg_Rect_cpu.convertTo(cvDispImg_Rect_cpu, CV_32F);
                     }
-                    
+
+                    //***Export Disparity in Rectified Images***
                     if (m_Is_imwrite)
                     {
                         cv::Mat cvDisp_RectImg_cpu_8bit(cvDispImg_Rect_cpu.size(), CV_8UC1);
                         cv::normalize(cvDispImg_Rect_cpu, cvDisp_RectImg_cpu_8bit, 0, 255, cv::NORM_MINMAX, CV_8UC1);
+
                         cv::imwrite("E:\\Project_ARCHITECT\\ARKit_DispImg_cvBM_cuda.png", cvDisp_RectImg_cpu_8bit);
                     }
 
@@ -254,11 +269,10 @@ namespace Stereo
                     }
                 }
 
-
-                //---Transform Disparity to Depth in Rectified Image---
+                //---Disparity to Depth in Rectified Current Keyframe---
                 imp_Disp2Depth();
 
-                //---Transform Depth from Rectified to Original Image---
+                //---Depth from Rectified to Original Current Keyframe---
                 imp_Depth_Rect2Orig();
 
                 //---Compare Depth from Stereo Matching & Sensor---
@@ -276,165 +290,10 @@ namespace Stereo
                 Transform[3] = glm::vec4(m_Keyframe_Curt.get_PC(), 1.0f);
 
                 m_Delegate.Notify(m_Keyframe_Curt.get_Img(), DepthImage, Transform);
+
+                //---Free Last Keyframe---
+                m_idx_Keyf_Last = false;
             }
-            
-            if (m_Is_TestData_MyMMS)
-            {
-                //---Input Test Images---
-                cv::Mat cvInputImgL = cv::imread("E:\\Project_ARCHITECT\\01 Image Rectification\\My MMS\\Orig_01.jpg");
-                cv::cvtColor(cvInputImgL, cvInputImgL, cv::COLOR_BGRA2RGBA);
-                const int ImgSize_InputL_1D = cvInputImgL.rows * cvInputImgL.cols * 4;
-                std::vector<char> InputImgL(ImgSize_InputL_1D);
-                glm::ivec2 ImgSize_TestOrigL(cvInputImgL.cols, cvInputImgL.rows);
-                memcpy(InputImgL.data(), cvInputImgL.data, ImgSize_InputL_1D);
-                cv::Mat cvInputImgR = cv::imread("E:\\Project_ARCHITECT\\01 Image Rectification\\My MMS\\Orig_02.jpg");
-                cv::cvtColor(cvInputImgR, cvInputImgR, cv::COLOR_BGRA2RGBA);
-                const int ImgSize_InputR_1D = cvInputImgR.rows * cvInputImgR.cols * 4;
-                std::vector<char> InputImgR(ImgSize_InputR_1D);
-                glm::ivec2 ImgSize_TestOrigR(cvInputImgR.cols, cvInputImgR.rows);
-                memcpy(InputImgR.data(), cvInputImgR.data, ImgSize_InputR_1D);
-
-                glm::mat3 K_L(glm::vec3(1280.465, 0, 0), glm::vec3(0, 1280.465, 0), glm::vec3(712.961, 515.829, 1));
-                glm::mat3 K_R(glm::vec3(1281.566, 0, 0), glm::vec3(0, 1281.566, 0), glm::vec3(698.496, 511.008, 1));
-
-                glm::vec3 PC_L(0.0f);
-                glm::vec3 PC_R(1.630, 0.016, -0.192);
-
-                glm::mat3 R_L(1.0f);
-                glm::mat3 R_R(glm::vec3(0.9999, -0.0084, 0.0132), glm::vec3(0.0085, 0.9999, -0.0122), glm::vec3(-0.0132, 0.0123, 0.9999));
-
-                m_Keyframe_Curt = FutoGmtCV::CFutoImg(InputImgL, ImgSize_TestOrigL, 3, K_L, R_L, PC_L);
-                m_Keyframe_Last = FutoGmtCV::CFutoImg(InputImgR, ImgSize_TestOrigR, 3, K_R, R_R, PC_R);
-
-                //---Rectification---
-                FutoGmtCV::CFutoImg RectImg_Curt, RectImg_Last;
-                FutoGmtCV::SHomographyTransform Homo_B, Homo_M;
-
-                FutoGmtCV::CRectification_Planar PlanarRectifier = FutoGmtCV::CRectification_Planar(m_Keyframe_Curt, m_Keyframe_Last);
-                PlanarRectifier.execute(RectImg_Curt, RectImg_Last, Homo_B, Homo_M);
-
-                // For OpenCV
-                cv::Mat cvRectImg_Curt(RectImg_Curt.get_ImgSize().y, RectImg_Curt.get_ImgSize().x, CV_8UC1);
-                memcpy(cvRectImg_Curt.data, RectImg_Curt.get_Img().data(), RectImg_Curt.get_Img().size());
-
-                cv::Mat cvRectImg_Last(RectImg_Last.get_ImgSize().y, RectImg_Last.get_ImgSize().x, CV_8UC1);
-                memcpy(cvRectImg_Last.data, RectImg_Last.get_Img().data(), RectImg_Last.get_Img().size());
-
-                if (m_Is_imwrite)
-                {
-                    cv::imwrite("E:\\Project_ARCHITECT\\MMS_RectImg_Curt.png", cvRectImg_Curt);
-
-                    cv::imwrite("E:\\Project_ARCHITECT\\MMS_RectImg_Last.png", cvRectImg_Last);
-                }
-
-                //---Stereo Matching---
-                std::vector<char> DispImg_Rect(RectImg_Curt.get_Img().size(), 0.0);
-
-                // For OpenCV
-                cv::cuda::GpuMat cvRectImg_Curt_gpu, cvRectImg_Last_gpu;
-                cvRectImg_Curt_gpu.upload(cvRectImg_Curt);
-                cvRectImg_Last_gpu.upload(cvRectImg_Last);
-
-                cv::cuda::GpuMat cvDispImg_Rect_gpu;
-                cv::Mat cvDispImg_Rect_cpu;
-
-                if (m_StereoMatching_Method == "LibSGM")
-                {
-                    m_pStereoMatcher_LibSGM = std::make_unique<sgm::StereoSGM>(RectImg_Curt.get_ImgSize().x, RectImg_Curt.get_ImgSize().y, m_DispRange, 8, 8, sgm::EXECUTE_INOUT_HOST2HOST);
-                    m_pStereoMatcher_LibSGM->execute(RectImg_Curt.get_Img().data(), RectImg_Last.get_Img().data(), DispImg_Rect.data());
-
-                    if (m_Is_imwrite)
-                    {
-                        cv::Mat cvDispImg_LibSGM(cvRectImg_Curt.size(), CV_8UC1);
-                        memcpy(cvDispImg_LibSGM.data, DispImg_Rect.data(), DispImg_Rect.size());
-                        cv::normalize(cvDispImg_LibSGM, cvDispImg_LibSGM, 0, 500, cv::NORM_MINMAX, CV_8UC1);
-                        cv::imwrite("E:\\Project_ARCHITECT\\MMS_DispImg_LibSGM.png", cvDispImg_LibSGM);
-                    }
-
-                }
-
-                if (m_StereoMatching_Method == "cvBM_cuda")
-                {
-                    m_pStereoMatcher_cvBM_cuda = cv::cuda::createStereoBM(m_DispRange, 7); // Disparity Range, B�ock Size
-                    m_pStereoMatcher_cvBM_cuda->compute(cvRectImg_Curt_gpu, cvRectImg_Last_gpu, cvDispImg_Rect_gpu);
-
-                    cvDispImg_Rect_gpu.download(cvDispImg_Rect_cpu);
-                    if (cvDispImg_Rect_cpu.type() == CV_16S)
-                    {
-                        cvDispImg_Rect_cpu.convertTo(cvDispImg_Rect_cpu, CV_32F, 1.0 / 16);
-                    }
-
-                    if (m_Is_imwrite)
-                    {
-                        cv::Mat cvDispImg_Rect_cpu_8bit(cvDispImg_Rect_cpu.size(), CV_8UC1);
-                        cv::normalize(cvDispImg_Rect_cpu, cvDispImg_Rect_cpu_8bit, 0, 255, cv::NORM_MINMAX, CV_8UC1);
-                        cv::imwrite("E:\\Project_ARCHITECT\\MMS_DispImg_cvBM_cuda.png", cvDispImg_Rect_cpu_8bit);
-                    }
-                }
-
-                if (m_StereoMatching_Method == "cvBP_cuda")
-                {
-                    m_pStereoMatcher_cvBP_cuda = cv::cuda::createStereoBeliefPropagation();
-                    m_pStereoMatcher_cvBP_cuda->compute(cvRectImg_Curt_gpu, cvRectImg_Last_gpu, cvDispImg_Rect_gpu);
-
-                    cvDispImg_Rect_gpu.download(cvDispImg_Rect_cpu);
-                    if (cvDispImg_Rect_cpu.type() == CV_16S)
-                    {
-                        cvDispImg_Rect_cpu.convertTo(cvDispImg_Rect_cpu, CV_32F, 1.0 / 16);
-                    }
-
-                    if (m_Is_imwrite)
-                    {
-                        cv::Mat cvDispImg_Rect_cpu_8bit(cvDispImg_Rect_cpu.size(), CV_8UC1);
-                        cv::normalize(cvDispImg_Rect_cpu, cvDispImg_Rect_cpu_8bit, 0, 255, cv::NORM_MINMAX, CV_8UC1);
-                        cv::imwrite("E:\\Project_ARCHITECT\\MMS_DispImg_cvBP_cuda.png", cvDispImg_Rect_cpu_8bit);
-                    }
-                }
-
-
-                if (m_StereoMatching_Method == "cvConstBP_cuda")
-                {
-                    m_pStereoMatcher_cvConstBP_cuda = cv::cuda::createStereoConstantSpaceBP();
-                    m_pStereoMatcher_cvConstBP_cuda->compute(cvRectImg_Curt_gpu, cvRectImg_Last_gpu, cvDispImg_Rect_gpu);
-
-                    cvDispImg_Rect_gpu.download(cvDispImg_Rect_cpu);
-                    if (cvDispImg_Rect_cpu.type() == CV_16S)
-                    {
-                        cvDispImg_Rect_cpu.convertTo(cvDispImg_Rect_cpu, CV_32F, 1.0 / 16);
-                    }
-
-                    if (m_Is_imwrite)
-                    {
-                        cv::Mat cvDispImg_Rect_cpu_8bit(cvDispImg_Rect_cpu.size(), CV_8UC1);
-                        cv::normalize(cvDispImg_Rect_cpu, cvDispImg_Rect_cpu_8bit, 0, 255, cv::NORM_MINMAX, CV_8UC1);
-                        cv::imwrite("E:\\Project_ARCHITECT\\MMS_DispImg_cvConstBP_cuda.png", cvDispImg_Rect_cpu_8bit);
-                    }
-                }
-
-                if (m_StereoMatching_Method == "cv_SGBM")
-                {
-                    m_pStereoMatcher_cvSGBM = cv::StereoSGBM::create();
-                    m_pStereoMatcher_cvSGBM->compute(cvRectImg_Curt, cvRectImg_Last, cvDispImg_Rect_cpu);
-
-                    cvDispImg_Rect_gpu.download(cvDispImg_Rect_cpu);
-                    if (cvDispImg_Rect_cpu.type() == CV_16S)
-                    {
-                        cvDispImg_Rect_cpu.convertTo(cvDispImg_Rect_cpu, CV_32F, 1.0 / 16);
-                    }
-
-                    if (m_Is_imwrite)
-                    {
-                        cv::Mat cvDispImg_Rect_cpu_8bit(cvDispImg_Rect_cpu.size(), CV_8UC1);
-                        cv::normalize(cvDispImg_Rect_cpu, cvDispImg_Rect_cpu_8bit, 0, 255, cv::NORM_MINMAX, CV_8UC1);
-                        cv::imwrite("E:\\Project_ARCHITECT\\MMS_DispImg_cvSGBM.png", cvDispImg_Rect_cpu_8bit);
-                    }
-                }
-
-
-
-            }
-
-            m_idx_Keyf_Last = false;
         }
         
     }
