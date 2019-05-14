@@ -46,7 +46,7 @@ namespace Edit
 
     private:
 
-        void Identity();
+        void Identify();
     };
 
     

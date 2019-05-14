@@ -22,7 +22,7 @@ namespace Edit
         : m_PathToFile(_rFilename)
         , m_Type(Undefined)
     {
-        Identity();
+        Identify();
     }
 
     // -----------------------------------------------------------------------------
@@ -41,7 +41,7 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void CAsset::Identity()
+    void CAsset::Identify()
     {
         int Index = 0;
 
