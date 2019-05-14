@@ -7,6 +7,8 @@
 
 #include "editor/imgui/imgui.h"
 
+#include "editor/imgui/extensions/ImTextureSlot.h"
+
 namespace Dt
 {
     class CAreaLightComponentGUI : public CAreaLightComponent
@@ -17,14 +19,7 @@ namespace Dt
         {
             ImGui::ColorEdit3("Color", &m_Color.r);
 
-            static char PathToTexture[255] = {};
-
-            strcpy_s(PathToTexture, m_Texture.c_str());
-
-            if (ImGui::InputText("Path to texture", PathToTexture, 255))
-            {
-                m_Texture = PathToTexture;
-            }
+            ImGui::TextureField("##AREA_LIGHT_TEXTURE", "Texture", m_Texture);
 
             ImGui::DragFloat("Intensity", &m_Intensity);
 

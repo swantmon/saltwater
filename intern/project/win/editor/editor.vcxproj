@@ -62,6 +62,7 @@
     <ClCompile Include="..\..\..\src\editor\edit_unload_map_state.cpp" />
     <ClCompile Include="..\..\..\src\editor\imgui\extensions\ImFiledialog.cpp" />
     <ClCompile Include="..\..\..\src\editor\imgui\extensions\ImGuizmo.cpp" />
+    <ClCompile Include="..\..\..\src\editor\imgui\extensions\ImTextureSlot.cpp" />
     <ClCompile Include="..\..\..\src\editor\imgui\imgui.cpp" />
     <ClCompile Include="..\..\..\src\editor\imgui\imgui_demo.cpp" />
     <ClCompile Include="..\..\..\src\editor\imgui\imgui_draw.cpp" />
@@ -111,6 +112,7 @@
     <ClInclude Include="..\..\..\src\editor\edit_unload_map_state.h" />
     <ClInclude Include="..\..\..\src\editor\imgui\extensions\ImFiledialog.h" />
     <ClInclude Include="..\..\..\src\editor\imgui\extensions\ImGuizmo.h" />
+    <ClInclude Include="..\..\..\src\editor\imgui\extensions\ImTextureSlot.h" />
     <ClInclude Include="..\..\..\src\editor\imgui\imconfig.h" />
     <ClInclude Include="..\..\..\src\editor\imgui\imgui.h" />
     <ClInclude Include="..\..\..\src\editor\imgui\imgui_impl_opengl.h" />

@@ -7,6 +7,8 @@
 
 #include "editor/imgui/imgui.h"
 
+#include "editor/imgui/extensions/ImTextureSlot.h"
+
 #include "engine/graphic/gfx_texture_manager.h"
 
 namespace Dt
@@ -57,40 +59,46 @@ namespace Dt
             }
 
             // -----------------------------------------------------------------------------
-            // Rest
+            // Texture
             // -----------------------------------------------------------------------------
-            static char PathToTexture[255] = {};
-
-            if (ImGui::InputText("Path to Texture", PathToTexture, 255) && strlen(PathToTexture) > 0)
+            if (m_TexturePtr != nullptr)
             {
-                Gfx::STextureDescriptor TextureDescriptor; 
+                std::string Texture = m_TexturePtr->GetFileName();
 
-                TextureDescriptor.m_NumberOfPixelsU  = Gfx::STextureDescriptor::s_NumberOfPixelsFromSource; 
-                TextureDescriptor.m_NumberOfPixelsV  = Gfx::STextureDescriptor::s_NumberOfPixelsFromSource; 
-                TextureDescriptor.m_NumberOfPixelsW  = 1;
-                TextureDescriptor.m_NumberOfMipMaps  = 1;
-                TextureDescriptor.m_NumberOfTextures = 1;
-                TextureDescriptor.m_Access           = Gfx::CTexture::CPUWrite; 
-                TextureDescriptor.m_Usage            = Gfx::CTexture::GPURead; 
-                TextureDescriptor.m_Semantic         = Gfx::CTexture::Diffuse; 
-                TextureDescriptor.m_pFileName        = 0; 
-                TextureDescriptor.m_pPixels          = 0; 
-                TextureDescriptor.m_Binding          = Gfx::CTexture::ShaderResource;
-                TextureDescriptor.m_Format           = Gfx::STextureDescriptor::s_FormatFromSource;
-                TextureDescriptor.m_pFileName        = PathToTexture;
-
-                if (GetType() == Dt::CSkyComponent::Cubemap)
+                if (ImGui::TextureField("##SKY_TEXTURE", "Texture", Texture))
                 {
-                    TextureDescriptor.m_NumberOfTextures = 6;
+                    Gfx::STextureDescriptor TextureDescriptor;
 
-                    SetTexture(Gfx::TextureManager::CreateCubeTexture(TextureDescriptor));
-                }
-                else
-                {
-                    SetTexture(Gfx::TextureManager::CreateTexture2D(TextureDescriptor));
+                    TextureDescriptor.m_NumberOfPixelsU = Gfx::STextureDescriptor::s_NumberOfPixelsFromSource;
+                    TextureDescriptor.m_NumberOfPixelsV = Gfx::STextureDescriptor::s_NumberOfPixelsFromSource;
+                    TextureDescriptor.m_NumberOfPixelsW = 1;
+                    TextureDescriptor.m_NumberOfMipMaps = 1;
+                    TextureDescriptor.m_NumberOfTextures = 1;
+                    TextureDescriptor.m_Access = Gfx::CTexture::CPUWrite;
+                    TextureDescriptor.m_Usage = Gfx::CTexture::GPURead;
+                    TextureDescriptor.m_Semantic = Gfx::CTexture::Diffuse;
+                    TextureDescriptor.m_pFileName = 0;
+                    TextureDescriptor.m_pPixels = 0;
+                    TextureDescriptor.m_Binding = Gfx::CTexture::ShaderResource;
+                    TextureDescriptor.m_Format = Gfx::STextureDescriptor::s_FormatFromSource;
+                    TextureDescriptor.m_pFileName = Texture.c_str();
+
+                    if (GetType() == Dt::CSkyComponent::Cubemap)
+                    {
+                        TextureDescriptor.m_NumberOfTextures = 6;
+
+                        SetTexture(Gfx::TextureManager::CreateCubeTexture(TextureDescriptor));
+                    }
+                    else
+                    {
+                        SetTexture(Gfx::TextureManager::CreateTexture2D(TextureDescriptor));
+                    }
                 }
             }
 
+            // -----------------------------------------------------------------------------
+            // Intensity
+            // -----------------------------------------------------------------------------
             ImGui::DragFloat("Intensity", &m_Intensity);
         }
 
