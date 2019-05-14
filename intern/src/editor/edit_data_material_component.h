@@ -1,9 +1,13 @@
 
 #pragma once
 
-#include "engine/data/data_material_component.h"
+#include "editor/edit_asset_helper.h"
 
 #include "editor/imgui/imgui.h"
+
+#include "engine/data/data_material_component.h"
+
+#include "engine/graphic/gfx_material_manager.h"
 
 namespace Dt
 {
@@ -21,7 +25,7 @@ namespace Dt
 
             ImGui::SliderFloat("Reflectance", &m_Reflectance, 0.0f, 1.0f);
 
-            ImGui::SliderFloat("Metalness", &m_MetalMask, 0.0f, 1.0f);
+            ImGui::SliderFloat("Metallic", &m_MetalMask, 0.0f, 1.0f);
 
             ImGui::SliderFloat("Displacement", &m_Displacement, 0.0f, 1.0f);
 
@@ -42,7 +46,12 @@ namespace Dt
 
                 if (const ImGuiPayload* _pPayload = ImGui::AcceptDragDropPayload("ASSETS_DRAGDROP", ImGuiTargetFlags))
                 {
-                    int a = 4;
+                    auto& DraggedAsset = *static_cast<Edit::CAsset*>(_pPayload->Data);
+
+                    if (DraggedAsset.GetType() == Edit::CAsset::Material)
+                    {
+                        Gfx::MaterialManager::CreateMaterialFromXML(DraggedAsset.GetPathToFile(), this);
+                    }
                 }
 
                 ImGui::EndDragDropTarget();
