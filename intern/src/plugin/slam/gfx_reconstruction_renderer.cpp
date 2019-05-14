@@ -216,6 +216,9 @@ namespace
         CShaderPtr m_MembranePropagateGridCSPtr;
         CShaderPtr m_MembranePropagatePixelsCSPtr;
 
+        CShaderPtr m_PlaneMeshVSPtr;
+        CShaderPtr m_PlaneMeshFSPtr;
+
         CBufferPtr m_RaycastConstantBufferPtr;
         CBufferPtr m_RaycastHitProxyBufferPtr;
         CBufferPtr m_RaycastHighLightConstantBufferPtr;
@@ -238,6 +241,8 @@ namespace
 
         CMeshPtr m_FullscreenQuadMeshPtr;
         CInputLayoutPtr m_FullscreenQuadLayoutPtr;
+
+        CInputLayoutPtr m_PlaneMeshLayoutPtr;
 
         CRenderContextPtr m_OutlineRenderContextPtr;
 
@@ -400,6 +405,9 @@ namespace
         m_MembraneEvalBorderCSPtr = nullptr;
         m_MembranePropagateGridCSPtr = nullptr;
         m_MembranePropagatePixelsCSPtr = nullptr;
+
+        m_PlaneMeshVSPtr = nullptr;
+        m_PlaneMeshFSPtr = nullptr;
         
         m_PickingBuffer = nullptr;
 
@@ -422,6 +430,7 @@ namespace
         m_CubeOutlineMeshPtr = nullptr;
         m_PlaneMeshPtr = nullptr;
         m_CameraInputLayoutPtr = nullptr;
+        m_PlaneMeshLayoutPtr = nullptr;
         m_VolumeInputLayoutPtr = nullptr;
         m_InpaintedPlaneLayoutPtr = nullptr;
         m_CubeOutlineInputLayoutPtr = nullptr;
@@ -538,6 +547,9 @@ namespace
         m_MembranePropagateGridCSPtr = ShaderManager::CompileCS("../../plugins/slam/scalable/rendering/cs_membrane_propagate_grid.glsl", "main", DefineString.c_str());
         m_MembranePropagatePixelsCSPtr = ShaderManager::CompileCS("../../plugins/slam/scalable/rendering/cs_membrane_propagate_pixels.glsl", "main", DefineString.c_str());
 
+        m_PlaneMeshVSPtr = ShaderManager::CompileVS("../../plugins/slam/scalable/rendering/vs_plane_mesh.glsl", "main", DefineString.c_str());
+        m_PlaneMeshFSPtr = ShaderManager::CompilePS("../../plugins/slam/scalable/rendering/fs_plane_mesh.glsl", "main", DefineString.c_str());
+
         SInputElementDescriptor InputLayoutDesc = {};
 
         InputLayoutDesc.m_pSemanticName        = "POSITION";
@@ -567,6 +579,14 @@ namespace
         };
 
         m_FullscreenQuadLayoutPtr = ShaderManager::CreateInputLayout(FullscreenQuadLayout, sizeof(FullscreenQuadLayout) / sizeof(FullscreenQuadLayout[0]), m_BackgroundVSPtr);
+
+        SInputElementDescriptor PlaneMeshLayout[] =
+        {
+            { "POSITION", 0, CInputLayout::Float3Format, 0,  0, 20, CInputLayout::PerVertex, 0 },
+            { "TEXCOORD", 1, CInputLayout::Float2Format, 0, 12, 20, CInputLayout::PerVertex, 0 },
+        };
+
+        m_PlaneMeshLayoutPtr = ShaderManager::CreateInputLayout(PlaneMeshLayout, sizeof(PlaneMeshLayout) / sizeof(PlaneMeshLayout[0]), m_PlaneMeshVSPtr);
     }
     
     // -----------------------------------------------------------------------------
@@ -1654,8 +1674,6 @@ namespace
         Performance::BeginEvent("Plane rendering");
         
         ContextManager::SetRenderContext(m_OutlineRenderContextPtr);
-        ContextManager::SetShaderVS(m_OutlineVSPtr);
-        ContextManager::SetShaderPS(m_OutlineFSPtr);
 
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
         ContextManager::SetConstantBuffer(1, m_DrawCallConstantBufferPtr);
@@ -1666,6 +1684,9 @@ namespace
         {
             if (Plane.second.m_Mesh != nullptr)
             {
+                ContextManager::SetShaderVS(m_PlaneMeshVSPtr);
+                ContextManager::SetShaderPS(m_PlaneMeshFSPtr);
+
                 const unsigned int Offset = 0;
                 ContextManager::SetVertexBuffer(Plane.second.m_Mesh->GetLOD(0)->GetSurface()->GetVertexBuffer());
                 ContextManager::SetIndexBuffer(Plane.second.m_Mesh->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
@@ -1682,6 +1703,9 @@ namespace
             }
             else
             {
+                ContextManager::SetShaderVS(m_OutlineVSPtr);
+                ContextManager::SetShaderPS(m_OutlineFSPtr);
+
                 const unsigned int Offset = 0;
                 ContextManager::SetVertexBuffer(m_PlaneMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
                 ContextManager::SetIndexBuffer(m_PlaneMeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);

@@ -69,7 +69,7 @@ namespace MR
         struct SPlaneVertex
         {
             glm::vec3 m_Position;
-            //glm::vec2 m_UV;
+            glm::vec2 m_UV;
         };
 
         using CPlaneVertices = std::vector<SPlaneVertex>;
