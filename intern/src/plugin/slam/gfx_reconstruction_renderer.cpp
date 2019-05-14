@@ -277,7 +277,15 @@ namespace
         bool m_RenderLevel1Queue;
         bool m_RenderLevel2Queue;
         bool m_RenderBackSides;
-        bool m_RenderPlanes;
+        
+        enum EPlaneRenderingMode
+        {
+            NONE,
+            EXTENT_ONLY,
+            MESH_ONLY,
+            MESH_WITH_EXTENT,
+            ALL
+        } m_PlaneRenderMode;
 
         glm::mat4 m_SelectionTransform;
         ESelection m_SelectionState;
@@ -335,8 +343,33 @@ namespace
         m_RenderLevel1Queue   = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:level1"      , false);
         m_RenderLevel2Queue   = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:level2"      , false);
         m_RenderBackSides     = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:backsides"          , true);
-        m_RenderPlanes        = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:planes"             , false);
         m_InpaintedPlaneScale = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:inpainted_plane:scale", 2.0f);
+
+        auto PlaneModeString = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:plane_mode", "none");
+
+        if (PlaneModeString == "none")
+        {
+            m_PlaneRenderMode = EPlaneRenderingMode::NONE;
+        } else if (PlaneModeString == "extent")
+        {
+            m_PlaneRenderMode = EPlaneRenderingMode::EXTENT_ONLY;
+        }
+        else if (PlaneModeString == "mesh")
+        {
+            m_PlaneRenderMode = EPlaneRenderingMode::MESH_ONLY;
+        }
+        else if(PlaneModeString == "mesh_with_extent")
+        {
+            m_PlaneRenderMode = EPlaneRenderingMode::MESH_WITH_EXTENT;
+        }
+        else if (PlaneModeString == "all")
+        {
+            m_PlaneRenderMode = EPlaneRenderingMode::ALL;
+        }
+        else
+        {
+            BASE_THROWV("Unknown plane rendering mode: %s", PlaneModeString.c_str());
+        }
 
         if (Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:aabb:load", false))
         {
@@ -1682,7 +1715,13 @@ namespace
         
         for (const auto& Plane : rPlanes)
         {
-            if (Plane.second.m_Mesh != nullptr)
+            bool HasMesh = Plane.second.m_Mesh != nullptr;
+
+            bool RenderMesh = (m_PlaneRenderMode == EPlaneRenderingMode::ALL || m_PlaneRenderMode == EPlaneRenderingMode::MESH_ONLY || m_PlaneRenderMode == EPlaneRenderingMode::MESH_WITH_EXTENT) && HasMesh;
+
+            bool RenderExtent = m_PlaneRenderMode == EPlaneRenderingMode::EXTENT_ONLY || m_PlaneRenderMode == EPlaneRenderingMode::ALL || (m_PlaneRenderMode == EPlaneRenderingMode::MESH_WITH_EXTENT && RenderMesh);
+
+            if (RenderMesh)
             {
                 ContextManager::SetShaderVS(m_PlaneMeshVSPtr);
                 ContextManager::SetShaderPS(m_PlaneMeshFSPtr);
@@ -1701,7 +1740,8 @@ namespace
 
                 ContextManager::DrawIndexed(Plane.second.m_Mesh->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
             }
-            else
+
+            if (RenderExtent)
             {
                 ContextManager::SetShaderVS(m_OutlineVSPtr);
                 ContextManager::SetShaderPS(m_OutlineFSPtr);
@@ -2028,7 +2068,7 @@ namespace
 
         RenderSelectionBox();
 
-        if (m_RenderPlanes)
+        if (m_PlaneRenderMode != EPlaneRenderingMode::NONE)
         {
             RenderPlanes();
         }
