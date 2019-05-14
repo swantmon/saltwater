@@ -1259,10 +1259,6 @@ namespace Edit
             pTransformationFacet->SetScale(glm::vec3(2.5f));
             pTransformationFacet->SetRotation(glm::vec3(glm::radians(90.0f), 0.0f, 0.0f));
 
-//             pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 1.0f));
-//             pTransformationFacet->SetScale(glm::vec3(1.0f));
-//             pTransformationFacet->SetRotation(glm::vec3(0.0f));
-
             // -----------------------------------------------------------------------------
 
             auto LightProbeComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CLightProbeComponent>();
@@ -1286,9 +1282,7 @@ namespace Edit
             auto pMeshComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CMeshComponent>();
 
             pMeshComponent->SetMeshType(Dt::CMeshComponent::Asset);
-            pMeshComponent->SetFilename(Core::AssetManager::GetPathToAssets() + "/models/bunny.dae");
-
-/*            pMeshComponent->SetMeshType(Dt::CMeshComponent::Sphere);*/
+            pMeshComponent->SetFilename("/models/bunny.dae");
 
             rEntity.AttachComponent(pMeshComponent);
 
