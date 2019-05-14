@@ -1691,7 +1691,7 @@ namespace
                 ContextManager::SetVertexBuffer(Plane.second.m_Mesh->GetLOD(0)->GetSurface()->GetVertexBuffer());
                 ContextManager::SetIndexBuffer(Plane.second.m_Mesh->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
 
-                ContextManager::SetInputLayout(m_CameraInputLayoutPtr);
+                ContextManager::SetInputLayout(m_PlaneMeshLayoutPtr);
                 ContextManager::SetTopology(STopology::TriangleList);
 
                 BufferData.m_WorldMatrix = Plane.second.m_Transform;

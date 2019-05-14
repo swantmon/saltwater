@@ -11,7 +11,7 @@ layout(std140, binding = 1) uniform PerDrawCallData
 };
 
 layout(location = 0) in vec3 in_VertexPosition;
-layout(location = 1) in vec3 in_TexCoord;
+layout(location = 1) in vec2 in_TexCoord;
 
 out gl_PerVertex
 {
