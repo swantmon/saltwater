@@ -1856,6 +1856,42 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
+    void CSLAMReconstructor::AddPlaneWithMesh(glm::mat4 _Transform, glm::vec4 _Extent, const CPlaneVertices& _rVertices, const CPlaneIndices& _rIndices, int _ID)
+    {
+        SBufferDescriptor BufferDesc = {};
+        
+        BufferDesc.m_Binding = CBuffer::VertexBuffer;
+        BufferDesc.m_Access = CBuffer::CPUWrite;
+        BufferDesc.m_NumberOfBytes = _rVertices.size() * sizeof(_rVertices[0]);
+        BufferDesc.m_pBytes = const_cast<SPlaneVertex*>(_rVertices.data());
+        BufferDesc.m_Usage = CBuffer::GPURead;
+        
+        CBufferPtr VertexBuffer = BufferManager::CreateBuffer(BufferDesc);
+
+        BufferDesc.m_Binding = CBuffer::IndexBuffer;
+        BufferDesc.m_NumberOfBytes = _rIndices.size() * sizeof(_rIndices[0]);
+        BufferDesc.m_pBytes = const_cast<uint32_t*>(_rIndices.data());
+
+        CBufferPtr IndexBuffer = BufferManager::CreateBuffer(BufferDesc);
+
+        SPlane Plane = { _Transform, _Extent, VertexBuffer, IndexBuffer };
+
+        m_Planes[_ID] = Plane;
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    void CSLAMReconstructor::UpdatePlaneWithMesh(glm::mat4 _Transform, glm::vec4 _Extent, const CPlaneVertices& _rVertices, const CPlaneIndices& _rIndices, int _ID)
+    {
+        AddPlaneWithMesh(_Transform, _Extent, _rVertices, _rIndices, _ID);
+
+        //SPlane Plane = { _Transform, _Extent };
+
+        //m_Planes[_ID] = Plane;
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CSLAMReconstructor::RemovePlane(int _ID)
     {
         m_Planes.erase(m_Planes.find(_ID));

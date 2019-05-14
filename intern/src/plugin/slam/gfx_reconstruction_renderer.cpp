@@ -1660,23 +1660,42 @@ namespace
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
         ContextManager::SetConstantBuffer(1, m_DrawCallConstantBufferPtr);
 
-        const unsigned int Offset = 0;
-        ContextManager::SetVertexBuffer(m_PlaneMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
-        ContextManager::SetIndexBuffer(m_PlaneMeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
-
-        ContextManager::SetInputLayout(m_CameraInputLayoutPtr);
-        ContextManager::SetTopology(STopology::TriangleList);
-
         SDrawCallConstantBuffer BufferData;
         
         for (const auto& Plane : rPlanes)
         {
-            BufferData.m_WorldMatrix = Plane.second.m_Transform * glm::scale(glm::vec3(Plane.second.m_Extent));
-            BufferData.m_Color = glm::vec4(1.0f, 1.0f, 0.0f, 0.3f);
+            if (Plane.second.m_VertexBuffer != nullptr)
+            {
+                const unsigned int Offset = 0;
+                ContextManager::SetVertexBuffer(Plane.second.m_VertexBuffer);
+                ContextManager::SetIndexBuffer(Plane.second.m_IndexBuffer, Offset);
 
-            BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
+                ContextManager::SetInputLayout(m_CameraInputLayoutPtr);
+                ContextManager::SetTopology(STopology::TriangleList);
 
-            ContextManager::DrawIndexed(m_PlaneMeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
+                BufferData.m_WorldMatrix = Plane.second.m_Transform;
+                BufferData.m_Color = glm::vec4(1.0f, 0.0f, 0.0f, 0.3f);
+
+                BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
+
+                ContextManager::DrawIndexed(m_PlaneMeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
+            }
+            else
+            {
+                const unsigned int Offset = 0;
+                ContextManager::SetVertexBuffer(m_PlaneMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
+                ContextManager::SetIndexBuffer(m_PlaneMeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
+
+                ContextManager::SetInputLayout(m_CameraInputLayoutPtr);
+                ContextManager::SetTopology(STopology::TriangleList);
+
+                BufferData.m_WorldMatrix = Plane.second.m_Transform * glm::scale(glm::vec3(Plane.second.m_Extent));
+                BufferData.m_Color = glm::vec4(1.0f, 1.0f, 0.0f, 0.3f);
+
+                BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
+
+                ContextManager::DrawIndexed(m_PlaneMeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
+            }
         }
 
         Performance::EndEvent();

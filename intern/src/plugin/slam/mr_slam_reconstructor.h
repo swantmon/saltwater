@@ -62,7 +62,19 @@ namespace MR
         {
             glm::mat4 m_Transform;
             glm::vec4 m_Extent;
+
+            Gfx::CBufferPtr m_VertexBuffer;
+            Gfx::CBufferPtr m_IndexBuffer;
         };
+
+        struct SPlaneVertex
+        {
+            glm::vec3 m_Position;
+            glm::vec2 m_UV;
+        };
+
+        using CPlaneVertices = std::vector<SPlaneVertex>;
+        using CPlaneIndices = std::vector<uint32_t>;
 
         struct SIndirectParameters
         {
@@ -151,7 +163,12 @@ namespace MR
 
         void AddPlane(glm::mat4 _Transform, glm::vec4 _Extent, int _ID);
         void UpdatePlane(glm::mat4 _Transform, glm::vec4 _Extent, int _ID);
+
+        void AddPlaneWithMesh(glm::mat4 _Transform, glm::vec4 _Extent, const CPlaneVertices& _rVertices, const CPlaneIndices& _rIndices, int _ID);
+        void UpdatePlaneWithMesh(glm::mat4 _Transform, glm::vec4 _Extent, const CPlaneVertices& _rVertices, const CPlaneIndices& _rIndices, int _ID);
+
         void RemovePlane(int _ID);
+
         const std::map<int, SPlane>& GetPlanes() const;
 
         void PauseIntegration(bool _Paused);

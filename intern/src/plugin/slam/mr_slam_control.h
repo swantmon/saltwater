@@ -762,6 +762,40 @@ namespace MR
                     uint16_t* pIndices = reinterpret_cast<uint16_t*>(Decompressed.data() + Offset);
 
                     Offset += IndexCount * sizeof(pIndices[0]);
+
+                    assert(UVCount == VertexCount);
+                    assert(IndexCount % 3 == 0);
+
+                    std::vector<CSLAMReconstructor::SPlaneVertex> Vertices;
+                    std::vector<uint32_t> Indices;
+
+                    for (int i = 0; i < VertexCount; ++ i)
+                    {
+                        CSLAMReconstructor::SPlaneVertex Vertex;
+
+                        Vertex.m_Position = glm::vec3(pVertices[i].x, pVertices[i].y, pVertices[i].z);
+                        Vertex.m_UV = glm::vec2(pUV[i].x, pUV[i].y);
+
+                        Vertices.push_back(Vertex);
+                    }
+
+                    for (int i = 0; i < IndexCount; ++i)
+                    {
+                        Indices.push_back(pIndices[i]);
+                    }
+
+                    switch (PlaneAction)
+                    {
+                    case ADDPLANE:
+                        m_Reconstructor.AddPlaneWithMesh(PlaneTransform, PlaneExtent, Vertices, Indices, PlaneID);
+                        break;
+                    case UPDATEPLANE:
+                        m_Reconstructor.UpdatePlaneWithMesh(PlaneTransform, PlaneExtent, Vertices, Indices, PlaneID);
+                        break;
+                    case REMOVEPLANE:
+                        m_Reconstructor.RemovePlane(PlaneID);
+                        break;
+                    }
                 }
                 else
                 {
