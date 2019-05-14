@@ -726,11 +726,17 @@ namespace MR
             }
             else if (MessageType == PLANE)
             {
-                int PlaneID = *reinterpret_cast<int*>(Decompressed.data() + sizeof(int32_t));
-                int PlaneAction = *reinterpret_cast<int*>(Decompressed.data() + 2 * sizeof(int32_t));
+                int Offset = sizeof(int32_t);
+                int PlaneID = *reinterpret_cast<int*>(Decompressed.data() + Offset);
 
-                glm::mat4 PlaneTransform = *reinterpret_cast<glm::mat4*>(Decompressed.data() + 3 * sizeof(int32_t));
-                glm::vec4 PlaneExtent = *reinterpret_cast<glm::vec4*>(Decompressed.data() + 3 * sizeof(int32_t) + sizeof(glm::mat4));
+                Offset += sizeof(PlaneID);
+                int PlaneAction = *reinterpret_cast<int*>(Decompressed.data() + Offset);
+
+                Offset += sizeof(PlaneAction);
+                glm::mat4 PlaneTransform = *reinterpret_cast<glm::mat4*>(Decompressed.data() + Offset);
+
+                Offset += sizeof(PlaneTransform);
+                glm::vec4 PlaneExtent = *reinterpret_cast<glm::vec4*>(Decompressed.data() + Offset);
 
                 PlaneTransform = glm::eulerAngleX(glm::half_pi<float>()) * PlaneTransform;
 
