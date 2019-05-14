@@ -106,6 +106,7 @@ namespace GUI
 
         SSorter m_Sorter;
 
+        std::filesystem::path m_RootPath;
         std::filesystem::path m_CurrentPath;
         std::filesystem::space_info m_SpaceInfo;
 

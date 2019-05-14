@@ -1,6 +1,7 @@
 
 #include "editor/edit_precompiled.h"
 
+#include "engine/core/core_asset_manager.h"
 #include "engine/core/core_console.h"
 
 #include "editor/edit_assets_panel.h"
@@ -45,7 +46,8 @@ namespace GUI
         , m_Regex    (".*.[]?")
         , m_SpaceInfo()
     {
-        m_CurrentPath = std::filesystem::current_path();
+        m_RootPath    = Core::AssetManager::GetPathToAssets();
+        m_CurrentPath = Core::AssetManager::GetPathToAssets();
 
         m_SelectedFiles.clear();
 
@@ -80,13 +82,20 @@ namespace GUI
 
         ImGui::SameLine();
 
-        ImGui::Text(m_CurrentPath.string().c_str());
+        std::string CurrentFilePath = std::filesystem::relative(m_CurrentPath, m_RootPath).string();
+
+        std::replace(CurrentFilePath.begin(), CurrentFilePath.end(), '\\', '/');
+
+        ImGui::Text(CurrentFilePath.c_str());
 
         ImGui::BeginChild("Directories", ImVec2(250, 0), true, ImGuiWindowFlags_HorizontalScrollbar);
 
-        if (ImGui::Selectable("..", false, 0, ImVec2(ImGui::GetWindowContentRegionWidth(), 0)))
+        if (m_RootPath != m_CurrentPath)
         {
-            DoGoUp = true;
+            if (ImGui::Selectable("..", false, 0, ImVec2(ImGui::GetWindowContentRegionWidth(), 0)))
+            {
+                DoGoUp = true;
+            }
         }
 
         for (auto& rCurrentDirectory : m_Directories)
@@ -300,7 +309,7 @@ namespace GUI
 
                     if (std::regex_match(rCurrentItemInPath.path().filename().string(), m_Regex))
                     {
-                        std::string CurrentFilePath = rCurrentItemInPath.path().string();
+                        std::string CurrentFilePath = std::filesystem::relative(rCurrentItemInPath.path(), m_RootPath).string();
 
                         std::replace(CurrentFilePath.begin(), CurrentFilePath.end(), '\\', '/');
 
