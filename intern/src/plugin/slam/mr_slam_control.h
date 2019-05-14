@@ -738,19 +738,45 @@ namespace MR
                 Offset += sizeof(PlaneTransform);
                 glm::vec4 PlaneExtent = *reinterpret_cast<glm::vec4*>(Decompressed.data() + Offset);
 
+                Offset += sizeof(PlaneExtent);
+
                 PlaneTransform = glm::eulerAngleX(glm::half_pi<float>()) * PlaneTransform;
 
-                switch (PlaneAction)
+                if (Offset < Decompressed.size()) // Is there additional data (a mesh)?
                 {
-                case ADDPLANE:
-                    m_Reconstructor.AddPlane(PlaneTransform, PlaneExtent, PlaneID);
-                    break;
-                case UPDATEPLANE:
-                    m_Reconstructor.UpdatePlane(PlaneTransform, PlaneExtent, PlaneID);
-                    break;
-                case REMOVEPLANE:
-                    m_Reconstructor.RemovePlane(PlaneID);
-                    break;
+                    int VertexCount = *reinterpret_cast<int*>(Decompressed.data() + Offset);
+
+                    Offset += sizeof(VertexCount);
+                    glm::vec4* pVertices = reinterpret_cast<glm::vec4*>(Decompressed.data() + Offset);
+
+                    Offset += VertexCount * sizeof(pVertices[0]);
+                    int UVCount = *reinterpret_cast<int*>(Decompressed.data() + Offset);
+
+                    Offset += sizeof(UVCount);
+                    glm::vec2* pUV = reinterpret_cast<glm::vec2*>(Decompressed.data() + Offset);
+
+                    Offset += UVCount * sizeof(pUV[0]);
+                    int IndexCount = *reinterpret_cast<int*>(Decompressed.data() + Offset);
+
+                    Offset += sizeof(IndexCount);
+                    uint16_t* pIndices = reinterpret_cast<uint16_t*>(Decompressed.data() + Offset);
+
+                    Offset += IndexCount * sizeof(pIndices[0]);
+                }
+                else
+                {
+                    switch (PlaneAction)
+                    {
+                    case ADDPLANE:
+                        m_Reconstructor.AddPlane(PlaneTransform, PlaneExtent, PlaneID);
+                        break;
+                    case UPDATEPLANE:
+                        m_Reconstructor.UpdatePlane(PlaneTransform, PlaneExtent, PlaneID);
+                        break;
+                    case REMOVEPLANE:
+                        m_Reconstructor.RemovePlane(PlaneID);
+                        break;
+                    }
                 }
 
                 m_pPlaneExtractor->UpdatePlane(PlaneID);
