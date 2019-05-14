@@ -52,7 +52,7 @@ namespace GUI
         m_Sorter.m_SortModeSize = UNSORTED;
         m_Sorter.m_SortModeDate = UNSORTED;
 
-        ClearCache();
+        RefreshCache();
     }
 
     // -----------------------------------------------------------------------------
@@ -137,7 +137,7 @@ namespace GUI
             m_Sorter.m_SortModeSize = UNSORTED;
             m_Sorter.m_SortModeDate = UNSORTED;
 
-            ClearCache();
+            RefreshCache();
         }
 
         ImGui::NextColumn();
@@ -171,7 +171,7 @@ namespace GUI
             }
             m_Sorter.m_SortModeName = UNSORTED;
             m_Sorter.m_SortModeDate = UNSORTED;
-            ClearCache();
+            RefreshCache();
         }
         ImGui::NextColumn();
 
@@ -205,7 +205,7 @@ namespace GUI
             m_Sorter.m_SortModeName = UNSORTED;
             m_Sorter.m_SortModeSize = UNSORTED;
 
-            ClearCache();
+            RefreshCache();
         }
 
         ImGui::NextColumn();
@@ -246,13 +246,13 @@ namespace GUI
         {
             m_CurrentPath = m_CurrentPath.parent_path();
 
-            ClearCache();
+            RefreshCache();
         }
         else if (!GoDownString.empty())
         {
             m_CurrentPath = m_CurrentPath / GoDownString;
 
-            ClearCache();
+            RefreshCache();
         }
 
         ImGui::End();
@@ -267,61 +267,11 @@ namespace GUI
 
     // -----------------------------------------------------------------------------
 
-    void CAssetsPanel::FillRoots()
-    {
-        DWORD Drives = GetLogicalDrives();
-
-        for (TCHAR CurrentDrive = 'A'; CurrentDrive <= 'Z'; CurrentDrive++, Drives >>= 1)
-        {
-            if (!(Drives & 1)) continue;
-
-            BOOL success = FALSE;
-            TCHAR rootPath[4];
-            TCHAR volumeName[MAX_PATH + 1];
-
-            rootPath[0] = CurrentDrive;
-            rootPath[1] = ':';
-            rootPath[2] = '\\';
-            rootPath[3] = '\0';
-
-            success = GetVolumeInformation(rootPath, volumeName, MAX_PATH + 1, nullptr, nullptr, nullptr, nullptr, 0);
-
-            if (!success) continue;
-
-#ifdef UNICODE
-            int needed;
-            LPSTR str;
-
-            needed = WideCharToMultiByte(CP_UTF8, 0, rootPath, -1, nullptr, 0, nullptr, nullptr);
-            if (needed <= 0) continue;
-            str = (LPSTR)_malloca(needed);
-            WideCharToMultiByte(CP_UTF8, 0, rootPath, -1, str, needed, nullptr, nullptr);
-            std::string root = str;
-            _freea(str);
-
-            needed = WideCharToMultiByte(CP_UTF8, 0, volumeName, -1, nullptr, 0, nullptr, nullptr);
-            if (needed <= 0) continue;
-            str = (LPSTR)_malloca(needed);
-            WideCharToMultiByte(CP_UTF8, 0, volumeName, -1, str, needed, nullptr, nullptr);
-            std::string label = root + " (" + str + ")";
-            _freea(str);
-#else
-            std::string root = rootName;
-            std::string label = root + " (" + volumeName + ")";
-#endif
-            m_Roots.push_back({ root, label });
-        }
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CAssetsPanel::ClearCache()
+    void CAssetsPanel::RefreshCache()
     {
         m_Roots.clear();
         m_Directories.clear();
         m_Files.clear();
-
-        FillRoots();
 
         m_SpaceInfo = std::filesystem::space(m_CurrentPath);
 

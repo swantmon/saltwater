@@ -103,8 +103,7 @@ namespace GUI
 
     private:
 
-        void FillRoots();
-        void ClearCache();
+        void RefreshCache();
     };
 } // namespace GUI
 } // namespace Edit
