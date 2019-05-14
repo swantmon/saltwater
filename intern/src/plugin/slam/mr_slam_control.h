@@ -774,7 +774,7 @@ namespace MR
                         CSLAMReconstructor::SPlaneVertex Vertex;
 
                         Vertex.m_Position = glm::vec3(pVertices[i].x, pVertices[i].y, pVertices[i].z);
-                        Vertex.m_UV = glm::vec2(pUV[i].x, pUV[i].y);
+                        //Vertex.m_UV = glm::vec2(pUV[i].x, pUV[i].y);
 
                         Vertices.push_back(Vertex);
                     }

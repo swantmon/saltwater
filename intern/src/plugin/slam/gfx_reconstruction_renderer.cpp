@@ -1664,11 +1664,11 @@ namespace
         
         for (const auto& Plane : rPlanes)
         {
-            if (Plane.second.m_VertexBuffer != nullptr)
+            if (Plane.second.m_Mesh != nullptr)
             {
                 const unsigned int Offset = 0;
-                ContextManager::SetVertexBuffer(Plane.second.m_VertexBuffer);
-                ContextManager::SetIndexBuffer(Plane.second.m_IndexBuffer, Offset);
+                ContextManager::SetVertexBuffer(Plane.second.m_Mesh->GetLOD(0)->GetSurface()->GetVertexBuffer());
+                ContextManager::SetIndexBuffer(Plane.second.m_Mesh->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
 
                 ContextManager::SetInputLayout(m_CameraInputLayoutPtr);
                 ContextManager::SetTopology(STopology::TriangleList);
@@ -1678,7 +1678,7 @@ namespace
 
                 BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
 
-                ContextManager::DrawIndexed(m_PlaneMeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
+                ContextManager::DrawIndexed(Plane.second.m_Mesh->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
             }
             else
             {

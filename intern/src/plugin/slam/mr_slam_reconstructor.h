@@ -63,14 +63,13 @@ namespace MR
             glm::mat4 m_Transform;
             glm::vec4 m_Extent;
 
-            Gfx::CBufferPtr m_VertexBuffer;
-            Gfx::CBufferPtr m_IndexBuffer;
+            Gfx::CMeshPtr m_Mesh;
         };
 
         struct SPlaneVertex
         {
             glm::vec3 m_Position;
-            glm::vec2 m_UV;
+            //glm::vec2 m_UV;
         };
 
         using CPlaneVertices = std::vector<SPlaneVertex>;

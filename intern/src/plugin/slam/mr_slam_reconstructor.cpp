@@ -1858,23 +1858,9 @@ namespace MR
 
     void CSLAMReconstructor::AddPlaneWithMesh(glm::mat4 _Transform, glm::vec4 _Extent, const CPlaneVertices& _rVertices, const CPlaneIndices& _rIndices, int _ID)
     {
-        SBufferDescriptor BufferDesc = {};
-        
-        BufferDesc.m_Binding = CBuffer::VertexBuffer;
-        BufferDesc.m_Access = CBuffer::CPUWrite;
-        BufferDesc.m_NumberOfBytes = _rVertices.size() * sizeof(_rVertices[0]);
-        BufferDesc.m_pBytes = const_cast<SPlaneVertex*>(_rVertices.data());
-        BufferDesc.m_Usage = CBuffer::GPURead;
-        
-        CBufferPtr VertexBuffer = BufferManager::CreateBuffer(BufferDesc);
+        auto MeshPtr =  MeshManager::CreateMesh(_rVertices.data(), _rVertices.size(), sizeof(_rVertices[0]), _rIndices.data(), _rIndices.size());
 
-        BufferDesc.m_Binding = CBuffer::IndexBuffer;
-        BufferDesc.m_NumberOfBytes = _rIndices.size() * sizeof(_rIndices[0]);
-        BufferDesc.m_pBytes = const_cast<uint32_t*>(_rIndices.data());
-
-        CBufferPtr IndexBuffer = BufferManager::CreateBuffer(BufferDesc);
-
-        SPlane Plane = { _Transform, _Extent, VertexBuffer, IndexBuffer };
+        SPlane Plane = { _Transform, _Extent, MeshPtr };
 
         m_Planes[_ID] = Plane;
     }
