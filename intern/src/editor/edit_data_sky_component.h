@@ -61,40 +61,7 @@ namespace Dt
             // -----------------------------------------------------------------------------
             // Texture
             // -----------------------------------------------------------------------------
-            if (m_TexturePtr != nullptr)
-            {
-                std::string Texture = m_TexturePtr->GetFileName();
-
-                if (ImGui::TextureField("##SKY_TEXTURE", "Texture", Texture))
-                {
-                    Gfx::STextureDescriptor TextureDescriptor;
-
-                    TextureDescriptor.m_NumberOfPixelsU = Gfx::STextureDescriptor::s_NumberOfPixelsFromSource;
-                    TextureDescriptor.m_NumberOfPixelsV = Gfx::STextureDescriptor::s_NumberOfPixelsFromSource;
-                    TextureDescriptor.m_NumberOfPixelsW = 1;
-                    TextureDescriptor.m_NumberOfMipMaps = 1;
-                    TextureDescriptor.m_NumberOfTextures = 1;
-                    TextureDescriptor.m_Access = Gfx::CTexture::CPUWrite;
-                    TextureDescriptor.m_Usage = Gfx::CTexture::GPURead;
-                    TextureDescriptor.m_Semantic = Gfx::CTexture::Diffuse;
-                    TextureDescriptor.m_pFileName = 0;
-                    TextureDescriptor.m_pPixels = 0;
-                    TextureDescriptor.m_Binding = Gfx::CTexture::ShaderResource;
-                    TextureDescriptor.m_Format = Gfx::STextureDescriptor::s_FormatFromSource;
-                    TextureDescriptor.m_pFileName = Texture.c_str();
-
-                    if (GetType() == Dt::CSkyComponent::Cubemap)
-                    {
-                        TextureDescriptor.m_NumberOfTextures = 6;
-
-                        SetTexture(Gfx::TextureManager::CreateCubeTexture(TextureDescriptor));
-                    }
-                    else
-                    {
-                        SetTexture(Gfx::TextureManager::CreateTexture2D(TextureDescriptor));
-                    }
-                }
-            }
+            ImGui::TextureField("##SKY_TEXTURE", "Texture", m_Texture);
 
             // -----------------------------------------------------------------------------
             // Intensity
