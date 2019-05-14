@@ -5,6 +5,7 @@
 
 #include "editor/edit_asset_helper.h"
 
+#include "editor/imgui/imgui_internal.h"
 #include "editor/imgui/extensions/ImTextureSlot.h"
 
 #include "engine/graphic/gfx_texture_manager.h"
@@ -27,25 +28,25 @@ namespace ImGui
 
         if (_rTexture.length() > 0 || GfxImagePtr != nullptr)
         {
-            ImGui::Image((void*)(intptr_t)GfxImagePtr->GetNativeHandle(), Size);
+            Image((void*)(intptr_t)GfxImagePtr->GetNativeHandle(), Size);
 
             if (ImGui::IsItemHovered())
             {
-                ImGui::BeginTooltip();
-                ImGui::Image((void*)(intptr_t)GfxImagePtr->GetNativeHandle(), TooltipSize);
-                ImGui::EndTooltip();
+                BeginTooltip();
+                Image((void*)(intptr_t)GfxImagePtr->GetNativeHandle(), TooltipSize);
+                EndTooltip();
             }
         }
         else
         {
-            ImGui::ColorButton(_pID, DefaultColor, ImGuiColorEditFlags_NoTooltip, Size);
+            ColorButton(_pID, DefaultColor, ImGuiColorEditFlags_NoTooltip, Size);
         }
 
         bool HasNewValue = false;
 
-        if (ImGui::BeginDragDropTarget())
+        if (BeginDragDropTarget())
         {
-            if (const ImGuiPayload * _pPayload = ImGui::AcceptDragDropPayload("ASSETS_DRAGDROP", _ImGuiDragDropFlags))
+            if (const ImGuiPayload * _pPayload = AcceptDragDropPayload("ASSETS_DRAGDROP", _ImGuiDragDropFlags))
             {
                 auto& DraggedAsset = *static_cast<Edit::CAsset*>(_pPayload->Data);
 
@@ -57,7 +58,7 @@ namespace ImGui
                 }
             }
 
-            ImGui::EndDragDropTarget();
+            EndDragDropTarget();
         }
 
         return HasNewValue;
@@ -65,15 +66,15 @@ namespace ImGui
 
     // -----------------------------------------------------------------------------
 
-    bool TextureField(const char* _pID, const char* _pLabel, std::string& _rTexture, const char* _pNoTexture, ImVec4 DefaultColor, ImVec2 Size, ImVec2 TooltipSize, ImGuiDragDropFlags _ImGuiDragDropFlags)
+    bool TextureField(const char* _pID, const char* _pLabel, std::string& _rTexture, const char* _pNoTexture, ImVec4 _DefaultColor, ImVec2 _Size, ImVec2 _TooltipSize, ImGuiDragDropFlags _ImGuiDragDropFlags)
     {
-        bool Result = ImGui::TextureSlot(_pID, _rTexture); ImGui::SameLine();
+        bool Result = TextureSlot(_pID, _rTexture, _DefaultColor, _Size, _TooltipSize, _ImGuiDragDropFlags); SameLine();
 
-        char* pText = (char*)_pNoTexture;
+        auto pText = (char*)_pNoTexture;
 
         if (_rTexture.length() > 0) pText = (char*)_rTexture.c_str();
 
-        ImGui::InputText(_pLabel, pText, strlen(pText), ImGuiInputTextFlags_ReadOnly);
+        InputText(_pLabel, pText, strlen(pText), ImGuiInputTextFlags_ReadOnly);
 
         return Result;
     }
