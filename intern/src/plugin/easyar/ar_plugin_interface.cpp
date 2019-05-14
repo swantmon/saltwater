@@ -116,6 +116,13 @@ namespace AR
 
         m_FirstTargetIsWorldCenter = Core::CProgramParameters::GetInstance().Get("mr:camera:first_marker_is_world_center", true);
 
+        if (Key == "<INSERT YOUR EASYAR KEY HERE>")
+        {
+            ENGINE_CONSOLE_ERROR("No key for EasyAR found in config file.");
+
+            return;
+        }
+
         // -----------------------------------------------------------------------------
         // Engine
         // -----------------------------------------------------------------------------

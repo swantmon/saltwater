@@ -21,7 +21,7 @@ namespace Dt
 
             ImGui::TextureField("##AREA_LIGHT_TEXTURE", "Texture", m_Texture);
 
-            ImGui::DragFloat("Intensity", &m_Intensity);
+            ImGui::DragFloat("Intensity", &m_Intensity, 10.0f);
 
             ImGui::DragFloat3("Direction", &m_Direction.x);
 
