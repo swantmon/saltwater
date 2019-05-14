@@ -13,7 +13,7 @@
 
 namespace Edit
 {
-    std::array<std::regex, 2> CAsset::s_Filter = { std::regex(".*.(obj|dae|fbx)"), std::regex(".*.(mat)") };
+    std::array<std::regex, CAsset::NumberOfTypes> CAsset::s_Filter = { std::regex(".*.(obj|dae|fbx)"), std::regex(".*.(mat)"), std::regex(".*.(jpg|tga|dds|png|hdr)"), std::regex(".*.(sws)"), std::regex(".*.(swr)") };
 } // namespace Edit
 
 namespace Edit

@@ -19,6 +19,9 @@ namespace Edit
         {
             Model,
             Material,
+            Texture,
+            Scene,
+            Record,
             NumberOfTypes,
             Undefined = -1,
         };
