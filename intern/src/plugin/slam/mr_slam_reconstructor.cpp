@@ -1901,7 +1901,7 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    const std::map<int, CSLAMReconstructor::SPlane>& CSLAMReconstructor::GetPlanes() const
+    std::map<int, CSLAMReconstructor::SPlane>& CSLAMReconstructor::GetPlanes()
     {
         return m_Planes;
     }

@@ -31,6 +31,7 @@ namespace MR
         ~CPlaneColorizer();
 
         void UpdatePlane(int _PlaneID);
+        void UpdatePlane(CSLAMReconstructor::SPlane& _rPlane);
 
         void ColorizeAllPlanes();
 

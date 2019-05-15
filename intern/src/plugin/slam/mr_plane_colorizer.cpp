@@ -52,17 +52,39 @@ namespace MR
 
         if (Iter != rPlaneMap.end())
         {
-            const auto& rPlane = *Iter;
+            auto& rPlane = Iter->second;
+
+            UpdatePlane(rPlane);
         }
     }
 
+    // -----------------------------------------------------------------------------
+
+    void CPlaneColorizer::UpdatePlane(CSLAMReconstructor::SPlane& _rPlane)
+    {
+
+    }
+    
     // -----------------------------------------------------------------------------
 
     void CPlaneColorizer::ColorizeAllPlanes()
     {
         auto& rPlaneMap = m_pReconstructor->GetPlanes();
 
-        for (auto Iter : rPlaneMap)
+        std::vector<unsigned char> Pixels;
+
+        for (int i = 0; i < m_PlaneTextureSize; ++ i)
+        {
+            for (int j = 0; j < m_PlaneTextureSize; ++ j)
+            {
+                Pixels.push_back(255);
+                Pixels.push_back(20);
+                Pixels.push_back(147);
+                Pixels.push_back(255);
+            }
+        }
+
+        for (auto& Iter : rPlaneMap)
         {
             auto& rPlane = Iter.second;
 
@@ -82,8 +104,11 @@ namespace MR
                 TextureDescriptor.m_Usage = CTexture::EUsage::GPUReadWrite;
                 TextureDescriptor.m_Semantic = CTexture::UndefinedSemantic;
                 TextureDescriptor.m_Format = CTexture::R8G8B8A8_UBYTE;
+                TextureDescriptor.m_pPixels = Pixels.data();
 
-                auto TexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
+                rPlane.m_TexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
+
+                UpdatePlane(rPlane);
             }
         }
     }
