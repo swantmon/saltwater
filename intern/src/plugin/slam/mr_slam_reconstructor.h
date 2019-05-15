@@ -63,7 +63,9 @@ namespace MR
             glm::mat4 m_Transform;
             glm::vec4 m_Extent;
 
-            Gfx::CMeshPtr m_Mesh;
+            Gfx::CMeshPtr m_MeshPtr;
+
+            Gfx::CTexturePtr m_TexturePtr;
         };
 
         struct SPlaneVertex

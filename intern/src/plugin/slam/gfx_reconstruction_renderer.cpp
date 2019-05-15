@@ -1713,9 +1713,9 @@ namespace
 
         SDrawCallConstantBuffer BufferData;
         
-        for (const auto& Plane : rPlanes)
+        for (const auto& rPlane : rPlanes)
         {
-            bool HasMesh = Plane.second.m_Mesh != nullptr;
+            bool HasMesh = rPlane.second.m_MeshPtr != nullptr;
 
             bool RenderMesh = (m_PlaneRenderMode == EPlaneRenderingMode::ALL || m_PlaneRenderMode == EPlaneRenderingMode::MESH_ONLY || m_PlaneRenderMode == EPlaneRenderingMode::MESH_WITH_EXTENT) && HasMesh;
 
@@ -1723,26 +1723,32 @@ namespace
 
             if (RenderMesh)
             {
+                ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
+
                 ContextManager::SetShaderVS(m_PlaneMeshVSPtr);
                 ContextManager::SetShaderPS(m_PlaneMeshFSPtr);
 
                 const unsigned int Offset = 0;
-                ContextManager::SetVertexBuffer(Plane.second.m_Mesh->GetLOD(0)->GetSurface()->GetVertexBuffer());
-                ContextManager::SetIndexBuffer(Plane.second.m_Mesh->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
+                ContextManager::SetVertexBuffer(rPlane.second.m_MeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
+                ContextManager::SetIndexBuffer(rPlane.second.m_MeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
+
+                ContextManager::SetTexture(0, rPlane.second.m_TexturePtr);
 
                 ContextManager::SetInputLayout(m_PlaneMeshLayoutPtr);
                 ContextManager::SetTopology(STopology::TriangleList);
 
-                BufferData.m_WorldMatrix = Plane.second.m_Transform;
+                BufferData.m_WorldMatrix = rPlane.second.m_Transform;
                 BufferData.m_Color = glm::vec4(1.0f, 0.0f, 0.0f, 0.3f);
 
                 BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
 
-                ContextManager::DrawIndexed(Plane.second.m_Mesh->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
+                ContextManager::DrawIndexed(rPlane.second.m_MeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
             }
 
             if (RenderExtent)
             {
+                ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Wireframe));
+
                 ContextManager::SetShaderVS(m_OutlineVSPtr);
                 ContextManager::SetShaderPS(m_OutlineFSPtr);
 
@@ -1753,7 +1759,7 @@ namespace
                 ContextManager::SetInputLayout(m_CameraInputLayoutPtr);
                 ContextManager::SetTopology(STopology::TriangleList);
 
-                BufferData.m_WorldMatrix = Plane.second.m_Transform * glm::scale(glm::vec3(Plane.second.m_Extent));
+                BufferData.m_WorldMatrix = rPlane.second.m_Transform * glm::scale(glm::vec3(rPlane.second.m_Extent));
                 BufferData.m_Color = glm::vec4(1.0f, 1.0f, 0.0f, 0.3f);
 
                 BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
