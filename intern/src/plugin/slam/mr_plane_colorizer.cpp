@@ -80,19 +80,6 @@ namespace MR
     {
         auto& rPlaneMap = m_pReconstructor->GetPlanes();
 
-        std::vector<unsigned char> Pixels;
-
-        for (int i = 0; i < m_PlaneTextureSize; ++ i)
-        {
-            for (int j = 0; j < m_PlaneTextureSize; ++ j)
-            {
-                Pixels.push_back(255);
-                Pixels.push_back(20);
-                Pixels.push_back(147);
-                Pixels.push_back(255);
-            }
-        }
-
         for (auto& Iter : rPlaneMap)
         {
             auto& rPlane = Iter.second;
@@ -113,7 +100,7 @@ namespace MR
                     TextureDescriptor.m_Usage = CTexture::EUsage::GPUReadWrite;
                     TextureDescriptor.m_Semantic = CTexture::UndefinedSemantic;
                     TextureDescriptor.m_Format = CTexture::R8G8B8A8_UBYTE;
-                    TextureDescriptor.m_pPixels = Pixels.data();
+                    TextureDescriptor.m_pPixels = nullptr;
 
                     rPlane.m_TexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
                 }
@@ -153,7 +140,7 @@ namespace MR
         ContextManager::SetTopology(STopology::TriangleList);
 
         BufferData.m_WorldMatrix = _rPlane.m_Transform;
-        BufferData.m_Color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+        BufferData.m_Color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
 
         BufferManager::UploadBufferData(m_ConstantBufferPtr, &BufferData);
 
@@ -174,6 +161,7 @@ namespace MR
             << "#define TRUNCATED_DISTANCE " << Settings.m_TruncatedDistance / 1000.0f << " \n"
             << "#define VOLUME_SIZE " << Settings.m_VolumeSize << " \n"
             << "#define VOXEL_SIZE " << Settings.m_VoxelSize << " \n"
+            << "#define MAX_INTEGRATION_WEIGHT " << Settings.m_MaxIntegrationWeight << '\n'
             << "#define ROOT_RESOLUTION " << Settings.m_GridResolutions[0] << '\n'
             << "#define LEVEL1_RESOLUTION " << Settings.m_GridResolutions[1] << '\n'
             << "#define LEVEL2_RESOLUTION " << Settings.m_GridResolutions[2] << '\n'
@@ -182,8 +170,7 @@ namespace MR
             << "#define VOXELS_PER_LEVEL2GRID " << Settings.m_VoxelsPerGrid[2] << " \n"
             << "#define RAYCAST_NEAR " << 0.0f << " \n"
             << "#define RAYCAST_FAR " << 1000.0f << " \n"
-            << "#define MIN_TREE_WEIGHT " << Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:min_weight", 30) << " \n"
-            << "#define CAPTURE_COLOR\n";
+            << "#define MIN_TREE_WEIGHT " << Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:min_weight", 30) << " \n";
 
         std::string DefineString = DefineStream.str();
 

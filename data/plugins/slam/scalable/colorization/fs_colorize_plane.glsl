@@ -14,7 +14,7 @@ layout(location = 0) in vec3 in_WSPosition;
 
 void main()
 {
-    imageStore(cs_Texture, ivec2(gl_FragCoord.xy), vec4(0.5f));
+    imageStore(cs_Texture, ivec2(gl_FragCoord.xy), g_Color);
 }
 
 #endif // __INCLUDE_FS_OUTLINE_GLSL__
