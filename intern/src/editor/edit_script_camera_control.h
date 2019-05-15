@@ -40,5 +40,11 @@ namespace Scpt
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Scpt::CCameraControlScript::DirtyCreate);
         }
+
+        // -----------------------------------------------------------------------------
+
+        void OnDropAsset(const Edit::CAsset&)
+        {
+        }
     };
 } // namespace Scpt

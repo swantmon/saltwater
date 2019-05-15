@@ -33,5 +33,11 @@ namespace Dt
         {
             return "Mesh";
         }
+
+        // -----------------------------------------------------------------------------
+
+        void OnDropAsset(const Edit::CAsset&)
+        {
+        }
     };
 } // namespace Dt

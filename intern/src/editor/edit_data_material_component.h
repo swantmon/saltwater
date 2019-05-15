@@ -19,15 +19,6 @@ namespace Dt
 
         void OnGUI()
         {
-            ImGuiDragDropFlags ImGuiTargetFlags = 0;
-
-            // ImGuiTargetFlags |= ImGuiDragDropFlags_AcceptBeforeDelivery;    // Don't wait until the delivery (release mouse button on a target) to do something
-            // ImGuiTargetFlags |= ImGuiDragDropFlags_AcceptNoDrawDefaultRect; // Don't display the yellow rectangle
-
-            // -----------------------------------------------------------------------------
-
-            ImGui::BeginChild("MATERIAL_COMPONENT_GUI_CHILD");
-
             ImGui::TextureSlot("##ALBEDO_TEXTURE", m_ColorTexture); ImGui::SameLine();
 
             ImGui::ColorEdit4("Albedo", &m_Color.x);
@@ -87,25 +78,6 @@ namespace Dt
             ImGui::Dummy(ImVec2(20, 20)); ImGui::SameLine();
 
             ImGui::DragFloat2("Offset", &m_TilingOffset.z);
-
-            // -----------------------------------------------------------------------------
-
-            ImGui::EndChild();
-
-            if (ImGui::BeginDragDropTarget())
-            {
-                if (const ImGuiPayload* _pPayload = ImGui::AcceptDragDropPayload("ASSETS_DRAGDROP", ImGuiTargetFlags))
-                {
-                    auto& DraggedAsset = *static_cast<Edit::CAsset*>(_pPayload->Data);
-
-                    if (DraggedAsset.GetType() == Edit::CAsset::Material)
-                    {
-                        Gfx::MaterialManager::CreateMaterialFromXML(DraggedAsset.GetPathToFile(), this);
-                    }
-                }
-
-                ImGui::EndDragDropTarget();
-            }
         }
 
         // -----------------------------------------------------------------------------
@@ -113,6 +85,16 @@ namespace Dt
         const char* GetHeader()
         {
             return "Material";
+        }
+
+        // -----------------------------------------------------------------------------
+
+        void OnDropAsset(const Edit::CAsset& _rAsset)
+        {
+            if (_rAsset.GetType() == Edit::CAsset::Material)
+            {
+                Gfx::MaterialManager::CreateMaterialFromXML(_rAsset.GetPathToFile(), this);
+            }
         }
     };
 } // namespace Dt

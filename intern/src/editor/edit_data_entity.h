@@ -107,5 +107,11 @@ namespace Dt
         {
             return "Entity";
         }
+
+        // -----------------------------------------------------------------------------
+
+        void OnDropAsset(const Edit::CAsset&)
+        {
+        }
     };
 } // namespace Dt

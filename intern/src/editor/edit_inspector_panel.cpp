@@ -120,9 +120,11 @@ namespace GUI
                         auto Panel = rFactory.Get(Hash, pComponent);
 
                         ImGui::PushID(IndexID);
-
+                        
                         if (ImGui::CollapsingHeader(Panel->GetHeader()))
                         {
+                            ImGui::BeginChild("COMPONENT");
+
                             bool IsActive = pComponent->IsActive();
 
                             ImGui::Checkbox("Active##ComponentActive", &IsActive);
@@ -130,9 +132,23 @@ namespace GUI
                             pComponent->SetActive(IsActive);
 
                             Panel->OnGUI();
+
+                            ImGui::EndChild();
                         }
 
                         ImGui::PopID();
+
+                        if (ImGui::BeginDragDropTarget())
+                        {
+                            if (const ImGuiPayload * _pPayload = ImGui::AcceptDragDropPayload("ASSETS_DRAGDROP", 0))
+                            {
+                                auto& DraggedAsset = *static_cast<Edit::CAsset*>(_pPayload->Data);
+
+                                Panel->OnDropAsset(DraggedAsset);
+                            }
+
+                            ImGui::EndDragDropTarget();
+                        }
 
                         ++IndexID;
                     }
