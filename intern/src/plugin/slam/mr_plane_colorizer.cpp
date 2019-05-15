@@ -136,7 +136,7 @@ namespace MR
         ContextManager::SetTargetSet(m_TargetSetPtr);
         ContextManager::SetViewPortSet(m_ViewPortSetPtr);
 
-        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::NoCull));
         ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::Default));
         ContextManager::SetBlendState(StateManager::GetBlendState(CBlendState::Default));
 
