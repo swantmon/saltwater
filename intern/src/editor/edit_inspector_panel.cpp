@@ -3,18 +3,20 @@
 
 #include "base/base_include_glm.h"
 
+#include "editor/edit_asset_helper.h"
 #include "editor/edit_component_factory.h"
 #include "editor/edit_gui_factory.h"
 #include "editor/edit_inspector_panel.h"
 
 #include "editor/imgui/imgui.h"
 
-#include "engine/data/data_entity.h"
-#include "engine/data/data_entity_manager.h"
-#include "engine/data/data_transformation_facet.h"
 #include "engine/data/data_component_facet.h"
 #include "engine/data/data_component_manager.h"
+#include "engine/data/data_entity.h"
+#include "engine/data/data_entity_manager.h"
+#include "engine/data/data_material_component.h"
 #include "engine/data/data_script_component.h"
+#include "engine/data/data_transformation_facet.h"
 
 namespace Edit
 {
@@ -169,6 +171,33 @@ namespace GUI
             }
 
             ImGui::PopItemWidth();
+
+            // -----------------------------------------------------------------------------
+            // Special issues
+            // -----------------------------------------------------------------------------
+            if (pComponentFacet && pComponentFacet->HasComponent<Dt::CMaterialComponent>() == false)
+            {
+                if (ImGui::BeginDragDropTarget())
+                {
+                    if (const ImGuiPayload * _pPayload = ImGui::AcceptDragDropPayload("ASSETS_DRAGDROP", 0))
+                    {
+                        auto& DraggedAsset = *static_cast<Edit::CAsset*>(_pPayload->Data);
+
+                        if (DraggedAsset.GetType() == Edit::CAsset::Material)
+                        {
+                            auto pComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CMaterialComponent>();
+
+                            pComponent->SetFileName(DraggedAsset.GetPathToFile());
+
+                            m_pEntity->AttachComponent(pComponent);
+
+                            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Dt::CMaterialComponent::DirtyCreate);
+                        }
+                    }
+
+                    ImGui::EndDragDropTarget();
+                }
+            }
         }
 
         ImGui::End();

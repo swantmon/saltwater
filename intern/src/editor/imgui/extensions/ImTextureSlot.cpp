@@ -17,18 +17,31 @@ namespace ImGui
         auto GetHash = [](const std::string & _rText)
         {
             auto NumberOfBytes = static_cast<unsigned int>(_rText.length());
-            const auto* pData = static_cast<const void*>(_rText.c_str());
+            auto pData = static_cast<const void*>(_rText.c_str());
 
             return Base::CRC32(pData, NumberOfBytes);
         };
 
-        // -----------------------------------------------------------------------------
+        ImGuiWindow* window = GetCurrentWindow();
 
+        if (window->SkipItems)
+            return false;
+
+        ImGuiID id = window->GetID(_pID);
+
+        // -----------------------------------------------------------------------------
+        // Item
+        // -----------------------------------------------------------------------------
         auto GfxImagePtr = Gfx::TextureManager::GetTextureByHash(GetHash(_rTexture));
 
-        if (_rTexture.length() > 0 || GfxImagePtr != nullptr)
+        if (_rTexture.length() > 0 && GfxImagePtr != nullptr)
         {
             Image((void*)(intptr_t)GfxImagePtr->GetNativeHandle(), Size);
+
+            ImGuiContext& g = *GImGui;
+
+            float button_radius = g.FontSize * 0.5f;
+            ImVec2 button_center = ImVec2(ImMin(window->DC.LastItemRect.Max.x, window->ClipRect.Max.x) - g.Style.FramePadding.x - button_radius, window->DC.LastItemRect.GetCenter().y);
 
             if (ImGui::IsItemHovered())
             {
@@ -36,12 +49,20 @@ namespace ImGui
                 Image((void*)(intptr_t)GfxImagePtr->GetNativeHandle(), TooltipSize);
                 EndTooltip();
             }
+
+            if (CloseButton(window->GetID((void*)((intptr_t)id + 1)), button_center, button_radius))
+            {
+                _rTexture.clear();
+            }
         }
         else
         {
             ColorButton(_pID, DefaultColor, ImGuiColorEditFlags_NoTooltip, Size);
         }
 
+        // -----------------------------------------------------------------------------
+        // Drag & drop
+        // -----------------------------------------------------------------------------
         bool HasNewValue = false;
 
         if (BeginDragDropTarget())
