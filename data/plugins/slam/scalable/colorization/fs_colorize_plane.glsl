@@ -2,6 +2,8 @@
 #ifndef __INCLUDE_FS_OUTLINE_GLSL__
 #define __INCLUDE_FS_OUTLINE_GLSL__
 
+#include "../../plugins/slam/scalable/common_raycast.glsl"
+
 layout(std140, binding = 1) uniform PerDrawCallData
 {
     mat4 g_WorldMatrix;
@@ -14,7 +16,29 @@ layout(location = 0) in vec3 in_WSPosition;
 
 void main()
 {
-    imageStore(cs_Texture, ivec2(gl_FragCoord.xy), g_Color);
+	mat3 SaltwaterToReconstruction = mat3(
+        1.0f, 0.0f,  0.0f,
+        0.0f, 0.0f, -1.0f,
+        0.0f, 1.0f,  0.0f
+    );
+ 
+    mat3 ReconstructionToSaltwater = mat3(
+        1.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 1.0f,
+        0.0f, -1.0f, 0.0f
+    );
+
+    /*vec3 CameraPosition = SaltwaterToReconstruction * g_ViewPosition.xyz;
+    vec3 RayDirection = SaltwaterToReconstruction * normalize(in_WSRayDirection);
+ 
+    RayDirection.x = RayDirection.x == 0.0f ? 1e-15f : RayDirection.x;
+    RayDirection.y = RayDirection.y == 0.0f ? 1e-15f : RayDirection.y;
+    RayDirection.z = RayDirection.z == 0.0f ? 1e-15f : RayDirection.z;
+
+    vec4 Vertex = GetPosition(CameraPosition, RayDirection);*/
+    vec3 Color = GetColor(SaltwaterToReconstruction * in_WSPosition);
+
+    imageStore(cs_Texture, ivec2(gl_FragCoord.xy), vec4(Color, 1.0f));
 }
 
 #endif // __INCLUDE_FS_OUTLINE_GLSL__

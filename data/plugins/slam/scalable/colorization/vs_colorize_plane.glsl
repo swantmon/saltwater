@@ -2,8 +2,6 @@
 #ifndef __INCLUDE_VS_OUTLINE_GLSL__
 #define __INCLUDE_VS_OUTLINE_GLSL__
 
-#include "../../plugins/slam/scalable/common_raycast.glsl"
-
 layout(std140, binding = 0) uniform PerDrawCallData
 {
     mat4 g_WorldMatrix;

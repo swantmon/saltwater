@@ -78,6 +78,8 @@ namespace MR
 
     void CPlaneColorizer::ColorizeAllPlanes()
     {
+        Performance::BeginEvent("Plane colorization");
+
         auto& rPlaneMap = m_pReconstructor->GetPlanes();
 
         for (auto& Iter : rPlaneMap)
@@ -108,14 +110,14 @@ namespace MR
                 ColorizePlane(rPlane);
             }
         }
+
+        Performance::EndEvent();
     }
 
     // -----------------------------------------------------------------------------
 
     void CPlaneColorizer::ColorizePlane(CSLAMReconstructor::SPlane& _rPlane)
     {
-        Performance::BeginEvent("Plane colorization");
-        
         ContextManager::SetConstantBuffer(0, m_ConstantBufferPtr);
 
         SConstantBuffer BufferData;
@@ -145,8 +147,6 @@ namespace MR
         BufferManager::UploadBufferData(m_ConstantBufferPtr, &BufferData);
 
         ContextManager::DrawIndexed(_rPlane.m_MeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
-
-        Performance::EndEvent();
     }
 
     // -----------------------------------------------------------------------------
@@ -170,6 +170,7 @@ namespace MR
             << "#define VOXELS_PER_LEVEL2GRID " << Settings.m_VoxelsPerGrid[2] << " \n"
             << "#define RAYCAST_NEAR " << 0.0f << " \n"
             << "#define RAYCAST_FAR " << 1000.0f << " \n"
+            << "#define CAPTURE_COLOR \n"
             << "#define MIN_TREE_WEIGHT " << Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:min_weight", 30) << " \n";
 
         std::string DefineString = DefineStream.str();
