@@ -19,7 +19,7 @@
 #include "engine/graphic/gfx_texture_manager.h"
 #include "engine/graphic/gfx_view_manager.h"
 
-#include "plugin/slam/mr_plane_extractor.h"
+#include "plugin/slam/mr_plane_colorizer.h"
 
 #include <iostream>
 #include <limits>
@@ -44,7 +44,7 @@ namespace MR
 {
     // -----------------------------------------------------------------------------
 
-    void CPlaneExtractor::UpdatePlane(int _PlaneID)
+    void CPlaneColorizer::UpdatePlane(int _PlaneID)
     {
         auto& rPlaneMap = m_pReconstructor->GetPlanes();
 
@@ -58,15 +58,49 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
-    CPlaneExtractor::CPlaneExtractor(MR::CSLAMReconstructor* _pReconstructor)
-        : m_pReconstructor(_pReconstructor)
+    void CPlaneColorizer::ColorizeAllPlanes()
     {
-        assert(_pReconstructor != nullptr);
+        auto& rPlaneMap = m_pReconstructor->GetPlanes();
+
+        for (auto Iter : rPlaneMap)
+        {
+            auto& rPlane = Iter.second;
+
+            if (rPlane.m_MeshPtr != nullptr)
+            {
+                assert(rPlane.m_TexturePtr != nullptr);
+
+                STextureDescriptor TextureDescriptor = {};
+
+                TextureDescriptor.m_NumberOfPixelsU = m_PlaneTextureSize;
+                TextureDescriptor.m_NumberOfPixelsV = m_PlaneTextureSize;
+                TextureDescriptor.m_NumberOfPixelsW = 1;
+                TextureDescriptor.m_NumberOfMipMaps = 1;
+                TextureDescriptor.m_NumberOfTextures = 1;
+                TextureDescriptor.m_Binding = CTexture::ShaderResource;
+                TextureDescriptor.m_Access = CTexture::EAccess::CPURead;
+                TextureDescriptor.m_Usage = CTexture::EUsage::GPUReadWrite;
+                TextureDescriptor.m_Semantic = CTexture::UndefinedSemantic;
+                TextureDescriptor.m_Format = CTexture::R8G8B8A8_UBYTE;
+
+                auto TexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
+            }
+        }
     }
 
     // -----------------------------------------------------------------------------
 
-    CPlaneExtractor::~CPlaneExtractor()
+    CPlaneColorizer::CPlaneColorizer(MR::CSLAMReconstructor* _pReconstructor)
+        : m_pReconstructor(_pReconstructor)
+    {
+        assert(_pReconstructor != nullptr);
+
+        m_PlaneTextureSize = Core::CProgramParameters::GetInstance().Get("mr:plane_texture_size", 512);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CPlaneColorizer::~CPlaneColorizer()
     {
 
     }

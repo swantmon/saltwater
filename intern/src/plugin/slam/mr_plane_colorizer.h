@@ -23,14 +23,16 @@
 
 namespace MR
 {
-    class CPlaneExtractor
+    class CPlaneColorizer
     {
     public:
 
-        CPlaneExtractor(MR::CSLAMReconstructor* _pReconstructor);
-        ~CPlaneExtractor();
+        CPlaneColorizer(MR::CSLAMReconstructor* _pReconstructor);
+        ~CPlaneColorizer();
 
         void UpdatePlane(int _PlaneID);
+
+        void ColorizeAllPlanes();
 
     private:
 
@@ -44,5 +46,7 @@ namespace MR
     private:
 
         MR::CSLAMReconstructor* m_pReconstructor;
+
+        int m_PlaneTextureSize;
     };
 } // namespace Scpt

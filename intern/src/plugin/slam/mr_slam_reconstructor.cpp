@@ -1867,7 +1867,7 @@ namespace MR
         TextureDescriptor.m_NumberOfPixelsW = 1;
         TextureDescriptor.m_NumberOfMipMaps = 1;
         TextureDescriptor.m_NumberOfTextures = STextureDescriptor::s_NumberOfTexturesFromSource;
-        TextureDescriptor.m_Binding = CTexture::RenderTarget | CTexture::ShaderResource;
+        TextureDescriptor.m_Binding = CTexture::ShaderResource;
         TextureDescriptor.m_Access = CTexture::EAccess::CPURead;
         TextureDescriptor.m_Usage = CTexture::EUsage::GPUReadWrite;
         TextureDescriptor.m_Semantic = CTexture::UndefinedSemantic;
@@ -1897,21 +1897,6 @@ namespace MR
     void CSLAMReconstructor::RemovePlane(int _ID)
     {
         m_Planes.erase(m_Planes.find(_ID));
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CSLAMReconstructor::ColorizePlanes()
-    {
-        for (auto Iter : m_Planes)
-        {
-            auto& rPlane = Iter.second;
-
-            if (rPlane.m_MeshPtr != nullptr)
-            {
-                assert(rPlane.m_TexturePtr != nullptr);
-            }
-        }
     }
 
     // -----------------------------------------------------------------------------

@@ -27,7 +27,7 @@
 #include "engine/graphic/gfx_selection_renderer.h"
 #include "engine/graphic/gfx_view_manager.h"
 
-#include "plugin/slam/mr_plane_extractor.h"
+#include "plugin/slam/mr_plane_colorizer.h"
 
 #include "engine/script/script_script.h"
 
@@ -213,7 +213,7 @@ namespace MR
         // -----------------------------------------------------------------------------
         // Plane extraction
         // -----------------------------------------------------------------------------
-        std::unique_ptr<MR::CPlaneExtractor> m_pPlaneExtractor;
+        std::unique_ptr<MR::CPlaneColorizer> m_pPlaneColorizer;
 
     public:
 
@@ -393,7 +393,7 @@ namespace MR
 
             m_SendInpaintedResult = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:send_result", true);
 
-            m_pPlaneExtractor = std::make_unique<MR::CPlaneExtractor>(&m_Reconstructor);
+            m_pPlaneColorizer = std::make_unique<MR::CPlaneColorizer>(&m_Reconstructor);
         }
 
         // -----------------------------------------------------------------------------
@@ -591,7 +591,7 @@ namespace MR
 
         void ColorizePlanes()
         {
-            m_Reconstructor.ColorizePlanes();
+            m_pPlaneColorizer->ColorizeAllPlanes();
         }
 
     private:
@@ -820,7 +820,7 @@ namespace MR
                     }
                 }
 
-                m_pPlaneExtractor->UpdatePlane(PlaneID);
+                m_pPlaneColorizer->UpdatePlane(PlaneID);
             }
             else if (MessageType == COLORINTRINSICS)
             {

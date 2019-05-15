@@ -170,8 +170,6 @@ namespace MR
 
         void RemovePlane(int _ID);
 
-        void ColorizePlanes();
-
         const std::map<int, SPlane>& GetPlanes() const;
 
         void PauseIntegration(bool _Paused);
