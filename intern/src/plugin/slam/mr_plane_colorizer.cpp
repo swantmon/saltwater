@@ -118,10 +118,6 @@ namespace MR
 
     void CPlaneColorizer::ColorizePlane(CSLAMReconstructor::SPlane& _rPlane)
     {
-        ContextManager::SetConstantBuffer(0, m_ConstantBufferPtr);
-
-        SConstantBuffer BufferData;
-
         ContextManager::SetTargetSet(m_TargetSetPtr);
         ContextManager::SetViewPortSet(m_ViewPortSetPtr);
 
@@ -141,10 +137,13 @@ namespace MR
         ContextManager::SetInputLayout(m_PlaneMeshLayoutPtr);
         ContextManager::SetTopology(STopology::TriangleList);
 
+        SConstantBuffer BufferData;
+
         BufferData.m_WorldMatrix = _rPlane.m_Transform;
         BufferData.m_Color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
 
         BufferManager::UploadBufferData(m_ConstantBufferPtr, &BufferData);
+        ContextManager::SetConstantBuffer(0, m_ConstantBufferPtr);
 
         ContextManager::DrawIndexed(_rPlane.m_MeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
     }
