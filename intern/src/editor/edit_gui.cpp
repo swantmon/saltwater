@@ -47,6 +47,8 @@
 
 #include <array>
 
+#define SHOW_DEMO_WINDOW 0
+
 using namespace Edit;
 
 namespace 
@@ -362,6 +364,10 @@ namespace
         {
             return;
         }
+
+#if SHOW_DEMO_WINDOW == 1
+        ImGui::ShowDemoWindow();
+#endif
 
         // -----------------------------------------------------------------------------
         // Menu
