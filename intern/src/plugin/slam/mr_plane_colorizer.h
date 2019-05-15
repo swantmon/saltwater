@@ -46,12 +46,27 @@ namespace MR
             CEILING
         };
 
+        void SetupShaders();
+        void SetupBuffers();
+        void SetupStates();
+
     private:
 
         MR::CSLAMReconstructor* m_pReconstructor;
 
+        int m_PlaneTextureSize;
+
         Gfx::CTexturePtr m_DummyTexturePtr;
 
-        int m_PlaneTextureSize;
+        Gfx::CShaderPtr m_ColorizationVSPtr;
+        Gfx::CShaderPtr m_ColorizationFSPtr;
+
+        Gfx::CBufferPtr m_ConstantBufferPtr;
+        
+        Gfx::CInputLayoutPtr m_PlaneMeshLayoutPtr;
+
+        Gfx::CViewPortSetPtr m_ViewPortSetPtr;
+
+        Gfx::CTargetSetPtr m_TargetSetPtr;
     };
 } // namespace Scpt
