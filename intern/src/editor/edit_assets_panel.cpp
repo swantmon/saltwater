@@ -72,15 +72,14 @@ namespace GUI
         ImGui::SetNextWindowPos(ImVec2(30, 100), ImGuiCond_FirstUseEver);
         ImGui::SetNextWindowSize(ImVec2(300, 400), ImGuiCond_FirstUseEver);
 
-        ImGui::Begin("Assets", &m_IsVisible);
+        if (!ImGui::Begin("Assets", &m_IsVisible))
+        {
+            ImGui::End();
+        }
 
         bool DoGoUp = false;
 
         std::string GoDownString = "";
-
-        CFile* pSelectedFile = nullptr;
-
-        ImGui::SameLine();
 
         std::string CurrentFilePath = std::filesystem::relative(m_CurrentPath, m_RootPath).string();
 
@@ -246,8 +245,6 @@ namespace GUI
             ImGui::NextColumn();
             ImGui::Text(rCurrentFile.m_DateTime.c_str());
             ImGui::NextColumn();
-
-            if (rCurrentFile.m_Selected) pSelectedFile = &rCurrentFile;
         }
 
         ImGui::EndChild();
