@@ -102,5 +102,11 @@ namespace Dt
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Dt::CLightProbeComponent::DirtyCreate);
         }
+
+        // -----------------------------------------------------------------------------
+
+        void OnDropAsset(const Edit::CAsset&)
+        {
+        }
     };
 } // namespace Dt

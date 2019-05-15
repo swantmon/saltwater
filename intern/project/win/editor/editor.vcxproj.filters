@@ -43,6 +43,9 @@
     <Filter Include="gui\native\extensions">
       <UniqueIdentifier>{1503ff86-efa6-4c04-9742-127169b967e8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="helper">
+      <UniqueIdentifier>{d0fbe43a-4627-4293-ad46-09d5dbf4af0b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\editor\edit_edit_state.cpp">
@@ -158,6 +161,21 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\editor\edit_toolbar_panel.cpp">
       <Filter>gui\panels</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor\imgui\extensions\ImFiledialog.cpp">
+      <Filter>gui\native\extensions</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor\edit_script_camera_control.cpp">
+      <Filter>gui\objects\components\scripts</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor\edit_assets_panel.cpp">
+      <Filter>gui\panels</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor\edit_asset_helper.cpp">
+      <Filter>helper</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\editor\imgui\extensions\ImTextureSlot.cpp">
+      <Filter>gui\native\extensions</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -291,6 +309,21 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\editor\edit_toolbar_panel.h">
       <Filter>gui\panels</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor\imgui\extensions\ImFiledialog.h">
+      <Filter>gui\native\extensions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor\edit_script_camera_control.h">
+      <Filter>gui\objects\components\scripts</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor\edit_assets_panel.h">
+      <Filter>gui\panels</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor\edit_asset_helper.h">
+      <Filter>helper</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\editor\imgui\extensions\ImTextureSlot.h">
+      <Filter>gui\native\extensions</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

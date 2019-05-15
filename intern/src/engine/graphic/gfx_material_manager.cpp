@@ -176,8 +176,8 @@ namespace
 
     private:
 
-        typedef Base::CManagedPool<CInternMaterial, 32, 1> CMaterials;
-        typedef std::map<Base::BHash, CInternMaterial*> CMaterialsByHash;
+        using CMaterials = Base::CManagedPool<CInternMaterial, 32, 1>;
+        using CMaterialsByHash = std::map<Base::BHash, CInternMaterial*>;
 
     private:
 
@@ -219,7 +219,7 @@ namespace
     CGfxMaterialManager::CGfxMaterialManager()
         : m_Materials         ( )
         , m_MaterialsByHash   ( )
-        , m_DefaultMaterialPtr(0)
+        , m_DefaultMaterialPtr(nullptr)
     {
 
     }
@@ -250,7 +250,7 @@ namespace
 
     void CGfxMaterialManager::OnExit()
     {
-        m_DefaultMaterialPtr = 0;
+        m_DefaultMaterialPtr = nullptr;
 
         m_MaterialsByHash.clear();
 
@@ -283,11 +283,13 @@ namespace
         // -----------------------------------------------------------------------------
         // Load data
         // -----------------------------------------------------------------------------
-        auto Importer = Core::AssetImporter::AllocateTinyXMLImporter(_rPathToFile);
+        std::string PathToAsset = Core::AssetManager::GetPathToAssets() + "/" + _rPathToFile;
+
+        auto Importer = Core::AssetImporter::AllocateTinyXMLImporter(PathToAsset);
 
         if (Importer == nullptr) return m_DefaultMaterialPtr;
 
-        tinyxml2::XMLDocument* pMaterialFile = static_cast<tinyxml2::XMLDocument*>(Core::AssetImporter::GetNativeAccessFromImporter(Importer));
+        auto* pMaterialFile = static_cast<tinyxml2::XMLDocument*>(Core::AssetImporter::GetNativeAccessFromImporter(Importer));
 
         if (pMaterialFile == nullptr) return m_DefaultMaterialPtr;
 
@@ -309,7 +311,7 @@ namespace
         // -----------------------------------------------------------------------------
         MaterialDescriptor.m_MaterialName = std::string(pElementDefinition->Attribute("Name")) + ": " + _rPathToFile;
 
-        if (pElementColor != 0)
+        if (pElementColor != nullptr)
         {
             float ColorR = pElementColor->FloatAttribute("R", 0.0f);
             float ColorG = pElementColor->FloatAttribute("G", 0.0f);
@@ -364,11 +366,13 @@ namespace
         // -----------------------------------------------------------------------------
         // Importer
         // -----------------------------------------------------------------------------
-        auto Importer = Core::AssetImporter::AllocateAssimpImporter(_rPathToFile, Core::AssetGenerator::SGeneratorFlag::Nothing);
+        std::string PathToAsset = Core::AssetManager::GetPathToAssets() + "/" + _rPathToFile;
+
+        auto Importer = Core::AssetImporter::AllocateAssimpImporter(PathToAsset, Core::AssetGenerator::SGeneratorFlag::Nothing);
 
         if (Importer == nullptr) return m_DefaultMaterialPtr;
 
-        const Assimp::Importer* pImporter = static_cast<const Assimp::Importer*>(Core::AssetImporter::GetNativeAccessFromImporter(Importer));
+        const auto* pImporter = static_cast<const Assimp::Importer*>(Core::AssetImporter::GetNativeAccessFromImporter(Importer));
 
         if (pImporter == nullptr) return m_DefaultMaterialPtr;
 
@@ -426,7 +430,7 @@ namespace
             {
                 if (MaterialDescriptor.m_ColorTexture.find(".mat") != std::string::npos)
                 {
-                    std::string PathToMat = _rPathToFile.substr(0, _rPathToFile.find_last_of('/')) + "/" + MaterialDescriptor.m_ColorTexture;
+                    std::string PathToMat = MaterialDescriptor.m_ColorTexture;
 
                     return CreateMaterialFromXML(PathToMat, _pComponent);
                 }
@@ -458,7 +462,7 @@ namespace
     {
         if (_pComponent->GetTypeID() != Base::CTypeInfo::GetTypeID<Dt::CMaterialComponent>()) return;
 
-        Dt::CMaterialComponent* pMaterialComponent = static_cast<Dt::CMaterialComponent*>(_pComponent);
+        auto* pMaterialComponent = static_cast<Dt::CMaterialComponent*>(_pComponent);
 
         // -----------------------------------------------------------------------------
         // Dirty check
@@ -490,7 +494,7 @@ namespace
         MaterialDescriptor.m_BumpTexture             = pMaterialComponent->GetBumpTexture();
         MaterialDescriptor.m_AlphaTexture            = pMaterialComponent->GetAlphaTexture();
 
-        CInternMaterial* pInternMaterial = 0;
+        CInternMaterial* pInternMaterial = nullptr;
 
         if ((DirtyFlags & Dt::CMaterialComponent::DirtyCreate) != 0)
         {
@@ -578,13 +582,13 @@ namespace
         // -----------------------------------------------------------------------------
         CTexturePtr TexturePtrs[CMaterial::SMaterialKey::s_NumberOfTextures];
 
-        TexturePtrs[0] = 0;
-        TexturePtrs[1] = 0;
-        TexturePtrs[2] = 0;
-        TexturePtrs[3] = 0;
-        TexturePtrs[4] = 0;
-        TexturePtrs[5] = 0;
-        TexturePtrs[6] = 0;
+        TexturePtrs[0] = nullptr;
+        TexturePtrs[1] = nullptr;
+        TexturePtrs[2] = nullptr;
+        TexturePtrs[3] = nullptr;
+        TexturePtrs[4] = nullptr;
+        TexturePtrs[5] = nullptr;
+        TexturePtrs[6] = nullptr;
 
         _pComponent->m_MaterialKey.m_HasDiffuseTex   = _rDescriptor.m_ColorTexture.length() > 0;
         _pComponent->m_MaterialKey.m_HasNormalTex    = _rDescriptor.m_NormalTexture.length() > 0;
@@ -614,8 +618,8 @@ namespace
         TextureDescriptor.m_Format           = CTexture::R8G8B8_UBYTE;
         TextureDescriptor.m_Usage            = CTexture::GPURead;
         TextureDescriptor.m_Semantic         = CTexture::Diffuse;
-        TextureDescriptor.m_pPixels          = 0;
-        TextureDescriptor.m_pFileName        = 0;
+        TextureDescriptor.m_pPixels          = nullptr;
+        TextureDescriptor.m_pFileName        = nullptr;
 
         if (_pComponent->m_MaterialKey.m_HasDiffuseTex)
         {
@@ -713,7 +717,7 @@ namespace
         if (_rMaterial.m_MaterialKey.m_HasBumpTex)      Defines += g_pShaderAttributeDefines[5];
         if (_rMaterial.m_MaterialKey.m_HasAlphaTex)     Defines += g_pShaderAttributeDefines[6];
 
-        const char* pDefineString = 0;
+        const char* pDefineString = nullptr;
 
         if (Defines.length() > 0)
         {

@@ -3,37 +3,27 @@
 
 #include "engine/data/data_component_manager.h"
 #include "engine/data/data_entity_manager.h"
-#include "engine/data/data_post_aa_component.h"
+
+#include "engine/script/script_camera_control_script.h"
 
 #include "editor/imgui/imgui.h"
 
-namespace Dt
+namespace Scpt
 {
-    class CPostAAComponentGUI : public CPostAAComponent
+    class CCameraControlScriptGUI : public Scpt::CCameraControlScript
     {
     public:
 
         void OnGUI()
         {
-            // -----------------------------------------------------------------------------
-            // Type
-            // -----------------------------------------------------------------------------
-            {
-                const char* Text[EType::NumberOfTypes] = { "SMAA", "FXAA" };
-
-                int Index = static_cast<int>(GetType());
-
-                ImGui::Combo("Type", &Index, Text, 2);
-
-                SetType(static_cast<EType>(Index));
-            }
+            ImGui::Text("Not implemented...");
         }
 
         // -----------------------------------------------------------------------------
 
         const char* GetHeader()
         {
-            return "Anti Aliasing";
+            return "Camera Control (Script)";
         }
 
         // -----------------------------------------------------------------------------
@@ -44,11 +34,11 @@ namespace Dt
 
             pCurrentEntity->SetCategory(Dt::SEntityCategory::Dynamic);
 
-            auto pComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CPostAAComponent>();
+            auto pComponent = Dt::CComponentManager::GetInstance().Allocate<Scpt::CCameraControlScript>();
 
             pCurrentEntity->AttachComponent(pComponent);
 
-            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Dt::CPostAAComponent::DirtyCreate);
+            Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Scpt::CCameraControlScript::DirtyCreate);
         }
 
         // -----------------------------------------------------------------------------
@@ -57,4 +47,4 @@ namespace Dt
         {
         }
     };
-} // namespace Dt
+} // namespace Scpt

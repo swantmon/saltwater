@@ -46,5 +46,11 @@ namespace Scpt
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Scpt::CSLAMScriptGUI::DirtyCreate);
         }
+
+        // -----------------------------------------------------------------------------
+
+        void OnDropAsset(const Edit::CAsset&)
+        {
+        }
     };
 } // namespace Scpt

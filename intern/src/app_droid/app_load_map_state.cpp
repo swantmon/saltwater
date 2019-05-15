@@ -292,7 +292,7 @@ namespace App
             auto pMeshComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CMeshComponent>();
 
 #if USE_HEAD_MODEL == 1
-            pMeshComponent->SetFilename(Core::AssetManager::GetPathToAssets() + "/models/head.dae");
+            pMeshComponent->SetFilename("/models/head.dae");
 #else
             pMeshComponent->SetMeshType(Dt::CMeshComponent::Sphere);
 #endif

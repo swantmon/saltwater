@@ -180,11 +180,11 @@ namespace
         
     private:
         
-        typedef Base::CManagedPool<CInternMesh   , 64  , 1> CMeshes;
-        typedef Base::CManagedPool<CInternLOD    , 256 , 1> CLODs;
-        typedef Base::CManagedPool<CInternSurface, 1024, 1> CSurfaces;
+        using CMeshes = Base::CManagedPool<CInternMesh   , 64  , 1>;
+        using CLODs = Base::CManagedPool<CInternLOD    , 256 , 1>;
+        using CSurfaces = Base::CManagedPool<CInternSurface, 1024, 1>;
         
-        typedef std::unordered_map<Base::BHash, CInternMesh*> CMeshByHash;
+        using CMeshByHash = std::unordered_map<Base::BHash, CInternMesh*>;
         
     private:
         
@@ -328,7 +328,7 @@ namespace
         BufferDesc.m_Access = CBuffer::CPUWrite;
         BufferDesc.m_NumberOfBytes = _NumberOfVertices * _SizeOfVertex;
         BufferDesc.m_pBytes = const_cast<void*>(_rVertices);
-        BufferDesc.m_pClassKey = 0;
+        BufferDesc.m_pClassKey = nullptr;
 
         rSurface.m_VertexBufferPtr = BufferManager::CreateBuffer(BufferDesc);
         rSurface.m_NumberOfVertices = static_cast<unsigned>(_NumberOfVertices);
@@ -341,7 +341,7 @@ namespace
         BufferDesc.m_Access = CBuffer::CPUWrite;
         BufferDesc.m_NumberOfBytes = _NumberOfIndices * sizeof(_rIndices[0]);
         BufferDesc.m_pBytes = const_cast<uint32_t*>(_rIndices);
-        BufferDesc.m_pClassKey = 0;
+        BufferDesc.m_pClassKey = nullptr;
 
         rSurface.m_IndexBufferPtr = BufferManager::CreateBuffer(BufferDesc);
         rSurface.m_NumberOfIndices = static_cast<unsigned>(_NumberOfIndices);
@@ -407,8 +407,8 @@ namespace
 
         unsigned int NumberOfBytes = (2 * sizeof(glm::vec3) + sizeof(glm::vec2)) * NumberOfVertices;
 
-        float* pVertices = static_cast<float*>(Base::CMemory::Allocate(NumberOfBytes));
-        unsigned int* pIndices  = static_cast<unsigned int*>(Base::CMemory::Allocate(sizeof(unsigned int) * NumberOfIndices));
+        auto* pVertices = static_cast<float*>(Base::CMemory::Allocate(NumberOfBytes));
+        auto* pIndices  = static_cast<unsigned int*>(Base::CMemory::Allocate(sizeof(unsigned int) * NumberOfIndices));
 
         assert(pVertices);
         assert(pIndices);
@@ -493,7 +493,7 @@ namespace
         BufferDesc.m_Access        = CBuffer::CPUWrite;
         BufferDesc.m_NumberOfBytes = NumberOfBytes;
         BufferDesc.m_pBytes        = pVertices;
-        BufferDesc.m_pClassKey     = 0;
+        BufferDesc.m_pClassKey     = nullptr;
         
         rSurface.m_VertexBufferPtr  = BufferManager::CreateBuffer(BufferDesc);
         rSurface.m_NumberOfVertices = NumberOfVertices;
@@ -506,7 +506,7 @@ namespace
         BufferDesc.m_Access        = CBuffer::CPUWrite;
         BufferDesc.m_NumberOfBytes = sizeof(unsigned int) * NumberOfIndices;
         BufferDesc.m_pBytes        = pIndices;
-        BufferDesc.m_pClassKey     = 0;
+        BufferDesc.m_pClassKey     = nullptr;
         
         rSurface.m_IndexBufferPtr  = BufferManager::CreateBuffer(BufferDesc);
         rSurface.m_NumberOfIndices = NumberOfIndices;
@@ -575,8 +575,8 @@ namespace
         unsigned int NumberOfVertices = (Height - 2) * Width + 2;
         unsigned int NumberOfIndices  = ((Height - 2) * (Width - 1) * 2) * 3;
         
-        glm::vec3* pVertices = static_cast<glm::vec3*>(Base::CMemory::Allocate(sizeof(glm::vec3) * NumberOfVertices * 2));
-        unsigned int* pIndices  = static_cast<unsigned int*>(Base::CMemory::Allocate(sizeof(unsigned int) * NumberOfIndices));
+        auto* pVertices = static_cast<glm::vec3*>(Base::CMemory::Allocate(sizeof(glm::vec3) * NumberOfVertices * 2));
+        auto* pIndices  = static_cast<unsigned int*>(Base::CMemory::Allocate(sizeof(unsigned int) * NumberOfIndices));
         
         assert(pVertices);
         assert(pIndices);
@@ -674,7 +674,7 @@ namespace
         BufferDesc.m_Access        = CBuffer::CPUWrite;
         BufferDesc.m_NumberOfBytes = sizeof(glm::vec3) * NumberOfVertices * 2;
         BufferDesc.m_pBytes        = pVertices;
-        BufferDesc.m_pClassKey     = 0;
+        BufferDesc.m_pClassKey     = nullptr;
 
         rSurface.m_VertexBufferPtr  = BufferManager::CreateBuffer(BufferDesc);
         rSurface.m_NumberOfVertices = NumberOfVertices;
@@ -687,7 +687,7 @@ namespace
         BufferDesc.m_Access        = CBuffer::CPUWrite;
         BufferDesc.m_NumberOfBytes = sizeof(unsigned int) * NumberOfIndices;
         BufferDesc.m_pBytes        = pIndices;
-        BufferDesc.m_pClassKey     = 0;
+        BufferDesc.m_pClassKey     = nullptr;
         
         rSurface.m_IndexBufferPtr  = BufferManager::CreateBuffer(BufferDesc);
         rSurface.m_NumberOfIndices = NumberOfIndices;
@@ -754,15 +754,15 @@ namespace
         std::vector<glm::uvec3>  LightTriangles;
 
         // Create a simple tetrahedron
-        LightVertices.push_back(glm::vec3(-1.0f, -1.0f, -1.0f));
-        LightVertices.push_back(glm::vec3(1.0f, -1.0f, 1.0f));
-        LightVertices.push_back(glm::vec3(-1.0f, 1.0f, 1.0f));
-        LightVertices.push_back(glm::vec3(1.0f, 1.0f, -1.0f));
+        LightVertices.emplace_back(-1.0f, -1.0f, -1.0f);
+        LightVertices.emplace_back(1.0f, -1.0f, 1.0f);
+        LightVertices.emplace_back(-1.0f, 1.0f, 1.0f);
+        LightVertices.emplace_back(1.0f, 1.0f, -1.0f);
 
-        LightTriangles.push_back(glm::uvec3(0, 3, 2));
-        LightTriangles.push_back(glm::uvec3(0, 1, 3));
-        LightTriangles.push_back(glm::uvec3(1, 0, 2));
-        LightTriangles.push_back(glm::uvec3(1, 2, 3));
+        LightTriangles.emplace_back(0, 3, 2);
+        LightTriangles.emplace_back(0, 1, 3);
+        LightTriangles.emplace_back(1, 0, 2);
+        LightTriangles.emplace_back(1, 2, 3);
 
         // Split the faces of the tetrahedron
         for (unsigned int RefinementStep = 0; RefinementStep < _Refinement; ++RefinementStep)
@@ -772,13 +772,13 @@ namespace
 
             unsigned int NextVertexIndex = 0;
 
-            for (unsigned int IndexOfTriangle = 0; IndexOfTriangle < LightTriangles.size(); ++IndexOfTriangle)
+            for (auto & LightTriangle : LightTriangles)
             {
                 glm::vec3 NewVertices[6];
 
                 for (unsigned int IndexOfVertex = 0; IndexOfVertex < 3; ++IndexOfVertex)
                 {
-                    NewVertices[IndexOfVertex] = LightVertices[LightTriangles[IndexOfTriangle][IndexOfVertex]];
+                    NewVertices[IndexOfVertex] = LightVertices[LightTriangle[IndexOfVertex]];
                 }
 
                 glm::vec3 StartVertex, EndVertex;
@@ -791,15 +791,15 @@ namespace
                     NewVertices[IndexOfVertex + 3] = (StartVertex + EndVertex) / 2.0f;
                 }
 
-                for (unsigned int IndexOfVertex = 0; IndexOfVertex < 6; ++IndexOfVertex)
+                for (auto NewVertice : NewVertices)
                 {
-                    Vertices.push_back(NewVertices[IndexOfVertex]);
+                    Vertices.push_back(NewVertice);
                 }
 
-                Triangles.push_back(glm::uvec3(NextVertexIndex + 0, NextVertexIndex + 3, NextVertexIndex + 5));
-                Triangles.push_back(glm::uvec3(NextVertexIndex + 3, NextVertexIndex + 1, NextVertexIndex + 4));
-                Triangles.push_back(glm::uvec3(NextVertexIndex + 3, NextVertexIndex + 4, NextVertexIndex + 5));
-                Triangles.push_back(glm::uvec3(NextVertexIndex + 5, NextVertexIndex + 4, NextVertexIndex + 2));
+                Triangles.emplace_back(NextVertexIndex + 0, NextVertexIndex + 3, NextVertexIndex + 5);
+                Triangles.emplace_back(NextVertexIndex + 3, NextVertexIndex + 1, NextVertexIndex + 4);
+                Triangles.emplace_back(NextVertexIndex + 3, NextVertexIndex + 4, NextVertexIndex + 5);
+                Triangles.emplace_back(NextVertexIndex + 5, NextVertexIndex + 4, NextVertexIndex + 2);
 
                 NextVertexIndex += 6;
             }
@@ -811,9 +811,9 @@ namespace
         // We want a unit sphere
         std::vector<glm::vec3> VerticesNormal;
 
-        for (unsigned int IndexOfVertex = 0; IndexOfVertex < LightVertices.size(); ++IndexOfVertex)
+        for (auto LightVertice : LightVertices)
         {
-            glm::vec3 Vertex = glm::normalize(LightVertices[IndexOfVertex]);
+            glm::vec3 Vertex = glm::normalize(LightVertice);
 
             VerticesNormal.push_back(Vertex * _Radius);
             VerticesNormal.push_back(Vertex);
@@ -830,7 +830,7 @@ namespace
         BufferDesc.m_Access        = CBuffer::CPUWrite;
         BufferDesc.m_NumberOfBytes = sizeof(VerticesNormal[0]) * static_cast<unsigned int>(VerticesNormal.size());
         BufferDesc.m_pBytes        = VerticesNormal.data();
-        BufferDesc.m_pClassKey     = 0;
+        BufferDesc.m_pClassKey     = nullptr;
 
         rSurface.m_VertexBufferPtr  = BufferManager::CreateBuffer(BufferDesc);
         rSurface.m_NumberOfVertices = static_cast<unsigned int>(VerticesNormal.size()) / 2;
@@ -843,7 +843,7 @@ namespace
         BufferDesc.m_Access        = CBuffer::CPUWrite;
         BufferDesc.m_NumberOfBytes = sizeof(LightTriangles[0]) * static_cast<unsigned int>(LightTriangles.size());
         BufferDesc.m_pBytes        = LightTriangles.data();
-        BufferDesc.m_pClassKey     = 0;
+        BufferDesc.m_pClassKey     = nullptr;
         
         rSurface.m_IndexBufferPtr  = BufferManager::CreateBuffer(BufferDesc);
         rSurface.m_NumberOfIndices = static_cast<unsigned int>(LightTriangles.size()) * 3;
@@ -905,8 +905,8 @@ namespace
         unsigned int NumberOfVertices = 3 + _Slices;
         unsigned int NumberOfIndices = _Slices * 6;
 
-        glm::vec3* pVertices = static_cast<glm::vec3*>(Base::CMemory::Allocate(sizeof(glm::vec3) * NumberOfVertices * 2));
-        unsigned int* pIndices = static_cast<unsigned int*>(Base::CMemory::Allocate(sizeof(unsigned int) * NumberOfIndices));
+        auto* pVertices = static_cast<glm::vec3*>(Base::CMemory::Allocate(sizeof(glm::vec3) * NumberOfVertices * 2));
+        auto* pIndices = static_cast<unsigned int*>(Base::CMemory::Allocate(sizeof(unsigned int) * NumberOfIndices));
 
         assert(pVertices);
         assert(pIndices);
@@ -979,7 +979,7 @@ namespace
         BufferDesc.m_Access        = CBuffer::CPUWrite;
         BufferDesc.m_NumberOfBytes = sizeof(glm::vec3) * NumberOfVertices * 2;
         BufferDesc.m_pBytes        = pVertices;
-        BufferDesc.m_pClassKey     = 0;
+        BufferDesc.m_pClassKey     = nullptr;
         
         rSurface.m_VertexBufferPtr  = BufferManager::CreateBuffer(BufferDesc);
         rSurface.m_NumberOfVertices = NumberOfVertices;
@@ -992,7 +992,7 @@ namespace
         BufferDesc.m_Access        = CBuffer::CPUWrite;
         BufferDesc.m_NumberOfBytes = sizeof(unsigned int) * NumberOfIndices;
         BufferDesc.m_pBytes        = pIndices;
-        BufferDesc.m_pClassKey     = 0;
+        BufferDesc.m_pClassKey     = nullptr;
         
         rSurface.m_IndexBufferPtr  = BufferManager::CreateBuffer(BufferDesc);
         rSurface.m_NumberOfIndices = NumberOfIndices;
@@ -1060,8 +1060,8 @@ namespace
         unsigned int NumberOfVertices = 4;
         unsigned int NumberOfIndices  = 6;
         
-        glm::vec2* pVertices = static_cast<glm::vec2*>(Base::CMemory::Allocate(sizeof(glm::vec2) * NumberOfVertices));
-        unsigned int* pIndices  = static_cast<unsigned int*>(Base::CMemory::Allocate(sizeof(unsigned int) * NumberOfIndices));
+        auto* pVertices = static_cast<glm::vec2*>(Base::CMemory::Allocate(sizeof(glm::vec2) * NumberOfVertices));
+        auto* pIndices  = static_cast<unsigned int*>(Base::CMemory::Allocate(sizeof(unsigned int) * NumberOfIndices));
         
         // -----------------------------------------------------------------------------
         // Create vertices's of a cone.
@@ -1100,7 +1100,7 @@ namespace
         BufferDesc.m_Access        = CBuffer::CPUWrite;
         BufferDesc.m_NumberOfBytes = sizeof(glm::vec2) * NumberOfVertices;
         BufferDesc.m_pBytes        = pVertices;
-        BufferDesc.m_pClassKey     = 0;
+        BufferDesc.m_pClassKey     = nullptr;
         
         rSurface.m_VertexBufferPtr  = BufferManager::CreateBuffer(BufferDesc);
         rSurface.m_NumberOfVertices = NumberOfVertices;
@@ -1113,7 +1113,7 @@ namespace
         BufferDesc.m_Access        = CBuffer::CPUWrite;
         BufferDesc.m_NumberOfBytes = sizeof(unsigned int) * NumberOfIndices;
         BufferDesc.m_pBytes        = pIndices;
-        BufferDesc.m_pClassKey     = 0;
+        BufferDesc.m_pClassKey     = nullptr;
         
         rSurface.m_IndexBufferPtr  = BufferManager::CreateBuffer(BufferDesc);
         rSurface.m_NumberOfIndices = NumberOfIndices;
@@ -1159,7 +1159,7 @@ namespace
 
         Gfx::CShaderPtr VSMVPShader = Gfx::ShaderManager::CompileVS(g_pMVPShaderFilenameVS[VSIndex], g_pMVPShaderNamesVS[VSIndex]);
 
-        assert(VSShader != 0 && VSMVPShader != 0);
+        assert(VSShader != nullptr && VSMVPShader != nullptr);
 
         // -----------------------------------------------------------------------------
         // Set input layout if vertex shader has no input layout
@@ -1168,7 +1168,7 @@ namespace
         {
             SInputElementDescriptorSetting InputLayoutDesc = g_InputLayoutDescriptor[VSIndex];
 
-            Gfx::SInputElementDescriptor* pDescriptor = static_cast<Gfx::SInputElementDescriptor*>(Base::CMemory::Allocate(sizeof(Gfx::SInputElementDescriptor) * InputLayoutDesc.m_NumberOfElements));
+            auto* pDescriptor = static_cast<Gfx::SInputElementDescriptor*>(Base::CMemory::Allocate(sizeof(Gfx::SInputElementDescriptor) * InputLayoutDesc.m_NumberOfElements));
 
             unsigned int IndexOfRenderInputDesc = InputLayoutDesc.m_Offset;
 
@@ -1188,7 +1188,7 @@ namespace
         {
             SInputElementDescriptorSetting InputLayoutDesc = g_InputLayoutDescriptor[VSIndex];
 
-            Gfx::SInputElementDescriptor* pDescriptor = static_cast<Gfx::SInputElementDescriptor*>(Base::CMemory::Allocate(sizeof(Gfx::SInputElementDescriptor) * InputLayoutDesc.m_NumberOfElements));
+            auto* pDescriptor = static_cast<Gfx::SInputElementDescriptor*>(Base::CMemory::Allocate(sizeof(Gfx::SInputElementDescriptor) * InputLayoutDesc.m_NumberOfElements));
 
             unsigned int IndexOfRenderInputDesc = InputLayoutDesc.m_Offset;
 
@@ -1216,7 +1216,7 @@ namespace
     {
         if (_pComponent->GetTypeID() != Base::CTypeInfo::GetTypeID<Dt::CMeshComponent>()) return;
 
-        Dt::CMeshComponent* pMeshComponent = static_cast<Dt::CMeshComponent*>(_pComponent);
+        auto* pMeshComponent = static_cast<Dt::CMeshComponent*>(_pComponent);
 
         // -----------------------------------------------------------------------------
         // Dirty check
@@ -1269,16 +1269,19 @@ namespace
         // -----------------------------------------------------------------------------
         // Build path to texture in file system and load model
         // -----------------------------------------------------------------------------
-        auto Importer = Core::AssetImporter::AllocateAssimpImporter(_rPathToFile, _GenFlag);
+        std::string PathToModel = Core::AssetManager::GetPathToAssets() + "/" + _rPathToFile;
 
-        const Assimp::Importer* pImporter = static_cast<const Assimp::Importer*>(Core::AssetImporter::GetNativeAccessFromImporter(Importer));
+        auto Importer = Core::AssetImporter::AllocateAssimpImporter(PathToModel, _GenFlag);
 
-        if (!pImporter)
-        {
-            return;
-        }
+        if (Importer == nullptr) return;
+
+        const auto* pImporter = static_cast<const Assimp::Importer*>(Core::AssetImporter::GetNativeAccessFromImporter(Importer));
+
+        if (!pImporter) return;
 
         const aiScene* pScene = pImporter->GetScene();
+
+        if (pScene == nullptr) return;
 
         FillMeshFromAssimp(_pMesh, pScene, _MeshIndex);
 
@@ -1325,7 +1328,7 @@ namespace
 
                 rSurface.m_SurfaceKey.m_HasPosition = true;
 
-                assert(_pAssimpMesh->mVertices != 0);
+                assert(_pAssimpMesh->mVertices != nullptr);
 
                 rSurface.m_SurfaceKey.m_HasNormal = (_pAssimpMesh->mNormals != nullptr);
                 rSurface.m_SurfaceKey.m_HasTangent = (_pAssimpMesh->mTangents != nullptr);
@@ -1362,8 +1365,8 @@ namespace
 
                 assert(NumberOfIndicesPerFace == 3);
 
-                unsigned int* pUploadIndexData = static_cast<unsigned int*>(Base::CMemory::Allocate(sizeof(unsigned int) * NumberOfIndices));
-                float*        pUploadVertexData = static_cast<float*>(Base::CMemory::Allocate(sizeof(float) * NumberOfVertexElements));
+                auto* pUploadIndexData  = static_cast<unsigned int*>(Base::CMemory::Allocate(sizeof(unsigned int) * NumberOfIndices));
+                auto* pUploadVertexData = static_cast<float*>(Base::CMemory::Allocate(sizeof(float) * NumberOfVertexElements));
 
                 // -----------------------------------------------------------------------------
                 // Get data from file
@@ -1408,7 +1411,7 @@ namespace
 
                     if (rSurface.m_SurfaceKey.m_HasTangent)
                     {
-                        assert(pTangentData != 0);
+                        assert(pTangentData != nullptr);
 
                         pUploadVertexData[VertexDataIndex + 0] = pTangentData[CurrentVertex].x;
                         pUploadVertexData[VertexDataIndex + 1] = pTangentData[CurrentVertex].y;
@@ -1419,7 +1422,7 @@ namespace
 
                     if (rSurface.m_SurfaceKey.m_HasBitangent)
                     {
-                        assert(pBitangentData != 0);
+                        assert(pBitangentData != nullptr);
 
                         pUploadVertexData[VertexDataIndex + 0] = pBitangentData[CurrentVertex].x;
                         pUploadVertexData[VertexDataIndex + 1] = pBitangentData[CurrentVertex].y;
@@ -1450,7 +1453,7 @@ namespace
                 VertexBufferDesc.m_Access = CBuffer::CPUWrite;
                 VertexBufferDesc.m_NumberOfBytes = sizeof(float) * NumberOfVertexElements;
                 VertexBufferDesc.m_pBytes = pUploadVertexData;
-                VertexBufferDesc.m_pClassKey = 0;
+                VertexBufferDesc.m_pClassKey = nullptr;
 
                 rSurface.m_VertexBufferPtr = BufferManager::CreateBuffer(VertexBufferDesc);
 
@@ -1464,7 +1467,7 @@ namespace
                 IndexBufferDesc.m_Access = CBuffer::CPUWrite;
                 IndexBufferDesc.m_NumberOfBytes = sizeof(unsigned int) * NumberOfIndices;
                 IndexBufferDesc.m_pBytes = pUploadIndexData;
-                IndexBufferDesc.m_pClassKey = 0;
+                IndexBufferDesc.m_pClassKey = nullptr;
 
                 rSurface.m_IndexBufferPtr = BufferManager::CreateBuffer(IndexBufferDesc);
 

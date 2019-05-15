@@ -114,5 +114,11 @@ namespace Dt
         {
             return "Transformation";
         }
+
+        // -----------------------------------------------------------------------------
+
+        void OnDropAsset(const Edit::CAsset&)
+        {
+        }
     };
 } // namespace Dt

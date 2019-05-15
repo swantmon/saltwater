@@ -20,6 +20,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\editor\edit_application.cpp" />
+    <ClCompile Include="..\..\..\src\editor\edit_assets_panel.cpp" />
+    <ClCompile Include="..\..\..\src\editor\edit_asset_helper.cpp" />
     <ClCompile Include="..\..\..\src\editor\edit_console_panel.cpp" />
     <ClCompile Include="..\..\..\src\editor\edit_data_area_light_component.cpp" />
     <ClCompile Include="..\..\..\src\editor\edit_data_bloom_component.cpp" />
@@ -53,11 +55,14 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\..\..\src\editor\edit_scene_graph_panel.cpp" />
+    <ClCompile Include="..\..\..\src\editor\edit_script_camera_control.cpp" />
     <ClCompile Include="..\..\..\src\editor\edit_script_slam.cpp" />
     <ClCompile Include="..\..\..\src\editor\edit_start_state.cpp" />
     <ClCompile Include="..\..\..\src\editor\edit_toolbar_panel.cpp" />
     <ClCompile Include="..\..\..\src\editor\edit_unload_map_state.cpp" />
+    <ClCompile Include="..\..\..\src\editor\imgui\extensions\ImFiledialog.cpp" />
     <ClCompile Include="..\..\..\src\editor\imgui\extensions\ImGuizmo.cpp" />
+    <ClCompile Include="..\..\..\src\editor\imgui\extensions\ImTextureSlot.cpp" />
     <ClCompile Include="..\..\..\src\editor\imgui\imgui.cpp" />
     <ClCompile Include="..\..\..\src\editor\imgui\imgui_demo.cpp" />
     <ClCompile Include="..\..\..\src\editor\imgui\imgui_draw.cpp" />
@@ -67,6 +72,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\editor\edit_application.h" />
+    <ClInclude Include="..\..\..\src\editor\edit_assets_panel.h" />
+    <ClInclude Include="..\..\..\src\editor\edit_asset_helper.h" />
     <ClInclude Include="..\..\..\src\editor\edit_component_factory.h" />
     <ClInclude Include="..\..\..\src\editor\edit_console_panel.h" />
     <ClInclude Include="..\..\..\src\editor\edit_data_area_light_component.h" />
@@ -97,12 +104,15 @@
     <ClInclude Include="..\..\..\src\editor\edit_play_state.h" />
     <ClInclude Include="..\..\..\src\editor\edit_precompiled.h" />
     <ClInclude Include="..\..\..\src\editor\edit_scene_graph_panel.h" />
+    <ClInclude Include="..\..\..\src\editor\edit_script_camera_control.h" />
     <ClInclude Include="..\..\..\src\editor\edit_script_slam.h" />
     <ClInclude Include="..\..\..\src\editor\edit_start_state.h" />
     <ClInclude Include="..\..\..\src\editor\edit_state.h" />
     <ClInclude Include="..\..\..\src\editor\edit_toolbar_panel.h" />
     <ClInclude Include="..\..\..\src\editor\edit_unload_map_state.h" />
+    <ClInclude Include="..\..\..\src\editor\imgui\extensions\ImFiledialog.h" />
     <ClInclude Include="..\..\..\src\editor\imgui\extensions\ImGuizmo.h" />
+    <ClInclude Include="..\..\..\src\editor\imgui\extensions\ImTextureSlot.h" />
     <ClInclude Include="..\..\..\src\editor\imgui\imconfig.h" />
     <ClInclude Include="..\..\..\src\editor\imgui\imgui.h" />
     <ClInclude Include="..\..\..\src\editor\imgui\imgui_impl_opengl.h" />

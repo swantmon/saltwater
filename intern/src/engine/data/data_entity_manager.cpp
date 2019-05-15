@@ -222,16 +222,19 @@ namespace
         // -----------------------------------------------------------------------------
         int GeneratorFlag = Core::AssetGenerator::SGeneratorFlag::Default;
 
-        auto Importer = Core::AssetImporter::AllocateAssimpImporter(_rFile, GeneratorFlag);
+        std::string PathToModel = Core::AssetManager::GetPathToAssets() + "/" + _rFile;
+
+        auto Importer = Core::AssetImporter::AllocateAssimpImporter(PathToModel, GeneratorFlag);
+
+        if (Importer == nullptr) return VectorOfEntites;
 
         const auto* pImporter = static_cast<const Assimp::Importer*>(Core::AssetImporter::GetNativeAccessFromImporter(Importer));
 
+        if (pImporter == nullptr) return VectorOfEntites;
+
         const aiScene* pScene = pImporter->GetScene();
 
-        if (!pScene)
-        {
-            return VectorOfEntites;
-        }
+        if (!pScene) return VectorOfEntites;
 
         // -----------------------------------------------------------------------------
         // Create a new entity for each mesh
