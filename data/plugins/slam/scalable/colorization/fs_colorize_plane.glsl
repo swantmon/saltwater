@@ -8,15 +8,13 @@ layout(std140, binding = 1) uniform PerDrawCallData
 	vec4 g_Color;
 };
 
-layout (binding = 0, rgba8) uniform image2D cs_Diminished;
+layout (binding = 0, rgba8) uniform image2D cs_Texture;
 
-layout(location = 0) in vec2 in_UV;
-
-layout(location = 0) out vec4 out_Color;
+layout(location = 0) in vec3 in_WSPosition;
 
 void main()
 {
-    out_Color = vec4(texture(PlaneTexture, in_UV).rgb, 1.0f);
+    imageStore(cs_Texture, ivec2(gl_FragCoord.xy), vec4(0.5f));
 }
 
 #endif // __INCLUDE_FS_OUTLINE_GLSL__

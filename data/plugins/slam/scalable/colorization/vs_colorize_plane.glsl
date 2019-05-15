@@ -4,7 +4,7 @@
 
 #include "common_global.glsl"
 
-layout(std140, binding = 1) uniform PerDrawCallData
+layout(std140, binding = 0) uniform PerDrawCallData
 {
     mat4 g_WorldMatrix;
 	vec4 g_Color;
@@ -18,7 +18,7 @@ out gl_PerVertex
     vec4 gl_Position;
 };
 
-layout(location = 0) out vec2 out_UV;
+layout(location = 0) out vec3 out_WSPosition;
 
 // -----------------------------------------------------------------------------
 // Functions
@@ -26,9 +26,8 @@ layout(location = 0) out vec2 out_UV;
 
 void main()
 {
-    vec4 WSPosition = g_WorldMatrix * vec4(in_VertexPosition, 1.0f);
-    out_UV = in_TexCoord;
-    gl_Position = g_WorldToScreen * WSPosition;
+    out_WSPosition = (g_WorldMatrix * vec4(in_VertexPosition, 1.0f)).xyz;
+    gl_Position = vec4(in_TexCoord * 2.0f - 1.0f, 0.0f, 1.0f);
 }
 
 #endif // __INCLUDE_VS_OUTLINE_GLSL__
