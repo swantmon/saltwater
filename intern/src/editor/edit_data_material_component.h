@@ -40,7 +40,7 @@ namespace Dt
 
             // -----------------------------------------------------------------------------
 
-            ImGui::TextureField("##NORMAL_TEXTURE", "Normal", m_AmbientOcclusionTexture);
+            ImGui::TextureField("##NORMAL_TEXTURE", "Normal", m_NormalTexture);
 
             // -----------------------------------------------------------------------------
 
