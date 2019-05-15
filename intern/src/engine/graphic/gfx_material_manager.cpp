@@ -283,7 +283,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Load data
         // -----------------------------------------------------------------------------
-        auto Importer = Core::AssetImporter::AllocateTinyXMLImporter(_rPathToFile);
+        std::string PathToAsset = Core::AssetManager::GetPathToAssets() + "/" + _rPathToFile;
+
+        auto Importer = Core::AssetImporter::AllocateTinyXMLImporter(PathToAsset);
 
         if (Importer == nullptr) return m_DefaultMaterialPtr;
 
@@ -364,7 +366,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Importer
         // -----------------------------------------------------------------------------
-        auto Importer = Core::AssetImporter::AllocateAssimpImporter(_rPathToFile, Core::AssetGenerator::SGeneratorFlag::Nothing);
+        std::string PathToAsset = Core::AssetManager::GetPathToAssets() + "/" + _rPathToFile;
+
+        auto Importer = Core::AssetImporter::AllocateAssimpImporter(PathToAsset, Core::AssetGenerator::SGeneratorFlag::Nothing);
 
         if (Importer == nullptr) return m_DefaultMaterialPtr;
 
@@ -426,7 +430,7 @@ namespace
             {
                 if (MaterialDescriptor.m_ColorTexture.find(".mat") != std::string::npos)
                 {
-                    std::string PathToMat = _rPathToFile.substr(0, _rPathToFile.find_last_of('/')) + "/" + MaterialDescriptor.m_ColorTexture;
+                    std::string PathToMat = MaterialDescriptor.m_ColorTexture;
 
                     return CreateMaterialFromXML(PathToMat, _pComponent);
                 }

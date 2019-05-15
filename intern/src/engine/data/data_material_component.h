@@ -20,7 +20,7 @@ namespace Dt
     {
     public:
 
-        typedef Base::BHash BHash;
+        using BHash = Base::BHash;
 
     public:
 

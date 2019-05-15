@@ -7,6 +7,7 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
+#include "editor/edit_assets_panel.h"
 #include "editor/edit_console_panel.h"
 #include "editor/edit_gui.h"
 #include "editor/edit_infos_panel.h"
@@ -46,6 +47,8 @@
 
 #include <array>
 
+#define SHOW_DEMO_WINDOW 0
+
 using namespace Edit;
 
 namespace 
@@ -76,6 +79,7 @@ namespace
 
         enum EPanels
         {
+            Assets,
             Inspector,
             SceneGraph,
             Infos,
@@ -86,6 +90,7 @@ namespace
 
         const std::array<Edit::GUI::IPanel*, NumberOfPanels> m_Panels = 
         {
+            &GUI::CAssetsPanel::GetInstance(),
             &GUI::CInspectorPanel::GetInstance(),
             &GUI::CSceneGraphPanel::GetInstance(),
             &GUI::CInfosPanel::GetInstance(),
@@ -106,8 +111,6 @@ namespace
 
         bool m_ShowGUI;
 		bool m_IsFullscreen;
-
-        Edit::CImFileFialog m_ImportModelDialog;
 
         Engine::CEventDelegates::HandleType m_GfxOnRenderGUIDelegate;
 
@@ -137,7 +140,6 @@ namespace
         , m_CloseWindow        (false)
         , m_ShowGUI            (true)
         , m_IsFullscreen       (false)
-        , m_ImportModelDialog  ("Import model...", std::regex(".*.(obj|dae|fbx)"))
     {                          
     }
     
@@ -363,6 +365,10 @@ namespace
             return;
         }
 
+#if SHOW_DEMO_WINDOW == 1
+        ImGui::ShowDemoWindow();
+#endif
+
         // -----------------------------------------------------------------------------
         // Menu
         // -----------------------------------------------------------------------------
@@ -493,13 +499,6 @@ namespace
                     Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
                 }
 
-                ImGui::Separator();
-
-                if (ImGui::MenuItem("Import"))
-                {
-                    m_ImportModelDialog.Open();
-                }
-
                 ImGui::EndMenu();
             }
 
@@ -534,32 +533,6 @@ namespace
         for (auto pPanel : m_Panels)
         {
             if (pPanel->IsVisible()) pPanel->Render();
-        }
-
-        // -----------------------------------------------------------------------------
-        // Dialogs
-        // -----------------------------------------------------------------------------
-        if (m_ImportModelDialog.Draw())
-        {
-            const auto& rSelectedFiles = m_ImportModelDialog.GetSelectedFiles();
-
-            for (const auto& rSelectedFile : rSelectedFiles)
-            {
-                auto Entities = Dt::EntityManager::CreateEntitiesFromScene(rSelectedFile);
-
-                Dt::SEntityDescriptor EntityDesc;
-
-                EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
-                EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
-
-                Dt::CEntity& rNewModel = Dt::EntityManager::CreateEntity(EntityDesc);
-
-                for (auto& rEntity : Entities) rNewModel.Attach(*rEntity);
-
-                rNewModel.SetName("New model");
-
-                Dt::EntityManager::MarkEntityAsDirty(rNewModel, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
-            }
         }
     }
 

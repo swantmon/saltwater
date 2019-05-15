@@ -7,8 +7,6 @@
 
 #include "engine/data/data_component.h"
 
-#include "engine/graphic/gfx_texture.h"
-
 namespace Dt
 {
     class ENGINE_API CSkyComponent : public CComponent<CSkyComponent>
@@ -54,9 +52,8 @@ namespace Dt
         EQuality GetQuality() const;
         unsigned int GetQualityInPixel() const;
 
-        void SetTexture(Gfx::CTexturePtr _TexturePtr);
-        Gfx::CTexturePtr GetTexture();
-        const Gfx::CTexturePtr GetTexture() const;
+        void SetTexture(const std::string& _rTexture);
+        const std::string& GetTexture() const;
 
         bool HasTexture() const;
 
@@ -74,7 +71,7 @@ namespace Dt
         EType            m_Type;               //< Type of the skybox for procedural panorama or cubemap
         EQuality         m_Quality;            //< Quality of the probe (@see EQuality)
         bool             m_HasHDR;             //< Declares either the image consists of HDR values
-        Gfx::CTexturePtr m_TexturePtr;         //< Texture
+        std::string      m_Texture;            //< Texture
         float            m_Intensity;          //< Intensity of sky that is freely adjustable by artist (multiplier on the image)
 
     private:

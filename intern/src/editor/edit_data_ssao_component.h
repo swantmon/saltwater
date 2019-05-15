@@ -39,5 +39,11 @@ namespace Dt
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Dt::CSSAOComponent::DirtyCreate);
         }
+
+        // -----------------------------------------------------------------------------
+
+        void OnDropAsset(const Edit::CAsset&)
+        {
+        }
     };
 } // namespace Dt

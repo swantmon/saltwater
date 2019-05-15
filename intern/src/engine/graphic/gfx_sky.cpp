@@ -6,8 +6,9 @@
 namespace Gfx
 {
     CSky::CSky()
-        : m_CubemapPtr   ()
-        , m_TimeStamp    (static_cast<Base::U64>(-1))
+        : m_CubemapPtr     ()
+        , m_TimeStamp      (static_cast<Base::U64>(-1))
+        , m_InputTexturePtr()
     {
 
     }
@@ -31,5 +32,12 @@ namespace Gfx
     Base::U64 CSky::GetTimeStamp() const
     {
         return m_TimeStamp;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CSky::SetInputTexture(Gfx::CTexturePtr _InputTexturePtr)
+    {
+        m_InputTexturePtr = _InputTexturePtr;
     }
 } // namespace Gfx

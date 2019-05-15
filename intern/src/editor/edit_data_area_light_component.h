@@ -7,6 +7,8 @@
 
 #include "editor/imgui/imgui.h"
 
+#include "editor/imgui/extensions/ImTextureSlot.h"
+
 namespace Dt
 {
     class CAreaLightComponentGUI : public CAreaLightComponent
@@ -17,16 +19,9 @@ namespace Dt
         {
             ImGui::ColorEdit3("Color", &m_Color.r);
 
-            static char PathToTexture[255] = {};
+            ImGui::TextureField("##AREA_LIGHT_TEXTURE", "Texture", m_Texture);
 
-            strcpy_s(PathToTexture, m_Texture.c_str());
-
-            if (ImGui::InputText("Path to texture", PathToTexture, 255))
-            {
-                m_Texture = PathToTexture;
-            }
-
-            ImGui::DragFloat("Intensity", &m_Intensity);
+            ImGui::DragFloat("Intensity", &m_Intensity, 10.0f);
 
             ImGui::DragFloat3("Direction", &m_Direction.x);
 
@@ -65,6 +60,12 @@ namespace Dt
             pCurrentEntity->AttachComponent(pComponent);
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Dt::CAreaLightComponent::DirtyCreate);
+        }
+
+        // -----------------------------------------------------------------------------
+
+        void OnDropAsset(const Edit::CAsset&)
+        {
         }
     };
 } // namespace Dt

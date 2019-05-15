@@ -5,6 +5,8 @@
 #include "base/base_type_info.h"
 #include "base/base_uncopyable.h"
 
+#include "editor/edit_asset_helper.h"
+
 #include <array>
 #include <map>
 
@@ -13,10 +15,11 @@ class BASE_CONCAT(Name, Factory) : public Edit::IGUIFactory                     
 {                                                                                                               \
 public:                                                                                                         \
     BASE_CONCAT(Name, Factory)() { }                                                                            \
-    IGUIFactory* Create() { return new BASE_CONCAT(Name, Factory)(); };                                         \
+    IGUIFactory* Create() { return new BASE_CONCAT(Name, Factory)(); }                                          \
     void SetChild(void* _pChild) { m_pChild = (Name*)(_pChild); }                                               \
     void OnGUI() { m_pChild->OnGUI(); }                                                                         \
-    const char* GetHeader() { return m_pChild->GetHeader(); };                                                  \
+    const char* GetHeader() { return m_pChild->GetHeader(); }                                                   \
+    void OnDropAsset(const Edit::CAsset& _rAsset) { m_pChild->OnDropAsset(_rAsset); }                           \
 private:                                                                                                        \
     Name* m_pChild;                                                                                             \
 };                                                                                                              \
@@ -41,6 +44,8 @@ namespace Edit
         virtual void OnGUI() = 0;
 
         virtual const char* GetHeader() = 0;
+
+        virtual void OnDropAsset(const Edit::CAsset& _rAsset) = 0;
     };
 
     // -----------------------------------------------------------------------------
