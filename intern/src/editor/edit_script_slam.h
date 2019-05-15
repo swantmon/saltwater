@@ -18,6 +18,11 @@ namespace Scpt
         {
             ImGui::Checkbox("Enable Selection", &m_IsSelectionEnabled);
             ImGui::Checkbox("Enable Mouse Control", &m_IsMouseControlEnabled);
+            
+            if (ImGui::Button("Colorize Planes"))
+            {
+                ColorizePlanes();
+            }
         }
 
         // -----------------------------------------------------------------------------

@@ -587,6 +587,13 @@ namespace MR
             m_UseTrackingCamera = !_Flag;
         }
 
+        // -----------------------------------------------------------------------------
+
+        void ColorizePlanes()
+        {
+            m_Reconstructor.ColorizePlanes();
+        }
+
     private:
 
         glm::mat4 PoseToView(const glm::mat4& _rPoseMatrix)

@@ -21,6 +21,7 @@ namespace SLAM
 
         void SetActivateSelection(bool _Flag);
         void EnableMouseControl(bool _Flag);
+        void ColorizePlanes();
 
     private:
 

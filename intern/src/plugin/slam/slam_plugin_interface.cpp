@@ -66,6 +66,13 @@ namespace SLAM
 
     // -----------------------------------------------------------------------------
 
+    void CPluginInterface::ColorizePlanes()
+    {
+        m_SLAMControl.ColorizePlanes();
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CPluginInterface::OnPause()
     {
         ENGINE_CONSOLE_INFOV("SLAM plugin paused!");
@@ -124,4 +131,11 @@ extern "C" CORE_PLUGIN_API_EXPORT void SetActivateSelection(bool _Flag)
 extern "C" CORE_PLUGIN_API_EXPORT void EnableMouseControl(bool _Flag)
 {
     static_cast<SLAM::CPluginInterface&>(GetInstance()).EnableMouseControl(_Flag);
+}
+
+// -----------------------------------------------------------------------------
+
+extern "C" CORE_PLUGIN_API_EXPORT void ColorizePlanes()
+{
+    static_cast<SLAM::CPluginInterface&>(GetInstance()).ColorizePlanes();
 }

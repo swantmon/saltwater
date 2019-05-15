@@ -1901,6 +1901,21 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
+    void CSLAMReconstructor::ColorizePlanes()
+    {
+        for (auto Iter : m_Planes)
+        {
+            auto& rPlane = Iter.second;
+
+            if (rPlane.m_MeshPtr != nullptr)
+            {
+                assert(rPlane.m_TexturePtr != nullptr);
+            }
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
     const std::map<int, CSLAMReconstructor::SPlane>& CSLAMReconstructor::GetPlanes() const
     {
         return m_Planes;

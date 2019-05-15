@@ -46,6 +46,8 @@ namespace Scpt
             EnableMouseControl = (FSetFlag)(Core::PluginManager::GetPluginFunction("SLAM", "EnableMouseControl"));
 
             m_IsMouseControlEnabled = !Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:use_tracking_camera", false);
+
+            Colorize = (FSimple)(Core::PluginManager::GetPluginFunction("SLAM", "ColorizePlanes"));
         }
 
         // -----------------------------------------------------------------------------
@@ -70,13 +72,23 @@ namespace Scpt
             InputCallback(_rEvent);
         }
 
+        // -----------------------------------------------------------------------------
+
+        void ColorizePlanes()
+        {
+            Colorize();
+        }
+
     private:
 
-        typedef void(*FInputCallback)(const Base::CInputEvent& _rEvent);
+        using FInputCallback = void(*)(const Base::CInputEvent& _rEvent);
         FInputCallback InputCallback;
 
-        typedef void(*FSetFlag)(bool _Flag);
+        using FSetFlag = void(*)(bool _Flag);
         FSetFlag SetActivateSelection;
         FSetFlag EnableMouseControl;
+
+        using FSimple = void(*)();
+        FSimple Colorize;
     };
 } // namespace Scpt

@@ -170,6 +170,8 @@ namespace MR
 
         void RemovePlane(int _ID);
 
+        void ColorizePlanes();
+
         const std::map<int, SPlane>& GetPlanes() const;
 
         void PauseIntegration(bool _Paused);
@@ -246,7 +248,7 @@ namespace MR
         void CreateRaycastPyramid();
         
         void UpdateFrustum();
-                        
+
     private:
 
         SReconstructionSettings m_ReconstructionSettings;
