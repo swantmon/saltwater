@@ -62,7 +62,10 @@ namespace MR
 
     void CPlaneColorizer::UpdatePlane(CSLAMReconstructor::SPlane& _rPlane)
     {
-
+        if (_rPlane.m_TexturePtr == nullptr)
+        {
+            _rPlane.m_TexturePtr = m_DummyTexturePtr;
+        }
     }
     
     // -----------------------------------------------------------------------------
@@ -90,27 +93,35 @@ namespace MR
 
             if (rPlane.m_MeshPtr != nullptr)
             {
-                assert(rPlane.m_TexturePtr != nullptr);
+                if (rPlane.m_TexturePtr == m_DummyTexturePtr)
+                {
+                    STextureDescriptor TextureDescriptor = {};
 
-                STextureDescriptor TextureDescriptor = {};
+                    TextureDescriptor.m_NumberOfPixelsU = m_PlaneTextureSize;
+                    TextureDescriptor.m_NumberOfPixelsV = m_PlaneTextureSize;
+                    TextureDescriptor.m_NumberOfPixelsW = 1;
+                    TextureDescriptor.m_NumberOfMipMaps = 1;
+                    TextureDescriptor.m_NumberOfTextures = 1;
+                    TextureDescriptor.m_Binding = CTexture::ShaderResource;
+                    TextureDescriptor.m_Access = CTexture::EAccess::CPURead;
+                    TextureDescriptor.m_Usage = CTexture::EUsage::GPUReadWrite;
+                    TextureDescriptor.m_Semantic = CTexture::UndefinedSemantic;
+                    TextureDescriptor.m_Format = CTexture::R8G8B8A8_UBYTE;
+                    TextureDescriptor.m_pPixels = Pixels.data();
 
-                TextureDescriptor.m_NumberOfPixelsU = m_PlaneTextureSize;
-                TextureDescriptor.m_NumberOfPixelsV = m_PlaneTextureSize;
-                TextureDescriptor.m_NumberOfPixelsW = 1;
-                TextureDescriptor.m_NumberOfMipMaps = 1;
-                TextureDescriptor.m_NumberOfTextures = 1;
-                TextureDescriptor.m_Binding = CTexture::ShaderResource;
-                TextureDescriptor.m_Access = CTexture::EAccess::CPURead;
-                TextureDescriptor.m_Usage = CTexture::EUsage::GPUReadWrite;
-                TextureDescriptor.m_Semantic = CTexture::UndefinedSemantic;
-                TextureDescriptor.m_Format = CTexture::R8G8B8A8_UBYTE;
-                TextureDescriptor.m_pPixels = Pixels.data();
+                    rPlane.m_TexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
+                }
 
-                rPlane.m_TexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
-
-                UpdatePlane(rPlane);
+                ColorizePlane(rPlane);
             }
         }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CPlaneColorizer::ColorizePlane(CSLAMReconstructor::SPlane& _rPlane)
+    {
+
     }
 
     // -----------------------------------------------------------------------------
@@ -121,6 +132,22 @@ namespace MR
         assert(_pReconstructor != nullptr);
 
         m_PlaneTextureSize = Core::CProgramParameters::GetInstance().Get("mr:plane_texture_size", 512);
+
+        STextureDescriptor TextureDescriptor = {};
+
+        TextureDescriptor.m_NumberOfPixelsU = STextureDescriptor::s_NumberOfPixelsFromSource;
+        TextureDescriptor.m_NumberOfPixelsV = STextureDescriptor::s_NumberOfPixelsFromSource;
+        TextureDescriptor.m_NumberOfPixelsW = 1;
+        TextureDescriptor.m_NumberOfMipMaps = 1;
+        TextureDescriptor.m_NumberOfTextures = STextureDescriptor::s_NumberOfTexturesFromSource;
+        TextureDescriptor.m_Binding = CTexture::ShaderResource;
+        TextureDescriptor.m_Access = CTexture::EAccess::CPURead;
+        TextureDescriptor.m_Usage = CTexture::EUsage::GPUReadWrite;
+        TextureDescriptor.m_Semantic = CTexture::UndefinedSemantic;
+        TextureDescriptor.m_Format = CTexture::R8G8B8A8_UBYTE;
+        TextureDescriptor.m_pFileName = "textures/lines_d.png";
+
+        m_DummyTexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
     }
 
     // -----------------------------------------------------------------------------

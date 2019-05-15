@@ -37,6 +37,8 @@ namespace MR
 
     private:
 
+        void ColorizePlane(CSLAMReconstructor::SPlane& _rPlane);
+
         enum EPLANETYPE
         {
             FLOOR,
@@ -47,6 +49,8 @@ namespace MR
     private:
 
         MR::CSLAMReconstructor* m_pReconstructor;
+
+        Gfx::CTexturePtr m_DummyTexturePtr;
 
         int m_PlaneTextureSize;
     };

@@ -1860,23 +1860,7 @@ namespace MR
     {
         auto MeshPtr =  MeshManager::CreateMesh(_rVertices.data(), _rVertices.size(), sizeof(_rVertices[0]), _rIndices.data(), _rIndices.size());
 
-        STextureDescriptor TextureDescriptor = {};
-
-        TextureDescriptor.m_NumberOfPixelsU = STextureDescriptor::s_NumberOfPixelsFromSource;
-        TextureDescriptor.m_NumberOfPixelsV = STextureDescriptor::s_NumberOfPixelsFromSource;
-        TextureDescriptor.m_NumberOfPixelsW = 1;
-        TextureDescriptor.m_NumberOfMipMaps = 1;
-        TextureDescriptor.m_NumberOfTextures = STextureDescriptor::s_NumberOfTexturesFromSource;
-        TextureDescriptor.m_Binding = CTexture::ShaderResource;
-        TextureDescriptor.m_Access = CTexture::EAccess::CPURead;
-        TextureDescriptor.m_Usage = CTexture::EUsage::GPUReadWrite;
-        TextureDescriptor.m_Semantic = CTexture::UndefinedSemantic;
-        TextureDescriptor.m_Format = CTexture::R8G8B8A8_UBYTE;
-        TextureDescriptor.m_pFileName = "textures/lines_d.png";
-
-        auto TexturePtr = TextureManager::CreateTexture2D(TextureDescriptor);
-
-        SPlane Plane = { _Transform, _Extent, MeshPtr, TexturePtr };
+        SPlane Plane = { _Transform, _Extent, MeshPtr, nullptr };
 
         m_Planes[_ID] = Plane;
     }
