@@ -618,7 +618,7 @@ namespace MR
             
             m_RecordMode = _Flag ? PLAY : NONE;
         }
-
+        
     private:
 
         glm::mat4 PoseToView(const glm::mat4& _rPoseMatrix)

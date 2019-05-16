@@ -30,8 +30,27 @@ namespace Scpt
     {
     public:
 
+        enum EPlaneRenderingMode
+        {
+            NONE,
+            EXTENT_ONLY,
+            MESH_ONLY,
+            MESH_WITH_EXTENT,
+            ALL
+        };
+
         struct SScriptSettings
         {
+            bool m_RenderVolume;
+
+            bool m_RenderRoot;
+            bool m_RenderLevel1;
+            bool m_RenderLevel2;
+
+            EPlaneRenderingMode m_PlaneMode;
+
+            bool m_Reset;
+
             bool m_IsSelectionEnabled;
             bool m_IsMouseControlEnabled;
             bool m_IsPlayingRecording;
@@ -54,6 +73,11 @@ namespace Scpt
 
             SetSettings = (FSetSettings)(Core::PluginManager::GetPluginFunction("SLAM", "UpdateScriptSettings"));
 
+            m_Settings.m_RenderVolume = true;
+            m_Settings.m_RenderRoot = false;
+            m_Settings.m_RenderLevel1 = false;
+            m_Settings.m_RenderLevel2 = false;
+            m_Settings.m_PlaneMode = EPlaneRenderingMode::MESH_ONLY;
             m_Settings.m_IsSelectionEnabled = false;
             m_Settings.m_IsMouseControlEnabled = false;
             m_Settings.m_IsPlayingRecording = false;

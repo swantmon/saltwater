@@ -45,6 +45,30 @@ namespace Scpt
             }
 
             m_Settings.m_Colorize = (ImGui::Button("Colorize Planes"));
+
+            m_Settings.m_Reset = (ImGui::Button("Reset Reconstruction"));
+
+            ImGui::Checkbox("Render Volume", &m_Settings.m_RenderVolume);
+            ImGui::Checkbox("Render Root", &m_Settings.m_RenderRoot);
+            ImGui::Checkbox("Render Level 1", &m_Settings.m_RenderLevel1);
+            ImGui::Checkbox("Render Level 2", &m_Settings.m_RenderLevel2);
+
+            const int ItemCount = 5;
+            const char* pItems[ItemCount] = { "None", "Extent Only", "Mesh Only", "Mesh with Extent", "Mesh and Extent" };
+            static const char* pCurrentItem = pItems[2];
+
+            if (ImGui::BeginCombo("Plane Mode", pCurrentItem))
+            {
+                for (int i = 0; i < ItemCount; ++ i)
+                {
+                    if (ImGui::Selectable(pItems[i]))
+                    {
+                        pCurrentItem = pItems[i];
+                        m_Settings.m_PlaneMode = static_cast<EPlaneRenderingMode>(i);
+                    }
+                }
+                ImGui::EndCombo();
+            }
         }
 
         // -----------------------------------------------------------------------------

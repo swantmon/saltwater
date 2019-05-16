@@ -42,5 +42,7 @@ namespace ReconstructionRenderer
     CTexturePtr GetInpaintedRendering(const glm::mat4& _rPoseMatrix, const Base::AABB3Float& _rAABB, CTexturePtr _BackgroundTexturePtr = nullptr);
 
     const Base::AABB3Float& GetSelectionBox();
+
+    void SetVisibleObjects(bool _RenderVolume, bool _RenderRoot, bool _RenderLevel1, bool _RenderLevel2, int _PlaneMode);
 } // namespace ReconstructionRenderer
 } // namespace Gfx

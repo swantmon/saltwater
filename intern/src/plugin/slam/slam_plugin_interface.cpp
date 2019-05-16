@@ -67,6 +67,14 @@ namespace SLAM
         {
             m_SLAMControl.SetRecordFile(_rSettings.m_RecordFile);
         }
+
+        Gfx::ReconstructionRenderer::SetVisibleObjects(
+            _rSettings.m_RenderVolume,
+            _rSettings.m_RenderRoot,
+            _rSettings.m_RenderLevel1,
+            _rSettings.m_RenderLevel2,
+            _rSettings.m_PlaneMode
+        );
     }
 
     // -----------------------------------------------------------------------------

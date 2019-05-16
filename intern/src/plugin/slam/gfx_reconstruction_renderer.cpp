@@ -134,6 +134,7 @@ namespace
         CTexturePtr GetInpaintedRendering(const Base::AABB3Float& _rAABB, CTexturePtr _BackgroundTexturePtr);
 
         const Base::AABB3Float& GetSelectionBox();
+        void SetVisibleObjects(bool _RenderVolume, bool _RenderRoot, bool _RenderLevel1, bool _RenderLevel2, int _PlaneMode);
 
     private:
 
@@ -1997,6 +1998,18 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    void CGfxReconstructionRenderer::SetVisibleObjects(bool _RenderVolume, bool _RenderRoot, bool _RenderLevel1, bool _RenderLevel2, int _PlaneMode)
+    {
+        m_RenderVolume = _RenderVolume;
+        m_RenderRootQueue = _RenderRoot;
+        m_RenderLevel1Queue = _RenderLevel1;
+        m_RenderLevel2Queue = _RenderLevel2;
+
+        m_PlaneRenderMode = static_cast<EPlaneRenderingMode>(_PlaneMode);
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CGfxReconstructionRenderer::Render()
     {
         if (!m_IsInitialized && !m_pReconstructor->IsInitialized())
@@ -2413,6 +2426,13 @@ namespace ReconstructionRenderer
     const Base::AABB3Float& GetSelectionBox()
     {
         return CGfxReconstructionRenderer::GetInstance().GetSelectionBox();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void SetVisibleObjects(bool _RenderVolume, bool _RenderRoot, bool _RenderLevel1, bool _RenderLevel2, int _PlaneMode)
+    {
+        CGfxReconstructionRenderer::GetInstance().SetVisibleObjects(_RenderVolume, _RenderRoot, _RenderLevel1, _RenderLevel2, _PlaneMode);
     }
 
 } // namespace ReconstructionRenderer
