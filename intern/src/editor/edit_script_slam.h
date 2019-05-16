@@ -16,10 +16,33 @@ namespace Scpt
 
         void OnGUI()
         {
-            ImGui::Checkbox("Enable Selection", &m_Settings.m_IsMouseControlEnabled);
+            ImGui::Checkbox("Enable Selection", &m_Settings.m_IsSelectionEnabled);
             ImGui::Checkbox("Enable Mouse Control", &m_Settings.m_IsMouseControlEnabled);
             ImGui::Checkbox("Permanent Colorization", &m_Settings.m_IsPermanentColorizationEnabled);
             ImGui::Checkbox("Play Recording", &m_Settings.m_IsPlayingRecording);
+
+            m_Settings.m_SetRecordFile = false;
+
+            char FileString[1024];
+            std::strcpy(FileString, m_Settings.m_RecordFile.c_str());
+            ImGui::InputText("Record File", FileString, 1024, ImGuiInputTextFlags_ReadOnly);
+
+            if (ImGui::BeginDragDropTarget())
+            {
+                if (const ImGuiPayload * _pPayload = ImGui::AcceptDragDropPayload("ASSETS_DRAGDROP", 0))
+                {
+                    auto& DraggedAsset = *static_cast<Edit::CAsset*>(_pPayload->Data);
+
+                    if (m_Settings.m_RecordFile != DraggedAsset.GetPathToFile())
+                    {
+                        m_Settings.m_SetRecordFile = true;
+                    }
+
+                    m_Settings.m_RecordFile = DraggedAsset.GetPathToFile();
+                }
+
+                ImGui::EndDragDropTarget();
+            }
 
             m_Settings.m_Colorize = (ImGui::Button("Colorize Planes"));
         }

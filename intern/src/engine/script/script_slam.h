@@ -38,6 +38,9 @@ namespace Scpt
             bool m_IsPermanentColorizationEnabled;
 
             bool m_Colorize;
+
+            bool m_SetRecordFile;
+            std::string m_RecordFile;
         };
         
         void Start() override

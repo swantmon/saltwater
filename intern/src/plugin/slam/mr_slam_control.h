@@ -27,6 +27,8 @@
 #include "engine/graphic/gfx_selection_renderer.h"
 #include "engine/graphic/gfx_view_manager.h"
 
+#include "engine/core/core_asset_manager.h"
+
 #include "plugin/slam/mr_plane_colorizer.h"
 
 #include "engine/script/script_script.h"
@@ -161,7 +163,6 @@ namespace MR
         };
         
         ERecordMode m_RecordMode;
-        std::string m_RecordFileName;
 
         std::fstream m_RecordFile;
         std::unique_ptr<Base::CRecordWriter> m_pRecordWriter;
@@ -360,27 +361,15 @@ namespace MR
             }
 
             std::string RecordParam = Core::CProgramParameters::GetInstance().Get("mr:slam:recording:mode", "none");
-            m_RecordFileName = Core::CProgramParameters::GetInstance().Get("mr:slam:recording:file", "");
-            double SpeedOfPlayback = Core::CProgramParameters::GetInstance().Get("mr:slam:recording:speed", 1.0);
-
-            if (RecordParam == "play")
+            
+            if (RecordParam == "record")
             {
-                m_RecordMode = PLAY;
-                m_RecordFile.open(m_RecordFileName, std::fstream::in | std::fstream::binary);
-                m_pRecordReader = std::make_unique<Base::CRecordReader>(m_RecordFile, 1);
+                auto FileName = Core::CProgramParameters::GetInstance().Get("mr:slam:recording:file", "");
 
-                m_pRecordReader->SkipTime();
-
-                m_pRecordReader->SetSpeed(SpeedOfPlayback);
-
-                ENGINE_CONSOLE_INFOV("Playing recording from file \"%s\"", m_RecordFileName.c_str());
-            }
-            else if (RecordParam == "record")
-            {
                 m_RecordMode = RECORD;
-                m_RecordFile.open(m_RecordFileName, std::fstream::out | std::fstream::binary);
+                m_RecordFile.open(FileName, std::fstream::out | std::fstream::binary);
 
-                ENGINE_CONSOLE_INFOV("Recoding into file file \"%s\"", m_RecordFileName.c_str());
+                ENGINE_CONSOLE_INFOV("Recoding into file file \"%s\"", FileName.c_str());
             }
             else if (RecordParam == "none")
             {
@@ -452,7 +441,7 @@ namespace MR
             // -----------------------------------------------------------------------------
             // Playing
             // -----------------------------------------------------------------------------
-            if (m_RecordMode == PLAY)
+            if (m_RecordMode == PLAY && m_pRecordReader != nullptr)
             {
                 m_pRecordReader->Update();
 
@@ -575,6 +564,29 @@ namespace MR
 
         // -----------------------------------------------------------------------------
 
+        void SetRecordFile(const std::string& _rFileName)
+        {
+            std::string RecordParam = Core::CProgramParameters::GetInstance().Get("mr:slam:recording:mode", "none");
+            double SpeedOfPlayback = Core::CProgramParameters::GetInstance().Get("mr:slam:recording:speed", 1.0);
+
+            m_RecordFile.open(Core::AssetManager::GetPathToAssets() + "/" + _rFileName, std::fstream::in | std::fstream::binary);
+
+            if (!m_RecordFile.is_open())
+            {
+                ENGINE_CONSOLE_INFOV("File %s not found", _rFileName.c_str());
+            }
+
+            m_pRecordReader = std::make_unique<Base::CRecordReader>(m_RecordFile, 1);
+
+            m_pRecordReader->SkipTime();
+
+            m_pRecordReader->SetSpeed(SpeedOfPlayback);
+
+            ENGINE_CONSOLE_INFOV("Playing recording from file \"%s\"", _rFileName.c_str());
+        }
+
+        // -----------------------------------------------------------------------------
+
         void SetActivateSelection(bool _Flag)
         {
             m_SelectionFlag = _Flag;
@@ -602,23 +614,6 @@ namespace MR
             {
                 ENGINE_CONSOLE_INFO("Cannot play recording while in record mode");
                 return;
-            }
-            
-            if (m_pRecordReader == nullptr)
-            {
-                std::string RecordParam = Core::CProgramParameters::GetInstance().Get("mr:slam:recording:mode", "none");
-                m_RecordFileName = Core::CProgramParameters::GetInstance().Get("mr:slam:recording:file", "");
-                double SpeedOfPlayback = Core::CProgramParameters::GetInstance().Get("mr:slam:recording:speed", 1.0);
-
-                m_RecordMode = PLAY;
-                m_RecordFile.open(m_RecordFileName, std::fstream::in | std::fstream::binary);
-                m_pRecordReader = std::make_unique<Base::CRecordReader>(m_RecordFile, 1);
-
-                m_pRecordReader->SkipTime();
-
-                m_pRecordReader->SetSpeed(SpeedOfPlayback);
-
-                ENGINE_CONSOLE_INFOV("Playing recording from file \"%s\"", m_RecordFileName.c_str());
             }
             
             m_RecordMode = _Flag ? PLAY : NONE;
