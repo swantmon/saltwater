@@ -1860,7 +1860,7 @@ namespace MR
     {
         glm::vec3 Normal = glm::normalize(glm::mat3(_rTransform) * glm::vec3(0.0f, -1.0f, 0.0f));
 
-        auto MeshPtr =  MeshManager::CreateMesh(_rVertices.data(), _rVertices.size(), sizeof(_rVertices[0]), _rIndices.data(), _rIndices.size());
+        auto MeshPtr =  MeshManager::CreateMesh(_rVertices.data(), static_cast<int>(_rVertices.size()), sizeof(_rVertices[0]), _rIndices.data(), static_cast<int>(_rIndices.size()));
 
         SPlane Plane = { _rTransform, _rExtent, Normal, MeshPtr, nullptr };
 
