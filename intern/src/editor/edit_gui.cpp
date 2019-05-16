@@ -7,13 +7,17 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
+#include "editor/edit_application.h"
 #include "editor/edit_assets_panel.h"
 #include "editor/edit_console_panel.h"
+#include "editor/edit_edit_state.h"
 #include "editor/edit_gui.h"
 #include "editor/edit_infos_panel.h"
 #include "editor/edit_inspector_panel.h"
+#include "editor/edit_load_map_state.h"
 #include "editor/edit_scene_graph_panel.h"
 #include "editor/edit_toolbar_panel.h"
+#include "editor/edit_unload_map_state.h"
 
 #include "editor/imgui/imgui.h"
 #include "editor/imgui/imgui_impl_opengl.h"
@@ -107,7 +111,6 @@ namespace
         int m_AnalogStickDeadZone;
 
         bool m_EnableGamepad;
-        bool m_CloseWindow;
 
         bool m_ShowGUI;
 		bool m_IsFullscreen;
@@ -137,7 +140,6 @@ namespace
         , m_pGamePad           (nullptr)
         , m_pWindow            (nullptr)
         , m_AnalogStickDeadZone(0)
-        , m_CloseWindow        (false)
         , m_ShowGUI            (true)
         , m_IsFullscreen       (false)
     {                          
@@ -378,19 +380,43 @@ namespace
             {
                 if (ImGui::MenuItem("Open Scene", "CTRL+O"))
                 {
+                    Edit::CEditState::GetInstance().SetNextState(CState::UnloadMap);
+
+                    Edit::CUnloadMapState::GetInstance().SaveToFile("test.sws");
+
+                    Edit::CUnloadMapState::GetInstance().SetNextState(CState::LoadMap);
+
+                    Edit::CLoadMapState::GetInstance().LoadFromFile("test.sws");
+
+                    Edit::CLoadMapState::GetInstance().SetNextState(CState::Edit);
                 }
 
                 if (ImGui::MenuItem("Save", "CTRL+S"))
                 {
+                    Edit::CEditState::GetInstance().SetNextState(CState::UnloadMap);
+
+                    Edit::CUnloadMapState::GetInstance().SetNextState(CState::Edit);
                 }
 
                 if (ImGui::MenuItem("Save As", "CTRL+SHIFT+S"))
                 {
+                    Edit::CEditState::GetInstance().SetNextState(CState::UnloadMap);
+
+                    Edit::CUnloadMapState::GetInstance().SaveToFile("test.sws");
+
+                    Edit::CUnloadMapState::GetInstance().SetNextState(CState::Edit);
                 }
 
                 ImGui::Separator();
 
-                ImGui::MenuItem("Exit", "ALT+F4", &m_CloseWindow);
+                if (ImGui::MenuItem("Exit", "ALT+F4"))
+                {
+                    Edit::CEditState::GetInstance().SetNextState(CState::UnloadMap);
+
+                    Edit::CUnloadMapState::GetInstance().SaveToFile("test.sws");
+
+                    Edit::CUnloadMapState::GetInstance().SetNextState(CState::Exit);
+                }
 
                 ImGui::EndMenu();
             }
@@ -591,7 +617,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Special
             // -----------------------------------------------------------------------------
-            if (SDLEvent.type == SDL_QUIT || m_CloseWindow)
+            if (SDLEvent.type == SDL_QUIT)
             {
                 Base::CInputEvent Event = Base::CInputEvent(Base::CInputEvent::Exit);
 

@@ -34,9 +34,9 @@ namespace Edit
     CEditState::CEditState()
         : m_CurrentOperation(Hand)
         , m_CurrentMode     (World)
-        , m_Action          (CState::Edit)
         , m_pSelectionTicket(nullptr)
     {
+        m_NextState = CState::Edit;
     }
     
     // -----------------------------------------------------------------------------
@@ -116,11 +116,6 @@ namespace Edit
 
         Edit::GUI::CInspectorPanel::GetInstance().InspectEntity(Dt::CEntity::s_InvalidID);
 
-        // -----------------------------------------------------------------------------
-        // Reset action
-        // -----------------------------------------------------------------------------
-        m_Action = CState::Edit;
-        
         return Edit::CState::Edit;
     }
     
@@ -128,19 +123,6 @@ namespace Edit
     
     CState::EStateType CEditState::InternOnRun()
     {
-        CState::EStateType NextState = CState::Edit;
-
-        switch (m_Action)
-        {
-        case Edit::CState::Exit:
-            CUnloadMapState::GetInstance().SetNextState(CState::Exit);
-            NextState = Edit::CState::UnloadMap;
-            break;
-        case Edit::CState::Play:
-            NextState = Edit::CState::Play;
-            break;
-        }
-
         // -----------------------------------------------------------------------------
         // Selection
         // -----------------------------------------------------------------------------
@@ -166,7 +148,7 @@ namespace Edit
             }
         }
 
-        return NextState;
+        return m_NextState;
     }
 
     // -----------------------------------------------------------------------------
@@ -175,7 +157,7 @@ namespace Edit
     {
         if (_rInputEvent.GetType() == Base::CInputEvent::Exit)
         {
-            m_Action = CState::Exit;
+            m_NextState = CState::Exit;
         }
         else if (_rInputEvent.GetType() == Base::CInputEvent::Input)
         {

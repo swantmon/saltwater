@@ -63,9 +63,9 @@ namespace Edit
 namespace Edit
 {
     CLoadMapState::CLoadMapState()
-        : m_pMapfile("")
+        : m_Filename ("")
     {
-        
+        m_NextState = CState::Edit;
     }
     
     // -----------------------------------------------------------------------------
@@ -77,16 +77,16 @@ namespace Edit
     
     // -----------------------------------------------------------------------------
     
-    void CLoadMapState::SetMapfile(const char* _pFilename)
+    void CLoadMapState::LoadFromFile(const std::string& _rFilename)
     {
-        m_pMapfile = _pFilename;
+        m_Filename = _rFilename;
     }
-    
+
     // -----------------------------------------------------------------------------
-    
-    const char* CLoadMapState::GetMapfile() const
+
+    const std::string& CLoadMapState::GetFilename() const
     {
-        return m_pMapfile;
+        return m_Filename;
     }
     
     // -----------------------------------------------------------------------------
@@ -132,7 +132,7 @@ namespace Edit
     
     CState::EStateType CLoadMapState::InternOnRun()
     {
-        return CState::CState::Edit;
+        return m_NextState;
     }
 } // namespace Edit
 

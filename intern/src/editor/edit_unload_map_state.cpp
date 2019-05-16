@@ -19,9 +19,8 @@ namespace Edit
 namespace Edit
 {
     CUnloadMapState::CUnloadMapState()
-        : m_NextState(CState::UnloadMap)
     {
-
+        m_NextState = CState::Exit;
     }
     
     // -----------------------------------------------------------------------------
@@ -33,17 +32,20 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void CUnloadMapState::SetNextState(CState::EStateType _NextState)
+    void CUnloadMapState::SaveToFile(const std::string& _rFilename)
     {
-        m_NextState = _NextState;
+        m_Filename = _rFilename;
     }
-    
+
     // -----------------------------------------------------------------------------
     
     CState::EStateType CUnloadMapState::InternOnEnter()
     {
-        Dt::Map          ::FreeMap();
-        Dt::EntityManager::Clear();
+        if (m_NextState == CState::Exit)
+        {
+            Dt::Map::FreeMap();
+            Dt::EntityManager::Clear();
+        }
 
         return Edit::CState::UnloadMap;
     }

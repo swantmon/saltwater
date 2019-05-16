@@ -17,7 +17,7 @@ namespace Edit
 {
     CExitState::CExitState()
     {
-        
+        m_NextState = CState::Exit;
     }
     
     // -----------------------------------------------------------------------------
@@ -45,8 +45,6 @@ namespace Edit
     
     CState::EStateType CExitState::InternOnRun()
     {
-        CState::EStateType NextState = CState::Exit;
-
-        return NextState;
+        return m_NextState;
     }
 } // namespace Edit

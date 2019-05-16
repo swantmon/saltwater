@@ -14,11 +14,7 @@ namespace Edit
 
     public:
 
-        void SetNextState(CState::EStateType _NextState);
-
-    private:
-
-        CState::EStateType m_NextState;
+        void SaveToFile(const std::string& _rFilename);
         
     private:
         
@@ -27,9 +23,12 @@ namespace Edit
 
     private:
 
-        virtual CState::EStateType InternOnEnter();
-        virtual CState::EStateType InternOnLeave();
-        virtual CState::EStateType InternOnRun();
+        CState::EStateType InternOnEnter() override;
+        CState::EStateType InternOnLeave() override;
+        CState::EStateType InternOnRun() override;
 
+    private:
+
+        std::string m_Filename;
     };
 } // namespace Edit

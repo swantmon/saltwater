@@ -51,8 +51,6 @@ namespace Edit
 
         EMode m_CurrentMode;
 
-        CState::EStateType m_Action;
-
         Gfx::CSelectionTicket* m_pSelectionTicket;
 
         Gui::EventHandler::CEventDelegate::HandleType m_OnEventDelegate;
