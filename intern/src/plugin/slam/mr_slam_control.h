@@ -594,6 +594,19 @@ namespace MR
             m_pPlaneColorizer->ColorizeAllPlanes();
         }
 
+        // -----------------------------------------------------------------------------
+
+        void SetIsPlaying(bool _Flag)
+        {
+            if (m_RecordMode == RECORD)
+            {
+                ENGINE_CONSOLE_INFO("Cannot play recording while in record mode");
+                return;
+            }
+
+            m_RecordMode = _Flag ? PLAY : NONE;
+        }
+
     private:
 
         glm::mat4 PoseToView(const glm::mat4& _rPoseMatrix)

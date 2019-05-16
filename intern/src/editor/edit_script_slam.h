@@ -19,6 +19,23 @@ namespace Scpt
             ImGui::Checkbox("Enable Selection", &m_IsSelectionEnabled);
             ImGui::Checkbox("Enable Mouse Control", &m_IsMouseControlEnabled);
             
+            ImGui::Checkbox("Play recording", &m_IsPlaying);
+
+            /*if (m_IsPlayingRecording)
+            {
+                if (ImGui::Button("Pause"))
+                {
+                    m_IsPlayingRecording = false;
+                }
+            }
+            else
+            {
+                if (ImGui::Button("Play"))
+                {
+                    m_IsPlayingRecording = true;
+                }
+            }*/
+
             if (ImGui::Button("Colorize Planes"))
             {
                 ColorizePlanes();

@@ -32,6 +32,7 @@ namespace Scpt
 
         bool m_IsSelectionEnabled = true;
         bool m_IsMouseControlEnabled = false;
+        bool m_IsPlaying = false;
 
         void Start() override
         {
@@ -44,6 +45,7 @@ namespace Scpt
 
             SetActivateSelection = (FSetFlag)(Core::PluginManager::GetPluginFunction("SLAM", "SetActivateSelection"));
             EnableMouseControl = (FSetFlag)(Core::PluginManager::GetPluginFunction("SLAM", "EnableMouseControl"));
+            SetIsPlaying = (FSetFlag)(Core::PluginManager::GetPluginFunction("SLAM", "SetIsPlaying"));
 
             m_IsMouseControlEnabled = !Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:use_tracking_camera", false);
 
@@ -63,6 +65,7 @@ namespace Scpt
         {
             SetActivateSelection(m_IsSelectionEnabled);
             EnableMouseControl(m_IsMouseControlEnabled);
+            SetIsPlaying(m_IsPlaying);
         }
 
         // -----------------------------------------------------------------------------
@@ -78,7 +81,7 @@ namespace Scpt
         {
             Colorize();
         }
-
+        
     private:
 
         using FInputCallback = void(*)(const Base::CInputEvent& _rEvent);
@@ -87,6 +90,7 @@ namespace Scpt
         using FSetFlag = void(*)(bool _Flag);
         FSetFlag SetActivateSelection;
         FSetFlag EnableMouseControl;
+        FSetFlag SetIsPlaying;
 
         using FSimple = void(*)();
         FSimple Colorize;
