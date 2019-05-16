@@ -12,7 +12,7 @@
 
 namespace ImGui
 {
-    bool TextureSlot(const char* _pID, std::string& _rTexture, ImVec4 DefaultColor, ImVec2 Size, ImVec2 TooltipSize, ImGuiDragDropFlags _ImGuiDragDropFlags)
+    bool TextureSlot(const char* _pID, std::string& _rTexture, const ImVec4& DefaultColor, const ImVec2& Size, const ImVec2& TooltipSize, ImGuiDragDropFlags _ImGuiDragDropFlags)
     {
         auto GetHash = [](const std::string & _rText)
         {
@@ -22,12 +22,11 @@ namespace ImGui
             return Base::CRC32(pData, NumberOfBytes);
         };
 
-        ImGuiWindow* window = GetCurrentWindow();
+        ImGuiWindow* _pWindow = GetCurrentWindow();
 
-        if (window->SkipItems)
-            return false;
+        if (_pWindow->SkipItems) return false;
 
-        ImGuiID id = window->GetID(_pID);
+        ImGuiID GuiID = _pWindow->GetID(_pID);
 
         // -----------------------------------------------------------------------------
         // Item
@@ -38,10 +37,10 @@ namespace ImGui
         {
             Image((void*)(intptr_t)GfxImagePtr->GetNativeHandle(), Size);
 
-            ImGuiContext& g = *GImGui;
+            ImGuiContext& rG = *GImGui;
 
-            float button_radius = g.FontSize * 0.5f;
-            ImVec2 button_center = ImVec2(ImMin(window->DC.LastItemRect.Max.x, window->ClipRect.Max.x) - g.Style.FramePadding.x - button_radius, window->DC.LastItemRect.GetCenter().y);
+            float ButtonRadius = rG.FontSize * 0.5f;
+            ImVec2 ButtonCenter = ImVec2(ImMin(_pWindow->DC.LastItemRect.Max.x, _pWindow->ClipRect.Max.x) - rG.Style.FramePadding.x - ButtonRadius, _pWindow->DC.LastItemRect.GetCenter().y);
 
             if (ImGui::IsItemHovered())
             {
@@ -50,7 +49,7 @@ namespace ImGui
                 EndTooltip();
             }
 
-            if (CloseButton(window->GetID((void*)((intptr_t)id + 1)), button_center, button_radius))
+            if (CloseButton(_pWindow->GetID((void*)((intptr_t)GuiID + 1)), ButtonCenter, ButtonRadius))
             {
                 _rTexture.clear();
             }
@@ -87,15 +86,25 @@ namespace ImGui
 
     // -----------------------------------------------------------------------------
 
-    bool TextureField(const char* _pID, const char* _pLabel, std::string& _rTexture, const char* _pNoTexture, ImVec4 _DefaultColor, ImVec2 _Size, ImVec2 _TooltipSize, ImGuiDragDropFlags _ImGuiDragDropFlags)
+    bool TextureField(const char* _pID, const char* _pLabel, std::string& _rTexture, const char* _pNoTexture, const ImVec4& _DefaultColor, const ImVec2& _Size, const ImVec2& _TooltipSize, ImGuiDragDropFlags _ImGuiDragDropFlags)
     {
+        ImGuiWindow* _pWindow = GetCurrentWindow();
+
+        if (_pWindow->SkipItems) return false;
+
+        // -----------------------------------------------------------------------------
+
         bool Result = TextureSlot(_pID, _rTexture, _DefaultColor, _Size, _TooltipSize, _ImGuiDragDropFlags); SameLine();
 
         auto pText = (char*)_pNoTexture;
 
         if (_rTexture.length() > 0) pText = (char*)_rTexture.c_str();
 
-        InputText(_pLabel, pText, strlen(pText), ImGuiInputTextFlags_ReadOnly);
+        SetNextItemWidth(-(GetWindowContentRegionWidth() - CalcItemWidth()));
+
+        InputText(_pID, pText, strlen(pText), ImGuiInputTextFlags_ReadOnly); SameLine();
+
+        Text(_pLabel);
 
         return Result;
     }
