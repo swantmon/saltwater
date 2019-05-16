@@ -118,6 +118,16 @@ namespace MR
 
     void CPlaneColorizer::ColorizePlane(CSLAMReconstructor::SPlane& _rPlane)
     {
+        MR::CSLAMReconstructor::SSLAMVolume& rVolume = m_pReconstructor->GetVolume();
+
+        ContextManager::SetResourceBuffer(0, rVolume.m_RootVolumePoolPtr);
+        ContextManager::SetResourceBuffer(1, rVolume.m_RootGridPoolPtr);
+        ContextManager::SetResourceBuffer(2, rVolume.m_Level1PoolPtr);
+        ContextManager::SetResourceBuffer(3, rVolume.m_TSDFPoolPtr);
+        ContextManager::SetResourceBuffer(6, rVolume.m_RootVolumePositionBufferPtr);
+
+        ContextManager::SetConstantBuffer(2, rVolume.m_AABBBufferPtr);
+
         ContextManager::SetTargetSet(m_TargetSetPtr);
         ContextManager::SetViewPortSet(m_ViewPortSetPtr);
 
