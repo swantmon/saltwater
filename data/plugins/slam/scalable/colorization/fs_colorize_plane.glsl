@@ -28,15 +28,15 @@ void main()
         0.0f, -1.0f, 0.0f
     );
 
-    /*vec3 CameraPosition = SaltwaterToReconstruction * g_ViewPosition.xyz;
-    vec3 RayDirection = SaltwaterToReconstruction * normalize(in_WSRayDirection);
+    vec3 CameraPosition = SaltwaterToReconstruction * in_WSPosition;
+    vec3 RayDirection = SaltwaterToReconstruction * normalize(vec3(0.0f, 0.0f, -1.0f));
  
     RayDirection.x = RayDirection.x == 0.0f ? 1e-15f : RayDirection.x;
     RayDirection.y = RayDirection.y == 0.0f ? 1e-15f : RayDirection.y;
     RayDirection.z = RayDirection.z == 0.0f ? 1e-15f : RayDirection.z;
 
-    vec4 Vertex = GetPosition(CameraPosition, RayDirection);*/
-    vec3 Color = GetColor(SaltwaterToReconstruction * in_WSPosition);
+    vec3 Vertex = GetPosition(CameraPosition, RayDirection);
+    vec3 Color = GetColor(Vertex);
 
     imageStore(cs_Texture, ivec2(gl_FragCoord.xy), vec4(Color, 1.0f));
 }
