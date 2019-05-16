@@ -5,6 +5,8 @@
 
 #include "plugin/slam/mr_slam_control.h"
 
+#include "engine/script/script_slam.h"
+
 namespace SLAM
 {
     class CPluginInterface : public Core::IPlugin
@@ -19,10 +21,7 @@ namespace SLAM
 
         void OnInput(const Base::CInputEvent& _rEvent);
 
-        void SetActivateSelection(bool _Flag);
-        void EnableMouseControl(bool _Flag);
-        void ColorizePlanes();
-        void SetIsPlaying(bool _Flag);
+        void UpdateScriptSettings(const Scpt::CSLAMScript::SScriptSettings& _rSettings);
 
     private:
 

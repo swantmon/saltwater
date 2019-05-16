@@ -30,26 +30,32 @@ namespace Scpt
     {
     public:
 
-        bool m_IsSelectionEnabled = true;
-        bool m_IsMouseControlEnabled = false;
-        bool m_IsPlaying = false;
+        struct SScriptSettings
+        {
+            bool m_IsSelectionEnabled;
+            bool m_IsMouseControlEnabled;
+            bool m_IsPlayingRecording;
+            bool m_IsPermanentColorizationEnabled;
 
+            bool m_Colorize;
+        };
+        
         void Start() override
         {
             if (!Core::PluginManager::LoadPlugin("SLAM"))
             {
                 throw Base::CException(__FILE__, __LINE__, "SLAM plugin could not be loaded");
             }
-
+            
             InputCallback = (FInputCallback)(Core::PluginManager::GetPluginFunction("SLAM", "OnInput"));
 
-            SetActivateSelection = (FSetFlag)(Core::PluginManager::GetPluginFunction("SLAM", "SetActivateSelection"));
-            EnableMouseControl = (FSetFlag)(Core::PluginManager::GetPluginFunction("SLAM", "EnableMouseControl"));
-            SetIsPlaying = (FSetFlag)(Core::PluginManager::GetPluginFunction("SLAM", "SetIsPlaying"));
+            SetSettings = (FSetSettings)(Core::PluginManager::GetPluginFunction("SLAM", "UpdateScriptSettings"));
 
-            m_IsMouseControlEnabled = !Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:use_tracking_camera", false);
-
-            Colorize = (FSimple)(Core::PluginManager::GetPluginFunction("SLAM", "ColorizePlanes"));
+            m_Settings.m_IsSelectionEnabled = false;
+            m_Settings.m_IsMouseControlEnabled = false;
+            m_Settings.m_IsPlayingRecording = false;
+            m_Settings.m_IsPermanentColorizationEnabled = false;
+            m_Settings.m_Colorize = false;
         }
 
         // -----------------------------------------------------------------------------
@@ -63,9 +69,7 @@ namespace Scpt
 
         void Update() override
         {
-            SetActivateSelection(m_IsSelectionEnabled);
-            EnableMouseControl(m_IsMouseControlEnabled);
-            SetIsPlaying(m_IsPlaying);
+            SetSettings(m_Settings);
         }
 
         // -----------------------------------------------------------------------------
@@ -74,25 +78,17 @@ namespace Scpt
         {
             InputCallback(_rEvent);
         }
-
-        // -----------------------------------------------------------------------------
-
-        void ColorizePlanes()
-        {
-            Colorize();
-        }
         
     private:
 
         using FInputCallback = void(*)(const Base::CInputEvent& _rEvent);
         FInputCallback InputCallback;
 
-        using FSetFlag = void(*)(bool _Flag);
-        FSetFlag SetActivateSelection;
-        FSetFlag EnableMouseControl;
-        FSetFlag SetIsPlaying;
+        using FSetSettings = void(*)(const SScriptSettings& _rSettings);
+        FSetSettings SetSettings;
 
-        using FSimple = void(*)();
-        FSimple Colorize;
+    protected:
+
+        SScriptSettings m_Settings;
     };
 } // namespace Scpt

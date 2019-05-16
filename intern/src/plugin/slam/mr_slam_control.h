@@ -603,7 +603,24 @@ namespace MR
                 ENGINE_CONSOLE_INFO("Cannot play recording while in record mode");
                 return;
             }
+            
+            if (m_pRecordReader == nullptr)
+            {
+                std::string RecordParam = Core::CProgramParameters::GetInstance().Get("mr:slam:recording:mode", "none");
+                m_RecordFileName = Core::CProgramParameters::GetInstance().Get("mr:slam:recording:file", "");
+                double SpeedOfPlayback = Core::CProgramParameters::GetInstance().Get("mr:slam:recording:speed", 1.0);
 
+                m_RecordMode = PLAY;
+                m_RecordFile.open(m_RecordFileName, std::fstream::in | std::fstream::binary);
+                m_pRecordReader = std::make_unique<Base::CRecordReader>(m_RecordFile, 1);
+
+                m_pRecordReader->SkipTime();
+
+                m_pRecordReader->SetSpeed(SpeedOfPlayback);
+
+                ENGINE_CONSOLE_INFOV("Playing recording from file \"%s\"", m_RecordFileName.c_str());
+            }
+            
             m_RecordMode = _Flag ? PLAY : NONE;
         }
 

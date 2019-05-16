@@ -16,30 +16,12 @@ namespace Scpt
 
         void OnGUI()
         {
-            ImGui::Checkbox("Enable Selection", &m_IsSelectionEnabled);
-            ImGui::Checkbox("Enable Mouse Control", &m_IsMouseControlEnabled);
-            
-            ImGui::Checkbox("Play recording", &m_IsPlaying);
+            ImGui::Checkbox("Enable Selection", &m_Settings.m_IsMouseControlEnabled);
+            ImGui::Checkbox("Enable Mouse Control", &m_Settings.m_IsMouseControlEnabled);
+            ImGui::Checkbox("Permanent Colorization", &m_Settings.m_IsPermanentColorizationEnabled);
+            ImGui::Checkbox("Play Recording", &m_Settings.m_IsPlayingRecording);
 
-            /*if (m_IsPlayingRecording)
-            {
-                if (ImGui::Button("Pause"))
-                {
-                    m_IsPlayingRecording = false;
-                }
-            }
-            else
-            {
-                if (ImGui::Button("Play"))
-                {
-                    m_IsPlayingRecording = true;
-                }
-            }*/
-
-            if (ImGui::Button("Colorize Planes"))
-            {
-                ColorizePlanes();
-            }
+            m_Settings.m_Colorize = (ImGui::Button("Colorize Planes"));
         }
 
         // -----------------------------------------------------------------------------
