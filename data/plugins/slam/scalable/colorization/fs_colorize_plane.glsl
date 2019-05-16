@@ -36,7 +36,7 @@ void main()
     RayDirection.y = RayDirection.y == 0.0f ? 1e-15f : RayDirection.y;
     RayDirection.z = RayDirection.z == 0.0f ? 1e-15f : RayDirection.z;
 
-    vec3 Vertex = GetPosition(CameraPosition, RayDirection);
+    vec3 Vertex = GetPosition(CameraPosition - RayDirection * CAMERA_OFFSET, RayDirection);
     vec3 Color = GetColor(Vertex);
 
     imageStore(cs_Texture, ivec2(gl_FragCoord.xy), vec4(Color, 1.0f));

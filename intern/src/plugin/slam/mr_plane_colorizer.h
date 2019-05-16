@@ -55,6 +55,8 @@ namespace MR
         MR::CSLAMReconstructor* m_pReconstructor;
 
         int m_PlaneTextureSize;
+        float m_CameraOffset;
+        float m_MaxRaycastLength;
 
         Gfx::CTexturePtr m_DummyTexturePtr;
 

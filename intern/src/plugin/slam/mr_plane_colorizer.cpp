@@ -188,9 +188,10 @@ namespace MR
             << "#define VOXELS_PER_LEVEL1GRID " << Settings.m_VoxelsPerGrid[1] << " \n"
             << "#define VOXELS_PER_LEVEL2GRID " << Settings.m_VoxelsPerGrid[2] << " \n"
             << "#define RAYCAST_NEAR " << 0.0f << " \n"
-            << "#define RAYCAST_FAR " << 1000.0f << " \n"
+            << "#define RAYCAST_FAR " << m_MaxRaycastLength << " \n"
             << "#define CAPTURE_COLOR \n"
-            << "#define MIN_TREE_WEIGHT " << Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:min_weight", 30) << " \n";
+            << "#define MIN_TREE_WEIGHT " << Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:min_weight", 30) << " \n"
+            << "#define CAMERA_OFFSET " << m_CameraOffset << '\n';
 
         std::string DefineString = DefineStream.str();
 
@@ -250,7 +251,9 @@ namespace MR
     {
         assert(_pReconstructor != nullptr);
 
-        m_PlaneTextureSize = Core::CProgramParameters::GetInstance().Get("mr:plane_texture_size", 512);
+        m_PlaneTextureSize = Core::CProgramParameters::GetInstance().Get("mr:plane_extraction:texture_size", 512);
+        m_CameraOffset = Core::CProgramParameters::GetInstance().Get("mr:plane_extraction:camera_offset", 0.2f);
+        m_MaxRaycastLength = Core::CProgramParameters::GetInstance().Get("mr:plane_extraction:max_raycast_length", 0.4f);
 
         STextureDescriptor TextureDescriptor = {};
 
