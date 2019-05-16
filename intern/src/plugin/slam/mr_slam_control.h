@@ -618,6 +618,13 @@ namespace MR
             
             m_RecordMode = _Flag ? PLAY : NONE;
         }
+
+        // -----------------------------------------------------------------------------
+        
+        void ResetReconstruction()
+        {
+            m_Reconstructor.ResetReconstruction();
+        }
         
     private:
 

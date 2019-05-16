@@ -75,6 +75,11 @@ namespace SLAM
             _rSettings.m_RenderLevel2,
             _rSettings.m_PlaneMode
         );
+
+        if (_rSettings.m_Reset)
+        {
+            m_SLAMControl.ResetReconstruction();
+        }
     }
 
     // -----------------------------------------------------------------------------
