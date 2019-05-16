@@ -383,12 +383,12 @@ namespace Scpt
             TextureDescriptor.m_NumberOfTextures = 1;
             TextureDescriptor.m_Binding          = Gfx::CTexture::ShaderResource;
             TextureDescriptor.m_Access           = Gfx::CTexture::CPUWrite;
-            TextureDescriptor.m_Format           = Gfx::CTexture::R8G8B8A8_BYTE;
+            TextureDescriptor.m_Format           = Gfx::CTexture::R8G8B8A8_UBYTE;
             TextureDescriptor.m_Usage            = Gfx::CTexture::GPUReadWrite;
             TextureDescriptor.m_Semantic         = Gfx::CTexture::Diffuse;
             TextureDescriptor.m_pFileName        = nullptr;
             TextureDescriptor.m_pPixels          = nullptr;
-        
+
             m_PanoramaTexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
 
             Gfx::TextureManager::SetTextureLabel(m_PanoramaTexturePtr, "Sky panorama from image");
