@@ -609,13 +609,10 @@ namespace MR
 
         void SetIsPlaying(bool _Flag)
         {
-            if (m_RecordMode == RECORD)
+            if (m_RecordMode != RECORD)
             {
-                ENGINE_CONSOLE_INFO("Cannot play recording while in record mode");
-                return;
+                m_RecordMode = _Flag ? PLAY : NONE;
             }
-            
-            m_RecordMode = _Flag ? PLAY : NONE;
         }
 
         // -----------------------------------------------------------------------------

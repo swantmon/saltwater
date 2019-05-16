@@ -1815,10 +1815,15 @@ namespace MR
 
     void CSLAMReconstructor::ResetReconstruction(const SReconstructionSettings* pReconstructionSettings)
     {
+        m_Planes.clear();
+
+        if (!m_IsInizialized)
+        {
+            return;
+        }
+
         m_RootVolumeMap.clear();
         m_RootVolumeVector.clear();
-
-        m_Planes.clear();
 
         if (pReconstructionSettings != nullptr)
         {
