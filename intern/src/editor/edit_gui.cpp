@@ -130,6 +130,8 @@ namespace
 
 		void ToggleFullscreen();
         void ToggleGUI();
+
+        void Exit();
     };
 } // namespace 
 
@@ -140,6 +142,7 @@ namespace
         , m_pGamePad           (nullptr)
         , m_pWindow            (nullptr)
         , m_AnalogStickDeadZone(0)
+        , m_EnableGamepad      (false)
         , m_ShowGUI            (true)
         , m_IsFullscreen       (false)
     {                          
@@ -411,11 +414,7 @@ namespace
 
                 if (ImGui::MenuItem("Exit", "ALT+F4"))
                 {
-                    Edit::CEditState::GetInstance().SetNextState(CState::UnloadMap);
-
-                    Edit::CUnloadMapState::GetInstance().SaveToFile("test.sws");
-
-                    Edit::CUnloadMapState::GetInstance().SetNextState(CState::Exit);
+                    Exit();
                 }
 
                 ImGui::EndMenu();
@@ -619,9 +618,7 @@ namespace
             // -----------------------------------------------------------------------------
             if (SDLEvent.type == SDL_QUIT)
             {
-                Base::CInputEvent Event = Base::CInputEvent(Base::CInputEvent::Exit);
-
-                Gui::EventHandler::OnEvent(Event);
+                Exit();
             }
         }
     }
@@ -894,6 +891,17 @@ namespace
     void CEditorGui::ToggleGUI()
     {
         m_ShowGUI = !m_ShowGUI;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CEditorGui::Exit()
+    {
+        Edit::CEditState::GetInstance().SetNextState(CState::UnloadMap);
+
+        Edit::CUnloadMapState::GetInstance().SaveToFile("test.sws");
+
+        Edit::CUnloadMapState::GetInstance().SetNextState(CState::Exit);
     }
 } // namespace 
 

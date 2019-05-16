@@ -62,8 +62,8 @@ namespace Edit
         
     private:
         
-        CState::EStateType InternOnEnter() override;
-        CState::EStateType InternOnLeave() override;
+        void InternOnEnter() override;
+        void InternOnLeave() override;
         CState::EStateType InternOnRun() override;
 
     private:

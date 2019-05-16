@@ -19,8 +19,8 @@ namespace Edit
 namespace Edit
 {
     CUnloadMapState::CUnloadMapState()
+        : CState(UnloadMap)
     {
-        m_NextState = CState::Exit;
     }
     
     // -----------------------------------------------------------------------------
@@ -39,22 +39,20 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
     
-    CState::EStateType CUnloadMapState::InternOnEnter()
+    void CUnloadMapState::InternOnEnter()
     {
-        if (m_NextState == CState::Exit)
+        if (m_NextState == CState::Exit || m_NextState == CState::LoadMap)
         {
             Dt::Map::FreeMap();
             Dt::EntityManager::Clear();
         }
-
-        return Edit::CState::UnloadMap;
     }
     
     // -----------------------------------------------------------------------------
     
-    CState::EStateType CUnloadMapState::InternOnLeave()
+    void CUnloadMapState::InternOnLeave()
     {
-        return Edit::CState::UnloadMap;
+        m_NextState = CState::UnloadMap;
     }
     
     // -----------------------------------------------------------------------------

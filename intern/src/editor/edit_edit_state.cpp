@@ -32,7 +32,8 @@ namespace Edit
 namespace Edit
 {
     CEditState::CEditState()
-        : m_CurrentOperation(Hand)
+        : CState            (Edit)
+        , m_CurrentOperation(Hand)
         , m_CurrentMode     (World)
         , m_pSelectionTicket(nullptr)
     {
@@ -76,7 +77,7 @@ namespace Edit
     
     // -----------------------------------------------------------------------------
     
-    CState::EStateType CEditState::InternOnEnter()
+    void CEditState::InternOnEnter()
     {
         // -----------------------------------------------------------------------------
         // Input
@@ -89,13 +90,11 @@ namespace Edit
         assert(m_pSelectionTicket == nullptr);
 
         m_pSelectionTicket = &Gfx::SelectionRenderer::AcquireTicket(-1, -1, 1, 1, Gfx::SPickFlag::Everything);
-        
-        return Edit::CState::Edit;
     }
     
     // -----------------------------------------------------------------------------
     
-    CState::EStateType CEditState::InternOnLeave()
+    void CEditState::InternOnLeave()
     {
         // -----------------------------------------------------------------------------
         // Unregister event
@@ -116,7 +115,10 @@ namespace Edit
 
         Edit::GUI::CInspectorPanel::GetInstance().InspectEntity(Dt::CEntity::s_InvalidID);
 
-        return Edit::CState::Edit;
+        // -----------------------------------------------------------------------------
+        // Reset state
+        // -----------------------------------------------------------------------------
+        m_NextState = Edit;
     }
     
     // -----------------------------------------------------------------------------
@@ -155,11 +157,7 @@ namespace Edit
 
     void CEditState::OnEvent(const Base::CInputEvent& _rInputEvent)
     {
-        if (_rInputEvent.GetType() == Base::CInputEvent::Exit)
-        {
-            m_NextState = CState::Exit;
-        }
-        else if (_rInputEvent.GetType() == Base::CInputEvent::Input)
+        if (_rInputEvent.GetType() == Base::CInputEvent::Input)
         {
             if (_rInputEvent.GetAction() == Base::CInputEvent::MouseLeftReleased && m_pSelectionTicket != nullptr)
             {

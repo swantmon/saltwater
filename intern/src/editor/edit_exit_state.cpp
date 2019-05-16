@@ -16,8 +16,8 @@ namespace Edit
 namespace Edit
 {
     CExitState::CExitState()
+        : CState(Exit)
     {
-        m_NextState = CState::Exit;
     }
     
     // -----------------------------------------------------------------------------
@@ -29,16 +29,15 @@ namespace Edit
     
     // -----------------------------------------------------------------------------
     
-    CState::EStateType CExitState::InternOnEnter()
+    void CExitState::InternOnEnter()
     {
-        return Edit::CState::Exit;
     }
     
     // -----------------------------------------------------------------------------
     
-    CState::EStateType CExitState::InternOnLeave()
+    void CExitState::InternOnLeave()
     {
-        return Edit::CState::Exit;
+        m_NextState = CState::Exit;
     }
     
     // -----------------------------------------------------------------------------

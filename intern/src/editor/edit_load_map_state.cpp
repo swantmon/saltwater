@@ -63,7 +63,8 @@ namespace Edit
 namespace Edit
 {
     CLoadMapState::CLoadMapState()
-        : m_Filename ("")
+        : CState     (LoadMap)
+        , m_Filename ("")
     {
         m_NextState = CState::Edit;
     }
@@ -91,7 +92,7 @@ namespace Edit
     
     // -----------------------------------------------------------------------------
     
-    CState::EStateType CLoadMapState::InternOnEnter()
+    void CLoadMapState::InternOnEnter()
     {
         auto Scene = Core::CProgramParameters::GetInstance().Get("application:load_scene", "default");
 
@@ -117,15 +118,13 @@ namespace Edit
         {
             CreateSLAMScene();
         }
-                
-        return Edit::CState::LoadMap;
     }
     
     // -----------------------------------------------------------------------------
     
-    CState::EStateType CLoadMapState::InternOnLeave()
+    void CLoadMapState::InternOnLeave()
     {
-        return Edit::CState::LoadMap;
+        m_NextState = LoadMap;
     }
     
     // -----------------------------------------------------------------------------
