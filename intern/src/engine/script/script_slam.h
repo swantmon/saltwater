@@ -60,6 +60,7 @@ namespace Scpt
 
             bool m_SetRecordFile;
             std::string m_RecordFile;
+            float m_PlaybackSpeed;
         };
         
         void Start() override
@@ -83,6 +84,7 @@ namespace Scpt
             m_Settings.m_IsPlayingRecording = false;
             m_Settings.m_IsPermanentColorizationEnabled = false;
             m_Settings.m_Colorize = false;
+            m_Settings.m_PlaybackSpeed = 1.0f;
         }
 
         // -----------------------------------------------------------------------------

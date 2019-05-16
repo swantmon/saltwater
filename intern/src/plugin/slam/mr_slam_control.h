@@ -564,10 +564,9 @@ namespace MR
 
         // -----------------------------------------------------------------------------
 
-        void SetRecordFile(const std::string& _rFileName)
+        void SetRecordFile(const std::string& _rFileName, float _Speed = 1.0f)
         {
             std::string RecordParam = Core::CProgramParameters::GetInstance().Get("mr:slam:recording:mode", "none");
-            double SpeedOfPlayback = Core::CProgramParameters::GetInstance().Get("mr:slam:recording:speed", 1.0);
 
             m_RecordFile.open(Core::AssetManager::GetPathToAssets() + "/" + _rFileName, std::fstream::in | std::fstream::binary);
 
@@ -580,7 +579,7 @@ namespace MR
 
             m_pRecordReader->SkipTime();
 
-            m_pRecordReader->SetSpeed(SpeedOfPlayback);
+            m_pRecordReader->SetSpeed(_Speed);
 
             ENGINE_CONSOLE_INFOV("Playing recording from file \"%s\"", _rFileName.c_str());
         }

@@ -65,7 +65,7 @@ namespace SLAM
 
         if (_rSettings.m_SetRecordFile)
         {
-            m_SLAMControl.SetRecordFile(_rSettings.m_RecordFile);
+            m_SLAMControl.SetRecordFile(_rSettings.m_RecordFile, _rSettings.m_PlaybackSpeed);
         }
 
         Gfx::ReconstructionRenderer::SetVisibleObjects(
