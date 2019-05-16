@@ -63,6 +63,8 @@ namespace MR
             glm::mat4 m_Transform;
             glm::vec4 m_Extent;
 
+            glm::vec3 m_Normal;
+
             Gfx::CMeshPtr m_MeshPtr;
 
             Gfx::CTexturePtr m_TexturePtr;
@@ -162,11 +164,11 @@ namespace MR
 
         void ResetReconstruction(const SReconstructionSettings* pReconstructionSettings = nullptr);
 
-        void AddPlane(glm::mat4 _Transform, glm::vec4 _Extent, int _ID);
-        void UpdatePlane(glm::mat4 _Transform, glm::vec4 _Extent, int _ID);
+        void AddPlane(const glm::mat4& _rTransform, const glm::vec4& _rExtent, int _ID);
+        void UpdatePlane(const glm::mat4& _rTransform, const glm::vec4& _rExtent, int _ID);
 
-        void AddPlaneWithMesh(glm::mat4 _Transform, glm::vec4 _Extent, const CPlaneVertices& _rVertices, const CPlaneIndices& _rIndices, int _ID);
-        void UpdatePlaneWithMesh(glm::mat4 _Transform, glm::vec4 _Extent, const CPlaneVertices& _rVertices, const CPlaneIndices& _rIndices, int _ID);
+        void AddPlaneWithMesh(const glm::mat4& _rTransform, const glm::vec4& _rExtent, const CPlaneVertices& _rVertices, const CPlaneIndices& _rIndices, int _ID);
+        void UpdatePlaneWithMesh(const glm::mat4& _rTransform, const glm::vec4& _rExtent, const CPlaneVertices& _rVertices, const CPlaneIndices& _rIndices, int _ID);
 
         void RemovePlane(int _ID);
 

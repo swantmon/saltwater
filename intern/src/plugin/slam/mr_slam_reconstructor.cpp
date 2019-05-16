@@ -1838,38 +1838,40 @@ namespace MR
     
     // -----------------------------------------------------------------------------
 
-    void CSLAMReconstructor::AddPlane(glm::mat4 _Transform, glm::vec4 _Extent, int _ID)
+    void CSLAMReconstructor::AddPlane(const glm::mat4& _rTransform, const glm::vec4& _rExtent, int _ID)
     {
-        SPlane Plane = { _Transform, _Extent };
+        SPlane Plane = { _rTransform, _rExtent };
 
         m_Planes[_ID] = Plane;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CSLAMReconstructor::UpdatePlane(glm::mat4 _Transform, glm::vec4 _Extent, int _ID)
+    void CSLAMReconstructor::UpdatePlane(const glm::mat4& _rTransform, const glm::vec4& _rExtent, int _ID)
     {
-        SPlane Plane = { _Transform, _Extent };
+        SPlane Plane = { _rTransform, _rExtent };
 
         m_Planes[_ID] = Plane;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CSLAMReconstructor::AddPlaneWithMesh(glm::mat4 _Transform, glm::vec4 _Extent, const CPlaneVertices& _rVertices, const CPlaneIndices& _rIndices, int _ID)
+    void CSLAMReconstructor::AddPlaneWithMesh(const glm::mat4& _rTransform, const glm::vec4& _rExtent, const CPlaneVertices& _rVertices, const CPlaneIndices& _rIndices, int _ID)
     {
+        glm::vec3 Normal = glm::normalize(glm::mat3(_rTransform) * glm::vec3(0.0f, -1.0f, 0.0f));
+
         auto MeshPtr =  MeshManager::CreateMesh(_rVertices.data(), _rVertices.size(), sizeof(_rVertices[0]), _rIndices.data(), _rIndices.size());
 
-        SPlane Plane = { _Transform, _Extent, MeshPtr, nullptr };
+        SPlane Plane = { _rTransform, _rExtent, Normal, MeshPtr, nullptr };
 
         m_Planes[_ID] = Plane;
     }
     
     // -----------------------------------------------------------------------------
     
-    void CSLAMReconstructor::UpdatePlaneWithMesh(glm::mat4 _Transform, glm::vec4 _Extent, const CPlaneVertices& _rVertices, const CPlaneIndices& _rIndices, int _ID)
+    void CSLAMReconstructor::UpdatePlaneWithMesh(const glm::mat4& _rTransform, const glm::vec4& _rExtent, const CPlaneVertices& _rVertices, const CPlaneIndices& _rIndices, int _ID)
     {
-        AddPlaneWithMesh(_Transform, _Extent, _rVertices, _rIndices, _ID);
+        AddPlaneWithMesh(_rTransform, _rExtent, _rVertices, _rIndices, _ID);
 
         //SPlane Plane = { _Transform, _Extent };
 

@@ -4,10 +4,11 @@
 
 #include "../../plugins/slam/scalable/common_raycast.glsl"
 
-layout(std140, binding = 1) uniform PerDrawCallData
+layout(std140, binding = 0) uniform PerDrawCallData
 {
     mat4 g_WorldMatrix;
 	vec4 g_Color;
+	vec3 g_Normal;
 };
 
 layout (binding = 0, rgba8) uniform image2D cs_Texture;
@@ -29,7 +30,7 @@ void main()
     );
 
     vec3 CameraPosition = SaltwaterToReconstruction * in_WSPosition;
-    vec3 RayDirection = SaltwaterToReconstruction * normalize(vec3(0.0f, 0.0f, -1.0f));
+    vec3 RayDirection = SaltwaterToReconstruction * g_Normal;
  
     RayDirection.x = RayDirection.x == 0.0f ? 1e-15f : RayDirection.x;
     RayDirection.y = RayDirection.y == 0.0f ? 1e-15f : RayDirection.y;

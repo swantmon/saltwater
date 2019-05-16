@@ -42,6 +42,8 @@ namespace
     {
         glm::mat4 m_WorldMatrix;
         glm::vec4 m_Color;
+        glm::vec3 m_Normal;
+        float Padding;
     };
 
 } // namespace
@@ -125,7 +127,6 @@ namespace MR
         ContextManager::SetResourceBuffer(2, rVolume.m_Level1PoolPtr);
         ContextManager::SetResourceBuffer(3, rVolume.m_TSDFPoolPtr);
         ContextManager::SetResourceBuffer(6, rVolume.m_RootVolumePositionBufferPtr);
-
         ContextManager::SetConstantBuffer(2, rVolume.m_AABBBufferPtr);
 
         ContextManager::SetTargetSet(m_TargetSetPtr);
@@ -151,11 +152,20 @@ namespace MR
 
         BufferData.m_WorldMatrix = _rPlane.m_Transform;
         BufferData.m_Color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+        BufferData.m_Normal = _rPlane.m_Normal;
 
         BufferManager::UploadBufferData(m_ConstantBufferPtr, &BufferData);
         ContextManager::SetConstantBuffer(0, m_ConstantBufferPtr);
 
         ContextManager::DrawIndexed(_rPlane.m_MeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
+        
+        ContextManager::ResetResourceBuffer(0);
+        ContextManager::ResetResourceBuffer(1);
+        ContextManager::ResetResourceBuffer(2);
+        ContextManager::ResetResourceBuffer(3);
+        ContextManager::ResetResourceBuffer(6);
+        ContextManager::ResetConstantBuffer(0);
+        ContextManager::ResetConstantBuffer(2);
     }
 
     // -----------------------------------------------------------------------------
