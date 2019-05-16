@@ -376,6 +376,20 @@ namespace
         {
             if (ImGui::BeginMenu("File"))
             {
+                if (ImGui::MenuItem("Open Scene", "CTRL+O"))
+                {
+                }
+
+                if (ImGui::MenuItem("Save", "CTRL+S"))
+                {
+                }
+
+                if (ImGui::MenuItem("Save As", "CTRL+SHIFT+S"))
+                {
+                }
+
+                ImGui::Separator();
+
                 ImGui::MenuItem("Exit", "ALT+F4", &m_CloseWindow);
 
                 ImGui::EndMenu();
