@@ -74,10 +74,10 @@ namespace Scpt
 
             SetSettings = (FSetSettings)(Core::PluginManager::GetPluginFunction("SLAM", "UpdateScriptSettings"));
 
-            m_Settings.m_RenderVolume = true;
-            m_Settings.m_RenderRoot = false;
-            m_Settings.m_RenderLevel1 = false;
-            m_Settings.m_RenderLevel2 = false;
+            m_Settings.m_RenderVolume = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:volume", true);
+            m_Settings.m_RenderRoot = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:root", false);
+            m_Settings.m_RenderLevel1 = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:level1", false);
+            m_Settings.m_RenderLevel2 = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:level2", false);
             m_Settings.m_PlaneMode = EPlaneRenderingMode::MESH_ONLY;
             m_Settings.m_IsSelectionEnabled = false;
             m_Settings.m_IsMouseControlEnabled = false;

@@ -338,12 +338,12 @@ namespace
         m_ResizeDelegate = Gfx::Main::RegisterResizeHandler(std::bind(&CGfxReconstructionRenderer::OnResize, this, std::placeholders::_1, std::placeholders::_2));
                                 
         m_UseTrackingCamera   = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:use_tracking_camera", true);
-        m_RenderVolume        = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:volume"             , true);
-        m_RenderVertexMap     = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:vertex_map"         , false);
-        m_RenderRootQueue     = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:root"        , false);
-        m_RenderLevel1Queue   = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:level1"      , false);
-        m_RenderLevel2Queue   = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:level2"      , false);
-        m_RenderBackSides     = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:backsides"          , true);
+        m_RenderVertexMap     = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:vertex_map", false);
+        m_RenderVolume        = true;
+        m_RenderRootQueue     = false;
+        m_RenderLevel1Queue   = false;
+        m_RenderLevel2Queue   = false;
+        m_RenderBackSides     = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:backsides", true);
         m_InpaintedPlaneScale = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:inpainted_plane:scale", 2.0f);
 
         auto PlaneModeString = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:plane_mode", "none");
