@@ -85,6 +85,7 @@ namespace FutoGmtCV
         cal_H(m_Img_Orig_B.get_PPM(), m_Img_Orig_M.get_PPM());
 
         //---Step 2. Center Rectified Images---
+
         glm::vec2 CenterShift_B(0.0f);
         glm::vec2 CenterShift_M(0.0f);
 
@@ -97,7 +98,7 @@ namespace FutoGmtCV
         imp_CenterShift_K(CenterShift_B, CenterShift_M);
 
         cal_H(m_Img_Orig_B.get_PPM(), m_Img_Orig_M.get_PPM()); // Update Homography because Rectified Camera mtx has changed.
-        
+
         //---Step 3. Calculate the Corners of Rectified Images---
         cal_RectImgBound(m_Img_Orig_B.get_ImgSize(), 0);
         cal_RectImgBound(m_Img_Orig_M.get_ImgSize(), 1);

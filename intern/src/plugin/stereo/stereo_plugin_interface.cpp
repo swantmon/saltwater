@@ -134,6 +134,13 @@ namespace Stereo
                     cv::imwrite(ExportStream.str(), cvOrigImg_Last);
                     ExportStream.clear();
                     ExportStream.str("");
+
+                    
+                    m_ofstream_PC << "ARKit_OrigImg_Curt_" << m_KeyfNum << ".png, ";
+                    m_ofstream_PC << m_Keyframe_Curt.get_PC().x << ", ";
+                    m_ofstream_PC << m_Keyframe_Curt.get_PC().y << ", ";
+                    m_ofstream_PC << m_Keyframe_Curt.get_PC().z << std::endl;
+
                 }
 
                 //---Planar Rectification: Generate Rectified Keyframes---
@@ -432,6 +439,7 @@ namespace Stereo
 
         //---Program Design Setting---
         m_Is_imwrite = Core::CProgramParameters::GetInstance().Get("mr:stereo:00_program_design_setting:show_result", true);
+        m_ofstream_PC = std::ofstream("E:\\Project_ARCHITECT\\ARKit_CameraPosition.txt", std::ios::trunc);
 
         //---ARKit Data---
         m_FrameResolution = Core::CProgramParameters::GetInstance().Get("mr:stereo:00_input_setting:frame_resolution", 0.5); // Full = 1; Half = 0.5;
@@ -493,6 +501,8 @@ namespace Stereo
         m_Disp_RectImg_TexturePtr = nullptr;
         m_Depth_RectImg_TexturePtr = nullptr;
         m_ParaxEq_BufferPtr = nullptr;
+
+        m_ofstream_PC.close();
         
         ENGINE_CONSOLE_INFOV("Stereo matching plugin exited!");
     }
