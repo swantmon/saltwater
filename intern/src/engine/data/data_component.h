@@ -55,7 +55,7 @@ namespace Dt
 
         IComponent()
             : m_ID(0)
-            , m_pHostEntity(0)
+            , m_pHostEntity(nullptr)
             , m_DirtyFlags(0)
         {};
 
@@ -139,7 +139,7 @@ namespace Dt
 
     private:
 
-        typedef std::array<void*, NumberOfFacets> CFacets;
+        using CFacets = std::array<void*, NumberOfFacets>;
 
     private:
 

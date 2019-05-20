@@ -473,15 +473,12 @@ BASE_TEST(SerializeComplexWithBinary)
 #include <map>
 
 
-class ISerializeBase
+class IFactoryBase
 {
 public:
-
-    virtual void Read(Base::CTextReader& _rCodec) = 0;
-
-    virtual void Write(Base::CTextWriter& _rCodec) = 0;
-
-    virtual ISerializeBase* Allocate() = 0;
+    virtual inline void Read(Base::CTextReader& _rCodec) = 0;
+    virtual inline void Write(Base::CTextWriter& _rCodec) = 0;
+    virtual IFactoryBase* Create() = 0;
 };
 
 class CSerializeFactory
@@ -497,15 +494,8 @@ public:
 
 public:
 
-    struct SFactoryElement
-    {
-        ISerializeBase* m_pFactory;
-    };
-
-public:
-
-    using CFactoryMap     = std::map<Base::ID, SFactoryElement>;
-    using CFactoryMapPair = std::pair<Base::ID, SFactoryElement>;
+    using CFactoryMap     = std::map<Base::ID, IFactoryBase*>;
+    using CFactoryMapPair = std::pair<Base::ID, IFactoryBase*>;
 
 public:
 
@@ -514,34 +504,22 @@ public:
 public:
 
     template<class T>
-    void Register(ISerializeBase* _pBase)
+    void Register(IFactoryBase* _pBase)
     {
         auto ID = Base::CTypeInfo::GetTypeID<T>();
 
-        if (m_Factory.find(ID) == m_Factory.end())
-        {
-            SFactoryElement NewElement;
-
-            NewElement.m_pFactory = _pBase;
-
-            m_Factory.insert(CFactoryMapPair(ID, NewElement));
-        }
+        if (m_Factory.find(ID) == m_Factory.end()) m_Factory.insert(CFactoryMapPair(ID, _pBase));
     }
 
-    ISerializeBase* Get(Base::ID _ID)
+    IFactoryBase* Allocate(Base::ID _ID)
     {
-        if (m_Factory.find(_ID) != m_Factory.end())
-        {
-            SFactoryElement& rElement = m_Factory.find(_ID)->second;
-
-            return rElement.m_pFactory->Allocate();
-        }
+        if (m_Factory.find(_ID) != m_Factory.end()) return m_Factory.find(_ID)->second->Create();
 
         return nullptr;
     }
 };
 
-class CDerivedA : public ISerializeBase
+class CDerivedA : public IFactoryBase
 {
 public:
 
@@ -559,7 +537,7 @@ public:
         _rCodec << a;
     }
 
-    ISerializeBase* Allocate() override
+    IFactoryBase* Create() override
     {
         return new CDerivedA();
     }
@@ -574,7 +552,7 @@ struct SRegisterSerializeDerivedA
 } g_SRegisterSerializeDerivedA;
 
 
-class CDerivedB : public ISerializeBase
+class CDerivedB : public IFactoryBase
 {
 public:
 
@@ -592,7 +570,7 @@ public:
         _rCodec << b;
     }
 
-    ISerializeBase* Allocate() override
+    IFactoryBase* Create() override
     {
         return new CDerivedB();
     }
@@ -640,8 +618,8 @@ BASE_TEST(SerializeInterfaceWithText)
     // -----------------------------------------------------------------------------
     Base::ID IDTest;
 
-    ISerializeBase* pBaseCompexClassATest;
-    ISerializeBase* pBaseCompexClassBTest;
+    IFactoryBase* pBaseCompexClassATest;
+    IFactoryBase* pBaseCompexClassBTest;
 
     // -----------------------------------------------------------------------------
     // Reading
@@ -650,13 +628,13 @@ BASE_TEST(SerializeInterfaceWithText)
 
     Reader >> IDTest;
 
-    pBaseCompexClassATest = CSerializeFactory::GetInstance().Get(IDTest);
+    pBaseCompexClassATest = CSerializeFactory::GetInstance().Allocate(IDTest);
 
     Reader >> (*pBaseCompexClassATest);
 
     Reader >> IDTest;
 
-    pBaseCompexClassBTest = CSerializeFactory::GetInstance().Get(IDTest);
+    pBaseCompexClassBTest = CSerializeFactory::GetInstance().Allocate(IDTest);
 
     Reader >> (*pBaseCompexClassBTest);
 

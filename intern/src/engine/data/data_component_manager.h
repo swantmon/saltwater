@@ -49,9 +49,9 @@ namespace Dt
 
     private:
 
-        typedef std::vector<std::unique_ptr<Dt::IComponent>>     CComponents;
-        typedef std::map<Base::ID, Dt::IComponent*>              CComponentsByID;
-        typedef std::map<Base::ID, std::vector<Dt::IComponent*>> CComponentsByType;
+        using CComponents = std::vector<std::unique_ptr<Dt::IComponent>>;
+        using CComponentsByID = std::map<Base::ID, Dt::IComponent*>;
+        using CComponentsByType = std::map<Base::ID, std::vector<Dt::IComponent*>>;
 
     private:
 
@@ -79,7 +79,7 @@ namespace Dt
         // -----------------------------------------------------------------------------
         m_Components.emplace_back(std::unique_ptr<T>(new T()));
 
-        T* pComponent = static_cast<T*>(m_Components.back().get());
+        auto* pComponent = static_cast<T*>(m_Components.back().get());
 
         pComponent->m_ID = m_CurrentID++;
 
