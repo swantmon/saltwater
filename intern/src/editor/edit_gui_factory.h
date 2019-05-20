@@ -87,8 +87,8 @@ namespace Edit
 
     private:
 
-        typedef std::map<size_t, SFactoryElement> CFactoryMap;
-        typedef std::pair<size_t, SFactoryElement> CFactoryMapPair;
+        using CFactoryMap = std::map<size_t, SFactoryElement>;
+        using CFactoryMapPair = std::pair<size_t, SFactoryElement>;
         
     private:
         
