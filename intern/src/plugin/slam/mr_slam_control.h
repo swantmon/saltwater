@@ -276,7 +276,7 @@ namespace MR
 
                     if (!Core::PluginManager::LoadPlugin("PixMix"))
                     {
-                        throw Base::CException(__FILE__, __LINE__, "Kinect plugin was not loaded");
+                        BASE_THROWM("PixMix plugin was not loaded");
                     }
 
                     InpaintWithPixMix = (InpaintWithPixMixFunc)(Core::PluginManager::GetPluginFunction("PixMix", "Inpaint"));
@@ -302,7 +302,7 @@ namespace MR
                 
                 if (!Core::PluginManager::LoadPlugin("Kinect"))
                 {
-                    throw Base::CException(__FILE__, __LINE__, "Kinect plugin was not loaded");
+                    BASE_THROWM("Kinect plugin was not loaded")
                 }
 
                 m_DataSource = KINECT;
@@ -357,7 +357,7 @@ namespace MR
             }
             else
             {
-                throw Base::CException(__FILE__, __LINE__, "Unknown data source for SLAM plugin");
+                BASE_THROWM("Unknown data source for SLAM plugin");
             }
 
             std::string RecordParam = Core::CProgramParameters::GetInstance().Get("mr:slam:recording:mode", "none");
