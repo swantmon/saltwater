@@ -67,14 +67,14 @@ namespace AssetHelper
     {
         if (_rAsset.GetType() != CAsset::Model) return nullptr;
 
-        auto Entities = Dt::EntityManager::CreateEntitiesFromScene(_rAsset.GetPathToFile());
+        auto Entities = Dt::CEntityManager::GetInstance().CreateEntitiesFromScene(_rAsset.GetPathToFile());
 
         Dt::SEntityDescriptor EntityDesc;
 
         EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
         EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
-        Dt::CEntity& rNewModel = Dt::EntityManager::CreateEntity(EntityDesc);
+        Dt::CEntity& rNewModel = Dt::CEntityManager::GetInstance().CreateEntity(EntityDesc);
 
         for (auto& rEntity : Entities) rNewModel.Attach(*rEntity);
 

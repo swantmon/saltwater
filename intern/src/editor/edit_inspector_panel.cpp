@@ -44,7 +44,7 @@ namespace GUI
             return;
         }
 
-        m_pEntity = Dt::EntityManager::GetEntityByID(_ID);
+        m_pEntity = Dt::CEntityManager::GetInstance().GetEntityByID(_ID);
     }
 
     // -----------------------------------------------------------------------------
@@ -157,7 +157,7 @@ namespace GUI
                 }
             }
 
-            Dt::EntityManager::MarkEntityAsDirty(*m_pEntity, Dt::CEntity::DirtyMove);
+            Dt::CEntityManager::GetInstance().MarkEntityAsDirty(*m_pEntity, Dt::CEntity::DirtyMove);
 
             ImGui::Separator();
 

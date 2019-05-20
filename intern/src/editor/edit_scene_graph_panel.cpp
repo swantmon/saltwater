@@ -148,7 +148,7 @@ namespace GUI
             {
                 if (ImGui::Button("Delete"))
                 {
-                    Dt::EntityManager::MarkEntityAsDirty(*pEntity, Dt::CEntity::DirtyRemove | Dt::CEntity::DirtyDestroy);
+                    Dt::CEntityManager::GetInstance().MarkEntityAsDirty(*pEntity, Dt::CEntity::DirtyRemove | Dt::CEntity::DirtyDestroy);
                 }
 
                 ImGui::EndPopup();
@@ -181,17 +181,17 @@ namespace GUI
 
                     auto EntityIDDestination = *static_cast<const Dt::CEntity::BID*>(payload->Data);
 
-                    Dt::CEntity* pSourceEntity = Dt::EntityManager::GetEntityByID(EntityIDDestination);
+                    Dt::CEntity* pSourceEntity = Dt::CEntityManager::GetInstance().GetEntityByID(EntityIDDestination);
 
                     if (pSourceEntity == nullptr) return;
 
                     pSourceEntity->Detach();
 
-                    Dt::CEntity* pDestinationEntity = Dt::EntityManager::GetEntityByID(CurrentID);
+                    Dt::CEntity* pDestinationEntity = Dt::CEntityManager::GetInstance().GetEntityByID(CurrentID);
 
                     pDestinationEntity->Attach(*pSourceEntity);
 
-                    Dt::EntityManager::MarkEntityAsDirty(*pSourceEntity, Dt::CEntity::DirtyMove);
+                    Dt::CEntityManager::GetInstance().MarkEntityAsDirty(*pSourceEntity, Dt::CEntity::DirtyMove);
                 }
                 ImGui::EndDragDropTarget();
             }
@@ -216,7 +216,7 @@ namespace GUI
 
                 if (pEntity != nullptr)
                 {
-                    Dt::EntityManager::MarkEntityAsDirty(*pEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+                    Dt::CEntityManager::GetInstance().MarkEntityAsDirty(*pEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
                 }
             }
 

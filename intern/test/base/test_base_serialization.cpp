@@ -478,7 +478,7 @@ class IFactoryBase
 public:
     virtual inline void Read(Base::CTextReader& _rCodec) = 0;
     virtual inline void Write(Base::CTextWriter& _rCodec) = 0;
-    virtual IFactoryBase* Create() = 0;
+    virtual IFactoryBase* AllocateInstance() = 0;
 };
 
 class CSerializeFactory
@@ -513,7 +513,7 @@ public:
 
     IFactoryBase* Allocate(Base::ID _ID)
     {
-        if (m_Factory.find(_ID) != m_Factory.end()) return m_Factory.find(_ID)->second->Create();
+        if (m_Factory.find(_ID) != m_Factory.end()) return m_Factory.find(_ID)->second->AllocateInstance();
 
         return nullptr;
     }
@@ -537,7 +537,7 @@ public:
         _rCodec << a;
     }
 
-    IFactoryBase* Create() override
+    IFactoryBase* AllocateInstance() override
     {
         return new CDerivedA();
     }
@@ -570,7 +570,7 @@ public:
         _rCodec << b;
     }
 
-    IFactoryBase* Create() override
+    IFactoryBase* AllocateInstance() override
     {
         return new CDerivedB();
     }

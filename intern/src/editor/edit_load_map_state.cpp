@@ -153,7 +153,7 @@ namespace Edit
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
             EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
-            Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+            Dt::CEntity& rEntity = Dt::CEntityManager::GetInstance().CreateEntity(EntityDesc);
 
             rEntity.SetName("Main Camera");
 
@@ -169,7 +169,7 @@ namespace Edit
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*Component, Dt::CCameraComponent::DirtyCreate);
 
-            Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+            Dt::CEntityManager::GetInstance().MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
     }
 
@@ -191,7 +191,7 @@ namespace Edit
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
             EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
-            Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+            Dt::CEntity& rEntity = Dt::CEntityManager::GetInstance().CreateEntity(EntityDesc);
 
             rEntity.SetName("Main Camera");
 
@@ -220,7 +220,7 @@ namespace Edit
 
             // -----------------------------------------------------------------------------
 
-            Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+            Dt::CEntityManager::GetInstance().MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
 
         // -----------------------------------------------------------------------------
@@ -232,7 +232,7 @@ namespace Edit
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
             EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
-            Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+            Dt::CEntity& rEntity = Dt::CEntityManager::GetInstance().CreateEntity(EntityDesc);
 
             rEntity.SetName("AA");
 
@@ -246,7 +246,7 @@ namespace Edit
                 Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*Component, Dt::CLightProbeComponent::DirtyCreate);
             }
 
-            Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+            Dt::CEntityManager::GetInstance().MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
 
         // -----------------------------------------------------------------------------
@@ -258,7 +258,7 @@ namespace Edit
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
             EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
-            Dt::CEntity& rLightingEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+            Dt::CEntity& rLightingEntity = Dt::CEntityManager::GetInstance().CreateEntity(EntityDesc);
 
             rLightingEntity.SetName("Local light probe");
 
@@ -285,7 +285,7 @@ namespace Edit
                 Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*LightProbeComponent, Dt::CLightProbeComponent::DirtyCreate);
             }
 
-            Dt::EntityManager::MarkEntityAsDirty(rLightingEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+            Dt::CEntityManager::GetInstance().MarkEntityAsDirty(rLightingEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
 
         {
@@ -294,7 +294,7 @@ namespace Edit
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
             EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
-            Dt::CEntity& rEnvironmentEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+            Dt::CEntity& rEnvironmentEntity = Dt::CEntityManager::GetInstance().CreateEntity(EntityDesc);
 
             rEnvironmentEntity.SetName("Environment");
 
@@ -336,7 +336,7 @@ namespace Edit
                 Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*Component, Dt::CSkyComponent::DirtyCreate);
             }
 
-            Dt::EntityManager::MarkEntityAsDirty(rEnvironmentEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+            Dt::CEntityManager::GetInstance().MarkEntityAsDirty(rEnvironmentEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
 
         // -----------------------------------------------------------------------------
@@ -347,7 +347,7 @@ namespace Edit
         EntityDesc.m_EntityCategory = Dt::SEntityCategory::Static;
         EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
-        Dt::CEntity& rRootEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+        Dt::CEntity& rRootEntity = Dt::CEntityManager::GetInstance().CreateEntity(EntityDesc);
 
         rRootEntity.SetName("Root");
 
@@ -359,13 +359,13 @@ namespace Edit
 
         // -----------------------------------------------------------------------------
 
-        Dt::EntityManager::MarkEntityAsDirty(rRootEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        Dt::CEntityManager::GetInstance().MarkEntityAsDirty(rRootEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
 
         {
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Static;
             EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
-            Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+            Dt::CEntity& rEntity = Dt::CEntityManager::GetInstance().CreateEntity(EntityDesc);
 
             rEntity.SetName("Sphere");
 
@@ -400,7 +400,7 @@ namespace Edit
 
             // -----------------------------------------------------------------------------
 
-            Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+            Dt::CEntityManager::GetInstance().MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
 
             rRootEntity.Attach(rEntity);
         }
@@ -409,7 +409,7 @@ namespace Edit
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Static;
             EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
-            Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+            Dt::CEntity& rEntity = Dt::CEntityManager::GetInstance().CreateEntity(EntityDesc);
 
             rEntity.SetName("Plane");
 
@@ -444,7 +444,7 @@ namespace Edit
 
             // -----------------------------------------------------------------------------
 
-            Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+            Dt::CEntityManager::GetInstance().MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
 
             rRootEntity.Attach(rEntity);
         }
@@ -468,7 +468,7 @@ namespace Edit
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
             EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
-            Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+            Dt::CEntity& rEntity = Dt::CEntityManager::GetInstance().CreateEntity(EntityDesc);
 
             rEntity.SetName("Main Camera");
 
@@ -497,7 +497,7 @@ namespace Edit
 
             // -----------------------------------------------------------------------------
 
-            Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+            Dt::CEntityManager::GetInstance().MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
 
         // -----------------------------------------------------------------------------
@@ -509,7 +509,7 @@ namespace Edit
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
             EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
-            Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+            Dt::CEntity& rEntity = Dt::CEntityManager::GetInstance().CreateEntity(EntityDesc);
 
             rEntity.SetName("AA");
 
@@ -523,7 +523,7 @@ namespace Edit
                 Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*Component, Dt::CLightProbeComponent::DirtyCreate);
             }
 
-            Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+            Dt::CEntityManager::GetInstance().MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
 
         // -----------------------------------------------------------------------------
@@ -535,7 +535,7 @@ namespace Edit
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
             EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
-            Dt::CEntity& rLightingEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+            Dt::CEntity& rLightingEntity = Dt::CEntityManager::GetInstance().CreateEntity(EntityDesc);
 
             rLightingEntity.SetName("Local light probe");
 
@@ -562,7 +562,7 @@ namespace Edit
                 Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*LightProbeComponent, Dt::CLightProbeComponent::DirtyCreate);
             }
 
-            Dt::EntityManager::MarkEntityAsDirty(rLightingEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+            Dt::CEntityManager::GetInstance().MarkEntityAsDirty(rLightingEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
 
         {
@@ -571,7 +571,7 @@ namespace Edit
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
             EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
-            Dt::CEntity& rEnvironmentEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+            Dt::CEntity& rEnvironmentEntity = Dt::CEntityManager::GetInstance().CreateEntity(EntityDesc);
 
             rEnvironmentEntity.SetName("Environment");
 
@@ -613,7 +613,7 @@ namespace Edit
                 Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*Component, Dt::CSkyComponent::DirtyCreate);
             }
 
-            Dt::EntityManager::MarkEntityAsDirty(rEnvironmentEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+            Dt::CEntityManager::GetInstance().MarkEntityAsDirty(rEnvironmentEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
 
         // -----------------------------------------------------------------------------
@@ -625,7 +625,7 @@ namespace Edit
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
             EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
-            Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+            Dt::CEntity& rEntity = Dt::CEntityManager::GetInstance().CreateEntity(EntityDesc);
 
             rEntity.SetName("SLAM");
 
@@ -639,7 +639,7 @@ namespace Edit
 
             // -----------------------------------------------------------------------------
 
-            Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+            Dt::CEntityManager::GetInstance().MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
     }
 
@@ -661,7 +661,7 @@ namespace Edit
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
             EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
-            Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+            Dt::CEntity& rEntity = Dt::CEntityManager::GetInstance().CreateEntity(EntityDesc);
 
             rEntity.SetName("Main Camera");
 
@@ -700,7 +700,7 @@ namespace Edit
 
             // -----------------------------------------------------------------------------
 
-            Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+            Dt::CEntityManager::GetInstance().MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
 
         // -----------------------------------------------------------------------------
@@ -712,7 +712,7 @@ namespace Edit
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
             EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
-            Dt::CEntity& rLightingEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+            Dt::CEntity& rLightingEntity = Dt::CEntityManager::GetInstance().CreateEntity(EntityDesc);
 
             rLightingEntity.SetName("Local light probe");
 
@@ -739,7 +739,7 @@ namespace Edit
                 Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*LightProbeComponent, Dt::CLightProbeComponent::DirtyCreate);
             }
 
-            Dt::EntityManager::MarkEntityAsDirty(rLightingEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+            Dt::CEntityManager::GetInstance().MarkEntityAsDirty(rLightingEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
 
         {
@@ -748,7 +748,7 @@ namespace Edit
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
             EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
-            Dt::CEntity& rEnvironmentEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+            Dt::CEntity& rEnvironmentEntity = Dt::CEntityManager::GetInstance().CreateEntity(EntityDesc);
 
             rEnvironmentEntity.SetName("Environment");
 
@@ -798,7 +798,7 @@ namespace Edit
                 Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*Component, Dt::CSkyComponent::DirtyCreate);
             }
 
-            Dt::EntityManager::MarkEntityAsDirty(rEnvironmentEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+            Dt::CEntityManager::GetInstance().MarkEntityAsDirty(rEnvironmentEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
 
         // -----------------------------------------------------------------------------
@@ -810,7 +810,7 @@ namespace Edit
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
             EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
-            Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+            Dt::CEntity& rEntity = Dt::CEntityManager::GetInstance().CreateEntity(EntityDesc);
 
             rEntity.SetName("AA");
 
@@ -824,7 +824,7 @@ namespace Edit
                 Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*Component, Dt::CLightProbeComponent::DirtyCreate);
             }
 
-            Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+            Dt::CEntityManager::GetInstance().MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
 
         // -----------------------------------------------------------------------------
@@ -835,7 +835,7 @@ namespace Edit
         RootEntityDesc.m_EntityCategory = Dt::SEntityCategory::Static;
         RootEntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
-        Dt::CEntity& rRootEntity = Dt::EntityManager::CreateEntity(RootEntityDesc);
+        Dt::CEntity& rRootEntity = Dt::CEntityManager::GetInstance().CreateEntity(RootEntityDesc);
 
         rRootEntity.SetName("Root");
 
@@ -853,7 +853,7 @@ namespace Edit
             SphereDesc.m_EntityCategory = Dt::SEntityCategory::Static;
             SphereDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
-            Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(SphereDesc);
+            Dt::CEntity& rEntity = Dt::CEntityManager::GetInstance().CreateEntity(SphereDesc);
 
             rEntity.SetName("Sphere");
 
@@ -896,7 +896,7 @@ namespace Edit
             PlaneEntityDesc.m_EntityCategory = Dt::SEntityCategory::Static;
             PlaneEntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
-            Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(PlaneEntityDesc);
+            Dt::CEntity& rEntity = Dt::CEntityManager::GetInstance().CreateEntity(PlaneEntityDesc);
 
             rEntity.SetName("Plane");
             rEntity.SetLayer(Dt::SEntityLayer::AR);
@@ -934,7 +934,7 @@ namespace Edit
             rRootEntity.Attach(rEntity);
         }
 
-        Dt::EntityManager::MarkEntityAsDirty(rRootEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        Dt::CEntityManager::GetInstance().MarkEntityAsDirty(rRootEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
 
     }
 
@@ -956,7 +956,7 @@ namespace Edit
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
             EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
-            Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+            Dt::CEntity& rEntity = Dt::CEntityManager::GetInstance().CreateEntity(EntityDesc);
 
             rEntity.SetName("Main Camera");
 
@@ -985,7 +985,7 @@ namespace Edit
 
             // -----------------------------------------------------------------------------
 
-            Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+            Dt::CEntityManager::GetInstance().MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
 
             // -----------------------------------------------------------------------------
 
@@ -1002,7 +1002,7 @@ namespace Edit
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
             EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
-            Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+            Dt::CEntity& rEntity = Dt::CEntityManager::GetInstance().CreateEntity(EntityDesc);
 
             rEntity.SetName("AA");
 
@@ -1016,7 +1016,7 @@ namespace Edit
                 Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*Component, Dt::CLightProbeComponent::DirtyCreate);
             }
 
-            Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+            Dt::CEntityManager::GetInstance().MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
 
         // -----------------------------------------------------------------------------
@@ -1028,7 +1028,7 @@ namespace Edit
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Static;
             EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
         
-            Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+            Dt::CEntity& rEntity = Dt::CEntityManager::GetInstance().CreateEntity(EntityDesc);
         
             rEntity.SetName("Floor");
         
@@ -1061,7 +1061,7 @@ namespace Edit
         
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pMaterialComponent, Dt::CMaterialComponent::DirtyCreate);
 
-            Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+            Dt::CEntityManager::GetInstance().MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
         
         {
@@ -1070,7 +1070,7 @@ namespace Edit
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Static;
             EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
         
-            Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+            Dt::CEntity& rEntity = Dt::CEntityManager::GetInstance().CreateEntity(EntityDesc);
         
             rEntity.SetName("WallL");
         
@@ -1105,7 +1105,7 @@ namespace Edit
 
             // -----------------------------------------------------------------------------
 
-            Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+            Dt::CEntityManager::GetInstance().MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
 
         {
@@ -1114,7 +1114,7 @@ namespace Edit
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Static;
             EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
-            Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+            Dt::CEntity& rEntity = Dt::CEntityManager::GetInstance().CreateEntity(EntityDesc);
 
             rEntity.SetName("WallR");
 
@@ -1149,7 +1149,7 @@ namespace Edit
 
             // -----------------------------------------------------------------------------
 
-            Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+            Dt::CEntityManager::GetInstance().MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
 
         {
@@ -1158,7 +1158,7 @@ namespace Edit
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Static;
             EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
-            Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+            Dt::CEntity& rEntity = Dt::CEntityManager::GetInstance().CreateEntity(EntityDesc);
 
             rEntity.SetName("WallB");
 
@@ -1193,7 +1193,7 @@ namespace Edit
 
             // -----------------------------------------------------------------------------
 
-            Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+            Dt::CEntityManager::GetInstance().MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
 
         {
@@ -1202,7 +1202,7 @@ namespace Edit
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Static;
             EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
-            Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+            Dt::CEntity& rEntity = Dt::CEntityManager::GetInstance().CreateEntity(EntityDesc);
 
             rEntity.SetName("Roof");
 
@@ -1235,7 +1235,7 @@ namespace Edit
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pMaterialComponent, Dt::CMaterialComponent::DirtyCreate);
 
-            Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+            Dt::CEntityManager::GetInstance().MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
 
 
@@ -1248,7 +1248,7 @@ namespace Edit
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Static;
             EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
-            Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+            Dt::CEntity& rEntity = Dt::CEntityManager::GetInstance().CreateEntity(EntityDesc);
 
             rEntity.SetName("Sphere");
 
@@ -1301,7 +1301,7 @@ namespace Edit
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pMaterialComponent, Dt::CMaterialComponent::DirtyCreate);
 
-            Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+            Dt::CEntityManager::GetInstance().MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
 
         // -----------------------------------------------------------------------------
@@ -1313,7 +1313,7 @@ namespace Edit
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Static;
             EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
-            Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+            Dt::CEntity& rEntity = Dt::CEntityManager::GetInstance().CreateEntity(EntityDesc);
 
             rEntity.SetName("Light Probe");
 
@@ -1340,7 +1340,7 @@ namespace Edit
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*LightProbeComponent, Dt::CLightProbeComponent::DirtyCreate);
 
-            Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+            Dt::CEntityManager::GetInstance().MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
 
         {
@@ -1349,7 +1349,7 @@ namespace Edit
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
             EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
-            Dt::CEntity& rLightingEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+            Dt::CEntity& rLightingEntity = Dt::CEntityManager::GetInstance().CreateEntity(EntityDesc);
 
             rLightingEntity.SetName("Point Light");
 
@@ -1374,7 +1374,7 @@ namespace Edit
                 Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*LightComponent, Dt::CPointLightComponent::DirtyCreate);
             }
 
-            Dt::EntityManager::MarkEntityAsDirty(rLightingEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+            Dt::CEntityManager::GetInstance().MarkEntityAsDirty(rLightingEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
     }
 } // namespace Edit

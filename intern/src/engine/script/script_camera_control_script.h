@@ -59,7 +59,7 @@ namespace Scpt
             GetTransformation()->SetPosition(m_Position);
             GetTransformation()->SetRotation(glm::toQuat(m_RotationMatrix));
 
-            Dt::EntityManager::MarkEntityAsDirty(*GetEntity(), Dt::CEntity::DirtyMove);
+            Dt::CEntityManager::GetInstance().MarkEntityAsDirty(*GetEntity(), Dt::CEntity::DirtyMove);
         }
 
         // -----------------------------------------------------------------------------

@@ -119,7 +119,7 @@ namespace Scpt
 
                 m_pCameraEntity->GetTransformationFacet()->SetRotation(glm::toQuat(WSRotation));
 
-                Dt::EntityManager::MarkEntityAsDirty(*m_pCameraEntity, Dt::CEntity::DirtyMove);
+                Dt::CEntityManager::GetInstance().MarkEntityAsDirty(*m_pCameraEntity, Dt::CEntity::DirtyMove);
             }
 
             if (m_pCameraComponent != nullptr)

@@ -44,7 +44,7 @@ namespace Edit
         if (m_NextState == CState::Exit || m_NextState == CState::LoadMap)
         {
             Dt::Map::FreeMap();
-            Dt::EntityManager::Clear();
+            Dt::CEntityManager::GetInstance().Clear();
         }
     }
     

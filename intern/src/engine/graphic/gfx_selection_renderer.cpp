@@ -572,7 +572,7 @@ namespace
         {
             rTicket.m_HitFlag = SHitFlag::Entity;
 
-            rTicket.m_pObject = Dt::EntityManager::GetEntityByID(pOutput->m_EntityID);
+            rTicket.m_pObject = Dt::CEntityManager::GetInstance().GetEntityByID(pOutput->m_EntityID);
         }
 
         BufferManager::UnmapBuffer(m_SelectionOutputBufferPtrs[IndexOfBuffer]);

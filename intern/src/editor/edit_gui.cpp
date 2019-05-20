@@ -429,11 +429,11 @@ namespace
                     EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
                     EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
-                    Dt::CEntity& rNewEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+                    Dt::CEntity& rNewEntity = Dt::CEntityManager::GetInstance().CreateEntity(EntityDesc);
 
                     rNewEntity.SetName("New entity");
 
-                    Dt::EntityManager::MarkEntityAsDirty(rNewEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+                    Dt::CEntityManager::GetInstance().MarkEntityAsDirty(rNewEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
                 }
 
                 if (ImGui::BeginMenu("3D Object"))
@@ -445,7 +445,7 @@ namespace
                         EntityDesc.m_EntityCategory = Dt::SEntityCategory::Static;
                         EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
-                        Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+                        Dt::CEntity& rEntity = Dt::CEntityManager::GetInstance().CreateEntity(EntityDesc);
 
                         rEntity.SetName("New Sphere");
 
@@ -459,7 +459,7 @@ namespace
 
                         Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pMeshComponent, Dt::CMeshComponent::DirtyCreate);
 
-                        Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+                        Dt::CEntityManager::GetInstance().MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
                     }
 
                     if (ImGui::MenuItem("Cube"))
@@ -469,7 +469,7 @@ namespace
                         EntityDesc.m_EntityCategory = Dt::SEntityCategory::Static;
                         EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
-                        Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+                        Dt::CEntity& rEntity = Dt::CEntityManager::GetInstance().CreateEntity(EntityDesc);
 
                         rEntity.SetName("New Cube");
 
@@ -483,7 +483,7 @@ namespace
 
                         Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pMeshComponent, Dt::CMeshComponent::DirtyCreate);
 
-                        Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+                        Dt::CEntityManager::GetInstance().MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
                     }
 
                     if (ImGui::MenuItem("Cone"))
@@ -493,7 +493,7 @@ namespace
                         EntityDesc.m_EntityCategory = Dt::SEntityCategory::Static;
                         EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
-                        Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+                        Dt::CEntity& rEntity = Dt::CEntityManager::GetInstance().CreateEntity(EntityDesc);
 
                         rEntity.SetName("New Cone");
 
@@ -507,7 +507,7 @@ namespace
 
                         Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pMeshComponent, Dt::CMeshComponent::DirtyCreate);
 
-                        Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+                        Dt::CEntityManager::GetInstance().MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
                     }
 
                     ImGui::EndMenu();
@@ -520,7 +520,7 @@ namespace
                     EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
                     EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
-                    Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+                    Dt::CEntity& rEntity = Dt::CEntityManager::GetInstance().CreateEntity(EntityDesc);
 
                     rEntity.SetName("Camera");
 
@@ -535,7 +535,7 @@ namespace
 
                     // -----------------------------------------------------------------------------
 
-                    Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+                    Dt::CEntityManager::GetInstance().MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
                 }
 
                 ImGui::EndMenu();
