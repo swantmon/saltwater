@@ -3,6 +3,8 @@
 
 #include "base/base_delegate.h"
 #include "base/base_pool.h"
+#include "base/base_serialize_text_reader.h"
+#include "base/base_serialize_text_writer.h"
 
 #include "engine/engine_config.h"
 
@@ -72,6 +74,11 @@ namespace Dt
 
         CEntityDelegate::HandleType RegisterDirtyEntityHandler(CEntityDelegate::FunctionType _Function);
 
+    public:
+
+        void Read(Base::CTextReader& _rCodec);
+        void Write(Base::CTextWriter& _rCodec);
+
     private:
 
         class CInternEntity : public CEntity
@@ -88,6 +95,7 @@ namespace Dt
 
         class CInternTransformationFacet : public CTransformationFacet
         {
+
         private:
             friend class CEntityManager;
         };

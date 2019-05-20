@@ -398,6 +398,8 @@ namespace
                 {
                     Edit::CEditState::GetInstance().SetNextState(CState::UnloadMap);
 
+                    Edit::CUnloadMapState::GetInstance().SaveToFile("test.sws");
+
                     Edit::CUnloadMapState::GetInstance().SetNextState(CState::Edit);
                 }
 

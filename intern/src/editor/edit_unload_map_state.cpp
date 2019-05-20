@@ -41,6 +41,22 @@ namespace Edit
     
     void CUnloadMapState::InternOnEnter()
     {
+        // -----------------------------------------------------------------------------
+        // Save
+        // -----------------------------------------------------------------------------
+        std::ofstream oStream;
+
+        oStream.open(m_Filename);
+
+        Base::CTextWriter Writer(oStream, 1);
+
+        Dt::CEntityManager::GetInstance().Write(Writer);
+
+        oStream.close();
+
+        // -----------------------------------------------------------------------------
+        // Unload?
+        // -----------------------------------------------------------------------------
         if (m_NextState == CState::Exit || m_NextState == CState::LoadMap)
         {
             Dt::Map::FreeMap();

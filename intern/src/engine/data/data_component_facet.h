@@ -6,6 +6,7 @@
 #include "base/base_typedef.h"
 
 #include "engine/data/data_component.h"
+#include "engine/data/data_component_manager.h"
 
 #include <vector>
 
@@ -15,7 +16,7 @@ namespace Dt
     {
     public:
 
-        typedef std::vector<Dt::IComponent*> CComponentVector;
+        using CComponentVector = std::vector<Dt::IComponent*>;
 
     public:
 
@@ -36,6 +37,42 @@ namespace Dt
 
         CComponentFacet();
         ~CComponentFacet();
+
+    public:
+
+        template <class TArchive>
+        inline void Read(TArchive& _rCodec)
+        {
+            unsigned int NumberOfComponents;
+
+            _rCodec >> NumberOfComponents;
+
+            m_Components.resize(NumberOfComponents);
+
+            for (int i = 0; i < NumberOfComponents; ++i)
+            {
+                Base::ID ID;
+
+                _rCodec >> ID;
+
+                m_Components[i] = Dt::CComponentManager::GetInstance().GetComponent<Dt::IComponent>(ID);
+            }
+        }
+
+        template <class TArchive>
+        inline void Write(TArchive& _rCodec)
+        {
+            unsigned int NumberOfComponents = 0;
+
+            NumberOfComponents = m_Components.size();
+
+            _rCodec << NumberOfComponents;
+
+            for (auto Component : m_Components)
+            {
+                _rCodec << Component->GetID();
+            }
+        }
 
     protected:
 

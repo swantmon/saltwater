@@ -36,6 +36,58 @@ namespace Dt
         CHierarchyFacet();
         ~CHierarchyFacet();
 
+    public:
+
+        template <class TArchive>
+        inline void Read(TArchive& _rCodec)
+        {
+            bool Check = false;
+            Base::ID ID;
+
+            _rCodec >> m_TimeStamp;
+
+            _rCodec >> Check;
+            if (Check)
+            {
+                _rCodec >> ID;
+                m_pParent = Dt::CEntityManager::GetInstance().GetEntityByID(ID);
+            }
+
+            _rCodec >> Check;
+            if (Check)
+            {
+                _rCodec >> ID;
+                m_pFirstChild = Dt::CEntityManager::GetInstance().GetEntityByID(ID);
+            }
+
+            _rCodec >> Check;
+            if (Check)
+            {
+                _rCodec >> ID;
+                m_pSibling = Dt::CEntityManager::GetInstance().GetEntityByID(ID);
+            }
+        }
+
+        template <class TArchive>
+        inline void Write(TArchive& _rCodec)
+        {
+            bool Check = false;
+
+            _rCodec << m_TimeStamp;
+
+            Check = m_pParent != nullptr;
+            _rCodec << Check;
+            if (Check) _rCodec << m_pParent->GetID();
+
+            Check = m_pFirstChild != nullptr;
+            _rCodec << Check;
+            if (Check) _rCodec << m_pFirstChild->GetID();
+
+            Check = m_pSibling != nullptr;
+            _rCodec << Check;
+            if (Check) _rCodec << m_pSibling->GetID();
+        }
+
     private:
 
         Base::U64 m_TimeStamp;              //< Time stamp to detect if entity already updated in this frame

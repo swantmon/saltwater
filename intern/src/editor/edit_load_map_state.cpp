@@ -94,29 +94,50 @@ namespace Edit
     
     void CLoadMapState::InternOnEnter()
     {
-        auto Scene = Core::CProgramParameters::GetInstance().Get("application:load_scene", "default");
+        if (!m_Filename.empty())
+        {
+            // -----------------------------------------------------------------------------
+            // Save
+            // -----------------------------------------------------------------------------
+            std::ifstream oStream;
 
-        ENGINE_CONSOLE_INFOV("Loading scene '%s'", Scene.c_str());
+            oStream.open(m_Filename);
 
-        if (Scene == "empty")
-        {
-            CreateEmptyScene();
+            Base::CTextReader Reader(oStream, 1);
+
+            Dt::CEntityManager::GetInstance().Read(Reader);
+
+            oStream.close();
         }
-        else if (Scene == "default")
+        else
         {
-            CreateDefaultScene();
-        }
-        else if (Scene == "default_ar")
-        {
-            CreateDefaultARScene();
-        }
-        else if (Scene == "cornell_box")
-        {
-            CreateCornellBoxScene();
-        }
-        else if (Scene == "slam")
-        {
-            CreateSLAMScene();
+            // -----------------------------------------------------------------------------
+            // Default
+            // -----------------------------------------------------------------------------
+            auto Scene = Core::CProgramParameters::GetInstance().Get("application:load_scene", "default");
+
+            ENGINE_CONSOLE_INFOV("Loading scene '%s'", Scene.c_str());
+
+            if (Scene == "empty")
+            {
+                CreateEmptyScene();
+            }
+            else if (Scene == "default")
+            {
+                CreateDefaultScene();
+            }
+            else if (Scene == "default_ar")
+            {
+                CreateDefaultARScene();
+            }
+            else if (Scene == "cornell_box")
+            {
+                CreateCornellBoxScene();
+            }
+            else if (Scene == "slam")
+            {
+                CreateSLAMScene();
+            }
         }
     }
     

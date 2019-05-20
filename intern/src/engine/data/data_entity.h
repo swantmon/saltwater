@@ -70,7 +70,7 @@ namespace Dt
 
     public:
 
-        typedef Base::ID BID;
+        using BID = Base::ID;
 
     public:
 
@@ -168,6 +168,44 @@ namespace Dt
 
         void AttachComponent(Dt::IComponent* _pComponent);
         void DetachComponent(Dt::IComponent* _pComponent);
+
+    public:
+
+        template <class TArchive>
+        inline void Read(TArchive& _rCodec)
+        {
+            Base::Serialize(_rCodec, m_Name);
+
+            _rCodec >> m_ID;
+            _rCodec >> m_WorldAABB[0][0];
+            _rCodec >> m_WorldAABB[0][1];
+            _rCodec >> m_WorldAABB[0][2];
+            _rCodec >> m_WorldAABB[1][0];
+            _rCodec >> m_WorldAABB[1][1];
+            _rCodec >> m_WorldAABB[1][2];
+            _rCodec >> m_WorldPosition[0];
+            _rCodec >> m_WorldPosition[1];
+            _rCodec >> m_WorldPosition[2];
+            _rCodec >> m_Flags.m_Key;
+        }
+
+        template <class TArchive>
+        inline void Write(TArchive& _rCodec)
+        {
+            Base::Serialize(_rCodec, m_Name);
+
+            _rCodec << m_ID;
+            _rCodec << m_WorldAABB[0][0];
+            _rCodec << m_WorldAABB[0][1];
+            _rCodec << m_WorldAABB[0][2];
+            _rCodec << m_WorldAABB[1][0];
+            _rCodec << m_WorldAABB[1][1];
+            _rCodec << m_WorldAABB[1][2];
+            _rCodec << m_WorldPosition[0];
+            _rCodec << m_WorldPosition[1];
+            _rCodec << m_WorldPosition[2];
+            _rCodec << m_Flags.m_Key;
+        }
 
     protected:
         

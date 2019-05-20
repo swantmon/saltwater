@@ -303,6 +303,87 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
+    void CEntityManager::Read(Base::CTextReader& _rCodec)
+    {
+        int NumberOfEntities = 0;
+
+        _rCodec >> NumberOfEntities;
+
+        for (int i = 0; i < NumberOfEntities; ++i)
+        {
+            auto CurrentEntity = m_Entities.Allocate();
+
+            _rCodec >> CurrentEntity;
+        }
+
+        bool Check = false;
+
+        for (auto CurrentEntity = m_Entities.Begin(); CurrentEntity != m_Entities.End(); ++CurrentEntity)
+        {
+            _rCodec >> Check;
+            if (Check)
+            {
+                CurrentEntity->m_pTransformationFacet = &m_TransformationFacets.Allocate();
+
+                _rCodec >> CurrentEntity->m_pTransformationFacet;
+            }
+
+            _rCodec >> Check;
+            if (Check)
+            {
+                CurrentEntity->m_pHierarchyFacet = &m_HierarchyFacets.Allocate();
+
+                _rCodec >> CurrentEntity->m_pHierarchyFacet;
+            }
+
+            _rCodec >> Check;
+            if (Check)
+            {
+                CurrentEntity->m_pComponentsFacet = &m_ComponentsFacets.Allocate();
+
+                _rCodec >> CurrentEntity->m_pComponentsFacet;
+            }
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CEntityManager::Write(Base::CTextWriter& _rCodec)
+    {
+        unsigned int NumberOfEntities = 0;
+
+        NumberOfEntities = m_Entities.GetNumberOfItems();
+
+        _rCodec << NumberOfEntities;
+
+        for (auto CurrentEntity = m_Entities.Begin(); CurrentEntity != m_Entities.End(); ++CurrentEntity)
+        {
+            _rCodec << *CurrentEntity;
+        }
+
+        bool Check = false;
+
+        for (auto CurrentEntity = m_Entities.Begin(); CurrentEntity != m_Entities.End(); ++CurrentEntity)
+        {
+            auto pFacetTransformation = CurrentEntity->GetTransformationFacet();
+            Check = pFacetTransformation != nullptr;
+            _rCodec << Check;
+            if (Check) _rCodec << *pFacetTransformation;
+
+            auto pFacetHierarchy = CurrentEntity->GetHierarchyFacet();
+            Check = pFacetHierarchy != nullptr;
+            _rCodec << Check;
+            if (Check) _rCodec << *pFacetHierarchy;
+
+            auto pFacetComponent = CurrentEntity->GetComponentFacet();
+            Check = pFacetComponent != nullptr;
+            _rCodec << Check;
+            if (Check) _rCodec << *pFacetComponent;
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CEntityManager::UpdateEntity(CEntity& _rEntity)
     {
         unsigned int     DirtyFlags;
