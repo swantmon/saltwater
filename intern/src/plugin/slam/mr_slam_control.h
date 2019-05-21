@@ -762,9 +762,10 @@ namespace MR
             else if (MessageType == PLANE)
             {
                 int Offset = sizeof(int32_t);
-                int PlaneID = *reinterpret_cast<int*>(Decompressed.data() + Offset);
 
-                Offset += sizeof(PlaneID);
+				std::string PlaneID(Decompressed.data() + Offset, Decompressed.data() + Offset + 16);
+
+				Offset += static_cast<int>(PlaneID.size());
                 int PlaneAction = *reinterpret_cast<int*>(Decompressed.data() + Offset);
 
                 Offset += sizeof(PlaneAction);

@@ -30,7 +30,7 @@ namespace MR
         CPlaneColorizer(MR::CSLAMReconstructor* _pReconstructor);
         ~CPlaneColorizer();
 
-        void UpdatePlane(int _PlaneID);
+        void UpdatePlane(const std::string& _ID);
         void UpdatePlane(CSLAMReconstructor::SPlane& _rPlane);
 
         void ColorizeAllPlanes();

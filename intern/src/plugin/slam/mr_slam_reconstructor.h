@@ -164,15 +164,15 @@ namespace MR
 
         void ResetReconstruction(const SReconstructionSettings* pReconstructionSettings = nullptr);
 
-        void AddPlane(const glm::mat4& _rTransform, const glm::vec4& _rExtent, int _ID);
-        void UpdatePlane(const glm::mat4& _rTransform, const glm::vec4& _rExtent, int _ID);
+        void AddPlane(const glm::mat4& _rTransform, const glm::vec4& _rExtent, const std::string& _ID);
+        void UpdatePlane(const glm::mat4& _rTransform, const glm::vec4& _rExtent, const std::string& _ID);
 
-        void AddPlaneWithMesh(const glm::mat4& _rTransform, const glm::vec4& _rExtent, const CPlaneVertices& _rVertices, const CPlaneIndices& _rIndices, int _ID);
-        void UpdatePlaneWithMesh(const glm::mat4& _rTransform, const glm::vec4& _rExtent, const CPlaneVertices& _rVertices, const CPlaneIndices& _rIndices, int _ID);
+        void AddPlaneWithMesh(const glm::mat4& _rTransform, const glm::vec4& _rExtent, const CPlaneVertices& _rVertices, const CPlaneIndices& _rIndices, const std::string& _ID);
+        void UpdatePlaneWithMesh(const glm::mat4& _rTransform, const glm::vec4& _rExtent, const CPlaneVertices& _rVertices, const CPlaneIndices& _rIndices, const std::string& _ID);
 
-        void RemovePlane(int _ID);
+        void RemovePlane(const std::string& _ID);
 
-        std::map<int, SPlane>& GetPlanes();
+        std::map<std::string, SPlane>& GetPlanes();
 
         void PauseIntegration(bool _Paused);
         void PauseTracking(bool _Paused);
@@ -370,6 +370,6 @@ namespace MR
 
         bool m_IsInizialized;
 
-        std::map<int, SPlane> m_Planes;
+        std::map<std::string, SPlane> m_Planes;
     };
 } // namespace MR

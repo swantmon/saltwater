@@ -52,11 +52,11 @@ namespace MR
 {
     // -----------------------------------------------------------------------------
 
-    void CPlaneColorizer::UpdatePlane(int _PlaneID)
+    void CPlaneColorizer::UpdatePlane(const std::string& _ID)
     {
         auto& rPlaneMap = m_pReconstructor->GetPlanes();
 
-        auto Iter = rPlaneMap.find(_PlaneID);
+        auto Iter = rPlaneMap.find(_ID);
 
         if (Iter != rPlaneMap.end())
         {
