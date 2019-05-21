@@ -621,7 +621,91 @@ namespace MR
         {
             m_Reconstructor.ResetReconstruction();
         }
+
+		// -----------------------------------------------------------------------------
         
+		void SendPlanes()
+		{
+			if (Net::CNetworkManager::GetInstance().IsConnected(m_SLAMSocket))
+			{
+				for (auto& [rPlaneID, rPlane] : m_Reconstructor.GetPlanes())
+				{
+					/*int m_Category;
+					int m_MessageType;
+					int m_CompressedSize;
+					int m_DecompressedSize;
+					std::vector<char> m_Payload;*/
+
+					auto VertexCount = static_cast<uint32_t>(rPlane.m_Vertices.size());
+					auto IndexCount = static_cast<uint32_t>(rPlane.m_Indices.size());
+
+					std::vector<glm::vec3> Vertices;
+					std::vector<glm::vec2> UV;
+					std::vector<uint16_t> Indices;
+
+					Vertices.reserve(VertexCount);
+					UV.reserve(VertexCount);
+					Indices.reserve(IndexCount);
+
+					for (auto& Vertex : rPlane.m_Vertices)
+					{
+						Vertices.push_back(Vertex.m_Position);
+						UV.push_back(Vertex.m_UV);
+					}
+
+					for (auto& Index : rPlane.m_Indices)
+					{
+						Indices.push_back(static_cast<uint16_t>(Index));
+					}
+
+					int32_t MessageID = PLANE;
+
+					int VerticesMemSize = VertexCount * sizeof(Vertices[0]);
+					int UVMemSize = VertexCount * sizeof(UV[0]);
+					int IndicesMemSize = IndexCount * sizeof(Indices[0]);
+
+					int MessageLength = sizeof(MessageID) + VerticesMemSize + UVMemSize + IndicesMemSize + 3 * sizeof(uint32_t) + static_cast<int>(rPlaneID.size());
+
+					std::vector<char> Payload(MessageLength);
+
+					int Offset = 0;
+
+					std::memcpy(Payload.data() + Offset, &MessageID, sizeof(MessageID));
+					Offset += sizeof(MessageID);
+
+					std::memcpy(Payload.data() + Offset, rPlaneID.data(), rPlaneID.size());
+					Offset += static_cast<int>(rPlaneID.size());
+
+					std::memcpy(Payload.data() + Offset, &VertexCount, sizeof(VertexCount));
+					Offset += sizeof(VertexCount);
+
+					std::memcpy(Payload.data() + Offset, Vertices.data(), VerticesMemSize);
+					Offset += VerticesMemSize;
+
+					std::memcpy(Payload.data() + Offset, &VertexCount, sizeof(VertexCount)); // UV count is the same as vertex count
+					Offset += sizeof(VertexCount);
+
+					std::memcpy(Payload.data() + Offset, UV.data(), UVMemSize);
+					Offset += UVMemSize;
+
+					std::memcpy(Payload.data() + Offset, &IndexCount, sizeof(IndexCount)); // UV count is the same as vertex count
+					Offset += sizeof(IndexCount);
+
+					std::memcpy(Payload.data() + Offset, Indices.data(), IndicesMemSize);
+					Offset += IndicesMemSize;
+
+					Net::CMessage Message;
+					Message.m_Category = 0;
+					Message.m_CompressedSize = MessageLength;
+					Message.m_DecompressedSize = MessageLength;
+					Message.m_MessageType = 0;
+					Message.m_Payload = std::move(Payload);
+
+					Net::CNetworkManager::GetInstance().SendMessage(m_SLAMSocket, Message);
+				}
+			}
+		}
+
     private:
 
         glm::mat4 PoseToView(const glm::mat4& _rPoseMatrix)
@@ -677,7 +761,15 @@ namespace MR
 
             if (_rMessage.m_CompressedSize != _rMessage.m_DecompressedSize)
             {
-                Base::Decompress(_rMessage.m_Payload, Decompressed);
+                try
+                {
+					Base::Decompress(_rMessage.m_Payload, Decompressed);
+                }
+                catch (...)
+                {
+					ENGINE_CONSOLE_ERRORV("Failed to decompress! Ignoring network message!");
+					return;
+                }
             }
             else
             {

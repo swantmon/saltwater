@@ -76,6 +76,11 @@ namespace SLAM
             _rSettings.m_PlaneMode
         );
 
+		if (_rSettings.m_SendPlanes)
+		{
+			m_SLAMControl.SendPlanes();
+		}
+
         if (_rSettings.m_Reset)
         {
             m_SLAMControl.ResetReconstruction();

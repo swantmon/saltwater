@@ -57,6 +57,7 @@ namespace Scpt
             bool m_IsPermanentColorizationEnabled;
 
             bool m_Colorize;
+			bool m_SendPlanes;
 
             bool m_SetRecordFile;
             std::string m_RecordFile;
@@ -84,6 +85,7 @@ namespace Scpt
             m_Settings.m_IsPlayingRecording = false;
             m_Settings.m_IsPermanentColorizationEnabled = false;
             m_Settings.m_Colorize = false;
+			m_Settings.m_SendPlanes = false;
             m_Settings.m_PlaybackSpeed = 1.0f;
         }
 

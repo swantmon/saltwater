@@ -18,8 +18,9 @@ namespace Scpt
         {
             ImGui::Checkbox("Enable Selection", &m_Settings.m_IsSelectionEnabled);
             ImGui::Checkbox("Enable Mouse Control", &m_Settings.m_IsMouseControlEnabled);
-            ImGui::Checkbox("Permanent Colorization", &m_Settings.m_IsPermanentColorizationEnabled);
-            m_Settings.m_Colorize = (ImGui::Button("Colorize Planes"));
+			ImGui::Checkbox("Permanent Colorization", &m_Settings.m_IsPermanentColorizationEnabled);
+			m_Settings.m_SendPlanes = ImGui::Button("Send Planes");
+            m_Settings.m_Colorize = ImGui::Button("Colorize Planes");
             ImGui::Checkbox("Play Recording", &m_Settings.m_IsPlayingRecording);
 
             ImGui::SliderFloat("Playback Speed", &m_Settings.m_PlaybackSpeed, 0.1f, 10.0f);
