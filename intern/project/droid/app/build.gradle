@@ -52,6 +52,7 @@ dependencies {
 
     // Android core
     implementation 'com.google.android.material:material:1.0.0'
+    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
 }
 
 // Extracts the shared libraries from aars in the natives configuration.

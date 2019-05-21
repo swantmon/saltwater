@@ -812,17 +812,11 @@ namespace
             return;
         }
 
-#if PLATFORM_ANDROID
-        static const int s_NumberOfChannels = 4;
-#else
-        static const int s_NumberOfChannels = 4;
-#endif
-
         // -----------------------------------------------------------------------------
         // Allocate memory
         // -----------------------------------------------------------------------------
         const int NumberOfPixels = pInternTexture->GetNumberOfPixelsU() * pInternTexture->GetNumberOfPixelsV();
-        const int NumberOfBytes = NumberOfPixels * s_NumberOfChannels * sizeof(char);
+        const int NumberOfBytes = NumberOfPixels * ConvertGLFormatToBytesPerPixel(pInternTexture->GetFormat());
         const GLuint Format = ConvertGLImageFormat(pInternTexture->GetFormat());
         const GLuint ImageType = ConvertGLImageType(pInternTexture->GetFormat());
 
