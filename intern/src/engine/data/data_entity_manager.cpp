@@ -350,7 +350,7 @@ namespace Dt
 
                 for (auto& Component : Components)
                 {
-                    CurrentEntity->AttachComponent(Component);
+                    Component->SetHostEntity(&*CurrentEntity);
 
                     Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*Component, Dt::IComponent::DirtyCreate);
                 }

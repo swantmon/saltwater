@@ -71,6 +71,16 @@ namespace Dt
             return m_pHostEntity;
         }
 
+        void SetHostEntity(Dt::CEntity* _pEntity)
+        {
+            if (m_pHostEntity != nullptr)
+            {
+                m_pHostEntity->DetachComponent(this);
+            }
+
+            m_pHostEntity = _pEntity;
+        }
+
         unsigned int GetDirtyFlags() const
         {
             return m_DirtyFlags;
