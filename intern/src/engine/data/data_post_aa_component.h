@@ -35,11 +35,19 @@ namespace Dt
         inline void Read(Base::CTextReader& _rCodec) override
         {
             CComponent::Read(_rCodec);
+
+            int Type;
+
+            _rCodec >> Type;
+
+            m_Type = (EType)Type;
         }
 
         inline void Write(Base::CTextWriter& _rCodec) override
         {
             CComponent::Write(_rCodec);
+
+            _rCodec << (int)m_Type;
         }
 
         inline IComponent* Allocate() override

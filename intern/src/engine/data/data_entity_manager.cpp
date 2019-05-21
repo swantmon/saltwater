@@ -345,11 +345,22 @@ namespace Dt
                 CurrentEntity->m_pComponentsFacet = &m_ComponentsFacets.Allocate();
 
                 _rCodec >> CurrentEntity->m_pComponentsFacet;
+
+                auto Components = CurrentEntity->m_pComponentsFacet->GetComponents();
+
+                for (auto& Component : Components)
+                {
+                    CurrentEntity->AttachComponent(Component);
+
+                    Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*Component, Dt::IComponent::DirtyCreate);
+                }
             }
         }
 
         for (auto CurrentEntity = m_Entities.Begin(); CurrentEntity != m_Entities.End(); ++CurrentEntity)
         {
+            m_EntityByID[CurrentEntity->m_ID] = &*CurrentEntity;
+
             MarkEntityAsDirty(*CurrentEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
     }

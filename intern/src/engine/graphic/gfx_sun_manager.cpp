@@ -448,7 +448,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Render every surface of this entity
             // -----------------------------------------------------------------------------
-            if (MeshPtr->GetLOD(0) == nullptr) continue;
+            if (MeshPtr == nullptr || MeshPtr->GetLOD(0) == nullptr) continue;
 
             CSurfacePtr SurfacePtr = MeshPtr->GetLOD(0)->GetSurface();
 

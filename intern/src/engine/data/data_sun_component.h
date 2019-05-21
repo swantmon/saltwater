@@ -62,11 +62,43 @@ namespace Dt
         inline void Read(Base::CTextReader& _rCodec) override
         {
             CComponent::Read(_rCodec);
+
+            int RefreshMode;
+
+            _rCodec >> RefreshMode;
+            _rCodec >> m_Direction[0];
+            _rCodec >> m_Direction[1];
+            _rCodec >> m_Direction[2];
+            _rCodec >> m_Color[0];
+            _rCodec >> m_Color[1];
+            _rCodec >> m_Color[2];
+            _rCodec >> m_Lightness[0];
+            _rCodec >> m_Lightness[1];
+            _rCodec >> m_Lightness[2];
+            _rCodec >> m_Temperature;
+            _rCodec >> m_Intensity;
+            _rCodec >> m_HasTemperature;
+
+            m_RefreshMode = (ERefreshMode)RefreshMode;
         }
 
         inline void Write(Base::CTextWriter& _rCodec) override
         {
             CComponent::Write(_rCodec);
+
+            _rCodec << (int)m_RefreshMode;
+            _rCodec << m_Direction[0];
+            _rCodec << m_Direction[1];
+            _rCodec << m_Direction[2];
+            _rCodec << m_Color[0];
+            _rCodec << m_Color[1];
+            _rCodec << m_Color[2];
+            _rCodec << m_Lightness[0];
+            _rCodec << m_Lightness[1];
+            _rCodec << m_Lightness[2];
+            _rCodec << m_Temperature;
+            _rCodec << m_Intensity;
+            _rCodec << m_HasTemperature;
         }
 
         inline IComponent* Allocate() override

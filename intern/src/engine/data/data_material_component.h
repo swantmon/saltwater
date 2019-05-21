@@ -95,11 +95,63 @@ namespace Dt
         inline void Read(Base::CTextReader& _rCodec) override
         {
             CComponent::Read(_rCodec);
+
+            Base::Serialize(_rCodec, m_Materialname);
+            Base::Serialize(_rCodec, m_FileName);
+            Base::Serialize(_rCodec, m_ColorTexture);
+            Base::Serialize(_rCodec, m_NormalTexture);
+            Base::Serialize(_rCodec, m_RoughnessTexture);
+            Base::Serialize(_rCodec, m_MetalTexture);
+            Base::Serialize(_rCodec, m_AmbientOcclusionTexture);
+            Base::Serialize(_rCodec, m_BumpTexture);
+            Base::Serialize(_rCodec, m_AlphaTexture);
+
+            _rCodec >> m_Color[0];
+            _rCodec >> m_Color[1];
+            _rCodec >> m_Color[2];
+            _rCodec >> m_Color[3];
+
+            _rCodec >> m_TilingOffset[0];
+            _rCodec >> m_TilingOffset[1];
+            _rCodec >> m_TilingOffset[2];
+            _rCodec >> m_TilingOffset[3];
+
+            _rCodec >> m_Roughness;
+            _rCodec >> m_Reflectance;
+            _rCodec >> m_MetalMask;
+            _rCodec >> m_Displacement;
+            _rCodec >> m_RefractionIndex;
         }
 
         inline void Write(Base::CTextWriter& _rCodec) override
         {
             CComponent::Write(_rCodec);
+
+            Base::Serialize(_rCodec, m_Materialname);
+            Base::Serialize(_rCodec, m_FileName);
+            Base::Serialize(_rCodec, m_ColorTexture);
+            Base::Serialize(_rCodec, m_NormalTexture);
+            Base::Serialize(_rCodec, m_RoughnessTexture);
+            Base::Serialize(_rCodec, m_MetalTexture);
+            Base::Serialize(_rCodec, m_AmbientOcclusionTexture);
+            Base::Serialize(_rCodec, m_BumpTexture);
+            Base::Serialize(_rCodec, m_AlphaTexture);
+
+            _rCodec << m_Color[0];
+            _rCodec << m_Color[1];
+            _rCodec << m_Color[2];
+            _rCodec << m_Color[3];
+
+            _rCodec << m_TilingOffset[0];
+            _rCodec << m_TilingOffset[1];
+            _rCodec << m_TilingOffset[2];
+            _rCodec << m_TilingOffset[3];
+
+            _rCodec << m_Roughness;
+            _rCodec << m_Reflectance;
+            _rCodec << m_MetalMask;
+            _rCodec << m_Displacement;
+            _rCodec << m_RefractionIndex;
         }
 
         inline IComponent* Allocate() override

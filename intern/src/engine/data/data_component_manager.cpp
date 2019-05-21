@@ -2,6 +2,7 @@
 #include "engine/engine_precompiled.h"
 
 #include "engine/data/data_component_manager.h"
+#include "engine/data/data_script_component.h"
 
 namespace Dt
 {
@@ -18,9 +19,7 @@ namespace Dt
     
     CComponentManager::~CComponentManager()
     {
-        m_ComponentByID.clear();
-        m_ComponentsByType.clear();
-        m_Components.clear();
+        Clear();
     }
 
     // -----------------------------------------------------------------------------
@@ -80,6 +79,15 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
+    void CComponentManager::Clear()
+    {
+        m_ComponentByID.clear();
+        m_ComponentsByType.clear();
+        m_Components.clear();
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CComponentManager::Read(Base::CTextReader& _rCodec)
     {
         Base::ID TypeID = 0;
@@ -106,11 +114,6 @@ namespace Dt
             m_ComponentByID[NewComponent->m_ID] = NewComponent;
 
             m_ComponentsByType[NewComponent->GetTypeID()].emplace_back(NewComponent);
-
-            // -----------------------------------------------------------------------------
-            // Create component
-            // -----------------------------------------------------------------------------
-            MarkComponentAsDirty(*NewComponent, Dt::IComponent::DirtyCreate);
         }
     }
 
@@ -122,7 +125,17 @@ namespace Dt
 
         for (auto& Component : m_Components)
         {
-            _rCodec << Component->GetTypeID();
+            if (Component->GetTypeID() == CScriptComponent::STATIC_TYPE_ID)
+            {
+                auto ScriptComponent = static_cast<CScriptComponent*>(&*Component);
+
+                _rCodec << ScriptComponent->GetScriptTypeID();
+            }
+            else
+            {
+                _rCodec << Component->GetTypeID();
+            }
+            
             _rCodec << *Component;
         }
     }

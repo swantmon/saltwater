@@ -48,11 +48,27 @@ namespace Dt
         inline void Read(Base::CTextReader& _rCodec) override
         {
             CComponent::Read(_rCodec);
+
+            Base::Serialize(_rCodec, m_Filename);
+
+            int MeshType;
+
+            _rCodec >> m_GeneratorFlag;
+            _rCodec >> m_MeshIndex;
+            _rCodec >> MeshType;
+
+            m_MeshType = (EMeshType)MeshType;
         }
 
         inline void Write(Base::CTextWriter& _rCodec) override
         {
             CComponent::Write(_rCodec);
+
+            Base::Serialize(_rCodec, m_Filename);
+
+            _rCodec << m_GeneratorFlag;
+            _rCodec << m_MeshIndex;
+            _rCodec << (int)m_MeshType;
         }
 
         inline IComponent* Allocate() override

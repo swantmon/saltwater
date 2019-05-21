@@ -67,6 +67,8 @@ namespace Dt
             if (m_Factory.find(ID) == m_Factory.end()) m_Factory.insert(CFactoryMapPair(ID, _pBase));
         }
 
+        void Clear();
+
     public:
 
         void Read(Base::CTextReader& _rCodec);

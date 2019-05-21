@@ -63,6 +63,7 @@ namespace Edit
         {
             Dt::Map::FreeMap();
             Dt::CEntityManager::GetInstance().Clear();
+            Dt::CComponentManager::GetInstance().Clear();
         }
     }
     

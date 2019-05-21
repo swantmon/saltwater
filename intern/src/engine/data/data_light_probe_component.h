@@ -92,11 +92,53 @@ namespace Dt
         inline void Read(Base::CTextReader& _rCodec) override
         {
             CComponent::Read(_rCodec);
+
+            int RefreshMode;
+            int Type;
+            int Quality;
+            int ClearFlag;
+
+            _rCodec >> RefreshMode;
+            _rCodec >> Type;
+            _rCodec >> Quality;
+            _rCodec >> ClearFlag;
+
+            m_RefreshMode = (ERefreshMode)RefreshMode;
+            m_Type = (EType)Type;
+            m_Quality = (EQuality)Quality;
+            m_ClearFlag = (EClearFlag)ClearFlag;
+
+            Base::Serialize(_rCodec, m_Cubemap);
+
+            _rCodec >> m_Intensity;
+            _rCodec >> m_Near;
+            _rCodec >> m_Far;
+            _rCodec >> m_ParallaxCorrection;
+
+            _rCodec >> m_BoxSize[0];
+            _rCodec >> m_BoxSize[1];
+            _rCodec >> m_BoxSize[2];
         }
 
         inline void Write(Base::CTextWriter& _rCodec) override
         {
             CComponent::Write(_rCodec);
+
+            _rCodec << (int)m_RefreshMode;        
+            _rCodec << (int)m_Type;               
+            _rCodec << (int)m_Quality;            
+            _rCodec << (int)m_ClearFlag;          
+
+            Base::Serialize(_rCodec, m_Cubemap);            
+
+            _rCodec << m_Intensity;          
+            _rCodec << m_Near;               
+            _rCodec << m_Far;                
+            _rCodec << m_ParallaxCorrection; 
+
+            _rCodec << m_BoxSize[0];            
+            _rCodec << m_BoxSize[1];
+            _rCodec << m_BoxSize[2];
         }
 
         inline IComponent* Allocate() override

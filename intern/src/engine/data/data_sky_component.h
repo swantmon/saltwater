@@ -70,12 +70,36 @@ namespace Dt
 
         inline void Read(Base::CTextReader& _rCodec) override
         {
-            CComponent::Read(_rCodec);
+            CComponent::Read(_rCodec); 
+
+            int RefreshMode, Type, Quality;
+            
+            _rCodec >> RefreshMode;
+            _rCodec >> Type;
+            _rCodec >> Quality;
+            _rCodec >> m_HasHDR;
+
+            Base::Serialize(_rCodec, m_Texture);
+
+            _rCodec >> m_Intensity;
+
+            m_RefreshMode = (ERefreshMode)RefreshMode;
+            m_Type = (EType)Type;
+            Quality = (EQuality)Quality;
         }
 
         inline void Write(Base::CTextWriter& _rCodec) override
         {
             CComponent::Write(_rCodec);
+
+            _rCodec << (int)m_RefreshMode;
+            _rCodec << (int)m_Type;
+            _rCodec << (int)m_Quality;
+            _rCodec << m_HasHDR; 
+
+            Base::Serialize(_rCodec, m_Texture);
+
+            _rCodec << m_Intensity;
         }
 
         inline IComponent* Allocate() override
