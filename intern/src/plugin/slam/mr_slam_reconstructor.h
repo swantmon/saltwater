@@ -58,6 +58,15 @@ namespace MR
     {
     public:
 
+		struct SPlaneVertex
+		{
+			glm::vec3 m_Position;
+			glm::vec2 m_UV;
+		};
+
+		using CPlaneVertices = std::vector<SPlaneVertex>;
+		using CPlaneIndices = std::vector<uint32_t>;
+
         struct SPlane
         {
             glm::mat4 m_Transform;
@@ -68,16 +77,10 @@ namespace MR
             Gfx::CMeshPtr m_MeshPtr;
 
             Gfx::CTexturePtr m_TexturePtr;
-        };
 
-        struct SPlaneVertex
-        {
-            glm::vec3 m_Position;
-            glm::vec2 m_UV;
+			CPlaneVertices m_Vertices;
+			CPlaneIndices m_Indices;
         };
-
-        using CPlaneVertices = std::vector<SPlaneVertex>;
-        using CPlaneIndices = std::vector<uint32_t>;
 
         struct SIndirectParameters
         {

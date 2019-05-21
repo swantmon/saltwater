@@ -1867,7 +1867,7 @@ namespace MR
 
         auto MeshPtr =  MeshManager::CreateMesh(_rVertices.data(), static_cast<int>(_rVertices.size()), sizeof(_rVertices[0]), _rIndices.data(), static_cast<int>(_rIndices.size()));
 
-        SPlane Plane = { _rTransform, _rExtent, Normal, MeshPtr, nullptr };
+        SPlane Plane = { _rTransform, _rExtent, Normal, MeshPtr, nullptr, _rVertices, _rIndices };
 
         m_Planes[_ID] = Plane;
     }
