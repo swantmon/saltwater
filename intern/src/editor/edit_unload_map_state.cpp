@@ -50,6 +50,8 @@ namespace Edit
 
         Base::CTextWriter Writer(oStream, 1);
 
+        Dt::CComponentManager::GetInstance().Write(Writer);
+        Dt::Map::Write(Writer);
         Dt::CEntityManager::GetInstance().Write(Writer);
 
         oStream.close();

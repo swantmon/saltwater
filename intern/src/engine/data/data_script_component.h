@@ -6,6 +6,7 @@
 #include "base/base_input_event.h"
 
 #include "engine/data/data_component.h"
+#include "engine/data/data_component_manager.h"
 
 namespace Dt
 {

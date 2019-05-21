@@ -5,6 +5,8 @@
 
 namespace Dt
 {
+    REGISTER_COMPONENT_SER(CSunComponent);
+
     CSunComponent::CSunComponent()
         : m_RefreshMode   (Static)
         , m_Direction     (0.0f, 0.0f, -1.0f)

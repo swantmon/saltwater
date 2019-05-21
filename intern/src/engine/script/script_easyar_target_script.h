@@ -4,8 +4,11 @@
 #include "base/base_coordinate_system.h"
 #include "base/base_include_glm.h"
 
+#include "engine/core/core_plugin_manager.h"
+
 #include "engine/data/data_camera_component.h"
 #include "engine/data/data_component_facet.h"
+#include "engine/data/data_entity_manager.h"
 #include "engine/data/data_transformation_facet.h"
 
 #include "engine/script/script_script.h"
@@ -90,6 +93,23 @@ namespace Scpt
         void OnInput(const Base::CInputEvent& _rEvent) override
         {
             BASE_UNUSED(_rEvent);
+        }
+
+    public:
+
+        inline void Read(Base::CTextReader& _rCodec) override
+        {
+            CComponent::Read(_rCodec);
+        }
+
+        inline void Write(Base::CTextWriter& _rCodec) override
+        {
+            CComponent::Write(_rCodec);
+        }
+
+        inline IComponent* Allocate() override
+        {
+            return new CEasyARTargetScript();
         }
     };
 } // namespace Scpt

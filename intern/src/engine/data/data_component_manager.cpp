@@ -80,10 +80,72 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
+    void CComponentManager::Read(Base::CTextReader& _rCodec)
+    {
+        Base::ID TypeID = 0;
+        size_t NumberOfComponents = 0;
+
+        _rCodec >> NumberOfComponents;
+
+        for (auto i = 0; i < NumberOfComponents; ++i)
+        {
+            // -----------------------------------------------------------------------------
+            // Read from reader
+            // -----------------------------------------------------------------------------
+            _rCodec >> TypeID;
+
+            auto NewComponent = InternAllocate(TypeID);
+
+            assert(NewComponent);
+
+            _rCodec >> *NewComponent;
+
+            // -----------------------------------------------------------------------------
+            // Save component to organizer
+            // -----------------------------------------------------------------------------
+            m_ComponentByID[NewComponent->m_ID] = NewComponent;
+
+            m_ComponentsByType[NewComponent->GetTypeID()].emplace_back(NewComponent);
+
+            // -----------------------------------------------------------------------------
+            // Create component
+            // -----------------------------------------------------------------------------
+            MarkComponentAsDirty(*NewComponent, Dt::IComponent::DirtyCreate);
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CComponentManager::Write(Base::CTextWriter & _rCodec)
+    {
+        _rCodec << m_Components.size();
+
+        for (auto& Component : m_Components)
+        {
+            _rCodec << Component->GetTypeID();
+            _rCodec << *Component;
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CComponentManager::MarkComponentAsDirty(IComponent& _rComponent, unsigned int _DirtyFlags)
     {
         _rComponent.m_DirtyFlags = _DirtyFlags;
 
         m_ComponentDelegate.Notify(&_rComponent);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    IComponent* CComponentManager::InternAllocate(Base::ID _TypeID)
+    {
+        assert(m_Factory.find(_TypeID) != m_Factory.end());
+
+        auto AllocatedComponent = m_Factory.find(_TypeID)->second->Allocate();
+
+        m_Components.emplace_back(std::unique_ptr<IComponent>(AllocatedComponent));
+
+        return static_cast<IComponent*>(m_Components.back().get());
     }
 } // namespace Dt

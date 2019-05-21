@@ -7,6 +7,8 @@
 
 namespace Dt
 {
+    REGISTER_COMPONENT_SER(CPointLightComponent);
+
     CPointLightComponent::CPointLightComponent()
         : m_RefreshMode                        (Static)
         , m_ShadowType                         (HardShadows)

@@ -82,6 +82,11 @@ namespace
         CEntity* GetNextEntity(CEntity* _pEntity, const Base::AABB3Float& _rAABB, const glm::vec3& _rPosition, float _SquareRadius) const;
         CEntity* GetNextEntity(CEntity* _pEntity, unsigned int _Category, const Base::AABB3Float& _rAABB, const glm::vec3& _rPosition, float _SquareRadius) const;
 
+    public:
+
+        void Read(Base::CTextReader& _rCodec);
+        void Write(Base::CTextWriter& _rCodec);
+
     private:
 
         class CInternEntityIterator : public CEntityIterator
@@ -487,7 +492,7 @@ namespace
             _rEntity.GetNext()->SetPrevious(_rEntity.GetPrevious());
         }
 
-        _rEntity.SetFolder(0);
+        _rEntity.SetFolder(nullptr);
         
         // -----------------------------------------------------------------------------
         // Decrease entity counter
@@ -1046,6 +1051,32 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    void CDtLvlMap::Read(Base::CTextReader& _rCodec)
+    {
+        if (HasMap()) FreeMap();
+
+        _rCodec >> m_NumberOfMetersX;
+        _rCodec >> m_NumberOfMetersY;
+        _rCodec >> m_NumberOfRegions;
+        _rCodec >> m_NumberOfRegionsX;
+        _rCodec >> m_NumberOfRegionsY;
+
+        AllocateMap(m_NumberOfRegionsX, m_NumberOfRegionsY);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CDtLvlMap::Write(Base::CTextWriter& _rCodec)
+    {
+        _rCodec << m_NumberOfMetersX;
+        _rCodec << m_NumberOfMetersY;
+        _rCodec << m_NumberOfRegions;
+        _rCodec << m_NumberOfRegionsX;
+        _rCodec << m_NumberOfRegionsY;
+    }
+
+    // -----------------------------------------------------------------------------
+
     bool CDtLvlMap::IsValid(const Base::AABB3Float& _rAABB) const
     {
         // -----------------------------------------------------------------------------
@@ -1338,6 +1369,20 @@ namespace Map
     void RemoveEntity(CEntity& _rEntity)
     {
         CDtLvlMap::GetInstance().RemoveEntity(_rEntity);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void Read(Base::CTextReader& _rCodec)
+    {
+        CDtLvlMap::GetInstance().Read(_rCodec);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void Write(Base::CTextWriter& _rCodec)
+    {
+        CDtLvlMap::GetInstance().Write(_rCodec);
     }
 } // namespace Map
 } // namespace Dt

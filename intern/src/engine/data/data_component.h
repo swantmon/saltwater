@@ -1,9 +1,11 @@
 
 #pragma once
 
-#include "engine/engine_config.h"
-
+#include "base/base_serialize_text_reader.h"
+#include "base/base_serialize_text_writer.h"
 #include "base/base_type_info.h"
+
+#include "engine/engine_config.h"
 
 #include "engine/data/data_entity.h"
 
@@ -95,6 +97,12 @@ namespace Dt
 
         virtual ~IComponent() {};
 
+        virtual inline void Read(Base::CTextReader& _rCodec) = 0;
+
+        virtual inline void Write(Base::CTextWriter& _rCodec) = 0;
+
+        virtual IComponent* Allocate() = 0;
+
     protected:
 
         Base::ID m_ID;
@@ -136,6 +144,20 @@ namespace Dt
         void SetFacet(unsigned int _Category, void* _pFacet);
         void* GetFacet(unsigned int _Category);
         const void* GetFacet(unsigned int _Category) const;
+
+        inline void Read(Base::CTextReader& _rCodec) override
+        {
+            _rCodec >> m_ID;
+            _rCodec >> m_Flags.m_Key;
+            _rCodec >> m_DirtyFlags;
+        }
+
+        inline void Write(Base::CTextWriter& _rCodec) override
+        {
+            _rCodec << m_ID;
+            _rCodec << m_Flags.m_Key;
+            _rCodec << m_DirtyFlags;
+        }
 
     private:
 

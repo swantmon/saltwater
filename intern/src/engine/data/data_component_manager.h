@@ -5,6 +5,8 @@
 
 #include "base/base_defines.h"
 #include "base/base_delegate.h"
+#include "base/base_serialize_text_reader.h"
+#include "base/base_serialize_text_writer.h"
 #include "base/base_singleton.h"
 #include "base/base_typedef.h"
 #include "base/base_uncopyable.h"
@@ -15,6 +17,16 @@
 #include <map>
 #include <memory>
 #include <vector>
+
+#define REGISTER_COMPONENT_SER(_Name)                                                                               \
+    struct BASE_CONCAT(SRegisterSerialize, _Name)                                                               \
+    {                                                                                                           \
+        BASE_CONCAT(SRegisterSerialize, _Name)()                                                                \
+        {                                                                                                       \
+            static _Name BASE_CONCAT(s_SRegisterSerialize, _Name);                                              \
+            Dt::CComponentManager::GetInstance().Register<_Name>(&BASE_CONCAT(s_SRegisterSerialize, _Name));    \
+        }                                                                                                       \
+    } BASE_CONCAT(g_SRegisterSerialize, _Name);
 
 namespace Dt
 {
@@ -45,7 +57,20 @@ namespace Dt
 
         void MarkComponentAsDirty(IComponent& _rComponent, unsigned int _DirtyFlags);
 
-        CComponentDelegate::HandleType RegisterDirtyComponentHandler(CComponentDelegate::FunctionType _NewDelegate);
+        CComponentDelegate::HandleType RegisterDirtyComponentHandler(CComponentDelegate::FunctionType _NewDelegate); 
+        
+        template<class T> 
+        void Register(IComponent* _pBase)
+        {
+            auto ID = Base::CTypeInfo::GetTypeID<T>();
+
+            if (m_Factory.find(ID) == m_Factory.end()) m_Factory.insert(CFactoryMapPair(ID, _pBase));
+        }
+
+    public:
+
+        void Read(Base::CTextReader& _rCodec);
+        void Write(Base::CTextWriter& _rCodec);
 
     private:
 
@@ -53,14 +78,23 @@ namespace Dt
         using CComponentsByID = std::map<Base::ID, Dt::IComponent*>;
         using CComponentsByType = std::map<Base::ID, std::vector<Dt::IComponent*>>;
 
+        using CFactoryMap     = std::map<Base::ID, IComponent*>;
+        using CFactoryMapPair = std::pair<Base::ID, IComponent*>;
+
     private:
 
-        CComponents         m_Components; 
-        CComponentsByID     m_ComponentByID;
-        CComponentsByType   m_ComponentsByType;
-        Base::ID            m_CurrentID;
+        CFactoryMap m_Factory;
+
+        CComponents       m_Components;
+        CComponentsByID   m_ComponentByID;
+        CComponentsByType m_ComponentsByType;
+        Base::ID          m_CurrentID;
 
         CComponentDelegate m_ComponentDelegate;
+
+    private:
+
+        IComponent* InternAllocate(Base::ID _TypeID);
 
     private:
 

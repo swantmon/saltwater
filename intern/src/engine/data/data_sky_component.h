@@ -6,6 +6,7 @@
 #include "base/base_typedef.h"
 
 #include "engine/data/data_component.h"
+#include "engine/data/data_component_manager.h"
 
 namespace Dt
 {
@@ -64,6 +65,23 @@ namespace Dt
 
         CSkyComponent();
         ~CSkyComponent();
+
+    public:
+
+        inline void Read(Base::CTextReader& _rCodec) override
+        {
+            CComponent::Read(_rCodec);
+        }
+
+        inline void Write(Base::CTextWriter& _rCodec) override
+        {
+            CComponent::Write(_rCodec);
+        }
+
+        inline IComponent* Allocate() override
+        {
+            return new CSkyComponent();
+        }
 
     private:
 

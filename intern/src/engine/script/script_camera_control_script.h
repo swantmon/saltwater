@@ -5,6 +5,7 @@
 
 #include "engine/core/core_time.h"
 
+#include "engine/data/data_entity_manager.h"
 #include "engine/data/data_transformation_facet.h"
 
 #include "engine/script/script_script.h"
@@ -109,6 +110,23 @@ namespace Scpt
                     m_LastCursorPosition = rCursorPosition;
                 }
             }
+        }
+
+    public:
+
+        inline void Read(Base::CTextReader& _rCodec) override
+        {
+            CComponent::Read(_rCodec);
+        }
+
+        inline void Write(Base::CTextWriter& _rCodec) override
+        {
+            CComponent::Write(_rCodec);
+        }
+
+        inline IComponent* Allocate() override
+        {
+            return new CCameraControlScript();
         }
     };
 } // namespace Scpt

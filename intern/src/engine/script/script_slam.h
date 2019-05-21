@@ -78,5 +78,22 @@ namespace Scpt
         typedef void(*FSetFlag)(bool _Flag);
         FSetFlag SetActivateSelection;
         FSetFlag EnableMouseControl;
+
+    public:
+
+        inline void Read(Base::CTextReader& _rCodec) override
+        {
+            CComponent::Read(_rCodec);
+        }
+
+        inline void Write(Base::CTextWriter& _rCodec) override
+        {
+            CComponent::Write(_rCodec);
+        }
+
+        inline IComponent* Allocate() override
+        {
+            return new CSLAMScript();
+        }
     };
 } // namespace Scpt

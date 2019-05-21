@@ -4,8 +4,11 @@
 #include "base/base_coordinate_system.h"
 #include "base/base_include_glm.h"
 
+#include "engine/core/core_plugin_manager.h"
+
 #include "engine/data/data_camera_component.h"
 #include "engine/data/data_component_facet.h"
+#include "engine/data/data_entity_manager.h"
 #include "engine/data/data_transformation_facet.h"
 
 #include "engine/script/script_script.h"
@@ -16,11 +19,11 @@ namespace Scpt
     {
     public:
 
-        typedef const void* (*ArCoreAcquireNewMarkerFunc)(float _X, float _Y);
-        typedef const void (*ArCoreReleaseMarkerFunc)(const void* _pMarker);
-        typedef int (*ArCoreGetMarkerTrackingStateFunc)(const void* _pMarker);
-        typedef glm::mat4 (*ArCoreGetMarkerModelMatrixFunc)(const void* _pMarker);
-        typedef bool (*ArCoreSetSettingsFunc)(bool _ShowPlanes, bool _ShowPoints);
+        using ArCoreAcquireNewMarkerFunc = const void* (*)(float _X, float _Y);
+        using ArCoreReleaseMarkerFunc = const void (*)(const void* _pMarker);
+        using ArCoreGetMarkerTrackingStateFunc = int (*)(const void* _pMarker);
+        using ArCoreGetMarkerModelMatrixFunc = glm::mat4 (*)(const void* _pMarker);
+        using ArCoreSetSettingsFunc = bool (*)(bool _ShowPlanes, bool _ShowPoints);
 
         ArCoreAcquireNewMarkerFunc AcquireNewMarker;
         ArCoreReleaseMarkerFunc ReleaseMarker;
@@ -108,6 +111,23 @@ namespace Scpt
                     SetSettings(false, false);
                 }
             }
+        }
+
+    public:
+
+        inline void Read(Base::CTextReader& _rCodec) override
+        {
+            CComponent::Read(_rCodec);
+        }
+
+        inline void Write(Base::CTextWriter& _rCodec) override
+        {
+            CComponent::Write(_rCodec);
+        }
+
+        inline IComponent* Allocate() override
+        {
+            return new CARPlaceObjectOnTouchScript();
         }
     };
 } // namespace Scpt

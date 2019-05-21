@@ -494,6 +494,24 @@
     <ClCompile Include="..\..\..\src\engine\graphic\gfx_highlight_renderer.cpp">
       <Filter>graphic\engine\renderer</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\engine\script\script_ar_camera_control_script.cpp">
+      <Filter>script\scripts</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\engine\script\script_ar_place_object_on_touch_script.cpp">
+      <Filter>script\scripts</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\engine\script\script_camera_control_script.cpp">
+      <Filter>script\scripts</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\engine\script\script_easyar_target_script.cpp">
+      <Filter>script\scripts</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\engine\script\script_light_estimation.cpp">
+      <Filter>script\scripts</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\engine\script\script_slam.cpp">
+      <Filter>script\scripts</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\engine\core\core_asset_generator.h">

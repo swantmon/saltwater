@@ -70,7 +70,7 @@ namespace Dt
 
             for (auto Component : m_Components)
             {
-                _rCodec << Component->GetID();
+                if (Component != nullptr) _rCodec << Component->GetID();
             }
         }
 

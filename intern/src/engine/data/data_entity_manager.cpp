@@ -311,9 +311,12 @@ namespace Dt
 
         for (int i = 0; i < NumberOfEntities; ++i)
         {
-            auto CurrentEntity = m_Entities.Allocate();
+            m_Entities.Allocate();
+        }
 
-            _rCodec >> CurrentEntity;
+        for (auto CurrentEntity = m_Entities.Begin(); CurrentEntity != m_Entities.End(); ++CurrentEntity)
+        {
+            _rCodec >> *CurrentEntity;
         }
 
         bool Check = false;
@@ -343,6 +346,11 @@ namespace Dt
 
                 _rCodec >> CurrentEntity->m_pComponentsFacet;
             }
+        }
+
+        for (auto CurrentEntity = m_Entities.Begin(); CurrentEntity != m_Entities.End(); ++CurrentEntity)
+        {
+            MarkEntityAsDirty(*CurrentEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
     }
 

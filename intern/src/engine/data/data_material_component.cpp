@@ -5,6 +5,8 @@
 
 namespace Dt
 {
+    REGISTER_COMPONENT_SER(CMaterialComponent);
+
     CMaterialComponent::CMaterialComponent()
         : m_Materialname("")
         , m_FileName("")

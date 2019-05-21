@@ -5,6 +5,8 @@
 
 namespace Dt
 {
+    REGISTER_COMPONENT_SER(CDOFComponent);
+
     CDOFComponent::CDOFComponent()
         : m_NearDistance         (0.01f)
         , m_FarDistance          (0.5f)

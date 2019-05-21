@@ -6,6 +6,7 @@
 #include "base/base_include_glm.h"
 
 #include "engine/data/data_component.h"
+#include "engine/data/data_component_manager.h"
 
 #include "engine/graphic/gfx_texture.h"
 
@@ -102,6 +103,45 @@ namespace Dt
 
         CCameraComponent();
         ~CCameraComponent();
+
+    public:
+
+        inline void Read(Base::CTextReader& _rCodec) override
+        {
+            CComponent::Read(_rCodec);
+
+            _rCodec >> m_CullingMask;
+            _rCodec >> m_Depth;
+            _rCodec >> m_ShutterSpeed;
+            _rCodec >> m_Aperture;
+            _rCodec >> m_ISO;
+            _rCodec >> m_EC;
+            _rCodec >> m_Size;
+            _rCodec >> m_FoV;
+            _rCodec >> m_Near;
+            _rCodec >> m_Far;
+        }
+
+        inline void Write(Base::CTextWriter& _rCodec) override
+        {
+            CComponent::Write(_rCodec);
+
+            _rCodec << m_CullingMask;
+            _rCodec << m_Depth;
+            _rCodec << m_ShutterSpeed;
+            _rCodec << m_Aperture;
+            _rCodec << m_ISO;
+            _rCodec << m_EC;
+            _rCodec << m_Size;
+            _rCodec << m_FoV;
+            _rCodec << m_Near;
+            _rCodec << m_Far;
+        }
+
+        inline IComponent* Allocate() override
+        {
+            return new CCameraComponent();
+        }
 
     private:
 

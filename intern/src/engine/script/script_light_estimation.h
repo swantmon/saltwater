@@ -4,6 +4,7 @@
 #include "base/base_coordinate_system.h"
 #include "base/base_include_glm.h"
 
+#include "engine/core/core_asset_manager.h"
 #include "engine/core/core_plugin_manager.h"
 
 #include "engine/core/core_program_parameters.h"
@@ -483,6 +484,23 @@ namespace Scpt
             // -----------------------------------------------------------------------------
 
             SwitchLightEstimation((EEstimationType)m_Mode);
+        }
+
+    public:
+
+        inline void Read(Base::CTextReader& _rCodec) override
+        {
+            CComponent::Read(_rCodec);
+        }
+
+        inline void Write(Base::CTextWriter& _rCodec) override
+        {
+            CComponent::Write(_rCodec);
+        }
+
+        inline IComponent* Allocate() override
+        {
+            return new CLightEstimationScript();
         }
     };
 } // namespace Scpt

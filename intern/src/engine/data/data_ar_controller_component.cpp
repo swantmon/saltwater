@@ -7,6 +7,8 @@
 
 namespace Dt
 {
+    REGISTER_COMPONENT_SER(CARControllerPluginComponent);
+
     CARControllerPluginComponent::CARControllerPluginComponent()
         : m_pCameraEntity      (nullptr)
         , m_DeviceType         (Undefined)

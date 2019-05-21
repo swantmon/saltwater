@@ -105,6 +105,10 @@ namespace Edit
 
             Base::CTextReader Reader(oStream, 1);
 
+            Dt::CComponentManager::GetInstance().Read(Reader);
+
+            Dt::Map::Read(Reader);
+
             Dt::CEntityManager::GetInstance().Read(Reader);
 
             oStream.close();
