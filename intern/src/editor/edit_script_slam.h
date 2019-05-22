@@ -23,7 +23,7 @@ namespace Scpt
             m_Settings.m_Colorize = ImGui::Button("Colorize Planes");
             ImGui::Checkbox("Play Recording", &m_Settings.m_IsPlayingRecording);
 
-            ImGui::SliderFloat("Playback Speed", &m_Settings.m_PlaybackSpeed, 0.1f, 10.0f);
+            ImGui::SliderFloat("Playback Speed", &m_Settings.m_PlaybackSpeed, 0.1f, 100.0f);
 
             m_Settings.m_SetRecordFile = false;
 
