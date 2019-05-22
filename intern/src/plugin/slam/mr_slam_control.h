@@ -626,15 +626,14 @@ namespace MR
         
 		void SendPlanes()
 		{
+			//m_pPlaneColorizer->ColorizeAllPlanes();
+
 			if (Net::CNetworkManager::GetInstance().IsConnected(m_SLAMSocket))
 			{
 				for (auto& [rPlaneID, rPlane] : m_Reconstructor.GetPlanes())
 				{
-					/*int m_Category;
-					int m_MessageType;
-					int m_CompressedSize;
-					int m_DecompressedSize;
-					std::vector<char> m_Payload;*/
+					int32_t TextureWidth = rPlane.m_TexturePtr->GetNumberOfPixelsU();
+					int32_t TextureHeight = rPlane.m_TexturePtr->GetNumberOfPixelsV();
 
 					auto VertexCount = static_cast<uint32_t>(rPlane.m_Vertices.size());
 					auto IndexCount = static_cast<uint32_t>(rPlane.m_Indices.size());
@@ -664,7 +663,10 @@ namespace MR
 					int UVMemSize = VertexCount * sizeof(UV[0]);
 					int IndicesMemSize = IndexCount * sizeof(Indices[0]);
 
-					int MessageLength = sizeof(MessageID) + VerticesMemSize + UVMemSize + IndicesMemSize + 3 * sizeof(uint32_t) + static_cast<int>(rPlaneID.size());
+					int MessageLength = sizeof(MessageID) + static_cast<int>(rPlaneID.size()); // Message ID + Plane ID
+					MessageLength += sizeof(rPlane.m_Extent) + sizeof(rPlane.m_Transform);
+					MessageLength += VerticesMemSize + UVMemSize + IndicesMemSize + 3 * sizeof(uint32_t); // Mesh + Counters
+					MessageLength += TextureWidth * TextureHeight * 4 + 2 * sizeof(int32_t); // Texture size + RGBA data
 
 					std::vector<char> Payload(MessageLength);
 
@@ -675,6 +677,12 @@ namespace MR
 
 					std::memcpy(Payload.data() + Offset, rPlaneID.data(), rPlaneID.size());
 					Offset += static_cast<int>(rPlaneID.size());
+
+					std::memcpy(Payload.data() + Offset, &rPlane.m_Extent, sizeof(rPlane.m_Extent));
+					Offset += sizeof(rPlane.m_Extent);
+
+					std::memcpy(Payload.data() + Offset, &rPlane.m_Transform, sizeof(rPlane.m_Transform));
+					Offset += sizeof(rPlane.m_Transform);
 
 					std::memcpy(Payload.data() + Offset, &VertexCount, sizeof(VertexCount));
 					Offset += sizeof(VertexCount);
@@ -693,6 +701,15 @@ namespace MR
 
 					std::memcpy(Payload.data() + Offset, Indices.data(), IndicesMemSize);
 					Offset += IndicesMemSize;
+
+					std::memcpy(Payload.data() + Offset, &TextureWidth, sizeof(TextureWidth));
+					Offset += sizeof(TextureWidth);
+
+					std::memcpy(Payload.data() + Offset, &TextureHeight, sizeof(TextureHeight));
+					Offset += sizeof(TextureHeight);
+
+					Gfx::TextureManager::CopyTextureToCPU(rPlane.m_TexturePtr, Payload.data() + Offset);
+					Offset += 4 * TextureWidth * TextureHeight;
 
 					Net::CMessage Message;
 					Message.m_Category = 0;
