@@ -6,10 +6,9 @@
 #include "editor/edit_load_map_state.h"
 
 #include "engine/core/core_asset_manager.h"
+#include "engine/core/core_program_parameters.h"
 
 #include "engine/camera/cam_control_manager.h"
-
-#include "engine/core/core_program_parameters.h"
 
 #include "engine/data/data_camera_component.h"
 #include "engine/data/data_component.h"
@@ -64,7 +63,7 @@ namespace Edit
 {
     CLoadMapState::CLoadMapState()
         : CState     (LoadMap)
-        , m_Filename ("")
+        , m_Filename (Core::CProgramParameters::GetInstance().Get("application:load_scene", "Sample Scene.sws"))
     {
         m_NextState = CState::Edit;
     }
@@ -94,15 +93,15 @@ namespace Edit
     
     void CLoadMapState::InternOnEnter()
     {
-        if (!m_Filename.empty())
+        // -----------------------------------------------------------------------------
+        // Load
+        // -----------------------------------------------------------------------------
+        std::ifstream oStream;
+
+        oStream.open(Core::AssetManager::GetPathToAssets() + "/" + m_Filename);
+
+        if (oStream.is_open())
         {
-            // -----------------------------------------------------------------------------
-            // Save
-            // -----------------------------------------------------------------------------
-            std::ifstream oStream;
-
-            oStream.open(m_Filename);
-
             Base::CTextReader Reader(oStream, 1);
 
             Dt::CComponentManager::GetInstance().Read(Reader);
@@ -118,7 +117,7 @@ namespace Edit
             // -----------------------------------------------------------------------------
             // Default
             // -----------------------------------------------------------------------------
-            auto Scene = Core::CProgramParameters::GetInstance().Get("application:load_scene", "default");
+            auto Scene = Core::CProgramParameters::GetInstance().Get("application:scene_template", "default");
 
             ENGINE_CONSOLE_INFOV("Loading scene '%s'", Scene.c_str());
 

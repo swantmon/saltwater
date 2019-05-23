@@ -3,6 +3,9 @@
 
 #include "editor/edit_unload_map_state.h"
 
+#include "engine/core/core_asset_manager.h"
+#include "engine/core/core_program_parameters.h"
+
 #include "engine/data/data_entity_manager.h"
 #include "engine/data/data_map.h"
 
@@ -19,7 +22,8 @@ namespace Edit
 namespace Edit
 {
     CUnloadMapState::CUnloadMapState()
-        : CState(UnloadMap)
+        : CState    (UnloadMap)
+        , m_Filename(Core::CProgramParameters::GetInstance().Get("application:load_scene", "Sample Scene.sws"))
     {
     }
     
@@ -46,15 +50,18 @@ namespace Edit
         // -----------------------------------------------------------------------------
         std::ofstream oStream;
 
-        oStream.open(m_Filename);
+        oStream.open(Core::AssetManager::GetPathToAssets() + "/" + m_Filename);
 
-        Base::CTextWriter Writer(oStream, 1);
+        if (oStream.is_open())
+        {
+            Base::CTextWriter Writer(oStream, 1);
 
-        Dt::CComponentManager::GetInstance().Write(Writer);
-        Dt::Map::Write(Writer);
-        Dt::CEntityManager::GetInstance().Write(Writer);
+            Dt::CComponentManager::GetInstance().Write(Writer);
+            Dt::Map::Write(Writer);
+            Dt::CEntityManager::GetInstance().Write(Writer);
 
-        oStream.close();
+            oStream.close();
+        }
 
         // -----------------------------------------------------------------------------
         // Unload?
