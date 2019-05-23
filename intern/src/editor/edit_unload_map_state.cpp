@@ -69,7 +69,7 @@ namespace Edit
 
             oStream.close();
 
-            Core::CProgramParameters::GetInstance().Add("application:last_scene", m_Filename);
+            Core::CProgramParameters::GetInstance().Set("application:last_scene", m_Filename);
         }
         else
         {

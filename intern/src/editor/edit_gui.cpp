@@ -115,6 +115,9 @@ namespace
         bool m_ShowGUI;
 		bool m_IsFullscreen;
 
+        Edit::CImFileFialog m_OpenSceneDialog;
+        Edit::CImFileFialog m_SaveSceneDialog;
+
         Engine::CEventDelegates::HandleType m_GfxOnRenderGUIDelegate;
 
     private:
@@ -145,6 +148,8 @@ namespace
         , m_EnableGamepad      (false)
         , m_ShowGUI            (true)
         , m_IsFullscreen       (false)
+        , m_OpenSceneDialog    ("Open scene...", CAsset::s_Filter[CAsset::Scene])
+        , m_SaveSceneDialog    ("Save scene...", CAsset::s_Filter[CAsset::Scene])
     {                          
     }
     
@@ -375,6 +380,39 @@ namespace
 #endif
 
         // -----------------------------------------------------------------------------
+        // Dialogs
+        // -----------------------------------------------------------------------------
+        if (m_SaveSceneDialog.Draw())
+        {
+            auto Files = m_SaveSceneDialog.GetSelectedFiles();
+
+            if (!Files.empty())
+            {
+                Edit::CEditState::GetInstance().SetNextState(CState::UnloadMap);
+
+                Edit::CUnloadMapState::GetInstance().SaveToFile("test.sws");
+
+                Edit::CUnloadMapState::GetInstance().SetNextState(CState::Edit);
+            }
+        }
+
+        if (m_OpenSceneDialog.Draw())
+        {
+            auto Files = m_OpenSceneDialog.GetSelectedFiles();
+
+            if (!Files.empty())
+            {
+                Edit::CEditState::GetInstance().SetNextState(CState::UnloadMap);
+
+                Edit::CUnloadMapState::GetInstance().SetNextState(CState::LoadMap);
+
+                Edit::CLoadMapState::GetInstance().LoadFromFile("test.sws");
+
+                Edit::CLoadMapState::GetInstance().SetNextState(CState::Edit);
+            }
+        }
+
+        // -----------------------------------------------------------------------------
         // Menu
         // -----------------------------------------------------------------------------
         if (ImGui::BeginMainMenuBar())
@@ -383,13 +421,7 @@ namespace
             {
                 if (ImGui::MenuItem("Open Scene", "CTRL+O"))
                 {
-                    Edit::CEditState::GetInstance().SetNextState(CState::UnloadMap);
-
-                    Edit::CUnloadMapState::GetInstance().SetNextState(CState::LoadMap);
-
-                    Edit::CLoadMapState::GetInstance().LoadFromFile("test.sws");
-
-                    Edit::CLoadMapState::GetInstance().SetNextState(CState::Edit);
+                    m_OpenSceneDialog.Open();
                 }
 
                 if (ImGui::MenuItem("Save", "CTRL+S"))
@@ -401,11 +433,7 @@ namespace
 
                 if (ImGui::MenuItem("Save As", "CTRL+SHIFT+S"))
                 {
-                    Edit::CEditState::GetInstance().SetNextState(CState::UnloadMap);
-
-                    Edit::CUnloadMapState::GetInstance().SaveToFile("test.sws");
-
-                    Edit::CUnloadMapState::GetInstance().SetNextState(CState::Edit);
+                    m_SaveSceneDialog.Open();
                 }
 
                 ImGui::Separator();

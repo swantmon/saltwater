@@ -30,20 +30,13 @@
 #ifdef _WIN32
 namespace Edit
 {
-    CImFileFialog::CImFileFialog(const std::string& _rTitle, const std::regex& _rFilter)
+    CImFileFialog::CImFileFialog(const std::string& _rTitle, const std::regex& _rFilter, const std::string& _rRoot, int _Config)
         : m_Title(_rTitle)
         , m_Regex(_rFilter)
+        , m_Config((EConfig)_Config)
     { 
-        SetToCurrentPath(); 
-    }
-
-    // -----------------------------------------------------------------------------
-
-    void CImFileFialog::SetToCurrentPath() 
-    {
-        m_CurrentPath = std::filesystem::current_path();
-
-        ClearCache();
+        m_RootPath = _rRoot;
+        m_CurrentPath = _rRoot;
     }
 
     // -----------------------------------------------------------------------------
@@ -124,7 +117,7 @@ namespace Edit
     {
         m_ShouldOpen = true;
 
-        SetToCurrentPath();
+        ClearCache();
 
         m_SelectedFiles.clear();
 
@@ -436,7 +429,6 @@ namespace Edit
             }
             else if (DoGoHome) 
             {
-                SetToCurrentPath();
                 ClearCache();
             }
         }
