@@ -64,7 +64,7 @@ namespace Edit
 {
     CLoadMapState::CLoadMapState()
         : CState     (LoadMap)
-        , m_Filename ("test.sws")
+        , m_Filename ("")
     {
         m_NextState = CState::Edit;
     }

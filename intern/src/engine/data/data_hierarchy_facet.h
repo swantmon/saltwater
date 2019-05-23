@@ -44,8 +44,6 @@ namespace Dt
             bool Check = false;
             Base::ID ID;
 
-            _rCodec >> m_TimeStamp;
-
             _rCodec >> Check;
             if (Check)
             {
@@ -72,8 +70,6 @@ namespace Dt
         inline void Write(TArchive& _rCodec)
         {
             bool Check = false;
-
-            _rCodec << m_TimeStamp;
 
             Check = m_pParent != nullptr;
             _rCodec << Check;
