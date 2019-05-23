@@ -95,7 +95,7 @@ namespace GUI
         // -----------------------------------------------------------------------------
         auto Filename = Edit::CLoadMapState::GetInstance().GetFilename();
 
-        auto Scenename = Filename.substr(0, Filename.find_last_of('.'));
+        auto Scenename = Filename.substr(0, Filename.find_last_of('.')) + "##SCENE_GRAPH_PANEL";
 
         ImGui::SetNextWindowPos(ImVec2(30, 100), ImGuiCond_FirstUseEver);
         ImGui::SetNextWindowSize(ImVec2(300, 400), ImGuiCond_FirstUseEver);
