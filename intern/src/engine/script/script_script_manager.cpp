@@ -136,14 +136,13 @@ namespace
 
         if ((DirtyFlags & Dt::CScriptComponent::DirtyInfo) != 0)
         {
-            // -----------------------------------------------------------------------------
-            // Get script from list
-            // -----------------------------------------------------------------------------
             auto ScriptIter = std::find_if(m_Scripts.begin(), m_Scripts.end(), [&](Dt::CScriptComponent* _pObject) { return _pObject == pScriptComponent; });
 
             if (!pScriptComponent->IsActiveAndUsable() && ScriptIter != m_Scripts.end())
             {
                 pScriptComponent->Exit();
+
+                m_Scripts.erase(ScriptIter);
             }
 
             if (pScriptComponent->IsActiveAndUsable() && ScriptIter == m_Scripts.end())
@@ -160,7 +159,10 @@ namespace
 
             if (ScriptIter != m_Scripts.end())
             {
-                pScriptComponent->Exit();
+                if (pScriptComponent->IsActiveAndUsable())
+                {
+                    pScriptComponent->Exit();
+                }
 
                 m_Scripts.erase(ScriptIter);
             }

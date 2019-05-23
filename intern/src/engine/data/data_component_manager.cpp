@@ -43,13 +43,18 @@ namespace Dt
 
     void CComponentManager::Deallocate(Base::ID _ID)
     {
-        // -----------------------------------------------------------------------------
-        // Release from organizer
-        // -----------------------------------------------------------------------------
         auto Component = m_ComponentByID[_ID];
 
         if (Component == nullptr) return;
 
+        // -----------------------------------------------------------------------------
+        // Mark component as dirty
+        // -----------------------------------------------------------------------------
+        MarkComponentAsDirty(*Component, Dt::IComponent::DirtyDestroy);
+
+        // -----------------------------------------------------------------------------
+        // Release from organizer
+        // -----------------------------------------------------------------------------
         m_ComponentByID.erase(_ID);
 
         auto& rComponentTypeVector = m_ComponentsByType[Component->GetTypeID()];
@@ -81,6 +86,11 @@ namespace Dt
 
     void CComponentManager::Clear()
     {
+        for (auto& rComponent : m_Components)
+        {
+            MarkComponentAsDirty(*rComponent, Dt::IComponent::DirtyDestroy);
+        }
+
         m_ComponentByID.clear();
         m_ComponentsByType.clear();
         m_Components.clear();
@@ -147,6 +157,8 @@ namespace Dt
         _rComponent.m_DirtyFlags = _DirtyFlags;
 
         m_ComponentDelegate.Notify(&_rComponent);
+
+        _rComponent.m_DirtyFlags = 0;
     }
 
     // -----------------------------------------------------------------------------
