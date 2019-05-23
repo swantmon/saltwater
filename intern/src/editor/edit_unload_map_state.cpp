@@ -23,7 +23,7 @@ namespace Edit
 {
     CUnloadMapState::CUnloadMapState()
         : CState    (UnloadMap)
-        , m_Filename(Core::CProgramParameters::GetInstance().Get("application:load_scene", "Sample Scene.sws"))
+        , m_Filename("Default Scene.sws")
     {
     }
     
@@ -39,6 +39,13 @@ namespace Edit
     void CUnloadMapState::SaveToFile(const std::string& _rFilename)
     {
         m_Filename = _rFilename;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    const std::string& CUnloadMapState::GetFilename() const
+    {
+        return m_Filename;
     }
 
     // -----------------------------------------------------------------------------
@@ -61,6 +68,8 @@ namespace Edit
             Dt::CEntityManager::GetInstance().Write(Writer);
 
             oStream.close();
+
+            Core::CProgramParameters::GetInstance().Add("application:last_scene", m_Filename);
         }
         else
         {

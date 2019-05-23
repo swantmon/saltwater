@@ -15,7 +15,6 @@ namespace Edit
     public:
         
         void LoadFromFile(const std::string& _rFilename);
-        const std::string& GetFilename() const;
         
     private:
         

@@ -390,8 +390,6 @@ namespace
                     Edit::CLoadMapState::GetInstance().LoadFromFile("test.sws");
 
                     Edit::CLoadMapState::GetInstance().SetNextState(CState::Edit);
-
-                    Edit::CUnloadMapState::GetInstance().SaveToFile("test.sws");
                 }
 
                 if (ImGui::MenuItem("Save", "CTRL+S"))

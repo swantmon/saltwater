@@ -15,6 +15,7 @@ namespace Edit
     public:
 
         void SaveToFile(const std::string& _rFilename);
+        const std::string& GetFilename() const;
         
     private:
         

@@ -2,10 +2,12 @@
 #include "editor/edit_precompiled.h"
 
 #include "editor/edit_asset_helper.h"
+#include "editor/edit_edit_state.h"
 #include "editor/edit_gui_factory.h"
+#include "editor/edit_inspector_panel.h"
 #include "editor/edit_load_map_state.h"
 #include "editor/edit_scene_graph_panel.h"
-#include "editor/edit_inspector_panel.h"
+#include "editor/edit_unload_map_state.h"
 
 #include "engine/core/core_console.h"
 
@@ -93,7 +95,7 @@ namespace GUI
         // -----------------------------------------------------------------------------
         // GUI
         // -----------------------------------------------------------------------------
-        auto Filename = Edit::CLoadMapState::GetInstance().GetFilename();
+        auto Filename = Edit::CUnloadMapState::GetInstance().GetFilename();
 
         auto Scenename = Filename.substr(0, Filename.find_last_of('.')) + "##SCENE_GRAPH_PANEL";
 
@@ -217,11 +219,29 @@ namespace GUI
             {
                 auto& DraggedAsset = *static_cast<CAsset*>(_pPayload->Data);
 
-                auto pEntity = Edit::AssetHelper::LoadPrefabFromModel(DraggedAsset);
-
-                if (pEntity != nullptr)
+                if (DraggedAsset.GetType() == CAsset::Model)
                 {
-                    Dt::CEntityManager::GetInstance().MarkEntityAsDirty(*pEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+                    auto pEntity = Edit::AssetHelper::LoadPrefabFromModel(DraggedAsset);
+
+                    if (pEntity != nullptr)
+                    {
+                        Dt::CEntityManager::GetInstance().MarkEntityAsDirty(*pEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+                    }
+                }
+                else if (DraggedAsset.GetType() == CAsset::Scene)
+                {
+                    const auto& File = DraggedAsset.GetPathToFile();
+
+                    if (File != Edit::CUnloadMapState::GetInstance().GetFilename())
+                    {
+                        Edit::CEditState::GetInstance().SetNextState(CState::UnloadMap);
+
+                        Edit::CUnloadMapState::GetInstance().SetNextState(CState::LoadMap);
+
+                        Edit::CLoadMapState::GetInstance().LoadFromFile(File);
+
+                        Edit::CLoadMapState::GetInstance().SetNextState(CState::Edit);
+                    }
                 }
             }
 

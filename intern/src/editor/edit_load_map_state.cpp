@@ -4,6 +4,7 @@
 #include "base/base_serialize_text_reader.h"
 
 #include "editor/edit_load_map_state.h"
+#include "editor/edit_unload_map_state.h"
 
 #include "engine/core/core_asset_manager.h"
 #include "engine/core/core_program_parameters.h"
@@ -63,7 +64,7 @@ namespace Edit
 {
     CLoadMapState::CLoadMapState()
         : CState     (LoadMap)
-        , m_Filename (Core::CProgramParameters::GetInstance().Get("application:load_scene", "Sample Scene.sws"))
+        , m_Filename ("")
     {
         m_NextState = CState::Edit;
     }
@@ -81,18 +82,19 @@ namespace Edit
     {
         m_Filename = _rFilename;
     }
-
-    // -----------------------------------------------------------------------------
-
-    const std::string& CLoadMapState::GetFilename() const
-    {
-        return m_Filename;
-    }
     
     // -----------------------------------------------------------------------------
     
     void CLoadMapState::InternOnEnter()
     {
+        // -----------------------------------------------------------------------------
+        // Get filename
+        // -----------------------------------------------------------------------------
+        if (m_Filename.empty())
+        {
+            m_Filename = Core::CProgramParameters::GetInstance().Get("application:last_scene", "Default Scene.sws");
+        }
+
         // -----------------------------------------------------------------------------
         // Load
         // -----------------------------------------------------------------------------
@@ -111,13 +113,15 @@ namespace Edit
             Dt::CEntityManager::GetInstance().Read(Reader);
 
             oStream.close();
+
+            CUnloadMapState::GetInstance().SaveToFile(m_Filename);
         }
         else
         {
             // -----------------------------------------------------------------------------
             // Default
             // -----------------------------------------------------------------------------
-            auto Scene = Core::CProgramParameters::GetInstance().Get("application:scene_template", "default");
+            auto Scene = Core::CProgramParameters::GetInstance().Get("application:template", "default");
 
             ENGINE_CONSOLE_INFOV("Loading scene '%s'", Scene.c_str());
 
