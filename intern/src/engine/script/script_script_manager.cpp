@@ -35,7 +35,7 @@ namespace
 
     private:
 
-        typedef std::vector<Dt::CScriptComponent*> CScripts;
+        using CScripts = std::vector<Dt::CScriptComponent*>;
 
     private:
 
@@ -115,7 +115,7 @@ namespace
         // -----------------------------------------------------------------------------
         if (_pComponent->GetTypeID() != Base::CTypeInfo::GetTypeID<Dt::CScriptComponent>()) return;
 
-        Dt::CScriptComponent* pScriptComponent = static_cast<Dt::CScriptComponent*>(_pComponent);
+        auto* pScriptComponent = static_cast<Dt::CScriptComponent*>(_pComponent);
 
         // -----------------------------------------------------------------------------
         // Dirty check

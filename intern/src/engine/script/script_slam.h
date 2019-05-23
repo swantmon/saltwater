@@ -72,10 +72,10 @@ namespace Scpt
 
     private:
 
-        typedef void(*FInputCallback)(const Base::CInputEvent& _rEvent);
+        using FInputCallback = void(*)(const Base::CInputEvent& _rEvent);
         FInputCallback InputCallback;
 
-        typedef void(*FSetFlag)(bool _Flag);
+        using FSetFlag = void(*)(bool _Flag);
         FSetFlag SetActivateSelection;
         FSetFlag EnableMouseControl;
 

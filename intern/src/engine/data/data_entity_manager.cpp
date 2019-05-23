@@ -240,14 +240,6 @@ namespace Dt
         _rEntity.SetDirtyFlags(_DirtyFlags);
 
         // -----------------------------------------------------------------------------
-        // Add entity to map
-        // -----------------------------------------------------------------------------
-        if ((_DirtyFlags & CEntity::DirtyAdd) != 0 && (_DirtyFlags & CEntity::DirtyRemove) == 0)
-        {
-            Map::AddEntity(_rEntity);
-        }
-
-        // -----------------------------------------------------------------------------
         // Set every child to dirty
         // -----------------------------------------------------------------------------
         CEntity*         pChildEntity;
@@ -317,6 +309,8 @@ namespace Dt
         for (auto CurrentEntity = m_Entities.Begin(); CurrentEntity != m_Entities.End(); ++CurrentEntity)
         {
             _rCodec >> *CurrentEntity;
+
+            m_EntityByID[CurrentEntity->m_ID] = &*CurrentEntity;
         }
 
         bool Check = false;
@@ -348,19 +342,17 @@ namespace Dt
 
                 auto Components = CurrentEntity->m_pComponentsFacet->GetComponents();
 
-                for (auto& Component : Components)
+                for (auto& rComponent : Components)
                 {
-                    Component->SetHostEntity(&*CurrentEntity);
+                    rComponent->SetHostEntity(&*CurrentEntity);
 
-                    Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*Component, Dt::IComponent::DirtyCreate);
+                    Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*rComponent, Dt::IComponent::DirtyCreate);
                 }
             }
         }
 
         for (auto CurrentEntity = m_Entities.Begin(); CurrentEntity != m_Entities.End(); ++CurrentEntity)
         {
-            m_EntityByID[CurrentEntity->m_ID] = &*CurrentEntity;
-
             MarkEntityAsDirty(*CurrentEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
     }
@@ -436,18 +428,23 @@ namespace Dt
         // -----------------------------------------------------------------------------
         DirtyFlags = _rEntity.GetDirtyFlags();
 
-        if ((DirtyFlags & CEntity::DirtyRemove) != 0)
+        if (DirtyFlags & CEntity::DirtyRemove && _rEntity.IsInMap())
         {
             Map::RemoveEntity(_rEntity);
-
-            if ((DirtyFlags & CEntity::DirtyDestroy) != 0)
-            {
-                FreeEntity(_rEntity);
-            }
         }
-        else if ((DirtyFlags & CEntity::DirtyMove) != 0)
+        else if (DirtyFlags & CEntity::DirtyAdd && !_rEntity.IsInMap())
+        {
+            Map::AddEntity(_rEntity);
+        }
+        
+        if (DirtyFlags & CEntity::DirtyMove)
         {
             Map::MoveEntity(_rEntity);
+        }
+
+        if (DirtyFlags & CEntity::DirtyDestroy && !_rEntity.IsInMap())
+        {
+            FreeEntity(_rEntity);
         }
     }
 
