@@ -278,6 +278,8 @@ namespace GUI
     {
         m_Directories.clear();
         m_Files.clear();
+        
+        if (!std::filesystem::exists(m_CurrentPath)) return;
 
         m_SpaceInfo = std::filesystem::space(m_CurrentPath);
 

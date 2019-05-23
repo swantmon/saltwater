@@ -3,6 +3,7 @@
 
 #include "editor/edit_asset_helper.h"
 #include "editor/edit_gui_factory.h"
+#include "editor/edit_load_map_state.h"
 #include "editor/edit_scene_graph_panel.h"
 #include "editor/edit_inspector_panel.h"
 
@@ -92,10 +93,14 @@ namespace GUI
         // -----------------------------------------------------------------------------
         // GUI
         // -----------------------------------------------------------------------------
+        auto Filename = Edit::CLoadMapState::GetInstance().GetFilename();
+
+        auto Scenename = Filename.substr(0, Filename.find_last_of('.'));
+
         ImGui::SetNextWindowPos(ImVec2(30, 100), ImGuiCond_FirstUseEver);
         ImGui::SetNextWindowSize(ImVec2(300, 400), ImGuiCond_FirstUseEver);
 
-        ImGui::Begin("Scene Graph", &m_IsVisible);
+        ImGui::Begin(Scenename.c_str(), &m_IsVisible);
 
         ImGui::BeginChild("SCENE_GRAPH_PANEL_CHILD");
 

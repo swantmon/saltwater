@@ -62,6 +62,10 @@ namespace Edit
 
             oStream.close();
         }
+        else
+        {
+            ENGINE_CONSOLE_ERROR("Scene can not be saved because file can not be created or is already in use. Maybe the folder is missing?");
+        }
 
         // -----------------------------------------------------------------------------
         // Unload?

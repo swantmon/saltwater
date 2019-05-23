@@ -385,13 +385,13 @@ namespace
                 {
                     Edit::CEditState::GetInstance().SetNextState(CState::UnloadMap);
 
-                    Edit::CUnloadMapState::GetInstance().SaveToFile("test.sws");
-
                     Edit::CUnloadMapState::GetInstance().SetNextState(CState::LoadMap);
 
                     Edit::CLoadMapState::GetInstance().LoadFromFile("test.sws");
 
                     Edit::CLoadMapState::GetInstance().SetNextState(CState::Edit);
+
+                    Edit::CUnloadMapState::GetInstance().SaveToFile("test.sws");
                 }
 
                 if (ImGui::MenuItem("Save", "CTRL+S"))
@@ -898,8 +898,6 @@ namespace
     void CEditorGui::Exit()
     {
         Edit::CEditState::GetInstance().SetNextState(CState::UnloadMap);
-
-        Edit::CUnloadMapState::GetInstance().SaveToFile("test.sws");
 
         Edit::CUnloadMapState::GetInstance().SetNextState(CState::Exit);
     }
