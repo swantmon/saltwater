@@ -148,8 +148,8 @@ namespace
         , m_EnableGamepad      (false)
         , m_ShowGUI            (true)
         , m_IsFullscreen       (false)
-        , m_OpenSceneDialog    ("Open scene...", CAsset::s_Filter[CAsset::Scene])
-        , m_SaveSceneDialog    ("Save scene...", CAsset::s_Filter[CAsset::Scene])
+        , m_OpenSceneDialog    ("Open scene...", CAsset::s_Filter[CAsset::Scene], Core::AssetManager::GetPathToAssets(), CImFileFialog::RootIsRoot)
+        , m_SaveSceneDialog    ("Save scene...", CAsset::s_Filter[CAsset::Scene], Core::AssetManager::GetPathToAssets(), CImFileFialog::RootIsRoot | CImFileFialog::SaveDialog)
     {                          
     }
     
@@ -388,9 +388,16 @@ namespace
 
             if (!Files.empty())
             {
+                auto rSceneFile = Files[0];
+
+                if (!regex_match(rSceneFile, CAsset::s_Filter[CAsset::Scene]))
+                {
+                    rSceneFile += ".sws";
+                }
+
                 Edit::CEditState::GetInstance().SetNextState(CState::UnloadMap);
 
-                Edit::CUnloadMapState::GetInstance().SaveToFile("test.sws");
+                Edit::CUnloadMapState::GetInstance().SaveToFile(rSceneFile);
 
                 Edit::CUnloadMapState::GetInstance().SetNextState(CState::Edit);
             }
@@ -402,11 +409,13 @@ namespace
 
             if (!Files.empty())
             {
+                auto rSceneFile = Files[0];
+
                 Edit::CEditState::GetInstance().SetNextState(CState::UnloadMap);
 
                 Edit::CUnloadMapState::GetInstance().SetNextState(CState::LoadMap);
 
-                Edit::CLoadMapState::GetInstance().LoadFromFile("test.sws");
+                Edit::CLoadMapState::GetInstance().LoadFromFile(rSceneFile);
 
                 Edit::CLoadMapState::GetInstance().SetNextState(CState::Edit);
             }

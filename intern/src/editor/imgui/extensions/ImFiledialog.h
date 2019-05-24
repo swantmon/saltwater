@@ -15,9 +15,8 @@ namespace Edit
         enum EConfig
         {
             SaveDialog     = 0x01,
-            ChooseMultiple = 0x02,
-            AllowRoots     = 0x04,
-            RootIsRoot     = 0x08
+            AllowRoots     = 0x02,
+            RootIsRoot     = 0x04
         };
 
     public:

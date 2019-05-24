@@ -143,7 +143,10 @@ namespace Edit
         {
             if (m_IsCacheDirty) 
             {
-                FillRoots();
+                if (m_Config & EConfig::AllowRoots)
+                {
+                    FillRoots();
+                }
 
                 m_SpaceInfo = std::filesystem::space(m_CurrentPath);
 
@@ -206,36 +209,61 @@ namespace Edit
 
             ImGui::BeginChild("Directories", ImVec2(250, 350), true, ImGuiWindowFlags_HorizontalScrollbar);
 
-            if (ImGui::TreeNode("Roots")) 
+            if (m_Config & EConfig::AllowRoots)
             {
-                for (auto& p : m_Roots) 
+                if (ImGui::TreeNode("Roots"))
                 {
-                    if (ImGui::Selectable(p.m_Label.c_str(), false, 0, ImVec2(ImGui::GetWindowContentRegionWidth(), 0))) 
+                    for (auto& p : m_Roots)
                     {
-                        GoDownString = p.m_Root;
+                        if (ImGui::Selectable(p.m_Label.c_str(), false, 0, ImVec2(ImGui::GetWindowContentRegionWidth(), 0)))
+                        {
+                            GoDownString = p.m_Root;
+                        }
+                    }
+
+                    ImGui::TreePop();
+                }
+
+                if (ImGui::TreeNodeEx("Directories", ImGuiTreeNodeFlags_DefaultOpen))
+                {
+                    if (!(m_Config & EConfig::RootIsRoot && m_CurrentPath == m_RootPath))
+                    {
+                        if (ImGui::Selectable("..", false, 0, ImVec2(ImGui::GetWindowContentRegionWidth(), 0)))
+                        {
+                            DoGoUp = true;
+                        }
+                    }
+
+                    for (auto& p : m_Directories)
+                    {
+                        if (ImGui::Selectable(p.c_str(), false, 0, ImVec2(ImGui::GetWindowContentRegionWidth(), 0)))
+                        {
+                            GoDownString = p;
+                        }
+                    }
+
+                    ImGui::TreePop();
+                }
+            }
+            else
+            {
+                if (!(m_Config & EConfig::RootIsRoot && m_CurrentPath == m_RootPath))
+                {
+                    if (ImGui::Selectable("..", false, 0, ImVec2(ImGui::GetWindowContentRegionWidth(), 0)))
+                    {
+                        DoGoUp = true;
                     }
                 }
 
-                ImGui::TreePop();
-            }
-
-            if (ImGui::TreeNodeEx("Directories", ImGuiTreeNodeFlags_DefaultOpen)) 
-            {
-                if (ImGui::Selectable("..", false, 0, ImVec2(ImGui::GetWindowContentRegionWidth(), 0))) 
+                for (auto& p : m_Directories)
                 {
-                    DoGoUp = true;
-                }
-
-                for (auto& p : m_Directories) 
-                {
-                    if (ImGui::Selectable(p.c_str(), false, 0, ImVec2(ImGui::GetWindowContentRegionWidth(), 0))) 
+                    if (ImGui::Selectable(p.c_str(), false, 0, ImVec2(ImGui::GetWindowContentRegionWidth(), 0)))
                     {
                         GoDownString = p;
                     }
                 }
-
-                ImGui::TreePop();
             }
+            
             ImGui::EndChild();
    
             ImGui::SameLine();
@@ -375,16 +403,51 @@ namespace Edit
                 ImGui::EndChild();
             }
 
-            std::string SelectedFileString;
-            bool gotSelected = pSelectedFile;
+            static bool IsFileSelected = false;
 
-            SelectedFileString = (m_CurrentPath / std::filesystem::path(pSelectedFile ? pSelectedFile->m_Filename : "...")).string();
+            auto SelectedFileString = (m_CurrentPath / std::filesystem::path(pSelectedFile ? pSelectedFile->m_Filename : "")).string();
 
             std::replace(SelectedFileString.begin(), SelectedFileString.end(), '\\', '/');
 
-            ImGui::Text(SelectedFileString.c_str());
+            auto SelectedFilenameString = SelectedFileString.substr(SelectedFileString.find_last_of('/') + 1);
 
-            if (!gotSelected) 
+            if (m_Config & EConfig::SaveDialog)
+            {
+                IsFileSelected = !SelectedFilenameString.empty();
+
+                static char pText[256];
+
+                if (IsFileSelected)
+                {
+                    strcpy_s(pText, SelectedFilenameString.c_str());
+                }
+
+                ImGui::InputText("##INPUT", pText, 256);
+
+                SelectedFileString = m_CurrentPath.string() + "/" + pText;
+
+                IsFileSelected = strlen(pText) > 0;
+            }
+            else
+            {
+                IsFileSelected = pSelectedFile;
+
+                if (IsFileSelected)
+                {
+                    ImGui::Text(SelectedFileString.c_str());
+                }
+                else
+                {
+                    ImGui::Text("No file selected.");
+                }
+            }
+
+            if (m_Config & EConfig::RootIsRoot)
+            {
+                SelectedFileString = std::filesystem::relative(std::filesystem::path(SelectedFileString), m_RootPath).string();
+            }
+
+            if (!IsFileSelected)
             {
                 const ImVec4 lolight = ImGui::GetStyle().Colors[ImGuiCol_TextDisabled];
                 ImGui::PushStyleColor(ImGuiCol_Button, lolight);
@@ -392,24 +455,42 @@ namespace Edit
                 ImGui::PushStyleColor(ImGuiCol_ButtonActive, lolight);
             }
 
-            if (ImGui::Button("OK", ImVec2(120, 30)) && gotSelected) 
+            if (m_Config & EConfig::SaveDialog)
             {
-                m_SelectedFiles.clear();
-                m_SelectedFiles.push_back(SelectedFileString);
+                ImGui::SameLine();
 
-                ImGui::CloseCurrentPopup();
+                if (ImGui::Button("Save") && IsFileSelected)
+                {
+                    m_SelectedFiles.clear();
+                    m_SelectedFiles.emplace_back(SelectedFileString);
 
-                IsDone = true;
+                    ImGui::CloseCurrentPopup();
+
+                    IsDone = true;
+                }
+            }
+            else
+            {
+                if (ImGui::Button("OK") && IsFileSelected)
+                {
+                    m_SelectedFiles.clear();
+                    m_SelectedFiles.emplace_back(SelectedFileString);
+
+                    ImGui::CloseCurrentPopup();
+
+                    IsDone = true;
+                }
             }
 
-            if (!gotSelected) ImGui::PopStyleColor(3);
+            if (!IsFileSelected) ImGui::PopStyleColor(3);
 
             ImGui::SetItemDefaultFocus();
             ImGui::SameLine();
 
-            if (ImGui::Button("Cancel", ImVec2(120, 30))) 
+            if (ImGui::Button("Cancel")) 
             {
                 ImGui::CloseCurrentPopup();
+
                 IsDone = true;
             }
 
