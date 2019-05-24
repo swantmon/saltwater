@@ -133,8 +133,19 @@ namespace Net
             assert(_TransferredBytes == s_HeaderSize);
 
             int32_t MessageID = *reinterpret_cast<int32_t*>(m_Header.data());
-            int32_t CompressedMessageLength = *reinterpret_cast<int32_t*>(m_Header.data() + sizeof(int32_t));
+			int32_t CompressedMessageLength = *reinterpret_cast<int32_t*>(m_Header.data() + sizeof(int32_t));
             int32_t DecompressedMessageLength = *reinterpret_cast<int32_t*>(m_Header.data() + 2 * sizeof(int32_t));
+
+            if (CompressedMessageLength < 1)
+            {
+				BASE_THROWV("Length of compressed message is invalid (%i)", CompressedMessageLength);
+            }
+
+			if (CompressedMessageLength < 1)
+			{
+				BASE_THROWV("Length of decompressed message is invalid (%i)", DecompressedMessageLength);
+			}
+
             m_PendingMessage.m_Payload.resize(CompressedMessageLength);
 
             auto Callback = std::bind(&CSocket::ReceivePayload, this, std::placeholders::_1, std::placeholders::_2);

@@ -27,6 +27,10 @@
 #include "engine/graphic/gfx_selection_renderer.h"
 #include "engine/graphic/gfx_view_manager.h"
 
+#include "engine/core/core_asset_manager.h"
+
+#include "plugin/slam/mr_plane_colorizer.h"
+
 #include "engine/script/script_script.h"
 
 #include "engine/network/core_network_manager.h"
@@ -55,6 +59,13 @@ namespace MR
         {
             NETWORK,
             KINECT
+        };
+
+        enum EPlaneAction
+        {
+            ADDPLANE,
+            UPDATEPLANE,
+            REMOVEPLANE
         };
 
         EDATASOURCE m_DataSource;
@@ -152,7 +163,6 @@ namespace MR
         };
         
         ERecordMode m_RecordMode;
-        std::string m_RecordFileName;
 
         std::fstream m_RecordFile;
         std::unique_ptr<Base::CRecordWriter> m_pRecordWriter;
@@ -199,6 +209,12 @@ namespace MR
 
         using InpaintWithPixMixFunc = void(*)(const glm::ivec2&, const std::vector<char>&, std::vector<char>&);
         InpaintWithPixMixFunc InpaintWithPixMix;
+
+
+        // -----------------------------------------------------------------------------
+        // Plane extraction
+        // -----------------------------------------------------------------------------
+        std::unique_ptr<MR::CPlaneColorizer> m_pPlaneColorizer;
 
     public:
 
@@ -260,7 +276,7 @@ namespace MR
 
                     if (!Core::PluginManager::LoadPlugin("PixMix"))
                     {
-                        throw Base::CException(__FILE__, __LINE__, "Kinect plugin was not loaded");
+                        BASE_THROWM("PixMix plugin was not loaded");
                     }
 
                     InpaintWithPixMix = (InpaintWithPixMixFunc)(Core::PluginManager::GetPluginFunction("PixMix", "Inpaint"));
@@ -286,7 +302,7 @@ namespace MR
                 
                 if (!Core::PluginManager::LoadPlugin("Kinect"))
                 {
-                    throw Base::CException(__FILE__, __LINE__, "Kinect plugin was not loaded");
+                    BASE_THROWM("Kinect plugin was not loaded")
                 }
 
                 m_DataSource = KINECT;
@@ -341,31 +357,19 @@ namespace MR
             }
             else
             {
-                throw Base::CException(__FILE__, __LINE__, "Unknown data source for SLAM plugin");
+                BASE_THROWM("Unknown data source for SLAM plugin");
             }
 
             std::string RecordParam = Core::CProgramParameters::GetInstance().Get("mr:slam:recording:mode", "none");
-            m_RecordFileName = Core::CProgramParameters::GetInstance().Get("mr:slam:recording:file", "");
-            double SpeedOfPlayback = Core::CProgramParameters::GetInstance().Get("mr:slam:recording:speed", 1.0);
-
-            if (RecordParam == "play")
+            
+            if (RecordParam == "record")
             {
-                m_RecordMode = PLAY;
-                m_RecordFile.open(m_RecordFileName, std::fstream::in | std::fstream::binary);
-                m_pRecordReader = std::make_unique<Base::CRecordReader>(m_RecordFile, 1);
+                auto FileName = Core::CProgramParameters::GetInstance().Get("mr:slam:recording:file", "");
 
-                m_pRecordReader->SkipTime();
-
-                m_pRecordReader->SetSpeed(SpeedOfPlayback);
-
-                ENGINE_CONSOLE_INFOV("Playing recording from file \"%s\"", m_RecordFileName.c_str());
-            }
-            else if (RecordParam == "record")
-            {
                 m_RecordMode = RECORD;
-                m_RecordFile.open(m_RecordFileName, std::fstream::out | std::fstream::binary);
+                m_RecordFile.open(FileName, std::fstream::out | std::fstream::binary);
 
-                ENGINE_CONSOLE_INFOV("Recoding into file file \"%s\"", m_RecordFileName.c_str());
+                ENGINE_CONSOLE_INFOV("Recoding into file file \"%s\"", FileName.c_str());
             }
             else if (RecordParam == "none")
             {
@@ -377,6 +381,8 @@ namespace MR
             }
 
             m_SendInpaintedResult = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:send_result", true);
+
+            m_pPlaneColorizer = std::make_unique<MR::CPlaneColorizer>(&m_Reconstructor);
         }
 
         // -----------------------------------------------------------------------------
@@ -435,7 +441,7 @@ namespace MR
             // -----------------------------------------------------------------------------
             // Playing
             // -----------------------------------------------------------------------------
-            if (m_RecordMode == PLAY)
+            if (m_RecordMode == PLAY && m_pRecordReader != nullptr)
             {
                 m_pRecordReader->Update();
 
@@ -558,6 +564,28 @@ namespace MR
 
         // -----------------------------------------------------------------------------
 
+        void SetRecordFile(const std::string& _rFileName, float _Speed = 1.0f)
+        {
+            std::string RecordParam = Core::CProgramParameters::GetInstance().Get("mr:slam:recording:mode", "none");
+
+            m_RecordFile.open(Core::AssetManager::GetPathToAssets() + "/" + _rFileName, std::fstream::in | std::fstream::binary);
+
+            if (!m_RecordFile.is_open())
+            {
+                ENGINE_CONSOLE_INFOV("File %s not found", _rFileName.c_str());
+            }
+
+            m_pRecordReader = std::make_unique<Base::CRecordReader>(m_RecordFile, 1);
+
+            m_pRecordReader->SkipTime();
+
+            m_pRecordReader->SetSpeed(_Speed);
+
+            ENGINE_CONSOLE_INFOV("Playing recording from file \"%s\"", _rFileName.c_str());
+        }
+
+        // -----------------------------------------------------------------------------
+
         void SetActivateSelection(bool _Flag)
         {
             m_SelectionFlag = _Flag;
@@ -569,6 +597,134 @@ namespace MR
         {
             m_UseTrackingCamera = !_Flag;
         }
+
+        // -----------------------------------------------------------------------------
+
+        void ColorizePlanes()
+        {
+            m_pPlaneColorizer->ColorizeAllPlanes();
+        }
+
+        // -----------------------------------------------------------------------------
+
+        void SetIsPlaying(bool _Flag)
+        {
+            if (m_RecordMode != RECORD)
+            {
+                m_RecordMode = _Flag ? PLAY : NONE;
+            }
+        }
+
+        // -----------------------------------------------------------------------------
+        
+        void ResetReconstruction()
+        {
+            m_Reconstructor.ResetReconstruction();
+        }
+
+		// -----------------------------------------------------------------------------
+        
+		void SendPlanes()
+		{
+			//m_pPlaneColorizer->ColorizeAllPlanes();
+
+			if (Net::CNetworkManager::GetInstance().IsConnected(m_SLAMSocket))
+			{
+				for (auto& [rPlaneID, rPlane] : m_Reconstructor.GetPlanes())
+				{
+					int32_t TextureWidth = rPlane.m_TexturePtr->GetNumberOfPixelsU();
+					int32_t TextureHeight = rPlane.m_TexturePtr->GetNumberOfPixelsV();
+
+					auto Transform = glm::eulerAngleX(-glm::half_pi<float>()) * rPlane.m_Transform;
+					Transform = glm::transpose(Transform);
+
+					auto VertexCount = static_cast<uint32_t>(rPlane.m_Vertices.size());
+					auto IndexCount = static_cast<uint32_t>(rPlane.m_Indices.size());
+
+					std::vector<glm::vec3> Vertices;
+					std::vector<glm::vec2> UV;
+					std::vector<uint16_t> Indices;
+
+					Vertices.reserve(VertexCount);
+					UV.reserve(VertexCount);
+					Indices.reserve(IndexCount);
+
+					for (auto& Vertex : rPlane.m_Vertices)
+					{
+						Vertices.push_back(Vertex.m_Position);
+						UV.push_back(Vertex.m_UV);
+					}
+
+					for (auto& Index : rPlane.m_Indices)
+					{
+						Indices.push_back(static_cast<uint16_t>(Index));
+					}
+
+					int32_t MessageID = PLANE;
+
+					int VerticesMemSize = VertexCount * sizeof(Vertices[0]);
+					int UVMemSize = VertexCount * sizeof(UV[0]);
+					int IndicesMemSize = IndexCount * sizeof(Indices[0]);
+
+					int MessageLength = sizeof(MessageID) + static_cast<int>(rPlaneID.size()); // Message ID + Plane ID
+					MessageLength += sizeof(rPlane.m_Extent) + sizeof(rPlane.m_Transform);
+					MessageLength += VerticesMemSize + UVMemSize + IndicesMemSize + 3 * sizeof(uint32_t); // Mesh + Counters
+					MessageLength += TextureWidth * TextureHeight * 4 + 2 * sizeof(int32_t); // Texture size + RGBA data
+
+					std::vector<char> Payload(MessageLength);
+
+					int Offset = 0;
+
+					std::memcpy(Payload.data() + Offset, &MessageID, sizeof(MessageID));
+					Offset += sizeof(MessageID);
+
+					std::memcpy(Payload.data() + Offset, rPlaneID.data(), rPlaneID.size());
+					Offset += static_cast<int>(rPlaneID.size());
+
+					std::memcpy(Payload.data() + Offset, &rPlane.m_Extent, sizeof(rPlane.m_Extent));
+					Offset += sizeof(rPlane.m_Extent);
+
+					std::memcpy(Payload.data() + Offset, &Transform, sizeof(Transform));
+					Offset += sizeof(Transform);
+
+					std::memcpy(Payload.data() + Offset, &VertexCount, sizeof(VertexCount));
+					Offset += sizeof(VertexCount);
+
+					std::memcpy(Payload.data() + Offset, Vertices.data(), VerticesMemSize);
+					Offset += VerticesMemSize;
+
+					std::memcpy(Payload.data() + Offset, &VertexCount, sizeof(VertexCount)); // UV count is the same as vertex count
+					Offset += sizeof(VertexCount);
+
+					std::memcpy(Payload.data() + Offset, UV.data(), UVMemSize);
+					Offset += UVMemSize;
+
+					std::memcpy(Payload.data() + Offset, &IndexCount, sizeof(IndexCount)); // UV count is the same as vertex count
+					Offset += sizeof(IndexCount);
+
+					std::memcpy(Payload.data() + Offset, Indices.data(), IndicesMemSize);
+					Offset += IndicesMemSize;
+
+					std::memcpy(Payload.data() + Offset, &TextureWidth, sizeof(TextureWidth));
+					Offset += sizeof(TextureWidth);
+
+					std::memcpy(Payload.data() + Offset, &TextureHeight, sizeof(TextureHeight));
+					Offset += sizeof(TextureHeight);
+
+					Gfx::TextureManager::CopyTextureToCPU(rPlane.m_TexturePtr, Payload.data() + Offset);
+					Offset += 4 * TextureWidth * TextureHeight;
+
+					Net::CMessage Message;
+					Message.m_Category = 0;
+					Message.m_CompressedSize = MessageLength;
+					Message.m_DecompressedSize = MessageLength;
+					Message.m_MessageType = 0;
+					Message.m_Payload = std::move(Payload);
+
+					Net::CNetworkManager::GetInstance().SendMessage(m_SLAMSocket, Message);
+				}
+			}
+		}
 
     private:
 
@@ -625,7 +781,15 @@ namespace MR
 
             if (_rMessage.m_CompressedSize != _rMessage.m_DecompressedSize)
             {
-                Base::Decompress(_rMessage.m_Payload, Decompressed);
+                try
+                {
+					Base::Decompress(_rMessage.m_Payload, Decompressed);
+                }
+                catch (...)
+                {
+					ENGINE_CONSOLE_ERRORV("Failed to decompress! Ignoring network message!");
+					return;
+                }
             }
             else
             {
@@ -709,26 +873,95 @@ namespace MR
             }
             else if (MessageType == PLANE)
             {
-                int PlaneID = *reinterpret_cast<int*>(Decompressed.data() + sizeof(int32_t));
-                int PlaneAction = *reinterpret_cast<int*>(Decompressed.data() + 2 * sizeof(int32_t));
+                int Offset = sizeof(int32_t);
 
-                glm::mat4 PlaneTransform = *reinterpret_cast<glm::mat4*>(Decompressed.data() + 3 * sizeof(int32_t));
-                glm::vec4 PlaneExtent = *reinterpret_cast<glm::vec4*>(Decompressed.data() + 3 * sizeof(int32_t) + sizeof(glm::mat4));
+				std::string PlaneID(Decompressed.data() + Offset, Decompressed.data() + Offset + 16);
+
+				Offset += static_cast<int>(PlaneID.size());
+                int PlaneAction = *reinterpret_cast<int*>(Decompressed.data() + Offset);
+
+                Offset += sizeof(PlaneAction);
+                glm::mat4 PlaneTransform = *reinterpret_cast<glm::mat4*>(Decompressed.data() + Offset);
+
+                Offset += sizeof(PlaneTransform);
+                glm::vec4 PlaneExtent = *reinterpret_cast<glm::vec4*>(Decompressed.data() + Offset);
+
+                Offset += sizeof(PlaneExtent);
 
                 PlaneTransform = glm::eulerAngleX(glm::half_pi<float>()) * PlaneTransform;
 
-                switch (PlaneAction)
+                if (Offset < Decompressed.size()) // Is there additional data (a mesh)?
                 {
-                case 0:
-                    m_Reconstructor.AddPlane(PlaneTransform, PlaneExtent, PlaneID);
-                    break;
-                case 1:
-                    m_Reconstructor.UpdatePlane(PlaneTransform, PlaneExtent, PlaneID);
-                    break;
-                case 2:
-                    m_Reconstructor.RemovePlane(PlaneID);
-                    break;
+                    int VertexCount = *reinterpret_cast<int*>(Decompressed.data() + Offset);
+
+                    Offset += sizeof(VertexCount);
+                    glm::vec4* pVertices = reinterpret_cast<glm::vec4*>(Decompressed.data() + Offset);
+
+                    Offset += VertexCount * sizeof(pVertices[0]);
+                    int UVCount = *reinterpret_cast<int*>(Decompressed.data() + Offset);
+
+                    Offset += sizeof(UVCount);
+                    glm::vec2* pUV = reinterpret_cast<glm::vec2*>(Decompressed.data() + Offset);
+
+                    Offset += UVCount * sizeof(pUV[0]);
+                    int IndexCount = *reinterpret_cast<int*>(Decompressed.data() + Offset);
+
+                    Offset += sizeof(IndexCount);
+                    uint16_t* pIndices = reinterpret_cast<uint16_t*>(Decompressed.data() + Offset);
+
+                    Offset += IndexCount * sizeof(pIndices[0]);
+
+                    assert(UVCount == VertexCount);
+                    assert(IndexCount % 3 == 0);
+
+                    std::vector<CSLAMReconstructor::SPlaneVertex> Vertices;
+                    std::vector<uint32_t> Indices;
+
+                    for (int i = 0; i < VertexCount; ++ i)
+                    {
+                        CSLAMReconstructor::SPlaneVertex Vertex;
+
+                        Vertex.m_Position = glm::vec3(pVertices[i].x, pVertices[i].y, pVertices[i].z);
+                        Vertex.m_UV = glm::vec2(pUV[i].x, pUV[i].y);
+
+                        Vertices.push_back(Vertex);
+                    }
+
+                    for (int i = 0; i < IndexCount; ++i)
+                    {
+                        Indices.push_back(pIndices[i]);
+                    }
+
+                    switch (PlaneAction)
+                    {
+                    case ADDPLANE:
+                        m_Reconstructor.AddPlaneWithMesh(PlaneTransform, PlaneExtent, Vertices, Indices, PlaneID);
+                        break;
+                    case UPDATEPLANE:
+                        m_Reconstructor.UpdatePlaneWithMesh(PlaneTransform, PlaneExtent, Vertices, Indices, PlaneID);
+                        break;
+                    case REMOVEPLANE:
+                        m_Reconstructor.RemovePlane(PlaneID);
+                        break;
+                    }
                 }
+                else
+                {
+                    switch (PlaneAction)
+                    {
+                    case ADDPLANE:
+                        m_Reconstructor.AddPlane(PlaneTransform, PlaneExtent, PlaneID);
+                        break;
+                    case UPDATEPLANE:
+                        m_Reconstructor.UpdatePlane(PlaneTransform, PlaneExtent, PlaneID);
+                        break;
+                    case REMOVEPLANE:
+                        m_Reconstructor.RemovePlane(PlaneID);
+                        break;
+                    }
+                }
+
+                m_pPlaneColorizer->UpdatePlane(PlaneID);
             }
             else if (MessageType == COLORINTRINSICS)
             {

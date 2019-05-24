@@ -134,6 +134,7 @@ namespace
         CTexturePtr GetInpaintedRendering(const Base::AABB3Float& _rAABB, CTexturePtr _BackgroundTexturePtr);
 
         const Base::AABB3Float& GetSelectionBox();
+        void SetVisibleObjects(bool _RenderVolume, bool _RenderRoot, bool _RenderLevel1, bool _RenderLevel2, int _PlaneMode);
 
     private:
 
@@ -216,6 +217,9 @@ namespace
         CShaderPtr m_MembranePropagateGridCSPtr;
         CShaderPtr m_MembranePropagatePixelsCSPtr;
 
+        CShaderPtr m_PlaneMeshVSPtr;
+        CShaderPtr m_PlaneMeshFSPtr;
+
         CBufferPtr m_RaycastConstantBufferPtr;
         CBufferPtr m_RaycastHitProxyBufferPtr;
         CBufferPtr m_RaycastHighLightConstantBufferPtr;
@@ -238,6 +242,8 @@ namespace
 
         CMeshPtr m_FullscreenQuadMeshPtr;
         CInputLayoutPtr m_FullscreenQuadLayoutPtr;
+
+        CInputLayoutPtr m_PlaneMeshLayoutPtr;
 
         CRenderContextPtr m_OutlineRenderContextPtr;
 
@@ -272,7 +278,15 @@ namespace
         bool m_RenderLevel1Queue;
         bool m_RenderLevel2Queue;
         bool m_RenderBackSides;
-        bool m_RenderPlanes;
+        
+        enum EPlaneRenderingMode
+        {
+            NONE,
+            EXTENT_ONLY,
+            MESH_ONLY,
+            MESH_WITH_EXTENT,
+            ALL
+        } m_PlaneRenderMode;
 
         glm::mat4 m_SelectionTransform;
         ESelection m_SelectionState;
@@ -324,14 +338,39 @@ namespace
         m_ResizeDelegate = Gfx::Main::RegisterResizeHandler(std::bind(&CGfxReconstructionRenderer::OnResize, this, std::placeholders::_1, std::placeholders::_2));
                                 
         m_UseTrackingCamera   = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:use_tracking_camera", true);
-        m_RenderVolume        = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:volume"             , true);
-        m_RenderVertexMap     = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:vertex_map"         , false);
-        m_RenderRootQueue     = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:root"        , false);
-        m_RenderLevel1Queue   = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:level1"      , false);
-        m_RenderLevel2Queue   = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:queues:level2"      , false);
-        m_RenderBackSides     = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:backsides"          , true);
-        m_RenderPlanes        = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:planes"             , false);
+        m_RenderVertexMap     = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:vertex_map", false);
+        m_RenderVolume        = true;
+        m_RenderRootQueue     = false;
+        m_RenderLevel1Queue   = false;
+        m_RenderLevel2Queue   = false;
+        m_RenderBackSides     = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:backsides", true);
         m_InpaintedPlaneScale = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:inpainted_plane:scale", 2.0f);
+
+        auto PlaneModeString = Core::CProgramParameters::GetInstance().Get("mr:slam:rendering:plane_mode", "none");
+
+        if (PlaneModeString == "none")
+        {
+            m_PlaneRenderMode = EPlaneRenderingMode::NONE;
+        } else if (PlaneModeString == "extent")
+        {
+            m_PlaneRenderMode = EPlaneRenderingMode::EXTENT_ONLY;
+        }
+        else if (PlaneModeString == "mesh")
+        {
+            m_PlaneRenderMode = EPlaneRenderingMode::MESH_ONLY;
+        }
+        else if(PlaneModeString == "mesh_with_extent")
+        {
+            m_PlaneRenderMode = EPlaneRenderingMode::MESH_WITH_EXTENT;
+        }
+        else if (PlaneModeString == "all")
+        {
+            m_PlaneRenderMode = EPlaneRenderingMode::ALL;
+        }
+        else
+        {
+            BASE_THROWV("Unknown plane rendering mode: %s", PlaneModeString.c_str());
+        }
 
         if (Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:aabb:load", false))
         {
@@ -400,6 +439,9 @@ namespace
         m_MembraneEvalBorderCSPtr = nullptr;
         m_MembranePropagateGridCSPtr = nullptr;
         m_MembranePropagatePixelsCSPtr = nullptr;
+
+        m_PlaneMeshVSPtr = nullptr;
+        m_PlaneMeshFSPtr = nullptr;
         
         m_PickingBuffer = nullptr;
 
@@ -422,6 +464,7 @@ namespace
         m_CubeOutlineMeshPtr = nullptr;
         m_PlaneMeshPtr = nullptr;
         m_CameraInputLayoutPtr = nullptr;
+        m_PlaneMeshLayoutPtr = nullptr;
         m_VolumeInputLayoutPtr = nullptr;
         m_InpaintedPlaneLayoutPtr = nullptr;
         m_CubeOutlineInputLayoutPtr = nullptr;
@@ -538,6 +581,9 @@ namespace
         m_MembranePropagateGridCSPtr = ShaderManager::CompileCS("../../plugins/slam/scalable/rendering/cs_membrane_propagate_grid.glsl", "main", DefineString.c_str());
         m_MembranePropagatePixelsCSPtr = ShaderManager::CompileCS("../../plugins/slam/scalable/rendering/cs_membrane_propagate_pixels.glsl", "main", DefineString.c_str());
 
+        m_PlaneMeshVSPtr = ShaderManager::CompileVS("../../plugins/slam/scalable/rendering/vs_plane_mesh.glsl", "main", DefineString.c_str());
+        m_PlaneMeshFSPtr = ShaderManager::CompilePS("../../plugins/slam/scalable/rendering/fs_plane_mesh.glsl", "main", DefineString.c_str());
+
         SInputElementDescriptor InputLayoutDesc = {};
 
         InputLayoutDesc.m_pSemanticName        = "POSITION";
@@ -567,6 +613,14 @@ namespace
         };
 
         m_FullscreenQuadLayoutPtr = ShaderManager::CreateInputLayout(FullscreenQuadLayout, sizeof(FullscreenQuadLayout) / sizeof(FullscreenQuadLayout[0]), m_BackgroundVSPtr);
+
+        SInputElementDescriptor PlaneMeshLayout[] =
+        {
+            { "POSITION", 0, CInputLayout::Float3Format, 0,  0, 20, CInputLayout::PerVertex, 0 },
+            { "TEXCOORD", 1, CInputLayout::Float2Format, 0, 12, 20, CInputLayout::PerVertex, 0 },
+        };
+
+        m_PlaneMeshLayoutPtr = ShaderManager::CreateInputLayout(PlaneMeshLayout, sizeof(PlaneMeshLayout) / sizeof(PlaneMeshLayout[0]), m_PlaneMeshVSPtr);
     }
     
     // -----------------------------------------------------------------------------
@@ -1654,29 +1708,65 @@ namespace
         Performance::BeginEvent("Plane rendering");
         
         ContextManager::SetRenderContext(m_OutlineRenderContextPtr);
-        ContextManager::SetShaderVS(m_OutlineVSPtr);
-        ContextManager::SetShaderPS(m_OutlineFSPtr);
 
         ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
         ContextManager::SetConstantBuffer(1, m_DrawCallConstantBufferPtr);
 
-        const unsigned int Offset = 0;
-        ContextManager::SetVertexBuffer(m_PlaneMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
-        ContextManager::SetIndexBuffer(m_PlaneMeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
-
-        ContextManager::SetInputLayout(m_CameraInputLayoutPtr);
-        ContextManager::SetTopology(STopology::TriangleList);
-
         SDrawCallConstantBuffer BufferData;
         
-        for (const auto& Plane : rPlanes)
+        for (const auto& rPlane : rPlanes)
         {
-            BufferData.m_WorldMatrix = Plane.second.m_Transform * glm::scale(glm::vec3(Plane.second.m_Extent));
-            BufferData.m_Color = glm::vec4(1.0f, 1.0f, 0.0f, 0.3f);
+            bool HasMesh = rPlane.second.m_MeshPtr != nullptr;
 
-            BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
+            bool RenderMesh = (m_PlaneRenderMode == EPlaneRenderingMode::ALL || m_PlaneRenderMode == EPlaneRenderingMode::MESH_ONLY || m_PlaneRenderMode == EPlaneRenderingMode::MESH_WITH_EXTENT) && HasMesh;
 
-            ContextManager::DrawIndexed(m_PlaneMeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
+            bool RenderExtent = m_PlaneRenderMode == EPlaneRenderingMode::EXTENT_ONLY || m_PlaneRenderMode == EPlaneRenderingMode::ALL || (m_PlaneRenderMode == EPlaneRenderingMode::MESH_WITH_EXTENT && RenderMesh);
+
+            if (RenderMesh)
+            {
+                ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
+
+                ContextManager::SetShaderVS(m_PlaneMeshVSPtr);
+                ContextManager::SetShaderPS(m_PlaneMeshFSPtr);
+
+                const unsigned int Offset = 0;
+                ContextManager::SetVertexBuffer(rPlane.second.m_MeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
+                ContextManager::SetIndexBuffer(rPlane.second.m_MeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
+
+                ContextManager::SetTexture(0, rPlane.second.m_TexturePtr);
+
+                ContextManager::SetInputLayout(m_PlaneMeshLayoutPtr);
+                ContextManager::SetTopology(STopology::TriangleList);
+
+                BufferData.m_WorldMatrix = rPlane.second.m_Transform;
+                BufferData.m_Color = glm::vec4(1.0f, 0.0f, 0.0f, 0.3f);
+
+                BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
+
+                ContextManager::DrawIndexed(rPlane.second.m_MeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
+            }
+
+            if (RenderExtent)
+            {
+                ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Wireframe));
+
+                ContextManager::SetShaderVS(m_OutlineVSPtr);
+                ContextManager::SetShaderPS(m_OutlineFSPtr);
+
+                const unsigned int Offset = 0;
+                ContextManager::SetVertexBuffer(m_PlaneMeshPtr->GetLOD(0)->GetSurface()->GetVertexBuffer());
+                ContextManager::SetIndexBuffer(m_PlaneMeshPtr->GetLOD(0)->GetSurface()->GetIndexBuffer(), Offset);
+
+                ContextManager::SetInputLayout(m_CameraInputLayoutPtr);
+                ContextManager::SetTopology(STopology::TriangleList);
+
+                BufferData.m_WorldMatrix = rPlane.second.m_Transform * glm::scale(glm::vec3(rPlane.second.m_Extent));
+                BufferData.m_Color = glm::vec4(1.0f, 1.0f, 0.0f, 0.3f);
+
+                BufferManager::UploadBufferData(m_DrawCallConstantBufferPtr, &BufferData);
+
+                ContextManager::DrawIndexed(m_PlaneMeshPtr->GetLOD(0)->GetSurface()->GetNumberOfIndices(), 0, 0);
+            }
         }
 
         Performance::EndEvent();
@@ -1908,6 +1998,18 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    void CGfxReconstructionRenderer::SetVisibleObjects(bool _RenderVolume, bool _RenderRoot, bool _RenderLevel1, bool _RenderLevel2, int _PlaneMode)
+    {
+        m_RenderVolume = _RenderVolume;
+        m_RenderRootQueue = _RenderRoot;
+        m_RenderLevel1Queue = _RenderLevel1;
+        m_RenderLevel2Queue = _RenderLevel2;
+
+        m_PlaneRenderMode = static_cast<EPlaneRenderingMode>(_PlaneMode);
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CGfxReconstructionRenderer::Render()
     {
         if (!m_IsInitialized && !m_pReconstructor->IsInitialized())
@@ -1985,7 +2087,7 @@ namespace
 
         RenderSelectionBox();
 
-        if (m_RenderPlanes)
+        if (m_PlaneRenderMode != EPlaneRenderingMode::NONE)
         {
             RenderPlanes();
         }
@@ -2324,6 +2426,13 @@ namespace ReconstructionRenderer
     const Base::AABB3Float& GetSelectionBox()
     {
         return CGfxReconstructionRenderer::GetInstance().GetSelectionBox();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void SetVisibleObjects(bool _RenderVolume, bool _RenderRoot, bool _RenderLevel1, bool _RenderLevel2, int _PlaneMode)
+    {
+        CGfxReconstructionRenderer::GetInstance().SetVisibleObjects(_RenderVolume, _RenderRoot, _RenderLevel1, _RenderLevel2, _PlaneMode);
     }
 
 } // namespace ReconstructionRenderer

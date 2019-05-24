@@ -13,7 +13,7 @@ namespace
     {
         if (_Result != Z_OK && _Result != Z_STREAM_END)
         {
-            throw Base::CException(__FILE__, __LINE__, "Failed to decompress");
+            BASE_THROWM("Failed to decompress")
         }
     }
 

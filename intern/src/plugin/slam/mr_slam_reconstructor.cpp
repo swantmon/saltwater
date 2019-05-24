@@ -1815,10 +1815,15 @@ namespace MR
 
     void CSLAMReconstructor::ResetReconstruction(const SReconstructionSettings* pReconstructionSettings)
     {
+        m_Planes.clear();
+
+        if (!m_IsInizialized)
+        {
+            return;
+        }
+
         m_RootVolumeMap.clear();
         m_RootVolumeVector.clear();
-
-        m_Planes.clear();
 
         if (pReconstructionSettings != nullptr)
         {
@@ -1838,32 +1843,56 @@ namespace MR
     
     // -----------------------------------------------------------------------------
 
-    void CSLAMReconstructor::AddPlane(glm::mat4 _Transform, glm::vec4 _Extent, int _ID)
+    void CSLAMReconstructor::AddPlane(const glm::mat4& _rTransform, const glm::vec4& _rExtent, const std::string& _ID)
     {
-        SPlane Plane = { _Transform, _Extent };
+        SPlane Plane = { _rTransform, _rExtent };
 
         m_Planes[_ID] = Plane;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CSLAMReconstructor::UpdatePlane(glm::mat4 _Transform, glm::vec4 _Extent, int _ID)
+    void CSLAMReconstructor::UpdatePlane(const glm::mat4& _rTransform, const glm::vec4& _rExtent, const std::string& _ID)
     {
-        SPlane Plane = { _Transform, _Extent };
+        SPlane Plane = { _rTransform, _rExtent };
 
         m_Planes[_ID] = Plane;
     }
 
     // -----------------------------------------------------------------------------
 
-    void CSLAMReconstructor::RemovePlane(int _ID)
+    void CSLAMReconstructor::AddPlaneWithMesh(const glm::mat4& _rTransform, const glm::vec4& _rExtent, const CPlaneVertices& _rVertices, const CPlaneIndices& _rIndices, const std::string& _ID)
+    {
+        glm::vec3 Normal = glm::normalize(glm::mat3(_rTransform) * glm::vec3(0.0f, -1.0f, 0.0f));
+
+        auto MeshPtr =  MeshManager::CreateMesh(_rVertices.data(), static_cast<int>(_rVertices.size()), sizeof(_rVertices[0]), _rIndices.data(), static_cast<int>(_rIndices.size()));
+
+        SPlane Plane = { _rTransform, _rExtent, Normal, MeshPtr, nullptr, _rVertices, _rIndices };
+
+        m_Planes[_ID] = Plane;
+    }
+    
+    // -----------------------------------------------------------------------------
+    
+    void CSLAMReconstructor::UpdatePlaneWithMesh(const glm::mat4& _rTransform, const glm::vec4& _rExtent, const CPlaneVertices& _rVertices, const CPlaneIndices& _rIndices, const std::string& _ID)
+    {
+        AddPlaneWithMesh(_rTransform, _rExtent, _rVertices, _rIndices, _ID);
+
+        //SPlane Plane = { _Transform, _Extent };
+
+        //m_Planes[_ID] = Plane;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CSLAMReconstructor::RemovePlane(const std::string& _ID)
     {
         m_Planes.erase(m_Planes.find(_ID));
     }
 
     // -----------------------------------------------------------------------------
 
-    const std::map<int, CSLAMReconstructor::SPlane>& CSLAMReconstructor::GetPlanes() const
+    std::map<std::string, CSLAMReconstructor::SPlane>& CSLAMReconstructor::GetPlanes()
     {
         return m_Planes;
     }

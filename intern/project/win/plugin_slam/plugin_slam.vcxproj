@@ -29,6 +29,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\..\src\plugin\slam\gfx_reconstruction_renderer.cpp" />
     <ClCompile Include="..\..\..\src\plugin\slam\mr_icp_tracker.cpp" />
+    <ClCompile Include="..\..\..\src\plugin\slam\mr_plane_colorizer.cpp" />
     <ClCompile Include="..\..\..\src\plugin\slam\mr_slam_reconstructor.cpp" />
     <ClCompile Include="..\..\..\src\plugin\slam\mr_slam_reconstruction_settings.cpp" />
     <ClCompile Include="..\..\..\src\plugin\slam\slam_plugin_interface.cpp">
@@ -42,6 +43,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\src\plugin\slam\gfx_reconstruction_renderer.h" />
     <ClInclude Include="..\..\..\src\plugin\slam\mr_icp_tracker.h" />
+    <ClInclude Include="..\..\..\src\plugin\slam\mr_plane_colorizer.h" />
     <ClInclude Include="..\..\..\src\plugin\slam\mr_slam_reconstructor.h" />
     <ClInclude Include="..\..\..\src\plugin\slam\mr_slam_control.h" />
     <ClInclude Include="..\..\..\src\plugin\slam\mr_slam_reconstruction_settings.h" />

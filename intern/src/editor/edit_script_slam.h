@@ -16,8 +16,61 @@ namespace Scpt
 
         void OnGUI()
         {
-            ImGui::Checkbox("Enable Selection", &m_IsSelectionEnabled);
-            ImGui::Checkbox("Enable Mouse Control", &m_IsMouseControlEnabled);
+            ImGui::Checkbox("Enable Selection", &m_Settings.m_IsSelectionEnabled);
+            ImGui::Checkbox("Enable Mouse Control", &m_Settings.m_IsMouseControlEnabled);
+			ImGui::Checkbox("Permanent Colorization", &m_Settings.m_IsPermanentColorizationEnabled);
+			m_Settings.m_SendPlanes = ImGui::Button("Send Planes");
+            m_Settings.m_Colorize = ImGui::Button("Colorize Planes");
+            ImGui::Checkbox("Play Recording", &m_Settings.m_IsPlayingRecording);
+
+            ImGui::SliderFloat("Playback Speed", &m_Settings.m_PlaybackSpeed, 0.1f, 100.0f);
+
+            m_Settings.m_SetRecordFile = false;
+
+            char FileString[1024];
+            std::strcpy(FileString, m_Settings.m_RecordFile.c_str());
+            ImGui::InputText("Record File", FileString, 1024, ImGuiInputTextFlags_ReadOnly);
+
+            if (ImGui::BeginDragDropTarget())
+            {
+                if (const ImGuiPayload * _pPayload = ImGui::AcceptDragDropPayload("ASSETS_DRAGDROP", 0))
+                {
+                    auto& DraggedAsset = *static_cast<Edit::CAsset*>(_pPayload->Data);
+
+                    if (m_Settings.m_RecordFile != DraggedAsset.GetPathToFile())
+                    {
+                        m_Settings.m_SetRecordFile = true;
+                    }
+
+                    m_Settings.m_RecordFile = DraggedAsset.GetPathToFile();
+                }
+
+                ImGui::EndDragDropTarget();
+            }
+
+            m_Settings.m_Reset = (ImGui::Button("Reset Reconstruction"));
+
+            ImGui::Checkbox("Render Volume", &m_Settings.m_RenderVolume);
+            ImGui::Checkbox("Render Root", &m_Settings.m_RenderRoot);
+            ImGui::Checkbox("Render Level 1", &m_Settings.m_RenderLevel1);
+            ImGui::Checkbox("Render Level 2", &m_Settings.m_RenderLevel2);
+
+            const int ItemCount = 5;
+            const char* pItems[ItemCount] = { "None", "Extent Only", "Mesh Only", "Mesh with Extent", "Mesh and Extent" };
+            static const char* pCurrentItem = pItems[2];
+
+            if (ImGui::BeginCombo("Plane Mode", pCurrentItem))
+            {
+                for (int i = 0; i < ItemCount; ++ i)
+                {
+                    if (ImGui::Selectable(pItems[i]))
+                    {
+                        pCurrentItem = pItems[i];
+                        m_Settings.m_PlaneMode = static_cast<EPlaneRenderingMode>(i);
+                    }
+                }
+                ImGui::EndCombo();
+            }
         }
 
         // -----------------------------------------------------------------------------
