@@ -11,13 +11,43 @@
 
 #include <vector>
 
+#if _DEBUG
+#pragma comment(lib, "OceanBaseD.lib")
+#pragma comment(lib, "OceanCVD.lib")
+#pragma comment(lib, "OceanCVDetectorD.lib")
+#pragma comment(lib, "OceanCVSegmentationD.lib")
+#pragma comment(lib, "OceanCVSynthesisD.lib")
+#pragma comment(lib, "OceanGeometryD.lib")
+#pragma comment(lib, "OceanIOD.lib")
+#pragma comment(lib, "OceanMathD.lib")
+#pragma comment(lib, "OceanMediaD.lib")
+#pragma comment(lib, "OceanNetworkD.lib")
+#pragma comment(lib, "OceanPlatformWinD.lib")
+#else
+#pragma comment(lib, "OceanBase.lib")
+#pragma comment(lib, "OceanCV.lib")
+#pragma comment(lib, "OceanCVDetector.lib")
+#pragma comment(lib, "OceanCVSegmentation.lib")
+#pragma comment(lib, "OceanCVSynthesis.lib")
+#pragma comment(lib, "OceanGeometry.lib")
+#pragma comment(lib, "OceanIO.lib")
+#pragma comment(lib, "OceanMath.lib")
+#pragma comment(lib, "OceanMedia.lib")
+#pragma comment(lib, "OceanNetwork.lib")
+#pragma comment(lib, "OceanPlatformWin.lib")
+#endif
+
+#define _WINDOWS
+#undef _DLL
+#include "ocean/cv/synthesis/SynthesisOneFramePixel.h"
+
 CORE_PLUGIN_INFO(PM::CPluginInterface, "PixMix", "1.0", "This plugin enables inpainting with PixMix.")
 
 namespace PM
 {
     void CPluginInterface::OnStart()
     {
-        
+
     }
 
     // -----------------------------------------------------------------------------
@@ -56,10 +86,52 @@ namespace PM
 
     // -----------------------------------------------------------------------------
 
-    void CPluginInterface::Inpaint(const glm::ivec2& _Resolution, const std::vector<char>& _SourceImage, std::vector<char>& _DestinationImage)
+    void CPluginInterface::Inpaint(const glm::ivec2& _Resolution, const std::vector<glm::u8vec4>& _SourceImage, std::vector<glm::u8vec4>& _DestinationImage)
     {
         assert(_Resolution.x > 0 && _Resolution.y > 0);
         assert(_SourceImage.size() == _DestinationImage.size());
+
+		std::vector<glm::u8vec3> Image(_Resolution.x * _Resolution.y);
+		std::vector<unsigned char> Mask(_Resolution.x * _Resolution.y);
+
+		for (int i = 0; i < _Resolution.x * _Resolution.y; ++ i)
+		{
+			glm::u8vec4 Pixel = _SourceImage[i];
+			Image[i] = glm::u8vec3(Pixel.r, Pixel.g, Pixel.b);
+			Mask[i] = Pixel.r == 255 && Pixel.g == 255 && Pixel.b == 255 ? 0x00 : 0xFF;
+		}
+
+		cv::Mat InputCV(_Resolution.x, _Resolution.x, CV_8UC3);
+		cv::Mat MaskCV(_Resolution.x, _Resolution.x, CV_8UC1);
+
+		std::memcpy(InputCV.data, Image.data(), sizeof(Image[0]) * Image.size());
+		std::memcpy(MaskCV.data, Mask.data(), sizeof(Mask[0]) * Mask.size());
+		
+		Ocean::CV::Synthesis::SynthesisOneFramePixel PixMix;
+		Ocean::RandomGenerator Generator;
+
+		Ocean::FrameType InputType(_Resolution.x, _Resolution.y, Ocean::FrameType::FORMAT_RGB24, Ocean::FrameType::PixelOrigin::ORIGIN_UPPER_LEFT);
+		Ocean::Frame Input(InputType, &Image[0].r, true);
+
+		Ocean::FrameType MaskType(_Resolution.x, _Resolution.y, Ocean::FrameType::FORMAT_Y8, Ocean::FrameType::PixelOrigin::ORIGIN_UPPER_LEFT);
+		Ocean::Frame MaskF(MaskType, Mask.data(), true);
+
+		PixMix.initialize(Input, MaskF);
+
+		PixMix.applyInpainting(Generator, Ocean::CV::Synthesis::SynthesisOneFramePixel::IT_PATCH_REGION_2);
+
+		PixMix.createInpaintingResult(Input);
+
+		_DestinationImage.resize(_Resolution.x * _Resolution.y);
+
+		const auto pOutputPixels = reinterpret_cast<glm::u8vec3*>(Input.data());
+
+		for (int i = 0; i < _Resolution.x * _Resolution.y; ++ i)
+		{
+			_DestinationImage[i] = glm::u8vec4(pOutputPixels[i], 255);
+		}
+
+		/*memcpy(PixMixResult.data, Input.data(), Till.total() * Till.elemSize());
 
         cv::Mat_<cv::Vec4b> Source4(_Resolution.x, _Resolution.y);
         cv::Mat_<cv::Vec4b> Dest4(_Resolution.x, _Resolution.y);
@@ -121,11 +193,11 @@ namespace PM
 
         cv::cvtColor(Dest3, Dest4, cv::COLOR_RGB2BGRA);
 
-        std::memcpy(_DestinationImage.data(), Dest4.data, _DestinationImage.size());
+        std::memcpy(_DestinationImage.data(), Dest4.data, _DestinationImage.size());*/
     }
-} // namespace HW
+} // namespace PM
 
-extern "C" CORE_PLUGIN_API_EXPORT void Inpaint(const glm::ivec2& _Resolution, const std::vector<char>& _SourceImage, std::vector<char>& _DestinationImage)
+extern "C" CORE_PLUGIN_API_EXPORT void Inpaint(const glm::ivec2& _Resolution, const std::vector<glm::u8vec4>& _SourceImage, std::vector<glm::u8vec4>& _DestinationImage)
 {
     static_cast<PM::CPluginInterface&>(GetInstance()).Inpaint(_Resolution, _SourceImage, _DestinationImage);
 }
