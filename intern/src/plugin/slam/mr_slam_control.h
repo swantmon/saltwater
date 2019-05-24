@@ -635,6 +635,9 @@ namespace MR
 					int32_t TextureWidth = rPlane.m_TexturePtr->GetNumberOfPixelsU();
 					int32_t TextureHeight = rPlane.m_TexturePtr->GetNumberOfPixelsV();
 
+					auto Transform = glm::eulerAngleX(-glm::half_pi<float>()) * rPlane.m_Transform;
+					Transform = glm::transpose(Transform);
+
 					auto VertexCount = static_cast<uint32_t>(rPlane.m_Vertices.size());
 					auto IndexCount = static_cast<uint32_t>(rPlane.m_Indices.size());
 
@@ -681,8 +684,8 @@ namespace MR
 					std::memcpy(Payload.data() + Offset, &rPlane.m_Extent, sizeof(rPlane.m_Extent));
 					Offset += sizeof(rPlane.m_Extent);
 
-					std::memcpy(Payload.data() + Offset, &rPlane.m_Transform, sizeof(rPlane.m_Transform));
-					Offset += sizeof(rPlane.m_Transform);
+					std::memcpy(Payload.data() + Offset, &Transform, sizeof(Transform));
+					Offset += sizeof(Transform);
 
 					std::memcpy(Payload.data() + Offset, &VertexCount, sizeof(VertexCount));
 					Offset += sizeof(VertexCount);
