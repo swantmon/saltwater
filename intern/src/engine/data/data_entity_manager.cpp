@@ -313,6 +313,8 @@ namespace Dt
             m_EntityByID[CurrentEntity->m_ID] = &*CurrentEntity;
         }
 
+        std::vector<const void*> TemporaryImporter;
+
         bool Check = false;
 
         for (auto CurrentEntity = m_Entities.Begin(); CurrentEntity != m_Entities.End(); ++CurrentEntity)
@@ -344,6 +346,22 @@ namespace Dt
 
                 for (auto& rComponent : Components)
                 {
+                    if (rComponent->GetTypeID() == Dt::CMeshComponent::STATIC_TYPE_ID)
+                    {
+                        auto MeshComponent = static_cast<Dt::CMeshComponent*>(rComponent);
+
+                        if (MeshComponent->GetMeshType() == CMeshComponent::Asset)
+                        {
+                            auto& rFile = MeshComponent->GetFilename();
+
+                            std::string PathToModel = Core::AssetManager::GetPathToAssets() + "/" + rFile;
+
+                            auto Importer = Core::AssetImporter::AllocateAssimpImporter(PathToModel, MeshComponent->GetGeneratorFlag());
+
+                            TemporaryImporter.push_back(Importer);
+                        }
+                    }
+
                     rComponent->SetHostEntity(&*CurrentEntity);
 
                     Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*rComponent, Dt::IComponent::DirtyCreate);
@@ -354,6 +372,11 @@ namespace Dt
         for (auto CurrentEntity = m_Entities.Begin(); CurrentEntity != m_Entities.End(); ++CurrentEntity)
         {
             MarkEntityAsDirty(*CurrentEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        }
+
+        for (auto pImporter : TemporaryImporter)
+        {
+            Core::AssetImporter::ReleaseImporter(pImporter);
         }
     }
 
@@ -401,6 +424,20 @@ namespace Dt
         CHierarchyFacet* pHierarchicalFacet;
 
         // -----------------------------------------------------------------------------
+        // Dirty flags
+        // -----------------------------------------------------------------------------
+        DirtyFlags = _rEntity.GetDirtyFlags();
+
+        if (DirtyFlags & CEntity::DirtyRemove && _rEntity.IsInMap())
+        {
+            Map::RemoveEntity(_rEntity);
+        }
+        else if (DirtyFlags & CEntity::DirtyAdd && !_rEntity.IsInMap())
+        {
+            Map::AddEntity(_rEntity);
+        }
+
+        // -----------------------------------------------------------------------------
         // Update world matrix
         // -----------------------------------------------------------------------------
         pHierarchicalFacet = _rEntity.GetHierarchyFacet();
@@ -425,18 +462,7 @@ namespace Dt
 
         // -----------------------------------------------------------------------------
         // Update entity in map
-        // -----------------------------------------------------------------------------
-        DirtyFlags = _rEntity.GetDirtyFlags();
-
-        if (DirtyFlags & CEntity::DirtyRemove && _rEntity.IsInMap())
-        {
-            Map::RemoveEntity(_rEntity);
-        }
-        else if (DirtyFlags & CEntity::DirtyAdd && !_rEntity.IsInMap())
-        {
-            Map::AddEntity(_rEntity);
-        }
-        
+        // -----------------------------------------------------------------------------        
         if (DirtyFlags & CEntity::DirtyMove)
         {
             Map::MoveEntity(_rEntity);
