@@ -50,8 +50,8 @@ namespace Dt
         {
             CComponent::Read(_rCodec);
 
-            Base::Serialize(m_WindDirection);
-            Base::Serialize(m_FogColor);
+            Base::Serialize(_rCodec, m_WindDirection);
+            Base::Serialize(_rCodec, m_FogColor);
 
             _rCodec >> m_FrustumDepthInMeter;
             _rCodec >> m_ShadowIntensity;
@@ -65,8 +65,8 @@ namespace Dt
         {
             CComponent::Write(_rCodec);
 
-            Base::Serialize(m_WindDirection);
-            Base::Serialize(m_FogColor);
+            Base::Serialize(_rCodec, m_WindDirection);
+            Base::Serialize(_rCodec, m_FogColor);
 
             _rCodec << m_FrustumDepthInMeter;
             _rCodec << m_ShadowIntensity;

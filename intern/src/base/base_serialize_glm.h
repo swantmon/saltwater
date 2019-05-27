@@ -8,57 +8,57 @@
 
 namespace SER
 {
-    template<class TArchive, typename T, glm::precision P = glm::defaultp>
+    template<class TArchive, typename T, glm::precision P>
     inline void Write(TArchive & _rArchive, const glm::tvec2<T, P> & _rVec);
 
-    template<class TArchive, typename T, glm::precision P = glm::defaultp>
+    template<class TArchive, typename T, glm::precision P>
     inline void Read(TArchive & _rArchive, glm::tvec2<T, P> & _rVec);
 
-    template<class TArchive, typename T, glm::precision P = glm::defaultp>
+    template<class TArchive, typename T, glm::precision P>
     inline void Serialize(TArchive & _rArchive, glm::tvec3<T, P> & _rVec);
-    template<class TArchive, typename T, glm::precision P = glm::defaultp>
+    template<class TArchive, typename T, glm::precision P>
     inline void Write(TArchive& _rArchive, const glm::tvec2<T, P>& _rVec);
 
-    template<class TArchive, typename T, glm::precision P = glm::defaultp>
+    template<class TArchive, typename T, glm::precision P>
     inline void Read(TArchive& _rArchive, glm::tvec3<T, P>& _rVec);
 
-    template<class TArchive, typename T, glm::precision P = glm::defaultp>
+    template<class TArchive, typename T, glm::precision P>
     inline void Serialize(TArchive& _rArchive, glm::tvec3<T, P>& _rVec);
 
-    template<class TArchive, typename T, glm::precision P = glm::defaultp>
+    template<class TArchive, typename T, glm::precision P>
     inline void Write(TArchive & _rArchive, const glm::tvec4<T, P> & _rVec);
 
-    template<class TArchive, typename T, glm::precision P = glm::defaultp>
+    template<class TArchive, typename T, glm::precision P>
     inline void Read(TArchive & _rArchive, glm::tvec4<T, P> & _rVec);
 
-    template<class TArchive, typename T, glm::precision P = glm::defaultp>
+    template<class TArchive, typename T, glm::precision P>
     inline void Serialize(TArchive& _rArchive, glm::tvec4<T, P>& _rVec);
 
-    template<class TArchive, typename T, glm::precision P = glm::defaultp>
+    template<class TArchive, typename T, glm::precision P>
     inline void Write(TArchive & _rArchive, const glm::tquat<T, P> & _rQuat);
 
-    template<class TArchive, typename T, glm::precision P = glm::defaultp>
+    template<class TArchive, typename T, glm::precision P>
     inline void Read(TArchive & _rArchive, glm::tquat<T, P> & _rQuat);
 
-    template<class TArchive, typename T, glm::precision P = glm::defaultp>
+    template<class TArchive, typename T, glm::precision P>
     inline void Serialize(TArchive& _rArchive, glm::tquat<T, P>& _rQuat);
 
-    template<class TArchive, typename T, glm::precision P = glm::defaultp>
+    template<class TArchive, typename T, glm::precision P>
     inline void Write(TArchive & _rArchive, const glm::tmat3x3<T, P> & _rMat);
 
-    template<class TArchive, typename T, glm::precision P = glm::defaultp>
+    template<class TArchive, typename T, glm::precision P>
     inline void Read(TArchive & _rArchive, glm::tmat3x3<T, P> & _rMat);
 
-    template<class TArchive, typename T, glm::precision P = glm::defaultp>
+    template<class TArchive, typename T, glm::precision P>
     inline void Serialize(TArchive& _rArchive, glm::tmat3x3<T, P>& _rMat);
 
-    template<class TArchive, typename T, glm::precision P = glm::defaultp>
+    template<class TArchive, typename T, glm::precision P>
     inline void Write(TArchive & _rArchive, const glm::tmat4x4<T, P> & _rMat);
 
-    template<class TArchive, typename T, glm::precision P = glm::defaultp>
+    template<class TArchive, typename T, glm::precision P>
     inline void Read(TArchive & _rArchive, glm::tmat4x4<T, P> & _rMat);
 
-    template<class TArchive, typename T, glm::precision P = glm::defaultp>
+    template<class TArchive, typename T, glm::precision P>
     inline void Serialize(TArchive & _rArchive, glm::tmat4x4<T, P> & _rMat);
 } // namespace SER
 

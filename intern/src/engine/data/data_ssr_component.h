@@ -40,7 +40,7 @@ namespace Dt
             _rCodec >> m_Intensity;
             _rCodec >> m_RoughnessMask;
             _rCodec >> m_Distance;
-            _rCodec >> m_UseLastFrame
+            _rCodec >> m_UseLastFrame;
         }
 
         inline void Write(Base::CTextWriter& _rCodec) override
@@ -50,7 +50,7 @@ namespace Dt
             _rCodec << m_Intensity;
             _rCodec << m_RoughnessMask;
             _rCodec << m_Distance;
-            _rCodec << m_UseLastFrame
+            _rCodec << m_UseLastFrame;
         }
 
         inline IComponent* Allocate() override
