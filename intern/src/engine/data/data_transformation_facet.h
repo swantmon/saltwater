@@ -4,6 +4,7 @@
 #include "engine/engine_config.h"
 
 #include "base/base_include_glm.h"
+#include "base/base_serialize_glm.h"
 
 namespace Dt
 {
@@ -37,69 +38,25 @@ namespace Dt
         template <class TArchive>
         inline void Read(TArchive& _rCodec)
         {
-            _rCodec >> m_WorldMatrix[0][0];
-            _rCodec >> m_WorldMatrix[0][1];
-            _rCodec >> m_WorldMatrix[0][2];
-            _rCodec >> m_WorldMatrix[0][3];
-            _rCodec >> m_WorldMatrix[1][0];
-            _rCodec >> m_WorldMatrix[1][1];
-            _rCodec >> m_WorldMatrix[1][2];
-            _rCodec >> m_WorldMatrix[1][3];
-            _rCodec >> m_WorldMatrix[2][0];
-            _rCodec >> m_WorldMatrix[2][1];
-            _rCodec >> m_WorldMatrix[2][2];
-            _rCodec >> m_WorldMatrix[2][3];
-            _rCodec >> m_WorldMatrix[3][0];
-            _rCodec >> m_WorldMatrix[3][1];
-            _rCodec >> m_WorldMatrix[3][2];
-            _rCodec >> m_WorldMatrix[3][3];
+            Base::Serialize(_rCodec, m_WorldMatrix);
 
-            _rCodec >> m_Position[0];
-            _rCodec >> m_Position[1];
-            _rCodec >> m_Position[2];
+            Base::Serialize(_rCodec, m_Position);
 
-            _rCodec >> m_Rotation[0];
-            _rCodec >> m_Rotation[1];
-            _rCodec >> m_Rotation[2];
-            _rCodec >> m_Rotation[3];
+            Base::Serialize(_rCodec, m_Rotation);
 
-            _rCodec >> m_Scale[0];
-            _rCodec >> m_Scale[1];
-            _rCodec >> m_Scale[2];
+            Base::Serialize(_rCodec, m_Scale);
         }
 
         template <class TArchive>
         inline void Write(TArchive& _rCodec)
         {
-            _rCodec << m_WorldMatrix[0][0];
-            _rCodec << m_WorldMatrix[0][1];
-            _rCodec << m_WorldMatrix[0][2];
-            _rCodec << m_WorldMatrix[0][3];
-            _rCodec << m_WorldMatrix[1][0];
-            _rCodec << m_WorldMatrix[1][1];
-            _rCodec << m_WorldMatrix[1][2];
-            _rCodec << m_WorldMatrix[1][3];
-            _rCodec << m_WorldMatrix[2][0];
-            _rCodec << m_WorldMatrix[2][1];
-            _rCodec << m_WorldMatrix[2][2];
-            _rCodec << m_WorldMatrix[2][3];
-            _rCodec << m_WorldMatrix[3][0];
-            _rCodec << m_WorldMatrix[3][1];
-            _rCodec << m_WorldMatrix[3][2];
-            _rCodec << m_WorldMatrix[3][3];
+            Base::Serialize(_rCodec, m_WorldMatrix);
 
-            _rCodec << m_Position[0];
-            _rCodec << m_Position[1];
-            _rCodec << m_Position[2];
+            Base::Serialize(_rCodec, m_Position);
 
-            _rCodec << m_Rotation[0];
-            _rCodec << m_Rotation[1];
-            _rCodec << m_Rotation[2];
-            _rCodec << m_Rotation[3];
+            Base::Serialize(_rCodec, m_Rotation);
 
-            _rCodec << m_Scale[0];
-            _rCodec << m_Scale[1];
-            _rCodec << m_Scale[2];
+            Base::Serialize(_rCodec, m_Scale);
         }
 
     private:
