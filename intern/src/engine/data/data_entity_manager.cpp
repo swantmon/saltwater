@@ -423,9 +423,28 @@ namespace Dt
         unsigned int     DirtyFlags;
         CHierarchyFacet* pHierarchicalFacet;
 
+        const Base::U64 TimeStamp = Core::Time::GetNumberOfFrame();
+
         // -----------------------------------------------------------------------------
-        // Dirty flags
+        // Update world matrix
         // -----------------------------------------------------------------------------
+        pHierarchicalFacet = _rEntity.GetHierarchyFacet();
+
+        if (pHierarchicalFacet != nullptr)
+        {
+            if (pHierarchicalFacet->GetTimeStamp() >= TimeStamp)
+            {
+                UpdateWorldMatrix(_rEntity, true);
+            }
+        }
+        else
+        {
+            UpdateWorldMatrix(_rEntity, false);
+        }
+
+        // -----------------------------------------------------------------------------
+        // Update entity in map
+        // -----------------------------------------------------------------------------        
         DirtyFlags = _rEntity.GetDirtyFlags();
 
         if (DirtyFlags & CEntity::DirtyRemove && _rEntity.IsInMap())
@@ -437,35 +456,11 @@ namespace Dt
             Map::AddEntity(_rEntity);
         }
 
-        // -----------------------------------------------------------------------------
-        // Update world matrix
-        // -----------------------------------------------------------------------------
-        pHierarchicalFacet = _rEntity.GetHierarchyFacet();
-
-        if (pHierarchicalFacet != nullptr)
-        {
-            const Base::U64 TimeStamp = Core::Time::GetNumberOfFrame();
-
-            if (pHierarchicalFacet->GetTimeStamp() == TimeStamp)
-            {
-                return;
-            }
-
-            pHierarchicalFacet->SetTimeStamp(TimeStamp);
-
-            UpdateWorldMatrix(_rEntity, true);
-        }
-        else
-        {
-            UpdateWorldMatrix(_rEntity, false);
-        }
-
-        // -----------------------------------------------------------------------------
-        // Update entity in map
-        // -----------------------------------------------------------------------------        
         if (DirtyFlags & CEntity::DirtyMove)
         {
             Map::MoveEntity(_rEntity);
+
+            if (pHierarchicalFacet != nullptr) pHierarchicalFacet->SetTimeStamp(TimeStamp + 1);
         }
 
         if (DirtyFlags & CEntity::DirtyDestroy && !_rEntity.IsInMap())
