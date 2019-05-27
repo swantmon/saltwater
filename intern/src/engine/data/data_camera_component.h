@@ -120,6 +120,22 @@ namespace Dt
             _rCodec >> m_FoV;
             _rCodec >> m_Near;
             _rCodec >> m_Far;
+
+            m_pBackgroundTexture = nullptr;
+
+            Base::Serialize(_rCodec, m_BackgroundColor);
+            Base::Serialize(_rCodec, m_ProjectionMatrix);
+            Base::Serialize(_rCodec, m_ViewportRect);
+
+            int ClearFlag, ProjectionType, CameraMode;
+
+            _rCodec >> ClearFlag;
+            _rCodec >> ProjectionType;
+            _rCodec >> CameraMode;
+
+            m_ClearFlag = (EClearFlag)ClearFlag;
+            m_ProjectionType = (EProjectionType)ProjectionType;
+            m_CameraMode = (ECameraMode)CameraMode;
         }
 
         inline void Write(Base::CTextWriter& _rCodec) override
@@ -136,6 +152,14 @@ namespace Dt
             _rCodec << m_FoV;
             _rCodec << m_Near;
             _rCodec << m_Far;
+
+            Base::Serialize(_rCodec, m_BackgroundColor);
+            Base::Serialize(_rCodec, m_ProjectionMatrix);
+            Base::Serialize(_rCodec, m_ViewportRect);
+
+            _rCodec << (int)m_ClearFlag;
+            _rCodec << (int)m_ProjectionType;
+            _rCodec << (int)m_CameraMode;
         }
 
         inline IComponent* Allocate() override

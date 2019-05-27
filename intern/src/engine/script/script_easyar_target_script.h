@@ -19,10 +19,10 @@ namespace Scpt
     {
     public:
 
-        typedef const void* (*AcquireNewTargetFunc)(const std::string& _rPathToFile);
-        typedef const void(*ReleaseTargetFunc)(const void* _pTarget);
-        typedef int(*GetTargetTrackingStateFunc)(const void* _pTarget);
-        typedef glm::mat4(*GetTargetModelMatrixFunc)(const void* _pTarget);
+        using AcquireNewTargetFunc = const void* (*)(const std::string& _rPathToFile);
+        using ReleaseTargetFunc = const void(*)(const void* _pTarget);
+        using GetTargetTrackingStateFunc = int(*)(const void* _pTarget);
+        using GetTargetModelMatrixFunc = glm::mat4(*)(const void* _pTarget);
 
         AcquireNewTargetFunc AcquireNewTarget;
         ReleaseTargetFunc ReleaseTarget;
@@ -100,11 +100,15 @@ namespace Scpt
         inline void Read(Base::CTextReader& _rCodec) override
         {
             CComponent::Read(_rCodec);
+
+            Base::Serialize(_rCodec, m_TargetFile);
         }
 
         inline void Write(Base::CTextWriter& _rCodec) override
         {
             CComponent::Write(_rCodec);
+
+            Base::Serialize(_rCodec, m_TargetFile);
         }
 
         inline IComponent* Allocate() override

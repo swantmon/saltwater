@@ -36,11 +36,21 @@ namespace Dt
         inline void Read(Base::CTextReader& _rCodec) override
         {
             CComponent::Read(_rCodec);
+
+            _rCodec >> m_Intensity;
+            _rCodec >> m_RoughnessMask;
+            _rCodec >> m_Distance;
+            _rCodec >> m_UseLastFrame
         }
 
         inline void Write(Base::CTextWriter& _rCodec) override
         {
             CComponent::Write(_rCodec);
+
+            _rCodec << m_Intensity;
+            _rCodec << m_RoughnessMask;
+            _rCodec << m_Distance;
+            _rCodec << m_UseLastFrame
         }
 
         inline IComponent* Allocate() override

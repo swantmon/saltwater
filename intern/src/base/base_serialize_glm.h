@@ -9,7 +9,15 @@
 namespace SER
 {
     template<class TArchive, typename T, glm::precision P = glm::defaultp>
-    inline void Write(TArchive& _rArchive, const glm::tvec3<T, P>& _rVec);
+    inline void Write(TArchive & _rArchive, const glm::tvec2<T, P> & _rVec);
+
+    template<class TArchive, typename T, glm::precision P = glm::defaultp>
+    inline void Read(TArchive & _rArchive, glm::tvec2<T, P> & _rVec);
+
+    template<class TArchive, typename T, glm::precision P = glm::defaultp>
+    inline void Serialize(TArchive & _rArchive, glm::tvec3<T, P> & _rVec);
+    template<class TArchive, typename T, glm::precision P = glm::defaultp>
+    inline void Write(TArchive& _rArchive, const glm::tvec2<T, P>& _rVec);
 
     template<class TArchive, typename T, glm::precision P = glm::defaultp>
     inline void Read(TArchive& _rArchive, glm::tvec3<T, P>& _rVec);
@@ -56,6 +64,33 @@ namespace SER
 
 namespace SER
 {
+
+    template<class TArchive, typename T, glm::precision P>
+    inline void Write(TArchive& _rArchive, const glm::tvec2<T, P>& _rVec)
+    {
+        _rArchive << _rVec[0];
+        _rArchive << _rVec[1];
+    }
+
+    // -----------------------------------------------------------------------------
+
+    template<class TArchive, typename T, glm::precision P>
+    inline void Read(TArchive& _rArchive, glm::tvec2<T, P>& _rVec)
+    {
+        _rArchive >> _rVec[0];
+        _rArchive >> _rVec[1];
+    }
+
+    // -----------------------------------------------------------------------------
+
+    template<class TArchive, typename T, glm::precision P>
+    inline void Serialize(TArchive& _rArchive, glm::tvec2<T, P>& _rVec)
+    {
+        SER::SplitGlobalSerialize(_rArchive, _rVec);
+    }
+
+    // -----------------------------------------------------------------------------
+
     template<class TArchive, typename T, glm::precision P>
     inline void Write(TArchive& _rArchive, const glm::tvec3<T, P>& _rVec)
     {

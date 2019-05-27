@@ -4,6 +4,7 @@
 #include "engine/engine_config.h"
 
 #include "base/base_include_glm.h"
+#include "base/base_serialize_glm.h"
 
 #include "engine/data/data_component.h"
 #include "engine/data/data_component_manager.h"
@@ -46,11 +47,33 @@ namespace Dt
         inline void Read(Base::CTextReader& _rCodec) override
         {
             CComponent::Read(_rCodec);
+
+            _rCodec >> m_NearDistance;
+            _rCodec >> m_FarDistance;
+            _rCodec >> m_NearToFarRatio;
+            _rCodec >> m_FadeUnToSmallBlur;
+            _rCodec >> m_FadeSmallToMediumBlur;
+
+            Base::Serialize(_rCodec, m_Near);
+            Base::Serialize(_rCodec, m_LerpScale);
+            Base::Serialize(_rCodec, m_LerpBias);
+            Base::Serialize(_rCodec, m_EqFar);
         }
 
         inline void Write(Base::CTextWriter& _rCodec) override
         {
             CComponent::Write(_rCodec);
+
+            _rCodec << m_NearDistance;
+            _rCodec << m_FarDistance;
+            _rCodec << m_NearToFarRatio;
+            _rCodec << m_FadeUnToSmallBlur;
+            _rCodec << m_FadeSmallToMediumBlur;
+
+            Base::Serialize(_rCodec, m_Near);
+            Base::Serialize(_rCodec, m_LerpScale);
+            Base::Serialize(_rCodec, m_LerpBias);
+            Base::Serialize(_rCodec, m_EqFar);
         }
 
         inline IComponent* Allocate() override

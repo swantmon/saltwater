@@ -4,6 +4,7 @@
 #include "engine/engine_config.h"
 
 #include "base/base_include_glm.h"
+#include "base/base_serialize_glm.h"
 #include "base/base_typedef.h"
 
 #include "engine/data/data_component.h"
@@ -115,9 +116,7 @@ namespace Dt
             _rCodec >> m_Far;
             _rCodec >> m_ParallaxCorrection;
 
-            _rCodec >> m_BoxSize[0];
-            _rCodec >> m_BoxSize[1];
-            _rCodec >> m_BoxSize[2];
+            Base::Serialize(_rCodec, m_BoxSize);
         }
 
         inline void Write(Base::CTextWriter& _rCodec) override
@@ -136,9 +135,7 @@ namespace Dt
             _rCodec << m_Far;                
             _rCodec << m_ParallaxCorrection; 
 
-            _rCodec << m_BoxSize[0];            
-            _rCodec << m_BoxSize[1];
-            _rCodec << m_BoxSize[2];
+            Base::Serialize(_rCodec, m_BoxSize);
         }
 
         inline IComponent* Allocate() override

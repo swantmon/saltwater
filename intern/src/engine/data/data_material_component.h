@@ -106,15 +106,9 @@ namespace Dt
             Base::Serialize(_rCodec, m_BumpTexture);
             Base::Serialize(_rCodec, m_AlphaTexture);
 
-            _rCodec >> m_Color[0];
-            _rCodec >> m_Color[1];
-            _rCodec >> m_Color[2];
-            _rCodec >> m_Color[3];
+            Base::Serialize(_rCodec, m_Color);
 
-            _rCodec >> m_TilingOffset[0];
-            _rCodec >> m_TilingOffset[1];
-            _rCodec >> m_TilingOffset[2];
-            _rCodec >> m_TilingOffset[3];
+            Base::Serialize(_rCodec, m_TilingOffset);
 
             _rCodec >> m_Roughness;
             _rCodec >> m_Reflectance;
@@ -137,15 +131,9 @@ namespace Dt
             Base::Serialize(_rCodec, m_BumpTexture);
             Base::Serialize(_rCodec, m_AlphaTexture);
 
-            _rCodec << m_Color[0];
-            _rCodec << m_Color[1];
-            _rCodec << m_Color[2];
-            _rCodec << m_Color[3];
+            Base::Serialize(_rCodec, m_Color);
 
-            _rCodec << m_TilingOffset[0];
-            _rCodec << m_TilingOffset[1];
-            _rCodec << m_TilingOffset[2];
-            _rCodec << m_TilingOffset[3];
+            Base::Serialize(_rCodec, m_TilingOffset);
 
             _rCodec << m_Roughness;
             _rCodec << m_Reflectance;

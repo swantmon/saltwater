@@ -4,6 +4,7 @@
 #include "engine/engine_config.h"
 
 #include "base/base_include_glm.h"
+#include "base/base_serialize_glm.h"
 #include "base/base_typedef.h"
 
 #include "engine/data/data_component.h"
@@ -66,15 +67,11 @@ namespace Dt
             int RefreshMode;
 
             _rCodec >> RefreshMode;
-            _rCodec >> m_Direction[0];
-            _rCodec >> m_Direction[1];
-            _rCodec >> m_Direction[2];
-            _rCodec >> m_Color[0];
-            _rCodec >> m_Color[1];
-            _rCodec >> m_Color[2];
-            _rCodec >> m_Lightness[0];
-            _rCodec >> m_Lightness[1];
-            _rCodec >> m_Lightness[2];
+
+            Base::Serialize(_rCodec, m_Direction);
+            Base::Serialize(_rCodec, m_Color);
+            Base::Serialize(_rCodec, m_Lightness);
+
             _rCodec >> m_Temperature;
             _rCodec >> m_Intensity;
             _rCodec >> m_HasTemperature;
@@ -87,15 +84,11 @@ namespace Dt
             CComponent::Write(_rCodec);
 
             _rCodec << (int)m_RefreshMode;
-            _rCodec << m_Direction[0];
-            _rCodec << m_Direction[1];
-            _rCodec << m_Direction[2];
-            _rCodec << m_Color[0];
-            _rCodec << m_Color[1];
-            _rCodec << m_Color[2];
-            _rCodec << m_Lightness[0];
-            _rCodec << m_Lightness[1];
-            _rCodec << m_Lightness[2];
+
+            Base::Serialize(_rCodec, m_Direction);
+            Base::Serialize(_rCodec, m_Color);
+            Base::Serialize(_rCodec, m_Lightness);
+
             _rCodec << m_Temperature;
             _rCodec << m_Intensity;
             _rCodec << m_HasTemperature;

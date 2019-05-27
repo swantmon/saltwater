@@ -183,9 +183,9 @@ namespace Dt
             _rCodec >> m_WorldAABB[1][0];
             _rCodec >> m_WorldAABB[1][1];
             _rCodec >> m_WorldAABB[1][2];
-            _rCodec >> m_WorldPosition[0];
-            _rCodec >> m_WorldPosition[1];
-            _rCodec >> m_WorldPosition[2];
+
+            Base::Serialize(_rCodec, m_WorldPosition);
+
             _rCodec >> m_Flags.m_Key;
         }
 
@@ -201,9 +201,9 @@ namespace Dt
             _rCodec << m_WorldAABB[1][0];
             _rCodec << m_WorldAABB[1][1];
             _rCodec << m_WorldAABB[1][2];
-            _rCodec << m_WorldPosition[0];
-            _rCodec << m_WorldPosition[1];
-            _rCodec << m_WorldPosition[2];
+
+            Base::Serialize(_rCodec, m_WorldPosition);
+
             _rCodec << m_Flags.m_Key;
         }
 
