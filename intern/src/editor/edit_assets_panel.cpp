@@ -43,7 +43,7 @@ namespace GUI
 {
     CAssetsPanel::CAssetsPanel()
         : m_Title    ("Assets")
-        , m_Regex    (".*.[]?")
+        , m_Regex    (CAsset::s_Filter[CAsset::All])
         , m_SpaceInfo()
     {
         m_RootPath    = Core::AssetManager::GetPathToAssets();

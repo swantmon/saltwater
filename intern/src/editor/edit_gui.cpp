@@ -411,13 +411,16 @@ namespace
             {
                 auto rSceneFile = Files[0];
 
-                Edit::CEditState::GetInstance().SetNextState(CState::UnloadMap);
+                if (rSceneFile != Edit::CUnloadMapState::GetInstance().GetFilename() && regex_match(rSceneFile, CAsset::s_Filter[CAsset::Scene]))
+                {
+                    Edit::CEditState::GetInstance().SetNextState(CState::UnloadMap);
 
-                Edit::CUnloadMapState::GetInstance().SetNextState(CState::LoadMap);
+                    Edit::CUnloadMapState::GetInstance().SetNextState(CState::LoadMap);
 
-                Edit::CLoadMapState::GetInstance().LoadFromFile(rSceneFile);
+                    Edit::CLoadMapState::GetInstance().LoadFromFile(rSceneFile);
 
-                Edit::CLoadMapState::GetInstance().SetNextState(CState::Edit);
+                    Edit::CLoadMapState::GetInstance().SetNextState(CState::Edit);
+                }
             }
         }
 
