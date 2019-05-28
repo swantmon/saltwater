@@ -5,7 +5,6 @@
 
 #include "base/base_include_glm.h"
 #include "base/base_serialize_glm.h"
-#include "base/base_serialize_std_string.h"
 #include "base/base_typedef.h"
 
 #include "engine/data/data_component.h"

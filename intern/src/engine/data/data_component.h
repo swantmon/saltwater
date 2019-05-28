@@ -1,8 +1,6 @@
 
 #pragma once
 
-#include "base/base_serialize_glm.h"
-#include "base/base_serialize_std_string.h"
 #include "base/base_serialize_text_reader.h"
 #include "base/base_serialize_text_writer.h"
 #include "base/base_type_info.h"

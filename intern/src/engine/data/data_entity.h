@@ -4,7 +4,6 @@
 #include "engine/engine_config.h"
 
 #include "base/base_aabb3.h"
-#include "base/base_serialize_glm.h"
 #include "base/base_typedef.h"
 
 #include "engine/data/data_entity_folder.h"
