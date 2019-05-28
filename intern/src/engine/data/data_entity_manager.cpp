@@ -75,24 +75,11 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    CEntity& CEntityManager::CreateEntity(const SEntityDescriptor& _rDescriptor, CEntity::BID _ID)
+    CEntity& CEntityManager::CreateEntity(const SEntityDescriptor& _rDescriptor)
     {
         CInternEntity& rEntity = m_Entities.Allocate();
 
-        CEntity::BID ID = _ID;
-
-        if (ID == CEntity::s_InvalidID)
-        {
-            ID = m_EntityID;
-        }
-        else
-        {
-            m_EntityID = glm::max(ID, m_EntityID);
-        }
-
-        ++m_EntityID;
-
-        rEntity.m_ID               = ID;
+        rEntity.m_ID               = ++m_EntityID;
         rEntity.m_Flags.m_Category = _rDescriptor.m_EntityCategory;
 
         if ((_rDescriptor.m_FacetFlags & CEntity::FacetHierarchy) != 0)
@@ -303,7 +290,9 @@ namespace Dt
 
         for (int i = 0; i < NumberOfEntities; ++i)
         {
-            m_Entities.Allocate();
+            SEntityDescriptor EntityDescriptor = {};
+
+            CreateEntity(EntityDescriptor);
         }
 
         for (auto CurrentEntity = m_Entities.Begin(); CurrentEntity != m_Entities.End(); ++CurrentEntity)

@@ -60,7 +60,7 @@ namespace Dt
 
         void Clear();
 
-        CEntity& CreateEntity(const SEntityDescriptor& _rDescriptor, CEntity::BID _ID = CEntity::s_InvalidID);
+        CEntity& CreateEntity(const SEntityDescriptor& _rDescriptor);
 
         std::vector<CEntity*> CreateEntitiesFromScene(const std::string& _rFile);
 
