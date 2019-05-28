@@ -126,16 +126,6 @@ namespace Stereo
                     ExportStream.clear();
                     ExportStream.str("");
 
-                    cv::Mat cvOrigImg_Last(m_OrigImgSize.y, m_OrigImgSize.x, CV_8UC4);
-                    memcpy(cvOrigImg_Last.data, m_Keyframe_Last.get_Img().data(), m_Keyframe_Last.get_Img().size());
-                    cv::cvtColor(cvOrigImg_Last, cvOrigImg_Last, cv::COLOR_BGRA2RGBA); // Transform to RGB before imshow & imwrite
-
-                    ExportStream << "E:\\Project_ARCHITECT\\ARKit_OrigImg_Last_" << m_KeyfNum << ".png";
-                    cv::imwrite(ExportStream.str(), cvOrigImg_Last);
-                    ExportStream.clear();
-                    ExportStream.str("");
-
-                    
                     m_ofstream_PC << "ARKit_OrigImg_Curt_" << m_KeyfNum << ".png, ";
                     m_ofstream_PC << m_Keyframe_Curt.get_PC().x << ", ";
                     m_ofstream_PC << m_Keyframe_Curt.get_PC().y << ", ";
@@ -205,13 +195,13 @@ namespace Stereo
                         cvDispImg_Rect_cpu.convertTo(cvDispImg_Rect_cpu, CV_32F);
                     }
 
-                    //***Export Disparity in Rectified Images***
+                    //***Export Disparity in Rectified Images (in 16-bit)***
                     if (m_Is_imwrite)
                     {
-                        cv::Mat cvDisp_RectImg_cpu_8bit(cvDispImg_Rect_cpu.size(), CV_8UC1);
-                        cv::normalize(cvDispImg_Rect_cpu, cvDisp_RectImg_cpu_8bit, 0, 255, cv::NORM_MINMAX, CV_8UC1);
+                        cv::Mat cvDisp_RectImg_cpu_16UC1(cvDispImg_Rect_cpu.size(), CV_16UC1);
+                        cv::normalize(cvDispImg_Rect_cpu, cvDisp_RectImg_cpu_16UC1, 0, 65535, cv::NORM_MINMAX, CV_16UC1);
 
-                        cv::imwrite("E:\\Project_ARCHITECT\\ARKit_DispImg_cvBM_cuda.png", cvDisp_RectImg_cpu_8bit);
+                        cv::imwrite("E:\\Project_ARCHITECT\\ARKit_DispImg_cvBM_cuda.png", cvDisp_RectImg_cpu_16UC1);
                     }
 
                     const int cvMemCpySize = cvDispImg_Rect_cpu.cols * cvDispImg_Rect_cpu.rows * cvDispImg_Rect_cpu.elemSize();
@@ -288,6 +278,25 @@ namespace Stereo
                 Gfx::TextureManager::CopyToTexture2D(m_Depth_Sensor_TexturePtr, TargetRect, m_OrigImgSize.x, static_cast<const void*>(_rDepthImage.data()));
 
                 chk_Depth();
+
+                //***** Export Depth in OrigImg (from Stereo Matching & Sensor) with 16-bit *****
+                if (m_Is_imwrite)
+                {
+                    cv::Mat cvDepth_OrigImg(m_Keyframe_Curt.get_ImgSize().y, m_Keyframe_Curt.get_ImgSize().x, CV_16UC1);
+                    memcpy(cvDepth_OrigImg.data, m_Depth_OrigImg.data(), m_Depth_OrigImg.size() * sizeof(m_Depth_OrigImg[0]));
+                    ExportStream << "E:\\Project_ARCHITECT\\ARKit_DepthImg_OrigImg_" << m_KeyfNum << ".png";
+                    cv::imwrite(ExportStream.str(), cvDepth_OrigImg);
+                    ExportStream.clear();
+                    ExportStream.str("");
+
+                    cv::Mat cvDepth_Sensor(m_Keyframe_Curt.get_ImgSize().y, m_Keyframe_Curt.get_ImgSize().x, CV_16UC1);
+                    memcpy(cvDepth_Sensor.data, _rDepthImage.data(), _rDepthImage.size() * sizeof(_rDepthImage[0]));
+                    ExportStream << "E:\\Project_ARCHITECT\\ARKit_DepthImg_Sensor_" << m_KeyfNum << ".png";
+                    cv::imwrite(ExportStream.str(), cvDepth_Sensor);
+                    ExportStream.clear();
+                    ExportStream.str("");
+                }
+
 
                 //---Return Depth in Original Image---
                 const int MemCpySize = m_Depth_OrigImg_TexturePtr->GetNumberOfPixelsU() * m_Depth_OrigImg_TexturePtr->GetNumberOfPixelsV() * sizeof(uint16_t);
@@ -398,13 +407,12 @@ namespace Stereo
 
         Gfx::Performance::EndEvent();
         // GPU End
-
-        std::vector<char> DepthImage(m_Depth_OrigImg_TexturePtr->GetNumberOfPixelsU() * m_Depth_OrigImg_TexturePtr->GetNumberOfPixelsV() * sizeof(uint16_t));
-        Gfx::TextureManager::CopyTextureToCPU(m_Depth_OrigImg_TexturePtr, DepthImage.data());
+        m_Depth_OrigImg.resize(m_Depth_OrigImg_TexturePtr->GetNumberOfPixelsU() * m_Depth_OrigImg_TexturePtr->GetNumberOfPixelsV() * sizeof(uint16_t));
+        Gfx::TextureManager::CopyTextureToCPU(m_Depth_OrigImg_TexturePtr, m_Depth_OrigImg.data());
         glm::mat4 Transform = glm::mat4(glm::transpose(m_Keyframe_Curt.get_Rot()));
         Transform[3] = glm::vec4(m_Keyframe_Curt.get_PC(), 1.0f);
 
-        m_Delegate.Notify(m_Keyframe_Curt.get_Img(), DepthImage, Transform);
+        m_Delegate.Notify(m_Keyframe_Curt.get_Img(), m_Depth_OrigImg, Transform);
     }
 
     void CPluginInterface::chk_Depth()

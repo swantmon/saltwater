@@ -107,17 +107,21 @@ namespace Stereo
         void imp_Disp2Depth(); // Transform Disparity to Depth in Rectified Image
 
         //---Depth from Rectified to Original---
+        std::vector<char> m_Depth_OrigImg;
+
         Gfx::CShaderPtr m_Depth_Rect2Orig_CSPtr;
         Gfx::CTexturePtr m_Depth_OrigImg_TexturePtr;
         Gfx::CBufferPtr m_Homogrampy_BufferPtr;
 
         void imp_Depth_Rect2Orig();
 
+        //---Check Depth from Stereo Matching & Sensor---
         void chk_Depth();
         Gfx::CShaderPtr m_chk_Depth_CSPtr;
         Gfx::CTexturePtr m_Depth_Sensor_TexturePtr;
         Gfx::CTexturePtr m_Depth_Difference_TexturePtr;
 
+        //---Return Depth to plugin_slam---
         CStereoDelegate m_Delegate;
     };
 
