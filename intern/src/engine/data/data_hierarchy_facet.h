@@ -3,7 +3,10 @@
 
 #include "engine/engine_config.h"
 
+#include "base/base_serialize_std_string.h"
 #include "base/base_typedef.h"
+
+#include "engine/data/data_entity_manager.h"
 
 namespace Dt
 {
