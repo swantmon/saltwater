@@ -5,6 +5,7 @@
 #include "app_droid/app_load_map_state.h"
 
 #include "base/base_include_glm.h"
+#include "base/base_serialize_text_reader.h"
 
 #include "engine/core/core_asset_manager.h"
 
@@ -47,13 +48,6 @@ namespace App
     }
 } // namespace App
 
-namespace Base
-{
-    class CTextReader
-    {
-    };
-} // namespace Base
-
 namespace App
 {
     CLoadMapState::CLoadMapState()
@@ -72,7 +66,34 @@ namespace App
 
     void CLoadMapState::InternOnEnter()
     {
-        CreateDefaultScene();
+        // -----------------------------------------------------------------------------
+        // Get filename
+        // -----------------------------------------------------------------------------
+        std::string Filename = Core::CProgramParameters::GetInstance().Get("application:last_scene", "Default Scene.sws");
+
+        // -----------------------------------------------------------------------------
+        // Load
+        // -----------------------------------------------------------------------------
+        std::ifstream oStream;
+
+        oStream.open(Core::AssetManager::GetPathToAssets() + "/" + Filename);
+
+        if (oStream.is_open())
+        {
+            Base::CTextReader Reader(oStream, 1);
+
+            Dt::CComponentManager::GetInstance().Read(Reader);
+
+            Dt::Map::Read(Reader);
+
+            Dt::CEntityManager::GetInstance().Read(Reader);
+
+            oStream.close();
+        }
+        else
+        {
+            CreateDefaultScene();
+        }
     }
 
     // -----------------------------------------------------------------------------
@@ -107,7 +128,7 @@ namespace App
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
             EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
-            Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+            Dt::CEntity& rEntity = Dt::CEntityManager::GetInstance().CreateEntity(EntityDesc);
 
             rEntity.SetName("Main Camera");
 
@@ -132,7 +153,7 @@ namespace App
 
             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*ScriptComponent, Dt::CScriptComponent::DirtyCreate);
 
-            Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+            Dt::CEntityManager::GetInstance().MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
 
         // -----------------------------------------------------------------------------
@@ -144,7 +165,7 @@ namespace App
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
             EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
-            Dt::CEntity& rEnvironmentEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+            Dt::CEntity& rEnvironmentEntity = Dt::CEntityManager::GetInstance().CreateEntity(EntityDesc);
 
             rEnvironmentEntity.SetName("Environment");
 
@@ -196,7 +217,7 @@ namespace App
                 Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*Component, Dt::CSkyComponent::DirtyCreate);
             }
 
-            Dt::EntityManager::MarkEntityAsDirty(rEnvironmentEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+            Dt::CEntityManager::GetInstance().MarkEntityAsDirty(rEnvironmentEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
 
         {
@@ -205,7 +226,7 @@ namespace App
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
             EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
-            Dt::CEntity& rLightingEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+            Dt::CEntity& rLightingEntity = Dt::CEntityManager::GetInstance().CreateEntity(EntityDesc);
 
             rLightingEntity.SetName("Local light probe");
 
@@ -232,7 +253,7 @@ namespace App
                 Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*LightProbeComponent, Dt::CLightProbeComponent::DirtyCreate);
             }
 
-            Dt::EntityManager::MarkEntityAsDirty(rLightingEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+            Dt::CEntityManager::GetInstance().MarkEntityAsDirty(rLightingEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
         }
 
         // -----------------------------------------------------------------------------
@@ -243,7 +264,7 @@ namespace App
         EntityDesc.m_EntityCategory = Dt::SEntityCategory::Static;
         EntityDesc.m_FacetFlags     = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
-        Dt::CEntity& rRootEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+        Dt::CEntity& rRootEntity = Dt::CEntityManager::GetInstance().CreateEntity(EntityDesc);
 
         rRootEntity.SetName("Root");
 
@@ -263,7 +284,7 @@ namespace App
 
         // -----------------------------------------------------------------------------
 
-        Dt::EntityManager::MarkEntityAsDirty(rRootEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+        Dt::CEntityManager::GetInstance().MarkEntityAsDirty(rRootEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
 
         {
             Dt::SEntityDescriptor EntityDesc;
@@ -271,7 +292,7 @@ namespace App
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Static;
             EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
-            Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+            Dt::CEntity& rEntity = Dt::CEntityManager::GetInstance().CreateEntity(EntityDesc);
 
             rEntity.SetName("Object");
 
@@ -315,7 +336,7 @@ namespace App
 
             // -----------------------------------------------------------------------------
 
-            Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+            Dt::CEntityManager::GetInstance().MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
 
             rRootEntity.Attach(rEntity);
         }
@@ -326,7 +347,7 @@ namespace App
             EntityDesc.m_EntityCategory = Dt::SEntityCategory::Static;
             EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
-            Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+            Dt::CEntity& rEntity = Dt::CEntityManager::GetInstance().CreateEntity(EntityDesc);
 
             rEntity.SetName("Plane");
             rEntity.SetLayer(Dt::SEntityLayer::AR);
@@ -361,7 +382,7 @@ namespace App
 
             // -----------------------------------------------------------------------------
 
-            Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+            Dt::CEntityManager::GetInstance().MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
 
             rRootEntity.Attach(rEntity);
         }
