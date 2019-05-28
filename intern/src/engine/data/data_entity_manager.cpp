@@ -295,19 +295,16 @@ namespace Dt
             CreateEntity(EntityDescriptor);
         }
 
-        for (auto CurrentEntity = m_Entities.Begin(); CurrentEntity != m_Entities.End(); ++CurrentEntity)
-        {
-            _rCodec >> *CurrentEntity;
-
-            m_EntityByID[CurrentEntity->m_ID] = &*CurrentEntity;
-        }
-
         std::vector<const void*> TemporaryImporter;
 
         bool Check = false;
 
         for (auto CurrentEntity = m_Entities.Begin(); CurrentEntity != m_Entities.End(); ++CurrentEntity)
         {
+            _rCodec >> *CurrentEntity;
+
+            m_EntityByID[CurrentEntity->m_ID] = &*CurrentEntity;
+
             _rCodec >> Check;
             if (Check)
             {
@@ -374,6 +371,7 @@ namespace Dt
     void CEntityManager::Write(Base::CTextWriter& _rCodec)
     {
         unsigned int NumberOfEntities = 0;
+        bool Check = false;
 
         NumberOfEntities = m_Entities.GetNumberOfItems();
 
@@ -382,12 +380,7 @@ namespace Dt
         for (auto CurrentEntity = m_Entities.Begin(); CurrentEntity != m_Entities.End(); ++CurrentEntity)
         {
             _rCodec << *CurrentEntity;
-        }
 
-        bool Check = false;
-
-        for (auto CurrentEntity = m_Entities.Begin(); CurrentEntity != m_Entities.End(); ++CurrentEntity)
-        {
             auto pFacetTransformation = CurrentEntity->GetTransformationFacet();
             Check = pFacetTransformation != nullptr;
             _rCodec << Check;
