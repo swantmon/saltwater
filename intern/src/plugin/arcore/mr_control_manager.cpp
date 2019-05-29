@@ -294,7 +294,7 @@ namespace
 
         Gfx::Main::CResizeDelegate::HandleType m_ResizeHandle;
 
-        Dt::EntityManager::CEntityDelegate::HandleType m_EntityDelegate;
+        Dt::CEntityManager::CEntityDelegate::HandleType m_EntityDelegate;
 
         Dt::CComponentManager::CComponentDelegate::HandleType m_ComponentDelegate;
 
@@ -479,7 +479,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Handler
         // -----------------------------------------------------------------------------
-        m_EntityDelegate = Dt::EntityManager::RegisterDirtyEntityHandler(std::bind(&CMRControlManager::OnDirtyEntity, this, std::placeholders::_1));
+        m_EntityDelegate = Dt::CEntityManager::GetInstance().RegisterDirtyEntityHandler(std::bind(&CMRControlManager::OnDirtyEntity, this, std::placeholders::_1));
 
         m_ComponentDelegate = Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(std::bind(&CMRControlManager::OnDirtyComponent, this, std::placeholders::_1));
 
