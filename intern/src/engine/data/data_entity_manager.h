@@ -21,11 +21,7 @@
 #include <functional>
 #include <string>
 #include <vector>
-
-namespace Dt
-{
-    class CMesh;
-} // namespace Dt
+#include <unordered_map>
 
 namespace Dt
 {
