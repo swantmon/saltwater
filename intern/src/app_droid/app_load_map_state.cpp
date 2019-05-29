@@ -74,13 +74,13 @@ namespace App
         // -----------------------------------------------------------------------------
         // Load
         // -----------------------------------------------------------------------------
-        std::ifstream oStream;
+        std::ifstream iStream;
 
-        oStream.open(Core::AssetManager::GetPathToAssets() + "/" + Filename);
+        iStream.open(Core::AssetManager::GetPathToAssets() + "/" + Filename);
 
-        if (oStream.is_open())
+        if (iStream.is_open())
         {
-            Base::CTextReader Reader(oStream, 1);
+            Base::CTextReader Reader(iStream, 1);
 
             Dt::CComponentManager::GetInstance().Read(Reader);
 
@@ -88,7 +88,7 @@ namespace App
 
             Dt::CEntityManager::GetInstance().Read(Reader);
 
-            oStream.close();
+            iStream.close();
         }
         else
         {
