@@ -92,8 +92,8 @@ namespace Scpt
         {
             if (_rEvent.GetAction() == Base::CInputEvent::TouchPressed)
             {
-                float x = _rEvent.GetGlobalCursorPosition()[0];
-                float y = _rEvent.GetGlobalCursorPosition()[1];
+                auto x = (float)_rEvent.GetGlobalCursorPosition()[0];
+                auto y = (float)_rEvent.GetGlobalCursorPosition()[1];
 
                 if (x < 200.0f || y < 200.0f) return;
 
