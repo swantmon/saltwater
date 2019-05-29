@@ -21,7 +21,7 @@ namespace SER
 
     public:
         using CStream = std::istream;
-        typedef CTextReader CThis;
+        using CThis = CTextReader;
 
     public:
         inline  CTextReader(CStream& _rStream, unsigned int _Version);

@@ -1,18 +1,4 @@
 
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \file base_serialize_binary_writer.h
-///
-/// \author Tobias Schwandt
-/// \author Credits to Joerg Sahm
-/// \author Copyright (c) Tobias Schwandt. All rights reserved.
-///
-/// \date 2012-2013
-///
-/// \version 1.0
-/// 
-////////////////////////////////////////////////////////////////////////////////
-
 #pragma once
 
 #include "base/base_defines.h"
@@ -34,8 +20,8 @@ namespace SER
         };
 
     public:
-        typedef std::ostream   CStream;
-        typedef CBinaryWriter  CThis;
+        using CStream = std::ostream;
+        using CThis = CBinaryWriter;
 
     public:
         inline  CBinaryWriter(CStream& _rStream, unsigned int _Version);
@@ -134,7 +120,7 @@ namespace SER
     template<typename TElement>
     inline void CBinaryWriter::WriteCollection(const TElement* _pElements, unsigned int _NumberOfElements)
     {
-        typedef typename SRemovePointer<TElement>::X XUnqualified;
+        using XUnqualified = typename SRemovePointer<TElement>::X;
         bool IsPrimitive = SIsPrimitive<TElement>::Value;
 
         if (IsPrimitive)

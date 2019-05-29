@@ -23,7 +23,7 @@ namespace SER
 
     public:
         using CStream = std::ostream;
-        typedef CTextWriter  CThis;
+        using CThis = CTextWriter;
 
     public:
         inline  CTextWriter(CStream& _rStream, unsigned int _Version);

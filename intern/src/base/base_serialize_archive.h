@@ -1,18 +1,4 @@
 
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \file base_serialize_archive.h
-///
-/// \author Tobias Schwandt
-/// \author Credits to Joerg Sahm
-/// \author Copyright (c) Tobias Schwandt. All rights reserved.
-///
-/// \date 2012-2013
-///
-/// \version 1.0
-/// 
-////////////////////////////////////////////////////////////////////////////////
-
 #pragma once
 
 #include "base/base_defines.h"
@@ -35,52 +21,51 @@ namespace SER
     class CArchive
     {
     public:
-
-        typedef CArchive CThis;
-
-    public:
-        inline CArchive(unsigned int _Version);
+        using CThis = CArchive;
 
     public:
         template<typename TElement>
-        inline CThis& Write(const TElement& _rElement) = 0;
+        inline CThis& Write(const TElement& _rElement) {};
 
         template<typename TElement>
-        inline CThis& operator << (const TElement& _rElement) = 0;
+        inline CThis& operator << (const TElement& _rElement) {};
 
         template<typename TElement>
-        inline CThis& Read(TElement& _rElement) = 0;
+        inline CThis& Read(TElement& _rElement) {};
 
         template<typename TElement>
-        inline CThis& operator >> (TElement& _rElement) = 0;
+        inline CThis& operator >> (TElement& _rElement) {};
 
         template<typename TElement>
-        inline CThis& operator & (const TElement& _rElement) = 0;
+        inline CThis& operator & (const TElement& _rElement) {};
 
     public:
         template<typename TElement>
-        inline void BeginCollection() = 0;
+        inline void BeginCollection() {};
 
         template<typename TElement>
-        inline void WriteCollection(const TElement* _pElements, unsigned int _NumberOfElements) = 0;
+        inline void WriteCollection(const TElement* _pElements, unsigned int _NumberOfElements) {};
 
         template<typename TElement>
-        inline void EndCollection() = 0;
+        inline void EndCollection() {};
 
         template<typename TElement>
-        inline void WritePrimitive(const TElement& _rElement) = 0;
+        inline void WritePrimitive(const TElement& _rElement) {};
 
         template<typename TElement>
-        inline void WriteClass(const TElement& _rElement) = 0;
+        inline void WriteClass(const TElement& _rElement) {};
 
         template<typename TElement>
-        inline void ReadPrimitive(TElement& _rElement) = 0;
+        inline void ReadPrimitive(TElement& _rElement) {};
 
         template<typename TElement>
-        inline void ReadClass(TElement& _rElement) = 0;
+        inline void ReadClass(TElement& _rElement) {};
 
     protected:
         unsigned int m_ArchiveVersion;
+
+    protected:
+        inline CArchive(unsigned int _Version);
 
     protected:
         template<class TArchive, typename TElement>
