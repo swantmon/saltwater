@@ -161,51 +161,14 @@ namespace Dt
         CComponentFacet* GetComponentFacet();
         const CComponentFacet* GetComponentFacet() const;
 
-    public:
-
         void Attach(CEntity& _rEntity);
         void Detach();
 
         void AttachComponent(Dt::IComponent* _pComponent);
         void DetachComponent(Dt::IComponent* _pComponent);
 
-    public:
-
-        template <class TArchive>
-        inline void Read(TArchive& _rCodec)
-        {
-            Base::Serialize(_rCodec, m_Name);
-
-            _rCodec >> m_ID;
-            _rCodec >> m_WorldAABB[0][0];
-            _rCodec >> m_WorldAABB[0][1];
-            _rCodec >> m_WorldAABB[0][2];
-            _rCodec >> m_WorldAABB[1][0];
-            _rCodec >> m_WorldAABB[1][1];
-            _rCodec >> m_WorldAABB[1][2];
-
-            Base::Serialize(_rCodec, m_WorldPosition);
-
-            _rCodec >> m_Flags.m_Key;
-        }
-
-        template <class TArchive>
-        inline void Write(TArchive& _rCodec)
-        {
-            Base::Serialize(_rCodec, m_Name);
-
-            _rCodec << m_ID;
-            _rCodec << m_WorldAABB[0][0];
-            _rCodec << m_WorldAABB[0][1];
-            _rCodec << m_WorldAABB[0][2];
-            _rCodec << m_WorldAABB[1][0];
-            _rCodec << m_WorldAABB[1][1];
-            _rCodec << m_WorldAABB[1][2];
-
-            Base::Serialize(_rCodec, m_WorldPosition);
-
-            _rCodec << m_Flags.m_Key;
-        }
+        void Read(CSceneReader& _rCodec);
+        void Write(CSceneWriter& _rCodec);
 
     protected:
         

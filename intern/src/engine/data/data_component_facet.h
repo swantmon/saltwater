@@ -33,48 +33,13 @@ namespace Dt
 
         const CComponentVector& GetComponents() const;
 
+        void Read(CSceneReader& _rCodec);
+        void Write(CSceneWriter& _rCodec);
+
     public:
 
         CComponentFacet();
         ~CComponentFacet();
-
-    public:
-
-        template <class TArchive>
-        inline void Read(TArchive& _rCodec)
-        {
-            unsigned int NumberOfComponents;
-
-            _rCodec >> NumberOfComponents;
-
-            m_Components.resize(NumberOfComponents);
-
-            for (int i = 0; i < NumberOfComponents; ++i)
-            {
-                Base::ID ID;
-
-                _rCodec >> ID;
-
-                m_Components[i] = Dt::CComponentManager::GetInstance().GetComponent<Dt::IComponent>(ID);
-            }
-        }
-
-        template <class TArchive>
-        inline void Write(TArchive& _rCodec)
-        {
-            unsigned int NumberOfComponents = 0;
-
-            NumberOfComponents = m_Components.size();
-
-            _rCodec << NumberOfComponents;
-
-            for (auto Component : m_Components)
-            {
-                assert(Component != nullptr);
-                
-                _rCodec << Component->GetID();
-            }
-        }
 
     protected:
 

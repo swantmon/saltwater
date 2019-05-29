@@ -84,8 +84,8 @@ namespace
 
     public:
 
-        void Read(Base::CTextReader& _rCodec);
-        void Write(Base::CTextWriter& _rCodec);
+        void Read(CSceneReader& _rCodec);
+        void Write(CSceneWriter& _rCodec);
 
     private:
 
@@ -1051,7 +1051,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CDtLvlMap::Read(Base::CTextReader& _rCodec)
+    void CDtLvlMap::Read(CSceneReader& _rCodec)
     {
         if (HasMap()) FreeMap();
 
@@ -1066,7 +1066,7 @@ namespace
 
     // -----------------------------------------------------------------------------
 
-    void CDtLvlMap::Write(Base::CTextWriter& _rCodec)
+    void CDtLvlMap::Write(CSceneWriter& _rCodec)
     {
         _rCodec << m_NumberOfMetersX;
         _rCodec << m_NumberOfMetersY;
@@ -1373,14 +1373,14 @@ namespace Map
 
     // -----------------------------------------------------------------------------
 
-    void Read(Base::CTextReader& _rCodec)
+    void Read(CSceneReader& _rCodec)
     {
         CDtLvlMap::GetInstance().Read(_rCodec);
     }
 
     // -----------------------------------------------------------------------------
 
-    void Write(Base::CTextWriter& _rCodec)
+    void Write(CSceneWriter& _rCodec)
     {
         CDtLvlMap::GetInstance().Write(_rCodec);
     }

@@ -94,7 +94,7 @@ namespace Dt
 
     public:
 
-        inline void Read(Base::CTextReader& _rCodec) override
+        inline void Read(CSceneReader& _rCodec) override
         {
             CComponent::Read(_rCodec);
 
@@ -124,7 +124,7 @@ namespace Dt
             _rCodec >> m_HasTemperature;
         }
 
-        inline void Write(Base::CTextWriter& _rCodec) override
+        inline void Write(CSceneWriter& _rCodec) override
         {
             CComponent::Write(_rCodec);
 

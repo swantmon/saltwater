@@ -9,12 +9,6 @@
 
 #include "engine/data/data_region.h"
 
-namespace Base
-{
-    class CTextReader;
-    class CTextWriter;
-} // namespace Base
-
 namespace Dt
 {
     class CEntity;
@@ -106,7 +100,7 @@ namespace Map
     ENGINE_API void RemoveEntity(CEntity& _rEntity);
     ENGINE_API void MoveEntity(CEntity& _rEntity);
 
-    ENGINE_API void Read(Base::CTextReader& _rCodec);
-    ENGINE_API void Write(Base::CTextWriter& _rCodec);
+    ENGINE_API void Read(CSceneReader& _rCodec);
+    ENGINE_API void Write(CSceneWriter& _rCodec);
 } // namespace Map
 } // namespace Dt

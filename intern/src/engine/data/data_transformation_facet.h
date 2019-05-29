@@ -28,36 +28,13 @@ namespace Dt
         glm::mat4& GetWorldMatrix();
         const glm::mat4& GetWorldMatrix() const;
 
+        void Read(CSceneReader& _rCodec);
+        void Write(CSceneWriter& _rCodec);
+
     public:
 
         CTransformationFacet();
         ~CTransformationFacet();
-
-    public:
-
-        template <class TArchive>
-        inline void Read(TArchive& _rCodec)
-        {
-            Base::Serialize(_rCodec, m_WorldMatrix);
-
-            Base::Serialize(_rCodec, m_Position);
-
-            Base::Serialize(_rCodec, m_Rotation);
-
-            Base::Serialize(_rCodec, m_Scale);
-        }
-
-        template <class TArchive>
-        inline void Write(TArchive& _rCodec)
-        {
-            Base::Serialize(_rCodec, m_WorldMatrix);
-
-            Base::Serialize(_rCodec, m_Position);
-
-            Base::Serialize(_rCodec, m_Rotation);
-
-            Base::Serialize(_rCodec, m_Scale);
-        }
 
     private:
 

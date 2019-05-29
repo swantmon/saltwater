@@ -107,9 +107,9 @@ namespace Dt
 
         virtual ~IComponent() {};
 
-        virtual inline void Read(Base::CTextReader& _rCodec) = 0;
+        virtual inline void Read(CSceneReader& _rCodec) = 0;
 
-        virtual inline void Write(Base::CTextWriter& _rCodec) = 0;
+        virtual inline void Write(CSceneWriter& _rCodec) = 0;
 
         virtual IComponent* Allocate() = 0;
 
@@ -155,19 +155,8 @@ namespace Dt
         void* GetFacet(unsigned int _Category);
         const void* GetFacet(unsigned int _Category) const;
 
-        inline void Read(Base::CTextReader& _rCodec) override
-        {
-            _rCodec >> m_ID;
-            _rCodec >> m_Flags.m_Key;
-            _rCodec >> m_DirtyFlags;
-        }
-
-        inline void Write(Base::CTextWriter& _rCodec) override
-        {
-            _rCodec << m_ID;
-            _rCodec << m_Flags.m_Key;
-            _rCodec << m_DirtyFlags;
-        }
+        inline void Read(CSceneReader& _rCodec) override;
+        inline void Write(CSceneWriter& _rCodec) override;
 
     private:
 
@@ -235,6 +224,26 @@ namespace Dt
     const void* CComponent<T>::GetFacet(unsigned int _Category) const
     {
         return m_Facets[_Category];
+    }
+
+    // -----------------------------------------------------------------------------
+
+    template<class T>
+    void CComponent<T>::Read(CSceneReader& _rCodec)
+    {
+        _rCodec >> m_ID;
+        _rCodec >> m_Flags.m_Key;
+        _rCodec >> m_DirtyFlags;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    template<class T>
+    void CComponent<T>::Write(CSceneWriter& _rCodec)
+    {
+        _rCodec << m_ID;
+        _rCodec << m_Flags.m_Key;
+        _rCodec << m_DirtyFlags;
     }
 } // namespace Dt
 
