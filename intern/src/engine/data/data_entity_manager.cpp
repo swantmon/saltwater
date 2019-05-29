@@ -370,10 +370,9 @@ namespace Dt
 
     void CEntityManager::Write(Base::CTextWriter& _rCodec)
     {
-        unsigned int NumberOfEntities = 0;
         bool Check = false;
 
-        NumberOfEntities = m_Entities.GetNumberOfItems();
+        auto NumberOfEntities = m_Entities.GetNumberOfItems();
 
         _rCodec << NumberOfEntities;
 

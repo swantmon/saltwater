@@ -44,13 +44,13 @@ namespace Dt
 
     void CComponentFacet::Read(CSceneReader& _rCodec)
     {
-        unsigned int NumberOfComponents;
+        size_t NumberOfComponents;
 
         _rCodec >> NumberOfComponents;
 
         m_Components.resize(NumberOfComponents);
 
-        for (int i = 0; i < NumberOfComponents; ++i)
+        for (auto i = 0; i < NumberOfComponents; ++i)
         {
             Base::ID ID;
 
@@ -64,9 +64,7 @@ namespace Dt
 
     void CComponentFacet::Write(CSceneWriter& _rCodec)
     {
-        unsigned int NumberOfComponents = 0;
-
-        NumberOfComponents = m_Components.size();
+        auto NumberOfComponents = m_Components.size();
 
         _rCodec << NumberOfComponents;
 
