@@ -71,9 +71,13 @@ namespace Dt
 
             auto ID = Base::CTypeInfo::GetTypeID<T>();
 
-            if (m_Factory.find(Hash) == m_Factory.end()) m_Factory.insert(CFactoryMapPair(Hash, _pBase));
+            assert(m_Factory.find(Hash) == m_Factory.end());
 
-            if (m_FactoryHash.find(ID) == m_FactoryHash.end()) m_FactoryHash.insert(CFactoryHashMapPair(ID, Hash));
+            assert(m_FactoryHash.find(ID) == m_FactoryHash.end());
+
+            m_Factory.insert(CFactoryMapPair(Hash, _pBase));
+
+            m_FactoryHash.insert(CFactoryHashMapPair(ID, Hash));
         }
 
         void Clear();
