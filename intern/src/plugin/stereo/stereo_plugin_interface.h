@@ -65,8 +65,9 @@ namespace Stereo
     private:
         //---Program Design Setting---
         bool m_Is_imwrite; // Export Image Result by OpenCV?
-        std::ofstream m_ofstream_PC;
         bool m_Is_AgiOri;
+
+        std::ofstream m_ofstream_PC;
 
         //---ARKit Data---
         float m_FrameResolution; // Full=1, Half=0.5.

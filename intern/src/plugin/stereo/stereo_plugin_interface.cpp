@@ -1,6 +1,8 @@
 
 #include "plugin/stereo/stereo_precompiled.h"
 
+#include "base/base_json.h"
+
 #include "engine/core/core_console.h"
 #include "engine/core/core_program_parameters.h" // For controlling parameters in Config.
 
@@ -32,6 +34,8 @@ namespace
         float m_FocalLength; // Unit = pixel
         glm::ivec2 m_Padding;
     };
+
+    nlohmann::json Container_AgiIO, Container_AgiEO;
 }
 
 namespace Stereo
@@ -112,13 +116,126 @@ namespace Stereo
 
                 if (m_Is_AgiOri)
                 {
+                    using namespace nlohmann;
 
+                    auto Count_jsonPtr = 0;
+
+                    glm::mat3 _rCamMtx;
+
+                    while (true)
+                    {
+                        std::string jsonPtrStr("/sensors/sensor/" + std::to_string(Count_jsonPtr) + "/-label");
+                        auto jsonPtr = json::json_pointer(jsonPtrStr);
+                        std::string jsonValue = Container_AgiIO[jsonPtr];
+                        int AgiLabel = std::stoi(jsonValue);
+
+                        if (AgiLabel == m_KeyfID)
+                        {
+                            jsonPtrStr = "/sensors/sensor/" + std::to_string(Count_jsonPtr) + "/calibration/fx";
+                            auto jsonPtr_fx = json::json_pointer(jsonPtrStr);
+                            std::string jsonValue_fx = Container_AgiIO[jsonPtr_fx];
+                            _rCamMtx[0].x = std::stof(jsonValue_fx);
+
+                            jsonPtrStr = "/sensors/sensor/" + std::to_string(Count_jsonPtr) + "/calibration/fy";
+                            auto jsonPtr_fy = json::json_pointer(json::json_pointer(jsonPtrStr));
+                            std::string jsonValue_fy = Container_AgiIO[jsonPtr_fy];
+                            _rCamMtx[1].y = std::stof(jsonValue_fy);
+
+                            jsonPtrStr = "/sensors/sensor/" + std::to_string(Count_jsonPtr) + "/calibration/cx";
+                            auto jsonPtr_cx = json::json_pointer(json::json_pointer(json::json_pointer(jsonPtrStr)));
+                            std::string jsonValue_cx = Container_AgiIO[jsonPtr_cx];
+                            _rCamMtx[2].x = std::stof(jsonValue_cx);
+
+                            jsonPtrStr = "/sensors/sensor/" + std::to_string(Count_jsonPtr) + "/calibration/cy";
+                            auto jsonPtr_cy = json::json_pointer(json::json_pointer(json::json_pointer(jsonPtrStr)));
+                            std::string jsonValue_cy = Container_AgiIO[jsonPtr_cy];
+                            _rCamMtx[2].y = std::stof(jsonValue_cy);
+
+                            break;
+                        }
+
+                        Count_jsonPtr++;
+                    }
+
+                    Count_jsonPtr = 0;
+
+                    glm::mat3 _rRotMtx;
+                    glm::vec3 _rPCVec;
+
+                    glm::mat3 Rot_Foto2CV;
+                    Rot_Foto2CV[1].y = -1;
+                    Rot_Foto2CV[2].z = -1;
+
+                    while (true)
+                    {
+                        std::string jsonPtrStr("/" + std::to_string(Count_jsonPtr) + "/PhotoID");
+                        auto jsonPtr = json::json_pointer(jsonPtrStr);
+                        std::string jsonValue = Container_AgiEO[jsonPtr];
+                        int AgiLabel = std::stoi(jsonValue);
+
+                        if (AgiLabel == m_KeyfID)
+                        {
+                            jsonPtrStr = "/" + std::to_string(Count_jsonPtr) + "/X";
+                            auto jsonPtr_X = json::json_pointer(jsonPtrStr);
+                            _rPCVec.x = Container_AgiEO[jsonPtr_X];
+
+                            jsonPtrStr = "/" + std::to_string(Count_jsonPtr) + "/Y";
+                            auto jsonPtr_Y = json::json_pointer(jsonPtrStr);
+                            _rPCVec.y = Container_AgiEO[jsonPtr_Y];
+
+                            jsonPtrStr = "/" + std::to_string(Count_jsonPtr) + "/Z";
+                            auto jsonPtr_Z = json::json_pointer(jsonPtrStr);
+                            _rPCVec.z = Container_AgiEO[jsonPtr_Z];
+
+                            jsonPtrStr = "/" + std::to_string(Count_jsonPtr) + "/r11";
+                            auto jsonPtr_r11 = json::json_pointer(jsonPtrStr);
+                            _rRotMtx[0].x = Container_AgiEO[jsonPtr_r11];
+
+                            jsonPtrStr = "/" + std::to_string(Count_jsonPtr) + "/r12";
+                            auto jsonPtr_r12 = json::json_pointer(jsonPtrStr);
+                            _rRotMtx[1].x = Container_AgiEO[jsonPtr_r12];
+
+                            jsonPtrStr = "/" + std::to_string(Count_jsonPtr) + "/r13";
+                            auto jsonPtr_r13 = json::json_pointer(jsonPtrStr);
+                            _rRotMtx[2].x = Container_AgiEO[jsonPtr_r13];
+
+                            jsonPtrStr = "/" + std::to_string(Count_jsonPtr) + "/r21";
+                            auto jsonPtr_r21 = json::json_pointer(jsonPtrStr);
+                            _rRotMtx[0].y = Container_AgiEO[jsonPtr_r21];
+
+                            jsonPtrStr = "/" + std::to_string(Count_jsonPtr) + "/r22";
+                            auto jsonPtr_r22 = json::json_pointer(jsonPtrStr);
+                            _rRotMtx[1].y = Container_AgiEO[jsonPtr_r22];
+
+                            jsonPtrStr = "/" + std::to_string(Count_jsonPtr) + "/r23";
+                            auto jsonPtr_r23 = json::json_pointer(jsonPtrStr);
+                            _rRotMtx[2].y = Container_AgiEO[jsonPtr_r23];
+
+                            jsonPtrStr = "/" + std::to_string(Count_jsonPtr) + "/r31";
+                            auto jsonPtr_r31 = json::json_pointer(jsonPtrStr);
+                            _rRotMtx[0].z = Container_AgiEO[jsonPtr_r31];
+
+                            jsonPtrStr = "/" + std::to_string(Count_jsonPtr) + "/r32";
+                            auto jsonPtr_r32 = json::json_pointer(jsonPtrStr);
+                            _rRotMtx[1].z = Container_AgiEO[jsonPtr_r32];
+
+                            jsonPtrStr = "/" + std::to_string(Count_jsonPtr) + "/r33";
+                            auto jsonPtr_r33 = json::json_pointer(jsonPtrStr);
+                            _rRotMtx[2].z = Container_AgiEO[jsonPtr_r33];
+
+                            _rRotMtx = Rot_Foto2CV * _rRotMtx;
+
+                            break;
+                        }
+
+                        Count_jsonPtr++;
+                    }
+
+                    m_Keyframe_Curt = FutoGmtCV::CFutoImg(m_Keyframe_Curt.get_Img(), m_Keyframe_Curt.get_ImgSize(), 4, _rCamMtx, _rRotMtx, _rPCVec);
                 }
 
                 //***Export Original Images***
                 std::stringstream ExportStream;
-                ExportStream.clear();
-                ExportStream.str("");
 
                 if (m_Is_imwrite)
                 {
@@ -458,8 +575,35 @@ namespace Stereo
 
         //---Program Design Setting---
         m_Is_imwrite = Core::CProgramParameters::GetInstance().Get("mr:stereo:00_program_design_setting:show_result", true);
-        m_ofstream_PC = std::ofstream("E:\\Project_ARCHITECT\\ARKit_CameraPosition.txt", std::ios::trunc);
+
         m_Is_AgiOri = Core::CProgramParameters::GetInstance().Get("mr:stereo:00_program_design_setting:reference_ori", false);
+
+        m_ofstream_PC = std::ofstream("E:\\Project_ARCHITECT\\ARKit_CameraPosition.txt", std::ios::trunc);
+
+        std::ifstream fin_AgiIO("AgiIO.json");
+
+        if (m_Is_AgiOri)
+        {
+            std::ifstream fin_AgiIO("AgiIO.json");
+            if (fin_AgiIO.is_open())
+            {
+                std::string FileContent((std::istreambuf_iterator<char>(fin_AgiIO)), std::istreambuf_iterator<char>());
+
+                Container_AgiIO = nlohmann::json::parse(FileContent);
+
+                fin_AgiIO.close();
+            }
+
+            std::ifstream fin_AgiEO("AgiEO.json");
+            if (fin_AgiEO.is_open())
+            {
+                std::string FileContent((std::istreambuf_iterator<char>(fin_AgiEO)), std::istreambuf_iterator<char>());
+
+                Container_AgiEO = nlohmann::json::parse(FileContent);
+
+                fin_AgiEO.close();
+            }
+        }
 
         //---ARKit Data---
         m_FrameResolution = Core::CProgramParameters::GetInstance().Get("mr:stereo:00_input_setting:frame_resolution", 0.5); // Full = 1; Half = 0.5;
