@@ -66,11 +66,12 @@ namespace Stereo
         //---Program Design Setting---
         bool m_Is_imwrite; // Export Image Result by OpenCV?
         std::ofstream m_ofstream_PC;
+        bool m_Is_AgiOri;
 
         //---ARKit Data---
         float m_FrameResolution; // Full=1, Half=0.5.
         glm::ivec2 m_OrigImgSize; // Size of original image -> x = width & y = height
-        int m_KeyfNum = 0;
+        int m_KeyfID = 0;
 
         //---Keyframe---
         FutoGmtCV::CFutoImg m_Keyframe_Curt, m_Keyframe_Last; // Only compute 2 frames first.

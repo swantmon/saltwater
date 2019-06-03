@@ -108,7 +108,12 @@ namespace Stereo
                 m_Keyframe_Curt = frame;
                 m_idx_Keyf_Last = true;
 
-                m_KeyfNum++;
+                m_KeyfID++;
+
+                if (m_Is_AgiOri)
+                {
+
+                }
 
                 //***Export Original Images***
                 std::stringstream ExportStream;
@@ -121,12 +126,12 @@ namespace Stereo
                     memcpy(cvOrigImg_Curt.data, m_Keyframe_Curt.get_Img().data(), m_Keyframe_Curt.get_Img().size());
                     cv::cvtColor(cvOrigImg_Curt, cvOrigImg_Curt, cv::COLOR_BGRA2RGBA); // Transform to RGB before imshow & imwrite
 
-                    ExportStream << "E:\\Project_ARCHITECT\\ARKit_OrigImg_Curt_" << m_KeyfNum << ".png";
+                    ExportStream << "E:\\Project_ARCHITECT\\ARKit_OrigImg_Curt_" << m_KeyfID << ".png";
                     cv::imwrite(ExportStream.str(), cvOrigImg_Curt);
                     ExportStream.clear();
                     ExportStream.str("");
 
-                    m_ofstream_PC << "ARKit_OrigImg_Curt_" << m_KeyfNum << ".png, ";
+                    m_ofstream_PC << "ARKit_OrigImg_Curt_" << m_KeyfID << ".png, ";
                     m_ofstream_PC << m_Keyframe_Curt.get_PC().x << ", ";
                     m_ofstream_PC << m_Keyframe_Curt.get_PC().y << ", ";
                     m_ofstream_PC << m_Keyframe_Curt.get_PC().z << std::endl;
@@ -147,9 +152,15 @@ namespace Stereo
                 //***Export Rectified Images***
                 if (m_Is_imwrite)
                 {
-                    cv::imwrite("E:\\Project_ARCHITECT\\ARKit_RectImg_Curt.png", cvRectImg_Curt);
+                    ExportStream << "E:\\Project_ARCHITECT\\ARKit_RectImg_Curt_" << m_KeyfID << ".png";
+                    cv::imwrite(ExportStream.str(), cvRectImg_Curt);
+                    ExportStream.clear();
+                    ExportStream.str("");
 
-                    cv::imwrite("E:\\Project_ARCHITECT\\ARKit_RectImg_Last.png", cvRectImg_Last);
+                    ExportStream << "E:\\Project_ARCHITECT\\ARKit_RectImg_Last_" << m_KeyfID << ".png";
+                    cv::imwrite(ExportStream.str(), cvRectImg_Last);
+                    ExportStream.clear();
+                    ExportStream.str("");
                 }
 
                 //---Stereo Matching: Generate Disparity in Rectified Current Keyframe---
@@ -284,14 +295,14 @@ namespace Stereo
                 {
                     cv::Mat cvDepth_OrigImg(m_Keyframe_Curt.get_ImgSize().y, m_Keyframe_Curt.get_ImgSize().x, CV_16UC1);
                     memcpy(cvDepth_OrigImg.data, m_Depth_OrigImg.data(), m_Depth_OrigImg.size() * sizeof(m_Depth_OrigImg[0]));
-                    ExportStream << "E:\\Project_ARCHITECT\\ARKit_DepthImg_OrigImg_" << m_KeyfNum << ".png";
+                    ExportStream << "E:\\Project_ARCHITECT\\ARKit_DepthImg_OrigImg_" << m_KeyfID << ".png";
                     cv::imwrite(ExportStream.str(), cvDepth_OrigImg);
                     ExportStream.clear();
                     ExportStream.str("");
 
                     cv::Mat cvDepth_Sensor(m_Keyframe_Curt.get_ImgSize().y, m_Keyframe_Curt.get_ImgSize().x, CV_16UC1);
                     memcpy(cvDepth_Sensor.data, _rDepthImage.data(), _rDepthImage.size() * sizeof(_rDepthImage[0]));
-                    ExportStream << "E:\\Project_ARCHITECT\\ARKit_DepthImg_Sensor_" << m_KeyfNum << ".png";
+                    ExportStream << "E:\\Project_ARCHITECT\\ARKit_DepthImg_Sensor_" << m_KeyfID << ".png";
                     cv::imwrite(ExportStream.str(), cvDepth_Sensor);
                     ExportStream.clear();
                     ExportStream.str("");
@@ -448,6 +459,7 @@ namespace Stereo
         //---Program Design Setting---
         m_Is_imwrite = Core::CProgramParameters::GetInstance().Get("mr:stereo:00_program_design_setting:show_result", true);
         m_ofstream_PC = std::ofstream("E:\\Project_ARCHITECT\\ARKit_CameraPosition.txt", std::ios::trunc);
+        m_Is_AgiOri = Core::CProgramParameters::GetInstance().Get("mr:stereo:00_program_design_setting:reference_ori", false);
 
         //---ARKit Data---
         m_FrameResolution = Core::CProgramParameters::GetInstance().Get("mr:stereo:00_input_setting:frame_resolution", 0.5); // Full = 1; Half = 0.5;
