@@ -51,13 +51,16 @@ namespace Scpt
 
             m_ArCoreAvailable = Core::PluginManager::LoadPlugin("ArCore");
 
-            AcquireNewMarker = (ArCoreAcquireNewMarkerFunc)(Core::PluginManager::GetPluginFunction("ArCore", "AcquireNewMarker"));
-            ReleaseMarker = (ArCoreReleaseMarkerFunc)(Core::PluginManager::GetPluginFunction("ArCore", "ReleaseMarker"));
+            if (m_ArCoreAvailable)
+            {
+                AcquireNewMarker = (ArCoreAcquireNewMarkerFunc)(Core::PluginManager::GetPluginFunction("ArCore", "AcquireNewMarker"));
+                ReleaseMarker = (ArCoreReleaseMarkerFunc)(Core::PluginManager::GetPluginFunction("ArCore", "ReleaseMarker"));
 
-            GetMarkerTrackingState = (ArCoreGetMarkerTrackingStateFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetMarkerTrackingState"));
-            GetMarkerModelMatrix = (ArCoreGetMarkerModelMatrixFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetMarkerModelMatrix"));
+                GetMarkerTrackingState = (ArCoreGetMarkerTrackingStateFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetMarkerTrackingState"));
+                GetMarkerModelMatrix = (ArCoreGetMarkerModelMatrixFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetMarkerModelMatrix"));
 
-            SetSettings = (ArCoreSetSettingsFunc)(Core::PluginManager::GetPluginFunction("ArCore", "SetSettings"));
+                SetSettings = (ArCoreSetSettingsFunc)(Core::PluginManager::GetPluginFunction("ArCore", "SetSettings"));
+            }
         }
 
         // -----------------------------------------------------------------------------
@@ -90,6 +93,8 @@ namespace Scpt
 
         void OnInput(const Base::CInputEvent& _rEvent) override
         {
+            if (!m_ArCoreAvailable) return;
+
             if (_rEvent.GetAction() == Base::CInputEvent::TouchPressed)
             {
                 auto x = (float)_rEvent.GetGlobalCursorPosition()[0];
