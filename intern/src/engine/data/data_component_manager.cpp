@@ -100,7 +100,7 @@ namespace Dt
 
     void CComponentManager::Read(Base::CTextReader& _rCodec)
     {
-        Base::ID TypeID = 0;
+        Base::BHash Hash = 0;
         size_t NumberOfComponents = 0;
 
         _rCodec >> NumberOfComponents;
@@ -110,47 +110,56 @@ namespace Dt
             // -----------------------------------------------------------------------------
             // Read from reader
             // -----------------------------------------------------------------------------
-            _rCodec >> TypeID;
+            _rCodec >> Hash;
 
-            auto NewComponent = InternAllocate(TypeID);
+            auto pNewComponent = InternAllocateByHash(Hash);
 
-            assert(NewComponent);
+            assert(pNewComponent);
 
-            _rCodec >> *NewComponent;
+            _rCodec >> *pNewComponent;
 
             // -----------------------------------------------------------------------------
             // Identify ID
             // -----------------------------------------------------------------------------
-            m_CurrentID = glm::max(m_CurrentID, NewComponent->m_ID + 1);
+            m_CurrentID = glm::max(m_CurrentID, pNewComponent->m_ID + 1);
 
             // -----------------------------------------------------------------------------
             // Save component to organizer
             // -----------------------------------------------------------------------------
-            m_ComponentByID[NewComponent->m_ID] = NewComponent;
+            m_ComponentByID[pNewComponent->m_ID] = pNewComponent;
 
-            m_ComponentsByType[NewComponent->GetTypeID()].emplace_back(NewComponent);
+            m_ComponentsByType[pNewComponent->GetTypeID()].emplace_back(pNewComponent);
         }
     }
 
     // -----------------------------------------------------------------------------
 
-    void CComponentManager::Write(Base::CTextWriter & _rCodec)
+    void CComponentManager::Write(Base::CTextWriter& _rCodec)
     {
         _rCodec << m_Components.size();
 
         for (auto& Component : m_Components)
         {
-            if (Component->GetTypeID() == CScriptComponent::STATIC_TYPE_ID)
+            Base::ID ID = Component->GetTypeID();
+
+            if (ID == CScriptComponent::STATIC_TYPE_ID)
             {
                 auto ScriptComponent = static_cast<CScriptComponent*>(&*Component);
 
-                _rCodec << ScriptComponent->GetScriptTypeID();
+                ID = ScriptComponent->GetScriptTypeID();
             }
-            else
+
+            if (m_FactoryHash.find(ID) == m_FactoryHash.end())
             {
-                _rCodec << Component->GetTypeID();
+                ENGINE_CONSOLE_WARNING("Failed writing component because hash is missing in factory.");
+
+                continue;
             }
-            
+
+            Base::BHash Hash = m_FactoryHash.find(ID)->second;
+
+            _rCodec << Hash;
+
             _rCodec << *Component;
         }
     }
@@ -168,11 +177,11 @@ namespace Dt
 
     // -----------------------------------------------------------------------------
 
-    IComponent* CComponentManager::InternAllocate(Base::ID _TypeID)
+    IComponent* CComponentManager::InternAllocateByHash(Base::BHash _Hash)
     {
-        assert(m_Factory.find(_TypeID) != m_Factory.end());
+        assert(m_Factory.find(_Hash) != m_Factory.end());
 
-        auto AllocatedComponent = m_Factory.find(_TypeID)->second->Allocate();
+        auto AllocatedComponent = m_Factory.find(_Hash)->second->Allocate();
 
         m_Components.emplace_back(std::unique_ptr<IComponent>(AllocatedComponent));
 

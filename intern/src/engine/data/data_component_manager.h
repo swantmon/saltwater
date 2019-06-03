@@ -3,6 +3,7 @@
 
 #include "engine/engine_config.h"
 
+#include "base/base_crc.h"
 #include "base/base_defines.h"
 #include "base/base_delegate.h"
 #include "base/base_serialize_text_reader.h"
@@ -18,15 +19,19 @@
 #include <memory>
 #include <vector>
 
-#define REGISTER_COMPONENT_SER(_Name)                                                                               \
-    struct BASE_CONCAT(SRegisterSerialize, _Name)                                                               \
-    {                                                                                                           \
-        BASE_CONCAT(SRegisterSerialize, _Name)()                                                                \
-        {                                                                                                       \
-            static _Name BASE_CONCAT(s_SRegisterSerialize, _Name);                                              \
-            Dt::CComponentManager::GetInstance().Register<_Name>(&BASE_CONCAT(s_SRegisterSerialize, _Name));    \
-        }                                                                                                       \
-    } BASE_CONCAT(g_SRegisterSerialize, _Name);
+#define REGISTER_COMPONENT_SER_NAME(_Name, _Class)                                                                    \
+    struct BASE_CONCAT(SRegisterSerialize, _Class)                                                                    \
+    {                                                                                                                 \
+        BASE_CONCAT(SRegisterSerialize, _Class)()                                                                     \
+        {                                                                                                             \
+            static _Class BASE_CONCAT(s_SRegisterSerialize, _Class);                                                  \
+            Dt::CComponentManager::GetInstance().Register<_Class>(_Name, &BASE_CONCAT(s_SRegisterSerialize, _Class)); \
+        }                                                                                                             \
+    } BASE_CONCAT(g_SRegisterSerialize, _Class);
+
+#define REGISTER_COMPONENT_SER(_Class) REGISTER_COMPONENT_SER_NAME(#_Class, _Class)
+
+
 
 namespace Dt
 {
@@ -60,11 +65,15 @@ namespace Dt
         CComponentDelegate::HandleType RegisterDirtyComponentHandler(CComponentDelegate::FunctionType _NewDelegate); 
         
         template<class T> 
-        void Register(IComponent* _pBase)
+        void Register(const std::string& _rName, IComponent* _pBase)
         {
+            auto Hash = Base::CRC32(_rName.c_str(), _rName.length());
+
             auto ID = Base::CTypeInfo::GetTypeID<T>();
 
-            if (m_Factory.find(ID) == m_Factory.end()) m_Factory.insert(CFactoryMapPair(ID, _pBase));
+            if (m_Factory.find(Hash) == m_Factory.end()) m_Factory.insert(CFactoryMapPair(Hash, _pBase));
+
+            if (m_FactoryHash.find(ID) == m_FactoryHash.end()) m_FactoryHash.insert(CFactoryHashMapPair(ID, Hash));
         }
 
         void Clear();
@@ -76,16 +85,20 @@ namespace Dt
 
     private:
 
-        using CComponents = std::vector<std::unique_ptr<Dt::IComponent>>;
-        using CComponentsByID = std::map<Base::ID, Dt::IComponent*>;
-        using CComponentsByType = std::map<Base::ID, std::vector<Dt::IComponent*>>;
+        using CComponents = std::vector<std::unique_ptr<IComponent>>;
+        using CComponentsByID = std::map<Base::ID, IComponent*>;
+        using CComponentsByType = std::map<Base::ID, std::vector<IComponent*>>;
 
-        using CFactoryMap     = std::map<Base::ID, IComponent*>;
-        using CFactoryMapPair = std::pair<Base::ID, IComponent*>;
+        using CFactoryMap     = std::map<Base::BHash, IComponent*>;
+        using CFactoryMapPair = std::pair<Base::BHash, IComponent*>;
+
+        using CFactoryHashMap     = std::map<Base::ID, Base::BHash>;
+        using CFactoryHashMapPair = std::pair<Base::ID, Base::BHash>;
 
     private:
 
         CFactoryMap m_Factory;
+        CFactoryHashMap m_FactoryHash;
 
         CComponents       m_Components;
         CComponentsByID   m_ComponentByID;
@@ -96,7 +109,7 @@ namespace Dt
 
     private:
 
-        IComponent* InternAllocate(Base::ID _TypeID);
+        IComponent* InternAllocateByHash(Base::BHash _TypeID);
 
     private:
 
