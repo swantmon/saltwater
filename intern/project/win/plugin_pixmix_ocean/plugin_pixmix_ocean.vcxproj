@@ -27,12 +27,12 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\src\plugin\pixmix_ocean\pm_plugin_interface.cpp" />
-    <ClCompile Include="..\..\..\src\plugin\pixmix_ocean\pm_precompiled.cpp" />
+    <ClCompile Include="..\..\..\src\plugin\pixmix_ocean\pmo_plugin_interface.cpp" />
+    <ClCompile Include="..\..\..\src\plugin\pixmix_ocean\pmo_precompiled.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\src\plugin\pixmix_ocean\pm_plugin_interface.h" />
-    <ClInclude Include="..\..\..\src\plugin\pixmix_ocean\pm_precompiled.h" />
+    <ClInclude Include="..\..\..\src\plugin\pixmix_ocean\pmo_plugin_interface.h" />
+    <ClInclude Include="..\..\..\src\plugin\pixmix_ocean\pmo_precompiled.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{5A6B2FAB-6EA2-495E-96FB-64AC45AD96EF}</ProjectGuid>
@@ -116,7 +116,7 @@
       <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\arcore\include;..\..\..\..\extern\artoolkit\include;..\..\..\..\extern\opencv\include;..\..\..\..\extern\kinect\include</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <PrecompiledHeaderFile>plugin/pixmix_ocean/pm_precompiled.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>plugin/pixmix_ocean/pmo_precompiled.h</PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -132,13 +132,13 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>Create</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>ISDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\arcore\include;..\..\..\..\extern\glm\include;..\..\..\..\extern\json\include;..\..\..\..\extern\assimp\include;..\..\..\..\extern\devil\include;..\..\..\..\extern\glew\include;..\..\..\..\extern\tinyxml2\include;..\..\..\..\extern\ocean\include</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <PrecompiledHeaderFile>plugin/pixmix_ocean/pm_precompiled.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>plugin/pixmix_ocean/pmo_precompiled.h</PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <DisableSpecificWarnings>4190;4251;4275;26495</DisableSpecificWarnings>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -166,7 +166,7 @@
       <PreprocessorDefinitions>BASE_RELEASE;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\arcore\include;..\..\..\..\extern\artoolkit\include;..\..\..\..\extern\opencv\include;..\..\..\..\extern\kinect\include</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <PrecompiledHeaderFile>plugin/pixmix_ocean/pm_precompiled.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>plugin/pixmix_ocean/pmo_precompiled.h</PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -185,14 +185,14 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>Create</PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>ISDLL;BASE_RELEASE;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\arcore\include;..\..\..\..\extern\glm\include;..\..\..\..\extern\json\include;..\..\..\..\extern\assimp\include;..\..\..\..\extern\devil\include;..\..\..\..\extern\glew\include;..\..\..\..\extern\tinyxml2\include;..\..\..\..\extern\ocean\include</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <PrecompiledHeaderFile>plugin/pixmix_ocean/pm_precompiled.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>plugin/pixmix_ocean/pmo_precompiled.h</PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <DisableSpecificWarnings>4190;4251;4275;26495</DisableSpecificWarnings>
       <LanguageStandard>stdcpp17</LanguageStandard>

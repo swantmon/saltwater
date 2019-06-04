@@ -1,11 +1,10 @@
 
-#include "plugin/pixmix/pm_precompiled.h"
+#include "plugin/pixmix_ocean/pmo_precompiled.h"
 
 #include "base/base_include_glm.h"
 #include "engine/core/core_console.h"
 #include "engine/engine.h"
-#include "plugin/pixmix/pm_plugin_interface.h"
-#include "plugin/pixmix/PixMix/PixMix.h"
+#include "plugin/pixmix_ocean/pmo_plugin_interface.h"
 
 #include <vector>
 
@@ -35,13 +34,18 @@
 #pragma comment(lib, "OceanPlatformWin.lib")
 #endif
 
+#pragma warning(push)
+#pragma warning(disable : 4100 4245 5033)
+
 #define _WINDOWS
 #undef _DLL
 #include "ocean/cv/synthesis/SynthesisOneFramePixel.h"
 
-CORE_PLUGIN_INFO(PM::CPluginInterface, "PixMixOcean", "1.0", "This plugin enables inpainting with PixMix (Original version).")
+#pragma warning(pop)
 
-namespace PM
+CORE_PLUGIN_INFO(PMO::CPluginInterface, "PixMixOcean", "1.0", "This plugin enables inpainting with PixMix (Original version).")
+
+namespace PMO
 {
     void CPluginInterface::OnStart()
     {
@@ -98,13 +102,7 @@ namespace PM
 			Image[i] = glm::u8vec3(Pixel.r, Pixel.g, Pixel.b);
 			Mask[i] = Pixel.r == 255 && Pixel.g == 255 && Pixel.b == 255 ? 0x00 : 0xFF;
 		}
-
-		cv::Mat InputCV(_Resolution.x, _Resolution.x, CV_8UC3);
-		cv::Mat MaskCV(_Resolution.x, _Resolution.x, CV_8UC1);
-
-		std::memcpy(InputCV.data, Image.data(), sizeof(Image[0]) * Image.size());
-		std::memcpy(MaskCV.data, Mask.data(), sizeof(Mask[0]) * Mask.size());
-		
+        
 		Ocean::CV::Synthesis::SynthesisOneFramePixel PixMix;
 		Ocean::RandomGenerator Generator;
 
@@ -128,74 +126,10 @@ namespace PM
 		{
 			_DestinationImage[i] = glm::u8vec4(pOutputPixels[i], 255);
 		}
-
-		/*memcpy(PixMixResult.data, Input.data(), Till.total() * Till.elemSize());
-
-        cv::Mat_<cv::Vec4b> Source4(_Resolution.x, _Resolution.y);
-        cv::Mat_<cv::Vec4b> Dest4(_Resolution.x, _Resolution.y);
-
-        std::memcpy(Source4.data, _SourceImage.data(), _SourceImage.size());
-        std::memcpy(Dest4.data, _DestinationImage.data(), _DestinationImage.size());
-                
-        cv::Mat_<cv::Vec3b> Source3(_Resolution.x, _Resolution.y);
-        cv::Mat_<cv::Vec3b> Dest3(_Resolution.x, _Resolution.y);
-
-        cv::cvtColor(Source4, Source3, cv::COLOR_BGRA2RGB);
-
-        uchar NonMaskValue = 255;
-        cv::Mat_<uchar> Mask(Source3.rows, Source3.cols, NonMaskValue);
-
-        for (int r = 0; r < Source3.rows; ++r)
-        {
-            for (int c = 0; c < Source3.cols; ++c)
-            {
-                cv::Vec3b color = Source3(r, c);
-
-                if (color[0] == 255 && color[1] == 255 && color[2] == 255)
-                {
-                    Mask(r, c) = 0;
-                    if (r + 2 < Source3.rows)
-                    {
-                        Mask(r + 2, c) = 0;
-                    }
-
-                    if (r - 2 >= 0)
-                    {
-                        Mask(r - 2, c) = 0;
-                    }
-
-                    if (c + 2 < Source3.cols)
-                    {
-                        Mask(r, c + 2) = 0;
-                    }
-
-                    if (c - 2 >= 0)
-                    {
-                        Mask(r, c - 2) = 0;
-                    }
-                }
-            }
-        }
-
-        cv::imshow("Input color image", Source3);
-        cv::imshow("Input mask image", Mask);
-        //cv::waitKey(1);
-
-        PixMix pm;
-        pm.init(Source3, Mask);
-
-        pm.execute(Dest3, 0.05f);
-
-        cv::imshow("Output color image", Dest3);
-        //cv::waitKey();
-
-        cv::cvtColor(Dest3, Dest4, cv::COLOR_RGB2BGRA);
-
-        std::memcpy(_DestinationImage.data(), Dest4.data, _DestinationImage.size());*/
     }
-} // namespace PM
+} // namespace PMO
 
 extern "C" CORE_PLUGIN_API_EXPORT void Inpaint(const glm::ivec2& _Resolution, const std::vector<glm::u8vec4>& _SourceImage, std::vector<glm::u8vec4>& _DestinationImage)
 {
-    static_cast<PM::CPluginInterface&>(GetInstance()).Inpaint(_Resolution, _SourceImage, _DestinationImage);
+    static_cast<PMO::CPluginInterface&>(GetInstance()).Inpaint(_Resolution, _SourceImage, _DestinationImage);
 }

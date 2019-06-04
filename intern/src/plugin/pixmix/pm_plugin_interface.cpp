@@ -60,15 +60,13 @@ namespace PM
     {
         assert(_Resolution.x > 0 && _Resolution.y > 0);
         assert(_SourceImage.size() == _DestinationImage.size());
-        
-		memcpy(PixMixResult.data, Input.data(), Till.total() * Till.elemSize());
 
         cv::Mat_<cv::Vec4b> Source4(_Resolution.x, _Resolution.y);
         cv::Mat_<cv::Vec4b> Dest4(_Resolution.x, _Resolution.y);
 
         std::memcpy(Source4.data, _SourceImage.data(), _SourceImage.size());
         std::memcpy(Dest4.data, _DestinationImage.data(), _DestinationImage.size());
-                
+
         cv::Mat_<cv::Vec3b> Source3(_Resolution.x, _Resolution.y);
         cv::Mat_<cv::Vec3b> Dest3(_Resolution.x, _Resolution.y);
 

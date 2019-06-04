@@ -284,7 +284,7 @@ namespace MR
 
                     m_InpaintingMode = INPAINTING_PIXMIX;
                 }
-                else if (ModeParameter == "pixmix")
+                else if (ModeParameter == "pixmix_ocean")
                 {
                     ENGINE_CONSOLE_INFO("Inpainting with PixMix (Original version)");
 

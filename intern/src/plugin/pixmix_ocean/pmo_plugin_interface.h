@@ -3,7 +3,7 @@
 
 #include "engine/core/core_plugin_manager.h"
 
-namespace PM
+namespace PMO
 {
     class CPluginInterface : public Core::IPlugin
     {
