@@ -67,7 +67,7 @@ namespace Dt
         template<class T> 
         void Register(const std::string& _rName, IComponent* _pBase)
         {
-            auto Hash = Base::CRC32(_rName.c_str(), _rName.length());
+            auto Hash = Base::CRC32(_rName.c_str(), static_cast<unsigned int>(_rName.length()));
 
             auto ID = Base::CTypeInfo::GetTypeID<T>();
 
