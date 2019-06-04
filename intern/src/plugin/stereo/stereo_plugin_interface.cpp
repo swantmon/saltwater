@@ -268,15 +268,18 @@ namespace Stereo
                 //***Export Rectified Images***
                 if (m_Is_imwrite)
                 {
-                    ExportStr << "E:\\Project_ARCHITECT\\ARKit_RectImg_Curt_" << m_KeyfID << ".png";
-                    cv::imwrite(ExportStr.str(), cvRectImg_Curt);
-                    ExportStr.clear();
-                    ExportStr.str("");
+                    ExportStr = "E:\\Project_ARCHITECT\\ARKit_RectImg_Curt_" + std::to_string(m_KeyfID) + ".png";
+                    cv::imwrite(ExportStr, cvRectImg_Curt);
+                    ExportStr = "";
 
-                    ExportStr << "E:\\Project_ARCHITECT\\ARKit_RectImg_Last_" << m_KeyfID << ".png";
-                    cv::imwrite(ExportStr.str(), cvRectImg_Last);
-                    ExportStr.clear();
-                    ExportStr.str("");
+                    ExportStr = "E:\\Project_ARCHITECT\\ARKit_RectImg_Last_" + std::to_string(m_KeyfID) + ".png";
+                    cv::imwrite(ExportStr, cvRectImg_Last);
+                    ExportStr = "";
+                }
+
+                if (m_RectImg_Curt.get_ImgSize().x > 2500 || m_RectImg_Curt.get_ImgSize().y > 2500)
+                {
+                    return;
                 }
 
                 //---Stereo Matching: Generate Disparity in Rectified Current Keyframe---
@@ -293,17 +296,22 @@ namespace Stereo
                 if (m_StereoMatching_Method == "LibSGM")
                 {
                     m_pStereoMatcher_LibSGM = std::make_unique<sgm::StereoSGM>(m_RectImg_Curt.get_ImgSize().x, m_RectImg_Curt.get_ImgSize().y, m_DispRange, 8, 16, sgm::EXECUTE_INOUT_HOST2HOST);
-                    // * Disparity needs to be Transformed from 16-bit signed integer to 32-bit float 
-                    m_pStereoMatcher_LibSGM->execute(m_RectImg_Curt.get_Img().data(), m_RectImg_Last.get_Img().data(), m_Disparity_RectImg.data());
+                        // Default disparity is pixel level => Disparity is the same in 8-bit & 16-bit.
+                        // If turn on sub-pixel => Output disparity must be 16-bit. => Divided by 16 to derive true disparity!!!
+                    
+                    std::vector<uint16_t> Disp_RectImg_Temp(m_RectImg_Curt.get_Img().size(), 0.0);
+                    
+                    m_pStereoMatcher_LibSGM->execute(m_RectImg_Curt.get_Img().data(), m_RectImg_Last.get_Img().data(), Disp_RectImg_Temp.data());
 
+                    m_Disparity_RectImg = std::vector<float>::vector(Disp_RectImg_Temp.begin(), Disp_RectImg_Temp.end());
+
+                    //***Export Disparity in Rectified Images (in 16-bit)***
                     if (m_Is_imwrite)
                     {
-                        cv::Mat cvDispImg_LibSGM(cvRectImg_Curt.size(), CV_8UC1);
-                        memcpy(cvDispImg_LibSGM.data, m_Disparity_RectImg.data(), m_Disparity_RectImg.size());
-                        cv::normalize(cvDispImg_LibSGM, cvDispImg_LibSGM, 0, 500, cv::NORM_MINMAX, CV_8UC1);
+                        cv::Mat cvDispImg_LibSGM(cvRectImg_Curt.size(), CV_16UC1);
+                        memcpy(cvDispImg_LibSGM.data, Disp_RectImg_Temp.data(), Disp_RectImg_Temp.size() * sizeof(Disp_RectImg_Temp[0]));
                         cv::imwrite("E:\\Project_ARCHITECT\\ARKit_DispImg_LibSGM.png", cvDispImg_LibSGM);
                     }
-
                 }
 
                 if (m_StereoMatching_Method == "cvBM_cuda")
