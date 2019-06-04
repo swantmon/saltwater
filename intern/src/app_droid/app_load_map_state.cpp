@@ -31,7 +31,8 @@
 #include "engine/script/script_light_estimation.h"
 #include "engine/script/script_script_manager.h"
 
-#define USE_HEAD_MODEL 1
+#define USE_SCENE 0
+#define USE_HEAD_MODEL 0
 
 namespace App
 {
@@ -66,6 +67,7 @@ namespace App
 
     void CLoadMapState::InternOnEnter()
     {
+#if USE_SCENE
         // -----------------------------------------------------------------------------
         // Get filename
         // -----------------------------------------------------------------------------
@@ -94,6 +96,9 @@ namespace App
         {
             CreateDefaultScene();
         }
+#else
+        CreateDefaultScene();
+#endif
     }
 
     // -----------------------------------------------------------------------------
