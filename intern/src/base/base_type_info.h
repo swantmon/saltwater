@@ -31,7 +31,7 @@ namespace CORE
     // -----------------------------------------------------------------------------
 
     template<class T>
-    static const char* CTypeInfo::GetTypeName(const T& _rValue)
+    const char* CTypeInfo::GetTypeName(const T& _rValue)
     {
         return typeid(_rValue).name();
     }

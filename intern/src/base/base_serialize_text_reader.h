@@ -119,7 +119,7 @@ namespace SER
         , m_State         (Root)
     {
         // -----------------------------------------------------------------------------
-        // Read header informations (internal format, version)
+        // Read header information (internal format, version)
         // -----------------------------------------------------------------------------        
         InternReadName(Private::Code::s_Version);
 
@@ -462,26 +462,21 @@ namespace SER
 
     inline void CTextReader::InternReadChar(const char _Char)
     {
-        BASE_UNUSED(_Char);
-
-        InternIgnore(sizeof(char));
+        InternIgnore(sizeof(_Char));
     }
 
     // -----------------------------------------------------------------------------
 
     inline void CTextReader::InternReadChar(const char _Char, unsigned int _NumberOfChars)
     {
-        for (unsigned int IndexOfChar = 0; IndexOfChar < _NumberOfChars; ++ IndexOfChar)
-        {
-            InternReadChar(_Char);
-        }
+        InternIgnore(sizeof(_Char) * _NumberOfChars);
     }
 
     // -----------------------------------------------------------------------------
 
     inline void CTextReader::InternReadName(const char* _pChar)
     {
-        InternIgnore(static_cast<unsigned int>(strlen(_pChar)));
+        InternIgnore(sizeof(*_pChar) * static_cast<unsigned int>(strlen(_pChar)));
     }
 
     // -----------------------------------------------------------------------------
@@ -502,7 +497,7 @@ namespace SER
 
     inline void CTextReader::InternReadIndent()
     {
-        InternReadChar(Private::Code::s_Indent, m_NumberOfIdents);
+        InternIgnore(sizeof(Private::Code::s_Indent) * m_NumberOfIdents);
     }
 
     // -----------------------------------------------------------------------------
