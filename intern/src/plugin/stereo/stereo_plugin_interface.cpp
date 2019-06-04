@@ -235,7 +235,7 @@ namespace Stereo
                 }
 
                 //***Export Original Images***
-                std::stringstream ExportStream;
+                std::string ExportStr;
 
                 if (m_Is_imwrite)
                 {
@@ -243,10 +243,9 @@ namespace Stereo
                     memcpy(cvOrigImg_Curt.data, m_Keyframe_Curt.get_Img().data(), m_Keyframe_Curt.get_Img().size());
                     cv::cvtColor(cvOrigImg_Curt, cvOrigImg_Curt, cv::COLOR_BGRA2RGBA); // Transform to RGB before imshow & imwrite
 
-                    ExportStream << "E:\\Project_ARCHITECT\\ARKit_OrigImg_Curt_" << m_KeyfID << ".png";
-                    cv::imwrite(ExportStream.str(), cvOrigImg_Curt);
-                    ExportStream.clear();
-                    ExportStream.str("");
+                    ExportStr = "E:\\Project_ARCHITECT\\ARKit_OrigImg_Curt_" + std::to_string(m_KeyfID) + ".png";
+                    cv::imwrite(ExportStr, cvOrigImg_Curt);
+                    ExportStr = "";
 
                     m_ofstream_PC << "ARKit_OrigImg_Curt_" << m_KeyfID << ".png, ";
                     m_ofstream_PC << m_Keyframe_Curt.get_PC().x << ", ";
@@ -269,15 +268,15 @@ namespace Stereo
                 //***Export Rectified Images***
                 if (m_Is_imwrite)
                 {
-                    ExportStream << "E:\\Project_ARCHITECT\\ARKit_RectImg_Curt_" << m_KeyfID << ".png";
-                    cv::imwrite(ExportStream.str(), cvRectImg_Curt);
-                    ExportStream.clear();
-                    ExportStream.str("");
+                    ExportStr << "E:\\Project_ARCHITECT\\ARKit_RectImg_Curt_" << m_KeyfID << ".png";
+                    cv::imwrite(ExportStr.str(), cvRectImg_Curt);
+                    ExportStr.clear();
+                    ExportStr.str("");
 
-                    ExportStream << "E:\\Project_ARCHITECT\\ARKit_RectImg_Last_" << m_KeyfID << ".png";
-                    cv::imwrite(ExportStream.str(), cvRectImg_Last);
-                    ExportStream.clear();
-                    ExportStream.str("");
+                    ExportStr << "E:\\Project_ARCHITECT\\ARKit_RectImg_Last_" << m_KeyfID << ".png";
+                    cv::imwrite(ExportStr.str(), cvRectImg_Last);
+                    ExportStr.clear();
+                    ExportStr.str("");
                 }
 
                 //---Stereo Matching: Generate Disparity in Rectified Current Keyframe---
@@ -412,17 +411,15 @@ namespace Stereo
                 {
                     cv::Mat cvDepth_OrigImg(m_Keyframe_Curt.get_ImgSize().y, m_Keyframe_Curt.get_ImgSize().x, CV_16UC1);
                     memcpy(cvDepth_OrigImg.data, m_Depth_OrigImg.data(), m_Depth_OrigImg.size() * sizeof(m_Depth_OrigImg[0]));
-                    ExportStream << "E:\\Project_ARCHITECT\\ARKit_DepthImg_OrigImg_" << m_KeyfID << ".png";
-                    cv::imwrite(ExportStream.str(), cvDepth_OrigImg);
-                    ExportStream.clear();
-                    ExportStream.str("");
+                    ExportStr = "E:\\Project_ARCHITECT\\ARKit_DepthImg_OrigImg_" + std::to_string(m_KeyfID) + ".png";
+                    cv::imwrite(ExportStr, cvDepth_OrigImg);
+                    ExportStr = "";
 
                     cv::Mat cvDepth_Sensor(m_Keyframe_Curt.get_ImgSize().y, m_Keyframe_Curt.get_ImgSize().x, CV_16UC1);
                     memcpy(cvDepth_Sensor.data, _rDepthImage.data(), _rDepthImage.size() * sizeof(_rDepthImage[0]));
-                    ExportStream << "E:\\Project_ARCHITECT\\ARKit_DepthImg_Sensor_" << m_KeyfID << ".png";
-                    cv::imwrite(ExportStream.str(), cvDepth_Sensor);
-                    ExportStream.clear();
-                    ExportStream.str("");
+                    ExportStr = "E:\\Project_ARCHITECT\\ARKit_DepthImg_Sensor_" + std::to_string(m_KeyfID) + ".png";
+                    cv::imwrite(ExportStr, cvDepth_Sensor);
+                    ExportStr = "";
                 }
 
 
