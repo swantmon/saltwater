@@ -182,7 +182,8 @@ namespace MR
         {
             INPAINTING_DISABLED,
             INPAINTING_NN,
-            INTPAINTING_PIXMIX
+            INPAINTING_PIXMIX,
+            INPAINTING_PIXMIX_OCEAN,
         };
 
         EInpaintintingMode m_InpaintingMode;
@@ -272,7 +273,7 @@ namespace MR
                 }
                 else if (ModeParameter == "pixmix")
                 {
-                    ENGINE_CONSOLE_INFO("Inpainting with PixMix");
+                    ENGINE_CONSOLE_INFO("Inpainting with PixMix (Open version)");
 
                     if (!Core::PluginManager::LoadPlugin("PixMix"))
                     {
@@ -281,7 +282,20 @@ namespace MR
 
                     InpaintWithPixMix = (InpaintWithPixMixFunc)(Core::PluginManager::GetPluginFunction("PixMix", "Inpaint"));
 
-                    m_InpaintingMode = INTPAINTING_PIXMIX;
+                    m_InpaintingMode = INPAINTING_PIXMIX;
+                }
+                else if (ModeParameter == "pixmix")
+                {
+                    ENGINE_CONSOLE_INFO("Inpainting with PixMix (Original version)");
+
+                    if (!Core::PluginManager::LoadPlugin("PixMixOcean"))
+                    {
+                        BASE_THROWM("PixMix plugin was not loaded");
+                    }
+
+                    InpaintWithPixMix = (InpaintWithPixMixFunc)(Core::PluginManager::GetPluginFunction("PixMix_Ocean", "Inpaint"));
+
+                    m_InpaintingMode = INPAINTING_PIXMIX_OCEAN;
                 }
                 else
                 {
@@ -1233,7 +1247,7 @@ namespace MR
 
                 Net::CNetworkManager::GetInstance().SendMessage(m_NeuralNetworkSocket, Message);
             }
-            else if (m_InpaintingMode == INTPAINTING_PIXMIX)
+            else if (m_InpaintingMode == INPAINTING_PIXMIX || m_InpaintingMode == INPAINTING_PIXMIX_OCEAN)
             {
 				std::vector<glm::u8vec4> RawData(m_PlaneResolution * m_PlaneResolution);
 
