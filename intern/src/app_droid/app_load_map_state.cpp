@@ -31,7 +31,7 @@
 #include "engine/script/script_light_estimation.h"
 #include "engine/script/script_script_manager.h"
 
-#define USE_SCENE 0
+#define USE_SCENE 1
 #define USE_HEAD_MODEL 0
 
 namespace App
