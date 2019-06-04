@@ -27,30 +27,19 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\src\plugin\pixmix\PixMix\OneLvPixMix.cpp" />
-    <ClCompile Include="..\..\..\src\plugin\pixmix\PixMix\PixMix.cpp" />
-    <ClCompile Include="..\..\..\src\plugin\pixmix\PixMix\Utilities.cpp" />
-    <ClCompile Include="..\..\..\src\plugin\pixmix\pm_plugin_interface.cpp" />
-    <ClCompile Include="..\..\..\src\plugin\pixmix\pm_precompiled.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
-    </ClCompile>
+    <ClCompile Include="..\..\..\src\plugin\pixmix_ocean\pm_plugin_interface.cpp" />
+    <ClCompile Include="..\..\..\src\plugin\pixmix_ocean\pm_precompiled.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\src\plugin\pixmix\PixMix\OneLvPixMix.h" />
-    <ClInclude Include="..\..\..\src\plugin\pixmix\PixMix\PixMix.h" />
-    <ClInclude Include="..\..\..\src\plugin\pixmix\PixMix\Utilities.h" />
-    <ClInclude Include="..\..\..\src\plugin\pixmix\pm_plugin_interface.h" />
-    <ClInclude Include="..\..\..\src\plugin\pixmix\pm_precompiled.h" />
+    <ClInclude Include="..\..\..\src\plugin\pixmix_ocean\pm_plugin_interface.h" />
+    <ClInclude Include="..\..\..\src\plugin\pixmix_ocean\pm_precompiled.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{6DEB9929-9605-42B2-AB22-8740559FEA88}</ProjectGuid>
+    <ProjectGuid>{5A6B2FAB-6EA2-495E-96FB-64AC45AD96EF}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>camera</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>plugin_pixmix</ProjectName>
+    <ProjectName>plugin_pixmix_ocean</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -127,7 +116,7 @@
       <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\arcore\include;..\..\..\..\extern\artoolkit\include;..\..\..\..\extern\opencv\include;..\..\..\..\extern\kinect\include</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <PrecompiledHeaderFile>plugin/pixmix/pm_precompiled.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>plugin/pixmix_ocean/pm_precompiled.h</PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -147,9 +136,9 @@
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>ISDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\arcore\include;..\..\..\..\extern\glm\include;..\..\..\..\extern\json\include;..\..\..\..\extern\assimp\include;..\..\..\..\extern\devil\include;..\..\..\..\extern\glew\include;..\..\..\..\extern\tinyxml2\include;..\..\..\..\extern\opencv\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\arcore\include;..\..\..\..\extern\glm\include;..\..\..\..\extern\json\include;..\..\..\..\extern\assimp\include;..\..\..\..\extern\devil\include;..\..\..\..\extern\glew\include;..\..\..\..\extern\tinyxml2\include;..\..\..\..\extern\ocean\include</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <PrecompiledHeaderFile>plugin/pixmix/pm_precompiled.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>plugin/pixmix_ocean/pm_precompiled.h</PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <DisableSpecificWarnings>4190;4251;4275;26495</DisableSpecificWarnings>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -177,7 +166,7 @@
       <PreprocessorDefinitions>BASE_RELEASE;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\arcore\include;..\..\..\..\extern\artoolkit\include;..\..\..\..\extern\opencv\include;..\..\..\..\extern\kinect\include</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <PrecompiledHeaderFile>plugin/pixmix/pm_precompiled.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>plugin/pixmix_ocean/pm_precompiled.h</PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -201,9 +190,9 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>ISDLL;BASE_RELEASE;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\arcore\include;..\..\..\..\extern\glm\include;..\..\..\..\extern\json\include;..\..\..\..\extern\assimp\include;..\..\..\..\extern\devil\include;..\..\..\..\extern\glew\include;..\..\..\..\extern\tinyxml2\include;..\..\..\..\extern\opencv\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\src;..\..\..\..\extern\arcore\include;..\..\..\..\extern\glm\include;..\..\..\..\extern\json\include;..\..\..\..\extern\assimp\include;..\..\..\..\extern\devil\include;..\..\..\..\extern\glew\include;..\..\..\..\extern\tinyxml2\include;..\..\..\..\extern\ocean\include</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <PrecompiledHeaderFile>plugin/pixmix/pm_precompiled.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>plugin/pixmix_ocean/pm_precompiled.h</PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <DisableSpecificWarnings>4190;4251;4275;26495</DisableSpecificWarnings>
       <LanguageStandard>stdcpp17</LanguageStandard>

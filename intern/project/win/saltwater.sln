@@ -29,6 +29,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "plugin_slam", "plugin_slam\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "plugin_pixmix", "plugin_pixmix\plugin_pixmix.vcxproj", "{6DEB9929-9605-42B2-AB22-8740559FEA88}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "plugin_pixmix_ocean", "plugin_pixmix_ocean\plugin_pixmix_ocean.vcxproj", "{5A6B2FAB-6EA2-495E-96FB-64AC45AD96EF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -129,6 +131,14 @@ Global
 		{6DEB9929-9605-42B2-AB22-8740559FEA88}.Release|x64.Build.0 = Release|x64
 		{6DEB9929-9605-42B2-AB22-8740559FEA88}.Release|x86.ActiveCfg = Release|Win32
 		{6DEB9929-9605-42B2-AB22-8740559FEA88}.Release|x86.Build.0 = Release|Win32
+		{5A6B2FAB-6EA2-495E-96FB-64AC45AD96EF}.Debug|x64.ActiveCfg = Debug|x64
+		{5A6B2FAB-6EA2-495E-96FB-64AC45AD96EF}.Debug|x64.Build.0 = Debug|x64
+		{5A6B2FAB-6EA2-495E-96FB-64AC45AD96EF}.Debug|x86.ActiveCfg = Debug|Win32
+		{5A6B2FAB-6EA2-495E-96FB-64AC45AD96EF}.Debug|x86.Build.0 = Debug|Win32
+		{5A6B2FAB-6EA2-495E-96FB-64AC45AD96EF}.Release|x64.ActiveCfg = Release|x64
+		{5A6B2FAB-6EA2-495E-96FB-64AC45AD96EF}.Release|x64.Build.0 = Release|x64
+		{5A6B2FAB-6EA2-495E-96FB-64AC45AD96EF}.Release|x86.ActiveCfg = Release|Win32
+		{5A6B2FAB-6EA2-495E-96FB-64AC45AD96EF}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -141,6 +151,7 @@ Global
 		{B75EB043-6466-4506-8075-E56E89813AFD} = {F0542C3D-B5F9-4381-A027-10B1804A46EF}
 		{E0842B40-2749-4D03-B627-55761E06452B} = {F0542C3D-B5F9-4381-A027-10B1804A46EF}
 		{6DEB9929-9605-42B2-AB22-8740559FEA88} = {F0542C3D-B5F9-4381-A027-10B1804A46EF}
+		{5A6B2FAB-6EA2-495E-96FB-64AC45AD96EF} = {F0542C3D-B5F9-4381-A027-10B1804A46EF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {ABE024EA-EFBA-425A-9D54-106C60269005}
