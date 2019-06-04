@@ -1,6 +1,8 @@
 
 #include "engine/engine_precompiled.h"
 
+#include "base/base_exception.h"
+
 #include "engine/data/data_component_manager.h"
 #include "engine/data/data_script_component.h"
 
@@ -149,11 +151,9 @@ namespace Dt
                 ID = ScriptComponent->GetScriptTypeID();
             }
 
-            if (m_FactoryHash.find(ID) == m_FactoryHash.end())
+            if (m_FactoryHash.find(ID) == std::end(m_FactoryHash))
             {
-                ENGINE_CONSOLE_WARNING("Failed writing component because hash is missing in factory.");
-
-                continue;
+                BASE_THROWV("Failed writing component %s because hash is missing in factory.", Base::CTypeInfo::GetTypeName(Component));
             }
 
             Base::BHash Hash = m_FactoryHash.find(ID)->second;
@@ -179,7 +179,7 @@ namespace Dt
 
     IComponent* CComponentManager::InternAllocateByHash(Base::BHash _Hash)
     {
-        assert(m_Factory.find(_Hash) != m_Factory.end());
+        assert(m_Factory.find(_Hash) != std::end(m_Factory));
 
         auto AllocatedComponent = m_Factory.find(_Hash)->second->Allocate();
 
