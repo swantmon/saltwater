@@ -36,6 +36,11 @@ namespace Dt
         CHierarchyFacet();
         ~CHierarchyFacet();
 
+    public:
+
+        void Read(CSceneReader& _rCodec);
+        void Write(CSceneWriter& _rCodec);
+
     private:
 
         Base::U64 m_TimeStamp;              //< Time stamp to detect if entity already updated in this frame

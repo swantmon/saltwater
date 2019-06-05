@@ -5,6 +5,8 @@
 
 namespace Dt
 {
+    REGISTER_COMPONENT_SER(CLightProbeComponent);
+
     CLightProbeComponent::CLightProbeComponent()
         : m_RefreshMode       (Static)
         , m_Type              (Sky)

@@ -131,7 +131,13 @@
     <ClCompile Include="..\..\..\src\engine\gui\gui_input_manager.cpp" />
     <ClCompile Include="..\..\..\src\engine\network\core_network_manager.cpp" />
     <ClCompile Include="..\..\..\src\engine\network\core_network_socket.cpp" />
+    <ClCompile Include="..\..\..\src\engine\script\script_ar_camera_control_script.cpp" />
+    <ClCompile Include="..\..\..\src\engine\script\script_ar_place_object_on_touch_script.cpp" />
+    <ClCompile Include="..\..\..\src\engine\script\script_camera_control_script.cpp" />
+    <ClCompile Include="..\..\..\src\engine\script\script_easyar_target_script.cpp" />
+    <ClCompile Include="..\..\..\src\engine\script\script_light_estimation.cpp" />
     <ClCompile Include="..\..\..\src\engine\script\script_script_manager.cpp" />
+    <ClCompile Include="..\..\..\src\engine\script\script_slam.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\engine\camera\cam_control.h" />

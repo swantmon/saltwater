@@ -32,11 +32,13 @@ namespace Edit
 namespace Edit
 {
     CEditState::CEditState()
-        : m_CurrentOperation(Hand)
+        : CState            (Edit)
+        , m_CurrentOperation(Hand)
         , m_CurrentMode     (World)
-        , m_Action          (CState::Edit)
+        , m_DirtyFlag       (false)
         , m_pSelectionTicket(nullptr)
     {
+        m_NextState = CState::Edit;
     }
     
     // -----------------------------------------------------------------------------
@@ -73,10 +75,24 @@ namespace Edit
     {
         return m_CurrentMode;
     }
+
+    // -----------------------------------------------------------------------------
+
+    void CEditState::SetDirty(bool _Flag)
+    {
+        m_DirtyFlag = _Flag;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    bool CEditState::IsDirty() const
+    {
+        return m_DirtyFlag;
+    }
     
     // -----------------------------------------------------------------------------
     
-    CState::EStateType CEditState::InternOnEnter()
+    void CEditState::InternOnEnter()
     {
         // -----------------------------------------------------------------------------
         // Input
@@ -89,13 +105,11 @@ namespace Edit
         assert(m_pSelectionTicket == nullptr);
 
         m_pSelectionTicket = &Gfx::SelectionRenderer::AcquireTicket(-1, -1, 1, 1, Gfx::SPickFlag::Everything);
-        
-        return Edit::CState::Edit;
     }
     
     // -----------------------------------------------------------------------------
     
-    CState::EStateType CEditState::InternOnLeave()
+    void CEditState::InternOnLeave()
     {
         // -----------------------------------------------------------------------------
         // Unregister event
@@ -117,30 +131,15 @@ namespace Edit
         Edit::GUI::CInspectorPanel::GetInstance().InspectEntity(Dt::CEntity::s_InvalidID);
 
         // -----------------------------------------------------------------------------
-        // Reset action
+        // Reset state
         // -----------------------------------------------------------------------------
-        m_Action = CState::Edit;
-        
-        return Edit::CState::Edit;
+        m_NextState = Edit;
     }
     
     // -----------------------------------------------------------------------------
     
     CState::EStateType CEditState::InternOnRun()
     {
-        CState::EStateType NextState = CState::Edit;
-
-        switch (m_Action)
-        {
-        case Edit::CState::Exit:
-            CUnloadMapState::GetInstance().SetNextState(CState::Exit);
-            NextState = Edit::CState::UnloadMap;
-            break;
-        case Edit::CState::Play:
-            NextState = Edit::CState::Play;
-            break;
-        }
-
         // -----------------------------------------------------------------------------
         // Selection
         // -----------------------------------------------------------------------------
@@ -166,18 +165,14 @@ namespace Edit
             }
         }
 
-        return NextState;
+        return m_NextState;
     }
 
     // -----------------------------------------------------------------------------
 
     void CEditState::OnEvent(const Base::CInputEvent& _rInputEvent)
     {
-        if (_rInputEvent.GetType() == Base::CInputEvent::Exit)
-        {
-            m_Action = CState::Exit;
-        }
-        else if (_rInputEvent.GetType() == Base::CInputEvent::Input)
+        if (_rInputEvent.GetType() == Base::CInputEvent::Input)
         {
             if (_rInputEvent.GetAction() == Base::CInputEvent::MouseLeftReleased && m_pSelectionTicket != nullptr)
             {

@@ -12,9 +12,16 @@ namespace Edit
     {
     public:
 
-        CImFileFialog(const std::string& _rTitle, const std::regex& _rFilter = std::regex(".*.[]?"));
+        enum EConfig
+        {
+            SaveDialog     = 0x01,
+            AllowRoots     = 0x02,
+            RootIsRoot     = 0x04
+        };
 
-        void SetToCurrentPath();
+    public:
+
+        CImFileFialog(const std::string& _rTitle, const std::regex& _rFilter = std::regex(".*.[]?"), const std::string& _rRoot = ".", int _Config = 0);
 
         void Open();
         
@@ -92,8 +99,11 @@ namespace Edit
 
         SSorter m_Sorter;
 
+        std::filesystem::path m_RootPath;
         std::filesystem::path m_CurrentPath;
         std::filesystem::space_info m_SpaceInfo;
+
+        EConfig m_Config;
 
     private:
 

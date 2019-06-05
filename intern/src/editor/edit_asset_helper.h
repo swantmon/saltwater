@@ -22,6 +22,7 @@ namespace Edit
             Texture,
             Scene,
             Record,
+            All,
             NumberOfTypes,
             Undefined = -1,
         };

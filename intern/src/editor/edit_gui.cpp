@@ -7,13 +7,17 @@
 #include "base/base_singleton.h"
 #include "base/base_uncopyable.h"
 
+#include "editor/edit_application.h"
 #include "editor/edit_assets_panel.h"
 #include "editor/edit_console_panel.h"
+#include "editor/edit_edit_state.h"
 #include "editor/edit_gui.h"
 #include "editor/edit_infos_panel.h"
 #include "editor/edit_inspector_panel.h"
+#include "editor/edit_load_map_state.h"
 #include "editor/edit_scene_graph_panel.h"
 #include "editor/edit_toolbar_panel.h"
+#include "editor/edit_unload_map_state.h"
 
 #include "editor/imgui/imgui.h"
 #include "editor/imgui/imgui_impl_opengl.h"
@@ -51,6 +55,12 @@
 
 using namespace Edit;
 
+namespace Config
+{
+    static const std::string s_WindowTitle = "Editor";
+    static const std::string s_UnsavedHint = " [unsaved]";
+} // namespace Config
+
 namespace 
 {
     class CEditorGui : Base::CUncopyable
@@ -74,6 +84,8 @@ namespace
         void ProcessEvents();
 
         void* GetEditorWindowHandle();
+
+        void SwitchScene(const std::string& _rScene);
 
     private:
 
@@ -107,10 +119,17 @@ namespace
         int m_AnalogStickDeadZone;
 
         bool m_EnableGamepad;
-        bool m_CloseWindow;
 
         bool m_ShowGUI;
 		bool m_IsFullscreen;
+        bool m_WantsToExit;
+        bool m_WantsToOpenScene;
+        bool m_WantsToSaveScene;
+
+        std::string m_OpenSceneName;
+
+        Edit::CImFileFialog m_OpenSceneDialog;
+        Edit::CImFileFialog m_SaveSceneAsDialog;
 
         Engine::CEventDelegates::HandleType m_GfxOnRenderGUIDelegate;
 
@@ -137,9 +156,15 @@ namespace
         , m_pGamePad           (nullptr)
         , m_pWindow            (nullptr)
         , m_AnalogStickDeadZone(0)
-        , m_CloseWindow        (false)
+        , m_EnableGamepad      (false)
         , m_ShowGUI            (true)
         , m_IsFullscreen       (false)
+        , m_WantsToExit        (false)
+        , m_WantsToOpenScene   (false)
+        , m_WantsToSaveScene   (false)
+        , m_OpenSceneName      ("")
+        , m_OpenSceneDialog    ("Open scene...", CAsset::s_Filter[CAsset::Scene], Core::AssetManager::GetPathToAssets(), CImFileFialog::RootIsRoot)
+        , m_SaveSceneAsDialog  ("Save scene...", CAsset::s_Filter[CAsset::Scene], Core::AssetManager::GetPathToAssets(), CImFileFialog::RootIsRoot | CImFileFialog::SaveDialog)
     {                          
     }
     
@@ -172,7 +197,7 @@ namespace
 
         SDL_SetHintWithPriority(SDL_HINT_RENDER_VSYNC, "0", SDL_HINT_OVERRIDE);
 
-        m_pWindow = SDL_CreateWindow("Editor", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WindowSize.x, WindowSize.y, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+        m_pWindow = SDL_CreateWindow(Config::s_WindowTitle.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WindowSize.x, WindowSize.y, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 
         if (m_pWindow == nullptr)
         {
@@ -345,6 +370,14 @@ namespace
     void CEditorGui::ProcessEvents()
     {
         // -----------------------------------------------------------------------------
+        // Check state
+        // -----------------------------------------------------------------------------
+        std::string Title = Config::s_WindowTitle + " (Scene: " + CUnloadMapState::GetInstance().GetFilename();
+
+        if (CEditState::GetInstance().IsDirty()) SDL_SetWindowTitle(m_pWindow, (Title + Config::s_UnsavedHint + ")").c_str());
+        else SDL_SetWindowTitle(m_pWindow, (Title + ")").c_str());
+
+        // -----------------------------------------------------------------------------
         // Events
         // -----------------------------------------------------------------------------
         ProcessSDLEvents();
@@ -360,6 +393,147 @@ namespace
 
         ImGuizmo::BeginFrame();
 
+        // -----------------------------------------------------------------------------
+        // Exit, save and scene switch
+        // -----------------------------------------------------------------------------
+        if (m_WantsToExit && CEditState::GetInstance().IsDirty() == false)
+        {
+            using Base::CInputEvent;
+
+            CInputEvent Event(CInputEvent::Input);
+
+            Event = Base::CInputEvent(Base::CInputEvent::Exit);
+
+            Gui::EventHandler::OnEvent(Event);
+
+            Edit::CEditState::GetInstance().SetNextState(CState::UnloadMap);
+
+            Edit::CUnloadMapState::GetInstance().SetNextState(CState::Exit);
+
+            m_WantsToExit = false;
+        }
+
+        if (m_WantsToOpenScene && CEditState::GetInstance().IsDirty() == false)
+        {
+            Edit::CEditState::GetInstance().SetNextState(CState::UnloadMap);
+
+            Edit::CUnloadMapState::GetInstance().SetNextState(CState::LoadMap);
+
+            Edit::CLoadMapState::GetInstance().LoadFromFile(m_OpenSceneName);
+
+            Edit::CLoadMapState::GetInstance().SetNextState(CState::Edit);
+
+            CEditState::GetInstance().SetDirty(false);
+
+            m_WantsToOpenScene = false;
+        }
+
+        if ((m_WantsToExit || m_WantsToOpenScene) && CEditState::GetInstance().IsDirty() == true)
+        {
+            ImGui::OpenPopup("Scene Have Been Modified");
+        }
+
+        if (CEditState::GetInstance().IsDirty() == false)
+        {
+            m_WantsToSaveScene = false;
+        }
+
+        if (m_WantsToSaveScene && CEditState::GetInstance().IsDirty() == true)
+        {
+            Edit::CEditState::GetInstance().SetNextState(CState::UnloadMap);
+
+            Edit::CUnloadMapState::GetInstance().SetNextState(CState::Edit);
+
+            CUnloadMapState::GetInstance().PreventSaving(false);
+
+            CEditState::GetInstance().SetDirty(false);
+
+            m_WantsToSaveScene = false;
+        }
+
+        // -----------------------------------------------------------------------------
+        // Dialogs
+        // -----------------------------------------------------------------------------
+        if (m_SaveSceneAsDialog.Draw())
+        {
+            auto Files = m_SaveSceneAsDialog.GetSelectedFiles();
+
+            if (!Files.empty())
+            {
+                auto rSceneFile = Files[0];
+
+                if (!regex_match(rSceneFile, CAsset::s_Filter[CAsset::Scene]))
+                {
+                    rSceneFile += ".sws";
+                }
+
+                Edit::CEditState::GetInstance().SetNextState(CState::UnloadMap);
+
+                Edit::CUnloadMapState::GetInstance().SaveToFile(rSceneFile);
+
+                Edit::CUnloadMapState::GetInstance().SetNextState(CState::Edit);
+
+                CEditState::GetInstance().SetDirty(false);
+            }
+        }
+
+        if (m_OpenSceneDialog.Draw())
+        {
+            auto Files = m_OpenSceneDialog.GetSelectedFiles();
+
+            if (!Files.empty())
+            {
+                auto rSceneFile = Files[0];
+
+                SwitchScene(rSceneFile);
+            }
+        }
+
+        if (ImGui::BeginPopupModal("Scene Have Been Modified", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+        {
+            ImGui::Text("Do you want to save the changes you made in the scene:");
+            ImGui::Text(CUnloadMapState::GetInstance().GetFilename().c_str());
+
+            ImGui::Text("");
+
+            ImGui::Text("Your changes will be lost if you don't save them.");
+
+            if (ImGui::Button("Save"))
+            {
+                CEditState::GetInstance().SetDirty(false);
+
+                CUnloadMapState::GetInstance().PreventSaving(false);
+
+                ImGui::CloseCurrentPopup();
+            }
+
+            ImGui::SameLine();
+
+            if (ImGui::Button("Don't Save"))
+            {
+                CEditState::GetInstance().SetDirty(false);
+
+                CUnloadMapState::GetInstance().PreventSaving(true);
+
+                ImGui::CloseCurrentPopup();
+            }
+
+            ImGui::SameLine();
+
+            if (ImGui::Button("Cancel"))
+            {
+                m_WantsToExit = false;
+                m_WantsToOpenScene = false;
+
+                ImGui::CloseCurrentPopup();
+            }
+
+            ImGui::EndPopup();
+        }
+
+        // -----------------------------------------------------------------------------
+        // Windows
+        // -----------------------------------------------------------------------------
         if (!m_ShowGUI)
         {
             return;
@@ -367,7 +541,7 @@ namespace
 
 #if SHOW_DEMO_WINDOW == 1
         ImGui::ShowDemoWindow();
-#endif
+#endif        
 
         // -----------------------------------------------------------------------------
         // Menu
@@ -376,7 +550,27 @@ namespace
         {
             if (ImGui::BeginMenu("File"))
             {
-                ImGui::MenuItem("Exit", "ALT+F4", &m_CloseWindow);
+                if (ImGui::MenuItem("Open Scene", "CTRL+O"))
+                {
+                    m_OpenSceneDialog.Open();
+                }
+
+                if (ImGui::MenuItem("Save", "CTRL+S"))
+                {
+                    m_WantsToSaveScene = true;
+                }
+
+                if (ImGui::MenuItem("Save As", "CTRL+SHIFT+S"))
+                {
+                    m_SaveSceneAsDialog.Open();
+                }
+
+                ImGui::Separator();
+
+                if (ImGui::MenuItem("Exit", "ALT+F4"))
+                {
+                    m_WantsToExit = true;
+                }
 
                 ImGui::EndMenu();
             }
@@ -390,11 +584,11 @@ namespace
                     EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
                     EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
-                    Dt::CEntity& rNewEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+                    Dt::CEntity& rNewEntity = Dt::CEntityManager::GetInstance().CreateEntity(EntityDesc);
 
                     rNewEntity.SetName("New entity");
 
-                    Dt::EntityManager::MarkEntityAsDirty(rNewEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+                    Dt::CEntityManager::GetInstance().MarkEntityAsDirty(rNewEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
                 }
 
                 if (ImGui::BeginMenu("3D Object"))
@@ -406,7 +600,7 @@ namespace
                         EntityDesc.m_EntityCategory = Dt::SEntityCategory::Static;
                         EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
-                        Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+                        Dt::CEntity& rEntity = Dt::CEntityManager::GetInstance().CreateEntity(EntityDesc);
 
                         rEntity.SetName("New Sphere");
 
@@ -420,7 +614,7 @@ namespace
 
                         Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pMeshComponent, Dt::CMeshComponent::DirtyCreate);
 
-                        Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+                        Dt::CEntityManager::GetInstance().MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
                     }
 
                     if (ImGui::MenuItem("Cube"))
@@ -430,7 +624,7 @@ namespace
                         EntityDesc.m_EntityCategory = Dt::SEntityCategory::Static;
                         EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
-                        Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+                        Dt::CEntity& rEntity = Dt::CEntityManager::GetInstance().CreateEntity(EntityDesc);
 
                         rEntity.SetName("New Cube");
 
@@ -444,7 +638,7 @@ namespace
 
                         Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pMeshComponent, Dt::CMeshComponent::DirtyCreate);
 
-                        Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+                        Dt::CEntityManager::GetInstance().MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
                     }
 
                     if (ImGui::MenuItem("Cone"))
@@ -454,7 +648,7 @@ namespace
                         EntityDesc.m_EntityCategory = Dt::SEntityCategory::Static;
                         EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
-                        Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+                        Dt::CEntity& rEntity = Dt::CEntityManager::GetInstance().CreateEntity(EntityDesc);
 
                         rEntity.SetName("New Cone");
 
@@ -468,7 +662,7 @@ namespace
 
                         Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pMeshComponent, Dt::CMeshComponent::DirtyCreate);
 
-                        Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+                        Dt::CEntityManager::GetInstance().MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
                     }
 
                     ImGui::EndMenu();
@@ -481,7 +675,7 @@ namespace
                     EntityDesc.m_EntityCategory = Dt::SEntityCategory::Dynamic;
                     EntityDesc.m_FacetFlags = Dt::CEntity::FacetHierarchy | Dt::CEntity::FacetTransformation | Dt::CEntity::FacetComponents;
 
-                    Dt::CEntity& rEntity = Dt::EntityManager::CreateEntity(EntityDesc);
+                    Dt::CEntity& rEntity = Dt::CEntityManager::GetInstance().CreateEntity(EntityDesc);
 
                     rEntity.SetName("Camera");
 
@@ -496,7 +690,7 @@ namespace
 
                     // -----------------------------------------------------------------------------
 
-                    Dt::EntityManager::MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+                    Dt::CEntityManager::GetInstance().MarkEntityAsDirty(rEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
                 }
 
                 ImGui::EndMenu();
@@ -552,6 +746,25 @@ namespace
 
         return WMinfo.info.win.window;
     }
+
+    // -----------------------------------------------------------------------------
+
+    void CEditorGui::SwitchScene(const std::string& _rScene)
+    {
+        if (_rScene != Edit::CUnloadMapState::GetInstance().GetFilename() && regex_match(_rScene, CAsset::s_Filter[CAsset::Scene]))
+        {
+            if (_rScene != Edit::CUnloadMapState::GetInstance().GetFilename())
+            {
+                m_WantsToOpenScene = true;
+
+                m_OpenSceneName = _rScene;
+            }
+            else
+            {
+                ENGINE_CONSOLE_INFOV("Scene %s is already loaded.", _rScene.c_str());
+            }
+        }
+    }
     
     // -----------------------------------------------------------------------------
 
@@ -577,11 +790,9 @@ namespace
             // -----------------------------------------------------------------------------
             // Special
             // -----------------------------------------------------------------------------
-            if (SDLEvent.type == SDL_QUIT || m_CloseWindow)
+            if (SDLEvent.type == SDL_QUIT)
             {
-                Base::CInputEvent Event = Base::CInputEvent(Base::CInputEvent::Exit);
-
-                Gui::EventHandler::OnEvent(Event);
+                m_WantsToExit = true;
             }
         }
     }
@@ -590,16 +801,10 @@ namespace
 
     void CEditorGui::ProcessWindowEvents(const SDL_Event& _rSDLEvent)
     {
-        using Base::CInputEvent;
-
-        CInputEvent Event(CInputEvent::Input);
-
         switch (_rSDLEvent.window.event)
         {
         case SDL_WINDOWEVENT_CLOSE:
-            Event = Base::CInputEvent(Base::CInputEvent::Exit);
-
-            Gui::EventHandler::OnEvent(Event);
+            m_WantsToExit = true;
             break;
         case SDL_WINDOWEVENT_RESIZED:
         case SDL_WINDOWEVENT_SIZE_CHANGED:
@@ -638,6 +843,9 @@ namespace
             
             if ((Mod & KMOD_ALT) != 0 && Key == SDLK_RETURN) ToggleFullscreen();
             else if ((Mod & KMOD_ALT) != 0 && Key == SDLK_HASH) ToggleGUI();
+            else if ((Mod & KMOD_CTRL) && (Mod & KMOD_SHIFT) && Key == SDLK_s) m_SaveSceneAsDialog.Open();
+            else if ((Mod & KMOD_CTRL) && Key == SDLK_s) m_WantsToSaveScene = true;
+            else if ((Mod & KMOD_CTRL) && Key == SDLK_o) m_OpenSceneDialog.Open();
             break;
         case SDL_KEYUP:
             Key = _rSDLEvent.key.keysym.sym;
@@ -899,6 +1107,13 @@ namespace GUI
     void* GetEditorWindowHandle()
     {
         return CEditorGui::GetInstance().GetEditorWindowHandle();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void SwitchScene(const std::string& _rScene)
+    {
+        CEditorGui::GetInstance().SwitchScene(_rScene);
     }
 } // namespace GUI
 } // namespace Edit

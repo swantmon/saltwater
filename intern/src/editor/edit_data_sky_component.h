@@ -17,17 +17,19 @@ namespace Dt
     {
     public:
 
-        void OnGUI()
+        bool OnGUI()
         {
+            bool HasChanged = false;
+
             // -----------------------------------------------------------------------------
             // Refresh mode
             // -----------------------------------------------------------------------------
             {
                 const char* Text[] = { "Static", "Dynamic" };
 
-                int Index = static_cast<int>(GetRefreshMode());
+                auto Index = static_cast<int>(GetRefreshMode());
 
-                ImGui::Combo("Refresh Mode", &Index, Text, 2);
+                HasChanged |= ImGui::Combo("Refresh Mode", &Index, Text, 2);
 
                 SetRefreshMode(static_cast<ERefreshMode>(Index));
             }
@@ -38,9 +40,9 @@ namespace Dt
             {
                 const char* Text[] = { "Procedural", "Panorama", "Cubemap" };
 
-                int Index = static_cast<int>(GetType());
+                auto Index = static_cast<int>(GetType());
 
-                ImGui::Combo("Type", &Index, Text, 3);
+                HasChanged |= ImGui::Combo("Type", &Index, Text, 3);
 
                 SetType(static_cast<EType>(Index));
             }
@@ -51,9 +53,9 @@ namespace Dt
             {
                 const char* Text[] = { "64", "128", "256", "512", "1024", "2048" };
 
-                int Index = static_cast<int>(GetQuality());
+                auto Index = static_cast<int>(GetQuality());
 
-                ImGui::Combo("Quality", &Index, Text, 6);
+                HasChanged |= ImGui::Combo("Quality", &Index, Text, 6);
 
                 SetQuality(static_cast<EQuality>(Index));
             }
@@ -61,12 +63,14 @@ namespace Dt
             // -----------------------------------------------------------------------------
             // Texture
             // -----------------------------------------------------------------------------
-            ImGui::TextureField("##SKY_TEXTURE", "Texture", m_Texture);
+            HasChanged |= ImGui::TextureField("##SKY_TEXTURE", "Texture", m_Texture);
 
             // -----------------------------------------------------------------------------
             // Intensity
             // -----------------------------------------------------------------------------
-            ImGui::DragFloat("Intensity", &m_Intensity);
+            HasChanged |= ImGui::DragFloat("Intensity", &m_Intensity);
+
+            return HasChanged;
         }
 
         // -----------------------------------------------------------------------------
@@ -80,7 +84,7 @@ namespace Dt
 
         void OnNewComponent(Dt::CEntity::BID _ID)
         {
-            Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(_ID);
+            Dt::CEntity* pCurrentEntity = Dt::CEntityManager::GetInstance().GetEntityByID(_ID);
 
             pCurrentEntity->SetCategory(Dt::SEntityCategory::Dynamic);
 

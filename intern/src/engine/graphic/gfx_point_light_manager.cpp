@@ -108,7 +108,7 @@ namespace
 
         Dt::CComponentManager::CComponentDelegate::HandleType m_OnDirtyComponentDelegate;
 
-        Dt::EntityManager::CEntityDelegate::HandleType m_OnDirtyEntityDelegate;
+        Dt::CEntityManager::CEntityDelegate::HandleType m_OnDirtyEntityDelegate;
 
     private:
 
@@ -235,7 +235,7 @@ namespace
         // -----------------------------------------------------------------------------
         m_OnDirtyComponentDelegate = Dt::CComponentManager::GetInstance().RegisterDirtyComponentHandler(std::bind(&CGfxPointLightManager::OnDirtyComponent, this, std::placeholders::_1));
 
-        m_OnDirtyEntityDelegate = Dt::EntityManager::RegisterDirtyEntityHandler(std::bind(&CGfxPointLightManager::OnDirtyEntity, this, std::placeholders::_1));
+        m_OnDirtyEntityDelegate = Dt::CEntityManager::GetInstance().RegisterDirtyEntityHandler(std::bind(&CGfxPointLightManager::OnDirtyEntity, this, std::placeholders::_1));
     }
 
     // -----------------------------------------------------------------------------

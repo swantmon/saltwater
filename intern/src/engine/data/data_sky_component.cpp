@@ -7,6 +7,8 @@
 
 namespace Dt
 {
+    REGISTER_COMPONENT_SER(CSkyComponent);
+
     CSkyComponent::CSkyComponent()
         : m_RefreshMode(Static)
         , m_Quality    (PX1024)

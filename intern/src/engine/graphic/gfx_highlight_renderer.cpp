@@ -373,7 +373,7 @@ namespace
 
     void CGfxHighlightRenderer::HighlightEntity(Base::ID _EntityID)
     {
-        m_pSelectedEntity = Dt::EntityManager::GetEntityByID(_EntityID);
+        m_pSelectedEntity = Dt::CEntityManager::GetInstance().GetEntityByID(_EntityID);
 
         assert(m_pSelectedEntity != nullptr);
     }

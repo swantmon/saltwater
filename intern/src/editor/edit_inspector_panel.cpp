@@ -5,6 +5,7 @@
 
 #include "editor/edit_asset_helper.h"
 #include "editor/edit_component_factory.h"
+#include "editor/edit_edit_state.h"
 #include "editor/edit_gui_factory.h"
 #include "editor/edit_inspector_panel.h"
 
@@ -44,7 +45,7 @@ namespace GUI
             return;
         }
 
-        m_pEntity = Dt::EntityManager::GetEntityByID(_ID);
+        m_pEntity = Dt::CEntityManager::GetInstance().GetEntityByID(_ID);
     }
 
     // -----------------------------------------------------------------------------
@@ -55,6 +56,7 @@ namespace GUI
         ImGui::SetNextWindowSize(ImVec2(300, 400), ImGuiCond_FirstUseEver);
 
         int IndexID = 0;
+        bool HasChanged = false;
 
         auto& rFactory = Edit::CGUIFactory::GetInstance();
         auto& rComponentFactory = Edit::CComponentFactory::GetInstance();
@@ -71,7 +73,10 @@ namespace GUI
 
                 auto Panel = rFactory.Get<Dt::CEntity>(m_pEntity);
 
-                Panel->OnGUI();
+                if (Panel->OnGUI())
+                {
+                    CEditState::GetInstance().SetDirty();
+                }
 
                 ImGui::PopID();
 
@@ -92,7 +97,7 @@ namespace GUI
 
                 if (ImGui::CollapsingHeader(Panel->GetHeader(), ImGuiTreeNodeFlags_DefaultOpen))
                 {
-                    Panel->OnGUI();
+                    if (Panel->OnGUI()) CEditState::GetInstance().SetDirty();
                 }
 
                 ImGui::PopID();
@@ -127,11 +132,19 @@ namespace GUI
 
                             bool IsActive = pComponent->IsActive();
 
-                            ImGui::Checkbox("Active##ComponentActive", &IsActive);
+                            if (ImGui::Checkbox("Active##ComponentActive", &IsActive))
+                            {
+                                pComponent->SetActive(IsActive);
 
-                            pComponent->SetActive(IsActive);
+                                HasChanged = true;
+                            }                            
 
-                            Panel->OnGUI();
+                            if (Panel->OnGUI())
+                            {
+                                Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Dt::IComponent::DirtyInfo);
+
+                                CEditState::GetInstance().SetDirty();
+                            }
 
                             ImGui::EndChild();
                         }
@@ -145,6 +158,8 @@ namespace GUI
                                 auto& DraggedAsset = *static_cast<Edit::CAsset*>(_pPayload->Data);
 
                                 Panel->OnDropAsset(DraggedAsset);
+
+                                HasChanged = true;
                             }
 
                             ImGui::EndDragDropTarget();
@@ -152,12 +167,10 @@ namespace GUI
 
                         ++IndexID;
                     }
-
-                    Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Dt::IComponent::DirtyInfo);
                 }
             }
 
-            Dt::EntityManager::MarkEntityAsDirty(*m_pEntity, Dt::CEntity::DirtyMove);
+            Dt::CEntityManager::GetInstance().MarkEntityAsDirty(*m_pEntity, Dt::CEntity::DirtyMove);
 
             ImGui::Separator();
 
@@ -208,11 +221,21 @@ namespace GUI
                             m_pEntity->AttachComponent(pComponent);
 
                             Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Dt::CMaterialComponent::DirtyCreate);
+
+                            HasChanged = true;
                         }
                     }
 
                     ImGui::EndDragDropTarget();
                 }
+            }
+
+            // -----------------------------------------------------------------------------
+            // Dirty
+            // -----------------------------------------------------------------------------
+            if (HasChanged)
+            {
+                CEditState::GetInstance().SetDirty();
             }
         }
 

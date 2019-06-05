@@ -1,9 +1,11 @@
 
 #pragma once
 
-#include "engine/engine_config.h"
-
+#include "base/base_serialize_text_reader.h"
+#include "base/base_serialize_text_writer.h"
 #include "base/base_type_info.h"
+
+#include "engine/engine_config.h"
 
 #include "engine/data/data_entity.h"
 
@@ -55,7 +57,7 @@ namespace Dt
 
         IComponent()
             : m_ID(0)
-            , m_pHostEntity(0)
+            , m_pHostEntity(nullptr)
             , m_DirtyFlags(0)
         {};
 
@@ -67,6 +69,16 @@ namespace Dt
         const Dt::CEntity* GetHostEntity() const
         {
             return m_pHostEntity;
+        }
+
+        void SetHostEntity(Dt::CEntity* _pEntity)
+        {
+            if (m_pHostEntity != nullptr)
+            {
+                m_pHostEntity->DetachComponent(this);
+            }
+
+            m_pHostEntity = _pEntity;
         }
 
         unsigned int GetDirtyFlags() const
@@ -94,6 +106,12 @@ namespace Dt
         virtual const Base::ID GetTypeID() const = 0;
 
         virtual ~IComponent() {};
+
+        virtual inline void Read(CSceneReader& _rCodec) = 0;
+
+        virtual inline void Write(CSceneWriter& _rCodec) = 0;
+
+        virtual IComponent* Allocate() = 0;
 
     protected:
 
@@ -137,9 +155,12 @@ namespace Dt
         void* GetFacet(unsigned int _Category);
         const void* GetFacet(unsigned int _Category) const;
 
+        inline void Read(CSceneReader& _rCodec) override;
+        inline void Write(CSceneWriter& _rCodec) override;
+
     private:
 
-        typedef std::array<void*, NumberOfFacets> CFacets;
+        using CFacets = std::array<void*, NumberOfFacets>;
 
     private:
 
@@ -203,6 +224,26 @@ namespace Dt
     const void* CComponent<T>::GetFacet(unsigned int _Category) const
     {
         return m_Facets[_Category];
+    }
+
+    // -----------------------------------------------------------------------------
+
+    template<class T>
+    void CComponent<T>::Read(CSceneReader& _rCodec)
+    {
+        _rCodec >> m_ID;
+        _rCodec >> m_Flags.m_Key;
+        _rCodec >> m_DirtyFlags;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    template<class T>
+    void CComponent<T>::Write(CSceneWriter& _rCodec)
+    {
+        _rCodec << m_ID;
+        _rCodec << m_Flags.m_Key;
+        _rCodec << m_DirtyFlags;
     }
 } // namespace Dt
 

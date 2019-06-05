@@ -5,9 +5,9 @@ namespace Edit
 {
     class CState
     {
-        
+
     public:
-        
+
         enum EStateType
         {
             Start,
@@ -20,34 +20,62 @@ namespace Edit
             NumberOfStateTypes,
             UndefinedStateType = -1
         };
-        
+
+    public:
+
+        inline CState();
+        inline CState(EStateType _State);
+                
     public:
         
-        inline CState::EStateType OnEnter();
-        inline CState::EStateType OnLeave();
+        inline void OnEnter();
+        inline void OnLeave();
         inline CState::EStateType OnRun();
+
+    public:
+
+        inline void SetNextState(EStateType _State);
+
+    protected:
+
+        EStateType m_NextState = UndefinedStateType;
 
     private:
         
-        virtual CState::EStateType InternOnEnter() = 0;
-        virtual CState::EStateType InternOnLeave() = 0;
-        virtual CState::EStateType InternOnRun()   = 0;
-        
+        virtual void InternOnEnter() = 0;
+        virtual void InternOnLeave() = 0;
+        virtual CState::EStateType InternOnRun() = 0;
     };
 } // namespace Edit
 
 namespace Edit
 {
-    CState::EStateType CState::OnEnter()
+    CState::CState()
+        : m_NextState(UndefinedStateType)
     {
-        return InternOnEnter();
+
+    }
+
+    // -----------------------------------------------------------------------------
+
+    CState::CState(EStateType _State)
+        : m_NextState(_State)
+    {
+
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CState::OnEnter()
+    {
+        InternOnEnter();
     }
     
     // -----------------------------------------------------------------------------
     
-    CState::EStateType CState::OnLeave()
+    void CState::OnLeave()
     {
-        return InternOnLeave();
+        InternOnLeave();
     }
     
     // -----------------------------------------------------------------------------
@@ -55,5 +83,12 @@ namespace Edit
     CState::EStateType CState::OnRun()
     {
         return InternOnRun();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    inline void CState::SetNextState(EStateType _State)
+    {
+        m_NextState = _State;
     }
 } // namespace Edit

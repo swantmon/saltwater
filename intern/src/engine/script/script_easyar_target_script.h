@@ -4,8 +4,11 @@
 #include "base/base_coordinate_system.h"
 #include "base/base_include_glm.h"
 
+#include "engine/core/core_plugin_manager.h"
+
 #include "engine/data/data_camera_component.h"
 #include "engine/data/data_component_facet.h"
+#include "engine/data/data_entity_manager.h"
 #include "engine/data/data_transformation_facet.h"
 
 #include "engine/script/script_script.h"
@@ -16,10 +19,10 @@ namespace Scpt
     {
     public:
 
-        typedef const void* (*AcquireNewTargetFunc)(const std::string& _rPathToFile);
-        typedef const void(*ReleaseTargetFunc)(const void* _pTarget);
-        typedef int(*GetTargetTrackingStateFunc)(const void* _pTarget);
-        typedef glm::mat4(*GetTargetModelMatrixFunc)(const void* _pTarget);
+        using AcquireNewTargetFunc = const void* (*)(const std::string& _rPathToFile);
+        using ReleaseTargetFunc = const void(*)(const void* _pTarget);
+        using GetTargetTrackingStateFunc = int(*)(const void* _pTarget);
+        using GetTargetModelMatrixFunc = glm::mat4(*)(const void* _pTarget);
 
         AcquireNewTargetFunc AcquireNewTarget;
         ReleaseTargetFunc ReleaseTarget;
@@ -82,7 +85,7 @@ namespace Scpt
 
             pTransformation->SetRotation(glm::eulerAngles(glm::toQuat(glm::mat3(ModelMatrix))));
 
-            Dt::EntityManager::MarkEntityAsDirty(*m_pEntity, Dt::CEntity::DirtyMove);
+            Dt::CEntityManager::GetInstance().MarkEntityAsDirty(*m_pEntity, Dt::CEntity::DirtyMove);
         }
 
         // -----------------------------------------------------------------------------
@@ -90,6 +93,27 @@ namespace Scpt
         void OnInput(const Base::CInputEvent& _rEvent) override
         {
             BASE_UNUSED(_rEvent);
+        }
+
+    public:
+
+        inline void Read(CSceneReader& _rCodec) override
+        {
+            CComponent::Read(_rCodec);
+
+            Base::Serialize(_rCodec, m_TargetFile);
+        }
+
+        inline void Write(CSceneWriter& _rCodec) override
+        {
+            CComponent::Write(_rCodec);
+
+            Base::Serialize(_rCodec, m_TargetFile);
+        }
+
+        inline IComponent* Allocate() override
+        {
+            return new CEasyARTargetScript();
         }
     };
 } // namespace Scpt

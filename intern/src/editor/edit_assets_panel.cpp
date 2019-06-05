@@ -43,7 +43,7 @@ namespace GUI
 {
     CAssetsPanel::CAssetsPanel()
         : m_Title    ("Assets")
-        , m_Regex    (".*.[]?")
+        , m_Regex    (CAsset::s_Filter[CAsset::All])
         , m_SpaceInfo()
     {
         m_RootPath    = Core::AssetManager::GetPathToAssets();
@@ -278,6 +278,8 @@ namespace GUI
     {
         m_Directories.clear();
         m_Files.clear();
+        
+        if (!std::filesystem::exists(m_CurrentPath)) return;
 
         m_SpaceInfo = std::filesystem::space(m_CurrentPath);
 

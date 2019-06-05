@@ -7,6 +7,8 @@
 
 namespace Dt
 {
+    REGISTER_COMPONENT_SER(CBloomComponent);
+
     CBloomComponent::CBloomComponent()
         : m_Tint         (glm::vec4(1.0f, 1.0f, 1.0f, 1.0f))
         , m_Intensity    (1.0f)

@@ -16,8 +16,8 @@ namespace Edit
 namespace Edit
 {
     CIntroState::CIntroState()
+        : CState(Intro)
     {
-
     }
     
     // -----------------------------------------------------------------------------
@@ -29,22 +29,23 @@ namespace Edit
     
     // -----------------------------------------------------------------------------
     
-    CState::EStateType CIntroState::InternOnEnter()
+    void CIntroState::InternOnEnter()
     {
-        return Edit::CState::Intro;
     }
     
     // -----------------------------------------------------------------------------
     
-    CState::EStateType CIntroState::InternOnLeave()
+    void CIntroState::InternOnLeave()
     {
-        return Edit::CState::Intro;
+        m_NextState = CState::Intro;
     }
     
     // -----------------------------------------------------------------------------
     
     CState::EStateType CIntroState::InternOnRun()
     {
-        return Edit::CState::LoadMap;
+        m_NextState = CState::LoadMap;
+
+        return m_NextState;
     }
 } // namespace Edit

@@ -2,9 +2,13 @@
 #include "editor/edit_precompiled.h"
 
 #include "editor/edit_asset_helper.h"
+#include "editor/edit_edit_state.h"
+#include "editor/edit_gui.h"
 #include "editor/edit_gui_factory.h"
-#include "editor/edit_scene_graph_panel.h"
 #include "editor/edit_inspector_panel.h"
+#include "editor/edit_load_map_state.h"
+#include "editor/edit_scene_graph_panel.h"
+#include "editor/edit_unload_map_state.h"
 
 #include "engine/core/core_console.h"
 
@@ -92,10 +96,16 @@ namespace GUI
         // -----------------------------------------------------------------------------
         // GUI
         // -----------------------------------------------------------------------------
+        auto Filename = Edit::CUnloadMapState::GetInstance().GetFilename();
+
+        auto Scenename = Filename.substr(0, Filename.find_last_of('.'));
+
         ImGui::SetNextWindowPos(ImVec2(30, 100), ImGuiCond_FirstUseEver);
         ImGui::SetNextWindowSize(ImVec2(300, 400), ImGuiCond_FirstUseEver);
 
-        ImGui::Begin("Scene Graph", &m_IsVisible);
+        ImGui::Begin("Scene Graph##SCENE_GRAPH_PANEL", &m_IsVisible, CEditState::GetInstance().IsDirty() ? ImGuiWindowFlags_UnsavedDocument : 0);
+
+        ImGui::Text("Scene: %s", Scenename.c_str());
 
         ImGui::BeginChild("SCENE_GRAPH_PANEL_CHILD");
 
@@ -148,7 +158,7 @@ namespace GUI
             {
                 if (ImGui::Button("Delete"))
                 {
-                    Dt::EntityManager::MarkEntityAsDirty(*pEntity, Dt::CEntity::DirtyRemove | Dt::CEntity::DirtyDestroy);
+                    Dt::CEntityManager::GetInstance().MarkEntityAsDirty(*pEntity, Dt::CEntity::DirtyRemove | Dt::CEntity::DirtyDestroy);
                 }
 
                 ImGui::EndPopup();
@@ -181,17 +191,19 @@ namespace GUI
 
                     auto EntityIDDestination = *static_cast<const Dt::CEntity::BID*>(payload->Data);
 
-                    Dt::CEntity* pSourceEntity = Dt::EntityManager::GetEntityByID(EntityIDDestination);
+                    Dt::CEntity* pSourceEntity = Dt::CEntityManager::GetInstance().GetEntityByID(EntityIDDestination);
 
                     if (pSourceEntity == nullptr) return;
 
                     pSourceEntity->Detach();
 
-                    Dt::CEntity* pDestinationEntity = Dt::EntityManager::GetEntityByID(CurrentID);
+                    Dt::CEntity* pDestinationEntity = Dt::CEntityManager::GetInstance().GetEntityByID(CurrentID);
 
                     pDestinationEntity->Attach(*pSourceEntity);
 
-                    Dt::EntityManager::MarkEntityAsDirty(*pSourceEntity, Dt::CEntity::DirtyMove);
+                    Dt::CEntityManager::GetInstance().MarkEntityAsDirty(*pSourceEntity, Dt::CEntity::DirtyMove);
+
+                    CEditState::GetInstance().SetDirty();
                 }
                 ImGui::EndDragDropTarget();
             }
@@ -212,11 +224,20 @@ namespace GUI
             {
                 auto& DraggedAsset = *static_cast<CAsset*>(_pPayload->Data);
 
-                auto pEntity = Edit::AssetHelper::LoadPrefabFromModel(DraggedAsset);
-
-                if (pEntity != nullptr)
+                if (DraggedAsset.GetType() == CAsset::Model)
                 {
-                    Dt::EntityManager::MarkEntityAsDirty(*pEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+                    auto pEntity = Edit::AssetHelper::LoadPrefabFromModel(DraggedAsset);
+
+                    if (pEntity != nullptr)
+                    {
+                        Dt::CEntityManager::GetInstance().MarkEntityAsDirty(*pEntity, Dt::CEntity::DirtyCreate | Dt::CEntity::DirtyAdd);
+                    }
+                }
+                else if (DraggedAsset.GetType() == CAsset::Scene)
+                {
+                    const auto& File = DraggedAsset.GetPathToFile();
+
+                    GUI::SwitchScene(File);
                 }
             }
 

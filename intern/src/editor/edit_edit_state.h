@@ -45,13 +45,16 @@ namespace Edit
         void SetMode(EMode _Mode);
         EMode GetMode() const;
 
+        void SetDirty(bool _Flag = true);
+        bool IsDirty() const;
+
     private:
 
         EOperation m_CurrentOperation;
 
         EMode m_CurrentMode;
 
-        CState::EStateType m_Action;
+        bool m_DirtyFlag;
 
         Gfx::CSelectionTicket* m_pSelectionTicket;
 
@@ -64,8 +67,8 @@ namespace Edit
         
     private:
         
-        CState::EStateType InternOnEnter() override;
-        CState::EStateType InternOnLeave() override;
+        void InternOnEnter() override;
+        void InternOnLeave() override;
         CState::EStateType InternOnRun() override;
 
     private:

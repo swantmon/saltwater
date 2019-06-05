@@ -39,4 +39,40 @@ namespace Dt
     {
         return m_Components;
     }
+
+    // -----------------------------------------------------------------------------
+
+    void CComponentFacet::Read(CSceneReader& _rCodec)
+    {
+        size_t NumberOfComponents;
+
+        _rCodec >> NumberOfComponents;
+
+        m_Components.resize(NumberOfComponents);
+
+        for (auto i = 0; i < NumberOfComponents; ++i)
+        {
+            Base::ID ID;
+
+            _rCodec >> ID;
+
+            m_Components[i] = Dt::CComponentManager::GetInstance().GetComponent<Dt::IComponent>(ID);
+        }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CComponentFacet::Write(CSceneWriter& _rCodec)
+    {
+        auto NumberOfComponents = m_Components.size();
+
+        _rCodec << NumberOfComponents;
+
+        for (auto Component : m_Components)
+        {
+            assert(Component != nullptr);
+
+            _rCodec << Component->GetID();
+        }
+    }
 } // namespace Dt

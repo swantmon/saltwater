@@ -4,8 +4,10 @@
 #include "engine/engine_config.h"
 
 #include "base/base_include_glm.h"
+#include "base/base_serialize_glm.h"
 
 #include "engine/data/data_component.h"
+#include "engine/data/data_component_manager.h"
 
 #include "engine/graphic/gfx_texture.h"
 
@@ -102,6 +104,69 @@ namespace Dt
 
         CCameraComponent();
         ~CCameraComponent();
+
+    public:
+
+        inline void Read(CSceneReader& _rCodec) override
+        {
+            CComponent::Read(_rCodec);
+
+            _rCodec >> m_CullingMask;
+            _rCodec >> m_Depth;
+            _rCodec >> m_ShutterSpeed;
+            _rCodec >> m_Aperture;
+            _rCodec >> m_ISO;
+            _rCodec >> m_EC;
+            _rCodec >> m_Size;
+            _rCodec >> m_FoV;
+            _rCodec >> m_Near;
+            _rCodec >> m_Far;
+
+            m_pBackgroundTexture = nullptr;
+
+            Base::Serialize(_rCodec, m_BackgroundColor);
+            Base::Serialize(_rCodec, m_ProjectionMatrix);
+            Base::Serialize(_rCodec, m_ViewportRect);
+
+            int ClearFlag, ProjectionType, CameraMode;
+
+            _rCodec >> ClearFlag;
+            _rCodec >> ProjectionType;
+            _rCodec >> CameraMode;
+
+            m_ClearFlag = (EClearFlag)ClearFlag;
+            m_ProjectionType = (EProjectionType)ProjectionType;
+            m_CameraMode = (ECameraMode)CameraMode;
+        }
+
+        inline void Write(CSceneWriter& _rCodec) override
+        {
+            CComponent::Write(_rCodec);
+
+            _rCodec << m_CullingMask;
+            _rCodec << m_Depth;
+            _rCodec << m_ShutterSpeed;
+            _rCodec << m_Aperture;
+            _rCodec << m_ISO;
+            _rCodec << m_EC;
+            _rCodec << m_Size;
+            _rCodec << m_FoV;
+            _rCodec << m_Near;
+            _rCodec << m_Far;
+
+            Base::Serialize(_rCodec, m_BackgroundColor);
+            Base::Serialize(_rCodec, m_ProjectionMatrix);
+            Base::Serialize(_rCodec, m_ViewportRect);
+
+            _rCodec << (int)m_ClearFlag;
+            _rCodec << (int)m_ProjectionType;
+            _rCodec << (int)m_CameraMode;
+        }
+
+        inline IComponent* Allocate() override
+        {
+            return new CCameraComponent();
+        }
 
     private:
 

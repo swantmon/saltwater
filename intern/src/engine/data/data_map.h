@@ -99,5 +99,8 @@ namespace Map
     ENGINE_API void AddEntity(CEntity& _rEntity);
     ENGINE_API void RemoveEntity(CEntity& _rEntity);
     ENGINE_API void MoveEntity(CEntity& _rEntity);
+
+    ENGINE_API void Read(CSceneReader& _rCodec);
+    ENGINE_API void Write(CSceneWriter& _rCodec);
 } // namespace Map
 } // namespace Dt

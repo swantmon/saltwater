@@ -22,6 +22,7 @@ namespace Edit
 namespace Edit
 {
     CStartState::CStartState()
+        : CState(Start)
     {
         
     }
@@ -35,7 +36,7 @@ namespace Edit
     
     // -----------------------------------------------------------------------------
     
-    CState::EStateType CStartState::InternOnEnter()
+    void CStartState::InternOnEnter()
     {
         // -----------------------------------------------------------------------------
         // Prepare controls
@@ -47,15 +48,13 @@ namespace Edit
         // Set editor camera in edit state as starting control
         // -----------------------------------------------------------------------------
         Cam::ControlManager::SetActiveControl(Cam::CControl::EditorControl);
-
-        return Edit::CState::Start;
     }
     
     // -----------------------------------------------------------------------------
     
-    CState::EStateType CStartState::InternOnLeave()
+    void CStartState::InternOnLeave()
     {
-        return Edit::CState::Start;
+        m_NextState = Start;
     }
     
     // -----------------------------------------------------------------------------

@@ -4,6 +4,7 @@
 #include "engine/engine_config.h"
 
 #include "base/base_include_glm.h"
+#include "base/base_serialize_glm.h"
 
 namespace Dt
 {
@@ -26,6 +27,9 @@ namespace Dt
         void SetWorldMatrix(glm::mat4& _rMatrix);
         glm::mat4& GetWorldMatrix();
         const glm::mat4& GetWorldMatrix() const;
+
+        void Read(CSceneReader& _rCodec);
+        void Write(CSceneWriter& _rCodec);
 
     public:
 

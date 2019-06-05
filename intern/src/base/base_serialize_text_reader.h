@@ -1,18 +1,4 @@
 
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \file base_serialize_text_reader.h
-///
-/// \author Tobias Schwandt
-/// \author Credits to Joerg Sahm
-/// \author Copyright (c) Tobias Schwandt. All rights reserved.
-///
-/// \date 2012-2013
-///
-/// \version 1.0
-/// 
-////////////////////////////////////////////////////////////////////////////////
-
 #pragma once
 
 #include "base/base_defines.h"
@@ -34,8 +20,8 @@ namespace SER
         };
 
     public:
-        typedef std::istream  CStream;
-        typedef CTextReader CThis;
+        using CStream = std::istream;
+        using CThis = CTextReader;
 
     public:
         inline  CTextReader(CStream& _rStream, unsigned int _Version);
@@ -116,6 +102,8 @@ namespace SER
 
         inline void InternReadEOL();
 
+        inline void InternJumpEOL();
+
         inline void InternReadIndent();
 
         inline void InternIgnore(unsigned int _NumberOfBytes);
@@ -131,7 +119,7 @@ namespace SER
         , m_State         (Root)
     {
         // -----------------------------------------------------------------------------
-        // Read header informations (internal format, version)
+        // Read header information (internal format, version)
         // -----------------------------------------------------------------------------        
         InternReadName(Private::Code::s_Version);
 
@@ -185,7 +173,7 @@ namespace SER
     template<typename TElement>
     inline unsigned int CTextReader::BeginCollection()
     {
-        typedef typename SRemoveQualifier<TElement>::X XUnqualified;
+        using XUnqualified = typename SRemoveQualifier<TElement>::X;
 
         return InternBeginCollection(static_cast<XUnqualified*>(0));
     }
@@ -203,7 +191,7 @@ namespace SER
     template<typename TElement>
     inline void CTextReader::EndCollection()
     {
-        typedef typename SRemoveQualifier<TElement>::X XUnqualified;
+        using XUnqualified = typename SRemoveQualifier<TElement>::X;
 
         InternEndCollection(static_cast<XUnqualified*>(0));
     }
@@ -230,17 +218,7 @@ namespace SER
     template<typename TElement>
     inline void CTextReader::ReadClass(TElement& _rElement)
     {
-        typedef typename SRemoveQualifier<TElement>::X XUnqualified;
-
-        std::string ClassName = typeid(XUnqualified).name();
-
-        InternReadIndent();
-
-        InternReadChar(Private::Code::s_BracketOpen);
-
-        InternReadName(ClassName.c_str());
-
-        InternReadEOL();
+        InternJumpEOL();
 
         ++ m_NumberOfIdents;
 
@@ -484,26 +462,21 @@ namespace SER
 
     inline void CTextReader::InternReadChar(const char _Char)
     {
-        BASE_UNUSED(_Char);
-
-        InternIgnore(sizeof(char));
+        InternIgnore(sizeof(_Char));
     }
 
     // -----------------------------------------------------------------------------
 
     inline void CTextReader::InternReadChar(const char _Char, unsigned int _NumberOfChars)
     {
-        for (unsigned int IndexOfChar = 0; IndexOfChar < _NumberOfChars; ++ IndexOfChar)
-        {
-            InternReadChar(_Char);
-        }
+        InternIgnore(sizeof(_Char) * _NumberOfChars);
     }
 
     // -----------------------------------------------------------------------------
 
     inline void CTextReader::InternReadName(const char* _pChar)
     {
-        InternIgnore(static_cast<unsigned int>(strlen(_pChar)));
+        InternIgnore(sizeof(*_pChar) * static_cast<unsigned int>(strlen(_pChar)));
     }
 
     // -----------------------------------------------------------------------------
@@ -515,9 +488,16 @@ namespace SER
 
     // -----------------------------------------------------------------------------
 
+    inline void CTextReader::InternJumpEOL()
+    {
+        m_pStream->ignore(std::numeric_limits<std::streamsize>::max(), Private::Code::s_EOL);
+    }
+
+    // -----------------------------------------------------------------------------
+
     inline void CTextReader::InternReadIndent()
     {
-        InternReadChar(Private::Code::s_Indent, m_NumberOfIdents);
+        InternIgnore(sizeof(Private::Code::s_Indent) * m_NumberOfIdents);
     }
 
     // -----------------------------------------------------------------------------

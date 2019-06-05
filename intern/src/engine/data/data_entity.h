@@ -70,7 +70,7 @@ namespace Dt
 
     public:
 
-        typedef Base::ID BID;
+        using BID = Base::ID;
 
     public:
 
@@ -161,13 +161,14 @@ namespace Dt
         CComponentFacet* GetComponentFacet();
         const CComponentFacet* GetComponentFacet() const;
 
-    public:
-
         void Attach(CEntity& _rEntity);
         void Detach();
 
         void AttachComponent(Dt::IComponent* _pComponent);
         void DetachComponent(Dt::IComponent* _pComponent);
+
+        void Read(CSceneReader& _rCodec);
+        void Write(CSceneWriter& _rCodec);
 
     protected:
         

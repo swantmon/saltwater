@@ -55,7 +55,7 @@ namespace
 
         Dt::CComponentManager::CComponentDelegate::HandleType m_OnDirtyComponentDelegate;
 
-        Dt::EntityManager::CEntityDelegate::HandleType m_OnDirtyEntityDelegate;
+        Dt::CEntityManager::CEntityDelegate::HandleType m_OnDirtyEntityDelegate;
 
         Gui::EventHandler::CEventDelegate::HandleType m_OnEventDelegate;
     };
@@ -73,7 +73,7 @@ namespace
         // -----------------------------------------------------------------------------
         // register changing entities
         // -----------------------------------------------------------------------------
-        m_OnDirtyEntityDelegate = Dt::EntityManager::RegisterDirtyEntityHandler(std::bind(&CCamControlManager::OnDirtyEntity, this, std::placeholders::_1));
+        m_OnDirtyEntityDelegate = Dt::CEntityManager::GetInstance().RegisterDirtyEntityHandler(std::bind(&CCamControlManager::OnDirtyEntity, this, std::placeholders::_1));
 
         // -----------------------------------------------------------------------------
         // register input event to gui

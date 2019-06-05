@@ -4,6 +4,7 @@
 #include "engine/engine_config.h"
 
 #include "engine/data/data_component.h"
+#include "engine/data/data_component_manager.h"
 
 #include <string>
 
@@ -41,6 +42,39 @@ namespace Dt
 
         CMeshComponent();
         ~CMeshComponent();
+
+    public:
+
+        inline void Read(CSceneReader& _rCodec) override
+        {
+            CComponent::Read(_rCodec);
+
+            Base::Serialize(_rCodec, m_Filename);
+
+            int MeshType;
+
+            _rCodec >> m_GeneratorFlag;
+            _rCodec >> m_MeshIndex;
+            _rCodec >> MeshType;
+
+            m_MeshType = (EMeshType)MeshType;
+        }
+
+        inline void Write(CSceneWriter& _rCodec) override
+        {
+            CComponent::Write(_rCodec);
+
+            Base::Serialize(_rCodec, m_Filename);
+
+            _rCodec << m_GeneratorFlag;
+            _rCodec << m_MeshIndex;
+            _rCodec << (int)m_MeshType;
+        }
+
+        inline IComponent* Allocate() override
+        {
+            return new CMeshComponent();
+        }
 
     private:
 

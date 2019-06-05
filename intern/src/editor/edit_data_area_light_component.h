@@ -15,29 +15,33 @@ namespace Dt
     {
     public:
 
-        void OnGUI()
+        bool OnGUI()
         {
-            ImGui::ColorEdit3("Color", &m_Color.r);
+            bool HasChanged = false;
 
-            ImGui::TextureField("##AREA_LIGHT_TEXTURE", "Texture", m_Texture);
+            HasChanged |= ImGui::ColorEdit3("Color", &m_Color.r);
 
-            ImGui::DragFloat("Intensity", &m_Intensity, 10.0f);
+            HasChanged |= ImGui::TextureField("##AREA_LIGHT_TEXTURE", "Texture", m_Texture);
 
-            ImGui::DragFloat3("Direction", &m_Direction.x);
+            HasChanged |= ImGui::DragFloat("Intensity", &m_Intensity, 10.0f);
+
+            HasChanged |= ImGui::DragFloat3("Direction", &m_Direction.x);
 
 			float DegreeAngle = glm::degrees(m_Rotation);
 
-            ImGui::DragFloat("Rotation", &DegreeAngle, 0.1f, 0.0f, 0.0f, "%.2f");
+            HasChanged |= ImGui::DragFloat("Rotation", &DegreeAngle, 0.1f, 0.0f, 0.0f, "%.2f");
 
 			m_Rotation = glm::radians(DegreeAngle);
 
-            ImGui::DragFloat("Width", &m_Width);
+            HasChanged |= ImGui::DragFloat("Width", &m_Width);
 
-            ImGui::DragFloat("Height", &m_Height);
+            HasChanged |= ImGui::DragFloat("Height", &m_Height);
 
-            ImGui::Checkbox("Is Two Sided", &m_IsTwoSided);
+            HasChanged |= ImGui::Checkbox("Is Two Sided", &m_IsTwoSided);
 
-            UpdateLightness();
+            if (HasChanged) UpdateLightness();
+
+            return HasChanged;
         }
 
         // -----------------------------------------------------------------------------
@@ -51,7 +55,7 @@ namespace Dt
 
         void OnNewComponent(Dt::CEntity::BID _ID)
         {
-            Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(_ID);
+            Dt::CEntity* pCurrentEntity = Dt::CEntityManager::GetInstance().GetEntityByID(_ID);
 
             pCurrentEntity->SetCategory(Dt::SEntityCategory::Dynamic);
 

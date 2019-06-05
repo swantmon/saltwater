@@ -4,8 +4,10 @@
 #include "engine/engine_config.h"
 
 #include "base/base_include_glm.h"
+#include "base/base_serialize_glm.h"
 
 #include "engine/data/data_component.h"
+#include "engine/data/data_component_manager.h"
 
 #include <string>
 
@@ -88,6 +90,63 @@ namespace Dt
 
         CMaterialComponent();
         ~CMaterialComponent();
+
+    public:
+
+        inline void Read(CSceneReader& _rCodec) override
+        {
+            CComponent::Read(_rCodec);
+
+            Base::Serialize(_rCodec, m_Materialname);
+            Base::Serialize(_rCodec, m_FileName);
+            Base::Serialize(_rCodec, m_ColorTexture);
+            Base::Serialize(_rCodec, m_NormalTexture);
+            Base::Serialize(_rCodec, m_RoughnessTexture);
+            Base::Serialize(_rCodec, m_MetalTexture);
+            Base::Serialize(_rCodec, m_AmbientOcclusionTexture);
+            Base::Serialize(_rCodec, m_BumpTexture);
+            Base::Serialize(_rCodec, m_AlphaTexture);
+
+            Base::Serialize(_rCodec, m_Color);
+
+            Base::Serialize(_rCodec, m_TilingOffset);
+
+            _rCodec >> m_Roughness;
+            _rCodec >> m_Reflectance;
+            _rCodec >> m_MetalMask;
+            _rCodec >> m_Displacement;
+            _rCodec >> m_RefractionIndex;
+        }
+
+        inline void Write(CSceneWriter& _rCodec) override
+        {
+            CComponent::Write(_rCodec);
+
+            Base::Serialize(_rCodec, m_Materialname);
+            Base::Serialize(_rCodec, m_FileName);
+            Base::Serialize(_rCodec, m_ColorTexture);
+            Base::Serialize(_rCodec, m_NormalTexture);
+            Base::Serialize(_rCodec, m_RoughnessTexture);
+            Base::Serialize(_rCodec, m_MetalTexture);
+            Base::Serialize(_rCodec, m_AmbientOcclusionTexture);
+            Base::Serialize(_rCodec, m_BumpTexture);
+            Base::Serialize(_rCodec, m_AlphaTexture);
+
+            Base::Serialize(_rCodec, m_Color);
+
+            Base::Serialize(_rCodec, m_TilingOffset);
+
+            _rCodec << m_Roughness;
+            _rCodec << m_Reflectance;
+            _rCodec << m_MetalMask;
+            _rCodec << m_Displacement;
+            _rCodec << m_RefractionIndex;
+        }
+
+        inline IComponent* Allocate() override
+        {
+            return new CMaterialComponent();
+        }
 
     private:
 

@@ -121,5 +121,22 @@ namespace Scpt
     protected:
 
         SScriptSettings m_Settings;
+
+    public:
+
+        inline void Read(CSceneReader& _rCodec) override
+        {
+            CComponent::Read(_rCodec);
+        }
+
+        inline void Write(CSceneWriter& _rCodec) override
+        {
+            CComponent::Write(_rCodec);
+        }
+
+        inline IComponent* Allocate() override
+        {
+            return new CSLAMScript();
+        }
     };
 } // namespace Scpt

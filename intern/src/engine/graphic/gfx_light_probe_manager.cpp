@@ -421,9 +421,9 @@ namespace
         m_GeometryVPBufferPtr = nullptr;
         m_GeometryMBufferPtr  = nullptr;
 
-        for (auto & ShadowTexturePtr : m_LightJob.m_ShadowTexturePtrs)
+        for (auto& rShadowTexturePtr : m_LightJob.m_ShadowTexturePtrs)
         {
-            ShadowTexturePtr = nullptr;
+            rShadowTexturePtr = nullptr;
         }
 
         m_LightJob.m_SpecularTexturePtr = nullptr;
@@ -436,9 +436,9 @@ namespace
     {
         auto DataComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CLightProbeComponent>();
 
-        for (auto Component : DataComponents)
+        for (auto pComponent : DataComponents)
         {
-            auto* pDtComponent = static_cast<Dt::CLightProbeComponent*>(Component);
+            auto* pDtComponent = static_cast<Dt::CLightProbeComponent*>(pComponent);
 
             if (!pDtComponent->IsActiveAndUsable()) continue;
 
@@ -467,9 +467,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Dirty check
         // -----------------------------------------------------------------------------
-        unsigned int DirtyFlags;
-
-        DirtyFlags = pLightProbeComponent->GetDirtyFlags();
+        auto DirtyFlags = pLightProbeComponent->GetDirtyFlags();
 
         CInternLightProbe* pGfxComponent = nullptr;
 
@@ -605,7 +603,7 @@ namespace
         CInternLightProbe::CTargetSets&   rSpecularTargetSets   = _rInterLightProbeFacet.m_SpecularHDRTargetSetPtrs;
         CInternLightProbe::CViewPortSets& rSpecularViewPortSets = _rInterLightProbeFacet.m_SpecularViewPortSetPtrs;
 
-        for (unsigned int IndexOfMipmap = 0; IndexOfMipmap < _rInterLightProbeFacet.m_SpecularPtr->GetNumberOfMipLevels(); ++ IndexOfMipmap)
+        for (auto IndexOfMipmap = 0u; IndexOfMipmap < _rInterLightProbeFacet.m_SpecularPtr->GetNumberOfMipLevels(); ++ IndexOfMipmap)
         {
             // -----------------------------------------------------------------------------
             // Target set
@@ -617,8 +615,8 @@ namespace
             // -----------------------------------------------------------------------------
             // View port
             // -----------------------------------------------------------------------------
-            ViewPortDesc.m_Width    = static_cast<float>(MipmapCubeTexture->GetNumberOfPixelsU());
-            ViewPortDesc.m_Height   = static_cast<float>(MipmapCubeTexture->GetNumberOfPixelsV());
+            ViewPortDesc.m_Width  = static_cast<float>(MipmapCubeTexture->GetNumberOfPixelsU());
+            ViewPortDesc.m_Height = static_cast<float>(MipmapCubeTexture->GetNumberOfPixelsV());
             
             CViewPortPtr SpecularMipmapViewPort = ViewManager::CreateViewPort(ViewPortDesc);
             
@@ -642,8 +640,8 @@ namespace
             // -----------------------------------------------------------------------------
             // View port
             // -----------------------------------------------------------------------------
-            ViewPortDesc.m_Width    = static_cast<float>(_rInterLightProbeFacet.m_DiffusePtr->GetNumberOfPixelsU());
-            ViewPortDesc.m_Height   = static_cast<float>(_rInterLightProbeFacet.m_DiffusePtr->GetNumberOfPixelsV());
+            ViewPortDesc.m_Width  = static_cast<float>(_rInterLightProbeFacet.m_DiffusePtr->GetNumberOfPixelsU());
+            ViewPortDesc.m_Height = static_cast<float>(_rInterLightProbeFacet.m_DiffusePtr->GetNumberOfPixelsV());
             
             CViewPortPtr DiffuseMipmapViewPort = ViewManager::CreateViewPort(ViewPortDesc);
             
@@ -1085,8 +1083,10 @@ namespace
         float MipmapRoughness      = 0.0f;
         float MipmapRoughnessDelta = 1.0f / NumberOfMiplevels;
 
-        for (const auto& CurrentOfSpecularMipmap : rSpecularTargetSets)
+        for (const auto& rCurrentOfSpecularMipmap : rSpecularTargetSets)
         {
+            BASE_UNUSED(rCurrentOfSpecularMipmap);
+
             // -----------------------------------------------------------------------------
             // Upload per mipmap changing data
             // -----------------------------------------------------------------------------
@@ -1178,7 +1178,7 @@ namespace
     void CGfxLightProbeManager::UpdateLightProperties()
     {
         SLightPropertiesBuffer LightBuffer[s_MaxNumberOfLightsPerProbe];
-        unsigned int     IndexOfLight;
+        unsigned int           IndexOfLight;
 
         // -----------------------------------------------------------------------------
         // Clear jobs
@@ -1216,11 +1216,11 @@ namespace
         // -----------------------------------------------------------------------------
         auto DataComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CSunComponent>();
 
-        for (auto Component : DataComponents)
+        for (auto pComponent : DataComponents)
         {
             if (IndexOfLight == s_MaxNumberOfLightsPerProbe) break;
 
-            auto* pDtComponent = static_cast<Dt::CSunComponent*>(Component);
+            auto* pDtComponent = static_cast<Dt::CSunComponent*>(pComponent);
 
             if (pDtComponent->IsActiveAndUsable() == false) continue;
 
@@ -1248,11 +1248,11 @@ namespace
         // -----------------------------------------------------------------------------
         DataComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CPointLightComponent>();
 
-        for (auto Component : DataComponents)
+        for (auto pComponent : DataComponents)
         {
             if (IndexOfLight == s_MaxNumberOfLightsPerProbe) break;
 
-            auto* pDtComponent = static_cast<Dt::CPointLightComponent*>(Component);
+            auto* pDtComponent = static_cast<Dt::CPointLightComponent*>(pComponent);
 
             if (pDtComponent->IsActiveAndUsable() == false) continue;
 
@@ -1295,11 +1295,11 @@ namespace
         // -----------------------------------------------------------------------------
         DataComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CLightProbeComponent>();
 
-        for (auto Component : DataComponents)
+        for (auto pComponent : DataComponents)
         {
             if (IndexOfLight == s_MaxNumberOfLightsPerProbe) break;
 
-            auto* pDtComponent = static_cast<Dt::CLightProbeComponent*>(Component);
+            auto* pDtComponent = static_cast<Dt::CLightProbeComponent*>(pComponent);
 
             if (pDtComponent->IsActiveAndUsable() == false) continue;
 
@@ -1323,7 +1323,7 @@ namespace
 
     void CGfxLightProbeManager::UpdateGeometryBuffer(const glm::vec3& _rPosition, float _Near, float _Far)
     {
-        std::array<glm::vec3, 6> LookDirections = {
+        static const std::array<glm::vec3, 6> LookDirections = {
             glm::vec3(+1.0f,  0.0f,  0.0f),
             glm::vec3(-1.0f,  0.0f,  0.0f),
             glm::vec3( 0.0f, -1.0f,  0.0f),
@@ -1332,7 +1332,7 @@ namespace
             glm::vec3( 0.0f,  0.0f, +1.0f),
         };
 
-        std::array<glm::vec3, 6> UpDirections = {
+        static const std::array<glm::vec3, 6> UpDirections = {
             glm::vec3(0.0f, 1.0f,  0.0f),
             glm::vec3(0.0f, 1.0f,  0.0f),
             glm::vec3(0.0f, 0.0f, -1.0f),

@@ -19,8 +19,8 @@ namespace SER
         };
 
     public:
-        typedef std::ostream  CStream;
-        typedef CRecordWriter CThis;
+        using CStream = std::ostream;
+        using CThis = CRecordWriter;
 
     public:
         inline  CRecordWriter(CStream& _rStream, unsigned int _Version);
@@ -127,7 +127,7 @@ namespace SER
     template<typename TElement>
     inline void CRecordWriter::WriteCollection(const TElement* _pElements, unsigned int _NumberOfElements)
     {
-        typedef typename SRemovePointer<TElement>::X XUnqualified;
+        using XUnqualified = typename SRemovePointer<TElement>::X;
         bool IsPrimitive = SIsPrimitive<TElement>::Value;
 
         if (IsPrimitive)

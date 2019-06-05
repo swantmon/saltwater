@@ -14,7 +14,7 @@ namespace Scpt
     {
     public:
 
-        void OnGUI()
+        bool OnGUI()
         {
             ImGui::Checkbox("Enable Selection", &m_Settings.m_IsSelectionEnabled);
             ImGui::Checkbox("Enable Mouse Control", &m_Settings.m_IsMouseControlEnabled);
@@ -71,6 +71,8 @@ namespace Scpt
                 }
                 ImGui::EndCombo();
             }
+
+            return true;
         }
 
         // -----------------------------------------------------------------------------
@@ -84,7 +86,7 @@ namespace Scpt
 
         void OnNewComponent(Dt::CEntity::BID _ID)
         {
-            Dt::CEntity* pCurrentEntity = Dt::EntityManager::GetEntityByID(_ID);
+            Dt::CEntity* pCurrentEntity = Dt::CEntityManager::GetInstance().GetEntityByID(_ID);
 
             pCurrentEntity->SetCategory(Dt::SEntityCategory::Dynamic);
 

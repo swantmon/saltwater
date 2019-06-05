@@ -435,4 +435,43 @@ namespace Dt
 
         m_pComponentsFacet->RemoveComponent(_pComponent);
     }
+
+    // -----------------------------------------------------------------------------
+
+    void CEntity::Read(CSceneReader& _rCodec)
+    {
+        Base::Serialize(_rCodec, m_Name);
+
+        _rCodec >> m_ID;
+        _rCodec >> m_WorldAABB[0][0];
+        _rCodec >> m_WorldAABB[0][1];
+        _rCodec >> m_WorldAABB[0][2];
+        _rCodec >> m_WorldAABB[1][0];
+        _rCodec >> m_WorldAABB[1][1];
+        _rCodec >> m_WorldAABB[1][2];
+
+        Base::Serialize(_rCodec, m_WorldPosition);
+
+        _rCodec >> m_Flags.m_Key;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CEntity::Write(CSceneWriter& _rCodec)
+    {
+        Base::Serialize(_rCodec, m_Name);
+
+        _rCodec << m_ID;
+        _rCodec << m_WorldAABB[0][0];
+        _rCodec << m_WorldAABB[0][1];
+        _rCodec << m_WorldAABB[0][2];
+        _rCodec << m_WorldAABB[1][0];
+        _rCodec << m_WorldAABB[1][1];
+        _rCodec << m_WorldAABB[1][2];
+
+        Base::Serialize(_rCodec, m_WorldPosition);
+
+        _rCodec << m_Flags.m_Key;
+    }
+
 } // namespace Dt

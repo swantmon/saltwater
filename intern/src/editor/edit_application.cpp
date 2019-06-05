@@ -46,7 +46,7 @@ namespace
         
     private:
         
-        static Edit::CState* s_pStates[Edit::CState::NumberOfStateTypes];
+        static std::array<Edit::CState*, Edit::CState::NumberOfStateTypes> s_pStates;
         
     private:
         
@@ -61,7 +61,7 @@ namespace
 
 namespace
 {
-    Edit::CState* CApplication::s_pStates[] =
+    std::array<Edit::CState*, Edit::CState::NumberOfStateTypes> CApplication::s_pStates =
     {
         &Edit::CStartState    ::GetInstance(),
         &Edit::CIntroState    ::GetInstance(),

@@ -1,18 +1,4 @@
 
-////////////////////////////////////////////////////////////////////////////////
-///
-/// \file base_serialize.h
-///
-/// \author Tobias Schwandt
-/// \author Credits to Joerg Sahm
-/// \author Copyright (c) Tobias Schwandt. All rights reserved.
-///
-/// \date 2012-2013
-///
-/// \version 1.0
-/// 
-////////////////////////////////////////////////////////////////////////////////
-
 #pragma once
 
 #include "base/base_defines.h"

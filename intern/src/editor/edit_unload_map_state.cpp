@@ -3,6 +3,9 @@
 
 #include "editor/edit_unload_map_state.h"
 
+#include "engine/core/core_asset_manager.h"
+#include "engine/core/core_program_parameters.h"
+
 #include "engine/data/data_entity_manager.h"
 #include "engine/data/data_map.h"
 
@@ -19,9 +22,10 @@ namespace Edit
 namespace Edit
 {
     CUnloadMapState::CUnloadMapState()
-        : m_NextState(CState::UnloadMap)
+        : CState         (UnloadMap)
+        , m_Filename     ("Default Scene.sws")
+        , m_PreventSaving(true)
     {
-
     }
     
     // -----------------------------------------------------------------------------
@@ -33,26 +37,80 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
-    void CUnloadMapState::SetNextState(CState::EStateType _NextState)
+    void CUnloadMapState::SaveToFile(const std::string& _rFilename)
     {
-        m_NextState = _NextState;
+        m_Filename = _rFilename;
     }
-    
-    // -----------------------------------------------------------------------------
-    
-    CState::EStateType CUnloadMapState::InternOnEnter()
-    {
-        Dt::Map          ::FreeMap();
-        Dt::EntityManager::Clear();
 
-        return Edit::CState::UnloadMap;
+    // -----------------------------------------------------------------------------
+
+    const std::string& CUnloadMapState::GetFilename() const
+    {
+        return m_Filename;
+    }
+
+    // -----------------------------------------------------------------------------
+    
+    void CUnloadMapState::PreventSaving(bool _Flag)
+    {
+        m_PreventSaving = _Flag;
+    }
+
+    // -----------------------------------------------------------------------------
+    
+    void CUnloadMapState::InternOnEnter()
+    {
+        // -----------------------------------------------------------------------------
+        // Save
+        // -----------------------------------------------------------------------------
+        if (!m_PreventSaving)
+        {
+            std::ofstream oStream;
+
+            oStream.open(Core::AssetManager::GetPathToAssets() + "/" + m_Filename);
+
+            if (oStream.is_open())
+            {
+                Base::CTextWriter Writer(oStream, 1);
+
+                Dt::CComponentManager::GetInstance().Write(Writer);
+                Dt::Map::Write(Writer);
+                Dt::CEntityManager::GetInstance().Write(Writer);
+
+                oStream.close();
+
+                Core::CProgramParameters::GetInstance().Set("application:last_scene", m_Filename);
+
+                ENGINE_CONSOLE_INFOV("Scene '%s' have been saved succesfully.", m_Filename.c_str());
+            }
+            else
+            {
+                ENGINE_CONSOLE_ERROR("Scene can not be saved because file can not be created or is already in use. Maybe the folder is missing?");
+            }
+        }
+        else
+        {
+            ENGINE_CONSOLE_INFOV("Scene '%s' have been not saved.", m_Filename.c_str());
+        }
+
+        // -----------------------------------------------------------------------------
+        // Unload?
+        // -----------------------------------------------------------------------------
+        if (m_NextState == CState::Exit || m_NextState == CState::LoadMap)
+        {
+            Dt::Map::FreeMap();
+            Dt::CEntityManager::GetInstance().Clear();
+            Dt::CComponentManager::GetInstance().Clear();
+        }
     }
     
     // -----------------------------------------------------------------------------
     
-    CState::EStateType CUnloadMapState::InternOnLeave()
+    void CUnloadMapState::InternOnLeave()
     {
-        return Edit::CState::UnloadMap;
+        m_NextState = CState::UnloadMap;
+
+        m_PreventSaving = true;
     }
     
     // -----------------------------------------------------------------------------
