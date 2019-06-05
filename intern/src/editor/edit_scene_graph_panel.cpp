@@ -98,12 +98,14 @@ namespace GUI
         // -----------------------------------------------------------------------------
         auto Filename = Edit::CUnloadMapState::GetInstance().GetFilename();
 
-        auto Scenename = Filename.substr(0, Filename.find_last_of('.')) + "##SCENE_GRAPH_PANEL";
+        auto Scenename = Filename.substr(0, Filename.find_last_of('.'));
 
         ImGui::SetNextWindowPos(ImVec2(30, 100), ImGuiCond_FirstUseEver);
         ImGui::SetNextWindowSize(ImVec2(300, 400), ImGuiCond_FirstUseEver);
 
-        ImGui::Begin(Scenename.c_str(), &m_IsVisible, CEditState::GetInstance().IsDirty() ? ImGuiWindowFlags_UnsavedDocument : 0);
+        ImGui::Begin("Scene Graph##SCENE_GRAPH_PANEL", &m_IsVisible, CEditState::GetInstance().IsDirty() ? ImGuiWindowFlags_UnsavedDocument : 0);
+
+        ImGui::Text("Scene: %s", Scenename.c_str());
 
         ImGui::BeginChild("SCENE_GRAPH_PANEL_CHILD");
 
