@@ -1925,6 +1925,11 @@ namespace
     
     CTexturePtr CGfxReconstructionRenderer::GetInpaintedRendering(const Base::AABB3Float& _rAABB, CTexturePtr _BackgroundTexturePtr)
     {
+		if (!m_IsInitialized)
+		{
+			return nullptr;
+		}
+
         m_IsInpainting = true;
 
         if (m_InpaintedPlaneTexture != nullptr)

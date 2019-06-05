@@ -182,7 +182,8 @@ namespace MR
         {
             INPAINTING_DISABLED,
             INPAINTING_NN,
-            INTPAINTING_PIXMIX
+            INPAINTING_PIXMIX,
+            INPAINTING_PIXMIX_OCEAN,
         };
 
         EInpaintintingMode m_InpaintingMode;
@@ -207,7 +208,7 @@ namespace MR
 
         glm::mat4 m_PreliminaryPoseMatrix;
 
-        using InpaintWithPixMixFunc = void(*)(const glm::ivec2&, const std::vector<char>&, std::vector<char>&);
+        using InpaintWithPixMixFunc = void(*)(const glm::ivec2&, const std::vector<glm::u8vec4>&, std::vector<glm::u8vec4>&);
         InpaintWithPixMixFunc InpaintWithPixMix;
 
 
@@ -272,7 +273,7 @@ namespace MR
                 }
                 else if (ModeParameter == "pixmix")
                 {
-                    ENGINE_CONSOLE_INFO("Inpainting with PixMix");
+                    ENGINE_CONSOLE_INFO("Inpainting with PixMix (Open version)");
 
                     if (!Core::PluginManager::LoadPlugin("PixMix"))
                     {
@@ -281,7 +282,20 @@ namespace MR
 
                     InpaintWithPixMix = (InpaintWithPixMixFunc)(Core::PluginManager::GetPluginFunction("PixMix", "Inpaint"));
 
-                    m_InpaintingMode = INTPAINTING_PIXMIX;
+                    m_InpaintingMode = INPAINTING_PIXMIX;
+                }
+                else if (ModeParameter == "pixmix_ocean")
+                {
+                    ENGINE_CONSOLE_INFO("Inpainting with PixMix (Original version)");
+
+                    if (!Core::PluginManager::LoadPlugin("PixMixOcean"))
+                    {
+                        BASE_THROWM("PixMix plugin was not loaded");
+                    }
+
+                    InpaintWithPixMix = (InpaintWithPixMixFunc)(Core::PluginManager::GetPluginFunction("PixMix_Ocean", "Inpaint"));
+
+                    m_InpaintingMode = INPAINTING_PIXMIX_OCEAN;
                 }
                 else
                 {
@@ -1233,18 +1247,18 @@ namespace MR
 
                 Net::CNetworkManager::GetInstance().SendMessage(m_NeuralNetworkSocket, Message);
             }
-            else if (m_InpaintingMode == INTPAINTING_PIXMIX)
+            else if (m_InpaintingMode == INPAINTING_PIXMIX || m_InpaintingMode == INPAINTING_PIXMIX_OCEAN)
             {
-                auto RawData = std::vector<char>(m_PlaneResolution * m_PlaneResolution * 4);
+				std::vector<glm::u8vec4> RawData(m_PlaneResolution * m_PlaneResolution);
 
-                Gfx::TextureManager::CopyTextureToCPU(m_PlaneTexture, RawData.data());
+                Gfx::TextureManager::CopyTextureToCPU(m_PlaneTexture, reinterpret_cast<char*>(RawData.data()));
 
-                auto InpaintedImage = std::vector<char>(m_PlaneResolution * m_PlaneResolution * 4);
+				std::vector<glm::u8vec4> InpaintedImage(m_PlaneResolution * m_PlaneResolution);
 
                 InpaintWithPixMix(glm::ivec2(m_PlaneResolution, m_PlaneResolution), RawData, InpaintedImage);
 
                 auto TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_PlaneResolution, m_PlaneResolution));
-                Gfx::TextureManager::CopyToTexture2D(m_PlaneTexture, TargetRect, m_PlaneResolution, const_cast<char*>(InpaintedImage.data()), true);
+                Gfx::TextureManager::CopyToTexture2D(m_PlaneTexture, TargetRect, m_PlaneResolution, reinterpret_cast<char*>(InpaintedImage.data()), true);
 
                 Gfx::ReconstructionRenderer::SetInpaintedPlane(m_PlaneTexture, AABB);
             }
