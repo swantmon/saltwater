@@ -164,17 +164,19 @@ namespace PM
             }
         }
 
+#ifdef ENGINE_DEBUG_MODE
         cv::imshow("Input color image", Source3);
         cv::imshow("Input mask image", Mask);
-        //cv::waitKey(1);
+#endif
 
         PixMix pm;
         pm.init(Source3, Mask);
 
         pm.execute(Dest3, 0.05f);
 
+#ifdef ENGINE_DEBUG_MODE
         cv::imshow("Output color image", Dest3);
-        //cv::waitKey();
+#endif
 
         cv::cvtColor(Dest3, Dest4, cv::COLOR_RGB2BGRA);
 
