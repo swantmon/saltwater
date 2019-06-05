@@ -831,6 +831,7 @@ namespace
             else if ((Mod & KMOD_ALT) != 0 && Key == SDLK_HASH) ToggleGUI();
             else if ((Mod & KMOD_CTRL) && (Mod & KMOD_SHIFT) && Key == SDLK_s) m_SaveSceneAsDialog.Open();
             else if ((Mod & KMOD_CTRL) && Key == SDLK_s) m_WantsToSaveScene = true;
+            else if ((Mod & KMOD_CTRL) && Key == SDLK_o) m_OpenSceneDialog.Open();
             break;
         case SDL_KEYUP:
             Key = _rSDLEvent.key.keysym.sym;
