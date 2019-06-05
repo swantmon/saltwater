@@ -304,7 +304,10 @@ namespace Dt
             _rCodec >> *CurrentEntity;
 
             m_EntityByID[CurrentEntity->m_ID] = &*CurrentEntity;
+        }
 
+        for (auto CurrentEntity = m_Entities.Begin(); CurrentEntity != m_Entities.End(); ++CurrentEntity)
+        {
             _rCodec >> Check;
             if (Check)
             {
@@ -379,7 +382,10 @@ namespace Dt
         for (auto CurrentEntity = m_Entities.Begin(); CurrentEntity != m_Entities.End(); ++CurrentEntity)
         {
             _rCodec << *CurrentEntity;
+        }
 
+        for (auto CurrentEntity = m_Entities.Begin(); CurrentEntity != m_Entities.End(); ++CurrentEntity)
+        {
             auto pFacetTransformation = CurrentEntity->GetTransformationFacet();
             Check = pFacetTransformation != nullptr;
             _rCodec << Check;

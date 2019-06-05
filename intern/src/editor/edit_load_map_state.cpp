@@ -3,6 +3,7 @@
 
 #include "base/base_serialize_text_reader.h"
 
+#include "editor/edit_edit_state.h"
 #include "editor/edit_load_map_state.h"
 #include "editor/edit_unload_map_state.h"
 
@@ -153,6 +154,8 @@ namespace Edit
             {
                 CreateSLAMScene();
             }
+
+            CEditState::GetInstance().SetDirty(true);
         }
     }
     
