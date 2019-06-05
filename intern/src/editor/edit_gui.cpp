@@ -55,11 +55,11 @@
 
 using namespace Edit;
 
-namespace
+namespace Config
 {
-    static const std::string m_WindowTitle = "Editor";
-    static const std::string m_UnsavedHint = " [unsaved]";
-} // namespace
+    static const std::string s_WindowTitle = "Editor";
+    static const std::string s_UnsavedHint = " [unsaved]";
+} // namespace Config
 
 namespace 
 {
@@ -197,7 +197,7 @@ namespace
 
         SDL_SetHintWithPriority(SDL_HINT_RENDER_VSYNC, "0", SDL_HINT_OVERRIDE);
 
-        m_pWindow = SDL_CreateWindow(m_WindowTitle.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WindowSize.x, WindowSize.y, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+        m_pWindow = SDL_CreateWindow(Config::s_WindowTitle.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WindowSize.x, WindowSize.y, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 
         if (m_pWindow == nullptr)
         {
@@ -372,9 +372,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Check state
         // -----------------------------------------------------------------------------
-        std::string Title = m_WindowTitle + " (Scene: " + CUnloadMapState::GetInstance().GetFilename();
+        std::string Title = Config::s_WindowTitle + " (Scene: " + CUnloadMapState::GetInstance().GetFilename();
 
-        if (CEditState::GetInstance().IsDirty()) SDL_SetWindowTitle(m_pWindow, (Title + m_UnsavedHint + ")").c_str());
+        if (CEditState::GetInstance().IsDirty()) SDL_SetWindowTitle(m_pWindow, (Title + Config::s_UnsavedHint + ")").c_str());
         else SDL_SetWindowTitle(m_pWindow, (Title + ")").c_str());
 
         // -----------------------------------------------------------------------------
