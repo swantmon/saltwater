@@ -792,7 +792,7 @@ namespace
             // -----------------------------------------------------------------------------
             if (SDLEvent.type == SDL_QUIT)
             {
-                m_WantsToExit = 1;
+                m_WantsToExit = true;
             }
         }
     }
@@ -804,7 +804,7 @@ namespace
         switch (_rSDLEvent.window.event)
         {
         case SDL_WINDOWEVENT_CLOSE:
-            m_WantsToExit = 1;
+            m_WantsToExit = true;
             break;
         case SDL_WINDOWEVENT_RESIZED:
         case SDL_WINDOWEVENT_SIZE_CHANGED:
