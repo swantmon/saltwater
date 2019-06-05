@@ -1,5 +1,7 @@
 #pragma once
 
+#ifndef OCEAN_PIXMIX
+
 #include <random>
 #include <opencv2/opencv.hpp>
 
@@ -91,3 +93,5 @@ inline cv::Vec2i OneLvPixMix::getValidRandPos()
 
     return p;
 }
+
+#endif

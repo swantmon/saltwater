@@ -6,8 +6,6 @@
 #include "engine/engine.h"
 #include "plugin/pixmix/pm_plugin_interface.h"
 
-#define OCEAN_PIXMIX
-
 #ifndef OCEAN_PIXMIX
 
 #if _DEBUG

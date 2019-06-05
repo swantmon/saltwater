@@ -1,5 +1,7 @@
 #pragma once
 
+#ifndef OCEAN_PIXMIX
+
 #include <vector>
 #include "OneLvPixMix.h"
 
@@ -21,3 +23,5 @@ private:
     void fillInLowerLv(OneLvPixMix &pmUpper, OneLvPixMix &pmLower);
     void blendBorder(cv::Mat_<cv::Vec3b> &dst);
 };
+
+#endif
