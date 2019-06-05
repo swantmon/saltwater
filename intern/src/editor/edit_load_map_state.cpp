@@ -117,6 +117,8 @@ namespace Edit
             oStream.close();
 
             CUnloadMapState::GetInstance().SaveToFile(m_Filename);
+
+            ENGINE_CONSOLE_INFOV("Sucessfully opened scene '%s.'", m_Filename.c_str());
         }
         else
         {
@@ -125,7 +127,7 @@ namespace Edit
             // -----------------------------------------------------------------------------
             auto Scene = Core::CProgramParameters::GetInstance().Get("application:template", "default");
 
-            ENGINE_CONSOLE_INFOV("Loading scene '%s'", Scene.c_str());
+            ENGINE_CONSOLE_INFOV("Loading scene template '%s'", Scene.c_str());
 
             if (Scene == "empty")
             {

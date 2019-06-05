@@ -81,7 +81,7 @@ namespace Edit
 
                 Core::CProgramParameters::GetInstance().Set("application:last_scene", m_Filename);
 
-                ENGINE_CONSOLE_INFOV("Scene %s has been saved succesfully.", m_Filename.c_str());
+                ENGINE_CONSOLE_INFOV("Scene '%s' have been saved succesfully.", m_Filename.c_str());
             }
             else
             {
@@ -90,7 +90,7 @@ namespace Edit
         }
         else
         {
-            ENGINE_CONSOLE_INFOV("Scene %s has been not saved.", m_Filename.c_str());
+            ENGINE_CONSOLE_INFOV("Scene '%s' have been not saved.", m_Filename.c_str());
         }
 
         // -----------------------------------------------------------------------------

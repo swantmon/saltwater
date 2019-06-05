@@ -153,7 +153,7 @@ namespace Dt
 
             if (m_FactoryHash.find(ID) == std::end(m_FactoryHash))
             {
-                BASE_THROWV("Failed writing component %s because hash is missing in factory.", Base::CTypeInfo::GetTypeName(Component));
+                BASE_THROWV("Failed writing component '%s' because hash is missing in factory.", Base::CTypeInfo::GetTypeName(Component));
             }
 
             Base::BHash Hash = m_FactoryHash.find(ID)->second;
