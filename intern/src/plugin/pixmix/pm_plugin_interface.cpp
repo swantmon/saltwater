@@ -1,14 +1,15 @@
 
 #include "plugin/pixmix/pm_precompiled.h"
 
+
 #include "base/base_include_glm.h"
 #include "engine/core/core_console.h"
-#include "engine/engine.h"
+#include "engine/engine_config.h"
 #include "plugin/pixmix/pm_plugin_interface.h"
 
 #ifndef OCEAN_PIXMIX
 
-#if _DEBUG
+#ifdef ENGINE_DEBUG_MODE
 
 #pragma comment(lib, "opencv_world410d.lib")
 
@@ -23,7 +24,7 @@
 
 #else
 
-#if _DEBUG
+#ifdef ENGINE_DEBUG_MODE
 
 #pragma comment(lib, "OceanBaseD.lib")
 #pragma comment(lib, "OceanCVD.lib")
