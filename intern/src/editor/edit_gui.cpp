@@ -118,6 +118,7 @@ namespace
 		bool m_IsFullscreen;
         bool m_WantsToExit;
         bool m_WantsToOpenScene;
+        bool m_WantsToSaveScene;
 
         std::string m_OpenSceneName;
 
@@ -154,6 +155,7 @@ namespace
         , m_IsFullscreen       (false)
         , m_WantsToExit        (false)
         , m_WantsToOpenScene   (false)
+        , m_WantsToSaveScene   (false)
         , m_OpenSceneName      ("")
         , m_OpenSceneDialog    ("Open scene...", CAsset::s_Filter[CAsset::Scene], Core::AssetManager::GetPathToAssets(), CImFileFialog::RootIsRoot)
         , m_SaveSceneAsDialog  ("Save scene...", CAsset::s_Filter[CAsset::Scene], Core::AssetManager::GetPathToAssets(), CImFileFialog::RootIsRoot | CImFileFialog::SaveDialog)
@@ -378,10 +380,18 @@ namespace
         ImGuizmo::BeginFrame();
 
         // -----------------------------------------------------------------------------
-        // Exit and scene switch
+        // Exit, save and scene switch
         // -----------------------------------------------------------------------------
         if (m_WantsToExit && CEditState::GetInstance().IsDirty() == false)
         {
+            using Base::CInputEvent;
+
+            CInputEvent Event(CInputEvent::Input);
+
+            Event = Base::CInputEvent(Base::CInputEvent::Exit);
+
+            Gui::EventHandler::OnEvent(Event);
+
             Edit::CEditState::GetInstance().SetNextState(CState::UnloadMap);
 
             Edit::CUnloadMapState::GetInstance().SetNextState(CState::Exit);
@@ -407,6 +417,24 @@ namespace
         if ((m_WantsToExit || m_WantsToOpenScene) && CEditState::GetInstance().IsDirty() == true)
         {
             ImGui::OpenPopup("Scene Have Been Modified");
+        }
+
+        if (CEditState::GetInstance().IsDirty() == false)
+        {
+            m_WantsToSaveScene = false;
+        }
+
+        if (m_WantsToSaveScene && CEditState::GetInstance().IsDirty() == true)
+        {
+            Edit::CEditState::GetInstance().SetNextState(CState::UnloadMap);
+
+            Edit::CUnloadMapState::GetInstance().SetNextState(CState::Edit);
+
+            CUnloadMapState::GetInstance().PreventSaving(false);
+
+            CEditState::GetInstance().SetDirty(false);
+
+            m_WantsToSaveScene = false;
         }
 
         // -----------------------------------------------------------------------------
@@ -435,7 +463,7 @@ namespace
             }
         }
 
-        if (m_WantsToOpenScene && CEditState::GetInstance().IsDirty() == false && m_OpenSceneDialog.Draw())
+        if (m_OpenSceneDialog.Draw())
         {
             auto Files = m_OpenSceneDialog.GetSelectedFiles();
 
@@ -510,18 +538,12 @@ namespace
             {
                 if (ImGui::MenuItem("Open Scene", "CTRL+O"))
                 {
-                    m_WantsToOpenScene = true;
-
                     m_OpenSceneDialog.Open();
                 }
 
                 if (ImGui::MenuItem("Save", "CTRL+S"))
                 {
-                    Edit::CEditState::GetInstance().SetNextState(CState::UnloadMap);
-
-                    Edit::CUnloadMapState::GetInstance().SetNextState(CState::Edit);
-
-                    CEditState::GetInstance().SetDirty(false);
+                    m_WantsToSaveScene = true;
                 }
 
                 if (ImGui::MenuItem("Save As", "CTRL+SHIFT+S"))
@@ -756,7 +778,7 @@ namespace
             // -----------------------------------------------------------------------------
             if (SDLEvent.type == SDL_QUIT)
             {
-                m_WantsToExit = true;
+                m_WantsToExit = 1;
             }
         }
     }
@@ -765,16 +787,10 @@ namespace
 
     void CEditorGui::ProcessWindowEvents(const SDL_Event& _rSDLEvent)
     {
-        using Base::CInputEvent;
-
-        CInputEvent Event(CInputEvent::Input);
-
         switch (_rSDLEvent.window.event)
         {
         case SDL_WINDOWEVENT_CLOSE:
-            Event = Base::CInputEvent(Base::CInputEvent::Exit);
-
-            Gui::EventHandler::OnEvent(Event);
+            m_WantsToExit = 1;
             break;
         case SDL_WINDOWEVENT_RESIZED:
         case SDL_WINDOWEVENT_SIZE_CHANGED:
@@ -813,6 +829,8 @@ namespace
             
             if ((Mod & KMOD_ALT) != 0 && Key == SDLK_RETURN) ToggleFullscreen();
             else if ((Mod & KMOD_ALT) != 0 && Key == SDLK_HASH) ToggleGUI();
+            else if ((Mod & KMOD_CTRL) && (Mod & KMOD_SHIFT) && Key == SDLK_s) m_SaveSceneAsDialog.Open();
+            else if ((Mod & KMOD_CTRL) && Key == SDLK_s) m_WantsToSaveScene = true;
             break;
         case SDL_KEYUP:
             Key = _rSDLEvent.key.keysym.sym;

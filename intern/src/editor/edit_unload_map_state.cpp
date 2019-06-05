@@ -24,7 +24,7 @@ namespace Edit
     CUnloadMapState::CUnloadMapState()
         : CState         (UnloadMap)
         , m_Filename     ("Default Scene.sws")
-        , m_PreventSaving(false)
+        , m_PreventSaving(true)
     {
     }
     
@@ -110,7 +110,7 @@ namespace Edit
     {
         m_NextState = CState::UnloadMap;
 
-        m_PreventSaving = false;
+        m_PreventSaving = true;
     }
     
     // -----------------------------------------------------------------------------
