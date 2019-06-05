@@ -82,6 +82,7 @@ namespace MR
 
         glm::ivec2 m_DeviceResolution;
         glm::mat4  m_DeviceProjectionMatrix;
+        glm::mat4  m_RelativeCameraTransform;
 
         bool m_UseTrackingCamera = true;
 
@@ -139,6 +140,7 @@ namespace MR
             glm::ivec2 m_DepthSize;
             glm::ivec2 m_ColorSize;
             glm::ivec2 m_DeviceResolution;
+            glm::mat4  m_RelativeCameraTransform;
             glm::mat4  m_DeviceProjectionMatrix;
         };
 
@@ -847,7 +849,9 @@ namespace MR
                 //int32_t Width = *reinterpret_cast<int32_t*>(Decompressed.data() + sizeof(int32_t));
                 //int32_t Height = *reinterpret_cast<int32_t*>(Decompressed.data() + 2 * sizeof(int32_t));
 
-                const uint16_t* RawBuffer = reinterpret_cast<uint16_t*>(Decompressed.data() + 3 * sizeof(int32_t));
+                glm::mat4 Projection = *reinterpret_cast<glm::mat4*>(Decompressed.data() + 3 * sizeof(int32_t));
+
+                const uint16_t* RawBuffer = reinterpret_cast<uint16_t*>(Decompressed.data() + 3 * sizeof(int32_t) + sizeof(glm::mat4));
 
                 Base::AABB2UInt TargetRect;
                 TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_DepthSize));
@@ -990,7 +994,9 @@ namespace MR
             const int32_t Width = *reinterpret_cast<const int32_t*>(_rData.data() + sizeof(int32_t));
             const int32_t Height = *reinterpret_cast<const int32_t*>(_rData.data() + 2 * sizeof(int32_t));
 
-            const char* YData = _rData.data() + 3 * sizeof(int32_t);
+            m_DeviceProjectionMatrix = *reinterpret_cast<const glm::mat4*>(_rData.data() + 3 * sizeof(int32_t));
+
+            const char* YData = _rData.data() + 3 * sizeof(int32_t) + sizeof(glm::mat4);
             const char* UVData = YData + Width * Height;
 
             Base::AABB2UInt TargetRect;
@@ -1019,6 +1025,7 @@ namespace MR
             m_DepthSize = _rMessage.m_DepthSize;
             m_ColorSize = _rMessage.m_ColorSize;
             m_DeviceResolution = _rMessage.m_DeviceResolution;
+            m_RelativeCameraTransform = _rMessage.m_RelativeCameraTransform;
             m_DeviceProjectionMatrix = _rMessage.m_DeviceProjectionMatrix;
 
             Gfx::ReconstructionRenderer::SetDeviceResolution(m_DeviceResolution);
