@@ -64,8 +64,8 @@ namespace PM
         cv::Mat_<cv::Vec4b> Source4(_Resolution.x, _Resolution.y);
         cv::Mat_<cv::Vec4b> Dest4(_Resolution.x, _Resolution.y);
 
-        std::memcpy(Source4.data, _SourceImage.data(), _SourceImage.size());
-        std::memcpy(Dest4.data, _DestinationImage.data(), _DestinationImage.size());
+        std::memcpy(Source4.data, _SourceImage.data(), _SourceImage.size() * sizeof(_SourceImage[0]));
+        std::memcpy(Dest4.data, _DestinationImage.data(), _DestinationImage.size() * sizeof(_DestinationImage[0]));
 
         cv::Mat_<cv::Vec3b> Source3(_Resolution.x, _Resolution.y);
         cv::Mat_<cv::Vec3b> Dest3(_Resolution.x, _Resolution.y);
@@ -121,7 +121,7 @@ namespace PM
 
         cv::cvtColor(Dest3, Dest4, cv::COLOR_RGB2BGRA);
 
-        std::memcpy(_DestinationImage.data(), Dest4.data, _DestinationImage.size());
+        std::memcpy(_DestinationImage.data(), Dest4.data, _DestinationImage.size() * sizeof(_DestinationImage[0]));
     }
 } // namespace PM
 
