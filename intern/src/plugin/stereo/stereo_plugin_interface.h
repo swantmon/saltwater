@@ -1,22 +1,28 @@
 
 #pragma once
 
+//---Engine---
 #include "engine/core/core_plugin_manager.h"
 
-#include "engine/graphic/gfx_shader_manager.h" // To manage GPU Shader
-#include "engine/graphic/gfx_texture_manager.h" // To manage GPU Texture (Data in GPU processing) 
-#include "engine/graphic/gfx_buffer_manager.h" // To manage GPU Buffer (Memory in GPU) 
+//---GLSL for GPU Parallel Processing---
+#include "engine/graphic/gfx_shader_manager.h"
+#include "engine/graphic/gfx_texture_manager.h"
+#include "engine/graphic/gfx_buffer_manager.h"
 
-#include "base/base_include_glm.h" // Some warnings appears when directly #include glm 
-
+//---Return Result---
 #include "base/base_delegate.h"
 
+//---FutoGmtCV---
 #include "plugin\stereo\FutoGmtCV_Img.h"
 #include "plugin\stereo\FutoGmtCV_Rect_Planar.h"
+
+//---Basic Processing---
+#include "base/base_include_glm.h" // Some warnings appears when directly #include glm 
 
 #include <vector>
 #include <memory>
 
+//---Advanced Processing---
 #include "opencv2/opencv.hpp" 
 #include "opencv2/cudastereo.hpp"
 

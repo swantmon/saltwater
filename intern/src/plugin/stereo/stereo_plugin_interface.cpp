@@ -1,19 +1,22 @@
 
+//---Preparing for Engine Execution---
 #include "plugin/stereo/stereo_precompiled.h"
-
-#include "base/base_json.h"
-
-#include "engine/core/core_console.h"
-#include "engine/core/core_program_parameters.h" // For controlling parameters in Config.
 
 #include "engine/engine.h"
 
-#include "engine/graphic/gfx_context_manager.h"
-#include "engine/graphic/gfx_performance.h"
-#include "engine/graphic/gfx_texture.h" // For Transmit Texture between CPU & GPU
-
 #include "plugin/stereo/stereo_plugin_interface.h"
 
+//---Config---
+#include "engine/core/core_console.h"
+#include "engine/core/core_program_parameters.h"
+
+//---GLSL for GPU Parallel Processing---
+#include "engine/graphic/gfx_context_manager.h"
+#include "engine/graphic/gfx_performance.h"
+#include "engine/graphic/gfx_texture.h"
+
+//---File IO in JSON Format---
+//#include "base/base_json.h"
 
 
 CORE_PLUGIN_INFO(Stereo::CPluginInterface, "Stereo Matching", "1.0", "This plugin takes RGB and transformation data and provides 2.5D depth maps")
@@ -35,7 +38,7 @@ namespace
         glm::ivec2 m_Padding;
     };
 
-    nlohmann::json Container_AgiIO, Container_AgiEO;
+    //nlohmann::json Container_AgiIO, Container_AgiEO;
 }
 
 namespace Stereo
@@ -83,37 +86,35 @@ namespace Stereo
 
     void CPluginInterface::OnFrameCPU(const std::vector<char>& _rRGBImage, const glm::mat4& _Transform, const glm::mat4& _Intrinsics, const std::vector<uint16_t>& _rDepthImage)
     {
-        glm::mat3 Cam_mtx = glm::mat3(_Intrinsics) * m_FrameResolution; // Intrinsic should be modified according to frame resolution.
-        Cam_mtx[2].z = 1;
+        glm::mat3 CamMtx = glm::mat3(_Intrinsics) * m_FrameResolution; // Intrinsic should be modified according to frame resolution.
+        CamMtx[2].z = 1;
 
-        glm::mat3 Rot_mtx = glm::transpose(glm::mat3(_Transform));// Rotation given by ARKit is Camera2World, but Rotation in Photogrammetry needs World2Camera.
+        glm::mat3 RotMtx = glm::transpose(glm::mat3(_Transform));// Rotation given by ARKit is Camera2World, but Rotation in Photogrammetry needs World2Camera.
 
-        glm::vec3 PC_vec = glm::vec3(_Transform[3]); // The last column of _Transform given by ARKit is the Position of Camera in World.
-
-        FutoGmtCV::CFutoImg frame(_rRGBImage, m_OrigImgSize, 4, Cam_mtx, Rot_mtx, PC_vec);
+        glm::vec3 PCVec = glm::vec3(_Transform[3]); // The last column of _Transform given by ARKit is the Position of Camera in World.
         
-        //---Select Keyframe for Computation---
-        if (!m_idx_Keyf_Curt) // Current keyframe is empty -> Set current keyframe.
+        //---Only Compute Keyframes---
+        if (!m_idx_Keyf_Curt)
         {
             //---Set Current Keyframe---
-            m_Keyframe_Curt = frame;
+            m_Keyframe_Curt = FutoGmtCV::CFutoImg(_rRGBImage, m_OrigImgSize, 4, CamMtx, RotMtx, PCVec);
             m_idx_Keyf_Curt = true;
         }
-        else if (m_idx_Keyf_Curt && !m_idx_Keyf_Last) // Current keyframe exists but Last keyframe is empty -> Set both current & last keyframes.
+        else if (m_idx_Keyf_Curt && !m_idx_Keyf_Last)
         {
-            //---Calculate Baseline Length---
-            glm::vec3 BaseLine = frame.get_PC() - m_Keyframe_Curt.get_PC();
+            glm::vec3 BaseLine = PCVec - m_Keyframe_Curt.get_PC();
             float BaseLineLength = glm::l2Norm(BaseLine);
-
-            if (BaseLineLength >= m_Cdt_Keyf_BaseLineL) // Select Keyframe: Baseline condition
+            
+            // Select Keyframe: Based on Baseline condition
+            if (BaseLineLength >= m_Cdt_Keyf_BaseLineL) 
             {
                 //---Set Current & Last Keyframe---
                 m_Keyframe_Last = m_Keyframe_Curt;
-                m_Keyframe_Curt = frame;
+                m_Keyframe_Curt = FutoGmtCV::CFutoImg(_rRGBImage, m_OrigImgSize, 4, CamMtx, RotMtx, PCVec);
                 m_idx_Keyf_Last = true;
 
                 m_KeyfID++;
-
+                /*
                 if (m_Is_AgiOri)
                 {
                     using namespace nlohmann;
@@ -233,6 +234,7 @@ namespace Stereo
 
                     m_Keyframe_Curt = FutoGmtCV::CFutoImg(m_Keyframe_Curt.get_Img(), m_Keyframe_Curt.get_ImgSize(), 4, _rCamMtx, _rRotMtx, _rPCVec);
                 }
+                */
 
                 //***Export Original Images***
                 std::string ExportStr;
@@ -279,7 +281,7 @@ namespace Stereo
 
                 if (m_RectImg_Curt.get_ImgSize().x > 2500 || m_RectImg_Curt.get_ImgSize().y > 2500)
                 {
-                    return;
+                    return; // LibSGM will break if the Rectified Image Size is too large.
                 }
 
                 //---Stereo Matching: Generate Disparity in Rectified Current Keyframe---
@@ -586,7 +588,7 @@ namespace Stereo
         m_ofstream_PC = std::ofstream("E:\\Project_ARCHITECT\\ARKit_CameraPosition.txt", std::ios::trunc);
 
         std::ifstream fin_AgiIO("AgiIO.json");
-
+        /*
         if (m_Is_AgiOri)
         {
             std::ifstream fin_AgiIO("AgiIO.json");
@@ -609,7 +611,7 @@ namespace Stereo
                 fin_AgiEO.close();
             }
         }
-
+        */
         //---ARKit Data---
         m_FrameResolution = Core::CProgramParameters::GetInstance().Get("mr:stereo:00_input_setting:frame_resolution", 0.5); // Full = 1; Half = 0.5;
 
