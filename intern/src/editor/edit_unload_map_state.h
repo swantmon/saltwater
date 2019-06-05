@@ -16,6 +16,8 @@ namespace Edit
 
         void SaveToFile(const std::string& _rFilename);
         const std::string& GetFilename() const;
+
+        void PreventSaving(bool _Flag);
         
     private:
         
@@ -31,5 +33,6 @@ namespace Edit
     private:
 
         std::string m_Filename;
+        bool m_PreventSaving;
     };
 } // namespace Edit

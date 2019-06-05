@@ -3,6 +3,7 @@
 
 #include "editor/edit_asset_helper.h"
 #include "editor/edit_edit_state.h"
+#include "editor/edit_gui.h"
 #include "editor/edit_gui_factory.h"
 #include "editor/edit_inspector_panel.h"
 #include "editor/edit_load_map_state.h"
@@ -102,7 +103,7 @@ namespace GUI
         ImGui::SetNextWindowPos(ImVec2(30, 100), ImGuiCond_FirstUseEver);
         ImGui::SetNextWindowSize(ImVec2(300, 400), ImGuiCond_FirstUseEver);
 
-        ImGui::Begin(Scenename.c_str(), &m_IsVisible);
+        ImGui::Begin(Scenename.c_str(), &m_IsVisible, CEditState::GetInstance().IsDirty() ? ImGuiWindowFlags_UnsavedDocument : 0);
 
         ImGui::BeginChild("SCENE_GRAPH_PANEL_CHILD");
 
@@ -199,6 +200,8 @@ namespace GUI
                     pDestinationEntity->Attach(*pSourceEntity);
 
                     Dt::CEntityManager::GetInstance().MarkEntityAsDirty(*pSourceEntity, Dt::CEntity::DirtyMove);
+
+                    CEditState::GetInstance().SetDirty();
                 }
                 ImGui::EndDragDropTarget();
             }
@@ -232,16 +235,7 @@ namespace GUI
                 {
                     const auto& File = DraggedAsset.GetPathToFile();
 
-                    if (File != Edit::CUnloadMapState::GetInstance().GetFilename())
-                    {
-                        Edit::CEditState::GetInstance().SetNextState(CState::UnloadMap);
-
-                        Edit::CUnloadMapState::GetInstance().SetNextState(CState::LoadMap);
-
-                        Edit::CLoadMapState::GetInstance().LoadFromFile(File);
-
-                        Edit::CLoadMapState::GetInstance().SetNextState(CState::Edit);
-                    }
+                    GUI::SwitchScene(File);
                 }
             }
 

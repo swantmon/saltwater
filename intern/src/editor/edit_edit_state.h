@@ -45,11 +45,16 @@ namespace Edit
         void SetMode(EMode _Mode);
         EMode GetMode() const;
 
+        void SetDirty(bool _Flag = true);
+        bool IsDirty() const;
+
     private:
 
         EOperation m_CurrentOperation;
 
         EMode m_CurrentMode;
+
+        bool m_DirtyFlag;
 
         Gfx::CSelectionTicket* m_pSelectionTicket;
 

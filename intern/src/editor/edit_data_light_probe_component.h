@@ -13,17 +13,19 @@ namespace Dt
     {
     public:
 
-        void OnGUI()
+        bool OnGUI()
         {
+            bool HasChanged = false;
+
             // -----------------------------------------------------------------------------
             // Refresh mode
             // -----------------------------------------------------------------------------
             {
                 const char* Text[] = { "Static", "Dynamic" };
 
-                int Index = static_cast<int>(GetRefreshMode());
+                auto Index = static_cast<int>(GetRefreshMode());
 
-                ImGui::Combo("Refresh Mode", &Index, Text, 2);
+                HasChanged |= ImGui::Combo("Refresh Mode", &Index, Text, 2);
 
                 SetRefreshMode(static_cast<ERefreshMode>(Index));
             }
@@ -34,9 +36,9 @@ namespace Dt
             {
                 const char* Text[] = { "Sky", "Local", "Custom" };
 
-                int Index = static_cast<int>(GetType());
+                auto Index = static_cast<int>(GetType());
 
-                ImGui::Combo("Type", &Index, Text, 3);
+                HasChanged |= ImGui::Combo("Type", &Index, Text, 3);
 
                 SetType(static_cast<EType>(Index));
             }
@@ -47,9 +49,9 @@ namespace Dt
             {
                 const char* Text[] = { "32", "64", "128", "256", "512", "1024", "2048" };
 
-                int Index = static_cast<int>(GetQuality());
+                auto Index = static_cast<int>(GetQuality());
 
-                ImGui::Combo("Quality", &Index, Text, 7);
+                HasChanged |= ImGui::Combo("Quality", &Index, Text, 7);
 
                 SetQuality(static_cast<EQuality>(Index));
             }
@@ -60,9 +62,9 @@ namespace Dt
             {
                 const char* Text[] = { "Skybox", "Black" };
 
-                int Index = static_cast<int>(GetClearFlag());
+                auto Index = static_cast<int>(GetClearFlag());
 
-                ImGui::Combo("Clear Flag", &Index, Text, 2);
+                HasChanged |= ImGui::Combo("Clear Flag", &Index, Text, 2);
 
                 SetClearFlag(static_cast<EClearFlag>(Index));
             }
@@ -70,15 +72,17 @@ namespace Dt
             // -----------------------------------------------------------------------------
             // Rest
             // -----------------------------------------------------------------------------
-            ImGui::DragFloat("Intensity", &m_Intensity);
+            HasChanged |= ImGui::DragFloat("Intensity", &m_Intensity);
 
-            ImGui::DragFloat("Near", &m_Near);
+            HasChanged |= ImGui::DragFloat("Near", &m_Near);
 
-            ImGui::DragFloat("Far", &m_Far);
+            HasChanged |= ImGui::DragFloat("Far", &m_Far);
 
-            ImGui::Checkbox("Parallax Correction", &m_ParallaxCorrection);
+            HasChanged |= ImGui::Checkbox("Parallax Correction", &m_ParallaxCorrection);
 
-            ImGui::DragFloat3("Box Size", &m_BoxSize.x);
+            HasChanged |= ImGui::DragFloat3("Box Size", &m_BoxSize.x);
+
+            return HasChanged;
         }
 
         // -----------------------------------------------------------------------------

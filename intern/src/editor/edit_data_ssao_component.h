@@ -13,9 +13,9 @@ namespace Dt
     {
     public:
 
-        void OnGUI()
+        bool OnGUI()
         {
-            
+            return false;
         }
 
         // -----------------------------------------------------------------------------

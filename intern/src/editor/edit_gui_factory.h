@@ -17,7 +17,7 @@ public:                                                                         
     BASE_CONCAT(Name, Factory)() { }                                                                            \
     IGUIFactory* Create() { return new BASE_CONCAT(Name, Factory)(); }                                          \
     void SetChild(void* _pChild) { m_pChild = (Name*)(_pChild); }                                               \
-    void OnGUI() { m_pChild->OnGUI(); }                                                                         \
+    bool OnGUI() { return m_pChild->OnGUI(); }                                                                  \
     const char* GetHeader() { return m_pChild->GetHeader(); }                                                   \
     void OnDropAsset(const Edit::CAsset& _rAsset) { m_pChild->OnDropAsset(_rAsset); }                           \
 private:                                                                                                        \
@@ -41,7 +41,7 @@ namespace Edit
 
         virtual void SetChild(void* _pChild) = 0;
 
-        virtual void OnGUI() = 0;
+        virtual bool OnGUI() = 0;
 
         virtual const char* GetHeader() = 0;
 

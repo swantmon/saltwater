@@ -13,19 +13,21 @@ namespace Dt
     {
     public:
 
-        void OnGUI()
+        bool OnGUI()
         {
-            ImGui::ColorEdit3("Color", &m_Color.r);
+            bool HasChanged = false;
 
-            ImGui::DragFloat("Intensity", &m_Intensity);
+            HasChanged |= ImGui::ColorEdit3("Color", &m_Color.r);
 
-            ImGui::DragFloat3("Direction", &m_Direction.x);
+            HasChanged |= ImGui::DragFloat("Intensity", &m_Intensity);
 
-            ImGui::DragFloat("Attenuation Radius", &m_AttentuationRadius, 0.01f, 0.0f, 100.0f, "%.2f");
+            HasChanged |= ImGui::DragFloat3("Direction", &m_Direction.x);
 
-            ImGui::SliderAngle("Inner Cone", &m_InnerConeAngle, 0.0f, 180.0f, "%.0f angle");
+            HasChanged |= ImGui::DragFloat("Attenuation Radius", &m_AttentuationRadius, 0.01f, 0.0f, 100.0f, "%.2f");
 
-            ImGui::SliderAngle("Outer Cone", &m_OuterConeAngle, 0.0f, 180.0f, "%.0f angle");
+            HasChanged |= ImGui::SliderAngle("Inner Cone", &m_InnerConeAngle, 0.0f, 180.0f, "%.0f angle");
+
+            HasChanged |= ImGui::SliderAngle("Outer Cone", &m_OuterConeAngle, 0.0f, 180.0f, "%.0f angle");
 
             // -----------------------------------------------------------------------------
             // Shadow Type
@@ -33,9 +35,9 @@ namespace Dt
             {
                 const char* Text[] = { "No Shadows", "Hard Shadows", "Global Illumination" };
 
-                int Index = static_cast<int>(GetShadowType());
+                auto Index = static_cast<int>(GetShadowType());
 
-                ImGui::Combo("Shadow Type", &Index, Text, 3);
+                HasChanged |= ImGui::Combo("Shadow Type", &Index, Text, 3);
 
                 SetShadowType(static_cast<EShadowType>(Index));
             }
@@ -46,9 +48,9 @@ namespace Dt
             {
                 const char* Text[] = { "Low", "Medium", "High", "Very High" };
 
-                int Index = static_cast<int>(GetShadowQuality());
+                auto Index = static_cast<int>(GetShadowQuality());
 
-                ImGui::Combo("Shadow Quality", &Index, Text, 4);
+                HasChanged |= ImGui::Combo("Shadow Quality", &Index, Text, 4);
 
                 SetShadowQuality(static_cast<EShadowQuality>(Index));
             }
@@ -59,14 +61,16 @@ namespace Dt
             {
                 const char* Text[] = { "Static", "Dynamic" };
 
-                int Index = static_cast<int>(GetRefreshMode());
+                auto Index = static_cast<int>(GetRefreshMode());
 
-                ImGui::Combo("Shadow Refresh", &Index, Text, 2);
+                HasChanged |= ImGui::Combo("Shadow Refresh", &Index, Text, 2);
 
                 SetRefreshMode(static_cast<ERefreshMode>(Index));
             }
 
-            UpdateLightness();
+            if (HasChanged) UpdateLightness();
+
+            return HasChanged;
         }
 
         // -----------------------------------------------------------------------------

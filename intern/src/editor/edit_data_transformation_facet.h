@@ -19,8 +19,10 @@ namespace Dt
     {
     public:
         
-        void OnGUI()
+        bool OnGUI()
         {
+            bool HasChanged = false;
+
             auto Camera = Gfx::ViewManager::GetMainCamera();
 
             auto ViewMatrix = Camera->GetView()->GetViewMatrix();
@@ -29,7 +31,7 @@ namespace Dt
             // -----------------------------------------------------------------------------
             // Position
             // -----------------------------------------------------------------------------
-            ImGui::DragFloat3("Position", &m_Position.x, 0.01f);
+            HasChanged |= ImGui::DragFloat3("Position", &m_Position.x, 0.01f);
 
             // -----------------------------------------------------------------------------
             // Rotation
@@ -43,12 +45,12 @@ namespace Dt
             DegreeAngles.y = glm::degrees(EulerAngles.y);
             DegreeAngles.z = glm::degrees(EulerAngles.z);
 
-            ImGui::DragFloat3("Rotation", &DegreeAngles.x, 0.1f, 0.0f, 0.0f, "%.2f");
+            HasChanged |= ImGui::DragFloat3("Rotation", &DegreeAngles.x, 0.1f, 0.0f, 0.0f, "%.2f");
 
             // -----------------------------------------------------------------------------
             // Scale
             // -----------------------------------------------------------------------------
-            ImGui::DragFloat3("Scale", &m_Scale.x, 0.01f);
+            HasChanged |= ImGui::DragFloat3("Scale", &m_Scale.x, 0.01f);
 
             // -----------------------------------------------------------------------------
             // GUIZMO
@@ -96,6 +98,8 @@ namespace Dt
                 ImGuizmo::Manipulate(&ViewMatrix[0][0], &ProjMatrix[0][0], CurrentGizmoOperation, CurrentGizmoMode, &WorldMatrix[0][0], nullptr, nullptr);
 
                 ImGuizmo::DecomposeMatrixToComponents(&WorldMatrix[0][0], &m_Position.x, &DegreeAngles.x, &m_Scale.x);
+
+                HasChanged |= ImGuizmo::IsUsing();
             }
 
             // -----------------------------------------------------------------------------
@@ -106,6 +110,8 @@ namespace Dt
             EulerAngles.z = glm::radians(DegreeAngles.z);
 
             m_Rotation = glm::quat(EulerAngles);
+
+            return HasChanged;
         }
 
         // -----------------------------------------------------------------------------

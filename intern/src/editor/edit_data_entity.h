@@ -13,8 +13,10 @@ namespace Dt
     {
     public:
         
-        void OnGUI()
+        bool OnGUI()
         {
+            bool HasChanged = false;
+
             ImGui::Columns(2, nullptr, false);
 
             ImGui::SetColumnWidth(0, 80);
@@ -29,7 +31,7 @@ namespace Dt
             // -----------------------------------------------------------------------------
             bool IsActive = m_Flags.m_IsActive;
 
-            ImGui::Checkbox("Active", &IsActive);
+            HasChanged |= ImGui::Checkbox("Active", &IsActive);
 
             SetActive(IsActive);
 
@@ -45,6 +47,8 @@ namespace Dt
             if (ImGui::InputText("Name", EntityName, 255))
             {
                 m_Name = EntityName;
+
+                HasChanged = true;
             }
 
             // -----------------------------------------------------------------------------
@@ -52,9 +56,9 @@ namespace Dt
             // -----------------------------------------------------------------------------
             const char* CategoryText[SEntityCategory::NumberOfCategories] = { "Static", "Dynamic" };
 
-            int CategoryIndex = static_cast<int>(GetCategory());
+            auto CategoryIndex = static_cast<int>(GetCategory());
 
-            ImGui::Combo("Category", &CategoryIndex, CategoryText, SEntityCategory::NumberOfCategories);
+            HasChanged |= ImGui::Combo("Category", &CategoryIndex, CategoryText, SEntityCategory::NumberOfCategories);
 
             SetCategory(static_cast<SEntityCategory::Enum>(CategoryIndex));
 
@@ -91,7 +95,7 @@ namespace Dt
             {
                 for (int n = 0; n < SEntityLayer::NumberOfLayers; n++)
                 {
-                    ImGui::CheckboxFlags(EntityLayerText[n], &LayerFlags, EntityLayerValue[n]);
+                    HasChanged |= ImGui::CheckboxFlags(EntityLayerText[n], &LayerFlags, EntityLayerValue[n]);
                 }
                 ImGui::EndCombo();
             }
@@ -99,6 +103,8 @@ namespace Dt
             m_Flags.m_Layer = LayerFlags;
 
             ImGui::Columns(1, nullptr, false);
+
+            return HasChanged;
         }
 
         // -----------------------------------------------------------------------------

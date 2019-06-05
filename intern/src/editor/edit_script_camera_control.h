@@ -14,9 +14,11 @@ namespace Scpt
     {
     public:
 
-        void OnGUI()
+        bool OnGUI()
         {
             ImGui::Text("Not implemented...");
+
+            return false;
         }
 
         // -----------------------------------------------------------------------------

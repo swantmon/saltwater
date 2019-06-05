@@ -14,5 +14,7 @@ namespace GUI
     void ProcessEvents();
 
     void* GetEditorWindowHandle();
+
+    void SwitchScene(const std::string& _rScene);
 } // namespace GUI
 } // namespace Edit

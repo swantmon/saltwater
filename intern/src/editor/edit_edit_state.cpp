@@ -35,6 +35,7 @@ namespace Edit
         : CState            (Edit)
         , m_CurrentOperation(Hand)
         , m_CurrentMode     (World)
+        , m_DirtyFlag       (false)
         , m_pSelectionTicket(nullptr)
     {
         m_NextState = CState::Edit;
@@ -73,6 +74,20 @@ namespace Edit
     CEditState::EMode CEditState::GetMode() const
     {
         return m_CurrentMode;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CEditState::SetDirty(bool _Flag)
+    {
+        m_DirtyFlag = _Flag;
+    }
+
+    // -----------------------------------------------------------------------------
+
+    bool CEditState::IsDirty() const
+    {
+        return m_DirtyFlag;
     }
     
     // -----------------------------------------------------------------------------

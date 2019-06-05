@@ -13,15 +13,19 @@ namespace Dt
     {
     public:
 
-        void OnGUI()
+        bool OnGUI()
         {
-            ImGui::DragFloat("Intensity", &m_Intensity);
+            bool HasChanged = false;
 
-            ImGui::DragFloat("Roughness", &m_RoughnessMask);
+            HasChanged |= ImGui::DragFloat("Intensity", &m_Intensity);
 
-            ImGui::DragFloat("Distance", &m_Distance);
+            HasChanged |= ImGui::DragFloat("Roughness", &m_RoughnessMask);
 
-            ImGui::Checkbox("Use last frame", &m_UseLastFrame);
+            HasChanged |= ImGui::DragFloat("Distance", &m_Distance);
+
+            HasChanged |= ImGui::Checkbox("Use last frame", &m_UseLastFrame);
+
+            return HasChanged;
         }
 
         // -----------------------------------------------------------------------------

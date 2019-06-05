@@ -14,10 +14,12 @@ namespace Scpt
     {
     public:
 
-        void OnGUI()
+        bool OnGUI()
         {
             ImGui::Checkbox("Enable Selection", &m_IsSelectionEnabled);
             ImGui::Checkbox("Enable Mouse Control", &m_IsMouseControlEnabled);
+
+            return true;
         }
 
         // -----------------------------------------------------------------------------
