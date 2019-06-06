@@ -394,64 +394,6 @@ namespace
         ImGuizmo::BeginFrame();
 
         // -----------------------------------------------------------------------------
-        // Exit, save and scene switch
-        // -----------------------------------------------------------------------------
-        if (m_WantsToExit && CEditState::GetInstance().IsDirty() == false)
-        {
-            using Base::CInputEvent;
-
-            CInputEvent Event(CInputEvent::Input);
-
-            Event = Base::CInputEvent(Base::CInputEvent::Exit);
-
-            Gui::EventHandler::OnEvent(Event);
-
-            Edit::CEditState::GetInstance().SetNextState(CState::UnloadMap);
-
-            Edit::CUnloadMapState::GetInstance().SetNextState(CState::Exit);
-
-            m_WantsToExit = false;
-        }
-
-        if (m_WantsToOpenScene && CEditState::GetInstance().IsDirty() == false)
-        {
-            Edit::CEditState::GetInstance().SetNextState(CState::UnloadMap);
-
-            Edit::CUnloadMapState::GetInstance().SetNextState(CState::LoadMap);
-
-            Edit::CLoadMapState::GetInstance().LoadFromFile(m_OpenSceneName);
-
-            Edit::CLoadMapState::GetInstance().SetNextState(CState::Edit);
-
-            CEditState::GetInstance().SetDirty(false);
-
-            m_WantsToOpenScene = false;
-        }
-
-        if ((m_WantsToExit || m_WantsToOpenScene) && CEditState::GetInstance().IsDirty() == true)
-        {
-            ImGui::OpenPopup("Scene Have Been Modified");
-        }
-
-        if (CEditState::GetInstance().IsDirty() == false)
-        {
-            m_WantsToSaveScene = false;
-        }
-
-        if (m_WantsToSaveScene && CEditState::GetInstance().IsDirty() == true)
-        {
-            Edit::CEditState::GetInstance().SetNextState(CState::UnloadMap);
-
-            Edit::CUnloadMapState::GetInstance().SetNextState(CState::Edit);
-
-            CUnloadMapState::GetInstance().PreventSaving(false);
-
-            CEditState::GetInstance().SetDirty(false);
-
-            m_WantsToSaveScene = false;
-        }
-
-        // -----------------------------------------------------------------------------
         // Dialogs
         // -----------------------------------------------------------------------------
         if (m_SaveSceneAsDialog.Draw())
@@ -487,6 +429,11 @@ namespace
 
                 SwitchScene(rSceneFile);
             }
+        }
+
+        if ((m_WantsToExit || m_WantsToOpenScene) && CEditState::GetInstance().IsDirty() == true)
+        {
+            ImGui::OpenPopup("Scene Have Been Modified");
         }
 
         if (ImGui::BeginPopupModal("Scene Have Been Modified", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
@@ -529,6 +476,59 @@ namespace
             }
 
             ImGui::EndPopup();
+        }
+
+        // -----------------------------------------------------------------------------
+        // Exit, save and scene switch
+        // -----------------------------------------------------------------------------
+        if (m_WantsToExit && CEditState::GetInstance().IsDirty() == false)
+        {
+            using Base::CInputEvent;
+
+            CInputEvent Event(CInputEvent::Input);
+
+            Event = Base::CInputEvent(Base::CInputEvent::Exit);
+
+            Gui::EventHandler::OnEvent(Event);
+
+            Edit::CEditState::GetInstance().SetNextState(CState::UnloadMap);
+
+            Edit::CUnloadMapState::GetInstance().SetNextState(CState::Exit);
+
+            m_WantsToExit = false;
+        }
+
+        if (m_WantsToOpenScene && CEditState::GetInstance().IsDirty() == false)
+        {
+            Edit::CEditState::GetInstance().SetNextState(CState::UnloadMap);
+
+            Edit::CUnloadMapState::GetInstance().SetNextState(CState::LoadMap);
+
+            Edit::CLoadMapState::GetInstance().LoadFromFile(m_OpenSceneName);
+
+            Edit::CLoadMapState::GetInstance().SetNextState(CState::Edit);
+
+            CEditState::GetInstance().SetDirty(false);
+
+            m_WantsToOpenScene = false;
+        }
+
+        if (CEditState::GetInstance().IsDirty() == false)
+        {
+            m_WantsToSaveScene = false;
+        }
+
+        if (m_WantsToSaveScene && CEditState::GetInstance().IsDirty() == true)
+        {
+            Edit::CEditState::GetInstance().SetNextState(CState::UnloadMap);
+
+            Edit::CUnloadMapState::GetInstance().SetNextState(CState::Edit);
+
+            CUnloadMapState::GetInstance().PreventSaving(false);
+
+            CEditState::GetInstance().SetDirty(false);
+
+            m_WantsToSaveScene = false;
         }
 
         // -----------------------------------------------------------------------------
