@@ -862,9 +862,12 @@ namespace MR
                 //int32_t Width = *reinterpret_cast<int32_t*>(Decompressed.data() + sizeof(int32_t));
                 //int32_t Height = *reinterpret_cast<int32_t*>(Decompressed.data() + 2 * sizeof(int32_t));
 
-                glm::mat4 Projection = *reinterpret_cast<glm::mat4*>(Decompressed.data() + 3 * sizeof(int32_t));
+                float fx = *reinterpret_cast<float*>(Decompressed.data() + 3 * sizeof(int32_t));
+                float fy = *reinterpret_cast<float*>(Decompressed.data() + 4 * sizeof(int32_t));
+                float cx = *reinterpret_cast<float*>(Decompressed.data() + 5 * sizeof(int32_t));
+                float cy = *reinterpret_cast<float*>(Decompressed.data() + 6 * sizeof(int32_t));
 
-                const uint16_t* RawBuffer = reinterpret_cast<uint16_t*>(Decompressed.data() + 3 * sizeof(int32_t) + sizeof(glm::mat4));
+                const uint16_t* RawBuffer = reinterpret_cast<uint16_t*>(Decompressed.data() + 7 * sizeof(int32_t));
 
                 Base::AABB2UInt TargetRect;
                 TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_DepthSize));
@@ -1011,9 +1014,14 @@ namespace MR
             const int32_t Width = *reinterpret_cast<const int32_t*>(_rData.data() + sizeof(int32_t));
             const int32_t Height = *reinterpret_cast<const int32_t*>(_rData.data() + 2 * sizeof(int32_t));
 
-            m_DeviceProjectionMatrix = *reinterpret_cast<const glm::mat4*>(_rData.data() + 3 * sizeof(int32_t));
+            float fx = *reinterpret_cast<const float*>(_rData.data() + 3 * sizeof(int32_t));
+            float fy = *reinterpret_cast<const float*>(_rData.data() + 4 * sizeof(int32_t));
+            float cx = *reinterpret_cast<const float*>(_rData.data() + 5 * sizeof(int32_t));
+            float cy = *reinterpret_cast<const float*>(_rData.data() + 6 * sizeof(int32_t));
 
-            const char* YData = _rData.data() + 3 * sizeof(int32_t) + sizeof(glm::mat4);
+            m_DeviceProjectionMatrix = *reinterpret_cast<const glm::mat4*>(_rData.data() + 7 * sizeof(int32_t));
+
+            const char* YData = _rData.data() + 7 * sizeof(int32_t) + sizeof(glm::mat4);
             const char* UVData = YData + Width * Height;
 
             Base::AABB2UInt TargetRect;
