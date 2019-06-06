@@ -1,5 +1,5 @@
-#ifndef __INCLUDE_CS_YUV_TO_RGB_GLSL__
-#define __INCLUDE_CS_YUV_TO_RGB_GLSL__
+#ifndef __INCLUDE_CS_SHIFT_DEPTH_GLSL__
+#define __INCLUDE_CS_SHIFT_DEPTH_GLSL__
 
 layout(binding = 0, r16ui) readonly uniform uimage2D cs_Shift;
 layout(binding = 1, r16ui) writeonly uniform uimage2D cs_Depth;
@@ -37,4 +37,4 @@ void main()
 #endif
 }
 
-#endif //__INCLUDE_CS_YUV_TO_RGB_GLSL__
+#endif //__INCLUDE_CS_SHIFT_DEPTH_GLSL__

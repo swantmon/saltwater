@@ -129,8 +129,11 @@ namespace MR
         Gfx::CTexturePtr m_YTexture;
         Gfx::CTexturePtr m_UVTexture;
 
-        Gfx::CTexturePtr m_ShiftTexture;
         Gfx::CShaderPtr m_ShiftDepthCSPtr;
+        Gfx::CShaderPtr m_RegisterDepthCSPtr;
+        
+        Gfx::CTexturePtr m_ShiftTexture;
+        Gfx::CTexturePtr m_UnregisteredDepthTexture;
         Gfx::CTexturePtr m_ShiftLUTPtr;
 
         struct SIntrinsicsMessage
@@ -859,13 +862,17 @@ namespace MR
 
                 Gfx::ContextManager::SetShaderCS(m_ShiftDepthCSPtr);
                 Gfx::ContextManager::SetImageTexture(0, m_ShiftTexture);
-                Gfx::ContextManager::SetImageTexture(1, m_DepthTexture);
+                Gfx::ContextManager::SetImageTexture(1, m_UnregisteredDepthTexture);
                 Gfx::ContextManager::SetImageTexture(2, m_ShiftLUTPtr);
 
                 int WorkgroupsX = DivUp(m_CaptureColor ? m_ColorSize.x : m_DepthSize.x, m_TileSize2D);
                 int WorkgroupsY = DivUp(m_CaptureColor ? m_ColorSize.y : m_DepthSize.y, m_TileSize2D);
                 Gfx::ContextManager::Dispatch(WorkgroupsX, WorkgroupsY, 1);
                 
+                Gfx::ContextManager::SetImageTexture(0, m_DepthTexture);
+                Gfx::ContextManager::SetShaderCS(m_RegisterDepthCSPtr);
+                Gfx::ContextManager::Dispatch(WorkgroupsX, WorkgroupsY, 1);
+
                 if (!m_CaptureColor && m_StreamState == STREAM_SLAM)
                 {
                     m_Reconstructor.OnNewFrame(m_DepthTexture, nullptr, &m_PoseMatrix);
@@ -1074,6 +1081,7 @@ namespace MR
             TextureDescriptor.m_NumberOfPixelsU = m_CaptureColor ? m_ColorSize.x : m_DepthSize.x;
             TextureDescriptor.m_NumberOfPixelsV = m_CaptureColor ? m_ColorSize.y : m_DepthSize.y;
             m_DepthTexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
+            m_UnregisteredDepthTexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
 
             std::stringstream DefineStream;
             DefineStream
@@ -1106,6 +1114,8 @@ namespace MR
             }
             std::string DefineString = DefineStream.str();
             m_ShiftDepthCSPtr = Gfx::ShaderManager::CompileCS("../../plugins/slam/cs_shift_depth.glsl", "main", DefineString.c_str());
+
+            m_RegisterDepthCSPtr = Gfx::ShaderManager::CompileCS("../../plugins/slam/cs_register_depth.glsl", "main", DefineString.c_str());
 
             if (m_SendInpaintedResult)
             {
