@@ -62,6 +62,7 @@ namespace SLAM
         m_SLAMControl.EnableMouseControl(_rSettings.m_IsMouseControlEnabled);
         m_SLAMControl.SetActivateSelection(_rSettings.m_IsSelectionEnabled);
         m_SLAMControl.SetIsPlaying(_rSettings.m_IsPlayingRecording);
+        m_SLAMControl.SetPlaybackSpeed(_rSettings.m_PlaybackSpeed);
 
         if (_rSettings.m_SetRecordFile)
         {

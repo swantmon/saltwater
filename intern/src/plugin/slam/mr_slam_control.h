@@ -605,6 +605,16 @@ namespace MR
 
         // -----------------------------------------------------------------------------
 
+        void SetPlaybackSpeed(float _Speed)
+        {
+            if (m_pRecordReader != nullptr)
+            {
+                m_pRecordReader->SetSpeed(_Speed);
+            }
+        }
+
+        // -----------------------------------------------------------------------------
+
         void SetActivateSelection(bool _Flag)
         {
             m_SelectionFlag = _Flag;
