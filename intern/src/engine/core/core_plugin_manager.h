@@ -24,6 +24,8 @@ namespace PluginManager
     
     ENGINE_API bool LoadPlugin(const std::string& _rName);
 
+    ENGINE_API bool IsAvailable(const std::string& _rName);
+
     ENGINE_API void* GetPluginFunction(const std::string& _rName, const std::string& _rFunction);
 } // namespace PluginManager
 } // namespace Core

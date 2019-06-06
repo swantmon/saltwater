@@ -53,6 +53,8 @@ namespace
         
         bool LoadPlugin(const std::string& _rName);
 
+        bool IsAvailable(const std::string& _rName);
+
         void* GetPluginFunction(const std::string& _rName, const std::string& _rMethod);
 
     private:
@@ -60,7 +62,7 @@ namespace
         struct SInternPlugin
         {
 #ifdef PLATFORM_WINDOWS
-            typedef HINSTANCE CInstance;
+            using CInstance = HINSTANCE;
 #elif PLATFORM_ANDROID
             typedef void* CInstance;
 #endif // PLATFORM_WINDOWS
@@ -103,7 +105,7 @@ namespace
         WCHAR FileName[32768];
         MultiByteToWideChar(CP_UTF8, 0, _rFileName.c_str(), -1, FileName, 32768);
         std::wstring PluginFile = std::wstring(FileName);
-        return LoadLibraryExW(PluginFile.c_str(), NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
+        return LoadLibraryExW(PluginFile.c_str(), nullptr, LOAD_WITH_ALTERED_SEARCH_PATH);
     }
 
     // -----------------------------------------------------------------------------
@@ -169,7 +171,7 @@ namespace
 
                     if (pInfo != nullptr)
                     {
-                        auto Message = "Found plugin \'"s + pInfo->m_pPluginName + "\' in file \'"s + PluginFileName + "\'"s;
+                        auto Message = "Found plugin \'"s + pInfo->m_pPluginName + R"(' in file ')" + PluginFileName + "\'"s;
                         ENGINE_CONSOLE_INFO(Message.c_str());
                         m_Plugins[pInfo->m_pPluginName] = { pLib, pInfo, false };
                     }
@@ -215,7 +217,7 @@ namespace
 
         auto SelectedPlugins = Core::CProgramParameters::GetInstance().Get("plugins:selection", std::vector<std::string>());
 
-        for (auto SelectedPlugin : SelectedPlugins)
+        for (const auto& SelectedPlugin : SelectedPlugins)
         {
             if (m_Plugins.find(SelectedPlugin) == m_Plugins.end())
             {
@@ -378,6 +380,13 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    bool CPluginManager::IsAvailable(const std::string& _rName)
+    {
+        return m_Plugins.find(_rName) != std::end(m_Plugins);
+    }
+
+    // -----------------------------------------------------------------------------
+
     void* CPluginManager::GetPluginFunction(const std::string& _rName, const std::string& _rFunction)
     {
         auto PluginIter = m_Plugins.find(_rName);
@@ -385,7 +394,8 @@ namespace
         if (PluginIter == m_Plugins.end())
         {
             auto Error = "Plugin "s + _rName + " not available"s;
-            BASE_THROWM(Error.c_str());
+            ENGINE_CONSOLE_ERROR(Error.c_str());
+            return nullptr;
         }
 
         auto Proc = InternGetProc(PluginIter->second.m_Instance, _rFunction);
@@ -393,7 +403,8 @@ namespace
         if (Proc == nullptr)
         {
             auto Error = "Function "s + _rFunction + " not available in plugin "s + _rName;
-            BASE_THROWM(Error.c_str());
+            ENGINE_CONSOLE_ERROR(Error.c_str());
+            return nullptr;
         }
 
         return Proc;
@@ -450,6 +461,13 @@ namespace PluginManager
     bool LoadPlugin(const std::string& _rName)
     {
         return CPluginManager::GetInstance().LoadPlugin(_rName);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    bool IsAvailable(const std::string& _rName)
+    {
+        return CPluginManager::GetInstance().IsAvailable(_rName);
     }
 
     // -----------------------------------------------------------------------------
