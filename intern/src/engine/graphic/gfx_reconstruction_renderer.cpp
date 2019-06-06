@@ -49,7 +49,7 @@ namespace
 
     private:
 
-        typedef void(*FSLAMRenderHitProxy)();
+        using FSLAMRenderHitProxy = void(*)();
 
         FSLAMRenderHitProxy SLAMRenderHitProxy;
     };
@@ -201,12 +201,12 @@ namespace
 
     void CGfxEngineReconstructionRenderer::RenderHitProxy()
     {
-        if (SLAMRenderHitProxy == 0)
+        if (Core::PluginManager::IsAvailable("SLAM") && SLAMRenderHitProxy == nullptr)
         {
             SLAMRenderHitProxy = (FSLAMRenderHitProxy)(Core::PluginManager::GetPluginFunction("SLAM", "OnRenderHitProxy"));
         }
 
-        if (SLAMRenderHitProxy != 0) SLAMRenderHitProxy();
+        if (SLAMRenderHitProxy != nullptr) SLAMRenderHitProxy();
     }
 } // namespace
 
