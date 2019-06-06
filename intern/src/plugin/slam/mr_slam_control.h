@@ -158,8 +158,8 @@ namespace MR
             glm::ivec2 m_DepthSize;
             glm::ivec2 m_ColorSize;
             glm::ivec2 m_DeviceResolution;
-            glm::mat4  m_RelativeCameraTransform;
             glm::mat4  m_DeviceProjectionMatrix;
+            glm::mat4  m_RelativeCameraTransform;
         };
 
         Net::SocketHandle m_SLAMSocket;
