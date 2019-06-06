@@ -313,6 +313,43 @@ namespace MR
 
     // -----------------------------------------------------------------------------
 
+    void CSLAMReconstructor::UpdataGPUIntrinsics()
+    {
+        const float FocalLengthX0 = m_FocalLength.x;
+        const float FocalLengthY0 = m_FocalLength.y;
+        const float FocalPointX0 = m_FocalPoint.x;
+        const float FocalPointY0 = m_FocalPoint.y;
+
+        std::vector<SIntrinsics> Intrinsics(m_ReconstructionSettings.m_PyramidLevelCount);
+
+        for (int i = 0; i < m_ReconstructionSettings.m_PyramidLevelCount; ++i)
+        {
+            const int PyramidFactor = 1 << i;
+
+            const float FocalLengthX = FocalLengthX0 / PyramidFactor;
+            const float FocalLengthY = FocalLengthY0 / PyramidFactor;
+            const float FocalPointX = FocalPointX0 / PyramidFactor;
+            const float FocalPointY = FocalPointY0 / PyramidFactor;
+
+            glm::mat4 KMatrix(
+                FocalLengthX, 0.0f, 0.0f, 0.0f,
+                0.0f, FocalLengthY, 0.0f, 0.0f,
+                FocalPointX, FocalPointY, 1.0f, 0.0f,
+                0.0f, 0.0f, 0.0f, 1.0f
+            );
+
+            Intrinsics[i].m_FocalPoint = glm::vec2(FocalPointX, FocalPointY);
+            Intrinsics[i].m_FocalLength = glm::vec2(FocalLengthX, FocalLengthY);
+            Intrinsics[i].m_InvFocalLength = glm::vec2(1.0f / FocalLengthX, 1.0f / FocalLengthY);
+            Intrinsics[i].m_KMatrix = KMatrix;
+            Intrinsics[i].m_InvKMatrix = glm::inverse(KMatrix);
+        }
+
+        BufferManager::UploadBufferData(m_IntrinsicsConstantBufferPtr, Intrinsics.data());
+    }
+
+    // -----------------------------------------------------------------------------
+
     glm::vec4 CSLAMReconstructor::GetHessianNormalForm(const glm::vec3& rA, const glm::vec3& rB, const glm::vec3& rC)
     {
         glm::vec3 V1 = rB - rA;
@@ -1180,36 +1217,6 @@ namespace MR
     
     void CSLAMReconstructor::SetupBuffers(bool _CreatePool)
     {
-        const float FocalLengthX0 = m_FocalLength.x;
-        const float FocalLengthY0 = m_FocalLength.y;
-        const float FocalPointX0 = m_FocalPoint.x;
-        const float FocalPointY0 = m_FocalPoint.y;
-        
-        std::vector<SIntrinsics> Intrinsics(m_ReconstructionSettings.m_PyramidLevelCount);
-
-        for (int i = 0; i < m_ReconstructionSettings.m_PyramidLevelCount; ++ i)
-        {
-            const int PyramidFactor = 1 << i;
-
-            const float FocalLengthX = FocalLengthX0 / PyramidFactor;
-            const float FocalLengthY = FocalLengthY0 / PyramidFactor;
-            const float FocalPointX = FocalPointX0 / PyramidFactor;
-            const float FocalPointY = FocalPointY0 / PyramidFactor;
-
-            glm::mat4 KMatrix(
-                FocalLengthX, 0.0f, 0.0f, 0.0f,
-                0.0f, FocalLengthY, 0.0f, 0.0f,
-                FocalPointX, FocalPointY, 1.0f, 0.0f,
-                0.0f, 0.0f, 0.0f, 1.0f
-            );
-
-            Intrinsics[i].m_FocalPoint = glm::vec2(FocalPointX, FocalPointY);
-            Intrinsics[i].m_FocalLength = glm::vec2(FocalLengthX, FocalLengthY);
-            Intrinsics[i].m_InvFocalLength = glm::vec2(1.0f / FocalLengthX, 1.0f / FocalLengthY);
-            Intrinsics[i].m_KMatrix = KMatrix;
-            Intrinsics[i].m_InvKMatrix = glm::inverse(KMatrix);
-        }
-
         SBufferDescriptor BufferDesc = {};
 
         BufferDesc.m_Stride = 0;
@@ -1217,10 +1224,11 @@ namespace MR
         BufferDesc.m_Binding = CBuffer::ConstantBuffer;
         BufferDesc.m_Access = CBuffer::CPUWrite;
         BufferDesc.m_NumberOfBytes = sizeof(SIntrinsics) * m_ReconstructionSettings.m_PyramidLevelCount;
-        BufferDesc.m_pBytes = Intrinsics.data();
+        BufferDesc.m_pBytes = nullptr;
         BufferDesc.m_pClassKey = nullptr;
 
         m_IntrinsicsConstantBufferPtr = BufferManager::CreateBuffer(BufferDesc);
+        UpdataGPUIntrinsics();
         
         STrackingData TrackingData;
         TrackingData.m_PoseMatrix = m_PoseMatrix;
@@ -1375,6 +1383,18 @@ namespace MR
     {
         _rMin = m_DepthBounds[0];
         _rMax = m_DepthBounds[1];
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CSLAMReconstructor::OnNewFrame(Gfx::CTexturePtr DepthBuffer, Gfx::CTexturePtr ColorBuffer, const glm::mat4* pTransform, const glm::vec2& _rFocalLength, const glm::vec2& _rFocalPoint)
+    {
+        m_FocalLength = _rFocalLength;
+        m_FocalPoint = _rFocalPoint;
+
+        UpdataGPUIntrinsics();
+
+        OnNewFrame(DepthBuffer, ColorBuffer, pTransform);
     }
 
     // -----------------------------------------------------------------------------

@@ -211,6 +211,7 @@ namespace MR
         void GetDepthBounds(float& _rMin, float& _rMax);
 
         void OnNewFrame(Gfx::CTexturePtr DepthBuffer, Gfx::CTexturePtr ColorBuffer, const glm::mat4* pTransform);
+        void OnNewFrame(Gfx::CTexturePtr DepthBuffer, Gfx::CTexturePtr ColorBuffer, const glm::mat4* pTransform, const glm::vec2& _rFocalLength, const glm::vec2& _rFocalPoint);
         
         void Start();
         void Exit();
@@ -251,6 +252,8 @@ namespace MR
         void CreateRaycastPyramid();
         
         void UpdateFrustum();
+
+        void UpdataGPUIntrinsics();
 
     private:
 
