@@ -66,6 +66,12 @@ namespace MR
             REMOVEPLANE
         };
 
+        struct SIntrinsics
+        {
+            glm::vec2 m_FocalLength;
+            glm::vec2 m_FocalPoint;
+        };
+
         EDATASOURCE m_DataSource;
         
         Gfx::CTexturePtr m_DepthTexture;
@@ -77,9 +83,21 @@ namespace MR
         glm::ivec2 m_DepthSize;
         glm::ivec2 m_ColorSize;
 
+        SIntrinsics m_ColorIntrinsics;
+        SIntrinsics m_DepthIntrinsics;
+
         glm::ivec2 m_DeviceResolution;
-        glm::mat4  m_DeviceProjectionMatrix;
-        glm::mat4  m_RelativeCameraTransform;
+        glm::mat4 m_DeviceProjectionMatrix;
+        glm::mat4 m_RelativeCameraTransform;
+
+        struct SRegisteringBuffer
+        {
+            SIntrinsics m_ColorIntrinsics;
+            SIntrinsics m_DepthIntrinsics;
+            glm::mat4 m_RelativeCameraTransform;
+        };
+
+        Gfx::CBufferPtr m_RegisteringBufferPtr;
 
         bool m_UseTrackingCamera = true;
 
@@ -309,6 +327,7 @@ namespace MR
                 m_DataSource = NETWORK;
 
                 CreateShiftLUTTexture();
+                CreateRegisteringBuffer();
             }
             else if (DataSource == "kinect")
             {
@@ -859,10 +878,10 @@ namespace MR
                 //int32_t Width = *reinterpret_cast<int32_t*>(Decompressed.data() + sizeof(int32_t));
                 //int32_t Height = *reinterpret_cast<int32_t*>(Decompressed.data() + 2 * sizeof(int32_t));
 
-                float fx = *reinterpret_cast<float*>(Decompressed.data() + 3 * sizeof(int32_t));
-                float fy = *reinterpret_cast<float*>(Decompressed.data() + 4 * sizeof(int32_t));
-                float cx = *reinterpret_cast<float*>(Decompressed.data() + 5 * sizeof(int32_t));
-                float cy = *reinterpret_cast<float*>(Decompressed.data() + 6 * sizeof(int32_t));
+                m_DepthIntrinsics.m_FocalLength.x = *reinterpret_cast<float*>(Decompressed.data() + 3 * sizeof(int32_t));
+                m_DepthIntrinsics.m_FocalLength.y = *reinterpret_cast<float*>(Decompressed.data() + 4 * sizeof(int32_t));
+                m_DepthIntrinsics.m_FocalPoint.x = *reinterpret_cast<float*>(Decompressed.data() + 5 * sizeof(int32_t));
+                m_DepthIntrinsics.m_FocalPoint.y = *reinterpret_cast<float*>(Decompressed.data() + 6 * sizeof(int32_t));
 
                 const uint16_t* RawBuffer = reinterpret_cast<uint16_t*>(Decompressed.data() + 7 * sizeof(int32_t));
 
@@ -879,13 +898,22 @@ namespace MR
                 int WorkgroupsY = DivUp(m_CaptureColor ? m_ColorSize.y : m_DepthSize.y, m_TileSize2D);
                 Gfx::ContextManager::Dispatch(WorkgroupsX, WorkgroupsY, 1);
                 
+                SRegisteringBuffer BufferData;
+                BufferData.m_ColorIntrinsics = m_ColorIntrinsics;
+                BufferData.m_DepthIntrinsics = m_DepthIntrinsics;
+                BufferData.m_RelativeCameraTransform = m_RelativeCameraTransform;
+
+                Gfx::BufferManager::UploadBufferData(m_RegisteringBufferPtr, &BufferData);
+
+                Gfx::ContextManager::SetConstantBuffer(0, m_RegisteringBufferPtr);
+
                 Gfx::ContextManager::SetImageTexture(0, m_DepthTexture);
                 Gfx::ContextManager::SetShaderCS(m_RegisterDepthCSPtr);
                 Gfx::ContextManager::Dispatch(WorkgroupsX, WorkgroupsY, 1);
 
                 if (!m_CaptureColor && m_StreamState == STREAM_SLAM)
                 {
-                    m_Reconstructor.OnNewFrame(m_DepthTexture, nullptr, &m_PoseMatrix);
+                    m_Reconstructor.OnNewFrame(m_DepthTexture, nullptr, &m_PoseMatrix, m_DepthIntrinsics.m_FocalLength, m_DepthIntrinsics.m_FocalPoint);
                 }
             }
             else if (MessageType == COLORFRAME && m_CaptureColor)
@@ -894,7 +922,7 @@ namespace MR
 
                 if (m_StreamState == STREAM_SLAM)
                 {
-                    m_Reconstructor.OnNewFrame(m_DepthTexture, m_RGBATexture, &m_PoseMatrix);
+                    m_Reconstructor.OnNewFrame(m_DepthTexture, m_RGBATexture, &m_PoseMatrix, m_ColorIntrinsics.m_FocalLength, m_ColorIntrinsics.m_FocalPoint);
                 }
                 else
                 {
@@ -1007,10 +1035,10 @@ namespace MR
             const int32_t Width = *reinterpret_cast<const int32_t*>(_rData.data() + sizeof(int32_t));
             const int32_t Height = *reinterpret_cast<const int32_t*>(_rData.data() + 2 * sizeof(int32_t));
 
-            float fx = *reinterpret_cast<const float*>(_rData.data() + 3 * sizeof(int32_t));
-            float fy = *reinterpret_cast<const float*>(_rData.data() + 4 * sizeof(int32_t));
-            float cx = *reinterpret_cast<const float*>(_rData.data() + 5 * sizeof(int32_t));
-            float cy = *reinterpret_cast<const float*>(_rData.data() + 6 * sizeof(int32_t));
+            m_ColorIntrinsics.m_FocalLength.x = *reinterpret_cast<const float*>(_rData.data() + 3 * sizeof(int32_t));
+            m_ColorIntrinsics.m_FocalLength.y = *reinterpret_cast<const float*>(_rData.data() + 4 * sizeof(int32_t));
+            m_ColorIntrinsics.m_FocalPoint.x = *reinterpret_cast<const float*>(_rData.data() + 5 * sizeof(int32_t));
+            m_ColorIntrinsics.m_FocalPoint.y = *reinterpret_cast<const float*>(_rData.data() + 6 * sizeof(int32_t));
 
             m_DeviceProjectionMatrix = *reinterpret_cast<const glm::mat4*>(_rData.data() + 7 * sizeof(int32_t));
 
@@ -1294,6 +1322,19 @@ namespace MR
             {
                 Gfx::ReconstructionRenderer::SetInpaintedPlane(m_PlaneTexture, AABB);
             }
+        }
+
+        // -----------------------------------------------------------------------------
+
+        void CreateRegisteringBuffer()
+        {
+            Gfx::SBufferDescriptor BufferDesc = {};
+            BufferDesc.m_Binding = Gfx::CBuffer::ConstantBuffer;
+            BufferDesc.m_Access = Gfx::CBuffer::CPUWrite;
+            BufferDesc.m_NumberOfBytes = sizeof(SRegisteringBuffer);
+            BufferDesc.m_Usage = Gfx::CBuffer::GPURead;
+
+            m_RegisteringBufferPtr = Gfx::BufferManager::CreateBuffer(BufferDesc);
         }
 
         // -----------------------------------------------------------------------------
