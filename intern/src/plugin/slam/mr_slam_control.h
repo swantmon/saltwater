@@ -883,6 +883,12 @@ namespace MR
                 m_DepthIntrinsics.m_FocalPoint.x = *reinterpret_cast<float*>(Decompressed.data() + 5 * sizeof(int32_t));
                 m_DepthIntrinsics.m_FocalPoint.y = *reinterpret_cast<float*>(Decompressed.data() + 6 * sizeof(int32_t));
 
+                if (m_CaptureColor)
+                {
+                    m_DepthIntrinsics.m_FocalLength = m_DepthIntrinsics.m_FocalLength / glm::vec2(m_DepthSize) * glm::vec2(m_ColorSize);
+                    m_DepthIntrinsics.m_FocalPoint = m_DepthIntrinsics.m_FocalPoint / glm::vec2(m_DepthSize) * glm::vec2(m_ColorSize);
+                }
+
                 const uint16_t* RawBuffer = reinterpret_cast<uint16_t*>(Decompressed.data() + 7 * sizeof(int32_t));
 
                 Base::AABB2UInt TargetRect;
