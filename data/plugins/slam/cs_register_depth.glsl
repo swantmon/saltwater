@@ -28,7 +28,7 @@ void main()
 
     if (Depth > 0.0f)
     {
-        Vertex = ((transpose(g_RelativeCameraTransform)) * vec4(Vertex, 1.0f)).xyz;
+        Vertex = (inverse(g_RelativeCameraTransform) * vec4(Vertex, 1.0f)).xyz;
 
         ivec2 ColorCoords = ivec2(Vertex.xy * g_ColorFocalLength + g_ColorFocalPoint);
         uint RegisteredDepth = uint(Vertex.z * 1000.0f);
