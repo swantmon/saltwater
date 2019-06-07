@@ -913,6 +913,8 @@ namespace MR
 
                 Gfx::ContextManager::SetConstantBuffer(0, m_RegisteringBufferPtr);
 
+                Gfx::TextureManager::ClearTexture(m_DepthTexture);
+
                 Gfx::ContextManager::SetImageTexture(0, m_DepthTexture);
                 Gfx::ContextManager::SetShaderCS(m_RegisterDepthCSPtr);
                 Gfx::ContextManager::Dispatch(WorkgroupsX, WorkgroupsY, 1);

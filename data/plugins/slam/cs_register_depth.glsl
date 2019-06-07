@@ -20,7 +20,7 @@ void main()
 
     ivec2 Coords = ivec2(gl_GlobalInvocationID.xy);
 
-    const float Depth = imageLoad(cs_UnregisteredDepth, ImageSize - Coords).x / 1000.0f;
+    const float Depth = imageLoad(cs_UnregisteredDepth, Coords).x / 1000.0f;
 
     vec3 Vertex;    
     Vertex.xy = Depth * (Coords - g_DepthFocalPoint) / g_DepthFocalLength;
@@ -33,7 +33,7 @@ void main()
         ivec2 ColorCoords = ivec2((Vertex.xy * g_ColorFocalLength) / Vertex.z + g_ColorFocalPoint);
         uint RegisteredDepth = uint(Vertex.z * 1000.0f);
 
-        imageStore(cs_RegisteredDepth, ImageSize - ColorCoords, uvec4(RegisteredDepth));
+        imageStore(cs_RegisteredDepth, ColorCoords, uvec4(RegisteredDepth));
     }
 }
 

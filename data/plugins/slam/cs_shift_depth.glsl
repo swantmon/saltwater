@@ -18,7 +18,6 @@ void main()
         uint Depth = imageLoad(cs_ShiftLUT, ivec2(Shift, 0)).x;
         Depth = Shift < imageSize(cs_ShiftLUT).x ? Depth : 0;
         Coords.y -= (DEPTH_HEIGHT - COLOR_HEIGHT) / 2;
-        Coords.x = COLOR_WIDTH - Coords.x - 1;
         imageStore(cs_Depth, Coords, uvec4(Depth));
     }
 
@@ -30,7 +29,6 @@ void main()
         uint Shift = imageLoad(cs_Shift, Coords).x;
         uint Depth = imageLoad(cs_ShiftLUT, ivec2(Shift, 0)).x;
         Depth = Shift < imageSize(cs_ShiftLUT).x ? Depth : 0;
-        Coords.x = imageSize(cs_Depth).x - Coords.x - 1;
         imageStore(cs_Depth, Coords, uvec4(Depth));
     }
 
