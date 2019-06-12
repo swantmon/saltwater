@@ -323,14 +323,7 @@ namespace Stereo
 
                     cvDispImg_Rect_gpu.download(cvDispImg_Rect_cpu);
 
-                    if (cvDispImg_Rect_cpu.depth() == CV_16S)
-                    {
-                        cvDispImg_Rect_cpu.convertTo(cvDispImg_Rect_cpu, CV_32F, 1.0 / 16);
-                    }
-                    else
-                    {
-                        cvDispImg_Rect_cpu.convertTo(cvDispImg_Rect_cpu, CV_32F);
-                    }
+                    cvDispImg_Rect_cpu.convertTo(cvDispImg_Rect_cpu, CV_32F); // The Disparity should be 32F.
 
                     //***Export Disparity in Rectified Images (in 16-bit)***
                     if (m_Is_imwrite)
@@ -351,17 +344,20 @@ namespace Stereo
                     m_pStereoMatcher_cvBP_cuda->compute(cvRectImg_Curt_gpu, cvRectImg_Last_gpu, cvDispImg_Rect_gpu);
 
                     cvDispImg_Rect_gpu.download(cvDispImg_Rect_cpu);
-                    if (cvDispImg_Rect_cpu.type() == CV_16S)
-                    {
-                        cvDispImg_Rect_cpu.convertTo(cvDispImg_Rect_cpu, CV_32F, 1.0 / 16);
-                    }
 
+                    cvDispImg_Rect_cpu.convertTo(cvDispImg_Rect_cpu, CV_32F); // Disparity is 16S but without fractional bit.
+
+                    //***Export Disparity in Rectified Images (in 16-bit)***
                     if (m_Is_imwrite)
                     {
-                        cv::Mat cvDispImg_Rect_cpu_8bit(cvDispImg_Rect_cpu.size(), CV_8UC1);
-                        cv::normalize(cvDispImg_Rect_cpu, cvDispImg_Rect_cpu_8bit, 0, 255, cv::NORM_MINMAX, CV_8UC1);
-                        cv::imwrite("E:\\Project_ARCHITECT\\ARKit_DispImg_cvBP_cuda.png", cvDispImg_Rect_cpu_8bit);
+                        cv::Mat cvDisp_RectImg_cpu_16UC1(cvDispImg_Rect_cpu.size(), CV_16UC1);
+                        cv::normalize(cvDispImg_Rect_cpu, cvDisp_RectImg_cpu_16UC1, 0, 65535, cv::NORM_MINMAX, CV_16UC1);
+
+                        cv::imwrite("E:\\Project_ARCHITECT\\ARKit_DispImg_cvBP_cuda.png", cvDisp_RectImg_cpu_16UC1);
                     }
+
+                    const int cvMemCpySize = cvDispImg_Rect_cpu.cols * cvDispImg_Rect_cpu.rows * cvDispImg_Rect_cpu.elemSize();
+                    memcpy(m_Disparity_RectImg.data(), cvDispImg_Rect_cpu.data, cvMemCpySize);
                 }
 
 
