@@ -1,17 +1,17 @@
 #ifndef __INCLUDE_CS_Compare_Depth_GLSL__
 #define __INCLUDE_CS_Compare_Depth_GLSL__
 
-layout (binding = 0, r16ui) readonly uniform uimage2D cs_Depth_StereoMatching;
+layout (binding = 0, r16ui) readonly uniform uimage2D cs_Depth_Vision;
 layout (binding = 1, r16ui) readonly uniform uimage2D cs_Depth_Sensor;
-layout (binding = 2, r16ui) writeonly uniform uimage2D cs_Depth_Difference;
+layout (binding = 2, r16i) writeonly uniform iimage2D cs_Depth_Difference;
 
 layout (local_size_x = TILE_SIZE_2D, local_size_y = TILE_SIZE_2D, local_size_z = 1) in;
 void main()
 {
-	uint depth_Sensor = imageLoad(cs_Depth_Sensor,  ivec2(gl_GlobalInvocationID.xy)).r;
-	uint depth_Stereo = imageLoad(cs_Depth_StereoMatching, ivec2(gl_GlobalInvocationID.xy)).r;
-	uint depth_Diff = depth_Stereo - depth_Sensor;
-	imageStore(cs_Depth_Difference, ivec2(gl_GlobalInvocationID.xy), uvec4(depth_Diff));
+	const int depth_Sensor = int(imageLoad(cs_Depth_Sensor, ivec2(gl_GlobalInvocationID.xy)).r);
+	const int depth_Stereo = int(imageLoad(cs_Depth_Vision, ivec2(gl_GlobalInvocationID.xy)).r);
+	int depth_Diff = depth_Stereo - depth_Sensor;
+	imageStore(cs_Depth_Difference, ivec2(gl_GlobalInvocationID.xy), ivec4(depth_Diff));
 }
 
 #endif //__INCLUDE_CS_Compare_Depth_GLSL__

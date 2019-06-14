@@ -72,7 +72,9 @@ namespace Stereo
 
         m_Depth_Sensor_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_Depth_OrigImg);
 
-        m_Depth_Difference_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_Depth_OrigImg);
+        Gfx::STextureDescriptor TextureDescriptor_Depth_Diff = TextureDescriptor_Depth_OrigImg;
+        TextureDescriptor_Depth_Diff.m_Format = Gfx::CTexture::R16_INT; // 1 channels with 16-bit int.
+        m_Depth_Difference_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_Depth_Diff);
     }
 
     // -----------------------------------------------------------------------------
@@ -359,7 +361,6 @@ namespace Stereo
                     const int cvMemCpySize = cvDispImg_Rect_cpu.cols * cvDispImg_Rect_cpu.rows * cvDispImg_Rect_cpu.elemSize();
                     memcpy(m_Disparity_RectImg.data(), cvDispImg_Rect_cpu.data, cvMemCpySize);
                 }
-
 
                 if (m_StereoMatching_Method == "cvConstBP_cuda")
                 {
