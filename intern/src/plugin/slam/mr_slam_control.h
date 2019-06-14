@@ -898,6 +898,15 @@ namespace MR
                 int WorkgroupsY = DivUp(m_DepthSize.y, m_TileSize2D);
                 Gfx::ContextManager::Dispatch(WorkgroupsX, WorkgroupsY, 1);
                 
+                if (!m_CaptureColor && m_StreamState == STREAM_SLAM)
+                {
+                    m_Reconstructor.OnNewFrame(m_DepthTexture, nullptr, &m_PoseMatrix, m_DepthIntrinsics.m_FocalLength, m_DepthIntrinsics.m_FocalPoint);
+                }
+            }
+            else if (MessageType == COLORFRAME && m_CaptureColor)
+            {
+                ExtractRGBAFrame(Decompressed);
+
                 SRegisteringBuffer BufferData;
                 BufferData.m_ColorIntrinsics = m_ColorIntrinsics;
                 BufferData.m_DepthIntrinsics = m_DepthIntrinsics;
@@ -910,20 +919,13 @@ namespace MR
                 Gfx::TextureManager::ClearTexture(m_DepthTexture);
 
                 Gfx::ContextManager::SetImageTexture(0, m_DepthTexture);
+                Gfx::ContextManager::SetImageTexture(1, m_UnregisteredDepthTexture);
+
                 Gfx::ContextManager::SetShaderCS(m_RegisterDepthCSPtr);
 
-                WorkgroupsX = DivUp(m_CaptureColor ? m_ColorSize.x : m_DepthSize.x, m_TileSize2D);
-                WorkgroupsY = DivUp(m_CaptureColor ? m_ColorSize.y : m_DepthSize.y, m_TileSize2D);
+                int WorkgroupsX = DivUp(m_CaptureColor ? m_ColorSize.x : m_DepthSize.x, m_TileSize2D);
+                int WorkgroupsY = DivUp(m_CaptureColor ? m_ColorSize.y : m_DepthSize.y, m_TileSize2D);
                 Gfx::ContextManager::Dispatch(WorkgroupsX, WorkgroupsY, 1);
-
-                if (!m_CaptureColor && m_StreamState == STREAM_SLAM)
-                {
-                    m_Reconstructor.OnNewFrame(m_DepthTexture, nullptr, &m_PoseMatrix, m_DepthIntrinsics.m_FocalLength, m_DepthIntrinsics.m_FocalPoint);
-                }
-            }
-            else if (MessageType == COLORFRAME && m_CaptureColor)
-            {
-                ExtractRGBAFrame(Decompressed);
 
                 if (m_StreamState == STREAM_SLAM)
                 {
