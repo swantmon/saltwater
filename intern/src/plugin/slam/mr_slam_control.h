@@ -883,12 +883,6 @@ namespace MR
                 m_DepthIntrinsics.m_FocalPoint.x = *reinterpret_cast<float*>(Decompressed.data() + 5 * sizeof(int32_t));
                 m_DepthIntrinsics.m_FocalPoint.y = *reinterpret_cast<float*>(Decompressed.data() + 6 * sizeof(int32_t));
 
-                if (m_CaptureColor)
-                {
-                    m_DepthIntrinsics.m_FocalLength = m_DepthIntrinsics.m_FocalLength / glm::vec2(m_DepthSize) * glm::vec2(m_ColorSize);
-                    m_DepthIntrinsics.m_FocalPoint = m_DepthIntrinsics.m_FocalPoint / glm::vec2(m_DepthSize) * glm::vec2(m_ColorSize);
-                }
-
                 const uint16_t* RawBuffer = reinterpret_cast<uint16_t*>(Decompressed.data() + 7 * sizeof(int32_t));
 
                 Base::AABB2UInt TargetRect;
@@ -900,8 +894,8 @@ namespace MR
                 Gfx::ContextManager::SetImageTexture(1, m_UnregisteredDepthTexture);
                 Gfx::ContextManager::SetImageTexture(2, m_ShiftLUTPtr);
 
-                int WorkgroupsX = DivUp(m_CaptureColor ? m_ColorSize.x : m_DepthSize.x, m_TileSize2D);
-                int WorkgroupsY = DivUp(m_CaptureColor ? m_ColorSize.y : m_DepthSize.y, m_TileSize2D);
+                int WorkgroupsX = DivUp(m_DepthSize.x, m_TileSize2D);
+                int WorkgroupsY = DivUp(m_DepthSize.y, m_TileSize2D);
                 Gfx::ContextManager::Dispatch(WorkgroupsX, WorkgroupsY, 1);
                 
                 SRegisteringBuffer BufferData;
@@ -917,6 +911,9 @@ namespace MR
 
                 Gfx::ContextManager::SetImageTexture(0, m_DepthTexture);
                 Gfx::ContextManager::SetShaderCS(m_RegisterDepthCSPtr);
+
+                WorkgroupsX = DivUp(m_CaptureColor ? m_ColorSize.x : m_DepthSize.x, m_TileSize2D);
+                WorkgroupsY = DivUp(m_CaptureColor ? m_ColorSize.y : m_DepthSize.y, m_TileSize2D);
                 Gfx::ContextManager::Dispatch(WorkgroupsX, WorkgroupsY, 1);
 
                 if (!m_CaptureColor && m_StreamState == STREAM_SLAM)
@@ -1128,6 +1125,9 @@ namespace MR
             TextureDescriptor.m_NumberOfPixelsU = m_CaptureColor ? m_ColorSize.x : m_DepthSize.x;
             TextureDescriptor.m_NumberOfPixelsV = m_CaptureColor ? m_ColorSize.y : m_DepthSize.y;
             m_DepthTexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
+
+            TextureDescriptor.m_NumberOfPixelsU = m_DepthSize.x;
+            TextureDescriptor.m_NumberOfPixelsV = m_DepthSize.y;
             m_UnregisteredDepthTexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
 
             std::stringstream DefineStream;
