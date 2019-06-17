@@ -72,7 +72,7 @@ namespace Scpt
                 ImGui::EndCombo();
             }
 
-            return true;
+            return false;
         }
 
         // -----------------------------------------------------------------------------
