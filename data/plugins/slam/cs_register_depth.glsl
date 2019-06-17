@@ -10,7 +10,8 @@ layout(std140, binding = 0) uniform UBOIntrinsics
     vec2 g_ColorFocalPoint;
     vec2 g_DepthFocalLength;
     vec2 g_DepthFocalPoint;
-    mat4 g_RelativeCameraTransform;
+    mat4 g_DepthToCameraTransform;
+    mat4 g_CameraToDepthTransform;
 };
 
 layout (local_size_x = TILE_SIZE_2D, local_size_y = TILE_SIZE_2D, local_size_z = 1) in;
@@ -28,7 +29,7 @@ void main()
 
     if (Depth > 0.0f)
     {
-        Vertex = (inverse(g_RelativeCameraTransform) * vec4(Vertex, 1.0f)).xyz;
+        Vertex = (g_DepthToCameraTransform * vec4(Vertex, 1.0f)).xyz;
 
         ivec2 ColorCoords = ivec2((Vertex.xy * g_ColorFocalLength) / Vertex.z + g_ColorFocalPoint);
         uint RegisteredDepth = uint(Vertex.z * 1000.0f);

@@ -94,7 +94,8 @@ namespace MR
         {
             SIntrinsics m_ColorIntrinsics;
             SIntrinsics m_DepthIntrinsics;
-            glm::mat4 m_RelativeCameraTransform;
+            glm::mat4 m_DepthToCameraTransform;
+            glm::mat4 m_CameraToDepthTransform;
         };
 
         Gfx::CBufferPtr m_RegisteringBufferPtr;
@@ -910,8 +911,9 @@ namespace MR
                 SRegisteringBuffer BufferData;
                 BufferData.m_ColorIntrinsics = m_ColorIntrinsics;
                 BufferData.m_DepthIntrinsics = m_DepthIntrinsics;
-                BufferData.m_RelativeCameraTransform = m_RelativeCameraTransform;
-
+                BufferData.m_DepthToCameraTransform = glm::inverse(m_RelativeCameraTransform);
+                BufferData.m_CameraToDepthTransform = m_RelativeCameraTransform;
+                
                 Gfx::BufferManager::UploadBufferData(m_RegisteringBufferPtr, &BufferData);
 
                 Gfx::ContextManager::SetConstantBuffer(0, m_RegisteringBufferPtr);
