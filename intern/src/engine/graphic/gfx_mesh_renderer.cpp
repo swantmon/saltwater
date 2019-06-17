@@ -77,8 +77,6 @@ namespace
         void OnNewMap();
         void OnUnloadMap();
 
-        void OnResize(unsigned int _Width, unsigned int _Height);
-
         void Update();
         void Render();
         void RenderForward();
@@ -137,7 +135,7 @@ namespace
 
     private:
 
-        typedef std::vector<SRenderJob> CRenderJobs;
+        using CRenderJobs = std::vector<SRenderJob>;
 
     private:
 
@@ -200,13 +198,13 @@ namespace
 
     void CGfxMeshRenderer::OnExit()
     {
-        m_ModelBufferPtr           = 0;
-        m_SurfaceMaterialBufferPtr = 0;
-        m_HitProxyPassPSBufferPtr  = 0;
-        m_ForwardPassBufferPtr     = 0;
-        m_LightPropertiesBufferPtr = 0;
-        m_HitProxyShaderPtr        = 0;
-        m_DeferredContextPtr       = 0;
+        m_ModelBufferPtr           = nullptr;
+        m_SurfaceMaterialBufferPtr = nullptr;
+        m_HitProxyPassPSBufferPtr  = nullptr;
+        m_ForwardPassBufferPtr     = nullptr;
+        m_LightPropertiesBufferPtr = nullptr;
+        m_HitProxyShaderPtr        = nullptr;
+        m_DeferredContextPtr       = nullptr;
 
         // -----------------------------------------------------------------------------
         // Iterate throw render jobs to release managed pointer
@@ -303,8 +301,8 @@ namespace
         ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
         ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
         ConstanteBufferDesc.m_NumberOfBytes = sizeof(SPerDrawCallConstantBufferVS);
-        ConstanteBufferDesc.m_pBytes        = 0;
-        ConstanteBufferDesc.m_pClassKey     = 0;
+        ConstanteBufferDesc.m_pBytes        = nullptr;
+        ConstanteBufferDesc.m_pClassKey     = nullptr;
 
         m_ModelBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
@@ -317,8 +315,8 @@ namespace
         ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
         ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
         ConstanteBufferDesc.m_NumberOfBytes = sizeof(CMaterial::SMaterialAttributes);
-        ConstanteBufferDesc.m_pBytes        = 0;
-        ConstanteBufferDesc.m_pClassKey     = 0;
+        ConstanteBufferDesc.m_pBytes        = nullptr;
+        ConstanteBufferDesc.m_pClassKey     = nullptr;
 
         m_SurfaceMaterialBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
@@ -331,8 +329,8 @@ namespace
         ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
         ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
         ConstanteBufferDesc.m_NumberOfBytes = sizeof(SHitProxyProperties);
-        ConstanteBufferDesc.m_pBytes        = 0;
-        ConstanteBufferDesc.m_pClassKey     = 0;
+        ConstanteBufferDesc.m_pBytes        = nullptr;
+        ConstanteBufferDesc.m_pClassKey     = nullptr;
 
         m_HitProxyPassPSBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
@@ -345,8 +343,8 @@ namespace
         ConstanteBufferDesc.m_Binding       = CBuffer::ResourceBuffer;
         ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
         ConstanteBufferDesc.m_NumberOfBytes = sizeof(SLightProperties) * s_MaxNumberOfLights;
-        ConstanteBufferDesc.m_pBytes        = 0;
-        ConstanteBufferDesc.m_pClassKey     = 0;
+        ConstanteBufferDesc.m_pBytes        = nullptr;
+        ConstanteBufferDesc.m_pClassKey     = nullptr;
 
         m_LightPropertiesBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
@@ -359,8 +357,8 @@ namespace
         ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
         ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
         ConstanteBufferDesc.m_NumberOfBytes = sizeof(SForwardPassProperties);
-        ConstanteBufferDesc.m_pBytes        = 0;
-        ConstanteBufferDesc.m_pClassKey     = 0;
+        ConstanteBufferDesc.m_pBytes        = nullptr;
+        ConstanteBufferDesc.m_pClassKey     = nullptr;
 
         m_ForwardPassBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
@@ -429,7 +427,7 @@ namespace
 
     void CGfxMeshRenderer::Render()
     {
-        if (m_DeferredRenderJobs.size() == 0) return;
+        if (m_DeferredRenderJobs.empty()) return;
 
         Performance::BeginEvent("Meshes");
 
@@ -544,7 +542,7 @@ namespace
 
     void CGfxMeshRenderer::RenderForward()
     {
-        if (m_ForwardRenderJobs.size() == 0) return;
+        if (m_ForwardRenderJobs.empty()) return;
 
         Performance::BeginEvent("Transparent Meshes");
 
@@ -577,14 +575,14 @@ namespace
 
         ContextManager::SetTexture(7, ReflectionRenderer::GetBRDF());
 
-        if (m_ForwardLightTextures.m_SpecularTexturePtr != 0)
+        if (m_ForwardLightTextures.m_SpecularTexturePtr != nullptr)
         {
             ContextManager::SetSampler(8, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
             ContextManager::SetTexture(8, m_ForwardLightTextures.m_SpecularTexturePtr);
         }
 
-        if (m_ForwardLightTextures.m_DiffuseTexturePtr != 0)
+        if (m_ForwardLightTextures.m_DiffuseTexturePtr != nullptr)
         {
             ContextManager::SetSampler(9, SamplerManager::GetSampler(CSampler::MinMagMipLinearClamp));
 
@@ -593,7 +591,7 @@ namespace
 
         for (unsigned int IndexOfTexture = 0; IndexOfTexture < s_MaxNumberOfLights; ++IndexOfTexture)
         {
-            if (m_ForwardLightTextures.m_ShadowTexturePtrs[IndexOfTexture] != 0)
+            if (m_ForwardLightTextures.m_ShadowTexturePtrs[IndexOfTexture] != nullptr)
             {
                 ContextManager::SetSampler(10 + IndexOfTexture, SamplerManager::GetSampler(CSampler::PCF));
 
@@ -710,7 +708,7 @@ namespace
 
     void CGfxMeshRenderer::RenderHitProxy()
     {
-        if (m_DeferredRenderJobs.size() == 0) return;
+        if (m_DeferredRenderJobs.empty()) return;
 
         Performance::BeginEvent("Mesh Hit Proxy");
 
@@ -813,7 +811,7 @@ namespace
 
         for (auto Component : DataMeshComponents)
         {
-            Dt::CMeshComponent* pDtComponent = static_cast<Dt::CMeshComponent*>(Component);
+            auto* pDtComponent = static_cast<Dt::CMeshComponent*>(Component);
 
             if (pDtComponent->IsActiveAndUsable() == false) continue;
 
@@ -821,7 +819,7 @@ namespace
 
             if (rCurrentEntity.GetLayer() & Dt::SEntityLayer::Default)
             {
-                Gfx::CMesh* pGfxComponent = static_cast<Gfx::CMesh*>(pDtComponent->GetFacet(Dt::CMeshComponent::Graphic));
+                auto* pGfxComponent = static_cast<Gfx::CMesh*>(pDtComponent->GetFacet(Dt::CMeshComponent::Graphic));
 
                 // -----------------------------------------------------------------------------
                 // Set every surface of this entity into a new render job
@@ -844,7 +842,7 @@ namespace
                     }
                 }
 
-                assert(pMaterial != 0);
+                assert(pMaterial != nullptr);
 
                 // -----------------------------------------------------------------------------
                 // Set information to render job
@@ -912,11 +910,11 @@ namespace
         {
             if (IndexOfLight == s_MaxNumberOfLights) break;
 
-            Dt::CSunComponent* pDtComponent = static_cast<Dt::CSunComponent*>(Component);
+            auto* pDtComponent = static_cast<Dt::CSunComponent*>(Component);
 
             if (pDtComponent->IsActiveAndUsable() == false) continue;
 
-            Gfx::CSun* pGfxComponent = static_cast<Gfx::CSun*>(pDtComponent->GetFacet(Dt::CSunComponent::Graphic));
+            auto* pGfxComponent = static_cast<Gfx::CSun*>(pDtComponent->GetFacet(Dt::CSunComponent::Graphic));
 
             float HasShadows = 1.0f;
 
@@ -944,11 +942,11 @@ namespace
         {
             if (IndexOfLight == s_MaxNumberOfLights) break;
 
-            Dt::CPointLightComponent* pDtComponent = static_cast<Dt::CPointLightComponent*>(Component);
+            auto* pDtComponent = static_cast<Dt::CPointLightComponent*>(Component);
 
             if (pDtComponent->IsActiveAndUsable() == false) continue;
 
-            Gfx::CPointLight* pGfxComponent = static_cast<Gfx::CPointLight*>(pDtComponent->GetFacet(Dt::CPointLightComponent::Graphic));
+            auto* pGfxComponent = static_cast<Gfx::CPointLight*>(pDtComponent->GetFacet(Dt::CPointLightComponent::Graphic));
 
             float InvSqrAttenuationRadius = pDtComponent->GetReciprocalSquaredAttenuationRadius();
             float AngleScale              = pDtComponent->GetAngleScale();
@@ -991,11 +989,11 @@ namespace
         {
             if (IndexOfLight == s_MaxNumberOfLights) break;
 
-            Dt::CLightProbeComponent* pDtComponent = static_cast<Dt::CLightProbeComponent*>(Component);
+            auto* pDtComponent = static_cast<Dt::CLightProbeComponent*>(Component);
 
             if (pDtComponent->IsActiveAndUsable() == false) continue;
 
-            Gfx::CLightProbe* pGfxComponent = static_cast<Gfx::CLightProbe*>(pDtComponent->GetFacet(Dt::CLightProbeComponent::Graphic));
+            auto* pGfxComponent = static_cast<Gfx::CLightProbe*>(pDtComponent->GetFacet(Dt::CLightProbeComponent::Graphic));
 
             LightProperties[IndexOfLight].m_LightType      = 3;
             LightProperties[IndexOfLight].m_LightPosition  = glm::vec4(pDtComponent->GetHostEntity()->GetWorldPosition(), 1.0f);
