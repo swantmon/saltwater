@@ -18,11 +18,11 @@ namespace // No specific namespace => Only allowed to use in this page.
 namespace FutoGmtCV
 {
     //---Constructors & Destructor---
-    CRectification_Planar::CRectification_Planar()
+    CPlanarRectification::CPlanarRectification()
     {
     }
 
-    CRectification_Planar::CRectification_Planar(const CFutoImg& OrigImg_B, const CFutoImg& OrigImg_M)
+    CPlanarRectification::CPlanarRectification(const CFutoImg& OrigImg_B, const CFutoImg& OrigImg_M)
         : m_Img_Orig_B(OrigImg_B),
           m_Img_Orig_M(OrigImg_M)
     {
@@ -65,7 +65,7 @@ namespace FutoGmtCV
     }
 
 
-    CRectification_Planar::~CRectification_Planar()
+    CPlanarRectification::~CPlanarRectification()
     {
         //---Release Manager---
         m_PlanarRectCSPtr = nullptr;
@@ -74,7 +74,7 @@ namespace FutoGmtCV
     }
 
     //---Execution Functions---
-    void CRectification_Planar::execute(CFutoImg& Img_Rect_B, CFutoImg& Img_Rect_M, SHomographyTransform& Homo_B, SHomographyTransform& Homo_M)
+    void CPlanarRectification::execute(CFutoImg& Img_Rect_B, CFutoImg& Img_Rect_M, SHomographyTransform& Homo_B, SHomographyTransform& Homo_M)
     {
         //---Step 1. Calculate Orientations of Rectified Images & Homography from Original to Rectified---
         cal_K_Rect(m_Img_Orig_B.get_Cam(), m_Img_Orig_M.get_Cam());
@@ -114,14 +114,14 @@ namespace FutoGmtCV
     }
 
     //---Assistant Functions: Compute Orientations---
-    void CRectification_Planar::cal_K_Rect(const glm::mat3& K_Orig_B, const glm::mat3& K_Orig_M)
+    void CPlanarRectification::cal_K_Rect(const glm::mat3& K_Orig_B, const glm::mat3& K_Orig_M)
     {
         m_K_Rect_B = 0.5 * (K_Orig_B + K_Orig_M);
         m_K_Rect_B[1].x = 0; // Let skew = 0
         m_K_Rect_M = m_K_Rect_B; // Camera mtx of both rectified images are the same.
     }
 
-    void CRectification_Planar::cal_R_Rect(const glm::vec3& PC_Orig_B, const glm::vec3& PC_Orig_M, const glm::mat3& R_Orig_B)
+    void CPlanarRectification::cal_R_Rect(const glm::vec3& PC_Orig_B, const glm::vec3& PC_Orig_M, const glm::mat3& R_Orig_B)
     {
         glm::vec3 R_Rect_row0 = PC_Orig_M - PC_Orig_B;
         R_Rect_row0 = (R_Rect_row0.x + R_Rect_row0.y + R_Rect_row0.z) >= 0 ? R_Rect_row0 : -R_Rect_row0; // Keep RectImg always along with positive baseline direction
@@ -136,19 +136,19 @@ namespace FutoGmtCV
         m_R_Rect = glm::transpose(glm::mat3(R_Rect_row0, R_Rect_row1, R_Rect_row2));
     }
 
-    void CRectification_Planar::cal_PC_Rect(const glm::vec3& PC_Orig_B, const glm::vec3& PC_Orig_M)
+    void CPlanarRectification::cal_PC_Rect(const glm::vec3& PC_Orig_B, const glm::vec3& PC_Orig_M)
     {
         m_PC_Rect_B = PC_Orig_B;
         m_PC_Rect_M = PC_Orig_M;
     }
 
-    void CRectification_Planar::cal_P_Rect()
+    void CPlanarRectification::cal_P_Rect()
     {
         m_P_Rect_B = m_K_Rect_B * glm::mat4x3(m_R_Rect[0], m_R_Rect[1], m_R_Rect[2], -m_R_Rect * m_PC_Rect_B);
         m_P_Rect_M = m_K_Rect_M * glm::mat4x3(m_R_Rect[0], m_R_Rect[1], m_R_Rect[2], -m_R_Rect * m_PC_Rect_M);
     }
 
-    void CRectification_Planar::cal_H(const glm::mat4x3& P_Orig_B, const glm::mat4x3& P_Orig_M)
+    void CPlanarRectification::cal_H(const glm::mat4x3& P_Orig_B, const glm::mat4x3& P_Orig_M)
     {
         //---Calculate the Homography---
         // A simple way to calculate Homography (Also proposed by Fusiello). <= glm::inverse cannot apply on glm::mat4*3
@@ -163,7 +163,7 @@ namespace FutoGmtCV
     }
 
     //---Assistant Functions: Center Rectified Images---
-    void CRectification_Planar::cal_CenterShift(glm::vec2& CenterDrift, const glm::ivec2& ImgSize_Orig, const int Which_Img)
+    void CPlanarRectification::cal_CenterShift(glm::vec2& CenterDrift, const glm::ivec2& ImgSize_Orig, const int Which_Img)
     {
         glm::mat3 H;
         switch (Which_Img)
@@ -182,7 +182,7 @@ namespace FutoGmtCV
         CenterDrift = glm::vec2(Center_Orig - Center_Orig2Rect);
     }
 
-    void CRectification_Planar::imp_CenterShift_K(const glm::vec2& Shift_B, const glm::vec2& Shift_M)
+    void CPlanarRectification::imp_CenterShift_K(const glm::vec2& Shift_B, const glm::vec2& Shift_M)
     {
         m_K_Rect_B[2].x += Shift_B.x;
         m_K_Rect_B[2].y += Shift_B.y;
@@ -191,7 +191,7 @@ namespace FutoGmtCV
     }
 
     //---Assistant Functions: Generate Rectified Images---
-    void CRectification_Planar::cal_RectImgBound(const glm::ivec2& ImgSize_Orig, const int Which_Img)
+    void CPlanarRectification::cal_RectImgBound(const glm::ivec2& ImgSize_Orig, const int Which_Img)
     {
         glm::mat3 H;
         switch (Which_Img)
@@ -243,7 +243,7 @@ namespace FutoGmtCV
         }
     }
 
-    void CRectification_Planar::determ_RectImgSize()
+    void CPlanarRectification::determ_RectImgSize()
     {
         glm::ivec2 RectImgConerUL, RectImgConerDR;
 
@@ -261,7 +261,7 @@ namespace FutoGmtCV
         m_ImgSize_Rect = m_Homography_B.m_RectImgConer_DR - m_Homography_B.m_RectImgConer_UL;
     }
 
-    void CRectification_Planar::genrt_RectImg(const std::vector<char>& Img_Orig, const int Which_Img)
+    void CPlanarRectification::genrt_RectImg(const std::vector<char>& Img_Orig, const int Which_Img)
     {
         //---Initialize Output Texture Manager---
         Gfx::STextureDescriptor TextureDescriptor_RectImg = {};
@@ -337,7 +337,7 @@ namespace FutoGmtCV
     }
 
     //---Assistant Functions: Return Rectified Images---
-    void CRectification_Planar::get_Result(CFutoImg& Img_Rect, SHomographyTransform& Homo, const int Which_Img)
+    void CPlanarRectification::get_Result(CFutoImg& Img_Rect, SHomographyTransform& Homo, const int Which_Img)
     {
         switch (Which_Img)
         {

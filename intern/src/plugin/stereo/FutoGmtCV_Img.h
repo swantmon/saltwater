@@ -1,7 +1,7 @@
 ﻿
 #pragma once
 
-#include "C:/saltwater/intern/src/base/base_include_glm.h" // Some warnings appears when directly #include glm 
+#include "C:/saltwater/intern/src/base/base_include_glm.h" // Some warnings appears when directly #include "glm" in Engine
 
 #include <vector>
 

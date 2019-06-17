@@ -19,13 +19,13 @@ namespace FutoGmtCV
         glm::ivec2 m_RectImgConer_DR;
     };
 
-    class CRectification_Planar
+    class CPlanarRectification
     {
     //---Constructor & Destructor---
     public:
-        CRectification_Planar();
-        CRectification_Planar(const CFutoImg& OrigImg_B, const CFutoImg& OrigImg_M);
-        ~CRectification_Planar();
+        CPlanarRectification();
+        CPlanarRectification(const CFutoImg& OrigImg_B, const CFutoImg& OrigImg_M);
+        ~CPlanarRectification();
 
     //---Execution Functions---
     public:
