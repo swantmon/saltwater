@@ -24,6 +24,7 @@
 #include "engine/graphic/gfx_ar_renderer.h"
 #include "engine/graphic/gfx_buffer_manager.h"
 #include "engine/graphic/gfx_context_manager.h"
+#include "engine/graphic/gfx_debug.h"
 #include "engine/graphic/gfx_main.h"
 #include "engine/graphic/gfx_material.h"
 #include "engine/graphic/gfx_mesh.h"
@@ -461,22 +462,9 @@ namespace
     {
         if (m_RenderJobs.empty()) return;
 
-        auto DataCameraComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CCameraComponent>();
-
-        Gfx::CTexturePtr BackgroundTexturePtr = nullptr;
-
-        for (auto Component : DataCameraComponents)
-        {
-            auto* pDtComponent = static_cast<Dt::CCameraComponent*>(Component);
-
-            if (pDtComponent->IsActiveAndUsable() == false) continue;
-
-            BackgroundTexturePtr = pDtComponent->GetBackgroundTexture();
-        }
-
-        if (BackgroundTexturePtr == nullptr) return;
-
         Performance::BeginEvent("AR Shadows");
+
+        Debug::Push(131222);
 
         ContextManager::SetTargetSet(TargetSetManager::GetLightAccumulationTargetSet());
 
@@ -498,7 +486,7 @@ namespace
 
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
 
-        ContextManager::SetTexture(0, BackgroundTexturePtr);
+        ContextManager::SetTexture(0, TargetSetManager::GetLightAccumulationTargetSet()->GetRenderTarget(0));
 
         ContextManager::SetShaderPS(m_DifferentialForwardShaderPSPtr);
 
@@ -555,7 +543,7 @@ namespace
             ContextManager::DrawIndexed(SurfacePtr->GetNumberOfIndices(), 0, 0);
         }
 
-        for (unsigned int IndexOfTexture = 0; IndexOfTexture < 16; ++IndexOfTexture)
+        for (auto IndexOfTexture = 0; IndexOfTexture < 16; ++IndexOfTexture)
         {
             ContextManager::ResetSampler(IndexOfTexture);
 
@@ -592,6 +580,8 @@ namespace
         ContextManager::ResetViewPortSet();
 
         ContextManager::ResetTargetSet();
+
+        Debug::Pop();
 
         Performance::EndEvent();
     }
