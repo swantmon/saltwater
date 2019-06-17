@@ -362,6 +362,8 @@ namespace
     void CGfxARRenderer::Update()
     {
         BuildRenderJobs();
+
+        UpdateLightProperties();
     }
 
     // -----------------------------------------------------------------------------
