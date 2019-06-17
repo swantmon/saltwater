@@ -757,7 +757,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Jobs
         // -----------------------------------------------------------------------------
-        for (auto RenderJob : m_RenderJobs)
+        for (auto& RenderJob : m_RenderJobs)
         {
             const CMaterial* pMaterial = RenderJob.m_SurfaceMaterialPtr;
 
@@ -789,7 +789,7 @@ namespace
 
             ContextManager::SetIndexBuffer(SurfacePtr->GetIndexBuffer(), 0);
 
-            ContextManager::SetInputLayout(SurfacePtr->GetMVPShaderVS()->GetInputLayout());
+            ContextManager::SetInputLayout(SurfacePtr->GetShaderVS()->GetInputLayout());
 
             ContextManager::DrawIndexed(SurfacePtr->GetNumberOfIndices(), 0, 0);
         }
