@@ -29,7 +29,7 @@ namespace
         return (TotalShaderCount + WorkGroupSize - 1) / WorkGroupSize;
     }
 
-    struct SParallaxEquation // Info of Parallax Equation for GLSL.
+    struct SParallaxEquation // Info for Parallax Equation in GLSL.
     {
         float m_BaselineLength; // Unit = meter
         float m_FocalLength; // Unit = pixel
@@ -67,9 +67,9 @@ namespace Stereo
         m_DepthImg_Sensor_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDesc_DepthImg_Orig);
 
         //---Setting Texture of Depth Difference for GLSL---
-        Gfx::STextureDescriptor TextureDesc_DepthImg_Diff = TextureDesc_DepthImg_Orig;
-        TextureDesc_DepthImg_Diff.m_Format = Gfx::CTexture::R16_INT; // 1 channels with 16-bit int.
-        m_Depth_Difference_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDesc_DepthImg_Diff);
+        Gfx::STextureDescriptor TextureDesc_DepthDiff = TextureDesc_DepthImg_Orig;
+        TextureDesc_DepthDiff.m_Format = Gfx::CTexture::R16_INT; // 1 channels with 16-bit int.
+        m_Depth_Difference_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDesc_DepthDiff);
     }
 
     // -----------------------------------------------------------------------------
@@ -91,7 +91,7 @@ namespace Stereo
 
         glm::vec3 PCVec = glm::vec3(_Transform[3]); // The last column of _Transform given by ARKit is the Position of Camera in World.
         
-        //---Only Compute Keyframes---
+        //---Only Compute 2 Keyframes Once---
         if (!m_Is_KeyFrame)
         {
             m_OrigImg_Curt = FutoGmtCV::CFutoImg(_rRGBImage, m_OrigImgSize, 4, CamMtx, RotMtx, PCVec);
@@ -113,7 +113,9 @@ namespace Stereo
 
             m_KeyFrameID++;
 
-            //---Epipolarizytion: Original Image Pair => Rectified Image Pair---
+            //---Epipolarizytion---
+            // * Original Image Pair => Rectified Image Pair
+
             m_Rectifier_Planar = FutoGmtCV::CPlanarRectification(m_OrigImg_Curt, m_OrigImg_Last); // Apply Planar Rectification
             m_Rectifier_Planar.execute(m_RectImg_Curt, m_RectImg_Last, m_Homo_Curt, m_Homo_Last);
 
@@ -122,15 +124,23 @@ namespace Stereo
                 return; // LibSGM will break if the size of rectified image is too large.
             }
 
-            //---Stereo Matching: Disparity in Rectified Current Image---
+            //---Stereo Matching---
+            // * Calculate Disparity in Rectified Current Image
+
             m_DispImg_Rect.resize(m_RectImg_Curt.get_Img().size(), 0.0);
 
             imp_StereoMatching();
 
-            //---Disparity to Depth in Rectified Current Image---
+            //---Disparity to Depth---
+            // * Using Parallax Equation to Transform Disparity to Depth
+            // * Depth is in Rectified Current Image
+
             imp_Disp2Depth();
 
-            //---Depth from Rectified to Original Current Image (Horizontal Flip for Reconstruction)---
+            //---Depth from Rectified to Original---
+            // * Based on Inverse Homography calculated in Rectification
+            // * Depth is in Original Current Image & Horizontal Flipped (for Reconstruction)
+
             imp_Depth_Rect2Orig();
 
             //---Depth Analysis---
@@ -254,41 +264,42 @@ namespace Stereo
     void CPluginInterface::imp_Disp2Depth()
     {
         //---Initialize Texture Manager for Disparity in Rectified Image---
-        Gfx::STextureDescriptor TextureDescriptor_RectImg = {};
+        Gfx::STextureDescriptor TextureDesc_DispImg_Rect = {};
+        TextureDesc_DispImg_Rect.m_NumberOfPixelsU = m_RectImg_Curt.get_ImgSize().x;
+        TextureDesc_DispImg_Rect.m_NumberOfPixelsV = m_RectImg_Last.get_ImgSize().y;
+        TextureDesc_DispImg_Rect.m_NumberOfPixelsW = 1;
+        TextureDesc_DispImg_Rect.m_NumberOfMipMaps = 1;
+        TextureDesc_DispImg_Rect.m_NumberOfTextures = 1;
+        TextureDesc_DispImg_Rect.m_Binding = Gfx::CTexture::ShaderResource;
+        TextureDesc_DispImg_Rect.m_Access = Gfx::CTexture::EAccess::CPUWrite;
+        TextureDesc_DispImg_Rect.m_Usage = Gfx::CTexture::EUsage::GPUReadWrite;
+        TextureDesc_DispImg_Rect.m_Semantic = Gfx::CTexture::UndefinedSemantic;
+        TextureDesc_DispImg_Rect.m_Format = Gfx::CTexture::R32_FLOAT; // 1 channels with 32-bit float.
 
-        TextureDescriptor_RectImg.m_NumberOfPixelsU = m_RectImg_Curt.get_ImgSize().x;
-        TextureDescriptor_RectImg.m_NumberOfPixelsV = m_RectImg_Last.get_ImgSize().y;
-        TextureDescriptor_RectImg.m_NumberOfPixelsW = 1;
-        TextureDescriptor_RectImg.m_NumberOfMipMaps = 1;
-        TextureDescriptor_RectImg.m_NumberOfTextures = 1;
-        TextureDescriptor_RectImg.m_Binding = Gfx::CTexture::ShaderResource;
-        TextureDescriptor_RectImg.m_Access = Gfx::CTexture::EAccess::CPUWrite;
-        TextureDescriptor_RectImg.m_Usage = Gfx::CTexture::EUsage::GPUReadWrite;
-        TextureDescriptor_RectImg.m_Semantic = Gfx::CTexture::UndefinedSemantic;
-        TextureDescriptor_RectImg.m_Format = Gfx::CTexture::R32_FLOAT; // 1 channels with 32-float.
+        m_DispImg_Rect_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDesc_DispImg_Rect);
 
-        m_Disp_RectImg_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_RectImg);
-
-        m_Depth_RectImg_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_RectImg);
+        Gfx::STextureDescriptor TextureDesc_DepthImg_Rect = TextureDesc_DispImg_Rect;
+        TextureDesc_DepthImg_Rect.m_Format = Gfx::CTexture::R16_UINT; // 1 channels with 16-bit uint.
+        m_DepthImg_Rect_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDesc_DepthImg_Rect);
 
         //---GPU Start---
         Gfx::Performance::BeginEvent("Disparity to Depth");
 
         // Submit Data to Managers
-        SParallaxEquation ParaxEq;
-        ParaxEq.m_BaselineLength = glm::l2Norm(m_RectImg_Curt.get_PC() - m_RectImg_Last.get_PC());
-        ParaxEq.m_FocalLength = m_RectImg_Curt.get_Cam()[0].x;
+        SParallaxEquation ParaxEqInfo;
+        ParaxEqInfo.m_BaselineLength = glm::l2Norm(m_RectImg_Curt.get_PC() - m_RectImg_Last.get_PC());
+        ParaxEqInfo.m_FocalLength = m_RectImg_Curt.get_Cam()[0].x;
 
-        Gfx::BufferManager::UploadBufferData(m_ParaxEq_BufferPtr, &ParaxEq);
+        Gfx::BufferManager::UploadBufferData(m_ParaxEq_BufferPtr, &ParaxEqInfo);
 
         Base::AABB2UInt TargetRect;
         TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_RectImg_Curt.get_ImgSize().x, m_RectImg_Curt.get_ImgSize().y));
-        Gfx::TextureManager::CopyToTexture2D(m_Disp_RectImg_TexturePtr, TargetRect, m_RectImg_Curt.get_ImgSize().x, static_cast<const void*>(m_DispImg_Rect.data()));
+        Gfx::TextureManager::CopyToTexture2D(m_DispImg_Rect_TexturePtr, TargetRect, m_RectImg_Curt.get_ImgSize().x, static_cast<const void*>(m_DispImg_Rect.data()));
 
         // Connecting Managers (@CPU) & GLSL (@GPU)
         Gfx::ContextManager::SetShaderCS(m_Disp2Depth_CSPtr);
-        Gfx::ContextManager::SetImageTexture(0, m_Disp_RectImg_TexturePtr);
-        Gfx::ContextManager::SetImageTexture(1, m_Depth_RectImg_TexturePtr);
+        Gfx::ContextManager::SetImageTexture(0, m_DispImg_Rect_TexturePtr);
+        Gfx::ContextManager::SetImageTexture(1, m_DepthImg_Rect_TexturePtr);
         Gfx::ContextManager::SetConstantBuffer(0, m_ParaxEq_BufferPtr);
 
         // Start GPU Parallel Processing
@@ -313,7 +324,7 @@ namespace Stereo
 
         // Connecting Managers (@CPU) & GLSL (@GPU)
         Gfx::ContextManager::SetShaderCS(m_Depth_Rect2Orig_CSPtr);
-        Gfx::ContextManager::SetImageTexture(0, m_Depth_RectImg_TexturePtr);
+        Gfx::ContextManager::SetImageTexture(0, m_DepthImg_Rect_TexturePtr);
         Gfx::ContextManager::SetImageTexture(1, m_DepthImg_Orig_TexturePtr);
         Gfx::ContextManager::SetConstantBuffer(0, m_Homogrampy_BufferPtr);
 
@@ -328,7 +339,9 @@ namespace Stereo
 
         Gfx::Performance::EndEvent();
         // GPU End
-        m_Depth_OrigImg.resize(m_DepthImg_Orig_TexturePtr->GetNumberOfPixelsU() * m_DepthImg_Orig_TexturePtr->GetNumberOfPixelsV() * sizeof(uint16_t));
+
+        const uint MemSize = m_DepthImg_Orig_TexturePtr->GetNumberOfPixelsU() * m_DepthImg_Orig_TexturePtr->GetNumberOfPixelsV() * sizeof(uint16_t);
+        m_Depth_OrigImg.resize(MemSize);
         Gfx::TextureManager::CopyTextureToCPU(m_DepthImg_Orig_TexturePtr, m_Depth_OrigImg.data());
         glm::mat4 Transform = glm::mat4(glm::transpose(m_OrigImg_Curt.get_Rot()));
         Transform[3] = glm::vec4(m_OrigImg_Curt.get_PC(), 1.0f);
@@ -425,6 +438,7 @@ namespace Stereo
         //---00 Input---
         m_FrameResolution = Core::CProgramParameters::GetInstance().Get("mr:stereo:00_input:frame_resolution", 0.5); // Full = 1; Half = 0.5;
 
+        //---00 Keyframe---
         m_Cdt_Keyf_BaseLineL = Core::CProgramParameters::GetInstance().Get("mr:stereo:00_input:baseline_length", 0.03);
 
         m_Is_KeyFrame = false;
@@ -432,11 +446,11 @@ namespace Stereo
         //---01 Rectification-----
 
         //---02 Stereo Matching---
-        m_DispRange = Core::CProgramParameters::GetInstance().Get("mr:stereo:02_stereo_matching:disparity_range", 128);
-
         m_StereoMatching_Method = Core::CProgramParameters::GetInstance().Get("mr:stereo:02_stereo_matching:Method", "LibSGM");
 
-        //---03 Disparity to Depth---
+        m_DispRange = Core::CProgramParameters::GetInstance().Get("mr:stereo:02_stereo_matching:disparity_range", 128);
+
+        //---03 Disparity to Depth in Rectified Current Image---
         std::stringstream DefineStream;
         DefineStream
             << "#define TILE_SIZE_2D " << TileSize_2D << " \n";
@@ -453,7 +467,7 @@ namespace Stereo
         ParaxEq_BufferDesc.m_pClassKey = 0;
         m_ParaxEq_BufferPtr = Gfx::BufferManager::CreateBuffer(ParaxEq_BufferDesc);
 
-        //---04 Depth from Rectified to Original---
+        //---04 Depth from Rectified to Original Current Image---
         m_Depth_Rect2Orig_CSPtr = Gfx::ShaderManager::CompileCS("../../plugins/stereo/cs_Depth_Rect2Orig.glsl", "main", DefineString.c_str());
 
         Gfx::SBufferDescriptor Homography_BufferDesc = {};
@@ -466,12 +480,12 @@ namespace Stereo
         Homography_BufferDesc.m_pClassKey = 0;
         m_Homogrampy_BufferPtr = Gfx::BufferManager::CreateBuffer(Homography_BufferDesc);
 
-        //---05 Depth Analysis---
+        //---05 Compare Depth between plugin_stereo & Sensor---
         m_Is_CompareDepth = Core::CProgramParameters::GetInstance().Get("mr:stereo:05_depth_analysis:compare_sensor", true);
 
         m_Compare_Depth_CSPtr = Gfx::ShaderManager::CompileCS("../../plugins/stereo/cs_Compare_Depth.glsl", "main", DefineString.c_str());
 
-        //---06 Output---
+        //---06 Return Results---
         m_Is_ExportResult = Core::CProgramParameters::GetInstance().Get("mr:stereo:06_output:export_results", true);
     }
 
@@ -481,8 +495,8 @@ namespace Stereo
     {
         //---Release Manager---
         m_Disp2Depth_CSPtr = nullptr;
-        m_Disp_RectImg_TexturePtr = nullptr;
-        m_Depth_RectImg_TexturePtr = nullptr;
+        m_DispImg_Rect_TexturePtr = nullptr;
+        m_DepthImg_Rect_TexturePtr = nullptr;
         m_ParaxEq_BufferPtr = nullptr;
 
         m_Depth_Rect2Orig_CSPtr = nullptr;

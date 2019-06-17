@@ -9,28 +9,28 @@ layout(std140, binding = 0) uniform HomographyBuffer
 	ivec2 g_RectImgConer_DR;
 };
 
-layout (binding = 0, r32f) readonly uniform image2D cs_Depth_RectImg;
-layout (binding = 1, r16ui) writeonly uniform uimage2D cs_Depth_OrigImg;
+layout (binding = 0, r16ui) readonly uniform uimage2D cs_Depth_RectImg; // Pixel in uimage2D(r16ui) is uint in 16-bit
+layout (binding = 1, r16ui) writeonly uniform uimage2D cs_Depth_OrigImg; // Pixel in uimage2D(r16ui) is uint in 16-bit
 
-vec4 BiLinearInterpolation(vec2 pixPosition)
+float BiLinearInterpolation(vec2 pixPosition)
 {
-	ivec2 pixPosition_UL = ivec2(pixPosition);
-	ivec2 pixPosition_UR = pixPosition_UL + ivec2(1, 0);
-	ivec2 pixPosition_DL = pixPosition_UL + ivec2(0, 1);
-	ivec2 pixPosition_DR = pixPosition_UL + ivec2(1, 1);
+	const ivec2 pixPosition_UL = ivec2(pixPosition);
+	const ivec2 pixPosition_UR = pixPosition_UL + ivec2(1, 0);
+	const ivec2 pixPosition_DL = pixPosition_UL + ivec2(0, 1);
+	const ivec2 pixPosition_DR = pixPosition_UL + ivec2(1, 1);
 
-	vec4 pixValue_UL = imageLoad(cs_Depth_RectImg, pixPosition_UL);
-	vec4 pixValue_UR = imageLoad(cs_Depth_RectImg, pixPosition_UR);
-	vec4 pixValue_DL = imageLoad(cs_Depth_RectImg, pixPosition_DL);
-	vec4 pixValue_DR = imageLoad(cs_Depth_RectImg, pixPosition_DR);
+	const uint pixValue_UL = imageLoad(cs_Depth_RectImg, pixPosition_UL).r;
+	const uint pixValue_UR = imageLoad(cs_Depth_RectImg, pixPosition_UR).r;
+	const uint pixValue_DL = imageLoad(cs_Depth_RectImg, pixPosition_DL).r;
+	const uint pixValue_DR = imageLoad(cs_Depth_RectImg, pixPosition_DR).r;
 
-	float a_x = (pixPosition.x - pixPosition_UL.x) / (pixPosition_UR.x - pixPosition_UL.x);
-	float a_y = (pixPosition.y - pixPosition_UL.y) / (pixPosition_DL.y - pixPosition_UL.y);
+	const float a_x = (pixPosition.x - pixPosition_UL.x) / (pixPosition_UR.x - pixPosition_UL.x);
+	const float a_y = (pixPosition.y - pixPosition_UL.y) / (pixPosition_DL.y - pixPosition_UL.y);
 
-	vec4 pixValue_UM = mix(pixValue_UL, pixValue_UR, a_x);
-	vec4 pixValue_DM = mix(pixValue_DL, pixValue_DR, a_x);
+	const float pixValue_UM = mix(pixValue_UL, pixValue_UR, a_x);
+	const float pixValue_DM = mix(pixValue_DL, pixValue_DR, a_x);
 
-	vec4 pixValue = mix(pixValue_UM, pixValue_DM, a_y);
+	const float pixValue = mix(pixValue_UM, pixValue_DM, a_y);
 	
 	return pixValue;
 }
@@ -43,7 +43,7 @@ void main()
 	pix_Orig2Rect /= pix_Orig2Rect.z;
 	vec2 pix_Rect = vec2(pix_Orig2Rect) - g_RectImgConer_UL;
 
-	vec4 Depth = BiLinearInterpolation(pix_Rect);
+	float Depth = BiLinearInterpolation(pix_Rect);
 
 	ivec2 Coords = ivec2(gl_GlobalInvocationID.xy);
 	Coords.x = imageSize(cs_Depth_OrigImg).x - Coords.x;

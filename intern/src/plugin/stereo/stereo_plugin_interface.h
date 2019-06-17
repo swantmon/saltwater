@@ -33,7 +33,7 @@ namespace Stereo
 {
     class CPluginInterface : public Core::IPlugin
     {
-    //---Engine Function---
+    //---Engine---
     public:
 
         void OnStart() override;
@@ -66,35 +66,36 @@ namespace Stereo
 
     //---plugin_stereo---
     private:
-        //---ARKit Data---
+        //---00 Input---
         float m_FrameResolution; // Full=1, Half=0.5.
 
         glm::ivec2 m_OrigImgSize; // Size of original image -> x = width & y = height
 
-        int m_KeyFrameID = 0;
-
-        //---Keyframe---
+        //---00 Keyframe---
         FutoGmtCV::CFutoImg m_OrigImg_Curt, m_OrigImg_Last; // Original Image Pair. -> Only compute 2 frames once.
 
         bool m_Is_KeyFrame; // The status of current keyframe.
 
+        int m_KeyFrameID = 0;
+
         float m_Cdt_Keyf_BaseLineL; // Keyframe Selection: BaseLine Condition. Unit is meter.
 
-        //---Rectification---
+        //---01 Rectification---
         FutoGmtCV::CFutoImg m_RectImg_Curt, m_RectImg_Last; // Rectified Image Pair.
 
-        FutoGmtCV::SHomographyTransform m_Homo_Curt, m_Homo_Last;
+        FutoGmtCV::SHomographyTransform m_Homo_Curt, m_Homo_Last; // Homography
 
-        FutoGmtCV::CPlanarRectification m_Rectifier_Planar; // Implemant Rectification
+        FutoGmtCV::CPlanarRectification m_Rectifier_Planar; // Implement planar rectification
 
-        //---Stereo Matching---
+        //---02 Stereo Matching---
         void imp_StereoMatching();
 
         std::vector<float> m_DispImg_Rect; // Disparity in Rectified Image => Using float because disparity is pixel or sub-pixel.
 
         int m_DispRange; // Disparity Searching Range for Stereo Matching
 
-        std::string m_StereoMatching_Method;
+        std::string m_StereoMatching_Method; // Select stereo matching method.
+
         std::unique_ptr<sgm::StereoSGM> m_pStereoMatcher_LibSGM;
         cv::Ptr<cv::StereoSGBM> m_pStereoMatcher_cvSGBM;
         cv::Ptr<cv::StereoBM> m_pStereoMatcher_cvBM;
@@ -102,15 +103,15 @@ namespace Stereo
         cv::Ptr<cv::StereoMatcher> m_pStereoMatcher_cvBP_cuda;
         cv::Ptr<cv::StereoMatcher> m_pStereoMatcher_cvConstBP_cuda;
 
-        //---Disparity to Depth---
+        //---03 Disparity to Depth in Rectified Current Image---
         void imp_Disp2Depth(); 
 
         Gfx::CShaderPtr m_Disp2Depth_CSPtr;
-        Gfx::CTexturePtr m_Disp_RectImg_TexturePtr;
-        Gfx::CTexturePtr m_Depth_RectImg_TexturePtr;
+        Gfx::CTexturePtr m_DispImg_Rect_TexturePtr;
+        Gfx::CTexturePtr m_DepthImg_Rect_TexturePtr;
         Gfx::CBufferPtr m_ParaxEq_BufferPtr;
 
-        //---Depth from Rectified to Original---
+        //---04 Depth from Rectified to Original Current Image---
         void imp_Depth_Rect2Orig();
 
         std::vector<char> m_Depth_OrigImg; // Horizontal flip for reconstruction in plugin_slam.
@@ -119,21 +120,20 @@ namespace Stereo
         Gfx::CTexturePtr m_DepthImg_Orig_TexturePtr;
         Gfx::CBufferPtr m_Homogrampy_BufferPtr;
 
-        //---Compare Depth between Stereo Matching & Sensor---
-        bool m_Is_CompareDepth;
-
-        void cmp_Depth();
-
+        //---05 Compare Depth between plugin_stereo & Sensor---
         std::vector<uint16_t> m_DepthImg_Sensor;
+
+        bool m_Is_CompareDepth;
+        void cmp_Depth(); 
 
         Gfx::CShaderPtr m_Compare_Depth_CSPtr;
         Gfx::CTexturePtr m_DepthImg_Sensor_TexturePtr;
         Gfx::CTexturePtr m_Depth_Difference_TexturePtr;
 
-        //---Return Result---
-        CStereoDelegate m_Delegate;
+        //---06 Return Results---
+        CStereoDelegate m_Delegate; // Return results to plugin_slam.
 
-        bool m_Is_ExportResult; 
+        bool m_Is_ExportResult; // Export results
         void export_Result();
     };
 
