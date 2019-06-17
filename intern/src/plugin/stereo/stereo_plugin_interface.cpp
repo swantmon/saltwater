@@ -22,7 +22,7 @@ CORE_PLUGIN_INFO(Stereo::CPluginInterface, "Stereo Matching", "1.0", "This plugi
 namespace
 {
 
-    #define TileSize_2D 16 // Define size of work group for GPU parallel processing.
+    #define TileSize_2D 16 // Define size of work group for GPU parallel processing. <= 16 suggested for 2D image (based on experience).
 
     int DivUp(int TotalShaderCount, int WorkGroupSize) // Calculate number of work groups.
     {
@@ -34,12 +34,6 @@ namespace
         float m_BaselineLength; // Unit = meter
         float m_FocalLength; // Unit = pixel
         glm::ivec2 m_Padding;
-    };
-
-    enum EStereoMatchingMethod
-    {
-        LibSGM,
-        cvBM_cuda
     };
 }
 
@@ -98,10 +92,10 @@ namespace Stereo
         glm::vec3 PCVec = glm::vec3(_Transform[3]); // The last column of _Transform given by ARKit is the Position of Camera in World.
         
         //---Only Compute Keyframes---
-        if (!m_is_Keyf_Curt)
+        if (!m_Is_KeyFrame)
         {
             m_OrigImg_Curt = FutoGmtCV::CFutoImg(_rRGBImage, m_OrigImgSize, 4, CamMtx, RotMtx, PCVec);
-            m_is_Keyf_Curt = true;
+            m_Is_KeyFrame = true;
         }
         else
         {
@@ -117,9 +111,9 @@ namespace Stereo
             m_OrigImg_Last = m_OrigImg_Curt;
             m_OrigImg_Curt = FutoGmtCV::CFutoImg(_rRGBImage, m_OrigImgSize, 4, CamMtx, RotMtx, PCVec);
 
-            m_KeyfID++;
+            m_KeyFrameID++;
 
-            //---Epipolarizytion---
+            //---Epipolarizytion: Original Image Pair => Rectified Image Pair---
             m_Rectifier_Planar = FutoGmtCV::CPlanarRectification(m_OrigImg_Curt, m_OrigImg_Last); // Apply Planar Rectification
             m_Rectifier_Planar.execute(m_RectImg_Curt, m_RectImg_Last, m_Homo_Curt, m_Homo_Last);
 
@@ -128,197 +122,26 @@ namespace Stereo
                 return; // LibSGM will break if the size of rectified image is too large.
             }
 
-            cv::Mat cvRectImg_Curt(m_RectImg_Curt.get_ImgSize().y, m_RectImg_Curt.get_ImgSize().x, CV_8UC1); // For Stereo Matching in OpenCV
-            memcpy(cvRectImg_Curt.data, m_RectImg_Curt.get_Img().data(), m_RectImg_Curt.get_Img().size());
-
-            cv::Mat cvRectImg_Last(m_RectImg_Last.get_ImgSize().y, m_RectImg_Last.get_ImgSize().x, CV_8UC1); // For Stereo Matching in OpenCV
-            memcpy(cvRectImg_Last.data, m_RectImg_Last.get_Img().data(), m_RectImg_Last.get_Img().size());
-
-            //---Stereo Matching---
+            //---Stereo Matching: Disparity in Rectified Current Image---
             m_DispImg_Rect.resize(m_RectImg_Curt.get_Img().size(), 0.0);
 
-            cv::cuda::GpuMat cvRectImg_Curt_gpu, cvRectImg_Last_gpu; // For Stereo Matching in OpenCV+Cuda
-            cvRectImg_Curt_gpu.upload(cvRectImg_Curt);
-            cvRectImg_Last_gpu.upload(cvRectImg_Last);
+            imp_StereoMatching();
 
-            cv::cuda::GpuMat cvDispImg_Rect_gpu; // For Stereo Matching in OpenCV+Cuda
-            cv::Mat cvDispImg_Rect_cpu; // For Stereo Matching in OpenCV
-
-
-
-
-            //---Export Setting---
-            std::string ExportStr;
-            //----------
-
-            if (m_IsExport_OrigImg) // Export current keyframe
-            {
-                cv::Mat cvOrigImg_Curt(m_OrigImgSize.y, m_OrigImgSize.x, CV_8UC4);
-                memcpy(cvOrigImg_Curt.data, m_OrigImg_Curt.get_Img().data(), m_OrigImg_Curt.get_Img().size());
-                cv::cvtColor(cvOrigImg_Curt, cvOrigImg_Curt, cv::COLOR_BGRA2RGBA); // Transform to RGB before imshow & imwrite
-
-                ExportStr = "E:\\Project_ARCHITECT\\ARKit_OrigImg_Curt_" + std::to_string(m_KeyfID) + ".png";
-                cv::imwrite(ExportStr, cvOrigImg_Curt);
-                ExportStr = "";
-            }
-
-
-
-            //***Export Rectified Images***
-            if (m_IsExport_OrigImg)
-            {
-                ExportStr = "E:\\Project_ARCHITECT\\ARKit_RectImg_Curt_" + std::to_string(m_KeyfID) + ".png";
-                cv::imwrite(ExportStr, cvRectImg_Curt);
-                ExportStr = "";
-
-                ExportStr = "E:\\Project_ARCHITECT\\ARKit_RectImg_Last_" + std::to_string(m_KeyfID) + ".png";
-                cv::imwrite(ExportStr, cvRectImg_Last);
-                ExportStr = "";
-            }
-
-
-            //---Stereo Matching: Generate Disparity in Rectified Current Keyframe---
-
-
-            if (m_StereoMatching_Method == "LibSGM")
-            {
-                m_pStereoMatcher_LibSGM = std::make_unique<sgm::StereoSGM>(m_RectImg_Curt.get_ImgSize().x, m_RectImg_Curt.get_ImgSize().y, m_DispRange, 8, 16, sgm::EXECUTE_INOUT_HOST2HOST);
-                // Default disparity is pixel level => Disparity is the same in 8-bit & 16-bit.
-                // If turn on sub-pixel => Output disparity must be 16-bit. => Divided by 16 to derive true disparity!!!
-
-                std::vector<uint16_t> Disp_RectImg_Temp(m_RectImg_Curt.get_Img().size(), 0.0);
-
-                m_pStereoMatcher_LibSGM->execute(m_RectImg_Curt.get_Img().data(), m_RectImg_Last.get_Img().data(), Disp_RectImg_Temp.data());
-
-                m_DispImg_Rect = std::vector<float>::vector(Disp_RectImg_Temp.begin(), Disp_RectImg_Temp.end());
-
-                //***Export Disparity in Rectified Images (in 16-bit)***
-                if (m_IsExport_OrigImg)
-                {
-                    cv::Mat cvDispImg_LibSGM(cvRectImg_Curt.size(), CV_16UC1);
-                    memcpy(cvDispImg_LibSGM.data, Disp_RectImg_Temp.data(), Disp_RectImg_Temp.size() * sizeof(Disp_RectImg_Temp[0]));
-                    cv::imwrite("E:\\Project_ARCHITECT\\ARKit_DispImg_LibSGM.png", cvDispImg_LibSGM);
-                }
-            }
-
-            if (m_StereoMatching_Method == "cvBM_cuda")
-            {
-                m_pStereoMatcher_cvBM_cuda = cv::cuda::createStereoBM(m_DispRange, 7); // Disparity Range, Block Size
-                m_pStereoMatcher_cvBM_cuda->compute(cvRectImg_Curt_gpu, cvRectImg_Last_gpu, cvDispImg_Rect_gpu);
-
-                cvDispImg_Rect_gpu.download(cvDispImg_Rect_cpu);
-
-                cvDispImg_Rect_cpu.convertTo(cvDispImg_Rect_cpu, CV_32F); // The Disparity should be 32F.
-
-                //***Export Disparity in Rectified Images (in 16-bit)***
-                if (m_IsExport_OrigImg)
-                {
-                    cv::Mat cvDisp_RectImg_cpu_16UC1(cvDispImg_Rect_cpu.size(), CV_16UC1);
-                    cv::normalize(cvDispImg_Rect_cpu, cvDisp_RectImg_cpu_16UC1, 0, 65535, cv::NORM_MINMAX, CV_16UC1);
-
-                    cv::imwrite("E:\\Project_ARCHITECT\\ARKit_DispImg_cvBM_cuda.png", cvDisp_RectImg_cpu_16UC1);
-                }
-
-                const int cvMemCpySize = cvDispImg_Rect_cpu.cols * cvDispImg_Rect_cpu.rows * cvDispImg_Rect_cpu.elemSize();
-                memcpy(m_DispImg_Rect.data(), cvDispImg_Rect_cpu.data, cvMemCpySize);
-            }
-
-            if (m_StereoMatching_Method == "cvBP_cuda")
-            {
-                m_pStereoMatcher_cvBP_cuda = cv::cuda::createStereoBeliefPropagation();
-                m_pStereoMatcher_cvBP_cuda->compute(cvRectImg_Curt_gpu, cvRectImg_Last_gpu, cvDispImg_Rect_gpu);
-
-                cvDispImg_Rect_gpu.download(cvDispImg_Rect_cpu);
-
-                cvDispImg_Rect_cpu.convertTo(cvDispImg_Rect_cpu, CV_32F); // Disparity is 16S but without fractional bit.
-
-                //***Export Disparity in Rectified Images (in 16-bit)***
-                if (m_IsExport_OrigImg)
-                {
-                    cv::Mat cvDisp_RectImg_cpu_16UC1(cvDispImg_Rect_cpu.size(), CV_16UC1);
-                    cv::normalize(cvDispImg_Rect_cpu, cvDisp_RectImg_cpu_16UC1, 0, 65535, cv::NORM_MINMAX, CV_16UC1);
-
-                    cv::imwrite("E:\\Project_ARCHITECT\\ARKit_DispImg_cvBP_cuda.png", cvDisp_RectImg_cpu_16UC1);
-                }
-
-                const int cvMemCpySize = cvDispImg_Rect_cpu.cols * cvDispImg_Rect_cpu.rows * cvDispImg_Rect_cpu.elemSize();
-                memcpy(m_DispImg_Rect.data(), cvDispImg_Rect_cpu.data, cvMemCpySize);
-            }
-
-            if (m_StereoMatching_Method == "cvConstBP_cuda")
-            {
-                m_pStereoMatcher_cvConstBP_cuda = cv::cuda::createStereoConstantSpaceBP();
-                m_pStereoMatcher_cvConstBP_cuda->compute(cvRectImg_Curt_gpu, cvRectImg_Last_gpu, cvDispImg_Rect_gpu);
-
-                cvDispImg_Rect_gpu.download(cvDispImg_Rect_cpu);
-
-                cvDispImg_Rect_cpu.convertTo(cvDispImg_Rect_cpu, CV_32F); // Disparity is 16S but without fractional bit.
-
-                //***Export Disparity in Rectified Images (in 16-bit)***
-                if (m_IsExport_OrigImg)
-                {
-                    cv::Mat cvDisp_RectImg_cpu_16UC1(cvDispImg_Rect_cpu.size(), CV_16UC1);
-                    cv::normalize(cvDispImg_Rect_cpu, cvDisp_RectImg_cpu_16UC1, 0, 65535, cv::NORM_MINMAX, CV_16UC1);
-
-                    cv::imwrite("E:\\Project_ARCHITECT\\ARKit_DispImg_cvConstBP_cuda.png", cvDisp_RectImg_cpu_16UC1);
-                }
-
-                const int cvMemCpySize = cvDispImg_Rect_cpu.cols * cvDispImg_Rect_cpu.rows * cvDispImg_Rect_cpu.elemSize();
-                memcpy(m_DispImg_Rect.data(), cvDispImg_Rect_cpu.data, cvMemCpySize);
-            }
-
-            if (m_StereoMatching_Method == "cv_SGBM")
-            {
-                m_pStereoMatcher_cvSGBM = cv::StereoSGBM::create();
-                m_pStereoMatcher_cvSGBM->compute(cvRectImg_Curt, cvRectImg_Last, cvDispImg_Rect_cpu);
-
-                if (cvDispImg_Rect_cpu.type() == CV_16S)
-                {
-                    cvDispImg_Rect_cpu.convertTo(cvDispImg_Rect_cpu, CV_32F, 1.0 / 16); // Disparity is 16S with 4 fractional bits.
-                }
-
-                if (m_IsExport_OrigImg)
-                {
-                    cv::Mat cvDispImg_Rect_cpu_16UC1(cvDispImg_Rect_cpu.size(), CV_16UC1);
-                    cv::normalize(cvDispImg_Rect_cpu, cvDispImg_Rect_cpu_16UC1, 0, 65535, cv::NORM_MINMAX, CV_16UC1);
-                    cv::imwrite("E:\\Project_ARCHITECT\\ARKit_DispImg_cvSGBM.png", cvDispImg_Rect_cpu_16UC1);
-                }
-
-                const int cvMemCpySize = cvDispImg_Rect_cpu.cols * cvDispImg_Rect_cpu.rows * cvDispImg_Rect_cpu.elemSize();
-                memcpy(m_DispImg_Rect.data(), cvDispImg_Rect_cpu.data, cvMemCpySize);
-            }
-
-            //---Disparity to Depth in Rectified Current Keyframe---
+            //---Disparity to Depth in Rectified Current Image---
             imp_Disp2Depth();
 
-            //---Depth from Rectified to Original Current Keyframe---
+            //---Depth from Rectified to Original Current Image (Horizontal Flip for Reconstruction)---
             imp_Depth_Rect2Orig();
 
-            //---Compare Depth from Stereo Matching & Sensor---
-            Base::AABB2UInt TargetRect;
-            TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_OrigImgSize.x, m_OrigImgSize.y));
-            Gfx::TextureManager::CopyToTexture2D(m_DepthImg_Sensor_TexturePtr, TargetRect, m_OrigImgSize.x, static_cast<const void*>(_rDepthImage.data()));
-
-            cmp_Depth();
-
-            //***** Export Depth in OrigImg (from Stereo Matching & Sensor) with 16-bit *****
-            if (m_IsExport_OrigImg)
+            //---Depth Analysis---
+            if (m_Is_CompareDepth) // Compare Depth from plugin_stereo & Sensor
             {
-                cv::Mat cvDepth_OrigImg(m_OrigImg_Curt.get_ImgSize().y, m_OrigImg_Curt.get_ImgSize().x, CV_16UC1);
-                memcpy(cvDepth_OrigImg.data, m_Depth_OrigImg.data(), m_Depth_OrigImg.size() * sizeof(m_Depth_OrigImg[0]));
-                ExportStr = "E:\\Project_ARCHITECT\\ARKit_DepthImg_OrigImg_" + std::to_string(m_KeyfID) + ".png";
-                cv::imwrite(ExportStr, cvDepth_OrigImg);
-                ExportStr = "";
+                m_DepthImg_Sensor = _rDepthImage;
 
-                cv::Mat cvDepth_Sensor(m_OrigImg_Curt.get_ImgSize().y, m_OrigImg_Curt.get_ImgSize().x, CV_16UC1);
-                memcpy(cvDepth_Sensor.data, _rDepthImage.data(), _rDepthImage.size() * sizeof(_rDepthImage[0]));
-                ExportStr = "E:\\Project_ARCHITECT\\ARKit_DepthImg_Sensor_" + std::to_string(m_KeyfID) + ".png";
-                cv::imwrite(ExportStr, cvDepth_Sensor);
-                ExportStr = "";
+                cmp_Depth();
             }
 
-
-            //---Return Depth in Original Image---
+            //---Return Depth to plugin_slam---
             const int MemCpySize = m_DepthImg_Orig_TexturePtr->GetNumberOfPixelsU() * m_DepthImg_Orig_TexturePtr->GetNumberOfPixelsV() * sizeof(uint16_t);
             std::vector<char> DepthImage(MemCpySize);
             Gfx::TextureManager::CopyTextureToCPU(m_DepthImg_Orig_TexturePtr, DepthImage.data());
@@ -327,6 +150,10 @@ namespace Stereo
 
             m_Delegate.Notify(m_OrigImg_Curt.get_Img(), DepthImage, Transform);
 
+            if (m_Is_ExportResult)
+            {
+                export_Result();
+            }
         }
         
     }
@@ -347,6 +174,83 @@ namespace Stereo
     }
 
     // -----------------------------------------------------------------------------
+    void CPluginInterface::imp_StereoMatching()
+    {
+        if (m_StereoMatching_Method == "LibSGM")
+        {
+            m_pStereoMatcher_LibSGM = std::make_unique<sgm::StereoSGM>(m_RectImg_Curt.get_ImgSize().x, m_RectImg_Curt.get_ImgSize().y, m_DispRange, 8, 16, sgm::EXECUTE_INOUT_HOST2HOST);
+                // Default disparity is pixel level => Disparity is the same in 8-bit & 16-bit.
+                // If turn on sub-pixel => Output disparity must be 16-bit. => Divided by 16 to derive true disparity!!!
+
+            std::vector<uint16_t> DispImg_Rect_uint16(m_DispImg_Rect.size(), 0.0);
+
+            m_pStereoMatcher_LibSGM->execute(m_RectImg_Curt.get_Img().data(), m_RectImg_Last.get_Img().data(), DispImg_Rect_uint16.data());
+
+            m_DispImg_Rect = std::vector<float>::vector(DispImg_Rect_uint16.begin(), DispImg_Rect_uint16.end());
+        }
+        else if (m_StereoMatching_Method == "FuSGM")
+        {
+        }
+        else // Method provided by OpenCV
+        {
+            cv::Mat cvRectImg_Curt(m_RectImg_Curt.get_ImgSize().y, m_RectImg_Curt.get_ImgSize().x, CV_8UC1);
+            memcpy(cvRectImg_Curt.data, m_RectImg_Curt.get_Img().data(), m_RectImg_Curt.get_Img().size());
+
+            cv::Mat cvRectImg_Last(m_RectImg_Last.get_ImgSize().y, m_RectImg_Last.get_ImgSize().x, CV_8UC1);
+            memcpy(cvRectImg_Last.data, m_RectImg_Last.get_Img().data(), m_RectImg_Last.get_Img().size());
+            
+            cv::cuda::GpuMat cvRectImg_Curt_gpu, cvRectImg_Last_gpu;
+            cvRectImg_Curt_gpu.upload(cvRectImg_Curt);
+            cvRectImg_Last_gpu.upload(cvRectImg_Last);
+
+            cv::cuda::GpuMat cvDispImg_Rect_gpu;
+            cv::Mat cvDispImg_Rect_cpu;
+
+            if (m_StereoMatching_Method == "cvBM_cuda")
+            {
+                m_pStereoMatcher_cvBM_cuda = cv::cuda::createStereoBM(m_DispRange, 7); // Disparity Range, Block Size
+
+                m_pStereoMatcher_cvBM_cuda->compute(cvRectImg_Curt_gpu, cvRectImg_Last_gpu, cvDispImg_Rect_gpu);
+
+                cvDispImg_Rect_gpu.download(cvDispImg_Rect_cpu);
+                cvDispImg_Rect_cpu.convertTo(cvDispImg_Rect_cpu, CV_32F); 
+            }
+            else if (m_StereoMatching_Method == "cvBP_cuda")
+            {
+                m_pStereoMatcher_cvBP_cuda = cv::cuda::createStereoBeliefPropagation();
+
+                m_pStereoMatcher_cvBP_cuda->compute(cvRectImg_Curt_gpu, cvRectImg_Last_gpu, cvDispImg_Rect_gpu);
+
+                cvDispImg_Rect_gpu.download(cvDispImg_Rect_cpu); // Disparity is 16S but without fractional bit.
+                cvDispImg_Rect_cpu.convertTo(cvDispImg_Rect_cpu, CV_32F); 
+            }
+            else if (m_StereoMatching_Method == "cvConstBP_cuda")
+            {
+                m_pStereoMatcher_cvConstBP_cuda = cv::cuda::createStereoConstantSpaceBP();
+
+                m_pStereoMatcher_cvConstBP_cuda->compute(cvRectImg_Curt_gpu, cvRectImg_Last_gpu, cvDispImg_Rect_gpu);
+
+                cvDispImg_Rect_gpu.download(cvDispImg_Rect_cpu); // Disparity is 16S but without fractional bit.
+                cvDispImg_Rect_cpu.convertTo(cvDispImg_Rect_cpu, CV_32F); 
+            }
+            else if (m_StereoMatching_Method == "cv_SGBM")
+            {
+                m_pStereoMatcher_cvSGBM = cv::StereoSGBM::create();
+
+                m_pStereoMatcher_cvSGBM->compute(cvRectImg_Curt, cvRectImg_Last, cvDispImg_Rect_cpu);
+                cvDispImg_Rect_cpu.convertTo(cvDispImg_Rect_cpu, CV_32F, 1.0 / 16); // Disparity is 16S with 4 fractional bits.
+            }
+            else
+            {
+
+            }
+
+            const int cvMemCpySize = cvDispImg_Rect_cpu.cols * cvDispImg_Rect_cpu.rows * cvDispImg_Rect_cpu.elemSize();
+            memcpy(m_DispImg_Rect.data(), cvDispImg_Rect_cpu.data, cvMemCpySize);
+
+        }
+    }
+
     void CPluginInterface::imp_Disp2Depth()
     {
         //---Initialize Texture Manager for Disparity in Rectified Image---
@@ -434,6 +338,10 @@ namespace Stereo
 
     void CPluginInterface::cmp_Depth()
     {
+        Base::AABB2UInt TargetRect;
+        TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_OrigImgSize.x, m_OrigImgSize.y));
+        Gfx::TextureManager::CopyToTexture2D(m_DepthImg_Sensor_TexturePtr, TargetRect, m_OrigImgSize.x, static_cast<const void*>(m_DepthImg_Sensor.data()));
+
         //---GPU Start---
         Gfx::Performance::BeginEvent("Compare Depth");
 
@@ -458,9 +366,54 @@ namespace Stereo
 
     // -----------------------------------------------------------------------------
 
-    void CPluginInterface::export_OrigImg()
+    void CPluginInterface::export_Result()
     {
-        
+        std::string ExportStr;
+
+        uint MemCpySize = 0;
+
+        //---Export Original Images---
+        cv::Mat cvOrigImg_Curt(m_OrigImgSize.y, m_OrigImgSize.x, CV_8UC4);
+
+        MemCpySize = m_OrigImg_Curt.get_Img().size() * sizeof(m_OrigImg_Curt.get_Img()[0]);
+        memcpy(cvOrigImg_Curt.data, m_OrigImg_Curt.get_Img().data(), MemCpySize);
+
+        cv::cvtColor(cvOrigImg_Curt, cvOrigImg_Curt, cv::COLOR_BGRA2RGBA); // Transform to RGB before imshow & imwrite
+
+        ExportStr = "E:\\Project_ARCHITECT\\OrigImg_Curt_" + std::to_string(m_KeyFrameID) + ".png";
+        cv::imwrite(ExportStr, cvOrigImg_Curt);
+
+        //---Export Rectified Image Pairs---
+        cv::Mat cvRectImg_Curt(m_RectImg_Curt.get_ImgSize().y, m_RectImg_Curt.get_ImgSize().x, CV_8UC1);
+        memcpy(cvRectImg_Curt.data, m_RectImg_Curt.get_Img().data(), m_RectImg_Curt.get_Img().size());
+
+        ExportStr = "E:\\Project_ARCHITECT\\RectImg_Curt_" + std::to_string(m_KeyFrameID) + ".png";
+        cv::imwrite(ExportStr, cvRectImg_Curt);
+
+
+        cv::Mat cvRectImg_Last(m_RectImg_Last.get_ImgSize().y, m_RectImg_Last.get_ImgSize().x, CV_8UC1);
+        memcpy(cvRectImg_Last.data, m_RectImg_Last.get_Img().data(), m_RectImg_Last.get_Img().size());
+
+        ExportStr = "E:\\Project_ARCHITECT\\RectImg_Last_" + std::to_string(m_KeyFrameID) + ".png";
+        cv::imwrite(ExportStr, cvRectImg_Last);
+
+        //---Export Depth in Original Image in uint16_t (from plugin_stereo & Sensor)---
+        cv::Mat cvDepthImg_Orig(m_OrigImg_Curt.get_ImgSize().y, m_OrigImg_Curt.get_ImgSize().x, CV_16UC1);
+
+        MemCpySize = m_Depth_OrigImg.size() * sizeof(m_Depth_OrigImg[0]);
+        memcpy(cvDepthImg_Orig.data, m_Depth_OrigImg.data(), MemCpySize);
+
+        ExportStr = "E:\\Project_ARCHITECT\\DepthImg_Orig_" + std::to_string(m_KeyFrameID) + ".png";
+        cv::imwrite(ExportStr, cvDepthImg_Orig);
+
+
+        cv::Mat cvDepthImg_Sensor(m_OrigImg_Curt.get_ImgSize().y, m_OrigImg_Curt.get_ImgSize().x, CV_16UC1);
+
+        MemCpySize = m_DepthImg_Sensor.size() * sizeof(m_DepthImg_Sensor[0]);
+        memcpy(cvDepthImg_Sensor.data, m_DepthImg_Sensor.data(), MemCpySize);
+
+        ExportStr = "E:\\Project_ARCHITECT\\DepthImg_Sensor_" + std::to_string(m_KeyFrameID) + ".png";
+        cv::imwrite(ExportStr, cvDepthImg_Sensor);
     }
 
     // -----------------------------------------------------------------------------
@@ -469,29 +422,24 @@ namespace Stereo
     {
         ENGINE_CONSOLE_INFOV("Stereo matching plugin started!");
 
-        //---Export Result---
-        m_IsExport_OrigImg = Core::CProgramParameters::GetInstance().Get("mr:stereo:00_export_result:00_orig_img", true);
+        //---00 Input---
+        m_FrameResolution = Core::CProgramParameters::GetInstance().Get("mr:stereo:00_input:frame_resolution", 0.5); // Full = 1; Half = 0.5;
 
-        //---Input Setting---
-        m_FrameResolution = Core::CProgramParameters::GetInstance().Get("mr:stereo:00_pre-setting:frame_resolution", 0.5); // Full = 1; Half = 0.5;
+        m_Cdt_Keyf_BaseLineL = Core::CProgramParameters::GetInstance().Get("mr:stereo:00_input:baseline_length", 0.03);
 
-        //---Keyframe Setting---
-        m_Cdt_Keyf_BaseLineL = Core::CProgramParameters::GetInstance().Get("mr:stereo:00_pre-setting:baseline_length", 0.03);
+        m_Is_KeyFrame = false;
 
-        m_is_Keyf_Curt = false;
-        m_is_Keyf_Last = false;
+        //---01 Rectification-----
 
-        //---Rectification-----
-
-        //---Stereo Matching---
+        //---02 Stereo Matching---
         m_DispRange = Core::CProgramParameters::GetInstance().Get("mr:stereo:02_stereo_matching:disparity_range", 128);
 
         m_StereoMatching_Method = Core::CProgramParameters::GetInstance().Get("mr:stereo:02_stereo_matching:Method", "LibSGM");
 
-        //---Disparity to Depth---
+        //---03 Disparity to Depth---
         std::stringstream DefineStream;
         DefineStream
-            << "#define TILE_SIZE_2D " << TileSize_2D << " \n"; // 16 for work group size is suggested for 2D image (based on experience).
+            << "#define TILE_SIZE_2D " << TileSize_2D << " \n";
         std::string DefineString = DefineStream.str();
         m_Disp2Depth_CSPtr = Gfx::ShaderManager::CompileCS("../../plugins/stereo/cs_Disparity_to_Depth.glsl", "main", DefineString.c_str());
 
@@ -505,7 +453,7 @@ namespace Stereo
         ParaxEq_BufferDesc.m_pClassKey = 0;
         m_ParaxEq_BufferPtr = Gfx::BufferManager::CreateBuffer(ParaxEq_BufferDesc);
 
-        //---Depth from Rectified to Original---
+        //---04 Depth from Rectified to Original---
         m_Depth_Rect2Orig_CSPtr = Gfx::ShaderManager::CompileCS("../../plugins/stereo/cs_Depth_Rect2Orig.glsl", "main", DefineString.c_str());
 
         Gfx::SBufferDescriptor Homography_BufferDesc = {};
@@ -518,8 +466,13 @@ namespace Stereo
         Homography_BufferDesc.m_pClassKey = 0;
         m_Homogrampy_BufferPtr = Gfx::BufferManager::CreateBuffer(Homography_BufferDesc);
 
-        //---Compare Depth---
+        //---05 Depth Analysis---
+        m_Is_CompareDepth = Core::CProgramParameters::GetInstance().Get("mr:stereo:05_depth_analysis:compare_sensor", true);
+
         m_Compare_Depth_CSPtr = Gfx::ShaderManager::CompileCS("../../plugins/stereo/cs_Compare_Depth.glsl", "main", DefineString.c_str());
+
+        //---06 Output---
+        m_Is_ExportResult = Core::CProgramParameters::GetInstance().Get("mr:stereo:06_output:export_results", true);
     }
 
     // -----------------------------------------------------------------------------

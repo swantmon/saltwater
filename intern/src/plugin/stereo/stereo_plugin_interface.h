@@ -66,30 +66,31 @@ namespace Stereo
 
     //---plugin_stereo---
     private:
-        //---Export Result---
-        bool m_IsExport_OrigImg; // Export original keyframe?
-        void export_OrigImg();
-
         //---ARKit Data---
         float m_FrameResolution; // Full=1, Half=0.5.
+
         glm::ivec2 m_OrigImgSize; // Size of original image -> x = width & y = height
-        int m_KeyfID = 0;
+
+        int m_KeyFrameID = 0;
 
         //---Keyframe---
-        FutoGmtCV::CFutoImg m_OrigImg_Curt, m_OrigImg_Last; // Only compute 2 frames first.
-        bool m_is_Keyf_Curt; // The status of current keyframe.
+        FutoGmtCV::CFutoImg m_OrigImg_Curt, m_OrigImg_Last; // Original Image Pair. -> Only compute 2 frames once.
 
-        std::size_t m_Cdt_Keyf_MaxNum; // Maximal keyframes for calculation once
+        bool m_Is_KeyFrame; // The status of current keyframe.
+
         float m_Cdt_Keyf_BaseLineL; // Keyframe Selection: BaseLine Condition. Unit is meter.
 
         //---Rectification---
-        FutoGmtCV::CFutoImg m_RectImg_Curt, m_RectImg_Last;
+        FutoGmtCV::CFutoImg m_RectImg_Curt, m_RectImg_Last; // Rectified Image Pair.
+
         FutoGmtCV::SHomographyTransform m_Homo_Curt, m_Homo_Last;
 
         FutoGmtCV::CPlanarRectification m_Rectifier_Planar; // Implemant Rectification
 
         //---Stereo Matching---
-        std::vector<float> m_DispImg_Rect; // Disparity in Rectified Image
+        void imp_StereoMatching();
+
+        std::vector<float> m_DispImg_Rect; // Disparity in Rectified Image => Using float because disparity is pixel or sub-pixel.
 
         int m_DispRange; // Disparity Searching Range for Stereo Matching
 
@@ -102,30 +103,38 @@ namespace Stereo
         cv::Ptr<cv::StereoMatcher> m_pStereoMatcher_cvConstBP_cuda;
 
         //---Disparity to Depth---
+        void imp_Disp2Depth(); 
+
         Gfx::CShaderPtr m_Disp2Depth_CSPtr;
         Gfx::CTexturePtr m_Disp_RectImg_TexturePtr;
         Gfx::CTexturePtr m_Depth_RectImg_TexturePtr;
         Gfx::CBufferPtr m_ParaxEq_BufferPtr;
 
-        void imp_Disp2Depth(); // Transform Disparity to Depth in Rectified Image
-
         //---Depth from Rectified to Original---
-        std::vector<char> m_Depth_OrigImg;
+        void imp_Depth_Rect2Orig();
+
+        std::vector<char> m_Depth_OrigImg; // Horizontal flip for reconstruction in plugin_slam.
 
         Gfx::CShaderPtr m_Depth_Rect2Orig_CSPtr;
         Gfx::CTexturePtr m_DepthImg_Orig_TexturePtr;
         Gfx::CBufferPtr m_Homogrampy_BufferPtr;
 
-        void imp_Depth_Rect2Orig();
-
         //---Compare Depth between Stereo Matching & Sensor---
+        bool m_Is_CompareDepth;
+
         void cmp_Depth();
+
+        std::vector<uint16_t> m_DepthImg_Sensor;
+
         Gfx::CShaderPtr m_Compare_Depth_CSPtr;
         Gfx::CTexturePtr m_DepthImg_Sensor_TexturePtr;
         Gfx::CTexturePtr m_Depth_Difference_TexturePtr;
 
-        //---Return Depth to plugin_slam---
+        //---Return Result---
         CStereoDelegate m_Delegate;
+
+        bool m_Is_ExportResult; 
+        void export_Result();
     };
 
 } // namespace Stereo
