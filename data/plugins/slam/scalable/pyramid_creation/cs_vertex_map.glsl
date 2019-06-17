@@ -26,13 +26,12 @@ void main()
     
     const int PyramidLevel = int(log2(DEPTH_IMAGE_WIDTH / ImageSize.x));
 
-    const vec2 ImagePos = vec2(gl_GlobalInvocationID.xy);
+    const ivec2 ImagePos = ivec2(gl_GlobalInvocationID.xy);
     
     const vec2 FocalPoint = g_Intrinsics[PyramidLevel].m_FocalPoint;
     const vec2 InvFocalLength = g_Intrinsics[PyramidLevel].m_InvFocalLength;
 
-    const ivec2 DepthPos = ivec2(ImageSize.x - ImagePos.x, ImagePos.y);
-    const float Depth = imageLoad(cs_DepthBuffer, DepthPos).x / 1000.0f;
+    const float Depth = imageLoad(cs_DepthBuffer, ImagePos).x / 1000.0f;
     
     vec4 Vertex = vec4(0.0f);
     
@@ -42,7 +41,7 @@ void main()
     {
         for (int y = -2; y <= 2; ++ y)
         {
-            float Sample = imageLoad(cs_DepthBuffer, DepthPos + ivec2(x, y)).x / 1000.0f;
+            float Sample = imageLoad(cs_DepthBuffer, ImagePos + ivec2(x, y)).x / 1000.0f;
 
             if (Sample < MIN_DEPTH || Sample > MAX_DEPTH)
             {
