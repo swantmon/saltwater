@@ -18,6 +18,7 @@
 #include "engine/data/data_map.h"
 #include "engine/data/data_material_component.h"
 #include "engine/data/data_mesh_component.h"
+#include "engine/data/data_sun_component.h"
 #include "engine/data/data_transformation_facet.h"
 
 #include "engine/graphic/gfx_ar_renderer.h"
@@ -31,6 +32,7 @@
 #include "engine/graphic/gfx_state_manager.h"
 #include "engine/graphic/gfx_sampler_manager.h"
 #include "engine/graphic/gfx_shader_manager.h"
+#include "engine/graphic/gfx_sun.h"
 #include "engine/graphic/gfx_target_set_manager.h"
 #include "engine/graphic/gfx_texture_manager.h"
 #include "engine/graphic/gfx_view_manager.h"
@@ -69,7 +71,12 @@ namespace
 
         void Update();
         void Render();
+        void RenderForward();
         void RenderHitProxy();
+
+    private:
+
+        static const unsigned int s_MaxNumberOfLights = 4;
 
     private:
 
@@ -88,6 +95,19 @@ namespace
             unsigned int m_ID;
         };
 
+        struct SLightProperties
+        {
+            glm::mat4    m_LightViewProjection;
+            glm::vec4    m_LightPosition;
+            glm::vec4    m_LightDirection;
+            glm::vec4    m_LightColor;
+            glm::vec4    m_LightSettings;
+            unsigned int m_LightType;
+            unsigned int m_Padding0;
+            unsigned int m_Padding1;
+            unsigned int m_Padding2;
+        };
+
         struct SRenderJob
         {
             Base::ID         m_EntityID;
@@ -96,26 +116,35 @@ namespace
             glm::mat4        m_ModelMatrix;
         };
 
+        struct SLightJob
+        {
+            std::array<CTexturePtr, s_MaxNumberOfLights> m_ShadowTexturePtrs;
+        };
+
     private:
 
-        typedef std::vector<SRenderJob> CRenderJobs;
+        using CRenderJobs = std::vector<SRenderJob>;
 
     private:
 
         CBufferPtr m_ModelBufferPtr;
         CBufferPtr m_MaterialPSBufferPtr;
         CBufferPtr m_HitProxyPassPSBufferPtr;
+        CBufferPtr m_LightPropertiesBufferPtr;
 
         CRenderContextPtr m_DeferredRenderContextPtr;
 
         CShaderPtr m_DifferentialGBufferShaderPSPtr;
+        CShaderPtr m_DifferentialForwardShaderPSPtr;
         CShaderPtr m_HitProxyShaderPtr;
 
         CRenderJobs m_RenderJobs;
+        SLightJob   m_ForwardLightTextures;
 
     private:
 
-        void BuildRenderJobs();     
+        void BuildRenderJobs();
+        void UpdateLightProperties();
     };
 } // namespace
 
@@ -125,10 +154,13 @@ namespace
         : m_ModelBufferPtr                ()
         , m_MaterialPSBufferPtr           ()
         , m_HitProxyPassPSBufferPtr       ()
+        , m_LightPropertiesBufferPtr      ()
         , m_DeferredRenderContextPtr      ()
         , m_DifferentialGBufferShaderPSPtr()
+        , m_DifferentialForwardShaderPSPtr()
         , m_HitProxyShaderPtr             ()
         , m_RenderJobs                    ()
+        , m_ForwardLightTextures          ()
     {
         // -----------------------------------------------------------------------------
         // Reserve some jobs
@@ -153,22 +185,31 @@ namespace
 
     void CGfxARRenderer::OnExit()
     {
-        m_ModelBufferPtr                   = 0;
-        m_MaterialPSBufferPtr              = 0;
-        m_HitProxyPassPSBufferPtr          = 0;
-        m_DeferredRenderContextPtr         = 0;
-        m_DifferentialGBufferShaderPSPtr   = 0;
-        m_HitProxyShaderPtr                = 0;
+        m_ModelBufferPtr                 = nullptr;
+        m_MaterialPSBufferPtr            = nullptr;
+        m_HitProxyPassPSBufferPtr        = nullptr;
+        m_LightPropertiesBufferPtr       = nullptr;
+        m_DeferredRenderContextPtr       = nullptr;
+        m_DifferentialGBufferShaderPSPtr = nullptr;
+        m_DifferentialForwardShaderPSPtr = nullptr;
+        m_HitProxyShaderPtr              = nullptr;
 
         // -----------------------------------------------------------------------------
         // Iterate throw render jobs to release managed pointer
         // -----------------------------------------------------------------------------
         for (auto& rCurrentRenderJob : m_RenderJobs)
         {
-            rCurrentRenderJob.m_SurfacePtr = 0;
+            rCurrentRenderJob.m_SurfacePtr = nullptr;
         }
 
         m_RenderJobs.clear();
+
+        // -----------------------------------------------------------------------------
+
+        for (auto& rTexture : m_ForwardLightTextures.m_ShadowTexturePtrs)
+        {
+            rTexture = nullptr;
+        }
     }
 
     // -----------------------------------------------------------------------------
@@ -176,6 +217,8 @@ namespace
     void CGfxARRenderer::OnSetupShader()
     {
         m_DifferentialGBufferShaderPSPtr = ShaderManager::CompilePS("ar/fs_differential_gbuffer.glsl", "main");
+
+        m_DifferentialForwardShaderPSPtr = ShaderManager::CompilePS("ar/fs_differential_forward.glsl", "main", ("#define MAX_NUMBER_OF_LIGHTS " + std::to_string(s_MaxNumberOfLights)).c_str());
 
         m_HitProxyShaderPtr = ShaderManager::CompilePS("picking/fs_hitproxy.glsl", "main");
     }
@@ -229,8 +272,8 @@ namespace
         ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
         ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
         ConstanteBufferDesc.m_NumberOfBytes = sizeof(SPerDrawCallConstantBufferVS);
-        ConstanteBufferDesc.m_pBytes        = 0;
-        ConstanteBufferDesc.m_pClassKey     = 0;
+        ConstanteBufferDesc.m_pBytes        = nullptr;
+        ConstanteBufferDesc.m_pClassKey     = nullptr;
 
         m_ModelBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
@@ -241,8 +284,8 @@ namespace
         ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
         ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
         ConstanteBufferDesc.m_NumberOfBytes = sizeof(CMaterial::SMaterialAttributes);
-        ConstanteBufferDesc.m_pBytes        = 0;
-        ConstanteBufferDesc.m_pClassKey     = 0;
+        ConstanteBufferDesc.m_pBytes        = nullptr;
+        ConstanteBufferDesc.m_pClassKey     = nullptr;
 
         m_MaterialPSBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
@@ -253,10 +296,24 @@ namespace
         ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
         ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
         ConstanteBufferDesc.m_NumberOfBytes = sizeof(SHitProxyProperties);
-        ConstanteBufferDesc.m_pBytes        = 0;
-        ConstanteBufferDesc.m_pClassKey     = 0;
+        ConstanteBufferDesc.m_pBytes        = nullptr;
+        ConstanteBufferDesc.m_pClassKey     = nullptr;
 
         m_HitProxyPassPSBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
+
+        // -----------------------------------------------------------------------------
+
+        ConstanteBufferDesc.m_Stride        = 0;
+        ConstanteBufferDesc.m_Usage         = CBuffer::GPURead;
+        ConstanteBufferDesc.m_Binding       = CBuffer::ResourceBuffer;
+        ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
+        ConstanteBufferDesc.m_NumberOfBytes = sizeof(SLightProperties) * s_MaxNumberOfLights;
+        ConstanteBufferDesc.m_pBytes        = nullptr;
+        ConstanteBufferDesc.m_pClassKey     = nullptr;
+
+        m_LightPropertiesBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
+
+        BufferManager::SetBufferLabel(m_LightPropertiesBufferPtr, "Light Properties");
     }
 
     // -----------------------------------------------------------------------------
@@ -311,7 +368,7 @@ namespace
 
     void CGfxARRenderer::Render()
     {
-        if (m_RenderJobs.size() == 0) return;
+        if (m_RenderJobs.empty()) return;
 
         auto DataCameraComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CCameraComponent>();
 
@@ -319,7 +376,7 @@ namespace
 
         for (auto Component : DataCameraComponents)
         {
-            Dt::CCameraComponent* pDtComponent = static_cast<Dt::CCameraComponent*>(Component);
+            auto* pDtComponent = static_cast<Dt::CCameraComponent*>(Component);
 
             if (pDtComponent->IsActiveAndUsable() == false) continue;
 
@@ -398,9 +455,150 @@ namespace
 
     // -----------------------------------------------------------------------------
 
+    void CGfxARRenderer::RenderForward()
+    {
+        if (m_RenderJobs.empty()) return;
+
+        auto DataCameraComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CCameraComponent>();
+
+        Gfx::CTexturePtr BackgroundTexturePtr = nullptr;
+
+        for (auto Component : DataCameraComponents)
+        {
+            auto* pDtComponent = static_cast<Dt::CCameraComponent*>(Component);
+
+            if (pDtComponent->IsActiveAndUsable() == false) continue;
+
+            BackgroundTexturePtr = pDtComponent->GetBackgroundTexture();
+        }
+
+        if (BackgroundTexturePtr == nullptr) return;
+
+        Performance::BeginEvent("AR Shadows");
+
+        ContextManager::SetTargetSet(TargetSetManager::GetLightAccumulationTargetSet());
+
+        ContextManager::SetViewPortSet(ViewManager::GetViewPortSet());
+
+        ContextManager::SetBlendState(StateManager::GetBlendState(CBlendState::AlphaBlend));
+
+        ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::Default));
+
+        ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
+
+        ContextManager::SetTopology(STopology::TriangleList);
+
+        ContextManager::SetConstantBuffer(0, Main::GetPerFrameConstantBuffer());
+        ContextManager::SetConstantBuffer(1, m_ModelBufferPtr);
+        ContextManager::SetConstantBuffer(2, m_MaterialPSBufferPtr);
+
+        ContextManager::SetResourceBuffer(0, m_LightPropertiesBufferPtr);
+
+        ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
+
+        ContextManager::SetTexture(0, BackgroundTexturePtr);
+
+        ContextManager::SetShaderPS(m_DifferentialForwardShaderPSPtr);
+
+        // -----------------------------------------------------------------------------
+        // Bind shadow textures
+        // -----------------------------------------------------------------------------
+        for (auto IndexOfTexture = 0; IndexOfTexture < s_MaxNumberOfLights; ++IndexOfTexture)
+        {
+            if (m_ForwardLightTextures.m_ShadowTexturePtrs[IndexOfTexture] != nullptr)
+            {
+                ContextManager::SetSampler(1 + IndexOfTexture, SamplerManager::GetSampler(CSampler::PCF));
+
+                ContextManager::SetTexture(1 + IndexOfTexture, m_ForwardLightTextures.m_ShadowTexturePtrs[IndexOfTexture]);
+            }
+        }
+
+        // -----------------------------------------------------------------------------
+        // Jobs
+        // -----------------------------------------------------------------------------
+        for (auto RenderJob : m_RenderJobs)
+        {
+            const CMaterial* pMaterial = RenderJob.m_SurfaceMaterialPtr;
+
+            // -----------------------------------------------------------------------------
+            // Upload data to buffer
+            // -----------------------------------------------------------------------------
+            SPerDrawCallConstantBufferVS ModelBuffer;
+
+            ModelBuffer.m_ModelMatrix = RenderJob.m_ModelMatrix;
+
+            BufferManager::UploadBufferData(m_ModelBufferPtr, &ModelBuffer);
+
+            BufferManager::UploadBufferData(m_MaterialPSBufferPtr, &pMaterial->GetMaterialAttributes());
+
+            // -----------------------------------------------------------------------------
+            // Surface
+            // -----------------------------------------------------------------------------
+            CSurfacePtr SurfacePtr = RenderJob.m_SurfacePtr;
+
+            // -----------------------------------------------------------------------------
+            // Set shader
+            // -----------------------------------------------------------------------------
+            ContextManager::SetShaderVS(SurfacePtr->GetShaderVS());
+
+            // -----------------------------------------------------------------------------
+            // Render
+            // -----------------------------------------------------------------------------
+            ContextManager::SetVertexBuffer(SurfacePtr->GetVertexBuffer());
+
+            ContextManager::SetIndexBuffer(SurfacePtr->GetIndexBuffer(), 0);
+
+            ContextManager::SetInputLayout(SurfacePtr->GetMVPShaderVS()->GetInputLayout());
+
+            ContextManager::DrawIndexed(SurfacePtr->GetNumberOfIndices(), 0, 0);
+        }
+
+        for (unsigned int IndexOfTexture = 0; IndexOfTexture < 16; ++IndexOfTexture)
+        {
+            ContextManager::ResetSampler(IndexOfTexture);
+
+            ContextManager::ResetTexture(IndexOfTexture);
+        }
+
+        ContextManager::ResetInputLayout();
+
+        ContextManager::ResetIndexBuffer();
+
+        ContextManager::ResetVertexBuffer();
+
+        ContextManager::ResetConstantBuffer(0);
+        ContextManager::ResetConstantBuffer(1);
+        ContextManager::ResetConstantBuffer(2);
+        ContextManager::ResetConstantBuffer(3);
+
+        ContextManager::ResetShaderVS();
+
+        ContextManager::ResetShaderDS();
+
+        ContextManager::ResetShaderHS();
+
+        ContextManager::ResetShaderGS();
+
+        ContextManager::ResetShaderPS();
+
+        ContextManager::ResetTopology();
+
+        ContextManager::ResetRasterizerState();
+
+        ContextManager::ResetDepthStencilState();
+
+        ContextManager::ResetViewPortSet();
+
+        ContextManager::ResetTargetSet();
+
+        Performance::EndEvent();
+    }
+
+    // -----------------------------------------------------------------------------
+
     void CGfxARRenderer::RenderHitProxy()
     {
-        if (m_RenderJobs.size() == 0) return;
+        if (m_RenderJobs.empty()) return;
 
         Performance::BeginEvent("AR Hit Proxy");
 
@@ -464,7 +662,7 @@ namespace
 
         for (auto Component : DataMeshComponents)
         {
-            Dt::CMeshComponent* pDtComponent = static_cast<Dt::CMeshComponent*>(Component);
+            auto* pDtComponent = static_cast<Dt::CMeshComponent*>(Component);
 
             if (pDtComponent->IsActiveAndUsable() == false) continue;
 
@@ -472,7 +670,7 @@ namespace
 
             if (rCurrentEntity.GetLayer() & Dt::SEntityLayer::AR)
             {
-                Gfx::CMesh* pGfxComponent = static_cast<Gfx::CMesh*>(pDtComponent->GetFacet(Dt::CMeshComponent::Graphic));
+                auto* pGfxComponent = static_cast<Gfx::CMesh*>(pDtComponent->GetFacet(Dt::CMeshComponent::Graphic));
 
                 // -----------------------------------------------------------------------------
                 // Surface
@@ -493,7 +691,7 @@ namespace
                     }
                 }
 
-                assert(pMaterial != 0);
+                assert(pMaterial != nullptr);
 
                 // -----------------------------------------------------------------------------
                 // Set information to render job
@@ -508,6 +706,66 @@ namespace
                 m_RenderJobs.push_back(NewRenderJob);
             }
         }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxARRenderer::UpdateLightProperties()
+    {
+        SLightProperties LightProperties[s_MaxNumberOfLights];
+        unsigned int     IndexOfLight;
+
+        // -----------------------------------------------------------------------------
+        // Clear textures
+        // -----------------------------------------------------------------------------
+        for (unsigned int IndexOfTexture = 0; IndexOfTexture < s_MaxNumberOfLights; ++IndexOfTexture)
+        {
+            m_ForwardLightTextures.m_ShadowTexturePtrs[IndexOfTexture] = nullptr;
+        }
+
+        // -----------------------------------------------------------------------------
+        // Initiate light properties buffer
+        // -----------------------------------------------------------------------------
+        Base::CMemory::Zero(&LightProperties, sizeof(SLightProperties) * s_MaxNumberOfLights);
+
+        // -----------------------------------------------------------------------------
+        // Fill with data
+        // -----------------------------------------------------------------------------
+        IndexOfLight = 0;
+
+        // -----------------------------------------------------------------------------
+        // Suns
+        // -----------------------------------------------------------------------------
+        auto DataComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CSunComponent>();
+
+        for (auto Component : DataComponents)
+        {
+            if (IndexOfLight == s_MaxNumberOfLights) break;
+
+            auto* pDtComponent = static_cast<Dt::CSunComponent*>(Component);
+
+            if (pDtComponent->IsActiveAndUsable() == false) continue;
+
+            auto* pGfxComponent = static_cast<Gfx::CSun*>(pDtComponent->GetFacet(Dt::CSunComponent::Graphic));
+
+            float HasShadows = 1.0f;
+
+            LightProperties[IndexOfLight].m_LightType = 1;
+            LightProperties[IndexOfLight].m_LightViewProjection = pGfxComponent->GetCamera()->GetViewProjectionMatrix();
+            LightProperties[IndexOfLight].m_LightDirection = glm::normalize(glm::vec4(pDtComponent->GetDirection(), 0.0f));
+            LightProperties[IndexOfLight].m_LightColor = glm::vec4(pDtComponent->GetLightness(), 1.0f);
+            LightProperties[IndexOfLight].m_LightSettings = glm::vec4(pDtComponent->GetSunAngularRadius(), 0.0f, 0.0f, HasShadows);
+
+            // -----------------------------------------------------------------------------
+
+            m_ForwardLightTextures.m_ShadowTexturePtrs[IndexOfLight] = pGfxComponent->GetShadowMapPtr();
+
+            // -----------------------------------------------------------------------------
+
+            ++IndexOfLight;
+        }
+
+        BufferManager::UploadBufferData(m_LightPropertiesBufferPtr, &LightProperties);
     }
 } // namespace
 
@@ -623,6 +881,13 @@ namespace ARRenderer
     void Render()
     {
         CGfxARRenderer::GetInstance().Render();
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void RenderForward()
+    {
+        CGfxARRenderer::GetInstance().RenderForward();
     }
 
     // -----------------------------------------------------------------------------
