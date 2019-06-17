@@ -75,6 +75,7 @@ namespace MR
         EDATASOURCE m_DataSource;
         
         Gfx::CTexturePtr m_DepthTexture;
+        Gfx::CTexturePtr m_DepthTexture32;
         Gfx::CTexturePtr m_RGBATexture;
         std::vector<uint16_t> m_DepthBuffer;
         std::vector<char> m_ColorBuffer;
@@ -147,6 +148,7 @@ namespace MR
 
         Gfx::CShaderPtr m_ShiftDepthCSPtr;
         Gfx::CShaderPtr m_RegisterDepthCSPtr;
+        Gfx::CShaderPtr m_32To16BitCSPtr;
         
         Gfx::CTexturePtr m_ShiftTexture;
         Gfx::CTexturePtr m_UnregisteredDepthTexture;
@@ -379,7 +381,7 @@ namespace MR
                 TextureDescriptor.m_Format = Gfx::CTexture::R16_UINT;
 
                 m_DepthTexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
-                
+
                 TextureDescriptor.m_Format = Gfx::CTexture::R8G8B8A8_UBYTE;
 
                 m_RGBATexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
@@ -433,6 +435,7 @@ namespace MR
             m_Reconstructor.Exit();
 
             m_DepthTexture = nullptr;
+            m_DepthTexture32 = nullptr;
             m_RGBATexture = nullptr;
 
             m_SLAMNetHandle = nullptr;
@@ -918,15 +921,22 @@ namespace MR
 
                 Gfx::ContextManager::SetConstantBuffer(0, m_RegisteringBufferPtr);
 
-                Gfx::TextureManager::ClearTexture(m_DepthTexture);
+                uint32_t ClearData = 0xFFFFFFFF;
+                Gfx::TextureManager::ClearTexture(m_DepthTexture32, &ClearData);
 
-                Gfx::ContextManager::SetImageTexture(0, m_DepthTexture);
+                Gfx::ContextManager::SetImageTexture(0, m_DepthTexture32);
                 Gfx::ContextManager::SetImageTexture(1, m_UnregisteredDepthTexture);
 
                 Gfx::ContextManager::SetShaderCS(m_RegisterDepthCSPtr);
 
                 int WorkgroupsX = DivUp(m_CaptureColor ? m_ColorSize.x : m_DepthSize.x, m_TileSize2D);
                 int WorkgroupsY = DivUp(m_CaptureColor ? m_ColorSize.y : m_DepthSize.y, m_TileSize2D);
+                Gfx::ContextManager::Dispatch(WorkgroupsX, WorkgroupsY, 1);
+
+                Gfx::ContextManager::SetImageTexture(1, m_DepthTexture);
+
+                Gfx::ContextManager::SetShaderCS(m_32To16BitCSPtr);
+
                 Gfx::ContextManager::Dispatch(WorkgroupsX, WorkgroupsY, 1);
 
                 if (m_StreamState == STREAM_SLAM)
@@ -1130,6 +1140,10 @@ namespace MR
             TextureDescriptor.m_NumberOfPixelsV = m_CaptureColor ? m_ColorSize.y : m_DepthSize.y;
             m_DepthTexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
 
+            TextureDescriptor.m_Format = Gfx::CTexture::R32_UINT;
+            m_DepthTexture32 = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
+
+            TextureDescriptor.m_Format = Gfx::CTexture::R16_UINT;
             TextureDescriptor.m_NumberOfPixelsU = m_DepthSize.x;
             TextureDescriptor.m_NumberOfPixelsV = m_DepthSize.y;
             m_UnregisteredDepthTexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
@@ -1167,6 +1181,7 @@ namespace MR
             m_ShiftDepthCSPtr = Gfx::ShaderManager::CompileCS("../../plugins/slam/cs_shift_depth.glsl", "main", DefineString.c_str());
 
             m_RegisterDepthCSPtr = Gfx::ShaderManager::CompileCS("../../plugins/slam/cs_register_depth.glsl", "main", DefineString.c_str());
+            m_32To16BitCSPtr = Gfx::ShaderManager::CompileCS("../../plugins/slam/cs_32To16Bit.glsl", "main", DefineString.c_str());
 
             if (m_SendInpaintedResult)
             {

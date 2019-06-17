@@ -1,7 +1,7 @@
 #ifndef __INCLUDE_CS_REGISTER_DEPTH_GLSL__
 #define __INCLUDE_CS_REGISTER_DEPTH_GLSL__
 
-layout(binding = 0, r16ui) writeonly uniform uimage2D cs_RegisteredDepth;
+layout(binding = 0, r32ui) coherent uniform uimage2D cs_RegisteredDepth;
 layout(binding = 1, r16ui) readonly uniform uimage2D cs_UnregisteredDepth;
 
 layout(std140, binding = 0) uniform UBOIntrinsics
@@ -34,7 +34,7 @@ void main()
         ivec2 ColorCoords = ivec2((Vertex.xy * g_ColorFocalLength) / Vertex.z + g_ColorFocalPoint);
         uint RegisteredDepth = uint(Vertex.z * 1000.0f);
 
-        imageStore(cs_RegisteredDepth, ColorCoords, uvec4(RegisteredDepth));
+        imageAtomicMin(cs_RegisteredDepth, ColorCoords, RegisteredDepth);
     }
 }
 
