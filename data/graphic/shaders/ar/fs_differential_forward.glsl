@@ -1,6 +1,6 @@
 
-#ifndef __INCLUDE_FS_MATERIAL_FORWARD_GLSL__
-#define __INCLUDE_FS_MATERIAL_FORWARD_GLSL__
+#ifndef __INCLUDE_FS_DIFFERENTIAL_FORWARD_GLSL__
+#define __INCLUDE_FS_DIFFERENTIAL_FORWARD_GLSL__
 
 #include "common.glsl"
 #include "common_light.glsl"
@@ -118,4 +118,4 @@ void main(void)
     out_Output = vec4(Luminance, Alpha);
 }
 
-#endif // __INCLUDE_FS_MATERIAL_FORWARD_GLSL__
+#endif // __INCLUDE_FS_DIFFERENTIAL_FORWARD_GLSL__
