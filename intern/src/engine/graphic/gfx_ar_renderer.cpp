@@ -388,7 +388,7 @@ namespace
 
         if (BackgroundTexturePtr == nullptr) return;
 
-        Performance::BeginEvent("DGB");
+        Performance::BeginEvent("AR: Differential GBuffer");
 
         ContextManager::SetRenderContext(m_DeferredRenderContextPtr);
 
@@ -462,7 +462,7 @@ namespace
     {
         if (m_RenderJobs.empty()) return;
 
-        Performance::BeginEvent("AR Shadows");
+        Performance::BeginEvent("AR: Differential Forward (Shadows only)");
 
         Debug::Push(131222);
 
