@@ -32,7 +32,7 @@ struct SLightProperties
 // -----------------------------------------------------------------------------
 // Input from engine
 // -----------------------------------------------------------------------------
-layout(std140, binding = 3) uniform UB3
+layout(std140, binding = 2) uniform UB3
 {
     vec4  ps_TilingOffset;
     vec4  ps_Color;
