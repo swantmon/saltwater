@@ -31,5 +31,6 @@ namespace ShadowRenderer
     
     void Update();
     void Render();
+    void RenderForward();
 } // namespace ShadowRenderer
 } // namespace Gfx
