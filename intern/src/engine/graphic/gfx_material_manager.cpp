@@ -515,6 +515,18 @@ namespace
     CGfxMaterialManager::CInternMaterial* CGfxMaterialManager::CreateMaterialFromDescription(const SMaterialDescriptor& _rDescriptor, Dt::CMaterialComponent* _pComponent)
     {
         // -----------------------------------------------------------------------------
+        // Hash
+        // -----------------------------------------------------------------------------
+        auto Hash = (Base::BHash)(0);
+
+        if (_rDescriptor.m_MaterialName.size() > 0)
+        {
+             Hash = Base::CRC32(_rDescriptor.m_MaterialName.c_str(), static_cast<unsigned int>(_rDescriptor.m_MaterialName.length()));
+
+            if (m_MaterialsByHash.find(Hash) != m_MaterialsByHash.end()) return m_MaterialsByHash.at(Hash);
+        }
+
+        // -----------------------------------------------------------------------------
         // Fill material component (if needed)
         // -----------------------------------------------------------------------------
         if (_pComponent != nullptr)
@@ -538,23 +550,13 @@ namespace
         }
 
         // -----------------------------------------------------------------------------
-        // Hash
-        // -----------------------------------------------------------------------------
-        Base::BHash Hash = Base::CRC32(_rDescriptor.m_MaterialName.c_str(), static_cast<unsigned int>(_rDescriptor.m_MaterialName.length()));
-
-        if (m_MaterialsByHash.find(Hash) != m_MaterialsByHash.end())
-        {
-            return m_MaterialsByHash.at(Hash);
-        }
-
-        // -----------------------------------------------------------------------------
         // Create material
         // -----------------------------------------------------------------------------
         auto Component = m_Materials.Allocate();
 
         FillMaterialFromData(Component, _rDescriptor);
 
-        m_MaterialsByHash[Hash] = Component;
+        if (Hash != 0) m_MaterialsByHash[Hash] = Component;
 
         return Component;
     }
