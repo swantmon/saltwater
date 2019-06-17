@@ -140,6 +140,7 @@ namespace
         CShaderPtr m_HitProxyShaderPtr;
 
         CRenderJobs m_RenderJobs;
+        CRenderJobs m_ShadowRenderJobs;
         SLightJob   m_ForwardLightTextures;
 
     private:
@@ -161,12 +162,14 @@ namespace
         , m_DifferentialForwardShaderPSPtr()
         , m_HitProxyShaderPtr             ()
         , m_RenderJobs                    ()
+        , m_ShadowRenderJobs              ()
         , m_ForwardLightTextures          ()
     {
         // -----------------------------------------------------------------------------
         // Reserve some jobs
         // -----------------------------------------------------------------------------
         m_RenderJobs.reserve(2);
+        m_ShadowRenderJobs.reserve(2);
     }
 
     // -----------------------------------------------------------------------------
@@ -204,6 +207,13 @@ namespace
         }
 
         m_RenderJobs.clear();
+
+        for (auto& rCurrentRenderJob : m_ShadowRenderJobs)
+        {
+            rCurrentRenderJob.m_SurfacePtr = nullptr;
+        }
+
+        m_ShadowRenderJobs.clear();
 
         // -----------------------------------------------------------------------------
 
@@ -460,7 +470,7 @@ namespace
 
     void CGfxARRenderer::RenderForward()
     {
-        if (m_RenderJobs.empty()) return;
+        if (m_ShadowRenderJobs.empty()) return;
 
         Performance::BeginEvent("AR: Differential Forward (Shadows only)");
 
@@ -506,7 +516,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Jobs
         // -----------------------------------------------------------------------------
-        for (auto RenderJob : m_RenderJobs)
+        for (auto RenderJob : m_ShadowRenderJobs)
         {
             const CMaterial* pMaterial = RenderJob.m_SurfaceMaterialPtr;
 
@@ -590,7 +600,7 @@ namespace
 
     void CGfxARRenderer::RenderHitProxy()
     {
-        if (m_RenderJobs.empty()) return;
+        if (m_RenderJobs.empty() && m_ShadowRenderJobs.empty()) return;
 
         Performance::BeginEvent("AR Hit Proxy");
 
@@ -608,21 +618,25 @@ namespace
         // -----------------------------------------------------------------------------
         // First pass: iterate throw render jobs and compute all meshes
         // -----------------------------------------------------------------------------
-        CRenderJobs::const_iterator EndOfRenderJobs = m_RenderJobs.end();
+        std::vector<SRenderJob> RenderJobs;
 
-        for (CRenderJobs::const_iterator CurrentRenderJob = m_RenderJobs.begin(); CurrentRenderJob != EndOfRenderJobs; ++CurrentRenderJob)
+        std::move(m_RenderJobs.begin(), m_RenderJobs.end(), std::back_inserter(RenderJobs));
+
+        std::move(m_ShadowRenderJobs.begin(), m_ShadowRenderJobs.end(), std::back_inserter(RenderJobs));
+
+        for (auto CurrentRenderJob : RenderJobs)
         {
-            CSurfacePtr  SurfacePtr = CurrentRenderJob->m_SurfacePtr;
+            CSurfacePtr  SurfacePtr = CurrentRenderJob.m_SurfacePtr;
 
             SPerDrawCallConstantBufferVS ModelBuffer;
 
-            ModelBuffer.m_ModelMatrix = CurrentRenderJob->m_ModelMatrix;
+            ModelBuffer.m_ModelMatrix = CurrentRenderJob.m_ModelMatrix;
 
             BufferManager::UploadBufferData(m_ModelBufferPtr, &ModelBuffer);
 
             SHitProxyProperties HitProxyProperties;
 
-            HitProxyProperties.m_ID = static_cast<unsigned int>(CurrentRenderJob->m_EntityID);
+            HitProxyProperties.m_ID = static_cast<unsigned int>(CurrentRenderJob.m_EntityID);
 
             BufferManager::UploadBufferData(m_HitProxyPassPSBufferPtr, &HitProxyProperties);
 
@@ -637,6 +651,8 @@ namespace
             ContextManager::DrawIndexed(SurfacePtr->GetNumberOfIndices(), 0, 0);
         }
 
+        RenderJobs.clear();
+
         ContextManager::ResetShaderPS();
 
         ContextManager::ResetShaderVS();
@@ -650,6 +666,8 @@ namespace
     {
         m_RenderJobs.clear();
 
+        m_ShadowRenderJobs.clear();
+
         auto DataMeshComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CMeshComponent>();
 
         for (auto Component : DataMeshComponents)
@@ -660,7 +678,7 @@ namespace
 
             const Dt::CEntity& rCurrentEntity = *pDtComponent->GetHostEntity();
 
-            if (rCurrentEntity.GetLayer() & Dt::SEntityLayer::AR)
+            if (rCurrentEntity.GetLayer() & Dt::SEntityLayer::AR || rCurrentEntity.GetLayer() & Dt::SEntityLayer::ShadowOnly)
             {
                 auto* pGfxComponent = static_cast<Gfx::CMesh*>(pDtComponent->GetFacet(Dt::CMeshComponent::Graphic));
 
@@ -695,7 +713,8 @@ namespace
                 NewRenderJob.m_SurfaceMaterialPtr = pMaterial;
                 NewRenderJob.m_ModelMatrix        = rCurrentEntity.GetTransformationFacet()->GetWorldMatrix();
 
-                m_RenderJobs.push_back(NewRenderJob);
+                if (rCurrentEntity.GetLayer() & Dt::SEntityLayer::AR)         m_RenderJobs.push_back(NewRenderJob);
+                if (rCurrentEntity.GetLayer() & Dt::SEntityLayer::ShadowOnly) m_ShadowRenderJobs.push_back(NewRenderJob);
             }
         }
     }

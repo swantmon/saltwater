@@ -355,7 +355,7 @@ namespace App
             Dt::CEntity& rEntity = Dt::CEntityManager::GetInstance().CreateEntity(EntityDesc);
 
             rEntity.SetName("Plane");
-            rEntity.SetLayer(Dt::SEntityLayer::AR);
+            rEntity.SetLayer(Dt::SEntityLayer::ShadowOnly);
 
             Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
 
