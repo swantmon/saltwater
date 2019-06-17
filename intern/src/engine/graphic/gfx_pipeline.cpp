@@ -554,6 +554,8 @@ namespace Pipeline
 
         RefractionRenderer::RenderForward();
 
+        ARRenderer::RenderForward();
+
         Engine::RaiseEvent(Engine::EEvent::Gfx_OnRenderForward);
 
         Performance::EndEvent();
