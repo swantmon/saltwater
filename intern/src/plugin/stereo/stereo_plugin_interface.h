@@ -114,7 +114,7 @@ namespace Stereo
         //---04 Depth from Rectified to Original Current Image---
         void imp_Depth_Rect2Orig();
 
-        std::vector<char> m_Depth_OrigImg; // Horizontal flip for reconstruction in plugin_slam.
+        std::vector<char> m_DepthImg_Orig; // Horizontal flip for reconstruction in plugin_slam.
 
         Gfx::CShaderPtr m_Depth_Rect2Orig_CSPtr;
         Gfx::CTexturePtr m_DepthImg_Orig_TexturePtr;
@@ -133,8 +133,11 @@ namespace Stereo
         //---06 Return Results---
         CStereoDelegate m_Delegate; // Return results to plugin_slam.
 
-        bool m_Is_ExportResult; // Export results
-        void export_Result();
+        bool m_Is_ExportOrigImg, m_Is_ExportRectImg, m_Is_ExportDepth; // Export results
+
+        void export_OrigImg();
+        void export_RectImg();
+        void export_Depth();
     };
 
 } // namespace Stereo

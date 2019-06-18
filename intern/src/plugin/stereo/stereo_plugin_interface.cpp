@@ -113,11 +113,21 @@ namespace Stereo
 
             m_KeyFrameID++;
 
+            if (m_Is_ExportOrigImg)
+            {
+                export_OrigImg();
+            }
+
             //---Epipolarizytion---
             // * Original Image Pair => Rectified Image Pair
 
             m_Rectifier_Planar = FutoGmtCV::CPlanarRectification(m_OrigImg_Curt, m_OrigImg_Last); // Apply Planar Rectification
             m_Rectifier_Planar.execute(m_RectImg_Curt, m_RectImg_Last, m_Homo_Curt, m_Homo_Last);
+
+            if (m_Is_ExportRectImg)
+            {
+                export_RectImg();
+            }
 
             if (m_RectImg_Curt.get_ImgSize().x > 2500 || m_RectImg_Curt.get_ImgSize().y > 2500)
             {
@@ -129,7 +139,13 @@ namespace Stereo
 
             m_DispImg_Rect.resize(m_RectImg_Curt.get_Img().size(), 0.0);
 
+            const clock_t Time_SM_begin = clock();
+
             imp_StereoMatching();
+
+            const clock_t Time_SM_end = clock();
+
+            float CalTime_SM = float(Time_SM_end - Time_SM_begin) / CLOCKS_PER_SEC;
 
             //---Disparity to Depth---
             // * Using Parallax Equation to Transform Disparity to Depth
@@ -160,9 +176,9 @@ namespace Stereo
 
             m_Delegate.Notify(m_OrigImg_Curt.get_Img(), DepthImage, Transform);
 
-            if (m_Is_ExportResult)
+            if (m_Is_ExportDepth)
             {
-                export_Result();
+                export_Depth();
             }
         }
         
@@ -341,12 +357,12 @@ namespace Stereo
         // GPU End
 
         const uint MemSize = m_DepthImg_Orig_TexturePtr->GetNumberOfPixelsU() * m_DepthImg_Orig_TexturePtr->GetNumberOfPixelsV() * sizeof(uint16_t);
-        m_Depth_OrigImg.resize(MemSize);
-        Gfx::TextureManager::CopyTextureToCPU(m_DepthImg_Orig_TexturePtr, m_Depth_OrigImg.data());
+        m_DepthImg_Orig.resize(MemSize);
+        Gfx::TextureManager::CopyTextureToCPU(m_DepthImg_Orig_TexturePtr, m_DepthImg_Orig.data());
         glm::mat4 Transform = glm::mat4(glm::transpose(m_OrigImg_Curt.get_Rot()));
         Transform[3] = glm::vec4(m_OrigImg_Curt.get_PC(), 1.0f);
 
-        m_Delegate.Notify(m_OrigImg_Curt.get_Img(), m_Depth_OrigImg, Transform);
+        m_Delegate.Notify(m_OrigImg_Curt.get_Img(), m_DepthImg_Orig, Transform);
     }
 
     void CPluginInterface::cmp_Depth()
@@ -379,13 +395,11 @@ namespace Stereo
 
     // -----------------------------------------------------------------------------
 
-    void CPluginInterface::export_Result()
+    void CPluginInterface::export_OrigImg()
     {
         std::string ExportStr;
-
         uint MemCpySize = 0;
 
-        //---Export Original Images---
         cv::Mat cvOrigImg_Curt(m_OrigImgSize.y, m_OrigImgSize.x, CV_8UC4);
 
         MemCpySize = m_OrigImg_Curt.get_Img().size() * sizeof(m_OrigImg_Curt.get_Img()[0]);
@@ -395,8 +409,13 @@ namespace Stereo
 
         ExportStr = "E:\\Project_ARCHITECT\\OrigImg_Curt_" + std::to_string(m_KeyFrameID) + ".png";
         cv::imwrite(ExportStr, cvOrigImg_Curt);
+    }
 
-        //---Export Rectified Image Pairs---
+    void CPluginInterface::export_RectImg()
+    {
+        std::string ExportStr;
+        uint MemCpySize = 0;
+
         cv::Mat cvRectImg_Curt(m_RectImg_Curt.get_ImgSize().y, m_RectImg_Curt.get_ImgSize().x, CV_8UC1);
         memcpy(cvRectImg_Curt.data, m_RectImg_Curt.get_Img().data(), m_RectImg_Curt.get_Img().size());
 
@@ -409,12 +428,17 @@ namespace Stereo
 
         ExportStr = "E:\\Project_ARCHITECT\\RectImg_Last_" + std::to_string(m_KeyFrameID) + ".png";
         cv::imwrite(ExportStr, cvRectImg_Last);
+    }
 
-        //---Export Depth in Original Image in uint16_t (from plugin_stereo & Sensor)---
+    void CPluginInterface::export_Depth()
+    {
+        std::string ExportStr;
+        uint MemCpySize = 0;
+
         cv::Mat cvDepthImg_Orig(m_OrigImg_Curt.get_ImgSize().y, m_OrigImg_Curt.get_ImgSize().x, CV_16UC1);
 
-        MemCpySize = m_Depth_OrigImg.size() * sizeof(m_Depth_OrigImg[0]);
-        memcpy(cvDepthImg_Orig.data, m_Depth_OrigImg.data(), MemCpySize);
+        MemCpySize = m_DepthImg_Orig.size() * sizeof(m_DepthImg_Orig[0]);
+        memcpy(cvDepthImg_Orig.data, m_DepthImg_Orig.data(), MemCpySize);
 
         ExportStr = "E:\\Project_ARCHITECT\\DepthImg_Orig_" + std::to_string(m_KeyFrameID) + ".png";
         cv::imwrite(ExportStr, cvDepthImg_Orig);
@@ -439,7 +463,7 @@ namespace Stereo
         m_FrameResolution = Core::CProgramParameters::GetInstance().Get("mr:stereo:00_input:frame_resolution", 0.5); // Full = 1; Half = 0.5;
 
         //---00 Keyframe---
-        m_Cdt_Keyf_BaseLineL = Core::CProgramParameters::GetInstance().Get("mr:stereo:00_input:baseline_length", 0.03);
+        m_Cdt_Keyf_BaseLineL = Core::CProgramParameters::GetInstance().Get("mr:stereo:00_Keyframe:baseline_length", 0.03); // Unit = meter
 
         m_Is_KeyFrame = false;
 
@@ -486,7 +510,9 @@ namespace Stereo
         m_Compare_Depth_CSPtr = Gfx::ShaderManager::CompileCS("../../plugins/stereo/cs_Compare_Depth.glsl", "main", DefineString.c_str());
 
         //---06 Return Results---
-        m_Is_ExportResult = Core::CProgramParameters::GetInstance().Get("mr:stereo:06_output:export_results", true);
+        m_Is_ExportOrigImg = Core::CProgramParameters::GetInstance().Get("mr:stereo:06_output:export_orig_img", true);
+        m_Is_ExportRectImg = Core::CProgramParameters::GetInstance().Get("mr:stereo:06_output:export_rect_img", true);
+        m_Is_ExportDepth = Core::CProgramParameters::GetInstance().Get("mr:stereo:06_output:export_depth", true);
     }
 
     // -----------------------------------------------------------------------------
