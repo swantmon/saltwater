@@ -164,6 +164,10 @@ namespace
 
         CTexturePtr m_NoiseTexturePtr;
 
+#ifdef PLATFORM_ANDROID
+        CTexturePtr m_TempTexturePtr;
+#endif
+
         CTextureSetPtr m_HalfTexturePtrs[2];
         CTextureSetPtr m_BilateralBlurHTextureSetPtr;
         CTextureSetPtr m_BilateralBlurVTextureSetPtr;
@@ -208,7 +212,7 @@ namespace
         , m_NoiseTexturePtr                  ()
         , m_DeferredRenderContextPtr         ()
         , m_SSAORenderJobs                   ()
-        , m_RenderJobs                 ()
+        , m_RenderJobs                       ()
         , m_ForwardLightTextures             ()
     {
         m_SSAORenderJobs.reserve(1);
@@ -274,6 +278,10 @@ namespace
 
         m_HalfTexturePtrs[0] = nullptr;
         m_HalfTexturePtrs[1] = nullptr;
+
+#ifdef PLATFORM_ANDROID
+        m_TempTexturePtr = nullptr;
+#endif
 
         // -----------------------------------------------------------------------------
         // Shadow jobs
@@ -345,7 +353,26 @@ namespace
         CTexturePtr HalfTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor);
 
         TextureManager::SetTextureLabel(HalfTexturePtr, "SSAO");
-        
+
+#ifdef PLATFORM_ANDROID
+        RendertargetDescriptor.m_NumberOfPixelsU  = Size[0];
+        RendertargetDescriptor.m_NumberOfPixelsV  = Size[1];
+        RendertargetDescriptor.m_NumberOfPixelsW  = 1;
+        RendertargetDescriptor.m_NumberOfMipMaps  = 1;
+        RendertargetDescriptor.m_NumberOfTextures = 1;
+        RendertargetDescriptor.m_Binding          = CTexture::ShaderResource;
+        RendertargetDescriptor.m_Access           = CTexture::CPUWrite;
+        RendertargetDescriptor.m_Format           = CTexture::R16G16B16A16_FLOAT;
+        RendertargetDescriptor.m_Usage            = CTexture::GPURead;
+        RendertargetDescriptor.m_Semantic         = CTexture::Diffuse;
+        RendertargetDescriptor.m_pFileName        = nullptr;
+        RendertargetDescriptor.m_pPixels          = nullptr;
+
+        m_TempTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor);
+
+        TextureManager::SetTextureLabel(m_TempTexturePtr, "Temp Buffer");
+#endif
+
         // -----------------------------------------------------------------------------
         // Create render target
         // -----------------------------------------------------------------------------
@@ -640,6 +667,23 @@ namespace
 
         CTexturePtr HalfTexturePtr    = TextureManager::CreateTexture2D(RendertargetDescriptor);
         CTexturePtr HalfTextureTwoPtr = TextureManager::CreateTexture2D(RendertargetDescriptor);
+
+#ifdef PLATFORM_ANDROID
+        RendertargetDescriptor.m_NumberOfPixelsU  = Size[0];
+        RendertargetDescriptor.m_NumberOfPixelsV  = Size[1];
+        RendertargetDescriptor.m_NumberOfPixelsW  = 1;
+        RendertargetDescriptor.m_NumberOfMipMaps  = 1;
+        RendertargetDescriptor.m_NumberOfTextures = 1;
+        RendertargetDescriptor.m_Binding          = CTexture::ShaderResource;
+        RendertargetDescriptor.m_Access           = CTexture::CPUWrite;
+        RendertargetDescriptor.m_Format           = CTexture::R16G16B16A16_FLOAT;
+        RendertargetDescriptor.m_Usage            = CTexture::GPURead;
+        RendertargetDescriptor.m_Semantic         = CTexture::Diffuse;
+        RendertargetDescriptor.m_pFileName        = nullptr;
+        RendertargetDescriptor.m_pPixels          = nullptr;
+
+        m_TempTexturePtr = TextureManager::CreateTexture2D(RendertargetDescriptor);
+#endif
         
         // -----------------------------------------------------------------------------
         // Create render target
@@ -713,6 +757,16 @@ namespace
     {
         if (m_RenderJobs.empty()) return;
 
+#ifdef PLATFORM_ANDROID
+        Performance::BeginEvent("Copy Framebuffer to temporary texture");
+        
+        ContextManager::SetTargetSet(TargetSetManager::GetLightAccumulationTargetSet());
+
+        TextureManager::CopyActiveTargetSetToTexture(m_TempTexturePtr, Base::AABB2UInt(glm::uvec2(0,0), glm::uvec2(m_TempTexturePtr->GetNumberOfPixelsU(), m_TempTexturePtr->GetNumberOfPixelsV())));
+
+        Performance::EndEvent();
+#endif
+
         Performance::BeginEvent("Shadows only");
 
         Debug::Push(131222);
@@ -737,7 +791,11 @@ namespace
 
         ContextManager::SetSampler(0, SamplerManager::GetSampler(CSampler::MinMagMipPointClamp));
 
+#ifdef PLATFORM_ANDROID
+        ContextManager::SetTexture(0, m_TempTexturePtr);
+#else
         ContextManager::SetTexture(0, TargetSetManager::GetLightAccumulationTargetSet()->GetRenderTarget(0));
+#endif
 
         ContextManager::SetShaderPS(m_DifferentialForwardShaderPSPtr);
 

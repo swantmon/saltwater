@@ -67,6 +67,8 @@ namespace
         void CopyToTextureArray2D(CTexturePtr _TextureArrayPtr, unsigned int _IndexOfSlice, const Base::AABB2UInt& _rTargetRect, unsigned int _NumberOfBytesPerLine, const void* _pBytes, bool _UpdateMipLevels);
         void CopyToTextureArray2D(CTexturePtr _TextureArrayPtr, unsigned int _IndexOfSlice, CTexturePtr _TexturePtr, bool _UpdateMipLevels);
 
+        void CopyActiveTargetSetToTexture(CTexturePtr _TexturePtr, const Base::AABB2UInt& _rTargetRect);
+
         CTexturePtr GetMipmapFromTexture2D(CTexturePtr _TexturePtr, unsigned int _Mipmap);
         
         void UpdateMipmap(CTexturePtr _TexturePtr);
@@ -575,6 +577,27 @@ namespace
 
             ENGINE_CONSOLE_STREAMWARNING("Copy to texture array is actually not supported.");
         }
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CGfxTextureManager::CopyActiveTargetSetToTexture(CTexturePtr _TexturePtr, const Base::AABB2UInt& _rTargetRect)
+    {
+        assert(_TexturePtr.IsValid());
+
+        glm::uvec2 Offset     = _rTargetRect[0];
+        glm::uvec2 UpdateSize = _rTargetRect[1] - _rTargetRect[0];
+
+        assert(_TexturePtr->GetNumberOfPixelsU() >= UpdateSize[0] + Offset[0]);
+        assert(_TexturePtr->GetNumberOfPixelsV() >= UpdateSize[1] + Offset[1]);
+
+        auto* pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
+
+        Gfx::CNativeTextureHandle TextureHandle = pInternTexture->m_NativeTexture;
+
+        glBindTexture(GL_TEXTURE_2D, TextureHandle);
+
+        glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, Offset[0], Offset[1], UpdateSize[0], UpdateSize[1]);
     }
 
     // -----------------------------------------------------------------------------
@@ -2565,6 +2588,13 @@ namespace TextureManager
     void CopyToTextureArray2D(CTexturePtr _TextureArrayPtr, unsigned int _IndexOfSlice, CTexturePtr _TexturePtr, bool _UpdateMipLevels)
     {
         CGfxTextureManager::GetInstance().CopyToTextureArray2D(_TextureArrayPtr, _IndexOfSlice, _TexturePtr, _UpdateMipLevels);
+    }
+
+    // -----------------------------------------------------------------------------
+
+    void CopyActiveTargetSetToTexture(CTexturePtr _TexturePtr, const Base::AABB2UInt& _rTargetRect)
+    {
+        CGfxTextureManager::GetInstance().CopyActiveTargetSetToTexture(_TexturePtr, _rTargetRect);
     }
 
     // -----------------------------------------------------------------------------
