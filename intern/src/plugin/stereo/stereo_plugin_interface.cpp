@@ -208,7 +208,8 @@ namespace Stereo
                 // Default disparity is pixel level => Disparity is the same in 8-bit & 16-bit.
                 // If turn on sub-pixel => Output disparity must be 16-bit. => Divided by 16 to derive true disparity!!!
 
-            std::vector<uint16_t> DispImg_Rect_uint16(m_DispImg_Rect.size(), 0.0);
+            uint MemSize = m_RectImg_Curt.get_ImgSize().x * m_RectImg_Curt.get_ImgSize().y * sizeof(uint16_t);
+            std::vector<uint16_t> DispImg_Rect_uint16(MemSize, 0.0);
 
             m_pStereoMatcher_LibSGM->execute(m_RectImg_Curt.get_Img().data(), m_RectImg_Last.get_Img().data(), DispImg_Rect_uint16.data());
 
