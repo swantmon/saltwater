@@ -139,6 +139,11 @@ namespace Stereo
 
             m_DispImg_Rect.resize(m_RectImg_Curt.get_Img().size(), 0.0);
 
+            if (m_StereoMatching_Method == "LibSGM")
+            {
+                imp_StereoMatching_Tile();
+            }
+
             const clock_t Time_SM_begin = clock();
 
             imp_StereoMatching();
@@ -200,6 +205,50 @@ namespace Stereo
     }
 
     // -----------------------------------------------------------------------------
+
+    void CPluginInterface::imp_StereoMatching_Tile()
+    {
+        /*
+        Step 1. Determine Tile Size.
+        Step 2. Calculate Tile Numbers.
+        Step 3. Extract Tile from Whole Image.
+            Per Tile: 1D Whole Image -> 2D Kernal / 2D Tile  -> 1D Tile
+            Multi-Tile = Move Kernal
+        Step 4. Processing
+        Step 5. Combine Tiled Result back to Whole Image.
+        */
+
+        uint TileSM_Size = m_OrigImgSize.x < m_OrigImgSize.y ? m_OrigImgSize.x : m_OrigImgSize.y;
+        std::vector<char> TileImg_Curt(TileSM_Size * TileSM_Size, 0), TileImg_Last(TileSM_Size * TileSM_Size, 0);
+
+        glm::uvec2 TileSM_Num(m_RectImg_Curt.get_ImgSize().x / TileSM_Size, m_RectImg_Curt.get_ImgSize().y / TileSM_Size);
+            // If RectImgSize % TileSize != 0  =>  The remainings are processed specially latter.
+
+        for (auto idx_Tile_y = 0; idx_Tile_y < TileSM_Num.x; idx_Tile_y++)
+        {
+            for (auto idx_Tile_x = 0; idx_Tile_x < TileSM_Num.x; idx_Tile_x++)
+            {
+                for (auto idx_Tile_Img_y = 0; idx_Tile_Img_y < TileSM_Size; idx_Tile_Img_y++)
+                {
+                    for (auto idx_Tile_Img_x = 0; idx_Tile_Img_x < TileSM_Size; idx_Tile_Img_x++)
+                    {
+                        TileImg_Curt[idx_Tile_Img_x + idx_Tile_Img_y * m_RectImg_Curt.get_ImgSize().x] = m_RectImg_Curt.get_Img()[idx_Tile_Img_x + idx_Tile_x * TileSM_Size + idx_Tile_Img_y * m_RectImg_Curt.get_ImgSize().x];
+                        TileImg_Last[idx_Tile_Img_x + idx_Tile_Img_y * m_RectImg_Curt.get_ImgSize().x] = m_RectImg_Last.get_Img()[idx_Tile_Img_x + idx_Tile_x * TileSM_Size + idx_Tile_Img_y * m_RectImg_Curt.get_ImgSize().x];
+
+                    }
+                }
+            }
+        }
+
+        if (m_RectImg_Curt.get_ImgSize().x % TileSM_Size)
+        {
+        }
+
+        if (m_RectImg_Curt.get_ImgSize().y % TileSM_Size)
+        {
+        }
+    }
+
     void CPluginInterface::imp_StereoMatching()
     {
         if (m_StereoMatching_Method == "LibSGM")
@@ -208,7 +257,7 @@ namespace Stereo
                 // Default disparity is pixel level => Disparity is the same in 8-bit & 16-bit.
                 // If turn on sub-pixel => Output disparity must be 16-bit. => Divided by 16 to derive true disparity!!!
 
-            std::vector<uint16_t> DispImg_Rect_uint16(m_DispImg_Rect.size(), 0.0);
+            std::vector<uint16_t> DispImg_Rect_uint16(m_RectImg_Curt.get_Img().size(), 0.0);
 
             m_pStereoMatcher_LibSGM->execute(m_RectImg_Curt.get_Img().data(), m_RectImg_Last.get_Img().data(), DispImg_Rect_uint16.data());
 
