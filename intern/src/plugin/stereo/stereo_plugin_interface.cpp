@@ -215,9 +215,12 @@ namespace Stereo
         */
 
         auto Tile_Size = m_OrigImgSize.x < m_OrigImgSize.y ? m_OrigImgSize.x : m_OrigImgSize.y;
-        std::vector<char> TileImg_Curt(Tile_Size * Tile_Size, 0), TileImg_Last(Tile_Size * Tile_Size, 0);
-        std::vector<uint16_t> TileDisp_Curt(Tile_Size * Tile_Size, 0);
-        m_pStereoMatcher_LibSGM = std::make_unique<sgm::StereoSGM>(Tile_Size, Tile_Size, m_DispRange, 8, 16, sgm::EXECUTE_INOUT_HOST2HOST);
+        auto Tile_Overlap = int(Tile_Size * 0.2);
+        auto Tile_Size_Overlap = Tile_Size + 2 * Tile_Overlap;
+
+        std::vector<char> TileImg_Curt(Tile_Size_Overlap * Tile_Size_Overlap, 0), TileImg_Last(Tile_Size_Overlap * Tile_Size_Overlap, 0);
+        std::vector<uint16_t> TileDisp_Curt(Tile_Size_Overlap * Tile_Size_Overlap, 0);
+        m_pStereoMatcher_LibSGM = std::make_unique<sgm::StereoSGM>(Tile_Size_Overlap, Tile_Size_Overlap, m_DispRange, 8, 16, sgm::EXECUTE_INOUT_HOST2HOST);
 
         glm::uvec2 Tile_Num(m_RectImg_Curt.get_ImgSize().x / Tile_Size, m_RectImg_Curt.get_ImgSize().y / Tile_Size);
             // If RectImgSize % TileSize != 0  =>  Processing the remainings individually.
@@ -226,28 +229,38 @@ namespace Stereo
         {
             for (auto idx_TileNum_x = 0; idx_TileNum_x < Tile_Num.x; idx_TileNum_x++)
             {
-                for (auto idx_Tile_Pix_y = 0; idx_Tile_Pix_y < Tile_Size; idx_Tile_Pix_y++)
+                for (auto idx_Tile_Pix_y = 0; idx_Tile_Pix_y < Tile_Size_Overlap; idx_Tile_Pix_y++)
                 {
-                    for (auto idx_Tile_Pix_x = 0; idx_Tile_Pix_x < Tile_Size; idx_Tile_Pix_x++)
+                    for (auto idx_Tile_Pix_x = 0; idx_Tile_Pix_x < Tile_Size_Overlap; idx_Tile_Pix_x++)
                     {
-                        const auto TilePos_Tile = idx_Tile_Pix_x + idx_Tile_Pix_y * Tile_Size;
-                        const auto TilePos_Img = idx_Tile_Pix_x + idx_Tile_Pix_y * m_RectImg_Curt.get_ImgSize().x;
-                        const auto ImgPos = TilePos_Img + idx_TileNum_x * Tile_Size + idx_TileNum_y * Tile_Size * m_RectImg_Curt.get_ImgSize().x;
+                        const auto TilePos_Tile = idx_Tile_Pix_x + idx_Tile_Pix_y * Tile_Size_Overlap;
+                        const auto TilePos_Img = (idx_Tile_Pix_x - Tile_Overlap) + idx_Tile_Pix_y * m_RectImg_Curt.get_ImgSize().x;
+                        const auto ImgPos = TilePos_Img + idx_TileNum_x * Tile_Size_Overlap + idx_TileNum_y * Tile_Size_Overlap * m_RectImg_Curt.get_ImgSize().x;
 
-                        TileImg_Curt.at(TilePos_Tile) = m_RectImg_Curt.get_Img().at(ImgPos);
-                        TileImg_Last.at(TilePos_Tile) = m_RectImg_Last.get_Img().at(ImgPos);
+                        try
+                        {
+                            TileImg_Curt.at(TilePos_Tile) = m_RectImg_Curt.get_Img().at(ImgPos);
+                            TileImg_Last.at(TilePos_Tile) = m_RectImg_Last.get_Img().at(ImgPos);
+                        }
+                        catch (std::out_of_range e)
+                        {
+                            TileImg_Curt.at(TilePos_Tile) = 0;
+                            TileImg_Last.at(TilePos_Tile) = 0;
+                        }
                     }
                 }
 
-                cv::Mat cvTileImg_Curt(Tile_Size, Tile_Size, CV_8UC1);
+                
+                cv::Mat cvTileImg_Curt(Tile_Size_Overlap, Tile_Size_Overlap, CV_8UC1);
                 memcpy(cvTileImg_Curt.data, TileImg_Curt.data(), TileImg_Curt.size() * sizeof(TileImg_Curt[0]));
                 cv::imshow("TileImg_Curt", cvTileImg_Curt);
 
-                cv::Mat cvTileImg_Last(Tile_Size, Tile_Size, CV_8UC1);
+                cv::Mat cvTileImg_Last(Tile_Size_Overlap, Tile_Size_Overlap, CV_8UC1);
                 memcpy(cvTileImg_Last.data, TileImg_Last.data(), TileImg_Last.size() * sizeof(TileImg_Last[0]));
                 cv::imshow("TileImg_Last", cvTileImg_Last);
 
                 cv::waitKey();
+                
 
                 m_pStereoMatcher_LibSGM->execute(TileImg_Curt.data(), TileImg_Last.data(), TileDisp_Curt.data());
 
@@ -267,10 +280,12 @@ namespace Stereo
 
         if (m_RectImg_Curt.get_ImgSize().x % Tile_Size)
         {
+
         }
 
         if (m_RectImg_Curt.get_ImgSize().y % Tile_Size)
         {
+
         }
     }
 
