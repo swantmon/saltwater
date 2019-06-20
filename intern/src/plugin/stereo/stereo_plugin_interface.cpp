@@ -214,9 +214,9 @@ namespace Stereo
         Step 5. Combine Tiled Result back to Whole Image.
         */
 
-        auto Tile_Size = m_OrigImgSize.x < m_OrigImgSize.y ? m_OrigImgSize.x : m_OrigImgSize.y;
-        auto Tile_Overlap = int(Tile_Size * 0.2);
-        auto Tile_Size_Overlap = Tile_Size + 2 * Tile_Overlap;
+        const auto Tile_Size = m_OrigImgSize.x < m_OrigImgSize.y ? m_OrigImgSize.x : m_OrigImgSize.y;
+        const auto Tile_Overlap = int(Tile_Size * 0.1);
+        const auto Tile_Size_Overlap = Tile_Size + 2 * Tile_Overlap;
 
         std::vector<char> TileImg_Curt(Tile_Size_Overlap * Tile_Size_Overlap, 0), TileImg_Last(Tile_Size_Overlap * Tile_Size_Overlap, 0);
         std::vector<uint16_t> TileDisp_Curt(Tile_Size_Overlap * Tile_Size_Overlap, 0);
@@ -237,15 +237,28 @@ namespace Stereo
                         const auto TilePos_Img = (idx_Tile_Pix_x - Tile_Overlap) + idx_Tile_Pix_y * m_RectImg_Curt.get_ImgSize().x;
                         const auto ImgPos = TilePos_Img + idx_TileNum_x * Tile_Size_Overlap + idx_TileNum_y * Tile_Size_Overlap * m_RectImg_Curt.get_ImgSize().x;
 
-                        try
-                        {
-                            TileImg_Curt.at(TilePos_Tile) = m_RectImg_Curt.get_Img().at(ImgPos);
-                            TileImg_Last.at(TilePos_Tile) = m_RectImg_Last.get_Img().at(ImgPos);
-                        }
-                        catch (std::out_of_range e)
+                        if (TilePos_Img < idx_Tile_Pix_y * m_RectImg_Curt.get_ImgSize().x)
                         {
                             TileImg_Curt.at(TilePos_Tile) = 0;
                             TileImg_Last.at(TilePos_Tile) = 0;
+                        }
+                        else if (TilePos_Img > (idx_Tile_Pix_y + 1) * m_RectImg_Curt.get_ImgSize().x)
+                        {
+                            TileImg_Curt.at(TilePos_Tile) = 0;
+                            TileImg_Last.at(TilePos_Tile) = 0;
+                        }
+                        else
+                        {
+                            try
+                            {
+                                TileImg_Curt.at(TilePos_Tile) = m_RectImg_Curt.get_Img().at(ImgPos);
+                                TileImg_Last.at(TilePos_Tile) = m_RectImg_Last.get_Img().at(ImgPos);
+                            }
+                            catch (std::out_of_range e)
+                            {
+                                TileImg_Curt.at(TilePos_Tile) = 0;
+                                TileImg_Last.at(TilePos_Tile) = 0;
+                            }
                         }
                     }
                 }
