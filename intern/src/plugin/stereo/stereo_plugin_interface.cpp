@@ -232,35 +232,41 @@ namespace Stereo
             {
                 for (auto idx_BuffTilePix_y = 0; idx_BuffTilePix_y < BuffTile_Size; idx_BuffTilePix_y++)
                 {
-                    glm::uvec2 ImgBound;
-                    ImgBound.x = (idx_TileNum_y * Tile_Size + idx_BuffTilePix_y) * m_RectImg_Curt.get_ImgSize().x; // Left Boundary
-                    if (idx_BuffTilePix_y >= Tile_Size)
+                    glm::ivec2 ImgBound;
+
+                    ImgBound.x = (idx_TileNum_y * Tile_Size + idx_BuffTilePix_y - BufferPix) * m_RectImg_Curt.get_ImgSize().x; // Left Boundary
+                    if (ImgBound.x < 0)
+                    {
+                        ImgBound.x = 0;
+                    }
+                    if (ImgBound.x >= m_RectImg_Curt.get_Img().size())
                     {
                         ImgBound.x = m_RectImg_Curt.get_Img().size() - m_RectImg_Curt.get_ImgSize().x;
                     }
+
                     ImgBound.y = ImgBound.x + m_RectImg_Curt.get_ImgSize().x - 1; // Right Boundary
                     assert(ImgBound.y < m_RectImg_Curt.get_Img().size());
 
-                    for (auto idx_TilePix_x = 0; idx_TilePix_x < Tile_Size; idx_TilePix_x++)
+                    for (auto idx_BuffTilePix_x = 0; idx_BuffTilePix_x < BuffTile_Size; idx_BuffTilePix_x++)
                     {
-                        const auto TilePos_Tile = idx_TilePix_x + idx_BuffTilePix_y * Tile_Size;
-                        const auto TilePos_Img = (idx_TilePix_x - BufferPix) + (idx_BuffTilePix_y - BufferPix) * m_RectImg_Curt.get_ImgSize().x;
-                        const auto ImgPos = TilePos_Img + idx_TileNum_x * BuffTile_Size + idx_TileNum_y * BuffTile_Size * m_RectImg_Curt.get_ImgSize().x;
+                        const auto BuffTilePos_Tile = idx_BuffTilePix_x + idx_BuffTilePix_y * BuffTile_Size;
+                        const auto BuffTilePos_Img = (idx_BuffTilePix_x - BufferPix) + (idx_BuffTilePix_y - BufferPix) * m_RectImg_Curt.get_ImgSize().x;
+                        const auto ImgPos = BuffTilePos_Img + idx_TileNum_x * Tile_Size + idx_TileNum_y * Tile_Size * m_RectImg_Curt.get_ImgSize().x;
 
-                        if (TilePos_Img < ImgBound.x || TilePos_Img > ImgBound.y)
+                        if (ImgPos < ImgBound.x || ImgPos > ImgBound.y)
                         {
-                            BuffTile_CurtImg[TilePos_Tile] = 0;
-                            BuffTile_LastImg[TilePos_Tile] = 0;
+                            BuffTile_CurtImg[BuffTilePos_Tile] = 0;
+                            BuffTile_LastImg[BuffTilePos_Tile] = 0;
                         }
                         else
                         {
-                            BuffTile_CurtImg[TilePos_Tile] = m_RectImg_Curt.get_Img()[ImgPos];
-                            BuffTile_LastImg[TilePos_Tile] = m_RectImg_Last.get_Img()[ImgPos];
+                            BuffTile_CurtImg[BuffTilePos_Tile] = m_RectImg_Curt.get_Img()[ImgPos];
+                            BuffTile_LastImg[BuffTilePos_Tile] = m_RectImg_Last.get_Img()[ImgPos];
                         }
                     }
                 }
 
-                
+                /*
                 cv::Mat cvTileImg_Curt(BuffTile_Size, BuffTile_Size, CV_8UC1);
                 memcpy(cvTileImg_Curt.data, BuffTile_CurtImg.data(), BuffTile_CurtImg.size() * sizeof(BuffTile_CurtImg[0]));
                 cv::imshow("TileImg_Curt", cvTileImg_Curt);
@@ -270,7 +276,7 @@ namespace Stereo
                 cv::imshow("TileImg_Last", cvTileImg_Last);
 
                 cv::waitKey();
-                
+                */
 
                 m_pStereoMatcher_LibSGM->execute(BuffTile_CurtImg.data(), BuffTile_LastImg.data(), BuffTile_Disp.data());
 
@@ -279,7 +285,7 @@ namespace Stereo
                     for (auto idx_Tile_Pix_x = 0; idx_Tile_Pix_x < Tile_Size; idx_Tile_Pix_x++)
                     {
                         const auto TilePos_Tile = (idx_Tile_Pix_x + BufferPix) + (idx_Tile_Pix_y + BufferPix) * BuffTile_Size;
-                        const auto TilePos_Img = (idx_Tile_Pix_x + BufferPix) + (idx_Tile_Pix_y + BufferPix) * m_RectImg_Curt.get_ImgSize().x;
+                        const auto TilePos_Img = idx_Tile_Pix_x + idx_Tile_Pix_y * m_RectImg_Curt.get_ImgSize().x;
                         const auto ImgPos = TilePos_Img + idx_TileNum_x * Tile_Size + idx_TileNum_y * Tile_Size * m_RectImg_Curt.get_ImgSize().x;
 
                         m_DispImg_Rect[ImgPos] = BuffTile_Disp[TilePos_Tile];
