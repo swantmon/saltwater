@@ -87,6 +87,8 @@ namespace Stereo
 
         FutoGmtCV::CPlanarRectification m_Rectifier_Planar; // Implement planar rectification
 
+        glm::uvec2 m_RectImgSize;
+
         //---02 Stereo Matching---
         void imp_StereoMatching();
         void imp_StereoMatching_Tile();
@@ -96,6 +98,8 @@ namespace Stereo
         int m_DispRange; // Disparity Searching Range for Stereo Matching
 
         std::string m_StereoMatching_Method; // Select stereo matching method.
+
+        std::string m_StereoMatching_Mode; // Select calculation mode of stereo matching.
 
         std::unique_ptr<sgm::StereoSGM> m_pStereoMatcher_LibSGM;
         cv::Ptr<cv::StereoSGBM> m_pStereoMatcher_cvSGBM;

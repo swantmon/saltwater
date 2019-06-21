@@ -46,6 +46,12 @@ namespace Stereo
 
         m_OrigImgSize = _rImageSize;
 
+        //---Tile-based Stereo Matching---
+        const auto Tile_Size = m_OrigImgSize.x < m_OrigImgSize.y ? m_OrigImgSize.x : m_OrigImgSize.y;
+        const auto BufferPix = int(Tile_Size * 0.1);
+        const auto BuffTile_Size = Tile_Size + 2 * BufferPix;
+        m_pStereoMatcher_LibSGM = std::make_unique<sgm::StereoSGM>(BuffTile_Size, BuffTile_Size, m_DispRange, 8, 16, sgm::EXECUTE_INOUT_HOST2HOST);
+
         //---Setting Texture of Depth in Original Image for GLSL---
         Gfx::STextureDescriptor TextureDesc_DepthImg_Orig = {};
 
@@ -141,8 +147,14 @@ namespace Stereo
 
             const clock_t Time_SM_begin = clock();
 
-            imp_StereoMatching_Tile();
-            //imp_StereoMatching();
+            if (m_StereoMatching_Mode == "Original")
+            {
+                imp_StereoMatching();
+            }
+            else if (m_StereoMatching_Mode == "Tile")
+            {
+                imp_StereoMatching_Tile();
+            }
 
             const clock_t Time_SM_end = clock();
 
@@ -211,7 +223,6 @@ namespace Stereo
 
         std::vector<char> BuffTile_CurtImg(BuffTile_Size * BuffTile_Size, 0), BuffTile_LastImg(BuffTile_Size * BuffTile_Size, 0);
         std::vector<uint16_t> BuffTile_Disp(BuffTile_CurtImg.size(), 0);
-        m_pStereoMatcher_LibSGM = std::make_unique<sgm::StereoSGM>(BuffTile_Size, BuffTile_Size, m_DispRange, 8, 16, sgm::EXECUTE_INOUT_HOST2HOST);
 
 
         glm::uvec2 Tile_Num;
@@ -560,9 +571,11 @@ namespace Stereo
         m_Is_KeyFrame = false;
 
         //---01 Rectification-----
+        m_RectImgSize = Core::CProgramParameters::GetInstance().Get("mr:stereo:02_stereo_matching:default_rectified_image_size", glm::uvec2(640, 360));
 
         //---02 Stereo Matching---
-        m_StereoMatching_Method = Core::CProgramParameters::GetInstance().Get("mr:stereo:02_stereo_matching:Method", "LibSGM");
+        m_StereoMatching_Method = Core::CProgramParameters::GetInstance().Get("mr:stereo:02_stereo_matching:method", "LibSGM");
+        m_StereoMatching_Mode = Core::CProgramParameters::GetInstance().Get("mr:stereo:02_stereo_matching:mode", "Original");
 
         m_DispRange = Core::CProgramParameters::GetInstance().Get("mr:stereo:02_stereo_matching:disparity_range", 128);
 
