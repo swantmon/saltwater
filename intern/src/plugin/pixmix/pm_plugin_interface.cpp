@@ -67,7 +67,11 @@
 
 #include <vector>
 
+#ifndef OCEAN_PIXMIX
 CORE_PLUGIN_INFO(PM::CPluginInterface, "PixMix", "1.0", "This plugin enables inpainting with PixMix (Open version).")
+#else
+CORE_PLUGIN_INFO(PM::CPluginInterface, "PixMix", "1.0", "This plugin enables inpainting with PixMix (Original version).")
+#endif
 
 namespace PM
 {
