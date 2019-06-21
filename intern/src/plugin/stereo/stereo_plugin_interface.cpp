@@ -204,16 +204,7 @@ namespace Stereo
 
     void CPluginInterface::imp_StereoMatching_Tile()
     {
-        /*
-        Step 1. Determine Tile Size.
-        Step 2. Calculate Tile Numbers.
-        Step 3. Extract Tile from Whole Image.
-            Per Tile: 1D Whole Image -> 2D Kernal / 2D Tile  -> 1D Tile
-            Multi-Tile = Move Kernal
-        Step 4. Processing
-        Step 5. Combine Tiled Result back to Whole Image.
-        */
-
+        // Pre-Setting: Move to the beginning of plugin when everything is done.
         const auto Tile_Size = m_OrigImgSize.x < m_OrigImgSize.y ? m_OrigImgSize.x : m_OrigImgSize.y;
         const auto BufferPix = int(Tile_Size * 0.1);
         const auto BuffTile_Size = Tile_Size + 2 * BufferPix;
@@ -223,13 +214,15 @@ namespace Stereo
         m_pStereoMatcher_LibSGM = std::make_unique<sgm::StereoSGM>(BuffTile_Size, BuffTile_Size, m_DispRange, 8, 16, sgm::EXECUTE_INOUT_HOST2HOST);
 
 
-        glm::uvec2 Tile_Num = m_RectImg_Curt.get_ImgSize() / Tile_Size;
-            // If RectImgSize % TileSize != 0  =>  Processing the remainings individually.
+        glm::uvec2 Tile_Num;
+        Tile_Num.x = std::ceil(float(m_RectImg_Curt.get_ImgSize().x) / Tile_Size);
+        Tile_Num.y = std::ceil(float(m_RectImg_Curt.get_ImgSize().y) / Tile_Size);
 
         for (auto idx_TileNum_y = 0; idx_TileNum_y < Tile_Num.y; idx_TileNum_y++)
         {
             for (auto idx_TileNum_x = 0; idx_TileNum_x < Tile_Num.x; idx_TileNum_x++)
             {
+                //---Extract tiles---
                 for (auto idx_BuffTilePix_y = 0; idx_BuffTilePix_y < BuffTile_Size; idx_BuffTilePix_y++)
                 {
                     glm::ivec2 ImgBound;
@@ -280,28 +273,22 @@ namespace Stereo
 
                 m_pStereoMatcher_LibSGM->execute(BuffTile_CurtImg.data(), BuffTile_LastImg.data(), BuffTile_Disp.data());
 
-                for (auto idx_Tile_Pix_y = 0; idx_Tile_Pix_y < Tile_Size; idx_Tile_Pix_y++)
+                //---Combine tile result back to whole result---
+                for (auto idx_TilePix_y = 0; idx_TilePix_y < Tile_Size; idx_TilePix_y++)
                 {
-                    for (auto idx_Tile_Pix_x = 0; idx_Tile_Pix_x < Tile_Size; idx_Tile_Pix_x++)
+                    for (auto idx_TilePix_x = 0; idx_TilePix_x < Tile_Size; idx_TilePix_x++)
                     {
-                        const auto TilePos_Tile = (idx_Tile_Pix_x + BufferPix) + (idx_Tile_Pix_y + BufferPix) * BuffTile_Size;
-                        const auto TilePos_Img = idx_Tile_Pix_x + idx_Tile_Pix_y * m_RectImg_Curt.get_ImgSize().x;
+                        const auto TilePos_Tile = (idx_TilePix_x + BufferPix) + (idx_TilePix_y + BufferPix) * BuffTile_Size;
+                        const auto TilePos_Img = idx_TilePix_x + idx_TilePix_y * m_RectImg_Curt.get_ImgSize().x;
                         const auto ImgPos = TilePos_Img + idx_TileNum_x * Tile_Size + idx_TileNum_y * Tile_Size * m_RectImg_Curt.get_ImgSize().x;
 
-                        m_DispImg_Rect[ImgPos] = BuffTile_Disp[TilePos_Tile];
+                        if (ImgPos < m_DispImg_Rect.size())
+                        {
+                            m_DispImg_Rect[ImgPos] = BuffTile_Disp[TilePos_Tile];
+                        } 
                     }
                 }
             }
-        }
-
-        if (m_RectImg_Curt.get_ImgSize().x % Tile_Size)
-        {
-
-        }
-
-        if (m_RectImg_Curt.get_ImgSize().y % Tile_Size)
-        {
-
         }
     }
 
