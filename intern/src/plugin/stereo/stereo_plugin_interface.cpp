@@ -230,12 +230,16 @@ namespace Stereo
         {
             for (auto idx_TileNum_x = 0; idx_TileNum_x < Tile_Num.x; idx_TileNum_x++)
             {
-                for (auto idx_BuffTilePix_y = -BufferPix; idx_BuffTilePix_y < (Tile_Size + BufferPix); idx_BuffTilePix_y++)
+                for (auto idx_BuffTilePix_y = 0; idx_BuffTilePix_y < BuffTile_Size; idx_BuffTilePix_y++)
                 {
                     glm::uvec2 ImgBound;
-                    ImgBound.x = (idx_TileNum_y * Tile_Size + idx_BuffTilePix_y + BufferPix) * m_RectImg_Curt.get_ImgSize().x; // Left Boundary
-                    ImgBound.y = ImgBound.x + m_RectImg_Curt.get_ImgSize().x - 1;
-                    ImgBound.y = ImgBound.y < m_RectImg_Curt.get_Img().size() ? ImgBound.y : m_RectImg_Curt.get_Img().size(); // Right Boundary
+                    ImgBound.x = (idx_TileNum_y * Tile_Size + idx_BuffTilePix_y) * m_RectImg_Curt.get_ImgSize().x; // Left Boundary
+                    if (idx_BuffTilePix_y >= Tile_Size)
+                    {
+                        ImgBound.x = m_RectImg_Curt.get_Img().size() - m_RectImg_Curt.get_ImgSize().x;
+                    }
+                    ImgBound.y = ImgBound.x + m_RectImg_Curt.get_ImgSize().x - 1; // Right Boundary
+                    assert(ImgBound.y < m_RectImg_Curt.get_Img().size());
 
                     for (auto idx_TilePix_x = 0; idx_TilePix_x < Tile_Size; idx_TilePix_x++)
                     {
