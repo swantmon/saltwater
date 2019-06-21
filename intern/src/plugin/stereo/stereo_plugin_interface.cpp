@@ -215,69 +215,70 @@ namespace Stereo
         */
 
         const auto Tile_Size = m_OrigImgSize.x < m_OrigImgSize.y ? m_OrigImgSize.x : m_OrigImgSize.y;
-        const auto Tile_Overlap = int(Tile_Size * 0.1);
-        const auto Tile_Size_Overlap = Tile_Size + 2 * Tile_Overlap;
+        const auto BufferPix = int(Tile_Size * 0.1);
+        const auto BuffTile_Size = Tile_Size + 2 * BufferPix;
 
-        std::vector<char> TileImg_Curt(Tile_Size_Overlap * Tile_Size_Overlap, 0), TileImg_Last(Tile_Size_Overlap * Tile_Size_Overlap, 0);
-        std::vector<uint16_t> TileDisp_Curt(Tile_Size_Overlap * Tile_Size_Overlap, 0);
-        m_pStereoMatcher_LibSGM = std::make_unique<sgm::StereoSGM>(Tile_Size_Overlap, Tile_Size_Overlap, m_DispRange, 8, 16, sgm::EXECUTE_INOUT_HOST2HOST);
+        std::vector<char> BuffTile_CurtImg(BuffTile_Size * BuffTile_Size, 0), BuffTile_LastImg(BuffTile_Size * BuffTile_Size, 0);
+        std::vector<uint16_t> BuffTile_Disp(BuffTile_CurtImg.size(), 0);
+        m_pStereoMatcher_LibSGM = std::make_unique<sgm::StereoSGM>(BuffTile_Size, BuffTile_Size, m_DispRange, 8, 16, sgm::EXECUTE_INOUT_HOST2HOST);
 
-        glm::uvec2 Tile_Num(m_RectImg_Curt.get_ImgSize().x / Tile_Size, m_RectImg_Curt.get_ImgSize().y / Tile_Size);
+
+        glm::uvec2 Tile_Num = m_RectImg_Curt.get_ImgSize() / Tile_Size;
             // If RectImgSize % TileSize != 0  =>  Processing the remainings individually.
 
         for (auto idx_TileNum_y = 0; idx_TileNum_y < Tile_Num.y; idx_TileNum_y++)
         {
             for (auto idx_TileNum_x = 0; idx_TileNum_x < Tile_Num.x; idx_TileNum_x++)
             {
-                for (auto idx_Tile_Pix_y = 0; idx_Tile_Pix_y < Tile_Size_Overlap; idx_Tile_Pix_y++)
+                for (auto idx_BuffTilePix_y = -BufferPix; idx_BuffTilePix_y < (Tile_Size + BufferPix); idx_BuffTilePix_y++)
                 {
-                    for (auto idx_Tile_Pix_x = 0; idx_Tile_Pix_x < Tile_Size_Overlap; idx_Tile_Pix_x++)
-                    {
-                        const auto TilePos_Tile = idx_Tile_Pix_x + idx_Tile_Pix_y * Tile_Size_Overlap;
-                        const auto TilePos_Img = (idx_Tile_Pix_x - Tile_Overlap) + idx_Tile_Pix_y * m_RectImg_Curt.get_ImgSize().x;
-                        const auto ImgPos = TilePos_Img + idx_TileNum_x * Tile_Size_Overlap + idx_TileNum_y * Tile_Size_Overlap * m_RectImg_Curt.get_ImgSize().x;
+                    glm::uvec2 ImgBound;
+                    ImgBound.x = (idx_TileNum_y * Tile_Size + idx_BuffTilePix_y + BufferPix) * m_RectImg_Curt.get_ImgSize().x; // Left Boundary
+                    ImgBound.y = ImgBound.x + m_RectImg_Curt.get_ImgSize().x - 1;
+                    ImgBound.y = ImgBound.y < m_RectImg_Curt.get_Img().size() ? ImgBound.y : m_RectImg_Curt.get_Img().size(); // Right Boundary
 
-                        if (ImgPos < 0 || ImgPos >= m_RectImg_Curt.get_Img().size())
+                    for (auto idx_TilePix_x = 0; idx_TilePix_x < Tile_Size; idx_TilePix_x++)
+                    {
+                        const auto TilePos_Tile = idx_TilePix_x + idx_BuffTilePix_y * Tile_Size;
+                        const auto TilePos_Img = (idx_TilePix_x - BufferPix) + (idx_BuffTilePix_y - BufferPix) * m_RectImg_Curt.get_ImgSize().x;
+                        const auto ImgPos = TilePos_Img + idx_TileNum_x * BuffTile_Size + idx_TileNum_y * BuffTile_Size * m_RectImg_Curt.get_ImgSize().x;
+
+                        if (TilePos_Img < ImgBound.x || TilePos_Img > ImgBound.y)
                         {
-                            TileImg_Curt.at(TilePos_Tile) = 0;
-                            TileImg_Last.at(TilePos_Tile) = 0;
-                        }
-                        else if (TilePos_Img < idx_Tile_Pix_y * m_RectImg_Curt.get_ImgSize().x || TilePos_Img >(idx_Tile_Pix_y + 1) * m_RectImg_Curt.get_ImgSize().x)
-                        {
-                            TileImg_Curt.at(TilePos_Tile) = 0;
-                            TileImg_Last.at(TilePos_Tile) = 0;
+                            BuffTile_CurtImg[TilePos_Tile] = 0;
+                            BuffTile_LastImg[TilePos_Tile] = 0;
                         }
                         else
                         {
-                            TileImg_Curt.at(TilePos_Tile) = m_RectImg_Curt.get_Img().at(ImgPos);
-                            TileImg_Last.at(TilePos_Tile) = m_RectImg_Last.get_Img().at(ImgPos);
+                            BuffTile_CurtImg[TilePos_Tile] = m_RectImg_Curt.get_Img()[ImgPos];
+                            BuffTile_LastImg[TilePos_Tile] = m_RectImg_Last.get_Img()[ImgPos];
                         }
                     }
                 }
 
-                /*
-                cv::Mat cvTileImg_Curt(Tile_Size_Overlap, Tile_Size_Overlap, CV_8UC1);
-                memcpy(cvTileImg_Curt.data, TileImg_Curt.data(), TileImg_Curt.size() * sizeof(TileImg_Curt[0]));
+                
+                cv::Mat cvTileImg_Curt(BuffTile_Size, BuffTile_Size, CV_8UC1);
+                memcpy(cvTileImg_Curt.data, BuffTile_CurtImg.data(), BuffTile_CurtImg.size() * sizeof(BuffTile_CurtImg[0]));
                 cv::imshow("TileImg_Curt", cvTileImg_Curt);
 
-                cv::Mat cvTileImg_Last(Tile_Size_Overlap, Tile_Size_Overlap, CV_8UC1);
-                memcpy(cvTileImg_Last.data, TileImg_Last.data(), TileImg_Last.size() * sizeof(TileImg_Last[0]));
+                cv::Mat cvTileImg_Last(BuffTile_Size, BuffTile_Size, CV_8UC1);
+                memcpy(cvTileImg_Last.data, BuffTile_LastImg.data(), BuffTile_LastImg.size() * sizeof(BuffTile_LastImg[0]));
                 cv::imshow("TileImg_Last", cvTileImg_Last);
 
                 cv::waitKey();
-                */
+                
 
-                m_pStereoMatcher_LibSGM->execute(TileImg_Curt.data(), TileImg_Last.data(), TileDisp_Curt.data());
+                m_pStereoMatcher_LibSGM->execute(BuffTile_CurtImg.data(), BuffTile_LastImg.data(), BuffTile_Disp.data());
 
                 for (auto idx_Tile_Pix_y = 0; idx_Tile_Pix_y < Tile_Size; idx_Tile_Pix_y++)
                 {
                     for (auto idx_Tile_Pix_x = 0; idx_Tile_Pix_x < Tile_Size; idx_Tile_Pix_x++)
                     {
-                        const auto TilePos_Tile = idx_Tile_Pix_x + idx_Tile_Pix_y * Tile_Size;
-                        const auto TilePos_Img = idx_Tile_Pix_x + idx_Tile_Pix_y * m_RectImg_Curt.get_ImgSize().x;
+                        const auto TilePos_Tile = (idx_Tile_Pix_x + BufferPix) + (idx_Tile_Pix_y + BufferPix) * BuffTile_Size;
+                        const auto TilePos_Img = (idx_Tile_Pix_x + BufferPix) + (idx_Tile_Pix_y + BufferPix) * m_RectImg_Curt.get_ImgSize().x;
                         const auto ImgPos = TilePos_Img + idx_TileNum_x * Tile_Size + idx_TileNum_y * Tile_Size * m_RectImg_Curt.get_ImgSize().x;
 
-                        m_DispImg_Rect.at(ImgPos + Tile_Overlap) = TileDisp_Curt.at(TilePos_Tile + Tile_Overlap);
+                        m_DispImg_Rect[ImgPos] = BuffTile_Disp[TilePos_Tile];
                     }
                 }
             }
