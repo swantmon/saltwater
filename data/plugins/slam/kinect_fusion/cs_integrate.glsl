@@ -44,7 +44,7 @@ void main()
 
         if (CSVoxelPosition.x > 0 && CSVoxelPosition.x < DEPTH_IMAGE_WIDTH && CSVoxelPosition.y > 0 && CSVoxelPosition.y < DEPTH_IMAGE_HEIGHT)
         {
-			const ivec2 DepthCoords = ivec2(DEPTH_IMAGE_WIDTH - CSVoxelPosition.x, CSVoxelPosition.y);
+			const ivec2 DepthCoords = ivec2(CSVoxelPosition);
             const int Depth = int(imageLoad(cs_Depth, DepthCoords).x);
             
             if (Depth != 0)

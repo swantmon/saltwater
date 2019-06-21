@@ -62,7 +62,7 @@ void main()
 
         if (CSVoxelPosition.x > 0 && CSVoxelPosition.x < DEPTH_IMAGE_WIDTH && CSVoxelPosition.y > 0 && CSVoxelPosition.y < DEPTH_IMAGE_HEIGHT && VSVoxelPosition.z > 0.0f)
         {
-			const ivec2 DepthCoords = ivec2(DEPTH_IMAGE_WIDTH - CSVoxelPosition.x, CSVoxelPosition.y);
+			const ivec2 DepthCoords = ivec2(CSVoxelPosition);
             const int Depth = int(imageLoad(cs_Depth, DepthCoords).x);
             
             if (Depth != 0)
@@ -89,8 +89,6 @@ void main()
                     Voxel.y = min(MAX_INTEGRATION_WEIGHT, Voxel.y + 1.0f);
 
                     ivec2 ColorCoords = DepthCoords;
-                    ColorCoords.x = DEPTH_IMAGE_WIDTH - ColorCoords.x - 1;
-                    ColorCoords.y -= (DEPTH_IMAGE_HEIGHT - COLOR_IMAGE_HEIGHT) / 2;
                     vec3 Color = imageLoad(cs_Color, ColorCoords).rgb;
                     Color = Color.x == 0.0f ? OldColor : (OldColor * Voxel.y + g_ColorWeight * Color) / (Voxel.y + g_ColorWeight);
                     TSDFPoolValue = PackVoxel(Voxel.x, Voxel.y, Color);

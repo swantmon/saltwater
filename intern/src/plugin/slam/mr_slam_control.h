@@ -50,9 +50,7 @@ namespace MR
             DEPTHFRAME,
             COLORFRAME,
             LIGHTESTIMATE,
-            PLANE,
-            INFRAREDFRAME,
-            COLORINTRINSICS
+            PLANE
         };
 
         enum EDATASOURCE
@@ -68,20 +66,40 @@ namespace MR
             REMOVEPLANE
         };
 
+        struct SIntrinsics
+        {
+            glm::vec2 m_FocalLength;
+            glm::vec2 m_FocalPoint;
+        };
+
         EDATASOURCE m_DataSource;
         
         Gfx::CTexturePtr m_DepthTexture;
+        Gfx::CTexturePtr m_DepthTexture32;
         Gfx::CTexturePtr m_RGBATexture;
         std::vector<uint16_t> m_DepthBuffer;
         std::vector<char> m_ColorBuffer;
         glm::mat4 m_PoseMatrix;
-        glm::mat4 m_ColorIntrinsics;
 
         glm::ivec2 m_DepthSize;
         glm::ivec2 m_ColorSize;
 
+        SIntrinsics m_ColorIntrinsics;
+        SIntrinsics m_DepthIntrinsics;
+
         glm::ivec2 m_DeviceResolution;
-        glm::mat4  m_DeviceProjectionMatrix;
+        glm::mat4 m_DeviceProjectionMatrix;
+        glm::mat4 m_RelativeCameraTransform;
+
+        struct SRegisteringBuffer
+        {
+            SIntrinsics m_ColorIntrinsics;
+            SIntrinsics m_DepthIntrinsics;
+            glm::mat4 m_DepthToCameraTransform;
+            glm::mat4 m_CameraToDepthTransform;
+        };
+
+        Gfx::CBufferPtr m_RegisteringBufferPtr;
 
         bool m_UseTrackingCamera = true;
 
@@ -128,8 +146,12 @@ namespace MR
         Gfx::CTexturePtr m_YTexture;
         Gfx::CTexturePtr m_UVTexture;
 
-        Gfx::CTexturePtr m_ShiftTexture;
         Gfx::CShaderPtr m_ShiftDepthCSPtr;
+        Gfx::CShaderPtr m_RegisterDepthCSPtr;
+        Gfx::CShaderPtr m_32To16BitCSPtr;
+        
+        Gfx::CTexturePtr m_ShiftTexture;
+        Gfx::CTexturePtr m_UnregisteredDepthTexture;
         Gfx::CTexturePtr m_ShiftLUTPtr;
 
         struct SIntrinsicsMessage
@@ -140,6 +162,7 @@ namespace MR
             glm::ivec2 m_ColorSize;
             glm::ivec2 m_DeviceResolution;
             glm::mat4  m_DeviceProjectionMatrix;
+            glm::mat4  m_RelativeCameraTransform;
         };
 
         Net::SocketHandle m_SLAMSocket;
@@ -183,7 +206,6 @@ namespace MR
             INPAINTING_DISABLED,
             INPAINTING_NN,
             INPAINTING_PIXMIX,
-            INPAINTING_PIXMIX_OCEAN,
         };
 
         EInpaintintingMode m_InpaintingMode;
@@ -284,19 +306,6 @@ namespace MR
 
                     m_InpaintingMode = INPAINTING_PIXMIX;
                 }
-                else if (ModeParameter == "pixmix_ocean")
-                {
-                    ENGINE_CONSOLE_INFO("Inpainting with PixMix (Original version)");
-
-                    if (!Core::PluginManager::LoadPlugin("PixMixOcean"))
-                    {
-                        BASE_THROWM("PixMix plugin was not loaded");
-                    }
-
-                    InpaintWithPixMix = (InpaintWithPixMixFunc)(Core::PluginManager::GetPluginFunction("PixMix_Ocean", "Inpaint"));
-
-                    m_InpaintingMode = INPAINTING_PIXMIX_OCEAN;
-                }
                 else
                 {
                     m_InpaintingMode = INPAINTING_DISABLED;
@@ -307,6 +316,7 @@ namespace MR
                 m_DataSource = NETWORK;
 
                 CreateShiftLUTTexture();
+                CreateRegisteringBuffer();
             }
             else if (DataSource == "kinect")
             {
@@ -357,7 +367,7 @@ namespace MR
                 TextureDescriptor.m_Format = Gfx::CTexture::R16_UINT;
 
                 m_DepthTexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
-                
+
                 TextureDescriptor.m_Format = Gfx::CTexture::R8G8B8A8_UBYTE;
 
                 m_RGBATexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
@@ -411,6 +421,7 @@ namespace MR
             m_Reconstructor.Exit();
 
             m_DepthTexture = nullptr;
+            m_DepthTexture32 = nullptr;
             m_RGBATexture = nullptr;
 
             m_SLAMNetHandle = nullptr;
@@ -596,6 +607,16 @@ namespace MR
             m_pRecordReader->SetSpeed(_Speed);
 
             ENGINE_CONSOLE_INFOV("Playing recording from file \"%s\"", _rFileName.c_str());
+        }
+
+        // -----------------------------------------------------------------------------
+
+        void SetPlaybackSpeed(float _Speed)
+        {
+            if (m_pRecordReader != nullptr)
+            {
+                m_pRecordReader->SetSpeed(_Speed);
+            }
         }
 
         // -----------------------------------------------------------------------------
@@ -847,7 +868,12 @@ namespace MR
                 //int32_t Width = *reinterpret_cast<int32_t*>(Decompressed.data() + sizeof(int32_t));
                 //int32_t Height = *reinterpret_cast<int32_t*>(Decompressed.data() + 2 * sizeof(int32_t));
 
-                const uint16_t* RawBuffer = reinterpret_cast<uint16_t*>(Decompressed.data() + 3 * sizeof(int32_t));
+                m_DepthIntrinsics.m_FocalLength.x = *reinterpret_cast<float*>(Decompressed.data() + 3 * sizeof(int32_t));
+                m_DepthIntrinsics.m_FocalLength.y = *reinterpret_cast<float*>(Decompressed.data() + 4 * sizeof(int32_t));
+                m_DepthIntrinsics.m_FocalPoint.x = *reinterpret_cast<float*>(Decompressed.data() + 5 * sizeof(int32_t));
+                m_DepthIntrinsics.m_FocalPoint.y = *reinterpret_cast<float*>(Decompressed.data() + 6 * sizeof(int32_t));
+
+                const uint16_t* RawBuffer = reinterpret_cast<uint16_t*>(Decompressed.data() + 7 * sizeof(int32_t));
 
                 Base::AABB2UInt TargetRect;
                 TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_DepthSize));
@@ -855,25 +881,53 @@ namespace MR
 
                 Gfx::ContextManager::SetShaderCS(m_ShiftDepthCSPtr);
                 Gfx::ContextManager::SetImageTexture(0, m_ShiftTexture);
-                Gfx::ContextManager::SetImageTexture(1, m_DepthTexture);
+                Gfx::ContextManager::SetImageTexture(1, m_UnregisteredDepthTexture);
                 Gfx::ContextManager::SetImageTexture(2, m_ShiftLUTPtr);
 
-                int WorkgroupsX = DivUp(m_CaptureColor ? m_ColorSize.x : m_DepthSize.x, m_TileSize2D);
-                int WorkgroupsY = DivUp(m_CaptureColor ? m_ColorSize.y : m_DepthSize.y, m_TileSize2D);
+                int WorkgroupsX = DivUp(m_DepthSize.x, m_TileSize2D);
+                int WorkgroupsY = DivUp(m_DepthSize.y, m_TileSize2D);
                 Gfx::ContextManager::Dispatch(WorkgroupsX, WorkgroupsY, 1);
                 
                 if (!m_CaptureColor && m_StreamState == STREAM_SLAM)
                 {
-                    m_Reconstructor.OnNewFrame(m_DepthTexture, nullptr, &m_PoseMatrix);
+                    m_Reconstructor.OnNewFrame(m_DepthTexture, nullptr, &m_PoseMatrix, m_DepthIntrinsics.m_FocalLength, m_DepthIntrinsics.m_FocalPoint);
                 }
             }
             else if (MessageType == COLORFRAME && m_CaptureColor)
             {
                 ExtractRGBAFrame(Decompressed);
 
+                SRegisteringBuffer BufferData;
+                BufferData.m_ColorIntrinsics = m_ColorIntrinsics;
+                BufferData.m_DepthIntrinsics = m_DepthIntrinsics;
+                BufferData.m_DepthToCameraTransform = glm::inverse(m_RelativeCameraTransform);
+                BufferData.m_CameraToDepthTransform = m_RelativeCameraTransform;
+                
+                Gfx::BufferManager::UploadBufferData(m_RegisteringBufferPtr, &BufferData);
+
+                Gfx::ContextManager::SetConstantBuffer(0, m_RegisteringBufferPtr);
+
+                uint32_t ClearData = 0xFFFFFFFF;
+                Gfx::TextureManager::ClearTexture(m_DepthTexture32, &ClearData);
+
+                Gfx::ContextManager::SetImageTexture(0, m_DepthTexture32);
+                Gfx::ContextManager::SetImageTexture(1, m_UnregisteredDepthTexture);
+
+                Gfx::ContextManager::SetShaderCS(m_RegisterDepthCSPtr);
+
+                int WorkgroupsX = DivUp(m_CaptureColor ? m_ColorSize.x : m_DepthSize.x, m_TileSize2D);
+                int WorkgroupsY = DivUp(m_CaptureColor ? m_ColorSize.y : m_DepthSize.y, m_TileSize2D);
+                Gfx::ContextManager::Dispatch(WorkgroupsX, WorkgroupsY, 1);
+
+                Gfx::ContextManager::SetImageTexture(1, m_DepthTexture);
+
+                Gfx::ContextManager::SetShaderCS(m_32To16BitCSPtr);
+
+                Gfx::ContextManager::Dispatch(WorkgroupsX, WorkgroupsY, 1);
+
                 if (m_StreamState == STREAM_SLAM)
                 {
-                    m_Reconstructor.OnNewFrame(m_DepthTexture, m_RGBATexture, &m_PoseMatrix);
+                    m_Reconstructor.OnNewFrame(m_DepthTexture, m_RGBATexture, &m_PoseMatrix, m_ColorIntrinsics.m_FocalLength, m_ColorIntrinsics.m_FocalPoint);
                 }
                 else
                 {
@@ -977,10 +1031,6 @@ namespace MR
 
                 m_pPlaneColorizer->UpdatePlane(PlaneID);
             }
-            else if (MessageType == COLORINTRINSICS)
-            {
-                m_ColorIntrinsics = *reinterpret_cast<glm::mat4*>(Decompressed.data() + sizeof(int32_t));
-            }
         }
 
         // -----------------------------------------------------------------------------
@@ -990,7 +1040,14 @@ namespace MR
             const int32_t Width = *reinterpret_cast<const int32_t*>(_rData.data() + sizeof(int32_t));
             const int32_t Height = *reinterpret_cast<const int32_t*>(_rData.data() + 2 * sizeof(int32_t));
 
-            const char* YData = _rData.data() + 3 * sizeof(int32_t);
+            m_ColorIntrinsics.m_FocalLength.x = *reinterpret_cast<const float*>(_rData.data() + 3 * sizeof(int32_t));
+            m_ColorIntrinsics.m_FocalLength.y = *reinterpret_cast<const float*>(_rData.data() + 4 * sizeof(int32_t));
+            m_ColorIntrinsics.m_FocalPoint.x = *reinterpret_cast<const float*>(_rData.data() + 5 * sizeof(int32_t));
+            m_ColorIntrinsics.m_FocalPoint.y = *reinterpret_cast<const float*>(_rData.data() + 6 * sizeof(int32_t));
+
+            m_DeviceProjectionMatrix = *reinterpret_cast<const glm::mat4*>(_rData.data() + 7 * sizeof(int32_t));
+
+            const char* YData = _rData.data() + 7 * sizeof(int32_t) + sizeof(glm::mat4);
             const char* UVData = YData + Width * Height;
 
             Base::AABB2UInt TargetRect;
@@ -1019,6 +1076,7 @@ namespace MR
             m_DepthSize = _rMessage.m_DepthSize;
             m_ColorSize = _rMessage.m_ColorSize;
             m_DeviceResolution = _rMessage.m_DeviceResolution;
+            m_RelativeCameraTransform = _rMessage.m_RelativeCameraTransform;
             m_DeviceProjectionMatrix = _rMessage.m_DeviceProjectionMatrix;
 
             Gfx::ReconstructionRenderer::SetDeviceResolution(m_DeviceResolution);
@@ -1068,6 +1126,14 @@ namespace MR
             TextureDescriptor.m_NumberOfPixelsV = m_CaptureColor ? m_ColorSize.y : m_DepthSize.y;
             m_DepthTexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
 
+            TextureDescriptor.m_Format = Gfx::CTexture::R32_UINT;
+            m_DepthTexture32 = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
+
+            TextureDescriptor.m_Format = Gfx::CTexture::R16_UINT;
+            TextureDescriptor.m_NumberOfPixelsU = m_DepthSize.x;
+            TextureDescriptor.m_NumberOfPixelsV = m_DepthSize.y;
+            m_UnregisteredDepthTexture = Gfx::TextureManager::CreateTexture2D(TextureDescriptor);
+
             std::stringstream DefineStream;
             DefineStream
                 << "#define TILE_SIZE_2D " << m_TileSize2D << " \n"
@@ -1099,6 +1165,9 @@ namespace MR
             }
             std::string DefineString = DefineStream.str();
             m_ShiftDepthCSPtr = Gfx::ShaderManager::CompileCS("../../plugins/slam/cs_shift_depth.glsl", "main", DefineString.c_str());
+
+            m_RegisterDepthCSPtr = Gfx::ShaderManager::CompileCS("../../plugins/slam/cs_register_depth.glsl", "main", DefineString.c_str());
+            m_32To16BitCSPtr = Gfx::ShaderManager::CompileCS("../../plugins/slam/cs_32To16Bit.glsl", "main", DefineString.c_str());
 
             if (m_SendInpaintedResult)
             {
@@ -1247,7 +1316,7 @@ namespace MR
 
                 Net::CNetworkManager::GetInstance().SendMessage(m_NeuralNetworkSocket, Message);
             }
-            else if (m_InpaintingMode == INPAINTING_PIXMIX || m_InpaintingMode == INPAINTING_PIXMIX_OCEAN)
+            else if (m_InpaintingMode == INPAINTING_PIXMIX)
             {
 				std::vector<glm::u8vec4> RawData(m_PlaneResolution * m_PlaneResolution);
 
@@ -1266,6 +1335,19 @@ namespace MR
             {
                 Gfx::ReconstructionRenderer::SetInpaintedPlane(m_PlaneTexture, AABB);
             }
+        }
+
+        // -----------------------------------------------------------------------------
+
+        void CreateRegisteringBuffer()
+        {
+            Gfx::SBufferDescriptor BufferDesc = {};
+            BufferDesc.m_Binding = Gfx::CBuffer::ConstantBuffer;
+            BufferDesc.m_Access = Gfx::CBuffer::CPUWrite;
+            BufferDesc.m_NumberOfBytes = sizeof(SRegisteringBuffer);
+            BufferDesc.m_Usage = Gfx::CBuffer::GPURead;
+
+            m_RegisteringBufferPtr = Gfx::BufferManager::CreateBuffer(BufferDesc);
         }
 
         // -----------------------------------------------------------------------------
