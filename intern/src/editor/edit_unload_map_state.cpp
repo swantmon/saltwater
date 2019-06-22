@@ -81,16 +81,16 @@ namespace Edit
 
                 Core::CProgramParameters::GetInstance().Set("application:last_scene", m_Filename);
 
-                ENGINE_CONSOLE_INFOV("Scene '%s' have been saved succesfully.", m_Filename.c_str());
+                ENGINE_CONSOLE_INFOV("Scene '%s' has been saved succesfully.", m_Filename.c_str());
             }
             else
             {
-                ENGINE_CONSOLE_ERROR("Scene can not be saved because file can not be created or is already in use. Maybe the folder is missing?");
+                ENGINE_CONSOLE_ERROR("Scene cannot be saved because the file could not be created or is already in use. Maybe the folder is missing?");
             }
         }
         else
         {
-            ENGINE_CONSOLE_INFOV("Scene '%s' have been not saved.", m_Filename.c_str());
+            ENGINE_CONSOLE_INFOV("Scene '%s' has not been saved.", m_Filename.c_str());
         }
 
         // -----------------------------------------------------------------------------
