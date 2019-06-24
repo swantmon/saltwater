@@ -47,10 +47,18 @@ namespace Stereo
         m_OrigImgSize = _rImageSize;
 
         //---Tile-based Stereo Matching---
-        const auto Tile_Size = m_OrigImgSize.x < m_OrigImgSize.y ? m_OrigImgSize.x : m_OrigImgSize.y;
-        const auto BufferPix = int(Tile_Size * 0.1);
-        const auto BuffTile_Size = Tile_Size + 2 * BufferPix;
-        m_pStereoMatcher_LibSGM = std::make_unique<sgm::StereoSGM>(BuffTile_Size, BuffTile_Size, m_DispRange, 8, 16, sgm::EXECUTE_INOUT_HOST2HOST);
+        if (m_StereoMatching_Mode == "Tile")
+        {
+            const auto Tile_Size = m_OrigImgSize.x < m_OrigImgSize.y ? m_OrigImgSize.x : m_OrigImgSize.y;;
+            const auto BufferPix = int(Tile_Size * 0.1);
+            const auto BuffTile_Size = Tile_Size + 2 * BufferPix;
+            m_pStereoMatcher_LibSGM = std::make_unique<sgm::StereoSGM>(BuffTile_Size, BuffTile_Size, m_DispRange, 8, 16, sgm::EXECUTE_INOUT_HOST2HOST);
+        }
+
+        if (m_StereoMatching_Mode == "Sub")
+        {
+            m_pStereoMatcher_LibSGM = std::make_unique<sgm::StereoSGM>(m_RectImgSize.x, m_RectImgSize.y, m_DispRange, 8, 16, sgm::EXECUTE_INOUT_HOST2HOST);
+        }
 
         //---Setting Texture of Depth in Original Image for GLSL---
         Gfx::STextureDescriptor TextureDesc_DepthImg_Orig = {};
@@ -155,6 +163,10 @@ namespace Stereo
             {
                 imp_StereoMatching_Tile();
             }
+            else if (m_StereoMatching_Mode == "Sub")
+            {
+                imp_StereoMatching_Sub();
+            }
 
             const clock_t Time_SM_end = clock();
 
@@ -214,9 +226,85 @@ namespace Stereo
 
     // -----------------------------------------------------------------------------
 
+    void CPluginInterface::imp_StereoMatching()
+    {
+        if (m_StereoMatching_Method == "LibSGM")
+        {
+            m_pStereoMatcher_LibSGM = std::make_unique<sgm::StereoSGM>(m_RectImg_Curt.get_ImgSize().x, m_RectImg_Curt.get_ImgSize().y, m_DispRange, 8, 16, sgm::EXECUTE_INOUT_HOST2HOST);
+            // Default disparity is pixel level => Disparity is the same in 8-bit & 16-bit.
+            // If turn on sub-pixel => Output disparity must be 16-bit. => Divided by 16 to derive true disparity!!!
+
+            std::vector<uint16_t> DispImg_Rect_uint16(m_RectImg_Curt.get_Img().size(), 0.0);
+
+            m_pStereoMatcher_LibSGM->execute(m_RectImg_Curt.get_Img().data(), m_RectImg_Last.get_Img().data(), DispImg_Rect_uint16.data());
+
+            m_DispImg_Rect = std::vector<float>::vector(DispImg_Rect_uint16.begin(), DispImg_Rect_uint16.end());
+        }
+        else if (m_StereoMatching_Method == "FuSGM")
+        {
+        }
+        else // Method provided by OpenCV
+        {
+            cv::Mat cvRectImg_Curt(m_RectImg_Curt.get_ImgSize().y, m_RectImg_Curt.get_ImgSize().x, CV_8UC1);
+            memcpy(cvRectImg_Curt.data, m_RectImg_Curt.get_Img().data(), m_RectImg_Curt.get_Img().size());
+
+            cv::Mat cvRectImg_Last(m_RectImg_Last.get_ImgSize().y, m_RectImg_Last.get_ImgSize().x, CV_8UC1);
+            memcpy(cvRectImg_Last.data, m_RectImg_Last.get_Img().data(), m_RectImg_Last.get_Img().size());
+
+            cv::cuda::GpuMat cvRectImg_Curt_gpu, cvRectImg_Last_gpu;
+            cvRectImg_Curt_gpu.upload(cvRectImg_Curt);
+            cvRectImg_Last_gpu.upload(cvRectImg_Last);
+
+            cv::cuda::GpuMat cvDispImg_Rect_gpu;
+            cv::Mat cvDispImg_Rect_cpu;
+
+            if (m_StereoMatching_Method == "cvBM_cuda")
+            {
+                m_pStereoMatcher_cvBM_cuda = cv::cuda::createStereoBM(m_DispRange, 7); // Disparity Range, Block Size
+
+                m_pStereoMatcher_cvBM_cuda->compute(cvRectImg_Curt_gpu, cvRectImg_Last_gpu, cvDispImg_Rect_gpu);
+
+                cvDispImg_Rect_gpu.download(cvDispImg_Rect_cpu);
+                cvDispImg_Rect_cpu.convertTo(cvDispImg_Rect_cpu, CV_32F);
+            }
+            else if (m_StereoMatching_Method == "cvBP_cuda")
+            {
+                m_pStereoMatcher_cvBP_cuda = cv::cuda::createStereoBeliefPropagation();
+
+                m_pStereoMatcher_cvBP_cuda->compute(cvRectImg_Curt_gpu, cvRectImg_Last_gpu, cvDispImg_Rect_gpu);
+
+                cvDispImg_Rect_gpu.download(cvDispImg_Rect_cpu); // Disparity is 16S but without fractional bit.
+                cvDispImg_Rect_cpu.convertTo(cvDispImg_Rect_cpu, CV_32F);
+            }
+            else if (m_StereoMatching_Method == "cvConstBP_cuda")
+            {
+                m_pStereoMatcher_cvConstBP_cuda = cv::cuda::createStereoConstantSpaceBP();
+
+                m_pStereoMatcher_cvConstBP_cuda->compute(cvRectImg_Curt_gpu, cvRectImg_Last_gpu, cvDispImg_Rect_gpu);
+
+                cvDispImg_Rect_gpu.download(cvDispImg_Rect_cpu); // Disparity is 16S but without fractional bit.
+                cvDispImg_Rect_cpu.convertTo(cvDispImg_Rect_cpu, CV_32F);
+            }
+            else if (m_StereoMatching_Method == "cv_SGBM")
+            {
+                m_pStereoMatcher_cvSGBM = cv::StereoSGBM::create();
+
+                m_pStereoMatcher_cvSGBM->compute(cvRectImg_Curt, cvRectImg_Last, cvDispImg_Rect_cpu);
+                cvDispImg_Rect_cpu.convertTo(cvDispImg_Rect_cpu, CV_32F, 1.0 / 16); // Disparity is 16S with 4 fractional bits.
+            }
+            else
+            {
+
+            }
+
+            const int cvMemCpySize = cvDispImg_Rect_cpu.cols * cvDispImg_Rect_cpu.rows * cvDispImg_Rect_cpu.elemSize();
+            memcpy(m_DispImg_Rect.data(), cvDispImg_Rect_cpu.data, cvMemCpySize);
+
+        }
+    }
+
     void CPluginInterface::imp_StereoMatching_Tile()
     {
-        // Pre-Setting: Move to the beginning of plugin when everything is done.
         const auto Tile_Size = m_OrigImgSize.x < m_OrigImgSize.y ? m_OrigImgSize.x : m_OrigImgSize.y;
         const auto BufferPix = int(Tile_Size * 0.1);
         const auto BuffTile_Size = Tile_Size + 2 * BufferPix;
@@ -303,82 +391,68 @@ namespace Stereo
         }
     }
 
-    void CPluginInterface::imp_StereoMatching()
+    void CPluginInterface::imp_StereoMatching_Sub()
     {
-        if (m_StereoMatching_Method == "LibSGM")
+        const glm::uvec2 SubImg_Size = m_RectImgSize;
+
+        const glm::uvec2 SubImg_Center = m_RectImg_Curt.get_ImgSize() / 2;
+
+        const glm::ivec2 SubImg_LU(SubImg_Center.x - SubImg_Size.x / 2, SubImg_Center.y - SubImg_Size.y / 2);
+        const int SubImg_LU_1D = SubImg_LU.x + SubImg_LU.y * m_RectImg_Curt.get_ImgSize().x;
+
+        std::vector<char> SubRectImg_Curt(SubImg_Size.x * SubImg_Size.y, 0), SubRectImg_Last(SubImg_Size.x * SubImg_Size.y, 0);
+        std::vector<uint16_t> SubDisparity(SubRectImg_Curt.size(), 0);
+
+        for (auto idx_y = 0; idx_y < SubImg_Size.y; idx_y++)
         {
-            m_pStereoMatcher_LibSGM = std::make_unique<sgm::StereoSGM>(m_RectImg_Curt.get_ImgSize().x, m_RectImg_Curt.get_ImgSize().y, m_DispRange, 8, 16, sgm::EXECUTE_INOUT_HOST2HOST);
-                // Default disparity is pixel level => Disparity is the same in 8-bit & 16-bit.
-                // If turn on sub-pixel => Output disparity must be 16-bit. => Divided by 16 to derive true disparity!!!
+            for (auto idx_x = 0; idx_x < SubImg_Size.x; idx_x++)
+            {
+                const int PixPosition_Sub = idx_x + idx_y * SubImg_Size.x;
+                const int PixPosition_Img = SubImg_LU_1D + idx_x + idx_y * m_RectImg_Curt.get_ImgSize().x;
 
-            std::vector<uint16_t> DispImg_Rect_uint16(m_RectImg_Curt.get_Img().size(), 0.0);
-
-            m_pStereoMatcher_LibSGM->execute(m_RectImg_Curt.get_Img().data(), m_RectImg_Last.get_Img().data(), DispImg_Rect_uint16.data());
-
-            m_DispImg_Rect = std::vector<float>::vector(DispImg_Rect_uint16.begin(), DispImg_Rect_uint16.end());
+                if (PixPosition_Img >= 0 && PixPosition_Img < m_RectImg_Curt.get_Img().size())
+                {
+                    SubRectImg_Curt[PixPosition_Sub] = m_RectImg_Curt.get_Img()[PixPosition_Img];
+                    SubRectImg_Last[PixPosition_Sub] = m_RectImg_Last.get_Img()[PixPosition_Img];
+                }
+                else
+                {
+                    SubRectImg_Curt[PixPosition_Sub] = 0;
+                    SubRectImg_Last[PixPosition_Sub] = 0;
+                }
+            }
         }
-        else if (m_StereoMatching_Method == "FuSGM")
+
+        /*
+        cv::Mat cvSubImg_Curt(SubImg_Size.y, SubImg_Size.x, CV_8UC1);
+        memcpy(cvSubImg_Curt.data, SubRectImg_Curt.data(), SubRectImg_Curt.size() * sizeof(SubRectImg_Curt[0]));
+        cv::imshow("SubImg_Curt", cvSubImg_Curt);
+
+        cv::Mat cvSubImg_Last(SubImg_Size.y, SubImg_Size.x, CV_8UC1);
+        memcpy(cvSubImg_Last.data, SubRectImg_Last.data(), SubRectImg_Last.size() * sizeof(SubRectImg_Last[0]));
+        cv::imshow("SubImg_Last", cvSubImg_Last);
+
+        cv::waitKey();
+         */
+
+        m_pStereoMatcher_LibSGM->execute(SubRectImg_Curt.data(), SubRectImg_Last.data(), SubDisparity.data());
+
+        for (auto idx_y = 0; idx_y < SubImg_Size.y; idx_y++)
         {
-        }
-        else // Method provided by OpenCV
-        {
-            cv::Mat cvRectImg_Curt(m_RectImg_Curt.get_ImgSize().y, m_RectImg_Curt.get_ImgSize().x, CV_8UC1);
-            memcpy(cvRectImg_Curt.data, m_RectImg_Curt.get_Img().data(), m_RectImg_Curt.get_Img().size());
-
-            cv::Mat cvRectImg_Last(m_RectImg_Last.get_ImgSize().y, m_RectImg_Last.get_ImgSize().x, CV_8UC1);
-            memcpy(cvRectImg_Last.data, m_RectImg_Last.get_Img().data(), m_RectImg_Last.get_Img().size());
-            
-            cv::cuda::GpuMat cvRectImg_Curt_gpu, cvRectImg_Last_gpu;
-            cvRectImg_Curt_gpu.upload(cvRectImg_Curt);
-            cvRectImg_Last_gpu.upload(cvRectImg_Last);
-
-            cv::cuda::GpuMat cvDispImg_Rect_gpu;
-            cv::Mat cvDispImg_Rect_cpu;
-
-            if (m_StereoMatching_Method == "cvBM_cuda")
+            for (auto idx_x = 0; idx_x < SubImg_Size.x; idx_x++)
             {
-                m_pStereoMatcher_cvBM_cuda = cv::cuda::createStereoBM(m_DispRange, 7); // Disparity Range, Block Size
+                const int PixPosition_Sub = idx_x + idx_y * SubImg_Size.x;
+                const int PixPosition_Img = SubImg_LU_1D + idx_x + idx_y * m_RectImg_Curt.get_ImgSize().x;
 
-                m_pStereoMatcher_cvBM_cuda->compute(cvRectImg_Curt_gpu, cvRectImg_Last_gpu, cvDispImg_Rect_gpu);
-
-                cvDispImg_Rect_gpu.download(cvDispImg_Rect_cpu);
-                cvDispImg_Rect_cpu.convertTo(cvDispImg_Rect_cpu, CV_32F); 
+                if (PixPosition_Img >= 0 && PixPosition_Img < m_RectImg_Curt.get_Img().size())
+                {
+                    m_DispImg_Rect[PixPosition_Img] = SubDisparity[PixPosition_Sub];
+                }
             }
-            else if (m_StereoMatching_Method == "cvBP_cuda")
-            {
-                m_pStereoMatcher_cvBP_cuda = cv::cuda::createStereoBeliefPropagation();
-
-                m_pStereoMatcher_cvBP_cuda->compute(cvRectImg_Curt_gpu, cvRectImg_Last_gpu, cvDispImg_Rect_gpu);
-
-                cvDispImg_Rect_gpu.download(cvDispImg_Rect_cpu); // Disparity is 16S but without fractional bit.
-                cvDispImg_Rect_cpu.convertTo(cvDispImg_Rect_cpu, CV_32F); 
-            }
-            else if (m_StereoMatching_Method == "cvConstBP_cuda")
-            {
-                m_pStereoMatcher_cvConstBP_cuda = cv::cuda::createStereoConstantSpaceBP();
-
-                m_pStereoMatcher_cvConstBP_cuda->compute(cvRectImg_Curt_gpu, cvRectImg_Last_gpu, cvDispImg_Rect_gpu);
-
-                cvDispImg_Rect_gpu.download(cvDispImg_Rect_cpu); // Disparity is 16S but without fractional bit.
-                cvDispImg_Rect_cpu.convertTo(cvDispImg_Rect_cpu, CV_32F); 
-            }
-            else if (m_StereoMatching_Method == "cv_SGBM")
-            {
-                m_pStereoMatcher_cvSGBM = cv::StereoSGBM::create();
-
-                m_pStereoMatcher_cvSGBM->compute(cvRectImg_Curt, cvRectImg_Last, cvDispImg_Rect_cpu);
-                cvDispImg_Rect_cpu.convertTo(cvDispImg_Rect_cpu, CV_32F, 1.0 / 16); // Disparity is 16S with 4 fractional bits.
-            }
-            else
-            {
-
-            }
-
-            const int cvMemCpySize = cvDispImg_Rect_cpu.cols * cvDispImg_Rect_cpu.rows * cvDispImg_Rect_cpu.elemSize();
-            memcpy(m_DispImg_Rect.data(), cvDispImg_Rect_cpu.data, cvMemCpySize);
-
         }
     }
+
+    // -----------------------------------------------------------------------------
 
     void CPluginInterface::imp_Disp2Depth()
     {
@@ -571,7 +645,7 @@ namespace Stereo
         m_Is_KeyFrame = false;
 
         //---01 Rectification-----
-        m_RectImgSize = Core::CProgramParameters::GetInstance().Get("mr:stereo:02_stereo_matching:default_rectified_image_size", glm::uvec2(640, 360));
+        m_RectImgSize = Core::CProgramParameters::GetInstance().Get("mr:stereo:01_image_rectification:default_rectified_image_size", glm::uvec2(640, 640));
 
         //---02 Stereo Matching---
         m_StereoMatching_Method = Core::CProgramParameters::GetInstance().Get("mr:stereo:02_stereo_matching:method", "LibSGM");
