@@ -12,8 +12,8 @@
 #include "engine/graphic/gfx_buffer_manager.h"
 
 //---FutoGmtCV---
-#include "plugin\stereo\FutoGmtCV_Img.h"
-#include "plugin\stereo\FutoGmtCV_Rect_Planar.h"
+#include "plugin\stereo\FutoGCV_Img.h"
+#include "plugin\stereo\FutoGCV_Rectification_Planar.h"
 
 //---Basic Processing---
 #include <vector>
@@ -72,7 +72,7 @@ namespace Stereo
         glm::ivec2 m_OrigImgSize; // Size of original image -> x = width & y = height
 
         //---00 Keyframe---
-        FutoGmtCV::CFutoImg m_OrigImg_Curt, m_OrigImg_Last; // Original Image Pair. -> Only compute 2 frames once.
+        FutoGCV::CFutoImg m_OrigImg_Curt, m_OrigImg_Last; // Original Image Pair. -> Only compute 2 frames once.
 
         bool m_Is_KeyFrame; // The status of current keyframe.
 
@@ -81,11 +81,11 @@ namespace Stereo
         float m_Cdt_Keyf_BaseLineL; // Keyframe Selection: BaseLine Condition. Unit is meter.
 
         //---01 Rectification---
-        FutoGmtCV::CFutoImg m_RectImg_Curt, m_RectImg_Last; // Rectified Image Pair.
+        FutoGCV::CFutoImg m_RectImg_Curt, m_RectImg_Last; // Rectified Image Pair.
 
-        FutoGmtCV::SHomographyTransform m_Homo_Curt, m_Homo_Last; // Homography
+        FutoGCV::SHomographyTransform m_Homo_Curt, m_Homo_Last; // Homography
 
-        FutoGmtCV::CPlanarRectification m_Rectifier_Planar; // Implement planar rectification
+        FutoGCV::CPlanarRectification m_Rectifier_Planar; // Implement planar rectification
 
         glm::uvec2 m_RectImgSize;
 

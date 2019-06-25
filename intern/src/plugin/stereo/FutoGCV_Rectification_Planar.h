@@ -5,11 +5,11 @@
 #include "engine/graphic/gfx_texture_manager.h" // To manage GPU Texture (Data in GPU processing) 
 #include "engine/graphic/gfx_buffer_manager.h" // To manage GPU Buffer (Memory in GPU) 
 
-#include "plugin\stereo\FutoGmtCV_Img.h"
+#include "plugin\stereo\FutoGCV_Img.h"
 
 #include "opencv2/opencv.hpp"
 
-namespace FutoGmtCV
+namespace FutoGCV
 {
     struct SHomographyTransform // Always make sure whole structure is the multiple of 4*float
     {

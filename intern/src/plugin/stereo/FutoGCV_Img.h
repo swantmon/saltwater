@@ -5,7 +5,7 @@
 
 #include <vector>
 
-namespace FutoGmtCV
+namespace FutoGCV
 {
     class CFutoImg
     {

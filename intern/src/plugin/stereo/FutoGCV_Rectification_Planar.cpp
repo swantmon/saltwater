@@ -1,5 +1,5 @@
 #include "plugin\stereo\stereo_precompiled.h"
-#include "plugin\stereo\FutoGmtCV_Rect_Planar.h"
+#include "plugin\stereo\FutoGCV_Rectification_Planar.h"
 
 #include "engine/graphic/gfx_context_manager.h"
 #include "engine/graphic/gfx_performance.h"
@@ -15,7 +15,7 @@ namespace // No specific namespace => Only allowed to use in this page.
     }
 }
 
-namespace FutoGmtCV
+namespace FutoGCV
 {
     //---Constructors & Destructor---
     CPlanarRectification::CPlanarRectification()

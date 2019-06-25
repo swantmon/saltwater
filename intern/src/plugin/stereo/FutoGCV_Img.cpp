@@ -3,7 +3,7 @@
 #include "plugin\stereo\FutoGmtCV_Img.h"
 
 
-namespace FutoGmtCV
+namespace FutoGCV
 {
     //---Constructors & Destructor---
     CFutoImg::CFutoImg()

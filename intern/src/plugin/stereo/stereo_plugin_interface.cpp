@@ -97,6 +97,7 @@ namespace Stereo
 
     void CPluginInterface::OnFrameCPU(const std::vector<char>& _rRGBImage, const glm::mat4& _Transform, const glm::mat4& _Intrinsics, const std::vector<uint16_t>& _rDepthImage)
     {
+        //---Setting Orientations from ARKit---
         glm::mat3 CamMtx = glm::mat3(_Intrinsics) * m_FrameResolution; // Intrinsic should be modified according to frame resolution.
         CamMtx[1].x = 0; // No skew
         CamMtx[2].z = 1; // Last element should keep 1 because of homogeneous coordinates
@@ -108,7 +109,7 @@ namespace Stereo
         //---Only Compute 2 Keyframes Once---
         if (!m_Is_KeyFrame)
         {
-            m_OrigImg_Curt = FutoGmtCV::CFutoImg(_rRGBImage, m_OrigImgSize, 4, CamMtx, RotMtx, PCVec);
+            m_OrigImg_Curt = FutoGCV::CFutoImg(_rRGBImage, m_OrigImgSize, 4, CamMtx, RotMtx, PCVec);
             m_Is_KeyFrame = true;
         }
         else
@@ -123,7 +124,7 @@ namespace Stereo
 
             //---Set Current & Last Keyframe---
             m_OrigImg_Last = m_OrigImg_Curt;
-            m_OrigImg_Curt = FutoGmtCV::CFutoImg(_rRGBImage, m_OrigImgSize, 4, CamMtx, RotMtx, PCVec);
+            m_OrigImg_Curt = FutoGCV::CFutoImg(_rRGBImage, m_OrigImgSize, 4, CamMtx, RotMtx, PCVec);
 
             m_KeyFrameID++;
 
@@ -135,7 +136,7 @@ namespace Stereo
             //---Epipolarizytion---
             // * Original Image Pair => Rectified Image Pair
 
-            m_Rectifier_Planar = FutoGmtCV::CPlanarRectification(m_OrigImg_Curt, m_OrigImg_Last); // Apply Planar Rectification
+            m_Rectifier_Planar = FutoGCV::CPlanarRectification(m_OrigImg_Curt, m_OrigImg_Last); // Apply Planar Rectification
             m_Rectifier_Planar.execute(m_RectImg_Curt, m_RectImg_Last, m_Homo_Curt, m_Homo_Last);
 
             if (m_Is_ExportRectImg)
@@ -678,7 +679,7 @@ namespace Stereo
         Homography_BufferDesc.m_Usage = Gfx::CBuffer::GPURead;
         Homography_BufferDesc.m_Binding = Gfx::CBuffer::ConstantBuffer;
         Homography_BufferDesc.m_Access = Gfx::CBuffer::CPUWrite;
-        Homography_BufferDesc.m_NumberOfBytes = sizeof(FutoGmtCV::SHomographyTransform);
+        Homography_BufferDesc.m_NumberOfBytes = sizeof(FutoGCV::SHomographyTransform);
         Homography_BufferDesc.m_pBytes = nullptr;
         Homography_BufferDesc.m_pClassKey = 0;
         m_Homogrampy_BufferPtr = Gfx::BufferManager::CreateBuffer(Homography_BufferDesc);
