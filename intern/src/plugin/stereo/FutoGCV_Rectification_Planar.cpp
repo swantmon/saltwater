@@ -22,9 +22,8 @@ namespace FutoGCV
     {
     }
 
-    CPlanarRectification::CPlanarRectification(const CFutoImg& OrigImg_B, const CFutoImg& OrigImg_M)
-        : m_Img_Orig_B(OrigImg_B),
-          m_Img_Orig_M(OrigImg_M)
+    CPlanarRectification::CPlanarRectification(const glm::uvec2& ImgSize_Orig, const glm::uvec2& ImgSize_Rect)
+        : m_ImgSize_Rect(ImgSize_Rect)
     {
         //---Initialize Shader Manager---
         std::stringstream DefineStream;
@@ -45,13 +44,14 @@ namespace FutoGCV
         BufferDesc.m_pBytes = nullptr;
         BufferDesc.m_pClassKey = 0;
 
-        m_HomographyBufferPtr = Gfx::BufferManager::CreateBuffer(BufferDesc);
+        m_HomographyB_BufferPtr = Gfx::BufferManager::CreateBuffer(BufferDesc);
+        m_HomographyM_BufferPtr = Gfx::BufferManager::CreateBuffer(BufferDesc);
 
-        //---Initialize Input Texture Manager---
+        //---Initialize Texture Manager for Original Image---
         Gfx::STextureDescriptor TextureDescriptor_OrigImg = {};
 
-        TextureDescriptor_OrigImg.m_NumberOfPixelsU = m_Img_Orig_B.get_ImgSize().x;
-        TextureDescriptor_OrigImg.m_NumberOfPixelsV = m_Img_Orig_B.get_ImgSize().y;
+        TextureDescriptor_OrigImg.m_NumberOfPixelsU = ImgSize_Orig.x;
+        TextureDescriptor_OrigImg.m_NumberOfPixelsV = ImgSize_Orig.y;
         TextureDescriptor_OrigImg.m_NumberOfPixelsW = 1;
         TextureDescriptor_OrigImg.m_NumberOfMipMaps = 1;
         TextureDescriptor_OrigImg.m_NumberOfTextures = 1;
@@ -61,56 +61,96 @@ namespace FutoGCV
         TextureDescriptor_OrigImg.m_Semantic = Gfx::CTexture::UndefinedSemantic;
         TextureDescriptor_OrigImg.m_Format = Gfx::CTexture::R8G8B8A8_UBYTE; // 4 channels and each channel is 8-bit.
 
-        m_OrigImgTexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_OrigImg);
-    }
+        m_OrigImgB_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_OrigImg);
+        m_OrigImgM_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_OrigImg);
 
+        if (m_ImgSize_Rect == glm::uvec2(0))
+        {
+            m_Is_FixSize = false;
+        }
+        else
+        {
+            m_Is_FixSize = true;
+
+            //---Initialize Texture Manager for Rectified Image---
+            Gfx::STextureDescriptor TextureDescriptor_RectImg = TextureDescriptor_OrigImg;
+
+            TextureDescriptor_RectImg.m_NumberOfPixelsU = m_ImgSize_Rect.x;
+            TextureDescriptor_RectImg.m_NumberOfPixelsV = m_ImgSize_Rect.y;
+            TextureDescriptor_RectImg.m_Format = Gfx::CTexture::R8_UBYTE; // 1 channels and each channel is 8-bit.
+
+            m_RectImgB_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_RectImg);
+            m_RectImgM_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_RectImg);
+        }
+    }
 
     CPlanarRectification::~CPlanarRectification()
     {
         //---Release Manager---
         m_PlanarRectCSPtr = nullptr;
-        m_OrigImgTexturePtr = nullptr;
-        m_RectImgTexturePtr = nullptr;
+
+        m_OrigImgB_TexturePtr = nullptr;
+        m_OrigImgM_TexturePtr = nullptr;
+
+        m_RectImgB_TexturePtr = nullptr;
+        m_RectImgM_TexturePtr = nullptr;
+
+        m_HomographyB_BufferPtr = nullptr;
+        m_HomographyM_BufferPtr = nullptr;
     }
 
     //---Execution Functions---
-    void CPlanarRectification::execute(CFutoImg& Img_Rect_B, CFutoImg& Img_Rect_M, SHomographyTransform& Homo_B, SHomographyTransform& Homo_M)
+    void CPlanarRectification::execute(const CFutoImg& OrigImg_B, const CFutoImg& OrigImg_M)
     {
         //---Step 1. Calculate Orientations of Rectified Images & Homography from Original to Rectified---
-        cal_K_Rect(m_Img_Orig_B.get_Cam(), m_Img_Orig_M.get_Cam());
-        cal_R_Rect(m_Img_Orig_B.get_PC(), m_Img_Orig_M.get_PC(), m_Img_Orig_B.get_Rot());
-        cal_PC_Rect(m_Img_Orig_B.get_PC(), m_Img_Orig_M.get_PC());
+        cal_K_Rect(OrigImg_B.get_Cam(), OrigImg_M.get_Cam());
+        cal_R_Rect(OrigImg_B.get_PC(), OrigImg_M.get_PC(), OrigImg_B.get_Rot());
+        cal_PC_Rect(OrigImg_B.get_PC(), OrigImg_M.get_PC());
         cal_P_Rect();
 
-        cal_H(m_Img_Orig_B.get_PPM(), m_Img_Orig_M.get_PPM());
+        cal_H(OrigImg_B.get_PPM(), OrigImg_M.get_PPM());
 
         //---Step 2. Center Rectified Images---
 
         glm::vec2 CenterShift_B(0.0f);
         glm::vec2 CenterShift_M(0.0f);
 
-        cal_CenterShift(CenterShift_B, m_Img_Orig_B.get_ImgSize(), 0);
-        cal_CenterShift(CenterShift_M, m_Img_Orig_M.get_ImgSize(), 1);
+        cal_CenterShift(CenterShift_B, OrigImg_B.get_ImgSize(), 0);
+        cal_CenterShift(CenterShift_M, OrigImg_M.get_ImgSize(), 1);
+
         float CenterShift_y = (CenterShift_B.y + CenterShift_M.y) / 2;
         CenterShift_B.y = CenterShift_y;
         CenterShift_M.y = CenterShift_y;
 
         imp_CenterShift_K(CenterShift_B, CenterShift_M);
 
-        cal_H(m_Img_Orig_B.get_PPM(), m_Img_Orig_M.get_PPM()); // Update Homography because Rectified Camera mtx has changed.
+        cal_H(OrigImg_B.get_PPM(), OrigImg_M.get_PPM()); // Update Homography because Rectified Camera mtx has changed.
 
         //---Step 3. Calculate the Corners of Rectified Images---
-        cal_RectImgBound(m_Img_Orig_B.get_ImgSize(), 0);
-        cal_RectImgBound(m_Img_Orig_M.get_ImgSize(), 1);
+        cal_RectImgBound(OrigImg_B.get_ImgSize(), 0);
+        cal_RectImgBound(OrigImg_M.get_ImgSize(), 1);
 
-        determ_RectImgSize();
+        determ_RectFrame();
 
         //---Step 4. Generate Rectified Images---
-        genrt_RectImg(m_Img_Orig_B.get_Img(), 0);
-        genrt_RectImg(m_Img_Orig_M.get_Img(), 1);
+        genrt_RectImg(OrigImg_B.get_Img(), OrigImg_B.get_ImgSize(), 0);
+        genrt_RectImg(OrigImg_M.get_Img(), OrigImg_M.get_ImgSize(), 1);
+    }
 
-        get_Result(Img_Rect_B, Homo_B, 0);
-        get_Result(Img_Rect_M, Homo_M, 1);
+    void CPlanarRectification::return_Result(CFutoImg& RectImgB, CFutoImg& RectImgM, SHomographyTransform& Homo_B, SHomographyTransform& Homo_M)
+    {
+        
+        const int RectImgSize_1D = m_ImgSize_Rect.x * m_ImgSize_Rect.y;
+        std::vector<char> RectImgB_Vector1D(RectImgSize_1D, 0), RectImgM_Vector1D(RectImgSize_1D, 0);
+        Gfx::TextureManager::CopyTextureToCPU(m_RectImgB_TexturePtr, reinterpret_cast<char*>(RectImgB_Vector1D.data()));
+        Gfx::TextureManager::CopyTextureToCPU(m_RectImgM_TexturePtr, reinterpret_cast<char*>(RectImgM_Vector1D.data()));
+
+
+        RectImgB = CFutoImg(RectImgB_Vector1D, m_ImgSize_Rect, 1, m_K_Rect_B, m_R_Rect, m_PC_Rect_B);
+        RectImgM = CFutoImg(RectImgM_Vector1D, m_ImgSize_Rect, 1, m_K_Rect_M, m_R_Rect, m_PC_Rect_M);
+
+        Homo_B = m_Homography_B;
+        Homo_M = m_Homography_M;
     }
 
     //---Assistant Functions: Compute Orientations---
@@ -243,7 +283,7 @@ namespace FutoGCV
         }
     }
 
-    void CPlanarRectification::determ_RectImgSize()
+    void CPlanarRectification::determ_RectFrame()
     {
         glm::ivec2 RectImgConerUL, RectImgConerDR;
 
@@ -258,27 +298,44 @@ namespace FutoGCV
         m_Homography_M.m_RectImgConer_UL = RectImgConerUL;
         m_Homography_M.m_RectImgConer_DR = RectImgConerDR;
 
-        m_ImgSize_Rect = m_Homography_B.m_RectImgConer_DR - m_Homography_B.m_RectImgConer_UL;
+        glm::uvec2 RectPlane = m_Homography_B.m_RectImgConer_DR - m_Homography_B.m_RectImgConer_UL;
+
+        if (m_Is_FixSize)
+        {
+            glm::ivec2 AddShift = m_ImgSize_Rect - RectPlane;
+            AddShift /= 2;
+
+            m_Homography_B.m_RectImgConer_UL -= AddShift;
+            m_Homography_B.m_RectImgConer_DR -= AddShift;
+
+            m_Homography_M.m_RectImgConer_UL -= AddShift;
+            m_Homography_M.m_RectImgConer_DR -= AddShift;
+        }
+        else
+        {
+            m_ImgSize_Rect = RectPlane;
+
+            //---Initialize Output Texture Manager---
+            Gfx::STextureDescriptor TextureDescriptor_RectImg = {};
+
+            TextureDescriptor_RectImg.m_NumberOfPixelsU = m_ImgSize_Rect.x;
+            TextureDescriptor_RectImg.m_NumberOfPixelsV = m_ImgSize_Rect.y;
+            TextureDescriptor_RectImg.m_NumberOfPixelsW = 1;
+            TextureDescriptor_RectImg.m_NumberOfMipMaps = 1;
+            TextureDescriptor_RectImg.m_NumberOfTextures = 1;
+            TextureDescriptor_RectImg.m_Binding = Gfx::CTexture::ShaderResource;
+            TextureDescriptor_RectImg.m_Access = Gfx::CTexture::EAccess::CPUWrite;
+            TextureDescriptor_RectImg.m_Usage = Gfx::CTexture::EUsage::GPUReadWrite;
+            TextureDescriptor_RectImg.m_Semantic = Gfx::CTexture::UndefinedSemantic;
+            TextureDescriptor_RectImg.m_Format = Gfx::CTexture::R8_UBYTE; // 1 channels with 8-bit.
+
+            m_RectImgB_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_RectImg);
+            m_RectImgM_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_RectImg);
+        }
     }
 
-    void CPlanarRectification::genrt_RectImg(const std::vector<char>& Img_Orig, const int Which_Img)
+    void CPlanarRectification::genrt_RectImg(const std::vector<char>& Img_Orig, const glm::ivec2& ImgSize_Orig, const int Which_Img)
     {
-        //---Initialize Output Texture Manager---
-        Gfx::STextureDescriptor TextureDescriptor_RectImg = {};
-
-        TextureDescriptor_RectImg.m_NumberOfPixelsU = m_ImgSize_Rect.x;
-        TextureDescriptor_RectImg.m_NumberOfPixelsV = m_ImgSize_Rect.y;
-        TextureDescriptor_RectImg.m_NumberOfPixelsW = 1;
-        TextureDescriptor_RectImg.m_NumberOfMipMaps = 1;
-        TextureDescriptor_RectImg.m_NumberOfTextures = 1;
-        TextureDescriptor_RectImg.m_Binding = Gfx::CTexture::ShaderResource;
-        TextureDescriptor_RectImg.m_Access = Gfx::CTexture::EAccess::CPUWrite;
-        TextureDescriptor_RectImg.m_Usage = Gfx::CTexture::EUsage::GPUReadWrite;
-        TextureDescriptor_RectImg.m_Semantic = Gfx::CTexture::UndefinedSemantic;
-        TextureDescriptor_RectImg.m_Format = Gfx::CTexture::R8_UBYTE; // 1 channels with 8-bit.
-
-        m_RectImgTexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_RectImg);
-
         //---GPU Computation Start---
         Gfx::Performance::BeginEvent("Planar Rectification");
 
@@ -288,26 +345,30 @@ namespace FutoGCV
         switch (Which_Img)
         {
         case 0: 
-            Gfx::BufferManager::UploadBufferData(m_HomographyBufferPtr, &m_Homography_B);
+            Gfx::BufferManager::UploadBufferData(m_HomographyB_BufferPtr, &m_Homography_B);
 
-            TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_Img_Orig_B.get_ImgSize().x, m_Img_Orig_B.get_ImgSize().y));
-            Gfx::TextureManager::CopyToTexture2D(m_OrigImgTexturePtr, TargetRect, m_Img_Orig_B.get_ImgSize().x, static_cast<const void*>(Img_Orig.data()));
+            TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(ImgSize_Orig.x, ImgSize_Orig.y));
+            Gfx::TextureManager::CopyToTexture2D(m_OrigImgB_TexturePtr, TargetRect, ImgSize_Orig.x, static_cast<const void*>(Img_Orig.data()));
+
+            Gfx::ContextManager::SetShaderCS(m_PlanarRectCSPtr);
+            Gfx::ContextManager::SetImageTexture(0, m_OrigImgB_TexturePtr);
+            Gfx::ContextManager::SetImageTexture(1, m_RectImgB_TexturePtr);
+            Gfx::ContextManager::SetConstantBuffer(0, m_HomographyB_BufferPtr);
 
             break;
         case 1: 
-            Gfx::BufferManager::UploadBufferData(m_HomographyBufferPtr, &m_Homography_M);
+            Gfx::BufferManager::UploadBufferData(m_HomographyM_BufferPtr, &m_Homography_M);
 
-            TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_Img_Orig_M.get_ImgSize().x, m_Img_Orig_M.get_ImgSize().y));
-            Gfx::TextureManager::CopyToTexture2D(m_OrigImgTexturePtr, TargetRect, m_Img_Orig_M.get_ImgSize().x, static_cast<const void*>(Img_Orig.data()));
+            TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(ImgSize_Orig.x, ImgSize_Orig.y));
+            Gfx::TextureManager::CopyToTexture2D(m_OrigImgM_TexturePtr, TargetRect, ImgSize_Orig.x, static_cast<const void*>(Img_Orig.data()));
+
+            Gfx::ContextManager::SetShaderCS(m_PlanarRectCSPtr);
+            Gfx::ContextManager::SetImageTexture(0, m_OrigImgM_TexturePtr);
+            Gfx::ContextManager::SetImageTexture(1, m_RectImgM_TexturePtr);
+            Gfx::ContextManager::SetConstantBuffer(0, m_HomographyM_BufferPtr);
 
             break;
         }
-
-        //---Connecting Managers (@CPU) & GLSL (@GPU)---
-        Gfx::ContextManager::SetShaderCS(m_PlanarRectCSPtr);
-        Gfx::ContextManager::SetImageTexture(0, m_OrigImgTexturePtr);
-        Gfx::ContextManager::SetImageTexture(1, m_RectImgTexturePtr);
-        Gfx::ContextManager::SetConstantBuffer(0, m_HomographyBufferPtr);
 
         //---Start GPU Parallel Processing---
         const int WorkGroupsX = DivUp(m_ImgSize_Rect.x, TileSize_2D);
@@ -319,37 +380,5 @@ namespace FutoGCV
 
         Gfx::Performance::EndEvent();
         //---GPU Computation End---
-
-        std::vector<char> Img_Rect;
-        const int RectImgSize_1D = m_ImgSize_Rect.x * m_ImgSize_Rect.y;
-        Img_Rect.resize(RectImgSize_1D);
-        Gfx::TextureManager::CopyTextureToCPU(m_RectImgTexturePtr, reinterpret_cast<char*>(Img_Rect.data()));
-
-        switch (Which_Img)
-        {
-        case 0:
-            m_Img_Rect_B = CFutoImg(Img_Rect, m_ImgSize_Rect, 1, m_K_Rect_B, m_R_Rect, m_PC_Rect_B);
-            break;
-        case 1:
-            m_Img_Rect_M = CFutoImg(Img_Rect, m_ImgSize_Rect, 1, m_K_Rect_M, m_R_Rect, m_PC_Rect_M);
-            break;
-        }
     }
-
-    //---Assistant Functions: Return Rectified Images---
-    void CPlanarRectification::get_Result(CFutoImg& Img_Rect, SHomographyTransform& Homo, const int Which_Img)
-    {
-        switch (Which_Img)
-        {
-        case 0: 
-            Img_Rect = m_Img_Rect_B;
-            Homo = m_Homography_B;
-            break;
-        case 1: 
-            Img_Rect = m_Img_Rect_M;
-            Homo = m_Homography_M;
-            break;
-        }
-    }
-
 } // FutoGmtCV

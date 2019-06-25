@@ -24,12 +24,14 @@ namespace FutoGCV
     //---Constructor & Destructor---
     public:
         CPlanarRectification();
-        CPlanarRectification(const CFutoImg& OrigImg_B, const CFutoImg& OrigImg_M);
+        CPlanarRectification(const glm::uvec2& ImgSize_Orig, const glm::uvec2& ImgSize_Rect = glm::uvec2(0));
         ~CPlanarRectification();
 
     //---Execution Functions---
     public:
-        void execute(CFutoImg& Img_Rect_B, CFutoImg& Img_Rect_M, SHomographyTransform& Homo_B, SHomographyTransform& Homo_M);
+        void execute(const CFutoImg& OrigImg_B, const CFutoImg& OrigImg_M);
+
+        void return_Result(CFutoImg& RectImg_Curt, CFutoImg& RectImg_Last, SHomographyTransform& Homo_B, SHomographyTransform& Homo_M);
 
     //---Assistant Functions---
     private:
@@ -43,17 +45,15 @@ namespace FutoGCV
         void imp_CenterShift_K(const glm::vec2& Drift_B, const glm::vec2& Drift_Mt);
 
         void cal_RectImgBound(const glm::ivec2& ImgSize_Orig, const int Which_Img = 0);
-        void determ_RectImgSize();
-        void genrt_RectImg(const std::vector<char>& Img_Orig, const int Which_Img = 0);
-
-        void get_Result(CFutoImg& Img_Rect, SHomographyTransform& Homo, const int Which_Img = 0);
+        void determ_RectFrame();
+        void genrt_RectImg(const std::vector<char>& Img_Orig, const glm::ivec2& ImgSize_Orig, const int Which_Img = 0);
 
     //---Members---
     private:
         //---Image Data---
-        CFutoImg m_Img_Orig_B, m_Img_Orig_M; // Original Images
         CFutoImg m_Img_Rect_B, m_Img_Rect_M; // Rectified Images
-        glm::ivec2 m_ImgSize_Rect;
+        glm::uvec2 m_ImgSize_Rect;
+        bool m_Is_FixSize;
 
         //---Homography---
         SHomographyTransform m_Homography_B, m_Homography_M; 
@@ -66,9 +66,11 @@ namespace FutoGCV
 
         //---GLSL Managers---
         Gfx::CShaderPtr m_PlanarRectCSPtr;
-        Gfx::CTexturePtr m_OrigImgTexturePtr;
-        Gfx::CTexturePtr m_RectImgTexturePtr;
-        Gfx::CBufferPtr m_HomographyBufferPtr;
+
+        Gfx::CTexturePtr m_OrigImgB_TexturePtr, m_OrigImgM_TexturePtr;
+        Gfx::CTexturePtr m_RectImgB_TexturePtr, m_RectImgM_TexturePtr;
+
+        Gfx::CBufferPtr m_HomographyB_BufferPtr, m_HomographyM_BufferPtr;
     };
 
 } // FutoGmtCV

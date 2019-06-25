@@ -46,6 +46,17 @@ namespace Stereo
 
         m_OrigImgSize = _rImageSize;
 
+        if (m_Is_FixRectSize)
+        {
+            m_Rectifier_Planar = FutoGCV::CPlanarRectification(m_OrigImgSize, m_RectImgSize);
+
+            m_pStereoMatcher_LibSGM = std::make_unique<sgm::StereoSGM>(m_RectImgSize.x, m_RectImgSize.y, m_DispRange, 8, 16, sgm::EXECUTE_INOUT_HOST2HOST);
+        } 
+        else
+        {
+            m_Rectifier_Planar = FutoGCV::CPlanarRectification(m_OrigImgSize);
+        }
+
         //---Tile-based Stereo Matching---
         if (m_StereoMatching_Mode == "Tile")
         {
@@ -136,8 +147,8 @@ namespace Stereo
             //---Epipolarizytion---
             // * Original Image Pair => Rectified Image Pair
 
-            m_Rectifier_Planar = FutoGCV::CPlanarRectification(m_OrigImg_Curt, m_OrigImg_Last); // Apply Planar Rectification
-            m_Rectifier_Planar.execute(m_RectImg_Curt, m_RectImg_Last, m_Homo_Curt, m_Homo_Last);
+            m_Rectifier_Planar.execute(m_OrigImg_Curt, m_OrigImg_Last); // Apply Planar Rectification
+            m_Rectifier_Planar.return_Result(m_RectImg_Curt, m_RectImg_Last, m_Homo_Curt, m_Homo_Last);
 
             if (m_Is_ExportRectImg)
             {
@@ -158,7 +169,14 @@ namespace Stereo
 
             if (m_StereoMatching_Mode == "Original")
             {
-                imp_StereoMatching();
+                if (m_Is_FixRectSize)
+                {
+                    imp_StereoMatching_Fix();
+                } 
+                else
+                {
+                    imp_StereoMatching();
+                }
             }
             else if (m_StereoMatching_Mode == "Tile")
             {
@@ -301,6 +319,18 @@ namespace Stereo
             const int cvMemCpySize = cvDispImg_Rect_cpu.cols * cvDispImg_Rect_cpu.rows * cvDispImg_Rect_cpu.elemSize();
             memcpy(m_DispImg_Rect.data(), cvDispImg_Rect_cpu.data, cvMemCpySize);
 
+        }
+    }
+
+    void CPluginInterface::imp_StereoMatching_Fix()
+    {
+        if (m_StereoMatching_Method == "LibSGM")
+        {
+            std::vector<uint16_t> DispImg_Rect_uint16(m_RectImg_Curt.get_Img().size(), 0.0);
+
+            m_pStereoMatcher_LibSGM->execute(m_RectImg_Curt.get_Img().data(), m_RectImg_Last.get_Img().data(), DispImg_Rect_uint16.data());
+
+            m_DispImg_Rect = std::vector<float>::vector(DispImg_Rect_uint16.begin(), DispImg_Rect_uint16.end());
         }
     }
 
@@ -641,11 +671,12 @@ namespace Stereo
         m_FrameResolution = Core::CProgramParameters::GetInstance().Get("mr:stereo:00_input:frame_resolution", 0.5); // Full = 1; Half = 0.5;
 
         //---00 Keyframe---
-        m_Cdt_Keyf_BaseLineL = Core::CProgramParameters::GetInstance().Get("mr:stereo:00_Keyframe:baseline_length", 0.03); // Unit = meter
+        m_Cdt_Keyf_BaseLineL = Core::CProgramParameters::GetInstance().Get("mr:stereo:00_keyframe:baseline_length", 0.03); // Unit = meter
 
         m_Is_KeyFrame = false;
 
         //---01 Rectification-----
+        m_Is_FixRectSize = Core::CProgramParameters::GetInstance().Get("mr:stereo:01_image_rectification:extract_fix_size", false);
         m_RectImgSize = Core::CProgramParameters::GetInstance().Get("mr:stereo:01_image_rectification:default_rectified_image_size", glm::uvec2(640, 640));
 
         //---02 Stereo Matching---

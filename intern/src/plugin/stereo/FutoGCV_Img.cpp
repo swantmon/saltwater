@@ -1,6 +1,6 @@
 #include "plugin\stereo\stereo_precompiled.h"
 
-#include "plugin\stereo\FutoGmtCV_Img.h"
+#include "plugin\stereo\FutoGCV_Img.h"
 
 
 namespace FutoGCV
