@@ -1,16 +1,8 @@
-#ifndef __INCLUDE_CS_Rectification_Planar_GLSL__
-#define __INCLUDE_CS_Rectification_Planar_GLSL__
+#ifndef __INCLUDE_CS_Down_Sampling_GLSL__
+#define __INCLUDE_CS_Down_Sampling_GLSL__
 
-layout(std140, binding = 0) uniform HomographyBuffer
-{
-    mat4 g_Homography;
-	mat4 g_InvHomography;
-	ivec2 g_RectImgConer_UL;
-	ivec2 g_RectImgConer_DR;
-};
-
-layout (binding = 0, rgba8) readonly uniform image2D cs_OrigImg; // Pixel in image2D(rgba8) is 8-bit vec4 (0~255 -> 0~1)
-layout (binding = 1, r8) writeonly uniform image2D cs_RectImg; // Pixel in image2D(r8) is 8-bit float (0~255 -> 0~1)
+layout (binding = 0, r8) readonly uniform image2D cs_Img_OrigScale; // Pixel in image2D(rgba8) is 8-bit float (0~255 -> 0~1)
+layout (binding = 1, r8) writeonly uniform image2D cs_Img_DownSample; // Pixel in image2D(r8) is 8-bit float (0~255 -> 0~1)
 
 float BiLinearInterpolation(vec2 pixPosition)
 {
@@ -19,15 +11,10 @@ float BiLinearInterpolation(vec2 pixPosition)
 	const ivec2 pixPosition_DL = pixPosition_UL + ivec2(0, 1);
 	const ivec2 pixPosition_DR = pixPosition_UL + ivec2(1, 1);
 
-	const vec4 pixValue_RGBA_UL = imageLoad(cs_OrigImg, pixPosition_UL);
-	const vec4 pixValue_RGBA_UR = imageLoad(cs_OrigImg, pixPosition_UR);
-	const vec4 pixValue_RGBA_DL = imageLoad(cs_OrigImg, pixPosition_DL);
-	const vec4 pixValue_RGBA_DR = imageLoad(cs_OrigImg, pixPosition_DR);
-
-	const float pixValue_UL = 0.299 * pixValue_RGBA_UL.x + 0.587 * pixValue_RGBA_UL.y + 0.114 * pixValue_RGBA_UL.z;
-	const float pixValue_UR = 0.299 * pixValue_RGBA_UR.x + 0.587 * pixValue_RGBA_UR.y + 0.114 * pixValue_RGBA_UR.z;
-	const float pixValue_DL = 0.299 * pixValue_RGBA_DL.x + 0.587 * pixValue_RGBA_DL.y + 0.114 * pixValue_RGBA_DL.z;
-	const float pixValue_DR = 0.299 * pixValue_RGBA_DR.x + 0.587 * pixValue_RGBA_DR.y + 0.114 * pixValue_RGBA_DR.z;
+	const float pixValue_UL = imageLoad(cs_Img_OrigScale, pixPosition_UL);
+	const float pixValue_UR = imageLoad(cs_Img_OrigScale, pixPosition_UR);
+	const float pixValue_DL = imageLoad(cs_Img_OrigScale, pixPosition_DL);
+	const float pixValue_DR = imageLoad(cs_Img_OrigScale, pixPosition_DR);
 
 	const float a_x = (pixPosition.x - pixPosition_UL.x) / (pixPosition_UR.x - pixPosition_UL.x);
 	const float a_y = (pixPosition.y - pixPosition_UL.y) / (pixPosition_DL.y - pixPosition_UL.y);
@@ -43,13 +30,16 @@ float BiLinearInterpolation(vec2 pixPosition)
 layout (local_size_x = TILE_SIZE_2D, local_size_y = TILE_SIZE_2D, local_size_z = 1) in;
 void main()
 {
-	const ivec3 pix_Rect = ivec3(gl_GlobalInvocationID.xy + g_RectImgConer_UL, 1);
-	vec3 pix_Rect2Orig = mat3(g_InvHomography) * (pix_Rect);
-	pix_Rect2Orig /= pix_Rect2Orig.z;
+	const vec2 ImgSize_OrigScale = imageSize(cs_Img_OrigScale);
+	const vec2 ImgSize_DownSample = imageSize(cs_Img_DownSample);
 
-	float pixValue = BiLinearInterpolation(vec2(pix_Rect2Orig));
+	const vec2 Sample = ImgSize_OrigScale / ImgSize_DownSample;
 
-	imageStore(cs_RectImg, ivec2(gl_GlobalInvocationID.xy), vec4(pixValue)); 
+	const vec2 pix_Sample = Sample * ivec2(gl_GlobalInvocationID.xy);
+
+	float pixValue = BiLinearInterpolation(pix_Sample);
+
+	imageStore(cs_Img_DownSample, ivec2(gl_GlobalInvocationID.xy), vec4(pixValue)); 
 }
 
-#endif //__INCLUDE_CS_Rectification_Planar_GLSL__
+#endif //__INCLUDE_CS_Down_Sampling_GLSL__

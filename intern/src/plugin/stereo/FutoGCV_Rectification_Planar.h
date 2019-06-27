@@ -33,7 +33,7 @@ namespace FutoGCV
 
         void return_Result(CFutoImg& RectImg_Curt, CFutoImg& RectImg_Last, SHomographyTransform& Homo_B, SHomographyTransform& Homo_M);
 
-        void imp_DownSampling(const glm::uvec2& ImgSize_DownSampleRect);
+        void imp_DownSampling(const glm::uvec2& ImgSize_DownSampleRect, const int Which_Img = 0);
 
     //---Assistant Functions---
     private:
@@ -74,7 +74,6 @@ namespace FutoGCV
         Gfx::CTexturePtr m_RectImgB_DownSample_TexturePtr, m_RectImgM_DownSample_TexturePtr;
 
         Gfx::CBufferPtr m_HomographyB_BufferPtr, m_HomographyM_BufferPtr;
-        Gfx::CBufferPtr m_DownSampling_BufferPtr;
     };
 
 } // FutoGmtCV

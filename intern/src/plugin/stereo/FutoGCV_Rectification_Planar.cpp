@@ -49,10 +49,6 @@ namespace FutoGCV
         m_HomographyB_BufferPtr = Gfx::BufferManager::CreateBuffer(BufferDesc_Homo);
         m_HomographyM_BufferPtr = Gfx::BufferManager::CreateBuffer(BufferDesc_Homo);
 
-        Gfx::SBufferDescriptor BufferDesc_DownSample = BufferDesc_Homo;
-        BufferDesc_DownSample.m_NumberOfBytes = sizeof(glm::uvec4);
-        m_DownSampling_BufferPtr = Gfx::BufferManager::CreateBuffer(BufferDesc_DownSample);
-
         //---Initialize Texture Manager for Original Image---
         Gfx::STextureDescriptor TextureDescriptor_OrigImg = {};
 
@@ -184,9 +180,38 @@ namespace FutoGCV
         Homo_M = m_Homography_M;
     }
 
-    void CPlanarRectification::imp_DownSampling(const glm::uvec2& ImgSize_DownSampleRect)
+    void CPlanarRectification::imp_DownSampling(const glm::uvec2& ImgSize_DownSampleRect, const int Which_Img)
     {
+        //---GPU Computation Start---
+        Gfx::Performance::BeginEvent("Rectified Image_Down-Sampling");
 
+        Gfx::ContextManager::SetShaderCS(m_DownSamplingCSPtr);
+
+        switch (Which_Img)
+        {
+        case 0:
+            Gfx::ContextManager::SetImageTexture(0, m_RectImgB_TexturePtr);
+            Gfx::ContextManager::SetImageTexture(1, m_RectImgB_DownSample_TexturePtr);
+
+            break;
+
+        case 1:
+            Gfx::ContextManager::SetImageTexture(0, m_RectImgM_TexturePtr);
+            Gfx::ContextManager::SetImageTexture(1, m_RectImgM_DownSample_TexturePtr);
+
+            break;
+        }
+
+        //---Start GPU Parallel Processing---
+        const int WorkGroupsX = DivUp(m_ImgSize_Rect.x, TileSize_2D);
+        const int WorkGroupsY = DivUp(m_ImgSize_Rect.y, TileSize_2D);
+
+        Gfx::ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+
+        Gfx::ContextManager::ResetShaderCS();
+
+        Gfx::Performance::EndEvent();
+        //---GPU Computation End---
     }
 
     //---Assistant Functions: Compute Orientations---
