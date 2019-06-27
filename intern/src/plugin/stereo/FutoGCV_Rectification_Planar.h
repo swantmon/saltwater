@@ -24,7 +24,7 @@ namespace FutoGCV
     //---Constructor & Destructor---
     public:
         CPlanarRectification();
-        CPlanarRectification(const glm::uvec2& ImgSize_Orig, const glm::uvec2& ImgSize_Rect = glm::uvec2(0));
+        CPlanarRectification(const glm::uvec2& ImgSize_Orig, const glm::uvec2& ImgSize_Rect = glm::uvec2(0), const glm::uvec2& ImgSize_DownSample = glm::uvec2(0));
         ~CPlanarRectification();
 
     //---Execution Functions---
@@ -32,6 +32,8 @@ namespace FutoGCV
         void execute(const CFutoImg& OrigImg_B, const CFutoImg& OrigImg_M);
 
         void return_Result(CFutoImg& RectImg_Curt, CFutoImg& RectImg_Last, SHomographyTransform& Homo_B, SHomographyTransform& Homo_M);
+
+        void imp_DownSampling(const glm::uvec2& ImgSize_DownSampleRect);
 
     //---Assistant Functions---
     private:
@@ -52,8 +54,8 @@ namespace FutoGCV
     private:
         //---Image Data---
         CFutoImg m_Img_Rect_B, m_Img_Rect_M; // Rectified Images
-        glm::uvec2 m_ImgSize_Rect;
-        bool m_Is_FixSize;
+        glm::uvec2 m_ImgSize_Rect, m_ImgSize_DownSample;
+        bool m_Is_FixSize, m_Is_DownSample;
 
         //---Homography---
         SHomographyTransform m_Homography_B, m_Homography_M; 
@@ -65,12 +67,14 @@ namespace FutoGCV
         glm::mat4x3 m_P_Rect_B, m_P_Rect_M; // Perspective Projection mtx of Rectified Images (World -> Image)
 
         //---GLSL Managers---
-        Gfx::CShaderPtr m_PlanarRectCSPtr;
+        Gfx::CShaderPtr m_PlanarRectCSPtr, m_DownSamplingCSPtr;
 
         Gfx::CTexturePtr m_OrigImgB_TexturePtr, m_OrigImgM_TexturePtr;
         Gfx::CTexturePtr m_RectImgB_TexturePtr, m_RectImgM_TexturePtr;
+        Gfx::CTexturePtr m_RectImgB_DownSample_TexturePtr, m_RectImgM_DownSample_TexturePtr;
 
         Gfx::CBufferPtr m_HomographyB_BufferPtr, m_HomographyM_BufferPtr;
+        Gfx::CBufferPtr m_DownSampling_BufferPtr;
     };
 
 } // FutoGmtCV

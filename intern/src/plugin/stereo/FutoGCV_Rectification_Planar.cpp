@@ -22,7 +22,7 @@ namespace FutoGCV
     {
     }
 
-    CPlanarRectification::CPlanarRectification(const glm::uvec2& ImgSize_Orig, const glm::uvec2& ImgSize_Rect)
+    CPlanarRectification::CPlanarRectification(const glm::uvec2& ImgSize_Orig, const glm::uvec2& ImgSize_Rect, const glm::uvec2& ImgSize_DownSample)
         : m_ImgSize_Rect(ImgSize_Rect)
     {
         //---Initialize Shader Manager---
@@ -33,19 +33,25 @@ namespace FutoGCV
 
         m_PlanarRectCSPtr = Gfx::ShaderManager::CompileCS("../../plugins/stereo/cs_Rectification_Planar.glsl", "main", DefineString.c_str());
 
+        m_DownSamplingCSPtr = Gfx::ShaderManager::CompileCS("../../plugins/stereo/cs_Down_Sampling.glsl", "main", DefineString.c_str());
+
         //---Initialize Buffer Manager---
-        Gfx::SBufferDescriptor BufferDesc = {};
+        Gfx::SBufferDescriptor BufferDesc_Homo = {};
 
-        BufferDesc.m_Stride = 0;
-        BufferDesc.m_Usage = Gfx::CBuffer::GPURead;
-        BufferDesc.m_Binding = Gfx::CBuffer::ConstantBuffer;
-        BufferDesc.m_Access = Gfx::CBuffer::CPUWrite;
-        BufferDesc.m_NumberOfBytes = sizeof(SHomographyTransform);
-        BufferDesc.m_pBytes = nullptr;
-        BufferDesc.m_pClassKey = 0;
+        BufferDesc_Homo.m_Stride = 0;
+        BufferDesc_Homo.m_Usage = Gfx::CBuffer::GPURead;
+        BufferDesc_Homo.m_Binding = Gfx::CBuffer::ConstantBuffer;
+        BufferDesc_Homo.m_Access = Gfx::CBuffer::CPUWrite;
+        BufferDesc_Homo.m_NumberOfBytes = sizeof(SHomographyTransform);
+        BufferDesc_Homo.m_pBytes = nullptr;
+        BufferDesc_Homo.m_pClassKey = 0;
 
-        m_HomographyB_BufferPtr = Gfx::BufferManager::CreateBuffer(BufferDesc);
-        m_HomographyM_BufferPtr = Gfx::BufferManager::CreateBuffer(BufferDesc);
+        m_HomographyB_BufferPtr = Gfx::BufferManager::CreateBuffer(BufferDesc_Homo);
+        m_HomographyM_BufferPtr = Gfx::BufferManager::CreateBuffer(BufferDesc_Homo);
+
+        Gfx::SBufferDescriptor BufferDesc_DownSample = BufferDesc_Homo;
+        BufferDesc_DownSample.m_NumberOfBytes = sizeof(glm::uvec4);
+        m_DownSampling_BufferPtr = Gfx::BufferManager::CreateBuffer(BufferDesc_DownSample);
 
         //---Initialize Texture Manager for Original Image---
         Gfx::STextureDescriptor TextureDescriptor_OrigImg = {};
@@ -81,6 +87,31 @@ namespace FutoGCV
 
             m_RectImgB_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_RectImg);
             m_RectImgM_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_RectImg);
+        }
+
+        if (m_ImgSize_DownSample == glm::uvec2(0))
+        {
+            m_Is_DownSample = false;
+        } 
+        else
+        {
+            m_Is_DownSample = true;
+
+            Gfx::STextureDescriptor TextureDescriptor_DownSampling = {};
+
+            TextureDescriptor_OrigImg.m_NumberOfPixelsU = m_ImgSize_DownSample.x;
+            TextureDescriptor_OrigImg.m_NumberOfPixelsV = m_ImgSize_DownSample.y;
+            TextureDescriptor_OrigImg.m_NumberOfPixelsW = 1;
+            TextureDescriptor_OrigImg.m_NumberOfMipMaps = 1;
+            TextureDescriptor_OrigImg.m_NumberOfTextures = 1;
+            TextureDescriptor_OrigImg.m_Binding = Gfx::CTexture::ShaderResource;
+            TextureDescriptor_OrigImg.m_Access = Gfx::CTexture::EAccess::CPURead;
+            TextureDescriptor_OrigImg.m_Usage = Gfx::CTexture::EUsage::GPUReadWrite;
+            TextureDescriptor_OrigImg.m_Semantic = Gfx::CTexture::UndefinedSemantic;
+            TextureDescriptor_OrigImg.m_Format = Gfx::CTexture::R8_UBYTE; // Single channel with 8-bit.
+
+            m_RectImgB_DownSample_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_DownSampling);
+            m_RectImgM_DownSample_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_DownSampling);
         }
     }
 
@@ -151,6 +182,11 @@ namespace FutoGCV
 
         Homo_B = m_Homography_B;
         Homo_M = m_Homography_M;
+    }
+
+    void CPlanarRectification::imp_DownSampling(const glm::uvec2& ImgSize_DownSampleRect)
+    {
+
     }
 
     //---Assistant Functions: Compute Orientations---

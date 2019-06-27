@@ -48,9 +48,9 @@ namespace Stereo
 
         if (m_Is_FixRectSize)
         {
-            m_Rectifier_Planar = FutoGCV::CPlanarRectification(m_OrigImgSize, m_RectImgSize);
+            m_Rectifier_Planar = FutoGCV::CPlanarRectification(m_OrigImgSize, m_RectImgSize_Sub);
 
-            m_pStereoMatcher_LibSGM = std::make_unique<sgm::StereoSGM>(m_RectImgSize.x, m_RectImgSize.y, m_DispRange, 8, 16, sgm::EXECUTE_INOUT_HOST2HOST);
+            m_pStereoMatcher_LibSGM = std::make_unique<sgm::StereoSGM>(m_RectImgSize_Sub.x, m_RectImgSize_Sub.y, m_DispRange, 8, 16, sgm::EXECUTE_INOUT_HOST2HOST);
         } 
         else
         {
@@ -68,7 +68,7 @@ namespace Stereo
 
         if (m_StereoMatching_Mode == "Sub")
         {
-            m_pStereoMatcher_LibSGM = std::make_unique<sgm::StereoSGM>(m_RectImgSize.x, m_RectImgSize.y, m_DispRange, 8, 16, sgm::EXECUTE_INOUT_HOST2HOST);
+            m_pStereoMatcher_LibSGM = std::make_unique<sgm::StereoSGM>(m_RectImgSize_Sub.x, m_RectImgSize_Sub.y, m_DispRange, 8, 16, sgm::EXECUTE_INOUT_HOST2HOST);
         }
 
         //---Setting Texture of Depth in Original Image for GLSL---
@@ -148,6 +148,12 @@ namespace Stereo
             // * Original Image Pair => Rectified Image Pair
 
             m_Rectifier_Planar.execute(m_OrigImg_Curt, m_OrigImg_Last); // Apply Planar Rectification
+
+            if (m_Is_DownScaleRect)
+            {
+                m_Rectifier_Planar.imp_DownSampling();
+            }
+
             m_Rectifier_Planar.return_Result(m_RectImg_Curt, m_RectImg_Last, m_Homo_Curt, m_Homo_Last);
 
             if (m_Is_ExportRectImg)
@@ -424,7 +430,7 @@ namespace Stereo
 
     void CPluginInterface::imp_StereoMatching_Sub()
     {
-        const glm::uvec2 SubImg_Size = m_RectImgSize;
+        const glm::uvec2 SubImg_Size = m_RectImgSize_Sub;
 
         const glm::uvec2 SubImg_Center = m_RectImg_Curt.get_ImgSize() / 2;
 
@@ -677,7 +683,10 @@ namespace Stereo
 
         //---01 Rectification-----
         m_Is_FixRectSize = Core::CProgramParameters::GetInstance().Get("mr:stereo:01_image_rectification:extract_fix_size", false);
-        m_RectImgSize = Core::CProgramParameters::GetInstance().Get("mr:stereo:01_image_rectification:default_rectified_image_size", glm::uvec2(640, 640));
+        m_RectImgSize_Sub = Core::CProgramParameters::GetInstance().Get("mr:stereo:01_image_rectification:sub_image_size", glm::uvec2(640, 640));
+
+        m_Is_DownScaleRect = Core::CProgramParameters::GetInstance().Get("mr:stereo:01_image_rectification:down_sampling", false);
+        m_RectImgSize_DownSample = Core::CProgramParameters::GetInstance().Get("mr:stereo:01_image_rectification:down_sampling_size", glm::uvec2(360, 360));
 
         //---02 Stereo Matching---
         m_StereoMatching_Method = Core::CProgramParameters::GetInstance().Get("mr:stereo:02_stereo_matching:method", "LibSGM");

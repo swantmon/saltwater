@@ -87,8 +87,8 @@ namespace Stereo
 
         FutoGCV::CPlanarRectification m_Rectifier_Planar; // Implement planar rectification
 
-        glm::uvec2 m_RectImgSize;
-        bool m_Is_FixRectSize;
+        bool m_Is_FixRectSize, m_Is_DownScaleRect;
+        glm::uvec2 m_RectImgSize_Sub, m_RectImgSize_DownSample;
 
         //---02 Stereo Matching---
         void imp_StereoMatching();
