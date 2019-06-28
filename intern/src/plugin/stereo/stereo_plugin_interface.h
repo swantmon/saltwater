@@ -87,7 +87,7 @@ namespace Stereo
 
         FutoGCV::CPlanarRectification m_Rectifier_Planar; // Implement planar rectification
 
-        bool m_Is_FixRectSize, m_Is_DownScaleRect;
+        bool m_Is_FixRectSize, m_Is_RectScaling;
         glm::uvec2 m_RectImgSize_Sub, m_RectImgSize_DownSample;
 
         //---02 Stereo Matching---
@@ -118,6 +118,9 @@ namespace Stereo
         Gfx::CTexturePtr m_DispImg_Rect_TexturePtr;
         Gfx::CTexturePtr m_DepthImg_Rect_TexturePtr;
         Gfx::CBufferPtr m_ParaxEq_BufferPtr;
+
+        Gfx::CShaderPtr m_DispUpSampling_CSPtr;
+        Gfx::CTexturePtr m_Disp_DownSample_TexturePtr;
 
         //---04 Depth from Rectified to Original Current Image---
         void imp_Depth_Rect2Orig();

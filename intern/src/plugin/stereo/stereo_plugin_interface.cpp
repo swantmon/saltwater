@@ -52,11 +52,24 @@ namespace Stereo
 
             m_pStereoMatcher_LibSGM = std::make_unique<sgm::StereoSGM>(m_RectImgSize_Sub.x, m_RectImgSize_Sub.y, m_DispRange, 8, 16, sgm::EXECUTE_INOUT_HOST2HOST);
         } 
-        else if (m_Is_DownScaleRect)
+        else if (m_Is_RectScaling)
         {
             m_Rectifier_Planar = FutoGCV::CPlanarRectification(m_OrigImgSize, glm::uvec2(0), m_RectImgSize_DownSample);
 
             m_pStereoMatcher_LibSGM = std::make_unique<sgm::StereoSGM>(m_RectImgSize_DownSample.x, m_RectImgSize_DownSample.y, m_DispRange, 8, 16, sgm::EXECUTE_INOUT_HOST2HOST);
+
+            Gfx::STextureDescriptor TextureDesc_DownSample = {};
+            TextureDesc_DownSample.m_NumberOfPixelsU = m_RectImgSize_DownSample.x;
+            TextureDesc_DownSample.m_NumberOfPixelsV = m_RectImgSize_DownSample.y;
+            TextureDesc_DownSample.m_NumberOfPixelsW = 1;
+            TextureDesc_DownSample.m_NumberOfMipMaps = 1;
+            TextureDesc_DownSample.m_NumberOfTextures = 1;
+            TextureDesc_DownSample.m_Binding = Gfx::CTexture::ShaderResource;
+            TextureDesc_DownSample.m_Access = Gfx::CTexture::EAccess::CPUWrite;
+            TextureDesc_DownSample.m_Usage = Gfx::CTexture::EUsage::GPUReadWrite;
+            TextureDesc_DownSample.m_Semantic = Gfx::CTexture::UndefinedSemantic;
+            TextureDesc_DownSample.m_Format = Gfx::CTexture::R32_FLOAT; // 1 channels with 32-bit float.
+            m_Disp_DownSample_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDesc_DownSample);
         }
         else
         {
@@ -155,13 +168,14 @@ namespace Stereo
 
             m_Rectifier_Planar.execute(m_OrigImg_Curt, m_OrigImg_Last); // Apply Planar Rectification
 
-            if (m_Is_DownScaleRect)
-            {
-                m_Rectifier_Planar.imp_DownSampling(0);
-                m_Rectifier_Planar.imp_DownSampling(1);
-            }
-
             m_Rectifier_Planar.return_Result(m_RectImg_Curt, m_RectImg_Last, m_Homo_Curt, m_Homo_Last);
+
+            FutoGCV::CFutoImg RectImg_Curt_DownSample, RectImg_Last_DownSample;
+            if (m_Is_RectScaling)
+            {
+                m_Rectifier_Planar.imp_DownSampling(RectImg_Curt_DownSample, 0);
+                m_Rectifier_Planar.imp_DownSampling(RectImg_Last_DownSample, 1);
+            }
 
             if (m_Is_ExportRectImg)
             {
@@ -176,7 +190,14 @@ namespace Stereo
             //---Stereo Matching---
             // * Calculate Disparity in Rectified Current Image
 
-            m_DispImg_Rect.resize(m_RectImg_Curt.get_Img().size(), 0.0);
+            if (m_Is_RectScaling)
+            {
+                m_DispImg_Rect.resize(RectImg_Curt_DownSample.get_Img().size(), 0.0);
+            } 
+            else
+            {
+                m_DispImg_Rect.resize(m_RectImg_Curt.get_Img().size(), 0.0);
+            }
 
             const clock_t Time_SM_begin = clock();
 
@@ -519,6 +540,32 @@ namespace Stereo
         TextureDesc_DepthImg_Rect.m_Format = Gfx::CTexture::R16_UINT; // 1 channels with 16-bit uint.
         m_DepthImg_Rect_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDesc_DepthImg_Rect);
 
+        if (m_Is_RectScaling)
+        {
+            Gfx::Performance::BeginEvent("Up-Sampling Disparity");
+
+            // Submit Data to Managers
+            Base::AABB2UInt TargetRect;
+            TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_RectImgSize_DownSample.x, m_RectImgSize_DownSample.y));
+            Gfx::TextureManager::CopyToTexture2D(m_Disp_DownSample_TexturePtr, TargetRect, m_RectImgSize_DownSample.x, static_cast<const void*>(m_DispImg_Rect.data()));
+
+            // Connecting Managers (@CPU) & GLSL (@GPU)
+            Gfx::ContextManager::SetShaderCS(m_DispUpSampling_CSPtr);
+            Gfx::ContextManager::SetImageTexture(0, m_Disp_DownSample_TexturePtr);
+            Gfx::ContextManager::SetImageTexture(1, m_DispImg_Rect_TexturePtr);
+
+            // Start GPU Parallel Processing
+            const int WorkGroupsX = DivUp(m_RectImg_Curt.get_ImgSize().x, TileSize_2D);
+            const int WorkGroupsY = DivUp(m_RectImg_Curt.get_ImgSize().y, TileSize_2D);
+
+            Gfx::ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
+
+            Gfx::ContextManager::ResetShaderCS();
+
+            Gfx::Performance::EndEvent();
+            //---GPU End---
+        }
+
         //---GPU Start---
         Gfx::Performance::BeginEvent("Disparity to Depth");
 
@@ -692,7 +739,7 @@ namespace Stereo
         m_Is_FixRectSize = Core::CProgramParameters::GetInstance().Get("mr:stereo:01_image_rectification:extract_fix_size", false);
         m_RectImgSize_Sub = Core::CProgramParameters::GetInstance().Get("mr:stereo:01_image_rectification:sub_image_size", glm::uvec2(640, 640));
 
-        m_Is_DownScaleRect = Core::CProgramParameters::GetInstance().Get("mr:stereo:01_image_rectification:down_sampling", false);
+        m_Is_RectScaling = Core::CProgramParameters::GetInstance().Get("mr:stereo:01_image_rectification:down_sampling", false);
         m_RectImgSize_DownSample = Core::CProgramParameters::GetInstance().Get("mr:stereo:01_image_rectification:down_sampling_size", glm::uvec2(360, 360));
 
         //---02 Stereo Matching---
@@ -707,6 +754,7 @@ namespace Stereo
             << "#define TILE_SIZE_2D " << TileSize_2D << " \n";
         std::string DefineString = DefineStream.str();
         m_Disp2Depth_CSPtr = Gfx::ShaderManager::CompileCS("../../plugins/stereo/cs_Disparity_to_Depth.glsl", "main", DefineString.c_str());
+        m_DispUpSampling_CSPtr = Gfx::ShaderManager::CompileCS("../../plugins/stereo/cs_Up_Sampling.glsl", "main", DefineString.c_str());
 
         Gfx::SBufferDescriptor ParaxEq_BufferDesc = {};
         ParaxEq_BufferDesc.m_Stride = 0;

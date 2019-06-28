@@ -33,7 +33,7 @@ namespace FutoGCV
 
         void return_Result(CFutoImg& RectImg_Curt, CFutoImg& RectImg_Last, SHomographyTransform& Homo_B, SHomographyTransform& Homo_M);
 
-        void imp_DownSampling(const int Which_Img = 0);
+        void imp_DownSampling(CFutoImg& RectImg_DownSampling, const int Which_Img = 0);
 
     //---Assistant Functions---
     private:

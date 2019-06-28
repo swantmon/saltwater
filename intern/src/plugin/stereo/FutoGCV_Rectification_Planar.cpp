@@ -167,36 +167,20 @@ namespace FutoGCV
 
     void CPlanarRectification::return_Result(CFutoImg& RectImgB, CFutoImg& RectImgM, SHomographyTransform& Homo_B, SHomographyTransform& Homo_M)
     {
-        if (m_Is_DownSample)
-        {
-            const int RectImgSize_1D = m_ImgSize_DownSample.x * m_ImgSize_DownSample.y;
-            std::vector<char> RectImgB_Vector1D(RectImgSize_1D, 0), RectImgM_Vector1D(RectImgSize_1D, 0);
-            Gfx::TextureManager::CopyTextureToCPU(m_RectImgB_DownSample_TexturePtr, reinterpret_cast<char*>(RectImgB_Vector1D.data()));
-            Gfx::TextureManager::CopyTextureToCPU(m_RectImgM_DownSample_TexturePtr, reinterpret_cast<char*>(RectImgM_Vector1D.data()));
-
-            RectImgB = CFutoImg(RectImgB_Vector1D, m_ImgSize_DownSample, 1, m_K_Rect_B, m_R_Rect, m_PC_Rect_B);
-            RectImgM = CFutoImg(RectImgM_Vector1D, m_ImgSize_DownSample, 1, m_K_Rect_M, m_R_Rect, m_PC_Rect_M);
-
-            Homo_B = m_Homography_B;
-            Homo_M = m_Homography_M;
-        } 
-        else
-        {
-            const int RectImgSize_1D = m_ImgSize_Rect.x * m_ImgSize_Rect.y;
-            std::vector<char> RectImgB_Vector1D(RectImgSize_1D, 0), RectImgM_Vector1D(RectImgSize_1D, 0);
-            Gfx::TextureManager::CopyTextureToCPU(m_RectImgB_TexturePtr, reinterpret_cast<char*>(RectImgB_Vector1D.data()));
-            Gfx::TextureManager::CopyTextureToCPU(m_RectImgM_TexturePtr, reinterpret_cast<char*>(RectImgM_Vector1D.data()));
+        const int RectImgSize_1D = m_ImgSize_Rect.x * m_ImgSize_Rect.y;
+        std::vector<char> RectImgB_Vector1D(RectImgSize_1D, 0), RectImgM_Vector1D(RectImgSize_1D, 0);
+        Gfx::TextureManager::CopyTextureToCPU(m_RectImgB_TexturePtr, reinterpret_cast<char*>(RectImgB_Vector1D.data()));
+        Gfx::TextureManager::CopyTextureToCPU(m_RectImgM_TexturePtr, reinterpret_cast<char*>(RectImgM_Vector1D.data()));
 
 
-            RectImgB = CFutoImg(RectImgB_Vector1D, m_ImgSize_Rect, 1, m_K_Rect_B, m_R_Rect, m_PC_Rect_B);
-            RectImgM = CFutoImg(RectImgM_Vector1D, m_ImgSize_Rect, 1, m_K_Rect_M, m_R_Rect, m_PC_Rect_M);
+        RectImgB = CFutoImg(RectImgB_Vector1D, m_ImgSize_Rect, 1, m_K_Rect_B, m_R_Rect, m_PC_Rect_B);
+        RectImgM = CFutoImg(RectImgM_Vector1D, m_ImgSize_Rect, 1, m_K_Rect_M, m_R_Rect, m_PC_Rect_M);
 
-            Homo_B = m_Homography_B;
-            Homo_M = m_Homography_M;
-        }
+        Homo_B = m_Homography_B;
+        Homo_M = m_Homography_M;
     }
 
-    void CPlanarRectification::imp_DownSampling(const int Which_Img)
+    void CPlanarRectification::imp_DownSampling(CFutoImg& RectImg_DownSampling, const int Which_Img)
     {
         //---GPU Computation Start---
         Gfx::Performance::BeginEvent("Down-Sampling Rectified Image");
@@ -228,6 +212,25 @@ namespace FutoGCV
 
         Gfx::Performance::EndEvent();
         //---GPU Computation End---
+
+        //---Return Down-Sampled Rectified Images---
+        const int RectImgSize_1D = m_ImgSize_DownSample.x * m_ImgSize_DownSample.y;
+        std::vector<char> RectImg_Vector1D(RectImgSize_1D, 0);
+
+        switch (Which_Img)
+        {
+        case 0:
+            Gfx::TextureManager::CopyTextureToCPU(m_RectImgB_DownSample_TexturePtr, reinterpret_cast<char*>(RectImg_Vector1D.data()));
+
+            break;
+
+        case 1:
+            Gfx::TextureManager::CopyTextureToCPU(m_RectImgM_DownSample_TexturePtr, reinterpret_cast<char*>(RectImg_Vector1D.data()));
+
+            break;
+        }
+
+        RectImg_DownSampling = CFutoImg(RectImg_Vector1D, m_ImgSize_DownSample, 1);
     }
 
     //---Assistant Functions: Compute Orientations---

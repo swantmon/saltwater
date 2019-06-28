@@ -1,7 +1,7 @@
 #ifndef __INCLUDE_CS_Down_Sampling_GLSL__
 #define __INCLUDE_CS_Down_Sampling_GLSL__
 
-layout (binding = 0, r8) readonly uniform image2D cs_Img_OrigScale; // Pixel in image2D(rgba8) is 8-bit float (0~255 -> 0~1)
+layout (binding = 0, r8) readonly uniform image2D cs_Img_OrigScale; // Pixel in image2D(rg8) is 8-bit float (0~255 -> 0~1)
 layout (binding = 1, r8) writeonly uniform image2D cs_Img_DownSample; // Pixel in image2D(r8) is 8-bit float (0~255 -> 0~1)
 
 float BiLinearInterpolation(vec2 pixPosition)
