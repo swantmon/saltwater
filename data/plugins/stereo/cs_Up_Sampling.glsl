@@ -30,8 +30,8 @@ float BiLinearInterpolation(vec2 pixPosition)
 layout (local_size_x = TILE_SIZE_2D, local_size_y = TILE_SIZE_2D, local_size_z = 1) in;
 void main()
 {
-	const ivec2 ImgSize_DownSample = imageSize(cs_Disp_DownSample);
-	const ivec2 ImgSize_UpSample = imageSize(cs_Disp_UpSample);
+	const vec2 ImgSize_DownSample = imageSize(cs_Disp_DownSample);
+	const vec2 ImgSize_UpSample = imageSize(cs_Disp_UpSample);
 
 	const vec2 UpRatio = ImgSize_DownSample / ImgSize_UpSample;
 

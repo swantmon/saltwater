@@ -175,6 +175,24 @@ namespace Stereo
             {
                 m_Rectifier_Planar.imp_DownSampling(RectImg_Curt_DownSample, 0);
                 m_Rectifier_Planar.imp_DownSampling(RectImg_Last_DownSample, 1);
+
+                /*
+                std::string ExportStr;
+                uint MemCpySize = 0;
+
+                cv::Mat cvRectImg_Curt(RectImg_Curt_DownSample.get_ImgSize().y, RectImg_Curt_DownSample.get_ImgSize().x, CV_8UC1);
+                memcpy(cvRectImg_Curt.data, RectImg_Curt_DownSample.get_Img().data(), RectImg_Curt_DownSample.get_Img().size());
+
+                ExportStr = "E:\\Project_ARCHITECT\\RectImg_Curt_Down_" + std::to_string(m_KeyFrameID) + ".png";
+                cv::imwrite(ExportStr, cvRectImg_Curt);
+
+
+                cv::Mat cvRectImg_Last(RectImg_Last_DownSample.get_ImgSize().y, RectImg_Last_DownSample.get_ImgSize().x, CV_8UC1);
+                memcpy(cvRectImg_Last.data, RectImg_Last_DownSample.get_Img().data(), RectImg_Last_DownSample.get_Img().size());
+
+                ExportStr = "E:\\Project_ARCHITECT\\RectImg_Last_Down_" + std::to_string(m_KeyFrameID) + ".png";
+                cv::imwrite(ExportStr, cvRectImg_Last);
+                */
             }
 
             if (m_Is_ExportRectImg)
@@ -207,6 +225,10 @@ namespace Stereo
                 {
                     imp_StereoMatching_Fix();
                 } 
+                else if (m_Is_RectScaling)
+                {
+                    imp_StereoMatching_Scaling(RectImg_Curt_DownSample.get_Img(), RectImg_Last_DownSample.get_Img());
+                }
                 else
                 {
                     imp_StereoMatching();
@@ -517,6 +539,18 @@ namespace Stereo
         }
     }
 
+    void CPluginInterface::imp_StereoMatching_Scaling(const std::vector<char>& RectImg_Curt_DownSample, const std::vector<char>& RectImg_Last_DownSample)
+    {
+        if (m_StereoMatching_Method == "LibSGM")
+        {
+            std::vector<uint16_t> DispImg_Rect_uint16(RectImg_Curt_DownSample.size(), 0.0);
+
+            m_pStereoMatcher_LibSGM->execute(RectImg_Curt_DownSample.data(), RectImg_Last_DownSample.data(), DispImg_Rect_uint16.data());
+
+            m_DispImg_Rect = std::vector<float>::vector(DispImg_Rect_uint16.begin(), DispImg_Rect_uint16.end());
+        }
+    }
+
     // -----------------------------------------------------------------------------
 
     void CPluginInterface::imp_Disp2Depth()
@@ -565,6 +599,12 @@ namespace Stereo
             Gfx::Performance::EndEvent();
             //---GPU End---
         }
+        else
+        {
+            Base::AABB2UInt TargetRect;
+            TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_RectImg_Curt.get_ImgSize().x, m_RectImg_Curt.get_ImgSize().y));
+            Gfx::TextureManager::CopyToTexture2D(m_DispImg_Rect_TexturePtr, TargetRect, m_RectImg_Curt.get_ImgSize().x, static_cast<const void*>(m_DispImg_Rect.data()));
+        }
 
         //---GPU Start---
         Gfx::Performance::BeginEvent("Disparity to Depth");
@@ -575,10 +615,6 @@ namespace Stereo
         ParaxEqInfo.m_FocalLength = m_RectImg_Curt.get_Cam()[0].x;
 
         Gfx::BufferManager::UploadBufferData(m_ParaxEq_BufferPtr, &ParaxEqInfo);
-
-        Base::AABB2UInt TargetRect;
-        TargetRect = Base::AABB2UInt(glm::uvec2(0, 0), glm::uvec2(m_RectImg_Curt.get_ImgSize().x, m_RectImg_Curt.get_ImgSize().y));
-        Gfx::TextureManager::CopyToTexture2D(m_DispImg_Rect_TexturePtr, TargetRect, m_RectImg_Curt.get_ImgSize().x, static_cast<const void*>(m_DispImg_Rect.data()));
 
         // Connecting Managers (@CPU) & GLSL (@GPU)
         Gfx::ContextManager::SetShaderCS(m_Disp2Depth_CSPtr);

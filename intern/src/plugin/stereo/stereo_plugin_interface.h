@@ -95,6 +95,7 @@ namespace Stereo
         void imp_StereoMatching_Tile();
         void imp_StereoMatching_Sub();
         void imp_StereoMatching_Fix();
+        void imp_StereoMatching_Scaling(const std::vector<char>& RectImg_Curt_DownSample, const std::vector<char>& RectImg_Last_DownSample);
 
         std::vector<float> m_DispImg_Rect; // Disparity in Rectified Image => Using float because disparity is pixel or sub-pixel.
 
