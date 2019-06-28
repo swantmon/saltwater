@@ -39,6 +39,8 @@ void main()
 
 	float pixValue = BiLinearInterpolation(pix_Sample);
 
+	pixValue /= UpRatio.x;
+
 	imageStore(cs_Disp_UpSample, ivec2(gl_GlobalInvocationID.xy), vec4(pixValue)); 
 }
 
