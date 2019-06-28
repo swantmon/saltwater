@@ -11,10 +11,10 @@ float BiLinearInterpolation(vec2 pixPosition)
 	const ivec2 pixPosition_DL = pixPosition_UL + ivec2(0, 1);
 	const ivec2 pixPosition_DR = pixPosition_UL + ivec2(1, 1);
 
-	const float pixValue_UL = imageLoad(cs_Img_OrigScale, pixPosition_UL);
-	const float pixValue_UR = imageLoad(cs_Img_OrigScale, pixPosition_UR);
-	const float pixValue_DL = imageLoad(cs_Img_OrigScale, pixPosition_DL);
-	const float pixValue_DR = imageLoad(cs_Img_OrigScale, pixPosition_DR);
+	const float pixValue_UL = imageLoad(cs_Img_OrigScale, pixPosition_UL).x;
+	const float pixValue_UR = imageLoad(cs_Img_OrigScale, pixPosition_UR).x;
+	const float pixValue_DL = imageLoad(cs_Img_OrigScale, pixPosition_DL).x;
+	const float pixValue_DR = imageLoad(cs_Img_OrigScale, pixPosition_DR).x;
 
 	const float a_x = (pixPosition.x - pixPosition_UL.x) / (pixPosition_UR.x - pixPosition_UL.x);
 	const float a_y = (pixPosition.y - pixPosition_UL.y) / (pixPosition_DL.y - pixPosition_UL.y);
@@ -35,7 +35,7 @@ void main()
 
 	const vec2 Sample = ImgSize_OrigScale / ImgSize_DownSample;
 
-	const vec2 pix_Sample = Sample * ivec2(gl_GlobalInvocationID.xy);
+	const vec2 pix_Sample = Sample * uvec2(gl_GlobalInvocationID.xy);
 
 	float pixValue = BiLinearInterpolation(pix_Sample);
 

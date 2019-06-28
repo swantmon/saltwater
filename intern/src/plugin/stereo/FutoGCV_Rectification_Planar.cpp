@@ -23,7 +23,8 @@ namespace FutoGCV
     }
 
     CPlanarRectification::CPlanarRectification(const glm::uvec2& ImgSize_Orig, const glm::uvec2& ImgSize_Rect, const glm::uvec2& ImgSize_DownSample)
-        : m_ImgSize_Rect(ImgSize_Rect)
+        : m_ImgSize_Rect(ImgSize_Rect),
+          m_ImgSize_DownSample(ImgSize_DownSample)
     {
         //---Initialize Shader Manager---
         std::stringstream DefineStream;
@@ -88,23 +89,23 @@ namespace FutoGCV
         if (m_ImgSize_DownSample == glm::uvec2(0))
         {
             m_Is_DownSample = false;
-        } 
+        }
         else
         {
             m_Is_DownSample = true;
 
             Gfx::STextureDescriptor TextureDescriptor_DownSampling = {};
 
-            TextureDescriptor_OrigImg.m_NumberOfPixelsU = m_ImgSize_DownSample.x;
-            TextureDescriptor_OrigImg.m_NumberOfPixelsV = m_ImgSize_DownSample.y;
-            TextureDescriptor_OrigImg.m_NumberOfPixelsW = 1;
-            TextureDescriptor_OrigImg.m_NumberOfMipMaps = 1;
-            TextureDescriptor_OrigImg.m_NumberOfTextures = 1;
-            TextureDescriptor_OrigImg.m_Binding = Gfx::CTexture::ShaderResource;
-            TextureDescriptor_OrigImg.m_Access = Gfx::CTexture::EAccess::CPURead;
-            TextureDescriptor_OrigImg.m_Usage = Gfx::CTexture::EUsage::GPUReadWrite;
-            TextureDescriptor_OrigImg.m_Semantic = Gfx::CTexture::UndefinedSemantic;
-            TextureDescriptor_OrigImg.m_Format = Gfx::CTexture::R8_UBYTE; // Single channel with 8-bit.
+            TextureDescriptor_DownSampling.m_NumberOfPixelsU = m_ImgSize_DownSample.x;
+            TextureDescriptor_DownSampling.m_NumberOfPixelsV = m_ImgSize_DownSample.y;
+            TextureDescriptor_DownSampling.m_NumberOfPixelsW = 1;
+            TextureDescriptor_DownSampling.m_NumberOfMipMaps = 1;
+            TextureDescriptor_DownSampling.m_NumberOfTextures = 1;
+            TextureDescriptor_DownSampling.m_Binding = Gfx::CTexture::ShaderResource;
+            TextureDescriptor_DownSampling.m_Access = Gfx::CTexture::EAccess::CPURead;
+            TextureDescriptor_DownSampling.m_Usage = Gfx::CTexture::EUsage::GPUReadWrite;
+            TextureDescriptor_DownSampling.m_Semantic = Gfx::CTexture::UndefinedSemantic;
+            TextureDescriptor_DownSampling.m_Format = Gfx::CTexture::R8_UBYTE; // Single channel with 8-bit.
 
             m_RectImgB_DownSample_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_DownSampling);
             m_RectImgM_DownSample_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDescriptor_DownSampling);
@@ -166,24 +167,39 @@ namespace FutoGCV
 
     void CPlanarRectification::return_Result(CFutoImg& RectImgB, CFutoImg& RectImgM, SHomographyTransform& Homo_B, SHomographyTransform& Homo_M)
     {
-        
-        const int RectImgSize_1D = m_ImgSize_Rect.x * m_ImgSize_Rect.y;
-        std::vector<char> RectImgB_Vector1D(RectImgSize_1D, 0), RectImgM_Vector1D(RectImgSize_1D, 0);
-        Gfx::TextureManager::CopyTextureToCPU(m_RectImgB_TexturePtr, reinterpret_cast<char*>(RectImgB_Vector1D.data()));
-        Gfx::TextureManager::CopyTextureToCPU(m_RectImgM_TexturePtr, reinterpret_cast<char*>(RectImgM_Vector1D.data()));
+        if (m_Is_DownSample)
+        {
+            const int RectImgSize_1D = m_ImgSize_DownSample.x * m_ImgSize_DownSample.y;
+            std::vector<char> RectImgB_Vector1D(RectImgSize_1D, 0), RectImgM_Vector1D(RectImgSize_1D, 0);
+            Gfx::TextureManager::CopyTextureToCPU(m_RectImgB_DownSample_TexturePtr, reinterpret_cast<char*>(RectImgB_Vector1D.data()));
+            Gfx::TextureManager::CopyTextureToCPU(m_RectImgM_DownSample_TexturePtr, reinterpret_cast<char*>(RectImgM_Vector1D.data()));
+
+            RectImgB = CFutoImg(RectImgB_Vector1D, m_ImgSize_DownSample, 1, m_K_Rect_B, m_R_Rect, m_PC_Rect_B);
+            RectImgM = CFutoImg(RectImgM_Vector1D, m_ImgSize_DownSample, 1, m_K_Rect_M, m_R_Rect, m_PC_Rect_M);
+
+            Homo_B = m_Homography_B;
+            Homo_M = m_Homography_M;
+        } 
+        else
+        {
+            const int RectImgSize_1D = m_ImgSize_Rect.x * m_ImgSize_Rect.y;
+            std::vector<char> RectImgB_Vector1D(RectImgSize_1D, 0), RectImgM_Vector1D(RectImgSize_1D, 0);
+            Gfx::TextureManager::CopyTextureToCPU(m_RectImgB_TexturePtr, reinterpret_cast<char*>(RectImgB_Vector1D.data()));
+            Gfx::TextureManager::CopyTextureToCPU(m_RectImgM_TexturePtr, reinterpret_cast<char*>(RectImgM_Vector1D.data()));
 
 
-        RectImgB = CFutoImg(RectImgB_Vector1D, m_ImgSize_Rect, 1, m_K_Rect_B, m_R_Rect, m_PC_Rect_B);
-        RectImgM = CFutoImg(RectImgM_Vector1D, m_ImgSize_Rect, 1, m_K_Rect_M, m_R_Rect, m_PC_Rect_M);
+            RectImgB = CFutoImg(RectImgB_Vector1D, m_ImgSize_Rect, 1, m_K_Rect_B, m_R_Rect, m_PC_Rect_B);
+            RectImgM = CFutoImg(RectImgM_Vector1D, m_ImgSize_Rect, 1, m_K_Rect_M, m_R_Rect, m_PC_Rect_M);
 
-        Homo_B = m_Homography_B;
-        Homo_M = m_Homography_M;
+            Homo_B = m_Homography_B;
+            Homo_M = m_Homography_M;
+        }
     }
 
-    void CPlanarRectification::imp_DownSampling(const glm::uvec2& ImgSize_DownSampleRect, const int Which_Img)
+    void CPlanarRectification::imp_DownSampling(const int Which_Img)
     {
         //---GPU Computation Start---
-        Gfx::Performance::BeginEvent("Rectified Image_Down-Sampling");
+        Gfx::Performance::BeginEvent("Down-Sampling Rectified Image");
 
         Gfx::ContextManager::SetShaderCS(m_DownSamplingCSPtr);
 

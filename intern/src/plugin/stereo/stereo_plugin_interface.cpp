@@ -52,6 +52,12 @@ namespace Stereo
 
             m_pStereoMatcher_LibSGM = std::make_unique<sgm::StereoSGM>(m_RectImgSize_Sub.x, m_RectImgSize_Sub.y, m_DispRange, 8, 16, sgm::EXECUTE_INOUT_HOST2HOST);
         } 
+        else if (m_Is_DownScaleRect)
+        {
+            m_Rectifier_Planar = FutoGCV::CPlanarRectification(m_OrigImgSize, glm::uvec2(0), m_RectImgSize_DownSample);
+
+            m_pStereoMatcher_LibSGM = std::make_unique<sgm::StereoSGM>(m_RectImgSize_DownSample.x, m_RectImgSize_DownSample.y, m_DispRange, 8, 16, sgm::EXECUTE_INOUT_HOST2HOST);
+        }
         else
         {
             m_Rectifier_Planar = FutoGCV::CPlanarRectification(m_OrigImgSize);
@@ -151,7 +157,8 @@ namespace Stereo
 
             if (m_Is_DownScaleRect)
             {
-                m_Rectifier_Planar.imp_DownSampling();
+                m_Rectifier_Planar.imp_DownSampling(0);
+                m_Rectifier_Planar.imp_DownSampling(1);
             }
 
             m_Rectifier_Planar.return_Result(m_RectImg_Curt, m_RectImg_Last, m_Homo_Curt, m_Homo_Last);
