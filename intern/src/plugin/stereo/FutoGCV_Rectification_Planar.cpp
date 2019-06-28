@@ -203,8 +203,8 @@ namespace FutoGCV
         }
 
         //---Start GPU Parallel Processing---
-        const int WorkGroupsX = DivUp(m_ImgSize_Rect.x, TileSize_2D);
-        const int WorkGroupsY = DivUp(m_ImgSize_Rect.y, TileSize_2D);
+        const int WorkGroupsX = DivUp(m_ImgSize_DownSample.x, TileSize_2D);
+        const int WorkGroupsY = DivUp(m_ImgSize_DownSample.y, TileSize_2D);
 
         Gfx::ContextManager::Dispatch(WorkGroupsX, WorkGroupsY, 1);
 
