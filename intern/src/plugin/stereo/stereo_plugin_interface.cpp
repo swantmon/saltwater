@@ -775,7 +775,7 @@ namespace Stereo
         m_Is_FixRectSize = Core::CProgramParameters::GetInstance().Get("mr:stereo:01_image_rectification:extract_fix_size", false);
         m_RectImgSize_Sub = Core::CProgramParameters::GetInstance().Get("mr:stereo:01_image_rectification:sub_image_size", glm::uvec2(640, 640));
 
-        m_Is_RectScaling = Core::CProgramParameters::GetInstance().Get("mr:stereo:01_image_rectification:down_sampling", false);
+        m_Is_RectScaling = Core::CProgramParameters::GetInstance().Get("mr:stereo:01_image_rectification:scaling", false);
         m_RectImgSize_DownSample = Core::CProgramParameters::GetInstance().Get("mr:stereo:01_image_rectification:down_sampling_size", glm::uvec2(360, 360));
 
         //---02 Stereo Matching---
