@@ -21,7 +21,6 @@ CORE_PLUGIN_INFO(Stereo::CPluginInterface, "Stereo Matching", "1.0", "This plugi
 
 namespace
 {
-
     #define TileSize_2D 16 // Define size of work group for GPU parallel processing. <= 16 suggested for 2D image (based on experience).
 
     int DivUp(int TotalShaderCount, int WorkGroupSize) // Calculate number of work groups.
@@ -46,7 +45,7 @@ namespace Stereo
 
         m_OrigImgSize = _rImageSize;
 
-        if (m_Is_FixRectSize)
+        if (m_Is_RectSubImg)
         {
             m_Rectifier_Planar = FutoGCV::CPlanarRectification(m_OrigImgSize, m_RectImgSize_Sub);
 
@@ -208,6 +207,7 @@ namespace Stereo
             //---Stereo Matching---
             // * Calculate Disparity in Rectified Current Image
 
+            const clock_t Time_SM_begin = clock();
             if (m_Is_RectScaling)
             {
                 m_DispImg_Rect.resize(RectImg_Curt_DownSample.get_Img().size(), 0.0);
@@ -217,11 +217,9 @@ namespace Stereo
                 m_DispImg_Rect.resize(m_RectImg_Curt.get_Img().size(), 0.0);
             }
 
-            const clock_t Time_SM_begin = clock();
-
             if (m_StereoMatching_Mode == "Original")
             {
-                if (m_Is_FixRectSize)
+                if (m_Is_RectSubImg)
                 {
                     imp_StereoMatching_Fix();
                 } 
@@ -772,7 +770,7 @@ namespace Stereo
         m_Is_KeyFrame = false;
 
         //---01 Rectification-----
-        m_Is_FixRectSize = Core::CProgramParameters::GetInstance().Get("mr:stereo:01_image_rectification:extract_fix_size", false);
+        m_Is_RectSubImg = Core::CProgramParameters::GetInstance().Get("mr:stereo:01_image_rectification:extract_sub_image", false);
         m_RectImgSize_Sub = Core::CProgramParameters::GetInstance().Get("mr:stereo:01_image_rectification:sub_image_size", glm::uvec2(640, 640));
 
         m_Is_RectScaling = Core::CProgramParameters::GetInstance().Get("mr:stereo:01_image_rectification:scaling", false);
