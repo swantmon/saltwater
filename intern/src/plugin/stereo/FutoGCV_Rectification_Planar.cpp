@@ -233,6 +233,11 @@ namespace FutoGCV
         RectImg_DownSampling = CFutoImg(RectImg_Vector1D, m_ImgSize_DownSample, 1);
     }
 
+    glm::uvec2 CPlanarRectification::get_RectImgSize()
+    {
+        return m_ImgSize_Rect;
+    }
+
     //---Assistant Functions: Compute Orientations---
     void CPlanarRectification::cal_K_Rect(const glm::mat3& K_Orig_B, const glm::mat3& K_Orig_M)
     {

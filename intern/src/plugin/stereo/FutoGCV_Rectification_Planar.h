@@ -35,6 +35,8 @@ namespace FutoGCV
 
         void imp_DownSampling(CFutoImg& RectImg_DownSampling, const int Which_Img = 0);
 
+        glm::uvec2 get_RectImgSize();
+
     //---Assistant Functions---
     private:
         void cal_K_Rect(const glm::mat3& K_Orig_B, const glm::mat3& K_Orig_M);

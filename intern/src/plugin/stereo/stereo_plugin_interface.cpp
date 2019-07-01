@@ -167,6 +167,11 @@ namespace Stereo
 
             m_Rectifier_Planar.execute(m_OrigImg_Curt, m_OrigImg_Last); // Apply Planar Rectification
 
+            if (m_Rectifier_Planar.get_RectImgSize().x > 5000 || m_Rectifier_Planar.get_RectImgSize().y > 5000)
+            {
+                return; // LibSGM will break if the size of rectified image is too large.
+            }
+
             m_Rectifier_Planar.return_Result(m_RectImg_Curt, m_RectImg_Last, m_Homo_Curt, m_Homo_Last);
 
             FutoGCV::CFutoImg RectImg_Curt_DownSample, RectImg_Last_DownSample;
@@ -197,11 +202,6 @@ namespace Stereo
             if (m_Is_ExportRectImg)
             {
                 export_RectImg();
-            }
-
-            if (m_RectImg_Curt.get_ImgSize().x > 2500 || m_RectImg_Curt.get_ImgSize().y > 2500)
-            {
-                return; // LibSGM will break if the size of rectified image is too large.
             }
 
             //---Stereo Matching---
