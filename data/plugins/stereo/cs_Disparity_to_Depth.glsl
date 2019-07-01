@@ -17,6 +17,7 @@ void main()
 	float Disparity = imageLoad(cs_Disp_RectImg, ivec2(gl_GlobalInvocationID.xy)).r;
 	
 	float Depth = Disparity == 0.0f ? 0.0f : g_FocalLength * g_BaselineLength / Disparity;
+	Depth = Depth < 4 ? Depth : 0; // Depth more than 4 m is regarded as outlier.
 	Depth *= 1000.0f; // Unit = mini-meter
 	imageStore(cs_Depth_RectImg, ivec2(gl_GlobalInvocationID.xy), uvec4(Depth));
 }
