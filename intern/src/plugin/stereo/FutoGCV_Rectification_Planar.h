@@ -35,7 +35,7 @@ namespace FutoGCV
 
         void imp_DownSampling(CFutoImg& RectImg_DownSampling, const int Which_Img = 0);
 
-        glm::uvec2 get_RectImgSize();
+        bool m_Is_LargeSize;
 
     //---Assistant Functions---
     private:

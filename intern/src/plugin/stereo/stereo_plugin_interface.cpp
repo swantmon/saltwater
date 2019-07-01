@@ -167,7 +167,7 @@ namespace Stereo
 
             m_Rectifier_Planar.execute(m_OrigImg_Curt, m_OrigImg_Last); // Apply Planar Rectification
 
-            if (m_Rectifier_Planar.get_RectImgSize().x > 5000 || m_Rectifier_Planar.get_RectImgSize().y > 5000)
+            if (m_Rectifier_Planar.m_Is_LargeSize)
             {
                 return; // LibSGM will break if the size of rectified image is too large.
             }

@@ -130,6 +130,8 @@ namespace FutoGCV
     //---Execution Functions---
     void CPlanarRectification::execute(const CFutoImg& OrigImg_B, const CFutoImg& OrigImg_M)
     {
+        m_Is_LargeSize = false;
+
         //---Step 1. Calculate Orientations of Rectified Images & Homography from Original to Rectified---
         cal_K_Rect(OrigImg_B.get_Cam(), OrigImg_M.get_Cam());
         cal_R_Rect(OrigImg_B.get_PC(), OrigImg_M.get_PC(), OrigImg_B.get_Rot());
@@ -231,11 +233,6 @@ namespace FutoGCV
         }
 
         RectImg_DownSampling = CFutoImg(RectImg_Vector1D, m_ImgSize_DownSample, 1);
-    }
-
-    glm::uvec2 CPlanarRectification::get_RectImgSize()
-    {
-        return m_ImgSize_Rect;
     }
 
     //---Assistant Functions: Compute Orientations---
@@ -384,6 +381,11 @@ namespace FutoGCV
         m_Homography_M.m_RectImgConer_DR = RectImgConerDR;
 
         glm::uvec2 RectPlane = m_Homography_B.m_RectImgConer_DR - m_Homography_B.m_RectImgConer_UL;
+
+        if (RectPlane.x > 5000 || RectPlane.y > 5000)
+        {
+            m_Is_LargeSize = true;
+        }
 
         if (m_Is_FixSize)
         {
