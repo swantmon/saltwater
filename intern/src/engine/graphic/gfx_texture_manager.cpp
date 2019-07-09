@@ -1,4 +1,4 @@
-﻿
+
 #include "engine/engine_precompiled.h"
 
 #include "app_droid/app_application.h"
@@ -139,6 +139,7 @@ namespace
         CTexturePtr InternCreateExternalTexture();
 
         int ConvertGLFormatToBytesPerPixel(Gfx::CTexture::EFormat _Format) const;
+		int ConvertGLFormatToChannels(Gfx::CTexture::EFormat _Format) const;
         int ConvertGLImageUsage(Gfx::CTexture::EUsage _Usage) const;
         int ConvertGLInternalImageFormat(Gfx::CTexture::EFormat _Format) const;
         int ConvertGLImageFormat(Gfx::CTexture::EFormat _Format) const;
@@ -178,6 +179,7 @@ namespace
         // Initialize devil image engine. But we only initialize core part.
         // -----------------------------------------------------------------------------
         ilInit();
+		iluInit();
 
         // -----------------------------------------------------------------------------
         // Create 2x2 dummy texture
@@ -657,136 +659,119 @@ namespace
 
     void CGfxTextureManager::SaveTexture(CTexturePtr _TexturePtr, const std::string& _rPathToFile)
     {
-        // -----------------------------------------------------------------------------
-        // Get data
-        // -----------------------------------------------------------------------------
         assert(_TexturePtr != nullptr);
 
         auto* pInternTexture = static_cast<CInternTexture*>(_TexturePtr.GetPtr());
 
         assert(pInternTexture);
 
-        // -----------------------------------------------------------------------------
-        // Handle error cases
-        // -----------------------------------------------------------------------------
-        if (pInternTexture->GetNumberOfPixelsW() > 1)
-        {
-            ENGINE_CONSOLE_WARNING("Saving 3D textures is not suported. Saving aborted!");
+		// -----------------------------------------------------------------------------
 
-            return;
-        }
+		auto Width			  = pInternTexture->GetNumberOfPixelsU();
+		auto Height			  = pInternTexture->GetNumberOfPixelsV();
+		auto Depth			  = pInternTexture->GetNumberOfPixelsW();
+		auto NumberOfPixels   = Width * Height * Depth;
+		auto NumberOfChannels = ConvertGLFormatToChannels(pInternTexture->GetFormat());
+		auto BPP			  = ConvertGLFormatToBytesPerPixel(pInternTexture->GetFormat());
+		auto NumberOfBytes    = NumberOfPixels * BPP;
+		auto Level		      = pInternTexture->GetCurrentMipLevel();
 
-        if (_rPathToFile.find_last_of('.') == -1 || _rPathToFile.substr(_rPathToFile.find_last_of('.')) != ".ppm")
-        {
-            ENGINE_CONSOLE_WARNING("No or unsupported image extension found. Use Portable Pixmap (.ppm) to save textures.");
+		if (Depth > 1)
+		{
+			ENGINE_CONSOLE_WARNING("Saving 3D texture is not supported. Saving aborted.");
 
-            return;
-        }
+			return;
+		}
+
+		auto pData = Base::CMemory::Allocate((Base::Size)(NumberOfBytes));
+
+		if (pData == nullptr) return;
+
+		// -----------------------------------------------------------------------------
+
+		ILuint TemporaryImage = ilGenImage();
+
+		ilBindImage(TemporaryImage);
+
+		const GLenum NativeBinding = pInternTexture->m_NativeBinding;
+		const GLuint Format		   = ConvertGLImageFormat(pInternTexture->GetFormat());
+		const GLuint ImageType	   = ConvertGLImageType(pInternTexture->GetFormat());
+
+		glBindTexture(NativeBinding, pInternTexture->m_NativeTexture);
+
+		const auto NumberOfLayers = pInternTexture->IsCube() ? 6 : 1;
 
 #if PLATFORM_ANDROID
-        static const int s_NumberOfChannels = 4;
-#else
-        static const int s_NumberOfChannels = 3;
+		GLuint Framebuffer;
+
+		glGenFramebuffers(1, &Framebuffer);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, Framebuffer);
 #endif
 
-        // -----------------------------------------------------------------------------
-        // Save data to PPM function
-        // -----------------------------------------------------------------------------
-        auto SaveBytesToPPM = [](const std::string& _rPathToFile, int _Width, int _Height, void* _pBytes)
-        {
-            std::ofstream PPMOutput;
-
-            PPMOutput.open(_rPathToFile, std::ofstream::out);
-
-            PPMOutput << "P3" << std::endl;
-
-            PPMOutput << _Width << " " << _Height << std::endl;
-
-            PPMOutput << "255" << std::endl;
-
-            for (int IndexOfPixel = 0; IndexOfPixel < _Width * _Height; ++IndexOfPixel)
+		for (int Layer = 0; Layer < NumberOfLayers; ++Layer)
+		{
+#if PLATFORM_ANDROID
+		    if (pInternTexture->IsCube())
             {
-                int Index = IndexOfPixel * s_NumberOfChannels;
-
-                PPMOutput << ((char*)_pBytes)[Index + 0] % 255 << " ";
-                PPMOutput << ((char*)_pBytes)[Index + 1] % 255 << " ";
-                PPMOutput << ((char*)_pBytes)[Index + 2] % 255 << " ";
+                glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + Layer, pInternTexture->m_NativeTexture, Level);
+            }
+            else
+            {
+				glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, pInternTexture->m_NativeTexture, Level);
             }
 
-            PPMOutput.close();
-        };
+            GLenum Status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 
-        // -----------------------------------------------------------------------------
-        // Allocate memory
-        // -----------------------------------------------------------------------------
-        int NumberOfPixel = pInternTexture->GetNumberOfPixelsU() * pInternTexture->GetNumberOfPixelsV();
-        int NumberOfBytes = NumberOfPixel * s_NumberOfChannels * sizeof(char);
-
-        void* pBytes = Base::CMemory::Allocate(NumberOfBytes);
-
-        // -----------------------------------------------------------------------------
-        // Get data from GPU
-        // -----------------------------------------------------------------------------
-        glBindTexture(pInternTexture->m_NativeBinding, pInternTexture->m_NativeTexture);
-
-        if (pInternTexture->IsCube())
-        {
-#if PLATFORM_ANDROID
-            GLuint Framebuffer;
-
-            glGenFramebuffers(1, &Framebuffer);
-
-            glBindFramebuffer(GL_FRAMEBUFFER, Framebuffer);
-#endif
-
-            for (int i = 0; i < 6; i++)
-            {
-#if PLATFORM_ANDROID
-                glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, pInternTexture->m_NativeTexture, 0);
-
-                GLenum Status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-
-                glReadPixels(0, 0, pInternTexture->GetNumberOfPixelsU(), pInternTexture->GetNumberOfPixelsV(), GL_RGBA, GL_UNSIGNED_BYTE, pBytes);
+            glReadPixels(0, 0, pInternTexture->GetNumberOfPixelsU(), pInternTexture->GetNumberOfPixelsV(), GL_RGBA, GL_UNSIGNED_BYTE, pData);
 #else
-                glGetTexImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, GL_BYTE, pBytes);
+			if (pInternTexture->IsCube())
+			{
+				glGetTexImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + Layer, Level, Format, ImageType, pData);
+			}
+			else
+			{
+				glGetTexImage(NativeBinding, Level, Format, ImageType, pData);
+			}
 #endif
 
-                std::string PathToFilePerFace = _rPathToFile.substr(0, _rPathToFile.find_last_of('.'));
+			if (!ilTexImage(Width, Height, Depth, (ILubyte)NumberOfChannels, Format, ImageType, pData))
+			{
+				ENGINE_CONSOLE_ERRORV("Failed get data from GL texture in layer '%i'.", Layer);
 
-                PathToFilePerFace += "_" + std::to_string(i) + _rPathToFile.substr(_rPathToFile.find_last_of('.'));
+				break;
+			}
 
-                SaveBytesToPPM(PathToFilePerFace, pInternTexture->GetNumberOfPixelsU(), pInternTexture->GetNumberOfPixelsV(), pBytes);
-            }
+			// -----------------------------------------------------------------------------
 
-#if PLATFORM_ANDROID
-            glDeleteFramebuffers(1, &Framebuffer);
-#endif
-        }
-        else
-        {
-#if PLATFORM_ANDROID
-            GLuint Framebuffer;
+			std::string NameOfTexture = _rPathToFile.c_str();
 
-            glGenFramebuffers(1, &Framebuffer);
+			if (NumberOfLayers > 1)
+			{
+				NameOfTexture.insert(NameOfTexture.find_last_of('.'), "_l" + std::to_string(Layer));
+			}
 
-            glBindFramebuffer(GL_FRAMEBUFFER, Framebuffer);
+			ilEnable(IL_FILE_OVERWRITE);
 
-            glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, pInternTexture->m_NativeTexture, 0);
-
-            glReadPixels(0, 0, pInternTexture->GetNumberOfPixelsU(), pInternTexture->GetNumberOfPixelsV(), GL_RGB, GL_BYTE, pBytes);
-
-            glDeleteFramebuffers(1, &Framebuffer);
+#ifdef PLATFORM_ANDROID
+            auto pSaveImagePath = NameOfTexture.c_str();
 #else
-            glGetTexImage(pInternTexture->m_NativeBinding, 0, GL_RGB, GL_BYTE, pBytes);
+            auto pSaveImagePath = reinterpret_cast<const wchar_t*>(NameOfTexture.c_str());
 #endif
 
-            SaveBytesToPPM(_rPathToFile, pInternTexture->GetNumberOfPixelsU(), pInternTexture->GetNumberOfPixelsV(), pBytes);
-        }
+			if (!ilSaveImage(pSaveImagePath))
+			{
+				ENGINE_CONSOLE_ERRORV("Failed saving texture '%s'.", _rPathToFile.c_str());
+			}
+		}
 
-        // -----------------------------------------------------------------------------
-        // Release memory
-        // -----------------------------------------------------------------------------
-        Base::CMemory::Free(pBytes);
+#if PLATFORM_ANDROID
+		glDeleteFramebuffers(1, &Framebuffer);
+#endif
+
+		// -----------------------------------------------------------------------------
+
+		Base::CMemory::Free(pData);
     }
 
     // -----------------------------------------------------------------------------
@@ -1113,6 +1098,7 @@ namespace
             rTexture.m_pPixels           = _rDescriptor.m_pPixels;
             rTexture.m_NumberOfPixels[0] = static_cast<Gfx::CTexture::BPixels>(ImageWidth);
             rTexture.m_NumberOfPixels[1] = static_cast<Gfx::CTexture::BPixels>(ImageHeight);
+			rTexture.m_NumberOfPixels[2] = static_cast<Gfx::CTexture::BPixels>(1);
             rTexture.m_Hash              = 0;
             
             rTexture.m_Info.m_Access            = _rDescriptor.m_Access;
@@ -1809,7 +1795,90 @@ namespace
         }
 
         return Texture2DPtr;
-    }
+	}
+
+	// -----------------------------------------------------------------------------
+
+	int CGfxTextureManager::ConvertGLFormatToChannels(Gfx::CTexture::EFormat _Format) const
+	{
+		static int s_NativeFormat[] =
+		{
+			1,
+			2,
+			3,
+			4,
+			1,
+			2,
+			3,
+			4,
+			1,
+			2,
+			3,
+			4,
+			1,
+			2,
+			3,
+			4,
+			1,
+			2,
+			3,
+			4,
+			1,
+			2,
+			3,
+			4,
+
+			1,
+			2,
+			3,
+			4,
+			1,
+			2,
+			3,
+			4,
+			1,
+			2,
+			3,
+			4,
+			1,
+			2,
+			3,
+			4,
+			1,
+			2,
+			3,
+			4,
+			1,
+			2,
+			3,
+			4,
+			1,
+			2,
+			3,
+			4,
+
+			1,
+			2,
+			3,
+			4,
+			1,
+			2,
+			3,
+			4,
+			1,
+			2,
+			3,
+			4,
+
+			3,
+			4,
+			4,
+			4,
+			3,
+		};
+
+		return s_NativeFormat[_Format];
+	}
     
     // -----------------------------------------------------------------------------
     
