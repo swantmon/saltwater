@@ -71,6 +71,7 @@ namespace Dt
             const char* EntityLayerText[SEntityLayer::NumberOfLayers] = { 
                 "Default", 
                 "AR", 
+                "Shadow Only",
                 "IgnoreRaycast", 
                 "UI" 
             };
@@ -78,6 +79,7 @@ namespace Dt
             const SEntityLayer::Enum EntityLayerValue[SEntityLayer::NumberOfLayers] = { 
                 SEntityLayer::Default, 
                 SEntityLayer::AR, 
+                SEntityLayer::ShadowOnly,
                 SEntityLayer::IgnoreRaycast,
                 SEntityLayer::UI 
             };

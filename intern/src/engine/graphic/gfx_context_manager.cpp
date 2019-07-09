@@ -165,7 +165,7 @@ namespace
         static const unsigned int s_NumberOfImageUnits    = 8;
         static const unsigned int s_NumberOfBufferUnits   = 16;
         static const unsigned int s_NumberOfResourceUnits = 16;
-        static const unsigned int s_NumberOfAtomicUnits = 16;
+        static const unsigned int s_NumberOfAtomicUnits   = 16;
 
         static const GLenum s_NativeTopologies[];
         
@@ -184,8 +184,8 @@ namespace
         
     private:
         
-        typedef Base::CManagedPool<CInternRenderContext> CRenderContexts;
-        typedef CRenderContexts::CIterator               CRenderContextIterator;
+        using CRenderContexts = Base::CManagedPool<CInternRenderContext>;
+        using CRenderContextIterator = CRenderContexts::CIterator;
 
     private:
 
@@ -525,7 +525,7 @@ namespace
                 if (RTDescription.BlendEnable == GL_TRUE)
                 {
                     // -----------------------------------------------------------------------------
-                    // Informations from:
+                    // Information from:
                     // https://www.opengl.org/wiki/Blending
                     // https://www.opengl.org/wiki/GLAPI/glBlendEquationSeparate
                     // https://www.opengl.org/wiki/GLAPI/glBlendFuncSeparate
@@ -586,8 +586,8 @@ namespace
             {
                 glEnable(GL_DEPTH_TEST);
                 
-                GLboolean DepthMask = static_cast<GLboolean>(rDescription.DepthWriteMask);
-                GLenum    DepthFunc = rDescription.DepthFunc;
+                auto   DepthMask = static_cast<GLboolean>(rDescription.DepthWriteMask);
+                GLenum DepthFunc = rDescription.DepthFunc;
                 
                 glDepthFunc(DepthFunc);
                 
@@ -813,11 +813,11 @@ namespace
             {
                 CViewPortPtr CurrentViewportPtr = pViewportPtrs[IndexOfViewport];
 
-                GLint TopX = static_cast<GLint>(CurrentViewportPtr->GetTopLeftX());
-                GLint TopY = static_cast<GLint>(CurrentViewportPtr->GetTopLeftY());
+                auto TopX = static_cast<GLint>(CurrentViewportPtr->GetTopLeftX());
+                auto TopY = static_cast<GLint>(CurrentViewportPtr->GetTopLeftY());
 
-                GLsizei Width = static_cast<GLsizei>(CurrentViewportPtr->GetWidth());
-                GLsizei Height = static_cast<GLsizei>(CurrentViewportPtr->GetHeight());
+                auto Width = static_cast<GLsizei>(CurrentViewportPtr->GetWidth());
+                auto Height = static_cast<GLsizei>(CurrentViewportPtr->GetHeight());
 
                 glViewport(TopX, TopY, Width, Height);
             }
@@ -898,7 +898,7 @@ namespace
 
             glEnableVertexAttribArray(IndexOfElement);
 
-            glVertexAttribPointer(IndexOfElement, FormatSize, NativeFormat, GL_FALSE, Stride, (char *)NULL + AlignedByteOffset);
+            glVertexAttribPointer(IndexOfElement, FormatSize, NativeFormat, GL_FALSE, Stride, (char *)nullptr + AlignedByteOffset);
                 
             if (rElement.GetInputClassification() == CInputLayout::PerInstance)
             {
@@ -1264,7 +1264,7 @@ namespace
     {
         if (_SamplerPtr == nullptr) return;
 
-        CNativeSampler* pNativeSampler = 0;
+        CNativeSampler* pNativeSampler = nullptr;
 
         assert(_Unit < s_NumberOfTextureUnits);
 
@@ -1292,14 +1292,14 @@ namespace
 
         GLuint TextureBinding = GL_TEXTURE_2D;
 
-        if (m_TextureUnits[_Unit] != NULL && m_TextureUnits[_Unit]->IsCube())
+        if (m_TextureUnits[_Unit] != nullptr && m_TextureUnits[_Unit]->IsCube())
         {
             TextureBinding = GL_TEXTURE_CUBE_MAP;
         }
 
         glBindTexture(TextureBinding, 0);
 
-        m_TextureUnits[_Unit] = 0;
+        m_TextureUnits[_Unit] = nullptr;
     }
 
     // -----------------------------------------------------------------------------
@@ -1341,7 +1341,7 @@ namespace
 
         glBindImageTexture(_Unit, 0, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA8);
 
-        m_ImageUnits[_Unit] = 0;
+        m_ImageUnits[_Unit] = nullptr;
     }
 
     // -----------------------------------------------------------------------------
@@ -1385,7 +1385,7 @@ namespace
 
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-        m_BufferUnits[_Unit] = 0;
+        m_BufferUnits[_Unit] = nullptr;
     }
 
     // -----------------------------------------------------------------------------
@@ -1394,7 +1394,7 @@ namespace
     {
         if (_BufferPtr == nullptr) return;
 
-        CNativeBuffer* pNativeBuffer = 0;
+        CNativeBuffer* pNativeBuffer = nullptr;
 
         assert(_Unit < s_NumberOfBufferUnits);
 
@@ -1415,7 +1415,7 @@ namespace
     {
         if (_BufferPtr == nullptr) return;
 
-        CNativeBuffer* pNativeBuffer = 0;
+        CNativeBuffer* pNativeBuffer = nullptr;
 
         assert(_Unit < s_NumberOfBufferUnits);
 
@@ -1427,7 +1427,7 @@ namespace
 
         glBindBufferRange(GL_UNIFORM_BUFFER, _Unit, pNativeBuffer->m_NativeBuffer, _Offset, _Range);
 
-        m_BufferUnits[_Unit] = 0; // TODO: store range binding
+        m_BufferUnits[_Unit] = nullptr; // TODO: store range binding
     }
 
     // -----------------------------------------------------------------------------
@@ -1447,7 +1447,7 @@ namespace
 
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
-        m_ResourceUnits[_Unit] = 0;
+        m_ResourceUnits[_Unit] = nullptr;
     }
 
     // -----------------------------------------------------------------------------
@@ -1456,7 +1456,7 @@ namespace
     {
         if (_BufferPtr == nullptr) return;
 
-        CNativeBuffer* pNativeBuffer = 0;
+        CNativeBuffer* pNativeBuffer = nullptr;
 
         assert(_Unit < s_NumberOfResourceUnits);
 
@@ -1477,7 +1477,7 @@ namespace
     {
         if (_BufferPtr == nullptr) return;
 
-        CNativeBuffer* pNativeBuffer = 0;
+        CNativeBuffer* pNativeBuffer = nullptr;
 
         assert(_Unit < s_NumberOfResourceUnits);
 
@@ -1489,7 +1489,7 @@ namespace
 
         glBindBufferRange(GL_SHADER_STORAGE_BUFFER, _Unit, pNativeBuffer->m_NativeBuffer, _Offset, _Range);
 
-        m_ResourceUnits[_Unit] = 0; // TODO: store range binding
+        m_ResourceUnits[_Unit] = nullptr; // TODO: store range binding
     }
 
     // -----------------------------------------------------------------------------
@@ -1509,7 +1509,7 @@ namespace
 
         glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, 0);
 
-        m_AtomicUnits[_Unit] = 0;
+        m_AtomicUnits[_Unit] = nullptr;
     }
 
     // -----------------------------------------------------------------------------
@@ -1518,7 +1518,7 @@ namespace
     {
         if (_BufferPtr == nullptr) return;
 
-        CNativeBuffer* pNativeBuffer = 0;
+        CNativeBuffer* pNativeBuffer = nullptr;
 
         assert(_Unit < s_NumberOfAtomicUnits);
 
@@ -1539,7 +1539,7 @@ namespace
     {
         if (_BufferPtr == nullptr) return;
 
-        CNativeBuffer* pNativeBuffer = 0;
+        CNativeBuffer* pNativeBuffer = nullptr;
 
         assert(_Unit < s_NumberOfAtomicUnits);
 
@@ -1551,7 +1551,7 @@ namespace
 
         glBindBufferRange(GL_ATOMIC_COUNTER_BUFFER, _Unit, pNativeBuffer->m_NativeBuffer, _Offset, _Range);
 
-        m_AtomicUnits[_Unit] = 0; // TODO: store range binding
+        m_AtomicUnits[_Unit] = nullptr; // TODO: store range binding
     }
 
     // -----------------------------------------------------------------------------
@@ -1593,7 +1593,7 @@ namespace
         BASE_UNUSED(_BaseVertexLocation);
 
         ValidatePipeline();
-        glDrawElements(s_NativeTopologies[m_Topology], _NumberOfIndices, GL_UNSIGNED_INT, 0);
+        glDrawElements(s_NativeTopologies[m_Topology], _NumberOfIndices, GL_UNSIGNED_INT, nullptr);
     }
 
     // -----------------------------------------------------------------------------
@@ -1613,7 +1613,7 @@ namespace
         BASE_UNUSED(_StartInstanceLocation);
 
         ValidatePipeline();
-        glDrawElementsInstanced(s_NativeTopologies[m_Topology], _NumberOfIndices, GL_UNSIGNED_INT, 0, _NumberOfInstances);
+        glDrawElementsInstanced(s_NativeTopologies[m_Topology], _NumberOfIndices, GL_UNSIGNED_INT, nullptr, _NumberOfInstances);
     }
 
     // -----------------------------------------------------------------------------
@@ -1685,7 +1685,7 @@ namespace
             GLint LogLength;
             glGetProgramPipelineiv(m_NativeShaderPipeline, GL_INFO_LOG_LENGTH, &LogLength);
 
-            GLchar* pInfoLog = new char[LogLength];
+            auto* pInfoLog = new char[LogLength];
             glGetProgramPipelineInfoLog(m_NativeShaderPipeline, LogLength, &LogLength, pInfoLog);
             ENGINE_CONSOLE_ERROR(pInfoLog);
             delete[] pInfoLog;

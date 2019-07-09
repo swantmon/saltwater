@@ -908,7 +908,7 @@ namespace Edit
             Dt::CEntity& rEntity = Dt::CEntityManager::GetInstance().CreateEntity(EntityDesc);
 
             rEntity.SetName("Plane");
-            rEntity.SetLayer(Dt::SEntityLayer::AR);
+            rEntity.SetLayer(Dt::SEntityLayer::ShadowOnly);
 
             pTransformationFacet = rEntity.GetTransformationFacet();
 
@@ -1202,7 +1202,7 @@ namespace Edit
             Dt::CEntity& rEntity = Dt::CEntityManager::GetInstance().CreateEntity(PlaneEntityDesc);
 
             rEntity.SetName("Plane");
-            rEntity.SetLayer(Dt::SEntityLayer::AR);
+            rEntity.SetLayer(Dt::SEntityLayer::ShadowOnly);
 
             Dt::CTransformationFacet* pPlaneTransformationFacet = rEntity.GetTransformationFacet();
 

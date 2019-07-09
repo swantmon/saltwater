@@ -355,12 +355,12 @@ namespace App
             Dt::CEntity& rEntity = Dt::CEntityManager::GetInstance().CreateEntity(EntityDesc);
 
             rEntity.SetName("Plane");
-            rEntity.SetLayer(Dt::SEntityLayer::AR);
+            rEntity.SetLayer(Dt::SEntityLayer::ShadowOnly);
 
             Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
 
             pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
-            pTransformationFacet->SetScale(glm::vec3(100000.0f, 100000.0f, 0.0001f));
+            pTransformationFacet->SetScale(glm::vec3(4.0f, 4.0f, 0.001f));
             pTransformationFacet->SetRotation(glm::vec3(0.0f));
 
             // -----------------------------------------------------------------------------

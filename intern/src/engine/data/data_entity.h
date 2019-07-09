@@ -37,9 +37,10 @@ namespace Dt
         {
             Default         = 0x01,
             AR              = 0x02,
-            IgnoreRaycast   = 0x04,
-            UI              = 0x08,
-            NumberOfLayers  = 4,
+            ShadowOnly      = 0x04,
+            IgnoreRaycast   = 0x08,
+            UI              = 0x10,
+            NumberOfLayers  = 5,
             UndefinedLayer  = -1
         };
     };

@@ -18,11 +18,13 @@
 #include "engine/data/data_map.h"
 #include "engine/data/data_material_component.h"
 #include "engine/data/data_mesh_component.h"
+#include "engine/data/data_sun_component.h"
 #include "engine/data/data_transformation_facet.h"
 
 #include "engine/graphic/gfx_ar_renderer.h"
 #include "engine/graphic/gfx_buffer_manager.h"
 #include "engine/graphic/gfx_context_manager.h"
+#include "engine/graphic/gfx_debug.h"
 #include "engine/graphic/gfx_main.h"
 #include "engine/graphic/gfx_material.h"
 #include "engine/graphic/gfx_mesh.h"
@@ -31,6 +33,7 @@
 #include "engine/graphic/gfx_state_manager.h"
 #include "engine/graphic/gfx_sampler_manager.h"
 #include "engine/graphic/gfx_shader_manager.h"
+#include "engine/graphic/gfx_sun.h"
 #include "engine/graphic/gfx_target_set_manager.h"
 #include "engine/graphic/gfx_texture_manager.h"
 #include "engine/graphic/gfx_view_manager.h"
@@ -98,14 +101,13 @@ namespace
 
     private:
 
-        typedef std::vector<SRenderJob> CRenderJobs;
+        using CRenderJobs = std::vector<SRenderJob>;
 
     private:
 
         CBufferPtr m_ModelBufferPtr;
         CBufferPtr m_MaterialPSBufferPtr;
         CBufferPtr m_HitProxyPassPSBufferPtr;
-
         CRenderContextPtr m_DeferredRenderContextPtr;
 
         CShaderPtr m_DifferentialGBufferShaderPSPtr;
@@ -115,7 +117,7 @@ namespace
 
     private:
 
-        void BuildRenderJobs();     
+        void BuildRenderJobs();
     };
 } // namespace
 
@@ -153,19 +155,19 @@ namespace
 
     void CGfxARRenderer::OnExit()
     {
-        m_ModelBufferPtr                   = 0;
-        m_MaterialPSBufferPtr              = 0;
-        m_HitProxyPassPSBufferPtr          = 0;
-        m_DeferredRenderContextPtr         = 0;
-        m_DifferentialGBufferShaderPSPtr   = 0;
-        m_HitProxyShaderPtr                = 0;
+        m_ModelBufferPtr                 = nullptr;
+        m_MaterialPSBufferPtr            = nullptr;
+        m_HitProxyPassPSBufferPtr        = nullptr;
+        m_DeferredRenderContextPtr       = nullptr;
+        m_DifferentialGBufferShaderPSPtr = nullptr;
+        m_HitProxyShaderPtr              = nullptr;
 
         // -----------------------------------------------------------------------------
         // Iterate throw render jobs to release managed pointer
         // -----------------------------------------------------------------------------
         for (auto& rCurrentRenderJob : m_RenderJobs)
         {
-            rCurrentRenderJob.m_SurfacePtr = 0;
+            rCurrentRenderJob.m_SurfacePtr = nullptr;
         }
 
         m_RenderJobs.clear();
@@ -229,8 +231,8 @@ namespace
         ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
         ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
         ConstanteBufferDesc.m_NumberOfBytes = sizeof(SPerDrawCallConstantBufferVS);
-        ConstanteBufferDesc.m_pBytes        = 0;
-        ConstanteBufferDesc.m_pClassKey     = 0;
+        ConstanteBufferDesc.m_pBytes        = nullptr;
+        ConstanteBufferDesc.m_pClassKey     = nullptr;
 
         m_ModelBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
@@ -241,8 +243,8 @@ namespace
         ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
         ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
         ConstanteBufferDesc.m_NumberOfBytes = sizeof(CMaterial::SMaterialAttributes);
-        ConstanteBufferDesc.m_pBytes        = 0;
-        ConstanteBufferDesc.m_pClassKey     = 0;
+        ConstanteBufferDesc.m_pBytes        = nullptr;
+        ConstanteBufferDesc.m_pClassKey     = nullptr;
 
         m_MaterialPSBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
 
@@ -253,8 +255,8 @@ namespace
         ConstanteBufferDesc.m_Binding       = CBuffer::ConstantBuffer;
         ConstanteBufferDesc.m_Access        = CBuffer::CPUWrite;
         ConstanteBufferDesc.m_NumberOfBytes = sizeof(SHitProxyProperties);
-        ConstanteBufferDesc.m_pBytes        = 0;
-        ConstanteBufferDesc.m_pClassKey     = 0;
+        ConstanteBufferDesc.m_pBytes        = nullptr;
+        ConstanteBufferDesc.m_pClassKey     = nullptr;
 
         m_HitProxyPassPSBufferPtr = BufferManager::CreateBuffer(ConstanteBufferDesc);
     }
@@ -311,7 +313,7 @@ namespace
 
     void CGfxARRenderer::Render()
     {
-        if (m_RenderJobs.size() == 0) return;
+        if (m_RenderJobs.empty()) return;
 
         auto DataCameraComponents = Dt::CComponentManager::GetInstance().GetComponents<Dt::CCameraComponent>();
 
@@ -319,7 +321,7 @@ namespace
 
         for (auto Component : DataCameraComponents)
         {
-            Dt::CCameraComponent* pDtComponent = static_cast<Dt::CCameraComponent*>(Component);
+            auto* pDtComponent = static_cast<Dt::CCameraComponent*>(Component);
 
             if (pDtComponent->IsActiveAndUsable() == false) continue;
 
@@ -328,7 +330,7 @@ namespace
 
         if (BackgroundTexturePtr == nullptr) return;
 
-        Performance::BeginEvent("DGB");
+        Performance::BeginEvent("AR: Differential GBuffer");
 
         ContextManager::SetRenderContext(m_DeferredRenderContextPtr);
 
@@ -400,7 +402,7 @@ namespace
 
     void CGfxARRenderer::RenderHitProxy()
     {
-        if (m_RenderJobs.size() == 0) return;
+        if (m_RenderJobs.empty()) return;
 
         Performance::BeginEvent("AR Hit Proxy");
 
@@ -418,21 +420,19 @@ namespace
         // -----------------------------------------------------------------------------
         // First pass: iterate throw render jobs and compute all meshes
         // -----------------------------------------------------------------------------
-        CRenderJobs::const_iterator EndOfRenderJobs = m_RenderJobs.end();
-
-        for (CRenderJobs::const_iterator CurrentRenderJob = m_RenderJobs.begin(); CurrentRenderJob != EndOfRenderJobs; ++CurrentRenderJob)
+        for (auto CurrentRenderJob : m_RenderJobs)
         {
-            CSurfacePtr  SurfacePtr = CurrentRenderJob->m_SurfacePtr;
+            CSurfacePtr  SurfacePtr = CurrentRenderJob.m_SurfacePtr;
 
             SPerDrawCallConstantBufferVS ModelBuffer;
 
-            ModelBuffer.m_ModelMatrix = CurrentRenderJob->m_ModelMatrix;
+            ModelBuffer.m_ModelMatrix = CurrentRenderJob.m_ModelMatrix;
 
             BufferManager::UploadBufferData(m_ModelBufferPtr, &ModelBuffer);
 
             SHitProxyProperties HitProxyProperties;
 
-            HitProxyProperties.m_ID = static_cast<unsigned int>(CurrentRenderJob->m_EntityID);
+            HitProxyProperties.m_ID = static_cast<unsigned int>(CurrentRenderJob.m_EntityID);
 
             BufferManager::UploadBufferData(m_HitProxyPassPSBufferPtr, &HitProxyProperties);
 
@@ -464,7 +464,7 @@ namespace
 
         for (auto Component : DataMeshComponents)
         {
-            Dt::CMeshComponent* pDtComponent = static_cast<Dt::CMeshComponent*>(Component);
+            auto* pDtComponent = static_cast<Dt::CMeshComponent*>(Component);
 
             if (pDtComponent->IsActiveAndUsable() == false) continue;
 
@@ -472,7 +472,7 @@ namespace
 
             if (rCurrentEntity.GetLayer() & Dt::SEntityLayer::AR)
             {
-                Gfx::CMesh* pGfxComponent = static_cast<Gfx::CMesh*>(pDtComponent->GetFacet(Dt::CMeshComponent::Graphic));
+                auto* pGfxComponent = static_cast<Gfx::CMesh*>(pDtComponent->GetFacet(Dt::CMeshComponent::Graphic));
 
                 // -----------------------------------------------------------------------------
                 // Surface
@@ -493,7 +493,7 @@ namespace
                     }
                 }
 
-                assert(pMaterial != 0);
+                assert(pMaterial != nullptr);
 
                 // -----------------------------------------------------------------------------
                 // Set information to render job
