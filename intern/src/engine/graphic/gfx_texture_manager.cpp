@@ -674,6 +674,7 @@ namespace
 		auto NumberOfChannels = ConvertGLFormatToChannels(pInternTexture->GetFormat());
 		auto BPP			  = ConvertGLFormatToBytesPerPixel(pInternTexture->GetFormat());
 		auto NumberOfBytes    = NumberOfPixels * BPP;
+		auto Level		      = pInternTexture->GetCurrentMipLevel();
 
 		if (Depth > 1)
 		{
@@ -700,9 +701,39 @@ namespace
 
 		const auto NumberOfLayers = pInternTexture->IsCube() ? 6 : 1;
 
+#if PLATFORM_ANDROID
+		GLuint Framebuffer;
+
+		glGenFramebuffers(1, &Framebuffer);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, Framebuffer);
+#endif
+
 		for (int Layer = 0; Layer < NumberOfLayers; ++Layer)
 		{
-			glGetTexImage(NativeBinding, Layer, Format, ImageType, pData);
+#if PLATFORM_ANDROID
+		    if (pInternTexture->IsCube())
+            {
+                glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + Layer, pInternTexture->m_NativeTexture, Level);
+            }
+            else
+            {
+				glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, pInternTexture->m_NativeTexture, Level);
+            }
+
+            GLenum Status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+
+            glReadPixels(0, 0, pInternTexture->GetNumberOfPixelsU(), pInternTexture->GetNumberOfPixelsV(), Format, ImageType, pData);
+#else
+			if (pInternTexture->IsCube())
+			{
+				glGetTexImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + Layer, Level, Format, ImageType, pData);
+			}
+			else
+			{
+				glGetTexImage(NativeBinding, Level, Format, ImageType, pData);
+			}
+#endif
 
 			if (!ilTexImage(Width, Height, Depth, (ILubyte)NumberOfChannels, Format, ImageType, pData))
 			{
@@ -722,11 +753,21 @@ namespace
 
 			ilEnable(IL_FILE_OVERWRITE);
 
-			if (!ilSaveImage(reinterpret_cast<const wchar_t*>(NameOfTexture.c_str())))
+#ifdef PLATFORM_ANDROID
+            auto pSaveImagePath = NameOfTexture.c_str();
+#else
+            auto pSaveImagePath = reinterpret_cast<const wchar_t*>(NameOfTexture.c_str());
+#endif
+
+			if (!ilSaveImage(pSaveImagePath))
 			{
 				ENGINE_CONSOLE_ERRORV("Failed saving texture '%s'.", _rPathToFile.c_str());
 			}
 		}
+
+#if PLATFORM_ANDROID
+		glDeleteFramebuffers(1, &Framebuffer);
+#endif
 
 		// -----------------------------------------------------------------------------
 

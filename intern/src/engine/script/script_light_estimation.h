@@ -366,9 +366,9 @@ namespace Scpt
 
             // -----------------------------------------------------------------------------
 
-            Gfx::TextureManager::SaveTexture(m_PanoramaTexturePtr, Core::AssetManager::GetPathToFiles() + "/env_panorama.ppm");
+            Gfx::TextureManager::SaveTexture(m_PanoramaTexturePtr, Core::AssetManager::GetPathToAssets() + "/env_panorama.png");
 
-            Gfx::TextureManager::SaveTexture(m_OutputCubemapPtr, Core::AssetManager::GetPathToFiles() + "/env_cubemap.ppm");
+            Gfx::TextureManager::SaveTexture(m_OutputCubemapPtr, Core::AssetManager::GetPathToAssets() + "/env_cubemap.png");
         }
 
         // -----------------------------------------------------------------------------
