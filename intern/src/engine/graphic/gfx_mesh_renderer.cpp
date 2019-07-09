@@ -145,7 +145,6 @@ namespace
         CBufferPtr        m_ForwardPassBufferPtr;
         CBufferPtr        m_LightPropertiesBufferPtr;
         CShaderPtr        m_HitProxyShaderPtr;
-        CRenderContextPtr m_DeferredContextPtr;
         CRenderJobs       m_DeferredRenderJobs;
         CRenderJobs       m_ForwardRenderJobs;
         CRenderJobs       m_HitproxyRenderJobs;
@@ -167,7 +166,6 @@ namespace
         , m_ForwardPassBufferPtr    ()
         , m_LightPropertiesBufferPtr()
         , m_HitProxyShaderPtr       ()
-        , m_DeferredContextPtr      ()
         , m_DeferredRenderJobs      ()
         , m_ForwardRenderJobs       ()
         , m_ForwardLightTextures    ()
@@ -204,7 +202,6 @@ namespace
         m_ForwardPassBufferPtr     = nullptr;
         m_LightPropertiesBufferPtr = nullptr;
         m_HitProxyShaderPtr        = nullptr;
-        m_DeferredContextPtr       = nullptr;
 
         // -----------------------------------------------------------------------------
         // Iterate throw render jobs to release managed pointer
@@ -269,19 +266,7 @@ namespace
 
     void CGfxMeshRenderer::OnSetupStates()
     {
-        CCameraPtr      CameraPtr              = ViewManager     ::GetMainCamera ();
-        CViewPortSetPtr ViewPortSetPtr         = ViewManager     ::GetViewPortSet();
-        CRenderStatePtr DeferredRenderStatePtr = StateManager    ::GetRenderState(0);
-        CTargetSetPtr   DeferredTargetSetPtr   = TargetSetManager::GetDeferredTargetSet();
-
-        CRenderContextPtr RenderContextPtr = ContextManager::CreateRenderContext();
-
-        RenderContextPtr->SetCamera(CameraPtr);
-        RenderContextPtr->SetViewPortSet(ViewPortSetPtr);
-        RenderContextPtr->SetTargetSet(DeferredTargetSetPtr);
-        RenderContextPtr->SetRenderState(DeferredRenderStatePtr);
-
-        m_DeferredContextPtr = RenderContextPtr;
+        
     }
 
     // -----------------------------------------------------------------------------
@@ -434,7 +419,15 @@ namespace
         // -----------------------------------------------------------------------------
         // Prepare renderer
         // -----------------------------------------------------------------------------
-        ContextManager::SetRenderContext(m_DeferredContextPtr);
+		ContextManager::SetTargetSet(TargetSetManager::GetDeferredTargetSet());
+
+		ContextManager::SetViewPortSet(ViewManager::GetViewPortSet());
+
+		ContextManager::SetBlendState(StateManager::GetBlendState(CBlendState::Default));
+
+		ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::Default));
+
+		ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::Default));
 
         // -----------------------------------------------------------------------------
         // Iterate throw render jobs and render all meshes
