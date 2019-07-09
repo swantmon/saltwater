@@ -25,9 +25,9 @@ namespace GUI
 
     public:
 
-        void Render();
+        void Render() override;
 
-        const char* GetName();
+        const char* GetName() override;
 
     private:
 
