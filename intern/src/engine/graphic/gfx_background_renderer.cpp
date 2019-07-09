@@ -554,7 +554,7 @@ namespace
 
         ContextManager::SetBlendState(StateManager::GetBlendState(CBlendState::Default));
 
-        ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::LessEqualDepth));
+        ContextManager::SetDepthStencilState(StateManager::GetDepthStencilState(CDepthStencilState::NoWriteDepth));
 
         ContextManager::SetRasterizerState(StateManager::GetRasterizerState(CRasterizerState::NoCull));
 
