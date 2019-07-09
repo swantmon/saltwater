@@ -723,7 +723,7 @@ namespace
 
             GLenum Status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 
-            glReadPixels(0, 0, pInternTexture->GetNumberOfPixelsU(), pInternTexture->GetNumberOfPixelsV(), Format, ImageType, pData);
+            glReadPixels(0, 0, pInternTexture->GetNumberOfPixelsU(), pInternTexture->GetNumberOfPixelsV(), GL_RGBA, GL_UNSIGNED_BYTE, pData);
 #else
 			if (pInternTexture->IsCube())
 			{
