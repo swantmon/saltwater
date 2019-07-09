@@ -189,7 +189,11 @@ namespace MR
 
         std::fstream m_RecordFile;
         std::unique_ptr<Base::CRecordWriter> m_pRecordWriter;
-        std::unique_ptr<Base::CRecordReader> m_pRecordReader;
+		std::unique_ptr<Base::CRecordReader> m_pRecordReader;
+
+		int m_NumberOfExtractedFrame;
+
+		bool m_ExtractStream;
 
         // -----------------------------------------------------------------------------
         // Stuff for inpainting
@@ -255,6 +259,12 @@ namespace MR
             m_pSelectionTicket = &Gfx::SelectionRenderer::AcquireTicket(-1, -1, 1, 1, Gfx::SPickFlag::Voxel);
 
             Gfx::ReconstructionRenderer::SetReconstructor(m_Reconstructor);
+
+			// -----------------------------------------------------------------------------
+			// Settings
+			// -----------------------------------------------------------------------------
+			m_ExtractStream = Core::CProgramParameters::GetInstance().Get("mr:slam:recording:extract_stream", false);
+			m_NumberOfExtractedFrame = 0;
 
             // -----------------------------------------------------------------------------
             // Determine where we get our data from
@@ -928,6 +938,25 @@ namespace MR
                 if (m_StreamState == STREAM_SLAM)
                 {
                     m_Reconstructor.OnNewFrame(m_DepthTexture, m_RGBATexture, &m_PoseMatrix, m_ColorIntrinsics.m_FocalLength, m_ColorIntrinsics.m_FocalPoint);
+
+					if (m_ExtractStream)
+					{
+						auto FrameString = std::to_string(m_NumberOfExtractedFrame);
+
+						auto PathToDepthTexture = Core::AssetManager::GetPathToAssets() + "/" + FrameString + "_depth.raw";
+						auto PathToColorTexture = Core::AssetManager::GetPathToAssets() + "/" + FrameString + "_color.png";
+
+						Gfx::TextureManager::SaveTexture(m_DepthTexture, PathToDepthTexture);
+						Gfx::TextureManager::SaveTexture(m_RGBATexture, PathToColorTexture);
+
+						std::ofstream PoseMatrixStream(Core::AssetManager::GetPathToAssets() + "/" + FrameString + "_pose.byte", std::ofstream::binary);
+
+						PoseMatrixStream.write((char*)(&m_PoseMatrix), sizeof(m_PoseMatrix));
+
+						PoseMatrixStream.close();
+
+						++m_NumberOfExtractedFrame;
+					}
                 }
                 else
                 {
