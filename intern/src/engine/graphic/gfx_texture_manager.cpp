@@ -672,7 +672,8 @@ namespace
 		auto Depth			  = pInternTexture->GetNumberOfPixelsW();
 		auto NumberOfPixels   = Width * Height * Depth;
 		auto NumberOfChannels = ConvertGLFormatToChannels(pInternTexture->GetFormat());
-		auto NumberOfBytes    = NumberOfPixels * ConvertGLFormatToBytesPerPixel(pInternTexture->GetFormat());
+		auto BPP			  = ConvertGLFormatToBytesPerPixel(pInternTexture->GetFormat());
+		auto NumberOfBytes    = NumberOfPixels * BPP;
 
 		if (Depth > 1)
 		{
