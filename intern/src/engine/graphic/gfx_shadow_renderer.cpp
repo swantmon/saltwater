@@ -815,7 +815,7 @@ namespace
         // -----------------------------------------------------------------------------
         // Jobs
         // -----------------------------------------------------------------------------
-        for (auto& RenderJob : m_RenderJobs)
+        for (const auto& RenderJob : m_RenderJobs)
         {
             const CMaterial* pMaterial = RenderJob.m_SurfaceMaterialPtr;
 

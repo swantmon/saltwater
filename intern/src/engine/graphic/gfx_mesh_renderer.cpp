@@ -432,18 +432,18 @@ namespace
         // -----------------------------------------------------------------------------
         // Iterate throw render jobs and render all meshes
         // -----------------------------------------------------------------------------
-        for (auto CurrentRenderJob : m_DeferredRenderJobs)
+        for (const auto& rCurrentRenderJob : m_DeferredRenderJobs)
         {
-            CSurfacePtr SurfacePtr = CurrentRenderJob.m_SurfacePtr;
+            CSurfacePtr SurfacePtr = rCurrentRenderJob.m_SurfacePtr;
 
-            const CMaterial* pMaterial = CurrentRenderJob.m_SurfaceMaterialPtr;
+            const CMaterial* pMaterial = rCurrentRenderJob.m_SurfaceMaterialPtr;
 
             // -----------------------------------------------------------------------------
             // Upload data to buffer
             // -----------------------------------------------------------------------------
             SPerDrawCallConstantBufferVS ModelBuffer;
 
-            ModelBuffer.m_ModelMatrix = CurrentRenderJob.m_ModelMatrix;
+            ModelBuffer.m_ModelMatrix = rCurrentRenderJob.m_ModelMatrix;
 
             BufferManager::UploadBufferData(m_ModelBufferPtr, &ModelBuffer);
 
@@ -605,16 +605,16 @@ namespace
         // -----------------------------------------------------------------------------
         // Actors
         // -----------------------------------------------------------------------------
-        for (auto RenderJob : m_ForwardRenderJobs)
+        for (const auto& rRenderJob : m_ForwardRenderJobs)
         {
-            const CMaterial* pMaterial = RenderJob.m_SurfaceMaterialPtr;
+            const CMaterial* pMaterial = rRenderJob.m_SurfaceMaterialPtr;
 
             // -----------------------------------------------------------------------------
             // Upload data to buffer
             // -----------------------------------------------------------------------------
             SPerDrawCallConstantBufferVS ModelBuffer;
 
-            ModelBuffer.m_ModelMatrix = RenderJob.m_ModelMatrix;
+            ModelBuffer.m_ModelMatrix = rRenderJob.m_ModelMatrix;
 
             BufferManager::UploadBufferData(m_ModelBufferPtr, &ModelBuffer);
 
@@ -623,7 +623,7 @@ namespace
             // -----------------------------------------------------------------------------
             // Surface
             // -----------------------------------------------------------------------------
-            CSurfacePtr SurfacePtr = RenderJob.m_SurfacePtr;
+            CSurfacePtr SurfacePtr = rRenderJob.m_SurfacePtr;
 
             // -----------------------------------------------------------------------------
             // Set shader
