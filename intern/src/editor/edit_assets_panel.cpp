@@ -75,6 +75,8 @@ namespace GUI
         if (!ImGui::Begin("Assets", &m_IsVisible))
         {
             ImGui::End();
+
+			return;
         }
 
         bool DoGoUp = false;
