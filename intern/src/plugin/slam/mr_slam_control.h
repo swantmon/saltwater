@@ -949,9 +949,11 @@ namespace MR
 						Gfx::TextureManager::SaveTexture(m_DepthTexture, PathToDepthTexture);
 						Gfx::TextureManager::SaveTexture(m_RGBATexture, PathToColorTexture);
 
-						std::ofstream PoseMatrixStream(Core::AssetManager::GetPathToAssets() + "/" + FrameString + "_pose.byte", std::ofstream::binary);
+						std::ofstream PoseMatrixStream(Core::AssetManager::GetPathToAssets() + "/" + FrameString + "_pose_intrinsics.byte", std::ofstream::binary);
 
 						PoseMatrixStream.write((char*)(&m_PoseMatrix), sizeof(m_PoseMatrix));
+						PoseMatrixStream.write((char*)(&m_ColorIntrinsics.m_FocalLength), sizeof(m_ColorIntrinsics.m_FocalLength));
+						PoseMatrixStream.write((char*)(&m_ColorIntrinsics.m_FocalPoint), sizeof(m_ColorIntrinsics.m_FocalPoint));
 
 						PoseMatrixStream.close();
 
