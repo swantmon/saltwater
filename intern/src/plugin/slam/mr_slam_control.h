@@ -403,7 +403,7 @@ namespace MR
                 m_RecordMode = RECORD;
                 m_RecordFile.open(FileName, std::fstream::out | std::fstream::binary);
 
-                ENGINE_CONSOLE_INFOV("Recoding into file file \"%s\"", FileName.c_str());
+                ENGINE_CONSOLE_INFOV("Recording into file file \"%s\"", FileName.c_str());
             }
             else if (RecordParam == "none")
             {
