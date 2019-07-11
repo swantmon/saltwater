@@ -1,8 +1,9 @@
 #ifndef __INCLUDE_CS_WLS_GLSL__
 #define __INCLUDE_CS_WLS_GLSL__
 
-layout (binding = 0, r32f) readonly uniform image2D cs_Disp_DownSample; // Pixel in image2D is 32-bit float
-layout (binding = 1, r32f) writeonly uniform image2D cs_Disp_UpSample; // Pixel in image2D is 32-bit float
+layout (binding = 0, r32f) readonly uniform image2D cs_Disp_LR; // Pixel in image2D is 32-bit float
+layout (binding = 1, r8) readonly uniform image2D cs_Img_HR; // Pixel in image2D is 8-bit float (0~255 -> 0~1)
+layout (binding = 2, r32f) writeonly uniform image2D cs_Disp_HR; // Pixel in image2D is 32-bit float
 
 float BiLinearInterpolation(vec2 pixPosition)
 {
