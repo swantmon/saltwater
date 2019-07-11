@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <base/base_singleton.h>
+
 #include <filesystem>
 #include <regex>
 #include <string>
@@ -10,6 +12,8 @@ namespace Edit
 {
     class CImFileFialog 
     {
+        BASE_SINGLETON_FUNC(CImFileFialog);
+
     public:
 
         enum EConfig
@@ -21,9 +25,7 @@ namespace Edit
 
     public:
 
-        CImFileFialog(const std::string& _rTitle, const std::regex& _rFilter = std::regex(".*.[]?"), const std::string& _rRoot = ".", int _Config = 0);
-
-        void Open();
+        void Open(const std::string& _rTitle, const std::regex& _rFilter = std::regex(".*.[]?"), const std::string& _rRoot = ".", int _Config = 0);
         
         bool Draw();
 
@@ -106,7 +108,7 @@ namespace Edit
         EConfig m_Config;
 
     private:
-
+        
         void FillRoots();
         void ClearCache();
     };

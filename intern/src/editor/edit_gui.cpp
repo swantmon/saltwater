@@ -128,9 +128,6 @@ namespace
 
         std::string m_OpenSceneName;
 
-        Edit::CImFileFialog m_OpenSceneDialog;
-        Edit::CImFileFialog m_SaveSceneAsDialog;
-
         Engine::CEventDelegates::HandleType m_GfxOnRenderGUIDelegate;
 
     private:
@@ -162,9 +159,7 @@ namespace
         , m_WantsToExit        (false)
         , m_WantsToOpenScene   (false)
         , m_WantsToSaveScene   (false)
-        , m_OpenSceneName      ("")
-        , m_OpenSceneDialog    ("Open scene...", CAsset::s_Filter[CAsset::Scene], Core::AssetManager::GetPathToAssets(), CImFileFialog::RootIsRoot)
-        , m_SaveSceneAsDialog  ("Save scene...", CAsset::s_Filter[CAsset::Scene], Core::AssetManager::GetPathToAssets(), CImFileFialog::RootIsRoot | CImFileFialog::SaveDialog)
+        , m_OpenSceneName("")
     {                          
     }
     
@@ -396,9 +391,9 @@ namespace
         // -----------------------------------------------------------------------------
         // Dialogs
         // -----------------------------------------------------------------------------
-        if (m_SaveSceneAsDialog.Draw())
+        if (CImFileFialog::GetInstance().Draw())
         {
-            auto Files = m_SaveSceneAsDialog.GetSelectedFiles();
+            auto Files = CImFileFialog::GetInstance().GetSelectedFiles();
 
             if (!Files.empty())
             {
@@ -419,9 +414,9 @@ namespace
             }
         }
 
-        if (m_OpenSceneDialog.Draw())
+        if (CImFileFialog::GetInstance().Draw())
         {
-            auto Files = m_OpenSceneDialog.GetSelectedFiles();
+            auto Files = CImFileFialog::GetInstance().GetSelectedFiles();
 
             if (!Files.empty())
             {
@@ -552,7 +547,7 @@ namespace
             {
                 if (ImGui::MenuItem("Open Scene", "CTRL+O"))
                 {
-                    m_OpenSceneDialog.Open();
+                    CImFileFialog::GetInstance().Open("Open scene...", CAsset::s_Filter[CAsset::Scene], Core::AssetManager::GetPathToAssets(), CImFileFialog::RootIsRoot);
                 }
 
                 if (ImGui::MenuItem("Save", "CTRL+S"))
@@ -562,7 +557,7 @@ namespace
 
                 if (ImGui::MenuItem("Save As", "CTRL+SHIFT+S"))
                 {
-                    m_SaveSceneAsDialog.Open();
+                    CImFileFialog::GetInstance().Open("Save scene...", CAsset::s_Filter[CAsset::Scene], Core::AssetManager::GetPathToAssets(), CImFileFialog::RootIsRoot | CImFileFialog::SaveDialog);
                 }
 
                 ImGui::Separator();
@@ -843,9 +838,9 @@ namespace
             
             if ((Mod & KMOD_ALT) != 0 && Key == SDLK_RETURN) ToggleFullscreen();
             else if ((Mod & KMOD_ALT) != 0 && Key == SDLK_HASH) ToggleGUI();
-            else if ((Mod & KMOD_CTRL) && (Mod & KMOD_SHIFT) && Key == SDLK_s) m_SaveSceneAsDialog.Open();
+            else if ((Mod & KMOD_CTRL) && (Mod & KMOD_SHIFT) && Key == SDLK_s) CImFileFialog::GetInstance().Open("Save scene...", CAsset::s_Filter[CAsset::Scene], Core::AssetManager::GetPathToAssets(), CImFileFialog::RootIsRoot | CImFileFialog::SaveDialog);
             else if ((Mod & KMOD_CTRL) && Key == SDLK_s) m_WantsToSaveScene = true;
-            else if ((Mod & KMOD_CTRL) && Key == SDLK_o) m_OpenSceneDialog.Open();
+            else if ((Mod & KMOD_CTRL) && Key == SDLK_o) CImFileFialog::GetInstance().Open("Open scene...", CAsset::s_Filter[CAsset::Scene], Core::AssetManager::GetPathToAssets(), CImFileFialog::RootIsRoot);
             break;
         case SDL_KEYUP:
             Key = _rSDLEvent.key.keysym.sym;
@@ -857,7 +852,7 @@ namespace
             break;
         }
     }
-
+    
     // -----------------------------------------------------------------------------
 
     void CEditorGui::ProcessMouseEvents(const SDL_Event& _rSDLEvent)
