@@ -33,13 +33,6 @@ namespace Dt
 
         // -----------------------------------------------------------------------------
 
-        const char* GetHeader()
-        {
-            return "Anti Aliasing";
-        }
-
-        // -----------------------------------------------------------------------------
-
         void OnNewComponent(Dt::CEntity::BID _ID)
         {
             Dt::CEntity* pCurrentEntity = Dt::CEntityManager::GetInstance().GetEntityByID(_ID);

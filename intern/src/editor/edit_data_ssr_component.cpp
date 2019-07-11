@@ -7,7 +7,5 @@
 
 namespace Dt
 {
-    REGISTER_GUI(CSSRComponentGUI, CSSRComponent);
-
-    REGISTER_COMPONENT(CSSRComponentGUI);
+    REGISTER_COMPONENT_GUI(CSSRComponentGUI, CSSRComponent, "Screen Space Reflections");
 } // namespace Dt

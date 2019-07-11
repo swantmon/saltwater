@@ -88,13 +88,6 @@ namespace Dt
 
         // -----------------------------------------------------------------------------
 
-        const char* GetHeader()
-        {
-            return "Material";
-        }
-
-        // -----------------------------------------------------------------------------
-
         void OnDropAsset(const Edit::CAsset& _rAsset)
         {
             if (_rAsset.GetType() == Edit::CAsset::Material)

@@ -23,13 +23,6 @@ namespace Scpt
 
         // -----------------------------------------------------------------------------
 
-        const char* GetHeader()
-        {
-            return "Camera Control (Script)";
-        }
-
-        // -----------------------------------------------------------------------------
-
         void OnNewComponent(Dt::CEntity::BID _ID)
         {
             Dt::CEntity* pCurrentEntity = Dt::CEntityManager::GetInstance().GetEntityByID(_ID);

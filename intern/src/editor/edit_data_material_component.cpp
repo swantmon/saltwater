@@ -6,5 +6,5 @@
 
 namespace Dt
 {
-    REGISTER_GUI(CMaterialComponentGUI, CMaterialComponent);
+    REGISTER_GUI(CMaterialComponentGUI, CMaterialComponent, "Material");
 } // namespace Dt

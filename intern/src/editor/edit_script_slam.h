@@ -77,13 +77,6 @@ namespace Scpt
 
         // -----------------------------------------------------------------------------
 
-        const char* GetHeader()
-        {
-            return "SLAM (Script)";
-        }
-
-        // -----------------------------------------------------------------------------
-
         void OnNewComponent(Dt::CEntity::BID _ID)
         {
             Dt::CEntity* pCurrentEntity = Dt::CEntityManager::GetInstance().GetEntityByID(_ID);

@@ -128,8 +128,6 @@ namespace GUI
                         
                         if (ImGui::CollapsingHeader(Panel->GetHeader()))
                         {
-                            ImGui::BeginChild("COMPONENT");
-
                             bool IsActive = pComponent->IsActive();
 
                             if (ImGui::Checkbox("Active##ComponentActive", &IsActive))
@@ -143,10 +141,8 @@ namespace GUI
                             {
                                 Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Dt::IComponent::DirtyInfo);
 
-                                CEditState::GetInstance().SetDirty();
-                            }
-
-                            ImGui::EndChild();
+								HasChanged = true;
+							}
                         }
 
                         ImGui::PopID();
@@ -159,7 +155,7 @@ namespace GUI
 
                                 Panel->OnDropAsset(DraggedAsset);
 
-                                HasChanged = true;
+								Dt::CComponentManager::GetInstance().MarkComponentAsDirty(*pComponent, Dt::IComponent::DirtyInfo);
                             }
 
                             ImGui::EndDragDropTarget();
