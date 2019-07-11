@@ -393,39 +393,41 @@ namespace
         // -----------------------------------------------------------------------------
         if (CImFileFialog::GetInstance().Draw())
         {
-            auto Files = CImFileFialog::GetInstance().GetSelectedFiles();
-
-            if (!Files.empty())
+            if (CImFileFialog::GetInstance().IsSaveDialog())
             {
-                auto rSceneFile = Files[0];
+                auto Files = CImFileFialog::GetInstance().GetSelectedFiles();
 
-                if (!regex_match(rSceneFile, CAsset::s_Filter[CAsset::Scene]))
+                if (!Files.empty())
                 {
-                    rSceneFile += ".sws";
+                    auto rSceneFile = Files[0];
+
+                    if (!regex_match(rSceneFile, CAsset::s_Filter[CAsset::Scene]))
+                    {
+                        rSceneFile += ".sws";
+                    }
+
+                    Edit::CEditState::GetInstance().SetNextState(CState::UnloadMap);
+
+                    Edit::CUnloadMapState::GetInstance().SaveToFile(rSceneFile);
+
+                    Edit::CUnloadMapState::GetInstance().SetNextState(CState::Edit);
+
+                    CEditState::GetInstance().SetDirty(false);
                 }
-
-                Edit::CEditState::GetInstance().SetNextState(CState::UnloadMap);
-
-                Edit::CUnloadMapState::GetInstance().SaveToFile(rSceneFile);
-
-                Edit::CUnloadMapState::GetInstance().SetNextState(CState::Edit);
-
-                CEditState::GetInstance().SetDirty(false);
             }
-        }
-
-        if (CImFileFialog::GetInstance().Draw())
-        {
-            auto Files = CImFileFialog::GetInstance().GetSelectedFiles();
-
-            if (!Files.empty())
+            else
             {
-                auto rSceneFile = Files[0];
+                auto Files = CImFileFialog::GetInstance().GetSelectedFiles();
 
-                SwitchScene(rSceneFile);
+                if (!Files.empty())
+                {
+                    auto rSceneFile = Files[0];
+
+                    SwitchScene(rSceneFile);
+                }
             }
         }
-
+        
         if ((m_WantsToExit || m_WantsToOpenScene) && CEditState::GetInstance().IsDirty() == true)
         {
             ImGui::OpenPopup("Scene Have Been Modified");

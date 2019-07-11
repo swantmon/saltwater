@@ -29,6 +29,8 @@ namespace Edit
         
         bool Draw();
 
+        bool IsSaveDialog();
+
         const std::vector<std::string>& GetSelectedFiles() const;
 
     private:

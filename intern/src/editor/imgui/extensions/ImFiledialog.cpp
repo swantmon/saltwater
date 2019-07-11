@@ -123,6 +123,13 @@ namespace Edit
 
     // -----------------------------------------------------------------------------
 
+    bool CImFileFialog::IsSaveDialog()
+    {
+        return (m_Config & EConfig::SaveDialog) > 0;
+    }
+
+    // -----------------------------------------------------------------------------
+
     bool CImFileFialog::Draw() 
     {
         bool IsDone = false;
