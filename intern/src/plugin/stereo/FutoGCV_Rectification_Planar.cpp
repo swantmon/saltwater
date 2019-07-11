@@ -4,7 +4,7 @@
 #include "engine/graphic/gfx_context_manager.h"
 #include "engine/graphic/gfx_performance.h"
 
-namespace // No specific namespace => Only allowed to use in this page.
+namespace // No specific namespace => Only allowed to use in this file.
 {
     //---Definition for GPU Parallel Processing---
     #define TileSize_2D 16

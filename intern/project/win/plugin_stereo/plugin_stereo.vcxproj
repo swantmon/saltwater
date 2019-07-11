@@ -27,6 +27,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\src\plugin\stereo\depth_upsampling_FGI.cpp" />
     <ClCompile Include="..\..\..\src\plugin\stereo\FutoGCV_Img.cpp" />
     <ClCompile Include="..\..\..\src\plugin\stereo\stereo_plugin_interface.cpp" />
     <ClCompile Include="..\..\..\src\plugin\stereo\stereo_precompiled.cpp">
@@ -39,6 +40,7 @@
     <ClCompile Include="..\..\..\src\plugin\stereo\stereo_Rect_Polar.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\src\plugin\stereo\depth_upsampling_FGI.h" />
     <ClInclude Include="..\..\..\src\plugin\stereo\FutoGCV_Img.h" />
     <ClInclude Include="..\..\..\src\plugin\stereo\stereo_plugin_interface.h" />
     <ClInclude Include="..\..\..\src\plugin\stereo\stereo_precompiled.h" />
