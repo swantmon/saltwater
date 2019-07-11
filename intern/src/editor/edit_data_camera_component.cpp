@@ -6,5 +6,5 @@
 
 namespace Dt
 {
-    REGISTER_COMPONENT(CCameraComponentGUI, CCameraComponent);
+    REGISTER_COMPONENT_GUI(CCameraComponentGUI, CCameraComponent);
 } // namespace Dt

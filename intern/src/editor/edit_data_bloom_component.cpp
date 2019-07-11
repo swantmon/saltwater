@@ -6,5 +6,5 @@
 
 namespace Dt
 {
-	REGISTER_COMPONENT(CBloomComponentGUI, CBloomComponent);
+	REGISTER_COMPONENT_GUI(CBloomComponentGUI, CBloomComponent);
 } // namespace Dt

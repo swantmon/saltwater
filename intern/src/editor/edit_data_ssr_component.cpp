@@ -7,5 +7,5 @@
 
 namespace Dt
 {
-    REGISTER_COMPONENT(CSSRComponentGUI, CSSRComponent);
+    REGISTER_COMPONENT_GUI(CSSRComponentGUI, CSSRComponent);
 } // namespace Dt

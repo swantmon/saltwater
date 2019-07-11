@@ -7,5 +7,5 @@
 
 namespace Scpt
 {
-    REGISTER_COMPONENT(CSLAMScriptGUI, CSLAMScript);
+    REGISTER_COMPONENT_GUI(CSLAMScriptGUI, CSLAMScript);
 } // namespace Scpt

@@ -12,7 +12,7 @@
 #include <vector>
 #include <set>
 
-#define REGISTER_COMPONENT(Name, Child)                                                                         \
+#define REGISTER_COMPONENT_GUI(Name, Child)                                                                         \
 class BASE_CONCAT(Name, ComponentFactory) : public Edit::IGUIComponentFactory						            \
 {                                                                                                               \
 public:                                                                                                         \
