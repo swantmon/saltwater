@@ -406,6 +406,8 @@ namespace
                         rSceneFile += ".sws";
                     }
 
+					CUnloadMapState::GetInstance().PreventSaving(false);
+
                     Edit::CEditState::GetInstance().SetNextState(CState::UnloadMap);
 
                     Edit::CUnloadMapState::GetInstance().SaveToFile(rSceneFile);
