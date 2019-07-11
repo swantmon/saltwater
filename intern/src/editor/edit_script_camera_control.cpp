@@ -7,7 +7,5 @@
 
 namespace Scpt
 {
-    REGISTER_GUI(CCameraControlScriptGUI, CCameraControlScript);
-
-    REGISTER_COMPONENT(CCameraControlScriptGUI);
+    REGISTER_COMPONENT(CCameraControlScriptGUI, CCameraControlScript);
 } // namespace Scpt

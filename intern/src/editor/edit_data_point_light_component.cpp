@@ -7,7 +7,5 @@
 
 namespace Dt
 {
-    REGISTER_GUI(CPointLightComponentGUI, CPointLightComponent);
-
-    REGISTER_COMPONENT(CPointLightComponentGUI);
+    REGISTER_COMPONENT(CPointLightComponentGUI, CPointLightComponent);
 } // namespace Dt

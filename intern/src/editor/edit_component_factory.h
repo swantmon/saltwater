@@ -5,19 +5,23 @@
 #include "base/base_type_info.h"
 #include "base/base_uncopyable.h"
 
+#include "editor/edit_gui_factory.h"
+
 #include "engine/data/data_entity.h"
 
 #include <vector>
 #include <set>
 
-#define REGISTER_COMPONENT(Name)                                                                                \
-class BASE_CONCAT(Name, ComponentFactory) : public Edit::IGUIComponentFactory                                   \
+#define REGISTER_COMPONENT(Name, Child)                                                                         \
+class BASE_CONCAT(Name, ComponentFactory) : public Edit::IGUIComponentFactory						            \
 {                                                                                                               \
 public:                                                                                                         \
-    BASE_CONCAT(Name, ComponentFactory)() { m_pChild = new Name(); }                                            \
-    ~BASE_CONCAT(Name, ComponentFactory)() { delete m_pChild; }                                                 \
+	IGUIFactory* Create() { return new BASE_CONCAT(Name, ComponentFactory)(); }                                 \
+	void SetChild(void* _pChild) { m_pChild = (Name*)(_pChild); }                                               \
+	bool OnGUI() { return m_pChild->OnGUI(); }                                                                  \
+	const char* GetHeader() { return m_pChild->GetHeader(); }                                                   \
+	void OnDropAsset(const Edit::CAsset& _rAsset) { m_pChild->OnDropAsset(_rAsset); }                           \
     void OnNewComponent(Dt::CEntity::BID _ID) { m_pChild->OnNewComponent(_ID); }                                \
-    const char* GetHeader() { return m_pChild->GetHeader(); };                                                  \
 private:                                                                                                        \
     Name* m_pChild;                                                                                             \
 };                                                                                                              \
@@ -27,18 +31,17 @@ struct BASE_CONCAT(SRegComponentFactory, Name)                                  
     {                                                                                                           \
         static BASE_CONCAT(Name, ComponentFactory) BASE_CONCAT(s_ComponentFactory, Name);                       \
         Edit::CComponentFactory::GetInstance().Register<Name>(&BASE_CONCAT(s_ComponentFactory, Name));          \
+		Edit::CGUIFactory::GetInstance().Register<Child>(&BASE_CONCAT(s_ComponentFactory, Name));               \
     }                                                                                                           \
 } const BASE_CONCAT(g_SRegComponentFactory, Name);
 
 namespace Edit
 {
-    class IGUIComponentFactory
+    class IGUIComponentFactory : public Edit::IGUIFactory
     {
     public:
 
         virtual void OnNewComponent(Dt::CEntity::BID _ID) = 0;
-
-        virtual const char* GetHeader() = 0;
     };
 
     // -----------------------------------------------------------------------------
@@ -51,7 +54,7 @@ namespace Edit
 
     public:
 
-        typedef std::vector<IGUIComponentFactory*> CFactoryVector;
+        using CFactoryVector = std::vector<IGUIComponentFactory*>;
 
     public:
 

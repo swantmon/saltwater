@@ -7,7 +7,5 @@
 
 namespace Dt
 {
-    REGISTER_GUI(CPostAAComponentGUI, CPostAAComponent);
-
-    REGISTER_COMPONENT(CPostAAComponentGUI);
+    REGISTER_COMPONENT(CPostAAComponentGUI, CPostAAComponent);
 } // namespace Dt

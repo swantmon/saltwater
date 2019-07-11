@@ -7,7 +7,5 @@
 
 namespace Dt
 {
-    REGISTER_GUI(CVolumeFogComponentGUI, CVolumeFogComponent);
-
-    REGISTER_COMPONENT(CVolumeFogComponentGUI);
+    REGISTER_COMPONENT(CVolumeFogComponentGUI, CVolumeFogComponent);
 } // namespace Dt

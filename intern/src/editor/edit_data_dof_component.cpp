@@ -7,7 +7,5 @@
 
 namespace Dt
 {
-    REGISTER_GUI(CDOFComponentGUI, CDOFComponent);
-
-    REGISTER_COMPONENT(CDOFComponentGUI);
+    REGISTER_COMPONENT(CDOFComponentGUI, CDOFComponent);
 } // namespace Dt
