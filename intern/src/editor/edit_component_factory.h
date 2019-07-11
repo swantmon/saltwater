@@ -101,10 +101,7 @@ namespace Edit
     {
         auto Hash = Base::CTypeInfo::GetTypeID<T>();
 
-        if (m_Hashes.find(Hash) == m_Hashes.end())
-        {
-            m_Factory.push_back(_pClassObject);
-        }
+        if (m_Hashes.find(Hash) == m_Hashes.end()) m_Factory.push_back(_pClassObject);
     }
 
     // -----------------------------------------------------------------------------
