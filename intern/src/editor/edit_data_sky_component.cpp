@@ -7,5 +7,5 @@
 
 namespace Dt
 {
-    REGISTER_COMPONENT(CSkyComponentGUI, CSkyComponent);
+    REGISTER_COMPONENT_GUI(CSkyComponentGUI, CSkyComponent);
 } // namespace Dt
