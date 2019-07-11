@@ -16,7 +16,6 @@
 #include "engine/graphic/gfx_texture.h"
 
 
-
 CORE_PLUGIN_INFO(Stereo::CPluginInterface, "Stereo Matching", "1.0", "This plugin takes RGB and transformation data and provides 2.5D depth maps")
 
 namespace
@@ -51,7 +50,7 @@ namespace Stereo
 
             m_pStereoMatcher_LibSGM = std::make_unique<sgm::StereoSGM>(m_RectImgSize_Sub.x, m_RectImgSize_Sub.y, m_DispRange, 8, 16, sgm::EXECUTE_INOUT_HOST2HOST);
         } 
-        else if (m_Is_RectScaling)
+        else if (m_Is_Scaling)
         {
             m_Rectifier_Planar = FutoGCV::CPlanarRectification(m_OrigImgSize, glm::uvec2(0), m_RectImgSize_DownSample);
 
@@ -175,7 +174,7 @@ namespace Stereo
             m_Rectifier_Planar.return_Result(m_RectImg_Curt, m_RectImg_Last, m_Homo_Curt, m_Homo_Last);
 
             FutoGCV::CFutoImg RectImg_Curt_DownSample, RectImg_Last_DownSample;
-            if (m_Is_RectScaling)
+            if (m_Is_Scaling)
             {
                 m_Rectifier_Planar.imp_DownSampling(RectImg_Curt_DownSample, 0);
                 m_Rectifier_Planar.imp_DownSampling(RectImg_Last_DownSample, 1);
@@ -208,7 +207,7 @@ namespace Stereo
             // * Calculate Disparity in Rectified Current Image
 
             const clock_t Time_SM_begin = clock();
-            if (m_Is_RectScaling)
+            if (m_Is_Scaling)
             {
                 m_DispImg_Rect.resize(RectImg_Curt_DownSample.get_Img().size(), 0.0);
             } 
@@ -223,7 +222,7 @@ namespace Stereo
                 {
                     imp_StereoMatching_Fix();
                 } 
-                else if (m_Is_RectScaling)
+                else if (m_Is_Scaling)
                 {
                     imp_StereoMatching_Scaling(RectImg_Curt_DownSample.get_Img(), RectImg_Last_DownSample.get_Img());
                 }
@@ -572,8 +571,11 @@ namespace Stereo
         TextureDesc_DepthImg_Rect.m_Format = Gfx::CTexture::R16_UINT; // 1 channels with 16-bit uint.
         m_DepthImg_Rect_TexturePtr = Gfx::TextureManager::CreateTexture2D(TextureDesc_DepthImg_Rect);
 
-        if (m_Is_RectScaling)
+        if (m_Is_Scaling)
         {
+
+            //===Up-Sampling Disparity by Bilinear Interpolation===
+            //---GPU Start---
             Gfx::Performance::BeginEvent("Up-Sampling Disparity");
 
             // Submit Data to Managers
@@ -596,6 +598,9 @@ namespace Stereo
 
             Gfx::Performance::EndEvent();
             //---GPU End---
+
+            //===Up-Sampling Disparity by FGS Provided by ===
+            
         }
         else
         {
@@ -773,8 +778,8 @@ namespace Stereo
         m_Is_RectSubImg = Core::CProgramParameters::GetInstance().Get("mr:stereo:01_image_rectification:extract_sub_image", false);
         m_RectImgSize_Sub = Core::CProgramParameters::GetInstance().Get("mr:stereo:01_image_rectification:sub_image_size", glm::uvec2(640, 640));
 
-        m_Is_RectScaling = Core::CProgramParameters::GetInstance().Get("mr:stereo:01_image_rectification:scaling", false);
-        m_RectImgSize_DownSample = Core::CProgramParameters::GetInstance().Get("mr:stereo:01_image_rectification:down_sampling_size", glm::uvec2(360, 360));
+        m_Is_Scaling = Core::CProgramParameters::GetInstance().Get("mr:stereo:01_image_rectification:scaling", false);
+        m_RectImgSize_DownSample = Core::CProgramParameters::GetInstance().Get("mr:stereo:01_image_rectification:down_sampling_size", glm::uvec2(256, 256));
 
         //---02 Stereo Matching---
         m_StereoMatching_Method = Core::CProgramParameters::GetInstance().Get("mr:stereo:02_stereo_matching:method", "LibSGM");

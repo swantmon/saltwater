@@ -24,6 +24,7 @@
 //---Additional Processing---
 #include "opencv2/opencv.hpp" 
 #include "opencv2/cudastereo.hpp"
+#include "opencv2/ximgproc/edge_filter.hpp"
 
 #include "libsgm.h"
 
@@ -87,7 +88,7 @@ namespace Stereo
 
         FutoGCV::CPlanarRectification m_Rectifier_Planar; // Implement planar rectification
 
-        bool m_Is_RectSubImg, m_Is_RectScaling;
+        bool m_Is_RectSubImg, m_Is_Scaling;
         glm::uvec2 m_RectImgSize_Sub, m_RectImgSize_DownSample;
 
         //---02 Stereo Matching---
@@ -127,6 +128,8 @@ namespace Stereo
         void imp_Depth_Rect2Orig();
 
         std::vector<char> m_DepthImg_Orig; // Horizontal flip for reconstruction in plugin_slam.
+
+        cv::Ptr<cv::ximgproc::FastBilateralSolverFilter> m_pFilter_cvFGS;
 
         Gfx::CShaderPtr m_Depth_Rect2Orig_CSPtr;
         Gfx::CTexturePtr m_DepthImg_Orig_TexturePtr;
