@@ -135,6 +135,8 @@ namespace Stereo
         Gfx::CTexturePtr m_DepthImg_Orig_TexturePtr;
         Gfx::CBufferPtr m_Homogrampy_BufferPtr;
 
+        cv::Ptr<cv::ximgproc::FastGlobalSmootherFilter> m_pSmoother_cvFGS;
+
         //---05 Compare Depth between plugin_stereo & Sensor---
         std::vector<uint16_t> m_DepthImg_Sensor;
 

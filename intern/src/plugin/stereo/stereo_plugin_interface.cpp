@@ -271,6 +271,25 @@ namespace Stereo
             glm::mat4 Transform = glm::mat4(glm::transpose(m_OrigImg_Curt.get_Rot()));
             Transform[3] = glm::vec4(m_OrigImg_Curt.get_PC(), 1.0f);
 
+            //---Test: Apply cvFGS---
+            /*
+            {
+                cv::Mat cvOrigImg_Curt_BGRA(m_OrigImgSize.y, m_OrigImgSize.x, CV_8UC4), cvOrigImg_Curt_Gray(m_OrigImgSize.y, m_OrigImgSize.x, CV_8UC1);
+                memcpy(cvOrigImg_Curt_BGRA.data, m_OrigImg_Curt.get_Img().data(), m_OrigImg_Curt.get_Img().size() * sizeof(m_OrigImg_Curt.get_Img()[0]));
+                cv::cvtColor(cvOrigImg_Curt_BGRA, cvOrigImg_Curt_Gray, cv::COLOR_BGRA2GRAY); // Transform to RGB before imshow & imwrite
+
+                m_pSmoother_cvFGS = cv::ximgproc::createFastGlobalSmootherFilter(cvOrigImg_Curt_Gray, 30, 0.01);
+
+                cv::Mat cvDepthIn(m_OrigImgSize.y, m_OrigImgSize.x, CV_16SC1), cvDepthOut(m_OrigImgSize.y, m_OrigImgSize.x, CV_16SC1);
+                memcpy(cvDepthIn.data, DepthImage.data(), MemCpySize);
+
+                m_pSmoother_cvFGS->filter(cvDepthIn, cvDepthOut);
+
+                DepthImage.clear();
+                memcpy(DepthImage.data(), cvDepthOut.data, cvDepthOut.cols * cvDepthOut.rows * cvDepthOut.elemSize());
+            }
+            */
+
             m_Delegate.Notify(m_OrigImg_Curt.get_Img(), DepthImage, Transform);
 
             if (m_Is_ExportDepth)
