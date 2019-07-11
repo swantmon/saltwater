@@ -7,5 +7,5 @@
 
 namespace Dt
 {
-    REGISTER_COMPONENT_GUI(CAreaLightComponentGUI, CAreaLightComponent);
+    REGISTER_COMPONENT_GUI(CAreaLightComponentGUI, CAreaLightComponent, "Area Light");
 } // namespace Dt

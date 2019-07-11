@@ -7,5 +7,5 @@
 
 namespace Dt
 {
-    REGISTER_COMPONENT_GUI(CDOFComponentGUI, CDOFComponent);
+    REGISTER_COMPONENT_GUI(CDOFComponentGUI, CDOFComponent, "Depth-of-Field");
 } // namespace Dt

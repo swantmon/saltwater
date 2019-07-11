@@ -7,5 +7,5 @@
 
 namespace Dt
 {
-    REGISTER_COMPONENT_GUI(CPostAAComponentGUI, CPostAAComponent);
+    REGISTER_COMPONENT_GUI(CPostAAComponentGUI, CPostAAComponent, "Anti Aliasing");
 } // namespace Dt

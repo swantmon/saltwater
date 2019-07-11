@@ -7,5 +7,5 @@
 
 namespace Dt
 {
-	REGISTER_COMPONENT_GUI(CSSAOComponentGUI, CSSAOComponent);
+	REGISTER_COMPONENT_GUI(CSSAOComponentGUI, CSSAOComponent, "Ambient Occlusion");
 } // namespace Dt

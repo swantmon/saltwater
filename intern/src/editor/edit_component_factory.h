@@ -12,16 +12,16 @@
 #include <vector>
 #include <set>
 
-#define REGISTER_COMPONENT_GUI(Name, Child)                                                                         \
+#define REGISTER_COMPONENT_GUI(Name, Child, HEADER)                                                             \
 class BASE_CONCAT(Name, ComponentFactory) : public Edit::IGUIComponentFactory						            \
 {                                                                                                               \
 public:                                                                                                         \
 	IGUIFactory* Create() { return new BASE_CONCAT(Name, ComponentFactory)(); }                                 \
 	void SetChild(void* _pChild) { m_pChild = (Name*)(_pChild); }                                               \
-	bool OnGUI() { return m_pChild->OnGUI(); }                                                                  \
-	const char* GetHeader() { return m_pChild->GetHeader(); }                                                   \
-	void OnDropAsset(const Edit::CAsset& _rAsset) { m_pChild->OnDropAsset(_rAsset); }                           \
-    void OnNewComponent(Dt::CEntity::BID _ID) { m_pChild->OnNewComponent(_ID); }                                \
+	bool OnGUI() { return m_pChild ? m_pChild->OnGUI() : false; }                                               \
+	const char* GetHeader() { return HEADER; }																	\
+	void OnDropAsset(const Edit::CAsset& _rAsset) { m_pChild ? m_pChild->OnDropAsset(_rAsset) : 0; }            \
+    void OnNewComponent(Dt::CEntity::BID _ID) { m_pChild ? m_pChild->OnNewComponent(_ID) : 0; }                 \
 private:                                                                                                        \
     Name* m_pChild;                                                                                             \
 };                                                                                                              \

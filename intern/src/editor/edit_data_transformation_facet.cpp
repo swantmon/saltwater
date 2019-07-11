@@ -6,5 +6,5 @@
 
 namespace Dt
 {
-    REGISTER_GUI(CTransformationFacetGUI, CTransformationFacet)
+    REGISTER_GUI(CTransformationFacetGUI, CTransformationFacet, "Transformation")
 } // namespace Dt

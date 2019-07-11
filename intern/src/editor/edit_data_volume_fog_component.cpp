@@ -7,5 +7,5 @@
 
 namespace Dt
 {
-    REGISTER_COMPONENT_GUI(CVolumeFogComponentGUI, CVolumeFogComponent);
+    REGISTER_COMPONENT_GUI(CVolumeFogComponentGUI, CVolumeFogComponent, "Volumetric Fog");
 } // namespace Dt

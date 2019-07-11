@@ -10,16 +10,16 @@
 #include <array>
 #include <map>
 
-#define REGISTER_GUI(Name, Child)                                                                               \
+#define REGISTER_GUI(Name, Child, HEADER)                                                                       \
 class BASE_CONCAT(Name, Factory) : public Edit::IGUIFactory                                                     \
 {                                                                                                               \
 public:                                                                                                         \
     BASE_CONCAT(Name, Factory)() { }                                                                            \
     IGUIFactory* Create() { return new BASE_CONCAT(Name, Factory)(); }                                          \
     void SetChild(void* _pChild) { m_pChild = (Name*)(_pChild); }                                               \
-    bool OnGUI() { return m_pChild->OnGUI(); }                                                                  \
-    const char* GetHeader() { return m_pChild->GetHeader(); }                                                   \
-    void OnDropAsset(const Edit::CAsset& _rAsset) { m_pChild->OnDropAsset(_rAsset); }                           \
+    bool OnGUI() { return m_pChild ? m_pChild->OnGUI() : false; }                                               \
+    const char* GetHeader() { return HEADER; }                  					                            \
+    void OnDropAsset(const Edit::CAsset& _rAsset) { m_pChild ? m_pChild->OnDropAsset(_rAsset) : 0; }            \
 private:                                                                                                        \
     Name* m_pChild;                                                                                             \
 };                                                                                                              \

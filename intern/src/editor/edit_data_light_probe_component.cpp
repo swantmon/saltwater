@@ -7,5 +7,5 @@
 
 namespace Dt
 {
-    REGISTER_COMPONENT_GUI(CLightProbeComponentGUI, CLightProbeComponent);
+    REGISTER_COMPONENT_GUI(CLightProbeComponentGUI, CLightProbeComponent, "Light Probe");
 } // namespace Dt

@@ -6,5 +6,5 @@
 
 namespace Dt
 {
-    REGISTER_GUI(CEntityGUI, CEntity)
+    REGISTER_GUI(CEntityGUI, CEntity, "Entity")
 } // namespace Dt
