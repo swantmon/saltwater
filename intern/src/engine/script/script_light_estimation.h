@@ -68,7 +68,7 @@ namespace Scpt
         using ARGetLightEstimationStateFunc = int(*)(void*);
         using ARGetLightEstimationMainLightIntensityFunc = glm::vec3(*)(void*);
         using ARGetLightEstimationMainLightDirectionFunc = glm::vec3(*)(void*);
-        using ARGetLightEstimationHDRCubemapFunc = void*(*)(void*);
+        using ARGetLightEstimationHDRCubemapFunc = void(*)(void*, int, const void**, int&,  int&, int&);
 
         ARGetLightEstimationFunc GetLightEstimation = nullptr;
         ARGetLightEstimationStateFunc GetLightEstimationState = nullptr;
@@ -85,6 +85,7 @@ namespace Scpt
         Gfx::CShaderPtr m_FusePanoramaShaderPtr;
 
         Gfx::CTexturePtr m_OutputCubemapPtr;
+        Gfx::CTexturePtr m_ArCoreOutputCubemapPtr;
         Gfx::CTexturePtr m_PanoramaTexturePtr;
 
         std::array<std::string, NumberOfEstimationTypes> m_PluginNames = { "Light Estimation Stitching", "Light Estimation LUT" };
@@ -137,6 +138,8 @@ namespace Scpt
             // -----------------------------------------------------------------------------
             ResetTextures();
 
+            Gfx::TextureManager::SetTextureLabel(m_OutputCubemapPtr, "Sky cube map from image");
+
             // -----------------------------------------------------------------------------
             // Prepare light estimation
             // -----------------------------------------------------------------------------
@@ -158,6 +161,9 @@ namespace Scpt
             m_OutputCubemapPtr = nullptr;
             m_C2PShaderPtr = nullptr;
             m_PanoramaTexturePtr = nullptr;
+
+
+            m_ArCoreOutputCubemapPtr = nullptr;
         }
 
         // -----------------------------------------------------------------------------
@@ -192,13 +198,42 @@ namespace Scpt
 
                 // -----------------------------------------------------------------------------
 
-                void* pCubemapFaces = GetLightEstimationHDRCubemap(pObject);
+                const void* pFaceData;
+                int W, H, B;
 
-                int TestHandle = (int)((char*)pCubemapFaces)[0];
+                GetLightEstimationHDRCubemap(pObject, 0, &pFaceData, W, H, B);
 
-                bool IsT = glIsTexture(TestHandle);
+                if (m_ArCoreOutputCubemapPtr == nullptr || m_ArCoreOutputCubemapPtr->GetNumberOfPixelsU() != W || m_ArCoreOutputCubemapPtr->GetNumberOfPixelsV() != H)
+                {
+                    Gfx::STextureDescriptor TextureDescriptor = { };
 
-                int a = 4;
+                    TextureDescriptor.m_NumberOfPixelsU  = W;
+                    TextureDescriptor.m_NumberOfPixelsV  = H;
+                    TextureDescriptor.m_NumberOfPixelsW  = 1;
+                    TextureDescriptor.m_NumberOfMipMaps  = Gfx::STextureDescriptor::s_GenerateAllMipMaps;
+                    TextureDescriptor.m_NumberOfTextures = 6;
+                    TextureDescriptor.m_Binding          = Gfx::CTexture::ShaderResource | Gfx::CTexture::RenderTarget;
+                    TextureDescriptor.m_Access           = Gfx::CTexture::CPUWrite;
+                    TextureDescriptor.m_Format           = Gfx::CTexture::Unknown;
+                    TextureDescriptor.m_Usage            = Gfx::CTexture::GPURead;
+                    TextureDescriptor.m_Semantic         = Gfx::CTexture::Diffuse;
+                    TextureDescriptor.m_pFileName        = nullptr;
+                    TextureDescriptor.m_pPixels          = nullptr;
+                    TextureDescriptor.m_Format           = Gfx::CTexture::R16G16B16A16_FLOAT;
+
+                    m_ArCoreOutputCubemapPtr = Gfx::TextureManager::CreateCubeTexture(TextureDescriptor);
+
+                    auto pGfxSky = static_cast<Gfx::CSky*>(m_pSkyComponent->GetFacet(Dt::CSkyComponent::Graphic));
+
+                    pGfxSky->SetInputTexture(m_ArCoreOutputCubemapPtr);
+                }
+
+                for(auto Face = 0; Face < 6; ++ Face)
+                {
+                    GetLightEstimationHDRCubemap(pObject, Face, &pFaceData, W, H, B);
+
+                    Gfx::TextureManager::CopyToTextureArray2D(m_ArCoreOutputCubemapPtr, Face, Base::AABB2UInt(glm::ivec2(0, 0), glm::ivec2(W, H)), 0, pFaceData);
+                }
             }
         }
 

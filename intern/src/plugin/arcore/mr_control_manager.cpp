@@ -224,13 +224,6 @@ namespace
             friend class CMRControlManager;
         };
 
-        class CInternLightEstimation : public CLightEstimation
-        {
-        private:
-
-            friend class CMRControlManager;
-        };
-
         class CInternMarker : public CMarker
         {
         public:
@@ -258,7 +251,7 @@ namespace
 
         CInternCamera m_Camera;
 
-        CInternLightEstimation m_LightEstimation;
+        CLightEstimation m_LightEstimation;
 
         glm::mat3 m_ARCToEngineMatrix;
 
@@ -578,60 +571,7 @@ namespace
         // Light estimation
         // Intensity value ranges from 0.0f to 1.0f.
         // -----------------------------------------------------------------------------
-        ArLightEstimate* ARLightEstimate;
-        ArLightEstimateState ARLightEstimateState;
-
-        ArLightEstimate_create(m_pARSession, &ARLightEstimate);
-
-        ArFrame_getLightEstimate(m_pARSession, m_pARFrame, ARLightEstimate);
-
-        ArLightEstimate_getState(m_pARSession, ARLightEstimate, &ARLightEstimateState);
-
-        m_LightEstimation.m_EstimationState = CLightEstimation::NotValid;
-
-        if (ARLightEstimateState == AR_LIGHT_ESTIMATE_STATE_VALID)
-        {
-            ArLightEstimate_getPixelIntensity(m_pARSession, ARLightEstimate, &m_LightEstimation.m_PixelIntensity);
-
-            ArLightEstimate_getColorCorrection(m_pARSession, ARLightEstimate, &m_LightEstimation.m_ColorCorrection[0]);
-
-            ArLightEstimate_getEnvironmentalHdrMainLightIntensity(m_pARSession, ARLightEstimate, &m_LightEstimation.m_MainLightIntensity[0]);
-
-            ArLightEstimate_getEnvironmentalHdrMainLightDirection(m_pARSession, ARLightEstimate, &m_LightEstimation.m_MainLightDirection[0]);
-
-            m_LightEstimation.m_MainLightDirection = m_ARCToEngineMatrix * m_LightEstimation.m_MainLightDirection;
-
-            ArLightEstimate_getEnvironmentalHdrAmbientSphericalHarmonics(m_pARSession, ARLightEstimate, m_LightEstimation.m_AmbientSH);
-
-            ArImageCubemap HDRCubemap;
-
-            ArLightEstimate_acquireEnvironmentalHdrCubemap(m_pARSession, ARLightEstimate, HDRCubemap);
-
-            int W = 0, H = 0;
-            ArImageFormat F;
-
-            for (auto Face = 0; Face < 6; ++Face)
-            {
-                ArImage* FaceImage = HDRCubemap[Face];
-
-                ArImage_getWidth(m_pARSession, FaceImage, &W);
-                ArImage_getHeight(m_pARSession, FaceImage, &H);
-                ArImage_getFormat(m_pARSession, FaceImage, &F);
-
-                const uint8_t* pData = 0;
-                int32_t BufferSize = -1;
-
-                ArImage_getPlaneData(m_pARSession, FaceImage, 0, &pData, &BufferSize);
-
-                ArImage_release(FaceImage);
-            }
-
-            m_LightEstimation.m_EstimationState = CLightEstimation::Valid;
-        }
-
-        ArLightEstimate_destroy(ARLightEstimate);
-
-        ARLightEstimate = nullptr;
+        m_LightEstimation.Detect(m_pARSession, m_pARFrame);
 
         // -----------------------------------------------------------------------------
         // Use tracked objects matrices
