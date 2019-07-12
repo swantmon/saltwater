@@ -37,6 +37,8 @@
 
 #include "plugin/slam/gfx_reconstruction_renderer.h"
 
+#include <filesystem>
+
 namespace MR
 {
     class CSLAMControl
@@ -783,14 +785,43 @@ namespace MR
 
         void ReadScene(CSceneReader& _rCodec)
         {
+            std::string RecordFile;
 
+            //_rCodec >> RecordFile;
         }
 
         // -----------------------------------------------------------------------------
 
         void WriteScene(CSceneWriter& _rCodec)
         {
+            std::string RecordFolder = Core::AssetManager::GetPathToAssets() + "/recordings/scene";
+            std::string RecordFile = RecordFolder + '/' + "test.swr";
+            
+            try
+            {
+                if (!std::filesystem::exists(RecordFolder))
+                {
+                    if (!std::filesystem::create_directory(RecordFolder))
+                    {
+                        BASE_THROWM("Scene folder could not be created");
+                    }
+                }
+                else if (!std::filesystem::is_directory(RecordFolder))
+                {
+                    BASE_THROWM(("Cannot create directory " + RecordFolder + ". Is there already a file with that name?").c_str());
+                }
 
+                if (!std::filesystem::copy_file(m_TempRecordPath, RecordFile))
+                {
+                    BASE_THROWM("SLAM record file could not be saved as part of the scene");
+                }
+            }
+            catch (std::exception& e)
+            {
+                BASE_THROWM(e.what());
+            }
+
+            Base::Serialize(_rCodec, RecordFile);
         }
 
     private:
