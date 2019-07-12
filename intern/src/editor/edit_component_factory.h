@@ -21,7 +21,7 @@ public:                                                                         
 	bool OnGUI() { return m_pChild ? m_pChild->OnGUI() : false; }                                               \
 	const char* GetHeader() { return HEADER; }																	\
 	void OnDropAsset(const Edit::CAsset& _rAsset) { m_pChild ? m_pChild->OnDropAsset(_rAsset) : 0; }            \
-    void OnNewComponent(Dt::CEntity::BID _ID) { m_pChild ? m_pChild->OnNewComponent(_ID) : 0; }                 \
+    void OnNewComponent(Dt::CEntity::BID _ID) { Name::OnNewComponent(_ID); }     			                    \
 private:                                                                                                        \
     Name* m_pChild;                                                                                             \
 };                                                                                                              \
