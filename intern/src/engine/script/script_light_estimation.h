@@ -27,6 +27,7 @@
 
 #include <array>
 #include <string>
+#include <engine/data/data_sun_component.h>
 
 namespace Scpt
 {
@@ -45,6 +46,7 @@ namespace Scpt
 
         Dt::CEntity* m_pSkyEntity = nullptr;
         Dt::CSkyComponent* m_pSkyComponent = nullptr;
+        Dt::CSunComponent* m_pSunComponent = nullptr;
 
     private:
 
@@ -102,6 +104,7 @@ namespace Scpt
             if (m_pSkyEntity != nullptr)
             {
                 m_pSkyComponent = m_pSkyEntity->GetComponentFacet()->GetComponent<Dt::CSkyComponent>();
+                m_pSunComponent = m_pSkyEntity->GetComponentFacet()->GetComponent<Dt::CSunComponent>();
             }
 
             if (m_pSkyComponent == nullptr) return;
@@ -171,7 +174,17 @@ namespace Scpt
 
                 glm::vec3 MainLightIntensity = GetLightEstimationMainLightIntensity(pObject);
 
-                ENGINE_CONSOLE_INFOV("Main light direction: %f, %f, %f; intensity %f, %f, %f", MainLightDirection.x, MainLightDirection.y, MainLightDirection.z, MainLightIntensity.x, MainLightIntensity.y, MainLightIntensity.z);
+                //ENGINE_CONSOLE_INFOV("Main light direction: %f, %f, %f; intensity %f, %f, %f", MainLightDirection.x, MainLightDirection.y, MainLightDirection.z, MainLightIntensity.x, MainLightIntensity.y, MainLightIntensity.z);
+
+                if (m_pSunComponent == nullptr) return;
+
+                m_pSunComponent->SetDirection(-MainLightDirection);
+
+                m_pSunComponent->SetColor(glm::normalize(MainLightIntensity));
+
+                m_pSunComponent->SetIntensity(glm::length(MainLightIntensity) * 90600.0f);
+
+                m_pSunComponent->UpdateLightness();
             }
         }
 
