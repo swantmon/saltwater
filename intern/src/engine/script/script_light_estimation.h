@@ -29,6 +29,8 @@
 #include <string>
 #include <engine/data/data_sun_component.h>
 
+#include "glm.hpp"
+
 namespace Scpt
 {
     class CLightEstimationScript : public CScript<CLightEstimationScript>
@@ -66,11 +68,13 @@ namespace Scpt
         using ARGetLightEstimationStateFunc = int(*)(void*);
         using ARGetLightEstimationMainLightIntensityFunc = glm::vec3(*)(void*);
         using ARGetLightEstimationMainLightDirectionFunc = glm::vec3(*)(void*);
+        using ARGetLightEstimationHDRCubemapFunc = void*(*)(void*);
 
         ARGetLightEstimationFunc GetLightEstimation = nullptr;
         ARGetLightEstimationStateFunc GetLightEstimationState = nullptr;
         ARGetLightEstimationMainLightIntensityFunc GetLightEstimationMainLightDirection = nullptr;
         ARGetLightEstimationMainLightDirectionFunc GetLightEstimationMainLightIntensity = nullptr;
+        ARGetLightEstimationHDRCubemapFunc GetLightEstimationHDRCubemap = nullptr;
 
         LESetInputTextureFunc SetInputTexture = nullptr;
         LESetOutputCubemapFunc SetOutputCubemap = nullptr;
@@ -170,11 +174,11 @@ namespace Scpt
 
                 if (State != 1) return;
 
+                // -----------------------------------------------------------------------------
+
                 glm::vec3 MainLightDirection = GetLightEstimationMainLightDirection(pObject);
 
                 glm::vec3 MainLightIntensity = GetLightEstimationMainLightIntensity(pObject);
-
-                //ENGINE_CONSOLE_INFOV("Main light direction: %f, %f, %f; intensity %f, %f, %f", MainLightDirection.x, MainLightDirection.y, MainLightDirection.z, MainLightIntensity.x, MainLightIntensity.y, MainLightIntensity.z);
 
                 if (m_pSunComponent == nullptr) return;
 
@@ -185,6 +189,16 @@ namespace Scpt
                 m_pSunComponent->SetIntensity(glm::length(MainLightIntensity) * 90600.0f);
 
                 m_pSunComponent->UpdateLightness();
+
+                // -----------------------------------------------------------------------------
+
+                void* pCubemapFaces = GetLightEstimationHDRCubemap(pObject);
+
+                int TestHandle = (int)((char*)pCubemapFaces)[0];
+
+                bool IsT = glIsTexture(TestHandle);
+
+                int a = 4;
             }
         }
 
@@ -385,6 +399,7 @@ namespace Scpt
                 GetLightEstimationState = (ARGetLightEstimationStateFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetLightEstimationState"));
                 GetLightEstimationMainLightDirection = (ARGetLightEstimationMainLightDirectionFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetLightEstimationMainLightDirection"));
                 GetLightEstimationMainLightIntensity = (ARGetLightEstimationMainLightIntensityFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetLightEstimationMainLightIntensity"));
+                GetLightEstimationHDRCubemap = (ARGetLightEstimationHDRCubemapFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetLightEstimationHDRCubemap"));
             }
             else
             {

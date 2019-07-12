@@ -603,7 +603,28 @@ namespace
 
             ArLightEstimate_getEnvironmentalHdrAmbientSphericalHarmonics(m_pARSession, ARLightEstimate, m_LightEstimation.m_AmbientSH);
 
-            ArLightEstimate_acquireEnvironmentalHdrCubemap(m_pARSession, ARLightEstimate, m_LightEstimation.m_HDRCubemap);
+            ArImageCubemap HDRCubemap;
+
+            ArLightEstimate_acquireEnvironmentalHdrCubemap(m_pARSession, ARLightEstimate, HDRCubemap);
+
+            int W = 0, H = 0;
+            ArImageFormat F;
+
+            for (auto Face = 0; Face < 6; ++Face)
+            {
+                ArImage* FaceImage = HDRCubemap[Face];
+
+                ArImage_getWidth(m_pARSession, FaceImage, &W);
+                ArImage_getHeight(m_pARSession, FaceImage, &H);
+                ArImage_getFormat(m_pARSession, FaceImage, &F);
+
+                const uint8_t* pData = 0;
+                int32_t BufferSize = -1;
+
+                ArImage_getPlaneData(m_pARSession, FaceImage, 0, &pData, &BufferSize);
+
+                ArImage_release(FaceImage);
+            }
 
             m_LightEstimation.m_EstimationState = CLightEstimation::Valid;
         }
