@@ -187,7 +187,7 @@ namespace MR
             RECORD,
         };
         
-        ERecordMode m_RecordMode;
+        ERecordMode m_RecordMode = NONE;
 
         std::fstream m_RecordFile;
         std::unique_ptr<Base::CRecordWriter> m_pRecordWriter;
@@ -398,26 +398,6 @@ namespace MR
             else
             {
                 BASE_THROWM("Unknown data source for SLAM plugin");
-            }
-
-            std::string RecordParam = Core::CProgramParameters::GetInstance().Get("mr:slam:recording:mode", "none");
-            
-            if (RecordParam == "record")
-            {
-                auto FileName = Core::CProgramParameters::GetInstance().Get("mr:slam:recording:file", "");
-
-                m_RecordMode = RECORD;
-                m_RecordFile.open(FileName, std::fstream::out | std::fstream::binary);
-
-                ENGINE_CONSOLE_INFOV("Recording into file file \"%s\"", FileName.c_str());
-            }
-            else if (RecordParam == "none")
-            {
-                m_RecordMode = NONE;
-            }
-            else
-            {
-                BASE_THROWM("Invalid recording mode!");
             }
 
             m_SendInpaintedResult = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:send_result", true);
@@ -785,9 +765,22 @@ namespace MR
 
         void ReadScene(CSceneReader& _rCodec)
         {
-            std::string RecordFile;
+            std::string RecordFileName;
 
-            //_rCodec >> RecordFile;
+            Base::Serialize(_rCodec, RecordFileName);
+
+            m_RecordFile.open(RecordFileName, std::fstream::in | std::fstream::binary);
+
+            if (!m_RecordFile.is_open())
+            {
+                BASE_THROWM("SLAM data of scene could not be loaded");
+            }
+
+            m_RecordMode = PLAY;
+
+            m_pRecordReader = std::make_unique<Base::CRecordReader>(m_RecordFile, 1);
+            m_pRecordReader->SkipTime();
+            m_pRecordReader->SetSpeed(10000.0f);
         }
 
         // -----------------------------------------------------------------------------
