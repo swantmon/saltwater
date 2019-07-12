@@ -591,7 +591,19 @@ namespace
 
         if (ARLightEstimateState == AR_LIGHT_ESTIMATE_STATE_VALID)
         {
-            ArLightEstimate_getPixelIntensity(m_pARSession, ARLightEstimate, &m_LightEstimation.m_Intensity);
+            ArLightEstimate_getPixelIntensity(m_pARSession, ARLightEstimate, &m_LightEstimation.m_PixelIntensity);
+
+            ArLightEstimate_getColorCorrection(m_pARSession, ARLightEstimate, &m_LightEstimation.m_ColorCorrection[0]);
+
+            ArLightEstimate_getEnvironmentalHdrMainLightIntensity(m_pARSession, ARLightEstimate, &m_LightEstimation.m_MainLightIntensity[0]);
+
+            ArLightEstimate_getEnvironmentalHdrMainLightDirection(m_pARSession, ARLightEstimate, &m_LightEstimation.m_MainLightDirection[0]);
+
+            m_LightEstimation.m_MainLightDirection = m_ARCToEngineMatrix * m_LightEstimation.m_MainLightDirection * glm::vec3(-1.0f);
+
+            ArLightEstimate_getEnvironmentalHdrAmbientSphericalHarmonics(m_pARSession, ARLightEstimate, m_LightEstimation.m_AmbientSH);
+
+            ArLightEstimate_acquireEnvironmentalHdrCubemap(m_pARSession, ARLightEstimate, m_LightEstimation.m_HDRCubemap);
 
             m_LightEstimation.m_EstimationState = CLightEstimation::Valid;
         }
@@ -707,6 +719,12 @@ namespace
 
             ArConfig_create(m_pARSession, &ARConfig);
 
+            ArConfig_setLightEstimationMode(m_pARSession, ARConfig, AR_LIGHT_ESTIMATION_MODE_ENVIRONMENTAL_HDR);
+
+            ArConfig_setUpdateMode(m_pARSession, ARConfig, AR_UPDATE_MODE_LATEST_CAMERA_IMAGE);
+
+            ArConfig_setPlaneFindingMode(m_pARSession, ARConfig, AR_PLANE_FINDING_MODE_HORIZONTAL_AND_VERTICAL);
+
             assert(ARConfig != 0);
 
             Status = ArSession_configure(m_pARSession, ARConfig);
@@ -718,6 +736,8 @@ namespace
             ArFrame_create(m_pARSession, &m_pARFrame);
 
             assert(m_pARFrame != 0);
+
+
 
             // -----------------------------------------------------------------------------
             // Default geometry
