@@ -193,6 +193,7 @@ namespace MR
 
         std::fstream m_TempRecordFile;
         std::unique_ptr<Base::CRecordWriter> m_pTempRecordWriter;
+        std::string m_TempRecordPath;
 
 		int m_NumberOfExtractedFrame;
 
@@ -421,8 +422,8 @@ namespace MR
 
             m_pPlaneColorizer = std::make_unique<MR::CPlaneColorizer>(&m_Reconstructor);
 
-            m_TempRecordFile.open(Core::AssetManager::GetPathToAssets() + "/recordings/" + "_temp_recording.swr", std::fstream::out | std::fstream::binary);
-
+            m_TempRecordPath = Core::AssetManager::GetPathToAssets() + "/recordings/" + "_temp_recording.swr";
+            m_TempRecordFile.open(m_TempRecordPath , std::fstream::out | std::fstream::binary);
         }
 
         // -----------------------------------------------------------------------------
