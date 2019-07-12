@@ -360,7 +360,7 @@ namespace App
             Dt::CTransformationFacet* pTransformationFacet = rEntity.GetTransformationFacet();
 
             pTransformationFacet->SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
-            pTransformationFacet->SetScale(glm::vec3(4.0f, 4.0f, 0.001f));
+            pTransformationFacet->SetScale(glm::vec3(10.0f, 10.0f, 0.001f));
             pTransformationFacet->SetRotation(glm::vec3(0.0f));
 
             // -----------------------------------------------------------------------------
@@ -377,7 +377,7 @@ namespace App
 
             auto pMaterialComponent = Dt::CComponentManager::GetInstance().Allocate<Dt::CMaterialComponent>();
 
-            pMaterialComponent->SetColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+            pMaterialComponent->SetColor(glm::vec4(1.0f, 1.0f, 1.0f, 0.75f));
             pMaterialComponent->SetMetalness(0.0f);
             pMaterialComponent->SetRoughness(1.0f);
 
