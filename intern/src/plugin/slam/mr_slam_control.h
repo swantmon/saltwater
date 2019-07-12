@@ -191,6 +191,9 @@ namespace MR
         std::unique_ptr<Base::CRecordWriter> m_pRecordWriter;
 		std::unique_ptr<Base::CRecordReader> m_pRecordReader;
 
+        std::fstream m_TempRecordFile;
+        std::unique_ptr<Base::CRecordWriter> m_pTempRecordWriter;
+
 		int m_NumberOfExtractedFrame;
 
 		bool m_ExtractStream;
@@ -417,6 +420,9 @@ namespace MR
             m_SendInpaintedResult = Core::CProgramParameters::GetInstance().Get("mr:diminished_reality:send_result", true);
 
             m_pPlaneColorizer = std::make_unique<MR::CPlaneColorizer>(&m_Reconstructor);
+
+            m_TempRecordFile.open(Core::AssetManager::GetPathToAssets() + "/recordings/" + "_temp_recording.swr", std::fstream::out | std::fstream::binary);
+
         }
 
         // -----------------------------------------------------------------------------
@@ -424,6 +430,7 @@ namespace MR
         void Exit()
         {
             m_RecordFile.close();
+            m_TempRecordFile.close();
 
             m_DepthBuffer.clear();
             m_ColorBuffer.clear();
@@ -770,6 +777,20 @@ namespace MR
 				}
 			}
 		}
+
+        // -----------------------------------------------------------------------------
+
+        void ReadScene(CSceneReader& _rCodec)
+        {
+
+        }
+
+        // -----------------------------------------------------------------------------
+
+        void WriteScene(CSceneWriter& _rCodec)
+        {
+
+        }
 
     private:
 
@@ -1282,6 +1303,17 @@ namespace MR
                     Base::Write(*m_pRecordWriter, _rMessage.m_Payload);
                 }
 
+                if (m_pTempRecordWriter == nullptr)
+                {
+                    m_pTempRecordWriter = std::make_unique<Base::CRecordWriter>(m_TempRecordFile, 1);
+                }
+
+                *m_pTempRecordWriter << _rMessage.m_Category;
+                *m_pTempRecordWriter << _rMessage.m_MessageType;
+                *m_pTempRecordWriter << _rMessage.m_CompressedSize;
+                *m_pTempRecordWriter << _rMessage.m_DecompressedSize;
+                Base::Write(*m_pTempRecordWriter, _rMessage.m_Payload);
+
                 HandleMessage(_rMessage);
             }
             else if (_rMessage.m_MessageType == 2)
@@ -1380,7 +1412,7 @@ namespace MR
 
             m_RegisteringBufferPtr = Gfx::BufferManager::CreateBuffer(BufferDesc);
         }
-
+        
         // -----------------------------------------------------------------------------
 
         void CreateShiftLUTTexture()

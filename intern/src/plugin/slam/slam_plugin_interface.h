@@ -23,6 +23,9 @@ namespace SLAM
 
         void UpdateScriptSettings(const Scpt::CSLAMScript::SScriptSettings& _rSettings);
 
+        void CPluginInterface::ReadScene(CSceneReader& _rCodec);
+        void CPluginInterface::WriteScene(CSceneWriter& _rCodec);
+
     private:
 
         MR::CSLAMControl m_SLAMControl;

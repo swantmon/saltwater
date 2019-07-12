@@ -127,11 +127,21 @@ namespace Scpt
         inline void Read(CSceneReader& _rCodec) override
         {
             CComponent::Read(_rCodec);
+
+            using FReadCallback = void(*)(CSceneReader & _rCodec);
+            auto ReadSlamScene = (FReadCallback)(Core::PluginManager::GetPluginFunction("SLAM", "ReadScene"));
+
+            ReadSlamScene(_rCodec);
         }
 
         inline void Write(CSceneWriter& _rCodec) override
         {
             CComponent::Write(_rCodec);
+
+            using FWriteCallback = void(*)(CSceneWriter & _rCodec);
+            auto WriteSlamScene = (FWriteCallback)(Core::PluginManager::GetPluginFunction("SLAM", "WriteScene"));
+
+            WriteSlamScene(_rCodec);
         }
 
         inline IComponent* Allocate() override
