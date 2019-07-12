@@ -58,7 +58,17 @@ namespace Scpt
         using LESetOutputCubemapFunc = void(*)(Gfx::CTexturePtr);
         using LEGetOutputCubemapFunc = Gfx::CTexturePtr(*)();
         using LESetActiveFunc = void(*)(bool);
+
         using ARGetBackgroundTextureFunc = Gfx::CTexturePtr(*)();
+        using ARGetLightEstimationFunc = void*(*)();
+        using ARGetLightEstimationStateFunc = int(*)(void*);
+        using ARGetLightEstimationMainLightIntensityFunc = glm::vec3(*)(void*);
+        using ARGetLightEstimationMainLightDirectionFunc = glm::vec3(*)(void*);
+
+        ARGetLightEstimationFunc GetLightEstimation = nullptr;
+        ARGetLightEstimationStateFunc GetLightEstimationState = nullptr;
+        ARGetLightEstimationMainLightIntensityFunc GetLightEstimationMainLightDirection = nullptr;
+        ARGetLightEstimationMainLightDirectionFunc GetLightEstimationMainLightIntensity = nullptr;
 
         LESetInputTextureFunc SetInputTexture = nullptr;
         LESetOutputCubemapFunc SetOutputCubemap = nullptr;
@@ -147,6 +157,22 @@ namespace Scpt
 
         void Update() override
         {
+            if (Core::PluginManager::IsAvailable("ArCore"))
+            {
+                void* pObject = GetLightEstimation();
+
+                if (pObject == nullptr) return;
+
+                int State = GetLightEstimationState(pObject);
+
+                if (State != 1) return;
+
+                glm::vec3 MainLightDirection = GetLightEstimationMainLightDirection(pObject);
+
+                glm::vec3 MainLightIntensity = GetLightEstimationMainLightIntensity(pObject);
+
+                ENGINE_CONSOLE_INFOV("Main light direction: %f, %f, %f; intensity %f, %f, %f", MainLightDirection.x, MainLightDirection.y, MainLightDirection.z, MainLightIntensity.x, MainLightIntensity.y, MainLightIntensity.z);
+            }
         }
 
         // -----------------------------------------------------------------------------
@@ -339,6 +365,13 @@ namespace Scpt
                 GetBackgroundTexture = (ARGetBackgroundTextureFunc)(Core::PluginManager::GetPluginFunction(ARPluginName, "GetBackgroundTexture"));
 
                 SetInputTexture(GetBackgroundTexture());
+
+                // -----------------------------------------------------------------------------
+
+                GetLightEstimation = (ARGetLightEstimationFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetLightEstimation"));
+                GetLightEstimationState = (ARGetLightEstimationStateFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetLightEstimationState"));
+                GetLightEstimationMainLightDirection = (ARGetLightEstimationMainLightDirectionFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetLightEstimationMainLightDirection"));
+                GetLightEstimationMainLightIntensity = (ARGetLightEstimationMainLightIntensityFunc)(Core::PluginManager::GetPluginFunction("ArCore", "GetLightEstimationMainLightIntensity"));
             }
             else
             {

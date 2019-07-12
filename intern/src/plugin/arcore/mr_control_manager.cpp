@@ -599,7 +599,7 @@ namespace
 
             ArLightEstimate_getEnvironmentalHdrMainLightDirection(m_pARSession, ARLightEstimate, &m_LightEstimation.m_MainLightDirection[0]);
 
-            m_LightEstimation.m_MainLightDirection = m_ARCToEngineMatrix * m_LightEstimation.m_MainLightDirection * glm::vec3(-1.0f);
+            m_LightEstimation.m_MainLightDirection = m_ARCToEngineMatrix * m_LightEstimation.m_MainLightDirection;
 
             ArLightEstimate_getEnvironmentalHdrAmbientSphericalHarmonics(m_pARSession, ARLightEstimate, m_LightEstimation.m_AmbientSH);
 
@@ -1438,6 +1438,11 @@ namespace ControlManager
 extern "C" CORE_PLUGIN_API_EXPORT const MR::CCamera* GetCamera()
 {
     return &MR::ControlManager::GetCamera();
+}
+
+extern "C" CORE_PLUGIN_API_EXPORT const MR::CLightEstimation* GetLightEstimation()
+{
+    return &MR::ControlManager::GetLightEstimation();
 }
 
 extern "C" CORE_PLUGIN_API_EXPORT const MR::CMarker* AcquireNewMarker(float _X, float _Y)
