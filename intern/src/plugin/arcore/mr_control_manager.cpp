@@ -7,6 +7,8 @@
 #include "base/base_uncopyable.h"
 #include "base/base_singleton.h"
 
+#include "engine/engine.h"
+
 #include "engine/core/core_plugin.h"
 #include "engine/core/core_jni_interface.h"
 
@@ -151,7 +153,7 @@ namespace
 
         void main()
         {
-            gl_PointSize = 10.0;
+            gl_PointSize = 4.0;
 
             gl_Position = m_MVP * vec4(in_Vertex.xyz, 1.0);
         }
@@ -290,6 +292,8 @@ namespace
         Dt::CEntityManager::CEntityDelegate::HandleType m_EntityDelegate;
 
         Dt::CComponentManager::CComponentDelegate::HandleType m_ComponentDelegate;
+
+        Engine::CEventDelegates::HandleType m_GfxOnRenderForwardHandle;
 
     private:
 
@@ -485,12 +489,19 @@ namespace
         // Initialize ARCore if needed
         // -----------------------------------------------------------------------------
         OnResume();
+
+        // -----------------------------------------------------------------------------
+        // Hook
+        // -----------------------------------------------------------------------------
+        m_GfxOnRenderForwardHandle = Engine::RegisterEventHandler(Engine::EEvent::Gfx_OnRenderForward, std::bind(&CMRControlManager::RenderBackground, this));
     }
 
     // -----------------------------------------------------------------------------
 
     void CMRControlManager::OnExit()
     {
+        m_GfxOnRenderForwardHandle = nullptr;
+
         m_TrackedObjects.clear();
 
         // -----------------------------------------------------------------------------
@@ -608,7 +619,48 @@ namespace
             ArPose_destroy(pARPose);
         }
 
-        RenderBackground();
+        // -----------------------------------------------------------------------------
+        // Prepare
+        // -----------------------------------------------------------------------------
+        Gfx::ContextManager::SetTargetSet(m_BackgroundTargetSetPtr);
+
+        Gfx::ContextManager::SetBlendState(Gfx::StateManager::GetBlendState(Gfx::CBlendState::Default));
+
+        Gfx::ContextManager::SetDepthStencilState(Gfx::StateManager::GetDepthStencilState(Gfx::CDepthStencilState::NoDepth));
+
+        Gfx::ContextManager::SetRasterizerState(Gfx::StateManager::GetRasterizerState(Gfx::CRasterizerState::NoCull));
+
+        Gfx::ContextManager::SetViewPortSet(Gfx::ViewManager::GetViewPortSet());
+
+        // -----------------------------------------------------------------------------
+        // Background image from webcam
+        // -----------------------------------------------------------------------------
+        int32_t HasGeometryChanged = 0;
+
+        ArFrame_getDisplayGeometryChanged(m_pARSession, m_pARFrame, &HasGeometryChanged);
+
+        if (HasGeometryChanged != 0 || g_IsUVsInitialized == false)
+        {
+            ArFrame_transformCoordinates2d(m_pARSession, m_pARFrame, AR_COORDINATES_2D_VIEW_NORMALIZED, s_NumberOfVertices, c_Uvs, AR_COORDINATES_2D_TEXTURE_NORMALIZED, g_TransformedUVs);
+
+            Gfx::BufferManager::UploadBufferData(m_WebcamUVBufferPtr, &g_TransformedUVs);
+
+            g_IsUVsInitialized = true;
+        }
+
+        Gfx::ContextManager::SetTopology(Gfx::STopology::TriangleStrip);
+
+        Gfx::ContextManager::SetShaderVS(m_WebcamVSPtr);
+
+        Gfx::ContextManager::SetShaderPS(m_WebcamPSPtr);
+
+        Gfx::ContextManager::SetVertexBuffer(m_WebcamUVBufferPtr);
+
+        Gfx::ContextManager::SetInputLayout(m_WebcamVSPtr->GetInputLayout());
+
+        Gfx::ContextManager::SetTexture(0, m_ExternalTexturePtr);
+
+        Gfx::ContextManager::Draw(4, 0);
     }
 
     // -----------------------------------------------------------------------------
@@ -679,6 +731,8 @@ namespace
             ArConfig* ARConfig = 0;
 
             ArConfig_create(m_pARSession, &ARConfig);
+
+            ArSession_getConfig(m_pARSession, ARConfig);
 
             ArConfig_setLightEstimationMode(m_pARSession, ARConfig, AR_LIGHT_ESTIMATION_MODE_ENVIRONMENTAL_HDR);
 
@@ -933,45 +987,15 @@ namespace
         // -----------------------------------------------------------------------------
         // Prepare
         // -----------------------------------------------------------------------------
-        Gfx::ContextManager::SetTargetSet(m_BackgroundTargetSetPtr);
+        Gfx::ContextManager::SetTargetSet(Gfx::TargetSetManager::GetLightAccumulationTargetSet());
 
-        Gfx::ContextManager::SetBlendState(Gfx::StateManager::GetBlendState(Gfx::CBlendState::Default));
+        Gfx::ContextManager::SetBlendState(Gfx::StateManager::GetBlendState(Gfx::CBlendState::AlphaBlend));
 
         Gfx::ContextManager::SetDepthStencilState(Gfx::StateManager::GetDepthStencilState(Gfx::CDepthStencilState::NoDepth));
 
         Gfx::ContextManager::SetRasterizerState(Gfx::StateManager::GetRasterizerState(Gfx::CRasterizerState::NoCull));
 
         Gfx::ContextManager::SetViewPortSet(Gfx::ViewManager::GetViewPortSet());
-
-        // -----------------------------------------------------------------------------
-        // Background image from webcam
-        // -----------------------------------------------------------------------------
-        int32_t HasGeometryChanged = 0;
-
-        ArFrame_getDisplayGeometryChanged(m_pARSession, m_pARFrame, &HasGeometryChanged);
-
-        if (HasGeometryChanged != 0 || g_IsUVsInitialized == false)
-        {
-            ArFrame_transformCoordinates2d(m_pARSession, m_pARFrame, AR_COORDINATES_2D_VIEW_NORMALIZED, s_NumberOfVertices, c_Uvs, AR_COORDINATES_2D_TEXTURE_NORMALIZED, g_TransformedUVs);
-
-            Gfx::BufferManager::UploadBufferData(m_WebcamUVBufferPtr, &g_TransformedUVs);
-
-            g_IsUVsInitialized = true;
-        }
-
-        Gfx::ContextManager::SetTopology(Gfx::STopology::TriangleStrip);
-
-        Gfx::ContextManager::SetShaderVS(m_WebcamVSPtr);
-
-        Gfx::ContextManager::SetShaderPS(m_WebcamPSPtr);
-
-        Gfx::ContextManager::SetVertexBuffer(m_WebcamUVBufferPtr);
-
-        Gfx::ContextManager::SetInputLayout(m_WebcamVSPtr->GetInputLayout());
-
-        Gfx::ContextManager::SetTexture(0, m_ExternalTexturePtr);
-
-        Gfx::ContextManager::Draw(4, 0);
 
         // -----------------------------------------------------------------------------
         // Render planes
@@ -1115,8 +1139,6 @@ namespace
             // -----------------------------------------------------------------------------
             // Update every available plane
             // -----------------------------------------------------------------------------
-            Gfx::ContextManager::SetBlendState(Gfx::StateManager::GetBlendState(Gfx::CBlendState::AlphaBlend));
-
             Gfx::ContextManager::SetShaderVS(m_PlaneVS);
 
             Gfx::ContextManager::SetShaderPS(m_PlanePS);
